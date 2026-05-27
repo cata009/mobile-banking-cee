@@ -1,0 +1,155 @@
+/**
+ * Demo Configuration Registry
+ * Central configuration for countries, scenarios, and feature metadata.
+ */
+
+import type { CountryId, Scenario, FeatureId, FeatureMeta } from "@/app/state/demoTypes";
+
+export const COUNTRIES: readonly CountryId[] = [
+  "RO",
+  "CZ",
+  "SK",
+  "HU",
+  "RS",
+  "BA",
+  "SI",
+] as const;
+
+export const COUNTRY_META: Record<CountryId, { name: string; nameEN: string; flag: string; currency: string }> = {
+  RO: { name: "Romania", nameEN: "Romania", flag: "RO", currency: "RON" },
+  RS: { name: "Serbia", nameEN: "Serbia", flag: "RS", currency: "RSD" },
+  HU: { name: "Hungary", nameEN: "Hungary", flag: "HU", currency: "HUF" },
+  BA: { name: "Bosnia and Herzegovina", nameEN: "Bosnia and Herzegovina", flag: "BA", currency: "BAM" },
+  SK: { name: "Slovakia", nameEN: "Slovakia", flag: "SK", currency: "EUR" },
+  SI: { name: "Slovenia", nameEN: "Slovenia", flag: "SI", currency: "EUR" },
+  CZ: { name: "Czech Republic", nameEN: "Czech Republic", flag: "CZ", currency: "CZK" },
+};
+
+export const SCENARIOS: readonly { id: Scenario; label: string; description?: string }[] = [
+  {
+    id: "active",
+    label: "Active App",
+    description: "Co-Apping session can be active with a banker.",
+  },
+  {
+    id: "inactive",
+    label: "Inactive App",
+    description: "Co-Apping session is not active.",
+  },
+] as const;
+
+export const FEATURE_META: Record<FeatureId, FeatureMeta> = {
+  fx_newPaymentsHub: {
+    id: "fx_newPaymentsHub",
+    label: "New Payments Hub",
+    description: "Redesigned payments interface with enhanced UX",
+    kind: "release",
+    scope: "global",
+    products: ["PI"],
+    designSystems: ["current"],
+    lifecycleStatus: "configured",
+    coverageStatus: "configured",
+    introducedIn: "release-v1",
+    baselineFrom: null,
+    affectedScreens: ["pi.home.overview"],
+  },
+
+  fx_cardsRedesign: {
+    id: "fx_cardsRedesign",
+    label: "Cards Redesign",
+    description: "Modernized card management UI (RO, CZ only)",
+    kind: "release",
+    scope: "countries",
+    countries: ["RO", "CZ"],
+    products: ["PI"],
+    designSystems: ["current"],
+    lifecycleStatus: "implemented",
+    coverageStatus: "implemented",
+    introducedIn: "release-v2",
+    baselineFrom: null,
+    affectedScreens: ["pi.home.overview"],
+  },
+
+  fx_quickActionsRedesign: {
+    id: "fx_quickActionsRedesign",
+    label: "Quick Actions Redesign",
+    description: "Redesigned quick actions layout with icons and animations",
+    kind: "release",
+    scope: "global",
+    products: ["PI"],
+    designSystems: ["current"],
+    lifecycleStatus: "configured",
+    coverageStatus: "configured",
+    introducedIn: "release-v4",
+    baselineFrom: null,
+    affectedScreens: ["pi.home.overview"],
+  },
+
+  fx_unplannedBanner: {
+    id: "fx_unplannedBanner",
+    label: "Unplanned Maintenance Banner",
+    description: "Display urgent maintenance notifications (RO only)",
+    kind: "unplanned",
+    scope: "countries",
+    countries: ["RO"],
+    products: ["PI"],
+    designSystems: ["current"],
+    lifecycleStatus: "implemented",
+    coverageStatus: "implemented",
+    introducedIn: null,
+    baselineFrom: null,
+    affectedScreens: ["pi.home.overview"],
+  },
+
+  fx_transactionsFilters: {
+    id: "fx_transactionsFilters",
+    label: "Advanced Transaction Filters",
+    description: "Enhanced filtering options for transaction history",
+    kind: "unplanned",
+    scope: "global",
+    products: ["PI"],
+    designSystems: ["current"],
+    lifecycleStatus: "configured",
+    coverageStatus: "configured",
+    introducedIn: null,
+    baselineFrom: null,
+    affectedScreens: ["pi.home.overview"],
+  },
+
+  fx_enhancedAnalytics: {
+    id: "fx_enhancedAnalytics",
+    label: "Enhanced Analytics",
+    description: "Advanced spending insights and analytics dashboard",
+    kind: "unplanned",
+    scope: "global",
+    products: ["PI"],
+    designSystems: ["current"],
+    lifecycleStatus: "configured",
+    coverageStatus: "configured",
+    introducedIn: "release-v4",
+    baselineFrom: null,
+    affectedScreens: ["pi.home.overview"],
+  },
+};
+
+export function getFeaturesByKind(kind: "release" | "unplanned"): FeatureId[] {
+  return (Object.keys(FEATURE_META) as FeatureId[]).filter(
+    (featureId) => FEATURE_META[featureId].kind === kind
+  );
+}
+
+export function getCountryMeta(country: CountryId) {
+  return COUNTRY_META[country];
+}
+
+export function getScenarioMeta(scenarioId: Scenario) {
+  return SCENARIOS.find((scenario) => scenario.id === scenarioId);
+}
+
+export function isReleaseFeature(featureId: FeatureId): boolean {
+  return FEATURE_META[featureId]?.kind === "release";
+}
+
+export function isUnplannedFeature(featureId: FeatureId): boolean {
+  return FEATURE_META[featureId]?.kind === "unplanned";
+}

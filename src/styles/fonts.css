@@ -1,0 +1,85 @@
+/* SF Pro Font - Apple System Font */
+@font-face {
+  font-family: 'SF_Pro';
+  font-style: normal;
+  font-weight: 590;
+  font-display: swap;
+  src: local('SF Pro Text Semibold'), local('-apple-system'), local('BlinkMacSystemFont');
+}
+
+/*
+ * UniCredit font aliases
+ *
+ * The codebase uses both weight-based family usage (`font-['UniCredit']` with
+ * `font-bold`) and exact Figma-exported family names such as
+ * `font-['UniCredit:Bold',sans-serif]`. Declare both so all active and legacy
+ * surfaces resolve through the same branded stack.
+ */
+@font-face {
+  font-family: 'UniCredit';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local('UniCredit Regular'),
+    local('UniCredit-Regular'),
+    local('UniCredit:Regular'),
+    local('UniCredit');
+}
+
+@font-face {
+  font-family: 'UniCredit';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local('UniCredit Bold'),
+    local('UniCredit-Bold'),
+    local('UniCredit:Bold'),
+    local('UniCredit');
+}
+
+@font-face {
+  font-family: 'UniCredit:Regular';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local('UniCredit Regular'),
+    local('UniCredit-Regular'),
+    local('UniCredit');
+}
+
+@font-face {
+  font-family: 'UniCredit:Bold';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local('UniCredit Bold'),
+    local('UniCredit-Bold'),
+    local('UniCredit');
+}
+
+:root {
+  --font-unicredit-stack: 'UniCredit', 'UniCredit:Regular', 'UniCredit:Bold', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.font-unicredit {
+  font-family: var(--font-unicredit-stack);
+}
+
+.font-unicredit-regular {
+  font-family: 'UniCredit:Regular', var(--font-unicredit-stack);
+  font-weight: 400;
+}
+
+.font-unicredit-bold {
+  font-family: 'UniCredit:Bold', var(--font-unicredit-stack);
+  font-weight: 700;
+}
+
+/* Fallback to system fonts if SF Pro is not available */
+.font-sf-pro {
+  font-family: 'SF_Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
