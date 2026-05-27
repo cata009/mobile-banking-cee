@@ -58,6 +58,7 @@ Continue with product evolution work:
 ## Commands / Verification
 
 - GitHub repository created: `https://github.com/cata009/mobile-banking-cee`.
+- Initial commit pushed to `origin/main`: `2767060` (`Initial mobile banking demo platform`).
 - `npm run build` passed on 2026-05-27.
 - Vite emitted a chunk-size warning because the bundle and image assets are large; this is recorded in `known-bananas.md`.
 - Browser verification passed on fresh dev server `http://localhost:5174`: Control Panel opens, shows Mobile PI/current design system context, and displays feature lifecycle/coverage statuses.

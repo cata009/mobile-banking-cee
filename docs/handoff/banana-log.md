@@ -16,3 +16,4 @@ This log records bananas found and how they were triaged.
 | `CountryCode` import in More card config pointed to the wrong module | Fixed by using the official `CountryId` taxonomy alias | `src/app/config/moreCardsConfig.ts`, `src/app/state/demoTypes.ts` |
 | No component/screen catalog export existed for future AI training or platform integration | Fixed by adding component registry and AI catalog source export | `src/app/registry/componentRegistry.ts`, `src/app/registry/aiCatalog.ts` |
 | `npx tsc --noEmit` cannot run from this workspace | Triaged as known tooling limitation because no local `typescript` package or typecheck script exists | `package.json`, `docs/handoff/known-bananas.md` |
+| Initial workspace was not published anywhere | Fixed by creating private GitHub repo and pushing `main` | `https://github.com/cata009/mobile-banking-cee`, commit `2767060` |
