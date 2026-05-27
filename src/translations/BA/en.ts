@@ -71,7 +71,7 @@ const en: TranslationKeys = {
   // ==========================================
   navigation: {
     home: 'Home',
-    analytics: 'Analytics',
+    analytics: 'Spending',
     payments: 'Payments',
     products: 'Products',
     more: 'More',

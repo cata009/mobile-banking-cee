@@ -21,7 +21,7 @@ export default function ProductCard({
 }: ProductCardProps) {
   return (
     <div 
-      className="flex flex-col items-start gap-[4px] self-stretch bg-white rounded-[4px] cursor-pointer hover:opacity-90 transition-opacity"
+      className="flex flex-col items-start gap-[4px] self-stretch bg-[var(--uc-surface)] rounded-[4px] cursor-pointer hover:opacity-90 transition-opacity"
       style={{
         padding: '16px'
       }}
@@ -40,7 +40,7 @@ export default function ProductCard({
           <p 
             className="font-['UniCredit',sans-serif] font-normal"
             style={{
-              color: '#000',
+              color: 'var(--uc-text)',
               fontSize: '18px',
               lineHeight: 'normal'
             }}
@@ -52,7 +52,7 @@ export default function ProductCard({
           <p 
             className="font-['UniCredit',sans-serif] font-bold"
             style={{
-              color: '#262626',
+              color: 'var(--uc-text)',
               fontSize: '14px',
               lineHeight: 'normal'
             }}
@@ -68,7 +68,7 @@ export default function ProductCard({
         <span 
           className="font-['UniCredit',sans-serif] font-bold text-right"
           style={{
-            color: '#262626',
+            color: 'var(--uc-text)',
             fontSize: '20px',
             lineHeight: 'normal'
           }}
@@ -80,7 +80,7 @@ export default function ProductCard({
         <span 
           className="font-['UniCredit',sans-serif] font-normal text-right"
           style={{
-            color: '#262626',
+            color: 'var(--uc-text)',
             fontSize: '14px',
             lineHeight: 'normal'
           }}

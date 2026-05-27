@@ -21,7 +21,7 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm }: LogoutConfir
     <>
       {/* Overlay - semi-transparent background - ABSOLUTE to stay within MobileFrame */}
       <div 
-        className="absolute inset-0 bg-black/40 z-[9998]"
+        className="absolute inset-0 bg-[rgb(var(--uc-static-black-rgb)_/_0.4)] z-[9998]"
         onClick={onClose}
       />
 
@@ -29,43 +29,43 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm }: LogoutConfir
       <div className="absolute inset-0 flex items-center justify-center z-[9999] px-[16px]">
         {/* Dialog Box */}
         <div 
-          className="bg-[#f2f2f7] rounded-[14px] w-full max-w-[270px] overflow-hidden"
+          className="bg-[var(--uc-surface-muted)] rounded-[14px] w-full max-w-[270px] overflow-hidden"
           style={{
-            boxShadow: '0px 0px 1px rgba(0, 0, 0, 0.04), 0px 2px 6px rgba(0, 0, 0, 0.04), 0px 16px 24px rgba(0, 0, 0, 0.06)'
+            boxShadow: '0px 0px 1px rgb(var(--uc-shadow-rgb) / 0.04), 0px 2px 6px rgb(var(--uc-shadow-rgb) / 0.04), 0px 16px 24px rgb(var(--uc-shadow-rgb) / 0.06)'
           }}
         >
           {/* Message Content */}
           <div className="px-[16px] pt-[20px] pb-[16px] text-center">
             {/* Title */}
-            <p className="font-['SF_Pro_Text','-apple-system','system-ui',sans-serif] text-[17px] font-semibold text-[#000000] leading-[22px] mb-[2px]">
+            <p className="font-['SF_Pro_Text','-apple-system','system-ui',sans-serif] text-[17px] font-semibold text-[var(--uc-primary-main)] leading-[22px] mb-[2px]">
               Are you sure you want to leave Mobile Banking?
             </p>
           </div>
 
           {/* Divider */}
-          <div className="h-[0.5px] bg-[#c6c6c8]" />
+          <div className="h-[0.5px] bg-[var(--uc-border)]" />
 
           {/* Buttons Container */}
           <div className="flex">
             {/* Cancel Button */}
             <button
               onClick={onClose}
-              className="flex-1 h-[44px] flex items-center justify-center cursor-pointer active:bg-[#d1d1d6] transition-colors"
+              className="flex-1 h-[44px] flex items-center justify-center cursor-pointer active:bg-[var(--uc-border-muted)] transition-colors"
             >
-              <span className="font-['SF_Pro_Text','-apple-system','system-ui',sans-serif] text-[17px] text-[#007AFF] leading-[22px]">
+              <span className="font-['SF_Pro_Text','-apple-system','system-ui',sans-serif] text-[17px] text-[var(--uc-action)] leading-[22px]">
                 Cancel
               </span>
             </button>
 
             {/* Vertical Divider */}
-            <div className="w-[0.5px] bg-[#c6c6c8]" />
+            <div className="w-[0.5px] bg-[var(--uc-border)]" />
 
             {/* OK Button */}
             <button
               onClick={handleConfirm}
-              className="flex-1 h-[44px] flex items-center justify-center cursor-pointer active:bg-[#d1d1d6] transition-colors"
+              className="flex-1 h-[44px] flex items-center justify-center cursor-pointer active:bg-[var(--uc-border-muted)] transition-colors"
             >
-              <span className="font-['SF_Pro_Text','-apple-system','system-ui',sans-serif] text-[17px] font-semibold text-[#007AFF] leading-[22px]">
+              <span className="font-['SF_Pro_Text','-apple-system','system-ui',sans-serif] text-[17px] font-semibold text-[var(--uc-action)] leading-[22px]">
                 OK
               </span>
             </button>

@@ -4,6 +4,8 @@
  * Icon and URL are configurable for future customization
  */
 
+import { AppIcon } from "@/app/components/icons";
+
 interface PrimeIconLabelValueProps {
   icon: React.ReactNode;
   label: string;
@@ -40,7 +42,7 @@ export function PrimeIconLabelValue({
         </div>
 
         {/* Label + Description */}
-        <div className="content-stretch flex flex-[1_0_0] flex-col gap-[4px] items-start justify-center leading-[normal] min-h-px min-w-px not-italic relative text-[16px] text-white whitespace-pre-wrap">
+        <div className="content-stretch flex flex-[1_0_0] flex-col gap-[4px] items-start justify-center leading-[normal] min-h-px min-w-px not-italic relative text-[16px] text-[var(--uc-static-white)] whitespace-pre-wrap">
           <p className="font-['UniCredit:Bold',sans-serif] relative shrink-0 w-full text-left">{label}</p>
           <p className="font-['UniCredit:Regular',sans-serif] relative shrink-0 w-full text-left">{description}</p>
         </div>
@@ -48,9 +50,7 @@ export function PrimeIconLabelValue({
 
       {/* Arrow Icon - Corrected SVG */}
       <div className="flex items-center justify-center relative shrink-0" style={{ width: '7px', height: '14px' }}>
-        <svg xmlns="http://www.w3.org/2000/svg" width="7" height="14" viewBox="0 0 7 14" fill="none">
-          <path fillRule="evenodd" clipRule="evenodd" d="M0.675889 0C-0.225296 0.934937 -0.225296 2.45219 0.675889 3.388L3.93913 7L0.675889 10.612C-0.225296 11.5478 -0.225296 13.0642 0.675889 14L7 7L0.675889 0Z" fill="white"/>
-        </svg>
+        <AppIcon name="prime-chevron-right" color="var(--uc-static-white)" />
       </div>
     </button>
   );

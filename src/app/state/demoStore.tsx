@@ -13,6 +13,7 @@ import type {
   ProductId,
   ReleaseId,
   Scenario,
+  ThemeMode,
   DemoState,
   DemoStore,
 } from "./demoTypes";
@@ -67,6 +68,8 @@ const DEFAULT_DEMO_STATE: DemoState = {
     // Initialize with empty context for default PI/RO/current baseline.
     "PI:RO:current:baseline-current:release-current": {},
   },
+  amountsHidden: false,
+  themeMode: "light",
 };
 
 /**
@@ -169,6 +172,34 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
   };
 
   /**
+   * Toggle account/card/product amount visibility across the mobile app
+   */
+  const toggleAmountsHidden = () => {
+    setState(prev => ({ ...prev, amountsHidden: !prev.amountsHidden }));
+  };
+
+  /**
+   * Set account/card/product amount visibility across the mobile app
+   */
+  const setAmountsHidden = (hidden: boolean) => {
+    setState(prev => ({ ...prev, amountsHidden: hidden }));
+  };
+
+  /**
+   * Set runtime light/dark theme across the demo
+   */
+  const setThemeMode = (themeMode: ThemeMode) => {
+    setState(prev => ({ ...prev, themeMode }));
+  };
+
+  /**
+   * Toggle runtime light/dark theme across the demo
+   */
+  const toggleThemeMode = () => {
+    setState(prev => ({ ...prev, themeMode: prev.themeMode === "light" ? "dark" : "light" }));
+  };
+
+  /**
    * Reset all feature flags to default (false)
    */
   const resetFlags = () => {
@@ -198,6 +229,10 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
     setBaseline,
     setRelease,
     setFlag,
+    toggleAmountsHidden,
+    setAmountsHidden,
+    setThemeMode,
+    toggleThemeMode,
     resetFlags,
     resetAll,
   };
@@ -274,6 +309,7 @@ export type {
   ProductId,
   ReleaseId,
   Scenario,
+  ThemeMode,
   DemoState,
   DemoStore,
 } from "./demoTypes";

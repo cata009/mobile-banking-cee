@@ -44,7 +44,7 @@ export default function PreLoginScreen({
   console.log("🟡 onOtherClick prop:", onOtherClick);
 
   return (
-    <div className="w-full h-full relative bg-black">
+    <div className="w-full h-full relative bg-[var(--uc-static-black)]">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img 
@@ -66,7 +66,7 @@ export default function PreLoginScreen({
         <div 
           className={`mt-auto w-full flex flex-col items-start px-[24px] py-[32px] ${showProductAccordion ? 'gap-[24px]' : 'gap-[32px]'}`}
           style={{
-            background: 'linear-gradient(180deg, rgba(38, 38, 38, 0.00) 0%, #262626 5.95%)'
+            background: 'linear-gradient(180deg, color-mix(in srgb, var(--uc-primary-k1) 0%, transparent) 0%, var(--uc-text) 5.95%)'
           }}
         >
           {/* ======== COUNTRIES WITH PRODUCT ACCORDION ======== */}

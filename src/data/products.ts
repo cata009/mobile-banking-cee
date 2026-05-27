@@ -93,6 +93,18 @@ export type Product =
   | Mortgage 
   | InvestmentAccount;
 
+export const ACCOUNT_DETAIL_PRODUCT_TYPES: ProductType[] = [
+  'current_account',
+  'saving_account',
+  'term_deposit',
+  'loan',
+  'mortgage'
+];
+
+export function isAccountDetailProduct(product: Product): boolean {
+  return ACCOUNT_DETAIL_PRODUCT_TYPES.includes(product.type);
+}
+
 // Mock Database
 export const mockProducts: Product[] = [
   // Accounts

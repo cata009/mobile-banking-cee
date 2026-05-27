@@ -49,7 +49,7 @@ export default function FaceIdAnimation({ onComplete }: FaceIdAnimationProps) {
     >
       {/* Dark Backdrop - very subtle */}
       <motion.div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-[rgb(var(--uc-static-black-rgb)_/_0.4)] backdrop-blur-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.15 }}
@@ -66,10 +66,10 @@ export default function FaceIdAnimation({ onComplete }: FaceIdAnimationProps) {
         }}
       >
         {/* Bezel - black rounded square */}
-        <div 
-          className="relative bg-black rounded-[42px] size-[150px]" 
+        <div
+          className="relative bg-[var(--uc-static-black)] rounded-[42px] size-[150px]"
           style={{
-            boxShadow: '0px 0px 0px 0px #262626, 0px 20px 50px 0px rgba(0,0,0,0.3)'
+            boxShadow: '0px 0px 0px 0px var(--uc-text), 0px 20px 50px 0px rgb(var(--uc-shadow-rgb) / 0.3)'
           }}
         >
           {/* Face ID Icon - Scanning Phase */}
@@ -87,14 +87,14 @@ export default function FaceIdAnimation({ onComplete }: FaceIdAnimationProps) {
               >
                 {/* SF Symbol Face ID icon with glow animation */}
                 <motion.p
-                  className="font-['SF_Pro:Light',sans-serif] text-[#a1f293] text-[72px] text-center leading-[normal]"
+                  className="font-['SF_Pro:Light',sans-serif] text-[var(--uc-green-success)] text-[72px] text-center leading-[normal]"
                   style={{ fontVariationSettings: "'wdth' 100" }}
                   animate={{
                     opacity: [1, 0.7, 1],
                     filter: [
-                      'drop-shadow(0 0 8px rgba(161, 242, 147, 0.6))',
-                      'drop-shadow(0 0 12px rgba(161, 242, 147, 0.8))',
-                      'drop-shadow(0 0 8px rgba(161, 242, 147, 0.6))',
+                      'drop-shadow(0 0 8px color-mix(in srgb, var(--uc-green-success) 60%, transparent))',
+                      'drop-shadow(0 0 12px color-mix(in srgb, var(--uc-green-success) 80%, transparent))',
+                      'drop-shadow(0 0 8px color-mix(in srgb, var(--uc-green-success) 60%, transparent))',
                     ],
                   }}
                   transition={{
@@ -139,7 +139,7 @@ export default function FaceIdAnimation({ onComplete }: FaceIdAnimationProps) {
                     cx="36"
                     cy="36"
                     r="32"
-                    stroke="#a1f293"
+                    stroke="var(--uc-green-success)"
                     strokeWidth="3"
                     fill="none"
                     initial={{ pathLength: 0 }}
@@ -153,7 +153,7 @@ export default function FaceIdAnimation({ onComplete }: FaceIdAnimationProps) {
                   {/* Checkmark path */}
                   <motion.path
                     d="M 22 36 L 30 44 L 50 24"
-                    stroke="#a1f293"
+                    stroke="var(--uc-green-success)"
                     strokeWidth="3.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"

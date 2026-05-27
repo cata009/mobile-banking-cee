@@ -19,32 +19,32 @@ export default function UnsupportedContextScreen({
   const designSystemMeta = DESIGN_SYSTEMS[designSystem];
 
   return (
-    <div className="w-full h-full bg-[#F5F5F5] flex flex-col">
+    <div className="w-full h-full bg-[var(--uc-app-bg)] flex flex-col">
       <div className="h-[54px] flex-shrink-0" />
       <div className="flex-1 flex items-center justify-center px-8">
-        <div className="w-full rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+        <div className="w-full rounded-[8px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-5 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--uc-text-muted)]">
             Planned context
           </p>
-          <h1 className="mt-2 text-[22px] font-bold leading-tight text-[#262626]">
+          <h1 className="mt-2 text-[22px] font-bold leading-tight text-[var(--uc-text)]">
             {productMeta.label}
           </h1>
-          <p className="mt-2 text-sm leading-5 text-gray-600">
+          <p className="mt-2 text-sm leading-5 text-[var(--uc-text-muted)]">
             This product/design-system combination is registered in the platform model,
             but it is not implemented as an interactive mobile flow yet.
           </p>
           <div className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between gap-4">
-              <span className="text-gray-500">Product status</span>
-              <span className="font-medium text-gray-900">{productMeta.status}</span>
+              <span className="text-[var(--uc-text-muted)]">Product status</span>
+              <span className="font-medium text-[var(--uc-text)]">{productMeta.status}</span>
             </div>
             <div className="flex justify-between gap-4">
-              <span className="text-gray-500">Design system</span>
-              <span className="font-medium text-gray-900 text-right">{designSystemMeta.label}</span>
+              <span className="text-[var(--uc-text-muted)]">Design system</span>
+              <span className="font-medium text-[var(--uc-text)] text-right">{designSystemMeta.label}</span>
             </div>
             <div className="flex justify-between gap-4">
-              <span className="text-gray-500">Design status</span>
-              <span className="font-medium text-gray-900">{designSystemMeta.status}</span>
+              <span className="text-[var(--uc-text-muted)]">Design status</span>
+              <span className="font-medium text-[var(--uc-text)]">{designSystemMeta.status}</span>
             </div>
           </div>
         </div>

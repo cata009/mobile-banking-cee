@@ -1,3 +1,4 @@
+import { AppIcon } from "@/app/components/icons";
 import svgPaths from "@/imports/svg-18ehkdpg9k";
 
 interface FloatingCoAppingButtonProps {
@@ -27,7 +28,7 @@ export default function FloatingCoAppingButton({ onClick, showSlideIn = false }:
       >
         <path 
           d={svgPaths.p2d5f5a80}
-          fill="#008574"
+          fill="var(--uc-green-bright)"
         />
       </svg>
 
@@ -44,19 +45,7 @@ export default function FloatingCoAppingButton({ onClick, showSlideIn = false }:
           justifyContent: 'center'
         }}
       >
-        <svg 
-          width="24"
-          height="24"
-          viewBox="0 0 24 24" 
-          fill="none"
-        >
-          <path 
-            fillRule="evenodd" 
-            clipRule="evenodd" 
-            d="M10.7144 5.15602V7.17729L3.02112 7.1773V18.6312H20.5671V15.3971H22.5917V19.305C22.5917 20.7338 21.4778 21.903 20.0698 21.9943L19.8923 22H0.996582V7.85105C0.996582 6.42161 2.11047 5.25296 3.51849 5.16175L3.69597 5.15602H10.7144ZM22.9966 3V13.1064C21.4809 13.1064 20.252 11.8794 20.252 10.3669V7.67722L14.8147 13.1064L12.8739 11.1686L18.3118 5.7395H15.6185C14.1028 5.7395 12.8739 4.51326 12.8739 3L22.9966 3Z" 
-            fill="white"
-          />
-        </svg>
+        <AppIcon name="floating-share-screen" color="var(--uc-static-white)" />
       </div>
 
       <style>{`

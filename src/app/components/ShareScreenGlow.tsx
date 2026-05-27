@@ -6,7 +6,7 @@
  * 
  * Features:
  * - Border glow animat pe marginile ecranului cu SVG pentru colțuri perfecte
- * - Gradient verde UniCredit (#008574 → #00D97E)
+ * - Gradient verde UniCredit (var(--uc-green-bright) → var(--uc-green-bright))
  * - Glow subtil non-disruptive în zona ecranului
  * - Animație de pulsare lentă (breathing effect - 2.5s cycle)
  * - Fade in/out smooth când se activează/dezactivează
@@ -31,13 +31,13 @@ export default function ShareScreenGlow() {
         @keyframes shareScreenGlowPulse {
           0%, 100% {
             box-shadow: 
-              inset 0 0 60px rgba(0, 217, 126, 0.08),
-              inset 0 0 30px rgba(0, 133, 116, 0.05);
+              inset 0 0 60px color-mix(in srgb, var(--uc-green-bright) 8%, transparent),
+              inset 0 0 30px color-mix(in srgb, var(--uc-green-main) 5%, transparent);
           }
           50% {
             box-shadow: 
-              inset 0 0 80px rgba(0, 217, 126, 0.12),
-              inset 0 0 40px rgba(0, 133, 116, 0.08);
+              inset 0 0 80px color-mix(in srgb, var(--uc-green-bright) 12%, transparent),
+              inset 0 0 40px color-mix(in srgb, var(--uc-green-main) 8%, transparent);
           }
         }
         
@@ -69,7 +69,7 @@ export default function ShareScreenGlow() {
         >
           {/* Rounded Rectangle Border - stroke PERFECT aliniat cu marginea */}
           {/* strokeWidth 3 = 1.5px interior + 1.5px exterior de la linia centrală */}
-          {/* CULOARE SOLIDĂ #008574 - exact ca butonul floating pentru blend perfect */}
+          {/* CULOARE SOLIDĂ var(--uc-green-bright) - exact ca butonul floating pentru blend perfect */}
           <rect
             x="1.5"
             y="1.5"
@@ -78,7 +78,7 @@ export default function ShareScreenGlow() {
             rx="36"
             ry="36"
             fill="none"
-            stroke="#008574"
+            stroke="var(--uc-green-bright)"
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
           />
@@ -97,7 +97,7 @@ export default function ShareScreenGlow() {
         <div 
           className="absolute inset-0 rounded-[36px]"
           style={{
-            background: 'radial-gradient(circle at center, transparent 65%, rgba(0, 217, 126, 0.02) 100%)',
+            background: 'radial-gradient(circle at center, transparent 65%, color-mix(in srgb, var(--uc-green-bright) 2%, transparent) 100%)',
             pointerEvents: 'none',
           }}
         />

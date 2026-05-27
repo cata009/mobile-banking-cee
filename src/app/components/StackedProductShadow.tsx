@@ -14,7 +14,7 @@ export default function StackedProductShadow() {
             fillRule="evenodd" 
             clipRule="evenodd" 
             d="M0 0H319V5C319 7.20914 317.209 9 315 9H4C1.79086 9 0 7.20914 0 5V0Z" 
-            fill="white"
+            fill="var(--uc-static-white)"
           />
         </svg>
         
@@ -25,10 +25,10 @@ export default function StackedProductShadow() {
           fill="none" 
           preserveAspectRatio="none"
         >
-          <path 
-            opacity="0.296317" 
-            d="M0 0.5H319" 
-            stroke="#D8D8D8" 
+          <path
+            opacity="0.296317"
+            d="M0 0.5H319"
+            stroke="var(--uc-border)"
             strokeWidth="1"
           />
         </svg>

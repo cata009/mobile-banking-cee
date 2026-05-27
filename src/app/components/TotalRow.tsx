@@ -11,7 +11,7 @@ export default function TotalRow({ integer, decimals, currency }: TotalRowProps)
       <span
         className="font-['UniCredit',sans-serif] font-normal"
         style={{
-          color: '#000',
+          color: 'var(--uc-text)',
           fontSize: '18px',
           lineHeight: 'normal'
         }}
@@ -25,7 +25,7 @@ export default function TotalRow({ integer, decimals, currency }: TotalRowProps)
         <span 
           className="font-['UniCredit',sans-serif] font-bold text-right"
           style={{
-            color: '#262626',
+            color: 'var(--uc-text)',
             fontSize: '20px',
             lineHeight: 'normal'
           }}
@@ -37,7 +37,7 @@ export default function TotalRow({ integer, decimals, currency }: TotalRowProps)
         <span 
           className="font-['UniCredit',sans-serif] font-normal text-right"
           style={{
-            color: '#262626',
+            color: 'var(--uc-text)',
             fontSize: '14px',
             lineHeight: 'normal'
           }}

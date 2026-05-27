@@ -11,11 +11,20 @@ export type Screen =
   | "co-apping-session"
   | "homepage"
   | "language-selector"
+  | "analytics" // Spending analytics
+  | "payments" // Payments menu
+  | "products" // Products menu
   | "prime" // Prime screen
   | "more" // More screen
   | "contacts" // Contacts screen
   | "account-detail" // Account details and transactions
+  | "account-details-info" // Account details information
   | "account-options" // Account options menu
+  | "transaction-detail" // Transaction details and redo payment entry
+  | "domestic-payment" // Domestic payment create form
+  | "payment-review" // Domestic payment review data
+  | "payment-sign" // Domestic payment sign screen
+  | "payment-success" // Domestic payment success screen
   | "design-system"; // Full-width component inventory
 
 interface NavigationState {

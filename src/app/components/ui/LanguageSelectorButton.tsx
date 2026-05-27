@@ -18,13 +18,13 @@ export default function LanguageSelectorButton({ onClick, language: providedLang
     >
       {/* Language code */}
       <p 
-        className="text-white text-right font-['UniCredit'] text-[14px] font-bold leading-[normal]"
+        className="text-[var(--uc-static-white)] text-right font-['UniCredit'] text-[14px] font-bold leading-[normal]"
       >
         {language.toUpperCase()}
       </p>
       
       {/* Underline */}
-      <div className="h-[1px] w-full bg-white" />
+      <div className="h-[1px] w-full bg-[var(--uc-surface)]" />
     </button>
   );
 }

@@ -28,6 +28,11 @@ export type ProductId = "PI" | "SME";
 export type DesignSystemId = "current" | "next";
 
 /**
+ * Runtime visual theme for the stakeholder demo.
+ */
+export type ThemeMode = "light" | "dark";
+
+/**
  * Stable baseline identifiers.
  */
 export type BaselineId = "baseline-current" | "uat-current";
@@ -50,8 +55,17 @@ export type ScreenId =
   | "pi.prelogin.active"
   | "pi.co-apping.session"
   | "pi.home.overview"
+  | "pi.analytics.overview"
   | "pi.account.detail"
+  | "pi.account.details-info"
   | "pi.account.options"
+  | "pi.transaction.detail"
+  | "pi.payments.overview"
+  | "pi.payment.domestic-create"
+  | "pi.payment.review"
+  | "pi.payment.sign"
+  | "pi.payment.success"
+  | "pi.products.overview"
   | "pi.prime.overview"
   | "pi.more.overview"
   | "pi.contacts.overview"
@@ -63,14 +77,29 @@ export type ScreenId =
 export type ComponentId =
   | "shell.mobile-frame"
   | "shell.bottom-navigation"
+  | "shell.bottom-sheet"
   | "prelogin.inactive"
   | "prelogin.active"
   | "co-apping.floating-button"
   | "co-apping.session-entry"
+  | "home.amount-visibility-toggle"
   | "home.account-summary"
   | "home.account-balance-card"
   | "home.unplanned-banner"
+  | "analytics.spendings"
+  | "accounts.details-info"
+  | "accounts.transaction-search"
   | "accounts.transaction-row"
+  | "transactions.detail"
+  | "payments.menu"
+  | "payments.other-shortcut"
+  | "payments.new-payment-sheet"
+  | "payments.new-payment-action"
+  | "payments.new-payment-discover-banner"
+  | "payments.domestic-flow"
+  | "products.menu"
+  | "products.offer-card"
+  | "products.product-card"
   | "more.card-grid"
   | "contacts.navigation-card"
   | "prime.advisor-tab"
@@ -83,6 +112,11 @@ export type FlowId =
   | "pi.prelogin-to-home.active"
   | "pi.co-apping.activation"
   | "pi.home-to-account-detail"
+  | "pi.home-to-analytics"
+  | "pi.home-to-payments-menu"
+  | "pi.transaction-redo-payment"
+  | "pi.new-domestic-payment"
+  | "pi.home-to-products-menu"
   | "pi.home-to-more-to-contacts";
 
 /**
@@ -213,6 +247,12 @@ export interface DemoState {
    * }
    */
   flagsByContext: Record<string, Record<FeatureId, boolean>>;
+
+  /** Whether account/card/product amounts are hidden across the mobile app. */
+  amountsHidden: boolean;
+
+  /** Current light/dark rendering mode. */
+  themeMode: ThemeMode;
 }
 
 /**
@@ -239,6 +279,18 @@ export interface DemoStore extends DemoState {
   
   /** Toggle or set a feature flag */
   setFlag: (featureId: FeatureId, enabled: boolean) => void;
+
+  /** Toggle account/card/product amount visibility across the mobile app. */
+  toggleAmountsHidden: () => void;
+
+  /** Set account/card/product amount visibility across the mobile app. */
+  setAmountsHidden: (hidden: boolean) => void;
+
+  /** Update runtime light/dark theme. */
+  setThemeMode: (themeMode: ThemeMode) => void;
+
+  /** Toggle runtime light/dark theme. */
+  toggleThemeMode: () => void;
   
   /** Reset all flags to default (false) */
   resetFlags: () => void;

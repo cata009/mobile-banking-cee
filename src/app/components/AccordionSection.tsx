@@ -1,4 +1,5 @@
 import { useState, ReactNode, Children, isValidElement, cloneElement, ReactElement } from 'react';
+import { AppIcon } from "@/app/components/icons";
 
 interface AccordionSectionProps {
   title: string;
@@ -51,7 +52,7 @@ export default function AccordionSection({
           <h2 
             className="font-['UniCredit',sans-serif] font-bold"
             style={{
-              color: '#262626',
+              color: 'var(--uc-text)',
               fontSize: '24px',
               lineHeight: 'normal'
             }}
@@ -73,7 +74,7 @@ export default function AccordionSection({
           <h2 
             className="font-['UniCredit',sans-serif] font-bold"
             style={{
-              color: '#262626',
+              color: 'var(--uc-text)',
               fontSize: '24px',
               lineHeight: 'normal'
             }}
@@ -90,9 +91,7 @@ export default function AccordionSection({
               height: '32px'
             }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <path fillRule="evenodd" clipRule="evenodd" d="M23 12.6759C22.0651 11.7747 20.5478 11.7747 19.612 12.6759L16 15.9391L12.388 12.6759C11.4522 11.7747 9.93578 11.7747 9 12.6759L16 19L23 12.6759Z" fill="#262626"/>
-            </svg>
+            <AppIcon name="chevron-down-wide" color="var(--uc-icon)" />
           </div>
         </button>
       )}

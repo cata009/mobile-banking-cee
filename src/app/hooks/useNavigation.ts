@@ -5,7 +5,22 @@ export type Screen =
   | "prelogin-active"
   | "co-apping-session"
   | "homepage"
-  | "language-selector";
+  | "language-selector"
+  | "analytics"
+  | "payments"
+  | "products"
+  | "prime"
+  | "more"
+  | "contacts"
+  | "account-detail"
+  | "account-details-info"
+  | "account-options"
+  | "transaction-detail"
+  | "domestic-payment"
+  | "payment-review"
+  | "payment-sign"
+  | "payment-success"
+  | "design-system";
 
 interface NavigationState {
   currentScreen: Screen;

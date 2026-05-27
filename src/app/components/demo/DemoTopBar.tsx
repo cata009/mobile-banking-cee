@@ -9,6 +9,7 @@ import { COUNTRIES, COUNTRY_META } from "@/app/registry/demoConfig";
 import { PRODUCT_ORDER, PRODUCTS } from "@/app/registry/projectModel";
 import { getReleaseBundle, RELEASE_ORDER } from "@/app/registry/releaseRegistry";
 import { useDemo } from "@/app/state/demoStore";
+import { AppIcon } from "@/app/components/icons";
 import { DemoFeatureSidePanel } from "./DemoFeatureSidePanel";
 import svgPaths from "@/imports/svg-pn3y56bdut";
 
@@ -18,10 +19,12 @@ export function DemoTopBar() {
     country,
     scenario,
     release,
+    themeMode,
     setProduct,
     setCountry,
     setScenario,
     setRelease,
+    setThemeMode,
   } = useDemo();
   const { currentScreen, navigateTo, setCoAppingActive } = useNavigationContext();
 
@@ -61,24 +64,24 @@ export function DemoTopBar() {
 
   return (
     <>
-      <div className="sticky top-0 z-[9999] bg-white border-b border-gray-200 shadow-sm">
+      <div className="sticky top-0 z-[9999] border-b border-[var(--uc-border-muted)] bg-[var(--uc-surface)] shadow-sm">
         <div className="flex items-center justify-between px-20 py-4">
           <div className="flex items-center gap-6">
             <div className="h-[27px] w-[140px] shrink-0">
               <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 139.508 26.7899">
                 <g>
-                  <path clipRule="evenodd" d={svgPaths.p2cef6600} fill="#E2001A" fillRule="evenodd" />
-                  <path clipRule="evenodd" d={svgPaths.p27e9da00} fill="#E2001A" fillRule="evenodd" />
-                  <path clipRule="evenodd" d={svgPaths.p2e662b0} fill="white" fillRule="evenodd" />
-                  <path d={svgPaths.p3d56e1f0} fill="#262626" />
-                  <path d={svgPaths.p18a76220} fill="#262626" />
-                  <path d={svgPaths.p2205fa00} fill="#262626" />
-                  <path d={svgPaths.p4138200} fill="#262626" />
-                  <path d={svgPaths.p120fd332} fill="#262626" />
-                  <path d={svgPaths.p3558cb00} fill="#262626" />
-                  <path d={svgPaths.p29646d00} fill="#262626" />
-                  <path d={svgPaths.p3ed7ba20} fill="#262626" />
-                  <path d={svgPaths.p4240280} fill="#262626" />
+                  <path clipRule="evenodd" d={svgPaths.p2cef6600} fill="var(--uc-brand)" fillRule="evenodd" />
+                  <path clipRule="evenodd" d={svgPaths.p27e9da00} fill="var(--uc-brand)" fillRule="evenodd" />
+                  <path clipRule="evenodd" d={svgPaths.p2e662b0} fill="var(--uc-static-white)" fillRule="evenodd" />
+                  <path d={svgPaths.p3d56e1f0} fill="var(--uc-text)" />
+                  <path d={svgPaths.p18a76220} fill="var(--uc-text)" />
+                  <path d={svgPaths.p2205fa00} fill="var(--uc-text)" />
+                  <path d={svgPaths.p4138200} fill="var(--uc-text)" />
+                  <path d={svgPaths.p120fd332} fill="var(--uc-text)" />
+                  <path d={svgPaths.p3558cb00} fill="var(--uc-text)" />
+                  <path d={svgPaths.p29646d00} fill="var(--uc-text)" />
+                  <path d={svgPaths.p3ed7ba20} fill="var(--uc-text)" />
+                  <path d={svgPaths.p4240280} fill="var(--uc-text)" />
                 </g>
               </svg>
             </div>
@@ -89,20 +92,18 @@ export function DemoTopBar() {
                 className="flex items-center gap-1 hover:opacity-70 transition-opacity"
               >
                 <div className="flex flex-col gap-1 text-left">
-                  <p className="font-['UniCredit:Regular',sans-serif] text-[14px] text-[#262626] leading-normal">
+                  <p className="font-['UniCredit:Regular',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
                     Application
                   </p>
-                  <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[#262626] leading-normal">
+                  <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
                     {PRODUCTS[product].label}
                   </p>
                 </div>
-                <svg className="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24">
-                  <path d={svgPaths.p12dc2d00} fill="#262626" />
-                </svg>
+                <AppIcon name="demo-chevron-down" color="var(--uc-text)" className="w-6 h-6 shrink-0" />
               </button>
 
               {isProductDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-[10000] min-w-[190px] py-1">
+                <div className="absolute top-full left-0 mt-2 bg-[var(--uc-surface)] border border-[var(--uc-border-muted)] rounded-lg shadow-lg z-[10000] min-w-[190px] py-1">
                   {PRODUCT_ORDER.map((productId) => (
                     <button
                       key={productId}
@@ -111,15 +112,15 @@ export function DemoTopBar() {
                         setProduct(productId);
                         setIsProductDropdownOpen(false);
                       }}
-                      className={`w-full px-4 py-2 text-sm text-left hover:bg-gray-50 transition-colors ${
+                      className={`w-full px-4 py-2 text-sm text-left hover:bg-[var(--uc-surface-muted)] transition-colors ${
                         product === productId
-                          ? "bg-red-50 font-['UniCredit:Bold',sans-serif] text-[#E2001A]"
-                          : "font-['UniCredit:Regular',sans-serif] text-[#262626]"
+                          ? "bg-[color-mix(in_srgb,var(--uc-brand)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-brand)]"
+                          : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
                       }`}
                     >
                       {PRODUCTS[productId].label}
                       {PRODUCTS[productId].status === "planned" && (
-                        <span className="ml-2 text-xs text-gray-400">planned</span>
+                        <span className="ml-2 text-xs text-[var(--uc-text-subtle)]">planned</span>
                       )}
                     </button>
                   ))}
@@ -133,20 +134,18 @@ export function DemoTopBar() {
                 className="flex items-center gap-1 hover:opacity-70 transition-opacity"
               >
                 <div className="flex flex-col gap-1 text-left">
-                  <p className="font-['UniCredit:Regular',sans-serif] text-[14px] text-[#262626] leading-normal">
+                  <p className="font-['UniCredit:Regular',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
                     Country
                   </p>
-                  <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[#262626] leading-normal">
+                  <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
                     {COUNTRY_META[country]?.nameEN || country}
                   </p>
                 </div>
-                <svg className="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24">
-                  <path d={svgPaths.p12dc2d00} fill="#262626" />
-                </svg>
+                <AppIcon name="demo-chevron-down" color="var(--uc-text)" className="w-6 h-6 shrink-0" />
               </button>
 
               {isCountryDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-[10000] min-w-[180px] py-1">
+                <div className="absolute top-full left-0 mt-2 bg-[var(--uc-surface)] border border-[var(--uc-border-muted)] rounded-lg shadow-lg z-[10000] min-w-[180px] py-1">
                   {COUNTRIES.map((countryCode) => (
                     <button
                       key={countryCode}
@@ -154,25 +153,25 @@ export function DemoTopBar() {
                         setCountry(countryCode);
                         setIsCountryDropdownOpen(false);
                       }}
-                      className={`w-full px-4 py-2 text-sm text-left hover:bg-gray-50 transition-colors ${
+                      className={`w-full px-4 py-2 text-sm text-left hover:bg-[var(--uc-surface-muted)] transition-colors ${
                         country === countryCode
-                          ? "bg-red-50 font-['UniCredit:Bold',sans-serif] text-[#E2001A]"
-                          : "font-['UniCredit:Regular',sans-serif] text-[#262626]"
+                          ? "bg-[color-mix(in_srgb,var(--uc-brand)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-brand)]"
+                          : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
                       }`}
                     >
                       {COUNTRY_META[countryCode]?.nameEN || countryCode}
                     </button>
                   ))}
-                  <div className="my-1 border-t border-gray-200" />
+                  <div className="my-1 border-t border-[var(--uc-border-muted)]" />
                   <button
                     onClick={() => {
                       navigateTo("design-system");
                       setIsCountryDropdownOpen(false);
                     }}
-                    className={`w-full px-4 py-2 text-sm text-left hover:bg-gray-50 transition-colors ${
+                    className={`w-full px-4 py-2 text-sm text-left hover:bg-[var(--uc-surface-muted)] transition-colors ${
                       currentScreen === "design-system"
-                        ? "bg-red-50 font-['UniCredit:Bold',sans-serif] text-[#E2001A]"
-                        : "font-['UniCredit:Regular',sans-serif] text-[#262626]"
+                        ? "bg-[color-mix(in_srgb,var(--uc-brand)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-brand)]"
+                        : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
                     }`}
                   >
                     Design system inventory
@@ -183,13 +182,13 @@ export function DemoTopBar() {
           </div>
 
           <div className="flex items-center">
-            <div className="bg-[#f5f5f5] flex gap-0.5 items-center px-1 py-0.5 rounded-[30px]">
+            <div className="bg-[var(--uc-app-bg)] flex gap-0.5 items-center px-1 py-0.5 rounded-[30px]">
               <button
                 onClick={() => setScenario("active")}
                 className={`px-3 py-1 rounded-[30px] transition-all ${
                   scenario === "active"
-                    ? "bg-white font-['UniCredit:Bold',sans-serif] text-[16px] text-[#262626] leading-[18px]"
-                    : "bg-transparent font-['UniCredit:Regular',sans-serif] text-[16px] text-[#666] leading-[18px]"
+                    ? "bg-[var(--uc-surface)] font-['UniCredit:Bold',sans-serif] text-[16px] text-[var(--uc-text)] leading-[18px]"
+                    : "bg-transparent font-['UniCredit:Regular',sans-serif] text-[16px] text-[var(--uc-text-muted)] leading-[18px]"
                 }`}
               >
                 Active App
@@ -198,8 +197,8 @@ export function DemoTopBar() {
                 onClick={() => setScenario("inactive")}
                 className={`px-3 py-1 rounded-[30px] transition-all ${
                   scenario === "inactive"
-                    ? "bg-white font-['UniCredit:Bold',sans-serif] text-[16px] text-[#262626] leading-[18px]"
-                    : "bg-transparent font-['UniCredit:Regular',sans-serif] text-[16px] text-[#666] leading-[18px]"
+                    ? "bg-[var(--uc-surface)] font-['UniCredit:Bold',sans-serif] text-[16px] text-[var(--uc-text)] leading-[18px]"
+                    : "bg-transparent font-['UniCredit:Regular',sans-serif] text-[16px] text-[var(--uc-text-muted)] leading-[18px]"
                 }`}
               >
                 Inactive App
@@ -214,20 +213,18 @@ export function DemoTopBar() {
                 className="flex items-center gap-1 hover:opacity-70 transition-opacity"
               >
                 <div className="flex flex-col gap-1 text-left">
-                  <p className="font-['UniCredit:Regular',sans-serif] text-[14px] text-[#262626] leading-normal">
+                  <p className="font-['UniCredit:Regular',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
                     Release
                   </p>
-                  <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[#262626] leading-normal">
+                  <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
                     {selectedRelease.label}
                   </p>
                 </div>
-                <svg className="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24">
-                  <path d={svgPaths.p12dc2d00} fill="#262626" />
-                </svg>
+                <AppIcon name="demo-chevron-down" color="var(--uc-text)" className="w-6 h-6 shrink-0" />
               </button>
 
               {isReleaseDropdownOpen && (
-                <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-[10000] min-w-[170px] py-1">
+                <div className="absolute top-full right-0 mt-2 bg-[var(--uc-surface)] border border-[var(--uc-border-muted)] rounded-lg shadow-lg z-[10000] min-w-[170px] py-1">
                   {RELEASE_ORDER.map((releaseId) => (
                     <button
                       key={releaseId}
@@ -235,10 +232,10 @@ export function DemoTopBar() {
                         setRelease(releaseId);
                         setIsReleaseDropdownOpen(false);
                       }}
-                      className={`w-full px-4 py-2 text-sm text-left hover:bg-gray-50 transition-colors ${
+                      className={`w-full px-4 py-2 text-sm text-left hover:bg-[var(--uc-surface-muted)] transition-colors ${
                         release === releaseId
-                          ? "bg-red-50 font-['UniCredit:Bold',sans-serif] text-[#E2001A]"
-                          : "font-['UniCredit:Regular',sans-serif] text-[#262626]"
+                          ? "bg-[color-mix(in_srgb,var(--uc-brand)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-brand)]"
+                          : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
                       }`}
                     >
                       {getReleaseBundle(releaseId).label}
@@ -251,26 +248,21 @@ export function DemoTopBar() {
             <button
               onClick={() => setIsControlPanelOpen(!isControlPanelOpen)}
               className={`w-6 h-6 transition-colors ${
-                isControlPanelOpen ? "text-[#E2001A]" : "text-[#262626] hover:text-[#E2001A]"
+                isControlPanelOpen ? "text-[var(--uc-brand)]" : "text-[var(--uc-text)] hover:text-[var(--uc-brand)]"
               }`}
               title="Control Panel"
             >
-              <svg className="block size-full" fill="none" viewBox="0 0 24 24">
-                <path clipRule="evenodd" d={svgPaths.p2284a880} fill="currentColor" fillRule="evenodd" />
-              </svg>
+              <AppIcon name="demo-settings" className="block size-full" />
             </button>
+
+            <ThemeModeSwitch value={themeMode} onChange={setThemeMode} />
 
             <button
               onClick={handleReset}
-              className="w-6 h-6 text-[#262626] hover:text-[#E2001A] transition-colors"
+              className="w-6 h-6 text-[var(--uc-text)] hover:text-[var(--uc-brand)] transition-colors"
               title="Reset to Prelogin"
             >
-              <svg className="block size-full" fill="none" viewBox="0 0 24 24">
-                <g>
-                  <path d={svgPaths.p2192be00} fill="currentColor" />
-                  <path d={svgPaths.p2e463400} fill="currentColor" />
-                </g>
-              </svg>
+              <AppIcon name="demo-reset" className="block size-full" />
             </button>
           </div>
         </div>
@@ -281,5 +273,39 @@ export function DemoTopBar() {
         onClose={() => setIsControlPanelOpen(false)}
       />
     </>
+  );
+}
+
+function ThemeModeSwitch({
+  value,
+  onChange,
+}: {
+  value: "light" | "dark";
+  onChange: (value: "light" | "dark") => void;
+}) {
+  return (
+    <div
+      className="flex items-center rounded-[18px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[2px]"
+      aria-label="Theme mode"
+    >
+      {(["light", "dark"] as const).map((mode) => {
+        const isActive = value === mode;
+        return (
+          <button
+            key={mode}
+            type="button"
+            aria-pressed={isActive}
+            onClick={() => onChange(mode)}
+            className={`rounded-[16px] px-3 py-1 font-['UniCredit:Bold',sans-serif] text-[12px] leading-none transition-colors ${
+              isActive
+                ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm"
+                : "text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]"
+            }`}
+          >
+            {mode === "light" ? "Light" : "Dark"}
+          </button>
+        );
+      })}
+    </div>
   );
 }

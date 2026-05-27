@@ -1,11 +1,9 @@
-/**
- * ContactsNavigationCard Component
- * Navigation card with icon, title, optional value/subtitle, and optional chevron
- * Similar to PrimeLabelValue but with black colors (#262626)
- */
+import { AppIcon, type IconName } from "@/app/components/icons";
+
+type ContactsNavigationIcon = "prime" | "location" | "time" | "phone" | "block" | "email" | "website" | "youtube" | "x";
 
 interface ContactsNavigationCardProps {
-  icon: 'prime' | 'location' | 'time' | 'phone' | 'block' | 'email' | 'website' | 'youtube' | 'x';
+  icon: ContactsNavigationIcon;
   title: string;
   value?: string;
   subtitle?: string;
@@ -13,131 +11,57 @@ interface ContactsNavigationCardProps {
   onClick: () => void;
 }
 
-export function ContactsNavigationCard({ 
-  icon, 
-  title, 
-  value, 
-  subtitle, 
-  hasChevron = false,
-  onClick 
-}: ContactsNavigationCardProps) {
-  
-  const renderIcon = () => {
-    switch (icon) {
-      case 'prime':
-        return (
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g transform="translate(5, 5)">
-              <path d="M0.916351 7.26543L4.52766 2.75H7.51211L5.58436 7.26543H0.916351Z" fill="#262626"/>
-              <path d="M8.78562 17.8612L0.916016 8.55556H5.49403L8.78562 17.8612Z" fill="#262626"/>
-              <path d="M10.9862 20.1667L6.83238 8.55556H15.1356L10.9862 20.1667Z" fill="#262626"/>
-              <path d="M16.477 8.55556L13.1445 17.8619L21.0827 8.55556H16.477Z" fill="#262626"/>
-              <path d="M14.4599 2.75L16.387 7.26543H21.0557L17.4444 2.75H14.4599Z" fill="#262626"/>
-              <path d="M6.95794 7.26543L8.88569 2.75H13.0861L15.0132 7.26543H6.95794Z" fill="#262626"/>
-            </g>
-          </svg>
-        );
-      case 'location':
-        return (
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fillRule="evenodd" clipRule="evenodd" d="M13.375 13.5019C13.375 11.7756 14.7739 10.3762 16.4997 10.3762C18.2261 10.3762 19.625 11.7756 19.625 13.5019C19.625 15.2281 18.2261 16.6275 16.4997 16.6275C14.7739 16.6275 13.375 15.2281 13.375 13.5019ZM22.3068 18.2494C23.3652 16.9563 24 15.3037 24 13.5019C24 9.35875 20.6423 6 16.4997 6C12.3578 6 9 9.35875 9 13.5019C9 15.2587 9.60483 16.8725 10.6158 18.1512L16.4953 26L22.3068 18.2494Z" fill="#262626"/>
-          </svg>
-        );
-      case 'time':
-        return (
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g transform="translate(6, 6)">
-              <path fillRule="evenodd" clipRule="evenodd" d="M11.25 10.6055H7.265C6.3025 10.6055 5.5225 10 5.5225 8.78906H9.375V5.06604C9.375 4.13422 10 3.37859 11.25 3.37859V10.6055ZM10 0.3125C4.4775 0.3125 0 4.65008 0 10C0 15.3505 4.4775 19.6875 10 19.6875C15.5231 19.6875 20 15.3505 20 10C20 4.65008 15.5231 0.3125 10 0.3125Z" fill="#262626"/>
-            </g>
-          </svg>
-        );
-      case 'phone':
-        return (
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g transform="translate(6, 6)">
-              <path fillRule="evenodd" clipRule="evenodd" d="M4.66577 10.7775C5.21335 11.8943 5.82352 12.9457 6.47904 13.9263C7.88062 13.3943 9.48869 13.9825 10.1255 15.2831L12.0621 19.24L11.6177 19.4312L10.2988 20C7.87993 19.26 5.49312 17.5594 3.60992 15.1575C2.88048 14.2275 2.22499 13.1925 1.67408 12.0675C1.12384 10.9425 0.714153 9.80186 0.437035 8.67814C-0.280413 5.77 -0.10122 2.965 0.876697 0.761876L2.19435 0.191248L2.64133 0L4.57984 3.95875C5.21734 5.25812 4.64179 6.78628 3.30215 7.43814C3.66587 8.54124 4.11952 9.66062 4.66577 10.7775ZM16.5925 9.69172C16.5925 9.00172 17.2012 8.44172 17.9514 8.44172C18.7015 8.44172 19.3103 9.00172 19.3103 9.69172C19.3103 10.3817 18.7015 10.9417 17.9514 10.9417C17.2012 10.9417 16.5925 10.3817 16.5925 9.69172ZM8.27352 10.9417C9.00897 10.9417 9.60579 10.3817 9.60579 9.69166C9.60579 9.00166 9.00897 8.44166 8.27352 8.44166C7.53738 8.44166 6.94124 9.00166 6.94124 9.69166C6.94124 10.3817 7.53738 10.9417 8.27352 10.9417ZM11.6043 9.69166C11.6043 9.00166 12.2012 8.44166 12.9366 8.44166C13.672 8.44166 14.2689 9.00166 14.2689 9.69166C14.2689 10.3817 13.672 10.9417 12.9366 10.9417C12.2012 10.9417 11.6043 10.3817 11.6043 9.69166Z" fill="#262626"/>
-            </g>
-          </svg>
-        );
-      case 'block':
-        return (
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fillRule="evenodd" clipRule="evenodd" d="M22.375 9.37875L22.3731 14.125H20.4987L20.5 9.37875C20.5 8.54938 19.8256 7.875 18.9963 7.875H12.0037C11.1744 7.875 10.5 8.54938 10.5 9.37875V14.125H8.625V9.37875C8.625 7.51563 10.1406 6 12.0037 6H18.9963C20.8594 6 22.375 7.51563 22.375 9.37875ZM16.3526 20.7294V22.2313C16.3526 22.6638 16.0026 23.0131 15.5713 23.0131C15.1394 23.0131 14.7894 22.6638 14.7894 22.2313V20.7294C14.3701 20.4681 14.0907 20.0031 14.0907 19.4719C14.0907 18.655 14.7538 17.9919 15.5713 17.9919C16.3888 17.9919 17.0513 18.655 17.0513 19.4719C17.0513 20.0031 16.7719 20.4681 16.3526 20.7294ZM8 15.375V26H21.1075C22.1531 26 23 25.0837 23 23.9544V15.375H8Z" fill="#262626"/>
-          </svg>
-        );
-      case 'email':
-        return (
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fillRule="evenodd" clipRule="evenodd" d="M18.6174 19.0256C19.5293 19.0256 20.2724 18.68 20.8493 17.9888C21.4256 17.2969 21.7137 16.3538 21.7137 15.1594C21.7137 13.6606 21.2312 12.495 20.2674 11.6619C19.3031 10.8287 18.0724 10.4125 16.5737 10.4125C14.7087 10.4125 13.1943 10.9625 12.0312 12.0631C10.8681 13.1631 10.2868 14.6825 10.2868 16.6213C10.2868 18.235 10.7737 19.4656 11.7481 20.315C12.7231 21.1637 14.1531 21.5881 16.0393 21.5881C17.2656 21.5881 18.4181 21.3731 19.4974 20.9438C19.7174 20.87 19.8062 20.7238 19.7649 20.5031L19.6231 19.8587C19.5812 19.6494 19.4506 19.5869 19.2299 19.67C18.2868 20.0062 17.2756 20.1731 16.1968 20.1731C13.5243 20.1731 12.1887 18.9525 12.1887 16.5112C12.1887 15.0231 12.5706 13.8756 13.3362 13.0687C14.1012 12.2619 15.1331 11.8581 16.4324 11.8581C17.5431 11.8581 18.4256 12.1594 19.0812 12.7625C19.7362 13.365 20.0631 14.2375 20.0631 15.3794C20.0631 16.1444 19.9374 16.7519 19.6862 17.2025C19.4343 17.6531 19.1249 17.8781 18.7587 17.8781C18.4024 17.8781 18.2243 17.7319 18.2243 17.4381C18.2243 17.3544 18.2506 17.1031 18.3031 16.6838L18.6799 13.7444C18.6906 13.6294 18.6749 13.5531 18.6331 13.5169C18.5912 13.48 18.5074 13.4619 18.3818 13.4619H17.6743C17.5062 13.4619 17.3912 13.53 17.3281 13.6656L17.2181 13.9019C16.9249 13.4931 16.4481 13.2887 15.7881 13.2887H15.6937C14.5831 13.2887 13.9068 13.9544 13.6656 15.285C13.5399 16.0188 13.4774 16.6056 13.4774 17.045C13.4774 18.1875 14.0587 18.7587 15.2218 18.7587H15.3318C15.9293 18.7587 16.3693 18.575 16.6524 18.2087H16.6993C17.0243 18.7537 17.6637 19.0256 18.6174 19.0256ZM6 16C6 10.4775 10.4775 6 16 6C21.5231 6 26 10.4775 26 16C26 21.5231 21.5231 26 16 26C10.4775 26 6 21.5231 6 16ZM16.0709 14.5149H16.1652C16.6159 14.5149 16.8046 14.7924 16.7315 15.3481L16.5577 16.6056C16.5059 16.9512 16.4221 17.2024 16.3065 17.3599C16.1915 17.5168 16.0184 17.5956 15.7878 17.5956H15.7096C15.5209 17.5956 15.3871 17.5487 15.3084 17.4543C15.2296 17.3599 15.1909 17.1974 15.1909 16.9668C15.1909 16.5687 15.2534 16.0449 15.379 15.3949C15.4315 15.0706 15.5103 14.8424 15.6152 14.7112C15.7203 14.5799 15.8715 14.5149 16.0709 14.5149Z" fill="#262626"/>
-          </svg>
-        );
-      case 'website':
-        return (
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g transform="translate(6, 7)">
-              <path fillRule="evenodd" clipRule="evenodd" d="M18.1252 8.75C18.1252 9.18937 18.044 9.60812 17.9052 10H2.09473C1.95536 9.60875 1.87536 9.18937 1.87536 8.75V0H18.1252V8.75ZM7.50006 13.75L6.25006 16.25H13.7501L12.5001 13.75H7.50006ZM17.9581 11.25L19.8181 15.7625C20.2356 16.7188 19.9094 17.5 19.095 17.5H0.905113C0.0901164 17.5 -0.235507 16.7188 0.181991 15.7625L2.01073 11.25H17.9581Z" fill="#262626"/>
-            </g>
-          </svg>
-        );
-      case 'youtube':
-        return (
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g transform="translate(6, 6)">
-              <path d="M10 0C15.5228 0 20 4.47715 20 10C20 15.5228 15.5228 20 10 20C4.47715 20 0 15.5228 0 10C0 4.47715 4.47715 0 10 0ZM10.0059 5.97656C9.96935 5.97657 6.40783 5.97749 5.51562 6.21582C5.0183 6.35098 4.63199 6.73833 4.50293 7.22949C4.26337 8.1263 4.2627 10 4.2627 10C4.2627 10.001 4.26343 11.8739 4.50293 12.7705C4.63813 13.2678 5.02444 13.6552 5.51562 13.7842C6.40783 14.0225 9.96935 14.0234 10.0059 14.0234C10.0059 14.0234 13.5988 14.0237 14.4961 13.7842C14.9936 13.6491 15.3807 13.2618 15.5098 12.7705C15.7493 11.8739 15.749 10.001 15.749 10C15.749 10 15.7493 8.1263 15.5098 7.22949C15.3746 6.73206 14.9874 6.34479 14.4961 6.21582C13.5988 5.97634 10.0059 5.97656 10.0059 5.97656ZM11.8369 9.99414L8.85156 11.7197V8.26758L11.8369 9.99414Z" fill="#262626"/>
-            </g>
-          </svg>
-        );
-      case 'x':
-        return (
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g transform="translate(6, 6)">
-              <path d="M10 0C15.5228 0 20 4.47715 20 10C20 15.5228 15.5228 20 10 20C4.47715 20 0 15.5228 0 10C0 4.47715 4.47715 0 10 0ZM8.77832 10.4102L5.19531 14.375H6.73145L9.49609 11.3164L11.9141 14.375H15L11.0586 9.33105L14.4092 5.625H12.875L10.3477 8.41992L8.16406 5.625H5L8.77832 10.4102ZM13.1855 13.4873H12.3359L6.78809 6.4668H7.70117L13.1855 13.4873Z" fill="#262626"/>
-            </g>
-          </svg>
-        );
-      default:
-        return null;
-    }
-  };
+const CONTACT_ICON_NAME: Record<ContactsNavigationIcon, IconName> = {
+  prime: "contact-prime",
+  location: "contact-location",
+  time: "contact-time",
+  phone: "contact-phone",
+  block: "contact-block",
+  email: "contact-email",
+  website: "contact-website",
+  youtube: "contact-youtube",
+  x: "contact-x",
+};
 
+export function ContactsNavigationCard({
+  icon,
+  title,
+  value,
+  subtitle,
+  hasChevron = false,
+  onClick,
+}: ContactsNavigationCardProps) {
   return (
     <button
       onClick={onClick}
-      className="w-full h-[80px] bg-white flex items-center gap-[16px] px-0 py-[24px] cursor-pointer"
+      className="flex h-[80px] w-full cursor-pointer items-center gap-[16px] bg-[var(--uc-surface)] px-0 py-[24px]"
+      type="button"
     >
-      {/* Icon */}
-      {renderIcon()}
+      <AppIcon name={CONTACT_ICON_NAME[icon]} color="var(--uc-text)" />
 
-      {/* Text Content */}
-      <div className="flex-1 flex flex-col gap-[4px] items-start justify-center min-w-0">
-        {/* Title */}
-        <p className="font-['UniCredit:Bold',sans-serif] text-[16px] text-[#262626] leading-normal text-left w-full">
+      <div className="flex min-w-0 flex-1 flex-col items-start justify-center gap-[4px]">
+        <p className="w-full text-left font-['UniCredit:Bold',sans-serif] text-[16px] leading-normal text-[var(--uc-text)]">
           {title}
         </p>
-        
-        {/* Subtitle (for multi-line content) */}
-        {subtitle && (
-          <p className="font-['UniCredit:Regular',sans-serif] text-[16px] text-[#262626] leading-normal text-left w-full">
+
+        {subtitle ? (
+          <p className="w-full text-left font-['UniCredit:Regular',sans-serif] text-[16px] leading-normal text-[var(--uc-text)]">
             {subtitle}
           </p>
-        )}
-        
-        {/* Value (clickable link style) */}
-        {value && (
-          <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[#007a91] leading-normal text-left">
+        ) : null}
+
+        {value ? (
+          <p className="text-left font-['UniCredit:Bold',sans-serif] text-[14px] leading-normal text-[var(--uc-action)]">
             {value}
           </p>
-        )}
+        ) : null}
       </div>
 
-      {/* Chevron Icon (if hasChevron) */}
-      {hasChevron && (
-        <div className="size-[32px] flex items-center justify-center shrink-0">
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fillRule="evenodd" clipRule="evenodd" d="M13.6759 9C12.7747 9.93494 12.7747 11.4522 13.6759 12.388L16.9391 16L13.6759 19.612C12.7747 20.5478 12.7747 22.0642 13.6759 23L20 16L13.6759 9Z" fill="#262626"/>
-          </svg>
+      {hasChevron ? (
+        <div className="flex size-[32px] shrink-0 items-center justify-center">
+          <AppIcon name="contact-chevron" color="var(--uc-text)" />
         </div>
-      )}
+      ) : null}
     </button>
   );
 }

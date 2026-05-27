@@ -8,7 +8,7 @@
  * - FIND ATM & BRANCHES
  */
 
-import svgPaths from "@/imports/svg-jx4cb946bv";
+import { AppIcon } from "@/app/components/icons";
 
 interface PanelWithoutCoAppingTranslationsProps {
   aboutSmartBanking: string;
@@ -22,12 +22,12 @@ function Group() {
     <div className="absolute contents inset-[16%_4.45%_9.75%_4.45%]" data-name="Group">
       <div className="absolute flex inset-[16%_41.95%_9.75%_4.45%] items-center justify-center">
         <div className="flex-none h-[5px] rotate-20 w-[21px]">
-          <div className="bg-[#e5e5e5] rounded-[4px] size-full" />
+          <div className="bg-[var(--uc-border-muted)] rounded-[4px] size-full" />
         </div>
       </div>
       <div className="absolute flex inset-[16%_4.45%_9.75%_41.95%] items-center justify-center">
         <div className="-rotate-20 flex-none h-[5px] w-[21px]">
-          <div className="bg-[#e5e5e5] rounded-[4px] size-full" data-name="Rectangle 11 Copy" />
+          <div className="bg-[var(--uc-border-muted)] rounded-[4px] size-full" data-name="Rectangle 11 Copy" />
         </div>
       </div>
     </div>
@@ -58,18 +58,7 @@ function Frame9({ onClose }: { onClose?: () => void }) {
 function IcNavigationPreloginActivatetokensWhite() {
   return (
     <div className="relative shrink-0 size-[32px]" data-name="ic_navigation_prelogin_activatetokens_white">
-      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 32 32">
-        <g id="ic_navigation_prelogin_activatetokens_white">
-          <path d={svgPaths.pa8e0080} fill="var(--fill-0, white)" id="Icon" />
-          <g id="Object">
-            <mask height="23" id="mask0_1_9663" maskUnits="userSpaceOnUse" style={{ maskType: "luminance" }} width="22" x="5" y="5">
-              <path d={svgPaths.pa8e0080} fill="var(--fill-0, white)" id="Icon_2" />
-            </mask>
-            <g mask="url(#mask0_1_9663)" />
-          </g>
-          <g id="SafeArea24" />
-        </g>
-      </svg>
+      <AppIcon name="panel-smart-banking" color="var(--uc-static-white)" />
     </div>
   );
 }
@@ -77,7 +66,7 @@ function IcNavigationPreloginActivatetokensWhite() {
 function Frame({ children }: { children: React.ReactNode }) {
   return (
     <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-h-px min-w-px relative">
-      <p className="font-['UniCredit:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[14px] text-white w-full whitespace-pre-wrap">{children}</p>
+      <p className="font-['UniCredit:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[14px] text-[var(--uc-static-white)] w-full whitespace-pre-wrap">{children}</p>
     </div>
   );
 }
@@ -103,12 +92,7 @@ function LightRestyleNavigation({ aboutSmartBanking }: { aboutSmartBanking: stri
 function IcNavigationPaymentsExchangeratesWhite() {
   return (
     <div className="relative shrink-0 size-[32px]" data-name="ic_navigation_payments_exchangerates_white">
-      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 32 32">
-        <g id="ic_navigation_payments_exchangerates_white">
-          <g id="SafeArea24" />
-          <path d={svgPaths.p27220500} fill="var(--fill-0, white)" id="Combined Shape" />
-        </g>
-      </svg>
+      <AppIcon name="payment-exchange-rates" color="var(--uc-static-white)" />
     </div>
   );
 }
@@ -116,7 +100,7 @@ function IcNavigationPaymentsExchangeratesWhite() {
 function Frame1({ children }: { children: React.ReactNode }) {
   return (
     <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-h-px min-w-px relative">
-      <p className="font-['UniCredit:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[14px] text-white w-full whitespace-pre-wrap">{children}</p>
+      <p className="font-['UniCredit:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[14px] text-[var(--uc-static-white)] w-full whitespace-pre-wrap">{children}</p>
     </div>
   );
 }
@@ -142,14 +126,7 @@ function LightRestyleNavigation1({ exchangeRates }: { exchangeRates: string }) {
 function IcNavigationRestyleLocatorWhite() {
   return (
     <div className="relative shrink-0 size-[32px]" data-name="ic_navigation_restyle_LocatorWhite">
-      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 32 32">
-        <g id="ic_navigation_restyle_LocatorWhite">
-          <g id="SafeArea24" />
-          <g id="Locator">
-            <path clipRule="evenodd" d={svgPaths.p343f1f80} fill="var(--fill-0, white)" fillRule="evenodd" id="Shape" />
-          </g>
-        </g>
-      </svg>
+      <AppIcon name="contact-location" color="var(--uc-static-white)" />
     </div>
   );
 }
@@ -157,7 +134,7 @@ function IcNavigationRestyleLocatorWhite() {
 function Frame2({ children }: { children: React.ReactNode }) {
   return (
     <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-h-px min-w-px relative">
-      <p className="font-['UniCredit:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[14px] text-white w-full whitespace-pre-wrap">{children}</p>
+      <p className="font-['UniCredit:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[14px] text-[var(--uc-static-white)] w-full whitespace-pre-wrap">{children}</p>
     </div>
   );
 }
@@ -195,7 +172,7 @@ function Frame10({ aboutSmartBanking, exchangeRates, findAtmBranches }: { aboutS
 
 function Frame8({ aboutSmartBanking, exchangeRates, findAtmBranches, onClose }: PanelWithoutCoAppingTranslationsProps) {
   return (
-    <div className="-translate-x-1/2 absolute bg-[#262626] bottom-0 content-stretch flex flex-col gap-[8px] items-start left-1/2 py-[24px] rounded-tl-[12px] rounded-tr-[12px]">
+    <div className="-translate-x-1/2 absolute bg-[var(--uc-text)] bottom-0 content-stretch flex flex-col gap-[8px] items-start left-1/2 py-[24px] rounded-tl-[12px] rounded-tr-[12px]">
       <Frame9 onClose={onClose} />
       <Frame10 aboutSmartBanking={aboutSmartBanking} exchangeRates={exchangeRates} findAtmBranches={findAtmBranches} />
     </div>
@@ -205,7 +182,7 @@ function Frame8({ aboutSmartBanking, exchangeRates, findAtmBranches, onClose }: 
 export default function PanelWithoutCoAppingTranslations({ aboutSmartBanking, exchangeRates, findAtmBranches, onClose }: PanelWithoutCoAppingTranslationsProps) {
   return (
     <div className="relative size-full" data-name="Panel">
-      <div className="absolute backdrop-blur-[5.939px] bg-black inset-0 opacity-51" data-name="Screen Dimming" />
+      <div className="absolute backdrop-blur-[5.939px] bg-[var(--uc-static-black)] inset-0 opacity-51" data-name="Screen Dimming" />
       <Frame8 aboutSmartBanking={aboutSmartBanking} exchangeRates={exchangeRates} findAtmBranches={findAtmBranches} onClose={onClose} />
     </div>
   );

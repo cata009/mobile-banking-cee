@@ -48,10 +48,18 @@ export const FEATURE_META: Record<FeatureId, FeatureMeta> = {
     products: ["PI"],
     designSystems: ["current"],
     lifecycleStatus: "configured",
-    coverageStatus: "configured",
+    coverageStatus: "implemented",
     introducedIn: "release-v1",
     baselineFrom: null,
-    affectedScreens: ["pi.home.overview"],
+    affectedScreens: [
+      "pi.home.overview",
+      "pi.payments.overview",
+      "pi.transaction.detail",
+      "pi.payment.domestic-create",
+      "pi.payment.review",
+      "pi.payment.sign",
+      "pi.payment.success",
+    ],
   },
 
   fx_cardsRedesign: {
@@ -125,10 +133,10 @@ export const FEATURE_META: Record<FeatureId, FeatureMeta> = {
     products: ["PI"],
     designSystems: ["current"],
     lifecycleStatus: "configured",
-    coverageStatus: "configured",
+    coverageStatus: "mock-driven",
     introducedIn: "release-v4",
     baselineFrom: null,
-    affectedScreens: ["pi.home.overview"],
+    affectedScreens: ["pi.home.overview", "pi.analytics.overview"],
   },
 };
 
