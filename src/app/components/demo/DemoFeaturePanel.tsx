@@ -68,11 +68,11 @@ export function DemoFeaturePanel() {
   const isInactive = scenario === "inactive";
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+    <div className="bg-[var(--uc-surface)] border border-[var(--uc-border-muted)] rounded-lg shadow-sm">
       {/* ─── HEADER ───────────────────────────────────────────── */}
-      <div className="px-4 py-3 border-b border-gray-200">
-        <h3 className="font-semibold text-gray-900">Feature Flags</h3>
-        <p className="text-xs text-gray-500 mt-1">
+      <div className="px-4 py-3 border-b border-[var(--uc-border-muted)]">
+        <h3 className="font-semibold text-[var(--uc-text)]">Feature Flags</h3>
+        <p className="text-xs text-[var(--uc-text-muted)] mt-1">
           Control experimental features and releases
         </p>
       </div>
@@ -82,7 +82,7 @@ export function DemoFeaturePanel() {
         {/* ─── RELEASE FEATURES ─────────────────────────────── */}
         {releaseFeatures.length > 0 && (
           <div>
-            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-2">
               Release Features
             </h4>
             <div className="space-y-2">
@@ -114,17 +114,17 @@ export function DemoFeaturePanel() {
 
         {/* ─── DIVIDER ──────────────────────────────────────── */}
         {releaseFeatures.length > 0 && unplannedFeatures.length > 0 && (
-          <div className="border-t border-gray-200 pt-4" />
+          <div className="border-t border-[var(--uc-border-muted)] pt-4" />
         )}
 
         {/* ─── UNPLANNED FEATURES ───────────────────────────── */}
         {unplannedFeatures.length > 0 && (
           <div>
-            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-2">
               Unplanned Features
             </h4>
             {isInactive && (
-              <div className="mb-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+              <div className="mb-2 px-3 py-2 bg-[color-mix(in_srgb,var(--uc-yellow-gold)_12%,var(--uc-surface))] border border-[var(--uc-yellow-gold)] rounded text-xs text-[var(--uc-gold-brown)]">
                 ⚠️ Disabled when scenario is inactive
               </div>
             )}
@@ -157,7 +157,7 @@ export function DemoFeaturePanel() {
 
         {/* ─── EMPTY STATE ──────────────────────────────────── */}
         {allFeatureIds.length === 0 && (
-          <div className="text-center py-8 text-gray-400 text-sm">
+          <div className="text-center py-8 text-[var(--uc-text-subtle)] text-sm">
             No feature flags configured
           </div>
         )}
@@ -197,8 +197,8 @@ function FeatureCheckbox({
   // Tag styling based on kind
   const tagStyles =
     kind === "release"
-      ? "bg-blue-100 text-blue-700 border-blue-200"
-      : "bg-purple-100 text-purple-700 border-purple-200";
+      ? "bg-[var(--uc-action-soft)] text-[var(--uc-action-hover)] border-[var(--uc-action-soft-strong)]"
+      : "bg-[color-mix(in_srgb,var(--uc-product-mauve)_18%,var(--uc-surface))] text-[var(--uc-product-mauve)] border-[var(--uc-product-mauve)]";
 
   return (
     <div
@@ -206,8 +206,8 @@ function FeatureCheckbox({
         flex items-start gap-3 p-3 rounded-md border transition-colors
         ${
           disabled
-            ? "bg-gray-50 border-gray-200 opacity-60"
-            : "bg-white border-gray-200 hover:border-gray-300"
+            ? "bg-[var(--uc-surface-muted)] border-[var(--uc-border-muted)] opacity-60"
+            : "bg-[var(--uc-surface)] border-[var(--uc-border-muted)] hover:border-[var(--uc-border)]"
         }
       `}
     >
@@ -219,13 +219,13 @@ function FeatureCheckbox({
         disabled={disabled}
         onChange={(e) => onChange(e.target.checked)}
         className={`
-          mt-0.5 w-4 h-4 rounded border-gray-300 transition-colors
+          mt-0.5 w-4 h-4 rounded border-[var(--uc-border)] transition-colors
           ${
             disabled
               ? "cursor-not-allowed"
-              : "cursor-pointer focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
+              : "cursor-pointer focus:ring-2 focus:ring-[var(--uc-brand)] focus:ring-offset-1"
           }
-          ${checked ? "text-red-600" : "text-gray-400"}
+          ${checked ? "text-[var(--uc-brand)]" : "text-[var(--uc-text-subtle)]"}
         `}
       />
 
@@ -236,7 +236,7 @@ function FeatureCheckbox({
             htmlFor={checkboxId}
             className={`
               text-sm font-medium
-              ${disabled ? "cursor-not-allowed text-gray-500" : "cursor-pointer text-gray-900"}
+              ${disabled ? "cursor-not-allowed text-[var(--uc-text-muted)]" : "cursor-pointer text-[var(--uc-text)]"}
             `}
           >
             {label}
@@ -254,7 +254,7 @@ function FeatureCheckbox({
 
           {/* ─── READ-ONLY INDICATOR ──────────────────────────── */}
           {kind === "release" && (
-            <span className="text-xs text-gray-400 italic">
+            <span className="text-xs text-[var(--uc-text-subtle)] italic">
               (controlled by release)
             </span>
           )}
@@ -262,18 +262,18 @@ function FeatureCheckbox({
 
         {/* ─── DESCRIPTION ──────────────────────────────────── */}
         {description && (
-          <p className="text-xs text-gray-500 mt-1">{description}</p>
+          <p className="text-xs text-[var(--uc-text-muted)] mt-1">{description}</p>
         )}
 
         {/* ─── FEATURE ID ──────────────────────────────────── */}
-        <p className="text-xs text-gray-400 font-mono mt-1">{featureId}</p>
+        <p className="text-xs text-[var(--uc-text-subtle)] font-mono mt-1">{featureId}</p>
 
         {/* ─── SCOPE LABEL & AVAILABILITY ──────────────────── */}
         {scopeLabel && (
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs text-gray-500">{scopeLabel}</span>
+            <span className="text-xs text-[var(--uc-text-muted)]">{scopeLabel}</span>
             {isAvailableForCountry === false && (
-              <span className="text-xs text-amber-600 font-medium">
+              <span className="text-xs text-[var(--uc-gold-brown)] font-medium">
                 ❌ Not available for selected country
               </span>
             )}

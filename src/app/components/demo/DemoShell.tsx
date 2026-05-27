@@ -16,13 +16,13 @@ interface DemoShellProps {
  */
 export function DemoShell({ children }: DemoShellProps) {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="h-screen overflow-hidden bg-[var(--uc-app-bg)] flex flex-col">
       {/* ─── STICKY TOP BAR ───────────────────────────────────── */}
       <DemoTopBar />
 
       {/* ─── MAIN CONTENT ─────────────────────────────────────── */}
       {/* Folosește flex-1 pentru a ocupa tot spațiul rămas */}
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 min-h-0 overflow-hidden">
         {children}
       </div>
     </div>

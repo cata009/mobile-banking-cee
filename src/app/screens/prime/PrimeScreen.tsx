@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { useLanguage } from '@/app/contexts/LanguageContext';
 import { YourAdvisorTab } from './YourAdvisorTab';
 import { YourBenefitsTab } from './YourBenefitsTab';
+import { AppIcon } from "@/app/components/icons";
 import imgPrimeHome from "figma:asset/6f8736f05a24b87b9ef5508cfd9021e9a466bf48.png";
 
 interface PrimeScreenProps {
@@ -22,11 +23,11 @@ export default function PrimeScreen({ onBack }: PrimeScreenProps) {
     <div className="w-full h-full relative flex flex-col">
       {/* Background Layers - ABSOLUTE positioned */}
       <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0" style={{ backgroundImage: "linear-gradient(209.194deg, rgb(116, 151, 192) 32.305%, rgb(38, 38, 38) 60.005%)" }} />
-        <div className="absolute inset-0 mix-blend-soft-light" style={{ backgroundImage: "url('data:image/svg+xml;utf8,<svg viewBox=\\'0 0 375 895.37\\' xmlns=\\'http://www.w3.org/2000/svg\\' preserveAspectRatio=\\'none\\'><rect x=\\'0\\' y=\\'0\\' height=\\'100%\\' width=\\'100%\\' fill=\\'url(%23grad)\\' opacity=\\'0.20000000298023224\\'/><defs><radialGradient id=\\'grad\\' gradientUnits=\\'userSpaceOnUse\\' cx=\\'0\\' cy=\\'0\\' r=\\'10\\' gradientTransform=\\'matrix(-0.05 44.718 -23.194 -0.026545 188 448.19)\\'><stop stop-color=\\'rgba(19,64,151,1)\\' offset=\\'0\\'/><stop stop-color=\\'rgba(15,48,113,1)\\' offset=\\'0.25\\'/><stop stop-color=\\'rgba(10,32,75,1)\\' offset=\\'0.5\\'/><stop stop-color=\\'rgba(5,16,38,1)\\' offset=\\'0.75\\'/><stop stop-color=\\'rgba(2,8,19,1)\\' offset=\\'0.875\\'/><stop stop-color=\\'rgba(1,4,9,1)\\' offset=\\'0.9375\\'/><stop stop-color=\\'rgba(0,0,0,1)\\' offset=\\'1\\'/></radialGradient></defs></svg>')" }} />
-        <div className="absolute inset-0" style={{ backgroundImage: "url('data:image/svg+xml;utf8,<svg viewBox=\\'0 0 375 895.37\\' xmlns=\\'http://www.w3.org/2000/svg\\' preserveAspectRatio=\\'none\\'><rect x=\\'0\\' y=\\'0\\' height=\\'100%\\' width=\\'100%\\' fill=\\'url(%23grad)\\' opacity=\\'0.20000000298023224\\'/><defs><radialGradient id=\\'grad\\' gradientUnits=\\'userSpaceOnUse\\' cx=\\'0\\' cy=\\'0\\' r=\\'10\\' gradientTransform=\\'matrix(-7.5 63.586 -13.925 -1.6812 262.5 259.5)\\'><stop stop-color=\\'rgba(23,20,32,0)\\' offset=\\'0\\'/><stop stop-color=\\'rgba(38,38,38,1)\\' offset=\\'1\\'/></radialGradient></defs></svg>')" }} />
+        <div className="absolute inset-0" style={{ backgroundImage: "linear-gradient(209.194deg, var(--uc-product-blue) 32.305%, var(--uc-static-black) 60.005%)" }} />
+        <div className="absolute inset-0 mix-blend-soft-light" style={{ backgroundImage: "radial-gradient(61.85% 49.94% at 50.13% 50.06%, color-mix(in srgb, var(--uc-product-blue-deep) 20%, transparent) 0%, color-mix(in srgb, var(--uc-static-black) 20%, transparent) 100%)" }} />
+        <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(37.18% 73.78% at 70% 28.98%, color-mix(in srgb, var(--uc-primary-k1) 0%, transparent) 0%, color-mix(in srgb, var(--uc-primary-k1) 20%, transparent) 100%)" }} />
         <img alt="" className="absolute max-w-none mix-blend-soft-light object-cover opacity-10 size-full" src={imgPrimeHome} />
-        <div className="absolute bg-[rgba(0,0,0,0.2)] inset-0" />
+        <div className="absolute bg-[rgb(var(--uc-shadow-rgb)_/_0.2)] inset-0" />
       </div>
 
       {/* Content - RELATIVE positioned above background */}
@@ -47,26 +48,16 @@ export default function PrimeScreen({ onBack }: PrimeScreenProps) {
                 }}
                 aria-label="Back"
               >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="24" 
-                  height="24" 
-                  viewBox="0 0 24 24" 
-                  fill="none"
+                <AppIcon
+                  name="back-heavy"
+                  color="var(--uc-static-white)"
                   style={{
                     width: '24.003px',
                     height: '24.003px',
                     flexShrink: 0,
                     aspectRatio: '1/1'
                   }}
-                >
-                  <path 
-                    fillRule="evenodd" 
-                    clipRule="evenodd" 
-                    d="M16.8452 1.01411C18.3901 2.48329 18.3901 4.86754 16.8452 6.33811L11.2511 12.0141L16.8452 17.6901C18.3901 19.1607 18.3901 21.5435 16.8452 23.0141L6.00391 12.0141L16.8452 1.01411Z" 
-                    fill="white"
-                  />
-                </svg>
+                />
               </button>
 
               {/* Empty space in right - no help button */}
@@ -86,7 +77,7 @@ export default function PrimeScreen({ onBack }: PrimeScreenProps) {
             }}
           >
             <h1 
-              className="font-['UniCredit',sans-serif] text-white"
+              className="font-['UniCredit',sans-serif] text-[var(--uc-static-white)]"
               style={{
                 fontSize: '28px',
                 fontStyle: 'normal',
@@ -113,13 +104,13 @@ export default function PrimeScreen({ onBack }: PrimeScreenProps) {
               <button
                 onClick={() => setActiveTab('advisor')}
                 className={`flex items-center justify-center px-[16px] py-[8px] rounded-[4px] shrink-0 transition-colors cursor-pointer ${
-                  activeTab === 'advisor' 
-                    ? 'bg-white' 
-                    : 'bg-transparent border border-solid border-white'
+                  activeTab === 'advisor'
+                    ? 'bg-[var(--uc-surface)]'
+                    : 'bg-transparent border border-solid border-[var(--uc-static-white)]'
                 }`}
               >
                 <p className={`font-['UniCredit:Bold',sans-serif] leading-[normal] not-italic text-[14px] uppercase ${
-                  activeTab === 'advisor' ? 'text-[#262626]' : 'text-white'
+                  activeTab === 'advisor' ? 'text-[var(--uc-text)]' : 'text-[var(--uc-static-white)]'
                 }`}>
                   {t('prime.tabYourAdvisor')}
                 </p>
@@ -129,13 +120,13 @@ export default function PrimeScreen({ onBack }: PrimeScreenProps) {
               <button
                 onClick={() => setActiveTab('benefits')}
                 className={`flex items-center justify-center px-[16px] py-[8px] rounded-[4px] shrink-0 transition-colors cursor-pointer ${
-                  activeTab === 'benefits' 
-                    ? 'bg-white' 
-                    : 'bg-transparent border border-solid border-white'
+                  activeTab === 'benefits'
+                    ? 'bg-[var(--uc-surface)]'
+                    : 'bg-transparent border border-solid border-[var(--uc-static-white)]'
                 }`}
               >
                 <p className={`font-['UniCredit:Bold',sans-serif] leading-[normal] not-italic text-[14px] uppercase ${
-                  activeTab === 'benefits' ? 'text-[#262626]' : 'text-white'
+                  activeTab === 'benefits' ? 'text-[var(--uc-text)]' : 'text-[var(--uc-static-white)]'
                 }`}>
                   {t('prime.tabYourBenefits')}
                 </p>

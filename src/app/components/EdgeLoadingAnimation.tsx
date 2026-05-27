@@ -50,7 +50,7 @@ export default function EdgeLoadingAnimation({ onComplete, onAnimationStart }: E
         <path
           d="M 2 2 L calc(100% - 2px) 2 L calc(100% - 2px) calc(100% - 2px) L 2 calc(100% - 2px) Z"
           fill="none"
-          stroke="#00D4B4"
+          stroke="var(--uc-teal-bright)"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -69,8 +69,8 @@ export default function EdgeLoadingAnimation({ onComplete, onAnimationStart }: E
         style={{
           width: '8px',
           height: '8px',
-          background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(0,212,180,0.8) 30%, rgba(0,212,180,0.4) 60%, transparent 100%)',
-          boxShadow: '0 0 6px 3px rgba(0,212,180,0.5), 0 0 12px 6px rgba(0,212,180,0.2)',
+          background: 'radial-gradient(circle, color-mix(in srgb, var(--uc-static-white) 90%, transparent) 0%, color-mix(in srgb, var(--uc-teal-bright) 80%, transparent) 30%, color-mix(in srgb, var(--uc-teal-bright) 40%, transparent) 60%, transparent 100%)',
+          boxShadow: '0 0 6px 3px color-mix(in srgb, var(--uc-teal-bright) 50%, transparent), 0 0 12px 6px color-mix(in srgb, var(--uc-teal-bright) 20%, transparent)',
           borderRadius: '50%',
           zIndex: 9999,
           animation: 'edgeTrace 1.8s ease-in-out forwards'

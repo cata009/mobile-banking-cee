@@ -21,7 +21,7 @@ function Time({ variant }: { variant: 'light' | 'dark' }) {
     return `${hours}:${minutes.toString().padStart(2, '0')}`;
   };
 
-  const textColor = variant === 'light' ? 'text-black' : 'text-white';
+  const textColor = variant === 'light' ? 'text-[var(--uc-text)]' : 'text-[var(--uc-static-white)]';
 
   return (
     <div className="content-stretch flex flex-[1_0_0] h-[22px] items-center justify-center min-h-px min-w-px pt-[1.5px] relative" data-name="Time">

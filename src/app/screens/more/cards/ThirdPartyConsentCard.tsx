@@ -16,7 +16,7 @@ export function ThirdPartyConsentCard({ onClick }: ThirdPartyConsentCardProps) {
       className="relative h-[120px] w-full rounded-[8px] overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
     >
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#f5f5f5] to-[#ccc]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[var(--uc-app-bg)] to-[var(--uc-neutral-400)]" />
 
       {/* Image - specific positioning from Figma with rotation */}
       <div className="absolute flex inset-[15.28%_-37.87%_-87.03%_14.48%] items-center justify-center">
@@ -35,7 +35,7 @@ export function ThirdPartyConsentCard({ onClick }: ThirdPartyConsentCardProps) {
 
       {/* Title - top left padding */}
       <div className="absolute inset-0 p-[16px] flex items-start">
-        <p className="font-['UniCredit:Bold',sans-serif] text-[18px] text-black leading-[normal] text-left whitespace-pre-wrap z-10 relative">
+        <p className="font-['UniCredit:Bold',sans-serif] text-[18px] text-[var(--uc-text)] leading-[normal] text-left whitespace-pre-wrap z-10 relative">
           3rd Party consent
         </p>
       </div>

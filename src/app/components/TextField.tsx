@@ -32,21 +32,21 @@ export default function TextField({
 
   // Culori bazate pe stare
   const getLabelColor = () => {
-    if (hasError) return '#666';
-    if (isActive) return '#007A91';
-    if (isFilled) return '#666';
-    return '#262626';
+    if (hasError) return 'var(--uc-text-muted)';
+    if (isActive) return 'var(--uc-action)';
+    if (isFilled) return 'var(--uc-text-muted)';
+    return 'var(--uc-text)';
   };
 
   const getDividerColor = () => {
-    if (hasError) return '#CF3524';
-    if (isActive) return '#007A91';
-    return '#262626';
+    if (hasError) return 'var(--uc-status-red)';
+    if (isActive) return 'var(--uc-action)';
+    return 'var(--uc-text)';
   };
 
   const getDescriptionColor = () => {
-    if (hasError) return '#CF3524';
-    return '#666';
+    if (hasError) return 'var(--uc-status-red)';
+    return 'var(--uc-text-muted)';
   };
 
   // Culorile description texts
@@ -84,7 +84,7 @@ export default function TextField({
             <div
               className="font-['UniCredit',sans-serif] pointer-events-none"
               style={{
-                color: '#262626',
+                color: 'var(--uc-text)',
                 fontSize: '18px',
                 fontStyle: 'normal',
                 fontWeight: 400,
@@ -107,7 +107,7 @@ export default function TextField({
               placeholder={placeholder}
               className="w-full bg-transparent border-none outline-none font-['UniCredit',sans-serif] p-0"
               style={{
-                color: '#262626',
+                color: 'var(--uc-text)',
                 fontSize: '18px',
                 fontStyle: 'normal',
                 fontWeight: 400,

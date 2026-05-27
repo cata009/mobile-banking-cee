@@ -53,7 +53,7 @@ export default function ProductsList({ children, isOpen, showTotal = false, tota
             {/* Show Total if enabled and we have 2+ products */}
             {showTotal && totalData && productCount >= 2 && (
               <div 
-                className="flex flex-col items-end self-stretch bg-white"
+                className="flex flex-col items-end self-stretch bg-[var(--uc-surface)]"
                 style={{
                   padding: '16px',
                   gap: '4px',

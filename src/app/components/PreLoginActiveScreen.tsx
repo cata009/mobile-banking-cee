@@ -55,7 +55,7 @@ export default function PreLoginActiveScreen({
   };
 
   return (
-    <div className="w-full h-full relative bg-black">
+    <div className="w-full h-full relative bg-[var(--uc-static-black)]">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img 
@@ -70,7 +70,7 @@ export default function PreLoginActiveScreen({
         className="absolute top-0 left-0 w-full z-10"
         style={{
           height: '75vh', // Adaptive height that reaches bottom section
-          background: 'linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.00) 100%)'
+          background: 'linear-gradient(180deg, color-mix(in srgb, var(--uc-static-black) 70%, transparent) 0%, color-mix(in srgb, var(--uc-static-black) 0%, transparent) 100%)'
         }}
       />
       
@@ -86,14 +86,14 @@ export default function PreLoginActiveScreen({
         <div className="mt-[24px] px-[24px] flex flex-col gap-[8px]">
           {/* H1 Title - 38px, bold, 40px line-height */}
           <h1 
-            className="text-white font-['UniCredit'] text-[38px] font-bold leading-[40px] tracking-[0.335px]"
+            className="text-[var(--uc-static-white)] font-['UniCredit'] text-[38px] font-bold leading-[40px] tracking-[0.335px]"
             style={{ whiteSpace: 'pre-wrap' }}
           >
             {t('preLoginActive.title')}
           </h1>
           
           {/* H2 Subtitle - 18px, regular - 8px gap from H1 */}
-          <h2 className="text-white font-['UniCredit'] text-[18px] font-normal leading-[normal]">
+          <h2 className="text-[var(--uc-static-white)] font-['UniCredit'] text-[18px] font-normal leading-[normal]">
             {t('preLoginActive.subtitle')}
           </h2>
         </div>
@@ -102,7 +102,7 @@ export default function PreLoginActiveScreen({
         <div 
           className="mt-auto w-full flex flex-col items-start px-[24px] py-[32px] gap-[24px]"
           style={{
-            background: 'linear-gradient(180deg, rgba(38, 38, 38, 0.00) 0%, #262626 5.95%)'
+            background: 'linear-gradient(180deg, color-mix(in srgb, var(--uc-primary-k1) 0%, transparent) 0%, var(--uc-text) 5.95%)'
           }}
         >
           {/* Login Button */}

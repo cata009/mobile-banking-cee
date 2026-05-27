@@ -49,7 +49,7 @@ export default function LanguageSelector({ onBack }: LanguageSelectorProps) {
   };
 
   return (
-    <div className="w-full h-full relative bg-white flex flex-col">
+    <div className="w-full h-full relative bg-[var(--uc-surface)] flex flex-col">
       {/* Page Header - cu spacing corect de la status bar */}
       <div className="pt-[54px]"> {/* 54px = status bar height (46px) + 8px gap */}
         <PageHeader 
@@ -76,9 +76,9 @@ export default function LanguageSelector({ onBack }: LanguageSelectorProps) {
         <div className="mt-auto px-[24px]">
           <button
             onClick={handleSave}
-            className="w-full h-[48px] bg-[#007A91] rounded-[4px] flex items-center justify-center cursor-pointer transition-opacity hover:opacity-90"
+            className="w-full h-[48px] bg-[var(--uc-action)] rounded-[4px] flex items-center justify-center cursor-pointer transition-opacity hover:opacity-90"
           >
-            <span className="font-['UniCredit',sans-serif] text-[18px] text-white font-bold leading-[normal]">
+            <span className="font-['UniCredit',sans-serif] text-[18px] text-[var(--uc-static-white)] font-bold leading-[normal]">
               {tempT('languageSelector.save')}
             </span>
           </button>

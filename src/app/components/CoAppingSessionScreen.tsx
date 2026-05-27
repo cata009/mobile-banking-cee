@@ -24,7 +24,7 @@ export default function CoAppingSessionScreen({
   };
 
   return (
-    <div className="w-full h-full relative bg-white flex flex-col">
+    <div className="w-full h-full relative bg-[var(--uc-surface)] flex flex-col">
       {/* Page Header - cu spacing corect de la status bar */}
       <div className="pt-[54px]"> {/* 54px = status bar height (46px) + 8px gap */}
         <PageHeader 
@@ -46,11 +46,11 @@ export default function CoAppingSessionScreen({
 
         {/* 24px gap între poză și texte */}
         <div className="pt-[24px] flex flex-col gap-[16px]">
-          <p className="font-['UniCredit',sans-serif] text-[16px] text-[#000] leading-relaxed">
+          <p className="font-['UniCredit',sans-serif] text-[16px] text-[var(--uc-primary-main)] leading-relaxed">
             {t('coApping.coAppingDescription')}
           </p>
           
-          <p className="font-['UniCredit',sans-serif] text-[16px] text-[#000] leading-relaxed">
+          <p className="font-['UniCredit',sans-serif] text-[16px] text-[var(--uc-primary-main)] leading-relaxed">
             {t('coApping.coAppingInstruction')}
           </p>
         </div>

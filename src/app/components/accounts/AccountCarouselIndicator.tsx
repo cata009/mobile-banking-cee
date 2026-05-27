@@ -59,7 +59,7 @@ export default function AccountCarouselIndicator({
             return (
               <span
                 key={item.key}
-                className="h-[4px] w-[4px] rounded-full bg-[#666666]"
+                className="h-[4px] w-[4px] rounded-full bg-[var(--uc-text-muted)]"
                 data-ds-label="Mini dot 4x4"
               />
             );
@@ -72,7 +72,7 @@ export default function AccountCarouselIndicator({
               key={item.index}
               type="button"
               onClick={() => onSelect?.(item.index)}
-              className={`rounded-full ${isActive ? "h-[6px] w-[30px] bg-[#007A91]" : "h-[6px] w-[6px] bg-[#666666]"}`}
+              className={`rounded-full ${isActive ? "h-[6px] w-[30px] bg-[var(--uc-action)]" : "h-[6px] w-[6px] bg-[var(--uc-text-muted)]"}`}
               aria-label={`Go to account ${item.index + 1}`}
               aria-current={isActive ? "true" : undefined}
               data-ds-label={isActive ? "Active rectangle 30x6" : "Inactive dot 6x6"}

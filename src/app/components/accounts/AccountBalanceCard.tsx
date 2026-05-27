@@ -1,4 +1,6 @@
+import type { KeyboardEventHandler } from "react";
 import type { AccountIdentity } from "@/data/accountDetails";
+import { AppIcon } from "@/app/components/icons";
 
 export interface AccountBalanceCardProps {
   account: AccountIdentity;
@@ -8,14 +10,7 @@ export interface AccountBalanceCardProps {
   currentBalance: string;
   onClick?: () => void;
   active?: boolean;
-}
-
-function CopyIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
-      <path d="M22 10.375C23.3806 10.375 24.5 11.4944 24.5 12.875V26H14.5C13.1194 26 12 24.8806 12 23.5V10.375H22ZM17 6C18.3806 6 19.5 7.11937 19.5 8.5V9.125H10.75V21.625H9.5C8.11937 21.625 7 20.5056 7 19.125V6H17Z" fill="#262626" />
-    </svg>
-  );
+  showSubAccount?: boolean;
 }
 
 export default function AccountBalanceCard({
@@ -26,53 +21,66 @@ export default function AccountBalanceCard({
   currentBalance,
   onClick,
   active = true,
+  showSubAccount = true,
 }: AccountBalanceCardProps) {
-  const Component = onClick ? "button" : "div";
+  const hasSubAccount = showSubAccount && Boolean(account.subAccount);
+  const handleKeyDown: KeyboardEventHandler<HTMLElement> = (event) => {
+    if (!onClick || (event.key !== "Enter" && event.key !== " ")) return;
+
+    event.preventDefault();
+    onClick();
+  };
 
   return (
-    <Component
+    <div
       onClick={onClick}
-      className={`flex h-[197px] w-[311px] shrink-0 flex-col items-start justify-between rounded-[6px] bg-white p-[16px] text-left transition-opacity ${
+      onKeyDown={handleKeyDown}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      className={`flex h-[197px] w-[311px] shrink-0 flex-col items-start gap-[16px] rounded-[6px] bg-[var(--uc-surface)] p-[16px] text-left transition-opacity ${
         onClick ? "cursor-pointer" : ""
       } ${active ? "" : "opacity-95"}`}
-      style={{ boxShadow: "0 16px 16px 0 rgba(0, 0, 0, 0.20)" }}
+      draggable={false}
+      style={{ boxShadow: "0 10px 24px rgb(var(--uc-shadow-rgb) / 0.10), 0 2px 6px rgb(var(--uc-shadow-rgb) / 0.06)" }}
       data-ds-label="AccountBalanceCard 311x197"
     >
-      <div className="flex w-full flex-col gap-[8px]">
+      <div className="flex w-full flex-col">
         <p
-          className="font-['UniCredit',sans-serif] text-[20px] font-bold text-[#007A91]"
+          className="font-['UniCredit',sans-serif] text-[20px] font-bold text-[var(--uc-action)]"
           data-ds-label="Account card title 20px"
         >
           {account.accountName}
         </p>
 
-        <div className="flex h-[32px] shrink-0 items-center justify-between self-stretch">
+        <div className="mt-[8px] flex h-[32px] shrink-0 items-center justify-between self-stretch">
           <p
-            className="min-w-0 max-w-[235px] truncate font-['UniCredit',sans-serif] text-[16px] font-bold text-[#666666]"
+            className="min-w-0 max-w-[235px] truncate font-['UniCredit',sans-serif] text-[16px] font-bold text-[var(--uc-text-muted)]"
             title={account.accountNumber}
             data-ds-label="Account IBAN 16px"
           >
             {account.accountNumber}
           </p>
           <span className="h-[32px] w-[32px] shrink-0" data-ds-label="Copy icon 32x32">
-            <CopyIcon />
+            <AppIcon name="copy-documents" color="var(--uc-icon)" />
           </span>
         </div>
 
-        <p className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[#666666]">
-          SUB ACCOUNT{" "}
-          <span className="text-[#000000]" data-ds-label="Sub account value 14px">
-            {account.subAccount}
-          </span>
-        </p>
+        {hasSubAccount ? (
+          <p className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[var(--uc-text-muted)]">
+            SUB ACCOUNT{" "}
+            <span className="text-[var(--uc-text)]" data-ds-label="Sub account value 14px">
+              {account.subAccount}
+            </span>
+          </p>
+        ) : null}
       </div>
 
       <div className="flex h-[80px] shrink-0 flex-col items-start gap-[8px] self-stretch">
         <div>
-          <p className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[#666666]">
+          <p className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[var(--uc-text-muted)]">
             Available balance
           </p>
-          <p className="whitespace-nowrap font-['UniCredit',sans-serif] text-[30px] font-bold leading-none text-[#000000]">
+          <p className="whitespace-nowrap font-['UniCredit',sans-serif] text-[30px] font-bold leading-none text-[var(--uc-text)]">
             {availableInteger}
             <span className="text-[20px]" data-ds-label="Available decimals 20px">
               {availableDecimals} {currency}
@@ -80,17 +88,17 @@ export default function AccountBalanceCard({
           </p>
         </div>
 
-        <div className="flex h-[1px] w-[279px] shrink-0 items-center justify-center bg-[#C9C9C9]" />
+        <div className="flex h-[1px] w-[279px] shrink-0 items-center justify-center bg-[var(--uc-border)]" />
 
-        <div className="flex w-full items-center justify-between">
-          <p className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[#666666]">
+        <div className="flex items-center gap-[4px]">
+          <p className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[var(--uc-text-muted)]">
             Current balance
           </p>
-          <p className="text-right font-['UniCredit',sans-serif] text-[14px] font-bold text-[#262626]">
+          <p className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[var(--uc-text)]" data-ds-label="Current balance value 14px">
             {currentBalance} {currency}
           </p>
         </div>
       </div>
-    </Component>
+    </div>
   );
 }

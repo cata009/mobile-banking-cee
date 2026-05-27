@@ -7,6 +7,7 @@ import { DemoNavigationSync } from "@/app/components/demo/DemoNavigationSync";
 import PreLoginScreen from "@/app/components/PreLoginScreen";
 import PreLoginActiveScreen from "@/app/components/PreLoginActiveScreen";
 import HomeScreen from "@/app/screens/home/HomeScreen";
+import AnalyticsScreen from "@/app/screens/analytics/AnalyticsScreen";
 import LanguageSelector from "@/app/components/LanguageSelector";
 import MobileFrame from "@/app/components/MobileFrame";
 import { isCoAppingAvailable } from "@/app/utils/coAppingAvailability";
@@ -23,12 +24,29 @@ import PrimeScreen from "@/app/screens/prime/PrimeScreen";
 
 // More component - available for all countries
 import MoreScreen from "@/app/screens/more/MoreScreen";
+import PaymentsScreen from "@/app/screens/payments/PaymentsScreen";
+import ProductsScreen from "@/app/screens/products/ProductsScreen";
 
 // Contacts component - available for all countries
 import ContactsScreen from "@/app/screens/contacts/ContactsScreen";
 import DesignSystemPage from "@/app/screens/design-system/DesignSystemPage";
 import AccountDetailScreen from "@/app/screens/accounts/AccountDetailScreen";
+import AccountDetailsInfoScreen from "@/app/screens/accounts/AccountDetailsInfoScreen";
 import AccountOptionsScreen from "@/app/screens/accounts/AccountOptionsScreen";
+import {
+  DomesticPaymentCreateScreen,
+  PaymentReviewScreen,
+  PaymentSignScreen,
+  PaymentSuccessScreen,
+  TransactionDetailScreen,
+} from "@/app/screens/payments/DomesticPaymentFlowScreens";
+import { useProducts } from "@/hooks/useProducts";
+import type { AccountTransaction } from "@/data/accountDetails";
+import {
+  createEmptyDomesticPaymentDraft,
+  createRedoDomesticPaymentDraft,
+  type DomesticPaymentDraft,
+} from "@/data/paymentFlow";
 import type { Product } from "@/data/products";
 
 // Panel components
@@ -47,23 +65,25 @@ export default function App() {
  * based on demo scenario
  */
 function AppWithNavigation() {
-  const { scenario } = useDemo();
+  const { scenario, themeMode } = useDemo();
   
   // Determine initial screen based on scenario
   const initialScreen = scenario === "active" ? "homepage" : "prelogin-inactive";
   const initialCoAppingActive = scenario === "active";
 
   return (
-    <NavigationProvider 
-      initialScreen={initialScreen}
-      initialCoAppingActive={initialCoAppingActive}
-    >
-      <LanguageProvider>
-        <DemoShell>
-          <AppContent />
-        </DemoShell>
-      </LanguageProvider>
-    </NavigationProvider>
+    <div data-uc-theme={themeMode} className={themeMode === "dark" ? "dark h-screen" : "h-screen"}>
+      <NavigationProvider
+        initialScreen={initialScreen}
+        initialCoAppingActive={initialCoAppingActive}
+      >
+        <LanguageProvider>
+          <DemoShell>
+            <AppContent />
+          </DemoShell>
+        </LanguageProvider>
+      </NavigationProvider>
+    </div>
   );
 }
 
@@ -76,7 +96,8 @@ function AppContent() {
     setCoAppingActive,
   } = useNavigationContext();
   
-  const { product, country, scenario, designSystem } = useDemo();
+  const { product, country, scenario, designSystem, themeMode } = useDemo();
+  const { categories } = useProducts();
   const coAppingAvailable = isCoAppingAvailable(country);
   const isSupportedRuntimeContext = product === "PI" && designSystem === "current";
   
@@ -93,9 +114,22 @@ function AppContent() {
   // Track if FAB should slide in
   const [showFABSlideIn, setShowFABSlideIn] = useState(false);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<AccountTransaction | null>(null);
+  const [paymentDraft, setPaymentDraft] = useState<DomesticPaymentDraft | null>(null);
+  const accountProducts = categories.flatMap((category) => category.products);
+  const selectedAccountProduct = accountProducts.find((accountProduct) => accountProduct.id === selectedAccountId) ?? accountProducts[0] ?? null;
   
   // Determină varianta status bar-ului bazat pe ecranul curent
   const getStatusBarVariant = (): 'light' | 'dark' => {
+    if (
+      themeMode === "dark" &&
+      currentScreen !== "prelogin-inactive" &&
+      currentScreen !== "prelogin-active" &&
+      currentScreen !== "prime"
+    ) {
+      return "dark";
+    }
+
     switch (currentScreen) {
       case 'prelogin-inactive':
         return 'dark'; // fundal întunecat cu imagine
@@ -106,7 +140,17 @@ function AppContent() {
       case 'co-apping-session':
         return 'light'; // fundal alb - full screen ca language selector
       case 'homepage':
-        return 'light'; // fundal gri deschis (#F5F5F5) - text și iconițe trebuie negre
+        return 'light'; // fundal gri deschis (var(--uc-app-bg)) - text și iconițe trebuie negre
+      case 'analytics':
+        return 'light';
+      case 'payments':
+      case 'domestic-payment':
+      case 'payment-review':
+      case 'payment-sign':
+      case 'payment-success':
+        return 'light';
+      case 'products':
+        return 'light';
       case 'prime':
         return 'dark'; // fundal gradient întunecat - text și iconițe albe
       case 'more':
@@ -114,7 +158,9 @@ function AppContent() {
       case 'contacts':
         return 'light'; // fundal alb - text și iconițe negre
       case 'account-detail':
+      case 'account-details-info':
       case 'account-options':
+      case 'transaction-detail':
         return 'light';
       case 'design-system':
         return 'light';
@@ -228,6 +274,21 @@ function AppContent() {
     navigateTo("more");
   };
 
+  const handlePaymentsClick = () => {
+    console.log("Payments clicked - navigating to Payments screen");
+    navigateTo("payments");
+  };
+
+  const handleAnalyticsClick = () => {
+    console.log("Analytics clicked - navigating to Analytics screen");
+    navigateTo("analytics");
+  };
+
+  const handleProductsClick = () => {
+    console.log("Products clicked - navigating to Products screen");
+    navigateTo("products");
+  };
+
   // Handler pentru înapoi din More
   const handleMoreBack = () => {
     goBack();
@@ -238,8 +299,42 @@ function AppContent() {
     navigateTo("account-detail");
   };
 
+  const handleAccountDetailsClick = (product: Product) => {
+    setSelectedAccountId(product.id);
+    navigateTo("account-details-info");
+  };
+
   const handleAccountOptionsClick = () => {
     navigateTo("account-options");
+  };
+
+  const handleTransactionClick = (transaction: AccountTransaction, productForTransaction: Product) => {
+    setSelectedAccountId(productForTransaction.id);
+    setSelectedTransaction(transaction);
+    navigateTo("transaction-detail");
+  };
+
+  const handleRedoPaymentClick = () => {
+    if (!selectedTransaction) return;
+
+    setPaymentDraft(createRedoDomesticPaymentDraft(selectedTransaction, country, selectedAccountProduct));
+    navigateTo("domestic-payment");
+  };
+
+  const handleDomesticPaymentClick = () => {
+    setPaymentDraft(createEmptyDomesticPaymentDraft(country, selectedAccountProduct));
+    navigateTo("domestic-payment");
+  };
+
+  const handleDomesticPaymentNext = (nextDraft: DomesticPaymentDraft) => {
+    setPaymentDraft(nextDraft);
+    navigateTo("payment-review");
+  };
+
+  const handlePaymentDone = () => {
+    setPaymentDraft(null);
+    setSelectedTransaction(null);
+    navigateTo("payments");
   };
 
   // Handler pentru logout confirmation
@@ -300,8 +395,20 @@ function AppContent() {
         {currentScreen === "homepage" && (
           <HomeScreen
             onPrimeClick={handlePrimeClick}
+            onAnalyticsClick={handleAnalyticsClick}
+            onPaymentsClick={handlePaymentsClick}
+            onProductsClick={handleProductsClick}
             onMoreClick={handleMoreClick}
             onAccountClick={handleAccountClick}
+          />
+        )}
+
+        {currentScreen === "analytics" && (
+          <AnalyticsScreen
+            onHomeClick={() => navigateTo("homepage")}
+            onPaymentsClick={handlePaymentsClick}
+            onProductsClick={handleProductsClick}
+            onMoreClick={handleMoreClick}
           />
         )}
 
@@ -309,7 +416,26 @@ function AppContent() {
           <AccountDetailScreen
             selectedProductId={selectedAccountId}
             onBack={goBack}
+            onDetailsClick={handleAccountDetailsClick}
             onOptionsClick={handleAccountOptionsClick}
+            onTransactionClick={handleTransactionClick}
+          />
+        )}
+
+        {currentScreen === "transaction-detail" && selectedTransaction && (
+          <TransactionDetailScreen
+            country={country}
+            product={selectedAccountProduct}
+            transaction={selectedTransaction}
+            onBack={goBack}
+            onRedoPayment={handleRedoPaymentClick}
+          />
+        )}
+
+        {currentScreen === "account-details-info" && (
+          <AccountDetailsInfoScreen
+            selectedProductId={selectedAccountId}
+            onBack={goBack}
           />
         )}
 
@@ -327,8 +453,57 @@ function AppContent() {
           <MoreScreen 
             onBack={handleMoreBack} 
             onHomeClick={() => navigateTo('homepage')}
+            onAnalyticsClick={handleAnalyticsClick}
+            onPaymentsClick={handlePaymentsClick}
+            onProductsClick={handleProductsClick}
             onContactsClick={() => navigateTo('contacts')}
             onLogoutConfirm={handleLogoutConfirm}
+          />
+        )}
+
+        {currentScreen === "payments" && (
+          <PaymentsScreen
+            onHomeClick={() => navigateTo("homepage")}
+            onAnalyticsClick={handleAnalyticsClick}
+            onProductsClick={handleProductsClick}
+            onMoreClick={handleMoreClick}
+            onDomesticPaymentClick={handleDomesticPaymentClick}
+          />
+        )}
+
+        {currentScreen === "domestic-payment" && paymentDraft && (
+          <DomesticPaymentCreateScreen
+            draft={paymentDraft}
+            onBack={goBack}
+            onNext={handleDomesticPaymentNext}
+          />
+        )}
+
+        {currentScreen === "payment-review" && paymentDraft && (
+          <PaymentReviewScreen
+            draft={paymentDraft}
+            onBack={goBack}
+            onSign={() => navigateTo("payment-sign")}
+          />
+        )}
+
+        {currentScreen === "payment-sign" && (
+          <PaymentSignScreen
+            onBack={goBack}
+            onSign={() => navigateTo("payment-success")}
+          />
+        )}
+
+        {currentScreen === "payment-success" && (
+          <PaymentSuccessScreen onDone={handlePaymentDone} />
+        )}
+
+        {currentScreen === "products" && (
+          <ProductsScreen
+            onHomeClick={() => navigateTo("homepage")}
+            onAnalyticsClick={handleAnalyticsClick}
+            onPaymentsClick={handlePaymentsClick}
+            onMoreClick={handleMoreClick}
           />
         )}
 

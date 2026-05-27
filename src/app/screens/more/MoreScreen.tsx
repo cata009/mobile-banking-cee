@@ -22,11 +22,14 @@ import { getMoreCardsForCountry, MoreCardType } from '@/app/config/moreCardsConf
 interface MoreScreenProps {
   onBack: () => void;
   onHomeClick?: () => void;
+  onAnalyticsClick?: () => void;
+  onPaymentsClick?: () => void;
+  onProductsClick?: () => void;
   onContactsClick?: () => void;
   onLogoutConfirm?: () => void;
 }
 
-export default function MoreScreen({ onBack, onHomeClick, onContactsClick, onLogoutConfirm }: MoreScreenProps) {
+export default function MoreScreen({ onBack, onHomeClick, onAnalyticsClick, onPaymentsClick, onProductsClick, onContactsClick, onLogoutConfirm }: MoreScreenProps) {
   const { country } = useDemo();
   const availableCards = getMoreCardsForCountry(country);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
@@ -61,6 +64,15 @@ export default function MoreScreen({ onBack, onHomeClick, onContactsClick, onLog
     if (tab === 'home' && onHomeClick) {
       onHomeClick();
     }
+    if (tab === 'analytics' && onAnalyticsClick) {
+      onAnalyticsClick();
+    }
+    if (tab === 'payments' && onPaymentsClick) {
+      onPaymentsClick();
+    }
+    if (tab === 'products' && onProductsClick) {
+      onProductsClick();
+    }
     // Future: handle other tabs
   };
 
@@ -89,9 +101,9 @@ export default function MoreScreen({ onBack, onHomeClick, onContactsClick, onLog
   };
 
   return (
-    <div className="w-full h-full relative flex flex-col bg-white">
+    <div className="w-full h-full relative flex flex-col bg-[var(--uc-surface)]">
       {/* Status Bar Space - matching HomeScreen exactly */}
-      <div className="h-[54px] flex-shrink-0 bg-white" />
+      <div className="h-[54px] flex-shrink-0 bg-[var(--uc-surface)]" />
 
       {/* Header - directly after status bar, no wrapper */}
       <MoreHeader
@@ -114,7 +126,7 @@ export default function MoreScreen({ onBack, onHomeClick, onContactsClick, onLog
       {/* Footer / Home Indicator - hidden when dialog is open */}
       {!showLogoutDialog && (
         <div className="relative w-full">
-          <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-[#E0E0E0] flex items-center justify-center">
+          <div className="absolute bottom-0 left-0 right-0 bg-[var(--uc-surface)] border-t border-[var(--uc-border-muted)] flex items-center justify-center">
             <BottomNavigation activeTab="more" onTabChange={handleTabChange} />
           </div>
         </div>
