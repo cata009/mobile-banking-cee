@@ -4,20 +4,39 @@ Last updated: 2026-06-01
 
 ## Current Focus
 
-Completing the Design System screenshot template reconstruction so every template is represented as reusable JSX, not as a PNG/JPG-only reference.
+Closing the Design System template expansion and icon-source cleanup so future AI-built flows reuse code-backed templates and the centralized icon registry.
 
 ## Last Meaningful Change
 
-Latest screenshot-template completion:
+Latest icon-source cleanup:
 
-- `src/app/components/templates/TemplateCodePreviews.tsx` now reconstructs the final 10 source-only screenshot templates as code: Account options, Activate Mobile Token, Analytics, Cards, Contact bottom sheet, account-detail homepage, Domestic payment, Review request, Review data, and Transaction detail.
-- `src/app/registry/templateRegistry.ts` now marks all 30 screenshot templates as `reconstructed-code` with `codePreviewId` mappings; source PNG/JPG assets remain comparison evidence in the Design System Templates tab.
-- `src/app/registry/componentRegistry.ts`, `src/app/registry/aiCatalog.ts`, `docs/handoff/next-tasks.md`, `docs/handoff/state-of-the-world.md`, `docs/handoff/banana-log.md`, and `docs/platform-capability-map/README.md` now record 30/30 code-backed template coverage.
+- `src/app/components/icons/AppIcon.tsx` now removes lucide wrappers that already had custom SVG equivalents or better custom registry targets: `share-2`, `copy`, `check`, `bell`, `file-text`, `qr-code`, `chevron-down-lucide`, `plus-circle`, `filter`, and lucide `close-x`.
+- `close-x` is now a custom SVG registry icon, and active/template usages were remapped to existing custom entries such as `copy-documents`, `filters`, `add-money`, `payment-create-qr`, `chevron-down`, `prime-check`, `account-option-statement`, and `account-option-push-notifications`.
+- `src/app/screens/kids/RoKidsApp.tsx` no longer imports `lucide-react` directly; Kids icon usage now routes through `AppIcon` / `IconName`, while Kids-only lucide glyphs are centralized as explicit `AppIcon` lucide-alone registry entries.
+- `src/app/components/icons/AppIcon.tsx` now documents extra raw-SVG audit exclusions for `PfmCategoryIcon` and the decorative `ProductOfferCard` chevron background, so remaining raw SVG boundaries match the actual source scan.
+- Remaining lucide-alone registry keys after the cleanup are: `wallet-cards`, `shopping-bag`, `arrow-right`, `camera`, `grid-2x2`, `landmark`, `repeat`, `lock`, `alert-triangle`, `credit-card`, `send`, `bike`, `book-open`, `calendar-days`, `circle-dollar-sign`, `clipboard-check`, `eye`, `eye-off`, `gift`, `palette`, `piggy-bank`, `receipt-text`, `shield-check`, `sliders-horizontal`, `trophy`, `user-round`, and `users`.
 - `npm run build` passed on 2026-06-01; Vite still emits the known chunk-size warning.
-- Static coverage checks passed: `screenshots=30 registry=30`, `reconstructed=30 codePreviewIds=30`, and no `implementationStatus: "source-only"` entries remain.
-- Raw color audits passed: no raw app hex outside `colorRegistry.ts` and no direct numeric `rgb()`/`rgba()` in `src/app` or `src/styles`.
+- Icon audits passed on 2026-06-01: `lucide-react` remains only in `AppIcon.tsx` plus vendored `src/app/components/ui/**`; removed lucide wrapper names no longer appear as active `AppIcon` names; removed lucide components are no longer referenced in `AppIcon.tsx`; raw `<svg>` occurrences match the documented audit boundaries.
+- Static template coverage still passes after the icon remap: `ids=50`, `codePreviewIds=50`, `uniqueCodePreviewIds=50`, `screenshots=30`, `codeOnly=20`, `previewCases=50`, `missingCases=0`.
 - `git diff --check` passed; Git only reported the normal LF-to-CRLF warnings on Windows.
-- In-app browser smoke verification passed on `http://127.0.0.1:5175`: Design System Inventory -> Templates selected, 30 template cards, 30 code-backed cards, and the final 10 templates each open in `code` mode with `Reconstructed code`, `src/app/components/templates/TemplateCodePreviews.tsx`, and expected screen text visible.
+- In-app browser smoke verification passed on `http://127.0.0.1:5175`: Design System Inventory -> Icons renders `Icon registry`, counters show `Mapped icons 97`, `Custom SVG 70`, `Lucide wrappers 27`, and centralized Kids icons such as `Bike` and `Piggy bank` are visible.
+
+Latest template expansion:
+
+- `src/app/components/templates/TemplateCodePreviews.tsx` now adds another 10 code-only templates derived from active app patterns: Prelogin inactive, Prelogin active, Language selector sheet, Other panel menu, Co-Apping session, Account transactions list, Account search results, Spending money out, Products ShopSmart, and Logout confirmation.
+- `src/app/registry/templateRegistry.ts` now represents 50 code-backed templates total: 30 screenshot-backed templates plus 20 code-only templates with `sourceKind: "code-only"` and no fake PNG source.
+- `src/app/screens/design-system/DesignSystemPage.tsx` now supports code-only templates in the Templates tab, keeps screenshot/source toggles only for screenshot-backed templates, and reduces template cards from `190px` to `168px` high to keep the expanded grid compact.
+- `src/app/registry/componentRegistry.ts`, `src/app/registry/aiCatalog.ts`, `docs/handoff/next-tasks.md`, `docs/handoff/state-of-the-world.md`, `docs/handoff/banana-log.md`, and `docs/platform-capability-map/README.md` now record 50 code-backed templates, including the 20 code-only templates.
+- `npm run build` passed on 2026-06-01; Vite still emits the known chunk-size warning.
+- Static coverage check passed: `ids=50`, `codePreviewIds=50`, `uniqueCodePreviewIds=50`, `screenshots=30`, `codeOnly=20`, `missingCases=0`.
+- `git diff --check` passed; Git only reported the normal LF-to-CRLF warnings on Windows.
+- In-app browser smoke verification passed on `http://127.0.0.1:5175`: Design System Inventory -> Templates selected, 50 template cards, 50 code-backed cards, stat counters show 30 screenshot sources and 20 code-only templates, and selecting a newly added code-only template opens in `code` mode with a `Code-only template` notice and no false source toggle.
+
+Previous screenshot-template completion:
+
+- `src/app/components/templates/TemplateCodePreviews.tsx` reconstructs all 30 source screenshot templates as code, including Account options, Activate Mobile Token, Analytics, Cards, Contact bottom sheet, account-detail homepage, Domestic payment, Review request, Review data, and Transaction detail.
+- `src/app/registry/templateRegistry.ts` marks all 30 screenshot templates as `reconstructed-code` with `codePreviewId` mappings; source PNG/JPG assets remain comparison evidence in the Design System Templates tab.
+- Raw color audits passed: no raw app hex outside `colorRegistry.ts` and no direct numeric `rgb()`/`rgba()` in `src/app` or `src/styles`.
 
 Latest RO Kids prototype implementation:
 
@@ -378,7 +397,7 @@ Latest icon registry and Design System Inventory implementation:
 - The Icons tab renders all mapped icons with name, category, source, default size, viewBox/source, usage, and deduplication notes.
 - The Icons tab also documents explicit audit boundaries for SVGs that intentionally remain outside the icon registry: brand logos, status/device chrome, decorative motion/texture/shadow SVGs, and vendored UI primitives.
 - Reusable icons in headers, navigation, payments, products, account/search/actions, contacts, panels, Prime, Co-Apping, demo topbar controls, and radio controls now route through `AppIcon`.
-- Direct app-level `lucide-react` usage is centralized behind `AppIcon`; remaining direct lucide imports are limited to vendored `src/app/components/ui/**` primitives.
+- Direct app-level `lucide-react` usage is centralized behind `AppIcon`; remaining direct lucide imports are limited to `AppIcon.tsx` plus vendored `src/app/components/ui/**` primitives.
 
 Latest Products offer card component fix:
 
@@ -391,7 +410,7 @@ Latest Products offer card component fix:
 Latest Design System Templates inventory implementation:
 
 - `src/app/registry/templateRegistry.ts` was added as the explicit source-level template registry for all screenshots in `screenshots/`.
-- The registry currently represents all 30 screenshot files with template id, name, source path, dimensions, format, imported image URL, and related reusable components.
+- The registry currently represents all 30 screenshot files with template id, name, source path, dimensions, format, imported image URL, and related reusable components, plus 20 code-only templates derived from active runtime patterns.
 - `src/app/screens/design-system/DesignSystemPage.tsx` now has a top-level `Components` / `Templates` tab switch.
 - The `Templates` tab renders selectable screenshot cards and a selected-template preview panel with source path, size, format, registry id, and reusable component badges.
 - The existing component inventory remains under the `Components` tab.
@@ -681,7 +700,7 @@ Continue with product evolution work:
 - `npm run build` passed after adding the reusable Products offer card on 2026-05-27; Vite still emits the known chunk-size warning.
 - In-app browser smoke verification passed on `http://localhost:5175`: opened Products and confirmed the first offer card computes to `327px` width, `157px` height, text stack `display:flex`, `width:206px`, `flex-direction:column`, `align-items:flex-start`, `gap:8px`, title `24px`/`700`/white/normal line-height/stretch, and subtitle `16px`/`400`/white/normal line-height/stretch.
 - `npm run build` passed after centralizing the app icon registry and adding the Design System Inventory `Icons` tab on 2026-05-27; Vite still emits the known chunk-size warning.
-- Icon audit passed with reusable UI icons routed through `AppIcon`; remaining `<svg>` occurrences are limited to `AppIcon`, brand logos, status/device chrome, decorative motion/texture/shadow SVGs, Prime background texture SVGs, and the Floating Co-Apping background shape.
+- Icon audit passed with reusable UI icons routed through `AppIcon`; remaining `<svg>` occurrences are limited to `AppIcon`, brand logos, status/device chrome, decorative motion/texture/shadow SVGs, Prime background texture SVGs, PFM category glyph registry, Product offer-card background geometry, and the Floating Co-Apping background shape.
 - In-app browser smoke verification passed on `http://localhost:5175`: opened Design System Inventory, selected `Icons`, confirmed the tab renders `Icon registry`, `Mapped icons`, `Custom SVG`, `Lucide wrappers`, `Deduplicated`, category sections including `Header`, `Payments`, and `Prime`, plus `Icon audit boundaries`; 84 icon cards rendered.
 - `npm run build` passed after the Products offer carousel drag/snap and spacing fix on 2026-05-27; Vite still emits the known chunk-size warning.
 - In-app browser smoke verification passed on `http://localhost:5175`: Products spacing measured `16px` for tab-to-offers, offers divider-to-carousel, carousel-to-our-products, our-products divider-to-grid, product column gap, and product row gap; dragging the offer carousel snapped to the second card at `scrollLeft=339`.
@@ -737,11 +756,11 @@ Continue with product evolution work:
 - Messages is a mock-driven runtime screen reconstructed from template 52; all PI countries are wired through `messagesConfig.ts`, but the current baseline copy/data is intentionally shared until market-specific messages are supplied.
 - New payment bottom-sheet action rows and Discover banner live as reusable components under `src/app/components/payments`; country-specific action text remains in `paymentsMenuConfig.ts`.
 - Screenshot templates live in `src/app/registry/templateRegistry.ts`; the Design System page consumes that registry so screenshot coverage can be audited separately from the long component inventory JSX.
-- Reconstructed templates live in `src/app/components/templates/TemplateCodePreviews.tsx`; `templateRegistry.ts` points implemented screenshot templates at a `codePreviewId`, while the original screenshot remains source/comparison evidence.
+- Reconstructed templates live in `src/app/components/templates/TemplateCodePreviews.tsx`; `templateRegistry.ts` points implemented screenshot templates and code-only templates at a `codePreviewId`, while original screenshots remain source/comparison evidence where they exist.
 - Design System Template cards should stay compact and code-backed templates should open in `code` mode by default; the PNG source toggle exists for comparison, not as the implementation surface.
 - Products offer carousel visuals live in `ProductOfferCard`; offer identity and country/product menu membership remain in `productsMenuConfig.ts`.
 - Reusable UI icons live in `src/app/components/icons/AppIcon.tsx`; product code should consume icons through `AppIcon` so a registry SVG change propagates to every usage.
-- Remaining raw SVGs outside `AppIcon` are treated as brand/logo, device chrome, or decorative effect assets unless explicitly promoted into the icon registry later.
+- Remaining raw SVGs outside `AppIcon` are treated as brand/logo, device chrome, decorative effect assets, PFM category glyph registry, or Product offer-card decorative geometry unless explicitly promoted into the icon registry later.
 - Products offer carousel behavior lives in `ProductsScreen` for now, matching the Account Detail drag/snap interaction without introducing a broader carousel abstraction yet.
 - Products page section and grid spacing should stay on the `16px` rhythm unless a later screenshot-level correction explicitly changes it.
 - Reusable DS colors live in `src/app/registry/colorRegistry.ts`; runtime styling consumes `src/styles/theme.css` variables so palette changes propagate through CSS tokens.
@@ -780,9 +799,10 @@ Continue with product evolution work:
 - Transaction search uses the current static mock transaction profile only; term deposits, loans, and mortgages still reuse the existing mock transaction profiles until product-specific transaction data is defined.
 - Messages uses static mock Inbox/Outbox rows and does not create a backend notification/message domain, unread-count state, message detail screen, or country-specific message copy yet.
 - `templateRegistry.ts` is intentionally explicit, so adding or renaming files in `screenshots/` requires updating the registry entry in the same session.
-- Reconstructed template coverage is complete: all 30 screenshot templates have real-code previews; source PNG/JPG files remain available only as comparison evidence.
+- Reconstructed template coverage is complete for the screenshot set and expanded beyond it: all 30 screenshot templates have real-code previews, and 20 additional code-only templates now cover active runtime patterns; source PNG/JPG files remain available only as comparison evidence.
 - `AppIcon.tsx` is intentionally explicit, so adding a reusable UI icon requires a registry entry with usage metadata in the same session.
-- SVG audit still allows brand logos, device chrome, decorative textures/effects, and vendored `ui/` primitives outside `AppIcon`; these boundaries are documented in the Design System Inventory Icons tab.
+- `AppIcon.tsx` still has 27 lucide-alone entries because no approved custom SVG equivalents are mapped yet: `wallet-cards`, `shopping-bag`, `arrow-right`, `camera`, `grid-2x2`, `landmark`, `repeat`, `lock`, `alert-triangle`, `credit-card`, `send`, `bike`, `book-open`, `calendar-days`, `circle-dollar-sign`, `clipboard-check`, `eye`, `eye-off`, `gift`, `palette`, `piggy-bank`, `receipt-text`, `shield-check`, `sliders-horizontal`, `trophy`, `user-round`, and `users`.
+- SVG audit still allows brand logos, device chrome, decorative textures/effects, the PFM category glyph registry, Product offer-card decorative geometry, and vendored `ui/` primitives outside `AppIcon`; these boundaries are documented in the Design System Inventory Icons tab.
 - `colorRegistry.ts` and `theme.css` are intentionally explicit, so adding a reusable color or app semantic color requires updating the registry/theme in the same session.
 - Color-token compliance is currently enforced by manual `rg` audits and browser smoke checks; no automated test fails the build yet if a future contributor introduces raw app colors.
 - The Browser virtual clipboard cannot read back copied values in this environment, so copy-hex verification used visible `Copied` UI feedback rather than clipboard-read confirmation.
@@ -796,4 +816,4 @@ constitutional check:
 - bananas triaged: yes
 - safe to resume: yes
 
-safe to resume: yes, 30 reconstructed template-code previews, Messages runtime screen from template 52, Documents and Settings runtime/template wiring from More, compact Design System Templates grid, Products bottom-navigation overlap fix, Design System Colors inventory, Light/Dark appearance switching, app-wide color tokenization, color audits, build verification, browser smoke verification, and prior Payments/Products/Analytics/account-detail/demo-foundation work are complete; remaining work is follow-up screenshot-level fine tuning and automated coverage, not source-only template reconstruction.
+safe to resume: yes, 50 code-backed template previews (30 screenshot-backed + 20 code-only active-pattern templates), centralized icon cleanup with redundant lucide wrappers removed, RO Kids icon calls routed through `AppIcon`, remaining lucide-alone keys documented, Messages runtime screen from template 52, Documents and Settings runtime/template wiring from More, compact Design System Templates grid, Products bottom-navigation overlap fix, Design System Colors inventory, Light/Dark appearance switching, app-wide color tokenization, color/icon audits, build verification, browser smoke verification, and prior Payments/Products/Analytics/account-detail/demo-foundation work are complete; remaining work is follow-up screenshot-level fine tuning and automated coverage.

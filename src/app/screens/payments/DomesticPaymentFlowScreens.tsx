@@ -75,7 +75,7 @@ function DetailRow({
       </div>
       {copy && (
         <button type="button" className="mt-[8px] grid size-[32px] place-items-center" aria-label={`Copy ${label}`}>
-          <AppIcon name="copy" size={24} strokeWidth={3} color="var(--uc-text)" />
+          <AppIcon name="copy-documents" size={24} color="var(--uc-text)" />
         </button>
       )}
     </div>
@@ -144,7 +144,7 @@ function ToggleSwitch({
           checked ? "right-[2px] bg-[var(--uc-action)]" : "left-[2px] bg-[var(--uc-text-muted)]"
         }`}
       >
-        {checked && <AppIcon name="check" size={16} strokeWidth={4} color="var(--uc-static-white)" />}
+        {checked && <AppIcon name="prime-check" size={16} color="var(--uc-static-white)" />}
       </span>
     </button>
   );
@@ -216,7 +216,7 @@ export function TransactionDetailScreen({
             { label: "Change\ncategory", icon: <AppIcon name="grid-2x2" size={25} strokeWidth={3} color="var(--uc-text)" /> },
             { label: "Create\nStanding order", icon: <AppIcon name="landmark" size={25} strokeWidth={3} color="var(--uc-text)" /> },
             { label: "Redo\npayment", icon: <AppIcon name="repeat" size={26} strokeWidth={3} color="var(--uc-text)" />, onClick: onRedoPayment },
-            { label: "Send\npayment", icon: <AppIcon name="file-text" size={24} strokeWidth={3} color="var(--uc-text)" /> },
+            { label: "Send\npayment", icon: <AppIcon name="account-option-statement" size={24} color="var(--uc-text)" /> },
           ].map((item) => (
             <button
               key={item.label}
@@ -321,7 +321,7 @@ export function DomesticPaymentCreateScreen({
           value={form.payerAccountNumber}
           onChange={(value) => update("payerAccountNumber", value)}
           helper={`${form.payerAccountName}\n${form.payerBalance}`}
-          right={<AppIcon name="chevron-down-lucide" size={26} strokeWidth={3} color="var(--uc-text)" />}
+          right={<AppIcon name="chevron-down" size={26} color="var(--uc-text)" />}
         />
 
         <SectionTitle>BENEFICIARY</SectionTitle>
@@ -366,7 +366,7 @@ export function DomesticPaymentCreateScreen({
           <p className="font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text)]">
             ADD VARIABLE SYMBOL AND MORE
           </p>
-          <AppIcon name="chevron-down-lucide" size={28} strokeWidth={3} color="var(--uc-text)" />
+          <AppIcon name="chevron-down" size={28} color="var(--uc-text)" />
         </div>
 
         <FlowTextField
@@ -484,7 +484,7 @@ export function PaymentSuccessScreen({ onDone }: { onDone: () => void }) {
       <div className="flex min-h-0 flex-1 flex-col px-[24px]">
         <div className="flex justify-center pt-[58px]">
           <div className="grid size-[100px] place-items-center rounded-full border-[6px] border-[var(--uc-green-olive)]">
-            <AppIcon name="check" size={64} strokeWidth={5} color="var(--uc-green-olive)" />
+            <AppIcon name="prime-check" size={64} color="var(--uc-green-olive)" />
           </div>
         </div>
         <p className="pt-[58px] font-['UniCredit',sans-serif] text-[16px] font-normal leading-[22px] text-[var(--uc-text)]">

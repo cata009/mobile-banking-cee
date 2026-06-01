@@ -1,11 +1,23 @@
 import type { ReactNode } from "react";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import { AppIcon, type IconName } from "@/app/components/icons";
+import NewPaymentActionListItem from "@/app/components/payments/NewPaymentActionListItem";
+import NewPaymentDiscoverBanner from "@/app/components/payments/NewPaymentDiscoverBanner";
+import PaymentOtherShortcut from "@/app/components/payments/PaymentOtherShortcut";
+import PanelWithTranslations from "@/app/components/PanelWithTranslations";
+import ProductMenuCard from "@/app/components/products/ProductMenuCard";
+import ProductOfferCard from "@/app/components/products/ProductOfferCard";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
+import TextField from "@/app/components/TextField";
+import UniCreditLogo from "@/app/components/UniCreditLogo";
 import { getDocumentsConfigForCountry, type DocumentListItem } from "@/app/config/documentsConfig";
+import { getMoreCardsForCountry, type MoreCardType } from "@/app/config/moreCardsConfig";
+import { getPaymentsMenuForCountry, type PaymentHeroItem } from "@/app/config/paymentsMenuConfig";
+import { getProductsMenuForCountry } from "@/app/config/productsMenuConfig";
 import { SETTINGS_SECTIONS } from "@/app/config/settingsConfig";
 import { MESSAGES_CONFIG_BY_COUNTRY, type MessageListItem } from "@/app/config/messagesConfig";
+import { LogoutConfirmDialog } from "@/app/components/LogoutConfirmDialog";
 import { ACCOUNT_OPTION_ITEMS, ACCOUNT_PRODUCT_OPTIONS } from "@/data/accountDetails";
 
 export type TemplateCodePreviewId =
@@ -38,7 +50,27 @@ export type TemplateCodePreviewId =
   | "pending-status"
   | "success-status"
   | "error-status"
-  | "warning-status";
+  | "warning-status"
+  | "home-dashboard"
+  | "payments-menu"
+  | "new-payment-sheet"
+  | "products-menu"
+  | "more-menu"
+  | "contacts-directory"
+  | "account-details-info"
+  | "messages-outbox"
+  | "prime-advisor"
+  | "prime-benefits"
+  | "prelogin-inactive"
+  | "prelogin-active"
+  | "language-selector-sheet"
+  | "more-panel-menu"
+  | "co-apping-session"
+  | "account-transactions-list"
+  | "account-search-results"
+  | "spending-money-out"
+  | "products-shopsmart"
+  | "logout-confirmation";
 
 type TemplateCodePreviewProps = {
   previewId: TemplateCodePreviewId;
@@ -83,6 +115,7 @@ type FieldLine = {
 };
 
 const messageRows = MESSAGES_CONFIG_BY_COUNTRY.RO.inbox;
+const outboxRows = MESSAGES_CONFIG_BY_COUNTRY.RO.outbox;
 
 const standingOrderRows: StandingOrderRow[] = [
   { title: "Radu standing order", date: "02.05.2025", amount: "120.000.00", currency: "RSD" },
@@ -102,6 +135,88 @@ const accountSelectionOptions: RadioOption[] = [
   { title: "Click Gold", subtitle: "EUR - 59378215528495028873", selected: true },
   { title: "Click Gold", subtitle: "RON - 59378215528495028873" },
   { title: "Click Gold", subtitle: "USD - 59378215528495028873" },
+];
+
+const moreCardMeta: Record<MoreCardType, { title: string; description: string; icon: IconName }> = {
+  contacts: {
+    title: "Contacts",
+    description: "Support, branches, and useful numbers",
+    icon: "contact-phone",
+  },
+  documents: {
+    title: "Documents",
+    description: "Statements and bank documents",
+    icon: "account-option-statement",
+  },
+  settings: {
+    title: "Settings",
+    description: "App preferences and security",
+    icon: "demo-settings",
+  },
+  "gdpr-consent": {
+    title: "GDPR consent",
+    description: "Manage personal data permissions",
+    icon: "info-circle",
+  },
+  "third-party-consent": {
+    title: "Third party consent",
+    description: "Open banking access and sharing",
+    icon: "account-option-share-info",
+  },
+  "digital-activities": {
+    title: "Digital activities",
+    description: "Recent online banking activity",
+    icon: "filters",
+  },
+  "my-requests": {
+    title: "My requests",
+    description: "Submitted service requests",
+    icon: "payment-templates",
+  },
+  tutorial: {
+    title: "Tutorial",
+    description: "Guided help for app features",
+    icon: "help-circle",
+  },
+};
+
+const accountDetailsInfoRows: Array<{ label: string; value: string; copy?: boolean }> = [
+  { label: "Account number", value: "RO49 AAAA 1B31 0075 9384 0000", copy: true },
+  { label: "Account owner", value: "Robert Ionescu" },
+  { label: "Account currency", value: "RON" },
+  { label: "Available balance", value: "12.250,00 RON" },
+  { label: "Booked balance", value: "12.240,00 RON" },
+  { label: "Branch", value: "UniCredit Bank Bucharest" },
+];
+
+const preloginProducts: Array<{ title: string; description: string; icon: IconName }> = [
+  { title: "Accounts", description: "Everyday banking and balances", icon: "wallet-cards" },
+  { title: "Cards", description: "Debit and credit card services", icon: "credit-card" },
+  { title: "Loans", description: "Personal and mortgage options", icon: "landmark" },
+];
+
+const languageSelectorOptions: RadioOption[] = [
+  { title: "ENGLISH", subtitle: "Use the app in English", selected: true },
+  { title: "ROMANA", subtitle: "Foloseste aplicatia in romana" },
+];
+
+const accountTransactionTemplateRows: Array<{ title: string; category: string; amount: string; icon: IconName }> = [
+  { title: "Kindergarten 45", category: "School fees", amount: "-247,00 RON", icon: "account-option-statement" },
+  { title: "Salary", category: "Incoming payment", amount: "+8.200,00 RON", icon: "landmark" },
+  { title: "Online card payment", category: "Shopping", amount: "-74,50 RON", icon: "shopping-bag" },
+  { title: "Transfer to savings", category: "Internal transfer", amount: "-500,00 RON", icon: "repeat" },
+];
+
+const filteredTransactionRows: Array<{ title: string; category: string; amount: string; icon: IconName }> = [
+  { title: "Carrefour Market", category: "Groceries", amount: "-153,80 RON", icon: "shopping-bag" },
+  { title: "Carrefour Online", category: "Shopping", amount: "-89,90 RON", icon: "credit-card" },
+];
+
+const spendingMoneyOutRows: Array<{ title: string; amount: string; share: string; icon: IconName; barClass: string }> = [
+  { title: "Groceries", amount: "-1.245,80 RON", share: "42%", icon: "shopping-bag", barClass: "bg-[var(--uc-product-pink)]" },
+  { title: "Home", amount: "-760,00 RON", share: "26%", icon: "landmark", barClass: "bg-[var(--uc-action)]" },
+  { title: "Transport", amount: "-420,30 RON", share: "14%", icon: "credit-card", barClass: "bg-[var(--uc-product-blue)]" },
+  { title: "Leisure", amount: "-318,50 RON", share: "11%", icon: "wallet-cards", barClass: "bg-[var(--uc-orange-status)]" },
 ];
 
 const pushRequestSections: Array<{ title: string; fields: FieldLine[] }> = [
@@ -137,7 +252,7 @@ const tokenOptions: RadioOption[] = [
 
 const domesticPaymentFields = {
   fromAccount: [
-    { label: "Account number", value: "123546545476745", helper: "Primary Account\n300.020,00 CZK", right: "chevron-down-lucide" as IconName },
+    { label: "Account number", value: "123546545476745", helper: "Primary Account\n300.020,00 CZK", right: "chevron-down" as IconName },
   ],
   beneficiary: [
     { label: "Beneficiary", value: "Kindergarten 45" },
@@ -452,7 +567,7 @@ function TemplateReadOnlyRow({ label, value, copy }: { label: string; value: str
       </div>
       {copy ? (
         <span className="mt-[8px] grid size-[32px] place-items-center">
-          <AppIcon name="copy" size={24} strokeWidth={3} color="var(--uc-text)" />
+          <AppIcon name="copy-documents" size={24} color="var(--uc-text)" />
         </span>
       ) : null}
     </div>
@@ -538,6 +653,98 @@ function TemplateFiveBottomNavigation({ active, productLabel = "Products" }: { a
       </div>
       <TemplateHomeIndicator />
     </div>
+  );
+}
+
+function TemplateTopLevelHeader({
+  title,
+  subtitle,
+  actions,
+  interactive,
+}: {
+  title: string;
+  subtitle?: string;
+  actions: Array<{ icon: IconName; label: string }>;
+  interactive: boolean;
+}) {
+  return (
+    <>
+      <StaticStatusBar />
+      <header className="px-[24px] pt-[34px] font-['UniCredit',sans-serif]">
+        <div className="flex min-h-[40px] items-start gap-[12px]">
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-[28px] font-bold leading-normal text-[var(--uc-text)]">{title}</h1>
+            {subtitle ? (
+              <p className="mt-[2px] text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
+                {subtitle}
+              </p>
+            ) : null}
+          </div>
+          <div className="flex h-[32px] shrink-0 items-center gap-[8px]">
+            {actions.map((action) => (
+              <TemplateAction
+                key={action.label}
+                ariaLabel={action.label}
+                interactive={interactive}
+                className="grid size-[32px] place-items-center"
+              >
+                <AppIcon name={action.icon} size={24} color="var(--uc-text)" />
+              </TemplateAction>
+            ))}
+          </div>
+        </div>
+      </header>
+    </>
+  );
+}
+
+function TemplatePaymentHeroCard({ item, interactive }: { item: PaymentHeroItem; interactive: boolean }) {
+  const iconMap: Record<PaymentHeroItem["illustration"], IconName> = {
+    wallet: "wallet-cards",
+    laptop: "payment-templates",
+    pen: "account-option-statement",
+    "qr-phone": "payment-create-qr",
+  };
+
+  return (
+    <TemplateAction
+      ariaLabel={item.title}
+      interactive={interactive}
+      className="relative h-[104px] w-full overflow-hidden rounded-[8px] bg-[linear-gradient(105deg,var(--uc-surface-muted)_0%,var(--uc-neutral-200)_52%,var(--uc-neutral-300)_100%)] text-left"
+    >
+      <span className="relative z-10 flex h-full w-[250px] flex-col justify-center px-[20px] font-['UniCredit',sans-serif]">
+        <span className="text-[23px] font-bold leading-[26px] text-[var(--uc-text)]">{item.title}</span>
+        <span className="mt-[12px] whitespace-pre-line text-[14px] font-normal leading-[16px] text-[var(--uc-text)]">
+          {item.description}
+        </span>
+      </span>
+      <span className="absolute bottom-[-16px] right-[-14px] grid size-[112px] place-items-center rounded-full bg-[rgb(var(--uc-static-white-rgb)_/_0.45)] text-[var(--uc-action)]">
+        <AppIcon name={iconMap[item.illustration]} size={54} strokeWidth={1.8} color="currentColor" />
+      </span>
+    </TemplateAction>
+  );
+}
+
+function MoreTemplateCard({ type, interactive }: { type: MoreCardType; interactive: boolean }) {
+  const meta = moreCardMeta[type];
+
+  return (
+    <TemplateAction
+      ariaLabel={meta.title}
+      interactive={interactive}
+      className="grid min-h-[92px] w-full grid-cols-[44px_1fr_24px] items-center gap-[12px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[14px] text-left"
+    >
+      <span className="grid size-[40px] place-items-center rounded-full bg-[var(--uc-action-soft)] text-[var(--uc-action)]">
+        <AppIcon name={meta.icon} size={22} color="currentColor" />
+      </span>
+      <span className="min-w-0 font-['UniCredit',sans-serif]">
+        <span className="block text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{meta.title}</span>
+        <span className="mt-[3px] block text-[13px] font-normal leading-[16px] text-[var(--uc-text-muted)]">
+          {meta.description}
+        </span>
+      </span>
+      <AppIcon name="chevron-link" size={22} color="var(--uc-text)" />
+    </TemplateAction>
   );
 }
 
@@ -821,6 +1028,733 @@ function RecurrentPaymentTemplate({ interactive }: { interactive: boolean }) {
   );
 }
 
+function HomeDashboardTemplate({ interactive }: { interactive: boolean }) {
+  return (
+    <TemplatePhoneSurface>
+      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[92px] scrollbar-hide">
+        <TemplateTopLevelHeader
+          title="Hello, Robert"
+          subtitle="Monday, 1 June"
+          actions={[
+            { icon: "amount-hide", label: "Hide amounts" },
+            { icon: "header-profile", label: "Profile" },
+            { icon: "header-messages", label: "Messages" },
+          ]}
+          interactive={interactive}
+        />
+        <main className="px-[24px] pt-[22px] font-['UniCredit',sans-serif]">
+          <AccountBalancePreviewCard />
+          <section className="mt-[22px] grid grid-cols-4 gap-[4px]">
+            <TemplateShortcut icon="info-circle" label="Details" interactive={interactive} />
+            <TemplateShortcut icon="account-options" label="Options" interactive={interactive} />
+            <TemplateShortcut icon="add-money" label="Add money" interactive={interactive} />
+            <TemplateShortcut icon="mcash" label="mCash" interactive={interactive} />
+          </section>
+          <section className="pt-[27px]">
+            <SectionHeadingDivider title="LATEST TRANSACTIONS" />
+            <div className="pt-[12px]">
+              <TemplateTransactionRow title="Kindergarten 45" category="School fees" amount="-247,00 RON" icon="account-option-statement" />
+              <TemplateTransactionRow title="Salary" category="Incoming payment" amount="+8.200,00 RON" icon="landmark" />
+              <TemplateTransactionRow title="Online card payment" category="Shopping" amount="-74,50 RON" icon="shopping-bag" />
+            </div>
+          </section>
+          <section className="pt-[18px]">
+            <SectionHeadingDivider title="PRODUCTS" />
+            <div className="mt-[14px] grid grid-cols-2 gap-[10px]">
+              <div className="rounded-[8px] bg-[var(--uc-product-blue-deep)] p-[14px] text-[var(--uc-static-white)]">
+                <p className="text-[18px] font-bold leading-[21px]">Savings</p>
+                <p className="mt-[20px] text-[20px] font-bold leading-none">2.450 RON</p>
+              </div>
+              <div className="rounded-[8px] bg-[var(--uc-red-card)] p-[14px] text-[var(--uc-static-white)]">
+                <p className="text-[18px] font-bold leading-[21px]">Cards</p>
+                <p className="mt-[20px] text-[20px] font-bold leading-none">1 active</p>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+      <TemplateFiveBottomNavigation active="Home" />
+    </TemplatePhoneSurface>
+  );
+}
+
+function PaymentsMenuTemplate({ interactive }: { interactive: boolean }) {
+  const menu = getPaymentsMenuForCountry("RO");
+
+  return (
+    <TemplatePhoneSurface>
+      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[92px] scrollbar-hide">
+        <TemplateTopLevelHeader
+          title={menu.title}
+          actions={[
+            { icon: "header-profile", label: "Profile" },
+            { icon: "header-messages", label: "Messages" },
+            { icon: "help-circle", label: "Help" },
+          ]}
+          interactive={interactive}
+        />
+        <main className="px-[20px] pt-[8px]">
+          <div className="flex flex-col gap-[13px]">
+            {menu.primaryItems.map((item) => (
+              <TemplatePaymentHeroCard key={item.id} item={item} interactive={interactive} />
+            ))}
+          </div>
+          <section className="pt-[16px]">
+            <h2 className="px-[10px] font-['UniCredit',sans-serif] text-[18px] font-bold leading-[20px] text-[var(--uc-text)]">
+              {menu.otherTitle}
+            </h2>
+            <div className="mt-[5px] h-px w-full bg-[var(--uc-border)]" />
+            <div className="overflow-x-auto overflow-y-hidden pt-[8px] scrollbar-hide">
+              <div className="flex w-max gap-[18px] pr-[20px]">
+                {menu.otherItems.map((item) => (
+                  <PaymentOtherShortcut key={item.id} item={item} />
+                ))}
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+      <TemplateFiveBottomNavigation active="Payments" />
+    </TemplatePhoneSurface>
+  );
+}
+
+function NewPaymentSheetTemplate({ interactive }: { interactive: boolean }) {
+  const menu = getPaymentsMenuForCountry("RO");
+
+  return (
+    <TemplatePhoneSurface>
+      <div className="absolute inset-0 bg-[var(--uc-surface)]">
+        <TemplateTopLevelHeader
+          title="Payments"
+          actions={[
+            { icon: "header-profile", label: "Profile" },
+            { icon: "header-messages", label: "Messages" },
+            { icon: "help-circle", label: "Help" },
+          ]}
+          interactive={interactive}
+        />
+        <div className="mt-[20px] px-[20px]">
+          {menu.primaryItems.slice(0, 3).map((item) => (
+            <div key={item.id} className="mb-[13px] opacity-80">
+              <TemplatePaymentHeroCard item={item} interactive={false} />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="absolute inset-0 bg-[rgb(var(--uc-static-black-rgb)_/_0.55)]" />
+      <section className="absolute inset-x-0 bottom-0 rounded-t-[12px] bg-[var(--uc-sheet-bg)] p-[16px] pb-[32px]">
+        <div className="mb-[18px] flex items-start justify-between gap-[16px]">
+          <h1 className="font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">
+            {menu.newPaymentSheet.title}
+          </h1>
+          <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Close" interactive={interactive}>
+            <AppIcon name="close-x" size={26} color="var(--uc-text)" />
+          </TemplateAction>
+        </div>
+        <div className="flex flex-col">
+          {menu.newPaymentSheet.actions.map((action) => (
+            <NewPaymentActionListItem key={action.id} action={action} onSelect={() => undefined} />
+          ))}
+        </div>
+        <NewPaymentDiscoverBanner
+          title={menu.newPaymentSheet.infoBanner.title}
+          description={menu.newPaymentSheet.infoBanner.description}
+        />
+      </section>
+    </TemplatePhoneSurface>
+  );
+}
+
+function ProductsMenuTemplate({ interactive }: { interactive: boolean }) {
+  const menu = getProductsMenuForCountry("RO");
+
+  return (
+    <TemplatePhoneSurface>
+      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[92px] scrollbar-hide">
+        <TemplateTopLevelHeader
+          title={menu.title}
+          actions={[
+            { icon: "header-profile", label: "Profile" },
+            { icon: "header-messages", label: "Messages" },
+            { icon: "help-circle", label: "Help" },
+          ]}
+          interactive={interactive}
+        />
+        <main className="px-[20px] pt-[14px] font-['UniCredit',sans-serif]">
+          <div className="grid h-[44px] grid-cols-2 rounded-[22px] bg-[var(--uc-surface-muted)] p-[3px] text-center text-[16px] font-bold">
+            <span className="flex items-center justify-center rounded-[19px] bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm">
+              {menu.bankingTabLabel}
+            </span>
+            <span className="flex items-center justify-center text-[var(--uc-text-muted)]">{menu.shopSmartTabLabel}</span>
+          </div>
+          <section className="pt-[18px]">
+            <SectionHeadingDivider title={menu.offersTitle} />
+            <div className="mt-[12px]">
+              <ProductOfferCard offer={menu.offers[0]} colorFamily="green" />
+            </div>
+          </section>
+          <section className="pt-[20px]">
+            <SectionHeadingDivider title={menu.productsTitle} />
+            <div className="mt-[12px] grid grid-cols-2 gap-[9px]">
+              {menu.products.slice(0, 4).map((card) => (
+                <ProductMenuCard key={card.id} card={card} />
+              ))}
+            </div>
+          </section>
+        </main>
+      </div>
+      <TemplateFiveBottomNavigation active="Products" />
+    </TemplatePhoneSurface>
+  );
+}
+
+function MoreMenuTemplate({ interactive }: { interactive: boolean }) {
+  const cards = getMoreCardsForCountry("RO");
+
+  return (
+    <TemplatePhoneSurface>
+      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[92px] scrollbar-hide">
+        <TemplateTopLevelHeader
+          title="More"
+          actions={[
+            { icon: "header-profile", label: "Profile" },
+            { icon: "header-messages", label: "Messages" },
+            { icon: "help-circle", label: "Help" },
+          ]}
+          interactive={interactive}
+        />
+        <main className="px-[24px] pt-[24px]">
+          <div className="flex flex-col gap-[12px]">
+            {cards.map((card) => (
+              <MoreTemplateCard key={card} type={card} interactive={interactive} />
+            ))}
+          </div>
+        </main>
+      </div>
+      <TemplateFiveBottomNavigation active="More" />
+    </TemplatePhoneSurface>
+  );
+}
+
+function ContactsDirectoryTemplate({ interactive }: { interactive: boolean }) {
+  return (
+    <TemplatePhoneSurface>
+      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[32px] scrollbar-hide">
+        <TemplateTopChrome title="Contact" interactive={interactive} />
+        <TemplateSearchStrip interactive={interactive} />
+        <main className="px-[16px]">
+          <SectionHeadingDivider title="CONTACT US" />
+          <div className="mt-[14px] flex flex-col gap-[12px]">
+            <ContactInfoCard icon="contact-phone" title="Call us" description="Talk to a consultant." action="CALL" interactive={interactive} />
+            <ContactInfoCard icon="contact-email" title="Write us" description="Send a secure message." action="SEND MESSAGE" interactive={interactive} />
+            <ContactInfoCard icon="contact-location" title="Find a branch" description="ATMs and branches near you." action="OPEN MAP" interactive={interactive} />
+            <ContactInfoCard icon="contact-website" title="Website" description="Open the UniCredit help page." action="OPEN WEBSITE" interactive={interactive} />
+          </div>
+        </main>
+      </div>
+    </TemplatePhoneSurface>
+  );
+}
+
+function AccountDetailsInfoTemplate({ interactive }: { interactive: boolean }) {
+  return (
+    <TemplatePhoneSurface>
+      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[32px] scrollbar-hide">
+        <TemplateTopChrome title="Details" showHelp={false} interactive={interactive} />
+        <main className="px-[24px] pt-[20px] font-['UniCredit',sans-serif]">
+          <AccountBalancePreviewCard />
+          <section className="pt-[24px]">
+            <SectionHeadingDivider title="ACCOUNT DETAILS" />
+            <div className="pt-[8px]">
+              {accountDetailsInfoRows.map((row) => (
+                <TemplateReadOnlyRow key={row.label} label={row.label} value={row.value} copy={row.copy} />
+              ))}
+            </div>
+          </section>
+          <TemplateAction
+            ariaLabel="Share account info"
+            interactive={interactive}
+            className="mt-[14px] flex h-[48px] w-full items-center justify-center gap-[10px] rounded bg-[var(--uc-action)] font-['UniCredit',sans-serif] text-[16px] font-bold text-[var(--uc-static-white)]"
+          >
+            <AppIcon name="share-filled" size={22} color="currentColor" />
+            Share account info
+          </TemplateAction>
+        </main>
+      </div>
+    </TemplatePhoneSurface>
+  );
+}
+
+function MessagesOutboxTemplate({ interactive }: { interactive: boolean }) {
+  return (
+    <TemplatePhoneSurface>
+      <TemplateTopChrome title="Messages" interactive={interactive} />
+      <TemplateTabs tabs={[{ label: "Inbox" }, { label: "Outbox", active: true }]} interactive={interactive} />
+      <TemplateSearchStrip interactive={interactive} />
+      <TemplateSectionTitle>2025</TemplateSectionTitle>
+      <div className="pt-[20px]">
+        {outboxRows.map((row) => (
+          <MessageListRow key={row.id} row={row} interactive={interactive} />
+        ))}
+      </div>
+    </TemplatePhoneSurface>
+  );
+}
+
+function PrimeAdvisorTemplate({ interactive }: { interactive: boolean }) {
+  return (
+    <TemplatePhoneSurface>
+      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[32px] scrollbar-hide">
+        <TemplateTopChrome title="Your advisor" interactive={interactive} />
+        <main className="px-[24px] pt-[26px] font-['UniCredit',sans-serif] text-[var(--uc-text)]">
+          <section className="rounded-[8px] bg-[var(--uc-surface-muted)] p-[20px] text-center">
+            <div className="mx-auto grid size-[92px] place-items-center rounded-full bg-[var(--uc-action-soft)] text-[var(--uc-action)]">
+              <AppIcon name="header-profile" size={52} color="currentColor" />
+            </div>
+            <h2 className="mt-[16px] text-[24px] font-bold leading-[28px]">Andrei Popescu</h2>
+            <p className="mt-[4px] text-[15px] font-normal leading-[19px] text-[var(--uc-text-muted)]">
+              UniCredit Personal Banking Advisor
+            </p>
+          </section>
+          <section className="pt-[24px]">
+            <SectionHeadingDivider title="CONTACT OPTIONS" />
+            <div className="pt-[14px]">
+              <TemplateReadOnlyRow label="Phone" value="+40 21 200 2020" copy />
+              <TemplateReadOnlyRow label="Email" value="andrei.popescu@unicredit.ro" copy />
+              <TemplateReadOnlyRow label="Branch" value="Bucharest Dorobanti" />
+            </div>
+          </section>
+          <TemplateBottomButton label="Book appointment" interactive={interactive} bottom={32} />
+        </main>
+      </div>
+    </TemplatePhoneSurface>
+  );
+}
+
+function PrimeBenefitItem({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="grid grid-cols-[32px_1fr] gap-[12px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[16px] font-['UniCredit',sans-serif]">
+      <span className="grid size-[28px] place-items-center rounded-full bg-[var(--uc-action)] text-[var(--uc-static-white)]">
+        <AppIcon name="prime-check" size={16} color="currentColor" />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{title}</span>
+        <span className="mt-[3px] block text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
+          {description}
+        </span>
+      </span>
+    </div>
+  );
+}
+
+function PrimeBenefitsTemplate({ interactive }: { interactive: boolean }) {
+  return (
+    <TemplatePhoneSurface>
+      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[104px] scrollbar-hide">
+        <TemplateTopChrome title="Your benefits" interactive={interactive} />
+        <main className="px-[24px] pt-[24px]">
+          <div className="rounded-[8px] bg-[var(--uc-static-black)] p-[20px] font-['UniCredit',sans-serif] text-[var(--uc-static-white)]">
+            <p className="text-[14px] font-bold uppercase leading-[18px] text-[rgb(var(--uc-static-white-rgb)_/_0.7)]">Prime</p>
+            <h2 className="mt-[8px] text-[28px] font-bold leading-[32px]">Premium banking support</h2>
+            <p className="mt-[12px] text-[15px] font-normal leading-[20px] text-[rgb(var(--uc-static-white-rgb)_/_0.82)]">
+              Priority service, dedicated advice, and selected lifestyle benefits.
+            </p>
+          </div>
+          <section className="pt-[24px]">
+            <SectionHeadingDivider title="INCLUDED BENEFITS" />
+            <div className="mt-[14px] flex flex-col gap-[12px]">
+              <PrimeBenefitItem title="Priority support" description="Faster help through phone and secure messages." />
+              <PrimeBenefitItem title="Dedicated advisor" description="A named advisor for everyday and long-term plans." />
+              <PrimeBenefitItem title="Travel assistance" description="Useful support when you pay or travel abroad." />
+            </div>
+          </section>
+        </main>
+      </div>
+      <TemplateBottomButton label="Explore Prime" interactive={interactive} bottom={32} />
+    </TemplatePhoneSurface>
+  );
+}
+
+function PreloginBackgroundArt() {
+  return (
+    <div className="absolute inset-0 overflow-hidden bg-[var(--uc-static-black)]" aria-hidden="true">
+      <div className="absolute inset-0 bg-[linear-gradient(155deg,var(--uc-neutral-750)_0%,var(--uc-static-black)_54%,var(--uc-product-blue-deep)_100%)]" />
+      <div className="absolute left-[38px] top-[160px] h-[212px] w-[142px] rotate-[-9deg] rounded-[28px] border-[8px] border-[rgb(var(--uc-static-white-rgb)_/_0.8)] bg-[rgb(var(--uc-static-white-rgb)_/_0.12)]" />
+      <div className="absolute right-[-30px] top-[236px] h-[184px] w-[190px] rotate-[14deg] rounded-[28px] bg-[rgb(var(--uc-static-white-rgb)_/_0.13)]" />
+      <div className="absolute bottom-[282px] left-[118px] h-[86px] w-[142px] rounded-[18px] bg-[linear-gradient(135deg,var(--uc-brand)_0%,var(--uc-orange-status)_100%)] shadow-[0_18px_32px_rgb(var(--uc-static-black-rgb)_/_0.3)]" />
+    </div>
+  );
+}
+
+function PreloginProductRow({
+  product,
+  interactive,
+}: {
+  product: (typeof preloginProducts)[number];
+  interactive: boolean;
+}) {
+  return (
+    <TemplateAction
+      ariaLabel={product.title}
+      interactive={interactive}
+      className="grid min-h-[64px] w-full grid-cols-[32px_1fr_24px] items-center gap-[12px] text-left"
+    >
+      <span className="grid size-[32px] place-items-center rounded-full bg-[rgb(var(--uc-static-white-rgb)_/_0.12)] text-[var(--uc-static-white)]">
+        <AppIcon name={product.icon} size={20} color="currentColor" />
+      </span>
+      <span className="min-w-0 font-['UniCredit',sans-serif] text-[var(--uc-static-white)]">
+        <span className="block text-[16px] font-bold leading-[20px]">{product.title}</span>
+        <span className="mt-[2px] block text-[13px] font-normal leading-[16px] text-[rgb(var(--uc-static-white-rgb)_/_0.72)]">
+          {product.description}
+        </span>
+      </span>
+      <AppIcon name="chevron-link" size={22} color="var(--uc-static-white)" />
+    </TemplateAction>
+  );
+}
+
+function PreloginInactiveTemplate({ interactive }: { interactive: boolean }) {
+  return (
+    <TemplatePhoneSurface>
+      <PreloginBackgroundArt />
+      <div className="absolute inset-0 flex flex-col">
+        <div className="flex items-center justify-between px-[24px] pt-[70px]">
+          <UniCreditLogo className="h-[24px] w-auto" />
+          <TemplateAction
+            ariaLabel="Change language"
+            interactive={interactive}
+            className="flex h-[32px] items-center gap-[6px] rounded-full border border-[rgb(var(--uc-static-white-rgb)_/_0.45)] px-[12px] font-['UniCredit',sans-serif] text-[13px] font-bold text-[var(--uc-static-white)]"
+          >
+            EN
+            <AppIcon name="chevron-down" size={14} color="currentColor" />
+          </TemplateAction>
+        </div>
+
+        <section className="mt-auto rounded-t-[16px] bg-[rgb(var(--uc-static-black-rgb)_/_0.94)] px-[24px] pb-[32px] pt-[24px]">
+          <h1 className="font-['UniCredit',sans-serif] text-[30px] font-bold leading-[34px] text-[var(--uc-static-white)]">
+            New look, more services.
+          </h1>
+          <p className="mt-[8px] font-['UniCredit',sans-serif] text-[17px] font-normal leading-[21px] text-[rgb(var(--uc-static-white-rgb)_/_0.78)]">
+            Open an account quickly and continue with everyday banking.
+          </p>
+          <div className="mt-[18px] flex flex-col gap-[6px]">
+            {preloginProducts.map((product) => (
+              <PreloginProductRow key={product.title} product={product} interactive={interactive} />
+            ))}
+          </div>
+          <div className="mt-[20px]">
+            {interactive ? (
+              <PrimaryButton className="w-full">Activate application</PrimaryButton>
+            ) : (
+              <div className="flex h-[48px] w-full items-center justify-center rounded bg-[var(--uc-action)] font-['UniCredit',sans-serif] text-base font-bold text-[var(--uc-static-white)]">
+                Activate application
+              </div>
+            )}
+          </div>
+          <div className="mt-[20px] flex justify-between font-['UniCredit',sans-serif] text-[13px] font-bold uppercase leading-[16px] text-[var(--uc-static-white)]">
+            <span>Contacts</span>
+            <span>mToken</span>
+            <span>Other</span>
+          </div>
+        </section>
+      </div>
+    </TemplatePhoneSurface>
+  );
+}
+
+function PreloginActiveTemplate({ interactive }: { interactive: boolean }) {
+  return (
+    <TemplatePhoneSurface>
+      <PreloginBackgroundArt />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(var(--uc-static-black-rgb)_/_0.78)_0%,rgb(var(--uc-static-black-rgb)_/_0)_54%)]" />
+      <div className="absolute inset-0 flex flex-col">
+        <div className="flex items-center justify-between px-[24px] pt-[70px]">
+          <UniCreditLogo className="h-[24px] w-auto" />
+          <TemplateAction
+            ariaLabel="Change language"
+            interactive={interactive}
+            className="flex h-[32px] items-center gap-[6px] rounded-full border border-[rgb(var(--uc-static-white-rgb)_/_0.45)] px-[12px] font-['UniCredit',sans-serif] text-[13px] font-bold text-[var(--uc-static-white)]"
+          >
+            EN
+            <AppIcon name="chevron-down" size={14} color="currentColor" />
+          </TemplateAction>
+        </div>
+        <section className="px-[24px] pt-[30px] font-['UniCredit',sans-serif] text-[var(--uc-static-white)]">
+          <h1 className="text-[38px] font-bold leading-[40px]">Welcome back</h1>
+          <p className="mt-[8px] text-[18px] font-normal leading-normal text-[rgb(var(--uc-static-white-rgb)_/_0.82)]">
+            Continue to Mobile Banking.
+          </p>
+        </section>
+        <section className="mt-auto bg-[rgb(var(--uc-static-black-rgb)_/_0.94)] px-[24px] pb-[32px] pt-[32px]">
+          {interactive ? (
+            <PrimaryButton className="w-full">Log in</PrimaryButton>
+          ) : (
+            <div className="flex h-[48px] w-full items-center justify-center rounded bg-[var(--uc-action)] font-['UniCredit',sans-serif] text-base font-bold text-[var(--uc-static-white)]">
+              Log in
+            </div>
+          )}
+          <div className="mt-[24px] flex justify-between font-['UniCredit',sans-serif] text-[13px] font-bold uppercase leading-[16px] text-[var(--uc-static-white)]">
+            <span>Contacts</span>
+            <span>mToken</span>
+            <span>Other</span>
+          </div>
+        </section>
+      </div>
+    </TemplatePhoneSurface>
+  );
+}
+
+function LanguageSelectorSheetTemplate({ interactive }: { interactive: boolean }) {
+  return (
+    <TemplatePhoneSurface>
+      <PreloginBackgroundArt />
+      <div className="absolute inset-0 bg-[rgb(var(--uc-static-black-rgb)_/_0.52)]" />
+      <section className="absolute inset-x-0 bottom-0 rounded-t-[12px] bg-[var(--uc-sheet-bg)] px-[24px] pb-[32px] pt-[20px]">
+        <div className="mb-[18px] flex items-start justify-between gap-[16px]">
+          <h1 className="font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">
+            Select language
+          </h1>
+          <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Close" interactive={interactive}>
+            <AppIcon name="close-x" size={24} color="var(--uc-text)" />
+          </TemplateAction>
+        </div>
+        <div className="flex flex-col">
+          {languageSelectorOptions.map((option) => (
+            <TemplateRadioRow key={option.title} option={option} interactive={interactive} />
+          ))}
+        </div>
+        <div className="mt-[20px]">
+          {interactive ? (
+            <PrimaryButton className="w-full">Confirm</PrimaryButton>
+          ) : (
+            <div className="flex h-[48px] w-full items-center justify-center rounded bg-[var(--uc-action)] font-['UniCredit',sans-serif] text-base font-bold text-[var(--uc-static-white)]">
+              Confirm
+            </div>
+          )}
+        </div>
+      </section>
+    </TemplatePhoneSurface>
+  );
+}
+
+function MorePanelMenuTemplate() {
+  return (
+    <TemplatePhoneSurface>
+      <PreloginBackgroundArt />
+      <PanelWithTranslations
+        aboutSmartBanking="ABOUT SMART BANKING"
+        exchangeRates="EXCHANGE RATES"
+        findAtmBranches="FIND ATM & BRANCHES"
+        startCoAppingSession="START CO-APPING SESSION"
+      />
+    </TemplatePhoneSurface>
+  );
+}
+
+function CoAppingSessionTemplate({ interactive }: { interactive: boolean }) {
+  return (
+    <TemplatePhoneSurface>
+      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[32px] scrollbar-hide">
+        <TemplateTopChrome title="Co-Apping session" showHelp={false} interactive={interactive} />
+        <main className="px-[24px] pt-[24px] font-['UniCredit',sans-serif]">
+          <div className="relative h-[160px] overflow-hidden rounded-[8px] bg-[linear-gradient(120deg,var(--uc-action-soft)_0%,var(--uc-product-blue)_100%)]">
+            <div className="absolute bottom-[-22px] left-[30px] h-[132px] w-[116px] rounded-t-[48px] bg-[var(--uc-product-blue-deep)]" />
+            <div className="absolute left-[56px] top-[33px] size-[50px] rounded-full bg-[var(--uc-product-brown)]" />
+            <div className="absolute right-[25px] top-[31px] h-[98px] w-[110px] rounded-[14px] bg-[rgb(var(--uc-static-white-rgb)_/_0.58)] p-[12px]">
+              <div className="h-[12px] w-[70px] rounded bg-[var(--uc-surface-muted)]" />
+              <div className="mt-[12px] h-[12px] w-[50px] rounded bg-[var(--uc-surface-muted)]" />
+              <div className="mt-[20px] h-[26px] rounded bg-[var(--uc-action)]" />
+            </div>
+          </div>
+          <div className="pt-[24px] text-[16px] font-normal leading-[22px] text-[var(--uc-text)]">
+            <p>A UniCredit consultant can guide you through the app while you stay in control.</p>
+            <p className="mt-[16px]">Enter the session code shared by the consultant to start the secure co-apping session.</p>
+          </div>
+          <div className="pt-[24px]">
+            <TextField
+              label="Co-Apping code"
+              value="472 915"
+              onChange={() => undefined}
+              helperText="Never share passwords, card PINs, or one-time authorization codes."
+            />
+          </div>
+          <div className="mt-[24px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[14px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">
+            The session can be ended at any time from the shared screen banner.
+          </div>
+        </main>
+      </div>
+      <TemplateBottomButton label="Continue" interactive={interactive} bottom={32} />
+    </TemplatePhoneSurface>
+  );
+}
+
+function AccountTransactionsListTemplate({ interactive }: { interactive: boolean }) {
+  return (
+    <TemplatePhoneSurface>
+      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[88px] scrollbar-hide">
+        <TemplateTopChrome title="Transactions" showHelp={false} interactive={interactive} />
+        <main className="px-[24px] pt-[18px] font-['UniCredit',sans-serif]">
+          <AccountBalancePreviewCard />
+          <TemplateSearchStrip interactive={interactive} />
+          <SectionHeadingDivider title="APRIL 2026" />
+          <div className="pt-[12px]">
+            {accountTransactionTemplateRows.map((row) => (
+              <TemplateTransactionRow key={row.title} {...row} />
+            ))}
+          </div>
+        </main>
+      </div>
+      <TemplateFiveBottomNavigation active="Home" />
+    </TemplatePhoneSurface>
+  );
+}
+
+function AccountSearchResultsTemplate({ interactive }: { interactive: boolean }) {
+  return (
+    <TemplatePhoneSurface>
+      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[88px] scrollbar-hide">
+        <TemplateTopChrome title="Search results" showHelp={false} interactive={interactive} />
+        <main className="px-[24px] pt-[18px] font-['UniCredit',sans-serif]">
+          <div className="flex h-[36px] items-center justify-between rounded-[10px] bg-[var(--uc-app-bg)]">
+            <span className="flex min-w-0 flex-1 items-center gap-[8px]">
+              <span className="grid size-[32px] place-items-center">
+                <AppIcon name="search" color="var(--uc-text)" />
+              </span>
+              <span className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[var(--uc-text)]">
+                Carrefour
+              </span>
+            </span>
+            <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Clear search" interactive={interactive}>
+              <AppIcon name="close-x-small" size={14} color="var(--uc-text)" />
+            </TemplateAction>
+          </div>
+          <p className="mt-[18px] text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
+            2 transactions found in My RON Account.
+          </p>
+          <div className="pt-[18px]">
+            {filteredTransactionRows.map((row) => (
+              <TemplateTransactionRow key={row.title} {...row} />
+            ))}
+          </div>
+          <TemplateAction
+            ariaLabel="Clear results"
+            interactive={interactive}
+            className="mt-[24px] flex h-[44px] w-full items-center justify-center font-['UniCredit',sans-serif] text-[14px] font-bold uppercase text-[var(--uc-action)]"
+          >
+            CLEAR RESULTS
+          </TemplateAction>
+        </main>
+      </div>
+      <TemplateFiveBottomNavigation active="Home" />
+    </TemplatePhoneSurface>
+  );
+}
+
+function SpendingMoneyOutTemplate({ interactive }: { interactive: boolean }) {
+  return (
+    <TemplatePhoneSurface>
+      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[90px] scrollbar-hide">
+        <TemplateTopLevelHeader
+          title="My Spendings"
+          subtitle="April 2026"
+          actions={[{ icon: "help-circle", label: "Help" }]}
+          interactive={interactive}
+        />
+        <main className="px-[24px] pt-[20px] font-['UniCredit',sans-serif]">
+          <div className="rounded-[8px] bg-[var(--uc-surface-muted)] p-[18px]">
+            <p className="text-[14px] font-bold uppercase leading-[18px] text-[var(--uc-text-muted)]">Money out</p>
+            <p className="mt-[8px] text-[32px] font-bold leading-none text-[var(--uc-text)]">-2.945,60 <span className="text-[18px]">RON</span></p>
+            <div className="mt-[18px] grid h-[96px] grid-cols-4 items-end gap-[10px]" aria-hidden="true">
+              <span className="h-[84px] rounded-t-full bg-[var(--uc-product-pink)]" />
+              <span className="h-[55px] rounded-t-full bg-[var(--uc-action)]" />
+              <span className="h-[36px] rounded-t-full bg-[var(--uc-product-blue)]" />
+              <span className="h-[27px] rounded-t-full bg-[var(--uc-orange-status)]" />
+            </div>
+          </div>
+          <section className="pt-[24px]">
+            <SectionHeadingDivider title="CATEGORIES" />
+            <div className="pt-[14px]">
+              {spendingMoneyOutRows.map((row) => (
+                <div key={row.title} className="grid min-h-[74px] grid-cols-[38px_1fr_auto] items-center gap-[12px] border-b border-[var(--uc-border-muted)]">
+                  <span className="grid size-[34px] place-items-center rounded-full bg-[var(--uc-action-soft)] text-[var(--uc-action)]">
+                    <AppIcon name={row.icon} size={21} color="currentColor" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{row.title}</span>
+                    <span className="mt-[7px] block h-[5px] overflow-hidden rounded-full bg-[var(--uc-surface-muted)]">
+                      <span className={`block h-full rounded-full ${row.barClass}`} style={{ width: row.share }} />
+                    </span>
+                  </span>
+                  <span className="text-right">
+                    <span className="block text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{row.amount}</span>
+                    <span className="mt-[2px] block text-[13px] font-normal leading-[16px] text-[var(--uc-text-muted)]">{row.share}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </main>
+      </div>
+      <TemplateFiveBottomNavigation active="Spending" />
+    </TemplatePhoneSurface>
+  );
+}
+
+function ProductsShopSmartTemplate({ interactive }: { interactive: boolean }) {
+  const menu = getProductsMenuForCountry("RO");
+
+  return (
+    <TemplatePhoneSurface>
+      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[92px] scrollbar-hide">
+        <TemplateTopLevelHeader
+          title={menu.title}
+          actions={[
+            { icon: "header-profile", label: "Profile" },
+            { icon: "header-messages", label: "Messages" },
+            { icon: "help-circle", label: "Help" },
+          ]}
+          interactive={interactive}
+        />
+        <main className="px-[20px] pt-[14px] font-['UniCredit',sans-serif]">
+          <div className="grid h-[44px] grid-cols-2 rounded-[22px] bg-[var(--uc-surface-muted)] p-[3px] text-center text-[16px] font-bold">
+            <span className="flex items-center justify-center text-[var(--uc-text-muted)]">{menu.bankingTabLabel}</span>
+            <span className="flex items-center justify-center rounded-[19px] bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm">
+              {menu.shopSmartTabLabel}
+            </span>
+          </div>
+          <section className="pt-[18px]">
+            <SectionHeadingDivider title={menu.shopSmartTitle} />
+            <div className="mt-[12px]">
+              <ProductOfferCard offer={menu.shopSmartOffers[0]} colorFamily="pink" />
+            </div>
+          </section>
+          <section className="pt-[20px]">
+            <SectionHeadingDivider title="PARTNER CATEGORIES" />
+            <div className="mt-[12px] grid grid-cols-2 gap-[9px]">
+              {menu.shopSmartProducts.map((card) => (
+                <ProductMenuCard key={card.title} card={card} />
+              ))}
+            </div>
+          </section>
+        </main>
+      </div>
+      <TemplateFiveBottomNavigation active="Products" />
+    </TemplatePhoneSurface>
+  );
+}
+
+function LogoutConfirmationTemplate({ interactive }: { interactive: boolean }) {
+  return (
+    <TemplatePhoneSurface>
+      <div className="absolute inset-0 bg-[var(--uc-surface)]">
+        <MoreMenuTemplate interactive={false} />
+      </div>
+      <LogoutConfirmDialog isOpen onClose={() => undefined} onConfirm={interactive ? () => undefined : undefined} />
+    </TemplatePhoneSurface>
+  );
+}
+
 function ProductBottomSheetTemplate({ interactive }: { interactive: boolean }) {
   return (
     <TemplatePhoneSurface>
@@ -1044,7 +1978,7 @@ function AnalyticsOverviewTemplate({ interactive }: { interactive: boolean }) {
         <section className="mt-[35px] px-[33px]">
           <div className="ml-auto flex w-[88px] flex-col items-center gap-[5px] text-center font-['UniCredit',sans-serif]">
             <span className="grid size-[42px] place-items-center rounded-full bg-[var(--uc-text)] text-[var(--uc-static-white)]">
-              <AppIcon name="plus-circle" size={30} strokeWidth={3} color="currentColor" />
+              <AppIcon name="add-money" size={30} color="currentColor" />
             </span>
             <span className="text-[20px] font-normal leading-[22px] text-[var(--uc-text)]">Card<br />Transaction</span>
           </div>
@@ -1195,7 +2129,7 @@ function CardsOverviewTemplate({ interactive }: { interactive: boolean }) {
           <TemplateShortcut icon="credit-card" label="Card Details" interactive={interactive} />
           <TemplateShortcut icon="demo-settings" label="Options" interactive={interactive} />
           <TemplateShortcut icon="lock" label="Block Card" interactive={interactive} />
-          <TemplateShortcut icon="copy" label="View PIN" interactive={interactive} />
+          <TemplateShortcut icon="copy-documents" label="View PIN" interactive={interactive} />
         </section>
 
         <TemplateSearchStrip interactive={interactive} />
@@ -1311,7 +2245,7 @@ function AccountDetailHomepageTemplate({ interactive }: { interactive: boolean }
           <div className="mt-[20px] grid grid-cols-4 gap-[4px] px-[14px]">
             <TemplateShortcut icon="info-circle" label="Details" interactive={interactive} />
             <TemplateShortcut icon="account-options" label="Options" interactive={interactive} />
-            <TemplateShortcut icon="plus-circle" label="Add money" interactive={interactive} />
+            <TemplateShortcut icon="add-money" label="Add money" interactive={interactive} />
             <TemplateShortcut icon="mcash" label="mCash" interactive={interactive} />
           </div>
           <TemplateSearchStrip interactive={interactive} />
@@ -1319,7 +2253,7 @@ function AccountDetailHomepageTemplate({ interactive }: { interactive: boolean }
             <h2 className="border-b border-[var(--uc-border)] pb-[7px] font-['UniCredit',sans-serif] text-[18px] font-bold uppercase leading-normal text-[var(--uc-text)]">
               APRIL 2026
             </h2>
-            <TemplateTransactionRow title="Kindergarten 45" category="School fees" amount="-24.700,00 RON" icon="file-text" />
+            <TemplateTransactionRow title="Kindergarten 45" category="School fees" amount="-24.700,00 RON" icon="account-option-statement" />
             <TemplateTransactionRow title="Salary" category="Incoming payment" amount="+8.200,00 RON" icon="landmark" />
             <TemplateTransactionRow title="Online card payment" category="Shopping" amount="-74,50 RON" icon="shopping-bag" />
           </section>
@@ -1430,7 +2364,7 @@ function TransactionDetailTemplate({ interactive }: { interactive: boolean }) {
         <main className="px-[24px] pt-[20px] font-['UniCredit',sans-serif]">
           <section className="text-center">
             <span className="mx-auto grid size-[54px] place-items-center rounded-full bg-[var(--uc-action-soft)] text-[var(--uc-action)]">
-              <AppIcon name="file-text" size={30} color="currentColor" />
+              <AppIcon name="account-option-statement" size={30} color="currentColor" />
             </span>
             <h2 className="mt-[14px] text-[24px] font-bold leading-[28px] text-[var(--uc-text)]">Kindergarten 45</h2>
             <p className="mt-[4px] text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">School fees</p>
@@ -1439,7 +2373,7 @@ function TransactionDetailTemplate({ interactive }: { interactive: boolean }) {
           <div className="mt-[24px] grid grid-cols-3 gap-[4px]">
             <TemplateShortcut icon="repeat" label="Repeat" interactive={interactive} />
             <TemplateShortcut icon="payment-templates" label="Template" interactive={interactive} />
-            <TemplateShortcut icon="copy" label="Share" interactive={interactive} />
+            <TemplateShortcut icon="copy-documents" label="Share" interactive={interactive} />
           </div>
           <section className="pt-[26px]">
             <SpendingInsightMiniChart />
@@ -1676,7 +2610,7 @@ function SuccessfulPaymentTemplate({ interactive }: { interactive: boolean }) {
       </div>
       <div className="mt-[83px] flex justify-center">
         <div className="grid size-[100px] place-items-center rounded-full border-[6px] border-[var(--uc-green-olive)]">
-          <AppIcon name="check" size={64} strokeWidth={5} color="var(--uc-green-olive)" />
+          <AppIcon name="prime-check" size={64} color="var(--uc-green-olive)" />
         </div>
       </div>
       <section className="px-[24px] pt-[61px] font-['UniCredit',sans-serif] text-[var(--uc-text)]">
@@ -1894,7 +2828,7 @@ function FeedbackStatusIcon({ kind, color }: { kind: FeedbackStatusKind; color: 
   if (kind === "success") {
     return (
       <div className={circleClass} style={{ borderColor: color, color }}>
-        <AppIcon name="check" size={62} strokeWidth={6} color="currentColor" />
+        <AppIcon name="prime-check" size={62} color="currentColor" />
       </div>
     );
   }
@@ -1902,7 +2836,7 @@ function FeedbackStatusIcon({ kind, color }: { kind: FeedbackStatusKind; color: 
   if (kind === "warning") {
     return (
       <div className={circleClass} style={{ borderColor: color, color }}>
-        <AppIcon name="bell" size={44} strokeWidth={3.8} color="currentColor" />
+        <AppIcon name="account-option-push-notifications" size={44} color="currentColor" />
         <span className="absolute bottom-[23px] h-[4px] w-[38px] rounded-full bg-current" />
         <span className="absolute left-[21px] top-[29px] h-[8px] w-[4px] -rotate-[35deg] rounded-full bg-current" />
         <span className="absolute right-[21px] top-[29px] h-[8px] w-[4px] rotate-[35deg] rounded-full bg-current" />
@@ -1978,6 +2912,46 @@ export function TemplateCodePreview({ previewId, presentationOnly = false }: Tem
   switch (previewId) {
     case "messages-inbox":
       return <MessagesInboxTemplate interactive={interactive} />;
+    case "home-dashboard":
+      return <HomeDashboardTemplate interactive={interactive} />;
+    case "payments-menu":
+      return <PaymentsMenuTemplate interactive={interactive} />;
+    case "new-payment-sheet":
+      return <NewPaymentSheetTemplate interactive={interactive} />;
+    case "products-menu":
+      return <ProductsMenuTemplate interactive={interactive} />;
+    case "more-menu":
+      return <MoreMenuTemplate interactive={interactive} />;
+    case "contacts-directory":
+      return <ContactsDirectoryTemplate interactive={interactive} />;
+    case "account-details-info":
+      return <AccountDetailsInfoTemplate interactive={interactive} />;
+    case "messages-outbox":
+      return <MessagesOutboxTemplate interactive={interactive} />;
+    case "prime-advisor":
+      return <PrimeAdvisorTemplate interactive={interactive} />;
+    case "prime-benefits":
+      return <PrimeBenefitsTemplate interactive={interactive} />;
+    case "prelogin-inactive":
+      return <PreloginInactiveTemplate interactive={interactive} />;
+    case "prelogin-active":
+      return <PreloginActiveTemplate interactive={interactive} />;
+    case "language-selector-sheet":
+      return <LanguageSelectorSheetTemplate interactive={interactive} />;
+    case "more-panel-menu":
+      return <MorePanelMenuTemplate />;
+    case "co-apping-session":
+      return <CoAppingSessionTemplate interactive={interactive} />;
+    case "account-transactions-list":
+      return <AccountTransactionsListTemplate interactive={interactive} />;
+    case "account-search-results":
+      return <AccountSearchResultsTemplate interactive={interactive} />;
+    case "spending-money-out":
+      return <SpendingMoneyOutTemplate interactive={interactive} />;
+    case "products-shopsmart":
+      return <ProductsShopSmartTemplate interactive={interactive} />;
+    case "logout-confirmation":
+      return <LogoutConfirmationTemplate interactive={interactive} />;
     case "documents":
       return <DocumentsTemplate interactive={interactive} />;
     case "recurrent-payment":

@@ -308,7 +308,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "implemented",
     componentPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     usedByScreens: ["platform.design-system"],
-    notes: "Renders all 30 screenshot templates as real JSX previews. Source PNG/JPG files remain comparison evidence, while template 52, list/form/sheet/status/payment/account/card/contact/analytics/product/tutorial templates now share reusable primitives in TemplateCodePreviews.tsx.",
+    notes: "Renders 50 real JSX template previews: all 30 screenshot-backed templates plus 20 code-only templates derived from active pre-login, panel, Co-Apping, Home/account, Payments, Products, More, Contacts, Messages, Spending, Prime, and dialog patterns. Source PNG/JPG files remain comparison evidence where they exist.",
   },
   "products.menu": {
     id: "products.menu",
