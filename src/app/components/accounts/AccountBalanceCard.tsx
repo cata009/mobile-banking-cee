@@ -37,11 +37,11 @@ export default function AccountBalanceCard({
       onKeyDown={handleKeyDown}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
-      className={`flex h-[197px] w-[311px] shrink-0 flex-col items-start gap-[16px] rounded-[6px] bg-[var(--uc-surface)] p-[16px] text-left transition-opacity ${
+      className={`flex h-[197px] w-[311px] shrink-0 flex-col items-start gap-[16px] rounded-[6px] bg-[var(--uc-surface)] p-[16px] text-left transition-[box-shadow,opacity] duration-300 ease-out ${
         onClick ? "cursor-pointer" : ""
       } ${active ? "" : "opacity-95"}`}
       draggable={false}
-      style={{ boxShadow: "0 10px 24px rgb(var(--uc-shadow-rgb) / 0.10), 0 2px 6px rgb(var(--uc-shadow-rgb) / 0.06)" }}
+      style={{ boxShadow: "0 16px 32px rgb(var(--uc-shadow-rgb) / 0.08), 0 3px 10px rgb(var(--uc-shadow-rgb) / 0.05)" }}
       data-ds-label="AccountBalanceCard 311x197"
     >
       <div className="flex w-full flex-col">

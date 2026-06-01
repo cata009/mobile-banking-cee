@@ -34,7 +34,7 @@ export function BottomSheet({ title, subtitle, meta, children, onClose }: Bottom
       <section
         aria-labelledby={title ? titleId : undefined}
         aria-modal="true"
-        className="relative max-h-[calc(100%-54px)] w-full overflow-y-auto rounded-t-[12px] bg-[var(--uc-sheet-bg)] px-[28px] pb-[32px] pt-[32px] shadow-[0_-8px_24px_rgb(var(--uc-shadow-rgb)_/_0.18)]"
+        className="relative max-h-[calc(100%-54px)] w-full overflow-y-auto rounded-t-[12px] bg-[var(--uc-sheet-bg)] p-[16px] shadow-[0_-8px_24px_rgb(var(--uc-shadow-rgb)_/_0.18)]"
         role="dialog"
       >
         <div className="mb-[24px] flex items-start justify-between gap-[16px]">

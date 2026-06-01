@@ -17,8 +17,9 @@ export type CountryId = Country;
  * Supported application products.
  * PI = personal individual mobile banking.
  * SME = small and medium enterprise mobile banking.
+ * KIDS_PI = kids-focused personal individual mobile banking.
  */
-export type ProductId = "PI" | "SME";
+export type ProductId = "PI" | "SME" | "KIDS_PI";
 
 /**
  * Supported design systems.
@@ -56,6 +57,7 @@ export type ScreenId =
   | "pi.co-apping.session"
   | "pi.home.overview"
   | "pi.analytics.overview"
+  | "pi.messages.overview"
   | "pi.account.detail"
   | "pi.account.details-info"
   | "pi.account.options"
@@ -68,7 +70,10 @@ export type ScreenId =
   | "pi.products.overview"
   | "pi.prime.overview"
   | "pi.more.overview"
+  | "pi.documents.overview"
+  | "pi.settings.overview"
   | "pi.contacts.overview"
+  | "kids.ro.prototype"
   | "platform.design-system";
 
 /**
@@ -87,6 +92,9 @@ export type ComponentId =
   | "home.account-balance-card"
   | "home.unplanned-banner"
   | "analytics.spendings"
+  | "pfm.category-icon"
+  | "messages.inbox-list"
+  | "accounts.action-bar"
   | "accounts.details-info"
   | "accounts.transaction-search"
   | "accounts.transaction-row"
@@ -97,13 +105,15 @@ export type ComponentId =
   | "payments.new-payment-action"
   | "payments.new-payment-discover-banner"
   | "payments.domestic-flow"
+  | "templates.reconstructed-code"
   | "products.menu"
   | "products.offer-card"
   | "products.product-card"
   | "more.card-grid"
   | "contacts.navigation-card"
   | "prime.advisor-tab"
-  | "prime.benefits-tab";
+  | "prime.benefits-tab"
+  | "kids.ro-prototype";
 
 /**
  * Addressable flow identifiers.
@@ -113,11 +123,15 @@ export type FlowId =
   | "pi.co-apping.activation"
   | "pi.home-to-account-detail"
   | "pi.home-to-analytics"
+  | "pi.header-to-messages"
   | "pi.home-to-payments-menu"
   | "pi.transaction-redo-payment"
   | "pi.new-domestic-payment"
   | "pi.home-to-products-menu"
-  | "pi.home-to-more-to-contacts";
+  | "pi.home-to-more-to-contacts"
+  | "pi.home-to-more-to-documents"
+  | "pi.home-to-more-to-settings"
+  | "kids.ro.ask-money-parent-approval";
 
 /**
  * Shared implementation status for registries and feature coverage.

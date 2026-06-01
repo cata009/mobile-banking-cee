@@ -18,6 +18,7 @@ export type LayoutFamily =
   | "co-apping"
   | "dashboard"
   | "analytics"
+  | "messages"
   | "account-detail"
   | "account-options"
   | "payments"
@@ -26,6 +27,7 @@ export type LayoutFamily =
   | "prime"
   | "service-menu"
   | "contacts"
+  | "kids"
   | "design-system";
 
 export interface ScreenMeta {
@@ -122,6 +124,20 @@ export const SCREEN_REGISTRY: Record<ScreenId, ScreenMeta> = {
     features: ["fx_enhancedAnalytics"],
     screenshots: ["screenshots/Analytics.jpg"],
     similarTo: ["pi.home.overview"],
+  },
+  "pi.messages.overview": {
+    id: "pi.messages.overview",
+    label: "PI Messages inbox",
+    runtimeScreen: "messages",
+    products: ["PI"],
+    countries: ALL_COUNTRIES,
+    designSystems: ["current"],
+    status: "mock-driven",
+    layoutFamily: "messages",
+    componentPath: "src/app/screens/messages/MessagesScreen.tsx",
+    features: [],
+    screenshots: ["screenshots/52.png"],
+    similarTo: ["pi.more.overview", "pi.analytics.overview"],
   },
   "pi.account.detail": {
     id: "pi.account.detail",
@@ -289,7 +305,35 @@ export const SCREEN_REGISTRY: Record<ScreenId, ScreenMeta> = {
     componentPath: "src/app/screens/more/MoreScreen.tsx",
     features: [],
     screenshots: [],
-    similarTo: ["pi.contacts.overview"],
+    similarTo: ["pi.documents.overview", "pi.settings.overview", "pi.contacts.overview"],
+  },
+  "pi.documents.overview": {
+    id: "pi.documents.overview",
+    label: "PI Documents overview",
+    runtimeScreen: "documents",
+    products: ["PI"],
+    countries: ALL_COUNTRIES,
+    designSystems: ["current"],
+    status: "partial",
+    layoutFamily: "messages",
+    componentPath: "src/app/screens/documents/DocumentsScreen.tsx",
+    features: [],
+    screenshots: ["screenshots/Documents.png"],
+    similarTo: ["pi.messages.overview", "pi.more.overview"],
+  },
+  "pi.settings.overview": {
+    id: "pi.settings.overview",
+    label: "PI Settings overview",
+    runtimeScreen: "settings",
+    products: ["PI"],
+    countries: ALL_COUNTRIES,
+    designSystems: ["current"],
+    status: "partial",
+    layoutFamily: "service-menu",
+    componentPath: "src/app/screens/settings/SettingsScreen.tsx",
+    features: [],
+    screenshots: ["screenshots/Settings.png"],
+    similarTo: ["pi.more.overview", "pi.contacts.overview"],
   },
   "pi.contacts.overview": {
     id: "pi.contacts.overview",
@@ -304,6 +348,20 @@ export const SCREEN_REGISTRY: Record<ScreenId, ScreenMeta> = {
     features: [],
     screenshots: [],
     similarTo: ["pi.more.overview"],
+  },
+  "kids.ro.prototype": {
+    id: "kids.ro.prototype",
+    label: "RO Kids banking prototype",
+    runtimeScreen: "homepage",
+    products: ["KIDS_PI"],
+    countries: ["RO"],
+    designSystems: ["current"],
+    status: "mock-driven",
+    layoutFamily: "kids",
+    componentPath: "src/app/screens/kids/RoKidsApp.tsx",
+    features: [],
+    screenshots: [],
+    similarTo: ["pi.home.overview", "pi.payments.overview", "pi.more.overview"],
   },
   "platform.design-system": {
     id: "platform.design-system",

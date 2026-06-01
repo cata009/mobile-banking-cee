@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import { AppIcon } from "@/app/components/icons";
+import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
 import type { AccountTransaction } from "@/data/accountDetails";
 import type { Product } from "@/data/products";
 import {
@@ -192,12 +193,20 @@ export function TransactionDetailScreen({
             {detail.amount}
           </p>
           <p className="mt-[18px] font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text-muted)]">
-            {detail.categoryGroup}
+            PFM CATEGORY
           </p>
-          <div className="mt-[8px] inline-flex h-[30px] items-center gap-[8px] rounded-full border border-[var(--uc-action)] px-[18px] text-[var(--uc-action)]">
-            <AppIcon name="landmark" size={15} strokeWidth={3} />
+          <div
+            className="mt-[8px] inline-flex h-[30px] items-center gap-[8px] rounded-full border px-[14px]"
+            style={{
+              borderColor: `var(${detail.pfmCategoryColorVar})`,
+              color: `var(${detail.pfmCategoryColorVar})`,
+            }}
+            data-transaction-pfm-category={detail.pfmCategory}
+            data-transaction-pfm-subcategory={detail.pfmSubcategoryLabel}
+          >
+            <PfmCategoryIcon category={detail.pfmCategory} size={20} />
             <span className="font-['UniCredit',sans-serif] text-[12px] font-bold leading-normal">
-              {detail.categoryTag}
+              {detail.pfmCategoryLabel.toUpperCase()}
             </span>
           </div>
         </section>

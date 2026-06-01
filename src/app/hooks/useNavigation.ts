@@ -7,6 +7,7 @@ export type Screen =
   | "homepage"
   | "language-selector"
   | "analytics"
+  | "messages"
   | "payments"
   | "products"
   | "prime"

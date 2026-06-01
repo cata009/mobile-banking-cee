@@ -15,16 +15,16 @@ export default function NewPaymentDiscoverBanner({
   if (!isVisible) return null;
 
   return (
-    <div className={`${className} rounded-[4px] bg-[var(--uc-action)] px-[16px] py-[14px] text-[var(--uc-text-inverse)]`}>
+    <div className={`${className} rounded-[4px] bg-[var(--uc-action)] p-[16px] text-[var(--uc-text-inverse)]`}>
       <div className="grid grid-cols-[20px_1fr_32px] items-start gap-[14px]">
         <span className="mt-[4px] flex h-[20px] w-[20px] shrink-0 items-center justify-center">
           <AppIcon name="info-circle" color="var(--uc-text-inverse)" />
         </span>
         <div className="min-w-0">
-          <p className="font-['UniCredit',sans-serif] text-[18px] font-bold leading-normal text-[var(--uc-text-inverse)]">
+          <p className="font-['UniCredit',sans-serif] text-[18px] font-bold leading-[normal] text-[var(--uc-text-inverse)]">
             {title}
           </p>
-          <p className="mt-[12px] font-['UniCredit',sans-serif] text-[18px] font-normal leading-normal text-[var(--uc-text-inverse)]">
+          <p className="mt-[4px] font-['UniCredit',sans-serif] text-[18px] font-normal leading-[normal] text-[var(--uc-text-inverse)]">
             {description}
           </p>
         </div>

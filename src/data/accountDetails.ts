@@ -1,5 +1,8 @@
 import type { Country } from "@/app/state/demoTypes";
+import { normalizePfmCategory } from "@/data/pfmCategories";
+import type { PfmCategoryName } from "@/data/pfmCategories";
 import type { Currency } from "@/data/products";
+import type { Product } from "@/data/products";
 
 export interface AccountIdentity {
   accountName: string;
@@ -18,6 +21,8 @@ export interface AccountTransaction {
   amount: number;
   type: "debit" | "credit";
   category: string;
+  pfmCategory: PfmCategoryName;
+  pfmSubcategory: string;
   status: "Booked" | "Pending";
 }
 
@@ -80,13 +85,13 @@ const ACCOUNT_IDENTITIES: Record<Country, AccountIdentity[]> = {
 
 const CURRENCY_TRANSACTION_SCALE: Record<Currency, number> = {
   EUR: 1,
-  CZK: 24.4,
-  RON: 4.98,
-  BAM: 1.96,
-  HUF: 396.5,
-  RSD: 117.1,
-  USD: 1.08,
-  GBP: 0.85,
+  CZK: 24.284,
+  RON: 5.2379,
+  BAM: 1.95583,
+  HUF: 354.83,
+  RSD: 117.3909,
+  USD: 1.1637,
+  GBP: 0.86618,
 };
 
 const MONTH_NAMES = [
@@ -108,93 +113,229 @@ const MONTH_SHORT = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SE
 
 interface CountryTransactionProfile {
   salaryPayer: string;
+  freelancePayer: string;
   person: string;
+  secondaryPerson: string;
   groceries: string;
   utility: string;
+  publicTransport: string;
   transport: string;
+  fuel: string;
   subscription: string;
   coffee: string;
+  restaurant: string;
   shopping: string;
   publicInstitution: string;
+  home: string;
+  education: string;
+  healthcare: string;
+  insurance: string;
+  childcare: string;
+  investments: string;
+  wallet: string;
+  charity: string;
+  bankFee: string;
+  atm: string;
+  fxOffice: string;
+  uncategorized: string;
 }
 
 const COUNTRY_TRANSACTION_PROFILES: Record<Country, CountryTransactionProfile> = {
   RO: {
     salaryPayer: "Dante International",
+    freelancePayer: "PFA Popescu Andreea",
     person: "Andreea Popescu",
+    secondaryPerson: "Mihai Ionescu",
     groceries: "Carrefour",
     utility: "Enel Energie",
-    transport: "OMV Petrom",
+    publicTransport: "STB",
+    transport: "Metrorex",
+    fuel: "OMV Petrom",
     subscription: "YouTube Premium",
     coffee: "Bar Magenta",
+    restaurant: "City Grill",
     shopping: "eMAG",
     publicInstitution: "ANAF",
+    home: "Apulum Residence",
+    education: "Scoala Spectrum",
+    healthcare: "Regina Maria",
+    insurance: "NN Asigurari",
+    childcare: "Little Team",
+    investments: "TradeVille",
+    wallet: "Apple Pay Wallet",
+    charity: "Crucea Rosie",
+    bankFee: "UniCredit Bank Fee",
+    atm: "ATM UniCredit",
+    fxOffice: "Exchange Desk",
+    uncategorized: "Piata Obor",
   },
   CZ: {
     salaryPayer: "Seznam.cz",
+    freelancePayer: "Freelancer Petr Novak",
     person: "Petr Novak",
+    secondaryPerson: "Jana Svobodova",
     groceries: "Albert",
     utility: "CEZ",
+    publicTransport: "DPP",
     transport: "Ceske drahy",
+    fuel: "Benzina Orlen",
     subscription: "Spotify",
     coffee: "Costa Coffee",
+    restaurant: "Lokal",
     shopping: "Alza.cz",
     publicInstitution: "Financni sprava",
+    home: "CPI Byty",
+    education: "Skola Praha",
+    healthcare: "Dr.Max",
+    insurance: "Kooperativa",
+    childcare: "Skolka Praha",
+    investments: "Portu",
+    wallet: "Apple Pay Wallet",
+    charity: "Charita CR",
+    bankFee: "UniCredit Bank Fee",
+    atm: "ATM UniCredit",
+    fxOffice: "Smenarna Praha",
+    uncategorized: "Farmers Market",
   },
   SK: {
     salaryPayer: "Eset",
+    freelancePayer: "Freelancer Lucia Horvathova",
     person: "Lucia Horvathova",
+    secondaryPerson: "Martin Kollar",
     groceries: "Billa",
     utility: "ZSE Energia",
-    transport: "Slovnaft",
+    publicTransport: "Dopravny podnik",
+    transport: "ZSSK",
+    fuel: "Slovnaft",
     subscription: "Netflix",
     coffee: "Urban House",
+    restaurant: "Slovak Pub",
     shopping: "Alza.sk",
     publicInstitution: "Financna sprava",
+    home: "Bratislava Rent",
+    education: "Skola Novohradska",
+    healthcare: "Dr.Max",
+    insurance: "Union poistovna",
+    childcare: "Skolka Bratislava",
+    investments: "Finax",
+    wallet: "Google Pay Wallet",
+    charity: "Liga proti rakovine",
+    bankFee: "UniCredit Bank Fee",
+    atm: "ATM UniCredit",
+    fxOffice: "Exchange Desk",
+    uncategorized: "Trhovisko Mileticova",
   },
   HU: {
     salaryPayer: "Graphisoft",
+    freelancePayer: "Freelancer Nagy Anna",
     person: "Nagy Anna",
+    secondaryPerson: "Kovacs Peter",
     groceries: "SPAR",
     utility: "MVM",
-    transport: "MOL",
+    publicTransport: "BKK",
+    transport: "MAV",
+    fuel: "MOL",
     subscription: "Netflix",
     coffee: "Cafe Frei",
+    restaurant: "Menza",
     shopping: "eMAG Hungary",
     publicInstitution: "NAV",
+    home: "Otthon Centrum",
+    education: "Budapest School",
+    healthcare: "Medicover",
+    insurance: "Allianz",
+    childcare: "Ovoda Budapest",
+    investments: "Concorde",
+    wallet: "Apple Pay Wallet",
+    charity: "Magyar Voroskereszt",
+    bankFee: "UniCredit Bank Fee",
+    atm: "ATM UniCredit",
+    fxOffice: "Exclusive Change",
+    uncategorized: "Lehel Market",
   },
   RS: {
     salaryPayer: "Nordeus",
+    freelancePayer: "Freelancer Ana Jovanovic",
     person: "Ana Jovanovic",
+    secondaryPerson: "Marko Petrovic",
     groceries: "Idea",
     utility: "EPS",
-    transport: "NIS Petrol",
+    publicTransport: "GSP Beograd",
+    transport: "Lasta",
+    fuel: "NIS Petrol",
     subscription: "Spotify",
     coffee: "Kafeterija",
+    restaurant: "Walter",
     shopping: "Gigatron",
     publicInstitution: "Poreska uprava",
+    home: "Belgrade Rent",
+    education: "Skola Kreativno Pero",
+    healthcare: "MediGroup",
+    insurance: "Dunav Osiguranje",
+    childcare: "Vrtic Beograd",
+    investments: "Ilirika",
+    wallet: "Google Pay Wallet",
+    charity: "Crveni krst Srbije",
+    bankFee: "UniCredit Bank Fee",
+    atm: "ATM UniCredit",
+    fxOffice: "Menjacnica",
+    uncategorized: "Kalenic Market",
   },
   BA: {
     salaryPayer: "Authority Partners",
+    freelancePayer: "Freelancer Amir Hadzic",
     person: "Amir Hadzic",
+    secondaryPerson: "Lejla Music",
     groceries: "Konzum",
     utility: "Elektroprivreda BIH",
-    transport: "Hifa Petrol",
+    publicTransport: "Centrotrans",
+    transport: "GRAS Sarajevo",
+    fuel: "Hifa Petrol",
     subscription: "Netflix",
     coffee: "Mrvica",
+    restaurant: "Klopa",
     shopping: "Bingo",
     publicInstitution: "Porezna uprava",
+    home: "Sarajevo Rent",
+    education: "International School",
+    healthcare: "ASA Bolnica",
+    insurance: "Sarajevo Osiguranje",
+    childcare: "Obdaniste Sarajevo",
+    investments: "Raiffeisen Invest",
+    wallet: "Apple Pay Wallet",
+    charity: "Crveni kriz BIH",
+    bankFee: "UniCredit Bank Fee",
+    atm: "ATM UniCredit",
+    fxOffice: "Exchange Office",
+    uncategorized: "Markale",
   },
   SI: {
     salaryPayer: "Outfit7",
+    freelancePayer: "Freelancer Maja Novak",
     person: "Maja Novak",
+    secondaryPerson: "Luka Kranjc",
     groceries: "Mercator",
     utility: "GEN-I",
-    transport: "Petrol",
+    publicTransport: "LPP",
+    transport: "Slovenske zeleznice",
+    fuel: "Petrol",
     subscription: "Spotify",
     coffee: "Kavarna Rog",
+    restaurant: "Gostilna Sokol",
     shopping: "Mimovrste",
     publicInstitution: "FURS",
+    home: "Ljubljana Rent",
+    education: "Vrtec Ljubljana",
+    healthcare: "Lekarna Ljubljana",
+    insurance: "Triglav",
+    childcare: "Vrtec Ljubljana",
+    investments: "NLB Skladi",
+    wallet: "Apple Pay Wallet",
+    charity: "Rdeci kriz",
+    bankFee: "UniCredit Bank Fee",
+    atm: "ATM UniCredit",
+    fxOffice: "Exchange Desk",
+    uncategorized: "Central Market",
   },
 };
 
@@ -213,9 +354,12 @@ function makeTransaction(
   details: string,
   baseEurAmount: number,
   category: string,
+  pfmSubcategory: string,
   status: "Booked" | "Pending" = "Booked",
 ): AccountTransaction {
   const amount = money(baseEurAmount, currency);
+  const pfmCategory = normalizePfmCategory(category);
+
   return {
     id: `${country}-${accountIndex}-${sequence}`,
     day: date.getDate().toString().padStart(2, "0"),
@@ -226,9 +370,166 @@ function makeTransaction(
     details,
     amount,
     type: amount >= 0 ? "credit" : "debit",
-    category,
+    category: pfmCategory,
+    pfmCategory,
+    pfmSubcategory,
     status,
   };
+}
+
+const SAVINGS_TRANSFER_PROFILE_INDEX = 100;
+const CREDIT_PRODUCT_PROFILE_INDEX = 200;
+
+function createTransactionFactory(country: Country, currency: Currency, accountIndex: number) {
+  let sequence = 1;
+
+  return (
+    date: Date,
+    label: string,
+    details: string,
+    baseEurAmount: number,
+    category: string,
+    pfmSubcategory: string,
+    status: AccountTransaction["status"] = "Booked",
+  ) =>
+    makeTransaction(
+      country,
+      currency,
+      accountIndex,
+      sequence++,
+      date,
+      label,
+      details,
+      baseEurAmount,
+      category,
+      pfmSubcategory,
+      status,
+    );
+}
+
+function getPrimaryCurrentAccountTransactions(
+  country: Country,
+  currency: Currency,
+  accountIndex: number,
+  profile: CountryTransactionProfile,
+): AccountTransaction[] {
+  const t = createTransactionFactory(country, currency, accountIndex);
+
+  return [
+    t(new Date(2026, 3, 29), profile.salaryPayer, "Salary April", 1250, "Income", "Salary"),
+    t(new Date(2026, 3, 27), profile.home, "Standing order", -320, "Home", "Rent and housing"),
+    t(new Date(2026, 3, 24), profile.groceries, "Card payment", -86.4, "Groceries", "Supermarket"),
+    t(new Date(2026, 3, 22), profile.restaurant, "Card payment", -34.8, "Lifestyle", "Restaurants"),
+    t(new Date(2026, 3, 20), profile.utility, "Account payment", -72.3, "Utilities", "Utility bill"),
+    t(new Date(2026, 3, 18), profile.person, "Incoming transfer", 120, "Transfers", "Incoming transfer"),
+    t(new Date(2026, 3, 16), profile.healthcare, "Card payment", -28.5, "Healthcare", "Medical care"),
+    t(new Date(2026, 3, 14), profile.insurance, "Direct debit", -39.2, "Insurance", "Insurance premium"),
+    t(new Date(2026, 3, 12), profile.education, "Account payment", -58, "Education", "School fee"),
+    t(new Date(2026, 3, 10), profile.childcare, "Account payment", -95, "Children", "Childcare"),
+    t(new Date(2026, 3, 8), profile.fuel, "Card payment", -51.2, "Transportation", "Fuel and transport"),
+    t(new Date(2026, 3, 6), profile.shopping, "Online card payment", -74.5, "Shopping", "Online purchase", "Pending"),
+    t(new Date(2026, 3, 4), profile.subscription, "Card payment", -12.99, "Leisure time", "Subscriptions"),
+    t(new Date(2026, 3, 2), profile.publicInstitution, "Account payment", -210, "Taxes and Penalties", "Taxes and fees"),
+    t(new Date(2026, 3, 30), profile.atm, "Cash withdrawal", -60, "ATM", "Cash withdrawal"),
+    t(new Date(2026, 3, 28), "Cash deposit", "Branch cash deposit", 75, "Cash", "Cash deposit"),
+    t(new Date(2026, 3, 26), profile.wallet, "Mobile wallet top-up", -45, "Wallet", "Wallet top-up"),
+    t(new Date(2026, 3, 23), profile.investments, "Account payment", -150, "Investments", "Broker transfer"),
+    t(new Date(2026, 3, 21), profile.bankFee, "Monthly package fee", -4.5, "Finance", "Bank fees"),
+    t(new Date(2026, 3, 19), profile.fxOffice, "Currency exchange", -8.2, "FX", "Currency exchange"),
+    t(new Date(2026, 3, 17), "Transfer to savings", "Own account transfer", -220, "Internal", "Own account transfer"),
+    t(new Date(2026, 3, 15), profile.charity, "Excluded from budget", -25, "Exclude from budget", "Excluded payment"),
+    t(new Date(2026, 3, 13), profile.uncategorized, "Card payment", -14.6, "Uncategorized", "Needs category"),
+    t(new Date(2025, 11, 18), profile.salaryPayer, "Year-end bonus", 840, "Income", "Salary"),
+    t(new Date(2025, 11, 12), profile.shopping, "Holiday shopping", -190.4, "Shopping", "Retail purchase"),
+    t(new Date(2025, 10, 27), profile.home, "Standing order", -320, "Home", "Rent and housing"),
+    t(new Date(2025, 10, 19), profile.utility, "Account payment", -68.2, "Utilities", "Utility bill"),
+  ];
+}
+
+function getSecondaryCurrentAccountTransactions(
+  country: Country,
+  currency: Currency,
+  accountIndex: number,
+  profile: CountryTransactionProfile,
+): AccountTransaction[] {
+  const t = createTransactionFactory(country, currency, accountIndex);
+
+  return [
+    t(new Date(2026, 3, 28), profile.freelancePayer, "Invoice payment", 640, "Income", "Freelance income"),
+    t(new Date(2026, 3, 26), profile.secondaryPerson, "Shared rent transfer", 160, "Transfers", "Incoming transfer"),
+    t(new Date(2026, 3, 23), profile.publicTransport, "Monthly pass", -27.5, "Transportation", "Public transport"),
+    t(new Date(2026, 3, 21), profile.coffee, "Card payment", -9.8, "Lifestyle", "Coffee shop"),
+    t(new Date(2026, 3, 19), profile.groceries, "Card payment", -48.6, "Groceries", "Supermarket"),
+    t(new Date(2026, 3, 17), profile.utility, "Direct debit", -54.4, "Utilities", "Utility bill"),
+    t(new Date(2026, 3, 15), profile.shopping, "Card payment", -39.9, "Shopping", "Retail purchase"),
+    t(new Date(2026, 3, 13), profile.healthcare, "Card payment", -18.4, "Healthcare", "Pharmacy"),
+    t(new Date(2026, 3, 11), profile.insurance, "Account payment", -22.6, "Insurance", "Policy payment"),
+    t(new Date(2026, 3, 9), profile.publicInstitution, "Account payment", -76, "Taxes and Penalties", "Local tax"),
+    t(new Date(2026, 3, 7), profile.wallet, "Card-linked wallet", -30, "Wallet", "Wallet payment"),
+    t(new Date(2026, 3, 5), profile.investments, "Recurring investment", -80, "Investments", "Investment plan"),
+    t(new Date(2026, 2, 29), profile.childcare, "Account payment", -64, "Children", "Child expenses"),
+    t(new Date(2026, 2, 25), profile.education, "Course fee", -42, "Education", "Courses"),
+    t(new Date(2026, 2, 20), profile.subscription, "Subscription renewal", -14.99, "Leisure time", "Subscriptions"),
+    t(new Date(2026, 2, 16), profile.bankFee, "Card administration fee", -3.5, "Finance", "Bank fees"),
+    t(new Date(2026, 2, 12), profile.fxOffice, "POS currency conversion", -5.8, "FX", "Currency exchange"),
+    t(new Date(2026, 2, 8), "Transfer to Emergency Fund", "Own account transfer", -140, "Internal", "Own account transfer"),
+    t(new Date(2026, 1, 27), profile.atm, "Cash withdrawal", -40, "ATM", "Cash withdrawal"),
+    t(new Date(2026, 1, 20), profile.uncategorized, "Card payment", -11.4, "Uncategorized", "Needs category"),
+    t(new Date(2025, 11, 22), profile.freelancePayer, "Freelance payout", 420, "Income", "Freelance income"),
+    t(new Date(2025, 11, 8), profile.healthcare, "Card payment", -96.5, "Healthcare", "Medical care"),
+    t(new Date(2025, 10, 23), profile.publicTransport, "Transport pass", -48.3, "Transportation", "Public transport"),
+    t(new Date(2025, 10, 11), profile.groceries, "Card payment", -72.8, "Groceries", "Supermarket"),
+  ];
+}
+
+function getSavingsTransferTransactions(country: Country, currency: Currency, accountIndex: number): AccountTransaction[] {
+  const t = createTransactionFactory(country, currency, accountIndex);
+
+  return [
+    t(new Date(2026, 3, 25), "Transfer from Primary Account", "Own account transfer", 300, "Internal", "Savings transfer"),
+    t(new Date(2026, 3, 18), "Transfer to Primary Account", "Own account transfer", -110, "Internal", "Savings transfer"),
+    t(new Date(2026, 3, 11), "Automatic savings transfer", "Own account transfer", 220, "Internal", "Savings transfer"),
+    t(new Date(2026, 3, 4), "Transfer to Term Deposit", "Own account transfer", -150, "Internal", "Term deposit transfer"),
+    t(new Date(2026, 2, 22), "Transfer from Current Account", "Own account transfer", 180, "Internal", "Savings transfer"),
+    t(new Date(2026, 2, 7), "Transfer to Current Account", "Own account transfer", -90, "Internal", "Savings transfer"),
+    t(new Date(2026, 1, 14), "Reserve transfer", "Own account transfer", 75, "Internal", "Savings transfer"),
+    t(new Date(2025, 11, 6), "Year-end savings transfer", "Own account transfer", 140, "Internal", "Savings transfer"),
+  ];
+}
+
+function getCreditProductTransactions(
+  country: Country,
+  currency: Currency,
+  accountIndex: number,
+  profile: CountryTransactionProfile,
+): AccountTransaction[] {
+  const t = createTransactionFactory(country, currency, accountIndex);
+
+  return [
+    t(new Date(2026, 3, 22), "Monthly repayment", "Account payment", -260, "Transfers", "Loan repayment"),
+    t(new Date(2026, 3, 22), "Interest charge", "Loan interest", -42.4, "Finance", "Interest"),
+    t(new Date(2026, 3, 15), profile.insurance, "Loan insurance", -18.5, "Insurance", "Insurance premium"),
+    t(new Date(2026, 2, 22), "Monthly repayment", "Account payment", -260, "Transfers", "Loan repayment"),
+    t(new Date(2026, 2, 22), "Interest charge", "Loan interest", -44.1, "Finance", "Interest"),
+    t(new Date(2026, 1, 22), "Monthly repayment", "Account payment", -260, "Transfers", "Loan repayment"),
+    t(new Date(2025, 11, 22), "Monthly repayment", "Account payment", -260, "Transfers", "Loan repayment"),
+  ];
+}
+
+export function getAccountTransactionProfileIndex(product: Product, productIndex: number) {
+  if (product.type === "current_account") {
+    return productIndex;
+  }
+
+  if (product.type === "saving_account" || product.type === "term_deposit") {
+    return SAVINGS_TRANSFER_PROFILE_INDEX;
+  }
+
+  if (product.type === "loan" || product.type === "mortgage") {
+    return CREDIT_PRODUCT_PROFILE_INDEX;
+  }
+
+  return productIndex;
 }
 
 export function getAccountIdentity(country: Country, index: number): AccountIdentity {
@@ -243,39 +544,19 @@ export function getAccountTransactions(
 ): AccountTransaction[] {
   const profile = COUNTRY_TRANSACTION_PROFILES[country];
 
-  if (accountIndex === 1) {
-    return [
-      makeTransaction(country, currency, accountIndex, 1, new Date(2026, 3, 18), "Interest payment", "Savings interest", 12.6, "Income"),
-      makeTransaction(country, currency, accountIndex, 2, new Date(2026, 3, 11), "Transfer from current", "Monthly savings", 220, "Internal"),
-      makeTransaction(country, currency, accountIndex, 3, new Date(2026, 3, 2), "Round UP", "Card payments saving", 17.35, "Savings"),
-      makeTransaction(country, currency, accountIndex, 4, new Date(2026, 2, 21), "Term deposit", "Principal transfer", -150, "Savings"),
-      makeTransaction(country, currency, accountIndex, 5, new Date(2026, 2, 7), "Transfer from current", "Reserve contribution", 180, "Internal"),
-      makeTransaction(country, currency, accountIndex, 6, new Date(2026, 1, 14), "Emergency fund", "Internal transfer", 90, "Internal"),
-    ];
+  if (accountIndex === SAVINGS_TRANSFER_PROFILE_INDEX) {
+    return getSavingsTransferTransactions(country, currency, accountIndex);
   }
 
-  if (accountIndex === 2) {
-    return [
-      makeTransaction(country, currency, accountIndex, 1, new Date(2026, 3, 24), "Virtual card top-up", "Internet payments reserve", -45, "Card"),
-      makeTransaction(country, currency, accountIndex, 2, new Date(2026, 3, 17), profile.subscription, "Monthly subscription", -11.99, "Leisure time"),
-      makeTransaction(country, currency, accountIndex, 3, new Date(2026, 3, 10), "FX conversion", "Currency exchange", -3.2, "FX"),
-      makeTransaction(country, currency, accountIndex, 4, new Date(2026, 2, 26), profile.shopping, "Online purchase", -74.5, "Shopping", "Pending"),
-      makeTransaction(country, currency, accountIndex, 5, new Date(2026, 2, 11), profile.person, "Shared expenses", 63, "Transfers"),
-      makeTransaction(country, currency, accountIndex, 6, new Date(2026, 1, 25), "ATM withdrawal", "Cash withdrawal", -60, "ATM"),
-    ];
+  if (accountIndex === CREDIT_PRODUCT_PROFILE_INDEX) {
+    return getCreditProductTransactions(country, currency, accountIndex, profile);
   }
 
-  return [
-    makeTransaction(country, currency, accountIndex, 1, new Date(2026, 3, 29), profile.salaryPayer, "Salary April", 1250, "Income"),
-    makeTransaction(country, currency, accountIndex, 2, new Date(2026, 3, 24), profile.groceries, "Groceries", -86.4, "Groceries"),
-    makeTransaction(country, currency, accountIndex, 3, new Date(2026, 3, 22), profile.coffee, "Card payment", -18.75, "Lifestyle"),
-    makeTransaction(country, currency, accountIndex, 4, new Date(2026, 3, 18), profile.person, "Transfer received", 120, "Transfers"),
-    makeTransaction(country, currency, accountIndex, 5, new Date(2026, 3, 12), profile.utility, "Utility bill", -72.3, "Utilities"),
-    makeTransaction(country, currency, accountIndex, 6, new Date(2026, 3, 8), profile.transport, "Fuel and transport", -51.2, "Transportation"),
-    makeTransaction(country, currency, accountIndex, 7, new Date(2026, 2, 29), profile.publicInstitution, "Taxes and fees", -210, "Taxes"),
-    makeTransaction(country, currency, accountIndex, 8, new Date(2026, 2, 15), profile.salaryPayer, "Salary March", 1250, "Income"),
-    makeTransaction(country, currency, accountIndex, 9, new Date(2026, 1, 27), profile.subscription, "Monthly subscription", -12.99, "Leisure time"),
-  ];
+  if (accountIndex % 2 === 1) {
+    return getSecondaryCurrentAccountTransactions(country, currency, accountIndex, profile);
+  }
+
+  return getPrimaryCurrentAccountTransactions(country, currency, accountIndex, profile);
 }
 
 export function groupAccountTransactionsByMonth(

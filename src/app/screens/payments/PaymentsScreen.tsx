@@ -23,12 +23,13 @@ type NavItem = "home" | "analytics" | "payments" | "products" | "more";
 interface PaymentsScreenProps {
   onHomeClick?: () => void;
   onAnalyticsClick?: () => void;
+  onMessagesClick?: () => void;
   onProductsClick?: () => void;
   onMoreClick?: () => void;
   onDomesticPaymentClick?: () => void;
 }
 
-function PaymentsHeader({ title }: { title: string }) {
+function PaymentsHeader({ title, onMessagesClick }: { title: string; onMessagesClick?: () => void }) {
   const handleAction = (action: string) => {
     console.log(`Payments ${action} clicked`);
   };
@@ -46,7 +47,7 @@ function PaymentsHeader({ title }: { title: string }) {
 
           <HeaderActionRail>
             <HeaderActionButton icon="profile" label="Profile" onClick={() => handleAction("profile")} />
-            <HeaderActionButton icon="messages" label="Messages" onClick={() => handleAction("messages")} />
+            <HeaderActionButton icon="messages" label="Messages" onClick={onMessagesClick} />
             <HeaderActionButton icon="help" label="Help" onClick={() => handleAction("help")} />
           </HeaderActionRail>
         </div>
@@ -198,6 +199,7 @@ function NewPaymentSheet({
 export default function PaymentsScreen({
   onHomeClick,
   onAnalyticsClick,
+  onMessagesClick,
   onProductsClick,
   onMoreClick,
   onDomesticPaymentClick,
@@ -231,7 +233,7 @@ export default function PaymentsScreen({
   return (
     <div className="relative flex h-full w-full flex-col bg-[var(--uc-surface)] text-[var(--uc-text)]">
       <div className="h-[54px] flex-shrink-0 bg-[var(--uc-surface)]" />
-      <PaymentsHeader title={menu.title} />
+      <PaymentsHeader title={menu.title} onMessagesClick={onMessagesClick} />
 
       <div className="flex-1 overflow-y-auto scrollbar-hide pb-[76px]">
         <div className="flex flex-col gap-[13px] px-[20px] pt-[8px]">
@@ -248,10 +250,12 @@ export default function PaymentsScreen({
             {menu.otherTitle}
           </h2>
           <div className="mt-[5px] h-px w-full bg-[var(--uc-border)]" />
-          <div className="flex gap-[18px] pt-[8px]">
-            {menu.otherItems.map((item) => (
-              <PaymentOtherShortcut key={item.id} item={item} onClick={handleOtherPaymentActionClick} />
-            ))}
+          <div className="overflow-x-auto overflow-y-hidden scrollbar-hide pt-[8px]">
+            <div className="flex w-max gap-[18px] pr-[20px]">
+              {menu.otherItems.map((item) => (
+                <PaymentOtherShortcut key={item.id} item={item} onClick={handleOtherPaymentActionClick} />
+              ))}
+            </div>
           </div>
         </section>
       </div>

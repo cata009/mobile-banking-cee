@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { DragEvent, MouseEvent, PointerEvent, UIEvent } from "react";
 import BottomNavigation from "@/app/components/BottomNavigation";
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
+import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
 import { useDemo } from "@/app/state/demoStore";
@@ -30,11 +31,12 @@ type OfferCarouselDragState = {
 interface ProductsScreenProps {
   onHomeClick?: () => void;
   onAnalyticsClick?: () => void;
+  onMessagesClick?: () => void;
   onPaymentsClick?: () => void;
   onMoreClick?: () => void;
 }
 
-function ProductsHeader({ title }: { title: string }) {
+function ProductsHeader({ title, onMessagesClick }: { title: string; onMessagesClick?: () => void }) {
   const handleAction = (action: string) => {
     console.log(`Products ${action} clicked`);
   };
@@ -51,7 +53,7 @@ function ProductsHeader({ title }: { title: string }) {
           </h1>
           <HeaderActionRail>
             <HeaderActionButton icon="profile" label="Profile" onClick={() => handleAction("profile")} />
-            <HeaderActionButton icon="messages" label="Messages" onClick={() => handleAction("messages")} />
+            <HeaderActionButton icon="messages" label="Messages" onClick={onMessagesClick} />
             <HeaderActionButton icon="help" label="Help" onClick={() => handleAction("help")} />
           </HeaderActionRail>
         </div>
@@ -101,17 +103,7 @@ function ProductsTabs({
 }
 
 function SectionHeading({ children }: { children: string }) {
-  return (
-    <div className="px-[24px]">
-      <h2
-        className="font-['UniCredit',sans-serif] font-bold uppercase text-[var(--uc-text)]"
-        style={{ fontSize: "21px", lineHeight: "24px" }}
-      >
-        {children}
-      </h2>
-      <div className="mt-[8px] h-px w-full bg-[var(--uc-border)]" />
-    </div>
-  );
+  return <SectionHeadingDivider title={children} className="px-[24px]" />;
 }
 
 function handleOfferClick(offer: ProductsOffer) {
@@ -464,7 +456,7 @@ function ShopSmartContent({
   );
 }
 
-export default function ProductsScreen({ onHomeClick, onAnalyticsClick, onPaymentsClick, onMoreClick }: ProductsScreenProps) {
+export default function ProductsScreen({ onHomeClick, onAnalyticsClick, onMessagesClick, onPaymentsClick, onMoreClick }: ProductsScreenProps) {
   const { country } = useDemo();
   const config = getProductsMenuForCountry(country);
   const [activeTab, setActiveTab] = useState<ProductsMenuTab>("banking");
@@ -481,7 +473,7 @@ export default function ProductsScreen({ onHomeClick, onAnalyticsClick, onPaymen
   return (
     <div className="relative flex h-full w-full flex-col bg-[var(--uc-surface)] text-[var(--uc-text)]">
       <div className="h-[54px] flex-shrink-0 bg-[var(--uc-surface)]" />
-      <ProductsHeader title={config.title} />
+      <ProductsHeader title={config.title} onMessagesClick={onMessagesClick} />
 
       {config.hasShopSmartTab && (
         <ProductsTabs
@@ -492,7 +484,7 @@ export default function ProductsScreen({ onHomeClick, onAnalyticsClick, onPaymen
         />
       )}
 
-      <div className="flex-1 overflow-y-auto scrollbar-hide pb-[92px]">
+      <div className="relative z-0 flex-1 overflow-y-auto scrollbar-hide pb-[92px]">
         {visibleTab === "banking" ? (
           <BankingContent
             offersTitle={config.offersTitle}
@@ -511,7 +503,7 @@ export default function ProductsScreen({ onHomeClick, onAnalyticsClick, onPaymen
         )}
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center border-t border-[var(--uc-border-muted)] bg-[var(--uc-bottom-bar-bg)]">
+      <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center border-t border-[var(--uc-border-muted)] bg-[var(--uc-bottom-bar-bg)]">
         <BottomNavigation activeTab="products" onTabChange={handleTabChange} />
       </div>
     </div>

@@ -11,7 +11,7 @@ import { useDemo } from "@/app/state/demoStore";
 import { getCountryConfig, formatMoneyNumber } from "@/app/registry/countryConfig";
 import { maskAmountParts, maskFormattedAmount } from "@/app/utils/amountPrivacy";
 import { useProducts } from "@/hooks/useProducts";
-import { getAccountTransactions, groupAccountTransactionsByMonth } from "@/data/accountDetails";
+import { getAccountTransactionProfileIndex, getAccountTransactions, groupAccountTransactionsByMonth } from "@/data/accountDetails";
 import type { AccountTransaction } from "@/data/accountDetails";
 import { isAccountDetailProduct } from "@/data/products";
 import type { Product } from "@/data/products";
@@ -25,9 +25,14 @@ interface AccountDetailScreenProps {
 }
 
 const ACCOUNT_CARD_WIDTH = 311;
+const ACCOUNT_CARD_HEIGHT = 197;
 const ACCOUNT_CARD_GAP = 16;
 const ACCOUNT_CARD_STEP = ACCOUNT_CARD_WIDTH + ACCOUNT_CARD_GAP;
 const ACCOUNT_CAROUSEL_EDGE_GUTTER = 16;
+const ACCOUNT_CARD_INACTIVE_VERTICAL_INSET = 16;
+const ACCOUNT_CARD_INACTIVE_SCALE_Y = (
+  ACCOUNT_CARD_HEIGHT - ACCOUNT_CARD_INACTIVE_VERTICAL_INSET * 2
+) / ACCOUNT_CARD_HEIGHT;
 const ACCOUNT_DETAIL_HEADER_HEIGHT = 102;
 
 type CarouselDragState = {
@@ -52,18 +57,6 @@ function getProductAccountIdentity(product: Product) {
     accountNumber: product.accountNumber,
     subAccount: "",
   };
-}
-
-function getTransactionProfileIndex(product: Product, productIndex: number) {
-  if (product.type === "saving_account" || product.type === "term_deposit") {
-    return 1;
-  }
-
-  if (product.type === "loan" || product.type === "mortgage") {
-    return 2;
-  }
-
-  return productIndex;
 }
 
 function CollapsingAccountHeader({
@@ -136,14 +129,14 @@ export default function AccountDetailScreen({
   const [isCarouselDragging, setIsCarouselDragging] = useState(false);
   const activeProduct = accountProducts[activeIndex] ?? accountProducts[0];
   const config = getCountryConfig(country);
-  const transactionProfileIndex = activeProduct ? getTransactionProfileIndex(activeProduct, activeIndex) : 0;
+  const transactionProfileIndex = activeProduct ? getAccountTransactionProfileIndex(activeProduct, activeIndex) : 0;
   const transactions = useMemo(
     () => getAccountTransactions(
       country,
       transactionProfileIndex,
-      activeProduct?.currency ?? config.currency,
+      config.currency,
     ),
-    [activeProduct?.currency, config.currency, country, transactionProfileIndex],
+    [config.currency, country, transactionProfileIndex],
   );
   const normalizedTransactionSearch = transactionSearch.trim().toLowerCase();
   const filteredTransactions = useMemo(() => {
@@ -453,7 +446,7 @@ export default function AccountDetailScreen({
           onPointerCancel={handleCarouselPointerCancel}
           onMouseDown={handleCarouselMouseDown}
           onClickCapture={handleCarouselClickCapture}
-          className={`overflow-x-auto overflow-y-visible pt-[16px] pb-[18px] scrollbar-hide select-none ${
+          className={`overflow-x-auto overflow-y-visible pt-[16px] pb-[34px] scrollbar-hide select-none ${
             isCarouselDragging ? "cursor-grabbing" : "cursor-grab"
           }`}
           style={{
@@ -474,11 +467,12 @@ export default function AccountDetailScreen({
                 { ...availableParts, currency: config.currency },
                 amountsHidden,
               );
+              const isActiveCard = index === activeIndex;
 
               return (
                 <div
                   key={product.id}
-                  className="cursor-pointer"
+                  className="flex w-[311px] shrink-0 cursor-pointer items-center justify-center"
                   role="button"
                   tabIndex={0}
                   onClick={() => scrollToAccount(index)}
@@ -490,15 +484,31 @@ export default function AccountDetailScreen({
                   onPointerDown={handleCarouselPointerDown}
                   onPointerMove={handleCarouselPointerMove}
                   onPointerUp={handleCarouselPointerUp}
+                  aria-pressed={isActiveCard}
+                  data-account-carousel-card-state={isActiveCard ? "active" : "inactive"}
+                  data-account-carousel-visual-height={
+                    isActiveCard
+                      ? ACCOUNT_CARD_HEIGHT
+                      : ACCOUNT_CARD_HEIGHT - ACCOUNT_CARD_INACTIVE_VERTICAL_INSET * 2
+                  }
+                  style={{ height: ACCOUNT_CARD_HEIGHT }}
                 >
-                  <div className="pointer-events-none">
+                  <div
+                    className="pointer-events-none w-[311px] transition-[transform,opacity,filter] duration-300 ease-out will-change-transform"
+                    style={{
+                      filter: isActiveCard ? "none" : "saturate(0.96) brightness(0.99)",
+                      opacity: isActiveCard ? 1 : 0.86,
+                      transform: isActiveCard ? "scaleY(1)" : `scaleY(${ACCOUNT_CARD_INACTIVE_SCALE_Y})`,
+                      transformOrigin: "center",
+                    }}
+                  >
                     <AccountBalanceCard
                       account={getProductAccountIdentity(product)}
                       availableInteger={displayedAvailable.integer}
                       availableDecimals={displayedAvailable.decimals}
                       currency={displayedAvailable.currency}
                       currentBalance={maskFormattedAmount(formatMoneyNumber(product.balance * 0.92, country), amountsHidden)}
-                      active={index === activeIndex}
+                      active={isActiveCard}
                       showSubAccount={false}
                     />
                   </div>
@@ -509,11 +519,13 @@ export default function AccountDetailScreen({
           </div>
         </div>
 
-        <AccountCarouselIndicator
-          count={accountProducts.length}
-          activeIndex={activeIndex}
-          onSelect={scrollToAccount}
-        />
+        <div className="-mt-[16px]">
+          <AccountCarouselIndicator
+            count={accountProducts.length}
+            activeIndex={activeIndex}
+            onSelect={scrollToAccount}
+          />
+        </div>
 
         <AccountActionBar onDetailsClick={() => onDetailsClick(activeProduct)} onOptionsClick={onOptionsClick} />
       </div>
@@ -535,14 +547,14 @@ export default function AccountDetailScreen({
         <div className="pt-[24px]">
           {transactionGroups.length > 0 ? (
             transactionGroups.map((group, index) => (
-              <div key={group.monthTitle} className={index > 0 ? "pt-[32px]" : undefined}>
+              <div key={group.monthTitle} className={index > 0 ? "pt-[16px]" : undefined}>
                 <AccountTransactionMonthDivider
                   title={group.monthTitle}
                   total={formatMoneyNumber(group.monthlyTotal, country)}
                   currency={config.currency}
                 />
 
-                <div className="pt-[8px]">
+                <div className="pt-[16px]">
                   {group.transactions.map((transaction) => (
                     <AccountTransactionRow
                       key={transaction.id}

@@ -8,6 +8,7 @@ import PreLoginScreen from "@/app/components/PreLoginScreen";
 import PreLoginActiveScreen from "@/app/components/PreLoginActiveScreen";
 import HomeScreen from "@/app/screens/home/HomeScreen";
 import AnalyticsScreen from "@/app/screens/analytics/AnalyticsScreen";
+import MessagesScreen from "@/app/screens/messages/MessagesScreen";
 import LanguageSelector from "@/app/components/LanguageSelector";
 import MobileFrame from "@/app/components/MobileFrame";
 import { isCoAppingAvailable } from "@/app/utils/coAppingAvailability";
@@ -24,8 +25,11 @@ import PrimeScreen from "@/app/screens/prime/PrimeScreen";
 
 // More component - available for all countries
 import MoreScreen from "@/app/screens/more/MoreScreen";
+import DocumentsScreen from "@/app/screens/documents/DocumentsScreen";
 import PaymentsScreen from "@/app/screens/payments/PaymentsScreen";
 import ProductsScreen from "@/app/screens/products/ProductsScreen";
+import SettingsScreen from "@/app/screens/settings/SettingsScreen";
+import RoKidsApp from "@/app/screens/kids/RoKidsApp";
 
 // Contacts component - available for all countries
 import ContactsScreen from "@/app/screens/contacts/ContactsScreen";
@@ -99,7 +103,9 @@ function AppContent() {
   const { product, country, scenario, designSystem, themeMode } = useDemo();
   const { categories } = useProducts();
   const coAppingAvailable = isCoAppingAvailable(country);
-  const isSupportedRuntimeContext = product === "PI" && designSystem === "current";
+  const isPiRuntimeContext = product === "PI" && designSystem === "current";
+  const isRoKidsRuntimeContext = product === "KIDS_PI" && country === "RO" && designSystem === "current";
+  const isSupportedRuntimeContext = isPiRuntimeContext || isRoKidsRuntimeContext;
   
   const [showTerminatePopup, setShowTerminatePopup] = useState(false);
   const [showPanel, setShowPanel] = useState(false);
@@ -121,6 +127,10 @@ function AppContent() {
   
   // Determină varianta status bar-ului bazat pe ecranul curent
   const getStatusBarVariant = (): 'light' | 'dark' => {
+    if (isRoKidsRuntimeContext) {
+      return "light";
+    }
+
     if (
       themeMode === "dark" &&
       currentScreen !== "prelogin-inactive" &&
@@ -142,6 +152,7 @@ function AppContent() {
       case 'homepage':
         return 'light'; // fundal gri deschis (var(--uc-app-bg)) - text și iconițe trebuie negre
       case 'analytics':
+      case 'messages':
         return 'light';
       case 'payments':
       case 'domestic-payment':
@@ -154,6 +165,8 @@ function AppContent() {
       case 'prime':
         return 'dark'; // fundal gradient întunecat - text și iconițe albe
       case 'more':
+      case 'documents':
+      case 'settings':
         return 'light'; // fundal alb - text și iconițe negre
       case 'contacts':
         return 'light'; // fundal alb - text și iconițe negre
@@ -284,6 +297,11 @@ function AppContent() {
     navigateTo("analytics");
   };
 
+  const handleMessagesClick = () => {
+    console.log("Messages clicked - navigating to Messages screen");
+    navigateTo("messages");
+  };
+
   const handleProductsClick = () => {
     console.log("Products clicked - navigating to Products screen");
     navigateTo("products");
@@ -359,6 +377,10 @@ function AppContent() {
       >
         {isSupportedRuntimeContext ? (
         <>
+        {isRoKidsRuntimeContext ? (
+          <RoKidsApp />
+        ) : (
+        <>
         {/* ========== PRE-LOGIN SCREENS ========== */}
         {/* Show INACTIVE PreLogin when scenario is "inactive" */}
         {currentScreen === "prelogin-inactive" && scenario === "inactive" && (
@@ -396,6 +418,7 @@ function AppContent() {
           <HomeScreen
             onPrimeClick={handlePrimeClick}
             onAnalyticsClick={handleAnalyticsClick}
+            onMessagesClick={handleMessagesClick}
             onPaymentsClick={handlePaymentsClick}
             onProductsClick={handleProductsClick}
             onMoreClick={handleMoreClick}
@@ -406,10 +429,15 @@ function AppContent() {
         {currentScreen === "analytics" && (
           <AnalyticsScreen
             onHomeClick={() => navigateTo("homepage")}
+            onMessagesClick={handleMessagesClick}
             onPaymentsClick={handlePaymentsClick}
             onProductsClick={handleProductsClick}
             onMoreClick={handleMoreClick}
           />
+        )}
+
+        {currentScreen === "messages" && (
+          <MessagesScreen onBack={goBack} />
         )}
 
         {currentScreen === "account-detail" && (
@@ -454,17 +482,29 @@ function AppContent() {
             onBack={handleMoreBack} 
             onHomeClick={() => navigateTo('homepage')}
             onAnalyticsClick={handleAnalyticsClick}
+            onMessagesClick={handleMessagesClick}
             onPaymentsClick={handlePaymentsClick}
             onProductsClick={handleProductsClick}
             onContactsClick={() => navigateTo('contacts')}
+            onDocumentsClick={() => navigateTo('documents')}
+            onSettingsClick={() => navigateTo('settings')}
             onLogoutConfirm={handleLogoutConfirm}
           />
+        )}
+
+        {currentScreen === "documents" && (
+          <DocumentsScreen onBack={goBack} />
+        )}
+
+        {currentScreen === "settings" && (
+          <SettingsScreen onBack={goBack} />
         )}
 
         {currentScreen === "payments" && (
           <PaymentsScreen
             onHomeClick={() => navigateTo("homepage")}
             onAnalyticsClick={handleAnalyticsClick}
+            onMessagesClick={handleMessagesClick}
             onProductsClick={handleProductsClick}
             onMoreClick={handleMoreClick}
             onDomesticPaymentClick={handleDomesticPaymentClick}
@@ -502,6 +542,7 @@ function AppContent() {
           <ProductsScreen
             onHomeClick={() => navigateTo("homepage")}
             onAnalyticsClick={handleAnalyticsClick}
+            onMessagesClick={handleMessagesClick}
             onPaymentsClick={handlePaymentsClick}
             onMoreClick={handleMoreClick}
           />
@@ -548,6 +589,8 @@ function AppContent() {
             onComplete={handleAnimationComplete}
             onAnimationStart={handleAnimationStart}
           />
+        )}
+        </>
         )}
         </>
         ) : (
