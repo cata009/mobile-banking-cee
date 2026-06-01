@@ -11,7 +11,7 @@ import { RELEASE_BUNDLES } from "./releaseRegistry";
 import { SCREEN_REGISTRY } from "./screenRegistry";
 import { TEMPLATE_REGISTRY } from "./templateRegistry";
 
-export const AI_CATALOG_VERSION = "2026-06-01.templates-30-reconstructed";
+export const AI_CATALOG_VERSION = "2026-06-01.templates-50-icons-clean";
 
 export const AI_CATALOG = {
   version: AI_CATALOG_VERSION,

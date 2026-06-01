@@ -25,7 +25,7 @@ Current runtime supports:
 - Payments `OTHER` shortcuts now render as a horizontally scrollable shortcut rail, with each shortcut label constrained to a maximum of 2 text rows.
 - Products offer banners now render through a chevron-based reusable card layout with a fixed right image column and clamped title/subtitle copy.
 - The Products offer-banner component now supports dropdown-selectable color families with `normal` and `light` tone variants in the Design System inventory.
-- Design System Inventory with `Components`, `Templates`, `Icons`, and `Colors` tabs; `Templates` currently covers all 30 files in `screenshots/` as selectable templates, reconstructs all 30 templates as real JSX code previews with PNG/JPG source comparison, `Icons` maps reusable app icons, and `Colors` maps `screenshots/Colors.svg` into palette swatches, copyable hex values, Light/Dark variants, and app color audit entries.
+- Design System Inventory with `Components`, `Templates`, `Icons`, and `Colors` tabs; `Templates` currently covers all 30 files in `screenshots/` as selectable screenshot-backed templates, adds 20 code-only templates derived from active runtime patterns, and renders all 50 as real JSX code previews with PNG/JPG source comparison only where a source asset exists. `Icons` maps reusable app icons, has removed lucide wrappers that already had custom SVG equivalents, centralizes remaining lucide-alone glyphs behind `AppIcon`, and records raw-SVG audit boundaries. `Colors` maps `screenshots/Colors.svg` into palette swatches, copyable hex values, Light/Dark variants, and app color audit entries.
 - The Design System color inventory now also catalogs the active PFM semantic category colors used by Spending and Account Detail, not just the original screenshot-extracted core palette.
 - in-app hide/show amount privacy for account/card/product balances, with transactions intentionally left visible.
 - Account Detail transaction search for the current account/product mock transaction profile, including clear reset and activation scroll behavior; current accounts now use country-specific merchant/counterparty transaction profiles across all 23 PFM categories, while saving accounts and term deposits intentionally show only own-account transfer in/out activity.
@@ -45,7 +45,7 @@ It is not yet:
 - a backend-integrated banking application;
 - a real payment-execution, ledger, or transaction-posting application;
 - a persistent audit/release management system;
-- a fully enriched AI training catalog with automated semantic validation, though the current `screenshots/` folder is covered by a structured template registry and all 30 screenshot templates now have reusable code previews.
+- a fully enriched AI training catalog with automated semantic validation, though the current `screenshots/` folder is covered by a structured template registry, all 30 screenshot templates have reusable code previews, and 20 additional active-pattern templates are now code-only entries.
 
 ## Current Architectural Direction
 
@@ -65,5 +65,5 @@ The architecture must support:
 - structured AI catalog export;
 - AI-assisted flow construction from known screens and components;
 - progressive conversion of screenshot templates into reusable code-backed screen primitives;
-- centralized icon and color registries that let AI reuse known DS assets instead of inventing local variants;
+- centralized icon and color registries that let AI reuse known DS assets instead of inventing local variants; active product screens should not import `lucide-react` directly outside the `AppIcon` boundary;
 - eventual integration into a larger project platform.

@@ -990,12 +990,14 @@ function TemplateInventory() {
   const selectedTemplate =
     TEMPLATE_REGISTRY.find((template) => template.id === selectedTemplateId) ?? TEMPLATE_REGISTRY[0];
   const reconstructedTemplates = TEMPLATE_REGISTRY.filter((template) => template.codePreviewId);
+  const screenshotBackedTemplates = TEMPLATE_REGISTRY.filter((template) => template.imageSrc);
+  const codeOnlyTemplates = TEMPLATE_REGISTRY.filter((template) => template.codePreviewId && !template.imageSrc);
 
   return (
     <Section
       id="templates"
       title="Templates"
-      description="Screenshoturile existente in proiect, transformate in template-uri selectabile pentru comparatie, reuse si mapare catre componentele deja catalogate."
+      description="Screenshoturile existente si template-urile code-only derivate din ecranele active, transformate in template-uri selectabile pentru comparatie, reuse si mapare catre componentele deja catalogate."
     >
       <div className="mb-5 grid gap-3 md:grid-cols-4">
         <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
@@ -1007,18 +1009,18 @@ function TemplateInventory() {
           <p className="mt-2 font-['UniCredit:Bold',sans-serif] text-[34px]">{reconstructedTemplates.length}</p>
         </div>
         <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
-          <p className="text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Source</p>
-          <p className="mt-2 font-['UniCredit:Bold',sans-serif] text-[22px]">screenshots/</p>
+          <p className="text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Screenshot sources</p>
+          <p className="mt-2 font-['UniCredit:Bold',sans-serif] text-[34px]">{screenshotBackedTemplates.length}</p>
         </div>
         <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
-          <p className="text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Selected</p>
-          <p className="mt-2 truncate font-['UniCredit:Bold',sans-serif] text-[22px]">{selectedTemplate?.name}</p>
+          <p className="text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Code-only</p>
+          <p className="mt-2 font-['UniCredit:Bold',sans-serif] text-[34px]">{codeOnlyTemplates.length}</p>
         </div>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_460px]">
         <div className="max-h-[calc(100vh-260px)] min-h-[420px] overflow-y-auto pr-1">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
             {TEMPLATE_REGISTRY.map((template) => (
               <TemplateCard
                 key={template.id}
@@ -1038,6 +1040,14 @@ function TemplateInventory() {
 
 function TemplateCodeThumbnail({ template }: { template: TemplateRegistryItem }) {
   if (!template.codePreviewId) {
+    if (!template.imageSrc) {
+      return (
+        <span className="flex h-full w-full items-center justify-center bg-[var(--uc-surface-muted)] px-3 text-center font-['UniCredit:Bold',sans-serif] text-[12px] uppercase text-[var(--uc-text-muted)]">
+          Code-only
+        </span>
+      );
+    }
+
     return (
       <img
         src={template.imageSrc}
@@ -1087,16 +1097,16 @@ function TemplateCard({ template, selected, onSelect }: {
       data-template-card="true"
       data-template-code={template.codePreviewId ? "true" : "false"}
       data-template-id={template.id}
-      className={`group flex h-[190px] min-w-0 flex-col overflow-hidden rounded-[8px] border bg-[var(--uc-surface)] text-left transition ${
+      className={`group flex h-[168px] min-w-0 flex-col overflow-hidden rounded-[8px] border bg-[var(--uc-surface)] text-left transition ${
         selected ? "border-[var(--uc-action)] ring-2 ring-[var(--uc-action)]/25" : "border-[var(--uc-border)] hover:border-[var(--uc-action-soft-strong)]"
       }`}
     >
-      <span className="block h-[122px] w-full overflow-hidden bg-[var(--uc-neutral-200)]">
+      <span className="block h-[104px] w-full overflow-hidden bg-[var(--uc-neutral-200)]">
         <TemplateCodeThumbnail template={template} />
       </span>
-      <span className="flex min-h-0 flex-1 flex-col justify-between gap-2 p-3">
+      <span className="flex min-h-0 flex-1 flex-col justify-between gap-1.5 p-2.5">
         <span className="flex min-w-0 items-center justify-between gap-2">
-          <span className="truncate font-['UniCredit:Bold',sans-serif] text-[15px] text-[var(--uc-text)]">{template.name}</span>
+          <span className="truncate font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text)]">{template.name}</span>
           {template.codePreviewId ? (
             <span className="shrink-0 rounded-full bg-[var(--uc-action-soft)] px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--uc-action)]">
               code
@@ -1114,12 +1124,17 @@ function TemplateCard({ template, selected, onSelect }: {
 
 function TemplatePreview({ template }: { template: TemplateRegistryItem }) {
   const [previewMode, setPreviewMode] = useState<"code" | "source">(template.codePreviewId ? "code" : "source");
+  const hasSourceImage = Boolean(template.imageSrc);
 
   useEffect(() => {
     setPreviewMode(template.codePreviewId ? "code" : "source");
-  }, [template.codePreviewId, template.id]);
+  }, [template.codePreviewId, template.id, hasSourceImage]);
 
-  const resolvedPreviewMode = template.codePreviewId ? previewMode : "source";
+  const resolvedPreviewMode = template.codePreviewId
+    ? previewMode === "source" && hasSourceImage
+      ? "source"
+      : "code"
+    : "source";
 
   return (
     <aside className="sticky top-[92px] h-fit overflow-hidden rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)]">
@@ -1127,7 +1142,7 @@ function TemplatePreview({ template }: { template: TemplateRegistryItem }) {
         <p className="text-[12px] uppercase tracking-[0.08em] text-[var(--uc-brand)]">Selected template</p>
         <h3 className="mt-2 font-['UniCredit:Bold',sans-serif] text-[24px] leading-tight text-[var(--uc-text)]">{template.name}</h3>
         <p className="mt-2 break-all text-[13px] text-[var(--uc-text-muted)]">{template.sourcePath}</p>
-        {template.codePreviewId ? (
+        {template.codePreviewId && hasSourceImage ? (
           <div className="mt-4 grid grid-cols-2 rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-1">
             {(["code", "source"] as const).map((mode) => (
               <button
@@ -1144,6 +1159,10 @@ function TemplatePreview({ template }: { template: TemplateRegistryItem }) {
               </button>
             ))}
           </div>
+        ) : template.codePreviewId ? (
+          <div className="mt-4 rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] px-3 py-2 font-['UniCredit:Bold',sans-serif] text-[13px] text-[var(--uc-text-muted)]">
+            Code-only template
+          </div>
         ) : null}
       </div>
 
@@ -1152,12 +1171,16 @@ function TemplatePreview({ template }: { template: TemplateRegistryItem }) {
           <div className="flex min-w-[377px] justify-center" data-template-selected-code-preview="true">
             <TemplateCodePreview previewId={template.codePreviewId} />
           </div>
-        ) : (
+        ) : hasSourceImage && template.imageSrc ? (
           <img
             src={template.imageSrc}
             alt={`${template.name} selected template screenshot`}
             className="mx-auto w-full max-w-[375px] rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] object-contain object-top"
           />
+        ) : (
+          <div className="flex min-h-[360px] items-center justify-center rounded-[6px] border border-dashed border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-6 text-center font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text-muted)]">
+            No screenshot source for this code-only template.
+          </div>
         )}
       </div>
 

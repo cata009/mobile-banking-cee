@@ -15,7 +15,7 @@ export default function QuickActions({ showPaymentsHub = false, showRedesign = f
   
   const transferAction = { id: "transfer", label: t('home.quickActions.transfer'), icon: "send" as IconName };
   const cardsAction = { id: "cards", label: t('home.quickActions.cards'), icon: "credit-card" as IconName };
-  const moreAction = { id: "more", label: t('home.quickActions.more'), icon: "plus-circle" as IconName };
+  const moreAction = { id: "more", label: t('home.quickActions.more'), icon: "add-money" as IconName };
   const baseActions = [transferAction, cardsAction, moreAction];
 
   // Add Payments Hub action if feature is enabled

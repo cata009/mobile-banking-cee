@@ -1,36 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
-import {
-  ArrowLeft,
-  Bell,
-  Bike,
-  BookOpen,
-  CalendarDays,
-  Check,
-  ChevronRight,
-  CircleDollarSign,
-  ClipboardCheck,
-  CreditCard,
-  Eye,
-  EyeOff,
-  Gift,
-  Home,
-  Lock,
-  Palette,
-  PiggyBank,
-  Plus,
-  QrCode,
-  ReceiptText,
-  Send,
-  ShieldCheck,
-  ShoppingBag,
-  SlidersHorizontal,
-  Trophy,
-  UserRound,
-  Users,
-  WalletCards,
-  X,
-  type LucideIcon,
-} from "lucide-react";
+import { AppIcon, type IconName } from "@/app/components/icons";
 import {
   RO_KIDS_ALLOWANCE,
   RO_KIDS_APPROVALS,
@@ -106,27 +75,27 @@ const ONBOARDING_SLIDES = [
   {
     title: "This is your money space",
     body: "See your balance, card and latest activity in one place.",
-    icon: WalletCards,
+    icon: "wallet-cards",
   },
   {
     title: "Ask safely",
     body: "Ask your parent for money when you need it and follow the status.",
-    icon: CircleDollarSign,
+    icon: "circle-dollar-sign",
   },
   {
     title: "Save for what matters",
     body: "Create goals and watch each step move you closer.",
-    icon: PiggyBank,
+    icon: "piggy-bank",
   },
   {
     title: "Your parent helps keep things safe",
     body: "Some actions may need approval, especially bigger transfers.",
-    icon: ShieldCheck,
+    icon: "shield-check",
   },
   {
     title: "You always know what is shared",
     body: "We are clear about what your parent can and cannot see.",
-    icon: Eye,
+    icon: "eye",
   },
 ] as const;
 
@@ -931,7 +900,7 @@ function KidsHomeScreen({
                 className="grid size-[32px] place-items-center rounded-[4px] bg-[rgb(var(--uc-shadow-rgb)_/_0.18)]"
                 onClick={() => setBalanceVisible((visible) => !visible)}
               >
-                {balanceVisible ? <Eye size={20} /> : <EyeOff size={20} />}
+                <AppIcon name={balanceVisible ? "eye" : "eye-off"} size={20} color="currentColor" />
               </button>
             </div>
             <p className="mt-[8px] text-[34px] font-bold leading-[38px]">
@@ -950,7 +919,7 @@ function KidsHomeScreen({
         {pendingRequest ? (
           <InfoBanner
             className="mt-[14px]"
-            icon={Bell}
+            icon="account-option-push-notifications"
             title="Waiting for Mom's approval"
             description={`${formatRon(pendingRequest.amount)} for ${pendingRequest.reason}`}
             actionLabel="Open"
@@ -959,10 +928,10 @@ function KidsHomeScreen({
         ) : null}
 
         <div className="mt-[18px] grid grid-cols-4 gap-[8px]">
-          <KidsActionTile icon={CircleDollarSign} label="Ask" onClick={() => onNavigate("request-money")} />
-          <KidsActionTile icon={CreditCard} label="My card" onClick={() => onNavigate("card")} />
-          <KidsActionTile icon={PiggyBank} label="Save" onClick={() => onNavigate("goals")} />
-          <KidsActionTile icon={Send} label="Send" onClick={() => onNavigate("send-money")} />
+          <KidsActionTile icon="circle-dollar-sign" label="Ask" onClick={() => onNavigate("request-money")} />
+          <KidsActionTile icon="credit-card" label="My card" onClick={() => onNavigate("card")} />
+          <KidsActionTile icon="piggy-bank" label="Save" onClick={() => onNavigate("goals")} />
+          <KidsActionTile icon="send" label="Send" onClick={() => onNavigate("send-money")} />
         </div>
 
         {goal ? (
@@ -980,7 +949,7 @@ function KidsHomeScreen({
               <SurfaceCard className="p-[16px]">
                 <div className="flex items-center justify-between gap-[12px]">
                   <div className="flex items-center gap-[12px]">
-                    <IconBubble icon={Bike} tone="teal" />
+                    <IconBubble icon="bike" tone="teal" />
                     <div>
                       <h3 className="text-[18px] font-bold leading-[22px] text-[var(--uc-text)]">
                         {goal.title}
@@ -990,7 +959,7 @@ function KidsHomeScreen({
                       </p>
                     </div>
                   </div>
-                  <ChevronRight size={22} color="var(--uc-icon-muted)" />
+                  <AppIcon name="chevron-forward-heavy" size={22} color="var(--uc-icon-muted)" />
                 </div>
                 <ProgressBar className="mt-[14px]" value={goalProgress(goal)} />
               </SurfaceCard>
@@ -1008,7 +977,7 @@ function KidsHomeScreen({
 
         <SurfaceCard className="mt-[22px] p-[16px]">
           <div className="flex items-start gap-[12px]">
-            <IconBubble icon={Trophy} tone="yellow" />
+            <IconBubble icon="trophy" tone="yellow" />
             <div className="min-w-0 flex-1">
               <h3 className="text-[18px] font-bold leading-[22px] text-[var(--uc-text)]">
                 You are getting closer to your goal!
@@ -1034,7 +1003,7 @@ function KidsHomeScreen({
             {chores.slice(0, 2).map((chore) => (
               <SimpleRow
                 key={chore.id}
-                icon={ClipboardCheck}
+                icon="clipboard-check"
                 title={chore.title}
                 subtitle={`${formatRon(chore.rewardAmount)} reward`}
                 trailing={<StatusPill label={choreStatusLabel(chore.status)} tone={chore.status === "todo" ? "neutral" : "teal"} />}
@@ -1050,7 +1019,7 @@ function KidsHomeScreen({
         >
           <SurfaceCard className="p-[16px] text-left">
             <div className="flex items-center gap-[12px]">
-              <IconBubble icon={ShieldCheck} tone="red" />
+              <IconBubble icon="shield-check" tone="red" />
               <div className="min-w-0 flex-1">
                 <h3 className="text-[17px] font-bold leading-[21px] text-[var(--uc-text)]">
                   What my parent can see
@@ -1059,7 +1028,7 @@ function KidsHomeScreen({
                   Clear sharing, no surprises.
                 </p>
               </div>
-              <ChevronRight size={22} color="var(--uc-icon-muted)" />
+              <AppIcon name="chevron-forward-heavy" size={22} color="var(--uc-icon-muted)" />
             </div>
           </SurfaceCard>
         </button>
@@ -1119,7 +1088,7 @@ function RequestMoneyScreen({
           <div className="mt-[18px]">
             <FormLabel>Send to</FormLabel>
             <SimpleRow
-              icon={UserRound}
+              icon="user-round"
               title={RO_KIDS_PARENT.name}
               subtitle={RO_KIDS_PARENT.phone}
               trailing={<StatusPill label="Parent" tone="red" />}
@@ -1180,7 +1149,7 @@ function SendMoneyScreen({
       <FlowHeader title="Send money" onBack={onBack} />
       <div className="px-[24px] pb-[22px]">
         <InfoBanner
-          icon={ShieldCheck}
+          icon="shield-check"
           title={needsApproval ? "This transfer needs approval" : "Ready to send"}
           description={
             needsApproval
@@ -1264,25 +1233,25 @@ function CardScreen({
         </SurfaceCard>
         <div className="mt-[14px] flex flex-col gap-[8px]">
           <LargeActionRow
-            icon={Lock}
+            icon="lock"
             title={cardSettings.isFrozen ? "Unfreeze card" : "Freeze card"}
             subtitle="Card controls are mocked in this prototype"
             onClick={onToggleFrozen}
           />
           <LargeActionRow
-            icon={Palette}
+            icon="palette"
             title="Customize card"
             subtitle="Choose theme, pattern and name"
             onClick={() => onNavigate("customize-card")}
           />
           <LargeActionRow
-            icon={SlidersHorizontal}
+            icon="sliders-horizontal"
             title="View limits"
             subtitle={`Approval above ${formatRon(controls.approvalThreshold)}`}
             onClick={() => onNavigate("parent-controls")}
           />
           <LargeActionRow
-            icon={WalletCards}
+            icon="wallet-cards"
             title="Wallet status"
             subtitle={cardSettings.walletEnabled ? "Wallet ready" : "Wallet unavailable"}
             onClick={() => undefined}
@@ -1290,7 +1259,7 @@ function CardScreen({
         </div>
         <InfoBanner
           className="mt-[16px]"
-          icon={ShieldCheck}
+          icon="shield-check"
           title="Wallet availability"
           description="Wallet availability depends on local rules for minors."
         />
@@ -1436,7 +1405,7 @@ function GoalDetailScreen({
       <div className="px-[24px] pb-[22px]">
         <SurfaceCard className="p-[18px]">
           <div className="flex items-center gap-[14px]">
-            <IconBubble icon={PiggyBank} tone="teal" size="large" />
+            <IconBubble icon="piggy-bank" tone="teal" size="large" />
             <div>
               <p className="text-[14px] leading-[18px] text-[var(--uc-text-muted)]">Saved so far</p>
               <h2 className="text-[30px] font-bold leading-[34px] text-[var(--uc-text)]">{formatRon(goal.savedAmount)}</h2>
@@ -1451,13 +1420,13 @@ function GoalDetailScreen({
         </div>
         <InfoBanner
           className="mt-[16px]"
-          icon={Gift}
+          icon="gift"
           title="Wish list sharing"
           description="Coming in a future release"
         />
         <SectionBlock className="mt-[22px]" title="Contributors">
           <div className="flex flex-col gap-[8px]">
-            <SimpleRow icon={Users} title="Mom" subtitle="Helped last week" trailing={<span className="font-bold text-[var(--uc-text)]">+20 RON</span>} />
+            <SimpleRow icon="users" title="Mom" subtitle="Helped last week" trailing={<span className="font-bold text-[var(--uc-text)]">+20 RON</span>} />
             {transactions.slice(0, 1).map((transaction) => (
               <TransactionRow key={transaction.id} transaction={transaction} />
             ))}
@@ -1513,7 +1482,7 @@ function AllowanceScreen({
       <div className="px-[24px] pb-[22px]">
         <SurfaceCard className="p-[18px]">
           <div className="flex items-center justify-between">
-            <IconBubble icon={CalendarDays} tone="teal" size="large" />
+            <IconBubble icon="calendar-days" tone="teal" size="large" />
             <StatusPill label={allowance.isActive ? "Active" : "Paused"} tone={allowance.isActive ? "teal" : "neutral"} />
           </div>
           <h2 className="mt-[16px] text-[28px] font-bold leading-[32px] text-[var(--uc-text)]">
@@ -1561,7 +1530,7 @@ function ActivityScreen({
             {moneyRequests.slice(0, 3).map((request) => (
               <SimpleRow
                 key={request.id}
-                icon={CircleDollarSign}
+                icon="circle-dollar-sign"
                 title={`${formatRon(request.amount)} for ${request.reason}`}
                 subtitle={request.note ?? "No note"}
                 trailing={<StatusPill label={statusLabel(request.status)} tone={statusTone(request.status)} />}
@@ -1574,7 +1543,7 @@ function ActivityScreen({
             {sendRequests.slice(0, 2).map((request) => (
               <SimpleRow
                 key={request.id}
-                icon={Send}
+                icon="send"
                 title={`${formatRon(request.amount)} to ${request.contactName}`}
                 subtitle={request.note ?? "No note"}
                 trailing={<StatusPill label={statusLabel(request.status)} tone={statusTone(request.status)} />}
@@ -1610,7 +1579,7 @@ function LearnScreen({
       <FlowHeader title="Learn" onBack={onBack} />
       <div className="px-[24px] pb-[22px]">
         <InfoBanner
-          icon={BookOpen}
+          icon="book-open"
           title="Short lessons"
           description="Tiny actions, clear money habits."
         />
@@ -1618,7 +1587,7 @@ function LearnScreen({
           {learnModules.map((module) => (
             <SurfaceCard key={module.id} className="p-[16px]">
               <div className="flex items-start gap-[12px]">
-                <IconBubble icon={module.isCompleted ? Check : BookOpen} tone={module.isCompleted ? "teal" : "yellow"} />
+                <IconBubble icon={module.isCompleted ? "prime-check" : "book-open"} tone={module.isCompleted ? "teal" : "yellow"} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-[8px]">
                     <h2 className="text-[18px] font-bold leading-[22px] text-[var(--uc-text)]">{module.title}</h2>
@@ -1663,7 +1632,7 @@ function KidChoresScreen({
             <SurfaceCard key={chore.id} className="p-[16px]">
               <div className="flex items-start justify-between gap-[12px]">
                 <div className="flex min-w-0 gap-[12px]">
-                  <IconBubble icon={ClipboardCheck} tone={chore.status === "paid" ? "teal" : "neutral"} />
+                  <IconBubble icon="clipboard-check" tone={chore.status === "paid" ? "teal" : "neutral"} />
                   <div className="min-w-0">
                     <h2 className="text-[18px] font-bold leading-[22px] text-[var(--uc-text)]">{chore.title}</h2>
                     <p className="mt-[3px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">
@@ -1698,15 +1667,13 @@ function OnboardingScreen({
   const [slideIndex, setSlideIndex] = useState(0);
   const slide = ONBOARDING_SLIDES[slideIndex] ?? ONBOARDING_SLIDES[0];
   const isLast = slideIndex === ONBOARDING_SLIDES.length - 1;
-  const SlideIcon = slide.icon;
-
   return (
     <KidMainShell activeTab={activeKidTab} notice={notice} onKidTab={onKidTab} onNoticeClose={onNoticeClose}>
       <FlowHeader title="Welcome" onBack={onBack} rightLabel="Skip" onRightClick={() => onReplace("kid-home")} />
       <div className="flex min-h-[560px] flex-col px-[24px] pb-[22px]">
         <SurfaceCard className="flex flex-1 flex-col items-center justify-center p-[24px] text-center">
           <div className="grid size-[88px] place-items-center rounded-[8px] bg-[var(--uc-action-soft)] text-[var(--uc-action)]">
-            <SlideIcon size={42} />
+            <AppIcon name={slide.icon} size={42} color="currentColor" />
           </div>
           <h1 className="mt-[24px] text-[28px] font-bold leading-[32px] text-[var(--uc-text)]">{slide.title}</h1>
           <p className="mt-[10px] text-[16px] leading-[22px] text-[var(--uc-text-muted)]">{slide.body}</p>
@@ -1767,7 +1734,7 @@ function ParentVisibilityScreen({
         />
         <InfoBanner
           className="mt-[16px]"
-          icon={ShieldCheck}
+          icon="shield-check"
           title="You will always know what is shared."
           description="Parent view uses clear approval and activity information."
         />
@@ -1787,14 +1754,14 @@ function KidsMoreScreen({
   onKidTab,
   activeKidTab,
 }: SharedScreenProps) {
-  const items: Array<{ icon: LucideIcon; title: string; subtitle: string; view: KidsView }> = [
-    { icon: CreditCard, title: "My card", subtitle: "Card, wallet and customization", view: "card" },
-    { icon: CalendarDays, title: "Allowance", subtitle: "Next payment and history", view: "allowance" },
-    { icon: ClipboardCheck, title: "Chores", subtitle: "Tasks and rewards", view: "chores" },
-    { icon: Eye, title: "What parent can see", subtitle: "Transparency and privacy", view: "parent-visibility" },
-    { icon: BookOpen, title: "Onboarding tutorial", subtitle: "Replay the intro", view: "onboarding" },
-    { icon: QrCode, title: "Parent activation", subtitle: "Mock invite code", view: "activation" },
-    { icon: Users, title: "Parent view", subtitle: "Dashboard and approvals", view: "parent-dashboard" },
+  const items: Array<{ icon: IconName; title: string; subtitle: string; view: KidsView }> = [
+    { icon: "credit-card", title: "My card", subtitle: "Card, wallet and customization", view: "card" },
+    { icon: "calendar-days", title: "Allowance", subtitle: "Next payment and history", view: "allowance" },
+    { icon: "clipboard-check", title: "Chores", subtitle: "Tasks and rewards", view: "chores" },
+    { icon: "eye", title: "What parent can see", subtitle: "Transparency and privacy", view: "parent-visibility" },
+    { icon: "book-open", title: "Onboarding tutorial", subtitle: "Replay the intro", view: "onboarding" },
+    { icon: "payment-create-qr", title: "Parent activation", subtitle: "Mock invite code", view: "activation" },
+    { icon: "users", title: "Parent view", subtitle: "Dashboard and approvals", view: "parent-dashboard" },
   ];
 
   return (
@@ -1865,7 +1832,7 @@ function ActivationScreen({
           <AmountInput className="mt-[18px]" label="Spending limit" value={spendingLimit} onChange={setSpendingLimit} suffix="RON" />
           <AmountInput className="mt-[18px]" label="Approval threshold" value={approvalThreshold} onChange={setApprovalThreshold} suffix="RON" />
           <SimpleRow
-            icon={CreditCard}
+            icon="credit-card"
             title="Allowed card status"
             subtitle="Digital card is active by default"
             trailing={<StatusPill label="Active" tone="teal" />}
@@ -1877,7 +1844,7 @@ function ActivationScreen({
         {codeVisible ? (
           <SurfaceCard className="mt-[16px] p-[18px] text-center">
             <div className="mx-auto grid size-[96px] place-items-center rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)]">
-              <QrCode size={48} color="var(--uc-text)" />
+              <AppIcon name="payment-create-qr" size={48} color="var(--uc-text)" />
             </div>
             <p className="mt-[14px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">Activation code</p>
             <h2 className="mt-[3px] text-[24px] font-bold leading-[28px] text-[var(--uc-text)]">RO-KIDS-2481</h2>
@@ -1930,10 +1897,10 @@ function ParentDashboardScreen({
         </SurfaceCard>
 
         <div className="mt-[14px] grid grid-cols-2 gap-[8px]">
-          <ParentQuickAction icon={Send} label="Send money" onClick={() => onNavigate("approval-detail")} />
-          <ParentQuickAction icon={CalendarDays} label="Allowance" onClick={() => onNavigate("set-allowance")} />
-          <ParentQuickAction icon={SlidersHorizontal} label="Safety limits" onClick={() => onNavigate("parent-controls")} />
-          <ParentQuickAction icon={ClipboardCheck} label="Add chore" onClick={() => onNavigate("create-chore")} />
+          <ParentQuickAction icon="send" label="Send money" onClick={() => onNavigate("approval-detail")} />
+          <ParentQuickAction icon="calendar-days" label="Allowance" onClick={() => onNavigate("set-allowance")} />
+          <ParentQuickAction icon="sliders-horizontal" label="Safety limits" onClick={() => onNavigate("parent-controls")} />
+          <ParentQuickAction icon="clipboard-check" label="Add chore" onClick={() => onNavigate("create-chore")} />
         </div>
 
         <SectionBlock className="mt-[22px]" title="Approvals" actionLabel="All" onAction={() => onNavigate("approvals")}>
@@ -1947,7 +1914,7 @@ function ParentDashboardScreen({
                   {choresWaiting} chore waiting approval
                 </p>
               </div>
-              <ChevronRight size={22} color="var(--uc-icon-muted)" />
+              <AppIcon name="chevron-forward-heavy" size={22} color="var(--uc-icon-muted)" />
             </div>
           </SurfaceCard>
         </SectionBlock>
@@ -1999,9 +1966,9 @@ function ChildDetailScreen({
           <MiniDataCard label="Safe today" value={formatRon(controls.dailySafeLimit)} />
         </div>
         <div className="mt-[14px] flex flex-col gap-[8px]">
-          <LargeActionRow icon={Bell} title="Approvals" subtitle="Requests and chores" onClick={() => onNavigate("approvals")} />
-          <LargeActionRow icon={SlidersHorizontal} title="Safety limits" subtitle="Thresholds and toggles" onClick={() => onNavigate("parent-controls")} />
-          <LargeActionRow icon={ClipboardCheck} title="Chores" subtitle="Manage tasks and rewards" onClick={() => onNavigate("parent-chores")} />
+          <LargeActionRow icon="account-option-push-notifications" title="Approvals" subtitle="Requests and chores" onClick={() => onNavigate("approvals")} />
+          <LargeActionRow icon="sliders-horizontal" title="Safety limits" subtitle="Thresholds and toggles" onClick={() => onNavigate("parent-controls")} />
+          <LargeActionRow icon="clipboard-check" title="Chores" subtitle="Manage tasks and rewards" onClick={() => onNavigate("parent-chores")} />
         </div>
         <SectionBlock className="mt-[22px]" title="Activity overview">
           <div className="flex flex-col gap-[8px]">
@@ -2140,7 +2107,7 @@ function SetAllowanceScreen({
           </div>
           <TextInputField className="mt-[18px]" label="Day" value={day} onChange={setDay} />
           <SimpleRow
-            icon={WalletCards}
+            icon="wallet-cards"
             title="Source account"
             subtitle={allowance.sourceAccount}
             trailing={<StatusPill label="Mock" tone="neutral" />}
@@ -2377,7 +2344,7 @@ function FlowHeader({
           onClick={onBack}
           aria-label="Back"
         >
-          <ArrowLeft size={24} strokeWidth={2.4} />
+          <AppIcon name="back-heavy" size={24} color="currentColor" />
         </button>
         <h1 className="truncate text-center text-[18px] font-bold leading-[22px] text-[var(--uc-text)]">
           {title}
@@ -2405,18 +2372,18 @@ function KidsBottomNav({
   activeTab: KidTab;
   onTabChange: (tab: KidTab) => void;
 }) {
-  const items: Array<{ id: KidTab; label: string; icon: LucideIcon }> = [
-    { id: "home", label: "Home", icon: Home },
-    { id: "activity", label: "Activity", icon: ReceiptText },
-    { id: "goals", label: "Goals", icon: PiggyBank },
-    { id: "learn", label: "Learn", icon: BookOpen },
-    { id: "more", label: "More", icon: Users },
+  const items: Array<{ id: KidTab; label: string; icon: IconName }> = [
+    { id: "home", label: "Home", icon: "nav-home" },
+    { id: "activity", label: "Activity", icon: "receipt-text" },
+    { id: "goals", label: "Goals", icon: "piggy-bank" },
+    { id: "learn", label: "Learn", icon: "book-open" },
+    { id: "more", label: "More", icon: "users" },
   ];
 
   return (
     <div className="flex h-[54px] w-[375px] items-start gap-[8px] px-[24px] pb-[5px]">
       {items.map((item) => {
-        const Icon = item.icon;
+        const icon = item.icon;
         const isActive = activeTab === item.id;
         const color = isActive ? "var(--uc-action)" : "var(--uc-icon-muted)";
         return (
@@ -2428,7 +2395,7 @@ function KidsBottomNav({
           >
             <span className={`block h-[2px] w-[24px] ${isActive ? "bg-[var(--uc-action)]" : "bg-transparent"}`} />
             <span className="grid size-[32px] place-items-center">
-              <Icon size={23} color={color} strokeWidth={2.2} />
+              <AppIcon name={icon} size={23} color={color} />
             </span>
             <span className={`text-center text-[14px] font-normal leading-[15px] ${isActive ? "text-[var(--uc-action)]" : "text-[var(--uc-text-muted)]"}`}>
               {item.label}
@@ -2489,11 +2456,11 @@ function SectionBlock({
 }
 
 function KidsActionTile({
-  icon: Icon,
+  icon,
   label,
   onClick,
 }: {
-  icon: LucideIcon;
+  icon: IconName;
   label: string;
   onClick: () => void;
 }) {
@@ -2504,7 +2471,7 @@ function KidsActionTile({
       onClick={onClick}
     >
       <span className="grid size-[32px] place-items-center rounded-[8px] bg-[var(--uc-action-soft)] text-[var(--uc-action)]">
-        <Icon size={20} strokeWidth={2.3} />
+        <AppIcon name={icon} size={20} color="currentColor" />
       </span>
       <span className="text-[13px] font-bold leading-[15px] text-[var(--uc-text)]">{label}</span>
     </button>
@@ -2512,11 +2479,11 @@ function KidsActionTile({
 }
 
 function IconBubble({
-  icon: Icon,
+  icon,
   tone,
   size = "default",
 }: {
-  icon: LucideIcon;
+  icon: IconName;
   tone: "teal" | "red" | "yellow" | "neutral";
   size?: "default" | "large";
 }) {
@@ -2531,7 +2498,7 @@ function IconBubble({
 
   return (
     <span className={`grid shrink-0 place-items-center rounded-[8px] ${sizeClass} ${toneClass}`}>
-      <Icon size={iconSize} strokeWidth={2.2} />
+      <AppIcon name={icon} size={iconSize} color="currentColor" />
     </span>
   );
 }
@@ -2596,14 +2563,14 @@ function ModePill({ label }: { label: string }) {
 }
 
 function InfoBanner({
-  icon: Icon,
+  icon,
   title,
   description,
   className = "",
   actionLabel,
   onAction,
 }: {
-  icon: LucideIcon;
+  icon: IconName;
   title: string;
   description: string;
   className?: string;
@@ -2613,7 +2580,7 @@ function InfoBanner({
   return (
     <div className={`rounded-[8px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-[14px] ${className}`}>
       <div className="flex items-start gap-[12px]">
-        <IconBubble icon={Icon} tone="teal" />
+        <IconBubble icon={icon} tone="teal" />
         <div className="min-w-0 flex-1">
           <h3 className="text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{title}</h3>
           <p className="mt-[3px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">{description}</p>
@@ -2651,7 +2618,7 @@ function StatusPanel({
   return (
     <SurfaceCard className={`p-[16px] ${className}`}>
       <div className="flex items-start gap-[12px]">
-        <IconBubble icon={tone === "success" ? Check : Bell} tone={iconTone} />
+        <IconBubble icon={tone === "success" ? "prime-check" : "account-option-push-notifications"} tone={iconTone} />
         <div className="min-w-0 flex-1">
           <h3 className="text-[17px] font-bold leading-[21px] text-[var(--uc-text)]">{title}</h3>
           <p className="mt-[3px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">{description}</p>
@@ -2680,13 +2647,13 @@ function NoticeToast({
   return (
     <div className="absolute left-[16px] right-[16px] top-[62px] z-30 rounded-[8px] bg-[var(--uc-surface)] p-[12px] shadow-[0_12px_30px_rgb(var(--uc-shadow-rgb)_/_0.18)]">
       <div className="flex items-start gap-[10px]">
-        <IconBubble icon={notice.tone === "success" ? Check : Bell} tone={notice.tone === "success" ? "teal" : notice.tone === "warning" ? "yellow" : "neutral"} />
+        <IconBubble icon={notice.tone === "success" ? "prime-check" : "account-option-push-notifications"} tone={notice.tone === "success" ? "teal" : notice.tone === "warning" ? "yellow" : "neutral"} />
         <div className="min-w-0 flex-1">
           <p className="text-[15px] font-bold leading-[18px] text-[var(--uc-text)]">{notice.title}</p>
           <p className="mt-[2px] text-[13px] leading-[17px] text-[var(--uc-text-muted)]">{notice.description}</p>
         </div>
         <button type="button" className="grid size-[28px] place-items-center" onClick={onClose} aria-label="Close notification">
-          <X size={18} />
+          <AppIcon name="close-x" size={18} color="currentColor" />
         </button>
       </div>
     </div>
@@ -2698,7 +2665,7 @@ function TransactionRow({ transaction }: { transaction: Transaction }) {
   return (
     <SurfaceCard className="p-[14px]">
       <div className="flex items-center gap-[12px]">
-        <IconBubble icon={positive ? CircleDollarSign : ShoppingBag} tone={positive ? "teal" : "neutral"} />
+        <IconBubble icon={positive ? "circle-dollar-sign" : "shopping-bag"} tone={positive ? "teal" : "neutral"} />
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{transaction.title}</h3>
           <p className="text-[13px] leading-[17px] text-[var(--uc-text-muted)]">
@@ -2714,12 +2681,12 @@ function TransactionRow({ transaction }: { transaction: Transaction }) {
 }
 
 function SimpleRow({
-  icon: Icon,
+  icon,
   title,
   subtitle,
   trailing,
 }: {
-  icon: LucideIcon;
+  icon: IconName;
   title: string;
   subtitle: string;
   trailing?: ReactNode;
@@ -2727,7 +2694,7 @@ function SimpleRow({
   return (
     <SurfaceCard className="p-[14px]">
       <div className="flex items-center gap-[12px]">
-        <IconBubble icon={Icon} tone="neutral" />
+        <IconBubble icon={icon} tone="neutral" />
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{title}</h3>
           <p className="truncate text-[13px] leading-[17px] text-[var(--uc-text-muted)]">{subtitle}</p>
@@ -2739,12 +2706,12 @@ function SimpleRow({
 }
 
 function LargeActionRow({
-  icon: Icon,
+  icon,
   title,
   subtitle,
   onClick,
 }: {
-  icon: LucideIcon;
+  icon: IconName;
   title: string;
   subtitle: string;
   onClick: () => void;
@@ -2753,12 +2720,12 @@ function LargeActionRow({
     <button type="button" className="w-full text-left" onClick={onClick}>
       <SurfaceCard className="p-[14px]">
         <div className="flex items-center gap-[12px]">
-          <IconBubble icon={Icon} tone="neutral" />
+          <IconBubble icon={icon} tone="neutral" />
           <div className="min-w-0 flex-1">
             <h3 className="text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{title}</h3>
             <p className="mt-[2px] text-[13px] leading-[17px] text-[var(--uc-text-muted)]">{subtitle}</p>
           </div>
-          <ChevronRight size={22} color="var(--uc-icon-muted)" />
+          <AppIcon name="chevron-forward-heavy" size={22} color="var(--uc-icon-muted)" />
         </div>
       </SurfaceCard>
     </button>
@@ -2766,11 +2733,11 @@ function LargeActionRow({
 }
 
 function ParentQuickAction({
-  icon: Icon,
+  icon,
   label,
   onClick,
 }: {
-  icon: LucideIcon;
+  icon: IconName;
   label: string;
   onClick: () => void;
 }) {
@@ -2780,7 +2747,7 @@ function ParentQuickAction({
       className="flex h-[92px] flex-col items-center justify-center gap-[9px] rounded-[8px] bg-[var(--uc-surface-muted)] text-center"
       onClick={onClick}
     >
-      <Icon size={24} color="var(--uc-action)" strokeWidth={2.2} />
+      <AppIcon name={icon} size={24} color="var(--uc-action)" />
       <span className="px-[8px] text-[14px] font-bold leading-[17px] text-[var(--uc-text)]">{label}</span>
     </button>
   );
@@ -2812,7 +2779,7 @@ function CardPreview({ settings }: { settings: CardSettings }) {
     >
       <div className="flex items-center justify-between">
         <span className="text-[16px] font-bold leading-[18px]">UniCredit</span>
-        <CreditCard size={28} color={theme.accent} />
+        <AppIcon name="credit-card" size={28} color={theme.accent} />
       </div>
       <div className="absolute right-[-28px] top-[50px] h-[160px] w-[160px] rounded-full border-[18px] opacity-25" style={{ borderColor: theme.accent }} />
       <div className="absolute left-[20px] right-[20px] bottom-[20px]">
@@ -2855,7 +2822,7 @@ function VisibilitySection({
       <div className="mt-[12px] flex flex-col gap-[10px]">
         {items.map((item) => (
           <div key={item} className="flex items-center gap-[10px]">
-            <IconBubble icon={tone === "teal" ? Check : Lock} tone={tone} />
+            <IconBubble icon={tone === "teal" ? "prime-check" : "lock"} tone={tone} />
             <span className="text-[15px] leading-[19px] text-[var(--uc-text)]">{item}</span>
           </div>
         ))}
@@ -2877,7 +2844,7 @@ function EmptyState({ title, description }: { title: string; description: string
   return (
     <div className="px-[24px] pb-[22px]">
       <SurfaceCard className="p-[22px] text-center">
-        <IconBubble icon={PiggyBank} tone="neutral" size="large" />
+        <IconBubble icon="piggy-bank" tone="neutral" size="large" />
         <h2 className="mt-[14px] text-[22px] font-bold leading-[26px] text-[var(--uc-text)]">{title}</h2>
         <p className="mt-[6px] text-[15px] leading-[21px] text-[var(--uc-text-muted)]">{description}</p>
       </SurfaceCard>
@@ -3087,11 +3054,11 @@ function choreStatusLabel(status: Chore["status"]) {
   return "Paid";
 }
 
-function approvalIcon(type: Approval["type"]) {
-  if (type === "moneyRequest") return CircleDollarSign;
-  if (type === "sendMoney") return Send;
-  if (type === "chore") return ClipboardCheck;
-  return ShoppingBag;
+function approvalIcon(type: Approval["type"]): IconName {
+  if (type === "moneyRequest") return "circle-dollar-sign";
+  if (type === "sendMoney") return "send";
+  if (type === "chore") return "clipboard-check";
+  return "shopping-bag";
 }
 
 function approvalReason(approval: Approval) {
