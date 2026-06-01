@@ -10,9 +10,10 @@ import { useDemo } from "@/app/state/demoStore";
 
 interface HomeHeaderProps {
   onPrimeClick?: () => void;
+  onMessagesClick?: () => void;
 }
 
-export default function HomeHeader({ onPrimeClick }: HomeHeaderProps) {
+export default function HomeHeader({ onPrimeClick, onMessagesClick }: HomeHeaderProps) {
   const { t } = useLanguage();
   const { amountsHidden, toggleAmountsHidden } = useDemo();
 
@@ -48,7 +49,7 @@ export default function HomeHeader({ onPrimeClick }: HomeHeaderProps) {
         <HeaderActionRail>
           <AmountVisibilityButton hidden={amountsHidden} onToggle={toggleAmountsHidden} />
           <HeaderActionButton icon="profile" label="Profile" />
-          <HeaderActionButton icon="messages" label="Messages" />
+          <HeaderActionButton icon="messages" label="Messages" onClick={onMessagesClick} />
         </HeaderActionRail>
       </div>
 

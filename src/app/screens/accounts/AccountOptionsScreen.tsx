@@ -1,6 +1,8 @@
 import PageHeader from "@/app/components/PageHeader";
 import { AppIcon } from "@/app/components/icons";
 import { ACCOUNT_OPTION_ITEMS, ACCOUNT_PRODUCT_OPTIONS } from "@/data/accountDetails";
+import { useState } from "react";
+import type { UIEvent } from "react";
 import imgDeposit from "figma:asset/612ac7960c2d43bfdada538aae6f3cf27be44d99.png";
 import imgRoundup from "figma:asset/f4db1d1cdcbf6f7ad5674a0b74b6af74a9706415.png";
 import imgVirtualCard from "figma:asset/40072ac1587e0a070d3bd6c437a557892e0687a0.png";
@@ -18,30 +20,43 @@ const productImages = {
 function OptionIcon({ id }: { id: string }) {
   switch (id) {
     case "share-account-info":
-      return <AppIcon name="share-2" size={22} strokeWidth={3} color="var(--uc-text)" />;
+      return <AppIcon name="account-option-share-info" color="var(--uc-text)" />;
     case "push-notifications":
-      return <AppIcon name="bell" size={22} fill="var(--uc-text)" strokeWidth={0} color="var(--uc-text)" />;
+      return <AppIcon name="account-option-push-notifications" color="var(--uc-text)" />;
     case "account-statement":
-      return <AppIcon name="file-text" size={22} fill="var(--uc-text)" color="var(--uc-static-white)" strokeWidth={1.6} />;
+      return <AppIcon name="account-option-statement" color="var(--uc-text)" />;
     case "create-paycode":
-      return <AppIcon name="qr-code" size={22} strokeWidth={2.7} color="var(--uc-text)" />;
+      return <AppIcon name="account-option-create-paycode" color="var(--uc-text)" />;
+    case "change-account-name":
+      return <AppIcon name="account-option-change-name" color="var(--uc-text)" />;
     default:
       return <AppIcon name="wallet-cards" size={22} strokeWidth={2.7} color="var(--uc-text)" />;
   }
 }
 
 export default function AccountOptionsScreen({ onBack }: AccountOptionsScreenProps) {
-  return (
-    <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">
-      <div className="shrink-0 pt-[54px]">
-        <PageHeader title="Account options" onBack={onBack} showHelp={false} compact />
-      </div>
+  const [headerProgress, setHeaderProgress] = useState(0);
 
-      <div className="flex-1 overflow-y-auto scrollbar-hide px-[24px] pb-[32px] pt-[30px]">
+  const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
+    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64));
+    setHeaderProgress(progress);
+  };
+
+  return (
+    <div className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] scrollbar-hide" onScroll={handlePageScroll}>
+      <PageHeader
+        title="Account options"
+        onBack={onBack}
+        showHelp={false}
+        collapsedTitleProgress={headerProgress}
+        includeSafeArea
+      />
+
+      <div className="px-[24px] pb-[32px] pt-[30px]">
         <div className="flex flex-col gap-[28px]">
           {ACCOUNT_OPTION_ITEMS.map((item) => (
-            <button key={item.id} className="grid grid-cols-[24px_1fr_24px] items-center gap-[16px] text-left">
-              <div className="flex h-[24px] w-[24px] items-center justify-center">
+            <button key={item.id} className="grid grid-cols-[32px_1fr_32px] items-center gap-[16px] text-left">
+              <div className="flex h-[32px] w-[32px] items-center justify-center">
                 <OptionIcon id={item.id} />
               </div>
               <div className="min-w-0">
@@ -52,7 +67,7 @@ export default function AccountOptionsScreen({ onBack }: AccountOptionsScreenPro
                   {item.description}
                 </p>
               </div>
-              <AppIcon name="chevron-right" size={24} strokeWidth={2.6} color="var(--uc-text)" />
+              <AppIcon name="chevron-link" color="var(--uc-text)" />
             </button>
           ))}
         </div>

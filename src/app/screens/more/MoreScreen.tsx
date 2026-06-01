@@ -23,13 +23,27 @@ interface MoreScreenProps {
   onBack: () => void;
   onHomeClick?: () => void;
   onAnalyticsClick?: () => void;
+  onMessagesClick?: () => void;
   onPaymentsClick?: () => void;
   onProductsClick?: () => void;
   onContactsClick?: () => void;
+  onDocumentsClick?: () => void;
+  onSettingsClick?: () => void;
   onLogoutConfirm?: () => void;
 }
 
-export default function MoreScreen({ onBack, onHomeClick, onAnalyticsClick, onPaymentsClick, onProductsClick, onContactsClick, onLogoutConfirm }: MoreScreenProps) {
+export default function MoreScreen({
+  onBack,
+  onHomeClick,
+  onAnalyticsClick,
+  onMessagesClick,
+  onPaymentsClick,
+  onProductsClick,
+  onContactsClick,
+  onDocumentsClick,
+  onSettingsClick,
+  onLogoutConfirm,
+}: MoreScreenProps) {
   const { country } = useDemo();
   const availableCards = getMoreCardsForCountry(country);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
@@ -82,9 +96,9 @@ export default function MoreScreen({ onBack, onHomeClick, onAnalyticsClick, onPa
       case 'contacts':
         return <ContactsCard key="contacts" onClick={() => onContactsClick?.()} />;
       case 'documents':
-        return <DocumentsCard key="documents" onClick={() => handleCardClick('Documents')} badgeCount={12} />;
+        return <DocumentsCard key="documents" onClick={() => onDocumentsClick?.()} badgeCount={12} />;
       case 'settings':
-        return <SettingsCard key="settings" onClick={() => handleCardClick('Settings')} />;
+        return <SettingsCard key="settings" onClick={() => onSettingsClick?.()} />;
       case 'gdpr-consent':
         return <GdprConsentCard key="gdpr-consent" onClick={() => handleCardClick('GDPR Consent')} />;
       case 'third-party-consent':
@@ -108,7 +122,7 @@ export default function MoreScreen({ onBack, onHomeClick, onAnalyticsClick, onPa
       {/* Header - directly after status bar, no wrapper */}
       <MoreHeader
         onProfile={handleProfileClick}
-        onMessages={handleMessagesClick}
+        onMessages={onMessagesClick ?? handleMessagesClick}
         onLogout={handleLogoutClick}
       />
 

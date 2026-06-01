@@ -16,6 +16,7 @@ import NavigationLink from "@/app/components/ui/NavigationLink";
 import PreLoginHeading from "@/app/components/ui/PreLoginHeading";
 import { RadioButton } from "@/app/components/common";
 import TextField from "@/app/components/TextField";
+import { TemplateCodePreview } from "@/app/components/templates/TemplateCodePreviews";
 import ProductAccordion from "@/app/components/ProductAccordion";
 import ProductAccordionAnimated from "@/app/components/ProductAccordionAnimated";
 import AccordionSection from "@/app/components/AccordionSection";
@@ -26,6 +27,7 @@ import TotalRow from "@/app/components/TotalRow";
 import AccountBalanceCard from "@/app/components/accounts/AccountBalanceCard";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
 import AccountCarouselIndicator from "@/app/components/accounts/AccountCarouselIndicator";
+import AccountDetailsInfoField from "@/app/components/accounts/AccountDetailsInfoField";
 import AccountTransactionRow from "@/app/components/accounts/AccountTransactionRow";
 import AccountTransactionMonthDivider from "@/app/components/accounts/AccountTransactionMonthDivider";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
@@ -67,6 +69,7 @@ import { Toggle } from "@/app/components/ui/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@/app/components/ui/toggle-group";
 import { getAccountIdentity } from "@/data/accountDetails";
 import { TEMPLATE_REGISTRY, type TemplateRegistryItem } from "@/app/registry/templateRegistry";
+import { PRODUCT_BANNER_TONE_OPTIONS } from "@/app/config/productBannerVariants";
 import {
   APP_COLOR_AUDIT,
   COLOR_PALETTES,
@@ -86,12 +89,12 @@ const activeComponentFiles = [
   "PanelOverlay", "PanelWithTranslations", "PanelWithoutCoAppingTranslations", "PreLoginActiveScreen",
   "PreLoginScreen", "PrimaryButton", "ProductAccordion", "ProductAccordionAnimated", "ProductCard",
   "ProductsList", "StatusBar", "TerminateSessionPopup", "TextField", "TotalRow", "UniCreditLogo",
-  "AccountBalanceCard", "AccountActionBar", "AccountCarouselIndicator", "AccountSearchBar", "AccountTransactionRow", "AccountTransactionMonthDivider",
+  "AccountBalanceCard", "AccountActionBar", "AccountCarouselIndicator", "AccountDetailsInfoField", "AccountSearchBar", "AccountTransactionRow", "AccountTransactionMonthDivider",
   "HomeHeader", "AccountSummary", "QuickActions", "TransactionsPreview", "UnplannedBanner",
   "MoreHeader", "MoreCardBase", "ContactsCard", "DocumentsCard", "SettingsCard", "GdprConsentCard",
   "ThirdPartyConsentCard", "DigitalActivitiesCard", "MyRequestsCard", "TutorialCard",
   "ContactsDivider", "ContactsNavigationCard", "PrimeScreen", "YourAdvisorTab", "YourBenefitsTab",
-  "PrimeLabelValue", "PrimeIconLabelValue", "BackButton", "RadioButton", "ProductOfferCard",
+  "PrimeLabelValue", "PrimeIconLabelValue", "BackButton", "RadioButton", "ProductOfferCard", "TemplateCodePreview",
 ];
 
 const uiRegistryFiles = [
@@ -447,6 +450,56 @@ function Specimen({ name, source, note, children, tone = "light", specs = [] }: 
           {children}
         </MeasurementSurface>
       </div>
+    </div>
+  );
+}
+
+function ProductOfferCardVariantSpecimen() {
+  const [selectedToneId, setSelectedToneId] = useState(PRODUCT_BANNER_TONE_OPTIONS[0]?.id ?? "green-normal");
+  const selectedTone =
+    PRODUCT_BANNER_TONE_OPTIONS.find((tone) => tone.id === selectedToneId) ?? PRODUCT_BANNER_TONE_OPTIONS[0];
+
+  if (!selectedTone) return null;
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <label className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--uc-text-muted)]" htmlFor="product-offer-tone-select">
+          Variant
+        </label>
+        <select
+          id="product-offer-tone-select"
+          value={selectedTone.id}
+          onChange={(event) => setSelectedToneId(event.target.value)}
+          className="h-[36px] min-w-[210px] rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-3 text-[14px] text-[var(--uc-text)]"
+        >
+          {PRODUCT_BANNER_TONE_OPTIONS.map((tone) => (
+            <option key={tone.id} value={tone.id}>
+              {tone.label}
+            </option>
+          ))}
+        </select>
+        <div className="flex items-center gap-3 text-[12px] text-[var(--uc-text-muted)]">
+          <span className="flex items-center gap-1.5">
+            <span className="size-3 rounded-[3px] border border-[var(--uc-border)]" style={{ backgroundColor: selectedTone.backgroundColor }} />
+            bg
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="size-3 rounded-[3px] border border-[var(--uc-border)]" style={{ backgroundColor: selectedTone.chevronColor }} />
+            chevron
+          </span>
+        </div>
+      </div>
+
+      <ProductOfferCard
+        colorFamily={selectedTone.family}
+        lightVersion={selectedTone.lightVersion}
+        offer={{
+          id: "ds-offer-sample",
+          title: "Premium current\naccount offer",
+          description: "Enjoy zero monthly fee\nand smart everyday\nbanking benefits.",
+        }}
+      />
     </div>
   );
 }
@@ -936,6 +989,7 @@ function TemplateInventory() {
   const [selectedTemplateId, setSelectedTemplateId] = useState(TEMPLATE_REGISTRY[0]?.id ?? "");
   const selectedTemplate =
     TEMPLATE_REGISTRY.find((template) => template.id === selectedTemplateId) ?? TEMPLATE_REGISTRY[0];
+  const reconstructedTemplates = TEMPLATE_REGISTRY.filter((template) => template.codePreviewId);
 
   return (
     <Section
@@ -943,10 +997,14 @@ function TemplateInventory() {
       title="Templates"
       description="Screenshoturile existente in proiect, transformate in template-uri selectabile pentru comparatie, reuse si mapare catre componentele deja catalogate."
     >
-      <div className="mb-5 grid gap-4 md:grid-cols-3">
+      <div className="mb-5 grid gap-3 md:grid-cols-4">
         <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
           <p className="text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Templates</p>
           <p className="mt-2 font-['UniCredit:Bold',sans-serif] text-[34px]">{TEMPLATE_REGISTRY.length}</p>
+        </div>
+        <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
+          <p className="text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Code previews</p>
+          <p className="mt-2 font-['UniCredit:Bold',sans-serif] text-[34px]">{reconstructedTemplates.length}</p>
         </div>
         <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
           <p className="text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Source</p>
@@ -958,21 +1016,54 @@ function TemplateInventory() {
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-          {TEMPLATE_REGISTRY.map((template) => (
-            <TemplateCard
-              key={template.id}
-              template={template}
-              selected={template.id === selectedTemplate?.id}
-              onSelect={() => setSelectedTemplateId(template.id)}
-            />
-          ))}
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_460px]">
+        <div className="max-h-[calc(100vh-260px)] min-h-[420px] overflow-y-auto pr-1">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
+            {TEMPLATE_REGISTRY.map((template) => (
+              <TemplateCard
+                key={template.id}
+                template={template}
+                selected={template.id === selectedTemplate?.id}
+                onSelect={() => setSelectedTemplateId(template.id)}
+              />
+            ))}
+          </div>
         </div>
 
         {selectedTemplate && <TemplatePreview template={selectedTemplate} />}
       </div>
     </Section>
+  );
+}
+
+function TemplateCodeThumbnail({ template }: { template: TemplateRegistryItem }) {
+  if (!template.codePreviewId) {
+    return (
+      <img
+        src={template.imageSrc}
+        alt={`${template.name} template screenshot`}
+        className="h-full w-full object-cover object-top transition-transform duration-200 group-hover:scale-[1.02]"
+        loading="lazy"
+      />
+    );
+  }
+
+  return (
+    <span className="relative block h-full w-full overflow-hidden bg-[var(--uc-app-bg)]">
+      <span
+        className="absolute top-0"
+        style={{
+          height: 814,
+          left: "50%",
+          marginLeft: -45.24,
+          transform: "scale(0.24)",
+          transformOrigin: "top left",
+          width: 377,
+        }}
+      >
+        <TemplateCodePreview previewId={template.codePreviewId} presentationOnly />
+      </span>
+    </span>
   );
 }
 
@@ -982,48 +1073,92 @@ function TemplateCard({ template, selected, onSelect }: {
   onSelect: () => void;
 }) {
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       aria-pressed={selected}
       onClick={onSelect}
-      className={`group flex h-[286px] min-w-0 flex-col overflow-hidden rounded-[8px] border bg-[var(--uc-surface)] text-left transition ${
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect();
+        }
+      }}
+      data-template-card="true"
+      data-template-code={template.codePreviewId ? "true" : "false"}
+      data-template-id={template.id}
+      className={`group flex h-[190px] min-w-0 flex-col overflow-hidden rounded-[8px] border bg-[var(--uc-surface)] text-left transition ${
         selected ? "border-[var(--uc-action)] ring-2 ring-[var(--uc-action)]/25" : "border-[var(--uc-border)] hover:border-[var(--uc-action-soft-strong)]"
       }`}
     >
-      <span className="block h-[206px] w-full overflow-hidden bg-[var(--uc-neutral-200)]">
-        <img
-          src={template.imageSrc}
-          alt={`${template.name} template screenshot`}
-          className="h-full w-full object-cover object-top transition-transform duration-200 group-hover:scale-[1.02]"
-          loading="lazy"
-        />
+      <span className="block h-[122px] w-full overflow-hidden bg-[var(--uc-neutral-200)]">
+        <TemplateCodeThumbnail template={template} />
       </span>
       <span className="flex min-h-0 flex-1 flex-col justify-between gap-2 p-3">
-        <span className="truncate font-['UniCredit:Bold',sans-serif] text-[16px] text-[var(--uc-text)]">{template.name}</span>
+        <span className="flex min-w-0 items-center justify-between gap-2">
+          <span className="truncate font-['UniCredit:Bold',sans-serif] text-[15px] text-[var(--uc-text)]">{template.name}</span>
+          {template.codePreviewId ? (
+            <span className="shrink-0 rounded-full bg-[var(--uc-action-soft)] px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--uc-action)]">
+              code
+            </span>
+          ) : null}
+        </span>
         <span className="flex flex-wrap items-center gap-2 text-[12px] text-[var(--uc-text-muted)]">
           <span>{template.width}x{template.height}</span>
           <span className="uppercase">{template.format}</span>
         </span>
       </span>
-    </button>
+    </div>
   );
 }
 
 function TemplatePreview({ template }: { template: TemplateRegistryItem }) {
+  const [previewMode, setPreviewMode] = useState<"code" | "source">(template.codePreviewId ? "code" : "source");
+
+  useEffect(() => {
+    setPreviewMode(template.codePreviewId ? "code" : "source");
+  }, [template.codePreviewId, template.id]);
+
+  const resolvedPreviewMode = template.codePreviewId ? previewMode : "source";
+
   return (
     <aside className="sticky top-[92px] h-fit overflow-hidden rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)]">
       <div className="border-b border-[var(--uc-border-muted)] p-5">
         <p className="text-[12px] uppercase tracking-[0.08em] text-[var(--uc-brand)]">Selected template</p>
         <h3 className="mt-2 font-['UniCredit:Bold',sans-serif] text-[24px] leading-tight text-[var(--uc-text)]">{template.name}</h3>
         <p className="mt-2 break-all text-[13px] text-[var(--uc-text-muted)]">{template.sourcePath}</p>
+        {template.codePreviewId ? (
+          <div className="mt-4 grid grid-cols-2 rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-1">
+            {(["code", "source"] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setPreviewMode(mode)}
+                className={`rounded-[4px] px-3 py-2 font-['UniCredit:Bold',sans-serif] text-[13px] capitalize ${
+                  resolvedPreviewMode === mode
+                    ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm"
+                    : "text-[var(--uc-text-muted)]"
+                }`}
+              >
+                {mode}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
 
-      <div className="max-h-[620px] overflow-auto bg-[var(--uc-app-bg)] p-4">
-        <img
-          src={template.imageSrc}
-          alt={`${template.name} selected template screenshot`}
-          className="mx-auto w-full max-w-[375px] rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] object-contain object-top"
-        />
+      <div className="max-h-[520px] overflow-auto bg-[var(--uc-app-bg)] p-4" data-template-preview-mode={resolvedPreviewMode}>
+        {resolvedPreviewMode === "code" && template.codePreviewId ? (
+          <div className="flex min-w-[377px] justify-center" data-template-selected-code-preview="true">
+            <TemplateCodePreview previewId={template.codePreviewId} />
+          </div>
+        ) : (
+          <img
+            src={template.imageSrc}
+            alt={`${template.name} selected template screenshot`}
+            className="mx-auto w-full max-w-[375px] rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] object-contain object-top"
+          />
+        )}
       </div>
 
       <div className="grid gap-4 border-t border-[var(--uc-border-muted)] p-5 text-[14px]">
@@ -1034,7 +1169,27 @@ function TemplatePreview({ template }: { template: TemplateRegistryItem }) {
           <span className="font-['UniCredit:Bold',sans-serif] uppercase text-[var(--uc-text)]">{template.format}</span>
           <span className="text-[var(--uc-text-subtle)]">Registry id</span>
           <span className="break-all font-['UniCredit:Bold',sans-serif] text-[var(--uc-text)]">{template.id}</span>
+          <span className="text-[var(--uc-text-subtle)]">Implementation</span>
+          <span className="font-['UniCredit:Bold',sans-serif] text-[var(--uc-text)]">
+            {template.implementationStatus === "reconstructed-code" ? "Reconstructed code" : "Source only"}
+          </span>
+          {template.implementationPath ? (
+            <>
+              <span className="text-[var(--uc-text-subtle)]">Code path</span>
+              <span className="break-all font-['UniCredit:Bold',sans-serif] text-[var(--uc-text)]">{template.implementationPath}</span>
+            </>
+          ) : null}
         </div>
+        {template.reuseNotes && template.reuseNotes.length > 0 ? (
+          <div>
+            <p className="mb-2 text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Reuse notes</p>
+            <ul className="grid gap-2 text-[13px] leading-5 text-[var(--uc-text-muted)]">
+              {template.reuseNotes.map((note) => (
+                <li key={note}>{note}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
         <div>
           <p className="mb-2 text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Reusable components</p>
           <div className="flex flex-wrap gap-2">
@@ -1191,7 +1346,7 @@ export default function DesignSystemPage() {
 
           <Section id="navigation" title="Navigation" description="Meniuri si linkuri de navigatie, inclusiv bottom navigation in toate taburile.">
             <div className="grid gap-5">
-              <Specimen name="BottomNavigation / all active states" source="components/BottomNavigation.tsx" specs={["container 375px", "icons 32px", "labels 14px", "active bar 24x2"]}>
+              <Specimen name="BottomNavigation / all active states" source="components/BottomNavigation.tsx" specs={["container 375x54", "icons 32px", "labels 14px / 15px line", "active bar 24x2", "0 gap bar/icon/label"]}>
                 <div className="grid gap-5 xl:grid-cols-2">
                   {(["home", "analytics", "payments", "products", "more"] as const).map((tab) => (
                     <div key={tab} className="w-[375px] rounded border bg-[var(--uc-surface)] pt-2">
@@ -1278,9 +1433,14 @@ export default function DesignSystemPage() {
                   })}
                 </div>
               </Specimen>
-              <Specimen name="AccountActionBar" source="components/accounts/AccountActionBar.tsx" tone="gray" specs={["container padding 8px 16px", "justify space-between", "item flex 1 0 0", "icon box 32x32", "label 14px regular"]}>
-                <div className="w-[375px] bg-[var(--uc-app-bg)]">
+              <Specimen name="AccountActionBar" source="components/accounts/AccountActionBar.tsx" tone="gray" specs={["supports 1-4 items", "align start / center / end / between", "container padding 8px 16px", "item flex 1 0 0 when between", "icon box 32x32", "label 14px regular / 15px line"]}>
+                <div className="flex w-[375px] flex-col gap-[16px] bg-[var(--uc-app-bg)]">
                   <AccountActionBar onOptionsClick={noop} />
+                  <AccountActionBar
+                    align="end"
+                    items={[{ id: "card-transaction", iconName: "add-money", iconColor: "var(--uc-icon)", label: "Card\nTransaction" }]}
+                    style={{ padding: "0 24px 18px" }}
+                  />
                 </div>
               </Specimen>
               <Specimen name="AccountCarouselIndicator" source="components/accounts/AccountCarouselIndicator.tsx" tone="gray" specs={["height 32px", "backdrop blur 13.591px", "inline-flex", "gap 6px", "active 30x6", "inactive 6x6", "mini 4x4 when count > 4"]}>
@@ -1289,47 +1449,64 @@ export default function DesignSystemPage() {
                   <AccountCarouselIndicator count={7} activeIndex={3} onSelect={noop} />
                 </div>
               </Specimen>
-              <Specimen name="AccountSearchBar" source="components/accounts/AccountSearchBar.tsx" tone="gray" specs={["height 36px", "padding 2px 0", "outer margin 16px", "radius 10px", "background var(--uc-app-bg)", "search icon 32x32", "filter/clear icon slot 32x32", "input 14px bold"]}>
+              <Specimen name="AccountDetailsInfoField" source="components/accounts/AccountDetailsInfoField.tsx" tone="gray" specs={["height 80px", "outside gap 0", "title 16px regular / normal", "subtitle 16px bold / normal", "title-to-subtitle gap 4px", "optional trailing icon variant"]}>
+                <div className="flex w-[327px] flex-col bg-[var(--uc-surface)]">
+                  <AccountDetailsInfoField
+                    title="Account number"
+                    subtitle="1234567890123456"
+                    trailingIcon={<AppIcon name="copy-documents" color="var(--uc-text)" />}
+                  />
+                  <AccountDetailsInfoField title="Available funds" subtitle="614,83 RON" />
+                  <AccountDetailsInfoField title="Current balance" subtitle="565,64 RON" />
+                </div>
+              </Specimen>
+              <Specimen name="AccountSearchBar" source="components/accounts/AccountSearchBar.tsx" tone="gray" specs={["height auto from 32px icons", "padding 0", "outer margin 16px", "radius 10px", "background var(--uc-app-bg)", "search icon 32x32", "filter/clear icon slot 32x32", "input 14px bold"]}>
                 <div className="flex w-[375px] flex-col gap-[12px] bg-[var(--uc-surface)] px-[16px]">
                   <AccountSearchBar />
                   <AccountSearchBar value="Carrefour" onValueChange={noop} />
                 </div>
               </Specimen>
-              <Specimen name="AccountTransactionRow" source="components/accounts/AccountTransactionRow.tsx" specs={["375x80", "padding 20px 16px", "date 18px bold", "month 14px bold", "icon box 32px", "details column 247px", "amount 20px + decimals 14px"]}>
+              <Specimen name="AccountTransactionRow" source="components/accounts/AccountTransactionRow.tsx" specs={["375x80", "padding 20px 16px", "day 18px/20px bold", "date gap 2px", "month 14px/15px bold", "date-to-icon gap 16px", "icon box 32px", "details column 247px", "label 16px/18px", "label-to-amount gap 4px", "amount line 22px", "amount 20px + decimals 14px", "divider L3 14px bold uppercase", "divider left muted / right K1", "divider-to-row gap 16px", "row-to-next-divider gap 16px"]}>
                 <div className="w-[375px] bg-[var(--uc-surface)]">
                   <AccountTransactionMonthDivider title="APRIL 2026" total="-24.318,15" currency="RON" />
-                  <AccountTransactionRow
-                    transaction={{
-                      id: "sample-credit",
-                      day: "11",
-                      month: "APR",
-                      monthKey: "2026-04",
-                      monthTitle: "APRIL 2026",
-                      label: "Transfer",
-                      amount: 25902.92,
-                      type: "credit",
-                      category: "Transfers",
-                      status: "Booked",
-                    }}
-                    formattedAmount="25.902,92"
-                    currency="RON"
-                  />
-                  <AccountTransactionRow
-                    transaction={{
-                      id: "sample-debit",
-                      day: "09",
-                      month: "APR",
-                      monthKey: "2026-04",
-                      monthTitle: "APRIL 2026",
-                      label: "Transfer",
-                      amount: -900,
-                      type: "debit",
-                      category: "Transfers",
-                      status: "Booked",
-                    }}
-                    formattedAmount="900,00"
-                    currency="RON"
-                  />
+                  <div className="pt-[16px]">
+                    <AccountTransactionRow
+                      transaction={{
+                        id: "sample-credit",
+                        day: "11",
+                        month: "APR",
+                        monthKey: "2026-04",
+                        monthTitle: "APRIL 2026",
+                        label: "Transfer",
+                        amount: 25902.92,
+                        type: "credit",
+                        category: "Transfers",
+                        pfmCategory: "Transfers",
+                        pfmSubcategory: "Incoming transfer",
+                        status: "Booked",
+                      }}
+                      formattedAmount="25.902,92"
+                      currency="RON"
+                    />
+                    <AccountTransactionRow
+                      transaction={{
+                        id: "sample-debit",
+                        day: "09",
+                        month: "APR",
+                        monthKey: "2026-04",
+                        monthTitle: "APRIL 2026",
+                        label: "Transfer",
+                        amount: -900,
+                        type: "debit",
+                        category: "Transfers",
+                        pfmCategory: "Transfers",
+                        pfmSubcategory: "Outgoing transfer",
+                        status: "Booked",
+                      }}
+                      formattedAmount="900,00"
+                      currency="RON"
+                    />
+                  </div>
                 </div>
               </Specimen>
               <Specimen name="More cards / all concrete card components" source="screens/more/cards/*" specs={["120px height", "8px radius", "individual image positioning"]}>
@@ -1362,14 +1539,8 @@ export default function DesignSystemPage() {
 
           <Section id="products" title="Products and country variants" description="Product accordions si product cards pentru toate tarile, ca sa vezi diferentele regionale intr-un singur loc.">
             <div className="grid gap-5">
-              <Specimen name="Products offer card" source="components/products/ProductOfferCard.tsx" specs={["327x157", "text stack 206px", "gap 8px", "title 24px bold", "subtitle 16px regular"]}>
-                <ProductOfferCard
-                  offer={{
-                    id: "ds-offer-sample",
-                    title: "Lorem ipsum lorem\nipsum title!",
-                    description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor.",
-                  }}
-                />
+              <Specimen name="Products offer card" source="components/products/ProductOfferCard.tsx" specs={["327x157", "dropdown variant selector", "16px text-to-image gutter", "100px image column", "title 22px bold / 2 lines", "subtitle 18px regular / 3 lines", "family + light/normal tones"]}>
+                <ProductOfferCardVariantSpecimen />
               </Specimen>
               <Specimen name="Product card / list / total row" source="components/ProductCard.tsx + ProductsList.tsx + TotalRow.tsx" tone="gray" specs={["card padding 16px", "icon 32px", "amount 20px", "decimals 14px"]}>
                 <div className="w-[375px]">

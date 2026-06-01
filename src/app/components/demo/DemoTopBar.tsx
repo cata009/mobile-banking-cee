@@ -91,14 +91,9 @@ export function DemoTopBar() {
                 onClick={() => setIsProductDropdownOpen(!isProductDropdownOpen)}
                 className="flex items-center gap-1 hover:opacity-70 transition-opacity"
               >
-                <div className="flex flex-col gap-1 text-left">
-                  <p className="font-['UniCredit:Regular',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
-                    Application
-                  </p>
-                  <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
-                    {PRODUCTS[product].label}
-                  </p>
-                </div>
+                <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
+                  {PRODUCTS[product].label}
+                </p>
                 <AppIcon name="demo-chevron-down" color="var(--uc-text)" className="w-6 h-6 shrink-0" />
               </button>
 
@@ -133,14 +128,9 @@ export function DemoTopBar() {
                 onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
                 className="flex items-center gap-1 hover:opacity-70 transition-opacity"
               >
-                <div className="flex flex-col gap-1 text-left">
-                  <p className="font-['UniCredit:Regular',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
-                    Country
-                  </p>
-                  <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
-                    {COUNTRY_META[country]?.nameEN || country}
-                  </p>
-                </div>
+                <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
+                  {COUNTRY_META[country]?.nameEN || country}
+                </p>
                 <AppIcon name="demo-chevron-down" color="var(--uc-text)" className="w-6 h-6 shrink-0" />
               </button>
 
@@ -181,30 +171,7 @@ export function DemoTopBar() {
             </div>
           </div>
 
-          <div className="flex items-center">
-            <div className="bg-[var(--uc-app-bg)] flex gap-0.5 items-center px-1 py-0.5 rounded-[30px]">
-              <button
-                onClick={() => setScenario("active")}
-                className={`px-3 py-1 rounded-[30px] transition-all ${
-                  scenario === "active"
-                    ? "bg-[var(--uc-surface)] font-['UniCredit:Bold',sans-serif] text-[16px] text-[var(--uc-text)] leading-[18px]"
-                    : "bg-transparent font-['UniCredit:Regular',sans-serif] text-[16px] text-[var(--uc-text-muted)] leading-[18px]"
-                }`}
-              >
-                Active App
-              </button>
-              <button
-                onClick={() => setScenario("inactive")}
-                className={`px-3 py-1 rounded-[30px] transition-all ${
-                  scenario === "inactive"
-                    ? "bg-[var(--uc-surface)] font-['UniCredit:Bold',sans-serif] text-[16px] text-[var(--uc-text)] leading-[18px]"
-                    : "bg-transparent font-['UniCredit:Regular',sans-serif] text-[16px] text-[var(--uc-text-muted)] leading-[18px]"
-                }`}
-              >
-                Inactive App
-              </button>
-            </div>
-          </div>
+          <ScenarioModeSwitch value={scenario} onChange={setScenario} />
 
           <div className="flex items-center gap-6">
             <div className="relative" ref={releaseDropdownRef}>
@@ -212,14 +179,9 @@ export function DemoTopBar() {
                 onClick={() => setIsReleaseDropdownOpen(!isReleaseDropdownOpen)}
                 className="flex items-center gap-1 hover:opacity-70 transition-opacity"
               >
-                <div className="flex flex-col gap-1 text-left">
-                  <p className="font-['UniCredit:Regular',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
-                    Release
-                  </p>
-                  <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
-                    {selectedRelease.label}
-                  </p>
-                </div>
+                <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
+                  {selectedRelease.label}
+                </p>
                 <AppIcon name="demo-chevron-down" color="var(--uc-text)" className="w-6 h-6 shrink-0" />
               </button>
 
@@ -303,6 +265,41 @@ function ThemeModeSwitch({
             }`}
           >
             {mode === "light" ? "Light" : "Dark"}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ScenarioModeSwitch({
+  value,
+  onChange,
+}: {
+  value: "active" | "inactive";
+  onChange: (value: "active" | "inactive") => void;
+}) {
+  return (
+    <div
+      className="flex items-center rounded-[18px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[2px]"
+      aria-label="Scenario mode"
+    >
+      {(["active", "inactive"] as const).map((mode) => {
+        const isActive = value === mode;
+
+        return (
+          <button
+            key={mode}
+            type="button"
+            aria-pressed={isActive}
+            onClick={() => onChange(mode)}
+            className={`rounded-[16px] px-3 py-1 font-['UniCredit:Bold',sans-serif] text-[12px] leading-none transition-colors ${
+              isActive
+                ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm"
+                : "text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]"
+            }`}
+          >
+            {mode === "active" ? "Active" : "Inactive"}
           </button>
         );
       })}

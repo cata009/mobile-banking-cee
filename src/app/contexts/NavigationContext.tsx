@@ -12,10 +12,13 @@ export type Screen =
   | "homepage"
   | "language-selector"
   | "analytics" // Spending analytics
+  | "messages" // Messages inbox/outbox
   | "payments" // Payments menu
   | "products" // Products menu
   | "prime" // Prime screen
   | "more" // More screen
+  | "documents" // Documents screen
+  | "settings" // Settings screen
   | "contacts" // Contacts screen
   | "account-detail" // Account details and transactions
   | "account-details-info" // Account details information

@@ -71,13 +71,13 @@ function createProductsMenuConfig(hasShopSmartTab: boolean): ProductsMenuConfig 
     offers: [
       {
         id: "offer-1",
-        title: "Lorem ipsum lorem\nipsum title!",
-        description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor.",
+        title: "Premium current\naccount offer",
+        description: "Enjoy zero monthly fee\nand smart everyday\nbanking benefits.",
       },
       {
         id: "offer-2",
-        title: "Lorem ipsum offer\nfor you!",
-        description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit.",
+        title: "Refinance with\nbetter rates",
+        description: "Move your loan and get\nmore flexible monthly\ninstallments.",
       },
     ],
     productsTitle: "OUR PRODUCTS",
@@ -95,8 +95,8 @@ function createProductsMenuConfig(hasShopSmartTab: boolean): ProductsMenuConfig 
     shopSmartOffers: [
       {
         id: "shopsmart-offer-1",
-        title: "Lorem ipsum\nShopSmart title!",
-        description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor.",
+        title: "Shop smarter with\nyour card",
+        description: "Get exclusive partner\ndeals and extra value\nwith every payment.",
       },
     ],
     shopSmartProducts: SHOPSMART_PRODUCTS,

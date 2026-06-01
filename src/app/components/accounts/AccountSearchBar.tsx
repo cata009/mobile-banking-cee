@@ -50,13 +50,13 @@ export default function AccountSearchBar({
 
   return (
     <div
-      className="flex h-[36px] flex-col items-start gap-[10px] self-stretch rounded-[10px] bg-[var(--uc-app-bg)] px-0 py-[2px]"
-      data-ds-label="AccountSearchBar 36px"
+      className="flex min-h-[32px] flex-col items-start self-stretch rounded-[10px] bg-[var(--uc-app-bg)] p-0"
+      data-ds-label="AccountSearchBar 32px"
     >
       <div className="flex h-[32px] w-full items-center justify-between">
-        <label className="flex min-w-0 flex-1 items-center gap-[8px] text-left">
-          <span className="h-[32px] w-[32px] shrink-0" data-ds-label="Search icon 32x32">
-            <AppIcon name="search" color="var(--uc-text)" />
+        <label className="flex h-[32px] min-w-0 flex-1 items-center gap-[8px] text-left">
+          <span className="flex h-[32px] w-[32px] shrink-0 items-center justify-center" data-ds-label="Search icon 32x32">
+            <AppIcon name="search" size={32} color="var(--uc-text)" />
           </span>
           <input
             ref={inputRef}
@@ -67,7 +67,7 @@ export default function AccountSearchBar({
             onFocus={handleInputFocus}
             placeholder={placeholder}
             aria-label={placeholder}
-            className="min-w-0 flex-1 appearance-none bg-transparent font-['UniCredit',sans-serif] text-[14px] font-bold leading-normal text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)] [&::-webkit-search-cancel-button]:hidden"
+            className="h-[32px] min-w-0 flex-1 appearance-none bg-transparent font-['UniCredit',sans-serif] text-[14px] font-bold leading-normal text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)] [&::-webkit-search-cancel-button]:hidden"
           />
         </label>
         <button
@@ -78,9 +78,9 @@ export default function AccountSearchBar({
           data-ds-label={hasSearchValue ? "Clear results icon 32x32" : "Filter icon 32x32"}
         >
           {hasSearchValue ? (
-            <AppIcon name="clear-results" color="var(--uc-text)" />
+            <AppIcon name="clear-results" size={32} color="var(--uc-text)" />
           ) : (
-            <AppIcon name="filters" color="var(--uc-text)" />
+            <AppIcon name="filters" size={32} color="var(--uc-text)" />
           )}
         </button>
       </div>

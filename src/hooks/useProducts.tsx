@@ -1,50 +1,16 @@
 import { ReactNode } from 'react';
 import { 
   Product, 
-  ProductCategory, 
-  Currency,
   getProductsByCategory,
   formatAmount 
 } from '@/data/products';
 import svgPaths from '@/imports/svg-wan58807zo';
 import { useDemo } from '@/app/state/demoStore';
-import { getCurrencySymbol } from '@/app/registry/countryConfig';
-import type { Country } from '@/app/state/demoTypes';
-
-// FX Rates (base: 1 EUR)
-const FX_RATES: Record<Currency, number> = {
-  'EUR': 1,
-  'CZK': 24.3902,  // 1 EUR = 24.39 CZK
-  'RON': 4.9756,   // 1 EUR = 4.98 RON
-  'BAM': 1.9558,   // 1 EUR = 1.96 BAM
-  'HUF': 396.5,    // 1 EUR = 396.5 HUF
-  'RSD': 117.09,   // 1 EUR = 117.09 RSD
-  'USD': 1.08,
-  'GBP': 0.85
-};
-
-// Map country to local currency
-const COUNTRY_CURRENCY_MAP: Record<Country, Currency> = {
-  'CZ': 'CZK',
-  'SK': 'EUR',
-  'SI': 'EUR',
-  'RO': 'RON',
-  'BA': 'BAM',
-  'HU': 'HUF',
-  'RS': 'RSD'
-};
+import { convertCurrency, getCountryCurrency, roundMoney } from '@/data/exchangeRates';
 
 export function useProducts() {
   const { country } = useDemo();
-  const localCurrency = COUNTRY_CURRENCY_MAP[country];
-  
-  // Convert amount from one currency to another
-  const convertCurrency = (amount: number, fromCurrency: Currency, toCurrency: Currency): number => {
-    if (fromCurrency === toCurrency) return amount;
-    // Convert to EUR first, then to target currency
-    const inEUR = amount / FX_RATES[fromCurrency];
-    return inEUR * FX_RATES[toCurrency];
-  };
+  const localCurrency = getCountryCurrency(country);
   
   // Get base categories and convert all products to local currency
   const categories = getProductsByCategory().map(category => ({
@@ -52,7 +18,7 @@ export function useProducts() {
     products: category.products.map(product => ({
       ...product,
       // Convert balance to local currency
-      balance: convertCurrency(product.balance, product.currency, localCurrency),
+      balance: roundMoney(convertCurrency(product.balance, product.currency, localCurrency)),
       // Update currency to local
       currency: localCurrency
     }))

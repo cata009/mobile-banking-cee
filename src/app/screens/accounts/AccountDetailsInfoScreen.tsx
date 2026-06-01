@@ -1,12 +1,13 @@
 import PageHeader from "@/app/components/PageHeader";
 import { AppIcon } from "@/app/components/icons";
+import AccountDetailsInfoField from "@/app/components/accounts/AccountDetailsInfoField";
 import { useDemo } from "@/app/state/demoStore";
 import { formatMoneyNumber, getCountryConfig } from "@/app/registry/countryConfig";
 import { maskFormattedAmount } from "@/app/utils/amountPrivacy";
 import { useProducts } from "@/hooks/useProducts";
 import { isAccountDetailProduct } from "@/data/products";
 import { useState } from "react";
-import type { ReactNode, UIEvent } from "react";
+import type { UIEvent } from "react";
 import type { Product } from "@/data/products";
 
 interface AccountDetailsInfoScreenProps {
@@ -24,30 +25,6 @@ const PRODUCT_TITLE_BY_TYPE: Record<Product["type"], string> = {
   mortgage: "MORTGAGE",
   investment_account: "INVESTMENT ACCOUNT",
 };
-
-function DetailField({
-  label,
-  value,
-  action,
-}: {
-  label: string;
-  value: string;
-  action?: ReactNode;
-}) {
-  return (
-    <div className="grid grid-cols-[1fr_40px] items-start gap-[16px]">
-      <div className="min-w-0">
-        <p className="font-['UniCredit',sans-serif] text-[18px] leading-[22px] font-bold uppercase text-[var(--uc-text)]">
-          {label}
-        </p>
-        <p className="mt-[2px] break-words font-['UniCredit',sans-serif] text-[20px] leading-[24px] font-normal text-[var(--uc-text-muted)]">
-          {value}
-        </p>
-      </div>
-      <div className="flex h-[40px] w-[40px] items-center justify-center">{action}</div>
-    </div>
-  );
-}
 
 function CardThumbnail() {
   return (
@@ -128,14 +105,18 @@ export default function AccountDetailsInfoScreen({
       />
 
       <div className="px-[24px] pb-[40px] pt-[46px]">
-        <div className="flex flex-col gap-[46px]">
-          <DetailField label="Account number" value={product.accountNumber} action={<AppIcon name="copy-documents" color="var(--uc-text)" />} />
-          <DetailField label="Available funds" value={availableFunds} />
-          <DetailField label="Current balance" value={currentBalance} />
-          <DetailField label="Blocked/reserved amount" value={zeroAmount} />
-          <DetailField label="Overdraft" value={zeroAmount} />
-          <DetailField label="Account title" value={PRODUCT_TITLE_BY_TYPE[product.type]} />
-          <DetailField label="Offer" value="Account under favorable conditions" />
+        <div className="flex flex-col">
+          <AccountDetailsInfoField
+            title="Account number"
+            subtitle={product.accountNumber}
+            trailingIcon={<AppIcon name="copy-documents" color="var(--uc-text)" />}
+          />
+          <AccountDetailsInfoField title="Available funds" subtitle={availableFunds} />
+          <AccountDetailsInfoField title="Current balance" subtitle={currentBalance} />
+          <AccountDetailsInfoField title="Blocked/reserved amount" subtitle={zeroAmount} />
+          <AccountDetailsInfoField title="Overdraft" subtitle={zeroAmount} />
+          <AccountDetailsInfoField title="Account title" subtitle={PRODUCT_TITLE_BY_TYPE[product.type]} />
+          <AccountDetailsInfoField title="Offer" subtitle="Account under favorable conditions" />
         </div>
 
         <div className="flex justify-center py-[48px]">

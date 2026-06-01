@@ -1,42 +1,68 @@
+import { getProductBannerTone, type ProductBannerColorFamily } from "@/app/config/productBannerVariants";
 import type { ProductsOffer } from "@/app/config/productsMenuConfig";
 import imgCoinsLeaves from "figma:asset/612ac7960c2d43bfdada538aae6f3cf27be44d99.png";
 
 interface ProductOfferCardProps {
   offer: ProductsOffer;
   onClick?: (offer: ProductsOffer) => void;
+  colorFamily?: ProductBannerColorFamily;
+  lightVersion?: boolean;
 }
 
-export default function ProductOfferCard({ offer, onClick }: ProductOfferCardProps) {
+function ProductOfferChevronBackground({ fillColor }: { fillColor: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 161 157"
+      className="absolute left-[-14px] top-1/2 h-[157px] w-[161px] -translate-y-1/2"
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M41.828 -36L160.486 78L41.828 192C24.9191 176.767 24.9191 152.064 41.828 136.824L103.055 78L41.828 19.176C24.9191 3.9356 24.9191 -20.7596 41.828 -36ZM-65.9884 -36L52.6697 78L-65.9884 192C-82.8971 176.767 -82.8971 152.064 -65.9884 136.824L-4.76076 78L-65.9884 19.176C-82.8971 3.9356 -82.8971 -20.7596 -65.9884 -36Z"
+        fill={fillColor}
+      />
+    </svg>
+  );
+}
+
+export default function ProductOfferCard({
+  offer,
+  onClick,
+  colorFamily = "green",
+  lightVersion = false,
+}: ProductOfferCardProps) {
+  const tone = getProductBannerTone(colorFamily, lightVersion);
+
   return (
     <button
       type="button"
-      className="relative h-[157px] w-[327px] shrink-0 overflow-hidden rounded-[8px] bg-[var(--uc-green-deep)] text-left text-[var(--uc-text-inverse)] cursor-pointer"
+      className="relative h-[157px] w-[327px] shrink-0 overflow-hidden rounded-[8px] text-left cursor-pointer"
+      style={{ backgroundColor: tone.backgroundColor, color: tone.textColor }}
+      data-product-offer-card-tone={tone.id}
       onClick={() => onClick?.(offer)}
     >
-      <div className="absolute inset-0 opacity-70">
-        <div className="absolute left-[-42px] top-[-28px] h-[220px] w-[110px] rotate-[-34deg] bg-[var(--uc-green-bright)]" />
-        <div className="absolute left-[78px] top-[-60px] h-[260px] w-[72px] rotate-[-44deg] bg-[var(--uc-green-main)]" />
-        <div className="absolute right-[-54px] top-[-12px] h-[204px] w-[84px] rotate-[-24deg] bg-[var(--uc-green-bright)]" />
-      </div>
+      <ProductOfferChevronBackground fillColor={tone.chevronColor} />
 
       <img
         src={imgCoinsLeaves}
         alt=""
-        className="absolute right-[-70px] top-0 h-full w-[178px] object-cover opacity-90 saturate-150"
+        className="absolute right-0 top-0 h-full w-[100px] object-cover object-center"
         draggable={false}
       />
 
-      <div className="relative z-10 flex h-full items-center px-[20px]">
-        <div className="flex w-[206px] flex-col items-start gap-[8px]">
+      <div className="relative z-10 flex h-full items-center pl-[20px] pr-[116px]">
+        <div className="flex min-w-0 flex-1 flex-col items-start gap-[8px]">
           <h3
-            className="self-stretch whitespace-pre-line font-['UniCredit',sans-serif] font-bold text-[var(--uc-text-inverse)]"
-            style={{ fontSize: "24px", lineHeight: "normal" }}
+            className="self-stretch overflow-hidden whitespace-pre-line font-['UniCredit',sans-serif] font-bold [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+            style={{ color: tone.textColor, fontSize: "22px", lineHeight: "normal" }}
           >
             {offer.title}
           </h3>
           <p
-            className="self-stretch whitespace-pre-line font-['UniCredit',sans-serif] font-normal text-[var(--uc-text-inverse)]"
-            style={{ fontSize: "16px", lineHeight: "normal" }}
+            className="self-stretch overflow-hidden whitespace-pre-line font-['UniCredit',sans-serif] font-normal [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]"
+            style={{ color: tone.textColor, fontSize: "18px", lineHeight: "normal" }}
           >
             {offer.description}
           </p>

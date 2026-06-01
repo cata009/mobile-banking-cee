@@ -8,6 +8,9 @@ const paymentOtherIconName: Record<PaymentOtherIcon, IconName> = {
   exchange: "payment-exchange-rates",
 };
 
+const paymentOtherLabelClass =
+  "overflow-hidden text-center font-['UniCredit',sans-serif] text-[14px] font-bold tracking-[1px] text-[var(--uc-text)]";
+
 function PaymentOtherShortcutIcon({ icon }: { icon: PaymentOtherIcon }) {
   return <AppIcon name={paymentOtherIconName[icon]} color="var(--uc-text-inverse)" />;
 }
@@ -23,7 +26,7 @@ export default function PaymentOtherShortcut({
     <button
       type="button"
       onClick={() => onClick?.(item)}
-      className="flex min-w-0 flex-1 flex-col items-center gap-[10px] cursor-pointer"
+      className="flex w-[74px] shrink-0 flex-col items-center gap-[10px] cursor-pointer"
       aria-label={item.label.replace(/\n/g, " ")}
     >
       <span className="flex size-[58px] items-center justify-center rounded-full bg-[var(--uc-action)]">
@@ -32,10 +35,15 @@ export default function PaymentOtherShortcut({
         </span>
       </span>
       <span
-        className="whitespace-pre-line text-center font-['UniCredit',sans-serif] text-[14px] font-bold leading-normal tracking-[1px] text-[var(--uc-text)]"
+        className={paymentOtherLabelClass}
         style={{ fontFeatureSettings: "'liga' off, 'clig' off" }}
       >
-        {item.label}
+        <span
+          className="block whitespace-pre-line [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+          style={{ lineHeight: "15px" }}
+        >
+          {item.label}
+        </span>
       </span>
     </button>
   );

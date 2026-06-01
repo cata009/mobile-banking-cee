@@ -1,6 +1,6 @@
 # Mobile Banking CEE Project Model
 
-Last updated: 2026-05-27
+Last updated: 2026-05-29
 
 This document is the architecture contract for how the demo platform should organize PI, SME, countries, design systems, baselines, releases, features, screens, and flows.
 
@@ -19,7 +19,7 @@ The project must serve three related uses:
 ```mermaid
 flowchart TD
   Operator["Human operator / stakeholder"] --> DemoShell["Demo platform shell"]
-  DemoShell --> Product["Product: PI or SME"]
+  DemoShell --> Product["Product: PI / SME / KIDS PI"]
   Product --> Country["Country"]
   Country --> DesignSystem["Design system"]
   DesignSystem --> Baseline["Baseline"]
@@ -39,7 +39,10 @@ flowchart TD
 Current target values:
 
 - `PI`: personal individual mobile banking;
-- `SME`: small and medium enterprise mobile banking.
+- `SME`: small and medium enterprise mobile banking;
+- `KIDS_PI`: kids-focused PI application layer, surfaced in runtime as Mobile PI Kids.
+
+Current runtime note: `KIDS_PI` has a Romania-only, current-design-system RO Kids prototype. It is mock-driven and contained in one feature module for experimentation. Non-RO Kids contexts and future-design-system Kids contexts still render the honest planned-state placeholder until their separate concepts are implemented.
 
 Rule: product differences must be explicit. Do not hide PI/SME divergence inside generic component conditionals without metadata.
 
@@ -208,7 +211,7 @@ The current settings/features panel should evolve into a control panel.
 
 It should eventually expose:
 
-- product: `PI` / `SME`;
+- product: `PI` / `SME` / `KIDS_PI`;
 - country;
 - design system;
 - baseline;
@@ -275,10 +278,10 @@ This is a target contract, not current runtime behavior.
 | Scenario switching | implemented | `src/app/state/demoTypes.ts`, `src/app/state/demoStore.tsx` |
 | Release/baseline switching | implemented | `src/app/registry/releaseRegistry.ts`, `src/app/state/demoStore.tsx`, `src/app/components/demo/DemoTopBar.tsx` |
 | Feature metadata | partial | `src/app/registry/demoConfig.ts`, `src/app/registry/featureUI.ts` |
-| PI/SME product model | implemented as runtime selector with planned-state placeholder | `src/app/registry/projectModel.ts`, `src/app/components/demo/DemoTopBar.tsx`, `src/app/components/UnsupportedContextScreen.tsx` |
+| PI/SME/KIDS_PI product model | implemented as runtime selector; SME and unsupported Kids contexts use planned-state placeholders, while RO/current DS Mobile PI Kids renders a mock-driven prototype | `src/app/registry/projectModel.ts`, `src/app/components/demo/DemoTopBar.tsx`, `src/app/App.tsx`, `src/app/components/UnsupportedContextScreen.tsx`, `src/app/screens/kids/RoKidsApp.tsx` |
 | Screen registry | foundation only | `src/app/registry/screenRegistry.ts` |
-| Flow registry | foundation only | `src/app/registry/flowRegistry.ts` |
-| Component registry | foundation only | `src/app/registry/componentRegistry.ts` |
+| Flow registry | foundation plus RO Kids core-flow entry | `src/app/registry/flowRegistry.ts` |
+| Component registry | foundation plus RO Kids contained-module entry | `src/app/registry/componentRegistry.ts` |
 | AI catalog export | foundation only | `src/app/registry/aiCatalog.ts` |
 | Next design system | implemented as runtime selector with planned-state placeholder | `src/app/registry/projectModel.ts`, `src/app/components/demo/DemoFeatureSidePanel.tsx`, `src/app/components/UnsupportedContextScreen.tsx` |
 | Larger platform export | foundation only | `src/app/registry/aiCatalog.ts` |

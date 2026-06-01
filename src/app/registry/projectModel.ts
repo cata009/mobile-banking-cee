@@ -16,9 +16,10 @@ export interface ProductMeta {
   label: string;
   description: string;
   status: "active" | "planned";
+  selectorVisibility: "visible" | "hidden";
 }
 
-export const PRODUCT_ORDER: readonly ProductId[] = ["PI", "SME"] as const;
+export const PRODUCT_ORDER: readonly ProductId[] = ["PI", "SME", "KIDS_PI"] as const;
 
 export interface DesignSystemMeta {
   id: DesignSystemId;
@@ -47,12 +48,21 @@ export const PRODUCTS: Record<ProductId, ProductMeta> = {
     label: "Mobile PI",
     description: "Personal individual mobile banking demo application.",
     status: "active",
+    selectorVisibility: "visible",
   },
   SME: {
     id: "SME",
     label: "Mobile SME",
     description: "Small and medium enterprise mobile banking demo application.",
     status: "planned",
+    selectorVisibility: "visible",
+  },
+  KIDS_PI: {
+    id: "KIDS_PI",
+    label: "Mobile PI Kids",
+    description: "Romania-first kids-focused personal individual mobile banking demo layer.",
+    status: "active",
+    selectorVisibility: "visible",
   },
 };
 

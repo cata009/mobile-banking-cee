@@ -1,5 +1,5 @@
 import type { AccountTransaction } from "@/data/accountDetails";
-import { AppIcon } from "@/app/components/icons";
+import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
 
 interface AccountTransactionRowProps {
   transaction: AccountTransaction;
@@ -9,10 +9,10 @@ interface AccountTransactionRowProps {
   onClick?: (transaction: AccountTransaction) => void;
 }
 
-function TransactionIcon() {
+function TransactionIcon({ transaction }: { transaction: AccountTransaction }) {
   return (
     <span className="flex h-[32px] w-[32px] items-center justify-center" data-ds-label="Transaction icon box 32x32">
-      <AppIcon name="transaction-transfer" color="var(--uc-green-status)" />
+      <PfmCategoryIcon category={transaction.pfmCategory} size={32} />
     </span>
   );
 }
@@ -48,24 +48,29 @@ export default function AccountTransactionRow({
       className="flex h-[80px] w-[375px] items-center justify-between bg-transparent px-[16px] py-[20px] text-left"
       data-ds-label="AccountTransactionRow 375x80"
     >
-      {showDate && (
-        <div className="flex flex-col items-center gap-[2px]">
-          <p className="font-['UniCredit',sans-serif] text-center text-[18px] font-bold leading-normal text-[var(--uc-text)]">
-            {transaction.day}
-          </p>
-          <p className="font-['UniCredit',sans-serif] text-center text-[14px] font-bold leading-normal text-[var(--uc-text-muted)]">
-            {transaction.month}
-          </p>
-        </div>
-      )}
+      <div className="flex shrink-0 items-center gap-[16px]">
+        {showDate && (
+          <div className="flex flex-col items-center gap-[2px]">
+            <p className="font-['UniCredit',sans-serif] text-center text-[18px] font-bold leading-[20px] text-[var(--uc-text)]">
+              {transaction.day}
+            </p>
+            <p className="font-['UniCredit',sans-serif] text-center text-[14px] font-bold leading-[15px] text-[var(--uc-text-muted)]">
+              {transaction.month}
+            </p>
+          </div>
+        )}
 
-      <TransactionIcon />
+        <TransactionIcon transaction={transaction} />
+      </div>
 
       <div className="flex w-[247px] shrink-0 flex-col items-end gap-[4px]">
-        <p className="font-['UniCredit',sans-serif] text-right text-[16px] font-normal leading-normal text-[var(--uc-text)]">
+        <p className="font-['UniCredit',sans-serif] text-right text-[16px] font-normal leading-[18px] text-[var(--uc-text)]">
           {transaction.label}
         </p>
-        <p className="text-right font-['UniCredit',sans-serif] font-bold leading-normal" style={{ color: amountColor }}>
+        <p
+          className="text-right font-['UniCredit',sans-serif] font-bold leading-[22px]"
+          style={{ color: amountColor }}
+        >
           <span className="text-[20px]">{sign}{amountParts.integer}</span>
           <span className="text-[20px] tracking-[0.3px]">{amountParts.separator}</span>
           <span className="text-[14px] uppercase">{amountParts.decimals} {currency}</span>

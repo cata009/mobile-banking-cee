@@ -15,10 +15,10 @@ export default function AccountTransactionMonthDivider({
       data-ds-label="AccountTransactionMonthDivider"
     >
       <div className="flex items-center justify-between self-stretch">
-        <h2 className="font-['UniCredit',sans-serif] text-[18px] font-bold leading-normal text-[var(--uc-text)]">
+        <h2 className="font-['UniCredit',sans-serif] text-[14px] font-bold uppercase leading-[normal] text-[var(--uc-text-muted)]">
           {title}
         </h2>
-        <p className="font-['UniCredit',sans-serif] text-[18px] font-bold leading-normal text-[var(--uc-text)]">
+        <p className="font-['UniCredit',sans-serif] text-right text-[14px] font-bold uppercase leading-[normal] text-[var(--uc-text)]">
           {total} {currency}
         </p>
       </div>

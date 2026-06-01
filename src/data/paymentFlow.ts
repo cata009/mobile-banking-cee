@@ -1,6 +1,8 @@
 import { formatMoneyNumber, getCountryConfig } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import type { AccountTransaction } from "@/data/accountDetails";
+import { getPfmCategory, normalizePfmCategory } from "@/data/pfmCategories";
+import type { PfmCategoryName } from "@/data/pfmCategories";
 import type { Product } from "@/data/products";
 
 export type DomesticPaymentEntry = "new" | "redo";
@@ -30,6 +32,10 @@ export interface TransactionDetailData {
   amount: string;
   categoryGroup: string;
   categoryTag: string;
+  pfmCategory: PfmCategoryName;
+  pfmCategoryLabel: string;
+  pfmCategoryColorVar: string;
+  pfmSubcategoryLabel: string;
   accountNumber: string;
   accountTitle: string;
   accountOwner: string;
@@ -139,14 +145,21 @@ export function createTransactionDetailData(
 ): TransactionDetailData {
   const config = getCountryConfig(country);
   const amount = `${transaction.amount < 0 ? "-" : ""}${formatMoneyNumber(Math.abs(transaction.amount), country)} ${config.currency}`;
-  const categoryTag = transaction.category === "Children" ? "SCHOOL FEES" : transaction.category.toUpperCase();
+  const pfmCategory = normalizePfmCategory(transaction.pfmCategory || transaction.category);
+  const pfmCategoryDefinition = getPfmCategory(pfmCategory);
+  const categoryTag =
+    transaction.pfmSubcategory || (pfmCategory === "Children" ? "School fees" : pfmCategory);
 
   return {
     title: transaction.label,
     bookingDate: formatTransactionDate(transaction),
     amount,
-    categoryGroup: transaction.category.toUpperCase(),
-    categoryTag,
+    categoryGroup: pfmCategory.toUpperCase(),
+    categoryTag: categoryTag.toUpperCase(),
+    pfmCategory,
+    pfmCategoryLabel: pfmCategoryDefinition.name,
+    pfmCategoryColorVar: pfmCategoryDefinition.colorVar,
+    pfmSubcategoryLabel: categoryTag,
     accountNumber: compactAccountNumber(product?.accountNumber || "", country),
     accountTitle: product?.name || "Primary Account",
     accountOwner: "John Snow",

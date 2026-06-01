@@ -1,3 +1,5 @@
+import type { TemplateCodePreviewId } from "@/app/components/templates/TemplateCodePreviews";
+
 export type TemplateRegistryItem = {
   id: string;
   name: string;
@@ -7,6 +9,10 @@ export type TemplateRegistryItem = {
   height: number;
   format: "png" | "jpg";
   relatedComponents: string[];
+  codePreviewId?: TemplateCodePreviewId;
+  implementationPath?: string;
+  implementationStatus?: "source-only" | "reconstructed-code";
+  reuseNotes?: string[];
 };
 
 const screenshotUrl = (fileName: string) => new URL(`../../../screenshots/${fileName}`, import.meta.url).href;
@@ -20,7 +26,15 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["MobileFrame", "StatusBar", "DynamicIsland"],
+    relatedComponents: ["MessagesScreen", "TemplateCodePreview", "AccountSearchBar", "AppIcon"],
+    codePreviewId: "messages-inbox",
+    implementationPath: "src/app/screens/messages/MessagesScreen.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "The runtime Messages screen is reconstructed from this template and uses the same country-addressable message config as the Design System preview.",
+      "Reuses the account search bar, AppIcon header actions, two-tab bar, date/message row, new badge, and dot-menu patterns.",
+      "The screenshot remains source evidence; the Design System preview renders reconstructed JSX while the header Messages icon opens the runtime screen.",
+    ],
   },
   {
     id: "template-67",
@@ -30,7 +44,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["MobileFrame", "StatusBar", "DynamicIsland"],
+    relatedComponents: ["TemplateCodePreview", "AccountSearchBar", "AppIcon"],
+    codePreviewId: "recurrent-payment",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Shares the same phone surface, header, tab bar, search strip, section title, and dot-menu primitives with template 52.",
+      "The standing-order row is data-driven, so further payment-list templates can reuse the same shape.",
+    ],
   },
   {
     id: "template-account-options",
@@ -40,7 +61,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 375,
     height: 1038,
     format: "png",
-    relatedComponents: ["AccountOptionsScreen", "PageHeader"],
+    relatedComponents: ["AccountOptionsScreen", "TemplateCodePreview", "AppIcon"],
+    codePreviewId: "account-options",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the account options list and product recommendation cards as JSX using the same account-details data already used by the runtime AccountOptionsScreen.",
+      "Introduces reusable account-option icon mapping and product promo card composition for follow-up account option flows.",
+    ],
   },
   {
     id: "template-activate-mtoken",
@@ -50,7 +78,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 754,
     height: 1628,
     format: "jpg",
-    relatedComponents: ["PreLoginActiveScreen", "PrimaryButton"],
+    relatedComponents: ["PreLoginActiveScreen", "TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    codePreviewId: "activate-mtoken",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the Activate Mobile Token choice screen with shared top chrome, radio option rows, CSS hero art, and fixed Start CTA.",
+      "Shares the same radio-row primitive with Generate Token, Product selection, and account-selection panel templates.",
+    ],
   },
   {
     id: "template-analytics",
@@ -60,7 +95,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 754,
     height: 1628,
     format: "jpg",
-    relatedComponents: ["BottomNavigation", "PageHeader"],
+    relatedComponents: ["BottomNavigation", "TemplateCodePreview", "AppIcon"],
+    codePreviewId: "analytics-overview",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the My Spendings analytics overview with code-native chart bars, add-cash banner, money-out summary, and five-item bottom navigation.",
+      "Creates reusable chart and five-tab navigation primitives for future analytics templates.",
+    ],
   },
   {
     id: "template-apple-pay",
@@ -70,7 +112,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["PrimaryButton", "PageHeader"],
+    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    codePreviewId: "apple-pay-activation",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the Apple Pay activation screen as JSX with close action, card/device hero, explanatory copy, fixed bottom CTA, and home indicator.",
+      "The hero is code-native CSS composition so this template can be reused without embedding the PNG as the implementation surface.",
+    ],
   },
   {
     id: "template-cards",
@@ -80,7 +129,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 754,
     height: 1996,
     format: "jpg",
-    relatedComponents: ["ProductCard", "ProductsList", "BottomNavigation"],
+    relatedComponents: ["ProductCard", "ProductsList", "BottomNavigation", "TemplateCodePreview", "AppIcon"],
+    codePreviewId: "cards-overview",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the Cards overview as JSX with a generated debit-card surface, free-to-spend balance, wallet actions, shortcuts, search, transaction rows, and bottom navigation.",
+      "Shares shortcut and transaction-row primitives with account detail and transaction detail templates.",
+    ],
   },
   {
     id: "template-contact",
@@ -90,7 +146,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["ContactsDivider", "ContactsNavigationCard", "PageHeader"],
+    relatedComponents: ["ContactsDivider", "ContactsNavigationCard", "TemplateCodePreview", "AppIcon"],
+    codePreviewId: "contact-info-sheet",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the contact information bottom sheet with a dark backdrop, close action, and reusable contact action cards.",
+      "Uses existing contact iconography so support/contact sheet flows can be composed without screenshot assets.",
+    ],
   },
   {
     id: "template-documents",
@@ -100,7 +163,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 863,
     format: "png",
-    relatedComponents: ["DocumentsCard", "PageHeader"],
+    relatedComponents: ["DocumentsScreen", "PageHeader", "AccountSearchBar"],
+    codePreviewId: "documents",
+    implementationPath: "src/app/screens/documents/DocumentsScreen.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the Documents list as the same family as Messages, reusing the shared header and search treatment but removing the mailbox tabs and per-row dot menu.",
+      "The More > Documents runtime screen and the Design System Template preview both read the same `documentsConfig.ts` grouped-list data.",
+    ],
   },
   {
     id: "template-error-to-be",
@@ -110,7 +180,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["PrimaryButton", "PageHeader"],
+    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    codePreviewId: "error-status",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Shares the feedback status screen primitive with Informative, Pending, Success, and Warning templates.",
+      "Reconstructs the title, help action, red status icon, lorem copy block, and fixed bottom CTA as JSX.",
+    ],
   },
   {
     id: "template-generate-token",
@@ -120,7 +197,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["PrimaryButton", "TextField"],
+    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    codePreviewId: "generate-token",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the token-generation screen with logout/help chrome, token panel, reusable radio option rows, and bottom Generate CTA.",
+      "Shares radio-row and CTA primitives with Product selection and account-selection panel templates.",
+    ],
   },
   {
     id: "template-homepage",
@@ -130,7 +214,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 750,
     height: 1624,
     format: "png",
-    relatedComponents: ["HomeHeader", "AccountSummary", "BottomNavigation"],
+    relatedComponents: ["HomeHeader", "AccountSummary", "BottomNavigation", "TemplateCodePreview", "AppIcon"],
+    codePreviewId: "account-detail-homepage",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "The source filename is `homepage`, but the screenshot content is an account-detail home screen; the registry maps it to the reconstructed account-detail homepage preview.",
+      "Reuses account balance card, shortcut, search, transaction-list, and five-item bottom navigation patterns for future account flows.",
+    ],
   },
   {
     id: "template-informative",
@@ -140,7 +231,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["PrimaryButton", "PageHeader"],
+    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    codePreviewId: "informative-status",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Introduces a reusable feedback status screen primitive with help-only top chrome, centered status icon, body copy, and fixed bottom CTA.",
+      "This variant renders the neutral informational icon and title while sharing layout with Pending, Success, Error, and Warning.",
+    ],
   },
   {
     id: "template-language-selection",
@@ -150,7 +248,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 375,
     height: 812,
     format: "png",
-    relatedComponents: ["LanguageSelectorButton", "RadioButton", "PageHeader"],
+    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    codePreviewId: "sign-pin",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "The source filename is `Language Selection`, but the screenshot content is a Sign/PIN screen; the registry maps it to the reconstructed sign-pin code preview.",
+      "Reuses the shared phone surface, back chrome, PIN input line treatment, fixed bottom CTA, and home indicator.",
+    ],
   },
   {
     id: "template-message",
@@ -160,7 +265,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["PageHeader"],
+    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    codePreviewId: "message-detail",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the message detail layout with back chrome, title/date, media placeholder, body copy, primary CTA, and link action.",
+      "Complements template 52 by covering the detail-side message pattern without introducing a runtime detail screen yet.",
+    ],
   },
   {
     id: "template-new-request-with-push",
@@ -170,7 +282,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 871,
     format: "png",
-    relatedComponents: ["PrimaryButton", "PageHeader"],
+    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    codePreviewId: "push-request-form",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the request-with-push form as sectioned JSX fields with payer, account, and payment-information blocks.",
+      "Adds a shared field-line primitive that can be reused by future review/payment form templates.",
+    ],
   },
   {
     id: "template-panel",
@@ -180,7 +299,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 375,
     height: 809,
     format: "png",
-    relatedComponents: ["PanelWithTranslations", "PanelWithoutCoAppingTranslations"],
+    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    codePreviewId: "account-selection-panel",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the account-selection bottom sheet with dark backdrop, sheet header/close action, radio account rows, and Select CTA.",
+      "Shares the same radio option row primitive with Generate Token and Product selection.",
+    ],
   },
   {
     id: "template-payment",
@@ -190,7 +316,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 375,
     height: 1378,
     format: "png",
-    relatedComponents: ["DomesticPaymentFlowScreens", "TextField", "PrimaryButton"],
+    relatedComponents: ["DomesticPaymentFlowScreens", "TextField", "PrimaryButton", "TemplateCodePreview", "AppIcon"],
+    codePreviewId: "domestic-payment-form",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the Domestic payment entry form with section headers, flow fields, camera/dropdown affordances, instant-payment toggle, and fixed Next CTA.",
+      "The shared flow-field primitive is reused by payment review templates and can seed future payment form variants.",
+    ],
   },
   {
     id: "template-pending",
@@ -200,7 +333,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["PrimaryButton", "PageHeader"],
+    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    codePreviewId: "pending-status",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Shares the feedback status screen primitive with Informative, Success, Error, and Warning templates.",
+      "Reconstructs the neutral pending/hourglass status treatment, lorem copy block, and fixed bottom CTA as JSX.",
+    ],
   },
   {
     id: "template-product-selection",
@@ -210,7 +350,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "jpg",
-    relatedComponents: ["ProductAccordion", "ProductAccordionAnimated"],
+    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    codePreviewId: "product-selection",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the product-selection screen with radio rows, default-product toggle, Access CTA, and bottom navigation.",
+      "Uses shared radio and mini bottom-navigation primitives so future product picker flows can reuse the layout.",
+    ],
   },
   {
     id: "template-product",
@@ -220,7 +367,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["ProductsScreen", "ProductMenuCard", "BottomNavigation"],
+    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    codePreviewId: "product-bottom-sheet",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the product bottom-sheet as JSX with real typography, overlay, close action, media placeholder, body copy, and reusable PrimaryButton.",
+      "Useful as a reusable product-detail sheet foundation instead of a static screenshot card.",
+    ],
   },
   {
     id: "template-review-request",
@@ -230,7 +384,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 1281,
     format: "png",
-    relatedComponents: ["PrimaryButton", "PageHeader"],
+    relatedComponents: ["PrimaryButton", "PageHeader", "TemplateCodePreview", "AppIcon"],
+    codePreviewId: "review-request",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the Review request confirmation screen with payer, account, and payment-information sections rendered as read-only rows.",
+      "Shares the read-only row and section-title primitives with Review data and Transaction detail templates.",
+    ],
   },
   {
     id: "template-review",
@@ -240,7 +401,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 375,
     height: 1077,
     format: "png",
-    relatedComponents: ["DomesticPaymentFlowScreens", "PrimaryButton"],
+    relatedComponents: ["DomesticPaymentFlowScreens", "PrimaryButton", "TemplateCodePreview", "AppIcon"],
+    codePreviewId: "review-data",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the Review data payment-order screen with a read-only payment summary, Save as template toggle, and fixed Sign CTA.",
+      "Extends the payment-flow template family without embedding the source PNG as the implementation.",
+    ],
   },
   {
     id: "template-rs-travel-insurance",
@@ -250,7 +418,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["ProductMenuCard", "PrimaryButton"],
+    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    codePreviewId: "travel-insurance-detail",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the travel-insurance detail screen with back/help chrome, code-native travel hero scene, body copy, and fixed Proceed CTA.",
+      "Keeps the screenshot as source evidence while avoiding a screenshot-as-implementation PNG dependency.",
+    ],
   },
   {
     id: "template-settings",
@@ -260,7 +435,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 754,
     height: 1628,
     format: "png",
-    relatedComponents: ["SettingsCard", "PageHeader"],
+    relatedComponents: ["SettingsScreen", "PageHeader", "SectionHeadingDivider", "AppIcon"],
+    codePreviewId: "settings",
+    implementationPath: "src/app/screens/settings/SettingsScreen.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the Settings screen as a shared PageHeader plus section-heading/divider and chevron-list rows driven by a common settings config.",
+      "The More > Settings runtime screen and the Design System Template preview both read the same `settingsConfig.ts` section data so copy and structure stay aligned.",
+    ],
   },
   {
     id: "template-success-to-be",
@@ -270,7 +452,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["PrimaryButton", "PageHeader"],
+    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    codePreviewId: "success-status",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Shares the feedback status screen primitive with Informative, Pending, Error, and Warning templates.",
+      "Reconstructs the green success icon, `Successfully requested` title, lorem copy block, and fixed bottom CTA as JSX.",
+    ],
   },
   {
     id: "template-transaction-detail",
@@ -280,7 +469,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 375,
     height: 1855,
     format: "png",
-    relatedComponents: ["DomesticPaymentFlowScreens", "AccountTransactionRow", "PageHeader"],
+    relatedComponents: ["DomesticPaymentFlowScreens", "AccountTransactionRow", "PageHeader", "TemplateCodePreview", "AppIcon"],
+    codePreviewId: "transaction-detail",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the transaction detail screen with merchant summary, action shortcuts, spending insight chart, copyable details, and Show less action.",
+      "Reuses read-only detail rows and shortcut primitives already introduced for payment/account templates.",
+    ],
   },
   {
     id: "template-transfer-to-new-phone",
@@ -290,7 +486,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 375,
     height: 812,
     format: "png",
-    relatedComponents: ["DomesticPaymentFlowScreens", "PrimaryButton"],
+    relatedComponents: ["TemplateCodePreview", "DomesticPaymentFlowScreens", "PrimaryButton", "AppIcon"],
+    codePreviewId: "successful-payment",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "The source filename is `Transfer to new phone`, but the screenshot content is a Successful payment screen; the registry maps it to a success-payment code preview.",
+      "Reuses the same success icon and bottom CTA pattern as the Domestic payment success runtime screen.",
+    ],
   },
   {
     id: "template-tutorial-1",
@@ -300,7 +503,14 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["TutorialCard", "PrimaryButton"],
+    relatedComponents: ["TemplateCodePreview", "TutorialCard", "AppIcon"],
+    codePreviewId: "tutorial-intro",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Reconstructs the tutorial/webview intro with loading chrome, progress bar, device media area, playback controls, carousel dots, and skip/back/next actions.",
+      "Adds a reusable webview/tutorial composition pattern for future onboarding templates.",
+    ],
   },
   {
     id: "template-warning-to-be",
@@ -310,6 +520,13 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["PrimaryButton", "PageHeader"],
+    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    codePreviewId: "warning-status",
+    implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
+    implementationStatus: "reconstructed-code",
+    reuseNotes: [
+      "Shares the feedback status screen primitive with Informative, Pending, Success, and Error templates.",
+      "Reconstructs the orange warning/bell status icon, lorem copy block, and fixed bottom CTA as JSX.",
+    ],
   },
 ];

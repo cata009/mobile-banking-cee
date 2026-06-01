@@ -1,12 +1,334 @@
 # Current Session
 
-Last updated: 2026-05-27
+Last updated: 2026-06-01
 
 ## Current Focus
 
-Close out the Design System Colors inventory, app-wide color-token mapping, and Light/Dark appearance mode, then commit and publish the finished batch.
+Completing the Design System screenshot template reconstruction so every template is represented as reusable JSX, not as a PNG/JPG-only reference.
 
 ## Last Meaningful Change
+
+Latest screenshot-template completion:
+
+- `src/app/components/templates/TemplateCodePreviews.tsx` now reconstructs the final 10 source-only screenshot templates as code: Account options, Activate Mobile Token, Analytics, Cards, Contact bottom sheet, account-detail homepage, Domestic payment, Review request, Review data, and Transaction detail.
+- `src/app/registry/templateRegistry.ts` now marks all 30 screenshot templates as `reconstructed-code` with `codePreviewId` mappings; source PNG/JPG assets remain comparison evidence in the Design System Templates tab.
+- `src/app/registry/componentRegistry.ts`, `src/app/registry/aiCatalog.ts`, `docs/handoff/next-tasks.md`, `docs/handoff/state-of-the-world.md`, `docs/handoff/banana-log.md`, and `docs/platform-capability-map/README.md` now record 30/30 code-backed template coverage.
+- `npm run build` passed on 2026-06-01; Vite still emits the known chunk-size warning.
+- Static coverage checks passed: `screenshots=30 registry=30`, `reconstructed=30 codePreviewIds=30`, and no `implementationStatus: "source-only"` entries remain.
+- Raw color audits passed: no raw app hex outside `colorRegistry.ts` and no direct numeric `rgb()`/`rgba()` in `src/app` or `src/styles`.
+- `git diff --check` passed; Git only reported the normal LF-to-CRLF warnings on Windows.
+- In-app browser smoke verification passed on `http://127.0.0.1:5175`: Design System Inventory -> Templates selected, 30 template cards, 30 code-backed cards, and the final 10 templates each open in `code` mode with `Reconstructed code`, `src/app/components/templates/TemplateCodePreviews.tsx`, and expected screen text visible.
+
+Latest RO Kids prototype implementation:
+
+- `src/data/roKidsBanking.ts` adds strict Romania/RON mock data and types for child profile, parent profile, money requests, send-money requests, saving goals, chores, approvals, allowance, transactions, learn modules, card settings, and parent controls.
+- `src/app/screens/kids/RoKidsApp.tsx` implements a contained Mobile PI Kids module with Kid Home, onboarding, parent activation, request money, parent approval, send money approval, My Card, card customization, saving goals, allowance, chores, Learn, What Parent Can See, Parent Dashboard, Parent Approvals, Parent Controls, and chore/allowance management.
+- `src/app/App.tsx` renders `RoKidsApp` only for `product=KIDS_PI`, `country=RO`, and `designSystem=current`; all other Kids contexts still fall back to the honest planned-state placeholder.
+- `src/app/registry/projectModel.ts`, `src/app/state/demoTypes.ts`, `src/app/registry/screenRegistry.ts`, `src/app/registry/flowRegistry.ts`, `src/app/registry/componentRegistry.ts`, and `src/app/registry/aiCatalog.ts` now register the RO Kids prototype, the core Ask Money -> Parent Approval -> Money Received flow, and the contained module component entry.
+- `docs/architecture/PROJECT_MODEL.md`, `docs/handoff/state-of-the-world.md`, and `docs/platform-capability-map/README.md` now record that Mobile PI Kids has a Romania-only mock-driven runtime prototype while other Kids concepts remain planned.
+- `npm run build` passed after the RO Kids implementation on 2026-05-29; Vite still emits the known chunk-size warning.
+- In-app browser verification on `http://127.0.0.1:5177` selected `Mobile PI Kids` + `Romania`, opened the Kids Home, completed Ask Money -> Parent Approval -> Approve -> Money Received, and confirmed Mia's balance moved from `86 RON` to `116 RON` with no stale waiting banner.
+- `git diff --check` passed after the RO Kids code changes; Git only reported the normal LF-to-CRLF warnings on Windows.
+- Typecheck, lint, and tests remain unavailable as separate scripts; `package.json` only exposes `dev`, `build`, and `preview`.
+
+Previous product-taxonomy infrastructure refinement:
+
+- `src/app/state/demoTypes.ts` now models `KIDS_PI` as a first-class `ProductId`, alongside `PI` and `SME`, so future registries can attach country/screen/flow coverage without another taxonomy migration.
+- `src/app/registry/projectModel.ts` now registers `KIDS PI` as a planned product layer and includes it in `PRODUCT_ORDER`, so it appears in the same selector/dropdown infrastructure as `Mobile SME planned`.
+- `docs/architecture/PROJECT_MODEL.md`, `docs/handoff/state-of-the-world.md`, and `docs/platform-capability-map/README.md` now record that `KIDS PI` exists for all countries and is visible in runtime selectors as a planned context, while still rendering the honest non-implemented placeholder.
+- `npm run build` passed after the KIDS PI selector exposure on 2026-05-28; Vite still emits the known chunk-size warning.
+
+Latest demo top-bar compactness refinement:
+
+- `src/app/components/demo/DemoTopBar.tsx` now renders the product, country, and release dropdown triggers as plain selected values (`Mobile PI`, `Romania`, `Current baseline`) without the extra `Application`, `Country`, and `Release` helper labels, making the control strip denser and easier to scan.
+
+Latest Spending / My Spendings PFM baseline refinement:
+
+- `src/data/spendingAnalytics.ts` now exposes a reusable period timeline for Spending, combining up to 2 years of month entries with appended yearly totals so the screen can navigate backward through historical months and forward into annual totals.
+- `src/data/accountDetails.ts` now includes extra 2025 mock transactions across primary current, secondary current, savings-transfer, and credit-product profiles so the Spending timeline has meaningful month/year history instead of a single isolated month.
+- `src/app/screens/analytics/AnalyticsScreen.tsx` now uses the timeline-driven period selector, centered period indicator, and screenshot-style `Money out` / `Money in` sections with proportional pale background pills per PFM category, while removing the previous transaction-count rows, cash banner, and cash-withdrawal divider from the baseline screen.
+- The Spending top hero (`Data For` + inflow/outflow chart + centered period dots) now supports full-width swipe/drag navigation between periods and animates as a single sliding panel: the outgoing period section exits toward the screen edge while the incoming section enters concurrently from the opposite side with eased slide/fade motion.
+- `src/app/screens/analytics/AnalyticsScreen.tsx` now uses the same drag/snap interaction model as the Products offers rail, with fixed `375px` period panels and deterministic horizontal snap math, so the Spending hero follows the same desktop swipe/drag pattern instead of a bespoke carousel contract.
+- The Spending period indicator dots are now anchored outside the moving hero panel, so only the `Data For` + chart + `Incomes/Spendings` section slides between periods while the centered indicator stays fixed in place.
+- The `Card Transaction` quick action above `Money out` is now restored through the shared `AccountActionBar` instead of the temporary custom button markup used during iteration.
+- `npm run build` passed after the Spending baseline refinement on 2026-05-28; Vite still emits the known chunk-size warning.
+- In-app browser verification on `http://localhost:5175` earlier in the day confirmed the Spending screen now starts on `APRIL 2026`, navigates forward into yearly totals (`2026`, then `2025`), keeps the indicator centered, and renders right-aligned proportional Money Out pills with shared PFM icons.
+- `npm run build` and `git diff --check` both passed again after the Spending hero transition polish on 2026-05-28; Git only reported the normal LF-to-CRLF warnings on Windows.
+
+Latest Documents screen implementation:
+
+- `src/app/screens/documents/DocumentsScreen.tsx` now implements the PI Documents screen as the same family as Messages, reusing the shared `PageHeader` and `AccountSearchBar` but removing the mailbox tabs and dot-menu actions.
+- `src/app/config/documentsConfig.ts` now owns the grouped-by-year Documents mock rows used by both runtime and template reconstruction.
+- `src/app/screens/more/MoreScreen.tsx` now routes the Documents card to a real runtime Documents screen, and `src/app/App.tsx` plus the navigation/flow/screen registries now recognize `documents` as a real screen reachable from More.
+- `src/app/components/templates/TemplateCodePreviews.tsx` and `src/app/registry/templateRegistry.ts` now reconstruct `screenshots/Documents.png` as code; this was part of the earlier partial template-coverage phase.
+- `npm run build` passed after the Documents implementation on 2026-05-28; Vite still emits the known chunk-size warning.
+
+Latest Settings screen implementation:
+
+- `src/app/screens/settings/SettingsScreen.tsx` now implements the PI Settings screen with the shared `PageHeader`, `SectionHeadingDivider`, and chevron-row treatment, driven by `src/app/config/settingsConfig.ts`.
+- `src/app/screens/more/MoreScreen.tsx` now routes the Settings card to the new runtime Settings screen, and `src/app/App.tsx` plus the navigation/flow/screen registries now recognize `settings` as a real screen reachable from More.
+- `src/app/components/templates/TemplateCodePreviews.tsx` and `src/app/registry/templateRegistry.ts` now reconstruct the `screenshots/Settings.png` template as code, so the Design System Templates tab shows Settings as a code-backed preview instead of source-only PNG.
+- `npm run build` passed after the Settings implementation on 2026-05-28; Vite still emits the known chunk-size warning.
+
+Latest manual dark-mode pair mapping pass:
+
+- `src/styles/theme.css` now applies the user-supplied dark counterparts for the previously unmatched DS colors, including neutral surfaces, teal accents, warm colors, product colors, and PFM semantic colors.
+- Pure black was removed from active DS tokens: `--uc-primary-main` and `--uc-static-black` now normalize to `#262626`, and `--uc-static-black-rgb` now uses `38 38 38`.
+- `src/app/registry/colorRegistry.ts` now mirrors the same manual dark pairs so the Design System Colors inventory matches runtime behavior.
+- PFM semantic colors that reuse the same light hex as core DS colors now also inherit the user-supplied dark pairs in the registry/runtime instead of staying on placeholder dark values.
+
+Latest DS color-registry expansion for active platform colors:
+
+- `src/app/registry/colorRegistry.ts` now includes a dedicated `PFM Categories` palette so active Personal Finance Management colors are cataloged explicitly in the Design System inventory instead of existing only as theme tokens.
+- Added DS color entries for the previously uncataloged active PFM colors and semantics, including `Taxes and Penalties`, `Groceries`, `Lifestyle`, `Investments`, `Internal`, plus the rest of the active PFM token set for semantic traceability.
+- `COLOR_SOURCE_AUDIT.normalizedColorsInRegistry` now reflects the expanded registry coverage for active platform colors.
+- `APP_COLOR_AUDIT` now records that the PFM-only colors are intentionally mapped through DS registry entries rather than remaining hidden in `theme.css`.
+
+Latest dark-mode token matching refinement:
+
+- `src/styles/theme.css` now remaps dark-mode tokens by exact-match reference against the supplied external DS table, reusing only the corresponding dark partners for colors that already exist in the current DS.
+- Updated dark mappings now include the neutral `#666666 -> #CCCCCC` pair, primary teal `#006375 -> #CCCCCC` and `#007A91 -> #FFFFFF`, brand red `#E2001A -> #E2001A`, product blue deep `#244858 -> #91D1DD`, green `#004C3D -> #004C3D`, `#008574 -> #008574`, `#359F42 -> #359F42`, status green `#3D7D43 -> #26EDA9`, warning orange `#F26B08 -> #FDA98B`, and status red `#CF3524 -> #FF7A8E`.
+- `src/app/registry/colorRegistry.ts` now mirrors those exact-match dark pairs in the Design System Colors inventory so the registry stays aligned with runtime theme tokens.
+- Banner blue variants in dark mode now also follow the exact-match teal mapping (`#006375 -> #CCCCCC`, `#007A91 -> #FFFFFF`) instead of reusing the light-mode values.
+
+Latest Products offer-card color-variant system:
+
+- `src/app/components/SectionHeadingDivider.tsx` now provides the shared 14px bold uppercase section-label + divider contract (`line-height: normal`) for top-of-section headings.
+- `src/app/screens/products/ProductsScreen.tsx` now uses that shared section heading contract for `OFFERS FOR YOU`, `OUR PRODUCTS`, `OTHER SOLUTIONS`, and the ShopSmart section labels instead of a local `21px/24px` heading style.
+
+- `src/app/config/productBannerVariants.ts` now defines reusable banner color-family mappings for `green`, `yellow`, `orange`, `pink`, `red`, `blue`, and `grey`, each with `normal` and `light` variants.
+- `src/styles/theme.css` now exposes stable banner color variables so these variants keep their supplied values regardless of app light/dark theme.
+- `src/app/components/products/ProductOfferCard.tsx` now accepts color-family and light-version props, applying the mapped background, chevron, and text colors through the new banner-variant config.
+- `src/app/screens/design-system/DesignSystemPage.tsx` now renders the Products offer-card specimen with a compact dropdown that switches between the banner color variants instead of listing every color block separately.
+- `src/app/registry/componentRegistry.ts` now records the Products offer-card as a family/light-tone variant component rather than a single green implementation.
+
+Latest Products offer-banner chevron refinement:
+
+- `src/app/components/products/ProductOfferCard.tsx` now owns the requested Products banner-card structure: centered vertical chevron SVG background, fixed `100px` right image column, and text aligned to the remaining left content area.
+- The Products offer-card text area now fills horizontally up to `16px` before the right image column instead of staying in a narrower fixed column.
+- The Products offer-card title now uses `22px` bold white typography clamped to 2 lines, while the subtitle uses `18px` regular white typography clamped to 3 lines with an `8px` gap from the title.
+- `src/app/config/productsMenuConfig.ts` now replaces lorem ipsum in Products offers with banking-focused copy sized to fit the current banner-card layout.
+- `src/app/screens/payments/PaymentsScreen.tsx` was reverted to its previous Payments hero-card implementation because the chevron/banner brief belonged to Products, not Payments.
+- `src/app/registry/componentRegistry.ts` now records the updated Products offer-card contract, including the chevron layout and `100px` image column.
+
+Latest Payments OTHER shortcut carousel refinement:
+
+- `src/app/screens/payments/PaymentsScreen.tsx` now renders the Payments `OTHER` shortcuts inside a horizontally scrollable rail instead of a static 4-item row.
+- `src/app/components/payments/PaymentOtherShortcut.tsx` now uses a fixed `74px` shortcut width and clamps labels to a maximum of 2 lines at `15px` line-height, so labels like `CREATE QR CODE` and `EXCHANGE RATES` no longer spill to a third row.
+- `src/app/registry/componentRegistry.ts` now records the `payments.other-shortcut` contract as a carousel-ready shortcut item with fixed width and 2-line label behavior.
+- `npm run build` passed after the Payments OTHER carousel refinement on 2026-05-28; Vite still emits the known chunk-size warning.
+
+Latest Account Details info-field component extraction:
+
+- `src/app/components/accounts/AccountDetailsInfoField.tsx` was added as the dedicated Account Details reusable field component, with an `80px` row height, `4px` title-to-subtitle gap, 16px regular title, 16px bold subtitle, and optional trailing-icon variant.
+- `src/app/screens/accounts/AccountDetailsInfoScreen.tsx` now uses `AccountDetailsInfoField` for the account-number/copy row and all default title/subtitle balance fields, with `0px` external gap between rows.
+- `src/app/registry/componentRegistry.ts` and `src/app/screens/design-system/DesignSystemPage.tsx` now catalog and demonstrate `accounts.details-info-field`, including the default and with-icon variants.
+- `npm run build` passed after the Account Details info-field extraction on 2026-05-28; Vite still emits the known chunk-size warning.
+- `git diff --check` passed for the touched Account Details component files; Git only reported the normal LF-to-CRLF warnings on Windows.
+- In-app browser verification on `http://localhost:5175` confirmed the first Account Details rows compute to `80px` height, title `16px/400/normal`, subtitle `16px/700/normal`, text color `rgb(38, 38, 38)`, and variant markers `with-icon` / `default`.
+
+Latest account transaction data enrichment:
+
+- `src/data/accountDetails.ts` now has country-specific merchant/counterparty profiles for all PI countries (`RO`, `CZ`, `SK`, `HU`, `RS`, `BA`, `SI`) covering current-account payments, card-linked card payments, incoming transfers, account payments, fees, ATM, FX, wallet, investments, taxes, home, education, children, healthcare, insurance, shopping, groceries, lifestyle, leisure, cash, internal transfers, excluded and uncategorized PFM cases.
+- Current-account transaction profiles are now distinct per current account instead of reusing the savings profile, so each current account shows different demo transactions.
+- Saving accounts and term deposits now use a transfer-only mock profile: only own-account transfers in/out, no merchant/card/interest/round-up rows.
+- `src/app/screens/accounts/AccountDetailScreen.tsx` now requests Account Detail transactions in the active country currency, keeping account transaction display aligned with country-local demo reporting.
+- `src/data/spendingAnalytics.ts` keeps internal own-account transfers visible in Account Detail but excludes `Internal` PFM transactions from Spending inflow/outflow totals and Money Out / Money In category lists, so savings movements do not appear as real expenses.
+- FX demo scale in `src/data/accountDetails.ts` now matches the existing `src/data/exchangeRates.ts` reference table values for deterministic local-currency reporting.
+- `npm run build` and `npm run build -- --mode development` passed after the enrichment on 2026-05-28; Vite still emits the known chunk-size warning.
+- PFM coverage audit confirmed all 23 categories from `src/data/pfmCategories.ts` are represented in Account Detail mock data; browser smoke on `http://localhost:5175` confirmed RO Primary Account, the second current account, and Emergency Fund render the expected richer/current-only/transfer-only transaction profiles.
+
+Latest AccountSearchBar icon-size contract fix:
+
+- `src/app/components/accounts/AccountSearchBar.tsx` now uses an icon-driven `32px` height with zero vertical padding, explicit `32x32` search/filter/clear SVG rendering, `32px` icon slots, and a `32px` input height.
+- `src/app/screens/design-system/DesignSystemPage.tsx` and `src/app/registry/componentRegistry.ts` now record the AccountSearchBar contract as auto-height from the standard 32px icons instead of a separate 36px wrapper.
+- `npm run build` passed after the AccountSearchBar icon-size fix on 2026-05-28; Vite still emits the known chunk-size warning.
+- In-app browser verification on `http://localhost:5175` confirmed CSS heights for the search bar root, search icon slot, filter button, search SVG, filter SVG, and input all compute to `32px`; measured boxes are scaled by the phone preview transform.
+
+Latest Account Detail carousel shadow refinement:
+
+- `src/app/screens/accounts/AccountDetailScreen.tsx` now gives the horizontal carousel a `34px` bottom shadow buffer while pulling the carousel indicator back up by `16px`, so card shadows are not clipped by the scrollport and the surrounding gray surface keeps the same visual rhythm.
+- `src/app/components/accounts/AccountBalanceCard.tsx` now uses a softer `0 16px 32px / 0.08` plus `0 3px 10px / 0.05` layered shadow, replacing the harder shorter shadow.
+- `npm run build` passed after the account-carousel shadow refinement on 2026-05-28; Vite still emits the known chunk-size warning.
+- In-app browser verification on `http://localhost:5175` confirmed the carousel has `padding-bottom: 34px`, the available room below the active card is `29px` in the scaled preview, the indicator remains at the prior visual y-position, and the action bar still starts at the same y-position.
+
+Latest Account Detail carousel depth refinement:
+
+- `src/app/screens/accounts/AccountDetailScreen.tsx` now keeps the focused account card at the full `311x197` size while inactive neighbor cards render at a `165px` visual height, preserving a `16px` top and bottom inset relative to the active card.
+- Inactive carousel cards now transition their vertical scale, opacity, and filter as focus changes, so click and mouse-drag/swipe movement has a smoother handoff between accounts.
+- `src/app/components/accounts/AccountBalanceCard.tsx` now uses a 300ms ease-out transition for opacity/shadow changes so the reusable card cooperates with the carousel focus animation.
+- `npm run build` passed after the account-carousel depth refinement on 2026-05-28; Vite still emits the known chunk-size warning.
+- In-app browser verification on `http://localhost:5175` confirmed the active card reports `data-account-carousel-visual-height="197"` and inactive cards report `165`; measured inside the scaled phone preview this is `169px` active vs `142px` inactive. Clicking `Savings Account` and mouse-dragging to `Emergency Fund` both swapped the full-height active state correctly.
+
+Latest Messages scroll and header refinement:
+
+- `src/app/screens/messages/MessagesScreen.tsx` now uses the shared `PageHeader` with safe-area handling and scroll-derived collapsed title progress instead of a local `MessagesTopChrome`.
+- `src/app/config/messagesConfig.ts` now includes extended mock data for Messages: 16 Inbox rows and 10 Outbox rows, so both mailboxes can be scrolled and tested inside the phone frame.
+- `src/app/registry/componentRegistry.ts`, `docs/handoff/state-of-the-world.md`, and `docs/platform-capability-map/README.md` now record the shared-header and scrollable extended-message behavior.
+- `npm run build` passed after the Messages scroll/header refinement on 2026-05-28; Vite still emits the known chunk-size warning.
+- `git diff --check` passed after the Messages scroll/header refinement; Git only reported the normal LF-to-CRLF warnings on Windows.
+- In-app browser verification on `http://localhost:5175` confirmed Messages opens with the shared sticky header, Inbox has 16 rows and `scrollHeight=1664` / `clientHeight=812`, scrolling sets the Messages page `scrollTop=420` and the collapsed centered title opacity to `1`, and Outbox has extended rows with `scrollHeight=1184` / `clientHeight=812`.
+
+Latest BottomNavigation Figma contract fix:
+
+- `src/app/components/BottomNavigation.tsx` now uses a fixed `375x54` bottom navigation contract with 24px side padding, 32px icon slots, a 24x2 active indicator, zero gap between active bar/icon/label, and 14px labels with `15px` line-height.
+- `src/app/registry/componentRegistry.ts` and `src/app/screens/design-system/DesignSystemPage.tsx` now document the bottom navigation sizing, icon, active-bar, and label contract.
+- `npm run build` passed after the BottomNavigation fix on 2026-05-28; Vite still emits the known chunk-size warning.
+- `git diff --check` passed after the first BottomNavigation code/doc update; Git only reported the normal LF-to-CRLF warnings on Windows.
+- In-app browser verification on `http://localhost:5175` confirmed the runtime BottomNavigation computes to `width=375px`, `height=54px`, label `font-size=14px`, label `line-height=15px`, active bar `24x2`, icon slot `32x32`, `0px` active-bar-to-icon gap, and `0px` icon-to-label gap. Visual boxes are scaled by the phone preview transform, but computed CSS values match the Figma contract.
+
+Latest Transaction Detail PFM category pill fix:
+
+- `src/data/paymentFlow.ts` now exposes the normalized transaction PFM category, display label, color token, and original subcategory on `TransactionDetailData`.
+- `src/app/screens/payments/DomesticPaymentFlowScreens.tsx` now renders the top Transaction Detail category pill from the real PFM category with `PfmCategoryIcon`, tokenized category color, and `data-transaction-pfm-category` evidence instead of showing the subcategory with a generic landmark icon.
+- `src/app/registry/componentRegistry.ts` now records that Transaction Detail uses the shared PFM icon/category mapping.
+- `npm run build` passed after the Transaction Detail PFM category pill fix on 2026-05-28; Vite still emits the known chunk-size warning.
+- Fresh preview verification on `http://127.0.0.1:5177` confirmed the Enel Energie transaction opens Transaction Detail with pill text `UTILITIES`, `data-transaction-pfm-category="Utilities"`, subcategory evidence `Utility bill`, and SVG rendering from the shared PFM icon component.
+
+Latest Account Options icon and header fix:
+
+- `src/app/components/icons/AppIcon.tsx` now includes the supplied custom Account Options SVGs for Share account info, Push notifications, Account statement, Create paycode, Change account name, and the 32x32 chevron link.
+- `src/app/screens/accounts/AccountOptionsScreen.tsx` now uses those registry icons instead of lucide fallbacks, with 32x32 leading/trailing icon slots.
+- Account Options now uses the same scroll-container `PageHeader` pattern as detail screens, with safe area handled by the header and collapsed centered title progress derived from page scroll.
+- `npm run build` passed after the Account Options icon/header fix on 2026-05-28; Vite still emits the known chunk-size warning.
+- `git diff --check` passed after the fix; Git only reported the normal LF-to-CRLF warnings on Windows.
+- In-app browser verification on `http://localhost:5175` confirmed the Account Options page renders the five supplied option icons and chevron SVGs through `AppIcon`, with 32px row slots and the standard `PageHeader` title setup.
+
+Latest Account Detail month-divider spacing fix:
+
+- `src/app/screens/accounts/AccountDetailScreen.tsx` now uses a `16px` rule between each month divider and the next transaction row, plus `16px` between the previous transaction block and the next month divider.
+- `src/app/screens/design-system/DesignSystemPage.tsx` and `src/app/registry/componentRegistry.ts` now document the month-divider spacing contract alongside the AccountTransactionRow specimen.
+- `npm run build` passed after the month-divider spacing fix on 2026-05-28; Vite still emits the known chunk-size warning.
+- `git diff --check` passed after the spacing fix; Git only reported the normal LF-to-CRLF warnings on Windows.
+- In-app browser visual verification on `http://localhost:5175` confirmed Account Detail renders with the updated month-divider spacing rhythm.
+
+Latest AccountTransactionRow spacing and line-height fix:
+
+- `src/app/components/accounts/AccountTransactionRow.tsx` now follows the requested Figma contract: transaction label line-height `18px`, amount block line-height `22px`, `4px` label-to-amount gap, day line-height `20px`, `2px` day/month gap, month line-height `15px`, and `16px` date-to-icon gap.
+- `src/app/screens/design-system/DesignSystemPage.tsx` and `src/app/registry/componentRegistry.ts` now document the updated AccountTransactionRow contract.
+- `npm run build` passed after the row spacing fix on 2026-05-28; Vite still emits the known chunk-size warning.
+- In-app browser verification on `http://localhost:5175` confirmed the runtime Account Detail row computes to label `18px`, amount `22px`, details gap `4px`, day `20px`, date gap `2px`, month `15px`, and left date/icon `column-gap: 16px`; visual pixel distances are scaled by the phone preview transform.
+
+Latest PFM icon glyph expansion:
+
+- `src/app/components/pfm/PfmCategoryIcon.tsx` now renders real 20x20 SVG glyphs inside the existing 32x32 category icon container for `Taxes and Penalties`, `Income`, `Home`, `Utilities`, `Transportation`, `Children`, `Healthcare`, `Shopping`, `Lifestyle`, `Education`, `Leisure time`, `Investments`, `Uncategorized`, `Groceries`, `Exclude from budget`, `Insurance`, `Finance`, `Wallet`, and `Transfers`, using the path data supplied by the user.
+- `Exclude from budget` preserves its source `0 0 21 20` viewBox while still fitting the app's 20px glyph contract inside the 32px container.
+- `src/data/pfmCategories.ts` now resolves source/Figma category labels case-insensitively, including aliases such as `Taxes and fines`, `Leisure personal care`, `School and education`, `Transport and utility`, `Uncategorized expenses`, `Cars and transportation`, `Health care`, and the user-supplied `Finacial` typo.
+- `src/styles/theme.css` now aligns the supplied PFM category color tokens with the SVG fills for the expanded glyph set.
+- `npm run build` passed after expanding the PFM glyphs on 2026-05-28; Vite still emits the known chunk-size warning.
+- In-app browser verification on `http://localhost:5175` confirmed visible Spending icons for `Wallet` and `Income`, plus Account Detail icons for `Income` and `Taxes and Penalties`, render as SVG glyphs sourced from `screenshots/PFM-icons.svg`; measured browser boxes are scaled by the phone preview transform, matching the intended 32px container / 20px glyph contract.
+
+Latest Spending PFM aggregation implementation:
+
+- `src/data/pfmCategories.ts` now defines the first-pass PFM taxonomy, category aliases, color-token references, fallback initials, and source traceability to `screenshots/PFM-icons.svg`.
+- `src/styles/theme.css` now exposes PFM category color variables for both light and dark demo themes.
+- `src/data/exchangeRates.ts` now centralizes deterministic demo FX conversion into each country's local reporting currency using a 2026-05-28 reference table.
+- `src/data/accountDetails.ts` now maps every generated account transaction to `pfmCategory` and `pfmSubcategory`; transaction detail now uses those PFM fields instead of treating the category as a free-form label.
+- `src/data/spendingAnalytics.ts` now aggregates Account Detail transaction profiles into a monthly Spending summary with income total, spending total, cash withdrawal total, Money Out category totals, and Money In category totals.
+- `src/app/screens/analytics/AnalyticsScreen.tsx` now renders April 2026 chart totals from the aggregation, removes the fake `Transaction Details` row, and shows PFM-category Money Out plus Money In sections.
+- `src/app/components/accounts/AccountTransactionRow.tsx` now renders the shared `PfmCategoryIcon` for each transaction category instead of the generic transfer icon.
+- `src/app/registry/componentRegistry.ts`, `src/app/registry/flowRegistry.ts`, `src/app/registry/aiCatalog.ts`, `docs/handoff/state-of-the-world.md`, and `docs/platform-capability-map/README.md` now record the Spending/PFM aggregation behavior.
+- `npm run build` passed after the Spending PFM aggregation work on 2026-05-28; Vite still emits the known chunk-size warning.
+- In-app browser verification on `http://localhost:5175` confirmed `My Spendings` shows April 2026, Outflow `1.438,43 RON`, Money Out categories (`Groceries`, `Utilities`, `Transportation`, `Wallet`, `Lifestyle`, `Leisure time`, `FX`), Money In categories (`Income`, `Internal`, `Transfers`, `Investments`), PFM icon markers sourced from `screenshots/PFM-icons.svg`, and no fake `Transaction Details` row.
+
+Latest AccountTransactionMonthDivider typography fix:
+
+- `src/app/components/accounts/AccountTransactionMonthDivider.tsx` now follows the L3 card-label contract: 14px UniCredit bold uppercase with CSS `line-height: normal`.
+- Divider left/month text now uses `var(--uc-text-muted)` / Primary Grey, while the right total uses `var(--uc-text)` / Primary K1 with right alignment.
+- `src/app/screens/design-system/DesignSystemPage.tsx` now documents the divider L3 contract in the AccountTransactionRow specimen.
+- `npm run build` passed after the divider typography fix on 2026-05-28; Vite still emits the known chunk-size warning.
+- In-app browser verification on `http://localhost:5175` confirmed `APRIL 2026` computes to `14px`, `700`, `line-height: normal`, `uppercase`, `rgb(102, 102, 102)`, and `5.683,92 RON` computes to `14px`, `700`, `line-height: normal`, `uppercase`, `rgb(38, 38, 38)`, `text-align: right`.
+
+Latest AccountActionBar reuse fix:
+
+- `src/app/components/accounts/AccountActionBar.tsx` now supports a configurable `items` API with 1-4 actions and page-level alignment (`start`, `center`, `end`, `between`) while preserving the existing 4-action Account Detail default.
+- `src/app/screens/analytics/AnalyticsScreen.tsx` now renders `Card Transaction` through the shared `AccountActionBar` instead of local markup, so future action-bar label/icon changes propagate there too.
+- `src/app/screens/design-system/DesignSystemPage.tsx` now documents AccountActionBar as a 1-4 item component and shows the one-item right-aligned `Card Transaction` variant.
+- `src/app/state/demoTypes.ts`, `src/app/registry/componentRegistry.ts`, and `src/app/registry/aiCatalog.ts` now catalog `accounts.action-bar` as a reusable component used by Account Detail and Analytics.
+- Browser verification on `http://localhost:5175` confirmed Analytics renders one AccountActionBar item with `justifyContent=flex-end`, `padding=0px 24px 18px 24px`, `fontSize=14px`, and `lineHeight=15px`; Account Detail still renders four items with `justifyContent=space-between`.
+- `npm run build` passed after the AccountActionBar reuse fix on 2026-05-28; Vite still emits the known chunk-size warning.
+
+Latest 10-template reconstruction pack:
+
+- Added 10 more screenshot templates as real JSX code previews in `src/app/components/templates/TemplateCodePreviews.tsx`: `Language Selection` as Sign/PIN, `Generate Token`, `Message`, `New request with push`, `Panel` as account-selection sheet, `Apple pay`, `Transfer to new phone` as Successful payment, `Tutorial 1`, `Product selection`, and `RS - Travel Insurance`.
+- The new templates share reusable primitives for phone surface, bottom CTA, home indicator, radio rows, form field rows, mini bottom navigation, media/device hero compositions, and code-native travel/card/tutorial visuals.
+- `src/app/registry/templateRegistry.ts` now marks those 10 templates as `reconstructed-code`; `src/app/registry/componentRegistry.ts` and `src/app/registry/aiCatalog.ts` now reflect 18 code-backed templates total.
+- Screenshot-to-template coverage check still passed after the new pack: `screenshots=30 registry=30`.
+- `npm run build` passed after the 10-template pack on 2026-05-28; Vite still emits the known chunk-size warning.
+- Raw color audits passed after the 10-template pack: no raw hex under `src/app` outside `colorRegistry.ts`, and no direct numeric `rgb()` / `rgba()` under `src/app` or `src/styles`.
+- `git diff --check` passed after the 10-template pack; Git only reported the normal LF-to-CRLF warnings on Windows.
+- In-app browser smoke verification passed on `http://127.0.0.1:5175`: Design System Inventory -> Templates renders 30 cards and 18 code-backed templates; all 10 new templates select in `code` mode, show `Reconstructed code`, point to `src/app/components/templates/TemplateCodePreviews.tsx`, and render their expected screen text.
+
+Latest AccountActionBar label annotation fix:
+
+- `src/app/components/accounts/AccountActionBar.tsx` now renders action labels with explicit `15px` line-height instead of `leading-normal`, so labels such as `Details` no longer compute as a 21px-tall text box.
+- `src/app/screens/design-system/DesignSystemPage.tsx` now documents the AccountActionBar label contract as `14px regular / 15px line`.
+- Browser verification on `http://localhost:5175` confirmed the runtime AccountActionBar labels render with `fontSize=14px`, `fontWeight=400`, and `lineHeight=15px`.
+- `npm run build` passed after the AccountActionBar label fix on 2026-05-28; Vite still emits the known chunk-size warning.
+
+Latest New payment sheet spacing annotations:
+
+- `src/app/components/BottomSheet.tsx` now uses uniform `16px` sheet padding for the New payment modal shell.
+- `src/app/components/payments/NewPaymentDiscoverBanner.tsx` now uses uniform `16px` banner padding, a `4px` title/subtitle gap, and CSS `line-height: normal` for the banner title and subtitle.
+- Browser verification on `http://127.0.0.1:5175` confirmed the New payment dialog padding is `16px` on all sides, the discover banner padding is `16px` on all sides, the subtitle margin-top is `4px`, and the subtitle line-height computes to `normal`.
+- `npm run build` passed after the sheet/banner annotation fix on 2026-05-28; Vite still emits the known chunk-size warning.
+- `git diff --check` passed after the sheet/banner annotation fix; Git only reported the normal LF-to-CRLF warnings on Windows.
+
+Latest Payments shortcut annotation fix:
+
+- `src/app/components/payments/PaymentOtherShortcut.tsx` now applies the requested 15px label box and 15px line-height to the `CARD REPAYMENT` shortcut label only.
+- The change is scoped to `card-repayment` so multi-line shortcuts such as `CREATE QR CODE` keep their existing layout.
+- Browser verification on `http://127.0.0.1:5175` confirmed the `CARD REPAYMENT` label computes to `cssHeight=15px` and `lineHeight=15px`.
+- `npm run build` passed after the annotation fix on 2026-05-28; Vite still emits the known chunk-size warning.
+- `git diff --check` passed after the annotation fix; Git only reported the normal LF-to-CRLF warnings on Windows.
+
+Latest feedback status template reconstruction:
+
+- Five additional screenshot templates were reconstructed as real JSX code previews: `Informative`, `Pending`, `Success to be`, `Error to be`, and `Warning to be`.
+- `src/app/components/templates/TemplateCodePreviews.tsx` now includes a reusable feedback status screen primitive with help-only top chrome, centered status icon, lorem body section, and fixed bottom `PrimaryButton` CTA.
+- The five feedback templates share the same parameterized implementation and differ only by title, status icon treatment, and semantic status color.
+- `src/app/registry/templateRegistry.ts` now marks those five templates as `reconstructed-code` with code preview ids: `informative-status`, `pending-status`, `success-status`, `error-status`, and `warning-status`.
+- That step brought `src/app/registry/componentRegistry.ts` and `src/app/registry/aiCatalog.ts` to 8 code-backed templates total: template 52, template 67, Product, plus the five feedback status templates.
+- Screenshot-to-template coverage check still passed after the feedback pack: `screenshots=30 registry=30`.
+- `npm run build` passed after the feedback template pack on 2026-05-28; Vite still emits the known chunk-size warning.
+- Raw color audits passed after the feedback template pack: no raw hex under `src/app` outside `colorRegistry.ts`, and no direct numeric `rgb()` / `rgba()` under `src/app` or `src/styles`.
+- `git diff --check` passed after the feedback template pack; Git only reported the normal LF-to-CRLF warnings on Windows.
+- In-app browser smoke verification for that step passed on `http://127.0.0.1:5175`: Design System Inventory -> Templates rendered 30 cards and 8 code-backed templates; the five new feedback templates were present, each selected in reconstructed-code mode, showed the expected title/status body/`Ok, got it` CTA, and pointed to `src/app/components/templates/TemplateCodePreviews.tsx`.
+
+Latest Messages runtime implementation:
+
+- `src/app/screens/messages/MessagesScreen.tsx` was added as the real runtime Messages screen reconstructed from `screenshots/52.png` / template 52.
+- `src/app/config/messagesConfig.ts` now exposes a country-addressable mock Messages config for all PI countries (`RO`, `CZ`, `SK`, `HU`, `RS`, `BA`, `SI`), currently sharing the same baseline Inbox/Outbox data until country-specific copy is supplied.
+- `src/app/App.tsx`, `NavigationContext`, and `useNavigation` now include the `messages` runtime screen.
+- Top-level runtime headers now route their Messages icon to the new screen from Home, Analytics / Spending, Payments, Products, and More.
+- `TemplateCodePreviews.tsx` now reuses the same message config data as the runtime Messages screen for template 52 continuity.
+- `screenRegistry.ts`, `componentRegistry.ts`, `flowRegistry.ts`, `templateRegistry.ts`, `demoTypes.ts`, and `aiCatalog.ts` now catalog `pi.messages.overview`, `messages.inbox-list`, and `pi.header-to-messages`.
+- `npm run build` passed on 2026-05-28 after the Messages runtime implementation; Vite still emits the known chunk-size warning.
+- Raw color audits passed after the Messages runtime implementation: no raw hex under `src/app` outside `colorRegistry.ts`, and no direct numeric `rgb()` / `rgba()` under `src/app` or `src/styles`.
+- `git diff --check` passed after the Messages runtime implementation; Git only reported the normal LF-to-CRLF warnings on Windows.
+- In-app browser smoke verification passed on `http://127.0.0.1:5175`: RO Home -> Messages opens the reconstructed screen with `Messages`, `Inbox`, `Outbox`, `2025`, five Inbox rows, and `NEW` badges; Back returns to Home; switching to Czech Republic and logging in again still exposes the Messages icon and opens the same screen; Outbox and search filter work, with `AUG` narrowing Outbox to one row and showing the clear-results action.
+
+Previous reconstructed template-code preview implementation:
+
+- `src/app/components/templates/TemplateCodePreviews.tsx` was added as the real-code renderer for screenshot templates, with reusable phone surface, static status chrome, top header, tab bar, search strip, list rows, dot menu, standing-order rows, and product bottom-sheet composition.
+- `template-52` now renders the Messages / Inbox screen as JSX by default in Design System Templates, while keeping `screenshots/52.png` as source evidence.
+- `template-67` now renders the Recurrent payment / Standing orders screen as JSX, reusing the same header, tab, search, section-title, and row/action patterns as template 52.
+- `template-product` now renders the Product bottom-sheet as JSX with overlay, rounded sheet, media placeholder, close action, body copy, and the existing `PrimaryButton`.
+- `src/app/registry/templateRegistry.ts`, `componentRegistry.ts`, `demoTypes.ts`, and `aiCatalog.ts` now mark reconstructed template coverage explicitly for AI catalog continuity.
+- `src/app/screens/design-system/DesignSystemPage.tsx` now makes the Templates grid more compact (`190px` cards), bounds the template-card list inside an internal scroller, marks code-backed templates, and opens implemented templates in `code` mode with a `source` toggle for PNG comparison.
+- `npm run build` passed after the template reconstruction work on 2026-05-27; Vite still emits the known chunk-size warning.
+- Screenshot-to-template coverage check passed after the template work: `screenshots=30 registry=30`.
+- Raw color audits passed after the template work: no raw hex under `src/app` outside `colorRegistry.ts`, and no direct numeric `rgb()` / `rgba()` under `src/app` or `src/styles`.
+- `git diff --check` passed after the template work; Git only reported the normal LF-to-CRLF warnings on Windows.
+- In-app browser smoke verification passed on `http://127.0.0.1:5175`: Design System Inventory -> Templates renders 30 compact cards, 3 code-backed templates, template 52 selected by default in `code` mode at `377 x 814`, code/source toggles are present, the card height is `190px`, thumbnail mode has no focusable nested controls, and selecting template 67 and Product keeps `code` mode with their expected reconstructed text visible.
+
+Latest Products bottom-navigation overlap fix:
+
+- `src/app/screens/products/ProductsScreen.tsx` now gives the Products scroll content a base stacking layer and the Products bottom navigation wrapper an explicit `z-20` layer.
+- This prevents Product menu card text/illustrations with internal `z-index` from painting above the bottom navigation while the Products page is scrolled.
+- `npm run build` passed after the fix on 2026-05-27; Vite still emits the known chunk-size warning.
+- `git diff --check` passed after the fix; Git only reported the normal LF-to-CRLF warning on Windows.
+- In-app browser verification passed on `http://localhost:5175`: after navigating to Products and scrolling down, `Investments and savings` no longer overlaps the bottom nav; measured overlap is `0`, the nav background is opaque white, and `elementFromPoint` over the nav resolves to nav elements rather than product-card text.
 
 Latest Design System Colors and Light/Dark implementation:
 
@@ -258,33 +580,43 @@ Approved direction from the user:
 17. Keep Products offer carousel cards as a reusable component contract matching the supplied 327x157 offer-card typography/layout spec.
 18. Keep Design System Inventory as the visible control surface for components, templates, icons, and colors.
 19. Keep reusable app colors centralized in `colorRegistry.ts` and `theme.css`, with Light/Dark controlled through demo state rather than scattered local styling.
+20. Explore Mobile PI Kids as country-specific concept battles, starting with a Romania-only RO Kids prototype that stays close to the current UniCredit design system and covers as many Kid/Parent flows as possible with mock data.
 
 ## Blocked By
 
 - Full SME and next-design-system screen implementations remain future product work, but they are no longer hidden leftovers: selecting them now produces an explicit planned-state runtime.
+- Mobile PI Kids is implemented only for Romania/current design system. HU, BA, CZ, and other Kids concepts remain future comparison executions before any unified cross-country Kids model is chosen.
 - No automated visual regression suite exists yet for safe-area/header/desktop viewport/account-carousel behavior; verification for these bugs was manual browser smoke testing plus production build.
 
 ## Next Recommended Action
 
 Continue with product evolution work:
 
-1. Fill SME screen registry entries when actual SME screens are imported or designed.
-2. Fill next-design-system screen/component mappings before visual migration.
-3. Keep `src/app/registry/templateRegistry.ts` updated whenever new screenshot templates are added to `screenshots/`.
-4. Expand AI catalog metadata as new screenshots and components are added.
-5. Add automated tests for product/release/design-system switching.
-6. Add visual regression coverage for account-detail sticky header, safe-area behavior, account-card carousel drag/snap, all-products carousel coverage, account-details info screen layout, desktop preview auto-fit behavior, and Design System template-card selection.
-7. Replace default Payments placeholder labels with country-specific titles and labels when copy is provided.
-8. Fine tune Products labels, imagery, ShopSmart content, and per-country copy once the country-specific source copy and final assets are provided.
-9. Fine tune New payment bottom sheet labels per country and implement the remaining Foreign/SEPA and Templates/Beneficiaries flows when those screens are supplied.
-10. Add automated coverage for amount visibility persistence across navigation and transaction-row exclusion.
-11. Add automated coverage for Account Detail transaction search, clear reset, and activation scroll behavior.
-12. Fine tune Transaction Detail and Domestic Payment create/review/sign/success spacing, labels, and per-country copy against final screenshot references.
-13. Add an automated color-token audit that fails on raw app hex/rgb/Tailwind palette classes outside approved registry/asset boundaries.
-14. Add visual regression coverage for Light/Dark mode across Home, Payments, Products, Analytics, More, and Design System Inventory.
+1. Audit and polish the RO Kids main journey: Kids Home -> Ask Money -> Parent Approval -> Money Received.
+2. Decide whether the next concept battle should be HU, BA, or CZ Kids, then keep that execution country-contained instead of prematurely unifying the models.
+3. Fill SME screen registry entries when actual SME screens are imported or designed.
+4. Fill next-design-system screen/component mappings before visual migration.
+5. Keep `src/app/registry/templateRegistry.ts` updated whenever new screenshot templates are added to `screenshots/`.
+6. Expand AI catalog metadata as new screenshots and components are added.
+7. Add automated tests for product/release/design-system switching and the RO Kids core money-request flow.
+8. Add visual regression coverage for account-detail sticky header, safe-area behavior, account-card carousel drag/snap, all-products carousel coverage, account-details info screen layout, desktop preview auto-fit behavior, Design System template-card selection, and RO Kids home/approval screens.
+9. Replace default Payments placeholder labels with country-specific titles and labels when copy is provided.
+10. Fine tune Products labels, imagery, ShopSmart content, and per-country copy once the country-specific source copy and final assets are provided.
+11. Fine tune New payment bottom sheet labels per country and implement the remaining Foreign/SEPA and Templates/Beneficiaries flows when those screens are supplied.
+12. Add automated coverage for amount visibility persistence across navigation and transaction-row exclusion.
+13. Add automated coverage for Account Detail transaction search, clear reset, and activation scroll behavior.
+14. Fine tune Transaction Detail and Domestic Payment create/review/sign/success spacing, labels, and per-country copy against final screenshot references.
+15. Add an automated color-token audit that fails on raw app hex/rgb/Tailwind palette classes outside approved registry/asset boundaries.
+16. Add visual regression coverage for Light/Dark mode across Home, Payments, Products, Analytics, More, and Design System Inventory.
 
 ## Commands / Verification
 
+- `npm run build` passed on 2026-05-29 after implementing RO Kids; Vite still emits the known chunk-size warning.
+- Dev server started on `http://127.0.0.1:5177` for RO Kids verification.
+- In-app browser smoke passed on `http://127.0.0.1:5177`: selected `Mobile PI Kids` + `Romania`, confirmed Kids Home, submitted Ask Money, opened Parent Approval, approved the request, returned to Mia home, and confirmed balance `116 RON available` with no stale waiting banner.
+- `git diff --check` passed after the RO Kids code changes; Git only reported the normal LF-to-CRLF warnings on Windows.
+- `rg -n "#[0-9A-Fa-f]{3,8}|rgba\\(|rgb\\([0-9]" src/app/screens/kids src/data/roKidsBanking.ts` returned no matches.
+- `rg -n "uc-warning|uc-status-green" src/app/screens/kids src/data/roKidsBanking.ts` returned no matches.
 - GitHub repository created: `https://github.com/cata009/mobile-banking-cee`.
 - Initial commit pushed to `origin/main`: `2767060` (`Initial mobile banking demo platform`).
 - `npm run build` passed on 2026-05-27.
@@ -362,6 +694,11 @@ Continue with product evolution work:
 
 ## Decisions
 
+- Mobile PI Kids is active only for `RO` + `current` design system in this first experiment; other Kids country/design-system contexts continue to use the planned-state placeholder.
+- RO Kids is intentionally a contained mock-driven module for concept exploration, not a new global router/product architecture yet.
+- The first RO Kids concept excludes loans, child debt, repayment obligations, reward freezing, punishment mechanics, gambling-like rewards, and leaderboards.
+- Parent controls in RO Kids use approval and transparency language (`Safety limits`, `Approval needed`, `What my parent can see`) rather than punishment or surveillance language.
+- Kids flows update local state only: approving a money request or chore changes the visible balance/activity for the prototype but does not introduce persistence, ledger posting, or backend APIs.
 - Runtime release selection is now explicit: `DemoState.release` + `DemoState.baseline`.
 - `CountryId` is the official taxonomy alias; legacy `Country` remains as the underlying union for compatibility.
 - `baseline` and `release` become explicit concepts.
@@ -381,6 +718,9 @@ Continue with product evolution work:
 - Account Detail should reuse homepage product categories for current accounts, saving accounts, term deposits, loans, and mortgages; cards and investments stay out of this carousel unless explicitly requested later.
 - Account Details info is a separate runtime screen opened from the `Details` action; it uses the product currently active in the Account Detail carousel.
 - Shared header collapse must live in `PageHeader`, with the screen providing scroll progress, so detail screens do not fork their own top bars.
+- Spending analytics should summarize the same account transaction profiles used by Account Detail, grouped by PFM category and reported in the selected country's local currency.
+- PFM category colors are tokenized in `theme.css`; `PfmCategoryIcon` now has real glyphs for Taxes and Penalties, Income, Home, Utilities, Transportation, Children, Healthcare, Shopping, Lifestyle, Education, Leisure time, Investments, Uncategorized, Groceries, Exclude from budget, Insurance, Finance, Wallet, and Transfers, while the remaining categories still use color badges and fallback initials traced to `screenshots/PFM-icons.svg`.
+- Demo FX conversion is deterministic and source-dated, not live; the app should not fetch exchange rates at runtime until a real data/API boundary is approved.
 - Payments copy is centralized in `paymentsMenuConfig.ts` by `CountryId`; current labels are intentionally shared across all countries until localized/country-specific wording is provided.
 - New payment sheet content lives inside `paymentsMenuConfig.ts`; the sheet shell is generic and reusable, while payment action copy remains country-scoped.
 - Products copy and tab availability are centralized in `productsMenuConfig.ts` by `CountryId`; only RO, CZ, SK, and HU show the `Banking` / `ShopSmart` split.
@@ -394,8 +734,11 @@ Continue with product evolution work:
 - Domestic payment success returns to Payments, because there is no real account ledger update or transaction creation behind the demo flow yet.
 - Payments `OTHER` shortcut visuals live in `PaymentOtherShortcut`; item identity and country menu membership remain in `paymentsMenuConfig.ts`.
 - Top-level page headers use fixed header action rails; Home intentionally orders `Hide/Show amounts`, `Profile`, `Messages`, while other top-level pages keep page-specific action sets in the same fixed rail.
+- Messages is a mock-driven runtime screen reconstructed from template 52; all PI countries are wired through `messagesConfig.ts`, but the current baseline copy/data is intentionally shared until market-specific messages are supplied.
 - New payment bottom-sheet action rows and Discover banner live as reusable components under `src/app/components/payments`; country-specific action text remains in `paymentsMenuConfig.ts`.
 - Screenshot templates live in `src/app/registry/templateRegistry.ts`; the Design System page consumes that registry so screenshot coverage can be audited separately from the long component inventory JSX.
+- Reconstructed templates live in `src/app/components/templates/TemplateCodePreviews.tsx`; `templateRegistry.ts` points implemented screenshot templates at a `codePreviewId`, while the original screenshot remains source/comparison evidence.
+- Design System Template cards should stay compact and code-backed templates should open in `code` mode by default; the PNG source toggle exists for comparison, not as the implementation surface.
 - Products offer carousel visuals live in `ProductOfferCard`; offer identity and country/product menu membership remain in `productsMenuConfig.ts`.
 - Reusable UI icons live in `src/app/components/icons/AppIcon.tsx`; product code should consume icons through `AppIcon` so a registry SVG change propagates to every usage.
 - Remaining raw SVGs outside `AppIcon` are treated as brand/logo, device chrome, or decorative effect assets unless explicitly promoted into the icon registry later.
@@ -407,6 +750,11 @@ Continue with product evolution work:
 
 ## Limitations
 
+- RO Kids data and transitions are local state only; reloading the app resets the concept.
+- RO Kids has no real parent consent, legal eligibility checks, activation QR, child device pairing, wallet/card operation, notifications, ledger posting, persistence, backend, or audit trail.
+- RO Kids is Romania-only for this execution and uses RON/Romanian assumptions; HU, BA, CZ, and other country Kids concepts are intentionally not implemented yet.
+- RO Kids copy is mostly English with light Romanian greeting/context, pending a dedicated localization/content pass.
+- `RoKidsApp.tsx` is intentionally broad and contained for the first concept battle; after the winning direction is chosen, split it into smaller screens/components before productionizing.
 - Local Git repository is initialized on `main` with remote `origin` set to `https://github.com/cata009/mobile-banking-cee.git`.
 - SME and next design system have runtime selectors and planned-state placeholders, but not real product screens yet.
 - Screen and flow registry entries are first-pass foundations and should be refined as more screenshots/components are cataloged.
@@ -417,6 +765,9 @@ Continue with product evolution work:
 - Carousel drag behavior is currently verified manually in the browser; add automated pointer/mouse drag coverage before changing the account carousel interaction model.
 - Transaction rows remain mock-profile driven for the expanded product carousel; term deposits, loans, and mortgages reuse existing account transaction profiles until product-specific transaction data is defined.
 - Account Details info values are mock-derived from the selected product and should receive screenshot-level spacing/copy refinements in follow-up fixes.
+- Spending analytics now derives from transaction profiles, but those profiles are still static mocks and currently deduplicated by reused profile index to avoid counting the same mock profile multiple times across product types.
+- PFM category icon glyph extraction is partial: Taxes and Penalties, Income, Home, Utilities, Transportation, Children, Healthcare, Shopping, Lifestyle, Education, Leisure time, Investments, Uncategorized, Groceries, Exclude from budget, Insurance, Finance, Wallet, and Transfers render as real 20x20 SVG glyphs; remaining categories such as Cash, ATM, FX, and Internal still use token-colored initial badges with source traceability to `screenshots/PFM-icons.svg`.
+- Exchange rates are a static 2026-05-28 demo reference table, not a live market feed.
 - Payments menu actions are mostly navigational placeholders; Domestic payment now has a mock create/review/sign/success flow, but there is still no real payment execution, QR generation, template management, repayment, or exchange-rate detail flow.
 - Payments menu labels are shared English placeholders across all countries until country-specific title/label updates are requested.
 - New payment sheet Domestic now opens the mock Domestic payment flow; Foreign/SEPA and Templates/Beneficiaries remain menu placeholders until their target screens are supplied.
@@ -427,7 +778,9 @@ Continue with product evolution work:
 - Products offer carousel drag/snap is manually browser-verified only; add automated pointer/visual regression coverage before changing carousel math again.
 - Amount visibility is not persisted to local storage; this satisfies navigation persistence but not browser reload persistence.
 - Transaction search uses the current static mock transaction profile only; term deposits, loans, and mortgages still reuse the existing mock transaction profiles until product-specific transaction data is defined.
+- Messages uses static mock Inbox/Outbox rows and does not create a backend notification/message domain, unread-count state, message detail screen, or country-specific message copy yet.
 - `templateRegistry.ts` is intentionally explicit, so adding or renaming files in `screenshots/` requires updating the registry entry in the same session.
+- Reconstructed template coverage is complete: all 30 screenshot templates have real-code previews; source PNG/JPG files remain available only as comparison evidence.
 - `AppIcon.tsx` is intentionally explicit, so adding a reusable UI icon requires a registry entry with usage metadata in the same session.
 - SVG audit still allows brand logos, device chrome, decorative textures/effects, and vendored `ui/` primitives outside `AppIcon`; these boundaries are documented in the Design System Inventory Icons tab.
 - `colorRegistry.ts` and `theme.css` are intentionally explicit, so adding a reusable color or app semantic color requires updating the registry/theme in the same session.
@@ -443,4 +796,4 @@ constitutional check:
 - bananas triaged: yes
 - safe to resume: yes
 
-safe to resume: yes, Design System Colors inventory, Light/Dark appearance switching, app-wide color tokenization, color audits, build verification, browser smoke verification, and prior Payments/Products/Analytics/account-detail/demo-foundation work are complete; remaining work is follow-up automation and screenshot-level fine tuning, not a blocker.
+safe to resume: yes, 30 reconstructed template-code previews, Messages runtime screen from template 52, Documents and Settings runtime/template wiring from More, compact Design System Templates grid, Products bottom-navigation overlap fix, Design System Colors inventory, Light/Dark appearance switching, app-wide color tokenization, color audits, build verification, browser smoke verification, and prior Payments/Products/Analytics/account-detail/demo-foundation work are complete; remaining work is follow-up screenshot-level fine tuning and automated coverage, not source-only template reconstruction.

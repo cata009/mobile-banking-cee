@@ -16,13 +16,14 @@ import type { Product } from "@/data/products";
 interface HomeScreenProps {
   onPrimeClick?: () => void;
   onAnalyticsClick?: () => void;
+  onMessagesClick?: () => void;
   onPaymentsClick?: () => void;
   onProductsClick?: () => void;
   onMoreClick?: () => void;
   onAccountClick?: (product: Product) => void;
 }
 
-export default function HomeScreen({ onPrimeClick, onAnalyticsClick, onPaymentsClick, onProductsClick, onMoreClick, onAccountClick }: HomeScreenProps) {
+export default function HomeScreen({ onPrimeClick, onAnalyticsClick, onMessagesClick, onPaymentsClick, onProductsClick, onMoreClick, onAccountClick }: HomeScreenProps) {
   const demoState = useDemo();
   const { scenario, amountsHidden, toggleAmountsHidden } = demoState;
 
@@ -89,7 +90,7 @@ export default function HomeScreen({ onPrimeClick, onAnalyticsClick, onPaymentsC
           <HeaderActionRail>
             <AmountVisibilityButton hidden={amountsHidden} onToggle={toggleAmountsHidden} />
             <HeaderActionButton icon="profile" label="Profile" />
-            <HeaderActionButton icon="messages" label="Messages" />
+            <HeaderActionButton icon="messages" label="Messages" onClick={onMessagesClick} />
           </HeaderActionRail>
         </div>
       </div>
