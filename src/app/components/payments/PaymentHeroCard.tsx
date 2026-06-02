@@ -1,7 +1,108 @@
 import { AppIcon } from "@/app/components/icons";
-import type { PaymentHeroIllustration, PaymentHeroItem } from "@/app/config/paymentsMenuConfig";
+import type { PaymentHeroIllustration, PaymentHeroImageVariant, PaymentHeroItem } from "@/app/config/paymentsMenuConfig";
+import paymentHeroImage1 from "../../../../screenshots/payments1.png";
+import paymentHeroImage2 from "../../../../screenshots/payments2.png";
+import paymentHeroImage3 from "../../../../screenshots/payments3.png";
+import paymentHeroImage4 from "../../../../screenshots/payments4.png";
+import paymentHeroImage5 from "../../../../screenshots/payments5.png";
+import paymentHeroImage6 from "../../../../screenshots/payments6.png";
+import paymentHeroImage7 from "../../../../screenshots/payments7.png";
+import paymentHeroImage8 from "../../../../screenshots/payments8.png";
+import paymentHeroImage9 from "../../../../screenshots/payments9.png";
 import imgLaptopDocuments from "figma:asset/befcf83245a907a033553e7ac7902995e124d730.png";
 import imgPenHand from "figma:asset/947d85da595e4eb3e946a83cbab7bb8d8c148da1.png";
+
+type PaymentHeroImagePreset = {
+  id: PaymentHeroImageVariant;
+  label: string;
+  title: string;
+  description: string;
+  src: string;
+  imageClassName: string;
+};
+
+export const PAYMENT_HERO_CARD_IMAGE_VARIANTS: readonly PaymentHeroImagePreset[] = [
+  {
+    id: "payments-1",
+    label: "Payments 1 / Wallet",
+    title: "Make a payment",
+    description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing",
+    src: paymentHeroImage1,
+    imageClassName: "right-0 top-0 h-[104px] w-[126px]",
+  },
+  {
+    id: "payments-2",
+    label: "Payments 2 / Laptop",
+    title: "Transfer money",
+    description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing",
+    src: paymentHeroImage2,
+    imageClassName: "bottom-0 right-0 h-[92px] w-[137px]",
+  },
+  {
+    id: "payments-3",
+    label: "Payments 3 / Bill payments",
+    title: "Bill payments &\ndonations",
+    description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing",
+    src: paymentHeroImage3,
+    imageClassName: "bottom-0 right-0 h-[104px] w-[96px]",
+  },
+  {
+    id: "payments-4",
+    label: "Payments 4 / Scan & pay",
+    title: "Scan & pay",
+    description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing",
+    src: paymentHeroImage4,
+    imageClassName: "bottom-0 right-0 h-[104px] w-[100px]",
+  },
+  {
+    id: "payments-5",
+    label: "Payments 5 / Phone side",
+    title: "Recurrent payments",
+    description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing",
+    src: paymentHeroImage5,
+    imageClassName: "bottom-0 right-[8px] h-[104px] w-[70px]",
+  },
+  {
+    id: "payments-6",
+    label: "Payments 6 / Approve payment",
+    title: "Approve payment",
+    description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing",
+    src: paymentHeroImage6,
+    imageClassName: "bottom-0 right-0 h-[96px] w-[137px]",
+  },
+  {
+    id: "payments-7",
+    label: "Payments 7 / Globe",
+    title: "Foreign payment",
+    description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing",
+    src: paymentHeroImage7,
+    imageClassName: "bottom-0 right-0 h-[104px] w-[104px]",
+  },
+  {
+    id: "payments-8",
+    label: "Payments 8 / Wearable",
+    title: "Wearable payments",
+    description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing",
+    src: paymentHeroImage8,
+    imageClassName: "bottom-0 right-0 h-[104px] w-[86px]",
+  },
+  {
+    id: "payments-9",
+    label: "Payments 9 / Mobile token",
+    title: "Mobile token",
+    description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing",
+    src: paymentHeroImage9,
+    imageClassName: "bottom-0 right-0 h-[104px] w-[118px]",
+  },
+];
+
+const PAYMENT_HERO_CARD_IMAGE_PRESETS = PAYMENT_HERO_CARD_IMAGE_VARIANTS.reduce(
+  (acc, preset) => {
+    acc[preset.id] = preset;
+    return acc;
+  },
+  {} as Record<PaymentHeroImageVariant, PaymentHeroImagePreset>,
+);
 
 function WalletIllustration() {
   return (
@@ -72,13 +173,19 @@ function PaymentIllustration({ type }: { type: PaymentHeroIllustration }) {
 
 export default function PaymentHeroCard({
   item,
+  imageVariant = item.imageVariant,
   imageSrc = item.imageSrc,
   onSelect,
 }: {
   item: PaymentHeroItem;
+  imageVariant?: PaymentHeroImageVariant;
   imageSrc?: string;
   onSelect?: (item: PaymentHeroItem) => void;
 }) {
+  const imagePreset = imageVariant ? PAYMENT_HERO_CARD_IMAGE_PRESETS[imageVariant] : undefined;
+  const resolvedImageSrc = imageSrc ?? imagePreset?.src;
+  const resolvedImageClassName = imagePreset?.imageClassName ?? "bottom-0 right-0 h-full w-[120px]";
+
   const handleClick = () => {
     console.log(`Payment menu item clicked: ${item.id}`);
     onSelect?.(item);
@@ -88,27 +195,25 @@ export default function PaymentHeroCard({
     <button
       type="button"
       onClick={handleClick}
-      className="relative h-[104px] w-full cursor-pointer overflow-hidden rounded-[8px] bg-[linear-gradient(105deg,var(--uc-surface-muted)_0%,var(--uc-neutral-200)_48%,var(--uc-neutral-300)_100%)] text-left"
+      className="relative h-[120px] w-full cursor-pointer overflow-hidden rounded-[8px] bg-[linear-gradient(105deg,var(--uc-surface-muted)_0%,var(--uc-neutral-200)_48%,var(--uc-neutral-300)_100%)] text-left"
     >
-      <div className="relative z-10 flex h-full w-[270px] flex-col justify-center px-[20px]">
+      <div className="relative z-10 flex h-full w-full flex-col px-[20px] pt-[16px]">
         <h2
-          className="font-['UniCredit',sans-serif] font-bold text-[var(--uc-text)]"
-          style={{ fontSize: "23px", lineHeight: "26px" }}
+          className="whitespace-nowrap font-['UniCredit',sans-serif] text-[24px] font-bold leading-normal text-[var(--uc-text)]"
         >
           {item.title}
         </h2>
         <p
-          className="mt-[12px] whitespace-pre-line font-['UniCredit',sans-serif] text-[var(--uc-text)]"
-          style={{ fontSize: "14px", lineHeight: "16px" }}
+          className="mt-[16px] whitespace-pre-line font-['UniCredit',sans-serif] text-[14px] font-normal leading-normal text-[var(--uc-text)]"
         >
           {item.description}
         </p>
       </div>
-      {imageSrc ? (
+      {resolvedImageSrc ? (
         <img
-          src={imageSrc}
+          src={resolvedImageSrc}
           alt=""
-          className="absolute bottom-0 right-0 h-full w-[120px] object-contain object-right-bottom"
+          className={`absolute object-contain object-right-bottom ${resolvedImageClassName}`}
           draggable={false}
         />
       ) : (

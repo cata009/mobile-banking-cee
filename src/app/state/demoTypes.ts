@@ -6,7 +6,7 @@
 /**
  * Supported UniCredit countries in CEE region
  */
-export type Country = "RO" | "RS" | "HU" | "BA" | "SK" | "SI" | "CZ";
+export type Country = "RO" | "RS" | "HU" | "BA" | "BA_BL" | "SK" | "SI" | "CZ";
 
 /**
  * Official country identifier alias used by project registries.

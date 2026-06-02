@@ -8,6 +8,7 @@ import { AppIcon, type IconName } from "@/app/components/icons";
 import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
 import NewPaymentActionListItem from "@/app/components/payments/NewPaymentActionListItem";
 import NewPaymentDiscoverBanner from "@/app/components/payments/NewPaymentDiscoverBanner";
+import PaymentHeroCard from "@/app/components/payments/PaymentHeroCard";
 import PaymentOtherShortcut from "@/app/components/payments/PaymentOtherShortcut";
 import PanelWithTranslations from "@/app/components/PanelWithTranslations";
 import PageHeader from "@/app/components/PageHeader";
@@ -722,29 +723,10 @@ function TemplateTopLevelHeader({
 }
 
 function TemplatePaymentHeroCard({ item, interactive }: { item: PaymentHeroItem; interactive: boolean }) {
-  const iconMap: Record<PaymentHeroItem["illustration"], IconName> = {
-    wallet: "wallet-cards",
-    laptop: "payment-templates",
-    pen: "account-option-statement",
-    "qr-phone": "payment-create-qr",
-  };
-
   return (
-    <TemplateAction
-      ariaLabel={item.title}
-      interactive={interactive}
-      className="relative h-[104px] w-full overflow-hidden rounded-[8px] bg-[linear-gradient(105deg,var(--uc-surface-muted)_0%,var(--uc-neutral-200)_52%,var(--uc-neutral-300)_100%)] text-left"
-    >
-      <span className="relative z-10 flex h-full w-[250px] flex-col justify-center px-[20px] font-['UniCredit',sans-serif]">
-        <span className="text-[23px] font-bold leading-[26px] text-[var(--uc-text)]">{item.title}</span>
-        <span className="mt-[12px] whitespace-pre-line text-[14px] font-normal leading-[16px] text-[var(--uc-text)]">
-          {item.description}
-        </span>
-      </span>
-      <span className="absolute bottom-[-16px] right-[-14px] grid size-[112px] place-items-center rounded-full bg-[rgb(var(--uc-static-white-rgb)_/_0.45)] text-[var(--uc-action)]">
-        <AppIcon name={iconMap[item.illustration]} size={54} strokeWidth={1.8} color="currentColor" />
-      </span>
-    </TemplateAction>
+    <div className={interactive ? "" : "pointer-events-none"}>
+      <PaymentHeroCard item={item} />
+    </div>
   );
 }
 
@@ -1097,10 +1079,7 @@ function PaymentsMenuTemplate({ interactive }: { interactive: boolean }) {
             ))}
           </div>
           <section className="pt-[16px]">
-            <h2 className="px-[10px] font-['UniCredit',sans-serif] text-[18px] font-bold leading-[20px] text-[var(--uc-text)]">
-              {menu.otherTitle}
-            </h2>
-            <div className="mt-[5px] h-px w-full bg-[var(--uc-border)]" />
+            <SectionHeadingDivider title={menu.otherTitle} />
             <div className="overflow-x-auto overflow-y-hidden pt-[8px] scrollbar-hide">
               <div className="flex w-max gap-[18px] pr-[20px]">
                 {menu.otherItems.map((item) => (
@@ -1118,6 +1097,7 @@ function PaymentsMenuTemplate({ interactive }: { interactive: boolean }) {
 
 function NewPaymentSheetTemplate({ interactive }: { interactive: boolean }) {
   const menu = getPaymentsMenuForCountry("RO");
+  const sheet = menu.heroSheets["new-payment"];
 
   return (
     <TemplatePhoneSurface>
@@ -1143,20 +1123,20 @@ function NewPaymentSheetTemplate({ interactive }: { interactive: boolean }) {
       <section className="absolute inset-x-0 bottom-0 rounded-t-[12px] bg-[var(--uc-sheet-bg)] p-[16px] pb-[32px]">
         <div className="mb-[18px] flex items-start justify-between gap-[16px]">
           <h1 className="font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">
-            {menu.newPaymentSheet.title}
+            {sheet.title}
           </h1>
           <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Close" interactive={interactive}>
             <AppIcon name="close-x" color="var(--uc-text)" />
           </TemplateAction>
         </div>
         <div className="flex flex-col">
-          {menu.newPaymentSheet.actions.map((action) => (
+          {sheet.actions.map((action) => (
             <NewPaymentActionListItem key={action.id} action={action} onSelect={() => undefined} />
           ))}
         </div>
         <NewPaymentDiscoverBanner
-          title={menu.newPaymentSheet.infoBanner.title}
-          description={menu.newPaymentSheet.infoBanner.description}
+          title={sheet.infoBanner.title}
+          description={sheet.infoBanner.description}
         />
       </section>
     </TemplatePhoneSurface>

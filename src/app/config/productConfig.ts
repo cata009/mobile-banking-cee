@@ -101,6 +101,30 @@ export const COUNTRY_PRODUCTS: CountryProducts = {
       description: LOREM_SHORT,
     },
   ],
+
+  // Bosnia Banja Luka - duplicate of Bosnia
+  BA_BL: [
+    {
+      id: "account",
+      title: "Open an account",
+      description: LOREM_SHORT,
+    },
+    {
+      id: "loans",
+      title: "Loans",
+      description: LOREM_SHORT,
+    },
+    {
+      id: "credit-cards",
+      title: "Credit cards",
+      description: LOREM_SHORT,
+    },
+    {
+      id: "current-account-packages",
+      title: "Current account packages",
+      description: LOREM_SHORT,
+    },
+  ],
   
   // Romania - 2 products
   RO: [

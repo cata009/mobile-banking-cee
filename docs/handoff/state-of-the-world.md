@@ -8,7 +8,7 @@ This project is a standalone `Vite + React` interactive demo platform for UniCre
 
 Current runtime supports:
 
-- country switching across CEE markets;
+- country switching across CEE markets, now including separate `BA` Bosnia and `BA_BL` Bosnia Banja Luka application variants;
 - active/inactive app scenario;
 - explicit release preview and baseline state through the `Release` control;
 - Light/Dark appearance switching from the demo top bar and control panel, driven by UniCredit design-system theme tokens;
@@ -23,7 +23,8 @@ Current runtime supports:
 - mobile frame demo shell;
 - PI-like mobile banking screens, including Home, Analytics / My Spendings, Messages, Documents, Account Detail, Account Details, Payments, Products, Prime, More, Settings, and Contacts.
 - RO Kids mock screens and flows, including Kid Home, onboarding, parent activation, request money, parent approval, send money approval, My Card, card customization, saving goals, allowance, chores, Learn, What Parent Can See, Parent Dashboard, Parent Approvals, Parent Controls, and chore/allowance management.
-- Payments `OTHER` shortcuts now render as a horizontally scrollable shortcut rail, with each shortcut label constrained to a maximum of 2 text rows.
+- Payments `OTHER` now uses the shared `SectionHeadingDivider` component for its title/divider and renders shortcuts as a horizontally scrollable shortcut rail, with each shortcut label constrained to a maximum of 2 text rows.
+- Payments primary hero cards now render through a reusable `PaymentHeroCard` with 9 screenshot-backed artwork variants (`payments1.png` ... `payments9.png`), a 120px card height, 24px single-line untruncated title, 14px subtitle, and dedicated `heroSheets` overlay configuration per card; runtime currently uses temporary artwork/actions until country-specific card mapping, final copy, and per-overlay menu content are supplied.
 - Products offer banners now render through a chevron-based reusable card layout with a fixed right image column and clamped title/subtitle copy.
 - The Products offer-banner component now supports dropdown-selectable color families with `normal` and `light` tone variants in the Design System inventory.
 - Products banking and ShopSmart commercial banners are now country-specific in both copy and color tone, and the offer rails can also vary in banner count by market, so switching country changes the Products storytelling instead of reusing one shared offer set everywhere.

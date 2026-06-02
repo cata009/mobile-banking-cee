@@ -6,6 +6,7 @@ import NewPaymentActionListItem from "@/app/components/payments/NewPaymentAction
 import NewPaymentDiscoverBanner from "@/app/components/payments/NewPaymentDiscoverBanner";
 import PaymentHeroCard from "@/app/components/payments/PaymentHeroCard";
 import PaymentOtherShortcut from "@/app/components/payments/PaymentOtherShortcut";
+import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
 import {
@@ -59,27 +60,41 @@ function handleOtherPaymentActionClick(item: PaymentOtherItem) {
   console.log(`Payment other action clicked: ${item.id}`);
 }
 
-function NewPaymentSheet({
+function PaymentHeroSheet({
   config,
+  heroId,
   onClose,
   onDomesticPaymentClick,
 }: {
   config: NewPaymentSheetConfig;
+  heroId: PaymentHeroItem["id"];
   onClose: () => void;
   onDomesticPaymentClick?: () => void;
 }) {
   const { t } = useLanguage();
   const localizedConfig: NewPaymentSheetConfig = {
     ...config,
-    title: t("runtime.payments.newPayment.title", config.title),
+    title: t(`runtime.payments.heroSheets.${heroId}.title`, config.title),
     actions: config.actions.map((action) => ({
       ...action,
-      title: t(`runtime.payments.newPayment.actions.${action.id}.title`, action.title),
-      description: t(`runtime.payments.newPayment.actions.${action.id}.description`, action.description),
+      title: t(
+        `runtime.payments.heroSheets.${heroId}.actions.${action.id}.title`,
+        t(`runtime.payments.newPayment.actions.${action.id}.title`, action.title),
+      ),
+      description: t(
+        `runtime.payments.heroSheets.${heroId}.actions.${action.id}.description`,
+        t(`runtime.payments.newPayment.actions.${action.id}.description`, action.description),
+      ),
     })),
     infoBanner: {
-      title: t("runtime.payments.newPayment.infoBanner.title", config.infoBanner.title),
-      description: t("runtime.payments.newPayment.infoBanner.description", config.infoBanner.description),
+      title: t(
+        `runtime.payments.heroSheets.${heroId}.infoBanner.title`,
+        t("runtime.payments.newPayment.infoBanner.title", config.infoBanner.title),
+      ),
+      description: t(
+        `runtime.payments.heroSheets.${heroId}.infoBanner.description`,
+        t("runtime.payments.newPayment.infoBanner.description", config.infoBanner.description),
+      ),
     },
   };
 
@@ -125,12 +140,12 @@ export default function PaymentsScreen({
     ...item,
     label: t(`runtime.payments.otherItems.${item.id}`, item.label),
   }));
-  const [isNewPaymentSheetOpen, setIsNewPaymentSheetOpen] = useState(false);
+  const [selectedPrimaryItemId, setSelectedPrimaryItemId] = useState<PaymentHeroItem["id"] | null>(null);
+  const selectedHeroSheet = selectedPrimaryItemId ? menu.heroSheets[selectedPrimaryItemId] : null;
 
   const handlePrimaryItemSelect = (item: PaymentHeroItem) => {
-    if (item.id === "new-payment") {
-      setIsNewPaymentSheetOpen(true);
-    }
+    console.log(`Payment hero action selected: ${item.id}`);
+    setSelectedPrimaryItemId(item.id);
   };
 
   const handleTabChange = (tab: NavItem) => {
@@ -162,13 +177,7 @@ export default function PaymentsScreen({
         </div>
 
         <section className="px-[20px] pt-[16px]">
-          <h2
-            className="px-[10px] font-['UniCredit',sans-serif] font-bold text-[var(--uc-text)]"
-            style={{ fontSize: "18px", lineHeight: "20px" }}
-          >
-            {t("runtime.payments.other", menu.otherTitle)}
-          </h2>
-          <div className="mt-[5px] h-px w-full bg-[var(--uc-border)]" />
+          <SectionHeadingDivider title={t("runtime.payments.other", menu.otherTitle)} />
           <div className="overflow-x-auto overflow-y-hidden scrollbar-hide pt-[8px]">
             <div className="flex w-max gap-[18px] pr-[20px]">
               {localizedOtherItems.map((item) => (
@@ -183,10 +192,11 @@ export default function PaymentsScreen({
         <BottomNavigation activeTab="payments" onTabChange={handleTabChange} />
       </div>
 
-      {isNewPaymentSheetOpen && (
-        <NewPaymentSheet
-          config={menu.newPaymentSheet}
-          onClose={() => setIsNewPaymentSheetOpen(false)}
+      {selectedHeroSheet && (
+        <PaymentHeroSheet
+          config={selectedHeroSheet}
+          heroId={selectedPrimaryItemId}
+          onClose={() => setSelectedPrimaryItemId(null)}
           onDomesticPaymentClick={onDomesticPaymentClick}
         />
       )}

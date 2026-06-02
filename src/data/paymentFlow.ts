@@ -53,6 +53,7 @@ const COUNTRY_BANK_NAMES: Record<CountryId, string> = {
   HU: "UniCredit Bank Hungary",
   RS: "UniCredit Bank Serbia",
   BA: "UniCredit Bank Bosnia and Herzegovina",
+  BA_BL: "UniCredit Bank Bosnia and Herzegovina",
   SI: "UniCredit Bank Slovenia",
 };
 
@@ -63,6 +64,7 @@ const COUNTRY_BANK_CODES: Record<CountryId, string> = {
   HU: "1091",
   RS: "170",
   BA: "129",
+  BA_BL: "129",
   SI: "2900",
 };
 
@@ -97,6 +99,7 @@ function beneficiaryAccount(country: CountryId) {
   if (country === "CZ") return "CZ40270000000021070555322";
   if (country === "SK") return "SK40270000000021070555322";
   if (country === "RO") return "RO49BACX000008204119876";
+  if (country === "BA_BL") return "BA40270000000021070555322";
   return `${country}40270000000021070555322`;
 }
 
