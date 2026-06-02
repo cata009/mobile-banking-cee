@@ -81,6 +81,7 @@ export type ScreenId =
  */
 export type ComponentId =
   | "shell.mobile-frame"
+  | "shell.phone-screenshot-control"
   | "shell.page-header"
   | "shell.bottom-navigation"
   | "shell.bottom-sheet"
@@ -114,6 +115,7 @@ export type ComponentId =
   | "payments.menu"
   | "payments.hero-card"
   | "payments.other-shortcut"
+  | "payments.other-shortcut-icon-bubble"
   | "payments.new-payment-sheet"
   | "payments.new-payment-action"
   | "payments.new-payment-discover-banner"

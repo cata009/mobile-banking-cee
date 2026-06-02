@@ -12,6 +12,7 @@ import { useDemo } from "@/app/state/demoStore";
 import { AppIcon } from "@/app/components/icons";
 import ThemeModeSegment from "@/app/components/ThemeModeSegment";
 import { DemoFeatureSidePanel } from "./DemoFeatureSidePanel";
+import { PhoneScreenshotControl } from "./PhoneScreenshotControl";
 import svgPaths from "@/imports/svg-pn3y56bdut";
 
 export function DemoTopBar() {
@@ -253,6 +254,8 @@ export function DemoTopBar() {
             >
               <AppIcon name="demo-settings" />
             </button>
+
+            <PhoneScreenshotControl disabled={isDesignSystemSelected} />
 
             <ThemeModeSegment value={themeMode} onChange={setThemeMode} />
 

@@ -72,6 +72,7 @@ export interface PaymentsMenuConfig {
   title: string;
   primaryItems: readonly PaymentHeroItem[];
   otherTitle: string;
+  otherTitleTranslationKey?: string | null;
   otherItems: readonly PaymentOtherItem[];
   heroSheets: Record<PaymentHeroId, NewPaymentSheetConfig>;
 }
@@ -104,6 +105,41 @@ const DEFAULT_PRIMARY_ITEMS: readonly PaymentHeroItem[] = [
     description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing",
     illustration: "qr-phone",
     imageVariant: "payments-4",
+  },
+];
+
+const RO_PRIMARY_ITEMS: readonly PaymentHeroItem[] = [
+  {
+    id: "new-payment",
+    title: "Payment to account",
+    description: "To a new beneficiary, using the template\nor foreign currency",
+    illustration: "wallet",
+    imageVariant: "payments-1",
+    translationKey: null,
+  },
+  {
+    id: "scan-pay",
+    title: "RoPay",
+    description: "Instant payments with QR or\nRoPay Alias",
+    illustration: "qr-phone",
+    imageVariant: "payments-4",
+    translationKey: null,
+  },
+  {
+    id: "between-accounts",
+    title: "Currency exchange",
+    description: "Currency exchange between\nyour accounts",
+    illustration: "laptop",
+    imageVariant: "payments-2",
+    translationKey: null,
+  },
+  {
+    id: "manage-ebills",
+    title: "Bills & Direct Debit",
+    description: "Utility payments bils and donations",
+    illustration: "wallet",
+    imageVariant: "payments-3",
+    translationKey: null,
   },
 ];
 
@@ -200,6 +236,13 @@ const DEFAULT_OTHER_ITEMS: readonly PaymentOtherItem[] = [
   { id: "exchange-rates", label: "EXCHANGE\nRATES", icon: "exchange" },
 ];
 
+const RO_OTHER_ITEMS: readonly PaymentOtherItem[] = [
+  { id: "standing-order", label: "Recurrent\nPayments", icon: "standing", translationKey: null },
+  { id: "templates", label: "Templates", icon: "templates", translationKey: null },
+  { id: "foreign-payments", label: "Foreign\nPayments", icon: "foreign", translationKey: null },
+  { id: "exchange-rates", label: "Exchange\nRates", icon: "exchange", translationKey: null },
+];
+
 const BA_OTHER_ITEMS: readonly PaymentOtherItem[] = [
   { id: "templates", label: "Template", icon: "templates", translationKey: null },
   { id: "card-repayment", label: "Card repayment", icon: "card", translationKey: null },
@@ -283,6 +326,8 @@ function createPaymentsMenuConfig(
   country: CountryId,
   options: {
     primaryItems?: readonly PaymentHeroItem[];
+    otherTitle?: string;
+    otherTitleTranslationKey?: string | null;
     otherItems?: readonly PaymentOtherItem[];
   } = {},
 ): PaymentsMenuConfig {
@@ -292,14 +337,20 @@ function createPaymentsMenuConfig(
   return {
     title: "Payments",
     primaryItems,
-    otherTitle: "OTHER",
+    otherTitle: options.otherTitle ?? "OTHER",
+    otherTitleTranslationKey: options.otherTitleTranslationKey,
     otherItems,
     heroSheets: createHeroSheets(country, primaryItems),
   };
 }
 
 export const PAYMENTS_MENU_CONFIG: Record<CountryId, PaymentsMenuConfig> = {
-  RO: createPaymentsMenuConfig("RO"),
+  RO: createPaymentsMenuConfig("RO", {
+    primaryItems: RO_PRIMARY_ITEMS,
+    otherTitle: "SHORTCUTS",
+    otherTitleTranslationKey: null,
+    otherItems: RO_OTHER_ITEMS,
+  }),
   CZ: createPaymentsMenuConfig("CZ"),
   SK: createPaymentsMenuConfig("SK"),
   HU: createPaymentsMenuConfig("HU"),

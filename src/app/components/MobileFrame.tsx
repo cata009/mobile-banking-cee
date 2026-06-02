@@ -45,6 +45,7 @@ export default function MobileFrame({
   isCoAppingActive,
 }: MobileFrameProps) {
   const previewContainerRef = useRef<HTMLDivElement>(null);
+  const screenSurfaceRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [previewScale, setPreviewScale] = useState(0.7);
 
@@ -95,10 +96,15 @@ export default function MobileFrame({
           <div className="absolute inset-0 bg-[rgb(var(--uc-static-black-rgb)_/_0.2)] blur-3xl transform translate-y-8" />
 
           <div className="relative bg-[var(--uc-static-black)] rounded-[48px] p-3 shadow-2xl">
-            <div className="relative rounded-[36px] overflow-hidden w-[375px] h-[812px] bg-[var(--uc-static-black)]">
+            <div
+              ref={screenSurfaceRef}
+              className="relative rounded-[36px] overflow-hidden w-[375px] h-[812px] bg-[var(--uc-static-black)]"
+              data-phone-screen="true"
+            >
               <div
                 ref={scrollContainerRef}
                 className="absolute inset-0 overflow-y-auto overflow-x-hidden scrollbar-hide"
+                data-phone-scroll="true"
                 style={{
                   zIndex: 0,
                   WebkitOverflowScrolling: 'touch',
