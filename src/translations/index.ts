@@ -27,6 +27,7 @@ export const TRANSLATIONS = {
   RS: RS_TRANSLATIONS,
   HU: HU_TRANSLATIONS,
   BA: BA_TRANSLATIONS,
+  BA_BL: BA_TRANSLATIONS,
   SI: SI_TRANSLATIONS,
 } as const;
 
@@ -38,7 +39,7 @@ export type CountryCode = keyof typeof TRANSLATIONS;
 /**
  * Get translations for a specific country and language
  * 
- * @param country - Country code (CZ, SK, RO, RS, HU, BA, SI)
+ * @param country - Country code (CZ, SK, RO, RS, HU, BA, BA_BL, SI)
  * @param language - Language code (en, cs, sk, ro, sr, hu, bs, sl)
  * @returns Translation object or null if not found
  * 

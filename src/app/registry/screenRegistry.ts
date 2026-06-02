@@ -45,7 +45,7 @@ export interface ScreenMeta {
   similarTo: readonly ScreenId[];
 }
 
-const ALL_COUNTRIES: readonly CountryId[] = ["RO", "CZ", "SK", "HU", "RS", "BA", "SI"] as const;
+const ALL_COUNTRIES: readonly CountryId[] = ["RO", "CZ", "SK", "HU", "RS", "BA", "BA_BL", "SI"] as const;
 
 export const SCREEN_REGISTRY: Record<ScreenId, ScreenMeta> = {
   "pi.prelogin.inactive": {

@@ -53,6 +53,12 @@ export const COUNTRY_CONFIG: Record<CountryId, CountryConfig> = {
     currencySymbol: "KM",
     defaultScenario: "active",
   },
+  BA_BL: {
+    currency: "BAM",
+    locale: "bs-BA",
+    currencySymbol: "KM",
+    defaultScenario: "active",
+  },
   SK: {
     currency: "EUR",
     locale: "sk-SK",

@@ -68,6 +68,13 @@ export const MORE_CARDS_CONFIG: Record<CountryId, MoreCardType[]> = {
     'settings',
   ],
 
+  // Bosnia Banja Luka - duplicate of Bosnia
+  BA_BL: [
+    'contacts',
+    'documents',
+    'settings',
+  ],
+
   // Hungary - 5 cards
   HU: [
     'contacts',

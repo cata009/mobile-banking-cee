@@ -13,6 +13,16 @@ export type PaymentOtherId =
   | "exchange-rates";
 
 export type PaymentHeroIllustration = "wallet" | "laptop" | "pen" | "qr-phone";
+export type PaymentHeroImageVariant =
+  | "payments-1"
+  | "payments-2"
+  | "payments-3"
+  | "payments-4"
+  | "payments-5"
+  | "payments-6"
+  | "payments-7"
+  | "payments-8"
+  | "payments-9";
 export type PaymentOtherIcon = "qr" | "templates" | "card" | "exchange";
 export type NewPaymentActionId =
   | "domestic-payment"
@@ -25,6 +35,7 @@ export interface PaymentHeroItem {
   title: string;
   description: string;
   illustration: PaymentHeroIllustration;
+  imageVariant?: PaymentHeroImageVariant;
   imageSrc?: string;
 }
 
@@ -57,7 +68,7 @@ export interface PaymentsMenuConfig {
   primaryItems: readonly PaymentHeroItem[];
   otherTitle: string;
   otherItems: readonly PaymentOtherItem[];
-  newPaymentSheet: NewPaymentSheetConfig;
+  heroSheets: Record<PaymentHeroId, NewPaymentSheetConfig>;
 }
 
 const DEFAULT_PRIMARY_ITEMS: readonly PaymentHeroItem[] = [
@@ -66,24 +77,28 @@ const DEFAULT_PRIMARY_ITEMS: readonly PaymentHeroItem[] = [
     title: "New payment",
     description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing",
     illustration: "wallet",
+    imageVariant: "payments-1",
   },
   {
     id: "between-accounts",
     title: "Between my accounts",
     description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing",
     illustration: "laptop",
+    imageVariant: "payments-2",
   },
   {
     id: "recurrent-payments",
     title: "Recurrent payments",
     description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing",
     illustration: "pen",
+    imageVariant: "payments-5",
   },
   {
     id: "scan-pay",
     title: "Scan & pay",
     description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing",
     illustration: "qr-phone",
+    imageVariant: "payments-4",
   },
 ];
 
@@ -101,8 +116,42 @@ const DOMESTIC_PAYMENT_DESCRIPTION: Record<CountryId, string> = {
   HU: "Send payment in HUF in HU",
   RS: "Send payment in RSD in RS",
   BA: "Send payment in BAM in BA",
+  BA_BL: "Send payment in BAM in BA",
   SI: "Send payment in EUR in SI",
 };
+
+function createHeroSheetConfig(
+  title: string,
+  country: CountryId,
+): NewPaymentSheetConfig {
+  return {
+    title,
+    actions: [
+      {
+        id: "domestic-payment",
+        title: "DOMESTIC PAYMENT",
+        description: DOMESTIC_PAYMENT_DESCRIPTION[country],
+        icon: "domestic",
+      },
+      {
+        id: "foreign-payment",
+        title: "FOREIGN PAYMENT",
+        description: "Send foreign or SEPA payment",
+        icon: "foreign",
+      },
+      {
+        id: "templates-beneficiaries",
+        title: "TEMPLATES AND BENEFICIARIES",
+        description: "Reuse details from a payment you made in the past",
+        icon: "templates",
+      },
+    ],
+    infoBanner: {
+      title: "Discover how to pay easier",
+      description: "Does the invoice has a QR code or postal order? Pay easier!",
+    },
+  };
+}
 
 function createPaymentsMenuConfig(country: CountryId): PaymentsMenuConfig {
   return {
@@ -110,32 +159,11 @@ function createPaymentsMenuConfig(country: CountryId): PaymentsMenuConfig {
     primaryItems: DEFAULT_PRIMARY_ITEMS,
     otherTitle: "OTHER",
     otherItems: DEFAULT_OTHER_ITEMS,
-    newPaymentSheet: {
-      title: "New payment",
-      actions: [
-        {
-          id: "domestic-payment",
-          title: "DOMESTIC PAYMENT",
-          description: DOMESTIC_PAYMENT_DESCRIPTION[country],
-          icon: "domestic",
-        },
-        {
-          id: "foreign-payment",
-          title: "FOREIGN PAYMENT",
-          description: "Send foreign or SEPA payment",
-          icon: "foreign",
-        },
-        {
-          id: "templates-beneficiaries",
-          title: "TEMPLATES AND BENEFICIARIES",
-          description: "Reuse details from a payment you made in the past",
-          icon: "templates",
-        },
-      ],
-      infoBanner: {
-        title: "Discover how to pay easier",
-        description: "Does the invoice has a QR code or postal order? Pay easier!",
-      },
+    heroSheets: {
+      "new-payment": createHeroSheetConfig("New payment", country),
+      "between-accounts": createHeroSheetConfig("Between my accounts", country),
+      "recurrent-payments": createHeroSheetConfig("Recurrent payments", country),
+      "scan-pay": createHeroSheetConfig("Scan & pay", country),
     },
   };
 }
@@ -147,6 +175,7 @@ export const PAYMENTS_MENU_CONFIG: Record<CountryId, PaymentsMenuConfig> = {
   HU: createPaymentsMenuConfig("HU"),
   RS: createPaymentsMenuConfig("RS"),
   BA: createPaymentsMenuConfig("BA"),
+  BA_BL: createPaymentsMenuConfig("BA_BL"),
   SI: createPaymentsMenuConfig("SI"),
 };
 

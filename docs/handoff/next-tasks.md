@@ -9,7 +9,7 @@ Status legend: `todo` / `in_progress` / `done` / `blocked`
 | done | Install AI Contributor Operating System docs | `agents.md`, `docs/handoff/*` |
 | done | Add project architecture model | `docs/architecture/PROJECT_MODEL.md` |
 | done | Add typed taxonomy and registries | `src/app/registry/projectModel.ts`, `screenRegistry.ts`, `flowRegistry.ts`, `releaseRegistry.ts` |
-| done | Run verification | `npm run build` passed on 2026-05-27; browser smoke passed on fresh dev server `5175`; typecheck is blocked by missing local TypeScript CLI |
+| done | Run verification | Latest closeout verification on 2026-06-02: `npm run build`, `npm run audit:templates`, static `BA_BL` coverage audit, and `git diff --check` passed; `typecheck`, `lint`, and `test` remain blocked by missing local scripts/tooling |
 
 ## Upcoming
 
@@ -22,6 +22,7 @@ Status legend: `todo` / `in_progress` / `done` / `blocked`
 | done | Build initial control panel view for feature lifecycle and coverage | Shows lifecycle/coverage badges from feature metadata |
 | done | Add screen/component catalog export for AI training and larger-platform integration | `componentRegistry.ts` and `aiCatalog.ts` |
 | done | Update platform capability map after runtime architecture changes | Updated release/control-panel wording |
+| done | Add Bosnia Banja Luka country/application variant | `BA_BL` duplicates Bosnia as a separate selectable country/application context across demo state, country/language/translation registries, runtime configs, data fixtures, screen/flow/template registries, Design System country selector, docs, and capability map; build, template audit, static coverage audit, and browser smoke passed on 2026-06-02 |
 | done | Add Payments menu for all countries | `PaymentsScreen`, `paymentsMenuConfig`, navigation, screen/component/flow registry entries |
 | done | Add Products menu for all countries | `ProductsScreen`, `productsMenuConfig`, navigation, screen/component/flow registry entries; ShopSmart tabs enabled for RO/CZ/SK/HU only |
 | done | Add Analytics / My Spendings tab | `AnalyticsScreen`, navigation wiring, screen/component/flow registry entries; reused shared header actions, New payment banner, Account Detail divider, and AccountTransactionRow; build and in-app browser computed-style smoke passed on `5175` |
@@ -46,6 +47,7 @@ Status legend: `todo` / `in_progress` / `done` / `blocked`
 | done | Add Design System Colors tab and Light/Dark appearance mode | `colorRegistry.ts` maps `screenshots/Colors.svg` into DS palettes and app color audit entries; `theme.css`, `demoStore`, `DemoTopBar`, `DemoFeatureSidePanel`, and `DesignSystemPage` implement color inventory, copy feedback, and Light/Dark switching; build, browser smoke, raw hex/rgb, and Tailwind palette audits passed on `5175` |
 | done | Add RO Kids Banking prototype for Mobile PI Kids Romania | `RoKidsApp`, `roKidsBanking` mock data, `App` gating, and registry entries implement a Romania-only mock-driven Kids/Parent concept; build, browser smoke, `git diff --check`, and raw color audits passed on `5177` |
 | done | Add global interactive cursor affordance | `src/styles/theme.css` applies pointer cursors to clickable controls across runtime screens, templates, and Design System specimens, preserves text cursor for text fields, and uses `not-allowed` for disabled controls; `npm run build`, browser computed-cursor checks, and closeout verification passed |
+| done | Add Payments hero-card image variants and per-card sheet contract | `PaymentHeroCard` supports 9 screenshot-backed artwork variants from `screenshots/payments1.png` through `screenshots/payments9.png`; `paymentsMenuConfig` now has per-card `heroSheets`; final country-specific mapping and copy remain a future task |
 
 ## Future Product Work
 
@@ -59,6 +61,7 @@ Status legend: `todo` / `in_progress` / `done` / `blocked`
 | todo | Add automated smoke coverage for RO Kids core flow | Browser smoke passed manually on `5177`, but no automated regression covers request creation, parent approval, balance update, or stale-banner prevention |
 | todo | Add tests for product/release/design-system switching | Build passes, but no automated UI tests yet |
 | todo | Add visual regression coverage for account-detail safe-area, title-card spacing, sticky search, account-card metadata/spacing, account carousel edge-peek/drag/snap, all-products carousel coverage, account-details info screen layout, and desktop preview auto-fit behavior | Manual browser verification caught the Dynamic Island overlap regression, page-level scroll regression, account-card metadata/spacing regression, sticky-search spacing regression, account-card carousel gutter/drag/edge-peek regression, all-products account carousel coverage, and Account Details info navigation; no automated guard exists yet |
+| todo | Map Payments hero-card variants, overlay menus, and final copy per country | `PaymentHeroCard` now supports 9 screenshot-backed image variants and each primary card has a dedicated `heroSheets` overlay config; final country/card applicability, H1/H2 copy, overlay menu labels, and icons are pending user-provided mapping |
 | todo | Replace shared Payments placeholder labels with country-specific copy | Current Payments config is country-scoped but all countries intentionally reuse the same baseline English labels |
 | todo | Fine tune Products copy, imagery, ShopSmart content, and per-country labels | Current Products config is country-scoped and the core card component contract is fixed; copy/assets are still shared placeholders |
 | todo | Fine tune Analytics chart spacing and PFM aggregation behavior | Current Analytics screen is screenshot-inspired and transaction-derived from static account profiles; Money Out / Money In PFM categories are wired, but chart interaction, exact spacing, and product-specific transaction profile depth still need final tuning |

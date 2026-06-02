@@ -4,9 +4,62 @@ Last updated: 2026-06-02
 
 ## Current Focus
 
-Closing the Design System template-to-app contract so future AI-built flows can read code-backed templates as standalone app page/state patterns tied to registered components, screens, flows, icons, and reuse rules.
+Closing the current BA_BL country/application variant, Payments/template alignment work, and accumulated handoff updates into a banana-clean commit.
 
 ## Last Meaningful Change
+
+Latest Bosnia Banja Luka country/application variant:
+
+- `src/app/state/demoTypes.ts`, `src/app/registry/demoConfig.ts`, and `src/app/registry/projectModel.ts`
+  - added `BA_BL` as a separate country/application variant next to existing `BA`
+  - top-bar/Design System country lists now include `Bosnia Banja Luka` with Bosnia flag and `BAM`
+- `src/app/registry/countryConfig.ts`, `src/app/registry/languageByCountry.ts`, and `src/translations/index.ts`
+  - `BA_BL` reuses Bosnia locale/currency/language/translation behavior (`bs-BA`, `BAM`, `KM`, `bs`, and BA translation package)
+- Runtime config/data cloned from Bosnia:
+  - `src/app/config/productConfig.ts`
+  - `src/app/config/moreCardsConfig.ts`
+  - `src/app/config/messagesConfig.ts`
+  - `src/app/config/documentsConfig.ts`
+  - `src/app/config/paymentsMenuConfig.ts`
+  - `src/app/config/productsMenuConfig.ts`
+  - `src/data/accountDetails.ts`
+  - `src/data/paymentFlow.ts`
+- AI/coverage registries updated:
+  - `src/app/registry/screenRegistry.ts`
+  - `src/app/registry/flowRegistry.ts`
+  - `src/app/registry/templateRegistry.ts`
+  - `src/app/screens/design-system/DesignSystemPage.tsx`
+- Documentation updated:
+  - `docs/handoff/state-of-the-world.md`
+  - `docs/platform-capability-map/README.md`
+  - `src/translations/README.md`
+- Verification on 2026-06-02:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=48 screens=23 flows=13`
+  - static `BA_BL` coverage audit passed across 19 country-model/config/registry/data surfaces
+  - in-app browser smoke on `http://localhost:3001/` confirmed the Country dropdown includes `Bosnia Banja Luka`, selecting it succeeds, and the topbar selected country reads `Bosnia Banja Luka`
+
+Closeout / commit readiness on 2026-06-02:
+
+- Commit scope:
+  - all currently modified and untracked project files are intended to be staged and committed per explicit user request
+  - includes Payments hero-card artwork variants, template/runtime alignment, `BA_BL` country/application coverage, and documentation/capability-map updates
+- Banana Loop result:
+  - fixed: Bosnia previously had one selectable application context although the business reality needs two maintained Bosnia applications; `BA_BL` is now a first-class duplicate of Bosnia
+  - triaged: final country-specific Payments hero-card mapping, labels, and overlay contents remain visible future work in `docs/handoff/next-tasks.md`
+  - triaged: build chunk-size warning and missing local `typecheck`/`lint`/`test` scripts remain known bananas, not blockers for this commit
+  - no new untriaged banana was found during closeout
+- Final verification on 2026-06-02:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=48 screens=23 flows=13`
+  - static `BA_BL` country/config/registry/data coverage audit passed
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
 
 Latest global cursor affordance fix:
 
@@ -926,7 +979,7 @@ Recent Products card component fix:
 Recent New payment bottom sheet implementation:
 
 - `src/app/components/BottomSheet.tsx` was added as a reusable phone-frame modal shell with dim overlay, outside-tap close, Escape close, rounded white panel, and header close action.
-- `src/app/config/paymentsMenuConfig.ts` now includes `newPaymentSheet` metadata with three actions: `DOMESTIC PAYMENT`, `FOREIGN PAYMENT`, and `TEMPLATES AND BENEFICIARIES`.
+- `src/app/config/paymentsMenuConfig.ts` now includes hero-sheet metadata for Payments primary cards, with placeholder actions such as `DOMESTIC PAYMENT`, `FOREIGN PAYMENT`, and `TEMPLATES AND BENEFICIARIES` until final per-menu overlays are supplied.
 - Domestic-payment helper text is country-scoped in config; CZ renders the supplied example text `Send payment in CZK in CR`.
 - `src/app/screens/payments/PaymentsScreen.tsx` now opens the New payment bottom sheet from the `New payment` hero card and renders the payment help banner with dismiss action.
 - `src/app/state/demoTypes.ts` and `src/app/registry/componentRegistry.ts` now include the reusable bottom-sheet shell and New payment sheet component entries for AI catalog continuity.
@@ -1363,6 +1416,48 @@ Continue with product evolution work:
   - `git diff --check` passed with only normal Windows LF/CRLF warnings
 - Commit scope:
   - all currently modified and untracked project files are intended to be included in the closeout commit per user request
+
+## 2026-06-02 Payments Hero Card Image Variants
+
+- `PaymentHeroCard` now supports 9 screenshot-backed image variants sourced from `screenshots/payments1.png` through `screenshots/payments9.png`.
+- `paymentsMenuConfig` now exposes `PaymentHeroImageVariant` and optional `imageVariant` metadata on `PaymentHeroItem`; the existing Payments primary cards have a temporary default artwork mapping until final country-specific mapping and H1/H2 copy are provided.
+- `paymentsMenuConfig` now also exposes `heroSheets` keyed by each `PaymentHeroId`, so every Payments hero card opens a dedicated overlay configuration rather than sharing one semantic `New payment` sheet.
+- `PaymentsScreen` tracks the selected hero card id and renders `PaymentHeroSheet` from that card's config; current sheet actions are intentionally placeholder-compatible until each menu receives its final overlay content.
+- The Design System `Payments hero card` specimen now has a selector with all 9 variants, so each supplied image can be inspected from the component inventory.
+- Template previews now reuse `PaymentHeroCard` for the Payments hero cards instead of a separate local approximation, and the New payment sheet template reads from `heroSheets["new-payment"]`.
+- `componentRegistry` now records the 9 screenshot-backed variant contract and optional `imageSrc` override.
+- Verification:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - `npm run audit:templates` passed: `template-contract ok: templates=50 codePreviews=50 components=48 screens=23 flows=13`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - Browser smoke on `http://localhost:3001/#buttons` confirmed the `Payments hero card` specimen loads, exposes 9 options (`payments-1` ... `payments-9`), and selecting `payments-9` renders the expected screenshot image at `118x104`.
+- Limitation:
+  - Country-specific Payments hero-card mapping, final H1/H2 copy, and final per-overlay menu content/icons remain intentionally pending user guidance.
+
+## 2026-06-02 Payments OTHER Divider Component Mapping
+
+- `src/app/screens/payments/PaymentsScreen.tsx` now renders the Payments `OTHER` section heading and divider through shared `SectionHeadingDivider` instead of local hardcoded heading/line markup.
+- `src/app/components/templates/TemplateCodePreviews.tsx` now uses the same component for the Payments menu template preview, keeping runtime and template inventory aligned.
+- Because all countries share `PaymentsScreen` and the country menu config only supplies labels/items, the component-backed `OTHER` divider applies across all country prototypes.
+- Verification:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - `npm run audit:templates` passed: `template-contract ok: templates=50 codePreviews=50 components=48 screens=23 flows=13`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+
+## 2026-06-02 Payments Hero Card Typography Follow-up
+
+- `src/app/components/payments/PaymentHeroCard.tsx` now matches the requested Figma baseline more closely:
+  - card height is `120px`
+  - title starts `16px` from the top
+  - title uses 24px bold, single-line `nowrap`, and no ellipsis/truncation
+  - subtitle uses 14px regular and sits `16px` below the title
+  - text is allowed to extend over the image area instead of reserving a narrow fixed text column
+- `src/app/screens/design-system/DesignSystemPage.tsx` and `src/app/registry/componentRegistry.ts` were updated so the Design System specimen and component registry describe the new card contract.
+- Verification:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - `npm run audit:templates` passed: `template-contract ok: templates=50 codePreviews=50 components=48 screens=23 flows=13`.
+  - In-app browser verification on `http://localhost:3001/#buttons` confirmed `cardHeight=120px`, `titleFontSize=24px`, `titleFontWeight=700`, `titleTop=16`, `titleWhiteSpace=nowrap`, `titleTextOverflow=clip`, `descFontSize=14px`, `descFontWeight=400`, and `descMarginTop=16px`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
 
 ## Constitutional Check
 

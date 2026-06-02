@@ -35,7 +35,7 @@ This translation system implements **Strategy 2** - per-country translations whe
 │   ├── hu.ts              # Hungarian translations
 │   ├── en.ts              # English translations (HU-specific)
 │   └── index.ts           # Export for HU
-├── BA/                     # Bosnia and Herzegovina
+├── BA/                     # Bosnia and Herzegovina; BA_BL reuses this translation package
 │   ├── bs.ts              # Bosnian translations
 │   ├── en.ts              # English translations (BA-specific)
 │   └── index.ts           # Export for BA
@@ -146,6 +146,7 @@ t('coApping.continue')                  // "Continue" (only CZ/SK)
 | Serbia | RS | `sr` (Srpski) | `en` |
 | Hungary | HU | `hu` (Magyar) | `en` |
 | Bosnia | BA | `bs` (Bosanski) | `en` |
+| Bosnia Banja Luka | BA_BL | `bs` (Bosanski) | `en` |
 | Slovenia | SI | `sl` (Slovenščina) | `en` |
 
 ---
@@ -155,7 +156,7 @@ t('coApping.continue')                  // "Continue" (only CZ/SK)
 ### Co-Apping
 
 ✅ **Available:** CZ, SK
-❌ **Not Available:** RO, RS, HU, BA, SI
+❌ **Not Available:** RO, RS, HU, BA, BA_BL, SI
 
 Translation keys under `coApping.*` are only present in CZ and SK files.
 
@@ -201,7 +202,7 @@ newFeature: {
   description: 'Description of new feature',
 }
 
-// Repeat for RO, RS, HU, BA, SI...
+// Repeat for RO, RS, HU, BA, BA_BL, SI...
 ```
 
 ### 3. Use in Component

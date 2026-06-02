@@ -32,7 +32,7 @@ export interface FlowMeta {
   evidence: readonly string[];
 }
 
-const ALL_COUNTRIES: readonly CountryId[] = ["RO", "CZ", "SK", "HU", "RS", "BA", "SI"] as const;
+const ALL_COUNTRIES: readonly CountryId[] = ["RO", "CZ", "SK", "HU", "RS", "BA", "BA_BL", "SI"] as const;
 
 export const FLOW_REGISTRY: Record<FlowId, FlowMeta> = {
   "pi.prelogin-to-home.active": {

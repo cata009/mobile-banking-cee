@@ -5,7 +5,7 @@
  * - CZ (Czech Republic / Cehia)
  * - SK (Slovakia / Slovacia)
  * 
- * For all other countries (RO, HU, RS, BA, SI), this feature is completely REMOVED:
+ * For all other countries (RO, HU, RS, BA, BA_BL, SI), this feature is completely REMOVED:
  * - No "START CO-APPING SESSION" button in Other menu
  * - No Co-Apping Session screen
  * - No Floating Co-Apping button on Homepage

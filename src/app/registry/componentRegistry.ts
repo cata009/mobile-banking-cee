@@ -406,7 +406,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "implemented",
     componentPath: "src/app/components/payments/PaymentHeroCard.tsx",
     usedByScreens: ["pi.payments.overview", "platform.design-system"],
-    notes: "Reusable 327x104 Payments primary card for New payment / Between accounts / Recurrent payments / Scan & pay. Supports temporary built-in illustrations plus an optional imageSrc slot for future supplied assets.",
+    notes: "Reusable 327x120 Payments primary card. Title is 24px bold, starts 16px from the top, keeps one untruncated line without ellipsis, and the 14px description sits 16px below. Supports 9 screenshot-backed image variants (`payments1.png` through `payments9.png`) plus an optional imageSrc override, so countries can later map specific payment card artwork and copy without changing the component.",
   },
   "payments.other-shortcut": {
     id: "payments.other-shortcut",

@@ -42,8 +42,8 @@ import AccountTransactionRow from "@/app/components/accounts/AccountTransactionR
 import AccountTransactionMonthDivider from "@/app/components/accounts/AccountTransactionMonthDivider";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
-import PaymentHeroCard from "@/app/components/payments/PaymentHeroCard";
-import { getPaymentsMenuForCountry } from "@/app/config/paymentsMenuConfig";
+import PaymentHeroCard, { PAYMENT_HERO_CARD_IMAGE_VARIANTS } from "@/app/components/payments/PaymentHeroCard";
+import type { PaymentHeroImageVariant, PaymentHeroItem } from "@/app/config/paymentsMenuConfig";
 import { type ProductsCard as ProductsMenuCardData } from "@/app/config/productsMenuConfig";
 import AccountSummary from "@/app/screens/home/AccountSummary";
 import QuickActions from "@/app/screens/home/QuickActions";
@@ -138,6 +138,7 @@ const accountCardSamples = {
   HU: { integer: "2 064 941", decimals: ",20", current: "1 906 341,20" },
   RS: { integer: "609.831", decimals: ",44", current: "563.031,44" },
   BA: { integer: "10.184", decimals: ",41", current: "9.384,41" },
+  BA_BL: { integer: "10.184", decimals: ",41", current: "9.384,41" },
   SI: { integer: "5.206", decimals: ",80", current: "4.806,80" },
 };
 
@@ -1113,21 +1114,29 @@ function BottomNavigationVariantSpecimen() {
 }
 
 function PaymentHeroCardVariantSpecimen() {
-  const [selectedItemId, setSelectedItemId] = useState("new-payment");
-  const items = getPaymentsMenuForCountry("RO").primaryItems;
-  const selectedItem = items.find((item) => item.id === selectedItemId) ?? items[0];
+  const [selectedVariantId, setSelectedVariantId] = useState<PaymentHeroImageVariant>(PAYMENT_HERO_CARD_IMAGE_VARIANTS[0].id);
+  const selectedVariant =
+    PAYMENT_HERO_CARD_IMAGE_VARIANTS.find((variant) => variant.id === selectedVariantId) ??
+    PAYMENT_HERO_CARD_IMAGE_VARIANTS[0];
+  const selectedItem: PaymentHeroItem = {
+    id: "new-payment",
+    title: selectedVariant.title,
+    description: selectedVariant.description,
+    illustration: "wallet",
+    imageVariant: selectedVariant.id,
+  };
 
   return (
     <div className="flex flex-col gap-4">
       <VariantSelector
         id="payment-hero-card-select"
         label="Card"
-        value={selectedItem.id}
-        onChange={setSelectedItemId}
-        options={items.map((item) => ({ id: item.id, label: item.title }))}
+        value={selectedVariant.id}
+        onChange={(value) => setSelectedVariantId(value as PaymentHeroImageVariant)}
+        options={PAYMENT_HERO_CARD_IMAGE_VARIANTS.map((variant) => ({ id: variant.id, label: variant.label }))}
       />
       <div className="w-full max-w-[327px]">
-        <PaymentHeroCard item={selectedItem} />
+        <PaymentHeroCard item={selectedItem} imageVariant={selectedVariant.id} />
       </div>
     </div>
   );
@@ -2793,7 +2802,7 @@ export default function DesignSystemPage() {
               <Specimen name="AccountTransactionRow" source="components/accounts/AccountTransactionRow.tsx" specs={["375x80", "padding 20px 16px", "day 18px/20px bold", "date gap 2px", "month 14px/15px bold", "date-to-icon gap 16px", "icon box 32px", "details column 247px", "label 16px/18px", "label-to-amount gap 4px", "amount line 22px", "amount 20px + decimals 14px", "divider L3 14px bold uppercase", "divider left muted / right K1", "divider-to-row gap 16px", "row-to-next-divider gap 16px"]}>
                 <AccountTransactionRowVariantSpecimen />
               </Specimen>
-              <Specimen name="Payments hero card" source="components/payments/PaymentHeroCard.tsx" specs={["327x104", "selector for primary payment cards", "future imageSrc asset slot", "title 23px/26px", "description 14px/16px", "temporary built-in illustrations"]}>
+              <Specimen name="Payments hero card" source="components/payments/PaymentHeroCard.tsx" specs={["327x120", "9 screenshot-backed image variants", "title 24px bold / no ellipsis", "title top gap 16px", "description 14px regular", "title-to-description gap 16px", "optional imageSrc override"]}>
                 <PaymentHeroCardVariantSpecimen />
               </Specimen>
               <Specimen name="More cards / all concrete card components" source="screens/more/cards/*" specs={["120px height", "8px radius", "individual image positioning"]}>

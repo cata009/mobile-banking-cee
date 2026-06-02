@@ -69,7 +69,7 @@ Supporting domains and how they connect:
 | Function | Description | User value | Status | Evidence |
 | --- | --- | --- | --- | --- |
 | Product selector | Switches between Mobile PI, Mobile SME, and Mobile PI Kids; SME remains planned, while Mobile PI Kids renders the RO/current-design-system prototype and falls back to planned placeholders for unsupported contexts | Makes multi-application scope explicit while preventing false coverage outside implemented concepts | `implemented` | [`src/app/components/demo/DemoTopBar.tsx`](../../src/app/components/demo/DemoTopBar.tsx), [`src/app/registry/projectModel.ts`](../../src/app/registry/projectModel.ts), [`src/app/App.tsx`](../../src/app/App.tsx), [`src/app/components/UnsupportedContextScreen.tsx`](../../src/app/components/UnsupportedContextScreen.tsx), [`src/app/screens/kids/RoKidsApp.tsx`](../../src/app/screens/kids/RoKidsApp.tsx) |
-| Country selector | Switches demo market context across 7 countries | Lets stakeholders compare regional differences | `implemented` | [`src/app/components/demo/DemoTopBar.tsx`](../../src/app/components/demo/DemoTopBar.tsx), [`src/app/registry/demoConfig.ts`](../../src/app/registry/demoConfig.ts) |
+| Country selector | Switches demo market context across 8 country/application variants, including separate Bosnia and Bosnia Banja Luka entries | Lets stakeholders compare regional differences and maintain Bosnia's two operational applications explicitly | `implemented` | [`src/app/components/demo/DemoTopBar.tsx`](../../src/app/components/demo/DemoTopBar.tsx), [`src/app/registry/demoConfig.ts`](../../src/app/registry/demoConfig.ts) |
 | Scenario selector | Toggles active/inactive app mode | Simulates pre-login vs active app posture | `implemented` | [`src/app/components/demo/DemoTopBar.tsx`](../../src/app/components/demo/DemoTopBar.tsx), [`src/app/state/demoTypes.ts`](../../src/app/state/demoTypes.ts) |
 | Release selector | Chooses legacy `current`, `v1`-`v4` as explicit release previews | Demonstrates release bundles while preserving runtime compatibility | `implemented` | [`src/app/components/demo/DemoTopBar.tsx`](../../src/app/components/demo/DemoTopBar.tsx), [`src/app/registry/demoConfig.ts`](../../src/app/registry/demoConfig.ts), [`src/app/registry/releaseRegistry.ts`](../../src/app/registry/releaseRegistry.ts) |
 | Control panel | Shows context, release/baseline, feature flags, lifecycle, and coverage metadata | Supports controlled demo storytelling and prevents blind toggles | `implemented` | [`src/app/components/demo/DemoFeatureSidePanel.tsx`](../../src/app/components/demo/DemoFeatureSidePanel.tsx), [`src/app/state/featureResolver.ts`](../../src/app/state/featureResolver.ts), [`src/app/registry/projectModel.ts`](../../src/app/registry/projectModel.ts) |
@@ -183,7 +183,7 @@ Supporting domains and how they connect:
 ### 4.3 Localization and Country Policy
 
 - Description: per-country translations, two-language support per country, shared runtime translation keys, and country-specific feature/presentation rules.
-- User value: aligns the same demo shell to 7 regional variants.
+- User value: aligns the same demo shell to 8 country/application variants.
 - UI entry points: language selector, country dropdown, screen copy throughout the app.
 - Routes/pages: all pages consume this capability.
 - API endpoints: none found.

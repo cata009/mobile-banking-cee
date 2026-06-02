@@ -1,7 +1,7 @@
 /**
  * PanelWithoutCoApping - Version of Panel without Co-Apping button
  * 
- * Used for countries where Co-Apping feature is not available (RO, HU, RS, BA, SI).
+ * Used for countries where Co-Apping feature is not available (RO, HU, RS, BA, BA_BL, SI).
  * Contains only the inactive menu items:
  * - ABOUT SMART BANKING
  * - EXCHANGE RATES

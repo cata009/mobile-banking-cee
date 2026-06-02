@@ -12,6 +12,7 @@ export const COUNTRIES: readonly CountryId[] = [
   "HU",
   "RS",
   "BA",
+  "BA_BL",
   "SI",
 ] as const;
 
@@ -20,6 +21,7 @@ export const COUNTRY_META: Record<CountryId, { name: string; nameEN: string; fla
   RS: { name: "Serbia", nameEN: "Serbia", flag: "RS", currency: "RSD" },
   HU: { name: "Hungary", nameEN: "Hungary", flag: "HU", currency: "HUF" },
   BA: { name: "Bosnia and Herzegovina", nameEN: "Bosnia and Herzegovina", flag: "BA", currency: "BAM" },
+  BA_BL: { name: "Bosnia Banja Luka", nameEN: "Bosnia Banja Luka", flag: "BA", currency: "BAM" },
   SK: { name: "Slovakia", nameEN: "Slovakia", flag: "SK", currency: "EUR" },
   SI: { name: "Slovenia", nameEN: "Slovenia", flag: "SI", currency: "EUR" },
   CZ: { name: "Czech Republic", nameEN: "Czech Republic", flag: "CZ", currency: "CZK" },

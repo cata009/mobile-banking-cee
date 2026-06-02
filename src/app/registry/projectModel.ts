@@ -140,5 +140,6 @@ export const PROJECT_COUNTRIES: readonly CountryId[] = [
   "HU",
   "RS",
   "BA",
+  "BA_BL",
   "SI",
 ] as const;

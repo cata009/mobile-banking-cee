@@ -51,7 +51,7 @@ export type TemplateRegistryItem = {
 
 const screenshotUrl = (fileName: string) => new URL(`../../../screenshots/${fileName}`, import.meta.url).href;
 
-const ALL_COUNTRIES: readonly CountryId[] = ["RO", "CZ", "SK", "HU", "RS", "BA", "SI"] as const;
+const ALL_COUNTRIES: readonly CountryId[] = ["RO", "CZ", "SK", "HU", "RS", "BA", "BA_BL", "SI"] as const;
 const DEFAULT_PRODUCTS: readonly ProductId[] = ["PI"] as const;
 const DEFAULT_DESIGN_SYSTEMS: readonly DesignSystemId[] = ["current"] as const;
 

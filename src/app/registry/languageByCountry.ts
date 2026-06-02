@@ -27,6 +27,7 @@ export const LOCAL_LANGUAGE_BY_COUNTRY: Record<CountryId, AppLanguage> = {
   RS: "sr", // Srbija → Srpski
   HU: "hu", // Magyarország → Magyar
   BA: "bs", // Bosna i Hercegovina → Bosanski
+  BA_BL: "bs", // Bosnia Banja Luka → Bosanski
   SK: "sk", // Slovensko → Slovenčina
   SI: "sl", // Slovenija → Slovenščina
   CZ: "cs", // Česká republika → Čeština
