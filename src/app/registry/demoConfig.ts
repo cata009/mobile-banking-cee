@@ -130,7 +130,7 @@ export const FEATURE_META: Record<FeatureId, FeatureMeta> = {
     id: "fx_enhancedAnalytics",
     label: "Enhanced Analytics",
     description: "Advanced spending insights and analytics dashboard",
-    kind: "unplanned",
+    kind: "release",
     scope: "global",
     products: ["PI"],
     designSystems: ["current"],

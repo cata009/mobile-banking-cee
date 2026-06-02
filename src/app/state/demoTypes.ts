@@ -36,7 +36,13 @@ export type ThemeMode = "light" | "dark";
 /**
  * Stable baseline identifiers.
  */
-export type BaselineId = "baseline-current" | "uat-current";
+export type BaselineId =
+  | "baseline-current"
+  | "baseline-r1"
+  | "baseline-r2"
+  | "baseline-r3"
+  | "baseline-r4"
+  | "uat-current";
 
 /**
  * Release identifiers.
@@ -47,6 +53,52 @@ export type ReleaseId =
   | "release-v2"
   | "release-v3"
   | "release-v4";
+
+/**
+ * Banking scenario identifiers used by the demo control panel.
+ * These model mock customer/product/rights conditions, not auth sessions.
+ */
+export type BankingScenarioId =
+  | "retail-prospect"
+  | "retail-single-account"
+  | "retail-multi-account-card"
+  | "retail-deposits-investments"
+  | "retail-payments-restricted"
+  | "sme-owner-preview"
+  | "kids-child-preview";
+
+/**
+ * Product holdings that can drive mock visibility and action availability.
+ */
+export type BankingHoldingType =
+  | "account"
+  | "card"
+  | "deposit"
+  | "investment"
+  | "loan"
+  | "savings-goal";
+
+/**
+ * Action identifiers resolved by the banking context engine.
+ */
+export type BankingActionId =
+  | "accounts.view"
+  | "cards.view"
+  | "cards.manage"
+  | "payments.domestic.create"
+  | "payments.foreign.create"
+  | "payments.templates.manage"
+  | "payments.ebills.manage"
+  | "payments.exchange.create"
+  | "deposits.view"
+  | "investments.view"
+  | "loans.view"
+  | "messages.view"
+  | "documents.view"
+  | "sme.payroll.preview"
+  | "kids.parent-approval.preview";
+
+export type DataSourceAuthority = "authority" | "reference" | "inspiration" | "deprecated";
 
 /**
  * Addressable screen identifiers for AI catalog and flow composition.
@@ -265,15 +317,18 @@ export interface DemoState {
 
   /** Selected release preview */
   release: ReleaseId;
+
+  /** Selected mock banking customer/product/rights profile */
+  bankingScenario: BankingScenarioId;
   
   /**
-   * Feature flags by context (product:country:designSystem:baseline:release)
+   * Feature flags by context (product:country:designSystem:baseline:release:bankingScenario)
    * Each context maintains its own set of unplanned feature toggles
    * 
    * @example
    * {
-   *   "PI:RO:current:baseline-current:release-current": { fx_transactionsFilters: true },
-   *   "PI:CZ:current:baseline-current:release-v1": { fx_unplannedBanner: false },
+   *   "PI:RO:current:baseline-current:release-current:retail-single-account": { fx_transactionsFilters: true },
+   *   "PI:CZ:current:baseline-current:release-v1:retail-multi-account-card": { fx_unplannedBanner: false },
    * }
    */
   flagsByContext: Record<string, Record<FeatureId, boolean>>;
@@ -306,6 +361,9 @@ export interface DemoStore extends DemoState {
 
   /** Update selected release preview */
   setRelease: (release: ReleaseId) => void;
+
+  /** Update selected mock banking scenario */
+  setBankingScenario: (bankingScenario: BankingScenarioId) => void;
   
   /** Toggle or set a feature flag */
   setFlag: (featureId: FeatureId, enabled: boolean) => void;

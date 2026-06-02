@@ -4,11 +4,41 @@ Last updated: 2026-06-02
 
 ## Current Focus
 
-Closing the current BA_BL country/application variant, Payments/template alignment work, and accumulated handoff updates into a banana-clean commit.
+Implementing and closing the reduced Phase 1 Reference Platform architecture: release/baseline OS, feature manifests, banking scenarios, entitlements, contract-ready mock repositories, project packs for all product/country combinations, and control-panel integration.
 
 ## Last Meaningful Change
 
-Latest Bosnia Banja Luka country/application variant:
+Latest Phase 1 Reference Platform implementation:
+
+- `src/app/registry/baselineRegistry.ts`
+  - adds a source-level baseline ledger for `baseline-current`, future `baseline-r1` through `baseline-r4`, and `uat-current`
+  - records promoted release features and promotion rules
+- `src/app/registry/releaseRegistry.ts`
+  - labels previews as R1/R2/R3/R4 while preserving existing runtime IDs
+  - makes later release previews cumulative where appropriate
+  - adds release diff, promotion readiness, target baseline, and flag-retirement candidate helpers
+- `src/app/registry/featureManifestRegistry.ts`
+  - adds feature manifests with authority, source, target baseline, affected screens, promotion checks, and retirement rules
+- `src/app/platform/banking/bankingScenarioRegistry.ts`
+  - adds mock banking profiles for prospects, retail account holders, multi-account/card holders, deposits/investments users, payment-restricted users, SME owner preview, and Kids child preview
+  - resolves holdings, entitlements, limits, enabled actions, and disabled-action reasons
+- `src/app/platform/effectiveAppContext.ts`
+  - composes baseline, release preview, release diff, promotion readiness, active features, banking scenario, holdings, rights, limits, visible screens/products, enabled/disabled actions, data snapshot, and project pack into one handoff object
+- `src/app/platform/data/bankingRepositories.ts`
+  - adds contract-ready mock repositories: accounts, cards, payments, products, entitlements, and scenarios
+- `src/app/registry/projectPackRegistry.ts`
+  - generates project packs for all 24 product/country combinations across `PI`, `SME`, and `KIDS_PI` for `RO`, `CZ`, `SK`, `HU`, `RS`, `BA`, `BA_BL`, and `SI`
+  - marks SME and non-RO Kids as prepared metadata variants instead of runtime coverage
+- Runtime wiring:
+  - `DemoFeatureSidePanel` now exposes release readiness, banking scenario selector, holdings, limits, rights, disabled-action reasons, data snapshot, and project-pack readiness
+  - `PaymentsScreen` and `PaymentHeroCard` consume the effective context minimally by disabling primary payment cards when the selected banking profile lacks required rights, holdings, limits, product/country scope, or release feature
+- Verification so far:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=50 screens=23 flows=13`
+  - Chrome/CDP smoke on `http://127.0.0.1:3001/` confirmed the Control Panel renders Release readiness, Banking Scenario, Data Snapshot, Rights, Project Pack, Knowledge sources, and disabled-action reasons after selecting the payments-restricted banking profile
+
+Previous Bosnia Banja Luka country/application variant:
 
 - `src/app/state/demoTypes.ts`, `src/app/registry/demoConfig.ts`, and `src/app/registry/projectModel.ts`
   - added `BA_BL` as a separate country/application variant next to existing `BA`
@@ -1633,4 +1663,4 @@ constitutional check:
 - bananas triaged: yes
 - safe to resume: yes
 
-safe to resume: yes, BA/BA_BL menu alignment, dynamic More Documents count, Contacts shared header/divider alignment, 50 code-backed template previews, typed template-to-app contracts, centralized icon/color work, build/audit verification, and browser smoke evidence are recorded; remaining work is explicit follow-up automation, screenshot-level fine tuning, and known tooling/performance bananas already triaged in `docs/handoff/known-bananas.md` and `docs/handoff/next-tasks.md`.
+safe to resume: yes, Phase 1 Reference Platform infrastructure is documented and verified: release/baseline OS, feature manifests, project packs for all 24 product/country combinations, banking scenarios, entitlements, contract-ready mock repositories, effective app context, control-panel runtime smoke, build, platform audit, template audit, and diff check evidence are recorded. Remaining work is explicit follow-up: real API adapters, persisted release publication workflow, broader runtime consumption of effective context, real SME/Kids country screens, and known tooling/performance bananas already triaged in `docs/handoff/known-bananas.md` and `docs/handoff/next-tasks.md`.

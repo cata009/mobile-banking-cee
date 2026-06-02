@@ -175,11 +175,15 @@ export default function PaymentHeroCard({
   item,
   imageVariant = item.imageVariant,
   imageSrc = item.imageSrc,
+  disabled = false,
+  disabledReason,
   onSelect,
 }: {
   item: PaymentHeroItem;
   imageVariant?: PaymentHeroImageVariant;
   imageSrc?: string;
+  disabled?: boolean;
+  disabledReason?: string;
   onSelect?: (item: PaymentHeroItem) => void;
 }) {
   const imagePreset = imageVariant ? PAYMENT_HERO_CARD_IMAGE_PRESETS[imageVariant] : undefined;
@@ -188,6 +192,10 @@ export default function PaymentHeroCard({
   const hasMultilineTitle = item.title.includes("\n");
 
   const handleClick = () => {
+    if (disabled) {
+      return;
+    }
+
     console.log(`Payment menu item clicked: ${item.id}`);
     onSelect?.(item);
   };
@@ -195,8 +203,12 @@ export default function PaymentHeroCard({
   return (
     <button
       type="button"
+      disabled={disabled}
+      title={disabledReason}
       onClick={handleClick}
-      className="relative h-[120px] w-full cursor-pointer overflow-hidden rounded-[8px] bg-[linear-gradient(105deg,var(--uc-surface-muted)_0%,var(--uc-neutral-200)_48%,var(--uc-neutral-300)_100%)] text-left"
+      className={`relative h-[120px] w-full overflow-hidden rounded-[8px] bg-[linear-gradient(105deg,var(--uc-surface-muted)_0%,var(--uc-neutral-200)_48%,var(--uc-neutral-300)_100%)] text-left transition-opacity ${
+        disabled ? "cursor-not-allowed opacity-55" : "cursor-pointer"
+      }`}
     >
       <div className="relative z-10 flex h-full w-full flex-col px-[20px] pt-[16px]">
         <h2

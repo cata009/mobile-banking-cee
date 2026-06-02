@@ -7,6 +7,7 @@ import { createContext, useContext, useState, ReactNode } from "react";
 import { getReleaseBundle } from "@/app/registry/releaseRegistry";
 import type {
   BaselineId,
+  BankingScenarioId,
   CountryId,
   DesignSystemId,
   FeatureId,
@@ -22,18 +23,18 @@ import type {
  * Get context key for current demo configuration.
  * 
  * @param state - Demo state dimensions that isolate manual flags
- * @returns Context key in format "product:country:designSystem:baseline:release"
+ * @returns Context key in format "product:country:designSystem:baseline:release:bankingScenario"
  * 
  * @example
  * ```ts
- * getContextKey({ product: "PI", country: "RO", designSystem: "current", baseline: "baseline-current", release: "release-current" })
- * // "PI:RO:current:baseline-current:release-current"
+ * getContextKey({ product: "PI", country: "RO", designSystem: "current", baseline: "baseline-current", release: "release-current", bankingScenario: "retail-single-account" })
+ * // "PI:RO:current:baseline-current:release-current:retail-single-account"
  * ```
  */
 export function getContextKey(
-  state: Pick<DemoState, "product" | "country" | "designSystem" | "baseline" | "release">
+  state: Pick<DemoState, "product" | "country" | "designSystem" | "baseline" | "release" | "bankingScenario">
 ): string {
-  return `${state.product}:${state.country}:${state.designSystem}:${state.baseline}:${state.release}`;
+  return `${state.product}:${state.country}:${state.designSystem}:${state.baseline}:${state.release}:${state.bankingScenario}`;
 }
 
 /**
@@ -44,7 +45,7 @@ export function getContextKey(
  * 
  * @example
  * ```ts
- * const state = { product: "PI", country: "RO", designSystem: "current", baseline: "baseline-current", release: "release-current", flagsByContext: { "PI:RO:current:baseline-current:release-current": { fx_transactionsFilters: true } } };
+ * const state = { product: "PI", country: "RO", designSystem: "current", baseline: "baseline-current", release: "release-current", bankingScenario: "retail-single-account", flagsByContext: { "PI:RO:current:baseline-current:release-current:retail-single-account": { fx_transactionsFilters: true } } };
  * getCurrentFlags(state)
  * // { fx_transactionsFilters: true }
  * ```
@@ -64,12 +65,19 @@ const DEFAULT_DEMO_STATE: DemoState = {
   designSystem: "current",
   baseline: "baseline-current",
   release: "release-current",
+  bankingScenario: "retail-single-account",
   flagsByContext: {
     // Initialize with empty context for default PI/RO/current baseline.
-    "PI:RO:current:baseline-current:release-current": {},
+    "PI:RO:current:baseline-current:release-current:retail-single-account": {},
   },
   amountsHidden: false,
   themeMode: "light",
+};
+
+const DEFAULT_BANKING_SCENARIO_BY_PRODUCT: Record<ProductId, BankingScenarioId> = {
+  PI: "retail-single-account",
+  SME: "sme-owner-preview",
+  KIDS_PI: "kids-child-preview",
 };
 
 /**
@@ -111,7 +119,11 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
    * Update selected product
    */
   const setProduct = (product: ProductId) => {
-    setState(prev => ({ ...prev, product }));
+    setState(prev => ({
+      ...prev,
+      product,
+      bankingScenario: DEFAULT_BANKING_SCENARIO_BY_PRODUCT[product],
+    }));
   };
 
   /**
@@ -152,6 +164,13 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
       release,
       baseline: releaseBundle.baseline,
     }));
+  };
+
+  /**
+   * Update selected mock banking scenario
+   */
+  const setBankingScenario = (bankingScenario: BankingScenarioId) => {
+    setState(prev => ({ ...prev, bankingScenario }));
   };
 
   /**
@@ -228,6 +247,7 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
     setDesignSystem,
     setBaseline,
     setRelease,
+    setBankingScenario,
     setFlag,
     toggleAmountsHidden,
     setAmountsHidden,
@@ -303,6 +323,7 @@ export function useFeatureFlag(featureId: FeatureId): boolean {
  */
 export type {
   BaselineId,
+  BankingScenarioId,
   CountryId,
   DesignSystemId,
   FeatureId,

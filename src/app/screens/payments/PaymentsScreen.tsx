@@ -8,7 +8,9 @@ import PaymentHeroCard from "@/app/components/payments/PaymentHeroCard";
 import PaymentOtherShortcut from "@/app/components/payments/PaymentOtherShortcut";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import { useLanguage } from "@/app/contexts/LanguageContext";
+import { resolveEffectiveAppContext } from "@/app/platform/effectiveAppContext";
 import { useDemo } from "@/app/state/demoStore";
+import type { BankingActionId } from "@/app/state/demoTypes";
 import {
   getPaymentsMenuForCountry,
   type NewPaymentAction,
@@ -75,6 +77,19 @@ function PaymentsHeader({
 
 function handleOtherPaymentActionClick(item: PaymentOtherItem) {
   console.log(`Payment other action clicked: ${item.id}`);
+}
+
+function getActionForHeroItem(item: PaymentHeroItem): BankingActionId {
+  switch (item.id) {
+    case "between-accounts":
+      return "payments.exchange.create";
+    case "manage-ebills":
+      return "payments.ebills.manage";
+    case "recurrent-payments":
+      return "payments.templates.manage";
+    default:
+      return "payments.domestic.create";
+  }
 }
 
 function PaymentHeroSheet({
@@ -146,8 +161,13 @@ export default function PaymentsScreen({
   onMoreClick,
   onDomesticPaymentClick,
 }: PaymentsScreenProps) {
-  const { country } = useDemo();
+  const demoState = useDemo();
+  const { country } = demoState;
   const { t } = useLanguage();
+  const effectiveContext = resolveEffectiveAppContext(demoState);
+  const disabledActionReasons = new Map(
+    effectiveContext.disabledActions.map((disabledAction) => [disabledAction.action, disabledAction.reason])
+  );
   const menu = getPaymentsMenuForCountry(country);
   const localizedPrimaryItems = menu.primaryItems.map((item) => {
     const translationKey = item.translationKey === undefined ? item.id : item.translationKey;
@@ -202,9 +222,20 @@ export default function PaymentsScreen({
 
       <div className="flex-1 overflow-y-auto scrollbar-hide pb-[76px]">
         <div className="flex flex-col gap-[13px] px-[20px] pt-[8px]">
-          {localizedPrimaryItems.map((item) => (
-            <PaymentHeroCard key={item.id} item={item} onSelect={handlePrimaryItemSelect} />
-          ))}
+          {localizedPrimaryItems.map((item) => {
+            const actionId = getActionForHeroItem(item);
+            const disabledReason = disabledActionReasons.get(actionId);
+
+            return (
+              <PaymentHeroCard
+                key={item.id}
+                item={item}
+                disabled={Boolean(disabledReason)}
+                disabledReason={disabledReason}
+                onSelect={handlePrimaryItemSelect}
+              />
+            );
+          })}
         </div>
 
         <section className="px-[20px] pt-[16px]">
