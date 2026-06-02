@@ -7,9 +7,10 @@ import imgMyRequests from "figma:asset/612ac7960c2d43bfdada538aae6f3cf27be44d99.
 
 interface MyRequestsCardProps {
   onClick: () => void;
+  title?: string;
 }
 
-export function MyRequestsCard({ onClick }: MyRequestsCardProps) {
+export function MyRequestsCard({ onClick, title = "My applications" }: MyRequestsCardProps) {
   return (
     <button
       onClick={onClick}
@@ -32,7 +33,7 @@ export function MyRequestsCard({ onClick }: MyRequestsCardProps) {
       {/* Title - top left padding */}
       <div className="absolute inset-0 p-[16px] flex items-start">
         <p className="font-['UniCredit:Bold',sans-serif] text-[18px] text-[var(--uc-text)] leading-[normal] text-left whitespace-pre-wrap z-10 relative">
-          My requests
+          {title}
         </p>
       </div>
     </button>

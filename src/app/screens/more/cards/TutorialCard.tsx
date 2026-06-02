@@ -7,9 +7,10 @@ import imgTutorial from "figma:asset/fabdcbcfc3ceae62811fed754b790551b42a2f6e.pn
 
 interface TutorialCardProps {
   onClick: () => void;
+  title?: string;
 }
 
-export function TutorialCard({ onClick }: TutorialCardProps) {
+export function TutorialCard({ onClick, title = "Tutorials" }: TutorialCardProps) {
   return (
     <button
       onClick={onClick}
@@ -32,7 +33,7 @@ export function TutorialCard({ onClick }: TutorialCardProps) {
       {/* Title - top left padding */}
       <div className="absolute inset-0 p-[16px] flex items-start">
         <p className="font-['UniCredit:Bold',sans-serif] text-[18px] text-[var(--uc-text)] leading-[normal] text-left whitespace-pre-wrap z-10 relative">
-          Tutorial
+          {title}
         </p>
       </div>
     </button>

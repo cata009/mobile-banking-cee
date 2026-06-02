@@ -5,6 +5,7 @@ import AccountActionBar from "@/app/components/accounts/AccountActionBar";
 import { AppIcon } from "@/app/components/icons";
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
 import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
 import { formatMoneyNumber } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
@@ -34,7 +35,7 @@ interface AnalyticsScreenProps {
   onMoreClick?: () => void;
 }
 
-function getCategoryDisplayLabel(category: string) {
+function getCategoryDisplayLabel(category: string, t: (key: string, fallback?: string) => string) {
   const labels: Record<string, string> = {
     Finance: "FINANCIAL",
     Shopping: "SHOPPING",
@@ -59,7 +60,7 @@ function getCategoryDisplayLabel(category: string) {
     "Exclude from budget": "EXCLUDED",
   };
 
-  return labels[category] ?? category.toUpperCase();
+  return t(`runtime.analytics.categories.${category}`, labels[category] ?? category.toUpperCase());
 }
 
 function buildCenteredIndicator(periods: SpendingAnalyticsPeriod[], activeIndex: number) {
@@ -92,6 +93,7 @@ function splitAmount(value: string) {
 }
 
 function AnalyticsHeader({ onMessagesClick }: { onMessagesClick?: () => void }) {
+  const { t } = useLanguage();
   const handleAction = (action: string) => {
     console.log(`Analytics ${action} clicked`);
   };
@@ -104,12 +106,12 @@ function AnalyticsHeader({ onMessagesClick }: { onMessagesClick?: () => void }) 
             className="min-w-0 flex-1 font-['UniCredit',sans-serif] font-bold text-[var(--uc-text)]"
             style={{ fontSize: "28px", lineHeight: "normal" }}
           >
-            My Spendings
+            {t("runtime.analytics.title", "My Spendings")}
           </h1>
           <HeaderActionRail>
-            <HeaderActionButton icon="profile" label="Profile" onClick={() => handleAction("profile")} />
-            <HeaderActionButton icon="messages" label="Messages" onClick={onMessagesClick} />
-            <HeaderActionButton icon="help" label="Help" onClick={() => handleAction("help")} />
+            <HeaderActionButton icon="profile" label={t("runtime.actions.profile", "Profile")} onClick={() => handleAction("profile")} />
+            <HeaderActionButton icon="messages" label={t("runtime.actions.messages", "Messages")} onClick={onMessagesClick} />
+            <HeaderActionButton icon="help" label={t("runtime.actions.help", "Help")} onClick={() => handleAction("help")} />
           </HeaderActionRail>
         </div>
       </div>
@@ -124,14 +126,15 @@ function MonthSelector({
   activePeriodKey: string;
   summary: SpendingAnalyticsSummary;
 }) {
+  const { t } = useLanguage();
   const isYear = activePeriodKey.startsWith("year-");
-  const leftLabel = isYear ? "Year total" : summary.periodLabel;
+  const leftLabel = isYear ? t("runtime.analytics.yearTotal", "Year total") : summary.periodLabel;
   const rightLabel = summary.yearLabel;
 
   return (
     <section className="overflow-hidden px-[24px]">
       <p className="font-['UniCredit',sans-serif] text-[16px] font-bold leading-normal text-[var(--uc-text-muted)]">
-        Data For
+        {t("runtime.analytics.dataFor", "Data For")}
       </p>
       <div className="mt-[4px] flex w-[327px] items-baseline gap-[96px]">
         <h2 className="shrink-0 font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">
@@ -424,6 +427,7 @@ function AnalyticsHeroCarousel({
 }
 
 function CardTransactionAction() {
+  const { t } = useLanguage();
   return (
     <AccountActionBar
       align="end"
@@ -432,7 +436,7 @@ function CardTransactionAction() {
           id: "card-transaction",
           iconName: "add-money",
           iconColor: "var(--uc-icon)",
-          label: "Card\nTransaction",
+          label: t("runtime.actions.cardTransaction", "Card Transaction").replace(" ", "\n"),
         },
       ]}
       style={{ padding: "0 24px 18px" }}
@@ -469,6 +473,7 @@ function AnalyticsSummaryBars({
   country: CountryId;
   summary: SpendingAnalyticsSummary;
 }) {
+  const { t } = useLanguage();
   const maxTotal = Math.max(summary.incomeTotal, summary.spendingTotal, 1);
   const incomeHeight = Math.max(18, Math.round((summary.incomeTotal / maxTotal) * 104));
   const spendingHeight = Math.max(18, Math.round((summary.spendingTotal / maxTotal) * 104));
@@ -479,7 +484,7 @@ function AnalyticsSummaryBars({
       <div className="absolute left-[24px] right-[24px] top-[120px] border-t border-dashed border-[var(--uc-border)]" />
 
       <div className="absolute left-[52px] top-[58px] w-[92px] font-['UniCredit',sans-serif]">
-        <p className="text-[14px] font-bold uppercase leading-normal text-[var(--uc-text-muted)]">Inflow</p>
+        <p className="text-[14px] font-bold uppercase leading-normal text-[var(--uc-text-muted)]">{t("runtime.analytics.inflow", "Inflow")}</p>
         <p className="mt-[6px] text-[14px] font-bold leading-normal text-[var(--uc-text)]">
           {formatMoneyNumber(summary.incomeTotal, country)}
         </p>
@@ -497,17 +502,17 @@ function AnalyticsSummaryBars({
       />
 
       <div className="absolute left-[214px] top-[74px] w-[132px] font-['UniCredit',sans-serif]">
-        <p className="text-[14px] font-bold uppercase leading-normal text-[var(--uc-text-muted)]">Outflow</p>
+        <p className="text-[14px] font-bold uppercase leading-normal text-[var(--uc-text-muted)]">{t("runtime.analytics.outflow", "Outflow")}</p>
         <p className="mt-[4px] text-[14px] font-bold leading-normal text-[var(--uc-text)]">
           {formatMoneyNumber(summary.spendingTotal, country)} {summary.currency}
         </p>
       </div>
 
       <div className="absolute left-[104px] top-[136px] w-[68px] text-right font-['UniCredit',sans-serif] text-[14px] font-bold uppercase leading-normal text-[var(--uc-text)]">
-        Incomes
+        {t("runtime.analytics.incomes", "Incomes")}
       </div>
       <div className="absolute left-[182px] top-[136px] text-left font-['UniCredit',sans-serif] text-[14px] font-bold uppercase leading-normal text-[var(--uc-text)]">
-        Spendings
+        {t("runtime.analytics.spendings", "Spendings")}
       </div>
     </section>
   );
@@ -555,6 +560,7 @@ function MoneyCategorySection({
   currency: string;
   direction: "out" | "in";
 }) {
+  const { t } = useLanguage();
   const maxCategoryTotal = Math.max(...categories.map((category) => category.total), 1);
 
   return (
@@ -592,7 +598,7 @@ function MoneyCategorySection({
 
                   <div className="relative z-[1] max-w-[255px] py-[8px] text-right">
                     <p className="font-['UniCredit',sans-serif] text-[14px] font-bold uppercase leading-normal tracking-[0.4px] text-[var(--uc-text-muted)]">
-                      {getCategoryDisplayLabel(category.category)}
+                      {getCategoryDisplayLabel(category.category, t)}
                     </p>
                     <CategoryAmount
                       amount={category.total}
@@ -608,7 +614,7 @@ function MoneyCategorySection({
         </div>
       ) : (
         <p className="px-[24px] pt-[20px] font-['UniCredit',sans-serif] text-[14px] font-normal leading-normal text-[var(--uc-text-muted)]">
-          No transactions for this period
+          {t("runtime.analytics.noTransactionsForPeriod", "No transactions for this period")}
         </p>
       )}
     </section>
@@ -623,6 +629,7 @@ export default function AnalyticsScreen({
   onMoreClick,
 }: AnalyticsScreenProps) {
   const { country } = useDemo();
+  const { t } = useLanguage();
   const { categories } = useProducts();
   const products = useMemo(() => categories.flatMap((category) => category.products), [categories]);
   const timeline = useMemo(() => createSpendingAnalyticsTimeline(country, products), [country, products]);
@@ -666,14 +673,14 @@ export default function AnalyticsScreen({
 
         <div className="bg-[var(--uc-app-bg)] pb-[40px]">
           <MoneyCategorySection
-            title="Money out"
+            title={t("runtime.analytics.moneyOut", "Money out")}
             categories={summary.moneyOutCategories}
             country={country}
             currency={summary.currency}
             direction="out"
           />
           <MoneyCategorySection
-            title="Money in"
+            title={t("runtime.analytics.moneyIn", "Money in")}
             categories={summary.moneyInCategories}
             country={country}
             currency={summary.currency}

@@ -112,10 +112,10 @@ export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelPr
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-[var(--uc-app-bg)] rounded-md transition-colors"
+            className="grid h-[32px] w-[32px] place-items-center hover:bg-[var(--uc-app-bg)] rounded-md transition-colors"
             title="Close panel"
           >
-            <AppIcon name="close-x" className="h-5 w-5 text-[var(--uc-text-muted)]" />
+            <AppIcon name="close-x" className="text-[var(--uc-text-muted)]" />
           </button>
         </div>
 

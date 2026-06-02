@@ -6,6 +6,7 @@
 import { useLanguage } from '@/app/contexts/LanguageContext';
 import { PrimeIconLabelValue } from '@/app/components/prime/PrimeIconLabelValue';
 import { AppIcon } from "@/app/components/icons";
+import { PrimeDiamondMark } from "@/app/components/prime/PrimeDiamondMark";
 
 export function YourBenefitsTab() {
   const { t } = useLanguage();
@@ -81,9 +82,8 @@ export function YourBenefitsTab() {
         <div className="content-stretch flex flex-col gap-[2.603px] items-start relative shrink-0">
           <div className="content-stretch flex gap-[2.603px] items-center relative shrink-0">
             <p className="font-['UniCredit:Medium',sans-serif] leading-[normal] not-italic relative shrink-0 text-[18.223px] text-[var(--uc-static-white)]">Prime</p>
-            {/* Prime Star Icon - Native SVG from Figma */}
             <div className="relative shrink-0 size-[15px] mt-[2.603px]">
-              <AppIcon name="prime-diamond-16" color="var(--uc-static-white)" size={15} />
+              <PrimeDiamondMark color="var(--uc-static-white)" size={15} />
             </div>
             <p className="font-['UniCredit:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[13.016px] text-[var(--uc-static-white)]">by</p>
           </div>

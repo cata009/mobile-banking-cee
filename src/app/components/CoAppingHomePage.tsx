@@ -3,7 +3,7 @@ import imgRectangle1 from "figma:asset/6f4a518088433560480f90c7a7448fdc1d294def.
 import BottomNavigation from "@/app/components/BottomNavigation";
 import AmountVisibilityButton from "@/app/components/AmountVisibilityButton";
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
-import { AppIcon } from "@/app/components/icons";
+import { PrimeDiamondMark } from "@/app/components/prime/PrimeDiamondMark";
 import ProductCard from "@/app/components/ProductCard";
 import AccordionSection from "@/app/components/AccordionSection";
 import ProductsList from "@/app/components/ProductsList";
@@ -41,7 +41,7 @@ export default function CoAppingHomePage() {
             backgroundBlendMode: 'soft-light, normal, soft-light, normal'
           }}
         >
-          <AppIcon name="prime-diamond-16" color="var(--uc-static-white)" />
+          <PrimeDiamondMark color="var(--uc-static-white)" />
           <span 
             className="font-['UniCredit',sans-serif] text-[var(--uc-static-white)]"
             style={{

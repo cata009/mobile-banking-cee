@@ -37,7 +37,9 @@ export function ContactsNavigationCard({
       className="flex h-[80px] w-full cursor-pointer items-center gap-[16px] bg-[var(--uc-surface)] px-0 py-[24px]"
       type="button"
     >
-      <AppIcon name={CONTACT_ICON_NAME[icon]} color="var(--uc-text)" />
+      <div className="flex size-[32px] shrink-0 items-center justify-center">
+        <AppIcon name={CONTACT_ICON_NAME[icon]} color="var(--uc-text)" />
+      </div>
 
       <div className="flex min-w-0 flex-1 flex-col items-start justify-center gap-[4px]">
         <p className="w-full text-left font-['UniCredit:Bold',sans-serif] text-[16px] leading-normal text-[var(--uc-text)]">

@@ -5,6 +5,7 @@ import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderAct
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
 import {
   getProductsMenuForCountry,
@@ -36,7 +37,8 @@ interface ProductsScreenProps {
   onMoreClick?: () => void;
 }
 
-function ProductsHeader({ title, onMessagesClick }: { title: string; onMessagesClick?: () => void }) {
+export function ProductsHeader({ title, onMessagesClick }: { title: string; onMessagesClick?: () => void }) {
+  const { t } = useLanguage();
   const handleAction = (action: string) => {
     console.log(`Products ${action} clicked`);
   };
@@ -52,9 +54,9 @@ function ProductsHeader({ title, onMessagesClick }: { title: string; onMessagesC
             {title}
           </h1>
           <HeaderActionRail>
-            <HeaderActionButton icon="profile" label="Profile" onClick={() => handleAction("profile")} />
-            <HeaderActionButton icon="messages" label="Messages" onClick={onMessagesClick} />
-            <HeaderActionButton icon="help" label="Help" onClick={() => handleAction("help")} />
+            <HeaderActionButton icon="profile" label={t("runtime.actions.profile", "Profile")} onClick={() => handleAction("profile")} />
+            <HeaderActionButton icon="messages" label={t("runtime.actions.messages", "Messages")} onClick={onMessagesClick} />
+            <HeaderActionButton icon="help" label={t("runtime.actions.help", "Help")} onClick={() => handleAction("help")} />
           </HeaderActionRail>
         </div>
       </div>
@@ -62,7 +64,7 @@ function ProductsHeader({ title, onMessagesClick }: { title: string; onMessagesC
   );
 }
 
-function ProductsTabs({
+export function ProductsTabs({
   activeTab,
   bankingLabel,
   shopSmartLabel,
@@ -102,7 +104,7 @@ function ProductsTabs({
   );
 }
 
-function SectionHeading({ children }: { children: string }) {
+export function SectionHeading({ children }: { children: string }) {
   return <SectionHeadingDivider title={children} className="px-[24px]" />;
 }
 
@@ -110,7 +112,7 @@ function handleOfferClick(offer: ProductsOffer) {
   console.log(`Products offer clicked: ${offer.id}`);
 }
 
-function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
+export function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
   const carouselRef = useRef<HTMLDivElement>(null);
   const dragStateRef = useRef<OfferCarouselDragState>({
     didMove: false,
@@ -369,6 +371,8 @@ function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
           >
             <ProductOfferCard
               offer={offer}
+              colorFamily={offer.colorFamily}
+              lightVersion={offer.lightVersion}
               onClick={(selectedOffer) => {
                 scrollToOffer(index);
                 handleOfferClick(selectedOffer);
@@ -386,7 +390,16 @@ function handleProductCardClick(card: ProductsCard) {
   console.log(`Products card clicked: ${card.id}`);
 }
 
-function BankingContent({
+export function getProductsCardTranslationId(card: ProductsCard) {
+  const normalizedTitle = card.title.replace(/\n/g, " ").toLowerCase();
+  if (normalizedTitle === "electronics") return "electronics";
+  if (normalizedTitle === "travel") return "travel";
+  if (normalizedTitle === "home and living") return "home-living";
+  if (normalizedTitle === "fashion") return "fashion";
+  return card.id;
+}
+
+export function BankingContent({
   offersTitle,
   offers,
   productsTitle,
@@ -403,33 +416,37 @@ function BankingContent({
 }) {
   return (
     <>
-      <section className="pt-[16px]">
-        <SectionHeading>{offersTitle}</SectionHeading>
-        <OffersRail offers={offers} />
-      </section>
+      {offers.length > 0 && (
+        <section className="pt-[16px]">
+          <SectionHeading>{offersTitle}</SectionHeading>
+          <OffersRail offers={offers} />
+        </section>
+      )}
 
       <section className="pt-[16px]">
-        <SectionHeading>{productsTitle}</SectionHeading>
+        {productsTitle ? <SectionHeading>{productsTitle}</SectionHeading> : null}
         <div className="grid grid-cols-[repeat(2,164px)] justify-center gap-[16px] pt-[16px]">
           {products.map((card) => (
-            <ProductMenuCard key={card.id} card={card} onClick={handleProductCardClick} />
+            <ProductMenuCard key={card.id} card={card} variant="standard" onClick={handleProductCardClick} />
           ))}
         </div>
       </section>
 
-      <section className="pt-[16px]">
-        <SectionHeading>{otherSolutionsTitle}</SectionHeading>
-        <div className="grid grid-cols-[164px] px-[24px] pt-[16px]">
-          {otherSolutions.map((card) => (
-            <ProductMenuCard key={card.id} card={card} onClick={handleProductCardClick} />
-          ))}
-        </div>
-      </section>
+      {otherSolutions.length > 0 && (
+        <section className="pt-[16px]">
+          <SectionHeading>{otherSolutionsTitle}</SectionHeading>
+          <div className="grid grid-cols-[164px] px-[24px] pt-[16px]">
+            {otherSolutions.map((card) => (
+              <ProductMenuCard key={card.id} card={card} variant="standard" onClick={handleProductCardClick} />
+            ))}
+          </div>
+        </section>
+      )}
     </>
   );
 }
 
-function ShopSmartContent({
+export function ShopSmartContent({
   title,
   offers,
   products,
@@ -438,6 +455,8 @@ function ShopSmartContent({
   offers: readonly ProductsOffer[];
   products: readonly ProductsCard[];
 }) {
+  const { t } = useLanguage();
+
   return (
     <>
       <section className="pt-[16px]">
@@ -445,10 +464,10 @@ function ShopSmartContent({
         <OffersRail offers={offers} />
       </section>
       <section className="pt-[16px]">
-        <SectionHeading>FEATURED CATEGORIES</SectionHeading>
+        <SectionHeading>{t("runtime.productsMenu.featuredCategories", "FEATURED CATEGORIES")}</SectionHeading>
         <div className="grid grid-cols-[repeat(2,164px)] justify-center gap-[16px] pt-[16px]">
           {products.map((card) => (
-            <ProductMenuCard key={card.id} card={card} onClick={handleProductCardClick} />
+            <ProductMenuCard key={card.id} card={card} variant="standard" onClick={handleProductCardClick} />
           ))}
         </div>
       </section>
@@ -458,7 +477,17 @@ function ShopSmartContent({
 
 export default function ProductsScreen({ onHomeClick, onAnalyticsClick, onMessagesClick, onPaymentsClick, onMoreClick }: ProductsScreenProps) {
   const { country } = useDemo();
+  const { t } = useLanguage();
   const config = getProductsMenuForCountry(country);
+  const localizeOffer = (offer: ProductsOffer): ProductsOffer => ({
+    ...offer,
+    title: t(`runtime.productsMenu.offers.${offer.id}.title`, offer.title),
+    description: t(`runtime.productsMenu.offers.${offer.id}.description`, offer.description),
+  });
+  const localizeCard = (card: ProductsCard): ProductsCard => ({
+    ...card,
+    title: t(`runtime.productsMenu.cards.${getProductsCardTranslationId(card)}`, card.title),
+  });
   const [activeTab, setActiveTab] = useState<ProductsMenuTab>("banking");
   const visibleTab = config.hasShopSmartTab ? activeTab : "banking";
 
@@ -473,13 +502,13 @@ export default function ProductsScreen({ onHomeClick, onAnalyticsClick, onMessag
   return (
     <div className="relative flex h-full w-full flex-col bg-[var(--uc-surface)] text-[var(--uc-text)]">
       <div className="h-[54px] flex-shrink-0 bg-[var(--uc-surface)]" />
-      <ProductsHeader title={config.title} onMessagesClick={onMessagesClick} />
+      <ProductsHeader title={t("runtime.productsMenu.title", config.title)} onMessagesClick={onMessagesClick} />
 
       {config.hasShopSmartTab && (
         <ProductsTabs
           activeTab={activeTab}
-          bankingLabel={config.bankingTabLabel}
-          shopSmartLabel={config.shopSmartTabLabel}
+          bankingLabel={t("runtime.productsMenu.banking", config.bankingTabLabel)}
+          shopSmartLabel={t("runtime.productsMenu.shopSmart", config.shopSmartTabLabel)}
           onChange={setActiveTab}
         />
       )}
@@ -487,18 +516,18 @@ export default function ProductsScreen({ onHomeClick, onAnalyticsClick, onMessag
       <div className="relative z-0 flex-1 overflow-y-auto scrollbar-hide pb-[92px]">
         {visibleTab === "banking" ? (
           <BankingContent
-            offersTitle={config.offersTitle}
-            offers={config.offers}
-            productsTitle={config.productsTitle}
-            products={config.products}
-            otherSolutionsTitle={config.otherSolutionsTitle}
-            otherSolutions={config.otherSolutions}
+            offersTitle={t("runtime.productsMenu.offersForYou", config.offersTitle)}
+            offers={config.offers.map(localizeOffer)}
+            productsTitle={config.productsTitle ? t("runtime.productsMenu.ourProducts", config.productsTitle) : ""}
+            products={config.products.map(localizeCard)}
+            otherSolutionsTitle={t("runtime.productsMenu.otherSolutionsForYou", config.otherSolutionsTitle)}
+            otherSolutions={config.otherSolutions.map(localizeCard)}
           />
         ) : (
           <ShopSmartContent
-            title={config.shopSmartTitle}
-            offers={config.shopSmartOffers}
-            products={config.shopSmartProducts}
+            title={t("runtime.productsMenu.shopSmartTitle", config.shopSmartTitle)}
+            offers={config.shopSmartOffers.map(localizeOffer)}
+            products={config.shopSmartProducts.map(localizeCard)}
           />
         )}
       </div>

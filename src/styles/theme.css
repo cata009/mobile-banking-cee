@@ -38,6 +38,7 @@
   --uc-product-mauve: #A26077;
   --uc-product-pink: #DD1860;
   --uc-product-brown: #5E3D32;
+  --uc-product-hedging: #717863;
   --uc-green-deep: #004C3D;
   --uc-green-main: #007A6B;
   --uc-green-bright: #008574;
@@ -203,6 +204,7 @@
   --uc-product-mauve: #D38AA3;
   --uc-product-pink: #FF5F9A;
   --uc-product-brown: #9A6246;
+  --uc-product-hedging: #717863;
   --uc-green-deep: #004C3D;
   --uc-green-main: #26C3A8;
   --uc-green-bright: #008574;
@@ -246,29 +248,29 @@
   --uc-banner-grey-2: #D0D0D0;
   --uc-banner-grey-3: rgb(var(--uc-static-black-rgb) / 0.8);
 
-  --uc-pfm-taxes-penalties: #7757A4;
-  --uc-pfm-income: #4FC6DD;
-  --uc-pfm-utilities: #CCCCCC;
-  --uc-pfm-exclude-budget: #F04A58;
-  --uc-pfm-shopping: #D94A5A;
-  --uc-pfm-insurance: #004C3D;
-  --uc-pfm-groceries: #A33694;
-  --uc-pfm-home: #008574;
-  --uc-pfm-education: #9A6246;
-  --uc-pfm-lifestyle: #6EC6FF;
-  --uc-pfm-transportation: #FF9D3B;
-  --uc-pfm-leisure-time: #FF5A68;
-  --uc-pfm-healthcare: #FF5F9A;
-  --uc-pfm-cash: #D4B04D;
-  --uc-pfm-investments: #363338;
-  --uc-pfm-children: #CCCCCC;
-  --uc-pfm-wallet: #D4B04D;
-  --uc-pfm-transfers: #359F42;
-  --uc-pfm-finance: #D6D1D8;
-  --uc-pfm-uncategorized: #26C3A8;
-  --uc-pfm-atm: #6EC6FF;
-  --uc-pfm-fx: #244858;
-  --uc-pfm-internal: #0D5870;
+  --uc-pfm-taxes-penalties: #9574BF;
+  --uc-pfm-income: #3499AD;
+  --uc-pfm-utilities: #4693A2;
+  --uc-pfm-exclude-budget: #E04950;
+  --uc-pfm-shopping: #DA5251;
+  --uc-pfm-insurance: #569482;
+  --uc-pfm-groceries: #C355B1;
+  --uc-pfm-home: #309B88;
+  --uc-pfm-education: #A17C73;
+  --uc-pfm-lifestyle: #55A2DC;
+  --uc-pfm-transportation: #FD8C46;
+  --uc-pfm-leisure-time: #F8434C;
+  --uc-pfm-healthcare: #F63E7B;
+  --uc-pfm-cash: #A28040;
+  --uc-pfm-investments: #88858A;
+  --uc-pfm-children: #4693A2;
+  --uc-pfm-wallet: #A28040;
+  --uc-pfm-transfers: #4CB65D;
+  --uc-pfm-finance: #858685;
+  --uc-pfm-uncategorized: #389987;
+  --uc-pfm-atm: #55A2DC;
+  --uc-pfm-fx: #688C9C;
+  --uc-pfm-internal: #5190A6;
 
   --uc-app-bg: var(--uc-neutral-100);
   --uc-surface: var(--uc-neutral-200);
@@ -396,6 +398,56 @@
   textarea,
   select {
     font-family: inherit;
+  }
+
+  :where(
+    a[href],
+    button,
+    select,
+    summary,
+    label[for],
+    input[type="button"],
+    input[type="checkbox"],
+    input[type="color"],
+    input[type="file"],
+    input[type="image"],
+    input[type="radio"],
+    input[type="range"],
+    input[type="reset"],
+    input[type="submit"],
+    [role="button"],
+    [role="checkbox"],
+    [role="link"],
+    [role="menuitem"],
+    [role="option"],
+    [role="radio"],
+    [role="switch"],
+    [role="tab"],
+    [data-clickable="true"]
+  ) {
+    cursor: pointer;
+  }
+
+  :where(
+    button,
+    select,
+    input,
+    textarea,
+    [role="button"],
+    [role="checkbox"],
+    [role="link"],
+    [role="menuitem"],
+    [role="option"],
+    [role="radio"],
+    [role="switch"],
+    [role="tab"],
+    [data-clickable="true"]
+  ):where(:disabled, [aria-disabled="true"], [data-disabled], [data-disabled="true"]) {
+    cursor: not-allowed;
+  }
+
+  :where(input:not([type]), input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], textarea):not(:disabled) {
+    cursor: text;
   }
   
   /* UniCredit Font Family */

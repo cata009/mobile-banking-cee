@@ -21,7 +21,7 @@ export default function ProductCard({
 }: ProductCardProps) {
   return (
     <div 
-      className="flex flex-col items-start gap-[4px] self-stretch bg-[var(--uc-surface)] rounded-[4px] cursor-pointer hover:opacity-90 transition-opacity"
+      className="flex flex-col items-start gap-[4px] self-stretch bg-[var(--uc-surface-raised)] rounded-[4px] cursor-pointer hover:opacity-90 transition-opacity"
       style={{
         padding: '16px'
       }}

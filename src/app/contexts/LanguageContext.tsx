@@ -10,7 +10,7 @@ export type Language = AppLanguage;
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, fallback?: string) => string;
   translations: TranslationKeys | null; // Add raw translations access
 }
 
@@ -37,10 +37,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
    * @param key - Translation key in dot notation
    * @returns Translated string or key as fallback
    */
-  const t = useCallback((key: string): string => {
+  const t = useCallback((key: string, fallback?: string): string => {
     if (!translations) {
       console.warn(`[LanguageContext] No translations found for ${country}/${language}`);
-      return key;
+      return fallback ?? key;
     }
 
     // Split key by dots: 'preLogin.welcome' → ['preLogin', 'welcome']
@@ -53,13 +53,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         value = value[k];
       } else {
         // Key not found - return the key itself as fallback
-        console.warn(`[LanguageContext] Translation key not found: ${key} for ${country}/${language}`);
-        return key;
+        if (fallback === undefined) {
+          console.warn(`[LanguageContext] Translation key not found: ${key} for ${country}/${language}`);
+        }
+        return fallback ?? key;
       }
     }
 
     // Return the final string value
-    return typeof value === 'string' ? value : key;
+    return typeof value === 'string' ? value : fallback ?? key;
   }, [country, language, translations]);
 
   return (
@@ -76,7 +78,7 @@ export function useLanguage() {
     return {
       language: 'en' as Language,
       setLanguage: () => {},
-      t: (key: string) => key,
+      t: (key: string, fallback?: string) => fallback ?? key,
       translations: null,
     };
   }

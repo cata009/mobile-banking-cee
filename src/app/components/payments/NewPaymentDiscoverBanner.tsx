@@ -16,8 +16,8 @@ export default function NewPaymentDiscoverBanner({
 
   return (
     <div className={`${className} rounded-[4px] bg-[var(--uc-action)] p-[16px] text-[var(--uc-text-inverse)]`}>
-      <div className="grid grid-cols-[20px_1fr_32px] items-start gap-[14px]">
-        <span className="mt-[4px] flex h-[20px] w-[20px] shrink-0 items-center justify-center">
+      <div className="grid grid-cols-[32px_1fr_32px] items-start gap-[14px]">
+        <span className="mt-[4px] flex h-[32px] w-[32px] shrink-0 items-center justify-center">
           <AppIcon name="info-circle" color="var(--uc-text-inverse)" />
         </span>
         <div className="min-w-0">

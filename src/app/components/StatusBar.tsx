@@ -3,6 +3,7 @@ import svgPaths from '@/imports/svg-2hn0mpby87';
 
 interface StatusBarProps {
   variant?: 'light' | 'dark'; // light = text negru, dark = text alb
+  isCoAppingActive?: boolean;
 }
 
 function Time({ variant }: { variant: 'light' | 'dark' }) {
@@ -18,7 +19,7 @@ function Time({ variant }: { variant: 'light' | 'dark' }) {
   const formatTime = (date: Date) => {
     const hours = date.getHours();
     const minutes = date.getMinutes();
-    return `${hours}:${minutes.toString().padStart(2, '0')}`;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   };
 
   const textColor = variant === 'light' ? 'text-[var(--uc-text)]' : 'text-[var(--uc-static-white)]';

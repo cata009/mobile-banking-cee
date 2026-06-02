@@ -1,11 +1,13 @@
 import type { TranslationKeys } from '../types';
+import { createSharedTranslations } from '../shared';
 
 /**
  * Romanian translations for Romania (RO)
  * Română - România
  */
 const ro: TranslationKeys = {
-  // ==========================================
+  ...createSharedTranslations('ro'),
+// ==========================================
   // PRE-LOGIN SCREEN
   // ==========================================
   preLogin: {
@@ -88,6 +90,23 @@ const ro: TranslationKeys = {
       thisMonth: 'Luna aceasta',
       lastMonth: 'Luna trecută',
       vsLastMonth: 'vs luna trecută',
+    },
+  },
+
+  // ==========================================
+  // MORE SCREEN
+  // ==========================================
+  more: {
+    title: 'Mai multe',
+    cards: {
+      contacts: 'Contacte',
+      documents: 'Documente',
+      settings: 'Setari',
+      gdprConsent: 'Consimtamant GDPR',
+      thirdPartyConsent: 'Consimtamant catre terti',
+      digitalActivities: 'Registru de activitate digitala',
+      myRequests: 'Cererile mele',
+      tutorial: 'Tutoriale',
     },
   },
 

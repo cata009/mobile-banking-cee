@@ -1,4 +1,15 @@
-import { useState, useRef, useEffect } from 'react';
+import { useMemo, useRef, useState } from "react";
+import { AppIcon, type IconName } from "@/app/components/icons";
+
+export type TextFieldVisualState =
+  | "empty"
+  | "on-focus"
+  | "filled"
+  | "error-filled"
+  | "error-empty"
+  | "disabled-empty"
+  | "disabled-filled"
+  | "multiple-filled";
 
 interface TextFieldProps {
   label: string;
@@ -9,7 +20,15 @@ interface TextFieldProps {
   errorText?: string;
   errorText2?: string;
   placeholder?: string;
+  disabled?: boolean;
+  visualState?: TextFieldVisualState;
+  trailingIconName?: IconName;
+  trailingIconColor?: string;
+  multipleValues?: string[];
+  multipleCount?: number;
 }
+
+const DISABLED_COLOR = "var(--uc-neutral-650)";
 
 export default function TextField({
   label,
@@ -19,160 +38,152 @@ export default function TextField({
   helperText2,
   errorText,
   errorText2,
-  placeholder = ''
+  placeholder = "",
+  disabled = false,
+  visualState,
+  trailingIconName,
+  trailingIconColor,
+  multipleValues,
+  multipleCount,
 }: TextFieldProps) {
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Determină starea curentă
-  const hasError = !!(errorText || errorText2);
-  const isFilled = value.trim().length > 0;
-  const isActive = isFocused && !hasError;
-  const showFloatingLabel = isFocused || isFilled;
+  const derivedState: TextFieldVisualState = useMemo(() => {
+    if (visualState) return visualState;
+    if (disabled) return value.trim().length > 0 ? "disabled-filled" : "disabled-empty";
+    if (errorText || errorText2) return value.trim().length > 0 ? "error-filled" : "error-empty";
+    if (isFocused) return "on-focus";
+    return value.trim().length > 0 ? "filled" : "empty";
+  }, [disabled, errorText, errorText2, isFocused, value, visualState]);
 
-  // Culori bazate pe stare
-  const getLabelColor = () => {
-    if (hasError) return 'var(--uc-text-muted)';
-    if (isActive) return 'var(--uc-action)';
-    if (isFilled) return 'var(--uc-text-muted)';
-    return 'var(--uc-text)';
-  };
+  const isDisabled = derivedState === "disabled-empty" || derivedState === "disabled-filled";
+  const isError = derivedState === "error-filled" || derivedState === "error-empty";
+  const isActive = derivedState === "on-focus";
+  const isMultiple = derivedState === "multiple-filled";
+  const hasValue = derivedState === "filled" || derivedState === "error-filled" || derivedState === "disabled-filled" || isMultiple || value.trim().length > 0;
+  const shouldFloatLabel = isActive || hasValue;
 
-  const getDividerColor = () => {
-    if (hasError) return 'var(--uc-status-red)';
-    if (isActive) return 'var(--uc-action)';
-    return 'var(--uc-text)';
-  };
+  const labelColor = isDisabled
+    ? DISABLED_COLOR
+    : isActive
+      ? "var(--uc-action)"
+      : "var(--uc-text-muted)";
 
-  const getDescriptionColor = () => {
-    if (hasError) return 'var(--uc-status-red)';
-    return 'var(--uc-text-muted)';
-  };
+  const valueColor = isDisabled ? DISABLED_COLOR : "var(--uc-text)";
+  const dividerColor = isDisabled
+    ? DISABLED_COLOR
+    : isError
+      ? "var(--uc-status-red)"
+      : isActive
+        ? "var(--uc-action)"
+        : "var(--uc-text-subtle)";
+  const helperColor = isDisabled
+    ? DISABLED_COLOR
+    : isError
+      ? "var(--uc-status-red)"
+      : "var(--uc-text-muted)";
 
-  // Culorile description texts
-  const showDescription = hasError ? !!(errorText || errorText2) : !!(helperText || helperText2);
-  const descriptionText1 = hasError ? errorText : helperText;
-  const descriptionText2 = hasError ? errorText2 : helperText2;
+  const descriptionText1 = isError ? errorText : helperText;
+  const descriptionText2 = isError ? errorText2 : helperText2;
+  const displayedMultipleValues = multipleValues?.join("; ") ?? value;
+  const effectiveMultipleCount = multipleCount ?? multipleValues?.length ?? 0;
+  const inputPlaceholder = shouldFloatLabel ? placeholder : label;
+  const placeholderColorClass = shouldFloatLabel
+    ? "placeholder:text-[var(--uc-text-subtle)]"
+    : isDisabled
+      ? "placeholder:text-[var(--uc-neutral-650)]"
+      : "placeholder:text-[var(--uc-text)]";
 
   return (
     <div className="w-full">
-      {/* Container principal */}
       <div className="relative">
-        {/* Floating Label (când focused sau filled) */}
-        {showFloatingLabel && (
+        {shouldFloatLabel ? (
           <label
-            className="font-['UniCredit',sans-serif] block mb-[4px]"
-            style={{
-              color: getLabelColor(),
-              fontSize: '14px',
-              fontStyle: 'normal',
-              fontWeight: 400,
-              lineHeight: 'normal'
-            }}
+            className="block font-['UniCredit',sans-serif] text-[14px] font-normal leading-normal"
+            style={{ color: labelColor }}
           >
             {label}
           </label>
-        )}
+        ) : null}
 
-        {/* Input Field Container */}
-        <div
-          className="relative cursor-text"
-          onClick={() => inputRef.current?.focus()}
-        >
-          {/* Placeholder Label (când nu e focused și nu are valoare) */}
-          {!showFloatingLabel && (
-            <div
-              className="font-['UniCredit',sans-serif] pointer-events-none"
-              style={{
-                color: 'var(--uc-text)',
-                fontSize: '18px',
-                fontStyle: 'normal',
-                fontWeight: 400,
-                lineHeight: 'normal'
-              }}
-            >
-              {label}
-            </div>
-          )}
+        <div className={`${shouldFloatLabel ? "mt-[4px]" : ""} flex items-end`}>
+          <div
+            className={`flex min-w-0 flex-1 items-end border-b pb-[3px] ${isDisabled ? "cursor-default" : "cursor-text"}`}
+            style={{
+              borderBottomColor: dividerColor,
+              borderBottomWidth: "0.5px",
+            }}
+            onClick={() => {
+              if (!isDisabled && !isMultiple) {
+                inputRef.current?.focus();
+              }
+            }}
+          >
+            {isMultiple ? (
+              <div className="min-w-0 flex flex-1 items-baseline gap-[8px]">
+                <span
+                  className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-['UniCredit',sans-serif] text-[18px] font-normal leading-normal"
+                  style={{ color: valueColor }}
+                  title={displayedMultipleValues}
+                >
+                  {displayedMultipleValues}
+                </span>
+                {effectiveMultipleCount > 0 ? (
+                  <span
+                    className="shrink-0 font-['UniCredit',sans-serif] text-[18px] font-bold leading-normal"
+                    style={{ color: valueColor }}
+                  >
+                    ({effectiveMultipleCount})
+                  </span>
+                ) : null}
+              </div>
+            ) : (
+              <input
+                ref={inputRef}
+                type="text"
+                value={hasValue ? value : ""}
+                onChange={(event) => onChange(event.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                placeholder={inputPlaceholder}
+                disabled={isDisabled}
+                className={`min-w-0 flex-1 bg-transparent font-['UniCredit',sans-serif] text-[18px] font-normal leading-normal outline-none disabled:cursor-default ${placeholderColorClass}`}
+                style={{ color: valueColor }}
+              />
+            )}
+          </div>
 
-          {/* Input real (vizibil când focused sau filled) */}
-          {showFloatingLabel && (
-            <input
-              ref={inputRef}
-              type="text"
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              placeholder={placeholder}
-              className="w-full bg-transparent border-none outline-none font-['UniCredit',sans-serif] p-0"
-              style={{
-                color: 'var(--uc-text)',
-                fontSize: '18px',
-                fontStyle: 'normal',
-                fontWeight: 400,
-                lineHeight: 'normal'
-              }}
-            />
-          )}
-
-          {/* Input ascuns pentru când nu e focused (pentru a captura focus) */}
-          {!showFloatingLabel && (
-            <input
-              ref={inputRef}
-              type="text"
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-text"
-            />
-          )}
+          <span className="ml-[12px] grid h-[32px] w-[32px] shrink-0 place-items-center" aria-hidden={!trailingIconName}>
+            {trailingIconName ? (
+              <AppIcon
+                name={trailingIconName}
+                color={trailingIconColor ?? (isDisabled ? DISABLED_COLOR : "var(--uc-text)")}
+              />
+            ) : null}
+          </span>
         </div>
 
-        {/* Divider - 4px gap */}
-        <div 
-          className="mt-[4px] flex-shrink-0"
-          style={{
-            width: '295px',
-            height: '0.5px',
-            backgroundColor: getDividerColor()
-          }}
-        />
-
-        {/* Helper/Error Texts - 6px gap */}
-        {showDescription && (
+        {descriptionText1 || descriptionText2 ? (
           <div className="mt-[6px] flex flex-col">
-            {descriptionText1 && (
+            {descriptionText1 ? (
               <p
-                className="font-['UniCredit',sans-serif]"
-                style={{
-                  color: getDescriptionColor(),
-                  fontSize: '14px',
-                  fontStyle: 'normal',
-                  fontWeight: 400,
-                  lineHeight: 'normal'
-                }}
+                className="font-['UniCredit',sans-serif] text-[14px] font-normal leading-normal"
+                style={{ color: helperColor }}
               >
                 {descriptionText1}
               </p>
-            )}
-            {descriptionText2 && (
+            ) : null}
+            {descriptionText2 ? (
               <p
-                className="font-['UniCredit',sans-serif]"
-                style={{
-                  color: getDescriptionColor(),
-                  fontSize: '14px',
-                  fontStyle: 'normal',
-                  fontWeight: 400,
-                  lineHeight: 'normal'
-                }}
+                className="font-['UniCredit',sans-serif] text-[14px] font-normal leading-normal"
+                style={{ color: helperColor }}
               >
                 {descriptionText2}
               </p>
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

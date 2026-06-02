@@ -1,11 +1,13 @@
 import type { TranslationKeys } from '../types';
+import { createSharedTranslations } from '../shared';
 
 /**
  * Slovenian translations for Slovenia (SI)
  * Slovenščina - Slovenija
  */
 const sl: TranslationKeys = {
-  // ==========================================
+  ...createSharedTranslations('sl'),
+// ==========================================
   // PRE-LOGIN SCREEN
   // ==========================================
   preLogin: {
@@ -88,6 +90,23 @@ const sl: TranslationKeys = {
       thisMonth: 'Ta mesec',
       lastMonth: 'Prejšnji mesec',
       vsLastMonth: 'vs prejšnji mesec',
+    },
+  },
+
+  // ==========================================
+  // MORE SCREEN
+  // ==========================================
+  more: {
+    title: 'Vec',
+    cards: {
+      contacts: 'Stiki',
+      documents: 'Dokumenti',
+      settings: 'Nastavitve',
+      gdprConsent: 'Soglasje GDPR',
+      thirdPartyConsent: 'Soglasje tretjim osebam',
+      digitalActivities: 'Zapis digitalne aktivnosti',
+      myRequests: 'Moje vloge',
+      tutorial: 'Vadnice',
     },
   },
 

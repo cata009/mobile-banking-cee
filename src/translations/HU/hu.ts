@@ -1,11 +1,13 @@
 import type { TranslationKeys } from '../types';
+import { createSharedTranslations } from '../shared';
 
 /**
  * Hungarian translations for Hungary (HU)
  * Magyar - Magyarország
  */
 const hu: TranslationKeys = {
-  // ==========================================
+  ...createSharedTranslations('hu'),
+// ==========================================
   // PRE-LOGIN SCREEN
   // ==========================================
   preLogin: {
@@ -88,6 +90,23 @@ const hu: TranslationKeys = {
       thisMonth: 'Ez a hónap',
       lastMonth: 'Múlt hónap',
       vsLastMonth: 'vs múlt hónap',
+    },
+  },
+
+  // ==========================================
+  // MORE SCREEN
+  // ==========================================
+  more: {
+    title: 'Tovabbiak',
+    cards: {
+      contacts: 'Kapcsolatok',
+      documents: 'Dokumentumok',
+      settings: 'Beallitasok',
+      gdprConsent: 'GDPR hozzajarulas',
+      thirdPartyConsent: 'Hozzajarulas harmadik felekhez',
+      digitalActivities: 'Digitalis tevekenysegi naplo',
+      myRequests: 'Kerelmeim',
+      tutorial: 'Utmutatok',
     },
   },
 

@@ -66,6 +66,11 @@ type LucideIconDefinition = BaseIconDefinition & {
 
 type IconDefinition = CustomIconDefinition | LucideIconDefinition;
 
+const STANDARD_UI_ICON_GLYPH_SIZE = 20;
+const NON_STANDARD_ICON_NAMES = new Set([
+  "divider-327",
+]);
+
 const CUSTOM_ICONS = {
   "header-profile": {
     source: "custom",
@@ -88,9 +93,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Header messages",
     category: "Header",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "5 8 22 15",
     usage: ["HeaderActionIcons", "Payments header", "Products header", "More header"],
     render: () => (
       <path
@@ -123,7 +128,7 @@ const CUSTOM_ICONS = {
     label: "Logout",
     category: "Header",
     width: 20,
-    height: 19,
+    height: 20,
     viewBox: "0 0 20 19",
     usage: ["More header"],
     render: () => (
@@ -135,26 +140,13 @@ const CUSTOM_ICONS = {
       />
     ),
   },
-  "nav-active-bar": {
-    source: "custom",
-    label: "Bottom nav active bar",
-    category: "Navigation",
-    width: 24,
-    height: 2,
-    viewBox: "0 0 24 2",
-    usage: ["BottomNavigation"],
-    notes: "Deduplicated from five identical bottom navigation active indicators.",
-    render: () => (
-      <path d="M0 0H24C24 1.10457 23.1046 2 22 2H2C0.89543 2 0 1.10457 0 0Z" fill="currentColor" />
-    ),
-  },
   "nav-home": {
     source: "custom",
     label: "Bottom nav home",
     category: "Navigation",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 5 20 21",
     usage: ["BottomNavigation"],
     render: () => (
       <path
@@ -169,9 +161,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Bottom nav analytics",
     category: "Navigation",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 6 20 20",
     usage: ["BottomNavigation"],
     render: () => (
       <path
@@ -186,9 +178,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Bottom nav payments",
     category: "Navigation",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "4 8 24 16",
     usage: ["BottomNavigation"],
     render: () => (
       <path
@@ -203,9 +195,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Bottom nav products",
     category: "Navigation",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 6 20 20",
     usage: ["BottomNavigation"],
     render: () => (
       <path
@@ -237,9 +229,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Hide amounts",
     category: "Accounts",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 6 20 20",
     usage: ["AmountVisibilityButton"],
     render: () => (
       <path
@@ -271,9 +263,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Search",
     category: "Actions",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 6 20 20",
     usage: ["AccountSearchBar"],
     render: () => (
       <path
@@ -288,9 +280,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Filters",
     category: "Actions",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 6 20 20",
     usage: ["AccountSearchBar"],
     render: () => (
       <path
@@ -305,24 +297,24 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Radio unselected",
     category: "System",
-    width: 22,
-    height: 22,
-    viewBox: "0 0 22 22",
+    width: 20,
+    height: 20,
+    viewBox: "0 0 20 20",
     usage: ["RadioButton"],
-    render: () => <circle cx="11" cy="11" r="10.5" fill="var(--uc-static-white)" stroke="currentColor" strokeWidth="1" />,
+    render: () => <circle cx="10" cy="10" r="9.5" fill="var(--uc-static-white)" stroke="currentColor" strokeWidth="1" />,
   },
   "radio-selected": {
     source: "custom",
     label: "Radio selected",
     category: "System",
-    width: 22,
-    height: 22,
-    viewBox: "0 0 22 22",
+    width: 20,
+    height: 20,
+    viewBox: "0 0 20 20",
     usage: ["RadioButton"],
     render: () => (
       <>
-        <circle cx="11" cy="11" r="10.5" fill="var(--uc-static-white)" stroke="currentColor" strokeWidth="1" />
-        <circle cx="11" cy="11" r="5" fill="var(--uc-action)" />
+        <circle cx="10" cy="10" r="9.5" fill="var(--uc-static-white)" stroke="currentColor" strokeWidth="1" />
+        <circle cx="10" cy="10" r="4.5" fill="var(--uc-action)" />
       </>
     ),
   },
@@ -330,9 +322,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Demo topbar chevron down",
     category: "System",
-    width: 24,
-    height: 24,
-    viewBox: "0 0 24 24",
+    width: 20,
+    height: 20,
+    viewBox: "6 8 12 8",
     usage: ["DemoTopBar"],
     notes: "Deduplicated from product, country and release dropdown triggers.",
     render: () => (
@@ -343,8 +335,8 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Demo settings",
     category: "System",
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
     viewBox: "0 0 24 24",
     usage: ["DemoTopBar"],
     render: () => (
@@ -360,9 +352,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Demo reset",
     category: "System",
-    width: 24,
-    height: 24,
-    viewBox: "0 0 24 24",
+    width: 20,
+    height: 20,
+    viewBox: "3 1 18 22",
     usage: ["DemoTopBar"],
     render: () => (
       <>
@@ -383,19 +375,6 @@ const CUSTOM_ICONS = {
       <path d="M10 0C15.53 0 20 4.47 20 10C20 15.53 15.53 20 10 20C4.47 20 0 15.53 0 10C0 4.47 4.47 0 10 0ZM10 8.58984L6.41016 5L5 6.41016L8.58984 10L5 13.5898L6.41016 15L10 11.4102L13.5898 15L15 13.5898L11.4102 10L15 6.41016L13.5898 5L10 8.58984Z" fill="currentColor" />
     ),
   },
-  "badge-corner": {
-    source: "custom",
-    label: "Badge corner",
-    category: "System",
-    width: 30.1176,
-    height: 30.1176,
-    viewBox: "0 0 30.1176 30.1176",
-    usage: ["MoreCardBase", "DocumentsCard"],
-    notes: "Deduplicated red quarter-circle badge shape.",
-    render: () => (
-      <path d="M22.5882 0C26.7466 0 30.1176 3.37103 30.1176 7.52941V30.1176C13.4841 30.1176 0 16.6335 0 0H22.5882Z" fill="currentColor" />
-    ),
-  },
   "divider-327": {
     source: "custom",
     label: "Divider 327",
@@ -407,35 +386,30 @@ const CUSTOM_ICONS = {
     notes: "Deduplicated accordion separator line.",
     render: () => <path d="M0.510938 0.5H326.489" stroke="currentColor" strokeLinecap="square" strokeWidth="0.25" />,
   },
-  "divider-375": {
-    source: "custom",
-    label: "Divider 375",
-    category: "System",
-    width: 375,
-    height: 1,
-    viewBox: "0 0 375 1",
-    usage: ["ContactsDivider"],
-    render: () => <path d="M0 0.5H375" stroke="currentColor" strokeLinecap="square" strokeWidth="0.25" />,
-  },
   "payment-create-qr": {
     source: "custom",
     label: "Create QR code",
     category: "Payments",
-    width: 22,
-    height: 28,
-    viewBox: "0 0 22 28",
+    width: 20,
+    height: 20,
+    viewBox: "0 0 12 20",
     usage: ["PaymentOtherShortcut", "PanelWithTranslations", "PanelWithoutCoAppingTranslations", "PanelWithoutCoApping"],
     render: () => (
-      <path d="M7.94922 4.06152C7.73514 4.78582 7.61523 5.55215 7.61523 6.34668C7.61525 6.54614 7.63101 6.74141 7.64453 6.9375H2.15723V22.7627H12.2266V13.6094C12.9001 13.9275 13.6249 14.1543 14.3848 14.2744V24.2002C14.3847 25.7891 13.0967 27.077 11.5078 27.0771H0V6.93848C7.82466e-05 5.34948 1.28891 4.06152 2.87793 4.06152H7.94922ZM7.55176 23.4805C6.95614 23.4806 6.47363 23.9641 6.47363 24.5605C6.47368 25.1553 6.95617 25.6386 7.55176 25.6387C8.14742 25.6387 8.63081 25.1553 8.63086 24.5605C8.63086 23.964 8.14745 23.4805 7.55176 23.4805ZM10.5771 15.2314L6.66406 19.1426L6.51758 18.9951C5.94306 18.4214 5.94305 17.4907 6.51758 16.917L7.36426 16.0703H3.80762V14.3916H7.36426L6.51758 13.5449C5.94304 12.9712 5.94304 12.0405 6.51758 11.4668L6.66406 11.3184L10.5771 15.2314ZM15.6543 0C19.1537 0.000214911 21.9998 2.8472 22 6.3457C22 9.84523 19.1538 12.6922 15.6543 12.6924C12.1546 12.6924 9.30762 9.84536 9.30762 6.3457C9.30782 2.84706 12.1548 0 15.6543 0ZM11.8467 9.41699C11.8468 9.82319 12.1768 10.1542 12.583 10.1543H15.2852V6.71484H11.8467V9.41699ZM16.7598 8.18848H16.0225V9.66211H17.4961V8.92578H18.2334V9.66211H18.9707V8.18848H17.4961V7.45117H16.7598V8.18848ZM14.5488 9.41699H12.583V7.45117H14.5488V9.41699ZM17.4961 8.92578H16.7598V8.18848H17.4961V8.92578ZM13.1973 8.80273H13.9346V8.06543H13.1973V8.80273ZM16.0225 7.45117H16.7598V6.71484H16.0225V7.45117ZM17.4961 7.45117H18.9707V6.71484H17.4961V7.45117ZM12.583 2.53809C12.1768 2.5382 11.8467 2.86916 11.8467 3.27539V5.97754H15.2852V2.53809H12.583ZM16.0225 5.97754H19.4619V3.27539C19.4619 2.8691 19.1309 2.53811 18.7246 2.53809H16.0225V5.97754ZM14.5488 5.24023H12.583V3.27539H14.5488V5.24023ZM18.7246 5.24023H16.7598V3.27539H18.7246V5.24023ZM13.1973 4.62695H13.9346V3.88965H13.1973V4.62695ZM17.373 4.62695H18.1104V3.88965H17.373V4.62695Z" fill="currentColor" />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M10.3704 15.5556H1.48148V2.22222H10.3704V15.5556ZM4.81482 17.4074C4.81482 18.0207 5.31259 18.5185 5.92593 18.5185C6.53926 18.5185 7.03704 18.0207 7.03704 17.4074C7.03704 16.7941 6.53926 16.2963 5.92593 16.2963C5.31259 16.2963 4.81482 16.7941 4.81482 17.4074ZM0 2.22222C0 0.994815 0.994815 0 2.22222 0H11.8519V17.7778C11.8519 19.0052 10.857 20 9.62963 20H0V2.22222ZM5.18519 6.66667V5.18518H2.22222V8.14815H3.7037V9.62963H2.22222V12.5926H5.18519V11.1111H6.66667V12.5926H8.14815V11.1111H9.62963V9.62963H8.14815V8.14815H9.62963V5.18518H6.66667V6.66667H8.14815V8.14815H6.66667V9.62963H5.18519V8.14815H3.7037V6.66667H5.18519ZM6.66667 9.62963H8.14815V11.1111H6.66667V9.62963ZM5.18518 9.62963V11.1111H3.7037V9.62963H5.18518Z"
+        fill="currentColor"
+      />
     ),
   },
   "payment-templates": {
     source: "custom",
     label: "Templates",
     category: "Payments",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "7 6 18 20",
     usage: ["PaymentOtherShortcut", "NewPaymentActionListItem"],
     notes: "Single canonical template icon shared by Payments OTHER and New payment sheet.",
     render: () => (
@@ -451,9 +425,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Card repayment",
     category: "Payments",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 7 20 18",
     usage: ["PaymentOtherShortcut"],
     render: () => (
       <path
@@ -468,9 +442,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Exchange rates",
     category: "Payments",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "5.5 4 21 24",
     usage: ["PaymentOtherShortcut", "PanelWithTranslations", "PanelWithoutCoAppingTranslations", "PanelWithoutCoApping"],
     render: () => (
       <path d="M9.38672 18.6084C10.062 18.6084 10.8198 18.7521 11.3848 18.9668C11.619 19.0527 11.6744 19.167 11.5918 19.4531L11.4121 20.1123C11.3432 20.3696 11.2466 20.4267 11.04 20.3408C10.5991 20.1691 10.1028 20.04 9.68945 20.04C8.75259 20.0401 8.5186 20.3982 8.51855 21.3857V22.6172H10.627C10.999 22.6172 10.999 22.7034 10.999 23.1328V23.5479C10.999 23.9915 10.999 24.0488 10.627 24.0488H8.50488V24.6074C8.50482 25.3516 8.28414 25.9815 7.77441 26.5684H11.3711C11.688 26.5684 11.7431 26.6399 11.7432 27.0547V27.585C11.7432 27.9427 11.6879 28 11.3848 28H5.87207C5.55518 28 5.50002 27.8855 5.5 27.6279V27.1699C5.5 26.8979 5.54174 26.8404 5.81738 26.6543C6.49251 26.1819 6.78125 25.6661 6.78125 24.75V24.0488H6.12012C5.78942 24.0488 5.76172 23.991 5.76172 23.6904V23.2471C5.76172 22.8892 5.83103 22.8177 6.0791 22.7891L6.78125 22.6748V21.3291C6.78125 19.4537 7.55371 18.6084 9.38672 18.6084ZM26.5 26.5293H18.9326V24.6328H26.5V26.5293ZM26.5 22.7354H18.9326V20.8379H26.5V22.7354ZM22.9336 4C23.0676 4.00001 23.1538 4.01607 23.1924 4.04785C23.2307 4.07976 23.2499 4.1459 23.25 4.24609V5.24609C23.8936 5.28262 24.4896 5.37895 25.0371 5.53418C25.258 5.5981 25.3399 5.73075 25.2822 5.93164L25.0664 6.79395C25.028 6.98571 24.8785 7.04117 24.6191 6.95898C24.1485 6.82202 23.6919 6.73023 23.25 6.68457V9.0127L23.5391 9.06836C24.3935 9.24182 24.9839 9.52003 25.3105 9.90332C25.5987 10.2503 25.7431 10.7755 25.7432 11.4785V11.6846C25.7431 12.5884 25.4835 13.259 24.9648 13.6973C24.5518 14.0534 23.9183 14.2596 23.0635 14.3145V15.2314C23.0635 15.3319 23.0443 15.3987 23.0059 15.4307C22.9674 15.4626 22.8806 15.4785 22.7461 15.4785H22.3428C22.2083 15.4785 22.1214 15.4626 22.083 15.4307C22.0446 15.3987 22.0254 15.3319 22.0254 15.2314V14.3281C21.2186 14.2916 20.4739 14.1498 19.792 13.9033C19.6576 13.8577 19.5716 13.8044 19.5332 13.7451C19.4949 13.6858 19.4898 13.5925 19.5186 13.4648L19.6768 12.6562C19.696 12.5469 19.7516 12.474 19.8428 12.4375C19.934 12.401 20.028 12.4055 20.124 12.4512C20.777 12.7067 21.4108 12.8622 22.0254 12.917V10.3145L21.8242 10.2734C20.9693 10.0908 20.3834 9.83005 20.0664 9.49219C19.7014 9.1178 19.5186 8.56092 19.5186 7.82129V7.64355C19.5186 6.78519 19.7973 6.15472 20.3545 5.75293C20.7771 5.46087 21.3966 5.29175 22.2129 5.24609V4.24609C22.2129 4.14594 22.2322 4.07978 22.2705 4.04785C22.3089 4.01589 22.3958 4 22.5303 4H22.9336ZM10.207 5.04395C11.067 5.044 11.8801 5.2551 12.6455 5.67871C12.7871 5.75405 12.8197 5.89125 12.7441 6.08887L12.3477 6.90723C12.272 7.08611 12.1486 7.12407 11.9785 7.02051C11.4021 6.68167 10.7972 6.51172 10.1641 6.51172C9.69155 6.51174 9.31801 6.64886 9.04395 6.92188C8.80783 7.15723 8.65178 7.5713 8.57617 8.16406H11.0996C11.2788 8.16406 11.3878 8.1949 11.4258 8.25586C11.4636 8.31706 11.4824 8.46154 11.4824 8.6875V8.95508C11.4824 9.17162 11.4636 9.30874 11.4258 9.36523C11.3878 9.42153 11.2789 9.44922 11.0996 9.44922H8.50586V10.3115H11.0996C11.2792 10.3115 11.388 10.3421 11.4258 10.4033C11.4635 10.4647 11.4824 10.6084 11.4824 10.834V11.0732C11.4824 11.2898 11.4636 11.4269 11.4258 11.4834C11.3879 11.5398 11.279 11.5684 11.0996 11.5684H8.63281C8.69899 11.9448 8.82243 12.2363 9.00195 12.4434C9.29495 12.7917 9.79087 12.9658 10.4902 12.9658C11.0573 12.9658 11.6149 12.8529 12.1631 12.627C12.267 12.5893 12.3403 12.5872 12.3828 12.6201C12.4253 12.6531 12.4609 12.7354 12.4893 12.8672L12.6455 13.5449C12.7022 13.7897 12.6541 13.9448 12.5029 14.0107C11.8698 14.2931 11.1613 14.4346 10.377 14.4346C9.09159 14.4346 8.17512 14.1613 7.62695 13.6152C7.17336 13.1822 6.88461 12.5002 6.76172 11.5684H5.88281C5.70333 11.5684 5.5945 11.5398 5.55664 11.4834C5.51884 11.4269 5.5 11.2898 5.5 11.0732V10.834C5.5 10.6085 5.51898 10.4647 5.55664 10.4033C5.59445 10.3421 5.70324 10.3115 5.88281 10.3115H6.69043V9.44922H5.88281C5.70346 9.44922 5.59457 9.42159 5.55664 9.36523C5.51884 9.30874 5.5 9.17162 5.5 8.95508V8.6875C5.5 8.46154 5.51884 8.31706 5.55664 8.25586C5.59461 8.19485 5.70352 8.16406 5.88281 8.16406H6.74707C6.86997 7.05338 7.26241 6.23421 7.92383 5.70703C8.4909 5.26453 9.25246 5.04395 10.207 5.04395ZM23.0635 12.876C23.3227 12.8394 23.529 12.7567 23.6826 12.6289C23.8746 12.4828 23.9707 12.1865 23.9707 11.7393V11.6289C23.9707 11.2821 23.9131 11.0402 23.7979 10.9033C23.673 10.7573 23.4283 10.6336 23.0635 10.5332V12.876ZM22.2129 6.68457C21.944 6.72109 21.7469 6.78015 21.6221 6.8623C21.4011 6.99928 21.291 7.27365 21.291 7.68457V7.79395C21.291 8.11355 21.3678 8.34706 21.5215 8.49316C21.656 8.62086 21.8866 8.7255 22.2129 8.80762V6.68457Z" fill="currentColor" />
@@ -480,7 +454,7 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Domestic payment",
     category: "Payments",
-    width: 19,
+    width: 20,
     height: 20,
     viewBox: "0 0 19 20",
     usage: ["NewPaymentActionListItem"],
@@ -497,9 +471,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Foreign payment",
     category: "Payments",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 6 20 20",
     usage: ["NewPaymentActionListItem"],
     render: () => (
       <path
@@ -514,9 +488,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Chevron right",
     category: "Actions",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "12 10 8 12",
     usage: ["NewPaymentActionListItem", "NavigationLink", "ProductAccordion"],
     render: () => (
       <path d="M13.2901 10.7098C12.9001 11.0998 12.9001 11.7298 13.2901 12.1198L17.1701 15.9998L13.2901 19.8798C12.9001 20.2698 12.9001 20.8998 13.2901 21.2898C13.6801 21.6798 14.3101 21.6798 14.7001 21.2898L19.2901 16.6998C19.6801 16.3098 19.6801 15.6798 19.2901 15.2898L14.7001 10.6998C14.3201 10.3198 13.6801 10.3198 13.2901 10.7098Z" fill="currentColor" />
@@ -526,9 +500,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Chevron down",
     category: "Actions",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "10 12 12 8",
     usage: ["ProductAccordion"],
     render: () => (
       <path d="M12.1207 13.2901L16.0007 17.1701L19.8807 13.2901C20.2707 12.9001 20.9007 12.9001 21.2907 13.2901C21.6807 13.6801 21.6807 14.3101 21.2907 14.7001L16.7007 19.2901C16.3107 19.6801 15.6807 19.6801 15.2907 19.2901L10.7007 14.7001C10.3107 14.3101 10.3107 13.6801 10.7007 13.2901C11.0907 12.9101 11.7307 12.9001 12.1207 13.2901Z" fill="currentColor" />
@@ -538,9 +512,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Chevron down wide",
     category: "Actions",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "9 12 14 8",
     usage: ["AccordionSection"],
     render: () => (
       <path
@@ -555,9 +529,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Back heavy",
     category: "Navigation",
-    width: 24,
-    height: 24,
-    viewBox: "0 0 24 24",
+    width: 20,
+    height: 20,
+    viewBox: "6 1 12.5 22.1",
     usage: ["PageHeader", "DomesticPaymentFlowScreens", "PrimeScreen"],
     render: () => (
       <path
@@ -572,9 +546,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Back line",
     category: "Navigation",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "10 6 8 20",
     usage: ["BackButton"],
     render: () => (
       <path d="M20 24L12 16L20 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -601,8 +575,8 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Close small",
     category: "System",
-    width: 12,
-    height: 12,
+    width: 20,
+    height: 20,
     viewBox: "0 0 12 12",
     usage: ["NewPaymentDiscoverBanner"],
     render: () => (
@@ -618,9 +592,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Close",
     category: "System",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "12 10 12 12",
     usage: ["BottomSheet", "DemoFeatureSidePanel", "RoKidsApp", "TemplateCodePreviews"],
     notes: "Custom close icon replacing the old lucide X wrapper.",
     render: () => (
@@ -636,9 +610,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Panel smart banking",
     category: "Actions",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "5 5 19 23",
     usage: ["PanelWithTranslations", "PanelWithoutCoAppingTranslations", "PanelWithoutCoApping"],
     render: () => (
       <path d="M15.6816 8.30957C16.06 8.3102 16.5033 8.65896 16.5039 9.06445L16.6025 16.4395C17.2881 16.3427 18.1534 16.3146 19.0908 16.374C20.068 16.4367 21.0973 16.6364 21.7793 16.8281C22.553 17.1008 23.1489 17.829 23.2461 18.752C23.2515 18.8029 23.332 22.6482 23.333 22.6982C23.333 22.9247 23.2976 23.1435 23.2441 23.3535C23.0705 24.332 22.5848 25.2615 21.8027 25.9688C20.1095 27.5003 17.5519 27.2828 15.9844 25.6045L9.58301 18.7832C10.194 18.1298 11.1094 18.3171 11.7793 18.832L14.6279 20.9727V20.8604L14.8906 9.06445C14.8906 8.65963 15.3033 8.31027 15.6816 8.30957ZM7.3916 10.5C8.71215 10.5002 9.78223 11.571 9.78223 12.8916C9.78207 14.212 8.71205 15.2821 7.3916 15.2822C6.07102 15.2822 5.00016 14.2121 5 12.8916C5 11.5709 6.07092 10.5 7.3916 10.5ZM24.708 10.5C25.9737 10.5 27 11.5263 27 12.792C26.9998 14.0575 25.9736 15.083 24.708 15.083C23.4426 15.0828 22.4172 14.0574 22.417 12.792C22.417 11.5264 23.4425 10.5002 24.708 10.5ZM15.5859 5C17.8888 5.00019 19.7547 6.83767 19.7549 9.10547C19.7549 10.7184 18.8029 12.1016 17.4277 12.7725L17.3281 8.84668C17.3274 8.01446 16.5478 7.28204 15.6592 7.28125C14.8631 7.28221 13.9777 7.92571 13.9785 8.82031L13.8164 12.8115C12.4021 12.1548 11.417 10.7484 11.417 9.10547C11.4171 6.83755 13.2837 5 15.5859 5Z" fill="currentColor" />
@@ -648,9 +622,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Panel share screen",
     category: "Actions",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6.5 8 19 17",
     usage: ["PanelWithTranslations"],
     render: () => (
       <path
@@ -665,8 +639,8 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Floating share screen",
     category: "Actions",
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
     viewBox: "0 0 24 24",
     usage: ["FloatingCoAppingButton"],
     render: () => (
@@ -682,9 +656,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Prime check",
     category: "Prime",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 9 20 14",
     usage: ["YourBenefitsTab"],
     render: () => (
       <path
@@ -699,9 +673,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Prime direction",
     category: "Prime",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 6 20 20",
     usage: ["YourAdvisorTab"],
     render: () => (
       <path
@@ -716,9 +690,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Prime phone",
     category: "Prime",
-    width: 24,
-    height: 24,
-    viewBox: "0 0 24 24",
+    width: 20,
+    height: 20,
+    viewBox: "2 2 20 20",
     usage: ["YourAdvisorTab"],
     render: () => (
       <>
@@ -733,9 +707,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Prime email",
     category: "Prime",
-    width: 24,
-    height: 24,
-    viewBox: "0 0 24 24",
+    width: 20,
+    height: 20,
+    viewBox: "1 5 22 14",
     usage: ["YourAdvisorTab"],
     render: () => (
       <>
@@ -748,8 +722,8 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Prime chevron right",
     category: "Prime",
-    width: 7,
-    height: 14,
+    width: 20,
+    height: 20,
     viewBox: "0 0 7 14",
     usage: ["PrimeIconLabelValue"],
     render: () => (
@@ -765,9 +739,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Account details",
     category: "Accounts",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 6 20 20",
     usage: ["AccountActionBar"],
     render: () => (
       <path
@@ -782,9 +756,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Account options",
     category: "Accounts",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 6 20 20",
     usage: ["AccountActionBar"],
     render: () => (
       <path
@@ -799,7 +773,7 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Share account info",
     category: "Accounts",
-    width: 17,
+    width: 20,
     height: 20,
     viewBox: "0 0 17 20",
     usage: ["AccountOptionsScreen"],
@@ -831,9 +805,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Account statement",
     category: "Accounts",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "8 6 16 20",
     usage: ["AccountOptionsScreen"],
     render: () => (
       <path
@@ -848,7 +822,7 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Create paycode",
     category: "Accounts",
-    width: 12,
+    width: 20,
     height: 20,
     viewBox: "0 0 12 20",
     usage: ["AccountOptionsScreen"],
@@ -865,9 +839,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Change account name",
     category: "Accounts",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 6 20 20",
     usage: ["AccountOptionsScreen"],
     render: () => (
       <path
@@ -880,9 +854,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Chevron link",
     category: "Actions",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "12.75 9 7.25 14",
     usage: ["AccountOptionsScreen", "ContactsNavigationCard"],
     render: () => (
       <path
@@ -926,9 +900,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Copy documents",
     category: "Accounts",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "7 6 18 20",
     usage: ["AccountBalanceCard", "AccountDetailsInfoScreen"],
     notes: "Deduplicated exact account copy icon.",
     render: () => (
@@ -939,9 +913,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Share filled",
     category: "Actions",
-    width: 28,
-    height: 28,
-    viewBox: "0 0 24 24",
+    width: 20,
+    height: 20,
+    viewBox: "3 2 18 20",
     usage: ["AccountDetailsInfoScreen"],
     render: () => (
       <path
@@ -956,9 +930,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Chevron forward heavy",
     category: "Actions",
-    width: 24,
-    height: 24,
-    viewBox: "0 0 24 24",
+    width: 20,
+    height: 20,
+    viewBox: "5.6 1 12.4 22.1",
     usage: ["AccountDetailsInfoScreen"],
     render: () => (
       <path
@@ -986,26 +960,13 @@ const CUSTOM_ICONS = {
       />
     ),
   },
-  "prime-diamond-16": {
-    source: "custom",
-    label: "Prime diamond 16",
-    category: "Prime",
-    width: 16,
-    height: 16,
-    viewBox: "0 0 16 16",
-    usage: ["HomeHeader", "HomeScreen", "CoAppingHomePage", "YourBenefitsTab", "YourAdvisorTab"],
-    notes: "Deduplicated exact Prime diamond icon.",
-    render: () => (
-      <path d="M7.98926 15L4.69434 6H11.2812L7.98926 15ZM9.70215 13.2139L12.3457 6H16L9.70215 13.2139ZM6.24316 13.2129L0 6H3.63184L6.24316 13.2129ZM3.7041 5H0L2.86523 1.5H5.2334L3.7041 5ZM9.65527 1.5L11.1846 5H4.79395L6.32324 1.5H9.65527ZM15.9785 5H12.2744L10.7451 1.5H13.1133L15.9785 5Z" fill="currentColor" />
-    ),
-  },
   "contact-prime": {
     source: "custom",
     label: "Contact Prime",
     category: "Contacts",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "5 5 21.1 20.2",
     usage: ["ContactsNavigationCard"],
     render: () => (
       <g transform="translate(5, 5)">
@@ -1022,9 +983,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Contact location",
     category: "Contacts",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "8 6 17 20",
     usage: ["ContactsNavigationCard", "PanelWithTranslations", "PanelWithoutCoAppingTranslations", "PanelWithoutCoApping"],
     render: () => (
       <path
@@ -1039,9 +1000,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Contact time",
     category: "Contacts",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 6 20 20",
     usage: ["ContactsNavigationCard"],
     render: () => (
       <g transform="translate(6, 6)">
@@ -1058,9 +1019,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Contact phone",
     category: "Contacts",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 6 20 20",
     usage: ["ContactsNavigationCard"],
     render: () => (
       <g transform="translate(6, 6)">
@@ -1077,9 +1038,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Contact block",
     category: "Contacts",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "8 6 15 20",
     usage: ["ContactsNavigationCard"],
     render: () => (
       <path
@@ -1094,9 +1055,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Contact email",
     category: "Contacts",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 6 20 20",
     usage: ["ContactsNavigationCard"],
     render: () => (
       <path
@@ -1111,9 +1072,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Contact website",
     category: "Contacts",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 7 20 18",
     usage: ["ContactsNavigationCard"],
     render: () => (
       <g transform="translate(6, 7)">
@@ -1130,9 +1091,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Contact YouTube",
     category: "Contacts",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 6 20 20",
     usage: ["ContactsNavigationCard"],
     render: () => (
       <g transform="translate(6, 6)">
@@ -1144,9 +1105,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Contact X",
     category: "Contacts",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "6 6 20 20",
     usage: ["ContactsNavigationCard"],
     render: () => (
       <g transform="translate(6, 6)">
@@ -1158,9 +1119,9 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Contact chevron",
     category: "Contacts",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    viewBox: "12.75 9 7.25 14",
     usage: ["ContactsNavigationCard"],
     render: () => (
       <path
@@ -1432,21 +1393,56 @@ export type IconInventoryItem = {
   category: IconCategory;
   source: IconDefinition["source"];
   defaultSize: string;
+  previewWidth: number;
+  previewHeight: number;
   viewBox: string;
   usage: string[];
   notes?: string;
 };
 
-export const ICON_INVENTORY: IconInventoryItem[] = Object.entries(ICON_REGISTRY).map(([name, definition]) => ({
-  name: name as IconName,
-  label: definition.label,
-  category: definition.category,
-  source: definition.source,
-  defaultSize: `${definition.width}x${definition.height}`,
-  viewBox: definition.source === "custom" ? definition.viewBox : "lucide-react",
-  usage: definition.usage,
-  notes: definition.notes,
-}));
+function usesStandardUiGlyph(name: IconName) {
+  return !NON_STANDARD_ICON_NAMES.has(name);
+}
+
+function resolveDefaultDimensions(name: IconName, definition: IconDefinition) {
+  if (usesStandardUiGlyph(name)) {
+    return {
+      width: STANDARD_UI_ICON_GLYPH_SIZE,
+      height: STANDARD_UI_ICON_GLYPH_SIZE,
+    };
+  }
+
+  return {
+    width: definition.width,
+    height: definition.height,
+  };
+}
+
+function getInventorySizeLabel(name: IconName, definition: IconDefinition) {
+  if (usesStandardUiGlyph(name)) {
+    return "32x32 slot / 20x20 glyph";
+  }
+
+  return `${definition.width}x${definition.height}`;
+}
+
+export const ICON_INVENTORY: IconInventoryItem[] = Object.entries(ICON_REGISTRY).map(([rawName, definition]) => {
+  const name = rawName as IconName;
+  const defaultDimensions = resolveDefaultDimensions(name, definition);
+
+  return {
+    name,
+    label: definition.label,
+    category: definition.category,
+    source: definition.source,
+    defaultSize: getInventorySizeLabel(name, definition),
+    previewWidth: defaultDimensions.width,
+    previewHeight: defaultDimensions.height,
+    viewBox: definition.source === "custom" ? definition.viewBox : "lucide-react",
+    usage: definition.usage,
+    notes: definition.notes,
+  };
+});
 
 export const ICON_AUDIT_EXCLUSIONS = [
   {
@@ -1489,11 +1485,31 @@ type AppIconProps = Omit<SVGProps<SVGSVGElement>, "name" | "color" | "width" | "
   strokeWidth?: number;
 };
 
-function resolveSize(definition: IconDefinition, size?: number, width?: number, height?: number) {
-  return {
-    width: width ?? size ?? definition.width,
-    height: height ?? size ?? definition.height,
-  };
+function resolveSize(name: IconName, definition: IconDefinition, size?: number, width?: number, height?: number) {
+  if (width || height) {
+    return {
+      width: width ?? size ?? definition.width,
+      height: height ?? size ?? definition.height,
+    };
+  }
+
+  if (size) {
+    return {
+      width: size,
+      height: size,
+    };
+  }
+
+  return resolveDefaultDimensions(name, definition);
+}
+
+function normalizeSvgDisplayClassName(className?: string) {
+  if (!className) return undefined;
+
+  return className
+    .replace(/\bw-6\b/g, "w-5")
+    .replace(/\bh-6\b/g, "h-5")
+    .replace(/\bsize-6\b/g, "size-5");
 }
 
 export function AppIcon({
@@ -1504,16 +1520,20 @@ export function AppIcon({
   color = "currentColor",
   title,
   strokeWidth,
+  className,
   ...svgProps
 }: AppIconProps) {
-  const definition = ICON_REGISTRY[name];
-  const dimensions = resolveSize(definition, size, width, height);
+  const resolvedName = name in ICON_REGISTRY ? name : "help-circle";
+  const definition = ICON_REGISTRY[resolvedName];
+  const dimensions = resolveSize(resolvedName, definition, size, width, height);
+  const normalizedClassName = normalizeSvgDisplayClassName(className);
 
   if (definition.source === "lucide") {
     const LucideComponent = definition.component;
     return (
       <LucideComponent
         aria-hidden={title ? undefined : true}
+        className={normalizedClassName}
         color={color}
         height={dimensions.height}
         role={title ? "img" : undefined}
@@ -1529,6 +1549,7 @@ export function AppIcon({
   return (
     <svg
       aria-hidden={title ? undefined : true}
+      className={normalizedClassName}
       color={color}
       fill="none"
       height={dimensions.height}

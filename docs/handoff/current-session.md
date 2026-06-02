@@ -1,14 +1,428 @@
 # Current Session
 
-Last updated: 2026-06-01
+Last updated: 2026-06-02
 
 ## Current Focus
 
-Closing the Design System template expansion and icon-source cleanup so future AI-built flows reuse code-backed templates and the centralized icon registry.
+Closing the Design System template-to-app contract so future AI-built flows can read code-backed templates as standalone app page/state patterns tied to registered components, screens, flows, icons, and reuse rules.
 
 ## Last Meaningful Change
 
+Latest global cursor affordance fix:
+
+- `src/styles/theme.css`
+  - added a base interactive-cursor policy for runtime screens, Design System specimens, and code-backed templates
+  - clickable controls now consistently show the hand cursor across native buttons, links, selects, semantic interactive roles (`button`, `tab`, `menuitem`, `option`, `radio`, `checkbox`, `switch`, `link`), labels bound to inputs, and future `[data-clickable="true"]` escape hatches
+  - disabled controls now resolve to `not-allowed`, while text inputs and textareas keep the normal text cursor
+- Verification on 2026-06-02:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - in-app browser checks confirmed `AccountTransactionRow`, product cards, and generic buttons compute `cursor: pointer`; selects compute `pointer`; text inputs compute `text`; disabled controls compute `not-allowed`
+
+Latest Products template/runtime alignment:
+
+- `src/app/screens/products/ProductsScreen.tsx`
+  - exported the runtime Products building blocks (`ProductsHeader`, `ProductsTabs`, `BankingContent`, `ShopSmartContent`, `OffersRail`, and product-card translation helper) so Design System templates can reuse the same layout/component contract instead of duplicating approximate markup
+- `src/app/components/templates/TemplateCodePreviews.tsx`
+  - `products-menu` and `products-shopsmart` templates now render the Romania Products reference through the same runtime header, underline tab menu, offers rail, product-card grids, and `BottomNavigation`
+  - removed the old template-only pill tab/menu spacing for these two templates, so the template visual now tracks the current Romania Products page more closely
+- Verification on 2026-06-02:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - in-app browser verification on `http://localhost:3001/#templates` confirmed Templates loads, `products-menu` renders, and the runtime `Banking / ShopSmart` tab labels are present
+
+Latest runtime translation key migration:
+
+- `src/translations/types.ts`, `src/translations/shared.ts`, and every country/language file under `src/translations/{RO,CZ,SK,HU,RS,BA,SI}`
+  - added a shared `runtime` translation namespace for active app surfaces: common actions, accounts, analytics/PFM, payments, products menu, messages, documents, settings, contacts, dialogs, and unsupported contexts
+  - all 14 country/language translation files now spread `createSharedTranslations(language)`, giving every supported country both English and local-language runtime keys from one governed source
+- `src/app/contexts/LanguageContext.tsx`
+  - `t()` now accepts an optional fallback, so newly migrated runtime components do not expose raw key strings while the fine-grained country copy is still being completed
+- Runtime screens/components migrated to use translation keys with fallbacks:
+  - `PaymentsScreen`, `ProductsScreen`, `DomesticPaymentFlowScreens`
+  - `AccountDetailScreen`, `AccountDetailsInfoScreen`, `AccountOptionsScreen`, `AccountActionBar`, `AccountSearchBar`
+  - `AnalyticsScreen`, `MessagesScreen`, `DocumentsScreen`, `SettingsScreen`, `ContactsScreen`
+  - `LogoutConfirmDialog`, `UnsupportedContextScreen`
+- Verification on 2026-06-02:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `git diff --check -- src/translations src/app/contexts/LanguageContext.tsx src/app/screens src/app/components/accounts src/app/components/LogoutConfirmDialog.tsx src/app/components/UnsupportedContextScreen.tsx` passed with only normal Windows LF/CRLF warnings
+- Limitation:
+  - this pass key-backed the active runtime/demo screens listed above; Design System template preview specimens and older registry/config labels still contain explanatory English by design and should be handled as a separate inventory-copy pass if the requirement expands to documentation/DS metadata text as well
+
+Latest PFM dark-mode color normalization:
+
+- `src/styles/theme.css`
+  - light PFM category tokens were preserved unchanged
+  - dark PFM category tokens were regenerated from the light values using the pattern inferred from the supplied Light/Dark pairs: OKLCH perceptual lightness increases by about `+0.07`, hue/chroma stay close to the light token, and very dark source colors are clamped to a readable dark-surface minimum
+  - all 23 PFM category tokens now keep category identity in dark mode instead of falling back to gray, stale light colors, or overly bright one-off partners
+- `src/app/registry/colorRegistry.ts`
+  - all PFM `darkHex` values now match the runtime CSS tokens exactly
+  - the PFM palette description now records the dark-mode derivation rule for Design System Inventory and AI reuse
+- Spending impact:
+  - `AnalyticsScreen` / My Spendings already consumes `PFM_CATEGORIES -> colorVar -> theme.css`, so the Spending PFM rows, icons, and pale category pills inherit the updated dark colors without local component changes
+- Verification on 2026-06-02:
+  - OKLCH reference-pair audit confirmed the supplied pairs average roughly `+0.07` perceptual lightness with near-preserved hue/chroma
+  - token/registry audit passed: `lightVarCount=23`, `darkVarCount=23`, `registryPfmCount=23`, `mismatches=[]`
+  - dark-surface contrast audit passed for all 23 PFM colors on `#333333`, with minimum contrast `3.15:1`
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `git diff --check -- src/styles/theme.css src/app/registry/colorRegistry.ts` passed with only normal Windows LF/CRLF warnings
+  - in-app browser smoke could not run because the browser connection failed while preparing local browser assets (`failed to write kernel assets`); runtime verification is covered by build plus token/registry/contrast audits
+
+Latest Text field underline alignment:
+
+- `src/app/components/TextField.tsx`
+  - `Text field` now reserves the same trailing `12px` gap plus `32px` control slot as `Dropdown`, even when no chevron is rendered
+  - this keeps the underline/input-writing rail equal between `Dropdown` and plain `Text field`; the component container no longer visually grows the text rail when the chevron is absent
+- Verification on 2026-06-02:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - in-app browser measurement on `http://localhost:3001/#forms` confirmed both `Dropdown` and `Text field` render `railWidth/inputWidth = 283px`, `gap = 12px`, and `slotWidth = 32px`, with SVG present only in `Dropdown`
+
+Latest Domestic payment component mapping:
+
+- `src/app/screens/payments/DomesticPaymentFlowScreens.tsx`
+  - Domestic payment create/review/sign screens now use the shared `PageHeader` instead of the local flow header
+  - `FROM ACCOUNT`, `BENEFICIARY`, and `PAYMENT DETAILS` separators now route through `SectionHeadingDivider`
+  - domestic payment dropdown/text fields now use `TextField`, including camera and dropdown trailing-icon affordances
+  - amount/currency entry now uses `AmountField` instead of separate local amount and currency field markup
+- `src/app/components/templates/TemplateCodePreviews.tsx`
+  - `Payment` and `New request with push` reconstructed previews now use the same `TextField`, `AmountField`, and `SectionHeadingDivider` primitives
+  - removed the obsolete local domestic-payment amount/currency field data now that the amount row is component-backed
+- `src/app/registry/templateRegistry.ts` and `src/app/registry/componentRegistry.ts`
+  - template/component metadata now lists `PageHeader`, `TextField`, `AmountField`, and `SectionHeadingDivider` as the reusable contract for Domestic payment and request-with-push patterns
+- Verification on 2026-06-02:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - in-app browser smoke verification on `http://localhost:3001/#templates` confirmed the Templates inventory loads, renders 50 template cards, includes `Payment` and `New request with push`, and has no app boot error
+
+Latest Design System field specimen split:
+
+- `src/app/screens/design-system/DesignSystemPage.tsx`
+  - the previous `Text field` specimen was renamed to `Dropdown`, preserving the same states and chevron-down field treatment
+  - a separate `Text field` specimen was added with the same visual states and look-and-feel, but without the trailing chevron control
+  - both specimens share the same `TextFieldSpecimens` state renderer, with the chevron controlled by a specimen prop rather than duplicated markup
+- Verification on 2026-06-02:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - in-app browser verification on `http://localhost:3001/#forms` confirmed `Dropdown`, `Text field`, `Amount field`, and `Generic UI controls` render in Forms; the `Dropdown` preview has one more SVG than `Text field`, matching the removed chevron
+
+Latest Design System component inventory cleanup:
+
+- `src/app/screens/design-system/DesignSystemPage.tsx`
+  - section eyebrow labels such as `HEADERS` are no longer rendered above section titles, removing the duplicated heading treatment
+  - section subtitles across Components, Templates, Icons, and Colors are now written in English
+  - `AccountActionBar` specimen variants were renamed/expanded to `4 elements`, `3 elements`, `2 elements`, and `1 element`
+  - `AccountCarouselIndicator` specimen was renamed to `Carousel Indicator`
+  - `Carousel Indicator` now exposes the requested swipe-state variants: first, next, further, and last for both 4-item and 7-item sets
+- `src/app/components/accounts/AccountActionBar.tsx`
+  - action items now support a hidden reserved slot, so the Design System can show 3/2/1 visible elements while preserving the same 4-position layout geometry
+- Verification on 2026-06-02:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - in-app browser verification on `http://localhost:3001/#headers` confirmed the duplicated `HEADERS` eyebrow is gone, the Headers subtitle is English, `AccountActionBar` exposes the four requested variants, and `Carousel Indicator` exposes the eight requested indicator states
+
+Latest Design System selector cleanup:
+
+- `src/app/screens/design-system/DesignSystemPage.tsx`
+  - `VariantSelector` no longer renders visible left-side dropdown labels such as `Variant`, `Active tab`, or `Country`
+  - select controls keep their accessible `aria-label`, so labels remain available to assistive tooling without cluttering the visual inventory
+  - `BottomNavigationVariantSpecimen` no longer renders the auxiliary `activeTab: ...` line above the navigation component
+- Verification on 2026-06-02:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - in-app browser verification on `http://localhost:3001/#navigation` confirmed `activeTab:` text is gone, visible dropdown labels are gone, and selects still expose aria labels (`Active tab`, `Variant`)
+
+Latest Design System specimen-wide theme cleanup:
+
+- `src/app/screens/design-system/DesignSystemPage.tsx`
+  - `Specimen` now owns the local icon-only Light/Dark theme segment for all component specimens, not only Headers
+  - all specimen preview bodies are locally scoped with `.dark` when their card segment switches to dark, so token-based component colors update inside the component card without changing the global app theme
+  - visible `.tsx` source pills and old spec-chip metadata are no longer rendered by `Specimen`, making the component inventory cleaner across sections
+  - `Status bar`, `PageHeader`, `Home`, and `More` now consume the theme mode supplied by `Specimen`, avoiding duplicate local theme state
+  - `Primary button` no longer has a Light/Dark variant dropdown; its visual variant now follows the specimen theme segment
+  - fixed dark preview surface logic so dark mode no longer uses `var(--uc-text)` as a background token
+  - `Home` remains background-transparent; in the Design System preview it inherits the page/frame background (`--uc-app-bg`) instead of owning a gray background itself
+- Verification on 2026-06-02:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - in-app browser verification on `http://localhost:3001/#headers` confirmed Headers have no source/spec metadata, no old Status bar Light/Dark dropdown, and four local theme segments
+  - in-app browser verification on `http://localhost:3001/#buttons` confirmed `Primary button` no longer has a Light/Dark dropdown or source/spec metadata
+  - in-app browser verification on `http://localhost:3001/#cards` confirmed source/spec metadata is hidden globally and component cards expose local theme controls
+  - Home dark-mode preview was checked by computed styles: frame background `rgb(18, 18, 18)`, header background transparent, title color `rgb(255, 255, 255)`
+
+Latest Design System Headers cleanup:
+
+- `src/app/screens/design-system/DesignSystemPage.tsx`
+  - `Home`, `More`, and `Status bar` now follow the same clean specimen pattern as `PageHeader`
+  - removed the visible `.tsx` source pills and extra spec chips from these Header specimens
+  - added icon-only Light/Dark `ThemeModeSegment` controls to `Home`, `More`, and `Status bar` specimen headers
+  - removed the old Light/Dark dropdown from `Status bar`; the specimen header segment now controls the status bar and dynamic island variant
+  - `HeaderPreviewFrame` now scopes dark preview frames with the `.dark` class, so transparent header components read the correct local dark-mode tokens in Design System Inventory
+- Verification on 2026-06-02:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - in-app browser verification on `http://localhost:3001/#headers` confirmed no `HomeHeader.tsx`, `MoreHeader.tsx`, or `StatusBar.tsx` source pills remain in the Headers section, the old `status-bar-variant-select` dropdown is gone, and all four Header cards expose icon-only theme segments
+
+Latest Design System inspector enrichment:
+
+- `src/app/screens/design-system/DesignSystemPage.tsx`
+  - the Design System Inspector now computes structured spacing data for every measured element inside a specimen
+  - selected/hovered elements now show visual spacing guides: parent-distance bands, internal padding bands, sibling-distance bands, and parent gap chips
+  - the inspector detail panel was expanded from size/font-only metadata to include parent layout, parent gap, and a dedicated `Spacing audit` section
+  - the spacing audit lists parent distances, padding, margin, parent gap, previous sibling distance, and next sibling distance in one place
+  - the sidebar inspector copy now explains that hover/click exposes size, font, padding, margin, gap, parent distances, and neighbor spacing
+- Verification on 2026-06-02:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `git diff --check -- src/app/screens/design-system/DesignSystemPage.tsx docs/handoff/current-session.md` passed with only normal Windows LF/CRLF warnings
+  - in-app browser verification on `http://localhost:3001/#headers` confirmed the inspector can be enabled and shows dashed element bounds, spacing guide bands, and the expanded `Spacing audit` panel
+
+Latest Design System interaction follow-up:
+
+- `src/app/screens/design-system/DesignSystemPage.tsx`
+  - the large intro card (`Visual audit workspace` / `Design System Inventory`) was removed from the main Design System page
+  - the Components / Templates / Icons / Colors inventory tabs were moved from the removed intro card into the sticky left sidebar
+  - Design System Inventory now derives the active inventory tab from the current hash on mount, so opening `#icons`, `#templates`, or `#colors` no longer renders the wrong/default Components inventory
+  - clicking a sidebar inventory tab now updates the hash to that tab's first valid section and scrolls there after render (`#overview`, `#templates`, `#icons`, `#colors`)
+  - direct Design System section URLs are now treated as app entry points: `AppWithNavigation` initializes the navigation state on `design-system` for known DS hashes, and `DemoNavigationSync` no longer resets those hashes back to prelogin
+  - this fixes direct/loading navigation for `#icons` and `#templates`, including the Templates inventory tab
+  - the left sidebar now starts aligned with the top of the content area and keeps inventory tabs, section links, and Inspector controls together for easier navigation
+  - Design System Inspector ON/OFF control was moved from the main intro card into the left sections sidebar, reducing the vertical height of the inventory page header
+  - the sidebar inspector control is marked as inspector UI, so it does not get selected by the measurement overlay itself
+  - `TextField states` specimen was renamed to `Text field`
+  - Forms now include a selector-driven `Amount field` specimen with the same states as `Text field`, plus a 24px-spaced currency column and 32x32 chevron control
+  - Cards now include a selector-driven `Payments hero card` specimen for the primary Payments menu cards
+  - `PrimaryButton family` specimen was renamed to `Primary button`
+  - selector variants are now `Primary Action / Light` and `Primary Action / Dark`, making Light/Dark the differentiator rather than separate button variants
+  - both modes now use the same `16px` bold label sizing
+- `src/app/components/payments/PaymentHeroCard.tsx`
+  - extracted the Payments primary menu cards from `PaymentsScreen` into a reusable component with the existing placeholder illustrations and an optional `imageSrc` slot for future supplied artwork
+- `src/app/screens/payments/PaymentsScreen.tsx`
+  - now consumes `PaymentHeroCard` instead of defining primary payment card JSX locally
+- `src/app/config/paymentsMenuConfig.ts`
+  - `PaymentHeroItem` now supports optional `imageSrc`, so future payment-card imagery can be mapped in config per card without changing the component
+- `src/app/components/products/ProductMenuCard.tsx`
+  - the Banking `Our products` / ShopSmart product menu card is now treated as an explicit reusable component surface, with an optional `imageSrc` slot for future supplied artwork and the existing generated illustration as fallback
+- `src/app/config/productsMenuConfig.ts`
+  - `ProductsCard` now supports optional `imageSrc`, so Account/Cards/Mortgages/Insurance/etc. artwork can be mapped per card without changing the component
+- `src/app/state/demoTypes.ts` and `src/app/registry/componentRegistry.ts`
+  - added `payments.hero-card` so Payments primary cards are represented in the machine-readable component registry
+- `src/app/registry/componentRegistry.ts`
+  - `products.product-card` notes now explicitly map the component to the Banking `Our products` grid, ShopSmart featured categories, and future card artwork slot
+- `src/app/components/AmountField.tsx`
+  - new reusable amount-input variant built on the shared `TextFieldVisualState` contract, with currency label/value typography and disabled/error/focus state passthrough
+- `src/app/state/demoTypes.ts` and `src/app/registry/componentRegistry.ts`
+  - added `ui.amount-field` so the new component is visible in the machine-readable component contract, not only in the visual inventory
+- `src/app/components/ui/PrimaryButton.tsx`
+  - the surface/dark wrapper now uses the same `16px` label size as the action/light button
+
+- `src/app/screens/payments/DomesticPaymentFlowScreens.tsx`
+  - `TransactionDetailScreen` no longer renders a local, one-off transaction action grid
+  - the transaction action shortcuts now use the shared `AccountActionBar` component, with the existing `Redo payment` handler wired through the reusable item contract
+- `src/app/components/templates/TemplateCodePreviews.tsx`
+  - `Transaction detail` template preview now also uses `AccountActionBar`, so the Design System template contract no longer teaches a separate shortcut implementation for the same action-bar pattern
+- Verification on 2026-06-02:
+  - `npm run build` passed after the Design System sidebar/header simplification; Vite still emits the known chunk-size warning
+  - `npm run build` passed after fixing Design System Inventory tab/hash navigation; Vite still emits the known chunk-size warning
+  - `npm run build` passed after making Design System hash URLs initialize and remain on `design-system`; Vite still emits the known chunk-size warning
+  - server-code verification on `http://localhost:3001/src/app/App.tsx` and `http://localhost:3001/src/app/components/demo/DemoNavigationSync.tsx` confirmed the active dev server is serving the new DS-hash initialization/reset guards
+  - follow-up in-app browser verification traced the remaining direct `#templates` blank page to an `AppIcon` runtime crash when a template preview passed an unmapped/undefined icon name; `AppIcon` now falls back to `help-circle` instead of taking down the app, and `main.tsx` exposes sanitized boot errors rather than leaving a white root
+  - in-app browser verification now passes for `http://localhost:3001/#templates` and `http://localhost:3001/#icons`: both load Design System Inventory content and no longer show an app boot error
+  - `Country coverage` in the Design System Overview was compacted from a long all-country card grid into a single selector-driven coverage panel; selecting a country updates languages, currency, Co-Apping, products, and More cards for that market
+  - `npm run build` passed after the compact Country coverage selector change; Vite still emits the known chunk-size warning
+  - in-app browser verification on `http://localhost:3001/#overview` confirmed the Country coverage selector has all 7 countries, no longer renders the old multi-card list, and switching to Czech Republic updates the panel to CZK + Co-Apping
+  - the top-bar country selector now clears Design System hash URLs when leaving `Design System Inventory`; choosing a real country from `#overview` no longer gets pulled back into the Design System by the hash sync effect
+  - `npm run build` passed after the top-bar DS-to-country selector fix; Vite still emits the known chunk-size warning
+  - in-app browser verification clicked `Design System Inventory` -> `Czech Republic` from `http://localhost:3001/#overview` and confirmed the app lands at `http://localhost:3001/`, shows the Czech Republic context label, and no longer renders the Design System page
+  - Design System Headers section labels were cleaned up: `HomeHeader` is now shown as `Home`, `MoreHeader` as `More`, and `StatusBar / DynamicIsland` as `Status bar`
+  - `PreLoginHeading` was moved out of Headers into the Navigation section as `Prelogin`, since it is a prelogin content component rather than a header
+  - `StatusBar` now zero-pads hours as well as minutes, so the status time renders like `09:35` instead of `9:35`
+  - Design System Headers specimens now share the same `375px` bordered preview frame for `PageHeader`, `Home`, `More`, and `Status bar`, so the audit surface is consistent while the runtime components remain unframed
+  - `HomeHeader` and `MoreHeader` are now background-transparent components; their owning screen or Design System preview frame supplies the surface color
+  - `HomeScreen` now reuses `HomeHeader` for both the sticky action row and scrollable title, removing a duplicated home-header implementation path
+  - `npm run build` passed after the Headers cleanup and StatusBar time formatting change; Vite still emits the known chunk-size warning
+  - in-app browser verification on `http://localhost:3001/#headers` confirmed the visible specimen names (`Home`, `More`, `Status bar`), `Prelogin` in the Navigation section, and a zero-padded `HH:mm` status time
+  - `npm run build` passed after the header preview-frame refactor; Vite still emits the known chunk-size warning
+  - in-app browser verification on `http://localhost:3001/#headers` confirmed four `375px` bordered preview frames in the Headers section and a zero-padded status-bar time (`09:51` in the check)
+  - `ThemeModeSegment` was introduced as the shared icon-only Light/Dark segmented control and is now used by the main demo topbar and the PageHeader Design System specimen
+  - `PageHeader` now supports centered large titles, PFM-colored large titles, and a clean fully-collapsed state where the large title disappears while the small centered title remains
+  - The PageHeader Design System specimen no longer shows the `components/PageHeader.tsx` code pill or the old measurement chips; its header now contains the icon-only Light/Dark segment, while the dropdown exposes `Level 1 page`, `Level 1 center`, `Level 1 categorized`, `Level 1 uncategorized`, and `Collapsed`
+  - `npm run build` passed after the PageHeader variant and icon-only theme segment changes; Vite still emits the known chunk-size warning
+  - in-app browser verification on `http://localhost:3001/#headers` confirmed both theme segments are icon-only, the old PageHeader path/spec text is gone, and all five requested PageHeader variants are available in the dropdown
+  - `npm run build` passed after exposing `ProductMenuCard` as the explicit `Products menu card` specimen and adding the optional product-card `imageSrc` slot; Vite still emits the known chunk-size warning
+  - Browser verification in Design System Inventory confirmed `Products menu card`, `components/products/ProductMenuCard.tsx`, its selector, and the rendered `164x120` card are visible
+  - Browser verification on `http://localhost:3001/#icons` confirmed the removed intro card/eyebrow, sidebar-hosted Components/Templates/Icons/Colors tabs, and aligned sidebar/content top positions (`asideTop=97`, `contentTop=97`, `topDelta=0`)
+  - `npm run build` passed after extracting `PaymentHeroCard` and adding `payments.hero-card`; Vite still emits the known chunk-size warning
+  - `npm run build` passed after adding `Amount field` and the `ui.amount-field` registry contract; Vite still emits the known chunk-size warning
+  - `npm run build` passed after moving the Inspector control into the Design System sidebar; Vite still emits the known chunk-size warning
+  - `npm run build` passed after the Transaction Detail action-bar replacement; Vite still emits the known chunk-size warning
+  - `git diff --check` passed for the touched runtime/template/handoff files with only normal Windows LF/CRLF warnings
+  - Browser opened `http://localhost:3001/#forms` successfully after the change
+
+- `src/app/components/TextField.tsx`
+  - empty, error-empty, and disabled-empty now behave as a proper floating-label field: the `Title` text stays in the value/placeholder position at `18px` body styling until the field is active or filled
+  - filled, focused, error-filled, disabled-filled, and multiple-filled keep the title floated above the value
+  - the underline is now rendered at `0.5px`
+  - trailing chevron/icon slot now sits outside the underline rail, with `12px` spacing to the left of the `32x32` icon container, matching the field spec instead of sitting directly on the line
+- `src/app/components/accounts/AccountCarouselIndicator.tsx`
+  - mid-range `7`-item state now renders the missing dot item so the carousel no longer collapses to `6` visible markers in the Design System specimen/runtime
+- `src/app/components/messages/MessagesMailboxTabs.tsx`
+  - numeric counter support was removed from the tab contract
+  - the leading blue dot is now controlled semantically through `hasNewItems`
+- `src/app/screens/messages/MessagesScreen.tsx`
+  - Inbox runtime demo now marks new content via the leading dot only
+- `src/app/screens/design-system/DesignSystemPage.tsx`
+  - `MessagesMailboxTabs` specimen now exposes both `Inbox active / new` and `Inbox active / no new`, rather than the old numeric badge state
+- `src/app/components/ProductsList.tsx`
+  - collapsed shadow and expanded rows now stay in one animated structure, so the product list / total row transition no longer snaps awkwardly between mounted/unmounted states
+- Verification on 2026-06-02:
+  - `npm run build` passed twice after these interaction fixes; Vite still emits the known chunk-size warning.
+
+Latest Design System forms + button alignment pass:
+
+- `src/app/components/common/RadioButton.tsx` now follows the spec contract the user validated manually:
+  - `32x32` radio slot
+  - `20x20` glyph
+  - `8px` gap to label
+  - `16px` bold label with normal line-height and `var(--uc-primary-k1)` text color
+- `src/app/components/TextField.tsx` was rebuilt into a shared stateful field contract instead of a narrow demo-only input:
+  - supports `empty`, `on-focus`, `filled`, `error-filled`, `error-empty`, `disabled-empty`, `disabled-filled`, and `multiple-filled`
+  - disabled now uses K4 (`var(--uc-neutral-650)`) consistently across title, value, divider, helper copy, and trailing chevron
+  - active/focus now uses `var(--uc-action)` for title + underline
+  - multiple-filled now supports semicolon-separated values, right-aligned count `(n)`, and ellipsis truncation in the value rail
+- `src/app/components/PrimaryButton.tsx` now owns a small family contract with `action` and `surface` variants plus `16px`/`18px` label sizing, and `src/app/components/ui/PrimaryButton.tsx` is now a thin wrapper over that shared button instead of a disconnected duplicate implementation.
+- `src/app/screens/design-system/DesignSystemPage.tsx` now reflects those shared changes:
+  - `StatusBar / DynamicIsland` specimen renders inside a proper `375x54` relative surface and passes the light/dark variant through `DynamicIsland`
+  - `RadioButton` specimen uses the shared component contract directly
+  - `PrimaryButton family` replaces the old duplicated `app` vs `ui duplicate` specimens
+  - `TextField states` now exposes all requested states through the shared `TextField`
+- `src/app/components/DynamicIsland.tsx` was tightened visually for the DS specimen with a flatter, cleaner shell and sensor treatment so it reads correctly on the isolated inventory surface.
+- Verification on 2026-06-02:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - Browser verification on `http://localhost:3001` confirmed:
+    - `StatusBar / DynamicIsland` sits correctly in the headers specimen instead of looking cropped/misaligned
+    - `RadioButton` no longer uses the old oversized gap/text treatment
+    - `PrimaryButton family` now shows the dark/surface `SELECT YOUR ACCOUNT` style inside the same family
+    - `TextField states` renders the new disabled/error/multiple variants from the shared component contract
+
+Latest template-contract pass:
+
+- `src/app/registry/templateRegistry.ts` now treats every template as a typed contract, not just visual evidence:
+  - `relatedComponents` is now `readonly ComponentId[]` and points only at component registry IDs.
+  - every template has `screenFamily`, `relatedScreens`, `flowIds`, `standalonePage`, products/countries/design systems, and optional `runtimeScreenId`.
+  - every template receives an `AI assembly contract` with default reuse rules and do-not-invent rules; template 52 also records its `messagesConfig.ts` data source and runtime Messages reuse rules.
+- `src/app/state/demoTypes.ts` and `src/app/registry/componentRegistry.ts` now include missing reusable DS/component IDs needed by templates, including `icons.app-icon`, `shell.page-header`, `ui.primary-button`, `ui.text-field`, `ui.radio-button`, `ui.section-heading-divider`, `brand.unicredit-logo`, `prelogin.language-selector`, `prelogin.other-panel`, `accounts.details-info-field`, and `dialogs.logout-confirmation`.
+- `src/app/screens/design-system/DesignSystemPage.tsx` now exposes the contract for each selected template: family, runtime screen, related screen IDs, flow IDs, reusable component IDs, data sources, reuse rules, and do-not-invent rules.
+- `scripts/audit-template-contract.mjs` plus the new `npm run audit:templates` command validate all template contracts against the source registries and the `TemplateCodePreview` switch cases.
+- `src/app/registry/aiCatalog.ts` version is now `2026-06-02.templates-contract`.
+- Verification on 2026-06-02:
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=46 screens=23 flows=13`.
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+
+Latest manual icon-registry touch-up from browser QA:
+
+- A focused follow-up pass in `src/app/components/icons/AppIcon.tsx` tightened several manually flagged UI icons whose inner SVG canvases were still making them read undersized inside the standard `32x32` slot / `20x20` glyph contract.
+- The pass included header / bottom-nav / action / account affordances such as `header-messages`, `nav-home`, `nav-analytics`, `nav-payments`, `nav-products`, `back-line`, `search`, `filters`, `chevron-right`, `chevron-down`, `chevron-down-wide`, `panel-smart-banking`, `panel-share-screen`, `demo-chevron-down`, `demo-reset`, `account-details`, `account-options`, `account-option-statement`, `account-option-change-name`, `copy-documents`, and `prime-check`.
+- `payment-create-qr` was corrected to the dedicated paycode SVG spec (`12x20` source art rendered through the shared `20x20` glyph size) instead of the older oversized mixed-payment icon.
+- `close-x-small` is no longer treated as a non-standard audit exception; it now renders as a standard `20x20` glyph inside the existing `32x32` dismiss slot used by `NewPaymentDiscoverBanner`.
+- `prime-email` and `prime-phone` were also normalized to `20x20` registry dimensions so the Prime contact/action family no longer mixes `24x24` and `20x20` definitions for icons that share the same standard runtime slot contract.
+- A follow-up refinement also tightened the Prime family viewBoxes themselves (`prime-phone -> 2 2 20 20`, `prime-email -> 1 5 22 14`), so those two no longer rely on a roomier inherited `24x24` canvas while sibling Prime/Contacts icons use cropped glyph frames.
+- `npm run build` passed again on 2026-06-01 after this touch-up; Vite still emits the known chunk-size warning.
+- `git diff --check -- src/app/components/icons/AppIcon.tsx` passed with only the normal LF-to-CRLF warnings on Windows.
+
+Latest icon-registry boundary cleanup:
+
+- Decorative and brand-mark assets that were still inflating the icon audit have been moved out of `AppIcon` usage and replaced with dedicated/local implementations:
+  - `src/app/components/prime/PrimeDiamondMark.tsx` now owns the Prime diamond brand mark previously rendered through `AppIcon name="prime-diamond-16"`.
+  - `src/app/components/BottomNavigation.tsx` now renders the active underline as a local `24x2` bar instead of `AppIcon name="nav-active-bar"`.
+  - `src/app/screens/contacts/ContactsDivider.tsx` now renders its divider as a plain `1px` block line instead of `AppIcon name="divider-375"`.
+  - `src/app/screens/more/cards/MoreCardBase.tsx` and `src/app/screens/more/cards/DocumentsCard.tsx` now render the corner badge as a local quarter-circle shape instead of `AppIcon name="badge-corner"`.
+- `src/app/components/icons/AppIcon.tsx` no longer contains `prime-diamond-16`, `nav-active-bar`, `divider-375`, or `badge-corner`, so the icon registry is now more honest: standard UI icons stay in `AppIcon`, while decorative shapes and brand marks live outside it.
+- A fresh repo-wide audit on 2026-06-01 shows the remaining explicit icon sizes are now illustrative/special only:
+  - Kids hero/feature art (`42`, `48`, `28`, dynamic `iconSize`)
+  - Payments/home/template hero illustrations (`30`, `40`, `54`, `62`, `64`, `86`)
+  - Prime diamond brand mark at `15`, now outside `AppIcon`
+- `npm run build` passed again on 2026-06-01 after the boundary cleanup; Vite still emits the known chunk-size warning.
+- `git diff --check` passed again with only the normal LF-to-CRLF warnings on Windows.
+- Browser re-verification of the cleaned surfaces was not run in this pass because browser automation was not available in the current tool surface; verification for this step relies on build success plus repo-wide icon-usage audits.
+- Final standard-UI cleanup on 2026-06-01 also normalized two remaining runtime surfaces that still behaved like regular UI icons rather than illustrations:
+  - `src/app/screens/home/InactiveState.tsx` now renders the inactive lock inside a `32x32` centered slot within the existing `80x80` circular badge, instead of hardcoding a `40px` glyph.
+  - `src/app/screens/kids/RoKidsApp.tsx` now renders `IconBubble` through a `32x32` centered inner slot for both `default` and `large` bubble sizes, instead of scaling the glyph itself to `21px` / `28px`.
+- A fresh repo-wide `AppIcon size={...}` audit after those fixes now leaves only deliberate illustrative or decorative exceptions:
+  - Template preview hero/illustration glyphs (`44`, `52`, `54`, `62`, `64`)
+  - Runtime promo/illustration glyphs in Products and Payments (`30`, `64`, `86`)
+  - Kids onboarding / activation / card-art illustrations (`28`, `42`, `48`)
+- `npm run build` passed again on 2026-06-01 after the `InactiveState` + `IconBubble` normalization; Vite still emits the known chunk-size warning.
+- `git diff --check -- src/app/screens/home/InactiveState.tsx src/app/screens/kids/RoKidsApp.tsx` passed with only the normal LF-to-CRLF warnings on Windows.
+- Follow-up icon audit on 2026-06-01 found a second class of sizing bug: several Prime/Contacts custom SVGs were already drawn inside a shrunken inner canvas, so they looked visibly smaller than sibling icons even though the outer runtime slot was already `32x32`.
+- `src/app/components/icons/AppIcon.tsx` now tightens the effective glyph canvas for the affected custom icons by replacing overly roomy `32x32` viewBoxes with content-cropped `20x20`-scale viewBoxes:
+  - `prime-direction`
+  - `contact-prime`
+  - `contact-location`
+  - `contact-time`
+  - `contact-phone`
+  - `contact-block`
+  - `contact-email`
+  - `contact-website`
+  - `contact-youtube`
+  - `contact-x`
+- This fix preserves the shared runtime contract (`20x20` glyph rendered inside the existing `32x32` slot) while removing the accidental extra whitespace that made these icons look doubly reduced compared with healthy references such as `prime-email`.
+- `npm run build` passed again on 2026-06-01 after the Prime/Contacts viewBox normalization; Vite still emits the known chunk-size warning.
+- `git diff --check -- src/app/components/icons/AppIcon.tsx` passed with only the normal LF-to-CRLF warnings on Windows.
+- Browser re-verification of the specific Prime/Contacts icon rows was not run in this pass because browser automation was not available in the current tool surface; verification for this step relies on direct SVG-definition audit plus build success.
+
+Latest Design System Inventory compaction pass:
+
+Latest Design System Inventory selector recovery fix:
+
+- The top-bar country/context selector bug on `http://localhost:3001` was traced to a runtime crash inside `src/app/screens/design-system/DesignSystemPage.tsx`, not to `DemoTopBar` navigation itself.
+- `MessagesMailboxTabsVariantSpecimen` was still rendering a removed `InlineControls` helper, which caused `ReferenceError: InlineControls is not defined` when entering `Design system inventory`; that made the destination screen appear blank, so the selector looked like it was no longer loading pages.
+- `src/app/screens/design-system/DesignSystemPage.tsx` now uses the existing shared `VariantSelector` for the `MessagesMailboxTabs` specimen instead of the missing helper.
+- `npm run build` passed again on 2026-06-01 after this fix; Vite still emits the known chunk-size warning.
+- In-app browser verification on `http://localhost:3001` reproduced the blank `Design system inventory` state before the patch, then confirmed the full flow after the fix: `Romania -> Design system inventory` loads the inventory correctly, and `Design System Inventory -> Czech Republic` exits back to the live country prelogin screen correctly.
+
+Latest DemoTopBar context-selector clarity fix:
+
+- `src/app/components/demo/DemoTopBar.tsx` now treats the country dropdown trigger as a hybrid context selector: when the current screen is `design-system`, the trigger label shows `Design System Inventory` instead of the last selected country.
+- Choosing a real country while the user is inside the Design System Inventory now exits that surface back to the scenario-appropriate prelogin entry (`prelogin-active` / `prelogin-inactive`), so the trigger immediately becomes country-relevant again instead of looking stuck on the inventory context.
+- Country rows in the dropdown only render as selected when the runtime is actually in a country context; the dedicated `Design system inventory` row owns the selected state while the inventory screen is open.
+- `src/app/components/demo/DemoNavigationSync.tsx` now resets to the scenario-appropriate prelogin entry instead of always forcing `prelogin-inactive`, fixing the race where leaving `Design System Inventory` through the country selector could appear to stop loading or reopen on the wrong entry state.
+- `src/app/components/demo/DemoTopBar.tsx` now uses `navigateToAndReset` for `Reset`, `Design system inventory`, and `Design System Inventory -> country` exits, so the control plane does not leave stale navigation history behind while switching context.
+- `npm run build` passed again on 2026-06-01 after the DemoTopBar + DemoNavigationSync fix; Vite still emits the known chunk-size warning.
+
+- `src/app/screens/design-system/DesignSystemPage.tsx` now groups the remaining multi-variant component families under selector-driven specimens instead of rendering their variants as separate long-form inventory blocks.
+- Added/finished selector-based inventory specimens for `PageHeader` light/dark and the generic `components/ui/*` family (`Button`, `Badge`, `Input`, `Checkbox`, `Switch`, `Toggle`, `ToggleGroup`, `Slider`, `Progress`, `Separator`, `Avatar`, `Skeleton`, `Alert`, `Tabs`), so those audits happen one variant at a time without touching the underlying components.
+- Structural audit on 2026-06-01 found no duplicate `source=` entries across `<Specimen ...>` blocks in `DesignSystemPage.tsx`, which is the current proof that no component family is still represented as multiple separate specimen cards in the Components inventory.
+- `npm run build` passed on 2026-06-01 after the DS compaction pass; Vite still emits the known chunk-size warning.
+- In-app browser verification on `http://localhost:3001` opened `Design System Inventory -> Components` and confirmed the generic UI section now renders as a single `Shadcn / generic UI primitives` card with `Family` and `Variant` dropdowns instead of listing all control states at once.
+
+Latest Home dark-mode account-card refinement:
+
+Latest Products country-specific commercial-banner refresh:
+
+- `src/app/config/productsMenuConfig.ts` now defines per-country Products offer copy and banner-tone selection instead of reusing one shared set of banking/shop-smart banners across all markets.
+- The same config now also varies banner count by market context, with richer multi-card rails (`3` banking offers in every country and `2` ShopSmart offers where the tab exists) so the Products carousel feels less repetitive during country switching.
+- `ProductsOffer` now carries optional `colorFamily` and `lightVersion` metadata, so offer content and visual treatment stay coupled in config rather than being hardcoded in the screen.
+- `src/app/screens/products/ProductsScreen.tsx` now passes each offer's configured banner tone into `ProductOfferCard`, allowing runtime Products rails to change color and artwork dynamically when the selected country changes.
+- `npm run build` passed on 2026-06-01 after the country-specific Products banner update; Vite still emits the known chunk-size warning.
+
+- `src/app/components/ProductCard.tsx` now uses `var(--uc-surface-raised)` instead of `var(--uc-surface)` for accordion product cards, so Home account/card items separate more cleanly from the dark app background.
+- `src/app/components/StackedProductShadow.tsx` now renders the stacked shelf fill with `var(--uc-surface-raised)` and the divider line with `var(--uc-border-muted)` instead of a hard white fill/border treatment, removing the bright white bars that were showing under collapsed cards in dark mode.
+- `src/hooks/useProducts.tsx` now removes the hard white `32x32` background rectangles from the `saving_account`, `term_deposit`, `loan`, `mortgage`, and `investment_account` product SVGs, so those Home accordion icons render transparently in dark mode instead of sitting on white tiles.
+- `src/app/config/productBannerVariants.ts` now maps each offer-banner color family to the matching screenshot asset from `screenshots/comm-banner-*.png`, reusing the same image for both `normal` and `light` variants inside that family.
+- `src/app/components/products/ProductOfferCard.tsx` now renders its right-side `100px` image column from the banner-tone mapping instead of a single shared fallback image, so the Products banner specimen/runtime can show family-specific artwork.
+- `npm run build` passed on 2026-06-01 after the dark-mode card fix; Vite still emits the known chunk-size warning.
+- In-app browser verification on `http://localhost:3001` switched the top-bar theme toggle to `Dark`, opened active PI Home, and confirmed the Home Accounts/Cards shelves no longer render the previous white stacked-shadow artifact behind the dark cards; the `Emergency Fund` icon now also renders without the old white tile backdrop in dark mode.
+
 Latest icon-source cleanup:
+
+Latest UI icon slot-standardization pass:
+
+- `src/app/components/demo/DemoTopBar.tsx` now renders the three dropdown chevrons plus the control-panel and reset affordances through explicit `32x32` slots, instead of the older `24px` wrappers / `size-full` glyph treatment, bringing those top-bar controls back onto the shared `32x32 slot / 20x20 glyph` contract.
+- `src/app/screens/prime/YourAdvisorTab.tsx` now renders the `Call now` and `Send email` action icons inside `32x32` centered slots rather than raw `24px` boxes, aligning the advisor quick actions with the same standard UI icon sizing used elsewhere in the app.
+- `src/app/components/icons/AppIcon.tsx` now defines `radio-selected` / `radio-unselected` as `20x20` glyphs, while `src/app/components/common/RadioButton.tsx` and the matching `TemplateRadioMark` in `src/app/components/templates/TemplateCodePreviews.tsx` now render those radio icons inside `32x32` slots instead of the older `22px` / `24px` treatments.
+- `src/app/screens/design-system/DesignSystemPage.tsx` now renders the generic `Alert` primitive specimen icon through a `32x32` slot instead of a hardcoded `16px` class override, `src/app/components/demo/DemoFeatureSidePanel.tsx` now uses a `32x32` close slot instead of a `20px` local override, and `src/app/components/common/BackButton.tsx` now relies on the default `20x20` glyph inside its existing `32x32` button slot.
+- The remaining toggle check marks in `src/app/components/templates/TemplateCodePreviews.tsx` and `src/app/screens/payments/DomesticPaymentFlowScreens.tsx` now use the default `20x20` glyph size instead of explicit `16px` overrides.
+- The inline PFM badge in `src/app/screens/payments/DomesticPaymentFlowScreens.tsx` now uses a full `32x32` `PfmCategoryIcon` slot with a slightly taller pill container, eliminating the last runtime `size={20}` PFM icon use.
+- A fresh repo-wide audit on 2026-06-01 shows the remaining explicit non-32/20 icon cases are now limited to deliberate non-standard assets: Prime brand diamonds at `15`, divider/badge decorative SVGs that intentionally fill their own shapes, the system `StatusBar` SVGs, and larger illustration/hero art icons (`28+`, `30+`, `40+`, `54+`, `62+`, `64+`, `86`).
+- `npm run build` passed again on 2026-06-01 after the DemoTopBar + Prime advisor slot cleanup; Vite still emits the known chunk-size warning.
+
+- `src/app/components/templates/TemplateCodePreviews.tsx` now normalizes standard interactive icons in shared template building blocks (`TemplateFlowField`, `TemplateReadOnlyRow`, `TemplateMiniBottomNavigation`, `TemplateFiveBottomNavigation`, `TemplateTopLevelHeader`, prelogin language selectors, close/help/header actions, chevrons, copy/share actions) so they render through explicit `32x32` slots with the `AppIcon` default `20x20` glyph contract instead of ad hoc `22px` / `24px` / `26px` overrides.
+- Follow-up refinements on the same pass now also normalize smaller stragglers in shared/runtime surfaces: `src/app/components/accounts/AccountSearchBar.tsx` no longer hardcodes `20px` sizes for search/filter/clear inside `32x32` slots, `src/app/components/products/ProductMenuCard.tsx` now renders its fallback arrow through a `32x32` slot instead of a raw `32px` glyph, and `TemplateCodePreviews.tsx` now uses the standard slot contract for transaction rows, shortcut tiles, money-out category rows, tutorial arrows, and transaction-detail hero icons where those controls are UI glyphs rather than illustrations.
+- The remaining explicit sizes in `TemplateCodePreviews.tsx` after the pass are now mostly deliberate non-standard or illustrative cases (`54px` payment-hero art, `52px` profile avatar icon, `62/64px` success glyphs, `44px` push-notification illustration, `30px` / `28px` promo accents, `21px` / `25px` transaction/decorative glyph tuning, and compact special icons such as `close-x-small`).
+- `src/app/screens/kids/RoKidsApp.tsx` now normalizes standard navigation/row/action icons (`FlowHeader` back button, `KidsBottomNav`, goal/parent/approval chevrons, `ParentQuickAction`, the eye toggle, action tiles, and toast close affordance) to the same slot/glyph contract while leaving intentional larger Kids illustrations (`42px` carousel art, `48px` QR hero, `28px` card artwork, `40px`/`54px` icon bubbles) untouched.
+- `npm run build` passed again on 2026-06-01 after the template + Kids slot-standardization pass; Vite still emits the known chunk-size warning.
+- `git diff --check -- src/app/components/templates/TemplateCodePreviews.tsx src/app/screens/kids/RoKidsApp.tsx docs/handoff/current-session.md` passed with only the normal LF-to-CRLF warnings on Windows.
 
 - `src/app/components/icons/AppIcon.tsx` now removes lucide wrappers that already had custom SVG equivalents or better custom registry targets: `share-2`, `copy`, `check`, `bell`, `file-text`, `qr-code`, `chevron-down-lucide`, `plus-circle`, `filter`, and lucide `close-x`.
 - `close-x` is now a custom SVG registry icon, and active/template usages were remapped to existing custom entries such as `copy-documents`, `filters`, `add-money`, `payment-create-qr`, `chevron-down`, `prime-check`, `account-option-statement`, and `account-option-push-notifications`.
@@ -163,6 +577,22 @@ Latest AccountSearchBar icon-size contract fix:
 - `src/app/screens/design-system/DesignSystemPage.tsx` and `src/app/registry/componentRegistry.ts` now record the AccountSearchBar contract as auto-height from the standard 32px icons instead of a separate 36px wrapper.
 - `npm run build` passed after the AccountSearchBar icon-size fix on 2026-05-28; Vite still emits the known chunk-size warning.
 - In-app browser verification on `http://localhost:5175` confirmed CSS heights for the search bar root, search icon slot, filter button, search SVG, filter SVG, and input all compute to `32px`; measured boxes are scaled by the phone preview transform.
+
+Latest AccountSearchBar specimen cleanup:
+
+- `src/app/components/accounts/AccountSearchBar.tsx` now renders the search, filter, and clear glyphs at `20x20` inside the existing `32x32` icon slots, so the component matches the intended `32px` hit area + `20px` SVG contract instead of drawing oversized icons.
+- `src/app/screens/design-system/DesignSystemPage.tsx` now renders the `AccountSearchBar` specimen without the previous artificial `px-[16px]` wrapper padding, removing the false white lateral margins around the bar in Design System Inventory.
+- `npm run build` passed on 2026-06-01 after the specimen/icon cleanup; Vite still emits the known chunk-size warning.
+- In-app browser verification on `http://localhost:3001` confirmed the Components inventory now shows `AccountSearchBar` with no extra lateral specimen padding and inspector overlays reporting `20x20` search/filter glyphs inside `32x32` icon slots.
+
+Latest Messages mailbox-tabs extraction:
+
+- `src/app/components/messages/MessagesMailboxTabs.tsx` is now the dedicated reusable component for the `Inbox / Outbox` switcher, preserving the `48px` tab rail, active leading dot, optional badge pill, muted inactive state, and `2px` active underline.
+- `src/app/screens/messages/MessagesScreen.tsx` no longer keeps mailbox tabs as local screen-only JSX; the runtime screen now consumes `MessagesMailboxTabs`.
+- `src/app/components/templates/TemplateCodePreviews.tsx` now reuses the same `MessagesMailboxTabs` component for Messages-family template previews, so runtime and template inventory no longer drift.
+- `src/app/screens/design-system/DesignSystemPage.tsx`, `src/app/registry/componentRegistry.ts`, and `src/app/state/demoTypes.ts` now catalog `MessagesMailboxTabs` as a first-class component in the Design System inventory / AI reuse map.
+- `npm run build` passed on 2026-06-01 after the mailbox-tab extraction; Vite still emits the known chunk-size warning.
+- In-app browser verification on `http://localhost:3001` confirmed the active app can still open `Messages` and switch from `Inbox` to `Outbox` after the extraction, rendering the correct Outbox rows.
 
 Latest Account Detail carousel shadow refinement:
 
@@ -755,9 +1185,10 @@ Continue with product evolution work:
 - Top-level page headers use fixed header action rails; Home intentionally orders `Hide/Show amounts`, `Profile`, `Messages`, while other top-level pages keep page-specific action sets in the same fixed rail.
 - Messages is a mock-driven runtime screen reconstructed from template 52; all PI countries are wired through `messagesConfig.ts`, but the current baseline copy/data is intentionally shared until market-specific messages are supplied.
 - New payment bottom-sheet action rows and Discover banner live as reusable components under `src/app/components/payments`; country-specific action text remains in `paymentsMenuConfig.ts`.
-- Screenshot templates live in `src/app/registry/templateRegistry.ts`; the Design System page consumes that registry so screenshot coverage can be audited separately from the long component inventory JSX.
-- Reconstructed templates live in `src/app/components/templates/TemplateCodePreviews.tsx`; `templateRegistry.ts` points implemented screenshot templates and code-only templates at a `codePreviewId`, while original screenshots remain source/comparison evidence where they exist.
+- Screenshot and code-only templates live in `src/app/registry/templateRegistry.ts`; the Design System page consumes that registry so screenshot coverage, code preview coverage, and AI reuse contracts can be audited separately from the long component inventory JSX.
+- Reconstructed templates live in `src/app/components/templates/TemplateCodePreviews.tsx`; `templateRegistry.ts` points implemented screenshot templates and code-only templates at a `codePreviewId`, typed `ComponentId` references, related `ScreenId` / `FlowId` links, screen family, runtime screen links where available, and an AI assembly contract, while original screenshots remain source/comparison evidence where they exist.
 - Design System Template cards should stay compact and code-backed templates should open in `code` mode by default; the PNG source toggle exists for comparison, not as the implementation surface.
+- `npm run audit:templates` is now the semantic guard for template/component/screen/flow drift; browser or visual regression is still needed for rendered preview fidelity.
 - Products offer carousel visuals live in `ProductOfferCard`; offer identity and country/product menu membership remain in `productsMenuConfig.ts`.
 - Reusable UI icons live in `src/app/components/icons/AppIcon.tsx`; product code should consume icons through `AppIcon` so a registry SVG change propagates to every usage.
 - Remaining raw SVGs outside `AppIcon` are treated as brand/logo, device chrome, decorative effect assets, PFM category glyph registry, or Product offer-card decorative geometry unless explicitly promoted into the icon registry later.
@@ -798,14 +1229,140 @@ Continue with product evolution work:
 - Amount visibility is not persisted to local storage; this satisfies navigation persistence but not browser reload persistence.
 - Transaction search uses the current static mock transaction profile only; term deposits, loans, and mortgages still reuse the existing mock transaction profiles until product-specific transaction data is defined.
 - Messages uses static mock Inbox/Outbox rows and does not create a backend notification/message domain, unread-count state, message detail screen, or country-specific message copy yet.
-- `templateRegistry.ts` is intentionally explicit, so adding or renaming files in `screenshots/` requires updating the registry entry in the same session.
-- Reconstructed template coverage is complete for the screenshot set and expanded beyond it: all 30 screenshot templates have real-code previews, and 20 additional code-only templates now cover active runtime patterns; source PNG/JPG files remain available only as comparison evidence.
+- `templateRegistry.ts` is intentionally explicit, so adding or renaming files in `screenshots/`, adding a code-only template, or changing a template-to-app relationship requires updating the registry entry and keeping `npm run audit:templates` green in the same session.
+- Reconstructed template coverage is complete for the screenshot set and expanded beyond it: all 30 screenshot templates have real-code previews, and 20 additional code-only templates now cover active runtime patterns; every template now has typed component/screen/flow reuse metadata, while source PNG/JPG files remain available only as comparison evidence.
+- The new template contract is a source-level AI map, not an automatic runtime screen generator; future work can use it to compose flows, but prompts are not compiled into new mounted screens yet.
 - `AppIcon.tsx` is intentionally explicit, so adding a reusable UI icon requires a registry entry with usage metadata in the same session.
+- Final custom-icon audit for standard UI glyphs is clean: all non-exempt `source: "custom"` icons in `AppIcon.tsx` now declare `20x20` metadata, including the last straggler `new-payment-domestic`.
+- A final follow-up pass also tightened a few remaining standard affordance viewBoxes whose glyphs were still reading slightly undersized despite correct `20x20` metadata:
+  - `back-heavy`
+  - `chevron-link`
+  - `contact-chevron`
+  - `share-filled`
+  - `chevron-forward-heavy`
+- These now use cropped content viewBoxes rather than roomy `24x24` / `32x32` canvases, so the rendered glyph fills the shared `20x20` inner space more consistently next to already-correct siblings.
+- `npm run build` passed again on 2026-06-01 after this viewBox-tightening pass; Vite still emits the known chunk-size warning.
+- A targeted icon audit confirmed the affected families now all remain on `20x20` metadata with the tightened viewBoxes: `back-heavy`, `chevron-link`, `share-filled`, `chevron-forward-heavy`, `contact-chevron`, `contact-prime`, `contact-location`, `contact-youtube`, `prime-direction`, `prime-email`, and `prime-phone`.
 - `AppIcon.tsx` still has 27 lucide-alone entries because no approved custom SVG equivalents are mapped yet: `wallet-cards`, `shopping-bag`, `arrow-right`, `camera`, `grid-2x2`, `landmark`, `repeat`, `lock`, `alert-triangle`, `credit-card`, `send`, `bike`, `book-open`, `calendar-days`, `circle-dollar-sign`, `clipboard-check`, `eye`, `eye-off`, `gift`, `palette`, `piggy-bank`, `receipt-text`, `shield-check`, `sliders-horizontal`, `trophy`, `user-round`, and `users`.
 - SVG audit still allows brand logos, device chrome, decorative textures/effects, the PFM category glyph registry, Product offer-card decorative geometry, and vendored `ui/` primitives outside `AppIcon`; these boundaries are documented in the Design System Inventory Icons tab.
 - `colorRegistry.ts` and `theme.css` are intentionally explicit, so adding a reusable color or app semantic color requires updating the registry/theme in the same session.
 - Color-token compliance is currently enforced by manual `rg` audits and browser smoke checks; no automated test fails the build yet if a future contributor introduces raw app colors.
 - The Browser virtual clipboard cannot read back copied values in this environment, so copy-hex verification used visible `Copied` UI feedback rather than clipboard-read confirmation.
+
+## 2026-06-02 Template System Header Update
+
+- Applied the shared system header components to Design System template previews by mounting `StatusBar` and `DynamicIsland` centrally in `TemplatePhoneSurface`.
+- Removed the local `StaticStatusBar` drawing from `TemplateCodePreviews.tsx`; existing top spacing is preserved through an invisible template spacer so reconstructed template layouts do not jump vertically.
+- Dark-overlay templates now request the dark system-header variant, while normal templates inherit the light variant from the shared surface.
+- `LogoutConfirmationTemplate` disables the outer system-header overlay because it embeds `MoreMenuTemplate`, which already renders through its own `TemplatePhoneSurface`.
+- Verification:
+  - `rg -n "StaticStatusBar|TemplatePhoneSurface statusBarVariant|TemplatePhoneSurface showSystemHeader|function TemplatePhoneSurface|StatusBar|DynamicIsland" "src/app/components/templates/TemplateCodePreviews.tsx"`
+  - `git diff --check -- "src/app/components/templates/TemplateCodePreviews.tsx"`
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+
+## 2026-06-02 Template Header Spacing Follow-up
+
+- `TemplatePhoneSurface` now owns the reserved system-header space for normal code-backed template previews, so page content starts below the shared `StatusBar` / `DynamicIsland` instead of relying on each template to add a local spacer.
+- `TemplateSystemHeaderSpacer` is now a compatibility no-op; existing templates can keep calling it without accumulating duplicated top gaps.
+- Full-bleed overlay templates such as prelogin, language selector sheet, smart-banking panel, and account-selection panel opt out of the reserved space so their background still extends behind the system bar.
+- Template page headers that render back/help/title chrome now route through shared `PageHeader`.
+- `PageHeader` gained a non-breaking `showBack` option so help-only template states can use the same component without showing an unwanted back action.
+- Verification:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - `npm run audit:templates` passed: `template-contract ok: templates=50 codePreviews=50 components=48 screens=23 flows=13`.
+  - `git diff --check -- src/app/components/templates/TemplateCodePreviews.tsx src/app/components/PageHeader.tsx` passed with only normal Windows LF/CRLF warnings.
+  - Browser reload on `http://localhost:3001/#templates` reached the Design System hash but the current in-app browser state did not consistently stay on the DS Templates surface for a reliable visual measurement; treat this as a follow-up smoke-check target after the selector/hash state is stabilized.
+
+## 2026-06-02 Products Menu Card Artwork Variant
+
+- Extended `ProductMenuCard` with a non-breaking `variant` prop: the default `standard` keeps the existing 164x120 country runtime cards, while the new `compact` variant renders a 164x72 card with a 16px title.
+- Added optional screenshot artwork support and per-card image placement for Account, Cards, Mortgages and Loans, Insurance, Investments and Savings, Market Hedging, Shopsmart, and Partner Offers.
+- Added Design System specimen controls for selecting the product card family and size variant; this is intentionally component-only and does not modify country product baselines.
+- Added product hedging color token/registry entry for `#717863`, and registered the three new component-demo product card families: Market Hedging, Shopsmart, and Partner Offers.
+- Verification:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - Browser smoke check on `http://localhost:3001/#products` confirmed the Products menu card specimen, the Standard/Compact selector, all 8 card options, and the 3 new cards.
+  - `rg -n '#717863|717863|market-hedging|partner-offers|shopsmart|uc-product-hedging' src/app src/styles`
+  - `git diff --check -- src/app/components/products/ProductMenuCard.tsx src/app/config/productsMenuConfig.ts src/app/screens/design-system/DesignSystemPage.tsx src/app/registry/componentRegistry.ts src/app/registry/colorRegistry.ts src/styles/theme.css`
+
+## 2026-06-02 Compact Form Component Specimens
+
+- Compactified the Design System Inventory Forms section by grouping Dropdown, Text field, and Amount field specimens into a responsive grid.
+- The field previews now use fluid `max-width: 327px` wrappers, so they can fit 2 cards per row at the current desktop width and 3 per row on wider inventory layouts.
+- Runtime field components are unchanged; this is only a Design System Inventory presentation adjustment.
+- Verification:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - Browser smoke check on `http://localhost:3001/#forms` confirmed Dropdown and Text field share the first row at the current viewport, with Amount field wrapping cleanly below.
+  - `git diff --check -- src/app/screens/design-system/DesignSystemPage.tsx`
+
+## 2026-06-02 Runtime Products Menu Card Artwork Sync
+
+- Synced the runtime Products `OUR PRODUCTS` cards to the latest standard `ProductMenuCard` artwork support by passing the supplied screenshots into the existing shared `BANKING_PRODUCTS` config.
+- Kept the runtime card list unchanged: Account, Cards, Mortgages and loans, Insurance, and Investments and savings only. The new Design System-only Market Hedging, Shopsmart, and Partner Offers demo cards were not added to country prototypes.
+- Explicitly rendered Products runtime cards with `variant="standard"` so the new compact component variant stays Design System-only until separately requested.
+- Verification:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - Browser smoke check on `http://localhost:3001/` -> Products confirmed `OUR PRODUCTS`, 5 existing product cards, 5 images inside those cards, and no Market Hedging / Partner Offers extra runtime cards.
+  - `git diff --check -- src/app/config/productsMenuConfig.ts src/app/screens/products/ProductsScreen.tsx`
+
+## 2026-06-02 Products Country Visibility Rules
+
+- Limited the Products `OTHER SOLUTIONS FOR YOU` divider and `Additional services` card to Czech Republic and Slovakia only by keeping base product configs empty and wrapping only CZ/SK with `withAdditionalServices`.
+- `ProductsScreen` now renders the Other Solutions section only when `otherSolutions.length > 0`, so RO/HU/RS/BA/SI no longer show an empty or non-applicable divider.
+- Confirmed Serbia, Bosnia, and Slovenia stay direct Products pages without Banking/ShopSmart tabs via their existing `createProductsMenuConfig(false)` configuration.
+- Verification:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - PowerShell config matrix check confirmed RO/HU tabs true without additional services, CZ/SK tabs true with additional services, RS/BA/SI no tabs, and base config no other solutions.
+  - `git diff --check -- src/app/config/productsMenuConfig.ts src/app/screens/products/ProductsScreen.tsx`
+
+## 2026-06-02 More Card Localization Pass
+
+- Added a typed `more` translation namespace to `src/translations/types.ts`, covering the More title and all More card labels.
+- Added More card translations to all 14 country/language files under `src/translations`.
+- Czech Republic and Slovakia English labels now use the requested wording:
+  - `Consent to third parties`
+  - `Digital activity record`
+  - `My applications`
+  - `Tutorials`
+- Czech and Slovak local-language labels were added for the same cards, so switching between English and the local app language changes the More screen labels instead of reusing hardcoded English.
+- `MoreHeader` and every More card now consume translation-backed labels through `MoreScreen` / `LanguageContext`; card components keep English defaults only for isolated Design System/specimen rendering.
+- Design System More-card selectors and More template preview metadata were updated to the new English labels.
+- Verification:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - Translation audit passed: `translation-more audit ok: files=14 keys=9`.
+  - `rg` audit confirmed the old requested More labels no longer remain in runtime/app code.
+  - `git diff --check -- src/translations/types.ts src/translations src/app/screens/more src/app/screens/design-system/DesignSystemPage.tsx src/app/components/templates/TemplateCodePreviews.tsx` passed with only normal Windows LF/CRLF warnings.
+- Limitation:
+  - This is the first coherent localization slice for More. Other active screens still contain hardcoded English and need a separate full localization migration, rather than being rewritten ad hoc in this pass.
+
+## 2026-06-02 Slovenia Products Direct Cards Rule
+
+- Updated Slovenia Products runtime to a cards-only surface:
+  - no `OFFERS FOR YOU` heading
+  - no offer carousel
+  - no `OUR PRODUCTS` heading
+  - no Insurance card
+  - four remaining standard cards: Account, Cards, Mortgages and loans, Investments and savings
+- `ProductsScreen` now skips the offer section when `offers.length === 0` and skips the products heading when `productsTitle` is empty, so the Slovenia behavior stays config-driven instead of being hardcoded into the screen.
+- Verification:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - Slovenia products config audit passed: `offers=0 products=4 insurance=hidden productsTitle=hidden`.
+  - `git diff --check -- src/app/config/productsMenuConfig.ts src/app/screens/products/ProductsScreen.tsx` passed with only normal Windows LF/CRLF warnings.
+
+## 2026-06-02 Closeout / Commit Prep
+
+- Prepared a full-session commit after the latest global cursor affordance fix and the broader accumulated Design System / runtime prototype work.
+- Current working tree includes runtime prototype, template, Design System inventory, translation, color/icon, Products, Payments, More, Settings/Documents, and handoff-documentation updates from this session.
+- Banana Loop result:
+  - build chunk-size warning remains triaged in `known-bananas.md`
+  - missing `typecheck`, `lint`, and `test` scripts remain triaged in `known-bananas.md` and `next-tasks.md`
+  - no new untriaged blocker was found during closeout
+- Verification run on 2026-06-02:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `npm run audit:templates` passed: `template-contract ok: templates=50 codePreviews=50 components=48 screens=23 flows=13`
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings
+- Commit scope:
+  - all currently modified and untracked project files are intended to be included in the closeout commit per user request
 
 ## Constitutional Check
 
@@ -816,4 +1373,4 @@ constitutional check:
 - bananas triaged: yes
 - safe to resume: yes
 
-safe to resume: yes, 50 code-backed template previews (30 screenshot-backed + 20 code-only active-pattern templates), centralized icon cleanup with redundant lucide wrappers removed, RO Kids icon calls routed through `AppIcon`, remaining lucide-alone keys documented, Messages runtime screen from template 52, Documents and Settings runtime/template wiring from More, compact Design System Templates grid, Products bottom-navigation overlap fix, Design System Colors inventory, Light/Dark appearance switching, app-wide color tokenization, color/icon audits, build verification, browser smoke verification, and prior Payments/Products/Analytics/account-detail/demo-foundation work are complete; remaining work is follow-up screenshot-level fine tuning and automated coverage.
+safe to resume: yes, 50 code-backed template previews (30 screenshot-backed + 20 code-only active-pattern templates), typed template-to-app contracts with component/screen/flow metadata, `npm run audit:templates`, centralized icon cleanup with redundant lucide wrappers removed, RO Kids icon calls routed through `AppIcon`, remaining lucide-alone keys documented, Messages runtime screen from template 52, Documents and Settings runtime/template wiring from More, compact Design System Templates grid, Products bottom-navigation overlap fix, Design System Colors inventory, Light/Dark appearance switching, app-wide color tokenization, color/icon audits, build verification, browser smoke verification, and prior Payments/Products/Analytics/account-detail/demo-foundation work are complete; remaining work is follow-up screenshot-level fine tuning and automated visual coverage.

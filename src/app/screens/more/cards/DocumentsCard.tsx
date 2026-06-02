@@ -5,14 +5,14 @@
  */
 
 import imgDocuments from "figma:asset/befcf83245a907a033553e7ac7902995e124d730.png";
-import { AppIcon } from "@/app/components/icons";
 
 interface DocumentsCardProps {
   onClick: () => void;
   badgeCount?: number;
+  title?: string;
 }
 
-export function DocumentsCard({ onClick, badgeCount }: DocumentsCardProps) {
+export function DocumentsCard({ onClick, badgeCount, title = "Documents" }: DocumentsCardProps) {
   return (
     <button
       onClick={onClick}
@@ -35,17 +35,14 @@ export function DocumentsCard({ onClick, badgeCount }: DocumentsCardProps) {
       {/* Title - top left padding */}
       <div className="absolute inset-0 p-[16px] flex items-start">
         <p className="font-['UniCredit:Bold',sans-serif] text-[18px] text-[var(--uc-text)] leading-[normal] text-left whitespace-pre-wrap z-10 relative">
-          Documents
+          {title}
         </p>
       </div>
 
       {/* Badge (if provided) - top right */}
       {badgeCount !== undefined && badgeCount > 0 && (
         <div className="absolute right-0 top-0 size-[32px] z-20">
-          {/* Red quarter circle badge in corner */}
-          <div className="absolute inset-[0_-0.37%_5.88%_6.25%]">
-            <AppIcon name="badge-corner" className="block size-full" color="var(--uc-brand)" />
-          </div>
+          <div className="absolute right-0 top-0 h-[30px] w-[30px] rounded-bl-[30px] bg-[var(--uc-brand)]" />
           {/* Badge number - centered in top-right quarter */}
           <div className="absolute right-[7px] top-[4px]">
             <span 

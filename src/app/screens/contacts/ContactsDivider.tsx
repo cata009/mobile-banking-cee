@@ -1,5 +1,3 @@
-import { AppIcon } from "@/app/components/icons";
-
 /**
  * ContactsDivider Component
  * Section divider with title and bottom line
@@ -18,9 +16,7 @@ export function ContactsDivider({ text }: ContactsDividerProps) {
       </p>
       
       {/* Bottom Line */}
-      <div className="absolute left-0 top-[31px] w-full h-px">
-        <AppIcon name="divider-375" className="block size-full" color="var(--uc-text-subtle)" preserveAspectRatio="none" />
-      </div>
+      <div className="absolute left-0 top-[31px] h-px w-full bg-[var(--uc-text-subtle)] opacity-60" />
     </div>
   );
 }

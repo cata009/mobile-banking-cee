@@ -21,7 +21,9 @@ export default function InactiveState() {
       <div className="relative z-10 text-center max-w-[300px]">
         {/* Icon */}
         <div className="w-[80px] h-[80px] bg-[var(--uc-border)] rounded-full flex items-center justify-center mx-auto mb-[24px]">
-          <AppIcon name="lock" size={40} className="text-[var(--uc-text-muted)]" />
+          <span className="grid size-[32px] place-items-center text-[var(--uc-text-muted)]">
+            <AppIcon name="lock" color="currentColor" />
+          </span>
         </div>
 
         {/* Title */}

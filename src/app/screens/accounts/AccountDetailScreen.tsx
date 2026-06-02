@@ -7,6 +7,7 @@ import AccountTransactionRow from "@/app/components/accounts/AccountTransactionR
 import AccountTransactionMonthDivider from "@/app/components/accounts/AccountTransactionMonthDivider";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import { AppIcon } from "@/app/components/icons";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
 import { getCountryConfig, formatMoneyNumber } from "@/app/registry/countryConfig";
 import { maskAmountParts, maskFormattedAmount } from "@/app/utils/amountPrivacy";
@@ -76,7 +77,7 @@ function CollapsingAccountHeader({
           className="flex h-[40px] w-[40px] items-center justify-center"
           aria-label="Back"
         >
-          <AppIcon name="back-heavy" className="h-[24px] w-[24px]" color="var(--uc-text)" />
+          <AppIcon name="back-heavy" color="var(--uc-text)" />
         </button>
         <h1
           className="pointer-events-none truncate text-center font-['UniCredit',sans-serif] text-[16px] font-bold leading-normal text-[var(--uc-text)]"
@@ -101,6 +102,7 @@ export default function AccountDetailScreen({
   onTransactionClick,
 }: AccountDetailScreenProps) {
   const { country, amountsHidden } = useDemo();
+  const { t } = useLanguage();
   const { categories } = useProducts();
   const accountProducts = useMemo(() => {
     const products = categories.flatMap((category) => category.products);
@@ -414,7 +416,7 @@ export default function AccountDetailScreen({
   if (!activeProduct) {
     return (
       <div className="h-full w-full bg-[var(--uc-surface)]">
-        <CollapsingAccountHeader title="Accounts" progress={1} onBack={onBack} />
+        <CollapsingAccountHeader title={t("runtime.accounts.title", "Accounts")} progress={1} onBack={onBack} />
       </div>
     );
   }
@@ -425,7 +427,7 @@ export default function AccountDetailScreen({
       className="h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] pb-[32px] scrollbar-hide"
       onScroll={handlePageScroll}
     >
-      <CollapsingAccountHeader title="Accounts" progress={headerProgress} onBack={onBack} />
+      <CollapsingAccountHeader title={t("runtime.accounts.title", "Accounts")} progress={headerProgress} onBack={onBack} />
 
       <div className="bg-[var(--uc-app-bg)]">
         <div
@@ -433,7 +435,7 @@ export default function AccountDetailScreen({
           style={{ opacity: largeTitleOpacity }}
         >
           <h1 className="font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">
-            Accounts
+            {t("runtime.accounts.title", "Accounts")}
           </h1>
         </div>
 
@@ -569,7 +571,7 @@ export default function AccountDetailScreen({
             ))
           ) : (
             <div className="px-[16px] py-[32px] text-center font-['UniCredit',sans-serif] text-[16px] font-bold leading-normal text-[var(--uc-text-muted)]">
-              {hasTransactionSearch ? "No transactions found" : null}
+              {hasTransactionSearch ? t("runtime.accounts.noTransactionsFound", "No transactions found") : null}
             </div>
           )}
         </div>

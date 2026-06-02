@@ -1,6 +1,6 @@
 # State Of The World
 
-Last updated: 2026-06-01
+Last updated: 2026-06-02
 
 ## What This Project Is
 
@@ -19,14 +19,19 @@ Current runtime supports:
 - design-system switching between `current` and `next`, with honest planned-state placeholder for next DS;
 - feature side panel for release and unplanned flags;
 - localized translation infrastructure by country;
+- More screen title and card labels are now translation-backed across every country/language pair; CZ/SK use the updated English labels `Consent to third parties`, `Digital activity record`, `My applications`, and `Tutorials`, plus local-language equivalents.
 - mobile frame demo shell;
 - PI-like mobile banking screens, including Home, Analytics / My Spendings, Messages, Documents, Account Detail, Account Details, Payments, Products, Prime, More, Settings, and Contacts.
 - RO Kids mock screens and flows, including Kid Home, onboarding, parent activation, request money, parent approval, send money approval, My Card, card customization, saving goals, allowance, chores, Learn, What Parent Can See, Parent Dashboard, Parent Approvals, Parent Controls, and chore/allowance management.
 - Payments `OTHER` shortcuts now render as a horizontally scrollable shortcut rail, with each shortcut label constrained to a maximum of 2 text rows.
 - Products offer banners now render through a chevron-based reusable card layout with a fixed right image column and clamped title/subtitle copy.
 - The Products offer-banner component now supports dropdown-selectable color families with `normal` and `light` tone variants in the Design System inventory.
-- Design System Inventory with `Components`, `Templates`, `Icons`, and `Colors` tabs; `Templates` currently covers all 30 files in `screenshots/` as selectable screenshot-backed templates, adds 20 code-only templates derived from active runtime patterns, and renders all 50 as real JSX code previews with PNG/JPG source comparison only where a source asset exists. `Icons` maps reusable app icons, has removed lucide wrappers that already had custom SVG equivalents, centralizes remaining lucide-alone glyphs behind `AppIcon`, and records raw-SVG audit boundaries. `Colors` maps `screenshots/Colors.svg` into palette swatches, copyable hex values, Light/Dark variants, and app color audit entries.
-- The Design System color inventory now also catalogs the active PFM semantic category colors used by Spending and Account Detail, not just the original screenshot-extracted core palette.
+- Products banking and ShopSmart commercial banners are now country-specific in both copy and color tone, and the offer rails can also vary in banner count by market, so switching country changes the Products storytelling instead of reusing one shared offer set everywhere.
+- Products `OUR PRODUCTS` runtime cards now reuse the standard `ProductMenuCard` artwork support with the supplied product images, while preserving the existing country product card list.
+- Products `OTHER SOLUTIONS FOR YOU` / `Additional services` is now visible only for Czech Republic and Slovakia; Serbia, Bosnia, and Slovenia remain direct Products pages without Banking/ShopSmart tabs, and Slovenia is further simplified to a four-card-only Products page with no offer rail/headings and no Insurance card.
+- Design System Inventory with `Components`, `Templates`, `Icons`, and `Colors` tabs; `Templates` currently covers all 30 files in `screenshots/` as selectable screenshot-backed templates, adds 20 code-only templates derived from active runtime patterns, and renders all 50 as real JSX code previews with PNG/JPG source comparison only where a source asset exists. Every template now has a typed AI reuse contract with `ComponentId`, `ScreenId`, `FlowId`, screen family, runtime screen links where available, standalone page/state intent, reuse rules, and do-not-invent rules, guarded by `npm run audit:templates`. `Icons` maps reusable app icons, has removed lucide wrappers that already had custom SVG equivalents, centralizes remaining lucide-alone glyphs behind `AppIcon`, and records raw-SVG audit boundaries. `Colors` maps `screenshots/Colors.svg` into palette swatches, copyable hex values, Light/Dark variants, and app color audit entries.
+- The Design System Inventory `Components` tab now groups multi-variant component families under selector-driven specimens instead of listing each variant as a separate long block, keeping the audit page shorter without changing the components themselves.
+- The Design System color inventory now also catalogs the active PFM semantic category colors used by Spending and Account Detail, not just the original screenshot-extracted core palette; PFM dark-mode partners now preserve each light category hue/chroma with an OKLCH perceptual lightness lift, so Spending category rows and icons remain colorful and readable in dark mode.
 - in-app hide/show amount privacy for account/card/product balances, with transactions intentionally left visible.
 - Account Detail transaction search for the current account/product mock transaction profile, including clear reset and activation scroll behavior; current accounts now use country-specific merchant/counterparty transaction profiles across all 23 PFM categories, while saving accounts and term deposits intentionally show only own-account transfer in/out activity.
 - Account Details info fields are now rendered through a reusable `AccountDetailsInfoField` component with a default title/subtitle variant and a trailing-icon variant for rows such as account number/copy.
@@ -45,7 +50,7 @@ It is not yet:
 - a backend-integrated banking application;
 - a real payment-execution, ledger, or transaction-posting application;
 - a persistent audit/release management system;
-- a fully enriched AI training catalog with automated semantic validation, though the current `screenshots/` folder is covered by a structured template registry, all 30 screenshot templates have reusable code previews, and 20 additional active-pattern templates are now code-only entries.
+- an automatic AI screen generator/compiler; the AI catalog now has semantic validation for template/component/screen/flow references, but it does not yet generate or mount new runtime screens from prompts by itself.
 
 ## Current Architectural Direction
 
@@ -65,5 +70,6 @@ The architecture must support:
 - structured AI catalog export;
 - AI-assisted flow construction from known screens and components;
 - progressive conversion of screenshot templates into reusable code-backed screen primitives;
+- typed template contracts that make every reusable template a standalone app page/state pattern with explicit component, screen, flow, data-source, and do-not-invent guidance;
 - centralized icon and color registries that let AI reuse known DS assets instead of inventing local variants; active product screens should not import `lucide-react` directly outside the `AppIcon` boundary;
 - eventual integration into a larger project platform.

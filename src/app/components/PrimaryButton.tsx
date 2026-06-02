@@ -3,6 +3,8 @@ interface PrimaryButtonProps {
   onClick?: () => void;
   disabled?: boolean;
   className?: string;
+  variant?: "action" | "surface";
+  labelSize?: "16" | "18";
 }
 
 export default function PrimaryButton({
@@ -10,19 +12,25 @@ export default function PrimaryButton({
   onClick,
   disabled = false,
   className = '',
+  variant = "action",
+  labelSize = "16",
 }: PrimaryButtonProps) {
+  const isAction = variant === "action";
+
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
       className={`
         flex w-[327px] h-[48px] px-0 py-3
         justify-center items-center gap-4
         rounded
-        bg-[var(--uc-action)]
-        text-[var(--uc-static-white)] font-['UniCredit',sans-serif] text-base font-bold
+        ${isAction ? "bg-[var(--uc-action)] text-[var(--uc-static-white)]" : "bg-[var(--uc-surface)] text-[var(--uc-text)]"}
+        font-['UniCredit',sans-serif] font-bold leading-[normal]
         transition-all duration-200
-        ${disabled ? 'opacity-30 cursor-not-allowed' : 'opacity-100 cursor-pointer hover:bg-[var(--uc-action-hover)] active:scale-[0.98]'}
+        ${labelSize === "18" ? "text-[18px]" : "text-[16px]"}
+        ${disabled ? 'opacity-30 cursor-not-allowed' : `opacity-100 cursor-pointer ${isAction ? "hover:bg-[var(--uc-action-hover)]" : "hover:opacity-90"} active:scale-[0.98]`}
         ${className}
       `}
     >

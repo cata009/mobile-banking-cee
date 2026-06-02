@@ -7,9 +7,10 @@ import imgThirdPartyConsent from "figma:asset/e017033a83e177f2a0d9a121d8161971ab
 
 interface ThirdPartyConsentCardProps {
   onClick: () => void;
+  title?: string;
 }
 
-export function ThirdPartyConsentCard({ onClick }: ThirdPartyConsentCardProps) {
+export function ThirdPartyConsentCard({ onClick, title = "Consent to third parties" }: ThirdPartyConsentCardProps) {
   return (
     <button
       onClick={onClick}
@@ -36,7 +37,7 @@ export function ThirdPartyConsentCard({ onClick }: ThirdPartyConsentCardProps) {
       {/* Title - top left padding */}
       <div className="absolute inset-0 p-[16px] flex items-start">
         <p className="font-['UniCredit:Bold',sans-serif] text-[18px] text-[var(--uc-text)] leading-[normal] text-left whitespace-pre-wrap z-10 relative">
-          3rd Party consent
+          {title}
         </p>
       </div>
     </button>

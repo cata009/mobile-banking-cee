@@ -6,6 +6,7 @@
 import { useLanguage } from '@/app/contexts/LanguageContext';
 import { PrimeLabelValue } from '@/app/components/prime/PrimeLabelValue';
 import { AppIcon } from "@/app/components/icons";
+import { PrimeDiamondMark } from "@/app/components/prime/PrimeDiamondMark";
 import imgAdvisorImage from "figma:asset/e693dd6eed452da6c4cda0e69dbdd3f45039c9f2.png";
 
 export function YourAdvisorTab() {
@@ -99,7 +100,7 @@ export function YourAdvisorTab() {
             <div className="flex flex-col items-center justify-center min-h-[inherit] size-full">
               <div className="content-stretch flex flex-col gap-[16px] items-center justify-center min-h-[inherit] px-[4px] py-[24px] relative w-full">
                 {/* Phone Icon - Native SVG from Figma */}
-                <div className="relative shrink-0 size-[24px]">
+                <div className="grid h-[32px] w-[32px] shrink-0 place-items-center">
                   <AppIcon name="prime-phone" color="var(--uc-static-white)" />
                 </div>
 
@@ -119,7 +120,7 @@ export function YourAdvisorTab() {
             <div className="flex flex-col items-center justify-center min-h-[inherit] size-full">
               <div className="content-stretch flex flex-col gap-[16px] items-center justify-center min-h-[inherit] px-[4px] py-[24px] relative w-full">
                 {/* Email Icon - Native SVG from Figma */}
-                <div className="relative shrink-0 size-[24px]">
+                <div className="grid h-[32px] w-[32px] shrink-0 place-items-center">
                   <AppIcon name="prime-email" color="var(--uc-static-white)" />
                 </div>
 
@@ -143,9 +144,8 @@ export function YourAdvisorTab() {
         <div className="content-stretch flex flex-col gap-[2.603px] items-start relative shrink-0">
           <div className="content-stretch flex gap-[2.603px] items-center relative shrink-0">
             <p className="font-['UniCredit:Medium',sans-serif] leading-[normal] not-italic relative shrink-0 text-[18.223px] text-[var(--uc-static-white)]">Prime</p>
-            {/* Prime Star Icon - Native SVG from Figma */}
             <div className="relative shrink-0 size-[15px] mt-[2.603px]">
-              <AppIcon name="prime-diamond-16" color="var(--uc-static-white)" size={15} />
+              <PrimeDiamondMark color="var(--uc-static-white)" size={15} />
             </div>
             <p className="font-['UniCredit:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[13.016px] text-[var(--uc-static-white)]">by</p>
           </div>
