@@ -14,8 +14,17 @@ import {
   PRODUCTS,
 } from "@/app/registry/projectModel";
 import { FEATURE_META } from "@/app/registry/demoConfig";
+import { BANKING_SCENARIOS } from "@/app/platform/banking/bankingScenarioRegistry";
+import { resolveEffectiveAppContext } from "@/app/platform/effectiveAppContext";
 import { getReleaseBundle } from "@/app/registry/releaseRegistry";
-import type { CountryId, DesignSystemId, FeatureId, FeatureMeta, ProductId } from "@/app/state/demoTypes";
+import type {
+  BankingScenarioId,
+  CountryId,
+  DesignSystemId,
+  FeatureId,
+  FeatureMeta,
+  ProductId,
+} from "@/app/state/demoTypes";
 
 function getScopeLabel(meta: FeatureMeta): string {
   if (meta.scope === "global") {
@@ -76,13 +85,16 @@ export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelPr
     scenario,
     designSystem,
     themeMode,
+    bankingScenario,
     setProduct,
     setDesignSystem,
     setThemeMode,
+    setBankingScenario,
     setFlag,
     release,
   } = demoState;
   const releaseBundle = getReleaseBundle(release);
+  const effectiveContext = resolveEffectiveAppContext(demoState);
 
   const allFeatureIds = Object.keys(FEATURE_META) as FeatureId[];
   const releaseFeatures = allFeatureIds.filter((id) => FEATURE_META[id].kind === "release");
@@ -130,6 +142,30 @@ export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelPr
               <ContextRow label="Baseline" value={BASELINES[releaseBundle.baseline].label} />
               <ContextRow label="Release preview" value={releaseBundle.label} />
               <ContextRow label="Scenario" value={scenario} />
+              <ContextRow label="Banking profile" value={effectiveContext.userScenario.label} />
+              <ContextRow label="Project pack" value={effectiveContext.projectPack.id} />
+            </div>
+          </section>
+
+          <section className="border border-[var(--uc-border-muted)] rounded-md p-4">
+            <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-3">
+              Release
+            </h4>
+            <div className="space-y-3">
+              <ContextRow label="Baseline ledger" value={effectiveContext.baseline.label} />
+              <ContextRow
+                label="Promotion target"
+                value={effectiveContext.promotionReadiness.targetBaseline ?? "none"}
+              />
+              <ContextRow
+                label="Added features"
+                value={effectiveContext.releaseDiff.addedFeatures.length.toString()}
+              />
+              <ContextRow
+                label="Retire flags"
+                value={effectiveContext.releaseDiff.flagRetirementCandidates.length.toString()}
+              />
+              <ReadinessChecks checks={effectiveContext.promotionReadiness.checks} />
             </div>
           </section>
 
@@ -177,6 +213,84 @@ export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelPr
             />
           </section>
 
+          <section className="border border-[var(--uc-border-muted)] rounded-md p-4">
+            <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-3">
+              Banking Scenario
+            </h4>
+            <SegmentedOptions
+              value={bankingScenario}
+              options={(Object.keys(BANKING_SCENARIOS) as BankingScenarioId[]).map((scenarioId) => ({
+                id: scenarioId,
+                label: BANKING_SCENARIOS[scenarioId].label,
+                note: BANKING_SCENARIOS[scenarioId].readiness,
+              }))}
+              onChange={(value) => setBankingScenario(value as BankingScenarioId)}
+            />
+            <div className="mt-4 space-y-2 text-sm">
+              <ContextRow label="Segment" value={effectiveContext.userScenario.segment} />
+              <ContextRow label="Authority" value={effectiveContext.userScenario.authority} />
+              <ContextRow label="Limit" value={`${effectiveContext.limits.perTransaction.toLocaleString()} ${effectiveContext.limits.currency}`} />
+              <ContextRow label="Daily" value={`${effectiveContext.limits.daily.toLocaleString()} ${effectiveContext.limits.currency}`} />
+            </div>
+          </section>
+
+          <section className="border border-[var(--uc-border-muted)] rounded-md p-4">
+            <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-3">
+              Data Snapshot
+            </h4>
+            <MetricGrid
+              items={[
+                ["Accounts", effectiveContext.dataSnapshot.accounts],
+                ["Cards", effectiveContext.dataSnapshot.cards],
+                ["Deposits", effectiveContext.dataSnapshot.deposits],
+                ["Investments", effectiveContext.dataSnapshot.investments],
+                ["Loans", effectiveContext.dataSnapshot.loans],
+                ["Goals", effectiveContext.dataSnapshot.savingsGoals],
+              ]}
+            />
+            <MiniList
+              title="Holdings"
+              items={effectiveContext.holdings.map(
+                (holding) => `${holding.label} - ${holding.currency} - ${holding.status}`
+              )}
+              empty="No holdings for this profile"
+            />
+          </section>
+
+          <section className="border border-[var(--uc-border-muted)] rounded-md p-4">
+            <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-3">
+              Rights
+            </h4>
+            <ContextRow label="Enabled actions" value={effectiveContext.enabledActions.length.toString()} />
+            <ContextRow label="Disabled actions" value={effectiveContext.disabledActions.length.toString()} />
+            <MiniList
+              title="Disabled reasons"
+              items={effectiveContext.disabledActions.slice(0, 8).map(
+                (disabledAction) => `${disabledAction.label}: ${disabledAction.reason}`
+              )}
+              empty="No disabled actions"
+            />
+          </section>
+
+          <section className="border border-[var(--uc-border-muted)] rounded-md p-4">
+            <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-3">
+              Project Pack
+            </h4>
+            <div className="space-y-2 text-sm">
+              <ContextRow label="Runtime coverage" value={effectiveContext.projectPack.runtimeCoverage} />
+              <ContextRow label="Integration" value={effectiveContext.projectPack.integrationReadiness} />
+              <ContextRow label="Default scenario" value={effectiveContext.projectPack.defaultScenario} />
+              <ContextRow label="Demo entries" value={effectiveContext.projectPack.demoEntries.length.toString()} />
+            </div>
+            <MiniList
+              title="Knowledge sources"
+              items={effectiveContext.projectPack.knowledgeSources.map(
+                (source) => `${source.id} - ${source.authority}`
+              )}
+              empty="No sources"
+            />
+          </section>
+
           <FeatureGroup
             title="Release Features"
             featureIds={releaseFeatures}
@@ -206,7 +320,7 @@ interface SegmentedOptionsProps {
 
 function SegmentedOptions({ value, options, onChange }: SegmentedOptionsProps) {
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="grid grid-cols-1 gap-2">
       {options.map((option) => (
         <button
           key={option.id}
@@ -236,6 +350,73 @@ function ContextRow({ label, value }: ContextRowProps) {
     <div className="flex items-start justify-between gap-4">
       <span className="text-[var(--uc-text-muted)]">{label}</span>
       <span className="font-medium text-[var(--uc-text)] text-right">{value}</span>
+    </div>
+  );
+}
+
+interface ReadinessChecksProps {
+  checks: readonly { id: string; label: string; passed: boolean; detail: string }[];
+}
+
+function ReadinessChecks({ checks }: ReadinessChecksProps) {
+  return (
+    <div className="space-y-2">
+      {checks.map((check) => (
+        <div
+          key={check.id}
+          className={`rounded-md border px-3 py-2 text-xs ${
+            check.passed
+              ? "border-[var(--uc-green-success)] bg-[color-mix(in_srgb,var(--uc-green-success)_10%,var(--uc-surface))]"
+              : "border-[var(--uc-yellow-gold)] bg-[color-mix(in_srgb,var(--uc-yellow-gold)_12%,var(--uc-surface))]"
+          }`}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <span className="font-semibold text-[var(--uc-text)]">{check.label}</span>
+            <span className={check.passed ? "text-[var(--uc-green-olive)]" : "text-[var(--uc-gold-brown)]"}>
+              {check.passed ? "ready" : "needs work"}
+            </span>
+          </div>
+          <p className="mt-1 text-[var(--uc-text-muted)]">{check.detail}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+interface MetricGridProps {
+  items: readonly [string, number][];
+}
+
+function MetricGrid({ items }: MetricGridProps) {
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {items.map(([label, value]) => (
+        <div key={label} className="rounded-md border border-[var(--uc-border-muted)] px-2 py-2 text-center">
+          <div className="text-base font-semibold text-[var(--uc-text)]">{value}</div>
+          <div className="text-[10px] uppercase text-[var(--uc-text-muted)]">{label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+interface MiniListProps {
+  title: string;
+  items: readonly string[];
+  empty: string;
+}
+
+function MiniList({ title, items, empty }: MiniListProps) {
+  return (
+    <div className="mt-4">
+      <p className="text-xs font-semibold uppercase text-[var(--uc-text-muted)]">{title}</p>
+      <div className="mt-2 space-y-1">
+        {(items.length > 0 ? items : [empty]).map((item) => (
+          <p key={item} className="rounded-sm bg-[var(--uc-surface-muted)] px-2 py-1 text-xs text-[var(--uc-text-muted)]">
+            {item}
+          </p>
+        ))}
+      </div>
     </div>
   );
 }

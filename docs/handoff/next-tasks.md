@@ -9,6 +9,9 @@ Status legend: `todo` / `in_progress` / `done` / `blocked`
 | done | Install AI Contributor Operating System docs | `agents.md`, `docs/handoff/*` |
 | done | Add project architecture model | `docs/architecture/PROJECT_MODEL.md` |
 | done | Add typed taxonomy and registries | `src/app/registry/projectModel.ts`, `screenRegistry.ts`, `flowRegistry.ts`, `releaseRegistry.ts` |
+| done | Add Phase 1 Reference Platform architecture | `docs/architecture/REFERENCE_PLATFORM_PHASE1.md`, `baselineRegistry.ts`, `featureManifestRegistry.ts`, release diff/readiness support, and project-pack registry |
+| done | Add banking scenario and entitlements infrastructure | `bankingScenarioRegistry.ts`, `effectiveAppContext.ts`, and `bankingRepositories.ts` model mock holdings, rights, limits, visible products, enabled actions, disabled-action reasons, and contract-ready repositories |
+| done | Cover future SME and Kids application variants by country | `projectPackRegistry.ts` generates 24 product/country packs across `PI`, `SME`, and `KIDS_PI` for all 8 country/application variants; SME and non-RO Kids are prepared metadata variants, not false runtime coverage |
 | done | Run verification | Latest fresh-start commit verification on 2026-06-02: `npm run build` passed with the known chunk-size warning, `npm run audit:templates` passed with `templates=50 codePreviews=50 components=50 screens=23 flows=13`, and `git diff --check` passed with only normal Windows LF/CRLF warnings; previous Chrome/CDP smoke covered screenshot-control top-bar placement, icon-only 32x32 trigger, visible PNG download, and Design System disabled state; `typecheck`, `lint`, and `test` remain blocked by missing local scripts/tooling |
 
 ## Upcoming
@@ -60,6 +63,9 @@ Status legend: `todo` / `in_progress` / `done` / `blocked`
 | --- | --- | --- |
 | todo | Import or build actual SME screens | Selector exists; runtime placeholder prevents false coverage |
 | todo | Implement actual next design-system screens/components | Selector exists; runtime placeholder prevents false coverage |
+| todo | Replace Phase 1 mock banking repositories with API adapters when backend contracts exist | `bankingRepositories.ts` is adapter-ready but currently reads scenario mocks only |
+| todo | Wire effective app context into more runtime screens | Payments primary cards now respect disabled payment actions; Home, Products, Cards-like future surfaces, Documents, and Kids/SME future screens should consume the same context intentionally |
+| todo | Add release-promotion workflow UI after stakeholder approval | Source-level baseline ledger and readiness checks exist, but there is no persisted publication workflow or audit history |
 | todo | Audit and polish the RO Kids main journey | First broad execution exists; next pass should inspect what is fake, what flows are broken, and polish Kids Home -> Ask Money -> Parent Approval -> Money Received |
 | todo | Implement country-contained Kids concept battles for HU, BA, and CZ | RO Kids is intentionally Romania-only; future executions should create comparable concepts before unifying the best experience |
 | todo | Unify the best Kids concepts after the country battles | Do not prematurely generalize; choose strongest patterns from RO/HU/BA/CZ after separate executions |

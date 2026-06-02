@@ -58,6 +58,7 @@ Current values:
 - `HU`
 - `RS`
 - `BA`
+- `BA_BL`
 - `SI`
 
 Country affects copy, currency, capability availability, legal terminology, and sometimes screen composition.
@@ -209,7 +210,7 @@ Lifecycle definitions:
 
 The current settings/features panel should evolve into a control panel.
 
-It should eventually expose:
+It now exposes the Phase 1 reference-platform controls and should continue to evolve carefully:
 
 - product: `PI` / `SME` / `KIDS_PI`;
 - country;
@@ -217,6 +218,12 @@ It should eventually expose:
 - baseline;
 - release preview;
 - scenario;
+- banking scenario;
+- holdings;
+- entitlements;
+- limits;
+- disabled-action reasons;
+- project-pack readiness;
 - language;
 - active features;
 - missing/partial coverage;
@@ -277,7 +284,11 @@ This is a target contract, not current runtime behavior.
 | Country switching | implemented | `src/app/components/demo/DemoTopBar.tsx`, `src/app/registry/demoConfig.ts` |
 | Scenario switching | implemented | `src/app/state/demoTypes.ts`, `src/app/state/demoStore.tsx` |
 | Release/baseline switching | implemented | `src/app/registry/releaseRegistry.ts`, `src/app/state/demoStore.tsx`, `src/app/components/demo/DemoTopBar.tsx` |
-| Feature metadata | partial | `src/app/registry/demoConfig.ts`, `src/app/registry/featureUI.ts` |
+| Baseline ledger and release promotion readiness | implemented as Phase 1 infrastructure | `src/app/registry/baselineRegistry.ts`, `src/app/registry/releaseRegistry.ts`, `src/app/registry/featureManifestRegistry.ts` |
+| Feature metadata | implemented as manifest foundation, runtime coverage still varies by screen | `src/app/registry/demoConfig.ts`, `src/app/registry/featureManifestRegistry.ts`, `src/app/registry/featureUI.ts` |
+| Banking scenario and entitlements model | implemented as mock-driven control-plane infrastructure | `src/app/platform/banking/bankingScenarioRegistry.ts`, `src/app/platform/effectiveAppContext.ts`, `src/app/components/demo/DemoFeatureSidePanel.tsx` |
+| Contract-ready mock repositories | implemented as adapter-ready mock repositories | `src/app/platform/data/bankingRepositories.ts` |
+| Project packs | implemented for all 24 product/country combinations | `src/app/registry/projectPackRegistry.ts` |
 | PI/SME/KIDS_PI product model | implemented as runtime selector; SME and unsupported Kids contexts use planned-state placeholders, while RO/current DS Mobile PI Kids renders a mock-driven prototype | `src/app/registry/projectModel.ts`, `src/app/components/demo/DemoTopBar.tsx`, `src/app/App.tsx`, `src/app/components/UnsupportedContextScreen.tsx`, `src/app/screens/kids/RoKidsApp.tsx` |
 | Screen registry | foundation only | `src/app/registry/screenRegistry.ts` |
 | Flow registry | foundation plus RO Kids core-flow entry | `src/app/registry/flowRegistry.ts` |

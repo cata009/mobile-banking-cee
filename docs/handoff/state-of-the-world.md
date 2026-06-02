@@ -11,6 +11,10 @@ Current runtime supports:
 - country switching across CEE markets, now including separate `BA` Bosnia and `BA_BL` Bosnia Banja Luka application variants;
 - active/inactive app scenario;
 - explicit release preview and baseline state through the `Release` control;
+- Phase 1 release/baseline operating system with a baseline ledger, feature manifests, R1/R2/R3/R4 promotion targets, release diffs, promotion readiness checks, and flag-retirement candidates;
+- Phase 1 project-pack registry covering all 24 product/country combinations across `PI`, `SME`, and `Mobile PI Kids` for `RO`, `CZ`, `SK`, `HU`, `RS`, `BA`, `BA_BL`, and `SI`;
+- Phase 1 banking scenario control with mock holdings, entitlements, limits, enabled actions, disabled-action reasons, and a resolved `effectiveAppContext`;
+- contract-ready mock banking repositories for accounts, cards, payments, products, entitlements, and scenarios; these still read mocked scenario data today but are shaped for future API adapters;
 - Light/Dark appearance switching from the demo top bar and control panel, driven by UniCredit design-system theme tokens;
 - Light/Dark exact-match token remapping for shared DS colors such as key neutrals, teal actions, status colors, and banner tones, using only approved dark partners from the supplied reference DS table;
 - The remaining previously-unmatched active DS colors now also use explicit manual dark-mode pairs supplied during this session, and pure black has been normalized out of the active DS tokens in favor of `#262626`.
@@ -53,6 +57,8 @@ It is not yet:
 - a backend-integrated banking application;
 - a real payment-execution, ledger, or transaction-posting application;
 - a persistent audit/release management system;
+- a real release publication workflow with persisted baseline promotion history; Phase 1 models the ledger and readiness checks in source only;
+- a real permission/entitlement backend; Phase 1 models mock rights and limits for stakeholder demos only;
 - an automatic AI screen generator/compiler; the AI catalog now has semantic validation for template/component/screen/flow references, but it does not yet generate or mount new runtime screens from prompts by itself.
 
 ## Current Architectural Direction

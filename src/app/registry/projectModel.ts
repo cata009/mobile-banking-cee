@@ -90,6 +90,30 @@ export const BASELINES: Record<BaselineId, BaselineMeta> = {
     description: "Stable current demo state without future release previews.",
     status: "active",
   },
+  "baseline-r1": {
+    id: "baseline-r1",
+    label: "R1 Promoted Baseline",
+    description: "Future official baseline after Release R1 is promoted.",
+    status: "planned",
+  },
+  "baseline-r2": {
+    id: "baseline-r2",
+    label: "R2 Promoted Baseline",
+    description: "Future official baseline after Release R2 is promoted.",
+    status: "planned",
+  },
+  "baseline-r3": {
+    id: "baseline-r3",
+    label: "R3 Promoted Baseline",
+    description: "Future official baseline after Release R3 is promoted.",
+    status: "planned",
+  },
+  "baseline-r4": {
+    id: "baseline-r4",
+    label: "R4 Promoted Baseline",
+    description: "Future official baseline after Release R4 is promoted.",
+    status: "planned",
+  },
   "uat-current": {
     id: "uat-current",
     label: "Current UAT",
@@ -98,7 +122,14 @@ export const BASELINES: Record<BaselineId, BaselineMeta> = {
   },
 };
 
-export const BASELINE_ORDER: readonly BaselineId[] = ["baseline-current", "uat-current"] as const;
+export const BASELINE_ORDER: readonly BaselineId[] = [
+  "baseline-current",
+  "baseline-r1",
+  "baseline-r2",
+  "baseline-r3",
+  "baseline-r4",
+  "uat-current",
+] as const;
 
 export const RELEASES: Record<ReleaseId, ReleaseMeta> = {
   "release-current": {
@@ -109,25 +140,25 @@ export const RELEASES: Record<ReleaseId, ReleaseMeta> = {
   },
   "release-v1": {
     id: "release-v1",
-    label: "Release V1",
+    label: "Release R1",
     description: "First release preview bundle.",
     status: "active",
   },
   "release-v2": {
     id: "release-v2",
-    label: "Release V2",
+    label: "Release R2",
     description: "Second release preview bundle.",
     status: "active",
   },
   "release-v3": {
     id: "release-v3",
-    label: "Release V3",
+    label: "Release R3",
     description: "Third release preview bundle.",
     status: "active",
   },
   "release-v4": {
     id: "release-v4",
-    label: "Release V4",
+    label: "Release R4",
     description: "Fourth release preview bundle.",
     status: "active",
   },
