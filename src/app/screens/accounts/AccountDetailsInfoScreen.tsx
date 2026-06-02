@@ -1,6 +1,7 @@
 import PageHeader from "@/app/components/PageHeader";
 import { AppIcon } from "@/app/components/icons";
 import AccountDetailsInfoField from "@/app/components/accounts/AccountDetailsInfoField";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
 import { formatMoneyNumber, getCountryConfig } from "@/app/registry/countryConfig";
 import { maskFormattedAmount } from "@/app/utils/amountPrivacy";
@@ -15,15 +16,15 @@ interface AccountDetailsInfoScreenProps {
   onBack: () => void;
 }
 
-const PRODUCT_TITLE_BY_TYPE: Record<Product["type"], string> = {
-  current_account: "CURRENT ACCOUNT",
-  debit_card: "DEBIT CARD",
-  credit_card: "CREDIT CARD",
-  saving_account: "SAVING ACCOUNT",
-  term_deposit: "TERM DEPOSIT",
-  loan: "LOAN",
-  mortgage: "MORTGAGE",
-  investment_account: "INVESTMENT ACCOUNT",
+const PRODUCT_TITLE_KEYS_BY_TYPE: Record<Product["type"], string> = {
+  current_account: "currentAccount",
+  debit_card: "debitCard",
+  credit_card: "creditCard",
+  saving_account: "savingAccount",
+  term_deposit: "termDeposit",
+  loan: "loan",
+  mortgage: "mortgage",
+  investment_account: "investmentAccount",
 };
 
 function CardThumbnail() {
@@ -38,12 +39,13 @@ function CardThumbnail() {
 }
 
 function ConnectedCardRow() {
+  const { t } = useLanguage();
   return (
     <button className="grid w-full grid-cols-[64px_1fr_24px] items-center gap-[16px] py-[18px] text-left">
       <CardThumbnail />
       <div className="min-w-0">
         <p className="font-['UniCredit',sans-serif] text-[18px] leading-[22px] font-bold uppercase text-[var(--uc-text)]">
-          Mastercard Standard Debit
+          {t("runtime.accounts.detailsInfo.mastercardStandardDebit", "Mastercard Standard Debit")}
         </p>
         <p className="mt-[2px] font-['UniCredit',sans-serif] text-[20px] leading-[24px] font-normal text-[var(--uc-text-muted)]">
           5545 XXXX XXXX 3250
@@ -64,6 +66,7 @@ export default function AccountDetailsInfoScreen({
   onBack,
 }: AccountDetailsInfoScreenProps) {
   const { country, amountsHidden } = useDemo();
+  const { t } = useLanguage();
   const { categories } = useProducts();
   const products = categories.flatMap((category) => category.products);
   const product = getAccountDetailsProduct(products, selectedProductId);
@@ -79,7 +82,7 @@ export default function AccountDetailsInfoScreen({
     return (
       <div className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] scrollbar-hide" onScroll={handlePageScroll}>
         <PageHeader
-          title="Account Details"
+          title={t("runtime.accounts.detailsInfo.title", "Account Details")}
           onBack={onBack}
           showHelp={false}
           collapsedTitleProgress={headerProgress}
@@ -96,10 +99,10 @@ export default function AccountDetailsInfoScreen({
   return (
     <div className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] scrollbar-hide" onScroll={handlePageScroll}>
       <PageHeader
-        title="Account Details"
+        title={t("runtime.accounts.detailsInfo.title", "Account Details")}
         onBack={onBack}
         rightActionIcon={<AppIcon name="share-filled" color="var(--uc-text)" />}
-        rightActionLabel="Share account details"
+        rightActionLabel={t("runtime.actions.shareAccountDetails", "Share account details")}
         collapsedTitleProgress={headerProgress}
         includeSafeArea
       />
@@ -107,27 +110,36 @@ export default function AccountDetailsInfoScreen({
       <div className="px-[24px] pb-[40px] pt-[46px]">
         <div className="flex flex-col">
           <AccountDetailsInfoField
-            title="Account number"
+            title={t("runtime.accounts.detailsInfo.accountNumber", "Account number")}
             subtitle={product.accountNumber}
             trailingIcon={<AppIcon name="copy-documents" color="var(--uc-text)" />}
           />
-          <AccountDetailsInfoField title="Available funds" subtitle={availableFunds} />
-          <AccountDetailsInfoField title="Current balance" subtitle={currentBalance} />
-          <AccountDetailsInfoField title="Blocked/reserved amount" subtitle={zeroAmount} />
-          <AccountDetailsInfoField title="Overdraft" subtitle={zeroAmount} />
-          <AccountDetailsInfoField title="Account title" subtitle={PRODUCT_TITLE_BY_TYPE[product.type]} />
-          <AccountDetailsInfoField title="Offer" subtitle="Account under favorable conditions" />
+          <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.availableFunds", "Available funds")} subtitle={availableFunds} />
+          <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.currentBalance", "Current balance")} subtitle={currentBalance} />
+          <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.blockedReservedAmount", "Blocked/reserved amount")} subtitle={zeroAmount} />
+          <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.overdraft", "Overdraft")} subtitle={zeroAmount} />
+          <AccountDetailsInfoField
+            title={t("runtime.accounts.detailsInfo.accountTitle", "Account title")}
+            subtitle={t(
+              `runtime.accounts.productTitles.${PRODUCT_TITLE_KEYS_BY_TYPE[product.type]}`,
+              product.type.replace(/_/g, " ").toUpperCase(),
+            )}
+          />
+          <AccountDetailsInfoField
+            title={t("runtime.accounts.detailsInfo.offer", "Offer")}
+            subtitle={t("runtime.accounts.detailsInfo.offerValue", "Account under favorable conditions")}
+          />
         </div>
 
         <div className="flex justify-center py-[48px]">
           <button className="font-['UniCredit',sans-serif] text-[16px] leading-[20px] font-bold uppercase text-[var(--uc-action)]">
-            Show less
+            {t("runtime.actions.showLess", "Show less")}
           </button>
         </div>
 
         <section>
           <h2 className="border-b border-[var(--uc-neutral-500)] pb-[8px] font-['UniCredit',sans-serif] text-[22px] leading-[28px] font-bold uppercase text-[var(--uc-text)]">
-            Connected cards
+            {t("runtime.accounts.detailsInfo.connectedCards", "Connected cards")}
           </h2>
           <ConnectedCardRow />
         </section>

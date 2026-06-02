@@ -55,11 +55,12 @@ export default function QuickActions({ showPaymentsHub = false, showRedesign = f
                   ${showRedesign ? 'hover:scale-105 shadow-sm flex-col' : ''}
                 `}
               >
-                <AppIcon
-                  name={action.icon}
-                  size={showRedesign ? 24 : 20}
-                  className={action.id === "payments-hub" ? "text-[var(--uc-brand)]" : "text-[var(--uc-text)]"}
-                />
+                <span className="grid h-[32px] w-[32px] place-items-center">
+                  <AppIcon
+                    name={action.icon}
+                    className={action.id === "payments-hub" ? "text-[var(--uc-brand)]" : "text-[var(--uc-text)]"}
+                  />
+                </span>
                 <span
                   className={`font-['UniCredit',sans-serif] ${
                     showRedesign ? 'text-[12px]' : 'text-[14px]'

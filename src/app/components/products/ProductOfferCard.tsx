@@ -1,6 +1,5 @@
 import { getProductBannerTone, type ProductBannerColorFamily } from "@/app/config/productBannerVariants";
 import type { ProductsOffer } from "@/app/config/productsMenuConfig";
-import imgCoinsLeaves from "figma:asset/612ac7960c2d43bfdada538aae6f3cf27be44d99.png";
 
 interface ProductOfferCardProps {
   offer: ProductsOffer;
@@ -46,7 +45,7 @@ export default function ProductOfferCard({
       <ProductOfferChevronBackground fillColor={tone.chevronColor} />
 
       <img
-        src={imgCoinsLeaves}
+        src={tone.imageSrc}
         alt=""
         className="absolute right-0 top-0 h-full w-[100px] object-cover object-center"
         draggable={false}

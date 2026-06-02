@@ -46,7 +46,9 @@ export default function TransactionsPreview({ showFilters = false }: Transaction
           <div className="px-[16px] py-[10px] bg-[var(--uc-surface-muted)] border-b border-[var(--uc-border-muted)]">
             <div className="flex items-center gap-[8px] overflow-x-auto scrollbar-hide">
               <button className="flex items-center gap-[6px] px-[12px] py-[6px] bg-[var(--uc-surface)] border border-[var(--uc-border)] rounded-[6px] text-[13px] font-medium text-[var(--uc-text)] hover:bg-[var(--uc-app-bg)] whitespace-nowrap">
-                <AppIcon name="filters" size={14} />
+                <span className="flex h-[32px] w-[32px] items-center justify-center">
+                  <AppIcon name="filters" />
+                </span>
                 {t('home.transactions.filter.all')}
               </button>
               <button className="px-[12px] py-[6px] bg-[var(--uc-surface)] border border-[var(--uc-border)] rounded-[6px] text-[13px] font-medium text-[var(--uc-text)] hover:bg-[var(--uc-app-bg)] whitespace-nowrap">
@@ -89,7 +91,9 @@ export default function TransactionsPreview({ showFilters = false }: Transaction
                 >
                   {transaction.amount} CZK
                 </span>
-                <AppIcon name="chevron-right" size={16} className="text-[var(--uc-text-subtle)]" />
+                <span className="flex h-[32px] w-[32px] items-center justify-center">
+                  <AppIcon name="chevron-right" className="text-[var(--uc-text-subtle)]" />
+                </span>
               </div>
             </div>
           ))}

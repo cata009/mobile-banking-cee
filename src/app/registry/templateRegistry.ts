@@ -1,4 +1,28 @@
 import type { TemplateCodePreviewId } from "@/app/components/templates/TemplateCodePreviews";
+import type {
+  ComponentId,
+  CountryId,
+  DesignSystemId,
+  FlowId,
+  ProductId,
+  ScreenId,
+} from "@/app/state/demoTypes";
+import type { LayoutFamily } from "./screenRegistry";
+
+export type TemplateReuseRole =
+  | "runtime-screen"
+  | "screen-state"
+  | "flow-step"
+  | "modal"
+  | "feedback"
+  | "standalone-pattern";
+
+export type TemplateReuseContract = {
+  role: TemplateReuseRole;
+  dataSources: readonly string[];
+  assemblyRules: readonly string[];
+  forbiddenPatterns: readonly string[];
+};
 
 export type TemplateRegistryItem = {
   id: string;
@@ -9,17 +33,87 @@ export type TemplateRegistryItem = {
   height: number;
   format: "png" | "jpg" | "code";
   sourceKind?: "screenshot" | "code-only";
-  relatedComponents: string[];
+  products: readonly ProductId[];
+  countries: readonly CountryId[];
+  designSystems: readonly DesignSystemId[];
+  screenFamily: LayoutFamily;
+  standalonePage: boolean;
+  runtimeScreenId?: ScreenId;
+  relatedScreens: readonly ScreenId[];
+  flowIds: readonly FlowId[];
+  relatedComponents: readonly ComponentId[];
   codePreviewId?: TemplateCodePreviewId;
   implementationPath?: string;
   implementationStatus?: "source-only" | "reconstructed-code";
   reuseNotes?: string[];
+  reuseContract: TemplateReuseContract;
 };
 
 const screenshotUrl = (fileName: string) => new URL(`../../../screenshots/${fileName}`, import.meta.url).href;
 
-export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
-  {
+const ALL_COUNTRIES: readonly CountryId[] = ["RO", "CZ", "SK", "HU", "RS", "BA", "SI"] as const;
+const DEFAULT_PRODUCTS: readonly ProductId[] = ["PI"] as const;
+const DEFAULT_DESIGN_SYSTEMS: readonly DesignSystemId[] = ["current"] as const;
+
+const DEFAULT_ASSEMBLY_RULES = [
+  "Treat this template as a standalone phone-frame screen or state pattern that can be composed into future flows.",
+  "Use registered components, config data, icons, and color tokens before introducing any new local UI shape.",
+  "Keep source screenshots as visual evidence only; code previews and runtime components are the implementation surface.",
+] as const;
+
+const DEFAULT_FORBIDDEN_PATTERNS = [
+  "Do not embed the source PNG/JPG as the UI implementation.",
+  "Do not import lucide/raw SVG directly when an AppIcon registry entry exists.",
+  "Do not invent a new component for a shape already represented in the component registry.",
+] as const;
+
+type TemplateRegistrySeed = Omit<
+  TemplateRegistryItem,
+  | "products"
+  | "countries"
+  | "designSystems"
+  | "standalonePage"
+  | "relatedScreens"
+  | "flowIds"
+  | "reuseContract"
+> & {
+  products?: readonly ProductId[];
+  countries?: readonly CountryId[];
+  designSystems?: readonly DesignSystemId[];
+  standalonePage?: boolean;
+  relatedScreens?: readonly ScreenId[];
+  flowIds?: readonly FlowId[];
+  reuseContract?: Partial<TemplateReuseContract>;
+};
+
+function defineTemplate(seed: TemplateRegistrySeed): TemplateRegistryItem {
+  const reuseContract = seed.reuseContract ?? {};
+
+  return {
+    products: DEFAULT_PRODUCTS,
+    countries: ALL_COUNTRIES,
+    designSystems: DEFAULT_DESIGN_SYSTEMS,
+    standalonePage: true,
+    relatedScreens: ["platform.design-system"],
+    flowIds: [],
+    ...seed,
+    reuseContract: {
+      role: reuseContract.role ?? "standalone-pattern",
+      dataSources: reuseContract.dataSources ?? [],
+      assemblyRules: [
+        ...DEFAULT_ASSEMBLY_RULES,
+        ...(reuseContract.assemblyRules ?? []),
+      ],
+      forbiddenPatterns: [
+        ...DEFAULT_FORBIDDEN_PATTERNS,
+        ...(reuseContract.forbiddenPatterns ?? []),
+      ],
+    },
+  };
+}
+
+export const TEMPLATE_REGISTRY: readonly TemplateRegistryItem[] = [
+  defineTemplate({
     id: "template-52",
     name: "52",
     sourcePath: "screenshots/52.png",
@@ -27,17 +121,29 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["MessagesScreen", "TemplateCodePreview", "AccountSearchBar", "AppIcon"],
+    screenFamily: "messages",
+    runtimeScreenId: "pi.messages.overview",
+    relatedScreens: ["pi.messages.overview", "platform.design-system"],
+    flowIds: ["pi.header-to-messages"],
+    relatedComponents: ["messages.inbox-list", "messages.mailbox-tabs", "accounts.transaction-search", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "messages-inbox",
     implementationPath: "src/app/screens/messages/MessagesScreen.tsx",
     implementationStatus: "reconstructed-code",
+    reuseContract: {
+      role: "runtime-screen",
+      dataSources: ["src/app/config/messagesConfig.ts"],
+      assemblyRules: [
+        "Use the runtime Messages screen and messages config for prompt-built mailbox flows.",
+        "Inbox/Outbox state changes should reuse MessagesMailboxTabs rather than separate tab implementations.",
+      ],
+    },
     reuseNotes: [
       "The runtime Messages screen is reconstructed from this template and uses the same country-addressable message config as the Design System preview.",
       "Reuses the account search bar, AppIcon header actions, two-tab bar, date/message row, new badge, and dot-menu patterns.",
       "The screenshot remains source evidence; the Design System preview renders reconstructed JSX while the header Messages icon opens the runtime screen.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-67",
     name: "67",
     sourcePath: "screenshots/67.png",
@@ -45,7 +151,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["TemplateCodePreview", "AccountSearchBar", "AppIcon"],
+    screenFamily: "payments",
+    relatedScreens: ["pi.payments.overview", "platform.design-system"],
+    flowIds: ["pi.home-to-payments-menu"],
+    relatedComponents: ["payments.menu", "accounts.transaction-search", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "recurrent-payment",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -53,8 +162,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Shares the same phone surface, header, tab bar, search strip, section title, and dot-menu primitives with template 52.",
       "The standing-order row is data-driven, so further payment-list templates can reuse the same shape.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-account-options",
     name: "Account options",
     sourcePath: "screenshots/account-options.png",
@@ -62,7 +171,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 375,
     height: 1038,
     format: "png",
-    relatedComponents: ["AccountOptionsScreen", "TemplateCodePreview", "AppIcon"],
+    screenFamily: "account-options",
+    runtimeScreenId: "pi.account.options",
+    relatedScreens: ["pi.account.options", "pi.account.detail", "platform.design-system"],
+    flowIds: ["pi.home-to-account-detail"],
+    relatedComponents: ["accounts.action-bar", "products.product-card", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "account-options",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -70,8 +183,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the account options list and product recommendation cards as JSX using the same account-details data already used by the runtime AccountOptionsScreen.",
       "Introduces reusable account-option icon mapping and product promo card composition for follow-up account option flows.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-activate-mtoken",
     name: "Activate mToken",
     sourcePath: "screenshots/Activate mToken.jpg",
@@ -79,7 +192,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 754,
     height: 1628,
     format: "jpg",
-    relatedComponents: ["PreLoginActiveScreen", "TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    screenFamily: "prelogin",
+    relatedScreens: ["pi.prelogin.active", "platform.design-system"],
+    flowIds: ["pi.prelogin-to-home.active"],
+    relatedComponents: ["prelogin.active", "ui.radio-button", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "activate-mtoken",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -87,8 +203,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the Activate Mobile Token choice screen with shared top chrome, radio option rows, CSS hero art, and fixed Start CTA.",
       "Shares the same radio-row primitive with Generate Token, Product selection, and account-selection panel templates.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-analytics",
     name: "Analytics",
     sourcePath: "screenshots/Analytics.jpg",
@@ -96,7 +212,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 754,
     height: 1628,
     format: "jpg",
-    relatedComponents: ["BottomNavigation", "TemplateCodePreview", "AppIcon"],
+    screenFamily: "analytics",
+    runtimeScreenId: "pi.analytics.overview",
+    relatedScreens: ["pi.analytics.overview", "platform.design-system"],
+    flowIds: ["pi.home-to-analytics"],
+    relatedComponents: ["analytics.spendings", "pfm.category-icon", "shell.bottom-navigation", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "analytics-overview",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -104,8 +224,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the My Spendings analytics overview with code-native chart bars, add-cash banner, money-out summary, and five-item bottom navigation.",
       "Creates reusable chart and five-tab navigation primitives for future analytics templates.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-apple-pay",
     name: "Apple pay",
     sourcePath: "screenshots/Apple pay.png",
@@ -113,7 +233,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    screenFamily: "products",
+    relatedScreens: ["pi.products.overview", "platform.design-system"],
+    flowIds: ["pi.home-to-products-menu"],
+    relatedComponents: ["products.menu", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "apple-pay-activation",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -121,8 +244,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the Apple Pay activation screen as JSX with close action, card/device hero, explanatory copy, fixed bottom CTA, and home indicator.",
       "The hero is code-native CSS composition so this template can be reused without embedding the PNG as the implementation surface.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-cards",
     name: "Cards",
     sourcePath: "screenshots/Cards.jpg",
@@ -130,7 +253,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 754,
     height: 1996,
     format: "jpg",
-    relatedComponents: ["ProductCard", "ProductsList", "BottomNavigation", "TemplateCodePreview", "AppIcon"],
+    screenFamily: "products",
+    relatedScreens: ["pi.products.overview", "pi.account.detail", "platform.design-system"],
+    flowIds: ["pi.home-to-products-menu", "pi.home-to-account-detail"],
+    relatedComponents: ["products.product-card", "accounts.transaction-search", "accounts.transaction-row", "shell.bottom-navigation", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "cards-overview",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -138,8 +264,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the Cards overview as JSX with a generated debit-card surface, free-to-spend balance, wallet actions, shortcuts, search, transaction rows, and bottom navigation.",
       "Shares shortcut and transaction-row primitives with account detail and transaction detail templates.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-contact",
     name: "Contact",
     sourcePath: "screenshots/Contact.png",
@@ -147,7 +273,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["ContactsDivider", "ContactsNavigationCard", "TemplateCodePreview", "AppIcon"],
+    screenFamily: "contacts",
+    relatedScreens: ["pi.contacts.overview", "platform.design-system"],
+    flowIds: ["pi.home-to-more-to-contacts"],
+    relatedComponents: ["contacts.navigation-card", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "contact-info-sheet",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -155,8 +284,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the contact information bottom sheet with a dark backdrop, close action, and reusable contact action cards.",
       "Uses existing contact iconography so support/contact sheet flows can be composed without screenshot assets.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-documents",
     name: "Documents",
     sourcePath: "screenshots/Documents.png",
@@ -164,7 +293,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 863,
     format: "png",
-    relatedComponents: ["DocumentsScreen", "PageHeader", "AccountSearchBar"],
+    screenFamily: "messages",
+    runtimeScreenId: "pi.documents.overview",
+    relatedScreens: ["pi.documents.overview", "pi.messages.overview", "platform.design-system"],
+    flowIds: ["pi.home-to-more-to-documents"],
+    relatedComponents: ["shell.page-header", "accounts.transaction-search", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "documents",
     implementationPath: "src/app/screens/documents/DocumentsScreen.tsx",
     implementationStatus: "reconstructed-code",
@@ -172,8 +305,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the Documents list as the same family as Messages, reusing the shared header and search treatment but removing the mailbox tabs and per-row dot menu.",
       "The More > Documents runtime screen and the Design System Template preview both read the same `documentsConfig.ts` grouped-list data.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-error-to-be",
     name: "Error to be",
     sourcePath: "screenshots/Error to be.png",
@@ -181,7 +314,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    screenFamily: "payment-flow",
+    relatedScreens: ["pi.payment.success", "platform.design-system"],
+    flowIds: ["pi.new-domestic-payment"],
+    relatedComponents: ["ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "error-status",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -189,8 +325,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Shares the feedback status screen primitive with Informative, Pending, Success, and Warning templates.",
       "Reconstructs the title, help action, red status icon, lorem copy block, and fixed bottom CTA as JSX.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-generate-token",
     name: "Generate Token",
     sourcePath: "screenshots/Generate Token.png",
@@ -198,7 +334,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    screenFamily: "prelogin",
+    relatedScreens: ["pi.prelogin.active", "platform.design-system"],
+    flowIds: ["pi.prelogin-to-home.active"],
+    relatedComponents: ["prelogin.active", "ui.radio-button", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "generate-token",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -206,8 +345,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the token-generation screen with logout/help chrome, token panel, reusable radio option rows, and bottom Generate CTA.",
       "Shares radio-row and CTA primitives with Product selection and account-selection panel templates.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-homepage",
     name: "Homepage",
     sourcePath: "screenshots/homepage.png",
@@ -215,7 +354,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 750,
     height: 1624,
     format: "png",
-    relatedComponents: ["HomeHeader", "AccountSummary", "BottomNavigation", "TemplateCodePreview", "AppIcon"],
+    screenFamily: "account-detail",
+    relatedScreens: ["pi.account.detail", "pi.home.overview", "platform.design-system"],
+    flowIds: ["pi.home-to-account-detail"],
+    relatedComponents: ["home.account-balance-card", "accounts.transaction-search", "accounts.transaction-row", "shell.bottom-navigation", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "account-detail-homepage",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -223,8 +365,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "The source filename is `homepage`, but the screenshot content is an account-detail home screen; the registry maps it to the reconstructed account-detail homepage preview.",
       "Reuses account balance card, shortcut, search, transaction-list, and five-item bottom navigation patterns for future account flows.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-informative",
     name: "Informative",
     sourcePath: "screenshots/Informative.png",
@@ -232,7 +374,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    screenFamily: "payment-flow",
+    relatedScreens: ["pi.payment.success", "platform.design-system"],
+    flowIds: ["pi.new-domestic-payment"],
+    relatedComponents: ["ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "informative-status",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -240,8 +385,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Introduces a reusable feedback status screen primitive with help-only top chrome, centered status icon, body copy, and fixed bottom CTA.",
       "This variant renders the neutral informational icon and title while sharing layout with Pending, Success, Error, and Warning.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-language-selection",
     name: "Language Selection",
     sourcePath: "screenshots/Language Selection.png",
@@ -249,7 +394,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 375,
     height: 812,
     format: "png",
-    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    screenFamily: "payment-flow",
+    runtimeScreenId: "pi.payment.sign",
+    relatedScreens: ["pi.payment.sign", "platform.design-system"],
+    flowIds: ["pi.new-domestic-payment", "pi.transaction-redo-payment"],
+    relatedComponents: ["payments.domestic-flow", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "sign-pin",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -257,8 +406,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "The source filename is `Language Selection`, but the screenshot content is a Sign/PIN screen; the registry maps it to the reconstructed sign-pin code preview.",
       "Reuses the shared phone surface, back chrome, PIN input line treatment, fixed bottom CTA, and home indicator.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-message",
     name: "Message",
     sourcePath: "screenshots/Message.png",
@@ -266,7 +415,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    screenFamily: "messages",
+    relatedScreens: ["pi.messages.overview", "platform.design-system"],
+    flowIds: ["pi.header-to-messages"],
+    relatedComponents: ["messages.inbox-list", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "message-detail",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -274,8 +426,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the message detail layout with back chrome, title/date, media placeholder, body copy, primary CTA, and link action.",
       "Complements template 52 by covering the detail-side message pattern without introducing a runtime detail screen yet.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-new-request-with-push",
     name: "New request with push",
     sourcePath: "screenshots/New request with push.png",
@@ -283,16 +435,19 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 871,
     format: "png",
-    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    screenFamily: "payment-flow",
+    relatedScreens: ["pi.payment.domestic-create", "platform.design-system"],
+    flowIds: ["pi.new-domestic-payment"],
+    relatedComponents: ["shell.page-header", "ui.text-field", "ui.amount-field", "ui.section-heading-divider", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "push-request-form",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
     reuseNotes: [
-      "Reconstructs the request-with-push form as sectioned JSX fields with payer, account, and payment-information blocks.",
-      "Adds a shared field-line primitive that can be reused by future review/payment form templates.",
+      "Reconstructs the request-with-push form with shared TextField, AmountField, SectionHeadingDivider, and primary CTA primitives.",
+      "Dropdown affordances and amount/currency rows now come from the same form components used by runtime payment flows.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-panel",
     name: "Panel",
     sourcePath: "screenshots/Panel.png",
@@ -300,7 +455,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 375,
     height: 809,
     format: "png",
-    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    screenFamily: "account-detail",
+    relatedScreens: ["pi.account.detail", "platform.design-system"],
+    flowIds: ["pi.home-to-account-detail"],
+    relatedComponents: ["shell.bottom-sheet", "ui.radio-button", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "account-selection-panel",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -308,8 +466,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the account-selection bottom sheet with dark backdrop, sheet header/close action, radio account rows, and Select CTA.",
       "Shares the same radio option row primitive with Generate Token and Product selection.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-payment",
     name: "Payment",
     sourcePath: "screenshots/Payment.png",
@@ -317,16 +475,20 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 375,
     height: 1378,
     format: "png",
-    relatedComponents: ["DomesticPaymentFlowScreens", "TextField", "PrimaryButton", "TemplateCodePreview", "AppIcon"],
+    screenFamily: "payment-flow",
+    runtimeScreenId: "pi.payment.domestic-create",
+    relatedScreens: ["pi.payment.domestic-create", "platform.design-system"],
+    flowIds: ["pi.new-domestic-payment", "pi.transaction-redo-payment"],
+    relatedComponents: ["payments.domestic-flow", "shell.page-header", "ui.text-field", "ui.amount-field", "ui.section-heading-divider", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "domestic-payment-form",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
     reuseNotes: [
-      "Reconstructs the Domestic payment entry form with section headers, flow fields, camera/dropdown affordances, instant-payment toggle, and fixed Next CTA.",
-      "The shared flow-field primitive is reused by payment review templates and can seed future payment form variants.",
+      "Reconstructs the Domestic payment entry form with shared PageHeader, SectionHeadingDivider, TextField, AmountField, camera/dropdown affordances, instant-payment toggle, and fixed Next CTA.",
+      "The runtime Domestic payment screen and the template preview now use the same field component family for dropdowns, text inputs, and amount/currency input.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-pending",
     name: "Pending",
     sourcePath: "screenshots/Pending.png",
@@ -334,7 +496,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    screenFamily: "payment-flow",
+    relatedScreens: ["pi.payment.success", "platform.design-system"],
+    flowIds: ["pi.new-domestic-payment"],
+    relatedComponents: ["ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "pending-status",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -342,8 +507,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Shares the feedback status screen primitive with Informative, Success, Error, and Warning templates.",
       "Reconstructs the neutral pending/hourglass status treatment, lorem copy block, and fixed bottom CTA as JSX.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-product-selection",
     name: "Product selection",
     sourcePath: "screenshots/Product selection.jpg",
@@ -351,7 +516,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "jpg",
-    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    screenFamily: "products",
+    relatedScreens: ["pi.products.overview", "platform.design-system"],
+    flowIds: ["pi.home-to-products-menu"],
+    relatedComponents: ["products.menu", "ui.radio-button", "ui.primary-button", "shell.bottom-navigation", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "product-selection",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -359,8 +527,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the product-selection screen with radio rows, default-product toggle, Access CTA, and bottom navigation.",
       "Uses shared radio and mini bottom-navigation primitives so future product picker flows can reuse the layout.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-product",
     name: "Product",
     sourcePath: "screenshots/Product.png",
@@ -368,7 +536,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    screenFamily: "products",
+    relatedScreens: ["pi.products.overview", "platform.design-system"],
+    flowIds: ["pi.home-to-products-menu"],
+    relatedComponents: ["shell.bottom-sheet", "products.menu", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "product-bottom-sheet",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -376,8 +547,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the product bottom-sheet as JSX with real typography, overlay, close action, media placeholder, body copy, and reusable PrimaryButton.",
       "Useful as a reusable product-detail sheet foundation instead of a static screenshot card.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-review-request",
     name: "Review request",
     sourcePath: "screenshots/Review request.png",
@@ -385,7 +556,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 1281,
     format: "png",
-    relatedComponents: ["PrimaryButton", "PageHeader", "TemplateCodePreview", "AppIcon"],
+    screenFamily: "payment-flow",
+    relatedScreens: ["pi.payment.review", "platform.design-system"],
+    flowIds: ["pi.new-domestic-payment"],
+    relatedComponents: ["shell.page-header", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "review-request",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -393,8 +567,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the Review request confirmation screen with payer, account, and payment-information sections rendered as read-only rows.",
       "Shares the read-only row and section-title primitives with Review data and Transaction detail templates.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-review",
     name: "Review",
     sourcePath: "screenshots/Review.png",
@@ -402,7 +576,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 375,
     height: 1077,
     format: "png",
-    relatedComponents: ["DomesticPaymentFlowScreens", "PrimaryButton", "TemplateCodePreview", "AppIcon"],
+    screenFamily: "payment-flow",
+    runtimeScreenId: "pi.payment.review",
+    relatedScreens: ["pi.payment.review", "platform.design-system"],
+    flowIds: ["pi.new-domestic-payment", "pi.transaction-redo-payment"],
+    relatedComponents: ["payments.domestic-flow", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "review-data",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -410,8 +588,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the Review data payment-order screen with a read-only payment summary, Save as template toggle, and fixed Sign CTA.",
       "Extends the payment-flow template family without embedding the source PNG as the implementation.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-rs-travel-insurance",
     name: "RS - Travel Insurance",
     sourcePath: "screenshots/RS - Travel Insurance.png",
@@ -419,7 +597,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    countries: ["RS"],
+    screenFamily: "products",
+    relatedScreens: ["pi.products.overview", "pi.more.overview", "platform.design-system"],
+    flowIds: ["pi.home-to-products-menu"],
+    relatedComponents: ["products.menu", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "travel-insurance-detail",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -427,8 +609,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the travel-insurance detail screen with back/help chrome, code-native travel hero scene, body copy, and fixed Proceed CTA.",
       "Keeps the screenshot as source evidence while avoiding a screenshot-as-implementation PNG dependency.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-settings",
     name: "Settings",
     sourcePath: "screenshots/Settings.png",
@@ -436,7 +618,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 754,
     height: 1628,
     format: "png",
-    relatedComponents: ["SettingsScreen", "PageHeader", "SectionHeadingDivider", "AppIcon"],
+    screenFamily: "service-menu",
+    runtimeScreenId: "pi.settings.overview",
+    relatedScreens: ["pi.settings.overview", "pi.more.overview", "platform.design-system"],
+    flowIds: ["pi.home-to-more-to-settings"],
+    relatedComponents: ["shell.page-header", "ui.section-heading-divider", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "settings",
     implementationPath: "src/app/screens/settings/SettingsScreen.tsx",
     implementationStatus: "reconstructed-code",
@@ -444,8 +630,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the Settings screen as a shared PageHeader plus section-heading/divider and chevron-list rows driven by a common settings config.",
       "The More > Settings runtime screen and the Design System Template preview both read the same `settingsConfig.ts` section data so copy and structure stay aligned.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-success-to-be",
     name: "Success to be",
     sourcePath: "screenshots/Success to be.png",
@@ -453,7 +639,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    screenFamily: "payment-flow",
+    relatedScreens: ["pi.payment.success", "platform.design-system"],
+    flowIds: ["pi.new-domestic-payment"],
+    relatedComponents: ["ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "success-status",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -461,8 +650,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Shares the feedback status screen primitive with Informative, Pending, Error, and Warning templates.",
       "Reconstructs the green success icon, `Successfully requested` title, lorem copy block, and fixed bottom CTA as JSX.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-transaction-detail",
     name: "Transaction detail",
     sourcePath: "screenshots/Transaction detail.png",
@@ -470,7 +659,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 375,
     height: 1855,
     format: "png",
-    relatedComponents: ["DomesticPaymentFlowScreens", "AccountTransactionRow", "PageHeader", "TemplateCodePreview", "AppIcon"],
+    screenFamily: "account-detail",
+    runtimeScreenId: "pi.transaction.detail",
+    relatedScreens: ["pi.transaction.detail", "pi.account.detail", "platform.design-system"],
+    flowIds: ["pi.transaction-redo-payment"],
+    relatedComponents: ["transactions.detail", "payments.domestic-flow", "shell.page-header", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "transaction-detail",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -478,8 +671,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the transaction detail screen with merchant summary, action shortcuts, spending insight chart, copyable details, and Show less action.",
       "Reuses read-only detail rows and shortcut primitives already introduced for payment/account templates.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-transfer-to-new-phone",
     name: "Transfer to new phone",
     sourcePath: "screenshots/Transfer to new phone.png",
@@ -487,7 +680,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 375,
     height: 812,
     format: "png",
-    relatedComponents: ["TemplateCodePreview", "DomesticPaymentFlowScreens", "PrimaryButton", "AppIcon"],
+    screenFamily: "payment-flow",
+    runtimeScreenId: "pi.payment.success",
+    relatedScreens: ["pi.payment.success", "platform.design-system"],
+    flowIds: ["pi.new-domestic-payment", "pi.transaction-redo-payment"],
+    relatedComponents: ["payments.domestic-flow", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "successful-payment",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -495,8 +692,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "The source filename is `Transfer to new phone`, but the screenshot content is a Successful payment screen; the registry maps it to a success-payment code preview.",
       "Reuses the same success icon and bottom CTA pattern as the Domestic payment success runtime screen.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-tutorial-1",
     name: "Tutorial 1",
     sourcePath: "screenshots/Tutorial 1.png",
@@ -504,7 +701,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["TemplateCodePreview", "TutorialCard", "AppIcon"],
+    screenFamily: "prelogin",
+    relatedScreens: ["pi.prelogin.inactive", "pi.prelogin.active", "platform.design-system"],
+    flowIds: ["pi.prelogin-to-home.active"],
+    relatedComponents: ["prelogin.inactive", "prelogin.active", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "tutorial-intro",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -512,8 +712,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Reconstructs the tutorial/webview intro with loading chrome, progress bar, device media area, playback controls, carousel dots, and skip/back/next actions.",
       "Adds a reusable webview/tutorial composition pattern for future onboarding templates.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-warning-to-be",
     name: "Warning to be",
     sourcePath: "screenshots/Warning to be.png",
@@ -521,7 +721,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     width: 377,
     height: 814,
     format: "png",
-    relatedComponents: ["TemplateCodePreview", "PrimaryButton", "AppIcon"],
+    screenFamily: "payment-flow",
+    relatedScreens: ["pi.payment.success", "platform.design-system"],
+    flowIds: ["pi.new-domestic-payment"],
+    relatedComponents: ["ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "warning-status",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -529,8 +732,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Shares the feedback status screen primitive with Informative, Pending, Success, and Error templates.",
       "Reconstructs the orange warning/bell status icon, lorem copy block, and fixed bottom CTA as JSX.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-home-dashboard-code",
     name: "Home dashboard",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::home-dashboard",
@@ -538,7 +741,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["HomeHeader", "AccountSummary", "AccountSearchBar", "BottomNavigation", "AppIcon"],
+    screenFamily: "dashboard",
+    runtimeScreenId: "pi.home.overview",
+    relatedScreens: ["pi.home.overview", "platform.design-system"],
+    flowIds: ["pi.prelogin-to-home.active"],
+    relatedComponents: ["home.account-summary", "accounts.transaction-search", "accounts.transaction-row", "shell.bottom-navigation", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "home-dashboard",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -546,8 +753,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only template derived from the active Home/account summary family, so it can seed future dashboard flows without a PNG source.",
       "Reuses the top header action rail, account balance card, shortcut pattern, transaction rows, product cards, and bottom navigation primitives.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-payments-menu-code",
     name: "Payments menu",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::payments-menu",
@@ -555,7 +762,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["PaymentsScreen", "PaymentOtherShortcut", "BottomNavigation", "AppIcon"],
+    screenFamily: "payments",
+    runtimeScreenId: "pi.payments.overview",
+    relatedScreens: ["pi.payments.overview", "platform.design-system"],
+    flowIds: ["pi.home-to-payments-menu"],
+    relatedComponents: ["payments.menu", "payments.other-shortcut", "shell.bottom-navigation", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "payments-menu",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -563,8 +774,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only template based on the runtime Payments menu and country-scoped payments config.",
       "Reuses the Payments hero card family, OTHER shortcut carousel items, header actions, and five-tab bottom navigation.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-new-payment-sheet-code",
     name: "New payment sheet",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::new-payment-sheet",
@@ -572,7 +783,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["BottomSheet", "NewPaymentActionListItem", "NewPaymentDiscoverBanner", "AppIcon"],
+    screenFamily: "payments",
+    relatedScreens: ["pi.payments.overview", "platform.design-system"],
+    flowIds: ["pi.new-domestic-payment"],
+    relatedComponents: ["shell.bottom-sheet", "payments.new-payment-sheet", "payments.new-payment-action", "payments.new-payment-discover-banner", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "new-payment-sheet",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -580,8 +794,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only template for the Payments New payment bottom sheet using the same action rows and discover banner as the runtime sheet.",
       "Keeps the corrected 16px sheet padding and 4px discover-banner title/subtitle spacing visible in the reusable template grid.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-products-menu-code",
     name: "Products menu",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::products-menu",
@@ -589,7 +803,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["ProductsScreen", "ProductOfferCard", "ProductMenuCard", "BottomNavigation"],
+    screenFamily: "products",
+    runtimeScreenId: "pi.products.overview",
+    relatedScreens: ["pi.products.overview", "platform.design-system"],
+    flowIds: ["pi.home-to-products-menu"],
+    relatedComponents: ["products.menu", "products.offer-card", "products.product-card", "shell.bottom-navigation", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "products-menu",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -597,8 +815,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only template derived from the Products runtime menu and products config.",
       "Reuses the segmented Banking/ShopSmart treatment, Products offer card, product card grid, and bottom navigation.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-more-menu-code",
     name: "More menu",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::more-menu",
@@ -606,7 +824,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["MoreScreen", "BottomNavigation", "AppIcon"],
+    screenFamily: "service-menu",
+    runtimeScreenId: "pi.more.overview",
+    relatedScreens: ["pi.more.overview", "platform.design-system"],
+    flowIds: ["pi.home-to-more-to-contacts", "pi.home-to-more-to-documents", "pi.home-to-more-to-settings"],
+    relatedComponents: ["more.card-grid", "shell.bottom-navigation", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "more-menu",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -614,8 +836,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only template derived from the country-aware More card matrix.",
       "Reuses the top-level header, More card row composition, icon registry, and five-tab bottom navigation.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-contacts-directory-code",
     name: "Contacts directory",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::contacts-directory",
@@ -623,7 +845,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["ContactsScreen", "ContactsNavigationCard", "AccountSearchBar", "AppIcon"],
+    screenFamily: "contacts",
+    runtimeScreenId: "pi.contacts.overview",
+    relatedScreens: ["pi.contacts.overview", "platform.design-system"],
+    flowIds: ["pi.home-to-more-to-contacts"],
+    relatedComponents: ["contacts.navigation-card", "accounts.transaction-search", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "contacts-directory",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -631,8 +857,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only template for a full Contacts directory surface, complementing the existing contact bottom-sheet screenshot template.",
       "Reuses the search strip, section divider, contact action cards, and centralized contact icons.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-account-details-info-code",
     name: "Account details info",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::account-details-info",
@@ -640,7 +866,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["AccountDetailsInfoScreen", "AccountDetailsInfoField", "AppIcon"],
+    screenFamily: "account-detail",
+    runtimeScreenId: "pi.account.details-info",
+    relatedScreens: ["pi.account.details-info", "pi.account.detail", "platform.design-system"],
+    flowIds: ["pi.home-to-account-detail"],
+    relatedComponents: ["accounts.details-info", "accounts.details-info-field", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "account-details-info",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -648,8 +878,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only template for the account-details information family, using the same account card, read-only rows, copy affordance, and share action.",
       "Complements the existing account options and account-detail homepage templates for account flow assembly.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-messages-outbox-code",
     name: "Messages outbox",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::messages-outbox",
@@ -657,7 +887,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["MessagesScreen", "AccountSearchBar", "AppIcon"],
+    screenFamily: "messages",
+    runtimeScreenId: "pi.messages.overview",
+    relatedScreens: ["pi.messages.overview", "platform.design-system"],
+    flowIds: ["pi.header-to-messages"],
+    relatedComponents: ["messages.inbox-list", "messages.mailbox-tabs", "accounts.transaction-search", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "messages-outbox",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -665,8 +899,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only mailbox variant that reuses the template 52 Messages family but selects Outbox data from messagesConfig.",
       "Gives future prompt-driven flows both inbox and sent-message list patterns without needing an extra PNG.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-prime-advisor-code",
     name: "Prime advisor",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::prime-advisor",
@@ -674,7 +908,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["PrimeScreen", "YourAdvisorTab", "PrimaryButton", "AppIcon"],
+    screenFamily: "prime",
+    runtimeScreenId: "pi.prime.overview",
+    relatedScreens: ["pi.prime.overview", "platform.design-system"],
+    flowIds: [],
+    relatedComponents: ["prime.advisor-tab", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "prime-advisor",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -682,8 +920,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only template for the Prime advisor contact pattern.",
       "Reuses top chrome, advisor summary card, read-only contact rows, copy affordances, and a fixed bottom CTA.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-prime-benefits-code",
     name: "Prime benefits",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::prime-benefits",
@@ -691,7 +929,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["PrimeScreen", "YourBenefitsTab", "PrimaryButton", "AppIcon"],
+    screenFamily: "prime",
+    runtimeScreenId: "pi.prime.overview",
+    relatedScreens: ["pi.prime.overview", "platform.design-system"],
+    flowIds: [],
+    relatedComponents: ["prime.benefits-tab", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "prime-benefits",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -699,8 +941,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only template for Prime benefits and premium-service storytelling.",
       "Reuses the status/card + checklist composition so Prime prompts can be built from known screen parts instead of invented cards.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-prelogin-inactive-code",
     name: "Prelogin inactive",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::prelogin-inactive",
@@ -708,7 +950,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["PreLoginScreen", "UniCreditLogo", "PrimaryButton", "AppIcon"],
+    screenFamily: "prelogin",
+    runtimeScreenId: "pi.prelogin.inactive",
+    relatedScreens: ["pi.prelogin.inactive", "platform.design-system"],
+    flowIds: ["pi.prelogin-to-home.active"],
+    relatedComponents: ["prelogin.inactive", "prelogin.language-selector", "brand.unicredit-logo", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "prelogin-inactive",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -716,8 +962,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only template for the inactive pre-login activation surface, including logo/language header, product teaser rows, CTA, and bottom utility links.",
       "Uses code-native background/card art rather than a PNG so pre-login prompt flows can reuse the layout vocabulary.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-prelogin-active-code",
     name: "Prelogin active",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::prelogin-active",
@@ -725,7 +971,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["PreLoginActiveScreen", "UniCreditLogo", "PrimaryButton", "AppIcon"],
+    screenFamily: "prelogin",
+    runtimeScreenId: "pi.prelogin.active",
+    relatedScreens: ["pi.prelogin.active", "platform.design-system"],
+    flowIds: ["pi.prelogin-to-home.active"],
+    relatedComponents: ["prelogin.active", "prelogin.language-selector", "brand.unicredit-logo", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "prelogin-active",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -733,8 +983,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only template for the active app login posture with title/subtitle, login CTA, language selector, and utility-link row.",
       "Complements the Home dashboard templates with the actual entry-state pattern used before authenticated navigation.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-language-selector-sheet-code",
     name: "Language selector sheet",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::language-selector-sheet",
@@ -742,7 +992,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["LanguageSelector", "RadioButton", "PrimaryButton", "AppIcon"],
+    screenFamily: "prelogin",
+    relatedScreens: ["pi.prelogin.inactive", "pi.prelogin.active", "platform.design-system"],
+    flowIds: ["pi.prelogin-to-home.active"],
+    relatedComponents: ["prelogin.language-selector", "ui.radio-button", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "language-selector-sheet",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -750,8 +1003,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only template for the pre-login language selection modal pattern over the inactive background.",
       "Reuses the same radio-row primitive family used by token, product-selection, and account-selection templates.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-more-panel-menu-code",
     name: "Other panel menu",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::more-panel-menu",
@@ -759,7 +1012,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["PanelWithTranslations", "PanelOverlay", "AppIcon"],
+    screenFamily: "prelogin",
+    relatedScreens: ["pi.prelogin.inactive", "pi.prelogin.active", "platform.design-system"],
+    flowIds: ["pi.co-apping.activation"],
+    relatedComponents: ["prelogin.other-panel", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "more-panel-menu",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -767,8 +1023,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only template for the dark pre-login Other panel using the actual translated panel component.",
       "Keeps smart banking, exchange rates, ATM/branches, and Co-Apping entry as reusable row patterns.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-co-apping-session-code",
     name: "Co-Apping session",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::co-apping-session",
@@ -776,7 +1032,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["CoAppingSessionScreen", "TextField", "PrimaryButton", "AppIcon"],
+    screenFamily: "co-apping",
+    runtimeScreenId: "pi.co-apping.session",
+    relatedScreens: ["pi.co-apping.session", "pi.prelogin.active", "platform.design-system"],
+    flowIds: ["pi.co-apping.activation"],
+    relatedComponents: ["co-apping.session-entry", "ui.text-field", "ui.primary-button", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "co-apping-session",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -784,8 +1044,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only template for the Co-Apping code-entry screen with hero art, explanatory copy, reusable TextField, privacy helper, and fixed Continue CTA.",
       "Supports future assistant-built support/session flows without inventing a new form pattern.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-account-transactions-list-code",
     name: "Account transactions list",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::account-transactions-list",
@@ -793,7 +1053,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["AccountDetailScreen", "AccountSearchBar", "AccountTransactionRow", "AppIcon"],
+    screenFamily: "account-detail",
+    runtimeScreenId: "pi.account.detail",
+    relatedScreens: ["pi.account.detail", "platform.design-system"],
+    flowIds: ["pi.home-to-account-detail"],
+    relatedComponents: ["home.account-balance-card", "accounts.transaction-search", "accounts.transaction-row", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "account-transactions-list",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -801,8 +1065,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only account transaction list template with account card, search strip, month divider, and transaction rows.",
       "Complements the account-detail homepage screenshot template with a denser list-first state for prompt-built account flows.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-account-search-results-code",
     name: "Account search results",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::account-search-results",
@@ -810,7 +1074,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["AccountSearchBar", "AccountTransactionRow", "AppIcon"],
+    screenFamily: "account-detail",
+    relatedScreens: ["pi.account.detail", "platform.design-system"],
+    flowIds: ["pi.home-to-account-detail"],
+    relatedComponents: ["accounts.transaction-search", "accounts.transaction-row", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "account-search-results",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -818,8 +1085,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only template for the transaction-search results state, including active query, clear affordance, result count, filtered rows, and clear-results action.",
       "Makes the search-result state available as a reusable prompt target instead of only an interaction inside the runtime screen.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-spending-money-out-code",
     name: "Spending money out",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::spending-money-out",
@@ -827,7 +1094,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["AnalyticsScreen", "SectionHeadingDivider", "BottomNavigation", "AppIcon"],
+    screenFamily: "analytics",
+    runtimeScreenId: "pi.analytics.overview",
+    relatedScreens: ["pi.analytics.overview", "platform.design-system"],
+    flowIds: ["pi.home-to-analytics"],
+    relatedComponents: ["analytics.spendings", "pfm.category-icon", "ui.section-heading-divider", "shell.bottom-navigation", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "spending-money-out",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -835,8 +1106,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only Spending category breakdown template with total card, bar chart, category rows, and proportional row bars.",
       "Extends the Analytics screenshot template with a reusable money-out category state for future PFM prompts.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-products-shopsmart-code",
     name: "Products ShopSmart",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::products-shopsmart",
@@ -844,7 +1115,11 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["ProductsScreen", "ProductOfferCard", "ProductMenuCard", "BottomNavigation"],
+    screenFamily: "products",
+    runtimeScreenId: "pi.products.overview",
+    relatedScreens: ["pi.products.overview", "platform.design-system"],
+    flowIds: ["pi.home-to-products-menu"],
+    relatedComponents: ["products.menu", "products.offer-card", "products.product-card", "shell.bottom-navigation", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "products-shopsmart",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -852,8 +1127,8 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only template for the ShopSmart tab state using the products menu config, ProductOfferCard, and ProductMenuCard grid.",
       "Complements the Banking products template so the tabbed Products family has both reusable states.",
     ],
-  },
-  {
+  }),
+  defineTemplate({
     id: "template-logout-confirmation-code",
     name: "Logout confirmation",
     sourcePath: "src/app/components/templates/TemplateCodePreviews.tsx::logout-confirmation",
@@ -861,7 +1136,10 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
     height: 814,
     format: "code",
     sourceKind: "code-only",
-    relatedComponents: ["LogoutConfirmDialog", "MoreScreen", "AppIcon"],
+    screenFamily: "service-menu",
+    relatedScreens: ["pi.more.overview", "platform.design-system"],
+    flowIds: ["pi.home-to-more-to-contacts", "pi.home-to-more-to-documents", "pi.home-to-more-to-settings"],
+    relatedComponents: ["dialogs.logout-confirmation", "more.card-grid", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "logout-confirmation",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -869,5 +1147,5 @@ export const TEMPLATE_REGISTRY: TemplateRegistryItem[] = [
       "Code-only template for the iOS-style logout confirmation overlay over the More surface.",
       "Reuses the actual LogoutConfirmDialog component so destructive/confirmation prompts stay visually consistent.",
     ],
-  },
+  }),
 ];

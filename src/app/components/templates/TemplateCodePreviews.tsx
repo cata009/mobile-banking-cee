@@ -1,16 +1,24 @@
 import type { ReactNode } from "react";
+import AccountActionBar, { type AccountActionBarItem } from "@/app/components/accounts/AccountActionBar";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
+import AmountField from "@/app/components/AmountField";
+import BottomNavigation from "@/app/components/BottomNavigation";
+import DynamicIsland from "@/app/components/DynamicIsland";
 import { AppIcon, type IconName } from "@/app/components/icons";
+import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
 import NewPaymentActionListItem from "@/app/components/payments/NewPaymentActionListItem";
 import NewPaymentDiscoverBanner from "@/app/components/payments/NewPaymentDiscoverBanner";
 import PaymentOtherShortcut from "@/app/components/payments/PaymentOtherShortcut";
 import PanelWithTranslations from "@/app/components/PanelWithTranslations";
+import PageHeader from "@/app/components/PageHeader";
 import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
+import StatusBar from "@/app/components/StatusBar";
 import TextField from "@/app/components/TextField";
 import UniCreditLogo from "@/app/components/UniCreditLogo";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 import { getDocumentsConfigForCountry, type DocumentListItem } from "@/app/config/documentsConfig";
 import { getMoreCardsForCountry, type MoreCardType } from "@/app/config/moreCardsConfig";
 import { getPaymentsMenuForCountry, type PaymentHeroItem } from "@/app/config/paymentsMenuConfig";
@@ -18,6 +26,13 @@ import { getProductsMenuForCountry } from "@/app/config/productsMenuConfig";
 import { SETTINGS_SECTIONS } from "@/app/config/settingsConfig";
 import { MESSAGES_CONFIG_BY_COUNTRY, type MessageListItem } from "@/app/config/messagesConfig";
 import { LogoutConfirmDialog } from "@/app/components/LogoutConfirmDialog";
+import {
+  BankingContent,
+  getProductsCardTranslationId,
+  ProductsHeader,
+  ProductsTabs,
+  ShopSmartContent,
+} from "@/app/screens/products/ProductsScreen";
 import { ACCOUNT_OPTION_ITEMS, ACCOUNT_PRODUCT_OPTIONS } from "@/data/accountDetails";
 
 export type TemplateCodePreviewId =
@@ -159,22 +174,22 @@ const moreCardMeta: Record<MoreCardType, { title: string; description: string; i
     icon: "info-circle",
   },
   "third-party-consent": {
-    title: "Third party consent",
+    title: "Consent to third parties",
     description: "Open banking access and sharing",
     icon: "account-option-share-info",
   },
   "digital-activities": {
-    title: "Digital activities",
+    title: "Digital activity record",
     description: "Recent online banking activity",
     icon: "filters",
   },
   "my-requests": {
-    title: "My requests",
+    title: "My applications",
     description: "Submitted service requests",
     icon: "payment-templates",
   },
   tutorial: {
-    title: "Tutorial",
+    title: "Tutorials",
     description: "Guided help for app features",
     icon: "help-circle",
   },
@@ -259,10 +274,6 @@ const domesticPaymentFields = {
     { label: "Prefix", value: "19" },
     { label: "Account number (mandatory)", value: "2000145399", right: "camera" as IconName },
     { label: "Bank code (mandatory)", value: "0800", helper: "Ceska sporitelna, a.s.", right: "camera" as IconName },
-  ],
-  payment: [
-    { label: "Amount limit", value: "24700" },
-    { label: "Currency", value: "CZK" },
   ],
 };
 
@@ -365,40 +376,51 @@ const feedbackStatusTemplates: Record<
   },
 };
 
-function StaticStatusBar() {
-  return (
-    <div className="flex h-[24px] w-full items-center justify-between px-[6px] pt-[3px] font-['SF_Pro',sans-serif] text-[14px] font-[590] text-[var(--uc-static-black)]">
-      <div className="flex w-[64px] items-center gap-[3px]" aria-hidden="true">
-        <span className="h-[10px] w-[3px] self-end rounded-sm bg-[var(--uc-static-black)]" />
-        <span className="h-[12px] w-[3px] self-end rounded-sm bg-[var(--uc-static-black)]" />
-        <span className="h-[14px] w-[3px] self-end rounded-sm bg-[var(--uc-static-black)]" />
-        <span className="h-[16px] w-[3px] self-end rounded-sm bg-[var(--uc-static-black)]" />
-        <span className="ml-[4px] h-[11px] w-[16px] rounded-full border-[2px] border-[var(--uc-static-black)] border-b-transparent border-l-transparent" />
-      </div>
-      <span>9:41 AM</span>
-      <div className="flex w-[86px] items-center justify-end gap-[5px]">
-        <span className="relative h-[14px] w-[8px]" aria-hidden="true">
-          <span className="absolute left-[3px] top-0 h-[14px] w-[2px] bg-[var(--uc-static-black)]" />
-          <span className="absolute left-[1px] top-[2px] h-[8px] w-[2px] rotate-45 bg-[var(--uc-static-black)]" />
-          <span className="absolute left-[5px] top-[4px] h-[8px] w-[2px] rotate-[-45deg] bg-[var(--uc-static-black)]" />
-        </span>
-        <span className="text-[14px] leading-none">100%</span>
-        <span className="relative h-[11px] w-[25px] rounded-[3px] border border-[var(--uc-static-black)]">
-          <span className="absolute -right-[3px] top-[3px] h-[5px] w-[2px] rounded-r-sm bg-[var(--uc-static-black)]" />
-          <span className="absolute left-[2px] top-[2px] h-[5px] w-[19px] rounded-[2px] bg-[var(--uc-static-black)]" />
-        </span>
-      </div>
-    </div>
-  );
+const TEMPLATE_SYSTEM_HEADER_HEIGHT = 54;
+
+function TemplateSystemHeaderSpacer() {
+  return null;
 }
 
-function TemplatePhoneSurface({ children }: { children: ReactNode }) {
+function TemplatePhoneSurface({
+  children,
+  showSystemHeader = true,
+  statusBarVariant = "light",
+  reserveSystemHeader = true,
+}: {
+  children: ReactNode;
+  showSystemHeader?: boolean;
+  statusBarVariant?: "light" | "dark";
+  reserveSystemHeader?: boolean;
+}) {
+  const contentTopOffset = showSystemHeader && reserveSystemHeader ? TEMPLATE_SYSTEM_HEADER_HEIGHT : 0;
+
   return (
     <div
       className="relative h-[814px] w-[377px] overflow-hidden border border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)]"
       data-ds-label="Template code screen 377x814"
+      data-template-phone-surface="true"
     >
-      {children}
+      {showSystemHeader ? (
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 z-50"
+          style={{ height: TEMPLATE_SYSTEM_HEADER_HEIGHT }}
+          data-template-system-header="true"
+        >
+          <StatusBar variant={statusBarVariant} />
+          <DynamicIsland variant={statusBarVariant} />
+        </div>
+      ) : null}
+      <div
+        className="relative h-full min-h-0 w-full"
+        style={{
+          height: contentTopOffset ? `calc(100% - ${contentTopOffset}px)` : "100%",
+          marginTop: contentTopOffset,
+        }}
+        data-template-phone-content="true"
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -474,10 +496,9 @@ function TemplateBottomButton({
 
 function TemplateRadioMark({ selected }: { selected?: boolean }) {
   return (
-    <span className="grid size-[24px] place-items-center">
+    <span className="grid size-[32px] place-items-center">
       <AppIcon
         name={selected ? "radio-selected" : "radio-unselected"}
-        size={24}
         color={selected ? "var(--uc-action)" : "var(--uc-text)"}
       />
     </span>
@@ -490,7 +511,7 @@ function TemplateRadioRow({ option, interactive }: { option: RadioOption; intera
       ariaLabel={option.title}
       pressed={Boolean(option.selected)}
       interactive={interactive}
-      className="grid min-h-[72px] w-full grid-cols-[24px_1fr] items-center gap-[16px] text-left"
+      className="grid min-h-[72px] w-full grid-cols-[32px_1fr] items-center gap-[16px] text-left"
     >
       <TemplateRadioMark selected={option.selected} />
       <span className="min-w-0">
@@ -508,23 +529,30 @@ function TemplateRadioRow({ option, interactive }: { option: RadioOption; intera
 }
 
 function TemplateFormLine({ field }: { field: FieldLine }) {
-  return (
-    <div className="min-h-[64px] border-b border-[var(--uc-border-muted)] pb-[7px] pt-[9px]">
-      <div className="flex items-start justify-between gap-[12px]">
-        <div className="min-w-0">
-          <p className="font-['UniCredit',sans-serif] text-[12px] font-bold uppercase leading-[15px] tracking-[0.08em] text-[var(--uc-text-muted)]">
-            {field.label}
-          </p>
-          <p className={`mt-[8px] truncate font-['UniCredit',sans-serif] text-[16px] leading-[20px] ${field.value ? "font-bold text-[var(--uc-text)]" : "font-normal text-[var(--uc-text-muted)]"}`}>
-            {field.value ?? field.placeholder}
-          </p>
-        </div>
-        {field.action ? (
-          <span className="font-['UniCredit',sans-serif] text-[14px] font-bold leading-[18px] text-[var(--uc-action)]">
-            {field.action}
-          </span>
-        ) : null}
+  const fieldValue = field.value ?? field.placeholder ?? "";
+
+  if (field.label.toLowerCase().includes("amount")) {
+    const [amount, currency = "RON"] = fieldValue.split(" ");
+    return (
+      <div className="pt-[22px]">
+        <AmountField
+          label={field.label}
+          value={amount}
+          onChange={() => undefined}
+          currency={currency}
+        />
       </div>
+    );
+  }
+
+  return (
+    <div className="pt-[22px]">
+      <TextField
+        label={field.label}
+        value={fieldValue}
+        onChange={() => undefined}
+        trailingIconName={field.action ? "chevron-down-wide" : undefined}
+      />
     </div>
   );
 }
@@ -541,17 +569,15 @@ function TemplateFlowField({
   right?: IconName;
 }) {
   return (
-    <div className="pt-[22px] font-['UniCredit',sans-serif]">
-      <p className="text-[12px] font-normal leading-normal text-[var(--uc-text-subtle)]">{label}</p>
-      <div className="flex items-end gap-[12px] border-b border-[var(--uc-text-subtle)] pb-[3px]">
-        <p className="min-w-0 flex-1 text-[18px] font-normal leading-normal text-[var(--uc-text)]">{value}</p>
-        {right ? <AppIcon name={right} size={24} strokeWidth={3} color="var(--uc-text)" /> : null}
-      </div>
-      {helper ? (
-        <p className="mt-[5px] whitespace-pre-line text-[12px] font-normal leading-normal text-[var(--uc-text-subtle)]">
-          {helper}
-        </p>
-      ) : null}
+    <div className="pt-[22px]">
+      <TextField
+        label={label}
+        value={value}
+        onChange={() => undefined}
+        helperText={helper?.split("\n")[0]}
+        helperText2={helper?.split("\n")[1]}
+        trailingIconName={right === "chevron-down" ? "chevron-down-wide" : right}
+      />
     </div>
   );
 }
@@ -567,7 +593,7 @@ function TemplateReadOnlyRow({ label, value, copy }: { label: string; value: str
       </div>
       {copy ? (
         <span className="mt-[8px] grid size-[32px] place-items-center">
-          <AppIcon name="copy-documents" size={24} color="var(--uc-text)" />
+          <AppIcon name="copy-documents" color="var(--uc-text)" />
         </span>
       ) : null}
     </div>
@@ -578,21 +604,14 @@ function TemplateToggle({ checked = true }: { checked?: boolean }) {
   return (
     <span className={`relative h-[30px] w-[60px] rounded-full border-[2px] ${checked ? "border-[var(--uc-action)]" : "border-[var(--uc-text-muted)]"}`} aria-hidden="true">
       <span className={`absolute top-1/2 grid size-[24px] -translate-y-1/2 place-items-center rounded-full ${checked ? "right-[2px] bg-[var(--uc-action)]" : "left-[2px] bg-[var(--uc-text-muted)]"}`}>
-        {checked ? <AppIcon name="check" size={16} strokeWidth={4} color="var(--uc-static-white)" /> : null}
+        {checked ? <AppIcon name="check" strokeWidth={4} color="var(--uc-static-white)" /> : null}
       </span>
     </span>
   );
 }
 
 function TemplateSimpleSectionTitle({ children }: { children: string }) {
-  return (
-    <div className="pt-[30px]">
-      <h2 className="font-['UniCredit',sans-serif] text-[16px] font-bold leading-normal text-[var(--uc-text)]">
-        {children}
-      </h2>
-      <div className="mt-[8px] h-px w-full bg-[var(--uc-border)]" />
-    </div>
-  );
+  return <SectionHeadingDivider title={children} className="pt-[30px]" />;
 }
 
 function TemplateMiniBottomNavigation({ active }: { active: "Home" | "Payments" | "Products" | "More" }) {
@@ -613,7 +632,9 @@ function TemplateMiniBottomNavigation({ active }: { active: "Home" | "Payments" 
               {selected ? (
                 <span className="absolute top-0 h-[2px] w-[24px] rounded-b-full bg-[var(--uc-action)]" />
               ) : null}
-              <AppIcon name={item.icon} size={26} color={selected ? "var(--uc-action)" : "var(--uc-text-muted)"} />
+              <span className="grid size-[32px] place-items-center">
+                <AppIcon name={item.icon} color={selected ? "var(--uc-action)" : "var(--uc-text-muted)"} />
+              </span>
               <span className={`font-['UniCredit',sans-serif] text-[12px] leading-[14px] ${selected ? "text-[var(--uc-action)]" : "text-[var(--uc-text-muted)]"}`}>
                 {item.label}
               </span>
@@ -643,7 +664,9 @@ function TemplateFiveBottomNavigation({ active, productLabel = "Products" }: { a
           return (
             <div key={item.label} className="relative flex flex-col items-center justify-center gap-[2px]">
               {selected ? <span className="absolute top-0 h-[2px] w-[24px] rounded-b-full bg-[var(--uc-action)]" /> : null}
-              <AppIcon name={item.icon} size={26} color={selected ? "var(--uc-action)" : "var(--uc-text-muted)"} />
+              <span className="grid size-[32px] place-items-center">
+                <AppIcon name={item.icon} color={selected ? "var(--uc-action)" : "var(--uc-text-muted)"} />
+              </span>
               <span className={`font-['UniCredit',sans-serif] text-[12px] leading-[14px] ${selected ? "text-[var(--uc-action)]" : "text-[var(--uc-text-muted)]"}`}>
                 {item.display}
               </span>
@@ -669,7 +692,7 @@ function TemplateTopLevelHeader({
 }) {
   return (
     <>
-      <StaticStatusBar />
+      <TemplateSystemHeaderSpacer />
       <header className="px-[24px] pt-[34px] font-['UniCredit',sans-serif]">
         <div className="flex min-h-[40px] items-start gap-[12px]">
           <div className="min-w-0 flex-1">
@@ -688,7 +711,7 @@ function TemplateTopLevelHeader({
                 interactive={interactive}
                 className="grid size-[32px] place-items-center"
               >
-                <AppIcon name={action.icon} size={24} color="var(--uc-text)" />
+                <AppIcon name={action.icon} color="var(--uc-text)" />
               </TemplateAction>
             ))}
           </div>
@@ -735,7 +758,7 @@ function MoreTemplateCard({ type, interactive }: { type: MoreCardType; interacti
       className="grid min-h-[92px] w-full grid-cols-[44px_1fr_24px] items-center gap-[12px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[14px] text-left"
     >
       <span className="grid size-[40px] place-items-center rounded-full bg-[var(--uc-action-soft)] text-[var(--uc-action)]">
-        <AppIcon name={meta.icon} size={22} color="currentColor" />
+        <AppIcon name={meta.icon} color="currentColor" />
       </span>
       <span className="min-w-0 font-['UniCredit',sans-serif]">
         <span className="block text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{meta.title}</span>
@@ -743,7 +766,9 @@ function MoreTemplateCard({ type, interactive }: { type: MoreCardType; interacti
           {meta.description}
         </span>
       </span>
-      <AppIcon name="chevron-link" size={22} color="var(--uc-text)" />
+      <span className="grid size-[32px] place-items-center">
+        <AppIcon name="chevron-link" color="var(--uc-text)" />
+      </span>
     </TemplateAction>
   );
 }
@@ -758,73 +783,45 @@ function TemplateTopChrome({
   interactive: boolean;
 }) {
   return (
-    <>
-      <StaticStatusBar />
-      <div className="grid h-[40px] grid-cols-[40px_1fr_40px] items-center px-[4px]">
-        <TemplateAction className="grid size-[40px] place-items-center" ariaLabel="Back" interactive={interactive}>
-          <AppIcon name="back-heavy" color="var(--uc-text)" />
-        </TemplateAction>
-        <div />
-        {showHelp ? (
-          <TemplateAction className="grid size-[40px] place-items-center" ariaLabel="Help" interactive={interactive}>
-            <AppIcon name="help-circle" color="var(--uc-text)" />
-          </TemplateAction>
-        ) : (
-          <div />
-        )}
-      </div>
-      <div className="px-[24px] pt-[1px]">
-        <h1 className="font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">
-          {title}
-        </h1>
-      </div>
-    </>
+    <PageHeader
+      title={title}
+      onBack={() => undefined}
+      onHelpClick={() => undefined}
+      showHelp={showHelp}
+      variant="transparent"
+      includeSafeArea={false}
+      compact={false}
+      onRightActionClick={interactive ? () => undefined : undefined}
+    />
   );
 }
 
 function TemplateHelpOnlyChrome({ title, interactive }: { title: string; interactive: boolean }) {
+  void interactive;
+
   return (
-    <>
-      <StaticStatusBar />
-      <div className="flex h-[40px] items-center justify-end px-[15px]">
-        <TemplateAction
-          className="grid size-[32px] place-items-center"
-          ariaLabel="Help"
-          interactive={interactive}
-        >
-          <AppIcon name="help-circle" size={20} color="var(--uc-text)" />
-        </TemplateAction>
-      </div>
-      <div className="px-[24px] pt-[1px]">
-        <h1 className="font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">
-          {title}
-        </h1>
-      </div>
-    </>
+    <PageHeader
+      title={title}
+      onBack={() => undefined}
+      onHelpClick={() => undefined}
+      showHelp
+      showBack={false}
+      variant="transparent"
+      includeSafeArea={false}
+      compact={false}
+    />
   );
 }
 
 function TemplateTabs({ tabs, interactive }: { tabs: TemplateTab[]; interactive: boolean }) {
+  void interactive;
+
   return (
-    <div className="mt-[22px] grid h-[48px] grid-cols-2 border-b border-[var(--uc-border)]">
-      {tabs.map((tab) => (
-        <TemplateAction
-          key={tab.label}
-          ariaLabel={tab.label}
-          pressed={Boolean(tab.active)}
-          interactive={interactive}
-          className="relative flex items-center justify-center font-['UniCredit',sans-serif] text-[16px] font-bold text-[var(--uc-text)]"
-        >
-          {tab.active ? (
-            <span className="mr-[8px] size-[12px] rounded-full bg-[var(--uc-action)]" aria-hidden="true" />
-          ) : null}
-          <span className={tab.active ? "" : "text-[var(--uc-text-muted)]"}>{tab.label}</span>
-          {tab.active ? (
-            <span className="absolute bottom-[-1px] left-0 h-[2px] w-full bg-[var(--uc-text)]" aria-hidden="true" />
-          ) : null}
-        </TemplateAction>
-      ))}
-    </div>
+    <MessagesMailboxTabs
+      tabs={tabs.map((tab) => ({ id: tab.label, label: tab.label }))}
+      activeTabId={tabs.find((tab) => tab.active)?.label ?? tabs[0]?.label ?? ""}
+      onChange={() => {}}
+    />
   );
 }
 
@@ -1149,7 +1146,7 @@ function NewPaymentSheetTemplate({ interactive }: { interactive: boolean }) {
             {menu.newPaymentSheet.title}
           </h1>
           <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Close" interactive={interactive}>
-            <AppIcon name="close-x" size={26} color="var(--uc-text)" />
+            <AppIcon name="close-x" color="var(--uc-text)" />
           </TemplateAction>
         </div>
         <div className="flex flex-col">
@@ -1168,43 +1165,44 @@ function NewPaymentSheetTemplate({ interactive }: { interactive: boolean }) {
 
 function ProductsMenuTemplate({ interactive }: { interactive: boolean }) {
   const menu = getProductsMenuForCountry("RO");
+  const { t } = useLanguage();
+  const localizeOffer = (offer: (typeof menu.offers)[number]) => ({
+    ...offer,
+    title: t(`runtime.productsMenu.offers.${offer.id}.title`, offer.title),
+    description: t(`runtime.productsMenu.offers.${offer.id}.description`, offer.description),
+  });
+  const localizeCard = (card: (typeof menu.products)[number]) => ({
+    ...card,
+    title: t(`runtime.productsMenu.cards.${getProductsCardTranslationId(card)}`, card.title),
+  });
 
   return (
-    <TemplatePhoneSurface>
-      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[92px] scrollbar-hide">
-        <TemplateTopLevelHeader
-          title={menu.title}
-          actions={[
-            { icon: "header-profile", label: "Profile" },
-            { icon: "header-messages", label: "Messages" },
-            { icon: "help-circle", label: "Help" },
-          ]}
-          interactive={interactive}
+    <TemplatePhoneSurface showSystemHeader={false}>
+      <div className="relative flex h-full w-full flex-col bg-[var(--uc-surface)] text-[var(--uc-text)]">
+        <div className="h-[54px] flex-shrink-0 bg-[var(--uc-surface)]" />
+        <ProductsHeader title={t("runtime.productsMenu.title", menu.title)} />
+        <ProductsTabs
+          activeTab="banking"
+          bankingLabel={t("runtime.productsMenu.banking", menu.bankingTabLabel)}
+          shopSmartLabel={t("runtime.productsMenu.shopSmart", menu.shopSmartTabLabel)}
+          onChange={() => undefined}
         />
-        <main className="px-[20px] pt-[14px] font-['UniCredit',sans-serif]">
-          <div className="grid h-[44px] grid-cols-2 rounded-[22px] bg-[var(--uc-surface-muted)] p-[3px] text-center text-[16px] font-bold">
-            <span className="flex items-center justify-center rounded-[19px] bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm">
-              {menu.bankingTabLabel}
-            </span>
-            <span className="flex items-center justify-center text-[var(--uc-text-muted)]">{menu.shopSmartTabLabel}</span>
-          </div>
-          <section className="pt-[18px]">
-            <SectionHeadingDivider title={menu.offersTitle} />
-            <div className="mt-[12px]">
-              <ProductOfferCard offer={menu.offers[0]} colorFamily="green" />
-            </div>
-          </section>
-          <section className="pt-[20px]">
-            <SectionHeadingDivider title={menu.productsTitle} />
-            <div className="mt-[12px] grid grid-cols-2 gap-[9px]">
-              {menu.products.slice(0, 4).map((card) => (
-                <ProductMenuCard key={card.id} card={card} />
-              ))}
-            </div>
-          </section>
-        </main>
+
+        <div className="relative z-0 flex-1 overflow-y-auto scrollbar-hide pb-[92px]">
+          <BankingContent
+            offersTitle={t("runtime.productsMenu.offersForYou", menu.offersTitle)}
+            offers={menu.offers.map(localizeOffer)}
+            productsTitle={menu.productsTitle ? t("runtime.productsMenu.ourProducts", menu.productsTitle) : ""}
+            products={menu.products.map(localizeCard)}
+            otherSolutionsTitle={t("runtime.productsMenu.otherSolutionsForYou", menu.otherSolutionsTitle)}
+            otherSolutions={menu.otherSolutions.map(localizeCard)}
+          />
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center border-t border-[var(--uc-border-muted)] bg-[var(--uc-bottom-bar-bg)]">
+          <BottomNavigation activeTab="products" />
+        </div>
       </div>
-      <TemplateFiveBottomNavigation active="Products" />
     </TemplatePhoneSurface>
   );
 }
@@ -1277,7 +1275,7 @@ function AccountDetailsInfoTemplate({ interactive }: { interactive: boolean }) {
             interactive={interactive}
             className="mt-[14px] flex h-[48px] w-full items-center justify-center gap-[10px] rounded bg-[var(--uc-action)] font-['UniCredit',sans-serif] text-[16px] font-bold text-[var(--uc-static-white)]"
           >
-            <AppIcon name="share-filled" size={22} color="currentColor" />
+            <AppIcon name="share-filled" color="currentColor" />
             Share account info
           </TemplateAction>
         </main>
@@ -1335,8 +1333,8 @@ function PrimeAdvisorTemplate({ interactive }: { interactive: boolean }) {
 function PrimeBenefitItem({ title, description }: { title: string; description: string }) {
   return (
     <div className="grid grid-cols-[32px_1fr] gap-[12px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[16px] font-['UniCredit',sans-serif]">
-      <span className="grid size-[28px] place-items-center rounded-full bg-[var(--uc-action)] text-[var(--uc-static-white)]">
-        <AppIcon name="prime-check" size={16} color="currentColor" />
+      <span className="grid size-[32px] place-items-center rounded-full bg-[var(--uc-action)] text-[var(--uc-static-white)]">
+        <AppIcon name="prime-check" color="currentColor" />
       </span>
       <span className="min-w-0">
         <span className="block text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{title}</span>
@@ -1401,7 +1399,7 @@ function PreloginProductRow({
       className="grid min-h-[64px] w-full grid-cols-[32px_1fr_24px] items-center gap-[12px] text-left"
     >
       <span className="grid size-[32px] place-items-center rounded-full bg-[rgb(var(--uc-static-white-rgb)_/_0.12)] text-[var(--uc-static-white)]">
-        <AppIcon name={product.icon} size={20} color="currentColor" />
+        <AppIcon name={product.icon} color="currentColor" />
       </span>
       <span className="min-w-0 font-['UniCredit',sans-serif] text-[var(--uc-static-white)]">
         <span className="block text-[16px] font-bold leading-[20px]">{product.title}</span>
@@ -1409,14 +1407,16 @@ function PreloginProductRow({
           {product.description}
         </span>
       </span>
-      <AppIcon name="chevron-link" size={22} color="var(--uc-static-white)" />
+      <span className="grid size-[32px] place-items-center">
+        <AppIcon name="chevron-link" color="var(--uc-static-white)" />
+      </span>
     </TemplateAction>
   );
 }
 
 function PreloginInactiveTemplate({ interactive }: { interactive: boolean }) {
   return (
-    <TemplatePhoneSurface>
+    <TemplatePhoneSurface statusBarVariant="dark" reserveSystemHeader={false}>
       <PreloginBackgroundArt />
       <div className="absolute inset-0 flex flex-col">
         <div className="flex items-center justify-between px-[24px] pt-[70px]">
@@ -1427,7 +1427,7 @@ function PreloginInactiveTemplate({ interactive }: { interactive: boolean }) {
             className="flex h-[32px] items-center gap-[6px] rounded-full border border-[rgb(var(--uc-static-white-rgb)_/_0.45)] px-[12px] font-['UniCredit',sans-serif] text-[13px] font-bold text-[var(--uc-static-white)]"
           >
             EN
-            <AppIcon name="chevron-down" size={14} color="currentColor" />
+            <AppIcon name="chevron-down" color="currentColor" />
           </TemplateAction>
         </div>
 
@@ -1465,7 +1465,7 @@ function PreloginInactiveTemplate({ interactive }: { interactive: boolean }) {
 
 function PreloginActiveTemplate({ interactive }: { interactive: boolean }) {
   return (
-    <TemplatePhoneSurface>
+    <TemplatePhoneSurface statusBarVariant="dark" reserveSystemHeader={false}>
       <PreloginBackgroundArt />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(var(--uc-static-black-rgb)_/_0.78)_0%,rgb(var(--uc-static-black-rgb)_/_0)_54%)]" />
       <div className="absolute inset-0 flex flex-col">
@@ -1477,7 +1477,7 @@ function PreloginActiveTemplate({ interactive }: { interactive: boolean }) {
             className="flex h-[32px] items-center gap-[6px] rounded-full border border-[rgb(var(--uc-static-white-rgb)_/_0.45)] px-[12px] font-['UniCredit',sans-serif] text-[13px] font-bold text-[var(--uc-static-white)]"
           >
             EN
-            <AppIcon name="chevron-down" size={14} color="currentColor" />
+            <AppIcon name="chevron-down" color="currentColor" />
           </TemplateAction>
         </div>
         <section className="px-[24px] pt-[30px] font-['UniCredit',sans-serif] text-[var(--uc-static-white)]">
@@ -1507,7 +1507,7 @@ function PreloginActiveTemplate({ interactive }: { interactive: boolean }) {
 
 function LanguageSelectorSheetTemplate({ interactive }: { interactive: boolean }) {
   return (
-    <TemplatePhoneSurface>
+    <TemplatePhoneSurface statusBarVariant="dark" reserveSystemHeader={false}>
       <PreloginBackgroundArt />
       <div className="absolute inset-0 bg-[rgb(var(--uc-static-black-rgb)_/_0.52)]" />
       <section className="absolute inset-x-0 bottom-0 rounded-t-[12px] bg-[var(--uc-sheet-bg)] px-[24px] pb-[32px] pt-[20px]">
@@ -1516,7 +1516,7 @@ function LanguageSelectorSheetTemplate({ interactive }: { interactive: boolean }
             Select language
           </h1>
           <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Close" interactive={interactive}>
-            <AppIcon name="close-x" size={24} color="var(--uc-text)" />
+            <AppIcon name="close-x" color="var(--uc-text)" />
           </TemplateAction>
         </div>
         <div className="flex flex-col">
@@ -1540,7 +1540,7 @@ function LanguageSelectorSheetTemplate({ interactive }: { interactive: boolean }
 
 function MorePanelMenuTemplate() {
   return (
-    <TemplatePhoneSurface>
+    <TemplatePhoneSurface statusBarVariant="dark" reserveSystemHeader={false}>
       <PreloginBackgroundArt />
       <PanelWithTranslations
         aboutSmartBanking="ABOUT SMART BANKING"
@@ -1626,7 +1626,7 @@ function AccountSearchResultsTemplate({ interactive }: { interactive: boolean })
               </span>
             </span>
             <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Clear search" interactive={interactive}>
-              <AppIcon name="close-x-small" size={14} color="var(--uc-text)" />
+              <AppIcon name="clear-results" color="var(--uc-text)" />
             </TemplateAction>
           </div>
           <p className="mt-[18px] text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
@@ -1676,9 +1676,9 @@ function SpendingMoneyOutTemplate({ interactive }: { interactive: boolean }) {
             <SectionHeadingDivider title="CATEGORIES" />
             <div className="pt-[14px]">
               {spendingMoneyOutRows.map((row) => (
-                <div key={row.title} className="grid min-h-[74px] grid-cols-[38px_1fr_auto] items-center gap-[12px] border-b border-[var(--uc-border-muted)]">
-                  <span className="grid size-[34px] place-items-center rounded-full bg-[var(--uc-action-soft)] text-[var(--uc-action)]">
-                    <AppIcon name={row.icon} size={21} color="currentColor" />
+                <div key={row.title} className="grid min-h-[74px] grid-cols-[36px_1fr_auto] items-center gap-[12px] border-b border-[var(--uc-border-muted)]">
+                  <span className="grid size-[32px] place-items-center rounded-full bg-[var(--uc-action-soft)] text-[var(--uc-action)]">
+                    <AppIcon name={row.icon} color="currentColor" />
                   </span>
                   <span className="min-w-0">
                     <span className="block text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{row.title}</span>
@@ -1703,50 +1703,48 @@ function SpendingMoneyOutTemplate({ interactive }: { interactive: boolean }) {
 
 function ProductsShopSmartTemplate({ interactive }: { interactive: boolean }) {
   const menu = getProductsMenuForCountry("RO");
+  const { t } = useLanguage();
+  const localizeOffer = (offer: (typeof menu.shopSmartOffers)[number]) => ({
+    ...offer,
+    title: t(`runtime.productsMenu.offers.${offer.id}.title`, offer.title),
+    description: t(`runtime.productsMenu.offers.${offer.id}.description`, offer.description),
+  });
+  const localizeCard = (card: (typeof menu.shopSmartProducts)[number]) => ({
+    ...card,
+    title: t(`runtime.productsMenu.cards.${getProductsCardTranslationId(card)}`, card.title),
+  });
 
   return (
-    <TemplatePhoneSurface>
-      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[92px] scrollbar-hide">
-        <TemplateTopLevelHeader
-          title={menu.title}
-          actions={[
-            { icon: "header-profile", label: "Profile" },
-            { icon: "header-messages", label: "Messages" },
-            { icon: "help-circle", label: "Help" },
-          ]}
-          interactive={interactive}
+    <TemplatePhoneSurface showSystemHeader={false}>
+      <div className="relative flex h-full w-full flex-col bg-[var(--uc-surface)] text-[var(--uc-text)]">
+        <div className="h-[54px] flex-shrink-0 bg-[var(--uc-surface)]" />
+        <ProductsHeader title={t("runtime.productsMenu.title", menu.title)} />
+        <ProductsTabs
+          activeTab="shopsmart"
+          bankingLabel={t("runtime.productsMenu.banking", menu.bankingTabLabel)}
+          shopSmartLabel={t("runtime.productsMenu.shopSmart", menu.shopSmartTabLabel)}
+          onChange={() => undefined}
         />
-        <main className="px-[20px] pt-[14px] font-['UniCredit',sans-serif]">
-          <div className="grid h-[44px] grid-cols-2 rounded-[22px] bg-[var(--uc-surface-muted)] p-[3px] text-center text-[16px] font-bold">
-            <span className="flex items-center justify-center text-[var(--uc-text-muted)]">{menu.bankingTabLabel}</span>
-            <span className="flex items-center justify-center rounded-[19px] bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm">
-              {menu.shopSmartTabLabel}
-            </span>
-          </div>
-          <section className="pt-[18px]">
-            <SectionHeadingDivider title={menu.shopSmartTitle} />
-            <div className="mt-[12px]">
-              <ProductOfferCard offer={menu.shopSmartOffers[0]} colorFamily="pink" />
-            </div>
-          </section>
-          <section className="pt-[20px]">
-            <SectionHeadingDivider title="PARTNER CATEGORIES" />
-            <div className="mt-[12px] grid grid-cols-2 gap-[9px]">
-              {menu.shopSmartProducts.map((card) => (
-                <ProductMenuCard key={card.title} card={card} />
-              ))}
-            </div>
-          </section>
-        </main>
+
+        <div className="relative z-0 flex-1 overflow-y-auto scrollbar-hide pb-[92px]">
+          <ShopSmartContent
+            title={t("runtime.productsMenu.shopSmartTitle", menu.shopSmartTitle)}
+            offers={menu.shopSmartOffers.map(localizeOffer)}
+            products={menu.shopSmartProducts.map(localizeCard)}
+          />
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center border-t border-[var(--uc-border-muted)] bg-[var(--uc-bottom-bar-bg)]">
+          <BottomNavigation activeTab="products" />
+        </div>
       </div>
-      <TemplateFiveBottomNavigation active="Products" />
     </TemplatePhoneSurface>
   );
 }
 
 function LogoutConfirmationTemplate({ interactive }: { interactive: boolean }) {
   return (
-    <TemplatePhoneSurface>
+    <TemplatePhoneSurface showSystemHeader={false}>
       <div className="absolute inset-0 bg-[var(--uc-surface)]">
         <MoreMenuTemplate interactive={false} />
       </div>
@@ -1757,7 +1755,7 @@ function LogoutConfirmationTemplate({ interactive }: { interactive: boolean }) {
 
 function ProductBottomSheetTemplate({ interactive }: { interactive: boolean }) {
   return (
-    <TemplatePhoneSurface>
+    <TemplatePhoneSurface statusBarVariant="dark">
       <div className="absolute inset-0 bg-[var(--uc-surface)]">
         <TemplateTopChrome title="Product" interactive={interactive} />
       </div>
@@ -1771,7 +1769,7 @@ function ProductBottomSheetTemplate({ interactive }: { interactive: boolean }) {
             Product name
           </h1>
           <TemplateAction className="grid size-[32px] place-items-center text-[var(--uc-text)]" ariaLabel="Close" interactive={interactive}>
-            <AppIcon name="close-x" size={24} color="currentColor" />
+            <AppIcon name="close-x" color="currentColor" />
           </TemplateAction>
         </div>
 
@@ -1965,11 +1963,13 @@ function AnalyticsOverviewTemplate({ interactive }: { interactive: boolean }) {
   return (
     <TemplatePhoneSurface>
       <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[90px] scrollbar-hide">
-        <StaticStatusBar />
+        <TemplateSystemHeaderSpacer />
         <header className="px-[24px] pt-[37px]">
           <div className="flex items-start justify-between">
             <h1 className="font-['UniCredit',sans-serif] text-[50px] font-bold leading-none text-[var(--uc-text)]">My Spendings</h1>
-            <AppIcon name="help-circle" size={40} color="var(--uc-text)" />
+            <span className="grid size-[40px] place-items-center">
+              <AppIcon name="help-circle" color="var(--uc-text)" />
+            </span>
           </div>
           <p className="mt-[60px] font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text-muted)]">Data For</p>
           <h2 className="mt-[10px] font-['UniCredit',sans-serif] text-[48px] font-bold leading-none text-[var(--uc-text)]">March 2025</h2>
@@ -1978,7 +1978,7 @@ function AnalyticsOverviewTemplate({ interactive }: { interactive: boolean }) {
         <section className="mt-[35px] px-[33px]">
           <div className="ml-auto flex w-[88px] flex-col items-center gap-[5px] text-center font-['UniCredit',sans-serif]">
             <span className="grid size-[42px] place-items-center rounded-full bg-[var(--uc-text)] text-[var(--uc-static-white)]">
-              <AppIcon name="add-money" size={30} color="currentColor" />
+              <AppIcon name="add-money" color="currentColor" />
             </span>
             <span className="text-[20px] font-normal leading-[22px] text-[var(--uc-text)]">Card<br />Transaction</span>
           </div>
@@ -1986,13 +1986,15 @@ function AnalyticsOverviewTemplate({ interactive }: { interactive: boolean }) {
         <section className="mx-[33px] mt-[26px] rounded-[6px] bg-[var(--uc-action)] p-[22px] font-['UniCredit',sans-serif] text-[var(--uc-static-white)]">
           <div className="grid grid-cols-[52px_1fr_24px] gap-[12px]">
             <span className="grid size-[42px] place-items-center rounded-full bg-[var(--uc-static-white)] text-[var(--uc-action)]">
-              <AppIcon name="info-circle" size={28} color="currentColor" />
+              <AppIcon name="info-circle" color="currentColor" />
             </span>
             <span>
               <span className="block text-[28px] font-bold leading-[32px]">Add cash transaction</span>
               <span className="mt-[12px] block text-[28px] font-normal leading-[32px]">Keep track of your cash transactions.</span>
             </span>
-            <AppIcon name="close-x-small" size={18} color="var(--uc-static-white)" />
+            <span className="grid size-[32px] place-items-center text-[var(--uc-static-white)]">
+              <AppIcon name="close-x" color="currentColor" />
+            </span>
           </div>
         </section>
         <section className="px-[24px] pt-[23px]">
@@ -2003,7 +2005,7 @@ function AnalyticsOverviewTemplate({ interactive }: { interactive: boolean }) {
           <h2 className="mt-[28px] font-['UniCredit',sans-serif] text-[40px] font-bold leading-none text-[var(--uc-text)]">Money Out</h2>
           <div className="mt-[52px] grid grid-cols-[64px_1fr] items-center gap-[24px]">
             <span className="grid size-[44px] place-items-center text-[var(--uc-product-pink)]">
-              <AppIcon name="shopping-bag" size={32} strokeWidth={2.8} color="currentColor" />
+              <AppIcon name="shopping-bag" strokeWidth={2.8} color="currentColor" />
             </span>
             <div className="text-right font-['UniCredit',sans-serif]">
               <p className="text-[28px] font-normal leading-normal text-[var(--uc-text)]">Transaction Details</p>
@@ -2052,7 +2054,9 @@ function TemplateShortcut({
       className="flex w-[72px] flex-col items-center gap-[8px] text-center font-['UniCredit',sans-serif]"
     >
       <span className="grid size-[46px] place-items-center rounded-full bg-[var(--uc-action)] text-[var(--uc-static-white)]">
-        <AppIcon name={icon} size={24} strokeWidth={2.8} color="currentColor" />
+        <span className="grid size-[32px] place-items-center">
+          <AppIcon name={icon} strokeWidth={2.8} color="currentColor" />
+        </span>
       </span>
       <span className="text-[11px] font-bold uppercase leading-[14px] text-[var(--uc-text)]">{label}</span>
     </TemplateAction>
@@ -2072,8 +2076,8 @@ function TemplateTransactionRow({
 }) {
   return (
     <div className="grid min-h-[78px] grid-cols-[42px_1fr_auto] items-center gap-[12px] border-b border-[var(--uc-border-muted)] font-['UniCredit',sans-serif]">
-      <span className="grid size-[34px] place-items-center text-[var(--uc-text)]">
-        <AppIcon name={icon} size={25} strokeWidth={2.6} color="currentColor" />
+      <span className="grid size-[32px] place-items-center text-[var(--uc-text)]">
+        <AppIcon name={icon} strokeWidth={2.6} color="currentColor" />
       </span>
       <span className="min-w-0">
         <span className="block truncate text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{title}</span>
@@ -2088,12 +2092,12 @@ function CardsOverviewTemplate({ interactive }: { interactive: boolean }) {
   return (
     <TemplatePhoneSurface>
       <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[86px] scrollbar-hide">
-        <StaticStatusBar />
+        <TemplateSystemHeaderSpacer />
         <header className="px-[24px] pt-[40px]">
           <div className="flex items-center justify-between">
             <h1 className="font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">Cards</h1>
             <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Help" interactive={interactive}>
-              <AppIcon name="help-circle" size={22} color="var(--uc-text)" />
+              <AppIcon name="help-circle" color="var(--uc-text)" />
             </TemplateAction>
           </div>
         </header>
@@ -2163,23 +2167,25 @@ function ContactInfoCard({
       className="grid min-h-[82px] w-full grid-cols-[44px_1fr_24px] items-center gap-[12px] rounded-[6px] bg-[var(--uc-surface)] p-[12px] text-left shadow-[0_8px_18px_rgb(var(--uc-shadow-rgb)_/_0.12)]"
     >
       <span className="grid size-[36px] place-items-center rounded-full bg-[var(--uc-action-soft)] text-[var(--uc-action)]">
-        <AppIcon name={icon} size={22} color="currentColor" />
+        <AppIcon name={icon} color="currentColor" />
       </span>
       <span className="min-w-0 font-['UniCredit',sans-serif]">
         <span className="block text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{title}</span>
         <span className="mt-[2px] block text-[13px] font-normal leading-[16px] text-[var(--uc-text-muted)]">{description}</span>
         <span className="mt-[5px] block text-[12px] font-bold uppercase leading-[15px] text-[var(--uc-action)]">{action}</span>
       </span>
-      <AppIcon name="contact-chevron" size={18} color="var(--uc-text)" />
+      <span className="grid size-[32px] place-items-center">
+        <AppIcon name="contact-chevron" color="var(--uc-text)" />
+      </span>
     </TemplateAction>
   );
 }
 
 function ContactInfoSheetTemplate({ interactive }: { interactive: boolean }) {
   return (
-    <TemplatePhoneSurface>
+    <TemplatePhoneSurface statusBarVariant="dark">
       <div className="absolute inset-0 bg-[var(--uc-surface)]">
-        <StaticStatusBar />
+        <TemplateSystemHeaderSpacer />
         <header className="px-[24px] pt-[40px] font-['UniCredit',sans-serif]">
           <h1 className="text-[28px] font-bold leading-normal text-[var(--uc-text)]">Contact</h1>
           <div className="mt-[24px] space-y-[14px]">
@@ -2196,7 +2202,7 @@ function ContactInfoSheetTemplate({ interactive }: { interactive: boolean }) {
             Need more information?
           </h1>
           <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Close" interactive={interactive}>
-            <AppIcon name="close-x" size={25} color="var(--uc-text)" />
+            <AppIcon name="close-x" color="var(--uc-text)" />
           </TemplateAction>
         </div>
         <div className="mt-[18px] flex flex-col gap-[12px]">
@@ -2217,7 +2223,9 @@ function AccountBalancePreviewCard() {
           <p className="text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">My RON Account</p>
           <p className="mt-[6px] text-[13px] font-normal leading-[16px] text-[var(--uc-text-muted)]">RO49AAAA1B31007593840000</p>
         </div>
-        <AppIcon name="copy-documents" size={22} color="var(--uc-text)" />
+        <span className="grid size-[32px] place-items-center">
+          <AppIcon name="copy-documents" color="var(--uc-text)" />
+        </span>
       </div>
       <p className="mt-[28px] text-[13px] font-bold uppercase leading-[16px] text-[var(--uc-text-muted)]">Available balance</p>
       <p className="mt-[5px] text-[30px] font-bold leading-none text-[var(--uc-text)]">12.250,00 <span className="text-[18px]">RON</span></p>
@@ -2229,12 +2237,12 @@ function AccountDetailHomepageTemplate({ interactive }: { interactive: boolean }
   return (
     <TemplatePhoneSurface>
       <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[88px] scrollbar-hide">
-        <StaticStatusBar />
+        <TemplateSystemHeaderSpacer />
         <header className="px-[24px] pt-[40px]">
           <div className="flex items-center justify-between">
             <h1 className="font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">Accounts</h1>
             <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Help" interactive={interactive}>
-              <AppIcon name="help-circle" size={22} color="var(--uc-text)" />
+              <AppIcon name="help-circle" color="var(--uc-text)" />
             </TemplateAction>
           </div>
         </header>
@@ -2279,9 +2287,14 @@ function DomesticPaymentFormTemplate({ interactive }: { interactive: boolean }) 
             <TemplateFlowField key={field.label} {...field} />
           ))}
           <TemplateSimpleSectionTitle>PAYMENT INFORMATION</TemplateSimpleSectionTitle>
-          {domesticPaymentFields.payment.map((field) => (
-            <TemplateFlowField key={field.label} {...field} />
-          ))}
+          <div className="pt-[22px]">
+            <AmountField
+              label="Amount limit"
+              value="24700"
+              onChange={() => undefined}
+              currency="CZK"
+            />
+          </div>
           <div className="mt-[24px] flex items-center justify-between border-t border-[var(--uc-border-muted)] pt-[18px]">
             <div>
               <p className="text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">Instant Payment</p>
@@ -2357,6 +2370,12 @@ function SpendingInsightMiniChart() {
 }
 
 function TransactionDetailTemplate({ interactive }: { interactive: boolean }) {
+  const transactionActionItems: AccountActionBarItem[] = [
+    { id: "repeat", iconName: "repeat", label: "Repeat" },
+    { id: "template", iconName: "payment-templates", label: "Template" },
+    { id: "share", iconName: "copy-documents", label: "Share" },
+  ];
+
   return (
     <TemplatePhoneSurface>
       <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[32px] scrollbar-hide">
@@ -2364,16 +2383,16 @@ function TransactionDetailTemplate({ interactive }: { interactive: boolean }) {
         <main className="px-[24px] pt-[20px] font-['UniCredit',sans-serif]">
           <section className="text-center">
             <span className="mx-auto grid size-[54px] place-items-center rounded-full bg-[var(--uc-action-soft)] text-[var(--uc-action)]">
-              <AppIcon name="account-option-statement" size={30} color="currentColor" />
+              <span className="grid size-[32px] place-items-center">
+                <AppIcon name="account-option-statement" color="currentColor" />
+              </span>
             </span>
             <h2 className="mt-[14px] text-[24px] font-bold leading-[28px] text-[var(--uc-text)]">Kindergarten 45</h2>
             <p className="mt-[4px] text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">School fees</p>
             <p className="mt-[14px] text-[28px] font-bold leading-none text-[var(--uc-text)]">-24.700,00 <span className="text-[18px]">CZK</span></p>
           </section>
-          <div className="mt-[24px] grid grid-cols-3 gap-[4px]">
-            <TemplateShortcut icon="repeat" label="Repeat" interactive={interactive} />
-            <TemplateShortcut icon="payment-templates" label="Template" interactive={interactive} />
-            <TemplateShortcut icon="copy-documents" label="Share" interactive={interactive} />
+          <div className={`mt-[24px] bg-[var(--uc-app-bg)] ${interactive ? "" : "pointer-events-none"}`}>
+            <AccountActionBar items={transactionActionItems} align="center" />
           </div>
           <section className="pt-[26px]">
             <SpendingInsightMiniChart />
@@ -2420,13 +2439,13 @@ function SignPinTemplate({ interactive }: { interactive: boolean }) {
 function GenerateTokenTemplate({ interactive }: { interactive: boolean }) {
   return (
     <TemplatePhoneSurface>
-      <StaticStatusBar />
+      <TemplateSystemHeaderSpacer />
       <div className="flex h-[40px] items-center justify-end gap-[11px] px-[19px]">
         <span className="font-['UniCredit',sans-serif] text-[14px] font-bold uppercase leading-[18px] text-[var(--uc-text)]">
           Logout
         </span>
         <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Help" interactive={interactive}>
-          <AppIcon name="help-circle" size={20} color="var(--uc-text)" />
+          <AppIcon name="help-circle" color="var(--uc-text)" />
         </TemplateAction>
       </div>
       <div className="px-[24px] pt-[1px]">
@@ -2518,9 +2537,9 @@ function PushRequestFormTemplate({ interactive }: { interactive: boolean }) {
 
 function AccountSelectionPanelTemplate({ interactive }: { interactive: boolean }) {
   return (
-    <TemplatePhoneSurface>
+    <TemplatePhoneSurface statusBarVariant="dark" reserveSystemHeader={false}>
       <div className="absolute inset-0 bg-[var(--uc-static-black)]">
-        <StaticStatusBar />
+        <TemplateSystemHeaderSpacer />
       </div>
       <section className="absolute inset-x-0 bottom-0 flex h-[674px] flex-col rounded-t-[12px] bg-[var(--uc-sheet-bg)] p-[24px]">
         <div className="flex items-start justify-between gap-[16px]">
@@ -2528,7 +2547,7 @@ function AccountSelectionPanelTemplate({ interactive }: { interactive: boolean }
             My Accounts
           </h1>
           <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Close" interactive={interactive}>
-            <AppIcon name="close-x" size={26} color="var(--uc-text)" />
+            <AppIcon name="close-x" color="var(--uc-text)" />
           </TemplateAction>
         </div>
 
@@ -2574,10 +2593,10 @@ function ApplePayPhoneHero() {
 function ApplePayActivationTemplate({ interactive }: { interactive: boolean }) {
   return (
     <TemplatePhoneSurface>
-      <StaticStatusBar />
+      <TemplateSystemHeaderSpacer />
       <div className="flex h-[40px] items-center justify-end px-[15px]">
         <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Close" interactive={interactive}>
-          <AppIcon name="close-x" size={26} color="var(--uc-text)" />
+          <AppIcon name="close-x" color="var(--uc-text)" />
         </TemplateAction>
       </div>
 
@@ -2601,7 +2620,7 @@ function ApplePayActivationTemplate({ interactive }: { interactive: boolean }) {
 function SuccessfulPaymentTemplate({ interactive }: { interactive: boolean }) {
   return (
     <TemplatePhoneSurface>
-      <StaticStatusBar />
+      <TemplateSystemHeaderSpacer />
       <div className="h-[40px]" />
       <div className="px-[24px] pt-[1px]">
         <h1 className="font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">
@@ -2629,10 +2648,10 @@ function TutorialIntroTemplate({ interactive }: { interactive: boolean }) {
   return (
     <TemplatePhoneSurface>
       <div className="border-b border-[var(--uc-border-muted)] bg-[var(--uc-surface)]">
-        <StaticStatusBar />
+        <TemplateSystemHeaderSpacer />
         <div className="grid h-[46px] grid-cols-[40px_1fr_40px] items-center px-[4px]">
           <TemplateAction className="grid size-[40px] place-items-center" ariaLabel="Close" interactive={interactive}>
-            <AppIcon name="close-x" size={24} color="var(--uc-text)" />
+            <AppIcon name="close-x" color="var(--uc-text)" />
           </TemplateAction>
           <div className="min-w-0 text-center font-['UniCredit',sans-serif]">
             <p className="text-[12px] font-bold leading-[14px] text-[var(--uc-text)]">Loading...</p>
@@ -2657,7 +2676,7 @@ function TutorialIntroTemplate({ interactive }: { interactive: boolean }) {
             <span className="ml-[3px] h-0 w-0 border-y-[9px] border-l-[15px] border-y-transparent border-l-[var(--uc-static-white)]" />
           </TemplateAction>
           <TemplateAction className="grid size-[42px] place-items-center rounded-full bg-[rgb(var(--uc-static-black-rgb)_/_0.72)]" ariaLabel="Expand" interactive={interactive}>
-            <AppIcon name="arrow-right" size={21} color="var(--uc-static-white)" />
+            <AppIcon name="arrow-right" color="var(--uc-static-white)" />
           </TemplateAction>
         </div>
       </section>
@@ -2679,10 +2698,10 @@ function TutorialIntroTemplate({ interactive }: { interactive: boolean }) {
           Skip
         </TemplateAction>
         <TemplateAction className="grid size-[48px] place-items-center rounded-full border border-[var(--uc-border)]" ariaLabel="Back" interactive={interactive}>
-          <AppIcon name="back-heavy" size={20} color="var(--uc-text)" />
+          <AppIcon name="back-heavy" color="var(--uc-text)" />
         </TemplateAction>
         <TemplateAction className="grid size-[48px] place-items-center rounded-full bg-[var(--uc-action)]" ariaLabel="Next" interactive={interactive}>
-          <AppIcon name="arrow-right" size={22} color="var(--uc-static-white)" />
+          <AppIcon name="arrow-right" color="var(--uc-static-white)" />
         </TemplateAction>
       </div>
     </TemplatePhoneSurface>

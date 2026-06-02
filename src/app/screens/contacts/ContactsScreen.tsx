@@ -6,6 +6,7 @@
 import PageHeader from '@/app/components/PageHeader';
 import { HeaderActionIcon } from '@/app/components/HeaderActionIcons';
 import { AppIcon } from "@/app/components/icons";
+import { useLanguage } from '@/app/contexts/LanguageContext';
 import { ContactsDivider } from './ContactsDivider';
 import { ContactsNavigationCard } from './ContactsNavigationCard';
 import imgUniCreditBuilding from "figma:asset/98dd23c242155a923a78eda01f9320afee4330eb.png";
@@ -16,6 +17,7 @@ interface ContactsScreenProps {
 }
 
 export default function ContactsScreen({ onBack, onPrimeClick }: ContactsScreenProps) {
+  const { t } = useLanguage();
   const handleCardClick = (cardName: string) => {
     console.log(`📞 ${cardName} clicked`);
     // Future: navigate to respective screen
@@ -42,9 +44,9 @@ export default function ContactsScreen({ onBack, onPrimeClick }: ContactsScreenP
             height: '40px',
             padding: '8px 7.998px 7.997px 7.998px'
           }}
-          aria-label="Back"
+          aria-label={t("runtime.actions.back", "Back")}
         >
-          <AppIcon name="back-heavy" className="h-[24.003px] w-[24.003px] shrink-0" color="var(--uc-text)" />
+          <AppIcon name="back-heavy" className="shrink-0" color="var(--uc-text)" />
         </button>
 
         {/* Help button - 8px de la dreapta */}
@@ -56,7 +58,7 @@ export default function ContactsScreen({ onBack, onPrimeClick }: ContactsScreenP
             height: '40px',
             padding: '8px 7.998px 7.997px 7.998px'
           }}
-          aria-label="Help"
+          aria-label={t("runtime.actions.help", "Help")}
         >
           <HeaderActionIcon icon="help" />
         </button>
@@ -86,7 +88,7 @@ export default function ContactsScreen({ onBack, onPrimeClick }: ContactsScreenP
               textOverflow: 'ellipsis'
             }}
           >
-            Contact us
+            {t("runtime.contacts.title", "Contact us")}
           </h1>
         </div>
 
@@ -102,54 +104,54 @@ export default function ContactsScreen({ onBack, onPrimeClick }: ContactsScreenP
 
           {/* BANK CONTACTS Section */}
           <div className="flex flex-col">
-            <ContactsDivider text="BANK CONTACTS" />
+            <ContactsDivider text={t("runtime.contacts.sections.bankContacts", "BANK CONTACTS")} />
             
             <div className="flex flex-col mt-[16px]">
               <ContactsNavigationCard
                 icon="prime"
-                title="MY PRIME ADVISOR"
+                title={t("runtime.contacts.cards.primeAdvisor", "MY PRIME ADVISOR")}
                 hasChevron
                 onClick={() => onPrimeClick ? onPrimeClick() : handleCardClick('My Prime Advisor')}
               />
               
               <ContactsNavigationCard
                 icon="location"
-                title="BRANCH & ATM FINDER"
+                title={t("runtime.contacts.cards.branchAtmFinder", "BRANCH & ATM FINDER")}
                 hasChevron
                 onClick={() => handleCardClick('Branch & ATM Finder')}
               />
               
               <ContactsNavigationCard
                 icon="time"
-                title="INFOLINE AVAILABILITY"
+                title={t("runtime.contacts.cards.infolineAvailability", "INFOLINE AVAILABILITY")}
                 subtitle="Mon - Sun | 07:00 - 22:00"
                 onClick={() => handleCardClick('Infoline Availability')}
               />
               
               <ContactsNavigationCard
                 icon="phone"
-                title="CALL US"
+                title={t("runtime.contacts.cards.callUs", "CALL US")}
                 value="+420 221 210 031"
                 onClick={() => handleCardClick('Call Us')}
               />
               
               <ContactsNavigationCard
                 icon="block"
-                title="EMERGENCY LINE FOR CARD BLOCKING"
+                title={t("runtime.contacts.cards.emergencyLine", "EMERGENCY LINE FOR CARD BLOCKING")}
                 value="+420 221 210 012"
                 onClick={() => handleCardClick('Emergency Line')}
               />
               
               <ContactsNavigationCard
                 icon="email"
-                title="EMAIL"
+                title={t("runtime.contacts.cards.email", "EMAIL")}
                 value="INFO@UNICREDITGROUP.RO"
                 onClick={() => handleCardClick('Email')}
               />
               
               <ContactsNavigationCard
                 icon="website"
-                title="WEBSITE"
+                title={t("runtime.contacts.cards.website", "WEBSITE")}
                 value="WWW.UNICREDIT.CZ"
                 onClick={() => handleCardClick('Website')}
               />
@@ -158,12 +160,12 @@ export default function ContactsScreen({ onBack, onPrimeClick }: ContactsScreenP
 
           {/* SOCIAL MEDIA Section */}
           <div className="flex flex-col">
-            <ContactsDivider text="SOCIAL MEDIA" />
+            <ContactsDivider text={t("runtime.contacts.sections.socialMedia", "SOCIAL MEDIA")} />
             
             <div className="flex flex-col mt-[16px]">
               <ContactsNavigationCard
                 icon="youtube"
-                title="YOUTUBE"
+                title={t("runtime.contacts.cards.youtube", "YOUTUBE")}
                 onClick={() => handleCardClick('YouTube')}
               />
               

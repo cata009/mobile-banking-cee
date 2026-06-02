@@ -53,7 +53,7 @@ export default function BottomNavigation({
             type="button"
           >
             <span className="block h-[2px] w-[24px]">
-              {isActive ? <AppIcon name="nav-active-bar" color="var(--uc-action)" /> : null}
+              {isActive ? <span className="block h-[2px] w-[24px] rounded-t-[2px] bg-[var(--uc-action)]" /> : null}
             </span>
 
             <span className="flex flex-col items-center gap-0">

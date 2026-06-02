@@ -3,6 +3,8 @@
  * iOS-style system alert for logout confirmation
  */
 
+import { useLanguage } from "@/app/contexts/LanguageContext";
+
 interface LogoutConfirmDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -10,6 +12,7 @@ interface LogoutConfirmDialogProps {
 }
 
 export function LogoutConfirmDialog({ isOpen, onClose, onConfirm }: LogoutConfirmDialogProps) {
+  const { t } = useLanguage();
   if (!isOpen) return null;
 
   const handleConfirm = () => {
@@ -38,7 +41,7 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm }: LogoutConfir
           <div className="px-[16px] pt-[20px] pb-[16px] text-center">
             {/* Title */}
             <p className="font-['SF_Pro_Text','-apple-system','system-ui',sans-serif] text-[17px] font-semibold text-[var(--uc-primary-main)] leading-[22px] mb-[2px]">
-              Are you sure you want to leave Mobile Banking?
+              {t("runtime.dialogs.logoutMessage", "Are you sure you want to leave Mobile Banking?")}
             </p>
           </div>
 
@@ -53,7 +56,7 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm }: LogoutConfir
               className="flex-1 h-[44px] flex items-center justify-center cursor-pointer active:bg-[var(--uc-border-muted)] transition-colors"
             >
               <span className="font-['SF_Pro_Text','-apple-system','system-ui',sans-serif] text-[17px] text-[var(--uc-action)] leading-[22px]">
-                Cancel
+                {t("runtime.dialogs.cancel", "Cancel")}
               </span>
             </button>
 
@@ -66,7 +69,7 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm }: LogoutConfir
               className="flex-1 h-[44px] flex items-center justify-center cursor-pointer active:bg-[var(--uc-border-muted)] transition-colors"
             >
               <span className="font-['SF_Pro_Text','-apple-system','system-ui',sans-serif] text-[17px] font-semibold text-[var(--uc-action)] leading-[22px]">
-                OK
+                {t("runtime.actions.okGotIt", "OK")}
               </span>
             </button>
           </div>

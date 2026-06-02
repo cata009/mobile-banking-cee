@@ -1,11 +1,13 @@
 import type { TranslationKeys } from '../types';
+import { createSharedTranslations } from '../shared';
 
 /**
  * Slovak translations for Slovakia (SK)
  * Slovenčina - Slovensko
  */
 const sk: TranslationKeys = {
-  // ==========================================
+  ...createSharedTranslations('sk'),
+// ==========================================
   // PRE-LOGIN SCREEN
   // ==========================================
   preLogin: {
@@ -112,6 +114,23 @@ const sk: TranslationKeys = {
       thisMonth: 'Tento mesiac',
       lastMonth: 'Minulý mesiac',
       vsLastMonth: 'vs minulý mesiac',
+    },
+  },
+
+  // ==========================================
+  // MORE SCREEN
+  // ==========================================
+  more: {
+    title: 'Viac',
+    cards: {
+      contacts: 'Kontakty',
+      documents: 'Dokumenty',
+      settings: 'Nastavenia',
+      gdprConsent: 'Suhlas GDPR',
+      thirdPartyConsent: 'Suhlas s tretimi stranami',
+      digitalActivities: 'Zaznam digitalnej aktivity',
+      myRequests: 'Moje ziadosti',
+      tutorial: 'Navody',
     },
   },
 

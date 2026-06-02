@@ -25,6 +25,7 @@ export interface PaymentHeroItem {
   title: string;
   description: string;
   illustration: PaymentHeroIllustration;
+  imageSrc?: string;
 }
 
 export interface PaymentOtherItem {

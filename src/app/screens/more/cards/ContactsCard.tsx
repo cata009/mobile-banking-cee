@@ -7,9 +7,10 @@ import imgContacts from "figma:asset/4d22afc493e4ab72aca4b5793ce68cd204c58b7f.pn
 
 interface ContactsCardProps {
   onClick: () => void;
+  title?: string;
 }
 
-export function ContactsCard({ onClick }: ContactsCardProps) {
+export function ContactsCard({ onClick, title = "Contacts" }: ContactsCardProps) {
   return (
     <button
       onClick={onClick}
@@ -32,7 +33,7 @@ export function ContactsCard({ onClick }: ContactsCardProps) {
       {/* Title - top left padding */}
       <div className="absolute inset-0 p-[16px] flex items-start">
         <p className="font-['UniCredit:Bold',sans-serif] text-[18px] text-[var(--uc-text)] leading-[normal] text-left whitespace-pre-wrap z-10 relative">
-          Contacts
+          {title}
         </p>
       </div>
     </button>

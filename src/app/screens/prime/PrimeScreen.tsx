@@ -52,8 +52,8 @@ export default function PrimeScreen({ onBack }: PrimeScreenProps) {
                   name="back-heavy"
                   color="var(--uc-static-white)"
                   style={{
-                    width: '24.003px',
-                    height: '24.003px',
+                    width: '20px',
+                    height: '20px',
                     flexShrink: 0,
                     aspectRatio: '1/1'
                   }}

@@ -15,17 +15,18 @@ export default function RadioButton({
 }: RadioButtonProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className={`w-full flex items-center gap-[16px] py-[20px] px-[24px] cursor-pointer transition-opacity hover:opacity-80 ${className}`}
+      className={`w-full flex items-center gap-[8px] px-[24px] py-[20px] text-left cursor-pointer transition-opacity hover:opacity-80 ${className}`}
       aria-label={label}
       role="radio"
       aria-checked={selected}
     >
-      <div className="relative w-[22px] h-[22px] flex-shrink-0">
+      <div className="grid h-[32px] w-[32px] flex-shrink-0 place-items-center">
         <AppIcon name={selected ? "radio-selected" : "radio-unselected"} color="var(--uc-text)" />
       </div>
       
-      <span className="font-['UniCredit:Bold',sans-serif] text-[18px] text-[var(--uc-text)] leading-[normal] uppercase">
+      <span className="font-['UniCredit',sans-serif] text-[16px] font-bold leading-[normal] text-[var(--uc-primary-k1)]">
         {label}
       </span>
     </button>

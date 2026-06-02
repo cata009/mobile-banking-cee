@@ -1,11 +1,13 @@
 import type { TranslationKeys } from '../types';
+import { createSharedTranslations } from '../shared';
 
 /**
  * Bosnian translations for Bosnia and Herzegovina (BA)
  * Bosanski - Bosna i Hercegovina
  */
 const bs: TranslationKeys = {
-  // ==========================================
+  ...createSharedTranslations('bs'),
+// ==========================================
   // PRE-LOGIN SCREEN
   // ==========================================
   preLogin: {
@@ -88,6 +90,23 @@ const bs: TranslationKeys = {
       thisMonth: 'Ovaj mjesec',
       lastMonth: 'Prošli mjesec',
       vsLastMonth: 'vs prošli mjesec',
+    },
+  },
+
+  // ==========================================
+  // MORE SCREEN
+  // ==========================================
+  more: {
+    title: 'Vise',
+    cards: {
+      contacts: 'Kontakti',
+      documents: 'Dokumenti',
+      settings: 'Postavke',
+      gdprConsent: 'GDPR saglasnost',
+      thirdPartyConsent: 'Saglasnost za trece strane',
+      digitalActivities: 'Zapis digitalnih aktivnosti',
+      myRequests: 'Moje prijave',
+      tutorial: 'Tutorijali',
     },
   },
 

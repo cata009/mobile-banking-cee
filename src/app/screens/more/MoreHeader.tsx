@@ -1,9 +1,13 @@
 /**
  * MoreHeader Component
- * Header for More section with title and action icons
+ * Header for More section with title and action icons.
+ *
+ * The component is background-transparent; the owning screen/preview provides
+ * the surface color so the same header can be audited consistently in DS.
  */
 
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 
 interface MoreHeaderProps {
   onProfile: () => void;
@@ -13,12 +17,12 @@ interface MoreHeaderProps {
 }
 
 export function MoreHeader({ onProfile, onMessages, onLogout, messageCount = 0 }: MoreHeaderProps) {
+  const { t } = useLanguage();
+
   return (
-    <div className="w-full bg-[var(--uc-surface)]">
-      {/* Single row with title and icons - no extra spacing */}
+    <div className="w-full">
       <div className="px-[24px] pb-[24px]">
         <div className="flex min-h-[32px] items-start gap-[8px]">
-          {/* Title */}
           <h1 
             className="flex-1 font-['UniCredit:Bold',sans-serif] text-[var(--uc-text)] min-w-0"
             style={{
@@ -28,10 +32,9 @@ export function MoreHeader({ onProfile, onMessages, onLogout, messageCount = 0 }
               lineHeight: 'normal'
             }}
           >
-            More
+            {t("more.title")}
           </h1>
 
-          {/* Action Icons */}
           <HeaderActionRail>
             <HeaderActionButton icon="profile" label="Profile" onClick={onProfile} />
             <HeaderActionButton icon="messages" label="Messages" onClick={onMessages} badgeCount={messageCount} />

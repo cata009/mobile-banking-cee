@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import type { UIEvent } from "react";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
+import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
 import PageHeader from "@/app/components/PageHeader";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
 import {
   getMessagesConfigForCountry,
@@ -11,45 +13,6 @@ import {
 
 interface MessagesScreenProps {
   onBack: () => void;
-}
-
-function MessagesTabs({
-  activeMailbox,
-  inboxLabel,
-  outboxLabel,
-  onChange,
-}: {
-  activeMailbox: MessageMailbox;
-  inboxLabel: string;
-  outboxLabel: string;
-  onChange: (mailbox: MessageMailbox) => void;
-}) {
-  const tabs: Array<{ id: MessageMailbox; label: string }> = [
-    { id: "inbox", label: inboxLabel },
-    { id: "outbox", label: outboxLabel },
-  ];
-
-  return (
-    <div className="mt-[22px] grid h-[48px] shrink-0 grid-cols-2 border-b border-[var(--uc-border)]">
-      {tabs.map((tab) => {
-        const isActive = tab.id === activeMailbox;
-
-        return (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => onChange(tab.id)}
-            aria-pressed={isActive}
-            className="relative flex items-center justify-center font-['UniCredit',sans-serif] text-[16px] font-bold text-[var(--uc-text)]"
-          >
-            {isActive && <span className="mr-[8px] size-[12px] rounded-full bg-[var(--uc-action)]" aria-hidden="true" />}
-            <span className={isActive ? "" : "text-[var(--uc-text-muted)]"}>{tab.label}</span>
-            {isActive && <span className="absolute bottom-[-1px] left-0 h-[2px] w-full bg-[var(--uc-text)]" aria-hidden="true" />}
-          </button>
-        );
-      })}
-    </div>
-  );
 }
 
 function MessagesSectionTitle({ children }: { children: string }) {
@@ -63,11 +26,12 @@ function MessagesSectionTitle({ children }: { children: string }) {
 }
 
 function DotMenuButton() {
+  const { t } = useLanguage();
   return (
     <button
       type="button"
       className="flex size-[32px] flex-col items-center justify-center gap-[3px]"
-      aria-label="More actions"
+      aria-label={t("runtime.actions.moreActions", "More actions")}
     >
       <span className="size-[4px] rounded-full bg-[var(--uc-text)]" />
       <span className="size-[4px] rounded-full bg-[var(--uc-text)]" />
@@ -109,11 +73,25 @@ function MessageListRow({ message }: { message: MessageListItem }) {
 
 export default function MessagesScreen({ onBack }: MessagesScreenProps) {
   const { country } = useDemo();
+  const { t } = useLanguage();
   const config = getMessagesConfigForCountry(country);
   const [activeMailbox, setActiveMailbox] = useState<MessageMailbox>("inbox");
   const [searchQuery, setSearchQuery] = useState("");
   const [headerProgress, setHeaderProgress] = useState(0);
   const messages = activeMailbox === "inbox" ? config.inbox : config.outbox;
+  const mailboxTabs = [
+      { id: "inbox" as MessageMailbox, label: t("runtime.messages.inbox", config.tabs.inbox), hasNewItems: true },
+      { id: "outbox" as MessageMailbox, label: t("runtime.messages.outbox", config.tabs.outbox) },
+    ] as const;
+  const localizeMessage = (message: MessageListItem): MessageListItem => {
+    const keyBase = `runtime.messages.rows.${message.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
+    return {
+      ...message,
+      title: t(`${keyBase}.title`, message.title),
+      description: t(`${keyBase}.description`, message.description),
+      badge: message.badge ? t("runtime.messages.newBadge", message.badge) : message.badge,
+    };
+  };
 
   const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
     const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64));
@@ -122,9 +100,10 @@ export default function MessagesScreen({ onBack }: MessagesScreenProps) {
 
   const filteredMessages = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
-    if (!normalizedQuery) return messages;
+    const localizedMessages = messages.map(localizeMessage);
+    if (!normalizedQuery) return localizedMessages;
 
-    return messages.filter((message) =>
+    return localizedMessages.filter((message) =>
       [
         message.day,
         message.month,
@@ -137,7 +116,7 @@ export default function MessagesScreen({ onBack }: MessagesScreenProps) {
         .toLowerCase()
         .includes(normalizedQuery),
     );
-  }, [config.sectionTitle, messages, searchQuery]);
+  }, [config.sectionTitle, messages, searchQuery, t]);
 
   return (
     <div
@@ -145,21 +124,16 @@ export default function MessagesScreen({ onBack }: MessagesScreenProps) {
       onScroll={handlePageScroll}
     >
       <PageHeader
-        title={config.title}
+        title={t("runtime.messages.title", config.title)}
         onBack={onBack}
         collapsedTitleProgress={headerProgress}
         includeSafeArea
       />
-      <MessagesTabs
-        activeMailbox={activeMailbox}
-        inboxLabel={config.tabs.inbox}
-        outboxLabel={config.tabs.outbox}
-        onChange={setActiveMailbox}
-      />
+      <MessagesMailboxTabs tabs={mailboxTabs} activeTabId={activeMailbox} onChange={(tabId) => setActiveMailbox(tabId as MessageMailbox)} />
       <div className="px-[16px] py-[26px]">
         <AccountSearchBar value={searchQuery} onValueChange={setSearchQuery} />
       </div>
-      <MessagesSectionTitle>{config.sectionTitle}</MessagesSectionTitle>
+      <MessagesSectionTitle>{t("runtime.messages.sectionTitle", config.sectionTitle)}</MessagesSectionTitle>
       <div className="pt-[20px] pb-[24px]">
         {filteredMessages.map((message) => (
           <MessageListRow key={message.id} message={message} />

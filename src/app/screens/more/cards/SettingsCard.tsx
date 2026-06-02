@@ -7,9 +7,10 @@ import imgSettings from "figma:asset/b756062d79e37b43d0eda8eee6125757ce5bb9bf.pn
 
 interface SettingsCardProps {
   onClick: () => void;
+  title?: string;
 }
 
-export function SettingsCard({ onClick }: SettingsCardProps) {
+export function SettingsCard({ onClick, title = "Settings" }: SettingsCardProps) {
   return (
     <button
       onClick={onClick}
@@ -32,7 +33,7 @@ export function SettingsCard({ onClick }: SettingsCardProps) {
       {/* Title - top left padding */}
       <div className="absolute inset-0 p-[16px] flex items-start">
         <p className="font-['UniCredit:Bold',sans-serif] text-[18px] text-[var(--uc-text)] leading-[normal] text-left whitespace-pre-wrap z-10 relative">
-          Settings
+          {title}
         </p>
       </div>
     </button>

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Fragment, createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { COUNTRIES, COUNTRY_META, FEATURE_META } from "@/app/registry/demoConfig";
 import { getAvailableLanguages, getLanguageDisplayName } from "@/app/registry/languageByCountry";
 import { isCoAppingAvailable } from "@/app/utils/coAppingAvailability";
@@ -6,31 +6,45 @@ import { getProductsForCountry } from "@/app/config/productConfig";
 import { MORE_CARDS_CONFIG, type MoreCardType } from "@/app/config/moreCardsConfig";
 import { AppIcon, ICON_AUDIT_EXCLUSIONS, ICON_INVENTORY, type IconCategory, type IconInventoryItem } from "@/app/components/icons";
 import PageHeader from "@/app/components/PageHeader";
+import ThemeModeSegment from "@/app/components/ThemeModeSegment";
 import BottomNavigation from "@/app/components/BottomNavigation";
 import HomeHeader from "@/app/screens/home/HomeHeader";
 import { MoreHeader } from "@/app/screens/more/MoreHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
-import UiPrimaryButton from "@/app/components/ui/PrimaryButton";
 import LanguageSelectorButton from "@/app/components/ui/LanguageSelectorButton";
 import NavigationLink from "@/app/components/ui/NavigationLink";
 import PreLoginHeading from "@/app/components/ui/PreLoginHeading";
 import { RadioButton } from "@/app/components/common";
 import TextField from "@/app/components/TextField";
+import AmountField from "@/app/components/AmountField";
 import { TemplateCodePreview } from "@/app/components/templates/TemplateCodePreviews";
 import ProductAccordion from "@/app/components/ProductAccordion";
 import ProductAccordionAnimated from "@/app/components/ProductAccordionAnimated";
 import AccordionSection from "@/app/components/AccordionSection";
 import ProductCard from "@/app/components/ProductCard";
+import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
+import productCardAccountImage from "../../../../screenshots/account.png";
+import productCardCardsImage from "../../../../screenshots/cards.png";
+import productCardInsuranceImage from "../../../../screenshots/insurance.png";
+import productCardInvestmentsImage from "../../../../screenshots/investments.png";
+import productCardMarketHedgingImage from "../../../../screenshots/market-hedging.png";
+import productCardMortgagesImage from "../../../../screenshots/mortgages.png";
+import productCardPartnerOffersImage from "../../../../screenshots/partner-offers.png";
+import productCardShopSmartImage from "../../../../screenshots/shopsmart.png";
 import ProductsList from "@/app/components/ProductsList";
 import TotalRow from "@/app/components/TotalRow";
 import AccountBalanceCard from "@/app/components/accounts/AccountBalanceCard";
-import AccountActionBar from "@/app/components/accounts/AccountActionBar";
+import AccountActionBar, { type AccountActionBarItem } from "@/app/components/accounts/AccountActionBar";
 import AccountCarouselIndicator from "@/app/components/accounts/AccountCarouselIndicator";
 import AccountDetailsInfoField from "@/app/components/accounts/AccountDetailsInfoField";
 import AccountTransactionRow from "@/app/components/accounts/AccountTransactionRow";
 import AccountTransactionMonthDivider from "@/app/components/accounts/AccountTransactionMonthDivider";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
+import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
+import PaymentHeroCard from "@/app/components/payments/PaymentHeroCard";
+import { getPaymentsMenuForCountry } from "@/app/config/paymentsMenuConfig";
+import { type ProductsCard as ProductsMenuCardData } from "@/app/config/productsMenuConfig";
 import AccountSummary from "@/app/screens/home/AccountSummary";
 import QuickActions from "@/app/screens/home/QuickActions";
 import TransactionsPreview from "@/app/screens/home/TransactionsPreview";
@@ -51,7 +65,6 @@ import PanelWithTranslations from "@/app/components/PanelWithTranslations";
 import PanelWithoutCoAppingTranslations from "@/app/components/PanelWithoutCoAppingTranslations";
 import StatusBar from "@/app/components/StatusBar";
 import DynamicIsland from "@/app/components/DynamicIsland";
-import UniCreditLogo from "@/app/components/UniCreditLogo";
 import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
@@ -88,7 +101,7 @@ const activeComponentFiles = [
   "FloatingCoAppingButton", "LanguageSelector", "LogoutConfirmDialog", "MobileFrame", "PageHeader",
   "PanelOverlay", "PanelWithTranslations", "PanelWithoutCoAppingTranslations", "PreLoginActiveScreen",
   "PreLoginScreen", "PrimaryButton", "ProductAccordion", "ProductAccordionAnimated", "ProductCard",
-  "ProductsList", "StatusBar", "TerminateSessionPopup", "TextField", "TotalRow", "UniCreditLogo",
+  "ProductMenuCard", "ProductsList", "StatusBar", "TerminateSessionPopup", "TextField", "AmountField", "TotalRow", "UniCreditLogo", "PaymentHeroCard",
   "AccountBalanceCard", "AccountActionBar", "AccountCarouselIndicator", "AccountDetailsInfoField", "AccountSearchBar", "AccountTransactionRow", "AccountTransactionMonthDivider",
   "HomeHeader", "AccountSummary", "QuickActions", "TransactionsPreview", "UnplannedBanner",
   "MoreHeader", "MoreCardBase", "ContactsCard", "DocumentsCard", "SettingsCard", "GdprConsentCard",
@@ -112,10 +125,10 @@ const moreCardLabels: Record<MoreCardType, string> = {
   documents: "Documents",
   settings: "Settings",
   "gdpr-consent": "GDPR Consent",
-  "third-party-consent": "3rd Party consent",
-  "digital-activities": "Digital activities register",
-  "my-requests": "My requests",
-  tutorial: "Tutorial",
+  "third-party-consent": "Consent to third parties",
+  "digital-activities": "Digital activity record",
+  "my-requests": "My applications",
+  tutorial: "Tutorials",
 };
 
 const accountCardSamples = {
@@ -155,12 +168,33 @@ const colorSectionLinks = [
 
 type InventoryTab = "components" | "templates" | "icons" | "colors";
 
+const inventorySectionLinks: Record<InventoryTab, readonly (readonly [string, string])[]> = {
+  components: componentSectionLinks,
+  templates: templateSectionLinks,
+  icons: iconSectionLinks,
+  colors: colorSectionLinks,
+};
+
 const inventoryTabLabels: Record<InventoryTab, string> = {
   components: "Components",
   templates: "Templates",
   icons: "Icons",
   colors: "Colors",
 };
+
+function getInventoryTabForHash(hash: string): InventoryTab {
+  const sectionId = hash.replace(/^#/, "");
+
+  if (templateSectionLinks.some(([id]) => id === sectionId)) return "templates";
+  if (iconSectionLinks.some(([id]) => id === sectionId)) return "icons";
+  if (colorSectionLinks.some(([id]) => id === sectionId)) return "colors";
+
+  return "components";
+}
+
+function getDefaultSectionForInventoryTab(tab: InventoryTab) {
+  return inventorySectionLinks[tab][0]?.[0] ?? "overview";
+}
 
 const iconCategoryOrder: IconCategory[] = [
   "Header",
@@ -173,6 +207,11 @@ const iconCategoryOrder: IconCategory[] = [
   "System",
   "External Lucide",
 ];
+
+type SelectorOption = {
+  id: string;
+  label: string;
+};
 
 type MeasuredElement = {
   id: string;
@@ -194,10 +233,45 @@ type MeasuredElement = {
     right: number;
     bottom: number;
   };
+  parentDisplay: string;
+  parentGap: string;
+  guides: SpacingGuide[];
+  spacingRows: readonly [string, string][];
+};
+
+type ElementBox = {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+  width: number;
+  height: number;
+  x: number;
+  y: number;
+};
+
+type SpacingGuide = {
+  id: string;
+  label: string;
+  kind: "parent" | "padding" | "sibling" | "gap";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  orientation: "horizontal" | "vertical";
 };
 
 function roundPx(value: number) {
   return Math.round(value * 10) / 10;
+}
+
+function px(value: number) {
+  return `${roundPx(value)} px`;
+}
+
+function parsePx(value: string) {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function compactText(value: string | null | undefined) {
@@ -224,34 +298,165 @@ function getSpacing(style: CSSStyleDeclaration, prefix: "padding" | "margin") {
   return `${style.getPropertyValue(`${prefix}-top`)} ${style.getPropertyValue(`${prefix}-right`)} ${style.getPropertyValue(`${prefix}-bottom`)} ${style.getPropertyValue(`${prefix}-left`)}`;
 }
 
-function readElementMeasurement(element: Element, root: HTMLElement, index: number): MeasuredElement | null {
-  const rect = element.getBoundingClientRect();
-  const rootRect = root.getBoundingClientRect();
-  const parentRect = (element.parentElement || root).getBoundingClientRect();
-
-  if (rect.width < 4 || rect.height < 4) return null;
-
-  const style = window.getComputedStyle(element);
+function getSpacingValues(style: CSSStyleDeclaration, prefix: "padding" | "margin") {
   return {
-    id: `${element.tagName.toLowerCase()}-${index}`,
-    label: getElementLabel(element),
-    tag: element.tagName.toLowerCase(),
+    top: parsePx(style.getPropertyValue(`${prefix}-top`)),
+    right: parsePx(style.getPropertyValue(`${prefix}-right`)),
+    bottom: parsePx(style.getPropertyValue(`${prefix}-bottom`)),
+    left: parsePx(style.getPropertyValue(`${prefix}-left`)),
+  };
+}
+
+function readBox(rect: DOMRect, rootRect: DOMRect): ElementBox {
+  return {
+    left: roundPx(rect.left - rootRect.left),
+    top: roundPx(rect.top - rootRect.top),
+    right: roundPx(rect.right - rootRect.left),
+    bottom: roundPx(rect.bottom - rootRect.top),
     width: roundPx(rect.width),
     height: roundPx(rect.height),
     x: roundPx(rect.left - rootRect.left),
     y: roundPx(rect.top - rootRect.top),
+  };
+}
+
+function addSpacingGuide(
+  guides: SpacingGuide[],
+  id: string,
+  label: string,
+  kind: SpacingGuide["kind"],
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  orientation: SpacingGuide["orientation"]
+) {
+  if (width < 0.5 || height < 0.5) return;
+  guides.push({
+    id,
+    label,
+    kind,
+    x: roundPx(x),
+    y: roundPx(y),
+    width: roundPx(width),
+    height: roundPx(height),
+    orientation,
+  });
+}
+
+function addParentDistanceGuides(guides: SpacingGuide[], box: ElementBox, parentBox: ElementBox) {
+  const rail = Math.min(28, Math.max(10, box.height));
+  const verticalRail = Math.min(28, Math.max(10, box.width));
+
+  addSpacingGuide(guides, "parent-left", px(box.left - parentBox.left), "parent", parentBox.left, box.top + box.height / 2 - rail / 2, box.left - parentBox.left, rail, "horizontal");
+  addSpacingGuide(guides, "parent-right", px(parentBox.right - box.right), "parent", box.right, box.top + box.height / 2 - rail / 2, parentBox.right - box.right, rail, "horizontal");
+  addSpacingGuide(guides, "parent-top", px(box.top - parentBox.top), "parent", box.left + box.width / 2 - verticalRail / 2, parentBox.top, verticalRail, box.top - parentBox.top, "vertical");
+  addSpacingGuide(guides, "parent-bottom", px(parentBox.bottom - box.bottom), "parent", box.left + box.width / 2 - verticalRail / 2, box.bottom, verticalRail, parentBox.bottom - box.bottom, "vertical");
+}
+
+function addPaddingGuides(guides: SpacingGuide[], box: ElementBox, padding: ReturnType<typeof getSpacingValues>) {
+  addSpacingGuide(guides, "padding-top", px(padding.top), "padding", box.left, box.top, box.width, padding.top, "vertical");
+  addSpacingGuide(guides, "padding-right", px(padding.right), "padding", box.right - padding.right, box.top, padding.right, box.height, "horizontal");
+  addSpacingGuide(guides, "padding-bottom", px(padding.bottom), "padding", box.left, box.bottom - padding.bottom, box.width, padding.bottom, "vertical");
+  addSpacingGuide(guides, "padding-left", px(padding.left), "padding", box.left, box.top, padding.left, box.height, "horizontal");
+}
+
+function getVisibleSiblingBox(element: Element, rootRect: DOMRect, direction: "previous" | "next") {
+  let sibling = direction === "previous" ? element.previousElementSibling : element.nextElementSibling;
+
+  while (sibling) {
+    if (!sibling.closest("[data-inspector-ui='true']")) {
+      const rect = sibling.getBoundingClientRect();
+      if (rect.width >= 4 && rect.height >= 4) return readBox(rect, rootRect);
+    }
+    sibling = direction === "previous" ? sibling.previousElementSibling : sibling.nextElementSibling;
+  }
+
+  return null;
+}
+
+function addSiblingGuides(guides: SpacingGuide[], box: ElementBox, previousBox: ElementBox | null, nextBox: ElementBox | null) {
+  const rail = Math.min(24, Math.max(10, box.height));
+  const verticalRail = Math.min(24, Math.max(10, box.width));
+
+  if (previousBox) {
+    if (previousBox.right <= box.left) {
+      addSpacingGuide(guides, "sibling-previous-x", px(box.left - previousBox.right), "sibling", previousBox.right, box.top + box.height / 2 - rail / 2, box.left - previousBox.right, rail, "horizontal");
+    } else if (previousBox.bottom <= box.top) {
+      addSpacingGuide(guides, "sibling-previous-y", px(box.top - previousBox.bottom), "sibling", box.left + box.width / 2 - verticalRail / 2, previousBox.bottom, verticalRail, box.top - previousBox.bottom, "vertical");
+    }
+  }
+
+  if (nextBox) {
+    if (box.right <= nextBox.left) {
+      addSpacingGuide(guides, "sibling-next-x", px(nextBox.left - box.right), "sibling", box.right, box.top + box.height / 2 - rail / 2, nextBox.left - box.right, rail, "horizontal");
+    } else if (box.bottom <= nextBox.top) {
+      addSpacingGuide(guides, "sibling-next-y", px(nextBox.top - box.bottom), "sibling", box.left + box.width / 2 - verticalRail / 2, box.bottom, verticalRail, nextBox.top - box.bottom, "vertical");
+    }
+  }
+}
+
+function readElementMeasurement(element: Element, root: HTMLElement, index: number): MeasuredElement | null {
+  const rect = element.getBoundingClientRect();
+  const rootRect = root.getBoundingClientRect();
+  const parentElement = element.parentElement || root;
+  const parentRect = parentElement.getBoundingClientRect();
+
+  if (rect.width < 4 || rect.height < 4) return null;
+
+  const style = window.getComputedStyle(element);
+  const parentStyle = window.getComputedStyle(parentElement);
+  const box = readBox(rect, rootRect);
+  const parentBox = readBox(parentRect, rootRect);
+  const paddingValues = getSpacingValues(style, "padding");
+  const marginValues = getSpacingValues(style, "margin");
+  const previousBox = getVisibleSiblingBox(element, rootRect, "previous");
+  const nextBox = getVisibleSiblingBox(element, rootRect, "next");
+  const guides: SpacingGuide[] = [];
+  const rowGap = parentStyle.getPropertyValue("row-gap");
+  const columnGap = parentStyle.getPropertyValue("column-gap");
+  const parentGap = `${rowGap} / ${columnGap}`;
+  const parentDistance = {
+    left: roundPx(rect.left - parentRect.left),
+    top: roundPx(rect.top - parentRect.top),
+    right: roundPx(parentRect.right - rect.right),
+    bottom: roundPx(parentRect.bottom - rect.bottom),
+  };
+
+  addParentDistanceGuides(guides, box, parentBox);
+  addPaddingGuides(guides, box, paddingValues);
+  addSiblingGuides(guides, box, previousBox, nextBox);
+
+  if (parsePx(rowGap) > 0 || parsePx(columnGap) > 0) {
+    addSpacingGuide(guides, "parent-gap-chip", `gap ${parentGap}`, "gap", box.left, box.bottom + 4, Math.min(box.width, 140), 18, "horizontal");
+  }
+
+  return {
+    id: `${element.tagName.toLowerCase()}-${index}`,
+    label: getElementLabel(element),
+    tag: element.tagName.toLowerCase(),
+    width: box.width,
+    height: box.height,
+    x: box.x,
+    y: box.y,
     fontSize: style.fontSize,
     lineHeight: style.lineHeight,
     fontWeight: style.fontWeight,
     fontFamily: style.fontFamily,
     padding: getSpacing(style, "padding"),
     margin: getSpacing(style, "margin"),
-    parentDistance: {
-      left: roundPx(rect.left - parentRect.left),
-      top: roundPx(rect.top - parentRect.top),
-      right: roundPx(parentRect.right - rect.right),
-      bottom: roundPx(parentRect.bottom - rect.bottom),
-    },
+    parentDistance,
+    parentDisplay: parentStyle.display,
+    parentGap,
+    guides,
+    spacingRows: [
+      ["parent", `L ${px(parentDistance.left)} · T ${px(parentDistance.top)} · R ${px(parentDistance.right)} · B ${px(parentDistance.bottom)}`],
+      ["padding", `T ${px(paddingValues.top)} · R ${px(paddingValues.right)} · B ${px(paddingValues.bottom)} · L ${px(paddingValues.left)}`],
+      ["margin", `T ${px(marginValues.top)} · R ${px(marginValues.right)} · B ${px(marginValues.bottom)} · L ${px(marginValues.left)}`],
+      ["parent gap", parentGap],
+      ["previous", previousBox ? `${px(Math.max(box.left - previousBox.right, box.top - previousBox.bottom, 0))}` : "none"],
+      ["next", nextBox ? `${px(Math.max(nextBox.left - box.right, nextBox.top - box.bottom, 0))}` : "none"],
+    ],
   };
 }
 
@@ -324,6 +529,8 @@ function MeasurementSurface({ children }: { children: React.ReactNode }) {
     return measurements.find((item) => item.width === roundPx(rect.width) && item.height === roundPx(rect.height) && item.label === getElementLabel(measuredTarget)) || null;
   };
 
+  const focusedMeasurement = active || measurements.find((item) => item.id === hoveredId) || null;
+
   return (
     <div
       ref={rootRef}
@@ -347,6 +554,39 @@ function MeasurementSurface({ children }: { children: React.ReactNode }) {
 
       {inspectMode && (
         <div className="pointer-events-none absolute inset-0 z-[60]" data-inspector-ui="true">
+          {focusedMeasurement?.guides.map((guide) => (
+            <div
+              key={guide.id}
+              className="absolute"
+              style={{
+                left: guide.x,
+                top: guide.y,
+                width: guide.width,
+                height: guide.height,
+              }}
+            >
+              <div
+                className="absolute inset-0"
+                style={{
+                  backgroundColor:
+                    guide.kind === "padding"
+                      ? "color-mix(in srgb, var(--uc-action) 10%, transparent)"
+                      : "color-mix(in srgb, var(--uc-brand) 14%, transparent)",
+                  border: "1px dashed color-mix(in srgb, var(--uc-text) 64%, transparent)",
+                }}
+              />
+              <div
+                className="absolute z-[2] whitespace-nowrap rounded-[4px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-1.5 py-0.5 font-['UniCredit:Bold',sans-serif] text-[11px] text-[var(--uc-text)] shadow-sm"
+                style={{
+                  left: guide.orientation === "horizontal" ? "50%" : "100%",
+                  top: "50%",
+                  transform: guide.orientation === "horizontal" ? "translate(-50%, -50%)" : "translate(4px, -50%)",
+                }}
+              >
+                {guide.label}
+              </div>
+            </div>
+          ))}
           {measurements.map((item) => {
             const isActive = active?.id === item.id;
             const isHovered = hoveredId === item.id;
@@ -369,7 +609,7 @@ function MeasurementSurface({ children }: { children: React.ReactNode }) {
       )}
 
       {inspectMode && active && (
-        <div className="absolute bottom-3 right-3 z-[70] w-[300px] rounded-[8px] border border-[var(--uc-action)] bg-[var(--uc-surface)] p-3 shadow-xl" data-inspector-ui="true">
+        <div className="absolute bottom-3 right-3 z-[70] w-[360px] rounded-[8px] border border-[var(--uc-action)] bg-[var(--uc-surface)] p-3 shadow-xl" data-inspector-ui="true">
           <div className="mb-2 flex items-start justify-between gap-3">
             <div>
               <p className="font-['UniCredit:Bold',sans-serif] text-[13px] text-[var(--uc-action)]">{active.label}</p>
@@ -386,9 +626,21 @@ function MeasurementSurface({ children }: { children: React.ReactNode }) {
             <dt className="text-[var(--uc-text-subtle)]">family</dt><dd className="truncate">{active.fontFamily}</dd>
             <dt className="text-[var(--uc-text-subtle)]">padding</dt><dd>{active.padding}</dd>
             <dt className="text-[var(--uc-text-subtle)]">margin</dt><dd>{active.margin}</dd>
+            <dt className="text-[var(--uc-text-subtle)]">parent layout</dt><dd>{active.parentDisplay} · gap {active.parentGap}</dd>
             <dt className="text-[var(--uc-text-subtle)]">to parent</dt>
             <dd>L {active.parentDistance.left}px · T {active.parentDistance.top}px · R {active.parentDistance.right}px · B {active.parentDistance.bottom}px</dd>
           </dl>
+          <div className="mt-3 border-t border-[var(--uc-border-muted)] pt-2">
+            <p className="mb-1 font-['UniCredit:Bold',sans-serif] text-[12px] text-[var(--uc-text)]">Spacing audit</p>
+            <dl className="grid grid-cols-[96px_1fr] gap-x-3 gap-y-1 text-[12px]">
+              {active.spacingRows.map(([label, value]) => (
+                <Fragment key={label}>
+                  <dt className="text-[var(--uc-text-subtle)]">{label}</dt>
+                  <dd>{value}</dd>
+                </Fragment>
+              ))}
+            </dl>
+          </div>
         </div>
       )}
     </div>
@@ -404,9 +656,6 @@ function Section({ id, title, description, children }: {
   return (
     <section id={id} className="scroll-mt-28 border-t border-[var(--uc-border)] py-10">
       <div className="mb-6 flex flex-col gap-2">
-        <p className="font-['UniCredit:Bold',sans-serif] text-[12px] uppercase tracking-[0.08em] text-[var(--uc-brand)]">
-          {id}
-        </p>
         <h2 className="font-['UniCredit:Bold',sans-serif] text-[28px] text-[var(--uc-text)]">{title}</h2>
         <p className="max-w-[860px] font-['UniCredit:Regular',sans-serif] text-[15px] leading-6 text-[var(--uc-text-muted)]">
           {description}
@@ -417,38 +666,143 @@ function Section({ id, title, description, children }: {
   );
 }
 
-function Specimen({ name, source, note, children, tone = "light", specs = [] }: {
+type ThemeMode = "light" | "dark";
+
+function Specimen({ name, note, children, tone = "light", showThemeControl = true }: {
   name: string;
-  source: string;
+  source?: string;
   note?: string;
-  children: React.ReactNode;
+  children: React.ReactNode | ((themeMode: ThemeMode) => React.ReactNode);
   tone?: "light" | "dark" | "gray";
   specs?: string[];
+  headerControl?: React.ReactNode;
+  showThemeControl?: boolean;
 }) {
-  const bg = tone === "dark" ? "bg-[var(--uc-text)]" : tone === "gray" ? "bg-[var(--uc-app-bg)]" : "bg-[var(--uc-surface)]";
+  const [themeMode, setThemeMode] = useState<ThemeMode>("light");
+  const isDark = themeMode === "dark";
+  const bg =
+    tone === "dark"
+      ? "bg-[var(--uc-static-black)]"
+      : tone === "gray"
+        ? "bg-[var(--uc-app-bg)]"
+        : "bg-[var(--uc-surface)]";
+  const renderedChildren = typeof children === "function" ? children(themeMode) : children;
 
   return (
     <div className="overflow-hidden rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)]">
       <div className="border-b border-[var(--uc-border-muted)] px-4 py-3">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <h3 className="font-['UniCredit:Bold',sans-serif] text-[16px] text-[var(--uc-text)]">{name}</h3>
-          <code className="rounded bg-[var(--uc-app-bg)] px-2 py-1 text-[12px] text-[var(--uc-text-muted)]">{source}</code>
+          {showThemeControl && (
+            <ThemeModeSegment value={themeMode} onChange={setThemeMode} ariaLabel={`${name} theme mode`} />
+          )}
         </div>
         {note && <p className="mt-1 text-[13px] text-[var(--uc-text-muted)]">{note}</p>}
-        {specs.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {specs.map((spec) => (
-              <span key={spec} className="rounded-full border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] px-2.5 py-1 text-[12px] text-[var(--uc-text-muted)]">
-                {spec}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
-      <div className={`${bg} relative p-5`}>
+      <div className={`${isDark ? "dark" : ""} ${bg} relative p-5`}>
         <MeasurementSurface>
-          {children}
+          {renderedChildren}
         </MeasurementSurface>
+      </div>
+    </div>
+  );
+}
+
+function VariantSelector({
+  id,
+  label = "Variant",
+  value,
+  options,
+  onChange,
+  extras,
+}: {
+  id: string;
+  label?: string;
+  value: string;
+  options: readonly SelectorOption[];
+  onChange: (value: string) => void;
+  extras?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <select
+        id={id}
+        aria-label={label}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="h-[36px] min-w-[210px] rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-3 text-[14px] text-[var(--uc-text)]"
+      >
+        {options.map((option) => (
+          <option key={option.id} value={option.id}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      {extras}
+    </div>
+  );
+}
+
+function CountryCoverageSummary() {
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
+  const products = getProductsForCountry(selectedCountry);
+  const moreCards = MORE_CARDS_CONFIG[selectedCountry];
+  const languages = getAvailableLanguages(selectedCountry);
+  const coAppingEnabled = isCoAppingAvailable(selectedCountry);
+
+  return (
+    <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
+      <VariantSelector
+        id="country-coverage-select"
+        label="Country"
+        value={selectedCountry}
+        onChange={(value) => setSelectedCountry(value as (typeof COUNTRIES)[number])}
+        options={COUNTRIES.map((country) => ({
+          id: country,
+          label: `${COUNTRY_META[country].nameEN} / ${COUNTRY_META[country].currency}`,
+        }))}
+      />
+
+      <div className="mt-5 flex flex-wrap items-start justify-between gap-4 border-t border-[var(--uc-border)] pt-5">
+        <div>
+          <h3 className="font-['UniCredit:Bold',sans-serif] text-[22px] text-[var(--uc-text)]">
+            {COUNTRY_META[selectedCountry].nameEN}
+          </h3>
+          <p className="text-[14px] text-[var(--uc-text-muted)]">
+            {selectedCountry} · {COUNTRY_META[selectedCountry].currency}
+          </p>
+        </div>
+        <Badge variant={coAppingEnabled ? "default" : "secondary"}>
+          {coAppingEnabled ? "Co-Apping" : "No Co-Apping"}
+        </Badge>
+      </div>
+
+      <div className="mt-5 grid gap-3 md:grid-cols-3">
+        {[
+          ["Languages", languages.length],
+          ["Products", products.length],
+          ["More cards", moreCards.length],
+        ].map(([label, value]) => (
+          <div key={label} className="rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-app-bg)] p-4">
+            <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">{label}</p>
+            <p className="mt-1 font-['UniCredit:Bold',sans-serif] text-[28px] text-[var(--uc-text)]">{value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5 grid gap-4 text-[14px] text-[var(--uc-text)]">
+        <div>
+          <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Languages</p>
+          <p>{languages.map(getLanguageDisplayName).join(", ")}</p>
+        </div>
+        <div>
+          <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Products</p>
+          <p>{products.map((item) => item.title).join(", ") || "None"}</p>
+        </div>
+        <div>
+          <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">More cards</p>
+          <p>{moreCards.map((card) => moreCardLabels[card]).join(", ")}</p>
+        </div>
       </div>
     </div>
   );
@@ -463,23 +817,13 @@ function ProductOfferCardVariantSpecimen() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--uc-text-muted)]" htmlFor="product-offer-tone-select">
-          Variant
-        </label>
-        <select
-          id="product-offer-tone-select"
-          value={selectedTone.id}
-          onChange={(event) => setSelectedToneId(event.target.value)}
-          className="h-[36px] min-w-[210px] rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-3 text-[14px] text-[var(--uc-text)]"
-        >
-          {PRODUCT_BANNER_TONE_OPTIONS.map((tone) => (
-            <option key={tone.id} value={tone.id}>
-              {tone.label}
-            </option>
-          ))}
-        </select>
-        <div className="flex items-center gap-3 text-[12px] text-[var(--uc-text-muted)]">
+      <VariantSelector
+        id="product-offer-tone-select"
+        value={selectedTone.id}
+        onChange={setSelectedToneId}
+        options={PRODUCT_BANNER_TONE_OPTIONS.map((tone) => ({ id: tone.id, label: tone.label }))}
+        extras={
+          <div className="flex items-center gap-3 text-[12px] text-[var(--uc-text-muted)]">
           <span className="flex items-center gap-1.5">
             <span className="size-3 rounded-[3px] border border-[var(--uc-border)]" style={{ backgroundColor: selectedTone.backgroundColor }} />
             bg
@@ -489,7 +833,8 @@ function ProductOfferCardVariantSpecimen() {
             chevron
           </span>
         </div>
-      </div>
+        }
+      />
 
       <ProductOfferCard
         colorFamily={selectedTone.family}
@@ -500,6 +845,354 @@ function ProductOfferCardVariantSpecimen() {
           description: "Enjoy zero monthly fee\nand smart everyday\nbanking benefits.",
         }}
       />
+    </div>
+  );
+}
+
+function ProductMenuCardVariantSpecimen() {
+  const cards: ProductsMenuCardData[] = [
+    {
+      id: "account",
+      title: "Current\naccounts",
+      background: "var(--uc-product-blue-deep)",
+      illustration: "flowers",
+      imageSrc: productCardAccountImage,
+    },
+    {
+      id: "cards",
+      title: "Cards",
+      background: "var(--uc-red-card)",
+      illustration: "bag",
+      imageSrc: productCardCardsImage,
+    },
+    {
+      id: "mortgages-loans",
+      title: "Mortgages and\nLoans",
+      background: "var(--uc-product-mauve)",
+      illustration: "pillow",
+      imageSrc: productCardMortgagesImage,
+    },
+    {
+      id: "insurance",
+      title: "Insurance",
+      background: "var(--uc-product-blue)",
+      illustration: "umbrella",
+      imageSrc: productCardInsuranceImage,
+    },
+    {
+      id: "investments-savings",
+      title: "Investments &\nSavings",
+      background: "var(--uc-product-slate)",
+      illustration: "branch",
+      imageSrc: productCardInvestmentsImage,
+    },
+    {
+      id: "market-hedging",
+      title: "Market Hedging",
+      background: "var(--uc-product-hedging)",
+      illustration: "arrow",
+      imageSrc: productCardMarketHedgingImage,
+    },
+    {
+      id: "shopsmart",
+      title: "Shopsmart",
+      background: "var(--uc-green-main)",
+      illustration: "bag",
+      imageSrc: productCardShopSmartImage,
+    },
+    {
+      id: "partner-offers",
+      title: "Partner\nOffers",
+      background: "var(--uc-orange-main)",
+      illustration: "arrow",
+      imageSrc: productCardPartnerOffersImage,
+    },
+  ];
+  const [selectedCardId, setSelectedCardId] = useState(cards[0]?.id ?? "account");
+  const [selectedSize, setSelectedSize] = useState<"standard" | "compact">("standard");
+  const selectedCard = cards.find((card) => card.id === selectedCardId) ?? cards[0];
+
+  if (!selectedCard) return null;
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap gap-3">
+        <VariantSelector
+          id="product-menu-card-select"
+          value={selectedCard.id}
+          onChange={setSelectedCardId}
+          options={cards.map((card) => ({ id: card.id, label: card.title.replace(/\n/g, " ") }))}
+          extras={
+            <div className="flex items-center gap-1.5 text-[12px] text-[var(--uc-text-muted)]">
+              <span
+                className="size-3 rounded-[3px] border border-[var(--uc-border)]"
+                style={{ background: selectedCard.background }}
+              />
+              background
+            </div>
+          }
+        />
+        <VariantSelector
+          id="product-menu-card-size-select"
+          value={selectedSize}
+          onChange={(value) => setSelectedSize(value as "standard" | "compact")}
+          options={[
+            { id: "standard", label: "Standard 120px" },
+            { id: "compact", label: "Compact 72px" },
+          ]}
+        />
+      </div>
+
+      <ProductMenuCard card={selectedCard} variant={selectedSize} />
+    </div>
+  );
+}
+
+function HeaderPreviewFrame({
+  children,
+  tone = "surface",
+  height,
+}: {
+  children: React.ReactNode;
+  tone?: "surface" | "app" | "dark";
+  height?: number;
+}) {
+  const surfaceClass =
+    tone === "dark"
+      ? "bg-[var(--uc-app-bg)]"
+      : tone === "app"
+        ? "bg-[var(--uc-app-bg)]"
+        : "bg-[var(--uc-surface)]";
+
+  return (
+    <div
+      className={`relative w-[375px] overflow-hidden border border-[var(--uc-border)] ${tone === "dark" ? "dark" : ""} ${surfaceClass}`}
+      style={height ? { height } : undefined}
+    >
+      {children}
+    </div>
+  );
+}
+
+function StatusBarVariantSpecimen() {
+  return (
+    <Specimen name="Status bar">
+      {(themeMode) => {
+        const isDark = themeMode === "dark";
+
+        return (
+          <HeaderPreviewFrame tone="surface" height={54}>
+            <StatusBar variant={isDark ? "dark" : "light"} isCoAppingActive={isDark} />
+            <DynamicIsland variant={isDark ? "dark" : "light"} />
+          </HeaderPreviewFrame>
+        );
+      }}
+    </Specimen>
+  );
+}
+
+function HomeHeaderSpecimen() {
+  return (
+    <Specimen name="Home">
+      <HeaderPreviewFrame tone="app">
+        <div className="pt-[24px]">
+          <HomeHeader onPrimeClick={noop} onMessagesClick={noop} />
+        </div>
+      </HeaderPreviewFrame>
+    </Specimen>
+  );
+}
+
+function MoreHeaderSpecimen() {
+  return (
+    <Specimen name="More">
+      <HeaderPreviewFrame tone="surface">
+        <div className="pt-[24px]">
+          <MoreHeader onProfile={noop} onMessages={noop} onLogout={noop} messageCount={7} />
+        </div>
+      </HeaderPreviewFrame>
+    </Specimen>
+  );
+}
+
+const PAGE_HEADER_VARIANTS = [
+  { id: "level-1-page", label: "Level 1 page" },
+  { id: "level-1-center", label: "Level 1 center" },
+  { id: "level-1-categorized", label: "Level 1 categorized" },
+  { id: "level-1-uncategorized", label: "Level 1 uncategorized" },
+  { id: "collapsed", label: "Collapsed" },
+] satisfies readonly SelectorOption[];
+
+function PageHeaderVariantSpecimen({
+  themeMode,
+}: {
+  themeMode: "light" | "dark";
+}) {
+  const [selectedVariant, setSelectedVariant] = useState("level-1-page");
+  const isDark = themeMode === "dark";
+  const variantProps = (() => {
+    switch (selectedVariant) {
+      case "level-1-center":
+        return {
+          title: "Account Details",
+          largeTitleAlign: "center" as const,
+        };
+      case "level-1-categorized":
+        return {
+          title: "Utility bill",
+          largeTitleColor: "var(--uc-pfm-utilities)",
+        };
+      case "level-1-uncategorized":
+        return {
+          title: "Uncategorized",
+          largeTitleColor: "var(--uc-pfm-uncategorized)",
+        };
+      case "collapsed":
+        return {
+          title: "Account Details",
+          collapsedTitleProgress: 1,
+        };
+      default:
+        return {
+          title: "Select language",
+        };
+    }
+  })();
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="page-header-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={PAGE_HEADER_VARIANTS}
+      />
+      <HeaderPreviewFrame tone={isDark ? "dark" : "surface"}>
+        <PageHeader
+          onBack={noop}
+          variant={isDark ? "dark" : "light"}
+          {...variantProps}
+        />
+      </HeaderPreviewFrame>
+    </div>
+  );
+}
+
+function PageHeaderSpecimen() {
+  return (
+    <Specimen name="PageHeader">
+      {(themeMode) => <PageHeaderVariantSpecimen themeMode={themeMode} />}
+    </Specimen>
+  );
+}
+
+function BottomNavigationVariantSpecimen() {
+  const [selectedTab, setSelectedTab] = useState("home");
+  const options = [
+    { id: "home", label: "Home" },
+    { id: "analytics", label: "Spending" },
+    { id: "payments", label: "Payments" },
+    { id: "products", label: "Products" },
+    { id: "more", label: "More" },
+  ] satisfies readonly SelectorOption[];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="bottom-navigation-variant-select"
+        label="Active tab"
+        value={selectedTab}
+        onChange={setSelectedTab}
+        options={options}
+      />
+      <div className="w-[375px] rounded border bg-[var(--uc-surface)]">
+        <BottomNavigation activeTab={selectedTab as "home" | "analytics" | "payments" | "products" | "more"} onTabChange={noop} />
+      </div>
+    </div>
+  );
+}
+
+function PaymentHeroCardVariantSpecimen() {
+  const [selectedItemId, setSelectedItemId] = useState("new-payment");
+  const items = getPaymentsMenuForCountry("RO").primaryItems;
+  const selectedItem = items.find((item) => item.id === selectedItemId) ?? items[0];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="payment-hero-card-select"
+        label="Card"
+        value={selectedItem.id}
+        onChange={setSelectedItemId}
+        options={items.map((item) => ({ id: item.id, label: item.title }))}
+      />
+      <div className="w-full max-w-[327px]">
+        <PaymentHeroCard item={selectedItem} />
+      </div>
+    </div>
+  );
+}
+
+function RadioButtonVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState("selected");
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="radio-button-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={[
+          { id: "selected", label: "Selected" },
+          { id: "unselected", label: "Unselected" },
+        ]}
+      />
+      <div className="w-full max-w-[327px]">
+        <RadioButton
+          selected={selectedVariant === "selected"}
+          label={selectedVariant === "selected" ? "ENGLISH" : "ROMANIAN"}
+          onClick={noop}
+        />
+      </div>
+    </div>
+  );
+}
+
+function PrimaryButtonVariantSpecimen({ themeMode }: { themeMode: ThemeMode }) {
+  const isDark = themeMode === "dark";
+
+  return (
+    <div className="w-[327px]">
+      <PrimaryButton variant={isDark ? "surface" : "action"} labelSize="16" className="w-full">
+        {isDark ? "SELECT YOUR ACCOUNT" : "Continue"}
+      </PrimaryButton>
+    </div>
+  );
+}
+
+function ButtonRegistryVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState("default");
+  const label = selectedVariant === "destructive" ? "Delete" : selectedVariant === "ghost" ? "Ghost" : "Continue";
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="button-registry-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={[
+          { id: "default", label: "Default" },
+          { id: "secondary", label: "Secondary" },
+          { id: "outline", label: "Outline" },
+          { id: "ghost", label: "Ghost" },
+          { id: "destructive", label: "Destructive" },
+        ]}
+      />
+      <div className="flex flex-wrap gap-3">
+        <Button variant={selectedVariant as "default" | "secondary" | "outline" | "ghost" | "destructive"}>
+          {label}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -535,94 +1228,701 @@ function MoreCardPreview({ type }: { type: MoreCardType }) {
   }
 }
 
-function TextFieldSpecimens() {
-  const [emptyValue, setEmptyValue] = useState("");
-  const [filledValue, setFilledValue] = useState("123434ABC");
+function TextFieldSpecimens({ withChevron }: { withChevron: boolean }) {
+  const [activeValue, setActiveValue] = useState("Textfield");
+  const [filledValue, setFilledValue] = useState("Textfield");
+  const [selectedVariant, setSelectedVariant] = useState("empty");
+
+  const variants = [
+    { id: "empty", label: "Empty" },
+    { id: "on-focus", label: "On focus" },
+    { id: "filled", label: "Filled" },
+    { id: "error-filled", label: "Error (filled)" },
+    { id: "error-empty", label: "Error (empty)" },
+    { id: "disabled-empty", label: "Disabled (empty)" },
+    { id: "disabled-filled", label: "Disabled (filled)" },
+    { id: "multiple-filled", label: "Multiple filled" },
+  ] satisfies readonly SelectorOption[];
+
+  const baseProps = {
+    helperText: "Message",
+    helperText2: "Message line 2",
+    ...(withChevron ? { trailingIconName: "chevron-down-wide" as const } : {}),
+  };
 
   return (
-    <div className="grid gap-6 md:grid-cols-3">
-      <TextField label="Inactive / empty" value={emptyValue} onChange={setEmptyValue} helperText="Helper text" />
-      <TextField label="Filled" value={filledValue} onChange={setFilledValue} helperText="Valid helper text" />
-      <TextField label="Error" value="ABC" onChange={noop} errorText="Invalid code" errorText2="Try again" />
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="text-field-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={variants}
+      />
+      <div className="w-[327px]">
+        {selectedVariant === "empty" ? <TextField label="Title" value="" onChange={noop} visualState="empty" {...baseProps} /> : null}
+        {selectedVariant === "on-focus" ? (
+          <TextField label="Title" value={activeValue} onChange={setActiveValue} visualState="on-focus" {...baseProps} />
+        ) : null}
+        {selectedVariant === "filled" ? (
+          <TextField label="Title" value={filledValue} onChange={setFilledValue} visualState="filled" {...baseProps} />
+        ) : null}
+        {selectedVariant === "error-filled" ? (
+          <TextField
+            label="Title"
+            value="Textfield"
+            onChange={noop}
+            visualState="error-filled"
+            errorText="Message"
+            errorText2="Message line 2"
+            {...(withChevron ? { trailingIconName: "chevron-down-wide" as const } : {})}
+          />
+        ) : null}
+        {selectedVariant === "error-empty" ? (
+          <TextField
+            label="Title"
+            value=""
+            onChange={noop}
+            visualState="error-empty"
+            errorText="Message"
+            errorText2="Message line 2"
+            {...(withChevron ? { trailingIconName: "chevron-down-wide" as const } : {})}
+          />
+        ) : null}
+        {selectedVariant === "disabled-empty" ? (
+          <TextField label="Title" value="" onChange={noop} visualState="disabled-empty" {...baseProps} />
+        ) : null}
+        {selectedVariant === "disabled-filled" ? (
+          <TextField label="Title" value="Textfield" onChange={noop} visualState="disabled-filled" {...baseProps} />
+        ) : null}
+        {selectedVariant === "multiple-filled" ? (
+          <TextField
+            label="Title"
+            value=""
+            onChange={noop}
+            visualState="multiple-filled"
+            multipleValues={["Textfield", "textfield", "textfield", "textfield"]}
+            multipleCount={4}
+            {...baseProps}
+          />
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function AmountFieldSpecimens() {
+  const [activeValue, setActiveValue] = useState("Insert amount");
+  const [filledValue, setFilledValue] = useState("1.250,00");
+  const [selectedVariant, setSelectedVariant] = useState("empty");
+
+  const variants = [
+    { id: "empty", label: "Empty" },
+    { id: "on-focus", label: "On focus" },
+    { id: "filled", label: "Filled" },
+    { id: "error-filled", label: "Error (filled)" },
+    { id: "error-empty", label: "Error (empty)" },
+    { id: "disabled-empty", label: "Disabled (empty)" },
+    { id: "disabled-filled", label: "Disabled (filled)" },
+    { id: "multiple-filled", label: "Multiple filled" },
+  ] satisfies readonly SelectorOption[];
+
+  const baseProps = {
+    helperText: "Message",
+    helperText2: "Message line 2",
+    currency: "RSD",
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="amount-field-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={variants}
+      />
+      <div className="w-[327px]">
+        {selectedVariant === "empty" ? <AmountField label="Amount" value="" onChange={noop} visualState="empty" {...baseProps} /> : null}
+        {selectedVariant === "on-focus" ? (
+          <AmountField label="Amount" value={activeValue} onChange={setActiveValue} visualState="on-focus" {...baseProps} />
+        ) : null}
+        {selectedVariant === "filled" ? (
+          <AmountField label="Amount" value={filledValue} onChange={setFilledValue} visualState="filled" {...baseProps} />
+        ) : null}
+        {selectedVariant === "error-filled" ? (
+          <AmountField
+            label="Amount"
+            value="1.250,00"
+            onChange={noop}
+            visualState="error-filled"
+            errorText="Message"
+            errorText2="Message line 2"
+            currency="RSD"
+          />
+        ) : null}
+        {selectedVariant === "error-empty" ? (
+          <AmountField
+            label="Amount"
+            value=""
+            onChange={noop}
+            visualState="error-empty"
+            errorText="Message"
+            errorText2="Message line 2"
+            currency="RSD"
+          />
+        ) : null}
+        {selectedVariant === "disabled-empty" ? (
+          <AmountField label="Amount" value="" onChange={noop} visualState="disabled-empty" {...baseProps} />
+        ) : null}
+        {selectedVariant === "disabled-filled" ? (
+          <AmountField label="Amount" value="1.250,00" onChange={noop} visualState="disabled-filled" {...baseProps} />
+        ) : null}
+        {selectedVariant === "multiple-filled" ? (
+          <AmountField
+            label="Amount"
+            value=""
+            onChange={noop}
+            visualState="multiple-filled"
+            multipleValues={["1.250,00", "350,00", "2.100,00", "90,00"]}
+            multipleCount={4}
+            {...baseProps}
+          />
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function AccountBalanceCardCountrySpecimen() {
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
+  const sample = accountCardSamples[selectedCountry];
+  const countryMeta = COUNTRY_META[selectedCountry];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="account-balance-country-select"
+        label="Country"
+        value={selectedCountry}
+        onChange={(value) => setSelectedCountry(value as (typeof COUNTRIES)[number])}
+        options={COUNTRIES.map((country) => ({ id: country, label: `${COUNTRY_META[country].nameEN} / ${COUNTRY_META[country].currency}` }))}
+      />
+      <div className="flex flex-col gap-2">
+        <p className="font-['UniCredit',sans-serif] text-[13px] font-bold text-[var(--uc-text-muted)]">
+          {countryMeta.nameEN} / {countryMeta.currency}
+        </p>
+        <AccountBalanceCard
+          account={getAccountIdentity(selectedCountry, 0)}
+          availableInteger={sample.integer}
+          availableDecimals={sample.decimals}
+          currency={countryMeta.currency}
+          currentBalance={sample.current}
+          showSubAccount={false}
+        />
+      </div>
+    </div>
+  );
+}
+
+function AccountActionBarVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState("4-elements");
+  const actions: AccountActionBarItem[] = [
+    { id: "details", iconName: "account-details", label: "Details" },
+    { id: "options", iconName: "account-options", label: "Options" },
+    { id: "add-money", iconName: "add-money", label: "Add money" },
+    { id: "mcash", iconName: "mcash", label: "mCash" },
+  ];
+  const variantItems: Record<string, AccountActionBarItem[]> = {
+    "4-elements": actions,
+    "3-elements": actions.map((item) => item.id === "add-money" ? { ...item, hidden: true } : item),
+    "2-elements": actions.map((item) => item.id === "options" || item.id === "add-money" ? { ...item, hidden: true } : item),
+    "1-element": actions.map((item) => item.id === "mcash" ? item : { ...item, hidden: true }),
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="account-action-bar-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={[
+          { id: "4-elements", label: "4 elements" },
+          { id: "3-elements", label: "3 elements" },
+          { id: "2-elements", label: "2 elements" },
+          { id: "1-element", label: "1 element" },
+        ]}
+      />
+      <div className="flex w-[375px] flex-col gap-[16px] bg-[var(--uc-app-bg)]">
+        <AccountActionBar items={variantItems[selectedVariant]} />
+      </div>
+    </div>
+  );
+}
+
+function AccountCarouselIndicatorVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState("4-first");
+  const variants: Record<string, { count: number; activeIndex: number }> = {
+    "4-first": { count: 4, activeIndex: 0 },
+    "4-next": { count: 4, activeIndex: 1 },
+    "4-more": { count: 4, activeIndex: 2 },
+    "4-last": { count: 4, activeIndex: 3 },
+    "7-first": { count: 7, activeIndex: 0 },
+    "7-next": { count: 7, activeIndex: 1 },
+    "7-more": { count: 7, activeIndex: 3 },
+    "7-last": { count: 7, activeIndex: 6 },
+  };
+  const activeVariant = variants[selectedVariant];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="account-carousel-indicator-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={[
+          { id: "4-first", label: "4 items / first" },
+          { id: "4-next", label: "4 items / next" },
+          { id: "4-more", label: "4 items / further" },
+          { id: "4-last", label: "4 items / last" },
+          { id: "7-first", label: "7 items / first" },
+          { id: "7-next", label: "7 items / next" },
+          { id: "7-more", label: "7 items / further" },
+          { id: "7-last", label: "7 items / last" },
+        ]}
+      />
+      <div className="flex w-[375px] flex-col gap-3 bg-[var(--uc-app-bg)] py-4">
+        <AccountCarouselIndicator
+          count={activeVariant.count}
+          activeIndex={activeVariant.activeIndex}
+          onSelect={noop}
+        />
+      </div>
+    </div>
+  );
+}
+
+function AccountDetailsInfoFieldVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState("with-icon");
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="account-details-info-field-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={[
+          { id: "with-icon", label: "Trailing icon" },
+          { id: "default", label: "Default row" },
+        ]}
+      />
+      <div className="flex w-[327px] flex-col bg-[var(--uc-surface)]">
+        {selectedVariant === "with-icon" ? (
+          <AccountDetailsInfoField
+            title="Account number"
+            subtitle="1234567890123456"
+            trailingIcon={<AppIcon name="copy-documents" color="var(--uc-text)" />}
+          />
+        ) : (
+          <AccountDetailsInfoField title="Available funds" subtitle="614,83 RON" />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AccountSearchBarVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState("default");
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="account-search-bar-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={[
+          { id: "default", label: "Default" },
+          { id: "filled", label: "Filled / clear state" },
+        ]}
+      />
+      <div className="flex w-[375px] flex-col gap-[12px] bg-[var(--uc-surface)]">
+        {selectedVariant === "default" ? (
+          <AccountSearchBar />
+        ) : (
+          <AccountSearchBar value="Carrefour" onValueChange={noop} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MessagesMailboxTabsVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState("inbox-new");
+  const activeTabId = selectedVariant === "outbox" ? "outbox" : "inbox";
+  const inboxHasNewItems = selectedVariant === "inbox-new";
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="messages-mailbox-tabs-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={[
+          { id: "inbox-new", label: "Inbox active / new" },
+          { id: "inbox", label: "Inbox active / no new" },
+          { id: "outbox", label: "Outbox active" },
+        ]}
+      />
+      <div className="w-[375px] bg-[var(--uc-surface)]">
+        <MessagesMailboxTabs
+          tabs={[
+            { id: "inbox", label: "Inbox", hasNewItems: inboxHasNewItems },
+            { id: "outbox", label: "Outbox" },
+          ]}
+          activeTabId={activeTabId}
+          onChange={(tabId) => setSelectedVariant(tabId)}
+        />
+      </div>
+    </div>
+  );
+}
+
+function AccountTransactionRowVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState("credit");
+  const isCredit = selectedVariant === "credit";
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="account-transaction-row-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={[
+          { id: "credit", label: "Credit" },
+          { id: "debit", label: "Debit" },
+        ]}
+      />
+      <div className="w-[375px] bg-[var(--uc-surface)]">
+        <AccountTransactionMonthDivider title="APRIL 2026" total="-24.318,15" currency="RON" />
+        <div className="pt-[16px]">
+          <AccountTransactionRow
+            transaction={{
+              id: isCredit ? "sample-credit" : "sample-debit",
+              day: isCredit ? "11" : "09",
+              month: "APR",
+              monthKey: "2026-04",
+              monthTitle: "APRIL 2026",
+              label: "Transfer",
+              amount: isCredit ? 25902.92 : -900,
+              type: isCredit ? "credit" : "debit",
+              category: "Transfers",
+              pfmCategory: "Transfers",
+              pfmSubcategory: isCredit ? "Incoming transfer" : "Outgoing transfer",
+              status: "Booked",
+            }}
+            formattedAmount={isCredit ? "25.902,92" : "900,00"}
+            currency="RON"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MoreCardVariantSpecimen() {
+  const options = Object.keys(moreCardLabels).map((type) => ({
+    id: type,
+    label: moreCardLabels[type as MoreCardType],
+  })) satisfies readonly SelectorOption[];
+  const [selectedType, setSelectedType] = useState(options[0]?.id ?? "contacts");
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="more-card-variant-select"
+        value={selectedType}
+        onChange={setSelectedType}
+        options={options}
+      />
+      <div className="w-[164px]">
+        <MoreCardPreview type={selectedType as MoreCardType} />
+      </div>
+    </div>
+  );
+}
+
+function ContactsNavigationCardVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState("prime");
+  const icon = selectedVariant as "prime" | "location" | "time" | "phone" | "block" | "email" | "website" | "youtube" | "x";
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="contacts-navigation-card-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={[
+          { id: "prime", label: "Prime / chevron" },
+          { id: "location", label: "Location" },
+          { id: "time", label: "Time / subtitle" },
+          { id: "phone", label: "Phone / value" },
+          { id: "block", label: "Block card" },
+          { id: "email", label: "Email" },
+          { id: "website", label: "Website" },
+          { id: "youtube", label: "YouTube" },
+          { id: "x", label: "X" },
+        ]}
+      />
+      <div className="w-[375px]">
+        <ContactsDivider text="BANK CONTACTS" />
+        <ContactsNavigationCard
+          icon={icon}
+          title={icon.toUpperCase()}
+          value={icon === "phone" ? "+420 221 210 031" : undefined}
+          subtitle={icon === "time" ? "Mon - Sun | 07:00 - 22:00" : undefined}
+          hasChevron={icon === "prime"}
+          onClick={noop}
+        />
+      </div>
+    </div>
+  );
+}
+
+function ProductAccordionCountrySpecimen({
+  animated = false,
+}: {
+  animated?: boolean;
+}) {
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id={animated ? "product-accordion-animated-country-select" : "product-accordion-country-select"}
+        label="Country"
+        value={selectedCountry}
+        onChange={(value) => setSelectedCountry(value as (typeof COUNTRIES)[number])}
+        options={COUNTRIES.map((country) => ({ id: country, label: COUNTRY_META[country].nameEN }))}
+      />
+      <div className="w-[375px] rounded-[8px] border border-[color-mix(in_srgb,var(--uc-static-white)_20%,transparent)] p-6">
+        <p className="mb-5 font-['UniCredit:Bold',sans-serif] text-[var(--uc-static-white)]">{COUNTRY_META[selectedCountry].nameEN}</p>
+        {animated ? (
+          <ProductAccordionAnimated
+            welcomeText={COUNTRY_META[selectedCountry].nameEN}
+            products={getProductsForCountry(selectedCountry)}
+            findOutMoreText="FIND OUT MORE"
+          />
+        ) : (
+          <ProductAccordion products={getProductsForCountry(selectedCountry)} />
+        )}
+      </div>
     </div>
   );
 }
 
 function ShadcnSpecimens() {
+  const [selectedFamily, setSelectedFamily] = useState("button");
+  const [selectedVariant, setSelectedVariant] = useState("default");
+
+  const familyOptions = [
+    { id: "button", label: "Button" },
+    { id: "badge", label: "Badge" },
+    { id: "input", label: "Input" },
+    { id: "checkbox", label: "Checkbox" },
+    { id: "switch", label: "Switch" },
+    { id: "toggle", label: "Toggle" },
+    { id: "toggle-group", label: "Toggle group" },
+    { id: "slider", label: "Slider" },
+    { id: "progress", label: "Progress" },
+    { id: "separator", label: "Separator" },
+    { id: "avatar", label: "Avatar" },
+    { id: "skeleton", label: "Skeleton" },
+    { id: "alert", label: "Alert" },
+    { id: "tabs", label: "Tabs" },
+  ] as const;
+
+  const variantOptionsByFamily: Partial<Record<(typeof familyOptions)[number]["id"], readonly SelectorOption[]>> = {
+    button: [
+      { id: "default", label: "Default" },
+      { id: "secondary", label: "Secondary" },
+      { id: "outline", label: "Outline" },
+      { id: "ghost", label: "Ghost" },
+      { id: "destructive", label: "Destructive" },
+    ],
+    badge: [
+      { id: "default", label: "Default" },
+      { id: "secondary", label: "Secondary" },
+    ],
+    checkbox: [
+      { id: "checked", label: "Checked" },
+      { id: "unchecked", label: "Unchecked" },
+    ],
+    switch: [
+      { id: "checked", label: "Checked" },
+      { id: "unchecked", label: "Unchecked" },
+    ],
+    toggle: [
+      { id: "pressed", label: "Pressed" },
+      { id: "unpressed", label: "Unpressed" },
+    ],
+    "toggle-group": [
+      { id: "left", label: "Left active" },
+      { id: "center", label: "Center active" },
+      { id: "right", label: "Right active" },
+    ],
+    progress: [
+      { id: "64", label: "64%" },
+      { id: "32", label: "32%" },
+    ],
+    tabs: [
+      { id: "current", label: "Current" },
+      { id: "variant", label: "Variant" },
+      { id: "audit", label: "Audit" },
+    ],
+  };
+
+  const activeVariantOptions = variantOptionsByFamily[selectedFamily];
+
+  useEffect(() => {
+    if (!activeVariantOptions || activeVariantOptions.some((option) => option.id === selectedVariant)) return;
+    setSelectedVariant(activeVariantOptions[0].id);
+  }, [activeVariantOptions, selectedVariant]);
+
+  const renderFamily = () => {
+    switch (selectedFamily) {
+      case "button":
+        return (
+          <Button variant={selectedVariant as "default" | "secondary" | "outline" | "ghost" | "destructive"}>
+            {selectedVariant[0].toUpperCase() + selectedVariant.slice(1)}
+          </Button>
+        );
+      case "badge":
+        return (
+          <Badge variant={selectedVariant as "default" | "secondary"}>
+            {selectedVariant === "secondary" ? "Secondary badge" : "Badge"}
+          </Badge>
+        );
+      case "input":
+        return <Input placeholder="Input specimen" />;
+      case "checkbox":
+        return <Checkbox defaultChecked={selectedVariant === "checked"} />;
+      case "switch":
+        return <Switch defaultChecked={selectedVariant === "checked"} />;
+      case "toggle":
+        return (
+          <Toggle aria-label="Bold toggle" pressed={selectedVariant === "pressed"}>
+            B
+          </Toggle>
+        );
+      case "toggle-group":
+        return (
+          <ToggleGroup type="single" value={selectedVariant}>
+            <ToggleGroupItem value="left">L</ToggleGroupItem>
+            <ToggleGroupItem value="center">C</ToggleGroupItem>
+            <ToggleGroupItem value="right">R</ToggleGroupItem>
+          </ToggleGroup>
+        );
+      case "slider":
+        return <Slider defaultValue={[42]} max={100} step={1} />;
+      case "progress":
+        return <Progress value={Number(selectedVariant)} />;
+      case "separator":
+        return <Separator />;
+      case "avatar":
+        return (
+          <Avatar>
+            <AvatarFallback>UC</AvatarFallback>
+          </Avatar>
+        );
+      case "skeleton":
+        return <Skeleton className="h-8 w-40" />;
+      case "alert":
+        return (
+          <Alert className="w-full">
+            <span className="grid h-[32px] w-[32px] place-items-center">
+              <AppIcon name="info-circle" />
+            </span>
+            <AlertTitle>Alert primitive</AlertTitle>
+            <AlertDescription>
+              This is a generic registry component, separate from the custom UniCredit maintenance banner.
+            </AlertDescription>
+          </Alert>
+        );
+      case "tabs":
+        return (
+          <Tabs value={selectedVariant} className="w-full">
+            <TabsList>
+              <TabsTrigger value="current">Current</TabsTrigger>
+              <TabsTrigger value="variant">Variant</TabsTrigger>
+              <TabsTrigger value="audit">Audit</TabsTrigger>
+            </TabsList>
+            <TabsContent value="current" className="rounded-[8px] border bg-[var(--uc-surface)] p-4">
+              Tabs content: current.
+            </TabsContent>
+            <TabsContent value="variant" className="rounded-[8px] border bg-[var(--uc-surface)] p-4">
+              Tabs content: variant.
+            </TabsContent>
+            <TabsContent value="audit" className="rounded-[8px] border bg-[var(--uc-surface)] p-4">
+              Tabs content: audit.
+            </TabsContent>
+          </Tabs>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle>Card / Badge / Button / Input</CardTitle>
-          <CardDescription>Generic UI registry primitives currently present in `components/ui`.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <div className="flex flex-wrap gap-2">
-            <Button>Default</Button>
-            <Button variant="secondary">Secondary</Button>
-            <Button variant="outline">Outline</Button>
-            <Button variant="ghost">Ghost</Button>
-            <Badge>Badge</Badge>
-            <Badge variant="secondary">Secondary badge</Badge>
+    <Card>
+      <CardHeader>
+        <CardTitle>Shadcn / generic UI primitives</CardTitle>
+        <CardDescription>Registry primitives grouped by family so variant audits stay compact.</CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <div className="min-w-[220px] flex-1">
+            <VariantSelector
+              id="shadcn-family-select"
+              label="Family"
+              value={selectedFamily}
+              onChange={setSelectedFamily}
+              options={familyOptions}
+            />
           </div>
-          <Input placeholder="Input specimen" />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Controls / Feedback</CardTitle>
-          <CardDescription>Radix-style controls for later consolidation checks.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-5">
-          <div className="flex flex-wrap items-center gap-4">
-            <Checkbox defaultChecked />
-            <Switch defaultChecked />
-            <Toggle aria-label="Bold toggle">B</Toggle>
-            <ToggleGroup type="single" defaultValue="left">
-              <ToggleGroupItem value="left">L</ToggleGroupItem>
-              <ToggleGroupItem value="center">C</ToggleGroupItem>
-              <ToggleGroupItem value="right">R</ToggleGroupItem>
-            </ToggleGroup>
-          </div>
-          <Slider defaultValue={[42]} max={100} step={1} />
-          <Progress value={64} />
-          <Separator />
-          <div className="flex items-center gap-3">
-            <Avatar><AvatarFallback>UC</AvatarFallback></Avatar>
-            <Skeleton className="h-8 w-40" />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Alert className="lg:col-span-2">
-        <AppIcon name="info-circle" className="h-4 w-4" />
-        <AlertTitle>Alert primitive</AlertTitle>
-        <AlertDescription>
-          This is a generic registry component, separate from the custom UniCredit maintenance banner.
-        </AlertDescription>
-      </Alert>
-
-      <Tabs defaultValue="current" className="lg:col-span-2">
-        <TabsList>
-          <TabsTrigger value="current">Current</TabsTrigger>
-          <TabsTrigger value="variant">Variant</TabsTrigger>
-          <TabsTrigger value="audit">Audit</TabsTrigger>
-        </TabsList>
-        <TabsContent value="current" className="rounded-[8px] border bg-[var(--uc-surface)] p-4">Tabs content: current.</TabsContent>
-        <TabsContent value="variant" className="rounded-[8px] border bg-[var(--uc-surface)] p-4">Tabs content: variant.</TabsContent>
-        <TabsContent value="audit" className="rounded-[8px] border bg-[var(--uc-surface)] p-4">Tabs content: audit.</TabsContent>
-      </Tabs>
-    </div>
+          {activeVariantOptions ? (
+            <div className="min-w-[220px] flex-1">
+              <VariantSelector
+                id="shadcn-variant-select"
+                value={selectedVariant}
+                onChange={setSelectedVariant}
+                options={activeVariantOptions}
+              />
+            </div>
+          ) : null}
+        </div>
+        <div className="flex min-h-[140px] items-center justify-center rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-6">
+          {renderFamily()}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
-function InventoryTabs({ activeTab, onChange }: {
+function InventoryTabs({ activeTab, onChange, placement = "inline" }: {
   activeTab: InventoryTab;
   onChange: (tab: InventoryTab) => void;
+  placement?: "inline" | "sidebar";
 }) {
+  const isSidebar = placement === "sidebar";
+
   return (
-    <div className="mt-6 inline-flex rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-app-bg)] p-1" role="tablist" aria-label="Design system inventory tabs">
+    <div
+      className={
+        isSidebar
+          ? "grid gap-1 rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-app-bg)] p-1"
+          : "mt-6 inline-flex rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-app-bg)] p-1"
+      }
+      role="tablist"
+      aria-label="Design system inventory tabs"
+    >
       {(["components", "templates", "icons", "colors"] as const).map((tab) => {
         const isActive = activeTab === tab;
         return (
@@ -632,7 +1932,7 @@ function InventoryTabs({ activeTab, onChange }: {
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(tab)}
-            className={`rounded-[6px] px-5 py-2 font-['UniCredit:Bold',sans-serif] text-[14px] transition-colors ${
+            className={`rounded-[6px] px-3 py-2 font-['UniCredit:Bold',sans-serif] text-[14px] capitalize transition-colors ${
               isActive ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm" : "text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]"
             }`}
           >
@@ -783,7 +2083,7 @@ function ColorInventory() {
       <Section
         id="colors"
         title="Color palettes"
-        description="Culorile extrase din screenshots/Colors.svg, normalizate ca registry canonic pentru light mode si propunerea de dark mode. Lista este filtrata pe paleta ca pagina sa ramana scurta si usor de parcurs."
+        description="Colors extracted from screenshots/Colors.svg, normalized into the canonical light-mode registry and proposed dark-mode mapping. The list is filtered by palette to keep the page compact and easy to scan."
       >
         <div className="mb-6 grid gap-4 md:grid-cols-4">
           {[
@@ -843,7 +2143,7 @@ function ColorInventory() {
       <Section
         id="color-audit"
         title="App color map"
-        description="Maparea culorilor intalnite in aplicatie catre tokenurile din design system. Exceptiile ramase sunt tratate ca asset-uri decorative sau brand-like, nu culori de UI."
+        description="App color usage mapped back to design-system tokens. Remaining exceptions are treated as decorative or brand-like assets, not reusable UI colors."
       >
         <div className="grid gap-3">
           {APP_COLOR_AUDIT.map((item) => (
@@ -855,10 +2155,9 @@ function ColorInventory() {
   );
 }
 
-function getIconPreviewSize(defaultSize: string) {
-  const [rawWidth, rawHeight] = defaultSize.split("x").map(Number);
-  const width = Number.isFinite(rawWidth) && rawWidth > 0 ? rawWidth : 32;
-  const height = Number.isFinite(rawHeight) && rawHeight > 0 ? rawHeight : 32;
+function getIconPreviewSize(icon: IconInventoryItem) {
+  const width = icon.previewWidth > 0 ? icon.previewWidth : 20;
+  const height = icon.previewHeight > 0 ? icon.previewHeight : 20;
   const maxSide = 40;
 
   if (width >= height) {
@@ -877,14 +2176,16 @@ function getIconPreviewSize(defaultSize: string) {
 }
 
 function IconInventoryCard({ icon }: { icon: IconInventoryItem }) {
-  const previewSize = getIconPreviewSize(icon.defaultSize);
+  const previewSize = getIconPreviewSize(icon);
 
   return (
     <article className="flex min-h-[232px] flex-col justify-between rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-4">
       <div>
         <div className="mb-4 flex items-start justify-between gap-3">
           <div className="grid size-[64px] place-items-center rounded-[8px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface-muted)]">
-            <AppIcon name={icon.name} color="var(--uc-text)" width={previewSize.width} height={previewSize.height} />
+            <div className="grid size-[32px] place-items-center rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)]">
+              <AppIcon name={icon.name} color="var(--uc-text)" width={previewSize.width} height={previewSize.height} />
+            </div>
           </div>
           <Badge variant={icon.source === "custom" ? "default" : "outline"}>{icon.source}</Badge>
         </div>
@@ -934,7 +2235,7 @@ function IconInventory() {
       <Section
         id="icons"
         title="Icon registry"
-        description="Single source of truth pentru iconitele de produs: fiecare consumator foloseste AppIcon, iar SVG-urile canonice sunt mapate aici cu usage si note de deduplicare."
+        description="Single source of truth for product icons: every consumer uses AppIcon, and canonical SVGs are mapped here with usage and deduplication notes."
       >
         <div className="mb-6 grid gap-4 md:grid-cols-4">
           {[
@@ -970,7 +2271,7 @@ function IconInventory() {
       <Section
         id="icon-audit"
         title="Icon audit boundaries"
-        description="Zonele de mai jos au fost lasate intentionat in afara registry-ului de iconite reutilizabile: sunt asset-uri generate, primitive vendored sau decor/brand, nu iconite de produs care trebuie schimbate global."
+        description="The areas below are intentionally outside the reusable icon registry: they are generated assets, vendored primitives, decoration, or brand surfaces rather than product icons that should update globally."
       >
         <div className="grid gap-4 lg:grid-cols-3">
           {ICON_AUDIT_EXCLUSIONS.map((item) => (
@@ -997,7 +2298,7 @@ function TemplateInventory() {
     <Section
       id="templates"
       title="Templates"
-      description="Screenshoturile existente si template-urile code-only derivate din ecranele active, transformate in template-uri selectabile pentru comparatie, reuse si mapare catre componentele deja catalogate."
+      description="Existing screenshots and code-only templates derived from active screens, turned into selectable templates for comparison, reuse, and mapping to cataloged components."
     >
       <div className="mb-5 grid gap-3 md:grid-cols-4">
         <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
@@ -1196,12 +2497,35 @@ function TemplatePreview({ template }: { template: TemplateRegistryItem }) {
           <span className="font-['UniCredit:Bold',sans-serif] text-[var(--uc-text)]">
             {template.implementationStatus === "reconstructed-code" ? "Reconstructed code" : "Source only"}
           </span>
+          <span className="text-[var(--uc-text-subtle)]">Family</span>
+          <span className="font-['UniCredit:Bold',sans-serif] text-[var(--uc-text)]">{template.screenFamily}</span>
+          <span className="text-[var(--uc-text-subtle)]">Runtime screen</span>
+          <span className="break-all font-['UniCredit:Bold',sans-serif] text-[var(--uc-text)]">
+            {template.runtimeScreenId ?? "pattern only"}
+          </span>
           {template.implementationPath ? (
             <>
               <span className="text-[var(--uc-text-subtle)]">Code path</span>
               <span className="break-all font-['UniCredit:Bold',sans-serif] text-[var(--uc-text)]">{template.implementationPath}</span>
             </>
           ) : null}
+        </div>
+        <div>
+          <p className="mb-2 text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Screen / flow contract</p>
+          <div className="grid gap-2 text-[13px] text-[var(--uc-text-muted)]">
+            <div className="flex flex-wrap gap-2">
+              {template.relatedScreens.map((screenId) => (
+                <Badge key={screenId} variant="outline">{screenId}</Badge>
+              ))}
+            </div>
+            {template.flowIds.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {template.flowIds.map((flowId) => (
+                  <Badge key={flowId} variant="secondary">{flowId}</Badge>
+                ))}
+              </div>
+            ) : null}
+          </div>
         </div>
         {template.reuseNotes && template.reuseNotes.length > 0 ? (
           <div>
@@ -1213,6 +2537,41 @@ function TemplatePreview({ template }: { template: TemplateRegistryItem }) {
             </ul>
           </div>
         ) : null}
+        <div>
+          <p className="mb-2 text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">AI assembly contract</p>
+          <div className="mb-2 flex flex-wrap gap-2">
+            <Badge variant="secondary">{template.reuseContract.role}</Badge>
+            {template.standalonePage ? <Badge variant="outline">standalone page pattern</Badge> : null}
+          </div>
+          {template.reuseContract.dataSources.length > 0 ? (
+            <div className="mb-3">
+              <p className="mb-1 font-['UniCredit:Bold',sans-serif] text-[13px] text-[var(--uc-text)]">Data sources</p>
+              <ul className="grid gap-1 text-[13px] leading-5 text-[var(--uc-text-muted)]">
+                {template.reuseContract.dataSources.map((source) => (
+                  <li key={source}>{source}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          <div className="grid gap-3">
+            <div>
+              <p className="mb-1 font-['UniCredit:Bold',sans-serif] text-[13px] text-[var(--uc-text)]">Reuse rules</p>
+              <ul className="grid gap-1 text-[13px] leading-5 text-[var(--uc-text-muted)]">
+                {template.reuseContract.assemblyRules.map((rule) => (
+                  <li key={rule}>{rule}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="mb-1 font-['UniCredit:Bold',sans-serif] text-[13px] text-[var(--uc-text)]">Do not invent</p>
+              <ul className="grid gap-1 text-[13px] leading-5 text-[var(--uc-text-muted)]">
+                {template.reuseContract.forbiddenPatterns.map((rule) => (
+                  <li key={rule}>{rule}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
         <div>
           <p className="mb-2 text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Reusable components</p>
           <div className="flex flex-wrap gap-2">
@@ -1229,62 +2588,63 @@ function TemplatePreview({ template }: { template: TemplateRegistryItem }) {
 export default function DesignSystemPage() {
   const [showLogout, setShowLogout] = useState(false);
   const [inspectMode, setInspectMode] = useState(true);
-  const [inventoryTab, setInventoryTab] = useState<InventoryTab>("components");
-  const sectionLinks = inventoryTab === "templates"
-    ? templateSectionLinks
-    : inventoryTab === "icons"
-      ? iconSectionLinks
-      : inventoryTab === "colors"
-        ? colorSectionLinks
-        : componentSectionLinks;
+  const [inventoryTab, setInventoryTab] = useState<InventoryTab>(() => {
+    if (typeof window === "undefined") return "components";
+    return getInventoryTabForHash(window.location.hash);
+  });
+  const sectionLinks = inventorySectionLinks[inventoryTab];
+
+  const handleInventoryTabChange = (nextTab: InventoryTab) => {
+    const nextSectionId = getDefaultSectionForInventoryTab(nextTab);
+    setInventoryTab(nextTab);
+    window.history.replaceState(null, "", `#${nextSectionId}`);
+    window.requestAnimationFrame(() => {
+      document.getElementById(nextSectionId)?.scrollIntoView({ block: "start" });
+    });
+  };
+
+  useEffect(() => {
+    const syncInventoryTabFromHash = () => {
+      setInventoryTab(getInventoryTabForHash(window.location.hash));
+    };
+
+    syncInventoryTabFromHash();
+    window.addEventListener("hashchange", syncInventoryTabFromHash);
+    return () => window.removeEventListener("hashchange", syncInventoryTabFromHash);
+  }, []);
 
   return (
     <InspectModeContext.Provider value={inspectMode}>
     <div className="h-full w-full self-stretch overflow-y-auto bg-[var(--uc-surface-muted)] text-[var(--uc-text)]">
       <div className="mx-auto flex w-full max-w-[1440px] gap-8 px-8 py-8">
-        <aside className="sticky top-[92px] hidden h-[calc(100vh-120px)] w-[250px] shrink-0 overflow-y-auto rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-4 xl:block">
+        <aside className="sticky top-[32px] hidden h-[calc(100vh-64px)] w-[250px] shrink-0 overflow-y-auto rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-4 xl:block">
+          <div className="mb-5">
+            <p className="mb-3 font-['UniCredit:Bold',sans-serif] text-[14px]">Inventory</p>
+            <InventoryTabs activeTab={inventoryTab} onChange={handleInventoryTabChange} placement="sidebar" />
+          </div>
           <p className="mb-3 font-['UniCredit:Bold',sans-serif] text-[14px]">Design system sections</p>
           {sectionLinks.map(([id, label]) => (
             <a key={id} href={`#${id}`} className="block rounded px-2 py-2 text-[14px] text-[var(--uc-text-muted)] hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-text)]">
               {label}
             </a>
           ))}
+          <div className="mt-5 border-t border-[var(--uc-border-muted)] pt-5" data-inspector-ui="true">
+            <p className="mb-2 font-['UniCredit:Bold',sans-serif] text-[14px]">Inspector</p>
+            <button
+              onClick={() => setInspectMode((value) => !value)}
+              className={`w-full rounded-[4px] px-3 py-2 font-['UniCredit:Bold',sans-serif] text-[14px] transition-colors ${
+                inspectMode ? "bg-[var(--uc-action)] text-[var(--uc-static-white)]" : "border border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)]"
+              }`}
+            >
+              {inspectMode ? "Inspector ON" : "Inspector OFF"}
+            </button>
+            <p className="mt-3 text-[12px] leading-5 text-[var(--uc-text-muted)]">
+              Hover or click elements to inspect size, font, padding, margin, gap, parent distance, and neighboring-element spacing.
+            </p>
+          </div>
         </aside>
 
         <main className="min-w-0 flex-1">
-          <div className="mb-8 rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-8">
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <p className="font-['UniCredit:Bold',sans-serif] text-[12px] uppercase tracking-[0.08em] text-[var(--uc-brand)]">
-                  Visual audit workspace
-                </p>
-                <h1 className="mt-2 font-['UniCredit:Bold',sans-serif] text-[40px] leading-tight">
-                  Design System Inventory
-                </h1>
-              </div>
-              <div className="rounded-[8px] bg-[var(--uc-text)] p-4">
-                <UniCreditLogo className="h-[24px]" />
-              </div>
-            </div>
-            <p className="max-w-[980px] text-[16px] leading-7 text-[var(--uc-text-muted)]">
-              Pagina aceasta scoate componentele din phone frame si le pune pe masa, pe categorii, ca o ciorna vizuala pentru unificare. Include componente active, componente demo, registry-ul generic UI si diferentele pe toate tarile definite in proiect.
-            </p>
-            <InventoryTabs activeTab={inventoryTab} onChange={setInventoryTab} />
-            <div className="mt-6 flex flex-wrap items-center gap-3 rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-4">
-              <button
-                onClick={() => setInspectMode((value) => !value)}
-                className={`rounded-[4px] px-4 py-2 font-['UniCredit:Bold',sans-serif] text-[14px] transition-colors ${
-                  inspectMode ? "bg-[var(--uc-action)] text-[var(--uc-static-white)]" : "bg-[var(--uc-surface)] text-[var(--uc-text)] border border-[var(--uc-border)]"
-                }`}
-              >
-                {inspectMode ? "Inspector ON" : "Inspector OFF"}
-              </button>
-              <p className="max-w-[760px] text-[14px] leading-6 text-[var(--uc-text-muted)]">
-                Cu Inspector ON, hover pe orice text, icon, buton sau imagine ca sa vezi dimensiunea. Click pe element pentru panoul detaliat: font size, line-height, font-family, padding, margin si distante fata de parinte.
-              </p>
-            </div>
-          </div>
-
           {inventoryTab === "templates" ? (
             <TemplateInventory />
           ) : inventoryTab === "icons" ? (
@@ -1293,7 +2653,7 @@ export default function DesignSystemPage() {
             <ColorInventory />
           ) : (
             <>
-          <Section id="overview" title="Coverage summary" description="Repere rapide despre suprafata inspectata si ce merita verificat prima data.">
+          <Section id="overview" title="Coverage summary" description="Quick reference for the audited surface and the areas worth checking first.">
             <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-5">
               {[
                 ["Countries", COUNTRIES.length],
@@ -1310,8 +2670,10 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          <Section id="countries" title="Country coverage" description="Toate tarile din registry sunt vizibile aici, cu limbi, currency, Co-Apping, product accordion si More cards.">
-            <div className="grid gap-4 lg:grid-cols-2">
+          <Section id="countries" title="Country coverage" description="Select a country to review languages, currency, Co-Apping, product accordions, and More cards for that market.">
+            <CountryCoverageSummary />
+            {false && (
+            <div className="hidden">
               {COUNTRIES.map((country) => {
                 const products = getProductsForCountry(country);
                 const moreCards = MORE_CARDS_CONFIG[country];
@@ -1335,49 +2697,22 @@ export default function DesignSystemPage() {
                 );
               })}
             </div>
+            )}
           </Section>
 
-          <Section id="headers" title="Headers" description="Header-ele active si variantele lor, izolate din ecranele curente.">
+          <Section id="headers" title="Headers" description="Active header components and their variants, isolated from the current app screens.">
             <div className="grid gap-5 xl:grid-cols-2">
-              <Specimen name="PageHeader / light" source="components/PageHeader.tsx" specs={["title 28px", "top controls 40x40", "mobile width 375px"]}>
-                <div className="w-[375px] overflow-hidden border bg-[var(--uc-surface)]">
-                  <PageHeader title="Select language" onBack={noop} />
-                </div>
-              </Specimen>
-              <Specimen name="PageHeader / dark" source="components/PageHeader.tsx" tone="dark" specs={["same layout", "transparent header", "white icons"]}>
-                <div className="w-[375px] overflow-hidden">
-                  <PageHeader title="Prime by UniCredit Bank" onBack={noop} variant="dark" />
-                </div>
-              </Specimen>
-              <Specimen name="HomeHeader" source="screens/home/HomeHeader.tsx" tone="gray" specs={["Prime pill", "32px action icons", "title 28px"]}>
-                <div className="w-[375px] pt-6"><HomeHeader onPrimeClick={noop} /></div>
-              </Specimen>
-              <Specimen name="MoreHeader" source="screens/more/MoreHeader.tsx" specs={["title 28px", "badge optional", "profile/messages/logout icons"]}>
-                <div className="w-[375px] pt-6"><MoreHeader onProfile={noop} onMessages={noop} onLogout={noop} messageCount={7} /></div>
-              </Specimen>
-              <Specimen name="PreLoginHeading" source="components/ui/PreLoginHeading.tsx" tone="dark">
-                <div className="w-[327px]"><PreLoginHeading h1="New look, & more services." h2="Open an account" h3="Open an account quickly and easily from the comfort of your home." /></div>
-              </Specimen>
-              <Specimen name="StatusBar / DynamicIsland" source="components/StatusBar.tsx + DynamicIsland.tsx">
-                <div className="grid gap-4">
-                  <div className="w-[375px] bg-[var(--uc-surface)]"><StatusBar variant="light" isCoAppingActive={false} /><DynamicIsland /></div>
-                  <div className="w-[375px] bg-[var(--uc-text)]"><StatusBar variant="dark" isCoAppingActive /><DynamicIsland /></div>
-                </div>
-              </Specimen>
+              <PageHeaderSpecimen />
+              <HomeHeaderSpecimen />
+              <MoreHeaderSpecimen />
+              <StatusBarVariantSpecimen />
             </div>
           </Section>
 
-          <Section id="navigation" title="Navigation" description="Meniuri si linkuri de navigatie, inclusiv bottom navigation in toate taburile.">
+          <Section id="navigation" title="Navigation" description="Navigation menus and links, including bottom navigation across every active tab.">
             <div className="grid gap-5">
               <Specimen name="BottomNavigation / all active states" source="components/BottomNavigation.tsx" specs={["container 375x54", "icons 32px", "labels 14px / 15px line", "active bar 24x2", "0 gap bar/icon/label"]}>
-                <div className="grid gap-5 xl:grid-cols-2">
-                  {(["home", "analytics", "payments", "products", "more"] as const).map((tab) => (
-                    <div key={tab} className="w-[375px] rounded border bg-[var(--uc-surface)] pt-2">
-                      <p className="px-4 pb-2 text-[13px] text-[var(--uc-text-muted)]">activeTab: {tab}</p>
-                      <BottomNavigation activeTab={tab} onTabChange={noop} />
-                    </div>
-                  ))}
-                </div>
+                <BottomNavigationVariantSpecimen />
               </Specimen>
               <div className="grid gap-5 lg:grid-cols-3">
                 <Specimen name="LanguageSelectorButton" source="components/ui/LanguageSelectorButton.tsx" tone="dark">
@@ -1386,32 +2721,23 @@ export default function DesignSystemPage() {
                 <Specimen name="NavigationLink" source="components/ui/NavigationLink.tsx" tone="dark">
                   <NavigationLink text="FIND OUT MORE" onClick={noop} />
                 </Specimen>
+                <Specimen name="Prelogin" source="components/ui/PreLoginHeading.tsx" tone="dark">
+                  <div className="w-[327px]"><PreLoginHeading h1="New look, & more services." h2="Open an account" h3="Open an account quickly and easily from the comfort of your home." /></div>
+                </Specimen>
                 <Specimen name="RadioButton" source="components/common/RadioButton.tsx">
-                  <div className="w-[327px]">
-                    <RadioButton selected label="ENGLISH" onClick={noop} />
-                    <RadioButton selected={false} label="ROMANA" onClick={noop} />
-                  </div>
+                  <RadioButtonVariantSpecimen />
                 </Specimen>
               </div>
             </div>
           </Section>
 
-          <Section id="buttons" title="Buttons" description="Butoanele definite custom, plus variantele generice din registry-ul UI.">
+          <Section id="buttons" title="Buttons" description="Custom button components and shared UI registry variants.">
             <div className="grid gap-5 lg:grid-cols-2">
-                <Specimen name="PrimaryButton / app" source="components/PrimaryButton.tsx" specs={["327x48", "radius 4px", "label 16px bold"]}>
-                <PrimaryButton onClick={noop}>Continue</PrimaryButton>
-              </Specimen>
-              <Specimen name="PrimaryButton / ui duplicate" source="components/ui/PrimaryButton.tsx" tone="dark" specs={["48px height", "white variant", "label 18px bold"]}>
-                <div className="w-[327px]"><UiPrimaryButton text="SELECT YOUR ACCOUNT" onClick={noop} /></div>
+              <Specimen name="Primary button" source="components/PrimaryButton.tsx + components/ui/PrimaryButton.tsx" specs={["327x48", "radius 4px", "Primary Action / Light", "Primary Action / Dark", "16px bold label"]}>
+                {(themeMode) => <PrimaryButtonVariantSpecimen themeMode={themeMode} />}
               </Specimen>
               <Specimen name="Button registry variants" source="components/ui/button.tsx">
-                <div className="flex flex-wrap gap-3">
-                  <Button>Default</Button>
-                  <Button variant="secondary">Secondary</Button>
-                  <Button variant="outline">Outline</Button>
-                  <Button variant="ghost">Ghost</Button>
-                  <Button variant="destructive">Destructive</Button>
-                </div>
+                <ButtonRegistryVariantSpecimen />
               </Specimen>
               <Specimen name="Floating Co-Apping Button" source="components/FloatingCoAppingButton.tsx">
                 <div className="relative h-[170px] w-[120px] rounded border bg-[var(--uc-app-bg)]">
@@ -1421,131 +2747,60 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          <Section id="forms" title="Forms and controls" description="Inputuri custom si primitivele UI de control care pot fi consolidate.">
+          <Section id="forms" title="Forms and controls" description="Custom inputs and reusable control primitives that can be consolidated.">
             <div className="grid gap-5">
-              <Specimen name="TextField states" source="components/TextField.tsx">
-                <TextFieldSpecimens />
-              </Specimen>
+              <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+                <Specimen name="Dropdown" source="components/TextField.tsx">
+                  <TextFieldSpecimens withChevron />
+                </Specimen>
+                <Specimen name="Text field" source="components/TextField.tsx">
+                  <TextFieldSpecimens withChevron={false} />
+                </Specimen>
+                <Specimen
+                  name="Amount field"
+                  source="components/AmountField.tsx"
+                  specs={["same states as Text field", "24px text-to-currency gap", "currency title 14px", "currency value 18px", "chevron 32x32 / 0 gap"]}
+                >
+                  <AmountFieldSpecimens />
+                </Specimen>
+              </div>
               <Specimen name="Generic UI controls" source="components/ui/*">
                 <ShadcnSpecimens />
               </Specimen>
             </div>
           </Section>
 
-          <Section id="cards" title="Cards and content blocks" description="Carduri active, carduri de contact, bannere, liste si block-uri de continut.">
+          <Section id="cards" title="Cards and content blocks" description="Active cards, contact cards, banners, lists, and reusable content blocks.">
             <div className="grid gap-5">
               <Specimen name="AccountBalanceCard / all countries" source="components/accounts/AccountBalanceCard.tsx" tone="gray" specs={["311x197", "padding 16px", "radius 6px", "soft layered shadow", "title 20px", "IBAN 16px", "copy 32x32", "optional sub-account", "amount 30px + decimals 20px", "current balance gap 4px"]}>
-                <div className="grid max-w-[1040px] gap-6 md:grid-cols-2 xl:grid-cols-3">
-                  {COUNTRIES.map((country) => {
-                    const sample = accountCardSamples[country];
-                    return (
-                      <div key={country} className="flex flex-col gap-2">
-                        <p className="font-['UniCredit',sans-serif] text-[13px] font-bold text-[var(--uc-text-muted)]">
-                          {COUNTRY_META[country].nameEN} / {COUNTRY_META[country].currency}
-                        </p>
-                        <AccountBalanceCard
-                          account={getAccountIdentity(country, 0)}
-                          availableInteger={sample.integer}
-                          availableDecimals={sample.decimals}
-                          currency={COUNTRY_META[country].currency}
-                          currentBalance={sample.current}
-                          showSubAccount={false}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
+                <AccountBalanceCardCountrySpecimen />
               </Specimen>
               <Specimen name="AccountActionBar" source="components/accounts/AccountActionBar.tsx" tone="gray" specs={["supports 1-4 items", "align start / center / end / between", "container padding 8px 16px", "item flex 1 0 0 when between", "icon box 32x32", "label 14px regular / 15px line"]}>
-                <div className="flex w-[375px] flex-col gap-[16px] bg-[var(--uc-app-bg)]">
-                  <AccountActionBar onOptionsClick={noop} />
-                  <AccountActionBar
-                    align="end"
-                    items={[{ id: "card-transaction", iconName: "add-money", iconColor: "var(--uc-icon)", label: "Card\nTransaction" }]}
-                    style={{ padding: "0 24px 18px" }}
-                  />
-                </div>
+                <AccountActionBarVariantSpecimen />
               </Specimen>
-              <Specimen name="AccountCarouselIndicator" source="components/accounts/AccountCarouselIndicator.tsx" tone="gray" specs={["height 32px", "backdrop blur 13.591px", "inline-flex", "gap 6px", "active 30x6", "inactive 6x6", "mini 4x4 when count > 4"]}>
-                <div className="flex w-[375px] flex-col gap-3 bg-[var(--uc-app-bg)] py-4">
-                  <AccountCarouselIndicator count={3} activeIndex={1} onSelect={noop} />
-                  <AccountCarouselIndicator count={7} activeIndex={3} onSelect={noop} />
-                </div>
+              <Specimen name="Carousel Indicator" source="components/accounts/AccountCarouselIndicator.tsx" tone="gray" specs={["height 32px", "backdrop blur 13.591px", "inline-flex", "gap 6px", "active 30x6", "inactive 6x6", "mini 4x4 when count > 4"]}>
+                <AccountCarouselIndicatorVariantSpecimen />
               </Specimen>
               <Specimen name="AccountDetailsInfoField" source="components/accounts/AccountDetailsInfoField.tsx" tone="gray" specs={["height 80px", "outside gap 0", "title 16px regular / normal", "subtitle 16px bold / normal", "title-to-subtitle gap 4px", "optional trailing icon variant"]}>
-                <div className="flex w-[327px] flex-col bg-[var(--uc-surface)]">
-                  <AccountDetailsInfoField
-                    title="Account number"
-                    subtitle="1234567890123456"
-                    trailingIcon={<AppIcon name="copy-documents" color="var(--uc-text)" />}
-                  />
-                  <AccountDetailsInfoField title="Available funds" subtitle="614,83 RON" />
-                  <AccountDetailsInfoField title="Current balance" subtitle="565,64 RON" />
-                </div>
+                <AccountDetailsInfoFieldVariantSpecimen />
+              </Specimen>
+              <Specimen name="MessagesMailboxTabs" source="components/messages/MessagesMailboxTabs.tsx" tone="gray" specs={["height 48px", "2 columns", "optional leading new dot 12px", "inactive label muted", "bottom active indicator 2px"]}>
+                <MessagesMailboxTabsVariantSpecimen />
               </Specimen>
               <Specimen name="AccountSearchBar" source="components/accounts/AccountSearchBar.tsx" tone="gray" specs={["height auto from 32px icons", "padding 0", "outer margin 16px", "radius 10px", "background var(--uc-app-bg)", "search icon 32x32", "filter/clear icon slot 32x32", "input 14px bold"]}>
-                <div className="flex w-[375px] flex-col gap-[12px] bg-[var(--uc-surface)] px-[16px]">
-                  <AccountSearchBar />
-                  <AccountSearchBar value="Carrefour" onValueChange={noop} />
-                </div>
+                <AccountSearchBarVariantSpecimen />
               </Specimen>
               <Specimen name="AccountTransactionRow" source="components/accounts/AccountTransactionRow.tsx" specs={["375x80", "padding 20px 16px", "day 18px/20px bold", "date gap 2px", "month 14px/15px bold", "date-to-icon gap 16px", "icon box 32px", "details column 247px", "label 16px/18px", "label-to-amount gap 4px", "amount line 22px", "amount 20px + decimals 14px", "divider L3 14px bold uppercase", "divider left muted / right K1", "divider-to-row gap 16px", "row-to-next-divider gap 16px"]}>
-                <div className="w-[375px] bg-[var(--uc-surface)]">
-                  <AccountTransactionMonthDivider title="APRIL 2026" total="-24.318,15" currency="RON" />
-                  <div className="pt-[16px]">
-                    <AccountTransactionRow
-                      transaction={{
-                        id: "sample-credit",
-                        day: "11",
-                        month: "APR",
-                        monthKey: "2026-04",
-                        monthTitle: "APRIL 2026",
-                        label: "Transfer",
-                        amount: 25902.92,
-                        type: "credit",
-                        category: "Transfers",
-                        pfmCategory: "Transfers",
-                        pfmSubcategory: "Incoming transfer",
-                        status: "Booked",
-                      }}
-                      formattedAmount="25.902,92"
-                      currency="RON"
-                    />
-                    <AccountTransactionRow
-                      transaction={{
-                        id: "sample-debit",
-                        day: "09",
-                        month: "APR",
-                        monthKey: "2026-04",
-                        monthTitle: "APRIL 2026",
-                        label: "Transfer",
-                        amount: -900,
-                        type: "debit",
-                        category: "Transfers",
-                        pfmCategory: "Transfers",
-                        pfmSubcategory: "Outgoing transfer",
-                        status: "Booked",
-                      }}
-                      formattedAmount="900,00"
-                      currency="RON"
-                    />
-                  </div>
-                </div>
+                <AccountTransactionRowVariantSpecimen />
+              </Specimen>
+              <Specimen name="Payments hero card" source="components/payments/PaymentHeroCard.tsx" specs={["327x104", "selector for primary payment cards", "future imageSrc asset slot", "title 23px/26px", "description 14px/16px", "temporary built-in illustrations"]}>
+                <PaymentHeroCardVariantSpecimen />
               </Specimen>
               <Specimen name="More cards / all concrete card components" source="screens/more/cards/*" specs={["120px height", "8px radius", "individual image positioning"]}>
-                <div className="grid max-w-[720px] grid-cols-2 gap-4">
-                  {Object.keys(moreCardLabels).map((type) => (
-                    <MoreCardPreview key={type} type={type as MoreCardType} />
-                  ))}
-                </div>
+                <MoreCardVariantSpecimen />
               </Specimen>
               <Specimen name="Contacts navigation cards / all icons" source="screens/contacts/ContactsNavigationCard.tsx" specs={["80px row", "32px icons", "title 16px bold", "value 14px teal"]}>
-                <div className="w-[375px]">
-                  <ContactsDivider text="BANK CONTACTS" />
-                  {(["prime", "location", "time", "phone", "block", "email", "website", "youtube", "x"] as const).map((icon) => (
-                    <ContactsNavigationCard key={icon} icon={icon} title={icon.toUpperCase()} value={icon === "phone" ? "+420 221 210 031" : undefined} subtitle={icon === "time" ? "Mon - Sun | 07:00 - 22:00" : undefined} hasChevron={icon === "prime"} onClick={noop} />
-                  ))}
-                </div>
+                <ContactsNavigationCardVariantSpecimen />
               </Specimen>
               <Specimen name="Home content modules" source="screens/home/*" tone="gray">
                 <div className="grid gap-6 xl:grid-cols-2">
@@ -1560,10 +2815,13 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          <Section id="products" title="Products and country variants" description="Product accordions si product cards pentru toate tarile, ca sa vezi diferentele regionale intr-un singur loc.">
+          <Section id="products" title="Products and country variants" description="Product accordions and cards across countries, so regional differences can be reviewed in one place.">
             <div className="grid gap-5">
               <Specimen name="Products offer card" source="components/products/ProductOfferCard.tsx" specs={["327x157", "dropdown variant selector", "16px text-to-image gutter", "100px image column", "title 22px bold / 2 lines", "subtitle 18px regular / 3 lines", "family + light/normal tones"]}>
                 <ProductOfferCardVariantSpecimen />
+              </Specimen>
+              <Specimen name="Products menu card" source="components/products/ProductMenuCard.tsx" specs={["164x120 standard", "164x72 compact", "dropdown card + size selectors", "title 18px standard / 16px compact", "config-driven background", "optional imageSrc with per-card placement"]}>
+                <ProductMenuCardVariantSpecimen />
               </Specimen>
               <Specimen name="Product card / list / total row" source="components/ProductCard.tsx + ProductsList.tsx + TotalRow.tsx" tone="gray" specs={["card padding 16px", "icon 32px", "amount 20px", "decimals 14px"]}>
                 <div className="w-[375px]">
@@ -1577,28 +2835,15 @@ export default function DesignSystemPage() {
                 </div>
               </Specimen>
               <Specimen name="ProductAccordion / all countries" source="components/ProductAccordion.tsx" tone="dark">
-                <div className="grid gap-6 xl:grid-cols-2">
-                  {COUNTRIES.map((country) => (
-                    <div key={country} className="w-[375px] rounded-[8px] border border-[color-mix(in_srgb,var(--uc-static-white)_20%,transparent)] p-6">
-                      <p className="mb-5 font-['UniCredit:Bold',sans-serif] text-[var(--uc-static-white)]">{COUNTRY_META[country].nameEN}</p>
-                      <ProductAccordion products={getProductsForCountry(country)} />
-                    </div>
-                  ))}
-                </div>
+                <ProductAccordionCountrySpecimen />
               </Specimen>
               <Specimen name="ProductAccordionAnimated / all countries" source="components/ProductAccordionAnimated.tsx" tone="dark">
-                <div className="grid gap-6 xl:grid-cols-2">
-                  {COUNTRIES.map((country) => (
-                    <div key={country} className="w-[375px] rounded-[8px] border border-[color-mix(in_srgb,var(--uc-static-white)_20%,transparent)] p-6">
-                      <ProductAccordionAnimated welcomeText={COUNTRY_META[country].nameEN} products={getProductsForCountry(country)} findOutMoreText="FIND OUT MORE" />
-                    </div>
-                  ))}
-                </div>
+                <ProductAccordionCountrySpecimen animated />
               </Specimen>
             </div>
           </Section>
 
-          <Section id="overlays" title="Overlays and dialogs" description="Componente care apar peste continut. Unele sunt interactive pentru a nu bloca pagina implicit.">
+          <Section id="overlays" title="Overlays and dialogs" description="Components that appear above the main content. Interactive examples stay closed by default so they do not block the page.">
             <div className="grid gap-5 lg:grid-cols-2">
               <Specimen name="LogoutConfirmDialog" source="components/LogoutConfirmDialog.tsx">
                 <div className="relative h-[260px] w-[375px] overflow-hidden rounded border bg-[var(--uc-app-bg)]">
@@ -1619,7 +2864,7 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          <Section id="registry" title="Implementation registry" description="Lista de componente gasite in repo. Badge-ul Live indica ce este randat explicit mai sus; restul sunt listate pentru audit si decizie de consolidare.">
+          <Section id="registry" title="Implementation registry" description="Components found in the repository. The Live badge marks what is rendered above; the rest stays listed for audit and consolidation decisions.">
             <div className="grid gap-6 lg:grid-cols-2">
               <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
                 <h3 className="mb-4 font-['UniCredit:Bold',sans-serif] text-[20px]">App-specific components</h3>

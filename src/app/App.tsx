@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigationContext, NavigationProvider } from "@/app/contexts/NavigationContext";
 import { LanguageProvider } from "@/app/contexts/LanguageContext";
 import { DemoProvider, useDemo } from "@/app/state/demoStore";
@@ -56,6 +56,24 @@ import type { Product } from "@/data/products";
 // Panel components
 import PanelOverlay from "@/app/components/PanelOverlay";
 
+const DESIGN_SYSTEM_HASHES = new Set([
+  "overview",
+  "countries",
+  "headers",
+  "navigation",
+  "buttons",
+  "forms",
+  "cards",
+  "products",
+  "overlays",
+  "registry",
+  "templates",
+  "icons",
+  "icon-audit",
+  "colors",
+  "color-audit",
+]);
+
 export default function App() {
   return (
     <DemoProvider>
@@ -70,10 +88,16 @@ export default function App() {
  */
 function AppWithNavigation() {
   const { scenario, themeMode } = useDemo();
+  const hashSection = typeof window === "undefined" ? "" : window.location.hash.replace(/^#/, "");
+  const shouldOpenDesignSystem = DESIGN_SYSTEM_HASHES.has(hashSection);
   
   // Determine initial screen based on scenario
-  const initialScreen = scenario === "active" ? "homepage" : "prelogin-inactive";
-  const initialCoAppingActive = scenario === "active";
+  const initialScreen = shouldOpenDesignSystem
+    ? "design-system"
+    : scenario === "active"
+      ? "homepage"
+      : "prelogin-inactive";
+  const initialCoAppingActive = !shouldOpenDesignSystem && scenario === "active";
 
   return (
     <div data-uc-theme={themeMode} className={themeMode === "dark" ? "dark h-screen" : "h-screen"}>
@@ -124,6 +148,19 @@ function AppContent() {
   const [paymentDraft, setPaymentDraft] = useState<DomesticPaymentDraft | null>(null);
   const accountProducts = categories.flatMap((category) => category.products);
   const selectedAccountProduct = accountProducts.find((accountProduct) => accountProduct.id === selectedAccountId) ?? accountProducts[0] ?? null;
+
+  useEffect(() => {
+    const syncDesignSystemHash = () => {
+      const hashSection = window.location.hash.replace(/^#/, "");
+      if (DESIGN_SYSTEM_HASHES.has(hashSection) && currentScreen !== "design-system") {
+        navigateTo("design-system");
+      }
+    };
+
+    syncDesignSystemHash();
+    window.addEventListener("hashchange", syncDesignSystemHash);
+    return () => window.removeEventListener("hashchange", syncDesignSystemHash);
+  }, [currentScreen, navigateTo]);
   
   // Determină varianta status bar-ului bazat pe ecranul curent
   const getStatusBarVariant = (): 'light' | 'dark' => {

@@ -1,11 +1,13 @@
 import type { TranslationKeys } from '../types';
+import { createSharedTranslations } from '../shared';
 
 /**
  * English translations for Czech Republic (CZ)
  * NOTE: English text may vary between countries based on local preferences
  */
 const en: TranslationKeys = {
-  // ==========================================
+  ...createSharedTranslations('en'),
+// ==========================================
   // PRE-LOGIN SCREEN
   // ==========================================
   preLogin: {
@@ -112,6 +114,23 @@ const en: TranslationKeys = {
       thisMonth: 'This month',
       lastMonth: 'Last month',
       vsLastMonth: 'vs last month',
+    },
+  },
+
+  // ==========================================
+  // MORE SCREEN
+  // ==========================================
+  more: {
+    title: 'More',
+    cards: {
+      contacts: 'Contacts',
+      documents: 'Documents',
+      settings: 'Settings',
+      gdprConsent: 'GDPR Consent',
+      thirdPartyConsent: 'Consent to third parties',
+      digitalActivities: 'Digital activity record',
+      myRequests: 'My applications',
+      tutorial: 'Tutorials',
     },
   },
 

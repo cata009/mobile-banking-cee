@@ -1,5 +1,6 @@
 import PageHeader from "@/app/components/PageHeader";
 import { AppIcon } from "@/app/components/icons";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 import { ACCOUNT_OPTION_ITEMS, ACCOUNT_PRODUCT_OPTIONS } from "@/data/accountDetails";
 import { useState } from "react";
 import type { UIEvent } from "react";
@@ -30,11 +31,12 @@ function OptionIcon({ id }: { id: string }) {
     case "change-account-name":
       return <AppIcon name="account-option-change-name" color="var(--uc-text)" />;
     default:
-      return <AppIcon name="wallet-cards" size={22} strokeWidth={2.7} color="var(--uc-text)" />;
+      return <AppIcon name="wallet-cards" strokeWidth={2.7} color="var(--uc-text)" />;
   }
 }
 
 export default function AccountOptionsScreen({ onBack }: AccountOptionsScreenProps) {
+  const { t } = useLanguage();
   const [headerProgress, setHeaderProgress] = useState(0);
 
   const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
@@ -45,7 +47,7 @@ export default function AccountOptionsScreen({ onBack }: AccountOptionsScreenPro
   return (
     <div className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] scrollbar-hide" onScroll={handlePageScroll}>
       <PageHeader
-        title="Account options"
+        title={t("runtime.accountOptions.title", "Account options")}
         onBack={onBack}
         showHelp={false}
         collapsedTitleProgress={headerProgress}
@@ -61,10 +63,10 @@ export default function AccountOptionsScreen({ onBack }: AccountOptionsScreenPro
               </div>
               <div className="min-w-0">
                 <p className="font-['UniCredit',sans-serif] text-[14px] leading-[18px] font-bold uppercase text-[var(--uc-text)]">
-                  {item.title}
+                  {t(`runtime.accountOptions.items.${item.id}.title`, item.title)}
                 </p>
                 <p className="mt-[2px] font-['UniCredit',sans-serif] text-[14px] leading-[18px] font-normal text-[var(--uc-text-muted)]">
-                  {item.description}
+                  {t(`runtime.accountOptions.items.${item.id}.description`, item.description)}
                 </p>
               </div>
               <AppIcon name="chevron-link" color="var(--uc-text)" />
@@ -74,7 +76,7 @@ export default function AccountOptionsScreen({ onBack }: AccountOptionsScreenPro
 
         <div className="pt-[28px]">
           <h2 className="border-b border-[var(--uc-border)] pb-[8px] font-['UniCredit',sans-serif] text-[16px] leading-[20px] font-bold uppercase text-[var(--uc-text)]">
-            Products
+            {t("runtime.productsMenu.title", "Products")}
           </h2>
 
           <div className="flex flex-col gap-[16px] pt-[16px]">
@@ -91,10 +93,10 @@ export default function AccountOptionsScreen({ onBack }: AccountOptionsScreenPro
                 <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/32 to-black/10" />
                 <div className="relative flex h-full flex-col justify-between px-[16px] py-[18px]">
                   <p className="font-['UniCredit',sans-serif] text-[26px] leading-[28px] font-bold text-[var(--uc-static-white)]">
-                    {product.title}
+                    {t(`runtime.accountOptions.products.${product.id}.title`, product.title)}
                   </p>
                   <p className="max-w-[250px] whitespace-pre-line font-['UniCredit',sans-serif] text-[14px] leading-[17px] font-normal text-[var(--uc-static-white)]">
-                    {product.description}
+                    {t(`runtime.accountOptions.products.${product.id}.description`, product.description)}
                   </p>
                 </div>
               </button>

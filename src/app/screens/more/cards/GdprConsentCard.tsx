@@ -7,9 +7,10 @@ import imgGdprConsent from "figma:asset/4d7abd397db5234d24f236a294f434a9b45b7d2b
 
 interface GdprConsentCardProps {
   onClick: () => void;
+  title?: string;
 }
 
-export function GdprConsentCard({ onClick }: GdprConsentCardProps) {
+export function GdprConsentCard({ onClick, title = "GDPR Consent" }: GdprConsentCardProps) {
   return (
     <button
       onClick={onClick}
@@ -31,7 +32,7 @@ export function GdprConsentCard({ onClick }: GdprConsentCardProps) {
       {/* Title - top left padding */}
       <div className="absolute inset-0 p-[16px] flex items-start">
         <p className="font-['UniCredit:Bold',sans-serif] text-[18px] text-[var(--uc-text)] leading-[normal] text-left whitespace-pre-wrap z-10 relative">
-          GDPR Consent
+          {title}
         </p>
       </div>
     </button>

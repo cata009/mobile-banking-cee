@@ -7,9 +7,32 @@ import { useEffect, useRef } from "react";
 import { useDemo } from "@/app/state/demoStore";
 import { useNavigationContext } from "@/app/contexts/NavigationContext";
 
+const DESIGN_SYSTEM_HASHES = new Set([
+  "overview",
+  "countries",
+  "headers",
+  "navigation",
+  "buttons",
+  "forms",
+  "cards",
+  "products",
+  "overlays",
+  "registry",
+  "templates",
+  "icons",
+  "icon-audit",
+  "colors",
+  "color-audit",
+]);
+
+function hasDesignSystemHash() {
+  return DESIGN_SYSTEM_HASHES.has(window.location.hash.replace(/^#/, ""));
+}
+
 export function DemoNavigationSync() {
   const { product, country, scenario, designSystem, baseline, release, flagsByContext } = useDemo();
   const { navigateToAndReset, setCoAppingActive } = useNavigationContext();
+  const scenarioEntryScreen = scenario === "active" ? "prelogin-active" : "prelogin-inactive";
 
   const isFirstMount = useRef(true);
   const prevValues = useRef({
@@ -38,7 +61,11 @@ export function DemoNavigationSync() {
       };
 
       setCoAppingActive(false);
-      navigateToAndReset("prelogin-inactive");
+      if (hasDesignSystemHash()) {
+        return;
+      }
+
+      navigateToAndReset(scenarioEntryScreen);
       return;
     }
 
@@ -63,7 +90,11 @@ export function DemoNavigationSync() {
       };
 
       setCoAppingActive(false);
-      navigateToAndReset("prelogin-inactive");
+      if (hasDesignSystemHash()) {
+        return;
+      }
+
+      navigateToAndReset(scenarioEntryScreen);
     }
   }, [
     product,
@@ -73,6 +104,7 @@ export function DemoNavigationSync() {
     baseline,
     release,
     flagsByContext,
+    scenarioEntryScreen,
     navigateToAndReset,
     setCoAppingActive,
   ]);

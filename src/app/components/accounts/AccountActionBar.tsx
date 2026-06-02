@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { AppIcon, type IconName } from "@/app/components/icons";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 
 interface AccountActionBarProps {
   items?: readonly AccountActionBarItem[];
@@ -19,6 +20,7 @@ export interface AccountActionBarItem {
   onClick?: () => void;
   ariaLabel?: string;
   iconColor?: string;
+  hidden?: boolean;
 }
 
 function AccountActionItem({
@@ -28,6 +30,7 @@ function AccountActionItem({
   ariaLabel,
   iconColor = "var(--uc-text)",
   stretch,
+  hidden = false,
 }: {
   iconName: IconName;
   label: string;
@@ -35,6 +38,7 @@ function AccountActionItem({
   ariaLabel?: string;
   iconColor?: string;
   stretch: boolean;
+  hidden?: boolean;
 }) {
   const normalizedLabel = label.replace(/\s+/g, " ").trim();
 
@@ -42,7 +46,10 @@ function AccountActionItem({
     <button
       type="button"
       onClick={onClick}
-      className={`flex flex-col items-center gap-[4px] ${stretch ? "min-w-0 flex-1" : "w-[82px] shrink-0"}`}
+      disabled={hidden}
+      tabIndex={hidden ? -1 : undefined}
+      aria-hidden={hidden ? "true" : undefined}
+      className={`flex flex-col items-center gap-[4px] ${stretch ? "min-w-0 flex-1" : "w-[82px] shrink-0"} ${hidden ? "pointer-events-none invisible" : ""}`}
       aria-label={ariaLabel ?? normalizedLabel}
       data-ds-label={`Account action ${normalizedLabel}`}
     >
@@ -54,15 +61,6 @@ function AccountActionItem({
       </span>
     </button>
   );
-}
-
-function getDefaultActions(onDetailsClick?: () => void, onOptionsClick?: () => void): AccountActionBarItem[] {
-  return [
-    { id: "details", iconName: "account-details", label: "Details", onClick: onDetailsClick },
-    { id: "options", iconName: "account-options", label: "Options", onClick: onOptionsClick },
-    { id: "add-money", iconName: "add-money", label: "Add money" },
-    { id: "mcash", iconName: "mcash", label: "mCash" },
-  ];
 }
 
 const ALIGNMENT_CLASS: Record<AccountActionBarAlignment, string> = {
@@ -80,7 +78,14 @@ export default function AccountActionBar({
   onDetailsClick,
   onOptionsClick,
 }: AccountActionBarProps) {
-  const actionItems = (items ?? getDefaultActions(onDetailsClick, onOptionsClick)).slice(0, 4);
+  const { t } = useLanguage();
+  const defaultActions = [
+    { id: "details", iconName: "account-details" as const, label: t("runtime.accounts.actions.details", "Details"), onClick: onDetailsClick },
+    { id: "options", iconName: "account-options" as const, label: t("runtime.accounts.actions.options", "Options"), onClick: onOptionsClick },
+    { id: "add-money", iconName: "add-money" as const, label: t("runtime.accounts.actions.addMoney", "Add money") },
+    { id: "mcash", iconName: "mcash" as const, label: t("runtime.accounts.actions.mCash", "mCash") },
+  ];
+  const actionItems = (items ?? defaultActions).slice(0, 4);
   const stretchItems = align === "between";
 
   return (
@@ -98,6 +103,7 @@ export default function AccountActionBar({
           onClick={item.onClick}
           ariaLabel={item.ariaLabel}
           iconColor={item.iconColor}
+          hidden={item.hidden}
           stretch={stretchItems}
         />
       ))}

@@ -8,11 +8,14 @@ interface PageHeaderProps {
   onRightActionClick?: () => void;
   variant?: "light" | "dark" | "transparent";
   showHelp?: boolean;
+  showBack?: boolean;
   compact?: boolean;
   collapsedTitleProgress?: number;
   includeSafeArea?: boolean;
   rightActionIcon?: ReactNode;
   rightActionLabel?: string;
+  largeTitleAlign?: "left" | "center";
+  largeTitleColor?: string;
 }
 
 export default function PageHeader({
@@ -22,17 +25,20 @@ export default function PageHeader({
   onRightActionClick,
   variant = "light",
   showHelp = true,
+  showBack = true,
   compact = false,
   collapsedTitleProgress = 0,
   includeSafeArea = false,
   rightActionIcon,
   rightActionLabel = "Action",
+  largeTitleAlign = "left",
+  largeTitleColor,
 }: PageHeaderProps) {
   const iconColor = variant === "dark" ? "white" : "var(--uc-text)";
   const textColor = variant === "dark" ? "text-[var(--uc-static-white)]" : "text-[var(--uc-text)]";
   const bgColor = variant === "dark" || variant === "transparent" ? "bg-transparent" : "bg-[var(--uc-surface)]";
   const titleProgress = Math.min(1, Math.max(0, collapsedTitleProgress));
-  const largeTitleOpacity = 1 - titleProgress * 0.9;
+  const largeTitleOpacity = 1 - titleProgress;
 
   const rightAction = rightActionIcon ? (
     <button
@@ -60,14 +66,18 @@ export default function PageHeader({
     <>
       <div className={`sticky top-0 z-10 w-full ${bgColor} ${includeSafeArea ? "pt-[54px]" : ""}`}>
         <div className="grid h-[48px] grid-cols-[40px_1fr_40px] items-center px-[8px] pt-[8px]">
-          <button
-            onClick={onBack}
-            className="flex h-[40px] w-[40px] cursor-pointer items-center justify-center"
-            style={{ padding: "8px 7.998px 7.997px 7.998px" }}
-            aria-label="Back"
-          >
-            <AppIcon name="back-heavy" color={iconColor} />
-          </button>
+          {showBack ? (
+            <button
+              onClick={onBack}
+              className="flex h-[40px] w-[40px] cursor-pointer items-center justify-center"
+              style={{ padding: "8px 7.998px 7.997px 7.998px" }}
+              aria-label="Back"
+            >
+              <AppIcon name="back-heavy" color={iconColor} />
+            </button>
+          ) : (
+            <div className="h-[40px] w-[40px]" />
+          )}
 
           <h1
             className={`pointer-events-none truncate text-center font-['UniCredit',sans-serif] text-[16px] font-bold leading-normal ${textColor}`}
@@ -84,7 +94,7 @@ export default function PageHeader({
       </div>
 
       <div
-        className={`flex items-center ${bgColor}`}
+        className={`flex items-center ${largeTitleAlign === "center" ? "justify-center text-center" : ""} ${bgColor}`}
         style={{
           width: "375px",
           padding: compact ? "0 24px" : "8px 16px",
@@ -103,6 +113,7 @@ export default function PageHeader({
             WebkitBoxOrient: "vertical",
             overflow: "hidden",
             textOverflow: "ellipsis",
+            color: largeTitleColor,
           }}
         >
           {title}

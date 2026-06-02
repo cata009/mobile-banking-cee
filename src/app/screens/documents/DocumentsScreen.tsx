@@ -1,6 +1,7 @@
 import { useMemo, useState, type UIEvent } from "react";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import PageHeader from "@/app/components/PageHeader";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
 import { getDocumentsConfigForCountry, type DocumentListItem } from "@/app/config/documentsConfig";
 
@@ -50,6 +51,7 @@ function DocumentListRow({ item }: { item: DocumentListItem }) {
 
 export default function DocumentsScreen({ onBack }: DocumentsScreenProps) {
   const { country } = useDemo();
+  const { t } = useLanguage();
   const config = getDocumentsConfigForCountry(country);
   const [searchQuery, setSearchQuery] = useState("");
   const [headerProgress, setHeaderProgress] = useState(0);
@@ -61,11 +63,23 @@ export default function DocumentsScreen({ onBack }: DocumentsScreenProps) {
 
   const filteredGroups = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
-    if (!normalizedQuery) {
-      return config.groups;
-    }
+    const localizeItem = (item: DocumentListItem): DocumentListItem => {
+      const keyBase = `runtime.documents.rows.${item.description.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
+      return {
+        ...item,
+        title: t(`${keyBase}.title`, item.title),
+        description: t(`${keyBase}.description`, item.description),
+        badge: item.badge ? t("runtime.documents.newBadge", item.badge) : item.badge,
+      };
+    };
+    const localizedGroups = config.groups.map((group) => ({
+      ...group,
+      items: group.items.map(localizeItem),
+    }));
 
-    return config.groups
+    if (!normalizedQuery) return localizedGroups;
+
+    return localizedGroups
       .map((group) => ({
         ...group,
         items: group.items.filter((item) =>
@@ -76,7 +90,7 @@ export default function DocumentsScreen({ onBack }: DocumentsScreenProps) {
         ),
       }))
       .filter((group) => group.items.length > 0);
-  }, [config.groups, searchQuery]);
+  }, [config.groups, searchQuery, t]);
 
   return (
     <div
@@ -84,7 +98,7 @@ export default function DocumentsScreen({ onBack }: DocumentsScreenProps) {
       onScroll={handlePageScroll}
     >
       <PageHeader
-        title={config.title}
+        title={t("runtime.documents.title", config.title)}
         onBack={onBack}
         collapsedTitleProgress={headerProgress}
         includeSafeArea

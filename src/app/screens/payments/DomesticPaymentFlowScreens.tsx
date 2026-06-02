@@ -1,8 +1,14 @@
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import PrimaryButton from "@/app/components/PrimaryButton";
+import AccountActionBar, { type AccountActionBarItem } from "@/app/components/accounts/AccountActionBar";
 import { AppIcon } from "@/app/components/icons";
+import AmountField from "@/app/components/AmountField";
+import { useLanguage } from "@/app/contexts/LanguageContext";
+import PageHeader from "@/app/components/PageHeader";
 import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
+import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
+import TextField from "@/app/components/TextField";
 import type { AccountTransaction } from "@/data/accountDetails";
 import type { Product } from "@/data/products";
 import {
@@ -20,38 +26,8 @@ function HomeIndicator() {
   );
 }
 
-function FlowHeader({ title, onBack }: { title: string; onBack?: () => void }) {
-  return (
-    <div className="shrink-0 bg-[var(--uc-surface)] pt-[54px]">
-      <div className="grid h-[48px] grid-cols-[40px_1fr_40px] items-center px-[8px] pt-[8px]">
-        {onBack ? (
-          <button type="button" onClick={onBack} className="grid size-[40px] place-items-center" aria-label="Back">
-            <AppIcon name="back-heavy" color="var(--uc-text)" />
-          </button>
-        ) : (
-          <div className="size-[40px]" />
-        )}
-        <div />
-        <div className="size-[40px]" />
-      </div>
-      <div className="px-[24px] pt-[8px]">
-        <h1 className="font-['UniCredit',sans-serif] text-[27px] font-bold leading-normal text-[var(--uc-text)]">
-          {title}
-        </h1>
-      </div>
-    </div>
-  );
-}
-
 function SectionTitle({ children }: { children: string }) {
-  return (
-    <div className="pt-[30px]">
-      <h2 className="font-['UniCredit',sans-serif] text-[16px] font-bold leading-normal text-[var(--uc-text)]">
-        {children}
-      </h2>
-      <div className="mt-[8px] h-px w-full bg-[var(--uc-border)]" />
-    </div>
-  );
+  return <SectionHeadingDivider title={children} className="pt-[30px]" />;
 }
 
 function DetailRow({
@@ -75,48 +51,22 @@ function DetailRow({
       </div>
       {copy && (
         <button type="button" className="mt-[8px] grid size-[32px] place-items-center" aria-label={`Copy ${label}`}>
-          <AppIcon name="copy-documents" size={24} color="var(--uc-text)" />
+          <AppIcon name="copy-documents" color="var(--uc-text)" />
         </button>
       )}
     </div>
   );
 }
 
-function FlowTextField({
-  label,
-  value,
-  onChange,
-  helper,
-  right,
-  readonly,
+function FlowField({
+  children,
 }: {
-  label: string;
-  value: string;
-  onChange?: (value: string) => void;
-  helper?: string;
-  right?: ReactNode;
-  readonly?: boolean;
+  children: ReactNode;
 }) {
   return (
-    <label className="block pt-[22px]">
-      <span className="block font-['UniCredit',sans-serif] text-[12px] font-normal leading-normal text-[var(--uc-text-subtle)]">
-        {label}
-      </span>
-      <span className="flex items-end gap-[12px] border-b border-[var(--uc-text-subtle)] pb-[3px]">
-        <input
-          readOnly={readonly}
-          value={value}
-          onChange={(event) => onChange?.(event.target.value)}
-          className="min-w-0 flex-1 bg-transparent font-['UniCredit',sans-serif] text-[18px] font-normal leading-normal text-[var(--uc-text)] outline-none"
-        />
-        {right}
-      </span>
-      {helper && (
-        <span className="mt-[5px] block whitespace-pre-line font-['UniCredit',sans-serif] text-[12px] font-normal leading-normal text-[var(--uc-text-subtle)]">
-          {helper}
-        </span>
-      )}
-    </label>
+    <div className="pt-[22px]">
+      {children}
+    </div>
   );
 }
 
@@ -144,7 +94,7 @@ function ToggleSwitch({
           checked ? "right-[2px] bg-[var(--uc-action)]" : "left-[2px] bg-[var(--uc-text-muted)]"
         }`}
       >
-        {checked && <AppIcon name="prime-check" size={16} color="var(--uc-static-white)" />}
+        {checked && <AppIcon name="prime-check" color="var(--uc-static-white)" />}
       </span>
     </button>
   );
@@ -167,17 +117,24 @@ export function TransactionDetailScreen({
   onBack: () => void;
   onRedoPayment: () => void;
 }) {
+  const { t } = useLanguage();
   const detail = useMemo(
     () => createTransactionDetailData(transaction, country, product),
     [country, product, transaction],
   );
   const currencyLabel = detail.amount.split(" ").slice(-1)[0];
+  const transactionActionItems: AccountActionBarItem[] = [
+    { id: "change-category", iconName: "grid-2x2", label: t("runtime.transactionDetail.actions.changeCategory", "Change\ncategory") },
+    { id: "standing-order", iconName: "landmark", label: t("runtime.transactionDetail.actions.createStandingOrder", "Create\nStanding order") },
+    { id: "redo-payment", iconName: "repeat", label: t("runtime.transactionDetail.actions.redoPayment", "Redo\npayment"), onClick: onRedoPayment },
+    { id: "send-payment", iconName: "account-option-statement", label: t("runtime.transactionDetail.actions.sendPayment", "Send\npayment") },
+  ];
 
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">
       <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide">
         <div className="pt-[54px]">
-          <button type="button" onClick={onBack} className="ml-[4px] grid size-[40px] place-items-center" aria-label="Back">
+          <button type="button" onClick={onBack} className="ml-[4px] grid size-[40px] place-items-center" aria-label={t("runtime.actions.back", "Back")}>
             <AppIcon name="back-heavy" color="var(--uc-text)" />
           </button>
         </div>
@@ -193,10 +150,10 @@ export function TransactionDetailScreen({
             {detail.amount}
           </p>
           <p className="mt-[18px] font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text-muted)]">
-            PFM CATEGORY
+            {t("runtime.transactionDetail.pfmCategory", "PFM CATEGORY")}
           </p>
           <div
-            className="mt-[8px] inline-flex h-[30px] items-center gap-[8px] rounded-full border px-[14px]"
+            className="mt-[8px] inline-flex min-h-[32px] items-center gap-[8px] rounded-full border px-[14px] py-[4px]"
             style={{
               borderColor: `var(${detail.pfmCategoryColorVar})`,
               color: `var(${detail.pfmCategoryColorVar})`,
@@ -204,39 +161,22 @@ export function TransactionDetailScreen({
             data-transaction-pfm-category={detail.pfmCategory}
             data-transaction-pfm-subcategory={detail.pfmSubcategoryLabel}
           >
-            <PfmCategoryIcon category={detail.pfmCategory} size={20} />
+            <PfmCategoryIcon category={detail.pfmCategory} size={32} />
             <span className="font-['UniCredit',sans-serif] text-[12px] font-bold leading-normal">
               {detail.pfmCategoryLabel.toUpperCase()}
             </span>
           </div>
         </section>
 
-        <section className="mt-[31px] grid grid-cols-4 gap-[4px] bg-[var(--uc-app-bg)] px-[18px] py-[16px]">
-          {[
-            { label: "Change\ncategory", icon: <AppIcon name="grid-2x2" size={25} strokeWidth={3} color="var(--uc-text)" /> },
-            { label: "Create\nStanding order", icon: <AppIcon name="landmark" size={25} strokeWidth={3} color="var(--uc-text)" /> },
-            { label: "Redo\npayment", icon: <AppIcon name="repeat" size={26} strokeWidth={3} color="var(--uc-text)" />, onClick: onRedoPayment },
-            { label: "Send\npayment", icon: <AppIcon name="account-option-statement" size={24} color="var(--uc-text)" /> },
-          ].map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              onClick={item.onClick}
-              className="flex flex-col items-center gap-[7px] text-center"
-            >
-              <span className="grid size-[28px] place-items-center">{item.icon}</span>
-              <span className="whitespace-pre-line font-['UniCredit',sans-serif] text-[12px] font-normal leading-[14px] text-[var(--uc-text)]">
-                {item.label}
-              </span>
-            </button>
-          ))}
+        <section className="mt-[31px] bg-[var(--uc-app-bg)]">
+          <AccountActionBar items={transactionActionItems} />
         </section>
 
         <section className="px-[22px] pt-[23px]">
           <h2 className="font-['UniCredit',sans-serif] text-[22px] font-bold leading-normal text-[var(--uc-text)]">
-            Spending Insight
+            {t("runtime.transactionDetail.spendingInsight", "Spending Insight")}
           </h2>
-          <SectionTitle>OVERVIEW FOR 2026</SectionTitle>
+          <SectionTitle>{t("runtime.payments.domesticFlow.overviewFor2026", "OVERVIEW FOR 2026")}</SectionTitle>
           <div className="pt-[28px]">
             <p className="font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text-muted)]">
               {detail.categoryGroup}
@@ -253,7 +193,7 @@ export function TransactionDetailScreen({
               10,334.22 {currencyLabel}
             </p>
           </div>
-          <SectionTitle>BREAKDOWN FOR {detail.categoryTag}</SectionTitle>
+          <SectionTitle>{t("runtime.transactionDetail.breakdownFor", "BREAKDOWN FOR")} {detail.categoryTag}</SectionTitle>
           <div className="mt-[34px] h-[150px] border-b border-[var(--uc-border)]">
             <div className="flex h-full items-end justify-between px-[18px]">
               {[118, 74, 47, 86, 69, 51, 82].map((height, index) => (
@@ -270,25 +210,25 @@ export function TransactionDetailScreen({
 
         <section className="px-[24px] pt-[30px]">
           <h2 className="font-['UniCredit',sans-serif] text-[22px] font-bold leading-normal text-[var(--uc-text)]">
-            Transaction details
+            {t("runtime.transactionDetail.title", "Transaction details")}
           </h2>
           <div className="pt-[20px]">
-            <DetailRow label="Account number" value={detail.accountNumber} copy />
-            <DetailRow label="Account title" value={detail.accountTitle} />
-            <DetailRow label="Account owner" value={detail.accountOwner} />
-            <DetailRow label="Booking date" value={detail.bookingDate} />
-            <DetailRow label="Beneficiary Name" value={detail.beneficiaryName} />
-            <DetailRow label="Beneficiary Bank Name" value={detail.beneficiaryBankName} />
-            <DetailRow label="Beneficiary account number" value={detail.beneficiaryAccountNumber} copy />
-            <DetailRow label="Amount" value={detail.amount} />
-            <DetailRow label="Payment details" value={detail.paymentDetails} />
-            <DetailRow label="Reference number" value={detail.referenceNumber} />
+            <DetailRow label={t("runtime.accounts.detailsInfo.accountNumber", "Account number")} value={detail.accountNumber} copy />
+            <DetailRow label={t("runtime.accounts.detailsInfo.accountTitle", "Account title")} value={detail.accountTitle} />
+            <DetailRow label={t("runtime.transactionDetail.accountOwner", "Account owner")} value={detail.accountOwner} />
+            <DetailRow label={t("runtime.transactionDetail.bookingDate", "Booking date")} value={detail.bookingDate} />
+            <DetailRow label={t("runtime.transactionDetail.beneficiaryName", "Beneficiary Name")} value={detail.beneficiaryName} />
+            <DetailRow label={t("runtime.transactionDetail.beneficiaryBankName", "Beneficiary Bank Name")} value={detail.beneficiaryBankName} />
+            <DetailRow label={t("runtime.transactionDetail.beneficiaryAccountNumber", "Beneficiary account number")} value={detail.beneficiaryAccountNumber} copy />
+            <DetailRow label={t("runtime.transactionDetail.amount", "Amount")} value={detail.amount} />
+            <DetailRow label={t("runtime.payments.domesticFlow.paymentDetails", "Payment details")} value={detail.paymentDetails} />
+            <DetailRow label={t("runtime.transactionDetail.referenceNumber", "Reference number")} value={detail.referenceNumber} />
           </div>
           <button
             type="button"
             className="mx-auto mt-[18px] block pb-[18px] font-['UniCredit',sans-serif] text-[12px] font-bold leading-normal text-[var(--uc-action)]"
           >
-            SHOW LESS
+            {t("runtime.actions.showLess", "SHOW LESS")}
           </button>
         </section>
       </div>
@@ -306,6 +246,7 @@ export function DomesticPaymentCreateScreen({
   onBack: () => void;
   onNext: (draft: DomesticPaymentDraft) => void;
 }) {
+  const { t } = useLanguage();
   const [form, setForm] = useState(draft);
   const update = (key: keyof DomesticPaymentDraft, value: string | boolean) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -313,78 +254,95 @@ export function DomesticPaymentCreateScreen({
 
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">
-      <FlowHeader title="Domestic payment" onBack={onBack} />
+      <PageHeader title={t("runtime.payments.newPayment.actions.domestic-payment.title", "Domestic payment")} onBack={onBack} includeSafeArea showHelp={false} />
       <div className="min-h-0 flex-1 overflow-y-auto px-[24px] pb-[18px] scrollbar-hide">
-        <SectionTitle>FROM ACCOUNT</SectionTitle>
-        <FlowTextField
-          label="Account number"
-          value={form.payerAccountNumber}
-          onChange={(value) => update("payerAccountNumber", value)}
-          helper={`${form.payerAccountName}\n${form.payerBalance}`}
-          right={<AppIcon name="chevron-down" size={26} color="var(--uc-text)" />}
-        />
+        <SectionTitle>{t("runtime.payments.domesticFlow.fromAccount", "FROM ACCOUNT")}</SectionTitle>
+        <FlowField>
+          <TextField
+            label={t("runtime.accounts.detailsInfo.accountNumber", "Account number")}
+            value={form.payerAccountNumber}
+            onChange={(value) => update("payerAccountNumber", value)}
+            helperText={form.payerAccountName}
+            helperText2={form.payerBalance}
+            trailingIconName="chevron-down-wide"
+          />
+        </FlowField>
 
-        <SectionTitle>BENEFICIARY</SectionTitle>
-        <FlowTextField label="Beneficiary" value={form.beneficiaryName} onChange={(value) => update("beneficiaryName", value)} />
-        <FlowTextField label="Prefix" value={form.prefix} onChange={(value) => update("prefix", value)} />
-        <FlowTextField
-          label="Account number (mandatory)"
-          value={form.accountNumber}
-          onChange={(value) => update("accountNumber", value)}
-          right={<AppIcon name="camera" size={24} strokeWidth={3} color="var(--uc-text)" />}
-        />
-        <FlowTextField
-          label="Bank code (mandatory)"
-          value={form.bankCode}
-          onChange={(value) => update("bankCode", value)}
-          helper={form.bankName}
-          right={<AppIcon name="camera" size={24} strokeWidth={3} color="var(--uc-text)" />}
-        />
+        <SectionTitle>{t("runtime.payments.domesticFlow.beneficiary", "BENEFICIARY")}</SectionTitle>
+        <FlowField>
+          <TextField label={t("runtime.transactionDetail.beneficiaryName", "Beneficiary")} value={form.beneficiaryName} onChange={(value) => update("beneficiaryName", value)} />
+        </FlowField>
+        <FlowField>
+          <TextField label={t("runtime.payments.domesticFlow.prefix", "Prefix")} value={form.prefix} onChange={(value) => update("prefix", value)} />
+        </FlowField>
+        <FlowField>
+          <TextField
+            label={t("runtime.payments.domesticFlow.accountNumberMandatory", "Account number (mandatory)")}
+            value={form.accountNumber}
+            onChange={(value) => update("accountNumber", value)}
+            trailingIconName="camera"
+          />
+        </FlowField>
+        <FlowField>
+          <TextField
+            label={t("runtime.payments.domesticFlow.bankCodeMandatory", "Bank code (mandatory)")}
+            value={form.bankCode}
+            onChange={(value) => update("bankCode", value)}
+            helperText={form.bankName}
+            trailingIconName="camera"
+          />
+        </FlowField>
 
-        <SectionTitle>PAYMENT DETAILS</SectionTitle>
-        <div className="grid grid-cols-[1fr_94px] gap-[24px]">
-          <FlowTextField
-            label="Amount limit"
+        <SectionTitle>{t("runtime.payments.domesticFlow.paymentDetails", "PAYMENT DETAILS")}</SectionTitle>
+        <FlowField>
+          <AmountField
+            label={t("runtime.payments.domesticFlow.amountLimit", "Amount limit")}
             value={form.amount}
             onChange={(value) => update("amount", formatAmountInput(value))}
+            currency={form.currency}
           />
-          <FlowTextField label="Currency" value={form.currency} readonly />
-        </div>
+        </FlowField>
 
         <div className="flex items-center justify-between pt-[34px]">
           <p className="font-['UniCredit',sans-serif] text-[14px] font-bold leading-normal text-[var(--uc-text)]">
-            INSTANT PAYMENT
+            {t("runtime.payments.domesticFlow.instantPayment", "INSTANT PAYMENT")}
           </p>
           <ToggleSwitch
             checked={form.instantPayment}
             onChange={(checked) => update("instantPayment", checked)}
-            ariaLabel="Instant payment"
+            ariaLabel={t("runtime.payments.domesticFlow.instantPayment", "Instant payment")}
           />
         </div>
 
         <div className="flex items-center justify-between pt-[32px]">
           <p className="font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text)]">
-            ADD VARIABLE SYMBOL AND MORE
+            {t("runtime.payments.domesticFlow.addVariableSymbolAndMore", "ADD VARIABLE SYMBOL AND MORE")}
           </p>
-          <AppIcon name="chevron-down" size={28} color="var(--uc-text)" />
+          <span className="grid h-[32px] w-[32px] place-items-center">
+            <AppIcon name="chevron-down" color="var(--uc-text)" />
+          </span>
         </div>
 
-        <FlowTextField
-          label="Information for beneficiary"
-          value={form.informationForBeneficiary}
-          onChange={(value) => update("informationForBeneficiary", value)}
-        />
-        <FlowTextField
-          label="Information for me"
-          value={form.informationForMe}
-          onChange={(value) => update("informationForMe", value)}
-        />
+        <FlowField>
+          <TextField
+            label={t("runtime.payments.domesticFlow.informationForBeneficiary", "Information for beneficiary")}
+            value={form.informationForBeneficiary}
+            onChange={(value) => update("informationForBeneficiary", value)}
+          />
+        </FlowField>
+        <FlowField>
+          <TextField
+            label={t("runtime.payments.domesticFlow.informationForMe", "Information for me")}
+            value={form.informationForMe}
+            onChange={(value) => update("informationForMe", value)}
+          />
+        </FlowField>
         <p className="px-[8px] pt-[44px] text-center font-['UniCredit',sans-serif] text-[14px] font-normal leading-[18px] text-[var(--uc-text)]">
-          You can review and sign your payment in the next step
+          {t("runtime.payments.domesticFlow.reviewAndSignHint", "You can review and sign your payment in the next step")}
         </p>
       </div>
       <div className="px-[24px] pb-[8px]">
-        <PrimaryButton onClick={() => onNext(form)}>Next</PrimaryButton>
+        <PrimaryButton onClick={() => onNext(form)}>{t("runtime.actions.next", "Next")}</PrimaryButton>
       </div>
       <HomeIndicator />
     </div>
@@ -400,38 +358,39 @@ export function PaymentReviewScreen({
   onBack: () => void;
   onSign: () => void;
 }) {
+  const { t } = useLanguage();
   const [saveAsTemplate, setSaveAsTemplate] = useState(false);
   const beneficiaryAccount = [draft.prefix, draft.accountNumber, draft.bankCode].filter(Boolean).join("-");
 
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">
-      <FlowHeader title="Review data" onBack={onBack} />
+      <PageHeader title={t("runtime.payments.domesticFlow.reviewData", "Review data")} onBack={onBack} includeSafeArea showHelp={false} />
       <div className="min-h-0 flex-1 overflow-y-auto px-[24px] pb-[18px] scrollbar-hide">
-        <SectionTitle>PAYMENT ORDER</SectionTitle>
+        <SectionTitle>{t("runtime.payments.domesticFlow.paymentOrder", "PAYMENT ORDER")}</SectionTitle>
         <div className="pt-[22px]">
-          <DetailRow label="Payer account" value={draft.payerAccountName || "Primary Account name"} />
-          <DetailRow label="Payer account number" value={draft.payerAccountNumber} />
-          <DetailRow label="Beneficiary name" value={draft.beneficiaryName || "Beneficiary"} />
-          <DetailRow label="Beneficiary account number" value={beneficiaryAccount || "-"} />
-          <DetailRow label="Amount" value={formatDraftAmount(draft)} />
-          <DetailRow label="Instant Payment" value={draft.instantPayment ? "Yes" : "No"} />
-          <DetailRow label="Due date" value={draft.dueDate} />
-          <DetailRow label="Express Payment (a fee is charged)" value={draft.expressPayment ? "Yes" : "No"} />
-          <DetailRow label="Information for beneficiary" value={draft.informationForBeneficiary || "-"} />
+          <DetailRow label={t("runtime.payments.domesticFlow.payerAccount", "Payer account")} value={draft.payerAccountName || t("runtime.payments.domesticFlow.primaryAccountName", "Primary Account name")} />
+          <DetailRow label={t("runtime.payments.domesticFlow.payerAccountNumber", "Payer account number")} value={draft.payerAccountNumber} />
+          <DetailRow label={t("runtime.transactionDetail.beneficiaryName", "Beneficiary name")} value={draft.beneficiaryName || t("runtime.transactionDetail.beneficiaryName", "Beneficiary")} />
+          <DetailRow label={t("runtime.transactionDetail.beneficiaryAccountNumber", "Beneficiary account number")} value={beneficiaryAccount || "-"} />
+          <DetailRow label={t("runtime.transactionDetail.amount", "Amount")} value={formatDraftAmount(draft)} />
+          <DetailRow label={t("runtime.payments.domesticFlow.instantPayment", "Instant Payment")} value={draft.instantPayment ? t("runtime.common.yes", "Yes") : t("runtime.common.no", "No")} />
+          <DetailRow label={t("runtime.payments.domesticFlow.dueDate", "Due date")} value={draft.dueDate} />
+          <DetailRow label={t("runtime.payments.domesticFlow.expressPayment", "Express Payment (a fee is charged)")} value={draft.expressPayment ? t("runtime.common.yes", "Yes") : t("runtime.common.no", "No")} />
+          <DetailRow label={t("runtime.payments.domesticFlow.informationForBeneficiary", "Information for beneficiary")} value={draft.informationForBeneficiary || "-"} />
         </div>
         <div className="flex items-center justify-between py-[16px]">
           <p className="font-['UniCredit',sans-serif] text-[14px] font-bold leading-normal text-[var(--uc-text)]">
-            SAVE AS TEMPLATE
+            {t("runtime.payments.domesticFlow.saveAsTemplate", "SAVE AS TEMPLATE")}
           </p>
           <ToggleSwitch
             checked={saveAsTemplate}
             onChange={setSaveAsTemplate}
-            ariaLabel="Save as template"
+            ariaLabel={t("runtime.payments.domesticFlow.saveAsTemplate", "Save as template")}
           />
         </div>
       </div>
       <div className="px-[24px] pb-[8px]">
-        <PrimaryButton onClick={onSign}>Sign</PrimaryButton>
+        <PrimaryButton onClick={onSign}>{t("runtime.actions.sign", "Sign")}</PrimaryButton>
       </div>
       <HomeIndicator />
     </div>
@@ -445,28 +404,23 @@ export function PaymentSignScreen({
   onBack: () => void;
   onSign: () => void;
 }) {
+  const { t } = useLanguage();
   const [pin, setPin] = useState("******");
 
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">
-      <FlowHeader title="Sign" onBack={onBack} />
+      <PageHeader title={t("runtime.actions.sign", "Sign")} onBack={onBack} includeSafeArea showHelp={false} />
       <div className="min-h-0 flex-1 px-[24px] pt-[150px]">
-        <label className="block">
-          <span className="block font-['UniCredit',sans-serif] text-[12px] font-normal leading-normal text-[var(--uc-action)]">
-            Enter pin code
-          </span>
-          <input
-            value={pin}
-            onChange={(event) => setPin(event.target.value)}
-            className="w-full border-b border-[var(--uc-action)] bg-transparent pb-[5px] font-['UniCredit',sans-serif] text-[18px] font-normal leading-normal text-[var(--uc-text)] outline-none"
-          />
-          <span className="mt-[6px] block font-['UniCredit',sans-serif] text-[12px] font-normal leading-normal text-[var(--uc-text-subtle)]">
-            Be sure that nobody is watching you
-          </span>
-        </label>
+        <TextField
+          label={t("runtime.payments.domesticFlow.enterPinCode", "Enter pin code")}
+          value={pin}
+          onChange={setPin}
+          helperText={t("runtime.payments.domesticFlow.pinPrivacyHint", "Be sure that nobody is watching you")}
+          visualState="on-focus"
+        />
       </div>
       <div className="px-[24px] pb-[8px]">
-        <PrimaryButton onClick={onSign}>Sign</PrimaryButton>
+        <PrimaryButton onClick={onSign}>{t("runtime.actions.sign", "Sign")}</PrimaryButton>
       </div>
       <HomeIndicator />
     </div>
@@ -474,11 +428,12 @@ export function PaymentSignScreen({
 }
 
 export function PaymentSuccessScreen({ onDone }: { onDone: () => void }) {
+  const { t } = useLanguage();
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">
       <div className="px-[24px] pt-[84px]">
         <h1 className="font-['UniCredit',sans-serif] text-[27px] font-bold leading-normal text-[var(--uc-text)]">
-          Successful payment
+          {t("runtime.payments.domesticFlow.successfulPayment", "Successful payment")}
         </h1>
       </div>
       <div className="flex min-h-0 flex-1 flex-col px-[24px]">
@@ -488,11 +443,11 @@ export function PaymentSuccessScreen({ onDone }: { onDone: () => void }) {
           </div>
         </div>
         <p className="pt-[58px] font-['UniCredit',sans-serif] text-[16px] font-normal leading-[22px] text-[var(--uc-text)]">
-          Your payment has been successfully sent to the bank
+          {t("runtime.payments.domesticFlow.paymentSentToBank", "Your payment has been successfully sent to the bank")}
         </p>
       </div>
       <div className="px-[24px] pb-[8px]">
-        <PrimaryButton onClick={onDone}>Ok, got it</PrimaryButton>
+        <PrimaryButton onClick={onDone}>{t("runtime.actions.okGotIt", "Ok, got it")}</PrimaryButton>
       </div>
       <HomeIndicator />
     </div>

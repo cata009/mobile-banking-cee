@@ -5,6 +5,145 @@
 
 export interface TranslationKeys {
   // ==========================================
+  // RUNTIME APP SURFACES
+  // ==========================================
+  runtime: {
+    actions: {
+      back: string;
+      profile: string;
+      messages: string;
+      help: string;
+      shareAccountDetails: string;
+      moreActions: string;
+      showLess: string;
+      next: string;
+      sign: string;
+      okGotIt: string;
+      search: string;
+      filters: string;
+      cardTransaction: string;
+    };
+    accounts: {
+      title: string;
+      noTransactionsFound: string;
+      actions: {
+        details: string;
+        options: string;
+        addMoney: string;
+        mCash: string;
+      };
+      detailsInfo: {
+        title: string;
+        accountNumber: string;
+        availableFunds: string;
+        currentBalance: string;
+        blockedReservedAmount: string;
+        overdraft: string;
+        accountTitle: string;
+        offer: string;
+        offerValue: string;
+        connectedCards: string;
+        mastercardStandardDebit: string;
+      };
+      productTitles: {
+        currentAccount: string;
+        debitCard: string;
+        creditCard: string;
+        savingAccount: string;
+        termDeposit: string;
+        loan: string;
+        mortgage: string;
+        investmentAccount: string;
+      };
+    };
+    analytics: {
+      title: string;
+      dataFor: string;
+      yearTotal: string;
+      inflow: string;
+      outflow: string;
+      incomes: string;
+      spendings: string;
+      moneyOut: string;
+      moneyIn: string;
+      noTransactionsForPeriod: string;
+      categories: Record<string, string>;
+    };
+    payments: {
+      title: string;
+      other: string;
+      primaryItems: Record<string, { title: string; description: string }>;
+      otherItems: Record<string, string>;
+      newPayment: {
+        title: string;
+        actions: Record<string, { title: string; description: string }>;
+        infoBanner: {
+          title: string;
+          description: string;
+        };
+      };
+      domesticFlow: {
+        overviewFor2026: string;
+        fromAccount: string;
+        beneficiary: string;
+        paymentDetails: string;
+        paymentOrder: string;
+      };
+    };
+    productsMenu: {
+      title: string;
+      banking: string;
+      shopSmart: string;
+      offersForYou: string;
+      ourProducts: string;
+      otherSolutionsForYou: string;
+      featuredCategories: string;
+      shopSmartTitle: string;
+      cards: Record<string, string>;
+      offers: Record<string, { title: string; description: string }>;
+    };
+    messages: {
+      title: string;
+      inbox: string;
+      outbox: string;
+      sectionTitle: string;
+      newBadge: string;
+      rows: Record<string, { title: string; description: string }>;
+    };
+    documents: {
+      title: string;
+      newBadge: string;
+      rows: Record<string, { title: string; description: string }>;
+    };
+    settings: {
+      title: string;
+      sections: Record<string, string>;
+      items: Record<string, { title: string; description: string }>;
+    };
+    contacts: {
+      title: string;
+      sections: {
+        contacts: string;
+        bankContacts: string;
+        socialMedia: string;
+      };
+      cards: Record<string, string>;
+    };
+    dialogs: {
+      logoutTitle: string;
+      logoutMessage: string;
+      cancel: string;
+      logout: string;
+    };
+    unsupported: {
+      message: string;
+      productStatus: string;
+      designSystem: string;
+      designStatus: string;
+    };
+  };
+
+  // ==========================================
   // PRE-LOGIN SCREEN
   // ==========================================
   preLogin: {
@@ -119,6 +258,23 @@ export interface TranslationKeys {
   };
 
   // ==========================================
+  // MORE SCREEN
+  // ==========================================
+  more: {
+    title: string;
+    cards: {
+      contacts: string;
+      documents: string;
+      settings: string;
+      gdprConsent: string;
+      thirdPartyConsent: string;
+      digitalActivities: string;
+      myRequests: string;
+      tutorial: string;
+    };
+  };
+
+  // ==========================================
   // PRIME (All countries)
   // ==========================================
   prime: {
@@ -175,6 +331,7 @@ export interface TranslationKeys {
  * Allows dot notation access: t('preLogin.welcome')
  */
 export type TranslationKey = 
+  | `runtime.${string}`
   | `preLogin.${keyof TranslationKeys['preLogin']}`
   | `preLoginActive.${keyof TranslationKeys['preLoginActive']}`
   | `languageSelector.${keyof TranslationKeys['languageSelector']}`
@@ -182,6 +339,8 @@ export type TranslationKey =
   | `navigation.${keyof TranslationKeys['navigation']}`
   | `home.${keyof TranslationKeys['home']}`
   | `home.period.${keyof TranslationKeys['home']['period']}`
+  | `more.${keyof TranslationKeys['more']}`
+  | `more.cards.${keyof TranslationKeys['more']['cards']}`
   | (TranslationKeys['coApping'] extends undefined ? never : `coApping.${keyof NonNullable<TranslationKeys['coApping']>}`)
   | (TranslationKeys['products'] extends undefined ? never : `products.${keyof NonNullable<TranslationKeys['products']>}`)
   | (TranslationKeys['products'] extends undefined ? never : `products.account.${keyof NonNullable<TranslationKeys['products']>['account']}`)

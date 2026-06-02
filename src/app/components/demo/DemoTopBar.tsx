@@ -10,6 +10,7 @@ import { PRODUCT_ORDER, PRODUCTS } from "@/app/registry/projectModel";
 import { getReleaseBundle, RELEASE_ORDER } from "@/app/registry/releaseRegistry";
 import { useDemo } from "@/app/state/demoStore";
 import { AppIcon } from "@/app/components/icons";
+import ThemeModeSegment from "@/app/components/ThemeModeSegment";
 import { DemoFeatureSidePanel } from "./DemoFeatureSidePanel";
 import svgPaths from "@/imports/svg-pn3y56bdut";
 
@@ -26,7 +27,7 @@ export function DemoTopBar() {
     setRelease,
     setThemeMode,
   } = useDemo();
-  const { currentScreen, navigateTo, setCoAppingActive } = useNavigationContext();
+  const { currentScreen, navigateToAndReset, setCoAppingActive } = useNavigationContext();
 
   const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
   const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
@@ -38,6 +39,43 @@ export function DemoTopBar() {
   const releaseDropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedRelease = getReleaseBundle(release);
+  const isDesignSystemSelected = currentScreen === "design-system";
+  const contextSelectorLabel = isDesignSystemSelected
+    ? "Design System Inventory"
+    : COUNTRY_META[country]?.nameEN || country;
+  const scenarioEntryScreen = scenario === "active" ? "prelogin-active" : "prelogin-inactive";
+
+  const closeAllDropdowns = () => {
+    setIsProductDropdownOpen(false);
+    setIsCountryDropdownOpen(false);
+    setIsReleaseDropdownOpen(false);
+  };
+
+  const handleCountrySelect = (countryCode: (typeof COUNTRIES)[number]) => {
+    const isLeavingDesignSystem = currentScreen === "design-system";
+    closeAllDropdowns();
+
+    if (isLeavingDesignSystem && window.location.hash) {
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+    }
+
+    setCountry(countryCode);
+
+    if (isLeavingDesignSystem) {
+      setCoAppingActive(false);
+      window.requestAnimationFrame(() => {
+        navigateToAndReset(scenarioEntryScreen);
+      });
+    }
+  };
+
+  const handleDesignSystemSelect = () => {
+    closeAllDropdowns();
+    setCoAppingActive(false);
+    window.requestAnimationFrame(() => {
+      navigateToAndReset("design-system");
+    });
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -58,8 +96,7 @@ export function DemoTopBar() {
 
   const handleReset = () => {
     setCoAppingActive(false);
-    const targetScreen = scenario === "active" ? "prelogin-active" : "prelogin-inactive";
-    navigateTo(targetScreen);
+    navigateToAndReset(scenarioEntryScreen);
   };
 
   return (
@@ -94,7 +131,9 @@ export function DemoTopBar() {
                 <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
                   {PRODUCTS[product].label}
                 </p>
-                <AppIcon name="demo-chevron-down" color="var(--uc-text)" className="w-6 h-6 shrink-0" />
+                <span className="grid h-[32px] w-[32px] shrink-0 place-items-center">
+                  <AppIcon name="demo-chevron-down" color="var(--uc-text)" />
+                </span>
               </button>
 
               {isProductDropdownOpen && (
@@ -129,9 +168,11 @@ export function DemoTopBar() {
                 className="flex items-center gap-1 hover:opacity-70 transition-opacity"
               >
                 <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
-                  {COUNTRY_META[country]?.nameEN || country}
+                  {contextSelectorLabel}
                 </p>
-                <AppIcon name="demo-chevron-down" color="var(--uc-text)" className="w-6 h-6 shrink-0" />
+                <span className="grid h-[32px] w-[32px] shrink-0 place-items-center">
+                  <AppIcon name="demo-chevron-down" color="var(--uc-text)" />
+                </span>
               </button>
 
               {isCountryDropdownOpen && (
@@ -139,12 +180,9 @@ export function DemoTopBar() {
                   {COUNTRIES.map((countryCode) => (
                     <button
                       key={countryCode}
-                      onClick={() => {
-                        setCountry(countryCode);
-                        setIsCountryDropdownOpen(false);
-                      }}
+                      onClick={() => handleCountrySelect(countryCode)}
                       className={`w-full px-4 py-2 text-sm text-left hover:bg-[var(--uc-surface-muted)] transition-colors ${
-                        country === countryCode
+                        !isDesignSystemSelected && country === countryCode
                           ? "bg-[color-mix(in_srgb,var(--uc-brand)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-brand)]"
                           : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
                       }`}
@@ -154,10 +192,7 @@ export function DemoTopBar() {
                   ))}
                   <div className="my-1 border-t border-[var(--uc-border-muted)]" />
                   <button
-                    onClick={() => {
-                      navigateTo("design-system");
-                      setIsCountryDropdownOpen(false);
-                    }}
+                    onClick={handleDesignSystemSelect}
                     className={`w-full px-4 py-2 text-sm text-left hover:bg-[var(--uc-surface-muted)] transition-colors ${
                       currentScreen === "design-system"
                         ? "bg-[color-mix(in_srgb,var(--uc-brand)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-brand)]"
@@ -182,7 +217,9 @@ export function DemoTopBar() {
                 <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
                   {selectedRelease.label}
                 </p>
-                <AppIcon name="demo-chevron-down" color="var(--uc-text)" className="w-6 h-6 shrink-0" />
+                <span className="grid h-[32px] w-[32px] shrink-0 place-items-center">
+                  <AppIcon name="demo-chevron-down" color="var(--uc-text)" />
+                </span>
               </button>
 
               {isReleaseDropdownOpen && (
@@ -209,22 +246,22 @@ export function DemoTopBar() {
 
             <button
               onClick={() => setIsControlPanelOpen(!isControlPanelOpen)}
-              className={`w-6 h-6 transition-colors ${
+              className={`grid h-[32px] w-[32px] place-items-center transition-colors ${
                 isControlPanelOpen ? "text-[var(--uc-brand)]" : "text-[var(--uc-text)] hover:text-[var(--uc-brand)]"
               }`}
               title="Control Panel"
             >
-              <AppIcon name="demo-settings" className="block size-full" />
+              <AppIcon name="demo-settings" />
             </button>
 
-            <ThemeModeSwitch value={themeMode} onChange={setThemeMode} />
+            <ThemeModeSegment value={themeMode} onChange={setThemeMode} />
 
             <button
               onClick={handleReset}
-              className="w-6 h-6 text-[var(--uc-text)] hover:text-[var(--uc-brand)] transition-colors"
+              className="grid h-[32px] w-[32px] place-items-center text-[var(--uc-text)] hover:text-[var(--uc-brand)] transition-colors"
               title="Reset to Prelogin"
             >
-              <AppIcon name="demo-reset" className="block size-full" />
+              <AppIcon name="demo-reset" />
             </button>
           </div>
         </div>
@@ -235,40 +272,6 @@ export function DemoTopBar() {
         onClose={() => setIsControlPanelOpen(false)}
       />
     </>
-  );
-}
-
-function ThemeModeSwitch({
-  value,
-  onChange,
-}: {
-  value: "light" | "dark";
-  onChange: (value: "light" | "dark") => void;
-}) {
-  return (
-    <div
-      className="flex items-center rounded-[18px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[2px]"
-      aria-label="Theme mode"
-    >
-      {(["light", "dark"] as const).map((mode) => {
-        const isActive = value === mode;
-        return (
-          <button
-            key={mode}
-            type="button"
-            aria-pressed={isActive}
-            onClick={() => onChange(mode)}
-            className={`rounded-[16px] px-3 py-1 font-['UniCredit:Bold',sans-serif] text-[12px] leading-none transition-colors ${
-              isActive
-                ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm"
-                : "text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]"
-            }`}
-          >
-            {mode === "light" ? "Light" : "Dark"}
-          </button>
-        );
-      })}
-    </div>
   );
 }
 

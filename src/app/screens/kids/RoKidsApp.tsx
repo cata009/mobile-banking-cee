@@ -900,7 +900,7 @@ function KidsHomeScreen({
                 className="grid size-[32px] place-items-center rounded-[4px] bg-[rgb(var(--uc-shadow-rgb)_/_0.18)]"
                 onClick={() => setBalanceVisible((visible) => !visible)}
               >
-                <AppIcon name={balanceVisible ? "eye" : "eye-off"} size={20} color="currentColor" />
+                <AppIcon name={balanceVisible ? "eye" : "eye-off"} color="currentColor" />
               </button>
             </div>
             <p className="mt-[8px] text-[34px] font-bold leading-[38px]">
@@ -950,7 +950,7 @@ function KidsHomeScreen({
                 <div className="flex items-center justify-between gap-[12px]">
                   <div className="flex items-center gap-[12px]">
                     <IconBubble icon="bike" tone="teal" />
-                    <div>
+                  <div>
                       <h3 className="text-[18px] font-bold leading-[22px] text-[var(--uc-text)]">
                         {goal.title}
                       </h3>
@@ -959,7 +959,7 @@ function KidsHomeScreen({
                       </p>
                     </div>
                   </div>
-                  <AppIcon name="chevron-forward-heavy" size={22} color="var(--uc-icon-muted)" />
+                  <AppIcon name="chevron-forward-heavy" color="var(--uc-icon-muted)" />
                 </div>
                 <ProgressBar className="mt-[14px]" value={goalProgress(goal)} />
               </SurfaceCard>
@@ -1028,7 +1028,7 @@ function KidsHomeScreen({
                   Clear sharing, no surprises.
                 </p>
               </div>
-              <AppIcon name="chevron-forward-heavy" size={22} color="var(--uc-icon-muted)" />
+              <AppIcon name="chevron-forward-heavy" color="var(--uc-icon-muted)" />
             </div>
           </SurfaceCard>
         </button>
@@ -1914,7 +1914,7 @@ function ParentDashboardScreen({
                   {choresWaiting} chore waiting approval
                 </p>
               </div>
-              <AppIcon name="chevron-forward-heavy" size={22} color="var(--uc-icon-muted)" />
+              <AppIcon name="chevron-forward-heavy" color="var(--uc-icon-muted)" />
             </div>
           </SurfaceCard>
         </SectionBlock>
@@ -2344,7 +2344,7 @@ function FlowHeader({
           onClick={onBack}
           aria-label="Back"
         >
-          <AppIcon name="back-heavy" size={24} color="currentColor" />
+          <AppIcon name="back-heavy" color="currentColor" />
         </button>
         <h1 className="truncate text-center text-[18px] font-bold leading-[22px] text-[var(--uc-text)]">
           {title}
@@ -2395,7 +2395,7 @@ function KidsBottomNav({
           >
             <span className={`block h-[2px] w-[24px] ${isActive ? "bg-[var(--uc-action)]" : "bg-transparent"}`} />
             <span className="grid size-[32px] place-items-center">
-              <AppIcon name={icon} size={23} color={color} />
+              <AppIcon name={icon} color={color} />
             </span>
             <span className={`text-center text-[14px] font-normal leading-[15px] ${isActive ? "text-[var(--uc-action)]" : "text-[var(--uc-text-muted)]"}`}>
               {item.label}
@@ -2471,7 +2471,7 @@ function KidsActionTile({
       onClick={onClick}
     >
       <span className="grid size-[32px] place-items-center rounded-[8px] bg-[var(--uc-action-soft)] text-[var(--uc-action)]">
-        <AppIcon name={icon} size={20} color="currentColor" />
+        <AppIcon name={icon} color="currentColor" />
       </span>
       <span className="text-[13px] font-bold leading-[15px] text-[var(--uc-text)]">{label}</span>
     </button>
@@ -2494,11 +2494,12 @@ function IconBubble({
     neutral: "bg-[var(--uc-surface-muted)] text-[var(--uc-text-muted)]",
   }[tone];
   const sizeClass = size === "large" ? "size-[54px]" : "size-[40px]";
-  const iconSize = size === "large" ? 28 : 21;
 
   return (
     <span className={`grid shrink-0 place-items-center rounded-[8px] ${sizeClass} ${toneClass}`}>
-      <AppIcon name={icon} size={iconSize} color="currentColor" />
+      <span className="grid size-[32px] place-items-center">
+        <AppIcon name={icon} color="currentColor" />
+      </span>
     </span>
   );
 }
@@ -2652,8 +2653,8 @@ function NoticeToast({
           <p className="text-[15px] font-bold leading-[18px] text-[var(--uc-text)]">{notice.title}</p>
           <p className="mt-[2px] text-[13px] leading-[17px] text-[var(--uc-text-muted)]">{notice.description}</p>
         </div>
-        <button type="button" className="grid size-[28px] place-items-center" onClick={onClose} aria-label="Close notification">
-          <AppIcon name="close-x" size={18} color="currentColor" />
+        <button type="button" className="grid size-[32px] place-items-center" onClick={onClose} aria-label="Close notification">
+          <AppIcon name="close-x" color="currentColor" />
         </button>
       </div>
     </div>
@@ -2725,7 +2726,7 @@ function LargeActionRow({
             <h3 className="text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{title}</h3>
             <p className="mt-[2px] text-[13px] leading-[17px] text-[var(--uc-text-muted)]">{subtitle}</p>
           </div>
-          <AppIcon name="chevron-forward-heavy" size={22} color="var(--uc-icon-muted)" />
+          <AppIcon name="chevron-forward-heavy" color="var(--uc-icon-muted)" />
         </div>
       </SurfaceCard>
     </button>
@@ -2747,7 +2748,9 @@ function ParentQuickAction({
       className="flex h-[92px] flex-col items-center justify-center gap-[9px] rounded-[8px] bg-[var(--uc-surface-muted)] text-center"
       onClick={onClick}
     >
-      <AppIcon name={icon} size={24} color="var(--uc-action)" />
+      <span className="grid size-[32px] place-items-center">
+        <AppIcon name={icon} color="var(--uc-action)" />
+      </span>
       <span className="px-[8px] text-[14px] font-bold leading-[17px] text-[var(--uc-text)]">{label}</span>
     </button>
   );

@@ -84,9 +84,10 @@ export default function AccordionSection({
 
           {/* Chevron */}
           <div 
-            className="transition-transform duration-300"
+            className="grid place-items-center transition-transform duration-300"
             style={{
               transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transformOrigin: 'center',
               width: '32px',
               height: '32px'
             }}

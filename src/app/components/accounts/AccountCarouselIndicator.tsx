@@ -32,6 +32,7 @@ function getIndicatorItems(count: number, activeIndex: number): IndicatorItem[] 
 
   return [
     { type: "mini", key: "start" },
+    { type: "item", index: activeIndex - 2 },
     { type: "item", index: activeIndex - 1 },
     { type: "item", index: activeIndex },
     { type: "item", index: activeIndex + 1 },

@@ -7,9 +7,10 @@ import imgDigitalActivities from "figma:asset/947d85da595e4eb3e946a83cbab7bb8d8c
 
 interface DigitalActivitiesCardProps {
   onClick: () => void;
+  title?: string;
 }
 
-export function DigitalActivitiesCard({ onClick }: DigitalActivitiesCardProps) {
+export function DigitalActivitiesCard({ onClick, title = "Digital activity record" }: DigitalActivitiesCardProps) {
   return (
     <button
       onClick={onClick}
@@ -32,7 +33,7 @@ export function DigitalActivitiesCard({ onClick }: DigitalActivitiesCardProps) {
       {/* Title - top left padding */}
       <div className="absolute inset-0 p-[16px] flex items-start">
         <p className="font-['UniCredit:Bold',sans-serif] text-[18px] text-[var(--uc-text)] leading-[normal] text-left whitespace-pre-wrap z-10 relative">
-          Digital activities register
+          {title}
         </p>
       </div>
     </button>

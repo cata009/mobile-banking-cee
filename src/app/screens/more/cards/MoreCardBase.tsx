@@ -4,8 +4,6 @@
  * Provides consistent styling and badge support
  */
 
-import { AppIcon } from "@/app/components/icons";
-
 interface MoreCardBaseProps {
   title: string;
   image: string;
@@ -45,10 +43,7 @@ export function MoreCardBase({ title, image, onClick, badgeCount }: MoreCardBase
       {/* Badge (if provided) - top right */}
       {badgeCount !== undefined && badgeCount > 0 && (
         <div className="absolute right-0 top-0 size-[32px] z-20">
-          {/* Red quarter circle badge in corner */}
-          <div className="absolute inset-[0_-0.37%_5.88%_6.25%]">
-            <AppIcon name="badge-corner" className="block size-full" color="var(--uc-brand)" />
-          </div>
+          <div className="absolute right-0 top-0 h-[30px] w-[30px] rounded-bl-[30px] bg-[var(--uc-brand)]" />
           {/* Badge number - centered in top-right quarter */}
           <div className="absolute right-[7px] top-[4px]">
             <span 

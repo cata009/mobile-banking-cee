@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import type { ChangeEvent, FocusEvent } from "react";
 import { AppIcon } from "@/app/components/icons";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 
 interface AccountSearchBarProps {
   placeholder?: string;
@@ -13,7 +14,7 @@ interface AccountSearchBarProps {
 }
 
 export default function AccountSearchBar({
-  placeholder = "Search",
+  placeholder,
   onClick,
   onFilterClick,
   onClearClick,
@@ -21,6 +22,8 @@ export default function AccountSearchBar({
   onValueChange,
   value,
 }: AccountSearchBarProps) {
+  const { t } = useLanguage();
+  const resolvedPlaceholder = placeholder ?? t("runtime.actions.search", "Search");
   const inputRef = useRef<HTMLInputElement>(null);
   const [internalValue, setInternalValue] = useState("");
   const searchValue = value ?? internalValue;
@@ -56,7 +59,7 @@ export default function AccountSearchBar({
       <div className="flex h-[32px] w-full items-center justify-between">
         <label className="flex h-[32px] min-w-0 flex-1 items-center gap-[8px] text-left">
           <span className="flex h-[32px] w-[32px] shrink-0 items-center justify-center" data-ds-label="Search icon 32x32">
-            <AppIcon name="search" size={32} color="var(--uc-text)" />
+            <AppIcon name="search" color="var(--uc-text)" />
           </span>
           <input
             ref={inputRef}
@@ -65,8 +68,8 @@ export default function AccountSearchBar({
             onChange={handleInputChange}
             onClick={onClick}
             onFocus={handleInputFocus}
-            placeholder={placeholder}
-            aria-label={placeholder}
+            placeholder={resolvedPlaceholder}
+            aria-label={resolvedPlaceholder}
             className="h-[32px] min-w-0 flex-1 appearance-none bg-transparent font-['UniCredit',sans-serif] text-[14px] font-bold leading-normal text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)] [&::-webkit-search-cancel-button]:hidden"
           />
         </label>
@@ -74,13 +77,13 @@ export default function AccountSearchBar({
           type="button"
           onClick={hasSearchValue ? handleClearClick : onFilterClick}
           className="grid h-[32px] w-[32px] shrink-0 place-items-center"
-          aria-label={hasSearchValue ? "Clear search results" : "Filters"}
+          aria-label={hasSearchValue ? "Clear search results" : t("runtime.actions.filters", "Filters")}
           data-ds-label={hasSearchValue ? "Clear results icon 32x32" : "Filter icon 32x32"}
         >
           {hasSearchValue ? (
-            <AppIcon name="clear-results" size={32} color="var(--uc-text)" />
+            <AppIcon name="clear-results" color="var(--uc-text)" />
           ) : (
-            <AppIcon name="filters" size={32} color="var(--uc-text)" />
+            <AppIcon name="filters" color="var(--uc-text)" />
           )}
         </button>
       </div>

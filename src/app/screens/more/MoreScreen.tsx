@@ -18,6 +18,7 @@ import BottomNavigation from '@/app/components/BottomNavigation';
 import { LogoutConfirmDialog } from '@/app/components/LogoutConfirmDialog';
 import { useDemo } from '@/app/state/demoStore';
 import { getMoreCardsForCountry, MoreCardType } from '@/app/config/moreCardsConfig';
+import { useLanguage } from '@/app/contexts/LanguageContext';
 
 interface MoreScreenProps {
   onBack: () => void;
@@ -45,8 +46,20 @@ export default function MoreScreen({
   onLogoutConfirm,
 }: MoreScreenProps) {
   const { country } = useDemo();
+  const { t } = useLanguage();
   const availableCards = getMoreCardsForCountry(country);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+
+  const cardLabels: Record<MoreCardType, string> = {
+    contacts: t("more.cards.contacts"),
+    documents: t("more.cards.documents"),
+    settings: t("more.cards.settings"),
+    "gdpr-consent": t("more.cards.gdprConsent"),
+    "third-party-consent": t("more.cards.thirdPartyConsent"),
+    "digital-activities": t("more.cards.digitalActivities"),
+    "my-requests": t("more.cards.myRequests"),
+    tutorial: t("more.cards.tutorial"),
+  };
 
   const handleProfileClick = () => {
     console.log('👤 Profile clicked');
@@ -94,21 +107,21 @@ export default function MoreScreen({
   const renderCard = (cardType: MoreCardType) => {
     switch (cardType) {
       case 'contacts':
-        return <ContactsCard key="contacts" onClick={() => onContactsClick?.()} />;
+        return <ContactsCard key="contacts" title={cardLabels.contacts} onClick={() => onContactsClick?.()} />;
       case 'documents':
-        return <DocumentsCard key="documents" onClick={() => onDocumentsClick?.()} badgeCount={12} />;
+        return <DocumentsCard key="documents" title={cardLabels.documents} onClick={() => onDocumentsClick?.()} badgeCount={12} />;
       case 'settings':
-        return <SettingsCard key="settings" onClick={() => onSettingsClick?.()} />;
+        return <SettingsCard key="settings" title={cardLabels.settings} onClick={() => onSettingsClick?.()} />;
       case 'gdpr-consent':
-        return <GdprConsentCard key="gdpr-consent" onClick={() => handleCardClick('GDPR Consent')} />;
+        return <GdprConsentCard key="gdpr-consent" title={cardLabels["gdpr-consent"]} onClick={() => handleCardClick(cardLabels["gdpr-consent"])} />;
       case 'third-party-consent':
-        return <ThirdPartyConsentCard key="third-party-consent" onClick={() => handleCardClick('3rd Party consent')} />;
+        return <ThirdPartyConsentCard key="third-party-consent" title={cardLabels["third-party-consent"]} onClick={() => handleCardClick(cardLabels["third-party-consent"])} />;
       case 'digital-activities':
-        return <DigitalActivitiesCard key="digital-activities" onClick={() => handleCardClick('Digital activities register')} />;
+        return <DigitalActivitiesCard key="digital-activities" title={cardLabels["digital-activities"]} onClick={() => handleCardClick(cardLabels["digital-activities"])} />;
       case 'my-requests':
-        return <MyRequestsCard key="my-requests" onClick={() => handleCardClick('My requests')} />;
+        return <MyRequestsCard key="my-requests" title={cardLabels["my-requests"]} onClick={() => handleCardClick(cardLabels["my-requests"])} />;
       case 'tutorial':
-        return <TutorialCard key="tutorial" onClick={() => handleCardClick('Tutorial')} />;
+        return <TutorialCard key="tutorial" title={cardLabels.tutorial} onClick={() => handleCardClick(cardLabels.tutorial)} />;
       default:
         return null;
     }

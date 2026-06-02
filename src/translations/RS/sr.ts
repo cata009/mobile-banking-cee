@@ -1,11 +1,13 @@
 import type { TranslationKeys } from '../types';
+import { createSharedTranslations } from '../shared';
 
 /**
  * Serbian translations for Serbia (RS)
  * Srpski - Srbija
  */
 const sr: TranslationKeys = {
-  // ==========================================
+  ...createSharedTranslations('sr'),
+// ==========================================
   // PRE-LOGIN SCREEN
   // ==========================================
   preLogin: {
@@ -88,6 +90,23 @@ const sr: TranslationKeys = {
       thisMonth: 'Овај месец',
       lastMonth: 'Прошли месец',
       vsLastMonth: 'у односу на прошли месец',
+    },
+  },
+
+  // ==========================================
+  // MORE SCREEN
+  // ==========================================
+  more: {
+    title: 'Vise',
+    cards: {
+      contacts: 'Kontakti',
+      documents: 'Dokumenti',
+      settings: 'Podesavanja',
+      gdprConsent: 'GDPR saglasnost',
+      thirdPartyConsent: 'Saglasnost za trece strane',
+      digitalActivities: 'Zapis digitalnih aktivnosti',
+      myRequests: 'Moje prijave',
+      tutorial: 'Tutorijali',
     },
   },
 
