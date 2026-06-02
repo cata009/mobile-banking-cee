@@ -9,7 +9,7 @@ Status legend: `todo` / `in_progress` / `done` / `blocked`
 | done | Install AI Contributor Operating System docs | `agents.md`, `docs/handoff/*` |
 | done | Add project architecture model | `docs/architecture/PROJECT_MODEL.md` |
 | done | Add typed taxonomy and registries | `src/app/registry/projectModel.ts`, `screenRegistry.ts`, `flowRegistry.ts`, `releaseRegistry.ts` |
-| done | Run verification | Latest closeout verification on 2026-06-02: `npm run build`, `npm run audit:templates`, static `BA_BL` coverage audit, and `git diff --check` passed; `typecheck`, `lint`, and `test` remain blocked by missing local scripts/tooling |
+| done | Run verification | Latest closeout verification on 2026-06-02: `npm run build`, `npm run audit:templates`, BA/BA_BL browser smoke, static Documents count audit, Contacts header/divider browser smoke, and `git diff --check` passed; `typecheck`, `lint`, and `test` remain blocked by missing local scripts/tooling |
 
 ## Upcoming
 
@@ -48,6 +48,9 @@ Status legend: `todo` / `in_progress` / `done` / `blocked`
 | done | Add RO Kids Banking prototype for Mobile PI Kids Romania | `RoKidsApp`, `roKidsBanking` mock data, `App` gating, and registry entries implement a Romania-only mock-driven Kids/Parent concept; build, browser smoke, `git diff --check`, and raw color audits passed on `5177` |
 | done | Add global interactive cursor affordance | `src/styles/theme.css` applies pointer cursors to clickable controls across runtime screens, templates, and Design System specimens, preserves text cursor for text fields, and uses `not-allowed` for disabled controls; `npm run build`, browser computed-cursor checks, and closeout verification passed |
 | done | Add Payments hero-card image variants and per-card sheet contract | `PaymentHeroCard` supports 9 screenshot-backed artwork variants from `screenshots/payments1.png` through `screenshots/payments9.png`; `paymentsMenuConfig` now has per-card `heroSheets`; final country-specific mapping and copy remain a future task |
+| done | Align BA and BA_BL More, Products, and Payments runtime menus | BA/BA_BL More now uses Contacts, Documents, Settings, Tutorials, My applications plus Contact phone + Messages header actions; Products are cards-only with Accounts, Cards, Loans, Savings; Payments has five primary cards and five OTHER shortcuts; build and browser smoke passed on 2026-06-02 |
+| done | Make More Documents badge dynamic | `MoreScreen` now uses `getDocumentsCountForCountry`; every supported country currently resolves to 7 document rows; build, template audit, static config audit, and browser smoke passed on 2026-06-02 |
+| done | Align Contacts header and section dividers with shared components | `ContactsScreen` now uses `PageHeader` collapsed-title progress and `SectionHeadingDivider`; Design System specimen/registry/docs updated; build, template audit, diff check, and browser smoke passed on 2026-06-02 |
 
 ## Future Product Work
 
@@ -67,6 +70,7 @@ Status legend: `todo` / `in_progress` / `done` / `blocked`
 | todo | Fine tune Analytics chart spacing and PFM aggregation behavior | Current Analytics screen is screenshot-inspired and transaction-derived from static account profiles; Money Out / Money In PFM categories are wired, but chart interaction, exact spacing, and product-specific transaction profile depth still need final tuning |
 | todo | Extract remaining PFM category glyphs from `screenshots/PFM-icons.svg` | Taxes and Penalties, Income, Home, Utilities, Transportation, Children, Healthcare, Shopping, Lifestyle, Education, Leisure time, Investments, Uncategorized, Groceries, Exclude from budget, Insurance, Finance, Wallet, and Transfers now render real 20x20 SVG glyphs; remaining categories such as Cash, ATM, FX, and Internal still use token-colored initial badges |
 | todo | Add automated tests for Messages header routing and list interactions | Build and in-app browser smoke passed for RO and CZ; no automated regression test exists yet for header Messages entry, Back navigation, Inbox/Outbox switching, or search filtering |
+| todo | Add automated tests for BA/BA_BL menu differences, Documents badge count, and Contacts header collapse | Build and browser smoke passed manually on 2026-06-02, but no automated regression test guards BA/BA_BL More/Products/Payments labels, the Documents counter, or Contacts `PageHeader` collapse/`SectionHeadingDivider` usage |
 | todo | Fine tune Domestic payment flow screens | Mock flow exists from both New payment and Redo payment, but needs screenshot-level copy/spacing/country refinements |
 | todo | Implement remaining New payment action flows | Domestic is implemented as a mock flow; Foreign/SEPA and Templates/Beneficiaries remain placeholders until target screens are supplied |
 | todo | Add automated tests for hide/show amounts | Build and Chrome smoke passed; no automated regression test exists yet for account/card masking and transaction exclusion |

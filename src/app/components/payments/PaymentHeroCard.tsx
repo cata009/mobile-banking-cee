@@ -185,6 +185,7 @@ export default function PaymentHeroCard({
   const imagePreset = imageVariant ? PAYMENT_HERO_CARD_IMAGE_PRESETS[imageVariant] : undefined;
   const resolvedImageSrc = imageSrc ?? imagePreset?.src;
   const resolvedImageClassName = imagePreset?.imageClassName ?? "bottom-0 right-0 h-full w-[120px]";
+  const hasMultilineTitle = item.title.includes("\n");
 
   const handleClick = () => {
     console.log(`Payment menu item clicked: ${item.id}`);
@@ -199,12 +200,13 @@ export default function PaymentHeroCard({
     >
       <div className="relative z-10 flex h-full w-full flex-col px-[20px] pt-[16px]">
         <h2
-          className="whitespace-nowrap font-['UniCredit',sans-serif] text-[24px] font-bold leading-normal text-[var(--uc-text)]"
+          className="whitespace-pre-line font-['UniCredit',sans-serif] text-[24px] font-bold text-[var(--uc-text)]"
+          style={{ lineHeight: hasMultilineTitle ? "26px" : "normal" }}
         >
           {item.title}
         </h2>
         <p
-          className="mt-[16px] whitespace-pre-line font-['UniCredit',sans-serif] text-[14px] font-normal leading-normal text-[var(--uc-text)]"
+          className={`${hasMultilineTitle ? "mt-[8px]" : "mt-[16px]"} whitespace-pre-line font-['UniCredit',sans-serif] text-[14px] font-normal leading-normal text-[var(--uc-text)]`}
         >
           {item.description}
         </p>

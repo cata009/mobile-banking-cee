@@ -967,7 +967,7 @@ const CUSTOM_ICONS = {
     width: 20,
     height: 20,
     viewBox: "5 5 21.1 20.2",
-    usage: ["ContactsNavigationCard"],
+    usage: ["ContactsNavigationCard", "HeaderActionIcons", "BA/BA_BL More/Products/Payments headers"],
     render: () => (
       <g transform="translate(5, 5)">
         <path d="M0.916351 7.26543L4.52766 2.75H7.51211L5.58436 7.26543H0.916351Z" fill="currentColor" />

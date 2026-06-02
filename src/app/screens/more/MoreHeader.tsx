@@ -11,13 +11,23 @@ import { useLanguage } from "@/app/contexts/LanguageContext";
 
 interface MoreHeaderProps {
   onProfile: () => void;
+  onContactPhone?: () => void;
   onMessages: () => void;
   onLogout: () => void;
+  actionVariant?: "default" | "contact-messages";
   messageCount?: number;
 }
 
-export function MoreHeader({ onProfile, onMessages, onLogout, messageCount = 0 }: MoreHeaderProps) {
+export function MoreHeader({
+  onProfile,
+  onContactPhone,
+  onMessages,
+  onLogout,
+  actionVariant = "default",
+  messageCount = 0,
+}: MoreHeaderProps) {
   const { t } = useLanguage();
+  const usesContactMessages = actionVariant === "contact-messages";
 
   return (
     <div className="w-full">
@@ -36,9 +46,15 @@ export function MoreHeader({ onProfile, onMessages, onLogout, messageCount = 0 }
           </h1>
 
           <HeaderActionRail>
-            <HeaderActionButton icon="profile" label="Profile" onClick={onProfile} />
+            {usesContactMessages ? (
+              <HeaderActionButton icon="contact-phone" label="Contact phone" onClick={onContactPhone} />
+            ) : (
+              <HeaderActionButton icon="profile" label="Profile" onClick={onProfile} />
+            )}
             <HeaderActionButton icon="messages" label="Messages" onClick={onMessages} badgeCount={messageCount} />
-            <HeaderActionButton icon="logout" label="Logout" onClick={onLogout} />
+            {usesContactMessages ? null : (
+              <HeaderActionButton icon="logout" label="Logout" onClick={onLogout} />
+            )}
           </HeaderActionRail>
         </div>
       </div>

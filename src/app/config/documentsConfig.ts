@@ -56,3 +56,9 @@ export const DOCUMENTS_CONFIG_BY_COUNTRY: Record<CountryId, DocumentsConfig> = {
 export function getDocumentsConfigForCountry(country: CountryId): DocumentsConfig {
   return DOCUMENTS_CONFIG_BY_COUNTRY[country];
 }
+
+export function getDocumentsCountForCountry(country: CountryId): number {
+  const config = getDocumentsConfigForCountry(country);
+
+  return config.groups.reduce((total, group) => total + group.items.length, 0);
+}

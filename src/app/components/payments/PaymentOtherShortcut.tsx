@@ -5,6 +5,8 @@ const paymentOtherIconName: Record<PaymentOtherIcon, IconName> = {
   qr: "payment-create-qr",
   templates: "payment-templates",
   card: "payment-card-repayment",
+  standing: "payment-templates",
+  foreign: "payment-exchange-rates",
   exchange: "payment-exchange-rates",
 };
 

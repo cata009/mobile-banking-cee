@@ -61,18 +61,22 @@ export const MORE_CARDS_CONFIG: Record<CountryId, MoreCardType[]> = {
     'tutorial',
   ],
 
-  // Bosnia - 3 cards
+  // Bosnia - 5 cards
   BA: [
     'contacts',
     'documents',
     'settings',
+    'tutorial',
+    'my-requests',
   ],
 
-  // Bosnia Banja Luka - duplicate of Bosnia
+  // Bosnia Banja Luka - follows Bosnia card order
   BA_BL: [
     'contacts',
     'documents',
     'settings',
+    'tutorial',
+    'my-requests',
   ],
 
   // Hungary - 5 cards

@@ -1,13 +1,7 @@
-/**
- * ContactsScreen Component
- * Contact information screen with bank contacts and social media
- */
-
+import { useState, type UIEvent } from "react";
 import PageHeader from '@/app/components/PageHeader';
-import { HeaderActionIcon } from '@/app/components/HeaderActionIcons';
-import { AppIcon } from "@/app/components/icons";
+import SectionHeadingDivider from '@/app/components/SectionHeadingDivider';
 import { useLanguage } from '@/app/contexts/LanguageContext';
-import { ContactsDivider } from './ContactsDivider';
 import { ContactsNavigationCard } from './ContactsNavigationCard';
 import imgUniCreditBuilding from "figma:asset/98dd23c242155a923a78eda01f9320afee4330eb.png";
 
@@ -18,6 +12,13 @@ interface ContactsScreenProps {
 
 export default function ContactsScreen({ onBack, onPrimeClick }: ContactsScreenProps) {
   const { t } = useLanguage();
+  const [headerProgress, setHeaderProgress] = useState(0);
+
+  const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
+    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64));
+    setHeaderProgress(progress);
+  };
+
   const handleCardClick = (cardName: string) => {
     console.log(`📞 ${cardName} clicked`);
     // Future: navigate to respective screen
@@ -29,70 +30,18 @@ export default function ContactsScreen({ onBack, onPrimeClick }: ContactsScreenP
   };
 
   return (
-    <div className="w-full h-full relative flex flex-col bg-[var(--uc-surface)]">
-      {/* Status Bar Space */}
-      <div className="h-[54px] flex-shrink-0 bg-[var(--uc-surface)]" />
-
-      {/* Sticky Back & Help Buttons - OUTSIDE scrollable area */}
-      <div className="sticky top-0 z-10 bg-[var(--uc-surface)] flex items-center justify-between h-[48px] pt-[8px] flex-shrink-0">
-        {/* Back button - 8px de la stânga */}
-        <button
-          onClick={onBack}
-          className="ml-[8px] flex items-center justify-center cursor-pointer"
-          style={{
-            width: '40px',
-            height: '40px',
-            padding: '8px 7.998px 7.997px 7.998px'
-          }}
-          aria-label={t("runtime.actions.back", "Back")}
-        >
-          <AppIcon name="back-heavy" className="shrink-0" color="var(--uc-text)" />
-        </button>
-
-        {/* Help button - 8px de la dreapta */}
-        <button
-          onClick={handleHelpClick}
-          className="mr-[8px] flex items-center justify-center cursor-pointer"
-          style={{
-            width: '40px',
-            height: '40px',
-            padding: '8px 7.998px 7.997px 7.998px'
-          }}
-          aria-label={t("runtime.actions.help", "Help")}
-        >
-          <HeaderActionIcon icon="help" />
-        </button>
-      </div>
-
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide">
-        {/* Title - scrollable */}
-        <div 
-          className="flex items-center"
-          style={{
-            width: '375px',
-            padding: '8px 16px'
-          }}
-        >
-          <h1 
-            className="font-['UniCredit',sans-serif] text-[var(--uc-text)]"
-            style={{
-              fontSize: '28px',
-              fontStyle: 'normal',
-              fontWeight: 700,
-              lineHeight: 'normal',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
-            }}
-          >
-            {t("runtime.contacts.title", "Contact us")}
-          </h1>
-        </div>
-
-        <div className="flex flex-col gap-[24px] px-[24px] pt-[8px] pb-[24px]">
+    <div
+      className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] scrollbar-hide"
+      onScroll={handlePageScroll}
+    >
+      <PageHeader
+        title={t("runtime.contacts.title", "Contact us")}
+        onBack={onBack}
+        onHelpClick={handleHelpClick}
+        collapsedTitleProgress={headerProgress}
+        includeSafeArea
+      />
+      <div className="flex flex-col gap-[24px] px-[24px] pt-[8px] pb-[24px]">
           {/* UniCredit Building Image */}
           <div className="w-full h-[160px] rounded-[8px] overflow-hidden">
             <img 
@@ -104,7 +53,7 @@ export default function ContactsScreen({ onBack, onPrimeClick }: ContactsScreenP
 
           {/* BANK CONTACTS Section */}
           <div className="flex flex-col">
-            <ContactsDivider text={t("runtime.contacts.sections.bankContacts", "BANK CONTACTS")} />
+            <SectionHeadingDivider title={t("runtime.contacts.sections.bankContacts", "BANK CONTACTS")} />
             
             <div className="flex flex-col mt-[16px]">
               <ContactsNavigationCard
@@ -160,7 +109,7 @@ export default function ContactsScreen({ onBack, onPrimeClick }: ContactsScreenP
 
           {/* SOCIAL MEDIA Section */}
           <div className="flex flex-col">
-            <ContactsDivider text={t("runtime.contacts.sections.socialMedia", "SOCIAL MEDIA")} />
+            <SectionHeadingDivider title={t("runtime.contacts.sections.socialMedia", "SOCIAL MEDIA")} />
             
             <div className="flex flex-col mt-[16px]">
               <ContactsNavigationCard
@@ -176,7 +125,6 @@ export default function ContactsScreen({ onBack, onPrimeClick }: ContactsScreenP
               />
             </div>
           </div>
-        </div>
       </div>
     </div>
   );

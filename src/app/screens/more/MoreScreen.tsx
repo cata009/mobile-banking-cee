@@ -18,6 +18,7 @@ import BottomNavigation from '@/app/components/BottomNavigation';
 import { LogoutConfirmDialog } from '@/app/components/LogoutConfirmDialog';
 import { useDemo } from '@/app/state/demoStore';
 import { getMoreCardsForCountry, MoreCardType } from '@/app/config/moreCardsConfig';
+import { getDocumentsCountForCountry } from '@/app/config/documentsConfig';
 import { useLanguage } from '@/app/contexts/LanguageContext';
 
 interface MoreScreenProps {
@@ -48,6 +49,8 @@ export default function MoreScreen({
   const { country } = useDemo();
   const { t } = useLanguage();
   const availableCards = getMoreCardsForCountry(country);
+  const documentsCount = getDocumentsCountForCountry(country);
+  const usesBosniaHeaderActions = country === "BA" || country === "BA_BL";
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const cardLabels: Record<MoreCardType, string> = {
@@ -69,6 +72,11 @@ export default function MoreScreen({
   const handleMessagesClick = () => {
     console.log('💬 Messages clicked');
     // Future: navigate to messages
+  };
+
+  const handleContactPhoneClick = () => {
+    console.log('Contact phone clicked');
+    onContactsClick?.();
   };
 
   const handleLogoutClick = () => {
@@ -109,7 +117,7 @@ export default function MoreScreen({
       case 'contacts':
         return <ContactsCard key="contacts" title={cardLabels.contacts} onClick={() => onContactsClick?.()} />;
       case 'documents':
-        return <DocumentsCard key="documents" title={cardLabels.documents} onClick={() => onDocumentsClick?.()} badgeCount={12} />;
+        return <DocumentsCard key="documents" title={cardLabels.documents} onClick={() => onDocumentsClick?.()} badgeCount={documentsCount} />;
       case 'settings':
         return <SettingsCard key="settings" title={cardLabels.settings} onClick={() => onSettingsClick?.()} />;
       case 'gdpr-consent':
@@ -135,8 +143,10 @@ export default function MoreScreen({
       {/* Header - directly after status bar, no wrapper */}
       <MoreHeader
         onProfile={handleProfileClick}
+        onContactPhone={handleContactPhoneClick}
         onMessages={onMessagesClick ?? handleMessagesClick}
         onLogout={handleLogoutClick}
+        actionVariant={usesBosniaHeaderActions ? "contact-messages" : "default"}
       />
 
       {/* Scrollable Content - Grid of cards */}

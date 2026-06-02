@@ -1459,6 +1459,70 @@ Continue with product evolution work:
   - In-app browser verification on `http://localhost:3001/#buttons` confirmed `cardHeight=120px`, `titleFontSize=24px`, `titleFontWeight=700`, `titleTop=16`, `titleWhiteSpace=nowrap`, `titleTextOverflow=clip`, `descFontSize=14px`, `descFontWeight=400`, and `descMarginTop=16px`.
   - `git diff --check` passed with only normal Windows LF/CRLF warnings.
 
+## 2026-06-02 BA / BA_BL More, Products, and Payments Menu Alignment
+
+- Updated Bosnia and Bosnia Banja Luka runtime menus:
+  - More now shows `Contacts`, `Documents`, `Settings`, `Tutorials`, and `My applications`; `My applications` lands under `Settings` in the two-column grid.
+  - More, Products, and Payments headers now use two actions for BA/BA_BL: `Contact phone` on the left and `Messages` on the right; Profile/Help/Logout are hidden on those headers for these two country variants.
+  - The `Contact phone` header action routes to Contacts where the screen has access to app navigation.
+- Updated Products for BA/BA_BL:
+  - removed `OFFERS FOR YOU`, the offer carousel, `OUR PRODUCTS`, and Insurance.
+  - remaining runtime cards are `Accounts`, `Cards`, `Loans`, and `Savings`.
+- Updated Payments for BA:
+  - primary cards: `New payment`, `Transfer money`, `Manage e-bills`, `Standing orders`, `Scan and pay`.
+  - `OTHER` shortcuts: `Template`, `Card repayment`, `Standing Order`, `Foreign Payments`, `Exchange Rate`.
+- Updated Payments for BA_BL:
+  - primary cards: `Make a payment`, `Transfer money / between accounts`, `Manage e-bills`, `Recurrent payments`, `QR code`.
+  - `OTHER` shortcuts match BA.
+- `PaymentHeroCard` now respects explicit newline titles and uses a tighter title-to-description gap only for multiline titles.
+- Limitation:
+  - `Standing Order` and `Foreign Payments` currently reuse existing Payments shortcut icons until the dedicated icon set is supplied.
+- Verification:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - In-app browser smoke on `http://127.0.0.1:3001/` passed for BA and BA_BL: More card/header matrix, Products cards-only surface, and Payments primary/OTHER copy all matched the requested labels.
+
+## 2026-06-02 More Documents Counter
+
+- `src/app/config/documentsConfig.ts` now exposes `getDocumentsCountForCountry(country)`, deriving the Documents count from the same grouped document rows rendered by `DocumentsScreen`.
+- `src/app/screens/more/MoreScreen.tsx` now passes the country-scoped Documents count into the More `DocumentsCard` instead of the old hardcoded `12`.
+- `src/app/screens/design-system/DesignSystemPage.tsx` now uses the same Documents count helper for the Documents card specimen, removing the remaining hardcoded `12` from app-side Documents card usage.
+- Current shared Documents config has 7 rows for every supported country: `RO`, `RS`, `HU`, `BA`, `BA_BL`, `SK`, `SI`, and `CZ`.
+- Verification:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - `npm run audit:templates` passed: `template-contract ok: templates=50 codePreviews=50 components=48 screens=23 flows=13`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - Static country/config audit passed: every supported country has a Documents config and currently resolves to 7 documents.
+  - In-app browser smoke on `http://127.0.0.1:3001/` passed: More showed `Documents7`, and opening Documents showed 7 document rows grouped as 5 rows in 2025 and 2 rows in 2026.
+
+## 2026-06-02 Contacts Header and Divider Alignment
+
+- `src/app/screens/contacts/ContactsScreen.tsx` now uses the shared `PageHeader` with scroll-driven `collapsedTitleProgress`, matching the centered small title behavior used by Settings/Documents-style pages.
+- Contacts section headings now render through shared `SectionHeadingDivider` instead of the local `ContactsDivider` treatment, so `Bank contacts` and `Social media` use the Design System divider contract.
+- `src/app/screens/design-system/DesignSystemPage.tsx` now shows the Contacts navigation-card specimen with `SectionHeadingDivider`, and the active component list no longer advertises `ContactsDivider` as the Contacts separator.
+- `src/app/registry/componentRegistry.ts` now records `pi.contacts.overview` as a `SectionHeadingDivider` consumer.
+- Verification:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - `npm run audit:templates` passed: `template-contract ok: templates=50 codePreviews=50 components=48 screens=23 flows=13`.
+  - In-app browser smoke on `http://127.0.0.1:3001/` passed: Contacts opened from More, the centered header title changed from opacity `0` to `1` after scroll, the large title faded out through parent opacity `0`, and both Contacts section headings were rendered as `data-ds-label="SectionHeadingDivider"` with the expected 14px bold uppercase title and 1px divider line.
+
+## 2026-06-02 Final Closeout Commit
+
+- Commit scope:
+  - all modified project files are intended to be staged and committed per the user's explicit `comite tot ce e de comis` request.
+  - scope includes BA/BA_BL More/Products/Payments menu alignment, dynamic More Documents counter, Contacts header/divider alignment, and the associated Design System, registry, handoff, and capability-map updates.
+- Banana Loop result:
+  - fixed: BA/BA_BL runtime menus now reflect the supplied market-specific More, Products, and Payments differences.
+  - fixed: More `Documents` badge no longer uses the hardcoded `12`; it derives from country-scoped Documents rows.
+  - fixed: Contacts now uses the shared collapsing `PageHeader` and shared `SectionHeadingDivider` contract.
+  - triaged: no automated regression currently guards BA/BA_BL menu differences, the Documents badge count, or Contacts header collapse; this is now a future task in `docs/handoff/next-tasks.md`.
+  - already known: Vite chunk-size warning and missing local `typecheck`/`lint`/`test` scripts remain tracked known bananas, not blockers for this commit.
+  - result: no untriaged banana remains.
+- Final verification:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - `npm run audit:templates` passed: `template-contract ok: templates=50 codePreviews=50 components=48 screens=23 flows=13`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - Browser smoke evidence recorded for BA/BA_BL menu alignment, More Documents count, and Contacts header/divider behavior.
+
 ## Constitutional Check
 
 constitutional check:
@@ -1468,4 +1532,4 @@ constitutional check:
 - bananas triaged: yes
 - safe to resume: yes
 
-safe to resume: yes, 50 code-backed template previews (30 screenshot-backed + 20 code-only active-pattern templates), typed template-to-app contracts with component/screen/flow metadata, `npm run audit:templates`, centralized icon cleanup with redundant lucide wrappers removed, RO Kids icon calls routed through `AppIcon`, remaining lucide-alone keys documented, Messages runtime screen from template 52, Documents and Settings runtime/template wiring from More, compact Design System Templates grid, Products bottom-navigation overlap fix, Design System Colors inventory, Light/Dark appearance switching, app-wide color tokenization, color/icon audits, build verification, browser smoke verification, and prior Payments/Products/Analytics/account-detail/demo-foundation work are complete; remaining work is follow-up screenshot-level fine tuning and automated visual coverage.
+safe to resume: yes, BA/BA_BL menu alignment, dynamic More Documents count, Contacts shared header/divider alignment, 50 code-backed template previews, typed template-to-app contracts, centralized icon/color work, build/audit verification, and browser smoke evidence are recorded; remaining work is explicit follow-up automation, screenshot-level fine tuning, and known tooling/performance bananas already triaged in `docs/handoff/known-bananas.md` and `docs/handoff/next-tasks.md`.

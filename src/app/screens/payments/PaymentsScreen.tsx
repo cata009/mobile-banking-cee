@@ -22,14 +22,25 @@ type NavItem = "home" | "analytics" | "payments" | "products" | "more";
 interface PaymentsScreenProps {
   onHomeClick?: () => void;
   onAnalyticsClick?: () => void;
+  onContactsClick?: () => void;
   onMessagesClick?: () => void;
   onProductsClick?: () => void;
   onMoreClick?: () => void;
   onDomesticPaymentClick?: () => void;
 }
 
-function PaymentsHeader({ title, onMessagesClick }: { title: string; onMessagesClick?: () => void }) {
+function PaymentsHeader({
+  title,
+  onContactsClick,
+  onMessagesClick,
+}: {
+  title: string;
+  onContactsClick?: () => void;
+  onMessagesClick?: () => void;
+}) {
+  const { country } = useDemo();
   const { t } = useLanguage();
+  const usesBosniaHeaderActions = country === "BA" || country === "BA_BL";
   const handleAction = (action: string) => {
     console.log(`Payments ${action} clicked`);
   };
@@ -46,9 +57,15 @@ function PaymentsHeader({ title, onMessagesClick }: { title: string; onMessagesC
           </h1>
 
           <HeaderActionRail>
-            <HeaderActionButton icon="profile" label={t("runtime.actions.profile", "Profile")} onClick={() => handleAction("profile")} />
+            {usesBosniaHeaderActions ? (
+              <HeaderActionButton icon="contact-phone" label="Contact phone" onClick={onContactsClick} />
+            ) : (
+              <HeaderActionButton icon="profile" label={t("runtime.actions.profile", "Profile")} onClick={() => handleAction("profile")} />
+            )}
             <HeaderActionButton icon="messages" label={t("runtime.actions.messages", "Messages")} onClick={onMessagesClick} />
-            <HeaderActionButton icon="help" label={t("runtime.actions.help", "Help")} onClick={() => handleAction("help")} />
+            {usesBosniaHeaderActions ? null : (
+              <HeaderActionButton icon="help" label={t("runtime.actions.help", "Help")} onClick={() => handleAction("help")} />
+            )}
           </HeaderActionRail>
         </div>
       </div>
@@ -123,6 +140,7 @@ function PaymentHeroSheet({
 export default function PaymentsScreen({
   onHomeClick,
   onAnalyticsClick,
+  onContactsClick,
   onMessagesClick,
   onProductsClick,
   onMoreClick,
@@ -131,14 +149,20 @@ export default function PaymentsScreen({
   const { country } = useDemo();
   const { t } = useLanguage();
   const menu = getPaymentsMenuForCountry(country);
-  const localizedPrimaryItems = menu.primaryItems.map((item) => ({
-    ...item,
-    title: t(`runtime.payments.primaryItems.${item.id}.title`, item.title),
-    description: t(`runtime.payments.primaryItems.${item.id}.description`, item.description),
-  }));
+  const localizedPrimaryItems = menu.primaryItems.map((item) => {
+    const translationKey = item.translationKey === undefined ? item.id : item.translationKey;
+
+    return {
+      ...item,
+      title: translationKey ? t(`runtime.payments.primaryItems.${translationKey}.title`, item.title) : item.title,
+      description: translationKey ? t(`runtime.payments.primaryItems.${translationKey}.description`, item.description) : item.description,
+    };
+  });
   const localizedOtherItems = menu.otherItems.map((item) => ({
     ...item,
-    label: t(`runtime.payments.otherItems.${item.id}`, item.label),
+    label: item.translationKey === null
+      ? item.label
+      : t(`runtime.payments.otherItems.${item.translationKey ?? item.id}`, item.label),
   }));
   const [selectedPrimaryItemId, setSelectedPrimaryItemId] = useState<PaymentHeroItem["id"] | null>(null);
   const selectedHeroSheet = selectedPrimaryItemId ? menu.heroSheets[selectedPrimaryItemId] : null;
@@ -167,7 +191,11 @@ export default function PaymentsScreen({
   return (
     <div className="relative flex h-full w-full flex-col bg-[var(--uc-surface)] text-[var(--uc-text)]">
       <div className="h-[54px] flex-shrink-0 bg-[var(--uc-surface)]" />
-      <PaymentsHeader title={t("runtime.payments.title", menu.title)} onMessagesClick={onMessagesClick} />
+      <PaymentsHeader
+        title={t("runtime.payments.title", menu.title)}
+        onContactsClick={onContactsClick}
+        onMessagesClick={onMessagesClick}
+      />
 
       <div className="flex-1 overflow-y-auto scrollbar-hide pb-[76px]">
         <div className="flex flex-col gap-[13px] px-[20px] pt-[8px]">

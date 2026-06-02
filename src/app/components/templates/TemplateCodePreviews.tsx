@@ -1151,10 +1151,14 @@ function ProductsMenuTemplate({ interactive }: { interactive: boolean }) {
     title: t(`runtime.productsMenu.offers.${offer.id}.title`, offer.title),
     description: t(`runtime.productsMenu.offers.${offer.id}.description`, offer.description),
   });
-  const localizeCard = (card: (typeof menu.products)[number]) => ({
-    ...card,
-    title: t(`runtime.productsMenu.cards.${getProductsCardTranslationId(card)}`, card.title),
-  });
+  const localizeCard = (card: (typeof menu.products)[number]) => {
+    const translationId = getProductsCardTranslationId(card);
+
+    return {
+      ...card,
+      title: translationId ? t(`runtime.productsMenu.cards.${translationId}`, card.title) : card.title,
+    };
+  };
 
   return (
     <TemplatePhoneSurface showSystemHeader={false}>
