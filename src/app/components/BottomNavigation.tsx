@@ -40,7 +40,10 @@ export default function BottomNavigation({
   };
 
   return (
-    <div className="flex h-[54px] w-[375px] items-start gap-[8px] px-[24px] pb-[5px]">
+    <div
+      className="flex h-[54px] w-[375px] items-start gap-[8px] px-[24px] pb-[5px]"
+      data-phone-bottom-navigation="true"
+    >
       {NAV_ITEMS.map((item) => {
         const isActive = activeTab === item.id;
         const color = isActive ? "var(--uc-action)" : "var(--uc-icon-muted)";

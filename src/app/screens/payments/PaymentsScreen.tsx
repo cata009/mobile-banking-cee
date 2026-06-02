@@ -164,6 +164,9 @@ export default function PaymentsScreen({
       ? item.label
       : t(`runtime.payments.otherItems.${item.translationKey ?? item.id}`, item.label),
   }));
+  const otherTitle = menu.otherTitleTranslationKey === null
+    ? menu.otherTitle
+    : t(menu.otherTitleTranslationKey ?? "runtime.payments.other", menu.otherTitle);
   const [selectedPrimaryItemId, setSelectedPrimaryItemId] = useState<PaymentHeroItem["id"] | null>(null);
   const selectedHeroSheet = selectedPrimaryItemId ? menu.heroSheets[selectedPrimaryItemId] : null;
 
@@ -205,7 +208,7 @@ export default function PaymentsScreen({
         </div>
 
         <section className="px-[20px] pt-[16px]">
-          <SectionHeadingDivider title={t("runtime.payments.other", menu.otherTitle)} />
+          <SectionHeadingDivider title={otherTitle} />
           <div className="overflow-x-auto overflow-y-hidden scrollbar-hide pt-[8px]">
             <div className="flex w-max gap-[18px] pr-[20px]">
               {localizedOtherItems.map((item) => (

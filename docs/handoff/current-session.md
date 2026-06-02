@@ -1523,6 +1523,107 @@ Continue with product evolution work:
   - `git diff --check` passed with only normal Windows LF/CRLF warnings.
   - Browser smoke evidence recorded for BA/BA_BL menu alignment, More Documents count, and Contacts header/divider behavior.
 
+## 2026-06-02 Phone Screenshot Control
+
+- Added a demo-shell screenshot control for all runtime phone demos.
+- `src/app/components/demo/DemoTopBar.tsx`
+  - mounts the screenshot control in the sticky demo header immediately after the Control Panel / Settings button and before the theme toggle.
+  - passes `disabled={currentScreen === "design-system"}`, so Design System Inventory shows the control but cannot open the dropdown or capture.
+- `src/app/components/demo/PhoneScreenshotControl.tsx`
+  - renders an icon-only 32x32 camera trigger with a dropdown.
+  - dropdown options:
+    - `Capture entire screen`
+    - `Capture visible screen`
+  - both options call the phone screenshot exporter and download a PNG.
+- `src/app/utils/phoneScreenshot.ts`
+  - clones the internal phone screen only, excluding bezel, shadow, and desktop shell chrome.
+  - inlines computed styles, image sources, and background images before rendering to PNG.
+  - `visible` captures the 375x812 phone viewport.
+  - `full` expands the tallest scrollable phone content so long runtime pages can export past the visible fold.
+  - `full` also re-anchors the L1 bottom navigation wrapper to the bottom of the expanded PNG when the current screen has bottom navigation.
+- `src/app/components/MobileFrame.tsx`
+  - adds refs and `data-phone-screen` / `data-phone-scroll` markers for capture targeting.
+  - no longer renders the screenshot control next to the scaled phone frame.
+- `src/app/components/BottomNavigation.tsx`
+  - adds a `data-phone-bottom-navigation` marker so the screenshot exporter can identify and preserve bottom navigation placement without changing runtime UI behavior.
+- Registry/docs:
+  - added `shell.phone-screenshot-control` to `ComponentId` and `COMPONENT_REGISTRY`.
+  - updated state/capability docs and next-task evidence.
+- Verification:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - `npm run audit:templates` passed.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - Browser smoke on `http://127.0.0.1:3001/` confirmed one screenshot control, one phone screen target, and one phone scroll target.
+  - Browser smoke confirmed the dropdown exposes `Capture entire screen` and `Capture visible screen`.
+  - Chrome CDP smoke confirmed the control is in the sticky top bar, immediately after Settings / Control Panel, icon-only with no trigger text, and computes to `32x32`.
+  - Chrome CDP smoke confirmed `Capture visible screen` produces a real PNG download through the browser download flow.
+  - Chrome CDP smoke confirmed Design System Inventory has one visible disabled screenshot control, `0` phone-screen capture targets, and no menu opens from the disabled trigger.
+  - Browser click smoke on both screenshot options produced no console errors and returned the button to enabled state.
+  - Browser smoke after the L1 fix confirmed full-height capture can be triggered from a bottom-navigation screen without console errors and with bottom navigation re-anchored in the cloned output.
+- Limitation:
+  - No automated committed regression test covers the screenshot control yet; CDP smoke evidence is recorded for this session.
+
+## 2026-06-02 Payments OTHER Shortcut Bubble Component
+
+- `src/app/components/payments/PaymentOtherShortcut.tsx`
+  - now exports `PaymentOtherShortcutIconBubble` as the reusable bubble atom for Payments OTHER shortcuts.
+  - replaces the previous oversized `58px` circular wrapper with a Figma-aligned hug bubble: `display:flex`, `padding:8px`, centered content, `gap:10px`, and a centered `32x32` icon slot.
+  - keeps the outer shortcut as a button and reuses the same country-scoped `PaymentOtherItem` config.
+  - updates the label to the supplied N5 treatment: UniCredit 14px bold, centered, normal line-height, no letter spacing, and `var(--Primary-K1, #262626)` text color.
+- `src/app/registry/componentRegistry.ts` and `src/app/state/demoTypes.ts`
+  - now track `payments.other-shortcut-icon-bubble` as an explicit implemented component atom.
+  - updated the existing `payments.other-shortcut` contract to reference the bubble atom instead of the old `58px` wrapper.
+- Verification:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - `npm run audit:templates` passed.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - Browser smoke on `http://127.0.0.1:3001/` verified Payments OTHER shortcut bubbles compute to `48x48`, inner icon slots compute to `32x32`, and labels compute to 14px bold centered normal line-height with no letter spacing.
+
+## 2026-06-02 Romania Payments Menu Copy Alignment
+
+- `src/app/config/paymentsMenuConfig.ts`
+  - adds a Romania-specific `RO_PRIMARY_ITEMS` set with four cards:
+    - `Payment to account`
+    - `RoPay`
+    - `Currency exchange`
+    - `Bills & Direct Debit`
+  - adds Romania-specific `RO_OTHER_ITEMS`:
+    - `Recurrent Payments`
+    - `Templates`
+    - `Foreign Payments`
+    - `Exchange Rates`
+  - sets the Romania shortcut section title to `SHORTCUTS`.
+- `src/app/screens/payments/PaymentsScreen.tsx`
+  - now respects `otherTitleTranslationKey: null` for country configs that need to render the raw config heading instead of the shared `runtime.payments.other` translation.
+  - this keeps existing translated `OTHER` behavior for other countries while letting Romania show `SHORTCUTS`.
+- Docs updated:
+  - `docs/handoff/state-of-the-world.md`
+  - `docs/handoff/next-tasks.md`
+  - `docs/platform-capability-map/README.md`
+- Verification:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - Static config audit confirmed Romania resolves to four primary cards, `SHORTCUTS`, and four shortcut labels.
+  - Chrome CDP smoke on `http://127.0.0.1:3001/` confirmed the rendered Romania Payments screen shows the four requested cards with the requested line breaks, `SHORTCUTS`, and the four requested shortcut labels.
+
+## 2026-06-02 Fresh-Start Commit Closeout
+
+- User requested committing the current workspace state before starting the next architecture pass from a clean tree.
+- Commit scope:
+  - all currently modified and untracked project files are intended to be included in this commit.
+  - scope includes the top-bar phone screenshot control, phone screenshot exporter, Payments OTHER shortcut bubble atom, Romania Payments menu copy alignment, component registry/state updates, and handoff/capability-map updates.
+- Final verification before commit:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - `npm run audit:templates` passed: `template-contract ok: templates=50 codePreviews=50 components=50 screens=23 flows=13`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Banana Loop result:
+  - fixed: screenshot export is now centralized in the demo top bar and targets only the phone screen.
+  - fixed: Payments OTHER shortcut bubble is a named reusable atom with the requested 48x48 / 32x32 geometry.
+  - fixed: Romania Payments now has the supplied primary card labels, `SHORTCUTS` heading, and shortcut labels.
+  - triaged: no committed automated regression test covers screenshot export or Payments bubble geometry yet; these remain explicit future tasks in `docs/handoff/next-tasks.md`.
+  - already known: Vite chunk-size warning and missing local `typecheck`, `lint`, and `test` scripts remain tracked known bananas, not blockers for this commit.
+- Next recommended action:
+  - start the reduced Phase 1 Reference Platform plan from a clean working tree: Release/Baseline OS, Feature Manifests, Scenario/Entitlements Control Panel, and contract-ready mock repositories, without Native Boundary, full Security Model, or enterprise Test & Evidence System in this pass.
+
 ## Constitutional Check
 
 constitutional check:
