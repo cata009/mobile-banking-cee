@@ -32,13 +32,24 @@ type OfferCarouselDragState = {
 interface ProductsScreenProps {
   onHomeClick?: () => void;
   onAnalyticsClick?: () => void;
+  onContactsClick?: () => void;
   onMessagesClick?: () => void;
   onPaymentsClick?: () => void;
   onMoreClick?: () => void;
 }
 
-export function ProductsHeader({ title, onMessagesClick }: { title: string; onMessagesClick?: () => void }) {
+export function ProductsHeader({
+  title,
+  onContactsClick,
+  onMessagesClick,
+}: {
+  title: string;
+  onContactsClick?: () => void;
+  onMessagesClick?: () => void;
+}) {
+  const { country } = useDemo();
   const { t } = useLanguage();
+  const usesBosniaHeaderActions = country === "BA" || country === "BA_BL";
   const handleAction = (action: string) => {
     console.log(`Products ${action} clicked`);
   };
@@ -54,9 +65,15 @@ export function ProductsHeader({ title, onMessagesClick }: { title: string; onMe
             {title}
           </h1>
           <HeaderActionRail>
-            <HeaderActionButton icon="profile" label={t("runtime.actions.profile", "Profile")} onClick={() => handleAction("profile")} />
+            {usesBosniaHeaderActions ? (
+              <HeaderActionButton icon="contact-phone" label="Contact phone" onClick={onContactsClick} />
+            ) : (
+              <HeaderActionButton icon="profile" label={t("runtime.actions.profile", "Profile")} onClick={() => handleAction("profile")} />
+            )}
             <HeaderActionButton icon="messages" label={t("runtime.actions.messages", "Messages")} onClick={onMessagesClick} />
-            <HeaderActionButton icon="help" label={t("runtime.actions.help", "Help")} onClick={() => handleAction("help")} />
+            {usesBosniaHeaderActions ? null : (
+              <HeaderActionButton icon="help" label={t("runtime.actions.help", "Help")} onClick={() => handleAction("help")} />
+            )}
           </HeaderActionRail>
         </div>
       </div>
@@ -391,6 +408,9 @@ function handleProductCardClick(card: ProductsCard) {
 }
 
 export function getProductsCardTranslationId(card: ProductsCard) {
+  if (card.translationKey === null) return null;
+  if (card.translationKey) return card.translationKey;
+
   const normalizedTitle = card.title.replace(/\n/g, " ").toLowerCase();
   if (normalizedTitle === "electronics") return "electronics";
   if (normalizedTitle === "travel") return "travel";
@@ -475,7 +495,14 @@ export function ShopSmartContent({
   );
 }
 
-export default function ProductsScreen({ onHomeClick, onAnalyticsClick, onMessagesClick, onPaymentsClick, onMoreClick }: ProductsScreenProps) {
+export default function ProductsScreen({
+  onHomeClick,
+  onAnalyticsClick,
+  onContactsClick,
+  onMessagesClick,
+  onPaymentsClick,
+  onMoreClick,
+}: ProductsScreenProps) {
   const { country } = useDemo();
   const { t } = useLanguage();
   const config = getProductsMenuForCountry(country);
@@ -484,10 +511,14 @@ export default function ProductsScreen({ onHomeClick, onAnalyticsClick, onMessag
     title: t(`runtime.productsMenu.offers.${offer.id}.title`, offer.title),
     description: t(`runtime.productsMenu.offers.${offer.id}.description`, offer.description),
   });
-  const localizeCard = (card: ProductsCard): ProductsCard => ({
-    ...card,
-    title: t(`runtime.productsMenu.cards.${getProductsCardTranslationId(card)}`, card.title),
-  });
+  const localizeCard = (card: ProductsCard): ProductsCard => {
+    const translationId = getProductsCardTranslationId(card);
+
+    return {
+      ...card,
+      title: translationId ? t(`runtime.productsMenu.cards.${translationId}`, card.title) : card.title,
+    };
+  };
   const [activeTab, setActiveTab] = useState<ProductsMenuTab>("banking");
   const visibleTab = config.hasShopSmartTab ? activeTab : "banking";
 
@@ -502,7 +533,11 @@ export default function ProductsScreen({ onHomeClick, onAnalyticsClick, onMessag
   return (
     <div className="relative flex h-full w-full flex-col bg-[var(--uc-surface)] text-[var(--uc-text)]">
       <div className="h-[54px] flex-shrink-0 bg-[var(--uc-surface)]" />
-      <ProductsHeader title={t("runtime.productsMenu.title", config.title)} onMessagesClick={onMessagesClick} />
+      <ProductsHeader
+        title={t("runtime.productsMenu.title", config.title)}
+        onContactsClick={onContactsClick}
+        onMessagesClick={onMessagesClick}
+      />
 
       {config.hasShopSmartTab && (
         <ProductsTabs

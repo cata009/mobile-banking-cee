@@ -541,6 +541,7 @@ function AppContent() {
           <PaymentsScreen
             onHomeClick={() => navigateTo("homepage")}
             onAnalyticsClick={handleAnalyticsClick}
+            onContactsClick={() => navigateTo('contacts')}
             onMessagesClick={handleMessagesClick}
             onProductsClick={handleProductsClick}
             onMoreClick={handleMoreClick}
@@ -579,6 +580,7 @@ function AppContent() {
           <ProductsScreen
             onHomeClick={() => navigateTo("homepage")}
             onAnalyticsClick={handleAnalyticsClick}
+            onContactsClick={() => navigateTo('contacts')}
             onMessagesClick={handleMessagesClick}
             onPaymentsClick={handlePaymentsClick}
             onMoreClick={handleMoreClick}

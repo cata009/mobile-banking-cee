@@ -40,6 +40,7 @@ export interface ProductsCard {
   background: string;
   illustration: ProductsCardIllustration;
   imageSrc?: string;
+  translationKey?: string | null;
 }
 
 export interface ProductsMenuConfig {
@@ -362,31 +363,21 @@ const RS_PRODUCTS_MENU = withOfferOverrides(createProductsMenuConfig(false), {
   ],
 });
 
-const BA_PRODUCTS_MENU = withOfferOverrides(createProductsMenuConfig(false), {
-  offers: [
-    {
-      id: "ba-offer-1",
-      title: "Everyday banking\nwith extra clarity",
-      description: "Combine account,\ncard, and digital access\nin one calm experience.",
-      colorFamily: "grey",
-      lightVersion: false,
-    },
-    {
-      id: "ba-offer-2",
-      title: "Savings goals for\nfuture milestones",
-      description: "Build a reserve for\ntravel, family plans,\nor unexpected moments.",
-      colorFamily: "green",
-      lightVersion: true,
-    },
-    {
-      id: "ba-offer-3",
-      title: "Insurance and loans\nthat fit real life",
-      description: "Support bigger plans with\nprotection and financing\nshaped for daily needs.",
-      colorFamily: "blue",
-      lightVersion: true,
-    },
-  ],
-});
+const BA_DIRECT_PRODUCTS: readonly ProductsCard[] = BANKING_PRODUCTS
+  .filter((product) => product.id !== "insurance")
+  .map((product) => {
+    if (product.id === "account") return { ...product, title: "Accounts", translationKey: null };
+    if (product.id === "mortgages-loans") return { ...product, title: "Loans", translationKey: null };
+    if (product.id === "investments-savings") return { ...product, title: "Savings", translationKey: null };
+    return { ...product, translationKey: null };
+  });
+
+const BA_PRODUCTS_MENU_DIRECT: ProductsMenuConfig = {
+  ...createProductsMenuConfig(false),
+  offers: [],
+  productsTitle: "",
+  products: BA_DIRECT_PRODUCTS,
+};
 
 const SI_PRODUCTS_MENU = withOfferOverrides(createProductsMenuConfig(false), {
   offers: [],
@@ -404,8 +395,8 @@ export const PRODUCTS_MENU_CONFIG: Record<CountryId, ProductsMenuConfig> = {
   SK: SK_PRODUCTS_MENU,
   HU: HU_PRODUCTS_MENU,
   RS: RS_PRODUCTS_MENU,
-  BA: BA_PRODUCTS_MENU,
-  BA_BL: BA_PRODUCTS_MENU,
+  BA: BA_PRODUCTS_MENU_DIRECT,
+  BA_BL: BA_PRODUCTS_MENU_DIRECT,
   SI: SI_PRODUCTS_MENU_DIRECT,
 };
 

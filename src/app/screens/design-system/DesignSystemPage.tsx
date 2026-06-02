@@ -4,8 +4,10 @@ import { getAvailableLanguages, getLanguageDisplayName } from "@/app/registry/la
 import { isCoAppingAvailable } from "@/app/utils/coAppingAvailability";
 import { getProductsForCountry } from "@/app/config/productConfig";
 import { MORE_CARDS_CONFIG, type MoreCardType } from "@/app/config/moreCardsConfig";
+import { getDocumentsCountForCountry } from "@/app/config/documentsConfig";
 import { AppIcon, ICON_AUDIT_EXCLUSIONS, ICON_INVENTORY, type IconCategory, type IconInventoryItem } from "@/app/components/icons";
 import PageHeader from "@/app/components/PageHeader";
+import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import ThemeModeSegment from "@/app/components/ThemeModeSegment";
 import BottomNavigation from "@/app/components/BottomNavigation";
 import HomeHeader from "@/app/screens/home/HomeHeader";
@@ -57,7 +59,6 @@ import { ThirdPartyConsentCard } from "@/app/screens/more/cards/ThirdPartyConsen
 import { DigitalActivitiesCard } from "@/app/screens/more/cards/DigitalActivitiesCard";
 import { MyRequestsCard } from "@/app/screens/more/cards/MyRequestsCard";
 import { TutorialCard } from "@/app/screens/more/cards/TutorialCard";
-import { ContactsDivider } from "@/app/screens/contacts/ContactsDivider";
 import { ContactsNavigationCard } from "@/app/screens/contacts/ContactsNavigationCard";
 import FloatingCoAppingButton from "@/app/components/FloatingCoAppingButton";
 import { LogoutConfirmDialog } from "@/app/components/LogoutConfirmDialog";
@@ -106,7 +107,7 @@ const activeComponentFiles = [
   "HomeHeader", "AccountSummary", "QuickActions", "TransactionsPreview", "UnplannedBanner",
   "MoreHeader", "MoreCardBase", "ContactsCard", "DocumentsCard", "SettingsCard", "GdprConsentCard",
   "ThirdPartyConsentCard", "DigitalActivitiesCard", "MyRequestsCard", "TutorialCard",
-  "ContactsDivider", "ContactsNavigationCard", "PrimeScreen", "YourAdvisorTab", "YourBenefitsTab",
+  "ContactsNavigationCard", "PrimeScreen", "YourAdvisorTab", "YourBenefitsTab",
   "PrimeLabelValue", "PrimeIconLabelValue", "BackButton", "RadioButton", "ProductOfferCard", "TemplateCodePreview",
 ];
 
@@ -1219,7 +1220,7 @@ function MoreCardPreview({ type }: { type: MoreCardType }) {
     case "contacts":
       return <ContactsCard onClick={noop} />;
     case "documents":
-      return <DocumentsCard onClick={noop} badgeCount={12} />;
+      return <DocumentsCard onClick={noop} badgeCount={getDocumentsCountForCountry("RO")} />;
     case "settings":
       return <SettingsCard onClick={noop} />;
     case "gdpr-consent":
@@ -1681,7 +1682,7 @@ function ContactsNavigationCardVariantSpecimen() {
         ]}
       />
       <div className="w-[375px]">
-        <ContactsDivider text="BANK CONTACTS" />
+        <SectionHeadingDivider title="BANK CONTACTS" />
         <ContactsNavigationCard
           icon={icon}
           title={icon.toUpperCase()}
@@ -2802,7 +2803,7 @@ export default function DesignSystemPage() {
               <Specimen name="AccountTransactionRow" source="components/accounts/AccountTransactionRow.tsx" specs={["375x80", "padding 20px 16px", "day 18px/20px bold", "date gap 2px", "month 14px/15px bold", "date-to-icon gap 16px", "icon box 32px", "details column 247px", "label 16px/18px", "label-to-amount gap 4px", "amount line 22px", "amount 20px + decimals 14px", "divider L3 14px bold uppercase", "divider left muted / right K1", "divider-to-row gap 16px", "row-to-next-divider gap 16px"]}>
                 <AccountTransactionRowVariantSpecimen />
               </Specimen>
-              <Specimen name="Payments hero card" source="components/payments/PaymentHeroCard.tsx" specs={["327x120", "9 screenshot-backed image variants", "title 24px bold / no ellipsis", "title top gap 16px", "description 14px regular", "title-to-description gap 16px", "optional imageSrc override"]}>
+              <Specimen name="Payments hero card" source="components/payments/PaymentHeroCard.tsx" specs={["327x120", "9 screenshot-backed image variants", "title 24px bold / respects newline titles", "title top gap 16px", "description 14px regular", "title-to-description gap 16px single-line / 8px multiline", "optional imageSrc override"]}>
                 <PaymentHeroCardVariantSpecimen />
               </Specimen>
               <Specimen name="More cards / all concrete card components" source="screens/more/cards/*" specs={["120px height", "8px radius", "individual image positioning"]}>

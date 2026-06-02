@@ -3,6 +3,7 @@ import type { CountryId } from "@/app/state/demoTypes";
 export type PaymentHeroId =
   | "new-payment"
   | "between-accounts"
+  | "manage-ebills"
   | "recurrent-payments"
   | "scan-pay";
 
@@ -10,6 +11,8 @@ export type PaymentOtherId =
   | "create-qr-code"
   | "templates"
   | "card-repayment"
+  | "standing-order"
+  | "foreign-payments"
   | "exchange-rates";
 
 export type PaymentHeroIllustration = "wallet" | "laptop" | "pen" | "qr-phone";
@@ -23,7 +26,7 @@ export type PaymentHeroImageVariant =
   | "payments-7"
   | "payments-8"
   | "payments-9";
-export type PaymentOtherIcon = "qr" | "templates" | "card" | "exchange";
+export type PaymentOtherIcon = "qr" | "templates" | "card" | "standing" | "foreign" | "exchange";
 export type NewPaymentActionId =
   | "domestic-payment"
   | "foreign-payment"
@@ -37,12 +40,14 @@ export interface PaymentHeroItem {
   illustration: PaymentHeroIllustration;
   imageVariant?: PaymentHeroImageVariant;
   imageSrc?: string;
+  translationKey?: string | null;
 }
 
 export interface PaymentOtherItem {
   id: PaymentOtherId;
   label: string;
   icon: PaymentOtherIcon;
+  translationKey?: string | null;
 }
 
 export interface NewPaymentAction {
@@ -102,11 +107,105 @@ const DEFAULT_PRIMARY_ITEMS: readonly PaymentHeroItem[] = [
   },
 ];
 
+const BA_PRIMARY_ITEMS: readonly PaymentHeroItem[] = [
+  {
+    id: "new-payment",
+    title: "New payment",
+    description: "New beneficiary, budget\npayment, template",
+    illustration: "wallet",
+    imageVariant: "payments-1",
+    translationKey: null,
+  },
+  {
+    id: "between-accounts",
+    title: "Transfer money",
+    description: "Transfer money in local or foreign",
+    illustration: "laptop",
+    imageVariant: "payments-2",
+    translationKey: null,
+  },
+  {
+    id: "manage-ebills",
+    title: "Manage e-bills",
+    description: "Contract e-bill and make payments fast\nand easy",
+    illustration: "wallet",
+    imageVariant: "payments-3",
+    translationKey: null,
+  },
+  {
+    id: "recurrent-payments",
+    title: "Standing orders",
+    description: "Recurrent payments info",
+    illustration: "pen",
+    imageVariant: "payments-5",
+    translationKey: null,
+  },
+  {
+    id: "scan-pay",
+    title: "Scan and pay",
+    description: "Qr code payment",
+    illustration: "qr-phone",
+    imageVariant: "payments-4",
+    translationKey: null,
+  },
+];
+
+const BA_BL_PRIMARY_ITEMS: readonly PaymentHeroItem[] = [
+  {
+    id: "new-payment",
+    title: "Make a payment",
+    description: "To new beneficiary or using template",
+    illustration: "wallet",
+    imageVariant: "payments-1",
+    translationKey: null,
+  },
+  {
+    id: "between-accounts",
+    title: "Transfer money\nbetween accounts",
+    description: "Transfer money in local or foreign currency",
+    illustration: "laptop",
+    imageVariant: "payments-2",
+    translationKey: null,
+  },
+  {
+    id: "manage-ebills",
+    title: "Manage e-bills",
+    description: "Create contracts and pay utility bills",
+    illustration: "wallet",
+    imageVariant: "payments-3",
+    translationKey: null,
+  },
+  {
+    id: "recurrent-payments",
+    title: "Recurrent payments",
+    description: "Create a new Standing Order/\nDirect Debit",
+    illustration: "pen",
+    imageVariant: "payments-5",
+    translationKey: null,
+  },
+  {
+    id: "scan-pay",
+    title: "QR code",
+    description: "QR Code",
+    illustration: "qr-phone",
+    imageVariant: "payments-4",
+    translationKey: null,
+  },
+];
+
 const DEFAULT_OTHER_ITEMS: readonly PaymentOtherItem[] = [
   { id: "create-qr-code", label: "CREATE QR\nCODE", icon: "qr" },
   { id: "templates", label: "TEMPLATES", icon: "templates" },
   { id: "card-repayment", label: "CARD\nREPAYMENT", icon: "card" },
   { id: "exchange-rates", label: "EXCHANGE\nRATES", icon: "exchange" },
+];
+
+const BA_OTHER_ITEMS: readonly PaymentOtherItem[] = [
+  { id: "templates", label: "Template", icon: "templates", translationKey: null },
+  { id: "card-repayment", label: "Card repayment", icon: "card", translationKey: null },
+  { id: "standing-order", label: "Standing Order", icon: "standing", translationKey: null },
+  { id: "foreign-payments", label: "Foreign Payments", icon: "foreign", translationKey: null },
+  { id: "exchange-rates", label: "Exchange Rate", icon: "exchange", translationKey: null },
 ];
 
 const DOMESTIC_PAYMENT_DESCRIPTION: Record<CountryId, string> = {
@@ -153,18 +252,49 @@ function createHeroSheetConfig(
   };
 }
 
-function createPaymentsMenuConfig(country: CountryId): PaymentsMenuConfig {
+const DEFAULT_HERO_SHEET_TITLES: Record<PaymentHeroId, string> = {
+  "new-payment": "New payment",
+  "between-accounts": "Between my accounts",
+  "manage-ebills": "Manage e-bills",
+  "recurrent-payments": "Recurrent payments",
+  "scan-pay": "Scan & pay",
+};
+
+const PAYMENT_HERO_IDS: readonly PaymentHeroId[] = [
+  "new-payment",
+  "between-accounts",
+  "manage-ebills",
+  "recurrent-payments",
+  "scan-pay",
+];
+
+function createHeroSheets(
+  country: CountryId,
+  primaryItems: readonly PaymentHeroItem[],
+): Record<PaymentHeroId, NewPaymentSheetConfig> {
+  return PAYMENT_HERO_IDS.reduce((sheets, heroId) => {
+    const itemTitle = primaryItems.find((item) => item.id === heroId)?.title.replace(/\n/g, " ");
+    sheets[heroId] = createHeroSheetConfig(itemTitle ?? DEFAULT_HERO_SHEET_TITLES[heroId], country);
+    return sheets;
+  }, {} as Record<PaymentHeroId, NewPaymentSheetConfig>);
+}
+
+function createPaymentsMenuConfig(
+  country: CountryId,
+  options: {
+    primaryItems?: readonly PaymentHeroItem[];
+    otherItems?: readonly PaymentOtherItem[];
+  } = {},
+): PaymentsMenuConfig {
+  const primaryItems = options.primaryItems ?? DEFAULT_PRIMARY_ITEMS;
+  const otherItems = options.otherItems ?? DEFAULT_OTHER_ITEMS;
+
   return {
     title: "Payments",
-    primaryItems: DEFAULT_PRIMARY_ITEMS,
+    primaryItems,
     otherTitle: "OTHER",
-    otherItems: DEFAULT_OTHER_ITEMS,
-    heroSheets: {
-      "new-payment": createHeroSheetConfig("New payment", country),
-      "between-accounts": createHeroSheetConfig("Between my accounts", country),
-      "recurrent-payments": createHeroSheetConfig("Recurrent payments", country),
-      "scan-pay": createHeroSheetConfig("Scan & pay", country),
-    },
+    otherItems,
+    heroSheets: createHeroSheets(country, primaryItems),
   };
 }
 
@@ -174,8 +304,8 @@ export const PAYMENTS_MENU_CONFIG: Record<CountryId, PaymentsMenuConfig> = {
   SK: createPaymentsMenuConfig("SK"),
   HU: createPaymentsMenuConfig("HU"),
   RS: createPaymentsMenuConfig("RS"),
-  BA: createPaymentsMenuConfig("BA"),
-  BA_BL: createPaymentsMenuConfig("BA_BL"),
+  BA: createPaymentsMenuConfig("BA", { primaryItems: BA_PRIMARY_ITEMS, otherItems: BA_OTHER_ITEMS }),
+  BA_BL: createPaymentsMenuConfig("BA_BL", { primaryItems: BA_BL_PRIMARY_ITEMS, otherItems: BA_OTHER_ITEMS }),
   SI: createPaymentsMenuConfig("SI"),
 };
 

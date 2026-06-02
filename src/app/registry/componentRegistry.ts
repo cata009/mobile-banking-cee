@@ -194,7 +194,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     designSystems: ["current"],
     status: "implemented",
     componentPath: "src/app/components/SectionHeadingDivider.tsx",
-    usedByScreens: ["pi.analytics.overview", "pi.payment.domestic-create", "pi.settings.overview", "platform.design-system"],
+    usedByScreens: ["pi.analytics.overview", "pi.payment.domestic-create", "pi.settings.overview", "pi.contacts.overview", "platform.design-system"],
   },
   "prelogin.inactive": {
     id: "prelogin.inactive",
@@ -397,6 +397,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "implemented",
     componentPath: "src/app/screens/payments/PaymentsScreen.tsx",
     usedByScreens: ["pi.payments.overview"],
+    notes: "Country-scoped Payments hub. Default countries keep the original four primary cards and OTHER rail, while BA and BA_BL render five primary cards and five OTHER shortcuts with supplied market copy.",
   },
   "payments.hero-card": {
     id: "payments.hero-card",
@@ -406,7 +407,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "implemented",
     componentPath: "src/app/components/payments/PaymentHeroCard.tsx",
     usedByScreens: ["pi.payments.overview", "platform.design-system"],
-    notes: "Reusable 327x120 Payments primary card. Title is 24px bold, starts 16px from the top, keeps one untruncated line without ellipsis, and the 14px description sits 16px below. Supports 9 screenshot-backed image variants (`payments1.png` through `payments9.png`) plus an optional imageSrc override, so countries can later map specific payment card artwork and copy without changing the component.",
+    notes: "Reusable 327x120 Payments primary card. Title is 24px bold, starts 16px from the top, respects supplied line breaks without ellipsis, and the 14px description sits 16px below single-line titles or 8px below explicitly multiline titles. Supports 9 screenshot-backed image variants (`payments1.png` through `payments9.png`) plus an optional imageSrc override.",
   },
   "payments.other-shortcut": {
     id: "payments.other-shortcut",
@@ -481,7 +482,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "implemented",
     componentPath: "src/app/screens/products/ProductsScreen.tsx",
     usedByScreens: ["pi.products.overview"],
-    notes: "Country-scoped configuration controls whether the Banking/ShopSmart tabs are visible.",
+    notes: "Country-scoped configuration controls whether the Banking/ShopSmart tabs are visible, whether offer rails/headings render, and which product cards remain. BA and BA_BL are cards-only with Accounts, Cards, Loans, and Savings.",
   },
   "products.offer-card": {
     id: "products.offer-card",
@@ -511,6 +512,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "partial",
     componentPath: "src/app/screens/more/MoreScreen.tsx",
     usedByScreens: ["pi.more.overview"],
+    notes: "Country-scoped More card matrix. BA and BA_BL include Tutorials plus My applications after Settings and use Contact phone + Messages header actions.",
   },
   "contacts.navigation-card": {
     id: "contacts.navigation-card",
