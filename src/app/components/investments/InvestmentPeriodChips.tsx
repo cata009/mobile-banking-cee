@@ -21,10 +21,10 @@ export default function InvestmentPeriodChips({
             key={period.id}
             type="button"
             onClick={() => onChange(period.id)}
-            className={`uc-type-n5-strong h-[36px] min-w-[48px] rounded-full px-[12px] ${
+            className={`inline-flex h-[21px] min-w-[35px] items-center justify-center whitespace-nowrap rounded-[3.5px] px-[8px] text-center text-[14px] font-bold leading-[15px] ${
               selected
-                ? "bg-[var(--uc-text)] text-[var(--uc-text-inverse)]"
-                : "bg-transparent text-[var(--uc-text)]"
+                ? "border border-transparent bg-[var(--uc-action)] text-[var(--uc-text-inverse)]"
+                : "border border-[var(--uc-text)] bg-transparent text-[var(--uc-text)]"
             }`}
             aria-pressed={selected}
           >

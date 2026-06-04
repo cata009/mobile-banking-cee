@@ -164,7 +164,7 @@ export default function InvestmentsPortfolioScreen({ onBack }: InvestmentsPortfo
   const sortedSecurities = useMemo(() => sortInvestmentSecurities(securities, selectedSortId), [securities, selectedSortId]);
   const activeSecurities = sortedSecurities.filter((security) => security.status === "active");
   const inactiveSecurities = sortedSecurities.filter((security) => security.status === "inactive");
-  const currency = securities[0]?.currency ?? investmentProducts[0]?.currency ?? getCountryConfig(country).currency;
+  const portfolioCurrency = getCountryConfig(country).currency;
   const totalPerformanceAmount = securities.reduce((sum, security) => sum + security.performanceAmount, 0);
   const totalPerformancePercent = totalValue > 0 ? (totalPerformanceAmount / totalValue) * 100 : 0;
   const chartPoints = useMemo(() => buildInvestmentChartPoints(totalValue, selectedPeriodId), [selectedPeriodId, totalValue]);
@@ -173,8 +173,8 @@ export default function InvestmentsPortfolioScreen({ onBack }: InvestmentsPortfo
     [securities, selectedTabId],
   );
 
-  const totalValueParts = maskInvestmentAmount(formatAmountParts(totalValue, country, currency), amountsHidden);
-  const performanceParts = maskInvestmentAmount(formatAmountParts(totalPerformanceAmount, country, currency, true), amountsHidden);
+  const totalValueParts = maskInvestmentAmount(formatAmountParts(totalValue, country, portfolioCurrency), amountsHidden);
+  const performanceParts = maskInvestmentAmount(formatAmountParts(totalPerformanceAmount, country, portfolioCurrency, true), amountsHidden);
   const totalPerformancePercentLabel = amountsHidden
     ? "**,**%"
     : `${totalPerformancePercent > 0 ? "+" : ""}${totalPerformancePercent.toFixed(2).replace(".", ",")}%`;
@@ -225,11 +225,16 @@ export default function InvestmentsPortfolioScreen({ onBack }: InvestmentsPortfo
             totalValue={totalValueParts}
             performanceAmount={performanceParts}
             performancePercentLabel={totalPerformancePercentLabel}
-            currency={currency}
+            currency={portfolioCurrency}
           />
           {selectedTabId === "performance" ? (
             <div className="px-[8px]">
-              <InvestmentPortfolioChart points={chartPoints} />
+              <InvestmentPortfolioChart
+                points={chartPoints}
+                country={country}
+                currency={portfolioCurrency}
+                amountsHidden={amountsHidden}
+              />
               <InvestmentPeriodChips
                 periods={INVESTMENT_PERIODS}
                 selectedPeriodId={selectedPeriodId}
@@ -251,52 +256,56 @@ export default function InvestmentsPortfolioScreen({ onBack }: InvestmentsPortfo
             actions={[
               {
                 id: "history",
-                iconName: "user-event-refresh",
+                iconName: "investment-history",
                 label: t("runtime.investments.actions.history", "History"),
               },
               {
                 id: "to-approve",
-                iconName: "clipboard-check",
+                iconName: "investment-to-approve",
                 label: t("runtime.investments.actions.toApprove", "To approve"),
                 badgeCount: 20,
               },
               {
                 id: "download-report",
-                iconName: "account-option-statement",
+                iconName: "investment-download-report",
                 label: t("runtime.investments.actions.downloadReport", "Download\nReport"),
               },
             ]}
             investLabel={t("runtime.investments.actions.invest", "Invest")}
           />
-          <SectionHeadingDivider
-            title={t("runtime.investments.allProducts", "ALL PRODUCTS")}
-            count={securities.length}
-            className="px-[24px] pt-[8px]"
-          />
-          <InvestmentFilterChips
-            options={INVESTMENT_SORT_OPTIONS}
-            selectedOptionId={selectedSortId}
-            onChange={setSelectedSortId}
-          />
-          <InvestmentProductsAccordion
-            title={t("runtime.investments.activeSecurities", "ACTIVE SECURITIES")}
-            count={activeSecurities.length}
-            defaultOpen
-          >
-            <div>{activeSecurities.map(renderSecurity)}</div>
-          </InvestmentProductsAccordion>
-          <InvestmentProductsAccordion
-            title={t("runtime.investments.inactiveSecurities", "INACTIVE SECURITIES")}
-            count={inactiveSecurities.length}
-            defaultOpen={false}
-          >
-            <div>{inactiveSecurities.map(renderSecurity)}</div>
-          </InvestmentProductsAccordion>
-          <InvestmentsFundBanner
-            title={t("runtime.investments.fundBanner.title", "Find out the best fund for you")}
-            description={t("runtime.investments.fundBanner.description", "Discover our suggestions")}
-            actionLabel={t("runtime.investments.fundBanner.action", "GO TO FUNDS WINDOW")}
-          />
+          {selectedTabId === "performance" ? (
+            <>
+              <SectionHeadingDivider
+                title={t("runtime.investments.allProducts", "ALL PRODUCTS")}
+                count={securities.length}
+                className="px-[24px] pt-[8px]"
+              />
+              <InvestmentFilterChips
+                options={INVESTMENT_SORT_OPTIONS}
+                selectedOptionId={selectedSortId}
+                onChange={setSelectedSortId}
+              />
+              <InvestmentProductsAccordion
+                title={t("runtime.investments.activeSecurities", "ACTIVE SECURITIES")}
+                count={activeSecurities.length}
+                defaultOpen
+              >
+                <div>{activeSecurities.map(renderSecurity)}</div>
+              </InvestmentProductsAccordion>
+              <InvestmentProductsAccordion
+                title={t("runtime.investments.inactiveSecurities", "INACTIVE SECURITIES")}
+                count={inactiveSecurities.length}
+                defaultOpen={false}
+              >
+                <div>{inactiveSecurities.map(renderSecurity)}</div>
+              </InvestmentProductsAccordion>
+              <InvestmentsFundBanner
+                title={t("runtime.investments.fundBanner.title", "Find out the best fund for you")}
+                description={t("runtime.investments.fundBanner.description", "Discover our suggestions")}
+                actionLabel={t("runtime.investments.fundBanner.action", "GO TO FUNDS WINDOW")}
+              />
+            </>
+          ) : null}
           <div className="h-[28px]" />
         </>
       ) : (

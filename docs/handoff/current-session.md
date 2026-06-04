@@ -4,9 +4,47 @@ Last updated: 2026-06-04
 
 ## Current Focus
 
-Implementing the new Investments Portfolio runtime screen for Mobile PI Retail customers, reachable from the Home Investments product card for all supported PI countries except `BA` and `BA_BL`.
+Implementing the new Investments Portfolio runtime screen for Mobile PI Retail customers, reachable from the Home Investments product card for all supported PI countries, including `BA` and `BA_BL`.
 
 Latest Investments Portfolio implementation:
+
+- Local portfolio-currency correction on 2026-06-04:
+  - `src/app/screens/investments/InvestmentsPortfolioScreen.tsx` now formats the portfolio header `Total value`, header `Performance`, and performance chart tooltip with `getCountryConfig(country).currency`.
+  - Instrument/product-card `Value` rows can still show their own instrument currency, but the portfolio-level summary is always in the selected country's local currency.
+  - Browser smoke on `http://127.0.0.1:3001/` confirmed `RO` shows `Total value` / `Performance` in `RON`, `BA` shows them in `BAM`, and `SI` shows them in `EUR`.
+  - Verification: `npm run build`, `npm run audit:templates`, and targeted `git diff --check` passed.
+
+- Design System tab and Bosnia eligibility correction on 2026-06-04:
+  - `InvestmentPortfolioTabs` now wraps the existing Design System `MessagesMailboxTabs` component instead of carrying a separate local tab implementation.
+  - `MessagesMailboxTabs` now supports the existing equal-width layout and a horizontally scrollable layout, so the Investments tab rail can be swiped to select `PERFORMANCE`, `PRODUCT TYPE`, `CURRENCY`, `ASSET CLASS`, and `ACCOUNT LIST`.
+  - `src/app/utils/investmentsAvailability.ts`, `screenRegistry.ts`, and `flowRegistry.ts` now make Investments available for Mobile PI Retail in every supported country/application variant, including `BA` and `BA_BL`.
+  - Verification: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and targeted `git diff --check` passed. Browser smoke on `http://127.0.0.1:3001/` confirmed the Investments tab rail uses `role="tablist"`, `display:flex`, `overflow-x:auto`, `scrollWidth=750` over a `375px` viewport, and `ACCOUNT LIST` can be selected; BA Home -> `Investment Portfolio` now opens Investments instead of staying on Home.
+
+- Distribution-tab content visibility correction on 2026-06-04:
+  - `src/app/screens/investments/InvestmentsPortfolioScreen.tsx` now keeps the `ALL PRODUCTS` divider, sorting chips, active/inactive security accordions, and fund banner visible only on the `Performance` tab.
+  - `Product Type`, `Currency`, `Asset Class`, and `Account List` now show the distribution view plus the Investments action bar without rendering the product-list section from `ALL PRODUCTS` downward.
+  - Verification: `npm run build` passed with the known Vite chunk-size warning; `npm run audit:templates` passed with `templates=50 codePreviews=50 components=69 screens=24 flows=14`; targeted `git diff --check` passed with only normal Windows LF/CRLF warnings.
+
+- Sorting chip visual correction on 2026-06-04:
+  - `src/app/components/investments/InvestmentFilterChips.tsx` now matches the supplied selected/not-selected `MAX VALUE` JSON: 24px height, 4px/8px padding, 14.5px pill radius, regular 14px N5 text, selected `#262626` fill with white text, and outlined transparent not-selected state.
+  - Verification: `npm run build` passed with the known Vite chunk-size warning; `npm run audit:templates` passed with `templates=50 codePreviews=50 components=69 screens=24 flows=14`; targeted `git diff --check` passed with only normal Windows LF/CRLF warnings.
+
+- Performance chart interaction correction on 2026-06-04:
+  - `src/app/components/investments/InvestmentPortfolioChart.tsx` now renders dotted horizontal chart lines and an interactive point tooltip modeled from the supplied Figma JSON: white 91x72 card, 6px radius, shadow, date/value/percentage rows, and teal point marker.
+  - Tapping/clicking a chart point updates the selected marker and tooltip; keyboard activation is also supported on point hit targets. Tooltip values respect country locale, current currency, and amount privacy masking.
+  - `src/app/components/investments/InvestmentPeriodChips.tsx` now matches the supplied selected/not-selected period-chip JSON: 35px minimum width, 21px height, 3.5px radius, teal selected fill with white text, and outlined not-selected state.
+  - Verification: `npm run build` passed with the known Vite chunk-size warning; `npm run audit:templates` passed with `templates=50 codePreviews=50 components=69 screens=24 flows=14`; targeted `git diff --check` passed with only normal Windows LF/CRLF warnings.
+
+- Investment action icon correction on 2026-06-04:
+  - `src/app/components/icons/AppIcon.tsx` now defines dedicated Investments-only glyphs for `investment-history`, `investment-to-approve`, and `investment-download-report` from the supplied SVGs.
+  - `src/app/screens/investments/InvestmentsPortfolioScreen.tsx` now maps the Investments action buttons to those dedicated icon keys, leaving shared icons such as `user-event-refresh`, `clipboard-check`, and `account-option-statement` unchanged for their existing consumers.
+  - Verification: `npm run build` passed with the known Vite chunk-size warning; `npm run audit:templates` passed with `templates=50 codePreviews=50 components=69 screens=24 flows=14`; targeted `git diff --check` passed with only normal Windows LF/CRLF warnings.
+
+- Invest CTA correction on 2026-06-04:
+  - `src/app/components/investments/InvestmentActionBar.tsx` now renders the Investments `invest` CTA from the supplied JSON as a compact `56x56` teal circle instead of the previous larger rounded card.
+  - `src/app/components/icons/AppIcon.tsx` adds the reusable `invest-action` glyph from the JSON: growth line, arrow head, and three vertical bars.
+  - Browser measurement on `http://127.0.0.1:3001/` confirmed CSS `width=56px`, `height=56px`, `padding=4px 12px`, teal `rgb(0,122,145)`, white lowercase `invest` text, 11px bold label, and 32px icon slot.
+  - Verification: `npm run build` passed with the known Vite chunk-size warning; `npm run audit:templates` passed with `templates=50 codePreviews=50 components=69 screens=24 flows=14`; targeted `git diff --check` passed with only normal Windows LF/CRLF warnings.
 
 - Follow-up tab distribution implementation on 2026-06-04:
   - `InvestmentPortfolioTabs` is now a controlled tab strip instead of a static selector row.
@@ -56,12 +94,12 @@ Latest Investments Portfolio implementation:
     - `InvestmentProductCard`
     - `InvestmentsFundBanner`
 - `src/app/utils/investmentsAvailability.ts`
-  - centralizes Investments eligibility: `product === "PI"` and country is not `BA` / `BA_BL`
+  - centralizes Investments eligibility: `product === "PI"` for every supported country/application variant, including `BA` and `BA_BL`
 - Home and navigation wiring:
   - `src/app/screens/home/HomeScreen.tsx` now accepts `onInvestmentsClick`
   - `src/app/screens/home/AccountSummary.tsx` routes the `investment_account` product card to Investments only in eligible PI countries
   - `src/app/contexts/NavigationContext.tsx` adds the `investments` screen state
-  - `src/app/App.tsx` renders `InvestmentsPortfolioScreen`, passes the Home handler, and keeps Bosnia variants gated
+  - `src/app/App.tsx` renders `InvestmentsPortfolioScreen`, passes the Home handler, and now allows Bosnia variants through the same PI Retail availability check
 - Registry/docs:
   - `src/app/state/demoTypes.ts`, `screenRegistry.ts`, `flowRegistry.ts`, `componentRegistry.ts`, and `projectPackRegistry.ts` now include `pi.investments.portfolio`, its Home-to-Investments flow, and the new component IDs
   - `src/translations/shared.ts` and `src/translations/types.ts` add `runtime.investments` fallback copy
@@ -77,7 +115,6 @@ Latest Investments Portfolio implementation:
     - screen exposed `Total value`, `ALL PRODUCTS`, active/inactive securities, period chips, action bar, and fund banner
     - `MIN VALUE` sorting changed the active securities order
     - Back returned to Home
-    - switching to `Bosnia and Herzegovina` and clicking `Investment Portfolio` stayed on Home, confirming the Bosnia gating
 
 Previous focus:
 
@@ -2120,6 +2157,44 @@ Continue with product evolution work:
   - in-app browser smoke on `http://127.0.0.1:3005/` passed for Documents ordering, one `NEW`, legal subtitles, 3-dot delete reveal, non-legal deletion, legal Info modal, and swipe-left reveal.
 - Next recommended action:
   - after deployment, manually smoke the production URL for Home -> More -> Documents and the demo screenshot/JSON dropdown, because the automated local browser smoke only covered the local dev server.
+
+## 2026-06-04 Vercel Demo Access Gate
+
+- Implemented the requested password protection gate for the demo:
+  - `api/access.js` validates the password `CE&EE2025-`, sets signed HTTP-only access cookies, tracks failed attempts in a signed HTTP-only cookie, and supports both JSON and form submissions.
+  - `middleware.js` runs as Vercel Routing Middleware in Node.js runtime and redirects unauthenticated production requests to `/access.html` before app assets are served.
+  - `public/access.html` is the static password page with the requested copy:
+    - `Enter password to continue`
+    - `For support, contact the local UX designer`
+    - `Remember my password`
+  - `src/app/components/security/AccessGate.tsx` wraps the Vite runtime as a local-dev fallback for `localhost:3005`, because the Vite dev server does not execute Vercel middleware/functions.
+  - `src/main.tsx` now mounts `AccessGate` before `App`.
+- Access duration decisions:
+  - checked `Remember my password`: 6 months (`Max-Age=15811200`, 183 days).
+  - unchecked: 1 month (`Max-Age=2678400`, 31 days).
+  - 10 failed attempts: temporary 24-hour block stored in the signed attempts cookie.
+  - blocked copy is `Access temporarily blocked. Please contact the local UX designer for support.` and intentionally does not mention clearing browser cookies.
+- Banana Loop result:
+  - fixed: production has a server-side Vercel Routing Middleware gate, not just a React visual gate.
+  - fixed: production password validation and failed-attempt logic are server-side in `/api/access`.
+  - fixed: local dev remains testable through the React fallback gate.
+  - fixed: generated client JS does not contain `CE&EE2025-`.
+  - triaged: the user-requested password is also present as a committed server-side fallback so the demo works without Vercel env setup; before broader external sharing, set `ACCESS_PASSWORD` and `ACCESS_COOKIE_SECRET` in Vercel and rotate/remove the fallback intentionally.
+  - triaged: no committed automated regression test covers the access gate yet; this is now a future task in `docs/handoff/next-tasks.md`.
+  - already known: Vite chunk-size warning and missing local `typecheck`, `lint`, and `test` scripts remain tracked known bananas, not blockers.
+- Verification:
+  - `node --check api/access.js` passed.
+  - `node --check middleware.js` passed.
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - `Select-String -Path dist\assets\*.js -Pattern 'CE&EE2025' -SimpleMatch` returned no matches.
+  - API simulation passed: bad password returns `401`, correct password returns `200`, status GET authenticates from the signed cookie, checked remember uses 6-month `Max-Age`, unchecked uses 1-month `Max-Age`, form submissions redirect with `303`, and the 10th bad attempt returns `423` without the forbidden cookie-reset wording.
+  - Middleware simulation passed: unauthenticated `/assets/App.js` redirects to `/access.html`, `/access.html` and `/api/access` pass through, and authenticated asset requests pass through.
+  - In-app browser smoke on `http://localhost:3005/` passed: access gate title/helper render, forbidden copy is absent, password `CE&EE2025-` unlocks the app.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=69 screens=24 flows=14`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+- Commit scope:
+  - the requested access-gate implementation plus all existing uncommitted workspace changes are intended to be committed per `comite tot ce nu e comis`.
+  - Existing uncommitted files included Investments Portfolio refinements already documented earlier in this handoff.
 
 ## Constitutional Check
 

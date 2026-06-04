@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Access required</title>
+    <style>
+      @font-face {
+        font-family: UniCredit;
+        src: local("UniCredit"), local("Inter"), local("Arial");
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: #f5f5f5;
+        color: #262626;
+        font-family: UniCredit, Inter, Arial, sans-serif;
+      }
+
+      form {
+        width: min(100%, 360px);
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 24px;
+        border-radius: 8px;
+        background: #ffffff;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+      }
+
+      .mark {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e2001a;
+      }
+
+      label[for="password"] {
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 24px;
+      }
+
+      input[type="password"] {
+        height: 44px;
+        border: 1px solid #b8b8b8;
+        border-radius: 6px;
+        padding: 0 12px;
+        color: #262626;
+        background: #ffffff;
+        font: inherit;
+        font-size: 16px;
+      }
+
+      .remember {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: #e2001a;
+      }
+
+      button {
+        height: 44px;
+        border: 0;
+        border-radius: 6px;
+        background: #e2001a;
+        color: #ffffff;
+        cursor: pointer;
+        font: inherit;
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .message {
+        display: none;
+        margin: 0;
+        color: #b00020;
+        font-size: 13px;
+        line-height: 18px;
+      }
+
+      .message[data-visible="true"] {
+        display: block;
+      }
+
+      .message[data-strong="true"] {
+        padding: 10px 12px;
+        border-radius: 6px;
+        background: #fff1f1;
+      }
+
+      .helper {
+        margin: 0;
+        color: #666666;
+        font-size: 13px;
+        line-height: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <form method="post" action="/api/access">
+      <div class="mark" aria-hidden="true"></div>
+      <label for="password">Enter password to continue</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" autofocus />
+      <input id="returnTo" name="returnTo" type="hidden" value="/" />
+      <label class="remember">
+        <input name="remember" type="checkbox" checked />
+        Remember my password
+      </label>
+      <p id="message" class="message" role="alert"></p>
+      <button type="submit">Continue</button>
+      <p class="helper">For support, contact the local UX designer</p>
+    </form>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const returnTo = params.get("returnTo");
+      const safeReturnTo = returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//") ? returnTo : "/";
+      document.getElementById("returnTo").value = safeReturnTo;
+
+      const messageByError = {
+        incorrect: "Incorrect password. Please check the password and try again.",
+        blocked: "Access temporarily blocked. Please contact the local UX designer for support.",
+      };
+      const error = params.get("error");
+      const message = messageByError[error];
+      if (message) {
+        const messageNode = document.getElementById("message");
+        messageNode.textContent = message;
+        messageNode.dataset.visible = "true";
+        messageNode.dataset.strong = error === "blocked" ? "true" : "false";
+      }
+    </script>
+  </body>
+</html>

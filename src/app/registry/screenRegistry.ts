@@ -47,7 +47,6 @@ export interface ScreenMeta {
 }
 
 const ALL_COUNTRIES: readonly CountryId[] = ["RO", "CZ", "SK", "HU", "RS", "BA", "BA_BL", "SI"] as const;
-const INVESTMENTS_COUNTRIES: readonly CountryId[] = ["RO", "CZ", "SK", "HU", "RS", "SI"] as const;
 
 export const SCREEN_REGISTRY: Record<ScreenId, ScreenMeta> = {
   "pi.prelogin.inactive": {
@@ -286,7 +285,7 @@ export const SCREEN_REGISTRY: Record<ScreenId, ScreenMeta> = {
     label: "PI Investments portfolio",
     runtimeScreen: "investments",
     products: ["PI"],
-    countries: INVESTMENTS_COUNTRIES,
+    countries: ALL_COUNTRIES,
     designSystems: ["current"],
     status: "mock-driven",
     layoutFamily: "investments",

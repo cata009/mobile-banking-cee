@@ -45,7 +45,7 @@ export default function InvestmentActionBar({
 }: InvestmentActionBarProps) {
   return (
     <div
-      className="grid grid-cols-[1fr_1fr_1fr_88px] items-start gap-[6px] px-[16px] py-[16px]"
+      className="grid grid-cols-[1fr_1fr_1fr_56px] items-start gap-[6px] px-[16px] py-[16px]"
       data-ds-label="Investments action bar"
     >
       {actions.slice(0, 3).map((action) => (
@@ -54,15 +54,15 @@ export default function InvestmentActionBar({
       <button
         type="button"
         onClick={onInvestClick}
-        className="flex h-[72px] flex-col items-center justify-center gap-[4px] rounded-[8px] bg-[var(--uc-action)] px-[8px] text-[var(--uc-static-white)]"
+        className="flex h-[56px] w-[56px] flex-col items-center justify-center gap-0 rounded-full bg-[var(--uc-action)] px-[12px] py-[4px] text-[var(--uc-static-white)]"
         aria-label={investLabel}
         data-ds-label="Investments invest action"
       >
         <span className="grid size-[32px] place-items-center">
-          <AppIcon name="add-money" color="var(--uc-static-white)" />
+          <AppIcon name="invest-action" color="var(--uc-static-white)" size={32} />
         </span>
-        <span className="uc-type-n5-strong text-center leading-[15px]">
-          {investLabel}
+        <span className="text-[11px] font-bold leading-[12px] text-[var(--uc-static-white)]">
+          {investLabel.toLowerCase()}
         </span>
       </button>
     </div>
