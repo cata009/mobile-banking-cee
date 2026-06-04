@@ -42,9 +42,9 @@ export function PrimeIconLabelValue({
         </div>
 
         {/* Label + Description */}
-        <div className="content-stretch flex flex-[1_0_0] flex-col gap-[4px] items-start justify-center leading-[normal] min-h-px min-w-px not-italic relative text-[16px] text-[var(--uc-static-white)] whitespace-pre-wrap">
-          <p className="font-['UniCredit:Bold',sans-serif] relative shrink-0 w-full text-left">{label}</p>
-          <p className="font-['UniCredit:Regular',sans-serif] relative shrink-0 w-full text-left">{description}</p>
+        <div className="content-stretch flex flex-[1_0_0] flex-col gap-[4px] items-start justify-center min-h-px min-w-px relative text-[var(--uc-static-white)] whitespace-pre-wrap">
+          <p className="uc-type-n4-strong relative shrink-0 w-full text-left">{label}</p>
+          <p className="uc-type-n4 relative shrink-0 w-full text-left">{description}</p>
         </div>
       </div>
 

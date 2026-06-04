@@ -20,13 +20,13 @@ export function YourBenefitsTab() {
     <div className="flex flex-col gap-[24px] w-full">
       {/* Title */}
       <div className="flex items-center justify-center w-full">
-        <p className="flex-[1_0_0] font-['UniCredit:Bold',sans-serif] leading-[normal] min-h-px min-w-px not-italic text-[24px] text-[var(--uc-static-white)] whitespace-pre-wrap">
+        <p className="uc-type-l1 flex-[1_0_0] min-h-px min-w-px text-[var(--uc-static-white)] whitespace-pre-wrap">
           {t('prime.benefits.pageTitle')}
         </p>
       </div>
 
       {/* Intro Text */}
-      <p className="font-['UniCredit:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[18px] text-[var(--uc-static-white)] w-full whitespace-pre-wrap">
+      <p className="uc-type-p1 relative shrink-0 text-[var(--uc-static-white)] w-full whitespace-pre-wrap">
         {t('prime.benefits.introText')}
       </p>
 
@@ -69,7 +69,7 @@ export function YourBenefitsTab() {
               onClick={handleTermsClick}
               className="content-stretch flex items-center justify-center relative rounded-[4px] shrink-0 w-full cursor-pointer hover:opacity-70 transition-opacity"
             >
-              <p className="font-['UniCredit:Bold',sans-serif] leading-[normal] not-italic relative shrink-0 text-[14px] text-center text-[var(--uc-static-white)] uppercase whitespace-nowrap">
+              <p className="uc-type-n5-strong relative shrink-0 text-center text-[var(--uc-static-white)] uppercase whitespace-nowrap">
                 {t('prime.benefits.termsConditions')}
               </p>
             </button>

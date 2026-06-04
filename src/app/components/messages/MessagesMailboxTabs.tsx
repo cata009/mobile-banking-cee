@@ -28,7 +28,7 @@ export default function MessagesMailboxTabs({
             type="button"
             onClick={() => onChange(tab.id)}
             aria-pressed={isActive}
-            className="relative flex items-center justify-center font-['UniCredit',sans-serif] text-[16px] font-bold text-[var(--uc-text)]"
+            className="uc-type-n4-strong relative flex items-center justify-center text-[var(--uc-text)]"
           >
             {tab.hasNewItems ? (
               <span className="mr-[8px] size-[12px] rounded-full bg-[var(--uc-action)]" aria-hidden="true" />

@@ -21,10 +21,10 @@ export default function NewPaymentDiscoverBanner({
           <AppIcon name="info-circle" color="var(--uc-text-inverse)" />
         </span>
         <div className="min-w-0">
-          <p className="font-['UniCredit',sans-serif] text-[18px] font-bold leading-[normal] text-[var(--uc-text-inverse)]">
+          <p className="uc-type-h2 text-[var(--uc-text-inverse)]">
             {title}
           </p>
-          <p className="mt-[4px] font-['UniCredit',sans-serif] text-[18px] font-normal leading-[normal] text-[var(--uc-text-inverse)]">
+          <p className="uc-type-p1 mt-[4px] text-[var(--uc-text-inverse)]">
             {description}
           </p>
         </div>

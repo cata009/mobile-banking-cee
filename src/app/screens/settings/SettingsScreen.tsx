@@ -1,7 +1,7 @@
 import { useState, type UIEvent } from "react";
+import NavigationRow from "@/app/components/NavigationRow";
 import PageHeader from "@/app/components/PageHeader";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
-import { AppIcon } from "@/app/components/icons";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { SETTINGS_SECTIONS } from "@/app/config/settingsConfig";
 
@@ -38,24 +38,14 @@ export default function SettingsScreen({ onBack }: SettingsScreenProps) {
 
               <div className="flex flex-col gap-[24px] pt-[16px]">
                 {section.items.map((item) => (
-                  <button
+                  <NavigationRow
                     key={item.id}
-                    type="button"
-                    className="grid grid-cols-[1fr_32px] items-center gap-[16px] text-left"
-                  >
-                    <div className="min-w-0">
-                      <p className="font-['UniCredit',sans-serif] text-[14px] font-bold uppercase leading-[15px] text-[var(--uc-text)]">
-                        {t(`runtime.settings.items.${item.id}.title`, item.title)}
-                      </p>
-                      <p className="mt-[4px] font-['UniCredit',sans-serif] text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
-                        {t(`runtime.settings.items.${item.id}.description`, item.description)}
-                      </p>
-                    </div>
-
-                    <div className="flex h-[32px] w-[32px] items-center justify-center justify-self-end">
-                      <AppIcon name="chevron-link" color="var(--uc-text)" />
-                    </div>
-                  </button>
+                    title={t(`runtime.settings.items.${item.id}.title`, item.title)}
+                    description={t(`runtime.settings.items.${item.id}.description`, item.description)}
+                    trailingAccessory="chevron"
+                    chevronIconName="chevron-link"
+                    onClick={() => undefined}
+                  />
                 ))}
               </div>
             </section>

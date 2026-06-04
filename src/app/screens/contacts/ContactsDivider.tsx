@@ -11,7 +11,7 @@ export function ContactsDivider({ text }: ContactsDividerProps) {
   return (
     <div className="relative w-full h-[32px] flex items-center">
       {/* Text */}
-      <p className="font-['UniCredit:Bold',sans-serif] text-[18px] text-[var(--uc-text)] leading-normal">
+      <p className="uc-type-h2 text-[var(--uc-text)]">
         {text}
       </p>
       

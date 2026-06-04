@@ -60,8 +60,8 @@ export default function ProductOfferCard({
             {offer.title}
           </h3>
           <p
-            className="self-stretch overflow-hidden whitespace-pre-line font-['UniCredit',sans-serif] font-normal [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]"
-            style={{ color: tone.textColor, fontSize: "18px", lineHeight: "normal" }}
+            className="uc-type-p1 self-stretch overflow-hidden whitespace-pre-line [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]"
+            style={{ color: tone.textColor }}
           >
             {offer.description}
           </p>

@@ -1,5 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { AppIcon, type IconName } from "@/app/components/icons";
+import ProfileAvatar from "@/app/components/ProfileAvatar";
+import ToggleButton from "@/app/components/ToggleButton";
 import {
   RO_KIDS_ALLOWANCE,
   RO_KIDS_APPROVALS,
@@ -2792,9 +2794,12 @@ function CardPreview({ settings }: { settings: CardSettings }) {
             <p className="text-[12px] uppercase leading-[14px] opacity-75">Name</p>
             <p className="mt-[2px] text-[18px] font-bold leading-[22px]">{settings.nameOnCard}</p>
           </div>
-          <div className="grid size-[36px] place-items-center rounded-full" style={{ background: theme.accent, color: settings.theme === "soft" || settings.theme === "minimal" ? "var(--uc-static-white)" : "var(--uc-text)" }}>
-            <span className="text-[16px] font-bold leading-none">{settings.avatar}</span>
-          </div>
+          <ProfileAvatar
+            className="shadow-[0_0_0_2px_rgb(var(--uc-static-white-rgb)_/_0.18)]"
+            initials={settings.avatar}
+            size={36}
+            variant="initials"
+          />
         </div>
       </div>
       {settings.isFrozen ? (
@@ -3021,18 +3026,11 @@ function ToggleRow({
         <p className="text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{title}</p>
         <p className="mt-[2px] text-[13px] leading-[17px] text-[var(--uc-text-muted)]">{subtitle}</p>
       </div>
-      <button
-        type="button"
-        className={`relative h-[30px] w-[52px] rounded-[15px] ${checked ? "bg-[var(--uc-action)]" : "bg-[var(--uc-border)]"}`}
-        onClick={() => onChange(!checked)}
-        aria-pressed={checked}
-      >
-        <span
-          className={`absolute top-[3px] size-[24px] rounded-full bg-[var(--uc-surface)] shadow-[0_2px_6px_rgb(var(--uc-shadow-rgb)_/_0.18)] transition-transform ${
-            checked ? "translate-x-[24px]" : "translate-x-[3px]"
-          }`}
-        />
-      </button>
+      <ToggleButton
+        ariaLabel={title}
+        checked={checked}
+        onToggle={onChange}
+      />
     </div>
   );
 }

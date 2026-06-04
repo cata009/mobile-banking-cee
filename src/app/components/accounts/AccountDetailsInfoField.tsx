@@ -20,10 +20,10 @@ export default function AccountDetailsInfoField({
       data-account-details-info-field-variant={trailingIcon ? "with-icon" : "default"}
     >
       <div className="flex min-w-0 flex-col gap-[4px]">
-        <p className="font-['UniCredit',sans-serif] text-[16px] [line-height:normal] font-normal uppercase text-[var(--uc-text)]">
+        <p className="uc-type-n4 uppercase text-[var(--uc-text)]">
           {title}
         </p>
-        <p className="break-words font-['UniCredit',sans-serif] text-[16px] [line-height:normal] font-bold text-[var(--uc-text)]">
+        <p className="uc-type-n4-strong break-words text-[var(--uc-text)]">
           {subtitle}
         </p>
       </div>

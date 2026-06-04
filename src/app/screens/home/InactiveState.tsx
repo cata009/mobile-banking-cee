@@ -27,18 +27,18 @@ export default function InactiveState() {
         </div>
 
         {/* Title */}
-        <h2 className="font-['UniCredit',sans-serif] text-[24px] font-bold text-[var(--uc-text)] mb-[12px]">
+        <h2 className="uc-type-l1 mb-[12px] text-[var(--uc-text)]">
           Application Inactive
         </h2>
 
         {/* Description */}
-        <p className="font-['UniCredit',sans-serif] text-[16px] text-[var(--uc-text-muted)] mb-[24px]">
+        <p className="uc-type-n4 mb-[24px] text-[var(--uc-text-muted)]">
           This application is currently in inactive mode. Switch to "Aplicație activă" in the demo controls to enable full functionality.
         </p>
 
         {/* Info Box */}
         <div className="bg-[var(--uc-surface)] border border-[var(--uc-border-muted)] rounded-[8px] p-[16px] text-left">
-          <p className="font-['UniCredit',sans-serif] text-[14px] text-[var(--uc-text-muted)]">
+          <p className="uc-type-n5 text-[var(--uc-text-muted)]">
             <strong className="text-[var(--uc-text)]">Demo Mode:</strong> Use the controls at the top of the page to switch between active and inactive scenarios.
           </p>
         </div>

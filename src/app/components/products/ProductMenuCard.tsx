@@ -118,14 +118,9 @@ export default function ProductMenuCard({ card, variant = "standard", onClick }:
       }}
     >
       <span
-        className="relative z-10 whitespace-pre-line font-['UniCredit',sans-serif]"
-        style={{
-          color: "var(--uc-text-inverse)",
-          fontSize: isCompact ? "16px" : "18px",
-          fontStyle: "normal",
-          fontWeight: 700,
-          lineHeight: "normal",
-        }}
+        className={`relative z-10 whitespace-pre-line text-[var(--uc-text-inverse)] ${
+          isCompact ? "uc-type-n4-strong" : "uc-type-h2"
+        }`}
       >
         {card.title}
       </span>

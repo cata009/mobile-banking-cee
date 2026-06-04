@@ -62,10 +62,10 @@ export default function AccountOptionsScreen({ onBack }: AccountOptionsScreenPro
                 <OptionIcon id={item.id} />
               </div>
               <div className="min-w-0">
-                <p className="font-['UniCredit',sans-serif] text-[14px] leading-[18px] font-bold uppercase text-[var(--uc-text)]">
+                <p className="uc-type-n5-strong leading-[18px] uppercase text-[var(--uc-text)]">
                   {t(`runtime.accountOptions.items.${item.id}.title`, item.title)}
                 </p>
-                <p className="mt-[2px] font-['UniCredit',sans-serif] text-[14px] leading-[18px] font-normal text-[var(--uc-text-muted)]">
+                <p className="uc-type-n5 mt-[2px] leading-[18px] text-[var(--uc-text-muted)]">
                   {t(`runtime.accountOptions.items.${item.id}.description`, item.description)}
                 </p>
               </div>
@@ -75,7 +75,7 @@ export default function AccountOptionsScreen({ onBack }: AccountOptionsScreenPro
         </div>
 
         <div className="pt-[28px]">
-          <h2 className="border-b border-[var(--uc-border)] pb-[8px] font-['UniCredit',sans-serif] text-[16px] leading-[20px] font-bold uppercase text-[var(--uc-text)]">
+          <h2 className="uc-type-n4-strong border-b border-[var(--uc-border)] pb-[8px] leading-[20px] uppercase text-[var(--uc-text)]">
             {t("runtime.productsMenu.title", "Products")}
           </h2>
 
@@ -95,7 +95,7 @@ export default function AccountOptionsScreen({ onBack }: AccountOptionsScreenPro
                   <p className="font-['UniCredit',sans-serif] text-[26px] leading-[28px] font-bold text-[var(--uc-static-white)]">
                     {t(`runtime.accountOptions.products.${product.id}.title`, product.title)}
                   </p>
-                  <p className="max-w-[250px] whitespace-pre-line font-['UniCredit',sans-serif] text-[14px] leading-[17px] font-normal text-[var(--uc-static-white)]">
+                  <p className="uc-type-n5 max-w-[250px] whitespace-pre-line leading-[17px] text-[var(--uc-static-white)]">
                     {t(`runtime.accountOptions.products.${product.id}.description`, product.description)}
                   </p>
                 </div>

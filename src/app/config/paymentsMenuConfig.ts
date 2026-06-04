@@ -122,7 +122,7 @@ const RO_PRIMARY_ITEMS: readonly PaymentHeroItem[] = [
     title: "RoPay",
     description: "Instant payments with QR or\nRoPay Alias",
     illustration: "qr-phone",
-    imageVariant: "payments-4",
+    imageVariant: "payments-9",
     translationKey: null,
   },
   {

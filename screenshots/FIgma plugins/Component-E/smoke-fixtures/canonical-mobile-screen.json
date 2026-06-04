@@ -1,0 +1,633 @@
+{
+  "schema": "build-ui.screen.v1",
+  "frame": {
+    "width": 393,
+    "height": 852,
+    "background": "#F5F5F5"
+  },
+  "root": {
+    "type": "container",
+    "name": "Smoke Mobile Screen",
+    "bounds": { "x": 0, "y": 0, "width": 393, "height": 852 },
+    "styles": {
+      "fills": [{ "type": "SOLID", "color": { "hex": "#F5F5F5" } }],
+      "effects": []
+    },
+    "children": [
+      {
+        "type": "shape",
+        "name": "App Background",
+        "bounds": { "x": 0, "y": 0, "width": 393, "height": 852 },
+        "styles": {
+          "fills": [{ "type": "SOLID", "color": { "hex": "#F5F5F5" } }],
+          "effects": []
+        },
+        "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+      },
+      {
+        "type": "container",
+        "name": "Status Bar",
+        "bounds": { "x": 0, "y": 0, "width": 393, "height": 44 },
+        "children": [
+          {
+            "type": "text",
+            "name": "Status Time",
+            "bounds": { "x": 24, "y": 14, "width": 52, "height": 18 },
+            "text": {
+              "characters": "09:41",
+              "fontName": { "family": "Inter", "style": "Semi Bold" },
+              "fontSize": 14,
+              "lineHeight": { "unit": "PIXELS", "value": 18 },
+              "letterSpacing": { "unit": "PIXELS", "value": 0 },
+              "textAlignHorizontal": "LEFT",
+              "textAlignVertical": "TOP"
+            },
+            "styles": {
+              "fills": [{ "type": "SOLID", "color": { "hex": "#262626" } }]
+            },
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          },
+          {
+            "type": "vector",
+            "name": "Status Indicators",
+            "bounds": { "x": 316, "y": 16, "width": 53, "height": 12 },
+            "assetRef": "smoke-status-indicators",
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          }
+        ],
+        "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+      },
+      {
+        "type": "container",
+        "name": "Header",
+        "bounds": { "x": 0, "y": 44, "width": 393, "height": 84 },
+        "children": [
+          {
+            "type": "vector",
+            "name": "Back Icon",
+            "bounds": { "x": 24, "y": 72, "width": 24, "height": 24 },
+            "assetRef": "smoke-icon-back",
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          },
+          {
+            "type": "text",
+            "name": "Screen Title",
+            "bounds": { "x": 80, "y": 68, "width": 232, "height": 32 },
+            "text": {
+              "characters": "Accounts",
+              "fontName": { "family": "Inter", "style": "Bold" },
+              "fontSize": 24,
+              "lineHeight": { "unit": "PIXELS", "value": 30 },
+              "letterSpacing": { "unit": "PIXELS", "value": 0 },
+              "textAlignHorizontal": "CENTER",
+              "textAlignVertical": "TOP"
+            },
+            "styles": {
+              "fills": [{ "type": "SOLID", "color": { "hex": "#262626" } }]
+            },
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          },
+          {
+            "type": "vector",
+            "name": "Contact Phone Icon",
+            "bounds": { "x": 313, "y": 72, "width": 24, "height": 24 },
+            "assetRef": "smoke-icon-phone",
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          },
+          {
+            "type": "vector",
+            "name": "Messages Icon",
+            "bounds": { "x": 353, "y": 72, "width": 24, "height": 24 },
+            "assetRef": "smoke-icon-message",
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          }
+        ],
+        "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+      },
+      {
+        "type": "container",
+        "name": "Primary Account Card",
+        "bounds": { "x": 24, "y": 140, "width": 345, "height": 180 },
+        "styles": {
+          "fills": [{ "type": "SOLID", "color": { "hex": "#FFFFFF" } }],
+          "cornerRadius": 16,
+          "effects": [
+            {
+              "type": "DROP_SHADOW",
+              "color": { "rgba": { "r": 0, "g": 0, "b": 0, "a": 0.08 } },
+              "offset": { "x": 0, "y": 12 },
+              "radius": 24,
+              "spread": 0,
+              "visible": true,
+              "blendMode": "NORMAL"
+            }
+          ]
+        },
+        "children": [
+          {
+            "type": "text",
+            "name": "Account Name",
+            "bounds": { "x": 48, "y": 164, "width": 220, "height": 18 },
+            "text": {
+              "characters": "Current account",
+              "fontName": { "family": "Inter", "style": "Semi Bold" },
+              "fontSize": 14,
+              "lineHeight": { "unit": "PIXELS", "value": 18 },
+              "letterSpacing": { "unit": "PIXELS", "value": 0 },
+              "textAlignHorizontal": "LEFT",
+              "textAlignVertical": "TOP"
+            },
+            "styles": {
+              "fills": [{ "type": "SOLID", "color": { "hex": "#262626" } }]
+            },
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          },
+          {
+            "type": "text",
+            "name": "Available Balance",
+            "bounds": { "x": 48, "y": 202, "width": 250, "height": 38 },
+            "text": {
+              "characters": "12,480.32 RON",
+              "fontName": { "family": "Inter", "style": "Bold" },
+              "fontSize": 28,
+              "lineHeight": { "unit": "PIXELS", "value": 34 },
+              "letterSpacing": { "unit": "PIXELS", "value": 0 },
+              "textAlignHorizontal": "LEFT",
+              "textAlignVertical": "TOP",
+              "segments": [
+                {
+                  "start": 0,
+                  "end": 9,
+                  "fontName": { "family": "Inter", "style": "Bold" },
+                  "fontSize": 28,
+                  "lineHeight": { "unit": "PIXELS", "value": 34 },
+                  "letterSpacing": { "unit": "PIXELS", "value": 0 },
+                  "fills": [{ "type": "SOLID", "color": { "hex": "#262626" } }]
+                },
+                {
+                  "start": 10,
+                  "end": 13,
+                  "fontName": { "family": "Inter", "style": "Semi Bold" },
+                  "fontSize": 14,
+                  "lineHeight": { "unit": "PIXELS", "value": 18 },
+                  "letterSpacing": { "unit": "PIXELS", "value": 0 },
+                  "fills": [{ "type": "SOLID", "color": { "hex": "#595959" } }]
+                }
+              ]
+            },
+            "styles": {
+              "fills": [{ "type": "SOLID", "color": { "hex": "#262626" } }]
+            },
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          },
+          {
+            "type": "line",
+            "name": "Card Divider",
+            "bounds": { "x": 48, "y": 260, "width": 297, "height": 1 },
+            "styles": {
+              "strokes": [{ "type": "SOLID", "color": { "hex": "#E5E5E5" } }],
+              "strokeWeight": 1
+            },
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          },
+          {
+            "type": "text",
+            "name": "IBAN Label",
+            "bounds": { "x": 48, "y": 280, "width": 70, "height": 18 },
+            "text": {
+              "characters": "IBAN",
+              "fontName": { "family": "Inter", "style": "Regular" },
+              "fontSize": 14,
+              "lineHeight": { "unit": "PIXELS", "value": 18 },
+              "letterSpacing": { "unit": "PIXELS", "value": 0 },
+              "textAlignHorizontal": "LEFT",
+              "textAlignVertical": "TOP"
+            },
+            "styles": {
+              "fills": [{ "type": "SOLID", "color": { "hex": "#595959" } }]
+            },
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          },
+          {
+            "type": "text",
+            "name": "IBAN Value",
+            "bounds": { "x": 122, "y": 280, "width": 223, "height": 18 },
+            "text": {
+              "characters": "RO49 BACX 0000 1234",
+              "fontName": { "family": "Inter", "style": "Semi Bold" },
+              "fontSize": 14,
+              "lineHeight": { "unit": "PIXELS", "value": 18 },
+              "letterSpacing": { "unit": "PIXELS", "value": 0 },
+              "textAlignHorizontal": "RIGHT",
+              "textAlignVertical": "TOP"
+            },
+            "styles": {
+              "fills": [{ "type": "SOLID", "color": { "hex": "#262626" } }]
+            },
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          }
+        ],
+        "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+      },
+      {
+        "type": "container",
+        "name": "Quick Actions Row",
+        "bounds": { "x": 24, "y": 344, "width": 345, "height": 88 },
+        "layout": {
+          "mode": "HORIZONTAL",
+          "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+          "gap": 19,
+          "primaryAxisSizingMode": "FIXED",
+          "counterAxisSizingMode": "FIXED",
+          "primaryAxisAlignItems": "MIN",
+          "counterAxisAlignItems": "MIN"
+        },
+        "children": [
+          {
+            "type": "container",
+            "name": "Action Send",
+            "bounds": { "x": 24, "y": 344, "width": 102, "height": 88 },
+            "styles": {
+              "fills": [{ "type": "SOLID", "color": { "hex": "#FFFFFF" } }],
+              "cornerRadius": 12,
+              "effects": []
+            },
+            "children": [
+              {
+                "type": "vector",
+                "name": "Action Send Icon",
+                "bounds": { "x": 63, "y": 360, "width": 24, "height": 24 },
+                "assetRef": "smoke-icon-send",
+                "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+              },
+              {
+                "type": "text",
+                "name": "Action Send Label",
+                "bounds": { "x": 38, "y": 394, "width": 74, "height": 18 },
+                "text": {
+                  "characters": "Send",
+                  "fontName": { "family": "Inter", "style": "Bold" },
+                  "fontSize": 14,
+                  "lineHeight": { "unit": "PIXELS", "value": 18 },
+                  "letterSpacing": { "unit": "PIXELS", "value": 0 },
+                  "textAlignHorizontal": "CENTER",
+                  "textAlignVertical": "TOP"
+                },
+                "styles": {
+                  "fills": [{ "type": "SOLID", "color": { "hex": "#262626" } }]
+                },
+                "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+              }
+            ],
+            "autoLayoutChild": { "layoutPositioning": "AUTO" }
+          },
+          {
+            "type": "container",
+            "name": "Action Top Up",
+            "bounds": { "x": 145, "y": 344, "width": 102, "height": 88 },
+            "styles": {
+              "fills": [{ "type": "SOLID", "color": { "hex": "#FFFFFF" } }],
+              "cornerRadius": 12,
+              "effects": []
+            },
+            "children": [
+              {
+                "type": "vector",
+                "name": "Action Top Up Icon",
+                "bounds": { "x": 184, "y": 360, "width": 24, "height": 24 },
+                "assetRef": "smoke-icon-plus",
+                "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+              },
+              {
+                "type": "text",
+                "name": "Action Top Up Label",
+                "bounds": { "x": 159, "y": 394, "width": 74, "height": 18 },
+                "text": {
+                  "characters": "Top up",
+                  "fontName": { "family": "Inter", "style": "Bold" },
+                  "fontSize": 14,
+                  "lineHeight": { "unit": "PIXELS", "value": 18 },
+                  "letterSpacing": { "unit": "PIXELS", "value": 0 },
+                  "textAlignHorizontal": "CENTER",
+                  "textAlignVertical": "TOP"
+                },
+                "styles": {
+                  "fills": [{ "type": "SOLID", "color": { "hex": "#262626" } }]
+                },
+                "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+              }
+            ],
+            "autoLayoutChild": { "layoutPositioning": "AUTO" }
+          },
+          {
+            "type": "container",
+            "name": "Action Details",
+            "bounds": { "x": 266, "y": 344, "width": 102, "height": 88 },
+            "styles": {
+              "fills": [{ "type": "SOLID", "color": { "hex": "#FFFFFF" } }],
+              "cornerRadius": 12,
+              "effects": []
+            },
+            "children": [
+              {
+                "type": "vector",
+                "name": "Action Details Icon",
+                "bounds": { "x": 305, "y": 360, "width": 24, "height": 24 },
+                "assetRef": "smoke-icon-info",
+                "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+              },
+              {
+                "type": "text",
+                "name": "Action Details Label",
+                "bounds": { "x": 280, "y": 394, "width": 74, "height": 18 },
+                "text": {
+                  "characters": "Details",
+                  "fontName": { "family": "Inter", "style": "Bold" },
+                  "fontSize": 14,
+                  "lineHeight": { "unit": "PIXELS", "value": 18 },
+                  "letterSpacing": { "unit": "PIXELS", "value": 0 },
+                  "textAlignHorizontal": "CENTER",
+                  "textAlignVertical": "TOP"
+                },
+                "styles": {
+                  "fills": [{ "type": "SOLID", "color": { "hex": "#262626" } }]
+                },
+                "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+              }
+            ],
+            "autoLayoutChild": { "layoutPositioning": "AUTO" }
+          }
+        ],
+        "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+      },
+      {
+        "type": "text",
+        "name": "Transactions Heading",
+        "bounds": { "x": 24, "y": 472, "width": 180, "height": 24 },
+        "text": {
+          "characters": "Latest transactions",
+          "fontName": { "family": "Inter", "style": "Bold" },
+          "fontSize": 18,
+          "lineHeight": { "unit": "PIXELS", "value": 24 },
+          "letterSpacing": { "unit": "PIXELS", "value": 0 },
+          "textAlignHorizontal": "LEFT",
+          "textAlignVertical": "TOP"
+        },
+        "styles": {
+          "fills": [{ "type": "SOLID", "color": { "hex": "#262626" } }]
+        },
+        "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+      },
+      {
+        "type": "container",
+        "name": "Transaction Row",
+        "bounds": { "x": 24, "y": 512, "width": 345, "height": 72 },
+        "styles": {
+          "fills": [{ "type": "SOLID", "color": { "hex": "#FFFFFF" } }],
+          "cornerRadius": 12,
+          "effects": []
+        },
+        "children": [
+          {
+            "type": "ellipse",
+            "name": "Transaction Icon Bubble",
+            "bounds": { "x": 40, "y": 528, "width": 40, "height": 40 },
+            "styles": {
+              "fills": [{ "type": "SOLID", "color": { "hex": "#E8F6F5" } }],
+              "effects": []
+            },
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          },
+          {
+            "type": "vector",
+            "name": "Transaction Card Icon",
+            "bounds": { "x": 48, "y": 536, "width": 24, "height": 24 },
+            "assetRef": "smoke-icon-card",
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          },
+          {
+            "type": "text",
+            "name": "Transaction Merchant",
+            "bounds": { "x": 96, "y": 526, "width": 150, "height": 20 },
+            "text": {
+              "characters": "Coffee House",
+              "fontName": { "family": "Inter", "style": "Semi Bold" },
+              "fontSize": 14,
+              "lineHeight": { "unit": "PIXELS", "value": 18 },
+              "letterSpacing": { "unit": "PIXELS", "value": 0 },
+              "textAlignHorizontal": "LEFT",
+              "textAlignVertical": "TOP"
+            },
+            "styles": {
+              "fills": [{ "type": "SOLID", "color": { "hex": "#262626" } }]
+            },
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          },
+          {
+            "type": "text",
+            "name": "Transaction Date",
+            "bounds": { "x": 96, "y": 550, "width": 120, "height": 18 },
+            "text": {
+              "characters": "Today, 08:24",
+              "fontName": { "family": "Inter", "style": "Regular" },
+              "fontSize": 13,
+              "lineHeight": { "unit": "PIXELS", "value": 18 },
+              "letterSpacing": { "unit": "PIXELS", "value": 0 },
+              "textAlignHorizontal": "LEFT",
+              "textAlignVertical": "TOP"
+            },
+            "styles": {
+              "fills": [{ "type": "SOLID", "color": { "hex": "#666666" } }]
+            },
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          },
+          {
+            "type": "text",
+            "name": "Transaction Amount",
+            "bounds": { "x": 254, "y": 536, "width": 91, "height": 20 },
+            "text": {
+              "characters": "-18.50 RON",
+              "fontName": { "family": "Inter", "style": "Bold" },
+              "fontSize": 14,
+              "lineHeight": { "unit": "PIXELS", "value": 18 },
+              "letterSpacing": { "unit": "PIXELS", "value": 0 },
+              "textAlignHorizontal": "RIGHT",
+              "textAlignVertical": "TOP"
+            },
+            "styles": {
+              "fills": [{ "type": "SOLID", "color": { "hex": "#262626" } }]
+            },
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          }
+        ],
+        "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+      },
+      {
+        "type": "container",
+        "name": "Bottom Navigation",
+        "bounds": { "x": 0, "y": 756, "width": 393, "height": 96 },
+        "styles": {
+          "fills": [{ "type": "SOLID", "color": { "hex": "#FFFFFF" } }],
+          "effects": [
+            {
+              "type": "DROP_SHADOW",
+              "color": { "rgba": { "r": 0, "g": 0, "b": 0, "a": 0.08 } },
+              "offset": { "x": 0, "y": -8 },
+              "radius": 24,
+              "spread": 0,
+              "visible": true,
+              "blendMode": "NORMAL"
+            }
+          ]
+        },
+        "children": [
+          {
+            "type": "vector",
+            "name": "Home Icon",
+            "bounds": { "x": 56, "y": 776, "width": 24, "height": 24 },
+            "assetRef": "smoke-icon-home",
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          },
+          {
+            "type": "text",
+            "name": "Home Label",
+            "bounds": { "x": 36, "y": 806, "width": 64, "height": 18 },
+            "text": {
+              "characters": "Home",
+              "fontName": { "family": "Inter", "style": "Bold" },
+              "fontSize": 12,
+              "lineHeight": { "unit": "PIXELS", "value": 16 },
+              "letterSpacing": { "unit": "PIXELS", "value": 0 },
+              "textAlignHorizontal": "CENTER",
+              "textAlignVertical": "TOP"
+            },
+            "styles": {
+              "fills": [{ "type": "SOLID", "color": { "hex": "#007A78" } }]
+            },
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          },
+          {
+            "type": "text",
+            "name": "Payments Label",
+            "bounds": { "x": 128, "y": 806, "width": 64, "height": 18 },
+            "text": {
+              "characters": "Payments",
+              "fontName": { "family": "Inter", "style": "Regular" },
+              "fontSize": 12,
+              "lineHeight": { "unit": "PIXELS", "value": 16 },
+              "letterSpacing": { "unit": "PIXELS", "value": 0 },
+              "textAlignHorizontal": "CENTER",
+              "textAlignVertical": "TOP"
+            },
+            "styles": {
+              "fills": [{ "type": "SOLID", "color": { "hex": "#595959" } }]
+            },
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          },
+          {
+            "type": "text",
+            "name": "Products Label",
+            "bounds": { "x": 220, "y": 806, "width": 64, "height": 18 },
+            "text": {
+              "characters": "Products",
+              "fontName": { "family": "Inter", "style": "Regular" },
+              "fontSize": 12,
+              "lineHeight": { "unit": "PIXELS", "value": 16 },
+              "letterSpacing": { "unit": "PIXELS", "value": 0 },
+              "textAlignHorizontal": "CENTER",
+              "textAlignVertical": "TOP"
+            },
+            "styles": {
+              "fills": [{ "type": "SOLID", "color": { "hex": "#595959" } }]
+            },
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          },
+          {
+            "type": "text",
+            "name": "More Label",
+            "bounds": { "x": 312, "y": 806, "width": 48, "height": 18 },
+            "text": {
+              "characters": "More",
+              "fontName": { "family": "Inter", "style": "Regular" },
+              "fontSize": 12,
+              "lineHeight": { "unit": "PIXELS", "value": 16 },
+              "letterSpacing": { "unit": "PIXELS", "value": 0 },
+              "textAlignHorizontal": "CENTER",
+              "textAlignVertical": "TOP"
+            },
+            "styles": {
+              "fills": [{ "type": "SOLID", "color": { "hex": "#595959" } }]
+            },
+            "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+          }
+        ],
+        "autoLayoutChild": { "layoutPositioning": "ABSOLUTE" }
+      }
+    ]
+  },
+  "assets": [
+    {
+      "id": "smoke-status-indicators",
+      "kind": "svg",
+      "mimeType": "image/svg+xml",
+      "encoding": "plain",
+      "content": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"53\" height=\"12\" viewBox=\"0 0 53 12\"><rect x=\"0\" y=\"4\" width=\"3\" height=\"8\" rx=\"1.5\" fill=\"#262626\"/><rect x=\"5\" y=\"2\" width=\"3\" height=\"10\" rx=\"1.5\" fill=\"#262626\"/><rect x=\"10\" y=\"0\" width=\"3\" height=\"12\" rx=\"1.5\" fill=\"#262626\"/><path d=\"M21 4.5c4-3.2 9-3.2 13 0\" stroke=\"#262626\" stroke-width=\"2\" stroke-linecap=\"round\" fill=\"none\"/><rect x=\"39\" y=\"2\" width=\"12\" height=\"8\" rx=\"2\" stroke=\"#262626\" stroke-width=\"1.5\" fill=\"none\"/><rect x=\"42\" y=\"4\" width=\"6\" height=\"4\" rx=\"1\" fill=\"#262626\"/></svg>"
+    },
+    {
+      "id": "smoke-icon-back",
+      "kind": "svg",
+      "mimeType": "image/svg+xml",
+      "encoding": "plain",
+      "content": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M15 5l-7 7 7 7\" fill=\"none\" stroke=\"#262626\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>"
+    },
+    {
+      "id": "smoke-icon-phone",
+      "kind": "svg",
+      "mimeType": "image/svg+xml",
+      "encoding": "plain",
+      "content": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M7 4h4l1.5 4-2.4 1.4c1 2.1 2.6 3.7 4.5 4.5l1.4-2.4 4 1.5v4c0 1.1-.9 2-2 2C10.3 19 5 13.7 5 6c0-1.1.9-2 2-2z\" fill=\"none\" stroke=\"#262626\" stroke-width=\"2\" stroke-linejoin=\"round\"/></svg>"
+    },
+    {
+      "id": "smoke-icon-message",
+      "kind": "svg",
+      "mimeType": "image/svg+xml",
+      "encoding": "plain",
+      "content": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M5 6.5C5 5.1 6.1 4 7.5 4h9C17.9 4 19 5.1 19 6.5v6c0 1.4-1.1 2.5-2.5 2.5H10l-4 4v-4.2c-.6-.4-1-1.1-1-1.8v-6.5z\" fill=\"none\" stroke=\"#262626\" stroke-width=\"2\" stroke-linejoin=\"round\"/><path d=\"M8 8l4 3 4-3\" fill=\"none\" stroke=\"#262626\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>"
+    },
+    {
+      "id": "smoke-icon-send",
+      "kind": "svg",
+      "mimeType": "image/svg+xml",
+      "encoding": "plain",
+      "content": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M4 12h15M13 6l6 6-6 6\" fill=\"none\" stroke=\"#007A78\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>"
+    },
+    {
+      "id": "smoke-icon-plus",
+      "kind": "svg",
+      "mimeType": "image/svg+xml",
+      "encoding": "plain",
+      "content": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M12 5v14M5 12h14\" fill=\"none\" stroke=\"#007A78\" stroke-width=\"2.2\" stroke-linecap=\"round\"/></svg>"
+    },
+    {
+      "id": "smoke-icon-info",
+      "kind": "svg",
+      "mimeType": "image/svg+xml",
+      "encoding": "plain",
+      "content": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"8\" fill=\"none\" stroke=\"#007A78\" stroke-width=\"2\"/><path d=\"M12 11v5M12 8h.01\" fill=\"none\" stroke=\"#007A78\" stroke-width=\"2.4\" stroke-linecap=\"round\"/></svg>"
+    },
+    {
+      "id": "smoke-icon-card",
+      "kind": "svg",
+      "mimeType": "image/svg+xml",
+      "encoding": "plain",
+      "content": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><rect x=\"4\" y=\"6\" width=\"16\" height=\"12\" rx=\"2\" fill=\"none\" stroke=\"#007A78\" stroke-width=\"2\"/><path d=\"M4 10h16\" stroke=\"#007A78\" stroke-width=\"2\"/></svg>"
+    },
+    {
+      "id": "smoke-icon-home",
+      "kind": "svg",
+      "mimeType": "image/svg+xml",
+      "encoding": "plain",
+      "content": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-8z\" fill=\"none\" stroke=\"#007A78\" stroke-width=\"2\" stroke-linejoin=\"round\"/></svg>"
+    }
+  ]
+}

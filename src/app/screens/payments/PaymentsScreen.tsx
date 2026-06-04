@@ -51,10 +51,7 @@ function PaymentsHeader({
     <div className="w-full bg-[var(--uc-surface)]">
       <div className="px-[24px] pb-[20px]">
         <div className="flex min-h-[32px] items-start gap-[8px]">
-          <h1
-            className="flex-1 min-w-0 font-['UniCredit',sans-serif] font-bold text-[var(--uc-text)]"
-            style={{ fontSize: "28px", lineHeight: "normal" }}
-          >
+          <h1 className="uc-type-h1 flex-1 min-w-0 text-[var(--uc-text)]">
             {title}
           </h1>
 

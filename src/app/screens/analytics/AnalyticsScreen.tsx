@@ -103,8 +103,7 @@ function AnalyticsHeader({ onMessagesClick }: { onMessagesClick?: () => void }) 
       <div className="px-[24px] pb-[20px]">
         <div className="flex min-h-[32px] items-start gap-[8px]">
           <h1
-            className="min-w-0 flex-1 font-['UniCredit',sans-serif] font-bold text-[var(--uc-text)]"
-            style={{ fontSize: "28px", lineHeight: "normal" }}
+            className="uc-type-h1 min-w-0 flex-1 text-[var(--uc-text)]"
           >
             {t("runtime.analytics.title", "My Spendings")}
           </h1>
@@ -133,14 +132,14 @@ function MonthSelector({
 
   return (
     <section className="overflow-hidden px-[24px]">
-      <p className="font-['UniCredit',sans-serif] text-[16px] font-bold leading-normal text-[var(--uc-text-muted)]">
+      <p className="uc-type-n4-strong text-[var(--uc-text-muted)]">
         {t("runtime.analytics.dataFor", "Data For")}
       </p>
       <div className="mt-[4px] flex w-[327px] items-baseline gap-[96px]">
-        <h2 className="shrink-0 font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">
+        <h2 className="uc-type-h1 shrink-0 text-[var(--uc-text)]">
           {leftLabel}
         </h2>
-        <span className="shrink-0 font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text-muted)]">
+        <span className="uc-type-h1 shrink-0 text-[var(--uc-text-muted)]">
           {rightLabel}
         </span>
       </div>
@@ -484,11 +483,11 @@ function AnalyticsSummaryBars({
       <div className="absolute left-[24px] right-[24px] top-[120px] border-t border-dashed border-[var(--uc-border)]" />
 
       <div className="absolute left-[52px] top-[58px] w-[92px] font-['UniCredit',sans-serif]">
-        <p className="text-[14px] font-bold uppercase leading-normal text-[var(--uc-text-muted)]">{t("runtime.analytics.inflow", "Inflow")}</p>
-        <p className="mt-[6px] text-[14px] font-bold leading-normal text-[var(--uc-text)]">
+        <p className="uc-type-n5-strong uppercase text-[var(--uc-text-muted)]">{t("runtime.analytics.inflow", "Inflow")}</p>
+        <p className="uc-type-n5-strong mt-[6px] text-[var(--uc-text)]">
           {formatMoneyNumber(summary.incomeTotal, country)}
         </p>
-        <p className="text-[14px] font-bold leading-normal text-[var(--uc-text)]">{summary.currency}</p>
+        <p className="uc-type-n5-strong text-[var(--uc-text)]">{summary.currency}</p>
       </div>
 
       <div
@@ -502,16 +501,16 @@ function AnalyticsSummaryBars({
       />
 
       <div className="absolute left-[214px] top-[74px] w-[132px] font-['UniCredit',sans-serif]">
-        <p className="text-[14px] font-bold uppercase leading-normal text-[var(--uc-text-muted)]">{t("runtime.analytics.outflow", "Outflow")}</p>
-        <p className="mt-[4px] text-[14px] font-bold leading-normal text-[var(--uc-text)]">
+        <p className="uc-type-n5-strong uppercase text-[var(--uc-text-muted)]">{t("runtime.analytics.outflow", "Outflow")}</p>
+        <p className="uc-type-n5-strong mt-[4px] text-[var(--uc-text)]">
           {formatMoneyNumber(summary.spendingTotal, country)} {summary.currency}
         </p>
       </div>
 
-      <div className="absolute left-[104px] top-[136px] w-[68px] text-right font-['UniCredit',sans-serif] text-[14px] font-bold uppercase leading-normal text-[var(--uc-text)]">
+      <div className="uc-type-n5-strong absolute left-[104px] top-[136px] w-[68px] text-right uppercase text-[var(--uc-text)]">
         {t("runtime.analytics.incomes", "Incomes")}
       </div>
-      <div className="absolute left-[182px] top-[136px] text-left font-['UniCredit',sans-serif] text-[14px] font-bold uppercase leading-normal text-[var(--uc-text)]">
+      <div className="uc-type-n5-strong absolute left-[182px] top-[136px] text-left uppercase text-[var(--uc-text)]">
         {t("runtime.analytics.spendings", "Spendings")}
       </div>
     </section>
@@ -534,13 +533,13 @@ function CategoryAmount({
   const color = direction === "out" ? "var(--uc-text)" : "var(--uc-text)";
 
   return (
-    <p className="text-right font-['UniCredit',sans-serif] font-bold leading-normal" style={{ color }}>
-      <span className="text-[22px]">
+    <p className="uc-type-n2-strong text-right leading-normal" style={{ color }}>
+      <span>
         {sign}
         {amountParts.integer}
       </span>
-      <span className="text-[22px]">{amountParts.separator}</span>
-      <span className="text-[14px] uppercase">
+      <span>{amountParts.separator}</span>
+      <span className="uc-type-n5 uppercase">
         {amountParts.decimals} {currency}
       </span>
     </p>
@@ -565,7 +564,7 @@ function MoneyCategorySection({
 
   return (
     <section className="pt-[20px]" data-money-section={direction}>
-      <h2 className="px-[24px] font-['UniCredit',sans-serif] text-[32px] font-bold leading-normal text-[var(--uc-text)]">
+      <h2 className="px-[24px] text-[32px] font-bold leading-normal text-[var(--uc-text)]">
         {title}
       </h2>
 
@@ -597,7 +596,7 @@ function MoneyCategorySection({
                   />
 
                   <div className="relative z-[1] max-w-[255px] py-[8px] text-right">
-                    <p className="font-['UniCredit',sans-serif] text-[14px] font-bold uppercase leading-normal tracking-[0.4px] text-[var(--uc-text-muted)]">
+                    <p className="uc-type-n5-strong uppercase leading-normal tracking-[0.4px] text-[var(--uc-text-muted)]">
                       {getCategoryDisplayLabel(category.category, t)}
                     </p>
                     <CategoryAmount
@@ -613,7 +612,7 @@ function MoneyCategorySection({
           })}
         </div>
       ) : (
-        <p className="px-[24px] pt-[20px] font-['UniCredit',sans-serif] text-[14px] font-normal leading-normal text-[var(--uc-text-muted)]">
+        <p className="uc-type-n5 px-[24px] pt-[20px] text-[var(--uc-text-muted)]">
           {t("runtime.analytics.noTransactionsForPeriod", "No transactions for this period")}
         </p>
       )}

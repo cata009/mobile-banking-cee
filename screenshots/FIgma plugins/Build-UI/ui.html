@@ -1,0 +1,487 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        font-size: 12px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--figma-color-text, #222222);
+        background: var(--figma-color-bg, #ffffff);
+      }
+
+      .panel {
+        display: grid;
+        grid-template-rows: auto auto 1fr auto;
+        height: 100vh;
+        min-height: 0;
+      }
+
+      header {
+        padding: 18px 18px 12px;
+        border-bottom: 1px solid var(--figma-color-border, #d8d8d8);
+      }
+
+      h1 {
+        margin: 0 0 6px;
+        font-size: 16px;
+        line-height: 1.25;
+      }
+
+      p {
+        margin: 0;
+        color: var(--figma-color-text-secondary, #666666);
+        line-height: 1.45;
+      }
+
+      .options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 14px;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--figma-color-border, #d8d8d8);
+      }
+
+      .option-group {
+        display: grid;
+        gap: 6px;
+        align-content: start;
+      }
+
+      .option-group strong {
+        font-size: 11px;
+        color: var(--figma-color-text-secondary, #666666);
+        text-transform: uppercase;
+      }
+
+      label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 28px;
+      }
+
+      input[type="checkbox"],
+      input[type="radio"] {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+      }
+
+      input[type="number"] {
+        width: 72px;
+        height: 28px;
+        border: 1px solid var(--figma-color-border, #d8d8d8);
+        border-radius: 6px;
+        padding: 0 8px;
+        color: var(--figma-color-text, #222222);
+        background: var(--figma-color-bg-secondary, #f7f7f7);
+        font: inherit;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        min-height: 0;
+        padding: 14px 18px 0;
+      }
+
+      .status {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 30px;
+        color: var(--figma-color-text-secondary, #666666);
+      }
+
+      .status strong {
+        color: var(--figma-color-text, #222222);
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 0;
+        resize: none;
+        border: 1px solid var(--figma-color-border, #d8d8d8);
+        border-radius: 8px;
+        padding: 12px;
+        color: var(--figma-color-text, #222222);
+        background: var(--figma-color-bg-secondary, #f7f7f7);
+        font:
+          11px / 1.5 "SFMono-Regular",
+          Consolas,
+          "Liberation Mono",
+          Menlo,
+          monospace;
+      }
+
+      .warnings {
+        min-height: 28px;
+        padding-top: 8px;
+        overflow: hidden;
+        color: var(--figma-color-text-warning, #8a5800);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      footer {
+        display: flex;
+        gap: 8px;
+        padding: 14px 18px 18px;
+      }
+
+      button {
+        display: inline-flex;
+        height: 34px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid transparent;
+        border-radius: 7px;
+        padding: 0 12px;
+        font: inherit;
+        font-weight: 700;
+      }
+
+      button.primary {
+        flex: 1;
+        color: var(--figma-color-text-onbrand, #ffffff);
+        background: var(--figma-color-bg-brand, #18a0fb);
+      }
+
+      button.secondary {
+        color: var(--figma-color-text, #222222);
+        background: var(--figma-color-bg-secondary, #f4f4f4);
+        border-color: var(--figma-color-border, #d8d8d8);
+      }
+
+      button:disabled {
+        opacity: 0.45;
+      }
+
+      button:active:not(:disabled) {
+        transform: translateY(1px);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="panel">
+      <header>
+        <h1>Build-UI</h1>
+        <p>
+          Paste JSON, alege destinatia, apoi construieste ecranul ca layer-e editabile.
+        </p>
+      </header>
+
+      <section class="options">
+        <div class="option-group">
+          <strong>Destination</strong>
+          <label>
+            <input type="radio" name="targetMode" value="auto" checked />
+            Auto: selected frame or new
+          </label>
+          <label>
+            <input type="radio" name="targetMode" value="selected" />
+            Require selected frame
+          </label>
+          <label>
+            <input type="radio" name="targetMode" value="new" />
+            Always create new frame
+          </label>
+        </div>
+
+        <div class="option-group">
+          <strong>New frame width</strong>
+          <label>
+            <input type="radio" name="newFrameWidth" value="393" checked />
+            393 px
+          </label>
+          <label>
+            <input type="radio" name="newFrameWidth" value="375" />
+            375 px
+          </label>
+          <label>
+            <input type="radio" name="newFrameWidth" value="json" />
+            JSON width
+          </label>
+        </div>
+
+        <div class="option-group">
+          <strong>Layout mode</strong>
+          <label>
+            <input type="radio" name="autoLayoutMode" value="smart" checked />
+            Smart hybrid
+          </label>
+          <label>
+            <input type="radio" name="autoLayoutMode" value="off" />
+            Pixel safe
+          </label>
+          <label>
+            <input type="radio" name="autoLayoutMode" value="explicit" />
+            Trust JSON layout
+          </label>
+        </div>
+
+        <div class="option-group">
+          <strong>Build behavior</strong>
+          <label>
+            <input id="removePreviousOutput" type="checkbox" checked />
+            Remove previous Build-UI output
+          </label>
+
+          <label>
+            <input id="clearFrame" type="checkbox" />
+            Clear selected frame first
+          </label>
+
+          <label>
+            <input id="useSelectedFrameAsRoot" type="checkbox" checked />
+            Use target frame as root
+          </label>
+
+          <label>
+            <input id="fitToFrame" type="checkbox" checked />
+            Scale to target width
+          </label>
+        </div>
+
+        <div class="option-group">
+          <strong>Layer details</strong>
+          <label>
+            <input id="autoResizeHeight" type="checkbox" checked />
+            Auto height from content
+          </label>
+
+          <label>
+            Bottom padding
+            <input id="bottomPadding" type="number" min="0" max="240" value="24" />
+          </label>
+
+          <label>
+            <input id="renderHiddenLayers" type="checkbox" checked />
+            Render hidden JSON layers
+          </label>
+
+          <label>
+            <input id="lockGeneratedLayers" type="checkbox" />
+            Lock generated layers
+          </label>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div class="status">
+          <span id="summary">Gata. Selecteaza un frame sau lasa pluginul sa creeze unul nou.</span>
+          <strong id="meta"></strong>
+        </div>
+        <textarea id="json" spellcheck="false" placeholder="Paste JSON aici. Accepta Component-E JSON, root, roots[], screen sau children[]."></textarea>
+        <div id="warnings" class="warnings"></div>
+      </section>
+
+      <footer>
+        <button id="build" class="primary">Build UI</button>
+        <button id="sample" class="secondary">Sample</button>
+        <button id="clearJson" class="secondary">Clear</button>
+        <button id="cancel" class="secondary">Close</button>
+      </footer>
+    </main>
+
+    <script>
+      const jsonBox = document.getElementById('json')
+      const summary = document.getElementById('summary')
+      const meta = document.getElementById('meta')
+      const warnings = document.getElementById('warnings')
+      const buildButton = document.getElementById('build')
+
+      const sampleJson = {
+        screen: {
+          name: 'Mobile Home',
+          width: 390,
+          height: 844,
+          background: '#F6F2EA',
+        },
+        children: [
+          {
+            type: 'text',
+            name: 'Greeting',
+            x: 24,
+            y: 56,
+            width: 260,
+            height: 38,
+            characters: 'Good morning',
+            fontSize: 30,
+            color: '#1D1D1F',
+          },
+          {
+            type: 'text',
+            name: 'Subtitle',
+            x: 24,
+            y: 100,
+            width: 312,
+            height: 22,
+            characters: 'Your design brief is ready.',
+            fontSize: 15,
+            color: '#68635D',
+          },
+          {
+            type: 'rectangle',
+            name: 'Main Card',
+            x: 20,
+            y: 156,
+            width: 350,
+            height: 176,
+            fill: '#FFFFFF',
+            radius: 24,
+            stroke: '#E6DED3',
+            strokeWeight: 1,
+            shadow: {
+              color: 'rgba(32, 22, 10, 0.14)',
+              y: 12,
+              blur: 32,
+            },
+          },
+          {
+            type: 'text',
+            name: 'Card Title',
+            x: 44,
+            y: 188,
+            width: 240,
+            height: 28,
+            characters: 'Build-UI works',
+            fontSize: 22,
+            color: '#1D1D1F',
+          },
+          {
+            type: 'text',
+            name: 'Card Body',
+            x: 44,
+            y: 224,
+            width: 272,
+            height: 56,
+            characters: 'Paste a structured JSON and this plugin turns it into editable Figma layers.',
+            fontSize: 14,
+            color: '#67615A',
+          },
+          {
+            type: 'ellipse',
+            name: 'Accent',
+            x: 300,
+            y: 188,
+            width: 34,
+            height: 34,
+            fill: '#18A0FB',
+          },
+        ],
+      }
+
+      function getOptions() {
+        return {
+          targetMode: document.querySelector('input[name="targetMode"]:checked').value,
+          newFrameWidth: document.querySelector('input[name="newFrameWidth"]:checked').value,
+          autoLayoutMode: document.querySelector('input[name="autoLayoutMode"]:checked').value,
+          removePreviousOutput: document.getElementById('removePreviousOutput').checked,
+          clearFrame: document.getElementById('clearFrame').checked,
+          useSelectedFrameAsRoot: document.getElementById('useSelectedFrameAsRoot').checked,
+          fitToFrame: document.getElementById('fitToFrame').checked,
+          autoResizeHeight: document.getElementById('autoResizeHeight').checked,
+          bottomPadding: parseInt(document.getElementById('bottomPadding').value, 10) || 24,
+          renderHiddenLayers: document.getElementById('renderHiddenLayers').checked,
+          lockGeneratedLayers: document.getElementById('lockGeneratedLayers').checked,
+        }
+      }
+
+      function setStatus(text, detail = '', warning = '') {
+        summary.textContent = text
+        meta.textContent = detail
+        warnings.textContent = warning
+      }
+
+      function formatBytes(value) {
+        if (value < 1024) {
+          return `${value} B`
+        }
+
+        return `${Math.round(value / 1024)} KB`
+      }
+
+      buildButton.onclick = () => {
+        const json = jsonBox.value.trim()
+        if (!json) {
+          setStatus('Pasteaza JSON-ul inainte sa construiesti.', '', '')
+          return
+        }
+
+        try {
+          JSON.parse(json)
+        } catch (error) {
+          setStatus('JSON invalid.', '', error.message)
+          return
+        }
+
+        buildButton.disabled = true
+        setStatus('Trimit JSON-ul catre plugin...', formatBytes(json.length), '')
+        parent.postMessage({ pluginMessage: { type: 'build-ui', json, options: getOptions() } }, '*')
+      }
+
+      document.getElementById('sample').onclick = () => {
+        jsonBox.value = JSON.stringify(sampleJson, null, 2)
+        setStatus('Sample JSON incarcat.', formatBytes(jsonBox.value.length), '')
+      }
+
+      document.getElementById('clearJson').onclick = () => {
+        jsonBox.value = ''
+        setStatus('Gata. Selecteaza un frame sau lasa pluginul sa creeze unul nou.', '', '')
+      }
+
+      document.getElementById('cancel').onclick = () => {
+        parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
+      }
+
+      jsonBox.addEventListener('input', () => {
+        const length = jsonBox.value.length
+        meta.textContent = length > 0 ? formatBytes(length) : ''
+      })
+
+      onmessage = (event) => {
+        const message = event.data.pluginMessage
+        if (!message) {
+          return
+        }
+
+        if (message.type === 'status') {
+          setStatus(message.message, meta.textContent, '')
+          return
+        }
+
+        if (message.type === 'built') {
+          const result = message.summary
+          buildButton.disabled = false
+          const warningText = result.warnings.length > 0 ? result.warnings.slice(0, 3).join(' | ') : ''
+          setStatus(`Creat ${result.created} layer-e in "${result.targetName}".`, `${result.skipped} skipped`, warningText)
+          return
+        }
+
+        if (message.type === 'error') {
+          buildButton.disabled = false
+          setStatus('Nu am putut construi UI-ul.', '', message.message)
+        }
+      }
+    </script>
+  </body>
+</html>

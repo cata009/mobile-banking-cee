@@ -174,6 +174,42 @@ const EN_RUNTIME: RuntimeTranslations = {
       },
     },
   },
+  investments: {
+    title: "Investment",
+    totalValue: "Total value",
+    performance: "Performance",
+    value: "Value",
+    total: "Total",
+    allProducts: "ALL PRODUCTS",
+    activeSecurities: "ACTIVE SECURITIES",
+    inactiveSecurities: "INACTIVE SECURITIES",
+    emptyTitle: "No investment products yet",
+    emptyDescription: "Your portfolio value will appear here when investment products are available.",
+    tabs: {
+      performance: "PERFORMANCE",
+      productType: "PRODUCT TYPE",
+      currency: "CURRENCY",
+      assetClass: "ASSET CLASS",
+      accountList: "ACCOUNT LIST",
+    },
+    distributionTitles: {
+      productType: "PRODUCT TYPE DISTRIBUTION",
+      currency: "CURRENCY DISTRIBUTION",
+      assetClass: "ASSET CLASS DISTRIBUTION",
+      accountList: "ACCOUNT LIST DISTRIBUTION",
+    },
+    actions: {
+      history: "History",
+      toApprove: "To approve",
+      downloadReport: "Download\nReport",
+      invest: "Invest",
+    },
+    fundBanner: {
+      title: "Find out the best fund for you",
+      description: "Discover our suggestions",
+      action: "GO TO FUNDS WINDOW",
+    },
+  },
   messages: {
     title: "Messages",
     inbox: "Inbox",
@@ -191,6 +227,7 @@ const EN_RUNTIME: RuntimeTranslations = {
   documents: {
     title: "Documents",
     newBadge: "NEW",
+    legalLabel: "Legal",
     rows: {
       "salary-transfer-advice": { title: "SALARY TRANSFER", description: "Salary transfer advice" },
       "transfer-confirmation": { title: "TRANSFER CONFIRMATION", description: "Transfer confirmation" },
@@ -199,6 +236,16 @@ const EN_RUNTIME: RuntimeTranslations = {
       "account-confirmation": { title: "ACCOUNT CONFIRMATION", description: "Account confirmation" },
       "tax-payment-receipt": { title: "TAX PAYMENT RECEIPT", description: "Tax payment receipt" },
       "loan-schedule-update": { title: "LOAN SCHEDULE", description: "Loan schedule update" },
+    },
+    deleteDialog: {
+      title: "Delete document",
+      body: "Are you sure you want to delete this document?",
+      confirm: "Delete",
+    },
+    legalDeleteDialog: {
+      title: "Info",
+      body: "The selected file is marked as legal and cannot be deleted.",
+      confirm: "OK",
     },
   },
   settings: {
@@ -393,6 +440,14 @@ function mergeRuntime(base: RuntimeTranslations, override?: DeepPartial<RuntimeT
       cards: { ...base.productsMenu.cards, ...override.productsMenu?.cards },
       offers: { ...base.productsMenu.offers, ...override.productsMenu?.offers },
     },
+    investments: {
+      ...base.investments,
+      ...override.investments,
+      tabs: { ...base.investments.tabs, ...override.investments?.tabs },
+      distributionTitles: { ...base.investments.distributionTitles, ...override.investments?.distributionTitles },
+      actions: { ...base.investments.actions, ...override.investments?.actions },
+      fundBanner: { ...base.investments.fundBanner, ...override.investments?.fundBanner },
+    },
     messages: {
       ...base.messages,
       ...override.messages,
@@ -402,6 +457,8 @@ function mergeRuntime(base: RuntimeTranslations, override?: DeepPartial<RuntimeT
       ...base.documents,
       ...override.documents,
       rows: { ...base.documents.rows, ...override.documents?.rows },
+      deleteDialog: { ...base.documents.deleteDialog, ...override.documents?.deleteDialog },
+      legalDeleteDialog: { ...base.documents.legalDeleteDialog, ...override.documents?.legalDeleteDialog },
     },
     settings: {
       ...base.settings,

@@ -51,10 +51,10 @@ export default function AccountTransactionRow({
       <div className="flex shrink-0 items-center gap-[16px]">
         {showDate && (
           <div className="flex flex-col items-center gap-[2px]">
-            <p className="font-['UniCredit',sans-serif] text-center text-[18px] font-bold leading-[20px] text-[var(--uc-text)]">
+            <p className="uc-type-h2 text-center leading-[20px] text-[var(--uc-text)]">
               {transaction.day}
             </p>
-            <p className="font-['UniCredit',sans-serif] text-center text-[14px] font-bold leading-[15px] text-[var(--uc-text-muted)]">
+            <p className="uc-type-n5-strong text-center leading-[15px] text-[var(--uc-text-muted)]">
               {transaction.month}
             </p>
           </div>
@@ -64,16 +64,16 @@ export default function AccountTransactionRow({
       </div>
 
       <div className="flex w-[247px] shrink-0 flex-col items-end gap-[4px]">
-        <p className="font-['UniCredit',sans-serif] text-right text-[16px] font-normal leading-[18px] text-[var(--uc-text)]">
+        <p className="uc-type-n4 text-right leading-[18px] text-[var(--uc-text)]">
           {transaction.label}
         </p>
         <p
-          className="text-right font-['UniCredit',sans-serif] font-bold leading-[22px]"
+          className="uc-type-n2-strong text-right leading-[22px]"
           style={{ color: amountColor }}
         >
-          <span className="text-[20px]">{sign}{amountParts.integer}</span>
-          <span className="text-[20px] tracking-[0.3px]">{amountParts.separator}</span>
-          <span className="text-[14px] uppercase">{amountParts.decimals} {currency}</span>
+          <span>{sign}{amountParts.integer}</span>
+          <span className="tracking-[0.3px]">{amountParts.separator}</span>
+          <span className="uc-type-n5 uppercase">{amountParts.decimals} {currency}</span>
         </p>
       </div>
     </button>

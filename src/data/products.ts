@@ -186,7 +186,10 @@ export const mockProducts: Product[] = [
     name: 'Investment Portfolio',
     accountNumber: '7890123456789012',
     balance: 42500.00,
-    currency: 'CZK'
+    currency: 'CZK',
+    portfolioValue: 42500.00,
+    totalGainLoss: 728.45,
+    totalGainLossPercentage: 1.74
   }
 ];
 

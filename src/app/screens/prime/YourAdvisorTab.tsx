@@ -25,7 +25,7 @@ export function YourAdvisorTab() {
   return (
     <div className="flex flex-col gap-[24px] w-full">
       {/* Intro Text */}
-      <p className="font-['UniCredit:Regular',sans-serif] leading-[normal] not-italic text-[18px] text-[var(--uc-static-white)] whitespace-pre-wrap">
+      <p className="uc-type-p1 text-[var(--uc-static-white)] whitespace-pre-wrap">
         {t('prime.advisor.introText')}
       </p>
 
@@ -43,11 +43,11 @@ export function YourAdvisorTab() {
           </div>
 
           {/* Advisor Name */}
-          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[4px] h-full items-start justify-center leading-[normal] min-h-px min-w-px not-italic relative text-[16px] text-[var(--uc-static-white)] whitespace-pre-wrap">
-            <p className="font-['UniCredit:Bold',sans-serif] relative shrink-0 w-full">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[4px] h-full items-start justify-center min-h-px min-w-px relative text-[var(--uc-static-white)] whitespace-pre-wrap">
+            <p className="uc-type-n4-strong relative shrink-0 w-full">
               {t('prime.advisor.yourAdvisor')}
             </p>
-            <p className="font-['UniCredit:Regular',sans-serif] relative shrink-0 w-full">
+            <p className="uc-type-n4 relative shrink-0 w-full">
               {t('prime.advisor.name')}
             </p>
           </div>
@@ -105,7 +105,7 @@ export function YourAdvisorTab() {
                 </div>
 
                 {/* Button Text */}
-                <p className="flex-[1_0_0] font-['UniCredit:Medium',sans-serif] leading-[16px] min-h-px min-w-px not-italic relative text-[14px] text-center text-[var(--uc-static-white)] whitespace-pre-wrap max-w-[79px]">
+                <p className="uc-type-n5-strong flex-[1_0_0] leading-[16px] min-h-px min-w-px relative text-center text-[var(--uc-static-white)] whitespace-pre-wrap max-w-[79px]">
                   {t('prime.advisor.callNow')}
                 </p>
               </div>
@@ -125,7 +125,7 @@ export function YourAdvisorTab() {
                 </div>
 
                 {/* Button Text */}
-                <p className="flex-[1_0_0] font-['UniCredit:Medium',sans-serif] leading-[16px] min-h-px min-w-px not-italic relative text-[14px] text-center text-[var(--uc-static-white)] whitespace-pre-wrap max-w-[79px]">
+                <p className="uc-type-n5-strong flex-[1_0_0] leading-[16px] min-h-px min-w-px relative text-center text-[var(--uc-static-white)] whitespace-pre-wrap max-w-[79px]">
                   {t('prime.advisor.sendEmail')}
                 </p>
               </div>
@@ -134,7 +134,7 @@ export function YourAdvisorTab() {
         </div>
 
         {/* Availability Text */}
-        <p className="font-['UniCredit:Regular',sans-serif] leading-[normal] min-w-full not-italic relative shrink-0 text-[14px] text-center text-[var(--uc-static-white)] w-[min-content] whitespace-pre-wrap">
+        <p className="uc-type-n5 min-w-full relative shrink-0 text-center text-[var(--uc-static-white)] w-[min-content] whitespace-pre-wrap">
           {t('prime.advisor.availability')}
         </p>
       </div>

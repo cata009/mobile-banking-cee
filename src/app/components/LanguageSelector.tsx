@@ -78,7 +78,7 @@ export default function LanguageSelector({ onBack }: LanguageSelectorProps) {
             onClick={handleSave}
             className="w-full h-[48px] bg-[var(--uc-action)] rounded-[4px] flex items-center justify-center cursor-pointer transition-opacity hover:opacity-90"
           >
-            <span className="font-['UniCredit',sans-serif] text-[18px] text-[var(--uc-static-white)] font-bold leading-[normal]">
+            <span className="uc-type-h2 text-[var(--uc-static-white)]">
               {tempT('languageSelector.save')}
             </span>
           </button>

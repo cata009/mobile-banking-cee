@@ -56,7 +56,7 @@ function AccountActionItem({
       <span className="flex h-[32px] w-[32px] items-center justify-center" data-ds-label="Account action icon 32x32">
         <AppIcon name={iconName} color={iconColor} />
       </span>
-      <span className="whitespace-pre-line font-['UniCredit',sans-serif] text-center text-[14px] font-normal leading-[15px] text-[var(--uc-text)]">
+      <span className="uc-type-p2 whitespace-pre-line text-center leading-[15px] text-[var(--uc-text)]">
         {label}
       </span>
     </button>

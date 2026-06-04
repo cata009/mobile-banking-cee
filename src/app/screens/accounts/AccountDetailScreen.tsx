@@ -80,7 +80,7 @@ function CollapsingAccountHeader({
           <AppIcon name="back-heavy" color="var(--uc-text)" />
         </button>
         <h1
-          className="pointer-events-none truncate text-center font-['UniCredit',sans-serif] text-[16px] font-bold leading-normal text-[var(--uc-text)]"
+          className="uc-type-n4-strong pointer-events-none truncate text-center text-[var(--uc-text)]"
           style={{
             opacity: progress,
             transform: `translateY(${(1 - progress) * 6}px)`,
@@ -434,7 +434,7 @@ export default function AccountDetailScreen({
           className="flex w-[375px] items-center px-[16px] py-[8px]"
           style={{ opacity: largeTitleOpacity }}
         >
-          <h1 className="font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">
+          <h1 className="uc-type-h1 text-[var(--uc-text)]">
             {t("runtime.accounts.title", "Accounts")}
           </h1>
         </div>
@@ -570,7 +570,7 @@ export default function AccountDetailScreen({
               </div>
             ))
           ) : (
-            <div className="px-[16px] py-[32px] text-center font-['UniCredit',sans-serif] text-[16px] font-bold leading-normal text-[var(--uc-text-muted)]">
+            <div className="uc-type-n4-strong px-[16px] py-[32px] text-center text-[var(--uc-text-muted)]">
               {hasTransactionSearch ? t("runtime.accounts.noTransactionsFound", "No transactions found") : null}
             </div>
           )}

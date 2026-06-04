@@ -18,7 +18,7 @@ export default function LanguageSelectorButton({ onClick, language: providedLang
     >
       {/* Language code */}
       <p 
-        className="text-[var(--uc-static-white)] text-right font-['UniCredit'] text-[14px] font-bold leading-[normal]"
+        className="uc-type-n5-strong text-right text-[var(--uc-static-white)]"
       >
         {language.toUpperCase()}
       </p>

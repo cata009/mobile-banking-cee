@@ -63,7 +63,7 @@ export default function BottomNavigation({
               <span className={item.iconBoxClassName ?? "grid size-[32px] place-items-center"}>
                 <AppIcon name={item.icon} color={color} />
               </span>
-              <span className={`font-['UniCredit',sans-serif] text-center text-[14px] font-normal leading-[15px] ${isActive ? "text-[var(--uc-action)]" : "text-[var(--uc-text-muted)]"}`}>
+              <span className={`uc-type-p2 text-center leading-[15px] ${isActive ? "text-[var(--uc-action)]" : "text-[var(--uc-text-muted)]"}`}>
                 {t(item.labelKey)}
               </span>
             </span>

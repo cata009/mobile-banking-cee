@@ -35,7 +35,7 @@ export function MoreCardBase({ title, image, onClick, badgeCount }: MoreCardBase
 
       {/* Title - top left padding */}
       <div className="absolute inset-0 p-[16px] flex items-start">
-        <p className="font-['UniCredit:Bold',sans-serif] text-[18px] text-[var(--uc-text)] leading-[normal] text-left whitespace-pre-wrap z-10 relative">
+        <p className="uc-type-h2 text-[var(--uc-text)] text-left whitespace-pre-wrap z-10 relative">
           {title}
         </p>
       </div>
@@ -46,10 +46,7 @@ export function MoreCardBase({ title, image, onClick, badgeCount }: MoreCardBase
           <div className="absolute right-0 top-0 h-[30px] w-[30px] rounded-bl-[30px] bg-[var(--uc-brand)]" />
           {/* Badge number - centered in top-right quarter */}
           <div className="absolute right-[7px] top-[4px]">
-            <span 
-              className="font-['UniCredit:Bold',sans-serif] text-[var(--uc-static-white)] text-[14px] leading-none block"
-              style={{ fontWeight: 700 }}
-            >
+            <span className="uc-type-n5-strong block leading-none text-[var(--uc-static-white)]">
               {badgeCount > 99 ? '99' : badgeCount}
             </span>
           </div>

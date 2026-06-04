@@ -1,0 +1,571 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      :root {
+        color-scheme: light;
+        --red: #e2001a;
+        --red-dark: #b90016;
+        --ink: #262626;
+        --muted: #666666;
+        --line: #d7d7d7;
+        --surface: #ffffff;
+        --soft: #f5f5f5;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--surface);
+        color: var(--ink);
+        font-family: Inter, Arial, sans-serif;
+        font-size: 12px;
+      }
+
+      .shell {
+        display: grid;
+        gap: 14px;
+        padding: 16px;
+      }
+
+      header {
+        display: grid;
+        gap: 4px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 18px;
+        line-height: 24px;
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 18px;
+      }
+
+      .tabs {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        padding: 4px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--soft);
+      }
+
+      .tab {
+        height: 34px;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--ink);
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .tab.active {
+        background: var(--surface);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+      }
+
+      .panel {
+        display: none;
+        gap: 12px;
+      }
+
+      .panel.active {
+        display: grid;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        font-weight: 700;
+      }
+
+      textarea,
+      select,
+      input[type="number"] {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #ffffff;
+        color: var(--ink);
+        font: inherit;
+      }
+
+      textarea {
+        min-height: 260px;
+        resize: vertical;
+        padding: 10px;
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 11px;
+        line-height: 16px;
+      }
+
+      select,
+      input[type="number"] {
+        height: 34px;
+        padding: 0 9px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+
+      .checks {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px 12px;
+      }
+
+      .check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      button {
+        height: 36px;
+        border: 0;
+        border-radius: 6px;
+        padding: 0 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .primary {
+        flex: 1;
+        background: var(--red);
+        color: #ffffff;
+      }
+
+      .primary:hover {
+        background: var(--red-dark);
+      }
+
+      .secondary {
+        background: var(--soft);
+        color: var(--ink);
+        border: 1px solid var(--line);
+      }
+
+      .status {
+        min-height: 20px;
+        padding: 8px 10px;
+        border-radius: 6px;
+        background: var(--soft);
+        color: var(--muted);
+        line-height: 16px;
+      }
+
+      .status.error {
+        background: #fff0f2;
+        color: var(--red);
+      }
+
+      .status.success {
+        background: #eef8f4;
+        color: #007a5a;
+      }
+
+      .diagnostics {
+        display: grid;
+        gap: 6px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fbfbfb;
+      }
+
+      .diagnostics[hidden] {
+        display: none;
+      }
+
+      .diagnostics-title {
+        font-weight: 700;
+      }
+
+      .diagnostics-list {
+        display: grid;
+        gap: 4px;
+        margin: 0;
+        padding-left: 16px;
+        color: var(--muted);
+        line-height: 16px;
+      }
+
+      .hint {
+        color: var(--muted);
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <h1>Component-E Build UI Bridge</h1>
+        <p>Build editable Figma screens from <strong>build-ui.screen.v1</strong> JSON or extract selected Figma layers into the same schema.</p>
+      </header>
+
+      <nav class="tabs" aria-label="Plugin mode">
+        <button class="tab active" data-tab="build" type="button">Build from JSON</button>
+        <button class="tab" data-tab="extract" type="button">Extract selection</button>
+      </nav>
+
+      <section id="buildPanel" class="panel active">
+        <label for="buildJson">
+          Screen JSON
+          <textarea id="buildJson" spellcheck="false" placeholder="Paste build-ui.screen.v1, Component-E, or Build-UI compatible JSON"></textarea>
+        </label>
+
+        <div class="grid">
+          <label for="targetMode">
+            Destination
+            <select id="targetMode">
+              <option value="auto">Auto: selected or new</option>
+              <option value="selected">Selected frame/component</option>
+              <option value="new">New frame</option>
+            </select>
+          </label>
+          <label for="newFrameWidth">
+            New frame width
+            <select id="newFrameWidth">
+              <option value="json">Use JSON width</option>
+              <option value="393">393 px</option>
+              <option value="375">375 px</option>
+            </select>
+          </label>
+          <label for="layoutMode">
+            Layout mode
+            <select id="layoutMode">
+              <option value="smart">Smart hybrid</option>
+              <option value="pixel">Pixel safe</option>
+              <option value="trust">Trust JSON layout</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="checks">
+          <label class="check"><input id="clearFrame" type="checkbox" checked /> Clear target first</label>
+          <label class="check"><input id="resizeFrame" type="checkbox" checked /> Resize target</label>
+          <label class="check"><input id="removePreviousOutput" type="checkbox" checked /> Remove previous output</label>
+          <label class="check"><input id="fitToFrame" type="checkbox" /> Fit JSON to target width</label>
+          <label class="check"><input id="lockGeneratedLayers" type="checkbox" /> Lock generated layers</label>
+        </div>
+
+        <div class="actions">
+          <button id="buildButton" class="primary" type="button">Build UI</button>
+          <button id="clearBuildButton" class="secondary" type="button">Clear JSON</button>
+        </div>
+      </section>
+
+      <section id="extractPanel" class="panel">
+        <div class="grid">
+          <label for="maxDepth">
+            Max depth
+            <input id="maxDepth" type="number" min="1" max="80" value="24" />
+          </label>
+          <label for="assetLimit">
+            Asset limit
+            <input id="assetLimit" type="number" min="0" max="300" value="120" />
+          </label>
+          <label>
+            Output
+            <span class="hint">Copied manually or by button</span>
+          </label>
+        </div>
+
+        <div class="checks">
+          <label class="check"><input id="includeSvgAssets" type="checkbox" checked /> Include SVG assets</label>
+          <label class="check"><input id="includeImageAssets" type="checkbox" checked /> Include image assets</label>
+          <label class="check"><input id="includePngSnapshot" type="checkbox" /> Include PNG snapshot 2x</label>
+          <label class="check"><input id="includeHidden" type="checkbox" /> Include hidden layers</label>
+        </div>
+
+        <div class="actions">
+          <button id="extractButton" class="primary" type="button">Extract selected layer</button>
+          <button id="copyExtractButton" class="secondary" type="button">Copy JSON</button>
+          <button id="clearExtractButton" class="secondary" type="button">Clear output</button>
+        </div>
+
+        <label for="extractJson">
+          Extracted JSON
+          <textarea id="extractJson" spellcheck="false" readonly placeholder="Select a Figma frame, component, group, or layer, then click Extract selected layer"></textarea>
+        </label>
+      </section>
+
+      <div id="status" class="status">Ready.</div>
+      <section id="diagnostics" class="diagnostics" hidden aria-live="polite">
+        <div id="diagnosticsTitle" class="diagnostics-title">Diagnostics</div>
+        <ul id="diagnosticsList" class="diagnostics-list"></ul>
+      </section>
+    </main>
+
+    <script>
+      const statusBox = document.getElementById("status");
+      const diagnosticsBox = document.getElementById("diagnostics");
+      const diagnosticsTitle = document.getElementById("diagnosticsTitle");
+      const diagnosticsList = document.getElementById("diagnosticsList");
+      const buildJson = document.getElementById("buildJson");
+      const extractJson = document.getElementById("extractJson");
+
+      function setStatus(message, kind = "") {
+        statusBox.textContent = message || "Ready.";
+        statusBox.className = `status ${kind}`.trim();
+      }
+
+      function setDiagnostics(title, lines = []) {
+        const normalizedLines = Array.isArray(lines)
+          ? lines.map((line) => String(line || "").trim()).filter(Boolean)
+          : [];
+
+        diagnosticsTitle.textContent = title || "Diagnostics";
+        diagnosticsList.textContent = "";
+
+        for (const line of normalizedLines) {
+          const item = document.createElement("li");
+          item.textContent = line;
+          diagnosticsList.appendChild(item);
+        }
+
+        diagnosticsBox.hidden = normalizedLines.length === 0;
+      }
+
+      function summarizeBuildDiagnostics(summary) {
+        const lines = [];
+
+        if (summary.preflight) {
+          lines.push(`Preflight: ${summary.preflight.layerCount || 0} layer(s), ${summary.preflight.textLayerCount || 0} text layer(s), ${summary.preflight.assetCount || 0} asset(s).`);
+        }
+
+        if (Array.isArray(summary.warnings) && summary.warnings.length > 0) {
+          lines.push(...summary.warnings.map((warning) => `Warning: ${warning}`));
+        }
+
+        return lines;
+      }
+
+      function summarizeExtractDiagnostics(summary, json) {
+        const lines = [];
+
+        if (summary.name) {
+          lines.push(`Root: ${summary.name}.`);
+        }
+        if (summary.warnings) {
+          lines.push(`${summary.warnings} extraction warning(s).`);
+        }
+
+        try {
+          const payload = JSON.parse(json);
+          if (Array.isArray(payload.components) && payload.components.length > 0) {
+            lines.push(`Component companion entries: ${payload.components.length}.`);
+          }
+          if (Array.isArray(payload.variantSets) && payload.variantSets.length > 0) {
+            lines.push(`Variant set companion entries: ${payload.variantSets.length}.`);
+          }
+          if (payload.exports?.rootPng2xAssetRefs?.length > 0) {
+            lines.push(`PNG snapshot refs: ${payload.exports.rootPng2xAssetRefs.length}.`);
+          }
+          if (Array.isArray(payload.warnings) && payload.warnings.length > 0) {
+            lines.push(...payload.warnings.map((warning) => `Warning: ${warning}`));
+          }
+        } catch (_error) {
+          lines.push("Extracted JSON could not be parsed for diagnostics.");
+        }
+
+        return lines;
+      }
+
+      function post(pluginMessage) {
+        parent.postMessage({ pluginMessage }, "*");
+      }
+
+      function checkboxValue(id) {
+        return document.getElementById(id).checked;
+      }
+
+      function selectValue(id) {
+        return document.getElementById(id).value;
+      }
+
+      function numberValue(id) {
+        const value = Number(document.getElementById(id).value);
+        return Number.isFinite(value) ? value : undefined;
+      }
+
+      for (const tab of document.querySelectorAll(".tab")) {
+        tab.addEventListener("click", () => {
+          const next = tab.dataset.tab;
+          for (const item of document.querySelectorAll(".tab")) {
+            item.classList.toggle("active", item.dataset.tab === next);
+          }
+          document.getElementById("buildPanel").classList.toggle("active", next === "build");
+          document.getElementById("extractPanel").classList.toggle("active", next === "extract");
+        });
+      }
+
+      document.getElementById("buildButton").addEventListener("click", () => {
+        const json = buildJson.value.trim();
+        if (!json) {
+          setStatus("Paste build-ui.screen.v1, Component-E, or Build-UI compatible JSON before building.", "error");
+          return;
+        }
+
+        try {
+          JSON.parse(json);
+        } catch (error) {
+          setStatus(`Invalid JSON: ${error.message}`, "error");
+          setDiagnostics("JSON diagnostics", [error.message]);
+          return;
+        }
+
+        setDiagnostics();
+        setStatus("Building editable Figma layers...");
+        post({
+          type: "build-ui",
+          json,
+          options: {
+            targetMode: selectValue("targetMode"),
+            newFrameWidth: selectValue("newFrameWidth"),
+            layoutMode: selectValue("layoutMode"),
+            clearFrame: checkboxValue("clearFrame"),
+            resizeFrame: checkboxValue("resizeFrame"),
+            removePreviousOutput: checkboxValue("removePreviousOutput"),
+            fitToFrame: checkboxValue("fitToFrame"),
+            lockGeneratedLayers: checkboxValue("lockGeneratedLayers")
+          }
+        });
+      });
+
+      document.getElementById("clearBuildButton").addEventListener("click", () => {
+        buildJson.value = "";
+        setDiagnostics();
+        setStatus("Build JSON cleared.");
+      });
+
+      document.getElementById("extractButton").addEventListener("click", () => {
+        setDiagnostics();
+        setStatus("Extracting selected Figma layers...");
+        post({
+          type: "extract-selection",
+          options: {
+            includeSvgAssets: checkboxValue("includeSvgAssets"),
+            includeImageAssets: checkboxValue("includeImageAssets"),
+            includePngSnapshot: checkboxValue("includePngSnapshot"),
+            includeHidden: checkboxValue("includeHidden"),
+            maxDepth: numberValue("maxDepth"),
+            assetLimit: numberValue("assetLimit")
+          }
+        });
+      });
+
+      async function copyOrDownloadText(text, fileName) {
+        try {
+          await navigator.clipboard.writeText(text);
+          return "clipboard";
+        } catch (_clipboardError) {
+          const helper = document.createElement("textarea");
+          helper.value = text;
+          helper.setAttribute("readonly", "readonly");
+          helper.style.position = "fixed";
+          helper.style.left = "-9999px";
+          document.body.appendChild(helper);
+          helper.focus();
+          helper.select();
+
+          try {
+            if (document.execCommand("copy")) {
+              return "clipboard";
+            }
+          } catch (_legacyError) {
+            // Fall through to download when both clipboard paths are blocked.
+          } finally {
+            helper.remove();
+          }
+
+          const blob = new Blob([text], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+          return "download";
+        }
+      }
+
+      document.getElementById("copyExtractButton").addEventListener("click", async () => {
+        if (!extractJson.value.trim()) {
+          setStatus("There is no extracted JSON to copy.", "error");
+          return;
+        }
+
+        const delivery = await copyOrDownloadText(extractJson.value, "unicredit-figma-selection.json");
+        setStatus(
+          delivery === "clipboard" ? "Extracted JSON copied to clipboard." : "Clipboard blocked. Extracted JSON downloaded.",
+          "success",
+        );
+      });
+
+      document.getElementById("clearExtractButton").addEventListener("click", () => {
+        extractJson.value = "";
+        setDiagnostics();
+        setStatus("Extract output cleared.");
+      });
+
+      window.onmessage = (event) => {
+        const message = event.data.pluginMessage;
+        if (!message) return;
+
+        if (message.type === "error") {
+          setStatus(message.message || "Something went wrong.", "error");
+          setDiagnostics("Error diagnostics", [message.message || "Something went wrong."]);
+          return;
+        }
+
+        if (message.type === "status") {
+          setStatus(message.message || "Working...");
+          return;
+        }
+
+        if (message.type === "built") {
+          const summary = message.summary || {};
+          const warnings = Array.isArray(summary.warnings) ? summary.warnings : [];
+          const warningText = Array.isArray(summary.warnings) && summary.warnings.length > 0
+            ? ` ${warnings.length} warning(s). See diagnostics.`
+            : "";
+          const preflightText = summary.preflight
+            ? ` Preflight: ${summary.preflight.layerCount || 0} layer(s), ${summary.preflight.assetCount || 0} asset(s).`
+            : "";
+          setStatus(`Built ${summary.created || 0} layer(s) in ${summary.targetName || "target frame"}.${preflightText}${warningText}`, "success");
+          setDiagnostics("Build diagnostics", summarizeBuildDiagnostics(summary));
+          return;
+        }
+
+        if (message.type === "extract-result") {
+          extractJson.value = message.json || "";
+          const summary = message.summary || {};
+          setStatus(`Extracted ${summary.nodes || 0} node(s), ${summary.assets || 0} asset(s), ${summary.bytes || 0} byte(s).`, "success");
+          setDiagnostics("Extract diagnostics", summarizeExtractDiagnostics(summary, message.json || ""));
+        }
+      };
+    </script>
+  </body>
+</html>

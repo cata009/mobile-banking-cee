@@ -18,7 +18,7 @@ interface MessagesScreenProps {
 function MessagesSectionTitle({ children }: { children: string }) {
   return (
     <div className="mx-[24px] border-b border-[var(--uc-border-muted)] pb-[5px]">
-      <h2 className="font-['UniCredit',sans-serif] text-[18px] font-bold leading-normal text-[var(--uc-text)]">
+      <h2 className="uc-type-h2 text-[var(--uc-text)]">
         {children}
       </h2>
     </div>
@@ -44,23 +44,23 @@ function MessageListRow({ message }: { message: MessageListItem }) {
   return (
     <div className="grid h-[80px] grid-cols-[32px_1fr_48px_32px] items-center gap-[2px] px-[18px]">
       <div className="text-center">
-        <p className="font-['UniCredit',sans-serif] text-[18px] font-bold leading-[20px] text-[var(--uc-text)]">
+        <p className="uc-type-h2 leading-[20px] text-[var(--uc-text)]">
           {message.day}
         </p>
-        <p className="font-['UniCredit',sans-serif] text-[14px] font-bold leading-[16px] text-[var(--uc-text-muted)]">
+        <p className="uc-type-n5-strong leading-[16px] text-[var(--uc-text-muted)]">
           {message.month}
         </p>
       </div>
       <div className="min-w-0 pl-[6px]">
-        <p className="truncate font-['UniCredit',sans-serif] text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">
+        <p className="uc-type-n4-strong truncate leading-[20px] text-[var(--uc-text)]">
           {message.title}
         </p>
-        <p className="truncate font-['UniCredit',sans-serif] text-[16px] font-normal leading-[22px] text-[var(--uc-text-muted)]">
+        <p className="uc-type-n4 truncate leading-[22px] text-[var(--uc-text-muted)]">
           {message.description}
         </p>
       </div>
       {message.badge ? (
-        <span className="justify-self-center rounded-full bg-[var(--uc-action-soft)] px-[7px] py-[2px] font-['UniCredit',sans-serif] text-[11px] font-bold leading-[14px] text-[var(--uc-action)]">
+        <span className="justify-self-center rounded-full bg-[var(--uc-action-soft)] px-[7px] py-[2px] text-[11px] font-bold leading-[14px] text-[var(--uc-action)]">
           {message.badge}
         </span>
       ) : (

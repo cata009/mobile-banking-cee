@@ -93,7 +93,7 @@ export default function PreLoginActiveScreen({
           </h1>
           
           {/* H2 Subtitle - 18px, regular - 8px gap from H1 */}
-          <h2 className="text-[var(--uc-static-white)] font-['UniCredit'] text-[18px] font-normal leading-[normal]">
+          <h2 className="uc-type-p1 text-[var(--uc-static-white)]">
             {t('preLoginActive.subtitle')}
           </h2>
         </div>

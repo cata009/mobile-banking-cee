@@ -44,10 +44,10 @@ function ConnectedCardRow() {
     <button className="grid w-full grid-cols-[64px_1fr_24px] items-center gap-[16px] py-[18px] text-left">
       <CardThumbnail />
       <div className="min-w-0">
-        <p className="font-['UniCredit',sans-serif] text-[18px] leading-[22px] font-bold uppercase text-[var(--uc-text)]">
+        <p className="uc-type-h2 uppercase leading-[22px] text-[var(--uc-text)]">
           {t("runtime.accounts.detailsInfo.mastercardStandardDebit", "Mastercard Standard Debit")}
         </p>
-        <p className="mt-[2px] font-['UniCredit',sans-serif] text-[20px] leading-[24px] font-normal text-[var(--uc-text-muted)]">
+        <p className="uc-type-n2 mt-[2px] leading-[24px] text-[var(--uc-text-muted)]">
           5545 XXXX XXXX 3250
         </p>
       </div>
@@ -132,7 +132,7 @@ export default function AccountDetailsInfoScreen({
         </div>
 
         <div className="flex justify-center py-[48px]">
-          <button className="font-['UniCredit',sans-serif] text-[16px] leading-[20px] font-bold uppercase text-[var(--uc-action)]">
+          <button className="uc-type-n4-strong leading-[20px] uppercase text-[var(--uc-action)]">
             {t("runtime.actions.showLess", "Show less")}
           </button>
         </div>

@@ -42,13 +42,13 @@ export function BottomSheet({ title, subtitle, meta, children, onClose }: Bottom
             {title ? (
               <h2
                 id={titleId}
-                className="font-['UniCredit',sans-serif] text-[30px] font-bold leading-[34px] text-[var(--uc-text)]"
+                className="uc-type-n1 leading-[34px] text-[var(--uc-text)]"
               >
                 {title}
               </h2>
             ) : null}
             {subtitle ? (
-              <div className="mt-[4px] font-['UniCredit',sans-serif] text-[14px] font-normal text-[var(--uc-text)]">
+              <div className="uc-type-n5 mt-[4px] text-[var(--uc-text)]">
                 {subtitle}
               </div>
             ) : null}

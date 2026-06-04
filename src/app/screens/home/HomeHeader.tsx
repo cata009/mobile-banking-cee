@@ -44,10 +44,8 @@ export default function HomeHeader({
           >
             <PrimeDiamondMark color="var(--uc-static-white)" />
             <span
-              className="font-['UniCredit',sans-serif] text-[var(--uc-static-white)]"
+              className="uc-type-n5-strong text-[var(--uc-static-white)]"
               style={{
-                fontSize: "14px",
-                fontWeight: 700,
                 lineHeight: "16px",
               }}
             >
@@ -65,13 +63,7 @@ export default function HomeHeader({
 
       {showTitle && (
         <div className="px-[24px] pb-[24px]">
-          <h1
-            className="font-['UniCredit',sans-serif] font-bold text-[var(--uc-text)]"
-            style={{
-              fontSize: "28px",
-              lineHeight: "normal",
-            }}
-          >
+          <h1 className="uc-type-h1 text-[var(--uc-text)]">
             {title}
           </h1>
         </div>

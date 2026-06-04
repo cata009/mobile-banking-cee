@@ -70,7 +70,7 @@ export default function AccountSearchBar({
             onFocus={handleInputFocus}
             placeholder={resolvedPlaceholder}
             aria-label={resolvedPlaceholder}
-            className="h-[32px] min-w-0 flex-1 appearance-none bg-transparent font-['UniCredit',sans-serif] text-[14px] font-bold leading-normal text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)] [&::-webkit-search-cancel-button]:hidden"
+            className="uc-type-n5-strong h-[32px] min-w-0 flex-1 appearance-none bg-transparent text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)] [&::-webkit-search-cancel-button]:hidden"
           />
         </label>
         <button

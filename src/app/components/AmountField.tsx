@@ -68,13 +68,13 @@ export default function AmountField({
       >
         <span className="flex min-w-[64px] flex-col">
           <span
-            className="font-['UniCredit',sans-serif] text-[14px] font-normal leading-normal"
+            className="uc-type-n5"
             style={{ color: currencyTitleColor }}
           >
             {currencyLabel}
           </span>
           <span
-            className="mt-[4px] font-['UniCredit',sans-serif] text-[18px] font-normal leading-normal"
+            className="uc-type-p1 mt-[4px]"
             style={{ color: currencyColor }}
           >
             {currency}

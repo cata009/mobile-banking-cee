@@ -21,7 +21,7 @@ export default function ProductCard({
 }: ProductCardProps) {
   return (
     <div 
-      className="flex flex-col items-start gap-[4px] self-stretch bg-[var(--uc-surface-raised)] rounded-[4px] cursor-pointer hover:opacity-90 transition-opacity"
+      className={`flex flex-col items-start gap-[4px] self-stretch rounded-[4px] bg-[var(--uc-surface-raised)] transition-opacity ${onClick ? "cursor-pointer hover:opacity-90" : ""}`}
       style={{
         padding: '16px'
       }}
@@ -37,26 +37,12 @@ export default function ProductCard({
         {/* Title & Account Number */}
         <div className="flex flex-col gap-0 flex-1">
           {/* Title */}
-          <p 
-            className="font-['UniCredit',sans-serif] font-normal"
-            style={{
-              color: 'var(--uc-text)',
-              fontSize: '18px',
-              lineHeight: 'normal'
-            }}
-          >
+          <p className="uc-type-p1 text-[var(--uc-text)]">
             {title}
           </p>
           
           {/* Account Number */}
-          <p 
-            className="font-['UniCredit',sans-serif] font-bold"
-            style={{
-              color: 'var(--uc-text)',
-              fontSize: '14px',
-              lineHeight: 'normal'
-            }}
-          >
+          <p className="uc-type-n5-strong text-[var(--uc-text)]">
             {accountNumber}
           </p>
         </div>
@@ -65,26 +51,12 @@ export default function ProductCard({
       {/* Balance Container */}
       <div className="flex justify-end items-baseline self-stretch">
         {/* Amount */}
-        <span 
-          className="font-['UniCredit',sans-serif] font-bold text-right"
-          style={{
-            color: 'var(--uc-text)',
-            fontSize: '20px',
-            lineHeight: 'normal'
-          }}
-        >
+        <span className="uc-type-n2-strong text-right text-[var(--uc-text)]">
           {amount}
         </span>
         
         {/* Decimals + Currency (no gap) */}
-        <span 
-          className="font-['UniCredit',sans-serif] font-normal text-right"
-          style={{
-            color: 'var(--uc-text)',
-            fontSize: '14px',
-            lineHeight: 'normal'
-          }}
-        >
+        <span className="uc-type-n5 text-right text-[var(--uc-text)]">
           {decimals} {currency}
         </span>
       </div>

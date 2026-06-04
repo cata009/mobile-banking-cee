@@ -46,11 +46,11 @@ export default function CoAppingSessionScreen({
 
         {/* 24px gap între poză și texte */}
         <div className="pt-[24px] flex flex-col gap-[16px]">
-          <p className="font-['UniCredit',sans-serif] text-[16px] text-[var(--uc-primary-main)] leading-relaxed">
+          <p className="uc-type-n4 leading-relaxed text-[var(--uc-primary-main)]">
             {t('coApping.coAppingDescription')}
           </p>
           
-          <p className="font-['UniCredit',sans-serif] text-[16px] text-[var(--uc-primary-main)] leading-relaxed">
+          <p className="uc-type-n4 leading-relaxed text-[var(--uc-primary-main)]">
             {t('coApping.coAppingInstruction')}
           </p>
         </div>

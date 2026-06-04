@@ -102,6 +102,26 @@ export interface TranslationKeys {
       cards: Record<string, string>;
       offers: Record<string, { title: string; description: string }>;
     };
+    investments: {
+      title: string;
+      totalValue: string;
+      performance: string;
+      value: string;
+      total: string;
+      allProducts: string;
+      activeSecurities: string;
+      inactiveSecurities: string;
+      emptyTitle: string;
+      emptyDescription: string;
+      tabs: Record<string, string>;
+      distributionTitles: Record<string, string>;
+      actions: Record<string, string>;
+      fundBanner: {
+        title: string;
+        description: string;
+        action: string;
+      };
+    };
     messages: {
       title: string;
       inbox: string;
@@ -113,7 +133,18 @@ export interface TranslationKeys {
     documents: {
       title: string;
       newBadge: string;
+      legalLabel: string;
       rows: Record<string, { title: string; description: string }>;
+      deleteDialog: {
+        title: string;
+        body: string;
+        confirm: string;
+      };
+      legalDeleteDialog: {
+        title: string;
+        body: string;
+        confirm: string;
+      };
     };
     settings: {
       title: string;

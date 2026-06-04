@@ -1,12 +1,444 @@
 # Current Session
 
-Last updated: 2026-06-02
+Last updated: 2026-06-04
 
 ## Current Focus
 
-Implementing and closing the reduced Phase 1 Reference Platform architecture: release/baseline OS, feature manifests, banking scenarios, entitlements, contract-ready mock repositories, project packs for all product/country combinations, and control-panel integration.
+Implementing the new Investments Portfolio runtime screen for Mobile PI Retail customers, reachable from the Home Investments product card for all supported PI countries except `BA` and `BA_BL`.
+
+Latest Investments Portfolio implementation:
+
+- Follow-up tab distribution implementation on 2026-06-04:
+  - `InvestmentPortfolioTabs` is now a controlled tab strip instead of a static selector row.
+  - `src/app/components/investments/InvestmentDistributionChart.tsx` adds the reusable donut/list distribution component modeled from the supplied Product Type JSON.
+  - `InvestmentsPortfolioScreen` now switches content across:
+    - `Performance`: existing total/performance line chart and period chips.
+    - `Product Type`: grouped by Fund, Bond, Stock, ETF, and Money market.
+    - `Currency`: grouped by the instrument currency, with EUR, local currency, USD, and GBP represented.
+    - `Asset Class`: grouped by Balanced, Fixed income, Equity, and Liquidity.
+    - `Account List`: grouped by security account, including local-currency, EUR, USD, and GBP securities accounts.
+  - Distribution values are derived from the same mock securities allocated from owned `investment_account` value, so the distribution rows and percentages sum back to the current portfolio total.
+  - Product cards now expose the security account, product type, and asset class metadata; instrument values can display in their own currency while portfolio totals remain in local currency.
+  - `src/app/config/investmentsPortfolioConfig.ts` now carries instrument currency, local value/currency, product type, asset class, and security-account metadata for each mock security.
+  - Verification on 2026-06-04:
+    - `npm run build` passed; known Vite chunk-size warning remains.
+    - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=69 screens=24 flows=14`.
+    - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+    - targeted `git diff --check` for the tab-distribution implementation paths passed with only normal Windows LF/CRLF warnings.
+    - static grouping check passed: Product Type, Currency, Asset Class, and Account List distributions each sum to `100%`, with multiple securities accounts and currencies represented.
+    - the dev server responded at `http://127.0.0.1:3001/`; in-app Browser JS execution was not exposed in this resumed tool context, so a fresh runtime click-smoke could not be completed in this turn.
+
+- `src/app/screens/investments/InvestmentsPortfolioScreen.tsx`
+  - added a scrollable Investments page using the shared `PageHeader` and the Figma-supplied structure:
+    - horizontal tabs: `PERFORMANCE`, `PRODUCT TYPE`, `CURRENCY`, `ASSET CLASS`, `ACCOUNT LIST`
+    - calculated `Total value` and `Performance`
+    - portfolio chart
+    - period chips: `1 M`, `3 M`, `1 Y`, `3 Y`, `5Y/MAX`
+    - action bar: `History`, `To approve`, `Download Report`, and the large `Invest` CTA
+    - `ALL PRODUCTS` divider with counter through the shared `SectionHeadingDivider` counter variation
+    - sorting chips: `MAX VALUE`, `MIN VALUE`, `MAX %`, `MIN %`
+    - collapsible `ACTIVE SECURITIES` and `INACTIVE SECURITIES` sections
+    - reusable investment product cards
+    - `Find out the best fund for you` suggestion banner
+  - total value is not hardcoded: it is derived from the current `investment_account` products returned by `useProducts()`, so it follows country currency conversion and future owned investment products automatically
+  - amount privacy masking is honored for total value, performance amount, and security values
+- `src/app/config/investmentsPortfolioConfig.ts`
+  - added the reusable Investments data/model layer: period options, sorting options, chart points, derived securities, total-value calculation, and sorting
+  - mock security values are allocated from the owned investment product total, so the screen cards sum back to the actual portfolio total
+- `src/app/components/investments/*`
+  - added reusable components for:
+    - `InvestmentPortfolioTabs`
+    - `InvestmentPortfolioChart`
+    - `InvestmentPeriodChips`
+    - `InvestmentActionBar`
+    - `InvestmentFilterChips`
+    - `InvestmentProductsAccordion`
+    - `InvestmentProductCard`
+    - `InvestmentsFundBanner`
+- `src/app/utils/investmentsAvailability.ts`
+  - centralizes Investments eligibility: `product === "PI"` and country is not `BA` / `BA_BL`
+- Home and navigation wiring:
+  - `src/app/screens/home/HomeScreen.tsx` now accepts `onInvestmentsClick`
+  - `src/app/screens/home/AccountSummary.tsx` routes the `investment_account` product card to Investments only in eligible PI countries
+  - `src/app/contexts/NavigationContext.tsx` adds the `investments` screen state
+  - `src/app/App.tsx` renders `InvestmentsPortfolioScreen`, passes the Home handler, and keeps Bosnia variants gated
+- Registry/docs:
+  - `src/app/state/demoTypes.ts`, `screenRegistry.ts`, `flowRegistry.ts`, `componentRegistry.ts`, and `projectPackRegistry.ts` now include `pi.investments.portfolio`, its Home-to-Investments flow, and the new component IDs
+  - `src/translations/shared.ts` and `src/translations/types.ts` add `runtime.investments` fallback copy
+  - `docs/handoff/state-of-the-world.md`, `docs/handoff/next-tasks.md`, and `docs/platform-capability-map/README.md` were updated for this feature
+- Verification on 2026-06-04:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=68 screens=24 flows=14`
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`
+  - targeted `git diff --check` for the Investments implementation/docs paths passed with only normal Windows LF/CRLF warnings
+  - in-app browser smoke on `http://127.0.0.1:3001/` passed:
+    - Romania Home -> `Investment Portfolio` opened the Investments screen
+    - `Total value` rendered as `9.166,97 RON`, derived from the owned CZK investment product converted through `useProducts()`
+    - screen exposed `Total value`, `ALL PRODUCTS`, active/inactive securities, period chips, action bar, and fund banner
+    - `MIN VALUE` sorting changed the active securities order
+    - Back returned to Home
+    - switching to `Bosnia and Herzegovina` and clicking `Investment Portfolio` stayed on Home, confirming the Bosnia gating
+
+Previous focus:
+
+Building a single bidirectional Figma handoff plugin around the canonical `build-ui.screen.v1` schema, so the app can export editable screen JSON to Figma and Figma selections can export JSON back into the same contract.
+
+Latest Documents ordering fix:
+
+- `src/app/config/documentsConfig.ts`
+  - `getDocumentsConfigForCountry(country)` now returns a sorted copy of each country config instead of exposing raw insertion order.
+  - document groups are ordered by the newest document date in the group, descending.
+  - document rows inside each group are ordered by year/month/day descending, so newest documents render at the top and older documents move downward across every supported country.
+  - the 2026 mock document dates now stay current to June 2026 (`JUN`, `MAY`, `APR`) instead of using future October dates.
+  - only the newest document carries the `NEW` badge; legal documents are marked through `isLegal` and display `Legal` as their subtitle.
+  - the shared Documents counter still derives from the same country config, so counts reflect the current 8-row list.
+- `src/app/screens/documents/DocumentsScreen.tsx`
+  - document rows now include the trailing `more-horizontal` actions control from the centralized icon registry.
+  - clicking the 3-dot action or swiping a row left reveals a red `DELETE` action.
+  - deleting a non-legal document opens the confirmation overlay; confirming removes that document from the current country list.
+  - deleting a legal document opens the requested `Info` overlay: `The selected file is marked as legal and cannot be deleted.`; OK returns to Documents and keeps the document visible.
+- `src/app/components/templates/TemplateCodePreviews.tsx`
+  - the Documents template preview now mirrors the row structure with the badge slot, `Legal` subtitle handling, and trailing 3-dot menu.
+- Verification on 2026-06-04:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - static Documents contract check passed: `newBadges=1`, `legal=3`, and 2026 months are `JUN/MAY/APR` with no future months after June.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=69 screens=24 flows=14`.
+  - targeted `git diff --check` for the Documents implementation paths passed with only normal Windows LF/CRLF warnings.
+  - in-app browser smoke on `http://127.0.0.1:3005/` passed: after login -> More -> Documents, the visible order starts with `2026` (`3 JUN`, `28 MAY`, `17 APR`), then `2025`; only the first row has `NEW`, legal rows show `Legal`, clicking 3 dots opens one `DELETE`, non-legal delete removes the row, legal delete shows the Info modal and keeps the row, and swipe-left opens one `DELETE` action.
+
+Latest UniCredit Build UI Bridge:
+
+- `figma-plugins/screen-json-importer/*`
+  - renamed the local Figma development plugin to `UniCredit Build UI Bridge`
+  - the plugin now has one English UI with two modes:
+    - `Build from JSON` for importing `build-ui.screen.v1`
+    - `Extract selection` for exporting a selected Figma frame/component/group/layer back into `build-ui.screen.v1`
+  - build/import supports selected frame/component or new frame destination, JSON/375/393 new-frame widths, Smart hybrid / Pixel safe / Trust JSON layout modes, clear target, remove previous generated output, resize, fit-to-target-width, and lock-generated-layer options
+  - build/import now also accepts legacy Build-UI / Component-E-compatible JSON and normalizes it to `build-ui.screen.v1` before rendering, including `codex-figma-component-spec/v1`, `components[].root`, `roots[]`, `root`, `screen`, top-level `children[]` / `layers[]`, and inline SVG/PNG/JPEG assets from `asset.dataUrl`, `asset.url`, or `dataUrl`
+  - extract/export supports SVG assets, image fills, hidden-layer inclusion, max depth, asset limits, Figma metadata, Auto Layout, `autoLayoutChild`, text segments, paints, effects, radii, strokes, opacity, rotation, visibility, and locked state
+  - extract/export now includes `components[]` and `variantSets[]` companion data when available, raw Figma style refs, component props, bound variables, and an optional `Include PNG snapshot 2x` export for visual comparison
+  - follow-up hardening keeps imported text geometry fixed for pixel placement, reapplies mixed text segment styles after global text styles, applies root frame visual styles beyond fills, accepts SVG assets by `kind`, `mimeType`, or plain SVG content, wraps single non-container selections in a screen root so re-imports do not render empty, warns when extraction hits the asset limit, and downloads `unicredit-figma-selection.json` if the plugin UI cannot copy extracted JSON to clipboard
+  - build/import now runs preflight diagnostics before creating Figma nodes; invalid canonical geometry such as string bounds blocks the build, while likely fidelity issues such as missing asset refs, CSS/DOM-style keys, unsupported layout values, and narrow text bounds are surfaced as build-summary warnings
+  - the English plugin UI now includes a dedicated Diagnostics panel after build/extract, listing preflight stats, all build warnings, extraction warnings, companion component/variant counts, and optional PNG snapshot refs instead of hiding JSON quality details in the one-line status
+  - README now documents the unified Figma-ready schema, Diagnostics review flow, and forbids CSS/DOM/browser-shell payload keys
+- `screenshots/FIgma plugins/Component-E/*`
+  - the original Component-E development plugin folder is now synced to the same bidirectional bridge as `Component-E Build UI Bridge`
+  - it preserves the original Component-E development plugin id `1643718617298515557`, so importing that manifest updates the Component-E plugin path while adding the Build-UI import capability
+  - `code.ts` now mirrors the bridge runtime with `// @ts-nocheck`, so `npm --prefix "screenshots/FIgma plugins/Component-E" run build` regenerates the bidirectional `code.js` instead of restoring the old extractor-only plugin
+- `scripts/audit-figma-bridge.mjs` and `package.json`
+  - added `npm run audit:figma-bridge` as a repeatable local gate for both bridge copies
+  - the audit checks manifest identity/no-network settings, English UI, schema routes, legacy normalization, preflight diagnostics, Diagnostics panel presence, inline SVG/PNG/JPEG asset import, SVG/image handling, component/variant companions, PNG snapshot support, single-layer wrapping, whitespace, and VM-smoked import/export behavior for both `UniCredit Build UI Bridge` and `Component-E Build UI Bridge`
+  - the audit also checks the app-side phone JSON exporter for the canonical schema, generated-payload validation, warning propagation, source metadata, forbidden CSS/DOM key guards, and missing-asset guards
+  - the VM smoke now imports the same manual smoke fixture files shipped with each plugin copy, then also re-imports extracted `build-ui.screen.v1` JSON for both a component-set selection and a single text-layer selection, so the local gate covers both directions in one command
+- `figma-plugins/screen-json-importer/smoke-fixtures/*` and `screenshots/FIgma plugins/Component-E/smoke-fixtures/*`
+  - added `canonical-mobile-screen.json`, a canonical Figma-ready `build-ui.screen.v1` mobile banking screen fixture with semantic layers, SVG assets, mixed-style money text, Figma paints/effects/text specs, and conservative Auto Layout intent
+  - added `legacy-component-e-screen.json`, a legacy `codex-figma-component-spec/v1` fixture with CSS-style legacy fields and inline SVG/PNG/JPEG assets to verify import normalization
+  - added `manual-runtime-smoke.md`, an English checklist for Figma-only validation of build, legacy import, extract/rebuild, and single-layer extraction safety
+- `src/app/components/demo/PhoneScreenshotControl.tsx`
+  - JSON copy now starts an async `ClipboardItem` write during the user action, so long-running JSON generation does not lose clipboard permission
+  - if clipboard remains blocked, the JSON is downloaded as `unicredit-visible-screen.json` or `unicredit-full-screen.json` instead of throwing the old fallback-copy alert
+- `src/app/utils/phoneScreenshot.ts`
+  - generated app-to-Figma JSON now runs an internal quality validation pass before delivery
+  - validation blocks invalid generated geometry/numeric values and adds top-level `warnings[]` for likely Figma fidelity issues such as missing asset refs, CSS/DOM-style keys, invalid layout values, and text bounds that may be too narrow
+  - generated JSON now includes source metadata `{ generator: "phone-screenshot", mode }`, so imported payloads can be traced back to visible/full app export mode
+- Verification on 2026-06-03:
+  - `node --check figma-plugins/screen-json-importer/code.js` passed
+  - `node --check "screenshots/FIgma plugins/Component-E/code.js"` passed
+  - `npm --prefix "screenshots/FIgma plugins/Component-E" run build` passed
+  - `npm --prefix "screenshots/FIgma plugins/Component-E" run lint` passed after setting ESLint parser project context for the Figma rule set
+  - `npm run audit:figma-bridge` passed with `plugins=2`, `appExporterStatic=7`, `static=21` checks per plugin, and matching VM summaries for both bridge copies: `createdSvg=14`, `createdImages=4`, `exportedAssets=2`, `components=1`, `variantSets=1`, `fixtureImports=2`, `preflightErrors=1`, `preflightWarnings=1`, `roundTrips=2`
+  - manifest JSON parse passed
+  - VM bridge smoke passed for canonical `build-ui.screen.v1` import/build, Component-E-style `components[].root` import/build, Build-UI-style `screen` + `children[]` import/build, inline SVG `asset.dataUrl`, inline PNG `asset.dataUrl`, and SVG import fallback by `mimeType`
+  - VM bridge smoke passed for `components[]`, `variantSets[]`, SVG asset export, optional PNG 2x snapshot export, and single-layer selection wrapping
+  - Component-E VM bridge smoke passed for canonical import, Component-E legacy import, inline SVG/PNG import, extract selection, `components[]`, `variantSets[]`, SVG asset export, and optional PNG 2x snapshot export
+  - plugin whitespace check passed for both bridge copies, including untracked Component-E files that `git diff --check` cannot inspect
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=60 screens=23 flows=13`
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`
+  - `git diff --check` passed for the plugin, screenshot control, and updated handoff/capability docs, with only normal Windows LF/CRLF warnings
+  - plugin text scan confirmed no Romanian/importer-old UI copy remains in `figma-plugins/screen-json-importer` or `screenshots/FIgma plugins/Component-E`, excluding `node_modules`
+  - inline static bridge audit passed: manifest name/id, no-network manifest, `build-ui` import routing, `extract-selection` export routing, schema presence, English UI modes, legacy normalizer, component/variant companions, optional PNG snapshot, root frame style application, single-layer export wrapping, robust extracted-JSON copy/download fallback, text segment order, and asset-limit warning were all present
+  - in-app browser smoke on `http://127.0.0.1:3001/` confirmed the dropdown exposes `Capture entire screen`, `Capture visible screen`, `Generate visible JSON`, and `Generate entire screen JSON`
+  - in-app browser smoke confirmed `Generate visible JSON` copies valid `build-ui.screen.v1` to the clipboard on Home with frame `375x812`, background `#F5F5F5`, no CSS payload leaks, `layout` / `autoLayoutChild`, bottom navigation labels, and 19 assets
+  - in-app browser smoke confirmed `Generate entire screen JSON` copies valid `build-ui.screen.v1` to the clipboard on Home with frame `375x1263`, background `#F5F5F5`, no CSS payload leaks, bottom navigation labels, and 22 assets
+  - resume verification on 2026-06-03 added manual smoke fixtures, plugin preflight diagnostics, and app-side generated JSON validation, wired them into `npm run audit:figma-bridge`, and reran `npm run audit:figma-bridge`, Component-E build/lint, `npm run build`, `npm run audit:templates`, `npm run audit:platform`, `git diff --check`, and plugin whitespace checks; all passed, with the same known Vite chunk-size warning
+  - continuation verification on 2026-06-03 added the plugin Diagnostics panel to both bridge copies, updated README guidance, extended `npm run audit:figma-bridge` to guard the panel, and reran `npm run audit:figma-bridge` plus inline UI script parse checks; both passed
+  - final code-safety verification on 2026-06-03 reran `npm run audit:figma-bridge`, `npm --prefix "screenshots/FIgma plugins/Component-E" run build`, `npm --prefix "screenshots/FIgma plugins/Component-E" run lint`, `node --check` for both plugin runtimes, `npm run build`, `npm run audit:templates`, `npm run audit:platform`, inline UI script parse checks, relevant `git diff --check`, plugin whitespace checks, and English-only plugin UI scan; all passed, with only the known Vite chunk-size warning and normal LF/CRLF warnings from Git
+  - resume in-app browser re-smoke reconfirmed the dropdown options, but Codex In-app Browser exposed neither virtual clipboard reads nor download capture in this resumed session, so the previous browser JSON payload evidence remains the latest successful app-runtime JSON read
+  - Figma runtime import/export itself still needs a manual plugin smoke after installing the manifest, because the Figma plugin API is not available in Node/browser verification
+
+Previous typography system rollout:
+
+Latest typography system rollout:
+
+- New token registry and CSS utility layer:
+  - `src/app/registry/typographyRegistry.ts`
+    - defines the canonical supplied token set: `H1`, `H2`, `L1`, `L2`, `L3`, `P1`, `P2`, `N1`, `N2 / Bold`, `N2 / Regular`, `N3`, `N4 / Bold`, `N4 / Regular`, `N5 / Bold`, `N5 / Regular`
+    - each token now carries a stable id, utility class, size, weight, and intended usage note so downstream screens/components can call a named contract instead of raw `text-[14px]` / `font-bold`
+  - `src/styles/theme.css`
+    - adds CSS variables for every canonical typography token plus utility classes such as `.uc-type-h1`, `.uc-type-p1`, `.uc-type-n4-strong`, and `.uc-type-n5`
+    - keeps line-height overrideable per surface, so runtime screens can still preserve special spacing without falling back to raw font-size declarations
+- Design System Inventory:
+  - `src/app/App.tsx`
+    - recognizes `#typography` as a Design System hash route
+  - `src/app/screens/design-system/DesignSystemPage.tsx`
+    - adds a `Typography` section above `Colors`
+    - shows the 15 canonical tokens as inventory specimens, with usage labels and sample text
+    - explains that active PI surfaces should call named typography tokens instead of hardcoded sizes
+- Runtime migration pass completed across shared/app surfaces except Kids:
+  - shared DS/runtime components now call typography tokens in `PageHeader`, `PrimaryButton`, `TextField`, `AmountField`, `NavigationRow`, `SectionHeadingDivider`, `BottomNavigation`, `MessagesMailboxTabs`, account components, `PaymentHeroCard`, `HeaderActionIcons`, Prime label/value rows, `TotalRow`, `BottomSheet`, `AccountActionBar`, `NewPaymentActionListItem`, `NewPaymentDiscoverBanner`, `LanguageSelectorButton`, `NavigationLink`, `AccordionSection`, `ProductCard`, `ProductAccordion`, `ProductAccordionAnimated`, `ProductMenuCard`, `ProductOfferCard`, `GhostBanner`, `InfoBanner`, `HelperCard`, `UserEventCard`, `PendingActionCard`, `RadioButton`, and several pre-login/shared helper surfaces
+  - screen-level/runtime migration now also covers major non-Kids flows including Home, Accounts, Payments, Documents, Messages, Prime, Products, inactive placeholders, Co-Apping session copy, and More/Contacts shared cards/dividers
+- Intentional typography exceptions still left hardcoded for now:
+  - `38px` pre-login hero titles
+  - `26px` and some `22px` promotional/account headings
+  - `13px` and `12px` compact micro labels/chips in a few Payments and badge surfaces
+  - these sizes do not exist in the supplied canonical taxonomy, so they were left explicit rather than mapped to a misleading token
+- Verification on 2026-06-03:
+  - `npm run build` passed twice; Vite still emits the known chunk-size warning
+  - in-app browser verification on `http://127.0.0.1:3001/#typography` confirmed the new `Typography` section renders above `Colors` and exposes the canonical token inventory (`15` tokens, including `Page header` and `Micro body / helper`)
+  - in-app browser full-page verification on `http://127.0.0.1:3001/` confirmed the active pre-login runtime still renders after the migration pass; the captured screen showed the current Romania pre-login surface with the localized login layout intact
+  - targeted runtime grep after the migration pass showed remaining hardcoded UniCredit sizing is now concentrated mostly in intentional taxonomy gaps (`38/26/22/13/12`) plus a few isolated non-canonical badge/lockup cases
+
+Latest Design System inventory layout adjustment:
+
+- `src/app/screens/design-system/DesignSystemPage.tsx`
+  - reduced the inventory page card grids to a maximum of two columns across Components, Templates, Icons, and Colors so specimens remain readable on smaller desktop viewports
+  - the Forms and controls section now renders the specimen cards in explicit 2-up rows at the current desktop preview width instead of attempting a denser 3-column layout
+  - supporting stats/audit grids inside the same page were also reduced from 3/4/5-column responsive layouts to 2-column maximum layouts
+  - cleaned the visible specimen metadata so Figma schema/node strings are no longer rendered in the Design System surface header/body; source metadata remains only in code constants and comments
+  - the left Inventory navigation now acts as a real scrollspy: while the page scroll container moves through section headings, the nested section highlight and URL hash progress automatically (`#forms` -> `#cards` -> `#overlays` -> `#registry`) instead of staying stuck on the last clicked anchor
+- Verification on 2026-06-03:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `git diff --check -- src/app/screens/design-system/DesignSystemPage.tsx docs/handoff/current-session.md` passed with only normal Windows LF/CRLF warnings
+  - in-app browser smoke on `http://127.0.0.1:3001/#forms` confirmed the Forms specimen cards render 2 per row (`Dropdown` + `Text field`, `Amount field` + `Toggle button`, `Navigation row` + `Profile avatar`) at the current desktop viewport
+  - follow-up browser verification on `http://127.0.0.1:3001/#forms` confirmed `codex-figma-component-spec/v1` and example node ids such as `9103:14301`, `9105:1688`, and `9105:1689` no longer appear in the visible Design System page text
+  - follow-up browser verification on `http://127.0.0.1:3001/#forms` confirmed the sidebar highlight now progresses with scroll position across the Components inventory: starting on `Forms`, then switching to `Cards`, later `Overlays`, and finally `Registry`, while the URL hash stays in sync with the active section
+
+Latest Figma-derived Profile avatar component:
+
+- `src/app/components/ProfileAvatar.tsx`
+  - added a reusable avatar family from the supplied `codex-figma-component-spec/v1` JSON set:
+    - full photo source node `9106:16257`
+    - profile photo + notification source node `9106:16242`
+    - initials source node `9106:16259`
+    - AI avatar source node `9106:16303`
+  - runtime contract now supports:
+    - full-photo and inset-profile-photo rendering from real `imageSrc`
+    - optional red notification dot
+    - dark `K1` initials fallback
+    - AI avatar variant with the supplied gradient glyph reconstructed in code
+    - controlled sizing so nearby runtime surfaces can reuse the same component instead of local one-off circles
+- Generic replacement pass:
+  - removed `src/app/components/ui/avatar.tsx`; the old generic avatar primitive is no longer the surfaced avatar source in the platform
+  - `src/app/screens/design-system/DesignSystemPage.tsx` now exposes a dedicated `Profile avatar` specimen and removes Avatar from the generic UI control inventory
+  - `src/app/screens/kids/RoKidsApp.tsx` now uses `ProfileAvatar` for the card personalization initials chip instead of a local circle + text implementation
+  - `src/app/state/demoTypes.ts` and `src/app/registry/componentRegistry.ts` now register `ui.profile-avatar` for AI/catalog reuse
+- Verification on 2026-06-03:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `git diff --check -- src/app/components/ProfileAvatar.tsx src/assets/design-system/avatar-photo-sample.svg src/app/screens/design-system/DesignSystemPage.tsx src/app/screens/kids/RoKidsApp.tsx src/app/registry/componentRegistry.ts src/app/state/demoTypes.ts docs/handoff/current-session.md` passed with only normal Windows LF/CRLF warnings
+  - in-app browser smoke on `http://127.0.0.1:3001/#forms` confirmed the new `Profile avatar` specimen renders in Forms, the variant selector defaults to `Photo full`, and the old generic Avatar option is no longer present in the generic UI control inventory
+
+Latest Figma-derived Navigation row component:
+
+- `src/app/components/NavigationRow.tsx`
+  - added a reusable 375x80 row family from the supplied `codex-figma-component-spec/v1` JSON set:
+    - text + description + toggle source node `9106:1711`
+    - text + teal link + toggle source node `9106:1807`
+    - icon + description + chevron source node `9106:1777`
+  - preserves the supplied current-DS layout contract:
+    - padding `24px 12px 24px 16px`
+    - content gap `16px`
+    - optional leading `32x32` icon slot
+    - `16px` bold title
+    - optional `16px` body copy
+    - optional `14px` teal CTA link
+    - trailing accessory variants for chevron or the shared `ToggleButton`
+  - runtime behavior stays composable:
+    - renders as a full-row button when only the row itself is interactive
+    - supports inline CTA link rendering when `linkLabel` is present
+    - delegates toggle behavior to `ToggleButton` when `trailingAccessory="toggle"`
+- Generic replacement pass:
+  - `src/app/screens/contacts/ContactsNavigationCard.tsx` now delegates to `NavigationRow` while preserving the contact-specific icon map and chevron/value variants
+  - `src/app/screens/settings/SettingsScreen.tsx` now renders each settings item through `NavigationRow` instead of a local one-off chevron row
+  - `src/app/components/templates/TemplateCodePreviews.tsx` now uses `NavigationRow` for Settings template rows
+  - `src/app/screens/design-system/DesignSystemPage.tsx` now exposes a dedicated `Navigation row` specimen and links the Contacts specimen back to the shared base component
+  - `src/app/state/demoTypes.ts` and `src/app/registry/componentRegistry.ts` now register `ui.navigation-row` for AI/catalog reuse
+- Verification on 2026-06-03:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `git diff --check -- src/app/components/NavigationRow.tsx src/app/screens/contacts/ContactsNavigationCard.tsx src/app/screens/settings/SettingsScreen.tsx src/app/components/templates/TemplateCodePreviews.tsx src/app/registry/componentRegistry.ts src/app/state/demoTypes.ts src/app/screens/design-system/DesignSystemPage.tsx docs/handoff/current-session.md` passed with only normal Windows LF/CRLF warnings
+  - local Playwright-style browser smoke could not run in this environment because the `playwright` package is not installed in the available Node REPL module roots
 
 ## Last Meaningful Change
+
+Latest UniCredit Build UI Bridge implementation:
+
+- `figma-plugins/screen-json-importer/code.js`
+  - now routes both `build-ui` import and `extract-selection` export messages
+  - imports `build-ui.screen.v1` into editable Figma nodes with guarded Auto Layout modes, SVG/image assets, Figma paints/effects/text specs, text segment reapplication, rotation, visibility, and locked-state preservation after node construction
+  - imports legacy Build-UI / Component-E-compatible JSON by normalizing `codex-figma-component-spec/v1`, `components[].root`, `roots[]`, `root`, `screen`, top-level `children[]` / `layers[]`, and inline SVG/PNG assets from `asset.dataUrl`, `asset.url`, or `dataUrl` into `build-ui.screen.v1`
+  - imports SVG assets when identified by `kind`, SVG `mimeType`, or plain SVG content, matching the looser asset behavior of the source Build-UI plugin
+  - exports selected Figma frames/components/groups/layers back to `build-ui.screen.v1` with canonical `frame`, `root`, `assets`, warnings, source metadata, semantic layer names, Figma styles, Auto Layout, text segments, and optional SVG/image assets
+  - adds `components[]` / `variantSets[]` companion data, raw Figma style refs, component props, bound variables, and optional PNG 2x snapshot exports for visual comparison
+  - applies root frame styles through the shared Figma style mapper, including strokes/radii/effects/opacity while guarding against hiding the target frame
+  - wraps a single selected text/shape/vector/image layer in a `Screen` root during extraction, so the same JSON imports back as visible content instead of an empty root frame
+- `figma-plugins/screen-json-importer/ui.html`
+  - replaced the old import-only UI with an English bidirectional `UniCredit Build UI Bridge` UI: `Build from JSON` and `Extract selection`
+- `figma-plugins/screen-json-importer/manifest.json` / `README.md`
+  - renamed the plugin, aligned manifest access/network settings with the source plugins, and documented the unified round-trip plus legacy-import contract
+- `screenshots/FIgma plugins/Component-E/manifest.json` / `code.ts` / `code.js` / `ui.html` / `README.md` / `package.json`
+  - converted the original Component-E folder from extractor-only into the same bidirectional bridge under the installable name `Component-E Build UI Bridge`
+  - kept the original Component-E development plugin id so the Component-E path remains the update target
+  - kept the TypeScript build path valid by mirroring the bridge runtime into `code.ts`
+- `scripts/audit-figma-bridge.mjs` / `package.json`
+  - added a project-level `audit:figma-bridge` script so future sessions can repeat the static + VM bridge checks without reconstructing long one-off Node commands
+  - strengthened the audit to round-trip extracted JSON back through the build path and to cover legacy Build-UI-style `screen + children[]` plus SVG, PNG, and JPEG inline assets
+- `src/app/components/demo/PhoneScreenshotControl.tsx`
+  - fixed JSON delivery by using async `ClipboardItem` writes during the user action, with JSON file download fallback when clipboard permissions are blocked
+- Verification on 2026-06-03:
+  - `node --check figma-plugins/screen-json-importer/code.js` passed
+  - `node --check "screenshots/FIgma plugins/Component-E/code.js"` passed
+  - `npm --prefix "screenshots/FIgma plugins/Component-E" run build` passed
+  - `npm --prefix "screenshots/FIgma plugins/Component-E" run lint` passed
+  - `npm run audit:figma-bridge` passed for both plugin manifests/copies, including two VM round trips per plugin
+  - manifest JSON parse passed
+  - VM bridge smoke passed for canonical, Component-E-style, Build-UI-style, inline SVG, inline PNG, SVG `mimeType` fallback, SVG asset export, optional PNG 2x snapshot export, single-layer selection wrapping, and component/variant companion generation
+  - Component-E VM bridge smoke passed on the generated `screenshots/FIgma plugins/Component-E/code.js`
+  - plugin whitespace check passed for the bridge runtime, UI, manifests, README, and Component-E package/config files
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `npm run audit:templates` passed
+  - `npm run audit:platform` passed
+  - inline static bridge audit passed for manifest name/id, no-network manifest, import/export routing, schema presence, English UI modes, legacy normalizer, component/variant companions, optional PNG snapshot, root frame style application, single-layer export wrapping, text segment order, extracted-JSON copy/download fallback, and asset-limit warning
+  - in-app browser smoke confirmed visible/full Home JSON copy to clipboard with schema `build-ui.screen.v1`, app background `#F5F5F5`, no CSS leaks, Auto Layout fields, and bottom navigation labels
+  - follow-up in-app browser smoke after reload confirmed the header dropdown still exposes all four options and the page logs `Figma screen JSON copied to clipboard (visible)` after selecting `Generate visible JSON`; this automation channel could not read the browser virtual clipboard directly
+
+Latest Design System Inventory navigation refinement:
+
+- `src/app/screens/design-system/DesignSystemPage.tsx`
+  - added scroll-container-driven section sync for the left sidebar inventory menu
+  - the active nested section now updates from real scroll position inside the page container, not only from clicked anchors or manual hash changes
+  - active section changes now keep the URL hash aligned via `replaceState` without jumpy navigation, so the inventory feels like a professional documentation sidebar
+- Verification on 2026-06-03:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `git diff --check -- src/app/screens/design-system/DesignSystemPage.tsx` passed with only normal Windows LF/CRLF warnings
+  - in-app browser verification on `http://127.0.0.1:3001/#forms` confirmed the sidebar selection progresses from `Forms` to `Cards`, then `Overlays`, then `Registry` as the page scrolls downward, and the browser was restored to `#forms` after verification
+
+Latest typography migration pass:
+
+- Added the canonical typography registry and CSS token utilities:
+  - `src/app/registry/typographyRegistry.ts`
+  - `src/styles/theme.css`
+- Added the Design System `Typography` inventory section above `Colors`:
+  - `src/app/App.tsx`
+  - `src/app/screens/design-system/DesignSystemPage.tsx`
+- Migrated a broad non-Kids runtime/shared surface set to named typography tokens:
+  - examples include `PageHeader`, `PrimaryButton`, `TextField`, `AmountField`, `NavigationRow`, `BottomSheet`, `ProductCard`, `ProductMenuCard`, `AccordionSection`, `AccountDetailScreen`, `AccountDetailsInfoScreen`, `AccountOptionsScreen`, `HomeHeader`, `TransactionsPreview`, `DomesticPaymentFlowScreens`, `CoAppingHomePage`, `CoAppingSessionScreen`, `MoreCardBase`, and several card/banner components
+- Verification on 2026-06-03:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - browser smoke on `http://127.0.0.1:3001/#typography` passed
+  - browser full-page smoke on `http://127.0.0.1:3001/` passed for the active Romania pre-login runtime after the typography migration
+
+Previous Romania Payments hero-card mapping:
+
+- `src/app/config/paymentsMenuConfig.ts`
+  - updated the Romania `RoPay` primary Payments card to use `imageVariant: "payments-9"` instead of `payments-4`
+  - this keeps the existing `RoPay` title/copy/placement but swaps the runtime hero artwork to the requested screenshot-backed Payments 9 visual
+- Verification on 2026-06-03:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `git diff --check -- src/app/config/paymentsMenuConfig.ts docs/handoff/current-session.md` passed with only normal Windows LF/CRLF warnings
+  - in-app browser verification on `http://127.0.0.1:3001/` confirmed Romania Payments renders the `RoPay` card with image source `/screenshots/payments9.png`
+
+Latest Figma-derived Toggle button component:
+
+- `src/app/components/ToggleButton.tsx`
+  - added a reusable 60x30 toggle button from the supplied `codex-figma-component-spec/v1` JSON pair:
+    - unchecked source node `9105:1689`
+    - checked source node `9105:1688`
+  - preserves the supplied current-DS geometry and behavior:
+    - white surface
+    - 2px border
+    - 22x22 knob
+    - gray unchecked state with left knob
+    - teal checked state with right knob and white check glyph
+  - follow-up correction on 2026-06-03:
+    - the checked-state rendering now uses the exact exported Figma SVG geometry for both the asymmetric checked track and the boolean-operation knob/check mark, instead of a hand-drawn centered check path inside a generic circle
+    - the unchecked state also now uses the exported rect/circle geometry rather than relying only on CSS rounded shapes
+  - runtime behavior is accessible: interactive usage renders `role="switch"` with `aria-checked`, while template/specimen usage can render the same visual non-interactively
+- Generic replacement pass:
+  - removed `src/app/components/ui/switch.tsx`; the generic switch primitive is no longer the source for this control in the platform
+  - `src/app/screens/payments/DomesticPaymentFlowScreens.tsx` now uses `ToggleButton` for `SAVE AS TEMPLATE`
+  - `src/app/screens/kids/RoKidsApp.tsx` now uses `ToggleButton` for the Kids control rows instead of the old local 52x30 thumb toggle
+  - `src/app/components/templates/TemplateCodePreviews.tsx` now uses `ToggleButton` for template toggle renderings instead of a local one-off span implementation
+  - `src/app/screens/design-system/DesignSystemPage.tsx` now exposes a dedicated `Toggle button` specimen in Forms and removes the old generic `Switch` family from the shadcn/generic primitive inventory
+  - `src/app/state/demoTypes.ts` and `src/app/registry/componentRegistry.ts` now register `ui.toggle-button` for AI/catalog reuse
+- Verification on 2026-06-03:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `git diff --check -- src/app/components/ToggleButton.tsx src/app/screens/payments/DomesticPaymentFlowScreens.tsx src/app/screens/kids/RoKidsApp.tsx src/app/components/templates/TemplateCodePreviews.tsx src/app/screens/design-system/DesignSystemPage.tsx src/app/registry/componentRegistry.ts src/app/state/demoTypes.ts` passed with only normal Windows LF/CRLF warnings
+  - in-app browser smoke on `http://127.0.0.1:3001/#forms` confirmed `Toggle button` is present, `Switch` is no longer present in the generic primitive inventory, and the specimen renders at `60x30` with `2px` border, teal checked state (`rgb(0, 122, 145)`), and gray unchecked state (`rgb(102, 102, 102)`)
+  - follow-up browser verification on `http://127.0.0.1:3001/#forms` confirmed the `Toggle button` specimen now renders the checked state from the exported `9105:1688` SVG geometry rather than a generic circle-plus-check approximation
+
+Latest code-derived Figma JSON export:
+
+- `src/app/components/demo/PhoneScreenshotControl.tsx`
+  - the existing camera dropdown now exposes four actions:
+    - `Capture entire screen`
+    - `Capture visible screen`
+    - `Generate visible JSON`
+    - `Generate entire screen JSON`
+  - both JSON actions copy `build-ui.screen.v1` payloads to the clipboard; async generation now uses a `ClipboardItem` promise to preserve user-action clipboard permission, and browser denial falls back to automatic `.json` download instead of failing immediately
+- `src/app/utils/phoneScreenshot.ts`
+  - `createPhoneFigmaJson` exports a code-derived layer tree from the rendered phone DOM, then converts it into Figma-ready objects; it does not serialize a full-screen screenshot image into the JSON
+  - final JSON shape is `frame`, `root`, and `assets`
+  - final layer objects use numeric `bounds`, Figma `styles.fills`, Figma `styles.effects`, text specs with numeric `fontSize` / `lineHeight` / `letterSpacing`, and `assetRef` references
+  - JSON extraction now always uses an unscaled phone clone for both `visible` and `full`, so desktop preview `transform: scale(...)` cannot shrink layer bounds inside the exported 375px frame
+  - final root background resolves to the actual app background / dominant app layer (`#F5F5F5` on Home) instead of the phone shell black (`#262626`)
+  - final container layers can include conservative `layout` intent (`VERTICAL` / `HORIZONTAL`, numeric padding/gap, sizing modes, alignment), and children inside those groups can include `autoLayoutChild` with `AUTO` or `ABSOLUTE` positioning
+  - Auto Layout inference is now stricter: it is applied only when primary-axis gaps and counter-axis alignment match the child bounds; irregular groups stay pixel-safe
+  - text bounds get Figma font safety width, and intended wrapping can be marked with `text.allowWrap`
+  - generic fallback names avoid DOM/numbered names such as `group:div` or `Container 1.1`; unknown stacks fall back to `Group`, `Vertical Stack`, or `Horizontal Row`
+  - root-level screen children remain `ABSOLUTE` inside a fixed root layout so the import keeps pixel placement while nested regular rows/stacks become easier to edit in Figma
+  - CSS-oriented keys such as `backgroundColor`, `boxShadow`, `asset.dataUrl`, and string font sizes are intentionally excluded from the final payload
+  - `visible` JSON keeps the current phone viewport frame at `375x812` and filters elements fully outside the visible frame
+  - `full` JSON uses the full-height phone capture clone, so scrollable L1 screens export the expanded frame and keep bottom navigation represented at the bottom of the layer tree
+- `figma-plugins/screen-json-importer/*`
+  - now contains the local `UniCredit Build UI Bridge` development plugin, not just an importer
+  - `Build from JSON` reads `build-ui.screen.v1`, resizes/clears/fits the target frame, applies Figma paints/effects/text specs, reapplies text segments, applies guarded Auto Layout intent, restores SVG/image assets, and reconstructs best-effort editable Figma layers
+  - `Extract selection` serializes selected Figma frames/components/groups/layers back into canonical `build-ui.screen.v1` with `frame`, `root`, `assets`, source metadata, warnings, Figma styles, Auto Layout, `autoLayoutChild`, text segments, image fills, SVG assets, rotation, visibility, locked state, and useful Figma metadata
+  - plugin README now records the bidirectional Figma-ready JSON contract: app-only content, app background instead of shell background, numeric bounds, Figma paints/effects/text specs, `assets[]`/`assetRef`, optional container `layout`, optional child `autoLayoutChild`, text safety width, designer-friendly hierarchy/names, and no CSS/HTML/DOM-style payload keys
+  - this is intentionally not a screenshot importer; exact UniCredit font rendering, complex masks/clipping, and component-aware replacement remain future component-aware mapping work
+- Verification on 2026-06-02:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `node --check figma-plugins/screen-json-importer/code.js` passed
+  - in-app browser smoke on `http://127.0.0.1:3001/` confirmed the dropdown labels `Capture entire screen`, `Capture visible screen`, `Generate visible JSON`, and `Generate entire screen JSON`
+  - Chrome/CDP utility smoke confirmed both visible and full JSON payloads use schema `build-ui.screen.v1`, include no full-screen `image` field, include no old schema text, and contain text layers
+  - Chrome/CDP utility smoke confirmed no final JSON layer leaks `backgroundColor`, `boxShadow`, `borderRadius`, `asset.dataUrl`, or string `fontSize`
+  - Chrome/CDP utility smoke confirmed visible JSON exports `375x812`, while Home L1 full JSON exports `375x1266` and includes bottom navigation text labels at the bottom of the layer tree
+  - Chrome/CDP utility smoke after the scale-safe / Auto Layout-friendly pass confirmed the live phone rect was desktop-scaled to `187.5x406`, while exported visible JSON still used `375x812`
+  - the same smoke confirmed visible/full root background and root fill resolved to `#F5F5F5`, not `#262626`
+  - the same smoke confirmed visible JSON had `165` layers, `28` layout containers, `62` `AUTO` children, and `3` `ABSOLUTE` children; full JSON had `204` layers, `38` layout containers, `85` `AUTO` children, and `4` `ABSOLUTE` children; both kept all top-level root children absolute for screen-level pixel placement
+  - the same smoke confirmed there were no CSS payload leaks, no string font sizes, no old schema, no DOM-style names, no numbered container names, no suspiciously narrow non-wrapping text layers, and bottom navigation labels were present in both visible/full exports
+- Follow-up verification on 2026-06-03:
+  - `node --check figma-plugins/screen-json-importer/code.js`, `npm run build`, `npm run audit:templates`, and `npm run audit:platform` passed
+  - in-app browser smoke confirmed Home visible JSON copies to clipboard as `build-ui.screen.v1`, frame `375x812`, background `#F5F5F5`, no CSS leaks, `layout` / `autoLayoutChild`, bottom navigation labels, and 19 assets
+  - in-app browser smoke confirmed Home full JSON copies to clipboard as `build-ui.screen.v1`, frame `375x1263`, background `#F5F5F5`, no CSS leaks, bottom navigation labels, and 22 assets
+
+Previous Figma-extracted Design System component:
+
+- `src/assets/design-system/card.svg`
+  - generated from the attached `codex-figma-component-spec/v1` JSON root asset `root-card-svg-27`
+  - preserves the Figma component's `64x40` SVG export with mask, 4px corner radius, bitmap artwork, top overlay, and logo
+- `src/app/components/cards/Card.tsx`
+  - adds a reusable `Card` React component that imports the SVG as a design asset instead of embedding a large SVG blob in TSX
+  - exposes controlled `figma`, `medium`, and `large` size variants
+  - stores the source schema, Figma component name, source node `0:9261`, dimensions, and corner radius in `CARD_SOURCE`
+- Design System / registry wiring:
+  - `src/app/screens/design-system/DesignSystemPage.tsx` now shows a `Card` specimen in `#cards` with `64x40`, `96x60`, and `160x100` previews
+  - `src/app/state/demoTypes.ts` and `src/app/registry/componentRegistry.ts` register `cards.card` for AI/catalog reuse
+- Verification on 2026-06-02:
+  - `npm run build` passed; Vite still emits the known chunk-size warning
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=51 screens=23 flows=13`
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings
+  - in-app browser smoke on `http://127.0.0.1:3001/#cards` confirmed the `Card` specimen renders 3 loaded card instances at `64x40`, `96x60`, and `160x100`
 
 Latest Phase 1 Reference Platform implementation:
 
@@ -1564,13 +1996,19 @@ Continue with product evolution work:
   - dropdown options:
     - `Capture entire screen`
     - `Capture visible screen`
-  - both options call the phone screenshot exporter and download a PNG.
+    - `Generate visible JSON`
+    - `Generate entire screen JSON`
+  - screenshot options call the phone screenshot exporter and download PNG files.
+  - JSON options copy Figma-ready `build-ui.screen.v1` layer-tree payloads to the clipboard; they do not export a screenshot-as-JSON.
 - `src/app/utils/phoneScreenshot.ts`
   - clones the internal phone screen only, excluding bezel, shadow, and desktop shell chrome.
   - inlines computed styles, image sources, and background images before rendering to PNG.
   - `visible` captures the 375x812 phone viewport.
   - `full` expands the tallest scrollable phone content so long runtime pages can export past the visible fold.
   - `full` also re-anchors the L1 bottom navigation wrapper to the bottom of the expanded PNG when the current screen has bottom navigation.
+  - `createPhoneFigmaJson` emits the same visible/full modes as Figma-ready `build-ui.screen.v1` JSON using `frame`, `root`, and `assets`; mode is represented by the resulting frame height rather than a CSS/web payload.
+  - the Figma JSON exporter outputs numeric absolute bounds plus Figma-native paints/effects/text specs, `assets[]`/`assetRef`, optional container Auto Layout `layout`, and child `autoLayoutChild` intent.
+  - Figma JSON extraction uses an unscaled clone for both visible and full modes, resolves root background from the app content instead of the phone shell, adds safety width for text bounds, and avoids DOM/numbered fallback layer names.
 - `src/app/components/MobileFrame.tsx`
   - adds refs and `data-phone-screen` / `data-phone-scroll` markers for capture targeting.
   - no longer renders the screenshot control next to the scaled phone frame.
@@ -1585,11 +2023,13 @@ Continue with product evolution work:
   - `git diff --check` passed with only normal Windows LF/CRLF warnings.
   - Browser smoke on `http://127.0.0.1:3001/` confirmed one screenshot control, one phone screen target, and one phone scroll target.
   - Browser smoke confirmed the dropdown exposes `Capture entire screen` and `Capture visible screen`.
+  - Browser smoke confirmed the dropdown also exposes `Generate visible JSON` and `Generate entire screen JSON`.
   - Chrome CDP smoke confirmed the control is in the sticky top bar, immediately after Settings / Control Panel, icon-only with no trigger text, and computes to `32x32`.
   - Chrome CDP smoke confirmed `Capture visible screen` produces a real PNG download through the browser download flow.
   - Chrome CDP smoke confirmed Design System Inventory has one visible disabled screenshot control, `0` phone-screen capture targets, and no menu opens from the disabled trigger.
   - Browser click smoke on both screenshot options produced no console errors and returned the button to enabled state.
   - Browser smoke after the L1 fix confirmed full-height capture can be triggered from a bottom-navigation screen without console errors and with bottom navigation re-anchored in the cloned output.
+  - Browser/CDP smoke after the Figma-ready JSON pass confirmed visible JSON exports `375x812`, Home L1 full JSON exports `375x1266`, both omit a full-screen `image` field, both use schema `build-ui.screen.v1`, full JSON includes the bottom navigation labels, both include Auto Layout-friendly `layout` / `autoLayoutChild` data without leaking CSS-style payload keys, and both use the app background `#F5F5F5` instead of the phone shell black.
 - Limitation:
   - No automated committed regression test covers the screenshot control yet; CDP smoke evidence is recorded for this session.
 
@@ -1654,6 +2094,33 @@ Continue with product evolution work:
 - Next recommended action:
   - start the reduced Phase 1 Reference Platform plan from a clean working tree: Release/Baseline OS, Feature Manifests, Scenario/Entitlements Control Panel, and contract-ready mock repositories, without Native Boundary, full Security Model, or enterprise Test & Evidence System in this pass.
 
+## 2026-06-04 Documents / Figma Bridge Closeout
+
+- User requested a full closeout: commit everything, push to GitHub, check for bananas, and publish to Vercel.
+- Commit scope for this closeout:
+  - all currently modified and untracked project files are intended to be staged and committed.
+  - scope includes the accumulated local work since the last pushed GitHub state: reference-platform work, typography/design-system/component work, Build UI Bridge / Component-E bridge work, screenshot/JSON exporter work, Investments Portfolio work, Payments/Products/More/Contacts adjustments, and the latest Documents legal/delete behavior.
+- Banana Loop result:
+  - fixed: `npm run audit:figma-bridge` initially failed because the Component-E bridge folder existed as `screenshots/FIgma plugins/ComponentEX` while the audit/docs contract expects `screenshots/FIgma plugins/Component-E`.
+  - fixed: the Component-E folder was renamed to `Component-E`, `npm --prefix "screenshots/FIgma plugins/Component-E" run build` regenerated `code.js`, and the bridge audit passed afterward.
+  - fixed: Documents now uses current-ish June 2026 dates, one `NEW` badge, legal/non-legal state, row 3-dot actions, swipe-left delete reveal, non-legal delete confirmation/removal, and legal-delete Info blocking.
+  - triaged: no automated regression test yet covers Documents swipe/delete/legal branches; this remains a future task in `docs/handoff/next-tasks.md` and `docs/platform-capability-map/README.md`.
+  - already known: Vite chunk-size warning and missing local `typecheck`/`lint`/`test` scripts remain tracked known bananas, not blockers for this closeout.
+  - result: no untriaged banana remains before commit/push/deploy.
+- Final verification before commit/deploy:
+  - `npm run build` passed; Vite still emits the known chunk-size warning.
+  - `npm run audit:templates` passed: `template-contract ok: templates=50 codePreviews=50 components=69 screens=24 flows=14`.
+  - `npm run audit:platform` passed: `reference-platform audit ok products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `npm run audit:figma-bridge` passed: `plugins=2 appExporterStatic=7`; both UniCredit and Component-E bridges reported `static=21` and matching VM smoke summaries.
+  - `npm --prefix "screenshots/FIgma plugins/Component-E" run build` passed.
+  - `npm --prefix "screenshots/FIgma plugins/Component-E" run lint` passed.
+  - `node --check` passed for `figma-plugins/screen-json-importer/code.js` and `screenshots/FIgma plugins/Component-E/code.js`.
+  - static Documents contract check passed: `newBadges=1`, `legal=3`, and current 2026 months `JUN/MAY/APR`.
+  - targeted `git diff --check` passed for the Documents implementation/docs paths with only normal Windows LF/CRLF warnings.
+  - in-app browser smoke on `http://127.0.0.1:3005/` passed for Documents ordering, one `NEW`, legal subtitles, 3-dot delete reveal, non-legal deletion, legal Info modal, and swipe-left reveal.
+- Next recommended action:
+  - after deployment, manually smoke the production URL for Home -> More -> Documents and the demo screenshot/JSON dropdown, because the automated local browser smoke only covered the local dev server.
+
 ## Constitutional Check
 
 constitutional check:
@@ -1663,4 +2130,4 @@ constitutional check:
 - bananas triaged: yes
 - safe to resume: yes
 
-safe to resume: yes, Phase 1 Reference Platform infrastructure is documented and verified: release/baseline OS, feature manifests, project packs for all 24 product/country combinations, banking scenarios, entitlements, contract-ready mock repositories, effective app context, control-panel runtime smoke, build, platform audit, template audit, and diff check evidence are recorded. Remaining work is explicit follow-up: real API adapters, persisted release publication workflow, broader runtime consumption of effective context, real SME/Kids country screens, and known tooling/performance bananas already triaged in `docs/handoff/known-bananas.md` and `docs/handoff/next-tasks.md`.
+safe to resume: yes, the accumulated runtime/design-system/Figma bridge/Documents work is documented and verified locally. Remaining work is explicit follow-up: production URL smoke after Vercel deploy, automated tests for Documents delete/legal branches, broader screenshot/JSON regression coverage, and the known tooling/performance bananas already triaged in `docs/handoff/known-bananas.md` and `docs/handoff/next-tasks.md`.

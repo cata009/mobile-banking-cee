@@ -29,12 +29,12 @@ export default function NewPaymentActionListItem({
       </span>
       <span className="min-w-0">
         <span
-          className="block font-['UniCredit',sans-serif] text-[18px] font-bold leading-normal text-[var(--uc-text)]"
+          className="uc-type-h2 block text-[var(--uc-text)]"
           style={{ fontFeatureSettings: "'liga' off, 'clig' off", letterSpacing: "0.3px" }}
         >
           {action.title}
         </span>
-        <span className="mt-[2px] block font-['UniCredit',sans-serif] text-[14px] font-normal leading-normal text-[var(--uc-text)]">
+        <span className="uc-type-n5 mt-[2px] block text-[var(--uc-text)]">
           {action.description}
         </span>
       </span>
