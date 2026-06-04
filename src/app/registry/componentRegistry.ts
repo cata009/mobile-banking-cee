@@ -383,8 +383,8 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     designSystems: ["current"],
     status: "implemented",
     componentPath: "src/app/components/messages/MessagesMailboxTabs.tsx",
-    usedByScreens: ["pi.messages.overview", "platform.design-system"],
-    notes: "Reusable 2-tab mailbox switcher for Messages-family screens and templates, with 48px height, active leading 12px dot, optional numeric badge pill, muted inactive label, and 2px bottom active indicator.",
+    usedByScreens: ["pi.messages.overview", "pi.investments.portfolio", "platform.design-system"],
+    notes: "Reusable Design System tab switcher for Messages-family screens, templates, and Investments portfolio tabs, with 48px height, active leading 12px dot when configured, muted inactive label, 2px bottom active indicator, and equal-width or horizontally scrollable layouts.",
   },
   "messages.inbox-list": {
     id: "messages.inbox-list",
@@ -549,7 +549,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "implemented",
     componentPath: "src/app/components/investments/InvestmentPortfolioTabs.tsx",
     usedByScreens: ["pi.investments.portfolio"],
-    notes: "Controlled horizontal tab strip for the Investments portfolio taxonomy: Performance, Product type, Currency, Asset class, and Account list.",
+    notes: "Controlled Investments wrapper around the shared MessagesMailboxTabs Design System component, using its horizontally scrollable layout for Performance, Product type, Currency, Asset class, and Account list.",
   },
   "investments.portfolio-chart": {
     id: "investments.portfolio-chart",
@@ -589,7 +589,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "implemented",
     componentPath: "src/app/components/investments/InvestmentActionBar.tsx",
     usedByScreens: ["pi.investments.portfolio"],
-    notes: "Investments-specific 3-small-actions plus large Invest CTA variation of the max-four action-button pattern.",
+    notes: "Investments-specific 3-small-actions plus compact Invest CTA variation of the max-four action-button pattern. The Invest CTA is a 56x56 teal circle with a 32x32 growth/investment glyph and lowercase 11px `invest` label, matching the supplied Figma JSON.",
   },
   "investments.filter-chips": {
     id: "investments.filter-chips",

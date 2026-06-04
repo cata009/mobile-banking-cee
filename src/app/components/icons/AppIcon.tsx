@@ -71,6 +71,8 @@ const NON_STANDARD_ICON_NAMES = new Set([
   "divider-327",
   "user-event-badge",
   "user-event-refresh",
+  "investment-history",
+  "investment-to-approve",
   "warning-small",
 ]);
 
@@ -839,6 +841,56 @@ const CUSTOM_ICONS = {
       />
     ),
   },
+  "investment-history": {
+    source: "custom",
+    label: "Investment history",
+    category: "Actions",
+    width: 32,
+    height: 32,
+    viewBox: "0 0 32 32",
+    usage: ["InvestmentActionBar"],
+    notes: "Investment History glyph from supplied SVG.",
+    render: () => (
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M18.0693 16.6101C17.574 16.1443 17.574 15.3899 18.0693 14.9249L19.2293 13.835L11.402 13.8356V12.6437H19.2293L18.0693 11.5545C17.574 11.0887 17.574 10.3344 18.0693 9.86929L21.6587 13.2397L18.0693 16.6101ZM14.3567 22.4368C14.852 22.9019 14.852 23.6562 14.3567 24.122L10.7673 20.751L14.3567 17.3806C14.852 17.847 14.852 18.6013 14.3567 19.0664L13.196 20.1557H21.024L21.0247 21.3469H13.196L14.3567 22.4368ZM22.662 7.29581L21.3333 6.0482L20.0053 7.29581L18.6773 6.0482L17.3487 7.29581L16.0207 6.0482L14.6927 7.29581L13.364 6.0482L12.036 7.29581L10.708 6.0482L9.37933 7.29581L8 6V26H24V6.03944L22.662 7.29581Z"
+        fill="currentColor"
+      />
+    ),
+  },
+  "investment-to-approve": {
+    source: "custom",
+    label: "Investment to approve",
+    category: "Actions",
+    width: 21,
+    height: 20,
+    viewBox: "0 0 21 20",
+    usage: ["InvestmentActionBar"],
+    notes: "Investment To approve glyph from supplied SVG.",
+    render: () => (
+      <path
+        d="M20.6895 8.27539V17.6729C20.6892 18.9581 19.6372 19.9998 18.3389 20H4.82715V13.0215C5.16646 13.0698 5.51057 13.1035 5.8623 13.1035C9.01387 13.1033 11.6843 11.0856 12.6787 8.27539H20.6895ZM7.91113 16.416C8.38281 16.8867 9.1465 16.8867 9.61816 16.416L10.7217 15.3115V18.5879H11.9287V15.3115L13.0322 16.416C13.504 16.887 14.2685 16.887 14.7402 16.416L11.3252 13.001L7.91113 16.416ZM14.9277 10.0605V13.3369L13.8232 12.2334C13.3522 11.7624 12.5873 11.7624 12.1162 12.2334L15.5312 15.6484L18.9453 12.2334C18.4743 11.7624 17.7093 11.7624 17.2383 12.2334L16.1348 13.3369V10.0605H14.9277ZM5.8623 0C7.7809 4.42561e-05 9.47889 0.925778 10.5479 2.35059L6.09082 6.80664L4.32227 5.03711C3.73543 4.451 2.78516 4.45114 2.19824 5.03711L6.09082 8.93066L11.3115 3.70996C11.575 4.37686 11.7246 5.10161 11.7246 5.8623C11.7245 9.09945 9.09948 11.7245 5.8623 11.7246C2.62507 11.7246 9.4653e-05 9.0995 0 5.8623C0 2.62434 2.62501 0 5.8623 0Z"
+        fill="currentColor"
+      />
+    ),
+  },
+  "investment-download-report": {
+    source: "custom",
+    label: "Investment download report",
+    category: "Actions",
+    width: 20,
+    height: 20,
+    viewBox: "0 0 20 20",
+    usage: ["InvestmentActionBar"],
+    notes: "Investment Download Report glyph from supplied SVG.",
+    render: () => (
+      <path
+        d="M2.5 18.125C2.5 19.1606 3.33938 20 4.375 20H2.5C1.46438 20 0.625 19.1606 0.625 18.125V0H2.5V18.125ZM17.5 0C18.5356 0 19.375 0.839375 19.375 1.875V20H6.25C5.21438 20 4.375 19.1606 4.375 18.125V0H17.5ZM9.6875 10C8.47937 10 7.5 10.9794 7.5 12.1875V14.375C8.70813 14.375 9.6875 13.3956 9.6875 12.1875V10ZM12.9688 7.26562C11.7606 7.26562 10.7812 8.245 10.7812 9.45312V14.375C11.9894 14.375 12.9688 13.3956 12.9688 12.1875V7.26562ZM16.25 5.625C15.0419 5.625 14.0625 6.60437 14.0625 7.8125V14.375C15.2706 14.375 16.25 13.3956 16.25 12.1875V5.625Z"
+        fill="currentColor"
+      />
+    ),
+  },
   "account-option-create-paycode": {
     source: "custom",
     label: "Create paycode",
@@ -898,6 +950,32 @@ const CUSTOM_ICONS = {
     usage: ["AccountActionBar"],
     render: () => (
       <path d="M10 0C15.5225 0 20 4.4775 20 10C20 15.5225 15.5225 20 10 20C4.47688 20 0 15.5225 0 10C0 4.4775 4.47688 0 10 0ZM9.0625 4.375V9.0625H4.375V10.9375H9.0625V15.625H10.9375V10.9375H15.625V9.0625H10.9375V4.375H9.0625Z" fill="currentColor" />
+    ),
+  },
+  "invest-action": {
+    source: "custom",
+    label: "Invest action",
+    category: "Actions",
+    width: 32,
+    height: 32,
+    viewBox: "0 0 32 32",
+    usage: ["InvestmentActionBar"],
+    notes: "Investments CTA glyph from supplied Figma JSON: growth line, arrow head, and three vertical bars.",
+    render: () => (
+      <>
+        <path
+          d="M5 20C8.2 16.8 11.2 15.35 14 15.35C16.72 15.35 18.78 12.44 21.05 8.55"
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+        />
+        <path d="M22.2 3.4L30.7 4.7L24.2 11.9L22.2 3.4Z" fill="currentColor" />
+        <path d="M9 21H11V28H9V21Z" fill="currentColor" />
+        <path d="M15 18H17V28H15V18Z" fill="currentColor" />
+        <path d="M21 16H23V28H21V16Z" fill="currentColor" />
+      </>
     ),
   },
   "add-circle": {

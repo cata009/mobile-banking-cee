@@ -21,10 +21,10 @@ export default function InvestmentFilterChips({
             key={option.id}
             type="button"
             onClick={() => onChange(option.id)}
-            className={`uc-type-n5-strong h-[32px] shrink-0 rounded-full border px-[16px] ${
+            className={`inline-flex h-[24px] shrink-0 items-center justify-center rounded-[14.5px] border px-[8px] py-[4px] text-[14px] font-normal leading-[15px] ${
               selected
                 ? "border-[var(--uc-text)] bg-[var(--uc-text)] text-[var(--uc-text-inverse)]"
-                : "border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)]"
+                : "border-[var(--uc-text)] bg-transparent text-[var(--uc-text)]"
             }`}
             aria-pressed={selected}
           >

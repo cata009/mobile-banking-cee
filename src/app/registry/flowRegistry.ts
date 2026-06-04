@@ -33,7 +33,6 @@ export interface FlowMeta {
 }
 
 const ALL_COUNTRIES: readonly CountryId[] = ["RO", "CZ", "SK", "HU", "RS", "BA", "BA_BL", "SI"] as const;
-const INVESTMENTS_COUNTRIES: readonly CountryId[] = ["RO", "CZ", "SK", "HU", "RS", "SI"] as const;
 
 export const FLOW_REGISTRY: Record<FlowId, FlowMeta> = {
   "pi.prelogin-to-home.active": {
@@ -199,7 +198,7 @@ export const FLOW_REGISTRY: Record<FlowId, FlowMeta> = {
     id: "pi.home-to-investments-portfolio",
     label: "PI home to Investments portfolio",
     products: ["PI"],
-    countries: INVESTMENTS_COUNTRIES,
+    countries: ALL_COUNTRIES,
     designSystems: ["current"],
     status: "mock-driven",
     entryScreen: "pi.home.overview",

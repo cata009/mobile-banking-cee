@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import AccessGate from '@/app/components/security/AccessGate';
 import '@/styles/index.css';
 
 const rootElement = document.getElementById('root');
@@ -35,7 +36,9 @@ if (!rootElement) {
     .then(({ default: App }) => {
       ReactDOM.createRoot(rootElement).render(
         <React.StrictMode>
-          <App />
+          <AccessGate>
+            <App />
+          </AccessGate>
         </React.StrictMode>
       );
     })
