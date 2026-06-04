@@ -13,10 +13,10 @@ export default function UnplannedBanner() {
             <AppIcon name="alert-triangle" className="text-[var(--uc-yellow-brown)]" />
           </span>
           <div className="flex-1">
-            <h4 className="font-['UniCredit',sans-serif] text-[16px] font-bold text-[var(--uc-text)] mb-[4px]">
+            <h4 className="uc-type-n4-strong mb-[4px] text-[var(--uc-text)]">
               Unplanned Maintenance
             </h4>
-            <p className="font-['UniCredit',sans-serif] text-[14px] text-[var(--uc-text-muted)]">
+            <p className="uc-type-n5 text-[var(--uc-text-muted)]">
               Some services may be temporarily unavailable due to urgent maintenance. We apologize for any inconvenience.
             </p>
           </div>

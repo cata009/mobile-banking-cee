@@ -28,6 +28,7 @@ import MoreScreen from "@/app/screens/more/MoreScreen";
 import DocumentsScreen from "@/app/screens/documents/DocumentsScreen";
 import PaymentsScreen from "@/app/screens/payments/PaymentsScreen";
 import ProductsScreen from "@/app/screens/products/ProductsScreen";
+import InvestmentsPortfolioScreen from "@/app/screens/investments/InvestmentsPortfolioScreen";
 import SettingsScreen from "@/app/screens/settings/SettingsScreen";
 import RoKidsApp from "@/app/screens/kids/RoKidsApp";
 
@@ -45,6 +46,7 @@ import {
   TransactionDetailScreen,
 } from "@/app/screens/payments/DomesticPaymentFlowScreens";
 import { useProducts } from "@/hooks/useProducts";
+import { isInvestmentsPortfolioAvailable } from "@/app/utils/investmentsAvailability";
 import type { AccountTransaction } from "@/data/accountDetails";
 import {
   createEmptyDomesticPaymentDraft,
@@ -70,6 +72,7 @@ const DESIGN_SYSTEM_HASHES = new Set([
   "templates",
   "icons",
   "icon-audit",
+  "typography",
   "colors",
   "color-audit",
 ]);
@@ -130,6 +133,7 @@ function AppContent() {
   const isPiRuntimeContext = product === "PI" && designSystem === "current";
   const isRoKidsRuntimeContext = product === "KIDS_PI" && country === "RO" && designSystem === "current";
   const isSupportedRuntimeContext = isPiRuntimeContext || isRoKidsRuntimeContext;
+  const investmentsPortfolioAvailable = isInvestmentsPortfolioAvailable(product, country);
   
   const [showTerminatePopup, setShowTerminatePopup] = useState(false);
   const [showPanel, setShowPanel] = useState(false);
@@ -198,6 +202,7 @@ function AppContent() {
       case 'payment-success':
         return 'light';
       case 'products':
+      case 'investments':
         return 'light';
       case 'prime':
         return 'dark'; // fundal gradient întunecat - text și iconițe albe
@@ -344,6 +349,13 @@ function AppContent() {
     navigateTo("products");
   };
 
+  const handleInvestmentsClick = () => {
+    if (!investmentsPortfolioAvailable) return;
+
+    console.log("Investments clicked - navigating to Investments portfolio screen");
+    navigateTo("investments");
+  };
+
   // Handler pentru înapoi din More
   const handleMoreBack = () => {
     goBack();
@@ -460,6 +472,7 @@ function AppContent() {
             onProductsClick={handleProductsClick}
             onMoreClick={handleMoreClick}
             onAccountClick={handleAccountClick}
+            onInvestmentsClick={handleInvestmentsClick}
           />
         )}
 
@@ -585,6 +598,10 @@ function AppContent() {
             onPaymentsClick={handlePaymentsClick}
             onMoreClick={handleMoreClick}
           />
+        )}
+
+        {currentScreen === "investments" && investmentsPortfolioAvailable && (
+          <InvestmentsPortfolioScreen onBack={goBack} />
         )}
 
         {/* Contacts Screen - EXACT ca Language Selector (NO animation) */}

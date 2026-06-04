@@ -33,6 +33,7 @@ export interface FlowMeta {
 }
 
 const ALL_COUNTRIES: readonly CountryId[] = ["RO", "CZ", "SK", "HU", "RS", "BA", "BA_BL", "SI"] as const;
+const INVESTMENTS_COUNTRIES: readonly CountryId[] = ["RO", "CZ", "SK", "HU", "RS", "SI"] as const;
 
 export const FLOW_REGISTRY: Record<FlowId, FlowMeta> = {
   "pi.prelogin-to-home.active": {
@@ -193,6 +194,27 @@ export const FLOW_REGISTRY: Record<FlowId, FlowMeta> = {
     requiredFeatures: [],
     optionalFeatures: [],
     evidence: ["src/app/App.tsx", "src/app/screens/products/ProductsScreen.tsx", "src/app/config/productsMenuConfig.ts"],
+  },
+  "pi.home-to-investments-portfolio": {
+    id: "pi.home-to-investments-portfolio",
+    label: "PI home to Investments portfolio",
+    products: ["PI"],
+    countries: INVESTMENTS_COUNTRIES,
+    designSystems: ["current"],
+    status: "mock-driven",
+    entryScreen: "pi.home.overview",
+    steps: [
+      { screenId: "pi.home.overview", intent: "Open the Investments product card from the home summary." },
+      { screenId: "pi.investments.portfolio", intent: "Review investment total value, period performance chart, grouped portfolio distributions, actions, sorted products, securities accordions, and fund suggestion banner." },
+    ],
+    requiredFeatures: [],
+    optionalFeatures: [],
+    evidence: [
+      "src/app/App.tsx",
+      "src/app/screens/home/AccountSummary.tsx",
+      "src/app/screens/investments/InvestmentsPortfolioScreen.tsx",
+      "src/app/config/investmentsPortfolioConfig.ts",
+    ],
   },
   "pi.home-to-more-to-contacts": {
     id: "pi.home-to-more-to-contacts",

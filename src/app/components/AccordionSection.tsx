@@ -49,14 +49,7 @@ export default function AccordionSection({
           }}
         >
           {/* Title */}
-          <h2 
-            className="font-['UniCredit',sans-serif] font-bold"
-            style={{
-              color: 'var(--uc-text)',
-              fontSize: '24px',
-              lineHeight: 'normal'
-            }}
-          >
+          <h2 className="uc-type-l1 text-[var(--uc-text)]">
             {title}
           </h2>
         </div>
@@ -71,14 +64,7 @@ export default function AccordionSection({
           }}
         >
           {/* Title */}
-          <h2 
-            className="font-['UniCredit',sans-serif] font-bold"
-            style={{
-              color: 'var(--uc-text)',
-              fontSize: '24px',
-              lineHeight: 'normal'
-            }}
-          >
+          <h2 className="uc-type-l1 text-[var(--uc-text)]">
             {title}
           </h2>
 

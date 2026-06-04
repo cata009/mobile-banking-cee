@@ -12,7 +12,10 @@ import ThemeModeSegment from "@/app/components/ThemeModeSegment";
 import BottomNavigation from "@/app/components/BottomNavigation";
 import HomeHeader from "@/app/screens/home/HomeHeader";
 import { MoreHeader } from "@/app/screens/more/MoreHeader";
+import NavigationRow, { NAVIGATION_ROW_SOURCE } from "@/app/components/NavigationRow";
+import ProfileAvatar, { PROFILE_AVATAR_SOURCE } from "@/app/components/ProfileAvatar";
 import PrimaryButton from "@/app/components/PrimaryButton";
+import ToggleButton, { TOGGLE_BUTTON_SOURCE } from "@/app/components/ToggleButton";
 import LanguageSelectorButton from "@/app/components/ui/LanguageSelectorButton";
 import NavigationLink from "@/app/components/ui/NavigationLink";
 import PreLoginHeading from "@/app/components/ui/PreLoginHeading";
@@ -24,6 +27,13 @@ import ProductAccordion from "@/app/components/ProductAccordion";
 import ProductAccordionAnimated from "@/app/components/ProductAccordionAnimated";
 import AccordionSection from "@/app/components/AccordionSection";
 import ProductCard from "@/app/components/ProductCard";
+import FigmaCard, { CARD_SOURCE, type CardSize } from "@/app/components/cards/Card";
+import GhostBanner, { GHOST_BANNER_SOURCE } from "@/app/components/cards/GhostBanner";
+import InfoBanner, { INFO_BANNER_SOURCE } from "@/app/components/cards/InfoBanner";
+import UserEventCard, { USER_EVENT_CARD_SOURCE } from "@/app/components/cards/UserEventCard";
+import HelperCard, { HELPER_CARD_SOURCE } from "@/app/components/cards/HelperCard";
+import PendingActionCard, { PENDING_ACTION_CARD_SOURCE } from "@/app/components/cards/PendingActionCard";
+import DebitCard, { DEBIT_CARD_SOURCE, DEBIT_CARD_VARIANTS, type DebitCardSize, type DebitCardVariant } from "@/app/components/cards/DebitCard";
 import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
 import productCardAccountImage from "../../../../screenshots/account.png";
@@ -71,19 +81,19 @@ import { Badge } from "@/app/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Input } from "@/app/components/ui/input";
 import { Checkbox } from "@/app/components/ui/checkbox";
-import { Switch } from "@/app/components/ui/switch";
 import { Slider } from "@/app/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/app/components/ui/alert";
-import { Avatar, AvatarFallback } from "@/app/components/ui/avatar";
 import { Progress } from "@/app/components/ui/progress";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { Separator } from "@/app/components/ui/separator";
 import { Toggle } from "@/app/components/ui/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@/app/components/ui/toggle-group";
+import avatarPhotoSample from "@/assets/design-system/avatar-photo-sample.svg";
 import { getAccountIdentity } from "@/data/accountDetails";
 import { TEMPLATE_REGISTRY, type TemplateRegistryItem } from "@/app/registry/templateRegistry";
 import { PRODUCT_BANNER_TONE_OPTIONS } from "@/app/config/productBannerVariants";
+import { TYPOGRAPHY_TOKENS, type TypographyToken } from "@/app/registry/typographyRegistry";
 import {
   APP_COLOR_AUDIT,
   COLOR_PALETTES,
@@ -101,8 +111,9 @@ const activeComponentFiles = [
   "AccordionSection", "AppIcon", "BottomNavigation", "CoAppingSessionScreen", "DynamicIsland", "EdgeLoadingAnimation",
   "FloatingCoAppingButton", "LanguageSelector", "LogoutConfirmDialog", "MobileFrame", "PageHeader",
   "PanelOverlay", "PanelWithTranslations", "PanelWithoutCoAppingTranslations", "PreLoginActiveScreen",
-  "PreLoginScreen", "PrimaryButton", "ProductAccordion", "ProductAccordionAnimated", "ProductCard",
-  "ProductMenuCard", "ProductsList", "StatusBar", "TerminateSessionPopup", "TextField", "AmountField", "TotalRow", "UniCreditLogo", "PaymentHeroCard",
+  "PreLoginScreen", "PrimaryButton", "ProductAccordion", "ProductAccordionAnimated", "ProductCard", "Card", "GhostBanner", "InfoBanner", "UserEventCard", "HelperCard", "PendingActionCard", "DebitCard",
+  "ProductMenuCard", "ProductsList", "StatusBar", "TerminateSessionPopup", "TextField", "AmountField", "NavigationRow", "ToggleButton", "TotalRow", "UniCreditLogo", "PaymentHeroCard",
+  "ProfileAvatar",
   "AccountBalanceCard", "AccountActionBar", "AccountCarouselIndicator", "AccountDetailsInfoField", "AccountSearchBar", "AccountTransactionRow", "AccountTransactionMonthDivider",
   "HomeHeader", "AccountSummary", "QuickActions", "TransactionsPreview", "UnplannedBanner",
   "MoreHeader", "MoreCardBase", "ContactsCard", "DocumentsCard", "SettingsCard", "GdprConsentCard",
@@ -112,12 +123,12 @@ const activeComponentFiles = [
 ];
 
 const uiRegistryFiles = [
-  "accordion", "alert-dialog", "alert", "aspect-ratio", "avatar", "badge", "breadcrumb", "button",
+  "accordion", "alert-dialog", "alert", "aspect-ratio", "badge", "breadcrumb", "button",
   "calendar", "card", "carousel", "chart", "checkbox", "collapsible", "command", "context-menu",
   "dialog", "drawer", "dropdown-menu", "form", "hover-card", "input-otp", "input", "label",
   "menubar", "navigation-menu", "pagination", "popover", "progress", "radio-group", "resizable",
   "scroll-area", "select", "separator", "sheet", "sidebar", "skeleton", "slider", "sonner",
-  "switch", "table", "tabs", "textarea", "toggle-group", "toggle", "tooltip",
+  "table", "tabs", "textarea", "toggle-group", "toggle", "tooltip",
   "ChevronIcon", "LanguageSelectorButton", "NavigationLink", "PreLoginHeading", "PrimaryButton",
 ];
 
@@ -164,6 +175,7 @@ const iconSectionLinks = [
 ];
 
 const colorSectionLinks = [
+  ["typography", "Typography"],
   ["colors", "Palettes"],
   ["color-audit", "App color map"],
 ];
@@ -182,6 +194,20 @@ const inventoryTabLabels: Record<InventoryTab, string> = {
   templates: "Templates",
   icons: "Icons",
   colors: "Colors",
+};
+
+const inventoryTabDescriptions: Record<InventoryTab, string> = {
+  components: "Reusable runtime building blocks",
+  templates: "Code-backed template references",
+  icons: "Centralized symbol inventory",
+  colors: "Typography and color tokens",
+};
+
+const inventoryTabCounts: Record<InventoryTab, number> = {
+  components: activeComponentFiles.length,
+  templates: TEMPLATE_REGISTRY.length,
+  icons: ICON_INVENTORY.length,
+  colors: TYPOGRAPHY_TOKENS.length + DESIGN_SYSTEM_COLORS.length,
 };
 
 function getInventoryTabForHash(hash: string): InventoryTab {
@@ -670,7 +696,7 @@ function Section({ id, title, description, children }: {
 
 type ThemeMode = "light" | "dark";
 
-function Specimen({ name, note, children, tone = "light", showThemeControl = true }: {
+function Specimen({ name, children, tone = "light", showThemeControl = true }: {
   name: string;
   source?: string;
   note?: string;
@@ -691,19 +717,18 @@ function Specimen({ name, note, children, tone = "light", showThemeControl = tru
   const renderedChildren = typeof children === "function" ? children(themeMode) : children;
 
   return (
-    <div className="overflow-hidden rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)]">
-      <div className="border-b border-[var(--uc-border-muted)] px-4 py-3">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h3 className="font-['UniCredit:Bold',sans-serif] text-[16px] text-[var(--uc-text)]">{name}</h3>
-          {showThemeControl && (
-            <ThemeModeSegment value={themeMode} onChange={setThemeMode} ariaLabel={`${name} theme mode`} />
-          )}
+      <div className="overflow-hidden rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)]">
+        <div className="border-b border-[var(--uc-border-muted)] px-4 py-3">
+          <div className="flex flex-wrap items-baseline justify-between gap-3">
+            <h3 className="font-['UniCredit:Bold',sans-serif] text-[16px] text-[var(--uc-text)]">{name}</h3>
+            {showThemeControl && (
+              <ThemeModeSegment value={themeMode} onChange={setThemeMode} ariaLabel={`${name} theme mode`} />
+            )}
+          </div>
         </div>
-        {note && <p className="mt-1 text-[13px] text-[var(--uc-text-muted)]">{note}</p>}
-      </div>
-      <div className={`${isDark ? "dark" : ""} ${bg} relative p-5`}>
-        <MeasurementSurface>
-          {renderedChildren}
+        <div className={`${isDark ? "dark" : ""} ${bg} relative p-5`}>
+          <MeasurementSurface>
+            {renderedChildren}
         </MeasurementSurface>
       </div>
     </div>
@@ -779,7 +804,7 @@ function CountryCoverageSummary() {
         </Badge>
       </div>
 
-      <div className="mt-5 grid gap-3 md:grid-cols-3">
+      <div className="mt-5 grid gap-3 md:grid-cols-2">
         {[
           ["Languages", languages.length],
           ["Products", products.length],
@@ -805,6 +830,239 @@ function CountryCoverageSummary() {
           <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">More cards</p>
           <p>{moreCards.map((card) => moreCardLabels[card]).join(", ")}</p>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function CardVariantSpecimen() {
+  const sizes: readonly { id: CardSize; label: string }[] = [
+    { id: "figma", label: "64x40" },
+    { id: "medium", label: "96x60" },
+    { id: "large", label: "160x100" },
+  ];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-end gap-6">
+        {sizes.map((size) => (
+          <div key={size.id} className="flex flex-col gap-2">
+            <FigmaCard ariaLabel={`Card ${size.label}`} size={size.id} />
+            <p className="font-['UniCredit:Regular',sans-serif] text-[12px] text-[var(--uc-text-muted)]">
+              {size.label}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function GhostBannerVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState("title-and-description");
+  const variants: Record<string, { title: string; description?: string }> = {
+    "title-and-description": {
+      title: "Apply for a loan",
+      description: "Check out our best loan offers with\nfixed and variable interest rate",
+    },
+    "title-only": {
+      title: "Apply for a loan",
+    },
+    "long-description": {
+      title: "Open a savings account",
+      description: "Set money aside automatically and earn interest with no monthly fees or hidden costs.",
+    },
+  };
+  const active = variants[selectedVariant];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="ghost-banner-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={[
+          { id: "title-and-description", label: "Title and description" },
+          { id: "title-only", label: "Title only" },
+          { id: "long-description", label: "Long description" },
+        ]}
+      />
+      <div className="flex w-[375px] flex-col gap-[16px] bg-[var(--uc-app-bg)] p-[16px]">
+        <GhostBanner title={active.title} description={active.description} onClick={() => undefined} />
+      </div>
+    </div>
+  );
+}
+
+function InfoBannerVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState("with-action");
+  const variants: Record<string, { title: string; description?: string; actionLabel?: string }> = {
+    "with-action": {
+      title: "We are completing your investment account opening.",
+      description: "It can take up to one business day. Come back again to start investing and grow your money.",
+      actionLabel: "EDIT",
+    },
+    "no-action": {
+      title: "We are completing your investment account opening.",
+      description: "It can take up to one business day. Come back again to start investing and grow your money.",
+    },
+    "title-only": {
+      title: "Your statement is ready to download.",
+      actionLabel: "VIEW",
+    },
+  };
+  const active = variants[selectedVariant];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="info-banner-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={[
+          { id: "with-action", label: "Title, description and action" },
+          { id: "no-action", label: "Title and description" },
+          { id: "title-only", label: "Title and action" },
+        ]}
+      />
+      <div className="flex w-[375px] flex-col gap-[16px] bg-[var(--uc-app-bg)] p-[16px]">
+        <InfoBanner
+          title={active.title}
+          description={active.description}
+          actionLabel={active.actionLabel}
+          onActionClick={() => undefined}
+        />
+      </div>
+    </div>
+  );
+}
+
+function UserEventCardVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState("link-and-options");
+  type EventVariant = {
+    iconName: "user-event-badge" | "user-event-refresh";
+    actionLabel?: string;
+    showOptions?: boolean;
+  };
+  const variants: Record<string, EventVariant> = {
+    "link-and-options": { iconName: "user-event-badge", actionLabel: "FIND OUT MORE", showOptions: true },
+    "plain": { iconName: "user-event-refresh" },
+  };
+  const active = variants[selectedVariant];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="user-event-card-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={[
+          { id: "link-and-options", label: "With link and options" },
+          { id: "plain", label: "Without link and options" },
+        ]}
+      />
+      <div className="flex w-[375px] flex-col gap-[16px] bg-[var(--uc-app-bg)] p-[16px]">
+        <UserEventCard
+          title="Expenses higher than usual"
+          description={"Track your spending and try to get\nthe most our of your money."}
+          iconName={active.iconName}
+          actionLabel={active.actionLabel}
+          showOptions={active.showOptions}
+          onActionClick={() => undefined}
+          onOptionsClick={() => undefined}
+        />
+      </div>
+    </div>
+  );
+}
+
+function DebitCardVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState<DebitCardVariant>("mc-debit-gold");
+  const sizes: readonly { id: DebitCardSize; label: string }[] = [
+    { id: "figma", label: "64x40" },
+    { id: "medium", label: "96x60" },
+    { id: "large", label: "160x100" },
+  ];
+  const variantOptions = Object.entries(DEBIT_CARD_VARIANTS).map(([id, art]) => ({
+    id,
+    label: `${art.label} (${art.network})`,
+  }));
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="debit-card-variant-select"
+        value={selectedVariant}
+        onChange={(value) => setSelectedVariant(value as DebitCardVariant)}
+        options={variantOptions}
+      />
+      <div className="flex flex-wrap items-end gap-6">
+        {sizes.map((size) => (
+          <div key={size.id} className="flex flex-col gap-2">
+            <DebitCard ariaLabel={`${DEBIT_CARD_VARIANTS[selectedVariant].label} ${size.label}`} variant={selectedVariant} size={size.id} />
+            <p className="font-['UniCredit:Regular',sans-serif] text-[12px] text-[var(--uc-text-muted)]">{size.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function HelperCardVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState("with-link");
+  const variants: Record<string, { actionLabel?: string; dismissible?: boolean }> = {
+    "with-link": { actionLabel: "SEE DETAILS", dismissible: true },
+    "plain": { dismissible: true },
+  };
+  const active = variants[selectedVariant];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="helper-card-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={[
+          { id: "with-link", label: "With link" },
+          { id: "plain", label: "Without link" },
+        ]}
+      />
+      <div className="flex w-[375px] flex-col gap-[16px] bg-[var(--uc-app-bg)] p-[16px]">
+        <HelperCard
+          title="Details"
+          description={"Vice pobrobností zobrazite tlačítkem\nDetaily."}
+          actionLabel={active.actionLabel}
+          dismissible={active.dismissible}
+          onActionClick={() => undefined}
+          onClose={() => undefined}
+        />
+      </div>
+    </div>
+  );
+}
+
+function PendingActionCardVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState("with-tag");
+  const showTag = selectedVariant === "with-tag";
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="pending-action-card-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={[
+          { id: "with-tag", label: "With expiring tag" },
+          { id: "no-tag", label: "Without tag" },
+        ]}
+      />
+      <div className="flex w-[375px] flex-col gap-[16px] bg-[var(--uc-app-bg)] p-[16px]">
+        <PendingActionCard
+          title="Pending Action"
+          description="You have to reject or confirm a pending payment"
+          tagLabel={showTag ? "Expiring on 12.04.25" : undefined}
+          onClick={() => undefined}
+        />
       </div>
     </div>
   );
@@ -1169,12 +1427,10 @@ function RadioButtonVariantSpecimen() {
 }
 
 function PrimaryButtonVariantSpecimen({ themeMode }: { themeMode: ThemeMode }) {
-  const isDark = themeMode === "dark";
-
   return (
     <div className="w-[327px]">
-      <PrimaryButton variant={isDark ? "surface" : "action"} labelSize="16" className="w-full">
-        {isDark ? "SELECT YOUR ACCOUNT" : "Continue"}
+      <PrimaryButton variant="action" labelSize="16" className="w-full">
+        Continue
       </PrimaryButton>
     </div>
   );
@@ -1397,6 +1653,122 @@ function AmountFieldSpecimens() {
             {...baseProps}
           />
         ) : null}
+      </div>
+    </div>
+  );
+}
+
+function ToggleButtonVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState("checked");
+  const checked = selectedVariant === "checked";
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="toggle-button-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={[
+          { id: "checked", label: "Checked" },
+          { id: "unchecked", label: "Unchecked" },
+        ]}
+      />
+      <div className="flex min-h-[60px] items-center">
+        <ToggleButton
+          ariaLabel="Toggle button specimen"
+          checked={checked}
+          onToggle={(nextChecked) => setSelectedVariant(nextChecked ? "checked" : "unchecked")}
+        />
+      </div>
+    </div>
+  );
+}
+
+function NavigationRowVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState("description-toggle");
+  const [toggleChecked, setToggleChecked] = useState(false);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="navigation-row-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={[
+          { id: "description-toggle", label: "Description + toggle" },
+          { id: "link-toggle", label: "Link + toggle" },
+          { id: "icon-description-chevron", label: "Icon + chevron" },
+        ]}
+      />
+      <div className="w-[375px]">
+        {selectedVariant === "description-toggle" ? (
+          <NavigationRow
+            title="TITLE LOREM IPSUM TITLE LOREM IPSUM"
+            description="Description Short"
+            trailingAccessory="toggle"
+            toggleChecked={toggleChecked}
+            onToggle={setToggleChecked}
+          />
+        ) : selectedVariant === "link-toggle" ? (
+          <NavigationRow
+            title="TITLE LOREM IPSUM"
+            linkLabel="OPEN FILE"
+            trailingAccessory="toggle"
+            toggleChecked={toggleChecked}
+            onToggle={setToggleChecked}
+          />
+        ) : (
+          <NavigationRow
+            title="TITLE LOREM IPSUM TITLE LOREM IPSUM"
+            description="Description Short"
+            leadingIconName="contact-prime"
+            trailingAccessory="chevron"
+            onClick={noop}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ProfileAvatarVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState("photo-full");
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="profile-avatar-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={[
+          { id: "photo-full", label: "Photo full" },
+          { id: "photo-profile", label: "Photo + dot" },
+          { id: "initials", label: "Initials" },
+          { id: "ai", label: "AI avatar" },
+        ]}
+      />
+      <div className="flex min-h-[72px] items-center rounded-[8px] bg-[var(--uc-app-bg)] px-[16px]">
+        {selectedVariant === "photo-full" ? (
+          <ProfileAvatar
+            ariaLabel="Profile avatar photo full specimen"
+            imageAlt="Profile avatar sample"
+            imageSrc={avatarPhotoSample}
+            variant="photo"
+          />
+        ) : selectedVariant === "photo-profile" ? (
+          <ProfileAvatar
+            ariaLabel="Profile avatar profile specimen"
+            imageAlt="Profile avatar sample"
+            imageSrc={avatarPhotoSample}
+            photoStyle="profile"
+            showNotification
+            variant="photo"
+          />
+        ) : selectedVariant === "initials" ? (
+          <ProfileAvatar ariaLabel="Profile avatar initials specimen" initials="MR" variant="initials" />
+        ) : (
+          <ProfileAvatar ariaLabel="Profile avatar AI specimen" variant="ai" />
+        )}
       </div>
     </div>
   );
@@ -1737,13 +2109,11 @@ function ShadcnSpecimens() {
     { id: "badge", label: "Badge" },
     { id: "input", label: "Input" },
     { id: "checkbox", label: "Checkbox" },
-    { id: "switch", label: "Switch" },
     { id: "toggle", label: "Toggle" },
     { id: "toggle-group", label: "Toggle group" },
     { id: "slider", label: "Slider" },
     { id: "progress", label: "Progress" },
     { id: "separator", label: "Separator" },
-    { id: "avatar", label: "Avatar" },
     { id: "skeleton", label: "Skeleton" },
     { id: "alert", label: "Alert" },
     { id: "tabs", label: "Tabs" },
@@ -1762,10 +2132,6 @@ function ShadcnSpecimens() {
       { id: "secondary", label: "Secondary" },
     ],
     checkbox: [
-      { id: "checked", label: "Checked" },
-      { id: "unchecked", label: "Unchecked" },
-    ],
-    switch: [
       { id: "checked", label: "Checked" },
       { id: "unchecked", label: "Unchecked" },
     ],
@@ -1814,8 +2180,6 @@ function ShadcnSpecimens() {
         return <Input placeholder="Input specimen" />;
       case "checkbox":
         return <Checkbox defaultChecked={selectedVariant === "checked"} />;
-      case "switch":
-        return <Switch defaultChecked={selectedVariant === "checked"} />;
       case "toggle":
         return (
           <Toggle aria-label="Bold toggle" pressed={selectedVariant === "pressed"}>
@@ -1836,12 +2200,6 @@ function ShadcnSpecimens() {
         return <Progress value={Number(selectedVariant)} />;
       case "separator":
         return <Separator />;
-      case "avatar":
-        return (
-          <Avatar>
-            <AvatarFallback>UC</AvatarFallback>
-          </Avatar>
-        );
       case "skeleton":
         return <Skeleton className="h-8 w-40" />;
       case "alert":
@@ -1916,8 +2274,10 @@ function ShadcnSpecimens() {
   );
 }
 
-function InventoryTabs({ activeTab, onChange, placement = "inline" }: {
+function InventoryTabs({ activeTab, activeSection, sectionLinks, onChange, placement = "inline" }: {
   activeTab: InventoryTab;
+  activeSection: string;
+  sectionLinks: readonly (readonly [string, string])[];
   onChange: (tab: InventoryTab) => void;
   placement?: "inline" | "sidebar";
 }) {
@@ -1927,27 +2287,86 @@ function InventoryTabs({ activeTab, onChange, placement = "inline" }: {
     <div
       className={
         isSidebar
-          ? "grid gap-1 rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-app-bg)] p-1"
+          ? "grid gap-2"
           : "mt-6 inline-flex rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-app-bg)] p-1"
       }
-      role="tablist"
+      role={isSidebar ? "navigation" : "tablist"}
       aria-label="Design system inventory tabs"
     >
       {(["components", "templates", "icons", "colors"] as const).map((tab) => {
         const isActive = activeTab === tab;
         return (
-          <button
+          <div
             key={tab}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            onClick={() => onChange(tab)}
-            className={`rounded-[6px] px-3 py-2 font-['UniCredit:Bold',sans-serif] text-[14px] capitalize transition-colors ${
-              isActive ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm" : "text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]"
+            className={`overflow-hidden rounded-[8px] border transition-colors ${
+              isSidebar
+                ? isActive
+                  ? "border-[var(--uc-action)] bg-[var(--uc-action-soft)]"
+                  : "border-[var(--uc-border)] bg-[var(--uc-surface)]"
+                : ""
             }`}
           >
-            {inventoryTabLabels[tab]}
-          </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => onChange(tab)}
+              className={
+                isSidebar
+                  ? `flex w-full items-start justify-between gap-3 px-4 py-3 text-left transition-colors ${
+                      isActive ? "text-[var(--uc-text)]" : "text-[var(--uc-text-muted)] hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-text)]"
+                    }`
+                  : `rounded-[6px] px-3 py-2 font-['UniCredit:Bold',sans-serif] text-[14px] capitalize transition-colors ${
+                      isActive ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm" : "text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]"
+                    }`
+              }
+            >
+              <span className="min-w-0">
+                <span className={`block ${isSidebar ? "uc-type-n4-strong" : "font-['UniCredit:Bold',sans-serif] text-[14px]"}`}>
+                  {inventoryTabLabels[tab]}
+                </span>
+                {isSidebar ? (
+                  <span className="uc-type-n5 mt-1 block text-[var(--uc-text-muted)]">
+                    {inventoryTabDescriptions[tab]}
+                  </span>
+                ) : null}
+              </span>
+              {isSidebar ? (
+                <span
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold leading-none ${
+                    isActive
+                      ? "bg-[var(--uc-action)] text-[var(--uc-static-white)]"
+                      : "bg-[var(--uc-app-bg)] text-[var(--uc-text-subtle)]"
+                  }`}
+                >
+                  {inventoryTabCounts[tab]}
+                </span>
+              ) : null}
+            </button>
+
+            {isSidebar && isActive ? (
+              <div className="border-t border-[color-mix(in_srgb,var(--uc-border)_75%,transparent)] px-3 py-2">
+                <div className="grid gap-1">
+                  {sectionLinks.map(([id, label]) => {
+                    const isSectionActive = activeSection === id;
+                    return (
+                      <a
+                        key={id}
+                        href={`#${id}`}
+                        className={`flex items-center rounded-[6px] px-3 py-2 transition-colors ${
+                          isSectionActive
+                            ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm"
+                            : "text-[var(--uc-text-muted)] hover:bg-[var(--uc-surface)] hover:text-[var(--uc-text)]"
+                        }`}
+                      >
+                        <span className="uc-type-n5">{label}</span>
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+          </div>
         );
       })}
     </div>
@@ -2004,6 +2423,36 @@ function ColorSwatch({ color, label }: { color: string; label: string }) {
   );
 }
 
+function TypographyTokenCard({ token }: { token: TypographyToken }) {
+  return (
+    <article className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="uc-type-n4-strong text-[var(--uc-text)]">{token.label}</h3>
+          <p className="uc-type-n5 mt-1 text-[var(--uc-text-muted)]">{token.usage}</p>
+        </div>
+        <div className="text-right">
+          <p className="uc-type-n5-strong text-[var(--uc-text)]">{token.weight}</p>
+          <p className="uc-type-n5 text-[var(--uc-text-muted)]">{token.fontSize}px</p>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-[8px] bg-[var(--uc-app-bg)] px-4 py-5">
+        <p className={`${token.className} text-[var(--uc-text)]`}>{token.sample}</p>
+      </div>
+
+      <div className="mt-4 grid gap-2">
+        <code className="block break-all rounded bg-[var(--uc-app-bg)] px-2 py-1 text-[12px] text-[var(--uc-text-muted)]">
+          .{token.className}
+        </code>
+        <p className="uc-type-n5 text-[var(--uc-text-muted)]">
+          {token.family} / {token.weight} / {token.fontSize} px
+        </p>
+      </div>
+    </article>
+  );
+}
+
 function ColorCard({
   color,
   copiedValue,
@@ -2050,7 +2499,7 @@ function ColorCard({
 
 function ColorAuditRow({ item }: { item: (typeof APP_COLOR_AUDIT)[number] }) {
   return (
-    <div className="grid gap-3 rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-4 md:grid-cols-[160px_1fr_130px] md:items-center">
+    <div className="grid gap-3 rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-4 md:grid-cols-[160px_minmax(0,1fr)] md:items-start">
       <div className="flex items-center gap-3">
         <span
           className="size-[36px] rounded-[6px] border border-[var(--uc-border)]"
@@ -2091,11 +2540,36 @@ function ColorInventory() {
   return (
     <>
       <Section
+        id="typography"
+        title="Typography"
+        description="Canonical typography tokens derived from the supplied Figma taxonomy. Active PI surfaces should call these named tokens instead of hardcoding font sizes, so a future token change propagates globally."
+      >
+        <div className="mb-6 grid gap-4 md:grid-cols-2">
+          <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
+            <p className="uc-type-n5-strong uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Named tokens</p>
+            <p className="uc-type-n1 mt-2 text-[var(--uc-text)]">{TYPOGRAPHY_TOKENS.length}</p>
+          </div>
+          <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
+            <p className="uc-type-n5-strong uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Purpose</p>
+            <p className="uc-type-n4 mt-2 text-[var(--uc-text)]">
+              Headers, cards, body, microcopy, numeric labels
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          {TYPOGRAPHY_TOKENS.map((token) => (
+            <TypographyTokenCard key={token.id} token={token} />
+          ))}
+        </div>
+      </Section>
+
+      <Section
         id="colors"
         title="Color palettes"
         description="Colors extracted from screenshots/Colors.svg, normalized into the canonical light-mode registry and proposed dark-mode mapping. The list is filtered by palette to keep the page compact and easy to scan."
       >
-        <div className="mb-6 grid gap-4 md:grid-cols-4">
+        <div className="mb-6 grid gap-4 md:grid-cols-2">
           {[
             ["Source groups", COLOR_SOURCE_AUDIT.extractedColorGroups],
             ["Solid groups", COLOR_SOURCE_AUDIT.solidColorGroups],
@@ -2143,7 +2617,7 @@ function ColorInventory() {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           {selectedColors.map((color) => (
             <ColorCard key={color.id} color={color} copiedValue={copiedValue} onCopy={handleCopy} />
           ))}
@@ -2247,7 +2721,7 @@ function IconInventory() {
         title="Icon registry"
         description="Single source of truth for product icons: every consumer uses AppIcon, and canonical SVGs are mapped here with usage and deduplication notes."
       >
-        <div className="mb-6 grid gap-4 md:grid-cols-4">
+        <div className="mb-6 grid gap-4 md:grid-cols-2">
           {[
             ["Mapped icons", ICON_INVENTORY.length],
             ["Custom SVG", customCount],
@@ -2268,7 +2742,7 @@ function IconInventory() {
                 <h3 className="font-['UniCredit:Bold',sans-serif] text-[20px] text-[var(--uc-text)]">{category}</h3>
                 <span className="text-[13px] text-[var(--uc-text-muted)]">{icons.length} icons</span>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 {icons.map((icon) => (
                   <IconInventoryCard key={icon.name} icon={icon} />
                 ))}
@@ -2283,7 +2757,7 @@ function IconInventory() {
         title="Icon audit boundaries"
         description="The areas below are intentionally outside the reusable icon registry: they are generated assets, vendored primitives, decoration, or brand surfaces rather than product icons that should update globally."
       >
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-2">
           {ICON_AUDIT_EXCLUSIONS.map((item) => (
             <div key={item.scope} className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
               <code className="rounded bg-[var(--uc-app-bg)] px-2 py-1 text-[12px] text-[var(--uc-text-muted)]">{item.scope}</code>
@@ -2310,7 +2784,7 @@ function TemplateInventory() {
       title="Templates"
       description="Existing screenshots and code-only templates derived from active screens, turned into selectable templates for comparison, reuse, and mapping to cataloged components."
     >
-      <div className="mb-5 grid gap-3 md:grid-cols-4">
+      <div className="mb-5 grid gap-3 md:grid-cols-2">
         <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
           <p className="text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Templates</p>
           <p className="mt-2 font-['UniCredit:Bold',sans-serif] text-[34px]">{TEMPLATE_REGISTRY.length}</p>
@@ -2331,7 +2805,7 @@ function TemplateInventory() {
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_460px]">
         <div className="max-h-[calc(100vh-260px)] min-h-[420px] overflow-y-auto pr-1">
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
+          <div className="grid gap-2 sm:grid-cols-2">
             {TEMPLATE_REGISTRY.map((template) => (
               <TemplateCard
                 key={template.id}
@@ -2597,16 +3071,22 @@ function TemplatePreview({ template }: { template: TemplateRegistryItem }) {
 
 export default function DesignSystemPage() {
   const [showLogout, setShowLogout] = useState(false);
-  const [inspectMode, setInspectMode] = useState(true);
+  const [inspectMode, setInspectMode] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const [inventoryTab, setInventoryTab] = useState<InventoryTab>(() => {
     if (typeof window === "undefined") return "components";
     return getInventoryTabForHash(window.location.hash);
+  });
+  const [activeSection, setActiveSection] = useState(() => {
+    if (typeof window === "undefined") return getDefaultSectionForInventoryTab("components");
+    return window.location.hash.replace(/^#/, "") || getDefaultSectionForInventoryTab(getInventoryTabForHash(window.location.hash));
   });
   const sectionLinks = inventorySectionLinks[inventoryTab];
 
   const handleInventoryTabChange = (nextTab: InventoryTab) => {
     const nextSectionId = getDefaultSectionForInventoryTab(nextTab);
     setInventoryTab(nextTab);
+    setActiveSection(nextSectionId);
     window.history.replaceState(null, "", `#${nextSectionId}`);
     window.requestAnimationFrame(() => {
       document.getElementById(nextSectionId)?.scrollIntoView({ block: "start" });
@@ -2615,7 +3095,9 @@ export default function DesignSystemPage() {
 
   useEffect(() => {
     const syncInventoryTabFromHash = () => {
+      const nextHash = window.location.hash.replace(/^#/, "");
       setInventoryTab(getInventoryTabForHash(window.location.hash));
+      setActiveSection(nextHash || getDefaultSectionForInventoryTab(getInventoryTabForHash(window.location.hash)));
     };
 
     syncInventoryTabFromHash();
@@ -2623,26 +3105,88 @@ export default function DesignSystemPage() {
     return () => window.removeEventListener("hashchange", syncInventoryTabFromHash);
   }, []);
 
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const sections = sectionLinks
+      .map(([id]) => document.getElementById(id))
+      .filter((section): section is HTMLElement => section instanceof HTMLElement);
+
+    if (sections.length === 0) return;
+
+    let frameId = 0;
+
+    const updateActiveSectionFromScroll = () => {
+      frameId = 0;
+
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const activationLine = containerRect.top + 148;
+      const nearBottom = scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 24;
+
+      let nextActiveSection = sections[0].id;
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top <= activationLine) {
+          nextActiveSection = section.id;
+          continue;
+        }
+        break;
+      }
+
+      if (nearBottom) {
+        nextActiveSection = sections[sections.length - 1].id;
+      }
+
+      setActiveSection((current) => {
+        if (current === nextActiveSection) return current;
+        if (window.location.hash !== `#${nextActiveSection}`) {
+          window.history.replaceState(null, "", `#${nextActiveSection}`);
+        }
+        return nextActiveSection;
+      });
+    };
+
+    const requestActiveSectionSync = () => {
+      if (frameId !== 0) return;
+      frameId = window.requestAnimationFrame(updateActiveSectionFromScroll);
+    };
+
+    requestActiveSectionSync();
+    scrollContainer.addEventListener("scroll", requestActiveSectionSync, { passive: true });
+    window.addEventListener("resize", requestActiveSectionSync);
+
+    return () => {
+      if (frameId !== 0) {
+        window.cancelAnimationFrame(frameId);
+      }
+      scrollContainer.removeEventListener("scroll", requestActiveSectionSync);
+      window.removeEventListener("resize", requestActiveSectionSync);
+    };
+  }, [sectionLinks]);
+
   return (
     <InspectModeContext.Provider value={inspectMode}>
-    <div className="h-full w-full self-stretch overflow-y-auto bg-[var(--uc-surface-muted)] text-[var(--uc-text)]">
-      <div className="mx-auto flex w-full max-w-[1440px] gap-8 px-8 py-8">
-        <aside className="sticky top-[32px] hidden h-[calc(100vh-64px)] w-[250px] shrink-0 overflow-y-auto rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-4 xl:block">
-          <div className="mb-5">
-            <p className="mb-3 font-['UniCredit:Bold',sans-serif] text-[14px]">Inventory</p>
-            <InventoryTabs activeTab={inventoryTab} onChange={handleInventoryTabChange} placement="sidebar" />
+    <div ref={scrollContainerRef} className="h-full w-full self-stretch overflow-y-auto bg-[var(--uc-surface-muted)] text-[var(--uc-text)]">
+      <div className="mx-auto flex w-full max-w-[1440px] gap-6 px-6 py-8 xl:gap-8 xl:px-8">
+        <aside className="sticky top-[32px] hidden h-[calc(100vh-64px)] w-[272px] shrink-0 overflow-y-auto rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-4 lg:block xl:w-[288px]">
+          <div className="mb-5 rounded-[8px] bg-[var(--uc-app-bg)] px-4 py-4">
+            <p className="uc-type-n5-strong uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Inventory</p>
+            <p className="uc-type-n4 mt-2 text-[var(--uc-text)]">
+              Browse the Design System like a real navigation tree, with the active area and nested sections kept together.
+            </p>
           </div>
-          <p className="mb-3 font-['UniCredit:Bold',sans-serif] text-[14px]">Design system sections</p>
-          {sectionLinks.map(([id, label]) => (
-            <a key={id} href={`#${id}`} className="block rounded px-2 py-2 text-[14px] text-[var(--uc-text-muted)] hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-text)]">
-              {label}
-            </a>
-          ))}
-          <div className="mt-5 border-t border-[var(--uc-border-muted)] pt-5" data-inspector-ui="true">
-            <p className="mb-2 font-['UniCredit:Bold',sans-serif] text-[14px]">Inspector</p>
+          <InventoryTabs
+            activeTab={inventoryTab}
+            activeSection={activeSection}
+            sectionLinks={sectionLinks}
+            onChange={handleInventoryTabChange}
+            placement="sidebar"
+          />
+          <div className="mt-5 rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-app-bg)] p-4" data-inspector-ui="true">
+            <p className="uc-type-n4-strong text-[var(--uc-text)]">Inspector</p>
             <button
               onClick={() => setInspectMode((value) => !value)}
-              className={`w-full rounded-[4px] px-3 py-2 font-['UniCredit:Bold',sans-serif] text-[14px] transition-colors ${
+              className={`mt-3 w-full rounded-[6px] px-3 py-2 font-['UniCredit:Bold',sans-serif] text-[14px] transition-colors ${
                 inspectMode ? "bg-[var(--uc-action)] text-[var(--uc-static-white)]" : "border border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)]"
               }`}
             >
@@ -2664,7 +3208,7 @@ export default function DesignSystemPage() {
           ) : (
             <>
           <Section id="overview" title="Coverage summary" description="Quick reference for the audited surface and the areas worth checking first.">
-            <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-5">
+            <div className="grid gap-4 md:grid-cols-2">
               {[
                 ["Countries", COUNTRIES.length],
                 ["App components", activeComponentFiles.length],
@@ -2724,7 +3268,7 @@ export default function DesignSystemPage() {
               <Specimen name="BottomNavigation / all active states" source="components/BottomNavigation.tsx" specs={["container 375x54", "icons 32px", "labels 14px / 15px line", "active bar 24x2", "0 gap bar/icon/label"]}>
                 <BottomNavigationVariantSpecimen />
               </Specimen>
-              <div className="grid gap-5 lg:grid-cols-3">
+              <div className="grid gap-5 lg:grid-cols-2">
                 <Specimen name="LanguageSelectorButton" source="components/ui/LanguageSelectorButton.tsx" tone="dark">
                   <LanguageSelectorButton onClick={noop} language="en" />
                 </Specimen>
@@ -2759,7 +3303,7 @@ export default function DesignSystemPage() {
 
           <Section id="forms" title="Forms and controls" description="Custom inputs and reusable control primitives that can be consolidated.">
             <div className="grid gap-5">
-              <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-5 lg:grid-cols-2">
                 <Specimen name="Dropdown" source="components/TextField.tsx">
                   <TextFieldSpecimens withChevron />
                 </Specimen>
@@ -2773,6 +3317,30 @@ export default function DesignSystemPage() {
                 >
                   <AmountFieldSpecimens />
                 </Specimen>
+                <Specimen
+                  name="Toggle button"
+                  source="components/ToggleButton.tsx"
+                  note={`${TOGGLE_BUTTON_SOURCE.schema} / ${TOGGLE_BUTTON_SOURCE.sourceNodeIds.unchecked} · ${TOGGLE_BUTTON_SOURCE.sourceNodeIds.checked}`}
+                  specs={["60x30", "off/on variants", "white surface", "2px border", "22x22 knob", "role=switch"]}
+                >
+                  <ToggleButtonVariantSpecimen />
+                </Specimen>
+                <Specimen
+                  name="Navigation row"
+                  source="components/NavigationRow.tsx"
+                  note={`${NAVIGATION_ROW_SOURCE.schema} / ${NAVIGATION_ROW_SOURCE.sourceNodeIds.textDescriptionToggle} Â· ${NAVIGATION_ROW_SOURCE.sourceNodeIds.textLinkToggle} Â· ${NAVIGATION_ROW_SOURCE.sourceNodeIds.iconDescriptionChevron}`}
+                  specs={["375x80", "padding 24px 12px 24px 16px", "16px layout gap", "optional 32px leading icon", "title 16px bold", "optional description 16px / link 14px teal", "chevron or shared ToggleButton accessory"]}
+                >
+                  <NavigationRowVariantSpecimen />
+                </Specimen>
+                <Specimen
+                  name="Profile avatar"
+                  source="components/ProfileAvatar.tsx"
+                  note={`${PROFILE_AVATAR_SOURCE.schema} / ${PROFILE_AVATAR_SOURCE.sourceNodeIds.photoFull} · ${PROFILE_AVATAR_SOURCE.sourceNodeIds.photoWithNotification} · ${PROFILE_AVATAR_SOURCE.sourceNodeIds.initials} · ${PROFILE_AVATAR_SOURCE.sourceNodeIds.ai}`}
+                  specs={["40x40 base", "full photo or inset profile photo", "optional 8px notification dot", "initials 16px bold on K1", "AI glyph 24px on neutral circle", "supports real imageSrc + controlled size"]}
+                >
+                  <ProfileAvatarVariantSpecimen />
+                </Specimen>
               </div>
               <Specimen name="Generic UI controls" source="components/ui/*">
                 <ShadcnSpecimens />
@@ -2782,11 +3350,38 @@ export default function DesignSystemPage() {
 
           <Section id="cards" title="Cards and content blocks" description="Active cards, contact cards, banners, lists, and reusable content blocks.">
             <div className="grid gap-5">
+              <Specimen name="Card" source="components/cards/Card.tsx" note={`${CARD_SOURCE.schema} / ${CARD_SOURCE.sourceNodeId}`} specs={["64x40 Figma base", "4px corner radius", "SVG artwork asset", "controlled figma / medium / large sizing"]}>
+                <CardVariantSpecimen />
+              </Specimen>
+              <Specimen name="Products offer card" source="components/products/ProductOfferCard.tsx" specs={["327x157", "dropdown variant selector", "16px text-to-image gutter", "100px image column", "title 22px bold / 2 lines", "subtitle 18px regular / 3 lines", "family + light/normal tones"]}>
+                <ProductOfferCardVariantSpecimen />
+              </Specimen>
+              <Specimen name="Products menu card" source="components/products/ProductMenuCard.tsx" specs={["164x120 standard", "164x72 compact", "dropdown card + size selectors", "title 18px standard / 16px compact", "config-driven background", "optional imageSrc with per-card placement"]}>
+                <ProductMenuCardVariantSpecimen />
+              </Specimen>
               <Specimen name="AccountBalanceCard / all countries" source="components/accounts/AccountBalanceCard.tsx" tone="gray" specs={["311x197", "padding 16px", "radius 6px", "soft layered shadow", "title 20px", "IBAN 16px", "copy 32x32", "optional sub-account", "amount 30px + decimals 20px", "current balance gap 4px"]}>
                 <AccountBalanceCardCountrySpecimen />
               </Specimen>
               <Specimen name="AccountActionBar" source="components/accounts/AccountActionBar.tsx" tone="gray" specs={["supports 1-4 items", "align start / center / end / between", "container padding 8px 16px", "item flex 1 0 0 when between", "icon box 32x32", "label 14px regular / 15px line"]}>
                 <AccountActionBarVariantSpecimen />
+              </Specimen>
+              <Specimen name="Ghost Banner" source="components/cards/GhostBanner.tsx" note={`${GHOST_BANNER_SOURCE.schema} / ${GHOST_BANNER_SOURCE.sourceNodeId}`} tone="gray" specs={["327x92 Figma base", "dashed border 1px var(--uc-text)", "8px corner radius", "padding 16px", "icon-to-text gap 8px", "icon box 32x32 / add-circle teal var(--uc-action)", "title 18px bold / 20px line", "title-to-description gap 4px", "description 16px regular / preserves newlines", "renders as button when onClick is set"]}>
+                <GhostBannerVariantSpecimen />
+              </Specimen>
+              <Specimen name="Info Banner" source="components/cards/InfoBanner.tsx" note={`${INFO_BANNER_SOURCE.schema} / ${INFO_BANNER_SOURCE.sourceNodeId}`} tone="gray" specs={["327x153 Figma base", "solid border 1px var(--uc-text)", "8px corner radius", "padding 16px", "icon-to-text gap 8px", "icon box 32x32 / info-circle var(--uc-text)", "title 18px bold / 20px line", "title-to-description gap 4px", "description 16px regular / preserves newlines", "text-block-to-action gap 8px", "optional action 14px bold teal var(--uc-action)"]}>
+                <InfoBannerVariantSpecimen />
+              </Specimen>
+              <Specimen name="User Event Card" source="components/cards/UserEventCard.tsx" note={`${USER_EVENT_CARD_SOURCE.schema} / ${USER_EVENT_CARD_SOURCE.sourceNodeIds.full} · ${USER_EVENT_CARD_SOURCE.sourceNodeIds.compact}`} tone="gray" specs={["343 wide Figma base", "white var(--uc-surface)", "8px radius", "shadow 0 4px 16px rgba(0,0,0,0.08)", "padding 16px", "avatar 48x48 circle teal var(--uc-action) / white 24x24 glyph", "avatar-to-text gap 8px", "title 14px bold", "description 14px regular / preserves newlines", "optional link 14px bold teal", "optional 32x32 more-horizontal options", "items center without link / start with link"]}>
+                <UserEventCardVariantSpecimen />
+              </Specimen>
+              <Specimen name="Helper Card" source="components/cards/HelperCard.tsx" note={`${HELPER_CARD_SOURCE.schema} / ${HELPER_CARD_SOURCE.sourceNodeIds.plain} · ${HELPER_CARD_SOURCE.sourceNodeIds.withLink}`} tone="gray" specs={["343 wide Figma base", "solid teal var(--uc-action)", "4px radius", "padding 16px", "icon-to-text gap 8px", "icon box 32x32 / white info-circle", "title 18px bold white", "description 18px regular white / preserves newlines", "optional white link 14px bold", "optional close-x-small top-right", "white text via var(--uc-static-white)"]}>
+                <HelperCardVariantSpecimen />
+              </Specimen>
+              <Specimen name="Pending Action Card" source="components/cards/PendingActionCard.tsx" note={`${PENDING_ACTION_CARD_SOURCE.schema} / ${PENDING_ACTION_CARD_SOURCE.sourceNodeId}`} tone="gray" specs={["327x157 Figma base", "teal gradient 90deg #007A91 to #44909E", "8px radius", "padding 24px", "title 24px bold white", "title-to-body gap 8px", "body 18px regular white", "optional white tag pill", "tag warning-small glyph teal", "tag label 12px bold uppercase teal", "renders as button when onClick is set"]}>
+                <PendingActionCardVariantSpecimen />
+              </Specimen>
+              <Specimen name="Debit Card" source="components/cards/DebitCard.tsx" note={`${DEBIT_CARD_SOURCE.schema} / ${DEBIT_CARD_SOURCE.sourceNodeId}`} specs={["64x40 Figma base", "8:5 aspect ratio", "SVG artwork asset", "variant registry (mc-debit-gold)", "Mastercard symbol + UniCredit + contactless marks", "controlled figma / medium / large sizing", "decorative by default / ariaLabel exposes as image"]}>
+                <DebitCardVariantSpecimen />
               </Specimen>
               <Specimen name="Carousel Indicator" source="components/accounts/AccountCarouselIndicator.tsx" tone="gray" specs={["height 32px", "backdrop blur 13.591px", "inline-flex", "gap 6px", "active 30x6", "inactive 6x6", "mini 4x4 when count > 4"]}>
                 <AccountCarouselIndicatorVariantSpecimen />
@@ -2809,7 +3404,7 @@ export default function DesignSystemPage() {
               <Specimen name="More cards / all concrete card components" source="screens/more/cards/*" specs={["120px height", "8px radius", "individual image positioning"]}>
                 <MoreCardVariantSpecimen />
               </Specimen>
-              <Specimen name="Contacts navigation cards / all icons" source="screens/contacts/ContactsNavigationCard.tsx" specs={["80px row", "32px icons", "title 16px bold", "value 14px teal"]}>
+              <Specimen name="Contacts navigation cards / all icons" source="components/NavigationRow.tsx + screens/contacts/ContactsNavigationCard.tsx" specs={["80px row", "32px icons", "title 16px bold", "value 14px teal", "contact wrapper maps icon variants to shared NavigationRow"]}>
                 <ContactsNavigationCardVariantSpecimen />
               </Specimen>
               <Specimen name="Home content modules" source="screens/home/*" tone="gray">
@@ -2825,14 +3420,8 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          <Section id="products" title="Products and country variants" description="Product accordions and cards across countries, so regional differences can be reviewed in one place.">
+          <Section id="products" title="Products and country variants" description="Product accordions and product-family country variants, so regional differences can be reviewed in one place.">
             <div className="grid gap-5">
-              <Specimen name="Products offer card" source="components/products/ProductOfferCard.tsx" specs={["327x157", "dropdown variant selector", "16px text-to-image gutter", "100px image column", "title 22px bold / 2 lines", "subtitle 18px regular / 3 lines", "family + light/normal tones"]}>
-                <ProductOfferCardVariantSpecimen />
-              </Specimen>
-              <Specimen name="Products menu card" source="components/products/ProductMenuCard.tsx" specs={["164x120 standard", "164x72 compact", "dropdown card + size selectors", "title 18px standard / 16px compact", "config-driven background", "optional imageSrc with per-card placement"]}>
-                <ProductMenuCardVariantSpecimen />
-              </Specimen>
               <Specimen name="Product card / list / total row" source="components/ProductCard.tsx + ProductsList.tsx + TotalRow.tsx" tone="gray" specs={["card padding 16px", "icon 32px", "amount 20px", "decimals 14px"]}>
                 <div className="w-[375px]">
                   <AccordionSection title="Accounts" defaultOpen>

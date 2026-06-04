@@ -77,12 +77,8 @@ export default function PrimeScreen({ onBack }: PrimeScreenProps) {
             }}
           >
             <h1 
-              className="font-['UniCredit',sans-serif] text-[var(--uc-static-white)]"
+              className="uc-type-h1 text-[var(--uc-static-white)]"
               style={{
-                fontSize: '28px',
-                fontStyle: 'normal',
-                fontWeight: 700,
-                lineHeight: 'normal',
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: 'vertical',
@@ -109,7 +105,7 @@ export default function PrimeScreen({ onBack }: PrimeScreenProps) {
                     : 'bg-transparent border border-solid border-[var(--uc-static-white)]'
                 }`}
               >
-                <p className={`font-['UniCredit:Bold',sans-serif] leading-[normal] not-italic text-[14px] uppercase ${
+                <p className={`uc-type-n5-strong uppercase ${
                   activeTab === 'advisor' ? 'text-[var(--uc-text)]' : 'text-[var(--uc-static-white)]'
                 }`}>
                   {t('prime.tabYourAdvisor')}
@@ -125,7 +121,7 @@ export default function PrimeScreen({ onBack }: PrimeScreenProps) {
                     : 'bg-transparent border border-solid border-[var(--uc-static-white)]'
                 }`}
               >
-                <p className={`font-['UniCredit:Bold',sans-serif] leading-[normal] not-italic text-[14px] uppercase ${
+                <p className={`uc-type-n5-strong uppercase ${
                   activeTab === 'benefits' ? 'text-[var(--uc-text)]' : 'text-[var(--uc-static-white)]'
                 }`}>
                   {t('prime.tabYourBenefits')}

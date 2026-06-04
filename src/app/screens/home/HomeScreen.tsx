@@ -19,9 +19,10 @@ interface HomeScreenProps {
   onProductsClick?: () => void;
   onMoreClick?: () => void;
   onAccountClick?: (product: Product) => void;
+  onInvestmentsClick?: () => void;
 }
 
-export default function HomeScreen({ onPrimeClick, onAnalyticsClick, onMessagesClick, onPaymentsClick, onProductsClick, onMoreClick, onAccountClick }: HomeScreenProps) {
+export default function HomeScreen({ onPrimeClick, onAnalyticsClick, onMessagesClick, onPaymentsClick, onProductsClick, onMoreClick, onAccountClick, onInvestmentsClick }: HomeScreenProps) {
   const demoState = useDemo();
   const { scenario } = demoState;
 
@@ -68,7 +69,11 @@ export default function HomeScreen({ onPrimeClick, onAnalyticsClick, onMessagesC
         <HomeHeader showActions={false} />
 
         {/* Account Summary */}
-        <AccountSummary showRedesign={features.cardsRedesign} onAccountClick={onAccountClick} />
+        <AccountSummary
+          showRedesign={features.cardsRedesign}
+          onAccountClick={onAccountClick}
+          onInvestmentsClick={onInvestmentsClick}
+        />
 
         {/* Unplanned Banner (conditional) */}
         {features.unplannedBanner && <UnplannedBanner />}

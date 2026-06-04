@@ -6,6 +6,7 @@ import BottomNavigation from "@/app/components/BottomNavigation";
 import DynamicIsland from "@/app/components/DynamicIsland";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
+import NavigationRow from "@/app/components/NavigationRow";
 import NewPaymentActionListItem from "@/app/components/payments/NewPaymentActionListItem";
 import NewPaymentDiscoverBanner from "@/app/components/payments/NewPaymentDiscoverBanner";
 import PaymentHeroCard from "@/app/components/payments/PaymentHeroCard";
@@ -18,6 +19,7 @@ import PrimaryButton from "@/app/components/PrimaryButton";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import StatusBar from "@/app/components/StatusBar";
 import TextField from "@/app/components/TextField";
+import ToggleButton from "@/app/components/ToggleButton";
 import UniCreditLogo from "@/app/components/UniCreditLogo";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { getDocumentsConfigForCountry, type DocumentListItem } from "@/app/config/documentsConfig";
@@ -602,13 +604,7 @@ function TemplateReadOnlyRow({ label, value, copy }: { label: string; value: str
 }
 
 function TemplateToggle({ checked = true }: { checked?: boolean }) {
-  return (
-    <span className={`relative h-[30px] w-[60px] rounded-full border-[2px] ${checked ? "border-[var(--uc-action)]" : "border-[var(--uc-text-muted)]"}`} aria-hidden="true">
-      <span className={`absolute top-1/2 grid size-[24px] -translate-y-1/2 place-items-center rounded-full ${checked ? "right-[2px] bg-[var(--uc-action)]" : "left-[2px] bg-[var(--uc-text-muted)]"}`}>
-        {checked ? <AppIcon name="check" strokeWidth={4} color="var(--uc-static-white)" /> : null}
-      </span>
-    </span>
-  );
+  return <ToggleButton checked={checked} />;
 }
 
 function TemplateSimpleSectionTitle({ children }: { children: string }) {
@@ -899,7 +895,7 @@ function DocumentListRowTemplate({
     <TemplateAction
       ariaLabel={row.title}
       interactive={interactive}
-      className="grid h-[80px] w-full grid-cols-[32px_1fr_48px] items-center gap-[2px] px-[18px] text-left"
+      className="grid h-[80px] w-full grid-cols-[32px_1fr_48px_32px] items-center gap-[2px] px-[18px] text-left"
     >
       <span className="text-center">
         <span className="block font-['UniCredit',sans-serif] text-[18px] font-bold leading-[20px] text-[var(--uc-text)]">
@@ -914,7 +910,7 @@ function DocumentListRowTemplate({
           {row.title}
         </span>
         <span className="block truncate font-['UniCredit',sans-serif] text-[16px] font-normal leading-[22px] text-[var(--uc-text-muted)]">
-          {row.description}
+          {row.isLegal ? "Legal" : row.description}
         </span>
       </span>
       {row.badge ? (
@@ -924,6 +920,9 @@ function DocumentListRowTemplate({
       ) : (
         <span />
       )}
+      <span className="grid size-[32px] place-items-center justify-self-end text-[var(--uc-text)]">
+        <AppIcon name="more-horizontal" color="currentColor" />
+      </span>
     </TemplateAction>
   );
 }
@@ -2742,22 +2741,14 @@ function SettingsRowTemplate({
   interactive: boolean;
 }) {
   return (
-    <TemplateAction
-      ariaLabel={title}
-      interactive={interactive}
-      className="grid w-full grid-cols-[1fr_32px] items-center gap-[16px] text-left"
-    >
-      <span className="min-w-0">
-        <span className="block font-['UniCredit',sans-serif] text-[14px] font-bold uppercase leading-[15px] text-[var(--uc-text)]">
-          {title}
-        </span>
-        <span className="mt-[4px] block font-['UniCredit',sans-serif] text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
-          {description}
-        </span>
-      </span>
-      <span className="flex h-[32px] w-[32px] items-center justify-center justify-self-end">
-        <AppIcon name="chevron-link" color="var(--uc-text)" />
-      </span>
+    <TemplateAction ariaLabel={title} interactive={interactive} className="w-full text-left">
+      <NavigationRow
+        title={title}
+        description={description}
+        trailingAccessory="chevron"
+        chevronIconName="chevron-link"
+        className="px-0 py-[24px]"
+      />
     </TemplateAction>
   );
 }

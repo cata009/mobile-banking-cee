@@ -23,6 +23,7 @@ export type LayoutFamily =
   | "account-options"
   | "payments"
   | "payment-flow"
+  | "investments"
   | "products"
   | "prime"
   | "service-menu"
@@ -46,6 +47,7 @@ export interface ScreenMeta {
 }
 
 const ALL_COUNTRIES: readonly CountryId[] = ["RO", "CZ", "SK", "HU", "RS", "BA", "BA_BL", "SI"] as const;
+const INVESTMENTS_COUNTRIES: readonly CountryId[] = ["RO", "CZ", "SK", "HU", "RS", "SI"] as const;
 
 export const SCREEN_REGISTRY: Record<ScreenId, ScreenMeta> = {
   "pi.prelogin.inactive": {
@@ -278,6 +280,20 @@ export const SCREEN_REGISTRY: Record<ScreenId, ScreenMeta> = {
     features: [],
     screenshots: [],
     similarTo: ["pi.payments.overview", "pi.more.overview"],
+  },
+  "pi.investments.portfolio": {
+    id: "pi.investments.portfolio",
+    label: "PI Investments portfolio",
+    runtimeScreen: "investments",
+    products: ["PI"],
+    countries: INVESTMENTS_COUNTRIES,
+    designSystems: ["current"],
+    status: "mock-driven",
+    layoutFamily: "investments",
+    componentPath: "src/app/screens/investments/InvestmentsPortfolioScreen.tsx",
+    features: [],
+    screenshots: [],
+    similarTo: ["pi.account.detail", "pi.products.overview"],
   },
   "pi.prime.overview": {
     id: "pi.prime.overview",

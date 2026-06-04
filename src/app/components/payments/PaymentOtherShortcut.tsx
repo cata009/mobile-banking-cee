@@ -11,7 +11,7 @@ const paymentOtherIconName: Record<PaymentOtherIcon, IconName> = {
 };
 
 const paymentOtherLabelClass =
-  "block w-full overflow-hidden text-center font-['UniCredit',sans-serif] text-[14px] font-bold";
+  "uc-type-n5-strong block w-full overflow-hidden text-center";
 
 function PaymentOtherShortcutIcon({ icon }: { icon: PaymentOtherIcon }) {
   return <AppIcon name={paymentOtherIconName[icon]} color="var(--uc-text-inverse)" />;

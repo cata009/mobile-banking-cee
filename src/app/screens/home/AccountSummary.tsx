@@ -11,15 +11,17 @@ import { useDemo } from "@/app/state/demoStore";
 import { getCurrencySymbol } from "@/app/registry/countryConfig";
 import { maskAmountParts } from "@/app/utils/amountPrivacy";
 import { useLanguage } from "@/app/contexts/LanguageContext";
+import { isInvestmentsPortfolioAvailable } from "@/app/utils/investmentsAvailability";
 import { isAccountDetailProduct } from "@/data/products";
 import type { Product } from "@/data/products";
 
 interface AccountSummaryProps {
   showRedesign?: boolean;
   onAccountClick?: (product: Product) => void;
+  onInvestmentsClick?: () => void;
 }
 
-export default function AccountSummary({ showRedesign = false, onAccountClick }: AccountSummaryProps) {
+export default function AccountSummary({ showRedesign = false, onAccountClick, onInvestmentsClick }: AccountSummaryProps) {
   const { 
     categories, 
     getProductIcon, 
@@ -31,7 +33,8 @@ export default function AccountSummary({ showRedesign = false, onAccountClick }:
   } = useProducts();
   
   const { t } = useLanguage();
-  const { country, amountsHidden } = useDemo();
+  const { country, amountsHidden, product: selectedProduct } = useDemo();
+  const investmentsAvailable = isInvestmentsPortfolioAvailable(selectedProduct, country);
 
   // Calculate totals for the main card
   const totalAvailable = calculateTotalAvailable();
@@ -53,14 +56,14 @@ export default function AccountSummary({ showRedesign = false, onAccountClick }:
           <div className="flex-1 p-[24px] flex flex-col gap-[4px]">
             {/* Total Available */}
             <div className="flex flex-col gap-[4px]">
-              <p className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[var(--uc-text)]">
+              <p className="uc-type-n5-strong text-[var(--uc-text)]">
                 {t(showRedesign ? 'home.totalBalance' : 'home.totalAvailable')}
               </p>
               <div className="flex items-baseline gap-[2px]">
-                <span className="font-['UniCredit',sans-serif] text-[30px] font-bold text-[var(--uc-text)] leading-[1]">
+                <span className="uc-type-n1 text-[var(--uc-text)] leading-[1]">
                   {displayedTotalAvailable.integer}
                 </span>
-                <span className="font-['UniCredit',sans-serif] text-[20px] font-bold text-[var(--uc-text)] leading-[1]">
+                <span className="uc-type-n2-strong text-[var(--uc-text)] leading-[1]">
                   {displayedTotalAvailable.decimals} {currencyCode}
                 </span>
               </div>
@@ -71,12 +74,12 @@ export default function AccountSummary({ showRedesign = false, onAccountClick }:
 
             {/* Total Owed */}
             <div className="flex flex-col gap-[4px]">
-              <p className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[var(--uc-text)]">Total Owed</p>
+              <p className="uc-type-n5-strong text-[var(--uc-text)]">Total Owed</p>
               <div className="flex items-baseline">
-                <span className="font-['UniCredit',sans-serif] text-[20px] font-bold text-[var(--uc-text)] leading-[1]">
+                <span className="uc-type-n2-strong text-[var(--uc-text)] leading-[1]">
                   {displayedTotalOwed.integer}
                 </span>
-                <span className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[var(--uc-text)] leading-[1]">
+                <span className="uc-type-n5-strong text-[var(--uc-text)] leading-[1]">
                   {displayedTotalOwed.decimals} {currencyCode}
                 </span>
               </div>
@@ -131,7 +134,9 @@ export default function AccountSummary({ showRedesign = false, onAccountClick }:
                       decimals={displayedAmount.decimals}
                       currency={displayedAmount.currency}
                       onClick={
-                        isAccountDetailProduct(product)
+                        product.type === "investment_account" && investmentsAvailable
+                          ? onInvestmentsClick
+                          : isAccountDetailProduct(product)
                           ? () => onAccountClick?.(product)
                           : undefined
                       }

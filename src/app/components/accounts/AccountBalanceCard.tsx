@@ -46,7 +46,7 @@ export default function AccountBalanceCard({
     >
       <div className="flex w-full flex-col">
         <p
-          className="font-['UniCredit',sans-serif] text-[20px] font-bold text-[var(--uc-action)]"
+          className="uc-type-n2-strong text-[var(--uc-action)]"
           data-ds-label="Account card title 20px"
         >
           {account.accountName}
@@ -54,7 +54,7 @@ export default function AccountBalanceCard({
 
         <div className="mt-[8px] flex h-[32px] shrink-0 items-center justify-between self-stretch">
           <p
-            className="min-w-0 max-w-[235px] truncate font-['UniCredit',sans-serif] text-[16px] font-bold text-[var(--uc-text-muted)]"
+            className="uc-type-n4-strong min-w-0 max-w-[235px] truncate text-[var(--uc-text-muted)]"
             title={account.accountNumber}
             data-ds-label="Account IBAN 16px"
           >
@@ -66,7 +66,7 @@ export default function AccountBalanceCard({
         </div>
 
         {hasSubAccount ? (
-          <p className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[var(--uc-text-muted)]">
+          <p className="uc-type-n5-strong text-[var(--uc-text-muted)]">
             SUB ACCOUNT{" "}
             <span className="text-[var(--uc-text)]" data-ds-label="Sub account value 14px">
               {account.subAccount}
@@ -77,12 +77,12 @@ export default function AccountBalanceCard({
 
       <div className="flex h-[80px] shrink-0 flex-col items-start gap-[8px] self-stretch">
         <div>
-          <p className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[var(--uc-text-muted)]">
+          <p className="uc-type-n5-strong text-[var(--uc-text-muted)]">
             Available balance
           </p>
-          <p className="whitespace-nowrap font-['UniCredit',sans-serif] text-[30px] font-bold leading-none text-[var(--uc-text)]">
+          <p className="uc-type-n1 whitespace-nowrap leading-none text-[var(--uc-text)]">
             {availableInteger}
-            <span className="text-[20px]" data-ds-label="Available decimals 20px">
+            <span className="uc-type-n2" data-ds-label="Available decimals 20px">
               {availableDecimals} {currency}
             </span>
           </p>
@@ -91,10 +91,10 @@ export default function AccountBalanceCard({
         <div className="flex h-[1px] w-[279px] shrink-0 items-center justify-center bg-[var(--uc-border)]" />
 
         <div className="flex items-center gap-[4px]">
-          <p className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[var(--uc-text-muted)]">
+          <p className="uc-type-n5-strong text-[var(--uc-text-muted)]">
             Current balance
           </p>
-          <p className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[var(--uc-text)]" data-ds-label="Current balance value 14px">
+          <p className="uc-type-n5-strong text-[var(--uc-text)]" data-ds-label="Current balance value 14px">
             {currentBalance} {currency}
           </p>
         </div>

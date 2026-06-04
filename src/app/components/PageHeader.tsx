@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { AppIcon } from "@/app/components/icons";
+import { cn } from "@/app/components/ui/utils";
 
 interface PageHeaderProps {
   title: string;
@@ -80,7 +81,7 @@ export default function PageHeader({
           )}
 
           <h1
-            className={`pointer-events-none truncate text-center font-['UniCredit',sans-serif] text-[16px] font-bold leading-normal ${textColor}`}
+            className={cn("uc-type-n4-strong pointer-events-none truncate text-center", textColor)}
             style={{
               opacity: titleProgress,
               transform: `translateY(${(1 - titleProgress) * 6}px)`,
@@ -102,12 +103,8 @@ export default function PageHeader({
         }}
       >
         <h1
-          className={`font-['UniCredit',sans-serif] ${textColor}`}
+          className={cn(compact ? "uc-type-l1" : "uc-type-h1", textColor)}
           style={{
-            fontSize: compact ? "24px" : "28px",
-            fontStyle: "normal",
-            fontWeight: 700,
-            lineHeight: "normal",
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",

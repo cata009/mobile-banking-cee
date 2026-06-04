@@ -9,11 +9,9 @@ export default function TotalRow({ integer, decimals, currency }: TotalRowProps)
     <div className="flex justify-between items-baseline self-stretch">
       {/* Label "Total" */}
       <span
-        className="font-['UniCredit',sans-serif] font-normal"
+        className="uc-type-p1"
         style={{
           color: 'var(--uc-text)',
-          fontSize: '18px',
-          lineHeight: 'normal'
         }}
       >
         Total
@@ -23,11 +21,9 @@ export default function TotalRow({ integer, decimals, currency }: TotalRowProps)
       <div className="flex items-baseline">
         {/* Integer part */}
         <span 
-          className="font-['UniCredit',sans-serif] font-bold text-right"
+          className="uc-type-n2-strong text-right"
           style={{
             color: 'var(--uc-text)',
-            fontSize: '20px',
-            lineHeight: 'normal'
           }}
         >
           {integer}
@@ -35,11 +31,9 @@ export default function TotalRow({ integer, decimals, currency }: TotalRowProps)
         
         {/* Decimals + Currency (no gap, same as ProductCard) */}
         <span 
-          className="font-['UniCredit',sans-serif] font-normal text-right"
+          className="uc-type-n5 text-right"
           style={{
             color: 'var(--uc-text)',
-            fontSize: '14px',
-            lineHeight: 'normal'
           }}
         >
           {decimals} {currency}

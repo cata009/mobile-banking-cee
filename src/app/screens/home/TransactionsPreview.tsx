@@ -33,10 +33,10 @@ export default function TransactionsPreview({ showFilters = false }: Transaction
       <div className="bg-[var(--uc-surface)] rounded-[8px] shadow-sm overflow-hidden">
         {/* Header */}
         <div className="px-[16px] py-[12px] border-b border-[var(--uc-border-muted)] flex items-center justify-between">
-          <h3 className="font-['UniCredit',sans-serif] text-[16px] font-bold text-[var(--uc-text)]">
+          <h3 className="uc-type-n4-strong text-[var(--uc-text)]">
             {t('home.transactions.title')}
           </h3>
-          <button className="text-[var(--uc-brand)] text-[14px] font-semibold hover:underline">
+          <button className="uc-type-n5-strong text-[var(--uc-brand)] hover:underline">
             {t('home.transactions.viewAll')}
           </button>
         </div>
@@ -76,7 +76,7 @@ export default function TransactionsPreview({ showFilters = false }: Transaction
               `}
             >
               <div className="flex-1">
-                <p className="font-['UniCredit',sans-serif] text-[14px] font-semibold text-[var(--uc-text)]">
+                <p className="uc-type-n5-strong text-[var(--uc-text)]">
                   {transaction.description}
                 </p>
                 <p className="font-['UniCredit',sans-serif] text-[12px] text-[var(--uc-text-muted)] mt-[2px]">
@@ -85,7 +85,7 @@ export default function TransactionsPreview({ showFilters = false }: Transaction
               </div>
               <div className="flex items-center gap-[8px]">
                 <span
-                  className={`font-['UniCredit',sans-serif] text-[16px] font-bold ${
+                  className={`uc-type-n4-strong ${
                     transaction.type === "credit" ? "text-[var(--uc-green-success)]" : "text-[var(--uc-text)]"
                   }`}
                 >

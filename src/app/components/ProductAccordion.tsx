@@ -25,15 +25,15 @@ function SeparatorLine() {
 function ExpandedProduct({ product }: { product: Product }) {
   return (
     <div className="flex flex-col gap-[16px] w-full">
-      <h2 className="text-[var(--uc-static-white)] font-['UniCredit'] text-[24px] font-bold leading-[normal] tracking-[0.267px]">
+      <h2 className="uc-type-l1 text-[var(--uc-static-white)]">
         {product.title}
       </h2>
       <div className="flex flex-col gap-[24px] w-full">
-        <p className="text-[var(--uc-static-white)] font-['UniCredit'] text-[18px] font-normal leading-[normal]">
+        <p className="uc-type-p1 text-[var(--uc-static-white)]">
           {product.description}
         </p>
         <button className="flex items-center gap-px self-start cursor-pointer hover:opacity-80 transition-opacity">
-          <span className="text-[var(--uc-static-white)] font-['UniCredit'] text-[14px] font-bold leading-[normal] uppercase">
+          <span className="uc-type-n5-strong uppercase text-[var(--uc-static-white)]">
             FIND OUT MORE
           </span>
           <AppIcon name="chevron-right" color="var(--uc-static-white)" />
@@ -60,7 +60,7 @@ function CollapsedProduct({ product, onClick }: { product: Product; onClick: () 
         
         {/* Title */}
         <div className="flex-1">
-          <h2 className="text-[var(--uc-static-white)] font-['UniCredit'] text-[24px] font-bold leading-[normal] tracking-[0.267px]">
+          <h2 className="uc-type-l1 text-[var(--uc-static-white)]">
             {product.title}
           </h2>
         </div>

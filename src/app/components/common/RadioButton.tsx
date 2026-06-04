@@ -26,7 +26,7 @@ export default function RadioButton({
         <AppIcon name={selected ? "radio-selected" : "radio-unselected"} color="var(--uc-text)" />
       </div>
       
-      <span className="font-['UniCredit',sans-serif] text-[16px] font-bold leading-[normal] text-[var(--uc-primary-k1)]">
+      <span className="uc-type-n4-strong text-[var(--uc-primary-k1)]">
         {label}
       </span>
     </button>

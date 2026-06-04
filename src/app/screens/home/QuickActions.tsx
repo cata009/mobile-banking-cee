@@ -34,7 +34,7 @@ export default function QuickActions({ showPaymentsHub = false, showRedesign = f
           ? 'bg-gradient-to-br from-[var(--uc-surface-muted)] to-[var(--uc-surface)] border-2 border-[var(--uc-border-muted)]'
           : 'bg-[var(--uc-surface)]'
       }`}>
-        <h3 className="font-['UniCredit',sans-serif] text-[16px] font-bold text-[var(--uc-text)] mb-[12px]">
+        <h3 className="uc-type-n4-strong mb-[12px] text-[var(--uc-text)]">
           {t('home.quickActions.title')} {showRedesign && "✨"}
         </h3>
         <div className={`grid gap-[12px] ${
@@ -62,9 +62,9 @@ export default function QuickActions({ showPaymentsHub = false, showRedesign = f
                   />
                 </span>
                 <span
-                  className={`font-['UniCredit',sans-serif] ${
-                    showRedesign ? 'text-[12px]' : 'text-[14px]'
-                  } font-semibold ${
+                  className={`${
+                    showRedesign ? 'text-[12px] font-semibold' : 'uc-type-n5-strong'
+                  } ${
                     action.id === "payments-hub" ? "text-[var(--uc-brand)]" : "text-[var(--uc-text)]"
                   }`}
                 >

@@ -49,7 +49,7 @@ export function HeaderActionButton({
     >
       <HeaderActionIcon icon={icon} />
       {badgeCount > 0 && (
-        <span className="absolute right-0 top-0 grid size-[20px] place-items-center rounded-full bg-[var(--uc-brand)] font-['UniCredit',sans-serif] text-[14px] font-bold leading-none tracking-[0.35px] text-[var(--uc-text-inverse)]">
+        <span className="uc-type-n5-strong absolute right-0 top-0 grid size-[20px] place-items-center rounded-full bg-[var(--uc-brand)] leading-none tracking-[0.35px] text-[var(--uc-text-inverse)]">
           {badgeCount > 99 ? "99+" : badgeCount}
         </span>
       )}

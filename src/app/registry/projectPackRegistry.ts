@@ -98,12 +98,18 @@ function demoEntries(product: ProductId, country: CountryId): readonly ScreenId[
     return [];
   }
 
-  return [
+  const piEntries: ScreenId[] = [
     "pi.home.overview",
     "pi.payments.overview",
     "pi.products.overview",
     "pi.more.overview",
   ];
+
+  if (country !== "BA" && country !== "BA_BL") {
+    piEntries.push("pi.investments.portfolio");
+  }
+
+  return piEntries;
 }
 
 function featureSet(product: ProductId): readonly FeatureId[] {

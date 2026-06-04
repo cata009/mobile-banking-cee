@@ -1,4 +1,5 @@
-import { AppIcon, type IconName } from "@/app/components/icons";
+import NavigationRow from "@/app/components/NavigationRow";
+import type { IconName } from "@/app/components/icons";
 
 type ContactsNavigationIcon = "prime" | "location" | "time" | "phone" | "block" | "email" | "website" | "youtube" | "x";
 
@@ -32,38 +33,14 @@ export function ContactsNavigationCard({
   onClick,
 }: ContactsNavigationCardProps) {
   return (
-    <button
+    <NavigationRow
+      title={title}
+      description={subtitle}
+      linkLabel={value}
+      leadingIconName={CONTACT_ICON_NAME[icon]}
+      trailingAccessory={hasChevron ? "chevron" : "none"}
+      chevronIconName="contact-chevron"
       onClick={onClick}
-      className="flex h-[80px] w-full cursor-pointer items-center gap-[16px] bg-[var(--uc-surface)] px-0 py-[24px]"
-      type="button"
-    >
-      <div className="flex size-[32px] shrink-0 items-center justify-center">
-        <AppIcon name={CONTACT_ICON_NAME[icon]} color="var(--uc-text)" />
-      </div>
-
-      <div className="flex min-w-0 flex-1 flex-col items-start justify-center gap-[4px]">
-        <p className="w-full text-left font-['UniCredit:Bold',sans-serif] text-[16px] leading-normal text-[var(--uc-text)]">
-          {title}
-        </p>
-
-        {subtitle ? (
-          <p className="w-full text-left font-['UniCredit:Regular',sans-serif] text-[16px] leading-normal text-[var(--uc-text)]">
-            {subtitle}
-          </p>
-        ) : null}
-
-        {value ? (
-          <p className="text-left font-['UniCredit:Bold',sans-serif] text-[14px] leading-normal text-[var(--uc-action)]">
-            {value}
-          </p>
-        ) : null}
-      </div>
-
-      {hasChevron ? (
-        <div className="flex size-[32px] shrink-0 items-center justify-center">
-          <AppIcon name="contact-chevron" color="var(--uc-text)" />
-        </div>
-      ) : null}
-    </button>
+    />
   );
 }

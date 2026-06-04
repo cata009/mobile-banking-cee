@@ -28,7 +28,7 @@ export const PAYMENT_HERO_CARD_IMAGE_VARIANTS: readonly PaymentHeroImagePreset[]
     title: "Make a payment",
     description: "Lorem ipsum dolor sit amet,\nconsectetur adipiscing",
     src: paymentHeroImage1,
-    imageClassName: "right-0 top-0 h-[104px] w-[126px]",
+    imageClassName: "bottom-0 right-0 h-[104px] w-[126px]",
   },
   {
     id: "payments-2",
@@ -212,13 +212,13 @@ export default function PaymentHeroCard({
     >
       <div className="relative z-10 flex h-full w-full flex-col px-[20px] pt-[16px]">
         <h2
-          className="whitespace-pre-line font-['UniCredit',sans-serif] text-[24px] font-bold text-[var(--uc-text)]"
+          className="uc-type-l1 whitespace-pre-line text-[var(--uc-text)]"
           style={{ lineHeight: hasMultilineTitle ? "26px" : "normal" }}
         >
           {item.title}
         </h2>
         <p
-          className={`${hasMultilineTitle ? "mt-[8px]" : "mt-[16px]"} whitespace-pre-line font-['UniCredit',sans-serif] text-[14px] font-normal leading-normal text-[var(--uc-text)]`}
+          className={`uc-type-n5 ${hasMultilineTitle ? "mt-[8px]" : "mt-[16px]"} whitespace-pre-line text-[var(--uc-text)]`}
         >
           {item.description}
         </p>

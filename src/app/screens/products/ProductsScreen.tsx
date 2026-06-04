@@ -59,7 +59,7 @@ export function ProductsHeader({
       <div className="px-[24px] pb-[22px]">
         <div className="flex min-h-[32px] items-start gap-[8px]">
           <h1
-            className="flex-1 min-w-0 font-['UniCredit',sans-serif] font-bold text-[var(--uc-text)]"
+            className="uc-type-n1 flex-1 min-w-0 text-[var(--uc-text)]"
             style={{ fontSize: "30px", lineHeight: "36px" }}
           >
             {title}
@@ -103,10 +103,9 @@ export function ProductsTabs({
             key={tab.id}
             type="button"
             onClick={() => onChange(tab.id)}
-            className="relative flex items-center justify-center font-['UniCredit',sans-serif] font-bold cursor-pointer"
+            className="uc-type-n2-strong relative flex items-center justify-center cursor-pointer"
             style={{
               color: activeTab === tab.id ? "var(--uc-text)" : "var(--uc-text-muted)",
-              fontSize: "21px",
               lineHeight: "24px",
             }}
           >

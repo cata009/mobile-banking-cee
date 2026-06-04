@@ -4,6 +4,7 @@ import PrimaryButton from "@/app/components/PrimaryButton";
 import AccountActionBar, { type AccountActionBarItem } from "@/app/components/accounts/AccountActionBar";
 import { AppIcon } from "@/app/components/icons";
 import AmountField from "@/app/components/AmountField";
+import ToggleButton from "@/app/components/ToggleButton";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import PageHeader from "@/app/components/PageHeader";
 import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
@@ -42,10 +43,10 @@ function DetailRow({
   return (
     <div className="flex items-start gap-[12px] py-[17px]">
       <div className="min-w-0 flex-1">
-        <p className="font-['UniCredit',sans-serif] text-[14px] font-normal leading-normal text-[var(--uc-text-muted)]">
+        <p className="uc-type-n5 text-[var(--uc-text-muted)]">
           {label}
         </p>
-        <p className="mt-[3px] whitespace-pre-line break-words font-['UniCredit',sans-serif] text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">
+        <p className="uc-type-n4-strong mt-[3px] whitespace-pre-line break-words leading-[20px] text-[var(--uc-text)]">
           {value}
         </p>
       </div>
@@ -67,36 +68,6 @@ function FlowField({
     <div className="pt-[22px]">
       {children}
     </div>
-  );
-}
-
-function ToggleSwitch({
-  checked,
-  onChange,
-  ariaLabel,
-}: {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  ariaLabel: string;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={ariaLabel}
-      aria-pressed={checked}
-      onClick={() => onChange(!checked)}
-      className={`relative h-[30px] w-[60px] rounded-full border-[2px] transition ${
-        checked ? "border-[var(--uc-action)] bg-[var(--uc-surface)]" : "border-[var(--uc-text-muted)] bg-[var(--uc-surface)]"
-      }`}
-    >
-      <span
-        className={`absolute top-1/2 grid size-[24px] -translate-y-1/2 place-items-center rounded-full transition ${
-          checked ? "right-[2px] bg-[var(--uc-action)]" : "left-[2px] bg-[var(--uc-text-muted)]"
-        }`}
-      >
-        {checked && <AppIcon name="prime-check" color="var(--uc-static-white)" />}
-      </span>
-    </button>
   );
 }
 
@@ -140,10 +111,10 @@ export function TransactionDetailScreen({
         </div>
 
         <section className="px-[24px] pt-[8px] text-center">
-          <h1 className="font-['UniCredit',sans-serif] text-[27px] font-bold leading-normal text-[var(--uc-text)]">
+          <h1 className="uc-type-h1 text-[var(--uc-text)]">
             {detail.title}
           </h1>
-          <p className="mt-[16px] font-['UniCredit',sans-serif] text-[14px] font-bold leading-normal text-[var(--uc-text-muted)]">
+          <p className="uc-type-n5-strong mt-[16px] text-[var(--uc-text-muted)]">
             {detail.bookingDate}
           </p>
           <p className="mt-[8px] font-['UniCredit',sans-serif] text-[22px] font-bold leading-normal text-[var(--uc-text)]">
@@ -162,7 +133,7 @@ export function TransactionDetailScreen({
             data-transaction-pfm-subcategory={detail.pfmSubcategoryLabel}
           >
             <PfmCategoryIcon category={detail.pfmCategory} size={32} />
-            <span className="font-['UniCredit',sans-serif] text-[12px] font-bold leading-normal">
+            <span className="text-[12px] font-bold leading-normal">
               {detail.pfmCategoryLabel.toUpperCase()}
             </span>
           </div>
@@ -181,7 +152,7 @@ export function TransactionDetailScreen({
             <p className="font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text-muted)]">
               {detail.categoryGroup}
             </p>
-            <p className="font-['UniCredit',sans-serif] text-[18px] font-bold leading-normal text-[var(--uc-text)]">
+            <p className="uc-type-h2 text-[var(--uc-text)]">
               26,341.33 {currencyLabel}
             </p>
             <div className="mt-[10px] h-[16px] w-full rounded-full bg-[var(--uc-action)]" />
@@ -189,7 +160,7 @@ export function TransactionDetailScreen({
             <p className="mt-[9px] font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text-muted)]">
               {detail.categoryTag}
             </p>
-            <p className="font-['UniCredit',sans-serif] text-[18px] font-bold leading-normal text-[var(--uc-text)]">
+            <p className="uc-type-h2 text-[var(--uc-text)]">
               10,334.22 {currencyLabel}
             </p>
           </div>
@@ -199,7 +170,7 @@ export function TransactionDetailScreen({
               {[118, 74, 47, 86, 69, 51, 82].map((height, index) => (
                 <div key={index} className="flex flex-col items-center gap-[14px]">
                   <div className="w-[16px] rounded-t-full bg-[var(--uc-action)]" style={{ height }} />
-                  <span className="font-['UniCredit',sans-serif] text-[11px] font-bold text-[var(--uc-text-muted)]">
+                  <span className="text-[11px] font-bold text-[var(--uc-text-muted)]">
                     {["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL"][index]}
                   </span>
                 </div>
@@ -226,7 +197,7 @@ export function TransactionDetailScreen({
           </div>
           <button
             type="button"
-            className="mx-auto mt-[18px] block pb-[18px] font-['UniCredit',sans-serif] text-[12px] font-bold leading-normal text-[var(--uc-action)]"
+            className="mx-auto mt-[18px] block pb-[18px] text-[12px] font-bold leading-normal text-[var(--uc-action)]"
           >
             {t("runtime.actions.showLess", "SHOW LESS")}
           </button>
@@ -304,18 +275,18 @@ export function DomesticPaymentCreateScreen({
         </FlowField>
 
         <div className="flex items-center justify-between pt-[34px]">
-          <p className="font-['UniCredit',sans-serif] text-[14px] font-bold leading-normal text-[var(--uc-text)]">
+          <p className="uc-type-n5-strong text-[var(--uc-text)]">
             {t("runtime.payments.domesticFlow.instantPayment", "INSTANT PAYMENT")}
           </p>
-          <ToggleSwitch
+          <ToggleButton
             checked={form.instantPayment}
-            onChange={(checked) => update("instantPayment", checked)}
+            onToggle={(checked) => update("instantPayment", checked)}
             ariaLabel={t("runtime.payments.domesticFlow.instantPayment", "Instant payment")}
           />
         </div>
 
         <div className="flex items-center justify-between pt-[32px]">
-          <p className="font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text)]">
+          <p className="uc-type-n5-strong text-[var(--uc-text)]">
             {t("runtime.payments.domesticFlow.addVariableSymbolAndMore", "ADD VARIABLE SYMBOL AND MORE")}
           </p>
           <span className="grid h-[32px] w-[32px] place-items-center">
@@ -337,7 +308,7 @@ export function DomesticPaymentCreateScreen({
             onChange={(value) => update("informationForMe", value)}
           />
         </FlowField>
-        <p className="px-[8px] pt-[44px] text-center font-['UniCredit',sans-serif] text-[14px] font-normal leading-[18px] text-[var(--uc-text)]">
+        <p className="uc-type-n5 px-[8px] pt-[44px] text-center leading-[18px] text-[var(--uc-text)]">
           {t("runtime.payments.domesticFlow.reviewAndSignHint", "You can review and sign your payment in the next step")}
         </p>
       </div>
@@ -379,12 +350,12 @@ export function PaymentReviewScreen({
           <DetailRow label={t("runtime.payments.domesticFlow.informationForBeneficiary", "Information for beneficiary")} value={draft.informationForBeneficiary || "-"} />
         </div>
         <div className="flex items-center justify-between py-[16px]">
-          <p className="font-['UniCredit',sans-serif] text-[14px] font-bold leading-normal text-[var(--uc-text)]">
+          <p className="uc-type-n5-strong text-[var(--uc-text)]">
             {t("runtime.payments.domesticFlow.saveAsTemplate", "SAVE AS TEMPLATE")}
           </p>
-          <ToggleSwitch
+          <ToggleButton
             checked={saveAsTemplate}
-            onChange={setSaveAsTemplate}
+            onToggle={setSaveAsTemplate}
             ariaLabel={t("runtime.payments.domesticFlow.saveAsTemplate", "Save as template")}
           />
         </div>
@@ -432,7 +403,7 @@ export function PaymentSuccessScreen({ onDone }: { onDone: () => void }) {
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">
       <div className="px-[24px] pt-[84px]">
-        <h1 className="font-['UniCredit',sans-serif] text-[27px] font-bold leading-normal text-[var(--uc-text)]">
+        <h1 className="uc-type-h1 text-[var(--uc-text)]">
           {t("runtime.payments.domesticFlow.successfulPayment", "Successful payment")}
         </h1>
       </div>
@@ -442,7 +413,7 @@ export function PaymentSuccessScreen({ onDone }: { onDone: () => void }) {
             <AppIcon name="prime-check" size={64} color="var(--uc-green-olive)" />
           </div>
         </div>
-        <p className="pt-[58px] font-['UniCredit',sans-serif] text-[16px] font-normal leading-[22px] text-[var(--uc-text)]">
+        <p className="uc-type-n4 pt-[58px] leading-[22px] text-[var(--uc-text)]">
           {t("runtime.payments.domesticFlow.paymentSentToBank", "Your payment has been successfully sent to the bank")}
         </p>
       </div>

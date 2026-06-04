@@ -15,6 +15,7 @@ export type Screen =
   | "messages" // Messages inbox/outbox
   | "payments" // Payments menu
   | "products" // Products menu
+  | "investments" // Investments portfolio
   | "prime" // Prime screen
   | "more" // More screen
   | "documents" // Documents screen

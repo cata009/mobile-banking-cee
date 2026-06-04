@@ -33,15 +33,7 @@ export function MoreHeader({
     <div className="w-full">
       <div className="px-[24px] pb-[24px]">
         <div className="flex min-h-[32px] items-start gap-[8px]">
-          <h1 
-            className="flex-1 font-['UniCredit:Bold',sans-serif] text-[var(--uc-text)] min-w-0"
-            style={{
-              fontSize: '28px',
-              fontStyle: 'normal',
-              fontWeight: 700,
-              lineHeight: 'normal'
-            }}
-          >
+          <h1 className="uc-type-h1 flex-1 min-w-0 text-[var(--uc-text)]">
             {t("more.title")}
           </h1>
 

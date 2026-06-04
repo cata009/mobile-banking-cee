@@ -100,7 +100,7 @@ export default function TextField({
       <div className="relative">
         {shouldFloatLabel ? (
           <label
-            className="block font-['UniCredit',sans-serif] text-[14px] font-normal leading-normal"
+            className="uc-type-n5 block"
             style={{ color: labelColor }}
           >
             {label}
@@ -123,7 +123,7 @@ export default function TextField({
             {isMultiple ? (
               <div className="min-w-0 flex flex-1 items-baseline gap-[8px]">
                 <span
-                  className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-['UniCredit',sans-serif] text-[18px] font-normal leading-normal"
+                  className="uc-type-p1 min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
                   style={{ color: valueColor }}
                   title={displayedMultipleValues}
                 >
@@ -131,7 +131,7 @@ export default function TextField({
                 </span>
                 {effectiveMultipleCount > 0 ? (
                   <span
-                    className="shrink-0 font-['UniCredit',sans-serif] text-[18px] font-bold leading-normal"
+                    className="uc-type-h2 shrink-0"
                     style={{ color: valueColor }}
                   >
                     ({effectiveMultipleCount})
@@ -148,7 +148,7 @@ export default function TextField({
                 onBlur={() => setIsFocused(false)}
                 placeholder={inputPlaceholder}
                 disabled={isDisabled}
-                className={`min-w-0 flex-1 bg-transparent font-['UniCredit',sans-serif] text-[18px] font-normal leading-normal outline-none disabled:cursor-default ${placeholderColorClass}`}
+                className={`uc-type-p1 min-w-0 flex-1 bg-transparent outline-none disabled:cursor-default ${placeholderColorClass}`}
                 style={{ color: valueColor }}
               />
             )}
@@ -168,7 +168,7 @@ export default function TextField({
           <div className="mt-[6px] flex flex-col">
             {descriptionText1 ? (
               <p
-                className="font-['UniCredit',sans-serif] text-[14px] font-normal leading-normal"
+                className="uc-type-n5"
                 style={{ color: helperColor }}
               >
                 {descriptionText1}
@@ -176,7 +176,7 @@ export default function TextField({
             ) : null}
             {descriptionText2 ? (
               <p
-                className="font-['UniCredit',sans-serif] text-[14px] font-normal leading-normal"
+                className="uc-type-n5"
                 style={{ color: helperColor }}
               >
                 {descriptionText2}

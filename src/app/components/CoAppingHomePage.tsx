@@ -43,10 +43,8 @@ export default function CoAppingHomePage() {
         >
           <PrimeDiamondMark color="var(--uc-static-white)" />
           <span 
-            className="font-['UniCredit',sans-serif] text-[var(--uc-static-white)]"
+            className="uc-type-n5-strong text-[var(--uc-static-white)]"
             style={{
-              fontSize: '14px',
-              fontWeight: 700,
               lineHeight: '16px'
             }}
           >
@@ -64,13 +62,7 @@ export default function CoAppingHomePage() {
 
       {/* Title */}
       <div className="px-[24px] pb-[24px]">
-        <h1 
-          className="font-['UniCredit',sans-serif] font-bold text-[var(--uc-text)]"
-          style={{
-            fontSize: '28px',
-            lineHeight: 'normal'
-          }}
-        >
+        <h1 className="uc-type-h1 text-[var(--uc-text)]">
           {t('navigation.home')}
         </h1>
       </div>
@@ -84,10 +76,10 @@ export default function CoAppingHomePage() {
             <div className="flex-1 p-[24px] flex flex-col gap-[4px]">
               {/* Total Available */}
               <div className="flex flex-col gap-[4px]">
-                <p className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[var(--uc-text)]">{t('home.totalAvailable')}</p>
+                <p className="uc-type-n5-strong text-[var(--uc-text)]">{t('home.totalAvailable')}</p>
                 <div className="flex items-baseline gap-[2px]">
-                  <span className="font-['UniCredit',sans-serif] text-[30px] font-bold text-[var(--uc-text)] leading-[1]">{displayedTotalAvailable.integer}</span>
-                  <span className="font-['UniCredit',sans-serif] text-[20px] font-bold text-[var(--uc-text)] leading-[1]">{displayedTotalAvailable.decimals} {currencyCode}</span>
+                  <span className="uc-type-n1 leading-[1] text-[var(--uc-text)]">{displayedTotalAvailable.integer}</span>
+                  <span className="uc-type-n2-strong leading-[1] text-[var(--uc-text)]">{displayedTotalAvailable.decimals} {currencyCode}</span>
                 </div>
               </div>
 
@@ -96,10 +88,10 @@ export default function CoAppingHomePage() {
 
               {/* Total Owed */}
               <div className="flex flex-col gap-[4px]">
-                <p className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[var(--uc-text)]">Total Owed</p>
+                <p className="uc-type-n5-strong text-[var(--uc-text)]">Total Owed</p>
                 <div className="flex items-baseline">
-                  <span className="font-['UniCredit',sans-serif] text-[20px] font-bold text-[var(--uc-text)] leading-[1]">{displayedTotalOwed.integer}</span>
-                  <span className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[var(--uc-text)] leading-[1]">{displayedTotalOwed.decimals} {currencyCode}</span>
+                  <span className="uc-type-n2-strong leading-[1] text-[var(--uc-text)]">{displayedTotalOwed.integer}</span>
+                  <span className="uc-type-n5-strong leading-[1] text-[var(--uc-text)]">{displayedTotalOwed.decimals} {currencyCode}</span>
                 </div>
               </div>
             </div>
