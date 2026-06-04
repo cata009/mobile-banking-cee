@@ -2162,7 +2162,7 @@ Continue with product evolution work:
 
 - Implemented the requested password protection gate for the demo:
   - `api/access.js` validates the password `CE&EE2025-`, sets signed HTTP-only access cookies, tracks failed attempts in a signed HTTP-only cookie, and supports both JSON and form submissions.
-  - `middleware.js` runs as Vercel Routing Middleware in Node.js runtime and redirects unauthenticated production requests to `/access.html` before app assets are served.
+  - `middleware.js` runs as Vercel Routing Middleware in Node.js runtime and redirects unauthenticated production requests to `/access.html` before app assets are served; it uses the official `next()` helper from `@vercel/functions` so allowed/authenticated requests continue to the Vite static app and `/api/access`.
   - `public/access.html` is the static password page with the requested copy:
     - `Enter password to continue`
     - `For support, contact the local UX designer`
@@ -2192,6 +2192,10 @@ Continue with product evolution work:
   - In-app browser smoke on `http://localhost:3005/` passed: access gate title/helper render, forbidden copy is absent, password `CE&EE2025-` unlocks the app.
   - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=69 screens=24 flows=14`.
   - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+- Production follow-up on 2026-06-04:
+  - After pushing `5e53df6`, production correctly redirected `/` to `/access.html`, but `/api/access` and `/access.html` returned empty `200` responses because the middleware pass-through returned `undefined` instead of Vercel's explicit `next()` response.
+  - Fixed by installing `@vercel/functions@3.6.2` and returning `next()` for allowed/authenticated middleware branches.
+  - Re-verified locally with `node --check middleware.js`, `node --check api/access.js`, `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and a Node middleware check confirming the `next()` response.
 - Commit scope:
   - the requested access-gate implementation plus all existing uncommitted workspace changes are intended to be committed per `comite tot ce nu e comis`.
   - Existing uncommitted files included Investments Portfolio refinements already documented earlier in this handoff.

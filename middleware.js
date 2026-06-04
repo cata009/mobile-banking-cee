@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { next } from "@vercel/functions";
 
 const ACCESS_COOKIE = "mb_access";
 const COOKIE_SECRET = process.env.ACCESS_COOKIE_SECRET || process.env.ACCESS_PASSWORD || "CE&EE2025-";
@@ -63,7 +64,7 @@ export default function middleware(request) {
   const url = new URL(request.url);
 
   if (isAllowedWithoutAccess(url.pathname) || isAccessValid(request)) {
-    return undefined;
+    return next();
   }
 
   const accessUrl = new URL("/access.html", request.url);
