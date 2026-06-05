@@ -28,6 +28,14 @@ Closing out the accumulated Investments, Kids, Design System Icons, and supporti
   - commit on `main`;
   - push `main` to `origin`;
   - deploy production with Vercel CLI via `npx vercel --prod --yes` because `vercel` is not installed globally but `npx vercel --version` resolves `54.9.1`.
+- Publish result:
+  - Git commit `71aa1cc` (`feat: polish investments and design system inventory`) was pushed to `origin/main`.
+  - Vercel production deployment `dpl_D8738d245RuydWJ5iR24TWDuMRmu` completed with status `READY`.
+  - Production deployment URL: `https://mobile-banking-hsdbfkqpj-imc-uci.vercel.app`.
+  - Production aliases include `https://mobile-banking-cee.vercel.app`.
+  - `npx vercel inspect https://mobile-banking-hsdbfkqpj-imc-uci.vercel.app` reported target `production`, status `Ready`, and the `api/access` function.
+  - `npx vercel logs https://mobile-banking-hsdbfkqpj-imc-uci.vercel.app --level error` returned no logs.
+  - Production HTTP smoke passed: `/` returned `200` with the app root, and `/api/access` returned `200` with `{"authenticated":false}` for an unauthenticated request.
 - Constitutional check:
   - scope preserved: yes
   - docs updated: yes
