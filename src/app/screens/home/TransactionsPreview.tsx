@@ -92,7 +92,7 @@ export default function TransactionsPreview({ showFilters = false }: Transaction
                   {transaction.amount} CZK
                 </span>
                 <span className="flex h-[32px] w-[32px] items-center justify-center">
-                  <AppIcon name="chevron-right" className="text-[var(--uc-text-subtle)]" />
+                  <AppIcon name="chevron-link" className="text-[var(--uc-text-subtle)]" />
                 </span>
               </div>
             </div>

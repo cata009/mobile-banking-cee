@@ -9,13 +9,15 @@ interface InvestmentsFundBannerProps {
 
 function FundBannerIllustration() {
   return (
-    <div className="absolute bottom-[-18px] right-[-8px] h-[128px] w-[116px]" aria-hidden="true">
-      <div className="absolute bottom-[10px] right-[4px] size-[82px] rounded-full bg-[var(--uc-action-soft-strong)]" />
-      <div className="absolute bottom-[35px] right-[54px] size-[34px] rounded-full bg-[var(--uc-yellow-gold)]" />
-      <div className="absolute bottom-[18px] right-[62px] h-[54px] w-[14px] rotate-[28deg] rounded-full bg-[var(--uc-green-main)]" />
-      <div className="absolute bottom-[56px] right-[26px] h-[38px] w-[12px] rotate-[-24deg] rounded-full bg-[var(--uc-green-success)]" />
-      <div className="absolute bottom-[18px] right-[20px] grid size-[42px] place-items-center rounded-full bg-[var(--uc-surface)] shadow-[0_6px_14px_rgb(var(--uc-shadow-rgb)_/_0.14)]">
-        <span className="uc-type-n2-strong text-[var(--uc-action)]">%</span>
+    <div className="absolute right-0 top-0 h-full w-[179px] overflow-hidden rounded-r-[8px]" aria-hidden="true">
+      <div className="absolute inset-0 bg-[var(--uc-surface-muted)]" />
+      <div className="absolute bottom-[18px] right-[20px] h-[88px] w-[92px] rounded-[8px] bg-[var(--uc-surface)] shadow-[0_6px_14px_rgb(var(--uc-shadow-rgb)_/_0.12)]" />
+      <div className="absolute bottom-[30px] right-[38px] h-[48px] w-[8px] rounded-[2px] bg-[var(--uc-action)]" />
+      <div className="absolute bottom-[30px] right-[54px] h-[34px] w-[8px] rounded-[2px] bg-[var(--uc-green-success)]" />
+      <div className="absolute bottom-[30px] right-[70px] h-[22px] w-[8px] rounded-[2px] bg-[var(--uc-yellow-gold)]" />
+      <div className="absolute right-[22px] top-[28px] h-[42px] w-[82px] rotate-[-18deg] rounded-[6px] bg-[var(--uc-surface)] shadow-[0_6px_14px_rgb(var(--uc-shadow-rgb)_/_0.1)]">
+        <div className="mx-[10px] mt-[12px] h-[4px] rounded-full bg-[var(--uc-border)]" />
+        <div className="mx-[10px] mt-[8px] h-[4px] w-[42px] rounded-full bg-[var(--uc-border)]" />
       </div>
     </div>
   );
@@ -31,19 +33,19 @@ export default function InvestmentsFundBanner({
     <button
       type="button"
       onClick={onClick}
-      className="relative mx-[24px] mt-[24px] min-h-[184px] overflow-hidden rounded-[8px] bg-[var(--uc-yellow-gold)] p-[24px] text-left"
+      className="relative mx-[16px] mt-[24px] min-h-[157px] overflow-hidden rounded-[8px] bg-[#F5F5F5] p-[16px] text-left"
       data-ds-label="Investments fund banner"
     >
-      <div className="relative z-10 max-w-[225px]">
-        <h2 className="uc-type-h2 text-[var(--uc-text)]">
+      <div className="relative z-10 max-w-[223px]">
+        <h2 className="text-[24px] font-bold leading-[26px] text-[var(--uc-text)]">
           {title}
         </h2>
-        <p className="uc-type-n4 mt-[14px] text-[var(--uc-text)]">
+        <p className="mt-[16px] text-[18px] font-normal leading-normal text-[var(--uc-text)]">
           {description}
         </p>
-        <span className="uc-type-n5-strong mt-[22px] inline-flex items-center gap-[6px] text-[var(--uc-action)]">
+        <span className="mt-[18px] inline-flex items-center gap-[5px] text-[14px] font-bold uppercase leading-normal text-[var(--uc-text)]">
           {actionLabel}
-          <AppIcon name="arrow-right" size={18} color="var(--uc-action)" strokeWidth={3} />
+          <AppIcon name="arrow-right" size={12} color="var(--uc-icon)" strokeWidth={3} />
         </span>
       </div>
       <FundBannerIllustration />

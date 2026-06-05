@@ -90,7 +90,7 @@ export default function HelperCard({
           className="absolute right-[12px] top-[9px] flex h-[24px] w-[24px] items-center justify-center"
           data-ds-label="HelperCard close"
         >
-          <AppIcon name="close-x-small" size={12} color="var(--uc-static-white)" />
+          <AppIcon name="close-x" size={12} color="var(--uc-static-white)" />
         </button>
       )}
     </div>

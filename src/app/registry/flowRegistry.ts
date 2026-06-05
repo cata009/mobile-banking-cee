@@ -284,6 +284,26 @@ export const FLOW_REGISTRY: Record<FlowId, FlowMeta> = {
     optionalFeatures: [],
     evidence: ["src/app/App.tsx", "src/app/screens/kids/RoKidsApp.tsx", "src/data/roKidsBanking.ts"],
   },
+  "kids.market-home-bottom-nav": {
+    id: "kids.market-home-bottom-nav",
+    label: "Kids market homepage and bottom nav comparison",
+    products: ["KIDS_PI"],
+    countries: ["CZ", "SK", "HU", "BA", "BA_BL", "SI"],
+    designSystems: ["current"],
+    status: "mock-driven",
+    entryScreen: "kids.cz.home-concept",
+    steps: [
+      { screenId: "kids.cz.home-concept", intent: "Open Mobile PI Kids in Czech Republic and review the pocket-plan homepage plus classic five-item bottom nav." },
+      { screenId: "kids.sk.home-concept", intent: "Switch to Slovakia and review the Bulbank document-inspired Kids concept with Products home, Education, Tasks, and More bottom navigation." },
+      { screenId: "kids.hu.home-concept", intent: "Switch to Hungary and review the smart-fintech homepage with pockets, insight metrics, and card-centered bottom nav." },
+      { screenId: "kids.ba.home-concept", intent: "Switch to Bosnia and review the family approval hub homepage with request, goals, card, and family nav tabs." },
+      { screenId: "kids.ba-bl.home-concept", intent: "Switch to Bosnia Banja Luka and review the card-first homepage with a centered card bottom-nav action." },
+      { screenId: "kids.si.home-concept", intent: "Switch to Slovenia and review the weekly plan and goal-coach homepage with Plan, Goals, Learn, and Profile nav tabs." },
+    ],
+    requiredFeatures: [],
+    optionalFeatures: [],
+    evidence: ["src/app/App.tsx", "src/app/screens/kids/KidsMarketHomeApp.tsx", "src/data/kidsMarketHomeConcepts.ts"],
+  },
 };
 
 export function getFlowMeta(flowId: FlowId): FlowMeta {

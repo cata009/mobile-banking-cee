@@ -104,28 +104,28 @@ function PortfolioSummary({
   currency: string;
 }) {
   const { t } = useLanguage();
-  const performanceColor = performanceAmount.integer.startsWith("-") ? "text-[var(--uc-danger)]" : "text-[var(--uc-green-success)]";
+  const performanceColor = performanceAmount.integer.startsWith("-") ? "text-[var(--uc-danger)]" : "text-[#3D7D43]";
 
   return (
     <div className="px-[16px] pt-[16px]">
       <div className="flex flex-col gap-[8px]">
         <div className="flex items-baseline gap-[8px]">
-          <span className="uc-type-n4 text-[var(--uc-text)]">
+          <span className="text-[14px] font-bold leading-normal text-[var(--uc-text)]">
             {t("runtime.investments.totalValue", "Total value")}:
           </span>
           <span className="text-[var(--uc-text)]">
-            <span className="uc-type-n4-strong">{totalValue.integer}</span>
-            <span className="uc-type-n5">{totalValue.decimal} {totalValue.currency || currency}</span>
+            <span className="text-center text-[20px] font-bold leading-[24px]">{totalValue.integer}</span>
+            <span className="text-[14px] font-normal leading-normal">{totalValue.decimal} {totalValue.currency || currency}</span>
           </span>
         </div>
         <div className="flex items-baseline gap-[8px]">
-          <span className="uc-type-n4 text-[var(--uc-text)]">
+          <span className="text-[14px] font-bold leading-normal text-[var(--uc-text)]">
             {t("runtime.investments.performance", "Performance")}:
           </span>
           <span className={performanceColor}>
-            <span className="uc-type-n4-strong">{performanceAmount.integer}</span>
-            <span className="uc-type-n5">{performanceAmount.decimal} {performanceAmount.currency || currency}</span>
-            <span className="uc-type-n5-strong"> / {performancePercentLabel}</span>
+            <span className="text-center text-[14px] font-bold leading-normal">{performanceAmount.integer}</span>
+            <span className="text-center text-[14px] font-bold leading-normal">{performanceAmount.decimal} {performanceAmount.currency || currency}</span>
+            <span className="text-center text-[14px] font-bold leading-normal"> / {performancePercentLabel}</span>
           </span>
         </div>
       </div>
@@ -278,6 +278,7 @@ export default function InvestmentsPortfolioScreen({ onBack }: InvestmentsPortfo
               <SectionHeadingDivider
                 title={t("runtime.investments.allProducts", "ALL PRODUCTS")}
                 count={securities.length}
+                countAlign="end"
                 className="px-[24px] pt-[8px]"
               />
               <InvestmentFilterChips

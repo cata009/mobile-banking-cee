@@ -11,7 +11,7 @@ import { RELEASE_BUNDLES } from "./releaseRegistry";
 import { SCREEN_REGISTRY } from "./screenRegistry";
 import { TEMPLATE_REGISTRY } from "./templateRegistry";
 
-export const AI_CATALOG_VERSION = "2026-06-02.templates-contract";
+export const AI_CATALOG_VERSION = "2026-06-04.kids-sk-bulbank-document-refactor";
 
 export const AI_CATALOG = {
   version: AI_CATALOG_VERSION,

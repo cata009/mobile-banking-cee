@@ -101,7 +101,7 @@ export function YourAdvisorTab() {
               <div className="content-stretch flex flex-col gap-[16px] items-center justify-center min-h-[inherit] px-[4px] py-[24px] relative w-full">
                 {/* Phone Icon - Native SVG from Figma */}
                 <div className="grid h-[32px] w-[32px] shrink-0 place-items-center">
-                  <AppIcon name="prime-phone" color="var(--uc-static-white)" />
+                  <AppIcon name="contact-phone" color="var(--uc-static-white)" />
                 </div>
 
                 {/* Button Text */}

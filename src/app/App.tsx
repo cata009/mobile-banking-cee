@@ -30,6 +30,7 @@ import PaymentsScreen from "@/app/screens/payments/PaymentsScreen";
 import ProductsScreen from "@/app/screens/products/ProductsScreen";
 import InvestmentsPortfolioScreen from "@/app/screens/investments/InvestmentsPortfolioScreen";
 import SettingsScreen from "@/app/screens/settings/SettingsScreen";
+import KidsMarketHomeApp from "@/app/screens/kids/KidsMarketHomeApp";
 import RoKidsApp from "@/app/screens/kids/RoKidsApp";
 
 // Contacts component - available for all countries
@@ -47,6 +48,7 @@ import {
 } from "@/app/screens/payments/DomesticPaymentFlowScreens";
 import { useProducts } from "@/hooks/useProducts";
 import { isInvestmentsPortfolioAvailable } from "@/app/utils/investmentsAvailability";
+import { isKidsHomeCountry } from "@/data/kidsMarketHomeConcepts";
 import type { AccountTransaction } from "@/data/accountDetails";
 import {
   createEmptyDomesticPaymentDraft,
@@ -132,7 +134,10 @@ function AppContent() {
   const coAppingAvailable = isCoAppingAvailable(country);
   const isPiRuntimeContext = product === "PI" && designSystem === "current";
   const isRoKidsRuntimeContext = product === "KIDS_PI" && country === "RO" && designSystem === "current";
-  const isSupportedRuntimeContext = isPiRuntimeContext || isRoKidsRuntimeContext;
+  const isMarketKidsRuntimeContext =
+    product === "KIDS_PI" && designSystem === "current" && isKidsHomeCountry(country);
+  const isKidsRuntimeContext = isRoKidsRuntimeContext || isMarketKidsRuntimeContext;
+  const isSupportedRuntimeContext = isPiRuntimeContext || isKidsRuntimeContext;
   const investmentsPortfolioAvailable = isInvestmentsPortfolioAvailable(product, country);
   
   const [showTerminatePopup, setShowTerminatePopup] = useState(false);
@@ -168,7 +173,7 @@ function AppContent() {
   
   // Determină varianta status bar-ului bazat pe ecranul curent
   const getStatusBarVariant = (): 'light' | 'dark' => {
-    if (isRoKidsRuntimeContext) {
+    if (isKidsRuntimeContext) {
       return "light";
     }
 
@@ -426,8 +431,12 @@ function AppContent() {
       >
         {isSupportedRuntimeContext ? (
         <>
-        {isRoKidsRuntimeContext ? (
-          <RoKidsApp />
+        {isKidsRuntimeContext ? (
+          isRoKidsRuntimeContext ? (
+            <RoKidsApp />
+          ) : isKidsHomeCountry(country) ? (
+            <KidsMarketHomeApp country={country} />
+          ) : null
         ) : (
         <>
         {/* ========== PRE-LOGIN SCREENS ========== */}

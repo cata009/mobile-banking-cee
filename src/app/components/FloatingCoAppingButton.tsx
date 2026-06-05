@@ -45,7 +45,7 @@ export default function FloatingCoAppingButton({ onClick, showSlideIn = false }:
           justifyContent: 'center'
         }}
       >
-        <AppIcon name="floating-share-screen" color="var(--uc-static-white)" />
+        <AppIcon name="panel-share-screen" color="var(--uc-static-white)" />
       </div>
 
       <style>{`

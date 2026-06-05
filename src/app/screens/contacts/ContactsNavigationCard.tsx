@@ -39,7 +39,7 @@ export function ContactsNavigationCard({
       linkLabel={value}
       leadingIconName={CONTACT_ICON_NAME[icon]}
       trailingAccessory={hasChevron ? "chevron" : "none"}
-      chevronIconName="contact-chevron"
+      chevronIconName="chevron-link"
       onClick={onClick}
     />
   );

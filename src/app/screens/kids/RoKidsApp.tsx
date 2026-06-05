@@ -961,7 +961,7 @@ function KidsHomeScreen({
                       </p>
                     </div>
                   </div>
-                  <AppIcon name="chevron-forward-heavy" color="var(--uc-icon-muted)" />
+                  <AppIcon name="chevron-link" color="var(--uc-icon-muted)" />
                 </div>
                 <ProgressBar className="mt-[14px]" value={goalProgress(goal)} />
               </SurfaceCard>
@@ -1030,7 +1030,7 @@ function KidsHomeScreen({
                   Clear sharing, no surprises.
                 </p>
               </div>
-              <AppIcon name="chevron-forward-heavy" color="var(--uc-icon-muted)" />
+              <AppIcon name="chevron-link" color="var(--uc-icon-muted)" />
             </div>
           </SurfaceCard>
         </button>
@@ -1916,7 +1916,7 @@ function ParentDashboardScreen({
                   {choresWaiting} chore waiting approval
                 </p>
               </div>
-              <AppIcon name="chevron-forward-heavy" color="var(--uc-icon-muted)" />
+              <AppIcon name="chevron-link" color="var(--uc-icon-muted)" />
             </div>
           </SurfaceCard>
         </SectionBlock>
@@ -2728,7 +2728,7 @@ function LargeActionRow({
             <h3 className="text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{title}</h3>
             <p className="mt-[2px] text-[13px] leading-[17px] text-[var(--uc-text-muted)]">{subtitle}</p>
           </div>
-          <AppIcon name="chevron-forward-heavy" color="var(--uc-icon-muted)" />
+          <AppIcon name="chevron-link" color="var(--uc-icon-muted)" />
         </div>
       </SurfaceCard>
     </button>

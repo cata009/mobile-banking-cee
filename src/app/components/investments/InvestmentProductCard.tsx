@@ -1,4 +1,5 @@
 import type { InvestmentSecurity } from "@/app/config/investmentsPortfolioConfig";
+import { AppIcon } from "@/app/components/icons";
 
 export interface InvestmentAmountParts {
   integer: string;
@@ -17,7 +18,7 @@ interface InvestmentProductCardProps {
 function performanceColor(value: number): string {
   if (value > 0) return "text-[var(--uc-green-success)]";
   if (value < 0) return "text-[var(--uc-danger)]";
-  return "text-[var(--uc-text-muted)]";
+  return "text-[var(--uc-text)]";
 }
 
 export default function InvestmentProductCard({
@@ -29,41 +30,33 @@ export default function InvestmentProductCard({
 }: InvestmentProductCardProps) {
   const colorClass = performanceColor(security.performanceAmount);
   const percentPrefix = security.performancePercent > 0 ? "+" : "";
+  const valueText = `${valueParts.integer}${valueParts.decimal} ${valueParts.currency}`;
+  const contributionLabel = security.contributionType.trim();
+  const showContribution = contributionLabel.length > 0 && contributionLabel.toLowerCase() !== "standard";
 
   return (
     <article
-      className="flex flex-col gap-[10px] border-b border-[var(--uc-border-muted)] px-[24px] py-[16px]"
+      className="flex min-h-[95px] flex-col gap-[4px] bg-[var(--uc-surface)] py-[16px] pl-[16px] pr-[24px]"
       data-ds-label="Investment product card"
     >
-      <div className="min-w-0">
-        <h3 className="uc-type-n5-strong truncate text-[var(--uc-text)]">
-          {security.title}
-        </h3>
-        <p className="uc-type-n5 mt-[2px] truncate text-[var(--uc-text-muted)]">
-          {security.securityAccountName} · {security.productType} · {security.assetClass}
+      <h3 className="truncate text-[14px] font-bold leading-normal text-[var(--uc-text)]">
+        {security.title}
+      </h3>
+      <div className="flex min-h-[22px] items-center gap-[8px]">
+        <p className="min-w-0 flex-1 truncate text-[14px] font-normal leading-normal text-[var(--uc-text)]" aria-label={valueLabel}>
+          {valueText}
+        </p>
+        <p className={`shrink-0 text-right ${colorClass}`} aria-label={performanceLabel}>
+          <span className="text-[20px] font-bold leading-[22px]">{performanceParts.integer}</span>
+          <span className="text-[14px] font-normal leading-normal">{performanceParts.decimal} {performanceParts.currency}</span>
         </p>
       </div>
-      <div className="flex items-start justify-between gap-[12px]">
-        <div>
-          <p className="uc-type-n5-strong text-[var(--uc-text-muted)]">{valueLabel}</p>
-          <p className="mt-[2px]">
-            <span className="uc-type-n4-strong text-[var(--uc-text)]">{valueParts.integer}</span>
-            <span className="uc-type-n5 text-[var(--uc-text)]">{valueParts.decimal} {valueParts.currency}</span>
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="uc-type-n5-strong text-[var(--uc-text-muted)]">{performanceLabel}</p>
-          <p className={`mt-[2px] ${colorClass}`}>
-            <span className="uc-type-n4-strong">{performanceParts.integer}</span>
-            <span className="uc-type-n5">{performanceParts.decimal} {performanceParts.currency}</span>
-          </p>
-        </div>
-      </div>
-      <div className="flex items-center justify-between gap-[12px]">
-        <span className="uc-type-n5-strong rounded-full bg-[var(--uc-surface-muted)] px-[10px] py-[4px] text-[var(--uc-text)]">
-          {security.contributionType}
+      <div className="flex min-h-[18px] items-center justify-between gap-[8px]">
+        <span className="flex min-w-0 items-center gap-[5px] text-[14px] font-normal leading-normal text-[var(--uc-text)]">
+          {showContribution ? <span className="truncate uppercase">{contributionLabel}</span> : null}
+          {showContribution ? <AppIcon name="user-event-refresh" size={18} color="var(--uc-icon)" /> : null}
         </span>
-        <span className={`uc-type-n5-strong ${colorClass}`}>
+        <span className={`shrink-0 text-right text-[14px] font-bold leading-normal ${colorClass}`}>
           {percentPrefix}{security.performancePercent.toFixed(1).replace(".", ",")}%
         </span>
       </div>

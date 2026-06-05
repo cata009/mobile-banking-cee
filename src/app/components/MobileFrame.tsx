@@ -19,9 +19,9 @@ const PHONE_BEZEL = 12;
 const PHONE_FRAME_WIDTH = SCREEN_WIDTH + PHONE_BEZEL * 2;
 const PHONE_FRAME_HEIGHT = SCREEN_HEIGHT + PHONE_BEZEL * 2;
 const PREVIEW_HORIZONTAL_PADDING = 96;
-const PREVIEW_VERTICAL_PADDING = 112;
+const PREVIEW_VERTICAL_PADDING = 32;
 const MIN_PREVIEW_SCALE = 0.5;
-const MAX_PREVIEW_SCALE = 1;
+const MAX_PREVIEW_SCALE = 1.18;
 
 function getBoundedPreviewScale(width: number, height: number) {
   if (width <= 0 || height <= 0) {

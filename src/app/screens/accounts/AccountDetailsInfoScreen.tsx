@@ -51,7 +51,7 @@ function ConnectedCardRow() {
           5545 XXXX XXXX 3250
         </p>
       </div>
-      <AppIcon name="chevron-forward-heavy" color="var(--uc-text)" />
+      <AppIcon name="chevron-link" color="var(--uc-text)" />
     </button>
   );
 }

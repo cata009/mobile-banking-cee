@@ -101,7 +101,7 @@ function NavigationRowContent({
         />
       ) : trailingAccessory === "chevron" ? (
         <span className="flex size-[32px] shrink-0 items-center justify-center">
-          <AppIcon name={chevronIconName ?? "contact-chevron"} color="var(--uc-text)" />
+          <AppIcon name={chevronIconName ?? "chevron-link"} color="var(--uc-text)" />
         </span>
       ) : hasTrailing ? (
         <span className="shrink-0" />

@@ -52,6 +52,12 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
       "pi.more.overview",
       "pi.contacts.overview",
       "kids.ro.prototype",
+      "kids.cz.home-concept",
+      "kids.sk.home-concept",
+      "kids.hu.home-concept",
+      "kids.ba.home-concept",
+      "kids.ba-bl.home-concept",
+      "kids.si.home-concept",
     ],
   },
   "shell.phone-screenshot-control": {
@@ -559,7 +565,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "implemented",
     componentPath: "src/app/components/investments/InvestmentPortfolioChart.tsx",
     usedByScreens: ["pi.investments.portfolio"],
-    notes: "Reusable SVG line/area chart driven by portfolio value and selected period points rather than a static screenshot.",
+    notes: "Reusable Recharts line/area chart driven by portfolio value and selected period points rather than a static screenshot or hand-drawn chart.",
   },
   "investments.distribution-chart": {
     id: "investments.distribution-chart",
@@ -579,7 +585,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "implemented",
     componentPath: "src/app/components/investments/InvestmentPeriodChips.tsx",
     usedByScreens: ["pi.investments.portfolio"],
-    notes: "Controlled period selector for 1M, 3M, 1Y, 3Y, and 5Y/MAX chart views.",
+    notes: "Controlled period selector for 1M, 3M, 6M, 1Y, 3Y, and ALL chart views.",
   },
   "investments.action-bar": {
     id: "investments.action-bar",
@@ -719,7 +725,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "implemented",
     componentPath: "src/app/components/cards/HelperCard.tsx",
     usedByScreens: ["platform.design-system"],
-    notes: "Figma-extracted 343-wide solid teal helper generated from `codex-figma-component-spec/v1` `Helpers` (plain node `9104:14526`, with-link node `9104:14570`). Leading 32x32 white `info-circle`, an 18px bold white title and an 18px regular white multiline body. One component covers both variants via props: `actionLabel` renders a 14px bold white text link and `dismissible` renders a white `close-x-small` control top-right. Teal `--uc-action` background, 4px radius, 16px padding, white text via `--uc-static-white`.",
+    notes: "Figma-extracted 343-wide solid teal helper generated from `codex-figma-component-spec/v1` `Helpers` (plain node `9104:14526`, with-link node `9104:14570`). Leading 32x32 white `info-circle`, an 18px bold white title and an 18px regular white multiline body. One component covers both variants via props: `actionLabel` renders a 14px bold white text link and `dismissible` renders a white `close-x` control top-right. Teal `--uc-action` background, 4px radius, 16px padding, white text via `--uc-static-white`.",
   },
   "cards.pending-action-card": {
     id: "cards.pending-action-card",
@@ -798,6 +804,23 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     componentPath: "src/app/screens/kids/RoKidsApp.tsx",
     usedByScreens: ["kids.ro.prototype"],
     notes: "Contained Romania-only Kids PI module with local state for kid home, request money, parent approvals, send money approval, card customization, saving goals, allowance, chores, Learn, onboarding, parent visibility, activation, parent dashboard, safety limits, and chore management.",
+  },
+  "kids.market-home-concepts": {
+    id: "kids.market-home-concepts",
+    label: "Kids market homepage concepts",
+    products: ["KIDS_PI"],
+    designSystems: ["current"],
+    status: "mock-driven",
+    componentPath: "src/app/screens/kids/KidsMarketHomeApp.tsx",
+    usedByScreens: [
+      "kids.cz.home-concept",
+      "kids.sk.home-concept",
+      "kids.hu.home-concept",
+      "kids.ba.home-concept",
+      "kids.ba-bl.home-concept",
+      "kids.si.home-concept",
+    ],
+    notes: "Country-contained Kids homepage and bottom-navigation concepts for Czech Republic, Slovakia, Hungary, Bosnia, Bosnia Banja Luka, and Slovenia. The same module uses market-specific mock data and intentionally different UI directions: CZ pocket-plan, SK Bulbank document-inspired Products/Education/Tasks/More, HU smart-fintech, BA family-hub, BA_BL card-first, and SI goal-coach.",
   },
 };
 

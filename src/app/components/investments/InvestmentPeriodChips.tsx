@@ -12,7 +12,7 @@ export default function InvestmentPeriodChips({
   onChange,
 }: InvestmentPeriodChipsProps) {
   return (
-    <div className="flex items-center justify-between px-[8px]" data-ds-label="Investments period chips">
+    <div className="flex items-center justify-center gap-[8px] px-[8px]" data-ds-label="Investments period chips">
       {periods.map((period) => {
         const selected = period.id === selectedPeriodId;
 
