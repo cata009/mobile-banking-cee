@@ -72,3 +72,9 @@ This log records bananas found and how they were triaged.
 | Vercel Routing Middleware pass-through broke static/API serving for this Vite deployment | Fixed by removing the middleware and keeping the SPA-mounted access gate plus `/api/access` validation as the active implementation | `src/app/components/security/AccessGate.tsx`, `api/access.js`; build/audits passed |
 | Demo access gate has no committed automated regression test | Triaged as a future automated coverage task; manual Node simulations and local browser smoke are recorded for this session | `docs/handoff/next-tasks.md`, `docs/handoff/current-session.md` |
 | Demo password has a source-level server fallback | Triaged as an intentional demo fallback plus known banana; before wider external sharing, configure `ACCESS_PASSWORD` and `ACCESS_COOKIE_SECRET` in Vercel and rotate/remove the fallback intentionally | `docs/handoff/known-bananas.md`, `api/access.js`, `middleware.js` |
+
+## 2026-06-05
+
+| Banana | Triage | Evidence |
+| --- | --- | --- |
+| `.codex-temp/` contained temporary PDF extraction images and dev-server logs and appeared as untracked publish scope | Fixed by adding `.codex-temp/` to `.gitignore` before staging, so only product/runtime source and handoff docs are committed | `.gitignore`, `git ls-files --others --exclude-standard` |

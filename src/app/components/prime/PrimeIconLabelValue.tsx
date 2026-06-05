@@ -50,7 +50,7 @@ export function PrimeIconLabelValue({
 
       {/* Arrow Icon - Corrected SVG */}
       <div className="flex items-center justify-center relative shrink-0" style={{ width: '7px', height: '14px' }}>
-        <AppIcon name="prime-chevron-right" color="var(--uc-static-white)" />
+        <AppIcon name="chevron-link" color="var(--uc-static-white)" />
       </div>
     </button>
   );

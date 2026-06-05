@@ -34,7 +34,7 @@ export default function NewPaymentDiscoverBanner({
           onClick={() => setIsVisible(false)}
           type="button"
         >
-          <AppIcon name="close-x-small" color="var(--uc-text-inverse)" />
+          <AppIcon name="close-x" color="var(--uc-text-inverse)" />
         </button>
       </div>
     </div>

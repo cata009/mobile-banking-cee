@@ -127,6 +127,12 @@ export type ScreenId =
   | "pi.settings.overview"
   | "pi.contacts.overview"
   | "kids.ro.prototype"
+  | "kids.cz.home-concept"
+  | "kids.sk.home-concept"
+  | "kids.hu.home-concept"
+  | "kids.ba.home-concept"
+  | "kids.ba-bl.home-concept"
+  | "kids.si.home-concept"
   | "platform.design-system";
 
 /**
@@ -201,7 +207,8 @@ export type ComponentId =
   | "prime.advisor-tab"
   | "prime.benefits-tab"
   | "dialogs.logout-confirmation"
-  | "kids.ro-prototype";
+  | "kids.ro-prototype"
+  | "kids.market-home-concepts";
 
 /**
  * Addressable flow identifiers.
@@ -220,7 +227,8 @@ export type FlowId =
   | "pi.home-to-more-to-contacts"
   | "pi.home-to-more-to-documents"
   | "pi.home-to-more-to-settings"
-  | "kids.ro.ask-money-parent-approval";
+  | "kids.ro.ask-money-parent-approval"
+  | "kids.market-home-bottom-nav";
 
 /**
  * Shared implementation status for registries and feature coverage.

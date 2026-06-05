@@ -18,6 +18,21 @@ import type {
   ScreenId,
 } from "@/app/state/demoTypes";
 
+const KIDS_MARKET_CONCEPT_COUNTRIES: readonly CountryId[] = ["CZ", "SK", "HU", "BA", "BA_BL", "SI"] as const;
+
+const KIDS_MARKET_SCREEN_BY_COUNTRY: Partial<Record<CountryId, ScreenId>> = {
+  CZ: "kids.cz.home-concept",
+  SK: "kids.sk.home-concept",
+  HU: "kids.hu.home-concept",
+  BA: "kids.ba.home-concept",
+  BA_BL: "kids.ba-bl.home-concept",
+  SI: "kids.si.home-concept",
+};
+
+function hasKidsMarketConcept(country: CountryId): boolean {
+  return KIDS_MARKET_CONCEPT_COUNTRIES.includes(country);
+}
+
 export interface KnowledgeSourceBinding {
   id: string;
   authority: DataSourceAuthority;
@@ -74,7 +89,7 @@ function runtimeCoverage(product: ProductId, country: CountryId): CapabilityStat
     return "implemented";
   }
 
-  if (product === "KIDS_PI" && country === "RO") {
+  if (product === "KIDS_PI" && (country === "RO" || hasKidsMarketConcept(country))) {
     return "mock-driven";
   }
 
@@ -82,7 +97,7 @@ function runtimeCoverage(product: ProductId, country: CountryId): CapabilityStat
 }
 
 function integrationReadiness(product: ProductId, country: CountryId): ProjectPack["integrationReadiness"] {
-  if (product === "PI" || (product === "KIDS_PI" && country === "RO")) {
+  if (product === "PI" || (product === "KIDS_PI" && (country === "RO" || hasKidsMarketConcept(country)))) {
     return "implemented";
   }
 
@@ -91,7 +106,12 @@ function integrationReadiness(product: ProductId, country: CountryId): ProjectPa
 
 function demoEntries(product: ProductId, country: CountryId): readonly ScreenId[] {
   if (product === "KIDS_PI") {
-    return country === "RO" ? ["kids.ro.prototype"] : [];
+    if (country === "RO") {
+      return ["kids.ro.prototype"];
+    }
+
+    const marketScreen = KIDS_MARKET_SCREEN_BY_COUNTRY[country];
+    return marketScreen ? [marketScreen] : [];
   }
 
   if (product === "SME") {
@@ -105,9 +125,7 @@ function demoEntries(product: ProductId, country: CountryId): readonly ScreenId[
     "pi.more.overview",
   ];
 
-  if (country !== "BA" && country !== "BA_BL") {
-    piEntries.push("pi.investments.portfolio");
-  }
+  piEntries.push("pi.investments.portfolio");
 
   return piEntries;
 }
@@ -150,6 +168,17 @@ function knowledgeSources(product: ProductId, country: CountryId): readonly Know
       description: "Mock holdings, rights, limits, and disabled-action reasons.",
     },
   ];
+
+  if (product === "KIDS_PI" && hasKidsMarketConcept(country)) {
+    return [
+      ...baseSources,
+      {
+        id: "kidsMarketHomeConcepts",
+        authority: "reference",
+        description: "Country-contained Mobile PI Kids concept data and bottom-navigation variants, including the Bulbank document-inspired Slovakia Kids concept.",
+      },
+    ];
+  }
 
   if (product === "KIDS_PI" && country !== "RO") {
     return [
@@ -196,7 +225,11 @@ function buildProjectPack(product: ProductId, country: CountryId): ProjectPack {
     notes:
       product === "PI"
         ? "Runtime demo is available today; country specifics continue to mature through config and manifests."
-        : "Future application variant is intentionally prepared as metadata, scenarios, and integration readiness before real screens are added.",
+        : product === "KIDS_PI" && country === "RO"
+          ? "Runtime RO Kids prototype is available today as a mock-driven concept with broad Kid/Parent flows."
+          : product === "KIDS_PI" && hasKidsMarketConcept(country)
+            ? "Runtime Kids market-home concept is available today as a mock-driven comparison variant; backend, parent/legal, and full flow depth remain out of scope."
+            : "Future application variant is intentionally prepared as metadata, scenarios, and integration readiness before real screens are added.",
   };
 }
 

@@ -20,9 +20,9 @@ const DESIGN_SYSTEM_HASHES = new Set([
   "registry",
   "templates",
   "icons",
-  "icon-audit",
   "colors",
   "color-audit",
+  "typography",
 ]);
 
 function hasDesignSystemHash() {

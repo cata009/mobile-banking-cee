@@ -3,7 +3,7 @@ import { convertCurrency, getCountryCurrency, roundMoney } from "@/data/exchange
 import type { Currency, Product } from "@/data/products";
 
 export type InvestmentPortfolioTabId = "performance" | "product-type" | "currency" | "asset-class" | "account-list";
-export type InvestmentPeriodId = "1m" | "3m" | "1y" | "3y" | "max";
+export type InvestmentPeriodId = "1m" | "3m" | "6m" | "1y" | "3y" | "max";
 export type InvestmentSortId = "max-value" | "min-value" | "max-percent" | "min-percent";
 export type InvestmentSecurityStatus = "active" | "inactive";
 export type InvestmentContributionType = "ONE OFF" | "RECURRENT";
@@ -27,6 +27,8 @@ export interface InvestmentSortOption {
 
 export interface InvestmentChartPoint {
   label: string;
+  dateLabel: string;
+  yearLabel: string;
   value: number;
 }
 
@@ -86,9 +88,10 @@ export const INVESTMENT_PORTFOLIO_TABS: readonly InvestmentPortfolioTabOption[] 
 export const INVESTMENT_PERIODS: readonly InvestmentPeriodOption[] = [
   { id: "1m", label: "1 M" },
   { id: "3m", label: "3 M" },
+  { id: "6m", label: "6 M" },
   { id: "1y", label: "1 Y" },
   { id: "3y", label: "3 Y" },
-  { id: "max", label: "5Y/MAX" },
+  { id: "max", label: "ALL" },
 ];
 
 export const INVESTMENT_SORT_OPTIONS: readonly InvestmentSortOption[] = [
@@ -174,19 +177,30 @@ const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
 const DISTRIBUTION_COLORS = ["#E42313", "#007A91", "#F2A900", "#7A5AF8", "#535453", "#24A06B"];
 
 const PERIOD_MULTIPLIERS: Record<InvestmentPeriodId, readonly number[]> = {
-  "1m": [0.982, 0.988, 0.981, 0.996, 1],
-  "3m": [0.956, 0.972, 0.966, 0.991, 1],
-  "1y": [0.92, 0.948, 0.938, 0.976, 1],
-  "3y": [0.82, 0.872, 0.914, 0.962, 1],
-  max: [0.74, 0.81, 0.86, 0.93, 1],
+  "1m": [0.982, 0.988, 0.981, 0.996, 0.991, 1],
+  "3m": [0.956, 0.972, 0.966, 0.982, 0.991, 1],
+  "6m": [0.934, 0.948, 0.962, 0.956, 0.984, 1],
+  "1y": [0.92, 0.934, 0.948, 0.938, 0.976, 1],
+  "3y": [0.82, 0.852, 0.872, 0.914, 0.962, 1],
+  max: [0.74, 0.78, 0.81, 0.86, 0.93, 1],
 };
 
-const PERIOD_LABELS: Record<InvestmentPeriodId, readonly string[]> = {
-  "1m": ["07.05", "14.05", "21.05", "28.05", "04.06"],
-  "3m": ["04.03", "04.04", "04.05", "21.05", "04.06"],
-  "1y": ["Jun", "Sep", "Dec", "Mar", "Jun"],
-  "3y": ["2023", "2024", "2025", "Mar", "Jun"],
-  max: ["2021", "2022", "2023", "2025", "2026"],
+const PERIOD_DATE_LABELS: Record<InvestmentPeriodId, readonly string[]> = {
+  "1m": ["07 May", "14 May", "21 May", "28 May", "02 Jun", "04 Jun"],
+  "3m": ["04 Mar", "04 Apr", "04 May", "21 May", "28 May", "04 Jun"],
+  "6m": ["04 Dec", "04 Jan", "04 Feb", "04 Mar", "04 May", "04 Jun"],
+  "1y": ["04 Jun", "04 Sep", "04 Dec", "04 Mar", "04 May", "04 Jun"],
+  "3y": ["04 Jun", "04 Jun", "04 Jun", "04 Mar", "04 May", "04 Jun"],
+  max: ["04 Jun", "04 Jun", "04 Jun", "04 Jun", "04 Jun", "04 Jun"],
+};
+
+const PERIOD_YEAR_LABELS: Record<InvestmentPeriodId, readonly string[]> = {
+  "1m": ["2026", "2026", "2026", "2026", "2026", "2026"],
+  "3m": ["2026", "2026", "2026", "2026", "2026", "2026"],
+  "6m": ["2025", "2026", "2026", "2026", "2026", "2026"],
+  "1y": ["2025", "2025", "2025", "2026", "2026", "2026"],
+  "3y": ["2023", "2024", "2025", "2026", "2026", "2026"],
+  max: ["2021", "2022", "2023", "2024", "2025", "2026"],
 };
 
 export function getInvestmentProducts(products: readonly Product[]): Product[] {
@@ -246,10 +260,13 @@ export function buildInvestmentChartPoints(
   periodId: InvestmentPeriodId,
 ): InvestmentChartPoint[] {
   const multipliers = PERIOD_MULTIPLIERS[periodId];
-  const labels = PERIOD_LABELS[periodId];
+  const dateLabels = PERIOD_DATE_LABELS[periodId];
+  const yearLabels = PERIOD_YEAR_LABELS[periodId];
 
   return multipliers.map((multiplier, index) => ({
-    label: labels[index] ?? "",
+    label: `${dateLabels[index] ?? ""} ${yearLabels[index] ?? ""}`.trim(),
+    dateLabel: dateLabels[index] ?? "",
+    yearLabel: yearLabels[index] ?? "",
     value: roundMoney(totalValue * multiplier),
   }));
 }

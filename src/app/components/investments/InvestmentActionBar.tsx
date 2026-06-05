@@ -45,7 +45,7 @@ export default function InvestmentActionBar({
 }: InvestmentActionBarProps) {
   return (
     <div
-      className="grid grid-cols-[1fr_1fr_1fr_56px] items-start gap-[6px] px-[16px] py-[16px]"
+      className="grid grid-cols-[1fr_1fr_1fr_56px] items-start gap-[6px] px-[16px] pb-[16px] pt-[24px]"
       data-ds-label="Investments action bar"
     >
       {actions.slice(0, 3).map((action) => (

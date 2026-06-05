@@ -2158,7 +2158,7 @@ function ContactInfoCard({
         <span className="mt-[5px] block text-[12px] font-bold uppercase leading-[15px] text-[var(--uc-action)]">{action}</span>
       </span>
       <span className="grid size-[32px] place-items-center">
-        <AppIcon name="contact-chevron" color="var(--uc-text)" />
+        <AppIcon name="chevron-link" color="var(--uc-text)" />
       </span>
     </TemplateAction>
   );

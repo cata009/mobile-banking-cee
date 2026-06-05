@@ -15,7 +15,7 @@ import { AppIcon } from "@/app/components/icons";
 function SeparatorLine() {
   return (
     <div className="flex justify-center items-center w-[327px] h-px">
-      <AppIcon name="divider-327" color="var(--uc-text-subtle)" />
+      <span className="block h-px w-full bg-[var(--uc-text-subtle)] opacity-40" />
     </div>
   );
 }
@@ -37,7 +37,7 @@ function ExpandedProduct({ product, findOutMoreText }: { product: Product; findO
           <span className="uc-type-n5-strong uppercase text-[var(--uc-static-white)]">
             {findOutMoreText}
           </span>
-          <AppIcon name="chevron-right" color="var(--uc-static-white)" />
+          <AppIcon name="chevron-link" color="var(--uc-static-white)" />
         </button>
       </div>
     </div>

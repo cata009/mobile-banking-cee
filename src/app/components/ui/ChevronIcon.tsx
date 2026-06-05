@@ -4,7 +4,7 @@ import { AppIcon } from "@/app/components/icons";
 export default function ChevronIcon() {
   return (
     <div className="w-[32px] h-[32px] flex items-center justify-center shrink-0">
-      <AppIcon name="chevron-right" color="var(--uc-static-white)" />
+      <AppIcon name="chevron-link" color="var(--uc-static-white)" />
     </div>
   );
 }

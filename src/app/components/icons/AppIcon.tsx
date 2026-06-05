@@ -9,6 +9,7 @@ import {
   CircleDollarSign,
   ClipboardCheck,
   CreditCard,
+  Download,
   Eye,
   EyeOff,
   Gift,
@@ -68,13 +69,13 @@ type IconDefinition = CustomIconDefinition | LucideIconDefinition;
 
 const STANDARD_UI_ICON_GLYPH_SIZE = 20;
 const NON_STANDARD_ICON_NAMES = new Set([
-  "divider-327",
   "user-event-badge",
   "user-event-refresh",
   "investment-history",
   "investment-to-approve",
   "warning-small",
 ]);
+const ICON_INVENTORY_EXCLUDED_NAMES = new Set(["radio-unselected", "radio-selected"]);
 
 const CUSTOM_ICONS = {
   "header-profile": {
@@ -380,17 +381,6 @@ const CUSTOM_ICONS = {
       <path d="M10 0C15.53 0 20 4.47 20 10C20 15.53 15.53 20 10 20C4.47 20 0 15.53 0 10C0 4.47 4.47 0 10 0ZM10 8.58984L6.41016 5L5 6.41016L8.58984 10L5 13.5898L6.41016 15L10 11.4102L13.5898 15L15 13.5898L11.4102 10L15 6.41016L13.5898 5L10 8.58984Z" fill="currentColor" />
     ),
   },
-  "divider-327": {
-    source: "custom",
-    label: "Divider 327",
-    category: "System",
-    width: 327,
-    height: 1,
-    viewBox: "0 0 327 1",
-    usage: ["ProductAccordion", "ProductAccordionAnimated"],
-    notes: "Deduplicated accordion separator line.",
-    render: () => <path d="M0.510938 0.5H326.489" stroke="currentColor" strokeLinecap="square" strokeWidth="0.25" />,
-  },
   "payment-create-qr": {
     source: "custom",
     label: "Create QR code",
@@ -489,16 +479,39 @@ const CUSTOM_ICONS = {
       />
     ),
   },
-  "chevron-right": {
+  "chevron-link": {
     source: "custom",
-    label: "Chevron right",
+    label: "Chevron link",
     category: "Actions",
     width: 20,
     height: 20,
-    viewBox: "12 10 8 12",
-    usage: ["NewPaymentActionListItem", "NavigationLink", "ProductAccordion"],
+    viewBox: "12.75 9 7.25 14",
+    usage: ["AccountDetailsInfoScreen", "AccountOptionsScreen", "ContactsNavigationCard", "NavigationLink", "NewPaymentActionListItem", "PrimeIconLabelValue", "ProductAccordion", "RoKidsApp", "TemplateCodePreviews"],
     render: () => (
-      <path d="M13.2901 10.7098C12.9001 11.0998 12.9001 11.7298 13.2901 12.1198L17.1701 15.9998L13.2901 19.8798C12.9001 20.2698 12.9001 20.8998 13.2901 21.2898C13.6801 21.6798 14.3101 21.6798 14.7001 21.2898L19.2901 16.6998C19.6801 16.3098 19.6801 15.6798 19.2901 15.2898L14.7001 10.6998C14.3201 10.3198 13.6801 10.3198 13.2901 10.7098Z" fill="currentColor" />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M13.6759 9C12.7747 9.93494 12.7747 11.4522 13.6759 12.388L16.9391 16L13.6759 19.612C12.7747 20.5478 12.7747 22.0642 13.6759 23L20 16L13.6759 9Z"
+        fill="currentColor"
+      />
+    ),
+  },
+  "chevron-left": {
+    source: "custom",
+    label: "Chevron left",
+    category: "Actions",
+    width: 20,
+    height: 20,
+    viewBox: "12 9 7.25 14",
+    usage: ["Icon inventory"],
+    render: () => (
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M13.6759 9C12.7747 9.93494 12.7747 11.4522 13.6759 12.388L16.9391 16L13.6759 19.612C12.7747 20.5478 12.7747 22.0642 13.6759 23L20 16L13.6759 9Z"
+        fill="currentColor"
+        transform="translate(32 0) scale(-1 1)"
+      />
     ),
   },
   "chevron-down": {
@@ -527,6 +540,24 @@ const CUSTOM_ICONS = {
         clipRule="evenodd"
         d="M23 12.6759C22.0651 11.7747 20.5478 11.7747 19.612 12.6759L16 15.9391L12.388 12.6759C11.4522 11.7747 9.93578 11.7747 9 12.6759L16 19L23 12.6759Z"
         fill="currentColor"
+      />
+    ),
+  },
+  "chevron-up": {
+    source: "custom",
+    label: "Chevron up",
+    category: "Actions",
+    width: 20,
+    height: 20,
+    viewBox: "9 12 14 8",
+    usage: ["Icon inventory"],
+    render: () => (
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M23 12.6759C22.0651 11.7747 20.5478 11.7747 19.612 12.6759L16 15.9391L12.388 12.6759C11.4522 11.7747 9.93578 11.7747 9 12.6759L16 19L23 12.6759Z"
+        fill="currentColor"
+        transform="rotate(180 16 16)"
       />
     ),
   },
@@ -594,23 +625,6 @@ const CUSTOM_ICONS = {
       />
     ),
   },
-  "close-x-small": {
-    source: "custom",
-    label: "Close small",
-    category: "System",
-    width: 20,
-    height: 20,
-    viewBox: "0 0 12 12",
-    usage: ["NewPaymentDiscoverBanner", "HelperCard"],
-    render: () => (
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M10.8859 0L6 4.88588L1.11375 0L0 1.11413L4.88588 6L0 10.8859L1.11375 12L6 7.11413L10.8859 12L12 10.8859L7.11413 6L12 1.11413L10.8859 0Z"
-        fill="currentColor"
-      />
-    ),
-  },
   "close-x": {
     source: "custom",
     label: "Close",
@@ -618,7 +632,7 @@ const CUSTOM_ICONS = {
     width: 20,
     height: 20,
     viewBox: "12 10 12 12",
-    usage: ["BottomSheet", "DemoFeatureSidePanel", "RoKidsApp", "TemplateCodePreviews"],
+    usage: ["BottomSheet", "DemoFeatureSidePanel", "HelperCard", "NewPaymentDiscoverBanner", "RoKidsApp", "TemplateCodePreviews"],
     notes: "Custom close icon replacing the old lucide X wrapper.",
     render: () => (
       <path
@@ -658,23 +672,6 @@ const CUSTOM_ICONS = {
       />
     ),
   },
-  "floating-share-screen": {
-    source: "custom",
-    label: "Floating share screen",
-    category: "Actions",
-    width: 20,
-    height: 20,
-    viewBox: "0 0 24 24",
-    usage: ["FloatingCoAppingButton"],
-    render: () => (
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M10.7144 5.15602V7.17729L3.02112 7.1773V18.6312H20.5671V15.3971H22.5917V19.305C22.5917 20.7338 21.4778 21.903 20.0698 21.9943L19.8923 22H0.996582V7.85105C0.996582 6.42161 2.11047 5.25296 3.51849 5.16175L3.69597 5.15602H10.7144ZM22.9966 3V13.1064C21.4809 13.1064 20.252 11.8794 20.252 10.3669V7.67722L14.8147 13.1064L12.8739 11.1686L18.3118 5.7395H15.6185C14.1028 5.7395 12.8739 4.51326 12.8739 3L22.9966 3Z"
-        fill="currentColor"
-      />
-    ),
-  },
   "prime-check": {
     source: "custom",
     label: "Prime check",
@@ -709,23 +706,6 @@ const CUSTOM_ICONS = {
       />
     ),
   },
-  "prime-phone": {
-    source: "custom",
-    label: "Prime phone",
-    category: "Prime",
-    width: 20,
-    height: 20,
-    viewBox: "2 2 20 20",
-    usage: ["YourAdvisorTab"],
-    render: () => (
-      <>
-        <path d="M6.8324 12.7775C7.39953 13.8944 8.03152 14.9456 8.71043 15.9262C10.1621 15.3944 11.8276 15.9825 12.4872 17.2831L14.4928 21.24L12.6666 22C10.1614 21.26 7.68931 19.5594 5.73884 17.1575C4.98335 16.2275 4.30445 15.1925 3.73387 14.0675C3.16397 12.9425 2.73966 11.8019 2.45264 10.6781C1.70957 7.77 1.89517 4.965 2.908 2.76188L4.27271 2.19125L4.73566 2L6.7434 5.95875C7.40367 7.25813 6.80756 8.78625 5.42009 9.43812C5.7968 10.5413 6.26665 11.6606 6.8324 12.7775Z" fill="currentColor" />
-        <path d="M19.1851 11.6917C19.1851 11.0017 19.8156 10.4417 20.5925 10.4417C21.3695 10.4417 22 11.0017 22 11.6917C22 12.3817 21.3695 12.9417 20.5925 12.9417C19.8156 12.9417 19.1851 12.3817 19.1851 11.6917Z" fill="currentColor" />
-        <path d="M10.569 12.9416C11.3307 12.9416 11.9489 12.3816 11.9489 11.6916C11.9489 11.0016 11.3307 10.4416 10.569 10.4416C9.80661 10.4416 9.18911 11.0016 9.18911 11.6916C9.18911 12.3816 9.80661 12.9416 10.569 12.9416Z" fill="currentColor" />
-        <path d="M14.0187 11.6916C14.0187 11.0016 14.6369 10.4416 15.3986 10.4416C16.1603 10.4416 16.7785 11.0016 16.7785 11.6916C16.7785 12.3816 16.1603 12.9416 15.3986 12.9416C14.6369 12.9416 14.0187 12.3816 14.0187 11.6916Z" fill="currentColor" />
-      </>
-    ),
-  },
   "prime-email": {
     source: "custom",
     label: "Prime email",
@@ -739,23 +719,6 @@ const CUSTOM_ICONS = {
         <path d="M0.996582 6.3104V5H22.9966V6.3104L11.9966 14.0062L0.996582 6.3104Z" fill="currentColor" />
         <path d="M0.996582 8.17869L11.9966 15.8745L22.9966 8.17939V15.2669C22.9966 17.3284 21.3548 19 19.3301 19H0.996582V8.17869Z" fill="currentColor" />
       </>
-    ),
-  },
-  "prime-chevron-right": {
-    source: "custom",
-    label: "Prime chevron right",
-    category: "Prime",
-    width: 20,
-    height: 20,
-    viewBox: "0 0 7 14",
-    usage: ["PrimeIconLabelValue"],
-    render: () => (
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M0.675889 0C-0.225296 0.934937 -0.225296 2.45219 0.675889 3.388L3.93913 7L0.675889 10.612C-0.225296 11.5478 -0.225296 13.0642 0.675889 14L7 7L0.675889 0Z"
-        fill="currentColor"
-      />
     ),
   },
   "account-details": {
@@ -923,23 +886,6 @@ const CUSTOM_ICONS = {
       />
     ),
   },
-  "chevron-link": {
-    source: "custom",
-    label: "Chevron link",
-    category: "Actions",
-    width: 20,
-    height: 20,
-    viewBox: "12.75 9 7.25 14",
-    usage: ["AccountOptionsScreen", "ContactsNavigationCard"],
-    render: () => (
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M13.6759 9C12.7747 9.93494 12.7747 11.4522 13.6759 12.388L16.9391 16L13.6759 19.612C12.7747 20.5478 12.7747 22.0642 13.6759 23L20 16L13.6759 9Z"
-        fill="currentColor"
-      />
-    ),
-  },
   "add-money": {
     source: "custom",
     label: "Add money",
@@ -1090,23 +1036,6 @@ const CUSTOM_ICONS = {
       />
     ),
   },
-  "chevron-forward-heavy": {
-    source: "custom",
-    label: "Chevron forward heavy",
-    category: "Actions",
-    width: 20,
-    height: 20,
-    viewBox: "5.6 1 12.4 22.1",
-    usage: ["AccountDetailsInfoScreen"],
-    render: () => (
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M7.15479 1.01411C5.60991 2.48329 5.60991 4.86754 7.15479 6.33811L12.7489 12.0141L7.15479 17.6901C5.60991 19.1607 5.60991 21.5435 7.15479 23.0141L17.9961 12.0141L7.15479 1.01411Z"
-        fill="currentColor"
-      />
-    ),
-  },
   "transaction-transfer": {
     source: "custom",
     label: "Transaction transfer",
@@ -1167,7 +1096,7 @@ const CUSTOM_ICONS = {
     width: 20,
     height: 20,
     viewBox: "6 6 20 20",
-    usage: ["ContactsNavigationCard"],
+    usage: ["ContactsNavigationCard", "HeaderActionIcons", "Products/Payments/More headers", "YourAdvisorTab"],
     render: () => (
       <g transform="translate(6, 6)">
         <path
@@ -1279,23 +1208,6 @@ const CUSTOM_ICONS = {
       </g>
     ),
   },
-  "contact-chevron": {
-    source: "custom",
-    label: "Contact chevron",
-    category: "Contacts",
-    width: 20,
-    height: 20,
-    viewBox: "12.75 9 7.25 14",
-    usage: ["ContactsNavigationCard"],
-    render: () => (
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M13.6759 9C12.7747 9.93494 12.7747 11.4522 13.6759 12.388L16.9391 16L13.6759 19.612C12.7747 20.5478 12.7747 22.0642 13.6759 23L20 16L13.6759 9Z"
-        fill="currentColor"
-      />
-    ),
-  },
 } satisfies Record<string, CustomIconDefinition>;
 
 const LUCIDE_ICONS = {
@@ -1388,6 +1300,15 @@ const LUCIDE_ICONS = {
     height: 20,
     component: CreditCard,
     usage: ["QuickActions"],
+  },
+  download: {
+    source: "lucide",
+    label: "Download",
+    category: "Actions",
+    width: 20,
+    height: 20,
+    component: Download,
+    usage: ["DesignSystemPage Icons inventory"],
   },
   send: {
     source: "lucide",
@@ -1590,23 +1511,25 @@ function getInventorySizeLabel(name: IconName, definition: IconDefinition) {
   return `${definition.width}x${definition.height}`;
 }
 
-export const ICON_INVENTORY: IconInventoryItem[] = Object.entries(ICON_REGISTRY).map(([rawName, definition]) => {
-  const name = rawName as IconName;
-  const defaultDimensions = resolveDefaultDimensions(name, definition);
+export const ICON_INVENTORY: IconInventoryItem[] = Object.entries(ICON_REGISTRY)
+  .filter(([rawName]) => !ICON_INVENTORY_EXCLUDED_NAMES.has(rawName))
+  .map(([rawName, definition]) => {
+    const name = rawName as IconName;
+    const defaultDimensions = resolveDefaultDimensions(name, definition);
 
-  return {
-    name,
-    label: definition.label,
-    category: definition.category,
-    source: definition.source,
-    defaultSize: getInventorySizeLabel(name, definition),
-    previewWidth: defaultDimensions.width,
-    previewHeight: defaultDimensions.height,
-    viewBox: definition.source === "custom" ? definition.viewBox : "lucide-react",
-    usage: definition.usage,
-    notes: definition.notes,
-  };
-});
+    return {
+      name,
+      label: definition.label,
+      category: definition.category,
+      source: definition.source,
+      defaultSize: getInventorySizeLabel(name, definition),
+      previewWidth: defaultDimensions.width,
+      previewHeight: defaultDimensions.height,
+      viewBox: definition.source === "custom" ? definition.viewBox : "lucide-react",
+      usage: definition.usage,
+      notes: definition.notes,
+    };
+  });
 
 export const ICON_AUDIT_EXCLUSIONS = [
   {

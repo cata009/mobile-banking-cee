@@ -1,12 +1,182 @@
 # Current Session
 
-Last updated: 2026-06-04
+Last updated: 2026-06-05
 
 ## Current Focus
+
+Closing out the accumulated Investments, Kids, Design System Icons, and supporting registry/documentation work, then publishing the latest version to GitHub and Vercel.
+
+## 2026-06-05 Closeout / Publish
+
+- User requested a commit, GitHub publish, and Vercel production publish for the latest version.
+- Commit scope:
+  - all tracked runtime, registry, documentation, and design-system changes currently in the workspace;
+  - new `src/app/screens/kids/KidsMarketHomeApp.tsx` and `src/data/kidsMarketHomeConcepts.ts`;
+  - `.gitignore` now excludes `.codex-temp/` so temporary PDF extraction images and dev-server logs are not committed as product/runtime source.
+- Banana Loop result:
+  - fixed: temporary `.codex-temp/` artifacts were visible as untracked files; `.gitignore` now excludes them before staging.
+  - already triaged: Vite chunk-size warning remains a known banana, not a blocker.
+  - already triaged: no local `typecheck`, `lint`, or `test` scripts exist; build and repository audits remain the available verification gates.
+  - result: no untriaged blocker remains before commit/push/deploy.
+- Final verification before commit:
+  - `npm run build` passed; known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=70 screens=30 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `npm run audit:figma-bridge` passed: `plugins=2 appExporterStatic=7`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Publish plan:
+  - commit on `main`;
+  - push `main` to `origin`;
+  - deploy production with Vercel CLI via `npx vercel --prod --yes` because `vercel` is not installed globally but `npx vercel --version` resolves `54.9.1`.
+- Constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+Latest Design System Icons inventory polish on 2026-06-04:
+
+- Latest Icons card alignment polish on 2026-06-04:
+  - `src/app/screens/design-system/DesignSystemPage.tsx` now vertically centers the icon preview, title, and hover actions in both AppIcon and PFM icon inventory cards.
+  - The icon-card copy/download controls are smaller: 20x20 action targets with 15x15 glyphs, while staying borderless, hover/focus-only, and aligned on the title row.
+  - Browser verification on `http://127.0.0.1:3005/#icons` confirmed AppIcon and PFM cards have centered title rows (`titleCenterDelta=0`), 32x32 preview slots, borderless 20x20 copy/download controls, initial action opacity `0`, and an empty console error log.
+
+- Latest Icons navigation/layout polish on 2026-06-04:
+  - `src/app/screens/design-system/DesignSystemPage.tsx` now caps both AppIcon and PFM icon card grids at 4 columns on desktop via `xl:grid-cols-4`, so Icons no longer spreads to 5 cards per row.
+  - The Icons sidebar section list now contains both `Icon registry` and `PFM icons`; the PFM icon block has a real `id="pfm-icons"` anchor for direct navigation and scroll-state tracking.
+  - Shared `Section` blocks now use `pt-0 pb-8` instead of `py-8`, removing the extra top gap above each page title so the active page title aligns with the top of the lateral menu/card column.
+  - Browser verification on `http://127.0.0.1:3005/#icons` confirmed the icon grid's first row renders 4 cards, the sidebar text includes both `Icon registry` and `PFM icons`, the PFM anchor exists, and the console error log is empty.
+  - Verification: `npm run build`, `npm run audit:templates`, and `npm run audit:platform` passed; the known Vite chunk-size warning remains.
+
+- Latest Icons card action polish on 2026-06-04:
+  - `src/app/screens/design-system/DesignSystemPage.tsx` now renders both AppIcon and PFM icon inventory cards with a 32x32 preview slot instead of the previous 44x44 preview block.
+  - `Copy SVG` and download actions moved from always-visible bordered buttons under the title to borderless 24x24 icon-only controls on the title row, aligned at the card's right edge.
+  - Icon actions are hidden by default and appear only on card hover or focus-within; the download menu remains visible while open, and copy feedback stays as a small `Copied` label beside the icon.
+  - Browser verification on `http://127.0.0.1:3005/#icons` confirmed AppIcon and PFM cards use 32x32 preview slots, borderless 24x24 copy/download controls, initial action opacity `0`, `group-hover` / `group-focus-within` wiring, and no console errors.
+  - Verification: `npm run build`, `npm run audit:templates`, and `npm run audit:platform` passed; the known Vite chunk-size warning remains.
+
+- Latest Design System stat-card compaction on 2026-06-04:
+  - `src/app/screens/design-system/DesignSystemPage.tsx` now uses a shared compact `InventoryStatGrid` for the top summary/stat cards in Components overview, Templates, Icons, Colors, and Typography.
+  - The stat cards now match the Icons density pattern: 8px radius, 12px uppercase label, 26px bold value, 4px value margin, 16px padding, 3-unit grid gap, and fluid `minmax(160px, 1fr)` columns instead of the older wide 2-column/34px-value layout.
+  - Browser verification on `http://127.0.0.1:3005/` confirmed `#overview`, `#templates`, `#colors`, `#typography`, and `#icons` all render compact stat grids with first-card measurements around `174x82px`, value font `26px`, and no console errors.
+  - Verification: `npm run build`, `npm run audit:templates`, and `npm run audit:platform` passed; the known Vite chunk-size warning remains.
+
+- Latest PFM icon inventory exposure on 2026-06-04:
+  - `src/app/screens/design-system/DesignSystemPage.tsx` now imports the runtime `PFM_CATEGORIES` map and `PfmCategoryIcon` component and shows the PFM category icon set inside the Icons tab.
+  - The existing compact `AppIcon` grid remains first; a separator/title block then introduces `PFM icons` with the source `screenshots/PFM-icons.svg` and the rendered PFM category cards.
+  - PFM cards match the compact icon-card pattern with preview, title, `Copy SVG`, and a PNG/SVG download menu. SVG exports inline the resolved PFM token color so copied/downloaded glyphs remain usable outside the app; categories that still use fallback initials export as valid fallback SVGs.
+  - The Icons search query now also filters PFM category names, color variables, initials, and source metadata, while the top counters report App icons, PFM icons, total visible results, custom SVGs, and lucide wrappers.
+  - Browser verification on `http://127.0.0.1:3005/#icons` confirmed the `PFM icons` section renders with 23 PFM category cards, source copy is visible, the search field is present, and the console error log is empty. Browser-controlled typing into the search field was blocked by the Browser plugin virtual-clipboard limitation, so search was verified by code path/build rather than a full automated typing smoke.
+  - Verification: `npm run build`, `npm run audit:templates`, and `npm run audit:platform` passed; the known Vite chunk-size warning remains.
+
+- Latest Design System Inventory structure polish on 2026-06-04:
+  - `src/app/screens/design-system/DesignSystemPage.tsx` now exposes `Typography` as a separate top-level inventory tab after `Colors` instead of embedding typography inside the Colors tab.
+  - Components, Templates, Icons, Colors, and Typography each expose a local search field for their own inventory content; Components search filters the implementation-registry badge lists, Templates filters the template cards, Colors filters palette cards and app color map rows, and Typography filters typography token cards.
+  - The sidebar no longer shows the explanatory `Inventory / Browse the Design System...` card.
+  - Sidebar selected states were toned down from the strong teal treatment to a quieter neutral selected background and dark count pill.
+  - The expanded sidebar submenu no longer has the separator line above its section links.
+  - Design System `Section` blocks no longer render a top border, so section titles sit higher without the extra separator line.
+  - `src/app/components/demo/DemoNavigationSync.tsx` now treats `#typography` as a valid Design System hash.
+  - Browser verification on `http://127.0.0.1:3005/#typography` confirmed `Typography` is a separate tab, the search field is present, sidebar intro copy is absent, section class is `scroll-mt-28 py-8` with no top border class, and console error log is empty.
+  - Verification: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and targeted `git diff --check` passed; `git diff --check` emitted only normal Windows LF/CRLF warnings.
+
+- `src/app/screens/design-system/DesignSystemPage.tsx`
+  - Icons inventory now has a search field above the icon grid.
+  - Icon cards are no longer grouped by category; all registered icons render in one continuous searchable grid.
+  - Icon cards were compressed from large two-column cards to a compact fluid grid; browser measurement on `http://127.0.0.1:3005/#icons` confirmed 4 columns at the active viewport, with first-card size about `220x84px`.
+  - Removed `Used by`, per-card `custom` / `lucide` badge, technical icon-name band, Size/ViewBox metadata, notes, and the entire final `Icon audit boundaries` section from the visible Icons tab.
+  - Remaining card content is icon preview, title, `Copy SVG`, and a compact download menu with `PNG` and `SVG` options.
+  - `Copy SVG` serializes the rendered `AppIcon` SVG and changes immediately to `Copied`; the download menu exports the same rendered icon as SVG or PNG.
+- `src/app/components/icons/AppIcon.tsx`
+  - added a generic reusable `download` icon entry for the Icons inventory export button, instead of reusing an Investments-specific download-report glyph.
+  - removed `divider-327` from the icon registry because it is a separator line, not an app icon; `ProductAccordion` and `ProductAccordionAnimated` now draw that separator as a CSS line.
+  - keeps `radio-selected` and `radio-unselected` available for the existing radio control internals, but excludes them from the visible reusable Icons inventory.
+  - removed the duplicate `floating-share-screen` registry entry; `FloatingCoAppingButton` now reuses the canonical `panel-share-screen` icon.
+  - removed duplicate right-chevron registry entries (`chevron-right`, `prime-chevron-right`, `chevron-forward-heavy`, and `contact-chevron`) and remapped their consumers to the single canonical `chevron-link` icon.
+  - added missing canonical `chevron-left` and `chevron-up` entries.
+  - removed duplicate `close-x-small`; `HelperCard` and `NewPaymentDiscoverBanner` now use canonical `close-x`.
+  - removed duplicate `prime-phone`; `YourAdvisorTab` now uses canonical `contact-phone`.
+- `src/app/components/demo/DemoNavigationSync.tsx`
+  - removed the now-deleted `icon-audit` hash from the Design System hash allowlist.
+- Browser verification on `http://127.0.0.1:3005/#icons`:
+  - search field was present;
+  - visible icon cards rendered in 4 columns;
+  - `Used by`, `Icon audit boundaries`, Size/ViewBox metadata, and per-card `custom` badge text were absent;
+  - searching `phone` filtered the visible grid to `Prime phone` and `Contact phone`;
+  - first-card `Copy SVG` changed to `Copied`, the download menu showed `PNG` and `SVG`, and selecting both options closed the menu without console errors;
+  - `Divider 327`, `Radio selected`, `Radio unselected`, and `Floating share screen` were absent from the Icons grid, while `Panel share screen` remained as the single share-screen entry;
+  - `Chevron right`, `Prime chevron right`, `Chevron forward heavy`, `Contact chevron`, `Close small`, and `Prime phone` were absent from the Icons grid; `Chevron link`, `Chevron left`, `Chevron up`, `Close`, and `Contact phone` remained present; visible card count was `95`;
+  - browser console error log was empty.
+
+Previous focus:
+
+Refactoring the Slovakia Mobile PI Kids concept to follow the supplied Bulbank Teen/Kids document as closely as possible while staying inside the existing UniCredit demo shell and design-system primitives.
+
+Latest Slovakia Kids document-inspired implementation on 2026-06-04:
+
+- Source document inspected:
+  - located and parsed `C:\Users\mihai\Desktop\UniCredit Bulbank teen(kids) mode 5.2.pdf`;
+  - extracted PDF text and page visuals into `.codex-temp/bulbank_pdf`;
+  - used the Kids slide direction as the runtime target: no Payments tab for kids, bottom nav `Home / Education / Tasks / More`, Products-style home with Accounts, Shortcuts, Cards, Offer, plus Education and Tasks pages.
+- `src/data/kidsMarketHomeConcepts.ts`
+  - updates Slovakia to `style: "sk-bulbank-kids"` with Maria, EUR mock data, `Products` home, two orange shortcuts (`Your tasks`, `Request money`), Education/Tasks metrics, Bulbank-like offer copy, and four-item bottom navigation.
+- `src/app/screens/kids/KidsMarketHomeApp.tsx`
+  - adds the Slovakia Bulbank rendering branch with document-inspired Products home, Accounts card, Shortcuts, Cards row, orange savings offer, Education preview, Tasks preview, and dedicated Education/Tasks/More pages.
+  - Slovakia pages now change the top title by selected tab (`Products`, `Education`, `Tasks`, `More`) and only show the Products/Accounts hero on Home, matching the document's page separation more closely.
+  - reuses existing shell, `AppIcon`, `Card`, `SectionHeadingDivider`, UniCredit tokens, and the existing phone/bottom-nav pattern; new Kids-local components stay contained inside `KidsMarketHomeApp.tsx`.
+- Registry/metadata corrections:
+  - `projectPackRegistry.ts` now reports CZ/SK/HU/BA/BA_BL/SI Kids concept countries as `mock-driven` runtime entries instead of planned placeholders.
+  - PI project-pack demo entries include Investments for every supported PI country/application variant, matching the active runtime.
+  - `screenRegistry.ts`, `flowRegistry.ts`, `componentRegistry.ts`, and `aiCatalog.ts` now call out the Slovakia Bulbank document-inspired concept.
+- Browser verification on `http://127.0.0.1:3011/`:
+  - selected `Mobile PI Kids` + `Slovakia`; project pack resolved to `kids-pi-sk`.
+  - Home phone text contained `SK Kids mode`, `Products`, `Accounts`, `Kids account 1`, `Shortcuts`, `Your tasks`, `Request money`, `Cards`, `Get a savings`, `Education`, `Tasks`, and bottom nav `Home / Education / Tasks / More`.
+  - Education tab rendered top title `Education`, segmented `In progress / Explore`, `4/12`, `Next lesson`, and four lesson cards.
+  - Tasks tab rendered top title `Tasks`, segmented `To do / Completed`, and three task rows with rewards and parent rejection status.
+  - More tab rendered top title `More` and the grid items `Analytics`, `My profile`, `Settings`, `Contacts and info`, and `My family`.
+  - Browser console error log was empty.
+- Verification:
+  - `npm run build` passed; known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=70 screens=30 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - raw color scan on `KidsMarketHomeApp.tsx` and `kidsMarketHomeConcepts.ts` found no raw hex/rgb color usage.
+
+Previous focus:
 
 Implementing the new Investments Portfolio runtime screen for Mobile PI Retail customers, reachable from the Home Investments product card for all supported PI countries, including `BA` and `BA_BL`.
 
 Latest Investments Portfolio implementation:
+
+- Demo shell phone-frame sizing polish on 2026-06-04:
+  - `src/app/components/MobileFrame.tsx` now uses the actual 16px top + 16px bottom preview padding in its scale calculation instead of reserving 112px vertically, and allows the phone preview to scale up to `1.18x` on taller desktop screens.
+  - Browser measurement on `http://127.0.0.1:3005/` at a `1032x911` viewport confirmed the full phone frame grew from about `345.5x724px` at `0.866x` to about `383.7x804px` at `0.962x`, with the header-to-phone top gap and phone-to-viewport bottom gap both measuring `16px`.
+  - Browser console error log was empty after reload; verification passed with `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and targeted `git diff --check`.
+
+- Investments tab click/drag correction on 2026-06-04:
+  - `src/app/components/messages/MessagesMailboxTabs.tsx` no longer sets pointer capture immediately on pointer down for scrollable tab rails.
+  - Scroll drag now starts only after a clear horizontal movement threshold (`10px`), so direct taps/clicks on `PRODUCT TYPE`, `CURRENCY`, `ASSET CLASS`, and `ACCOUNT LIST` continue to call the tab button `onClick` instead of being swallowed by the drag guard.
+  - Programmatic browser click smoke on `http://127.0.0.1:3005/` selected `PRODUCT TYPE`, hid `ALL PRODUCTS`, and showed the Product Type distribution with no console errors before the pointer-threshold patch; after the patch, local code preserves the same click path while reducing accidental drag suppression.
+
+- Runtime polish on active `3005` dev server on 2026-06-04:
+  - `InvestmentPortfolioChart` now uses `recharts` (`ResponsiveContainer`, `AreaChart`, axes, grid, tooltip, and reusable dot rendering) instead of a hand-drawn SVG chart implementation.
+  - `InvestmentPortfolioChart` no longer shows a selected tooltip by default; the value callout now behaves like a press/hold interaction and clears on mouse/touch release, chart leave, or outside pointer down instead of staying selected after a normal click.
+  - The Recharts tooltip wrapper now has animation and CSS transition disabled, so the value callout appears directly at the selected coordinate instead of sliding in from the left side of the chart.
+  - The chart callout now uses the selected Recharts coordinate and chooses a below-point or above-point placement based on available chart space.
+  - The Recharts focus/accessibility layer was removed for this mobile runtime chart to avoid the unwanted turquoise focus rectangle around the graph; chart dots are not left focused or selected after release.
+  - Chart axis labels now use range-aware compact formatting, so close portfolio values render as distinct labels such as `9,17k`, `8,92k`, `8,68k`, and `8,43k` instead of collapsing into repeated `9k`.
+  - X-axis padding now compacts the six date/year labels inward so the first/last date labels sit farther from the lateral axis/value labels.
+  - `InvestmentPeriodChips` keeps the production-style centered period selector row with an `8px` CSS gap between chips and now exposes `1 M`, `3 M`, `6 M`, `1 Y`, `3 Y`, and `ALL`.
+  - Performance chart data now has six points for every period; x-axis labels render as two-line date/year labels such as `04 Jun` / `2026`.
+  - `InvestmentsPortfolioScreen` now applies the requested value summary typography: `Total value` and `Performance` labels use 14px bold K1, total integer uses 20px bold / 24px line-height, decimals/currency use 14px regular, and positive Performance value uses `#3D7D43` at 14px bold.
+  - `InvestmentActionBar` now keeps a `24px` CSS top space between the period selector row and the action buttons.
+  - `SectionHeadingDivider` now supports a `countAlign="end"` variation, used by Investments so `ALL PRODUCTS` places the counter on the end of the divider line instead of outside the line or directly after the title.
+  - `SectionHeadingDivider` `countAlign="end"` now renders `ALL PRODUCTS` and the counter on the same row with the divider line underneath, matching the supplied title/counter screenshot.
+  - `MessagesMailboxTabs` now keeps the active scrollable tab in view and supports direct horizontal pointer dragging for the Investments tab rail while preserving normal tab click selection.
+  - `InvestmentProductCard` now matches the supplied 95px `List investments` JSON more closely: white row, 16/24/16/16 padding, no visible separator border between securities, 14px bold title, 14px value text, 20px bold performance integer with 14px decimal/currency, optional recurrent icon row, and right-aligned percentage.
+  - `InvestmentsFundBanner` now follows the supplied fund banner JSON: 343x157-ish layout, 16px side margin/padding, `#F5F5F5` background, 8px radius, 24px bold title, 18px description, and 14px uppercase CTA with arrow.
+  - Browser smoke on `http://127.0.0.1:3005/` confirmed: no tooltip appears initially; the Recharts tooltip wrapper computes `transition: none`; normal click and drag over chart clear the tooltip after release; no dot remains selected after release; `.recharts-surface` has no `tabindex`; Recharts renders six point hit areas; period chips show `1 M`, `3 M`, `6 M`, `1 Y`, `3 Y`, and `ALL`; chart labels render six two-line date/year labels with inward X-axis padding; positive Performance value computes to `rgb(61, 125, 67)`; period chips report `gap: 8px`; the action bar reports `padding-top: 24px`; the tab rail can be dragged horizontally and still supports direct clicks (`PRODUCT TYPE` and `ACCOUNT LIST` select correctly); the `ALL PRODUCTS` counter is on the same row as the title with the divider below; security cards have no separator border; the fund banner computes to `rgb(245, 245, 245)` background with 8px radius. Browser console error log was empty.
+  - Verification: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and targeted `git diff --check` passed.
 
 - Local portfolio-currency correction on 2026-06-04:
   - `src/app/screens/investments/InvestmentsPortfolioScreen.tsx` now formats the portfolio header `Total value`, header `Performance`, and performance chart tooltip with `getCountryConfig(country).currency`.

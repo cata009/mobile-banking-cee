@@ -39,7 +39,7 @@ export default function NewPaymentActionListItem({
         </span>
       </span>
       <span className="flex h-[32px] w-[32px] shrink-0 items-center justify-center">
-        <AppIcon name="chevron-right" color="var(--uc-icon)" />
+        <AppIcon name="chevron-link" color="var(--uc-icon)" />
       </span>
     </button>
   );

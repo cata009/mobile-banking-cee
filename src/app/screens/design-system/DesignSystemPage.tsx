@@ -5,7 +5,8 @@ import { isCoAppingAvailable } from "@/app/utils/coAppingAvailability";
 import { getProductsForCountry } from "@/app/config/productConfig";
 import { MORE_CARDS_CONFIG, type MoreCardType } from "@/app/config/moreCardsConfig";
 import { getDocumentsCountForCountry } from "@/app/config/documentsConfig";
-import { AppIcon, ICON_AUDIT_EXCLUSIONS, ICON_INVENTORY, type IconCategory, type IconInventoryItem } from "@/app/components/icons";
+import { AppIcon, ICON_INVENTORY, type IconInventoryItem } from "@/app/components/icons";
+import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
 import PageHeader from "@/app/components/PageHeader";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import ThemeModeSegment from "@/app/components/ThemeModeSegment";
@@ -91,6 +92,7 @@ import { Toggle } from "@/app/components/ui/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@/app/components/ui/toggle-group";
 import avatarPhotoSample from "@/assets/design-system/avatar-photo-sample.svg";
 import { getAccountIdentity } from "@/data/accountDetails";
+import { PFM_CATEGORIES, PFM_ICON_SOURCE, type PfmCategoryDefinition } from "@/data/pfmCategories";
 import { TEMPLATE_REGISTRY, type TemplateRegistryItem } from "@/app/registry/templateRegistry";
 import { PRODUCT_BANNER_TONE_OPTIONS } from "@/app/config/productBannerVariants";
 import { TYPOGRAPHY_TOKENS, type TypographyToken } from "@/app/registry/typographyRegistry";
@@ -171,22 +173,24 @@ const templateSectionLinks = [["templates", "Templates"]];
 
 const iconSectionLinks = [
   ["icons", "Icon registry"],
-  ["icon-audit", "Audit boundaries"],
+  ["pfm-icons", "PFM icons"],
 ];
 
 const colorSectionLinks = [
-  ["typography", "Typography"],
   ["colors", "Palettes"],
   ["color-audit", "App color map"],
 ];
 
-type InventoryTab = "components" | "templates" | "icons" | "colors";
+const typographySectionLinks = [["typography", "Typography"]];
+
+type InventoryTab = "components" | "templates" | "icons" | "colors" | "typography";
 
 const inventorySectionLinks: Record<InventoryTab, readonly (readonly [string, string])[]> = {
   components: componentSectionLinks,
   templates: templateSectionLinks,
   icons: iconSectionLinks,
   colors: colorSectionLinks,
+  typography: typographySectionLinks,
 };
 
 const inventoryTabLabels: Record<InventoryTab, string> = {
@@ -194,20 +198,23 @@ const inventoryTabLabels: Record<InventoryTab, string> = {
   templates: "Templates",
   icons: "Icons",
   colors: "Colors",
+  typography: "Typography",
 };
 
 const inventoryTabDescriptions: Record<InventoryTab, string> = {
   components: "Reusable runtime building blocks",
   templates: "Code-backed template references",
   icons: "Centralized symbol inventory",
-  colors: "Typography and color tokens",
+  colors: "Color tokens and app usage",
+  typography: "Type tokens and text styles",
 };
 
 const inventoryTabCounts: Record<InventoryTab, number> = {
   components: activeComponentFiles.length,
   templates: TEMPLATE_REGISTRY.length,
   icons: ICON_INVENTORY.length,
-  colors: TYPOGRAPHY_TOKENS.length + DESIGN_SYSTEM_COLORS.length,
+  colors: DESIGN_SYSTEM_COLORS.length,
+  typography: TYPOGRAPHY_TOKENS.length,
 };
 
 function getInventoryTabForHash(hash: string): InventoryTab {
@@ -216,6 +223,7 @@ function getInventoryTabForHash(hash: string): InventoryTab {
   if (templateSectionLinks.some(([id]) => id === sectionId)) return "templates";
   if (iconSectionLinks.some(([id]) => id === sectionId)) return "icons";
   if (colorSectionLinks.some(([id]) => id === sectionId)) return "colors";
+  if (typographySectionLinks.some(([id]) => id === sectionId)) return "typography";
 
   return "components";
 }
@@ -223,18 +231,6 @@ function getInventoryTabForHash(hash: string): InventoryTab {
 function getDefaultSectionForInventoryTab(tab: InventoryTab) {
   return inventorySectionLinks[tab][0]?.[0] ?? "overview";
 }
-
-const iconCategoryOrder: IconCategory[] = [
-  "Header",
-  "Navigation",
-  "Payments",
-  "Accounts",
-  "Contacts",
-  "Prime",
-  "Actions",
-  "System",
-  "External Lucide",
-];
 
 type SelectorOption = {
   id: string;
@@ -682,7 +678,7 @@ function Section({ id, title, description, children }: {
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="scroll-mt-28 border-t border-[var(--uc-border)] py-10">
+    <section id={id} className="scroll-mt-28 pb-8 pt-0">
       <div className="mb-6 flex flex-col gap-2">
         <h2 className="font-['UniCredit:Bold',sans-serif] text-[28px] text-[var(--uc-text)]">{title}</h2>
         <p className="max-w-[860px] font-['UniCredit:Regular',sans-serif] text-[15px] leading-6 text-[var(--uc-text-muted)]">
@@ -691,6 +687,54 @@ function Section({ id, title, description, children }: {
       </div>
       {children}
     </section>
+  );
+}
+
+function InventorySearchField({
+  value,
+  onChange,
+  placeholder,
+  label,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  label: string;
+}) {
+  return (
+    <label className="mb-4 flex h-[44px] items-center gap-2 rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-3">
+      <AppIcon name="search" color="var(--uc-text-muted)" />
+      <span className="sr-only">{label}</span>
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="h-full min-w-0 flex-1 bg-transparent font-['UniCredit:Regular',sans-serif] text-[14px] text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)]"
+      />
+      {value ? (
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          className="grid size-[28px] place-items-center text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]"
+          aria-label={`Clear ${label.toLowerCase()}`}
+        >
+          <AppIcon name="clear-results" color="currentColor" />
+        </button>
+      ) : null}
+    </label>
+  );
+}
+
+function InventoryStatGrid({ items }: { items: Array<[string, React.ReactNode]> }) {
+  return (
+    <div className="mb-5 grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(160px,1fr))]">
+      {items.map(([label, value]) => (
+        <div key={label} className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-4">
+          <p className="text-[12px] uppercase text-[var(--uc-text-muted)]">{label}</p>
+          <p className="mt-1 font-['UniCredit:Bold',sans-serif] text-[26px] leading-none text-[var(--uc-text)]">{value}</p>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -2293,16 +2337,16 @@ function InventoryTabs({ activeTab, activeSection, sectionLinks, onChange, place
       role={isSidebar ? "navigation" : "tablist"}
       aria-label="Design system inventory tabs"
     >
-      {(["components", "templates", "icons", "colors"] as const).map((tab) => {
+      {(["components", "templates", "icons", "colors", "typography"] as const).map((tab) => {
         const isActive = activeTab === tab;
         return (
           <div
             key={tab}
-            className={`overflow-hidden rounded-[8px] border transition-colors ${
+            className={`overflow-hidden rounded-[8px] transition-colors ${
               isSidebar
                 ? isActive
-                  ? "border-[var(--uc-action)] bg-[var(--uc-action-soft)]"
-                  : "border-[var(--uc-border)] bg-[var(--uc-surface)]"
+                  ? "bg-[var(--uc-surface-muted)]"
+                  : "bg-transparent"
                 : ""
             }`}
           >
@@ -2313,7 +2357,7 @@ function InventoryTabs({ activeTab, activeSection, sectionLinks, onChange, place
               onClick={() => onChange(tab)}
               className={
                 isSidebar
-                  ? `flex w-full items-start justify-between gap-3 px-4 py-3 text-left transition-colors ${
+                  ? `flex w-full items-center justify-between gap-3 rounded-[8px] px-3 py-2.5 text-left transition-colors ${
                       isActive ? "text-[var(--uc-text)]" : "text-[var(--uc-text-muted)] hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-text)]"
                     }`
                   : `rounded-[6px] px-3 py-2 font-['UniCredit:Bold',sans-serif] text-[14px] capitalize transition-colors ${
@@ -2325,18 +2369,13 @@ function InventoryTabs({ activeTab, activeSection, sectionLinks, onChange, place
                 <span className={`block ${isSidebar ? "uc-type-n4-strong" : "font-['UniCredit:Bold',sans-serif] text-[14px]"}`}>
                   {inventoryTabLabels[tab]}
                 </span>
-                {isSidebar ? (
-                  <span className="uc-type-n5 mt-1 block text-[var(--uc-text-muted)]">
-                    {inventoryTabDescriptions[tab]}
-                  </span>
-                ) : null}
               </span>
               {isSidebar ? (
                 <span
                   className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold leading-none ${
                     isActive
-                      ? "bg-[var(--uc-action)] text-[var(--uc-static-white)]"
-                      : "bg-[var(--uc-app-bg)] text-[var(--uc-text-subtle)]"
+                      ? "bg-[var(--uc-text)] text-[var(--uc-surface)]"
+                      : "bg-[var(--uc-surface-muted)] text-[var(--uc-text-subtle)]"
                   }`}
                 >
                   {inventoryTabCounts[tab]}
@@ -2345,7 +2384,7 @@ function InventoryTabs({ activeTab, activeSection, sectionLinks, onChange, place
             </button>
 
             {isSidebar && isActive ? (
-              <div className="border-t border-[color-mix(in_srgb,var(--uc-border)_75%,transparent)] px-3 py-2">
+              <div className="px-2 pb-2">
                 <div className="grid gap-1">
                   {sectionLinks.map(([id, label]) => {
                     const isSectionActive = activeSection === id;
@@ -2527,8 +2566,28 @@ function ColorAuditRow({ item }: { item: (typeof APP_COLOR_AUDIT)[number] }) {
 function ColorInventory() {
   const [selectedPalette, setSelectedPalette] = useState<ColorPaletteId>(COLOR_PALETTES[0].id);
   const [copiedValue, setCopiedValue] = useState<string | null>(null);
+  const [colorSearchQuery, setColorSearchQuery] = useState("");
   const selectedPaletteMeta = COLOR_PALETTES.find((palette) => palette.id === selectedPalette) ?? COLOR_PALETTES[0];
-  const selectedColors = DESIGN_SYSTEM_COLORS.filter((color) => color.paletteId === selectedPalette);
+  const normalizedColorQuery = colorSearchQuery.trim().toLowerCase();
+  const matchesColorQuery = (values: string[]) =>
+    normalizedColorQuery.length === 0 || values.join(" ").toLowerCase().includes(normalizedColorQuery);
+  const selectedColors = DESIGN_SYSTEM_COLORS.filter((color) =>
+    color.paletteId === selectedPalette &&
+    matchesColorQuery([
+      color.id,
+      color.name,
+      color.lightHex,
+      color.darkHex,
+      color.paletteId,
+      color.cssVariable,
+      color.usage,
+      ...color.sourceTokens,
+      color.darkNote ?? "",
+    ])
+  );
+  const visibleAuditRows = APP_COLOR_AUDIT.filter((item) =>
+    matchesColorQuery([item.sourceColor, item.targetToken, item.usage, item.status, item.note ?? ""])
+  );
   const mappedCount = APP_COLOR_AUDIT.filter((item) => item.status === "mapped").length;
 
   const handleCopy = (value: string) => {
@@ -2540,48 +2599,25 @@ function ColorInventory() {
   return (
     <>
       <Section
-        id="typography"
-        title="Typography"
-        description="Canonical typography tokens derived from the supplied Figma taxonomy. Active PI surfaces should call these named tokens instead of hardcoding font sizes, so a future token change propagates globally."
-      >
-        <div className="mb-6 grid gap-4 md:grid-cols-2">
-          <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
-            <p className="uc-type-n5-strong uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Named tokens</p>
-            <p className="uc-type-n1 mt-2 text-[var(--uc-text)]">{TYPOGRAPHY_TOKENS.length}</p>
-          </div>
-          <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
-            <p className="uc-type-n5-strong uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Purpose</p>
-            <p className="uc-type-n4 mt-2 text-[var(--uc-text)]">
-              Headers, cards, body, microcopy, numeric labels
-            </p>
-          </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          {TYPOGRAPHY_TOKENS.map((token) => (
-            <TypographyTokenCard key={token.id} token={token} />
-          ))}
-        </div>
-      </Section>
-
-      <Section
         id="colors"
         title="Color palettes"
         description="Colors extracted from screenshots/Colors.svg, normalized into the canonical light-mode registry and proposed dark-mode mapping. The list is filtered by palette to keep the page compact and easy to scan."
       >
-        <div className="mb-6 grid gap-4 md:grid-cols-2">
-          {[
+        <InventoryStatGrid
+          items={[
             ["Source groups", COLOR_SOURCE_AUDIT.extractedColorGroups],
             ["Solid groups", COLOR_SOURCE_AUDIT.solidColorGroups],
             ["Registry colors", DESIGN_SYSTEM_COLORS.length],
             ["Mapped app colors", mappedCount],
-          ].map(([label, value]) => (
-            <div key={label} className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
-              <p className="text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">{label}</p>
-              <p className="mt-2 font-['UniCredit:Bold',sans-serif] text-[34px]">{value}</p>
-            </div>
-          ))}
-        </div>
+          ]}
+        />
+
+        <InventorySearchField
+          value={colorSearchQuery}
+          onChange={setColorSearchQuery}
+          placeholder="Search colors"
+          label="Search colors"
+        />
 
         <div className="mb-6 rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-4">
           <div className="mb-4 flex flex-wrap gap-2" role="tablist" aria-label="Color palettes">
@@ -2618,9 +2654,15 @@ function ColorInventory() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          {selectedColors.map((color) => (
-            <ColorCard key={color.id} color={color} copiedValue={copiedValue} onCopy={handleCopy} />
-          ))}
+          {selectedColors.length > 0 ? (
+            selectedColors.map((color) => (
+              <ColorCard key={color.id} color={color} copiedValue={copiedValue} onCopy={handleCopy} />
+            ))
+          ) : (
+            <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-6 text-[14px] text-[var(--uc-text-muted)] sm:col-span-2">
+              No colors match this search.
+            </div>
+          )}
         </div>
       </Section>
 
@@ -2630,19 +2672,77 @@ function ColorInventory() {
         description="App color usage mapped back to design-system tokens. Remaining exceptions are treated as decorative or brand-like assets, not reusable UI colors."
       >
         <div className="grid gap-3">
-          {APP_COLOR_AUDIT.map((item) => (
-            <ColorAuditRow key={`${item.sourceColor}-${item.targetToken}`} item={item} />
-          ))}
+          {visibleAuditRows.length > 0 ? (
+            visibleAuditRows.map((item) => (
+              <ColorAuditRow key={`${item.sourceColor}-${item.targetToken}`} item={item} />
+            ))
+          ) : (
+            <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-6 text-[14px] text-[var(--uc-text-muted)]">
+              No app color rows match this search.
+            </div>
+          )}
         </div>
       </Section>
     </>
   );
 }
 
+function TypographyInventory() {
+  const [typographySearchQuery, setTypographySearchQuery] = useState("");
+  const normalizedTypographyQuery = typographySearchQuery.trim().toLowerCase();
+  const visibleTypographyTokens = TYPOGRAPHY_TOKENS.filter((token) => {
+    if (!normalizedTypographyQuery) return true;
+    return [
+      token.id,
+      token.label,
+      token.className,
+      token.family,
+      token.weight,
+      String(token.fontSize),
+      token.usage,
+      token.sample,
+    ].join(" ").toLowerCase().includes(normalizedTypographyQuery);
+  });
+
+  return (
+    <Section
+      id="typography"
+      title="Typography"
+      description="Canonical typography tokens derived from the supplied Figma taxonomy. Active PI surfaces should call these named tokens instead of hardcoding font sizes, so a future token change propagates globally."
+    >
+      <InventoryStatGrid
+        items={[
+          ["Named tokens", TYPOGRAPHY_TOKENS.length],
+          ["Visible", visibleTypographyTokens.length],
+        ]}
+      />
+
+      <InventorySearchField
+        value={typographySearchQuery}
+        onChange={setTypographySearchQuery}
+        placeholder="Search typography"
+        label="Search typography"
+      />
+
+      {visibleTypographyTokens.length > 0 ? (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {visibleTypographyTokens.map((token) => (
+            <TypographyTokenCard key={token.id} token={token} />
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-6 text-[14px] text-[var(--uc-text-muted)]">
+          No typography tokens match this search.
+        </div>
+      )}
+    </Section>
+  );
+}
+
 function getIconPreviewSize(icon: IconInventoryItem) {
   const width = icon.previewWidth > 0 ? icon.previewWidth : 20;
   const height = icon.previewHeight > 0 ? icon.previewHeight : 20;
-  const maxSide = 40;
+  const maxSide = 32;
 
   if (width >= height) {
     const displayWidth = Math.min(width, maxSide);
@@ -2661,122 +2761,417 @@ function getIconPreviewSize(icon: IconInventoryItem) {
 
 function IconInventoryCard({ icon }: { icon: IconInventoryItem }) {
   const previewSize = getIconPreviewSize(icon);
+  const cardRef = useRef<HTMLElement | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [downloadOpen, setDownloadOpen] = useState(false);
+
+  const getSerializedSvg = () => {
+    const svg = cardRef.current?.querySelector("svg");
+    if (!svg) return null;
+
+    const clone = svg.cloneNode(true) as SVGSVGElement;
+    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    clone.setAttribute("color", "#262626");
+    clone.removeAttribute("class");
+
+    return new XMLSerializer().serializeToString(clone);
+  };
+
+  const handleCopySvg = async () => {
+    const serializedSvg = getSerializedSvg();
+    if (!serializedSvg) return;
+
+    await navigator.clipboard.writeText(serializedSvg);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1200);
+  };
+
+  const downloadSvg = () => {
+    const serializedSvg = getSerializedSvg();
+    if (!serializedSvg) return;
+
+    const blob = new Blob([serializedSvg], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${icon.name}.svg`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setDownloadOpen(false);
+  };
+
+  const downloadPng = () => {
+    const serializedSvg = getSerializedSvg();
+    if (!serializedSvg) return;
+
+    const image = new Image();
+    const svgBlob = new Blob([serializedSvg], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(svgBlob);
+
+    image.onload = () => {
+      const scale = 4;
+      const canvas = document.createElement("canvas");
+      canvas.width = previewSize.width * scale;
+      canvas.height = previewSize.height * scale;
+      const context = canvas.getContext("2d");
+      if (!context) {
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const pngUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = pngUrl;
+        link.download = `${icon.name}.png`;
+        link.click();
+        URL.revokeObjectURL(pngUrl);
+      }, "image/png");
+    };
+
+    image.src = url;
+    setDownloadOpen(false);
+  };
 
   return (
-    <article className="flex min-h-[232px] flex-col justify-between rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-4">
-      <div>
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <div className="grid size-[64px] place-items-center rounded-[8px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface-muted)]">
-            <div className="grid size-[32px] place-items-center rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)]">
-              <AppIcon name={icon.name} color="var(--uc-text)" width={previewSize.width} height={previewSize.height} />
+    <article ref={cardRef} className="group rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-3">
+      <div className="flex items-center gap-3">
+        <div className="grid size-[32px] shrink-0 place-items-center rounded-[6px] border border-[var(--uc-border-muted)] bg-[var(--uc-app-bg)]">
+          <AppIcon name={icon.name} color="var(--uc-text)" width={previewSize.width} height={previewSize.height} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex min-h-[22px] items-center gap-2">
+            <h3 className="min-w-0 flex-1 truncate font-['UniCredit:Bold',sans-serif] text-[14px] leading-5 text-[var(--uc-text)]" title={icon.label}>
+              {icon.label}
+            </h3>
+            <div
+              className={`ml-auto flex shrink-0 items-center gap-0.5 transition-opacity ${
+                copied || downloadOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+              }`}
+            >
+              {copied ? <span className="text-[10px] text-[var(--uc-text-muted)]">Copied</span> : null}
+              <button
+                type="button"
+                onClick={handleCopySvg}
+                className="grid size-[20px] place-items-center rounded-[4px] text-[var(--uc-text-muted)] hover:bg-[var(--uc-app-bg)] hover:text-[var(--uc-text)] focus-visible:bg-[var(--uc-app-bg)] focus-visible:text-[var(--uc-text)] focus-visible:outline-none"
+                aria-label={`Copy ${icon.label} SVG`}
+                title={copied ? "Copied" : "Copy SVG"}
+              >
+                <AppIcon name="copy-documents" color="currentColor" width={15} height={15} />
+              </button>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setDownloadOpen((value) => !value)}
+                  className="grid size-[20px] place-items-center rounded-[4px] text-[var(--uc-text-muted)] hover:bg-[var(--uc-app-bg)] hover:text-[var(--uc-text)] focus-visible:bg-[var(--uc-app-bg)] focus-visible:text-[var(--uc-text)] focus-visible:outline-none"
+                  aria-label={`Download ${icon.label}`}
+                  aria-expanded={downloadOpen}
+                  title="Download"
+                >
+                  <AppIcon name="download" color="currentColor" width={15} height={15} />
+                </button>
+                {downloadOpen ? (
+                  <div className="absolute right-0 top-[24px] z-20 grid min-w-[86px] rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] py-1 shadow-lg">
+                    <button type="button" onClick={downloadPng} className="px-3 py-1.5 text-left text-[12px] text-[var(--uc-text)] hover:bg-[var(--uc-app-bg)]">
+                      PNG
+                    </button>
+                    <button type="button" onClick={downloadSvg} className="px-3 py-1.5 text-left text-[12px] text-[var(--uc-text)] hover:bg-[var(--uc-app-bg)]">
+                      SVG
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
-          <Badge variant={icon.source === "custom" ? "default" : "outline"}>{icon.source}</Badge>
         </div>
-        <h3 className="font-['UniCredit:Bold',sans-serif] text-[16px] text-[var(--uc-text)]">{icon.label}</h3>
-        <code className="mt-2 block break-all rounded bg-[var(--uc-app-bg)] px-2 py-1 text-[12px] text-[var(--uc-text-muted)]">
-          {icon.name}
-        </code>
-        <dl className="mt-3 grid gap-1 text-[12px] text-[var(--uc-text-muted)]">
-          <div className="flex justify-between gap-3">
-            <dt>Size</dt>
-            <dd className="font-['UniCredit:Bold',sans-serif] text-[var(--uc-text)]">{icon.defaultSize}</dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt>ViewBox</dt>
-            <dd className="max-w-[150px] truncate text-right">{icon.viewBox}</dd>
-          </div>
-        </dl>
-      </div>
-      <div className="mt-4 border-t border-[var(--uc-border-muted)] pt-3">
-        <p className="mb-2 text-[12px] uppercase tracking-[0.08em] text-[var(--uc-text-subtle)]">Used by</p>
-        <div className="flex flex-wrap gap-1.5">
-          {icon.usage.map((usage) => (
-            <span key={usage} className="rounded-full border border-[var(--uc-border)] px-2 py-0.5 text-[11px] text-[var(--uc-text-muted)]">
-              {usage}
-            </span>
-          ))}
-        </div>
-        {icon.notes && <p className="mt-3 text-[12px] leading-5 text-[var(--uc-action)]">{icon.notes}</p>}
       </div>
     </article>
   );
 }
 
-function IconInventory() {
-  const groupedIcons = iconCategoryOrder
-    .map((category) => ({
-      category,
-      icons: ICON_INVENTORY.filter((icon) => icon.category === category),
-    }))
-    .filter((group) => group.icons.length > 0);
-  const customCount = ICON_INVENTORY.filter((icon) => icon.source === "custom").length;
-  const lucideCount = ICON_INVENTORY.filter((icon) => icon.source === "lucide").length;
-  const dedupedCount = ICON_INVENTORY.filter((icon) => icon.notes?.toLowerCase().includes("deduplicated")).length;
+function getInventoryFileName(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function escapeSvgText(value: string) {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function PfmIconInventoryCard({ category }: { category: PfmCategoryDefinition }) {
+  const cardRef = useRef<HTMLElement | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [downloadOpen, setDownloadOpen] = useState(false);
+  const fileName = `pfm-${getInventoryFileName(category.name)}`;
+
+  const getCategoryColor = () =>
+    getComputedStyle(document.documentElement).getPropertyValue(category.colorVar).trim() || "#262626";
+
+  const getSerializedSvg = () => {
+    const categoryColor = getCategoryColor();
+    const svg = cardRef.current?.querySelector("svg");
+
+    if (svg) {
+      const clone = svg.cloneNode(true) as SVGSVGElement;
+      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      clone.removeAttribute("class");
+      clone.querySelectorAll("path").forEach((path) => {
+        path.setAttribute("fill", categoryColor);
+      });
+
+      return new XMLSerializer().serializeToString(clone);
+    }
+
+    return [
+      '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">',
+      `<circle cx="10" cy="10" r="10" fill="${categoryColor}"/>`,
+      `<text x="10" y="14" text-anchor="middle" font-family="UniCredit, Arial, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF">${escapeSvgText(category.fallbackInitial)}</text>`,
+      "</svg>",
+    ].join("");
+  };
+
+  const handleCopySvg = async () => {
+    const serializedSvg = getSerializedSvg();
+    await navigator.clipboard.writeText(serializedSvg);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1200);
+  };
+
+  const downloadSvg = () => {
+    const serializedSvg = getSerializedSvg();
+    const blob = new Blob([serializedSvg], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${fileName}.svg`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setDownloadOpen(false);
+  };
+
+  const downloadPng = () => {
+    const serializedSvg = getSerializedSvg();
+    const image = new Image();
+    const svgBlob = new Blob([serializedSvg], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(svgBlob);
+
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      const scale = 4;
+      canvas.width = 20 * scale;
+      canvas.height = 20 * scale;
+      const context = canvas.getContext("2d");
+      if (!context) {
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const pngUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = pngUrl;
+        link.download = `${fileName}.png`;
+        link.click();
+        URL.revokeObjectURL(pngUrl);
+      }, "image/png");
+    };
+
+    image.src = url;
+    setDownloadOpen(false);
+  };
 
   return (
-    <>
-      <Section
-        id="icons"
-        title="Icon registry"
-        description="Single source of truth for product icons: every consumer uses AppIcon, and canonical SVGs are mapped here with usage and deduplication notes."
-      >
-        <div className="mb-6 grid gap-4 md:grid-cols-2">
-          {[
-            ["Mapped icons", ICON_INVENTORY.length],
-            ["Custom SVG", customCount],
-            ["Lucide wrappers", lucideCount],
-            ["Deduplicated", dedupedCount],
-          ].map(([label, value]) => (
-            <div key={label} className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
-              <p className="text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">{label}</p>
-              <p className="mt-2 font-['UniCredit:Bold',sans-serif] text-[34px]">{value}</p>
-            </div>
-          ))}
+    <article
+      ref={cardRef}
+      className="group rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-3"
+      data-pfm-icon-inventory={category.name}
+    >
+      <div className="flex items-center gap-3">
+        <div className="grid size-[32px] shrink-0 place-items-center rounded-[6px] border border-[var(--uc-border-muted)] bg-[var(--uc-app-bg)]">
+          <PfmCategoryIcon category={category.name} size={32} />
         </div>
-
-        <div className="grid gap-8">
-          {groupedIcons.map(({ category, icons }) => (
-            <div key={category}>
-              <div className="mb-3 flex items-baseline justify-between gap-4 border-b border-[var(--uc-border)] pb-2">
-                <h3 className="font-['UniCredit:Bold',sans-serif] text-[20px] text-[var(--uc-text)]">{category}</h3>
-                <span className="text-[13px] text-[var(--uc-text-muted)]">{icons.length} icons</span>
+        <div className="min-w-0 flex-1">
+          <div className="flex min-h-[22px] items-center gap-2">
+            <h3 className="min-w-0 flex-1 truncate font-['UniCredit:Bold',sans-serif] text-[14px] leading-5 text-[var(--uc-text)]" title={category.name}>
+              {category.name}
+            </h3>
+            <div
+              className={`ml-auto flex shrink-0 items-center gap-0.5 transition-opacity ${
+                copied || downloadOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+              }`}
+            >
+              {copied ? <span className="text-[10px] text-[var(--uc-text-muted)]">Copied</span> : null}
+              <button
+                type="button"
+                onClick={handleCopySvg}
+                className="grid size-[20px] place-items-center rounded-[4px] text-[var(--uc-text-muted)] hover:bg-[var(--uc-app-bg)] hover:text-[var(--uc-text)] focus-visible:bg-[var(--uc-app-bg)] focus-visible:text-[var(--uc-text)] focus-visible:outline-none"
+                aria-label={`Copy ${category.name} PFM SVG`}
+                title={copied ? "Copied" : "Copy SVG"}
+              >
+                <AppIcon name="copy-documents" color="currentColor" width={15} height={15} />
+              </button>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setDownloadOpen((value) => !value)}
+                  className="grid size-[20px] place-items-center rounded-[4px] text-[var(--uc-text-muted)] hover:bg-[var(--uc-app-bg)] hover:text-[var(--uc-text)] focus-visible:bg-[var(--uc-app-bg)] focus-visible:text-[var(--uc-text)] focus-visible:outline-none"
+                  aria-label={`Download ${category.name} PFM icon`}
+                  aria-expanded={downloadOpen}
+                  title="Download"
+                >
+                  <AppIcon name="download" color="currentColor" width={15} height={15} />
+                </button>
+                {downloadOpen ? (
+                  <div className="absolute right-0 top-[24px] z-20 grid min-w-[86px] rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] py-1 shadow-lg">
+                    <button type="button" onClick={downloadPng} className="px-3 py-1.5 text-left text-[12px] text-[var(--uc-text)] hover:bg-[var(--uc-app-bg)]">
+                      PNG
+                    </button>
+                    <button type="button" onClick={downloadSvg} className="px-3 py-1.5 text-left text-[12px] text-[var(--uc-text)] hover:bg-[var(--uc-app-bg)]">
+                      SVG
+                    </button>
+                  </div>
+                ) : null}
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {icons.map((icon) => (
-                  <IconInventoryCard key={icon.name} icon={icon} />
-                ))}
-              </div>
             </div>
-          ))}
+          </div>
         </div>
-      </Section>
+      </div>
+    </article>
+  );
+}
 
-      <Section
-        id="icon-audit"
-        title="Icon audit boundaries"
-        description="The areas below are intentionally outside the reusable icon registry: they are generated assets, vendored primitives, decoration, or brand surfaces rather than product icons that should update globally."
-      >
-        <div className="grid gap-4 lg:grid-cols-2">
-          {ICON_AUDIT_EXCLUSIONS.map((item) => (
-            <div key={item.scope} className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
-              <code className="rounded bg-[var(--uc-app-bg)] px-2 py-1 text-[12px] text-[var(--uc-text-muted)]">{item.scope}</code>
-              <p className="mt-3 text-[14px] leading-6 text-[var(--uc-text-muted)]">{item.reason}</p>
-            </div>
+function matchesIconSearch(icon: IconInventoryItem, query: string) {
+  if (!query.trim()) return true;
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const searchableText = [
+    icon.label,
+    icon.name,
+    icon.defaultSize,
+    icon.viewBox,
+    icon.category,
+    icon.source,
+    ...icon.usage,
+  ].join(" ").toLowerCase();
+
+  return searchableText.includes(normalizedQuery);
+}
+
+function matchesPfmIconSearch(category: PfmCategoryDefinition, query: string) {
+  if (!query.trim()) return true;
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const searchableText = [
+    category.name,
+    category.colorVar,
+    category.fallbackInitial,
+    "PFM category",
+    PFM_ICON_SOURCE,
+  ].join(" ").toLowerCase();
+
+  return searchableText.includes(normalizedQuery);
+}
+
+function IconInventory() {
+  const [iconSearchQuery, setIconSearchQuery] = useState("");
+  const visibleIcons = ICON_INVENTORY.filter((icon) => matchesIconSearch(icon, iconSearchQuery));
+  const visiblePfmIcons = PFM_CATEGORIES.filter((category) => matchesPfmIconSearch(category, iconSearchQuery));
+  const customCount = ICON_INVENTORY.filter((icon) => icon.source === "custom").length;
+  const lucideCount = ICON_INVENTORY.filter((icon) => icon.source === "lucide").length;
+  const hasVisibleResults = visibleIcons.length > 0 || visiblePfmIcons.length > 0;
+
+  return (
+    <Section
+      id="icons"
+      title="Icon registry"
+      description="Single source of truth for reusable product icons, plus the PFM category icon map used by spending surfaces."
+    >
+      <InventoryStatGrid
+        items={[
+          ["App icons", ICON_INVENTORY.length],
+          ["PFM icons", PFM_CATEGORIES.length],
+          ["Visible", visibleIcons.length + visiblePfmIcons.length],
+          ["Custom SVG", customCount],
+          ["Lucide wrappers", lucideCount],
+        ]}
+      />
+
+      <InventorySearchField
+        value={iconSearchQuery}
+        onChange={setIconSearchQuery}
+        placeholder="Search icons"
+        label="Search icons"
+      />
+
+      {visibleIcons.length > 0 ? (
+        <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))] xl:grid-cols-4">
+          {visibleIcons.map((icon) => (
+            <IconInventoryCard key={icon.name} icon={icon} />
           ))}
         </div>
-      </Section>
-    </>
+      ) : null}
+
+      {visiblePfmIcons.length > 0 ? (
+        <div id="pfm-icons" className={`${visibleIcons.length > 0 ? "mt-8" : ""} scroll-mt-28`}>
+          <div className="mb-4 flex items-end gap-4 border-t border-[var(--uc-border-muted)] pt-6">
+            <div>
+              <h3 className="font-['UniCredit:Bold',sans-serif] text-[22px] leading-7 text-[var(--uc-text)]">PFM icons</h3>
+              <p className="mt-1 text-[13px] text-[var(--uc-text-muted)]">
+                Category glyphs from {PFM_ICON_SOURCE}, rendered through PfmCategoryIcon.
+              </p>
+            </div>
+            <span className="ml-auto font-['UniCredit:Bold',sans-serif] text-[18px] text-[var(--uc-text)]">{visiblePfmIcons.length}</span>
+          </div>
+          <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))] xl:grid-cols-4">
+            {visiblePfmIcons.map((category) => (
+              <PfmIconInventoryCard key={category.name} category={category} />
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {!hasVisibleResults ? (
+        <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-6 text-[14px] text-[var(--uc-text-muted)]">
+          No icons match this search.
+        </div>
+      ) : null}
+    </Section>
   );
 }
 
 function TemplateInventory() {
+  const [templateSearchQuery, setTemplateSearchQuery] = useState("");
   const [selectedTemplateId, setSelectedTemplateId] = useState(TEMPLATE_REGISTRY[0]?.id ?? "");
-  const selectedTemplate =
-    TEMPLATE_REGISTRY.find((template) => template.id === selectedTemplateId) ?? TEMPLATE_REGISTRY[0];
   const reconstructedTemplates = TEMPLATE_REGISTRY.filter((template) => template.codePreviewId);
   const screenshotBackedTemplates = TEMPLATE_REGISTRY.filter((template) => template.imageSrc);
   const codeOnlyTemplates = TEMPLATE_REGISTRY.filter((template) => template.codePreviewId && !template.imageSrc);
+  const normalizedTemplateQuery = templateSearchQuery.trim().toLowerCase();
+  const visibleTemplates = TEMPLATE_REGISTRY.filter((template) => {
+    if (!normalizedTemplateQuery) return true;
+    return [
+      template.id,
+      template.name,
+      template.sourcePath,
+      template.format,
+      template.codePreviewId ?? "",
+      ...template.relatedComponents,
+    ].join(" ").toLowerCase().includes(normalizedTemplateQuery);
+  });
+  const selectedTemplate =
+    visibleTemplates.find((template) => template.id === selectedTemplateId) ?? visibleTemplates[0] ?? TEMPLATE_REGISTRY[0];
 
   return (
     <Section
@@ -2784,37 +3179,40 @@ function TemplateInventory() {
       title="Templates"
       description="Existing screenshots and code-only templates derived from active screens, turned into selectable templates for comparison, reuse, and mapping to cataloged components."
     >
-      <div className="mb-5 grid gap-3 md:grid-cols-2">
-        <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
-          <p className="text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Templates</p>
-          <p className="mt-2 font-['UniCredit:Bold',sans-serif] text-[34px]">{TEMPLATE_REGISTRY.length}</p>
-        </div>
-        <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
-          <p className="text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Code previews</p>
-          <p className="mt-2 font-['UniCredit:Bold',sans-serif] text-[34px]">{reconstructedTemplates.length}</p>
-        </div>
-        <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
-          <p className="text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Screenshot sources</p>
-          <p className="mt-2 font-['UniCredit:Bold',sans-serif] text-[34px]">{screenshotBackedTemplates.length}</p>
-        </div>
-        <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
-          <p className="text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Code-only</p>
-          <p className="mt-2 font-['UniCredit:Bold',sans-serif] text-[34px]">{codeOnlyTemplates.length}</p>
-        </div>
-      </div>
+      <InventoryStatGrid
+        items={[
+          ["Templates", TEMPLATE_REGISTRY.length],
+          ["Code previews", reconstructedTemplates.length],
+          ["Screenshot sources", screenshotBackedTemplates.length],
+          ["Code-only", codeOnlyTemplates.length],
+        ]}
+      />
+
+      <InventorySearchField
+        value={templateSearchQuery}
+        onChange={setTemplateSearchQuery}
+        placeholder="Search templates"
+        label="Search templates"
+      />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_460px]">
         <div className="max-h-[calc(100vh-260px)] min-h-[420px] overflow-y-auto pr-1">
-          <div className="grid gap-2 sm:grid-cols-2">
-            {TEMPLATE_REGISTRY.map((template) => (
-              <TemplateCard
-                key={template.id}
-                template={template}
-                selected={template.id === selectedTemplate?.id}
-                onSelect={() => setSelectedTemplateId(template.id)}
-              />
-            ))}
-          </div>
+          {visibleTemplates.length > 0 ? (
+            <div className="grid gap-2 sm:grid-cols-2">
+              {visibleTemplates.map((template) => (
+                <TemplateCard
+                  key={template.id}
+                  template={template}
+                  selected={template.id === selectedTemplate?.id}
+                  onSelect={() => setSelectedTemplateId(template.id)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-6 text-[14px] text-[var(--uc-text-muted)]">
+              No templates match this search.
+            </div>
+          )}
         </div>
 
         {selectedTemplate && <TemplatePreview template={selectedTemplate} />}
@@ -3072,6 +3470,7 @@ function TemplatePreview({ template }: { template: TemplateRegistryItem }) {
 export default function DesignSystemPage() {
   const [showLogout, setShowLogout] = useState(false);
   const [inspectMode, setInspectMode] = useState(false);
+  const [componentSearchQuery, setComponentSearchQuery] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const [inventoryTab, setInventoryTab] = useState<InventoryTab>(() => {
     if (typeof window === "undefined") return "components";
@@ -3082,6 +3481,11 @@ export default function DesignSystemPage() {
     return window.location.hash.replace(/^#/, "") || getDefaultSectionForInventoryTab(getInventoryTabForHash(window.location.hash));
   });
   const sectionLinks = inventorySectionLinks[inventoryTab];
+  const normalizedComponentQuery = componentSearchQuery.trim().toLowerCase();
+  const matchesComponentQuery = (name: string) =>
+    normalizedComponentQuery.length === 0 || name.toLowerCase().includes(normalizedComponentQuery);
+  const visibleActiveComponentFiles = activeComponentFiles.filter(matchesComponentQuery);
+  const visibleUiRegistryFiles = uiRegistryFiles.filter(matchesComponentQuery);
 
   const handleInventoryTabChange = (nextTab: InventoryTab) => {
     const nextSectionId = getDefaultSectionForInventoryTab(nextTab);
@@ -3169,12 +3573,6 @@ export default function DesignSystemPage() {
     <div ref={scrollContainerRef} className="h-full w-full self-stretch overflow-y-auto bg-[var(--uc-surface-muted)] text-[var(--uc-text)]">
       <div className="mx-auto flex w-full max-w-[1440px] gap-6 px-6 py-8 xl:gap-8 xl:px-8">
         <aside className="sticky top-[32px] hidden h-[calc(100vh-64px)] w-[272px] shrink-0 overflow-y-auto rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-4 lg:block xl:w-[288px]">
-          <div className="mb-5 rounded-[8px] bg-[var(--uc-app-bg)] px-4 py-4">
-            <p className="uc-type-n5-strong uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Inventory</p>
-            <p className="uc-type-n4 mt-2 text-[var(--uc-text)]">
-              Browse the Design System like a real navigation tree, with the active area and nested sections kept together.
-            </p>
-          </div>
           <InventoryTabs
             activeTab={inventoryTab}
             activeSection={activeSection}
@@ -3205,23 +3603,27 @@ export default function DesignSystemPage() {
             <IconInventory />
           ) : inventoryTab === "colors" ? (
             <ColorInventory />
+          ) : inventoryTab === "typography" ? (
+            <TypographyInventory />
           ) : (
             <>
+          <InventorySearchField
+            value={componentSearchQuery}
+            onChange={setComponentSearchQuery}
+            placeholder="Search components"
+            label="Search components"
+          />
+
           <Section id="overview" title="Coverage summary" description="Quick reference for the audited surface and the areas worth checking first.">
-            <div className="grid gap-4 md:grid-cols-2">
-              {[
+            <InventoryStatGrid
+              items={[
                 ["Countries", COUNTRIES.length],
                 ["App components", activeComponentFiles.length],
                 ["UI registry files", uiRegistryFiles.length],
                 ["Feature flags", Object.keys(FEATURE_META).length],
                 ["Screenshot templates", TEMPLATE_REGISTRY.length],
-              ].map(([label, value]) => (
-                <div key={label} className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
-                  <p className="text-[13px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">{label}</p>
-                  <p className="mt-2 font-['UniCredit:Bold',sans-serif] text-[34px]">{value}</p>
-                </div>
-              ))}
-            </div>
+              ]}
+            />
           </Section>
 
           <Section id="countries" title="Country coverage" description="Select a country to review languages, currency, Co-Apping, product accordions, and More cards for that market.">
@@ -3374,7 +3776,7 @@ export default function DesignSystemPage() {
               <Specimen name="User Event Card" source="components/cards/UserEventCard.tsx" note={`${USER_EVENT_CARD_SOURCE.schema} / ${USER_EVENT_CARD_SOURCE.sourceNodeIds.full} · ${USER_EVENT_CARD_SOURCE.sourceNodeIds.compact}`} tone="gray" specs={["343 wide Figma base", "white var(--uc-surface)", "8px radius", "shadow 0 4px 16px rgba(0,0,0,0.08)", "padding 16px", "avatar 48x48 circle teal var(--uc-action) / white 24x24 glyph", "avatar-to-text gap 8px", "title 14px bold", "description 14px regular / preserves newlines", "optional link 14px bold teal", "optional 32x32 more-horizontal options", "items center without link / start with link"]}>
                 <UserEventCardVariantSpecimen />
               </Specimen>
-              <Specimen name="Helper Card" source="components/cards/HelperCard.tsx" note={`${HELPER_CARD_SOURCE.schema} / ${HELPER_CARD_SOURCE.sourceNodeIds.plain} · ${HELPER_CARD_SOURCE.sourceNodeIds.withLink}`} tone="gray" specs={["343 wide Figma base", "solid teal var(--uc-action)", "4px radius", "padding 16px", "icon-to-text gap 8px", "icon box 32x32 / white info-circle", "title 18px bold white", "description 18px regular white / preserves newlines", "optional white link 14px bold", "optional close-x-small top-right", "white text via var(--uc-static-white)"]}>
+              <Specimen name="Helper Card" source="components/cards/HelperCard.tsx" note={`${HELPER_CARD_SOURCE.schema} / ${HELPER_CARD_SOURCE.sourceNodeIds.plain} · ${HELPER_CARD_SOURCE.sourceNodeIds.withLink}`} tone="gray" specs={["343 wide Figma base", "solid teal var(--uc-action)", "4px radius", "padding 16px", "icon-to-text gap 8px", "icon box 32x32 / white info-circle", "title 18px bold white", "description 18px regular white / preserves newlines", "optional white link 14px bold", "optional close-x top-right", "white text via var(--uc-static-white)"]}>
                 <HelperCardVariantSpecimen />
               </Specimen>
               <Specimen name="Pending Action Card" source="components/cards/PendingActionCard.tsx" note={`${PENDING_ACTION_CARD_SOURCE.schema} / ${PENDING_ACTION_CARD_SOURCE.sourceNodeId}`} tone="gray" specs={["327x157 Figma base", "teal gradient 90deg #007A91 to #44909E", "8px radius", "padding 24px", "title 24px bold white", "title-to-body gap 8px", "body 18px regular white", "optional white tag pill", "tag warning-small glyph teal", "tag label 12px bold uppercase teal", "renders as button when onClick is set"]}>
@@ -3468,17 +3870,25 @@ export default function DesignSystemPage() {
               <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
                 <h3 className="mb-4 font-['UniCredit:Bold',sans-serif] text-[20px]">App-specific components</h3>
                 <div className="flex flex-wrap gap-2">
-                  {activeComponentFiles.map((name) => (
-                    <Badge key={name} variant="secondary">{name}</Badge>
-                  ))}
+                  {visibleActiveComponentFiles.length > 0 ? (
+                    visibleActiveComponentFiles.map((name) => (
+                      <Badge key={name} variant="secondary">{name}</Badge>
+                    ))
+                  ) : (
+                    <p className="text-[14px] text-[var(--uc-text-muted)]">No app-specific components match this search.</p>
+                  )}
                 </div>
               </div>
               <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
                 <h3 className="mb-4 font-['UniCredit:Bold',sans-serif] text-[20px]">Generic UI registry</h3>
                 <div className="flex flex-wrap gap-2">
-                  {uiRegistryFiles.map((name) => (
-                    <Badge key={name} variant="outline">{name}</Badge>
-                  ))}
+                  {visibleUiRegistryFiles.length > 0 ? (
+                    visibleUiRegistryFiles.map((name) => (
+                      <Badge key={name} variant="outline">{name}</Badge>
+                    ))
+                  ) : (
+                    <p className="text-[14px] text-[var(--uc-text-muted)]">No generic UI entries match this search.</p>
+                  )}
                 </div>
               </div>
             </div>
