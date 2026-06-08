@@ -8,6 +8,16 @@ import svgPaths from '@/imports/svg-wan58807zo';
 import { useDemo } from '@/app/state/demoStore';
 import { convertCurrency, getCountryCurrency, roundMoney } from '@/data/exchangeRates';
 
+function formatProductIban(country: string, productId: string, baseNumber: string): string {
+  const prefix = country === 'BA_BL' ? 'BA' : country;
+  let hash = 0;
+  for (let i = 0; i < productId.length; i++) {
+    hash += productId.charCodeAt(i);
+  }
+  const checkDigits = String((hash % 89) + 10);
+  return `${prefix}${checkDigits}BACX${baseNumber}`;
+}
+
 export function useProducts() {
   const { country } = useDemo();
   const localCurrency = getCountryCurrency(country);
@@ -15,13 +25,21 @@ export function useProducts() {
   // Get base categories and convert all products to local currency
   const categories = getProductsByCategory().map(category => ({
     ...category,
-    products: category.products.map(product => ({
-      ...product,
-      // Convert balance to local currency
-      balance: roundMoney(convertCurrency(product.balance, product.currency, localCurrency)),
-      // Update currency to local
-      currency: localCurrency
-    }))
+    products: category.products.map(product => {
+      const isCard = product.type === 'debit_card' || product.type === 'credit_card';
+      const formattedAccountNumber = isCard
+        ? product.accountNumber
+        : formatProductIban(country, product.id, product.accountNumber);
+
+      return {
+        ...product,
+        accountNumber: formattedAccountNumber,
+        // Convert balance to local currency
+        balance: roundMoney(convertCurrency(product.balance, product.currency, localCurrency)),
+        // Update currency to local
+        currency: localCurrency
+      };
+    })
   }));
 
   const getProductIcon = (product: Product): ReactNode => {
@@ -29,7 +47,7 @@ export function useProducts() {
       case 'current_account':
         return (
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-            <path fillRule="evenodd" clipRule="evenodd" d={svgPaths.p30b125f0} fill="#007A91" />
+            <path fillRule="evenodd" clipRule="evenodd" d={svgPaths.p30b125f0} fill="currentColor" />
           </svg>
         );
       
@@ -50,8 +68,8 @@ export function useProducts() {
       case 'term_deposit':
         return (
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
-            <path d="M7 19V26H26V19H28V26C28 27.1046 27.1046 28 26 28H7C5.89543 28 5 27.1046 5 26V19H7ZM24 24H9V4H24V24ZM11 22H22V6H11V22Z" fill="#007A91"/>
-            <path d="M24 24H9V4H24V24ZM15.8467 9.07715L15.8477 16.0908L14.3926 14.6641C13.7715 14.0545 12.7636 14.0543 12.1426 14.6641L16.6426 19.0771L21.1426 14.6641C20.5215 14.0545 19.5136 14.0543 18.8926 14.6641L17.4385 16.0908V9.07715H15.8467Z" fill="#007A91"/>
+            <path d="M7 19V26H26V19H28V26C28 27.1046 27.1046 28 26 28H7C5.89543 28 5 27.1046 5 26V19H7ZM24 24H9V4H24V24ZM11 22H22V6H11V22Z" fill="currentColor"/>
+            <path d="M24 24H9V4H24V24ZM15.8467 9.07715L15.8477 16.0908L14.3926 14.6641C13.7715 14.0545 12.7636 14.0543 12.1426 14.6641L16.6426 19.0771L21.1426 14.6641C20.5215 14.0545 19.5136 14.0543 18.8926 14.6641L17.4385 16.0908V9.07715H15.8467Z" fill="currentColor"/>
           </svg>
         );
       
@@ -59,7 +77,7 @@ export function useProducts() {
       case 'mortgage':
         return (
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
-            <path fillRule="evenodd" clipRule="evenodd" d="M21.0544 21.0763L16.5699 16.6087C17.2676 15.535 17.1471 14.0869 16.2036 13.1469C15.1176 12.0656 13.3584 12.0656 12.2718 13.1469C11.1877 14.2275 11.1877 15.9812 12.2731 17.0637C13.1978 17.9844 14.6088 18.1125 15.6778 17.4644L18.3731 20.1494L16.9684 21.5487C16.7519 21.7644 16.7525 22.1125 16.9684 22.3269L17.9828 23.3387C18.1993 23.5537 18.5481 23.5538 18.7645 23.3381L20.1686 21.9381L20.1786 21.9487C20.4208 22.1881 20.8141 22.1881 21.0551 21.9481C21.2966 21.7081 21.296 21.3162 21.0544 21.0763ZM25 12.875V21.6575C25 24.0556 23.0489 26 20.6416 26H11.8584C9.45114 26 7.5 24.0556 7.5 21.6575V12.875L16.3266 6L25 12.875ZM15.4175 13.9294C16.0693 14.5794 16.0681 15.6306 15.4169 16.2794C14.7656 16.9288 13.7104 16.9288 13.0592 16.28C12.4073 15.6313 12.4067 14.5794 13.0579 13.9294C13.7091 13.28 14.7669 13.2812 15.4175 13.9294Z" fill="#007A91"/>
+            <path fillRule="evenodd" clipRule="evenodd" d="M21.0544 21.0763L16.5699 16.6087C17.2676 15.535 17.1471 14.0869 16.2036 13.1469C15.1176 12.0656 13.3584 12.0656 12.2718 13.1469C11.1877 14.2275 11.1877 15.9812 12.2731 17.0637C13.1978 17.9844 14.6088 18.1125 15.6778 17.4644L18.3731 20.1494L16.9684 21.5487C16.7519 21.7644 16.7525 22.1125 16.9684 22.3269L17.9828 23.3387C18.1993 23.5537 18.5481 23.5538 18.7645 23.3381L20.1686 21.9381L20.1786 21.9487C20.4208 22.1881 20.8141 22.1881 21.0551 21.9481C21.2966 21.7081 21.296 21.3162 21.0544 21.0763ZM25 12.875V21.6575C25 24.0556 23.0489 26 20.6416 26H11.8584C9.45114 26 7.5 24.0556 7.5 21.6575V12.875L16.3266 6L25 12.875ZM15.4175 13.9294C16.0693 14.5794 16.0681 15.6306 15.4169 16.2794C14.7656 16.9288 13.7104 16.9288 13.0592 16.28C12.4073 15.6313 12.4067 14.5794 13.0579 13.9294C13.7091 13.28 14.7669 13.2812 15.4175 13.9294Z" fill="currentColor"/>
           </svg>
         );
       
@@ -67,7 +85,7 @@ export function useProducts() {
         return (
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
             <g transform="translate(7, 7)">
-              <path d="M4.5 13.5C4.5 15.9851 2.48513 18 0 18V13.5C0 11.0149 2.01487 9 4.5 9V13.5ZM11.25 13.5C11.25 15.9851 9.23512 18 6.75 18V7.875C6.75 5.38987 8.76488 3.375 11.25 3.375V13.5ZM18 13.5C18 15.9851 15.9851 18 13.5 18V4.5C13.5 2.01487 15.5149 0 18 0V13.5Z" fill="#007A91"/>
+              <path d="M4.5 13.5C4.5 15.9851 2.48513 18 0 18V13.5C0 11.0149 2.01487 9 4.5 9V13.5ZM11.25 13.5C11.25 15.9851 9.23512 18 6.75 18V7.875C6.75 5.38987 8.76488 3.375 11.25 3.375V13.5ZM18 13.5C18 15.9851 15.9851 18 13.5 18V4.5C13.5 2.01487 15.5149 0 18 0V13.5Z" fill="currentColor"/>
             </g>
           </svg>
         );
@@ -75,7 +93,7 @@ export function useProducts() {
       default:
         return (
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-            <path fillRule="evenodd" clipRule="evenodd" d={svgPaths.p30b125f0} fill="#007A91" />
+            <path fillRule="evenodd" clipRule="evenodd" d={svgPaths.p30b125f0} fill="currentColor" />
           </svg>
         );
     }

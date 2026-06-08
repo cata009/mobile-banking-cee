@@ -202,6 +202,7 @@ export type ComponentId =
   | "cards.helper-card"
   | "cards.pending-action-card"
   | "cards.debit-card"
+  | "cards.card-component"
   | "more.card-grid"
   | "contacts.navigation-card"
   | "prime.advisor-tab"

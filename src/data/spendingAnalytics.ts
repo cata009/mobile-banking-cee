@@ -142,7 +142,7 @@ function summarizeTransactions(
       spendingTotal = roundMoney(spendingTotal + absoluteAmount);
       addCategoryTotal(outCategoryTotals, category, absoluteAmount);
 
-      if (category === "ATM" || category === "Cash") {
+      if (category === "Wallet") {
         cashWithdrawalTotal = roundMoney(cashWithdrawalTotal + absoluteAmount);
       }
 

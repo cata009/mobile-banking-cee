@@ -22,7 +22,7 @@ export default function NewPaymentActionListItem({
     <button
       type="button"
       onClick={() => onSelect(action)}
-      className="grid h-[80px] w-full grid-cols-[32px_1fr_32px] items-center gap-[16px] text-left transition hover:bg-[var(--uc-surface-muted)]"
+      className="grid h-[80px] w-full grid-cols-[32px_1fr_32px] items-center gap-[16px] text-left transition"
     >
       <span className="flex h-[32px] w-[32px] shrink-0 items-center justify-center">
         <NewPaymentActionIconView icon={action.icon} />

@@ -136,7 +136,7 @@ export default function AccountSummary({ showRedesign = false, onAccountClick, o
                       onClick={
                         product.type === "investment_account" && investmentsAvailable
                           ? onInvestmentsClick
-                          : isAccountDetailProduct(product)
+                          : isAccountDetailProduct(product) || product.type === "debit_card" || product.type === "credit_card"
                           ? () => onAccountClick?.(product)
                           : undefined
                       }

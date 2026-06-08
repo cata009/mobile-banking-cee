@@ -102,7 +102,7 @@ export default function PreLoginActiveScreen({
         <div 
           className="mt-auto w-full flex flex-col items-start px-[24px] py-[32px] gap-[24px]"
           style={{
-            background: 'linear-gradient(180deg, color-mix(in srgb, var(--uc-primary-k1) 0%, transparent) 0%, var(--uc-text) 5.95%)'
+            background: 'linear-gradient(180deg, color-mix(in srgb, var(--uc-static-black) 0%, transparent) 0%, var(--uc-static-black) 5.95%)'
           }}
         >
           {/* Login Button */}

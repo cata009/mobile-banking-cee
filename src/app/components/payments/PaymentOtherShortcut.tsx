@@ -48,7 +48,7 @@ export default function PaymentOtherShortcut({
       <span
         className={paymentOtherLabelClass}
         style={{
-          color: "var(--Primary-K1, #262626)",
+          color: "var(--uc-text)",
           fontFeatureSettings: "'liga' off, 'clig' off",
           fontStyle: "normal",
           lineHeight: "normal",

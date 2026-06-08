@@ -14,16 +14,12 @@ export type PfmCategoryName =
   | "Transportation"
   | "Leisure time"
   | "Healthcare"
-  | "Cash"
   | "Investments"
   | "Children"
   | "Wallet"
   | "Transfers"
   | "Finance"
-  | "Uncategorized"
-  | "ATM"
-  | "FX"
-  | "Internal";
+  | "Uncategorized";
 
 export interface PfmCategoryDefinition {
   name: PfmCategoryName;
@@ -45,16 +41,12 @@ export const PFM_CATEGORIES: PfmCategoryDefinition[] = [
   { name: "Transportation", colorVar: "--uc-pfm-transportation", fallbackInitial: "T" },
   { name: "Leisure time", colorVar: "--uc-pfm-leisure-time", fallbackInitial: "L" },
   { name: "Healthcare", colorVar: "--uc-pfm-healthcare", fallbackInitial: "H" },
-  { name: "Cash", colorVar: "--uc-pfm-cash", fallbackInitial: "C" },
   { name: "Investments", colorVar: "--uc-pfm-investments", fallbackInitial: "I" },
   { name: "Children", colorVar: "--uc-pfm-children", fallbackInitial: "C" },
   { name: "Wallet", colorVar: "--uc-pfm-wallet", fallbackInitial: "W" },
   { name: "Transfers", colorVar: "--uc-pfm-transfers", fallbackInitial: "T" },
   { name: "Finance", colorVar: "--uc-pfm-finance", fallbackInitial: "F" },
   { name: "Uncategorized", colorVar: "--uc-pfm-uncategorized", fallbackInitial: "?" },
-  { name: "ATM", colorVar: "--uc-pfm-atm", fallbackInitial: "A" },
-  { name: "FX", colorVar: "--uc-pfm-fx", fallbackInitial: "F" },
-  { name: "Internal", colorVar: "--uc-pfm-internal", fallbackInitial: "I" },
 ];
 
 const normalizeCategoryKey = (value: string) => value.trim().toLowerCase();
@@ -83,6 +75,9 @@ const CATEGORY_ALIASES: Record<string, PfmCategoryName> = {
   "School and education": "Education",
   "Transport and utility": "Leisure time",
   "Uncategorized expenses": "Uncategorized",
+  ATM: "Wallet",
+  FX: "Transfers",
+  Internal: "Transfers",
 };
 
 const CATEGORY_ALIAS_BY_KEY = new Map(
@@ -96,6 +91,15 @@ export function normalizePfmCategory(category?: string | null): PfmCategoryName 
     return "Uncategorized";
   }
 
+  // Map legacy categories directly
+  const upperVal = trimmed.toUpperCase();
+  if (upperVal === "ATM" || upperVal === "CASH") {
+    return "Wallet";
+  }
+  if (upperVal === "FX" || upperVal === "INTERNAL") {
+    return "Transfers";
+  }
+
   if (PFM_CATEGORY_BY_NAME.has(trimmed as PfmCategoryName)) {
     return trimmed as PfmCategoryName;
   }
@@ -106,5 +110,5 @@ export function normalizePfmCategory(category?: string | null): PfmCategoryName 
 }
 
 export function getPfmCategory(category?: string | null): PfmCategoryDefinition {
-  return PFM_CATEGORY_BY_NAME.get(normalizePfmCategory(category)) ?? PFM_CATEGORIES[19];
+  return PFM_CATEGORY_BY_NAME.get(normalizePfmCategory(category)) ?? PFM_CATEGORIES[PFM_CATEGORIES.length - 1];
 }

@@ -13,7 +13,6 @@ import {
   Eye,
   EyeOff,
   Gift,
-  Grid2X2,
   Landmark,
   Lock,
   Palette,
@@ -74,6 +73,9 @@ const NON_STANDARD_ICON_NAMES = new Set([
   "investment-history",
   "investment-to-approve",
   "warning-small",
+  // 32×32 container icons — rendered at native size, not the 20×20 standard glyph override
+  "close-x",
+  "chevron-link",
 ]);
 const ICON_INVENTORY_EXCLUDED_NAMES = new Set(["radio-unselected", "radio-selected"]);
 
@@ -483,15 +485,14 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Chevron link",
     category: "Actions",
-    width: 20,
-    height: 20,
-    viewBox: "12.75 9 7.25 14",
+    width: 32,
+    height: 32,
+    viewBox: "0 0 32 32",
     usage: ["AccountDetailsInfoScreen", "AccountOptionsScreen", "ContactsNavigationCard", "NavigationLink", "NewPaymentActionListItem", "PrimeIconLabelValue", "ProductAccordion", "RoKidsApp", "TemplateCodePreviews"],
     render: () => (
       <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M13.6759 9C12.7747 9.93494 12.7747 11.4522 13.6759 12.388L16.9391 16L13.6759 19.612C12.7747 20.5478 12.7747 22.0642 13.6759 23L20 16L13.6759 9Z"
+        id="Icon"
+        d="M13.2901 10.71V10.71C12.9001 11.1 12.9001 11.73 13.2901 12.12L17.1701 16L13.2901 19.88C12.9001 20.27 12.9001 20.9 13.2901 21.29V21.29C13.6801 21.68 14.3101 21.68 14.7001 21.29L19.2901 16.7C19.6801 16.31 19.6801 15.68 19.2901 15.29L14.7001 10.7C14.3201 10.32 13.6801 10.32 13.2901 10.71Z"
         fill="currentColor"
       />
     ),
@@ -629,16 +630,15 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "Close",
     category: "System",
-    width: 20,
-    height: 20,
-    viewBox: "12 10 12 12",
+    width: 32,
+    height: 32,
+    viewBox: "0 0 32 32",
     usage: ["BottomSheet", "DemoFeatureSidePanel", "HelperCard", "NewPaymentDiscoverBanner", "RoKidsApp", "TemplateCodePreviews"],
     notes: "Custom close icon replacing the old lucide X wrapper.",
     render: () => (
       <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M22.8859 10L18 14.8859L13.1138 10L12 11.1141L16.8859 16L12 20.8859L13.1138 22L18 17.1141L22.8859 22L24 20.8859L19.1141 16L24 11.1141L22.8859 10Z"
+        id="Icon"
+        d="M22.3 9.70997V9.70997C21.91 9.31997 21.28 9.31997 20.89 9.70997L16 14.59L11.11 9.69997C10.72 9.30997 10.09 9.30997 9.69997 9.69997V9.69997C9.30997 10.09 9.30997 10.72 9.69997 11.11L14.59 16L9.69997 20.89C9.30997 21.28 9.30997 21.91 9.69997 22.3V22.3C10.09 22.69 10.72 22.69 11.11 22.3L16 17.41L20.89 22.3C21.28 22.69 21.91 22.69 22.3 22.3V22.3C22.69 21.91 22.69 21.28 22.3 20.89L17.41 16L22.3 11.11C22.68 10.73 22.68 10.09 22.3 9.70997Z"
         fill="currentColor"
       />
     ),
@@ -1208,6 +1208,23 @@ const CUSTOM_ICONS = {
       </g>
     ),
   },
+  "grid-2x2": {
+    source: "custom",
+    label: "Change Category",
+    category: "Actions",
+    width: 32,
+    height: 32,
+    viewBox: "0 0 32 32",
+    usage: ["TransactionDetailScreen"],
+    render: () => (
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M17 17H26V22.4C26 24.3882 24.3882 26 22.4 26H17V17ZM21.1415 6L26 15H19.1442C17.4959 15 16.4659 13.2232 17.2901 11.8007L21.1415 6ZM6 21.4996C6.00022 19.0145 8.01495 17 10.5001 17C12.9853 17 14.9999 19.0147 15 21.4998C15.0001 23.985 12.9856 25.9998 10.5005 26C8.01498 26 6.00009 23.9851 6 21.4996ZM9.6 6H15V15H6V9.6C6 7.61178 7.61178 6 9.6 6Z"
+        fill="currentColor"
+      />
+    ),
+  },
 } satisfies Record<string, CustomIconDefinition>;
 
 const LUCIDE_ICONS = {
@@ -1246,15 +1263,6 @@ const LUCIDE_ICONS = {
     height: 24,
     component: Camera,
     usage: ["DomesticPaymentFlowScreens"],
-  },
-  "grid-2x2": {
-    source: "lucide",
-    label: "Grid 2x2",
-    category: "External Lucide",
-    width: 25,
-    height: 25,
-    component: Grid2X2,
-    usage: ["TransactionDetailScreen"],
   },
   landmark: {
     source: "lucide",

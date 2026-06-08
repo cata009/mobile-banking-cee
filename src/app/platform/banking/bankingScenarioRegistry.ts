@@ -164,7 +164,6 @@ export const BANKING_ACTION_CATALOG: Record<BankingActionId, BankingActionDefini
     countries: ALL_COUNTRIES,
     requiredHoldings: ["account"],
     requiredEntitlement: "payments.exchange.create",
-    requiredFeature: "fx_newPaymentsHub",
     requiresPositiveLimit: true,
   },
   "deposits.view": {

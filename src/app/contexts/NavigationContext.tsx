@@ -25,6 +25,7 @@ export type Screen =
   | "account-details-info" // Account details information
   | "account-options" // Account options menu
   | "transaction-detail" // Transaction details and redo payment entry
+  | "card-detail" // Card details, carousel, and transactions
   | "domestic-payment" // Domestic payment create form
   | "payment-review" // Domestic payment review data
   | "payment-sign" // Domestic payment sign screen

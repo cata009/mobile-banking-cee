@@ -747,6 +747,16 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     usedByScreens: ["platform.design-system"],
     notes: "Figma-extracted 64x40 payment card artwork generated from `codex-figma-component-spec/v1` node `3039:30713` (Card_MC_Debit_Gold_IND_DIGITAL_SMALL). Keeps the source SVG (gold gradient body, Mastercard symbol, UniCredit and contactless marks) as a separate design asset and exposes a `variant` registry (currently `mc-debit-gold`) plus controlled figma / medium / large sizing at a fixed 8:5 aspect ratio. Decorative by default; `ariaLabel` exposes it as an image.",
   },
+  "cards.card-component": {
+    id: "cards.card-component",
+    label: "Card Component",
+    products: ["PI"],
+    designSystems: ["current"],
+    status: "implemented",
+    componentPath: "src/app/components/cards/CardComponent.tsx",
+    usedByScreens: ["platform.design-system"],
+    notes: "Figma-extracted 375-wide card management section generated from `codex-figma-component-spec/v1` node `9133:3831` (Card component). Primary/K7 (#F5F5F5) background, vertical layout with 12px gap, clips content. Frame 46 has 24px left padding, 8px gap: a 169-wide text column with 14px bold N5 card-holder name and 18px bold L2 masked card number (both K1, UniCredit Bold). Cards carousel is 351×140 horizontal with 24px gap and 1px left padding; each card slot is 219×138 with 5.67px corner radius, K6 (#E5E5E5) 1px outside border, and a 0 11.265px 11.265px rgba(0,0,0,0.2) drop-shadow. Accepts `cardHolderName`, `cardNumber`, and a `cards` array for carousel items with optional custom `imageSrc`.",
+  },
   "more.card-grid": {
     id: "more.card-grid",
     label: "More service card grid",

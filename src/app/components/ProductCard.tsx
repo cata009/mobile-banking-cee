@@ -30,7 +30,7 @@ export default function ProductCard({
       {/* Top Container: Icon + Title & Account Number */}
       <div className="flex items-start gap-[16px] self-stretch">
         {/* Icon */}
-        <div className="w-[32px] h-[32px] flex items-center justify-center flex-shrink-0">
+        <div className="w-[32px] h-[32px] flex items-center justify-center flex-shrink-0 text-[var(--uc-action)]">
           {icon}
         </div>
         

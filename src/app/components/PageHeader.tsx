@@ -7,7 +7,7 @@ interface PageHeaderProps {
   onBack: () => void;
   onHelpClick?: () => void;
   onRightActionClick?: () => void;
-  variant?: "light" | "dark" | "transparent";
+  variant?: "light" | "dark" | "transparent" | "gray";
   showHelp?: boolean;
   showBack?: boolean;
   compact?: boolean;
@@ -37,9 +37,26 @@ export default function PageHeader({
 }: PageHeaderProps) {
   const iconColor = variant === "dark" ? "white" : "var(--uc-text)";
   const textColor = variant === "dark" ? "text-[var(--uc-static-white)]" : "text-[var(--uc-text)]";
-  const bgColor = variant === "dark" || variant === "transparent" ? "bg-transparent" : "bg-[var(--uc-surface)]";
+  const bgColor =
+    variant === "dark" || variant === "transparent"
+      ? "bg-transparent"
+      : variant === "gray"
+      ? "bg-[var(--uc-app-bg)]"
+      : "bg-[var(--uc-surface)]";
   const titleProgress = Math.min(1, Math.max(0, collapsedTitleProgress));
   const largeTitleOpacity = 1 - titleProgress;
+
+  const stickyBgStyle = variant === "dark"
+    ? {
+        backgroundColor: `rgba(26, 26, 26, ${titleProgress * 0.95})`,
+        backdropFilter: titleProgress > 0 ? "blur(8px)" : "none",
+        WebkitBackdropFilter: titleProgress > 0 ? "blur(8px)" : "none",
+      }
+    : variant === "gray"
+    ? {
+        backgroundColor: "var(--uc-app-bg)",
+      }
+    : undefined;
 
   const rightAction = rightActionIcon ? (
     <button
@@ -65,7 +82,14 @@ export default function PageHeader({
 
   return (
     <>
-      <div className={`sticky top-0 z-10 w-full ${bgColor} ${includeSafeArea ? "pt-[54px]" : ""}`}>
+      <div
+        className={cn(
+          "sticky top-0 z-10 w-full transition-shadow duration-200",
+          variant !== "dark" && variant !== "gray" ? bgColor : "",
+          includeSafeArea ? "pt-[54px]" : ""
+        )}
+        style={stickyBgStyle}
+      >
         <div className="grid h-[48px] grid-cols-[40px_1fr_40px] items-center px-[8px] pt-[8px]">
           {showBack ? (
             <button
@@ -95,7 +119,11 @@ export default function PageHeader({
       </div>
 
       <div
-        className={`flex items-center ${largeTitleAlign === "center" ? "justify-center text-center" : ""} ${bgColor}`}
+        className={cn(
+          "flex items-center",
+          largeTitleAlign === "center" ? "justify-center text-center" : "",
+          bgColor
+        )}
         style={{
           width: "375px",
           padding: compact ? "0 24px" : "8px 16px",

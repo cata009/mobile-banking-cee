@@ -125,8 +125,10 @@ export default function NavigationRow({
   className,
   trailing,
 }: NavigationRowProps) {
+  const hasLeadingIcon = Boolean(leadingIconName);
   const rootClassName = cn(
-    "flex min-h-[80px] w-full items-center gap-[16px] bg-[var(--uc-surface)] px-[16px] py-[24px] text-left",
+    "flex h-[80px] w-full items-center gap-[16px] bg-[var(--uc-surface)] text-left",
+    hasLeadingIcon ? "pl-[16px] pr-[12px]" : "pl-[24px] pr-[24px]",
     className,
   );
 

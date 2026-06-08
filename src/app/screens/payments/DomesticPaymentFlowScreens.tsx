@@ -89,6 +89,13 @@ export function TransactionDetailScreen({
   onRedoPayment: () => void;
 }) {
   const { t } = useLanguage();
+  const [headerProgress, setHeaderProgress] = useState(0);
+
+  const handlePageScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 48));
+    setHeaderProgress(progress);
+  };
+
   const detail = useMemo(
     () => createTransactionDetailData(transaction, country, product),
     [country, product, transaction],
@@ -103,45 +110,48 @@ export function TransactionDetailScreen({
 
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">
-      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide">
-        <div className="pt-[54px]">
-          <button type="button" onClick={onBack} className="ml-[4px] grid size-[40px] place-items-center" aria-label={t("runtime.actions.back", "Back")}>
-            <AppIcon name="back-heavy" color="var(--uc-text)" />
-          </button>
+      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide" onScroll={handlePageScroll}>
+        <PageHeader
+          title={detail.title}
+          onBack={onBack}
+          variant="gray"
+          largeTitleAlign="center"
+          collapsedTitleProgress={headerProgress}
+          includeSafeArea
+          showHelp={false}
+        />
+
+        <div className="bg-[var(--uc-app-bg)] pb-[24px]">
+          <section className="px-[24px] pt-[8px] text-center" style={{ opacity: 1 - headerProgress }}>
+            <p className="uc-type-n5-strong mt-[8px] text-[var(--uc-text-muted)]">
+              {detail.bookingDate}
+            </p>
+            <p className="mt-[8px] font-['UniCredit',sans-serif] text-[22px] font-bold leading-normal text-[var(--uc-text)]">
+              {detail.amount}
+            </p>
+            <p className="mt-[18px] font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text-muted)]">
+              {t("runtime.transactionDetail.pfmCategory", "PFM CATEGORY")}
+            </p>
+            <div
+              className="mt-[8px] inline-flex min-h-[32px] items-center gap-[8px] rounded-full border px-[14px] py-[4px]"
+              style={{
+                borderColor: `var(${detail.pfmCategoryColorVar})`,
+                color: `var(${detail.pfmCategoryColorVar})`,
+              }}
+              data-transaction-pfm-category={detail.pfmCategory}
+              data-transaction-pfm-subcategory={detail.pfmSubcategoryLabel}
+            >
+              <PfmCategoryIcon category={detail.pfmCategory} size={32} />
+              <span className="text-[12px] font-bold leading-normal">
+                {detail.pfmCategoryLabel.toUpperCase()}
+              </span>
+            </div>
+          </section>
+
+          <section className="mt-[31px]">
+            <AccountActionBar items={transactionActionItems} />
+          </section>
         </div>
-
-        <section className="px-[24px] pt-[8px] text-center">
-          <h1 className="uc-type-h1 text-[var(--uc-text)]">
-            {detail.title}
-          </h1>
-          <p className="uc-type-n5-strong mt-[16px] text-[var(--uc-text-muted)]">
-            {detail.bookingDate}
-          </p>
-          <p className="mt-[8px] font-['UniCredit',sans-serif] text-[22px] font-bold leading-normal text-[var(--uc-text)]">
-            {detail.amount}
-          </p>
-          <p className="mt-[18px] font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text-muted)]">
-            {t("runtime.transactionDetail.pfmCategory", "PFM CATEGORY")}
-          </p>
-          <div
-            className="mt-[8px] inline-flex min-h-[32px] items-center gap-[8px] rounded-full border px-[14px] py-[4px]"
-            style={{
-              borderColor: `var(${detail.pfmCategoryColorVar})`,
-              color: `var(${detail.pfmCategoryColorVar})`,
-            }}
-            data-transaction-pfm-category={detail.pfmCategory}
-            data-transaction-pfm-subcategory={detail.pfmSubcategoryLabel}
-          >
-            <PfmCategoryIcon category={detail.pfmCategory} size={32} />
-            <span className="text-[12px] font-bold leading-normal">
-              {detail.pfmCategoryLabel.toUpperCase()}
-            </span>
-          </div>
-        </section>
-
-        <section className="mt-[31px] bg-[var(--uc-app-bg)]">
-          <AccountActionBar items={transactionActionItems} />
-        </section>
 
         <section className="px-[22px] pt-[23px]">
           <h2 className="font-['UniCredit',sans-serif] text-[22px] font-bold leading-normal text-[var(--uc-text)]">

@@ -1,10 +1,102 @@
 # Current Session
 
-Last updated: 2026-06-05
+Last updated: 2026-06-08
 
 ## Current Focus
 
-Closing out the accumulated Investments, Kids, Design System Icons, and supporting registry/documentation work, then publishing the latest version to GitHub and Vercel.
+Implementing CEE homepage product card updates, Transaction Details layout polishing, PFM Cash category removal, enabling the "Between my accounts" card by default, and fixing the contact & settings page row padding layouts.
+
+## 2026-06-08 Closeout / Publish
+
+- User requested publishing the current workspace to GitHub and then Vercel.
+- Commit scope:
+  - all tracked runtime, registry, translation, design-system, and handoff documentation changes currently in the workspace;
+  - new runtime Cards files under `src/app/components/cards/CardComponent.tsx` and `src/app/screens/cards/`;
+  - local `.claude/launch.json` is intentionally left uncommitted because it is local tool configuration, not product/runtime source.
+- Banana Loop result:
+  - fixed: homepage product-card icons and Payments shortcut labels now use theme-aware tokens in dark mode.
+  - already triaged: Vite chunk-size warning remains a known warning and does not block publish.
+  - already triaged: no local `typecheck`, `lint`, or `test` scripts exist; build and repository audits remain the available verification gates.
+  - result: no untriaged blocker remains before commit/push/deploy.
+- Final verification before commit:
+  - `npm run build` passed; known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=30 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `npm run audit:figma-bridge` passed: `plugins=2 appExporterStatic=7`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-06-08 Homepage Product Card Icon Dark Mode Fix
+
+- Fixed homepage product-card icon coloring at component level:
+  - `src/app/components/ProductCard.tsx` now sets the 32x32 icon slot to `text-[var(--uc-action)]`, so product-card glyph color follows the active theme token.
+  - `src/hooks/useProducts.tsx` now renders the Accounts, Savings/Term Deposit, Loans/Mortgage, Investment, and default product glyph paths with `fill="currentColor"` instead of the hardcoded light-mode teal `#007A91`.
+  - Debit/credit card artwork keeps its explicit Mastercard brand colors.
+- Browser verification on `http://127.0.0.1:3005/`:
+  - clicked the real top-bar `Switch to Dark Mode` control;
+  - confirmed `data-uc-theme="dark"`;
+  - confirmed `--uc-action` resolves to `#FFFFFF`;
+  - confirmed current-color icon paths are present and no browser console errors were logged.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=30 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+
+## 2026-06-08 Payments Shortcut Label Dark Mode Fix
+
+- Fixed the Payments `SHORTCUTS` / `OTHER` bubble label text color:
+  - `src/app/components/payments/PaymentOtherShortcut.tsx` now uses `var(--uc-text)` for shortcut labels instead of the light-only `var(--Primary-K1, #262626)` fallback.
+  - The shortcut bubble background and icon color stay on the existing theme tokens (`var(--uc-action)` and `var(--uc-text-inverse)`).
+- Browser verification on `http://127.0.0.1:3005/`:
+  - opened Payments from bottom navigation;
+  - switched to dark mode through the real top-bar control;
+  - confirmed `Recurrent Payments`, `Templates`, `Foreign Payments`, and `Exchange Rates` labels compute to `rgb(255, 255, 255)` through `--uc-text`;
+  - confirmed no browser console errors were logged.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=30 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+
+## 2026-06-06 CEE Homepage & Transaction Details Polish
+
+- Fixed the Contacts and Settings pages row paddings, heights, and layouts to occupy full container width:
+  - Removed `px-[24px]` from the outer wrappers in `ContactsScreen.tsx` and `SettingsScreen.tsx` to let row components stretch edge-to-edge.
+  - Wrapped `SectionHeadingDivider` components in `px-[24px]` containers and set `mx-[24px]` on the header image container (in Contacts) to maintain their correct horizontal margins.
+  - Updated `NavigationRow.tsx` rootClassName dynamically: if a row has a leading icon (e.g. in Contacts), it uses `pl-[16px] pr-[12px]`; if a row does not have a leading icon (e.g. in Settings), it uses `pl-[24px] pr-[24px]` to align text with the 24px layout margins.
+  - Set the component height in `NavigationRow.tsx` to a fixed `80px` (`h-[80px]` instead of `min-h-[80px] py-[24px]`) to match the exact Figma height specs.
+- Fixed the Transaction Details screen header scroll-collapse and content overlap:
+  - Placed the `PageHeader` directly inside the scroll container in `DomesticPaymentFlowScreens.tsx` instead of wrapping it in the gray wrapper `div`, ensuring it remains sticky and the collapsed centered title fades in correctly when scrolled, preventing content overlap with the status bar.
+- Mapped bottom sheet titles to follow design system H1 specifications:
+  - Updated `BottomSheet.tsx` to map titles to the `h1` HTML element tag and styled it with the `uc-type-h1` class (size `28px`, bold) instead of the previous 22px `h2`/`uc-type-n1` variant.
+  - Removed `hover:bg-[var(--uc-surface-muted)]` from `NewPaymentActionListItem.tsx` to avoid desktop-like hover effects on option items in the mobile bottom sheet simulator.
+- Enabled the "Between my accounts" / "Currency exchange" card in the Payments screen:
+  - Removed `requiredFeature: "fx_newPaymentsHub"` from `"payments.exchange.create"` in `bankingScenarioRegistry.ts` so the action is active by default across all countries in the baseline release.
+- Renamed accordion category titles across all countries:
+  - "Savings and term deposits" -> "Savings"
+  - "Mortgages and loans" -> "Loans"
+  - "Investments" -> "Investment"
+- Formatted account numbers dynamically as realistic, country-specific UniCredit IBANs (e.g., `RO[2-digit check]BACX[16 digits]`, with Bosnia `BA_BL` prefixing with `BA`) for all non-card products on both homepage holdings and account detail screens.
+- Mapped and restructured PFM categories:
+  - Mapped legacy `"ATM"` and `"Cash"` transactions to `"Wallet"`.
+  - Mapped `"FX"` and `"Internal"` transactions to `"Transfers"`.
+  - Removed `"ATM"`, `"FX"`, `"Internal"`, and `"Cash"` from the visible PFM categories list in `PFM_CATEGORIES` and cleaned up their color variables.
+- Transaction Details and Prime header UI polish:
+  - Replaced hand-rolled headers with the standard `PageHeader` component wired with page scroll tracking (`headerProgress`), enabling clean iOS-like collapsing transitions of the main title to the header center when scrolled.
+  - Added a new `"gray"` variant to `PageHeader` (`bg-[var(--uc-app-bg)]`) to keep the gray backdrop continuous up to the top of the header area on the Transaction Details screen.
+  - Extended `PageHeader`'s `"dark"` variant with a dynamic scroll-linked background opacity and backdrop blur transition to prevent content overlap issues when scrolling on the Prime screen.
+  - Replaced the lucide-based `"grid-2x2"` icon on the Transaction Details action bar with the custom change category SVG.
+- Fixed BottomSheet close icon and NavigationRow chevron icon dimensions to match Figma 32x32 specs:
+  - Updated `close-x` icon in `AppIcon.tsx`: changed from `width:20 height:20 viewBox:"12 10 12 12"` to `width:32 height:32 viewBox:"0 0 32 32"` with the exact Figma-supplied path so the glyph centers correctly inside its 32px touch target.
+  - Updated `chevron-link` icon in `AppIcon.tsx`: changed from `width:20 height:20 viewBox:"12.75 9 7.25 14"` to `width:32 height:32 viewBox:"0 0 32 32"` with the exact Figma-supplied path for proper centering.
+- Verification:
+  - Running `npm run build` completed successfully.
+  - Running `npm run audit:templates` passed: `templates=50 codePreviews=50 components=70 screens=30 flows=15`.
+  - Running `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
 
 ## 2026-06-05 Closeout / Publish
 
@@ -2382,4 +2474,4 @@ constitutional check:
 - bananas triaged: yes
 - safe to resume: yes
 
-safe to resume: yes, the accumulated runtime/design-system/Figma bridge/Documents work is documented and verified locally. Remaining work is explicit follow-up: production URL smoke after Vercel deploy, automated tests for Documents delete/legal branches, broader screenshot/JSON regression coverage, and the known tooling/performance bananas already triaged in `docs/handoff/known-bananas.md` and `docs/handoff/next-tasks.md`.
+safe to resume: yes, the CEE Homepage product accordion changes, dynamic country-specific lookalike IBANs, PFM category mappings, Cash category removal, Transaction Details gray header polishing, prelogin dark mode fixes, topbar theme-toggle compaction, and Dynamic Island resizing have been fully implemented, documented, and verified locally. Remaining work is future product work as outlined in `docs/handoff/next-tasks.md`.
