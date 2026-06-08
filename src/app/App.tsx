@@ -39,6 +39,7 @@ import DesignSystemPage from "@/app/screens/design-system/DesignSystemPage";
 import AccountDetailScreen from "@/app/screens/accounts/AccountDetailScreen";
 import AccountDetailsInfoScreen from "@/app/screens/accounts/AccountDetailsInfoScreen";
 import AccountOptionsScreen from "@/app/screens/accounts/AccountOptionsScreen";
+import CardDetailScreen from "@/app/screens/cards/CardDetailScreen";
 import {
   DomesticPaymentCreateScreen,
   PaymentReviewScreen,
@@ -153,6 +154,7 @@ function AppContent() {
   // Track if FAB should slide in
   const [showFABSlideIn, setShowFABSlideIn] = useState(false);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<AccountTransaction | null>(null);
   const [paymentDraft, setPaymentDraft] = useState<DomesticPaymentDraft | null>(null);
   const accountProducts = categories.flatMap((category) => category.products);
@@ -221,6 +223,7 @@ function AppContent() {
       case 'account-details-info':
       case 'account-options':
       case 'transaction-detail':
+      case 'card-detail':
         return 'light';
       case 'design-system':
         return 'light';
@@ -367,8 +370,18 @@ function AppContent() {
   };
 
   const handleAccountClick = (product: Product) => {
+    if (product.type === "debit_card" || product.type === "credit_card") {
+      setSelectedCardId(product.id);
+      navigateTo("card-detail");
+      return;
+    }
     setSelectedAccountId(product.id);
     navigateTo("account-detail");
+  };
+
+  const handleCardClick = (product: Product) => {
+    setSelectedCardId(product.id);
+    navigateTo("card-detail");
   };
 
   const handleAccountDetailsClick = (product: Product) => {
@@ -528,6 +541,14 @@ function AppContent() {
 
         {currentScreen === "account-options" && (
           <AccountOptionsScreen onBack={goBack} />
+        )}
+
+        {currentScreen === "card-detail" && (
+          <CardDetailScreen
+            selectedCardId={selectedCardId}
+            onBack={goBack}
+            onTransactionClick={handleTransactionClick}
+          />
         )}
 
         {/* Prime Screen - EXACT ca Language Selector (NO animation) */}

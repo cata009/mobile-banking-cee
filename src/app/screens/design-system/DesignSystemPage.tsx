@@ -35,6 +35,7 @@ import UserEventCard, { USER_EVENT_CARD_SOURCE } from "@/app/components/cards/Us
 import HelperCard, { HELPER_CARD_SOURCE } from "@/app/components/cards/HelperCard";
 import PendingActionCard, { PENDING_ACTION_CARD_SOURCE } from "@/app/components/cards/PendingActionCard";
 import DebitCard, { DEBIT_CARD_SOURCE, DEBIT_CARD_VARIANTS, type DebitCardSize, type DebitCardVariant } from "@/app/components/cards/DebitCard";
+import CardComponent, { CARD_COMPONENT_SOURCE } from "@/app/components/cards/CardComponent";
 import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
 import productCardAccountImage from "../../../../screenshots/account.png";
@@ -113,7 +114,7 @@ const activeComponentFiles = [
   "AccordionSection", "AppIcon", "BottomNavigation", "CoAppingSessionScreen", "DynamicIsland", "EdgeLoadingAnimation",
   "FloatingCoAppingButton", "LanguageSelector", "LogoutConfirmDialog", "MobileFrame", "PageHeader",
   "PanelOverlay", "PanelWithTranslations", "PanelWithoutCoAppingTranslations", "PreLoginActiveScreen",
-  "PreLoginScreen", "PrimaryButton", "ProductAccordion", "ProductAccordionAnimated", "ProductCard", "Card", "GhostBanner", "InfoBanner", "UserEventCard", "HelperCard", "PendingActionCard", "DebitCard",
+  "PreLoginScreen", "PrimaryButton", "ProductAccordion", "ProductAccordionAnimated", "ProductCard", "Card", "GhostBanner", "InfoBanner", "UserEventCard", "HelperCard", "PendingActionCard", "DebitCard", "CardComponent",
   "ProductMenuCard", "ProductsList", "StatusBar", "TerminateSessionPopup", "TextField", "AmountField", "NavigationRow", "ToggleButton", "TotalRow", "UniCreditLogo", "PaymentHeroCard",
   "ProfileAvatar",
   "AccountBalanceCard", "AccountActionBar", "AccountCarouselIndicator", "AccountDetailsInfoField", "AccountSearchBar", "AccountTransactionRow", "AccountTransactionMonthDivider",
@@ -3784,6 +3785,11 @@ export default function DesignSystemPage() {
               </Specimen>
               <Specimen name="Debit Card" source="components/cards/DebitCard.tsx" note={`${DEBIT_CARD_SOURCE.schema} / ${DEBIT_CARD_SOURCE.sourceNodeId}`} specs={["64x40 Figma base", "8:5 aspect ratio", "SVG artwork asset", "variant registry (mc-debit-gold)", "Mastercard symbol + UniCredit + contactless marks", "controlled figma / medium / large sizing", "decorative by default / ariaLabel exposes as image"]}>
                 <DebitCardVariantSpecimen />
+              </Specimen>
+              <Specimen name="Card Component" source="components/cards/CardComponent.tsx" note={`${CARD_COMPONENT_SOURCE.schema} / ${CARD_COMPONENT_SOURCE.sourceNodeId}`} tone="gray" specs={["375-wide Figma base", "Primary/K7 (#F5F5F5) background", "vertical gap 12px / clips content", "Frame 46: 24px left padding / 8px gap", "card-holder 14px bold N5 / K1", "card-number 18px bold L2 / K1", "carousel 351x140 / horizontal gap 24px", "card slot 219x138 / 5.67px radius", "K6 (#E5E5E5) 1px outside border", "drop-shadow 0 11.265px 11.265px rgba(0,0,0,0.2)", "accepts cardHolderName / cardNumber / cards array"]}>
+                <div className="w-[375px]">
+                  <CardComponent />
+                </div>
               </Specimen>
               <Specimen name="Carousel Indicator" source="components/accounts/AccountCarouselIndicator.tsx" tone="gray" specs={["height 32px", "backdrop blur 13.591px", "inline-flex", "gap 6px", "active 30x6", "inactive 6x6", "mini 4x4 when count > 4"]}>
                 <AccountCarouselIndicatorVariantSpecimen />

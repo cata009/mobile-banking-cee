@@ -739,16 +739,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     cssVariable: "--uc-pfm-healthcare",
   },
   {
-    id: "pfm-cash",
-    name: "PFM Cash",
-    paletteId: "pfm",
-    lightHex: "#7E5B01",
-    darkHex: "#A28040",
-    sourceTokens: ["PFM / Cash"],
-    usage: "Personal finance category color for cash movements.",
-    cssVariable: "--uc-pfm-cash",
-  },
-  {
     id: "pfm-children",
     name: "PFM Children",
     paletteId: "pfm",

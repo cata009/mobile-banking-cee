@@ -99,13 +99,13 @@ const en: TranslationKeys = {
   more: {
     title: 'More',
     cards: {
-      contacts: 'Contacts',
+      contacts: 'Contact',
       documents: 'Documents',
-      settings: 'Settings',
+      settings: 'settings',
       gdprConsent: 'GDPR Consent',
-      thirdPartyConsent: 'Consent to third parties',
+      thirdPartyConsent: 'Third party consents',
       digitalActivities: 'Digital activity record',
-      myRequests: 'My applications',
+      myRequests: 'Product applications and cancellations',
       tutorial: 'Tutorials',
     },
   },

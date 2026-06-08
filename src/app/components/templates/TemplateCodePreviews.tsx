@@ -2747,7 +2747,6 @@ function SettingsRowTemplate({
         description={description}
         trailingAccessory="chevron"
         chevronIconName="chevron-link"
-        className="px-0 py-[24px]"
       />
     </TemplateAction>
   );
@@ -2757,12 +2756,14 @@ function SettingsTemplate({ interactive }: { interactive: boolean }) {
   return (
     <TemplatePhoneSurface>
       <TemplateTopChrome title="Settings" interactive={interactive} />
-      <main className="px-[24px] pb-[32px] pt-[20px]">
-        <div className="flex flex-col gap-[32px]">
+      <main className="pb-[32px] pt-[20px]">
+        <div className="flex flex-col gap-[24px]">
           {SETTINGS_SECTIONS.map((section) => (
             <section key={section.id}>
-              <SectionHeadingDivider title={section.title} />
-              <div className="flex flex-col gap-[24px] pt-[16px]">
+              <div className="px-[24px]">
+                <SectionHeadingDivider title={section.title} />
+              </div>
+              <div className="flex flex-col gap-0 pt-[16px]">
                 {section.items.map((item) => (
                   <SettingsRowTemplate
                     key={item.id}

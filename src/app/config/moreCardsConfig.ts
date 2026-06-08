@@ -34,9 +34,9 @@ export const MORE_CARDS_CONFIG: Record<CountryId, MoreCardType[]> = {
     'contacts',
     'documents',
     'settings',
-    'gdpr-consent',
     'third-party-consent',
     'my-requests',
+    'tutorial',
   ],
 
   // Czech Republic - 7 cards
@@ -79,13 +79,14 @@ export const MORE_CARDS_CONFIG: Record<CountryId, MoreCardType[]> = {
     'my-requests',
   ],
 
-  // Hungary - 5 cards
+  // Hungary - 6 cards
   HU: [
     'contacts',
     'documents',
     'settings',
     'third-party-consent',
     'tutorial',
+    'my-requests',
   ],
 
   // Serbia - 5 cards

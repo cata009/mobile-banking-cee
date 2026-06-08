@@ -40,12 +40,12 @@ export function BottomSheet({ title, subtitle, meta, children, onClose }: Bottom
         <div className="mb-[24px] flex items-start justify-between gap-[16px]">
           <div className="min-w-0">
             {title ? (
-              <h2
+              <h1
                 id={titleId}
-                className="uc-type-n1 leading-[34px] text-[var(--uc-text)]"
+                className="uc-type-h1 text-[var(--uc-text)]"
               >
                 {title}
-              </h2>
+              </h1>
             ) : null}
             {subtitle ? (
               <div className="uc-type-n5 mt-[4px] text-[var(--uc-text)]">

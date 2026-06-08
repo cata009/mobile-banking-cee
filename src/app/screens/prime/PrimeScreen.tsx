@@ -5,10 +5,11 @@
  */
 
 import { useState } from 'react';
+import type { UIEvent } from 'react';
 import { useLanguage } from '@/app/contexts/LanguageContext';
 import { YourAdvisorTab } from './YourAdvisorTab';
 import { YourBenefitsTab } from './YourBenefitsTab';
-import { AppIcon } from "@/app/components/icons";
+import PageHeader from '@/app/components/PageHeader';
 import imgPrimeHome from "figma:asset/6f8736f05a24b87b9ef5508cfd9021e9a466bf48.png";
 
 interface PrimeScreenProps {
@@ -18,6 +19,12 @@ interface PrimeScreenProps {
 export default function PrimeScreen({ onBack }: PrimeScreenProps) {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<'advisor' | 'benefits'>('advisor');
+  const [headerProgress, setHeaderProgress] = useState(0);
+
+  const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
+    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 48));
+    setHeaderProgress(progress);
+  };
 
   return (
     <div className="w-full h-full relative flex flex-col">
@@ -32,63 +39,16 @@ export default function PrimeScreen({ onBack }: PrimeScreenProps) {
 
       {/* Content - RELATIVE positioned above background */}
       <div className="relative z-10 flex flex-col h-full">
-        {/* STICKY Header - doar back button + question mark */}
-        <div className="sticky top-0 z-20 pt-[54px]">
-          <div className="w-full bg-transparent">
-            {/* Container cu back button - 8px de la status bar + 40px button height */}
-            <div className="flex items-center justify-between h-[48px] pt-[8px]">
-              {/* Back button - 8px de la stânga */}
-              <button
-                onClick={onBack}
-                className="ml-[8px] flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  padding: '8px 7.998px 7.997px 7.998px'
-                }}
-                aria-label="Back"
-              >
-                <AppIcon
-                  name="back-heavy"
-                  color="var(--uc-static-white)"
-                  style={{
-                    width: '20px',
-                    height: '20px',
-                    flexShrink: 0,
-                    aspectRatio: '1/1'
-                  }}
-                />
-              </button>
-
-              {/* Empty space in right - no help button */}
-              <div className="w-[40px] h-[40px]" />
-            </div>
-          </div>
-        </div>
-
-        {/* SCROLLABLE Content - titlu + tabs + content */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide pb-[24px]">
-          {/* Page Title - 8px de la sticky header */}
-          <div 
-            className="flex items-center"
-            style={{
-              width: '375px',
-              padding: '8px 16px'
-            }}
-          >
-            <h1 
-              className="uc-type-h1 text-[var(--uc-static-white)]"
-              style={{
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}
-            >
-              {t('prime.pageTitle')}
-            </h1>
-          </div>
+        {/* SCROLLABLE Content - PageHeader + tabs + content */}
+        <div className="flex-1 overflow-y-auto scrollbar-hide pb-[24px]" onScroll={handlePageScroll}>
+          <PageHeader
+            title={t('prime.pageTitle')}
+            onBack={onBack}
+            variant="dark"
+            collapsedTitleProgress={headerProgress}
+            includeSafeArea
+            showHelp={false}
+          />
 
           {/* 24px spacing între titlu și tabs */}
           <div className="h-[24px]" />

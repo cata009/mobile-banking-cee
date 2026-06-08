@@ -54,7 +54,6 @@ function getCategoryDisplayLabel(category: string, t: (key: string, fallback?: s
     Wallet: "WALLET",
     Transfers: "TRANSFERS",
     Investments: "INVESTMENTS",
-    Cash: "CASH",
     ATM: "ATM",
     FX: "EXCHANGE",
     "Exclude from budget": "EXCLUDED",

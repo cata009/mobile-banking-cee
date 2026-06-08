@@ -223,21 +223,21 @@ export function getProductsByCategory(): ProductCategory[] {
     },
     {
       key: 'savings_deposits',
-      title: 'Savings and term deposits',
+      title: 'Savings',
       products: mockProducts.filter(p => 
         p.type === 'saving_account' || p.type === 'term_deposit'
       )
     },
     {
       key: 'mortgages_loans',
-      title: 'Mortgages and loans',
+      title: 'Loans',
       products: mockProducts.filter(p => 
         p.type === 'loan' || p.type === 'mortgage'
       )
     },
     {
       key: 'investments',
-      title: 'Investments',
+      title: 'Investment',
       products: mockProducts.filter(p => p.type === 'investment_account')
     }
   ];

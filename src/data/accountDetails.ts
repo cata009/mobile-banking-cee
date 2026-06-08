@@ -464,7 +464,7 @@ function getPrimaryCurrentAccountTransactions(
     t(new Date(2026, 3, 4), profile.subscription, "Card payment", -12.99, "Leisure time", "Subscriptions"),
     t(new Date(2026, 3, 2), profile.publicInstitution, "Account payment", -210, "Taxes and Penalties", "Taxes and fees"),
     t(new Date(2026, 3, 30), profile.atm, "Cash withdrawal", -60, "ATM", "Cash withdrawal"),
-    t(new Date(2026, 3, 28), "Cash deposit", "Branch cash deposit", 75, "Cash", "Cash deposit"),
+    t(new Date(2026, 3, 28), "Cash deposit", "Branch cash deposit", 75, "Wallet", "Cash deposit"),
     t(new Date(2026, 3, 26), profile.wallet, "Mobile wallet top-up", -45, "Wallet", "Wallet top-up"),
     t(new Date(2026, 3, 23), profile.investments, "Account payment", -150, "Investments", "Broker transfer"),
     t(new Date(2026, 3, 21), profile.bankFee, "Monthly package fee", -4.5, "Finance", "Bank fees"),

@@ -41,9 +41,9 @@ export default function ContactsScreen({ onBack, onPrimeClick }: ContactsScreenP
         collapsedTitleProgress={headerProgress}
         includeSafeArea
       />
-      <div className="flex flex-col gap-[24px] px-[24px] pt-[8px] pb-[24px]">
+      <div className="flex flex-col gap-[24px] pt-[8px] pb-[24px]">
           {/* UniCredit Building Image */}
-          <div className="w-full h-[160px] rounded-[8px] overflow-hidden">
+          <div className="mx-[24px] h-[160px] rounded-[8px] overflow-hidden">
             <img 
               src={imgUniCreditBuilding} 
               alt="UniCredit Building" 
@@ -53,7 +53,9 @@ export default function ContactsScreen({ onBack, onPrimeClick }: ContactsScreenP
 
           {/* BANK CONTACTS Section */}
           <div className="flex flex-col">
-            <SectionHeadingDivider title={t("runtime.contacts.sections.bankContacts", "BANK CONTACTS")} />
+            <div className="px-[24px]">
+              <SectionHeadingDivider title={t("runtime.contacts.sections.bankContacts", "BANK CONTACTS")} />
+            </div>
             
             <div className="flex flex-col mt-[16px]">
               <ContactsNavigationCard
@@ -109,7 +111,9 @@ export default function ContactsScreen({ onBack, onPrimeClick }: ContactsScreenP
 
           {/* SOCIAL MEDIA Section */}
           <div className="flex flex-col">
-            <SectionHeadingDivider title={t("runtime.contacts.sections.socialMedia", "SOCIAL MEDIA")} />
+            <div className="px-[24px]">
+              <SectionHeadingDivider title={t("runtime.contacts.sections.socialMedia", "SOCIAL MEDIA")} />
+            </div>
             
             <div className="flex flex-col mt-[16px]">
               <ContactsNavigationCard

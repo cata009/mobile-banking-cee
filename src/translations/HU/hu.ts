@@ -99,13 +99,13 @@ const hu: TranslationKeys = {
   more: {
     title: 'Tovabbiak',
     cards: {
-      contacts: 'Kapcsolatok',
+      contacts: 'Kapcsolat',
       documents: 'Dokumentumok',
-      settings: 'Beallitasok',
+      settings: 'beallitasok',
       gdprConsent: 'GDPR hozzajarulas',
-      thirdPartyConsent: 'Hozzajarulas harmadik felekhez',
+      thirdPartyConsent: 'Hozzajarulasok harmadik felekhez',
       digitalActivities: 'Digitalis tevekenysegi naplo',
-      myRequests: 'Kerelmeim',
+      myRequests: 'Termek igenylesek es lemondasok',
       tutorial: 'Utmutatok',
     },
   },

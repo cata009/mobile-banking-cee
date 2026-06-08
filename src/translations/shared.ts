@@ -84,7 +84,6 @@ const EN_RUNTIME: RuntimeTranslations = {
       Wallet: "WALLET",
       Transfers: "TRANSFERS",
       Investments: "INVESTMENTS",
-      Cash: "CASH",
       ATM: "ATM",
       FX: "EXCHANGE",
       "Exclude from budget": "EXCLUDED",
