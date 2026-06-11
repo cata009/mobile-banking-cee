@@ -1,12 +1,22 @@
 import { useState, useEffect } from 'react';
 import svgPaths from '@/imports/svg-2hn0mpby87';
 
+export type PhoneChromeVariant = 'light' | 'dark' | 'theme';
+
 interface StatusBarProps {
-  variant?: 'light' | 'dark'; // light = text negru, dark = text alb
+  variant?: PhoneChromeVariant; // light = text negru, dark = text alb, theme = controlled by phone theme CSS vars
   isCoAppingActive?: boolean;
 }
 
-function Time({ variant }: { variant: 'light' | 'dark' }) {
+function getStatusBarForeground(variant: PhoneChromeVariant) {
+  if (variant === 'theme') {
+    return 'var(--uc-phone-status-fg, var(--uc-text))';
+  }
+
+  return variant === 'light' ? 'var(--uc-text)' : 'var(--uc-static-white)';
+}
+
+function Time({ variant }: { variant: PhoneChromeVariant }) {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -22,13 +32,13 @@ function Time({ variant }: { variant: 'light' | 'dark' }) {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   };
 
-  const textColor = variant === 'light' ? 'text-[var(--uc-text)]' : 'text-[var(--uc-static-white)]';
+  const textColor = getStatusBarForeground(variant);
 
   return (
     <div className="content-stretch flex flex-[1_0_0] h-[22px] items-center justify-center min-h-px min-w-px pt-[1.5px] relative" data-name="Time">
       <p 
-        className={`font-['SF_Pro:Semibold',sans-serif] font-[590] leading-[22px] relative shrink-0 text-[17px] ${textColor} text-center`}
-        style={{ fontVariationSettings: "'wdth' 100" }}
+        className="font-['SF_Pro:Semibold',sans-serif] font-[590] leading-[22px] relative shrink-0 text-[17px] text-center"
+        style={{ color: textColor, fontVariationSettings: "'wdth' 100" }}
       >
         {formatTime(currentTime)}
       </p>
@@ -36,9 +46,9 @@ function Time({ variant }: { variant: 'light' | 'dark' }) {
   );
 }
 
-function Frame({ variant }: { variant: 'light' | 'dark' }) {
-  const fillColor = variant === 'light' ? 'black' : 'white';
-  const strokeColor = variant === 'light' ? 'black' : 'white';
+function Frame({ variant }: { variant: PhoneChromeVariant }) {
+  const fillColor = getStatusBarForeground(variant);
+  const strokeColor = getStatusBarForeground(variant);
 
   return (
     <div className="h-[13px] relative shrink-0 w-[27.328px]" data-name="Frame">
@@ -53,8 +63,8 @@ function Frame({ variant }: { variant: 'light' | 'dark' }) {
   );
 }
 
-function Levels({ variant }: { variant: 'light' | 'dark' }) {
-  const fillColor = variant === 'light' ? 'black' : 'white';
+function Levels({ variant }: { variant: PhoneChromeVariant }) {
+  const fillColor = getStatusBarForeground(variant);
 
   return (
     <div className="flex-[1_0_0] h-[22px] min-h-px min-w-px relative" data-name="Levels">

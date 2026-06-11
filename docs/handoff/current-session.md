@@ -1,10 +1,105 @@
 # Current Session
 
-Last updated: 2026-06-08
+Last updated: 2026-06-11
 
 ## Current Focus
 
-Implementing CEE homepage product card updates, Transaction Details layout polishing, PFM Cash category removal, enabling the "Between my accounts" card by default, and fixing the contact & settings page row padding layouts.
+Polishing the Hungary Mobile PI Kids CEE Light Restyle homepage and theme flow, with current focus on the supplied HU quick-action icons and clean closeout.
+
+## 2026-06-11 Hungary Kids Quick Action Icons
+
+- User requested the HU Kids Home quick-action rail use three supplied SVGs for `Request money`, `Account Details`, and `More Options`, and that those icons also exist in the Design System.
+- Runtime changes:
+  - `src/app/components/icons/AppIcon.tsx` now defines `hu-kids-request-money`, `hu-kids-account-details`, and `hu-kids-more-options` as custom registry icons using the supplied path geometry.
+  - The three new glyphs use `currentColor` instead of hardcoded `#262626`, so they remain token/theme-compatible across HU themes and Dark Mode.
+  - The three HU Kids glyphs are marked as non-standard icon dimensions so the Design System inventory preserves their native `24x24` / `20x22` proportions instead of normalizing them to the generic 20px UI glyph size.
+  - `src/app/screens/kids/KidsMarketHomeApp.tsx` now maps the HU Home quick-action rail to the new icons while leaving the Send money icon unchanged.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=30 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - In-app Browser on `http://127.0.0.1:3005/` confirmed `Mobile PI Kids` + `Hungary` Home renders `Request money`, `Account Details`, and `More Options` with the supplied path data, expected viewBoxes (`0 0 24 24`, `0 0 20 22`, `0 0 24 24`), token color `rgb(38, 38, 38)`, and no console errors.
+  - In-app Browser opened Design System Inventory -> Icons, searched `HU Kids`, and confirmed all three labels are present: `HU Kids request money`, `HU Kids account details`, and `HU Kids more options`.
+  - Browser was returned to `Mobile PI Kids` + `Hungary` Home after verification.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Banana Loop:
+  - fixed: the three HU quick-action buttons no longer use generic wallet/building/more icons.
+  - fixed: the supplied icons are centralized in `AppIcon`, so they appear in the Design System Icons inventory and remain reusable.
+  - fixed: local helper/config folders `.claude/` and `mini/` are ignored so the commit can stay clean while preserving the runtime asset copied under `src/assets/kids/`.
+  - already triaged: no automated icon raw-SVG audit exists yet; this remains in known bananas and did not block the scoped registry-based change.
+- Constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-06-11 Hungary Kids Theme Personalization
+
+- User requested a "wow" theme system for HU Kids, inspired by Revolut's theme UX:
+  - `More Options` opens a bottom sheet;
+  - the sheet exposes `Themes`;
+  - `Themes` opens a `Change theme` page;
+  - the page shows a framed real HU Home preview, not a fake screenshot;
+  - a carousel selects among multiple themes;
+  - `Apply` returns to Home with the selected theme applied;
+  - the top Home area shows a subtle animated effect that disappears after scrolling down, while themed colors remain blended into cards/nav/surfaces.
+- Runtime changes:
+  - `src/app/screens/kids/KidsMarketHomeApp.tsx` now has HU-local theme state with six presets: Standard, Blue Lines, Bubbles, Aurora, Garden, and Solar; Standard is the initial/no-theme state.
+  - HU Home is refactored into reusable composition pieces so the theme picker preview renders the actual Home components inside a scaled framed preview.
+  - `More Options` quick action now opens a phone-contained bottom sheet with a `Themes` row.
+  - `Change theme` page supports draft selection, live preview update, selected/applied states, and Apply-to-Home; the page now uses the shared `PageHeader` in always-compact dark mode and the shared `PrimaryButton` for Apply.
+  - The real Home preview is framed inside a rounded phone surround with a `234x353` inner viewport to match the Figma reference proportion.
+  - The theme carousel supports horizontal mouse drag without swallowing simple theme-button clicks; touch keeps native horizontal panning.
+  - The applied theme drives page background, blended card surfaces, action circles, progress bar, bottom navigation, and accent text.
+  - HU bottom navigation now renders through the shared PI `BottomNavigation` design-system component. The HU wrapper only supplies themed background/accent variables; labels and tab geometry come from the normal PI menu (`Home`, `Spending`, `Payments`, `Products`, `More`).
+  - HU bottom navigation tabs now load real HU Kids content instead of leaving inactive pages blank: `Spending` renders a duplicated Home-style saving focus surface, `Payments` uses the HU PI payments labels/config, and `Products` / `More` reuse the simpler Bosnia-inspired menu shape while keeping all visible labels from the HU runtime translations.
+  - HU now uses a theme-aware phone system chrome path: `MobileFrame`, `StatusBar`, and `DynamicIsland` support a `theme` variant, and HU Kids sets `--uc-phone-status-fg`, `--uc-phone-dynamic-island-bg`, and `--uc-phone-system-bar-bg` from the active/draft theme. Standard/no-theme keeps dark system text on light chrome; colored themes and `Change theme` use light system text on a blended themed top.
+  - `HuThemeMotionLayer` now starts at the top of the phone viewport instead of below the 54px system area, so the animated theme field continues under the status bar and fades into the page instead of looking like a separate band.
+  - `src/app/components/PrimaryButton.tsx` now uses `var(--uc-text-inverse)` on the action variant, fixing the dark-mode white-on-white contrast case when `--uc-action` resolves to white.
+  - `src/app/components/PageHeader.tsx` no longer reserves invisible large-title space when `compact` is fully collapsed, which supports full-screen compact detail pages such as `Change theme`.
+  - `src/styles/theme.css` adds the `hu-theme-field-drift` keyframes and `.hu-theme-motion-field` utility for the top animated theme layer.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=30 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - In-app Browser smoke on `http://127.0.0.1:3005/` selected `Mobile PI Kids` + `Hungary`, opened `More Options`, confirmed bottom sheet, opened `Change theme`, confirmed the preview contains real Home content (`Welcome back Alexandra` + `Request Money`), selected `Aurora`, applied it, returned to Home with `data-hu-theme="aurora"`, confirmed `hu-theme-field-drift` animation is active at top, confirmed animation opacity becomes `0` after scroll, and confirmed no browser console errors.
+  - Follow-up in-app Browser smoke after the carousel/header/button refinements confirmed Home starts on `data-hu-theme="default"` / `Standard`, `Change theme` exposes six theme buttons, clicking `Blue Lines` switches the draft preview to `data-hu-theme="blue-lines"`, clicking `Standard` returns the draft preview to `data-hu-theme="default"`, and dark-mode `Change theme` keeps the page on dark chrome while `PrimaryButton` computes to white background with `#262626` text.
+  - Follow-up in-app Browser smoke for HU Kids bottom navigation confirmed exactly one `data-phone-bottom-navigation="true"` instance inside the phone, with PI labels `Home`, `Spending`, `Payments`, `Products`, and `More`; clicking `Payments` moved the active indicator/accent to Payments, then clicking `Home` restored the Home active state.
+  - Follow-up in-app Browser smoke for HU Kids theme/system-bar blending confirmed a colored theme renders `--uc-phone-status-fg` through the themed chrome path, status time computes to white, battery fill uses `var(--uc-phone-status-fg, var(--uc-text))`, `HuThemeMotionLayer` starts at offset `0` from the phone screen top, the themed system-bar fade is active, no console errors were logged, and the browser was returned to the top of the HU Home state with a colored theme active.
+  - Follow-up in-app Browser smoke for HU Kids nav mapping confirmed `Payments` shows HU runtime labels (`New payment`, `Between my accounts`, `Recurrent payments`, `Scan & pay`), `Products` shows simplified product cards with HU labels (`Account`, `Cards`, `Mortgages and loans`, `Investments and savings`), `More` shows the simplified five-card shape with HU labels (`Contact`, `Documents`, `settings`, `Tutorials`, `Product applications and cancellations`), and no browser console errors were logged.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Limitations:
+  - Theme choices are local React state only; they do not persist across full app reloads.
+  - The feature is HU Kids concept-only and does not yet expose per-section customization like the deeper Revolut collection screens.
+- Next recommended action:
+  - Refine theme artwork names/visuals and decide whether to persist the selected theme or add locked/premium theme states.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-11 Hungary Kids CEE Light Restyle Homepage
+
+- User requested the existing Mobile Banking Kids Hungary project be transformed to closely match the supplied CEE light homepage, with `mini/` used as the helper/reference project before later interactive polish and element replacement.
+- Runtime changes:
+  - `src/app/screens/kids/KidsMarketHomeApp.tsx` now routes the HU Kids concept to a dedicated `HuCeeLightRestyleApp` render branch.
+  - The HU page recreates the supplied homepage structure inside the existing phone shell: UniCredit header, Alexandra profile image, HUF balance, quick-action rail, Request Money card, weekly spending card, recent transactions, cards, tasks, all-money buckets, and fixed L1 bottom navigation.
+  - `src/assets/kids/woman-profile.png` was copied from `mini/public/woman-profile.png` so the runtime no longer depends on the untracked helper project.
+  - `src/app/components/UniCreditLogo.tsx` now accepts an optional `textColor` prop so the same logo component can render correctly on the light HU header without changing its white default elsewhere.
+  - `src/data/kidsMarketHomeConcepts.ts` updates the HU concept metadata to Alexandra, HUF values, weekly limit, and the CEE light restyle positioning.
+- Verification:
+  - `npm run build` passed after the asset import change; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=30 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - In-app Browser smoke on `http://127.0.0.1:3005/` selected `Mobile PI Kids` + `Hungary`, confirmed project pack `kids-pi-hu`, HU homepage sections, loaded `src/assets/kids/woman-profile.png`, active Home bottom nav, no bottom-nav overlap at the checked position, and no browser console errors.
+  - Targeted Kids color scan found no new raw app color usage from the HU implementation; the only reported `rgb(...)` line is the pre-existing generic Kids nav shadow.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Limitations:
+  - HU is still a mock-driven/static concept page, not a real child wallet, card, request-money, chores, or ledger implementation.
+  - Request/card/task actions are staged as visual affordances for the next polish pass; no new backend or workflow capability was added.
+- Next recommended action:
+  - Continue visual polish against the supplied screenshot/JSON, then choose which static elements to cut, replace, or wire interactively.
+- Blocked by: none.
+- Safe to resume: yes.
 
 ## 2026-06-08 Closeout / Publish
 

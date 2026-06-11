@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import StatusBar from '@/app/components/StatusBar';
+import StatusBar, { type PhoneChromeVariant } from '@/app/components/StatusBar';
 import DynamicIsland from '@/app/components/DynamicIsland';
 import ShareScreenGlow from '@/app/components/ShareScreenGlow';
 
 interface MobileFrameProps {
   children: React.ReactNode;
-  statusBarVariant?: 'light' | 'dark';
+  statusBarVariant?: PhoneChromeVariant;
   overlay?: React.ReactNode;
   isCoAppingActive?: boolean;
 }
@@ -114,6 +114,13 @@ export default function MobileFrame({
                 {children}
               </div>
 
+              {statusBarVariant === 'theme' && (
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-x-0 top-0 z-[44] h-[76px]"
+                  style={{ background: 'var(--uc-phone-system-bar-bg, transparent)' }}
+                />
+              )}
               <StatusBar variant={statusBarVariant} />
               <DynamicIsland variant={statusBarVariant} />
 

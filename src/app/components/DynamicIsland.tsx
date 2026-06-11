@@ -1,10 +1,20 @@
 interface DynamicIslandProps {
-  variant?: "light" | "dark";
+  variant?: "light" | "dark" | "theme";
 }
 
 export default function DynamicIsland({ variant = "dark" }: DynamicIslandProps) {
-  const shellColor = variant === "light" ? "#262626" : "#1F1F1F";
-  const sensorColor = variant === "light" ? "#131313" : "#0E0E0E";
+  const shellColor =
+    variant === "theme"
+      ? "var(--uc-phone-dynamic-island-bg, #262626)"
+      : variant === "light"
+        ? "#262626"
+        : "#1F1F1F";
+  const sensorColor =
+    variant === "theme"
+      ? "var(--uc-phone-dynamic-island-sensor-bg, #0E0E0E)"
+      : variant === "light"
+        ? "#131313"
+        : "#0E0E0E";
 
   return (
     <div className="pointer-events-none absolute left-1/2 top-[12px] z-[45] -translate-x-1/2">
