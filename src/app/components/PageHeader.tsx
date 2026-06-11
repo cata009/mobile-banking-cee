@@ -45,6 +45,7 @@ export default function PageHeader({
       : "bg-[var(--uc-surface)]";
   const titleProgress = Math.min(1, Math.max(0, collapsedTitleProgress));
   const largeTitleOpacity = 1 - titleProgress;
+  const shouldRenderLargeTitle = !(compact && titleProgress >= 0.999);
 
   const stickyBgStyle = variant === "dark"
     ? {
@@ -118,32 +119,34 @@ export default function PageHeader({
         </div>
       </div>
 
-      <div
-        className={cn(
-          "flex items-center",
-          largeTitleAlign === "center" ? "justify-center text-center" : "",
-          bgColor
-        )}
-        style={{
-          width: "375px",
-          padding: compact ? "0 24px" : "8px 16px",
-          opacity: largeTitleOpacity,
-        }}
-      >
-        <h1
-          className={cn(compact ? "uc-type-l1" : "uc-type-h1", textColor)}
+      {shouldRenderLargeTitle ? (
+        <div
+          className={cn(
+            "flex items-center",
+            largeTitleAlign === "center" ? "justify-center text-center" : "",
+            bgColor
+          )}
           style={{
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            color: largeTitleColor,
+            width: "375px",
+            padding: compact ? "0 24px" : "8px 16px",
+            opacity: largeTitleOpacity,
           }}
         >
-          {title}
-        </h1>
-      </div>
+          <h1
+            className={cn(compact ? "uc-type-l1" : "uc-type-h1", textColor)}
+            style={{
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              color: largeTitleColor,
+            }}
+          >
+            {title}
+          </h1>
+        </div>
+      ) : null}
     </>
   );
 }

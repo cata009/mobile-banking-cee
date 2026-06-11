@@ -529,6 +529,28 @@
 }
 
 @layer utilities {
+  @keyframes hu-theme-field-drift {
+    0% {
+      transform: translate3d(-2%, -1%, 0) scale(1);
+      filter: saturate(1);
+    }
+
+    50% {
+      transform: translate3d(2%, 1%, 0) scale(1.035);
+      filter: saturate(1.12);
+    }
+
+    100% {
+      transform: translate3d(-1%, 2%, 0) scale(1.02);
+      filter: saturate(1.04);
+    }
+  }
+
+  .hu-theme-motion-field {
+    animation: hu-theme-field-drift 15s ease-in-out infinite alternate;
+    will-change: transform, filter;
+  }
+
   .uc-type-h1,
   .uc-type-h2,
   .uc-type-l1,

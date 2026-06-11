@@ -2,6 +2,8 @@ node_modules/
 dist/
 test-results/
 .codex-temp/
+.claude/
+mini/
 
 *.log
 vite-*.log
