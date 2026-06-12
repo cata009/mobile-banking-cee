@@ -1,12 +1,13 @@
 import type { CountryId } from "@/app/state/demoTypes";
 
-export type KidsHomeCountry = Extract<CountryId, "CZ" | "SK" | "HU" | "BA" | "BA_BL" | "SI">;
+export type KidsHomeCountry = Extract<CountryId, "CZ" | "SK" | "HU" | "RS" | "BA" | "BA_BL" | "SI">;
 
 export type KidsHomeStyle =
   | "cz-pocket-plan"
   | "sk-guided-flow"
   | "sk-bulbank-kids"
   | "hu-smart-fintech"
+  | "rs-safe-spend-coach"
   | "ba-family-hub"
   | "ba-bl-card-first"
   | "si-goal-coach";
@@ -93,7 +94,7 @@ export interface KidsMarketHomeConcept {
   nav: KidsBottomNavItem[];
 }
 
-export const KIDS_HOME_COUNTRIES: readonly KidsHomeCountry[] = ["CZ", "SK", "HU", "BA", "BA_BL", "SI"] as const;
+export const KIDS_HOME_COUNTRIES: readonly KidsHomeCountry[] = ["CZ", "SK", "HU", "RS", "BA", "BA_BL", "SI"] as const;
 
 export const KIDS_MARKET_HOME_CONCEPTS: Record<KidsHomeCountry, KidsMarketHomeConcept> = {
   CZ: {
@@ -243,6 +244,58 @@ export const KIDS_MARKET_HOME_CONCEPTS: Record<KidsHomeCountry, KidsMarketHomeCo
       { id: "card", label: "Card", icon: "credit-card" },
       { id: "insights", label: "Insights", icon: "receipt-text" },
       { id: "more", label: "Profile", icon: "user-round" },
+    ],
+  },
+  RS: {
+    country: "RS",
+    style: "rs-safe-spend-coach",
+    conceptLabel: "RS Kids safe-spend coach",
+    childName: "Luka",
+    childAge: 13,
+    avatar: "LU",
+    greeting: "Welcome back Luka",
+    heroTitle: "safe to spend today",
+    heroSubtitle: "A coached homepage for spending, earning, goals, and card safety.",
+    balance: 14820,
+    safeToday: 1200,
+    parentName: "Mum Jelena",
+    allowanceLabel: "Weekly plan",
+    allowanceAmount: 5000,
+    allowanceNext: "2 days left",
+    approvalCopy: "Mum sees payments, requests, tasks, and safety limits. Personal goal names stay private.",
+    cardStatus: "Card active, online payments off",
+    metrics: [
+      { label: "Today runway", value: "1,200 RSD", hint: "safe before weekend" },
+      { label: "Goal pace", value: "68%", hint: "hoodie still on track" },
+      { label: "Earn next", value: "+700", hint: "two tasks ready" },
+    ],
+    actions: [
+      { label: "Ask", detail: "Family top-up", icon: "circle-dollar-sign", tone: "red" },
+      { label: "Goal", detail: "Boost plan", icon: "piggy-bank", tone: "teal" },
+      { label: "Freeze", detail: "Card safety", icon: "shield-check", tone: "blue" },
+      { label: "More", detail: "Settings", icon: "nav-more", tone: "neutral" },
+    ],
+    pockets: [
+      { title: "Concert hoodie", savedAmount: 6800, targetAmount: 10000, emojiLabel: "DROP", helper: "Save 800 RSD this week to stay on pace" },
+      { title: "School trip", savedAmount: 4200, targetAmount: 16000, emojiLabel: "TRIP", helper: "Mum can approve a family boost" },
+      { title: "Gaming weekend", savedAmount: 1850, targetAmount: 6000, emojiLabel: "PLAY", helper: "Use task rewards, not lunch money" },
+    ],
+    feed: [
+      { title: "Allowance from Mum", amount: 5000, category: "Family", time: "Today" },
+      { title: "School cafeteria", amount: -460, category: "Food", time: "Today" },
+      { title: "Book shop", amount: -890, category: "School", time: "Yesterday" },
+    ],
+    coach: [
+      { title: "Safe spending signal", body: "You can spend 1,200 RSD today and still keep the Concert hoodie on track.", value: "On track" },
+      { title: "Money moment", body: "Allowance lands in 2 days. A school-trip request is ready for Mum.", value: "2 days" },
+      { title: "Safety check", body: "Card is active, online payments are off, and the weekly card limit is inside plan.", value: "Safe" },
+    ],
+    nav: [
+      { id: "home", label: "Home", icon: "nav-home" },
+      { id: "insights", label: "Spending", icon: "nav-analytics" },
+      { id: "requests", label: "Payments", icon: "nav-payments" },
+      { id: "card", label: "Card", icon: "credit-card" },
+      { id: "more", label: "More", icon: "nav-more" },
     ],
   },
   BA: {

@@ -55,6 +55,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
       "kids.cz.home-concept",
       "kids.sk.home-concept",
       "kids.hu.home-concept",
+      "kids.rs.home-concept",
       "kids.ba.home-concept",
       "kids.ba-bl.home-concept",
       "kids.si.home-concept",
@@ -826,11 +827,12 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
       "kids.cz.home-concept",
       "kids.sk.home-concept",
       "kids.hu.home-concept",
+      "kids.rs.home-concept",
       "kids.ba.home-concept",
       "kids.ba-bl.home-concept",
       "kids.si.home-concept",
     ],
-    notes: "Country-contained Kids homepage and bottom-navigation concepts for Czech Republic, Slovakia, Hungary, Bosnia, Bosnia Banja Luka, and Slovenia. The same module uses market-specific mock data and intentionally different UI directions: CZ pocket-plan, SK Bulbank document-inspired Products/Education/Tasks/More, HU smart-fintech, BA family-hub, BA_BL card-first, and SI goal-coach.",
+    notes: "Country-contained Kids homepage and bottom-navigation concepts for Czech Republic, Slovakia, Hungary, Serbia, Bosnia, Bosnia Banja Luka, and Slovenia. The same module uses market-specific mock data and intentionally different UI directions: CZ pocket-plan, SK Bulbank document-inspired Products/Education/Tasks/More, HU CEE Light Restyle/theme personalization, RS safe-spend coach, BA family-hub, BA_BL card-first, and SI goal-coach.",
   },
 };
 

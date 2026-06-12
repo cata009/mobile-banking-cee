@@ -6,6 +6,8 @@ type NavItem = "home" | "analytics" | "payments" | "products" | "more";
 
 interface BottomNavigationProps {
   activeTab?: NavItem;
+  iconOverrides?: Partial<Record<NavItem, IconName>>;
+  labelOverrides?: Partial<Record<NavItem, string>>;
   onTabChange?: (tab: NavItem) => void;
 }
 
@@ -24,6 +26,8 @@ const NAV_ITEMS: Array<{
 
 export default function BottomNavigation({
   activeTab: controlledActiveTab,
+  iconOverrides,
+  labelOverrides,
   onTabChange,
 }: BottomNavigationProps) {
   const { t } = useLanguage();
@@ -61,10 +65,10 @@ export default function BottomNavigation({
 
             <span className="flex flex-col items-center gap-0">
               <span className={item.iconBoxClassName ?? "grid size-[32px] place-items-center"}>
-                <AppIcon name={item.icon} color={color} />
+                <AppIcon name={iconOverrides?.[item.id] ?? item.icon} color={color} />
               </span>
               <span className={`uc-type-p2 text-center leading-[15px] ${isActive ? "text-[var(--uc-action)]" : "text-[var(--uc-text-muted)]"}`}>
-                {t(item.labelKey)}
+                {labelOverrides?.[item.id] ?? t(item.labelKey)}
               </span>
             </span>
           </button>

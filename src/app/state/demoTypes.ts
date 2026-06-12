@@ -130,6 +130,7 @@ export type ScreenId =
   | "kids.cz.home-concept"
   | "kids.sk.home-concept"
   | "kids.hu.home-concept"
+  | "kids.rs.home-concept"
   | "kids.ba.home-concept"
   | "kids.ba-bl.home-concept"
   | "kids.si.home-concept"

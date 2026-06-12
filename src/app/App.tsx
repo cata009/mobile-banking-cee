@@ -138,7 +138,8 @@ function AppContent() {
   const isMarketKidsRuntimeContext =
     product === "KIDS_PI" && designSystem === "current" && isKidsHomeCountry(country);
   const isKidsRuntimeContext = isRoKidsRuntimeContext || isMarketKidsRuntimeContext;
-  const isHuKidsRuntimeContext = product === "KIDS_PI" && country === "HU" && designSystem === "current";
+  const isThemedKidsRuntimeContext =
+    product === "KIDS_PI" && (country === "HU" || country === "RS") && designSystem === "current";
   const isSupportedRuntimeContext = isPiRuntimeContext || isKidsRuntimeContext;
   const investmentsPortfolioAvailable = isInvestmentsPortfolioAvailable(product, country);
   
@@ -176,7 +177,7 @@ function AppContent() {
   
   // Determină varianta status bar-ului bazat pe ecranul curent
   const getStatusBarVariant = (): 'light' | 'dark' | 'theme' => {
-    if (isHuKidsRuntimeContext) {
+    if (isThemedKidsRuntimeContext) {
       return "theme";
     }
 
