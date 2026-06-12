@@ -8,17 +8,20 @@ Polishing Hungary Mobile PI Kids interactions on top of the CEE Light Restyle + 
 
 ## 2026-06-12 Closeout Check
 
-- Latest request handled: user-supplied blockcraft savings image was applied to a real HU Kids Learn card and the user requested a commit after completion.
-- Last meaningful change: `Saving goals` Learn topic cards now use `src/assets/kids/learn/saving-goals-blockcraft.png`; other Learn topics and lesson rows/heroes continue using token/CSS placeholder artwork.
+- Latest request handled: HU Kids Learn artwork was expanded from the one-card visual test into a full topic/detail/lesson image set, and the user requested a commit after completion.
+- Last meaningful change: `src/app/screens/kids/KidsMarketHomeApp.tsx` now maps every HU Learn topic and lesson to optimized transparent `512x512` PNG artwork under `src/assets/kids/learn/hu-learn-*.png`; image slots render without the old artificial halo/drop-shadow/border treatment.
 - Verification run:
   - `npm run build` passed; the known Vite chunk-size warning remains.
   - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
   - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
-  - `git diff --check -- src/app/screens/kids/KidsMarketHomeApp.tsx docs/handoff/current-session.md docs/handoff/next-tasks.md` passed with normal Windows LF/CRLF warnings.
-  - In-app Browser on `http://127.0.0.1:5173/` was returned to `Mobile PI Kids` + `Hungary` + `Learn` in light mode and confirmed the `Saving goals` topic cards render the supplied PNG with transparent background, `0px` slot border, no lesson-row PNG usage, and no console errors.
+  - `git diff --check` passed with the normal Windows LF/CRLF warning for `KidsMarketHomeApp.tsx`.
+  - In-app Browser on `http://127.0.0.1:5173/` was returned to `Mobile PI Kids` + `Hungary` + `Learn` in light mode and confirmed six Learn topic cards render PNG images at natural `512x512`, `0px` image-slot border, `overflow: visible`, zero fallback slots, and no console errors.
+  - Browser smoke opened `Money basics`, confirmed `data-hu-kids-theme-scope="learn-topic"`, the topic hero PNG, three lesson-row PNGs with three distinct sources, and zero fallback slots.
+  - Browser smoke opened `Spend today, plan tomorrow`, confirmed `data-hu-kids-theme-scope="learn-lesson"`, the large lesson hero PNG, `0px` image-slot border, zero fallback slots, and acceptable light/dark visual blending.
 - Banana Loop:
-  - Fixed: the supplied image is the only Learn PNG imported by runtime code.
-  - Triaged: previous generated image candidates in `kids-img/` and unused `src/assets/kids/learn/*.png` files are intentionally left out of the commit unless the user approves deletion or reuse.
+  - Fixed: all normal HU Learn topic cards, topic detail heroes, lesson rows, and lesson detail heroes now use real image assets instead of token/CSS placeholder art.
+  - Fixed: the runtime no longer adds the rejected halo/drop-shadow treatment around supplied Learn PNGs.
+  - Triaged: raw source/reference files in `kids-img/` and rejected old generated candidates such as `card-confidence.png`, `money-basics.png`, `online-safety.png`, `request-money.png`, and `saving-goals.png` remain intentionally uncommitted unless the user approves deletion or archival.
 - constitutional check:
   - scope preserved: yes
   - docs updated: yes
@@ -33,15 +36,15 @@ Polishing Hungary Mobile PI Kids interactions on top of the CEE Light Restyle + 
   - `src/app/screens/kids/KidsMarketHomeApp.tsx`
     - replaces the visible HU Learn module cards with theme-aware topic cards: More-style calm surface, bottom-left title/subtitle, top-right financial-education artwork, and bottom progress bar.
     - decouples Learn card color from the generic remapped `--uc-neutral-400` theme token through a dedicated `--hu-learn-card-*` surface contract, so colored themes blend in light/dark mode without aggressive muddy gradients.
-    - standardizes future PNG artwork slots through `data-hu-learn-art-slot`: topic card `80x72`, featured topic `108x98`, topic hero `130x118`, lesson row `84x76`, and lesson hero `210x190` logical CSS pixels.
+    - standardizes PNG artwork slots through `data-hu-learn-art-slot`: topic card `98x92`, featured topic `140x122`, topic hero `166x146`, lesson row `100x88`, and lesson hero `250x230` logical CSS pixels.
     - removes Learn card text truncation/line clamp and moves card text into normal flow with `min-height`, so topic titles/subtitles can wrap without visible `...`.
     - removes the old card-level icon/badge/Q&A/`Continue` treatment (`Goal builder`, `Answer: Yes`, and card-level continue actions no longer render on the Learn cards).
     - adds typed HU Learn topics and lessons mapped from the existing Kids RO learning intent, with five topic areas: money basics, saving goals, online safety, request money, and card confidence.
     - adds `learn-topic` and `learn-lesson` views inside the centralized `HuThemeShell`, so topic detail and lesson detail pages inherit applied HU themes automatically like Home/Saving/Payments/More.
     - adds topic detail pages with hero progress, completed lesson count, lesson rows, and completed/ready state.
     - adds lesson detail pages with themed visual content, learning text, a `What to remember` summary, and local `Mark lesson complete` behavior that updates topic progress.
-    - uses CSS/HTML theme-token artwork as PNG-slot placeholders for the education visuals, so the current illustrations remain compatible with light/dark mode and can later be replaced without changing layout.
-    - maps the user-supplied blockcraft-style savings image to the `Saving goals` Learn topic cards as the first real PNG artwork test, with transparent rendering, no artificial slot border, and a subtle theme-token halo so the asset can be judged directly on the real card surface.
+    - maps all normal topic cards, topic detail heroes, lesson rows, and lesson detail heroes to transparent `512x512` PNG assets from the user-provided `kids-img` direction, processed into `src/assets/kids/learn/hu-learn-*.png`.
+    - renders supplied Learn PNGs transparently without the old artificial slot border, halo, or drop-shadow so the art blends directly with the light/dark theme-safe card surfaces.
 - Verification:
   - `npm run build` passed; the known Vite chunk-size warning remains.
   - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
@@ -49,13 +52,14 @@ Polishing Hungary Mobile PI Kids interactions on top of the CEE Light Restyle + 
   - In-app Browser on `http://127.0.0.1:5173/` selected `Mobile PI Kids` + `Hungary`, opened `Learn`, confirmed `Money lessons`, `All topics`, topic cards, no `Goal builder`, no `Answer: Yes`, no card-level `Continue`, and no console errors.
   - Browser smoke opened `Money basics`, confirmed `data-hu-kids-theme-scope="learn-topic"`, lesson completed/ready states, opened `Spend today, plan tomorrow`, confirmed `data-hu-kids-theme-scope="learn-lesson"`, `What to remember`, and `Mark lesson complete`.
   - Browser smoke completed the lesson, returned to topic detail, and confirmed the lesson state changed to `Completed`; after HMR, reopened `Saving goals` and confirmed three `data-hu-learn-lesson-card` markers with no console errors.
-  - Browser smoke on active `bubbles` / Blockcraft theme confirmed light-mode Learn card backgrounds compute to neutral/pastel blends, topic-card slots compute to `80x72`, featured slots compute to `108x98`, subtitles have no line clamp, subtitle overflow is visible, and no console errors were logged.
-  - Browser smoke on `http://127.0.0.1:5173/` selected `Mobile PI Kids` + `Hungary`, opened `Learn`, confirmed the featured `Saving goals` card renders `/src/assets/kids/learn/saving-goals-blockcraft.png`, image natural size `630x570`, transparent slot background, `0px` slot border, `overflow: visible`, no console errors, and acceptable light/dark mode blending before returning the browser to light mode.
+  - Browser smoke on active `bubbles` / Blockcraft theme confirmed light-mode Learn card backgrounds compute to neutral/pastel blends, subtitles have no line clamp, subtitle overflow is visible, and no console errors were logged.
+  - Browser smoke on `http://127.0.0.1:5173/` selected `Mobile PI Kids` + `Hungary`, opened `Learn`, confirmed six topic cards render `hu-learn-*` PNG assets at natural `512x512`, transparent slot background, `0px` slot border, `overflow: visible`, zero fallback slots, and no console errors.
+  - Browser smoke opened `Money basics` and confirmed the topic hero plus three distinct lesson-row PNGs; opening `Spend today, plan tomorrow` confirmed the large lesson hero PNG and acceptable light/dark mode blending before returning the browser to light mode.
 - Limitations:
   - HU Learn remains local mock state only; completion state is not persisted to a backend.
   - Current learning copy remains English demo copy until a dedicated Hungarian content/localization pass is approved.
-  - The `Saving goals` PNG is intentionally a one-topic-card visual test; Learn lesson rows/heroes and the other Learn topics still use token/CSS placeholder artwork until final approved PNG assets are provided.
-- Next recommended action: localize the HU Learn topic and lesson copy into Hungarian and decide whether the token-based illustrations should be replaced by final brand/learning artwork.
+  - The current images are optimized demo assets from the supplied visual direction; final production artwork can replace the `512x512` transparent PNGs without changing layout.
+- Next recommended action: localize the HU Learn topic and lesson copy into Hungarian and replace the demo artwork with final brand-approved PNGs when available.
 - Blocked by: none.
 - Safe to resume: yes.
 
