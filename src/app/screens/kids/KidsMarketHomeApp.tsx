@@ -4,13 +4,17 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
+import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
+import AccountTransactionMonthDivider from "@/app/components/accounts/AccountTransactionMonthDivider";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import BottomNavigation from "@/app/components/BottomNavigation";
 import Card from "@/app/components/cards/Card";
+import FaceIdAnimation from "@/app/components/FaceIdAnimation";
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
 import PageHeader from "@/app/components/PageHeader";
 import NewPaymentActionListItem from "@/app/components/payments/NewPaymentActionListItem";
@@ -37,14 +41,18 @@ import {
   type ProductsOffer,
 } from "@/app/config/productsMenuConfig";
 import { useLanguage } from "@/app/contexts/LanguageContext";
-import { formatMoney } from "@/app/registry/countryConfig";
+import { formatMoney, formatMoneyNumber } from "@/app/registry/countryConfig";
 import { MoreHeader } from "@/app/screens/more/MoreHeader";
 import { ContactsCard } from "@/app/screens/more/cards/ContactsCard";
 import { DocumentsCard } from "@/app/screens/more/cards/DocumentsCard";
 import { MyRequestsCard } from "@/app/screens/more/cards/MyRequestsCard";
 import { SettingsCard } from "@/app/screens/more/cards/SettingsCard";
 import { TutorialCard } from "@/app/screens/more/cards/TutorialCard";
+import MessagesScreen from "@/app/screens/messages/MessagesScreen";
+import { TransactionDetailScreen } from "@/app/screens/payments/DomesticPaymentFlowScreens";
+import learnSavingGoalsBlockcraftSrc from "../../../assets/kids/learn/saving-goals-blockcraft.png";
 import womanProfileSrc from "../../../assets/kids/woman-profile.png";
+import type { AccountTransaction } from "@/data/accountDetails";
 import {
   getKidsHomeConcept,
   getPocketProgress,
@@ -57,6 +65,13 @@ import {
   type KidsHomeStyle,
   type KidsMarketHomeConcept,
 } from "@/data/kidsMarketHomeConcepts";
+import {
+  RO_KIDS_GOALS,
+  RO_KIDS_LEARN_MODULES,
+  goalProgress,
+  type LearnModule,
+  type SavingGoal,
+} from "@/data/roKidsBanking";
 import type { CountryId } from "@/app/state/demoTypes";
 
 interface KidsMarketHomeAppProps {
@@ -138,6 +153,42 @@ const SK_MORE_ITEMS = [
   { title: "My family", icon: "users", tone: "orange" },
 ] as const;
 
+type RsKidsNavId = "home" | "analytics" | "payments" | "products" | "more";
+type RsKidsActionId = "ask" | "goal" | "freeze" | "more";
+
+const RS_KIDS_RUNTIME_COUNTRY: Extract<CountryId, "RS"> = "RS";
+
+const RS_KIDS_ACTIONS: Array<{ id: RsKidsActionId; label: string; icon: IconName }> = [
+  { id: "ask", label: "Ask family", icon: "circle-dollar-sign" },
+  { id: "goal", label: "Add to goal", icon: "piggy-bank" },
+  { id: "freeze", label: "Freeze card", icon: "shield-check" },
+  { id: "more", label: "More", icon: "nav-more" },
+];
+
+const RS_KIDS_MONEY_MOMENTS = [
+  { label: "Allowance", value: "2 days", detail: "5,000 RSD lands Friday", icon: "calendar-days" },
+  { label: "Request", value: "Ready", detail: "School trip note for Mum", icon: "send" },
+  { label: "Safety", value: "On", detail: "Online payments are off", icon: "shield-check" },
+] as const;
+
+const RS_KIDS_EARN_TASKS = [
+  { title: "Math worksheet", reward: 400, status: "Due today", icon: "book-open" },
+  { title: "Take out recycling", reward: 300, status: "Ready after school", icon: "clipboard-check" },
+] as const;
+
+const RS_KIDS_SAFETY_ITEMS = [
+  { label: "Card", value: "Active", icon: "credit-card" },
+  { label: "Online", value: "Off", icon: "lock" },
+  { label: "Weekly limit", value: "5,000 RSD", icon: "shield-check" },
+  { label: "Parent view", value: "Payments", icon: "users" },
+] as const;
+
+const RS_KIDS_SPENDING_CATEGORIES = [
+  { label: "Food", amount: 460, width: 34, toneClassName: "bg-[var(--uc-product-pink)]" },
+  { label: "School", amount: 890, width: 66, toneClassName: "bg-[var(--uc-product-blue)]" },
+  { label: "Fun", amount: 0, width: 12, toneClassName: "bg-[var(--uc-yellow-gold)]" },
+] as const;
+
 export default function KidsMarketHomeApp({ country }: KidsMarketHomeAppProps) {
   const resolvedCountry = isKidsHomeCountry(country) ? country : "CZ";
   const concept = getKidsHomeConcept(resolvedCountry);
@@ -160,6 +211,10 @@ export default function KidsMarketHomeApp({ country }: KidsMarketHomeAppProps) {
 
   if (concept.style === "hu-smart-fintech") {
     return <HuCeeLightRestyleApp concept={concept} />;
+  }
+
+  if (concept.style === "rs-safe-spend-coach") {
+    return <RsKidsSafeSpendApp concept={concept} />;
   }
 
   return (
@@ -216,21 +271,1327 @@ export default function KidsMarketHomeApp({ country }: KidsMarketHomeAppProps) {
   );
 }
 
+function RsKidsSafeSpendApp({ concept }: { concept: KidsMarketHomeConcept }) {
+  const [activeNav, setActiveNav] = useState<RsKidsNavId>("home");
+  const [showAmounts, setShowAmounts] = useState(true);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty("--uc-phone-status-fg", "var(--uc-static-white)");
+    root.style.setProperty(
+      "--uc-phone-dynamic-island-bg",
+      "color-mix(in srgb, var(--uc-static-black) 84%, var(--uc-teal-blue))",
+    );
+    root.style.setProperty(
+      "--uc-phone-dynamic-island-sensor-bg",
+      "color-mix(in srgb, var(--uc-static-black) 92%, transparent)",
+    );
+    root.style.setProperty(
+      "--uc-phone-system-bar-bg",
+      "linear-gradient(180deg, color-mix(in srgb, var(--uc-static-black) 26%, transparent) 0%, color-mix(in srgb, var(--uc-static-black) 8%, transparent) 62%, transparent 100%)",
+    );
+
+    return () => {
+      root.style.removeProperty("--uc-phone-status-fg");
+      root.style.removeProperty("--uc-phone-dynamic-island-bg");
+      root.style.removeProperty("--uc-phone-dynamic-island-sensor-bg");
+      root.style.removeProperty("--uc-phone-system-bar-bg");
+    };
+  }, []);
+
+  return (
+    <RsKidsShell>
+      {activeNav === "home" ? (
+        <div className="scrollbar-hide relative z-[1] flex-1 overflow-y-auto pb-[104px]" data-rs-kids-page="home">
+          <RsKidsHomePage
+            concept={concept}
+            onNavChange={setActiveNav}
+            onToggleAmounts={() => setShowAmounts((current) => !current)}
+            showAmounts={showAmounts}
+          />
+        </div>
+      ) : null}
+
+      {activeNav === "analytics" ? <RsKidsSpendingPage concept={concept} showAmounts={showAmounts} /> : null}
+      {activeNav === "payments" ? <RsKidsPaymentsPage /> : null}
+      {activeNav === "products" ? <RsKidsProductsPage /> : null}
+      {activeNav === "more" ? <RsKidsMorePage /> : null}
+
+      <RsKidsBottomNav activeNav={activeNav} onChange={setActiveNav} />
+    </RsKidsShell>
+  );
+}
+
+function RsKidsShell({ children }: { children: ReactNode }) {
+  return (
+    <div
+      className="relative flex h-full w-full flex-col overflow-hidden text-[var(--uc-text)]"
+      data-rs-kids-experience="safe-spend-coach"
+      style={
+        {
+          "--rs-kids-accent": "var(--uc-teal-blue)",
+          "--rs-kids-accent-2": "var(--uc-product-blue)",
+          "--rs-kids-reward": "var(--uc-yellow-gold)",
+          "--rs-kids-page-bg":
+            "linear-gradient(180deg, color-mix(in srgb, var(--uc-primary-k1) 82%, var(--uc-teal-blue)) 0px, color-mix(in srgb, var(--uc-primary-k1) 70%, var(--uc-product-blue)) 310px, color-mix(in srgb, var(--uc-app-bg) 88%, var(--uc-teal-soft)) 430px, var(--uc-app-bg) 610px)",
+          "--rs-kids-card-bg": "color-mix(in srgb, var(--uc-surface) 92%, var(--uc-teal-soft))",
+          "--rs-kids-nav-bg": "color-mix(in srgb, var(--uc-bottom-bar-bg) 88%, var(--uc-teal-blue))",
+        } as CSSProperties
+      }
+    >
+      <div className="absolute inset-0" style={{ background: "var(--rs-kids-page-bg)" }} />
+      <div aria-hidden="true" className="rs-kids-ambient-field pointer-events-none absolute inset-x-0 top-0 h-[420px]" />
+      {children}
+    </div>
+  );
+}
+
+function RsKidsHomePage({
+  concept,
+  onNavChange,
+  onToggleAmounts,
+  showAmounts,
+}: {
+  concept: KidsMarketHomeConcept;
+  onNavChange: (nav: RsKidsNavId) => void;
+  onToggleAmounts: () => void;
+  showAmounts: boolean;
+}) {
+  return (
+    <>
+      <div className="px-[24px] pt-[54px]">
+        <RsKidsHeader concept={concept} onToggleAmounts={onToggleAmounts} showAmounts={showAmounts} />
+        <RsKidsHero concept={concept} showAmounts={showAmounts} />
+      </div>
+
+      <RsKidsActionRail onNavChange={onNavChange} />
+
+      <div className="mt-[22px] space-y-[16px] px-[24px]">
+        <RsKidsMoneyMomentCard concept={concept} />
+        <RsKidsGoalSpotlight concept={concept} showAmounts={showAmounts} />
+        <RsKidsEarnNextCard showAmounts={showAmounts} />
+        <RsKidsCardSafetyCard concept={concept} />
+        <RsKidsActivityCard concept={concept} showAmounts={showAmounts} />
+        <RsKidsMoneyMapCard concept={concept} showAmounts={showAmounts} />
+      </div>
+    </>
+  );
+}
+
+function RsKidsHeader({
+  concept,
+  onToggleAmounts,
+  showAmounts,
+}: {
+  concept: KidsMarketHomeConcept;
+  onToggleAmounts: () => void;
+  showAmounts: boolean;
+}) {
+  return (
+    <header className="flex h-[40px] items-center justify-between text-[var(--uc-static-white)]">
+      <UniCreditLogo className="h-[24px] w-auto" textColor="var(--uc-static-white)" />
+      <div className="flex items-center gap-[10px]">
+        <button
+          aria-label={showAmounts ? "Hide amounts" : "Show amounts"}
+          className="grid size-[30px] place-items-center rounded-full border border-[color-mix(in_srgb,var(--uc-static-white)_18%,transparent)] bg-[color-mix(in_srgb,var(--uc-static-white)_12%,transparent)]"
+          onClick={onToggleAmounts}
+          type="button"
+        >
+          <AppIcon name={showAmounts ? "amount-hide" : "amount-show"} size={18} />
+        </button>
+        <button
+          aria-label="Messages"
+          className="relative grid size-[30px] place-items-center rounded-full border border-[color-mix(in_srgb,var(--uc-static-white)_18%,transparent)] bg-[color-mix(in_srgb,var(--uc-static-white)_12%,transparent)]"
+          type="button"
+        >
+          <AppIcon name="header-messages" size={20} />
+          <span className="absolute right-[5px] top-[5px] size-[7px] rounded-full bg-[var(--uc-red-main)]" />
+        </button>
+        <ProfileAvatar initials={concept.avatar} size={36} />
+      </div>
+    </header>
+  );
+}
+
+function RsKidsHero({
+  concept,
+  showAmounts,
+}: {
+  concept: KidsMarketHomeConcept;
+  showAmounts: boolean;
+}) {
+  const totalBalance = showAmounts ? formatKidsMoney(concept.balance, concept.country) : "****";
+  const safeToday = showAmounts ? formatKidsMoney(concept.safeToday, concept.country) : "****";
+
+  return (
+    <section className="relative mt-[30px] overflow-hidden rounded-[24px] border border-[color-mix(in_srgb,var(--uc-static-white)_14%,transparent)] bg-[color-mix(in_srgb,var(--uc-primary-k1)_84%,var(--uc-teal-blue))] p-[18px] text-[var(--uc-static-white)] shadow-[0_20px_54px_color-mix(in_srgb,var(--uc-static-black)_26%,transparent)]">
+      <div aria-hidden="true" className="rs-kids-signal-field absolute inset-[-22%]" />
+      <div className="relative z-[1]">
+        <div className="flex items-start justify-between gap-[12px]">
+          <div className="min-w-0">
+            <p className="text-[13px] font-bold uppercase leading-[15px] tracking-[0] text-[color-mix(in_srgb,var(--uc-static-white)_68%,transparent)]">
+              {concept.childName}'s money signal
+            </p>
+            <h1 className="mt-[8px] text-[40px] font-bold leading-[42px] tracking-[0]">
+              {safeToday}
+            </h1>
+            <p className="mt-[7px] text-[16px] font-bold leading-[20px] tracking-[0]">
+              {concept.heroTitle}
+            </p>
+          </div>
+          <span className="inline-flex shrink-0 items-center gap-[6px] rounded-full bg-[color-mix(in_srgb,var(--uc-green-success)_22%,var(--uc-static-black))] px-[10px] py-[7px] text-[12px] font-bold leading-[14px] text-[var(--uc-static-white)]">
+            <AppIcon name="prime-check" size={15} />
+            On track
+          </span>
+        </div>
+
+        <p className="mt-[14px] text-[14px] font-normal leading-[18px] tracking-[0] text-[color-mix(in_srgb,var(--uc-static-white)_74%,transparent)]">
+          Total balance {totalBalance}. Hoodie goal stays safe if lunch stays under plan.
+        </p>
+
+        <div className="mt-[16px] grid grid-cols-3 gap-[8px]">
+          {concept.metrics.map((metric) => (
+            <div key={metric.label} className="min-h-[76px] rounded-[16px] bg-[color-mix(in_srgb,var(--uc-static-white)_12%,transparent)] p-[10px] backdrop-blur-sm">
+              <p className="text-[16px] font-bold leading-[19px] tracking-[0]">{metric.value}</p>
+              <p className="mt-[5px] text-[11px] font-bold leading-[13px] tracking-[0] text-[color-mix(in_srgb,var(--uc-static-white)_70%,transparent)]">
+                {metric.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function RsKidsActionRail({ onNavChange }: { onNavChange: (nav: RsKidsNavId) => void }) {
+  const handleAction = (actionId: RsKidsActionId) => {
+    if (actionId === "more") {
+      onNavChange("more");
+    }
+  };
+
+  return (
+    <section className="mt-[22px] px-[24px]">
+      <div className="grid grid-cols-4 gap-[14px]">
+        {RS_KIDS_ACTIONS.map((action) => (
+          <button
+            key={action.id}
+            className="flex min-w-0 flex-col items-center gap-[9px]"
+            onClick={() => handleAction(action.id)}
+            type="button"
+          >
+            <span className="grid size-[62px] place-items-center rounded-full bg-[color-mix(in_srgb,var(--uc-surface)_82%,var(--rs-kids-accent))] text-[var(--uc-text)] shadow-sm">
+              <AppIcon name={action.icon} size={26} />
+            </span>
+            <span className="min-h-[32px] text-center text-[12px] font-bold leading-[14px] tracking-[0] text-[color-mix(in_srgb,var(--uc-static-white)_76%,transparent)]">
+              {action.label}
+            </span>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RsKidsMoneyMomentCard({ concept }: { concept: KidsMarketHomeConcept }) {
+  return (
+    <section className="rounded-[18px] bg-[var(--rs-kids-card-bg)] px-[16px] py-[16px] shadow-sm">
+      <div className="flex items-start justify-between gap-[12px]">
+        <div className="min-w-0">
+          <h2 className="text-[17px] font-bold leading-[21px] tracking-[0] text-[var(--uc-text)]">Next money moment</h2>
+          <p className="mt-[5px] text-[13px] font-normal leading-[17px] tracking-[0] text-[var(--uc-text-muted)]">
+            {concept.coach[1]?.body}
+          </p>
+        </div>
+        <span className="grid size-[42px] shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--rs-kids-accent)_14%,var(--uc-surface))] text-[var(--rs-kids-accent)]">
+          <AppIcon name="calendar-days" size={21} />
+        </span>
+      </div>
+
+      <div className="mt-[14px] space-y-[8px]">
+        {RS_KIDS_MONEY_MOMENTS.map((moment) => (
+          <div key={moment.label} className="flex items-center gap-[10px] rounded-[14px] bg-[color-mix(in_srgb,var(--uc-surface)_82%,var(--rs-kids-accent))] p-[10px]">
+            <span className="grid size-[34px] shrink-0 place-items-center rounded-full bg-[var(--uc-surface)] text-[var(--rs-kids-accent)]">
+              <AppIcon name={moment.icon} size={17} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[14px] font-bold leading-[17px] tracking-[0] text-[var(--uc-text)]">{moment.label}</p>
+              <p className="truncate text-[12px] font-normal leading-[15px] tracking-[0] text-[var(--uc-text-muted)]">{moment.detail}</p>
+            </div>
+            <span className="shrink-0 text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--rs-kids-accent)]">{moment.value}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RsKidsGoalSpotlight({
+  concept,
+  showAmounts,
+}: {
+  concept: KidsMarketHomeConcept;
+  showAmounts: boolean;
+}) {
+  const goal = concept.pockets[0];
+  const progress = getPocketProgress(goal);
+  const savedAmount = showAmounts ? formatKidsMoney(goal.savedAmount, concept.country) : "****";
+  const targetAmount = showAmounts ? formatKidsMoney(goal.targetAmount, concept.country) : "****";
+
+  return (
+    <section className="rounded-[18px] bg-[var(--uc-surface)] px-[16px] py-[16px] shadow-sm">
+      <div className="flex items-center gap-[14px]">
+        <div
+          className="grid size-[92px] shrink-0 place-items-center rounded-full"
+          style={{
+            background: `conic-gradient(var(--rs-kids-accent) ${progress}%, color-mix(in srgb, var(--uc-surface-muted) 78%, var(--rs-kids-accent)) 0)`,
+          }}
+        >
+          <div className="grid size-[68px] place-items-center rounded-full bg-[var(--uc-surface)] text-center">
+            <p className="text-[20px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">{progress}%</p>
+            <p className="text-[10px] font-bold uppercase leading-[12px] tracking-[0] text-[var(--uc-text-muted)]">{goal.emojiLabel}</p>
+          </div>
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[13px] font-bold uppercase leading-[15px] tracking-[0] text-[var(--rs-kids-accent)]">Goal spotlight</p>
+          <h2 className="mt-[4px] text-[19px] font-bold leading-[23px] tracking-[0] text-[var(--uc-text)]">{goal.title}</h2>
+          <p className="mt-[5px] text-[13px] font-normal leading-[17px] tracking-[0] text-[var(--uc-text-muted)]">{goal.helper}</p>
+          <p className="mt-[8px] text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--uc-text)]">
+            {savedAmount} of {targetAmount}
+          </p>
+        </div>
+      </div>
+      <button className="mt-[14px] flex h-[38px] w-full items-center justify-center rounded-full bg-[var(--rs-kids-accent)] text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--uc-text-inverse)]" type="button">
+        Boost goal
+      </button>
+    </section>
+  );
+}
+
+function RsKidsEarnNextCard({ showAmounts }: { showAmounts: boolean }) {
+  const totalReward = RS_KIDS_EARN_TASKS.reduce((sum, task) => sum + task.reward, 0);
+
+  return (
+    <section className="rounded-[18px] bg-[color-mix(in_srgb,var(--uc-surface)_90%,var(--uc-yellow-gold))] px-[16px] py-[16px] shadow-sm">
+      <div className="flex items-start justify-between gap-[12px]">
+        <div>
+          <h2 className="text-[17px] font-bold leading-[21px] tracking-[0] text-[var(--uc-text)]">Earn next</h2>
+          <p className="mt-[5px] text-[13px] font-normal leading-[17px] tracking-[0] text-[var(--uc-text-muted)]">
+            {showAmounts ? `${totalReward} RSD waiting in tasks` : "Rewards hidden"}
+          </p>
+        </div>
+        <span className="grid size-[42px] place-items-center rounded-full bg-[color-mix(in_srgb,var(--uc-yellow-gold)_26%,var(--uc-surface))] text-[var(--uc-primary-k1)]">
+          <AppIcon name="trophy" size={21} />
+        </span>
+      </div>
+
+      <div className="mt-[14px] space-y-[10px]">
+        {RS_KIDS_EARN_TASKS.map((task) => (
+          <div key={task.title} className="flex items-center gap-[11px] rounded-[14px] bg-[var(--uc-surface)] p-[11px]">
+            <span className="grid size-[36px] shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--uc-yellow-gold)_20%,var(--uc-surface))] text-[var(--uc-primary-k1)]">
+              <AppIcon name={task.icon} size={18} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[14px] font-bold leading-[17px] tracking-[0] text-[var(--uc-text)]">{task.title}</p>
+              <p className="text-[12px] font-normal leading-[15px] tracking-[0] text-[var(--uc-text-muted)]">{task.status}</p>
+            </div>
+            <span className="shrink-0 text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--uc-text)]">
+              {showAmounts ? `+${task.reward}` : "+****"}
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RsKidsCardSafetyCard({ concept }: { concept: KidsMarketHomeConcept }) {
+  return (
+    <section className="rounded-[18px] bg-[var(--uc-surface)] px-[16px] py-[16px] shadow-sm">
+      <div className="flex items-start gap-[14px]">
+        <div className="shrink-0 rounded-[10px] bg-[var(--uc-surface-muted)] p-[8px]">
+          <Card ariaLabel="Serbia Kids card" size="medium" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-[17px] font-bold leading-[21px] tracking-[0] text-[var(--uc-text)]">Card safety</h2>
+          <p className="mt-[5px] text-[13px] font-normal leading-[17px] tracking-[0] text-[var(--uc-text-muted)]">{concept.cardStatus}</p>
+          <p className="mt-[8px] text-[12px] font-bold leading-[15px] tracking-[0] text-[var(--rs-kids-accent)]">Mum can review payments, not private goal names.</p>
+        </div>
+      </div>
+
+      <div className="mt-[14px] grid grid-cols-2 gap-[8px]">
+        {RS_KIDS_SAFETY_ITEMS.map((item) => (
+          <div key={item.label} className="rounded-[14px] bg-[color-mix(in_srgb,var(--uc-surface-muted)_78%,var(--rs-kids-accent))] p-[10px]">
+            <div className="flex items-center gap-[7px] text-[var(--rs-kids-accent)]">
+              <AppIcon name={item.icon} size={16} />
+              <span className="text-[11px] font-bold uppercase leading-[13px] tracking-[0]">{item.label}</span>
+            </div>
+            <p className="mt-[6px] text-[14px] font-bold leading-[17px] tracking-[0] text-[var(--uc-text)]">{item.value}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RsKidsActivityCard({
+  concept,
+  showAmounts,
+}: {
+  concept: KidsMarketHomeConcept;
+  showAmounts: boolean;
+}) {
+  return (
+    <section className="rounded-[18px] bg-[var(--uc-surface)] px-[16px] py-[16px] shadow-sm">
+      <div className="flex items-center justify-between gap-[12px]">
+        <h2 className="text-[17px] font-bold leading-[21px] tracking-[0] text-[var(--uc-text)]">Recent activity</h2>
+        <button className="text-[12px] font-bold uppercase leading-[15px] tracking-[0] text-[var(--rs-kids-accent)]" type="button">
+          See all
+        </button>
+      </div>
+      <div className="mt-[14px] space-y-[12px]">
+        {concept.feed.map((item) => (
+          <RsKidsActivityRow key={`${item.title}-${item.time}`} item={item} country={concept.country} showAmounts={showAmounts} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RsKidsActivityRow({
+  country,
+  item,
+  showAmounts,
+}: {
+  country: KidsHomeCountry;
+  item: KidsHomeFeedItem;
+  showAmounts: boolean;
+}) {
+  const isPositive = item.amount >= 0;
+  const icon: IconName = item.category === "Family" ? "users" : item.category === "School" ? "book-open" : "receipt-text";
+
+  return (
+    <div className="flex items-center gap-[12px]">
+      <span
+        className={cn(
+          "grid size-[36px] shrink-0 place-items-center rounded-full text-[var(--uc-static-white)]",
+          isPositive ? "bg-[var(--uc-green-olive)]" : "bg-[var(--uc-product-pink)]",
+        )}
+      >
+        <AppIcon name={icon} size={18} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[14px] font-bold leading-[17px] tracking-[0] text-[var(--uc-text)]">{item.title}</p>
+        <p className="mt-[3px] text-[12px] font-normal leading-[15px] tracking-[0] text-[var(--uc-text-muted)]">
+          {item.category} · {item.time}
+        </p>
+      </div>
+      <p className={cn("shrink-0 text-right text-[14px] font-bold leading-[17px] tracking-[0]", isPositive ? "text-[var(--uc-green-olive)]" : "text-[var(--uc-text)]")}>
+        {showAmounts ? formatSignedKidsMoney(item.amount, country) : isPositive ? "+****" : "-****"}
+      </p>
+    </div>
+  );
+}
+
+function RsKidsMoneyMapCard({
+  concept,
+  showAmounts,
+}: {
+  concept: KidsMarketHomeConcept;
+  showAmounts: boolean;
+}) {
+  const goalsTotal = concept.pockets.reduce((sum, pocket) => sum + pocket.savedAmount, 0);
+
+  return (
+    <section className="rounded-[18px] bg-[var(--uc-surface)] px-[16px] py-[16px] shadow-sm">
+      <h2 className="text-[17px] font-bold leading-[21px] tracking-[0] text-[var(--uc-text)]">Money map</h2>
+      <div className="mt-[14px] space-y-[12px]">
+        <RsKidsMoneyMapRow icon="wallet-cards" label="Spend today" value={showAmounts ? formatKidsMoney(concept.safeToday, concept.country) : "****"} />
+        <RsKidsMoneyMapRow icon="piggy-bank" label="Goals" value={showAmounts ? formatKidsMoney(goalsTotal, concept.country) : "****"} />
+        <RsKidsMoneyMapRow icon="lock" label="Parent-safe reserve" value={showAmounts ? formatKidsMoney(concept.balance - concept.safeToday, concept.country) : "****"} />
+      </div>
+    </section>
+  );
+}
+
+function RsKidsMoneyMapRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: IconName;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-center gap-[12px]">
+      <span className="grid size-[36px] shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--rs-kids-accent)_13%,var(--uc-surface))] text-[var(--rs-kids-accent)]">
+        <AppIcon name={icon} size={18} />
+      </span>
+      <p className="min-w-0 flex-1 text-[14px] font-bold leading-[17px] tracking-[0] text-[var(--uc-text)]">{label}</p>
+      <p className="shrink-0 text-right text-[14px] font-bold leading-[17px] tracking-[0] text-[var(--uc-text)]">{value}</p>
+    </div>
+  );
+}
+
+function RsKidsSpendingPage({
+  concept,
+  showAmounts,
+}: {
+  concept: KidsMarketHomeConcept;
+  showAmounts: boolean;
+}) {
+  return (
+    <RsKidsMenuFrame subtitle="A coach view for daily choices." title="Spending coach">
+      <div className="space-y-[14px] px-[20px] pt-[16px]">
+        <section className="rounded-[18px] bg-[var(--uc-surface)] p-[16px] shadow-sm">
+          <p className="text-[13px] font-bold uppercase leading-[15px] tracking-[0] text-[var(--rs-kids-accent)]">Today decision</p>
+          <h2 className="mt-[6px] text-[24px] font-bold leading-[28px] tracking-[0] text-[var(--uc-text)]">
+            {showAmounts ? formatKidsMoney(concept.safeToday, concept.country) : "****"} is safe before Friday
+          </h2>
+          <p className="mt-[8px] text-[13px] font-normal leading-[17px] tracking-[0] text-[var(--uc-text-muted)]">
+            If lunch stays under 600 RSD, the Concert hoodie target remains on pace.
+          </p>
+        </section>
+
+        <section className="rounded-[18px] bg-[var(--uc-surface)] p-[16px] shadow-sm">
+          <h2 className="text-[17px] font-bold leading-[21px] tracking-[0] text-[var(--uc-text)]">This week by category</h2>
+          <div className="mt-[14px] space-y-[13px]">
+            {RS_KIDS_SPENDING_CATEGORIES.map((category) => (
+              <div key={category.label}>
+                <div className="flex items-center justify-between text-[13px] font-bold leading-[16px] tracking-[0]">
+                  <span className="text-[var(--uc-text)]">{category.label}</span>
+                  <span className="text-[var(--uc-text-muted)]">{showAmounts ? `${category.amount} RSD` : "****"}</span>
+                </div>
+                <div className="mt-[7px] h-[9px] overflow-hidden rounded-full bg-[var(--uc-surface-muted)]">
+                  <div className={cn("h-full rounded-full", category.toneClassName)} style={{ width: `${category.width}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <RsKidsMoneyMomentCard concept={concept} />
+      </div>
+    </RsKidsMenuFrame>
+  );
+}
+
+function RsKidsMenuFrame({
+  children,
+  subtitle,
+  title,
+}: {
+  children: ReactNode;
+  subtitle?: string;
+  title: string;
+}) {
+  return (
+    <div className="relative z-[1] flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--uc-app-bg)] text-[var(--uc-text)]">
+      <div className="bg-[color-mix(in_srgb,var(--uc-primary-k1)_86%,var(--rs-kids-accent))] px-[24px] pb-[22px] pt-[54px] text-[var(--uc-static-white)]">
+        <div className="flex min-h-[40px] items-start justify-between gap-[12px]">
+          <div className="min-w-0">
+            <h1 className="text-[28px] font-bold leading-[32px] tracking-[0]">{title}</h1>
+            {subtitle ? (
+              <p className="mt-[5px] text-[13px] font-normal leading-[17px] tracking-[0] text-[color-mix(in_srgb,var(--uc-static-white)_72%,transparent)]">
+                {subtitle}
+              </p>
+            ) : null}
+          </div>
+          <HeaderActionRail>
+            <HeaderActionButton icon="contact-phone" label="Contact phone" onClick={() => undefined} />
+            <HeaderActionButton icon="messages" label="Messages" onClick={() => undefined} />
+          </HeaderActionRail>
+        </div>
+      </div>
+      <div className="scrollbar-hide min-h-0 flex-1 overflow-y-auto pb-[104px]">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function RsKidsPaymentHeroSheet({
+  config,
+  heroId,
+  onClose,
+}: {
+  config: NewPaymentSheetConfig;
+  heroId: PaymentHeroItem["id"];
+  onClose: () => void;
+}) {
+  const { t } = useLanguage();
+  const localizedConfig: NewPaymentSheetConfig = {
+    ...config,
+    title: t(`runtime.payments.primaryItems.${heroId}.title`, config.title),
+    actions: config.actions.map((action) => ({
+      ...action,
+      title: t(`runtime.payments.newPayment.actions.${action.id}.title`, action.title),
+      description: t(`runtime.payments.newPayment.actions.${action.id}.description`, action.description),
+    })),
+    infoBanner: {
+      title: t("runtime.payments.newPayment.infoBanner.title", config.infoBanner.title),
+      description: t("runtime.payments.newPayment.infoBanner.description", config.infoBanner.description),
+    },
+  };
+  const handleActionSelect = (_action: NewPaymentAction) => {
+    onClose();
+  };
+
+  return (
+    <BottomSheet title={localizedConfig.title} onClose={onClose}>
+      <div className="flex flex-col">
+        {localizedConfig.actions.map((action) => (
+          <NewPaymentActionListItem key={action.id} action={action} onSelect={handleActionSelect} />
+        ))}
+      </div>
+      <NewPaymentDiscoverBanner
+        title={localizedConfig.infoBanner.title}
+        description={localizedConfig.infoBanner.description}
+      />
+    </BottomSheet>
+  );
+}
+
+function RsKidsPaymentsPage() {
+  const { t } = useLanguage();
+  const menu = getPaymentsMenuForCountry(RS_KIDS_RUNTIME_COUNTRY);
+  const [selectedPrimaryItemId, setSelectedPrimaryItemId] = useState<PaymentHeroItem["id"] | null>(null);
+  const selectedHeroSheet = selectedPrimaryItemId ? menu.heroSheets[selectedPrimaryItemId] : null;
+  const localizedPrimaryItems = menu.primaryItems.map((item) => ({
+    ...item,
+    title: t(`runtime.payments.primaryItems.${item.id}.title`, item.title),
+    description: t(`runtime.payments.primaryItems.${item.id}.description`, item.description),
+  }));
+  const localizedOtherItems = menu.otherItems.map((item) => ({
+    ...item,
+    label: t(`runtime.payments.otherItems.${item.id}`, item.label),
+  }));
+
+  return (
+    <>
+      <RsKidsMenuFrame subtitle="Payments stay supervised in Kids mode." title={t("runtime.payments.title", menu.title)}>
+        <div className="flex flex-col gap-[13px] px-[20px] pt-[16px]">
+          {localizedPrimaryItems.map((item) => (
+            <PaymentHeroCard
+              key={item.id}
+              item={item}
+              onSelect={(selectedItem) => setSelectedPrimaryItemId(selectedItem.id)}
+            />
+          ))}
+        </div>
+
+        <section className="px-[20px] pt-[16px]">
+          <SectionHeadingDivider title={t("runtime.payments.other", menu.otherTitle)} />
+          <div className="scrollbar-hide overflow-x-auto overflow-y-hidden pt-[8px]">
+            <div className="flex w-max gap-[18px] pr-[20px]">
+              {localizedOtherItems.map((item) => (
+                <PaymentOtherShortcut key={item.id} item={item} onClick={() => undefined} />
+              ))}
+            </div>
+          </div>
+        </section>
+      </RsKidsMenuFrame>
+
+      {selectedHeroSheet && selectedPrimaryItemId ? (
+        <RsKidsPaymentHeroSheet
+          config={selectedHeroSheet}
+          heroId={selectedPrimaryItemId}
+          onClose={() => setSelectedPrimaryItemId(null)}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function RsKidsProductsPage() {
+  const { t } = useLanguage();
+  const config = getProductsMenuForCountry(RS_KIDS_RUNTIME_COUNTRY);
+  const localizedProducts = config.products.map((card) => ({
+    ...card,
+    title: t(`runtime.productsMenu.cards.${getHuKidsProductCardTranslationId(card)}`, card.title),
+  }));
+  const localizedOffers = config.offers.map((offer) => ({
+    ...offer,
+    title: t(`runtime.productsMenu.offers.${offer.id}.title`, offer.title),
+    description: t(`runtime.productsMenu.offers.${offer.id}.description`, offer.description),
+  }));
+
+  return (
+    <RsKidsMenuFrame subtitle="Products are shown as Kids-safe discovery cards." title={t("runtime.productsMenu.title", config.title)}>
+      {localizedOffers.length > 0 ? (
+        <section className="px-[20px] pt-[16px]">
+          <SectionHeadingDivider title={t("runtime.productsMenu.offersForYou", config.offersTitle)} />
+          <div className="mt-[12px] grid gap-[10px]">
+            {localizedOffers.slice(0, 2).map((offer) => (
+              <button
+                key={offer.id}
+                className="rounded-[14px] bg-[var(--uc-surface)] p-[14px] text-left shadow-sm"
+                onClick={() => handleHuKidsOfferClick(offer)}
+                type="button"
+              >
+                <span className="block whitespace-pre-line text-[17px] font-bold leading-[21px] tracking-[0] text-[var(--uc-text)]">
+                  {offer.title}
+                </span>
+                <span className="mt-[7px] block whitespace-pre-line text-[13px] font-normal leading-[17px] tracking-[0] text-[var(--uc-text-muted)]">
+                  {offer.description}
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <section className="px-[20px] pt-[16px]">
+        {config.productsTitle ? (
+          <SectionHeadingDivider title={t("runtime.productsMenu.ourProducts", config.productsTitle)} />
+        ) : null}
+        <div className="grid grid-cols-[repeat(2,164px)] justify-center gap-[16px] pt-[16px]">
+          {localizedProducts.map((card) => (
+            <ProductMenuCard
+              key={card.id}
+              card={card}
+              variant="standard"
+              onClick={handleHuKidsProductClick}
+            />
+          ))}
+        </div>
+      </section>
+    </RsKidsMenuFrame>
+  );
+}
+
+function RsKidsMorePage() {
+  const { t } = useLanguage();
+  const availableCards = getMoreCardsForCountry(RS_KIDS_RUNTIME_COUNTRY);
+  const documentsCount = getDocumentsCountForCountry(RS_KIDS_RUNTIME_COUNTRY);
+  const cardLabels: Record<MoreCardType, string> = {
+    contacts: t("more.cards.contacts", "Contacts"),
+    documents: t("more.cards.documents", "Documents"),
+    settings: t("more.cards.settings", "Settings"),
+    "gdpr-consent": t("more.cards.gdprConsent", "GDPR Consent"),
+    "third-party-consent": t("more.cards.thirdPartyConsent", "Consent to third parties"),
+    "digital-activities": t("more.cards.digitalActivities", "Digital activity record"),
+    "my-requests": t("more.cards.myRequests", "My applications"),
+    tutorial: t("more.cards.tutorial", "Tutorials"),
+  };
+
+  const renderCard = (cardType: MoreCardType) => {
+    switch (cardType) {
+      case "contacts":
+        return <ContactsCard key="contacts" title={cardLabels.contacts} onClick={() => undefined} />;
+      case "documents":
+        return (
+          <DocumentsCard
+            key="documents"
+            title={cardLabels.documents}
+            badgeCount={documentsCount}
+            onClick={() => undefined}
+          />
+        );
+      case "settings":
+        return <SettingsCard key="settings" title={cardLabels.settings} onClick={() => undefined} />;
+      case "third-party-consent":
+        return <SettingsCard key="third-party-consent" title={cardLabels["third-party-consent"]} onClick={() => undefined} />;
+      case "my-requests":
+        return <MyRequestsCard key="my-requests" title={cardLabels["my-requests"]} onClick={() => undefined} />;
+      case "tutorial":
+        return <TutorialCard key="tutorial" title={cardLabels.tutorial} onClick={() => undefined} />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <RsKidsMenuFrame subtitle="Family visibility, documents, and settings." title={t("more.title", "More")}>
+      <div className="px-[16px] pt-[16px]">
+        <div className="grid grid-cols-2 gap-x-[15px] gap-y-[16px]">
+          {availableCards.map((cardType) => renderCard(cardType))}
+        </div>
+      </div>
+    </RsKidsMenuFrame>
+  );
+}
+
+function RsKidsBottomNav({
+  activeNav,
+  onChange,
+}: {
+  activeNav: RsKidsNavId;
+  onChange: (tab: RsKidsNavId) => void;
+}) {
+  return (
+    <div
+      className="absolute inset-x-0 bottom-0 z-10 flex items-center justify-center border-t border-[var(--uc-border-muted)] bg-[var(--rs-kids-nav-bg)] shadow-[0_-10px_28px_color-mix(in_srgb,var(--uc-static-black)_12%,transparent)] backdrop-blur-md"
+      style={
+        {
+          "--uc-action": "var(--rs-kids-accent)",
+          "--uc-bottom-bar-bg": "var(--rs-kids-nav-bg)",
+        } as CSSProperties
+      }
+    >
+      <BottomNavigation activeTab={activeNav} onTabChange={onChange} />
+    </div>
+  );
+}
+
 type HuLightNavId = "home" | "analytics" | "payments" | "products" | "more";
-type HuLightView = "home" | "theme";
-type HuThemeId = "default" | "blue-lines" | "bubbles" | "aurora" | "garden" | "solar";
+type HuLightView =
+  | "home"
+  | "theme"
+  | "request-money"
+  | "send-money"
+  | "card-details"
+  | "messages"
+  | "transaction-detail"
+  | "goals"
+  | "goal-detail"
+  | "create-goal"
+  | "learn-topic"
+  | "learn-lesson";
+type HuThemeId = "default" | "nordlys" | "blue-lines" | "bubbles" | "aurora" | "garden" | "solar";
+type HuMoneyReason = "Food" | "School" | "Transport" | "Fun" | "Other";
+type HuSendContact = "Anna" | "David" | "Grandma";
+type HuPendingActionFlow = "request-money" | "send-money";
+type HuPendingActionTone = "green" | "blue" | "pink" | "amber";
+type HuPendingActionStatus = "pending" | "approved";
+type HuMerchantLogoId = "mcdonalds" | "youtube" | "apple";
+type HuTransactionReturnView = Exclude<HuLightView, "transaction-detail">;
+type HuPendingAction = {
+  id: string;
+  title: string;
+  person: string;
+  description: string;
+  amountLabel: string;
+  status: HuPendingActionStatus;
+  tone: HuPendingActionTone;
+  icon: IconName;
+  flow: HuPendingActionFlow;
+  createdAt: string;
+};
+type HuKidsCard = {
+  id: string;
+  title: string;
+  lastDigits: string;
+  holderName: string;
+};
+type HuSendMoneyTransfer = {
+  id: string;
+  contactName: HuSendContact;
+  amount: number;
+  amountLabel: string;
+  note?: string;
+  status: HuPendingActionStatus;
+  createdAt: string;
+};
+type HuKidsTransaction = AccountTransaction & {
+  merchantLogo?: HuMerchantLogoId;
+  subtitle?: string;
+};
+type HuKidsCardDetailAction = {
+  id: string;
+  iconName: IconName;
+  label: string;
+  onClick?: () => void;
+};
+type HuKidsTransactionDayGroup = {
+  key: string;
+  title: string;
+  transactions: HuKidsTransaction[];
+  total: number;
+};
+type HuLearnVisual = "balance" | "goals" | "safety" | "request" | "card";
+type HuLearnArtVariant = "topic-card" | "topic-featured" | "topic-hero" | "lesson-row" | "lesson-hero";
+type HuLearnLesson = {
+  id: string;
+  title: string;
+  eyebrow: string;
+  description: string;
+  body: string[];
+  visual: HuLearnVisual;
+};
+type HuLearnTopic = {
+  id: string;
+  moduleId: LearnModule["id"];
+  title: string;
+  subtitle: string;
+  helper: string;
+  visual: HuLearnVisual;
+  lessons: HuLearnLesson[];
+};
 type HuKidsMenuShapeCountry = Extract<CountryId, "BA">;
 type HuKidsRuntimeCountry = Extract<CountryId, "HU">;
 
 const HU_KIDS_SIMPLIFIED_MENU_SHAPE_COUNTRY: HuKidsMenuShapeCountry = "BA";
 const HU_KIDS_RUNTIME_COUNTRY: HuKidsRuntimeCountry = "HU";
 
-const HU_LIGHT_ACTIONS: Array<{ id: "send" | "request" | "details" | "more"; label: string; icon: IconName }> = [
-  { id: "send", label: "Send money", icon: "nav-payments" },
+const HU_LIGHT_ACTIONS: Array<{ id: "request" | "send" | "card" | "more"; label: string; icon: IconName }> = [
   { id: "request", label: "Request money", icon: "hu-kids-request-money" },
-  { id: "details", label: "Account Details", icon: "hu-kids-account-details" },
+  { id: "send", label: "Send money", icon: "nav-payments" },
+  { id: "card", label: "My card", icon: "credit-card" },
   { id: "more", label: "More Options", icon: "hu-kids-more-options" },
 ];
+
+const HU_SAVING_ACTIONS: Array<{ id: "save" | "request" | "move" | "goal"; label: string; icon: IconName }> = [
+  { id: "save", label: "Save money", icon: "hu-kids-saving" },
+  { id: "request", label: "Request money", icon: "hu-kids-request-money" },
+  { id: "move", label: "Move money", icon: "repeat" },
+  { id: "goal", label: "Create goal", icon: "trophy" },
+];
+
+const HU_MONEY_REASONS: HuMoneyReason[] = ["Food", "School", "Transport", "Fun", "Other"];
+const HU_SEND_CONTACTS: HuSendContact[] = ["Anna", "David", "Grandma"];
+const HU_SEND_APPROVAL_THRESHOLD = 5000;
+
+const HU_KIDS_INITIAL_GOALS: SavingGoal[] = RO_KIDS_GOALS.map((goal) => ({
+  ...goal,
+  childId: "child-alexandra",
+  currency: "HUF",
+  savedAmount: goal.savedAmount * 100,
+  targetAmount: goal.targetAmount * 100,
+}));
+
+const HU_KIDS_INITIAL_LEARN_MODULES: LearnModule[] = RO_KIDS_LEARN_MODULES.map((module) => ({ ...module }));
+
+const HU_LEARN_TOPICS: HuLearnTopic[] = [
+  {
+    id: "money-basics",
+    moduleId: "learn-balance",
+    title: "Money basics",
+    subtitle: "Balance, daily spend and choices that fit today.",
+    helper: "Understand what money is available now and what should stay untouched.",
+    visual: "balance",
+    lessons: [
+      {
+        id: "money-basics-balance",
+        title: "What is balance?",
+        eyebrow: "Lesson 1",
+        description: "The money you can use now, after card payments and transfers.",
+        body: [
+          "Your balance is the money already available in your account. It changes when you receive allowance, pay by card, move money, or save toward a goal.",
+          "In this Kids home, the big number shows what Alexandra can spend today. The full amount stays lower on the page, because not all money should feel ready to spend.",
+          "A good habit is to check what is available today before deciding what to buy.",
+        ],
+        visual: "balance",
+      },
+      {
+        id: "money-basics-today",
+        title: "Spend today, plan tomorrow",
+        eyebrow: "Lesson 2",
+        description: "Learn why daily money and total money are different.",
+        body: [
+          "Daily spend is the amount that fits today's plan. Total money includes savings, goals, and money that should stay safe.",
+          "When an app separates these numbers, it helps you make faster decisions without accidentally using money saved for something important.",
+        ],
+        visual: "card",
+      },
+      {
+        id: "money-basics-check",
+        title: "Quick money check",
+        eyebrow: "Lesson 3",
+        description: "A small routine before buying something.",
+        body: [
+          "Before spending, ask three questions: do I have enough today, do I still need money later, and would this slow down a saving goal?",
+          "If the answer is unclear, wait a little or ask a parent. Waiting is also a money skill.",
+        ],
+        visual: "goals",
+      },
+    ],
+  },
+  {
+    id: "saving-goals",
+    moduleId: "learn-goals",
+    title: "Saving goals",
+    subtitle: "Small steps for bigger wishes.",
+    helper: "Turn wishes into reachable goals with a target and steady progress.",
+    visual: "goals",
+    lessons: [
+      {
+        id: "saving-goals-target",
+        title: "Pick a clear target",
+        eyebrow: "Lesson 1",
+        description: "Every goal needs a name and a target amount.",
+        body: [
+          "A goal works best when it is specific. 'New bike' is easier to understand than 'save more'.",
+          "The target amount tells you how close you are. Progress makes patience visible.",
+        ],
+        visual: "goals",
+      },
+      {
+        id: "saving-goals-boost",
+        title: "Boost it safely",
+        eyebrow: "Lesson 2",
+        description: "Add money without emptying today's budget.",
+        body: [
+          "Adding a little money often is easier than adding a lot once. The app can help you move money after allowance, rewards, or gifts.",
+          "A smart goal should grow while daily spending still feels comfortable.",
+        ],
+        visual: "balance",
+      },
+      {
+        id: "saving-goals-share",
+        title: "Ask for help",
+        eyebrow: "Lesson 3",
+        description: "Parents can help without seeing every private thought.",
+        body: [
+          "You can ask a parent to help with a goal when you need a boost. The important part is explaining the amount and why it matters.",
+          "Goal support should feel safe, not pressured.",
+        ],
+        visual: "request",
+      },
+    ],
+  },
+  {
+    id: "online-safety",
+    moduleId: "learn-scam",
+    title: "Online safety",
+    subtitle: "Spot strange links, prizes and urgent messages.",
+    helper: "Pause before sharing codes, card details, or personal information.",
+    visual: "safety",
+    lessons: [
+      {
+        id: "online-safety-pause",
+        title: "Pause before tapping",
+        eyebrow: "Lesson 1",
+        description: "Urgent messages are often trying to rush you.",
+        body: [
+          "A message saying 'act now' or 'you won' can feel exciting. Scams use that feeling to make people move too fast.",
+          "Slow down, check the sender, and ask a parent before opening strange links.",
+        ],
+        visual: "safety",
+      },
+      {
+        id: "online-safety-private",
+        title: "Keep codes private",
+        eyebrow: "Lesson 2",
+        description: "PINs, passwords, and login codes are never chat messages.",
+        body: [
+          "A bank, parent, or friend should not ask for your PIN in a message. If someone asks, stop and tell an adult.",
+          "Private codes protect your money like a key protects a door.",
+        ],
+        visual: "card",
+      },
+      {
+        id: "online-safety-report",
+        title: "Report what feels wrong",
+        eyebrow: "Lesson 3",
+        description: "Freezing a card and asking for help are strong choices.",
+        body: [
+          "If something feels wrong, you can freeze your card and speak with a parent. Acting quickly helps keep money safe.",
+          "Safety is not about never making mistakes. It is about knowing what to do next.",
+        ],
+        visual: "safety",
+      },
+    ],
+  },
+  {
+    id: "request-money",
+    moduleId: "learn-request",
+    title: "Request money",
+    subtitle: "Ask clearly and follow the status.",
+    helper: "Requests are easier to approve when the amount and reason are simple.",
+    visual: "request",
+    lessons: [
+      {
+        id: "request-money-reason",
+        title: "Explain the reason",
+        eyebrow: "Lesson 1",
+        description: "A good request says what the money is for.",
+        body: [
+          "A request with a reason helps your parent understand the situation. 'Food after practice' is clearer than just asking for money.",
+          "The app keeps the status visible, so you know whether it is waiting, approved, or declined.",
+        ],
+        visual: "request",
+      },
+      {
+        id: "request-money-amount",
+        title: "Choose a fair amount",
+        eyebrow: "Lesson 2",
+        description: "Small, realistic requests build trust.",
+        body: [
+          "A fair amount matches the real need. Asking for the right amount makes approvals faster and helps everyone feel confident.",
+          "If you are not sure how much something costs, estimate and add a short note.",
+        ],
+        visual: "balance",
+      },
+      {
+        id: "request-money-wait",
+        title: "Waiting is normal",
+        eyebrow: "Lesson 3",
+        description: "Pending means your parent still needs to check.",
+        body: [
+          "A pending request is not a no. It simply means the adult has not decided yet.",
+          "While waiting, keep the plan simple and avoid making the same request many times.",
+        ],
+        visual: "goals",
+      },
+    ],
+  },
+  {
+    id: "card-confidence",
+    moduleId: "learn-card",
+    title: "Card confidence",
+    subtitle: "Pay, freeze and protect your card.",
+    helper: "Learn what your card can do and how to keep it safe.",
+    visual: "card",
+    lessons: [
+      {
+        id: "card-confidence-pay",
+        title: "Before you pay",
+        eyebrow: "Lesson 1",
+        description: "Check the amount and merchant before confirming.",
+        body: [
+          "Before paying, look at the amount, merchant, and what you are buying. A few seconds can prevent surprises.",
+          "After paying, recent transactions help you remember where the money went.",
+        ],
+        visual: "card",
+      },
+      {
+        id: "card-confidence-freeze",
+        title: "Freeze if unsure",
+        eyebrow: "Lesson 2",
+        description: "Freezing is a fast safety action.",
+        body: [
+          "If you cannot find your card or something looks strange, freezing it helps protect your money.",
+          "You can unfreeze it later when everything is okay again.",
+        ],
+        visual: "safety",
+      },
+      {
+        id: "card-confidence-details",
+        title: "Card details are private",
+        eyebrow: "Lesson 3",
+        description: "Only reveal details when you really need them.",
+        body: [
+          "Card number, expiry date, and CVV should be treated carefully. Do not share screenshots or read them out loud in public.",
+          "If you copy details, make sure you know exactly where they are going.",
+        ],
+        visual: "card",
+      },
+    ],
+  },
+];
+
+function getHuLearnInitialCompletedLessonIds(modules: LearnModule[]) {
+  return HU_LEARN_TOPICS.flatMap((topic) => {
+    const module = modules.find((item) => item.id === topic.moduleId);
+    const completedCount = module?.isCompleted
+      ? topic.lessons.length
+      : Math.max(0, Math.min(topic.lessons.length, Math.floor(((module?.progress ?? 0) / 100) * topic.lessons.length)));
+
+    return topic.lessons.slice(0, completedCount).map((lesson) => lesson.id);
+  });
+}
+
+const HU_PENDING_ACTIONS: HuPendingAction[] = [
+  {
+    id: "grandpa-food",
+    title: "Request Money",
+    person: "Grandpa Andrei",
+    description: "30 Ron for Food",
+    amountLabel: "30 RON",
+    status: "pending",
+    tone: "green",
+    icon: "hu-kids-request-money",
+    flow: "request-money",
+    createdAt: "Today 14:31",
+  },
+  {
+    id: "mom-trip",
+    title: "School trip",
+    person: "Mom",
+    description: "4.000 HUF waiting for approval",
+    amountLabel: "4.000 HUF",
+    status: "pending",
+    tone: "blue",
+    icon: "book-open",
+    flow: "request-money",
+    createdAt: "Today 12:10",
+  },
+  {
+    id: "dad-reward",
+    title: "Task reward",
+    person: "Dad",
+    description: "Clean room reward approved",
+    amountLabel: "2.500 HUF",
+    status: "approved",
+    tone: "pink",
+    icon: "clipboard-check",
+    flow: "request-money",
+    createdAt: "Yesterday",
+  },
+];
+
+const HU_KIDS_CARDS: HuKidsCard[] = [
+  {
+    id: "alexandra-standard-main",
+    title: "Mastercard Standard",
+    lastDigits: "4007",
+    holderName: "ALEXANDRA",
+  },
+];
+
+const HU_SEND_MONEY_TRANSFERS: HuSendMoneyTransfer[] = [
+  {
+    id: "hu-send-anna-project",
+    contactName: "Anna",
+    amount: 1200,
+    amountLabel: "1.200 HUF",
+    note: "Class project tickets",
+    status: "approved",
+    createdAt: "Yesterday",
+  },
+];
+
+const HU_KIDS_TRANSACTIONS: HuKidsTransaction[] = [
+  {
+    id: "hu-kids-from-dad",
+    day: "12",
+    month: "JUN",
+    monthKey: "2026-06",
+    monthTitle: "Today",
+    label: "From Dad",
+    details: "Salary November",
+    subtitle: "Salary November",
+    amount: 11824.33,
+    type: "credit",
+    category: "Income",
+    pfmCategory: "Income",
+    pfmSubcategory: "Allowance",
+    status: "Booked",
+  },
+  {
+    id: "hu-kids-mcdonalds",
+    day: "12",
+    month: "JUN",
+    monthKey: "2026-06",
+    monthTitle: "Today",
+    label: "McDonalds",
+    details: "Lunch with card",
+    amount: -940.21,
+    type: "debit",
+    category: "Leisure time",
+    pfmCategory: "Leisure time",
+    pfmSubcategory: "Fast food",
+    status: "Booked",
+    merchantLogo: "mcdonalds",
+  },
+  {
+    id: "hu-kids-youtube",
+    day: "11",
+    month: "JUN",
+    monthKey: "2026-06",
+    monthTitle: "Today",
+    label: "YouTube",
+    details: "Monthly subscription",
+    subtitle: "Monthly, due tomorrow",
+    amount: -550,
+    type: "debit",
+    category: "Leisure time",
+    pfmCategory: "Leisure time",
+    pfmSubcategory: "Streaming",
+    status: "Pending",
+    merchantLogo: "youtube",
+  },
+  {
+    id: "hu-kids-apple-refund",
+    day: "10",
+    month: "JUN",
+    monthKey: "2026-06",
+    monthTitle: "Today",
+    label: "Refund from Apple",
+    details: "Expected by 15 June",
+    subtitle: "Expected by 15 June",
+    amount: 612.8,
+    type: "credit",
+    category: "Shopping",
+    pfmCategory: "Shopping",
+    pfmSubcategory: "Refund",
+    status: "Pending",
+    merchantLogo: "apple",
+  },
+];
+
+function formatHuKidsAmount(amount: number) {
+  return `${new Intl.NumberFormat("hu-HU", { maximumFractionDigits: 0 }).format(amount)} HUF`;
+}
+
+function formatHuKidsGoalAmount(amount: number, showAmounts = true) {
+  return showAmounts ? formatHuKidsAmount(amount) : formatHuMaskedMoney();
+}
+
+const HU_MASKED_INTEGER = "****";
+const HU_MASKED_DECIMALS = ",**";
+const HU_MASKED_AMOUNT = `${HU_MASKED_INTEGER}${HU_MASKED_DECIMALS}`;
+
+function formatHuMaskedMoney(currency = "HUF") {
+  return `${HU_MASKED_AMOUNT} ${currency}`;
+}
+
+function formatHuMaskedSignedMoney(isPositive: boolean, currency = "HUF") {
+  return `${isPositive ? "+" : "-"}${formatHuMaskedMoney(currency)}`;
+}
+
+function getHuKidsTransactionDayTitle(transaction: HuKidsTransaction) {
+  if (transaction.day === "12") {
+    return "Today";
+  }
+
+  if (transaction.day === "11") {
+    return "Yesterday";
+  }
+
+  return `${Number(transaction.day)} ${transaction.month}`;
+}
+
+function groupHuKidsTransactionsByDay(transactions: HuKidsTransaction[]): HuKidsTransactionDayGroup[] {
+  const groups = new Map<string, HuKidsTransactionDayGroup>();
+
+  transactions.forEach((transaction) => {
+    const key = `${transaction.monthKey}-${transaction.day}`;
+    const existing = groups.get(key);
+
+    if (existing) {
+      existing.transactions.push(transaction);
+      existing.total += transaction.amount;
+      return;
+    }
+
+    groups.set(key, {
+      key,
+      title: getHuKidsTransactionDayTitle(transaction),
+      transactions: [transaction],
+      total: transaction.amount,
+    });
+  });
+
+  return Array.from(groups.values())
+    .sort((a, b) => b.key.localeCompare(a.key))
+    .map((group) => ({
+      ...group,
+      transactions: group.transactions.sort((a, b) => Number(b.day) - Number(a.day)),
+    }));
+}
+
+function formatHuKidsDayTotal(total: number, showAmounts: boolean) {
+  const isPositive = total >= 0;
+  const sign = isPositive ? "+" : "-";
+
+  if (!showAmounts) {
+    return `${sign}${HU_MASKED_AMOUNT}`;
+  }
+
+  return `${sign}${formatMoneyNumber(Math.abs(total), HU_KIDS_RUNTIME_COUNTRY)}`;
+}
+
+type HuThemeMotionLayerSpec = {
+  role: string;
+  background: string;
+  className?: string;
+  blendMode?: CSSProperties["mixBlendMode"];
+  opacity?: number;
+};
 
 type HuThemePreset = {
   id: HuThemeId;
@@ -239,11 +1600,20 @@ type HuThemePreset = {
   accent: string;
   accent2: string;
   accent3: string;
+  accentStrong?: string;
   pageBackground: string;
   motionBackground: string;
   swatchBackground: string;
   surfaceWeight: number;
   navWeight: number;
+  motionLayers?: HuThemeMotionLayerSpec[];
+  motionHeight?: number;
+  motionMask?: string;
+  heroForeground?: string;
+  heroMutedForeground?: string;
+  heroControlBackground?: string;
+  heroControlForeground?: string;
+  heroControlBorder?: string;
 };
 
 const HU_THEME_PRESETS: HuThemePreset[] = [
@@ -262,34 +1632,144 @@ const HU_THEME_PRESETS: HuThemePreset[] = [
     navWeight: 100,
   },
   {
+    id: "nordlys",
+    name: "Nordlys",
+    hint: "polar night",
+    accent: "var(--uc-product-blue-deep)",
+    accent2: "var(--uc-teal-bright)",
+    accent3: "var(--uc-yellow-gold)",
+    pageBackground:
+      "linear-gradient(180deg, #03141C 0px, #042430 240px, #0A3A4A 400px, #155666 455px, color-mix(in srgb, var(--uc-app-bg) 52%, var(--uc-teal-blue)) 486px, color-mix(in srgb, var(--uc-app-bg) 78%, var(--uc-teal-soft)) 530px, var(--uc-app-bg) 600px)",
+    motionBackground: "none",
+    swatchBackground:
+      "radial-gradient(55% 38% at 72% 86%, rgba(251, 184, 0, 0.95), rgba(240, 135, 29, 0.5) 45%, transparent 72%), linear-gradient(116deg, transparent 30%, rgba(62, 214, 200, 0.85) 46%, rgba(79, 198, 221, 0.5) 58%, transparent 74%), radial-gradient(140% 110% at 50% -20%, #155666, #0A3A4A 45%, #03141C 100%)",
+    surfaceWeight: 92,
+    navWeight: 90,
+    motionHeight: 560,
+    motionMask: "linear-gradient(180deg, var(--uc-static-black) 64%, transparent 100%)",
+    heroForeground: "var(--uc-static-white)",
+    heroMutedForeground: "rgba(255, 255, 255, 0.68)",
+    heroControlBackground: "rgba(255, 255, 255, 0.14)",
+    heroControlForeground: "var(--uc-static-white)",
+    heroControlBorder: "rgba(255, 255, 255, 0.22)",
+    motionLayers: [
+      {
+        role: "polar-veil",
+        background:
+          "radial-gradient(150% 110% at 50% -20%, rgba(21, 86, 102, 0.55), rgba(21, 86, 102, 0) 62%)",
+        className: "hu-nordlys-veil opacity-[0.7]",
+        blendMode: "screen",
+      },
+      {
+        role: "silk-beam-a",
+        background:
+          "linear-gradient(112deg, transparent 28%, color-mix(in srgb, var(--uc-teal-bright) 52%, transparent) 44%, color-mix(in srgb, var(--uc-teal-blue) 34%, transparent) 56%, transparent 72%)",
+        className: "hu-nordlys-silk-a opacity-[0.5] dark:opacity-[0.42]",
+        blendMode: "screen",
+      },
+      {
+        role: "silk-beam-b",
+        background:
+          "linear-gradient(248deg, transparent 34%, color-mix(in srgb, var(--uc-product-blue) 42%, transparent) 49%, color-mix(in srgb, var(--uc-teal-blue) 22%, transparent) 57%, transparent 70%)",
+        className: "hu-nordlys-silk-b opacity-[0.38] dark:opacity-[0.32]",
+        blendMode: "screen",
+      },
+      {
+        role: "prism-glint",
+        background:
+          "linear-gradient(116deg, transparent 47.4%, rgba(214, 248, 252, 0.85) 48.4%, rgba(143, 211, 224, 0.45) 49.2%, transparent 50.2%)",
+        className: "hu-nordlys-glint",
+        blendMode: "screen",
+      },
+      {
+        role: "polar-ember",
+        background:
+          "radial-gradient(44% 26% at 86% 71%, color-mix(in srgb, var(--uc-static-white) 36%, var(--uc-yellow-gold)), color-mix(in srgb, var(--uc-yellow-gold) 82%, transparent) 16%, color-mix(in srgb, var(--uc-orange-bright) 34%, transparent) 46%, transparent 72%)",
+        className: "hu-nordlys-ember",
+        blendMode: "screen",
+      },
+    ],
+  },
+  {
     id: "blue-lines",
     name: "Blue Lines",
     hint: "kinetic lines",
     accent: "var(--uc-product-blue)",
     accent2: "var(--uc-teal-bright)",
     accent3: "var(--uc-product-blue-deep)",
-    pageBackground: "linear-gradient(180deg, color-mix(in srgb, var(--uc-primary-k1) 18%, var(--uc-product-blue)) 0%, var(--uc-app-bg) 390px)",
+    accentStrong: "color-mix(in srgb, var(--uc-product-blue) 80%, var(--uc-text))",
+    heroMutedForeground: "color-mix(in srgb, var(--uc-text-muted) 10%, var(--uc-text))",
+    pageBackground: "linear-gradient(180deg, color-mix(in srgb, var(--uc-static-black) 26%, var(--uc-product-blue)) 0%, var(--uc-app-bg) 390px)",
     motionBackground:
       "radial-gradient(circle at 74% 18%, color-mix(in srgb, var(--hu-theme-accent-2) 28%, transparent), transparent 30%), repeating-linear-gradient(124deg, transparent 0 13px, color-mix(in srgb, var(--hu-theme-accent) 72%, transparent) 14px 16px, transparent 17px 31px), repeating-linear-gradient(64deg, transparent 0 30px, color-mix(in srgb, var(--hu-theme-accent-3) 46%, transparent) 31px 32px, transparent 33px 58px)",
     swatchBackground:
       "radial-gradient(circle at 68% 28%, var(--uc-teal-bright), transparent 35%), linear-gradient(135deg, var(--uc-primary-k1), var(--uc-product-blue) 54%, var(--uc-teal-main))",
     surfaceWeight: 87,
     navWeight: 78,
+    motionLayers: [
+      {
+        role: "meridian-veil",
+        background:
+          "radial-gradient(130% 95% at 84% -14%, color-mix(in srgb, var(--uc-teal-blue) 64%, transparent), color-mix(in srgb, var(--uc-product-blue) 36%, transparent) 42%, transparent 62%)",
+        className: "hu-motion-breathe-38 opacity-[0.85]",
+        blendMode: "screen",
+      },
+      {
+        role: "meridian-blades",
+        background:
+          "linear-gradient(118deg, transparent 29%, color-mix(in srgb, var(--uc-teal-bright) 78%, transparent) 33%, color-mix(in srgb, var(--uc-teal-bright) 78%, transparent) 34.4%, transparent 38.5%, transparent 46%, color-mix(in srgb, var(--uc-static-white) 72%, transparent) 49.6%, color-mix(in srgb, var(--uc-teal-blue) 62%, transparent) 51.2%, transparent 55.5%, transparent 62%, color-mix(in srgb, var(--uc-teal-bright) 44%, transparent) 64.6%, transparent 67.5%)",
+        className: "hu-motion-slide-28 opacity-[0.8] dark:opacity-[0.6]",
+        blendMode: "screen",
+      },
+      {
+        role: "meridian-counter-band",
+        background:
+          "linear-gradient(118deg, transparent 52%, color-mix(in srgb, var(--uc-product-blue-deep) 46%, transparent) 64%, transparent 79%)",
+        className: "hu-motion-slide-counter-40 opacity-[0.9]",
+        blendMode: "soft-light",
+      },
+    ],
   },
   {
     id: "bubbles",
-    name: "Bubbles",
-    hint: "soft depth",
-    accent: "var(--uc-teal-blue)",
-    accent2: "var(--uc-product-blue)",
-    accent3: "var(--uc-teal-soft)",
-    pageBackground: "linear-gradient(180deg, color-mix(in srgb, var(--uc-teal-blue) 28%, var(--uc-app-bg)) 0%, var(--uc-app-bg) 380px)",
+    name: "Blockcraft",
+    hint: "pixel blocks",
+    accent: "var(--uc-green-olive)",
+    accent2: "var(--uc-green-deep)",
+    accent3: "var(--uc-yellow-brown)",
+    accentStrong: "color-mix(in srgb, var(--uc-green-olive) 65%, var(--uc-text))",
+    heroMutedForeground: "color-mix(in srgb, var(--uc-text-muted) 90%, var(--uc-text))",
+    pageBackground:
+      "linear-gradient(180deg, color-mix(in srgb, var(--uc-green-olive) 30%, var(--uc-app-bg)) 0%, color-mix(in srgb, var(--uc-yellow-brown) 10%, var(--uc-app-bg)) 275px, var(--uc-app-bg) 395px)",
     motionBackground:
-      "radial-gradient(circle at 22% 26%, color-mix(in srgb, var(--hu-theme-accent-2) 54%, transparent), transparent 18%), radial-gradient(circle at 66% 12%, color-mix(in srgb, var(--hu-theme-accent-3) 52%, transparent), transparent 18%), radial-gradient(circle at 46% 54%, color-mix(in srgb, var(--hu-theme-accent) 42%, transparent), transparent 22%), radial-gradient(circle at 84% 46%, color-mix(in srgb, var(--hu-theme-accent-2) 40%, transparent), transparent 18%)",
+      "linear-gradient(90deg, transparent 0 10%, color-mix(in srgb, var(--hu-theme-accent) 34%, transparent) 10% 21%, transparent 21% 100%), linear-gradient(0deg, transparent 0 18%, color-mix(in srgb, var(--hu-theme-accent-3) 26%, transparent) 18% 30%, transparent 30% 100%), radial-gradient(80% 55% at 72% 0%, color-mix(in srgb, var(--hu-theme-accent-2) 32%, transparent), transparent 70%)",
     swatchBackground:
-      "radial-gradient(circle at 30% 35%, var(--uc-product-blue), transparent 25%), radial-gradient(circle at 66% 62%, var(--uc-teal-bright), transparent 28%), linear-gradient(135deg, var(--uc-primary-k1), var(--uc-teal-blue))",
+      "linear-gradient(90deg, color-mix(in srgb, var(--uc-green-olive) 90%, var(--uc-static-white)) 0 22%, var(--uc-green-deep) 22% 44%, var(--uc-yellow-brown) 44% 66%, var(--uc-green-olive) 66% 100%)",
     surfaceWeight: 88,
-    navWeight: 78,
+    navWeight: 80,
+    motionLayers: [
+      {
+        role: "blockcraft-sky-veil",
+        background:
+          "radial-gradient(120% 80% at 52% -18%, color-mix(in srgb, var(--uc-green-olive) 42%, transparent), transparent 62%), radial-gradient(72% 42% at 82% 4%, color-mix(in srgb, var(--uc-yellow-gold) 30%, transparent), transparent 68%)",
+        className: "hu-motion-breathe-38 opacity-[0.82]",
+        blendMode: "soft-light",
+      },
+      {
+        role: "blockcraft-grid",
+        background:
+          "conic-gradient(from 45deg at 22% 24%, color-mix(in srgb, var(--uc-static-white) 24%, transparent) 0 25%, color-mix(in srgb, var(--uc-green-olive) 36%, transparent) 0 50%, color-mix(in srgb, var(--uc-green-deep) 34%, transparent) 0 75%, transparent 0 100%), conic-gradient(from 45deg at 72% 38%, color-mix(in srgb, var(--uc-yellow-gold) 24%, transparent) 0 25%, color-mix(in srgb, var(--uc-yellow-brown) 34%, transparent) 0 50%, color-mix(in srgb, var(--uc-green-deep) 28%, transparent) 0 75%, transparent 0 100%), linear-gradient(180deg, color-mix(in srgb, var(--uc-green-deep) 10%, transparent), transparent 58%)",
+        className: "hu-motion-craft-cubes-36 opacity-[0.58] dark:opacity-[0.5]",
+        blendMode: "soft-light",
+      },
+      {
+        role: "blockcraft-pixels",
+        background:
+          "conic-gradient(from 45deg at 18% 20%, color-mix(in srgb, var(--uc-static-white) 22%, transparent) 0 25%, color-mix(in srgb, var(--uc-green-olive) 46%, transparent) 0 50%, color-mix(in srgb, var(--uc-green-deep) 42%, transparent) 0 75%, transparent 0), conic-gradient(from 45deg at 62% 66%, color-mix(in srgb, var(--uc-yellow-gold) 28%, transparent) 0 25%, color-mix(in srgb, var(--uc-yellow-brown) 44%, transparent) 0 50%, color-mix(in srgb, var(--uc-green-deep) 34%, transparent) 0 75%, transparent 0)",
+        className: "hu-motion-craft-float-42 opacity-[0.7] dark:opacity-[0.56]",
+        blendMode: "screen",
+      },
+    ],
   },
   {
     id: "aurora",
@@ -298,6 +1778,8 @@ const HU_THEME_PRESETS: HuThemePreset[] = [
     accent: "var(--uc-product-pink)",
     accent2: "var(--uc-product-mauve)",
     accent3: "var(--uc-red-main)",
+    accentStrong: "color-mix(in srgb, var(--uc-product-pink) 65%, var(--uc-text))",
+    heroMutedForeground: "color-mix(in srgb, var(--uc-text-muted) 85%, var(--uc-text))",
     pageBackground: "linear-gradient(180deg, color-mix(in srgb, var(--uc-product-pink) 30%, var(--uc-app-bg)) 0%, var(--uc-app-bg) 385px)",
     motionBackground:
       "radial-gradient(circle at 18% 24%, color-mix(in srgb, var(--hu-theme-accent-3) 38%, transparent), transparent 28%), radial-gradient(circle at 70% 10%, color-mix(in srgb, var(--hu-theme-accent) 48%, transparent), transparent 34%), linear-gradient(130deg, color-mix(in srgb, var(--hu-theme-accent-2) 42%, transparent), transparent 52%), repeating-linear-gradient(38deg, transparent 0 28px, color-mix(in srgb, var(--hu-theme-accent) 26%, transparent) 29px 30px, transparent 31px 54px)",
@@ -305,6 +1787,29 @@ const HU_THEME_PRESETS: HuThemePreset[] = [
       "linear-gradient(135deg, var(--uc-product-mauve), var(--uc-product-pink) 52%, var(--uc-red-main))",
     surfaceWeight: 87,
     navWeight: 78,
+    motionLayers: [
+      {
+        role: "aurora-veil",
+        background:
+          "radial-gradient(120% 90% at 26% -14%, color-mix(in srgb, var(--uc-product-mauve) 48%, transparent), transparent 60%)",
+        className: "hu-motion-breathe-38 opacity-[0.75]",
+        blendMode: "screen",
+      },
+      {
+        role: "aurora-curtains",
+        background:
+          "linear-gradient(96deg, transparent 16%, color-mix(in srgb, var(--uc-product-pink) 40%, transparent) 30%, transparent 44%, transparent 56%, color-mix(in srgb, var(--uc-product-mauve) 34%, transparent) 70%, transparent 84%)",
+        className: "hu-motion-sway-32 opacity-[0.55] dark:opacity-[0.5]",
+        blendMode: "screen",
+      },
+      {
+        role: "aurora-glow-arc",
+        background:
+          "radial-gradient(56% 38% at 72% 16%, color-mix(in srgb, var(--uc-red-main) 26%, transparent), transparent 62%)",
+        className: "hu-motion-drift-46 opacity-[0.8]",
+        blendMode: "soft-light",
+      },
+    ],
   },
   {
     id: "garden",
@@ -313,6 +1818,8 @@ const HU_THEME_PRESETS: HuThemePreset[] = [
     accent: "var(--uc-green-success)",
     accent2: "var(--uc-yellow-gold)",
     accent3: "var(--uc-green-deep)",
+    accentStrong: "color-mix(in srgb, var(--uc-green-success) 60%, var(--uc-text))",
+    heroMutedForeground: "color-mix(in srgb, var(--uc-text-muted) 95%, var(--uc-text))",
     pageBackground: "linear-gradient(180deg, color-mix(in srgb, var(--uc-green-success) 28%, var(--uc-app-bg)) 0%, var(--uc-app-bg) 385px)",
     motionBackground:
       "radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--hu-theme-accent-2) 34%, transparent), transparent 28%), repeating-linear-gradient(110deg, transparent 0 12px, color-mix(in srgb, var(--hu-theme-accent) 56%, transparent) 13px 14px, transparent 15px 28px), repeating-linear-gradient(150deg, transparent 0 38px, color-mix(in srgb, var(--hu-theme-accent-3) 28%, transparent) 39px 41px, transparent 42px 76px)",
@@ -320,6 +1827,29 @@ const HU_THEME_PRESETS: HuThemePreset[] = [
       "linear-gradient(135deg, var(--uc-green-deep), var(--uc-green-success) 58%, var(--uc-yellow-gold))",
     surfaceWeight: 88,
     navWeight: 80,
+    motionLayers: [
+      {
+        role: "canopy-shade",
+        background:
+          "radial-gradient(64% 42% at 18% -6%, color-mix(in srgb, var(--uc-green-deep) 52%, transparent), transparent 64%), radial-gradient(58% 38% at 86% 4%, color-mix(in srgb, var(--uc-green-success) 44%, transparent), transparent 62%)",
+        className: "hu-motion-sway-34 opacity-[0.85]",
+        blendMode: "soft-light",
+      },
+      {
+        role: "sun-pockets",
+        background:
+          "radial-gradient(30% 20% at 72% 22%, color-mix(in srgb, var(--uc-yellow-gold) 58%, transparent), transparent 70%), radial-gradient(20% 14% at 38% 34%, color-mix(in srgb, var(--uc-yellow-gold) 34%, transparent), transparent 70%)",
+        className: "hu-motion-breathe-26 opacity-[0.75]",
+        blendMode: "screen",
+      },
+      {
+        role: "leaf-dapple",
+        background:
+          "radial-gradient(16% 11% at 56% 12%, color-mix(in srgb, var(--uc-green-success) 50%, transparent), transparent 70%), radial-gradient(13% 9% at 12% 38%, color-mix(in srgb, var(--uc-teal-bright) 30%, transparent), transparent 70%)",
+        className: "hu-motion-drift-34 opacity-[0.6]",
+        blendMode: "screen",
+      },
+    ],
   },
   {
     id: "solar",
@@ -328,6 +1858,8 @@ const HU_THEME_PRESETS: HuThemePreset[] = [
     accent: "var(--uc-orange-main)",
     accent2: "var(--uc-yellow-gold)",
     accent3: "var(--uc-red-main)",
+    accentStrong: "color-mix(in srgb, var(--uc-orange-main) 60%, var(--uc-text))",
+    heroMutedForeground: "color-mix(in srgb, var(--uc-text-muted) 95%, var(--uc-text))",
     pageBackground: "linear-gradient(180deg, color-mix(in srgb, var(--uc-orange-main) 30%, var(--uc-app-bg)) 0%, var(--uc-app-bg) 380px)",
     motionBackground:
       "radial-gradient(circle at 56% 22%, color-mix(in srgb, var(--hu-theme-accent-2) 38%, transparent), transparent 28%), repeating-radial-gradient(circle at 42% 22%, transparent 0 16px, color-mix(in srgb, var(--hu-theme-accent) 32%, transparent) 17px 18px, transparent 19px 34px), linear-gradient(140deg, color-mix(in srgb, var(--hu-theme-accent-3) 22%, transparent), transparent 55%)",
@@ -335,6 +1867,29 @@ const HU_THEME_PRESETS: HuThemePreset[] = [
       "radial-gradient(circle at 70% 28%, var(--uc-yellow-gold), transparent 30%), linear-gradient(135deg, var(--uc-red-main), var(--uc-orange-main) 58%, var(--uc-yellow-gold))",
     surfaceWeight: 88,
     navWeight: 80,
+    motionLayers: [
+      {
+        role: "halo-glow",
+        background:
+          "radial-gradient(46% 30% at 70% 12%, color-mix(in srgb, var(--uc-yellow-gold) 66%, transparent), color-mix(in srgb, var(--uc-orange-main) 34%, transparent) 46%, transparent 70%)",
+        className: "hu-motion-breathe-26 opacity-[0.85]",
+        blendMode: "screen",
+      },
+      {
+        role: "halo-rings",
+        background:
+          "repeating-radial-gradient(circle at 70% 12%, transparent 0 54px, color-mix(in srgb, var(--uc-orange-main) 38%, transparent) 55px 57.5px, transparent 58.5px 118px)",
+        className: "hu-motion-breathe-38 opacity-[0.5] dark:opacity-[0.45]",
+        blendMode: "screen",
+      },
+      {
+        role: "warm-band",
+        background:
+          "linear-gradient(150deg, color-mix(in srgb, var(--uc-red-main) 18%, transparent), transparent 55%)",
+        className: "hu-motion-drift-46 opacity-[0.8]",
+        blendMode: "soft-light",
+      },
+    ],
   },
 ];
 
@@ -349,26 +1904,80 @@ function getHuThemeStyle(theme: HuThemePreset): CSSProperties {
     "--hu-theme-accent": theme.accent,
     "--hu-theme-accent-2": theme.accent2,
     "--hu-theme-accent-3": theme.accent3,
+    "--hu-theme-accent-strong": theme.accentStrong ?? "var(--hu-theme-accent)",
+    "--hu-theme-app-bg": isStandard
+      ? "var(--uc-app-bg)"
+      : "color-mix(in srgb, var(--uc-neutral-100) 86%, var(--hu-theme-accent))",
     "--hu-theme-page-bg": theme.pageBackground,
     "--hu-theme-motion-bg": theme.motionBackground,
     "--hu-theme-swatch-bg": theme.swatchBackground,
     "--hu-theme-card-bg": isStandard
       ? "var(--uc-surface)"
-      : `color-mix(in srgb, var(--uc-surface) ${theme.surfaceWeight}%, var(--hu-theme-accent))`,
+      : `color-mix(in srgb, var(--uc-neutral-white) ${theme.surfaceWeight}%, var(--hu-theme-accent))`,
     "--hu-theme-card-strong-bg": isStandard
       ? "var(--uc-surface)"
-      : `color-mix(in srgb, var(--uc-surface) ${Math.max(78, theme.surfaceWeight - 6)}%, var(--hu-theme-accent-2))`,
+      : `color-mix(in srgb, var(--uc-neutral-white) ${Math.max(78, theme.surfaceWeight - 6)}%, var(--hu-theme-accent-2))`,
     "--hu-theme-control-bg": isStandard
       ? "var(--uc-surface)"
-      : "color-mix(in srgb, var(--uc-surface) 78%, var(--hu-theme-accent))",
+      : "color-mix(in srgb, var(--uc-neutral-white) 78%, var(--hu-theme-accent))",
     "--hu-theme-control-fg": "var(--uc-text)",
     "--hu-theme-progress-bg": isStandard
       ? "var(--uc-surface-muted)"
       : "color-mix(in srgb, var(--uc-surface-muted) 78%, var(--hu-theme-accent))",
+    "--hu-learn-card-bg": isStandard
+      ? "linear-gradient(135deg, var(--uc-app-bg) 0%, color-mix(in srgb, var(--uc-app-bg) 62%, var(--uc-neutral-400)) 100%)"
+      : "linear-gradient(135deg, color-mix(in srgb, var(--uc-neutral-white) 94%, var(--hu-theme-accent)) 0%, color-mix(in srgb, var(--uc-neutral-white) 90%, var(--hu-theme-accent-2)) 58%, color-mix(in srgb, var(--uc-neutral-white) 86%, var(--hu-theme-accent-3)) 100%)",
+    "--hu-learn-card-border": isStandard
+      ? "color-mix(in srgb, var(--uc-text) 8%, transparent)"
+      : "color-mix(in srgb, var(--uc-text) 11%, transparent)",
+    "--hu-learn-card-glow": isStandard
+      ? "radial-gradient(circle at 84% 18%, color-mix(in srgb, var(--uc-static-white) 38%, transparent), transparent 35%)"
+      : "radial-gradient(circle at 86% 14%, color-mix(in srgb, var(--hu-theme-accent-strong) 12%, transparent), transparent 36%), radial-gradient(circle at 10% 110%, color-mix(in srgb, var(--hu-theme-accent-2) 8%, transparent), transparent 48%)",
+    "--hu-learn-card-shadow": isStandard
+      ? "0 10px 22px color-mix(in srgb, var(--uc-static-black) 8%, transparent)"
+      : "0 14px 30px color-mix(in srgb, var(--uc-static-black) 13%, transparent)",
+    "--hu-learn-art-bg": isStandard
+      ? "radial-gradient(circle at 28% 22%, color-mix(in srgb, var(--uc-static-white) 42%, transparent), transparent 34%), linear-gradient(135deg, color-mix(in srgb, var(--uc-neutral-white) 72%, var(--uc-neutral-400)), color-mix(in srgb, var(--uc-neutral-white) 52%, var(--uc-neutral-500)))"
+      : "radial-gradient(circle at 28% 22%, color-mix(in srgb, var(--uc-static-white) 30%, transparent), transparent 35%), linear-gradient(135deg, color-mix(in srgb, var(--uc-neutral-white) 84%, var(--hu-theme-accent)), color-mix(in srgb, var(--uc-neutral-white) 74%, var(--hu-theme-accent-2)))",
+    "--hu-learn-art-soft": isStandard
+      ? "color-mix(in srgb, var(--uc-neutral-white) 68%, var(--uc-neutral-400))"
+      : "color-mix(in srgb, var(--uc-neutral-white) 78%, var(--hu-theme-accent))",
+    "--hu-learn-art-ink": isStandard
+      ? "color-mix(in srgb, var(--uc-text) 78%, var(--uc-neutral-400))"
+      : "color-mix(in srgb, var(--uc-text) 72%, var(--hu-theme-accent-strong))",
     "--hu-theme-nav-bg": isStandard
       ? "var(--uc-bottom-bar-bg)"
-      : `color-mix(in srgb, var(--uc-bottom-bar-bg) ${theme.navWeight}%, var(--hu-theme-accent))`,
-    "--hu-theme-hero-muted": "color-mix(in srgb, var(--uc-text-muted) 82%, var(--hu-theme-accent-3))",
+      : `color-mix(in srgb, var(--uc-neutral-white) ${theme.navWeight}%, var(--hu-theme-accent))`,
+    "--hu-theme-hero-fg": theme.heroForeground ?? "var(--uc-text)",
+    "--hu-theme-hero-muted":
+      theme.heroMutedForeground ?? "color-mix(in srgb, var(--uc-text-muted) 82%, var(--hu-theme-accent-3))",
+    "--hu-theme-hero-control-bg":
+      theme.heroControlBackground ??
+      (isStandard ? "var(--uc-surface)" : "color-mix(in srgb, var(--uc-surface) 78%, var(--hu-theme-accent))"),
+    "--hu-theme-hero-control-fg": theme.heroControlForeground ?? "var(--uc-text)",
+    "--hu-theme-hero-control-border": theme.heroControlBorder ?? "transparent",
+    ...(isStandard
+      ? {}
+      : {
+          "--uc-app-bg": "var(--hu-theme-app-bg)",
+          "--uc-surface": "var(--hu-theme-card-bg)",
+          "--uc-surface-muted": "var(--hu-theme-card-strong-bg)",
+          "--uc-surface-raised": "var(--hu-theme-card-bg)",
+          "--uc-bottom-bar-bg": "var(--hu-theme-nav-bg)",
+          "--uc-sheet-bg": "var(--hu-theme-card-bg)",
+          "--uc-action": "var(--hu-theme-accent-strong)",
+          "--uc-action-soft": "var(--hu-theme-control-bg)",
+          "--uc-action-soft-strong": "color-mix(in srgb, var(--hu-theme-accent) 32%, var(--uc-neutral-white))",
+          "--uc-brand": "var(--hu-theme-accent-strong)",
+          "--uc-border": "color-mix(in srgb, var(--uc-neutral-300) 70%, var(--hu-theme-accent))",
+          "--uc-border-muted": "color-mix(in srgb, var(--uc-neutral-200) 76%, var(--hu-theme-accent))",
+          "--card": "var(--hu-theme-card-bg)",
+          "--popover": "var(--hu-theme-card-bg)",
+          "--secondary": "var(--hu-theme-control-bg)",
+          "--muted": "var(--hu-theme-card-strong-bg)",
+          "--accent": "var(--hu-theme-control-bg)",
+          "--ring": "var(--hu-theme-accent-strong)",
+        }),
   } as CSSProperties;
 }
 
@@ -380,12 +1989,28 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
   const [appliedThemeId, setAppliedThemeId] = useState<HuThemeId>("default");
   const [draftThemeId, setDraftThemeId] = useState<HuThemeId>("default");
   const [motionProgress, setMotionProgress] = useState(0);
+  const [pendingActions, setPendingActions] = useState<HuPendingAction[]>(HU_PENDING_ACTIONS);
+  const [selectedPendingActionId, setSelectedPendingActionId] = useState(HU_PENDING_ACTIONS[0]?.id ?? "");
+  const [sendMoneyTransfers, setSendMoneyTransfers] = useState<HuSendMoneyTransfer[]>(HU_SEND_MONEY_TRANSFERS);
+  const [selectedCardId, setSelectedCardId] = useState(HU_KIDS_CARDS[0]?.id ?? "");
+  const [selectedTransaction, setSelectedTransaction] = useState<AccountTransaction | null>(null);
+  const [transactionReturnView, setTransactionReturnView] = useState<HuTransactionReturnView>("home");
+  const [goals, setGoals] = useState<SavingGoal[]>(HU_KIDS_INITIAL_GOALS);
+  const [selectedGoalId, setSelectedGoalId] = useState(HU_KIDS_INITIAL_GOALS[0]?.id ?? "");
+  const [learnModules] = useState<LearnModule[]>(HU_KIDS_INITIAL_LEARN_MODULES);
+  const [completedLearnLessonIds, setCompletedLearnLessonIds] = useState<string[]>(() =>
+    getHuLearnInitialCompletedLessonIds(HU_KIDS_INITIAL_LEARN_MODULES),
+  );
+  const [selectedLearnTopicId, setSelectedLearnTopicId] = useState(HU_LEARN_TOPICS[0]?.id ?? "");
+  const [selectedLearnLessonId, setSelectedLearnLessonId] = useState(HU_LEARN_TOPICS[0]?.lessons[0]?.id ?? "");
   const appliedTheme = getHuTheme(appliedThemeId);
   const draftTheme = getHuTheme(draftThemeId);
+  const learnTopics = useMemo(() => HU_LEARN_TOPICS, []);
   const phoneChromeTheme = view === "theme" ? draftTheme : appliedTheme;
-  const activeNavUsesThemeField = activeNav === "home" || activeNav === "analytics";
+  const activeNavUsesHeroThemeField = activeNav === "home" || activeNav === "analytics";
+  const phoneChromeIsThemed = view === "theme" || phoneChromeTheme.id !== "default";
   const phoneChromeUsesLightForeground =
-    view === "theme" || (activeNavUsesThemeField && phoneChromeTheme.id !== "default");
+    view === "theme" || phoneChromeTheme.id === "nordlys" || phoneChromeTheme.id === "blue-lines";
 
   const handleNavChange = (tab: HuLightNavId) => {
     setActiveNav(tab);
@@ -393,17 +2018,176 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
     setIsMoreSheetOpen(false);
   };
 
+  const handleOpenRequestMoney = () => {
+    setIsMoreSheetOpen(false);
+    setMotionProgress(0);
+    setView("request-money");
+  };
+
+  const handleOpenSendMoney = () => {
+    setIsMoreSheetOpen(false);
+    setMotionProgress(0);
+    setView("send-money");
+  };
+
+  const handleOpenMessages = () => {
+    setIsMoreSheetOpen(false);
+    setMotionProgress(0);
+    setView("messages");
+  };
+
+  const handleOpenGoals = () => {
+    setIsMoreSheetOpen(false);
+    setMotionProgress(0);
+    setActiveNav("analytics");
+    setView("goals");
+  };
+
+  const handleOpenCreateGoal = () => {
+    setIsMoreSheetOpen(false);
+    setMotionProgress(0);
+    setActiveNav("analytics");
+    setView("create-goal");
+  };
+
+  const handleSelectGoal = (goalId: string) => {
+    setSelectedGoalId(goalId);
+    setIsMoreSheetOpen(false);
+    setMotionProgress(0);
+    setActiveNav("analytics");
+    setView("goal-detail");
+  };
+
+  const handleOpenLearnTopic = (topicId: string) => {
+    setSelectedLearnTopicId(topicId);
+    setIsMoreSheetOpen(false);
+    setMotionProgress(0);
+    setActiveNav("products");
+    setView("learn-topic");
+  };
+
+  const handleOpenLearnLesson = (topicId: string, lessonId: string) => {
+    setSelectedLearnTopicId(topicId);
+    setSelectedLearnLessonId(lessonId);
+    setIsMoreSheetOpen(false);
+    setMotionProgress(0);
+    setActiveNav("products");
+    setView("learn-lesson");
+  };
+
+  const handleOpenCardDetails = (cardId: string) => {
+    setSelectedCardId(cardId);
+    setIsMoreSheetOpen(false);
+    setMotionProgress(0);
+    setView("card-details");
+  };
+
+  const handleOpenTransactionDetail = (transaction: AccountTransaction, returnView: HuTransactionReturnView) => {
+    setSelectedTransaction(transaction);
+    setTransactionReturnView(returnView);
+    setIsMoreSheetOpen(false);
+    setMotionProgress(0);
+    setView("transaction-detail");
+  };
+
+  const handleCreateMoneyRequest = (amount: number, reason: HuMoneyReason, note: string) => {
+    const amountLabel = formatHuKidsAmount(amount);
+    const action: HuPendingAction = {
+      id: `hu-money-request-${Date.now()}`,
+      title: "Request Money",
+      person: "Mom",
+      description: `${amountLabel} for ${reason}${note.trim() ? ` - ${note.trim()}` : ""}`,
+      amountLabel,
+      status: "pending",
+      tone: "green",
+      icon: "hu-kids-request-money",
+      flow: "request-money",
+      createdAt: "Just now",
+    };
+
+    setPendingActions((current) => [action, ...current]);
+    setSelectedPendingActionId(action.id);
+  };
+
+  const handleCreateSendMoney = (contactName: HuSendContact, amount: number, note: string) => {
+    const amountLabel = formatHuKidsAmount(amount);
+    const cleanNote = note.trim();
+    const needsApproval = amount > HU_SEND_APPROVAL_THRESHOLD;
+    const transfer: HuSendMoneyTransfer = {
+      id: `hu-send-money-${Date.now()}`,
+      contactName,
+      amount,
+      amountLabel,
+      note: cleanNote || undefined,
+      status: needsApproval ? "pending" : "approved",
+      createdAt: "Just now",
+    };
+    const action: HuPendingAction = {
+      id: `${transfer.id}-action`,
+      title: needsApproval ? "Send Money" : "Money sent",
+      person: contactName,
+      description: `${amountLabel} to ${contactName}${cleanNote ? ` - ${cleanNote}` : ""}`,
+      amountLabel,
+      status: transfer.status,
+      tone: needsApproval ? "amber" : "blue",
+      icon: "send",
+      flow: "send-money",
+      createdAt: transfer.createdAt,
+    };
+
+    setSendMoneyTransfers((current) => [transfer, ...current]);
+    setPendingActions((current) => [action, ...current]);
+    setSelectedPendingActionId(action.id);
+  };
+
+  const handleCreateGoal = (title: string, targetAmount: number) => {
+    const cleanTitle = title.trim() || "New goal";
+    const goal: SavingGoal = {
+      id: `hu-goal-${Date.now()}`,
+      childId: "child-alexandra",
+      title: cleanTitle,
+      targetAmount,
+      savedAmount: 0,
+      currency: "HUF",
+      icon: "Goal",
+    };
+
+    setGoals((current) => [goal, ...current]);
+    setSelectedGoalId(goal.id);
+    setView("goal-detail");
+    setActiveNav("analytics");
+    setMotionProgress(0);
+  };
+
+  const handleAddGoalMoney = (goalId: string, amount: number) => {
+    setGoals((current) =>
+      current.map((goal) =>
+        goal.id === goalId
+          ? { ...goal, savedAmount: Math.min(goal.targetAmount, goal.savedAmount + amount) }
+          : goal,
+      ),
+    );
+  };
+
+  const handleCompleteLearnLesson = (lessonId: string) => {
+    setCompletedLearnLessonIds((current) => (current.includes(lessonId) ? current : [...current, lessonId]));
+  };
+
   useEffect(() => {
     const root = document.documentElement;
-    const foreground = phoneChromeUsesLightForeground ? "var(--uc-static-white)" : "var(--uc-text)";
-    const islandBackground = phoneChromeUsesLightForeground
+    const foreground = phoneChromeUsesLightForeground
+      ? "var(--uc-static-white)"
+      : phoneChromeTheme.heroForeground ?? "var(--uc-text)";
+    const islandBackground = phoneChromeIsThemed
       ? `color-mix(in srgb, var(--uc-static-black) 72%, ${phoneChromeTheme.accent})`
       : "color-mix(in srgb, var(--uc-static-black) 90%, transparent)";
-    const sensorBackground = phoneChromeUsesLightForeground
+    const sensorBackground = phoneChromeIsThemed
       ? `color-mix(in srgb, var(--uc-static-black) 82%, ${phoneChromeTheme.accent3})`
       : "color-mix(in srgb, var(--uc-static-black) 96%, transparent)";
-    const systemBarBackground = phoneChromeUsesLightForeground
-      ? "linear-gradient(180deg, color-mix(in srgb, var(--uc-static-black) 24%, transparent) 0%, color-mix(in srgb, var(--uc-static-black) 10%, transparent) 52%, transparent 100%)"
+    const systemBarBackground = phoneChromeIsThemed
+      ? phoneChromeUsesLightForeground
+        ? "linear-gradient(180deg, color-mix(in srgb, var(--uc-static-black) 24%, transparent) 0%, color-mix(in srgb, var(--uc-static-black) 10%, transparent) 52%, transparent 100%)"
+        : `linear-gradient(180deg, color-mix(in srgb, var(--uc-surface) 46%, ${phoneChromeTheme.accent}) 0%, color-mix(in srgb, var(--uc-surface) 18%, transparent) 56%, transparent 100%)`
       : "transparent";
 
     root.style.setProperty("--uc-phone-status-fg", foreground);
@@ -417,100 +2201,332 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
       root.style.removeProperty("--uc-phone-dynamic-island-sensor-bg");
       root.style.removeProperty("--uc-phone-system-bar-bg");
     };
-  }, [phoneChromeTheme.accent, phoneChromeTheme.accent3, phoneChromeUsesLightForeground]);
+  }, [
+    phoneChromeIsThemed,
+    phoneChromeTheme.accent,
+    phoneChromeTheme.accent3,
+    phoneChromeTheme.heroForeground,
+    phoneChromeUsesLightForeground,
+  ]);
 
-  if (view === "theme") {
+  const shellTheme = view === "theme" ? draftTheme : appliedTheme;
+  const isThemeChangeView = view === "theme";
+  const isPiMenuView = view === "home" && !activeNavUsesHeroThemeField;
+  const shellScope = view === "home" ? activeNav : view;
+  const shellBackground = isThemeChangeView ? "var(--uc-static-black)" : "var(--hu-theme-page-bg)";
+  const shellMotionProgress =
+    view === "home" && activeNavUsesHeroThemeField ? motionProgress : isThemeChangeView ? 0.05 : 0.08;
+  const shellMotionFade = isThemeChangeView ? "var(--uc-static-black)" : "var(--hu-theme-page-bg)";
+
+  const renderActiveHuKidsView = () => {
+    if (view === "theme") {
+      return (
+        <HuThemeChangePage
+          appliedThemeId={appliedThemeId}
+          concept={concept}
+          draftTheme={draftTheme}
+          draftThemeId={draftThemeId}
+          onApply={() => {
+            setAppliedThemeId(draftThemeId);
+            setMotionProgress(0);
+            setView("home");
+          }}
+          onBack={() => {
+            setDraftThemeId(appliedThemeId);
+            setView("home");
+          }}
+          onSelectTheme={setDraftThemeId}
+          showAmounts={showAmounts}
+        />
+      );
+    }
+
+    if (view === "request-money") {
+      const latestRequest = pendingActions.find((action) => action.id === selectedPendingActionId) ?? pendingActions[0];
+
+      return (
+        <HuRequestMoneyScreen
+          latestRequest={latestRequest}
+          onBack={() => {
+            setView("home");
+            setActiveNav("home");
+            setMotionProgress(0);
+          }}
+          onSubmit={handleCreateMoneyRequest}
+          theme={appliedTheme}
+        />
+      );
+    }
+
+    if (view === "send-money") {
+      const latestTransfer = sendMoneyTransfers[0];
+
+      return (
+        <HuSendMoneyScreen
+          latestTransfer={latestTransfer}
+          onBack={() => {
+            setView("home");
+            setActiveNav("home");
+            setMotionProgress(0);
+          }}
+          onSubmit={handleCreateSendMoney}
+          theme={appliedTheme}
+        />
+      );
+    }
+
+    if (view === "card-details") {
+      const selectedCard = HU_KIDS_CARDS.find((card) => card.id === selectedCardId) ?? HU_KIDS_CARDS[0];
+
+      return (
+        <HuKidsCardDetailsPage
+          card={selectedCard}
+          onBack={() => {
+            setView("home");
+            setActiveNav("home");
+            setMotionProgress(0);
+          }}
+          onTransactionClick={(transaction) => handleOpenTransactionDetail(transaction, "card-details")}
+          showAmounts={showAmounts}
+          theme={appliedTheme}
+        />
+      );
+    }
+
+    if (view === "messages") {
+      return (
+        <div className="relative z-[1] min-h-0 flex-1 overflow-hidden">
+          <MessagesScreen
+            onBack={() => {
+              setView("home");
+              setMotionProgress(0);
+            }}
+          />
+        </div>
+      );
+    }
+
+    if (view === "goals") {
+      return (
+        <HuKidsGoalsPage
+          goals={goals}
+          onBack={() => {
+            setView("home");
+            setActiveNav("analytics");
+            setMotionProgress(0);
+          }}
+          onCreateGoal={handleOpenCreateGoal}
+          onSelectGoal={handleSelectGoal}
+          showAmounts={showAmounts}
+          theme={appliedTheme}
+        />
+      );
+    }
+
+    if (view === "goal-detail") {
+      const selectedGoal = goals.find((goal) => goal.id === selectedGoalId) ?? goals[0] ?? null;
+
+      return (
+        <HuKidsGoalDetailPage
+          goal={selectedGoal}
+          onAddMoney={(amount) => {
+            if (selectedGoal) {
+              handleAddGoalMoney(selectedGoal.id, amount);
+            }
+          }}
+          onAskParent={handleOpenRequestMoney}
+          onBack={() => {
+            setView("goals");
+            setActiveNav("analytics");
+            setMotionProgress(0);
+          }}
+          showAmounts={showAmounts}
+          theme={appliedTheme}
+        />
+      );
+    }
+
+    if (view === "create-goal") {
+      return (
+        <HuKidsCreateGoalPage
+          onBack={() => {
+            setView("goals");
+            setActiveNav("analytics");
+            setMotionProgress(0);
+          }}
+          onCreateGoal={handleCreateGoal}
+          theme={appliedTheme}
+        />
+      );
+    }
+
+    if (view === "learn-topic") {
+      const selectedTopic = learnTopics.find((topic) => topic.id === selectedLearnTopicId) ?? learnTopics[0] ?? null;
+
+      return (
+        <HuKidsLearnTopicPage
+          completedLessonIds={completedLearnLessonIds}
+          onBack={() => {
+            setView("home");
+            setActiveNav("products");
+            setMotionProgress(0);
+          }}
+          onOpenLesson={handleOpenLearnLesson}
+          theme={appliedTheme}
+          topic={selectedTopic}
+        />
+      );
+    }
+
+    if (view === "learn-lesson") {
+      const selectedTopic = learnTopics.find((topic) => topic.id === selectedLearnTopicId) ?? learnTopics[0] ?? null;
+      const selectedLesson =
+        selectedTopic?.lessons.find((lesson) => lesson.id === selectedLearnLessonId) ?? selectedTopic?.lessons[0] ?? null;
+
+      return (
+        <HuKidsLearnLessonPage
+          completed={selectedLesson ? completedLearnLessonIds.includes(selectedLesson.id) : false}
+          lesson={selectedLesson}
+          onBack={() => {
+            setView("learn-topic");
+            setActiveNav("products");
+            setMotionProgress(0);
+          }}
+          onComplete={() => {
+            if (selectedLesson) {
+              handleCompleteLearnLesson(selectedLesson.id);
+            }
+          }}
+          theme={appliedTheme}
+          topic={selectedTopic}
+        />
+      );
+    }
+
+    if (view === "transaction-detail" && selectedTransaction) {
+      return (
+        <div className="relative z-[1] min-h-0 flex-1 overflow-hidden">
+          <TransactionDetailScreen
+            country={HU_KIDS_RUNTIME_COUNTRY}
+            product={null}
+            transaction={selectedTransaction}
+            onBack={() => setView(transactionReturnView)}
+            onRedoPayment={() => undefined}
+          />
+        </div>
+      );
+    }
+
     return (
-      <HuThemeChangePage
-        appliedThemeId={appliedThemeId}
-        concept={concept}
-        draftTheme={draftTheme}
-        draftThemeId={draftThemeId}
-        onApply={() => {
-          setAppliedThemeId(draftThemeId);
-          setMotionProgress(0);
-          setView("home");
-        }}
-        onBack={() => {
-          setDraftThemeId(appliedThemeId);
-          setView("home");
-        }}
-        onSelectTheme={setDraftThemeId}
-        showAmounts={showAmounts}
-      />
+      <>
+        {activeNavUsesHeroThemeField ? (
+          <>
+            <div className="relative z-[1] h-[54px] flex-shrink-0" />
+
+            <div
+              className="scrollbar-hide relative z-[1] flex-1 overflow-y-auto pb-[104px]"
+              onScroll={(event) => {
+                const nextProgress = Math.min(event.currentTarget.scrollTop / 210, 1);
+                setMotionProgress(nextProgress);
+              }}
+            >
+              {activeNav === "analytics" ? (
+                <HuSavingContent
+                  concept={concept}
+                  goals={goals}
+                  onMessages={handleOpenMessages}
+                  onCreateGoal={handleOpenCreateGoal}
+                  onOpenGoals={handleOpenGoals}
+                  onRequestMoney={handleOpenRequestMoney}
+                  onSelectGoal={handleSelectGoal}
+                  onSendMoney={handleOpenSendMoney}
+                  onToggleAmounts={() => setShowAmounts((current) => !current)}
+                  showAmounts={showAmounts}
+                />
+              ) : (
+                <HuHomeContent
+                  concept={concept}
+                  onCardDetails={handleOpenCardDetails}
+                  onMessages={handleOpenMessages}
+                  onMoreOptions={() => setIsMoreSheetOpen(true)}
+                  onRequestMoney={handleOpenRequestMoney}
+                  onSendMoney={handleOpenSendMoney}
+                  onTransactionClick={(transaction) => handleOpenTransactionDetail(transaction, "home")}
+                  pendingActions={pendingActions}
+                  onToggleAmounts={() => setShowAmounts((current) => !current)}
+                  showAmounts={showAmounts}
+                />
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            {activeNav === "payments" ? <HuKidsPaymentsPage onMessages={handleOpenMessages} theme={appliedTheme} /> : null}
+            {activeNav === "products" ? (
+              <HuKidsLearnPage
+                completedLessonIds={completedLearnLessonIds}
+                learnModules={learnModules}
+                onSelectTopic={handleOpenLearnTopic}
+                onMessages={handleOpenMessages}
+                theme={appliedTheme}
+                topics={learnTopics}
+              />
+            ) : null}
+            {activeNav === "more" ? <HuKidsMorePage onMessages={handleOpenMessages} theme={appliedTheme} /> : null}
+          </>
+        )}
+
+        <HuLightBottomNav activeNav={activeNav} onChange={handleNavChange} />
+
+        {isMoreSheetOpen ? (
+          <HuMoreOptionsSheet
+            currentTheme={appliedTheme}
+            onClose={() => setIsMoreSheetOpen(false)}
+            onOpenThemes={() => {
+              setDraftThemeId(appliedThemeId);
+              setIsMoreSheetOpen(false);
+              setView("theme");
+            }}
+          />
+        ) : null}
+      </>
     );
-  }
+  };
 
   return (
-    <HuThemeShell theme={appliedTheme}>
-      {activeNavUsesThemeField ? (
-        <>
-          <HuThemeMotionLayer motionProgress={motionProgress} />
-          <div className="relative z-[1] h-[54px] flex-shrink-0" />
-
-          <div
-            className="scrollbar-hide relative z-[1] flex-1 overflow-y-auto pb-[104px]"
-            onScroll={(event) => {
-              const nextProgress = Math.min(event.currentTarget.scrollTop / 210, 1);
-              setMotionProgress(nextProgress);
-            }}
-          >
-            {activeNav === "analytics" ? (
-              <HuSavingContent
-                concept={concept}
-                onMoreOptions={() => setIsMoreSheetOpen(true)}
-                onToggleAmounts={() => setShowAmounts((current) => !current)}
-                showAmounts={showAmounts}
-              />
-            ) : (
-              <HuHomeContent
-                concept={concept}
-                onMoreOptions={() => setIsMoreSheetOpen(true)}
-                onToggleAmounts={() => setShowAmounts((current) => !current)}
-                showAmounts={showAmounts}
-              />
-            )}
-          </div>
-        </>
-      ) : (
-        <>
-          {activeNav === "payments" ? <HuKidsPaymentsPage /> : null}
-          {activeNav === "products" ? <HuKidsProductsPage /> : null}
-          {activeNav === "more" ? <HuKidsMorePage /> : null}
-        </>
-      )}
-
-      <HuLightBottomNav activeNav={activeNav} onChange={handleNavChange} />
-
-      {isMoreSheetOpen ? (
-        <HuMoreOptionsSheet
-          currentTheme={appliedTheme}
-          onClose={() => setIsMoreSheetOpen(false)}
-          onOpenThemes={() => {
-            setDraftThemeId(appliedThemeId);
-            setIsMoreSheetOpen(false);
-            setView("theme");
-          }}
+    <HuThemeShell
+      className={isThemeChangeView ? "text-[var(--uc-static-white)]" : undefined}
+      shellBackground={shellBackground}
+      theme={shellTheme}
+      themeScope={shellScope}
+    >
+      {!isPiMenuView ? (
+        <HuThemeMotionLayer
+          fadeTo={shellMotionFade}
+          motionProgress={shellMotionProgress}
+          preview={isThemeChangeView}
+          theme={shellTheme}
         />
       ) : null}
+      {renderActiveHuKidsView()}
     </HuThemeShell>
   );
 }
 
-function HuKidsPiMenuHeader({ title }: { title: string }) {
+function HuKidsPiMenuHeader({ onMessages, title }: { onMessages?: () => void; title: string }) {
   const { t } = useLanguage();
 
   return (
-    <div className="w-full bg-[var(--uc-surface)]">
+    <div className="w-full bg-[var(--hu-kids-menu-header-bg)]">
       <div className="px-[24px] pb-[22px]">
         <div className="flex min-h-[32px] items-start gap-[8px]">
-          <h1 className="uc-type-h1 min-w-0 flex-1 text-[var(--uc-text)]">{title}</h1>
+          <h1 className="uc-type-h1 min-w-0 flex-1 text-[var(--hu-kids-menu-title-fg)]">{title}</h1>
           <HeaderActionRail>
             <HeaderActionButton icon="contact-phone" label="Contact phone" onClick={() => undefined} />
             <HeaderActionButton
               icon="messages"
               label={t("runtime.actions.messages", "Messages")}
-              onClick={() => undefined}
+              onClick={onMessages}
             />
           </HeaderActionRail>
         </div>
@@ -521,17 +2537,82 @@ function HuKidsPiMenuHeader({ title }: { title: string }) {
 
 function HuKidsPiMenuFrame({
   children,
+  header,
+  onMessages,
+  theme,
   title,
 }: {
   children: ReactNode;
+  header?: ReactNode;
+  onMessages?: () => void;
+  theme: HuThemePreset;
   title: string;
 }) {
+  const isThemed = theme.id !== "default";
+  const frameStyle = {
+    "--hu-kids-menu-bg": isThemed ? "transparent" : "var(--uc-surface)",
+    "--hu-kids-menu-body-bg": isThemed
+      ? "color-mix(in srgb, var(--uc-app-bg) 86%, var(--hu-theme-accent))"
+      : "var(--uc-surface)",
+    "--hu-kids-menu-header-bg": isThemed ? "transparent" : "var(--uc-surface)",
+    "--hu-kids-menu-title-fg": isThemed ? "var(--hu-theme-hero-fg)" : "var(--uc-text)",
+    "--uc-action": "var(--hu-theme-accent-strong)",
+    ...(isThemed
+      ? {
+          "--uc-brand": "var(--hu-theme-accent-strong)",
+          "--uc-icon": "var(--hu-theme-hero-fg)",
+        }
+      : {}),
+  } as CSSProperties;
+  const contentStyle = {
+    "--uc-action": "var(--hu-theme-accent-strong)",
+    ...(isThemed
+      ? {
+          "--uc-brand": "var(--hu-theme-accent-strong)",
+          "--uc-neutral-200": "color-mix(in srgb, var(--uc-surface) 78%, var(--hu-theme-accent))",
+          "--uc-neutral-300": "color-mix(in srgb, var(--uc-surface) 66%, var(--hu-theme-accent-2))",
+          "--uc-neutral-400": "color-mix(in srgb, var(--uc-surface) 58%, var(--hu-theme-accent-3))",
+          "--uc-surface-muted": "var(--hu-theme-card-strong-bg)",
+        }
+      : {}),
+  } as CSSProperties;
+
   return (
-    <div className="relative z-[1] flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--uc-surface)] text-[var(--uc-text)]">
-      <div className="h-[54px] flex-shrink-0 bg-[var(--uc-surface)]" />
-      <HuKidsPiMenuHeader title={title} />
-      <div className="scrollbar-hide min-h-0 flex-1 overflow-y-auto pb-[104px]">
-        {children}
+    <div
+      className="relative z-[1] flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--hu-kids-menu-bg)] text-[var(--uc-text)]"
+      data-hu-kids-themed-section={theme.id}
+      style={frameStyle}
+    >
+      {isThemed ? (
+        <>
+          <HuThemeMotionLayer motionProgress={0.08} theme={theme} />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-[118px] z-0 h-[360px]"
+            style={{
+              background:
+                "linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--hu-kids-menu-body-bg) 58%, transparent) 36%, var(--hu-kids-menu-body-bg) 100%)",
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[360px]"
+            style={{ background: "linear-gradient(180deg, transparent 0%, var(--hu-kids-menu-body-bg) 62%)" }}
+          />
+        </>
+      ) : null}
+
+      <div className="relative z-[1] h-[54px] flex-shrink-0 bg-[var(--hu-kids-menu-header-bg)]" />
+      <div
+        className="relative z-[1]"
+        style={isThemed ? ({ "--uc-text": "var(--hu-kids-menu-title-fg)" } as CSSProperties) : undefined}
+      >
+        {header ?? <HuKidsPiMenuHeader onMessages={onMessages} title={title} />}
+      </div>
+      <div className="scrollbar-hide relative z-[1] min-h-0 flex-1 overflow-y-auto pb-[104px]">
+        <div className="min-h-full" style={contentStyle}>
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -579,7 +2660,7 @@ function HuKidsPaymentHeroSheet({
   );
 }
 
-function HuKidsPaymentsPage() {
+function HuKidsPaymentsPage({ onMessages, theme }: { onMessages?: () => void; theme: HuThemePreset }) {
   const { t } = useLanguage();
   const menu = getPaymentsMenuForCountry(HU_KIDS_RUNTIME_COUNTRY);
   const [selectedPrimaryItemId, setSelectedPrimaryItemId] = useState<PaymentHeroItem["id"] | null>(null);
@@ -596,7 +2677,7 @@ function HuKidsPaymentsPage() {
 
   return (
     <>
-      <HuKidsPiMenuFrame title={t("runtime.payments.title", menu.title)}>
+      <HuKidsPiMenuFrame onMessages={onMessages} theme={theme} title={t("runtime.payments.title", menu.title)}>
         <div className="flex flex-col gap-[13px] px-[20px] pt-[8px]">
           {localizedPrimaryItems.map((item) => (
             <PaymentHeroCard
@@ -646,7 +2727,7 @@ function getHuKidsProductCardTranslationId(card: ProductsCard) {
   return card.id;
 }
 
-function HuKidsProductsPage() {
+function HuKidsProductsPage({ onMessages, theme }: { onMessages?: () => void; theme: HuThemePreset }) {
   const { t } = useLanguage();
   const config = getProductsMenuForCountry(HU_KIDS_SIMPLIFIED_MENU_SHAPE_COUNTRY);
   const localizedProducts = config.products.map((card) => ({
@@ -660,7 +2741,7 @@ function HuKidsProductsPage() {
   }));
 
   return (
-    <HuKidsPiMenuFrame title={t("runtime.productsMenu.title", config.title)}>
+    <HuKidsPiMenuFrame onMessages={onMessages} theme={theme} title={t("runtime.productsMenu.title", config.title)}>
       {localizedOffers.length > 0 ? (
         <section className="pt-[16px]">
           <SectionHeadingDivider title={t("runtime.productsMenu.offersForYou", config.offersTitle)} className="px-[24px]" />
@@ -703,7 +2784,7 @@ function HuKidsProductsPage() {
   );
 }
 
-function HuKidsMorePage() {
+function HuKidsMorePage({ onMessages, theme }: { onMessages?: () => void; theme: HuThemePreset }) {
   const { t } = useLanguage();
   const availableCards = getMoreCardsForCountry(HU_KIDS_SIMPLIFIED_MENU_SHAPE_COUNTRY);
   const documentsCount = getDocumentsCountForCountry(HU_KIDS_RUNTIME_COUNTRY);
@@ -743,20 +2824,639 @@ function HuKidsMorePage() {
   };
 
   return (
-    <div className="relative z-[1] flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--uc-surface)] text-[var(--uc-text)]">
-      <div className="h-[54px] flex-shrink-0 bg-[var(--uc-surface)]" />
-      <MoreHeader
-        actionVariant="contact-messages"
-        onContactPhone={() => undefined}
-        onLogout={() => undefined}
-        onMessages={() => undefined}
-        onProfile={() => undefined}
-      />
+    <HuKidsPiMenuFrame
+      header={
+        <MoreHeader
+          actionVariant="contact-messages"
+          onContactPhone={() => undefined}
+          onLogout={() => undefined}
+          onMessages={onMessages}
+          onProfile={() => undefined}
+        />
+      }
+      theme={theme}
+      title={t("more.title", "More")}
+    >
+      <div className="px-[16px] pt-[16px]">
+        <div className="grid grid-cols-2 gap-x-[15px] gap-y-[16px]">
+          {availableCards.map((cardType) => renderCard(cardType))}
+        </div>
+      </div>
+    </HuKidsPiMenuFrame>
+  );
+}
 
-      <div className="scrollbar-hide min-h-0 flex-1 overflow-y-auto pb-[104px]">
-        <div className="px-[16px] pt-[16px]">
-          <div className="grid grid-cols-2 gap-x-[15px] gap-y-[16px]">
-            {availableCards.map((cardType) => renderCard(cardType))}
+function HuThemeShell({
+  children,
+  className,
+  shellBackground = "var(--hu-theme-page-bg)",
+  theme,
+  themeScope,
+}: {
+  children: ReactNode;
+  className?: string;
+  shellBackground?: string;
+  theme: HuThemePreset;
+  themeScope?: string;
+}) {
+  const shellStyle = {
+    ...getHuThemeStyle(theme),
+    "--hu-theme-shell-bg": shellBackground,
+    background: "var(--hu-theme-shell-bg)",
+  } as CSSProperties;
+
+  return (
+    <div
+      className={cn("relative flex h-full w-full flex-col overflow-hidden text-[var(--uc-text)]", className)}
+      data-hu-theme={theme.id}
+      data-hu-kids-theme-scope={themeScope}
+      style={shellStyle}
+    >
+      <div className="absolute inset-0" style={{ background: "var(--hu-theme-shell-bg)" }} />
+      {children}
+    </div>
+  );
+}
+
+function HuRequestMoneyScreen({
+  latestRequest,
+  onBack,
+  onSubmit,
+  theme,
+}: {
+  latestRequest?: HuPendingAction;
+  onBack: () => void;
+  onSubmit: (amount: number, reason: HuMoneyReason, note: string) => void;
+  theme: HuThemePreset;
+}) {
+  const [amount, setAmount] = useState("3000");
+  const [reason, setReason] = useState<HuMoneyReason>("Food");
+  const [note, setNote] = useState("");
+  const parsedAmount = Number(amount.replace(/[^\d]/g, ""));
+  const canSubmit = parsedAmount > 0;
+  const headerVariant = theme.id === "nordlys" || theme.id === "blue-lines" ? "dark" : "transparent";
+
+  const submitRequest = () => {
+    if (!canSubmit) {
+      return;
+    }
+
+    onSubmit(parsedAmount, reason, note);
+    setNote("");
+  };
+
+  return (
+    <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
+        <PageHeader
+          compact
+          includeSafeArea
+          onBack={onBack}
+          showHelp={false}
+          title="Request money"
+          variant={headerVariant}
+          collapsedTitleProgress={1}
+        />
+
+        <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto px-[24px] pb-[36px] pt-[18px]">
+          <section className="rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
+            <p className="text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">
+              Ask your parent for money
+            </p>
+            <p className="mt-[8px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
+              Your request will show as a pending action until it is approved.
+            </p>
+
+            <label className="mt-[18px] block text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
+              Amount
+            </label>
+            <div className="mt-[8px] flex h-[58px] items-center rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px]">
+              <input
+                className="min-w-0 flex-1 bg-transparent text-[28px] font-bold leading-[32px] tracking-[0] text-[var(--uc-text)] outline-none"
+                inputMode="numeric"
+                onChange={(event) => setAmount(event.target.value.replace(/[^\d]/g, ""))}
+                value={amount}
+              />
+              <span className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">HUF</span>
+            </div>
+
+            <div className="mt-[18px]">
+              <p className="text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
+                Reason
+              </p>
+              <div className="mt-[10px] flex flex-wrap gap-[8px]">
+                {HU_MONEY_REASONS.map((item) => {
+                  const selected = item === reason;
+
+                  return (
+                    <button
+                      key={item}
+                      className={cn(
+                        "h-[36px] rounded-full px-[14px] text-[13px] font-bold leading-[16px] tracking-[0] transition",
+                        selected
+                          ? "bg-[var(--hu-theme-accent-strong)] text-[var(--uc-static-white)]"
+                          : "bg-[var(--hu-theme-control-bg)] text-[var(--uc-text)]"
+                      )}
+                      onClick={() => setReason(item)}
+                      type="button"
+                    >
+                      {item}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <label className="mt-[18px] block text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
+              Note
+            </label>
+            <textarea
+              className="mt-[8px] h-[92px] w-full resize-none rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] py-[12px] text-[15px] font-normal leading-[19px] tracking-[0] text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)]"
+              onChange={(event) => setNote(event.target.value)}
+              placeholder="Example: lunch after school"
+              value={note}
+            />
+
+            <PrimaryButton className="mt-[18px] !w-full" disabled={!canSubmit} onClick={submitRequest}>
+              Send request
+            </PrimaryButton>
+          </section>
+
+          {latestRequest ? (
+            <section className="mt-[16px] rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
+              <div className="flex items-start gap-[12px]">
+                <span className="grid size-[44px] shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--uc-green-success)_16%,var(--hu-theme-card-bg))] text-[var(--uc-green-success)]">
+                  <AppIcon name={latestRequest.icon} size={24} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-[10px]">
+                    <p className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">
+                      {latestRequest.title}
+                    </p>
+                    <span className="rounded-full bg-[color-mix(in_srgb,var(--uc-green-success)_14%,var(--hu-theme-card-bg))] px-[8px] py-[3px] text-[10px] font-bold uppercase leading-[12px] tracking-[0] text-[var(--uc-green-success)]">
+                      {latestRequest.status}
+                    </span>
+                  </div>
+                  <p className="mt-[6px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
+                    {latestRequest.description}
+                  </p>
+                  <p className="mt-[10px] text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--uc-text)]">
+                    {latestRequest.createdAt} - {latestRequest.person}
+                  </p>
+                </div>
+              </div>
+              <button
+                className="mt-[16px] h-[42px] w-full rounded-[10px] bg-[var(--hu-theme-control-bg)] text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--hu-theme-accent-strong)]"
+                onClick={onBack}
+                type="button"
+              >
+                Back to home
+              </button>
+            </section>
+          ) : null}
+        </main>
+    </div>
+  );
+}
+
+function HuSendMoneyScreen({
+  latestTransfer,
+  onBack,
+  onSubmit,
+  theme,
+}: {
+  latestTransfer?: HuSendMoneyTransfer;
+  onBack: () => void;
+  onSubmit: (contactName: HuSendContact, amount: number, note: string) => void;
+  theme: HuThemePreset;
+}) {
+  const [contactName, setContactName] = useState<HuSendContact>("Anna");
+  const [amount, setAmount] = useState("1200");
+  const [note, setNote] = useState("Class project tickets");
+  const parsedAmount = Number(amount.replace(/[^\d]/g, ""));
+  const canSubmit = parsedAmount > 0;
+  const needsApproval = parsedAmount > HU_SEND_APPROVAL_THRESHOLD;
+  const headerVariant = theme.id === "nordlys" || theme.id === "blue-lines" ? "dark" : "transparent";
+
+  const submitTransfer = () => {
+    if (!canSubmit) {
+      return;
+    }
+
+    onSubmit(contactName, parsedAmount, note);
+  };
+
+  return (
+    <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
+        <PageHeader
+          collapsedTitleProgress={1}
+          compact
+          includeSafeArea
+          onBack={onBack}
+          showHelp={false}
+          title="Send money"
+          variant={headerVariant}
+        />
+
+        <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto px-[24px] pb-[36px] pt-[18px]">
+          <section className="rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
+            <div className="flex items-start gap-[12px]">
+              <span
+                className={cn(
+                  "grid size-[44px] shrink-0 place-items-center rounded-full",
+                  needsApproval
+                    ? "bg-[color-mix(in_srgb,var(--uc-yellow-gold)_22%,var(--hu-theme-card-bg))] text-[color-mix(in_srgb,var(--uc-yellow-gold)_78%,var(--uc-text))]"
+                    : "bg-[color-mix(in_srgb,var(--hu-theme-accent)_14%,var(--hu-theme-card-bg))] text-[var(--hu-theme-accent-strong)]",
+                )}
+              >
+                <AppIcon name={needsApproval ? "shield-check" : "send"} size={24} />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">
+                  {needsApproval ? "This transfer needs approval" : "Ready to send"}
+                </p>
+                <p className="mt-[6px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
+                  {needsApproval
+                    ? `Above ${formatHuKidsAmount(HU_SEND_APPROVAL_THRESHOLD)}, so Mom approves first.`
+                    : "Small transfers can finish right away."}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-[18px]">
+              <p className="text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
+                Person
+              </p>
+              <div className="mt-[10px] grid grid-cols-3 gap-[8px]">
+                {HU_SEND_CONTACTS.map((contact) => {
+                  const selected = contact === contactName;
+
+                  return (
+                    <button
+                      key={contact}
+                      aria-pressed={selected}
+                      className={cn(
+                        "h-[36px] rounded-full px-[12px] text-[13px] font-bold leading-[16px] tracking-[0] transition",
+                        selected
+                          ? "bg-[var(--hu-theme-accent-strong)] text-[var(--uc-static-white)]"
+                          : "bg-[var(--hu-theme-control-bg)] text-[var(--uc-text)]",
+                      )}
+                      onClick={() => setContactName(contact)}
+                      type="button"
+                    >
+                      {contact}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <label className="mt-[18px] block text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
+              Amount
+            </label>
+            <div className="mt-[8px] flex h-[58px] items-center rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px]">
+              <input
+                className="min-w-0 flex-1 bg-transparent text-[28px] font-bold leading-[32px] tracking-[0] text-[var(--uc-text)] outline-none"
+                inputMode="numeric"
+                onChange={(event) => setAmount(event.target.value.replace(/[^\d]/g, ""))}
+                value={amount}
+              />
+              <span className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">HUF</span>
+            </div>
+
+            <label className="mt-[18px] block text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
+              Note
+            </label>
+            <textarea
+              className="mt-[8px] h-[92px] w-full resize-none rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] py-[12px] text-[15px] font-normal leading-[19px] tracking-[0] text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)]"
+              onChange={(event) => setNote(event.target.value)}
+              placeholder="Optional"
+              value={note}
+            />
+
+            <PrimaryButton className="mt-[18px] !w-full" disabled={!canSubmit} onClick={submitTransfer}>
+              {needsApproval ? "Ask Mom to approve" : "Send money"}
+            </PrimaryButton>
+          </section>
+
+          {latestTransfer ? (
+            <section className="mt-[16px] rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
+              <div className="flex items-start gap-[12px]">
+                <span
+                  className={cn(
+                    "grid size-[44px] shrink-0 place-items-center rounded-full",
+                    latestTransfer.status === "approved"
+                      ? "bg-[color-mix(in_srgb,var(--hu-theme-accent)_14%,var(--hu-theme-card-bg))] text-[var(--hu-theme-accent-strong)]"
+                      : "bg-[color-mix(in_srgb,var(--uc-yellow-gold)_22%,var(--hu-theme-card-bg))] text-[color-mix(in_srgb,var(--uc-yellow-gold)_78%,var(--uc-text))]",
+                  )}
+                >
+                  <AppIcon name={latestTransfer.status === "approved" ? "prime-check" : "shield-check"} size={24} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-[10px]">
+                    <p className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">
+                      {latestTransfer.status === "approved" ? "Money sent" : "Needs parent approval"}
+                    </p>
+                    <span
+                      className={cn(
+                        "rounded-full px-[8px] py-[3px] text-[10px] font-bold uppercase leading-[12px] tracking-[0]",
+                        latestTransfer.status === "approved"
+                          ? "bg-[color-mix(in_srgb,var(--hu-theme-accent)_12%,var(--hu-theme-card-bg))] text-[var(--hu-theme-accent-strong)]"
+                          : "bg-[color-mix(in_srgb,var(--uc-yellow-gold)_22%,var(--hu-theme-card-bg))] text-[color-mix(in_srgb,var(--uc-yellow-gold)_78%,var(--uc-text))]",
+                      )}
+                    >
+                      {latestTransfer.status}
+                    </span>
+                  </div>
+                  <p className="mt-[6px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
+                    {latestTransfer.amountLabel} to {latestTransfer.contactName}
+                    {latestTransfer.note ? ` - ${latestTransfer.note}` : ""}
+                  </p>
+                  <p className="mt-[10px] text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--uc-text)]">
+                    {latestTransfer.createdAt}
+                  </p>
+                </div>
+              </div>
+              <button
+                className="mt-[16px] h-[42px] w-full rounded-[10px] bg-[var(--hu-theme-control-bg)] text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--hu-theme-accent-strong)]"
+                onClick={onBack}
+                type="button"
+              >
+                Back to home
+              </button>
+            </section>
+          ) : null}
+        </main>
+    </div>
+  );
+}
+
+function HuKidsCardDetailsPage({
+  card,
+  onBack,
+  onTransactionClick,
+  showAmounts,
+  theme,
+}: {
+  card: HuKidsCard;
+  onBack: () => void;
+  onTransactionClick: (transaction: AccountTransaction) => void;
+  showAmounts: boolean;
+  theme: HuThemePreset;
+}) {
+  const [transactionSearch, setTransactionSearch] = useState("");
+  const [isCardBackVisible, setIsCardBackVisible] = useState(false);
+  const [isFaceIdVisible, setIsFaceIdVisible] = useState(false);
+  const [isCardFrozen, setIsCardFrozen] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [copyToast, setCopyToast] = useState<{ message: string; visible: boolean } | null>(null);
+  const toastHideTimerRef = useRef<number | null>(null);
+  const toastClearTimerRef = useRef<number | null>(null);
+  const cardTransactions = useMemo(() => {
+    const query = transactionSearch.trim().toLowerCase();
+    if (!query) {
+      return HU_KIDS_TRANSACTIONS;
+    }
+
+    return HU_KIDS_TRANSACTIONS.filter((transaction) =>
+      [transaction.label, transaction.details, transaction.subtitle, transaction.pfmSubcategory]
+        .filter(Boolean)
+        .some((value) => value?.toLowerCase().includes(query)),
+    );
+  }, [transactionSearch]);
+
+  const revealCardDetails = () => {
+    if (isCardBackVisible) {
+      setIsCardBackVisible(false);
+      return;
+    }
+
+    setIsFaceIdVisible(true);
+  };
+
+  const completeCardDetailsReveal = () => {
+    setIsFaceIdVisible(false);
+    setIsCardBackVisible(true);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (toastHideTimerRef.current) {
+        window.clearTimeout(toastHideTimerRef.current);
+      }
+      if (toastClearTimerRef.current) {
+        window.clearTimeout(toastClearTimerRef.current);
+      }
+    };
+  }, []);
+
+  const showCopyToast = (message: string) => {
+    if (toastHideTimerRef.current) {
+      window.clearTimeout(toastHideTimerRef.current);
+    }
+    if (toastClearTimerRef.current) {
+      window.clearTimeout(toastClearTimerRef.current);
+    }
+
+    setCopyToast({ message, visible: true });
+    toastHideTimerRef.current = window.setTimeout(() => {
+      setCopyToast((current) => (current?.message === message ? { ...current, visible: false } : current));
+    }, 1800);
+    toastClearTimerRef.current = window.setTimeout(() => {
+      setCopyToast((current) => (current?.message === message ? null : current));
+    }, 2150);
+  };
+
+  const copyCardValue = async (field: string, value: string, label: string) => {
+    try {
+      await navigator.clipboard?.writeText(value);
+    } catch {
+      // The demo still confirms the copy intent when browser clipboard permissions are unavailable.
+    }
+
+    setCopiedField(field);
+    showCopyToast(`${label} successfully copied`);
+    window.setTimeout(() => setCopiedField((current) => (current === field ? null : current)), 1200);
+  };
+
+  const quickActions: HuKidsCardDetailAction[] = [
+    { id: "card-details", iconName: "eye", label: isCardBackVisible ? "Hide\ndetails" : "Card\ndetails", onClick: revealCardDetails },
+    { id: "manage-card", iconName: "account-options", label: "Manage\ncard" },
+    {
+      id: "block-card",
+      iconName: "lock",
+      label: isCardFrozen ? "Unblock\ncard" : "Block\ncard",
+      onClick: () => setIsCardFrozen((current) => !current),
+    },
+  ];
+
+  return (
+    <>
+      <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
+        <div style={{ "--uc-text": "var(--hu-theme-hero-fg)", "--uc-icon": "var(--hu-theme-hero-fg)" } as CSSProperties}>
+          <PageHeader
+            compact
+            collapsedTitleProgress={1}
+            includeSafeArea
+            onBack={onBack}
+            showHelp={false}
+            title="Cards"
+            variant="transparent"
+          />
+        </div>
+
+        <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto bg-[var(--uc-surface)] pb-[36px]">
+          <section className="bg-[var(--uc-surface-muted)] px-[24px] pb-[28px] pt-[8px]">
+            <HuKidsCardRevealStage
+              card={card}
+              copiedField={copiedField}
+              isBackVisible={isCardBackVisible}
+              isFrozen={isCardFrozen}
+              onCopy={copyCardValue}
+              onReveal={revealCardDetails}
+              showAmounts={showAmounts}
+            />
+
+            <HuKidsCardDetailsActionRail actions={quickActions} />
+          </section>
+
+          <HuKidsCardTransactionsPanel
+            onTransactionClick={onTransactionClick}
+            searchValue={transactionSearch}
+            showAmounts={showAmounts}
+            transactions={cardTransactions}
+            onSearchChange={setTransactionSearch}
+          />
+        </main>
+      </div>
+
+      {isFaceIdVisible ? <FaceIdAnimation onComplete={completeCardDetailsReveal} /> : null}
+      <HuKidsCopyToast toast={copyToast} />
+    </>
+  );
+}
+
+function HuKidsCopyToast({ toast }: { toast: { message: string; visible: boolean } | null }) {
+  if (!toast) {
+    return null;
+  }
+
+  return (
+    <div
+      aria-live="polite"
+      className="pointer-events-none absolute inset-x-0 bottom-[18px] z-[60] flex justify-center px-[16px]"
+      data-hu-copy-toast
+      role="status"
+    >
+      <div
+        className={cn(
+          "flex h-[34px] w-[343px] max-w-full items-center rounded-[48px] bg-[var(--uc-static-black)] px-[16px] py-[6px] shadow-[0_12px_26px_rgb(var(--uc-shadow-rgb)_/_0.24)] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          toast.visible ? "translate-y-0 opacity-100" : "translate-y-[10px] opacity-0",
+        )}
+      >
+        <p className="min-w-0 flex-1 truncate text-left text-[14px] font-bold leading-[20px] tracking-[0] text-[var(--uc-static-white)]">
+          {toast.message}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function HuKidsCardRevealStage({
+  card,
+  copiedField,
+  isBackVisible,
+  isFrozen,
+  onCopy,
+  onReveal,
+  showAmounts,
+}: {
+  card: HuKidsCard;
+  copiedField: string | null;
+  isBackVisible: boolean;
+  isFrozen: boolean;
+  onCopy: (field: string, value: string, label: string) => void;
+  onReveal: () => void;
+  showAmounts: boolean;
+}) {
+  const cardNumber = "5319 7200 0000 4007";
+  const expiry = "09/29";
+  const cvv = "214";
+  const cardNumberDisplay = showAmounts ? cardNumber : "5319 7200 **** 4007";
+
+  return (
+    <div className="relative flex justify-center">
+      <div
+        className="relative h-[206px] w-[327px]"
+        style={{ perspective: "1100px" }}
+      >
+        <div
+          className="absolute inset-0 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
+          style={{
+            transform: isBackVisible ? "rotateY(180deg)" : "rotateY(0deg)",
+            transformStyle: "preserve-3d",
+          }}
+        >
+          <button
+            aria-label="Reveal card details"
+            className="absolute inset-0 overflow-hidden rounded-[10px] border border-[color-mix(in_srgb,var(--uc-static-white)_34%,var(--uc-border-muted))] shadow-[0_18px_32px_color-mix(in_srgb,var(--uc-static-black)_28%,transparent)] transition-transform active:scale-[0.99]"
+            onClick={onReveal}
+            style={{ backfaceVisibility: "hidden" }}
+            type="button"
+          >
+            <Card
+              ariaLabel={`${card.title} card ending ${card.lastDigits}`}
+              className={cn("h-full w-full transition-[filter,transform] duration-500", isFrozen ? "saturate-[0.68]" : "")}
+              size="large"
+              style={{ height: 206, width: 327 }}
+            />
+            <HuKidsCardFreezeOverlay isFrozen={isFrozen} />
+          </button>
+
+          <div
+            className="absolute inset-0 overflow-hidden rounded-[10px] border border-[color-mix(in_srgb,var(--uc-static-white)_34%,var(--uc-border-muted))] bg-[linear-gradient(135deg,#ff8a18_0%,#f3771c_48%,#b6421d_100%)] p-[18px] text-[var(--uc-static-white)] shadow-[0_18px_32px_color-mix(in_srgb,var(--uc-static-black)_28%,transparent)]"
+            style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+          >
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-70">
+              <div className="absolute left-[-64px] top-[38px] h-[92px] w-[260px] rotate-45 rounded-full border-[28px] border-[color-mix(in_srgb,var(--uc-static-white)_34%,transparent)]" />
+              <div className="absolute right-[-42px] top-[-38px] h-[170px] w-[170px] rounded-full border-[24px] border-[color-mix(in_srgb,var(--uc-static-white)_16%,transparent)]" />
+            </div>
+
+            <div className="relative z-[1] flex h-full flex-col justify-between">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-[12px] font-bold uppercase leading-[14px] tracking-[0] opacity-80">Card details</p>
+                  <p className="mt-[4px] text-[18px] font-bold leading-[22px] tracking-[0]">{card.title}</p>
+                </div>
+                <span className="rounded-full bg-[color-mix(in_srgb,var(--uc-static-black)_22%,transparent)] px-[10px] py-[5px] text-[11px] font-bold uppercase leading-[13px] tracking-[0]">
+                  {isFrozen ? "Frozen" : "Active"}
+                </span>
+              </div>
+
+              <div className="space-y-[8px]">
+                <HuKidsCardCopyField
+                  copied={copiedField === "number"}
+                  label="Card number"
+                  value={cardNumberDisplay}
+                  onCopy={() => onCopy("number", cardNumber, "Account number")}
+                />
+                <div className="grid grid-cols-2 gap-[8px]">
+                  <HuKidsCardCopyField
+                    copied={copiedField === "expiry"}
+                    label="Expiry"
+                    value={expiry}
+                    onCopy={() => onCopy("expiry", expiry, "Expiry date")}
+                  />
+                  <HuKidsCardCopyField
+                    copied={copiedField === "cvv"}
+                    label="CVV"
+                    value={cvv}
+                    onCopy={() => onCopy("cvv", cvv, "CVV")}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <HuKidsCardFreezeOverlay isFrozen={isFrozen} />
           </div>
         </div>
       </div>
@@ -764,53 +3464,183 @@ function HuKidsMorePage() {
   );
 }
 
-function HuThemeShell({
-  children,
-  className,
-  theme,
-}: {
-  children: ReactNode;
-  className?: string;
-  theme: HuThemePreset;
-}) {
+function HuKidsCardDetailsActionRail({ actions }: { actions: HuKidsCardDetailAction[] }) {
+  return (
+    <div className="mt-[28px] grid grid-cols-3 items-start gap-[18px]" data-hu-card-details-actions>
+      {actions.map((action) => (
+        <button
+          key={action.id}
+          aria-label={action.label.replace(/\s+/g, " ").trim()}
+          className="flex min-w-0 flex-col items-center gap-[12px] text-center transition-transform active:scale-[0.98]"
+          onClick={action.onClick}
+          type="button"
+        >
+          <span className="grid size-[68px] place-items-center rounded-full bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm">
+            <AppIcon name={action.iconName} size={28} />
+          </span>
+          <span className="min-h-[38px] whitespace-pre-line text-[16px] font-normal leading-[19px] tracking-[0] text-[var(--uc-text-muted)]">
+            {action.label}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function HuKidsCardFreezeOverlay({ isFrozen }: { isFrozen: boolean }) {
   return (
     <div
-      className={cn("relative flex h-full w-full flex-col overflow-hidden text-[var(--uc-text)]", className)}
-      data-hu-theme={theme.id}
-      style={getHuThemeStyle(theme)}
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none absolute inset-0 transition-opacity duration-700",
+        isFrozen ? "opacity-100" : "opacity-0",
+      )}
     >
-      <div className="absolute inset-0" style={{ background: "var(--hu-theme-page-bg)" }} />
-      {children}
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,color-mix(in_srgb,var(--uc-static-white)_42%,transparent),color-mix(in_srgb,var(--uc-teal-bright)_42%,transparent)_46%,color-mix(in_srgb,var(--uc-product-blue)_30%,transparent))] backdrop-blur-[1px]" />
+      <div className="absolute inset-0 bg-[repeating-linear-gradient(132deg,transparent_0_17px,color-mix(in_srgb,var(--uc-static-white)_64%,transparent)_18px_19px,transparent_20px_42px)]" />
+      <div className="absolute left-[18px] top-[18px] rounded-full bg-[color-mix(in_srgb,var(--uc-static-black)_34%,transparent)] px-[11px] py-[6px] text-[11px] font-bold uppercase leading-[13px] tracking-[0] text-[var(--uc-static-white)] shadow-sm">
+        Frozen
+      </div>
     </div>
+  );
+}
+
+function HuKidsCardCopyField({
+  copied,
+  label,
+  onCopy,
+  value,
+}: {
+  copied: boolean;
+  label: string;
+  onCopy: () => void;
+  value: string;
+}) {
+  return (
+    <button
+      className="flex min-h-[48px] w-full items-center justify-between gap-[10px] rounded-[10px] bg-[color-mix(in_srgb,var(--uc-static-black)_24%,transparent)] px-[12px] py-[8px] text-left transition-colors active:bg-[color-mix(in_srgb,var(--uc-static-black)_34%,transparent)]"
+      onClick={onCopy}
+      type="button"
+    >
+      <span className="min-w-0">
+        <span className="block text-[10px] font-bold uppercase leading-[12px] tracking-[0] opacity-70">{label}</span>
+        <span className="mt-[3px] block truncate text-[15px] font-bold leading-[18px] tracking-[0]">{value}</span>
+      </span>
+      <span className="grid size-[28px] shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--uc-static-white)_18%,transparent)]">
+        {copied ? <AppIcon name="prime-check" size={16} /> : <AppIcon name="copy-documents" size={16} />}
+      </span>
+    </button>
+  );
+}
+
+function HuKidsCardTransactionsPanel({
+  onSearchChange,
+  onTransactionClick,
+  searchValue,
+  showAmounts,
+  transactions,
+}: {
+  onSearchChange: (value: string) => void;
+  onTransactionClick: (transaction: AccountTransaction) => void;
+  searchValue: string;
+  showAmounts: boolean;
+  transactions: HuKidsTransaction[];
+}) {
+  const transactionGroups = useMemo(() => groupHuKidsTransactionsByDay(transactions), [transactions]);
+
+  return (
+    <section className="bg-[var(--uc-surface)] pb-[28px] pt-[24px]" data-hu-card-details-transactions>
+      <div className="px-[24px]">
+        <AccountSearchBar value={searchValue} onValueChange={onSearchChange} />
+      </div>
+
+      <div className="mt-[26px]">
+        {transactionGroups.length > 0 ? (
+          transactionGroups.map((group, groupIndex) => (
+            <div key={group.key} className={groupIndex > 0 ? "pt-[18px]" : undefined}>
+              <AccountTransactionMonthDivider
+                currency="HUF"
+                title={group.title}
+                total={formatHuKidsDayTotal(group.total, showAmounts)}
+              />
+
+              <div className="px-[24px] pt-[16px]">
+                {group.transactions.map((transaction, index) => (
+                  <div key={transaction.id}>
+                    {index > 0 ? <div className="my-[16px] h-px bg-[var(--uc-border)]" /> : null}
+                    <HuKidsTransactionRow
+                      compact
+                      onClick={onTransactionClick}
+                      showAmounts={showAmounts}
+                      transaction={transaction}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="px-[24px] py-[28px] text-center text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
+            No transactions found
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
 function HuHomeContent({
   concept,
+  onCardDetails,
+  onMessages,
   onMoreOptions,
+  onRequestMoney,
+  onSendMoney,
+  onTransactionClick,
   onToggleAmounts,
+  pendingActions,
   preview = false,
   showAmounts,
 }: {
   concept: KidsMarketHomeConcept;
+  onCardDetails: (cardId: string) => void;
+  onMessages: () => void;
   onMoreOptions: () => void;
+  onRequestMoney: () => void;
+  onSendMoney: () => void;
+  onTransactionClick: (transaction: AccountTransaction) => void;
   onToggleAmounts: () => void;
+  pendingActions?: HuPendingAction[];
   preview?: boolean;
   showAmounts: boolean;
 }) {
   return (
     <>
-      <HuLightHeader showAmounts={showAmounts} onToggleAmounts={onToggleAmounts} preview={preview} />
+      <HuLightHeader
+        showAmounts={showAmounts}
+        onMessages={onMessages}
+        onToggleAmounts={onToggleAmounts}
+        preview={preview}
+      />
 
       <main className={cn(preview ? "pointer-events-none" : undefined)}>
         <HuLightBalance concept={concept} showAmounts={showAmounts} />
-        <HuLightActionRail onMoreOptions={onMoreOptions} />
-        <HuRequestMoneyRail />
+        <HuLightActionRail
+          onCardDetails={() => onCardDetails(HU_KIDS_CARDS[0]?.id ?? "")}
+          onMoreOptions={onMoreOptions}
+          onRequestMoney={onRequestMoney}
+          onSendMoney={onSendMoney}
+        />
+        <HuRequestMoneyRail
+          actions={pendingActions ?? HU_PENDING_ACTIONS}
+          onRequestMoney={onRequestMoney}
+          onSendMoney={onSendMoney}
+        />
 
         <div className="mt-[28px] space-y-[28px] px-[24px]">
           <HuSpendingCard showAmounts={showAmounts} />
-          <HuTransactionsCard showAmounts={showAmounts} />
-          <HuCardsPanel />
+          <HuTransactionsCard onTransactionClick={onTransactionClick} showAmounts={showAmounts} />
+          <HuCardsPanel onCardDetails={onCardDetails} />
           <HuTasksCard />
           <HuAllMoneyCard showAmounts={showAmounts} />
         </div>
@@ -821,25 +3651,48 @@ function HuHomeContent({
 
 function HuSavingContent({
   concept,
-  onMoreOptions,
+  goals,
+  onMessages,
+  onCreateGoal,
+  onOpenGoals,
+  onRequestMoney,
+  onSelectGoal,
+  onSendMoney,
   onToggleAmounts,
   showAmounts,
 }: {
   concept: KidsMarketHomeConcept;
-  onMoreOptions: () => void;
+  goals: SavingGoal[];
+  onMessages: () => void;
+  onCreateGoal: () => void;
+  onOpenGoals: () => void;
+  onRequestMoney: () => void;
+  onSelectGoal: (goalId: string) => void;
+  onSendMoney: () => void;
   onToggleAmounts: () => void;
   showAmounts: boolean;
 }) {
   return (
     <>
-      <HuLightHeader showAmounts={showAmounts} onToggleAmounts={onToggleAmounts} />
+      <HuLightHeader showAmounts={showAmounts} onMessages={onMessages} onToggleAmounts={onToggleAmounts} />
 
       <main>
         <HuLightBalance concept={concept} showAmounts={showAmounts} />
-        <HuLightActionRail onMoreOptions={onMoreOptions} />
+        <HuSavingActionRail
+          onCreateGoal={onCreateGoal}
+          onMoveMoney={onSendMoney}
+          onRequestMoney={onRequestMoney}
+          onSaveMoney={onOpenGoals}
+        />
 
         <div className="mt-[28px] space-y-[28px] px-[24px]">
-          <HuSavingFocusCard showAmounts={showAmounts} />
+          <HuSavingFocusCard onCreateGoal={onCreateGoal} onOpenGoals={onOpenGoals} showAmounts={showAmounts} />
+          <HuKidsGoalsSection
+            goals={goals}
+            onCreateGoal={onCreateGoal}
+            onSelectGoal={onSelectGoal}
+            showAmounts={showAmounts}
+          />
           <HuSpendingCard showAmounts={showAmounts} />
           <HuTasksCard />
           <HuAllMoneyCard showAmounts={showAmounts} />
@@ -854,14 +3707,52 @@ function HuThemeMotionLayer({
   fadeTo = "var(--uc-app-bg)",
   motionProgress = 0,
   preview = false,
+  theme,
 }: {
   fadeTo?: string;
   motionProgress?: number;
   preview?: boolean;
+  theme?: HuThemePreset;
 }) {
   const opacity = preview ? 0.9 : Math.max(0, 1 - motionProgress * 1.35);
   const translateY = preview ? 0 : motionProgress * -30;
   const scale = preview ? 1 : 1 + motionProgress * 0.025;
+  const layers = theme?.motionLayers;
+
+  if (layers && layers.length > 0) {
+    const maskImage =
+      theme.motionMask ?? "linear-gradient(180deg, var(--uc-static-black) 58%, transparent 97%)";
+
+    return (
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-[-28px] right-[-28px] top-0 z-0 overflow-hidden transition-opacity duration-200"
+        style={{
+          height: theme.motionHeight ?? 410,
+          maskImage,
+          opacity,
+          transform: `translateY(${translateY}px) scale(${scale})`,
+          WebkitMaskImage: maskImage,
+        }}
+      >
+        {layers.map((layer) => (
+          <div
+            key={layer.role}
+            className={cn("absolute inset-[-12%]", layer.className)}
+            style={{
+              background: layer.background,
+              mixBlendMode: layer.blendMode,
+              opacity: layer.opacity,
+            }}
+          />
+        ))}
+        <div
+          className="absolute inset-x-0 bottom-0 h-[150px]"
+          style={{ background: `linear-gradient(180deg, transparent, ${fadeTo})` }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -890,7 +3781,7 @@ function HuMoreOptionsSheet({
   return (
     <BottomSheet
       meta={
-        <span className="inline-flex items-center rounded-full bg-[color-mix(in_srgb,var(--hu-theme-accent)_12%,var(--uc-surface))] px-[10px] py-[4px] text-[12px] font-bold leading-[14px] tracking-[0] text-[var(--hu-theme-accent)]">
+        <span className="inline-flex items-center rounded-full bg-[color-mix(in_srgb,var(--hu-theme-accent)_12%,var(--uc-surface))] px-[10px] py-[4px] text-[12px] font-bold leading-[14px] tracking-[0] text-[var(--hu-theme-accent-strong)]">
           {currentTheme.name} active
         </span>
       }
@@ -905,7 +3796,7 @@ function HuMoreOptionsSheet({
           onClick={onOpenThemes}
           type="button"
         >
-          <span className="grid size-[44px] shrink-0 place-items-center rounded-full bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent)]">
+          <span className="grid size-[44px] shrink-0 place-items-center rounded-full bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent-strong)]">
             <AppIcon name="palette" size={22} />
           </span>
           <span className="min-w-0 flex-1">
@@ -966,10 +3857,7 @@ function HuThemeChangePage({
   const isApplied = appliedThemeId === draftThemeId;
 
   return (
-    <HuThemeShell className="bg-[var(--uc-static-black)] text-[var(--uc-static-white)]" theme={draftTheme}>
-      <div className="absolute inset-0 bg-[var(--uc-static-black)]" />
-      <HuThemeMotionLayer fadeTo="var(--uc-static-black)" motionProgress={0.05} preview />
-
+    <>
       <div className="relative z-[3] flex-shrink-0">
         <PageHeader
           collapsedTitleProgress={1}
@@ -1004,7 +3892,7 @@ function HuThemeChangePage({
           </PrimaryButton>
         </div>
       </main>
-    </HuThemeShell>
+    </>
   );
 }
 
@@ -1023,12 +3911,17 @@ function HuHomePreview({
       <div className="relative h-[353px] w-[234px] overflow-hidden rounded-[22px] bg-[var(--uc-app-bg)] shadow-[0_18px_38px_color-mix(in_srgb,var(--uc-static-black)_42%,transparent)]">
         <div className="h-[812px] w-[375px] origin-top-left scale-[0.624]">
           <HuThemeShell theme={theme}>
-            <HuThemeMotionLayer motionProgress={0.04} preview />
+            <HuThemeMotionLayer motionProgress={0.04} preview theme={theme} />
             <div className="relative z-[1] h-[54px] flex-shrink-0" />
             <div className="scrollbar-hide relative z-[1] flex-1 overflow-hidden pb-[104px]">
               <HuHomeContent
                 concept={concept}
+                onCardDetails={() => undefined}
+                onMessages={() => undefined}
                 onMoreOptions={() => undefined}
+                onRequestMoney={() => undefined}
+                onSendMoney={() => undefined}
+                pendingActions={HU_PENDING_ACTIONS}
                 onToggleAmounts={() => undefined}
                 preview
                 showAmounts={showAmounts}
@@ -1174,41 +4067,44 @@ function HuThemeCarousel({
 }
 
 function HuLightHeader({
+  onMessages,
   preview = false,
   showAmounts,
   onToggleAmounts,
 }: {
+  onMessages?: () => void;
   preview?: boolean;
   showAmounts: boolean;
   onToggleAmounts: () => void;
 }) {
   return (
     <header className="flex h-[40px] items-center justify-between px-[24px]">
-      <UniCreditLogo className="h-[24px] w-auto" textColor="var(--uc-text)" />
+      <UniCreditLogo className="h-[24px] w-auto" textColor="var(--hu-theme-hero-fg)" />
 
-      <div className="flex items-center gap-[12px]">
+      <div className="flex items-center gap-[10px]">
         <button
           aria-label={showAmounts ? "Hide amounts" : "Show amounts"}
-          className="grid size-[28px] place-items-center rounded-full bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-control-fg)] shadow-sm"
+          className="grid size-[26px] place-items-center rounded-full border border-[var(--hu-theme-hero-control-border)] bg-[var(--hu-theme-hero-control-bg)] text-[var(--hu-theme-hero-control-fg)] shadow-sm backdrop-blur-[10px]"
           disabled={preview}
           onClick={onToggleAmounts}
           type="button"
         >
-          <AppIcon name={showAmounts ? "amount-hide" : "amount-show"} size={18} />
+          <AppIcon name={showAmounts ? "amount-hide" : "amount-show"} size={15} />
         </button>
         <button
           aria-label="Messages"
-          className="grid size-[28px] place-items-center rounded-full bg-[color-mix(in_srgb,var(--hu-theme-control-bg)_72%,transparent)] text-[var(--uc-text)]"
+          className="grid size-[26px] place-items-center rounded-full border border-[color-mix(in_srgb,var(--hu-theme-hero-control-border)_70%,transparent)] bg-[color-mix(in_srgb,var(--hu-theme-hero-control-bg)_72%,transparent)] text-[var(--hu-theme-hero-control-fg)] backdrop-blur-[10px]"
           disabled={preview}
+          onClick={onMessages}
           type="button"
         >
-          <AppIcon name="header-messages" size={22} />
+          <AppIcon name="header-messages" size={17} />
         </button>
-        <button aria-label="Profile" className="grid size-[36px] place-items-center rounded-full" type="button">
+        <button aria-label="Profile" className="grid size-[34px] place-items-center rounded-full" type="button">
           <ProfileAvatar
             imageAlt="Alexandra profile"
             imageSrc={womanProfileSrc}
-            size={36}
+            size={34}
             variant="photo"
           />
         </button>
@@ -1228,27 +4124,40 @@ function HuLightBalance({
 
   return (
     <section className="mt-[68px] px-[24px] text-center">
-      <p className="text-[18px] font-normal leading-[22px] tracking-[0] text-[var(--uc-text-muted)]">
+      <p className="text-[18px] font-normal leading-[22px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
         Welcome back {displayName}
       </p>
-      <div className="mt-[10px] flex items-baseline justify-center gap-[6px] text-[var(--uc-text)]">
+      <div className="mt-[10px] flex items-baseline justify-center gap-[6px] text-[var(--hu-theme-hero-fg)]">
         {showAmounts ? (
           <>
-            <span className="text-[46px] font-bold leading-[48px] tracking-[0]">35.628</span>
+            <span className="text-[46px] font-bold leading-[48px] tracking-[0]">4.500</span>
             <span className="text-[28px] font-normal leading-[32px] tracking-[0]">,34 HUF</span>
           </>
         ) : (
-          <span className="text-[46px] font-bold leading-[48px] tracking-[0]">••••••</span>
+          <>
+            <span className="text-[46px] font-bold leading-[48px] tracking-[0]">{HU_MASKED_INTEGER}</span>
+            <span className="text-[28px] font-normal leading-[32px] tracking-[0]">{HU_MASKED_DECIMALS} HUF</span>
+          </>
         )}
       </div>
       <p className="mt-[8px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
-        are available for you to spend
+        are available for you to spend today
       </p>
     </section>
   );
 }
 
-function HuLightActionRail({ onMoreOptions }: { onMoreOptions: () => void }) {
+function HuLightActionRail({
+  onCardDetails,
+  onMoreOptions,
+  onRequestMoney,
+  onSendMoney,
+}: {
+  onCardDetails: () => void;
+  onMoreOptions: () => void;
+  onRequestMoney: () => void;
+  onSendMoney: () => void;
+}) {
   return (
     <section className="mt-[66px] px-[24px]">
       <div className="grid grid-cols-4 gap-[18px]">
@@ -1256,13 +4165,23 @@ function HuLightActionRail({ onMoreOptions }: { onMoreOptions: () => void }) {
           <button
             key={action.label}
             className="flex min-w-0 flex-col items-center gap-[10px]"
-            onClick={action.id === "more" ? onMoreOptions : undefined}
+            onClick={
+              action.id === "more"
+                ? onMoreOptions
+                : action.id === "request"
+                ? onRequestMoney
+                : action.id === "card"
+                ? onCardDetails
+                : action.id === "send"
+                ? onSendMoney
+                : undefined
+            }
             type="button"
           >
-            <span className="grid size-[68px] place-items-center rounded-full bg-[var(--hu-theme-control-bg)] text-[var(--uc-text)] shadow-sm">
+            <span className="grid size-[68px] place-items-center rounded-full border border-[var(--hu-theme-hero-control-border)] bg-[var(--hu-theme-hero-control-bg)] text-[var(--hu-theme-hero-control-fg)] shadow-sm backdrop-blur-[10px]">
               <AppIcon name={action.icon} size={28} />
             </span>
-            <span className="min-h-[34px] max-w-[70px] text-center text-[12px] font-bold leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
+            <span className="min-h-[34px] max-w-[70px] text-center text-[12px] font-bold leading-[14px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
               {action.label}
             </span>
           </button>
@@ -1272,25 +4191,243 @@ function HuLightActionRail({ onMoreOptions }: { onMoreOptions: () => void }) {
   );
 }
 
-function HuRequestMoneyRail() {
+function HuSavingActionRail({
+  onCreateGoal,
+  onMoveMoney,
+  onRequestMoney,
+  onSaveMoney,
+}: {
+  onCreateGoal: () => void;
+  onMoveMoney: () => void;
+  onRequestMoney: () => void;
+  onSaveMoney: () => void;
+}) {
   return (
-    <section className="mt-[24px] overflow-hidden">
-      <div className="flex gap-[8px] overflow-x-auto pl-[24px] pr-[16px] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <article className="relative h-[126px] w-[354px] shrink-0 overflow-hidden rounded-[16px] bg-[var(--hu-theme-card-bg)] shadow-sm">
-          <div className="relative z-[1] w-[226px] px-[18px] py-[18px]">
-            <h2 className="text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">Request Money</h2>
-            <p className="mt-[16px] text-[16px] font-normal leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">
-              Grandpa Andrei
-            </p>
-            <p className="mt-[14px] text-[16px] font-normal leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">
-              30 Ron for Food
-            </p>
-          </div>
-          <HuRequestMoneyArt />
-        </article>
-        <div className="h-[126px] w-[72px] shrink-0 rounded-[16px] bg-[var(--hu-theme-card-bg)]" />
+    <section className="mt-[66px] px-[24px]">
+      <div className="grid grid-cols-4 gap-[18px]">
+        {HU_SAVING_ACTIONS.map((action) => (
+          <button
+            key={action.id}
+            className="flex min-w-0 flex-col items-center gap-[10px]"
+            onClick={
+              action.id === "save"
+                ? onSaveMoney
+                : action.id === "request"
+                ? onRequestMoney
+                : action.id === "move"
+                ? onMoveMoney
+                : onCreateGoal
+            }
+            type="button"
+          >
+            <span className="grid size-[68px] place-items-center rounded-full border border-[var(--hu-theme-hero-control-border)] bg-[var(--hu-theme-hero-control-bg)] text-[var(--hu-theme-hero-control-fg)] shadow-sm backdrop-blur-[10px]">
+              <AppIcon name={action.icon} size={28} />
+            </span>
+            <span className="min-h-[34px] max-w-[70px] text-center text-[12px] font-bold leading-[14px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
+              {action.label}
+            </span>
+          </button>
+        ))}
       </div>
     </section>
+  );
+}
+
+function HuRequestMoneyRail({
+  actions,
+  onRequestMoney,
+  onSendMoney,
+}: {
+  actions: HuPendingAction[];
+  onRequestMoney: () => void;
+  onSendMoney: () => void;
+}) {
+  const railRef = useRef<HTMLDivElement | null>(null);
+  const dragStateRef = useRef({
+    hasDragged: false,
+    isActive: false,
+    scrollLeft: 0,
+    startX: 0,
+  });
+  const suppressClickRef = useRef(false);
+  const suppressClickTimerRef = useRef<number | null>(null);
+
+  const clearSuppressClick = () => {
+    suppressClickRef.current = false;
+
+    if (suppressClickTimerRef.current !== null) {
+      window.clearTimeout(suppressClickTimerRef.current);
+      suppressClickTimerRef.current = null;
+    }
+  };
+
+  useEffect(
+    () => () => {
+      if (suppressClickTimerRef.current !== null) {
+        window.clearTimeout(suppressClickTimerRef.current);
+      }
+    },
+    [],
+  );
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === "mouse" && event.button !== 0) {
+      return;
+    }
+
+    clearSuppressClick();
+
+    dragStateRef.current = {
+      hasDragged: false,
+      isActive: true,
+      scrollLeft: railRef.current?.scrollLeft ?? 0,
+      startX: event.clientX,
+    };
+
+    if (event.pointerType === "mouse") {
+      event.preventDefault();
+    }
+
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const rail = railRef.current;
+
+    if (!dragStateRef.current.isActive || !rail) {
+      return;
+    }
+
+    const dragDelta = event.clientX - dragStateRef.current.startX;
+
+    if (Math.abs(dragDelta) > 8) {
+      dragStateRef.current.hasDragged = true;
+      suppressClickRef.current = true;
+      event.preventDefault();
+    }
+
+    rail.scrollLeft = dragStateRef.current.scrollLeft - dragDelta;
+  };
+
+  const finishPointerDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const hadDragged = dragStateRef.current.hasDragged;
+    dragStateRef.current.isActive = false;
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    if (!hadDragged) {
+      return;
+    }
+
+    suppressClickRef.current = true;
+    suppressClickTimerRef.current = window.setTimeout(() => {
+      suppressClickRef.current = false;
+      suppressClickTimerRef.current = null;
+    }, 260);
+  };
+
+  const handleClickCapture = (event: ReactMouseEvent<HTMLDivElement>) => {
+    if (!suppressClickRef.current) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
+    clearSuppressClick();
+  };
+
+  const openAction = (action: HuPendingAction) => {
+    if (action.flow === "send-money") {
+      onSendMoney();
+      return;
+    }
+
+    onRequestMoney();
+  };
+
+  return (
+    <section className="mt-[24px]" data-hu-request-rail>
+      <div
+        ref={railRef}
+        className="cursor-grab touch-pan-x select-none overflow-x-auto px-[24px] active:cursor-grabbing [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        onClickCapture={handleClickCapture}
+        onPointerCancel={finishPointerDrag}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={finishPointerDrag}
+      >
+        <div className="flex w-max gap-[12px] pr-[24px]">
+          {actions.map((action) => (
+            <HuPendingActionCard key={action.id} action={action} onClick={() => openAction(action)} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HuPendingActionCard({ action, onClick }: { action: HuPendingAction; onClick: () => void }) {
+  const toneStyles: Record<HuPendingActionTone, { bg: string; fg: string }> = {
+    green: {
+      bg: "color-mix(in srgb, var(--uc-green-success) 14%, var(--hu-theme-card-bg))",
+      fg: "var(--uc-green-success)",
+    },
+    blue: {
+      bg: "color-mix(in srgb, var(--hu-theme-accent-2) 15%, var(--hu-theme-card-bg))",
+      fg: "var(--hu-theme-accent-strong)",
+    },
+    pink: {
+      bg: "color-mix(in srgb, var(--uc-magenta-main) 15%, var(--hu-theme-card-bg))",
+      fg: "var(--uc-magenta-main)",
+    },
+    amber: {
+      bg: "color-mix(in srgb, var(--uc-yellow-gold) 18%, var(--hu-theme-card-bg))",
+      fg: "color-mix(in srgb, var(--uc-yellow-gold) 74%, var(--uc-text))",
+    },
+  };
+  const tone = toneStyles[action.tone];
+  const isMoneyRequest = action.icon === "hu-kids-request-money";
+
+  return (
+    <button
+      className="relative h-[126px] w-[327px] shrink-0 overflow-hidden rounded-[16px] bg-[var(--hu-theme-card-bg)] text-left shadow-sm transition-transform active:scale-[0.99]"
+      data-hu-request-card
+      draggable={false}
+      onClick={onClick}
+      onDragStart={(event) => event.preventDefault()}
+      type="button"
+    >
+      <div className={cn("relative z-[1] h-full px-[18px] py-[18px]", isMoneyRequest ? "w-[226px]" : "w-full pr-[78px]")}>
+        <div className="flex items-start justify-between gap-[10px]">
+          <h2 className="text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">{action.title}</h2>
+          <span
+            className="rounded-full px-[8px] py-[3px] text-[10px] font-bold uppercase leading-[12px] tracking-[0]"
+            style={{ background: tone.bg, color: tone.fg }}
+          >
+            {action.status}
+          </span>
+        </div>
+        <p className="mt-[14px] text-[16px] font-normal leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">
+          {action.person}
+        </p>
+        <p className="mt-[10px] line-clamp-2 text-[16px] font-normal leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">
+          {action.description}
+        </p>
+      </div>
+      {isMoneyRequest ? (
+        <HuRequestMoneyArt />
+      ) : (
+        <span
+          className="absolute bottom-[18px] right-[18px] grid size-[46px] place-items-center rounded-full"
+          style={{ background: tone.bg, color: tone.fg }}
+        >
+          <AppIcon name={action.icon} size={24} />
+        </span>
+      )}
+    </button>
   );
 }
 
@@ -1314,7 +4451,751 @@ function HuRequestMoneyArt() {
   );
 }
 
-function HuSavingFocusCard({ showAmounts }: { showAmounts: boolean }) {
+function HuKidsGoalsSection({
+  goals,
+  onCreateGoal,
+  onSelectGoal,
+  showAmounts,
+}: {
+  goals: SavingGoal[];
+  onCreateGoal: () => void;
+  onSelectGoal: (goalId: string) => void;
+  showAmounts: boolean;
+}) {
+  return (
+    <section className="rounded-[16px] bg-[var(--hu-theme-card-bg)] px-[18px] py-[18px] shadow-sm">
+      <div className="flex items-center justify-between gap-[12px]">
+        <div>
+          <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Saving goals</h2>
+          <p className="mt-[4px] text-[13px] font-normal leading-[16px] tracking-[0] text-[var(--uc-text-muted)]">
+            Goals from Kids RO, adapted for Alexandra.
+          </p>
+        </div>
+        <button
+          className="grid size-[36px] shrink-0 place-items-center rounded-full bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent-strong)]"
+          onClick={onCreateGoal}
+          type="button"
+        >
+          <AppIcon name="add-circle" size={20} />
+        </button>
+      </div>
+
+      <div className="mt-[16px] flex flex-col gap-[10px]">
+        {goals.slice(0, 3).map((goal) => (
+          <HuKidsGoalCard
+            key={goal.id}
+            goal={goal}
+            onClick={() => onSelectGoal(goal.id)}
+            showAmounts={showAmounts}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function HuKidsGoalCard({
+  goal,
+  onClick,
+  showAmounts,
+}: {
+  goal: SavingGoal;
+  onClick: () => void;
+  showAmounts: boolean;
+}) {
+  const progress = goalProgress(goal);
+
+  return (
+    <button
+      className="w-full rounded-[14px] bg-[var(--hu-theme-card-strong-bg)] p-[14px] text-left transition-transform active:scale-[0.99]"
+      onClick={onClick}
+      type="button"
+    >
+      <div className="flex items-start gap-[12px]">
+        <span className="grid size-[42px] shrink-0 place-items-center rounded-full bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent-strong)]">
+          <AppIcon name="trophy" size={22} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-[8px]">
+            <h3 className="min-w-0 flex-1 text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">
+              {goal.title}
+            </h3>
+            <span className="shrink-0 rounded-full bg-[var(--hu-theme-control-bg)] px-[8px] py-[3px] text-[11px] font-bold leading-[13px] tracking-[0] text-[var(--hu-theme-accent-strong)]">
+              {progress}%
+            </span>
+          </div>
+          <p className="mt-[5px] text-[13px] font-normal leading-[16px] tracking-[0] text-[var(--uc-text-muted)]">
+            {formatHuKidsGoalAmount(goal.savedAmount, showAmounts)} / {formatHuKidsGoalAmount(goal.targetAmount, showAmounts)}
+          </p>
+          <div className="mt-[10px] h-[8px] overflow-hidden rounded-full bg-[var(--hu-theme-progress-bg)]">
+            <div className="h-full rounded-full bg-[var(--hu-theme-accent-strong)]" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function HuKidsGoalPageHeader({
+  onBack,
+  theme,
+  title,
+}: {
+  onBack: () => void;
+  theme: HuThemePreset;
+  title: string;
+}) {
+  const headerVariant = theme.id === "nordlys" || theme.id === "blue-lines" ? "dark" : "transparent";
+
+  return (
+    <PageHeader
+      collapsedTitleProgress={1}
+      compact
+      includeSafeArea
+      onBack={onBack}
+      showHelp={false}
+      title={title}
+      variant={headerVariant}
+    />
+  );
+}
+
+function HuKidsGoalsPage({
+  goals,
+  onBack,
+  onCreateGoal,
+  onSelectGoal,
+  showAmounts,
+  theme,
+}: {
+  goals: SavingGoal[];
+  onBack: () => void;
+  onCreateGoal: () => void;
+  onSelectGoal: (goalId: string) => void;
+  showAmounts: boolean;
+  theme: HuThemePreset;
+}) {
+  return (
+    <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
+      <HuKidsGoalPageHeader onBack={onBack} theme={theme} title="Saving goals" />
+      <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto px-[24px] pb-[36px] pt-[18px]">
+        <div className="rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
+          <div className="flex items-start gap-[12px]">
+            <span className="grid size-[46px] shrink-0 place-items-center rounded-full bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent-strong)]">
+              <AppIcon name="hu-kids-saving" size={25} />
+            </span>
+            <div className="min-w-0">
+              <h1 className="text-[20px] font-bold leading-[24px] tracking-[0] text-[var(--uc-text)]">Save for what matters</h1>
+              <p className="mt-[6px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
+                The full Kids RO goals model is now available in HU Kids.
+              </p>
+            </div>
+          </div>
+          <PrimaryButton className="mt-[18px] !w-full" onClick={onCreateGoal}>
+            Create saving goal
+          </PrimaryButton>
+        </div>
+
+        <div className="mt-[14px] flex flex-col gap-[10px]">
+          {goals.map((goal) => (
+            <HuKidsGoalCard
+              key={goal.id}
+              goal={goal}
+              onClick={() => onSelectGoal(goal.id)}
+              showAmounts={showAmounts}
+            />
+          ))}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function HuKidsGoalDetailPage({
+  goal,
+  onAddMoney,
+  onAskParent,
+  onBack,
+  showAmounts,
+  theme,
+}: {
+  goal: SavingGoal | null;
+  onAddMoney: (amount: number) => void;
+  onAskParent: () => void;
+  onBack: () => void;
+  showAmounts: boolean;
+  theme: HuThemePreset;
+}) {
+  if (!goal) {
+    return (
+      <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
+        <HuKidsGoalPageHeader onBack={onBack} theme={theme} title="Saving goal" />
+        <main className="px-[24px] pt-[18px]">
+          <section className="rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
+            <h1 className="text-[20px] font-bold leading-[24px] tracking-[0] text-[var(--uc-text)]">No goal selected</h1>
+            <p className="mt-[6px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">Create a goal to start saving.</p>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  const progress = goalProgress(goal);
+
+  return (
+    <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
+      <HuKidsGoalPageHeader onBack={onBack} theme={theme} title={goal.title} />
+      <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto px-[24px] pb-[36px] pt-[18px]">
+        <section className="rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
+          <div className="flex items-center gap-[14px]">
+            <span className="grid size-[54px] shrink-0 place-items-center rounded-full bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent-strong)]">
+              <AppIcon name="trophy" size={28} />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">Saved so far</p>
+              <h1 className="mt-[4px] text-[30px] font-bold leading-[34px] tracking-[0] text-[var(--uc-text)]">
+                {formatHuKidsGoalAmount(goal.savedAmount, showAmounts)}
+              </h1>
+              <p className="mt-[2px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
+                Target {formatHuKidsGoalAmount(goal.targetAmount, showAmounts)}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-[18px] h-[10px] overflow-hidden rounded-full bg-[var(--hu-theme-progress-bg)]">
+            <div className="h-full rounded-full bg-[var(--hu-theme-accent-strong)]" style={{ width: `${progress}%` }} />
+          </div>
+          <p className="mt-[10px] text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--hu-theme-accent-strong)]">
+            {progress}% complete
+          </p>
+        </section>
+
+        <div className="mt-[14px] grid grid-cols-2 gap-[8px]">
+          <button
+            className="h-[44px] rounded-[12px] bg-[var(--hu-theme-accent-strong)] text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--uc-text-inverse)]"
+            onClick={() => onAddMoney(1000)}
+            type="button"
+          >
+            Add 1.000 HUF
+          </button>
+          <button
+            className="h-[44px] rounded-[12px] bg-[var(--hu-theme-control-bg)] text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--hu-theme-accent-strong)]"
+            onClick={onAskParent}
+            type="button"
+          >
+            Ask parent
+          </button>
+        </div>
+
+        <section className="mt-[16px] rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
+          <div className="flex items-start gap-[12px]">
+            <span className="grid size-[42px] shrink-0 place-items-center rounded-full bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent-strong)]">
+              <AppIcon name="gift" size={22} />
+            </span>
+            <div>
+              <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Contributors</h2>
+              <p className="mt-[6px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
+                Mom helped last week with +2.000 HUF. Wishlist sharing stays a future release item.
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+function HuKidsCreateGoalPage({
+  onBack,
+  onCreateGoal,
+  theme,
+}: {
+  onBack: () => void;
+  onCreateGoal: (title: string, targetAmount: number) => void;
+  theme: HuThemePreset;
+}) {
+  const [title, setTitle] = useState("Skate lessons");
+  const [target, setTarget] = useState("30000");
+  const amount = Number(target.replace(/[^\d]/g, ""));
+  const canCreate = title.trim().length > 0 && amount > 0;
+
+  return (
+    <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
+      <HuKidsGoalPageHeader onBack={onBack} theme={theme} title="Create goal" />
+      <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto px-[24px] pb-[36px] pt-[18px]">
+        <section className="rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
+          <label className="block text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
+            Goal name
+          </label>
+          <input
+            className="mt-[8px] h-[48px] w-full rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)] outline-none"
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder="What are you saving for?"
+            value={title}
+          />
+
+          <label className="mt-[18px] block text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
+            Target
+          </label>
+          <div className="mt-[8px] flex h-[58px] items-center rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px]">
+            <input
+              className="min-w-0 flex-1 bg-transparent text-[28px] font-bold leading-[32px] tracking-[0] text-[var(--uc-text)] outline-none"
+              inputMode="numeric"
+              onChange={(event) => setTarget(event.target.value.replace(/[^\d]/g, ""))}
+              value={target}
+            />
+            <span className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">HUF</span>
+          </div>
+
+          <PrimaryButton className="mt-[18px] !w-full" disabled={!canCreate} onClick={() => onCreateGoal(title, amount)}>
+            Create goal
+          </PrimaryButton>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+function getHuLearnCompletedLessonsCount(topic: HuLearnTopic, completedLessonIds: string[]) {
+  return topic.lessons.filter((lesson) => completedLessonIds.includes(lesson.id)).length;
+}
+
+function getHuLearnTopicProgress(topic: HuLearnTopic, completedLessonIds: string[]) {
+  if (topic.lessons.length === 0) {
+    return 0;
+  }
+
+  return Math.round((getHuLearnCompletedLessonsCount(topic, completedLessonIds) / topic.lessons.length) * 100);
+}
+
+const HU_LEARN_CARD_SURFACE_STYLE = {
+  background: "var(--hu-learn-card-bg)",
+  borderColor: "var(--hu-learn-card-border)",
+  boxShadow: "var(--hu-learn-card-shadow)",
+} as CSSProperties;
+
+// Logical PNG slots: topic-card 80x72, topic-featured 108x98, topic-hero 130x118, lesson-row 84x76, lesson-hero 210x190.
+const HU_LEARN_ART_SLOT_CLASS: Record<HuLearnArtVariant, string> = {
+  "topic-card": "right-[10px] top-[10px] h-[72px] w-[80px] rounded-[22px]",
+  "topic-featured": "right-[16px] top-[12px] h-[98px] w-[108px] rounded-[28px]",
+  "topic-hero": "right-[24px] top-[18px] h-[118px] w-[130px] rounded-[32px]",
+  "lesson-row": "right-[12px] top-[16px] h-[76px] w-[84px] rounded-[22px]",
+  "lesson-hero": "bottom-[18px] right-[18px] h-[190px] w-[210px] rounded-[42px]",
+};
+
+const HU_LEARN_TOPIC_ART_IMAGE_SRC: Partial<Record<HuLearnTopic["id"], string>> = {
+  "saving-goals": learnSavingGoalsBlockcraftSrc,
+};
+
+function HuKidsLearnPage({
+  completedLessonIds,
+  learnModules,
+  onMessages,
+  onSelectTopic,
+  theme,
+  topics,
+}: {
+  completedLessonIds: string[];
+  learnModules: LearnModule[];
+  onMessages?: () => void;
+  onSelectTopic: (topicId: string) => void;
+  theme: HuThemePreset;
+  topics: HuLearnTopic[];
+}) {
+  const completedTopics = topics.filter((topic) => getHuLearnTopicProgress(topic, completedLessonIds) === 100).length;
+  const suggestedTopic = topics.find((topic) => topic.id === "saving-goals") ?? topics[0];
+
+  return (
+    <HuKidsPiMenuFrame onMessages={onMessages} theme={theme} title="Learn">
+      <section className="px-[16px] pt-[16px]">
+        <div className="flex items-end justify-between gap-[12px] px-[2px]">
+          <div>
+            <p className="text-[13px] font-bold uppercase leading-[16px] tracking-[0] text-[var(--hu-theme-accent-strong)]">
+              Financial education
+            </p>
+            <h2 className="mt-[4px] text-[26px] font-bold leading-[30px] tracking-[0] text-[var(--uc-text)]">
+              Money lessons
+            </h2>
+          </div>
+          <p className="shrink-0 text-right text-[12px] font-bold leading-[15px] tracking-[0] text-[var(--uc-text-muted)]">
+            {completedTopics}/{topics.length}
+            <br />
+            topics done
+          </p>
+        </div>
+
+        <div className="mt-[16px]">
+          <p className="px-[2px] text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">Suggested</p>
+          <HuLearnTopicCard
+            className="mt-[10px]"
+            completedLessonIds={completedLessonIds}
+            featured
+            onClick={() => onSelectTopic(suggestedTopic?.id ?? "")}
+            topic={suggestedTopic}
+          />
+        </div>
+
+        <section className="mt-[22px]">
+          <div className="flex items-center justify-between px-[2px]">
+            <p className="text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">All topics</p>
+            <p className="text-[12px] font-bold leading-[15px] tracking-[0] text-[var(--uc-text-muted)]">
+              {learnModules.length} from Kids RO
+            </p>
+          </div>
+          <div className="mt-[10px] grid grid-cols-2 gap-x-[15px] gap-y-[16px]">
+            {topics.map((topic) => (
+              <HuLearnTopicCard
+                key={topic.id}
+                completedLessonIds={completedLessonIds}
+                onClick={() => onSelectTopic(topic.id)}
+                topic={topic}
+              />
+            ))}
+          </div>
+        </section>
+      </section>
+    </HuKidsPiMenuFrame>
+  );
+}
+
+function HuLearnTopicCard({
+  className,
+  completedLessonIds,
+  featured = false,
+  onClick,
+  topic,
+}: {
+  className?: string;
+  completedLessonIds: string[];
+  featured?: boolean;
+  onClick: () => void;
+  topic?: HuLearnTopic;
+}) {
+  if (!topic) {
+    return null;
+  }
+
+  const progress = getHuLearnTopicProgress(topic, completedLessonIds);
+  const completedCount = getHuLearnCompletedLessonsCount(topic, completedLessonIds);
+  const imageSrc = HU_LEARN_TOPIC_ART_IMAGE_SRC[topic.id];
+
+  return (
+    <button
+      className={cn(
+        "group relative flex w-full items-end overflow-hidden rounded-[8px] border p-[14px] pb-[24px] text-left transition-opacity hover:opacity-90",
+        featured ? "min-h-[196px] pt-[112px]" : "min-h-[174px] pt-[88px]",
+        className,
+      )}
+      data-hu-learn-topic-card={topic.id}
+      onClick={onClick}
+      style={HU_LEARN_CARD_SURFACE_STYLE}
+      type="button"
+    >
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: "var(--hu-learn-card-glow)" }} />
+      <HuLearnTopicArt imageSrc={imageSrc} variant={featured ? "topic-featured" : "topic-card"} visual={topic.visual} />
+
+      <div className="relative z-[1] w-full">
+        <p className={cn("font-bold tracking-[0] text-[var(--uc-text)]", featured ? "text-[22px] leading-[26px]" : "text-[17px] leading-[20px]")}>
+          {topic.title}
+        </p>
+        <p className={cn("mt-[5px] font-normal tracking-[0] text-[var(--uc-text-muted)]", featured ? "text-[14px] leading-[18px]" : "text-[12px] leading-[15px]")}>
+          {topic.subtitle}
+        </p>
+        <p className="mt-[7px] text-[11px] font-bold leading-[13px] tracking-[0] text-[var(--hu-theme-accent-strong)]">
+          {completedCount}/{topic.lessons.length} lessons
+        </p>
+      </div>
+
+      <div className="absolute inset-x-[14px] bottom-[11px] h-[5px] overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--uc-text)_12%,transparent)]">
+        <div className="h-full rounded-full bg-[var(--hu-theme-accent-strong)]" style={{ width: `${progress}%` }} />
+      </div>
+    </button>
+  );
+}
+
+function HuKidsLearnTopicPage({
+  completedLessonIds,
+  onBack,
+  onOpenLesson,
+  theme,
+  topic,
+}: {
+  completedLessonIds: string[];
+  onBack: () => void;
+  onOpenLesson: (topicId: string, lessonId: string) => void;
+  theme: HuThemePreset;
+  topic: HuLearnTopic | null;
+}) {
+  if (!topic) {
+    return (
+      <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
+        <HuKidsGoalPageHeader onBack={onBack} theme={theme} title="Learn" />
+      </div>
+    );
+  }
+
+  const progress = getHuLearnTopicProgress(topic, completedLessonIds);
+  const completedCount = getHuLearnCompletedLessonsCount(topic, completedLessonIds);
+
+  return (
+    <div className="relative z-[1] flex min-h-0 flex-1 flex-col" data-hu-learn-topic={topic.id}>
+      <HuKidsGoalPageHeader onBack={onBack} theme={theme} title="Learn" />
+      <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto pb-[38px]">
+        <section className="relative min-h-[254px] overflow-hidden px-[24px] pb-[22px] pt-[18px]">
+          <HuLearnTopicArt variant="topic-hero" visual={topic.visual} />
+          <div className="relative z-[1] max-w-[245px] pt-[94px]">
+            <p className="text-[13px] font-bold uppercase leading-[16px] tracking-[0] text-[var(--hu-theme-accent-strong)]">
+              {completedCount === topic.lessons.length ? "Completed" : "Course"}
+            </p>
+            <h1 className="mt-[8px] text-[34px] font-bold leading-[38px] tracking-[0] text-[var(--hu-theme-hero-fg)]">
+              {topic.title}
+            </h1>
+            <p className="mt-[10px] text-[15px] font-normal leading-[20px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
+              {topic.helper}
+            </p>
+          </div>
+          <div className="relative z-[1] mt-[18px] h-[6px] overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--hu-theme-hero-fg)_20%,transparent)]">
+            <div className="h-full rounded-full bg-[var(--hu-theme-accent-strong)]" style={{ width: `${progress}%` }} />
+          </div>
+        </section>
+
+        <section className="px-[24px] pt-[16px]">
+          <div className="rounded-[16px] bg-[var(--hu-theme-card-bg)] px-[18px] py-[14px] shadow-sm">
+            <div className="flex items-center justify-between gap-[12px]">
+              <p className="text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">Lessons completed</p>
+              <p className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">
+                {completedCount}/{topic.lessons.length}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-[14px] flex flex-col gap-[10px]">
+            {topic.lessons.map((lesson, index) => (
+              <HuLearnLessonListCard
+                key={lesson.id}
+                completed={completedLessonIds.includes(lesson.id)}
+                index={index}
+                lesson={lesson}
+                onClick={() => onOpenLesson(topic.id, lesson.id)}
+              />
+            ))}
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+function HuLearnLessonListCard({
+  completed,
+  index,
+  lesson,
+  onClick,
+}: {
+  completed: boolean;
+  index: number;
+  lesson: HuLearnLesson;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className="relative min-h-[104px] overflow-hidden rounded-[18px] border p-[16px] text-left transition-transform active:scale-[0.99]"
+      data-hu-learn-lesson-card={lesson.id}
+      onClick={onClick}
+      style={HU_LEARN_CARD_SURFACE_STYLE}
+      type="button"
+    >
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: "var(--hu-learn-card-glow)" }} />
+      <HuLearnTopicArt variant="lesson-row" visual={lesson.visual} />
+      <div className="relative z-[1] pr-[92px]">
+        <p className="text-[13px] font-normal leading-[16px] tracking-[0] text-[var(--uc-text-muted)]">Lesson {index + 1}</p>
+        <h2 className="mt-[5px] text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">{lesson.title}</h2>
+        <p className="mt-[9px] flex items-center gap-[7px] text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--uc-text-muted)]">
+          {completed ? (
+            <>
+              <AppIcon name="prime-check" size={15} color="var(--hu-theme-accent-strong)" />
+              Completed
+            </>
+          ) : (
+            "Ready to start"
+          )}
+        </p>
+      </div>
+    </button>
+  );
+}
+
+function HuKidsLearnLessonPage({
+  completed,
+  lesson,
+  onBack,
+  onComplete,
+  theme,
+  topic,
+}: {
+  completed: boolean;
+  lesson: HuLearnLesson | null;
+  onBack: () => void;
+  onComplete: () => void;
+  theme: HuThemePreset;
+  topic: HuLearnTopic | null;
+}) {
+  if (!topic || !lesson) {
+    return (
+      <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
+        <HuKidsGoalPageHeader onBack={onBack} theme={theme} title="Lesson" />
+      </div>
+    );
+  }
+
+  const lessonIndex = topic.lessons.findIndex((item) => item.id === lesson.id);
+  const progress = ((lessonIndex + 1) / topic.lessons.length) * 100;
+
+  return (
+    <div className="relative z-[1] flex min-h-0 flex-1 flex-col" data-hu-learn-lesson={lesson.id}>
+      <HuKidsGoalPageHeader onBack={onBack} theme={theme} title="Lesson" />
+      <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto px-[24px] pb-[36px] pt-[18px]">
+        <div className="mx-auto h-[6px] w-[160px] overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--uc-text)_16%,transparent)]">
+          <div className="h-full rounded-full bg-[var(--hu-theme-accent-strong)]" style={{ width: `${progress}%` }} />
+        </div>
+
+        <section
+          className="relative mt-[18px] min-h-[430px] overflow-hidden rounded-[22px] border p-[22px]"
+          style={HU_LEARN_CARD_SURFACE_STYLE}
+        >
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: "var(--hu-learn-card-glow)" }} />
+          <p className="text-[16px] font-normal leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">{lesson.eyebrow}</p>
+          <h1 className="mt-[24px] text-[32px] font-bold leading-[36px] tracking-[0] text-[var(--uc-text)]">{lesson.title}</h1>
+          <p className="mt-[14px] text-[17px] font-normal leading-[23px] tracking-[0] text-[var(--uc-text-muted)]">{lesson.description}</p>
+          <HuLearnTopicArt variant="lesson-hero" visual={lesson.visual} />
+        </section>
+
+        <section className="mt-[14px] rounded-[18px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
+          <h2 className="text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">What to remember</h2>
+          <div className="mt-[12px] flex flex-col gap-[13px]">
+            {lesson.body.map((paragraph) => (
+              <p key={paragraph} className="text-[16px] font-normal leading-[22px] tracking-[0] text-[var(--uc-text-muted)]">
+                {paragraph}
+              </p>
+            ))}
+          </div>
+        </section>
+
+        <button
+          className={cn(
+            "mt-[16px] h-[48px] w-full rounded-[14px] text-[15px] font-bold leading-[19px] tracking-[0]",
+            completed
+              ? "bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent-strong)]"
+              : "bg-[var(--hu-theme-accent-strong)] text-[var(--uc-text-inverse)]",
+          )}
+          onClick={onComplete}
+          type="button"
+        >
+          {completed ? "Lesson completed" : "Mark lesson complete"}
+        </button>
+      </main>
+    </div>
+  );
+}
+
+function HuLearnTopicArt({
+  className,
+  imageSrc,
+  variant,
+  visual,
+}: {
+  className?: string;
+  imageSrc?: string;
+  variant: HuLearnArtVariant;
+  visual: HuLearnVisual;
+}) {
+  return (
+    <div
+      aria-hidden="true"
+      data-hu-learn-art-slot={variant}
+      className={cn(
+        "pointer-events-none absolute z-0",
+        imageSrc
+          ? "overflow-visible border-0 shadow-none"
+          : "overflow-hidden border shadow-[0_16px_24px_color-mix(in_srgb,var(--uc-static-black)_18%,transparent)]",
+        HU_LEARN_ART_SLOT_CLASS[variant],
+        className,
+      )}
+      style={{
+        background: imageSrc ? "transparent" : "var(--hu-learn-art-bg)",
+        borderColor: imageSrc ? "transparent" : "var(--hu-learn-card-border)",
+      }}
+    >
+      {imageSrc ? (
+        <>
+          <span
+            aria-hidden="true"
+            className="absolute inset-[14%] rounded-full opacity-70 blur-[12px]"
+            style={{
+              background:
+                "radial-gradient(circle, color-mix(in srgb, var(--hu-theme-accent-strong) 26%, transparent) 0%, transparent 70%)",
+            }}
+          />
+          <img
+            alt=""
+            className="relative z-[1] h-full w-full select-none object-contain drop-shadow-[0_13px_18px_color-mix(in_srgb,var(--uc-static-black)_24%,transparent)]"
+            draggable={false}
+            src={imageSrc}
+          />
+        </>
+      ) : null}
+      {!imageSrc && visual === "balance" ? (
+        <>
+          <span className="absolute left-[15%] top-[24%] size-[42%] rounded-full border-[4px] border-[color-mix(in_srgb,var(--uc-yellow-gold)_78%,var(--uc-static-white))] bg-[color-mix(in_srgb,var(--uc-yellow-gold)_24%,var(--hu-learn-art-soft))]" />
+          <span className="absolute left-[34%] top-[29%] size-[42%] rounded-full border-[4px] border-[color-mix(in_srgb,var(--hu-learn-art-ink)_74%,var(--uc-static-white))] bg-[color-mix(in_srgb,var(--hu-learn-art-soft)_84%,var(--hu-theme-accent))]" />
+          <span className="absolute bottom-[18%] right-[18%] h-[28%] w-[7%] rounded-full bg-[var(--hu-theme-accent-strong)]" />
+          <span className="absolute bottom-[18%] right-[31%] h-[20%] w-[7%] rounded-full bg-[color-mix(in_srgb,var(--hu-theme-accent-2)_68%,var(--uc-static-white))]" />
+        </>
+      ) : null}
+      {!imageSrc && visual === "goals" ? (
+        <>
+          <span className="absolute left-[16%] top-[16%] size-[58%] rounded-full border-[7px] border-[color-mix(in_srgb,var(--hu-learn-art-ink)_78%,var(--uc-static-white))]" />
+          <span className="absolute left-[32%] top-[32%] size-[28%] rounded-full border-[5px] border-[color-mix(in_srgb,var(--uc-static-white)_86%,var(--hu-learn-art-soft))] opacity-90" />
+          <span className="absolute right-[15%] top-[22%] h-[56%] w-[8%] rotate-45 rounded-full bg-[var(--uc-yellow-gold)]" />
+        </>
+      ) : null}
+      {!imageSrc && visual === "safety" ? (
+        <>
+          <span className="absolute left-[28%] top-[14%] h-[66%] w-[44%] rounded-b-[28%] rounded-t-[18%] bg-[color-mix(in_srgb,var(--hu-learn-art-ink)_74%,var(--uc-static-white))]" />
+          <span className="absolute left-[39%] top-[38%] h-[22%] w-[24%] rounded-[8px] border-[3px] border-[color-mix(in_srgb,var(--uc-static-white)_86%,var(--hu-learn-art-soft))] opacity-90" />
+          <span className="absolute left-[47%] top-[56%] h-[14%] w-[7%] rounded-full bg-[color-mix(in_srgb,var(--uc-static-white)_86%,var(--hu-learn-art-soft))] opacity-90" />
+        </>
+      ) : null}
+      {!imageSrc && visual === "request" ? (
+        <>
+          <span className="absolute left-[15%] top-[22%] h-[50%] w-[63%] rounded-[22%] bg-[var(--hu-learn-art-soft)]" />
+          <span className="absolute bottom-[18%] left-[36%] h-[18%] w-[18%] rotate-45 rounded-[4px] bg-[var(--hu-learn-art-soft)]" />
+          <span className="absolute right-[13%] top-[16%] size-[32%] rounded-full bg-[var(--uc-yellow-gold)] shadow-sm" />
+          <span className="absolute right-[24%] top-[25%] h-[18%] w-[5%] rounded-full bg-[var(--uc-static-white)]" />
+        </>
+      ) : null}
+      {!imageSrc && visual === "card" ? (
+        <>
+          <span className="absolute left-[14%] top-[25%] h-[56%] w-[70%] -rotate-[8deg] rounded-[14%] bg-[var(--hu-learn-art-soft)] shadow-sm" />
+          <span className="absolute left-[24%] top-[38%] h-[9%] w-[27%] rounded-full bg-[var(--hu-theme-accent-strong)]" />
+          <span className="absolute bottom-[25%] left-[24%] h-[8%] w-[43%] rounded-full bg-[color-mix(in_srgb,var(--uc-text)_22%,transparent)]" />
+          <span className="absolute right-[19%] top-[47%] size-[18%] rounded-full bg-[var(--uc-red-main)]" />
+          <span className="absolute right-[10%] top-[47%] size-[18%] rounded-full bg-[var(--uc-yellow-gold)] opacity-90" />
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+function HuSavingFocusCard({
+  onCreateGoal,
+  onOpenGoals,
+  showAmounts,
+}: {
+  onCreateGoal: () => void;
+  onOpenGoals: () => void;
+  showAmounts: boolean;
+}) {
   return (
     <section className="rounded-[16px] bg-[var(--hu-theme-card-bg)] px-[18px] py-[18px] shadow-sm">
       <div className="flex items-start justify-between gap-[14px]">
@@ -1324,7 +5205,7 @@ function HuSavingFocusCard({ showAmounts }: { showAmounts: boolean }) {
             Festival pass and sneakers stay on track.
           </p>
         </div>
-        <span className="grid size-[44px] shrink-0 place-items-center rounded-full bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent)]">
+        <span className="grid size-[44px] shrink-0 place-items-center rounded-full bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent-strong)]">
           <AppIcon name="piggy-bank" size={23} />
         </span>
       </div>
@@ -1332,20 +5213,30 @@ function HuSavingFocusCard({ showAmounts }: { showAmounts: boolean }) {
         <div>
           <p className="text-[13px] font-normal leading-[16px] tracking-[0] text-[var(--uc-text-muted)]">Saved so far</p>
           <p className="mt-[6px] text-[25px] font-bold leading-[29px] tracking-[0] text-[var(--uc-text)]">
-            {showAmounts ? "11.824" : "â€¢â€¢â€¢â€¢"}
-            <span className="text-[16px] font-normal leading-[20px]">,33 HUF</span>
+            {showAmounts ? "11.824" : HU_MASKED_INTEGER}
+            <span className="text-[16px] font-normal leading-[20px]">
+              {showAmounts ? ",33 HUF" : `${HU_MASKED_DECIMALS} HUF`}
+            </span>
           </p>
         </div>
         <button
-          className="flex h-[36px] items-center rounded-full bg-[var(--hu-theme-accent)] px-[14px] text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--uc-text-inverse)]"
+          className="flex h-[36px] items-center rounded-full bg-[var(--hu-theme-accent-strong)] px-[14px] text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--uc-text-inverse)]"
+          onClick={onCreateGoal}
           type="button"
         >
           Add goal
         </button>
       </div>
       <div className="mt-[16px] h-[10px] overflow-hidden rounded-full bg-[var(--hu-theme-progress-bg)]">
-        <div className="h-full w-[62%] rounded-full bg-[var(--hu-theme-accent)]" />
+        <div className="h-full w-[62%] rounded-full bg-[var(--hu-theme-accent-strong)]" />
       </div>
+      <button
+        className="mt-[14px] text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--hu-theme-accent-strong)]"
+        onClick={onOpenGoals}
+        type="button"
+      >
+        See saving goals
+      </button>
     </section>
   );
 }
@@ -1355,15 +5246,15 @@ function HuSpendingCard({ showAmounts }: { showAmounts: boolean }) {
     <section className="rounded-[16px] bg-[var(--hu-theme-card-bg)] px-[18px] py-[18px] shadow-sm">
       <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Spending this week</h2>
       <div className="mt-[20px] flex items-start justify-between gap-[12px]">
-        <HuAmountColumn label="Spent" value={showAmounts ? "25.000" : "••••"} suffix=",00 HUF" />
-        <HuAmountColumn align="right" label="Remaining" value={showAmounts ? "50.000" : "••••"} suffix=",00 HUF" />
+        <HuAmountColumn label="Spent" value={showAmounts ? "25.000" : HU_MASKED_INTEGER} suffix={showAmounts ? ",00 HUF" : `${HU_MASKED_DECIMALS} HUF`} />
+        <HuAmountColumn align="right" label="Remaining" value={showAmounts ? "50.000" : HU_MASKED_INTEGER} suffix={showAmounts ? ",00 HUF" : `${HU_MASKED_DECIMALS} HUF`} />
       </div>
       <div className="mt-[22px] h-[14px] overflow-hidden rounded-full bg-[var(--hu-theme-progress-bg)]">
-        <div className="h-full w-[90%] rounded-full bg-[var(--hu-theme-accent)]" />
+        <div className="h-full w-[90%] rounded-full bg-[var(--hu-theme-accent-strong)]" />
       </div>
       <div className="mt-[18px] flex items-center justify-between gap-[12px] text-[13px] leading-[16px] tracking-[0] text-[var(--uc-text-muted)]">
         <p>
-          Weekly limit: <span className="font-bold text-[var(--uc-text)]">{showAmounts ? "75.000,00 HUF" : "••••"}</span>
+          Weekly limit: <span className="font-bold text-[var(--uc-text)]">{showAmounts ? "75.000,00 HUF" : formatHuMaskedMoney()}</span>
         </p>
         <p>
           Days left: <span className="font-bold text-[var(--uc-text)]">2</span>
@@ -1395,13 +5286,44 @@ function HuAmountColumn({
   );
 }
 
-function HuTransactionsCard({ showAmounts }: { showAmounts: boolean }) {
+function HuTransactionsCard({
+  onTransactionClick,
+  showAmounts,
+}: {
+  onTransactionClick?: (transaction: AccountTransaction) => void;
+  showAmounts: boolean;
+}) {
+  const visibleTransactions = HU_KIDS_TRANSACTIONS.slice(0, 2);
+
+  return (
+    <section className="rounded-[16px] bg-[var(--hu-theme-card-bg)] px-[18px] pb-[18px] pt-[18px] shadow-sm">
+      <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Your recent transactions</h2>
+      <div className="mt-[18px]">
+        {visibleTransactions.map((transaction, index) => (
+          <div key={transaction.id}>
+            {index > 0 ? <div className="my-[16px] h-px bg-[var(--uc-border)]" /> : null}
+            <HuKidsTransactionRow
+              compact
+              onClick={onTransactionClick}
+              showAmounts={showAmounts}
+              transaction={transaction}
+            />
+          </div>
+        ))}
+      </div>
+      <button className="mx-auto mt-[22px] flex items-center gap-[6px] text-[13px] font-bold uppercase leading-[16px] tracking-[0] text-[var(--hu-theme-accent-strong)]" type="button">
+        SEE MORE TRANSACTIONS
+        <AppIcon name="chevron-link" size={24} />
+      </button>
+    </section>
+  );
+
   return (
     <section className="rounded-[16px] bg-[var(--hu-theme-card-bg)] px-[18px] pb-[18px] pt-[18px] shadow-sm">
       <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Your recent transactions</h2>
       <div className="mt-[18px]">
         <HuTransactionRow
-          amount={showAmounts ? "+11.824,33 RON" : "+•••• RON"}
+          amount={showAmounts ? "+11.824,33 RON" : `+${formatHuMaskedMoney("RON")}`}
           icon="add-money"
           isPositive
           source="From Dad"
@@ -1410,13 +5332,14 @@ function HuTransactionsCard({ showAmounts }: { showAmounts: boolean }) {
         />
         <div className="my-[16px] h-px bg-[var(--uc-border)]" />
         <HuTransactionRow
-          amount={showAmounts ? "-94,21 RON" : "-•••• RON"}
+          amount={showAmounts ? "-94,21 RON" : `-${formatHuMaskedMoney("RON")}`}
           icon="gift"
+          merchantLogo="mcdonalds"
           source="McDonalds"
           time="Today 11:24"
         />
       </div>
-      <button className="mx-auto mt-[22px] flex items-center gap-[6px] text-[13px] font-bold uppercase leading-[16px] tracking-[0] text-[var(--hu-theme-accent)]" type="button">
+      <button className="mx-auto mt-[22px] flex items-center gap-[6px] text-[13px] font-bold uppercase leading-[16px] tracking-[0] text-[var(--hu-theme-accent-strong)]" type="button">
         SEE MORE TRANSACTIONS
         <AppIcon name="chevron-link" size={24} />
       </button>
@@ -1428,6 +5351,7 @@ function HuTransactionRow({
   amount,
   icon,
   isPositive = false,
+  merchantLogo,
   source,
   subtitle,
   time,
@@ -1435,20 +5359,25 @@ function HuTransactionRow({
   amount: string;
   icon: IconName;
   isPositive?: boolean;
+  merchantLogo?: "mcdonalds";
   source: string;
   subtitle?: string;
   time: string;
 }) {
   return (
     <div className="flex items-start gap-[12px]">
-      <span
-        className={cn(
-          "grid size-[34px] shrink-0 place-items-center rounded-full text-[var(--uc-static-white)]",
-          isPositive ? "bg-[var(--uc-green-olive)]" : "bg-[var(--uc-product-pink)]",
-        )}
-      >
-        <AppIcon name={icon} size={18} />
-      </span>
+      {merchantLogo ? (
+        <HuMerchantLogo merchant={merchantLogo} />
+      ) : (
+        <span
+          className={cn(
+            "grid size-[34px] shrink-0 place-items-center rounded-full text-[var(--uc-static-white)]",
+            isPositive ? "bg-[var(--uc-green-olive)]" : "bg-[var(--uc-product-pink)]",
+          )}
+        >
+          <AppIcon name={icon} size={18} />
+        </span>
+      )}
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-[8px]">
           <p className="truncate text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">{source}</p>
@@ -1474,29 +5403,186 @@ function HuTransactionRow({
   );
 }
 
-function HuCardsPanel() {
-  return (
-    <section className="rounded-[8px] bg-[var(--hu-theme-card-bg)] px-[18px] py-[18px] shadow-sm">
-      <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Your cards</h2>
-      <div className="mt-[14px] grid grid-cols-3 gap-[18px]">
-        {[0, 1].map((index) => (
-          <article key={index} className="min-w-0 text-center">
-            <Card ariaLabel="Mastercard Standard card" size="figma" />
-            <h3 className="mt-[8px] text-[14px] font-bold leading-[16px] tracking-[0] text-[var(--uc-text)]">
-              Mastercard Standard
-            </h3>
-            <p className="text-[14px] font-normal leading-[17px] tracking-[0] text-[var(--uc-text-muted)]">*4007</p>
-          </article>
-        ))}
-        <button className="flex min-w-0 flex-col items-center text-center" type="button">
-          <span className="grid h-[42px] w-[70px] place-items-center rounded-[3px] border border-dashed border-[var(--uc-text)] text-[var(--hu-theme-accent)]">
-            <AppIcon name="add-circle" size={28} />
-          </span>
-          <span className="mt-[9px] text-[14px] font-bold leading-[16px] tracking-[0] text-[var(--uc-text)]">
-            Add new card
-          </span>
-        </button>
+function HuMerchantLogo({ merchant }: { merchant: "mcdonalds" }) {
+  if (merchant === "mcdonalds") {
+    return (
+      <span
+        aria-label="McDonalds merchant logo"
+        className="relative grid size-[34px] shrink-0 place-items-center overflow-hidden rounded-full bg-[#DB0007] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--uc-static-white)_24%,transparent)]"
+        role="img"
+      >
+        <span className="absolute bottom-[6px] left-[7px] h-[19px] w-[8px] rounded-t-full border-l-[3px] border-r-[3px] border-t-[3px] border-[#FFC72C]" />
+        <span className="absolute bottom-[6px] right-[7px] h-[19px] w-[8px] rounded-t-full border-l-[3px] border-r-[3px] border-t-[3px] border-[#FFC72C]" />
+        <span className="absolute bottom-[6px] h-[15px] w-[4px] rounded-t-full bg-[#FFC72C]" />
+      </span>
+    );
+  }
+
+  return null;
+}
+
+function HuKidsTransactionRow({
+  compact = false,
+  onClick,
+  showAmounts,
+  transaction,
+}: {
+  compact?: boolean;
+  onClick?: (transaction: AccountTransaction) => void;
+  showAmounts: boolean;
+  transaction: HuKidsTransaction;
+}) {
+  const isPositive = transaction.amount > 0;
+  const formattedAmount = showAmounts
+    ? `${isPositive ? "+" : "-"}${formatMoneyNumber(Math.abs(transaction.amount), HU_KIDS_RUNTIME_COUNTRY)} HUF`
+    : formatHuMaskedSignedMoney(isPositive);
+  const rowContent = (
+    <>
+      {transaction.merchantLogo ? (
+        <HuMerchantLogoMark merchant={transaction.merchantLogo} />
+      ) : (
+        <span
+          className={cn(
+            "grid size-[34px] shrink-0 place-items-center rounded-full text-[var(--uc-static-white)]",
+            isPositive ? "bg-[var(--uc-green-olive)]" : "bg-[var(--uc-product-pink)]",
+          )}
+        >
+          <AppIcon name={isPositive ? "add-money" : "gift"} size={18} />
+        </span>
+      )}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-[8px]">
+          <p className="truncate text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">{transaction.label}</p>
+          <p
+            className={cn(
+              "shrink-0 text-right text-[16px] font-bold leading-[20px] tracking-[0]",
+              isPositive ? "text-[var(--uc-green-olive)]" : "text-[var(--uc-text)]",
+            )}
+          >
+            {formattedAmount}
+          </p>
+        </div>
+        {transaction.subtitle ?? transaction.details ? (
+          <p className="mt-[10px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
+            {transaction.subtitle ?? transaction.details}
+          </p>
+        ) : null}
+        <p
+          className={cn(
+            "text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]",
+            transaction.subtitle ?? transaction.details ? "mt-[8px]" : "mt-[10px]",
+          )}
+        >
+          {transaction.monthTitle} {transaction.day}:31
+        </p>
       </div>
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        className={cn(
+          "flex w-full items-start gap-[12px] rounded-[12px] text-left transition-colors active:bg-[color-mix(in_srgb,var(--uc-text)_6%,transparent)]",
+          compact ? "py-0" : "px-[16px] py-[10px]",
+        )}
+        onClick={() => onClick(transaction)}
+        type="button"
+      >
+        {rowContent}
+      </button>
+    );
+  }
+
+  return (
+    <div className={cn("flex items-start gap-[12px]", compact ? undefined : "px-[16px] py-[10px]")}>
+      {rowContent}
+    </div>
+  );
+}
+
+function HuMerchantLogoMark({ merchant }: { merchant: HuMerchantLogoId }) {
+  if (merchant === "mcdonalds") {
+    return (
+      <span
+        aria-label="McDonalds merchant logo"
+        className="grid size-[34px] shrink-0 place-items-center overflow-hidden rounded-full bg-[#DA291C] text-[#FFC72C] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--uc-static-white)_28%,transparent)]"
+        role="img"
+      >
+        <svg aria-hidden="true" className="h-[24px] w-[24px]" fill="none" viewBox="0 0 24 24">
+          <path
+            d="M5.2 20.5V13.2C5.2 7.9 7.1 4.4 9.7 4.4C11.2 4.4 12.1 6.6 12.1 10.1V20.5"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeWidth="3.2"
+          />
+          <path
+            d="M12 20.5V10.1C12 6.6 12.9 4.4 14.4 4.4C17 4.4 18.9 7.9 18.9 13.2V20.5"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeWidth="3.2"
+          />
+        </svg>
+      </span>
+    );
+  }
+
+  if (merchant === "youtube") {
+    return (
+      <span
+        aria-label="YouTube merchant logo"
+        className="grid size-[34px] shrink-0 place-items-center overflow-hidden rounded-full bg-[#FF0000] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--uc-static-white)_24%,transparent)]"
+        role="img"
+      >
+        <span className="ml-[2px] h-0 w-0 border-y-[7px] border-l-[12px] border-y-transparent border-l-[var(--uc-static-white)]" />
+      </span>
+    );
+  }
+
+  return (
+    <span
+      aria-label="Apple merchant logo"
+      className="grid size-[34px] shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--uc-static-black)] text-[var(--uc-static-white)] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--uc-static-white)_18%,transparent)]"
+      role="img"
+    >
+      <svg aria-hidden="true" className="h-[21px] w-[21px]" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M15.3 2.1c.2 1.4-.4 2.8-1.2 3.7-.8.9-2.2 1.6-3.5 1.5-.2-1.3.5-2.7 1.3-3.6.9-1 2.3-1.7 3.4-1.6Z" />
+        <path d="M20.4 17.3c-.5 1.1-.7 1.6-1.4 2.6-.9 1.3-2.1 2.9-3.7 2.9-1.4 0-1.8-.9-3.7-.9s-2.4.9-3.7.9c-1.6.1-2.9-1.4-3.8-2.7-2.5-3.7-2.8-8-.9-10.3 1.3-1.6 3.3-2.5 5.2-2.5 1.5 0 2.9 1 3.7 1s2.3-1.2 4-1c.7 0 2.7.3 4 2.2-3.5 1.9-2.9 6.6.3 7.8Z" />
+      </svg>
+    </span>
+  );
+}
+
+function HuCardsPanel({ onCardDetails }: { onCardDetails: (cardId: string) => void }) {
+  const card = HU_KIDS_CARDS[0];
+
+  if (!card) {
+    return null;
+  }
+
+  return (
+    <section className="h-[102px] rounded-[8px] bg-[var(--hu-theme-card-bg)] p-[16px] shadow-sm" data-hu-cards-panel>
+      <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Your cards</h2>
+      <button
+        aria-label={`Open ${card.title} ending ${card.lastDigits}`}
+        className="mt-[12px] flex h-[40px] w-full items-center gap-[8px] rounded-[4px] text-left transition-transform active:scale-[0.99]"
+        onClick={() => onCardDetails(card.id)}
+        type="button"
+      >
+        <Card
+          ariaLabel={`${card.title} card ending ${card.lastDigits}`}
+          className="shadow-[0_4px_8px_color-mix(in_srgb,var(--uc-static-black)_12%,transparent)]"
+          size="figma"
+        />
+        <span className="flex min-w-0 flex-col gap-[4px]">
+          <span className="truncate text-[14px] font-bold leading-[15px] tracking-[0] text-[var(--uc-text)]">
+            {card.title}
+          </span>
+          <span className="text-[14px] font-normal leading-[15px] tracking-[0] text-[var(--uc-text)]">
+            *{card.lastDigits}
+          </span>
+        </span>
+      </button>
     </section>
   );
 }
@@ -1513,7 +5599,7 @@ function HuTasksCard() {
           </div>
         ))}
       </div>
-      <button className="mx-auto mt-[28px] flex items-center gap-[6px] text-[13px] font-bold uppercase leading-[16px] tracking-[0] text-[var(--hu-theme-accent)]" type="button">
+      <button className="mx-auto mt-[28px] flex items-center gap-[6px] text-[13px] font-bold uppercase leading-[16px] tracking-[0] text-[var(--hu-theme-accent-strong)]" type="button">
         SEE ALL TASKS
         <AppIcon name="chevron-link" size={24} />
       </button>
@@ -1541,8 +5627,10 @@ function HuAllMoneyCard({ showAmounts }: { showAmounts: boolean }) {
     <section className="rounded-[16px] bg-[var(--hu-theme-card-bg)] px-[18px] py-[18px] shadow-sm">
       <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">All your money</h2>
       <p className="mt-[4px] text-[29px] font-bold leading-[32px] tracking-[0] text-[var(--uc-text)]">
-        {showAmounts ? "35.628" : "••••"}
-        <span className="text-[20px] font-normal leading-[24px]">,00 HUF</span>
+        {showAmounts ? "35.628" : HU_MASKED_INTEGER}
+        <span className="text-[20px] font-normal leading-[24px]">
+          {showAmounts ? ",00 HUF" : `${HU_MASKED_DECIMALS} HUF`}
+        </span>
       </p>
       <div className="mt-[24px] space-y-[22px]">
         <HuMoneyBucket colorClass="bg-[var(--uc-product-blue)]" icon="mcash" label="Accounts" showAmounts={showAmounts} />
@@ -1571,7 +5659,7 @@ function HuMoneyBucket({
       </span>
       <p className="min-w-0 flex-1 text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">{label}</p>
       <p className="shrink-0 text-right text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--uc-text)]">
-        {showAmounts ? "11.824,33 HUF" : "•••• HUF"}
+        {showAmounts ? "11.824,33 HUF" : formatHuMaskedMoney()}
       </p>
     </div>
   );
@@ -1589,12 +5677,17 @@ function HuLightBottomNav({
       className="absolute inset-x-0 bottom-0 z-10 flex items-center justify-center border-t border-[var(--uc-border-muted)] bg-[var(--hu-theme-nav-bg)] shadow-[0_-10px_28px_color-mix(in_srgb,var(--uc-static-black)_12%,transparent)] backdrop-blur-md"
       style={
         {
-          "--uc-action": "var(--hu-theme-accent)",
+          "--uc-action": "var(--hu-theme-accent-strong)",
           "--uc-bottom-bar-bg": "var(--hu-theme-nav-bg)",
         } as CSSProperties
       }
     >
-      <BottomNavigation activeTab={activeNav} onTabChange={onChange} />
+      <BottomNavigation
+        activeTab={activeNav}
+        iconOverrides={{ analytics: "hu-kids-saving", products: "book-open" }}
+        labelOverrides={{ analytics: "Saving", products: "Learn" }}
+        onTabChange={onChange}
+      />
     </div>
   );
 }

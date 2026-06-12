@@ -551,6 +551,290 @@
     will-change: transform, filter;
   }
 
+  @keyframes hu-nordlys-breath {
+    from {
+      transform: scale(1) translateY(0);
+    }
+
+    to {
+      transform: scale(1.12) translateY(8px);
+    }
+  }
+
+  @keyframes hu-nordlys-silk-a {
+    from {
+      transform: translateX(-5%) rotate(-1.5deg);
+    }
+
+    to {
+      transform: translateX(5%) rotate(1.5deg);
+    }
+  }
+
+  @keyframes hu-nordlys-silk-b {
+    from {
+      transform: translateX(6%) translateY(-1.5%);
+    }
+
+    to {
+      transform: translateX(-6%) translateY(1.5%);
+    }
+  }
+
+  @keyframes hu-nordlys-glint {
+    0% {
+      transform: translateX(4%);
+      opacity: 0.12;
+    }
+
+    55% {
+      opacity: 0.55;
+    }
+
+    100% {
+      transform: translateX(-4%);
+      opacity: 0.22;
+    }
+  }
+
+  @keyframes hu-nordlys-ember {
+    from {
+      transform: scale(1);
+      opacity: 0.72;
+    }
+
+    to {
+      transform: scale(1.09);
+      opacity: 1;
+    }
+  }
+
+  .hu-nordlys-veil {
+    animation: hu-nordlys-breath 36s ease-in-out infinite alternate;
+  }
+
+  .hu-nordlys-silk-a {
+    animation: hu-nordlys-silk-a 30s ease-in-out infinite alternate;
+    transform-origin: 50% 60%;
+    will-change: transform;
+  }
+
+  .hu-nordlys-silk-b {
+    animation: hu-nordlys-silk-b 44s ease-in-out infinite alternate;
+    animation-delay: -22s;
+  }
+
+  .hu-nordlys-glint {
+    animation: hu-nordlys-glint 26s ease-in-out infinite alternate;
+    animation-delay: -9s;
+    opacity: 0.35;
+  }
+
+  .hu-nordlys-ember {
+    animation: hu-nordlys-ember 22s ease-in-out infinite alternate;
+    opacity: 0.75;
+  }
+
+  @keyframes rs-kids-ambient-drift {
+    from {
+      transform: translate3d(-2%, -1%, 0) scale(1);
+      filter: saturate(1);
+    }
+
+    to {
+      transform: translate3d(2%, 1.5%, 0) scale(1.05);
+      filter: saturate(1.12);
+    }
+  }
+
+  @keyframes rs-kids-signal-breathe {
+    0% {
+      transform: translate3d(-2%, 0, 0) rotate(-1deg) scale(1);
+      opacity: 0.74;
+    }
+
+    55% {
+      opacity: 0.96;
+    }
+
+    100% {
+      transform: translate3d(2%, 1%, 0) rotate(1deg) scale(1.04);
+      opacity: 0.82;
+    }
+  }
+
+  .rs-kids-ambient-field {
+    animation: rs-kids-ambient-drift 24s ease-in-out infinite alternate;
+    background:
+      radial-gradient(58% 32% at 82% 20%, color-mix(in srgb, var(--uc-yellow-gold) 46%, transparent), transparent 72%),
+      radial-gradient(70% 42% at 18% 22%, color-mix(in srgb, var(--uc-teal-bright) 34%, transparent), transparent 74%),
+      linear-gradient(128deg, transparent 28%, color-mix(in srgb, var(--uc-product-blue) 24%, transparent) 50%, transparent 76%);
+    mix-blend-mode: screen;
+    opacity: 0.68;
+    will-change: transform, filter;
+  }
+
+  .rs-kids-signal-field {
+    animation: rs-kids-signal-breathe 18s ease-in-out infinite alternate;
+    background:
+      radial-gradient(40% 28% at 78% 72%, color-mix(in srgb, var(--uc-yellow-gold) 78%, transparent), transparent 72%),
+      linear-gradient(112deg, transparent 24%, color-mix(in srgb, var(--uc-teal-bright) 38%, transparent) 46%, color-mix(in srgb, var(--uc-product-blue) 24%, transparent) 60%, transparent 78%),
+      radial-gradient(88% 70% at 28% 18%, color-mix(in srgb, var(--uc-teal-blue) 42%, transparent), transparent 72%);
+    mix-blend-mode: screen;
+    will-change: transform, opacity;
+  }
+
+  @keyframes hu-motion-breathe {
+    from {
+      transform: scale(1);
+    }
+
+    to {
+      transform: scale(1.07);
+    }
+  }
+
+  @keyframes hu-motion-drift {
+    from {
+      transform: translate3d(-2.5%, -1%, 0);
+    }
+
+    to {
+      transform: translate3d(2.5%, 1.5%, 0);
+    }
+  }
+
+  @keyframes hu-motion-slide {
+    from {
+      transform: translateX(-4.5%);
+    }
+
+    to {
+      transform: translateX(4.5%);
+    }
+  }
+
+  @keyframes hu-motion-slide-counter {
+    from {
+      transform: translateX(4%) translateY(-1%);
+    }
+
+    to {
+      transform: translateX(-4%) translateY(1%);
+    }
+  }
+
+  @keyframes hu-motion-sway {
+    from {
+      transform: rotate(-2deg) scale(1.03);
+    }
+
+    to {
+      transform: rotate(2deg) scale(1.03);
+    }
+  }
+
+  @keyframes hu-motion-craft-step {
+    from {
+      transform: translate3d(-10px, -6px, 0);
+    }
+
+    to {
+      transform: translate3d(10px, 8px, 0);
+    }
+  }
+
+  @keyframes hu-motion-craft-float {
+    from {
+      transform: translate3d(0, 8px, 0) scale(1);
+    }
+
+    to {
+      transform: translate3d(0, -8px, 0) scale(1.02);
+    }
+  }
+
+  .hu-motion-breathe-26 {
+    animation: hu-motion-breathe 26s ease-in-out infinite alternate;
+  }
+
+  .hu-motion-breathe-38 {
+    animation: hu-motion-breathe 38s ease-in-out infinite alternate;
+  }
+
+  .hu-motion-drift-34 {
+    animation: hu-motion-drift 34s ease-in-out infinite alternate;
+  }
+
+  .hu-motion-drift-46 {
+    animation: hu-motion-drift 46s ease-in-out infinite alternate;
+    animation-delay: -18s;
+  }
+
+  .hu-motion-slide-28 {
+    animation: hu-motion-slide 28s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+
+  .hu-motion-slide-counter-40 {
+    animation: hu-motion-slide-counter 40s ease-in-out infinite alternate;
+    animation-delay: -15s;
+  }
+
+  .hu-motion-sway-32 {
+    animation: hu-motion-sway 32s ease-in-out infinite alternate;
+    transform-origin: 50% 0%;
+  }
+
+  .hu-motion-sway-34 {
+    animation: hu-motion-sway 34s ease-in-out infinite alternate;
+    transform-origin: 50% 10%;
+  }
+
+  .hu-motion-craft-cubes-36 {
+    animation: hu-motion-craft-step 36s steps(6, end) infinite alternate;
+    background-position:
+      0 0,
+      34px 28px,
+      0 0;
+    background-size:
+      76px 76px,
+      112px 112px,
+      auto;
+    filter: drop-shadow(0 7px 10px color-mix(in srgb, var(--uc-static-black) 18%, transparent));
+    image-rendering: pixelated;
+    will-change: transform;
+  }
+
+  .hu-motion-craft-step-36 {
+    animation: hu-motion-craft-step 36s steps(6, end) infinite alternate;
+    background-size: 64px 64px, 96px 96px, 32px 32px, 32px 32px;
+    image-rendering: pixelated;
+    will-change: transform;
+  }
+
+  .hu-motion-craft-float-42 {
+    animation: hu-motion-craft-float 42s steps(5, end) infinite alternate;
+    animation-delay: -12s;
+    background-size: 92px 92px, 128px 128px;
+    image-rendering: pixelated;
+    will-change: transform;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hu-theme-motion-field,
+    .hu-nordlys-veil,
+    .hu-nordlys-silk-a,
+    .hu-nordlys-silk-b,
+    .hu-nordlys-glint,
+    .hu-nordlys-ember,
+    [class*="hu-motion-"],
+    .rs-kids-ambient-field,
+    .rs-kids-signal-field {
+      animation: none;
+    }
+  }
+
   .uc-type-h1,
   .uc-type-h2,
   .uc-type-l1,

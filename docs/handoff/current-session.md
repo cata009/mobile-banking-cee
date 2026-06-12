@@ -1,10 +1,459 @@
 # Current Session
 
-Last updated: 2026-06-11
+Last updated: 2026-06-12
 
 ## Current Focus
 
-Polishing the Hungary Mobile PI Kids CEE Light Restyle homepage and theme flow, with current focus on the supplied HU quick-action icons and clean closeout.
+Polishing Hungary Mobile PI Kids interactions on top of the CEE Light Restyle + theme system, while preserving the existing Serbia safe-spend coach and prior HU theme work.
+
+## 2026-06-12 Closeout Check
+
+- Latest request handled: user-supplied blockcraft savings image was applied to a real HU Kids Learn card and the user requested a commit after completion.
+- Last meaningful change: `Saving goals` Learn topic cards now use `src/assets/kids/learn/saving-goals-blockcraft.png`; other Learn topics and lesson rows/heroes continue using token/CSS placeholder artwork.
+- Verification run:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check -- src/app/screens/kids/KidsMarketHomeApp.tsx docs/handoff/current-session.md docs/handoff/next-tasks.md` passed with normal Windows LF/CRLF warnings.
+  - In-app Browser on `http://127.0.0.1:5173/` was returned to `Mobile PI Kids` + `Hungary` + `Learn` in light mode and confirmed the `Saving goals` topic cards render the supplied PNG with transparent background, `0px` slot border, no lesson-row PNG usage, and no console errors.
+- Banana Loop:
+  - Fixed: the supplied image is the only Learn PNG imported by runtime code.
+  - Triaged: previous generated image candidates in `kids-img/` and unused `src/assets/kids/learn/*.png` files are intentionally left out of the commit unless the user approves deletion or reuse.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-06-12 Hungary Kids Learn Topic Refactor
+
+- User requested the HU Kids `Learn` area be refactored away from the earlier module/Q&A card treatment into a Revolut-inspired topic -> lesson detail learning experience that visually matches the simpler `More` card language and blends with any applied HU Kids theme.
+- Runtime changes:
+  - `src/app/screens/kids/KidsMarketHomeApp.tsx`
+    - replaces the visible HU Learn module cards with theme-aware topic cards: More-style calm surface, bottom-left title/subtitle, top-right financial-education artwork, and bottom progress bar.
+    - decouples Learn card color from the generic remapped `--uc-neutral-400` theme token through a dedicated `--hu-learn-card-*` surface contract, so colored themes blend in light/dark mode without aggressive muddy gradients.
+    - standardizes future PNG artwork slots through `data-hu-learn-art-slot`: topic card `80x72`, featured topic `108x98`, topic hero `130x118`, lesson row `84x76`, and lesson hero `210x190` logical CSS pixels.
+    - removes Learn card text truncation/line clamp and moves card text into normal flow with `min-height`, so topic titles/subtitles can wrap without visible `...`.
+    - removes the old card-level icon/badge/Q&A/`Continue` treatment (`Goal builder`, `Answer: Yes`, and card-level continue actions no longer render on the Learn cards).
+    - adds typed HU Learn topics and lessons mapped from the existing Kids RO learning intent, with five topic areas: money basics, saving goals, online safety, request money, and card confidence.
+    - adds `learn-topic` and `learn-lesson` views inside the centralized `HuThemeShell`, so topic detail and lesson detail pages inherit applied HU themes automatically like Home/Saving/Payments/More.
+    - adds topic detail pages with hero progress, completed lesson count, lesson rows, and completed/ready state.
+    - adds lesson detail pages with themed visual content, learning text, a `What to remember` summary, and local `Mark lesson complete` behavior that updates topic progress.
+    - uses CSS/HTML theme-token artwork as PNG-slot placeholders for the education visuals, so the current illustrations remain compatible with light/dark mode and can later be replaced without changing layout.
+    - maps the user-supplied blockcraft-style savings image to the `Saving goals` Learn topic cards as the first real PNG artwork test, with transparent rendering, no artificial slot border, and a subtle theme-token halo so the asset can be judged directly on the real card surface.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - In-app Browser on `http://127.0.0.1:5173/` selected `Mobile PI Kids` + `Hungary`, opened `Learn`, confirmed `Money lessons`, `All topics`, topic cards, no `Goal builder`, no `Answer: Yes`, no card-level `Continue`, and no console errors.
+  - Browser smoke opened `Money basics`, confirmed `data-hu-kids-theme-scope="learn-topic"`, lesson completed/ready states, opened `Spend today, plan tomorrow`, confirmed `data-hu-kids-theme-scope="learn-lesson"`, `What to remember`, and `Mark lesson complete`.
+  - Browser smoke completed the lesson, returned to topic detail, and confirmed the lesson state changed to `Completed`; after HMR, reopened `Saving goals` and confirmed three `data-hu-learn-lesson-card` markers with no console errors.
+  - Browser smoke on active `bubbles` / Blockcraft theme confirmed light-mode Learn card backgrounds compute to neutral/pastel blends, topic-card slots compute to `80x72`, featured slots compute to `108x98`, subtitles have no line clamp, subtitle overflow is visible, and no console errors were logged.
+  - Browser smoke on `http://127.0.0.1:5173/` selected `Mobile PI Kids` + `Hungary`, opened `Learn`, confirmed the featured `Saving goals` card renders `/src/assets/kids/learn/saving-goals-blockcraft.png`, image natural size `630x570`, transparent slot background, `0px` slot border, `overflow: visible`, no console errors, and acceptable light/dark mode blending before returning the browser to light mode.
+- Limitations:
+  - HU Learn remains local mock state only; completion state is not persisted to a backend.
+  - Current learning copy remains English demo copy until a dedicated Hungarian content/localization pass is approved.
+  - The `Saving goals` PNG is intentionally a one-topic-card visual test; Learn lesson rows/heroes and the other Learn topics still use token/CSS placeholder artwork until final approved PNG assets are provided.
+- Next recommended action: localize the HU Learn topic and lesson copy into Hungarian and decide whether the token-based illustrations should be replaced by final brand/learning artwork.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-12 Hungary Kids Goals And Learn Migration
+
+- User requested the RO Kids Goals functionality be migrated into HU Kids Saving, and the HU Kids `Products` tab be renamed to `Learn` with the RO Kids Learn section.
+- Runtime changes:
+  - `src/app/screens/kids/KidsMarketHomeApp.tsx`
+    - imports the RO Kids `RO_KIDS_GOALS`, `RO_KIDS_LEARN_MODULES`, `SavingGoal`, `LearnModule`, and `goalProgress` contracts from `src/data/roKidsBanking.ts`.
+    - adapts the RO Kids initial goals to Alexandra/HUF mock values for HU Kids.
+    - adds HU Kids local `goals`, `selectedGoalId`, and `learnModules` state.
+    - adds HU Kids `goals`, `goal-detail`, and `create-goal` views inside the centralized HU `HuThemeShell`, so goal pages inherit the applied theme automatically.
+    - the Saving page now renders real goal cards from state, `Save money` opens the goal list, `Create goal` opens the create-goal flow, selecting a goal opens detail, `Add 1.000 HUF` updates goal progress, and `Ask parent` reuses the HU request-money flow.
+    - replaces the HU Kids bottom-nav `Products` label/icon with `Learn` / `book-open` while keeping the internal shared tab id as `products` for contained compatibility with the shared PI bottom navigation.
+    - adds a HU Learn page using RO Kids learn modules, progress bars, Q/A content, and module completion state.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - In-app Browser on `http://127.0.0.1:5173/` selected `Mobile PI Kids` + `Hungary`; confirmed bottom nav labels `Home`, `Saving`, `Payments`, `Learn`, `More`, with no visible `Products` label on the HU Kids nav.
+  - Browser smoke confirmed Saving scope `analytics` shows `Save money`, `Create goal`, `Saving goals`, and `New bike` with HUF values.
+  - Browser smoke opened Create goal from Saving, confirmed `data-hu-kids-theme-scope="create-goal"`, submitted the default `Skate lessons` goal, landed on `goal-detail`, and confirmed `Add 1.000 HUF` / `Ask parent`; clicking add money updated progress to `3% complete`.
+  - Browser smoke opened the `Learn` tab and confirmed `Short lessons`, `What is balance?`, and `How saving goals work` from RO Kids modules under `data-hu-kids-theme-scope="products"`.
+- Limitations:
+  - Browser tab ids were volatile during later repeated clicks, and the current tab intermittently reset to the default PI/RO context; the completed Learn-module click was not re-verified after that reset, but the Learn page/module state rendered correctly.
+  - HU Goals/Learn remain local mock state only, consistent with the RO Kids prototype; no backend persistence, ledger, parent consent, or real education completion API exists.
+- Next recommended action: decide whether HU Learn copy should remain English demo copy or be localized into Hungarian labels/content.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-12 Hungary Kids Messages And Saving Polish
+
+- User requested HU Kids copy-toast text be left-aligned and smaller, the header Messages icon open the same PI Messages page, the second bottom tab be renamed from `Spending` to `Saving` with the supplied piggy glyph, and the Saving page top actions become `Save money`, `Request money`, `Move money`, and `Create goal`.
+- Runtime changes:
+  - `src/app/screens/kids/KidsMarketHomeApp.tsx`
+    - HU copy toast text is now left-aligned at 14px / 20px line-height while keeping the same bottom pill container and auto-dismiss behavior.
+    - HU Kids now has a `messages` view that mounts the shared PI `MessagesScreen` inside the active HU theme shell; the Home/Saving header Messages button and HU PI-menu headers route to it.
+    - The Saving page uses a dedicated `HuSavingActionRail` with the requested four actions; `Request money` opens the existing request flow and `Move money` opens the existing send/move money flow, while `Save money` and `Create goal` are visual buttons only until a dedicated saving-goal flow is approved.
+    - HU bottom navigation overrides only the Kids HU `analytics` tab label/icon to `Saving` plus the supplied piggy glyph, leaving shared PI navigation labels untouched.
+  - `src/app/components/BottomNavigation.tsx`
+    - added optional `labelOverrides` and `iconOverrides` props for contained runtime variants such as HU Kids.
+  - `src/app/components/icons/AppIcon.tsx`
+    - added the supplied `hu-kids-saving` piggy glyph to the reusable AppIcon registry.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - In-app Browser on `http://127.0.0.1:5173/` selected `Mobile PI Kids` + `Hungary`; confirmed the header Messages icon opens shared PI Messages with Inbox/Outbox and `data-hu-kids-theme-scope="messages"`.
+  - Browser smoke confirmed the bottom nav labels are `Home`, `Saving`, `Payments`, `Products`, `More`, the supplied piggy SVG path renders for Saving, and the Saving page shows `Save money`, `Request money`, `Move money`, and `Create goal`.
+  - Browser smoke on Card Details copy confirmed the toast text is `14px`, `20px` line-height, `text-align: left`, and still displays `Account number successfully copied`; console error log was empty.
+- Limitations:
+  - `Save money` and `Create goal` do not yet open new flows; this avoids silently adding a larger savings-goal capability without approval.
+- Next recommended action: decide whether HU Kids needs a dedicated saving-goal creation flow or should reuse the existing RO Kids goal flow.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-12 Hungary Kids Card Copy Toast
+
+- User requested card-details copy actions show a bottom toast matching the supplied `Messages` Figma JSON (`343x34`, pill radius 48, `#262626` background, white bold 16px text) and disappear smoothly.
+- Runtime changes in `src/app/screens/kids/KidsMarketHomeApp.tsx`:
+  - HU Kids Card Details copy actions now trigger a bottom `HuKidsCopyToast` after copying card number, expiry, or CVV.
+  - Card number copy uses the requested message shape with `Account number successfully copied`; expiry and CVV use equivalent field-specific messages.
+  - Toast state has timed hide/clear cleanup, `aria-live="polite"`, `role="status"`, and a `data-hu-copy-toast` marker for smoke checks.
+  - The toast is rendered inside the HU theme shell above the phone bottom edge, using static DS black/white tokens so it remains readable in both light and dark modes.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - In-app Browser on `http://127.0.0.1:5173/` selected `Mobile PI Kids` + `Hungary`, opened `My card`, triggered the Face ID/card flip reveal through `Card details`, clicked copy on the card number, and confirmed the bottom toast text `Account number successfully copied`.
+  - Browser DOM smoke measured the toast at about `33px` high, bottom-positioned in the phone frame, and confirmed it cleared automatically after about 2.4 seconds.
+- Limitations:
+  - Real clipboard success still depends on browser clipboard permission; the demo still shows the toast after a copy attempt so the prototype interaction remains visible.
+- Next recommended action: decide whether all copy feedback across PI and Kids should reuse this toast pattern or remain screen-local.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-12 Hungary Kids Automatic Theme Boundary
+
+- User requested every existing HU Kids page respect the applied theme, and future HU Kids pages inherit the theme automatically instead of needing per-page fixes.
+- Runtime changes in `src/app/screens/kids/KidsMarketHomeApp.tsx`:
+  - `HuCeeLightRestyleApp` now renders every HU Kids view through one central `HuThemeShell` runtime boundary instead of early-returning separate themed shells for individual pages.
+  - The runtime shell exposes `data-hu-kids-theme-scope` for the active view/tab (`home`, `analytics`, `payments`, `products`, `more`, `theme`, `request-money`, `send-money`, `card-details`, `transaction-detail`), making smoke checks and future routing easier.
+  - Removed duplicated local `HuThemeShell` wrappers from `Change theme`, `Request money`, `Send money`, and `Card details`; the real Home preview intentionally keeps its own nested shell as an isolated preview frame.
+  - `HuThemeShell` now accepts a shell background override for the dark `Change theme` surface while still using the draft theme for preview/motion.
+  - Non-Standard HU themes now remap shared Design System tokens inside the HU runtime boundary (`--uc-app-bg`, `--uc-surface`, `--uc-surface-muted`, `--uc-bottom-bar-bg`, `--uc-sheet-bg`, `--uc-action`, border/card/popover/muted tokens), so imported PI surfaces and future DS-based HU Kids pages inherit the active theme automatically.
+  - Added a safe `--hu-theme-app-bg` and neutral-token based nav/surface mixes to avoid CSS variable cycles between `--uc-app-bg`, `--uc-bottom-bar-bg`, and `--hu-theme-page-bg`.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - In-app Browser on `http://127.0.0.1:5173/` selected `Mobile PI Kids` + `Hungary`, opened `More Options` -> `Themes`, selected `Nordlys`, and applied it.
+  - Browser DOM smoke confirmed after apply: Home has `data-hu-theme="nordlys"`, `data-hu-kids-theme-scope="home"`, `shellCount=1`, and themed `--uc-app-bg`, `--uc-surface`, `--uc-action`, and `--uc-bottom-bar-bg` values.
+  - Browser smoke confirmed the applied theme persisted across `Spending` (`scope=analytics`), `Payments`, `Products`, and `More`; PI-menu pages also exposed `data-hu-kids-themed-section="nordlys"`.
+  - Browser smoke confirmed child views `request-money`, `send-money`, `card-details`, and the shared PI `transaction-detail` all stayed inside the same `nordlys` theme boundary with `shellCount=1`.
+  - Dark-mode smoke on `transaction-detail` confirmed the active `nordlys` theme kept dark-token `--uc-app-bg`, `--uc-surface`, `--uc-text`, and `--uc-action` values; browser was returned to light mode and HU Home afterward.
+- Limitations:
+  - HU theme state still resets on full reload; persistence remains the existing follow-up.
+  - Future HU Kids pages inherit automatically only if they are rendered through `HuCeeLightRestyleApp` and use Design System/theme tokens rather than hardcoded colors.
+- Next recommended action: add an automated regression smoke for HU Kids theme scope/token coverage after the routing stabilizes.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-12 Hungary Kids Header Mask And Card Details Transactions
+
+- User requested HU Kids header icons be smaller inside their gray/themed controls, hide/show amount masking use PI-style asterisks instead of dot/bullet glyphs, and HU Kids Card Details transactions be restructured to match the PI card-details pattern shown in the reference.
+- Runtime changes in `src/app/screens/kids/KidsMarketHomeApp.tsx`:
+  - `HuLightHeader` now uses smaller 26px icon controls with reduced glyph sizes and a slightly smaller profile avatar.
+  - HU Kids hidden amount displays now use `****` / `****,** HUF` masks across the hero, saving, spending, recent transactions, all-money, money buckets, and Kids transaction rows; the corrupted bullet-mask strings were removed.
+  - HU Kids Card Details now puts the card and three large action buttons directly on a gray app section, without the prior rounded action container.
+  - Added a HU-local `HuKidsCardDetailsActionRail` with large circular `Card details`, `Manage card`, and `Block card` buttons.
+  - `HuKidsCardTransactionsPanel` now places `AccountSearchBar` above the transaction list, removes the old `Your recent transactions` title/chip header, groups Kids transactions by day, and uses the existing Design System `AccountTransactionMonthDivider` for day labels and daily net totals.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - In-app Browser on `http://127.0.0.1:5173/` selected `Mobile PI Kids` + `Hungary`, confirmed header controls render about 25px wide/high and the profile about 33px.
+  - Browser smoke toggled `Hide amounts` and confirmed masked snippets such as `****`, `****,** HUF`, `Weekly limit: ****,** HUF`, `+****,** HUF`, and `-****,** HUF`, with no bullet/corrupted glyphs in the visible body text.
+  - Browser smoke opened `My card` and confirmed the Card Details action rail is present, action circles are about 66px on a gray top section, search is outside the transactions list container, `Your recent transactions` and the old standalone `Today` chip are gone, three `AccountTransactionMonthDivider` instances render, and console error log was empty.
+- Limitations:
+  - The day labels and daily net totals are derived from local HU Kids mock transaction dates/amounts only.
+- Next recommended action: do a visual taste pass on whether Card Details action circles should be 64px, 66px, or 68px after reviewing in the phone frame.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-12 Hungary Kids Home Carousel Cards And Send Money
+
+- User requested the HU Kids Home pending-action carousel become swipeable again, `Your cards` be rebuilt from the supplied 327x102 Figma JSON as a clean single-card row, and the RO Kids Send money interaction be mapped onto the HU Kids Home `Send money` quick action.
+- Runtime changes in `src/app/screens/kids/KidsMarketHomeApp.tsx`:
+  - `HuRequestMoneyRail` now supports desktop mouse drag and touch-pan scrolling with click suppression after a real drag, so swiping the notification carousel no longer opens a card by accident.
+  - Pending-action cards are explicitly non-draggable browser elements while keeping normal click behavior.
+  - `Your cards` now renders one `Mastercard Standard *4007` row inside the Figma-sized section using the shared `Card size="figma"` artwork; the old second card/add-new-card layout was removed.
+  - Added a HU-local `send-money` view inspired by the RO Kids flow: contact chips, amount input, note field, approval-threshold copy, Design System `PrimaryButton`, latest-transfer status, and return-to-home behavior.
+  - The HU Kids Home/Saving `Send money` quick action opens the new flow; submitting creates a local Home pending-action notification for the transfer.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - In-app Browser on `http://127.0.0.1:5173/` selected `Mobile PI Kids` + `Hungary`, confirmed the pending-action rail has `scrollWidth=1077`, `clientWidth=375`, and 3 initial cards, then a real CUA drag moved `scrollLeft` from `0` to `281` without opening request/send screens.
+  - Browser smoke confirmed `Your cardsMastercard Standard*4007`, exactly one `Mastercard Standard`, no `Add new card`, and the card panel remained visible on HU Home.
+  - Browser smoke clicked `Send money`, confirmed the send-money form copy (`Ready to send`, contact chips, amount/note, primary action), submitted a transfer, returned Home, and confirmed a new `Money sent` action card appeared; console error log was empty.
+- Limitations:
+  - HU Send money is local mock state only; it does not call a payment rail, parent approval backend, notifications service, ledger, persistence, or fraud controls.
+  - The single-card `Your cards` section uses the existing runtime card SVG through the shared `Card` component rather than importing a duplicate inline asset from the JSON.
+- Next recommended action: visually tune the exact Send money copy/localization and decide whether the HU pending-action carousel should snap card-by-card or remain free-scroll.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-12 Hungary Kids Card Details Reveal And Freeze
+
+- User requested the HU Kids card-details page remove the leftover `Free To Spend`, card carousel, and `Show Card Details` link; blend the header into the active theme; render transactions like HU Kids Home; and add Face ID -> card flip reveal plus freeze/unfreeze card behavior.
+- Runtime changes in `src/app/screens/kids/KidsMarketHomeApp.tsx`:
+  - `HuKidsCardDetailsPage` now uses a compact transparent themed `PageHeader`, removing the old PI-style Free To Spend block, carousel dots, Apple Wallet-style block, and text-only Show Card Details link.
+  - Added `HuKidsCardRevealStage`, which makes both the large card artwork and `Card details` action trigger the existing `FaceIdAnimation` before flipping to a back face with copyable card number, expiry, and CVV mock details.
+  - Added local copy feedback for card fields and kept values mask-aware when amounts are hidden.
+  - `Block card` now toggles to `Unblock card` and applies a frozen visual overlay to the card; unblocking removes the freeze state.
+  - The Card Details transaction section now uses a HU Kids Home-style rounded `Your recent transactions` container, reusing the Kids transaction row pattern and search filtering instead of the normal PI Card Details category list.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check -- src/app/screens/kids/KidsMarketHomeApp.tsx` passed with only normal Windows LF/CRLF warnings.
+  - In-app Browser on `http://127.0.0.1:5173/` confirmed HU Kids Card Details no longer contains `Free To Spend` or `Show Card Details`, shows `Your recent transactions`, shows the reveal-side card fields, and exposes `Block` / `Unblock` state text without console errors observed during the inspected state.
+- Limitations:
+  - Card details, card field values, and freeze state are still HU-local mock state only; there is no secure card-data API, real clipboard audit, or backend card block operation.
+  - Browser automation was able to inspect and interact with the current page state but intermittently reset the demo context during scripted clicks, so a manual visual pass is still recommended for the exact Face ID timing and freeze/unfreeze animation feel.
+- Next recommended action: manually review HU Kids Card Details in light and dark themes, then tune flip/freeze motion duration and copy-field spacing if needed.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-11 Hungary Kids Blockcraft Edge Blend Polish
+
+- User flagged that after applying the Blockcraft/Bubbles theme, the HU Kids Home still showed a lighter/white-looking cut at the lateral edge in light and dark mode, and asked to try making the blocks slightly more 3D.
+- Runtime changes:
+  - `HuThemeShell` now sets the active theme background on the shell itself, not only on the absolute background layer, so the phone edges inherit `--hu-theme-page-bg`.
+  - Expanded layered HU theme motion horizontally beyond the phone content bounds to avoid hard side cuts.
+  - Added a bottom fade overlay for layered motion presets, matching the fallback motion-field behavior.
+  - Reworked Blockcraft motion from stripe-like bands into repeated conic-gradient cube tiles with light/mid/shadow faces.
+  - Added `.hu-motion-craft-cubes-36` with step motion, pixelated rendering, and a subtle drop shadow for a restrained 3D block effect.
+- Verification:
+  - `node scripts/audit-hu-theme-contrast.mjs` passed for Blockcraft applied fix verification in light and dark mode.
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - In-app browser reload at `http://localhost:5173/` showed no console errors, but automated DOM check did not land on the HU Kids themed state after reload.
+- Limitations:
+  - Exact visual approval still needs looking at Mobile PI Kids Hungary with Blockcraft applied, because the browser automation reload did not preserve the commented HU state.
+- Next recommended action: visually compare Blockcraft in light/dark; if the 3D cube effect feels too decorative, reduce `.hu-motion-craft-cubes-36` opacity/drop-shadow.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-11 Hungary Kids Blockcraft Theme Restyle
+
+- User requested the existing HU Kids `Bubbles` theme become a Minecraft-like theme with blocky top motion, craft-like colors, and accessibility-compatible contrast.
+- Runtime changes:
+  - Kept internal theme id `bubbles` for state compatibility, but renamed the visible theme to `Blockcraft` with `pixel blocks` hint.
+  - Replaced the old teal/bokeh treatment with a grass/dirt/torch palette using green, deep green, yellow-brown, and gold token mixes.
+  - Added blocky layered motion to the hero/top wash through `blockcraft-sky-veil`, `blockcraft-grid`, and `blockcraft-pixels` motion layers.
+  - Added `hu-motion-craft-step-36` and `hu-motion-craft-float-42` CSS utilities with step-based pixel motion and reduced-motion coverage through the existing `[class*="hu-motion-"]` rule.
+  - Updated `scripts/audit-hu-theme-contrast.mjs` so the `bubbles` audit fixture matches the new Blockcraft palette and the applied `accentStrong` / hero-muted contrast fixes.
+- Verification:
+  - `node scripts/audit-hu-theme-contrast.mjs` passed for the Blockcraft applied fix verification in light and dark mode.
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - In-app browser at `http://localhost:5173/` loaded without console errors; the visible demo was still on the control panel, so a HU Kids theme-picker click-through remains recommended.
+- Limitations:
+  - The theme is intentionally Minecraft-inspired rather than a licensed Minecraft-branded asset set.
+  - Theme persistence across reload remains a pre-existing follow-up.
+- Next recommended action: open Mobile PI Kids Hungary, More Options -> Themes, select `Blockcraft`, and tune exact block density after visual review on-device.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-11 Hungary Kids Daily Spend Hero Logic
+
+- User clarified the HU Kids Home top amount should be the money Alexandra can spend immediately today, while all of her money remains available lower on the page in a separate area.
+- Runtime changes in `src/app/screens/kids/KidsMarketHomeApp.tsx`:
+  - HU Kids top hero amount changed from the total-looking `35.628,34 HUF` to a daily spend amount `4.500,34 HUF`.
+  - Helper copy changed to `are available for you to spend today`.
+  - `All your money` remains the lower total-money section, preserving the distinction between daily spend and total holdings.
+  - HU Kids quick actions are now more child-oriented: `Request money`, `Send money`, `My card`, and `More Options`.
+  - `My card` opens the HU Kids card-details page from both Home and Saving action rails; `More Options` remains available so theme personalization is still reachable.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+- Limitations:
+  - Daily-spend amount is still static mock data; no allowance/limit calculation or backend spending window exists yet.
+- Next recommended action: tune the exact daily-spend amount and decide whether the fourth quick action should remain `More Options` or become a deeper kids feature after theme access moves elsewhere.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-11 Hungary Kids Merchant Logo Transactions
+
+- User requested the McDonalds transaction in HU Kids transactions use the merchant logo instead of the generic pink icon, scoped only to Kids, anticipating a future Mastercard Ethoca merchant-logo integration.
+- Runtime changes in `src/app/screens/kids/KidsMarketHomeApp.tsx`:
+  - `HuTransactionRow` now accepts a Kids-only `merchantLogo` prop.
+  - McDonalds rows on HU Kids Home `Your recent transactions` and the HU Kids card-details transaction section now pass `merchantLogo="mcdonalds"`.
+  - Added local `HuMerchantLogo` renderer for the McDonalds merchant mark placeholder; other Kids transactions continue using the existing icon-circle treatment.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+- Limitations:
+  - The merchant logo is currently a local visual placeholder, not an Ethoca-fed merchant asset service.
+  - Scope is intentionally HU Kids transaction rows only; PI transaction components were not changed.
+- Next recommended action: once real Ethoca payload shape is known, replace the literal `merchantLogo` enum with merchant-logo data on Kids transactions.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-11 Hungary Kids Card Details From Your Cards
+
+- User requested the HU Kids `Your cards` card image open a card-details page close to the existing PI Home/Card Details pattern, but with transactions shown like HU Kids Home `Your recent transactions` instead of the PI card transaction list.
+- Runtime changes in `src/app/screens/kids/KidsMarketHomeApp.tsx`:
+  - HU Kids now has a local `card-details` view in addition to `home`, `theme`, and `request-money`.
+  - The card artwork image inside `Your cards` is now an accessible button that opens the selected card detail page.
+  - Added HU-local card metadata for the two displayed Mastercard Standard examples.
+  - Added `HuKidsCardDetailsPage`, borrowing the PI card-details structure: compact `PageHeader`, Cards title, holder/masked card number, larger card artwork, carousel dots, Free To Spend, Show Card Details, Apple Wallet-style button, and four card quick actions.
+  - The detail page stays inside the active HU theme shell and keeps themed phone chrome.
+  - The transaction section deliberately uses the same `HuTransactionRow` visual pattern and same example transactions as HU Home `Your recent transactions`, per user request.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check -- src/app/screens/kids/KidsMarketHomeApp.tsx` passed with only normal Windows LF/CRLF warnings.
+- Limitations:
+  - The detail page is HU-local mock state; it does not use a real card backend, card controls, Apple Wallet integration, or card transaction feed.
+  - Visual browser click-through remains recommended on `http://127.0.0.1:3005/` because the prior automated in-app browser attach was unavailable in this session.
+- Next recommended action: click HU Kids Home -> `Your cards` card image and tune exact card detail spacing/action labels against the PI card-details reference if needed.
+- Blocked by: none for code.
+- Safe to resume: yes.
+
+## 2026-06-11 Hungary Kids Request Money Quick Action
+
+- User requested the HU Kids `Request money` quick action become functional using the existing RO Kids request-money flow as the model, the pending request card rail be corrected to 24px left/right gutters, and additional notification-style pending action cards be added.
+- Runtime changes in `src/app/screens/kids/KidsMarketHomeApp.tsx`:
+  - HU Kids now has a local `request-money` view in addition to `home` and `theme`.
+  - The `Request money` quick action in the four-button Home/Saving rail opens a full-screen themed request form instead of doing nothing.
+  - The request form follows the RO Kids pattern: amount input, reason chips, optional note, Design System `PrimaryButton`, and a latest-request status card.
+  - Submitting a request creates a new local pending action (`Mom`, HUF amount, reason/note, `pending`) and returns it to the Home notification rail state.
+  - The pending action rail now renders real data-driven cards, not the old single static card plus spacer.
+  - The first request card keeps the green Buddy-card artwork; additional example notification cards show school-trip and task-reward pending/approved states.
+  - The rail is horizontally scrollable with card width `327px` inside 24px page gutters, fixing the previous right-edge bleed.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+- Limitations:
+  - The flow is still HU-local React state only; there is no real parent notification, persistence, ledger posting, or parent approval integration.
+  - Browser automation could not attach to the in-app browser tab in this run (`No active tab found` / webview attach timeout), so visual click-through on `http://127.0.0.1:3005/` remains recommended after reload.
+- Next recommended action: manually click HU Kids Home -> `Request money`, submit an amount, return Home, and visually tune copy/spacing after seeing the new cards in the phone frame.
+- Blocked by: none for code; browser automation attach was unavailable for visual smoke.
+- Safe to resume: yes.
+
+## 2026-06-11 Hungary Kids Theme Coverage Across Bottom Navigation
+
+- User requested the active HU Kids theme be visible everywhere in the HU Kids bottom navigation: `Spending`, `Payments`, `Products`, and `More`, not just on Home.
+- Runtime changes in `src/app/screens/kids/KidsMarketHomeApp.tsx`:
+  - `HuKidsPaymentsPage`, `HuKidsProductsPage`, and `HuKidsMorePage` now receive the applied HU theme.
+  - `HuKidsPiMenuFrame` is now a theme-aware wrapper for the imported PI-style secondary menu pages, preserving the real `PaymentHeroCard`, `ProductMenuCard`, and More card components while supplying HU theme ambient motion, a tinted body wash, themed title/icon color, `--uc-action`, `--uc-surface-muted`, and neutral-card variables.
+  - `More` now also uses the shared themed frame instead of its previous standalone white surface.
+  - Secondary pages expose `data-hu-kids-themed-section="<theme>"` for smoke verification.
+  - HU phone chrome now treats every non-Standard applied theme as themed, so the status/system bar blend follows the active theme on every HU Kids tab; foreground stays light for dark-field themes and token-driven for lighter themes.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check -- src/app/screens/kids/KidsMarketHomeApp.tsx` passed with only normal Windows LF/CRLF warnings.
+  - In-app Browser on `http://127.0.0.1:3005/` selected `Mobile PI Kids` + `Hungary`, opened `More Options` -> `Themes`, selected `Nordlys`, applied it, and confirmed `data-hu-theme="nordlys"`.
+  - Browser tab smoke confirmed `Spending` keeps the themed Home/Saving layer, while `Payments`, `Products`, and `More` each render with `data-hu-kids-themed-section="nordlys"`, themed nav background, themed menu body wash, themed header foreground, tinted secondary card variables, and no console errors.
+  - Dark mode smoke on `More` confirmed `data-hu-theme="nordlys"` and `data-hu-kids-themed-section="nordlys"` survive the appearance switch with dark-token body/nav/card variables; browser was returned to light mode afterward.
+- Limitations:
+  - Theme state still resets on reload (pre-existing).
+  - This pass themes the imported PI menu surfaces through inherited tokens/ambient wrappers; it does not redesign the internal payment/product/more card artwork.
+- Next recommended action: visual taste pass on the exact amount of ambient motion/tint on secondary HU pages after stakeholder review.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-11 Hungary Kids Theme Motion Redesign (Distinct Identities)
+
+- User reported Blue Lines, Aurora, and Garden top animations looked too similar (repeating diagonal lines) and light mode looked weaker than dark; requested a distinct, more premium motion identity per theme.
+- All five colored themes now use the layered `motionLayers` engine (introduced with Nordlys) instead of the shared single-field repeating-stripe `motionBackground`; each gets its own 3-layer composition with screen/soft-light blends and per-mode opacity tuning (`dark:` classes):
+  - Blue Lines "meridian blades": teal-cyan veil top-right + three crisp sliding light blades (glass-blinds feel) + counter-drifting deep soft-light band.
+  - Bubbles "bokeh depth": three parallax bokeh layers (far/near orbs + breathing depth veil).
+  - Aurora "magenta curtains": mauve veil + swaying near-vertical silk curtains (no diagonals) + warm soft-light arc.
+  - Garden "canopy light": organic soft-light canopy shading + breathing gold sun pockets + drifting leaf dapple (no lines).
+  - Solar "halo": breathing gold-orange sun glow + concentric ring arcs + warm soft-light band.
+- `src/styles/theme.css`: five generic transform-only keyframes (`hu-motion-breathe/drift/slide/slide-counter/sway`) with duration-variant utility classes (26-46s, ease-in-out alternate); `prefers-reduced-motion` block extended with `[class*="hu-motion-"]`.
+- Old `motionBackground` strings remain on the presets but are ignored once `motionLayers` is present (legacy path still used by nothing among colored themes; Standard unaffected).
+- AA note: the wash gradients and all `accentStrong`/`heroMutedForeground` values from the accessibility pass are untouched; light-mode layers that can sit behind text are screen-blended (lighten = contrast-positive for dark text), deep soft-light bands are kept toward edges/corners.
+- Verification: `npm run build`, `npm run audit:templates` (screens=31), `npm run audit:platform` passed; `git diff --check` clean apart from CRLF warnings; browser smoke in light mode confirmed Blue Lines (crisp blades, no gray fog), Aurora (pink curtains), Garden (canopy + gold pockets) all rendering distinctly with animations running, and Blue Lines verified scrolled in dark mode; no console errors observed.
+- Limitations: Solar and Bubbles were redesigned with the same engine but only spot-checked via build (not screenshotted individually); blade/curtain alphas are taste-tunable.
+- Next recommended action: quick visual pass on Solar and Bubbles in both modes if further polish is desired.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-11 Hungary Kids Theme Accessibility Pass (WCAG AA)
+
+- User requested all five colored HU themes (Blue Lines, Bubbles, Aurora, Garden, Solar) be fixed for AA contrast in light and dark mode.
+- Measurement first: new dev script `scripts/audit-hu-theme-contrast.mjs` replicates the runtime `color-mix` formulas and gradient interpolation at real text positions, computes WCAG ratios for every theme x mode x pair (accent text on tinted cards, progress fill vs track, inverse text on accent chips, nav active tab, hero muted text on the top wash, balance on wash), and includes a solver that finds the strongest accent mix that passes everything.
+- Confirmed failures before the fix: Garden and Solar failed almost every accent pair in light mode (links 2.7-2.9:1, chips ~3.1:1); Bubbles and Aurora links ~3.9:1; ALL five themes failed progress fill vs track in dark mode (2.2-2.8:1) and nav active tab in both modes; Blue Lines hero text was broken in dark mode because its wash top flips to pale blue via `--uc-primary-k1`.
+- Fix in `src/app/screens/kids/KidsMarketHomeApp.tsx`, no visual identity change:
+  - New optional preset field `accentStrong` -> CSS var `--hu-theme-accent-strong` (defaults to `--hu-theme-accent`, so Standard and Nordlys are untouched; Nordlys was verified to already pass everything).
+  - Recipe `color-mix(in srgb, accent P%, var(--uc-text))` darkens in light mode and lightens in dark mode automatically; solver-chosen P: Blue Lines 80, Bubbles 75, Aurora 65, Garden 60, Solar 60.
+  - All text/fill consumers re-pointed to accent-strong (SEE MORE / SEE ALL links, both progress fills, Add goal chip background, add-card icon, saving icon chip, More-sheet chip text and palette icon, bottom-nav `--uc-action`); ambient tints (card/nav/control/wash mixes, swatches, motion) keep the original accent.
+  - Per-theme `heroMutedForeground` overrides (`color-mix(text-muted Q%, text)`: Blue Lines 10, Bubbles 90, Aurora 85, Garden/Solar 95) so welcome line, sub-line, and quick-action labels pass 4.5:1 on the wash at their actual gradient positions.
+  - Blue Lines wash now anchors on `--uc-static-black` instead of `--uc-primary-k1` (light mode visually identical: #395871 vs #3B5E79; dark mode top no longer flips light, white hero text ~5.9-9.2:1).
+- Verification: script reports every checked pair passing (>=4.5 text, >=3.0 non-text) in both modes for all five themes; `npm run build`, `npm run audit:templates` (screens=31), `npm run audit:platform` passed; `git diff --check` clean apart from CRLF warnings; browser smoke confirmed Garden light (dark labels, deep-green nav/links) and Aurora dark (light-pink progress fill clearly visible on track) with no console errors.
+- Limitations: ratios are computed from the design-token tables and sRGB gradient interpolation, not from screen captures; transaction green/pink icon chips and the static `--uc-green-olive` positive-amount color are shared app styles outside the theme system and were not audited here.
+- Next recommended action: none for this scope; rerun `node scripts/audit-hu-theme-contrast.mjs` whenever theme presets change.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-11 Hungary Kids Flagship Theme "Nordlys"
+
+- User requested ONE flagship, Revolut-level premium theme for HU Kids themes, designed and executed at maximum quality (multi-agent design panel ran 4 concepts x 3 judges; "Nordlys" polar-night direction won, with grafts from the runner-up concepts: product-blue-deep functional accent, frosted hero controls with hairline border, prism glint layer, configurable motion mask).
+- Concept: a mode-stable polar-night field (#03141C-#155666 literals so it never flips in dark mode) over the hero, two counter-drifting aurora silk beams + breathing veil + crisp prism glint + gold polar ember at the horizon, dissolving through an ice-teal dawn line into the normal page background by 600px — "night to day in one scroll".
+- Runtime changes in `src/app/screens/kids/KidsMarketHomeApp.tsx`:
+  - `HuThemeId` union gains `"nordlys"`; preset added second in `HU_THEME_PRESETS` (flagship slot after Standard).
+  - Theme model extended minimally and backward-compatibly: optional `motionLayers` (multi-layer animated stack with blend modes), `motionHeight`, `motionMask`, `heroForeground`, `heroMutedForeground`, `heroControlBackground/Foreground/Border`. All defaults resolve to the previous values, so the six existing themes render unchanged.
+  - `HuThemeMotionLayer` renders the layered stack masked with a CSS mask (no fade-overlay haze over dark fields) when `motionLayers` is present; legacy single-field path untouched. All three call sites (Home, Change theme page, framed preview) pass the active/draft theme.
+  - Hero-zone elements (logo, welcome line, balance, header buttons, quick-action circles and labels) now read `--hu-theme-hero-*` variables; hero controls support frosted glass (translucent white + hairline border + backdrop blur).
+- `src/styles/theme.css`: added `hu-nordlys-breath/silk-a/silk-b/glint/ember` keyframes (transform/opacity only, 22-44s) plus `.hu-nordlys-*` utility classes, and a `prefers-reduced-motion` block disabling all HU theme motion (including the pre-existing field drift).
+- Accent strategy: `--uc-product-blue-deep` (#244858 light / #91D1DD dark) drives links/progress/nav-active — midnight navy on light cards, moonlit ice on dark cards (≈8:1 / ≈5.9:1 contrast); gold reserved for glow only, never text; hero text is static white over the mode-stable dark field (≥11:1).
+- Verification:
+  - `npm run build` passed (known chunk-size warning); `npm run audit:templates` passed (templates=50 codePreviews=50 components=71 screens=31 flows=15); `npm run audit:platform` passed (products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6); `git diff --check` clean apart from normal CRLF warnings.
+  - Browser smoke on the preview server (port 5173): HU Kids Home starts on `data-hu-theme="default"`; More Options -> Themes shows 7 swatches with Nordlys second; selecting Nordlys updates the real framed preview; Apply returns Home with `data-hu-theme="nordlys"`; all five motion layers animate with their keyframes; scroll fades the motion stack opacity 1 -> 0; dark mode shows slate cards with ice accent links/progress; no console errors.
+  - Standard theme verified pixel-identical after the refactor (hero variables default to the previous colors).
+- Limitations:
+  - The gold polar ember reads subtle in light mode (screen-blend over the bright dawn zone); intensity was raised once, further tuning is a taste call.
+  - An HMR session artifact made the theme appear pre-applied during development; verified clean boot via real navigation — initial state remains Standard.
+  - Theme choice still does not persist across reloads (pre-existing limitation).
+- Next recommended action: optional ember intensity/position tuning and a decision on theme persistence / premium-locked states.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-11 Serbia Kids Safe-Spend Coach Iteration
+
+- User requested an incremental implementation: duplicate the Hungary Kids direction onto Serbia, leave HU untouched, and use Serbia as the place for the stronger UX iteration while Claude continues separate HU theme work.
+- Runtime changes:
+  - `src/data/kidsMarketHomeConcepts.ts` now includes Serbia (`RS`) as a current-design-system Kids market concept with Luka, RSD values, safe-to-spend copy, goal data, card activity, money moments, safety coaching, and earn-next tasks.
+  - `src/app/screens/kids/KidsMarketHomeApp.tsx` now routes the Serbia concept to a dedicated `RsKidsSafeSpendApp` branch instead of the planned placeholder.
+  - Serbia Home is rebuilt around a premium safe-spend coach structure: dark signal hero, safe-to-spend amount, balance, action rail, next money moment, goal spotlight, earn-next tasks, card-safety controls, recent activity, and a money map.
+  - Serbia reuses the shared PI `BottomNavigation` geometry with Kids-specific Home, Spending, Payments, Products, and More labels, and each tab has contained RS content instead of blank pages.
+  - Serbia Payments, Products, and More reuse the country-scoped PI menu configs for `RS`; the Kids wrapper changes presentation and context, not backend capability.
+  - `src/app/App.tsx` treats HU and RS Kids as themed phone-chrome contexts so Serbia can render white status-bar/Dynamic Island chrome over the dark hero.
+  - `src/styles/theme.css` adds Serbia-only ambient/signal animation utilities with reduced-motion handling.
+  - Runtime registries now expose `kids.rs.home-concept`, include RS in the Kids market concept project pack, and add Serbia to the Kids bottom-nav flow evidence.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - In-app Browser smoke on `http://127.0.0.1:3005/` selected `Mobile PI Kids` + `Serbia`, confirmed project pack `kids-pi-rs`, `data-rs-kids-experience="safe-spend-coach"`, Home `data-rs-kids-page="home"`, safe-to-spend/RSD/Luka/goal/money-moment/earn-next/card-safety/money-map content, exactly one shared PI `data-phone-bottom-navigation="true"` instance with `Home`, `Spending`, `Payments`, `Products`, and `More`, themed phone status foreground `#FFFFFF`, and no browser console errors.
+  - RS tab smoke confirmed `Spending` renders `Spending coach`, `Payments` renders RS payment menu content including `New payment`, `Products` renders RS product cards including `Account`, and `More` renders RS More content including `Contacts` / `Documents`; no browser console errors were logged.
+  - HU preservation smoke selected `Mobile PI Kids` + `Hungary` and confirmed project pack `kids-pi-hu`, `data-hu-theme="default"`, Alexandra/HUF Home content, exactly one shared PI bottom navigation, no `data-rs-kids-experience`, no RS copy, and no browser console errors.
+- Limitations:
+  - Serbia Kids is mock-driven only; there is no real parent consent, legal eligibility, card/wallet execution, ledger, persistence, notification, or audit integration.
+  - Serbia copy is custom English demo copy with RSD context, not a completed Serbian/Hungarian localization set.
+  - The bottom-nav pages are stakeholder-demo surfaces, not production payment/product/card flows.
+  - HU runtime was intentionally not replaced; existing HU Kids work, including the parallel theme additions in `KidsMarketHomeApp.tsx` / `theme.css`, remains separate.
+- Next recommended action:
+  - Compare the RS safe-spend coach against HU and decide which pattern should become the candidate unified Kids homepage before adding deeper child/parent flows.
+- Blocked by: none.
+- Safe to resume: yes.
 
 ## 2026-06-11 Hungary Kids Quick Action Icons
 
@@ -2559,6 +3008,19 @@ Continue with product evolution work:
 - Commit scope:
   - the requested access-gate implementation plus all existing uncommitted workspace changes are intended to be committed per `comite tot ce nu e comis`.
   - Existing uncommitted files included Investments Portfolio refinements already documented earlier in this handoff.
+
+## 2026-06-12 Hungary Kids Transactions And Card Details Polish
+
+- `src/app/screens/kids/KidsMarketHomeApp.tsx`
+  - HU Kids Home and card-details transactions now use a typed local `HuKidsTransaction` list compatible with the shared PI `AccountTransaction` model.
+  - HU Kids transaction rows are clickable from Home and Card Details and open the shared PI `TransactionDetailScreen`, so the same detail model used by PI RO/HU/RS is reused instead of a bespoke Kids-only detail page.
+  - HU Kids Card Details now uses PI Card Details building blocks for the main layout rhythm: large card artwork, `AccountActionBar`, `AccountSearchBar`, `AccountTransactionMonthDivider`, and a searchable transaction list while keeping the HU Kids themed shell.
+  - Merchant logos are Kids-local only: McDonalds, YouTube, and Apple render as vector merchant marks for the Ethoca-style placeholder, without leaking logo text into the transaction row label.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed.
+  - `npm run audit:platform` passed.
+  - In-app browser smoke on `http://127.0.0.1:5173/` selected `Mobile PI Kids` + `Hungary`, confirmed card-details transaction rows render without the bad `MMcDonalds` text artifact, opened a McDonalds transaction from Home into shared PI Transaction Detail, opened HU Kids Card Details through `My card`, opened a McDonalds transaction from Card Details into shared PI Transaction Detail, and found no console errors.
 
 ## Constitutional Check
 
