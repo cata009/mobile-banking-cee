@@ -50,7 +50,26 @@ import { SettingsCard } from "@/app/screens/more/cards/SettingsCard";
 import { TutorialCard } from "@/app/screens/more/cards/TutorialCard";
 import MessagesScreen from "@/app/screens/messages/MessagesScreen";
 import { TransactionDetailScreen } from "@/app/screens/payments/DomesticPaymentFlowScreens";
-import learnSavingGoalsBlockcraftSrc from "../../../assets/kids/learn/saving-goals-blockcraft.png";
+import huLearnAskHelpSrc from "../../../assets/kids/learn/hu-learn-ask-help.png";
+import huLearnBalanceSrc from "../../../assets/kids/learn/hu-learn-balance.png";
+import huLearnBoostSrc from "../../../assets/kids/learn/hu-learn-boost.png";
+import huLearnCardFreezeSrc from "../../../assets/kids/learn/hu-learn-card-freeze.png";
+import huLearnCardPaySrc from "../../../assets/kids/learn/hu-learn-card-pay.png";
+import huLearnCardPrivateSrc from "../../../assets/kids/learn/hu-learn-card-private.png";
+import huLearnMoneyCheckSrc from "../../../assets/kids/learn/hu-learn-money-check.png";
+import huLearnPauseSrc from "../../../assets/kids/learn/hu-learn-pause.png";
+import huLearnPrivateCodesSrc from "../../../assets/kids/learn/hu-learn-private-codes.png";
+import huLearnReportSafetySrc from "../../../assets/kids/learn/hu-learn-report-safety.png";
+import huLearnRequestAmountSrc from "../../../assets/kids/learn/hu-learn-request-amount.png";
+import huLearnRequestReasonSrc from "../../../assets/kids/learn/hu-learn-request-reason.png";
+import huLearnRequestWaitSrc from "../../../assets/kids/learn/hu-learn-request-wait.png";
+import huLearnSpendTodaySrc from "../../../assets/kids/learn/hu-learn-spend-today.png";
+import huLearnTargetSrc from "../../../assets/kids/learn/hu-learn-target.png";
+import huLearnTopicCardConfidenceSrc from "../../../assets/kids/learn/hu-learn-topic-card-confidence.png";
+import huLearnTopicMoneyBasicsSrc from "../../../assets/kids/learn/hu-learn-topic-money-basics.png";
+import huLearnTopicOnlineSafetySrc from "../../../assets/kids/learn/hu-learn-topic-online-safety.png";
+import huLearnTopicRequestMoneySrc from "../../../assets/kids/learn/hu-learn-topic-request-money.png";
+import huLearnTopicSavingGoalsSrc from "../../../assets/kids/learn/hu-learn-topic-saving-goals.png";
 import womanProfileSrc from "../../../assets/kids/woman-profile.png";
 import type { AccountTransaction } from "@/data/accountDetails";
 import {
@@ -1103,6 +1122,27 @@ type HuKidsTransactionDayGroup = {
 };
 type HuLearnVisual = "balance" | "goals" | "safety" | "request" | "card";
 type HuLearnArtVariant = "topic-card" | "topic-featured" | "topic-hero" | "lesson-row" | "lesson-hero";
+type HuLearnArtworkKey =
+  | "topic-money-basics"
+  | "topic-saving-goals"
+  | "topic-online-safety"
+  | "topic-request-money"
+  | "topic-card-confidence"
+  | "balance"
+  | "spend-today"
+  | "money-check"
+  | "target"
+  | "boost"
+  | "ask-help"
+  | "pause"
+  | "private-codes"
+  | "report-safety"
+  | "request-reason"
+  | "request-amount"
+  | "request-wait"
+  | "card-pay"
+  | "card-freeze"
+  | "card-private";
 type HuLearnLesson = {
   id: string;
   title: string;
@@ -4774,18 +4814,75 @@ const HU_LEARN_CARD_SURFACE_STYLE = {
   boxShadow: "var(--hu-learn-card-shadow)",
 } as CSSProperties;
 
-// Logical PNG slots: topic-card 80x72, topic-featured 108x98, topic-hero 130x118, lesson-row 84x76, lesson-hero 210x190.
+// Logical PNG slots are intentionally stable so final learning artwork can be swapped without relayout.
 const HU_LEARN_ART_SLOT_CLASS: Record<HuLearnArtVariant, string> = {
-  "topic-card": "right-[10px] top-[10px] h-[72px] w-[80px] rounded-[22px]",
-  "topic-featured": "right-[16px] top-[12px] h-[98px] w-[108px] rounded-[28px]",
-  "topic-hero": "right-[24px] top-[18px] h-[118px] w-[130px] rounded-[32px]",
-  "lesson-row": "right-[12px] top-[16px] h-[76px] w-[84px] rounded-[22px]",
-  "lesson-hero": "bottom-[18px] right-[18px] h-[190px] w-[210px] rounded-[42px]",
+  "topic-card": "right-[6px] top-[8px] h-[92px] w-[98px] rounded-[22px]",
+  "topic-featured": "right-[10px] top-[6px] h-[122px] w-[140px] rounded-[28px]",
+  "topic-hero": "right-[12px] top-[8px] h-[146px] w-[166px] rounded-[32px]",
+  "lesson-row": "right-[8px] top-[10px] h-[88px] w-[100px] rounded-[22px]",
+  "lesson-hero": "bottom-[2px] right-[-8px] h-[230px] w-[250px] rounded-[42px]",
 };
 
-const HU_LEARN_TOPIC_ART_IMAGE_SRC: Partial<Record<HuLearnTopic["id"], string>> = {
-  "saving-goals": learnSavingGoalsBlockcraftSrc,
+const HU_LEARN_ARTWORK_SRC: Record<HuLearnArtworkKey, string> = {
+  "topic-money-basics": huLearnTopicMoneyBasicsSrc,
+  "topic-saving-goals": huLearnTopicSavingGoalsSrc,
+  "topic-online-safety": huLearnTopicOnlineSafetySrc,
+  "topic-request-money": huLearnTopicRequestMoneySrc,
+  "topic-card-confidence": huLearnTopicCardConfidenceSrc,
+  balance: huLearnBalanceSrc,
+  "spend-today": huLearnSpendTodaySrc,
+  "money-check": huLearnMoneyCheckSrc,
+  target: huLearnTargetSrc,
+  boost: huLearnBoostSrc,
+  "ask-help": huLearnAskHelpSrc,
+  pause: huLearnPauseSrc,
+  "private-codes": huLearnPrivateCodesSrc,
+  "report-safety": huLearnReportSafetySrc,
+  "request-reason": huLearnRequestReasonSrc,
+  "request-amount": huLearnRequestAmountSrc,
+  "request-wait": huLearnRequestWaitSrc,
+  "card-pay": huLearnCardPaySrc,
+  "card-freeze": huLearnCardFreezeSrc,
+  "card-private": huLearnCardPrivateSrc,
 };
+
+const HU_LEARN_TOPIC_ARTWORK: Record<string, HuLearnArtworkKey> = {
+  "money-basics": "topic-money-basics",
+  "saving-goals": "topic-saving-goals",
+  "online-safety": "topic-online-safety",
+  "request-money": "topic-request-money",
+  "card-confidence": "topic-card-confidence",
+};
+
+const HU_LEARN_LESSON_ARTWORK: Record<string, HuLearnArtworkKey> = {
+  "money-basics-balance": "balance",
+  "money-basics-today": "spend-today",
+  "money-basics-check": "money-check",
+  "saving-goals-target": "target",
+  "saving-goals-boost": "boost",
+  "saving-goals-share": "ask-help",
+  "online-safety-pause": "pause",
+  "online-safety-private": "private-codes",
+  "online-safety-report": "report-safety",
+  "request-money-reason": "request-reason",
+  "request-money-amount": "request-amount",
+  "request-money-wait": "request-wait",
+  "card-confidence-pay": "card-pay",
+  "card-confidence-freeze": "card-freeze",
+  "card-confidence-details": "card-private",
+};
+
+function getHuLearnArtworkSrc(key?: HuLearnArtworkKey) {
+  return key ? HU_LEARN_ARTWORK_SRC[key] : undefined;
+}
+
+function getHuLearnTopicImageSrc(topic?: HuLearnTopic | null) {
+  return getHuLearnArtworkSrc(topic ? HU_LEARN_TOPIC_ARTWORK[topic.id] : undefined);
+}
+
+function getHuLearnLessonImageSrc(lesson?: HuLearnLesson | null) {
+  return getHuLearnArtworkSrc(lesson ? HU_LEARN_LESSON_ARTWORK[lesson.id] : undefined);
+}
 
 function HuKidsLearnPage({
   completedLessonIds,
@@ -4877,13 +4974,13 @@ function HuLearnTopicCard({
 
   const progress = getHuLearnTopicProgress(topic, completedLessonIds);
   const completedCount = getHuLearnCompletedLessonsCount(topic, completedLessonIds);
-  const imageSrc = HU_LEARN_TOPIC_ART_IMAGE_SRC[topic.id];
+  const imageSrc = getHuLearnTopicImageSrc(topic);
 
   return (
     <button
       className={cn(
         "group relative flex w-full items-end overflow-hidden rounded-[8px] border p-[14px] pb-[24px] text-left transition-opacity hover:opacity-90",
-        featured ? "min-h-[196px] pt-[112px]" : "min-h-[174px] pt-[88px]",
+        featured ? "min-h-[208px] pt-[124px]" : "min-h-[184px] pt-[104px]",
         className,
       )}
       data-hu-learn-topic-card={topic.id}
@@ -4936,14 +5033,15 @@ function HuKidsLearnTopicPage({
 
   const progress = getHuLearnTopicProgress(topic, completedLessonIds);
   const completedCount = getHuLearnCompletedLessonsCount(topic, completedLessonIds);
+  const imageSrc = getHuLearnTopicImageSrc(topic);
 
   return (
     <div className="relative z-[1] flex min-h-0 flex-1 flex-col" data-hu-learn-topic={topic.id}>
       <HuKidsGoalPageHeader onBack={onBack} theme={theme} title="Learn" />
       <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto pb-[38px]">
-        <section className="relative min-h-[254px] overflow-hidden px-[24px] pb-[22px] pt-[18px]">
-          <HuLearnTopicArt variant="topic-hero" visual={topic.visual} />
-          <div className="relative z-[1] max-w-[245px] pt-[94px]">
+        <section className="relative min-h-[316px] overflow-hidden px-[24px] pb-[22px] pt-[18px]">
+          <HuLearnTopicArt imageSrc={imageSrc} variant="topic-hero" visual={topic.visual} />
+          <div className="relative z-[1] max-w-[295px] pt-[138px]">
             <p className="text-[13px] font-bold uppercase leading-[16px] tracking-[0] text-[var(--hu-theme-accent-strong)]">
               {completedCount === topic.lessons.length ? "Completed" : "Course"}
             </p>
@@ -4997,6 +5095,8 @@ function HuLearnLessonListCard({
   lesson: HuLearnLesson;
   onClick: () => void;
 }) {
+  const imageSrc = getHuLearnLessonImageSrc(lesson);
+
   return (
     <button
       className="relative min-h-[104px] overflow-hidden rounded-[18px] border p-[16px] text-left transition-transform active:scale-[0.99]"
@@ -5006,8 +5106,8 @@ function HuLearnLessonListCard({
       type="button"
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: "var(--hu-learn-card-glow)" }} />
-      <HuLearnTopicArt variant="lesson-row" visual={lesson.visual} />
-      <div className="relative z-[1] pr-[92px]">
+      <HuLearnTopicArt imageSrc={imageSrc} variant="lesson-row" visual={lesson.visual} />
+      <div className="relative z-[1] pr-[112px]">
         <p className="text-[13px] font-normal leading-[16px] tracking-[0] text-[var(--uc-text-muted)]">Lesson {index + 1}</p>
         <h2 className="mt-[5px] text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">{lesson.title}</h2>
         <p className="mt-[9px] flex items-center gap-[7px] text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--uc-text-muted)]">
@@ -5050,6 +5150,7 @@ function HuKidsLearnLessonPage({
 
   const lessonIndex = topic.lessons.findIndex((item) => item.id === lesson.id);
   const progress = ((lessonIndex + 1) / topic.lessons.length) * 100;
+  const imageSrc = getHuLearnLessonImageSrc(lesson);
 
   return (
     <div className="relative z-[1] flex min-h-0 flex-1 flex-col" data-hu-learn-lesson={lesson.id}>
@@ -5067,7 +5168,7 @@ function HuKidsLearnLessonPage({
           <p className="text-[16px] font-normal leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">{lesson.eyebrow}</p>
           <h1 className="mt-[24px] text-[32px] font-bold leading-[36px] tracking-[0] text-[var(--uc-text)]">{lesson.title}</h1>
           <p className="mt-[14px] text-[17px] font-normal leading-[23px] tracking-[0] text-[var(--uc-text-muted)]">{lesson.description}</p>
-          <HuLearnTopicArt variant="lesson-hero" visual={lesson.visual} />
+          <HuLearnTopicArt imageSrc={imageSrc} variant="lesson-hero" visual={lesson.visual} />
         </section>
 
         <section className="mt-[14px] rounded-[18px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
@@ -5127,22 +5228,13 @@ function HuLearnTopicArt({
       }}
     >
       {imageSrc ? (
-        <>
-          <span
-            aria-hidden="true"
-            className="absolute inset-[14%] rounded-full opacity-70 blur-[12px]"
-            style={{
-              background:
-                "radial-gradient(circle, color-mix(in srgb, var(--hu-theme-accent-strong) 26%, transparent) 0%, transparent 70%)",
-            }}
-          />
-          <img
-            alt=""
-            className="relative z-[1] h-full w-full select-none object-contain drop-shadow-[0_13px_18px_color-mix(in_srgb,var(--uc-static-black)_24%,transparent)]"
-            draggable={false}
-            src={imageSrc}
-          />
-        </>
+        <img
+          alt=""
+          className="relative z-[1] h-full w-full select-none object-contain"
+          data-hu-learn-art-image={variant}
+          draggable={false}
+          src={imageSrc}
+        />
       ) : null}
       {!imageSrc && visual === "balance" ? (
         <>
