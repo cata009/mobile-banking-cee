@@ -2,6 +2,13 @@
 
 This log records bananas found and how they were triaged.
 
+## 2026-06-13
+
+| Banana | Triage | Evidence |
+| --- | --- | --- |
+| Shared PI `Payments` hero cards became transparent when HU Kids stopped supplying `--pi-payment-hero-bg` | Fixed the invalid inline CSS fallback in `PaymentHeroCard` and added neutral native card bridge variables only inside `HuKidsPiMenuFrame`; verified standalone `Mobile PI` + `Hungary` Payments and HU Kids Aurora Payments on `http://127.0.0.1:4001/` | `src/app/components/payments/PaymentHeroCard.tsx`; `src/app/screens/kids/KidsMarketHomeApp.tsx`; in-app Browser computed styles showed valid native gradients and no console errors; `npm run build`; `npm run audit:templates`; `npm run audit:platform`; `git diff --check` |
+| HU Kids theme contrast audit still reflected the old accent-repaint model and printed stale raw-accent failures | Replaced `scripts/audit-hu-theme-contrast.mjs` with a gate for the active runtime contract: native surfaces, subpage wash, payment-card gradient, active nav, progress, and inverse icon/text contrast across light/dark | `node scripts/audit-hu-theme-contrast.mjs` passed on 2026-06-13 |
+
 ## 2026-05-27
 
 | Banana | Triage | Evidence |

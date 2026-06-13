@@ -211,8 +211,9 @@ export default function PaymentHeroCard({
       }`}
       style={{
         background:
-          "var(--pi-payment-hero-bg, linear-gradient(105deg,var(--uc-surface-muted)_0%,var(--uc-neutral-200)_48%,var(--uc-neutral-300)_100%))",
-        boxShadow: "var(--pi-payment-hero-shadow, none)",
+          "var(--pi-payment-hero-bg, linear-gradient(105deg, var(--uc-surface-muted) 0%, var(--uc-neutral-200) 48%, var(--uc-neutral-300) 100%))",
+        boxShadow:
+          "var(--pi-payment-hero-shadow, inset 0 0 0 1px color-mix(in srgb, var(--uc-text) 6%, transparent))",
       }}
     >
       <div className="relative z-10 flex h-full w-full flex-col px-[20px] pt-[16px]">
