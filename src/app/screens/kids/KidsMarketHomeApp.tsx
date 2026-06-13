@@ -2744,6 +2744,7 @@ const HU_THEME_PRESETS: HuThemePreset[] = [
     accent: "var(--uc-product-blue-deep)",
     accent2: "var(--uc-teal-bright)",
     accent3: "var(--uc-yellow-gold)",
+    accentStrong: "color-mix(in srgb, var(--uc-product-blue-deep) 85%, var(--uc-text))",
     pageBackground:
       "linear-gradient(180deg, #03141C 0px, #042430 240px, #0A3A4A 400px, #155666 455px, color-mix(in srgb, var(--uc-app-bg) 52%, var(--uc-teal-blue)) 486px, color-mix(in srgb, var(--uc-app-bg) 78%, var(--uc-teal-soft)) 530px, var(--uc-app-bg) 600px)",
     motionBackground: "none",
@@ -2803,7 +2804,7 @@ const HU_THEME_PRESETS: HuThemePreset[] = [
     accent: "var(--uc-product-blue)",
     accent2: "var(--uc-teal-bright)",
     accent3: "var(--uc-product-blue-deep)",
-    accentStrong: "color-mix(in srgb, var(--uc-product-blue) 80%, var(--uc-text))",
+    accentStrong: "color-mix(in srgb, var(--uc-product-blue) 65%, var(--uc-text))",
     heroMutedForeground: "color-mix(in srgb, var(--uc-text-muted) 10%, var(--uc-text))",
     pageBackground: "linear-gradient(180deg, color-mix(in srgb, var(--uc-static-black) 26%, var(--uc-product-blue)) 0%, var(--uc-app-bg) 390px)",
     motionBackground:
@@ -2884,7 +2885,7 @@ const HU_THEME_PRESETS: HuThemePreset[] = [
     accent: "var(--uc-product-pink)",
     accent2: "var(--uc-product-mauve)",
     accent3: "var(--uc-red-main)",
-    accentStrong: "color-mix(in srgb, var(--uc-product-pink) 65%, var(--uc-text))",
+    accentStrong: "color-mix(in srgb, var(--uc-product-pink) 46%, var(--uc-text))",
     heroMutedForeground: "color-mix(in srgb, var(--uc-text-muted) 85%, var(--uc-text))",
     pageBackground: "linear-gradient(180deg, color-mix(in srgb, var(--uc-product-pink) 30%, var(--uc-app-bg)) 0%, var(--uc-app-bg) 385px)",
     motionBackground:
@@ -3013,23 +3014,36 @@ function getHuThemeStyle(theme: HuThemePreset): CSSProperties {
     "--hu-theme-accent-strong": theme.accentStrong ?? "var(--hu-theme-accent)",
     "--hu-theme-app-bg": isStandard
       ? "var(--uc-app-bg)"
-      : "color-mix(in srgb, var(--uc-neutral-100) 86%, var(--hu-theme-accent))",
+      : "color-mix(in srgb, var(--uc-app-bg) 94%, var(--hu-theme-accent))",
+    "--hu-theme-subpage-bg": isStandard
+      ? "var(--uc-surface)"
+      : "linear-gradient(180deg, color-mix(in srgb, var(--uc-surface) 97%, var(--hu-theme-accent)) 0%, color-mix(in srgb, var(--uc-surface) 99%, var(--hu-theme-accent-2)) 46%, color-mix(in srgb, var(--uc-bottom-bar-bg) 96%, var(--hu-theme-accent)) 100%)",
+    "--hu-theme-subpage-header-bg": isStandard
+      ? "var(--uc-surface)"
+      : "color-mix(in srgb, var(--uc-surface) 98%, var(--hu-theme-accent))",
+    "--hu-theme-native-card-bg":
+      "linear-gradient(105deg, var(--uc-surface-muted) 0%, var(--uc-neutral-200) 48%, var(--uc-neutral-300) 100%)",
+    "--hu-theme-native-card-shadow":
+      "inset 0 0 0 1px color-mix(in srgb, var(--uc-text) 6%, transparent), 0 10px 22px color-mix(in srgb, var(--uc-static-black) 7%, transparent)",
     "--hu-theme-page-bg": theme.pageBackground,
     "--hu-theme-motion-bg": theme.motionBackground,
     "--hu-theme-swatch-bg": theme.swatchBackground,
-    "--hu-theme-card-bg": isStandard
+    // Surfaces stay CLEAN by default (native surface). The theme lives in the
+    // page atmosphere, not as pigment mixed into every card. Home/Analytics
+    // scope swaps these to the translucent glass variants via HuThemeShell so
+    // the atmosphere only bleeds through on the L1 hero page, never on detail
+    // or menu pages (which would otherwise leak the dark/colored top).
+    "--hu-theme-card-bg": "var(--uc-surface)",
+    "--hu-theme-card-strong-bg": "var(--uc-surface-muted)",
+    "--hu-theme-glass-bg": isStandard
       ? "var(--uc-surface)"
-      : `color-mix(in srgb, var(--uc-neutral-white) ${theme.surfaceWeight}%, var(--hu-theme-accent))`,
-    "--hu-theme-card-strong-bg": isStandard
-      ? "var(--uc-surface)"
-      : `color-mix(in srgb, var(--uc-neutral-white) ${Math.max(78, theme.surfaceWeight - 6)}%, var(--hu-theme-accent-2))`,
-    "--hu-theme-control-bg": isStandard
-      ? "var(--uc-surface)"
-      : "color-mix(in srgb, var(--uc-neutral-white) 78%, var(--hu-theme-accent))",
-    "--hu-theme-control-fg": "var(--uc-text)",
-    "--hu-theme-progress-bg": isStandard
+      : "color-mix(in srgb, var(--uc-surface) 78%, transparent)",
+    "--hu-theme-glass-strong-bg": isStandard
       ? "var(--uc-surface-muted)"
-      : "color-mix(in srgb, var(--uc-surface-muted) 78%, var(--hu-theme-accent))",
+      : "color-mix(in srgb, var(--uc-surface) 68%, transparent)",
+    "--hu-theme-control-bg": "var(--uc-surface-muted)",
+    "--hu-theme-control-fg": "var(--uc-text)",
+    "--hu-theme-progress-bg": "var(--uc-surface-muted)",
     "--hu-learn-card-bg": isStandard
       ? "linear-gradient(135deg, var(--uc-app-bg) 0%, color-mix(in srgb, var(--uc-app-bg) 62%, var(--uc-neutral-400)) 100%)"
       : "linear-gradient(135deg, color-mix(in srgb, var(--uc-neutral-white) 94%, var(--hu-theme-accent)) 0%, color-mix(in srgb, var(--uc-neutral-white) 90%, var(--hu-theme-accent-2)) 58%, color-mix(in srgb, var(--uc-neutral-white) 86%, var(--hu-theme-accent-3)) 100%)",
@@ -3053,37 +3067,22 @@ function getHuThemeStyle(theme: HuThemePreset): CSSProperties {
       : "color-mix(in srgb, var(--uc-text) 72%, var(--hu-theme-accent-strong))",
     "--hu-theme-nav-bg": isStandard
       ? "var(--uc-bottom-bar-bg)"
-      : `color-mix(in srgb, var(--uc-neutral-white) ${theme.navWeight}%, var(--hu-theme-accent))`,
+      : "color-mix(in srgb, var(--uc-bottom-bar-bg) 80%, transparent)",
     "--hu-theme-hero-fg": theme.heroForeground ?? "var(--uc-text)",
     "--hu-theme-hero-muted":
       theme.heroMutedForeground ?? "color-mix(in srgb, var(--uc-text-muted) 82%, var(--hu-theme-accent-3))",
     "--hu-theme-hero-control-bg":
       theme.heroControlBackground ??
-      (isStandard ? "var(--uc-surface)" : "color-mix(in srgb, var(--uc-surface) 78%, var(--hu-theme-accent))"),
+      (isStandard ? "var(--uc-surface)" : "color-mix(in srgb, var(--uc-surface) 58%, transparent)"),
     "--hu-theme-hero-control-fg": theme.heroControlForeground ?? "var(--uc-text)",
     "--hu-theme-hero-control-border": theme.heroControlBorder ?? "transparent",
-    ...(isStandard
-      ? {}
-      : {
-          "--uc-app-bg": "var(--hu-theme-app-bg)",
-          "--uc-surface": "var(--hu-theme-card-bg)",
-          "--uc-surface-muted": "var(--hu-theme-card-strong-bg)",
-          "--uc-surface-raised": "var(--hu-theme-card-bg)",
-          "--uc-bottom-bar-bg": "var(--hu-theme-nav-bg)",
-          "--uc-sheet-bg": "var(--hu-theme-card-bg)",
-          "--uc-action": "var(--hu-theme-accent-strong)",
-          "--uc-action-soft": "var(--hu-theme-control-bg)",
-          "--uc-action-soft-strong": "color-mix(in srgb, var(--hu-theme-accent) 32%, var(--uc-neutral-white))",
-          "--uc-brand": "var(--hu-theme-accent-strong)",
-          "--uc-border": "color-mix(in srgb, var(--uc-neutral-300) 70%, var(--hu-theme-accent))",
-          "--uc-border-muted": "color-mix(in srgb, var(--uc-neutral-200) 76%, var(--hu-theme-accent))",
-          "--card": "var(--hu-theme-card-bg)",
-          "--popover": "var(--hu-theme-card-bg)",
-          "--secondary": "var(--hu-theme-control-bg)",
-          "--muted": "var(--hu-theme-card-strong-bg)",
-          "--accent": "var(--hu-theme-control-bg)",
-          "--ring": "var(--hu-theme-accent-strong)",
-        }),
+    // NOTE: the global UniCredit design tokens (--uc-surface, --uc-action,
+    // --uc-brand, --card, --secondary, --border, ...) are intentionally NOT
+    // overridden here. The theme is an atmosphere layer + functional accent,
+    // not a repaint of the whole design system. Components keep their native
+    // identity; theme presence comes only through the page background, the
+    // translucent glass cards on Home, and accent-strong on functional bits
+    // (progress fill, links, active nav tab, selected states).
   } as CSSProperties;
 }
 
@@ -3654,46 +3653,29 @@ function HuKidsPiMenuFrame({
   title: string;
 }) {
   const isThemed = theme.id !== "default";
+  // Sub-pages (Payments / Learn / More) keep native PI components. The theme
+  // is only a quiet ambient canvas plus functional accent; imported cards get
+  // neutral fallback surfaces so their shape remains visible in PI today and
+  // will still blend cleanly if PI adopts themes later.
   const frameStyle = {
-    "--hu-kids-menu-bg": isThemed ? "transparent" : "var(--uc-surface)",
-    "--hu-kids-menu-body-bg": isThemed
-      ? "color-mix(in srgb, var(--hu-theme-app-bg) 72%, var(--hu-theme-card-bg))"
-      : "var(--uc-surface)",
-    "--hu-kids-menu-header-bg": isThemed ? "transparent" : "var(--uc-surface)",
-    "--hu-kids-menu-title-fg": isThemed ? "var(--hu-theme-hero-fg)" : "var(--uc-text)",
-    "--uc-action": "var(--hu-theme-accent-strong)",
-    ...(isThemed
-      ? {
-          "--uc-brand": "var(--hu-theme-accent-strong)",
-          "--uc-icon": "var(--hu-theme-hero-fg)",
-        }
-      : {}),
+    "--hu-kids-menu-bg": isThemed ? "var(--hu-theme-subpage-bg)" : "var(--uc-surface)",
+    "--hu-kids-menu-body-bg": isThemed ? "var(--hu-theme-subpage-bg)" : "var(--uc-surface)",
+    "--hu-kids-menu-scroll-bg": isThemed ? "var(--hu-theme-subpage-bg)" : "var(--uc-surface)",
+    "--hu-kids-menu-header-bg": isThemed ? "var(--hu-theme-subpage-header-bg)" : "var(--uc-surface)",
+    "--hu-kids-menu-title-fg": "var(--uc-text)",
+    ...(isThemed ? { "--uc-action": "var(--hu-theme-accent-strong)" } : {}),
   } as CSSProperties;
   const contentStyle = {
-    "--uc-action": "var(--hu-theme-accent-strong)",
+    "--pi-payment-hero-bg": "var(--hu-theme-native-card-bg)",
+    "--pi-payment-hero-shadow": "var(--hu-theme-native-card-shadow)",
+    "--pi-menu-card-bg": "var(--hu-theme-native-card-bg)",
+    "--pi-menu-card-shadow": "var(--hu-theme-native-card-shadow)",
+    "--pi-offer-card-bg": "var(--uc-surface)",
+    "--pi-shortcut-icon-fg": "var(--uc-text-inverse)",
     ...(isThemed
       ? {
-          "--uc-brand": "var(--hu-theme-accent-strong)",
-          "--uc-surface-muted": "var(--hu-theme-card-strong-bg)",
-          "--pi-menu-card-bg":
-            "linear-gradient(135deg, color-mix(in srgb, var(--hu-theme-card-bg) 94%, var(--hu-theme-accent)) 0%, color-mix(in srgb, var(--hu-theme-card-strong-bg) 88%, var(--hu-theme-accent-2)) 62%, color-mix(in srgb, var(--hu-theme-card-bg) 90%, var(--hu-theme-accent-3)) 100%)",
-          "--pi-menu-card-shadow": "0 14px 30px color-mix(in srgb, var(--uc-static-black) 10%, transparent)",
-          "--pi-menu-card-image-opacity": "0.86",
-          "--pi-menu-card-image-filter": "saturate(0.92) contrast(0.96)",
-          "--pi-payment-hero-bg":
-            "linear-gradient(135deg, color-mix(in srgb, var(--hu-theme-card-bg) 96%, var(--hu-theme-accent)) 0%, color-mix(in srgb, var(--hu-theme-card-strong-bg) 88%, var(--hu-theme-accent-2)) 54%, color-mix(in srgb, var(--hu-theme-card-bg) 90%, var(--hu-theme-accent-3)) 100%)",
-          "--pi-payment-hero-shadow": "0 14px 30px color-mix(in srgb, var(--uc-static-black) 10%, transparent)",
-          "--pi-payment-hero-image-opacity": "0.9",
-          "--pi-payment-hero-image-filter": "saturate(0.92) contrast(0.96)",
-          "--pi-product-card-bg":
-            "linear-gradient(135deg, color-mix(in srgb, var(--hu-theme-card-bg) 88%, var(--hu-theme-accent)) 0%, color-mix(in srgb, var(--hu-theme-card-strong-bg) 82%, var(--hu-theme-accent-2)) 100%)",
-          "--pi-product-card-fg": "var(--uc-text)",
-          "--pi-product-card-shadow": "0 14px 30px color-mix(in srgb, var(--uc-static-black) 10%, transparent)",
-          "--pi-product-card-image-opacity": "0.82",
-          "--pi-product-card-image-filter": "saturate(0.9) contrast(0.95)",
-          "--pi-offer-card-bg": "var(--hu-theme-card-bg)",
+          "--uc-action": "var(--hu-theme-accent-strong)",
           "--pi-shortcut-icon-bg": "var(--hu-theme-accent-strong)",
-          "--pi-shortcut-icon-fg": "var(--uc-text-inverse)",
         }
       : {}),
   } as CSSProperties;
@@ -3704,25 +3686,6 @@ function HuKidsPiMenuFrame({
       data-hu-kids-themed-section={theme.id}
       style={frameStyle}
     >
-      {isThemed ? (
-        <>
-          <HuThemeMotionLayer motionProgress={0.08} theme={theme} />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-[118px] z-0 h-[360px]"
-            style={{
-              background:
-                "linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--hu-kids-menu-body-bg) 58%, transparent) 36%, var(--hu-kids-menu-body-bg) 100%)",
-            }}
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[360px]"
-            style={{ background: "linear-gradient(180deg, transparent 0%, var(--hu-kids-menu-body-bg) 62%)" }}
-          />
-        </>
-      ) : null}
-
       <div className="relative z-[1] h-[54px] flex-shrink-0 bg-[var(--hu-kids-menu-header-bg)]" />
       <div
         className="relative z-[1]"
@@ -3730,7 +3693,10 @@ function HuKidsPiMenuFrame({
       >
         {header ?? <HuKidsPiMenuHeader onMessages={onMessages} title={title} />}
       </div>
-      <div className="scrollbar-hide relative z-[1] min-h-0 flex-1 overflow-y-auto pb-[104px]">
+      <div
+        className="scrollbar-hide relative z-[1] min-h-0 flex-1 overflow-y-auto pb-[104px]"
+        style={isThemed ? ({ background: "var(--hu-kids-menu-scroll-bg)" } as CSSProperties) : undefined}
+      >
         <div className="min-h-full" style={contentStyle}>
           {children}
         </div>
@@ -3981,8 +3947,19 @@ function HuThemeShell({
   theme: HuThemePreset;
   themeScope?: string;
 }) {
+  // Only the L1 hero pages (Home / Analytics) float translucent glass cards
+  // over the live atmosphere. Detail and menu views keep solid clean surfaces
+  // so the dark/colored page top never leaks behind their content.
+  const usesGlassSurfaces =
+    theme.id !== "default" && (themeScope === "home" || themeScope === "analytics");
   const shellStyle = {
     ...getHuThemeStyle(theme),
+    ...(usesGlassSurfaces
+      ? {
+          "--hu-theme-card-bg": "var(--hu-theme-glass-bg)",
+          "--hu-theme-card-strong-bg": "var(--hu-theme-glass-strong-bg)",
+        }
+      : {}),
     "--hu-theme-shell-bg": shellBackground,
     background: "var(--hu-theme-shell-bg)",
   } as CSSProperties;
@@ -5178,7 +5155,7 @@ function HuHomePreview({
           style={{ transform: "translateZ(0)" }}
         >
           <div className="h-[812px] w-[375px] origin-top-left scale-[0.40533] rounded-[47px] overflow-hidden">
-            <HuThemeShell theme={theme}>
+            <HuThemeShell theme={theme} themeScope="home">
               <HuThemeMotionLayer motionProgress={0.04} preview theme={theme} />
               <StatusBar variant={phoneChromeUsesLightForeground ? "dark" : "light"} />
               <div className="relative z-[1] h-[54px] flex-shrink-0" />

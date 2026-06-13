@@ -6,6 +6,36 @@ Last updated: 2026-06-13
 
 Polishing Hungary Mobile PI Kids interactions on top of the CEE Light Restyle + theme system, while preserving the existing Serbia safe-spend coach and prior HU theme work.
 
+## 2026-06-13 HU Kids / PI Native Theme Contrast Closeout
+
+- Latest request handled: user approved the Revolut-style plan and reported that the Claude/Antigravity theme fix had broken PI `Payments` card contrast.
+- Runtime changes:
+  - Fixed `PaymentHeroCard`'s global fallback background in `src/app/components/payments/PaymentHeroCard.tsx`; the inline CSS gradient used Tailwind-style `_` separators, so PI cards became transparent whenever `--pi-payment-hero-bg` was not supplied.
+  - Kept the theme architecture as atmosphere, not a global design-system repaint: `getHuThemeStyle` still avoids overriding shared `--uc-*` surface/action/border/card tokens.
+  - Added a native HU subpage canvas contract in `KidsMarketHomeApp.tsx`: `Payments`, `Learn`, and `More` now use a very subtle `--hu-theme-subpage-bg` wash over native `--uc-surface`, instead of the heavy hero/page animation surface.
+  - Added neutral `--hu-theme-native-card-*` bridge variables for imported PI Payments/More cards inside `HuKidsPiMenuFrame`, preserving card shape/contrast without recoloring Products cards or semantic UI.
+  - Tuned `accentStrong` for Nordlys, Blue Lines, and Aurora so functional accents pass on native dark muted surfaces; Garden, Solar, and Blockcraft kept their existing accessible weights.
+  - Replaced `scripts/audit-hu-theme-contrast.mjs` with an audit for the current architecture: native surfaces, subpage wash, payment-card gradient, active nav, progress, and inverse icon/text contrast across light/dark.
+- Verification run:
+  - `node scripts/audit-hu-theme-contrast.mjs` passed across all HU themes in light and dark modes.
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - In-app Browser on `http://127.0.0.1:4001/`: selected `Mobile PI Kids` + `Hungary`, applied Aurora, opened `Payments`, `Learn`, and `More`, and confirmed themed sections expose the subtle subpage wash, visible native card surfaces/shadows, and no console errors.
+  - In-app Browser on `http://127.0.0.1:4001/`: switched back to standalone `Mobile PI` + `Hungary`, logged in, opened `Payments`, and confirmed PaymentHero cards compute to the valid native gradient plus inset contrast, with no HU theme wrapper active and no console errors.
+- Banana Loop:
+  - Fixed: PI standalone Payments cards no longer become transparent when no `--pi-payment-hero-bg` override exists.
+  - Fixed: HU Kids themed `Payments`, `Learn`, and `More` no longer depend on heavy hero motion/backgrounds or accent-washed imported card surfaces.
+  - Fixed: HU theme contrast audit no longer prints stale raw-accent false failures; it now fails only on the active runtime contrast contract.
+  - Limitation: browser dark-mode visual smoke was not repeated in this narrow in-app viewport because the global topbar dark-mode control was not visible; the updated contrast audit covers the light/dark token contract and passed.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
 ## 2026-06-13 HU Kids Theme Bridge And Toggle Stabilization
 
 - Latest request handled: user reported the previous appearance toggle fix still left a light/dark glitch and asked for an urgent fix, then the intelligent HU Kids blending plan, then commit.
@@ -474,6 +504,25 @@ Polishing Hungary Mobile PI Kids interactions on top of the CEE Light Restyle + 
   - Theme state still resets on reload (pre-existing).
   - This pass themes the imported PI menu surfaces through inherited tokens/ambient wrappers; it does not redesign the internal payment/product/more card artwork.
 - Next recommended action: visual taste pass on the exact amount of ambient motion/tint on secondary HU pages after stakeholder review.
+- Blocked by: none.
+- Safe to resume: yes.
+
+## 2026-06-11 Hungary Kids Theme Architecture Fix (Atmosphere, not repaint)
+
+- User audit request: the theming felt "sinister" / cheap vs Revolut. Root cause found in `getHuThemeStyle` (KidsMarketHomeApp.tsx ~3006): when a theme was active it REWROTE the global UniCredit design tokens (`--uc-surface`, `--uc-action`, `--uc-brand`, `--card`, `--secondary`, `--muted`, `--border`, `--bottom-bar-bg`, `--sheet-bg`, `--ring`) with accent-mixed values, and `--hu-theme-card-bg` was `color-mix(white 92%, accent)`. Effect: every card became a dirty-white accent wash, every button turned into the accent (lost identity), and the tint bled across ALL pages (sub-pages + detail views), because the override sat on the shell wrapping everything.
+- Confirmed target model with the user (2 questions): cards = translucent clean glass over the atmosphere; buttons = native identity, accent only on functional bits. Sub-pages = original elements + a whisper of tint.
+- Fix implemented:
+  - Removed the entire global design-token override block from `getHuThemeStyle`. Components now keep native `--uc-*` identity; theme presence = page atmosphere + functional accent (`--hu-theme-accent-strong` already drives links/progress/active-nav/selected).
+  - Surfaces redefined clean: `--hu-theme-card-bg` = `var(--uc-surface)` (solid native), `--hu-theme-card-strong-bg`/`--hu-theme-control-bg`/`--hu-theme-progress-bg` = neutral `--uc-surface(-muted)`. No accent pigment.
+  - New translucent variants `--hu-theme-glass-bg` / `--hu-theme-glass-strong-bg` (`color-mix(--uc-surface 78%/68%, transparent)`). `HuThemeShell` swaps card-bg/card-strong-bg to the glass variants ONLY when `themeScope` is `home` or `analytics` (the L1 hero pages) — so detail/menu views keep solid surfaces and never leak the dark/colored page top.
+  - Quick-action circles + header buttons (`--hu-theme-hero-control-bg`) → frosted neutral glass `color-mix(--uc-surface 58%, transparent)` + existing backdrop-blur, instead of accent-tinted.
+  - Bottom nav (`--hu-theme-nav-bg`) → translucent neutral `color-mix(--uc-bottom-bar-bg 80%, transparent)` (frosted, has backdrop-blur); active tab still accent via the local nav override.
+  - `--hu-theme-app-bg` softened to a 6% whisper (`color-mix(--uc-app-bg 94%, accent)`).
+  - `HuKidsPiMenuFrame` (Payments/Learn/More) rewritten: removed the per-section motion atmosphere and all `--pi-*` accent gradients; sub-pages now render native shared PI components on a faint `--hu-theme-app-bg` wash, with accent only via `--uc-action`. Card-details/savings inherit solid `--hu-theme-card-bg` → native.
+  - Theme-picker preview `HuThemeShell` now passed `themeScope="home"` so the preview uses the same glass as the real Home.
+- Verification: `npm run build`, `npm run audit:templates` (screens=31), `npm run audit:platform` passed; `git diff --check` clean apart from CRLF; browser smoke: Nordlys Home (dark hero, frosted controls, glass cards, accent links/progress), scrolled cards stay clean, Garden Home in LIGHT mode now clean glass (no dirty-white), Payments sub-page renders native PI with only a faint wash, theme-picker preview matches real Home; no console errors.
+- Limitations: learn-* card gradient vars (tutorial cards) still carry a light themed gradient — left intentionally as a self-contained learning surface; revisit if it should also go fully native. Translucency uses alpha (no backdrop-blur on body cards) for scroll performance; blur is only on hero controls + nav.
+- Next recommended action: confirm with user across all 6 themes in both modes; optionally neutralize learn cards.
 - Blocked by: none.
 - Safe to resume: yes.
 
