@@ -1,10 +1,31 @@
 # Current Session
 
-Last updated: 2026-06-12
+Last updated: 2026-06-13
 
 ## Current Focus
 
 Polishing Hungary Mobile PI Kids interactions on top of the CEE Light Restyle + theme system, while preserving the existing Serbia safe-spend coach and prior HU theme work.
+
+## 2026-06-13 Asset Closeout Check
+
+- Latest request handled: user requested committing everything still uncommitted so `main` is clean.
+- Last meaningful change: no runtime behavior changed in this closeout; the remaining untracked Kids Learn source/reference images were committed as asset archive material.
+- Commit scope:
+  - `kids-img/` raw source/reference PNGs used during the HU Kids Learn artwork selection pass.
+  - rejected/unused generated candidates under `src/assets/kids/learn/`: `card-confidence.png`, `money-basics.png`, `online-safety.png`, `request-money.png`, and `saving-goals.png`.
+- Verification run:
+  - `git status --short` identified only untracked image assets before this closeout.
+  - asset size check measured 34 uncommitted image files at about 46.8 MB total.
+  - no build rerun was required because this closeout adds unreferenced image files only and does not alter runtime code.
+- Banana Loop:
+  - Fixed: the workspace no longer leaves source/reference image assets hidden as untracked files after the previous HU Learn implementation.
+  - Triaged: the committed asset archive includes files not currently imported by runtime code; future cleanup should explicitly decide whether to keep them as source references or move them to external design storage.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
 
 ## 2026-06-12 Closeout Check
 
