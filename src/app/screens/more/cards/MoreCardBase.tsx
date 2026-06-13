@@ -15,10 +15,16 @@ export function MoreCardBase({ title, image, onClick, badgeCount }: MoreCardBase
   return (
     <button
       onClick={onClick}
-      className="relative h-[120px] w-full rounded-[8px] overflow-hidden hover:opacity-90 transition-opacity"
+      className="relative h-[120px] w-full overflow-hidden rounded-[8px] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
+      style={{ boxShadow: "var(--pi-menu-card-shadow, none)" }}
     >
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[var(--uc-app-bg)] to-[var(--uc-neutral-400)]" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "var(--pi-menu-card-bg, linear-gradient(90deg, var(--uc-app-bg) 0%, var(--uc-neutral-400) 100%))",
+        }}
+      />
 
       {/* Image - positioned at bottom right, scaled down */}
       <div className="absolute bottom-0 right-0 w-[50%] h-[50%] flex items-end justify-end overflow-hidden pointer-events-none">
@@ -27,6 +33,8 @@ export function MoreCardBase({ title, image, onClick, badgeCount }: MoreCardBase
           alt="" 
           className="object-contain object-bottom-right max-w-full max-h-full"
           style={{
+            filter: "var(--pi-menu-card-image-filter, none)",
+            opacity: "var(--pi-menu-card-image-opacity, 1)",
             transform: 'scale(0.9)',
             transformOrigin: 'bottom right'
           }}

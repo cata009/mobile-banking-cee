@@ -206,9 +206,14 @@ export default function PaymentHeroCard({
       disabled={disabled}
       title={disabledReason}
       onClick={handleClick}
-      className={`relative h-[120px] w-full overflow-hidden rounded-[8px] bg-[linear-gradient(105deg,var(--uc-surface-muted)_0%,var(--uc-neutral-200)_48%,var(--uc-neutral-300)_100%)] text-left transition-opacity ${
+      className={`relative h-[120px] w-full overflow-hidden rounded-[8px] text-left transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)] ${
         disabled ? "cursor-not-allowed opacity-55" : "cursor-pointer"
       }`}
+      style={{
+        background:
+          "var(--pi-payment-hero-bg, linear-gradient(105deg,var(--uc-surface-muted)_0%,var(--uc-neutral-200)_48%,var(--uc-neutral-300)_100%))",
+        boxShadow: "var(--pi-payment-hero-shadow, none)",
+      }}
     >
       <div className="relative z-10 flex h-full w-full flex-col px-[20px] pt-[16px]">
         <h2
@@ -228,6 +233,10 @@ export default function PaymentHeroCard({
           src={resolvedImageSrc}
           alt=""
           className={`absolute object-contain object-right-bottom ${resolvedImageClassName}`}
+          style={{
+            filter: "var(--pi-payment-hero-image-filter, none)",
+            opacity: "var(--pi-payment-hero-image-opacity, 1)",
+          }}
           draggable={false}
         />
       ) : (

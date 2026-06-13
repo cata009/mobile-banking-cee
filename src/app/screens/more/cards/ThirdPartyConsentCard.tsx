@@ -14,10 +14,16 @@ export function ThirdPartyConsentCard({ onClick, title = "Consent to third parti
   return (
     <button
       onClick={onClick}
-      className="relative h-[120px] w-full rounded-[8px] overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+      className="relative h-[120px] w-full cursor-pointer overflow-hidden rounded-[8px] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
+      style={{ boxShadow: "var(--pi-menu-card-shadow, none)" }}
     >
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[var(--uc-app-bg)] to-[var(--uc-neutral-400)]" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "var(--pi-menu-card-bg, linear-gradient(90deg, var(--uc-app-bg) 0%, var(--uc-neutral-400) 100%))",
+        }}
+      />
 
       {/* Image - specific positioning from Figma with rotation */}
       <div className="absolute flex inset-[15.28%_-37.87%_-87.03%_14.48%] items-center justify-center">
@@ -28,6 +34,10 @@ export function ThirdPartyConsentCard({ onClick, title = "Consent to third parti
                 alt="" 
                 className="absolute left-0 max-w-none size-full top-0" 
                 src={imgThirdPartyConsent}
+                style={{
+                  filter: "var(--pi-menu-card-image-filter, none)",
+                  opacity: "var(--pi-menu-card-image-opacity, 1)",
+                }}
               />
             </div>
           </div>

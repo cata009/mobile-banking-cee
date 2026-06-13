@@ -6,6 +6,91 @@ Last updated: 2026-06-13
 
 Polishing Hungary Mobile PI Kids interactions on top of the CEE Light Restyle + theme system, while preserving the existing Serbia safe-spend coach and prior HU theme work.
 
+## 2026-06-13 HU Kids Theme Bridge And Toggle Stabilization
+
+- Latest request handled: user reported the previous appearance toggle fix still left a light/dark glitch and asked for an urgent fix, then the intelligent HU Kids blending plan, then commit.
+- Runtime changes:
+  - Replaced the conflicting `HuThemeChangePage` appearance synchronizer with separate concepts for stored preference (`light` / `dark` / `system`) and effective global `themeMode` (`light` / `dark`), using a guarded internal-request ref so top-bar external changes no longer race the local selector.
+  - Added a scoped HU Kids PI-menu bridge in `HuKidsPiMenuFrame` through `--pi-*` surface variables for Payments, Products, More cards, shortcut bubbles, image treatment, shadows, and offer cards.
+  - Removed the HU Kids PI-menu remapping of `--uc-neutral-200/300/400`; shared PI components now keep their default fallback look outside HU Kids, while HU Kids can provide theme-aware `--pi-*` values.
+  - Updated shared `PaymentHeroCard`, `PaymentOtherShortcut`, `ProductMenuCard`, and all More card variants to consume optional `--pi-*` variables with current PI-compatible fallbacks.
+  - Moved HU Kids Card Details section backgrounds onto HU theme surfaces instead of generic shared `--uc-surface` / `--uc-surface-muted`.
+  - Added accessibility hardening without visible PI restyle: focus-visible rings for shared card/menu/button surfaces, `aria-current="page"` on shared `BottomNavigation`, focus trap/restoration for `BottomSheet`, semantic quiz radio groups, `aria-checked`, and polite quiz feedback.
+- Verification run:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=71 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - In-app Browser initially opened `http://127.0.0.1:5173/`, but then lost the tab and timed out attaching to a new webview; a Chrome headless/CDP fallback also proved unstable in this environment. Visual HU Kids smoke is therefore explicitly triaged as a next task, not claimed as completed.
+- Banana Loop:
+  - Fixed: theme-mode ping-pong risk is removed by separating appearance preference from effective mode and by treating unrequested global `themeMode` changes as external.
+  - Fixed: HU Kids themed Payments/Products/More no longer depend on double-mixed shared neutral tokens; they use a scoped bridge that PI can adopt later without changing current PI defaults.
+  - Fixed: keyboard focus and screen-reader semantics improved for bottom navigation, sheets, theme selector, menu cards, forms, and Learn quizzes.
+  - Triaged: automated visual smoke for HU Kids theme bridge must be rerun when Browser attach is stable; tracked in `docs/handoff/next-tasks.md` and `docs/handoff/known-bananas.md`.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-06-13 Kids HU Theme Selection Screen Polish
+
+- Redesigned, polished, and added controls to the theme selection screen and preview mockup:
+  - Added Light, Dark, and System appearance selector buttons below the theme carousel in `HuThemeChangePage`, styled as a small, premium segmented control capsule container.
+  - Implemented local state preference stored in `localStorage` (`hu-kids-appearance-mode`) that maps to global `themeMode`.
+  - Registered media query listeners for the `"system"` mode to dynamically track OS color scheme preferences.
+  - Configured a bidirectional synchronizer: if `themeMode` is toggled outside the theme screen (e.g. from the demo top control panel), the active selector highlights update automatically.
+  - Fixed an infinite rendering loop (screen flickering glitch) by guarding all global `setThemeMode` calls in the `useEffect` with actual `themeMode` value comparisons and updating dependency arrays correctly.
+  - Fixed theme carousel buttons clipping by increasing the horizontal scroll container padding to `px-[6px] py-[8px]` (clearance for focus ring shadow and `scale-[1.04]` hover transform).
+  - Adapted `HuThemeChangePage` layout: increased the theme selector carousel margin-top to `28px` and reduced the `HuHomePreview` card vertical padding to `py-[12px]` (saving `59px` in height overall) to prevent layout overlap/clipping.
+  - Sized down the phone mockup bezel to `162px` wide by `339px` high and the content container scale ratio to `scale-[0.40533]` with a compact dynamic island cutout (`h-[8px] w-[38px]`).
+  - Added `rounded-[47px] overflow-hidden` directly to the scaled `375x812` preview container inside `HuHomePreview` to ensure scaled screen contents are perfectly clipped within the frame's rounded corners.
+  - Extended the grey background card of `HuHomePreview` to full width (`w-full`), yielding exactly 24px margins that align perfectly with the page's central grid layout.
+  - Disabled the outer `HuThemeMotionLayer` during theme change previews. This ensures both the `PageHeader` (using `variant="gray"`) and the body background display a single, solid, uniform `var(--uc-app-bg)` (light grey in light mode, dark grey/black in dark mode), blending them seamlessly.
+  - Removed the forced white text color class `text-[var(--uc-static-white)]` from the shell wrapper, letting carousel text labels and checked indicators resolve to `var(--uc-text)` and `var(--uc-app-bg)` for perfect legibility and contrast in both modes.
+- Verification:
+  - `npm run build` compiled successfully.
+  - `npm run audit:templates` and `npm run audit:platform` passed without issues.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-06-13 Kids HU Learn Topics and Lessons Expansion
+
+- Expanded the financial education section in Hungary Kids App with 4 new topics and 12 lessons:
+  - Mapped new topic IDs (`smart-budgeting`, `earning-money`, `digital-security`, `family-banking`) to unique illustration keys (`money-check`, `boost`, `private-codes`, `ask-help`) in `HU_LEARN_TOPIC_ARTWORK`.
+  - Mapped all 12 new lessons to their respective visual keywords in `HU_LEARN_LESSON_ARTWORK` to ensure diverse and high-quality visuals with zero duplication on the main page.
+- Verification:
+  - `npm run build` compiled successfully.
+  - `npm run audit:templates` and `npm run audit:platform` passed without issues.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-06-13 Kids HU Learn Polish
+
+- Updated the Hungary Kids App Learn/Education section with high-quality financial copywriting:
+  - Extended the `HuLearnLesson` type definitions in `KidsMarketHomeApp.tsx` to include `slides` and `quiz` arrays.
+  - Fully populated `HU_LEARN_TOPICS` with detailed 3-slide explanations and a 2-question checkpoint quiz for all 15 lessons (5 topics total).
+- Built interactive slide card transitions and progress indicators in `HuKidsLearnLessonPage`:
+  - Added slide deck segmented progress bar indicators under the page header.
+  - Enabled stepping through cards using the "Continue" button.
+  - Rendered a checkpoint quiz with interactive radio selections, green/red correct/incorrect highlights, and clear visual icons.
+  - Gated the final "Mark lesson complete" trigger until all correct options are selected, ensuring lessons are fully learned.
+  - Fixed text and image overlap in the Slide header card: changed the illustration size from `lesson-hero` (230px tall) to `topic-hero` (146px tall), applied `pr-[150px]` right padding barrier to wrap titles safely, and removed redundant summary description copy to make the header card extremely clean and well-balanced.
+  - Replaced the bottom navigation tab icon for "Learn" (products) in KIDS HU with the new custom book SVG, registered as `hu-kids-learn` in `AppIcon.tsx` and mapped in `iconOverrides`.
+  - Polished the featured topic list logic in `HuKidsLearnTopicsPage`: renamed "Suggested" category header to "New" and excluded the featured topic (Saving Goals) from the "All topics" grid list below to ensure no topic is duplicated on the screen.
+- Verification:
+  - `npm run build` passed.
+  - `npm run audit:templates` and `npm run audit:platform` passed successfully.
+
 ## 2026-06-13 Asset Closeout Check
 
 - Latest request handled: user requested committing everything still uncommitted so `main` is clean.

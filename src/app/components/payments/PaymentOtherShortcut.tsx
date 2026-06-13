@@ -14,14 +14,15 @@ const paymentOtherLabelClass =
   "uc-type-n5-strong block w-full overflow-hidden text-center";
 
 function PaymentOtherShortcutIcon({ icon }: { icon: PaymentOtherIcon }) {
-  return <AppIcon name={paymentOtherIconName[icon]} color="var(--uc-text-inverse)" />;
+  return <AppIcon name={paymentOtherIconName[icon]} color="var(--pi-shortcut-icon-fg, var(--uc-text-inverse))" />;
 }
 
 export function PaymentOtherShortcutIconBubble({ icon }: { icon: PaymentOtherIcon }) {
   return (
     <span
-      className="flex shrink-0 items-center justify-center gap-[10px] rounded-full bg-[var(--uc-action)] p-[8px]"
+      className="flex shrink-0 items-center justify-center gap-[10px] rounded-full p-[8px]"
       data-ds-label="PaymentOtherShortcutIconBubble"
+      style={{ background: "var(--pi-shortcut-icon-bg, var(--uc-action))" }}
     >
       <span className="flex size-[32px] shrink-0 items-center justify-center">
         <PaymentOtherShortcutIcon icon={icon} />
@@ -41,7 +42,7 @@ export default function PaymentOtherShortcut({
     <button
       type="button"
       onClick={() => onClick?.(item)}
-      className="flex w-[74px] shrink-0 flex-col items-center gap-[10px] cursor-pointer"
+      className="flex w-[74px] shrink-0 cursor-pointer flex-col items-center gap-[10px] rounded-[8px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
       aria-label={item.label.replace(/\n/g, " ")}
     >
       <PaymentOtherShortcutIconBubble icon={item.icon} />

@@ -14,10 +14,16 @@ export function GdprConsentCard({ onClick, title = "GDPR Consent" }: GdprConsent
   return (
     <button
       onClick={onClick}
-      className="relative h-[120px] w-full rounded-[8px] overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+      className="relative h-[120px] w-full cursor-pointer overflow-hidden rounded-[8px] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
+      style={{ boxShadow: "var(--pi-menu-card-shadow, none)" }}
     >
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[var(--uc-app-bg)] to-[var(--uc-neutral-400)]" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "var(--pi-menu-card-bg, linear-gradient(90deg, var(--uc-app-bg) 0%, var(--uc-neutral-400) 100%))",
+        }}
+      />
 
       {/* Image - specific positioning from Figma - two overlapping user icons */}
       <div 
@@ -25,7 +31,9 @@ export function GdprConsentCard({ onClick, title = "GDPR Consent" }: GdprConsent
         style={{ 
           backgroundImage: `url('${imgGdprConsent}')`,
           backgroundSize: '61.60000091791153px 62.90000093728304px',
-          backgroundPosition: 'top left'
+          backgroundPosition: 'top left',
+          filter: "var(--pi-menu-card-image-filter, none)",
+          opacity: "var(--pi-menu-card-image-opacity, 1)",
         }}
       />
 

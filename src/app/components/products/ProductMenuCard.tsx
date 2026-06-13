@@ -55,7 +55,10 @@ function CardIllustration({ type }: { type: ProductsCardIllustration }) {
   if (type === "branch") return <BranchIllustration />;
 
   return (
-    <span className="absolute bottom-[8px] right-[4px] grid size-[32px] place-items-center text-[var(--uc-text-inverse)]">
+    <span
+      className="absolute bottom-[8px] right-[4px] grid size-[32px] place-items-center text-[var(--uc-text-inverse)]"
+      style={{ color: "var(--pi-product-card-fg, var(--uc-text-inverse))" }}
+    >
       <AppIcon name="arrow-right" strokeWidth={3} />
     </span>
   );
@@ -105,7 +108,7 @@ export default function ProductMenuCard({ card, variant = "standard", onClick }:
       type="button"
       aria-label={card.title.replace(/\n/g, " ")}
       onClick={() => onClick?.(card)}
-      className="relative shrink-0 overflow-hidden rounded-[8px] text-left cursor-pointer"
+      className="relative shrink-0 cursor-pointer overflow-hidden rounded-[8px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
       style={{
         display: "flex",
         width: "164px",
@@ -114,13 +117,15 @@ export default function ProductMenuCard({ card, variant = "standard", onClick }:
         padding: isCompact ? "12px" : "16px",
         alignItems: "flex-start",
         gap: "10px",
-        background: card.background,
+        background: `var(--pi-product-card-bg, ${card.background})`,
+        boxShadow: "var(--pi-product-card-shadow, none)",
       }}
     >
       <span
         className={`relative z-10 whitespace-pre-line text-[var(--uc-text-inverse)] ${
           isCompact ? "uc-type-n4-strong" : "uc-type-h2"
         }`}
+        style={{ color: "var(--pi-product-card-fg, var(--uc-text-inverse))" }}
       >
         {card.title}
       </span>
@@ -129,6 +134,10 @@ export default function ProductMenuCard({ card, variant = "standard", onClick }:
           src={cardImageSrc}
           alt=""
           className={`absolute object-contain object-right-bottom ${imagePlacement}`}
+          style={{
+            filter: "var(--pi-product-card-image-filter, none)",
+            opacity: "var(--pi-product-card-image-opacity, 1)",
+          }}
           draggable={false}
         />
       ) : (

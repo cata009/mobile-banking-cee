@@ -55,8 +55,9 @@ export default function BottomNavigation({
         return (
           <button
             key={item.id}
+            aria-current={isActive ? "page" : undefined}
             onClick={() => handleTabClick(item.id)}
-            className="flex h-full flex-1 cursor-pointer flex-col items-center gap-0"
+            className="flex h-full flex-1 cursor-pointer flex-col items-center gap-0 rounded-[8px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-bottom-bar-bg)]"
             type="button"
           >
             <span className="block h-[2px] w-[24px]">
