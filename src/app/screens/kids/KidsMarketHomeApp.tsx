@@ -17,6 +17,9 @@ import Card from "@/app/components/cards/Card";
 import FaceIdAnimation from "@/app/components/FaceIdAnimation";
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
 import PageHeader from "@/app/components/PageHeader";
+import StatusBar from "@/app/components/StatusBar";
+import { useDemo } from "@/app/state/demoStore";
+import type { ThemeMode } from "@/app/state/demoTypes";
 import NewPaymentActionListItem from "@/app/components/payments/NewPaymentActionListItem";
 import NewPaymentDiscoverBanner from "@/app/components/payments/NewPaymentDiscoverBanner";
 import PaymentHeroCard from "@/app/components/payments/PaymentHeroCard";
@@ -1150,6 +1153,15 @@ type HuLearnLesson = {
   description: string;
   body: string[];
   visual: HuLearnVisual;
+  slides: {
+    title: string;
+    text: string;
+  }[];
+  quiz: {
+    question: string;
+    options: string[];
+    correctIndex: number;
+  }[];
 };
 type HuLearnTopic = {
   id: string;
@@ -1214,6 +1226,40 @@ const HU_LEARN_TOPICS: HuLearnTopic[] = [
           "A good habit is to check what is available today before deciding what to buy.",
         ],
         visual: "balance",
+        slides: [
+          {
+            title: "Welcome to your balance!",
+            text: "In your banking app, the \"balance\" is the total amount of money sitting in your account right now. Think of it as your digital wallet that holds all your funds.",
+          },
+          {
+            title: "How it changes",
+            text: "Your balance goes up when you receive pocket money or earn rewards. It goes down whenever you pay with your card, buy a game, or move money to a saving goal.",
+          },
+          {
+            title: "Smart check routine",
+            text: "Before buying anything, check your balance. A good habit is to ask yourself if you have enough money available for today's needs before spending it.",
+          },
+        ],
+        quiz: [
+          {
+            question: "What is your account balance?",
+            options: [
+              "The total money available in your account.",
+              "A list of items you want to buy.",
+              "The money you spent last year.",
+            ],
+            correctIndex: 0,
+          },
+          {
+            question: "When does your balance go up?",
+            options: [
+              "When you buy a snack.",
+              "When you receive pocket money or allowance.",
+              "When you freeze your card.",
+            ],
+            correctIndex: 1,
+          },
+        ],
       },
       {
         id: "money-basics-today",
@@ -1225,6 +1271,40 @@ const HU_LEARN_TOPICS: HuLearnTopic[] = [
           "When an app separates these numbers, it helps you make faster decisions without accidentally using money saved for something important.",
         ],
         visual: "card",
+        slides: [
+          {
+            title: "The two numbers",
+            text: "Your app separates \"Daily spend\" from \"Total money\". This is because seeing all your money at once can make you feel like you can spend it all today!",
+          },
+          {
+            title: "Protecting your savings",
+            text: "If you have 10,000 HUF in total, but 8,000 HUF is saved for a new bicycle, your actual budget for snacks and games is only 2,000 HUF.",
+          },
+          {
+            title: "Separation is key",
+            text: "By keeping your daily spending money separate from your savings, you avoid accidentally spending the money you saved for important goals.",
+          },
+        ],
+        quiz: [
+          {
+            question: "Why does the app separate Daily spend from Total money?",
+            options: [
+              "To make the screen look more colorful.",
+              "To help you avoid spending money saved for goals.",
+              "To show how fast you can spend everything.",
+            ],
+            correctIndex: 1,
+          },
+          {
+            question: "If you have 8,000 HUF saved and a total of 10,000 HUF, what is your spending budget?",
+            options: [
+              "10,000 HUF",
+              "8,000 HUF",
+              "2,000 HUF",
+            ],
+            correctIndex: 2,
+          },
+        ],
       },
       {
         id: "money-basics-check",
@@ -1236,6 +1316,40 @@ const HU_LEARN_TOPICS: HuLearnTopic[] = [
           "If the answer is unclear, wait a little or ask a parent. Waiting is also a money skill.",
         ],
         visual: "goals",
+        slides: [
+          {
+            title: "The 3-question routine",
+            text: "Before tapping your card at a store, ask: 1) Do I need this today? 2) Do I have enough in my daily budget? 3) Will this delay my saving goals?",
+          },
+          {
+            title: "Wants vs. Needs",
+            text: "A \"need\" is something essential like school lunch. A \"want\" is something nice to have, like a toy. Recognizing the difference is a huge money skill!",
+          },
+          {
+            title: "The 24-Hour rule",
+            text: "If you really want to buy a \"want\", wait 24 hours. Often, you'll realize you didn't need it as much as you thought, saving your money.",
+          },
+        ],
+        quiz: [
+          {
+            question: "What is a \"need\"?",
+            options: [
+              "A new video game.",
+              "An essential item like school lunch.",
+              "A cinema ticket.",
+            ],
+            correctIndex: 1,
+          },
+          {
+            question: "What is the 24-hour rule?",
+            options: [
+              "Waiting a day to see if you still want to buy a non-essential item.",
+              "Spending all your money in 24 hours.",
+              "Only buying items that last 24 hours.",
+            ],
+            correctIndex: 0,
+          },
+        ],
       },
     ],
   },
@@ -1257,6 +1371,40 @@ const HU_LEARN_TOPICS: HuLearnTopic[] = [
           "The target amount tells you how close you are. Progress makes patience visible.",
         ],
         visual: "goals",
+        slides: [
+          {
+            title: "Make it specific",
+            text: "Saving without a plan is hard. It is much easier to save when you have a specific goal, like \"New Skateboard\" instead of just \"saving money\".",
+          },
+          {
+            title: "Set the numbers",
+            text: "Every goal needs a target amount (how much it costs) and a target date (when you want it). This gives you a clear finish line to run towards.",
+          },
+          {
+            title: "Patience is visible",
+            text: "Every time you save a little money and add it to your goal, your progress bar grows. Watching that bar go up makes your patience visible!",
+          },
+        ],
+        quiz: [
+          {
+            question: "Which of these is the best saving goal?",
+            options: [
+              "I want to save some money eventually.",
+              "Save 15,000 HUF for a skateboard by September.",
+              "Buy a lot of toys.",
+            ],
+            correctIndex: 1,
+          },
+          {
+            question: "How does the progress bar help you?",
+            options: [
+              "It shows how close you are to reaching your target.",
+              "It charges your phone battery.",
+              "It orders the item automatically.",
+            ],
+            correctIndex: 0,
+          },
+        ],
       },
       {
         id: "saving-goals-boost",
@@ -1268,6 +1416,40 @@ const HU_LEARN_TOPICS: HuLearnTopic[] = [
           "A smart goal should grow while daily spending still feels comfortable.",
         ],
         visual: "balance",
+        slides: [
+          {
+            title: "Small steps add up",
+            text: "You don't need to save a huge amount all at once. Saving small amounts regularly (like 500 HUF every week) is the easiest way to reach a goal.",
+          },
+          {
+            title: "Automatic saving",
+            text: "You can set up a rule in the app to automatically move a small part of your allowance straight to your saving goal when you receive it.",
+          },
+          {
+            title: "Power of consistency",
+            text: "Consistent saving is a superpower. 500 HUF a week turns into 2,000 HUF in a month, and 24,000 HUF in a year! Keep going!",
+          },
+        ],
+        quiz: [
+          {
+            question: "What is the easiest way to save for a big goal?",
+            options: [
+              "Wait and try to save all the money at the very end.",
+              "Save small, consistent amounts regularly.",
+              "Hope you find money on the ground.",
+            ],
+            correctIndex: 1,
+          },
+          {
+            question: "If you save 500 HUF a week, how much do you save in a month?",
+            options: [
+              "1,000 HUF",
+              "2,000 HUF",
+              "5,000 HUF",
+            ],
+            correctIndex: 1,
+          },
+        ],
       },
       {
         id: "saving-goals-share",
@@ -1279,6 +1461,40 @@ const HU_LEARN_TOPICS: HuLearnTopic[] = [
           "Goal support should feel safe, not pressured.",
         ],
         visual: "request",
+        slides: [
+          {
+            title: "Talk about your goals",
+            text: "If you are saving for something big or important, it's a great idea to share your goal progress with your parents or family.",
+          },
+          {
+            title: "Show your effort",
+            text: "Parents love to see that you are responsible. Show them the app progress showing you saved 50% of the goal by yourself first.",
+          },
+          {
+            title: "Savings match",
+            text: "Sometimes, parents might offer to match your savings (e.g., they pay the remaining 50%) or give you a boost in exchange for extra chores.",
+          },
+        ],
+        quiz: [
+          {
+            question: "What is a good way to show responsibility to parents?",
+            options: [
+              "Show them you've already saved a part of the goal yourself.",
+              "Demand they buy the item immediately.",
+              "Keep your goal completely secret.",
+            ],
+            correctIndex: 0,
+          },
+          {
+            question: "What does \"matching savings\" mean?",
+            options: [
+              "Finding two identical coins.",
+              "Parents contributing to your goal to reward your saving efforts.",
+              "Spending the same amount as your friend.",
+            ],
+            correctIndex: 1,
+          },
+        ],
       },
     ],
   },
@@ -1300,6 +1516,40 @@ const HU_LEARN_TOPICS: HuLearnTopic[] = [
           "Slow down, check the sender, and ask a parent before opening strange links.",
         ],
         visual: "safety",
+        slides: [
+          {
+            title: "The excitement trap",
+            text: "Have you seen a message saying \"You won a free game console! Tap here to claim in 2 minutes!\"? This excitement is a trick used by scammers."
+          },
+          {
+            title: "Why they rush you",
+            text: "Scammers create a fake sense of urgency. They want to rush you so you tap the link or share details before you have time to think."
+          },
+          {
+            title: "The rule of thumb",
+            text: "Real banks or companies will never threaten you or demand immediate action. If a message says \"act now\", stop and ask an adult."
+          }
+        ],
+        quiz: [
+          {
+            question: "Why do scammers make messages feel very urgent?",
+            options: [
+              "To help you get your reward faster.",
+              "To make you act quickly without thinking.",
+              "Because their computers are slow."
+            ],
+            correctIndex: 1
+          },
+          {
+            question: "What should you do with a link promising a free prize?",
+            options: [
+              "Tap it immediately.",
+              "Ignore it and ask a parent to verify.",
+              "Forward it to all contacts."
+            ],
+            correctIndex: 1
+          }
+        ]
       },
       {
         id: "online-safety-private",
@@ -1311,6 +1561,40 @@ const HU_LEARN_TOPICS: HuLearnTopic[] = [
           "Private codes protect your money like a key protects a door.",
         ],
         visual: "card",
+        slides: [
+          {
+            title: "Keys to your vault",
+            text: "Your PIN code, account passwords, and verification codes are completely private. They are the keys that protect your digital money."
+          },
+          {
+            title: "The support lie",
+            text: "Scammers might message you pretending to be game administrators or bank support, claiming they need your PIN to fix your account. Say NO!"
+          },
+          {
+            title: "Keep it hidden",
+            text: "Never share codes in chat apps. When entering your PIN at an ATM or store terminal, cover the keypad with your hand."
+          }
+        ],
+        quiz: [
+          {
+            question: "When is it okay to send your PIN in a chat message?",
+            options: [
+              "When a friend needs to borrow money.",
+              "When support claims your account is locked.",
+              "Never, PIN codes must always stay private."
+            ],
+            correctIndex: 2
+          },
+          {
+            question: "What should you do when typing your PIN at a store?",
+            options: [
+              "Cover the keypad with your other hand.",
+              "Say the numbers out loud.",
+              "Let the person behind you check it."
+            ],
+            correctIndex: 0
+          }
+        ]
       },
       {
         id: "online-safety-report",
@@ -1322,6 +1606,40 @@ const HU_LEARN_TOPICS: HuLearnTopic[] = [
           "Safety is not about never making mistakes. It is about knowing what to do next.",
         ],
         visual: "safety",
+        slides: [
+          {
+            title: "Don't be embarrassed",
+            text: "If you accidentally tapped a suspicious link or shared card info, don't worry. The most important thing is to act quickly."
+          },
+          {
+            title: "The Freeze button",
+            text: "Open your app and tap \"Freeze\" on your card. This immediately locks it, preventing anyone from taking money out."
+          },
+          {
+            title: "Tell an adult",
+            text: "Tell a parent or guardian right away. They can help contact the bank to block the card permanently and get a safe new one."
+          }
+        ],
+        quiz: [
+          {
+            question: "What is the first thing you should do if you lose your card?",
+            options: [
+              "Freeze the card in your banking app.",
+              "Wait a few weeks to see if it shows up.",
+              "Delete the banking app."
+            ],
+            correctIndex: 0
+          },
+          {
+            question: "Who should you talk to if you think your account is unsafe?",
+            options: [
+              "Your classmates.",
+              "A parent or guardian immediately.",
+              "Nobody, keep it secret."
+            ],
+            correctIndex: 1
+          }
+        ]
       },
     ],
   },
@@ -1343,6 +1661,40 @@ const HU_LEARN_TOPICS: HuLearnTopic[] = [
           "The app keeps the status visible, so you know whether it is waiting, approved, or declined.",
         ],
         visual: "request",
+        slides: [
+          {
+            title: "Money is a conversation",
+            text: "When you send a money request in the app, your parents see a notification. It's always best to write a short, polite reason explaining what it's for."
+          },
+          {
+            title: "Clear vs. Vague",
+            text: "A request for 1,500 HUF with the note \"Bus ticket home\" is much easier for parents to approve than a blank request for the same amount."
+          },
+          {
+            title: "Building trust",
+            text: "Explaining your needs shows that you respect their household budget and understand the value of money."
+          }
+        ],
+        quiz: [
+          {
+            question: "Why is adding a reason to a request helpful?",
+            options: [
+              "It helps parents understand the need so they can approve it easily.",
+              "It makes the notification sound louder.",
+              "It is required to type at least 50 words."
+            ],
+            correctIndex: 0
+          },
+          {
+            question: "Which request note is the most responsible?",
+            options: [
+              "\"give me money\"",
+              "\"2,000 HUF for art class sketchbook\"",
+              "\"cash please\""
+            ],
+            correctIndex: 1
+          }
+        ]
       },
       {
         id: "request-money-amount",
@@ -1354,6 +1706,40 @@ const HU_LEARN_TOPICS: HuLearnTopic[] = [
           "If you are not sure how much something costs, estimate and add a short note.",
         ],
         visual: "balance",
+        slides: [
+          {
+            title: "Check the price first",
+            text: "Before sending a request, find out how much the item actually costs. Don't guess a random high number."
+          },
+          {
+            title: "Stick to the facts",
+            text: "If school lunch costs 1,200 HUF, request exactly 1,200 HUF. Do not request 3,000 HUF unless you have agreed on buying something extra."
+          },
+          {
+            title: "Trust is a currency",
+            text: "Requesting fair, accurate amounts builds trust. When parents see you only ask for what you need, they trust you with larger amounts later."
+          }
+        ],
+        quiz: [
+          {
+            question: "How should you determine the request amount?",
+            options: [
+              "Ask for a large round number to get extra cash.",
+              "Check the actual cost and request that exact amount.",
+              "Ask for a different amount every day."
+            ],
+            correctIndex: 1
+          },
+          {
+            question: "What is the benefit of requesting fair amounts?",
+            options: [
+              "It builds trust with your parents.",
+              "It gives you free coupon codes.",
+              "It doubles your allowance."
+            ],
+            correctIndex: 0
+          }
+        ]
       },
       {
         id: "request-money-wait",
@@ -1365,6 +1751,40 @@ const HU_LEARN_TOPICS: HuLearnTopic[] = [
           "While waiting, keep the plan simple and avoid making the same request many times.",
         ],
         visual: "goals",
+        slides: [
+          {
+            title: "What \"Pending\" means",
+            text: "After sending a request, the app status shows \"Pending\". This means the request is waiting for your parent to read and approve it."
+          },
+          {
+            title: "Avoid notification spam",
+            text: "Do not send the same request multiple times. Spamming notifications will not speed up the approval—it might annoy them instead!"
+          },
+          {
+            title: "Be patient",
+            text: "Parents are often busy with work or chores. Be patient, and if it's super urgent, a polite phone call or in-person talk is always best."
+          }
+        ],
+        quiz: [
+          {
+            question: "What does a \"Pending\" status mean?",
+            options: [
+              "The request failed.",
+              "The request is waiting for your parent's review.",
+              "The bank has declined it."
+            ],
+            correctIndex: 1
+          },
+          {
+            question: "What should you do if your request is pending?",
+            options: [
+              "Send the same request repeatedly.",
+              "Wait patiently or talk in person if urgent.",
+              "Delete the request immediately."
+            ],
+            correctIndex: 1
+          }
+        ]
       },
     ],
   },
@@ -1386,6 +1806,40 @@ const HU_LEARN_TOPICS: HuLearnTopic[] = [
           "After paying, recent transactions help you remember where the money went.",
         ],
         visual: "card",
+        slides: [
+          {
+            title: "Look at the screen",
+            text: "Before tapping your card or phone at a store checkout, look at the merchant terminal screen. Always verify the total price is correct."
+          },
+          {
+            title: "Keep your receipt",
+            text: "It is good practice to ask for a receipt or check the instant notification in your app right after paying to confirm the amount."
+          },
+          {
+            title: "Track your history",
+            text: "Your transaction history lists all your card payments. Checking it once a week helps you see exactly where your pocket money goes."
+          }
+        ],
+        quiz: [
+          {
+            question: "What should you do before tapping your card at checkout?",
+            options: [
+              "Check the price displayed on the terminal screen.",
+              "Tuck the card away quickly.",
+              "Tell the cashier your balance."
+            ],
+            correctIndex: 0
+          },
+          {
+            question: "How does transaction history help you?",
+            options: [
+              "It increases your saving balance.",
+              "It shows exactly where and when you spent money.",
+              "It prints paper money."
+            ],
+            correctIndex: 1
+          }
+        ]
       },
       {
         id: "card-confidence-freeze",
@@ -1397,6 +1851,40 @@ const HU_LEARN_TOPICS: HuLearnTopic[] = [
           "You can unfreeze it later when everything is okay again.",
         ],
         visual: "safety",
+        slides: [
+          {
+            title: "Lost card? Don't panic",
+            text: "If you cannot find your debit card, do not worry. You can temporarily lock it immediately from the app using the \"Freeze\" feature."
+          },
+          {
+            title: "How it works",
+            text: "Freezing blocks all payments. If someone finds your card on the floor, they won't be able to spend a single HUF. Your money remains safe."
+          },
+          {
+            title: "Unfreeze in seconds",
+            text: "If you find your card under your gym bag later, just toggle \"Unfreeze\" in the app. The card becomes active and ready to use instantly."
+          }
+        ],
+        quiz: [
+          {
+            question: "What happens when you \"Freeze\" your card?",
+            options: [
+              "The card is deleted forever.",
+              "All transactions on the card are blocked until you unfreeze it.",
+              "Your phone screen locks."
+            ],
+            correctIndex: 1
+          },
+          {
+            question: "What should you do if you find your frozen card under your desk?",
+            options: [
+              "Unfreeze it in the app and continue using it.",
+              "Throw it in the bin.",
+              "Order a new card immediately."
+            ],
+            correctIndex: 0
+          }
+        ]
       },
       {
         id: "card-confidence-details",
@@ -1408,6 +1896,584 @@ const HU_LEARN_TOPICS: HuLearnTopic[] = [
           "If you copy details, make sure you know exactly where they are going.",
         ],
         visual: "card",
+        slides: [
+          {
+            title: "Private numbers",
+            text: "Your debit card has important numbers: the 16-digit card number, the expiry date, and the 3-digit CVV code on the back."
+          },
+          {
+            title: "No card selfies",
+            text: "Never send pictures of your card in chat apps, even if a friend claims they want to send you money. They only need your IBAN for that, never your card details."
+          },
+          {
+            title: "Online shopping safety",
+            text: "If you want to buy something online, ask a parent to verify the website is safe before you enter your private card numbers."
+          }
+        ],
+        quiz: [
+          {
+            question: "What is the 3-digit code on the back of your card?",
+            options: [
+              "The PIN code.",
+              "The CVV security code.",
+              "Your birth date."
+            ],
+            correctIndex: 1
+          },
+          {
+            question: "What details are needed for someone to send money directly to your account?",
+            options: [
+              "Your card number and CVV code.",
+              "Only your IBAN or account number.",
+              "Your online banking password."
+            ],
+            correctIndex: 1
+          }
+        ]
+      },
+    ],
+  },
+  {
+    id: "smart-budgeting",
+    moduleId: "learn-balance",
+    title: "Smart Budgeting",
+    subtitle: "Learn how to divide your money into categories.",
+    helper: "Allocate your funds systematically to cover needs, wants, and savings.",
+    visual: "balance",
+    lessons: [
+      {
+        id: "budgeting-categories",
+        title: "Categorize it",
+        eyebrow: "Lesson 1",
+        description: "A budget is simply a plan for your money.",
+        body: [],
+        visual: "balance",
+        slides: [
+          {
+            title: "Welcome to budgeting!",
+            text: "A budget is simply a plan for your money. Instead of keeping all your cash in one pile, you divide it into different boxes.",
+          },
+          {
+            title: "The 50-30-20 rule",
+            text: "Try the 50-30-20 rule! 50% for Needs (school, transport), 30% for Wants (games, snacks), and 20% for Savings (your goals).",
+          },
+          {
+            title: "Why it helps",
+            text: "Categorizing helps you see where your money goes. If you spend too much on games, your snack box gets empty!",
+          },
+        ],
+        quiz: [
+          {
+            question: "What is a budget?",
+            options: [
+              "A plan for how to divide and spend your money.",
+              "A list of games you want to buy.",
+              "A way to get free items from stores.",
+            ],
+            correctIndex: 0,
+          },
+          {
+            question: "Under the 50-30-20 rule, what is 20% reserved for?",
+            options: [
+              "Fun and games.",
+              "Essential school needs.",
+              "Savings and goals.",
+            ],
+            correctIndex: 2,
+          },
+        ],
+      },
+      {
+        id: "budgeting-tracking",
+        title: "Track your cash",
+        eyebrow: "Lesson 2",
+        description: "Monitoring and checking every expense you make.",
+        body: [],
+        visual: "card",
+        slides: [
+          {
+            title: "The tracking habit",
+            text: "Tracking means writing down or checking every transaction. If you don't track, your money will \"disappear\" without you noticing!",
+          },
+          {
+            title: "Look at history",
+            text: "Look at your app history every few days. Do you see a lot of small transactions? Those small snacks add up to a big amount!",
+          },
+          {
+            title: "Habits lead to wealth",
+            text: "Keep a diary or let the app categorize your spending automatically. Knowing your habits is the first step to wealth.",
+          },
+        ],
+        quiz: [
+          {
+            question: "What does tracking your cash mean?",
+            options: [
+              "Running after dropped coins.",
+              "Monitoring and checking every expense you make.",
+              "Asking your parents for money.",
+            ],
+            correctIndex: 1,
+          },
+          {
+            question: "Why do small expenses matter?",
+            options: [
+              "They don't matter at all.",
+              "They add up to a large sum over time.",
+              "They are always free.",
+            ],
+            correctIndex: 1,
+          },
+        ],
+      },
+      {
+        id: "budgeting-adjust",
+        title: "Adjust the plan",
+        eyebrow: "Lesson 3",
+        description: "Plans change, and that is okay!",
+        body: [],
+        visual: "goals",
+        slides: [
+          {
+            title: "Be flexible",
+            text: "Plans change, and that's okay! If you spent too much on a birthday gift this month, you can reduce your snack spending next week.",
+          },
+          {
+            title: "Making trade-offs",
+            text: "Adjusting means making trade-offs. If you want a more expensive game, you must choose to spend less on movie tickets.",
+          },
+          {
+            title: "You're in control",
+            text: "A budget is not a prison—it is a tool that you control. Adjusting it shows mature financial thinking.",
+          },
+        ],
+        quiz: [
+          {
+            question: "What is a financial trade-off?",
+            options: [
+              "Exchanging old toys for new ones.",
+              "Choosing to spend less on one thing to save for another.",
+              "Getting money from the bank.",
+            ],
+            correctIndex: 1,
+          },
+          {
+            question: "Is a budget fixed forever?",
+            options: [
+              "No, you can adjust it when your plans change.",
+              "Yes, it can never be altered.",
+              "Yes, only parents can change it.",
+            ],
+            correctIndex: 0,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "earning-money",
+    moduleId: "learn-goals",
+    title: "Earning and Chores",
+    subtitle: "How money is earned and how to manage rewards.",
+    helper: "Explore how work leads to earning and how to take initiative.",
+    visual: "goals",
+    lessons: [
+      {
+        id: "earning-work",
+        title: "Value of work",
+        eyebrow: "Lesson 1",
+        description: "Understanding where money comes from.",
+        body: [],
+        visual: "request",
+        slides: [
+          {
+            title: "Exchange of value",
+            text: "Money doesn't grow on trees—it comes from work. Adults exchange their time, skills, and effort for a salary.",
+          },
+          {
+            title: "Parents' effort",
+            text: "Understanding this helps you appreciate the pocket money you receive. It represents your parents' hard work and time.",
+          },
+          {
+            title: "Spending time",
+            text: "When you buy something, you are actually spending the hours of work it took to earn that money. Think about that exchange!",
+          },
+        ],
+        quiz: [
+          {
+            question: "Where does money come from?",
+            options: [
+              "Trees in the bank garden.",
+              "Exchange of time, skills, and work.",
+              "The ATM screen.",
+            ],
+            correctIndex: 1,
+          },
+          {
+            question: "What does your pocket money represent?",
+            options: [
+              "Free cash that has no value.",
+              "Your parents' hard work and time.",
+              "A bank loan.",
+            ],
+            correctIndex: 1,
+          },
+        ],
+      },
+      {
+        id: "earning-rewards",
+        title: "Chores and rewards",
+        eyebrow: "Lesson 2",
+        description: "Doing tasks responsibly builds a strong work ethic.",
+        body: [],
+        visual: "balance",
+        slides: [
+          {
+            title: "Helping out",
+            text: "Many families use chores as a way for kids to earn extra money. Chores are tasks that help the whole household run smoothly.",
+          },
+          {
+            title: "Duty vs. Extra",
+            text: "Basic chores (like cleaning your room) are part of being a family member. Special chores (like washing the car) can earn you rewards!",
+          },
+          {
+            title: "Strong work ethic",
+            text: "Doing tasks responsibly builds a strong work ethic. It teaches you that effort leads directly to financial reward.",
+          },
+        ],
+        quiz: [
+          {
+            question: "Which chore is usually a basic family duty (unpaid)?",
+            options: [
+              "Washing your parent's car.",
+              "Cleaning your own bedroom.",
+              "Painting the garden fence.",
+            ],
+            correctIndex: 1,
+          },
+          {
+            question: "What does earning money from chores teach you?",
+            options: [
+              "That effort leads to reward.",
+              "That you should be paid for sleeping.",
+              "That work is always easy.",
+            ],
+            correctIndex: 0,
+          },
+        ],
+      },
+      {
+        id: "earning-hustle",
+        title: "Side hustles",
+        eyebrow: "Lesson 3",
+        description: "A small business you start by yourself.",
+        body: [],
+        visual: "goals",
+        slides: [
+          {
+            title: "Your small business",
+            text: "A side hustle is a small business you start by yourself. It's a fun way to earn money using your talents!",
+          },
+          {
+            title: "Using your talents",
+            text: "Do you like drawing? You can make custom stickers. Are you good at math? You can help a younger student with homework.",
+          },
+          {
+            title: "Safety first",
+            text: "Always check with your parents before starting a side hustle. Safety and school should always come first.",
+          },
+        ],
+        quiz: [
+          {
+            question: "What is a side hustle?",
+            options: [
+              "A school sport event.",
+              "A small business you start to earn money using your skills.",
+              "Asking parents for a raise.",
+            ],
+            correctIndex: 1,
+          },
+          {
+            question: "What should you do before starting a small business?",
+            options: [
+              "Buy expensive equipment immediately.",
+              "Check with your parents for safety and approval.",
+              "Quit school.",
+            ],
+            correctIndex: 1,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "digital-security",
+    moduleId: "learn-scam",
+    title: "Digital Security",
+    subtitle: "Safeguard your mobile banking app and accounts.",
+    helper: "Protect passwords, app lock, and secure your network access.",
+    visual: "safety",
+    lessons: [
+      {
+        id: "security-biometric",
+        title: "App lock & biometrics",
+        eyebrow: "Lesson 1",
+        description: "Your banking app is protected by passwords or Face ID.",
+        body: [],
+        visual: "card",
+        slides: [
+          {
+            title: "App protection",
+            text: "Your banking app is protected by a password or Face ID / Touch ID. This is called biometric security.",
+          },
+          {
+            title: "No sharing passcodes",
+            text: "Never share your app passcode with friends. If they get access, they can see your balance or make unauthorized transfers.",
+          },
+          {
+            title: "Lost phone safety",
+            text: "If you lose your phone, biometric locks ensure that nobody who finds it can open your banking app. It stays secure!",
+          },
+        ],
+        quiz: [
+          {
+            question: "What is biometric security?",
+            options: [
+              "Locking your phone in a drawer.",
+              "Using Face ID or Touch ID to protect your app.",
+              "Changing your passcode every hour.",
+            ],
+            correctIndex: 1,
+          },
+          {
+            question: "Who should you share your banking app passcode with?",
+            options: [
+              "Your best school friend.",
+              "Nobody—it must remain private.",
+              "A gaming partner.",
+            ],
+            correctIndex: 1,
+          },
+        ],
+      },
+      {
+        id: "security-phishing",
+        title: "Avoid phishing",
+        eyebrow: "Lesson 2",
+        description: "Fake messages sent by scammers to steal your passwords.",
+        body: [],
+        visual: "safety",
+        slides: [
+          {
+            title: "Phishing traps",
+            text: "Phishing is when scammers send fake emails or messages pretending to be a bank, asking you to tap a link and enter details.",
+          },
+          {
+            title: "Fake verification",
+            text: "They might say: \"Your card is blocked! Tap here to verify your identity.\" This is a fake website designed to steal your passwords.",
+          },
+          {
+            title: "Real bank behavior",
+            text: "Real banks never send links asking for passwords or PIN codes. If you see such an email, delete it and tell a parent.",
+          },
+        ],
+        quiz: [
+          {
+            question: "What is phishing?",
+            options: [
+              "Catching fish in the river.",
+              "Fake messages sent by scammers to steal your passwords.",
+              "Changing your profile picture.",
+            ],
+            correctIndex: 1,
+          },
+          {
+            question: "What will a real bank never send you?",
+            options: [
+              "Monthly account statements.",
+              "Links asking you to type your password or PIN.",
+              "Educational articles.",
+            ],
+            correctIndex: 1,
+          },
+        ],
+      },
+      {
+        id: "security-wifi",
+        title: "Public Wi-Fi risks",
+        eyebrow: "Lesson 3",
+        description: "Hackers can monitor the data sent over open networks.",
+        body: [],
+        visual: "safety",
+        slides: [
+          {
+            title: "Open connection danger",
+            text: "Public Wi-Fi in cafes or malls is convenient, but it is not secure. Hackers can monitor the data sent over these networks.",
+          },
+          {
+            title: "No banking on public Wi-Fi",
+            text: "Never log in to your banking app or enter card details while connected to public Wi-Fi. It is easy for others to intercept.",
+          },
+          {
+            title: "Secure alternatives",
+            text: "Wait until you are on your home Wi-Fi or use your mobile data plan. Safe connection protects your financial vault.",
+          },
+        ],
+        quiz: [
+          {
+            question: "Why is public Wi-Fi unsafe for banking?",
+            options: [
+              "The signal is too slow.",
+              "Hackers can intercept data sent over open networks.",
+              "It drains your battery.",
+            ],
+            correctIndex: 1,
+          },
+          {
+            question: "What should you use instead of public Wi-Fi to open your bank app?",
+            options: [
+              "Any free public network.",
+              "Mobile data or your secure home network.",
+              "Your classmate's hotspot.",
+            ],
+            correctIndex: 1,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "family-banking",
+    moduleId: "learn-request",
+    title: "Family Banking",
+    subtitle: "How parents and kids work together on finance.",
+    helper: "Discuss big purchases, build trust, and plan team savings goals.",
+    visual: "request",
+    lessons: [
+      {
+        id: "family-decisions",
+        title: "Joint decisions",
+        eyebrow: "Lesson 1",
+        description: "Talking about big purchases together.",
+        body: [],
+        visual: "request",
+        slides: [
+          {
+            title: "Team sport",
+            text: "Money is a team sport in a family. Talking about big purchases together prevents surprises and helps everyone plan.",
+          },
+          {
+            title: "Ask first",
+            text: "If you want to buy an expensive gaming console, discuss it with your parents first. They can help you make a plan to save for it.",
+          },
+          {
+            title: "Building harmony",
+            text: "Shared financial decisions build harmony and teach you how real-world budgeting works in a household.",
+          },
+        ],
+        quiz: [
+          {
+            question: "Why talk about big purchases with family?",
+            options: [
+              "To get their permission to spend their money.",
+              "To prevent surprises and make a plan together.",
+              "To make them feel bad.",
+            ],
+            correctIndex: 1,
+          },
+          {
+            question: "Money management in a family works best as:",
+            options: [
+              "A team sport with open discussion.",
+              "A competition to spend fastest.",
+              "A secret game.",
+            ],
+            correctIndex: 0,
+          },
+        ],
+      },
+      {
+        id: "family-trust",
+        title: "Trust & honesty",
+        eyebrow: "Lesson 2",
+        description: "Financial trust is earned through honest actions.",
+        body: [],
+        visual: "balance",
+        slides: [
+          {
+            title: "Earning trust",
+            text: "Financial trust is earned through honest actions. If you make a mistake (like spending too much), be honest about it.",
+          },
+          {
+            title: "Honesty over secrecy",
+            text: "Hiding expenses or lying about how much a game cost will break trust. Broken trust is much harder to fix than a low balance.",
+          },
+          {
+            title: "Gaining freedom",
+            text: "When you are honest about money, your parents will feel confident giving you more freedom and responsibilities.",
+          },
+        ],
+        quiz: [
+          {
+            question: "What is the best action if you spend too much by mistake?",
+            options: [
+              "Hide the transaction history.",
+              "Be honest and talk to a parent about it.",
+              "Ask a friend to lie for you.",
+            ],
+            correctIndex: 1,
+          },
+          {
+            question: "What does financial honesty build?",
+            options: [
+              "Extra pocket money instantly.",
+              "Long-term trust and freedom.",
+              "High interest rates.",
+            ],
+            correctIndex: 1,
+          },
+        ],
+      },
+      {
+        id: "family-goals",
+        title: "Shared savings goals",
+        eyebrow: "Lesson 3",
+        description: "Working together on shared targets.",
+        body: [],
+        visual: "goals",
+        slides: [
+          {
+            title: "Team goals",
+            text: "A shared goal is a saving target that you and your parents work on together. For example, saving for a family trip or a new computer.",
+          },
+          {
+            title: "Milestone bonuses",
+            text: "You can contribute a part of your savings, and your parents can match it or add a bonus when you reach milestones.",
+          },
+          {
+            title: "Team spirit",
+            text: "Working together makes saving faster and teaches you the joy of reaching a target as a team.",
+          },
+        ],
+        quiz: [
+          {
+            question: "What is a shared saving goal?",
+            options: [
+              "A competition to see who saves more.",
+              "A saving target that you and your parents work on together.",
+              "Borrowing money from siblings.",
+            ],
+            correctIndex: 1,
+          },
+          {
+            question: "How does a shared goal help you?",
+            options: [
+              "It makes saving faster and teaches teamwork.",
+              "It lets you spend without limits.",
+              "It deletes all your tasks.",
+            ],
+            correctIndex: 0,
+          },
+        ],
       },
     ],
   },
@@ -2253,10 +3319,10 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
   const isThemeChangeView = view === "theme";
   const isPiMenuView = view === "home" && !activeNavUsesHeroThemeField;
   const shellScope = view === "home" ? activeNav : view;
-  const shellBackground = isThemeChangeView ? "var(--uc-static-black)" : "var(--hu-theme-page-bg)";
+  const shellBackground = isThemeChangeView ? "var(--uc-app-bg)" : "var(--hu-theme-page-bg)";
   const shellMotionProgress =
     view === "home" && activeNavUsesHeroThemeField ? motionProgress : isThemeChangeView ? 0.05 : 0.08;
-  const shellMotionFade = isThemeChangeView ? "var(--uc-static-black)" : "var(--hu-theme-page-bg)";
+  const shellMotionFade = isThemeChangeView ? "var(--uc-app-bg)" : "var(--hu-theme-page-bg)";
 
   const renderActiveHuKidsView = () => {
     if (view === "theme") {
@@ -2535,12 +3601,11 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
 
   return (
     <HuThemeShell
-      className={isThemeChangeView ? "text-[var(--uc-static-white)]" : undefined}
       shellBackground={shellBackground}
       theme={shellTheme}
       themeScope={shellScope}
     >
-      {!isPiMenuView ? (
+      {!isPiMenuView && !isThemeChangeView ? (
         <HuThemeMotionLayer
           fadeTo={shellMotionFade}
           motionProgress={shellMotionProgress}
@@ -2592,7 +3657,7 @@ function HuKidsPiMenuFrame({
   const frameStyle = {
     "--hu-kids-menu-bg": isThemed ? "transparent" : "var(--uc-surface)",
     "--hu-kids-menu-body-bg": isThemed
-      ? "color-mix(in srgb, var(--uc-app-bg) 86%, var(--hu-theme-accent))"
+      ? "color-mix(in srgb, var(--hu-theme-app-bg) 72%, var(--hu-theme-card-bg))"
       : "var(--uc-surface)",
     "--hu-kids-menu-header-bg": isThemed ? "transparent" : "var(--uc-surface)",
     "--hu-kids-menu-title-fg": isThemed ? "var(--hu-theme-hero-fg)" : "var(--uc-text)",
@@ -2609,10 +3674,26 @@ function HuKidsPiMenuFrame({
     ...(isThemed
       ? {
           "--uc-brand": "var(--hu-theme-accent-strong)",
-          "--uc-neutral-200": "color-mix(in srgb, var(--uc-surface) 78%, var(--hu-theme-accent))",
-          "--uc-neutral-300": "color-mix(in srgb, var(--uc-surface) 66%, var(--hu-theme-accent-2))",
-          "--uc-neutral-400": "color-mix(in srgb, var(--uc-surface) 58%, var(--hu-theme-accent-3))",
           "--uc-surface-muted": "var(--hu-theme-card-strong-bg)",
+          "--pi-menu-card-bg":
+            "linear-gradient(135deg, color-mix(in srgb, var(--hu-theme-card-bg) 94%, var(--hu-theme-accent)) 0%, color-mix(in srgb, var(--hu-theme-card-strong-bg) 88%, var(--hu-theme-accent-2)) 62%, color-mix(in srgb, var(--hu-theme-card-bg) 90%, var(--hu-theme-accent-3)) 100%)",
+          "--pi-menu-card-shadow": "0 14px 30px color-mix(in srgb, var(--uc-static-black) 10%, transparent)",
+          "--pi-menu-card-image-opacity": "0.86",
+          "--pi-menu-card-image-filter": "saturate(0.92) contrast(0.96)",
+          "--pi-payment-hero-bg":
+            "linear-gradient(135deg, color-mix(in srgb, var(--hu-theme-card-bg) 96%, var(--hu-theme-accent)) 0%, color-mix(in srgb, var(--hu-theme-card-strong-bg) 88%, var(--hu-theme-accent-2)) 54%, color-mix(in srgb, var(--hu-theme-card-bg) 90%, var(--hu-theme-accent-3)) 100%)",
+          "--pi-payment-hero-shadow": "0 14px 30px color-mix(in srgb, var(--uc-static-black) 10%, transparent)",
+          "--pi-payment-hero-image-opacity": "0.9",
+          "--pi-payment-hero-image-filter": "saturate(0.92) contrast(0.96)",
+          "--pi-product-card-bg":
+            "linear-gradient(135deg, color-mix(in srgb, var(--hu-theme-card-bg) 88%, var(--hu-theme-accent)) 0%, color-mix(in srgb, var(--hu-theme-card-strong-bg) 82%, var(--hu-theme-accent-2)) 100%)",
+          "--pi-product-card-fg": "var(--uc-text)",
+          "--pi-product-card-shadow": "0 14px 30px color-mix(in srgb, var(--uc-static-black) 10%, transparent)",
+          "--pi-product-card-image-opacity": "0.82",
+          "--pi-product-card-image-filter": "saturate(0.9) contrast(0.95)",
+          "--pi-offer-card-bg": "var(--hu-theme-card-bg)",
+          "--pi-shortcut-icon-bg": "var(--hu-theme-accent-strong)",
+          "--pi-shortcut-icon-fg": "var(--uc-text-inverse)",
         }
       : {}),
   } as CSSProperties;
@@ -2789,8 +3870,9 @@ function HuKidsProductsPage({ onMessages, theme }: { onMessages?: () => void; th
             {localizedOffers.map((offer) => (
               <button
                 key={offer.id}
-                className="rounded-[8px] bg-[var(--uc-surface-muted)] p-[16px] text-left"
+                className="rounded-[8px] p-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
                 onClick={() => handleHuKidsOfferClick(offer)}
+                style={{ background: "var(--pi-offer-card-bg, var(--uc-surface-muted))" }}
                 type="button"
               >
                 <span className="block whitespace-pre-line text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">
@@ -2969,7 +4051,7 @@ function HuRequestMoneyScreen({
             <label className="mt-[18px] block text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
               Amount
             </label>
-            <div className="mt-[8px] flex h-[58px] items-center rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px]">
+            <div className="mt-[8px] flex h-[58px] items-center rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] focus-within:ring-2 focus-within:ring-[var(--uc-action)] focus-within:ring-offset-2 focus-within:ring-offset-[var(--uc-app-bg)]">
               <input
                 className="min-w-0 flex-1 bg-transparent text-[28px] font-bold leading-[32px] tracking-[0] text-[var(--uc-text)] outline-none"
                 inputMode="numeric"
@@ -2991,9 +4073,9 @@ function HuRequestMoneyScreen({
                     <button
                       key={item}
                       className={cn(
-                        "h-[36px] rounded-full px-[14px] text-[13px] font-bold leading-[16px] tracking-[0] transition",
+                        "h-[36px] rounded-full px-[14px] text-[13px] font-bold leading-[16px] tracking-[0] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]",
                         selected
-                          ? "bg-[var(--hu-theme-accent-strong)] text-[var(--uc-static-white)]"
+                          ? "bg-[var(--hu-theme-accent-strong)] text-[var(--uc-text-inverse)]"
                           : "bg-[var(--hu-theme-control-bg)] text-[var(--uc-text)]"
                       )}
                       onClick={() => setReason(item)}
@@ -3010,7 +4092,7 @@ function HuRequestMoneyScreen({
               Note
             </label>
             <textarea
-              className="mt-[8px] h-[92px] w-full resize-none rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] py-[12px] text-[15px] font-normal leading-[19px] tracking-[0] text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)]"
+              className="mt-[8px] h-[92px] w-full resize-none rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] py-[12px] text-[15px] font-normal leading-[19px] tracking-[0] text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)] focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
               onChange={(event) => setNote(event.target.value)}
               placeholder="Example: lunch after school"
               value={note}
@@ -3045,7 +4127,7 @@ function HuRequestMoneyScreen({
                 </div>
               </div>
               <button
-                className="mt-[16px] h-[42px] w-full rounded-[10px] bg-[var(--hu-theme-control-bg)] text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--hu-theme-accent-strong)]"
+                className="mt-[16px] h-[42px] w-full rounded-[10px] bg-[var(--hu-theme-control-bg)] text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--hu-theme-accent-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
                 onClick={onBack}
                 type="button"
               >
@@ -3135,9 +4217,9 @@ function HuSendMoneyScreen({
                       key={contact}
                       aria-pressed={selected}
                       className={cn(
-                        "h-[36px] rounded-full px-[12px] text-[13px] font-bold leading-[16px] tracking-[0] transition",
+                        "h-[36px] rounded-full px-[12px] text-[13px] font-bold leading-[16px] tracking-[0] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]",
                         selected
-                          ? "bg-[var(--hu-theme-accent-strong)] text-[var(--uc-static-white)]"
+                          ? "bg-[var(--hu-theme-accent-strong)] text-[var(--uc-text-inverse)]"
                           : "bg-[var(--hu-theme-control-bg)] text-[var(--uc-text)]",
                       )}
                       onClick={() => setContactName(contact)}
@@ -3153,7 +4235,7 @@ function HuSendMoneyScreen({
             <label className="mt-[18px] block text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
               Amount
             </label>
-            <div className="mt-[8px] flex h-[58px] items-center rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px]">
+            <div className="mt-[8px] flex h-[58px] items-center rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] focus-within:ring-2 focus-within:ring-[var(--uc-action)] focus-within:ring-offset-2 focus-within:ring-offset-[var(--uc-app-bg)]">
               <input
                 className="min-w-0 flex-1 bg-transparent text-[28px] font-bold leading-[32px] tracking-[0] text-[var(--uc-text)] outline-none"
                 inputMode="numeric"
@@ -3167,7 +4249,7 @@ function HuSendMoneyScreen({
               Note
             </label>
             <textarea
-              className="mt-[8px] h-[92px] w-full resize-none rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] py-[12px] text-[15px] font-normal leading-[19px] tracking-[0] text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)]"
+              className="mt-[8px] h-[92px] w-full resize-none rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] py-[12px] text-[15px] font-normal leading-[19px] tracking-[0] text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)] focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
               onChange={(event) => setNote(event.target.value)}
               placeholder="Optional"
               value={note}
@@ -3344,8 +4426,8 @@ function HuKidsCardDetailsPage({
           />
         </div>
 
-        <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto bg-[var(--uc-surface)] pb-[36px]">
-          <section className="bg-[var(--uc-surface-muted)] px-[24px] pb-[28px] pt-[8px]">
+        <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto bg-[var(--hu-theme-card-bg)] pb-[36px]">
+          <section className="bg-[var(--hu-theme-card-strong-bg)] px-[24px] pb-[28px] pt-[8px]">
             <HuKidsCardRevealStage
               card={card}
               copiedField={copiedField}
@@ -3589,7 +4671,7 @@ function HuKidsCardTransactionsPanel({
   const transactionGroups = useMemo(() => groupHuKidsTransactionsByDay(transactions), [transactions]);
 
   return (
-    <section className="bg-[var(--uc-surface)] pb-[28px] pt-[24px]" data-hu-card-details-transactions>
+    <section className="bg-[var(--hu-theme-card-bg)] pb-[28px] pt-[24px]" data-hu-card-details-transactions>
       <div className="px-[24px]">
         <AccountSearchBar value={searchValue} onValueChange={onSearchChange} />
       </div>
@@ -3875,6 +4957,37 @@ function HuMoreOptionsSheet({
   );
 }
 
+type HuKidsAppearanceMode = ThemeMode | "system";
+
+const HU_KIDS_APPEARANCE_STORAGE_KEY = "hu-kids-appearance-mode";
+
+function getSystemThemeMode(): ThemeMode {
+  if (typeof window === "undefined") {
+    return "light";
+  }
+
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function getStoredHuKidsAppearanceMode(): HuKidsAppearanceMode {
+  if (typeof window === "undefined") {
+    return "system";
+  }
+
+  const stored = window.localStorage.getItem(HU_KIDS_APPEARANCE_STORAGE_KEY);
+  return stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
+}
+
+function storeHuKidsAppearanceMode(mode: HuKidsAppearanceMode) {
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(HU_KIDS_APPEARANCE_STORAGE_KEY, mode);
+  }
+}
+
+function resolveHuKidsAppearanceMode(mode: HuKidsAppearanceMode, systemThemeMode: ThemeMode): ThemeMode {
+  return mode === "system" ? systemThemeMode : mode;
+}
+
 function HuThemeChangePage({
   appliedThemeId,
   concept,
@@ -3895,6 +5008,70 @@ function HuThemeChangePage({
   showAmounts: boolean;
 }) {
   const isApplied = appliedThemeId === draftThemeId;
+  const { themeMode, setThemeMode } = useDemo();
+
+  const [selectedAppearance, setSelectedAppearance] = useState<HuKidsAppearanceMode>(getStoredHuKidsAppearanceMode);
+  const [systemThemeMode, setSystemThemeMode] = useState<ThemeMode>(getSystemThemeMode);
+  const internalThemeModeRequestRef = useRef<ThemeMode | null>(null);
+  const latestThemeModeRef = useRef(themeMode);
+  const skipSystemSyncRef = useRef(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (event: MediaQueryListEvent | MediaQueryList) => {
+      setSystemThemeMode(event.matches ? "dark" : "light");
+    };
+
+    handleChange(mediaQuery);
+    mediaQuery.addEventListener("change", handleChange);
+    return () => {
+      mediaQuery.removeEventListener("change", handleChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    const requestedMode = internalThemeModeRequestRef.current;
+
+    if (requestedMode === themeMode) {
+      internalThemeModeRequestRef.current = null;
+      latestThemeModeRef.current = themeMode;
+      return;
+    }
+
+    if (themeMode !== latestThemeModeRef.current) {
+      skipSystemSyncRef.current = true;
+      setSelectedAppearance(themeMode);
+      storeHuKidsAppearanceMode(themeMode);
+      latestThemeModeRef.current = themeMode;
+    }
+  }, [themeMode]);
+
+  useEffect(() => {
+    if (selectedAppearance !== "system") {
+      return;
+    }
+
+    if (skipSystemSyncRef.current) {
+      skipSystemSyncRef.current = false;
+      return;
+    }
+
+    if (themeMode !== systemThemeMode) {
+      internalThemeModeRequestRef.current = systemThemeMode;
+      setThemeMode(systemThemeMode);
+    }
+  }, [selectedAppearance, setThemeMode, systemThemeMode, themeMode]);
+
+  const handleAppearanceSelect = (mode: HuKidsAppearanceMode) => {
+    setSelectedAppearance(mode);
+    storeHuKidsAppearanceMode(mode);
+
+    const targetMode = resolveHuKidsAppearanceMode(mode, systemThemeMode);
+    if (themeMode !== targetMode) {
+      internalThemeModeRequestRef.current = targetMode;
+      setThemeMode(targetMode);
+    }
+  };
 
   return (
     <>
@@ -3906,21 +5083,46 @@ function HuThemeChangePage({
           onBack={onBack}
           showHelp={false}
           title="Change theme"
-          variant="dark"
+          variant="gray"
         />
       </div>
 
-      <main className="relative z-[2] flex min-h-0 flex-1 flex-col items-center overflow-hidden px-[18px] pb-[18px]">
-        <div className="mt-[8px] flex w-full justify-center">
+      <main className="relative z-[2] flex min-h-0 flex-1 flex-col items-center overflow-hidden px-[24px] pb-[24px]">
+        <div className="mt-[12px] flex w-full justify-center">
           <HuHomePreview concept={concept} showAmounts={showAmounts} theme={draftTheme} />
         </div>
 
-        <div className="mt-[16px] w-full">
+        <div className="mt-[28px] w-full">
           <HuThemeCarousel
             appliedThemeId={appliedThemeId}
             selectedThemeId={draftThemeId}
             onSelectTheme={onSelectTheme}
           />
+        </div>
+
+        {/* Appearance Control (Light, Dark, System) */}
+        <div className="mt-[16px] flex justify-center w-full">
+          <div className="flex items-center gap-[4px] rounded-full p-[3px] bg-[color-mix(in_srgb,var(--uc-text)_6%,transparent)] border border-[color-mix(in_srgb,var(--uc-text)_4%,transparent)] backdrop-blur-sm">
+            {(["light", "dark", "system"] as const).map((mode) => {
+              const isSelected = selectedAppearance === mode;
+              return (
+                <button
+                  key={mode}
+                  aria-pressed={isSelected}
+                  type="button"
+                  onClick={() => handleAppearanceSelect(mode)}
+                  className={cn(
+                    "rounded-full px-[14px] py-[5px] text-[11px] font-bold leading-none capitalize transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]",
+                    isSelected
+                      ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
+                      : "text-[color-mix(in_srgb,var(--uc-text)_50%,transparent)] hover:text-[var(--uc-text)] font-medium"
+                  )}
+                >
+                  {mode}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="mt-auto w-full px-[6px] pt-[14px]">
@@ -3945,30 +5147,62 @@ function HuHomePreview({
   showAmounts: boolean;
   theme: HuThemePreset;
 }) {
+  const { themeMode } = useDemo();
+  const isDark = themeMode === "dark";
+
+  const phoneChromeUsesLightForeground =
+    theme.id === "nordlys" ||
+    theme.id === "blue-lines" ||
+    (theme.id === "bubbles" && themeMode === "dark") ||
+    (theme.id === "aurora" && themeMode === "dark") ||
+    (theme.id === "garden" && themeMode === "dark") ||
+    (theme.id === "solar" && themeMode === "dark");
+
   return (
-    <div className="relative flex h-[405px] w-[286px] items-center justify-center rounded-[30px] bg-[color-mix(in_srgb,var(--uc-static-white)_11%,var(--uc-static-black))] p-[16px] shadow-[0_24px_70px_color-mix(in_srgb,var(--uc-static-black)_54%,transparent),inset_0_0_0_1px_color-mix(in_srgb,var(--uc-static-white)_10%,transparent)]">
-      <div className="absolute inset-[7px] rounded-[26px] border border-[color-mix(in_srgb,var(--uc-static-white)_8%,transparent)]" />
-      <div className="relative h-[353px] w-[234px] overflow-hidden rounded-[22px] bg-[var(--uc-app-bg)] shadow-[0_18px_38px_color-mix(in_srgb,var(--uc-static-black)_42%,transparent)]">
-        <div className="h-[812px] w-[375px] origin-top-left scale-[0.624]">
-          <HuThemeShell theme={theme}>
-            <HuThemeMotionLayer motionProgress={0.04} preview theme={theme} />
-            <div className="relative z-[1] h-[54px] flex-shrink-0" />
-            <div className="scrollbar-hide relative z-[1] flex-1 overflow-hidden pb-[104px]">
-              <HuHomeContent
-                concept={concept}
-                onCardDetails={() => undefined}
-                onMessages={() => undefined}
-                onMoreOptions={() => undefined}
-                onRequestMoney={() => undefined}
-                onSendMoney={() => undefined}
-                pendingActions={HU_PENDING_ACTIONS}
-                onToggleAmounts={() => undefined}
-                preview
-                showAmounts={showAmounts}
-              />
-            </div>
-            <HuLightBottomNav activeNav="home" onChange={() => undefined} />
-          </HuThemeShell>
+    <div
+      className={cn(
+        "relative flex h-auto w-full items-center justify-center rounded-[24px] py-[12px] px-[16px] transition-colors duration-200",
+        isDark
+          ? "bg-[var(--uc-surface)] shadow-[0_24px_60px_rgba(0,0,0,0.6)]"
+          : "bg-[var(--uc-surface)] border border-[color-mix(in_srgb,var(--uc-text)_6%,transparent)] shadow-[0_12px_36px_rgba(0,0,0,0.06)]"
+      )}
+    >
+      {/* Phone frame bezel */}
+      <div className="relative overflow-hidden rounded-[24px] border-[5px] border-[#151515] bg-[#151515] shadow-[0_16px_40px_rgba(0,0,0,0.4)] w-[162px] h-[339px] flex items-center justify-center">
+        {/* Dynamic Island inside preview */}
+        <div className="absolute top-[8px] z-[50] h-[8px] w-[38px] rounded-full bg-[#151515]" />
+
+        {/* Screen container with isolation and translateZ to ensure perfect round corner clipping */}
+        <div
+          className="relative h-[329px] w-[152px] overflow-hidden rounded-[19px] bg-[var(--uc-app-bg)] isolate"
+          style={{ transform: "translateZ(0)" }}
+        >
+          <div className="h-[812px] w-[375px] origin-top-left scale-[0.40533] rounded-[47px] overflow-hidden">
+            <HuThemeShell theme={theme}>
+              <HuThemeMotionLayer motionProgress={0.04} preview theme={theme} />
+              <StatusBar variant={phoneChromeUsesLightForeground ? "dark" : "light"} />
+              <div className="relative z-[1] h-[54px] flex-shrink-0" />
+              <div className="scrollbar-hide relative z-[1] flex-1 overflow-hidden pb-[104px]">
+                <HuHomeContent
+                  concept={concept}
+                  onCardDetails={() => undefined}
+                  onMessages={() => undefined}
+                  onMoreOptions={() => undefined}
+                  onRequestMoney={() => undefined}
+                  onSendMoney={() => undefined}
+                  pendingActions={HU_PENDING_ACTIONS}
+                  onToggleAmounts={() => undefined}
+                  preview
+                  showAmounts={showAmounts}
+                />
+              </div>
+              <HuLightBottomNav activeNav="home" onChange={() => undefined} />
+              {/* Home indicator bar */}
+              <div className="absolute inset-x-0 bottom-[8px] z-[40] flex justify-center">
+                <div className="h-[5px] w-[134px] rounded-full bg-[var(--uc-text)] opacity-[0.3]" />
+              </div>
+            </HuThemeShell>
+          </div>
         </div>
       </div>
     </div>
@@ -4049,7 +5283,7 @@ function HuThemeCarousel({
   return (
     <div
       ref={carouselRef}
-      className="scrollbar-hide flex w-full cursor-grab touch-pan-x select-none gap-[16px] overflow-x-auto px-[2px] pb-[2px] active:cursor-grabbing"
+      className="scrollbar-hide flex w-full cursor-grab touch-pan-x select-none gap-[16px] overflow-x-auto px-[6px] py-[8px] active:cursor-grabbing"
       onPointerCancel={finishPointerDrag}
       onPointerDown={handlePointerDown}
       onPointerLeave={finishPointerDrag}
@@ -4075,18 +5309,18 @@ function HuThemeCarousel({
               className={cn(
                 "relative grid size-[64px] place-items-center rounded-full border transition-transform duration-200",
                 isSelected
-                  ? "scale-[1.04] border-[var(--uc-static-white)] shadow-[0_0_0_3px_color-mix(in_srgb,var(--uc-static-white)_18%,transparent)]"
-                  : "border-[color-mix(in_srgb,var(--uc-static-white)_18%,transparent)]",
+                  ? "scale-[1.04] border-[var(--uc-text)] shadow-[0_0_0_3px_color-mix(in_srgb,var(--uc-text)_18%,transparent)]"
+                  : "border-[color-mix(in_srgb,var(--uc-text)_18%,transparent)]",
               )}
               style={{ background: theme.swatchBackground }}
             >
               {isSelected ? (
-                <span className="grid size-[34px] place-items-center rounded-full bg-[color-mix(in_srgb,var(--uc-static-black)_42%,transparent)] text-[var(--uc-static-white)]">
+                <span className="grid size-[34px] place-items-center rounded-full bg-[color-mix(in_srgb,var(--uc-app-bg)_62%,transparent)] text-[var(--uc-text)]">
                   <AppIcon name="prime-check" size={18} />
                 </span>
               ) : null}
               {!isSelected && isApplied ? (
-                <span className="absolute bottom-[-3px] right-[-3px] grid size-[22px] place-items-center rounded-full bg-[var(--uc-static-white)] text-[var(--uc-static-black)]">
+                <span className="absolute bottom-[-3px] right-[-3px] grid size-[22px] place-items-center rounded-full bg-[var(--uc-text)] text-[var(--uc-app-bg)] shadow-[0_2px_6px_rgba(0,0,0,0.15)]">
                   <AppIcon name="prime-check" size={13} />
                 </span>
               ) : null}
@@ -4094,7 +5328,7 @@ function HuThemeCarousel({
             <span
               className={cn(
                 "mt-[8px] max-w-full truncate text-[12px] leading-[15px] tracking-[0]",
-                isSelected ? "font-bold text-[var(--uc-static-white)]" : "font-normal text-[color-mix(in_srgb,var(--uc-static-white)_68%,transparent)]",
+                isSelected ? "font-bold text-[var(--uc-text)]" : "font-normal text-[color-mix(in_srgb,var(--uc-text)_68%,transparent)]",
               )}
             >
               {theme.name}
@@ -4768,7 +6002,7 @@ function HuKidsCreateGoalPage({
             Goal name
           </label>
           <input
-            className="mt-[8px] h-[48px] w-full rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)] outline-none"
+            className="mt-[8px] h-[48px] w-full rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
             onChange={(event) => setTitle(event.target.value)}
             placeholder="What are you saving for?"
             value={title}
@@ -4777,7 +6011,7 @@ function HuKidsCreateGoalPage({
           <label className="mt-[18px] block text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
             Target
           </label>
-          <div className="mt-[8px] flex h-[58px] items-center rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px]">
+          <div className="mt-[8px] flex h-[58px] items-center rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] focus-within:ring-2 focus-within:ring-[var(--uc-action)] focus-within:ring-offset-2 focus-within:ring-offset-[var(--uc-app-bg)]">
             <input
               className="min-w-0 flex-1 bg-transparent text-[28px] font-bold leading-[32px] tracking-[0] text-[var(--uc-text)] outline-none"
               inputMode="numeric"
@@ -4852,6 +6086,10 @@ const HU_LEARN_TOPIC_ARTWORK: Record<string, HuLearnArtworkKey> = {
   "online-safety": "topic-online-safety",
   "request-money": "topic-request-money",
   "card-confidence": "topic-card-confidence",
+  "smart-budgeting": "money-check",
+  "earning-money": "boost",
+  "digital-security": "private-codes",
+  "family-banking": "ask-help",
 };
 
 const HU_LEARN_LESSON_ARTWORK: Record<string, HuLearnArtworkKey> = {
@@ -4870,6 +6108,18 @@ const HU_LEARN_LESSON_ARTWORK: Record<string, HuLearnArtworkKey> = {
   "card-confidence-pay": "card-pay",
   "card-confidence-freeze": "card-freeze",
   "card-confidence-details": "card-private",
+  "budgeting-categories": "balance",
+  "budgeting-tracking": "spend-today",
+  "budgeting-adjust": "card-freeze",
+  "earning-work": "boost",
+  "earning-rewards": "target",
+  "earning-hustle": "card-pay",
+  "security-biometric": "card-private",
+  "security-phishing": "pause",
+  "security-wifi": "report-safety",
+  "family-decisions": "ask-help",
+  "family-trust": "request-wait",
+  "family-goals": "request-reason",
 };
 
 function getHuLearnArtworkSrc(key?: HuLearnArtworkKey) {
@@ -4922,7 +6172,7 @@ function HuKidsLearnPage({
         </div>
 
         <div className="mt-[16px]">
-          <p className="px-[2px] text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">Suggested</p>
+          <p className="px-[2px] text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">New</p>
           <HuLearnTopicCard
             className="mt-[10px]"
             completedLessonIds={completedLessonIds}
@@ -4940,14 +6190,16 @@ function HuKidsLearnPage({
             </p>
           </div>
           <div className="mt-[10px] grid grid-cols-2 gap-x-[15px] gap-y-[16px]">
-            {topics.map((topic) => (
-              <HuLearnTopicCard
-                key={topic.id}
-                completedLessonIds={completedLessonIds}
-                onClick={() => onSelectTopic(topic.id)}
-                topic={topic}
-              />
-            ))}
+            {topics
+              .filter((topic) => topic.id !== suggestedTopic?.id)
+              .map((topic) => (
+                <HuLearnTopicCard
+                  key={topic.id}
+                  completedLessonIds={completedLessonIds}
+                  onClick={() => onSelectTopic(topic.id)}
+                  topic={topic}
+                />
+              ))}
           </div>
         </section>
       </section>
@@ -5140,6 +6392,22 @@ function HuKidsLearnLessonPage({
   theme: HuThemePreset;
   topic: HuLearnTopic | null;
 }) {
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
+
+  useEffect(() => {
+    setCurrentSlideIndex(0);
+    if (completed && lesson?.quiz) {
+      const initial: Record<number, number> = {};
+      lesson.quiz.forEach((q, idx) => {
+        initial[idx] = q.correctIndex;
+      });
+      setSelectedAnswers(initial);
+    } else {
+      setSelectedAnswers({});
+    }
+  }, [lesson, completed]);
+
   if (!topic || !lesson) {
     return (
       <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
@@ -5152,48 +6420,202 @@ function HuKidsLearnLessonPage({
   const progress = ((lessonIndex + 1) / topic.lessons.length) * 100;
   const imageSrc = getHuLearnLessonImageSrc(lesson);
 
+  const totalSlides = (lesson.slides?.length ?? 0) + 1; // slides + quiz page
+  const hasQuiz = lesson.quiz && lesson.quiz.length > 0;
+
+  const allCorrect = hasQuiz
+    ? lesson.quiz.every((q, idx) => selectedAnswers[idx] === q.correctIndex)
+    : true;
+
+  const handleContinue = () => {
+    if (currentSlideIndex < totalSlides - 1) {
+      setCurrentSlideIndex((prev) => prev + 1);
+    }
+  };
+
+  const handleBackSlide = () => {
+    if (currentSlideIndex > 0) {
+      setCurrentSlideIndex((prev) => prev - 1);
+    } else {
+      onBack();
+    }
+  };
+
   return (
     <div className="relative z-[1] flex min-h-0 flex-1 flex-col" data-hu-learn-lesson={lesson.id}>
-      <HuKidsGoalPageHeader onBack={onBack} theme={theme} title="Lesson" />
-      <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto px-[24px] pb-[36px] pt-[18px]">
-        <div className="mx-auto h-[6px] w-[160px] overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--uc-text)_16%,transparent)]">
-          <div className="h-full rounded-full bg-[var(--hu-theme-accent-strong)]" style={{ width: `${progress}%` }} />
-        </div>
+      <HuKidsGoalPageHeader onBack={handleBackSlide} theme={theme} title="Lesson" />
 
-        <section
-          className="relative mt-[18px] min-h-[430px] overflow-hidden rounded-[22px] border p-[22px]"
-          style={HU_LEARN_CARD_SURFACE_STYLE}
-        >
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: "var(--hu-learn-card-glow)" }} />
-          <p className="text-[16px] font-normal leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">{lesson.eyebrow}</p>
-          <h1 className="mt-[24px] text-[32px] font-bold leading-[36px] tracking-[0] text-[var(--uc-text)]">{lesson.title}</h1>
-          <p className="mt-[14px] text-[17px] font-normal leading-[23px] tracking-[0] text-[var(--uc-text-muted)]">{lesson.description}</p>
-          <HuLearnTopicArt imageSrc={imageSrc} variant="lesson-hero" visual={lesson.visual} />
-        </section>
+      {/* Slide Segmented Indicator */}
+      <div className="flex gap-[6px] justify-center mt-[10px] px-[24px]">
+        {Array.from({ length: totalSlides }).map((_, idx) => (
+          <div
+            key={idx}
+            className={cn(
+              "h-[4px] flex-1 rounded-full transition-all duration-300",
+              idx <= currentSlideIndex
+                ? "bg-[var(--hu-theme-accent-strong)]"
+                : "bg-[color-mix(in_srgb,var(--uc-text)_12%,transparent)]"
+            )}
+          />
+        ))}
+      </div>
 
-        <section className="mt-[14px] rounded-[18px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
-          <h2 className="text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">What to remember</h2>
-          <div className="mt-[12px] flex flex-col gap-[13px]">
-            {lesson.body.map((paragraph) => (
-              <p key={paragraph} className="text-[16px] font-normal leading-[22px] tracking-[0] text-[var(--uc-text-muted)]">
-                {paragraph}
+      <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto px-[24px] pb-[36px] pt-[14px]">
+        {currentSlideIndex < (lesson.slides?.length ?? 0) ? (
+          // Slide View
+          <div className="flex flex-col gap-[14px]">
+            <section
+              className="relative min-h-[162px] overflow-hidden rounded-[22px] border p-[22px] pr-[150px]"
+              style={HU_LEARN_CARD_SURFACE_STYLE}
+            >
+              <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: "var(--hu-learn-card-glow)" }} />
+              <p className="text-[13px] font-normal leading-[17px] tracking-[0] text-[var(--uc-text-muted)]">
+                {lesson.eyebrow} - Slide {currentSlideIndex + 1} of {lesson.slides?.length ?? 3}
               </p>
-            ))}
-          </div>
-        </section>
+              <h1 className="mt-[10px] text-[22px] font-bold leading-[26px] tracking-[0] text-[var(--uc-text)]">{lesson.title}</h1>
+              <HuLearnTopicArt imageSrc={imageSrc} variant="topic-hero" visual={lesson.visual} />
+            </section>
 
-        <button
-          className={cn(
-            "mt-[16px] h-[48px] w-full rounded-[14px] text-[15px] font-bold leading-[19px] tracking-[0]",
-            completed
-              ? "bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent-strong)]"
-              : "bg-[var(--hu-theme-accent-strong)] text-[var(--uc-text-inverse)]",
-          )}
-          onClick={onComplete}
-          type="button"
-        >
-          {completed ? "Lesson completed" : "Mark lesson complete"}
-        </button>
+            <section className="rounded-[18px] bg-[var(--hu-theme-card-bg)] p-[20px] shadow-sm border border-[color-mix(in_srgb,var(--uc-text)_6%,transparent)] min-h-[160px]">
+              <h2 className="text-[19px] font-bold leading-[23px] tracking-[0] text-[var(--uc-text)]">
+                {lesson.slides?.[currentSlideIndex]?.title ?? "Learn"}
+              </h2>
+              <p className="mt-[12px] text-[16px] font-normal leading-[22px] tracking-[0] text-[var(--uc-text-muted)]">
+                {lesson.slides?.[currentSlideIndex]?.text}
+              </p>
+            </section>
+
+            <button
+              className="mt-[12px] h-[48px] w-full rounded-[14px] bg-[var(--hu-theme-accent-strong)] text-[15px] font-bold leading-[19px] tracking-[0] text-[var(--uc-text-inverse)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
+              onClick={handleContinue}
+              type="button"
+            >
+              Continue
+            </button>
+          </div>
+        ) : (
+          // Quiz View
+          <div className="flex flex-col gap-[14px]">
+            <section
+              className="relative min-h-[120px] overflow-hidden rounded-[22px] border p-[20px]"
+              style={HU_LEARN_CARD_SURFACE_STYLE}
+            >
+              <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: "var(--hu-learn-card-glow)" }} />
+              <p className="text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
+                {lesson.eyebrow} - Checkpoint
+              </p>
+              <h1 className="mt-[8px] text-[24px] font-bold leading-[28px] tracking-[0] text-[var(--uc-text)]">Quick Quiz</h1>
+              <p className="mt-[6px] text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
+                Answer both questions correctly to complete the lesson.
+              </p>
+            </section>
+
+            {lesson.quiz?.map((q, qIndex) => {
+              const selectedOption = selectedAnswers[qIndex];
+              const isAnswered = selectedOption !== undefined;
+              const isCorrect = selectedOption === q.correctIndex;
+              const questionId = `hu-learn-${lesson.id}-${qIndex}-question`;
+              const feedbackId = `hu-learn-${lesson.id}-${qIndex}-feedback`;
+
+              return (
+                <div
+                  key={qIndex}
+                  className="rounded-[18px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm border border-[color-mix(in_srgb,var(--uc-text)_6%,transparent)]"
+                  role="radiogroup"
+                  aria-labelledby={questionId}
+                >
+                  <p className="text-[12px] font-bold text-[var(--hu-theme-accent-strong)] uppercase tracking-wider">
+                    Question {qIndex + 1}
+                  </p>
+                  <h3 id={questionId} className="mt-[4px] text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">
+                    {q.question}
+                  </h3>
+                  <div className="mt-[12px] flex flex-col gap-[8px]">
+                    {q.options.map((option, optIndex) => {
+                      const isSelected = selectedOption === optIndex;
+                      const isOptionCorrect = optIndex === q.correctIndex;
+
+                      let optionClass =
+                        "border border-[color-mix(in_srgb,var(--uc-text)_10%,transparent)] bg-[var(--hu-theme-control-bg)] text-[var(--uc-text)]";
+                      if (isSelected) {
+                        if (isOptionCorrect) {
+                          optionClass =
+                            "border-2 border-[var(--uc-green-main)] bg-[color-mix(in_srgb,var(--uc-green-main)_10%,transparent)] text-[var(--uc-text)] font-semibold";
+                        } else {
+                          optionClass =
+                            "border-2 border-[var(--uc-red-main)] bg-[color-mix(in_srgb,var(--uc-red-main)_10%,transparent)] text-[var(--uc-text)] font-semibold";
+                        }
+                      }
+
+                      return (
+                        <button
+                          key={optIndex}
+                          type="button"
+                          aria-checked={isSelected}
+                          aria-describedby={isAnswered ? feedbackId : undefined}
+                          role="radio"
+                          className={cn(
+                            "flex w-full items-center justify-between rounded-[12px] px-[16px] py-[12px] text-left text-[14px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]",
+                            optionClass
+                          )}
+                          onClick={() => {
+                            setSelectedAnswers((prev) => ({
+                              ...prev,
+                              [qIndex]: optIndex,
+                            }));
+                          }}
+                        >
+                          <span className="flex-1 pr-2">{option}</span>
+                          <span
+                            className={cn(
+                              "size-[18px] rounded-full border flex items-center justify-center shrink-0",
+                              isSelected
+                                ? isOptionCorrect
+                                  ? "border-[var(--uc-green-main)] bg-[var(--uc-green-main)] text-white"
+                                  : "border-[var(--uc-red-main)] bg-[var(--uc-red-main)] text-white"
+                                : "border-[color-mix(in_srgb,var(--uc-text)_20%,transparent)]"
+                            )}
+                          >
+                            {isSelected && <span className="size-[8px] rounded-full bg-white" />}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {isAnswered && (
+                    <p
+                      id={feedbackId}
+                      aria-live="polite"
+                      className={cn(
+                        "mt-[10px] text-[13px] font-medium flex items-center gap-1",
+                        isCorrect ? "text-[var(--uc-green-main)]" : "text-[var(--uc-red-main)]"
+                      )}
+                    >
+                      {isCorrect ? "Correct. Great job." : "Incorrect. Try another option."}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+
+            <button
+              className={cn(
+                "mt-[12px] h-[48px] w-full rounded-[14px] text-[15px] font-bold leading-[19px] tracking-[0] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]",
+                completed
+                  ? "bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent-strong)]"
+                  : allCorrect
+                  ? "bg-[var(--hu-theme-accent-strong)] text-[var(--uc-text-inverse)]"
+                  : "bg-[color-mix(in_srgb,var(--uc-text)_10%,transparent)] text-[var(--uc-text-muted)] cursor-not-allowed",
+              )}
+              onClick={onComplete}
+              disabled={!allCorrect}
+              type="button"
+            >
+              {completed ? "Lesson completed" : "Mark lesson complete"}
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );
@@ -5776,7 +7198,7 @@ function HuLightBottomNav({
     >
       <BottomNavigation
         activeTab={activeNav}
-        iconOverrides={{ analytics: "hu-kids-saving", products: "book-open" }}
+        iconOverrides={{ analytics: "hu-kids-saving", products: "hu-kids-learn" }}
         labelOverrides={{ analytics: "Saving", products: "Learn" }}
         onTabChange={onChange}
       />

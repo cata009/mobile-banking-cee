@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useId } from "react";
+import { ReactNode, useEffect, useId, useRef } from "react";
 import { AppIcon } from "@/app/components/icons";
 
 interface BottomSheetProps {
@@ -11,16 +11,57 @@ interface BottomSheetProps {
 
 export function BottomSheet({ title, subtitle, meta, children, onClose }: BottomSheetProps) {
   const titleId = useId();
+  const dialogRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
+    const dialog = dialogRef.current;
+    const previouslyFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const getFocusableElements = () =>
+      Array.from(
+        dialog?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      ).filter((element) => !element.hasAttribute("disabled") && element.getAttribute("aria-hidden") !== "true");
+
+    const focusTimer = window.setTimeout(() => {
+      (getFocusableElements()[0] ?? dialog)?.focus();
+    }, 0);
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onClose();
+        return;
+      }
+
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const focusableElements = getFocusableElements();
+      if (focusableElements.length === 0) {
+        event.preventDefault();
+        dialog?.focus();
+        return;
+      }
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      window.clearTimeout(focusTimer);
+      window.removeEventListener("keydown", handleKeyDown);
+      previouslyFocusedElement?.focus();
+    };
   }, [onClose]);
 
   return (
@@ -35,7 +76,9 @@ export function BottomSheet({ title, subtitle, meta, children, onClose }: Bottom
         aria-labelledby={title ? titleId : undefined}
         aria-modal="true"
         className="relative max-h-[calc(100%-54px)] w-full overflow-y-auto rounded-t-[12px] bg-[var(--uc-sheet-bg)] p-[16px] shadow-[0_-8px_24px_rgb(var(--uc-shadow-rgb)_/_0.18)]"
+        ref={dialogRef}
         role="dialog"
+        tabIndex={-1}
       >
         <div className="mb-[24px] flex items-start justify-between gap-[16px]">
           <div className="min-w-0">
@@ -56,7 +99,7 @@ export function BottomSheet({ title, subtitle, meta, children, onClose }: Bottom
           </div>
           <button
             aria-label="Close"
-            className="grid size-[32px] shrink-0 place-items-center bg-transparent text-[var(--uc-text)]"
+            className="grid size-[32px] shrink-0 place-items-center bg-transparent text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-sheet-bg)]"
             onClick={onClose}
             type="button"
           >

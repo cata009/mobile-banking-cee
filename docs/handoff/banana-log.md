@@ -78,3 +78,11 @@ This log records bananas found and how they were triaged.
 | Banana | Triage | Evidence |
 | --- | --- | --- |
 | `.codex-temp/` contained temporary PDF extraction images and dev-server logs and appeared as untracked publish scope | Fixed by adding `.codex-temp/` to `.gitignore` before staging, so only product/runtime source and handoff docs are committed | `.gitignore`, `git ls-files --others --exclude-standard` |
+
+## 2026-06-13
+
+| Banana | Triage | Evidence |
+| --- | --- | --- |
+| HU Kids appearance selector still risked light/dark ping-pong after the previous fix | Fixed by separating stored appearance preference from effective `themeMode`, and by guarding internal vs external global theme changes in `HuThemeChangePage` | `src/app/screens/kids/KidsMarketHomeApp.tsx`; `npm run build`, `npm run audit:templates`, `npm run audit:platform`, `git diff --check` |
+| HU Kids themed Payments/Products/More reused shared PI gradients that double-mixed HU theme neutrals | Fixed with scoped `--pi-*` bridge variables in `HuKidsPiMenuFrame` plus fallback-compatible updates to shared Payments, Products, and More cards | `src/app/screens/kids/KidsMarketHomeApp.tsx`, `src/app/components/payments/PaymentHeroCard.tsx`, `src/app/components/products/ProductMenuCard.tsx`, `src/app/screens/more/cards/*` |
+| Automated visual smoke could not complete after the HU theme bridge fix because Browser lost the local tab and timed out, while Chrome headless/CDP was unstable | Triaged as a known banana and next task; build/audits/diff-check passed, but visual HU theme smoke must be rerun from a stable browser session | `docs/handoff/known-bananas.md`, `docs/handoff/next-tasks.md`, `docs/handoff/current-session.md` |
