@@ -8,7 +8,7 @@ import { getDocumentsCountForCountry } from "@/app/config/documentsConfig";
 import { AppIcon, ICON_INVENTORY, type IconInventoryItem } from "@/app/components/icons";
 import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
 import PageHeader from "@/app/components/PageHeader";
-import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
+import SectionHeadingDivider, { SECTION_HEADING_DIVIDER_SOURCE, type SectionHeadingDividerVariant } from "@/app/components/SectionHeadingDivider";
 import ThemeModeSegment from "@/app/components/ThemeModeSegment";
 import BottomNavigation from "@/app/components/BottomNavigation";
 import HomeHeader from "@/app/screens/home/HomeHeader";
@@ -18,16 +18,24 @@ import ProfileAvatar, { PROFILE_AVATAR_SOURCE } from "@/app/components/ProfileAv
 import PrimaryButton from "@/app/components/PrimaryButton";
 import ToggleButton, { TOGGLE_BUTTON_SOURCE } from "@/app/components/ToggleButton";
 import LanguageSelectorButton from "@/app/components/ui/LanguageSelectorButton";
+import LinkButton from "@/app/components/ui/LinkButton";
+import Bar, { BAR_SOURCE, type BarStatus } from "@/app/components/ui/Bar";
+import DateFilter, { DATE_FILTER_SOURCE, type DateFilterType } from "@/app/components/ui/DateFilter";
 import NavigationLink from "@/app/components/ui/NavigationLink";
+import PillSorting, { PILL_SORTING_SOURCE, type PillSortingValue } from "@/app/components/ui/PillSorting";
+import Pill, { type PillVariant } from "@/app/components/ui/Pill";
 import PreLoginHeading from "@/app/components/ui/PreLoginHeading";
+import ToastMessage, { TOAST_MESSAGE_SOURCE, type ToastMessageVariant } from "@/app/components/ui/ToastMessage";
+import WalletButton, { WALLET_BUTTON_SOURCE, type GoogleWalletLocale, type WalletButtonKind, type WalletButtonSize } from "@/app/components/ui/WalletButton";
 import { RadioButton } from "@/app/components/common";
 import TextField from "@/app/components/TextField";
 import AmountField from "@/app/components/AmountField";
+import CodeField from "@/app/components/CodeField";
 import { TemplateCodePreview } from "@/app/components/templates/TemplateCodePreviews";
 import ProductAccordion from "@/app/components/ProductAccordion";
 import ProductAccordionAnimated from "@/app/components/ProductAccordionAnimated";
 import AccordionSection from "@/app/components/AccordionSection";
-import ProductCard from "@/app/components/ProductCard";
+import ProductCard, { PRODUCT_CARD_EVOLUTION_SOURCE } from "@/app/components/ProductCard";
 import FigmaCard, { CARD_SOURCE, type CardSize } from "@/app/components/cards/Card";
 import GhostBanner, { GHOST_BANNER_SOURCE } from "@/app/components/cards/GhostBanner";
 import InfoBanner, { INFO_BANNER_SOURCE } from "@/app/components/cards/InfoBanner";
@@ -54,7 +62,7 @@ import AccountCarouselIndicator from "@/app/components/accounts/AccountCarouselI
 import AccountDetailsInfoField from "@/app/components/accounts/AccountDetailsInfoField";
 import AccountTransactionRow from "@/app/components/accounts/AccountTransactionRow";
 import AccountTransactionMonthDivider from "@/app/components/accounts/AccountTransactionMonthDivider";
-import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
+import AccountSearchBar, { ACCOUNT_SEARCH_BAR_SOURCE } from "@/app/components/accounts/AccountSearchBar";
 import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
 import PaymentHeroCard, { PAYMENT_HERO_CARD_IMAGE_VARIANTS } from "@/app/components/payments/PaymentHeroCard";
 import type { PaymentHeroImageVariant, PaymentHeroItem } from "@/app/config/paymentsMenuConfig";
@@ -112,10 +120,10 @@ const InspectModeContext = createContext(false);
 
 const activeComponentFiles = [
   "AccordionSection", "AppIcon", "BottomNavigation", "CoAppingSessionScreen", "DynamicIsland", "EdgeLoadingAnimation",
-  "FloatingCoAppingButton", "LanguageSelector", "LogoutConfirmDialog", "MobileFrame", "PageHeader",
+  "FloatingCoAppingButton", "LanguageSelector", "LogoutConfirmDialog", "MobileFrame", "PageHeader", "SectionHeadingDivider",
   "PanelOverlay", "PanelWithTranslations", "PanelWithoutCoAppingTranslations", "PreLoginActiveScreen",
   "PreLoginScreen", "PrimaryButton", "ProductAccordion", "ProductAccordionAnimated", "ProductCard", "Card", "GhostBanner", "InfoBanner", "UserEventCard", "HelperCard", "PendingActionCard", "DebitCard", "CardComponent",
-  "ProductMenuCard", "ProductsList", "StatusBar", "TerminateSessionPopup", "TextField", "AmountField", "NavigationRow", "ToggleButton", "TotalRow", "UniCreditLogo", "PaymentHeroCard",
+  "ProductMenuCard", "ProductsList", "StatusBar", "TerminateSessionPopup", "TextField", "AmountField", "CodeField", "NavigationRow", "ToggleButton", "TotalRow", "UniCreditLogo", "PaymentHeroCard",
   "ProfileAvatar",
   "AccountBalanceCard", "AccountActionBar", "AccountCarouselIndicator", "AccountDetailsInfoField", "AccountSearchBar", "AccountTransactionRow", "AccountTransactionMonthDivider",
   "HomeHeader", "AccountSummary", "QuickActions", "TransactionsPreview", "UnplannedBanner",
@@ -132,7 +140,8 @@ const uiRegistryFiles = [
   "menubar", "navigation-menu", "pagination", "popover", "progress", "radio-group", "resizable",
   "scroll-area", "select", "separator", "sheet", "sidebar", "skeleton", "slider", "sonner",
   "table", "tabs", "textarea", "toggle-group", "toggle", "tooltip",
-  "ChevronIcon", "LanguageSelectorButton", "NavigationLink", "PreLoginHeading", "PrimaryButton",
+  "ChevronIcon", "LanguageSelectorButton", "LinkButton", "NavigationLink", "Pill", "PreLoginHeading", "PrimaryButton",
+  "ToastMessage",
 ];
 
 const moreCardLabels: Record<MoreCardType, string> = {
@@ -237,6 +246,8 @@ type SelectorOption = {
   id: string;
   label: string;
 };
+
+type ProductCardEvolutionVariant = "pi-default" | "pi-accordion" | "pi-open" | "sme-default" | "sme-accordion" | "sme-open";
 
 type MeasuredElement = {
   id: string;
@@ -765,7 +776,7 @@ function Specimen({ name, children, tone = "light", showThemeControl = true }: {
       <div className="overflow-hidden rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)]">
         <div className="border-b border-[var(--uc-border-muted)] px-4 py-3">
           <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <h3 className="font-['UniCredit:Bold',sans-serif] text-[16px] text-[var(--uc-text)]">{name}</h3>
+            <h3 className="uc-type-n4-strong text-[var(--uc-text)]">{name}</h3>
             {showThemeControl && (
               <ThemeModeSegment value={themeMode} onChange={setThemeMode} ariaLabel={`${name} theme mode`} />
             )}
@@ -1508,10 +1519,210 @@ function ButtonRegistryVariantSpecimen() {
   );
 }
 
+function WalletButtonVariantSpecimen() {
+  const [kind, setKind] = useState<WalletButtonKind>("google-wallet");
+  const [size, setSize] = useState<WalletButtonSize>("condensed");
+  const [locale, setLocale] = useState<GoogleWalletLocale>("EN");
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap gap-3">
+        <VariantSelector
+          id="wallet-button-kind-select"
+          label="Wallet kind"
+          value={kind}
+          onChange={(value) => setKind(value as WalletButtonKind)}
+          options={[
+            { id: "google-wallet", label: "Google wallet" },
+            { id: "apple-wallet", label: "Apple wallet" },
+            { id: "click-to-pay", label: "Click to Pay" },
+          ]}
+        />
+        <VariantSelector
+          id="wallet-button-size-select"
+          label="Wallet size"
+          value={size}
+          onChange={(value) => setSize(value as WalletButtonSize)}
+          options={[
+            { id: "condensed", label: "Condensed" },
+            { id: "long", label: "Long / 327px" },
+          ]}
+        />
+        {kind === "google-wallet" ? (
+          <VariantSelector
+            id="wallet-button-locale-select"
+            label="Google locale"
+            value={locale}
+            onChange={(value) => setLocale(value as GoogleWalletLocale)}
+            options={[
+              { id: "EN", label: "EN" },
+              { id: "HU", label: "HU" },
+              { id: "SK", label: "SK" },
+              { id: "CZ", label: "CZ" },
+            ]}
+          />
+        ) : null}
+      </div>
+      <div className="flex min-h-[104px] w-[375px] items-center justify-center rounded-[8px] bg-[var(--uc-surface)] p-[24px]">
+        <WalletButton kind={kind} size={size} locale={locale} />
+      </div>
+    </div>
+  );
+}
+
+function BarVariantSpecimen() {
+  const [status, setStatus] = useState<BarStatus>("full");
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="bar-status-select"
+        value={status}
+        onChange={(value) => setStatus(value as BarStatus)}
+        options={[
+          { id: "empty", label: "Empty" },
+          { id: "full", label: "Full" },
+          { id: "mid-1", label: "Mid 1" },
+          { id: "mid-2", label: "Mid 2" },
+          { id: "small", label: "Small" },
+          { id: "thin", label: "Thin" },
+        ]}
+      />
+      <div className="flex min-h-[96px] w-[420px] items-center justify-center rounded-[8px] bg-[var(--uc-neutral-200)] p-[24px]">
+        <Bar status={status} />
+      </div>
+    </div>
+  );
+}
+
+function DateFilterVariantSpecimen() {
+  const [type, setType] = useState<DateFilterType>("five");
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="date-filter-type-select"
+        value={type}
+        onChange={(value) => setType(value as DateFilterType)}
+        options={[
+          { id: "five", label: "5 items" },
+          { id: "four", label: "4 items" },
+        ]}
+      />
+      <div className="flex min-h-[80px] w-[327px] items-center justify-center rounded-[8px] bg-[var(--uc-surface)] p-[16px]">
+        <DateFilter type={type} />
+      </div>
+    </div>
+  );
+}
+
+function PillSortingVariantSpecimen() {
+  const [selectedValue, setSelectedValue] = useState<PillSortingValue | null>("max-percent");
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="pill-sorting-state-select"
+        value={selectedValue ?? "none"}
+        onChange={(value) => setSelectedValue(value === "none" ? null : (value as PillSortingValue))}
+        options={[
+          { id: "max-percent", label: "Selected / MAX %" },
+          { id: "none", label: "Rest / no selection" },
+        ]}
+      />
+      <div className="w-[375px] rounded-[8px] bg-[var(--uc-surface)] py-[16px]">
+        <PillSorting selectedValue={selectedValue} />
+      </div>
+    </div>
+  );
+}
+
 function MiniProductIcon() {
   return (
     <div className="flex size-[32px] items-center justify-center rounded-full bg-[var(--uc-action-soft)]">
       <span className="font-['UniCredit:Bold',sans-serif] text-[13px] text-[var(--uc-action)]">UC</span>
+    </div>
+  );
+}
+
+function ProductCardListTotalRowEvolutionSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState<ProductCardEvolutionVariant>("pi-default");
+  const productStyle = selectedVariant.startsWith("sme") ? "sme" : "pi";
+  const type = selectedVariant.replace(`${productStyle}-`, "");
+  const isOpen = type === "open";
+  const isAccordion = type === "accordion";
+  const surfaceClass = productStyle === "sme" ? "bg-[var(--uc-neutral-200)]" : "bg-[var(--uc-surface)]";
+  const accountLabel = productStyle === "sme" ? "Company current account" : "Primary Account";
+  const accountNumber = productStyle === "sme" ? "HU72 BACX 0000 8832" : "RO49 BACX 0000 0000";
+
+  const cardA = (
+    <ProductCard
+      icon={<MiniProductIcon />}
+      title={accountLabel}
+      accountNumber={accountNumber}
+      amount={productStyle === "sme" ? "1,234,567" : "25,678"}
+      decimals=",00"
+      currency={productStyle === "sme" ? "HUF" : "RON"}
+      variant="evolution"
+      productStyle={productStyle}
+      stackRole={isOpen ? "first" : "single"}
+    />
+  );
+  const cardB = (
+    <ProductCard
+      icon={<MiniProductIcon />}
+      title={productStyle === "sme" ? "VAT account" : "Saving account"}
+      accountNumber={productStyle === "sme" ? "HU22 BACX 1111 9910" : "RO22 BACX 1111 1111"}
+      thirdLine={productStyle === "sme" ? "Available balance" : undefined}
+      amount={productStyle === "sme" ? "765,433" : "20,000"}
+      decimals=",00"
+      currency={productStyle === "sme" ? "HUF" : "RON"}
+      variant="evolution"
+      productStyle={productStyle}
+      stackRole={isOpen ? "middle" : "single"}
+    />
+  );
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="product-card-list-row-variant-select"
+        value={selectedVariant}
+        onChange={(value) => setSelectedVariant(value as ProductCardEvolutionVariant)}
+        options={[
+          { id: "pi-default", label: "PI app / Default" },
+          { id: "pi-accordion", label: "PI app / Accordion" },
+          { id: "pi-open", label: "PI app / Open" },
+          { id: "sme-default", label: "SME app / Default" },
+          { id: "sme-accordion", label: "SME app / Accordion" },
+          { id: "sme-open", label: "SME app / Open" },
+        ]}
+      />
+      <div className={`w-[375px] py-[16px] ${surfaceClass}`}>
+        {type === "default" ? (
+          <div className="px-[24px]">{cardA}</div>
+        ) : (
+          <ProductsList
+            isOpen={isOpen}
+            showTotal={isOpen}
+            variant="evolution"
+            productStyle={productStyle}
+            totalData={{
+              integer: productStyle === "sme" ? "2,000,000" : "45,678",
+              decimals: ",00",
+              currency: productStyle === "sme" ? "HUF" : "RON",
+            }}
+          >
+            {cardA}
+            {cardB}
+          </ProductsList>
+        )}
+      </div>
+      {isAccordion ? (
+        <p className="max-w-[327px] text-[12px] leading-[16px] text-[var(--uc-text-muted)]">
+          Closed accordion state shows the first card plus the stacked product shadow.
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -1703,6 +1914,104 @@ function AmountFieldSpecimens() {
   );
 }
 
+function CodeFieldSpecimens() {
+  const [filledValue, setFilledValue] = useState("1111");
+  const [errorValue, setErrorValue] = useState("1111");
+  const [selectedVariant, setSelectedVariant] = useState("filled");
+
+  const variants = [
+    { id: "filled", label: "Filled" },
+    { id: "error", label: "Error" },
+    { id: "empty", label: "Empty" },
+    { id: "disabled", label: "Disabled" },
+  ] satisfies readonly SelectorOption[];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="code-field-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={variants}
+      />
+      <div className="flex min-h-[128px] w-[327px] items-start justify-center">
+        {selectedVariant === "filled" ? (
+          <CodeField value={filledValue} onChange={setFilledValue} visualState="filled" ariaLabel="Filled code field specimen" />
+        ) : null}
+        {selectedVariant === "error" ? (
+          <CodeField
+            value={errorValue}
+            onChange={setErrorValue}
+            visualState="error"
+            errorText="Message"
+            errorText2="Message line 2"
+            ariaLabel="Error code field specimen"
+          />
+        ) : null}
+        {selectedVariant === "empty" ? (
+          <CodeField value="" onChange={noop} visualState="empty" ariaLabel="Empty code field specimen" />
+        ) : null}
+        {selectedVariant === "disabled" ? (
+          <CodeField value="1111" disabled visualState="disabled" ariaLabel="Disabled code field specimen" />
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function PillVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState<PillVariant>("primary");
+  const variants = [
+    { id: "primary", label: "Primary" },
+    { id: "secondary", label: "Secondary" },
+    { id: "active-counter", label: "Active counter" },
+    { id: "loading-counter", label: "Loading counter" },
+    { id: "activated", label: "Activated" },
+  ] satisfies readonly SelectorOption[];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="pill-variant-select"
+        value={selectedVariant}
+        onChange={(value) => setSelectedVariant(value as PillVariant)}
+        options={variants}
+      />
+      <div className="flex min-h-[72px] items-center justify-center rounded-[8px] bg-[var(--uc-app-bg)] p-[16px]">
+        <Pill variant={selectedVariant} onClick={noop} />
+      </div>
+    </div>
+  );
+}
+
+function ToastMessageVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState<ToastMessageVariant>("action-required");
+  const variants = [
+    { id: "action-required", label: "Action required / light" },
+    { id: "aware", label: "Aware / dark" },
+    { id: "google-pay", label: "Google Pay / dark" },
+  ] satisfies readonly SelectorOption[];
+  const isDarkSurface = selectedVariant !== "action-required";
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="toast-message-variant-select"
+        value={selectedVariant}
+        onChange={(value) => setSelectedVariant(value as ToastMessageVariant)}
+        options={variants}
+      />
+      <div
+        className={`flex min-h-[96px] w-[375px] items-center justify-center rounded-[8px] p-[24px] ${
+          isDarkSurface ? "bg-[var(--uc-static-black)]" : "bg-[var(--uc-surface)]"
+        }`}
+      >
+        <ToastMessage variant={selectedVariant} />
+      </div>
+    </div>
+  );
+}
+
 function ToggleButtonVariantSpecimen() {
   const [selectedVariant, setSelectedVariant] = useState("checked");
   const checked = selectedVariant === "checked";
@@ -1729,9 +2038,53 @@ function ToggleButtonVariantSpecimen() {
   );
 }
 
+function NavigationPlaceholderIcon() {
+  return <span className="block size-[32px] bg-[var(--uc-neutral-700)]" aria-hidden="true" />;
+}
+
+function NavigationFaqIcon() {
+  return (
+    <span className="flex size-[32px] items-center justify-center" aria-hidden="true">
+      <AppIcon name="help-circle" size={16} color="var(--uc-text)" />
+    </span>
+  );
+}
+
+function NavigationCardArt() {
+  return (
+    <span className="relative block h-[40px] w-[64px] overflow-hidden rounded-[4px] bg-[var(--uc-neutral-100)] shadow-[0_1px_1px_rgba(0,0,0,0.25)]" aria-hidden="true">
+      <span className="absolute left-[-7px] top-[-2px] h-[48px] w-[28px] skew-x-[-14deg] bg-[var(--uc-red-main)]" />
+      <span className="absolute left-[20px] top-[5px] text-[4px] font-bold leading-none text-[var(--uc-text)]">UniCredit</span>
+      <span className="absolute bottom-[9px] right-[8px] size-[10px] rounded-full bg-[var(--uc-orange-main)]" />
+      <span className="absolute bottom-[9px] right-[14px] size-[10px] rounded-full bg-[var(--uc-red-main)] opacity-90" />
+    </span>
+  );
+}
+
 function NavigationRowVariantSpecimen() {
-  const [selectedVariant, setSelectedVariant] = useState("description-toggle");
+  const [selectedVariant, setSelectedVariant] = useState("icon-title");
   const [toggleChecked, setToggleChecked] = useState(false);
+
+  const cases = [
+    { id: "icon-title", label: "Icon / Title" },
+    { id: "icon-description", label: "Icon / Description" },
+    { id: "icon-cta", label: "Icon / CTA" },
+    { id: "icon-readed", label: "Icon / Readed" },
+    { id: "icon-prelogin", label: "Icon / Prelogin" },
+    { id: "no-icon-title", label: "No icon / Title" },
+    { id: "no-icon-description", label: "No icon / Description" },
+    { id: "no-icon-cta", label: "No icon / CTA" },
+    { id: "toggle-title", label: "Toggle / Title" },
+    { id: "toggle-description", label: "Toggle / Description" },
+    { id: "toggle-cta", label: "Toggle / CTA" },
+    { id: "toggle-title-light", label: "Toggle / Title / Light restyle" },
+    { id: "toggle-description-light", label: "Toggle / Description / Light restyle" },
+    { id: "toggle-icon-light", label: "Toggle / Icon / Light restyle" },
+    { id: "special-card", label: "Special / Card" },
+    { id: "special-text-message", label: "Special / Text message" },
+    { id: "special-cta", label: "Special / CTA" },
+    { id: "special-payment-type", label: "Special / Payment type" },
+  ] satisfies readonly SelectorOption[];
 
   return (
     <div className="flex flex-col gap-4">
@@ -1739,14 +2092,73 @@ function NavigationRowVariantSpecimen() {
         id="navigation-row-variant-select"
         value={selectedVariant}
         onChange={setSelectedVariant}
-        options={[
-          { id: "description-toggle", label: "Description + toggle" },
-          { id: "link-toggle", label: "Link + toggle" },
-          { id: "icon-description-chevron", label: "Icon + chevron" },
-        ]}
+        options={cases}
       />
-      <div className="w-[375px]">
-        {selectedVariant === "description-toggle" ? (
+      <div className="w-[375px] bg-[var(--uc-neutral-200)]">
+        {selectedVariant === "icon-title" ? (
+          <NavigationRow
+            title="TITLE LOREM IPSUM TITLE LOREM IPSUM"
+            leadingVisual={<NavigationPlaceholderIcon />}
+            trailingAccessory="chevron"
+            onClick={noop}
+          />
+        ) : selectedVariant === "icon-description" ? (
+          <NavigationRow
+            title="TITLE LOREM IPSUM TITLE LOREM IPSUM"
+            description="Description Short"
+            leadingVisual={<NavigationPlaceholderIcon />}
+            trailingAccessory="chevron"
+            onClick={noop}
+          />
+        ) : selectedVariant === "icon-cta" ? (
+          <NavigationRow
+            title="TITLE LOREM IPSUM"
+            linkLabel="CTA"
+            leadingVisual={<NavigationPlaceholderIcon />}
+            trailingAccessory="chevron"
+            onClick={noop}
+          />
+        ) : selectedVariant === "icon-readed" ? (
+          <NavigationRow
+            title="TITLE LOREM IPSUM TITLE LOREM IPSUM"
+            description="Description Short"
+            leadingVisual={<NavigationPlaceholderIcon />}
+            trailingAccessory="chevron"
+            onClick={noop}
+          />
+        ) : selectedVariant === "icon-prelogin" ? (
+          <NavigationRow
+            title="TITLE LOREM IPSUM"
+            leadingVisual={<NavigationPlaceholderIcon />}
+          />
+        ) : selectedVariant === "no-icon-title" ? (
+          <NavigationRow
+            title="TITLE LOREM IPSUM TITLE LOREM IPSUM"
+            trailingAccessory="chevron"
+            onClick={noop}
+          />
+        ) : selectedVariant === "no-icon-description" ? (
+          <NavigationRow
+            title="TITLE LOREM IPSUM TITLE LOREM IPSUM"
+            description="Description Short"
+            trailingAccessory="chevron"
+            onClick={noop}
+          />
+        ) : selectedVariant === "no-icon-cta" ? (
+          <NavigationRow
+            title="TITLE LOREM IPSUM"
+            linkLabel="CTA"
+            trailingAccessory="chevron"
+            onClick={noop}
+          />
+        ) : selectedVariant === "toggle-title" ? (
+          <NavigationRow
+            title="TITLE LOREM IPSUM TITLE LOREM IPSUM"
+            trailingAccessory="toggle"
+            toggleChecked={toggleChecked}
+            onToggle={setToggleChecked}
+          />
+        ) : selectedVariant === "toggle-description" ? (
           <NavigationRow
             title="TITLE LOREM IPSUM TITLE LOREM IPSUM"
             description="Description Short"
@@ -1754,21 +2166,71 @@ function NavigationRowVariantSpecimen() {
             toggleChecked={toggleChecked}
             onToggle={setToggleChecked}
           />
-        ) : selectedVariant === "link-toggle" ? (
+        ) : selectedVariant === "toggle-cta" ? (
           <NavigationRow
             title="TITLE LOREM IPSUM"
-            linkLabel="OPEN FILE"
+            linkLabel="CTA"
             trailingAccessory="toggle"
             toggleChecked={toggleChecked}
             onToggle={setToggleChecked}
+          />
+        ) : selectedVariant === "toggle-title-light" ? (
+          <NavigationRow
+            title="LOREM IPSUM"
+            leadingVisual={<NavigationFaqIcon />}
+            trailingAccessory="toggle"
+            toggleChecked={toggleChecked}
+            onToggle={setToggleChecked}
+          />
+        ) : selectedVariant === "toggle-description-light" ? (
+          <NavigationRow
+            title="LOREM IPSUM"
+            description="Lorem ipsum"
+            leadingVisual={<NavigationFaqIcon />}
+            trailingAccessory="toggle"
+            toggleChecked={toggleChecked}
+            onToggle={setToggleChecked}
+          />
+        ) : selectedVariant === "toggle-icon-light" ? (
+          <NavigationRow
+            title="LOREM IPSUM"
+            leadingVisual={<NavigationPlaceholderIcon />}
+            trailingAccessory="toggle"
+            toggleChecked={toggleChecked}
+            onToggle={setToggleChecked}
+          />
+        ) : selectedVariant === "special-card" ? (
+          <NavigationRow
+            title="TITLE LOREM IPSUM"
+            description="Description Short"
+            leadingVisual={<NavigationCardArt />}
+            trailingAccessory="chevron"
+            onClick={noop}
+          />
+        ) : selectedVariant === "special-text-message" ? (
+          <NavigationRow
+            title="NO TRANSACTION YET 🧐"
+            rowHeight={64}
+            centerContent
+            titleClassName="uc-type-n5-strong"
+          />
+        ) : selectedVariant === "special-cta" ? (
+          <NavigationRow
+            title="SHOW MORE"
+            rowHeight={64}
+            centerContent
+            titleTone="action"
+            titleClassName="uc-type-n5-strong"
+            onClick={noop}
           />
         ) : (
           <NavigationRow
-            title="TITLE LOREM IPSUM TITLE LOREM IPSUM"
-            description="Description Short"
-            leadingIconName="contact-prime"
-            trailingAccessory="chevron"
-            onClick={noop}
+            title="PAYMENT TYPE"
+            rowHeight={64}
+            leadingIconName="transaction-transfer"
+            trailingAccessory="toggle"
+            toggleChecked={toggleChecked}
+            onToggle={setToggleChecked}
           />
         )}
       </div>
@@ -1968,13 +2430,16 @@ function AccountSearchBarVariantSpecimen() {
         options={[
           { id: "default", label: "Default" },
           { id: "filled", label: "Filled / clear state" },
+          { id: "filters-active", label: "Active / remove filters" },
         ]}
       />
       <div className="flex w-[375px] flex-col gap-[12px] bg-[var(--uc-surface)]">
         {selectedVariant === "default" ? (
           <AccountSearchBar />
-        ) : (
+        ) : selectedVariant === "filled" ? (
           <AccountSearchBar value="Carrefour" onValueChange={noop} />
+        ) : (
+          <AccountSearchBar filtersActive onFilterClick={noop} onRemoveFilters={noop} />
         )}
       </div>
     </div>
@@ -2107,6 +2572,50 @@ function ContactsNavigationCardVariantSpecimen() {
           subtitle={icon === "time" ? "Mon - Sun | 07:00 - 22:00" : undefined}
           hasChevron={icon === "prime"}
           onClick={noop}
+        />
+      </div>
+    </div>
+  );
+}
+
+const sectionHeadingDividerVariants = [
+  { id: "small-title-data", label: "Small title + data", title: "UPCOMING PAYMENTS", secondaryText: "30,000.00 RSD" },
+  { id: "small-two-line-title-data", label: "Small 2 lines + data", title: "UPCOMING PAYMENTS\nON TWO LINES", secondaryText: "30,000.00 RSD" },
+  { id: "medium-title", label: "Medium title", title: "TITLE" },
+  { id: "with-counter", label: "With counter", title: "TITLE", count: 18 },
+  { id: "medium-two-line-title", label: "Medium 2 lines title", title: "TITLE HERE IS SO LONG THAT\nCAN BE USED ON TWO LINES" },
+  { id: "large-title", label: "Large title", title: "November" },
+  { id: "large-two-line-title", label: "Large 2 lines title", title: "Your monthly Report", secondaryText: "for October 2018" },
+  { id: "action-date", label: "Action + date", title: "SELECT ALL", secondaryText: "DD/MM/YY - DD/MM/YY" },
+  { id: "name-action", label: "Name + Action", title: "PAYMENT DETAILS 2", secondaryText: "REMOVE" },
+  { id: "action-date-checkbox", label: "Action + date v2", title: "SELECT ALL", secondaryText: "DD/MM/YY - DD/MM/YY" },
+  { id: "light-title", label: "Light Restyle / Title", title: "ALL PRODUCTS", secondaryText: "N" },
+  { id: "light-date", label: "Light Restyle / Date", title: "15 JULY 2022" },
+  { id: "light-small-title-data", label: "Light Restyle / Small + data", title: "TRANSACTION FEE", secondaryText: "500,00 CZK" },
+] satisfies readonly (SelectorOption & {
+  title: string;
+  secondaryText?: string;
+  count?: number;
+})[];
+
+function SectionHeadingDividerVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState(sectionHeadingDividerVariants[0].id);
+  const activeVariant = sectionHeadingDividerVariants.find((variant) => variant.id === selectedVariant) ?? sectionHeadingDividerVariants[0];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="section-heading-divider-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={sectionHeadingDividerVariants}
+      />
+      <div className="flex min-h-[96px] w-[375px] items-start bg-[var(--uc-app-bg)] py-[16px]">
+        <SectionHeadingDivider
+          variant={activeVariant.id as SectionHeadingDividerVariant}
+          title={activeVariant.title}
+          secondaryText={activeVariant.secondaryText}
+          count={activeVariant.count}
         />
       </div>
     </div>
@@ -3671,6 +4180,22 @@ export default function DesignSystemPage() {
               <Specimen name="BottomNavigation / all active states" source="components/BottomNavigation.tsx" specs={["container 375x54", "icons 32px", "labels 14px / 15px line", "active bar 24x2", "0 gap bar/icon/label"]}>
                 <BottomNavigationVariantSpecimen />
               </Specimen>
+              <Specimen
+                name="Divider"
+                source="components/SectionHeadingDivider.tsx"
+                note={`${SECTION_HEADING_DIVIDER_SOURCE.schema} / ${SECTION_HEADING_DIVIDER_SOURCE.sourceNodeIds.menigaDivider}`}
+                specs={["13 mapped Meniga states", "375px standard width", "343px Light Restyle width", "14px N5 strong labels", "20px N2 large titles", "1px divider line", "action/counter/data variants"]}
+              >
+                <SectionHeadingDividerVariantSpecimen />
+              </Specimen>
+              <Specimen
+                name="Bar"
+                source="components/ui/Bar.tsx"
+                note={`${BAR_SOURCE.schema} / ${BAR_SOURCE.sourceNodeId}`}
+                specs={["6 mapped statuses", "375x8 standard states", "24px left inset", "teal active fill", "279x1 thin state"]}
+              >
+                <BarVariantSpecimen />
+              </Specimen>
               <div className="grid gap-5 lg:grid-cols-2">
                 <Specimen name="LanguageSelectorButton" source="components/ui/LanguageSelectorButton.tsx" tone="dark">
                   <LanguageSelectorButton onClick={noop} language="en" />
@@ -3692,6 +4217,22 @@ export default function DesignSystemPage() {
             <div className="grid gap-5 lg:grid-cols-2">
               <Specimen name="Primary button" source="components/PrimaryButton.tsx + components/ui/PrimaryButton.tsx" specs={["327x48", "radius 4px", "Primary Action / Light", "Primary Action / Dark", "16px bold label"]}>
                 {(themeMode) => <PrimaryButtonVariantSpecimen themeMode={themeMode} />}
+              </Specimen>
+              <Specimen name="Link button" source="components/ui/LinkButton.tsx" specs={["flex w-fit", "text-chevron gap 0", "label 13px bold uppercase / 16px line", "chevron-link 24px", "uses current action color"]}>
+                <div className="flex min-h-[72px] items-center justify-center rounded-[8px] bg-[var(--uc-surface)] p-[16px]">
+                  <LinkButton onClick={noop}>SEE MORE TRANSACTIONS</LinkButton>
+                </div>
+              </Specimen>
+              <Specimen
+                name="Wallet buttons"
+                source="components/ui/WalletButton.tsx"
+                note={`${WALLET_BUTTON_SOURCE.schema} / ${WALLET_BUTTON_SOURCE.sourceNodeIds.googleWallet} · ${WALLET_BUTTON_SOURCE.sourceNodeIds.appleWallet} · ${WALLET_BUTTON_SOURCE.sourceNodeIds.clickToPay}`}
+                specs={["Google wallet", "Apple wallet", "Click to Pay", "48px height", "condensed and 327px long states", "Google EN/HU/SK/CZ labels"]}
+              >
+                <WalletButtonVariantSpecimen />
+              </Specimen>
+              <Specimen name="Pill" source="components/ui/Pill.tsx" specs={["120x36", "18px radius", "8px horizontal padding", "N5 bold 14px label", "0 2 2 shadow", "16px success/loading icons", "8px icon-label gap"]}>
+                <PillVariantSpecimen />
               </Specimen>
               <Specimen name="Button registry variants" source="components/ui/button.tsx">
                 <ButtonRegistryVariantSpecimen />
@@ -3721,6 +4262,29 @@ export default function DesignSystemPage() {
                   <AmountFieldSpecimens />
                 </Specimen>
                 <Specimen
+                  name="Code field"
+                  source="components/CodeField.tsx"
+                  specs={["327px wrapper", "224px centered slot row", "4 slots 44x64", "16px slot gap", "8px radius / 1px border", "N1 30px bold digit", "error message 224px / gap 3px"]}
+                >
+                  <CodeFieldSpecimens />
+                </Specimen>
+                <Specimen
+                  name="Date filter"
+                  source="components/ui/DateFilter.tsx"
+                  note={`${DATE_FILTER_SOURCE.schema} / ${DATE_FILTER_SOURCE.sourceNodeId}`}
+                  specs={["238x24 wrapper", "4-item and 5-item states", "15px chip gap", "35x22 chips", "3.5px radius", "14px bold label", "teal selected chip"]}
+                >
+                  <DateFilterVariantSpecimen />
+                </Specimen>
+                <Specimen
+                  name="Pill sorting"
+                  source="components/ui/PillSorting.tsx"
+                  note={`${PILL_SORTING_SOURCE.schema} / ${PILL_SORTING_SOURCE.sourceNodeId}`}
+                  specs={["375x40 rail", "8px gap", "24px chip height", "14.5px radius", "14px regular idle labels", "black selected chip with bold white label"]}
+                >
+                  <PillSortingVariantSpecimen />
+                </Specimen>
+                <Specimen
                   name="Toggle button"
                   source="components/ToggleButton.tsx"
                   note={`${TOGGLE_BUTTON_SOURCE.schema} / ${TOGGLE_BUTTON_SOURCE.sourceNodeIds.unchecked} · ${TOGGLE_BUTTON_SOURCE.sourceNodeIds.checked}`}
@@ -3732,7 +4296,7 @@ export default function DesignSystemPage() {
                   name="Navigation row"
                   source="components/NavigationRow.tsx"
                   note={`${NAVIGATION_ROW_SOURCE.schema} / ${NAVIGATION_ROW_SOURCE.sourceNodeIds.textDescriptionToggle} Â· ${NAVIGATION_ROW_SOURCE.sourceNodeIds.textLinkToggle} Â· ${NAVIGATION_ROW_SOURCE.sourceNodeIds.iconDescriptionChevron}`}
-                  specs={["375x80", "padding 24px 12px 24px 16px", "16px layout gap", "optional 32px leading icon", "title 16px bold", "optional description 16px / link 14px teal", "chevron or shared ToggleButton accessory"]}
+                  specs={["18 mapped Meniga cases", "375px wide", "64px or 80px row height", "16px layout gap", "optional 32px leading visual", "optional 64x40 card art", "title 16px bold / description 16px", "CTA 14px teal", "chevron or shared ToggleButton accessory"]}
                 >
                   <NavigationRowVariantSpecimen />
                 </Specimen>
@@ -3800,7 +4364,13 @@ export default function DesignSystemPage() {
               <Specimen name="MessagesMailboxTabs" source="components/messages/MessagesMailboxTabs.tsx" tone="gray" specs={["height 48px", "2 columns", "optional leading new dot 12px", "inactive label muted", "bottom active indicator 2px"]}>
                 <MessagesMailboxTabsVariantSpecimen />
               </Specimen>
-              <Specimen name="AccountSearchBar" source="components/accounts/AccountSearchBar.tsx" tone="gray" specs={["height auto from 32px icons", "padding 0", "outer margin 16px", "radius 10px", "background var(--uc-app-bg)", "search icon 32x32", "filter/clear icon slot 32x32", "input 14px bold"]}>
+              <Specimen
+                name="AccountSearchBar"
+                source="components/accounts/AccountSearchBar.tsx"
+                note={`${ACCOUNT_SEARCH_BAR_SOURCE.schema} / ${ACCOUNT_SEARCH_BAR_SOURCE.sourceNodeIds.activeRemoveFilters}`}
+                tone="gray"
+                specs={["32px normal search row", "63px active-remove-filters state", "padding 16px x / 2px y when filters active", "gap 8px", "search/filter icon slots 32px", "input 14px bold", "remove filters 14px bold teal"]}
+              >
                 <AccountSearchBarVariantSpecimen />
               </Specimen>
               <Specimen name="AccountTransactionRow" source="components/accounts/AccountTransactionRow.tsx" specs={["375x80", "padding 20px 16px", "day 18px/20px bold", "date gap 2px", "month 14px/15px bold", "date-to-icon gap 16px", "icon box 32px", "details column 247px", "label 16px/18px", "label-to-amount gap 4px", "amount line 22px", "amount 20px + decimals 14px", "divider L3 14px bold uppercase", "divider left muted / right K1", "divider-to-row gap 16px", "row-to-next-divider gap 16px"]}>
@@ -3830,16 +4400,14 @@ export default function DesignSystemPage() {
 
           <Section id="products" title="Products and country variants" description="Product accordions and product-family country variants, so regional differences can be reviewed in one place.">
             <div className="grid gap-5">
-              <Specimen name="Product card / list / total row" source="components/ProductCard.tsx + ProductsList.tsx + TotalRow.tsx" tone="gray" specs={["card padding 16px", "icon 32px", "amount 20px", "decimals 14px"]}>
-                <div className="w-[375px]">
-                  <AccordionSection title="Accounts" defaultOpen>
-                    <ProductsList isOpen showTotal totalData={{ integer: "45,678", decimals: ",00", currency: "RON" }}>
-                      <ProductCard icon={<MiniProductIcon />} title="Primary Account" accountNumber="RO49 BACX 0000 0000" amount="25,678" decimals=",00" currency="RON" />
-                      <ProductCard icon={<MiniProductIcon />} title="Saving account" accountNumber="RO22 BACX 1111 1111" amount="20,000" decimals=",00" currency="RON" />
-                    </ProductsList>
-                  </AccordionSection>
-                  <div className="mt-4 rounded bg-[var(--uc-surface)] p-4"><TotalRow integer="45,678" decimals=",00" currency="RON" /></div>
-                </div>
+              <Specimen
+                name="Product card / list / total row - evolution"
+                source="components/ProductCard.tsx + ProductsList.tsx + TotalRow.tsx"
+                note={`${PRODUCT_CARD_EVOLUTION_SOURCE.schema} / ${PRODUCT_CARD_EVOLUTION_SOURCE.sourceNodeId} (requested ${PRODUCT_CARD_EVOLUTION_SOURCE.originalRequestedNodeId})`}
+                tone="gray"
+                specs={["327px Figma width", "PI + SME styles", "Default / Accordion / Open", "card padding 16px", "icon 32px", "amount 24px + decimals 14px", "total amount 20px + decimals 14px"]}
+              >
+                <ProductCardListTotalRowEvolutionSpecimen />
               </Specimen>
               <Specimen name="ProductAccordion / all countries" source="components/ProductAccordion.tsx" tone="dark">
                 <ProductAccordionCountrySpecimen />
@@ -3852,6 +4420,14 @@ export default function DesignSystemPage() {
 
           <Section id="overlays" title="Overlays and dialogs" description="Components that appear above the main content. Interactive examples stay closed by default so they do not block the page.">
             <div className="grid gap-5 lg:grid-cols-2">
+              <Specimen
+                name="Toast message"
+                source="components/ui/ToastMessage.tsx"
+                note={`${TOAST_MESSAGE_SOURCE.schema} / ${TOAST_MESSAGE_SOURCE.sourceNodeId}`}
+                specs={["3 mapped Meniga states", "327x32 Aware + Action required", "174x35 Google Pay hug variant", "16px radius", "32px icon slot / 8px red dot", "20px icon-to-text gap", "14px bold UniCredit message"]}
+              >
+                <ToastMessageVariantSpecimen />
+              </Specimen>
               <Specimen name="LogoutConfirmDialog" source="components/LogoutConfirmDialog.tsx">
                 <div className="relative h-[260px] w-[375px] overflow-hidden rounded border bg-[var(--uc-app-bg)]">
                   <Button onClick={() => setShowLogout(true)} className="m-4">Open logout dialog</Button>

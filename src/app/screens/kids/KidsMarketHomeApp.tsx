@@ -29,6 +29,7 @@ import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProfileAvatar from "@/app/components/ProfileAvatar";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import UniCreditLogo from "@/app/components/UniCreditLogo";
+import LinkButton from "@/app/components/ui/LinkButton";
 import { cn } from "@/app/components/ui/utils";
 import { getDocumentsCountForCountry } from "@/app/config/documentsConfig";
 import { getMoreCardsForCountry, type MoreCardType } from "@/app/config/moreCardsConfig";
@@ -1070,6 +1071,7 @@ type HuLightView =
   | "goals"
   | "goal-detail"
   | "create-goal"
+  | "learn"
   | "learn-topic"
   | "learn-lesson";
 type HuThemeId = "default" | "nordlys" | "blue-lines" | "bubbles" | "aurora" | "garden" | "solar";
@@ -1181,20 +1183,28 @@ const HU_KIDS_RUNTIME_COUNTRY: HuKidsRuntimeCountry = "HU";
 const HU_LIGHT_ACTIONS: Array<{ id: "request" | "send" | "card" | "more"; label: string; icon: IconName }> = [
   { id: "request", label: "Request money", icon: "hu-kids-request-money" },
   { id: "send", label: "Send money", icon: "nav-payments" },
-  { id: "card", label: "My card", icon: "credit-card" },
+  { id: "card", label: "Account details", icon: "hu-kids-account-details" },
   { id: "more", label: "More Options", icon: "hu-kids-more-options" },
 ];
 
-const HU_SAVING_ACTIONS: Array<{ id: "save" | "request" | "move" | "goal"; label: string; icon: IconName }> = [
+const HU_SAVING_ACTIONS: Array<{ id: "save" | "request" | "card" | "more"; label: string; icon: IconName }> = [
   { id: "save", label: "Save money", icon: "hu-kids-saving" },
   { id: "request", label: "Request money", icon: "hu-kids-request-money" },
-  { id: "move", label: "Move money", icon: "repeat" },
-  { id: "goal", label: "Create goal", icon: "trophy" },
+  { id: "card", label: "Account details", icon: "hu-kids-account-details" },
+  { id: "more", label: "More Options", icon: "hu-kids-more-options" },
 ];
 
 const HU_MONEY_REASONS: HuMoneyReason[] = ["Food", "School", "Transport", "Fun", "Other"];
 const HU_SEND_CONTACTS: HuSendContact[] = ["Anna", "David", "Grandma"];
 const HU_SEND_APPROVAL_THRESHOLD = 5000;
+const HU_WEEKLY_SPENDING_LIMIT = 40000;
+const HU_KIDS_WEEKLY_ALLOWANCE = 5000;
+
+const HU_KIDS_TASKS = [
+  { title: "Load dishwasher", recurrence: "Weekly", reward: 1000 },
+  { title: "Brush your teeth", recurrence: "Weekly", reward: 1000 },
+  { title: "Finish your homework", recurrence: "Weekly", reward: 1000 },
+] as const;
 
 const HU_KIDS_INITIAL_GOALS: SavingGoal[] = RO_KIDS_GOALS.map((goal) => ({
   ...goal,
@@ -2623,6 +2633,10 @@ function formatHuKidsAmount(amount: number) {
   return `${new Intl.NumberFormat("hu-HU", { maximumFractionDigits: 0 }).format(amount)} HUF`;
 }
 
+function formatHuFullAmount(amount: number) {
+  return new Intl.NumberFormat("hu-HU", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
+}
+
 function formatHuKidsGoalAmount(amount: number, showAmounts = true) {
   return showAmounts ? formatHuKidsAmount(amount) : formatHuMaskedMoney();
 }
@@ -2708,6 +2722,10 @@ type HuThemePreset = {
   accent3: string;
   accentStrong?: string;
   pageBackground: string;
+  /** Opaque solid that equals the first stop of pageBackground. Used as the
+   *  sticky hero header background so it occludes scrolled content while
+   *  blending seamlessly into the top of the page gradient. */
+  pageTopColor?: string;
   motionBackground: string;
   swatchBackground: string;
   surfaceWeight: number;
@@ -2747,6 +2765,7 @@ const HU_THEME_PRESETS: HuThemePreset[] = [
     accentStrong: "color-mix(in srgb, var(--uc-product-blue-deep) 85%, var(--uc-text))",
     pageBackground:
       "linear-gradient(180deg, #03141C 0px, #042430 240px, #0A3A4A 400px, #155666 455px, color-mix(in srgb, var(--uc-app-bg) 52%, var(--uc-teal-blue)) 486px, color-mix(in srgb, var(--uc-app-bg) 78%, var(--uc-teal-soft)) 530px, var(--uc-app-bg) 600px)",
+    pageTopColor: "#03141C",
     motionBackground: "none",
     swatchBackground:
       "radial-gradient(55% 38% at 72% 86%, rgba(251, 184, 0, 0.95), rgba(240, 135, 29, 0.5) 45%, transparent 72%), linear-gradient(116deg, transparent 30%, rgba(62, 214, 200, 0.85) 46%, rgba(79, 198, 221, 0.5) 58%, transparent 74%), radial-gradient(140% 110% at 50% -20%, #155666, #0A3A4A 45%, #03141C 100%)",
@@ -2807,6 +2826,7 @@ const HU_THEME_PRESETS: HuThemePreset[] = [
     accentStrong: "color-mix(in srgb, var(--uc-product-blue) 65%, var(--uc-text))",
     heroMutedForeground: "color-mix(in srgb, var(--uc-text-muted) 10%, var(--uc-text))",
     pageBackground: "linear-gradient(180deg, color-mix(in srgb, var(--uc-static-black) 26%, var(--uc-product-blue)) 0%, var(--uc-app-bg) 390px)",
+    pageTopColor: "color-mix(in srgb, var(--uc-static-black) 26%, var(--uc-product-blue))",
     motionBackground:
       "radial-gradient(circle at 74% 18%, color-mix(in srgb, var(--hu-theme-accent-2) 28%, transparent), transparent 30%), repeating-linear-gradient(124deg, transparent 0 13px, color-mix(in srgb, var(--hu-theme-accent) 72%, transparent) 14px 16px, transparent 17px 31px), repeating-linear-gradient(64deg, transparent 0 30px, color-mix(in srgb, var(--hu-theme-accent-3) 46%, transparent) 31px 32px, transparent 33px 58px)",
     swatchBackground:
@@ -2848,6 +2868,7 @@ const HU_THEME_PRESETS: HuThemePreset[] = [
     heroMutedForeground: "color-mix(in srgb, var(--uc-text-muted) 90%, var(--uc-text))",
     pageBackground:
       "linear-gradient(180deg, color-mix(in srgb, var(--uc-green-olive) 30%, var(--uc-app-bg)) 0%, color-mix(in srgb, var(--uc-yellow-brown) 10%, var(--uc-app-bg)) 275px, var(--uc-app-bg) 395px)",
+    pageTopColor: "color-mix(in srgb, var(--uc-green-olive) 30%, var(--uc-app-bg))",
     motionBackground:
       "linear-gradient(90deg, transparent 0 10%, color-mix(in srgb, var(--hu-theme-accent) 34%, transparent) 10% 21%, transparent 21% 100%), linear-gradient(0deg, transparent 0 18%, color-mix(in srgb, var(--hu-theme-accent-3) 26%, transparent) 18% 30%, transparent 30% 100%), radial-gradient(80% 55% at 72% 0%, color-mix(in srgb, var(--hu-theme-accent-2) 32%, transparent), transparent 70%)",
     swatchBackground:
@@ -2888,6 +2909,7 @@ const HU_THEME_PRESETS: HuThemePreset[] = [
     accentStrong: "color-mix(in srgb, var(--uc-product-pink) 46%, var(--uc-text))",
     heroMutedForeground: "color-mix(in srgb, var(--uc-text-muted) 85%, var(--uc-text))",
     pageBackground: "linear-gradient(180deg, color-mix(in srgb, var(--uc-product-pink) 30%, var(--uc-app-bg)) 0%, var(--uc-app-bg) 385px)",
+    pageTopColor: "color-mix(in srgb, var(--uc-product-pink) 30%, var(--uc-app-bg))",
     motionBackground:
       "radial-gradient(circle at 18% 24%, color-mix(in srgb, var(--hu-theme-accent-3) 38%, transparent), transparent 28%), radial-gradient(circle at 70% 10%, color-mix(in srgb, var(--hu-theme-accent) 48%, transparent), transparent 34%), linear-gradient(130deg, color-mix(in srgb, var(--hu-theme-accent-2) 42%, transparent), transparent 52%), repeating-linear-gradient(38deg, transparent 0 28px, color-mix(in srgb, var(--hu-theme-accent) 26%, transparent) 29px 30px, transparent 31px 54px)",
     swatchBackground:
@@ -2928,6 +2950,7 @@ const HU_THEME_PRESETS: HuThemePreset[] = [
     accentStrong: "color-mix(in srgb, var(--uc-green-success) 60%, var(--uc-text))",
     heroMutedForeground: "color-mix(in srgb, var(--uc-text-muted) 95%, var(--uc-text))",
     pageBackground: "linear-gradient(180deg, color-mix(in srgb, var(--uc-green-success) 28%, var(--uc-app-bg)) 0%, var(--uc-app-bg) 385px)",
+    pageTopColor: "color-mix(in srgb, var(--uc-green-success) 28%, var(--uc-app-bg))",
     motionBackground:
       "radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--hu-theme-accent-2) 34%, transparent), transparent 28%), repeating-linear-gradient(110deg, transparent 0 12px, color-mix(in srgb, var(--hu-theme-accent) 56%, transparent) 13px 14px, transparent 15px 28px), repeating-linear-gradient(150deg, transparent 0 38px, color-mix(in srgb, var(--hu-theme-accent-3) 28%, transparent) 39px 41px, transparent 42px 76px)",
     swatchBackground:
@@ -2968,6 +2991,7 @@ const HU_THEME_PRESETS: HuThemePreset[] = [
     accentStrong: "color-mix(in srgb, var(--uc-orange-main) 60%, var(--uc-text))",
     heroMutedForeground: "color-mix(in srgb, var(--uc-text-muted) 95%, var(--uc-text))",
     pageBackground: "linear-gradient(180deg, color-mix(in srgb, var(--uc-orange-main) 30%, var(--uc-app-bg)) 0%, var(--uc-app-bg) 380px)",
+    pageTopColor: "color-mix(in srgb, var(--uc-orange-main) 30%, var(--uc-app-bg))",
     motionBackground:
       "radial-gradient(circle at 56% 22%, color-mix(in srgb, var(--hu-theme-accent-2) 38%, transparent), transparent 28%), repeating-radial-gradient(circle at 42% 22%, transparent 0 16px, color-mix(in srgb, var(--hu-theme-accent) 32%, transparent) 17px 18px, transparent 19px 34px), linear-gradient(140deg, color-mix(in srgb, var(--hu-theme-accent-3) 22%, transparent), transparent 55%)",
     swatchBackground:
@@ -3017,15 +3041,30 @@ function getHuThemeStyle(theme: HuThemePreset): CSSProperties {
       : "color-mix(in srgb, var(--uc-app-bg) 94%, var(--hu-theme-accent))",
     "--hu-theme-subpage-bg": isStandard
       ? "var(--uc-surface)"
-      : "linear-gradient(180deg, color-mix(in srgb, var(--uc-surface) 97%, var(--hu-theme-accent)) 0%, color-mix(in srgb, var(--uc-surface) 99%, var(--hu-theme-accent-2)) 46%, color-mix(in srgb, var(--uc-bottom-bar-bg) 96%, var(--hu-theme-accent)) 100%)",
+      : "linear-gradient(180deg, color-mix(in srgb, var(--hu-theme-accent) 22%, var(--uc-surface)) 0%, color-mix(in srgb, var(--hu-theme-accent-2) 16%, var(--uc-surface)) 50%, color-mix(in srgb, var(--hu-theme-accent) 12%, var(--uc-bottom-bar-bg)) 100%)",
+    // Must EXACTLY match the subpage-bg gradient's top stop (accent 22%) so the
+    // opaque sticky header occludes scrolled content while blending seamlessly
+    // into the page gradient — no color step / hairline at the header/content seam.
     "--hu-theme-subpage-header-bg": isStandard
       ? "var(--uc-surface)"
-      : "color-mix(in srgb, var(--uc-surface) 98%, var(--hu-theme-accent))",
+      : "color-mix(in srgb, var(--hu-theme-accent) 22%, var(--uc-surface))",
+    "--hu-theme-pi-card-bg": isStandard
+      ? "var(--uc-surface)"
+      : "var(--uc-surface)",
+    "--hu-theme-pi-card-shadow": isStandard
+      ? "var(--hu-theme-native-card-shadow)"
+      : "0 2px 12px color-mix(in srgb, var(--uc-static-black) 12%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--hu-theme-accent) 16%, var(--uc-border))",
     "--hu-theme-native-card-bg":
       "linear-gradient(105deg, var(--uc-surface-muted) 0%, var(--uc-neutral-200) 48%, var(--uc-neutral-300) 100%)",
     "--hu-theme-native-card-shadow":
       "inset 0 0 0 1px color-mix(in srgb, var(--uc-text) 6%, transparent), 0 10px 22px color-mix(in srgb, var(--uc-static-black) 7%, transparent)",
     "--hu-theme-page-bg": theme.pageBackground,
+    // Opaque sticky-header backing for hero pages (Home/Earning/Saving): equals
+    // the page gradient's first stop so the header occludes scrolled content
+    // while blending into the top of the hero atmosphere.
+    "--hu-theme-hero-header-bg": isStandard
+      ? "var(--uc-app-bg)"
+      : theme.pageTopColor ?? "var(--uc-app-bg)",
     "--hu-theme-motion-bg": theme.motionBackground,
     "--hu-theme-swatch-bg": theme.swatchBackground,
     // Surfaces stay CLEAN by default (native surface). The theme lives in the
@@ -3112,7 +3151,7 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
   const draftTheme = getHuTheme(draftThemeId);
   const learnTopics = useMemo(() => HU_LEARN_TOPICS, []);
   const phoneChromeTheme = view === "theme" ? draftTheme : appliedTheme;
-  const activeNavUsesHeroThemeField = activeNav === "home" || activeNav === "analytics";
+  const activeNavUsesHeroThemeField = activeNav === "home" || activeNav === "analytics" || activeNav === "products";
   const phoneChromeIsThemed = view === "theme" || phoneChromeTheme.id !== "default";
   const phoneChromeUsesLightForeground =
     view === "theme" || phoneChromeTheme.id === "nordlys" || phoneChromeTheme.id === "blue-lines";
@@ -3167,7 +3206,7 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
     setSelectedLearnTopicId(topicId);
     setIsMoreSheetOpen(false);
     setMotionProgress(0);
-    setActiveNav("products");
+    setActiveNav("analytics");
     setView("learn-topic");
   };
 
@@ -3176,8 +3215,14 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
     setSelectedLearnLessonId(lessonId);
     setIsMoreSheetOpen(false);
     setMotionProgress(0);
-    setActiveNav("products");
+    setActiveNav("analytics");
     setView("learn-lesson");
+  };
+
+  const handleOpenLearn = () => {
+    setIsMoreSheetOpen(false);
+    setMotionProgress(0);
+    setView("learn");
   };
 
   const handleOpenCardDetails = (cardId: string) => {
@@ -3465,6 +3510,24 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
       );
     }
 
+    if (view === "learn") {
+      return (
+        <HuKidsLearnPage
+          completedLessonIds={completedLearnLessonIds}
+          learnModules={learnModules}
+          onSelectTopic={handleOpenLearnTopic}
+          onMessages={handleOpenMessages}
+          theme={appliedTheme}
+          topics={learnTopics}
+          onBack={() => {
+            setView("home");
+            setActiveNav("analytics");
+            setMotionProgress(0);
+          }}
+        />
+      );
+    }
+
     if (view === "learn-topic") {
       const selectedTopic = learnTopics.find((topic) => topic.id === selectedLearnTopicId) ?? learnTopics[0] ?? null;
 
@@ -3472,8 +3535,8 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
         <HuKidsLearnTopicPage
           completedLessonIds={completedLearnLessonIds}
           onBack={() => {
-            setView("home");
-            setActiveNav("products");
+            setView("learn");
+            setActiveNav("analytics");
             setMotionProgress(0);
           }}
           onOpenLesson={handleOpenLearnLesson}
@@ -3494,7 +3557,7 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
           lesson={selectedLesson}
           onBack={() => {
             setView("learn-topic");
-            setActiveNav("products");
+            setActiveNav("analytics");
             setMotionProgress(0);
           }}
           onComplete={() => {
@@ -3528,6 +3591,14 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
           <>
             <div className="relative z-[1] h-[54px] flex-shrink-0" />
 
+            <div className="relative z-[2] flex-shrink-0">
+              <HuLightHeader
+                showAmounts={showAmounts}
+                onMessages={handleOpenMessages}
+                onToggleAmounts={() => setShowAmounts((current) => !current)}
+              />
+            </div>
+
             <div
               className="scrollbar-hide relative z-[1] flex-1 overflow-y-auto pb-[104px]"
               onScroll={(event) => {
@@ -3535,20 +3606,7 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
                 setMotionProgress(nextProgress);
               }}
             >
-              {activeNav === "analytics" ? (
-                <HuSavingContent
-                  concept={concept}
-                  goals={goals}
-                  onMessages={handleOpenMessages}
-                  onCreateGoal={handleOpenCreateGoal}
-                  onOpenGoals={handleOpenGoals}
-                  onRequestMoney={handleOpenRequestMoney}
-                  onSelectGoal={handleSelectGoal}
-                  onSendMoney={handleOpenSendMoney}
-                  onToggleAmounts={() => setShowAmounts((current) => !current)}
-                  showAmounts={showAmounts}
-                />
-              ) : (
+              {activeNav === "home" ? (
                 <HuHomeContent
                   concept={concept}
                   onCardDetails={handleOpenCardDetails}
@@ -3561,23 +3619,36 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
                   onToggleAmounts={() => setShowAmounts((current) => !current)}
                   showAmounts={showAmounts}
                 />
-              )}
+              ) : activeNav === "analytics" ? (
+                <HuEarningContent
+                  completedLessonIds={completedLearnLessonIds}
+                  onOpenLearn={handleOpenLearn}
+                  onToggleAmounts={() => setShowAmounts((current) => !current)}
+                  showAmounts={showAmounts}
+                  topics={learnTopics}
+                />
+              ) : activeNav === "products" ? (
+                <HuSavingContent
+                  concept={concept}
+                  goals={goals}
+                  onCardDetails={handleOpenCardDetails}
+                  onMessages={handleOpenMessages}
+                  onCreateGoal={handleOpenCreateGoal}
+                  onMoreOptions={() => setIsMoreSheetOpen(true)}
+                  onOpenGoals={handleOpenGoals}
+                  onRequestMoney={handleOpenRequestMoney}
+                  onSelectGoal={handleSelectGoal}
+                  onSendMoney={handleOpenSendMoney}
+                  onToggleAmounts={() => setShowAmounts((current) => !current)}
+                  showAmounts={showAmounts}
+                />
+              ) : null}
             </div>
           </>
         ) : (
           <>
             {activeNav === "payments" ? <HuKidsPaymentsPage onMessages={handleOpenMessages} theme={appliedTheme} /> : null}
-            {activeNav === "products" ? (
-              <HuKidsLearnPage
-                completedLessonIds={completedLearnLessonIds}
-                learnModules={learnModules}
-                onSelectTopic={handleOpenLearnTopic}
-                onMessages={handleOpenMessages}
-                theme={appliedTheme}
-                topics={learnTopics}
-              />
-            ) : null}
-            {activeNav === "more" ? <HuKidsMorePage onMessages={handleOpenMessages} theme={appliedTheme} /> : null}
+            {activeNav === "more" ? <HuKidsMorePage theme={appliedTheme} /> : null}
           </>
         )}
 
@@ -3621,7 +3692,7 @@ function HuKidsPiMenuHeader({ onMessages, title }: { onMessages?: () => void; ti
   const { t } = useLanguage();
 
   return (
-    <div className="w-full bg-[var(--hu-kids-menu-header-bg)]">
+    <div className="w-full">
       <div className="px-[24px] pb-[22px]">
         <div className="flex min-h-[32px] items-start gap-[8px]">
           <h1 className="uc-type-h1 min-w-0 flex-1 text-[var(--hu-kids-menu-title-fg)]">{title}</h1>
@@ -3653,24 +3724,22 @@ function HuKidsPiMenuFrame({
   title: string;
 }) {
   const isThemed = theme.id !== "default";
-  // Sub-pages (Payments / Learn / More) keep native PI components. The theme
-  // is only a quiet ambient canvas plus functional accent; imported cards get
-  // neutral fallback surfaces so their shape remains visible in PI today and
-  // will still blend cleanly if PI adopts themes later.
+  // Pi-menu pages need a fully opaque tinted background + white cards that pop.
+  // The dark HuThemeShell page-bg must NOT bleed through anywhere.
   const frameStyle = {
     "--hu-kids-menu-bg": isThemed ? "var(--hu-theme-subpage-bg)" : "var(--uc-surface)",
-    "--hu-kids-menu-body-bg": isThemed ? "var(--hu-theme-subpage-bg)" : "var(--uc-surface)",
-    "--hu-kids-menu-scroll-bg": isThemed ? "var(--hu-theme-subpage-bg)" : "var(--uc-surface)",
     "--hu-kids-menu-header-bg": isThemed ? "var(--hu-theme-subpage-header-bg)" : "var(--uc-surface)",
     "--hu-kids-menu-title-fg": "var(--uc-text)",
     ...(isThemed ? { "--uc-action": "var(--hu-theme-accent-strong)" } : {}),
   } as CSSProperties;
+  // When themed: ALL card backgrounds → clean white so they pop off the tinted page.
+  // When default: keep native PI gray gradients (existing behavior).
   const contentStyle = {
-    "--pi-payment-hero-bg": "var(--hu-theme-native-card-bg)",
-    "--pi-payment-hero-shadow": "var(--hu-theme-native-card-shadow)",
-    "--pi-menu-card-bg": "var(--hu-theme-native-card-bg)",
-    "--pi-menu-card-shadow": "var(--hu-theme-native-card-shadow)",
-    "--pi-offer-card-bg": "var(--uc-surface)",
+    "--pi-payment-hero-bg": isThemed ? "var(--uc-surface)" : "var(--hu-theme-native-card-bg)",
+    "--pi-payment-hero-shadow": isThemed ? "var(--hu-theme-pi-card-shadow)" : "var(--hu-theme-native-card-shadow)",
+    "--pi-menu-card-bg": isThemed ? "var(--uc-surface)" : "var(--hu-theme-native-card-bg)",
+    "--pi-menu-card-shadow": isThemed ? "var(--hu-theme-pi-card-shadow)" : "var(--hu-theme-native-card-shadow)",
+    "--pi-offer-card-bg": isThemed ? "var(--uc-surface)" : "var(--uc-surface)",
     "--pi-shortcut-icon-fg": "var(--uc-text-inverse)",
     ...(isThemed
       ? {
@@ -3686,7 +3755,13 @@ function HuKidsPiMenuFrame({
       data-hu-kids-themed-section={theme.id}
       style={frameStyle}
     >
-      <div className="relative z-[1] h-[54px] flex-shrink-0 bg-[var(--hu-kids-menu-header-bg)]" />
+      {/* Header zone (status-bar spacer + title) and the scroll area are all
+          transparent so the single frame gradient flows continuously from the
+          status bar through the title into the content — no flat header band,
+          no color step/kink. The menu header never overlaps scrolled content
+          (scroll is confined to the inner area below the title), so it does
+          NOT need an opaque backing. */}
+      <div className="relative z-[1] h-[54px] flex-shrink-0" />
       <div
         className="relative z-[1]"
         style={isThemed ? ({ "--uc-text": "var(--hu-kids-menu-title-fg)" } as CSSProperties) : undefined}
@@ -3695,7 +3770,6 @@ function HuKidsPiMenuFrame({
       </div>
       <div
         className="scrollbar-hide relative z-[1] min-h-0 flex-1 overflow-y-auto pb-[104px]"
-        style={isThemed ? ({ background: "var(--hu-kids-menu-scroll-bg)" } as CSSProperties) : undefined}
       >
         <div className="min-h-full" style={contentStyle}>
           {children}
@@ -4714,15 +4788,7 @@ function HuHomeContent({
   showAmounts: boolean;
 }) {
   return (
-    <>
-      <HuLightHeader
-        showAmounts={showAmounts}
-        onMessages={onMessages}
-        onToggleAmounts={onToggleAmounts}
-        preview={preview}
-      />
-
-      <main className={cn(preview ? "pointer-events-none" : undefined)}>
+    <main className={cn(preview ? "pointer-events-none" : undefined)}>
         <HuLightBalance concept={concept} showAmounts={showAmounts} />
         <HuLightActionRail
           onCardDetails={() => onCardDetails(HU_KIDS_CARDS[0]?.id ?? "")}
@@ -4736,23 +4802,23 @@ function HuHomeContent({
           onSendMoney={onSendMoney}
         />
 
-        <div className="mt-[28px] space-y-[28px] px-[24px]">
+        <div className="mt-[24px] space-y-[24px] px-[24px]">
           <HuSpendingCard showAmounts={showAmounts} />
           <HuTransactionsCard onTransactionClick={onTransactionClick} showAmounts={showAmounts} />
           <HuCardsPanel onCardDetails={onCardDetails} />
-          <HuTasksCard />
           <HuAllMoneyCard showAmounts={showAmounts} />
         </div>
-      </main>
-    </>
+    </main>
   );
 }
 
 function HuSavingContent({
   concept,
   goals,
+  onCardDetails,
   onMessages,
   onCreateGoal,
+  onMoreOptions,
   onOpenGoals,
   onRequestMoney,
   onSelectGoal,
@@ -4762,8 +4828,10 @@ function HuSavingContent({
 }: {
   concept: KidsMarketHomeConcept;
   goals: SavingGoal[];
+  onCardDetails: (cardId: string) => void;
   onMessages: () => void;
   onCreateGoal: () => void;
+  onMoreOptions: () => void;
   onOpenGoals: () => void;
   onRequestMoney: () => void;
   onSelectGoal: (goalId: string) => void;
@@ -4772,14 +4840,11 @@ function HuSavingContent({
   showAmounts: boolean;
 }) {
   return (
-    <>
-      <HuLightHeader showAmounts={showAmounts} onMessages={onMessages} onToggleAmounts={onToggleAmounts} />
-
-      <main>
-        <HuLightBalance concept={concept} showAmounts={showAmounts} />
+    <main>
+        <HuSavingBalance showAmounts={showAmounts} />
         <HuSavingActionRail
-          onCreateGoal={onCreateGoal}
-          onMoveMoney={onSendMoney}
+          onCardDetails={() => onCardDetails(HU_KIDS_CARDS[0]?.id ?? "")}
+          onMoreOptions={onMoreOptions}
           onRequestMoney={onRequestMoney}
           onSaveMoney={onOpenGoals}
         />
@@ -4792,13 +4857,163 @@ function HuSavingContent({
             onSelectGoal={onSelectGoal}
             showAmounts={showAmounts}
           />
-          <HuSpendingCard showAmounts={showAmounts} />
-          <HuTasksCard />
-          <HuAllMoneyCard showAmounts={showAmounts} />
           <HuTransactionsCard showAmounts={showAmounts} />
         </div>
-      </main>
-    </>
+    </main>
+  );
+}
+
+function HuEarningContent({
+  completedLessonIds,
+  onOpenLearn,
+  onToggleAmounts,
+  showAmounts,
+  topics,
+}: {
+  completedLessonIds: string[];
+  onOpenLearn: () => void;
+  onToggleAmounts: () => void;
+  showAmounts: boolean;
+  topics: HuLearnTopic[];
+}) {
+  const completedTopics = topics.filter((topic) => getHuLearnTopicProgress(topic, completedLessonIds) === 100).length;
+
+  return (
+    <main>
+        <HuEarningBalance showAmounts={showAmounts} />
+
+        <div className="mt-[28px] space-y-[28px] px-[24px]">
+          <HuAllowanceCard showAmounts={showAmounts} />
+          <HuTasksCard showAmounts={showAmounts} />
+          <HuEducationCard
+            completedTopics={completedTopics}
+            totalTopics={topics.length}
+            onClick={onOpenLearn}
+          />
+        </div>
+    </main>
+  );
+}
+
+function HuEarningBalance({
+  showAmounts,
+}: {
+  showAmounts: boolean;
+}) {
+  const totalRewards = HU_KIDS_TASKS.reduce((sum, task) => sum + task.reward, 0);
+
+  return (
+    <section className="mt-[68px] px-[24px] text-center">
+      <p className="text-[18px] font-normal leading-[22px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
+        Earn this week
+      </p>
+      <div className="mt-[10px] flex items-baseline justify-center gap-[6px] text-[var(--hu-theme-hero-fg)]">
+        {showAmounts ? (
+          <>
+            <span className="text-[46px] font-bold leading-[48px] tracking-[0]">{formatHuFullAmount(totalRewards).replace(/ HUF$/, "")}</span>
+            <span className="text-[28px] font-normal leading-[32px] tracking-[0]">HUF</span>
+          </>
+        ) : (
+          <>
+            <span className="text-[46px] font-bold leading-[48px] tracking-[0]">{HU_MASKED_INTEGER}</span>
+            <span className="text-[28px] font-normal leading-[32px] tracking-[0]">HUF</span>
+          </>
+        )}
+      </div>
+      <p className="mt-[8px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
+        from {HU_KIDS_TASKS.length} active tasks
+      </p>
+    </section>
+  );
+}
+
+function HuAllowanceCard({ showAmounts = true }: { showAmounts?: boolean }) {
+  return (
+    <section
+      className="flex w-full flex-col gap-[16px] rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[16px]"
+    >
+      <div className="flex items-start gap-[12px]">
+        <span className="grid size-[40px] shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--hu-theme-accent)_10%,var(--hu-theme-card-bg))] text-[var(--hu-theme-accent)]">
+          <AppIcon name="piggy-bank" size={20} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Allowance</h2>
+          <p className="text-[14px] font-normal leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">
+            Weekly pocket money
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-baseline gap-[6px]">
+        {showAmounts ? (
+          <>
+            <span className="text-[28px] font-bold leading-[32px] tracking-[0] text-[var(--uc-text)]">
+              {formatHuFullAmount(HU_KIDS_WEEKLY_ALLOWANCE).replace(/ HUF$/, "")}
+            </span>
+            <span className="text-[16px] font-normal leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">HUF / week</span>
+          </>
+        ) : (
+          <>
+            <span className="text-[28px] font-bold leading-[32px] tracking-[0] text-[var(--uc-text)]">{HU_MASKED_INTEGER}</span>
+            <span className="text-[16px] font-normal leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">HUF / week</span>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function HuEducationCard({
+  completedTopics,
+  onClick,
+  totalTopics,
+}: {
+  completedTopics: number;
+  onClick: () => void;
+  totalTopics: number;
+}) {
+  const progressPct = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+
+  return (
+    <button
+      type="button"
+      className="flex w-full flex-col gap-[16px] rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[16px] text-left transition-transform active:scale-[0.99]"
+      onClick={onClick}
+    >
+      <div className="flex items-start gap-[12px]">
+        <span className="grid size-[40px] shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--hu-theme-accent)_10%,var(--hu-theme-card-bg))] text-[var(--hu-theme-accent)]">
+          <AppIcon name="hu-kids-learn" size={20} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Education</h2>
+          <p className="text-[14px] font-normal leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">
+            Financial education
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between gap-[12px]">
+        <div className="flex-1">
+          <div className="h-[8px] w-full overflow-hidden rounded-full bg-[var(--hu-theme-progress-bg)]">
+            <div
+              className="h-full rounded-full bg-[var(--hu-theme-accent-strong)]"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+          <div className="mt-[8px] flex items-baseline justify-between">
+            <span className="text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--uc-text)]">
+              {completedTopics}/{totalTopics}
+            </span>
+            <span className="text-[12px] font-normal leading-[16px] tracking-[0] text-[var(--uc-text-muted)]">
+              topics done
+            </span>
+          </div>
+        </div>
+        <span className="grid size-[32px] shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--hu-theme-accent)_10%,var(--hu-theme-card-bg))] text-[var(--hu-theme-accent)]">
+          <AppIcon name="arrow-right" size={20} />
+        </span>
+      </div>
+    </button>
   );
 }
 
@@ -5159,6 +5374,9 @@ function HuHomePreview({
               <HuThemeMotionLayer motionProgress={0.04} preview theme={theme} />
               <StatusBar variant={phoneChromeUsesLightForeground ? "dark" : "light"} />
               <div className="relative z-[1] h-[54px] flex-shrink-0" />
+              <div className="relative z-[2] flex-shrink-0">
+                <HuLightHeader showAmounts={showAmounts} onMessages={() => undefined} onToggleAmounts={() => undefined} preview />
+              </div>
               <div className="scrollbar-hide relative z-[1] flex-1 overflow-hidden pb-[104px]">
                 <HuHomeContent
                   concept={concept}
@@ -5329,7 +5547,7 @@ function HuLightHeader({
   onToggleAmounts: () => void;
 }) {
   return (
-    <header className="flex h-[40px] items-center justify-between px-[24px]">
+    <header className="relative z-[2] flex h-[40px] items-center justify-between px-[24px]">
       <UniCreditLogo className="h-[24px] w-auto" textColor="var(--hu-theme-hero-fg)" />
 
       <div className="flex items-center gap-[10px]">
@@ -5394,6 +5612,42 @@ function HuLightBalance({
       <p className="mt-[8px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
         are available for you to spend today
       </p>
+      <p className="mt-[4px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
+        Your weekly spending limit:{" "}
+        <span className="font-bold">
+          {showAmounts ? `${formatHuFullAmount(HU_WEEKLY_SPENDING_LIMIT)} HUF` : `${HU_MASKED_INTEGER}${HU_MASKED_DECIMALS} HUF`}
+        </span>
+      </p>
+    </section>
+  );
+}
+
+function HuSavingBalance({
+  showAmounts,
+}: {
+  showAmounts: boolean;
+}) {
+  return (
+    <section className="mt-[68px] px-[24px] text-center">
+      <p className="text-[18px] font-normal leading-[22px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
+        All your savings
+      </p>
+      <div className="mt-[10px] flex items-baseline justify-center gap-[6px] text-[var(--hu-theme-hero-fg)]">
+        {showAmounts ? (
+          <>
+            <span className="text-[46px] font-bold leading-[48px] tracking-[0]">4.500</span>
+            <span className="text-[28px] font-normal leading-[32px] tracking-[0]">,34 HUF</span>
+          </>
+        ) : (
+          <>
+            <span className="text-[46px] font-bold leading-[48px] tracking-[0]">{HU_MASKED_INTEGER}</span>
+            <span className="text-[28px] font-normal leading-[32px] tracking-[0]">{HU_MASKED_DECIMALS} HUF</span>
+          </>
+        )}
+      </div>
+      <p className="mt-[8px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
+        You have saved on your accounts and goals
+      </p>
     </section>
   );
 }
@@ -5415,6 +5669,7 @@ function HuLightActionRail({
         {HU_LIGHT_ACTIONS.map((action) => (
           <button
             key={action.label}
+            aria-label={action.label}
             className="flex min-w-0 flex-col items-center gap-[10px]"
             onClick={
               action.id === "more"
@@ -5429,11 +5684,15 @@ function HuLightActionRail({
             }
             type="button"
           >
-            <span className="grid size-[68px] place-items-center rounded-full border border-[var(--hu-theme-hero-control-border)] bg-[var(--hu-theme-hero-control-bg)] text-[var(--hu-theme-hero-control-fg)] shadow-sm backdrop-blur-[10px]">
-              <AppIcon name={action.icon} size={28} />
+            <span className="grid size-[64px] place-items-center rounded-full border border-[var(--hu-theme-hero-control-border)] bg-[var(--hu-theme-hero-control-bg)] text-[var(--hu-theme-hero-control-fg)] shadow-sm backdrop-blur-[10px]">
+              <AppIcon name={action.icon} size={24} />
             </span>
-            <span className="min-h-[34px] max-w-[70px] text-center text-[12px] font-bold leading-[14px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
-              {action.label}
+            <span className="min-h-[32px] max-w-[76px] text-center text-[14px] font-medium leading-[16px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
+              {action.label.split(" ").map((word) => (
+                <span key={word} className="block h-[16px]">
+                  {word}
+                </span>
+              ))}
             </span>
           </button>
         ))}
@@ -5443,13 +5702,13 @@ function HuLightActionRail({
 }
 
 function HuSavingActionRail({
-  onCreateGoal,
-  onMoveMoney,
+  onCardDetails,
+  onMoreOptions,
   onRequestMoney,
   onSaveMoney,
 }: {
-  onCreateGoal: () => void;
-  onMoveMoney: () => void;
+  onCardDetails: () => void;
+  onMoreOptions: () => void;
   onRequestMoney: () => void;
   onSaveMoney: () => void;
 }) {
@@ -5465,17 +5724,23 @@ function HuSavingActionRail({
                 ? onSaveMoney
                 : action.id === "request"
                 ? onRequestMoney
-                : action.id === "move"
-                ? onMoveMoney
-                : onCreateGoal
+                : action.id === "card"
+                ? onCardDetails
+                : action.id === "more"
+                ? onMoreOptions
+                : undefined
             }
             type="button"
           >
-            <span className="grid size-[68px] place-items-center rounded-full border border-[var(--hu-theme-hero-control-border)] bg-[var(--hu-theme-hero-control-bg)] text-[var(--hu-theme-hero-control-fg)] shadow-sm backdrop-blur-[10px]">
-              <AppIcon name={action.icon} size={28} />
+            <span className="grid size-[64px] place-items-center rounded-full border border-[var(--hu-theme-hero-control-border)] bg-[var(--hu-theme-hero-control-bg)] text-[var(--hu-theme-hero-control-fg)] shadow-sm backdrop-blur-[10px]">
+              <AppIcon name={action.icon} size={24} />
             </span>
-            <span className="min-h-[34px] max-w-[70px] text-center text-[12px] font-bold leading-[14px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
-              {action.label}
+            <span className="min-h-[32px] max-w-[76px] text-center text-[14px] font-medium leading-[16px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
+              {action.label.split(" ").map((word) => (
+                <span key={word} className="block h-[16px]">
+                  {word}
+                </span>
+              ))}
             </span>
           </button>
         ))}
@@ -6114,6 +6379,7 @@ function getHuLearnLessonImageSrc(lesson?: HuLearnLesson | null) {
 function HuKidsLearnPage({
   completedLessonIds,
   learnModules,
+  onBack,
   onMessages,
   onSelectTopic,
   theme,
@@ -6121,6 +6387,7 @@ function HuKidsLearnPage({
 }: {
   completedLessonIds: string[];
   learnModules: LearnModule[];
+  onBack?: () => void;
   onMessages?: () => void;
   onSelectTopic: (topicId: string) => void;
   theme: HuThemePreset;
@@ -6130,7 +6397,26 @@ function HuKidsLearnPage({
   const suggestedTopic = topics.find((topic) => topic.id === "saving-goals") ?? topics[0];
 
   return (
-    <HuKidsPiMenuFrame onMessages={onMessages} theme={theme} title="Learn">
+    <HuKidsPiMenuFrame header={onBack ? (
+      <div className="w-full bg-[var(--hu-kids-menu-header-bg)]">
+        <div className="px-[24px] pb-[22px]">
+          <div className="flex min-h-[32px] items-start gap-[8px]">
+            <button
+              type="button"
+              className="grid size-[32px] shrink-0 place-items-center text-[var(--uc-text)]"
+              onClick={onBack}
+              aria-label="Back"
+            >
+              <AppIcon name="chevron-left" size={24} />
+            </button>
+            <h1 className="uc-type-h1 min-w-0 flex-1 text-[var(--hu-kids-menu-title-fg)]">Learn</h1>
+            <HeaderActionRail>
+              <HeaderActionButton icon="messages" label="Messages" onClick={onMessages} />
+            </HeaderActionRail>
+          </div>
+        </div>
+      </div>
+    ) : undefined} onMessages={onMessages} theme={theme} title="Learn">
       <section className="px-[16px] pt-[16px]">
         <div className="flex items-end justify-between gap-[12px] px-[2px]">
           <div>
@@ -6802,10 +7088,9 @@ function HuTransactionsCard({
           </div>
         ))}
       </div>
-      <button className="mx-auto mt-[22px] flex items-center gap-[6px] text-[13px] font-bold uppercase leading-[16px] tracking-[0] text-[var(--hu-theme-accent-strong)]" type="button">
+      <LinkButton className="mx-auto mt-[22px] text-[var(--hu-theme-accent-strong)]">
         SEE MORE TRANSACTIONS
-        <AppIcon name="chevron-link" size={24} />
-      </button>
+      </LinkButton>
     </section>
   );
 
@@ -6830,10 +7115,9 @@ function HuTransactionsCard({
           time="Today 11:24"
         />
       </div>
-      <button className="mx-auto mt-[22px] flex items-center gap-[6px] text-[13px] font-bold uppercase leading-[16px] tracking-[0] text-[var(--hu-theme-accent-strong)]" type="button">
+      <LinkButton className="mx-auto mt-[22px] text-[var(--hu-theme-accent-strong)]">
         SEE MORE TRANSACTIONS
-        <AppIcon name="chevron-link" size={24} />
-      </button>
+      </LinkButton>
     </section>
   );
 }
@@ -6927,6 +7211,9 @@ function HuKidsTransactionRow({
   const formattedAmount = showAmounts
     ? `${isPositive ? "+" : "-"}${formatMoneyNumber(Math.abs(transaction.amount), HU_KIDS_RUNTIME_COUNTRY)} HUF`
     : formatHuMaskedSignedMoney(isPositive);
+  const amountMatch = formattedAmount.match(/^([+-]?\d[\d\s.]*)((?:,\d+)?)(.*)$/);
+  const amountInteger = amountMatch?.[1] ?? formattedAmount;
+  const amountDecimal = amountMatch ? `${amountMatch[2]}${amountMatch[3]}` : "";
   const rowContent = (
     <>
       {transaction.merchantLogo ? (
@@ -6944,26 +7231,23 @@ function HuKidsTransactionRow({
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-[8px]">
           <p className="truncate text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">{transaction.label}</p>
-          <p
-            className={cn(
-              "shrink-0 text-right text-[16px] font-bold leading-[20px] tracking-[0]",
-              isPositive ? "text-[var(--uc-green-olive)]" : "text-[var(--uc-text)]",
-            )}
-          >
-            {formattedAmount}
-          </p>
+          {isPositive ? (
+            <p className="shrink-0 text-right tracking-[0] text-[var(--uc-green-olive)]">
+              <span className="text-[18px] font-bold leading-[20px]">{amountInteger}</span>
+              <span className="text-[14px] font-normal leading-[20px]">{amountDecimal}</span>
+            </p>
+          ) : (
+            <p className="shrink-0 text-right text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">
+              {formattedAmount}
+            </p>
+          )}
         </div>
         {transaction.subtitle ?? transaction.details ? (
-          <p className="mt-[10px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
+          <p className="mt-[4px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
             {transaction.subtitle ?? transaction.details}
           </p>
         ) : null}
-        <p
-          className={cn(
-            "text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]",
-            transaction.subtitle ?? transaction.details ? "mt-[8px]" : "mt-[10px]",
-          )}
-        >
+        <p className="mt-[4px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
           {transaction.monthTitle} {transaction.day}:31
         </p>
       </div>
@@ -7000,19 +7284,9 @@ function HuMerchantLogoMark({ merchant }: { merchant: HuMerchantLogoId }) {
         className="grid size-[34px] shrink-0 place-items-center overflow-hidden rounded-full bg-[#DA291C] text-[#FFC72C] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--uc-static-white)_28%,transparent)]"
         role="img"
       >
-        <svg aria-hidden="true" className="h-[24px] w-[24px]" fill="none" viewBox="0 0 24 24">
-          <path
-            d="M5.2 20.5V13.2C5.2 7.9 7.1 4.4 9.7 4.4C11.2 4.4 12.1 6.6 12.1 10.1V20.5"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeWidth="3.2"
-          />
-          <path
-            d="M12 20.5V10.1C12 6.6 12.9 4.4 14.4 4.4C17 4.4 18.9 7.9 18.9 13.2V20.5"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeWidth="3.2"
-          />
+        {/* Simple Icons: McDonald's — CC0 */}
+        <svg aria-hidden="true" className="h-[20px] w-[20px]" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.243 3.006c2.066 0 3.742 8.714 3.742 19.478H24c0-11.588-3.042-20.968-6.766-20.968-2.127 0-4.007 2.81-5.248 7.227-1.241-4.416-3.121-7.227-5.231-7.227C3.031 1.516 0 10.888 0 22.476h3.014c0-10.763 1.658-19.47 3.724-19.47 2.066 0 3.741 8.05 3.741 17.98h2.997c0-9.93 1.684-17.98 3.75-17.98Z" />
         </svg>
       </span>
     );
@@ -7022,23 +7296,26 @@ function HuMerchantLogoMark({ merchant }: { merchant: HuMerchantLogoId }) {
     return (
       <span
         aria-label="YouTube merchant logo"
-        className="grid size-[34px] shrink-0 place-items-center overflow-hidden rounded-full bg-[#FF0000] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--uc-static-white)_24%,transparent)]"
+        className="grid size-[34px] shrink-0 place-items-center overflow-hidden rounded-full bg-[#FF0000] text-[var(--uc-static-white)] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--uc-static-white)_24%,transparent)]"
         role="img"
       >
-        <span className="ml-[2px] h-0 w-0 border-y-[7px] border-l-[12px] border-y-transparent border-l-[var(--uc-static-white)]" />
+        {/* Simple Icons: YouTube — CC0 */}
+        <svg aria-hidden="true" className="h-[18px] w-[18px]" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+        </svg>
       </span>
     );
   }
 
+  // Default: apple — Simple Icons: Apple — CC0
   return (
     <span
       aria-label="Apple merchant logo"
       className="grid size-[34px] shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--uc-static-black)] text-[var(--uc-static-white)] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--uc-static-white)_18%,transparent)]"
       role="img"
     >
-      <svg aria-hidden="true" className="h-[21px] w-[21px]" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M15.3 2.1c.2 1.4-.4 2.8-1.2 3.7-.8.9-2.2 1.6-3.5 1.5-.2-1.3.5-2.7 1.3-3.6.9-1 2.3-1.7 3.4-1.6Z" />
-        <path d="M20.4 17.3c-.5 1.1-.7 1.6-1.4 2.6-.9 1.3-2.1 2.9-3.7 2.9-1.4 0-1.8-.9-3.7-.9s-2.4.9-3.7.9c-1.6.1-2.9-1.4-3.8-2.7-2.5-3.7-2.8-8-.9-10.3 1.3-1.6 3.3-2.5 5.2-2.5 1.5 0 2.9 1 3.7 1s2.3-1.2 4-1c.7 0 2.7.3 4 2.2-3.5 1.9-2.9 6.6.3 7.8Z" />
+      <svg aria-hidden="true" className="h-[20px] w-[20px]" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" />
       </svg>
     </span>
   );
@@ -7078,36 +7355,86 @@ function HuCardsPanel({ onCardDetails }: { onCardDetails: (cardId: string) => vo
   );
 }
 
-function HuTasksCard() {
+function HuTasksCard({ showAmounts = true }: { showAmounts?: boolean }) {
   return (
-    <section className="rounded-[8px] bg-[var(--hu-theme-card-bg)] px-[18px] py-[18px] shadow-sm">
-      <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Your tasks</h2>
-      <div className="mt-[18px] space-y-[18px]">
-        {[0, 1].map((index) => (
-          <div key={index}>
-            <HuTaskRow />
-            {index === 0 ? <div className="mt-[18px] h-px bg-[var(--uc-border)]" /> : null}
+    <section className="flex w-full flex-col gap-[24px] rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[16px]">
+      {/* Header */}
+      <div className="flex flex-col gap-[4px]">
+        <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Tasks</h2>
+        <p className="text-[14px] leading-[20px] tracking-[0] text-[var(--uc-text)]">
+          You have{" "}
+          <span className="font-bold">{HU_KIDS_TASKS.length} tasks</span>{" "}
+          to do
+        </p>
+      </div>
+
+      {/* Task rows */}
+      <div className="flex flex-col gap-[12px]">
+        {HU_KIDS_TASKS.map((task, index) => (
+          <div key={task.title}>
+            <HuTaskRow task={task} showAmounts={showAmounts} />
+            {index < HU_KIDS_TASKS.length - 1 && (
+              <div className="mt-[12px] h-px w-full bg-[var(--uc-border-muted)]" />
+            )}
           </div>
         ))}
       </div>
-      <button className="mx-auto mt-[28px] flex items-center gap-[6px] text-[13px] font-bold uppercase leading-[16px] tracking-[0] text-[var(--hu-theme-accent-strong)]" type="button">
-        SEE ALL TASKS
-        <AppIcon name="chevron-link" size={24} />
-      </button>
+
+      {/* Footer */}
+      <div className="flex justify-center">
+        <button
+          type="button"
+          className="flex items-center gap-[4px] whitespace-nowrap text-[14px] font-bold uppercase leading-[16px] tracking-[0] text-[var(--hu-theme-accent-strong)]"
+        >
+          <AppIcon name="add-circle" size={16} />
+          <span>ADD NEW TASK</span>
+        </button>
+      </div>
     </section>
   );
 }
 
-function HuTaskRow() {
+function HuTaskRow({
+  task,
+  showAmounts = true,
+}: {
+  task: (typeof HU_KIDS_TASKS)[number];
+  showAmounts?: boolean;
+}) {
+  const formattedReward = formatHuFullAmount(task.reward);
+  const [integerPart, decimalPart] = formattedReward.split(",");
+
   return (
-    <div className="flex items-start gap-[18px]">
-      <span className="grid size-[34px] shrink-0 place-items-center rounded-full bg-[var(--uc-product-pink)] text-[var(--uc-static-white)]">
-        <AppIcon name="gift" size={18} />
-      </span>
-      <div className="min-w-0">
-        <p className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Clean your room</p>
-        <p className="mt-[4px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">100 HUF</p>
-        <p className="mt-[4px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">Due Today</p>
+    <div className="flex min-h-[48px] items-center gap-[8px]">
+      {/* Left side: checkbox + text */}
+      <div className="flex flex-1 items-center gap-[8px]">
+        {/* Unchecked checkbox */}
+        <span className="grid size-[32px] shrink-0 place-items-center">
+          <span className="size-[24px] rounded-[4px] border border-[var(--uc-border)] bg-[var(--hu-theme-card-bg)]" />
+        </span>
+        <div className="flex min-w-0 flex-col gap-[4px]">
+          <p className="min-h-[24px] text-[16px] font-bold leading-[18px] tracking-[0] text-[var(--uc-text)]">
+            {task.title}
+          </p>
+          <p className="text-[14px] font-normal leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">
+            {task.recurrence}
+          </p>
+        </div>
+      </div>
+
+      {/* Right side: amount */}
+      <div className="flex shrink-0 items-baseline gap-[-1px] text-[var(--uc-text)]">
+        {showAmounts ? (
+          <>
+            <span className="text-[18px] font-bold leading-[22px] tracking-[0]">{integerPart}</span>
+            <span className="text-[14px] font-normal leading-[18px] tracking-[0]">,{decimalPart} HUF</span>
+          </>
+        ) : (
+          <>
+            <span className="text-[18px] font-bold leading-[22px] tracking-[0]">{HU_MASKED_INTEGER}</span>
+            <span className="text-[14px] font-normal leading-[18px] tracking-[0]">{HU_MASKED_DECIMALS} HUF</span>
+          </>
+        )}
       </div>
     </div>
   );
@@ -7175,8 +7502,8 @@ function HuLightBottomNav({
     >
       <BottomNavigation
         activeTab={activeNav}
-        iconOverrides={{ analytics: "hu-kids-saving", products: "hu-kids-learn" }}
-        labelOverrides={{ analytics: "Saving", products: "Learn" }}
+        iconOverrides={{ analytics: "hu-kids-learn", products: "hu-kids-saving" }}
+        labelOverrides={{ analytics: "Earning", products: "Saving" }}
         onTabChange={onChange}
       />
     </div>

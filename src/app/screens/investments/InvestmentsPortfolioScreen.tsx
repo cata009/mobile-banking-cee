@@ -35,6 +35,7 @@ import { useProducts } from "@/hooks/useProducts";
 
 interface InvestmentsPortfolioScreenProps {
   onBack: () => void;
+  onHistoryClick?: () => void;
 }
 
 const TAB_TRANSLATION_KEYS: Record<InvestmentPortfolioTabId, string> = {
@@ -148,7 +149,7 @@ function EmptyInvestmentsState() {
   );
 }
 
-export default function InvestmentsPortfolioScreen({ onBack }: InvestmentsPortfolioScreenProps) {
+export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: InvestmentsPortfolioScreenProps) {
   const { country, amountsHidden } = useDemo();
   const { categories } = useProducts();
   const { t } = useLanguage();
@@ -258,6 +259,7 @@ export default function InvestmentsPortfolioScreen({ onBack }: InvestmentsPortfo
                 id: "history",
                 iconName: "investment-history",
                 label: t("runtime.investments.actions.history", "History"),
+                onClick: onHistoryClick,
               },
               {
                 id: "to-approve",

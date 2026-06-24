@@ -16,6 +16,7 @@ export type Screen =
   | "payments" // Payments menu
   | "products" // Products menu
   | "investments" // Investments portfolio
+  | "investments-history" // Investments history transactions/orders flow
   | "prime" // Prime screen
   | "more" // More screen
   | "documents" // Documents screen

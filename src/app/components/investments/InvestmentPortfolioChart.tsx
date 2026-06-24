@@ -352,19 +352,23 @@ export default function InvestmentPortfolioChart({
             stroke="var(--uc-action)"
             strokeWidth={3}
             activeDot={false}
-            dot={(props) => (
-              <InvestmentChartDot
-                {...props}
-                activeIndex={activePoint?.index ?? null}
-                onClear={clearActivePoint}
-                onSelect={(index, coordinate) => {
-                  const point = chartData[index];
-                  if (!point) return;
-                  setIsPointerActive(true);
-                  setActivePoint({ point, index, coordinate });
-                }}
-              />
-            )}
+            dot={(props) => {
+              const { key, ...dotProps } = props;
+              return (
+                <InvestmentChartDot
+                  key={key}
+                  {...dotProps}
+                  activeIndex={activePoint?.index ?? null}
+                  onClear={clearActivePoint}
+                  onSelect={(index, coordinate) => {
+                    const point = chartData[index];
+                    if (!point) return;
+                    setIsPointerActive(true);
+                    setActivePoint({ point, index, coordinate });
+                  }}
+                />
+              );
+            }}
           />
         </AreaChart>
       </ResponsiveContainer>

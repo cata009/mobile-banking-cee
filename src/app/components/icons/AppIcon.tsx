@@ -257,20 +257,20 @@ const CUSTOM_ICONS = {
     source: "custom",
     label: "HU Kids account details",
     category: "Accounts",
-    width: 20,
-    height: 22,
-    viewBox: "0 0 20 22",
+    width: 24,
+    height: 24,
+    viewBox: "0 0 24 24",
     usage: ["KidsMarketHomeApp HU quick action rail", "DesignSystemPage Icons inventory"],
-    notes: "Supplied HU Kids CEE Light Restyle account-details building glyph.",
+    notes: "Supplied HU Kids CEE Light Restyle account-details building glyph, 24×24 variant.",
     render: () => (
       <>
         <path
           fillRule="evenodd"
           clipRule="evenodd"
-          d="M3.12561 7.80645H2.50061C1.11999 7.80645 0.000610352 6.53542 0.000610352 4.96774L10.0006 0L20.0006 4.96774C20.0006 6.53542 18.8812 7.80645 17.5006 7.80645H16.8756V17.7419H14.3756V7.80645H11.2506V17.7419H8.75061V7.80645H5.62561V17.7419H3.12561V7.80645ZM11.2506 4.25806C11.2506 3.47458 10.6906 2.83871 10.0006 2.83871C9.31061 2.83871 8.75061 3.47458 8.75061 4.25806C8.75061 5.04155 9.31061 5.67742 10.0006 5.67742C10.6906 5.67742 11.2506 5.04155 11.2506 4.25806Z"
+          d="M5.125 8.80645H4.5C3.11937 8.80645 2 7.53542 2 5.96774L12 1L22 5.96774C22 7.53542 20.8806 8.80645 19.5 8.80645H18.875V18.7419H16.375V8.80645H13.25V18.7419H10.75V8.80645H7.625V18.7419H5.125V8.80645ZM13.25 5.25806C13.25 4.47458 12.69 3.83871 12 3.83871C11.31 3.83871 10.75 4.47458 10.75 5.25806C10.75 6.04155 11.31 6.67742 12 6.67742C12.69 6.67742 13.25 6.04155 13.25 5.25806Z"
           fill="currentColor"
         />
-        <path d="M19.3756 19.1613V22H0.62561V19.1613H19.3756Z" fill="currentColor" />
+        <path d="M21.375 20.1613V23H2.625V20.1613H21.375Z" fill="currentColor" />
       </>
     ),
   },
