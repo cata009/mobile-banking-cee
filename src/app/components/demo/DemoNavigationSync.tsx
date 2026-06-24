@@ -61,11 +61,9 @@ export function DemoNavigationSync() {
       };
 
       setCoAppingActive(false);
-      if (hasDesignSystemHash()) {
-        return;
-      }
-
-      navigateToAndReset(scenarioEntryScreen);
+      // Do NOT reset navigation on first mount — let the current screen persist
+      // (handles Vite HMR updates and page reloads gracefully).
+      // Navigation resets only when demo controls change explicitly below.
       return;
     }
 

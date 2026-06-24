@@ -3,24 +3,47 @@ import type { ChangeEvent, FocusEvent } from "react";
 import { AppIcon } from "@/app/components/icons";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 
+export const ACCOUNT_SEARCH_BAR_SOURCE = {
+  schema: "codex-figma-component-spec/v1",
+  sourceNodeIds: {
+    activeRemoveFilters: "1517:12655",
+  },
+  dimensions: {
+    activeRemoveFilters: {
+      width: 375,
+      height: 63,
+      searchHeight: 36,
+      iconSlot: 32,
+    },
+  },
+} as const;
+
 interface AccountSearchBarProps {
   placeholder?: string;
   onClick?: () => void;
   onFilterClick?: () => void;
+  onRemoveFilters?: () => void;
   onClearClick?: () => void;
   onFocus?: () => void;
   onValueChange?: (value: string) => void;
   value?: string;
+  filtersActive?: boolean;
+  showRemoveFiltersAction?: boolean;
+  removeFiltersLabel?: string;
 }
 
 export default function AccountSearchBar({
   placeholder,
   onClick,
   onFilterClick,
+  onRemoveFilters,
   onClearClick,
   onFocus,
   onValueChange,
   value,
+  filtersActive = false,
+  showRemoveFiltersAction = true,
+  removeFiltersLabel = "REMOVE FILTERS",
 }: AccountSearchBarProps) {
   const { t } = useLanguage();
   const resolvedPlaceholder = placeholder ?? t("runtime.actions.search", "Search");
@@ -28,6 +51,7 @@ export default function AccountSearchBar({
   const [internalValue, setInternalValue] = useState("");
   const searchValue = value ?? internalValue;
   const hasSearchValue = searchValue.trim().length > 0;
+  const showRemoveFilters = showRemoveFiltersAction && filtersActive && !hasSearchValue;
 
   const updateSearchValue = (nextValue: string) => {
     if (value === undefined) {
@@ -53,10 +77,11 @@ export default function AccountSearchBar({
 
   return (
     <div
-      className="flex min-h-[32px] flex-col items-start self-stretch rounded-[10px] bg-[var(--uc-app-bg)] p-0"
+      className={`flex flex-col self-stretch ${showRemoveFilters ? "min-h-[63px] items-end gap-[8px] px-[16px] py-[2px]" : "min-h-[32px] items-start rounded-[10px] bg-[var(--uc-app-bg)] p-0"}`}
       data-ds-label="AccountSearchBar 32px"
+      data-search-filters-active={showRemoveFilters ? "true" : undefined}
     >
-      <div className="flex h-[32px] w-full items-center justify-between">
+      <div className={`flex w-full items-center justify-between rounded-[10px] bg-[var(--uc-app-bg)] ${showRemoveFilters ? "h-[36px]" : "h-[32px]"}`}>
         <label className="flex h-[32px] min-w-0 flex-1 items-center gap-[8px] text-left">
           <span className="flex h-[32px] w-[32px] shrink-0 items-center justify-center" data-ds-label="Search icon 32x32">
             <AppIcon name="search" color="var(--uc-text)" />
@@ -78,15 +103,25 @@ export default function AccountSearchBar({
           onClick={hasSearchValue ? handleClearClick : onFilterClick}
           className="grid h-[32px] w-[32px] shrink-0 place-items-center"
           aria-label={hasSearchValue ? "Clear search results" : t("runtime.actions.filters", "Filters")}
+          aria-pressed={!hasSearchValue && filtersActive ? true : undefined}
           data-ds-label={hasSearchValue ? "Clear results icon 32x32" : "Filter icon 32x32"}
         >
           {hasSearchValue ? (
             <AppIcon name="clear-results" color="var(--uc-text)" />
           ) : (
-            <AppIcon name="filters" color="var(--uc-text)" />
+            <AppIcon name="filters" color={filtersActive ? "var(--uc-action)" : "var(--uc-text)"} />
           )}
         </button>
       </div>
+      {showRemoveFilters ? (
+        <button
+          type="button"
+          onClick={onRemoveFilters}
+          className="uc-type-n5-strong min-h-[32px] w-full py-[6px] text-right text-[14px] leading-[15px] text-[var(--uc-action)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-surface)]"
+        >
+          {removeFiltersLabel}
+        </button>
+      ) : null}
     </div>
   );
 }

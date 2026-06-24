@@ -9,6 +9,10 @@ export type InvestmentSecurityStatus = "active" | "inactive";
 export type InvestmentContributionType = "ONE OFF" | "RECURRENT";
 export type InvestmentProductType = "Fund" | "Stock" | "Bond" | "ETF" | "Money market";
 export type InvestmentAssetClass = "Balanced" | "Equity" | "Fixed income" | "Liquidity";
+export type InvestmentHistoryTabId = "transactions" | "orders";
+export type InvestmentHistoryTransactionType = "COUPON" | "BUY" | "SELL" | "OTHER WITHDRAWAL";
+export type InvestmentHistoryOrderStatus = "EXECUTED" | "PENDING" | "REJECTED";
+export type InvestmentHistoryDatePreset = "last-month" | "last-6-months" | "last-year" | "define";
 
 export interface InvestmentPeriodOption {
   id: InvestmentPeriodId;
@@ -62,6 +66,38 @@ export interface InvestmentDistributionItem {
   secondaryLabel?: string;
 }
 
+export interface InvestmentHistoryDateOption {
+  id: InvestmentHistoryDatePreset;
+  label: string;
+}
+
+export interface InvestmentHistoryTransaction {
+  id: string;
+  date: string;
+  title: string;
+  amount: number;
+  currency: Currency;
+  type: InvestmentHistoryTransactionType;
+  tone: "positive" | "negative" | "neutral";
+}
+
+export interface InvestmentHistoryOrder {
+  id: string;
+  date: string;
+  title: string;
+  amount: number;
+  currency: Currency;
+  orderType: "BUY" | "SELL";
+  status: InvestmentHistoryOrderStatus;
+  tone: "positive" | "negative" | "neutral";
+}
+
+export interface InvestmentHistoryFilterState {
+  datePreset: InvestmentHistoryDatePreset;
+  selectedTypes: InvestmentHistoryTransactionType[];
+  selectedCurrencies: Currency[];
+}
+
 interface InvestmentSecuritySeed {
   id: string;
   title: string;
@@ -99,6 +135,20 @@ export const INVESTMENT_SORT_OPTIONS: readonly InvestmentSortOption[] = [
   { id: "min-value", label: "MIN VALUE" },
   { id: "max-percent", label: "MAX %" },
   { id: "min-percent", label: "MIN %" },
+];
+
+export const INVESTMENT_HISTORY_DATE_OPTIONS: readonly InvestmentHistoryDateOption[] = [
+  { id: "last-month", label: "Last Month" },
+  { id: "last-6-months", label: "Last 6 Months" },
+  { id: "last-year", label: "Last year" },
+  { id: "define", label: "Define" },
+];
+
+export const INVESTMENT_HISTORY_TRANSACTION_TYPES: readonly InvestmentHistoryTransactionType[] = [
+  "COUPON",
+  "BUY",
+  "SELL",
+  "OTHER WITHDRAWAL",
 ];
 
 const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
@@ -367,4 +417,76 @@ export function buildInvestmentDistributionItems(
     ...item,
     color: DISTRIBUTION_COLORS[index % DISTRIBUTION_COLORS.length],
   }));
+}
+
+function buildIsoDate(year: number, monthIndex: number, day: number): string {
+  return new Date(Date.UTC(year, monthIndex, day)).toISOString();
+}
+
+export function buildInvestmentHistoryTransactions(
+  securities: readonly InvestmentSecurity[],
+  country: CountryId,
+): InvestmentHistoryTransaction[] {
+  const countryCurrency = getCountryCurrency(country) as Currency;
+  const transactionTypes: readonly InvestmentHistoryTransactionType[] = ["COUPON", "BUY", "OTHER WITHDRAWAL", "SELL", "SELL"];
+  const dates = [
+    buildIsoDate(2025, 9, 11),
+    buildIsoDate(2025, 9, 10),
+    buildIsoDate(2025, 9, 9),
+    buildIsoDate(2024, 8, 29),
+    buildIsoDate(2024, 8, 20),
+  ];
+
+  return securities.slice(0, 5).map((security, index) => {
+    const type = transactionTypes[index] ?? "BUY";
+    const currency = index % 2 === 0 ? countryCurrency : security.instrumentCurrency;
+    const sourceAmount = type === "COUPON"
+      ? Math.max(12, Math.abs(security.performanceAmount || security.localValue * 0.008))
+      : security.localValue * (index === 4 ? 0.18 : 0.12);
+    const amount = roundMoney(convertCurrency(sourceAmount, security.localCurrency, currency));
+    const isPositive = type === "COUPON";
+
+    return {
+      id: `trx-${security.id}-${index}`,
+      date: dates[index] ?? buildIsoDate(2024, 8, 20),
+      title: security.title,
+      amount: isPositive ? amount : -amount,
+      currency,
+      type,
+      tone: isPositive ? "positive" : "negative",
+    };
+  });
+}
+
+export function buildInvestmentHistoryOrders(
+  securities: readonly InvestmentSecurity[],
+  country: CountryId,
+): InvestmentHistoryOrder[] {
+  const countryCurrency = getCountryCurrency(country) as Currency;
+  const statuses: readonly InvestmentHistoryOrderStatus[] = ["EXECUTED", "PENDING", "REJECTED", "EXECUTED"];
+  const orderTypes: readonly ("BUY" | "SELL")[] = ["BUY", "BUY", "SELL", "SELL"];
+  const dates = [
+    buildIsoDate(2025, 9, 17),
+    buildIsoDate(2025, 9, 16),
+    buildIsoDate(2024, 8, 27),
+    buildIsoDate(2024, 8, 19),
+  ];
+
+  return securities.slice(0, 4).map((security, index) => {
+    const orderType = orderTypes[index] ?? "BUY";
+    const status = statuses[index] ?? "EXECUTED";
+    const currency = index % 2 === 0 ? countryCurrency : security.instrumentCurrency;
+    const amount = roundMoney(convertCurrency(security.localValue * (0.08 + index * 0.02), security.localCurrency, currency));
+
+    return {
+      id: `ord-${security.id}-${index}`,
+      date: dates[index] ?? buildIsoDate(2024, 8, 19),
+      title: security.title,
+      amount,
+      currency,
+      orderType,
+      status,
+      tone: status === "REJECTED" ? "negative" : "positive",
+    };
+  });
 }

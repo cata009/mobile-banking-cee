@@ -29,6 +29,7 @@ import DocumentsScreen from "@/app/screens/documents/DocumentsScreen";
 import PaymentsScreen from "@/app/screens/payments/PaymentsScreen";
 import ProductsScreen from "@/app/screens/products/ProductsScreen";
 import InvestmentsPortfolioScreen from "@/app/screens/investments/InvestmentsPortfolioScreen";
+import InvestmentsHistoryScreen from "@/app/screens/investments/InvestmentsHistoryScreen";
 import SettingsScreen from "@/app/screens/settings/SettingsScreen";
 import KidsMarketHomeApp from "@/app/screens/kids/KidsMarketHomeApp";
 import RoKidsApp from "@/app/screens/kids/RoKidsApp";
@@ -216,6 +217,7 @@ function AppContent() {
         return 'light';
       case 'products':
       case 'investments':
+      case 'investments-history':
         return 'light';
       case 'prime':
         return 'dark'; // fundal gradient întunecat - text și iconițe albe
@@ -368,6 +370,13 @@ function AppContent() {
 
     console.log("Investments clicked - navigating to Investments portfolio screen");
     navigateTo("investments");
+  };
+
+  const handleInvestmentsHistoryClick = () => {
+    if (!investmentsPortfolioAvailable) return;
+
+    console.log("Investments history clicked - navigating to Investments history screen");
+    navigateTo("investments-history");
   };
 
   // Handler pentru înapoi din More
@@ -637,7 +646,11 @@ function AppContent() {
         )}
 
         {currentScreen === "investments" && investmentsPortfolioAvailable && (
-          <InvestmentsPortfolioScreen onBack={goBack} />
+          <InvestmentsPortfolioScreen onBack={goBack} onHistoryClick={handleInvestmentsHistoryClick} />
+        )}
+
+        {currentScreen === "investments-history" && investmentsPortfolioAvailable && (
+          <InvestmentsHistoryScreen onBack={goBack} />
         )}
 
         {/* Contacts Screen - EXACT ca Language Selector (NO animation) */}

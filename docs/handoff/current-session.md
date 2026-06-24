@@ -1,10 +1,73 @@
 # Current Session
 
-Last updated: 2026-06-13
+Last updated: 2026-06-16
 
 ## Current Focus
 
-Polishing Hungary Mobile PI Kids interactions on top of the CEE Light Restyle + theme system, while preserving the existing Serbia safe-spend coach and prior HU theme work.
+Normalizing Meniga Harmonization Design System components into the local Design System Inventory while preserving existing PI/Kids runtime consumers.
+
+## 2026-06-16 AI Design Screen Factory Protocol
+
+- Latest request handled: user asked for a durable "mega protocol" file so future Codex sessions can repeatedly create high-quality Figma LAB screens from existing design-system components, and later reverse-import Figma screens/flows back into the Mobile Banking CEE platform.
+- Documentation changes:
+  - Added `docs/figma/ai-design-screen-factory-protocol.md` as the operating protocol for Figma screen composition, flow covers, Figma-to-platform reverse import, and component normalization.
+  - Captured the current successful LAB baseline: Meniga file key `FKbbStgBIP9bFAMl3DPKHF`, Templates page `7365:2841`, Documents source screen `9120:12914`, LAB page `9210:332`, generated Messages LAB screen `9210:382`, and the cloned primary Continue button source `7365:14603`.
+  - Defined gates for when Codex may mutate LAB pages without additional approval versus when it must ask before touching source pages, components, production pages, or platform product scope.
+  - Added prompt recipes for creating one LAB screen, batch-generating many screens, adding components to a generated screen, reverse-importing a Figma screen/flow, and normalizing a Figma component.
+- Verification:
+  - Documentation-only change; no runtime build was required.
+- safe to resume: yes
+
+## 2026-06-16 Meniga Code Field Design System Normalization
+
+- Latest request handled: user supplied two Meniga Harmonization Design System Figma nodes for `Type=Code` (`Filled` and `Error`) and asked to normalize the component into the local Design System Components inventory.
+- Follow-up request handled: user supplied Meniga Harmonization Design System Figma node `1057:21187` for `Pills` and asked to add the new component to the local Design System.
+- Follow-up request handled: user supplied Meniga Harmonization Design System Figma node `1515:1995` with additional `Navigation` cases and asked to map all of them onto the local `NavigationRow` component.
+- Follow-up request handled: user supplied Meniga Harmonization Design System Figma node `1058:22303` for `Divider` and asked to map all internal statuses.
+- Follow-up request handled: user supplied Meniga Harmonization Design System Figma node `1517:12655` for Search `Type=Active remove filters` and asked to map the option with filters active.
+- Follow-up request handled: user supplied Meniga Harmonization Design System Figma node `178:15386` for `Toast message` and asked to map it as a toast-message component.
+- Runtime changes:
+  - Added `src/app/components/CodeField.tsx` as a reusable UniCredit code/OTP field with four 44x64 slots, 16px slot gap, centered 224px slot row inside a 327px wrapper, 8px radius, 1px `#666` normal border, `--uc-status-red` error border/message state, N1 30px bold centered digits, numeric input/paste distribution, disabled/error states, `aria-invalid`, described error text, and focus-visible rings.
+  - Added the `Code field` specimen to Design System Inventory `Components -> Forms and controls` with `Filled`, `Error`, `Empty`, and `Disabled` variants.
+  - Registered `ui.code-field` in the component registry and `ComponentId` union for AI catalog reuse.
+  - Added `src/app/components/ui/Pill.tsx` as a reusable Meniga pill button with `Primary`, `Secondary`, `Active counter`, `Loading counter`, and `Activated` variants, matching the 120x36 / 18px radius / N5 bold / 16px icon Figma contract while using local UniCredit theme tokens for light/dark safety.
+  - Added the `Pill` specimen to Design System Inventory `Components -> Buttons` and registered `ui.pill` in the component registry and `ComponentId` union for AI catalog reuse.
+  - Extended `src/app/components/NavigationRow.tsx` without breaking existing callers: added reusable 64px/80px height support, optional custom leading visuals, centered special rows, action-tone title support, and typed source-node metadata for all Meniga additional navigation cases.
+  - Updated the `Navigation row` specimen selector to expose all 18 Meniga cases from node `1515:1995`: icon/no-icon/toggle/special rows, title/description/CTA/readed/prelogin, card, text message, payment type, and light-restyle toggle rows.
+  - Extended `src/app/components/SectionHeadingDivider.tsx` without breaking existing runtime callers: the default `section` variant remains compatible, while explicit Meniga `Divider` variants map small/medium/large title, title+data, counter, action/date, name/action, checkbox action/date, and Light Restyle states.
+  - Added the `Divider` specimen to Design System Inventory `Components -> Navigation`, backed by node `1058:22303`, with all 13 mapped statuses selectable from one component family.
+  - Updated `ui.section-heading-divider` registry metadata to describe the normalized Meniga Divider family and its PI/Kids usage.
+  - Extended `src/app/components/accounts/AccountSearchBar.tsx` with an explicit `filtersActive` / `onRemoveFilters` state for the Meniga active-filter search variant while preserving the default and typed-search/clear behavior.
+  - Updated the `AccountSearchBar` specimen selector to expose `Default`, `Filled / clear state`, and `Active / remove filters`, with source metadata for node `1517:12655`.
+  - Updated `accounts.transaction-search` registry metadata to document the active remove-filters state.
+  - Added `src/app/components/ui/ToastMessage.tsx` as a reusable Meniga toast-message family with `Action required`, `Aware`, and `Google Pay` variants, preserving the 327x32 icon-toast contract, the 174x35 hug Google Pay variant, 16px radius, 14px bold UniCredit text, 32px icon slot, and centered 8px status-red dot.
+  - Added the `Toast message` specimen to Design System Inventory `Components -> Overlays and dialogs`, and registered `ui.toast-message` in the component registry and `ComponentId` union for AI catalog reuse.
+- Verification run:
+  - Figma inspection confirmed source specs: filled node 327x64, error node 327x105, 4 slots at 44x64, 16px gap, N1 30px bold digits, `#666` normal border, `#CF3524` error border/message.
+  - Figma inspection confirmed `Pills` node `1057:21187`: five 120x36 variants (`Primary`, `Secondary`, `Active counter`, `Loading counter`, `Activated`), 18px radius, 8px horizontal padding, 14px UniCredit bold label, 0 2 2 shadow, teal primary, white secondary/counter/loading/activated surfaces, 16px loading/success icons, and 8px icon-label gap.
+  - Figma inspection confirmed `Navigation` node `1515:1995`: 18 variants with 375px width, 64px or 80px row height, 16px layout gap, 32px leading icons/visuals, 64x40 card visual, title/description/link/toggle/chevron cases, centered special text/CTA rows, and light-restyle FAQ/toggle cases.
+  - Figma inspection confirmed `Divider` node `1058:22303`: 13 variants covering standard 375px dividers, 343px Light Restyle dividers, 14px N5 strong labels, 20px N2 large titles, 1px line treatment, counters, action/date, name/action, and checkbox action/date status.
+  - Figma inspection confirmed Search node `1517:12655`: `Type=Active remove filters`, 375x63, 36px search row, 32px search/filter icon slots, 16px horizontal / 2px vertical outer padding, 8px gap, 14px bold placeholder, teal filter icon, and 14px bold teal `REMOVE FILTERS` action.
+  - Figma inspection confirmed Toast message node `178:15386`: three variants, `Type=Aware, Dark=Yes` at 327x32, `Type=Google pa, Dark=Yes` at 174x35, and `Type=Action required, Dark=No` at 327x32; 16px radius, 20px icon-to-text gap for icon variants, 32px icon slot with centered 8px red dot, 14px UniCredit Bold text, dark `#FFFFFF` at 20% surface, and light `#262626` at 6% surface.
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=74 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - In-app Browser on `http://localhost:4002/`: Design System Inventory counted 73 app components; `Code field` rendered under `Forms and controls`; filled state computed to 4 inputs, 44x64 slots, 224px row width, 16px gap, 8px radius, 30px/700 centered digits, numeric input mode, `#666` border, and no console errors; error state computed to `#CF3524` border/message color, 224px message width, and `aria-invalid=true`.
+  - In-app Browser on `http://localhost:4002/#buttons`: `Pill` rendered under `Buttons`; all five variants measured 120x36 with 18px radius, 14px/700 label, primary teal `#007A91`, white secondary/counter/loading/activated surfaces, loading/activated 16px icons, 8px icon-label gap, `aria-busy=true` on loading, and no console errors.
+  - In-app Browser on `http://localhost:4002/#forms`: `Navigation row` selector exposed all 18 mapped Meniga cases; standard rows measured 375x80, special text/CTA/payment rows measured 375x64, special card leading art measured 64x40, light-restyle FAQ leading visual measured 32x32, toggle cases rendered one shared switch, and no console errors were found.
+  - In-app Browser on `http://localhost:4002/#navigation`: `Divider` selector exposed all 13 mapped Meniga states; default small-title-data measured 375px wide with 327px line and 14px/700 muted title, Light Restyle small-title-data measured 343x20 with 343px line, counter variant exposed `18` with 343px line, and no console errors were found.
+  - In-app Browser on `http://localhost:4002/#cards`: `AccountSearchBar` selector exposed `Default`, `Filled / clear state`, and `Active / remove filters`; active-filter state measured 375x63, inner search row 343x36, placeholder 14px/700, teal `REMOVE FILTERS` action, pressed filter control, and no console errors.
+  - `npm run build` passed after adding `ToastMessage`; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed after adding `ToastMessage`: `templates=50 codePreviews=50 components=75 screens=31 flows=15`.
+  - `npm run audit:platform` passed after adding `ToastMessage`: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - In-app Browser on `http://localhost:4002/#overlays`: `Toast message` selector exposed all three mapped Meniga states; `Action required` measured 327x32 with 16px radius, 32x32 icon slot, 8x8 red dot, 20px gap, 14px/700 text, `role=status`, and `aria-live=polite`; `Aware` measured 327x32 on a 20% white dark surface; `Google Pay` measured 174x35 with no icon; no new console errors were found after variant switching.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
 
 ## 2026-06-13 HU Kids / PI Native Theme Contrast Closeout
 
@@ -3181,6 +3244,75 @@ Continue with product evolution work:
   - `npm run audit:platform` passed.
   - In-app browser smoke on `http://127.0.0.1:5173/` selected `Mobile PI Kids` + `Hungary`, confirmed card-details transaction rows render without the bad `MMcDonalds` text artifact, opened a McDonalds transaction from Home into shared PI Transaction Detail, opened HU Kids Card Details through `My card`, opened a McDonalds transaction from Card Details into shared PI Transaction Detail, and found no console errors.
 
+## 2026-06-16 Design System Products Evolution Mapping
+
+- User requested mapping the Figma share node `9201:7443` as `Product card / list / total row - evolution`.
+- Figma investigation:
+  - the shared node `9201:7443` was not valid through the Figma MCP context.
+  - the matching component set was resolved inside the file as `Product card - evolution`, node `8724:1885`.
+  - mapped variants: PI app Default/Accordion/Open (`8724:1898`, `8724:1908`, `8724:1886`) and SME app Default/Accordion/Open (`8724:1923`, `8724:1933`, `8724:1948`).
+- Implementation:
+  - `src/app/components/ProductCard.tsx` now exports `PRODUCT_CARD_EVOLUTION_SOURCE` and supports an opt-in `variant="evolution"` surface with 327px width, 16px padding, 4px radius control, 32px icon slot, PI/SME surface styling, 18px title, 14px account lines, and right-aligned 24px amount integer plus 14px decimals/currency.
+  - `src/app/components/ProductsList.tsx` supports opt-in `variant="evolution"` stacking for closed accordion and open list states without changing legacy callers.
+  - `src/app/components/TotalRow.tsx` supports opt-in `variant="evolution"` with the Figma total-row typography and right-aligned total amount.
+  - `src/app/screens/design-system/DesignSystemPage.tsx` now shows `Product card / list / total row - evolution` in `#products` with a selector for all six PI/SME Default/Accordion/Open variants.
+  - `src/app/state/demoTypes.ts` and `src/app/registry/componentRegistry.ts` register `products.product-card-list-total` separately from the existing Products menu card id.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+
+## 2026-06-16 Design System Wallet Bar Date Filter Sorting Mapping
+
+- User requested mapping six Meniga Harmonization Design System Figma nodes:
+  - `7464:1768` as `Google wallet`.
+  - `7464:1858` as `Apple wallet`.
+  - `7464:1912` as `Click to Pay`.
+  - `1058:22155` as `Bar`.
+  - `290:14520` as `Date filter`.
+  - `290:14610` as `Pill sorting`.
+- Figma inspection confirmed:
+  - Google Wallet has condensed EN/HU/SK/CZ and long EN/SK/CZ/HU 48px dark button states.
+  - Apple Wallet has small and 327px big 48px dark button states.
+  - Click to Pay has long/condensed Apple and Android-like radius states.
+  - Bar has Empty, Full, Mid 1, Mid 2, Small 375x8 states plus Thin 279x1.
+  - Date filter has 5-item and 4-item 238x24 variants with 35x22 chips and active teal selection.
+  - Pill sorting has selected and rest states in a 375x40 rail with 24px chips.
+- Implementation:
+  - Added `src/app/components/ui/WalletButton.tsx`, normalizing Google Wallet, Apple Wallet, and Click to Pay as a single token-safe 48px button family with local vector marks instead of expiring Figma MCP image assets.
+  - Added `src/app/components/ui/Bar.tsx`, `src/app/components/ui/DateFilter.tsx`, and `src/app/components/ui/PillSorting.tsx` as reusable Design System primitives.
+  - Added selector-driven specimens to `src/app/screens/design-system/DesignSystemPage.tsx`: `Wallet buttons` under Buttons, `Bar` under Navigation, and `Date filter` plus `Pill sorting` under Forms and controls.
+  - Added `ui.wallet-button`, `ui.bar`, `ui.date-filter`, and `ui.pill-sorting` to `src/app/state/demoTypes.ts` and `src/app/registry/componentRegistry.ts`.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+
+## 2026-06-17 Investments History Flow
+
+- User requested the Investments `History` action from the Investments Portfolio Performance tab to open the Figma-referenced history flow across all PI countries, plus transaction detail and order detail pages.
+- Figma sources inspected:
+  - Investments CEE DBN History flow node `9264:14637`.
+  - Investments CEE DBN Transaction details node `9266:43571`.
+  - Investments CEE DBN Order details node `9266:46258`.
+  - Meniga Harmonization Design System investments components around node `303:29101`.
+- Implementation:
+  - `src/app/screens/investments/InvestmentsHistoryScreen.tsx` adds the mock-driven History screen entered from the existing Investments action bar.
+  - `src/app/config/investmentsPortfolioConfig.ts` now derives country-aware mock history transactions and orders from the existing investment securities/product model instead of hardcoding a single-market list.
+  - `src/app/screens/investments/InvestmentsPortfolioScreen.tsx`, `src/app/App.tsx`, and `src/app/contexts/NavigationContext.tsx` wire the `History` action to the new `investments-history` route for all countries already eligible for Investments Portfolio.
+  - The History screen reuses existing DS/runtime components where possible: `PageHeader`, `MessagesMailboxTabs`, `AccountSearchBar`, `SectionHeadingDivider`, `NavigationRow`, `AccountActionBar`, and `AccountDetailsInfoField`.
+  - The flow includes Transactions/Orders tabs, search, date/type/currency filter panels, active filter summary, rows for transactions and orders, empty states, help/info copy, transaction detail, and order detail with order documents.
+  - `AccountSearchBar` now supports the Meniga active-remove-filters state through an opt-in `showRemoveFiltersAction` prop and a larger accessible remove-filters tap target; History uses its own filter chip rail to avoid duplicate remove actions.
+- QA notes:
+  - A browser warning exposed a `Maximum update depth exceeded` loop in `InvestmentsHistoryScreen`; fixed by stabilizing default filter dependencies through the currency key.
+  - Switching between Transactions and Orders now resets type filters to the active tab's type set, avoiding stale transaction-only types on Orders.
+  - Orders type filter intentionally exposes only `BUY` and `SELL`; transaction type filter exposes `COUPON`, `BUY`, `SELL`, and `OTHER WITHDRAWAL`.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed: `template-contract ok: templates=50 codePreviews=50 components=80 screens=31 flows=15`.
+  - `npm run audit:platform` passed: `reference-platform audit ok products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - In-app browser smoke on `http://127.0.0.1:5173/` selected `Mobile PI` + `Romania` + `Retail / savings + investments`, opened Home -> `Investment Portfolio` -> `History`, confirmed Transactions rows, filter panel open, Orders rows, Orders type filter limited to BUY/SELL, Order Detail with `ORDER DETAILS` and `ORDER DOCUMENTS`, Transaction Detail with `TRANSACTION DETAILS`, no `undefined` values, and no recent browser console warnings/errors after the filter-state fix.
+- Limitations:
+  - History remains mock-driven and front-end only; there is no backend trading/order-history integration.
+  - Browser smoke was performed in Romania; all-country access is covered through the existing Investments eligibility and country-aware data builders, plus `audit:platform`, but not visually repeated for every country in this session.
+
 ## Constitutional Check
 
 constitutional check:
@@ -3190,4 +3322,4 @@ constitutional check:
 - bananas triaged: yes
 - safe to resume: yes
 
-safe to resume: yes, the CEE Homepage product accordion changes, dynamic country-specific lookalike IBANs, PFM category mappings, Cash category removal, Transaction Details gray header polishing, prelogin dark mode fixes, topbar theme-toggle compaction, and Dynamic Island resizing have been fully implemented, documented, and verified locally. Remaining work is future product work as outlined in `docs/handoff/next-tasks.md`.
+safe to resume: yes, the Investments History flow, transaction detail, and order detail implementation has been added, documented, and verified locally. Remaining work is future product work as outlined in `docs/handoff/next-tasks.md`.

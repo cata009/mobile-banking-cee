@@ -6,6 +6,8 @@ interface ProductsListProps {
   children: ReactNode;
   isOpen: boolean;
   showTotal?: boolean;
+  variant?: 'legacy' | 'evolution';
+  productStyle?: 'pi' | 'sme';
   totalData?: {
     integer: string;
     decimals: string;
@@ -13,9 +15,17 @@ interface ProductsListProps {
   };
 }
 
-export default function ProductsList({ children, isOpen, showTotal = false, totalData }: ProductsListProps) {
+export default function ProductsList({
+  children,
+  isOpen,
+  showTotal = false,
+  variant = 'legacy',
+  productStyle = 'pi',
+  totalData,
+}: ProductsListProps) {
   const childrenArray = Children.toArray(children);
   const productCount = childrenArray.length;
+  const isEvolution = variant === 'evolution';
 
   // If single product, always show it fully (no total shown even if showTotal is true)
   if (productCount === 1) {
@@ -47,28 +57,43 @@ export default function ProductsList({ children, isOpen, showTotal = false, tota
           style={{
             maxHeight: isOpen ? '2000px' : '0px',
             opacity: isOpen ? 1 : 0,
-            paddingTop: isOpen ? '2px' : '0px',
+            paddingTop: isOpen ? (isEvolution ? '0px' : '2px') : '0px',
           }}
           aria-hidden={!isOpen}
         >
-          <div className="flex flex-col gap-[2px]">
-            {childrenArray.slice(1)}
+          <div className={isEvolution ? "flex flex-col gap-0" : "flex flex-col gap-[2px]"}>
+            {childrenArray.slice(1).map((child, index) => (
+              <div key={index} className={isEvolution ? "border-t border-[var(--uc-border-muted)]" : undefined}>
+                {child}
+              </div>
+            ))}
 
             {showTotal && totalData && productCount >= 2 && (
-              <div
-                className="flex flex-col items-end self-stretch bg-[var(--uc-surface)]"
-                style={{
-                  padding: '16px',
-                  gap: '4px',
-                  borderRadius: '0 0 4px 4px'
-                }}
-              >
+              isEvolution ? (
                 <TotalRow
+                  variant="evolution"
+                  productStyle={productStyle}
+                  className="border-t border-[var(--uc-border-muted)]"
                   integer={totalData.integer}
                   decimals={totalData.decimals}
                   currency={totalData.currency}
                 />
-              </div>
+              ) : (
+                <div
+                  className="flex flex-col items-end self-stretch bg-[var(--uc-surface)]"
+                  style={{
+                    padding: '16px',
+                    gap: '4px',
+                    borderRadius: '0 0 4px 4px'
+                  }}
+                >
+                  <TotalRow
+                    integer={totalData.integer}
+                    decimals={totalData.decimals}
+                    currency={totalData.currency}
+                  />
+                </div>
+              )
             )}
           </div>
         </div>
