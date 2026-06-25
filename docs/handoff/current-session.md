@@ -1,10 +1,35 @@
 # Current Session
 
-Last updated: 2026-06-16
+Last updated: 2026-06-25
 
 ## Current Focus
 
-Normalizing Meniga Harmonization Design System components into the local Design System Inventory while preserving existing PI/Kids runtime consumers.
+Closeout / commit sync for the current workspace state on `main`.
+
+## 2026-06-25 Git Sync Closeout
+
+- Latest request handled: user asked to commit everything so the project is synchronized with Git and no local work remains uncommitted.
+- Runtime change in this closeout:
+  - `src/app/screens/kids/KidsMarketHomeApp.tsx` now shows the first 3 HU Kids Home transactions in `HuTransactionsCard` instead of only 2.
+- Local run state:
+  - Vite dev server was started on `http://127.0.0.1:4001/` and returned `HTTP 200`.
+- Verification run:
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed.
+  - `npm run audit:platform` passed.
+- Banana Loop:
+  - Fixed/recorded: the only uncommitted runtime delta was the HU Kids transaction-card count change.
+  - Known/non-blocking: Vite chunk-size warning remains tracked in `docs/handoff/known-bananas.md`.
+  - Known/non-blocking: no local `typecheck`, `lint`, or `test` scripts are available; build and repo audits remain the relevant gates for this closeout.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+safe to resume: yes, after commit the workspace should be clean except for any intentionally running local dev server processes/log files.
 
 ## 2026-06-16 AI Design Screen Factory Protocol
 
