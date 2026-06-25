@@ -597,6 +597,9 @@ Hungary Kids supplied quick-action icon smoke on http://127.0.0.1:3005/
 Hungary Kids transactions and card-details smoke on http://127.0.0.1:5173/
 # passed on 2026-06-12: selected Mobile PI Kids + Hungary; confirmed HU Kids transaction rows render Kids-local vector merchant marks without the old `MMcDonalds` text artifact, opened a McDonalds row from Home into shared PI Transaction Detail, opened HU Kids Card Details through `My card`, opened a McDonalds row from Card Details into shared PI Transaction Detail, and browser console errors were empty
 
+HU Kids transaction-card count closeout
+# passed on 2026-06-25: `HuTransactionsCard` now exposes 3 Home transactions instead of 2; `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and `git diff --check` passed, with only the known Vite chunk-size warning and normal Windows LF/CRLF warnings
+
 Hungary Kids Card Details reveal/freeze smoke on http://127.0.0.1:5173/
 # passed on 2026-06-12: inspected HU Kids Card Details after the reveal/freeze changes; confirmed `Free To Spend` and `Show Card Details` are absent, the page renders a themed compact header and `Your recent transactions` Home-style container, the card detail fields are present on the flip side, and Block/Unblock state text is exposed. Browser scripted click-through intermittently reset the demo context, so exact motion timing remains a manual visual pass.
 

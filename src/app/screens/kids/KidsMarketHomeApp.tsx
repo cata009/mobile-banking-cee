@@ -7070,7 +7070,7 @@ function HuTransactionsCard({
   onTransactionClick?: (transaction: AccountTransaction) => void;
   showAmounts: boolean;
 }) {
-  const visibleTransactions = HU_KIDS_TRANSACTIONS.slice(0, 2);
+  const visibleTransactions = HU_KIDS_TRANSACTIONS.slice(0, 3);
 
   return (
     <section className="rounded-[16px] bg-[var(--hu-theme-card-bg)] px-[18px] pb-[18px] pt-[18px] shadow-sm">
