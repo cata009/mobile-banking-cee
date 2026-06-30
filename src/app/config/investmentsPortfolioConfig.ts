@@ -224,7 +224,7 @@ const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
   },
 ];
 
-const DISTRIBUTION_COLORS = ["#E42313", "#007A91", "#F2A900", "#7A5AF8", "#535453", "#24A06B"];
+const DISTRIBUTION_COLORS = ["#00A3E0", "#5BC199", "#074861", "#885BC1", "#535453", "#24A06B"];
 
 const PERIOD_MULTIPLIERS: Record<InvestmentPeriodId, readonly number[]> = {
   "1m": [0.982, 0.988, 0.981, 0.996, 0.991, 1],
@@ -342,7 +342,7 @@ export function sortInvestmentSecurities(
   return sorted.sort((a, b) => a.performancePercent - b.performancePercent);
 }
 
-function getDistributionGroupKey(security: InvestmentSecurity, tabId: InvestmentPortfolioTabId): string {
+export function getInvestmentDistributionGroupKey(security: InvestmentSecurity, tabId: InvestmentPortfolioTabId): string {
   if (tabId === "product-type") return security.productType;
   if (tabId === "currency") return security.instrumentCurrency;
   if (tabId === "asset-class") return security.assetClass;
@@ -382,7 +382,7 @@ export function buildInvestmentDistributionItems(
   const groups = new Map<string, InvestmentDistributionItem>();
 
   securities.forEach((security) => {
-    const id = getDistributionGroupKey(security, tabId);
+    const id = getInvestmentDistributionGroupKey(security, tabId);
     const existing = groups.get(id);
 
     if (existing) {

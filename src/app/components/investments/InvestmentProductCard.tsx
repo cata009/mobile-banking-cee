@@ -15,10 +15,14 @@ interface InvestmentProductCardProps {
   performanceLabel: string;
 }
 
+const INVESTMENT_TEXT_COLOR = "#262626";
+const INVESTMENT_POSITIVE_COLOR = "#3D7D43";
+const INVESTMENT_NEGATIVE_COLOR = "#E2001A";
+
 function performanceColor(value: number): string {
-  if (value > 0) return "text-[var(--uc-green-success)]";
-  if (value < 0) return "text-[var(--uc-danger)]";
-  return "text-[var(--uc-text)]";
+  if (value > 0) return INVESTMENT_POSITIVE_COLOR;
+  if (value < 0) return INVESTMENT_NEGATIVE_COLOR;
+  return INVESTMENT_TEXT_COLOR;
 }
 
 export default function InvestmentProductCard({
@@ -28,7 +32,7 @@ export default function InvestmentProductCard({
   valueLabel,
   performanceLabel,
 }: InvestmentProductCardProps) {
-  const colorClass = performanceColor(security.performanceAmount);
+  const toneColor = performanceColor(security.performanceAmount);
   const percentPrefix = security.performancePercent > 0 ? "+" : "";
   const valueText = `${valueParts.integer}${valueParts.decimal} ${valueParts.currency}`;
   const contributionLabel = security.contributionType.trim();
@@ -36,27 +40,27 @@ export default function InvestmentProductCard({
 
   return (
     <article
-      className="flex min-h-[95px] flex-col gap-[4px] bg-[var(--uc-surface)] py-[16px] pl-[16px] pr-[24px]"
+      className="flex min-h-[95px] flex-col gap-[4px] bg-[#FFFFFF] py-[16px] pl-[16px] pr-[24px]"
       data-ds-label="Investment product card"
     >
-      <h3 className="truncate text-[14px] font-bold leading-normal text-[var(--uc-text)]">
+      <h3 className="truncate text-[14px] font-bold leading-[15px] text-[#262626]">
         {security.title}
       </h3>
       <div className="flex min-h-[22px] items-center gap-[8px]">
-        <p className="min-w-0 flex-1 truncate text-[14px] font-normal leading-normal text-[var(--uc-text)]" aria-label={valueLabel}>
+        <p className="min-w-0 flex-1 truncate text-[14px] font-normal leading-[18px] text-[#262626]" aria-label={valueLabel}>
           {valueText}
         </p>
-        <p className={`shrink-0 text-right ${colorClass}`} aria-label={performanceLabel}>
+        <p className="shrink-0 text-right" style={{ color: toneColor }} aria-label={performanceLabel}>
           <span className="text-[20px] font-bold leading-[22px]">{performanceParts.integer}</span>
           <span className="text-[14px] font-normal leading-normal">{performanceParts.decimal} {performanceParts.currency}</span>
         </p>
       </div>
       <div className="flex min-h-[18px] items-center justify-between gap-[8px]">
-        <span className="flex min-w-0 items-center gap-[5px] text-[14px] font-normal leading-normal text-[var(--uc-text)]">
+        <span className="flex min-w-0 items-center gap-[5px] text-[14px] font-normal leading-[18px] text-[#262626]">
           {showContribution ? <span className="truncate uppercase">{contributionLabel}</span> : null}
-          {showContribution ? <AppIcon name="user-event-refresh" size={18} color="var(--uc-icon)" /> : null}
+          {showContribution ? <AppIcon name="user-event-refresh" size={18} color={INVESTMENT_TEXT_COLOR} /> : null}
         </span>
-        <span className={`shrink-0 text-right text-[14px] font-bold leading-normal ${colorClass}`}>
+        <span className="shrink-0 text-right text-[14px] font-bold leading-[18px]" style={{ color: toneColor }}>
           {percentPrefix}{security.performancePercent.toFixed(1).replace(".", ",")}%
         </span>
       </div>

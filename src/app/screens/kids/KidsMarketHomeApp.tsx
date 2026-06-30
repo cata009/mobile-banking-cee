@@ -7,6 +7,7 @@ import {
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
+  type UIEvent,
 } from "react";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import AccountTransactionMonthDivider from "@/app/components/accounts/AccountTransactionMonthDivider";
@@ -53,7 +54,9 @@ import { MyRequestsCard } from "@/app/screens/more/cards/MyRequestsCard";
 import { SettingsCard } from "@/app/screens/more/cards/SettingsCard";
 import { TutorialCard } from "@/app/screens/more/cards/TutorialCard";
 import MessagesScreen from "@/app/screens/messages/MessagesScreen";
+import ContactsScreen from "@/app/screens/contacts/ContactsScreen";
 import { TransactionDetailScreen } from "@/app/screens/payments/DomesticPaymentFlowScreens";
+import SettingsScreen from "@/app/screens/settings/SettingsScreen";
 import huLearnAskHelpSrc from "../../../assets/kids/learn/hu-learn-ask-help.png";
 import huLearnBalanceSrc from "../../../assets/kids/learn/hu-learn-balance.png";
 import huLearnBoostSrc from "../../../assets/kids/learn/hu-learn-boost.png";
@@ -1067,6 +1070,8 @@ type HuLightView =
   | "send-money"
   | "card-details"
   | "messages"
+  | "contacts"
+  | "settings"
   | "transaction-detail"
   | "goals"
   | "goal-detail"
@@ -1093,6 +1098,24 @@ type HuPendingAction = {
   icon: IconName;
   flow: HuPendingActionFlow;
   createdAt: string;
+};
+type HuTaskStatus = "todo" | "waiting-parent" | "approved";
+type HuKidsTask = {
+  id: string;
+  title: string;
+  recurrence: string;
+  reward: number;
+  status: HuTaskStatus;
+  parentNote?: string;
+};
+type HuGoalContribution = {
+  id: string;
+  goalId: string;
+  title: string;
+  subtitle: string;
+  amount: number;
+  createdAt: string;
+  tone: "self" | "parent";
 };
 type HuKidsCard = {
   id: string;
@@ -1200,11 +1223,11 @@ const HU_SEND_APPROVAL_THRESHOLD = 5000;
 const HU_WEEKLY_SPENDING_LIMIT = 40000;
 const HU_KIDS_WEEKLY_ALLOWANCE = 5000;
 
-const HU_KIDS_TASKS = [
-  { title: "Load dishwasher", recurrence: "Weekly", reward: 1000 },
-  { title: "Brush your teeth", recurrence: "Weekly", reward: 1000 },
-  { title: "Finish your homework", recurrence: "Weekly", reward: 1000 },
-] as const;
+const HU_KIDS_INITIAL_TASKS: HuKidsTask[] = [
+  { id: "load-dishwasher", title: "Load dishwasher", recurrence: "Weekly", reward: 1000, status: "todo" },
+  { id: "brush-teeth", title: "Brush your teeth", recurrence: "Weekly", reward: 1000, status: "todo" },
+  { id: "finish-homework", title: "Finish your homework", recurrence: "Weekly", reward: 1000, status: "todo" },
+];
 
 const HU_KIDS_INITIAL_GOALS: SavingGoal[] = RO_KIDS_GOALS.map((goal) => ({
   ...goal,
@@ -3140,7 +3163,20 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
   const [selectedTransaction, setSelectedTransaction] = useState<AccountTransaction | null>(null);
   const [transactionReturnView, setTransactionReturnView] = useState<HuTransactionReturnView>("home");
   const [goals, setGoals] = useState<SavingGoal[]>(HU_KIDS_INITIAL_GOALS);
+  const [goalContributions, setGoalContributions] = useState<HuGoalContribution[]>([
+    {
+      id: "goal-contribution-mom-bike",
+      goalId: HU_KIDS_INITIAL_GOALS[0]?.id ?? "goal-bike",
+      title: "Mom added money",
+      subtitle: "Last week",
+      amount: 2000,
+      createdAt: "Last week",
+      tone: "parent",
+    },
+  ]);
   const [selectedGoalId, setSelectedGoalId] = useState(HU_KIDS_INITIAL_GOALS[0]?.id ?? "");
+  const [tasks, setTasks] = useState<HuKidsTask[]>(HU_KIDS_INITIAL_TASKS);
+  const [selectedTaskId, setSelectedTaskId] = useState("");
   const [learnModules] = useState<LearnModule[]>(HU_KIDS_INITIAL_LEARN_MODULES);
   const [completedLearnLessonIds, setCompletedLearnLessonIds] = useState<string[]>(() =>
     getHuLearnInitialCompletedLessonIds(HU_KIDS_INITIAL_LEARN_MODULES),
@@ -3310,6 +3346,10 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
   };
 
   const handleAddGoalMoney = (goalId: string, amount: number) => {
+    if (amount <= 0) {
+      return;
+    }
+
     setGoals((current) =>
       current.map((goal) =>
         goal.id === goalId
@@ -3317,6 +3357,83 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
           : goal,
       ),
     );
+    setGoalContributions((current) => [
+      {
+        id: `goal-contribution-${Date.now()}`,
+        goalId,
+        title: "You added money",
+        subtitle: "Just now",
+        amount,
+        createdAt: "Just now",
+        tone: "self",
+      },
+      ...current,
+    ]);
+  };
+
+  const handleCompleteGoal = (goalId: string) => {
+    setGoals((current) =>
+      current.map((goal) =>
+        goal.id === goalId
+          ? { ...goal, savedAmount: goal.targetAmount }
+          : goal,
+      ),
+    );
+    setGoalContributions((current) => [
+      {
+        id: `goal-contribution-complete-${Date.now()}`,
+        goalId,
+        title: "Goal completed",
+        subtitle: "Just now",
+        amount: 0,
+        createdAt: "Just now",
+        tone: "self",
+      },
+      ...current,
+    ]);
+  };
+
+  const handleTerminateGoal = (goalId: string) => {
+    setGoals((current) => {
+      const remainingGoals = current.filter((goal) => goal.id !== goalId);
+      setSelectedGoalId(remainingGoals[0]?.id ?? "");
+      return remainingGoals;
+    });
+    setGoalContributions((current) => current.filter((contribution) => contribution.goalId !== goalId));
+    setView("goals");
+    setActiveNav("analytics");
+    setMotionProgress(0);
+  };
+
+  const handleSelectTask = (taskId: string) => {
+    setSelectedTaskId(taskId);
+    setIsMoreSheetOpen(false);
+    setMotionProgress(0);
+    setActiveNav("analytics");
+  };
+
+  const handleMarkTaskDone = (taskId: string) => {
+    setTasks((current) =>
+      current.map((task) =>
+        task.id === taskId
+          ? { ...task, status: "waiting-parent", parentNote: "Waiting for parent confirmation" }
+          : task,
+      ),
+    );
+  };
+
+  const handleOpenContacts = () => {
+    setIsMoreSheetOpen(false);
+    setMotionProgress(0);
+    setActiveNav("more");
+    setView("contacts");
+  };
+
+  const handleOpenSettings = () => {
+    setIsMoreSheetOpen(false);
+    setMotionProgress(0);
+    setActiveNav("more");
+    setView("settings");
   };
 
   const handleCompleteLearnLesson = (lessonId: string) => {
@@ -3456,6 +3573,35 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
       );
     }
 
+    if (view === "contacts") {
+      return (
+        <div className="relative z-[1] min-h-0 flex-1 overflow-hidden">
+          <ContactsScreen
+            onBack={() => {
+              setView("home");
+              setActiveNav("more");
+              setMotionProgress(0);
+            }}
+            onPrimeClick={() => undefined}
+          />
+        </div>
+      );
+    }
+
+    if (view === "settings") {
+      return (
+        <div className="relative z-[1] min-h-0 flex-1 overflow-hidden">
+          <SettingsScreen
+            onBack={() => {
+              setView("home");
+              setActiveNav("more");
+              setMotionProgress(0);
+            }}
+          />
+        </div>
+      );
+    }
+
     if (view === "goals") {
       return (
         <HuKidsGoalsPage
@@ -3478,6 +3624,7 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
 
       return (
         <HuKidsGoalDetailPage
+          contributions={goalContributions.filter((contribution) => contribution.goalId === selectedGoal?.id)}
           goal={selectedGoal}
           onAddMoney={(amount) => {
             if (selectedGoal) {
@@ -3489,6 +3636,16 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
             setView("goals");
             setActiveNav("analytics");
             setMotionProgress(0);
+          }}
+          onCompleteGoal={() => {
+            if (selectedGoal) {
+              handleCompleteGoal(selectedGoal.id);
+            }
+          }}
+          onTerminateGoal={() => {
+            if (selectedGoal) {
+              handleTerminateGoal(selectedGoal.id);
+            }
           }}
           showAmounts={showAmounts}
           theme={appliedTheme}
@@ -3623,8 +3780,10 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
                 <HuEarningContent
                   completedLessonIds={completedLearnLessonIds}
                   onOpenLearn={handleOpenLearn}
+                  onSelectTask={handleSelectTask}
                   onToggleAmounts={() => setShowAmounts((current) => !current)}
                   showAmounts={showAmounts}
+                  tasks={tasks}
                   topics={learnTopics}
                 />
               ) : activeNav === "products" ? (
@@ -3648,7 +3807,14 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
         ) : (
           <>
             {activeNav === "payments" ? <HuKidsPaymentsPage onMessages={handleOpenMessages} theme={appliedTheme} /> : null}
-            {activeNav === "more" ? <HuKidsMorePage theme={appliedTheme} /> : null}
+            {activeNav === "more" ? (
+              <HuKidsMorePage
+                onContacts={handleOpenContacts}
+                onMessages={handleOpenMessages}
+                onSettings={handleOpenSettings}
+                theme={appliedTheme}
+              />
+            ) : null}
           </>
         )}
 
@@ -3663,6 +3829,15 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
               setIsMoreSheetOpen(false);
               setView("theme");
             }}
+          />
+        ) : null}
+
+        {selectedTaskId ? (
+          <HuTaskDetailSheet
+            onClose={() => setSelectedTaskId("")}
+            onMarkDone={handleMarkTaskDone}
+            showAmounts={showAmounts}
+            task={tasks.find((task) => task.id === selectedTaskId) ?? null}
           />
         ) : null}
       </>
@@ -3714,12 +3889,14 @@ function HuKidsPiMenuFrame({
   children,
   header,
   onMessages,
+  onScroll,
   theme,
   title,
 }: {
   children: ReactNode;
   header?: ReactNode;
   onMessages?: () => void;
+  onScroll?: (event: UIEvent<HTMLDivElement>) => void;
   theme: HuThemePreset;
   title: string;
 }) {
@@ -3770,6 +3947,7 @@ function HuKidsPiMenuFrame({
       </div>
       <div
         className="scrollbar-hide relative z-[1] min-h-0 flex-1 overflow-y-auto pb-[104px]"
+        onScroll={onScroll}
       >
         <div className="min-h-full" style={contentStyle}>
           {children}
@@ -3946,7 +4124,17 @@ function HuKidsProductsPage({ onMessages, theme }: { onMessages?: () => void; th
   );
 }
 
-function HuKidsMorePage({ onMessages, theme }: { onMessages?: () => void; theme: HuThemePreset }) {
+function HuKidsMorePage({
+  onContacts,
+  onMessages,
+  onSettings,
+  theme,
+}: {
+  onContacts: () => void;
+  onMessages?: () => void;
+  onSettings: () => void;
+  theme: HuThemePreset;
+}) {
   const { t } = useLanguage();
   const availableCards = getMoreCardsForCountry(HU_KIDS_SIMPLIFIED_MENU_SHAPE_COUNTRY);
   const documentsCount = getDocumentsCountForCountry(HU_KIDS_RUNTIME_COUNTRY);
@@ -3964,7 +4152,7 @@ function HuKidsMorePage({ onMessages, theme }: { onMessages?: () => void; theme:
   const renderCard = (cardType: MoreCardType) => {
     switch (cardType) {
       case "contacts":
-        return <ContactsCard key="contacts" title={cardLabels.contacts} onClick={() => undefined} />;
+        return <ContactsCard key="contacts" title={cardLabels.contacts} onClick={onContacts} />;
       case "documents":
         return (
           <DocumentsCard
@@ -3975,7 +4163,7 @@ function HuKidsMorePage({ onMessages, theme }: { onMessages?: () => void; theme:
           />
         );
       case "settings":
-        return <SettingsCard key="settings" title={cardLabels.settings} onClick={() => undefined} />;
+        return <SettingsCard key="settings" title={cardLabels.settings} onClick={onSettings} />;
       case "my-requests":
         return <MyRequestsCard key="my-requests" title={cardLabels["my-requests"]} onClick={() => undefined} />;
       case "tutorial":
@@ -3990,7 +4178,7 @@ function HuKidsMorePage({ onMessages, theme }: { onMessages?: () => void; theme:
       header={
         <MoreHeader
           actionVariant="contact-messages"
-          onContactPhone={() => undefined}
+          onContactPhone={onContacts}
           onLogout={() => undefined}
           onMessages={onMessages}
           onProfile={() => undefined}
@@ -4849,7 +5037,7 @@ function HuSavingContent({
           onSaveMoney={onOpenGoals}
         />
 
-        <div className="mt-[28px] space-y-[28px] px-[24px]">
+        <div className="mt-[24px] space-y-[24px] px-[16px]">
           <HuSavingFocusCard onCreateGoal={onCreateGoal} onOpenGoals={onOpenGoals} showAmounts={showAmounts} />
           <HuKidsGoalsSection
             goals={goals}
@@ -4866,25 +5054,29 @@ function HuSavingContent({
 function HuEarningContent({
   completedLessonIds,
   onOpenLearn,
+  onSelectTask,
   onToggleAmounts,
   showAmounts,
+  tasks,
   topics,
 }: {
   completedLessonIds: string[];
   onOpenLearn: () => void;
+  onSelectTask: (taskId: string) => void;
   onToggleAmounts: () => void;
   showAmounts: boolean;
+  tasks: HuKidsTask[];
   topics: HuLearnTopic[];
 }) {
   const completedTopics = topics.filter((topic) => getHuLearnTopicProgress(topic, completedLessonIds) === 100).length;
 
   return (
     <main>
-        <HuEarningBalance showAmounts={showAmounts} />
+        <HuEarningBalance showAmounts={showAmounts} tasks={tasks} />
 
         <div className="mt-[28px] space-y-[28px] px-[24px]">
           <HuAllowanceCard showAmounts={showAmounts} />
-          <HuTasksCard showAmounts={showAmounts} />
+          <HuTasksCard onSelectTask={onSelectTask} showAmounts={showAmounts} tasks={tasks} />
           <HuEducationCard
             completedTopics={completedTopics}
             totalTopics={topics.length}
@@ -4897,10 +5089,12 @@ function HuEarningContent({
 
 function HuEarningBalance({
   showAmounts,
+  tasks,
 }: {
   showAmounts: boolean;
+  tasks: HuKidsTask[];
 }) {
-  const totalRewards = HU_KIDS_TASKS.reduce((sum, task) => sum + task.reward, 0);
+  const totalRewards = tasks.reduce((sum, task) => sum + task.reward, 0);
 
   return (
     <section className="mt-[68px] px-[24px] text-center">
@@ -4921,7 +5115,7 @@ function HuEarningBalance({
         )}
       </div>
       <p className="mt-[8px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
-        from {HU_KIDS_TASKS.length} active tasks
+        from {tasks.length} active tasks
       </p>
     </section>
   );
@@ -6023,7 +6217,7 @@ function HuKidsGoalCard({
 
   return (
     <button
-      className="w-full rounded-[14px] bg-[var(--hu-theme-card-strong-bg)] p-[14px] text-left transition-transform active:scale-[0.99]"
+      className="w-full rounded-[16px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-[16px] text-left shadow-sm transition-transform active:scale-[0.99]"
       onClick={onClick}
       type="button"
     >
@@ -6094,7 +6288,7 @@ function HuKidsGoalsPage({
   return (
     <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
       <HuKidsGoalPageHeader onBack={onBack} theme={theme} title="Saving goals" />
-      <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto px-[24px] pb-[36px] pt-[18px]">
+      <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto px-[16px] pb-[36px] pt-[18px]">
         <div className="rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
           <div className="flex items-start gap-[12px]">
             <span className="grid size-[46px] shrink-0 place-items-center rounded-full bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent-strong)]">
@@ -6128,20 +6322,30 @@ function HuKidsGoalsPage({
 }
 
 function HuKidsGoalDetailPage({
+  contributions,
   goal,
   onAddMoney,
   onAskParent,
   onBack,
+  onCompleteGoal,
+  onTerminateGoal,
   showAmounts,
   theme,
 }: {
+  contributions: HuGoalContribution[];
   goal: SavingGoal | null;
   onAddMoney: (amount: number) => void;
   onAskParent: () => void;
   onBack: () => void;
+  onCompleteGoal: () => void;
+  onTerminateGoal: () => void;
   showAmounts: boolean;
   theme: HuThemePreset;
 }) {
+  const [customAmount, setCustomAmount] = useState("1000");
+  const parsedCustomAmount = Number(customAmount.replace(/[^\d]/g, ""));
+  const canAddCustomAmount = parsedCustomAmount > 0;
+
   if (!goal) {
     return (
       <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
@@ -6157,11 +6361,12 @@ function HuKidsGoalDetailPage({
   }
 
   const progress = goalProgress(goal);
+  const isGoalComplete = progress >= 100;
 
   return (
     <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
       <HuKidsGoalPageHeader onBack={onBack} theme={theme} title={goal.title} />
-      <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto px-[24px] pb-[36px] pt-[18px]">
+      <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto px-[16px] pb-[36px] pt-[18px]">
         <section className="rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
           <div className="flex items-center gap-[14px]">
             <span className="grid size-[54px] shrink-0 place-items-center rounded-full bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent-strong)]">
@@ -6186,34 +6391,110 @@ function HuKidsGoalDetailPage({
           </p>
         </section>
 
-        <div className="mt-[14px] grid grid-cols-2 gap-[8px]">
-          <button
-            className="h-[44px] rounded-[12px] bg-[var(--hu-theme-accent-strong)] text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--uc-text-inverse)]"
-            onClick={() => onAddMoney(1000)}
-            type="button"
-          >
-            Add 1.000 HUF
-          </button>
-          <button
-            className="h-[44px] rounded-[12px] bg-[var(--hu-theme-control-bg)] text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--hu-theme-accent-strong)]"
-            onClick={onAskParent}
-            type="button"
-          >
-            Ask parent
-          </button>
-        </div>
+        <section className="mt-[14px] rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
+          <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Add money</h2>
+          <div className="mt-[14px] grid grid-cols-3 gap-[8px]">
+            {[1000, 2500, 5000].map((amount) => (
+              <button
+                key={amount}
+                className="h-[40px] rounded-[12px] bg-[var(--hu-theme-control-bg)] text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--hu-theme-accent-strong)]"
+                onClick={() => onAddMoney(amount)}
+                type="button"
+              >
+                +{formatHuKidsAmount(amount)}
+              </button>
+            ))}
+          </div>
+          <div className="mt-[12px] flex h-[48px] items-center rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] focus-within:ring-2 focus-within:ring-[var(--uc-action)] focus-within:ring-offset-2 focus-within:ring-offset-[var(--uc-app-bg)]">
+            <input
+              aria-label="Custom saving amount"
+              className="min-w-0 flex-1 bg-transparent text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)] outline-none"
+              inputMode="numeric"
+              onChange={(event) => setCustomAmount(event.target.value.replace(/[^\d]/g, ""))}
+              value={customAmount}
+            />
+            <span className="text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">HUF</span>
+          </div>
+          <div className="mt-[12px] grid grid-cols-2 gap-[8px]">
+            <button
+              className="h-[44px] rounded-[12px] bg-[var(--hu-theme-accent-strong)] text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--uc-text-inverse)] disabled:opacity-45"
+              disabled={!canAddCustomAmount}
+              onClick={() => onAddMoney(parsedCustomAmount)}
+              type="button"
+            >
+              Add amount
+            </button>
+            <button
+              className="h-[44px] rounded-[12px] bg-[var(--hu-theme-control-bg)] text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--hu-theme-accent-strong)]"
+              onClick={onAskParent}
+              type="button"
+            >
+              Ask parent
+            </button>
+          </div>
+        </section>
 
         <section className="mt-[16px] rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
-          <div className="flex items-start gap-[12px]">
+          <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Goal actions</h2>
+          <div className="mt-[12px] flex flex-col gap-[10px]">
+            <button
+              className="flex min-h-[48px] w-full items-center gap-[12px] rounded-[12px] bg-[var(--hu-theme-control-bg)] px-[14px] text-left text-[var(--hu-theme-accent-strong)] disabled:opacity-45"
+              disabled={isGoalComplete}
+              onClick={onCompleteGoal}
+              type="button"
+            >
+              <AppIcon name="prime-check" size={18} />
+              <span className="min-w-0 flex-1 text-[14px] font-bold leading-[18px] tracking-[0]">
+                {isGoalComplete ? "Goal completed" : "Complete goal now"}
+              </span>
+            </button>
+            <button
+              className="flex min-h-[48px] w-full items-center gap-[12px] rounded-[12px] bg-[color-mix(in_srgb,var(--uc-status-red)_8%,var(--uc-surface))] px-[14px] text-left text-[var(--uc-status-red)]"
+              onClick={onTerminateGoal}
+              type="button"
+            >
+              <AppIcon name="close-x" size={18} />
+              <span className="min-w-0 flex-1 text-[14px] font-bold leading-[18px] tracking-[0]">
+                Stop saving for this goal
+              </span>
+            </button>
+          </div>
+        </section>
+
+        <section className="mt-[16px] rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
+          <div className="flex items-center gap-[12px]">
             <span className="grid size-[42px] shrink-0 place-items-center rounded-full bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent-strong)]">
               <AppIcon name="gift" size={22} />
             </span>
-            <div>
-              <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Contributors</h2>
-              <p className="mt-[6px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
-                Mom helped last week with +2.000 HUF. Wishlist sharing stays a future release item.
+            <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Contributors</h2>
+          </div>
+          <div className="mt-[14px] flex flex-col divide-y divide-[var(--uc-border-muted)]">
+            {contributions.length > 0 ? (
+              contributions.map((contribution) => (
+                <div key={contribution.id} className="flex items-center gap-[12px] py-[12px] first:pt-0 last:pb-0">
+                  <span className="grid size-[34px] shrink-0 place-items-center rounded-full bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent-strong)]">
+                    <AppIcon name={contribution.tone === "parent" ? "users" : "hu-kids-saving"} size={18} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--uc-text)]">
+                      {contribution.title}
+                    </p>
+                    <p className="mt-[2px] text-[13px] font-normal leading-[16px] tracking-[0] text-[var(--uc-text-muted)]">
+                      {contribution.subtitle}
+                    </p>
+                  </div>
+                  {contribution.amount > 0 ? (
+                    <p className="shrink-0 text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--hu-theme-accent-strong)]">
+                      +{formatHuKidsGoalAmount(contribution.amount, showAmounts)}
+                    </p>
+                  ) : null}
+                </div>
+              ))
+            ) : (
+              <p className="py-[4px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
+                Added money and parent contributions will appear here.
               </p>
-            </div>
+            )}
           </div>
         </section>
       </main>
@@ -6395,28 +6676,31 @@ function HuKidsLearnPage({
 }) {
   const completedTopics = topics.filter((topic) => getHuLearnTopicProgress(topic, completedLessonIds) === 100).length;
   const suggestedTopic = topics.find((topic) => topic.id === "saving-goals") ?? topics[0];
+  const [collapsedTitleProgress, setCollapsedTitleProgress] = useState(0);
+  const headerVariant = theme.id === "nordlys" || theme.id === "blue-lines" ? "dark" : "transparent";
 
   return (
-    <HuKidsPiMenuFrame header={onBack ? (
-      <div className="w-full bg-[var(--hu-kids-menu-header-bg)]">
-        <div className="px-[24px] pb-[22px]">
-          <div className="flex min-h-[32px] items-start gap-[8px]">
-            <button
-              type="button"
-              className="grid size-[32px] shrink-0 place-items-center text-[var(--uc-text)]"
-              onClick={onBack}
-              aria-label="Back"
-            >
-              <AppIcon name="chevron-left" size={24} />
-            </button>
-            <h1 className="uc-type-h1 min-w-0 flex-1 text-[var(--hu-kids-menu-title-fg)]">Learn</h1>
-            <HeaderActionRail>
-              <HeaderActionButton icon="messages" label="Messages" onClick={onMessages} />
-            </HeaderActionRail>
-          </div>
-        </div>
-      </div>
-    ) : undefined} onMessages={onMessages} theme={theme} title="Learn">
+    <HuKidsPiMenuFrame
+      header={onBack ? (
+        <PageHeader
+          collapsedTitleProgress={collapsedTitleProgress}
+          compact
+          onBack={onBack}
+          onRightActionClick={onMessages}
+          rightActionIcon={<AppIcon name="messages" size={20} />}
+          rightActionLabel="Messages"
+          showHelp={false}
+          title="Learn"
+          variant={headerVariant}
+        />
+      ) : undefined}
+      onMessages={onMessages}
+      onScroll={(event) => {
+        setCollapsedTitleProgress(Math.min(event.currentTarget.scrollTop / 64, 1));
+      }}
+      theme={theme}
+      title="Learn"
+    >
       <section className="px-[16px] pt-[16px]">
         <div className="flex items-end justify-between gap-[12px] px-[2px]">
           <div>
@@ -7355,7 +7639,17 @@ function HuCardsPanel({ onCardDetails }: { onCardDetails: (cardId: string) => vo
   );
 }
 
-function HuTasksCard({ showAmounts = true }: { showAmounts?: boolean }) {
+function HuTasksCard({
+  onSelectTask,
+  showAmounts = true,
+  tasks,
+}: {
+  onSelectTask: (taskId: string) => void;
+  showAmounts?: boolean;
+  tasks: HuKidsTask[];
+}) {
+  const openTasks = tasks.filter((task) => task.status === "todo").length;
+
   return (
     <section className="flex w-full flex-col gap-[24px] rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[16px]">
       {/* Header */}
@@ -7363,17 +7657,17 @@ function HuTasksCard({ showAmounts = true }: { showAmounts?: boolean }) {
         <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Tasks</h2>
         <p className="text-[14px] leading-[20px] tracking-[0] text-[var(--uc-text)]">
           You have{" "}
-          <span className="font-bold">{HU_KIDS_TASKS.length} tasks</span>{" "}
+          <span className="font-bold">{openTasks} tasks</span>{" "}
           to do
         </p>
       </div>
 
       {/* Task rows */}
       <div className="flex flex-col gap-[12px]">
-        {HU_KIDS_TASKS.map((task, index) => (
+        {tasks.map((task, index) => (
           <div key={task.title}>
-            <HuTaskRow task={task} showAmounts={showAmounts} />
-            {index < HU_KIDS_TASKS.length - 1 && (
+            <HuTaskRow task={task} onClick={() => onSelectTask(task.id)} showAmounts={showAmounts} />
+            {index < tasks.length - 1 && (
               <div className="mt-[12px] h-px w-full bg-[var(--uc-border-muted)]" />
             )}
           </div>
@@ -7395,29 +7689,45 @@ function HuTasksCard({ showAmounts = true }: { showAmounts?: boolean }) {
 }
 
 function HuTaskRow({
+  onClick,
   task,
   showAmounts = true,
 }: {
-  task: (typeof HU_KIDS_TASKS)[number];
+  onClick: () => void;
+  task: HuKidsTask;
   showAmounts?: boolean;
 }) {
   const formattedReward = formatHuFullAmount(task.reward);
   const [integerPart, decimalPart] = formattedReward.split(",");
+  const completed = task.status !== "todo";
+  const statusLabel =
+    task.status === "waiting-parent"
+      ? "Waiting parent"
+      : task.status === "approved"
+        ? "Approved"
+        : task.recurrence;
 
   return (
-    <div className="flex min-h-[48px] items-center gap-[8px]">
+    <button className="flex min-h-[48px] w-full items-center gap-[8px] text-left" onClick={onClick} type="button">
       {/* Left side: checkbox + text */}
       <div className="flex flex-1 items-center gap-[8px]">
         {/* Unchecked checkbox */}
         <span className="grid size-[32px] shrink-0 place-items-center">
-          <span className="size-[24px] rounded-[4px] border border-[var(--uc-border)] bg-[var(--hu-theme-card-bg)]" />
+          <span className={cn(
+            "grid size-[24px] place-items-center rounded-[4px] border",
+            completed
+              ? "border-[var(--hu-theme-accent-strong)] bg-[var(--hu-theme-accent-strong)] text-[var(--uc-static-white)]"
+              : "border-[var(--uc-border)] bg-[var(--hu-theme-card-bg)]",
+          )}>
+            {completed ? <AppIcon name="prime-check" size={14} /> : null}
+          </span>
         </span>
         <div className="flex min-w-0 flex-col gap-[4px]">
           <p className="min-h-[24px] text-[16px] font-bold leading-[18px] tracking-[0] text-[var(--uc-text)]">
             {task.title}
           </p>
           <p className="text-[14px] font-normal leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">
-            {task.recurrence}
+            {statusLabel}
           </p>
         </div>
       </div>
@@ -7436,7 +7746,68 @@ function HuTaskRow({
           </>
         )}
       </div>
-    </div>
+    </button>
+  );
+}
+
+function HuTaskDetailSheet({
+  onClose,
+  onMarkDone,
+  showAmounts,
+  task,
+}: {
+  onClose: () => void;
+  onMarkDone: (taskId: string) => void;
+  showAmounts: boolean;
+  task: HuKidsTask | null;
+}) {
+  if (!task) {
+    return null;
+  }
+
+  const waiting = task.status === "waiting-parent";
+  const approved = task.status === "approved";
+
+  return (
+    <BottomSheet
+      title={task.title}
+      subtitle={waiting ? "Waiting parent" : approved ? "Approved" : task.recurrence}
+      onClose={onClose}
+    >
+      <div className="pb-[8px]">
+        <div className="flex items-start gap-[14px] rounded-[14px] bg-[var(--uc-app-bg)] p-[14px]">
+          <span className="grid size-[44px] shrink-0 place-items-center rounded-full bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent-strong)]">
+            <AppIcon name="clipboard-check" size={22} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[14px] leading-[18px] text-[var(--uc-text-muted)]">
+            {task.recurrence} task. Mark it as done when you have finished it. Your parent confirms it before the reward is paid.
+            </p>
+            <p className="mt-[12px] text-[13px] font-bold uppercase leading-[16px] text-[var(--uc-text-muted)]">Reward</p>
+            <p className="mt-[4px] text-[24px] font-bold leading-[28px] text-[var(--uc-text)]">
+              {showAmounts ? `${formatHuFullAmount(task.reward)} HUF` : formatHuMaskedMoney()}
+            </p>
+          </div>
+        </div>
+        {waiting || approved ? (
+          <div className="mt-[12px] rounded-[12px] bg-[var(--hu-theme-control-bg)] p-[14px]">
+            <p className="text-[14px] font-bold leading-[18px] text-[var(--hu-theme-accent-strong)]">
+              {approved ? "Approved by parent" : "Waiting for parent confirmation"}
+            </p>
+            <p className="mt-[4px] text-[13px] leading-[17px] text-[var(--uc-text-muted)]">
+              {approved ? "The reward is ready." : "Your parent can confirm the task in the parent app."}
+            </p>
+          </div>
+        ) : null}
+        <PrimaryButton
+          className="mt-[16px] !w-full"
+          disabled={waiting || approved}
+          onClick={() => onMarkDone(task.id)}
+        >
+          {waiting ? "Waiting parent" : approved ? "Approved" : "Mark as done"}
+        </PrimaryButton>
+      </div>
+    </BottomSheet>
   );
 }
 
