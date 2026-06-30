@@ -21,7 +21,7 @@ export default function InvestmentProductsAccordion({
       <button
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        className="flex h-[56px] items-center justify-between px-[24px]"
+        className="flex h-[56px] items-center justify-between px-[16px]"
         aria-expanded={isOpen}
       >
         <span className="uc-type-n4-strong text-left text-[var(--uc-text)]">

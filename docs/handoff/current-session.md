@@ -1,6 +1,154 @@
 # Current Session
 
-Last updated: 2026-06-25
+Last updated: 2026-06-30
+
+## 2026-06-30 GitHub And Vercel Publish Closeout
+
+- Latest request handled: user asked to commit all uncommitted workspace changes, publish to GitHub, and deploy the latest version to Vercel.
+- Commit scope:
+  - Investments Figma-alignment work: fund banner asset/card, securities rows, accordion padding, distribution chart/list/drilldown, history/order row alignment, and Product Type action-bar cleanup.
+  - HU Kids polish: saving-goal UX/cards/detail actions, task bottom-sheet flow, More Contact/settings linkage, and Learn standard collapsing header behavior.
+  - Design System Inventory cleanup: removed the visible `Implementation registry`, `App-specific components`, and `Generic UI registry` areas.
+  - Design-system handoff docs: portable component implementation package, platform icon SVG catalog, and icon export script.
+  - Handoff/capability docs already updated for the above runtime/product behavior changes.
+- Verification before commit:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=80 screens=31 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - `node --check scripts/export-platform-icon-catalog.mjs` passed.
+  - Platform icon catalog sanity check found `119` SVG code blocks.
+- Banana Loop:
+  - Fixed/recorded: the previously visible technical registry blocks in Design System Inventory were removed as requested.
+  - Fixed/recorded: cross-project component implementation handoff material now exists and was copied to the separate `all in one` workspace.
+  - Triaged/non-blocking: Vite chunk-size warning remains tracked in `docs/handoff/known-bananas.md`.
+  - Triaged/non-blocking: no local `typecheck`, `lint`, or `test` scripts are available; build plus repo audits remain the relevant gates for this closeout.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+safe to resume: yes, after GitHub push and Vercel deployment complete the workspace should be clean except for any intentionally running local dev server processes/log files.
+
+## 2026-06-29 Design System Inventory Registry Cleanup
+
+- Latest request handled: user asked to remove the visible `Implementation registry` area plus `App-specific components` and `Generic UI registry` from the Design System Inventory because that technical inventory is not useful in the reviewed UI.
+- Runtime changes:
+  - Updated `src/app/screens/design-system/DesignSystemPage.tsx` to remove the `Registry` side-nav link.
+  - Removed the `Implementation registry` section and its `App-specific components` / `Generic UI registry` cards from the Components inventory.
+  - Removed the now-unused component search field and `UI registry files` / `App components` coverage summary counts from the Components view.
+- Verification:
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+- safe to resume: yes
+
+## 2026-06-29 Component Implementation Handoff Package
+
+- Latest request handled: user asked for a portable, highly explicit document/package that explains how the platform-defined Design System Inventory components are implemented, so another Codex thread/project (`Components2`) can recreate them without going back through Figma.
+- Documentation changes:
+  - Added `docs/design-system/component-implementation-handoff/README.md` with package purpose, exclusions, and usage rules.
+  - Added `docs/design-system/component-implementation-handoff/components-handoff.md` with the included component registry map, source paths, global implementation rules, deep dives for `Products offer card` and `AccountBalanceCard / all countries`, and visual contracts for shell, account, product, card, payments, investments, and Meniga UI primitive families.
+  - Added `docs/design-system/component-implementation-handoff/COMPONENTS2_PROMPT.md` as a ready-to-send prompt for the separate `Components2` Codex conversation.
+- Explicitly excluded per user request: Status Bar, Floating Co-Apping, Button registry variants, Generic UI controls, Home content modules, and Logout confirmation dialog.
+- Verification:
+  - Documentation-only change; runtime build was not required.
+- safe to resume: yes
+
+## 2026-06-29 HU Kids Learn Header Goal Actions And Task Sheet
+
+- Latest request handled: user flagged HU Kids Learn header not using the standard collapsing PageHeader behavior, Saving goal cards still reading as one flat block, missing goal termination actions, and task details needing the same bottom-sheet model used by Payments.
+- Runtime changes:
+  - Updated `src/app/screens/kids/KidsMarketHomeApp.tsx` so HU Kids Learn uses the shared `PageHeader` with scroll-driven `collapsedTitleProgress`; the large title collapses into a centered compact title on scroll.
+  - Added scroll-progress support to `HuKidsPiMenuFrame` so contained HU Kids menu pages can drive standard header behavior without inventing another header model.
+  - Updated HU Kids saving-goal rows to render as separate white cards with border, radius, and shadow instead of blending into the tinted page block.
+  - Added goal lifecycle actions in goal detail: `Complete goal now` and `Stop saving for this goal`, both mock-driven/local-state only.
+  - Replaced the full-screen task-detail route with the shared `BottomSheet` shell; tapping a task opens a compact sheet, and `Mark as done` keeps the sheet open while moving the task to `Waiting parent`.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - Browser smoke on `http://127.0.0.1:5002/` with Chrome headless selected `Mobile PI Kids` + `Hungary`; Learn header rendered large title initially and only the small centered title after scrolling the real content scroller.
+  - Browser smoke confirmed Saving goal rows compute to white backgrounds, 16px radius, border, and shadow, and goal detail contains `Complete goal now` / `Stop saving for this goal`.
+  - Browser smoke confirmed `Brush your teeth` opens a `role=dialog` bottom sheet around 312px high and `Mark as done` changes the sheet content to `Waiting for parent confirmation` / `Waiting parent`.
+- safe to resume: yes
+
+## 2026-06-29 HU Kids Saving Tasks And More Linkage
+
+- Latest request handled: user flagged broken HU Kids Saving goals UI, fixed-amount-only goal detail UX, non-functional task completion, and unlinked More `Contact` / `settings` cards.
+- Runtime changes:
+  - Updated `src/app/screens/kids/KidsMarketHomeApp.tsx` so HU Kids tasks are stateful records with `todo` / `waiting-parent` / `approved` status instead of static display rows.
+  - Added a contained HU Kids task-detail flow: tapping a task opens detail, `Mark as done` moves it to `Waiting parent`, and the task list reflects the pending-parent status.
+  - Reworked HU Kids goal detail to support preset amounts, a numeric custom amount input, bounded progress updates, and contributor rows for parent/self additions instead of a single explanatory paragraph.
+  - Tightened HU Kids Saving spacing from the earlier 28px rhythm to 24px sections and 16px page inset for the saving-goals list/detail surfaces.
+  - Wired HU Kids More `Contact` and `settings` cards, plus the More header phone action, into the existing shared Mobile PI `ContactsScreen` and `SettingsScreen` inside the HU theme shell.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - Browser smoke on `http://127.0.0.1:5002/` with Chrome headless selected `Mobile PI Kids` + `Hungary`, opened Saving -> `See saving goals` -> `New bike`, confirmed `Create saving goal`, goal detail `Add money`, custom amount input, contributor list, `Ask parent`, and a new `You added money` contributor after adding `3500` HUF.
+  - Browser smoke opened Earning -> `Load dishwasher`, confirmed Task detail, `Mark as done`, and `Waiting for parent confirmation` / `Waiting parent` state.
+  - Browser smoke opened More and confirmed `Contact` opens the shared Contacts page and `settings` opens the shared Settings page.
+- safe to resume: yes
+
+## 2026-06-29 Investments History And Distribution Drilldown Alignment
+
+- Latest request handled: user flagged Investments History transaction/order rows, fund banner width, accordion horizontal padding, and missing distribution-category drilldown.
+- Runtime changes:
+  - Updated `src/app/components/investments/InvestmentsFundBanner.tsx` so the fund suggestion card is a block-level full-width card inside the 16px container inset instead of visually shrinking to content width.
+  - Updated `src/app/components/investments/InvestmentProductsAccordion.tsx` accordion headers from 24px to 16px horizontal padding to align with the securities rows and the user-requested 16px page rhythm.
+  - Updated `src/app/screens/investments/InvestmentsHistoryScreen.tsx` transaction/order rows against the referenced Figma `List investments` nodes: transaction rows keep the date block, order rows remove the date block, rows use 16px side padding, static `#262626` / `#666666` text, `#3D7D43` positive icon/amount, and `#E2001A` negative icon/amount.
+  - Updated `src/app/components/investments/InvestmentDistributionChart.tsx` distribution rows to be clickable 16px-padded buttons.
+  - Exported `getInvestmentDistributionGroupKey` from `src/app/config/investmentsPortfolioConfig.ts` so drilldowns reuse the same grouping logic as the chart.
+  - Added a contained distribution-category detail view inside `src/app/screens/investments/InvestmentsPortfolioScreen.tsx`, based on the referenced Figma category screen: back header, colored category dot, uppercase category title, total value, and 80px security rows with primary amount plus local-currency secondary amount where needed.
+- Verification:
+  - Figma screenshot inspection confirmed History transaction node `9264:16434` is a 375x80 `List investments` row with left date, arrow, right-aligned title/amount/type; Orders node `9266:42569` is a 375x80 `List investments` row without the date block; category node `9263:21308` is a 375x812 screen with dot + title, total value, and three 80px investment rows.
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - Browser smoke on `http://127.0.0.1:5002/` verified banner is block-level and full container width, inactive accordion header padding is `16px 16px`, transaction row has 16px side padding and green positive amount, order row has no date/month text and 16px side padding.
+  - Browser smoke verified Product Type -> Fund opens the new category detail view with title `FUND`, 24px title text, total value, one 80px-scaled security row, 16px side padding, and local amount shown in parentheses.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- safe to resume: yes
+
+## 2026-06-29 Investments Securities And Distribution Figma Alignment
+
+- Latest request handled: user pointed at Investments Portfolio security rows, the Product Type distribution chart, and the bottom action bar leaking into non-Performance tabs.
+- Runtime changes:
+  - Updated `src/app/components/investments/InvestmentProductCard.tsx` to follow the referenced Figma row contract more closely: white 375px row surface, 16/24/16/16 padding, 4px vertical rhythm, static `#262626` copy, `#3D7D43` positive performance, and UniCredit red `#E2001A` negative performance.
+  - Rebuilt `src/app/components/investments/InvestmentDistributionChart.tsx` from the previous CSS approximation into a Figma-style 179px SVG donut with external labels and guide lines, no center `100% Total` label, Figma-aligned text color, and list rows that keep the distribution totals below.
+  - Updated `src/app/config/investmentsPortfolioConfig.ts` distribution colors to the referenced Figma chart palette direction.
+  - Moved `InvestmentActionBar` inside the `Performance` tab branch in `src/app/screens/investments/InvestmentsPortfolioScreen.tsx`, so `Product Type`, `Currency`, `Asset Class`, and `Account List` no longer show `History / To approve / Download Report / invest`.
+- Verification:
+  - Figma inspection confirmed the row node `11552:21810` uses 375px width, 95px row height, 16px top/left/bottom padding, 24px right padding, 4px vertical gap, 14px bold title, 20px/14px performance amount split, `#262626` text, and `#3D7D43` positive performance.
+  - Figma inspection confirmed the chart node `11894:43480` uses a 375x179 layout with a 179px centered donut image area, external labels, and connector lines rather than a center-label donut.
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - Browser smoke on `http://127.0.0.1:5002/` opened Mobile PI Romania Investments Portfolio. Product Type verified: action bar absent, chart present, two SVG layers, no center `100%` text, first label `rgb(38,38,38)`, and chart text includes `Fund34%Bond24%Stock18%ETF14%`.
+  - Browser smoke on Performance verified the CEE Government Bond Fund row: width 365px due desktop phone scaling, height 95px, row gap 4px, padding `16px 24px 16px 16px`, background white, title `rgb(38,38,38)`, and negative amount/percent `rgb(226,0,26)`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- safe to resume: yes
+
+## 2026-06-29 Investments Fund Banner Figma Alignment
+
+- Latest request handled: user pointed at the `Find out the best fund for you` card in Investments Portfolio and supplied the Investments CEE DBN Figma node `11552:98044`.
+- Runtime changes:
+  - Updated `src/app/components/investments/InvestmentsFundBanner.tsx` to match the Figma card contract more closely: fixed 157px banner height, `#F5F5F5` surface, static `#262626` text for light-card contrast safety, 24px bold title, 18px regular description, 14px bold CTA, and 4px CTA/icon gap.
+  - Replaced the locally invented chart/card illustration with a local Unsplash plant image asset at `src/assets/investments/fund-banner-plant-unsplash.jpg`, cropped/faded into the right side to match the Figma composition direction.
+- Verification:
+  - Figma inspection confirmed node `11552:98044` is a 343x157 fund banner with 16px content inset, 223px text group, `#F5F5F5` background, 24px bold title, 18px regular description, and a right-side plant image.
+  - Browser smoke on `http://127.0.0.1:5002/` opened Mobile PI Romania Investments Portfolio and confirmed the rendered banner has the expected surface, typography, static dark text, right-side image, and CTA gap `4px`.
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- safe to resume: yes
+
+## 2026-06-28 Platform Icon SVG Catalog
+
+- Latest request handled: user clarified that the requested icon SVG catalog should come from the platform-defined design-system icon registries, not from Figma.
+- Documentation/tooling changes:
+  - Added `scripts/export-platform-icon-catalog.mjs`, which uses Vite SSR plus React server rendering to export the real rendered SVG for every platform-owned icon.
+  - Generated `docs/design-system/platform-icons-svg-catalog.md` with `100` `AppIcon` registry icons and `19` `PfmCategoryIcon` category glyphs.
+  - The catalog records source file, category/source metadata, size/viewBox, usage notes, and the SVG code block for each icon.
+- Verification:
+  - `node scripts/export-platform-icon-catalog.mjs` passed and regenerated the catalog.
+  - Catalog sanity check found `119` icon sections and `119` `svg` code blocks.
+  - `node --check scripts/export-platform-icon-catalog.mjs` passed.
+  - `git diff --check` passed with only the normal Windows LF/CRLF warning for `docs/handoff/current-session.md`.
+- safe to resume: yes
 
 ## Current Focus
 

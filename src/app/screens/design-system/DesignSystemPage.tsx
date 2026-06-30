@@ -133,17 +133,6 @@ const activeComponentFiles = [
   "PrimeLabelValue", "PrimeIconLabelValue", "BackButton", "RadioButton", "ProductOfferCard", "TemplateCodePreview",
 ];
 
-const uiRegistryFiles = [
-  "accordion", "alert-dialog", "alert", "aspect-ratio", "badge", "breadcrumb", "button",
-  "calendar", "card", "carousel", "chart", "checkbox", "collapsible", "command", "context-menu",
-  "dialog", "drawer", "dropdown-menu", "form", "hover-card", "input-otp", "input", "label",
-  "menubar", "navigation-menu", "pagination", "popover", "progress", "radio-group", "resizable",
-  "scroll-area", "select", "separator", "sheet", "sidebar", "skeleton", "slider", "sonner",
-  "table", "tabs", "textarea", "toggle-group", "toggle", "tooltip",
-  "ChevronIcon", "LanguageSelectorButton", "LinkButton", "NavigationLink", "Pill", "PreLoginHeading", "PrimaryButton",
-  "ToastMessage",
-];
-
 const moreCardLabels: Record<MoreCardType, string> = {
   contacts: "Contacts",
   documents: "Documents",
@@ -176,7 +165,6 @@ const componentSectionLinks = [
   ["cards", "Cards"],
   ["products", "Products"],
   ["overlays", "Overlays"],
-  ["registry", "Registry"],
 ];
 
 const templateSectionLinks = [["templates", "Templates"]];
@@ -3980,7 +3968,6 @@ function TemplatePreview({ template }: { template: TemplateRegistryItem }) {
 export default function DesignSystemPage() {
   const [showLogout, setShowLogout] = useState(false);
   const [inspectMode, setInspectMode] = useState(false);
-  const [componentSearchQuery, setComponentSearchQuery] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const [inventoryTab, setInventoryTab] = useState<InventoryTab>(() => {
     if (typeof window === "undefined") return "components";
@@ -3991,12 +3978,6 @@ export default function DesignSystemPage() {
     return window.location.hash.replace(/^#/, "") || getDefaultSectionForInventoryTab(getInventoryTabForHash(window.location.hash));
   });
   const sectionLinks = inventorySectionLinks[inventoryTab];
-  const normalizedComponentQuery = componentSearchQuery.trim().toLowerCase();
-  const matchesComponentQuery = (name: string) =>
-    normalizedComponentQuery.length === 0 || name.toLowerCase().includes(normalizedComponentQuery);
-  const visibleActiveComponentFiles = activeComponentFiles.filter(matchesComponentQuery);
-  const visibleUiRegistryFiles = uiRegistryFiles.filter(matchesComponentQuery);
-
   const handleInventoryTabChange = (nextTab: InventoryTab) => {
     const nextSectionId = getDefaultSectionForInventoryTab(nextTab);
     setInventoryTab(nextTab);
@@ -4117,19 +4098,10 @@ export default function DesignSystemPage() {
             <TypographyInventory />
           ) : (
             <>
-          <InventorySearchField
-            value={componentSearchQuery}
-            onChange={setComponentSearchQuery}
-            placeholder="Search components"
-            label="Search components"
-          />
-
           <Section id="overview" title="Coverage summary" description="Quick reference for the audited surface and the areas worth checking first.">
             <InventoryStatGrid
               items={[
                 ["Countries", COUNTRIES.length],
-                ["App components", activeComponentFiles.length],
-                ["UI registry files", uiRegistryFiles.length],
                 ["Feature flags", Object.keys(FEATURE_META).length],
                 ["Screenshot templates", TEMPLATE_REGISTRY.length],
               ]}
@@ -4447,34 +4419,6 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          <Section id="registry" title="Implementation registry" description="Components found in the repository. The Live badge marks what is rendered above; the rest stays listed for audit and consolidation decisions.">
-            <div className="grid gap-6 lg:grid-cols-2">
-              <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
-                <h3 className="mb-4 font-['UniCredit:Bold',sans-serif] text-[20px]">App-specific components</h3>
-                <div className="flex flex-wrap gap-2">
-                  {visibleActiveComponentFiles.length > 0 ? (
-                    visibleActiveComponentFiles.map((name) => (
-                      <Badge key={name} variant="secondary">{name}</Badge>
-                    ))
-                  ) : (
-                    <p className="text-[14px] text-[var(--uc-text-muted)]">No app-specific components match this search.</p>
-                  )}
-                </div>
-              </div>
-              <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
-                <h3 className="mb-4 font-['UniCredit:Bold',sans-serif] text-[20px]">Generic UI registry</h3>
-                <div className="flex flex-wrap gap-2">
-                  {visibleUiRegistryFiles.length > 0 ? (
-                    visibleUiRegistryFiles.map((name) => (
-                      <Badge key={name} variant="outline">{name}</Badge>
-                    ))
-                  ) : (
-                    <p className="text-[14px] text-[var(--uc-text-muted)]">No generic UI entries match this search.</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </Section>
             </>
           )}
         </main>

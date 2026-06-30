@@ -2,6 +2,14 @@
 
 This log records bananas found and how they were triaged.
 
+## 2026-06-30
+
+| Banana | Triage | Evidence |
+| --- | --- | --- |
+| Design System Inventory still exposed technical implementation registry blocks that the user explicitly did not want visible | Fixed by removing the visible `Implementation registry`, `App-specific components`, `Generic UI registry`, component search field, and related side-nav/count references from the inventory UI | `src/app/screens/design-system/DesignSystemPage.tsx`; `npm run build`; `npm run audit:templates`; `npm run audit:platform`; `git diff --check` |
+| Component implementation knowledge needed to be portable to the separate `Components2`/`all in one` workspace without re-reading Figma | Fixed by creating a dedicated component implementation handoff package, icon SVG catalog, and export script; the package was also copied to `C:\Users\mihai\Desktop\all in one\component-implementation-handoff` | `docs/design-system/component-implementation-handoff/*`; `docs/design-system/platform-icons-svg-catalog.md`; `scripts/export-platform-icon-catalog.mjs`; `node --check scripts/export-platform-icon-catalog.mjs`; catalog sanity check `119` SVG blocks |
+| Vite chunk-size warning still appears during production build | Triaged as existing known banana; build succeeds and this is not blocking current GitHub/Vercel publication | `docs/handoff/known-bananas.md`; `npm run build` |
+
 ## 2026-06-13
 
 | Banana | Triage | Evidence |

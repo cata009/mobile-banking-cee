@@ -8,6 +8,7 @@ import InvestmentPortfolioTabs from "@/app/components/investments/InvestmentPort
 import InvestmentProductCard, { type InvestmentAmountParts } from "@/app/components/investments/InvestmentProductCard";
 import InvestmentProductsAccordion from "@/app/components/investments/InvestmentProductsAccordion";
 import InvestmentsFundBanner from "@/app/components/investments/InvestmentsFundBanner";
+import { AppIcon } from "@/app/components/icons";
 import PageHeader from "@/app/components/PageHeader";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import {
@@ -18,9 +19,11 @@ import {
   buildInvestmentChartPoints,
   buildInvestmentSecurities,
   calculateInvestmentProductsTotalValue,
+  getInvestmentDistributionGroupKey,
   getInvestmentDistributionTitle,
   getInvestmentProducts,
   sortInvestmentSecurities,
+  type InvestmentDistributionItem,
   type InvestmentPortfolioTabId,
   type InvestmentPeriodId,
   type InvestmentSecurity,
@@ -149,6 +152,93 @@ function EmptyInvestmentsState() {
   );
 }
 
+function DistributionCategoryDetailScreen({
+  item,
+  tabId,
+  securities,
+  onBack,
+  formatDistributionAmount,
+}: {
+  item: InvestmentDistributionItem;
+  tabId: Exclude<InvestmentPortfolioTabId, "performance">;
+  securities: readonly InvestmentSecurity[];
+  onBack: () => void;
+  formatDistributionAmount: (value: number, itemCurrency: string) => InvestmentAmountParts;
+}) {
+  const [headerProgress, setHeaderProgress] = useState(0);
+  const matchingSecurities = securities.filter((security) => getInvestmentDistributionGroupKey(security, tabId) === item.id);
+  const totalParts = formatDistributionAmount(item.value, item.currency);
+  const categoryTitle = item.label.toUpperCase();
+
+  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
+    setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64)));
+  };
+
+  const renderCategoryRow = (security: InvestmentSecurity) => {
+    const primaryAmount = formatDistributionAmount(security.value, security.currency);
+    const localAmount = formatDistributionAmount(security.localValue, security.localCurrency);
+    const showLocalAmount = security.currency !== security.localCurrency;
+
+    return (
+      <button
+        key={security.id}
+        type="button"
+        className="flex h-[80px] w-full items-center justify-between bg-[#FFFFFF] px-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
+        data-investment-category-row={security.id}
+      >
+        <div className="min-w-0 flex-1 border-b border-[#E5E5E5] py-[14px] pr-[12px]">
+          <p className="truncate text-[14px] font-bold leading-[17px] text-[#262626]">{security.title}</p>
+          <p className="mt-[10px] truncate text-[#262626]">
+            <span className="text-[20px] font-bold leading-[24px]">{primaryAmount.integer}</span>
+            <span className="text-[14px] font-normal leading-[17px]">{primaryAmount.decimal} {primaryAmount.currency}</span>
+            {showLocalAmount ? (
+              <span className="text-[14px] font-normal leading-[17px] text-[#666666]">
+                {" "}({localAmount.integer}{localAmount.decimal} {localAmount.currency})
+              </span>
+            ) : null}
+          </p>
+        </div>
+        <span className="grid size-[32px] shrink-0 place-items-center" aria-hidden="true">
+          <AppIcon name="chevron-link" color="#262626" size={20} />
+        </span>
+      </button>
+    );
+  };
+
+  return (
+    <div className="h-full w-full overflow-y-auto bg-[#FFFFFF] text-[#262626] scrollbar-hide" onScroll={handleScroll} data-investment-distribution-detail={item.id}>
+      <PageHeader
+        title=""
+        onBack={onBack}
+        collapsedTitleProgress={headerProgress}
+        includeSafeArea
+      />
+      <section className="px-[16px] pt-[10px]">
+        <div className="flex items-center gap-[14px]">
+          <span className="size-[20px] shrink-0 rounded-full" style={{ backgroundColor: item.color }} aria-hidden="true" />
+          <h1 className="text-[24px] font-bold leading-[28px] tracking-[0.2px] text-[#262626]" data-investment-category-title="true">{categoryTitle}</h1>
+        </div>
+        <div className="pt-[44px]">
+          <p className="text-[14px] font-bold leading-[16px] text-[#262626]">Total value</p>
+          <p className="mt-[14px] text-[#262626]" aria-label={`${item.label} total value`}>
+            <span className="text-[30px] font-bold leading-[34px]">{totalParts.integer}</span>
+            <span className="text-[18px] font-normal leading-[22px]">{totalParts.decimal} {totalParts.currency}</span>
+          </p>
+        </div>
+      </section>
+      <section className="pt-[18px]">
+        {matchingSecurities.map(renderCategoryRow)}
+        {matchingSecurities.length === 0 ? (
+          <div className="px-[16px] py-[20px]">
+            <p className="text-[16px] font-bold leading-[20px] text-[#262626]">No securities in this category</p>
+          </div>
+        ) : null}
+      </section>
+      <div className="h-[34px]" />
+    </div>
+  );
+}
+
 export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: InvestmentsPortfolioScreenProps) {
   const { country, amountsHidden } = useDemo();
   const { categories } = useProducts();
@@ -157,6 +247,7 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
   const [selectedTabId, setSelectedTabId] = useState<InvestmentPortfolioTabId>("performance");
   const [selectedPeriodId, setSelectedPeriodId] = useState<InvestmentPeriodId>("max");
   const [selectedSortId, setSelectedSortId] = useState<InvestmentSortId>("max-value");
+  const [selectedDistributionItem, setSelectedDistributionItem] = useState<InvestmentDistributionItem | null>(null);
 
   const allProducts = useMemo(() => categories.flatMap((category) => category.products), [categories]);
   const investmentProducts = useMemo(() => getInvestmentProducts(allProducts), [allProducts]);
@@ -198,6 +289,18 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
 
   const formatDistributionAmount = (value: number, itemCurrency: string) =>
     maskInvestmentAmount(formatAmountParts(value, country, itemCurrency), amountsHidden);
+
+  if (selectedDistributionItem && selectedTabId !== "performance") {
+    return (
+      <DistributionCategoryDetailScreen
+        item={selectedDistributionItem}
+        tabId={selectedTabId}
+        securities={securities}
+        onBack={() => setSelectedDistributionItem(null)}
+        formatDistributionAmount={formatDistributionAmount}
+      />
+    );
+  }
 
   return (
     <div
@@ -251,32 +354,33 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
               items={distributionItems}
               formatAmount={formatDistributionAmount}
               totalLabel={t("runtime.investments.total", "Total")}
+              onItemClick={setSelectedDistributionItem}
             />
           )}
-          <InvestmentActionBar
-            actions={[
-              {
-                id: "history",
-                iconName: "investment-history",
-                label: t("runtime.investments.actions.history", "History"),
-                onClick: onHistoryClick,
-              },
-              {
-                id: "to-approve",
-                iconName: "investment-to-approve",
-                label: t("runtime.investments.actions.toApprove", "To approve"),
-                badgeCount: 20,
-              },
-              {
-                id: "download-report",
-                iconName: "investment-download-report",
-                label: t("runtime.investments.actions.downloadReport", "Download\nReport"),
-              },
-            ]}
-            investLabel={t("runtime.investments.actions.invest", "Invest")}
-          />
           {selectedTabId === "performance" ? (
             <>
+              <InvestmentActionBar
+                actions={[
+                  {
+                    id: "history",
+                    iconName: "investment-history",
+                    label: t("runtime.investments.actions.history", "History"),
+                    onClick: onHistoryClick,
+                  },
+                  {
+                    id: "to-approve",
+                    iconName: "investment-to-approve",
+                    label: t("runtime.investments.actions.toApprove", "To approve"),
+                    badgeCount: 20,
+                  },
+                  {
+                    id: "download-report",
+                    iconName: "investment-download-report",
+                    label: t("runtime.investments.actions.downloadReport", "Download\nReport"),
+                  },
+                ]}
+                investLabel={t("runtime.investments.actions.invest", "Invest")}
+              />
               <SectionHeadingDivider
                 title={t("runtime.investments.allProducts", "ALL PRODUCTS")}
                 count={securities.length}

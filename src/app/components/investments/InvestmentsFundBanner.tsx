@@ -1,4 +1,5 @@
 import { AppIcon } from "@/app/components/icons";
+import fundBannerPlant from "@/assets/investments/fund-banner-plant-unsplash.jpg";
 
 interface InvestmentsFundBannerProps {
   title: string;
@@ -9,16 +10,14 @@ interface InvestmentsFundBannerProps {
 
 function FundBannerIllustration() {
   return (
-    <div className="absolute right-0 top-0 h-full w-[179px] overflow-hidden rounded-r-[8px]" aria-hidden="true">
-      <div className="absolute inset-0 bg-[var(--uc-surface-muted)]" />
-      <div className="absolute bottom-[18px] right-[20px] h-[88px] w-[92px] rounded-[8px] bg-[var(--uc-surface)] shadow-[0_6px_14px_rgb(var(--uc-shadow-rgb)_/_0.12)]" />
-      <div className="absolute bottom-[30px] right-[38px] h-[48px] w-[8px] rounded-[2px] bg-[var(--uc-action)]" />
-      <div className="absolute bottom-[30px] right-[54px] h-[34px] w-[8px] rounded-[2px] bg-[var(--uc-green-success)]" />
-      <div className="absolute bottom-[30px] right-[70px] h-[22px] w-[8px] rounded-[2px] bg-[var(--uc-yellow-gold)]" />
-      <div className="absolute right-[22px] top-[28px] h-[42px] w-[82px] rotate-[-18deg] rounded-[6px] bg-[var(--uc-surface)] shadow-[0_6px_14px_rgb(var(--uc-shadow-rgb)_/_0.1)]">
-        <div className="mx-[10px] mt-[12px] h-[4px] rounded-full bg-[var(--uc-border)]" />
-        <div className="mx-[10px] mt-[8px] h-[4px] w-[42px] rounded-full bg-[var(--uc-border)]" />
-      </div>
+    <div className="absolute right-0 top-0 h-full w-[179px] overflow-hidden" aria-hidden="true">
+      <img
+        src={fundBannerPlant}
+        alt=""
+        className="absolute right-[-95px] top-0 h-full w-[230px] object-cover object-center"
+        draggable={false}
+      />
+      <div className="absolute inset-y-0 left-0 w-[88px] bg-gradient-to-r from-[#F5F5F5] via-[#F5F5F5]/90 to-transparent" />
     </div>
   );
 }
@@ -33,19 +32,19 @@ export default function InvestmentsFundBanner({
     <button
       type="button"
       onClick={onClick}
-      className="relative mx-[16px] mt-[24px] min-h-[157px] overflow-hidden rounded-[8px] bg-[#F5F5F5] p-[16px] text-left"
+      className="relative mx-[16px] mt-[24px] block h-[157px] w-[calc(100%-32px)] overflow-hidden rounded-[8px] bg-[#F5F5F5] p-[16px] text-left shadow-none"
       data-ds-label="Investments fund banner"
     >
       <div className="relative z-10 max-w-[223px]">
-        <h2 className="text-[24px] font-bold leading-[26px] text-[var(--uc-text)]">
+        <h2 className="text-[24px] font-bold leading-[26px] tracking-[0.2px] text-[#262626]">
           {title}
         </h2>
-        <p className="mt-[16px] text-[18px] font-normal leading-normal text-[var(--uc-text)]">
+        <p className="mt-[16px] text-[18px] font-normal leading-normal text-[#262626]">
           {description}
         </p>
-        <span className="mt-[18px] inline-flex items-center gap-[5px] text-[14px] font-bold uppercase leading-normal text-[var(--uc-text)]">
+        <span className="mt-[18px] inline-flex items-center gap-[4px] text-[14px] font-bold uppercase leading-normal text-[#262626]">
           {actionLabel}
-          <AppIcon name="arrow-right" size={12} color="var(--uc-icon)" strokeWidth={3} />
+          <AppIcon name="arrow-right" size={12} color="#262626" strokeWidth={3} />
         </span>
       </div>
       <FundBannerIllustration />
