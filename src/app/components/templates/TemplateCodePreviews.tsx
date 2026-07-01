@@ -1687,15 +1687,6 @@ function SpendingMoneyOutTemplate({ interactive }: { interactive: boolean }) {
 function ProductsShopSmartTemplate({ interactive }: { interactive: boolean }) {
   const menu = getProductsMenuForCountry("RO");
   const { t } = useLanguage();
-  const localizeOffer = (offer: (typeof menu.shopSmartOffers)[number]) => ({
-    ...offer,
-    title: t(`runtime.productsMenu.offers.${offer.id}.title`, offer.title),
-    description: t(`runtime.productsMenu.offers.${offer.id}.description`, offer.description),
-  });
-  const localizeCard = (card: (typeof menu.shopSmartProducts)[number]) => ({
-    ...card,
-    title: t(`runtime.productsMenu.cards.${getProductsCardTranslationId(card)}`, card.title),
-  });
 
   return (
     <TemplatePhoneSurface showSystemHeader={false}>
@@ -1711,9 +1702,8 @@ function ProductsShopSmartTemplate({ interactive }: { interactive: boolean }) {
 
         <div className="relative z-0 flex-1 overflow-y-auto scrollbar-hide pb-[92px]">
           <ShopSmartContent
-            title={t("runtime.productsMenu.shopSmartTitle", menu.shopSmartTitle)}
-            offers={menu.shopSmartOffers.map(localizeOffer)}
-            products={menu.shopSmartProducts.map(localizeCard)}
+            summary={menu.shopSmartSummary}
+            offerCards={menu.shopSmartOfferCards}
           />
         </div>
 

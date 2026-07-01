@@ -96,6 +96,7 @@ export const MORE_CARDS_CONFIG: Record<CountryId, MoreCardType[]> = {
     'settings',
     'third-party-consent',
     'my-requests',
+    'tutorial',
   ],
 };
 

@@ -6,10 +6,12 @@ import AccountTransactionRow from "@/app/components/accounts/AccountTransactionR
 import AccountTransactionMonthDivider from "@/app/components/accounts/AccountTransactionMonthDivider";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import { AppIcon } from "@/app/components/icons";
+import WalletButton from "@/app/components/ui/WalletButton";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
 import { getCountryConfig, formatMoneyNumber } from "@/app/registry/countryConfig";
 import { maskFormattedAmount } from "@/app/utils/amountPrivacy";
+import { formatMaskedCardNumber } from "@/app/utils/cardNumber";
 import { useProducts } from "@/hooks/useProducts";
 import { getAccountTransactions, groupAccountTransactionsByMonth } from "@/data/accountDetails";
 import type { AccountTransaction } from "@/data/accountDetails";
@@ -50,14 +52,6 @@ function getCardArtSrc(product: Product): string {
 
 function getCardHolderName(): string {
   return "PETER JAGODIĆ";
-}
-
-function maskCardNumber(accountNumber: string): string {
-  const digits = accountNumber.replace(/\D/g, "");
-  if (digits.length >= 8) {
-    return `${digits.slice(0, 4)}  ****  ****  ${digits.slice(-4)}`;
-  }
-  return `****  ****  ****  ${digits.slice(-4) || "0000"}`;
 }
 
 function CollapsingCardHeader({
@@ -101,32 +95,7 @@ function CollapsingCardHeader({
 }
 
 function AppleWalletButton() {
-  return (
-    <button
-      type="button"
-      className="flex h-[48px] w-[327px] items-center justify-center gap-[8px] rounded bg-[#000000] px-[16px]"
-      aria-label="Add to Apple Wallet"
-    >
-      <svg width="22" height="16" viewBox="0 0 22 16" fill="none" aria-hidden="true">
-        <rect x="0.5" y="0.5" width="21" height="15" rx="2.5" fill="white" stroke="#E5E5E5" />
-        <path d="M5.5 4.5H8.5C9.05228 4.5 9.5 4.94772 9.5 5.5V10.5C9.5 11.0523 9.05228 11.5 8.5 11.5H5.5C4.94772 11.5 4.5 11.0523 4.5 10.5V5.5C4.5 4.94772 4.94772 4.5 5.5 4.5Z" fill="#FF6B35"/>
-        <path d="M8.5 4.5H11.5C12.0523 4.5 12.5 4.94772 12.5 5.5V10.5C12.5 11.0523 12.0523 11.5 11.5 11.5H8.5C7.94772 11.5 7.5 11.0523 7.5 10.5V5.5C7.5 4.94772 7.94772 4.5 8.5 4.5Z" fill="#FF9500"/>
-        <circle cx="15.5" cy="8" r="2.5" fill="#007A91"/>
-      </svg>
-      <span
-        className="text-[16px] font-semibold leading-none text-white"
-        style={{ fontFamily: "UniCredit, -apple-system, sans-serif", letterSpacing: "-0.01em" }}
-      >
-        Add to
-      </span>
-      <span
-        className="text-[16px] font-bold leading-none text-white"
-        style={{ fontFamily: "UniCredit, -apple-system, sans-serif" }}
-      >
-        Apple Wallet
-      </span>
-    </button>
-  );
+  return <WalletButton kind="apple-wallet" size="long" />;
 }
 
 export default function CardDetailScreen({
@@ -398,8 +367,8 @@ export default function CardDetailScreen({
   const cardQuickActions = [
     { id: "card-details", iconName: "account-details" as const, label: t("runtime.cards.actions.details", "Card Details") },
     { id: "options", iconName: "account-options" as const, label: t("runtime.cards.actions.options", "Options") },
-    { id: "block-card", iconName: "lock" as const, label: t("runtime.cards.actions.blockCard", "Block Card") },
-    { id: "view-pin", iconName: "credit-card" as const, label: t("runtime.cards.actions.viewPin", "View PIN") },
+    { id: "block-card", iconName: "block-card" as const, label: t("runtime.cards.actions.blockCard", "Block Card") },
+    { id: "view-pin", iconName: "view-pin" as const, label: t("runtime.cards.actions.viewPin", "View PIN") },
   ];
 
   return (
@@ -426,7 +395,7 @@ export default function CardDetailScreen({
             {getCardHolderName()}
           </span>
           <span className="text-[18px] font-bold leading-none text-[var(--uc-text)]" style={{ fontFamily: "UniCredit, sans-serif" }}>
-            {maskCardNumber(activeCard.accountNumber)}
+            {formatMaskedCardNumber(activeCard.accountNumber)}
           </span>
         </div>
 

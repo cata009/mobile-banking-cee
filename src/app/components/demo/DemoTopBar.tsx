@@ -1,18 +1,48 @@
 /**
  * DemoTopBar Component
- * Professional demo header with product, country, scenario, release, and control panel access.
+ * Two-line stakeholder header with platform navigation, context controls, and demo actions.
  */
 
 import { useEffect, useRef, useState } from "react";
 import { useNavigationContext } from "@/app/contexts/NavigationContext";
 import { COUNTRIES, COUNTRY_META } from "@/app/registry/demoConfig";
-import { PRODUCT_ORDER, PRODUCTS } from "@/app/registry/projectModel";
+import { FLOW_PREVIEW_ORDER, type FlowPreviewId } from "@/app/registry/flowPreviewRegistry";
+import { PRODUCT_ORDER } from "@/app/registry/projectModel";
 import { getReleaseBundle, RELEASE_ORDER } from "@/app/registry/releaseRegistry";
 import { useDemo } from "@/app/state/demoStore";
-import { AppIcon } from "@/app/components/icons";
+import type { ProductId } from "@/app/state/demoTypes";
+import { QRCodeSVG } from "qrcode.react";
+import { AppIcon, type IconName } from "@/app/components/icons";
+import { withFramelessParam, withShareAccessTokenParam } from "@/app/utils/deepLink";
 import { DemoFeatureSidePanel } from "./DemoFeatureSidePanel";
 import { PhoneScreenshotControl } from "./PhoneScreenshotControl";
 import svgPaths from "@/imports/svg-pn3y56bdut";
+
+type PlatformTabId = "demo" | "flows" | "design-system";
+type PlatformNavIcon = IconName | "demo-app";
+
+const PRODUCT_SELECTOR_LABELS: Record<ProductId, string> = {
+  PI: "PI App",
+  SME: "SME App",
+  KIDS_PI: "Kids App",
+};
+
+async function requestShareAccessToken() {
+  const response = await fetch("/api/access?mode=share-token", {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    credentials: "same-origin",
+  });
+
+  if (!response.ok) return null;
+
+  const data = (await response.json().catch(() => ({}))) as { token?: string };
+  return typeof data.token === "string" && data.token.length > 0 ? data.token : null;
+}
+
+function getLocalShareAccessToken() {
+  return import.meta.env.DEV ? "local-dev-share-access" : null;
+}
 
 export function DemoTopBar() {
   const {
@@ -33,6 +63,11 @@ export function DemoTopBar() {
   const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [isReleaseDropdownOpen, setIsReleaseDropdownOpen] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [shareUrls, setShareUrls] = useState({ framed: "", device: "" });
+  const shareResetTimeoutRef = useRef<number | null>(null);
+  const shareRef = useRef<HTMLDivElement>(null);
 
   const productDropdownRef = useRef<HTMLDivElement>(null);
   const countryDropdownRef = useRef<HTMLDivElement>(null);
@@ -40,10 +75,14 @@ export function DemoTopBar() {
 
   const selectedRelease = getReleaseBundle(release);
   const isDesignSystemSelected = currentScreen === "design-system";
-  const contextSelectorLabel = isDesignSystemSelected
-    ? "Design System Inventory"
-    : COUNTRY_META[country]?.nameEN || country;
-  const scenarioEntryScreen = scenario === "active" ? "prelogin-active" : "prelogin-inactive";
+  const isFlowLibrarySelected = currentScreen === "flow-library";
+  const scenarioEntryScreen = scenario === "active" ? "homepage" : "prelogin-inactive";
+
+  const activePlatformTab: PlatformTabId = isFlowLibrarySelected
+    ? "flows"
+    : isDesignSystemSelected
+      ? "design-system"
+      : "demo";
 
   const closeAllDropdowns = () => {
     setIsProductDropdownOpen(false);
@@ -51,30 +90,53 @@ export function DemoTopBar() {
     setIsReleaseDropdownOpen(false);
   };
 
-  const handleCountrySelect = (countryCode: (typeof COUNTRIES)[number]) => {
-    const isLeavingDesignSystem = currentScreen === "design-system";
-    closeAllDropdowns();
-
-    if (isLeavingDesignSystem && window.location.hash) {
+  const leavePlatformSurface = () => {
+    if (currentScreen === "design-system" && window.location.hash) {
       window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
     }
+  };
 
+  const handleCountrySelect = (countryCode: (typeof COUNTRIES)[number]) => {
+    const shouldReturnToDemo = currentScreen === "design-system" || currentScreen === "flow-library";
+    closeAllDropdowns();
+    leavePlatformSurface();
     setCountry(countryCode);
 
-    if (isLeavingDesignSystem) {
+    if (shouldReturnToDemo) {
       setCoAppingActive(false);
-      window.requestAnimationFrame(() => {
-        navigateToAndReset(scenarioEntryScreen);
-      });
+      window.requestAnimationFrame(() => navigateToAndReset(scenarioEntryScreen));
     }
+  };
+
+  const handleProductSelect = (productId: ProductId) => {
+    closeAllDropdowns();
+    leavePlatformSurface();
+    setProduct(productId);
+    setCoAppingActive(false);
+    window.requestAnimationFrame(() => navigateToAndReset(scenarioEntryScreen));
+  };
+
+  const handleDemoSelect = () => {
+    closeAllDropdowns();
+    leavePlatformSurface();
+    setCoAppingActive(false);
+    window.requestAnimationFrame(() => navigateToAndReset(scenarioEntryScreen));
   };
 
   const handleDesignSystemSelect = () => {
     closeAllDropdowns();
     setCoAppingActive(false);
-    window.requestAnimationFrame(() => {
-      navigateToAndReset("design-system");
-    });
+    window.requestAnimationFrame(() => navigateToAndReset("design-system"));
+  };
+
+  const handleFlowLibrarySelect = () => {
+    const firstFlow = FLOW_PREVIEW_ORDER[0];
+    closeAllDropdowns();
+    setCoAppingActive(false);
+    if (firstFlow) {
+      window.dispatchEvent(new CustomEvent<FlowPreviewId>("flow-preview-select", { detail: firstFlow }));
+    }
+    window.requestAnimationFrame(() => navigateToAndReset("flow-library"));
   };
 
   useEffect(() => {
@@ -88,6 +150,9 @@ export function DemoTopBar() {
       if (releaseDropdownRef.current && !releaseDropdownRef.current.contains(event.target as Node)) {
         setIsReleaseDropdownOpen(false);
       }
+      if (shareRef.current && !shareRef.current.contains(event.target as Node)) {
+        setIsShareOpen(false);
+      }
     }
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -99,90 +164,174 @@ export function DemoTopBar() {
     navigateToAndReset(scenarioEntryScreen);
   };
 
+  const handleLogout = () => {
+    closeAllDropdowns();
+    leavePlatformSurface();
+    setCoAppingActive(false);
+    navigateToAndReset("prelogin-active");
+  };
+
+  const toggleShare = async () => {
+    if (isShareOpen) {
+      setIsShareOpen(false);
+      return;
+    }
+    const framed = window.location.href;
+    const device = withFramelessParam(framed);
+    setShareUrls({ framed, device });
+    setShareCopied(false);
+    setIsShareOpen(true);
+
+    try {
+      const shareAccessToken = (await requestShareAccessToken()) ?? getLocalShareAccessToken();
+      if (!shareAccessToken) return;
+      setShareUrls((current) =>
+        current.framed === framed
+          ? { ...current, device: withShareAccessTokenParam(device, shareAccessToken) }
+          : current
+      );
+    } catch {
+      const localShareAccessToken = getLocalShareAccessToken();
+      if (!localShareAccessToken) return;
+      setShareUrls((current) =>
+        current.framed === framed
+          ? { ...current, device: withShareAccessTokenParam(device, localShareAccessToken) }
+          : current
+      );
+    }
+  };
+
+  const handleCopyShareLink = async () => {
+    const shareUrl = shareUrls.framed || window.location.href;
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+    } catch {
+      const textarea = document.createElement("textarea");
+      textarea.value = shareUrl;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand("copy");
+      } catch {
+        // Clipboard unavailable; the URL is still in the address bar to copy manually.
+      }
+      document.body.removeChild(textarea);
+    }
+
+    setShareCopied(true);
+    if (shareResetTimeoutRef.current) {
+      window.clearTimeout(shareResetTimeoutRef.current);
+    }
+    shareResetTimeoutRef.current = window.setTimeout(() => setShareCopied(false), 1800);
+  };
+
+  const isLocalhostShare = /^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(window.location.host);
+
+  useEffect(() => () => {
+    if (shareResetTimeoutRef.current) {
+      window.clearTimeout(shareResetTimeoutRef.current);
+    }
+  }, []);
+
   return (
     <>
-      <div className="sticky top-0 z-[9999] border-b border-[var(--uc-border-muted)] bg-[var(--uc-surface)] shadow-sm">
-        <div className="flex items-center justify-between px-20 py-4">
-          <div className="flex items-center gap-6">
-            <div className="h-[27px] w-[140px] shrink-0">
-              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 139.508 26.7899">
-                <g>
-                  <path clipRule="evenodd" d={svgPaths.p2cef6600} fill="var(--uc-brand)" fillRule="evenodd" />
-                  <path clipRule="evenodd" d={svgPaths.p27e9da00} fill="var(--uc-brand)" fillRule="evenodd" />
-                  <path clipRule="evenodd" d={svgPaths.p2e662b0} fill="var(--uc-static-white)" fillRule="evenodd" />
-                  <path d={svgPaths.p3d56e1f0} fill="var(--uc-text)" />
-                  <path d={svgPaths.p18a76220} fill="var(--uc-text)" />
-                  <path d={svgPaths.p2205fa00} fill="var(--uc-text)" />
-                  <path d={svgPaths.p4138200} fill="var(--uc-text)" />
-                  <path d={svgPaths.p120fd332} fill="var(--uc-text)" />
-                  <path d={svgPaths.p3558cb00} fill="var(--uc-text)" />
-                  <path d={svgPaths.p29646d00} fill="var(--uc-text)" />
-                  <path d={svgPaths.p3ed7ba20} fill="var(--uc-text)" />
-                  <path d={svgPaths.p4240280} fill="var(--uc-text)" />
-                </g>
-              </svg>
-            </div>
+      <header className="sticky top-0 z-[9999] overflow-visible border-b border-[var(--uc-border-muted)] bg-[var(--uc-surface)] shadow-sm">
+        <div className="grid min-h-[64px] grid-cols-[1fr_auto_1fr] items-center gap-6 px-6 py-2 lg:px-10 xl:px-16">
+          <div className="flex min-w-0 items-center gap-4 overflow-visible">
+            <button
+              type="button"
+              className="h-[27px] w-[140px] shrink-0"
+              onClick={handleDemoSelect}
+              aria-label="Open demo"
+              title="Open demo"
+            >
+              <UniCreditLogo />
+            </button>
 
-            <div className="relative" ref={productDropdownRef}>
-              <button
+            <div className="relative shrink-0" ref={productDropdownRef}>
+              <ContextDropdownButton
+                label={PRODUCT_SELECTOR_LABELS[product]}
+                expanded={isProductDropdownOpen}
                 onClick={() => setIsProductDropdownOpen(!isProductDropdownOpen)}
-                className="flex items-center gap-1 hover:opacity-70 transition-opacity"
-              >
-                <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
-                  {PRODUCTS[product].label}
-                </p>
-                <span className="grid h-[32px] w-[32px] shrink-0 place-items-center">
-                  <AppIcon name="demo-chevron-down" color="var(--uc-text)" />
-                </span>
-              </button>
+              />
 
               {isProductDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 bg-[var(--uc-surface)] border border-[var(--uc-border-muted)] rounded-lg shadow-lg z-[10000] min-w-[190px] py-1">
+                <div className="absolute left-0 top-full z-[10000] mt-2 min-w-[156px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-1 shadow-lg">
                   {PRODUCT_ORDER.map((productId) => (
                     <button
                       key={productId}
-                      aria-label={`${PRODUCTS[productId].label}${PRODUCTS[productId].status === "planned" ? " planned" : ""}`}
-                      onClick={() => {
-                        setProduct(productId);
-                        setIsProductDropdownOpen(false);
-                      }}
-                      className={`w-full px-4 py-2 text-sm text-left hover:bg-[var(--uc-surface-muted)] transition-colors ${
+                      type="button"
+                      onClick={() => handleProductSelect(productId)}
+                      className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
                         product === productId
                           ? "bg-[color-mix(in_srgb,var(--uc-brand)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-brand)]"
                           : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
                       }`}
                     >
-                      {PRODUCTS[productId].label}
-                      {PRODUCTS[productId].status === "planned" && (
-                        <span className="ml-2 text-xs text-[var(--uc-text-subtle)]">planned</span>
-                      )}
+                      {PRODUCT_SELECTOR_LABELS[productId]}
                     </button>
                   ))}
                 </div>
               )}
             </div>
+          </div>
 
-            <div className="relative" ref={countryDropdownRef}>
-              <button
+          <nav className="flex min-w-0 items-stretch justify-center gap-2" aria-label="Platform navigation">
+            <PlatformNavButton
+              active={activePlatformTab === "demo"}
+              icon="demo-app"
+              label="Demo"
+              onClick={handleDemoSelect}
+            />
+            <PlatformNavButton
+              active={activePlatformTab === "flows"}
+              icon="repeat"
+              label="Flows"
+              onClick={handleFlowLibrarySelect}
+            />
+            <PlatformNavButton
+              active={activePlatformTab === "design-system"}
+              icon="palette"
+              label="Design system"
+              onClick={handleDesignSystemSelect}
+            />
+          </nav>
+
+          <div className="flex min-w-0 items-center justify-end gap-2">
+            <button
+              type="button"
+              className="flex h-[44px] min-w-[56px] items-center justify-center gap-2 rounded-[6px] px-2 text-[var(--uc-text)] transition-colors hover:bg-[var(--uc-surface-muted)]"
+              aria-label="Profile IM"
+              title="Mihai Iacob"
+            >
+              <span className="grid size-[32px] place-items-center rounded-full bg-[var(--uc-text)] font-['UniCredit:Bold',sans-serif] text-[12px] leading-none text-[var(--uc-surface)]">
+                IM
+              </span>
+            </button>
+            <HeaderIconButton icon="logout" label="Logout" onClick={handleLogout} />
+          </div>
+        </div>
+
+        <div className="grid min-h-[48px] grid-cols-[1fr_auto_1fr] items-center gap-4 overflow-visible border-t border-[var(--uc-border-muted)] px-6 py-1.5 lg:px-10 xl:px-16">
+          <div className="flex min-w-0 items-center gap-3 overflow-visible">
+            <div className="relative shrink-0" ref={countryDropdownRef}>
+              <ContextDropdownButton
+                label={COUNTRY_META[country]?.nameEN || country}
+                expanded={isCountryDropdownOpen}
                 onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
-                className="flex items-center gap-1 hover:opacity-70 transition-opacity"
-              >
-                <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
-                  {contextSelectorLabel}
-                </p>
-                <span className="grid h-[32px] w-[32px] shrink-0 place-items-center">
-                  <AppIcon name="demo-chevron-down" color="var(--uc-text)" />
-                </span>
-              </button>
+              />
 
               {isCountryDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 bg-[var(--uc-surface)] border border-[var(--uc-border-muted)] rounded-lg shadow-lg z-[10000] min-w-[180px] py-1">
+                <div className="absolute left-0 top-full z-[10000] mt-2 min-w-[180px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-1 shadow-lg">
                   {COUNTRIES.map((countryCode) => (
                     <button
                       key={countryCode}
                       onClick={() => handleCountrySelect(countryCode)}
-                      className={`w-full px-4 py-2 text-sm text-left hover:bg-[var(--uc-surface-muted)] transition-colors ${
-                        !isDesignSystemSelected && country === countryCode
+                      className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
+                        country === countryCode
                           ? "bg-[color-mix(in_srgb,var(--uc-brand)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-brand)]"
                           : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
                       }`}
@@ -190,40 +339,19 @@ export function DemoTopBar() {
                       {COUNTRY_META[countryCode]?.nameEN || countryCode}
                     </button>
                   ))}
-                  <div className="my-1 border-t border-[var(--uc-border-muted)]" />
-                  <button
-                    onClick={handleDesignSystemSelect}
-                    className={`w-full px-4 py-2 text-sm text-left hover:bg-[var(--uc-surface-muted)] transition-colors ${
-                      currentScreen === "design-system"
-                        ? "bg-[color-mix(in_srgb,var(--uc-brand)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-brand)]"
-                        : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
-                    }`}
-                  >
-                    Design system inventory
-                  </button>
                 </div>
               )}
             </div>
-          </div>
 
-          <ScenarioModeSwitch value={scenario} onChange={setScenario} />
-
-          <div className="flex items-center gap-6">
-            <div className="relative" ref={releaseDropdownRef}>
-              <button
+            <div className="relative shrink-0" ref={releaseDropdownRef}>
+              <ContextDropdownButton
+                label={selectedRelease.label}
+                expanded={isReleaseDropdownOpen}
                 onClick={() => setIsReleaseDropdownOpen(!isReleaseDropdownOpen)}
-                className="flex items-center gap-1 hover:opacity-70 transition-opacity"
-              >
-                <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text)] leading-normal">
-                  {selectedRelease.label}
-                </p>
-                <span className="grid h-[32px] w-[32px] shrink-0 place-items-center">
-                  <AppIcon name="demo-chevron-down" color="var(--uc-text)" />
-                </span>
-              </button>
+              />
 
               {isReleaseDropdownOpen && (
-                <div className="absolute top-full right-0 mt-2 bg-[var(--uc-surface)] border border-[var(--uc-border-muted)] rounded-lg shadow-lg z-[10000] min-w-[170px] py-1">
+                <div className="absolute left-0 top-full z-[10000] mt-2 min-w-[170px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-1 shadow-lg">
                   {RELEASE_ORDER.map((releaseId) => (
                     <button
                       key={releaseId}
@@ -231,7 +359,7 @@ export function DemoTopBar() {
                         setRelease(releaseId);
                         setIsReleaseDropdownOpen(false);
                       }}
-                      className={`w-full px-4 py-2 text-sm text-left hover:bg-[var(--uc-surface-muted)] transition-colors ${
+                      className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
                         release === releaseId
                           ? "bg-[color-mix(in_srgb,var(--uc-brand)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-brand)]"
                           : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
@@ -243,66 +371,286 @@ export function DemoTopBar() {
                 </div>
               )}
             </div>
+          </div>
 
-            <button
-              onClick={() => setIsControlPanelOpen(!isControlPanelOpen)}
-              className={`grid h-[32px] w-[32px] place-items-center transition-colors ${
-                isControlPanelOpen ? "text-[var(--uc-brand)]" : "text-[var(--uc-text)] hover:text-[var(--uc-brand)]"
-              }`}
-              title="Control Panel"
-            >
-              <AppIcon name="demo-settings" />
-            </button>
+          <ScenarioModeSwitch value={scenario} onChange={setScenario} />
 
-            <PhoneScreenshotControl disabled={isDesignSystemSelected} />
+          <div className="flex min-w-0 items-center justify-end gap-2">
+            {!isDesignSystemSelected && !isFlowLibrarySelected ? <PhoneScreenshotControl /> : null}
 
-            <button
-              onClick={() => setThemeMode(themeMode === "light" ? "dark" : "light")}
-              className="grid h-[32px] w-[32px] place-items-center text-[var(--uc-text)] hover:text-[var(--uc-brand)] transition-colors"
-              title={themeMode === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
-              aria-label={themeMode === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
-            >
-              {themeMode === "light" ? (
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                  <path
-                    d="M10 4.375V1.875M10 18.125V15.625M4.375 10H1.875M18.125 10H15.625M5.15625 5.15625L3.4375 3.4375M16.5625 16.5625L14.8438 14.8438M14.8438 5.15625L16.5625 3.4375M3.4375 16.5625L5.15625 14.8438"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M10 13.125C11.7259 13.125 13.125 11.7259 13.125 10C13.125 8.27411 11.7259 6.875 10 6.875C8.27411 6.875 6.875 8.27411 6.875 10C6.875 11.7259 8.27411 13.125 10 13.125Z"
-                    fill="currentColor"
-                  />
-                </svg>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M12.5485 2.25044C11.4726 3.02014 10.7708 4.27926 10.7708 5.70136C10.7708 8.04126 12.6675 9.93793 15.0074 9.93793C16.2221 9.93793 17.3167 9.42655 18.0892 8.60786C18.1152 8.83067 18.1286 9.05731 18.1286 9.28706C18.1286 12.6647 15.3907 15.4025 12.0131 15.4025C8.63546 15.4025 5.89758 12.6647 5.89758 9.28706C5.89758 6.36322 7.95028 3.91903 10.6928 3.31861C11.1895 3.20987 11.7092 3.14514 12.5485 2.25044Z"
-                    fill="currentColor"
-                  />
-                </svg>
+            <HeaderIconButton icon="demo-reset" label="Refresh" onClick={handleReset} />
+
+            <div className="relative" ref={shareRef}>
+              <HeaderIconButton
+                icon="share-filled"
+                label="Share"
+                active={isShareOpen}
+                onClick={toggleShare}
+                expanded={isShareOpen}
+              />
+
+              {isShareOpen && (
+                <div className="absolute right-0 top-full z-[10000] mt-2 w-[264px] rounded-xl border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-4 shadow-xl">
+                  <p className="font-['UniCredit:Bold',sans-serif] text-[14px] leading-none text-[var(--uc-text)]">
+                    Share this state
+                  </p>
+                  <p className="mt-1.5 font-['UniCredit:Regular',sans-serif] text-[12px] leading-[16px] text-[var(--uc-text-muted)]">
+                    Same product, country, screen, language and theme you see now.
+                  </p>
+
+                  <div className="mt-3 flex flex-col items-center gap-2 rounded-lg bg-[var(--uc-surface-muted)] p-3">
+                    <div className="rounded-md bg-white p-2">
+                      <QRCodeSVG
+                        value={shareUrls.device || window.location.href}
+                        size={144}
+                        level="M"
+                        marginSize={2}
+                        fgColor="#111111"
+                        bgColor="#ffffff"
+                      />
+                    </div>
+                    <p className="text-center font-['UniCredit:Regular',sans-serif] text-[11px] leading-[14px] text-[var(--uc-text-muted)]">
+                      Scan to open on your phone, fullscreen, no frame
+                    </p>
+                  </div>
+
+                  {isLocalhostShare && (
+                    <p className="mt-2 font-['UniCredit:Regular',sans-serif] text-[11px] leading-[14px] text-[#B45309]">
+                      On localhost the QR only resolves on this machine. Deploy the demo or use your LAN IP for real phones.
+                    </p>
+                  )}
+
+                  <button
+                    onClick={handleCopyShareLink}
+                    className={`mt-3 flex h-[36px] w-full items-center justify-center gap-2 rounded-lg text-[13px] font-['UniCredit:Bold',sans-serif] transition-colors ${
+                      shareCopied
+                        ? "bg-[var(--uc-brand)] text-[var(--uc-static-white)]"
+                        : "bg-[var(--uc-surface-muted)] text-[var(--uc-text)] hover:bg-[color-mix(in_srgb,var(--uc-brand)_12%,var(--uc-surface-muted))]"
+                    }`}
+                  >
+                    <span className="grid h-[18px] w-[18px] place-items-center">
+                      <AppIcon name={shareCopied ? "prime-check" : "share-filled"} />
+                    </span>
+                    {shareCopied ? "Link copied" : "Copy desktop link"}
+                  </button>
+                </div>
               )}
-            </button>
+            </div>
 
-            <button
-              onClick={handleReset}
-              className="grid h-[32px] w-[32px] place-items-center text-[var(--uc-text)] hover:text-[var(--uc-brand)] transition-colors"
-              title="Reset to Prelogin"
-            >
-              <AppIcon name="demo-reset" />
-            </button>
+            <ThemeModeButton
+              mode={themeMode}
+              onClick={() => setThemeMode(themeMode === "light" ? "dark" : "light")}
+            />
+
+            <HeaderIconButton
+              icon="demo-settings"
+              label="Settings"
+              active={isControlPanelOpen}
+              onClick={() => setIsControlPanelOpen(!isControlPanelOpen)}
+            />
           </div>
         </div>
-      </div>
+      </header>
 
       <DemoFeatureSidePanel
         isOpen={isControlPanelOpen}
         onClose={() => setIsControlPanelOpen(false)}
       />
     </>
+  );
+}
+
+function UniCreditLogo() {
+  return (
+    <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 139.508 26.7899">
+      <g>
+        <path clipRule="evenodd" d={svgPaths.p2cef6600} fill="var(--uc-brand)" fillRule="evenodd" />
+        <path clipRule="evenodd" d={svgPaths.p27e9da00} fill="var(--uc-brand)" fillRule="evenodd" />
+        <path clipRule="evenodd" d={svgPaths.p2e662b0} fill="var(--uc-static-white)" fillRule="evenodd" />
+        <path d={svgPaths.p3d56e1f0} fill="var(--uc-text)" />
+        <path d={svgPaths.p18a76220} fill="var(--uc-text)" />
+        <path d={svgPaths.p2205fa00} fill="var(--uc-text)" />
+        <path d={svgPaths.p4138200} fill="var(--uc-text)" />
+        <path d={svgPaths.p120fd332} fill="var(--uc-text)" />
+        <path d={svgPaths.p3558cb00} fill="var(--uc-text)" />
+        <path d={svgPaths.p29646d00} fill="var(--uc-text)" />
+        <path d={svgPaths.p3ed7ba20} fill="var(--uc-text)" />
+        <path d={svgPaths.p4240280} fill="var(--uc-text)" />
+      </g>
+    </svg>
+  );
+}
+
+function DemoPlatformIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="block"
+      width="22"
+      height="22"
+      viewBox="0 0 22 22"
+      fill="none"
+    >
+      <rect x="5.25" y="2.75" width="11.5" height="16.5" rx="2.6" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M8.5 6.5h5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <path
+        d="M9.35 14.65V10.9C9.35 10.34 9.96 10 10.43 10.3L13.4 12.18C13.84 12.46 13.84 13.09 13.4 13.37L10.43 15.25C9.96 15.55 9.35 15.21 9.35 14.65Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function ThemeModeIcon({ mode }: { mode: "light" | "dark" }) {
+  if (mode === "light") {
+    return (
+      <svg
+        aria-hidden="true"
+        className="block"
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+      >
+        <path
+          d="M10 4.375V1.875M10 18.125V15.625M4.375 10H1.875M18.125 10H15.625M5.15625 5.15625L3.4375 3.4375M16.5625 16.5625L14.8438 14.8438M14.8438 5.15625L16.5625 3.4375M3.4375 16.5625L5.15625 14.8438"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeWidth="1.7"
+        />
+        <path
+          d="M10 13.125C11.7259 13.125 13.125 11.7259 13.125 10C13.125 8.27411 11.7259 6.875 10 6.875C8.27411 6.875 6.875 8.27411 6.875 10C6.875 11.7259 8.27411 13.125 10 13.125Z"
+          fill="currentColor"
+        />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      aria-hidden="true"
+      className="block"
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+    >
+      <path
+        clipRule="evenodd"
+        d="M12.5485 2.25044C11.4726 3.02014 10.7708 4.27926 10.7708 5.70136C10.7708 8.04126 12.6675 9.93793 15.0074 9.93793C16.2221 9.93793 17.3167 9.42655 18.0892 8.60786C18.1152 8.83067 18.1286 9.05731 18.1286 9.28706C18.1286 12.6647 15.3907 15.4025 12.0131 15.4025C8.63546 15.4025 5.89758 12.6647 5.89758 9.28706C5.89758 6.36322 7.95028 3.91903 10.6928 3.31861C11.1895 3.20987 11.7092 3.14514 12.5485 2.25044Z"
+        fill="currentColor"
+        fillRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function PlatformNavButton({
+  active,
+  icon,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  icon: PlatformNavIcon;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-current={active ? "page" : undefined}
+      onClick={onClick}
+      className={`relative flex min-w-[92px] flex-col items-center justify-center gap-1 px-3 py-1.5 text-center transition-colors ${
+        active ? "text-[var(--uc-text)]" : "text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]"
+      }`}
+    >
+      {icon === "demo-app" ? <DemoPlatformIcon /> : <AppIcon name={icon} size={20} />}
+      <span className="font-['UniCredit:Bold',sans-serif] text-[12px] leading-none">{label}</span>
+      <span
+        aria-hidden="true"
+        className={`absolute bottom-[-9px] h-[3px] w-full max-w-[96px] rounded-t-[2px] ${
+          active ? "bg-[var(--uc-action)]" : "bg-transparent"
+        }`}
+      />
+    </button>
+  );
+}
+
+function ThemeModeButton({
+  mode,
+  onClick,
+}: {
+  mode: "light" | "dark";
+  onClick: () => void;
+}) {
+  const label = mode === "light" ? "Switch to dark mode" : "Switch to light mode";
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      className="grid size-[36px] place-items-center rounded-[6px] text-[var(--uc-text)] transition-colors hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-brand)]"
+    >
+      <ThemeModeIcon mode={mode} />
+    </button>
+  );
+}
+
+function ContextDropdownButton({
+  label,
+  expanded,
+  onClick,
+}: {
+  label: string;
+  expanded: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-expanded={expanded}
+      className="flex h-[34px] max-w-[220px] items-center gap-1 rounded-[6px] px-2 font-['UniCredit:Bold',sans-serif] text-[14px] leading-none text-[var(--uc-text)] transition-colors hover:bg-[var(--uc-surface-muted)]"
+    >
+      <span className="truncate">{label}</span>
+      <span className="grid size-[28px] shrink-0 place-items-center">
+        <AppIcon name="demo-chevron-down" color="currentColor" />
+      </span>
+    </button>
+  );
+}
+
+function HeaderIconButton({
+  icon,
+  label,
+  active = false,
+  expanded,
+  onClick,
+}: {
+  icon: IconName;
+  label: string;
+  active?: boolean;
+  expanded?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      aria-expanded={expanded}
+      title={label}
+      className={`grid size-[36px] place-items-center rounded-[6px] transition-colors ${
+        active
+          ? "bg-[color-mix(in_srgb,var(--uc-brand)_12%,var(--uc-surface))] text-[var(--uc-brand)]"
+          : "text-[var(--uc-text)] hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-brand)]"
+      }`}
+    >
+      <AppIcon name={icon} size={20} />
+    </button>
   );
 }
 
@@ -315,7 +663,7 @@ function ScenarioModeSwitch({
 }) {
   return (
     <div
-      className="flex items-center rounded-[18px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[2px]"
+      className="flex shrink-0 items-center rounded-[18px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[2px]"
       aria-label="Scenario mode"
     >
       {(["active", "inactive"] as const).map((mode) => {

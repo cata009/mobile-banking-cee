@@ -130,15 +130,16 @@ export const mockProducts: Product[] = [
     id: 'card-1',
     type: 'debit_card',
     name: 'Debit Card',
-    accountNumber: '3456789012345678',
+    accountNumber: '5173400012345678',
     balance: 0,
-    currency: 'CZK'
+    currency: 'CZK',
+    linkedAccountId: 'acc-1'
   },
   {
     id: 'card-2',
     type: 'credit_card',
     name: 'Credit Card',
-    accountNumber: '4567890123456789',
+    accountNumber: '5173500087654321',
     balance: 0,
     currency: 'EUR'
   },

@@ -238,7 +238,7 @@ const DEFAULT_OTHER_ITEMS: readonly PaymentOtherItem[] = [
 
 const RO_OTHER_ITEMS: readonly PaymentOtherItem[] = [
   { id: "standing-order", label: "Recurrent\nPayments", icon: "standing", translationKey: null },
-  { id: "templates", label: "Templates", icon: "templates", translationKey: null },
+  { id: "templates", label: "My\nTemplates", icon: "templates", translationKey: null },
   { id: "foreign-payments", label: "Foreign\nPayments", icon: "foreign", translationKey: null },
   { id: "exchange-rates", label: "Exchange\nRates", icon: "exchange", translationKey: null },
 ];

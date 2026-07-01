@@ -5,6 +5,9 @@ import productCardCardsImage from "../../../screenshots/cards.png";
 import productCardInsuranceImage from "../../../screenshots/insurance.png";
 import productCardInvestmentsImage from "../../../screenshots/investments.png";
 import productCardMortgagesImage from "../../../screenshots/mortgages.png";
+import shopsmartEnglishHomeImage from "@/assets/shopsmart/shopsmart-english-home.png";
+import shopsmartLentiamoImage from "@/assets/shopsmart/shopsmart-lentiamo.png";
+import shopsmartValentinoImage from "@/assets/shopsmart/shopsmart-valentino.png";
 
 export type ProductsMenuTab = "banking" | "shopsmart";
 export type ProductsCardId =
@@ -34,6 +37,25 @@ export interface ProductsOffer {
   lightVersion?: boolean;
 }
 
+export interface ShopSmartSummary {
+  activatedOffers: number;
+  totalSavedLabel: string;
+  totalSavedAmount: string;
+}
+
+export interface ShopSmartOfferCard {
+  id: string;
+  merchant: string;
+  title: string;
+  statusText: string;
+  imageSrc: string;
+  pillLabel?: string;
+  pillTone?: "teal" | "white";
+  tagLabel?: string;
+  distance?: string;
+  trailingIcon?: "website" | "partners";
+}
+
 export interface ProductsCard {
   id: ProductsCardId;
   title: string;
@@ -41,6 +63,16 @@ export interface ProductsCard {
   illustration: ProductsCardIllustration;
   imageSrc?: string;
   translationKey?: string | null;
+}
+
+export interface ProductCardSheetOption {
+  id: string;
+  title: string;
+}
+
+export interface ProductCardSheetConfig {
+  title?: string;
+  options: readonly ProductCardSheetOption[];
 }
 
 export interface ProductsMenuConfig {
@@ -57,7 +89,67 @@ export interface ProductsMenuConfig {
   shopSmartTitle: string;
   shopSmartOffers: readonly ProductsOffer[];
   shopSmartProducts: readonly ProductsCard[];
+  shopSmartSummary: ShopSmartSummary;
+  shopSmartOfferCards: readonly ShopSmartOfferCard[];
 }
+
+const DEFAULT_PRODUCT_CARD_SHEET: ProductCardSheetConfig = {
+  options: [
+    { id: "term-deposit", title: "Term deposit" },
+    { id: "saving-account", title: "Saving account" },
+    { id: "round-up", title: "Round Up" },
+    { id: "mutual-funds", title: "Mutual funds" },
+  ],
+};
+
+const PRODUCT_CARD_SHEETS: Partial<Record<ProductsCardId, ProductCardSheetConfig>> = {
+  account: {
+    options: [
+      { id: "current-account", title: "Current account" },
+      { id: "account-package", title: "Account package" },
+      { id: "overdraft", title: "Overdraft" },
+      { id: "switch-account", title: "Switch account" },
+    ],
+  },
+  cards: {
+    options: [
+      { id: "debit-card", title: "Debit card" },
+      { id: "credit-card", title: "Credit card" },
+      { id: "virtual-card", title: "Virtual card" },
+      { id: "digital-wallets", title: "Digital wallets" },
+    ],
+  },
+  "mortgages-loans": {
+    title: "Borrowing",
+    options: [
+      { id: "mortgage-loan", title: "Mortgage loan" },
+      { id: "personal-loan", title: "Personal loan" },
+      { id: "refinance-loan", title: "Refinance loan" },
+      { id: "loan-calculator", title: "Loan calculator" },
+    ],
+  },
+  insurance: {
+    title: "Insurances",
+    options: [
+      { id: "travel-insurance", title: "Travel insurance" },
+      { id: "home-insurance", title: "Home insurance" },
+      { id: "car-insurance", title: "Car Insurance (My Car)" },
+      { id: "life-insurance", title: "Life insurance" },
+    ],
+  },
+  "investments-savings": {
+    title: "Saving and investing",
+    options: DEFAULT_PRODUCT_CARD_SHEET.options,
+  },
+  "additional-services": {
+    options: [
+      { id: "branch-appointment", title: "Branch appointment" },
+      { id: "digital-activity-record", title: "Digital activity record" },
+      { id: "my-applications", title: "My applications" },
+      { id: "service-requests", title: "Service requests" },
+    ],
+  },
+};
 
 const BANKING_PRODUCTS: readonly ProductsCard[] = [
   {
@@ -104,6 +196,46 @@ const SHOPSMART_PRODUCTS: readonly ProductsCard[] = [
   { id: "insurance", title: "Fashion", background: "var(--uc-product-blue)", illustration: "flowers" },
 ];
 
+export const DEFAULT_SHOPSMART_SUMMARY: ShopSmartSummary = {
+  activatedOffers: 4,
+  totalSavedLabel: "Total saved",
+  totalSavedAmount: "0,00 RON",
+};
+
+export const DEFAULT_SHOPSMART_OFFER_CARDS: readonly ShopSmartOfferCard[] = [
+  {
+    id: "shopsmart-valentino",
+    merchant: "Valentino.ro",
+    title: "Up to 10% cashback peste\n500 de Lei",
+    statusText: "Until 31-December-2025",
+    imageSrc: shopsmartValentinoImage,
+    pillLabel: "Active",
+    pillTone: "white",
+    trailingIcon: "website",
+  },
+  {
+    id: "shopsmart-lentiamo",
+    merchant: "Lentiamo.ro",
+    title: "50.00 RON peste 500 de Lei",
+    statusText: "Until 31-December-2025",
+    imageSrc: shopsmartLentiamoImage,
+    pillLabel: "Active",
+    pillTone: "white",
+    trailingIcon: "website",
+  },
+  {
+    id: "shopsmart-english-home",
+    merchant: "English home - I9969693...",
+    title: "10% cashback peste 100 de Lei",
+    statusText: "Until 31-December-2025",
+    imageSrc: shopsmartEnglishHomeImage,
+    pillLabel: "Activate",
+    pillTone: "teal",
+    distance: "2,69 km",
+    trailingIcon: "partners",
+  },
+];
+
 const ADDITIONAL_SERVICES_PRODUCTS: readonly ProductsCard[] = [
   {
     id: "additional-services",
@@ -145,6 +277,8 @@ function createProductsMenuConfig(hasShopSmartTab: boolean): ProductsMenuConfig 
       },
     ],
     shopSmartProducts: SHOPSMART_PRODUCTS,
+    shopSmartSummary: DEFAULT_SHOPSMART_SUMMARY,
+    shopSmartOfferCards: DEFAULT_SHOPSMART_OFFER_CARDS,
   };
 }
 
@@ -402,4 +536,8 @@ export const PRODUCTS_MENU_CONFIG: Record<CountryId, ProductsMenuConfig> = {
 
 export function getProductsMenuForCountry(country: CountryId): ProductsMenuConfig {
   return PRODUCTS_MENU_CONFIG[country];
+}
+
+export function getProductCardSheetConfig(cardId: ProductsCardId): ProductCardSheetConfig {
+  return PRODUCT_CARD_SHEETS[cardId] ?? DEFAULT_PRODUCT_CARD_SHEET;
 }

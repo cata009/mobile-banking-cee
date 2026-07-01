@@ -29,7 +29,8 @@ export type LayoutFamily =
   | "service-menu"
   | "contacts"
   | "kids"
-  | "design-system";
+  | "design-system"
+  | "flow-library";
 
 export interface ScreenMeta {
   id: ScreenId;
@@ -378,20 +379,6 @@ export const SCREEN_REGISTRY: Record<ScreenId, ScreenMeta> = {
     screenshots: [],
     similarTo: ["pi.home.overview", "pi.payments.overview", "pi.more.overview"],
   },
-  "kids.cz.home-concept": {
-    id: "kids.cz.home-concept",
-    label: "CZ Kids homepage concept",
-    runtimeScreen: "homepage",
-    products: ["KIDS_PI"],
-    countries: ["CZ"],
-    designSystems: ["current"],
-    status: "mock-driven",
-    layoutFamily: "kids",
-    componentPath: "src/app/screens/kids/KidsMarketHomeApp.tsx",
-    features: [],
-    screenshots: [],
-    similarTo: ["kids.ro.prototype", "pi.home.overview"],
-  },
   "kids.sk.home-concept": {
     id: "kids.sk.home-concept",
     label: "SK Kids Bulbank document-inspired concept",
@@ -404,7 +391,7 @@ export const SCREEN_REGISTRY: Record<ScreenId, ScreenMeta> = {
     componentPath: "src/app/screens/kids/KidsMarketHomeApp.tsx",
     features: [],
     screenshots: [],
-    similarTo: ["kids.cz.home-concept", "kids.ro.prototype", "pi.products.overview"],
+    similarTo: ["kids.ro.prototype", "pi.products.overview"],
   },
   "kids.hu.home-concept": {
     id: "kids.hu.home-concept",
@@ -418,7 +405,7 @@ export const SCREEN_REGISTRY: Record<ScreenId, ScreenMeta> = {
     componentPath: "src/app/screens/kids/KidsMarketHomeApp.tsx",
     features: [],
     screenshots: [],
-    similarTo: ["kids.sk.home-concept", "kids.cz.home-concept", "kids.ro.prototype"],
+    similarTo: ["kids.sk.home-concept", "kids.ro.prototype"],
   },
   "kids.rs.home-concept": {
     id: "kids.rs.home-concept",
@@ -434,48 +421,6 @@ export const SCREEN_REGISTRY: Record<ScreenId, ScreenMeta> = {
     screenshots: [],
     similarTo: ["kids.hu.home-concept", "kids.ro.prototype", "pi.analytics.overview"],
   },
-  "kids.ba.home-concept": {
-    id: "kids.ba.home-concept",
-    label: "BA Kids family homepage concept",
-    runtimeScreen: "homepage",
-    products: ["KIDS_PI"],
-    countries: ["BA"],
-    designSystems: ["current"],
-    status: "mock-driven",
-    layoutFamily: "kids",
-    componentPath: "src/app/screens/kids/KidsMarketHomeApp.tsx",
-    features: [],
-    screenshots: [],
-    similarTo: ["kids.ro.prototype", "kids.cz.home-concept"],
-  },
-  "kids.ba-bl.home-concept": {
-    id: "kids.ba-bl.home-concept",
-    label: "BA BL Kids card-first homepage concept",
-    runtimeScreen: "homepage",
-    products: ["KIDS_PI"],
-    countries: ["BA_BL"],
-    designSystems: ["current"],
-    status: "mock-driven",
-    layoutFamily: "kids",
-    componentPath: "src/app/screens/kids/KidsMarketHomeApp.tsx",
-    features: [],
-    screenshots: [],
-    similarTo: ["kids.ba.home-concept", "kids.hu.home-concept", "kids.ro.prototype"],
-  },
-  "kids.si.home-concept": {
-    id: "kids.si.home-concept",
-    label: "SI Kids goal-coach homepage concept",
-    runtimeScreen: "homepage",
-    products: ["KIDS_PI"],
-    countries: ["SI"],
-    designSystems: ["current"],
-    status: "mock-driven",
-    layoutFamily: "kids",
-    componentPath: "src/app/screens/kids/KidsMarketHomeApp.tsx",
-    features: [],
-    screenshots: [],
-    similarTo: ["kids.sk.home-concept", "kids.hu.home-concept", "kids.ro.prototype"],
-  },
   "platform.design-system": {
     id: "platform.design-system",
     label: "Design system inventory",
@@ -489,6 +434,20 @@ export const SCREEN_REGISTRY: Record<ScreenId, ScreenMeta> = {
     features: [],
     screenshots: [],
     similarTo: [],
+  },
+  "platform.flow-library": {
+    id: "platform.flow-library",
+    label: "Future flow library",
+    runtimeScreen: "flow-library",
+    products: ["PI"],
+    countries: ["RO"],
+    designSystems: ["current"],
+    status: "mock-driven",
+    layoutFamily: "flow-library",
+    componentPath: "src/app/screens/flow-library/FlowLibraryScreen.tsx",
+    features: [],
+    screenshots: [],
+    similarTo: ["pi.products.overview", "pi.account.detail", "platform.design-system"],
   },
 };
 

@@ -1,6 +1,267 @@
 # Current Session
 
-Last updated: 2026-06-30
+Last updated: 2026-07-01
+
+## 2026-07-01 QR Share Access Token
+
+- Latest request handled: user asked that opening a Share QR URL on mobile should not force stakeholders to enter the demo password every time.
+- Runtime/security changes:
+  - Updated `api/access.js` so authenticated desktop sessions can request a short-lived server-signed share token through `GET /api/access?mode=share-token`.
+  - Updated `api/access.js` so `POST /api/access` can consume a valid `shareToken`, set the normal 6-month signed HTTP-only access cookie, and clear failed-attempt cookies without requiring the password on that device.
+  - Updated `src/app/components/demo/DemoTopBar.tsx` so the QR/device URL gets `frame=0` plus `access_token=...`; the copied desktop link stays clean and does not include the token.
+  - Updated `src/app/components/security/AccessGate.tsx` so `access_token` is consumed before the app boots, exchanged for access, and removed from the address bar via `history.replaceState`.
+  - Added a strict local-dev-only QR fallback token because Vite dev does not execute `/api/access`; production uses the server-signed token path.
+- Verification:
+  - `node --check api/access.js` passed.
+  - API simulation passed: unauthenticated token issuance returns `401`; authenticated desktop login can issue a share token; a fresh request with only that token receives access; subsequent status check authenticates from the new cookie.
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - In-app browser smoke on `http://127.0.0.1:5002/` opened a local-dev QR-style URL with `frame=0&access_token=local-dev-share-access`; AccessGate removed `access_token`, did not show the password screen, and rendered the demo content.
+- Limitations:
+  - Localhost QR links still only resolve on the same machine unless the demo is opened through a LAN/IP or deployed URL. Production QR bypass depends on the deployed `/api/access` endpoint being available.
+- safe to resume: yes
+
+## 2026-07-01 Header Product Selector Restore
+
+- Latest request handled: user flagged that the application-type selector disappeared from next to the UniCredit logo and asked to restore a clean selector for `PI App`, `SME App`, and `Kids App`.
+- Runtime changes:
+  - Updated `src/app/components/demo/DemoTopBar.tsx` so the first header row keeps the UniCredit logo and adds a compact product selector beside it.
+  - The selector uses the canonical `PRODUCT_ORDER` product registry and displays stakeholder-friendly labels: `PI App`, `SME App`, and `Kids App`.
+  - Selecting a product closes open header dropdowns, leaves platform-only surfaces, resets Co-Apping state, applies the product through `setProduct`, and navigates back to the scenario entry screen for the selected app context.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - In-app browser check on `http://127.0.0.1:5002/?product=PI&country=RO&scenario=active&ds=current&release=release-current&bank=retail-single-account&theme=light&lang=en&screen=prelogin-active` confirmed the header exposes `PI App`, opens `Kids App`, changes the URL to `product=KIDS_PI` with the Kids banking scenario, and can switch back to `PI App`.
+- safe to resume: yes
+
+## 2026-07-01 Header Action Order Polish
+
+- Latest request handled: user asked to reorder the right-side second-row header actions as Take a photo, Refresh, Share, Light/Dark, Settings, and to hide Take a photo when it is unavailable.
+- Runtime changes:
+  - Updated `src/app/components/demo/DemoTopBar.tsx` so `PhoneScreenshotControl` renders first only on normal demo screens.
+  - Design System Inventory and Flow Library no longer show a disabled screenshot/camera action; the control is omitted entirely there.
+  - Reordered remaining header actions to `Refresh`, `Share`, `Light/Dark`, then `Settings`.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - In-app browser check confirmed Design System actions are `Refresh -> Share -> Switch to dark mode -> Settings` with no screenshot/camera button.
+  - In-app browser check confirmed Homepage actions are `Screenshot options -> Refresh -> Share -> Switch to dark mode -> Settings`.
+- safe to resume: yes
+
+## 2026-07-01 Flow Library Layout Polish
+
+- Latest request handled: user asked to remove the narrow Flow Library sidebar pattern, move the flow selector above the flow summary, widen UX spec and Countries, and place Countries above UX spec.
+- Runtime changes:
+  - Reworked `src/app/screens/flow-library/FlowLibraryScreen.tsx` from a two-column `Flows` sidebar plus main content layout into a single full-width content stack.
+  - New order is `Flows` selector/search, `Countries`, `UX spec`, flow summary header, then `Journey`.
+  - Countries and UX spec now use the same full-width page container as Journey instead of the former narrower main-column width.
+  - The Round Up / Card PIN flow summary header now sits below UX spec so the operational details lead the page.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - In-app browser check on `http://127.0.0.1:5002/?product=PI&country=RO&scenario=active&ds=current&release=release-current&bank=retail-single-account&theme=light&lang=en&screen=flow-library&flow=ro-round-up` confirmed visible section order `Flows -> Countries -> UX spec -> Round Up -> Journey`, all at `1226px` width.
+- safe to resume: yes
+
+## 2026-07-01 Two-Line Stakeholder Header
+
+- Latest request handled: user asked to rebuild the desktop platform header after a LinkedIn-like model, split across two rows so more stakeholder actions remain visible.
+- Follow-up request handled: user flagged that the country/release dropdowns were clipped, a scrollbar appeared in the header, and the top search/Notifications tab should be removed for now.
+- Latest follow-up handled: user flagged the Demo and Light/Dark icons as visually wrong and asked for the `Active` / `Inactive` controller to sit in the middle of the second header row.
+- Runtime changes:
+  - Reworked `src/app/components/demo/DemoTopBar.tsx` into a two-line sticky header.
+  - First row now contains the UniCredit logo, the restored product selector, centered primary platform tabs (`Demo`, `Flows`, `Design system`), and right-side profile/logout controls with `IM` initials.
+  - Second row now contains the country dropdown, current baseline/release dropdown, `Active` / `Inactive` switch, and right-side actions for Settings, Share, Screenshot/JSON export, Light/Dark mode, and Refresh.
+  - `Flows` now opens the full-width Flow Library and explicitly selects the first flow preview from `FLOW_PREVIEW_ORDER`.
+  - `Design system` opens the current Design System Inventory.
+  - Removed header search and the temporary `Notifications` tab until that surface is intentionally added later.
+  - Removed header `overflow-x-auto` usage so the header no longer shows an unwanted scrollbar and the country/release dropdowns are not clipped by their row container.
+  - Replaced the Demo tab and Light/Dark action with local explicit SVG glyphs instead of invalid `AppIcon` names, preventing the fallback question/help icon from appearing in the stakeholder header.
+  - Split the second header row into left context controls, centered `Active` / `Inactive` scenario switch, and right-side action controls.
+  - Product switching is again available in the top header next to the logo and remains available in the Settings / control-panel surface.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check -- src/app/components/demo/DemoTopBar.tsx` passed with only normal Windows LF/CRLF warnings.
+  - Static header scan confirmed no remaining `searchQuery`, `platform-search`, `Notifications`, `notifications`, or `overflow-x-auto` usage in `DemoTopBar.tsx`.
+  - Static header scan confirmed no remaining invalid `icon="home"`, `icon={themeMode}`, `"sun"`, or `"moon"` icon-registry references in `DemoTopBar.tsx`.
+  - In-app browser check on `http://127.0.0.1:5002/?product=PI&country=RO&scenario=active&ds=current&release=release-current&bank=retail-single-account&theme=light&lang=en&screen=homepage` confirmed the Demo and Light/Dark buttons render custom SVGs, the header has no horizontal overflow (`scrollWidth == clientWidth == 1306`), and the scenario switch center matches the viewport center (`653px`).
+  - Local server `http://127.0.0.1:5002/` returned HTTP `200`.
+- Limitation:
+  - Automated Playwright browser smoke could not run because the local Playwright Chromium executable is not installed; verification is build/audit/static plus the live Vite server.
+- safe to resume: yes
+
+## 2026-07-01 RO Card PIN Flow Library Preview
+
+- Follow-up polish after browser comments:
+  - Replaced the Flow Library side-card list with a search field plus native dropdown only, so long flow catalogs are selected from one compact control instead of repeated cards.
+  - Moved the local Countries selector out of the narrow sidebar and into the main content column under UX spec, spanning the same central width as the spec panel.
+  - Replaced the large card-style UX spec layout with compact paragraph-style sections to reduce wasted horizontal space.
+  - Added a Flow Library search input and native flow dropdown above the selectable flow list, anticipating a long future flow catalog.
+  - Changed journey previews to render as real `375x812` screen capture frames scaled down to `180x390`, so more screens fit horizontally while downloads preserve the full screen dimensions.
+  - Added a visible download icon button on every journey screen card; each button exports that screen frame as a standalone PNG.
+  - Reworked the RO Card PIN `Cards` preview to use real shared runtime primitives/assets: Design System card artwork, `AccountActionBar`, `AccountSearchBar`, and `AppIcon` action glyphs instead of placeholder squares.
+  - Resized Card options, Face ID, PIN reveal, Set PIN, Sign, success, and fallback popup states to mobile-screen proportions with larger headers, rows, PIN boxes, and 48px bottom CTAs.
+- Latest request handled: user supplied RO Enablers node `2247:16744` and asked for this additional RO PI flow to be mapped as another selectable Flow Library preview.
+- Figma source inspected:
+  - RO Enablers `SBL-439479 - VIEW / RESET PIN` section node `2247:16744`, covering `VIEW CREDIT CARD DETAILS`, `VIEW DEBIT CARD DETAILS`, `CREDIT CARD CHANGE PIN`, and `DEBIT CARD CHANGE PIN`.
+  - Key observed states: Cards entry, Card options, Face ID modal, hidden PIN sheet, visible PIN sheet, Set PIN empty/filled, Sign, PIN saved success, and `Set up your card PIN` fallback popup.
+- Runtime changes:
+  - Extended `src/app/registry/flowPreviewRegistry.ts` with `ro-card-pin`, scoped to Romania and marked as a future-release preview.
+  - Reworked `src/app/screens/flow-library/FlowLibraryScreen.tsx` into a data-driven preview renderer so `RO Round Up` and `RO Card PIN` share the same Flow Library shell while keeping separate UX specs, scenario tabs, and journey screens.
+  - Added RO Card PIN preview scenarios: `View credit card PIN`, `View debit card PIN`, `Change credit card PIN`, and `Change debit card PIN`.
+  - Updated `src/app/App.tsx` and `src/app/components/demo/DemoTopBar.tsx` so the `Flows` menu and deep link state can switch between multiple flow previews, including `screen=flow-library&flow=ro-card-pin`.
+- Placement:
+  - Use `http://127.0.0.1:5002/?product=PI&country=RO&scenario=active&ds=current&release=release-current&bank=retail-single-account&theme=light&lang=en&screen=flow-library&flow=ro-card-pin`.
+  - In the desktop demo shell, use top bar `Flows` -> `RO Card PIN`; the side selector in Flow Library also switches between `RO Round Up` and `RO Card PIN`.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - Local dev server is running on `http://127.0.0.1:5002/`.
+  - In-app browser visual smoke confirmed the `View / Reset PIN` page renders the flow selector, RO-only country scope, English UX spec, four scenario tabs, connected journey cards, Face ID overlay, hidden/revealed PIN states, Set PIN fields, Sign screen, success confirmation, and fallback popup. Horizontal journey scroll was checked for the later success/fallback states.
+  - Follow-up in-app browser visual smoke confirmed compact UX spec paragraphs, search/dropdown flow selector, 5 visible `375x812` capture frames displayed at `180x390`, visible per-screen download buttons, successful click on `Download Cards screen`, and empty browser console errors/warnings.
+  - Latest Flow Library selector cleanup is code- and `git diff --check`-verified. Browser/build verification is currently blocked because `src/app/components/demo/DemoTopBar.tsx` is already deleted in the working tree, causing Vite to fail resolving `./DemoTopBar` from `DemoShell.tsx`.
+- Limitations:
+  - This is a separated future-flow preview, not wired into the live Cards/Card options runtime as an executable feature.
+  - The journey screens are now component-built 375x812 preview frames using shared runtime assets/primitives where available. They are not imported Figma instances and the PIN-specific states are still preview-only until executable Card options routing is approved.
+- safe to resume: yes
+
+## 2026-07-01 RO Round Up Flow Library Preview
+
+- Latest request handled: user supplied RO Enablers node `2344:10093` and asked for the future RO-only Round Up flow to be reproduced as a separated flow page with English UX spec and a journey diagram of connected app screens.
+- Figma source inspected:
+  - RO Enablers `Round UP` section node `2344:10093`. Full design-context extraction timed out because the section is very large, so the implementation used Figma metadata, screenshots, and targeted node inspection. The visible branches are `ENTRY`, `CREATE ROUND UP - NO SAVING ACCOUNT AVAILABLE`, `CREATE ROUND UP - EXISTING ACCOUNT`, `UPDATE ROUND UP`, and `DEACTIVATE ROUND UP`.
+- Runtime changes:
+  - Added `src/app/registry/flowPreviewRegistry.ts` with the first preview entry `ro-round-up`, scoped to Romania and marked as a future-release preview.
+  - Added `src/app/screens/flow-library/FlowLibraryScreen.tsx`, a full-width Flow Library surface with flow selection, local country chips, English UX spec cards, and scenario-selectable journey diagrams with connected phone-screen previews.
+  - Updated `src/app/components/demo/DemoTopBar.tsx` with a dedicated `Flows` menu, separate from country/baseline selection. Selecting `RO Round Up` opens the Flow Library instead of changing the active runtime country.
+  - Updated `src/app/App.tsx`, `NavigationContext`, `DemoNavigationSync`, `deepLink.ts`, `demoTypes.ts`, and `screenRegistry.ts` so `screen=flow-library&flow=ro-round-up` is deep-linkable, restorable, and visible in audits as `platform.flow-library`.
+- Placement:
+  - Use `http://127.0.0.1:5002/?product=PI&country=RO&scenario=active&ds=current&release=release-current&bank=retail-single-account&theme=light&lang=en&screen=flow-library&flow=ro-round-up`.
+  - In the desktop demo shell, use top bar `Flows` -> `RO Round Up`. Country chips inside the Flow Library are local to the preview and do not mutate the normal app country selector.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - Local dev server is running on `http://127.0.0.1:5002/`.
+  - In-app browser visual/DOM smoke confirmed the Flow Library renders the RO Round Up header, future-release badges, flow selector, country selector, five UX spec cards, scenario tabs, and connected phone-screen journey cards with arrows. Layout was adjusted after visual inspection so the UX spec and Journey areas fit better on the browser viewport.
+- Limitations:
+  - The Round Up page is a mock/future-flow preview, not wired into Products `Round Up` as an executable banking feature yet.
+  - RO is the only enabled country for this preview. The multi-country picker exists for future flows once product specs identify country scope and differences.
+- safe to resume: yes
+
+## 2026-07-01 Account Transaction Filter Sheet
+
+- Latest request handled: user supplied CZ Daily Banking in Mobile node `6999:7260` and asked for the Account Detail search filter button to open the referenced filter bottom sheet.
+- Figma source inspected:
+  - CZ Daily Banking in Mobile Account Detail filter sheet node `6999:7260`, including `Apply filters`, search-by-detail fields, date radio rows, amount rows with currency, status/category selectors, disabled `Apply`, and close action.
+- Runtime changes:
+  - Added `src/app/screens/accounts/AccountTransactionFiltersSheet.tsx` as a reusable Account Detail filter sheet using the shared `BottomSheet`, `TextField`, `PrimaryButton`, and `AppIcon` primitives.
+  - Updated `src/app/screens/accounts/AccountDetailScreen.tsx` so the existing `AccountSearchBar` filter icon opens the sheet, stores applied filters, shows the active remove-filters state, and applies keyword/account/variable-code/amount/status/type/category filtering to the current product transactions.
+  - The implementation is available through the existing Account Detail route for every Mobile PI country because it sits in the shared account detail screen and uses the country currency from runtime config.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - Local dev server is running on `http://127.0.0.1:5002/`.
+  - In-app browser smoke on `http://127.0.0.1:5002/` opened Mobile PI Romania -> Home -> Primary Account -> filter button and confirmed the sheet renders at the Figma-style top offset, full phone width, title `Apply filters`, five expected sections, disabled `Apply` button, 31px close/filter icon slots, and fixed bottom apply area.
+- Limitations:
+  - Selector rows for status, transaction type, and category currently render the Figma field shape with default values; dedicated option sub-sheets are not implemented yet.
+  - Date presets enable Apply but do not yet perform date-window filtering; amount/text/status/type/category filters do affect the mock transaction list.
+- safe to resume: yes
+
+## 2026-07-01 ShopSmart Cards And Products Tab
+
+- Latest request handled: user asked to define the two Meniga Design System ShopSmart card types as reusable DS components, use the correct Figma images, and reproduce the RO Enablers Products / ShopSmart tab area with the new component.
+- Figma sources inspected:
+  - Meniga Harmonization Design System `Shopsmart` source area under node `0:6964`, with card variants `Type=Offers 1` (`9185:16470`) and `Type=Offers 2` (`9185:16260`).
+  - RO Enablers `Products / ShopSmart` node `2843:35520`, including selected tab state, activated-offers summary, `ALL OFFERS` divider, search/filter strip, and three offer cards.
+- Runtime and DS changes:
+  - Added `src/app/components/shopsmart/ShopsmartOfferCard.tsx` as the reusable `Shopsmart` component, covering CTA pill, active pill, orange tag, image overlay, footer metadata, optional distance, and website/partner trailing icons.
+  - Downloaded and locally optimized Figma images under `src/assets/shopsmart/` so runtime does not depend on expiring MCP asset URLs.
+  - Added RO Enablers ShopSmart offer-card data and summary to `src/app/config/productsMenuConfig.ts`; the same temporary values are shared by current ShopSmart-tab countries until country-specific specs arrive.
+  - Rebuilt `ShopSmartContent` in `src/app/screens/products/ProductsScreen.tsx` to match the Figma structure instead of the old product-offer carousel/category grid.
+  - Updated `ProductsTabs` to the 48px Figma tab treatment with a 3px selected underline and no persistent focus outline after mouse click.
+  - Added the `Shopsmart` specimen to Design System Inventory `Cards and content blocks`, and registered `products.shopsmart-offer-card` in `demoTypes.ts` and `componentRegistry.ts`.
+  - Updated the Products ShopSmart code template metadata to point at `products.shopsmart-offer-card`.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=27 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - In-app browser visual/DOM smoke on `http://127.0.0.1:4001/` opened Mobile PI Romania Products -> ShopSmart and verified: selected tab has only a 3px bottom border, summary renders `ACTIVATED OFFERS:4`, `ALL OFFERS` is 18px with 2px letter spacing, search strip is 36px-ish with search/filter icons, and three `ShopsmartOfferCard` instances render with local image assets and correct pill states.
+- Limitations:
+  - ShopSmart offer values are still mock/shared values from the RO Enablers reference. Final merchant lists, localization, per-country availability, click-through behavior, and activation state rules are pending product specs.
+- safe to resume: yes
+
+## 2026-07-01 Products Card Bottom Sheet
+
+- Latest request handled: user supplied RO Enablers node `2634:12018` and asked for the Products card tap behavior to show the same bottom-sheet pattern across all Mobile PI countries, with current values applied everywhere until per-country specs arrive.
+- Figma source inspected:
+  - RO Enablers `MB Products` node `2634:12018`.
+  - The referenced sheet is a dimmed Products screen with a 12px-radius bottom sheet, 28px bold title, 32px close icon, and 80px `Navigation` rows with 24px left / 16px right padding, 18px bold labels, and 32px chevrons.
+- Runtime changes:
+  - Extended `src/app/components/BottomSheet.tsx` with optional `className`, `headerClassName`, and `bodyClassName` hooks while preserving existing default behavior.
+  - Extended `src/app/components/NavigationRow.tsx` with an optional `titleStyle` override so Figma-specific row typography can be applied without forking the component.
+  - Added generic product-card sheet config to `src/app/config/productsMenuConfig.ts`; `Saving and investing` uses the Figma values `Term deposit`, `Saving account`, `Round Up`, and `Mutual funds`, and the same temporary config model applies across all countries.
+  - Updated `src/app/screens/products/ProductsScreen.tsx` so tapping Banking, ShopSmart, and additional-service `ProductMenuCard` items opens the standard bottom sheet with full-width `NavigationRow` options and close/dim-dismiss support.
+- Verification:
+  - Figma context confirmed the visual contract and values above.
+  - In-app browser visual/DOM smoke on `http://127.0.0.1:4001/` opened Mobile PI Romania Products and clicked `Investments and savings`; the sheet rendered with title `Saving and investing`, 12px top radius, 24px sheet top padding, 32px close icon slot, full-width rows, 24px left / 16px right row padding, and the four expected row labels. A follow-up recheck after the 18px text-size fix was attempted, but the in-app browser connection timed out/reset.
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=80 screens=27 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Limitations:
+  - Product-card sheet options are front-end/mock values; final per-country product option lists, local-language labels, and destination flows are still pending user-provided specs.
+  - The in-app browser became unstable during the post-fix visual recheck, so the final 18px row typography is build-verified and code-verified but not re-measured visually after the last style override.
+- safe to resume: yes
+
+## 2026-07-01 Apple Wallet Button Icon Alignment
+
+- Latest request handled: user flagged the `Wallet buttons` Apple Wallet icon as visibly fake against the Meniga Design System node `7464:1881`.
+- Figma sources inspected:
+  - Meniga Harmonization Design System `Apple wallet` component node `7464:1858`.
+  - Apple Wallet mark/icon node `7464:1881`.
+  - Figma design context confirmed variants: `Property 1=small` is `163x48`, `Property 1=Big` is `327x48`, and the wallet mark renders at about `36.876x27.558`.
+- Runtime changes:
+  - Updated `src/app/components/ui/WalletButton.tsx` to replace the local fake Apple Wallet mark with a Figma-aligned inline SVG wallet-app mark: white rounded tile, stacked colored cards, grey lower card area, subtle separators, and real Figma icon dimensions.
+  - Added `appleWalletIcon: "7464:1881"` to `WALLET_BUTTON_SOURCE`.
+  - Set the Apple Wallet condensed button to the Figma `163px` width and kept the long variant at `327px`.
+  - Updated `src/app/screens/cards/CardDetailScreen.tsx` so its Apple Wallet affordance reuses the shared `WalletButton` instead of maintaining a separate fake local SVG.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - In-app browser DOM smoke on `http://127.0.0.1:4001/#buttons` set `wallet-button-kind-select=apple-wallet` and verified:
+    - condensed button `163x48`;
+    - long button `327x48`;
+    - Apple Wallet SVG mark `36.875x27.555`;
+    - long label `Add to Apple wallet`.
+- Limitations:
+  - The mark is a durable local vector approximation of the Figma asset, not a remote expiring image asset.
+- safe to resume: yes
+
+## 2026-06-30 Mobile PI Tutorials Flow
+
+- Latest request handled: user asked for Mobile Banking PI / More / Tutorials to open the Figma-style Tutorials bottom sheet and tutorial pages for every country.
+- Runtime changes:
+  - `src/app/screens/more/MoreScreen.tsx` now opens a contained Tutorials flow from the existing Tutorials card.
+  - `src/app/screens/more/tutorials/TutorialsFlow.tsx` adds a standard bottom-sheet list with close X, nine tutorial rows, chevrons, and a full-screen tutorial detail overlay with back/close controls, carousel dots, and step navigation.
+  - `src/app/config/tutorialsConfig.ts` centralizes tutorial copy and country overrides; Romania uses the BNR exchange title from the supplied screenshot, while other countries use generic currency-exchange wording.
+  - `src/app/config/moreCardsConfig.ts` now exposes `tutorial` for Serbia as well, so all Mobile PI countries have the Tutorials entry.
+  - `src/app/components/BottomSheet.tsx` keeps the existing default behavior and adds an optional `maxHeightOffsetPx` for flows such as Tutorials that need to start lower while still using the standard sheet shell.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - Local dev server was started on `http://127.0.0.1:4001/` and returned HTTP 200.
+  - In-app browser visual smoke on `http://127.0.0.1:4001/` selected Mobile PI Romania, opened More -> Tutorials, confirmed the dimmed More header remains visible behind the sheet, 9 tutorial rows render, row text is 14px/18px, chevrons and close X render at standard 32px-native icon slots, and opening the first row shows the tutorial detail overlay with back/X controls, large visual area, carousel dots, and `NEXT`.
+- Limitations:
+  - Tutorials are mock-driven/front-end only. Final legal/product tutorial copy and market-specific availability still need product/content approval.
+  - Visual smoke was performed on Romania; all-country availability is covered through `moreCardsConfig` and country-aware tutorial config, not repeated manually for every country in this run.
+- safe to resume: yes
 
 ## 2026-06-30 GitHub And Vercel Publish Closeout
 
@@ -3486,6 +3747,26 @@ Continue with product evolution work:
   - History remains mock-driven and front-end only; there is no backend trading/order-history integration.
   - Browser smoke was performed in Romania; all-country access is covered through the existing Investments eligibility and country-aware data builders, plus `audit:platform`, but not visually repeated for every country in this session.
 
+## 2026-07-01 Full Workspace Commit / Vercel Closeout
+
+- Latest request handled: user asked to commit everything currently uncommitted so the repository is clean, push it, and publish the latest version to Vercel.
+- Commit scope:
+  - all currently modified and untracked project files are intended to be staged and committed in one closeout package.
+  - scope includes the accumulated platform work since the last commit: two-line stakeholder header, restored product selector, Flow Library layout and preview plumbing, QR share access token bypass, ShopSmart/product/account-filter/tutorial/runtime component additions, Kids and Investments refinements, registry/capability-map updates, and handoff documentation.
+- Verification before commit:
+  - `node --check api/access.js` passed.
+  - QR access API simulation passed for unauthenticated issuance, authenticated token issuance, token exchange, and cookie-authenticated status.
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Banana Loop result:
+  - fixed/triaged: untracked runtime files such as `src/app/utils/deepLink.ts`, Flow Library files, ShopSmart assets, account-filter sheet, tutorials config, and the favicon are intentionally part of this closeout instead of remaining hidden local work.
+  - already known: Vite chunk-size warning remains a non-blocking known banana.
+  - already known: no local `typecheck`, `lint`, or full automated test scripts exist yet; build plus audits remain the repeatable verification gates for this repo.
+  - follow-up: add automated regression coverage for QR share access, Flow Library deep links, and the new header action/product selector behavior.
+- safe to resume: yes after the commit, push, and Vercel deploy complete.
+
 ## Constitutional Check
 
 constitutional check:
@@ -3495,4 +3776,4 @@ constitutional check:
 - bananas triaged: yes
 - safe to resume: yes
 
-safe to resume: yes, the Investments History flow, transaction detail, and order detail implementation has been added, documented, and verified locally. Remaining work is future product work as outlined in `docs/handoff/next-tasks.md`.
+safe to resume: yes, the latest closeout scope is documented and the remaining work is future product/regression coverage as outlined in `docs/handoff/next-tasks.md`.
