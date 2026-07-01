@@ -31,7 +31,7 @@ function hasDesignSystemHash() {
 
 export function DemoNavigationSync() {
   const { product, country, scenario, designSystem, baseline, release, flagsByContext } = useDemo();
-  const { navigateToAndReset, setCoAppingActive } = useNavigationContext();
+  const { currentScreen, navigateToAndReset, setCoAppingActive } = useNavigationContext();
   const scenarioEntryScreen = scenario === "active" ? "prelogin-active" : "prelogin-inactive";
 
   const isFirstMount = useRef(true);
@@ -88,7 +88,7 @@ export function DemoNavigationSync() {
       };
 
       setCoAppingActive(false);
-      if (hasDesignSystemHash()) {
+      if (hasDesignSystemHash() || currentScreen === "flow-library") {
         return;
       }
 
@@ -102,6 +102,7 @@ export function DemoNavigationSync() {
     baseline,
     release,
     flagsByContext,
+    currentScreen,
     scenarioEntryScreen,
     navigateToAndReset,
     setCoAppingActive,

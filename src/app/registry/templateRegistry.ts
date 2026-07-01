@@ -807,7 +807,7 @@ export const TEMPLATE_REGISTRY: readonly TemplateRegistryItem[] = [
     runtimeScreenId: "pi.products.overview",
     relatedScreens: ["pi.products.overview", "platform.design-system"],
     flowIds: ["pi.home-to-products-menu"],
-    relatedComponents: ["products.menu", "products.offer-card", "products.product-card", "shell.bottom-navigation", "icons.app-icon", "templates.reconstructed-code"],
+    relatedComponents: ["products.menu", "products.shopsmart-offer-card", "accounts.transaction-search", "shell.bottom-navigation", "icons.app-icon", "templates.reconstructed-code"],
     codePreviewId: "products-menu",
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
@@ -1124,7 +1124,7 @@ export const TEMPLATE_REGISTRY: readonly TemplateRegistryItem[] = [
     implementationPath: "src/app/components/templates/TemplateCodePreviews.tsx",
     implementationStatus: "reconstructed-code",
     reuseNotes: [
-      "Code-only template for the ShopSmart tab state using the products menu config, ProductOfferCard, and ProductMenuCard grid.",
+      "Code-only template for the ShopSmart tab state using the products menu config, ShopsmartOfferCard list, summary row, ALL OFFERS divider, and search/filter strip.",
       "Complements the Banking products template so the tabbed Products family has both reusable states.",
     ],
   }),

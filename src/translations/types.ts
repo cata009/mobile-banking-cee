@@ -16,6 +16,7 @@ export interface TranslationKeys {
       shareAccountDetails: string;
       moreActions: string;
       showLess: string;
+      showMore: string;
       next: string;
       sign: string;
       okGotIt: string;

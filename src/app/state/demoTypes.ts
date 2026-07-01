@@ -127,14 +127,11 @@ export type ScreenId =
   | "pi.settings.overview"
   | "pi.contacts.overview"
   | "kids.ro.prototype"
-  | "kids.cz.home-concept"
   | "kids.sk.home-concept"
   | "kids.hu.home-concept"
   | "kids.rs.home-concept"
-  | "kids.ba.home-concept"
-  | "kids.ba-bl.home-concept"
-  | "kids.si.home-concept"
-  | "platform.design-system";
+  | "platform.design-system"
+  | "platform.flow-library";
 
 /**
  * Addressable component identifiers for AI catalog and reuse mapping.
@@ -203,6 +200,7 @@ export type ComponentId =
   | "templates.reconstructed-code"
   | "products.menu"
   | "products.offer-card"
+  | "products.shopsmart-offer-card"
   | "products.product-card"
   | "products.product-card-list-total"
   | "cards.card"

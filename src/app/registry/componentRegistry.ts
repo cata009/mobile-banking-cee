@@ -52,13 +52,9 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
       "pi.more.overview",
       "pi.contacts.overview",
       "kids.ro.prototype",
-      "kids.cz.home-concept",
       "kids.sk.home-concept",
       "kids.hu.home-concept",
       "kids.rs.home-concept",
-      "kids.ba.home-concept",
-      "kids.ba-bl.home-concept",
-      "kids.si.home-concept",
     ],
   },
   "shell.phone-screenshot-control": {
@@ -749,6 +745,16 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     usedByScreens: ["pi.products.overview"],
     notes: "Reusable 327x157 offer carousel card with centered vertical chevron background, a text area that fills to 16px before the fixed 100px right image column, 22px bold title clamped to 2 lines, 18px regular subtitle clamped to 3 lines, and selectable family/light-tone pairs covering green, yellow, orange, pink, red, blue, and grey banner variants.",
   },
+  "products.shopsmart-offer-card": {
+    id: "products.shopsmart-offer-card",
+    label: "Shopsmart offer card",
+    products: ["PI"],
+    designSystems: ["current"],
+    status: "implemented",
+    componentPath: "src/app/components/shopsmart/ShopsmartOfferCard.tsx",
+    usedByScreens: ["pi.products.overview", "platform.design-system"],
+    notes: "Figma-mapped Shopsmart card component from Meniga DS nodes 9185:16470 and 9185:16260 plus RO Enablers ShopSmart runtime state 2843:35520. Supports the activate/active pill variant, orange free-shipping tag variant, local Figma image assets, 327px width, 8px radius, #666 border, 130/143px image heights, merchant/title/status typography, optional distance, and website/partner trailing icon.",
+  },
   "products.product-card": {
     id: "products.product-card",
     label: "Products menu card",
@@ -915,15 +921,11 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "mock-driven",
     componentPath: "src/app/screens/kids/KidsMarketHomeApp.tsx",
     usedByScreens: [
-      "kids.cz.home-concept",
       "kids.sk.home-concept",
       "kids.hu.home-concept",
       "kids.rs.home-concept",
-      "kids.ba.home-concept",
-      "kids.ba-bl.home-concept",
-      "kids.si.home-concept",
     ],
-    notes: "Country-contained Kids homepage and bottom-navigation concepts for Czech Republic, Slovakia, Hungary, Serbia, Bosnia, Bosnia Banja Luka, and Slovenia. The same module uses market-specific mock data and intentionally different UI directions: CZ pocket-plan, SK Bulbank document-inspired Products/Education/Tasks/More, HU CEE Light Restyle/theme personalization, RS safe-spend coach, BA family-hub, BA_BL card-first, and SI goal-coach.",
+    notes: "Country-contained Kids homepage and bottom-navigation concepts for Slovakia, Hungary, and Serbia. The same module uses market-specific mock data and intentionally different UI directions: SK Bulbank document-inspired Products/Education/Tasks/More, HU CEE Light Restyle/theme personalization, and RS safe-spend coach.",
   },
 };
 

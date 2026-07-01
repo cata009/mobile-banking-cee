@@ -8,7 +8,9 @@ type AccessStatus = "checking" | "locked" | "unlocked";
 
 const LOCAL_ACCESS_KEY = "mb-local-access";
 const LOCAL_ATTEMPTS_KEY = "mb-local-access-attempts";
+const SHARE_ACCESS_PARAM = "access_token";
 const LOCAL_DEV_PASSWORD = import.meta.env.DEV ? "CE&EE2025-" : "";
+const LOCAL_SHARE_ACCESS_TOKEN = import.meta.env.DEV ? "local-dev-share-access" : "";
 const ONE_MONTH_MS = 31 * 24 * 60 * 60 * 1000;
 const SIX_MONTHS_MS = 183 * 24 * 60 * 60 * 1000;
 const BLOCK_MS = 24 * 60 * 60 * 1000;
@@ -40,6 +42,15 @@ function getLocalAttemptState(): LocalAttemptState {
 
 function setLocalAttemptState(state: LocalAttemptState) {
   localStorage.setItem(LOCAL_ATTEMPTS_KEY, JSON.stringify(state));
+}
+
+function setLocalAccess(remember: boolean) {
+  const now = Date.now();
+  localStorage.setItem(
+    LOCAL_ACCESS_KEY,
+    JSON.stringify({ expiresAt: now + (remember ? SIX_MONTHS_MS : ONE_MONTH_MS) })
+  );
+  localStorage.removeItem(LOCAL_ATTEMPTS_KEY);
 }
 
 async function checkServerAccess() {
@@ -74,6 +85,44 @@ async function submitServerAccess(password: string, remember: boolean) {
   };
 }
 
+async function submitServerShareAccess(shareToken: string) {
+  const response = await fetch("/api/access", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ shareToken }),
+    credentials: "same-origin",
+  });
+  const data = (await response.json().catch(() => ({}))) as { ok?: boolean; blocked?: boolean; message?: string };
+
+  return {
+    ok: response.ok && Boolean(data.ok),
+    blocked: Boolean(data.blocked),
+    message: data.message,
+  };
+}
+
+function readShareAccessToken(search: string = window.location.search) {
+  try {
+    return new URLSearchParams(search).get(SHARE_ACCESS_PARAM);
+  } catch {
+    return null;
+  }
+}
+
+function removeShareAccessTokenFromUrl() {
+  try {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has(SHARE_ACCESS_PARAM)) return;
+    url.searchParams.delete(SHARE_ACCESS_PARAM);
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  } catch {
+    // URL cleanup is best-effort; access validation remains server-side.
+  }
+}
+
 function submitLocalAccess(password: string, remember: boolean) {
   const attemptState = getLocalAttemptState();
   const now = Date.now();
@@ -99,11 +148,7 @@ function submitLocalAccess(password: string, remember: boolean) {
     };
   }
 
-  localStorage.setItem(
-    LOCAL_ACCESS_KEY,
-    JSON.stringify({ expiresAt: now + (remember ? SIX_MONTHS_MS : ONE_MONTH_MS) })
-  );
-  localStorage.removeItem(LOCAL_ATTEMPTS_KEY);
+  setLocalAccess(remember);
   return { ok: true, blocked: false, message: "" };
 }
 
@@ -121,7 +166,30 @@ export default function AccessGate({ children }: AccessGateProps) {
     let isMounted = true;
 
     const checkAccess = async () => {
+      const shareToken = readShareAccessToken();
+
       try {
+        if (import.meta.env.DEV && shareToken === LOCAL_SHARE_ACCESS_TOKEN) {
+          setLocalAccess(true);
+          removeShareAccessTokenFromUrl();
+          if (!isMounted) return;
+          setStatus("unlocked");
+          return;
+        }
+
+        if (shareToken) {
+          const result = await submitServerShareAccess(shareToken);
+          removeShareAccessTokenFromUrl();
+          if (!isMounted) return;
+
+          if (result.ok) {
+            setStatus("unlocked");
+            return;
+          }
+
+          setMessage(result.message || "This share link has expired. Please scan a fresh QR code or enter the password.");
+        }
+
         const authenticated = await checkServerAccess();
         if (!isMounted) return;
         setStatus(authenticated ? "unlocked" : "locked");

@@ -216,7 +216,7 @@ const RS_KIDS_SPENDING_CATEGORIES = [
 ] as const;
 
 export default function KidsMarketHomeApp({ country }: KidsMarketHomeAppProps) {
-  const resolvedCountry = isKidsHomeCountry(country) ? country : "CZ";
+  const resolvedCountry = isKidsHomeCountry(country) ? country : "SK";
   const concept = getKidsHomeConcept(resolvedCountry);
   const [activeTab, setActiveTab] = useState<KidsBottomNavId>("home");
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
@@ -1220,7 +1220,6 @@ const HU_SAVING_ACTIONS: Array<{ id: "save" | "request" | "card" | "more"; label
 const HU_MONEY_REASONS: HuMoneyReason[] = ["Food", "School", "Transport", "Fun", "Other"];
 const HU_SEND_CONTACTS: HuSendContact[] = ["Anna", "David", "Grandma"];
 const HU_SEND_APPROVAL_THRESHOLD = 5000;
-const HU_WEEKLY_SPENDING_LIMIT = 40000;
 const HU_KIDS_WEEKLY_ALLOWANCE = 5000;
 
 const HU_KIDS_INITIAL_TASKS: HuKidsTask[] = [
@@ -5806,12 +5805,6 @@ function HuLightBalance({
       <p className="mt-[8px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
         are available for you to spend today
       </p>
-      <p className="mt-[4px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
-        Your weekly spending limit:{" "}
-        <span className="font-bold">
-          {showAmounts ? `${formatHuFullAmount(HU_WEEKLY_SPENDING_LIMIT)} HUF` : `${HU_MASKED_INTEGER}${HU_MASKED_DECIMALS} HUF`}
-        </span>
-      </p>
     </section>
   );
 }
@@ -7973,36 +7966,6 @@ function ConceptHero({
   isBalanceVisible: boolean;
   primaryPocketProgress: number;
 }) {
-  if (concept.style === "ba-family-hub") {
-    return (
-      <BaFamilyHubHero
-        concept={concept}
-        isBalanceVisible={isBalanceVisible}
-        primaryPocketProgress={primaryPocketProgress}
-      />
-    );
-  }
-
-  if (concept.style === "ba-bl-card-first") {
-    return (
-      <BaBlCardFirstHero
-        concept={concept}
-        isBalanceVisible={isBalanceVisible}
-        primaryPocketProgress={primaryPocketProgress}
-      />
-    );
-  }
-
-  if (concept.style === "si-goal-coach") {
-    return (
-      <SiGoalCoachHero
-        concept={concept}
-        isBalanceVisible={isBalanceVisible}
-        primaryPocketProgress={primaryPocketProgress}
-      />
-    );
-  }
-
   if (concept.style === "hu-smart-fintech") {
     return (
       <HuSmartHero
@@ -8017,79 +7980,12 @@ function ConceptHero({
     return <SkBulbankProductsHero concept={concept} isBalanceVisible={isBalanceVisible} />;
   }
 
-  if (concept.style === "sk-guided-flow") {
-    return (
-      <SkGuidedHero
-        concept={concept}
-        isBalanceVisible={isBalanceVisible}
-        primaryPocketProgress={primaryPocketProgress}
-      />
-    );
-  }
-
   return (
-    <CzPocketHero
+    <SkGuidedHero
       concept={concept}
       isBalanceVisible={isBalanceVisible}
       primaryPocketProgress={primaryPocketProgress}
     />
-  );
-}
-
-function CzPocketHero({
-  concept,
-  isBalanceVisible,
-  primaryPocketProgress,
-}: {
-  concept: KidsMarketHomeConcept;
-  isBalanceVisible: boolean;
-  primaryPocketProgress: number;
-}) {
-  return (
-    <section className="overflow-hidden rounded-[8px] bg-[var(--uc-surface)] p-[16px] shadow-sm">
-      <div className="flex items-start justify-between gap-[12px]">
-        <div className="min-w-0">
-          <p className="uc-type-p2 text-[var(--uc-text-muted)]">{concept.heroSubtitle}</p>
-          <h2 className="mt-[4px] text-[30px] font-bold leading-[34px] tracking-[0] text-[var(--uc-text)]">
-            {isBalanceVisible ? formatKidsMoney(concept.balance, concept.country) : "****"}
-          </h2>
-          <p className="uc-type-p2 mt-[4px] text-[var(--uc-text-muted)]">{concept.heroTitle}</p>
-        </div>
-        <div className="shrink-0 rounded-[8px] bg-[var(--uc-red-main)] px-[10px] py-[8px] text-[var(--uc-static-white)]">
-          <p className="text-[11px] font-bold leading-[13px] tracking-[0]">safe today</p>
-          <p className="text-[18px] font-bold leading-[22px] tracking-[0]">
-            {formatKidsMoney(concept.safeToday, concept.country)}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-[16px] grid grid-cols-3 gap-[8px]">
-        {concept.metrics.map((metric) => (
-          <div key={metric.label} className="min-h-[82px] rounded-[8px] bg-[var(--uc-neutral-100)] p-[10px]">
-            <p className="text-[11px] font-bold leading-[13px] tracking-[0] text-[var(--uc-text-muted)]">
-              {metric.label}
-            </p>
-            <p className="mt-[6px] text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">
-              {metric.value}
-            </p>
-            <p className="uc-type-p2 mt-[2px] text-[var(--uc-text-muted)]">{metric.hint}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-[16px]">
-        <div className="flex items-center justify-between">
-          <p className="uc-type-n5-strong text-[var(--uc-text)]">Pocket progress</p>
-          <span className="uc-type-p2 text-[var(--uc-text-muted)]">{primaryPocketProgress}%</span>
-        </div>
-        <div className="mt-[8px] h-[8px] overflow-hidden rounded-full bg-[var(--uc-neutral-200)]">
-          <div
-            className="h-full rounded-full bg-[var(--uc-action)]"
-            style={{ width: `${primaryPocketProgress}%` }}
-          />
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -8218,215 +8114,6 @@ function HuSmartHero({
               pocket {primaryPocketProgress}%
             </p>
           </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BaFamilyHubHero({
-  concept,
-  isBalanceVisible,
-  primaryPocketProgress,
-}: {
-  concept: KidsMarketHomeConcept;
-  isBalanceVisible: boolean;
-  primaryPocketProgress: number;
-}) {
-  return (
-    <section className="overflow-hidden rounded-[8px] bg-[var(--uc-surface)] shadow-sm">
-      <div className="bg-[var(--uc-red-main)] px-[16px] py-[14px] text-[var(--uc-static-white)]">
-        <div className="flex items-start justify-between gap-[12px]">
-          <div className="min-w-0">
-            <p className="text-[12px] font-bold leading-[14px] tracking-[0] text-[color-mix(in_srgb,var(--uc-static-white)_78%,transparent)]">
-              {concept.heroSubtitle}
-            </p>
-            <h2 className="mt-[5px] text-[25px] font-bold leading-[29px] tracking-[0]">{concept.heroTitle}</h2>
-          </div>
-          <span className="grid size-[44px] shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--uc-static-white)_18%,transparent)]">
-            <AppIcon name="users" color="var(--uc-static-white)" size={22} />
-          </span>
-        </div>
-      </div>
-
-      <div className="space-y-[12px] p-[14px]">
-        <div className="grid grid-cols-[1fr_118px] gap-[10px]">
-          <div className="rounded-[8px] bg-[var(--uc-neutral-100)] p-[12px]">
-            <p className="uc-type-p2 text-[var(--uc-text-muted)]">Money you can use</p>
-            <p className="mt-[4px] text-[28px] font-bold leading-[32px] tracking-[0] text-[var(--uc-text)]">
-              {isBalanceVisible ? formatKidsMoney(concept.balance, concept.country) : "****"}
-            </p>
-            <p className="uc-type-p2 mt-[4px] text-[var(--uc-text-muted)]">{concept.allowanceLabel}</p>
-          </div>
-          <div className="rounded-[8px] bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] p-[12px] text-[var(--uc-action)]">
-            <p className="text-[11px] font-bold leading-[13px] tracking-[0]">safe today</p>
-            <p className="mt-[6px] text-[22px] font-bold leading-[26px] tracking-[0]">
-              {formatKidsMoney(concept.safeToday, concept.country)}
-            </p>
-            <p className="uc-type-p2 mt-[4px] text-[var(--uc-text-muted)]">{concept.allowanceNext}</p>
-          </div>
-        </div>
-
-        <div className="rounded-[8px] border border-[var(--uc-border)] p-[12px]">
-          <div className="flex items-center gap-[10px]">
-            <span className="grid size-[34px] shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--uc-red-main)_10%,var(--uc-surface))] text-[var(--uc-red-main)]">
-              <AppIcon name="shield-check" size={18} />
-            </span>
-            <div className="min-w-0">
-              <p className="text-[14px] font-bold leading-[17px] tracking-[0] text-[var(--uc-text)]">Family approval lane</p>
-              <p className="uc-type-p2 mt-[2px] text-[var(--uc-text-muted)]">{concept.approvalCopy}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-[8px]">
-          {concept.metrics.map((metric) => (
-            <div key={metric.label} className="rounded-[8px] bg-[var(--uc-neutral-100)] p-[10px]">
-              <p className="text-[16px] font-bold leading-[19px] tracking-[0] text-[var(--uc-text)]">{metric.value}</p>
-              <p className="uc-type-p2 mt-[4px] text-[var(--uc-text-muted)]">{metric.label}</p>
-            </div>
-          ))}
-        </div>
-
-        <div>
-          <div className="flex items-center justify-between">
-            <p className="uc-type-n5-strong text-[var(--uc-text)]">{concept.pockets[0]?.title}</p>
-            <p className="uc-type-p2 text-[var(--uc-text-muted)]">{primaryPocketProgress}%</p>
-          </div>
-          <div className="mt-[7px] h-[8px] overflow-hidden rounded-full bg-[var(--uc-neutral-200)]">
-            <div className="h-full rounded-full bg-[var(--uc-red-main)]" style={{ width: `${primaryPocketProgress}%` }} />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BaBlCardFirstHero({
-  concept,
-  isBalanceVisible,
-  primaryPocketProgress,
-}: {
-  concept: KidsMarketHomeConcept;
-  isBalanceVisible: boolean;
-  primaryPocketProgress: number;
-}) {
-  return (
-    <section className="overflow-hidden rounded-[8px] bg-[var(--uc-surface)] p-[16px] shadow-sm">
-      <div className="flex items-start justify-between gap-[14px]">
-        <div className="min-w-0 flex-1">
-          <p className="uc-type-p2 text-[var(--uc-text-muted)]">{concept.heroSubtitle}</p>
-          <h2 className="mt-[5px] text-[25px] font-bold leading-[29px] tracking-[0] text-[var(--uc-text)]">{concept.heroTitle}</h2>
-          <p className="mt-[8px] text-[30px] font-bold leading-[34px] tracking-[0] text-[var(--uc-text)]">
-            {isBalanceVisible ? formatKidsMoney(concept.balance, concept.country) : "****"}
-          </p>
-        </div>
-        <div className="shrink-0 rounded-[8px] bg-[var(--uc-neutral-100)] p-[8px]">
-          <Card ariaLabel="Kids payment card" size="medium" />
-        </div>
-      </div>
-
-      <div className="mt-[14px] grid grid-cols-[1fr_1fr] gap-[8px]">
-        <div className="rounded-[8px] bg-[var(--uc-primary-k1)] p-[12px] text-[var(--uc-static-white)]">
-          <p className="text-[11px] font-bold leading-[13px] tracking-[0] text-[color-mix(in_srgb,var(--uc-static-white)_74%,transparent)]">
-            card status
-          </p>
-          <p className="mt-[5px] text-[16px] font-bold leading-[19px] tracking-[0]">{concept.cardStatus}</p>
-        </div>
-        <div className="rounded-[8px] bg-[color-mix(in_srgb,var(--uc-red-main)_10%,var(--uc-surface))] p-[12px] text-[var(--uc-red-main)]">
-          <p className="text-[11px] font-bold leading-[13px] tracking-[0]">safe today</p>
-          <p className="mt-[5px] text-[22px] font-bold leading-[26px] tracking-[0]">
-            {formatKidsMoney(concept.safeToday, concept.country)}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-[14px] rounded-[8px] border border-[var(--uc-border)] p-[12px]">
-        <div className="flex items-center justify-between gap-[10px]">
-          <div className="min-w-0">
-            <p className="text-[14px] font-bold leading-[17px] tracking-[0] text-[var(--uc-text)]">Next approval</p>
-            <p className="uc-type-p2 mt-[2px] text-[var(--uc-text-muted)]">{concept.approvalCopy}</p>
-          </div>
-          <span className="grid size-[36px] shrink-0 place-items-center rounded-full bg-[var(--uc-neutral-100)] text-[var(--uc-action)]">
-            <AppIcon name="send" size={18} />
-          </span>
-        </div>
-      </div>
-
-      <div className="mt-[14px] grid grid-cols-3 gap-[8px]">
-        {concept.metrics.map((metric) => (
-          <div key={metric.label} className="rounded-[8px] bg-[var(--uc-neutral-100)] p-[10px]">
-            <p className="text-[15px] font-bold leading-[18px] tracking-[0] text-[var(--uc-text)]">{metric.value}</p>
-            <p className="uc-type-p2 mt-[3px] text-[var(--uc-text-muted)]">{metric.label}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-[14px] h-[7px] overflow-hidden rounded-full bg-[var(--uc-neutral-200)]">
-        <div className="h-full rounded-full bg-[var(--uc-action)]" style={{ width: `${primaryPocketProgress}%` }} />
-      </div>
-    </section>
-  );
-}
-
-function SiGoalCoachHero({
-  concept,
-  isBalanceVisible,
-  primaryPocketProgress,
-}: {
-  concept: KidsMarketHomeConcept;
-  isBalanceVisible: boolean;
-  primaryPocketProgress: number;
-}) {
-  return (
-    <section className="rounded-[8px] bg-[var(--uc-surface)] p-[16px] shadow-sm">
-      <div className="flex items-start justify-between gap-[12px]">
-        <div className="min-w-0">
-          <p className="uc-type-p2 text-[var(--uc-text-muted)]">{concept.heroSubtitle}</p>
-          <h2 className="mt-[4px] text-[26px] font-bold leading-[30px] tracking-[0] text-[var(--uc-text)]">{concept.heroTitle}</h2>
-        </div>
-        <span className="inline-flex shrink-0 items-center gap-[5px] rounded-full bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] px-[9px] py-[6px] text-[var(--uc-action)]">
-          <AppIcon name="calendar-days" size={16} />
-          <span className="text-[12px] font-bold leading-[14px] tracking-[0]">week</span>
-        </span>
-      </div>
-
-      <div className="mt-[14px] rounded-[8px] bg-[var(--uc-neutral-100)] p-[14px]">
-        <div className="flex items-end justify-between gap-[12px]">
-          <div>
-            <p className="uc-type-p2 text-[var(--uc-text-muted)]">Money runway</p>
-            <p className="mt-[4px] text-[31px] font-bold leading-[35px] tracking-[0] text-[var(--uc-text)]">
-              {isBalanceVisible ? formatKidsMoney(concept.balance, concept.country) : "****"}
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="uc-type-p2 text-[var(--uc-text-muted)]">safe today</p>
-            <p className="text-[20px] font-bold leading-[24px] tracking-[0] text-[var(--uc-action)]">
-              {formatKidsMoney(concept.safeToday, concept.country)}
-            </p>
-          </div>
-        </div>
-        <div className="mt-[12px] h-[8px] overflow-hidden rounded-full bg-[var(--uc-neutral-200)]">
-          <div className="h-full rounded-full bg-[var(--uc-action)]" style={{ width: `${primaryPocketProgress}%` }} />
-        </div>
-      </div>
-
-      <div className="mt-[12px] grid grid-cols-3 gap-[8px]">
-        {concept.metrics.map((metric) => (
-          <div key={metric.label} className="rounded-[8px] border border-[var(--uc-border)] p-[10px]">
-            <p className="text-[16px] font-bold leading-[19px] tracking-[0] text-[var(--uc-text)]">{metric.value}</p>
-            <p className="uc-type-p2 mt-[4px] text-[var(--uc-text-muted)]">{metric.label}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-[12px] flex items-center gap-[10px] rounded-[8px] bg-[color-mix(in_srgb,var(--uc-green-status)_10%,var(--uc-surface))] p-[12px]">
-        <span className="grid size-[34px] shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--uc-green-status)_18%,var(--uc-surface))] text-[var(--uc-green-status)]">
-          <AppIcon name="book-open" size={18} />
-        </span>
-        <div className="min-w-0">
-          <p className="text-[14px] font-bold leading-[17px] tracking-[0] text-[var(--uc-text)]">Coach suggestion</p>
-          <p className="uc-type-p2 mt-[2px] text-[var(--uc-text-muted)]">{concept.coach[0]?.body}</p>
         </div>
       </div>
     </section>
@@ -8788,14 +8475,7 @@ function ActionGrid({ actions }: { actions: KidsHomeAction[] }) {
 }
 
 function PocketSection({ concept }: { concept: KidsMarketHomeConcept }) {
-  const title =
-    concept.style === "hu-smart-fintech"
-      ? "Smart pockets"
-      : concept.style === "si-goal-coach"
-        ? "Goal plan"
-        : concept.style === "ba-family-hub"
-          ? "Family goals"
-          : "Saving goals";
+  const title = concept.style === "hu-smart-fintech" ? "Smart pockets" : "Saving goals";
 
   return (
     <section>
@@ -8854,18 +8534,9 @@ function PocketCard({
 }
 
 function CoachSection({ concept }: { concept: KidsMarketHomeConcept }) {
-  const title =
-    concept.style === "cz-pocket-plan"
-      ? "Trust notes"
-      : concept.style === "ba-family-hub"
-        ? "Family clarity"
-        : concept.style === "ba-bl-card-first"
-          ? "Card coach"
-          : "Smart coach";
-
   return (
     <section>
-      <SectionHeadingDivider title={title} />
+      <SectionHeadingDivider title="Smart coach" />
       <div className="mt-[10px] space-y-[8px]">
         {concept.coach.map((item) => (
           <article
@@ -8943,7 +8614,6 @@ function KidsConceptBottomNav({
   onTabChange: (tab: KidsBottomNavId) => void;
 }) {
   const smart = style === "hu-smart-fintech";
-  const cardFirst = style === "ba-bl-card-first";
 
   return (
     <nav
@@ -8954,7 +8624,7 @@ function KidsConceptBottomNav({
       <div className="flex h-[62px] items-center justify-between gap-[4px]">
         {items.map((item) => {
           const isActive = activeTab === item.id;
-          const isCenter = (smart || cardFirst) && item.id === "card";
+          const isCenter = smart && item.id === "card";
           const color = isActive ? "var(--uc-action)" : "var(--uc-icon-muted)";
 
           return (

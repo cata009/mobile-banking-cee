@@ -31,6 +31,7 @@ export type Screen =
   | "payment-review" // Domestic payment review data
   | "payment-sign" // Domestic payment sign screen
   | "payment-success" // Domestic payment success screen
+  | "flow-library" // Full-width future flow preview library
   | "design-system"; // Full-width component inventory
 
 interface NavigationState {

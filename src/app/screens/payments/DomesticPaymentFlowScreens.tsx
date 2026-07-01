@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import AccountActionBar, { type AccountActionBarItem } from "@/app/components/accounts/AccountActionBar";
 import { AppIcon } from "@/app/components/icons";
@@ -65,7 +66,7 @@ function FlowField({
   children: ReactNode;
 }) {
   return (
-    <div className="pt-[22px]">
+    <div className="flex min-h-[80px] flex-col justify-center">
       {children}
     </div>
   );
@@ -90,6 +91,7 @@ export function TransactionDetailScreen({
 }) {
   const { t } = useLanguage();
   const [headerProgress, setHeaderProgress] = useState(0);
+  const [areDetailsExpanded, setAreDetailsExpanded] = useState(false);
 
   const handlePageScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 48));
@@ -103,9 +105,9 @@ export function TransactionDetailScreen({
   const currencyLabel = detail.amount.split(" ").slice(-1)[0];
   const transactionActionItems: AccountActionBarItem[] = [
     { id: "change-category", iconName: "grid-2x2", label: t("runtime.transactionDetail.actions.changeCategory", "Change\ncategory") },
-    { id: "standing-order", iconName: "landmark", label: t("runtime.transactionDetail.actions.createStandingOrder", "Create\nStanding order") },
-    { id: "redo-payment", iconName: "repeat", label: t("runtime.transactionDetail.actions.redoPayment", "Redo\npayment"), onClick: onRedoPayment },
-    { id: "send-payment", iconName: "account-option-statement", label: t("runtime.transactionDetail.actions.sendPayment", "Send\npayment") },
+    { id: "standing-order", iconName: "standing-order", label: t("runtime.transactionDetail.actions.createStandingOrder", "Create\nStanding order") },
+    { id: "redo-payment", iconName: "redo-payment", label: t("runtime.transactionDetail.actions.redoPayment", "Redo\npayment"), onClick: onRedoPayment },
+    { id: "send-payment", iconName: "send-payment", label: t("runtime.transactionDetail.actions.sendPayment", "Send\npayment") },
   ];
 
   return (
@@ -133,7 +135,7 @@ export function TransactionDetailScreen({
               {t("runtime.transactionDetail.pfmCategory", "PFM CATEGORY")}
             </p>
             <div
-              className="mt-[8px] inline-flex min-h-[32px] items-center gap-[8px] rounded-full border px-[14px] py-[4px]"
+              className="mt-[8px] inline-flex items-center justify-center gap-[8px] rounded-full border px-[16px] py-[4px]"
               style={{
                 borderColor: `var(${detail.pfmCategoryColorVar})`,
                 color: `var(${detail.pfmCategoryColorVar})`,
@@ -141,7 +143,7 @@ export function TransactionDetailScreen({
               data-transaction-pfm-category={detail.pfmCategory}
               data-transaction-pfm-subcategory={detail.pfmSubcategoryLabel}
             >
-              <PfmCategoryIcon category={detail.pfmCategory} size={32} />
+              <PfmCategoryIcon category={detail.pfmCategory} size={20} />
               <span className="text-[12px] font-bold leading-normal">
                 {detail.pfmCategoryLabel.toUpperCase()}
               </span>
@@ -197,19 +199,36 @@ export function TransactionDetailScreen({
             <DetailRow label={t("runtime.accounts.detailsInfo.accountNumber", "Account number")} value={detail.accountNumber} copy />
             <DetailRow label={t("runtime.accounts.detailsInfo.accountTitle", "Account title")} value={detail.accountTitle} />
             <DetailRow label={t("runtime.transactionDetail.accountOwner", "Account owner")} value={detail.accountOwner} />
-            <DetailRow label={t("runtime.transactionDetail.bookingDate", "Booking date")} value={detail.bookingDate} />
-            <DetailRow label={t("runtime.transactionDetail.beneficiaryName", "Beneficiary Name")} value={detail.beneficiaryName} />
-            <DetailRow label={t("runtime.transactionDetail.beneficiaryBankName", "Beneficiary Bank Name")} value={detail.beneficiaryBankName} />
-            <DetailRow label={t("runtime.transactionDetail.beneficiaryAccountNumber", "Beneficiary account number")} value={detail.beneficiaryAccountNumber} copy />
-            <DetailRow label={t("runtime.transactionDetail.amount", "Amount")} value={detail.amount} />
-            <DetailRow label={t("runtime.payments.domesticFlow.paymentDetails", "Payment details")} value={detail.paymentDetails} />
-            <DetailRow label={t("runtime.transactionDetail.referenceNumber", "Reference number")} value={detail.referenceNumber} />
+            <AnimatePresence initial={false}>
+              {areDetailsExpanded ? (
+                <motion.div
+                  key="extra-transaction-details"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                  style={{ overflow: "hidden" }}
+                >
+                  <DetailRow label={t("runtime.transactionDetail.bookingDate", "Booking date")} value={detail.bookingDate} />
+                  <DetailRow label={t("runtime.transactionDetail.beneficiaryName", "Beneficiary Name")} value={detail.beneficiaryName} />
+                  <DetailRow label={t("runtime.transactionDetail.beneficiaryBankName", "Beneficiary Bank Name")} value={detail.beneficiaryBankName} />
+                  <DetailRow label={t("runtime.transactionDetail.beneficiaryAccountNumber", "Beneficiary account number")} value={detail.beneficiaryAccountNumber} copy />
+                  <DetailRow label={t("runtime.transactionDetail.amount", "Amount")} value={detail.amount} />
+                  <DetailRow label={t("runtime.payments.domesticFlow.paymentDetails", "Payment details")} value={detail.paymentDetails} />
+                  <DetailRow label={t("runtime.transactionDetail.referenceNumber", "Reference number")} value={detail.referenceNumber} />
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
           </div>
           <button
             type="button"
-            className="mx-auto mt-[18px] block pb-[18px] text-[12px] font-bold leading-normal text-[var(--uc-action)]"
+            onClick={() => setAreDetailsExpanded((current) => !current)}
+            aria-expanded={areDetailsExpanded}
+            className="mx-auto mt-[18px] block pb-[18px] text-center font-['UniCredit',sans-serif] text-[14px] font-bold leading-normal text-[var(--uc-action)]"
           >
-            {t("runtime.actions.showLess", "SHOW LESS")}
+            {areDetailsExpanded
+              ? t("runtime.actions.showLess", "Show less")
+              : t("runtime.actions.showMore", "Show more")}
           </button>
         </section>
       </div>
@@ -229,14 +248,27 @@ export function DomesticPaymentCreateScreen({
 }) {
   const { t } = useLanguage();
   const [form, setForm] = useState(draft);
+  const [headerProgress, setHeaderProgress] = useState(0);
   const update = (key: keyof DomesticPaymentDraft, value: string | boolean) => {
     setForm((current) => ({ ...current, [key]: value }));
   };
 
+  const handlePageScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 48));
+    setHeaderProgress(progress);
+  };
+
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">
-      <PageHeader title={t("runtime.payments.newPayment.actions.domestic-payment.title", "Domestic payment")} onBack={onBack} includeSafeArea showHelp={false} />
-      <div className="min-h-0 flex-1 overflow-y-auto px-[24px] pb-[18px] scrollbar-hide">
+      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide" onScroll={handlePageScroll}>
+        <PageHeader
+          title={t("runtime.payments.domesticFlow.domesticPaymentTitle", "Domestic payment")}
+          onBack={onBack}
+          collapsedTitleProgress={headerProgress}
+          includeSafeArea
+          showHelp={false}
+        />
+        <div className="px-[24px] pb-[18px]">
         <SectionTitle>{t("runtime.payments.domesticFlow.fromAccount", "FROM ACCOUNT")}</SectionTitle>
         <FlowField>
           <TextField
@@ -321,6 +353,7 @@ export function DomesticPaymentCreateScreen({
         <p className="uc-type-n5 px-[8px] pt-[44px] text-center leading-[18px] text-[var(--uc-text)]">
           {t("runtime.payments.domesticFlow.reviewAndSignHint", "You can review and sign your payment in the next step")}
         </p>
+        </div>
       </div>
       <div className="px-[24px] pb-[8px]">
         <PrimaryButton onClick={() => onNext(form)}>{t("runtime.actions.next", "Next")}</PrimaryButton>
@@ -341,12 +374,25 @@ export function PaymentReviewScreen({
 }) {
   const { t } = useLanguage();
   const [saveAsTemplate, setSaveAsTemplate] = useState(false);
+  const [headerProgress, setHeaderProgress] = useState(0);
   const beneficiaryAccount = [draft.prefix, draft.accountNumber, draft.bankCode].filter(Boolean).join("-");
+
+  const handlePageScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 48));
+    setHeaderProgress(progress);
+  };
 
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">
-      <PageHeader title={t("runtime.payments.domesticFlow.reviewData", "Review data")} onBack={onBack} includeSafeArea showHelp={false} />
-      <div className="min-h-0 flex-1 overflow-y-auto px-[24px] pb-[18px] scrollbar-hide">
+      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide" onScroll={handlePageScroll}>
+        <PageHeader
+          title={t("runtime.payments.domesticFlow.reviewData", "Review data")}
+          onBack={onBack}
+          collapsedTitleProgress={headerProgress}
+          includeSafeArea
+          showHelp={false}
+        />
+        <div className="px-[24px] pb-[18px]">
         <SectionTitle>{t("runtime.payments.domesticFlow.paymentOrder", "PAYMENT ORDER")}</SectionTitle>
         <div className="pt-[22px]">
           <DetailRow label={t("runtime.payments.domesticFlow.payerAccount", "Payer account")} value={draft.payerAccountName || t("runtime.payments.domesticFlow.primaryAccountName", "Primary Account name")} />
@@ -368,6 +414,7 @@ export function PaymentReviewScreen({
             onToggle={setSaveAsTemplate}
             ariaLabel={t("runtime.payments.domesticFlow.saveAsTemplate", "Save as template")}
           />
+        </div>
         </div>
       </div>
       <div className="px-[24px] pb-[8px]">

@@ -15,6 +15,7 @@ const EN_RUNTIME: RuntimeTranslations = {
     shareAccountDetails: "Share account details",
     moreActions: "More actions",
     showLess: "Show less",
+    showMore: "Show more",
     next: "Next",
     sign: "Sign",
     okGotIt: "Ok, got it",
@@ -309,6 +310,7 @@ const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslatio
       sign: "Semnează",
       okGotIt: "Am înțeles",
       showLess: "Arată mai puțin",
+      showMore: "Arată mai mult",
     },
     accounts: { ...EN_RUNTIME.accounts, title: "Conturi" },
     analytics: {

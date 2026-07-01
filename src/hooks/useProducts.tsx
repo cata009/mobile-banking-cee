@@ -1,12 +1,14 @@
 import { ReactNode } from 'react';
-import { 
-  Product, 
+import {
+  Product,
   getProductsByCategory,
-  formatAmount 
+  formatAmount,
+  mockProducts
 } from '@/data/products';
 import svgPaths from '@/imports/svg-wan58807zo';
 import { useDemo } from '@/app/state/demoStore';
 import { convertCurrency, getCountryCurrency, roundMoney } from '@/data/exchangeRates';
+import { formatMaskedCardNumber } from '@/app/utils/cardNumber';
 
 function formatProductIban(country: string, productId: string, baseNumber: string): string {
   const prefix = country === 'BA_BL' ? 'BA' : country;
@@ -31,11 +33,18 @@ export function useProducts() {
         ? product.accountNumber
         : formatProductIban(country, product.id, product.accountNumber);
 
+      // Debit cards mirror the balance of their linked current account
+      const linkedAccount = product.type === 'debit_card'
+        ? mockProducts.find(p => p.id === product.linkedAccountId)
+        : undefined;
+      const sourceBalance = linkedAccount ? linkedAccount.balance : product.balance;
+      const sourceCurrency = linkedAccount ? linkedAccount.currency : product.currency;
+
       return {
         ...product,
         accountNumber: formattedAccountNumber,
         // Convert balance to local currency
-        balance: roundMoney(convertCurrency(product.balance, product.currency, localCurrency)),
+        balance: roundMoney(convertCurrency(sourceBalance, sourceCurrency, localCurrency)),
         // Update currency to local
         currency: localCurrency
       };
@@ -105,7 +114,7 @@ export function useProducts() {
 
   const getProductDisplayNumber = (product: Product): string => {
     if (product.type === 'debit_card' || product.type === 'credit_card') {
-      return product.accountNumber; // Already masked
+      return formatMaskedCardNumber(product.accountNumber);
     }
     return product.accountNumber;
   };

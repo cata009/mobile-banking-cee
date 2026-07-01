@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigationContext, NavigationProvider } from "@/app/contexts/NavigationContext";
-import { LanguageProvider } from "@/app/contexts/LanguageContext";
+import { LanguageProvider, useLanguage } from "@/app/contexts/LanguageContext";
 import { DemoProvider, useDemo } from "@/app/state/demoStore";
 import { DemoShell } from "@/app/components/demo/DemoShell";
 import { DemoNavigationSync } from "@/app/components/demo/DemoNavigationSync";
@@ -11,6 +11,7 @@ import AnalyticsScreen from "@/app/screens/analytics/AnalyticsScreen";
 import MessagesScreen from "@/app/screens/messages/MessagesScreen";
 import LanguageSelector from "@/app/components/LanguageSelector";
 import MobileFrame from "@/app/components/MobileFrame";
+import FramelessDeviceFrame from "@/app/components/FramelessDeviceFrame";
 import { isCoAppingAvailable } from "@/app/utils/coAppingAvailability";
 
 // Co-Apping components - only used for CZ and SK
@@ -37,6 +38,7 @@ import RoKidsApp from "@/app/screens/kids/RoKidsApp";
 // Contacts component - available for all countries
 import ContactsScreen from "@/app/screens/contacts/ContactsScreen";
 import DesignSystemPage from "@/app/screens/design-system/DesignSystemPage";
+import FlowLibraryScreen from "@/app/screens/flow-library/FlowLibraryScreen";
 import AccountDetailScreen from "@/app/screens/accounts/AccountDetailScreen";
 import AccountDetailsInfoScreen from "@/app/screens/accounts/AccountDetailsInfoScreen";
 import AccountOptionsScreen from "@/app/screens/accounts/AccountOptionsScreen";
@@ -49,6 +51,12 @@ import {
   TransactionDetailScreen,
 } from "@/app/screens/payments/DomesticPaymentFlowScreens";
 import { useProducts } from "@/hooks/useProducts";
+import {
+  buildDeepLinkUrl,
+  deepLinkToDemoInitialState,
+  parseDeepLinkFromUrl,
+} from "@/app/utils/deepLink";
+import type { FlowPreviewId } from "@/app/registry/flowPreviewRegistry";
 import { isInvestmentsPortfolioAvailable } from "@/app/utils/investmentsAvailability";
 import { isKidsHomeCountry } from "@/data/kidsMarketHomeConcepts";
 import type { AccountTransaction } from "@/data/accountDetails";
@@ -82,29 +90,49 @@ const DESIGN_SYSTEM_HASHES = new Set([
 ]);
 
 export default function App() {
+  // Parse the shared deep link once, so the whole provider tree boots into the
+  // shared state (product/country/scenario/release/theme/... — see deepLink.ts).
+  const parsedDeepLink = useMemo(() => parseDeepLinkFromUrl(), []);
+  const initialDemoState = useMemo(
+    () => deepLinkToDemoInitialState(parsedDeepLink),
+    [parsedDeepLink],
+  );
+
   return (
-    <DemoProvider>
-      <AppWithNavigation />
+    <DemoProvider initialState={initialDemoState}>
+      <AppWithNavigation parsedDeepLink={parsedDeepLink} />
     </DemoProvider>
   );
 }
 
 /**
  * Wrapper that initializes NavigationProvider with correct initial screen
- * based on demo scenario
+ * based on demo scenario (or a shared deep link, when present)
  */
-function AppWithNavigation() {
+function AppWithNavigation({
+  parsedDeepLink,
+}: {
+  parsedDeepLink: ReturnType<typeof parseDeepLinkFromUrl>;
+}) {
   const { scenario, themeMode } = useDemo();
   const hashSection = typeof window === "undefined" ? "" : window.location.hash.replace(/^#/, "");
   const shouldOpenDesignSystem = DESIGN_SYSTEM_HASHES.has(hashSection);
-  
-  // Determine initial screen based on scenario
-  const initialScreen = shouldOpenDesignSystem
-    ? "design-system"
-    : scenario === "active"
-      ? "homepage"
-      : "prelogin-inactive";
+
+  // Determine initial screen: a shared deep link wins, else fall back to the
+  // existing hash/scenario-driven default.
+  const initialScreen = parsedDeepLink?.screen
+    ? parsedDeepLink.screen
+    : shouldOpenDesignSystem
+      ? "design-system"
+      : scenario === "active"
+        ? "homepage"
+        : "prelogin-inactive";
   const initialCoAppingActive = !shouldOpenDesignSystem && scenario === "active";
+
+  // Frameless "real device" mode (opened from the Share QR): render the app
+  // fullscreen without the desktop demo shell / phone bezel.
+  const deviceMode = Boolean(parsedDeepLink?.deviceMode);
+  const appContent = <AppContent parsedDeepLink={parsedDeepLink} deviceMode={deviceMode} />;
 
   return (
     <div data-uc-theme={themeMode} className={themeMode === "dark" ? "dark h-screen" : "h-screen"}>
@@ -112,17 +140,21 @@ function AppWithNavigation() {
         initialScreen={initialScreen}
         initialCoAppingActive={initialCoAppingActive}
       >
-        <LanguageProvider>
-          <DemoShell>
-            <AppContent />
-          </DemoShell>
+        <LanguageProvider initialLanguage={parsedDeepLink?.language}>
+          {deviceMode ? appContent : <DemoShell>{appContent}</DemoShell>}
         </LanguageProvider>
       </NavigationProvider>
     </div>
   );
 }
 
-function AppContent() {
+function AppContent({
+  parsedDeepLink,
+  deviceMode,
+}: {
+  parsedDeepLink: ReturnType<typeof parseDeepLinkFromUrl>;
+  deviceMode: boolean;
+}) {
   const {
     currentScreen,
     isCoAppingActive,
@@ -130,8 +162,19 @@ function AppContent() {
     goBack,
     setCoAppingActive,
   } = useNavigationContext();
-  
-  const { product, country, scenario, designSystem, themeMode } = useDemo();
+
+  const {
+    product,
+    country,
+    scenario,
+    designSystem,
+    themeMode,
+    release,
+    baseline,
+    bankingScenario,
+    amountsHidden,
+  } = useDemo();
+  const { language } = useLanguage();
   const { categories } = useProducts();
   const coAppingAvailable = isCoAppingAvailable(country);
   const isPiRuntimeContext = product === "PI" && designSystem === "current";
@@ -156,8 +199,9 @@ function AppContent() {
   const [hideContentDuringAnimation, setHideContentDuringAnimation] = useState(false);
   // Track if FAB should slide in
   const [showFABSlideIn, setShowFABSlideIn] = useState(false);
-  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
-  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(parsedDeepLink?.accountId ?? null);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(parsedDeepLink?.cardId ?? null);
+  const [selectedFlowPreviewId, setSelectedFlowPreviewId] = useState<FlowPreviewId>(parsedDeepLink?.flowId ?? "ro-round-up");
   const [selectedTransaction, setSelectedTransaction] = useState<AccountTransaction | null>(null);
   const [paymentDraft, setPaymentDraft] = useState<DomesticPaymentDraft | null>(null);
   const accountProducts = categories.flatMap((category) => category.products);
@@ -175,7 +219,55 @@ function AppContent() {
     window.addEventListener("hashchange", syncDesignSystemHash);
     return () => window.removeEventListener("hashchange", syncDesignSystemHash);
   }, [currentScreen, navigateTo]);
-  
+
+  useEffect(() => {
+    const handleFlowPreviewSelect = (event: Event) => {
+      const flowId = (event as CustomEvent<FlowPreviewId>).detail;
+      if (flowId) setSelectedFlowPreviewId(flowId);
+    };
+
+    window.addEventListener("flow-preview-select", handleFlowPreviewSelect);
+    return () => window.removeEventListener("flow-preview-select", handleFlowPreviewSelect);
+  }, []);
+
+  // Keep the browser URL in sync with the current state, so the address bar is
+  // always a live deep link (refresh/bookmark/Share all work everywhere).
+  useEffect(() => {
+    const url = buildDeepLinkUrl({
+      product,
+      country,
+      scenario,
+      designSystem,
+      release,
+      bankingScenario,
+      themeMode,
+      amountsHidden,
+      language,
+      screen: currentScreen,
+      flowId: currentScreen === "flow-library" ? selectedFlowPreviewId : null,
+      accountId: selectedAccountId,
+      cardId: selectedCardId,
+      deviceMode,
+    });
+    window.history.replaceState(window.history.state, "", url);
+  }, [
+    product,
+    country,
+    scenario,
+    designSystem,
+    release,
+    baseline,
+    bankingScenario,
+    themeMode,
+    amountsHidden,
+    language,
+    currentScreen,
+    selectedFlowPreviewId,
+    selectedAccountId,
+    selectedCardId,
+    deviceMode,
+  ]);
+
   // Determină varianta status bar-ului bazat pe ecranul curent
   const getStatusBarVariant = (): 'light' | 'dark' | 'theme' => {
     if (isThemedKidsRuntimeContext) {
@@ -443,6 +535,10 @@ function AppContent() {
     navigateTo('prelogin-active');
   };
 
+  // In device mode the app is rendered fullscreen (no bezel); otherwise the
+  // desktop preview shows it inside the simulated phone frame.
+  const FrameComponent = deviceMode ? FramelessDeviceFrame : MobileFrame;
+
   return (
     <>
       {/* Demo Navigation Sync - automatically resets to Homepage on settings change */}
@@ -451,9 +547,17 @@ function AppContent() {
       {currentScreen === "design-system" && (
         <DesignSystemPage />
       )}
-      
-      {currentScreen !== "design-system" && (
-      <MobileFrame 
+
+      {currentScreen === "flow-library" && (
+        <FlowLibraryScreen
+          initialFlowId={parsedDeepLink?.flowId ?? "ro-round-up"}
+          selectedFlowId={selectedFlowPreviewId}
+          onFlowChange={setSelectedFlowPreviewId}
+        />
+      )}
+
+      {currentScreen !== "design-system" && currentScreen !== "flow-library" && (
+      <FrameComponent
         statusBarVariant={getStatusBarVariant()}
         isCoAppingActive={isCoAppingActive && coAppingAvailable}
       >
@@ -701,7 +805,7 @@ function AppContent() {
         ) : (
           <UnsupportedContextScreen product={product} designSystem={designSystem} />
         )}
-      </MobileFrame>
+      </FrameComponent>
       )}
     </>
   );

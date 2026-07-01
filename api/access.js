@@ -6,8 +6,10 @@ const PASSWORD = process.env.ACCESS_PASSWORD || "CE&EE2025-";
 const COOKIE_SECRET = process.env.ACCESS_COOKIE_SECRET || process.env.ACCESS_PASSWORD || "CE&EE2025-";
 const ONE_MONTH_SECONDS = 60 * 60 * 24 * 31;
 const SIX_MONTHS_SECONDS = 60 * 60 * 24 * 183;
+const SHARE_TOKEN_SECONDS = 60 * 60 * 24 * 7;
 const BLOCK_SECONDS = 60 * 60 * 24;
 const MAX_ATTEMPTS = 10;
+const SHARE_TOKEN_PURPOSE = "demo-share-access";
 
 function toBase64Url(value) {
   return Buffer.from(value).toString("base64url");
@@ -37,6 +39,26 @@ function decodeCookiePayload(value) {
   } catch {
     return null;
   }
+}
+
+function encodeAccessCookie(expiresAt) {
+  return encodeCookiePayload({ expiresAt });
+}
+
+function encodeShareToken() {
+  return encodeCookiePayload({
+    purpose: SHARE_TOKEN_PURPOSE,
+    expiresAt: Date.now() + SHARE_TOKEN_SECONDS * 1000,
+  });
+}
+
+function isShareTokenValid(token) {
+  const payload = decodeCookiePayload(token);
+  return Boolean(
+    payload?.purpose === SHARE_TOKEN_PURPOSE &&
+    payload.expiresAt &&
+    payload.expiresAt > Date.now()
+  );
 }
 
 function parseCookies(cookieHeader = "") {
@@ -166,6 +188,23 @@ export default async function handler(req, res) {
   const cookies = parseCookies(req.headers.cookie);
 
   if (req.method === "GET") {
+    const url = new URL(req.url || "/api/access", "https://local.app");
+    const mode = url.searchParams.get("mode");
+
+    if (mode === "share-token") {
+      if (!isAccessValid(cookies)) {
+        sendJson(res, 401, { ok: false, message: "Access required." });
+        return;
+      }
+
+      sendJson(res, 200, {
+        ok: true,
+        token: encodeShareToken(),
+        expiresIn: SHARE_TOKEN_SECONDS,
+      });
+      return;
+    }
+
     sendJson(res, 200, { authenticated: isAccessValid(cookies) });
     return;
   }
@@ -189,6 +228,19 @@ export default async function handler(req, res) {
   }
 
   const body = await readRequestBody(req);
+  const shareToken = body.shareToken;
+  if (typeof shareToken === "string" && isShareTokenValid(shareToken)) {
+    const maxAge = SIX_MONTHS_SECONDS;
+    const expiresAt = now + maxAge * 1000;
+    const successCookies = [
+      serializeCookie(ACCESS_COOKIE, encodeAccessCookie(expiresAt), maxAge, req),
+      clearCookie(ATTEMPTS_COOKIE, req),
+    ];
+
+    sendJson(res, 200, { ok: true, expiresAt, tokenAccess: true }, successCookies);
+    return;
+  }
+
   const password = body.password;
   const remember = body.remember === true || body.remember === "on" || body.remember === "true";
   const returnTo = safeReturnTo(body.returnTo);
@@ -222,7 +274,7 @@ export default async function handler(req, res) {
 
   const maxAge = remember ? SIX_MONTHS_SECONDS : ONE_MONTH_SECONDS;
   const expiresAt = now + maxAge * 1000;
-  const accessPayload = encodeCookiePayload({ expiresAt });
+  const accessPayload = encodeAccessCookie(expiresAt);
 
   const successCookies = [
     serializeCookie(ACCESS_COOKIE, accessPayload, maxAge, req),

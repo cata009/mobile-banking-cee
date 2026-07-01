@@ -1,17 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import type { DragEvent, MouseEvent, PointerEvent, UIEvent } from "react";
+import { BottomSheet } from "@/app/components/BottomSheet";
 import BottomNavigation from "@/app/components/BottomNavigation";
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
+import { AppIcon } from "@/app/components/icons";
+import NavigationRow from "@/app/components/NavigationRow";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
+import ShopsmartOfferCard from "@/app/components/shopsmart/ShopsmartOfferCard";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
 import {
+  getProductCardSheetConfig,
   getProductsMenuForCountry,
+  type ProductCardSheetOption,
   type ProductsCard,
   type ProductsMenuTab,
   type ProductsOffer,
+  type ShopSmartOfferCard,
+  type ShopSmartSummary,
 } from "@/app/config/productsMenuConfig";
 
 type NavItem = "home" | "analytics" | "payments" | "products" | "more";
@@ -94,7 +102,7 @@ export function ProductsTabs({
 }) {
   return (
     <div className="shrink-0 bg-[var(--uc-surface)]">
-      <div className="grid h-[64px] grid-cols-2 border-b border-[var(--uc-text-muted)]">
+      <div className="grid h-[48px] grid-cols-2">
         {[
           { id: "banking" as const, label: bankingLabel },
           { id: "shopsmart" as const, label: shopSmartLabel },
@@ -103,16 +111,15 @@ export function ProductsTabs({
             key={tab.id}
             type="button"
             onClick={() => onChange(tab.id)}
-            className="uc-type-n2-strong relative flex items-center justify-center cursor-pointer"
+            className={`uc-type-n2-strong flex cursor-pointer items-center justify-center border-b focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--uc-action)] ${
+              activeTab === tab.id ? "border-b-[3px] border-[var(--uc-text)]" : "border-[var(--uc-text-muted)]"
+            }`}
             style={{
               color: activeTab === tab.id ? "var(--uc-text)" : "var(--uc-text-muted)",
               lineHeight: "24px",
             }}
           >
             {tab.label}
-            {activeTab === tab.id && (
-              <span className="absolute bottom-[-1px] left-0 h-[3px] w-full bg-[var(--uc-text)]" />
-            )}
           </button>
         ))}
       </div>
@@ -402,10 +409,6 @@ export function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
   );
 }
 
-function handleProductCardClick(card: ProductsCard) {
-  console.log(`Products card clicked: ${card.id}`);
-}
-
 export function getProductsCardTranslationId(card: ProductsCard) {
   if (card.translationKey === null) return null;
   if (card.translationKey) return card.translationKey;
@@ -425,6 +428,7 @@ export function BankingContent({
   products,
   otherSolutionsTitle,
   otherSolutions,
+  onProductCardClick,
 }: {
   offersTitle: string;
   offers: readonly ProductsOffer[];
@@ -432,6 +436,7 @@ export function BankingContent({
   products: readonly ProductsCard[];
   otherSolutionsTitle: string;
   otherSolutions: readonly ProductsCard[];
+  onProductCardClick: (card: ProductsCard) => void;
 }) {
   return (
     <>
@@ -446,7 +451,7 @@ export function BankingContent({
         {productsTitle ? <SectionHeading>{productsTitle}</SectionHeading> : null}
         <div className="grid grid-cols-[repeat(2,164px)] justify-center gap-[16px] pt-[16px]">
           {products.map((card) => (
-            <ProductMenuCard key={card.id} card={card} variant="standard" onClick={handleProductCardClick} />
+            <ProductMenuCard key={card.id} card={card} variant="standard" onClick={onProductCardClick} />
           ))}
         </div>
       </section>
@@ -456,7 +461,7 @@ export function BankingContent({
           <SectionHeading>{otherSolutionsTitle}</SectionHeading>
           <div className="grid grid-cols-[164px] px-[24px] pt-[16px]">
             {otherSolutions.map((card) => (
-              <ProductMenuCard key={card.id} card={card} variant="standard" onClick={handleProductCardClick} />
+              <ProductMenuCard key={card.id} card={card} variant="standard" onClick={onProductCardClick} />
             ))}
           </div>
         </section>
@@ -466,31 +471,139 @@ export function BankingContent({
 }
 
 export function ShopSmartContent({
-  title,
-  offers,
-  products,
+  summary,
+  offerCards,
 }: {
-  title: string;
-  offers: readonly ProductsOffer[];
-  products: readonly ProductsCard[];
+  summary: ShopSmartSummary;
+  offerCards: readonly ShopSmartOfferCard[];
 }) {
   const { t } = useLanguage();
 
   return (
-    <>
-      <section className="pt-[16px]">
-        <SectionHeading>{title}</SectionHeading>
-        <OffersRail offers={offers} />
-      </section>
-      <section className="pt-[16px]">
-        <SectionHeading>{t("runtime.productsMenu.featuredCategories", "FEATURED CATEGORIES")}</SectionHeading>
-        <div className="grid grid-cols-[repeat(2,164px)] justify-center gap-[16px] pt-[16px]">
-          {products.map((card) => (
-            <ProductMenuCard key={card.id} card={card} variant="standard" onClick={handleProductCardClick} />
+    <section className="flex flex-col gap-[16px] pt-[16px]" data-products-shopsmart-content="true">
+      <ShopSmartSummaryBlock summary={summary} />
+      <div className="flex flex-col gap-[16px]">
+        <ShopSmartSectionHeading>{t("runtime.productsMenu.allOffers", "ALL OFFERS")}</ShopSmartSectionHeading>
+        <ShopSmartSearchBar placeholder={t("runtime.actions.search", "Search")} />
+        <div className="flex flex-col items-center gap-[16px] px-[24px]">
+          {offerCards.map((offer) => (
+            <ShopsmartOfferCard
+              key={offer.id}
+              merchant={offer.merchant}
+              title={offer.title}
+              statusText={offer.statusText}
+              imageSrc={offer.imageSrc}
+              pillLabel={offer.pillLabel}
+              pillTone={offer.pillTone}
+              tagLabel={offer.tagLabel}
+              distance={offer.distance}
+              trailingIcon={offer.trailingIcon}
+              onClick={() => handleShopSmartOfferClick(offer)}
+            />
           ))}
         </div>
-      </section>
-    </>
+      </div>
+    </section>
+  );
+}
+
+function handleShopSmartOfferClick(offer: ShopSmartOfferCard) {
+  console.log(`ShopSmart offer clicked: ${offer.id}`);
+}
+
+function ShopSmartSummaryBlock({ summary }: { summary: ShopSmartSummary }) {
+  return (
+    <button
+      type="button"
+      className="grid min-h-[80px] grid-cols-[1fr_32px] items-center gap-[16px] px-[24px] text-left"
+      onClick={() => console.log("ShopSmart summary clicked")}
+    >
+      <span className="flex min-w-0 flex-col">
+        <span className="text-[14px] font-bold uppercase leading-[20px] tracking-[1px] text-[var(--uc-text-muted)]">
+          ACTIVATED OFFERS:{summary.activatedOffers}
+        </span>
+        <span className="mt-[2px] text-[24px] font-bold leading-[30px] tracking-[0] text-[var(--uc-text)]">
+          {summary.totalSavedLabel}
+        </span>
+        <span className="mt-[1px] text-[18px] font-normal leading-[24px] tracking-[0] text-[var(--uc-text)]">
+          {summary.totalSavedAmount}
+        </span>
+      </span>
+      <span className="grid size-[32px] place-items-center text-[var(--uc-text)]">
+        <AppIcon name="chevron-link" color="currentColor" />
+      </span>
+    </button>
+  );
+}
+
+function ShopSmartSectionHeading({ children }: { children: string }) {
+  return (
+    <div className="relative h-[32px] px-[24px]">
+      <h2 className="text-[18px] font-bold uppercase leading-[22px] tracking-[2px] text-[var(--uc-text)]">
+        {children}
+      </h2>
+      <span aria-hidden="true" className="absolute bottom-0 left-0 h-px w-full bg-[var(--uc-border-muted)]" />
+    </div>
+  );
+}
+
+function ShopSmartSearchBar({ placeholder }: { placeholder: string }) {
+  return (
+    <div className="px-[16px] py-[2px]">
+      <div className="flex h-[36px] items-center justify-between rounded-[10px] bg-[var(--uc-app-bg)]">
+        <span className="grid size-[32px] shrink-0 place-items-center text-[var(--uc-text)]">
+          <AppIcon name="search" color="currentColor" />
+        </span>
+        <input
+          type="search"
+          aria-label={placeholder}
+          placeholder={placeholder}
+          className="h-[32px] min-w-0 flex-1 appearance-none bg-transparent text-[14px] font-bold leading-[18px] tracking-[1px] text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)] [&::-webkit-search-cancel-button]:hidden"
+        />
+        <button type="button" className="grid size-[32px] shrink-0 place-items-center text-[var(--uc-text)]" aria-label="Filters">
+          <AppIcon name="filters" color="currentColor" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ProductCardBottomSheet({
+  card,
+  onClose,
+}: {
+  card: ProductsCard;
+  onClose: () => void;
+}) {
+  const sheetConfig = getProductCardSheetConfig(card.id);
+  const sheetTitle = sheetConfig.title ?? card.title.replace(/\n/g, " ");
+
+  const handleOptionClick = (option: ProductCardSheetOption) => {
+    console.log(`Products sheet option clicked: ${card.id}/${option.id}`);
+  };
+
+  return (
+    <BottomSheet
+      title={sheetTitle}
+      className="px-0 pb-[24px] pt-[24px]"
+      headerClassName="px-[24px]"
+      bodyClassName="w-full"
+      onClose={onClose}
+    >
+      <div className="flex w-full flex-col" data-products-card-sheet="true">
+        {sheetConfig.options.map((option) => (
+          <NavigationRow
+            key={option.id}
+            title={option.title}
+            trailingAccessory="chevron"
+            className="pr-[16px]"
+            titleClassName="text-[18px] leading-normal tracking-[0.3px]"
+            titleStyle={{ fontSize: "18px", lineHeight: "normal", letterSpacing: "0.3px" }}
+            onClick={() => handleOptionClick(option)}
+          />
+        ))}
+      </div>
+    </BottomSheet>
   );
 }
 
@@ -519,7 +632,13 @@ export default function ProductsScreen({
     };
   };
   const [activeTab, setActiveTab] = useState<ProductsMenuTab>("banking");
+  const [selectedProductCard, setSelectedProductCard] = useState<ProductsCard | null>(null);
   const visibleTab = config.hasShopSmartTab ? activeTab : "banking";
+
+  const handleProductCardClick = (card: ProductsCard) => {
+    console.log(`Products card clicked: ${card.id}`);
+    setSelectedProductCard(card);
+  };
 
   const handleTabChange = (tab: NavItem) => {
     console.log(`Bottom nav tab clicked from products: ${tab}`);
@@ -556,12 +675,12 @@ export default function ProductsScreen({
             products={config.products.map(localizeCard)}
             otherSolutionsTitle={t("runtime.productsMenu.otherSolutionsForYou", config.otherSolutionsTitle)}
             otherSolutions={config.otherSolutions.map(localizeCard)}
+            onProductCardClick={handleProductCardClick}
           />
         ) : (
           <ShopSmartContent
-            title={t("runtime.productsMenu.shopSmartTitle", config.shopSmartTitle)}
-            offers={config.shopSmartOffers.map(localizeOffer)}
-            products={config.shopSmartProducts.map(localizeCard)}
+            summary={config.shopSmartSummary}
+            offerCards={config.shopSmartOfferCards}
           />
         )}
       </div>
@@ -569,6 +688,13 @@ export default function ProductsScreen({
       <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center border-t border-[var(--uc-border-muted)] bg-[var(--uc-bottom-bar-bg)]">
         <BottomNavigation activeTab="products" onTabChange={handleTabChange} />
       </div>
+
+      {selectedProductCard ? (
+        <ProductCardBottomSheet
+          card={selectedProductCard}
+          onClose={() => setSelectedProductCard(null)}
+        />
+      ) : null}
     </div>
   );
 }

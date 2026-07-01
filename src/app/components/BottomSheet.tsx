@@ -1,15 +1,30 @@
 import { ReactNode, useEffect, useId, useRef } from "react";
 import { AppIcon } from "@/app/components/icons";
+import { cn } from "@/app/components/ui/utils";
 
 interface BottomSheetProps {
   title?: string;
   subtitle?: ReactNode;
   meta?: ReactNode;
   children: ReactNode;
+  maxHeightOffsetPx?: number;
+  className?: string;
+  headerClassName?: string;
+  bodyClassName?: string;
   onClose: () => void;
 }
 
-export function BottomSheet({ title, subtitle, meta, children, onClose }: BottomSheetProps) {
+export function BottomSheet({
+  title,
+  subtitle,
+  meta,
+  children,
+  maxHeightOffsetPx = 54,
+  className,
+  headerClassName,
+  bodyClassName,
+  onClose,
+}: BottomSheetProps) {
   const titleId = useId();
   const dialogRef = useRef<HTMLElement | null>(null);
 
@@ -75,12 +90,16 @@ export function BottomSheet({ title, subtitle, meta, children, onClose }: Bottom
       <section
         aria-labelledby={title ? titleId : undefined}
         aria-modal="true"
-        className="relative max-h-[calc(100%-54px)] w-full overflow-y-auto rounded-t-[12px] bg-[var(--uc-sheet-bg)] p-[16px] shadow-[0_-8px_24px_rgb(var(--uc-shadow-rgb)_/_0.18)]"
+        className={cn(
+          "relative w-full overflow-y-auto rounded-t-[12px] bg-[var(--uc-sheet-bg)] p-[16px] shadow-[0_-8px_24px_rgb(var(--uc-shadow-rgb)_/_0.18)] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          className,
+        )}
         ref={dialogRef}
         role="dialog"
+        style={{ maxHeight: `calc(100% - ${maxHeightOffsetPx}px)` }}
         tabIndex={-1}
       >
-        <div className="mb-[24px] flex items-start justify-between gap-[16px]">
+        <div className={cn("mb-[24px] flex items-start justify-between gap-[16px]", headerClassName)}>
           <div className="min-w-0">
             {title ? (
               <h1
@@ -106,7 +125,7 @@ export function BottomSheet({ title, subtitle, meta, children, onClose }: Bottom
             <AppIcon name="close-x" color="var(--uc-icon)" />
           </button>
         </div>
-        {children}
+        <div className={bodyClassName}>{children}</div>
       </section>
     </div>
   );

@@ -14,6 +14,7 @@ import { ThirdPartyConsentCard } from './cards/ThirdPartyConsentCard';
 import { DigitalActivitiesCard } from './cards/DigitalActivitiesCard';
 import { MyRequestsCard } from './cards/MyRequestsCard';
 import { TutorialCard } from './cards/TutorialCard';
+import { TutorialsFlow } from './tutorials/TutorialsFlow';
 import BottomNavigation from '@/app/components/BottomNavigation';
 import { LogoutConfirmDialog } from '@/app/components/LogoutConfirmDialog';
 import { useDemo } from '@/app/state/demoStore';
@@ -52,6 +53,7 @@ export default function MoreScreen({
   const documentsCount = getDocumentsCountForCountry(country);
   const usesBosniaHeaderActions = country === "BA" || country === "BA_BL";
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [showTutorialsFlow, setShowTutorialsFlow] = useState(false);
 
   const cardLabels: Record<MoreCardType, string> = {
     contacts: t("more.cards.contacts"),
@@ -129,7 +131,7 @@ export default function MoreScreen({
       case 'my-requests':
         return <MyRequestsCard key="my-requests" title={cardLabels["my-requests"]} onClick={() => handleCardClick(cardLabels["my-requests"])} />;
       case 'tutorial':
-        return <TutorialCard key="tutorial" title={cardLabels.tutorial} onClick={() => handleCardClick(cardLabels.tutorial)} />;
+        return <TutorialCard key="tutorial" title={cardLabels.tutorial} onClick={() => setShowTutorialsFlow(true)} />;
       default:
         return null;
     }
@@ -177,6 +179,12 @@ export default function MoreScreen({
           onConfirm={onLogoutConfirm}
         />
       )}
+
+      <TutorialsFlow
+        country={country}
+        isOpen={showTutorialsFlow}
+        onClose={() => setShowTutorialsFlow(false)}
+      />
     </div>
   );
 }

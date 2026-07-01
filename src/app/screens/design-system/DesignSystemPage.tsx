@@ -46,6 +46,7 @@ import DebitCard, { DEBIT_CARD_SOURCE, DEBIT_CARD_VARIANTS, type DebitCardSize, 
 import CardComponent, { CARD_COMPONENT_SOURCE } from "@/app/components/cards/CardComponent";
 import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
+import ShopsmartOfferCard, { SHOPSMART_OFFER_CARD_SOURCE } from "@/app/components/shopsmart/ShopsmartOfferCard";
 import productCardAccountImage from "../../../../screenshots/account.png";
 import productCardCardsImage from "../../../../screenshots/cards.png";
 import productCardInsuranceImage from "../../../../screenshots/insurance.png";
@@ -54,6 +55,8 @@ import productCardMarketHedgingImage from "../../../../screenshots/market-hedgin
 import productCardMortgagesImage from "../../../../screenshots/mortgages.png";
 import productCardPartnerOffersImage from "../../../../screenshots/partner-offers.png";
 import productCardShopSmartImage from "../../../../screenshots/shopsmart.png";
+import shopsmartDsOffers1Image from "@/assets/shopsmart/shopsmart-ds-offers-1.png";
+import shopsmartDsOffers2Image from "@/assets/shopsmart/shopsmart-ds-offers-2.png";
 import ProductsList from "@/app/components/ProductsList";
 import TotalRow from "@/app/components/TotalRow";
 import AccountBalanceCard from "@/app/components/accounts/AccountBalanceCard";
@@ -130,7 +133,7 @@ const activeComponentFiles = [
   "MoreHeader", "MoreCardBase", "ContactsCard", "DocumentsCard", "SettingsCard", "GdprConsentCard",
   "ThirdPartyConsentCard", "DigitalActivitiesCard", "MyRequestsCard", "TutorialCard",
   "ContactsNavigationCard", "PrimeScreen", "YourAdvisorTab", "YourBenefitsTab",
-  "PrimeLabelValue", "PrimeIconLabelValue", "BackButton", "RadioButton", "ProductOfferCard", "TemplateCodePreview",
+  "PrimeLabelValue", "PrimeIconLabelValue", "BackButton", "RadioButton", "ProductOfferCard", "ShopsmartOfferCard", "TemplateCodePreview",
 ];
 
 const moreCardLabels: Record<MoreCardType, string> = {
@@ -1148,6 +1151,36 @@ function ProductOfferCardVariantSpecimen() {
           title: "Premium current\naccount offer",
           description: "Enjoy zero monthly fee\nand smart everyday\nbanking benefits.",
         }}
+      />
+    </div>
+  );
+}
+
+function ShopsmartOfferCardVariantSpecimen() {
+  return (
+    <div className="flex w-[375px] flex-col items-center gap-[16px] bg-[var(--uc-app-bg)] px-[24px] py-[16px]">
+      <ShopsmartOfferCard
+        merchant="Hilton Bucharest"
+        title="10% cashback"
+        statusText="Until 31.12.2024"
+        imageSrc={shopsmartDsOffers1Image}
+        imageHeight={143}
+        imageOverlay
+        pillLabel="Activate"
+        pillTone="teal"
+        distance="11.5 km"
+        trailingIcon="partners"
+      />
+      <ShopsmartOfferCard
+        merchant="Hilton Bucharest"
+        title="10% cashback"
+        statusText="Bookings over 2,000 RON"
+        imageSrc={shopsmartDsOffers2Image}
+        imageHeight={143}
+        imageOverlay
+        tagLabel="FREE SHIPPING"
+        distance="11.5 km"
+        trailingIcon="partners"
       />
     </div>
   );
@@ -4294,6 +4327,14 @@ export default function DesignSystemPage() {
               </Specimen>
               <Specimen name="Products offer card" source="components/products/ProductOfferCard.tsx" specs={["327x157", "dropdown variant selector", "16px text-to-image gutter", "100px image column", "title 22px bold / 2 lines", "subtitle 18px regular / 3 lines", "family + light/normal tones"]}>
                 <ProductOfferCardVariantSpecimen />
+              </Specimen>
+              <Specimen
+                name="Shopsmart"
+                source="components/shopsmart/ShopsmartOfferCard.tsx"
+                note={`${SHOPSMART_OFFER_CARD_SOURCE.schema} / ${SHOPSMART_OFFER_CARD_SOURCE.sourceNodeIds.offers1} + ${SHOPSMART_OFFER_CARD_SOURCE.sourceNodeIds.offers2}`}
+                specs={["327px wide", "8px radius + #666 border", "image top 130/143px", "merchant 15px bold teal", "title 21px bold", "footer 11px metadata", "Offers 1 CTA pill", "Offers 2 orange tag"]}
+              >
+                <ShopsmartOfferCardVariantSpecimen />
               </Specimen>
               <Specimen name="Products menu card" source="components/products/ProductMenuCard.tsx" specs={["164x120 standard", "164x72 compact", "dropdown card + size selectors", "title 18px standard / 16px compact", "config-driven background", "optional imageSrc with per-card placement"]}>
                 <ProductMenuCardVariantSpecimen />

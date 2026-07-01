@@ -18,16 +18,12 @@ import type {
   ScreenId,
 } from "@/app/state/demoTypes";
 
-const KIDS_MARKET_CONCEPT_COUNTRIES: readonly CountryId[] = ["CZ", "SK", "HU", "RS", "BA", "BA_BL", "SI"] as const;
+const KIDS_MARKET_CONCEPT_COUNTRIES: readonly CountryId[] = ["SK", "HU", "RS"] as const;
 
 const KIDS_MARKET_SCREEN_BY_COUNTRY: Partial<Record<CountryId, ScreenId>> = {
-  CZ: "kids.cz.home-concept",
   SK: "kids.sk.home-concept",
   HU: "kids.hu.home-concept",
   RS: "kids.rs.home-concept",
-  BA: "kids.ba.home-concept",
-  BA_BL: "kids.ba-bl.home-concept",
-  SI: "kids.si.home-concept",
 };
 
 function hasKidsMarketConcept(country: CountryId): boolean {

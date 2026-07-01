@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useCallback, useEffect, useRef } from 'react';
 import { useDemo } from '@/app/state/demoStore';
 import { getTranslations } from '@/translations';
 import type { AppLanguage } from '@/app/registry/languageByCountry';
@@ -16,13 +16,27 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
+export function LanguageProvider({
+  children,
+  initialLanguage,
+}: {
+  children: ReactNode;
+  /** Optional language restored from a shared deep link. */
+  initialLanguage?: Language;
+}) {
   const { country } = useDemo();
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>(initialLanguage ?? 'en');
+  const prevCountryRef = useRef(country);
 
-  // Reset to EN when country changes (not local language)
+  // Reset to EN only when the user actually switches country — comparing against
+  // the previous country (rather than a "first mount" flag) keeps a language
+  // restored from a shared deep link intact, and is robust under StrictMode's
+  // double-invoked effects.
   useEffect(() => {
-    setLanguage('en');
+    if (prevCountryRef.current !== country) {
+      prevCountryRef.current = country;
+      setLanguage('en');
+    }
   }, [country]);
 
   /**

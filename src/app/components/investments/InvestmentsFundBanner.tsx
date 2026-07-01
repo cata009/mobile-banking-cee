@@ -14,7 +14,8 @@ function FundBannerIllustration() {
       <img
         src={fundBannerPlant}
         alt=""
-        className="absolute right-[-95px] top-0 h-full w-[230px] object-cover object-center"
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ objectPosition: "0% center" }}
         draggable={false}
       />
       <div className="absolute inset-y-0 left-0 w-[88px] bg-gradient-to-r from-[#F5F5F5] via-[#F5F5F5]/90 to-transparent" />

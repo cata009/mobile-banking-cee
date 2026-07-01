@@ -6,6 +6,11 @@ import AccountCarouselIndicator from "@/app/components/accounts/AccountCarouselI
 import AccountTransactionRow from "@/app/components/accounts/AccountTransactionRow";
 import AccountTransactionMonthDivider from "@/app/components/accounts/AccountTransactionMonthDivider";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
+import AccountTransactionFiltersSheet, {
+  EMPTY_ACCOUNT_TRANSACTION_FILTERS,
+  hasAccountTransactionFilters,
+  type AccountTransactionFilterState,
+} from "@/app/screens/accounts/AccountTransactionFiltersSheet";
 import { AppIcon } from "@/app/components/icons";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
@@ -116,6 +121,8 @@ export default function AccountDetailScreen({
   const [activeIndex, setActiveIndex] = useState(selectedIndex === -1 ? 0 : selectedIndex);
   const [headerProgress, setHeaderProgress] = useState(0);
   const [transactionSearch, setTransactionSearch] = useState("");
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState<AccountTransactionFilterState>(EMPTY_ACCOUNT_TRANSACTION_FILTERS);
   const pageRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -141,9 +148,8 @@ export default function AccountDetailScreen({
     [config.currency, country, transactionProfileIndex],
   );
   const normalizedTransactionSearch = transactionSearch.trim().toLowerCase();
+  const filtersActive = hasAccountTransactionFilters(appliedFilters);
   const filteredTransactions = useMemo(() => {
-    if (!normalizedTransactionSearch) return transactions;
-
     return transactions.filter((transaction) => {
       const formattedAmount = `${transaction.amount < 0 ? "-" : "+"} ${formatMoneyNumber(
         Math.abs(transaction.amount),
@@ -163,9 +169,43 @@ export default function AccountDetailScreen({
         .join(" ")
         .toLowerCase();
 
-      return searchableText.includes(normalizedTransactionSearch);
+      const searchMatches = normalizedTransactionSearch ? searchableText.includes(normalizedTransactionSearch) : true;
+      const keywordMatches = appliedFilters.keyword.trim()
+        ? searchableText.includes(appliedFilters.keyword.trim().toLowerCase())
+        : true;
+      const accountMatches = appliedFilters.accountNumber.trim()
+        ? activeProduct?.accountNumber.toLowerCase().includes(appliedFilters.accountNumber.trim().toLowerCase())
+        : true;
+      const variableMatches = appliedFilters.variableCode.trim()
+        ? transaction.id.toLowerCase().includes(appliedFilters.variableCode.trim().toLowerCase())
+        : true;
+      const amountFrom = Number.parseFloat(appliedFilters.amountFrom.replace(",", "."));
+      const amountTo = Number.parseFloat(appliedFilters.amountTo.replace(",", "."));
+      const absoluteAmount = Math.abs(transaction.amount);
+      const amountFromMatches = Number.isFinite(amountFrom) ? absoluteAmount >= amountFrom : true;
+      const amountToMatches = Number.isFinite(amountTo) ? absoluteAmount <= amountTo : true;
+      const statusMatches = appliedFilters.status === "All transactions" ? true : transaction.status === appliedFilters.status;
+      const typeMatches =
+        appliedFilters.transactionType === "All transactions"
+          ? true
+          : appliedFilters.transactionType === "Incoming"
+            ? transaction.type === "credit"
+            : transaction.type === "debit";
+      const categoryMatches = appliedFilters.category === "All categories" ? true : transaction.category === appliedFilters.category;
+
+      return (
+        searchMatches &&
+        keywordMatches &&
+        accountMatches &&
+        variableMatches &&
+        amountFromMatches &&
+        amountToMatches &&
+        statusMatches &&
+        typeMatches &&
+        categoryMatches
+      );
     });
-  }, [config.currency, country, normalizedTransactionSearch, transactions]);
+  }, [activeProduct?.accountNumber, appliedFilters, config.currency, country, normalizedTransactionSearch, transactions]);
   const transactionGroups = useMemo(
     () => groupAccountTransactionsByMonth(filteredTransactions),
     [filteredTransactions],
@@ -421,15 +461,27 @@ export default function AccountDetailScreen({
     );
   }
 
-  return (
-    <div
-      ref={pageRef}
-      className="h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] pb-[32px] scrollbar-hide"
-      onScroll={handlePageScroll}
-    >
-      <CollapsingAccountHeader title={t("runtime.accounts.title", "Accounts")} progress={headerProgress} onBack={onBack} />
+  const handleApplyFilters = (filters: AccountTransactionFilterState) => {
+    setAppliedFilters(filters);
+    setFilterSheetOpen(false);
+    activateTransactionSearch();
+  };
 
-      <div className="bg-[var(--uc-app-bg)]">
+  const handleRemoveFilters = () => {
+    setAppliedFilters(EMPTY_ACCOUNT_TRANSACTION_FILTERS);
+    activateTransactionSearch();
+  };
+
+  return (
+    <div className="relative h-full w-full bg-[var(--uc-surface)]">
+      <div
+        ref={pageRef}
+        className="h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] pb-[32px] scrollbar-hide"
+        onScroll={handlePageScroll}
+      >
+        <CollapsingAccountHeader title={t("runtime.accounts.title", "Accounts")} progress={headerProgress} onBack={onBack} />
+
+        <div className="bg-[var(--uc-app-bg)]">
         <div
           className="flex w-[375px] items-center px-[16px] py-[8px]"
           style={{ opacity: largeTitleOpacity }}
@@ -532,50 +584,63 @@ export default function AccountDetailScreen({
         <AccountActionBar onDetailsClick={() => onDetailsClick(activeProduct)} onOptionsClick={onOptionsClick} />
       </div>
 
-      <div className="bg-[var(--uc-surface)]">
-        <div
-          ref={searchContainerRef}
-          className="sticky z-20 bg-[var(--uc-surface)] px-[16px] pt-[24px]"
-          style={{ top: `${ACCOUNT_DETAIL_HEADER_HEIGHT}px` }}
-        >
-          <AccountSearchBar
-            value={transactionSearch}
-            onClick={activateTransactionSearch}
-            onValueChange={handleTransactionSearchChange}
-            onFocus={activateTransactionSearch}
-          />
-        </div>
+        <div className="bg-[var(--uc-surface)]">
+          <div
+            ref={searchContainerRef}
+            className="sticky z-20 bg-[var(--uc-surface)] px-[16px] pt-[24px]"
+            style={{ top: `${ACCOUNT_DETAIL_HEADER_HEIGHT}px` }}
+          >
+            <AccountSearchBar
+              value={transactionSearch}
+              onClick={activateTransactionSearch}
+              onFilterClick={() => setFilterSheetOpen(true)}
+              onRemoveFilters={handleRemoveFilters}
+              onValueChange={handleTransactionSearchChange}
+              onFocus={activateTransactionSearch}
+              filtersActive={filtersActive}
+            />
+          </div>
 
-        <div className="pt-[24px]">
-          {transactionGroups.length > 0 ? (
-            transactionGroups.map((group, index) => (
-              <div key={group.monthTitle} className={index > 0 ? "pt-[16px]" : undefined}>
-                <AccountTransactionMonthDivider
-                  title={group.monthTitle}
-                  total={formatMoneyNumber(group.monthlyTotal, country)}
-                  currency={config.currency}
-                />
+          <div className="pt-[24px]">
+            {transactionGroups.length > 0 ? (
+              transactionGroups.map((group, index) => (
+                <div key={group.monthTitle} className={index > 0 ? "pt-[16px]" : undefined}>
+                  <AccountTransactionMonthDivider
+                    title={group.monthTitle}
+                    total={formatMoneyNumber(group.monthlyTotal, country)}
+                    currency={config.currency}
+                  />
 
-                <div className="pt-[16px]">
-                  {group.transactions.map((transaction) => (
-                    <AccountTransactionRow
-                      key={transaction.id}
-                      transaction={transaction}
-                      formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
-                      currency={config.currency}
-                      onClick={(selectedTransaction) => onTransactionClick?.(selectedTransaction, activeProduct)}
-                    />
-                  ))}
+                  <div className="pt-[16px]">
+                    {group.transactions.map((transaction) => (
+                      <AccountTransactionRow
+                        key={transaction.id}
+                        transaction={transaction}
+                        formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
+                        currency={config.currency}
+                        onClick={(selectedTransaction) => onTransactionClick?.(selectedTransaction, activeProduct)}
+                      />
+                    ))}
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="uc-type-n4-strong px-[16px] py-[32px] text-center text-[var(--uc-text-muted)]">
+                {hasTransactionSearch || filtersActive ? t("runtime.accounts.noTransactionsFound", "No transactions found") : null}
               </div>
-            ))
-          ) : (
-            <div className="uc-type-n4-strong px-[16px] py-[32px] text-center text-[var(--uc-text-muted)]">
-              {hasTransactionSearch ? t("runtime.accounts.noTransactionsFound", "No transactions found") : null}
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
+
+      {filterSheetOpen ? (
+        <AccountTransactionFiltersSheet
+          currency={config.currency}
+          filters={appliedFilters}
+          onApply={handleApplyFilters}
+          onClose={() => setFilterSheetOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }

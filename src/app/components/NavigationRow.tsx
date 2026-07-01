@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import ToggleButton from "@/app/components/ToggleButton";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import { cn } from "@/app/components/ui/utils";
@@ -64,6 +64,7 @@ export interface NavigationRowProps {
   centerContent?: boolean;
   titleTone?: "default" | "action";
   titleClassName?: string;
+  titleStyle?: CSSProperties;
   descriptionClassName?: string;
 }
 
@@ -82,6 +83,7 @@ function NavigationRowContent({
   centerContent,
   titleTone,
   titleClassName,
+  titleStyle,
   descriptionClassName,
 }: Omit<NavigationRowProps, "onClick" | "ariaLabel" | "className" | "rowHeight">) {
   const hasTrailing = trailingAccessory !== "none" || trailing;
@@ -101,7 +103,7 @@ function NavigationRowContent({
         ) : null}
 
         <div className={cn("min-w-0", centerContent ? "flex-none" : "flex-1")}>
-          <p className={cn("uc-type-n4-strong", titleColor, titleClassName)}>
+          <p className={cn("uc-type-n4-strong", titleColor, titleClassName)} style={titleStyle}>
             {title}
           </p>
           {description ? (
@@ -165,6 +167,7 @@ export default function NavigationRow({
   centerContent = false,
   titleTone = "default",
   titleClassName,
+  titleStyle,
   descriptionClassName,
 }: NavigationRowProps) {
   const hasLeadingIcon = Boolean(leadingIconName || leadingVisual);
@@ -209,6 +212,7 @@ export default function NavigationRow({
           centerContent={centerContent}
           titleTone={titleTone}
           titleClassName={titleClassName}
+          titleStyle={titleStyle}
           descriptionClassName={descriptionClassName}
         />
       </button>
@@ -232,6 +236,7 @@ export default function NavigationRow({
         centerContent={centerContent}
         titleTone={titleTone}
         titleClassName={titleClassName}
+        titleStyle={titleStyle}
         descriptionClassName={descriptionClassName}
       />
     </div>

@@ -655,7 +655,7 @@ export default function AnalyticsScreen({
       <div className="h-[54px] flex-shrink-0 bg-[var(--uc-app-bg)]" />
       <AnalyticsHeader onMessagesClick={onMessagesClick} />
 
-      <div className="flex-1 overflow-x-hidden overflow-y-auto scrollbar-hide pb-[128px]">
+      <div className="flex-1 overflow-x-hidden overflow-y-auto scrollbar-hide pb-[80px]">
         <div>
           <AnalyticsHeroCarousel
             periods={timeline.periods}
@@ -669,7 +669,7 @@ export default function AnalyticsScreen({
 
         <CardTransactionAction />
 
-        <div className="bg-[var(--uc-app-bg)] pb-[40px]">
+        <div className="bg-[var(--uc-app-bg)]">
           <MoneyCategorySection
             title={t("runtime.analytics.moneyOut", "Money out")}
             categories={summary.moneyOutCategories}
