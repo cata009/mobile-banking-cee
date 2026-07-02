@@ -1,9 +1,7 @@
 import { Fragment, createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { COUNTRIES, COUNTRY_META, FEATURE_META } from "@/app/registry/demoConfig";
-import { getAvailableLanguages, getLanguageDisplayName } from "@/app/registry/languageByCountry";
-import { isCoAppingAvailable } from "@/app/utils/coAppingAvailability";
+import { COUNTRIES, COUNTRY_META } from "@/app/registry/demoConfig";
 import { getProductsForCountry } from "@/app/config/productConfig";
-import { MORE_CARDS_CONFIG, type MoreCardType } from "@/app/config/moreCardsConfig";
+import { type MoreCardType } from "@/app/config/moreCardsConfig";
 import { getDocumentsCountForCountry } from "@/app/config/documentsConfig";
 import { AppIcon, ICON_INVENTORY, type IconInventoryItem } from "@/app/components/icons";
 import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
@@ -70,10 +68,6 @@ import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
 import PaymentHeroCard, { PAYMENT_HERO_CARD_IMAGE_VARIANTS } from "@/app/components/payments/PaymentHeroCard";
 import type { PaymentHeroImageVariant, PaymentHeroItem } from "@/app/config/paymentsMenuConfig";
 import { type ProductsCard as ProductsMenuCardData } from "@/app/config/productsMenuConfig";
-import AccountSummary from "@/app/screens/home/AccountSummary";
-import QuickActions from "@/app/screens/home/QuickActions";
-import TransactionsPreview from "@/app/screens/home/TransactionsPreview";
-import UnplannedBanner from "@/app/screens/home/UnplannedBanner";
 import { ContactsCard } from "@/app/screens/more/cards/ContactsCard";
 import { DocumentsCard } from "@/app/screens/more/cards/DocumentsCard";
 import { SettingsCard } from "@/app/screens/more/cards/SettingsCard";
@@ -102,7 +96,7 @@ import { Skeleton } from "@/app/components/ui/skeleton";
 import { Separator } from "@/app/components/ui/separator";
 import { Toggle } from "@/app/components/ui/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@/app/components/ui/toggle-group";
-import avatarPhotoSample from "@/assets/design-system/avatar-photo-sample.svg";
+import avatarPhotoSample from "@/assets/kids/woman-profile.png";
 import { getAccountIdentity } from "@/data/accountDetails";
 import { PFM_CATEGORIES, PFM_ICON_SOURCE, type PfmCategoryDefinition } from "@/data/pfmCategories";
 import { TEMPLATE_REGISTRY, type TemplateRegistryItem } from "@/app/registry/templateRegistry";
@@ -111,9 +105,7 @@ import { TYPOGRAPHY_TOKENS, type TypographyToken } from "@/app/registry/typograp
 import {
   APP_COLOR_AUDIT,
   COLOR_PALETTES,
-  COLOR_SOURCE_AUDIT,
   DESIGN_SYSTEM_COLORS,
-  type AppColorAuditStatus,
   type ColorPaletteId,
   type DesignSystemColor,
 } from "@/app/registry/colorRegistry";
@@ -159,8 +151,6 @@ const accountCardSamples = {
 };
 
 const componentSectionLinks = [
-  ["overview", "Overview"],
-  ["countries", "Countries"],
   ["headers", "Headers"],
   ["navigation", "Navigation"],
   ["buttons", "Buttons"],
@@ -230,7 +220,14 @@ function getInventoryTabForHash(hash: string): InventoryTab {
 }
 
 function getDefaultSectionForInventoryTab(tab: InventoryTab) {
-  return inventorySectionLinks[tab][0]?.[0] ?? "overview";
+  return inventorySectionLinks[tab][0]?.[0] ?? "headers";
+}
+
+function getSectionForHash(hash: string) {
+  const tab = getInventoryTabForHash(hash);
+  const sectionId = hash.replace(/^#/, "");
+  const isKnownSection = inventorySectionLinks[tab].some(([id]) => id === sectionId);
+  return isKnownSection ? sectionId : getDefaultSectionForInventoryTab(tab);
 }
 
 type SelectorOption = {
@@ -755,12 +752,7 @@ function Specimen({ name, children, tone = "light", showThemeControl = true }: {
 }) {
   const [themeMode, setThemeMode] = useState<ThemeMode>("light");
   const isDark = themeMode === "dark";
-  const bg =
-    tone === "dark"
-      ? "bg-[var(--uc-static-black)]"
-      : tone === "gray"
-        ? "bg-[var(--uc-app-bg)]"
-        : "bg-[var(--uc-surface)]";
+  const bg = tone === "dark" ? "bg-[var(--uc-static-black)]" : "bg-transparent";
   const renderedChildren = typeof children === "function" ? children(themeMode) : children;
 
   return (
@@ -813,71 +805,6 @@ function VariantSelector({
         ))}
       </select>
       {extras}
-    </div>
-  );
-}
-
-function CountryCoverageSummary() {
-  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
-  const products = getProductsForCountry(selectedCountry);
-  const moreCards = MORE_CARDS_CONFIG[selectedCountry];
-  const languages = getAvailableLanguages(selectedCountry);
-  const coAppingEnabled = isCoAppingAvailable(selectedCountry);
-
-  return (
-    <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
-      <VariantSelector
-        id="country-coverage-select"
-        label="Country"
-        value={selectedCountry}
-        onChange={(value) => setSelectedCountry(value as (typeof COUNTRIES)[number])}
-        options={COUNTRIES.map((country) => ({
-          id: country,
-          label: `${COUNTRY_META[country].nameEN} / ${COUNTRY_META[country].currency}`,
-        }))}
-      />
-
-      <div className="mt-5 flex flex-wrap items-start justify-between gap-4 border-t border-[var(--uc-border)] pt-5">
-        <div>
-          <h3 className="font-['UniCredit:Bold',sans-serif] text-[22px] text-[var(--uc-text)]">
-            {COUNTRY_META[selectedCountry].nameEN}
-          </h3>
-          <p className="text-[14px] text-[var(--uc-text-muted)]">
-            {selectedCountry} · {COUNTRY_META[selectedCountry].currency}
-          </p>
-        </div>
-        <Badge variant={coAppingEnabled ? "default" : "secondary"}>
-          {coAppingEnabled ? "Co-Apping" : "No Co-Apping"}
-        </Badge>
-      </div>
-
-      <div className="mt-5 grid gap-3 md:grid-cols-2">
-        {[
-          ["Languages", languages.length],
-          ["Products", products.length],
-          ["More cards", moreCards.length],
-        ].map(([label, value]) => (
-          <div key={label} className="rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-app-bg)] p-4">
-            <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">{label}</p>
-            <p className="mt-1 font-['UniCredit:Bold',sans-serif] text-[28px] text-[var(--uc-text)]">{value}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-5 grid gap-4 text-[14px] text-[var(--uc-text)]">
-        <div>
-          <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Languages</p>
-          <p>{languages.map(getLanguageDisplayName).join(", ")}</p>
-        </div>
-        <div>
-          <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Products</p>
-          <p>{products.map((item) => item.title).join(", ") || "None"}</p>
-        </div>
-        <div>
-          <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">More cards</p>
-          <p>{moreCards.map((card) => moreCardLabels[card]).join(", ")}</p>
-        </div>
-      </div>
     </div>
   );
 }
@@ -1058,8 +985,8 @@ function DebitCardVariantSpecimen() {
 function HelperCardVariantSpecimen() {
   const [selectedVariant, setSelectedVariant] = useState("with-link");
   const variants: Record<string, { actionLabel?: string; dismissible?: boolean }> = {
-    "with-link": { actionLabel: "SEE DETAILS", dismissible: true },
-    "plain": { dismissible: true },
+    "with-link": { actionLabel: "SEE DETAILS", dismissible: false },
+    "plain": { dismissible: false },
   };
   const active = variants[selectedVariant];
 
@@ -1077,7 +1004,7 @@ function HelperCardVariantSpecimen() {
       <div className="flex w-[375px] flex-col gap-[16px] bg-[var(--uc-app-bg)] p-[16px]">
         <HelperCard
           title="Details"
-          description={"Vice pobrobností zobrazite tlačítkem\nDetaily."}
+          description="Use Details to view more information."
           actionLabel={active.actionLabel}
           dismissible={active.dismissible}
           onActionClick={() => undefined}
@@ -1158,30 +1085,38 @@ function ProductOfferCardVariantSpecimen() {
 
 function ShopsmartOfferCardVariantSpecimen() {
   return (
-    <div className="flex w-[375px] flex-col items-center gap-[16px] bg-[var(--uc-app-bg)] px-[24px] py-[16px]">
-      <ShopsmartOfferCard
-        merchant="Hilton Bucharest"
-        title="10% cashback"
-        statusText="Until 31.12.2024"
-        imageSrc={shopsmartDsOffers1Image}
-        imageHeight={143}
-        imageOverlay
-        pillLabel="Activate"
-        pillTone="teal"
-        distance="11.5 km"
-        trailingIcon="partners"
-      />
-      <ShopsmartOfferCard
-        merchant="Hilton Bucharest"
-        title="10% cashback"
-        statusText="Bookings over 2,000 RON"
-        imageSrc={shopsmartDsOffers2Image}
-        imageHeight={143}
-        imageOverlay
-        tagLabel="FREE SHIPPING"
-        distance="11.5 km"
-        trailingIcon="partners"
-      />
+    <div className="flex flex-wrap items-start gap-[16px]">
+      <div className="h-[218px] w-[255px] overflow-visible">
+        <div className="origin-top-left scale-[0.78]">
+          <ShopsmartOfferCard
+            merchant="Hilton Bucharest"
+            title="10% cashback"
+            statusText="Until 31.12.2024"
+            imageSrc={shopsmartDsOffers1Image}
+            imageHeight={143}
+            imageOverlay
+            pillLabel="Activate"
+            pillTone="teal"
+            distance="11.5 km"
+            trailingIcon="partners"
+          />
+        </div>
+      </div>
+      <div className="h-[218px] w-[255px] overflow-visible">
+        <div className="origin-top-left scale-[0.78]">
+          <ShopsmartOfferCard
+            merchant="Hilton Bucharest"
+            title="10% cashback"
+            statusText="Bookings over 2,000 RON"
+            imageSrc={shopsmartDsOffers2Image}
+            imageHeight={143}
+            imageOverlay
+            tagLabel="FREE SHIPPING"
+            distance="11.5 km"
+            trailingIcon="partners"
+          />
+        </div>
+      </div>
     </div>
   );
 }
@@ -1661,7 +1596,7 @@ function PillSortingVariantSpecimen() {
 function MiniProductIcon() {
   return (
     <div className="flex size-[32px] items-center justify-center rounded-full bg-[var(--uc-action-soft)]">
-      <span className="font-['UniCredit:Bold',sans-serif] text-[13px] text-[var(--uc-action)]">UC</span>
+      <AppIcon name="account-details" size={20} color="var(--uc-action)" />
     </div>
   );
 }
@@ -1998,7 +1933,7 @@ function PillVariantSpecimen() {
         onChange={(value) => setSelectedVariant(value as PillVariant)}
         options={variants}
       />
-      <div className="flex min-h-[72px] items-center justify-center rounded-[8px] bg-[var(--uc-app-bg)] p-[16px]">
+      <div className="flex min-h-[72px] items-center justify-center p-[16px]">
         <Pill variant={selectedVariant} onClick={noop} />
       </div>
     </div>
@@ -2943,17 +2878,6 @@ function InventoryTabs({ activeTab, activeSection, sectionLinks, onChange, place
   );
 }
 
-function colorAuditStatusStyles(status: AppColorAuditStatus) {
-  switch (status) {
-    case "mapped":
-      return "border-[var(--uc-action-soft-strong)] bg-[var(--uc-action-soft)] text-[var(--uc-action-hover)]";
-    case "asset-exception":
-      return "border-[var(--uc-yellow-gold)] bg-[var(--uc-peach-100)] text-[var(--uc-gold-brown)]";
-    default:
-      return "border-[var(--uc-neutral-400)] bg-[var(--uc-app-bg)] text-[var(--uc-text-muted)]";
-  }
-}
-
 function CopyHexButton({
   value,
   copiedValue,
@@ -2986,7 +2910,7 @@ function CopyHexButton({
 function ColorSwatch({ color, label }: { color: string; label: string }) {
   return (
     <span
-      className="block h-[52px] w-full rounded-[6px] border border-[var(--uc-border)]"
+      className="block h-[40px] w-full rounded-[6px] border border-[var(--uc-border)]"
       style={{ backgroundColor: color }}
       aria-label={label}
     />
@@ -3033,18 +2957,18 @@ function ColorCard({
   onCopy: (value: string) => void;
 }) {
   return (
-    <article className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-4">
+    <article className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-3">
       <div className="grid grid-cols-2 gap-2">
         <ColorSwatch color={color.lightHex} label={`${color.name} light ${color.lightHex}`} />
         <ColorSwatch color={color.darkHex} label={`${color.name} dark ${color.darkHex}`} />
       </div>
-      <div className="mt-4">
+      <div className="mt-3">
         <h3 className="font-['UniCredit:Bold',sans-serif] text-[16px] text-[var(--uc-text)]">{color.name}</h3>
-        <code className="mt-1 block break-all rounded bg-[var(--uc-app-bg)] px-2 py-1 text-[12px] text-[var(--uc-text-muted)]">
+        <code className="mt-1 block break-all rounded bg-[var(--uc-app-bg)] px-2 py-1 text-[11px] text-[var(--uc-text-muted)]">
           {color.cssVariable}
         </code>
       </div>
-      <div className="mt-3 grid gap-2">
+      <div className="mt-2 grid gap-1.5">
         <div className="flex items-center justify-between gap-2">
           <span className="text-[12px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Light</span>
           <CopyHexButton value={color.lightHex} label="light" copiedValue={copiedValue} onCopy={onCopy} />
@@ -3054,25 +2978,17 @@ function ColorCard({
           <CopyHexButton value={color.darkHex} label="dark" copiedValue={copiedValue} onCopy={onCopy} />
         </div>
       </div>
-      <p className="mt-3 min-h-[44px] text-[13px] leading-5 text-[var(--uc-text-muted)]">{color.usage}</p>
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {color.sourceTokens.slice(0, 3).map((token) => (
-          <span key={token} className="rounded-full border border-[var(--uc-border)] px-2 py-0.5 text-[11px] text-[var(--uc-text-muted)]">
-            {token}
-          </span>
-        ))}
-      </div>
-      {color.darkNote && <p className="mt-3 text-[12px] leading-5 text-[var(--uc-action)]">{color.darkNote}</p>}
+      <p className="mt-2 text-[12px] leading-5 text-[var(--uc-text-muted)]">{color.usage}</p>
     </article>
   );
 }
 
 function ColorAuditRow({ item }: { item: (typeof APP_COLOR_AUDIT)[number] }) {
   return (
-    <div className="grid gap-3 rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-4 md:grid-cols-[160px_minmax(0,1fr)] md:items-start">
+    <article className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-3">
       <div className="flex items-center gap-3">
         <span
-          className="size-[36px] rounded-[6px] border border-[var(--uc-border)]"
+          className="size-[40px] shrink-0 rounded-[6px] border border-[var(--uc-border)]"
           style={{
             background:
               item.sourceColor.startsWith("#") && !item.sourceColor.includes("/")
@@ -3080,17 +2996,14 @@ function ColorAuditRow({ item }: { item: (typeof APP_COLOR_AUDIT)[number] }) {
                 : "linear-gradient(135deg, var(--uc-brand), var(--uc-orange-bright), var(--uc-yellow-gold))",
           }}
         />
-        <code className="break-all text-[12px] text-[var(--uc-text)]">{item.sourceColor}</code>
+        <div className="min-w-0">
+          <code className="block break-all font-mono text-[12px] text-[var(--uc-text)]">{item.sourceColor}</code>
+          <p className="mt-1 break-all font-['UniCredit:Bold',sans-serif] text-[13px] text-[var(--uc-text)]">{item.targetToken}</p>
+        </div>
       </div>
-      <div>
-        <p className="font-['UniCredit:Bold',sans-serif] text-[14px] text-[var(--uc-text)]">{item.targetToken}</p>
-        <p className="mt-1 text-[13px] leading-5 text-[var(--uc-text-muted)]">{item.usage}</p>
-        {item.note && <p className="mt-1 text-[12px] text-[var(--uc-text-subtle)]">{item.note}</p>}
-      </div>
-      <span className={`w-fit rounded-full border px-3 py-1 text-[12px] font-bold ${colorAuditStatusStyles(item.status)}`}>
-        {item.status}
-      </span>
-    </div>
+      <p className="mt-3 text-[12px] leading-5 text-[var(--uc-text-muted)]">{item.usage}</p>
+      {item.note && <p className="mt-1 text-[12px] leading-5 text-[var(--uc-text-subtle)]">{item.note}</p>}
+    </article>
   );
 }
 
@@ -3112,15 +3025,11 @@ function ColorInventory() {
       color.paletteId,
       color.cssVariable,
       color.usage,
-      ...color.sourceTokens,
-      color.darkNote ?? "",
     ])
   );
   const visibleAuditRows = APP_COLOR_AUDIT.filter((item) =>
-    matchesColorQuery([item.sourceColor, item.targetToken, item.usage, item.status, item.note ?? ""])
+    matchesColorQuery([item.sourceColor, item.targetToken, item.usage, item.note ?? ""])
   );
-  const mappedCount = APP_COLOR_AUDIT.filter((item) => item.status === "mapped").length;
-
   const handleCopy = (value: string) => {
     setCopiedValue(value);
     void navigator.clipboard?.writeText(value).catch(() => undefined);
@@ -3134,15 +3043,6 @@ function ColorInventory() {
         title="Color palettes"
         description="Colors extracted from screenshots/Colors.svg, normalized into the canonical light-mode registry and proposed dark-mode mapping. The list is filtered by palette to keep the page compact and easy to scan."
       >
-        <InventoryStatGrid
-          items={[
-            ["Source groups", COLOR_SOURCE_AUDIT.extractedColorGroups],
-            ["Solid groups", COLOR_SOURCE_AUDIT.solidColorGroups],
-            ["Registry colors", DESIGN_SYSTEM_COLORS.length],
-            ["Mapped app colors", mappedCount],
-          ]}
-        />
-
         <InventorySearchField
           value={colorSearchQuery}
           onChange={setColorSearchQuery}
@@ -3202,13 +3102,13 @@ function ColorInventory() {
         title="App color map"
         description="App color usage mapped back to design-system tokens. Remaining exceptions are treated as decorative or brand-like assets, not reusable UI colors."
       >
-        <div className="grid gap-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           {visibleAuditRows.length > 0 ? (
             visibleAuditRows.map((item) => (
               <ColorAuditRow key={`${item.sourceColor}-${item.targetToken}`} item={item} />
             ))
           ) : (
-            <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-6 text-[14px] text-[var(--uc-text-muted)]">
+            <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-6 text-[14px] text-[var(--uc-text-muted)] sm:col-span-2">
               No app color rows match this search.
             </div>
           )}
@@ -4008,7 +3908,7 @@ export default function DesignSystemPage() {
   });
   const [activeSection, setActiveSection] = useState(() => {
     if (typeof window === "undefined") return getDefaultSectionForInventoryTab("components");
-    return window.location.hash.replace(/^#/, "") || getDefaultSectionForInventoryTab(getInventoryTabForHash(window.location.hash));
+    return getSectionForHash(window.location.hash);
   });
   const sectionLinks = inventorySectionLinks[inventoryTab];
   const handleInventoryTabChange = (nextTab: InventoryTab) => {
@@ -4023,9 +3923,8 @@ export default function DesignSystemPage() {
 
   useEffect(() => {
     const syncInventoryTabFromHash = () => {
-      const nextHash = window.location.hash.replace(/^#/, "");
       setInventoryTab(getInventoryTabForHash(window.location.hash));
-      setActiveSection(nextHash || getDefaultSectionForInventoryTab(getInventoryTabForHash(window.location.hash)));
+      setActiveSection(getSectionForHash(window.location.hash));
     };
 
     syncInventoryTabFromHash();
@@ -4131,46 +4030,6 @@ export default function DesignSystemPage() {
             <TypographyInventory />
           ) : (
             <>
-          <Section id="overview" title="Coverage summary" description="Quick reference for the audited surface and the areas worth checking first.">
-            <InventoryStatGrid
-              items={[
-                ["Countries", COUNTRIES.length],
-                ["Feature flags", Object.keys(FEATURE_META).length],
-                ["Screenshot templates", TEMPLATE_REGISTRY.length],
-              ]}
-            />
-          </Section>
-
-          <Section id="countries" title="Country coverage" description="Select a country to review languages, currency, Co-Apping, product accordions, and More cards for that market.">
-            <CountryCoverageSummary />
-            {false && (
-            <div className="hidden">
-              {COUNTRIES.map((country) => {
-                const products = getProductsForCountry(country);
-                const moreCards = MORE_CARDS_CONFIG[country];
-                return (
-                  <div key={country} className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
-                    <div className="mb-4 flex items-start justify-between gap-4">
-                      <div>
-                        <h3 className="font-['UniCredit:Bold',sans-serif] text-[22px]">{COUNTRY_META[country].nameEN}</h3>
-                        <p className="text-[14px] text-[var(--uc-text-muted)]">{country} · {COUNTRY_META[country].currency}</p>
-                      </div>
-                      <Badge variant={isCoAppingAvailable(country) ? "default" : "secondary"}>
-                        {isCoAppingAvailable(country) ? "Co-Apping" : "No Co-Apping"}
-                      </Badge>
-                    </div>
-                    <div className="grid gap-3 text-[14px]">
-                      <p><strong>Languages:</strong> {getAvailableLanguages(country).map(getLanguageDisplayName).join(", ")}</p>
-                      <p><strong>Products:</strong> {products.map((item) => item.title).join(", ") || "None"}</p>
-                      <p><strong>More cards:</strong> {moreCards.map((card) => moreCardLabels[card]).join(", ")}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            )}
-          </Section>
-
           <Section id="headers" title="Headers" description="Active header components and their variants, isolated from the current app screens.">
             <div className="grid gap-5 xl:grid-cols-2">
               <PageHeaderSpecimen />
@@ -4300,7 +4159,7 @@ export default function DesignSystemPage() {
                 <Specimen
                   name="Navigation row"
                   source="components/NavigationRow.tsx"
-                  note={`${NAVIGATION_ROW_SOURCE.schema} / ${NAVIGATION_ROW_SOURCE.sourceNodeIds.textDescriptionToggle} Â· ${NAVIGATION_ROW_SOURCE.sourceNodeIds.textLinkToggle} Â· ${NAVIGATION_ROW_SOURCE.sourceNodeIds.iconDescriptionChevron}`}
+                  note={`${NAVIGATION_ROW_SOURCE.schema} / ${NAVIGATION_ROW_SOURCE.sourceNodeIds.textDescriptionToggle} · ${NAVIGATION_ROW_SOURCE.sourceNodeIds.textLinkToggle} · ${NAVIGATION_ROW_SOURCE.sourceNodeIds.iconDescriptionChevron}`}
                   specs={["18 mapped Meniga cases", "375px wide", "64px or 80px row height", "16px layout gap", "optional 32px leading visual", "optional 64x40 card art", "title 16px bold / description 16px", "CTA 14px teal", "chevron or shared ToggleButton accessory"]}
                 >
                   <NavigationRowVariantSpecimen />
@@ -4397,16 +4256,6 @@ export default function DesignSystemPage() {
               </Specimen>
               <Specimen name="Contacts navigation cards / all icons" source="components/NavigationRow.tsx + screens/contacts/ContactsNavigationCard.tsx" specs={["80px row", "32px icons", "title 16px bold", "value 14px teal", "contact wrapper maps icon variants to shared NavigationRow"]}>
                 <ContactsNavigationCardVariantSpecimen />
-              </Specimen>
-              <Specimen name="Home content modules" source="screens/home/*" tone="gray">
-                <div className="grid gap-6 xl:grid-cols-2">
-                  <div className="w-[375px]"><AccountSummary showRedesign /></div>
-                  <div className="w-[375px]">
-                    <QuickActions showPaymentsHub showRedesign />
-                    <TransactionsPreview showFilters />
-                    <UnplannedBanner />
-                  </div>
-                </div>
               </Specimen>
             </div>
           </Section>

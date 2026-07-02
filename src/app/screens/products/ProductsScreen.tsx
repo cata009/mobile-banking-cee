@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { DragEvent, MouseEvent, PointerEvent, UIEvent } from "react";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import BottomNavigation from "@/app/components/BottomNavigation";
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
 import { AppIcon } from "@/app/components/icons";
+import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import NavigationRow from "@/app/components/NavigationRow";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import ProductMenuCard from "@/app/components/products/ProductMenuCard";
@@ -478,15 +479,43 @@ export function ShopSmartContent({
   offerCards: readonly ShopSmartOfferCard[];
 }) {
   const { t } = useLanguage();
+  const [searchQuery, setSearchQuery] = useState("");
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+  const visibleOfferCards = useMemo(() => {
+    if (!normalizedSearchQuery) return offerCards;
+
+    return offerCards.filter((offer) => {
+      const searchableText = [
+        offer.merchant,
+        offer.title,
+        offer.statusText,
+        offer.pillLabel,
+        offer.tagLabel,
+        offer.distance,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return searchableText.includes(normalizedSearchQuery);
+    });
+  }, [normalizedSearchQuery, offerCards]);
 
   return (
     <section className="flex flex-col gap-[16px] pt-[16px]" data-products-shopsmart-content="true">
       <ShopSmartSummaryBlock summary={summary} />
       <div className="flex flex-col gap-[16px]">
         <ShopSmartSectionHeading>{t("runtime.productsMenu.allOffers", "ALL OFFERS")}</ShopSmartSectionHeading>
-        <ShopSmartSearchBar placeholder={t("runtime.actions.search", "Search")} />
+        <div className="px-[16px] py-[2px]">
+          <AccountSearchBar
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+            onFilterClick={() => console.log("ShopSmart filters clicked")}
+            placeholder={t("runtime.actions.search", "Search")}
+          />
+        </div>
         <div className="flex flex-col items-center gap-[16px] px-[24px]">
-          {offerCards.map((offer) => (
+          {visibleOfferCards.map((offer) => (
             <ShopsmartOfferCard
               key={offer.id}
               merchant={offer.merchant}
@@ -501,6 +530,11 @@ export function ShopSmartContent({
               onClick={() => handleShopSmartOfferClick(offer)}
             />
           ))}
+          {visibleOfferCards.length === 0 ? (
+            <p className="w-full py-[24px] text-center text-[14px] font-bold leading-[18px] text-[var(--uc-text-muted)]">
+              {t("runtime.productsMenu.noOffersFound", "No offers found")}
+            </p>
+          ) : null}
         </div>
       </div>
     </section>
@@ -547,35 +581,16 @@ function ShopSmartSectionHeading({ children }: { children: string }) {
   );
 }
 
-function ShopSmartSearchBar({ placeholder }: { placeholder: string }) {
-  return (
-    <div className="px-[16px] py-[2px]">
-      <div className="flex h-[36px] items-center justify-between rounded-[10px] bg-[var(--uc-app-bg)]">
-        <span className="grid size-[32px] shrink-0 place-items-center text-[var(--uc-text)]">
-          <AppIcon name="search" color="currentColor" />
-        </span>
-        <input
-          type="search"
-          aria-label={placeholder}
-          placeholder={placeholder}
-          className="h-[32px] min-w-0 flex-1 appearance-none bg-transparent text-[14px] font-bold leading-[18px] tracking-[1px] text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)] [&::-webkit-search-cancel-button]:hidden"
-        />
-        <button type="button" className="grid size-[32px] shrink-0 place-items-center text-[var(--uc-text)]" aria-label="Filters">
-          <AppIcon name="filters" color="currentColor" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function ProductCardBottomSheet({
   card,
+  country,
   onClose,
 }: {
   card: ProductsCard;
+  country: Parameters<typeof getProductCardSheetConfig>[1];
   onClose: () => void;
 }) {
-  const sheetConfig = getProductCardSheetConfig(card.id);
+  const sheetConfig = getProductCardSheetConfig(card.id, country);
   const sheetTitle = sheetConfig.title ?? card.title.replace(/\n/g, " ");
 
   const handleOptionClick = (option: ProductCardSheetOption) => {
@@ -692,6 +707,7 @@ export default function ProductsScreen({
       {selectedProductCard ? (
         <ProductCardBottomSheet
           card={selectedProductCard}
+          country={country}
           onClose={() => setSelectedProductCard(null)}
         />
       ) : null}

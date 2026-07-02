@@ -5,6 +5,7 @@ export type ProductType =
   | 'current_account'
   | 'debit_card'
   | 'credit_card'
+  | 'meal_card'
   | 'saving_account'
   | 'term_deposit'
   | 'loan'
@@ -42,6 +43,14 @@ export interface CreditCard extends BaseProduct {
   expiryDate: string;
   creditLimit: number;
   availableCredit: number;
+}
+
+export interface MealCard extends BaseProduct {
+  type: 'meal_card';
+  cardType: CardType;
+  cardNumber: string;
+  expiryDate: string;
+  linkedAccountId: string;
 }
 
 export interface SavingAccount extends BaseProduct {
@@ -87,6 +96,7 @@ export type Product =
   | CurrentAccount 
   | DebitCard 
   | CreditCard 
+  | MealCard
   | SavingAccount 
   | TermDeposit 
   | Loan 
@@ -219,7 +229,7 @@ export function getProductsByCategory(): ProductCategory[] {
       key: 'cards',
       title: 'Cards',
       products: mockProducts.filter(p => 
-        p.type === 'debit_card' || p.type === 'credit_card'
+        p.type === 'debit_card' || p.type === 'credit_card' || p.type === 'meal_card'
       )
     },
     {

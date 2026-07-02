@@ -3,7 +3,7 @@
  * Card for 3rd Party Consent section in More menu
  */
 
-import imgThirdPartyConsent from "figma:asset/e017033a83e177f2a0d9a121d8161971ab5db3b5.png";
+import { MORE_CARD_IMAGE_BY_TYPE } from "@/app/config/moreCardAssets";
 
 interface ThirdPartyConsentCardProps {
   onClick: () => void;
@@ -33,7 +33,9 @@ export function ThirdPartyConsentCard({ onClick, title = "Consent to third parti
               <img 
                 alt="" 
                 className="absolute left-0 max-w-none size-full top-0" 
-                src={imgThirdPartyConsent}
+                decoding="async"
+                loading="eager"
+                src={MORE_CARD_IMAGE_BY_TYPE["third-party-consent"]}
                 style={{
                   filter: "var(--pi-menu-card-image-filter, none)",
                   opacity: "var(--pi-menu-card-image-opacity, 1)",

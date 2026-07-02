@@ -1,6 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
-import StatusBar from '@/app/components/StatusBar';
-import DynamicIsland from '@/app/components/DynamicIsland';
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import ShareScreenGlow from '@/app/components/ShareScreenGlow';
 
 interface FramelessDeviceFrameProps {
@@ -12,6 +10,7 @@ interface FramelessDeviceFrameProps {
 
 /** The app is authored at a logical 375px width. */
 const FRAME_WIDTH = 375;
+const FRAMELESS_TOP_RESERVE = 12;
 
 /**
  * FramelessDeviceFrame
@@ -27,7 +26,6 @@ const FRAME_WIDTH = 375;
  */
 export default function FramelessDeviceFrame({
   children,
-  statusBarVariant = 'dark',
   overlay,
   isCoAppingActive,
 }: FramelessDeviceFrameProps) {
@@ -68,10 +66,28 @@ export default function FramelessDeviceFrame({
     };
   }, []);
 
+  useEffect(() => {
+    const previousOverscroll = document.documentElement.style.overscrollBehaviorY;
+    document.documentElement.style.overscrollBehaviorY = 'none';
+
+    const hideBrowserChrome = () => {
+      if (window.scrollY === 0) {
+        window.scrollTo(0, 1);
+      }
+    };
+
+    window.requestAnimationFrame(hideBrowserChrome);
+    window.setTimeout(hideBrowserChrome, 250);
+
+    return () => {
+      document.documentElement.style.overscrollBehaviorY = previousOverscroll;
+    };
+  }, []);
+
   return (
     <div
       ref={containerRef}
-      className="relative h-[100dvh] w-screen overflow-hidden bg-[var(--uc-app-bg)]"
+      className="relative min-h-[calc(100dvh+1px)] w-screen overflow-hidden bg-[var(--uc-app-bg)]"
     >
       <div
         className="relative overflow-hidden bg-[var(--uc-app-bg)]"
@@ -80,7 +96,8 @@ export default function FramelessDeviceFrame({
           height: surface.logicalHeight,
           transform: `scale(${surface.scale})`,
           transformOrigin: 'top left',
-        }}
+          ['--uc-phone-top-reserve' as string]: `${FRAMELESS_TOP_RESERVE}px`,
+        } as CSSProperties}
         data-phone-screen="true"
       >
         <div
@@ -95,16 +112,7 @@ export default function FramelessDeviceFrame({
           {children}
         </div>
 
-        {statusBarVariant === 'theme' && (
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 z-[44] h-[76px]"
-            style={{ background: 'var(--uc-phone-system-bar-bg, transparent)' }}
-          />
-        )}
-        <StatusBar variant={statusBarVariant} />
-        <DynamicIsland variant={statusBarVariant} />
-
+        {/* Native device/browser chrome owns the top system area in QR mode. */}
         {overlay && <div className="absolute inset-0 z-[100]">{overlay}</div>}
 
         {isCoAppingActive && <ShareScreenGlow />}

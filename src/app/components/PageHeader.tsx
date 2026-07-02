@@ -87,7 +87,7 @@ export default function PageHeader({
         className={cn(
           "sticky top-0 z-10 w-full transition-shadow duration-200",
           variant !== "dark" && variant !== "gray" ? bgColor : "",
-          includeSafeArea ? "pt-[54px]" : ""
+          includeSafeArea ? "pt-[var(--uc-phone-top-reserve,54px)]" : ""
         )}
         style={stickyBgStyle}
       >

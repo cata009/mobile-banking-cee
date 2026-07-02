@@ -79,6 +79,23 @@ export type BankingHoldingType =
   | "savings-goal";
 
 /**
+ * Editable product mix dimensions controlled from the demo Control Panel.
+ * These counts drive the mock product list rendered in the mobile demo.
+ */
+export type ProductCountKey =
+  | "accounts"
+  | "debitCards"
+  | "creditCards"
+  | "mealCards"
+  | "deposits"
+  | "savingsAccounts"
+  | "loans"
+  | "mortgages"
+  | "investments";
+
+export type ProductCounts = Record<ProductCountKey, number>;
+
+/**
  * Action identifiers resolved by the banking context engine.
  */
 export type BankingActionId =
@@ -376,6 +393,9 @@ export interface DemoState {
 
   /** Current light/dark rendering mode. */
   themeMode: ThemeMode;
+
+  /** Editable mock product counts used to build the visible demo portfolio. */
+  productCounts: ProductCounts;
 }
 
 /**
@@ -402,6 +422,9 @@ export interface DemoStore extends DemoState {
 
   /** Update selected mock banking scenario */
   setBankingScenario: (bankingScenario: BankingScenarioId) => void;
+
+  /** Update one editable product count in the mock portfolio. */
+  setProductCount: (key: ProductCountKey, value: number) => void;
   
   /** Toggle or set a feature flag */
   setFlag: (featureId: FeatureId, enabled: boolean) => void;

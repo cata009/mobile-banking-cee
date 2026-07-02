@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { AppIcon } from "@/app/components/icons";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -86,13 +85,13 @@ export function PhoneScreenshotControl({
             className={`grid h-[32px] w-[32px] place-items-center transition-colors ${
               isDisabled
                 ? "cursor-not-allowed text-[var(--uc-text-subtle)] opacity-50"
-                : "text-[var(--uc-text)] hover:text-[var(--uc-brand)]"
+                : "text-[var(--uc-text)] hover:text-[var(--uc-action)]"
             }`}
             disabled={isDisabled}
             aria-label={disabled ? "Screenshot disabled in Design System" : "Screenshot options"}
             title={disabled ? "Screenshot disabled in Design System" : "Screenshot"}
           >
-            <AppIcon name="camera" size={18} />
+            <ScreenshotOptionsIcon />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
@@ -124,6 +123,31 @@ export function PhoneScreenshotControl({
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
+  );
+}
+
+function ScreenshotOptionsIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="block size-6"
+      fill="none"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12 11.3126C10.8612 11.3126 9.93819 12.2356 9.93819 13.3745C9.93819 14.5133 10.8612 15.4363 12 15.4363C13.1389 15.4363 14.0619 14.5133 14.0619 13.3745C14.0619 12.2356 13.1389 11.3126 12 11.3126Z"
+        fill="currentColor"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M19.9039 9.93801C19.3348 9.93801 18.873 9.47685 18.873 8.90708C18.873 8.33732 19.3348 7.87616 19.9039 7.87616C20.473 7.87616 20.9348 8.33732 20.9348 8.90708C20.9348 9.47685 20.473 9.93801 19.9039 9.93801ZM14.9155 16.2899C14.1423 17.0638 13.0942 17.4982 12.0001 17.4982C9.72307 17.4982 7.87634 15.6515 7.87634 13.3745C7.87634 11.0975 9.72307 9.25076 12.0001 9.25076C14.277 9.25076 16.1238 11.0975 16.1238 13.3745C16.1238 14.4686 15.6894 15.5168 14.9155 16.2899ZM20.2474 5.8143H8.56357L7.189 3.75244H3.75256L2.37799 5.8143H1.00342V17.4982C1.10307 18.9731 2.27765 20.147 3.75256 20.2473H22.9966V8.56345C22.8962 7.08853 21.7224 5.91396 20.2474 5.8143Z"
+        fill="currentColor"
+      />
+    </svg>
   );
 }
 

@@ -1,6 +1,8 @@
 import { ReactNode } from 'react';
 import {
   Product,
+  ProductCategory,
+  ProductType,
   getProductsByCategory,
   formatAmount,
   mockProducts
@@ -9,6 +11,7 @@ import svgPaths from '@/imports/svg-wan58807zo';
 import { useDemo } from '@/app/state/demoStore';
 import { convertCurrency, getCountryCurrency, roundMoney } from '@/data/exchangeRates';
 import { formatMaskedCardNumber } from '@/app/utils/cardNumber';
+import type { ProductCountKey, ProductCounts } from '@/app/state/demoTypes';
 
 function formatProductIban(country: string, productId: string, baseNumber: string): string {
   const prefix = country === 'BA_BL' ? 'BA' : country;
@@ -20,21 +23,243 @@ function formatProductIban(country: string, productId: string, baseNumber: strin
   return `${prefix}${checkDigits}BACX${baseNumber}`;
 }
 
+type ProductCountDefinition = {
+  key: ProductCountKey;
+  categoryKey: ProductCategory["key"];
+  targetType: ProductType;
+  sourceTypes: ProductType[];
+  fallbackType: ProductType;
+  title: string;
+  idPrefix: string;
+  accountSeed: string;
+};
+
+const PRODUCT_COUNT_DEFINITIONS: ProductCountDefinition[] = [
+  {
+    key: "accounts",
+    categoryKey: "accounts",
+    targetType: "current_account",
+    sourceTypes: ["current_account"],
+    fallbackType: "current_account",
+    title: "Primary Account",
+    idPrefix: "acc",
+    accountSeed: "1234567890123456",
+  },
+  {
+    key: "debitCards",
+    categoryKey: "cards",
+    targetType: "debit_card",
+    sourceTypes: ["debit_card"],
+    fallbackType: "debit_card",
+    title: "Debit Card",
+    idPrefix: "card-debit",
+    accountSeed: "5173400012345678",
+  },
+  {
+    key: "creditCards",
+    categoryKey: "cards",
+    targetType: "credit_card",
+    sourceTypes: ["credit_card"],
+    fallbackType: "credit_card",
+    title: "Credit Card",
+    idPrefix: "card-credit",
+    accountSeed: "5173500087654321",
+  },
+  {
+    key: "mealCards",
+    categoryKey: "cards",
+    targetType: "meal_card",
+    sourceTypes: ["meal_card"],
+    fallbackType: "debit_card",
+    title: "Meal Card",
+    idPrefix: "card-meal",
+    accountSeed: "5173600098765432",
+  },
+  {
+    key: "savingsAccounts",
+    categoryKey: "savings_deposits",
+    targetType: "saving_account",
+    sourceTypes: ["saving_account"],
+    fallbackType: "saving_account",
+    title: "Savings Account",
+    idPrefix: "sav",
+    accountSeed: "5678901234567890",
+  },
+  {
+    key: "deposits",
+    categoryKey: "savings_deposits",
+    targetType: "term_deposit",
+    sourceTypes: ["term_deposit"],
+    fallbackType: "term_deposit",
+    title: "Term Deposit",
+    idPrefix: "term",
+    accountSeed: "4567890123456789",
+  },
+  {
+    key: "loans",
+    categoryKey: "mortgages_loans",
+    targetType: "loan",
+    sourceTypes: ["loan"],
+    fallbackType: "loan",
+    title: "Personal Loan",
+    idPrefix: "loan",
+    accountSeed: "5678901234567890",
+  },
+  {
+    key: "mortgages",
+    categoryKey: "mortgages_loans",
+    targetType: "mortgage",
+    sourceTypes: ["mortgage"],
+    fallbackType: "mortgage",
+    title: "Mortgage Loan",
+    idPrefix: "mort",
+    accountSeed: "6789012345678901",
+  },
+  {
+    key: "investments",
+    categoryKey: "investments",
+    targetType: "investment_account",
+    sourceTypes: ["investment_account"],
+    fallbackType: "investment_account",
+    title: "Investment Portfolio",
+    idPrefix: "inv",
+    accountSeed: "7890123456789012",
+  },
+];
+
+function replaceTailDigits(seed: string, index: number): string {
+  const suffix = String(index + 1).padStart(2, "0");
+  return `${seed.slice(0, -2)}${suffix}`;
+}
+
+function productName(baseName: string, count: number, index: number): string {
+  return count === 1 ? baseName : `${baseName} ${index + 1}`;
+}
+
+function sourceForDefinition(definition: ProductCountDefinition, allProducts: Product[]): Product {
+  return (
+    allProducts.find((product) => definition.sourceTypes.includes(product.type)) ??
+    allProducts.find((product) => product.type === definition.fallbackType) ??
+    allProducts[0]
+  );
+}
+
+function cloneProductForCount(
+  definition: ProductCountDefinition,
+  allProducts: Product[],
+  count: number,
+  index: number,
+): Product {
+  const source = sourceForDefinition(definition, allProducts);
+  const accountNumber = replaceTailDigits(definition.accountSeed, index);
+  const id = `${definition.idPrefix}-${index + 1}`;
+  const baseProduct = {
+    ...source,
+    id,
+    type: definition.targetType,
+    name: productName(definition.title, count, index),
+    accountNumber,
+  } as Product;
+
+  switch (definition.targetType) {
+    case "debit_card":
+    case "meal_card":
+      return {
+        ...baseProduct,
+        linkedAccountId: "acc-1",
+        cardType: "Standard",
+        cardNumber: accountNumber,
+        expiryDate: "12/29",
+        balance: 0,
+      } as Product;
+    case "credit_card":
+      return {
+        ...baseProduct,
+        cardType: "Standard",
+        cardNumber: accountNumber,
+        expiryDate: "12/29",
+        creditLimit: 5000,
+        availableCredit: 3200,
+        balance: 0,
+      } as Product;
+    case "current_account":
+    case "saving_account":
+      return {
+        ...baseProduct,
+        iban: accountNumber,
+      } as Product;
+    case "loan":
+      return {
+        ...baseProduct,
+        balance: -Math.abs(baseProduct.balance || 45000),
+        loanAmount: Math.abs(baseProduct.balance || 45000),
+        remainingAmount: Math.abs(baseProduct.balance || 45000),
+        monthlyPayment: 900,
+      } as Product;
+    case "mortgage":
+      return {
+        ...baseProduct,
+        balance: -Math.abs(baseProduct.balance || 2850000),
+        loanAmount: Math.abs(baseProduct.balance || 2850000),
+        remainingAmount: Math.abs(baseProduct.balance || 2850000),
+        propertyValue: Math.abs(baseProduct.balance || 2850000) * 1.2,
+        monthlyPayment: 3500,
+      } as Product;
+    case "investment_account":
+      return {
+        ...baseProduct,
+        portfolioValue: Math.abs(baseProduct.balance || 42500),
+        totalGainLoss: 728.45,
+        totalGainLossPercentage: 1.74,
+      } as Product;
+    default:
+      return baseProduct;
+  }
+}
+
+function applyProductCounts(categories: ProductCategory[], productCounts: ProductCounts): ProductCategory[] {
+  const allProducts = categories.flatMap((category) => category.products);
+
+  return categories
+    .map((category) => {
+      const definitions = PRODUCT_COUNT_DEFINITIONS.filter(
+        (definition) => definition.categoryKey === category.key,
+      );
+
+      if (definitions.length === 0) {
+        return category;
+      }
+
+      const products = definitions.flatMap((definition) => {
+        const count = productCounts[definition.key] ?? 0;
+        return Array.from({ length: count }, (_, index) =>
+          cloneProductForCount(definition, allProducts, count, index),
+        );
+      });
+
+      return {
+        ...category,
+        products,
+      };
+    })
+    .filter((category) => category.products.length > 0);
+}
+
 export function useProducts() {
-  const { country } = useDemo();
+  const { country, productCounts } = useDemo();
   const localCurrency = getCountryCurrency(country);
   
   // Get base categories and convert all products to local currency
-  const categories = getProductsByCategory().map(category => ({
+  const categories = applyProductCounts(getProductsByCategory(), productCounts).map(category => ({
     ...category,
     products: category.products.map(product => {
-      const isCard = product.type === 'debit_card' || product.type === 'credit_card';
+      const isCard = product.type === 'debit_card' || product.type === 'credit_card' || product.type === 'meal_card';
       const formattedAccountNumber = isCard
         ? product.accountNumber
         : formatProductIban(country, product.id, product.accountNumber);
 
       // Debit cards mirror the balance of their linked current account
-      const linkedAccount = product.type === 'debit_card'
+      const linkedAccount = product.type === 'debit_card' || product.type === 'meal_card'
         ? mockProducts.find(p => p.id === product.linkedAccountId)
         : undefined;
       const sourceBalance = linkedAccount ? linkedAccount.balance : product.balance;
@@ -62,6 +287,7 @@ export function useProducts() {
       
       case 'debit_card':
       case 'credit_card':
+      case 'meal_card':
         return (
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
             <rect width="32" height="32" fill="white"/>
@@ -113,7 +339,7 @@ export function useProducts() {
   };
 
   const getProductDisplayNumber = (product: Product): string => {
-    if (product.type === 'debit_card' || product.type === 'credit_card') {
+    if (product.type === 'debit_card' || product.type === 'credit_card' || product.type === 'meal_card') {
       return formatMaskedCardNumber(product.accountNumber);
     }
     return product.accountNumber;

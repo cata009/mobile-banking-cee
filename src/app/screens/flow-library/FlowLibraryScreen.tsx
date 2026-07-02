@@ -45,6 +45,8 @@ interface FlowContent {
   scenarios: Record<string, ScenarioContent>;
 }
 
+type FlowLibrarySection = "overview" | "demo" | "spec" | "flow";
+
 type RoundUpScreenKind =
   | "home-entry"
   | "products-round-up"
@@ -86,27 +88,27 @@ const ROUND_UP_CONTENT: FlowContent = {
     {
       title: "Purpose",
       body:
-        "Round Up helps Romanian PI customers save automatically by rounding eligible card payments to the next configured threshold and transferring the difference to a savings account.",
+        "Round Up is a savings habit flow for Romanian PI customers. The customer chooses an existing current account as the payment source, selects or opens an eligible savings account as destination, and defines how each eligible card payment should be rounded. After activation, every qualifying card transaction can generate a small automatic transfer equal to the difference between the real payment amount and the configured rounding threshold.\n\nThe business value is that saving becomes invisible and repeatable: the customer does not need to manually move money after every payment, while the bank can position the feature as a low-friction entry point into savings. The UX should make the mechanism feel simple, reversible, and safe, because customers need to understand that the purchase is not changed; only an additional saving transfer is created.",
     },
     {
       title: "Entry points",
       body:
-        "The flow is discoverable from the Home promotional card, from Account actions, and from Products > Saving and investing > Round Up. The preview remains outside the official baseline until a future release is defined.",
+        "The flow has three likely discovery contexts. Home can promote Round Up as a habit-building card when the customer is eligible but inactive. Products > Saving and investing can list Round Up as a product/service option beside Term deposit, Saving account, and Mutual funds. Account actions can expose Round Up from a relevant current or savings account once the customer is already thinking about money movement.\n\nFor BA analysis, these entry points should be treated as different intents: Home is educational and acquisition-oriented, Products is catalogue discovery, and Account actions are task-oriented management. The same core setup can be reused, but entry copy, back behavior, and success return destination may differ.",
     },
     {
       title: "Account logic",
       body:
-        "If an eligible savings account is missing, the journey first opens a savings account. If one exists, setup goes directly to source account, destination account, rounding option, optional boost, terms, and activation.",
+        "Eligibility depends on having at least one usable current account for card payments and one destination savings account that can receive the rounded-up transfers. If the customer has no eligible savings account, the journey should first branch into a lightweight savings-account opening step, then continue into Round Up activation. If an eligible savings account already exists, the journey skips account opening and starts directly with configuration.\n\nThe configuration needs to capture: source account, destination account, rounding threshold, optional extra boost amount, terms acknowledgement, and activation confirmation. If several accounts are available, defaults should be preselected but clearly changeable. If the customer changes a value later, the management journey should preserve current settings, show what is being changed, and only enable Save Changes when the state differs from the active configuration.",
     },
     {
       title: "Signing and feedback",
       body:
-        "Create, update, and deactivate all use the standard signing screen. Success states should be explicit and should return the customer to Accounts, where Round Up transactions are visible.",
+        "Create, update, and deactivate are financial configuration changes and should use the standard signing pattern already familiar from payments. The user should not see a special new authorization model just for Round Up. Before signing, the Review/Sign screen should summarize the key customer-facing consequences: what account pays the difference, where money lands, and when transfers start or stop.\n\nSuccess feedback should be explicit. Activation should confirm that future eligible card payments will be rounded. Update should confirm that the new setup is now active. Deactivation should confirm that automatic saving has stopped. The post-success destination should take the customer back to the most useful proof point: either the relevant account, where future Round Up transaction rows can be seen, or the Manage Round Up page if the user came from settings.",
     },
     {
       title: "Country model",
       body:
-        "This preview is scoped to Romania only. The page is built as a multi-country flow surface so future flows can enable additional countries without mixing them into the current baseline selector.",
+        "This preview is scoped to Romania and should not be confused with the global app country selector or current baseline state. The local country chips in this Flow Library are there so future flow previews can declare their own scope without changing the live app country.\n\nThe expected governance model is: a future flow can exist in the Flow Library before it is baseline-ready; it can be reviewed by BA, UX, business, testers, and developers; and only later can it be promoted into the actual demo application or baseline ledger. Until that promotion happens, this page remains a preview and should clearly communicate scope, assumptions, and missing backend integration.",
     },
   ],
   scenarios: {
@@ -170,27 +172,27 @@ const CARD_PIN_CONTENT: FlowContent = {
     {
       title: "Purpose",
       body:
-        "The Card PIN preview lets Romanian PI customers view the existing PIN or set a new card PIN from Card options, with biometric protection before disclosure.",
+        "The Card PIN preview covers two related customer needs: viewing an existing PIN and setting or changing a card PIN. Both actions start from the Card options context and must feel protected, because PIN disclosure is sensitive even inside an authenticated banking session.\n\nFor stakeholders, the important UX rule is that the app should never expose a PIN casually. The customer must intentionally open the PIN feature, pass biometric verification where applicable, and then either reveal masked digits for a short moment or enter a new PIN through a controlled setup flow.",
     },
     {
       title: "Entry points",
       body:
-        "The customer starts in Cards, opens Options, then uses the General settings row `View PIN`. The same entry supports both view and change PIN branches for credit and debit cards.",
+        "The primary entry is Cards > Options > General settings > View PIN. The same entry can support credit and debit cards, but copy, artwork, and eligibility can differ by card type. The route should preserve card context so the customer always understands which card is being managed.\n\nA secondary deep link can be considered later from card activation or card delivery flows, but it should not be assumed until a product decision exists. For this preview, the Cards and Card options path is the canonical journey.",
     },
     {
       title: "View PIN logic",
       body:
-        "Viewing the PIN first shows the card-options page behind a Face ID modal. After successful verification, the PIN sheet opens with hidden digits and a `Show PIN` action. Revealed digits can be memorized and then dismissed.",
+        "Viewing a PIN starts with a biometric verification modal over the card-options context. After successful verification, the PIN surface opens with digits hidden by default. The customer must tap Show PIN before digits become visible.\n\nThe revealed state should be temporary, visually calm, and explicit about privacy. The screen should explain that the PIN is personal, should not be shared, and may close automatically after a short period. Closing the sheet should return to Card options without leaving sensitive information visible in navigation history.",
     },
     {
       title: "Change PIN logic",
       body:
-        "Changing the PIN opens `Set your PIN`, validates a four-digit PIN and matching confirmation, then routes through the standard Sign screen before the success confirmation.",
+        "Changing or setting a PIN opens a dedicated Set your PIN screen. The customer enters a four-digit PIN and confirms it. Validation should catch empty fields, non-matching values, obvious weak patterns if required by policy, and disabled states before Continue.\n\nAfter valid entry, the flow routes through the standard Sign screen. Success confirms that the new PIN was saved and tells the customer they will use it for future card transactions. This preview keeps backend outcome mock-driven; a production flow would need real card processor status, retry handling, and audit events.",
     },
     {
       title: "Fallback state",
       body:
-        "If a card is not eligible for PIN setup, the flow returns to Card options and shows the centered `Set up your card PIN` popup with a Continue acknowledgement.",
+        "If the selected card is not eligible for PIN setup or PIN reveal, the app should fail with a product-friendly explanation rather than a technical error. The current preview models this as a centered popup over Card options: `Set up your card PIN`, explanatory copy, and a Continue acknowledgement.\n\nBA follow-up should define the exact reasons that can produce this state: card not activated, card not delivered, card type unsupported, processor unavailable, customer authentication level insufficient, or temporary service outage. Each reason may require different copy and retry behavior.",
     },
   ],
   scenarios: {
@@ -261,6 +263,8 @@ export default function FlowLibraryScreen({
   const selectedScenario = flowContent.scenarios[selectedScenarioId] ?? flowContent.scenarios[flowContent.defaultScenarioId];
   const [selectedCountries, setSelectedCountries] = useState<CountryId[]>([flow.countryScope[0]]);
   const [flowSearchQuery, setFlowSearchQuery] = useState("");
+  const [activeSection, setActiveSection] = useState<FlowLibrarySection>("overview");
+  const [activeDemoStepIndex, setActiveDemoStepIndex] = useState(0);
 
   const enabledCountries = useMemo(() => new Set<CountryId>(flow.countryScope), [flow.countryScope]);
   const filteredFlowIds = useMemo(() => {
@@ -287,7 +291,12 @@ export default function FlowLibraryScreen({
   useEffect(() => {
     setSelectedScenarioId(flowContent.defaultScenarioId);
     setSelectedCountries([...flow.countryScope]);
+    setActiveDemoStepIndex(0);
   }, [flow.countryScope, flowContent.defaultScenarioId, selectedFlowId]);
+
+  useEffect(() => {
+    setActiveDemoStepIndex(0);
+  }, [selectedScenarioId]);
 
   const handleFlowSelect = (flowId: FlowPreviewId) => {
     if (!controlledFlowId) setInternalFlowId(flowId);
@@ -306,114 +315,310 @@ export default function FlowLibraryScreen({
   return (
     <div className="h-full overflow-y-auto bg-[var(--uc-app-bg)] text-[var(--uc-text)] scrollbar-hide" data-flow-library-screen="true">
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-[24px] px-[40px] py-[32px]">
-        <Panel title="Flows">
-          <div className="grid gap-[12px] lg:grid-cols-[minmax(280px,420px)_minmax(280px,420px)_1fr]">
-            <div>
-              <label className="sr-only" htmlFor="flow-library-search">Search flows</label>
-              <div className="flex h-[40px] items-center gap-[8px] rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[12px]">
-                <AppIcon name="search" size={18} color="var(--uc-text-muted)" />
-                <input
-                  id="flow-library-search"
-                  value={flowSearchQuery}
-                  onChange={(event) => setFlowSearchQuery(event.target.value)}
-                  placeholder="Search flows"
-                  className="min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)]"
-                />
-              </div>
-            </div>
+        <FlowSelectorBar
+          selectedFlowId={selectedFlowId}
+          flowSearchQuery={flowSearchQuery}
+          dropdownFlowIds={dropdownFlowIds}
+          filteredFlowIds={filteredFlowIds}
+          onFlowSearchChange={setFlowSearchQuery}
+          onFlowSelect={handleFlowSelect}
+        />
 
-            <div>
-              <label className="sr-only" htmlFor="flow-library-select">Select flow</label>
-              <select
-                id="flow-library-select"
-                value={selectedFlowId}
-                onChange={(event) => handleFlowSelect(event.target.value as FlowPreviewId)}
-                className="h-[40px] w-full rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[12px] text-[13px] font-bold text-[var(--uc-text)] outline-none"
+        <FlowLibraryTabs activeSection={activeSection} onSectionChange={setActiveSection} />
+
+        {activeSection === "overview" ? (
+          <OverviewPanel
+            flow={flow}
+            selectedCountries={selectedCountries}
+            enabledCountries={enabledCountries}
+            onCountryToggle={toggleCountry}
+          />
+        ) : null}
+
+        {activeSection === "demo" ? (
+          <InteractiveDemoPanel
+            selectedScenarioId={selectedScenarioId}
+            selectedScenario={selectedScenario}
+            scenarios={flowContent.scenarios}
+            selectedCountries={selectedCountries}
+            activeDemoStepIndex={activeDemoStepIndex}
+            onScenarioSelect={setSelectedScenarioId}
+            onStepSelect={setActiveDemoStepIndex}
+          />
+        ) : null}
+
+        {activeSection === "spec" ? <SpecPanel uxSpec={flowContent.uxSpec} /> : null}
+
+        {activeSection === "flow" ? (
+          <ScenarioJourneyPanel
+            selectedScenarioId={selectedScenarioId}
+            selectedScenario={selectedScenario}
+            scenarios={flowContent.scenarios}
+            selectedCountries={selectedCountries}
+            onScenarioSelect={setSelectedScenarioId}
+          />
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function FlowSelectorBar({
+  selectedFlowId,
+  flowSearchQuery,
+  dropdownFlowIds,
+  filteredFlowIds,
+  onFlowSearchChange,
+  onFlowSelect,
+}: {
+  selectedFlowId: FlowPreviewId;
+  flowSearchQuery: string;
+  dropdownFlowIds: readonly FlowPreviewId[];
+  filteredFlowIds: readonly FlowPreviewId[];
+  onFlowSearchChange: (value: string) => void;
+  onFlowSelect: (flowId: FlowPreviewId) => void;
+}) {
+  return (
+    <div className="grid gap-[12px] lg:grid-cols-[minmax(280px,420px)_280px_1fr]">
+      <div>
+        <label className="sr-only" htmlFor="flow-library-search">Search flows</label>
+        <div className="flex h-[44px] items-center gap-[10px] rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[14px] shadow-sm transition-colors focus-within:border-[var(--uc-action)]">
+          <AppIcon name="search" size={18} color="var(--uc-text-muted)" />
+          <input
+            id="flow-library-search"
+            value={flowSearchQuery}
+            onChange={(event) => onFlowSearchChange(event.target.value)}
+            placeholder="Search flows"
+            className="min-w-0 flex-1 bg-transparent text-[14px] leading-[18px] text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)]"
+          />
+        </div>
+      </div>
+
+      <div className="relative">
+        <label className="sr-only" htmlFor="flow-library-select">Select flow</label>
+        <select
+          id="flow-library-select"
+          value={selectedFlowId}
+          onChange={(event) => onFlowSelect(event.target.value as FlowPreviewId)}
+          className="h-[44px] w-full appearance-none rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[14px] pr-[42px] text-[14px] font-bold leading-[18px] text-[var(--uc-text)] shadow-sm outline-none transition-colors hover:border-[var(--uc-action)] focus:border-[var(--uc-action)]"
+        >
+          {dropdownFlowIds.map((flowId) => (
+            <option key={flowId} value={flowId}>{FLOW_PREVIEWS[flowId].label}</option>
+          ))}
+        </select>
+        <span className="pointer-events-none absolute right-[12px] top-1/2 grid size-[18px] -translate-y-1/2 place-items-center text-[var(--uc-text)]">
+          <AppIcon name="chevron-down" size={16} color="currentColor" />
+        </span>
+      </div>
+
+      {filteredFlowIds.length === 0 ? (
+        <p className="flex min-h-[44px] items-center rounded-[6px] bg-[var(--uc-surface-muted)] px-[12px] py-[9px] text-[12px] leading-[16px] text-[var(--uc-text-muted)]">
+          No flows match this search.
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function FlowLibraryTabs({
+  activeSection,
+  onSectionChange,
+}: {
+  activeSection: FlowLibrarySection;
+  onSectionChange: (section: FlowLibrarySection) => void;
+}) {
+  const tabs: Array<{ id: FlowLibrarySection; label: string }> = [
+    { id: "overview", label: "Overview" },
+    { id: "demo", label: "Demo" },
+    { id: "spec", label: "Spec" },
+    { id: "flow", label: "Flow" },
+  ];
+
+  return (
+    <div className="flex flex-wrap gap-[8px] border-b border-[var(--uc-border)]">
+      {tabs.map((tab) => {
+        const active = activeSection === tab.id;
+        return (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => onSectionChange(tab.id)}
+            className={`relative min-h-[44px] px-[18px] text-[14px] font-bold leading-[18px] transition-colors ${
+              active ? "text-[var(--uc-text)]" : "text-[var(--uc-text-muted)] hover:text-[var(--uc-action)]"
+            }`}
+          >
+            {tab.label}
+            {active ? <span className="absolute inset-x-[10px] bottom-0 h-[3px] rounded-t-[3px] bg-[var(--uc-action)]" /> : null}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function OverviewPanel({
+  flow,
+  selectedCountries,
+  enabledCountries,
+  onCountryToggle,
+}: {
+  flow: ReturnType<typeof getFlowPreviewMeta>;
+  selectedCountries: CountryId[];
+  enabledCountries: Set<CountryId>;
+  onCountryToggle: (country: CountryId) => void;
+}) {
+  return (
+    <div className="grid gap-[24px]">
+      <header className="flex flex-wrap items-end justify-between gap-[24px] rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[24px] shadow-sm">
+        <div className="max-w-[760px]">
+          <p className="text-[13px] font-bold uppercase leading-[16px] tracking-[0] text-[var(--uc-action)]">Flow library</p>
+          <h1 className="mt-[8px] text-[34px] font-bold leading-[40px] tracking-[0] text-[var(--uc-text)]">{flow.title}</h1>
+          <p className="mt-[12px] max-w-[720px] text-[16px] leading-[24px] tracking-[0] text-[var(--uc-text-muted)]">{flow.summary}</p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-[8px]">
+          <Badge>{flow.status.replace(/-/g, " ")}</Badge>
+          <Badge>{flow.countryScope.join(", ")}</Badge>
+          <a
+            href={flow.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[12px] py-[8px] text-[13px] font-bold text-[var(--uc-action)]"
+          >
+            Figma source {flow.figmaNodeId}
+          </a>
+        </div>
+      </header>
+
+      <Panel title="Countries">
+        <div className="grid gap-[8px] sm:grid-cols-4 lg:grid-cols-8">
+          {COUNTRIES.map((country) => {
+            const enabled = enabledCountries.has(country);
+            const selected = selectedCountries.includes(country);
+            return (
+              <button
+                key={country}
+                type="button"
+                disabled={!enabled}
+                onClick={() => onCountryToggle(country)}
+                className={`rounded-[18px] border px-[10px] py-[8px] text-[12px] font-bold leading-[14px] transition-colors ${
+                  selected
+                    ? "border-[var(--uc-action)] bg-[var(--uc-action)] text-[var(--uc-static-white)]"
+                    : enabled
+                      ? "border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)] hover:border-[var(--uc-action)]"
+                      : "border-[var(--uc-border-muted)] bg-[var(--uc-surface-muted)] text-[var(--uc-text-subtle)]"
+                }`}
               >
-                {dropdownFlowIds.map((flowId) => (
-                  <option key={flowId} value={flowId}>{FLOW_PREVIEWS[flowId].label}</option>
-                ))}
-              </select>
-            </div>
+                {country}
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-[12px] text-[12px] leading-[18px] text-[var(--uc-text-muted)]">
+          Country selection is local to this flow preview. It does not change the app country selector or baseline state.
+        </p>
+      </Panel>
+    </div>
+  );
+}
 
-            {filteredFlowIds.length === 0 ? (
-              <p className="flex min-h-[40px] items-center rounded-[6px] bg-[var(--uc-surface-muted)] px-[12px] py-[9px] text-[12px] leading-[16px] text-[var(--uc-text-muted)]">
-                No flows match this search.
-              </p>
-            ) : null}
-          </div>
-        </Panel>
+function SpecPanel({ uxSpec }: { uxSpec: readonly SpecItem[] }) {
+  return (
+    <Panel title="UX spec">
+      <div className="grid gap-[18px]">
+        {uxSpec.map((item) => (
+          <article key={item.title} className="max-w-[1120px] text-[15px] leading-[24px] tracking-[0]">
+            <h2 className="text-[16px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">{item.title}</h2>
+            <p className="mt-[6px] whitespace-pre-line text-[15px] leading-[24px] tracking-[0] text-[var(--uc-text-muted)]">{item.body}</p>
+          </article>
+        ))}
+      </div>
+    </Panel>
+  );
+}
 
-        <Panel title="Countries">
-          <div className="grid gap-[8px] sm:grid-cols-4 lg:grid-cols-8">
-            {COUNTRIES.map((country) => {
-              const enabled = enabledCountries.has(country);
-              const selected = selectedCountries.includes(country);
+function InteractiveDemoPanel({
+  selectedScenarioId,
+  selectedScenario,
+  scenarios,
+  selectedCountries,
+  activeDemoStepIndex,
+  onScenarioSelect,
+  onStepSelect,
+}: {
+  selectedScenarioId: string;
+  selectedScenario: ScenarioContent;
+  scenarios: Record<string, ScenarioContent>;
+  selectedCountries: CountryId[];
+  activeDemoStepIndex: number;
+  onScenarioSelect: (scenarioId: string) => void;
+  onStepSelect: (stepIndex: number) => void;
+}) {
+  const activeStep = selectedScenario.steps[Math.min(activeDemoStepIndex, selectedScenario.steps.length - 1)] ?? selectedScenario.steps[0];
+
+  return (
+    <Panel title="Demo">
+      <div className="grid gap-[24px] xl:grid-cols-[420px_1fr]">
+        <div>
+          <div className="flex flex-wrap gap-[8px] pb-[8px]">
+            {Object.entries(scenarios).map(([scenarioId, scenario]) => {
+              const active = selectedScenarioId === scenarioId;
               return (
                 <button
-                  key={country}
+                  key={scenarioId}
                   type="button"
-                  disabled={!enabled}
-                  onClick={() => toggleCountry(country)}
-                  className={`rounded-[18px] border px-[10px] py-[8px] text-[12px] font-bold leading-[14px] transition-colors ${
-                    selected
-                      ? "border-[var(--uc-action)] bg-[var(--uc-action)] text-[var(--uc-static-white)]"
-                      : enabled
-                        ? "border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)] hover:border-[var(--uc-action)]"
-                        : "border-[var(--uc-border-muted)] bg-[var(--uc-surface-muted)] text-[var(--uc-text-subtle)]"
+                  onClick={() => onScenarioSelect(scenarioId)}
+                  className={`rounded-[20px] px-[14px] py-[8px] text-[13px] font-bold leading-[16px] transition-colors ${
+                    active
+                      ? "bg-[var(--uc-action)] text-[var(--uc-static-white)]"
+                      : "bg-[var(--uc-surface-muted)] text-[var(--uc-text)] hover:bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface-muted))]"
                   }`}
                 >
-                  {country}
+                  {scenario.label}
                 </button>
               );
             })}
           </div>
-          <p className="mt-[12px] text-[12px] leading-[18px] text-[var(--uc-text-muted)]">
-            Country selection is local to this flow preview. It does not change the app country selector or baseline state.
-          </p>
-        </Panel>
+          <p className="mt-[8px] text-[14px] leading-[20px] text-[var(--uc-text-muted)]">{selectedScenario.description}</p>
 
-        <Panel title="UX spec">
-          <div className="grid gap-x-[32px] gap-y-[14px] xl:grid-cols-2">
-            {flowContent.uxSpec.map((item) => (
-              <article key={item.title} className="text-[14px] leading-[21px] tracking-[0]">
-                <h2 className="inline text-[14px] font-bold leading-[21px] tracking-[0] text-[var(--uc-text)]">{item.title}: </h2>
-                <p className="inline text-[14px] leading-[21px] tracking-[0] text-[var(--uc-text-muted)]">{item.body}</p>
-              </article>
-            ))}
+          <div className="mt-[20px] grid gap-[8px]">
+            {selectedScenario.steps.map((step, index) => {
+              const active = activeStep?.id === step.id;
+              return (
+                <button
+                  key={step.id}
+                  type="button"
+                  onClick={() => onStepSelect(index)}
+                  className={`flex min-h-[58px] items-center gap-[12px] rounded-[6px] border px-[12px] text-left transition-colors ${
+                    active
+                      ? "border-[var(--uc-action)] bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))]"
+                      : "border-[var(--uc-border)] bg-[var(--uc-surface)] hover:border-[var(--uc-action)]"
+                  }`}
+                >
+                  <span className={`grid size-[26px] shrink-0 place-items-center rounded-full text-[12px] font-bold ${
+                    active ? "bg-[var(--uc-action)] text-[var(--uc-static-white)]" : "bg-[var(--uc-surface-muted)] text-[var(--uc-text-muted)]"
+                  }`}>
+                    {index + 1}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-[14px] font-bold leading-[18px] text-[var(--uc-text)]">{step.title}</span>
+                    <span className="mt-[2px] block text-[12px] leading-[16px] text-[var(--uc-text-muted)]">{step.description}</span>
+                  </span>
+                </button>
+              );
+            })}
           </div>
-        </Panel>
+        </div>
 
-        <header className="flex flex-wrap items-end justify-between gap-[24px] rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[20px] shadow-sm">
-          <div className="max-w-[760px]">
-            <p className="text-[13px] font-bold uppercase leading-[16px] tracking-[0] text-[var(--uc-action)]">Flow library</p>
-            <h1 className="mt-[8px] text-[34px] font-bold leading-[40px] tracking-[0] text-[var(--uc-text)]">{flow.title}</h1>
-            <p className="mt-[12px] max-w-[680px] text-[16px] leading-[24px] tracking-[0] text-[var(--uc-text-muted)]">{flow.summary}</p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-[8px]">
-            <Badge>{flow.status.replace(/-/g, " ")}</Badge>
-            <Badge>{flow.countryScope.join(", ")}</Badge>
-            <a
-              href={flow.sourceUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[12px] py-[8px] text-[13px] font-bold text-[var(--uc-action)]"
-            >
-              Figma source {flow.figmaNodeId}
-            </a>
-          </div>
-        </header>
-
-        <ScenarioJourneyPanel
-          selectedScenarioId={selectedScenarioId}
-          selectedScenario={selectedScenario}
-          scenarios={flowContent.scenarios}
-          selectedCountries={selectedCountries}
-          onScenarioSelect={setSelectedScenarioId}
-        />
+        <div className="flex min-h-[520px] flex-col items-center justify-center rounded-[8px] bg-[var(--uc-surface-muted)] px-[24px] py-[28px]">
+          {activeStep ? (
+            <div className="scale-[1.12]">
+              <PhonePreview kind={activeStep.screen} country={selectedCountries[0] ?? "RO"} />
+            </div>
+          ) : null}
+        </div>
       </div>
-    </div>
+    </Panel>
   );
 }
 

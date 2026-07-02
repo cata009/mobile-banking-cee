@@ -1,6 +1,325 @@
 # Current Session
 
-Last updated: 2026-07-01
+Last updated: 2026-07-02
+
+## 2026-07-02 HU Kids Home More And Send Money Cleanup
+
+- Latest request handled: user asked to remove the HU Kids More `Product applications and cancellations` card, remove the Send money result/status card, replace `Grandma` with `More contacts`, and move Home `Your cards` above `Your recent transactions`.
+- Runtime changes:
+  - Updated `src/app/screens/kids/KidsMarketHomeApp.tsx` so HU Kids More filters out `my-requests`; Contacts, Documents, settings, and Tutorials remain.
+  - Updated HU Kids Send money contact chips from `Anna / David / Grandma` to `Anna / David / More contacts`.
+  - Removed the initial/latest transfer result card from HU Kids Send money so the form no longer shows the `Money sent / Approved / Back to home` card under the submit button.
+  - Reordered HU Kids Home so `Your cards` now renders above `Your recent transactions`.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-07-02 HU Kids Figma Cat Card Mapping
+
+- Latest request handled: user asked to map the HU Kids small `Your cards` card and card-details hero 1:1 from the supplied Kids App Figma nodes `9146:18133`, `9146:18040`, and `9146:18567`.
+- Runtime changes:
+  - Added local Figma-derived card assets under `src/assets/kids/figma/`: `hu-card-home-cat.png`, `hu-card-detail-cat.png`, and `hu-card-bg-cat.png`.
+  - Updated `src/app/screens/kids/KidsMarketHomeApp.tsx` so the HU Kids `Your cards` thumbnail uses the Figma cat card artwork instead of the generic debit-card component.
+  - Updated the HU Kids card-details hero so the front side uses the Figma cat card with top information, while the revealed/back side uses the clean cat background asset beneath the existing copyable card-detail fields.
+  - Aligned the local HU Kids card mock metadata to the Figma card ending `5678` and holder `ALEXANDRA ALBON`.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed for the touched Kids screen and new PNG assets with only normal Windows LF/CRLF warnings.
+  - In-app browser smoke on `http://127.0.0.1:4001/?product=KIDS_PI&country=HU&scenario=active&ds=current&release=release-current&bank=kids-child-preview&theme=light&lang=en&screen=homepage` confirmed the Home card uses `/src/assets/kids/figma/hu-card-home-cat.png`, shows `*5678`, and clicking it opens card details with `/src/assets/kids/figma/hu-card-detail-cat.png` plus `/src/assets/kids/figma/hu-card-bg-cat.png`.
+- safe to resume: yes
+
+## 2026-07-02 HU Kids Tasks Payments And Goal Icons
+
+- Latest request handled: user asked to make task statuses clearer, remove several HU Kids Payments entries, and diversify Saving goals icons.
+- Runtime changes:
+  - Updated `src/app/screens/kids/KidsMarketHomeApp.tsx` so HU task rows now show the recurrence plus an explicit status pill: `Pending`, `Waiting parent`, or `Approved`.
+  - Filtered the HU Kids Payments page so `Recurrent payments` is removed from the primary cards, while `Card repayment` and `Exchange rates` are removed from the bottom shortcuts.
+  - Kept the Payments filtering scoped to `HuKidsPaymentsPage`; `RsKidsPaymentsPage` remains on the unfiltered shared menu.
+  - Added `getHuKidsGoalIcon` so `New bike`, `Headphones`, and `School trip` render different icons instead of all using `trophy`.
+- Verification:
+  - Static inspection confirmed the HU payment filters are applied only inside `HuKidsPaymentsPage`, not `RsKidsPaymentsPage`.
+  - Static scan confirmed `Pending`, `getHuKidsGoalIcon`, and the HU hidden payment id sets are present in `KidsMarketHomeApp.tsx`.
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+- safe to resume: yes
+
+## 2026-07-02 HU Kids Tasks Add Button Removal
+
+- Latest request handled: user asked to remove the `ADD NEW TASK` button from the HU Kids homepage Tasks card.
+- Runtime changes:
+  - Updated `src/app/screens/kids/KidsMarketHomeApp.tsx` so `HuTasksCard` no longer renders the footer action for adding a new task.
+  - Removed the whole footer wrapper, not only the label, so no empty spacing or inaccessible hidden control remains.
+- Verification:
+  - Static scan confirmed `ADD NEW TASK`, `Add new task`, and `add new task` no longer exist in `KidsMarketHomeApp.tsx`.
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+- safe to resume: yes
+
+## 2026-07-02 HU Kids Card Action Icons
+
+- Latest request handled: user asked for the HU Kids `Cards` detail action rail to use the supplied show/details icon for `Card details` and the supplied lock/block icon for `Block card`.
+- Runtime changes:
+  - Added `show-card-details` as a custom 24x24 SVG icon in `src/app/components/icons/AppIcon.tsx`.
+  - Replaced the existing `block-card` custom icon path with the supplied 24x24 lock/block SVG and registered it for the HU Kids card action rail.
+  - Updated `src/app/screens/kids/KidsMarketHomeApp.tsx` so the card detail rail uses `show-card-details` for `Card details` and `block-card` for `Block card` instead of the generic `eye` and `lock` glyphs.
+- Verification:
+  - Static scan confirmed `show-card-details` is registered and used by `KidsMarketHomeApp.tsx`.
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+- safe to resume: yes
+
+## 2026-07-02 HU Kids More Options Sheet Cleanup
+
+- Latest request handled: user flagged that the HU Kids homepage `More options` sheet still showed unnecessary explanatory copy and secondary options.
+- Runtime changes:
+  - Updated `src/app/screens/kids/KidsMarketHomeApp.tsx` so `HuMoreOptionsSheet` no longer renders the top description `Personalize Alexandra's home...`.
+  - Removed the `Standard active` theme meta badge by dropping the unused `currentTheme` prop from the sheet.
+  - Removed the secondary `Card controls` and `Safety limits` action buttons from the sheet.
+  - Kept the `Themes` row as the only visible action in this specific HU Kids `More options` sheet.
+- Verification:
+  - Static scan confirmed `Personalize Alexandra`, `Standard active`, `Card controls`, `Safety limits`, `currentTheme={appliedTheme}`, and `currentTheme` no longer exist in `KidsMarketHomeApp.tsx`.
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+- safe to resume: yes
+
+## 2026-07-01 Design System Specimen Background And Shopsmart Layout
+
+- Latest request handled: user flagged that several component specimens showed an unnecessary grey/blue preview background, that the Shopsmart examples were stacked vertically and too large, and that the `Country coverage` overview block was not useful.
+- Runtime changes:
+  - Updated `src/app/screens/design-system/DesignSystemPage.tsx` so standard Design System Inventory specimens no longer paint an automatic preview background; only explicit dark specimens keep the dark canvas needed for contrast.
+  - Removed the extra grey background wrapper from the Pill specimen so the 120x36 pill is presented on the clean card surface.
+  - Reworked the Shopsmart specimen into two compact side-by-side previews at approximately 255px width each, preserving the real `ShopsmartOfferCard` runtime component unchanged.
+  - Removed the `Country coverage` section and the `Countries` sidebar link from the Design System Inventory component tab.
+  - Updated stale/unknown component hashes, including old `#countries`, to fall back to the first remaining component section: `Headers`.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check -- src/app/screens/design-system/DesignSystemPage.tsx` passed with only normal Windows LF/CRLF warnings.
+  - Static scan confirmed `Country coverage`, `Markets currently represented`, `CountryCoverageSummary`, and the `Countries` sidebar link no longer exist in `DesignSystemPage.tsx`.
+  - In-app browser smoke confirmed Shopsmart renders two cards side by side at about `255x207`, and the Pill specimen preview plus inner wrapper have transparent backgrounds while the pill remains `120x36`.
+- safe to resume: yes
+
+## 2026-07-01 Editable Product Mix Control Panel
+
+- Latest request handled: user asked to replace the static `Data Snapshot` grid with editable product-count controls, remove `Goals`, and remove the noisy `Project Pack` section from the Control Panel.
+- Runtime changes:
+  - Added typed `productCounts` state to `src/app/state/demoTypes.ts` and `src/app/state/demoStore.tsx`.
+  - Updated `src/app/components/demo/DemoFeatureSidePanel.tsx` so `Data Snapshot` now exposes editable numeric controls for `Accounts`, `Debit cards`, `Credit cards`, `Meal cards`, `Deposits`, `Savings accounts`, `Loans`, `Mortgages`, and `Investments`.
+  - Removed the visible `Project Pack` section from the Control Panel.
+  - Updated `src/hooks/useProducts.tsx` so product-count edits rebuild the actual mock product categories used by the mobile demo. `0` removes that product type/category from Home; values above existing mock data generate distinct cloned rows with stable ids, names, and account/card numbers.
+  - Added `meal_card` to `src/data/products.ts` so meal cards can be represented separately from debit and credit cards in the product mix.
+  - Updated `scripts/audit-reference-platform.mjs` to guard the new editable product-count panel contract and the removed Project Pack panel copy.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check -- src/app/state/demoTypes.ts src/app/state/demoStore.tsx src/data/products.ts src/hooks/useProducts.tsx src/app/components/demo/DemoFeatureSidePanel.tsx src/app/screens/accounts/AccountDetailsInfoScreen.tsx scripts/audit-reference-platform.mjs` passed with only normal Windows LF/CRLF warnings.
+  - In-app browser smoke on `http://127.0.0.1:5002/?product=PI&country=RO&scenario=active&ds=current&release=release-current&bank=retail-single-account&theme=light&lang=en&screen=homepage` confirmed the panel shows the nine editable product counts, `Project Pack` is not visible, setting `Accounts=0` removes the visible Accounts section, and setting `Debit cards=3` renders three debit-card rows.
+- safe to resume: yes
+
+## 2026-07-01 Control Panel Simplification
+
+- Latest request handled: user flagged the Settings / Control Panel drawer as too noisy and asked to remove the duplicate context, release, product, design-system, appearance, SME/Kids preview, and scenario metadata blocks.
+- Runtime changes:
+  - Updated `src/app/components/demo/DemoFeatureSidePanel.tsx` so the drawer now starts directly with `Banking Scenario`.
+  - Removed the visible `Current Context`, `Release`, `Product`, `Design System`, and `Appearance` sections from the drawer.
+  - Removed `SME / owner preview` and `Kids / child preview` from the Banking Scenario picker while leaving those scenario registry entries intact for URL/state compatibility.
+  - Removed the Banking Scenario metadata rows `Segment`, `Authority`, `Limit`, and `Daily`.
+  - Kept the useful lower sections: `Data Snapshot`, `Rights`, `Project Pack`, `Release Features`, and `Unplanned Features`.
+  - Updated `scripts/audit-reference-platform.mjs` so the platform audit now guards the simplified drawer contract and fails if the removed noisy panel copy comes back.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check -- src/app/components/demo/DemoFeatureSidePanel.tsx scripts/audit-reference-platform.mjs docs/handoff/current-session.md docs/handoff/state-of-the-world.md docs/platform-capability-map/README.md` passed with only normal Windows LF/CRLF warnings.
+  - In-app browser smoke after reload confirmed the drawer is open, removed labels are absent, and the visible panel starts with the simplified scenario/data/rights/project-pack/feature structure.
+- safe to resume: yes
+
+## 2026-07-01 Flow Library Demo Preview Caption Cleanup
+
+- Latest request handled: user flagged the redundant title/description under the Flow Library `Demo` phone preview, e.g. `Card options` / `The change action branches...`.
+- Runtime changes:
+  - Updated `src/app/screens/flow-library/FlowLibraryScreen.tsx` so the large demo preview renders only the selected phone screen.
+  - Step title and description remain available in the left-side interactive step list, where they are useful for navigation.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check -- src/app/screens/flow-library/FlowLibraryScreen.tsx docs/handoff/current-session.md` passed with only normal Windows LF/CRLF warnings.
+  - Targeted static scan confirmed the removed preview-caption bindings `activeStep.title`, `activeStep.description`, and `mt-[38px]` no longer exist in `FlowLibraryScreen.tsx`.
+- safe to resume: yes
+
+## 2026-07-01 Design System Colors Cleanup
+
+- Latest request handled: user flagged that the `Colors` inventory cards were too tall/noisy, that source token pills and dark-mode notes were not useful, and that `App color map` status tags such as `mapped` should not exist.
+- Runtime changes:
+  - Compact `ColorCard` specimens by reducing swatch height, padding, metadata font size, and spacing.
+  - Removed visible source-token pills such as `Primary / 100`, `Primary / 600`, and `Copy 2-5`.
+  - Removed visible dark-note helper text such as `Dark surfaces move to Primary 900...`.
+  - Removed the color inventory stats strip, including `Mapped app colors`.
+  - Reworked `App color map` rows into the same compact two-column card grid language as the palette cards.
+  - Removed visible status tags from `App color map` rows.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check -- src/app/screens/design-system/DesignSystemPage.tsx docs/handoff/current-session.md docs/handoff/state-of-the-world.md docs/platform-capability-map/README.md` passed with only normal Windows LF/CRLF warnings.
+  - Targeted static scan confirmed removed color UI artifacts are no longer rendered from `DesignSystemPage.tsx`: status-tag renderer, `Mapped app colors`, source-token pills, visible `item.status`, and the dark-note helper copy.
+- safe to resume: yes
+
+## 2026-07-01 Design System Inventory Cleanup
+
+- Latest request handled: user flagged several noisy or visually broken Design System Inventory specimens and asked for cleanup in Overview/Countries, Forms, and Cards.
+- Runtime changes:
+  - Removed the `Coverage summary` overview section from the Design System Inventory.
+  - Simplified `Country coverage` so it no longer renders the country dropdown, `No Co-Apping` badge, `RO · RON` label, or the languages/products/more-cards detail grid.
+  - Fixed the `Date filter` specimen chip sizing/centering and aligned its source metadata to the rendered 286px / 24px control.
+  - Swapped the ProfileAvatar photo specimen to a normal static PNG photo.
+  - Updated the Helper Card specimen to English copy and disabled the visible close control for this card variant.
+  - Removed the raw Home content module specimen that exposed translation keys such as `home.quick.actions.title` and `home.transactions.title`.
+  - Replaced the product evolution placeholder `UC` badge with the shared account-details AppIcon.
+- Verification:
+  - Static scan passed for removed strings/selectors: `Coverage summary`, `country-coverage-select`, `No Co-Apping`, `RO · RON`, `Română, English`, `Home content modules`, `home.quick`, `home.transactions`, old Helper Card copy, and `>UC<` no longer appear in the Design System Inventory source.
+  - Targeted source scan confirmed the new DateFilter dimensions, static PNG avatar sample, English Helper Card copy, and `account-details` icon usage.
+- safe to resume: yes
+
+## 2026-07-01 Platform Surface Header Simplification
+
+- Latest request handled: user flagged that the second stakeholder-header row with country, baseline, active/inactive, and demo actions is not useful on `Flows` and `Design system`, and that the Flow Library dropdown is too wide.
+- Runtime changes:
+  - Updated `src/app/components/demo/DemoTopBar.tsx` so `Flows` and `Design system` render only the first stakeholder-header row: logo/product selector, centered platform tabs, profile initials, and logout.
+  - Demo/mobile app screens keep the second header row with country, baseline, scenario, screenshot, refresh, share, theme, and settings controls.
+  - Updated `src/app/screens/flow-library/FlowLibraryScreen.tsx` so the flow-select dropdown uses a 280px desktop column instead of the previous 420px-wide layout.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check -- src/app/components/demo/DemoTopBar.tsx src/app/screens/flow-library/FlowLibraryScreen.tsx` passed with only normal Windows LF/CRLF warnings.
+  - In-app browser smoke confirmed Flow Library header has one row, no `Romania / Current baseline / Active` row, and `#flow-library-select` width is `280px`.
+  - In-app browser smoke confirmed Design System header also has one row and no context-control row.
+- safe to resume: yes
+
+## 2026-07-01 Flow Library Tabs And BA Spec
+
+- Latest request handled: user asked to remove the bordered/titled `Flows` card, improve the flow dropdown styling, expand the UX spec copy for BA use, and split Flow Library into `Overview`, `Demo`, `Spec`, and `Flow` tabs.
+- Runtime changes:
+  - Updated `src/app/screens/flow-library/FlowLibraryScreen.tsx` so the flow search and flow select controls sit naked at the top, without the old `Flows` panel title/card chrome.
+  - Added local `Overview`, `Demo`, `Spec`, and `Flow` tabs for the Flow Library surface.
+  - `Overview` now contains the flow summary, source badges/link, and local country scope selector.
+  - `Demo` now provides an interactive preview mode: scenario chips and step buttons drive a single larger phone preview so reviewers can click through states without scrolling a storyboard.
+  - `Spec` now contains longer BA-readable narrative sections for RO Round Up and RO Card PIN, including purpose, entry points, eligibility/account logic, signing/feedback, fallback, and governance notes.
+  - `Flow` preserves the connected journey storyboard with downloadable preview frames.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check -- src/app/screens/flow-library/FlowLibraryScreen.tsx` passed with only normal Windows LF/CRLF warnings.
+  - In-app browser smoke on `http://127.0.0.1:5002/?product=PI&country=RO&scenario=active&ds=current&release=release-current&bank=retail-single-account&theme=light&lang=en&screen=flow-library&flow=ro-round-up` confirmed the old `Flows` section title is gone, the local tabs render, the flow select remains populated, the `Spec` tab shows the expanded Round Up narrative, and the local `Demo` tab can switch to the `Set up Round Up` preview state.
+- Limitation:
+  - The `Demo` tab is still a mock-driven interactive preview inside Flow Library, not a promoted live Mobile PI runtime flow. Real app execution requires a separate product decision and routing implementation.
+- safe to resume: yes
+
+## 2026-07-01 Header Icon Micro-Polish
+
+- Latest request handled: user flagged that the screenshot-options header action must use the supplied camera SVG and that the country/release dropdown chevrons looked too large.
+- Runtime changes:
+  - Updated `src/app/components/demo/PhoneScreenshotControl.tsx` to render the supplied 24x24 camera SVG inline with `currentColor` instead of the previous lucide camera glyph.
+  - Updated `src/app/components/demo/DemoTopBar.tsx` so context dropdown chevrons use a quieter 16px slot and 14px glyph for product, country, and release selectors.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - In-app browser check on Card Detail confirmed the screenshot button renders a `24x24` SVG with `viewBox="0 0 24 24"` and two paths, while `Romania` / `Current baseline` chevrons render as `14x14` SVGs in `16x16` slots.
+- safe to resume: yes
+
+## 2026-07-01 More Asset Preload And Header Hover
+
+- Latest request handled: user reported visible image-loading delay when switching to the PI More section and requested header hover states to use teal `#007A91` instead of red.
+- Runtime changes:
+  - Added `src/app/config/moreCardAssets.ts` as the central registry for all PI More menu card artwork.
+  - Added `preloadMoreCardImages`, which warms the browser image cache once per source with async decoding.
+  - `AppContent` preloads all More card assets on application boot, and `MoreScreen` preloads the country-specific card set when mounted.
+  - More menu cards now consume the shared asset registry and mark inline images as eager/async decoded to reduce visible late-load flicker during section switching.
+  - Header interactive hover/active states in `DemoTopBar` and `PhoneScreenshotControl` now use `--uc-action` teal rather than `--uc-brand` red, while the UniCredit logo remains brand red by design.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+- safe to resume: yes
+
+## 2026-07-01 ShopSmart Search Normalization
+
+- Latest request handled: user flagged that the Products / ShopSmart search bar did not behave like Account Details search; after typing, the filter icon stayed visible instead of switching to the clear-search X.
+- Runtime changes:
+  - Replaced the local `ShopSmartSearchBar` duplicate in `src/app/screens/products/ProductsScreen.tsx` with the shared `AccountSearchBar`.
+  - Added stateful ShopSmart offer search, filtering by merchant, title, status, pill/tag, and distance.
+  - The right-side search action now follows the shared DS contract: filter icon when empty, `clear-results` X when text exists, and focus remains in the input after clearing.
+  - Added a small empty state for searches with no matching offers.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - In-app browser smoke on Products / ShopSmart confirmed typing `5555` changes the right action to `Clear search results` / `Clear results icon 32x32`, clicking it empties the input, restores `Filters` / `Filter icon 32x32`, and the Valentino offer returns.
+- safe to resume: yes
+
+## 2026-07-01 Romania Product Sheet Options
+
+- Latest request handled: user flagged that Romania Products bottom sheets showed extra generic product options.
+- Runtime changes:
+  - Added country-specific product-card sheet overrides in `src/app/config/productsMenuConfig.ts`.
+  - Romania `Account` now shows only `Current account` and `Overdraft`.
+  - Romania `Cards` now removes `Digital wallets` and renames credit card to `Credit card UniCredit Consumer Financing`, keeping Debit, renamed Credit, and Virtual card.
+  - Romania `Borrowing` now shows only `Personal loan` then `Mortgage loan`.
+  - Romania `Insurances` now shows `Genius Protect`, `Home insurance`, `Travel`, `My Car`, `Umbrella`, and `Start invest`.
+  - Romania product card order now places `Investments and savings` in position 4 and `Insurance` in position 5.
+  - Other countries keep the existing shared product-sheet option lists.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - Static config assertion passed: `RO insurance sheet and product order ok`.
+- safe to resume: yes
+
+## 2026-07-01 QR Mobile Fullscreen Polish
+
+- Latest request handled: user flagged that QR/mobile opening still shows duplicated top system UI, because the real phone/browser chrome appears above the app while the frameless app still rendered its simulated StatusBar and Dynamic Island.
+- Runtime changes:
+  - Updated `src/app/components/FramelessDeviceFrame.tsx` so QR/device links (`frame=0`) no longer render the simulated `StatusBar`, `DynamicIsland`, or theme top system-bar wash. Desktop `MobileFrame` remains unchanged.
+  - Follow-up mobile polish: replaced the aggressive 54px frameless crop with a `--uc-phone-top-reserve` token. Desktop phone mock keeps the 54px reserve, while QR/device mode uses a smaller 12px top reserve so content is not glued to the browser chrome and is not clipped.
+  - Updated `src/app/App.tsx` so device mode uses a `min-h-[100dvh]` shell instead of a forced `h-screen` desktop shell.
+  - Added a small mobile browser chrome-collapse helper in `FramelessDeviceFrame`, using a 1px taller document surface and initial scroll nudge where the browser allows it.
+  - Added PWA/standalone metadata in `index.html` and `public/manifest.webmanifest` so stakeholders can add/open the demo as an app-like standalone surface instead of a normal browser tab.
+  - Stabilized the font fallback stack and font rendering in `src/styles/fonts.css`.
+- Font audit:
+  - The import chain is present: `src/main.tsx` imports `src/styles/index.css`, which imports `src/styles/fonts.css`.
+  - No `.woff`, `.woff2`, `.ttf`, or `.otf` UniCredit font files are currently bundled in the repo; the current `@font-face` rules resolve only from locally installed fonts and otherwise fall back to system fonts.
+  - For exact UniCredit typography on mobile devices, a licensed UniCredit webfont asset should be added and referenced explicitly.
+- Limitation:
+  - A normal Chrome/Safari tab opened from QR cannot be forced by web code to hide the browser URL bar and bottom toolbar permanently. The best app-like result is the new standalone/PWA path; direct browser tabs can only avoid the duplicated in-app status area and opportunistically collapse browser chrome.
+- Verification:
+  - Static scan passed: `src/app/components/FramelessDeviceFrame.tsx` no longer contains `StatusBar`, `DynamicIsland`, or `uc-phone-system-bar-bg`.
+  - Static font scan confirmed there are no bundled `.woff`, `.woff2`, `.ttf`, or `.otf` files in the repo.
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `npm run audit:templates` passed with `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed with `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - Build output contains `dist/manifest.webmanifest`.
+- safe to resume: yes
 
 ## 2026-07-01 QR Share Access Token
 

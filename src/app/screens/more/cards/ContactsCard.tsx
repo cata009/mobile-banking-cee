@@ -3,7 +3,7 @@
  * Card for Contacts section in More menu
  */
 
-import imgContacts from "figma:asset/4d22afc493e4ab72aca4b5793ce68cd204c58b7f.png";
+import { MORE_CARD_IMAGE_BY_TYPE } from "@/app/config/moreCardAssets";
 
 interface ContactsCardProps {
   onClick: () => void;
@@ -31,7 +31,9 @@ export function ContactsCard({ onClick, title = "Contacts" }: ContactsCardProps)
           <img 
             alt="" 
             className="absolute left-0 max-w-none size-full top-0" 
-            src={imgContacts}
+            decoding="async"
+            loading="eager"
+            src={MORE_CARD_IMAGE_BY_TYPE.contacts}
             style={{
               filter: "var(--pi-menu-card-image-filter, none)",
               opacity: "var(--pi-menu-card-image-opacity, 1)",

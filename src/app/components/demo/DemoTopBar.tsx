@@ -76,6 +76,7 @@ export function DemoTopBar() {
   const selectedRelease = getReleaseBundle(release);
   const isDesignSystemSelected = currentScreen === "design-system";
   const isFlowLibrarySelected = currentScreen === "flow-library";
+  const showContextControls = !isDesignSystemSelected && !isFlowLibrarySelected;
   const scenarioEntryScreen = scenario === "active" ? "homepage" : "prelogin-inactive";
 
   const activePlatformTab: PlatformTabId = isFlowLibrarySelected
@@ -267,7 +268,7 @@ export function DemoTopBar() {
                       onClick={() => handleProductSelect(productId)}
                       className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
                         product === productId
-                          ? "bg-[color-mix(in_srgb,var(--uc-brand)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-brand)]"
+                          ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
                           : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
                       }`}
                     >
@@ -303,7 +304,7 @@ export function DemoTopBar() {
           <div className="flex min-w-0 items-center justify-end gap-2">
             <button
               type="button"
-              className="flex h-[44px] min-w-[56px] items-center justify-center gap-2 rounded-[6px] px-2 text-[var(--uc-text)] transition-colors hover:bg-[var(--uc-surface-muted)]"
+              className="flex h-[44px] min-w-[56px] items-center justify-center gap-2 rounded-[6px] px-2 text-[var(--uc-text)] transition-colors hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-action)]"
               aria-label="Profile IM"
               title="Mihai Iacob"
             >
@@ -315,141 +316,143 @@ export function DemoTopBar() {
           </div>
         </div>
 
-        <div className="grid min-h-[48px] grid-cols-[1fr_auto_1fr] items-center gap-4 overflow-visible border-t border-[var(--uc-border-muted)] px-6 py-1.5 lg:px-10 xl:px-16">
-          <div className="flex min-w-0 items-center gap-3 overflow-visible">
-            <div className="relative shrink-0" ref={countryDropdownRef}>
-              <ContextDropdownButton
-                label={COUNTRY_META[country]?.nameEN || country}
-                expanded={isCountryDropdownOpen}
-                onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
-              />
+        {showContextControls ? (
+          <div className="grid min-h-[48px] grid-cols-[1fr_auto_1fr] items-center gap-4 overflow-visible border-t border-[var(--uc-border-muted)] px-6 py-1.5 lg:px-10 xl:px-16">
+            <div className="flex min-w-0 items-center gap-3 overflow-visible">
+              <div className="relative shrink-0" ref={countryDropdownRef}>
+                <ContextDropdownButton
+                  label={COUNTRY_META[country]?.nameEN || country}
+                  expanded={isCountryDropdownOpen}
+                  onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                />
 
-              {isCountryDropdownOpen && (
-                <div className="absolute left-0 top-full z-[10000] mt-2 min-w-[180px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-1 shadow-lg">
-                  {COUNTRIES.map((countryCode) => (
-                    <button
-                      key={countryCode}
-                      onClick={() => handleCountrySelect(countryCode)}
-                      className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
-                        country === countryCode
-                          ? "bg-[color-mix(in_srgb,var(--uc-brand)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-brand)]"
-                          : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
-                      }`}
-                    >
-                      {COUNTRY_META[countryCode]?.nameEN || countryCode}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="relative shrink-0" ref={releaseDropdownRef}>
-              <ContextDropdownButton
-                label={selectedRelease.label}
-                expanded={isReleaseDropdownOpen}
-                onClick={() => setIsReleaseDropdownOpen(!isReleaseDropdownOpen)}
-              />
-
-              {isReleaseDropdownOpen && (
-                <div className="absolute left-0 top-full z-[10000] mt-2 min-w-[170px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-1 shadow-lg">
-                  {RELEASE_ORDER.map((releaseId) => (
-                    <button
-                      key={releaseId}
-                      onClick={() => {
-                        setRelease(releaseId);
-                        setIsReleaseDropdownOpen(false);
-                      }}
-                      className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
-                        release === releaseId
-                          ? "bg-[color-mix(in_srgb,var(--uc-brand)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-brand)]"
-                          : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
-                      }`}
-                    >
-                      {getReleaseBundle(releaseId).label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <ScenarioModeSwitch value={scenario} onChange={setScenario} />
-
-          <div className="flex min-w-0 items-center justify-end gap-2">
-            {!isDesignSystemSelected && !isFlowLibrarySelected ? <PhoneScreenshotControl /> : null}
-
-            <HeaderIconButton icon="demo-reset" label="Refresh" onClick={handleReset} />
-
-            <div className="relative" ref={shareRef}>
-              <HeaderIconButton
-                icon="share-filled"
-                label="Share"
-                active={isShareOpen}
-                onClick={toggleShare}
-                expanded={isShareOpen}
-              />
-
-              {isShareOpen && (
-                <div className="absolute right-0 top-full z-[10000] mt-2 w-[264px] rounded-xl border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-4 shadow-xl">
-                  <p className="font-['UniCredit:Bold',sans-serif] text-[14px] leading-none text-[var(--uc-text)]">
-                    Share this state
-                  </p>
-                  <p className="mt-1.5 font-['UniCredit:Regular',sans-serif] text-[12px] leading-[16px] text-[var(--uc-text-muted)]">
-                    Same product, country, screen, language and theme you see now.
-                  </p>
-
-                  <div className="mt-3 flex flex-col items-center gap-2 rounded-lg bg-[var(--uc-surface-muted)] p-3">
-                    <div className="rounded-md bg-white p-2">
-                      <QRCodeSVG
-                        value={shareUrls.device || window.location.href}
-                        size={144}
-                        level="M"
-                        marginSize={2}
-                        fgColor="#111111"
-                        bgColor="#ffffff"
-                      />
-                    </div>
-                    <p className="text-center font-['UniCredit:Regular',sans-serif] text-[11px] leading-[14px] text-[var(--uc-text-muted)]">
-                      Scan to open on your phone, fullscreen, no frame
-                    </p>
+                {isCountryDropdownOpen && (
+                  <div className="absolute left-0 top-full z-[10000] mt-2 min-w-[180px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-1 shadow-lg">
+                    {COUNTRIES.map((countryCode) => (
+                      <button
+                        key={countryCode}
+                        onClick={() => handleCountrySelect(countryCode)}
+                        className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
+                          country === countryCode
+                            ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
+                            : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
+                        }`}
+                      >
+                        {COUNTRY_META[countryCode]?.nameEN || countryCode}
+                      </button>
+                    ))}
                   </div>
+                )}
+              </div>
 
-                  {isLocalhostShare && (
-                    <p className="mt-2 font-['UniCredit:Regular',sans-serif] text-[11px] leading-[14px] text-[#B45309]">
-                      On localhost the QR only resolves on this machine. Deploy the demo or use your LAN IP for real phones.
-                    </p>
-                  )}
+              <div className="relative shrink-0" ref={releaseDropdownRef}>
+                <ContextDropdownButton
+                  label={selectedRelease.label}
+                  expanded={isReleaseDropdownOpen}
+                  onClick={() => setIsReleaseDropdownOpen(!isReleaseDropdownOpen)}
+                />
 
-                  <button
-                    onClick={handleCopyShareLink}
-                    className={`mt-3 flex h-[36px] w-full items-center justify-center gap-2 rounded-lg text-[13px] font-['UniCredit:Bold',sans-serif] transition-colors ${
-                      shareCopied
-                        ? "bg-[var(--uc-brand)] text-[var(--uc-static-white)]"
-                        : "bg-[var(--uc-surface-muted)] text-[var(--uc-text)] hover:bg-[color-mix(in_srgb,var(--uc-brand)_12%,var(--uc-surface-muted))]"
-                    }`}
-                  >
-                    <span className="grid h-[18px] w-[18px] place-items-center">
-                      <AppIcon name={shareCopied ? "prime-check" : "share-filled"} />
-                    </span>
-                    {shareCopied ? "Link copied" : "Copy desktop link"}
-                  </button>
-                </div>
-              )}
+                {isReleaseDropdownOpen && (
+                  <div className="absolute left-0 top-full z-[10000] mt-2 min-w-[170px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-1 shadow-lg">
+                    {RELEASE_ORDER.map((releaseId) => (
+                      <button
+                        key={releaseId}
+                        onClick={() => {
+                          setRelease(releaseId);
+                          setIsReleaseDropdownOpen(false);
+                        }}
+                        className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
+                          release === releaseId
+                            ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
+                            : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
+                        }`}
+                      >
+                        {getReleaseBundle(releaseId).label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
-            <ThemeModeButton
-              mode={themeMode}
-              onClick={() => setThemeMode(themeMode === "light" ? "dark" : "light")}
-            />
+            <ScenarioModeSwitch value={scenario} onChange={setScenario} />
 
-            <HeaderIconButton
-              icon="demo-settings"
-              label="Settings"
-              active={isControlPanelOpen}
-              onClick={() => setIsControlPanelOpen(!isControlPanelOpen)}
-            />
+            <div className="flex min-w-0 items-center justify-end gap-2">
+              <PhoneScreenshotControl />
+
+              <HeaderIconButton icon="demo-reset" label="Refresh" onClick={handleReset} />
+
+              <div className="relative" ref={shareRef}>
+                <HeaderIconButton
+                  icon="share-filled"
+                  label="Share"
+                  active={isShareOpen}
+                  onClick={toggleShare}
+                  expanded={isShareOpen}
+                />
+
+                {isShareOpen && (
+                  <div className="absolute right-0 top-full z-[10000] mt-2 w-[264px] rounded-xl border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-4 shadow-xl">
+                    <p className="font-['UniCredit:Bold',sans-serif] text-[14px] leading-none text-[var(--uc-text)]">
+                      Share this state
+                    </p>
+                    <p className="mt-1.5 font-['UniCredit:Regular',sans-serif] text-[12px] leading-[16px] text-[var(--uc-text-muted)]">
+                      Same product, country, screen, language and theme you see now.
+                    </p>
+
+                    <div className="mt-3 flex flex-col items-center gap-2 rounded-lg bg-[var(--uc-surface-muted)] p-3">
+                      <div className="rounded-md bg-white p-2">
+                        <QRCodeSVG
+                          value={shareUrls.device || window.location.href}
+                          size={144}
+                          level="M"
+                          marginSize={2}
+                          fgColor="#111111"
+                          bgColor="#ffffff"
+                        />
+                      </div>
+                      <p className="text-center font-['UniCredit:Regular',sans-serif] text-[11px] leading-[14px] text-[var(--uc-text-muted)]">
+                        Scan to open on your phone, fullscreen, no frame
+                      </p>
+                    </div>
+
+                    {isLocalhostShare && (
+                      <p className="mt-2 font-['UniCredit:Regular',sans-serif] text-[11px] leading-[14px] text-[#B45309]">
+                        On localhost the QR only resolves on this machine. Deploy the demo or use your LAN IP for real phones.
+                      </p>
+                    )}
+
+                    <button
+                      onClick={handleCopyShareLink}
+                      className={`mt-3 flex h-[36px] w-full items-center justify-center gap-2 rounded-lg text-[13px] font-['UniCredit:Bold',sans-serif] transition-colors ${
+                        shareCopied
+                          ? "bg-[var(--uc-action)] text-[var(--uc-static-white)]"
+                          : "bg-[var(--uc-surface-muted)] text-[var(--uc-text)] hover:bg-[color-mix(in_srgb,var(--uc-action)_12%,var(--uc-surface-muted))] hover:text-[var(--uc-action)]"
+                      }`}
+                    >
+                      <span className="grid h-[18px] w-[18px] place-items-center">
+                        <AppIcon name={shareCopied ? "prime-check" : "share-filled"} />
+                      </span>
+                      {shareCopied ? "Link copied" : "Copy desktop link"}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <ThemeModeButton
+                mode={themeMode}
+                onClick={() => setThemeMode(themeMode === "light" ? "dark" : "light")}
+              />
+
+              <HeaderIconButton
+                icon="demo-settings"
+                label="Settings"
+                active={isControlPanelOpen}
+                onClick={() => setIsControlPanelOpen(!isControlPanelOpen)}
+              />
+            </div>
           </div>
-        </div>
+        ) : null}
       </header>
 
       <DemoFeatureSidePanel
@@ -562,7 +565,7 @@ function PlatformNavButton({
       aria-current={active ? "page" : undefined}
       onClick={onClick}
       className={`relative flex min-w-[92px] flex-col items-center justify-center gap-1 px-3 py-1.5 text-center transition-colors ${
-        active ? "text-[var(--uc-text)]" : "text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]"
+        active ? "text-[var(--uc-text)]" : "text-[var(--uc-text-muted)] hover:text-[var(--uc-action)]"
       }`}
     >
       {icon === "demo-app" ? <DemoPlatformIcon /> : <AppIcon name={icon} size={20} />}
@@ -592,7 +595,7 @@ function ThemeModeButton({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="grid size-[36px] place-items-center rounded-[6px] text-[var(--uc-text)] transition-colors hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-brand)]"
+      className="grid size-[36px] place-items-center rounded-[6px] text-[var(--uc-text)] transition-colors hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-action)]"
     >
       <ThemeModeIcon mode={mode} />
     </button>
@@ -613,11 +616,11 @@ function ContextDropdownButton({
       type="button"
       onClick={onClick}
       aria-expanded={expanded}
-      className="flex h-[34px] max-w-[220px] items-center gap-1 rounded-[6px] px-2 font-['UniCredit:Bold',sans-serif] text-[14px] leading-none text-[var(--uc-text)] transition-colors hover:bg-[var(--uc-surface-muted)]"
+      className="flex h-[34px] max-w-[220px] items-center gap-1 rounded-[6px] px-2 font-['UniCredit:Bold',sans-serif] text-[14px] leading-none text-[var(--uc-text)] transition-colors hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-action)]"
     >
       <span className="truncate">{label}</span>
-      <span className="grid size-[28px] shrink-0 place-items-center">
-        <AppIcon name="demo-chevron-down" color="currentColor" />
+      <span className="grid size-[16px] shrink-0 place-items-center opacity-90">
+        <AppIcon name="demo-chevron-down" color="currentColor" size={14} />
       </span>
     </button>
   );
@@ -645,8 +648,8 @@ function HeaderIconButton({
       title={label}
       className={`grid size-[36px] place-items-center rounded-[6px] transition-colors ${
         active
-          ? "bg-[color-mix(in_srgb,var(--uc-brand)_12%,var(--uc-surface))] text-[var(--uc-brand)]"
-          : "text-[var(--uc-text)] hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-brand)]"
+          ? "bg-[color-mix(in_srgb,var(--uc-action)_12%,var(--uc-surface))] text-[var(--uc-action)]"
+          : "text-[var(--uc-text)] hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-action)]"
       }`}
     >
       <AppIcon name={icon} size={20} />
@@ -678,7 +681,7 @@ function ScenarioModeSwitch({
             className={`rounded-[16px] px-3 py-1 font-['UniCredit:Bold',sans-serif] text-[12px] leading-none transition-colors ${
               isActive
                 ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm"
-                : "text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]"
+                : "text-[var(--uc-text-muted)] hover:text-[var(--uc-action)]"
             }`}
           >
             {mode === "active" ? "Active" : "Inactive"}

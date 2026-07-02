@@ -77,6 +77,9 @@ import huLearnTopicMoneyBasicsSrc from "../../../assets/kids/learn/hu-learn-topi
 import huLearnTopicOnlineSafetySrc from "../../../assets/kids/learn/hu-learn-topic-online-safety.png";
 import huLearnTopicRequestMoneySrc from "../../../assets/kids/learn/hu-learn-topic-request-money.png";
 import huLearnTopicSavingGoalsSrc from "../../../assets/kids/learn/hu-learn-topic-saving-goals.png";
+import huCardBgCatSrc from "../../../assets/kids/figma/hu-card-bg-cat.png";
+import huCardDetailCatSrc from "../../../assets/kids/figma/hu-card-detail-cat.png";
+import huCardHomeCatSrc from "../../../assets/kids/figma/hu-card-home-cat.png";
 import womanProfileSrc from "../../../assets/kids/woman-profile.png";
 import type { AccountTransaction } from "@/data/accountDetails";
 import {
@@ -1081,7 +1084,7 @@ type HuLightView =
   | "learn-lesson";
 type HuThemeId = "default" | "nordlys" | "blue-lines" | "bubbles" | "aurora" | "garden" | "solar";
 type HuMoneyReason = "Food" | "School" | "Transport" | "Fun" | "Other";
-type HuSendContact = "Anna" | "David" | "Grandma";
+type HuSendContact = "Anna" | "David" | "More contacts";
 type HuPendingActionFlow = "request-money" | "send-money";
 type HuPendingActionTone = "green" | "blue" | "pink" | "amber";
 type HuPendingActionStatus = "pending" | "approved";
@@ -1202,6 +1205,8 @@ type HuKidsRuntimeCountry = Extract<CountryId, "HU">;
 
 const HU_KIDS_SIMPLIFIED_MENU_SHAPE_COUNTRY: HuKidsMenuShapeCountry = "BA";
 const HU_KIDS_RUNTIME_COUNTRY: HuKidsRuntimeCountry = "HU";
+const HU_KIDS_HIDDEN_PAYMENT_PRIMARY_IDS = new Set(["recurrent-payments"]);
+const HU_KIDS_HIDDEN_PAYMENT_OTHER_IDS = new Set(["card-repayment", "exchange-rates"]);
 
 const HU_LIGHT_ACTIONS: Array<{ id: "request" | "send" | "card" | "more"; label: string; icon: IconName }> = [
   { id: "request", label: "Request money", icon: "hu-kids-request-money" },
@@ -1218,7 +1223,7 @@ const HU_SAVING_ACTIONS: Array<{ id: "save" | "request" | "card" | "more"; label
 ];
 
 const HU_MONEY_REASONS: HuMoneyReason[] = ["Food", "School", "Transport", "Fun", "Other"];
-const HU_SEND_CONTACTS: HuSendContact[] = ["Anna", "David", "Grandma"];
+const HU_SEND_CONTACTS: HuSendContact[] = ["Anna", "David", "More contacts"];
 const HU_SEND_APPROVAL_THRESHOLD = 5000;
 const HU_KIDS_WEEKLY_ALLOWANCE = 5000;
 
@@ -2565,20 +2570,8 @@ const HU_KIDS_CARDS: HuKidsCard[] = [
   {
     id: "alexandra-standard-main",
     title: "Mastercard Standard",
-    lastDigits: "4007",
-    holderName: "ALEXANDRA",
-  },
-];
-
-const HU_SEND_MONEY_TRANSFERS: HuSendMoneyTransfer[] = [
-  {
-    id: "hu-send-anna-project",
-    contactName: "Anna",
-    amount: 1200,
-    amountLabel: "1.200 HUF",
-    note: "Class project tickets",
-    status: "approved",
-    createdAt: "Yesterday",
+    lastDigits: "5678",
+    holderName: "ALEXANDRA ALBON",
   },
 ];
 
@@ -3157,7 +3150,6 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
   const [motionProgress, setMotionProgress] = useState(0);
   const [pendingActions, setPendingActions] = useState<HuPendingAction[]>(HU_PENDING_ACTIONS);
   const [selectedPendingActionId, setSelectedPendingActionId] = useState(HU_PENDING_ACTIONS[0]?.id ?? "");
-  const [sendMoneyTransfers, setSendMoneyTransfers] = useState<HuSendMoneyTransfer[]>(HU_SEND_MONEY_TRANSFERS);
   const [selectedCardId, setSelectedCardId] = useState(HU_KIDS_CARDS[0]?.id ?? "");
   const [selectedTransaction, setSelectedTransaction] = useState<AccountTransaction | null>(null);
   const [transactionReturnView, setTransactionReturnView] = useState<HuTransactionReturnView>("home");
@@ -3320,7 +3312,6 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
       createdAt: transfer.createdAt,
     };
 
-    setSendMoneyTransfers((current) => [transfer, ...current]);
     setPendingActions((current) => [action, ...current]);
     setSelectedPendingActionId(action.id);
   };
@@ -3525,11 +3516,8 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
     }
 
     if (view === "send-money") {
-      const latestTransfer = sendMoneyTransfers[0];
-
       return (
         <HuSendMoneyScreen
-          latestTransfer={latestTransfer}
           onBack={() => {
             setView("home");
             setActiveNav("home");
@@ -3821,7 +3809,6 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
 
         {isMoreSheetOpen ? (
           <HuMoreOptionsSheet
-            currentTheme={appliedTheme}
             onClose={() => setIsMoreSheetOpen(false)}
             onOpenThemes={() => {
               setDraftThemeId(appliedThemeId);
@@ -4003,15 +3990,19 @@ function HuKidsPaymentsPage({ onMessages, theme }: { onMessages?: () => void; th
   const menu = getPaymentsMenuForCountry(HU_KIDS_RUNTIME_COUNTRY);
   const [selectedPrimaryItemId, setSelectedPrimaryItemId] = useState<PaymentHeroItem["id"] | null>(null);
   const selectedHeroSheet = selectedPrimaryItemId ? menu.heroSheets[selectedPrimaryItemId] : null;
-  const localizedPrimaryItems = menu.primaryItems.map((item) => ({
-    ...item,
-    title: t(`runtime.payments.primaryItems.${item.id}.title`, item.title),
-    description: t(`runtime.payments.primaryItems.${item.id}.description`, item.description),
-  }));
-  const localizedOtherItems = menu.otherItems.map((item) => ({
-    ...item,
-    label: t(`runtime.payments.otherItems.${item.id}`, item.label),
-  }));
+  const localizedPrimaryItems = menu.primaryItems
+    .filter((item) => !HU_KIDS_HIDDEN_PAYMENT_PRIMARY_IDS.has(item.id))
+    .map((item) => ({
+      ...item,
+      title: t(`runtime.payments.primaryItems.${item.id}.title`, item.title),
+      description: t(`runtime.payments.primaryItems.${item.id}.description`, item.description),
+    }));
+  const localizedOtherItems = menu.otherItems
+    .filter((item) => !HU_KIDS_HIDDEN_PAYMENT_OTHER_IDS.has(item.id))
+    .map((item) => ({
+      ...item,
+      label: t(`runtime.payments.otherItems.${item.id}`, item.label),
+    }));
 
   return (
     <>
@@ -4135,7 +4126,9 @@ function HuKidsMorePage({
   theme: HuThemePreset;
 }) {
   const { t } = useLanguage();
-  const availableCards = getMoreCardsForCountry(HU_KIDS_SIMPLIFIED_MENU_SHAPE_COUNTRY);
+  const availableCards = getMoreCardsForCountry(HU_KIDS_SIMPLIFIED_MENU_SHAPE_COUNTRY).filter(
+    (cardType) => cardType !== "my-requests",
+  );
   const documentsCount = getDocumentsCountForCountry(HU_KIDS_RUNTIME_COUNTRY);
   const cardLabels: Record<MoreCardType, string> = {
     contacts: t("more.cards.contacts", "Contact"),
@@ -4379,12 +4372,10 @@ function HuRequestMoneyScreen({
 }
 
 function HuSendMoneyScreen({
-  latestTransfer,
   onBack,
   onSubmit,
   theme,
 }: {
-  latestTransfer?: HuSendMoneyTransfer;
   onBack: () => void;
   onSubmit: (contactName: HuSendContact, amount: number, note: string) => void;
   theme: HuThemePreset;
@@ -4498,53 +4489,6 @@ function HuSendMoneyScreen({
             </PrimaryButton>
           </section>
 
-          {latestTransfer ? (
-            <section className="mt-[16px] rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[18px] shadow-sm">
-              <div className="flex items-start gap-[12px]">
-                <span
-                  className={cn(
-                    "grid size-[44px] shrink-0 place-items-center rounded-full",
-                    latestTransfer.status === "approved"
-                      ? "bg-[color-mix(in_srgb,var(--hu-theme-accent)_14%,var(--hu-theme-card-bg))] text-[var(--hu-theme-accent-strong)]"
-                      : "bg-[color-mix(in_srgb,var(--uc-yellow-gold)_22%,var(--hu-theme-card-bg))] text-[color-mix(in_srgb,var(--uc-yellow-gold)_78%,var(--uc-text))]",
-                  )}
-                >
-                  <AppIcon name={latestTransfer.status === "approved" ? "prime-check" : "shield-check"} size={24} />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-[10px]">
-                    <p className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">
-                      {latestTransfer.status === "approved" ? "Money sent" : "Needs parent approval"}
-                    </p>
-                    <span
-                      className={cn(
-                        "rounded-full px-[8px] py-[3px] text-[10px] font-bold uppercase leading-[12px] tracking-[0]",
-                        latestTransfer.status === "approved"
-                          ? "bg-[color-mix(in_srgb,var(--hu-theme-accent)_12%,var(--hu-theme-card-bg))] text-[var(--hu-theme-accent-strong)]"
-                          : "bg-[color-mix(in_srgb,var(--uc-yellow-gold)_22%,var(--hu-theme-card-bg))] text-[color-mix(in_srgb,var(--uc-yellow-gold)_78%,var(--uc-text))]",
-                      )}
-                    >
-                      {latestTransfer.status}
-                    </span>
-                  </div>
-                  <p className="mt-[6px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
-                    {latestTransfer.amountLabel} to {latestTransfer.contactName}
-                    {latestTransfer.note ? ` - ${latestTransfer.note}` : ""}
-                  </p>
-                  <p className="mt-[10px] text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--uc-text)]">
-                    {latestTransfer.createdAt}
-                  </p>
-                </div>
-              </div>
-              <button
-                className="mt-[16px] h-[42px] w-full rounded-[10px] bg-[var(--hu-theme-control-bg)] text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--hu-theme-accent-strong)]"
-                onClick={onBack}
-                type="button"
-              >
-                Back to home
-              </button>
-            </section>
-          ) : null}
         </main>
     </div>
   );
@@ -4639,11 +4583,11 @@ function HuKidsCardDetailsPage({
   };
 
   const quickActions: HuKidsCardDetailAction[] = [
-    { id: "card-details", iconName: "eye", label: isCardBackVisible ? "Hide\ndetails" : "Card\ndetails", onClick: revealCardDetails },
+    { id: "card-details", iconName: "show-card-details", label: isCardBackVisible ? "Hide\ndetails" : "Card\ndetails", onClick: revealCardDetails },
     { id: "manage-card", iconName: "account-options", label: "Manage\ncard" },
     {
       id: "block-card",
-      iconName: "lock",
+      iconName: "block-card",
       label: isCardFrozen ? "Unblock\ncard" : "Block\ncard",
       onClick: () => setIsCardFrozen((current) => !current),
     },
@@ -4738,10 +4682,10 @@ function HuKidsCardRevealStage({
   onReveal: () => void;
   showAmounts: boolean;
 }) {
-  const cardNumber = "5319 7200 0000 4007";
+  const cardNumber = "5319 7200 0000 5678";
   const expiry = "09/29";
   const cvv = "214";
-  const cardNumberDisplay = showAmounts ? cardNumber : "5319 7200 **** 4007";
+  const cardNumberDisplay = showAmounts ? cardNumber : "5319 7200 **** 5678";
 
   return (
     <div className="relative flex justify-center">
@@ -4763,23 +4707,31 @@ function HuKidsCardRevealStage({
             style={{ backfaceVisibility: "hidden" }}
             type="button"
           >
-            <Card
-              ariaLabel={`${card.title} card ending ${card.lastDigits}`}
-              className={cn("h-full w-full transition-[filter,transform] duration-500", isFrozen ? "saturate-[0.68]" : "")}
-              size="large"
-              style={{ height: 206, width: 327 }}
+            <img
+              alt={`${card.title} card ending ${card.lastDigits}`}
+              className={cn("block h-full w-full object-cover transition-[filter,transform] duration-500", isFrozen ? "saturate-[0.68]" : "")}
+              draggable={false}
+              height={206}
+              src={huCardDetailCatSrc}
+              width={327}
             />
             <HuKidsCardFreezeOverlay isFrozen={isFrozen} />
           </button>
 
           <div
-            className="absolute inset-0 overflow-hidden rounded-[10px] border border-[color-mix(in_srgb,var(--uc-static-white)_34%,var(--uc-border-muted))] bg-[linear-gradient(135deg,#ff8a18_0%,#f3771c_48%,#b6421d_100%)] p-[18px] text-[var(--uc-static-white)] shadow-[0_18px_32px_color-mix(in_srgb,var(--uc-static-black)_28%,transparent)]"
+            className="absolute inset-0 overflow-hidden rounded-[10px] border border-[color-mix(in_srgb,var(--uc-static-white)_34%,var(--uc-border-muted))] p-[18px] text-[var(--uc-static-white)] shadow-[0_18px_32px_color-mix(in_srgb,var(--uc-static-black)_28%,transparent)]"
             style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
           >
-            <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-70">
-              <div className="absolute left-[-64px] top-[38px] h-[92px] w-[260px] rotate-45 rounded-full border-[28px] border-[color-mix(in_srgb,var(--uc-static-white)_34%,transparent)]" />
-              <div className="absolute right-[-42px] top-[-38px] h-[170px] w-[170px] rounded-full border-[24px] border-[color-mix(in_srgb,var(--uc-static-white)_16%,transparent)]" />
-            </div>
+            <img
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+              draggable={false}
+              height={206}
+              src={huCardBgCatSrc}
+              width={327}
+            />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[color-mix(in_srgb,var(--uc-static-black)_24%,transparent)]" />
 
             <div className="relative z-[1] flex h-full flex-col justify-between">
               <div className="flex items-start justify-between">
@@ -4991,8 +4943,8 @@ function HuHomeContent({
 
         <div className="mt-[24px] space-y-[24px] px-[24px]">
           <HuSpendingCard showAmounts={showAmounts} />
-          <HuTransactionsCard onTransactionClick={onTransactionClick} showAmounts={showAmounts} />
           <HuCardsPanel onCardDetails={onCardDetails} />
+          <HuTransactionsCard onTransactionClick={onTransactionClick} showAmounts={showAmounts} />
           <HuAllMoneyCard showAmounts={showAmounts} />
         </div>
     </main>
@@ -5277,23 +5229,15 @@ function HuThemeMotionLayer({
 }
 
 function HuMoreOptionsSheet({
-  currentTheme,
   onClose,
   onOpenThemes,
 }: {
-  currentTheme: HuThemePreset;
   onClose: () => void;
   onOpenThemes: () => void;
 }) {
   return (
     <BottomSheet
-      meta={
-        <span className="inline-flex items-center rounded-full bg-[color-mix(in_srgb,var(--hu-theme-accent)_12%,var(--uc-surface))] px-[10px] py-[4px] text-[12px] font-bold leading-[14px] tracking-[0] text-[var(--hu-theme-accent-strong)]">
-          {currentTheme.name} active
-        </span>
-      }
       onClose={onClose}
-      subtitle="Personalize Alexandra's home with motion, color, and blended cards."
       title="More options"
     >
       <div className="space-y-[10px]">
@@ -5316,27 +5260,6 @@ function HuMoreOptionsSheet({
           </span>
           <AppIcon color="var(--uc-icon-muted)" name="chevron-link" size={28} />
         </button>
-
-        <div className="grid grid-cols-2 gap-[10px]">
-          <button
-            className="flex items-center gap-[10px] rounded-[12px] bg-[var(--uc-surface-muted)] p-[12px] text-left"
-            type="button"
-          >
-            <span className="grid size-[34px] place-items-center rounded-full bg-[var(--uc-surface)] text-[var(--uc-text)]">
-              <AppIcon name="sliders-horizontal" size={18} />
-            </span>
-            <span className="text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--uc-text)]">Card controls</span>
-          </button>
-          <button
-            className="flex items-center gap-[10px] rounded-[12px] bg-[var(--uc-surface-muted)] p-[12px] text-left"
-            type="button"
-          >
-            <span className="grid size-[34px] place-items-center rounded-full bg-[var(--uc-surface)] text-[var(--uc-text)]">
-              <AppIcon name="shield-check" size={18} />
-            </span>
-            <span className="text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--uc-text)]">Safety limits</span>
-          </button>
-        </div>
       </div>
     </BottomSheet>
   );
@@ -6207,6 +6130,7 @@ function HuKidsGoalCard({
   showAmounts: boolean;
 }) {
   const progress = goalProgress(goal);
+  const iconName = getHuKidsGoalIcon(goal);
 
   return (
     <button
@@ -6216,7 +6140,7 @@ function HuKidsGoalCard({
     >
       <div className="flex items-start gap-[12px]">
         <span className="grid size-[42px] shrink-0 place-items-center rounded-full bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent-strong)]">
-          <AppIcon name="trophy" size={22} />
+          <AppIcon name={iconName} size={22} />
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-[8px]">
@@ -6237,6 +6161,15 @@ function HuKidsGoalCard({
       </div>
     </button>
   );
+}
+
+function getHuKidsGoalIcon(goal: SavingGoal): IconName {
+  const title = goal.title.toLowerCase();
+
+  if (title.includes("bike")) return "bike";
+  if (title.includes("headphone")) return "gift";
+  if (title.includes("school")) return "book-open";
+  return "trophy";
 }
 
 function HuKidsGoalPageHeader({
@@ -7614,10 +7547,13 @@ function HuCardsPanel({ onCardDetails }: { onCardDetails: (cardId: string) => vo
         onClick={() => onCardDetails(card.id)}
         type="button"
       >
-        <Card
-          ariaLabel={`${card.title} card ending ${card.lastDigits}`}
-          className="shadow-[0_4px_8px_color-mix(in_srgb,var(--uc-static-black)_12%,transparent)]"
-          size="figma"
+        <img
+          alt={`${card.title} card ending ${card.lastDigits}`}
+          className="block h-[40px] w-[64px] shrink-0 rounded-[4px] object-cover shadow-[0_4px_8px_color-mix(in_srgb,var(--uc-static-black)_12%,transparent)]"
+          draggable={false}
+          height={40}
+          src={huCardHomeCatSrc}
+          width={64}
         />
         <span className="flex min-w-0 flex-col gap-[4px]">
           <span className="truncate text-[14px] font-bold leading-[15px] tracking-[0] text-[var(--uc-text)]">
@@ -7666,17 +7602,6 @@ function HuTasksCard({
           </div>
         ))}
       </div>
-
-      {/* Footer */}
-      <div className="flex justify-center">
-        <button
-          type="button"
-          className="flex items-center gap-[4px] whitespace-nowrap text-[14px] font-bold uppercase leading-[16px] tracking-[0] text-[var(--hu-theme-accent-strong)]"
-        >
-          <AppIcon name="add-circle" size={16} />
-          <span>ADD NEW TASK</span>
-        </button>
-      </div>
     </section>
   );
 }
@@ -7698,7 +7623,7 @@ function HuTaskRow({
       ? "Waiting parent"
       : task.status === "approved"
         ? "Approved"
-        : task.recurrence;
+        : "Pending";
 
   return (
     <button className="flex min-h-[48px] w-full items-center gap-[8px] text-left" onClick={onClick} type="button">
@@ -7719,9 +7644,23 @@ function HuTaskRow({
           <p className="min-h-[24px] text-[16px] font-bold leading-[18px] tracking-[0] text-[var(--uc-text)]">
             {task.title}
           </p>
-          <p className="text-[14px] font-normal leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">
-            {statusLabel}
-          </p>
+          <div className="flex min-w-0 flex-wrap items-center gap-[6px]">
+            <span className="text-[14px] font-normal leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">
+              {task.recurrence}
+            </span>
+            <span
+              className={cn(
+                "rounded-full px-[7px] py-[2px] text-[11px] font-bold leading-[13px] tracking-[0]",
+                task.status === "approved"
+                  ? "bg-[color-mix(in_srgb,var(--uc-green-success)_14%,var(--uc-surface))] text-[var(--uc-green-success)]"
+                  : task.status === "waiting-parent"
+                    ? "bg-[color-mix(in_srgb,var(--uc-yellow-gold)_18%,var(--uc-surface))] text-[var(--uc-yellow-gold)]"
+                    : "bg-[var(--hu-theme-control-bg)] text-[var(--hu-theme-accent-strong)]",
+              )}
+            >
+              {statusLabel}
+            </span>
+          </div>
         </div>
       </div>
 

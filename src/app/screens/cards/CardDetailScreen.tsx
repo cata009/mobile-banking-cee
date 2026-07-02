@@ -64,7 +64,7 @@ function CollapsingCardHeader({
   onHelpClick?: () => void;
 }) {
   return (
-    <div className="sticky top-0 z-30 bg-[var(--uc-app-bg)] pt-[54px]">
+    <div className="sticky top-0 z-30 bg-[var(--uc-app-bg)] pt-[var(--uc-phone-top-reserve,54px)]">
       <div className="grid h-[48px] grid-cols-[40px_1fr_40px] items-center px-[8px] pt-[8px]">
         <button
           onClick={onBack}

@@ -4,7 +4,7 @@
  * Supports badge count for new documents
  */
 
-import imgDocuments from "figma:asset/befcf83245a907a033553e7ac7902995e124d730.png";
+import { MORE_CARD_IMAGE_BY_TYPE } from "@/app/config/moreCardAssets";
 
 interface DocumentsCardProps {
   onClick: () => void;
@@ -33,7 +33,9 @@ export function DocumentsCard({ onClick, badgeCount, title = "Documents" }: Docu
           <img 
             alt="" 
             className="absolute left-0 max-w-none size-full top-0" 
-            src={imgDocuments}
+            decoding="async"
+            loading="eager"
+            src={MORE_CARD_IMAGE_BY_TYPE.documents}
             style={{
               filter: "var(--pi-menu-card-image-filter, none)",
               opacity: "var(--pi-menu-card-image-opacity, 1)",

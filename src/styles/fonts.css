@@ -62,7 +62,11 @@
 }
 
 :root {
-  --font-unicredit-stack: 'UniCredit', 'UniCredit:Regular', 'UniCredit:Bold', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-unicredit-stack: 'UniCredit', 'UniCredit:Regular', 'UniCredit:Bold', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .font-unicredit {

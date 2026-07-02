@@ -11,6 +11,8 @@ import type {
   CountryId,
   DesignSystemId,
   FeatureId,
+  ProductCountKey,
+  ProductCounts,
   ProductId,
   ReleaseId,
   Scenario,
@@ -18,6 +20,18 @@ import type {
   DemoState,
   DemoStore,
 } from "./demoTypes";
+
+export const DEFAULT_PRODUCT_COUNTS: ProductCounts = {
+  accounts: 2,
+  debitCards: 1,
+  creditCards: 1,
+  mealCards: 0,
+  deposits: 1,
+  savingsAccounts: 1,
+  loans: 1,
+  mortgages: 1,
+  investments: 1,
+};
 
 /**
  * Get context key for current demo configuration.
@@ -72,6 +86,7 @@ const DEFAULT_DEMO_STATE: DemoState = {
   },
   amountsHidden: false,
   themeMode: "light",
+  productCounts: DEFAULT_PRODUCT_COUNTS,
 };
 
 const DEFAULT_BANKING_SCENARIO_BY_PRODUCT: Record<ProductId, BankingScenarioId> = {
@@ -112,6 +127,10 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
     flagsByContext: {
       ...DEFAULT_DEMO_STATE.flagsByContext,
       ...initialState?.flagsByContext,
+    },
+    productCounts: {
+      ...DEFAULT_DEMO_STATE.productCounts,
+      ...initialState?.productCounts,
     },
   });
 
@@ -171,6 +190,21 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
    */
   const setBankingScenario = (bankingScenario: BankingScenarioId) => {
     setState(prev => ({ ...prev, bankingScenario }));
+  };
+
+  /**
+   * Update one editable product count. The runtime clamps values to a compact
+   * demo-friendly range so the phone UI cannot be accidentally flooded.
+   */
+  const setProductCount = (key: ProductCountKey, value: number) => {
+    const normalizedValue = Number.isFinite(value) ? Math.max(0, Math.min(9, Math.trunc(value))) : 0;
+    setState(prev => ({
+      ...prev,
+      productCounts: {
+        ...prev.productCounts,
+        [key]: normalizedValue,
+      },
+    }));
   };
 
   /**
@@ -248,6 +282,7 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
     setBaseline,
     setRelease,
     setBankingScenario,
+    setProductCount,
     setFlag,
     toggleAmountsHidden,
     setAmountsHidden,
@@ -327,6 +362,8 @@ export type {
   CountryId,
   DesignSystemId,
   FeatureId,
+  ProductCountKey,
+  ProductCounts,
   ProductId,
   ReleaseId,
   Scenario,
