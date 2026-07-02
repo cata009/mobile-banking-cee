@@ -58,6 +58,7 @@ import {
 } from "@/app/utils/deepLink";
 import type { FlowPreviewId } from "@/app/registry/flowPreviewRegistry";
 import { isInvestmentsPortfolioAvailable } from "@/app/utils/investmentsAvailability";
+import { preloadMoreCardImages } from "@/app/config/moreCardAssets";
 import { isKidsHomeCountry } from "@/data/kidsMarketHomeConcepts";
 import type { AccountTransaction } from "@/data/accountDetails";
 import {
@@ -133,9 +134,13 @@ function AppWithNavigation({
   // fullscreen without the desktop demo shell / phone bezel.
   const deviceMode = Boolean(parsedDeepLink?.deviceMode);
   const appContent = <AppContent parsedDeepLink={parsedDeepLink} deviceMode={deviceMode} />;
+  const shellClassName = [
+    themeMode === "dark" ? "dark" : "",
+    deviceMode ? "min-h-[100dvh]" : "h-screen",
+  ].filter(Boolean).join(" ");
 
   return (
-    <div data-uc-theme={themeMode} className={themeMode === "dark" ? "dark h-screen" : "h-screen"}>
+    <div data-uc-theme={themeMode} className={shellClassName}>
       <NavigationProvider
         initialScreen={initialScreen}
         initialCoAppingActive={initialCoAppingActive}
@@ -206,6 +211,10 @@ function AppContent({
   const [paymentDraft, setPaymentDraft] = useState<DomesticPaymentDraft | null>(null);
   const accountProducts = categories.flatMap((category) => category.products);
   const selectedAccountProduct = accountProducts.find((accountProduct) => accountProduct.id === selectedAccountId) ?? accountProducts[0] ?? null;
+
+  useEffect(() => {
+    preloadMoreCardImages();
+  }, []);
 
   useEffect(() => {
     const syncDesignSystemHash = () => {

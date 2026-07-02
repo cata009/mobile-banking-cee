@@ -1,30 +1,33 @@
 /**
  * Demo Control Panel
- * Slide-in panel with context, release/baseline metadata, and feature coverage controls.
+ * Slide-in panel with scenario, editable product mix, rights, and feature coverage controls.
  */
 
 import { AppIcon } from "@/app/components/icons";
 import { useDemo } from "@/app/state/demoStore";
 import { isFeatureActive } from "@/app/state/featureResolver";
-import {
-  BASELINES,
-  DESIGN_SYSTEM_ORDER,
-  DESIGN_SYSTEMS,
-  PRODUCT_ORDER,
-  PRODUCTS,
-} from "@/app/registry/projectModel";
 import { FEATURE_META } from "@/app/registry/demoConfig";
 import { BANKING_SCENARIOS } from "@/app/platform/banking/bankingScenarioRegistry";
 import { resolveEffectiveAppContext } from "@/app/platform/effectiveAppContext";
-import { getReleaseBundle } from "@/app/registry/releaseRegistry";
 import type {
   BankingScenarioId,
   CountryId,
-  DesignSystemId,
   FeatureId,
   FeatureMeta,
-  ProductId,
+  ProductCountKey,
 } from "@/app/state/demoTypes";
+
+const PRODUCT_COUNT_CONTROLS: Array<{ key: ProductCountKey; label: string }> = [
+  { key: "accounts", label: "Accounts" },
+  { key: "debitCards", label: "Debit cards" },
+  { key: "creditCards", label: "Credit cards" },
+  { key: "mealCards", label: "Meal cards" },
+  { key: "deposits", label: "Deposits" },
+  { key: "savingsAccounts", label: "Savings accounts" },
+  { key: "loans", label: "Loans" },
+  { key: "mortgages", label: "Mortgages" },
+  { key: "investments", label: "Investments" },
+];
 
 function getScopeLabel(meta: FeatureMeta): string {
   if (meta.scope === "global") {
@@ -81,24 +84,21 @@ interface DemoFeatureSidePanelProps {
 export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelProps) {
   const demoState = useDemo();
   const {
-    product,
     scenario,
-    designSystem,
-    themeMode,
     bankingScenario,
-    setProduct,
-    setDesignSystem,
-    setThemeMode,
+    productCounts,
     setBankingScenario,
+    setProductCount,
     setFlag,
-    release,
   } = demoState;
-  const releaseBundle = getReleaseBundle(release);
   const effectiveContext = resolveEffectiveAppContext(demoState);
 
   const allFeatureIds = Object.keys(FEATURE_META) as FeatureId[];
   const releaseFeatures = allFeatureIds.filter((id) => FEATURE_META[id].kind === "release");
   const unplannedFeatures = allFeatureIds.filter((id) => FEATURE_META[id].kind === "unplanned");
+  const visibleBankingScenarioIds = (Object.keys(BANKING_SCENARIOS) as BankingScenarioId[]).filter(
+    (scenarioId) => scenarioId !== "sme-owner-preview" && scenarioId !== "kids-child-preview"
+  );
   const isInactive = scenario === "inactive";
 
   return (
@@ -119,7 +119,7 @@ export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelPr
           <div>
             <h3 className="font-semibold text-[var(--uc-text)] text-lg">Control Panel</h3>
             <p className="text-xs text-[var(--uc-text-muted)] mt-1">
-              Context, release preview, and feature coverage
+              Scenario, data snapshot, and feature coverage
             </p>
           </div>
           <button
@@ -134,126 +134,26 @@ export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelPr
         <div className="p-6 space-y-6">
           <section className="border border-[var(--uc-border-muted)] rounded-md p-4">
             <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-3">
-              Current Context
-            </h4>
-            <div className="space-y-2 text-sm">
-              <ContextRow label="Selected product" value={PRODUCTS[product].label} />
-              <ContextRow label="Selected design system" value={DESIGN_SYSTEMS[designSystem].label} />
-              <ContextRow label="Baseline" value={BASELINES[releaseBundle.baseline].label} />
-              <ContextRow label="Release preview" value={releaseBundle.label} />
-              <ContextRow label="Scenario" value={scenario} />
-              <ContextRow label="Banking profile" value={effectiveContext.userScenario.label} />
-              <ContextRow label="Project pack" value={effectiveContext.projectPack.id} />
-            </div>
-          </section>
-
-          <section className="border border-[var(--uc-border-muted)] rounded-md p-4">
-            <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-3">
-              Release
-            </h4>
-            <div className="space-y-3">
-              <ContextRow label="Baseline ledger" value={effectiveContext.baseline.label} />
-              <ContextRow
-                label="Promotion target"
-                value={effectiveContext.promotionReadiness.targetBaseline ?? "none"}
-              />
-              <ContextRow
-                label="Added features"
-                value={effectiveContext.releaseDiff.addedFeatures.length.toString()}
-              />
-              <ContextRow
-                label="Retire flags"
-                value={effectiveContext.releaseDiff.flagRetirementCandidates.length.toString()}
-              />
-              <ReadinessChecks checks={effectiveContext.promotionReadiness.checks} />
-            </div>
-          </section>
-
-          <section className="border border-[var(--uc-border-muted)] rounded-md p-4">
-            <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-3">
-              Product
-            </h4>
-            <SegmentedOptions
-              value={product}
-              options={PRODUCT_ORDER.map((productId) => ({
-                id: productId,
-                label: PRODUCTS[productId].label,
-                note: PRODUCTS[productId].status === "planned" ? "planned" : undefined,
-              }))}
-              onChange={(value) => setProduct(value as ProductId)}
-            />
-          </section>
-
-          <section className="border border-[var(--uc-border-muted)] rounded-md p-4">
-            <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-3">
-              Design System
-            </h4>
-            <SegmentedOptions
-              value={designSystem}
-              options={DESIGN_SYSTEM_ORDER.map((designSystemId) => ({
-                id: designSystemId,
-                label: DESIGN_SYSTEMS[designSystemId].label,
-                note: DESIGN_SYSTEMS[designSystemId].status === "planned" ? "planned" : undefined,
-              }))}
-              onChange={(value) => setDesignSystem(value as DesignSystemId)}
-            />
-          </section>
-
-          <section className="border border-[var(--uc-border-muted)] rounded-md p-4">
-            <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-3">
-              Appearance
-            </h4>
-            <SegmentedOptions
-              value={themeMode}
-              options={[
-                { id: "light", label: "Light" },
-                { id: "dark", label: "Dark" },
-              ]}
-              onChange={(value) => setThemeMode(value as "light" | "dark")}
-            />
-          </section>
-
-          <section className="border border-[var(--uc-border-muted)] rounded-md p-4">
-            <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-3">
               Banking Scenario
             </h4>
             <SegmentedOptions
               value={bankingScenario}
-              options={(Object.keys(BANKING_SCENARIOS) as BankingScenarioId[]).map((scenarioId) => ({
+              options={visibleBankingScenarioIds.map((scenarioId) => ({
                 id: scenarioId,
                 label: BANKING_SCENARIOS[scenarioId].label,
                 note: BANKING_SCENARIOS[scenarioId].readiness,
               }))}
               onChange={(value) => setBankingScenario(value as BankingScenarioId)}
             />
-            <div className="mt-4 space-y-2 text-sm">
-              <ContextRow label="Segment" value={effectiveContext.userScenario.segment} />
-              <ContextRow label="Authority" value={effectiveContext.userScenario.authority} />
-              <ContextRow label="Limit" value={`${effectiveContext.limits.perTransaction.toLocaleString()} ${effectiveContext.limits.currency}`} />
-              <ContextRow label="Daily" value={`${effectiveContext.limits.daily.toLocaleString()} ${effectiveContext.limits.currency}`} />
-            </div>
           </section>
 
           <section className="border border-[var(--uc-border-muted)] rounded-md p-4">
             <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-3">
               Data Snapshot
             </h4>
-            <MetricGrid
-              items={[
-                ["Accounts", effectiveContext.dataSnapshot.accounts],
-                ["Cards", effectiveContext.dataSnapshot.cards],
-                ["Deposits", effectiveContext.dataSnapshot.deposits],
-                ["Investments", effectiveContext.dataSnapshot.investments],
-                ["Loans", effectiveContext.dataSnapshot.loans],
-                ["Goals", effectiveContext.dataSnapshot.savingsGoals],
-              ]}
-            />
-            <MiniList
-              title="Holdings"
-              items={effectiveContext.holdings.map(
-                (holding) => `${holding.label} - ${holding.currency} - ${holding.status}`
-              )}
-              empty="No holdings for this profile"
+            <ProductCountEditor
+              values={productCounts}
+              onChange={setProductCount}
             />
           </section>
 
@@ -269,25 +169,6 @@ export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelPr
                 (disabledAction) => `${disabledAction.label}: ${disabledAction.reason}`
               )}
               empty="No disabled actions"
-            />
-          </section>
-
-          <section className="border border-[var(--uc-border-muted)] rounded-md p-4">
-            <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-3">
-              Project Pack
-            </h4>
-            <div className="space-y-2 text-sm">
-              <ContextRow label="Runtime coverage" value={effectiveContext.projectPack.runtimeCoverage} />
-              <ContextRow label="Integration" value={effectiveContext.projectPack.integrationReadiness} />
-              <ContextRow label="Default scenario" value={effectiveContext.projectPack.defaultScenario} />
-              <ContextRow label="Demo entries" value={effectiveContext.projectPack.demoEntries.length.toString()} />
-            </div>
-            <MiniList
-              title="Knowledge sources"
-              items={effectiveContext.projectPack.knowledgeSources.map(
-                (source) => `${source.id} - ${source.authority}`
-              )}
-              empty="No sources"
             />
           </section>
 
@@ -354,47 +235,32 @@ function ContextRow({ label, value }: ContextRowProps) {
   );
 }
 
-interface ReadinessChecksProps {
-  checks: readonly { id: string; label: string; passed: boolean; detail: string }[];
+interface ProductCountEditorProps {
+  values: Record<ProductCountKey, number>;
+  onChange: (key: ProductCountKey, value: number) => void;
 }
 
-function ReadinessChecks({ checks }: ReadinessChecksProps) {
+function ProductCountEditor({ values, onChange }: ProductCountEditorProps) {
   return (
-    <div className="space-y-2">
-      {checks.map((check) => (
-        <div
-          key={check.id}
-          className={`rounded-md border px-3 py-2 text-xs ${
-            check.passed
-              ? "border-[var(--uc-green-success)] bg-[color-mix(in_srgb,var(--uc-green-success)_10%,var(--uc-surface))]"
-              : "border-[var(--uc-yellow-gold)] bg-[color-mix(in_srgb,var(--uc-yellow-gold)_12%,var(--uc-surface))]"
-          }`}
+    <div className="grid grid-cols-2 gap-2">
+      {PRODUCT_COUNT_CONTROLS.map(({ key, label }) => (
+        <label
+          key={key}
+          className="rounded-md border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-3 py-2"
         >
-          <div className="flex items-center justify-between gap-3">
-            <span className="font-semibold text-[var(--uc-text)]">{check.label}</span>
-            <span className={check.passed ? "text-[var(--uc-green-olive)]" : "text-[var(--uc-gold-brown)]"}>
-              {check.passed ? "ready" : "needs work"}
-            </span>
-          </div>
-          <p className="mt-1 text-[var(--uc-text-muted)]">{check.detail}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-interface MetricGridProps {
-  items: readonly [string, number][];
-}
-
-function MetricGrid({ items }: MetricGridProps) {
-  return (
-    <div className="grid grid-cols-3 gap-2">
-      {items.map(([label, value]) => (
-        <div key={label} className="rounded-md border border-[var(--uc-border-muted)] px-2 py-2 text-center">
-          <div className="text-base font-semibold text-[var(--uc-text)]">{value}</div>
-          <div className="text-[10px] uppercase text-[var(--uc-text-muted)]">{label}</div>
-        </div>
+          <span className="block text-[11px] font-semibold uppercase tracking-wide text-[var(--uc-text-muted)]">
+            {label}
+          </span>
+          <input
+            aria-label={`${label} product count`}
+            type="number"
+            min={0}
+            max={9}
+            value={values[key]}
+            onChange={(event) => onChange(key, Number(event.target.value))}
+            className="mt-1 h-[32px] w-full rounded-sm border border-[var(--uc-border-muted)] bg-[var(--uc-app-bg)] px-2 text-right text-base font-semibold text-[var(--uc-text)] outline-none focus:border-[var(--uc-action)]"
+          />
+        </label>
       ))}
     </div>
   );

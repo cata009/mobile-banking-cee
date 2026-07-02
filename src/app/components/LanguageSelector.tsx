@@ -51,7 +51,7 @@ export default function LanguageSelector({ onBack }: LanguageSelectorProps) {
   return (
     <div className="w-full h-full relative bg-[var(--uc-surface)] flex flex-col">
       {/* Page Header - cu spacing corect de la status bar */}
-      <div className="pt-[54px]"> {/* 54px = status bar height (46px) + 8px gap */}
+      <div className="pt-[var(--uc-phone-top-reserve,54px)]"> {/* phone top reserve */}
         <PageHeader 
           title={tempT('languageSelector.selectLanguage')}
           onBack={onBack}

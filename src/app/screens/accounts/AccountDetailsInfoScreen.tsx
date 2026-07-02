@@ -20,6 +20,7 @@ const PRODUCT_TITLE_KEYS_BY_TYPE: Record<Product["type"], string> = {
   current_account: "currentAccount",
   debit_card: "debitCard",
   credit_card: "creditCard",
+  meal_card: "debitCard",
   saving_account: "savingAccount",
   term_deposit: "termDeposit",
   loan: "loan",

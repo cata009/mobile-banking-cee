@@ -3,7 +3,7 @@
  * Card for GDPR Consent section in More menu
  */
 
-import imgGdprConsent from "figma:asset/4d7abd397db5234d24f236a294f434a9b45b7d2b.png";
+import { MORE_CARD_IMAGE_BY_TYPE } from "@/app/config/moreCardAssets";
 
 interface GdprConsentCardProps {
   onClick: () => void;
@@ -29,7 +29,7 @@ export function GdprConsentCard({ onClick, title = "GDPR Consent" }: GdprConsent
       <div 
         className="absolute bottom-[-35.83%] left-[38.66%] right-[-0.24%] top-1/2"
         style={{ 
-          backgroundImage: `url('${imgGdprConsent}')`,
+          backgroundImage: `url('${MORE_CARD_IMAGE_BY_TYPE["gdpr-consent"]}')`,
           backgroundSize: '61.60000091791153px 62.90000093728304px',
           backgroundPosition: 'top left',
           filter: "var(--pi-menu-card-image-filter, none)",

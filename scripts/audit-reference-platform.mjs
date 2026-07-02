@@ -97,8 +97,41 @@ scenarios.forEach((scenario) => {
 repositoriesExpected.forEach((repository) => assertIncludes(repositories, repository, "repository export"));
 effectiveFields.forEach((field) => assertIncludes(effectiveContext, field, "effective context field"));
 
-["Banking Scenario", "Data Snapshot", "Rights", "Project Pack", "ReadinessChecks"].forEach((panelSection) => {
+["Banking Scenario", "Data Snapshot", "Rights", "Release Features", "Unplanned Features"].forEach((panelSection) => {
   assertIncludes(sidePanel, panelSection, "control panel section");
+});
+
+[
+  "CURRENT CONTEXT",
+  "Release preview",
+  "Project Pack",
+  "Selected product",
+  "PRODUCT_ORDER",
+  "DESIGN SYSTEM",
+  "APPEARANCE",
+  "SME / owner preview",
+  "Kids / child preview",
+].forEach((removedPanelCopy) => {
+  assert(!sidePanel.includes(removedPanelCopy), `Removed control panel copy still present: ${removedPanelCopy}`);
+});
+
+[
+  "ProductCountKey",
+  "ProductCounts",
+  "productCounts",
+  "setProductCount",
+].forEach((productCountSymbol) => {
+  assertIncludes(demoTypes + sidePanel, productCountSymbol, "editable product-count control contract");
+});
+
+[
+  "Debit cards",
+  "Credit cards",
+  "Meal cards",
+  "Savings accounts",
+  "Mortgages",
+].forEach((productCountLabel) => {
+  assertIncludes(sidePanel, productCountLabel, "editable product-count label");
 });
 
 console.log(

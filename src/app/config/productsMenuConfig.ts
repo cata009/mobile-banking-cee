@@ -151,6 +151,44 @@ const PRODUCT_CARD_SHEETS: Partial<Record<ProductsCardId, ProductCardSheetConfig
   },
 };
 
+const RO_PRODUCT_CARD_SHEETS: Partial<Record<ProductsCardId, ProductCardSheetConfig>> = {
+  account: {
+    options: [
+      { id: "current-account", title: "Current account" },
+      { id: "overdraft", title: "Overdraft" },
+    ],
+  },
+  cards: {
+    options: [
+      { id: "debit-card", title: "Debit card" },
+      { id: "credit-card-consumer-financing", title: "Credit card UniCredit Consumer Financing" },
+      { id: "virtual-card", title: "Virtual card" },
+    ],
+  },
+  "mortgages-loans": {
+    title: "Borrowing",
+    options: [
+      { id: "personal-loan", title: "Personal loan" },
+      { id: "mortgage-loan", title: "Mortgage loan" },
+    ],
+  },
+  insurance: {
+    title: "Insurances",
+    options: [
+      { id: "genius-protect", title: "Genius Protect" },
+      { id: "home-insurance", title: "Home insurance" },
+      { id: "travel", title: "Travel" },
+      { id: "my-car", title: "My Car" },
+      { id: "umbrella", title: "Umbrella" },
+      { id: "start-invest", title: "Start invest" },
+    ],
+  },
+};
+
+const COUNTRY_PRODUCT_CARD_SHEETS: Partial<Record<CountryId, Partial<Record<ProductsCardId, ProductCardSheetConfig>>>> = {
+  RO: RO_PRODUCT_CARD_SHEETS,
+};
+
 const BANKING_PRODUCTS: readonly ProductsCard[] = [
   {
     id: "account",
@@ -188,6 +226,18 @@ const BANKING_PRODUCTS: readonly ProductsCard[] = [
     imageSrc: productCardInvestmentsImage,
   },
 ];
+
+const RO_BANKING_PRODUCT_ORDER: readonly ProductsCardId[] = [
+  "account",
+  "cards",
+  "mortgages-loans",
+  "investments-savings",
+  "insurance",
+];
+
+const RO_BANKING_PRODUCTS: readonly ProductsCard[] = RO_BANKING_PRODUCT_ORDER
+  .map((productId) => BANKING_PRODUCTS.find((product) => product.id === productId))
+  .filter((product): product is ProductsCard => Boolean(product));
 
 const SHOPSMART_PRODUCTS: readonly ProductsCard[] = [
   { id: "account", title: "Electronics", background: "var(--uc-product-blue-deep)", illustration: "bag" },
@@ -303,47 +353,50 @@ function withAdditionalServices(baseConfig: ProductsMenuConfig): ProductsMenuCon
   };
 }
 
-const RO_PRODUCTS_MENU = withOfferOverrides(createProductsMenuConfig(true), {
-  offers: [
-    {
-      id: "ro-offer-1",
-      title: "Premium current\naccount offer",
-      description: "Enjoy zero monthly fee\nand smart everyday\nbanking benefits.",
-      colorFamily: "green",
-      lightVersion: false,
-    },
-    {
-      id: "ro-offer-2",
-      title: "Home loan with\nbetter terms",
-      description: "Refinance your mortgage\nand keep your monthly\nbudget more relaxed.",
-      colorFamily: "blue",
-      lightVersion: true,
-    },
-    {
-      id: "ro-offer-3",
-      title: "Travel insurance\nfor summer plans",
-      description: "Add extra peace of mind\nfor holidays, city breaks,\nand family escapes.",
-      colorFamily: "yellow",
-      lightVersion: false,
-    },
-  ],
-  shopSmartOffers: [
-    {
-      id: "ro-shopsmart-offer-1",
-      title: "Shop smarter with\nyour card",
-      description: "Unlock partner deals\nand extra value on\neveryday purchases.",
-      colorFamily: "yellow",
-      lightVersion: true,
-    },
-    {
-      id: "ro-shopsmart-offer-2",
-      title: "Weekend city deals\nfor card holders",
-      description: "Save on dining, tickets,\nand quick getaways with\nselected partners.",
-      colorFamily: "pink",
-      lightVersion: true,
-    },
-  ],
-});
+const RO_PRODUCTS_MENU = {
+  ...withOfferOverrides(createProductsMenuConfig(true), {
+    offers: [
+      {
+        id: "ro-offer-1",
+        title: "Premium current\naccount offer",
+        description: "Enjoy zero monthly fee\nand smart everyday\nbanking benefits.",
+        colorFamily: "green",
+        lightVersion: false,
+      },
+      {
+        id: "ro-offer-2",
+        title: "Home loan with\nbetter terms",
+        description: "Refinance your mortgage\nand keep your monthly\nbudget more relaxed.",
+        colorFamily: "blue",
+        lightVersion: true,
+      },
+      {
+        id: "ro-offer-3",
+        title: "Travel insurance\nfor summer plans",
+        description: "Add extra peace of mind\nfor holidays, city breaks,\nand family escapes.",
+        colorFamily: "yellow",
+        lightVersion: false,
+      },
+    ],
+    shopSmartOffers: [
+      {
+        id: "ro-shopsmart-offer-1",
+        title: "Shop smarter with\nyour card",
+        description: "Unlock partner deals\nand extra value on\neveryday purchases.",
+        colorFamily: "yellow",
+        lightVersion: true,
+      },
+      {
+        id: "ro-shopsmart-offer-2",
+        title: "Weekend city deals\nfor card holders",
+        description: "Save on dining, tickets,\nand quick getaways with\nselected partners.",
+        colorFamily: "pink",
+        lightVersion: true,
+      },
+    ],
+  }),
+  products: RO_BANKING_PRODUCTS,
+};
 
 const CZ_PRODUCTS_MENU = withAdditionalServices(withOfferOverrides(createProductsMenuConfig(true), {
   offers: [
@@ -538,6 +591,7 @@ export function getProductsMenuForCountry(country: CountryId): ProductsMenuConfi
   return PRODUCTS_MENU_CONFIG[country];
 }
 
-export function getProductCardSheetConfig(cardId: ProductsCardId): ProductCardSheetConfig {
-  return PRODUCT_CARD_SHEETS[cardId] ?? DEFAULT_PRODUCT_CARD_SHEET;
+export function getProductCardSheetConfig(cardId: ProductsCardId, country?: CountryId): ProductCardSheetConfig {
+  const countrySheet = country ? COUNTRY_PRODUCT_CARD_SHEETS[country]?.[cardId] : undefined;
+  return countrySheet ?? PRODUCT_CARD_SHEETS[cardId] ?? DEFAULT_PRODUCT_CARD_SHEET;
 }

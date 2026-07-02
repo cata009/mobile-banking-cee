@@ -3,7 +3,7 @@
  * Card for Digital Activities Register section in More menu
  */
 
-import imgDigitalActivities from "figma:asset/947d85da595e4eb3e946a83cbab7bb8d8c148da1.png";
+import { MORE_CARD_IMAGE_BY_TYPE } from "@/app/config/moreCardAssets";
 
 interface DigitalActivitiesCardProps {
   onClick: () => void;
@@ -31,7 +31,9 @@ export function DigitalActivitiesCard({ onClick, title = "Digital activity recor
           <img 
             alt="" 
             className="absolute left-0 max-w-none size-full top-0" 
-            src={imgDigitalActivities}
+            decoding="async"
+            loading="eager"
+            src={MORE_CARD_IMAGE_BY_TYPE["digital-activities"]}
             style={{
               filter: "var(--pi-menu-card-image-filter, none)",
               opacity: "var(--pi-menu-card-image-opacity, 1)",

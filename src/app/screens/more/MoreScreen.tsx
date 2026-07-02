@@ -4,7 +4,7 @@
  * Individual cards can be enabled/disabled per country
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MoreHeader } from './MoreHeader';
 import { ContactsCard } from './cards/ContactsCard';
 import { DocumentsCard } from './cards/DocumentsCard';
@@ -21,6 +21,7 @@ import { useDemo } from '@/app/state/demoStore';
 import { getMoreCardsForCountry, MoreCardType } from '@/app/config/moreCardsConfig';
 import { getDocumentsCountForCountry } from '@/app/config/documentsConfig';
 import { useLanguage } from '@/app/contexts/LanguageContext';
+import { preloadMoreCardImages } from '@/app/config/moreCardAssets';
 
 interface MoreScreenProps {
   onBack: () => void;
@@ -54,6 +55,10 @@ export default function MoreScreen({
   const usesBosniaHeaderActions = country === "BA" || country === "BA_BL";
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [showTutorialsFlow, setShowTutorialsFlow] = useState(false);
+
+  useEffect(() => {
+    preloadMoreCardImages(availableCards);
+  }, [availableCards]);
 
   const cardLabels: Record<MoreCardType, string> = {
     contacts: t("more.cards.contacts"),

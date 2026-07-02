@@ -1,0 +1,20 @@
+{
+  "name": "UniCredit Mobile Banking Demo",
+  "short_name": "UniCredit Demo",
+  "description": "UniCredit CEE mobile banking stakeholder demo.",
+  "start_url": "/?frame=0",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["fullscreen", "standalone", "minimal-ui"],
+  "background_color": "#f5f5f5",
+  "theme_color": "#f5f5f5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

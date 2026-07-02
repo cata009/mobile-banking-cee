@@ -56,7 +56,7 @@ export default function HomeScreen({ onPrimeClick, onAnalyticsClick, onMessagesC
   return (
     <div className="w-full h-full relative bg-[var(--uc-app-bg)] flex flex-col text-[var(--uc-text)]">
       {/* Status Bar Space */}
-      <div className="h-[54px] flex-shrink-0 bg-[var(--uc-app-bg)]" />
+      <div className="h-[var(--uc-phone-top-reserve,54px)] flex-shrink-0 bg-[var(--uc-app-bg)]" />
 
       {/* STICKY Top Bar - Prime Badge + Icons - FIXED */}
       <div className="sticky top-0 z-10 bg-[var(--uc-app-bg)] flex-shrink-0">

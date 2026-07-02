@@ -3,7 +3,7 @@
  * Card for My Requests section in More menu
  */
 
-import imgMyRequests from "figma:asset/612ac7960c2d43bfdada538aae6f3cf27be44d99.png";
+import { MORE_CARD_IMAGE_BY_TYPE } from "@/app/config/moreCardAssets";
 
 interface MyRequestsCardProps {
   onClick: () => void;
@@ -31,7 +31,9 @@ export function MyRequestsCard({ onClick, title = "My applications" }: MyRequest
           <img 
             alt="" 
             className="absolute left-0 max-w-none size-full top-0" 
-            src={imgMyRequests}
+            decoding="async"
+            loading="eager"
+            src={MORE_CARD_IMAGE_BY_TYPE["my-requests"]}
             style={{
               filter: "var(--pi-menu-card-image-filter, none)",
               opacity: "var(--pi-menu-card-image-opacity, 1)",

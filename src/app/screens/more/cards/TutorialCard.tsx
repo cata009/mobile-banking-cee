@@ -3,7 +3,7 @@
  * Card for Tutorial section in More menu
  */
 
-import imgTutorial from "figma:asset/fabdcbcfc3ceae62811fed754b790551b42a2f6e.png";
+import { MORE_CARD_IMAGE_BY_TYPE } from "@/app/config/moreCardAssets";
 
 interface TutorialCardProps {
   onClick: () => void;
@@ -31,7 +31,9 @@ export function TutorialCard({ onClick, title = "Tutorials" }: TutorialCardProps
           <img 
             alt="" 
             className="absolute left-0 max-w-none size-full top-0" 
-            src={imgTutorial}
+            decoding="async"
+            loading="eager"
+            src={MORE_CARD_IMAGE_BY_TYPE.tutorial}
             style={{
               filter: "var(--pi-menu-card-image-filter, none)",
               opacity: "var(--pi-menu-card-image-opacity, 1)",

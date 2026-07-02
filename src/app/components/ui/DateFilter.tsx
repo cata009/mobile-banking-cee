@@ -4,10 +4,10 @@ import { cn } from "@/app/components/ui/utils";
 export const DATE_FILTER_SOURCE = {
   schema: "codex-figma-component-spec/v1",
   sourceNodeId: "290:14520",
-  width: 238,
+  width: 286,
   height: 24,
-  chipWidth: 35,
-  chipHeight: 22,
+  chipWidth: 42,
+  chipHeight: 24,
 } as const;
 
 export type DateFilterType = "five" | "four";
@@ -32,7 +32,7 @@ function DateFilterChip({
     <button
       type="button"
       className={cn(
-        "flex h-[22px] w-[35px] shrink-0 items-center justify-center rounded-[3.5px] px-[6px] py-[3px] text-center text-[14px] font-bold leading-[14px]",
+        "inline-flex h-[24px] min-w-[42px] shrink-0 items-center justify-center rounded-[4px] px-[8px] text-center text-[14px] font-bold leading-[16px] whitespace-nowrap",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]",
         selected ? "border border-[var(--uc-action)] bg-[var(--uc-action)] text-[var(--uc-static-white)]" : "border border-[var(--uc-text)] bg-transparent text-[var(--uc-text)]",
       )}
@@ -51,8 +51,7 @@ export default function DateFilter({ type = "five", selectedValue = "3 Y", selec
   return (
     <div
       className={cn(
-        "flex h-[24px] w-[238px] items-center gap-[15px]",
-        type === "four" ? "justify-center px-[26px] py-px" : "p-px",
+        "flex min-h-[24px] w-full max-w-[286px] items-center justify-center gap-[8px]",
         className,
       )}
       data-date-filter-type={type}

@@ -3,7 +3,7 @@
  * Card for Settings section in More menu
  */
 
-import imgSettings from "figma:asset/b756062d79e37b43d0eda8eee6125757ce5bb9bf.png";
+import { MORE_CARD_IMAGE_BY_TYPE } from "@/app/config/moreCardAssets";
 
 interface SettingsCardProps {
   onClick: () => void;
@@ -31,7 +31,9 @@ export function SettingsCard({ onClick, title = "Settings" }: SettingsCardProps)
           <img 
             alt="" 
             className="absolute left-0 max-w-none size-full top-0" 
-            src={imgSettings}
+            decoding="async"
+            loading="eager"
+            src={MORE_CARD_IMAGE_BY_TYPE.settings}
             style={{
               filter: "var(--pi-menu-card-image-filter, none)",
               opacity: "var(--pi-menu-card-image-opacity, 1)",
