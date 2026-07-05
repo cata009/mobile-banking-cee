@@ -1,0 +1,14 @@
+{
+  "name": "@mobile-pi/coapping-chat-package",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Portable Mobile PI co-apping chat and floating assistant UI extracted from Projects Studio.",
+  "main": "./src/index.ts",
+  "peerDependencies": {
+    "lucide-react": "^0.487.0",
+    "react": "^18.3.1 || ^19.0.0",
+    "react-dom": "^18.3.1 || ^19.0.0"
+  }
+}
+

@@ -4,7 +4,7 @@ import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
 import PageHeader from "@/app/components/PageHeader";
 import { useLanguage } from "@/app/contexts/LanguageContext";
-import { useDemo } from "@/app/state/demoStore";
+import { useCountry } from "@/app/state/demoStore";
 import {
   getMessagesConfigForCountry,
   type MessageListItem,
@@ -72,7 +72,7 @@ function MessageListRow({ message }: { message: MessageListItem }) {
 }
 
 export default function MessagesScreen({ onBack }: MessagesScreenProps) {
-  const { country } = useDemo();
+  const country = useCountry();
   const { t } = useLanguage();
   const config = getMessagesConfigForCountry(country);
   const [activeMailbox, setActiveMailbox] = useState<MessageMailbox>("inbox");

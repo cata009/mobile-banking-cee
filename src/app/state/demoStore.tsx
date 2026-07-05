@@ -3,7 +3,7 @@
  * Context provider and hook for demo configuration state
  */
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, useState, ReactNode } from "react";
 import { getReleaseBundle } from "@/app/registry/releaseRegistry";
 import type {
   BaselineId,
@@ -100,6 +100,19 @@ const DEFAULT_BANKING_SCENARIO_BY_PRODUCT: Record<ProductId, BankingScenarioId> 
  */
 const DemoContext = createContext<DemoStore | null>(null);
 
+// --- Narrow sub-contexts for high-frequency consumers ---
+// These exist so consumers that only need `country` or the data slice
+// ({country, productCounts}) don't re-render when unrelated fields like
+// themeMode or feature flags toggle. Each provider value is memoized so its
+// identity is stable across renders where its slice didn't change.
+const CountryContext = createContext<CountryId | null>(null);
+
+interface ProductDataSlice {
+  country: CountryId;
+  productCounts: ProductCounts;
+}
+const ProductDataContext = createContext<ProductDataSlice | null>(null);
+
 /**
  * Demo Provider Props
  */
@@ -135,68 +148,54 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
   });
 
   /**
-   * Update selected product
+   * Setters are wrapped in `useCallback` with stable deps so their identity is
+   * preserved across renders. This (a) lets children safely list them in
+   * `useEffect`/`useCallback` deps without re-running, and (b) keeps the
+   * `value` object below stable whenever `state` itself hasn't changed.
+   *
+   * Note: `setFlag` / `resetFlags` read the context key from `prev` inside the
+   * updater (not from `state` directly). This makes them stable AND more
+   * correct — the flag now always targets the context that is active at the
+   * moment the update is applied, not the one captured at render time.
    */
-  const setProduct = (product: ProductId) => {
+  const setProduct = useCallback((product: ProductId) => {
     setState(prev => ({
       ...prev,
       product,
       bankingScenario: DEFAULT_BANKING_SCENARIO_BY_PRODUCT[product],
     }));
-  };
+  }, []);
 
-  /**
-   * Update selected country
-   */
-  const setCountry = (country: CountryId) => {
+  const setCountry = useCallback((country: CountryId) => {
     setState(prev => ({ ...prev, country }));
-  };
+  }, []);
 
-  /**
-   * Update co-apping scenario
-   */
-  const setScenario = (scenario: Scenario) => {
+  const setScenario = useCallback((scenario: Scenario) => {
     setState(prev => ({ ...prev, scenario }));
-  };
+  }, []);
 
-  /**
-   * Update selected design system
-   */
-  const setDesignSystem = (designSystem: DesignSystemId) => {
+  const setDesignSystem = useCallback((designSystem: DesignSystemId) => {
     setState(prev => ({ ...prev, designSystem }));
-  };
+  }, []);
 
-  /**
-   * Update selected baseline
-   */
-  const setBaseline = (baseline: BaselineId) => {
+  const setBaseline = useCallback((baseline: BaselineId) => {
     setState(prev => ({ ...prev, baseline }));
-  };
+  }, []);
 
-  /**
-   * Update selected release preview and keep baseline synchronized.
-   */
-  const setRelease = (release: ReleaseId) => {
+  const setRelease = useCallback((release: ReleaseId) => {
     const releaseBundle = getReleaseBundle(release);
     setState(prev => ({
       ...prev,
       release,
       baseline: releaseBundle.baseline,
     }));
-  };
+  }, []);
 
-  /**
-   * Update selected mock banking scenario
-   */
-  const setBankingScenario = (bankingScenario: BankingScenarioId) => {
+  const setBankingScenario = useCallback((bankingScenario: BankingScenarioId) => {
     setState(prev => ({ ...prev, bankingScenario }));
-  };
+  }, []);
 
-  /**
-   * Update one editable product count. The runtime clamps values to a compact
-   * demo-friendly range so the phone UI cannot be accidentally flooded.
-   */
-  const setProductCount = (key: ProductCountKey, value: number) => {
+  const setProductCount = useCallback((key: ProductCountKey, value: number) => {
     const normalizedValue = Number.isFinite(value) ? Math.max(0, Math.min(9, Math.trunc(value))) : 0;
     setState(prev => ({
       ...prev,
@@ -205,94 +204,117 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
         [key]: normalizedValue,
       },
     }));
-  };
+  }, []);
 
-  /**
-   * Toggle or set a feature flag
-   */
-  const setFlag = (featureId: FeatureId, enabled: boolean) => {
-    const contextKey = getContextKey(state);
-    setState(prev => ({
-      ...prev,
-      flagsByContext: {
-        ...prev.flagsByContext,
-        [contextKey]: {
-          ...prev.flagsByContext[contextKey],
-          [featureId]: enabled,
+  const setFlag = useCallback((featureId: FeatureId, enabled: boolean) => {
+    setState(prev => {
+      const contextKey = getContextKey(prev);
+      return {
+        ...prev,
+        flagsByContext: {
+          ...prev.flagsByContext,
+          [contextKey]: {
+            ...prev.flagsByContext[contextKey],
+            [featureId]: enabled,
+          },
         },
-      },
-    }));
-  };
+      };
+    });
+  }, []);
 
-  /**
-   * Toggle account/card/product amount visibility across the mobile app
-   */
-  const toggleAmountsHidden = () => {
+  const toggleAmountsHidden = useCallback(() => {
     setState(prev => ({ ...prev, amountsHidden: !prev.amountsHidden }));
-  };
+  }, []);
 
-  /**
-   * Set account/card/product amount visibility across the mobile app
-   */
-  const setAmountsHidden = (hidden: boolean) => {
+  const setAmountsHidden = useCallback((hidden: boolean) => {
     setState(prev => ({ ...prev, amountsHidden: hidden }));
-  };
+  }, []);
 
-  /**
-   * Set runtime light/dark theme across the demo
-   */
-  const setThemeMode = (themeMode: ThemeMode) => {
+  const setThemeMode = useCallback((themeMode: ThemeMode) => {
     setState(prev => ({ ...prev, themeMode }));
-  };
+  }, []);
 
-  /**
-   * Toggle runtime light/dark theme across the demo
-   */
-  const toggleThemeMode = () => {
+  const toggleThemeMode = useCallback(() => {
     setState(prev => ({ ...prev, themeMode: prev.themeMode === "light" ? "dark" : "light" }));
-  };
+  }, []);
 
-  /**
-   * Reset all feature flags to default (false)
-   */
-  const resetFlags = () => {
-    const contextKey = getContextKey(state);
-    setState(prev => ({
-      ...prev,
-      flagsByContext: {
-        ...prev.flagsByContext,
-        [contextKey]: {},
-      },
-    }));
-  };
+  const resetFlags = useCallback(() => {
+    setState(prev => {
+      const contextKey = getContextKey(prev);
+      return {
+        ...prev,
+        flagsByContext: {
+          ...prev.flagsByContext,
+          [contextKey]: {},
+        },
+      };
+    });
+  }, []);
 
-  /**
-   * Reset entire demo state to defaults
-   */
-  const resetAll = () => {
+  const resetAll = useCallback(() => {
     setState(DEFAULT_DEMO_STATE);
-  };
+  }, []);
 
-  const value: DemoStore = {
-    ...state,
-    setProduct,
-    setCountry,
-    setScenario,
-    setDesignSystem,
-    setBaseline,
-    setRelease,
-    setBankingScenario,
-    setProductCount,
-    setFlag,
-    toggleAmountsHidden,
-    setAmountsHidden,
-    setThemeMode,
-    toggleThemeMode,
-    resetFlags,
-    resetAll,
-  };
+  // `value` is memoized so its identity stays stable across renders where
+  // `state` did not change (e.g. when DemoProvider's parent re-renders for an
+  // unrelated reason). The setters above are stable, so only `state` drives
+  // identity here.
+  const value = useMemo<DemoStore>(
+    () => ({
+      ...state,
+      setProduct,
+      setCountry,
+      setScenario,
+      setDesignSystem,
+      setBaseline,
+      setRelease,
+      setBankingScenario,
+      setProductCount,
+      setFlag,
+      toggleAmountsHidden,
+      setAmountsHidden,
+      setThemeMode,
+      toggleThemeMode,
+      resetFlags,
+      resetAll,
+    }),
+    [
+      state,
+      setProduct,
+      setCountry,
+      setScenario,
+      setDesignSystem,
+      setBaseline,
+      setRelease,
+      setBankingScenario,
+      setProductCount,
+      setFlag,
+      toggleAmountsHidden,
+      setAmountsHidden,
+      setThemeMode,
+      toggleThemeMode,
+      resetFlags,
+      resetAll,
+    ],
+  );
 
-  return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>;
+  // Slice values for the narrow sub-contexts. Each is memoized on its own
+  // slice so its identity is stable when unrelated fields change.
+  const countryValue = state.country;
+  const productDataValue = useMemo<ProductDataSlice>(
+    () => ({ country: state.country, productCounts: state.productCounts }),
+    [state.country, state.productCounts],
+  );
+
+  return (
+    <DemoContext.Provider value={value}>
+      <CountryContext.Provider value={countryValue}>
+        <ProductDataContext.Provider value={productDataValue}>
+          {children}
+        </ProductDataContext.Provider>
+      </CountryContext.Provider>
+    </DemoContext.Provider>
+  );
 }
 
 /**
@@ -351,6 +373,39 @@ export function useFeatureFlag(featureId: FeatureId): boolean {
   const demoState = useDemo();
   const currentFlags = getCurrentFlags(demoState);
   return currentFlags[featureId] ?? false;
+}
+
+/**
+ * Subscribe ONLY to `country`. Consumers using this hook will NOT re-render
+ * when themeMode, feature flags, product counts, or other unrelated state
+ * changes. Prefer this over `useDemo()` in screens/components that read
+ * nothing but the active country.
+ *
+ * @throws Error if used outside DemoProvider
+ */
+export function useCountry(): CountryId {
+  const context = useContext(CountryContext);
+  if (context === null) {
+    throw new Error("useCountry must be used within a DemoProvider");
+  }
+  return context;
+}
+
+/**
+ * Subscribe ONLY to `{ country, productCounts }` — the data slice that drives
+ * product/IBAN/currency derivation in `useProducts`. Consumers using this hook
+ * will NOT re-render when themeMode or feature flags toggle. This is the
+ * single highest-value narrow selector: it stops the expensive product
+ * re-derivation cascade that previously fired on every theme/flag change.
+ *
+ * @throws Error if used outside DemoProvider
+ */
+export function useProductData(): ProductDataSlice {
+  const context = useContext(ProductDataContext);
+  if (context === null) {
+    throw new Error("useProductData must be used within a DemoProvider");
+  }
+  return context;
 }
 
 /**

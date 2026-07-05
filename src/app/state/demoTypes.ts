@@ -49,6 +49,7 @@ export type BaselineId =
  */
 export type ReleaseId =
   | "release-current"
+  | "release-future-cz-coapping"
   | "release-v1"
   | "release-v2"
   | "release-v3"
@@ -285,6 +286,7 @@ export type Scenario = "inactive" | "active";
 export type FeatureId =
   | "fx_newPaymentsHub"
   | "fx_cardsRedesign"
+  | "fx_czCoAppingSmartAssistant"
   | "fx_unplannedBanner"
   | "fx_transactionsFilters"
   | "fx_enhancedAnalytics"

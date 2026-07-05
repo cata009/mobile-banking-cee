@@ -1,5 +1,5 @@
 import { useLanguage } from "@/app/contexts/LanguageContext";
-import { useDemo } from "@/app/state/demoStore";
+import { useCountry } from "@/app/state/demoStore";
 import { hasProductAccordion, getProductsForCountry } from "@/app/config/productConfig";
 import backgroundImage from "figma:asset/8bd60aae39a3561f94f07a9337dc105869df04aa.png";
 import UniCreditLogo from "@/app/components/UniCreditLogo";
@@ -19,7 +19,7 @@ export default function PreLoginScreen({
   onLanguageClick,
 }: PreLoginScreenProps) {
   const { t, language, translations } = useLanguage();
-  const { country } = useDemo();
+  const country = useCountry();
   
   // Check if current country has product accordion
   const showProductAccordion = hasProductAccordion(country);

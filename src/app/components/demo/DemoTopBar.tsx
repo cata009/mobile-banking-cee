@@ -5,12 +5,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useNavigationContext } from "@/app/contexts/NavigationContext";
-import { COUNTRIES, COUNTRY_META } from "@/app/registry/demoConfig";
+import { COUNTRIES, COUNTRY_META, FEATURE_META } from "@/app/registry/demoConfig";
 import { FLOW_PREVIEW_ORDER, type FlowPreviewId } from "@/app/registry/flowPreviewRegistry";
 import { PRODUCT_ORDER } from "@/app/registry/projectModel";
-import { getReleaseBundle, RELEASE_ORDER } from "@/app/registry/releaseRegistry";
+import { getReleaseBundle } from "@/app/registry/releaseRegistry";
 import { useDemo } from "@/app/state/demoStore";
-import type { ProductId } from "@/app/state/demoTypes";
+import type { CountryId, DesignSystemId, ProductId, ReleaseId } from "@/app/state/demoTypes";
 import { QRCodeSVG } from "qrcode.react";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import { withFramelessParam, withShareAccessTokenParam } from "@/app/utils/deepLink";
@@ -26,6 +26,27 @@ const PRODUCT_SELECTOR_LABELS: Record<ProductId, string> = {
   SME: "SME App",
   KIDS_PI: "Kids App",
 };
+
+const FUTURE_RELEASE_ORDER: readonly ReleaseId[] = ["release-future-cz-coapping"] as const;
+
+function getFutureReleaseOptions(
+  product: ProductId,
+  country: CountryId,
+  designSystem: DesignSystemId
+): ReleaseId[] {
+  return FUTURE_RELEASE_ORDER.filter((releaseId) => {
+    const bundle = getReleaseBundle(releaseId);
+
+    return bundle.features.some((featureId) => {
+      const feature = FEATURE_META[featureId];
+      if (!feature) return false;
+      if (feature.products && !feature.products.includes(product)) return false;
+      if (feature.designSystems && !feature.designSystems.includes(designSystem)) return false;
+      if (feature.scope === "countries" && !feature.countries?.includes(country)) return false;
+      return true;
+    });
+  });
+}
 
 async function requestShareAccessToken() {
   const response = await fetch("/api/access?mode=share-token", {
@@ -49,6 +70,7 @@ export function DemoTopBar() {
     product,
     country,
     scenario,
+    designSystem,
     release,
     themeMode,
     setProduct,
@@ -63,6 +85,7 @@ export function DemoTopBar() {
   const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [isReleaseDropdownOpen, setIsReleaseDropdownOpen] = useState(false);
+  const [isFutureReleaseDropdownOpen, setIsFutureReleaseDropdownOpen] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [shareUrls, setShareUrls] = useState({ framed: "", device: "" });
@@ -72,8 +95,16 @@ export function DemoTopBar() {
   const productDropdownRef = useRef<HTMLDivElement>(null);
   const countryDropdownRef = useRef<HTMLDivElement>(null);
   const releaseDropdownRef = useRef<HTMLDivElement>(null);
+  const futureReleaseDropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedRelease = getReleaseBundle(release);
+  const futureReleaseOptions = getFutureReleaseOptions(product, country, designSystem);
+  const isFutureReleaseSelected = futureReleaseOptions.includes(release);
+  const selectedFutureRelease = isFutureReleaseSelected
+    ? selectedRelease
+    : futureReleaseOptions[0]
+      ? getReleaseBundle(futureReleaseOptions[0])
+      : null;
   const isDesignSystemSelected = currentScreen === "design-system";
   const isFlowLibrarySelected = currentScreen === "flow-library";
   const showContextControls = !isDesignSystemSelected && !isFlowLibrarySelected;
@@ -85,10 +116,17 @@ export function DemoTopBar() {
       ? "design-system"
       : "demo";
 
+  useEffect(() => {
+    if (release === "release-current") return;
+    if (getFutureReleaseOptions(product, country, designSystem).includes(release)) return;
+    setRelease("release-current");
+  }, [country, designSystem, product, release, setRelease]);
+
   const closeAllDropdowns = () => {
     setIsProductDropdownOpen(false);
     setIsCountryDropdownOpen(false);
     setIsReleaseDropdownOpen(false);
+    setIsFutureReleaseDropdownOpen(false);
   };
 
   const leavePlatformSurface = () => {
@@ -102,6 +140,9 @@ export function DemoTopBar() {
     closeAllDropdowns();
     leavePlatformSurface();
     setCountry(countryCode);
+    if (isFutureReleaseSelected && !getFutureReleaseOptions(product, countryCode, designSystem).includes(release)) {
+      setRelease("release-current");
+    }
 
     if (shouldReturnToDemo) {
       setCoAppingActive(false);
@@ -113,6 +154,9 @@ export function DemoTopBar() {
     closeAllDropdowns();
     leavePlatformSurface();
     setProduct(productId);
+    if (isFutureReleaseSelected && !getFutureReleaseOptions(productId, country, designSystem).includes(release)) {
+      setRelease("release-current");
+    }
     setCoAppingActive(false);
     window.requestAnimationFrame(() => navigateToAndReset(scenarioEntryScreen));
   };
@@ -150,6 +194,9 @@ export function DemoTopBar() {
       }
       if (releaseDropdownRef.current && !releaseDropdownRef.current.contains(event.target as Node)) {
         setIsReleaseDropdownOpen(false);
+      }
+      if (futureReleaseDropdownRef.current && !futureReleaseDropdownRef.current.contains(event.target as Node)) {
+        setIsFutureReleaseDropdownOpen(false);
       }
       if (shareRef.current && !shareRef.current.contains(event.target as Node)) {
         setIsShareOpen(false);
@@ -347,32 +394,83 @@ export function DemoTopBar() {
 
               <div className="relative shrink-0" ref={releaseDropdownRef}>
                 <ContextDropdownButton
-                  label={selectedRelease.label}
+                  label={isFutureReleaseSelected ? "Future" : "Baseline"}
                   expanded={isReleaseDropdownOpen}
                   onClick={() => setIsReleaseDropdownOpen(!isReleaseDropdownOpen)}
                 />
 
                 {isReleaseDropdownOpen && (
-                  <div className="absolute left-0 top-full z-[10000] mt-2 min-w-[170px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-1 shadow-lg">
-                    {RELEASE_ORDER.map((releaseId) => (
-                      <button
-                        key={releaseId}
-                        onClick={() => {
-                          setRelease(releaseId);
-                          setIsReleaseDropdownOpen(false);
-                        }}
-                        className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
-                          release === releaseId
-                            ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
-                            : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
-                        }`}
-                      >
-                        {getReleaseBundle(releaseId).label}
-                      </button>
-                    ))}
+                  <div className="absolute left-0 top-full z-[10000] mt-2 min-w-[150px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-1 shadow-lg">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRelease("release-current");
+                        setIsReleaseDropdownOpen(false);
+                      }}
+                      className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
+                        !isFutureReleaseSelected
+                          ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
+                          : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
+                      }`}
+                    >
+                      Baseline
+                    </button>
+                    <button
+                      type="button"
+                      disabled={futureReleaseOptions.length === 0}
+                      onClick={() => {
+                        const firstFutureRelease = futureReleaseOptions[0];
+                        if (!firstFutureRelease) return;
+                        setRelease(firstFutureRelease);
+                        setIsReleaseDropdownOpen(false);
+                      }}
+                      className={`w-full px-4 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:text-[var(--uc-text-muted)] disabled:opacity-50 ${
+                        isFutureReleaseSelected
+                          ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
+                          : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)] hover:bg-[var(--uc-surface-muted)]"
+                      }`}
+                    >
+                      Future
+                    </button>
                   </div>
                 )}
               </div>
+
+              {isFutureReleaseSelected && selectedFutureRelease && (
+                <div className="relative shrink-0" ref={futureReleaseDropdownRef}>
+                  <ContextDropdownButton
+                    label={selectedFutureRelease.label}
+                    expanded={isFutureReleaseDropdownOpen}
+                    onClick={() => setIsFutureReleaseDropdownOpen(!isFutureReleaseDropdownOpen)}
+                  />
+
+                  {isFutureReleaseDropdownOpen && (
+                    <div className="absolute left-0 top-full z-[10000] mt-2 min-w-[220px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-1 shadow-lg">
+                      {futureReleaseOptions.map((releaseId) => {
+                        const futureRelease = getReleaseBundle(releaseId);
+
+                        return (
+                          <button
+                            key={releaseId}
+                            type="button"
+                            onClick={() => {
+                              setRelease(releaseId);
+                              setIsFutureReleaseDropdownOpen(false);
+                            }}
+                            className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
+                              release === releaseId
+                                ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
+                                : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
+                            }`}
+                          >
+                            {futureRelease.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <ScenarioModeSwitch value={scenario} onChange={setScenario} />

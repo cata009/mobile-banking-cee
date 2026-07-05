@@ -3,7 +3,7 @@ import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import { AppIcon } from "@/app/components/icons";
 import PageHeader from "@/app/components/PageHeader";
 import { useLanguage } from "@/app/contexts/LanguageContext";
-import { useDemo } from "@/app/state/demoStore";
+import { useCountry } from "@/app/state/demoStore";
 import { getDocumentsConfigForCountry, type DocumentListItem } from "@/app/config/documentsConfig";
 
 interface DocumentsScreenProps {
@@ -175,7 +175,7 @@ function DocumentListRow({
 }
 
 export default function DocumentsScreen({ onBack }: DocumentsScreenProps) {
-  const { country } = useDemo();
+  const country = useCountry();
   const { t } = useLanguage();
   const config = getDocumentsConfigForCountry(country);
   const [searchQuery, setSearchQuery] = useState("");

@@ -8,7 +8,7 @@ import {
   mockProducts
 } from '@/data/products';
 import svgPaths from '@/imports/svg-wan58807zo';
-import { useDemo } from '@/app/state/demoStore';
+import { useProductData } from '@/app/state/demoStore';
 import { convertCurrency, getCountryCurrency, roundMoney } from '@/data/exchangeRates';
 import { formatMaskedCardNumber } from '@/app/utils/cardNumber';
 import type { ProductCountKey, ProductCounts } from '@/app/state/demoTypes';
@@ -246,7 +246,7 @@ function applyProductCounts(categories: ProductCategory[], productCounts: Produc
 }
 
 export function useProducts() {
-  const { country, productCounts } = useDemo();
+  const { country, productCounts } = useProductData();
   const localCurrency = getCountryCurrency(country);
   
   // Get base categories and convert all products to local currency

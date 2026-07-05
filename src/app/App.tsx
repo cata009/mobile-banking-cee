@@ -1,48 +1,56 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useNavigationContext, NavigationProvider } from "@/app/contexts/NavigationContext";
 import { LanguageProvider, useLanguage } from "@/app/contexts/LanguageContext";
 import { DemoProvider, useDemo } from "@/app/state/demoStore";
+import { isFeatureActive } from "@/app/state/featureResolver";
 import { DemoShell } from "@/app/components/demo/DemoShell";
 import { DemoNavigationSync } from "@/app/components/demo/DemoNavigationSync";
-import PreLoginScreen from "@/app/components/PreLoginScreen";
-import PreLoginActiveScreen from "@/app/components/PreLoginActiveScreen";
-import HomeScreen from "@/app/screens/home/HomeScreen";
-import AnalyticsScreen from "@/app/screens/analytics/AnalyticsScreen";
-import MessagesScreen from "@/app/screens/messages/MessagesScreen";
 import LanguageSelector from "@/app/components/LanguageSelector";
 import MobileFrame from "@/app/components/MobileFrame";
 import FramelessDeviceFrame from "@/app/components/FramelessDeviceFrame";
 import { isCoAppingAvailable } from "@/app/utils/coAppingAvailability";
-
-// Co-Apping components - only used for CZ and SK
-import CoAppingSessionScreen from "@/app/components/CoAppingSessionScreen";
-import FloatingCoAppingButton from "@/app/components/FloatingCoAppingButton";
-import TerminateSessionPopup from "@/app/components/TerminateSessionPopup";
 import EdgeLoadingAnimation from "@/app/components/EdgeLoadingAnimation";
 import UnsupportedContextScreen from "@/app/components/UnsupportedContextScreen";
 
+// --- Screens (lazy-loaded for code-splitting) ---
+const PreLoginScreen = lazy(() => import("@/app/components/PreLoginScreen"));
+const PreLoginActiveScreen = lazy(() => import("@/app/components/PreLoginActiveScreen"));
+const HomeScreen = lazy(() => import("@/app/screens/home/HomeScreen"));
+const AnalyticsScreen = lazy(() => import("@/app/screens/analytics/AnalyticsScreen"));
+const MessagesScreen = lazy(() => import("@/app/screens/messages/MessagesScreen"));
+
+// Co-Apping components - only used for CZ and SK
+const CoAppingSessionScreen = lazy(() => import("@/app/components/CoAppingSessionScreen"));
+const FloatingCoAppingButton = lazy(() => import("@/app/components/FloatingCoAppingButton"));
+const TerminateSessionPopup = lazy(() => import("@/app/components/TerminateSessionPopup"));
+
 // Prime component - available for all countries
-import PrimeScreen from "@/app/screens/prime/PrimeScreen";
+const PrimeScreen = lazy(() => import("@/app/screens/prime/PrimeScreen"));
 
 // More component - available for all countries
-import MoreScreen from "@/app/screens/more/MoreScreen";
-import DocumentsScreen from "@/app/screens/documents/DocumentsScreen";
-import PaymentsScreen from "@/app/screens/payments/PaymentsScreen";
-import ProductsScreen from "@/app/screens/products/ProductsScreen";
-import InvestmentsPortfolioScreen from "@/app/screens/investments/InvestmentsPortfolioScreen";
-import InvestmentsHistoryScreen from "@/app/screens/investments/InvestmentsHistoryScreen";
-import SettingsScreen from "@/app/screens/settings/SettingsScreen";
-import KidsMarketHomeApp from "@/app/screens/kids/KidsMarketHomeApp";
-import RoKidsApp from "@/app/screens/kids/RoKidsApp";
+const MoreScreen = lazy(() => import("@/app/screens/more/MoreScreen"));
+const DocumentsScreen = lazy(() => import("@/app/screens/documents/DocumentsScreen"));
+const PaymentsScreen = lazy(() => import("@/app/screens/payments/PaymentsScreen"));
+const ProductsScreen = lazy(() => import("@/app/screens/products/ProductsScreen"));
+const InvestmentsPortfolioScreen = lazy(() => import("@/app/screens/investments/InvestmentsPortfolioScreen"));
+const InvestmentsHistoryScreen = lazy(() => import("@/app/screens/investments/InvestmentsHistoryScreen"));
+const SettingsScreen = lazy(() => import("@/app/screens/settings/SettingsScreen"));
+const KidsMarketHomeApp = lazy(() => import("@/app/screens/kids/KidsMarketHomeApp"));
+const RoKidsApp = lazy(() => import("@/app/screens/kids/RoKidsApp"));
 
 // Contacts component - available for all countries
-import ContactsScreen from "@/app/screens/contacts/ContactsScreen";
-import DesignSystemPage from "@/app/screens/design-system/DesignSystemPage";
-import FlowLibraryScreen from "@/app/screens/flow-library/FlowLibraryScreen";
-import AccountDetailScreen from "@/app/screens/accounts/AccountDetailScreen";
-import AccountDetailsInfoScreen from "@/app/screens/accounts/AccountDetailsInfoScreen";
-import AccountOptionsScreen from "@/app/screens/accounts/AccountOptionsScreen";
-import CardDetailScreen from "@/app/screens/cards/CardDetailScreen";
+const ContactsScreen = lazy(() => import("@/app/screens/contacts/ContactsScreen"));
+const DesignSystemPage = lazy(() => import("@/app/screens/design-system/DesignSystemPage"));
+const FlowLibraryScreen = lazy(() => import("@/app/screens/flow-library/FlowLibraryScreen"));
+const AccountDetailScreen = lazy(() => import("@/app/screens/accounts/AccountDetailScreen"));
+const AccountDetailsInfoScreen = lazy(() => import("@/app/screens/accounts/AccountDetailsInfoScreen"));
+const AccountOptionsScreen = lazy(() => import("@/app/screens/accounts/AccountOptionsScreen"));
+const CardDetailScreen = lazy(() => import("@/app/screens/cards/CardDetailScreen"));
+
+// DomesticPaymentFlowScreens exports 5 named exports from one module. They
+// stay as a static import because they already share one module file (one
+// emitted chunk). Wrapping 5 named exports via React.lazy would add complexity
+// without splitting the chunk further.
 import {
   DomesticPaymentCreateScreen,
   PaymentReviewScreen,
@@ -60,6 +68,8 @@ import type { FlowPreviewId } from "@/app/registry/flowPreviewRegistry";
 import { isInvestmentsPortfolioAvailable } from "@/app/utils/investmentsAvailability";
 import { preloadMoreCardImages } from "@/app/config/moreCardAssets";
 import { isKidsHomeCountry } from "@/data/kidsMarketHomeConcepts";
+import { CoAppingChatLauncher } from "../../package/mobile-pi-coapping-chat-package/src";
+import "../../package/mobile-pi-coapping-chat-package/src/coapping.css";
 import type { AccountTransaction } from "@/data/accountDetails";
 import {
   createEmptyDomesticPaymentDraft,
@@ -168,6 +178,7 @@ function AppContent({
     setCoAppingActive,
   } = useNavigationContext();
 
+  const demoState = useDemo();
   const {
     product,
     country,
@@ -178,10 +189,14 @@ function AppContent({
     baseline,
     bankingScenario,
     amountsHidden,
-  } = useDemo();
+  } = demoState;
   const { language } = useLanguage();
   const { categories } = useProducts();
   const coAppingAvailable = isCoAppingAvailable(country);
+  const isCzCoAppingChatbotPreviewActive = isFeatureActive(demoState, "fx_czCoAppingSmartAssistant");
+  const isPreloginScreen = currentScreen === "prelogin-inactive" || currentScreen === "prelogin-active";
+  const isInAppScreen =
+    !isPreloginScreen && currentScreen !== "flow-library" && currentScreen !== "design-system";
   const isPiRuntimeContext = product === "PI" && designSystem === "current";
   const isRoKidsRuntimeContext = product === "KIDS_PI" && country === "RO" && designSystem === "current";
   const isMarketKidsRuntimeContext =
@@ -554,15 +569,19 @@ function AppContent({
       <DemoNavigationSync />
 
       {currentScreen === "design-system" && (
-        <DesignSystemPage />
+        <Suspense fallback={<ScreenFallback />}>
+          <DesignSystemPage />
+        </Suspense>
       )}
 
       {currentScreen === "flow-library" && (
-        <FlowLibraryScreen
-          initialFlowId={parsedDeepLink?.flowId ?? "ro-round-up"}
-          selectedFlowId={selectedFlowPreviewId}
-          onFlowChange={setSelectedFlowPreviewId}
-        />
+        <Suspense fallback={<ScreenFallback />}>
+          <FlowLibraryScreen
+            initialFlowId={parsedDeepLink?.flowId ?? "ro-round-up"}
+            selectedFlowId={selectedFlowPreviewId}
+            onFlowChange={setSelectedFlowPreviewId}
+          />
+        </Suspense>
       )}
 
       {currentScreen !== "design-system" && currentScreen !== "flow-library" && (
@@ -570,6 +589,7 @@ function AppContent({
         statusBarVariant={getStatusBarVariant()}
         isCoAppingActive={isCoAppingActive && coAppingAvailable}
       >
+        <Suspense fallback={<ScreenFallback />}>
         {isSupportedRuntimeContext ? (
         <>
         {isKidsRuntimeContext ? (
@@ -793,6 +813,10 @@ function AppContent({
           />
         )}
         
+        {isCzCoAppingChatbotPreviewActive && isInAppScreen && (
+          <CoAppingChatLauncher buttonLabel="Open CZ Co-Apping Chatbot" />
+        )}
+
         {/* Terminate Session Popup - overlay peste tot când vrei să termini sesiunea */}
         {showTerminatePopup && (
           <TerminateSessionPopup
@@ -814,8 +838,21 @@ function AppContent({
         ) : (
           <UnsupportedContextScreen product={product} designSystem={designSystem} />
         )}
+        </Suspense>
       </FrameComponent>
       )}
     </>
+  );
+}
+
+/**
+ * Lightweight fallback shown while a lazy screen chunk loads. Kept inline to
+ * avoid pulling in any component that would itself be lazy.
+ */
+function ScreenFallback() {
+  return (
+    <div className="flex h-full w-full items-center justify-center bg-[var(--uc-surface)]">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--uc-border)] border-t-[var(--uc-action)]" />
+    </div>
   );
 }

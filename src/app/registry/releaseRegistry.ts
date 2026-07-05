@@ -15,7 +15,7 @@ export interface ReleaseBundle {
   id: ReleaseId;
   label: string;
   baseline: BaselineId;
-  releaseCode: "CURRENT" | "R1" | "R2" | "R3" | "R4";
+  releaseCode: "CURRENT" | "FUTURE" | "R1" | "R2" | "R3" | "R4";
   features: readonly FeatureId[];
   introducedFeatures: readonly FeatureId[];
   promotionTargetBaseline: BaselineId | null;
@@ -48,6 +48,7 @@ export interface ReleasePromotionReadiness {
 
 export const RELEASE_ORDER: readonly ReleaseId[] = [
   "release-current",
+  "release-future-cz-coapping",
   "release-v1",
   "release-v2",
   "release-v3",
@@ -57,13 +58,23 @@ export const RELEASE_ORDER: readonly ReleaseId[] = [
 export const RELEASE_BUNDLES: Record<ReleaseId, ReleaseBundle> = {
   "release-current": {
     id: "release-current",
-    label: "Current baseline",
+    label: "Baseline",
     baseline: "baseline-current",
     releaseCode: "CURRENT",
     features: [],
     introducedFeatures: [],
     promotionTargetBaseline: null,
     status: "baseline",
+  },
+  "release-future-cz-coapping": {
+    id: "release-future-cz-coapping",
+    label: "CZ Co-Apping Chatbot",
+    baseline: "baseline-current",
+    releaseCode: "FUTURE",
+    features: ["fx_czCoAppingSmartAssistant"],
+    introducedFeatures: ["fx_czCoAppingSmartAssistant"],
+    promotionTargetBaseline: null,
+    status: "release-preview",
   },
   "release-v1": {
     id: "release-v1",
@@ -146,15 +157,18 @@ export function getReleasePromotionReadiness(release: ReleaseId): ReleasePromoti
   const blockedCoverage = manifests.filter((manifest) =>
     ["blocked", "missing", "legacy"].includes(manifest.coverageStatus)
   );
+  const isFuturePreview = bundle.releaseCode === "FUTURE";
 
   const checks: ReleasePromotionCheck[] = [
     {
       id: "target-baseline",
       label: "Target baseline",
-      passed: bundle.status === "baseline" || targetBaseline !== null,
+      passed: bundle.status === "baseline" || isFuturePreview || targetBaseline !== null,
       detail:
         bundle.status === "baseline"
           ? "Current release is already the baseline state."
+          : isFuturePreview
+            ? "Future feature previews stay pinned to their source baseline until explicitly promoted."
           : targetBaseline
             ? `${release} promotes to ${targetBaseline.id}.`
             : `${release} has no promotion target.`,
@@ -171,11 +185,13 @@ export function getReleasePromotionReadiness(release: ReleaseId): ReleasePromoti
     {
       id: "promotion-targets",
       label: "Promotion targets",
-      passed: featuresWithoutTargetBaseline.length === 0,
+      passed: isFuturePreview || featuresWithoutTargetBaseline.length === 0,
       detail:
-        featuresWithoutTargetBaseline.length === 0
-          ? "Every release feature has a target baseline."
-          : `Missing target baseline: ${featuresWithoutTargetBaseline.map((manifest) => manifest.id).join(", ")}.`,
+        isFuturePreview
+          ? "No promotion target is required while this remains an isolated future feature preview."
+          : featuresWithoutTargetBaseline.length === 0
+            ? "Every release feature has a target baseline."
+            : `Missing target baseline: ${featuresWithoutTargetBaseline.map((manifest) => manifest.id).join(", ")}.`,
     },
     {
       id: "affected-screens",

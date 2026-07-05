@@ -23,7 +23,7 @@ export default defineConfig({
   plugins: [
     figmaAssetResolver(),
     // The React and Tailwind plugins are both required for Make, even if
-    // Tailwind is not being actively used – do not remove them
+    // Tailwind is not being used – do not remove them
     react(),
     tailwindcss(),
   ],
@@ -31,6 +31,61 @@ export default defineConfig({
     alias: {
       // Alias @ to the src directory
       '@': path.resolve(__dirname, './src'),
+    },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        // Split the previously-monolithic ~2 MB App chunk into stable vendor
+        // groups that cache independently and load in parallel. This is purely
+        // a chunking change — no runtime behavior is affected.
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          radix: [
+            '@radix-ui/react-accordion',
+            '@radix-ui/react-alert-dialog',
+            '@radix-ui/react-aspect-ratio',
+            '@radix-ui/react-avatar',
+            '@radix-ui/react-checkbox',
+            '@radix-ui/react-collapsible',
+            '@radix-ui/react-context-menu',
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-hover-card',
+            '@radix-ui/react-label',
+            '@radix-ui/react-menubar',
+            '@radix-ui/react-navigation-menu',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-progress',
+            '@radix-ui/react-radio-group',
+            '@radix-ui/react-scroll-area',
+            '@radix-ui/react-select',
+            '@radix-ui/react-separator',
+            '@radix-ui/react-slider',
+            '@radix-ui/react-slot',
+            '@radix-ui/react-switch',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-toggle',
+            '@radix-ui/react-toggle-group',
+            '@radix-ui/react-tooltip',
+          ],
+          motion: ['motion'],
+          charts: ['recharts'],
+          icons: ['lucide-react'],
+          date: ['date-fns', 'react-day-picker'],
+          overlays: ['vaul', 'embla-carousel-react', 'cmdk', 'sonner'],
+          forms: ['react-hook-form', 'input-otp'],
+          utils: [
+            'clsx',
+            'tailwind-merge',
+            'class-variance-authority',
+            'react-resizable-panels',
+            '@popperjs/core',
+            'react-popper',
+            'next-themes',
+          ],
+        },
+      },
     },
   },
 })

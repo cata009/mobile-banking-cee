@@ -6,7 +6,7 @@ import { AppIcon } from "@/app/components/icons";
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
 import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
 import { useLanguage } from "@/app/contexts/LanguageContext";
-import { useDemo } from "@/app/state/demoStore";
+import { useCountry } from "@/app/state/demoStore";
 import { formatMoneyNumber } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import {
@@ -626,7 +626,7 @@ export default function AnalyticsScreen({
   onProductsClick,
   onMoreClick,
 }: AnalyticsScreenProps) {
-  const { country } = useDemo();
+  const country = useCountry();
   const { t } = useLanguage();
   const { categories } = useProducts();
   const products = useMemo(() => categories.flatMap((category) => category.products), [categories]);
