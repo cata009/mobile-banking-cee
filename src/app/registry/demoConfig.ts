@@ -80,6 +80,27 @@ export const FEATURE_META: Record<FeatureId, FeatureMeta> = {
     affectedScreens: ["pi.home.overview"],
   },
 
+  fx_czCoAppingSmartAssistant: {
+    id: "fx_czCoAppingSmartAssistant",
+    label: "CZ Co-Apping Chatbot",
+    description: "Pinned Czech Republic feature preview for the portable Co-Apping Smart Assistant chat.",
+    kind: "release",
+    scope: "countries",
+    countries: ["CZ"],
+    releases: ["release-future-cz-coapping"],
+    products: ["PI"],
+    designSystems: ["current"],
+    lifecycleStatus: "implemented",
+    coverageStatus: "implemented",
+    introducedIn: "release-future-cz-coapping",
+    baselineFrom: null,
+    affectedScreens: [
+      "pi.prelogin.active",
+      "pi.home.overview",
+      "pi.co-apping.session",
+    ],
+  },
+
   fx_quickActionsRedesign: {
     id: "fx_quickActionsRedesign",
     label: "Quick Actions Redesign",

@@ -11,7 +11,7 @@ import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
 import ShopsmartOfferCard from "@/app/components/shopsmart/ShopsmartOfferCard";
 import { useLanguage } from "@/app/contexts/LanguageContext";
-import { useDemo } from "@/app/state/demoStore";
+import { useCountry } from "@/app/state/demoStore";
 import {
   getProductCardSheetConfig,
   getProductsMenuForCountry,
@@ -56,7 +56,7 @@ export function ProductsHeader({
   onContactsClick?: () => void;
   onMessagesClick?: () => void;
 }) {
-  const { country } = useDemo();
+  const country = useCountry();
   const { t } = useLanguage();
   const usesBosniaHeaderActions = country === "BA" || country === "BA_BL";
   const handleAction = (action: string) => {
@@ -630,7 +630,7 @@ export default function ProductsScreen({
   onPaymentsClick,
   onMoreClick,
 }: ProductsScreenProps) {
-  const { country } = useDemo();
+  const country = useCountry();
   const { t } = useLanguage();
   const config = getProductsMenuForCountry(country);
   const localizeOffer = (offer: ProductsOffer): ProductsOffer => ({

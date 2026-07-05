@@ -67,6 +67,7 @@ function targetBaselineForRelease(release: ReleaseId | null | undefined): Baseli
 function buildManifest(featureId: FeatureId, source: FeatureManifestSource): FeatureManifest {
   const meta = FEATURE_META[featureId];
   const introducedIn = meta.introducedIn ?? null;
+  const isFutureFeature = introducedIn?.startsWith("release-future") ?? false;
 
   return {
     id: featureId,
@@ -87,10 +88,14 @@ function buildManifest(featureId: FeatureId, source: FeatureManifestSource): Fea
       "release bundle references manifest id",
       "affected screens listed",
       "coverage status declared",
-      "target baseline declared for release features",
+      isFutureFeature
+        ? "source baseline captured for future feature preview"
+        : "target baseline declared for release features",
     ],
     retirementRule:
-      meta.kind === "release"
+      isFutureFeature
+        ? "Keep pinned to its source baseline until the feature is explicitly rebased or promoted into the official baseline."
+        : meta.kind === "release"
         ? "Retire release gating after the target baseline is promoted and the feature is listed in the baseline ledger."
         : "Keep as operator-only scenario flag until it is either promoted into a release manifest or removed.",
   };
@@ -99,6 +104,7 @@ function buildManifest(featureId: FeatureId, source: FeatureManifestSource): Fea
 export const FEATURE_MANIFESTS: Record<FeatureId, FeatureManifest> = {
   fx_newPaymentsHub: buildManifest("fx_newPaymentsHub", "runtime"),
   fx_cardsRedesign: buildManifest("fx_cardsRedesign", "runtime"),
+  fx_czCoAppingSmartAssistant: buildManifest("fx_czCoAppingSmartAssistant", "runtime"),
   fx_quickActionsRedesign: buildManifest("fx_quickActionsRedesign", "catalog"),
   fx_unplannedBanner: buildManifest("fx_unplannedBanner", "runtime"),
   fx_transactionsFilters: buildManifest("fx_transactionsFilters", "catalog"),

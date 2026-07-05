@@ -1,0 +1,30 @@
+{
+  "sourceProject": ".od/projects/mobile-pi",
+  "portableEntry": "src/index.ts",
+  "portableCss": "src/coapping.css",
+  "originalSourceFiles": [
+    "src/app/components/CoAppingChatAssistant.tsx",
+    "src/app/components/CoAppingChatLauncher.tsx",
+    "src/app/components/FloatingCoAppingButton.tsx",
+    "src/app/components/CoAppingSessionScreen.tsx",
+    "src/app/components/PanelWithTranslations.tsx",
+    "src/app/components/PanelWithoutCoAppingTranslations.tsx",
+    "src/app/components/PanelOverlay.tsx",
+    "src/app/components/TerminateSessionPopup.tsx",
+    "src/app/utils/coAppingAvailability.ts",
+    "src/imports/svg-wan58807zo.ts",
+    "src/imports/svg-18ehkdpg9k.ts",
+    "src/imports/svg-2hn0mpby87.ts"
+  ],
+  "runtimeDependencies": [
+    "react",
+    "lucide-react"
+  ],
+  "hostRequirements": [
+    "The host screen container must be position: relative.",
+    "Import src/coapping.css once.",
+    "Provide custom reply resolver if the chat must call a real AI/backend.",
+    "Optionally override CSS variables for brand colors."
+  ]
+}
+

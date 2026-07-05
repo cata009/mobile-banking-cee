@@ -4,7 +4,7 @@ import Panel from "@/imports/Panel";
 import PanelWithoutCoApping from "@/app/components/PanelWithoutCoApping";
 import PanelWithTranslations from "@/app/components/PanelWithTranslations";
 import PanelWithoutCoAppingTranslations from "@/app/components/PanelWithoutCoAppingTranslations";
-import { useDemo } from "@/app/state/demoStore";
+import { useCountry } from "@/app/state/demoStore";
 import { isCoAppingAvailable } from "@/app/utils/coAppingAvailability";
 
 interface InteractivePreLoginActiveProps {
@@ -16,7 +16,7 @@ export default function InteractivePreLoginActive({
   onStartCoApping,
   onClose,
 }: InteractivePreLoginActiveProps) {
-  const { country } = useDemo();
+  const country = useCountry();
   const { t } = useLanguage();
   const coAppingAvailable = isCoAppingAvailable(country);
 

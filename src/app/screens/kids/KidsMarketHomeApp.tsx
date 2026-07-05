@@ -78,8 +78,8 @@ import huLearnTopicOnlineSafetySrc from "../../../assets/kids/learn/hu-learn-top
 import huLearnTopicRequestMoneySrc from "../../../assets/kids/learn/hu-learn-topic-request-money.png";
 import huLearnTopicSavingGoalsSrc from "../../../assets/kids/learn/hu-learn-topic-saving-goals.png";
 import huCardBgCatSrc from "../../../assets/kids/figma/hu-card-bg-cat.png";
-import huCardDetailCatSrc from "../../../assets/kids/figma/hu-card-detail-cat.png";
 import huCardHomeCatSrc from "../../../assets/kids/figma/hu-card-home-cat.png";
+import huSunEmojiSrc from "../../../assets/kids/figma/hu-sun-emoji.png";
 import womanProfileSrc from "../../../assets/kids/woman-profile.png";
 import type { AccountTransaction } from "@/data/accountDetails";
 import {
@@ -107,59 +107,10 @@ interface KidsMarketHomeAppProps {
   country: CountryId;
 }
 
-const TONE_CLASSES: Record<KidsHomeAction["tone"], { bg: string; text: string; iconBg: string }> = {
-  red: {
-    bg: "bg-[color-mix(in_srgb,var(--uc-red-main)_10%,var(--uc-surface))]",
-    text: "text-[var(--uc-red-main)]",
-    iconBg: "bg-[color-mix(in_srgb,var(--uc-red-main)_16%,var(--uc-surface))]",
-  },
-  teal: {
-    bg: "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))]",
-    text: "text-[var(--uc-action)]",
-    iconBg: "bg-[color-mix(in_srgb,var(--uc-action)_16%,var(--uc-surface))]",
-  },
-  blue: {
-    bg: "bg-[color-mix(in_srgb,var(--uc-product-blue)_10%,var(--uc-surface))]",
-    text: "text-[var(--uc-product-blue)]",
-    iconBg: "bg-[color-mix(in_srgb,var(--uc-product-blue)_16%,var(--uc-surface))]",
-  },
-  green: {
-    bg: "bg-[color-mix(in_srgb,var(--uc-green-status)_10%,var(--uc-surface))]",
-    text: "text-[var(--uc-green-status)]",
-    iconBg: "bg-[color-mix(in_srgb,var(--uc-green-status)_16%,var(--uc-surface))]",
-  },
-  yellow: {
-    bg: "bg-[color-mix(in_srgb,var(--uc-yellow-gold)_18%,var(--uc-surface))]",
-    text: "text-[var(--uc-primary-k1)]",
-    iconBg: "bg-[color-mix(in_srgb,var(--uc-yellow-gold)_28%,var(--uc-surface))]",
-  },
-  orange: {
-    bg: "bg-[color-mix(in_srgb,var(--uc-orange-main)_10%,var(--uc-surface))]",
-    text: "text-[var(--uc-orange-main)]",
-    iconBg: "bg-[color-mix(in_srgb,var(--uc-orange-main)_16%,var(--uc-surface))]",
-  },
-  neutral: {
-    bg: "bg-[var(--uc-surface)]",
-    text: "text-[var(--uc-text)]",
-    iconBg: "bg-[var(--uc-neutral-100)]",
-  },
-};
-
-function formatKidsMoney(amount: number, country: KidsHomeCountry) {
-  return formatMoney(amount, country, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
-}
-
-function formatSignedKidsMoney(amount: number, country: KidsHomeCountry) {
-  const formatted = formatKidsMoney(Math.abs(amount), country);
-  return `${amount >= 0 ? "+" : "-"}${formatted}`;
-}
-
-function resolveIconName(icon: string): IconName {
-  return icon as IconName;
-}
+// Shared helpers (formatKidsMoney, formatSignedKidsMoney, resolveIconName,
+// TONE_CLASSES) live in ./shared/money so each kids fork module can import
+// them without going through this monolith.
+import { formatKidsMoney, formatSignedKidsMoney, resolveIconName, TONE_CLASSES } from "./shared/money";
 
 const SK_TASKS = [
   { title: "Clean your room", status: "TO DO", reward: 5, icon: "nav-home", tone: "green" },
@@ -1066,6 +1017,14 @@ function RsKidsBottomNav({
 }
 
 type HuLightNavId = "home" | "analytics" | "payments" | "products" | "more";
+function getHuKidsBottomNavTitle(navId: HuLightNavId) {
+  if (navId === "analytics") return "Earning";
+  if (navId === "products") return "Saving";
+  if (navId === "payments") return "Payments";
+  if (navId === "more") return "More";
+  return "Home";
+}
+
 type HuLightView =
   | "home"
   | "theme"
@@ -2575,6 +2534,11 @@ const HU_KIDS_CARDS: HuKidsCard[] = [
   },
 ];
 
+const HU_KIDS_TOTAL_MONEY = 35628;
+const HU_KIDS_WEEKLY_LIMIT = 75000;
+const HU_KIDS_WEEKLY_SPENT = 25000;
+const HU_KIDS_DAYS_LEFT = 2;
+
 const HU_KIDS_TRANSACTIONS: HuKidsTransaction[] = [
   {
     id: "hu-kids-from-dad",
@@ -2652,6 +2616,15 @@ function formatHuFullAmount(amount: number) {
   return new Intl.NumberFormat("hu-HU", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
 }
 
+function formatHuKidsDecimalAmount(amount: number) {
+  return new Intl.NumberFormat("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
+}
+
+function getHuKidsDecimalParts(amount: number) {
+  const [integer = "0", decimal = "00"] = formatHuKidsDecimalAmount(amount).split(",");
+  return { integer, decimal: `,${decimal}` };
+}
+
 function formatHuKidsGoalAmount(amount: number, showAmounts = true) {
   return showAmounts ? formatHuKidsAmount(amount) : formatHuMaskedMoney();
 }
@@ -2666,6 +2639,22 @@ function formatHuMaskedMoney(currency = "HUF") {
 
 function formatHuMaskedSignedMoney(isPositive: boolean, currency = "HUF") {
   return `${isPositive ? "+" : "-"}${formatHuMaskedMoney(currency)}`;
+}
+
+function getHuKidsSpendModel() {
+  const weeklyCapacityRemaining = Math.max(HU_KIDS_WEEKLY_LIMIT - HU_KIDS_WEEKLY_SPENT, 0);
+  const availableToSpend = Math.min(HU_KIDS_TOTAL_MONEY, weeklyCapacityRemaining);
+  const spentProgress = HU_KIDS_WEEKLY_LIMIT > 0 ? Math.min((HU_KIDS_WEEKLY_SPENT / HU_KIDS_WEEKLY_LIMIT) * 100, 100) : 0;
+
+  return {
+    availableToSpend,
+    daysLeft: HU_KIDS_DAYS_LEFT,
+    spentProgress,
+    totalMoney: HU_KIDS_TOTAL_MONEY,
+    weeklyCapacityRemaining,
+    weeklyLimit: HU_KIDS_WEEKLY_LIMIT,
+    weeklySpent: HU_KIDS_WEEKLY_SPENT,
+  };
 }
 
 function getHuKidsTransactionDayTitle(transaction: HuKidsTransaction) {
@@ -3249,6 +3238,7 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
   const handleOpenLearn = () => {
     setIsMoreSheetOpen(false);
     setMotionProgress(0);
+    setActiveNav("analytics");
     setView("learn");
   };
 
@@ -3658,7 +3648,6 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
       return (
         <HuKidsLearnPage
           completedLessonIds={completedLearnLessonIds}
-          learnModules={learnModules}
           onSelectTopic={handleOpenLearnTopic}
           onMessages={handleOpenMessages}
           theme={appliedTheme}
@@ -3737,6 +3726,7 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
 
             <div className="relative z-[2] flex-shrink-0">
               <HuLightHeader
+                title={getHuKidsBottomNavTitle(activeNav)}
                 showAmounts={showAmounts}
                 onMessages={handleOpenMessages}
                 onToggleAmounts={() => setShowAmounts((current) => !current)}
@@ -3767,6 +3757,7 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
                 <HuEarningContent
                   completedLessonIds={completedLearnLessonIds}
                   onOpenLearn={handleOpenLearn}
+                  onSelectTopic={handleOpenLearnTopic}
                   onSelectTask={handleSelectTask}
                   onToggleAmounts={() => setShowAmounts((current) => !current)}
                   showAmounts={showAmounts}
@@ -3793,12 +3784,21 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
           </>
         ) : (
           <>
-            {activeNav === "payments" ? <HuKidsPaymentsPage onMessages={handleOpenMessages} theme={appliedTheme} /> : null}
+            {activeNav === "payments" ? (
+              <HuKidsPaymentsPage
+                onMessages={handleOpenMessages}
+                onToggleAmounts={() => setShowAmounts((current) => !current)}
+                showAmounts={showAmounts}
+                theme={appliedTheme}
+              />
+            ) : null}
             {activeNav === "more" ? (
               <HuKidsMorePage
                 onContacts={handleOpenContacts}
                 onMessages={handleOpenMessages}
+                onToggleAmounts={() => setShowAmounts((current) => !current)}
                 onSettings={handleOpenSettings}
+                showAmounts={showAmounts}
                 theme={appliedTheme}
               />
             ) : null}
@@ -3849,24 +3849,25 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
   );
 }
 
-function HuKidsPiMenuHeader({ onMessages, title }: { onMessages?: () => void; title: string }) {
-  const { t } = useLanguage();
-
+function HuKidsPiMenuHeader({
+  onMessages,
+  onToggleAmounts,
+  showAmounts = true,
+  title,
+}: {
+  onMessages?: () => void;
+  onToggleAmounts?: () => void;
+  showAmounts?: boolean;
+  title: string;
+}) {
   return (
-    <div className="w-full">
-      <div className="px-[24px] pb-[22px]">
-        <div className="flex min-h-[32px] items-start gap-[8px]">
-          <h1 className="uc-type-h1 min-w-0 flex-1 text-[var(--hu-kids-menu-title-fg)]">{title}</h1>
-          <HeaderActionRail>
-            <HeaderActionButton icon="contact-phone" label="Contact phone" onClick={() => undefined} />
-            <HeaderActionButton
-              icon="messages"
-              label={t("runtime.actions.messages", "Messages")}
-              onClick={onMessages}
-            />
-          </HeaderActionRail>
-        </div>
-      </div>
+    <div className="w-full pb-[22px]">
+      <HuLightHeader
+        title={title}
+        onMessages={onMessages}
+        onToggleAmounts={onToggleAmounts ?? (() => undefined)}
+        showAmounts={showAmounts}
+      />
     </div>
   );
 }
@@ -3875,14 +3876,18 @@ function HuKidsPiMenuFrame({
   children,
   header,
   onMessages,
+  onToggleAmounts,
   onScroll,
+  showAmounts,
   theme,
   title,
 }: {
   children: ReactNode;
   header?: ReactNode;
   onMessages?: () => void;
+  onToggleAmounts?: () => void;
   onScroll?: (event: UIEvent<HTMLDivElement>) => void;
+  showAmounts?: boolean;
   theme: HuThemePreset;
   title: string;
 }) {
@@ -3929,7 +3934,14 @@ function HuKidsPiMenuFrame({
         className="relative z-[1]"
         style={isThemed ? ({ "--uc-text": "var(--hu-kids-menu-title-fg)" } as CSSProperties) : undefined}
       >
-        {header ?? <HuKidsPiMenuHeader onMessages={onMessages} title={title} />}
+        {header ?? (
+          <HuKidsPiMenuHeader
+            onMessages={onMessages}
+            onToggleAmounts={onToggleAmounts}
+            showAmounts={showAmounts}
+            title={title}
+          />
+        )}
       </div>
       <div
         className="scrollbar-hide relative z-[1] min-h-0 flex-1 overflow-y-auto pb-[104px]"
@@ -3985,7 +3997,17 @@ function HuKidsPaymentHeroSheet({
   );
 }
 
-function HuKidsPaymentsPage({ onMessages, theme }: { onMessages?: () => void; theme: HuThemePreset }) {
+function HuKidsPaymentsPage({
+  onMessages,
+  onToggleAmounts,
+  showAmounts,
+  theme,
+}: {
+  onMessages?: () => void;
+  onToggleAmounts: () => void;
+  showAmounts: boolean;
+  theme: HuThemePreset;
+}) {
   const { t } = useLanguage();
   const menu = getPaymentsMenuForCountry(HU_KIDS_RUNTIME_COUNTRY);
   const [selectedPrimaryItemId, setSelectedPrimaryItemId] = useState<PaymentHeroItem["id"] | null>(null);
@@ -4006,7 +4028,13 @@ function HuKidsPaymentsPage({ onMessages, theme }: { onMessages?: () => void; th
 
   return (
     <>
-      <HuKidsPiMenuFrame onMessages={onMessages} theme={theme} title={t("runtime.payments.title", menu.title)}>
+      <HuKidsPiMenuFrame
+        onMessages={onMessages}
+        onToggleAmounts={onToggleAmounts}
+        showAmounts={showAmounts}
+        theme={theme}
+        title={t("runtime.payments.title", menu.title)}
+      >
         <div className="flex flex-col gap-[13px] px-[20px] pt-[8px]">
           {localizedPrimaryItems.map((item) => (
             <PaymentHeroCard
@@ -4117,12 +4145,16 @@ function HuKidsProductsPage({ onMessages, theme }: { onMessages?: () => void; th
 function HuKidsMorePage({
   onContacts,
   onMessages,
+  onToggleAmounts,
   onSettings,
+  showAmounts,
   theme,
 }: {
   onContacts: () => void;
   onMessages?: () => void;
+  onToggleAmounts: () => void;
   onSettings: () => void;
+  showAmounts: boolean;
   theme: HuThemePreset;
 }) {
   const { t } = useLanguage();
@@ -4167,15 +4199,9 @@ function HuKidsMorePage({
 
   return (
     <HuKidsPiMenuFrame
-      header={
-        <MoreHeader
-          actionVariant="contact-messages"
-          onContactPhone={onContacts}
-          onLogout={() => undefined}
-          onMessages={onMessages}
-          onProfile={() => undefined}
-        />
-      }
+      onMessages={onMessages}
+      onToggleAmounts={onToggleAmounts}
+      showAmounts={showAmounts}
       theme={theme}
       title={t("more.title", "More")}
     >
@@ -4603,7 +4629,7 @@ function HuKidsCardDetailsPage({
             includeSafeArea
             onBack={onBack}
             showHelp={false}
-            title="Cards"
+            title="Your cards"
             variant="transparent"
           />
         </div>
@@ -4686,6 +4712,7 @@ function HuKidsCardRevealStage({
   const expiry = "09/29";
   const cvv = "214";
   const cardNumberDisplay = showAmounts ? cardNumber : "5319 7200 **** 5678";
+  const spendModel = getHuKidsSpendModel();
 
   return (
     <div className="relative flex justify-center">
@@ -4707,13 +4734,11 @@ function HuKidsCardRevealStage({
             style={{ backfaceVisibility: "hidden" }}
             type="button"
           >
-            <img
-              alt={`${card.title} card ending ${card.lastDigits}`}
-              className={cn("block h-full w-full object-cover transition-[filter,transform] duration-500", isFrozen ? "saturate-[0.68]" : "")}
-              draggable={false}
-              height={206}
-              src={huCardDetailCatSrc}
-              width={327}
+            <HuKidsCardFrontArtwork
+              card={card}
+              isFrozen={isFrozen}
+              showAmounts={showAmounts}
+              spendModel={spendModel}
             />
             <HuKidsCardFreezeOverlay isFrozen={isFrozen} />
           </button>
@@ -4774,6 +4799,108 @@ function HuKidsCardRevealStage({
       </div>
     </div>
   );
+}
+
+function HuKidsCardFrontArtwork({
+  card,
+  isFrozen,
+  showAmounts,
+  spendModel,
+}: {
+  card: HuKidsCard;
+  isFrozen: boolean;
+  showAmounts: boolean;
+  spendModel: ReturnType<typeof getHuKidsSpendModel>;
+}) {
+  const amountParts = getHuKidsDecimalParts(spendModel.availableToSpend);
+
+  return (
+    <div
+      aria-label={`${card.title} card ending ${card.lastDigits}`}
+      className={cn("relative h-full w-full overflow-hidden", isFrozen ? "saturate-[0.68]" : "")}
+      role="img"
+    >
+      <img
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+        draggable={false}
+        height={206}
+        src={huCardBgCatSrc}
+        width={327}
+      />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[color-mix(in_srgb,var(--uc-static-black)_8%,transparent)]" />
+
+      <div className="absolute left-[14px] top-[14px] text-left text-[var(--uc-static-white)]">
+        <p className="text-[11px] font-bold leading-[13px] tracking-[0]">{toTitleCase(card.holderName)}</p>
+        <p className="mt-[1px] text-[13px] font-bold leading-[15px] tracking-[0] opacity-90">**** {card.lastDigits}</p>
+      </div>
+
+      <div className="absolute right-[16px] top-[61px] h-[24px] w-[110px] overflow-hidden">
+        <UniCreditLogo className="h-[24px] w-[110px] [&_svg]:!h-full [&_svg]:!w-full" textColor="var(--uc-static-white)" />
+      </div>
+
+      <div className="absolute bottom-[64px] left-[14px] text-left text-[var(--uc-static-white)]">
+        {showAmounts ? (
+          <p className="flex items-baseline gap-[2px]">
+            <span className="text-[24px] font-bold leading-[26px] tracking-[0]">{amountParts.integer}</span>
+            <span className="text-[13px] font-normal leading-[16px] tracking-[0]">{amountParts.decimal} HUF</span>
+          </p>
+        ) : (
+          <p className="flex items-baseline gap-[2px]">
+            <span className="text-[24px] font-bold leading-[26px] tracking-[0]">{HU_MASKED_INTEGER}</span>
+            <span className="text-[13px] font-normal leading-[16px] tracking-[0]">{HU_MASKED_DECIMALS} HUF</span>
+          </p>
+        )}
+        <p className="mt-[2px] text-[12px] font-normal leading-[15px] tracking-[0] opacity-86">Available to spend</p>
+      </div>
+
+      <div className="absolute bottom-[68px] right-[13px]">
+        <HuMastercardMark />
+      </div>
+
+      <p className="absolute bottom-[15px] left-[14px] max-w-[188px] truncate text-[16px] font-bold leading-[18px] tracking-[0] text-[var(--uc-static-white)]">
+        {card.title}
+      </p>
+    </div>
+  );
+}
+
+function HuMastercardMark() {
+  return (
+    <svg aria-hidden="true" className="h-[54px] w-[69px]" fill="none" viewBox="0 0 69 54">
+      <mask id="hu-mastercard-mask-0" height="35" maskUnits="userSpaceOnUse" style={{ maskType: "luminance" }} width="21" x="24" y="4">
+        <path d="M44.5116 4.55664H24.1418V38.0654H44.5116V4.55664Z" fill="white" />
+      </mask>
+      <g mask="url(#hu-mastercard-mask-0)">
+        <path d="M49.2267 -0.189453H19.4265V42.8119H49.2267V-0.189453Z" fill="#FF5F00" />
+      </g>
+      <mask id="hu-mastercard-mask-1" height="43" maskUnits="userSpaceOnUse" style={{ maskType: "luminance" }} width="35" x="0" y="0">
+        <path d="M26.311 21.2634C26.311 14.4287 29.5173 8.44839 34.4212 4.55644C30.8376 1.70866 26.311 0 21.3129 0C9.61914 0 0.188721 9.49258 0.188721 21.2634C0.188721 33.0342 9.61914 42.5267 21.3129 42.5267C26.2167 42.5267 30.7433 40.8181 34.4212 37.9703C29.423 34.0784 26.311 28.0031 26.311 21.2634Z" fill="white" />
+      </mask>
+      <g mask="url(#hu-mastercard-mask-1)">
+        <path d="M39.042 -4.74609H-4.62085V47.3682H39.042V-4.74609Z" fill="#EB001B" />
+      </g>
+      <mask id="hu-mastercard-mask-2" height="2" maskUnits="userSpaceOnUse" style={{ maskType: "luminance" }} width="2" x="66" y="33">
+        <path d="M66.5789 34.4578V33.7934H66.8618V33.6984H66.2017V33.7934H66.4846L66.5789 34.4578ZM67.8991 34.4578V33.6035H67.7105L67.4276 34.1731L67.1447 33.6035H66.9561V34.4578H67.1447V33.7934L67.3333 34.3629H67.5219L67.7105 33.7934V34.4578H67.8991Z" fill="white" />
+      </mask>
+      <g mask="url(#hu-mastercard-mask-2)">
+        <path d="M72.6143 28.8574H61.3921V39.2043H72.6143V28.8574Z" fill="#F79E1B" />
+      </g>
+      <mask id="hu-mastercard-mask-3" height="43" maskUnits="userSpaceOnUse" style={{ maskType: "luminance" }} width="35" x="34" y="0">
+        <path d="M68.5593 21.2634C68.5593 33.0342 59.1289 42.5267 47.4352 42.5267C42.5314 42.5267 38.0048 40.8181 34.3269 37.9703C39.2307 34.0784 42.4371 28.0031 42.4371 21.2634C42.4371 14.4287 39.2307 8.44839 34.3269 4.55644C37.9105 1.70866 42.4371 0 47.4352 0C59.1289 0 68.5593 9.49258 68.5593 21.2634Z" fill="white" />
+      </mask>
+      <g mask="url(#hu-mastercard-mask-3)">
+        <path d="M73.2744 -4.74609H29.6116V47.3682H73.2744V-4.74609Z" fill="#F79E1B" />
+      </g>
+    </svg>
+  );
+}
+
+function toTitleCase(value: string) {
+  return value
+    .toLocaleLowerCase("en")
+    .replace(/\b\p{L}/gu, (match) => match.toLocaleUpperCase("en"));
 }
 
 function HuKidsCardDetailsActionRail({ actions }: { actions: HuKidsCardDetailAction[] }) {
@@ -5005,6 +5132,7 @@ function HuSavingContent({
 function HuEarningContent({
   completedLessonIds,
   onOpenLearn,
+  onSelectTopic,
   onSelectTask,
   onToggleAmounts,
   showAmounts,
@@ -5013,13 +5141,14 @@ function HuEarningContent({
 }: {
   completedLessonIds: string[];
   onOpenLearn: () => void;
+  onSelectTopic: (topicId: string) => void;
   onSelectTask: (taskId: string) => void;
   onToggleAmounts: () => void;
   showAmounts: boolean;
   tasks: HuKidsTask[];
   topics: HuLearnTopic[];
 }) {
-  const completedTopics = topics.filter((topic) => getHuLearnTopicProgress(topic, completedLessonIds) === 100).length;
+  const educationTopics = topics.slice(0, 2);
 
   return (
     <main>
@@ -5028,10 +5157,12 @@ function HuEarningContent({
         <div className="mt-[28px] space-y-[28px] px-[24px]">
           <HuAllowanceCard showAmounts={showAmounts} />
           <HuTasksCard onSelectTask={onSelectTask} showAmounts={showAmounts} tasks={tasks} />
-          <HuEducationCard
-            completedTopics={completedTopics}
+          <HuLearnEducationCard
+            completedLessonIds={completedLessonIds}
+            onOpenLearn={onOpenLearn}
+            onSelectTopic={onSelectTopic}
+            topics={educationTopics}
             totalTopics={topics.length}
-            onClick={onOpenLearn}
           />
         </div>
     </main>
@@ -5105,60 +5236,6 @@ function HuAllowanceCard({ showAmounts = true }: { showAmounts?: boolean }) {
         )}
       </div>
     </section>
-  );
-}
-
-function HuEducationCard({
-  completedTopics,
-  onClick,
-  totalTopics,
-}: {
-  completedTopics: number;
-  onClick: () => void;
-  totalTopics: number;
-}) {
-  const progressPct = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
-
-  return (
-    <button
-      type="button"
-      className="flex w-full flex-col gap-[16px] rounded-[16px] bg-[var(--hu-theme-card-bg)] p-[16px] text-left transition-transform active:scale-[0.99]"
-      onClick={onClick}
-    >
-      <div className="flex items-start gap-[12px]">
-        <span className="grid size-[40px] shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--hu-theme-accent)_10%,var(--hu-theme-card-bg))] text-[var(--hu-theme-accent)]">
-          <AppIcon name="hu-kids-learn" size={20} />
-        </span>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Education</h2>
-          <p className="text-[14px] font-normal leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">
-            Financial education
-          </p>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between gap-[12px]">
-        <div className="flex-1">
-          <div className="h-[8px] w-full overflow-hidden rounded-full bg-[var(--hu-theme-progress-bg)]">
-            <div
-              className="h-full rounded-full bg-[var(--hu-theme-accent-strong)]"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-          <div className="mt-[8px] flex items-baseline justify-between">
-            <span className="text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--uc-text)]">
-              {completedTopics}/{totalTopics}
-            </span>
-            <span className="text-[12px] font-normal leading-[16px] tracking-[0] text-[var(--uc-text-muted)]">
-              topics done
-            </span>
-          </div>
-        </div>
-        <span className="grid size-[32px] shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--hu-theme-accent)_10%,var(--hu-theme-card-bg))] text-[var(--hu-theme-accent)]">
-          <AppIcon name="arrow-right" size={20} />
-        </span>
-      </div>
-    </button>
   );
 }
 
@@ -5491,7 +5568,13 @@ function HuHomePreview({
               <StatusBar variant={phoneChromeUsesLightForeground ? "dark" : "light"} />
               <div className="relative z-[1] h-[54px] flex-shrink-0" />
               <div className="relative z-[2] flex-shrink-0">
-                <HuLightHeader showAmounts={showAmounts} onMessages={() => undefined} onToggleAmounts={() => undefined} preview />
+                <HuLightHeader
+                  title="Home"
+                  showAmounts={showAmounts}
+                  onMessages={() => undefined}
+                  onToggleAmounts={() => undefined}
+                  preview
+                />
               </div>
               <div className="scrollbar-hide relative z-[1] flex-1 overflow-hidden pb-[104px]">
                 <HuHomeContent
@@ -5656,15 +5739,19 @@ function HuLightHeader({
   preview = false,
   showAmounts,
   onToggleAmounts,
+  title,
 }: {
   onMessages?: () => void;
   preview?: boolean;
   showAmounts: boolean;
   onToggleAmounts: () => void;
+  title: string;
 }) {
   return (
     <header className="relative z-[2] flex h-[40px] items-center justify-between px-[24px]">
-      <UniCreditLogo className="h-[24px] w-auto" textColor="var(--hu-theme-hero-fg)" />
+      <h1 className="min-w-0 truncate text-[26px] font-bold leading-[31px] tracking-[0] text-[var(--hu-theme-hero-fg)]">
+        {title}
+      </h1>
 
       <div className="flex items-center gap-[10px]">
         <button
@@ -5706,17 +5793,26 @@ function HuLightBalance({
   showAmounts: boolean;
 }) {
   const displayName = concept.childName || "Alexandra";
+  const spendModel = getHuKidsSpendModel();
+  const amountParts = getHuKidsDecimalParts(spendModel.availableToSpend);
 
   return (
     <section className="mt-[68px] px-[24px] text-center">
-      <p className="text-[18px] font-normal leading-[22px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
-        Welcome back {displayName}
-      </p>
+      <div className="flex items-center justify-center gap-[6px] text-[18px] font-normal leading-[22px] tracking-[0] text-[var(--hu-theme-hero-muted)]">
+        <p>Welcome back {displayName}</p>
+        <img
+          alt=""
+          aria-hidden="true"
+          className="size-[20px] shrink-0"
+          draggable={false}
+          src={huSunEmojiSrc}
+        />
+      </div>
       <div className="mt-[10px] flex items-baseline justify-center gap-[6px] text-[var(--hu-theme-hero-fg)]">
         {showAmounts ? (
           <>
-            <span className="text-[46px] font-bold leading-[48px] tracking-[0]">4.500</span>
-            <span className="text-[28px] font-normal leading-[32px] tracking-[0]">,34 HUF</span>
+            <span className="text-[46px] font-bold leading-[48px] tracking-[0]">{amountParts.integer}</span>
+            <span className="text-[28px] font-normal leading-[32px] tracking-[0]">{amountParts.decimal} HUF</span>
           </>
         ) : (
           <>
@@ -6585,7 +6681,6 @@ function getHuLearnLessonImageSrc(lesson?: HuLearnLesson | null) {
 
 function HuKidsLearnPage({
   completedLessonIds,
-  learnModules,
   onBack,
   onMessages,
   onSelectTopic,
@@ -6593,14 +6688,12 @@ function HuKidsLearnPage({
   topics,
 }: {
   completedLessonIds: string[];
-  learnModules: LearnModule[];
   onBack?: () => void;
   onMessages?: () => void;
   onSelectTopic: (topicId: string) => void;
   theme: HuThemePreset;
   topics: HuLearnTopic[];
 }) {
-  const completedTopics = topics.filter((topic) => getHuLearnTopicProgress(topic, completedLessonIds) === 100).length;
   const suggestedTopic = topics.find((topic) => topic.id === "saving-goals") ?? topics[0];
   const [collapsedTitleProgress, setCollapsedTitleProgress] = useState(0);
   const headerVariant = theme.id === "nordlys" || theme.id === "blue-lines" ? "dark" : "transparent";
@@ -6628,23 +6721,7 @@ function HuKidsLearnPage({
       title="Learn"
     >
       <section className="px-[16px] pt-[16px]">
-        <div className="flex items-end justify-between gap-[12px] px-[2px]">
-          <div>
-            <p className="text-[13px] font-bold uppercase leading-[16px] tracking-[0] text-[var(--hu-theme-accent-strong)]">
-              Financial education
-            </p>
-            <h2 className="mt-[4px] text-[26px] font-bold leading-[30px] tracking-[0] text-[var(--uc-text)]">
-              Money lessons
-            </h2>
-          </div>
-          <p className="shrink-0 text-right text-[12px] font-bold leading-[15px] tracking-[0] text-[var(--uc-text-muted)]">
-            {completedTopics}/{topics.length}
-            <br />
-            topics done
-          </p>
-        </div>
-
-        <div className="mt-[16px]">
+        <div>
           <p className="px-[2px] text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">New</p>
           <HuLearnTopicCard
             className="mt-[10px]"
@@ -6659,7 +6736,7 @@ function HuKidsLearnPage({
           <div className="flex items-center justify-between px-[2px]">
             <p className="text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">All topics</p>
             <p className="text-[12px] font-bold leading-[15px] tracking-[0] text-[var(--uc-text-muted)]">
-              {learnModules.length} from Kids RO
+              {topics.length} from Kids RO
             </p>
           </div>
           <div className="mt-[10px] grid grid-cols-2 gap-x-[15px] gap-y-[16px]">
@@ -6677,6 +6754,118 @@ function HuKidsLearnPage({
         </section>
       </section>
     </HuKidsPiMenuFrame>
+  );
+}
+
+function HuLearnEducationCard({
+  completedLessonIds,
+  onOpenLearn,
+  onSelectTopic,
+  topics,
+  totalTopics,
+}: {
+  completedLessonIds: string[];
+  onOpenLearn?: () => void;
+  onSelectTopic: (topicId: string) => void;
+  topics: HuLearnTopic[];
+  totalTopics: number;
+}) {
+  return (
+    <section
+      className="rounded-[16px] border border-[color-mix(in_srgb,var(--uc-text)_6%,transparent)] bg-[var(--uc-surface)] px-[16px] pb-[14px] pt-[16px] shadow-sm"
+      data-hu-learn-education-card
+    >
+      <div>
+        <button
+          className="block text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
+          onClick={onOpenLearn}
+          type="button"
+        >
+          <h2 className="text-[20px] font-bold leading-[24px] tracking-[0] text-[var(--uc-text)]">Education</h2>
+        </button>
+        <p className="mt-[3px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
+          Money lessons for safer spending and saving.
+        </p>
+      </div>
+
+      <div className="mt-[20px] flex flex-col">
+        {topics.map((topic, index) => (
+          <HuLearnEducationRow
+            key={topic.id}
+            completedLessonIds={completedLessonIds}
+            onClick={() => onSelectTopic(topic.id)}
+            showDivider={index < topics.length - 1}
+            topic={topic}
+          />
+        ))}
+      </div>
+
+      {totalTopics > 2 ? (
+        <LinkButton
+          className="mx-auto mt-[16px] h-[24px] text-[var(--hu-theme-accent-strong)]"
+          iconSize={24}
+          onClick={onOpenLearn}
+        >
+          SHOW MORE
+        </LinkButton>
+      ) : null}
+    </section>
+  );
+}
+
+function HuLearnEducationRow({
+  completedLessonIds,
+  onClick,
+  showDivider,
+  topic,
+}: {
+  completedLessonIds: string[];
+  onClick: () => void;
+  showDivider: boolean;
+  topic: HuLearnTopic;
+}) {
+  const completedCount = getHuLearnCompletedLessonsCount(topic, completedLessonIds);
+  const imageSrc = getHuLearnTopicImageSrc(topic);
+  const progress = getHuLearnTopicProgress(topic, completedLessonIds);
+
+  return (
+    <button
+      className={cn(
+        "flex min-h-[100px] w-full items-center gap-[8px] py-[12px] text-left transition-opacity hover:opacity-90",
+        showDivider ? "border-b border-[color-mix(in_srgb,var(--uc-text)_12%,transparent)]" : "",
+      )}
+      data-hu-learn-education-row={topic.id}
+      onClick={onClick}
+      type="button"
+    >
+      <span className="relative grid size-[80px] shrink-0 place-items-center overflow-hidden rounded-[12px] bg-[color-mix(in_srgb,var(--uc-static-white)_56%,var(--hu-theme-accent)_8%)]">
+        {imageSrc ? (
+          <img
+            alt=""
+            aria-hidden="true"
+            className="h-full w-full object-contain"
+            draggable={false}
+            src={imageSrc}
+          />
+        ) : (
+          <AppIcon name="hu-kids-learn" size={28} />
+        )}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[16px] font-bold leading-[19px] tracking-[0] text-[var(--uc-text)]">
+          {topic.title}
+        </span>
+        <span className="mt-[5px] line-clamp-2 block text-[13px] font-normal leading-[16px] tracking-[0] text-[var(--uc-text-muted)]">
+          {topic.subtitle}
+        </span>
+        <span className="mt-[7px] block text-[11px] font-bold leading-[13px] tracking-[0] text-[var(--hu-theme-accent-strong)]">
+          {completedCount}/{topic.lessons.length} lessons
+        </span>
+        <span className="mt-[6px] block h-[6px] overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--uc-text)_12%,transparent)]">
+          <span className="block h-full rounded-full bg-[var(--hu-theme-accent-strong)]" style={{ width: `${progress}%` }} />
+        </span>
+      </span>
+    </button>
   );
 }
 
@@ -7229,22 +7418,30 @@ function HuSavingFocusCard({
 }
 
 function HuSpendingCard({ showAmounts }: { showAmounts: boolean }) {
+  const spendModel = getHuKidsSpendModel();
+  const spentParts = getHuKidsDecimalParts(spendModel.weeklySpent);
+  const remainingParts = getHuKidsDecimalParts(spendModel.availableToSpend);
+  const weeklyLimitLabel = formatHuKidsDecimalAmount(spendModel.weeklyLimit);
+
   return (
     <section className="rounded-[16px] bg-[var(--hu-theme-card-bg)] px-[18px] py-[18px] shadow-sm">
       <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">Spending this week</h2>
       <div className="mt-[20px] flex items-start justify-between gap-[12px]">
-        <HuAmountColumn label="Spent" value={showAmounts ? "25.000" : HU_MASKED_INTEGER} suffix={showAmounts ? ",00 HUF" : `${HU_MASKED_DECIMALS} HUF`} />
-        <HuAmountColumn align="right" label="Remaining" value={showAmounts ? "50.000" : HU_MASKED_INTEGER} suffix={showAmounts ? ",00 HUF" : `${HU_MASKED_DECIMALS} HUF`} />
+        <HuAmountColumn label="Spent" value={showAmounts ? spentParts.integer : HU_MASKED_INTEGER} suffix={showAmounts ? `${spentParts.decimal} HUF` : `${HU_MASKED_DECIMALS} HUF`} />
+        <HuAmountColumn align="right" label="Remaining" value={showAmounts ? remainingParts.integer : HU_MASKED_INTEGER} suffix={showAmounts ? `${remainingParts.decimal} HUF` : `${HU_MASKED_DECIMALS} HUF`} />
       </div>
       <div className="mt-[22px] h-[14px] overflow-hidden rounded-full bg-[var(--hu-theme-progress-bg)]">
-        <div className="h-full w-[90%] rounded-full bg-[var(--hu-theme-accent-strong)]" />
+        <div
+          className="h-full rounded-full bg-[var(--hu-theme-accent-strong)]"
+          style={{ width: `${spendModel.spentProgress}%` }}
+        />
       </div>
       <div className="mt-[18px] flex items-center justify-between gap-[12px] text-[13px] leading-[16px] tracking-[0] text-[var(--uc-text-muted)]">
         <p>
-          Weekly limit: <span className="font-bold text-[var(--uc-text)]">{showAmounts ? "75.000,00 HUF" : formatHuMaskedMoney()}</span>
+          Weekly limit: <span className="font-bold text-[var(--uc-text)]">{showAmounts ? `${weeklyLimitLabel} HUF` : formatHuMaskedMoney()}</span>
         </p>
         <p>
-          Days left: <span className="font-bold text-[var(--uc-text)]">2</span>
+          Days left: <span className="font-bold text-[var(--uc-text)]">{spendModel.daysLeft}</span>
         </p>
       </div>
     </section>
@@ -7744,35 +7941,45 @@ function HuTaskDetailSheet({
 }
 
 function HuAllMoneyCard({ showAmounts }: { showAmounts: boolean }) {
+  const spendModel = getHuKidsSpendModel();
+  const totalParts = getHuKidsDecimalParts(spendModel.totalMoney);
+  const accountAmount = 11824.33;
+  const savingAmount = 11824.33;
+  const goalsAmount = spendModel.totalMoney - accountAmount - savingAmount;
+
   return (
     <section className="rounded-[16px] bg-[var(--hu-theme-card-bg)] px-[18px] py-[18px] shadow-sm">
       <h2 className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">All your money</h2>
       <p className="mt-[4px] text-[29px] font-bold leading-[32px] tracking-[0] text-[var(--uc-text)]">
-        {showAmounts ? "35.628" : HU_MASKED_INTEGER}
+        {showAmounts ? totalParts.integer : HU_MASKED_INTEGER}
         <span className="text-[20px] font-normal leading-[24px]">
-          {showAmounts ? ",00 HUF" : `${HU_MASKED_DECIMALS} HUF`}
+          {showAmounts ? `${totalParts.decimal} HUF` : `${HU_MASKED_DECIMALS} HUF`}
         </span>
       </p>
       <div className="mt-[24px] space-y-[22px]">
-        <HuMoneyBucket colorClass="bg-[var(--uc-product-blue)]" icon="mcash" label="Accounts" showAmounts={showAmounts} />
-        <HuMoneyBucket colorClass="bg-[var(--uc-green-bright)]" icon="piggy-bank" label="Saving account" showAmounts={showAmounts} />
-        <HuMoneyBucket colorClass="bg-[var(--uc-product-pink)]" icon="gift" label="Goals" showAmounts={showAmounts} />
+        <HuMoneyBucket amount={accountAmount} colorClass="bg-[var(--uc-product-blue)]" icon="mcash" label="Accounts" showAmounts={showAmounts} />
+        <HuMoneyBucket amount={savingAmount} colorClass="bg-[var(--uc-green-bright)]" icon="piggy-bank" label="Saving account" showAmounts={showAmounts} />
+        <HuMoneyBucket amount={goalsAmount} colorClass="bg-[var(--uc-product-pink)]" icon="gift" label="Goals" showAmounts={showAmounts} />
       </div>
     </section>
   );
 }
 
 function HuMoneyBucket({
+  amount,
   colorClass,
   icon,
   label,
   showAmounts,
 }: {
+  amount: number;
   colorClass: string;
   icon: IconName;
   label: string;
   showAmounts: boolean;
 }) {
+  const amountLabel = `${formatHuKidsDecimalAmount(amount)} HUF`;
+
   return (
     <div className="flex items-center gap-[18px]">
       <span className={cn("grid size-[34px] shrink-0 place-items-center rounded-full text-[var(--uc-static-white)]", colorClass)}>
@@ -7780,7 +7987,7 @@ function HuMoneyBucket({
       </span>
       <p className="min-w-0 flex-1 text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text)]">{label}</p>
       <p className="shrink-0 text-right text-[14px] font-bold leading-[18px] tracking-[0] text-[var(--uc-text)]">
-        {showAmounts ? "11.824,33 HUF" : formatHuMaskedMoney()}
+        {showAmounts ? amountLabel : formatHuMaskedMoney()}
       </p>
     </div>
   );

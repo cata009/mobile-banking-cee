@@ -17,7 +17,7 @@ import { TutorialCard } from './cards/TutorialCard';
 import { TutorialsFlow } from './tutorials/TutorialsFlow';
 import BottomNavigation from '@/app/components/BottomNavigation';
 import { LogoutConfirmDialog } from '@/app/components/LogoutConfirmDialog';
-import { useDemo } from '@/app/state/demoStore';
+import { useCountry } from '@/app/state/demoStore';
 import { getMoreCardsForCountry, MoreCardType } from '@/app/config/moreCardsConfig';
 import { getDocumentsCountForCountry } from '@/app/config/documentsConfig';
 import { useLanguage } from '@/app/contexts/LanguageContext';
@@ -48,7 +48,7 @@ export default function MoreScreen({
   onSettingsClick,
   onLogoutConfirm,
 }: MoreScreenProps) {
-  const { country } = useDemo();
+  const country = useCountry();
   const { t } = useLanguage();
   const availableCards = getMoreCardsForCountry(country);
   const documentsCount = getDocumentsCountForCountry(country);

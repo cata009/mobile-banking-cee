@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useCallback, useEffect, useRef } from 'react';
-import { useDemo } from '@/app/state/demoStore';
+import { useCountry } from '@/app/state/demoStore';
 import { getTranslations } from '@/translations';
 import type { AppLanguage } from '@/app/registry/languageByCountry';
 import { getAvailableLanguages, LOCAL_LANGUAGE_BY_COUNTRY } from '@/app/registry/languageByCountry';
@@ -24,7 +24,7 @@ export function LanguageProvider({
   /** Optional language restored from a shared deep link. */
   initialLanguage?: Language;
 }) {
-  const { country } = useDemo();
+  const country = useCountry();
   const [language, setLanguage] = useState<Language>(initialLanguage ?? 'en');
   const prevCountryRef = useRef(country);
 

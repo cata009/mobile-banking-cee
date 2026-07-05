@@ -1,6 +1,430 @@
 # Current Session
 
-Last updated: 2026-07-02
+Last updated: 2026-07-05
+
+## 2026-07-05 Full Workspace Commit Closeout
+
+- Latest request handled: user asked to commit everything currently uncommitted so the workspace is clean.
+- Commit scope:
+  - all currently modified and untracked project files are intended to be staged and committed in one closeout package.
+  - scope includes the recent Baseline/Future selector and CZ Co-Apping preview package, HU Kids polish carried in the working tree, performance refactor (`manualChunks`, `React.lazy`, DemoStore memo/split), Kids split Phase 0, handoff docs, capability-map updates, and the new HU sun asset.
+  - `package/mobile-pi-coapping-chat-package/` is intentionally included in Git as part of this closeout, resolving the earlier untracked-package deployment risk.
+- Verification before commit:
+  - `npm run build` passed on 2026-07-05. Output confirms App chunk at `472.35 kB` with lazy screen/vendor chunks; Vite also reports `Generated an empty chunk: "react-vendor"` as a non-blocking follow-up observation.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Banana Loop result:
+  - fixed: the CZ Co-Apping package is no longer left as hidden/untracked runtime work once this commit is created.
+  - triaged: oversized source/runtime assets remain the next high-ROI cleanup; several referenced Figma PNG assets are still multi-MB and are now tracked in `known-bananas.md` / `next-tasks.md`.
+  - triaged: the empty `react-vendor` manual chunk is non-blocking but should be reviewed in a follow-up chunking pass.
+  - already known: no local `typecheck`, `lint`, or full automated test scripts exist yet; build plus audits remain the repeatable verification gates for this repo.
+  - already known: HU theme contrast on Payments/More still needs visual verification from a stable browser session or the user.
+- Constitutional Check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes after commit succeeds
+
+## 2026-07-05 Critical Refactor — Bundle + DemoStore + Kids split Phase 0
+
+- Latest request handled: user asked to resolve the 3 most critical maintainability risks identified in the architecture audit (god file, monolithic bundle, unstable DemoStore).
+- Approved plan: 6 steps (rising risk, declining immediate value). Completed 5/6. Step 6 (Rs extract) deferred to a dedicated Kids session.
+- Changes delivered:
+
+### PASUL 1 — `manualChunks` in `vite.config.ts` (zero-risk config)
+- Added `build.rollupOptions.output.manualChunks` block splitting the monolithic ~2 MB App chunk into 9 stable vendor groups: `react-vendor`, `radix`, `motion`, `charts` (recharts), `icons` (lucide), `date`, `overlays`, `forms`, `utils`.
+- Pure chunking change — no runtime behavior affected.
+
+### PASUL 2 — `React.lazy` for 23 screens in `src/app/App.tsx`
+- Converted all 23 screen imports from static to `React.lazy(() => import(...))`.
+- Added two `<Suspense>` boundaries with a lightweight inline `ScreenFallback` (spinner on `--uc-surface`).
+- `DomesticPaymentFlowScreens` (5 named exports in one module) kept as static import — they already share one emitted chunk.
+- `MobileFrame`, `FramelessDeviceFrame`, `DemoShell`, `DemoNavigationSync`, `useProducts` stay eager (frame/shell/infra).
+
+### PASUL 3 — DemoStore minimal fix (`src/app/state/demoStore.tsx`)
+- Wrapped all 15 setters in `useCallback` (stable identity).
+- Wrapped `value` object in `useMemo([state, ...stable setters])`.
+- Fixed latent correctness issue: `setFlag` / `resetFlags` now read `getContextKey(prev)` inside the updater instead of closing over `state` at render time — more correct AND stable.
+
+### PASUL 4 — DemoStore targeted split (useCountry + useProductData)
+- Added two narrow sub-contexts (`CountryContext`, `ProductDataContext`) with memoized slice values.
+- Added two selector hooks: `useCountry()`, `useProductData()`.
+- Migrated `useProducts.tsx` to `useProductData()` (highest value — stops product re-derivation on theme/flag toggle).
+- Migrated 11 country-only consumers to `useCountry()`: InteractivePreLoginActive, LanguageSelector, PanelOverlay, PreLoginScreen, LanguageContext, AnalyticsScreen, DocumentsScreen, MessagesScreen, MoreScreen, ProductsScreen (2 sites), PaymentsScreen (1 of 2 sites).
+- `useDemo()` unchanged for demo chrome that legitimately needs everything (DemoTopBar, AppShell, DemoFeatureSidePanel, DemoNavigationSync).
+
+### PASUL 5 — Kids split Phase 0: extract `shared/money.ts`
+- Created `src/app/screens/kids/shared/money.ts` with: `formatKidsMoney`, `formatSignedKidsMoney`, `resolveIconName`, `TONE_CLASSES`.
+- Removed the definitions from `KidsMarketHomeApp.tsx` and replaced with an import.
+- First file of the kids modular split structure. Folder layout prepared for Phase 1+ (rs/, sk/, hu/, shared/).
+
+- Verification:
+  - `npx vite build` passed after each of the 5 steps (last build 3.4s, clean).
+  - App chunk: **2.058 kB → 472 kB (77% reduction)**. Lazy per-screen chunks emitted (DesignSystemPage 310 kB, KidsMarketHomeApp 224 kB, RoKidsApp 65 kB, etc.).
+  - `value` identity churn stopped (memoized). Setters stable. `useProducts` + 11 consumers no longer re-render on theme/flag toggle.
+- Limitations:
+  - PASUL 6 (Rs extract, ~880 lines) not done — deferred to dedicated Kids session per user decision. Next steps: Phase 1 Rs → Phase 2 Sk → Phase 3 Hu (sub-phased) → Phase 4 slim dispatcher.
+  - HU theme contrast issues on Payments/More (from earlier this session) still need visual verification by the user.
+- safe to resume: yes
+
+## 2026-07-04 CZ Co-Apping Full-Page Assistant
+
+- Latest request handled: user approved converting the Czech Republic Future `CZ Co-Apping Chatbot` from a bottom-sheet assistant into a full-page assistant surface.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` now makes the assistant fill the phone viewport, hides the sheet grabber, removes the bottom-sheet radius/shadow, and uses a full-page horizontal enter/exit transition.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` now reserves a simulated iPhone status-bar safe area so the assistant header controls sit below the dynamic island instead of overlapping it.
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` updates assistant header navigation: a new chat uses Back to return to the app and the right-side conversations button opens history; conversation detail keeps Back to conversations plus More; list/discovery can close the assistant.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+- Limitations:
+  - Conversation history still opens in-place; the lateral drawer animation remains a future polish item.
+  - `package/mobile-pi-coapping-chat-package/` remains untracked in Git; add it before any Git-based deploy that should include the CZ Co-Apping runtime.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Chat Scroll Feedback
+
+- Latest request handled: user asked for Czech Republic Future `CZ Co-Apping Chatbot` conversation detail to open at the latest message, show a scroll-to-bottom affordance after scrolling upward, and add AI response feedback controls.
+- Runtime changes:
+  - Added a dedicated chat transcript ref and scroll tracking in `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx`.
+  - Conversation detail now snaps to the newest message on open/message updates and shows a centered down-arrow button when the user scrolls away from the bottom.
+  - Added thumbs up/down feedback controls before AI response timestamps.
+  - Styled the scroll affordance and feedback buttons in `package/mobile-pi-coapping-chat-package/src/coapping.css`.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+- Limitations:
+  - Feedback controls are UI-only and do not yet persist or call telemetry/API.
+  - `package/mobile-pi-coapping-chat-package/` remains untracked in Git; add it before any Git-based deploy that should include the CZ Co-Apping runtime.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Conversation Typography Tuning
+
+- Latest request handled: user asked for the Czech Republic Future `CZ Co-Apping Chatbot` conversation copy to be reduced because 16px felt too large in the chat detail.
+- Runtime changes:
+  - Tuned `.mpc-agent-copy` and `.mpc-bubble` in `package/mobile-pi-coapping-chat-package/src/coapping.css` to 14px font size with 16px line-height.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+- Limitation:
+  - `package/mobile-pi-coapping-chat-package/` remains untracked in Git; add it before any Git-based deploy that should include the CZ Co-Apping runtime.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Conversation List Scroll Depth
+
+- Latest request handled: user asked for the Czech Republic Future `CZ Co-Apping Chatbot` conversation list to include enough mock history for scroll testing, keep `New+` fixed, show a scroll-to-top affordance when scrolled, and remove `Last conversation` copy from row subtitles.
+- Runtime changes:
+  - Added 10 more mocked conversation histories in `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx`, each with internal message content.
+  - Added conversation-list scroll tracking, a fixed floating action rail, and a scroll-to-top button next to `New+`.
+  - Cleaned conversation subtitles to date/time only.
+  - Updated `package/mobile-pi-coapping-chat-package/src/coapping.css` so the floating controls sit outside the scrollable list and the list keeps enough bottom clearance.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+- Limitation:
+  - `package/mobile-pi-coapping-chat-package/` remains untracked in Git; add it before any Git-based deploy that should include the CZ Co-Apping runtime.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Chat Detail Polish
+
+- Latest request handled: user asked for the Czech Republic Future `CZ Co-Apping Chatbot` investment-advice conversation to contain much more text for scroll testing, and for the conversation detail `More` menu to expose `Share`, `Rename conversation`, and `Delete conversation`.
+- Runtime changes:
+  - Extended the mocked `investment-advice` conversation in `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` with longer investment guidance, follow-up questions, fee/recurrent-order context, and a future Investments deep-link placeholder.
+  - Added `isMoreMenuOpen` state and a detail-only More popover in `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx`.
+  - Added compact popover styling in `package/mobile-pi-coapping-chat-package/src/coapping.css`, including a danger treatment for `Delete conversation`.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+- Limitations:
+  - `Share`, `Rename conversation`, and `Delete conversation` are staged UI actions only; they do not yet mutate or persist conversation state.
+  - `package/mobile-pi-coapping-chat-package/` remains untracked in Git; add it before any Git-based deploy that should include the CZ Co-Apping runtime.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping New Chat Close Control
+
+- Latest request handled: user asked for the Czech Republic Future `CZ Co-Apping Chatbot` empty/new conversation screen to show the `X` close button in the top-right.
+- Runtime changes:
+  - Updated `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` so the right-side header action renders `Close` for new/list/discovery states and keeps `More` only for an active conversation detail.
+  - Kept the left-side contextual behavior intact: new chat opens the conversation list, and conversation detail uses Back.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+- Limitation:
+  - `package/mobile-pi-coapping-chat-package/` remains untracked in Git; add it before any Git-based deploy that should include the CZ Co-Apping runtime.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Contextual Chat Header
+
+- Latest request handled: user asked for the Czech Republic Future `CZ Co-Apping Chatbot` header controls to be contextual: empty/new chat opens the conversation list from the left button, conversation detail shows Back on the left, and More only appears once an actual conversation is open.
+- Runtime changes:
+  - Updated `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` so conversation detail is defined only when there are active messages.
+  - Empty/new conversation state now shows the conversations-list control on the left and hides the right-side More action.
+  - Conversation detail keeps Back on the left and More on the right; list/discovery states keep their existing close behavior.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+- Limitation:
+  - `package/mobile-pi-coapping-chat-package/` remains untracked in Git; add it before any Git-based deploy that should include the CZ Co-Apping runtime.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Discovery Feed
+
+- Latest request handled: user asked for the Czech Republic Future `CZ Co-Apping Chatbot` second header segment to stop acting like another conversation state and instead show a Perplexity-style discovery surface with banking promos, product prompts, articles, and real imagery.
+- Runtime changes:
+  - Updated `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` so `Discovery` is a separate assistant mode that hides the conversation list, chat messages, suggested-topic empty state, and composer.
+  - Added a discovery hero story for investments, two product promo cards, and useful-read rows with reusable topic icons.
+  - Updated `package/mobile-pi-coapping-chat-package/src/coapping.css` with the discovery feed layout, image hero, promo-card grid, article rows, and scroll-hidden feed behavior.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+- Limitations:
+  - Discovery imagery currently uses remote static Unsplash demo URLs until official banking/CMS assets are provided.
+  - Discovery cards are mock-driven and do not deep link yet.
+  - `package/mobile-pi-coapping-chat-package/` remains untracked in Git; add it before any Git-based deploy that should include the CZ Co-Apping runtime.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Composer Attachment Menu
+
+- Latest request handled: user asked for the `+` button in the Czech Republic Future `CZ Co-Apping Chatbot` composer to expose attachment choices for Camera, Photos, and Files.
+- Runtime changes:
+  - Added a compact attachment menu anchored to the composer `+` button in `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx`.
+  - Added hidden native file inputs so `Camera` triggers image capture, `Photos` opens an image picker, and `Files` opens a generic file picker.
+  - Added `CameraIcon`, `PhotosIcon`, and `FileAttachmentIcon` in `package/mobile-pi-coapping-chat-package/src/icons.tsx`.
+  - Added attachment-menu styling in `package/mobile-pi-coapping-chat-package/src/coapping.css`.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `git diff --check -- docs/handoff/current-session.md package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx package/mobile-pi-coapping-chat-package/src/icons.tsx package/mobile-pi-coapping-chat-package/src/coapping.css` passed with only the normal Windows LF/CRLF warning for the handoff file.
+  - `git status --short` confirms the edited co-apping package files are still untracked (`??`), so Git diff/check coverage for those files remains limited until they are added.
+- Limitation:
+  - Attachment selection currently opens the native picker only; selected files are not yet rendered as previews, persisted, uploaded, or sent into the assistant conversation.
+  - `package/mobile-pi-coapping-chat-package/` remains untracked in Git; add it before any Git-based deploy that should include the CZ Co-Apping runtime.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Investment Advice Conversation
+
+- Latest request handled: user asked for one mocked Czech Republic Future `CZ Co-Apping Chatbot` conversation to contain a longer investment-advice exchange where the user asks for guidance and the AI points toward the Investments area.
+- Runtime changes:
+  - Replaced the old `Show me product offers` mock conversation in `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` with `Investment advice for my savings`.
+  - Added a longer multi-message exchange covering investment goal, time horizon, risk framing, emergency reserve, portfolio/product review, and an `Open Investments` / `Go to Investments` placeholder action.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `git diff --check -- docs/handoff/current-session.md package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` passed with only the normal Windows LF/CRLF warning for the handoff file.
+- Limitation:
+  - The Investments redirect is still text-only placeholder content; the real deep-link/action should be wired later when the destination contract is defined.
+  - `package/mobile-pi-coapping-chat-package/` remains untracked in Git; add it before any Git-based deploy that should include the CZ Co-Apping runtime.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Conversation Title Size
+
+- Latest request handled: user asked for the `Conversations` title inside the CZ Co-Apping conversation list to be smaller.
+- Runtime changes:
+  - Updated `package/mobile-pi-coapping-chat-package/src/coapping.css` so `.mpc-conversation-title` renders at 14px with an 18px line height.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `git diff --check -- docs/handoff/current-session.md package/mobile-pi-coapping-chat-package/src/coapping.css` passed with only the normal Windows LF/CRLF warning for the handoff file.
+- Limitation:
+  - `package/mobile-pi-coapping-chat-package/` remains untracked in Git; add it before any Git-based deploy that should include the CZ Co-Apping runtime.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Conversation Search
+
+- Latest request handled: user asked for the Czech Republic Future `CZ Co-Apping Chatbot` conversation list to include 5 richer mocked conversations and for the bottom search to filter the list, show no results, and provide a clear `X`.
+- Runtime changes:
+  - Added 5 mocked conversation histories in `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx`, each with multi-message user/assistant content.
+  - Extended conversation search so it matches title, subtitle, and full message history text.
+  - Added a `No results` state plus a clear-search button in the conversation search bar.
+  - Updated `package/mobile-pi-coapping-chat-package/src/coapping.css` for the empty state and search clear affordance.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `git diff --check -- docs/handoff/current-session.md package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx package/mobile-pi-coapping-chat-package/src/coapping.css` passed with only the normal Windows LF/CRLF warning for the handoff file.
+- Limitation:
+  - `package/mobile-pi-coapping-chat-package/` remains untracked in Git; add it before any Git-based deploy that should include the CZ Co-Apping runtime.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Suggested Topics Plain Rows
+
+- Latest request handled: user asked for the Czech Republic Future `CZ Co-Apping Chatbot` default suggested topics to stop rendering as a framed container with pill rows and instead match the simple ChatGPT-style icon + text prompt list.
+- Runtime changes:
+  - Updated `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` so suggested topics render as plain rows with leading icons instead of chip buttons.
+  - Added reusable `SuggestedTopicIcon` variants in `package/mobile-pi-coapping-chat-package/src/icons.tsx` for payments, offers, security, and insights.
+  - Updated `package/mobile-pi-coapping-chat-package/src/coapping.css` to remove the visible suggested-topics shelf/card styling and per-topic pill styling.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `git diff --check -- docs/handoff/current-session.md package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx package/mobile-pi-coapping-chat-package/src/coapping.css package/mobile-pi-coapping-chat-package/src/icons.tsx` passed with only the normal Windows LF/CRLF warning for the handoff file.
+- Limitation:
+  - `package/mobile-pi-coapping-chat-package/` remains untracked in Git; add it before any Git-based deploy that should include the CZ Co-Apping runtime.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Conversation List Header Cleanup
+
+- Latest request handled: user asked for the Czech Republic Future `CZ Co-Apping Chatbot` conversation-list header to show no left-side control for now.
+- Runtime changes:
+  - Updated `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` so the left header slot renders a non-interactive spacer while the conversation list is open.
+  - Detail mode still renders Back -> conversation list on the left, and More options on the right.
+  - Added `mpc-chat-control-spacer` in `package/mobile-pi-coapping-chat-package/src/coapping.css` to preserve header alignment without a visible or focusable button.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `git diff --check -- docs/handoff/current-session.md package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx package/mobile-pi-coapping-chat-package/src/coapping.css package/mobile-pi-coapping-chat-package/src/icons.tsx` passed.
+- Limitation:
+  - `package/mobile-pi-coapping-chat-package/` remains untracked in Git; add it before any Git-based deploy that should include the CZ Co-Apping runtime.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Detail Header Controls
+
+- Latest request handled: user asked for the Czech Republic Future `CZ Co-Apping Chatbot` conversation detail header to show a Back control on the left and a More / 3-dots control on the right.
+- Runtime changes:
+  - Updated `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` so conversation detail mode renders Back -> conversation list on the left and More options on the right.
+  - Preserved list mode behavior: the left control remains the conversations toggle and the right control still closes the assistant while the conversation list is open.
+  - Added reusable `MoreIcon` in `package/mobile-pi-coapping-chat-package/src/icons.tsx`; reused the existing `BackIcon`.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `git diff --check -- package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx package/mobile-pi-coapping-chat-package/src/icons.tsx` passed.
+- Limitation:
+  - `package/mobile-pi-coapping-chat-package/` is currently untracked in Git. Local build uses it, but a future commit/deploy must explicitly add the package if this runtime should be published from Git.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Conversation List Polish
+
+- Latest request handled: user asked for the Czech Republic Future `CZ Co-Apping Chatbot` conversation list to remove card-like borders, use simple title/subtitle rows, move `New+` into a floating action, and replace the message composer with conversation search while the list is open.
+- Runtime changes:
+  - Updated `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` so conversation rows derive their title from the first user prompt when available and show the latest conversation time as the subtitle.
+  - Removed `New conversation` from the list body and added a floating `New+` action that resets to a blank conversation with suggested topics.
+  - Replaced the normal chat composer with a bottom `Search conversations` bar whenever the conversation list is open.
+  - Updated `package/mobile-pi-coapping-chat-package/src/coapping.css` so conversation list rows are plain text rows with separators instead of card boxes.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `git diff --check -- package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx package/mobile-pi-coapping-chat-package/src/coapping.css` passed.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping New Conversation Default
+
+- Latest request handled: user asked for the Czech Republic Future `CZ Co-Apping Chatbot` sheet to open slightly lower, align the Search/Discovery segmented control with the surrounding header buttons, and default to a new conversation instead of showing the existing assistant intro.
+- Runtime changes:
+  - Updated `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` so the default chat state is empty and shows vertical suggested topics above the composer, outside the composer container.
+  - Added a conversation-list mode behind the top-left conversations button, with actions for `New conversation` and the saved `Smart Assistant intro` conversation.
+  - Kept the previous assistant intro as a recoverable conversation instead of showing it by default.
+  - Updated `package/mobile-pi-coapping-chat-package/src/coapping.css` so the bottom sheet starts lower under the simulated system bar, the segmented Search/Discovery buttons share the calm light control treatment, and suggested topics are stacked vertically.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings in already-modified files.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Composer Voice Options
+
+- Latest request handled: user asked for the Czech Republic Future `CZ Co-Apping Chatbot` composer to always expose a small microphone action next to the primary action, so the customer can record a voice message from the start or use the larger voice-conversation action.
+- Runtime changes:
+  - Updated `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` to render a persistent `mpc-mic-button` between the input and the primary send/voice button.
+  - The primary button now remains the large voice conversation action while the input is empty, and switches to send when text is typed.
+  - Added an active visual state for the small microphone button in `package/mobile-pi-coapping-chat-package/src/coapping.css`.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings in already-modified files.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Header Identity Cleanup
+
+- Latest request handled: user asked to remove the redundant `Smart Assistant / Online now` identity row from the Czech Republic Future `CZ Co-Apping Chatbot` sheet.
+- Runtime changes:
+  - Updated `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` to remove the assistant identity row from the sheet header.
+  - Removed now-unused identity-row/title/presence CSS from `package/mobile-pi-coapping-chat-package/src/coapping.css`.
+  - Kept the top control row with conversations, Search/Discovery segment, and close action.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings in already-modified files.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Launcher Scope
+
+- Latest request handled: user reported that the `CZ Co-Apping Chatbot` floating launcher was visible on `prelogin-active`, but the future assistant should be visible only inside the app experience.
+- Runtime changes:
+  - Updated `src/app/App.tsx` to derive `isPreloginScreen` / `isInAppScreen` from `currentScreen`.
+  - Gated the future `CoAppingChatLauncher` behind `isInAppScreen`, so it no longer renders on `prelogin-active`, `prelogin-inactive`, `flow-library`, or `design-system`, while remaining available on actual Mobile PI app screens for the CZ future feature.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings in already-modified files.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Chat Empty State Topics
+
+- Latest request handled: user clarified that `Suggested topics` should be the default empty chat state, shown above the composer when the chat opens, not something that remains visible after the model/user has already written messages.
+- Runtime changes:
+  - Updated `package/mobile-pi-coapping-chat-package/src/defaults.ts` so the chat opens with no initial assistant messages.
+  - Updated `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` so suggested topics render only while the conversation is empty and disappear after the first sent message / reply cycle starts.
+  - Kept the suggested topics outside the composer, directly above it.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Chat Bottom Sheet Direction
+
+- Latest request handled: user asked for the Czech Republic Future `CZ Co-Apping Chatbot` chat to move away from the full-screen WhatsApp-like treatment and become a bottom-sheet style AI assistant with pull-down close, cleaner header controls, no visible chat scrollbar, AI-style full-width assistant responses, and a composer that defaults to voice mode until the user types.
+- Runtime changes:
+  - Updated `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` so the assistant opens as a draggable bottom sheet, closes through a pull-down gesture or the top-right X, and keeps suggested topics outside the composer.
+  - Updated the chat header to use a compact two-segment Search/Discovery control, a conversations button on the left, and a close button on the right, while preserving assistant identity/status below.
+  - Changed assistant messages from avatar + colored bubble to full-width AI response copy with timestamp; user messages remain compact and timestamped.
+  - Updated the composer so the primary action is voice mode when the input is empty, switches to send when text is typed, and visually marks active listening mode.
+  - Updated `package/mobile-pi-coapping-chat-package/src/icons.tsx` and `src/coapping.css` for the new close, conversations, Search/Discovery, voice-mode controls, bottom-sheet animation, and hidden chat scrollbars.
+- Versioning note:
+  - The reusable Co-Apping package lives under currently untracked `package/`; these runtime files are present in the workspace and used by the build, but they must be explicitly added if this work is committed.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings in already-modified files.
+- safe to resume: yes
+
+## 2026-07-03 CZ Co-Apping Chat Composer Polish
+
+- Latest request handled: user asked for the Czech Republic Future `CZ Co-Apping Chatbot` composer to feel closer to a modern AI chat composer: default placeholder `Ask me anything`, a small microphone control beside Send, and suggested topics placed above the composer instead of inside it.
+- Runtime changes:
+  - Updated `package/mobile-pi-coapping-chat-package/src/defaults.ts` and `src/types.ts` so the default input placeholder is `Ask me anything` and the microphone button has its own accessible label.
+  - Updated `package/mobile-pi-coapping-chat-package/src/icons.tsx` and `src/CoAppingChatAssistant.tsx` to add a compact `MicrophoneIcon` button between the text input and send button.
+  - Updated `package/mobile-pi-coapping-chat-package/src/coapping.css` so suggested topics render as a separate shelf above the composer, while the composer itself stays focused on add/input/mic/send and the mobile home indicator.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - Targeted source check found the expected `Ask me anything`, `recordVoiceLabel`, `mpc-topic-shelf`, `mpc-mic-button`, and `MicrophoneIcon` entries in the portable Co-Apping package.
+  - Browser automation was not available in this turn because the expected `node_repl` browser control tool was not exposed; verification is code/build-level.
+- safe to resume: yes
+
+## 2026-07-02 HU Kids Earning Education Entry Point
+
+- Latest request handled: user asked for the HU Kids Earning level-1 Education card to use the normal white card surface, and for `Show more` to navigate to the Learn level-2 page instead of expanding the card inline.
+- Runtime changes:
+  - Updated `src/app/screens/kids/KidsMarketHomeApp.tsx` so the Earning Education card uses a white `--uc-surface` card with standard border/shadow instead of the themed translucent learn surface.
+  - Removed the local `showAllEducationTopics` expansion state from Earning; the card now always previews the first two topics.
+  - Replaced the custom `SHOW MORE` button with shared `LinkButton` styling, matching the `SEE MORE TRANSACTIONS` chevron spacing/behavior.
+  - Wired `SHOW MORE` to `handleOpenLearn`, which now explicitly keeps the bottom navigation on Earning and opens the Learn level-2 page.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+- safe to resume: yes
+
+## 2026-07-02 HU Kids Dynamic Card And Spend Model
+
+- Latest request handled: user clarified that the HU Kids card detail artwork must not bake card text/logos into a PNG; the card should use the Figma cat background with dynamic overlay data, real UniCredit/Mastercard marks, a `Your cards` header, and a coherent spend model linking Home available spend with the weekly spending card.
+- Runtime changes:
+  - Updated `src/app/screens/kids/KidsMarketHomeApp.tsx` so the HU Kids card detail front now uses the clean cat background image plus live overlay text for holder name, masked digits, available spend, UniCredit logo, Mastercard mark, and product name.
+  - Replaced the temporary Mastercard mark with the exact SVG supplied from Figma by the user; UniCredit continues to use the repository logo component rather than a fake asset.
+  - Renamed the card detail page header from `Cards` to `Your cards`.
+  - Added a single HU Kids spend model: `availableToSpend = min(totalMoney, weeklyLimit - weeklySpent)`. Home hero, card overlay, Spending this week, and All your money now derive from that shared model.
+- Figma/resource notes:
+  - Figma metadata access for the referenced Kids App nodes was unreliable in-session (`INVALID_ARGUMENT` / timeout), so the implementation uses the repo-exported Figma cat background plus the user-provided Mastercard SVG instead of inventing brand marks.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+- safe to resume: yes
+
+## 2026-07-02 HU Kids Learn Education Card Cleanup
+
+- Latest request handled: user asked to remove the HU Kids Learn top `Financial education / Money lessons / topics done` block and align the education card to the supplied Kids App Figma reference by showing two lesson/topic rows plus `Show more`.
+- Runtime changes:
+  - Updated `src/app/screens/kids/KidsMarketHomeApp.tsx` so `HuKidsLearnPage` no longer renders the separate `Financial education` summary block, `New` heading, featured card, or `All topics` grid.
+  - Added a compact `HuLearnEducationCard` with a header, two visible topic rows, 80x80 artwork, progress text/bar, and a `Show more` / `Show less` control that expands the remaining topics without breaking topic navigation.
+  - Kept existing topic and lesson detail routing intact; each row still opens the selected education topic.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+- safe to resume: yes
+
+## 2026-07-02 HU Kids Welcome Sun Accent
+
+- Latest request handled: user asked to add the Figma sun image after `Welcome back` on the HU Kids Home hero.
+- Runtime changes:
+  - Exported the supplied Kids App Figma node `9146:53524` (`fluent-emoji-flat:sun`, 20x20) as `src/assets/kids/figma/hu-sun-emoji.png`.
+  - Updated `src/app/screens/kids/KidsMarketHomeApp.tsx` so `HuLightBalance` renders the sun image inline after `Welcome back Alexandra`.
+  - Marked the sun image decorative with empty `alt` and `aria-hidden` so screen readers keep the greeting clean.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+- safe to resume: yes
 
 ## 2026-07-02 HU Kids Home More And Send Money Cleanup
 
@@ -4085,6 +4509,64 @@ Continue with product evolution work:
   - already known: no local `typecheck`, `lint`, or full automated test scripts exist yet; build plus audits remain the repeatable verification gates for this repo.
   - follow-up: add automated regression coverage for QR share access, Flow Library deep links, and the new header action/product selector behavior.
 - safe to resume: yes after the commit, push, and Vercel deploy complete.
+
+## 2026-07-02 HU Kids L1 Header Unification
+
+- Latest request handled: user asked for HU Kids top in-app header to stop showing the UniCredit logo on the main child app tabs and instead show the current page title on the left, while preserving the existing Home right-side controls across Home, Earning, Saving, Payments, and More.
+- Implementation:
+  - `src/app/screens/kids/KidsMarketHomeApp.tsx` now maps HU Kids bottom-nav tabs to page titles: `Home`, `Earning`, `Saving`, `Payments`, and `More`.
+  - `HuLightHeader` now renders the page title instead of the UniCredit logo and keeps the existing amount visibility, messages, and profile avatar controls on the right.
+  - `HuKidsPiMenuFrame` uses the same header contract for PI-style menu pages, so Payments and More now share the same L1 header model as Home/Earning/Saving.
+  - `HuKidsPaymentsPage` and `HuKidsMorePage` receive and propagate `showAmounts` / `onToggleAmounts`, keeping the amount visibility control consistent across the main tabs.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - Attempted headless browser smoke through both project Node and bundled Codex Node, but Playwright was unavailable/mispackaged locally (`playwright` missing in project; bundled `playwright` missing `playwright-core`). No browser automation verification was completed for this small UI change.
+- safe to resume: yes.
+
+## 2026-07-02 HU Kids Earning Education Placement Correction
+
+- Latest request handled: user clarified that the compact `Education` card with two visible learning items and `Show more` belongs on the Earning Level 1 area, not inside the Level 2 Learn detail page.
+- Implementation:
+  - `src/app/screens/kids/KidsMarketHomeApp.tsx` now renders the compact `HuLearnEducationCard` inside `HuEarningContent`, after Allowance and Tasks.
+  - The Earning Level 1 education card shows two topics by default, expands with `Show more`, and each row opens the selected Learn topic directly.
+  - `HuKidsLearnPage` was restored to the original `New` featured card plus `All topics` two-column topic grid, while keeping the removed top intro block (`Financial education / Money lessons / topics done`) out of the page.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+- safe to resume: yes.
+
+## 2026-07-03 Baseline / Future Feature Selector
+
+- Latest request handled: user approved the simplified release model where stakeholder UI exposes only `Baseline` and `Future`, with `Future` opening isolated future-feature previews instead of composing multiple pending releases together.
+- Runtime changes:
+  - Updated `src/app/components/demo/DemoTopBar.tsx` so the top release selector now shows only `Baseline` and `Future`; old `Release R1/R2/R3/R4 preview` options are hidden from the stakeholder header.
+  - Added a second dropdown that appears only when `Future` is selected and lists compatible future features for the current product/country/design-system context.
+  - Added the first future feature, `CZ Co-Apping Chatbot`, available only for `PI` + `CZ` + current design system.
+  - Imported the portable `mobile-pi-coapping-chat-package` launcher and CSS, then mounted it only when `fx_czCoAppingSmartAssistant` resolves active.
+  - Normalized legacy/deep-linked release ids that are not visible future previews back to `release-current`, preventing hidden old release features from masquerading as Baseline.
+  - Updated release readiness and feature manifests so Future features are treated as pinned previews without promotion targets until explicitly rebased or promoted.
+- Product decision:
+  - `Baseline` remains the official current truth.
+  - `Future` means one isolated feature preview based on the baseline captured when that feature was created.
+  - Future features are not auto-composed and are not continuously rebased; when a future feature becomes official, it is removed from Future and promoted into Baseline explicitly.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+- safe to resume: yes.
+
+## 2026-07-03 CZ Future Co-Apping Voice Capture
+
+- Latest request handled: user asked for the CZ Future Co-Apping chatbot record button to support actual audio capture, parse the voice input, and send it as a voice-derived message.
+- Implementation:
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now uses browser microphone capture through `MediaRecorder` and browser speech recognition through `SpeechRecognition` / `webkitSpeechRecognition` when available.
+  - The small microphone button starts/stops dictation, updates the composer draft with interim transcript text, and sends the transcript as a user message when recognition ends or the user stops recording.
+  - The large voice action remains available for voice-mode entry; once transcript/text exists, it behaves as the send action.
+  - Unsupported or empty captures fail honestly with draft fallback copy instead of pretending a transcript was produced.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` adds a compact voice-status line for `Listening...` / `Parsing voice...`.
+- Limitations:
+  - This is browser-API based. Real transcription depends on microphone permission and browser support; Chrome-like browsers generally expose `webkitSpeechRecognition`, while support may vary on iOS/Safari.
+  - The captured audio blob is not uploaded to a backend yet because the current CZ Co-Apping feature remains a front-end future-preview mock. The sent message is the parsed transcript.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+- safe to resume: yes.
 
 ## Constitutional Check
 

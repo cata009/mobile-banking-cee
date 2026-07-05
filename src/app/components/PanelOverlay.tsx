@@ -4,7 +4,7 @@
  */
 
 import { useLanguage } from "@/app/contexts/LanguageContext";
-import { useDemo } from "@/app/state/demoStore";
+import { useCountry } from "@/app/state/demoStore";
 import { isCoAppingAvailable } from "@/app/utils/coAppingAvailability";
 import PanelWithTranslations from "@/app/components/PanelWithTranslations";
 import PanelWithoutCoAppingTranslations from "@/app/components/PanelWithoutCoAppingTranslations";
@@ -16,7 +16,7 @@ interface PanelOverlayProps {
 
 export default function PanelOverlay({ onClose, onStartCoApping }: PanelOverlayProps) {
   const { t } = useLanguage();
-  const { country } = useDemo();
+  const country = useCountry();
   const coAppingAvailable = isCoAppingAvailable(country);
 
   // Handler pentru click pe fundal (închide panel-ul)

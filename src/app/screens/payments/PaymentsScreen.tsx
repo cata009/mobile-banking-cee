@@ -9,7 +9,7 @@ import PaymentOtherShortcut from "@/app/components/payments/PaymentOtherShortcut
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { resolveEffectiveAppContext } from "@/app/platform/effectiveAppContext";
-import { useDemo } from "@/app/state/demoStore";
+import { useDemo, useCountry } from "@/app/state/demoStore";
 import type { BankingActionId } from "@/app/state/demoTypes";
 import {
   getPaymentsMenuForCountry,
@@ -40,7 +40,7 @@ function PaymentsHeader({
   onContactsClick?: () => void;
   onMessagesClick?: () => void;
 }) {
-  const { country } = useDemo();
+  const country = useCountry();
   const { t } = useLanguage();
   const usesBosniaHeaderActions = country === "BA" || country === "BA_BL";
   const handleAction = (action: string) => {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLanguage, Language } from '@/app/contexts/LanguageContext';
-import { useDemo } from '@/app/state/demoStore';
+import { useCountry } from '@/app/state/demoStore';
 import { getAvailableLanguages, getLanguageDisplayName } from '@/app/registry/languageByCountry';
 import { getTranslations } from '@/translations';
 import { RadioButton } from '@/app/components/common';
@@ -12,7 +12,7 @@ interface LanguageSelectorProps {
 
 export default function LanguageSelector({ onBack }: LanguageSelectorProps) {
   const { language, setLanguage, t } = useLanguage();
-  const { country } = useDemo(); // Get current country from demo state
+  const country = useCountry(); // Get current country from demo state
   const [tempLanguage, setTempLanguage] = useState<Language>(language);
 
   // Get available languages for current country

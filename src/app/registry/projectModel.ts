@@ -86,7 +86,7 @@ export const DESIGN_SYSTEM_ORDER: readonly DesignSystemId[] = ["current", "next"
 export const BASELINES: Record<BaselineId, BaselineMeta> = {
   "baseline-current": {
     id: "baseline-current",
-    label: "Current Baseline",
+    label: "Baseline",
     description: "Stable current demo state without future release previews.",
     status: "active",
   },
@@ -134,8 +134,14 @@ export const BASELINE_ORDER: readonly BaselineId[] = [
 export const RELEASES: Record<ReleaseId, ReleaseMeta> = {
   "release-current": {
     id: "release-current",
-    label: "Current",
+    label: "Baseline",
     description: "Current stable release baseline.",
+    status: "active",
+  },
+  "release-future-cz-coapping": {
+    id: "release-future-cz-coapping",
+    label: "CZ Co-Apping Chatbot",
+    description: "Pinned future feature preview based on the current CZ Mobile PI baseline.",
     status: "active",
   },
   "release-v1": {
