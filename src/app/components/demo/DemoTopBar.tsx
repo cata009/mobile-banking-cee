@@ -41,6 +41,12 @@ const PRODUCT_SELECTOR_LABELS: Record<ProductId, string> = {
   KIDS_PI: "Kids App",
 };
 
+const PRODUCT_CONTEXT_LABELS: Record<ProductId, string> = {
+  PI: "PI",
+  SME: "SME",
+  KIDS_PI: "Kids",
+};
+
 const FUTURE_RELEASE_ORDER: readonly ReleaseId[] = ["release-future-cz-coapping"] as const;
 
 function getFutureReleaseOptions(
@@ -97,7 +103,6 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
 
   const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
   const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
-  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [isReleaseDropdownOpen, setIsReleaseDropdownOpen] = useState(false);
   const [isFutureReleaseDropdownOpen, setIsFutureReleaseDropdownOpen] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
@@ -107,11 +112,12 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
   const shareRef = useRef<HTMLDivElement>(null);
 
   const productDropdownRef = useRef<HTMLDivElement>(null);
-  const countryDropdownRef = useRef<HTMLDivElement>(null);
   const releaseDropdownRef = useRef<HTMLDivElement>(null);
   const futureReleaseDropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedRelease = getReleaseBundle(release);
+  const selectedCountryLabel = COUNTRY_META[country]?.nameEN || country;
+  const selectedAppCountryLabel = `${PRODUCT_CONTEXT_LABELS[product]} - ${selectedCountryLabel}`;
   const futureReleaseOptions = getFutureReleaseOptions(product, country, designSystem);
   const isFutureReleaseSelected = futureReleaseOptions.includes(release);
   const selectedFutureRelease = isFutureReleaseSelected
@@ -138,7 +144,6 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
 
   const closeAllDropdowns = () => {
     setIsProductDropdownOpen(false);
-    setIsCountryDropdownOpen(false);
     setIsReleaseDropdownOpen(false);
     setIsFutureReleaseDropdownOpen(false);
   };
@@ -164,8 +169,13 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
     }
   };
 
-  const handleProductSelect = (productId: ProductId) => {
-    closeAllDropdowns();
+  const handleProductSelect = (productId: ProductId, options?: { keepDropdownOpen?: boolean }) => {
+    if (options?.keepDropdownOpen) {
+      setIsReleaseDropdownOpen(false);
+      setIsFutureReleaseDropdownOpen(false);
+    } else {
+      closeAllDropdowns();
+    }
     leavePlatformSurface();
     setProduct(productId);
     if (isFutureReleaseSelected && !getFutureReleaseOptions(productId, country, designSystem).includes(release)) {
@@ -202,9 +212,6 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
     function handleClickOutside(event: MouseEvent) {
       if (productDropdownRef.current && !productDropdownRef.current.contains(event.target as Node)) {
         setIsProductDropdownOpen(false);
-      }
-      if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target as Node)) {
-        setIsCountryDropdownOpen(false);
       }
       if (releaseDropdownRef.current && !releaseDropdownRef.current.contains(event.target as Node)) {
         setIsReleaseDropdownOpen(false);
@@ -315,18 +322,22 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
 
             <div className="relative shrink-0" ref={productDropdownRef}>
               <ContextDropdownButton
-                label={PRODUCT_SELECTOR_LABELS[product]}
+                label={selectedAppCountryLabel}
                 expanded={isProductDropdownOpen}
                 onClick={() => setIsProductDropdownOpen(!isProductDropdownOpen)}
+                maxWidthClassName="max-w-[260px]"
               />
 
               {isProductDropdownOpen && (
-                <div className="absolute left-0 top-full z-[10000] mt-2 min-w-[156px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-1 shadow-lg">
+                <div className="absolute left-0 top-full z-[10000] mt-2 w-[256px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-2 shadow-lg">
+                  <p className="px-4 pb-1 pt-1 font-['UniCredit:Bold',sans-serif] text-[11px] uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
+                    App
+                  </p>
                   {PRODUCT_ORDER.map((productId) => (
                     <button
                       key={productId}
                       type="button"
-                      onClick={() => handleProductSelect(productId)}
+                      onClick={() => handleProductSelect(productId, { keepDropdownOpen: true })}
                       className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
                         product === productId
                           ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
@@ -334,6 +345,25 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
                       }`}
                     >
                       {PRODUCT_SELECTOR_LABELS[productId]}
+                    </button>
+                  ))}
+
+                  <div className="my-1 h-px bg-[var(--uc-border-muted)]" />
+                  <p className="px-4 pb-1 pt-1 font-['UniCredit:Bold',sans-serif] text-[11px] uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
+                    Country
+                  </p>
+                  {COUNTRIES.map((countryCode) => (
+                    <button
+                      key={countryCode}
+                      type="button"
+                      onClick={() => handleCountrySelect(countryCode)}
+                      className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
+                        country === countryCode
+                          ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
+                          : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
+                      }`}
+                    >
+                      {COUNTRY_META[countryCode]?.nameEN || countryCode}
                     </button>
                   ))}
                 </div>
@@ -380,35 +410,9 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
         {showContextControls ? (
           <div className="grid min-h-[48px] grid-cols-[1fr_auto_1fr] items-center gap-4 overflow-visible border-t border-[var(--uc-border-muted)] px-6 py-1.5 lg:px-10 xl:px-16">
             <div className="flex min-w-0 items-center gap-3 overflow-visible">
-              <div className="relative shrink-0" ref={countryDropdownRef}>
-                <ContextDropdownButton
-                  label={COUNTRY_META[country]?.nameEN || country}
-                  expanded={isCountryDropdownOpen}
-                  onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
-                />
-
-                {isCountryDropdownOpen && (
-                  <div className="absolute left-0 top-full z-[10000] mt-2 min-w-[180px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-1 shadow-lg">
-                    {COUNTRIES.map((countryCode) => (
-                      <button
-                        key={countryCode}
-                        onClick={() => handleCountrySelect(countryCode)}
-                        className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
-                          country === countryCode
-                            ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
-                            : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
-                        }`}
-                      >
-                        {COUNTRY_META[countryCode]?.nameEN || countryCode}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
               <div className="relative shrink-0" ref={releaseDropdownRef}>
                 <ContextDropdownButton
-                  label={isFutureReleaseSelected ? "Future" : "Baseline"}
+                  label={isFutureReleaseSelected ? "Future App" : "Baseline App"}
                   expanded={isReleaseDropdownOpen}
                   onClick={() => setIsReleaseDropdownOpen(!isReleaseDropdownOpen)}
                 />
@@ -427,7 +431,7 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
                           : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
                       }`}
                     >
-                      Baseline
+                      Baseline App
                     </button>
                     <button
                       type="button"
@@ -444,7 +448,7 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
                           : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)] hover:bg-[var(--uc-surface-muted)]"
                       }`}
                     >
-                      Future
+                      Future App
                     </button>
                   </div>
                 )}
@@ -783,17 +787,19 @@ function ContextDropdownButton({
   label,
   expanded,
   onClick,
+  maxWidthClassName = "max-w-[220px]",
 }: {
   label: string;
   expanded: boolean;
   onClick: () => void;
+  maxWidthClassName?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-expanded={expanded}
-      className="flex h-[34px] max-w-[220px] items-center gap-1 rounded-[6px] px-2 font-['UniCredit:Bold',sans-serif] text-[14px] leading-none text-[var(--uc-text)] transition-colors hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-action)]"
+      className={`flex h-[34px] ${maxWidthClassName} items-center gap-1 rounded-[6px] px-2 font-['UniCredit:Bold',sans-serif] text-[14px] leading-none text-[var(--uc-text)] transition-colors hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-action)]`}
     >
       <span className="truncate">{label}</span>
       <span className="grid size-[16px] shrink-0 place-items-center opacity-90">
