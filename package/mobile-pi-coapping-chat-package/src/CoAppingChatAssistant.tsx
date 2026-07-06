@@ -3,6 +3,7 @@ import type {
   ChangeEvent,
   CSSProperties,
   FormEvent,
+  MouseEvent as ReactMouseEvent,
   PointerEvent as ReactPointerEvent,
   UIEvent as ReactUIEvent,
 } from "react";
@@ -34,10 +35,13 @@ import {
   VoiceModeIcon,
 } from "./icons";
 import type {
+  CoAppingChatAction,
   CoAppingChatLabels,
   CoAppingChatContext,
   CoAppingChatMessage,
+  CoAppingFollowUpSuggestion,
   CoAppingReplyResolver,
+  CoAppingRichBlock,
   CoAppingSuggestedTopic,
 } from "./types";
 
@@ -49,6 +53,7 @@ export interface CoAppingChatAssistantProps {
   entryContext?: CoAppingChatContext | null;
   resolveReply?: CoAppingReplyResolver;
   typingDelayMs?: number;
+  onAction?: (action: CoAppingChatAction) => void;
 }
 
 function getCurrentTime() {
@@ -309,7 +314,200 @@ function AgentFormattedResponse({ text, isStreaming = false }: { text: string; i
   );
 }
 
-function BubbleMessage({ message }: { message: CoAppingChatMessage }) {
+function RichActionButton({
+  action,
+  onAction,
+}: {
+  action?: CoAppingChatAction;
+  onAction?: (action: CoAppingChatAction) => void;
+}) {
+  if (!action) return null;
+
+  return (
+    <button type="button" className="mpc-rich-action" onClick={() => onAction?.(action)}>
+      {action.label}
+    </button>
+  );
+}
+
+function RichMetricGrid({ metrics }: { metrics: Array<{ label: string; value: string; helper?: string }> }) {
+  return (
+    <div className="mpc-rich-metric-grid">
+      {metrics.map((metric) => (
+        <div key={`${metric.label}-${metric.value}`} className="mpc-rich-metric">
+          <span>{metric.label}</span>
+          <strong>{metric.value}</strong>
+          {metric.helper ? <small>{metric.helper}</small> : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RichBlock({
+  block,
+  onAction,
+}: {
+  block: CoAppingRichBlock;
+  onAction?: (action: CoAppingChatAction) => void;
+}) {
+  if (block.type === "investment-summary") {
+    return (
+      <div className="mpc-rich-card mpc-rich-card-summary">
+        <div className="mpc-rich-card-head">
+          <span>{block.eyebrow}</span>
+          <strong>{block.title}</strong>
+        </div>
+        <p>{block.body}</p>
+        <RichMetricGrid metrics={block.metrics} />
+        <RichActionButton action={block.action} onAction={onAction} />
+      </div>
+    );
+  }
+
+  if (block.type === "investment-allocation") {
+    return (
+      <div className="mpc-rich-card">
+        <div className="mpc-rich-card-head">
+          <strong>{block.title}</strong>
+          <span>{block.body}</span>
+        </div>
+        <div className="mpc-allocation-list">
+          {block.items.map((item) => (
+            <div key={item.label} className="mpc-allocation-row">
+              <div className="mpc-allocation-row-copy">
+                <strong>{item.label}</strong>
+                <span>{item.helper}</span>
+              </div>
+              <div className="mpc-allocation-value">{item.value}%</div>
+              <div className="mpc-allocation-track" aria-hidden="true">
+                <span style={{ width: `${item.value}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+        <RichActionButton action={block.action} onAction={onAction} />
+      </div>
+    );
+  }
+
+  if (block.type === "investment-projection") {
+    return (
+      <div className="mpc-rich-card">
+        <div className="mpc-rich-card-head">
+          <strong>{block.title}</strong>
+          <span>{block.body}</span>
+        </div>
+        <div className="mpc-projection-list">
+          {block.scenarios.map((scenario) => (
+            <div
+              key={scenario.label}
+              className={["mpc-projection-row", scenario.emphasis ? "mpc-projection-row-emphasis" : ""]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              <span>{scenario.label}</span>
+              <strong>{scenario.value}</strong>
+              <small>{scenario.detail}</small>
+            </div>
+          ))}
+        </div>
+        <RichActionButton action={block.action} onAction={onAction} />
+      </div>
+    );
+  }
+
+  if (block.type === "product-cards") {
+    return (
+      <div className="mpc-rich-card mpc-rich-card-products">
+        <div className="mpc-rich-card-head">
+          <strong>{block.title}</strong>
+          <span>{block.body}</span>
+        </div>
+        <div className="mpc-product-card-row">
+          {block.products.map((product) => (
+            <button
+              key={product.id}
+              type="button"
+              className={["mpc-product-card", product.tone ? `mpc-product-card-${product.tone}` : ""]
+                .filter(Boolean)
+                .join(" ")}
+              onClick={() => product.action && onAction?.(product.action)}
+            >
+              <strong>{product.title}</strong>
+              <span>{product.subtitle}</span>
+              <small>{product.meta}</small>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mpc-rich-card">
+      <div className="mpc-rich-card-head">
+        <strong>{block.title}</strong>
+        <span>{block.body}</span>
+      </div>
+      <RichMetricGrid metrics={block.metrics} />
+      <RichActionButton action={block.action} onAction={onAction} />
+    </div>
+  );
+}
+
+function RichBlocks({
+  blocks,
+  onAction,
+}: {
+  blocks?: CoAppingRichBlock[];
+  onAction?: (action: CoAppingChatAction) => void;
+}) {
+  if (!blocks?.length) return null;
+
+  return (
+    <div className="mpc-rich-stack">
+      {blocks.map((block, index) => (
+        <RichBlock key={`${block.type}-${index}`} block={block} onAction={onAction} />
+      ))}
+    </div>
+  );
+}
+
+function ChatStatusBar() {
+  return (
+    <div className="mpc-chat-status-bar" aria-hidden="true">
+      <span className="mpc-chat-status-time">{getCurrentTime()}</span>
+      <span className="mpc-chat-status-island">
+        <span />
+        <span />
+      </span>
+      <span className="mpc-chat-status-icons">
+        <span className="mpc-chat-signal">
+          <span />
+          <span />
+          <span />
+          <span />
+        </span>
+        <span className="mpc-chat-wifi">
+          <span />
+          <span />
+        </span>
+        <span className="mpc-chat-battery">
+          <span />
+        </span>
+      </span>
+    </div>
+  );
+}
+
+function BubbleMessage({
+  message,
+  onAction,
+}: {
+  message: CoAppingChatMessage;
+  onAction?: (action: CoAppingChatAction) => void;
+}) {
   const isAgent = message.role === "agent";
   const timeLabel = formatMessageTimeLabel(message);
 
@@ -317,6 +515,7 @@ function BubbleMessage({ message }: { message: CoAppingChatMessage }) {
     return (
       <div className="mpc-message mpc-message-agent" aria-live={message.isStreaming ? "polite" : undefined}>
         <AgentFormattedResponse text={message.text} isStreaming={message.isStreaming} />
+        {!message.isStreaming ? <RichBlocks blocks={message.richBlocks} onAction={onAction} /> : null}
         {!message.isStreaming ? (
           <div className="mpc-agent-meta">
             <div className="mpc-response-feedback" aria-label="Response feedback">
@@ -998,9 +1197,389 @@ const polishedAgentReplies: Record<string, string> = {
     "### Pay in local currency\nIn many cases, paying in local currency avoids merchant conversion markup.\nThe assistant can explain the pattern, while final fee information should come from official pricing documents.",
 };
 
+const navigateInvestmentsAction: CoAppingChatAction = {
+  id: "open-investments",
+  label: "Open Investments",
+  type: "navigate",
+  target: "investments",
+};
+
+const navigateAnalyticsAction: CoAppingChatAction = {
+  id: "open-analytics",
+  label: "Open Spending",
+  type: "navigate",
+  target: "analytics",
+};
+
+const navigateCardAction: CoAppingChatAction = {
+  id: "open-card-detail",
+  label: "Open card details",
+  type: "navigate",
+  target: "card-detail",
+};
+
+function sendMessageAction(id: string, label: string, prompt = label): CoAppingChatAction {
+  return {
+    id,
+    label,
+    prompt,
+    type: "send-message",
+  };
+}
+
+function followUp(id: string, label: string, prompt = label): CoAppingFollowUpSuggestion {
+  return {
+    id,
+    label,
+    prompt,
+    action: sendMessageAction(id, label, prompt),
+  };
+}
+
+function navigateFollowUp(id: string, action: CoAppingChatAction): CoAppingFollowUpSuggestion {
+  return {
+    id,
+    label: action.label,
+    action,
+  };
+}
+
+const investmentEntryFollowUps: CoAppingFollowUpSuggestion[] = [
+  followUp("start-investment-goal", "Start an investment goal"),
+  followUp("review-portfolio", "Review my portfolio"),
+  followUp("learn-investing", "Learn how it works"),
+];
+
+const investmentGoalTypeFollowUps: CoAppingFollowUpSuggestion[] = [
+  followUp("goal-grow-savings", "Grow my savings"),
+  followUp("goal-future-purchase", "Future purchase"),
+  followUp("goal-retirement", "Long-term reserve"),
+];
+
+const investmentHorizonFollowUps: CoAppingFollowUpSuggestion[] = [
+  followUp("horizon-3-5", "In 3-5 years"),
+  followUp("horizon-5-10", "In 5-10 years"),
+  followUp("horizon-unsure", "Not sure yet"),
+];
+
+const investmentAmountFollowUps: CoAppingFollowUpSuggestion[] = [
+  followUp("amount-5000", "5,000 CZK"),
+  followUp("amount-10000", "10,000 CZK"),
+  followUp("amount-unsure", "I'm not sure yet"),
+];
+
+const investmentMonthlyFollowUps: CoAppingFollowUpSuggestion[] = [
+  followUp("monthly-500", "500 CZK monthly"),
+  followUp("monthly-1000", "1,000 CZK monthly"),
+  followUp("monthly-not-now", "Not now"),
+];
+
+const investmentPortfolioFollowUps: CoAppingFollowUpSuggestion[] = [
+  followUp("check-performance", "Check performance"),
+  followUp("top-up-investment", "Top up investment"),
+  followUp("start-new-goal", "Start a new goal", "Start an investment goal"),
+];
+
+const investmentProjectionFollowUps: CoAppingFollowUpSuggestion[] = [
+  navigateFollowUp("open-investments", navigateInvestmentsAction),
+  followUp("adjust-amount", "Adjust amount"),
+  followUp("review-portfolio-next", "Review portfolio", "Review my portfolio"),
+];
+
+const investmentAllocationBlock: CoAppingRichBlock = {
+  type: "investment-allocation",
+  title: "Balanced portfolio preview",
+  body: "A model mix for a medium-term goal. Final selection still needs product documents and risk confirmation.",
+  items: [
+    { label: "Global equities", value: 55, helper: "Growth engine, higher movement" },
+    { label: "Bonds", value: 25, helper: "Stability and income layer" },
+    { label: "European equities", value: 10, helper: "Regional exposure" },
+    { label: "Defensive/liquidity", value: 10, helper: "Buffer for rebalancing" },
+  ],
+  action: navigateInvestmentsAction,
+};
+
+const investmentSummaryBlock: CoAppingRichBlock = {
+  type: "investment-summary",
+  eyebrow: "Portfolio snapshot",
+  title: "Investment review",
+  body: "Use this as a review surface before opening a specific fund or order flow.",
+  metrics: [
+    { label: "Current value", value: "5,620 EUR", helper: "Demo portfolio" },
+    { label: "Return", value: "+12.4%", helper: "+620 EUR since start" },
+    { label: "Next review", value: "Jul 2026", helper: "Planned check-in" },
+  ],
+  action: navigateInvestmentsAction,
+};
+
+const investmentProjectionBlock: CoAppingRichBlock = {
+  type: "investment-projection",
+  title: "Five-year simulation",
+  body: "Illustrative scenario for 5,000 CZK now plus 1,000 CZK monthly. Not a guarantee.",
+  scenarios: [
+    { label: "Lower", value: "61k CZK", detail: "More conservative market path" },
+    { label: "Expected", value: "74k CZK", detail: "Middle scenario", emphasis: true },
+    { label: "Higher", value: "89k CZK", detail: "Stronger market path" },
+  ],
+  action: navigateInvestmentsAction,
+};
+
+const investmentProductCardsBlock: CoAppingRichBlock = {
+  type: "product-cards",
+  title: "Relevant investment surfaces",
+  body: "The assistant can keep the chat conversational, then hand off to real product areas.",
+  products: [
+    {
+      id: "portfolio",
+      title: "Portfolio",
+      subtitle: "Value, performance, allocation",
+      meta: "Open overview",
+      tone: "blue",
+      action: navigateInvestmentsAction,
+    },
+    {
+      id: "history",
+      title: "History",
+      subtitle: "Orders and confirmations",
+      meta: "Open activity",
+      tone: "neutral",
+      action: {
+        id: "open-investments-history",
+        label: "Open History",
+        type: "navigate",
+        target: "investments-history",
+      },
+    },
+  ],
+};
+
+const cardSecurityProductBlock: CoAppingRichBlock = {
+  type: "product-cards",
+  title: "Card controls",
+  body: "For secure card tasks, the assistant should expose the exact destination and keep strong authentication in the app.",
+  products: [
+    {
+      id: "debit-card",
+      title: "Debit Card",
+      subtitle: "5173 **** **** 5601",
+      meta: "Limits, online payments, freeze",
+      tone: "blue",
+      action: navigateCardAction,
+    },
+    {
+      id: "pin-check",
+      title: "PIN and security",
+      subtitle: "Sensitive controls",
+      meta: "Requires authorization",
+      tone: "dark",
+      action: navigateCardAction,
+    },
+  ],
+};
+
+const spendingInsightBlock: CoAppingRichBlock = {
+  type: "spending-insight",
+  title: "Subscription signal",
+  body: "Recurring payments are a good bridge between insight and action.",
+  metrics: [
+    { label: "Detected", value: "6", helper: "Monthly merchants" },
+    { label: "Largest", value: "429 CZK", helper: "Streaming bundle" },
+    { label: "Review", value: "2", helper: "Price changed recently" },
+  ],
+  action: navigateAnalyticsAction,
+};
+
+const richMessageEnhancements: Record<string, Pick<CoAppingChatMessage, "richBlocks" | "followUps">> = {
+  "investments-agent-1": {
+    richBlocks: [investmentProductCardsBlock],
+    followUps: investmentEntryFollowUps,
+  },
+  "investments-agent-3": {
+    richBlocks: [investmentSummaryBlock],
+    followUps: investmentPortfolioFollowUps,
+  },
+  "investments-agent-5": {
+    richBlocks: [investmentAllocationBlock],
+    followUps: [
+      followUp("see-projection", "See projection"),
+      followUp("why-balanced", "Why this portfolio?"),
+      navigateFollowUp("open-investments", navigateInvestmentsAction),
+    ],
+  },
+  "investments-agent-6": {
+    richBlocks: [investmentSummaryBlock, investmentAllocationBlock],
+    followUps: investmentPortfolioFollowUps,
+  },
+  "investments-agent-7": {
+    richBlocks: [investmentProjectionBlock],
+    followUps: investmentProjectionFollowUps,
+  },
+  "security-agent-1": {
+    richBlocks: [cardSecurityProductBlock],
+    followUps: [
+      navigateFollowUp("open-card-detail", navigateCardAction),
+      followUp("check-card-limits", "Check card limits"),
+      followUp("review-online-payments", "Review online payments"),
+    ],
+  },
+  "insights-agent-2": {
+    richBlocks: [spendingInsightBlock],
+    followUps: [
+      navigateFollowUp("open-spending", navigateAnalyticsAction),
+      followUp("review-subscriptions", "Review subscriptions"),
+      followUp("find-price-changes", "Find price changes"),
+    ],
+  },
+};
+
+function getContextualAssistantEnhancement(
+  input: string,
+  fallbackText: string,
+): Pick<CoAppingChatMessage, "text" | "richBlocks" | "followUps"> {
+  const normalized = input.toLowerCase();
+
+  if (/\b(start|create|new)\b.*\b(goal|investment)\b|\bstart an investment goal\b/.test(normalized)) {
+    return {
+      text:
+        "### Let's shape the goal\nI can set up a planning path before any product decision.\nChoose the goal type first, then we will narrow the horizon, starting amount, monthly contribution, and risk comfort.\nNothing is submitted from chat; this is a guided preview before opening Investments.",
+      richBlocks: [investmentProductCardsBlock],
+      followUps: investmentGoalTypeFollowUps,
+    };
+  }
+
+  if (/\b(grow my savings|future purchase|long-term reserve|retirement)\b/.test(normalized)) {
+    return {
+      text:
+        "### Goal selected\nGood. The next important signal is time horizon.\nA longer horizon can usually tolerate more movement than money you may need soon. Pick the closest option so the preview can stay realistic.",
+      followUps: investmentHorizonFollowUps,
+    };
+  }
+
+  if (/\b(3-5|5-10|not sure yet)\b/.test(normalized)) {
+    return {
+      text:
+        "### Time horizon captured\nNow choose an initial amount for the simulation.\nThis amount is only used for the demo projection; the real app would confirm source of funds, product documents, and risk profile before any order.",
+      followUps: investmentAmountFollowUps,
+    };
+  }
+
+  if (/\b(5,000|10000|10,000|i'm not sure yet|im not sure yet)\b/.test(normalized)) {
+    return {
+      text:
+        "### Starting amount noted\nA recurring contribution can make the plan feel less dependent on one perfect entry day.\nChoose a monthly amount or skip it for now.",
+      followUps: investmentMonthlyFollowUps,
+    };
+  }
+
+  if (/\b(500 czk monthly|1,000 czk monthly|1000 czk monthly|not now)\b/.test(normalized)) {
+    return {
+      text:
+        "### Model portfolio preview\nBased on a medium-term goal, I would show a balanced portfolio preview before taking the user into Investments.\nThe preview explains the mix, expected movement, and what must still be checked in the real product flow.",
+      richBlocks: [investmentAllocationBlock],
+      followUps: [
+        followUp("see-projection", "See projection"),
+        followUp("why-balanced", "Why this portfolio?"),
+        navigateFollowUp("open-investments", navigateInvestmentsAction),
+      ],
+    };
+  }
+
+  if (/\b(see projection|simulation|projection)\b/.test(normalized)) {
+    return {
+      text:
+        "### Projection preview\nHere is the kind of simulation that makes the assistant feel useful without pretending the future is certain.\nThe important part is to frame it as illustrative and keep the CTA inside the authenticated Investments flow.",
+      richBlocks: [investmentProjectionBlock],
+      followUps: investmentProjectionFollowUps,
+    };
+  }
+
+  if (/\b(review my portfolio|review portfolio|check portfolio|current portfolio)\b/.test(normalized)) {
+    return {
+      text:
+        "### Portfolio check\nYour investment overview should answer three questions quickly:\n1. What is the current value?\n2. How has it performed?\n3. Is the allocation still close to the goal?\nFrom there, the user can inspect funds, currency exposure, and history.",
+      richBlocks: [investmentSummaryBlock, investmentAllocationBlock],
+      followUps: investmentPortfolioFollowUps,
+    };
+  }
+
+  if (/\b(check performance|performance)\b/.test(normalized)) {
+    return {
+      text:
+        "### Performance context\nRecent performance is useful, but it should be read together with allocation, time horizon, and risk.\nIf the user sees a strong month, the assistant should explain what changed and avoid pushing a product decision too quickly.",
+      richBlocks: [investmentSummaryBlock],
+      followUps: [
+        navigateFollowUp("open-investments", navigateInvestmentsAction),
+        followUp("top-up-investment", "Top up investment"),
+        followUp("learn-investing", "Learn how it works"),
+      ],
+    };
+  }
+
+  if (/\b(top up|add money|increase investment)\b/.test(normalized)) {
+    return {
+      text:
+        "### Top-up amount\nBefore opening an order flow, ask for an amount and keep the user aware that product documents and risk checks still apply.\nFor demo purposes, choose one of the quick amounts or type a custom value.",
+      followUps: [
+        followUp("topup-500", "500 CZK"),
+        followUp("topup-1000", "1,000 CZK"),
+        followUp("topup-2500", "2,500 CZK"),
+        followUp("topup-cancel", "Not now"),
+      ],
+    };
+  }
+
+  if (/\b(learn how it works|how it works|why this portfolio|explain risk)\b/.test(normalized)) {
+    return {
+      text:
+        "### How the investment preview works\nThe assistant first clarifies the goal, then shows a model allocation and a scenario range.\n- Allocation explains what the money is exposed to.\n- Projection shows possible outcomes, not promises.\n- CTA opens the real Investments area for documents, suitability, and authorization.\nThis keeps the chat helpful while the bank app remains the source of truth.",
+      richBlocks: [investmentAllocationBlock],
+      followUps: investmentEntryFollowUps,
+    };
+  }
+
+  if (/\b(pin|card secure|card security|secure card|online payments|card limits)\b/.test(normalized)) {
+    return {
+      text: fallbackText,
+      richBlocks: [cardSecurityProductBlock],
+      followUps: [
+        navigateFollowUp("open-card-detail", navigateCardAction),
+        followUp("check-card-limits", "Check card limits"),
+        followUp("review-online-payments", "Review online payments"),
+      ],
+    };
+  }
+
+  if (/\b(subscription|subscriptions|spending insight|price changes)\b/.test(normalized)) {
+    return {
+      text: fallbackText,
+      richBlocks: [spendingInsightBlock],
+      followUps: [
+        navigateFollowUp("open-spending", navigateAnalyticsAction),
+        followUp("review-subscriptions", "Review subscriptions"),
+        followUp("find-price-changes", "Find price changes"),
+      ],
+    };
+  }
+
+  if (/\b(invest|investment|savings|portfolio|fund|fees)\b/.test(normalized)) {
+    return {
+      text: fallbackText,
+      richBlocks: [investmentProductCardsBlock],
+      followUps: investmentEntryFollowUps,
+    };
+  }
+
+  return { text: fallbackText };
+}
+
 fallbackConversationMessages.forEach((message) => {
   if (message.role === "agent" && polishedAgentReplies[message.id]) {
     message.text = polishedAgentReplies[message.id];
+  }
+  const enhancement = richMessageEnhancements[message.id];
+  if (message.role === "agent" && enhancement) {
+    message.richBlocks = enhancement.richBlocks;
+    message.followUps = enhancement.followUps;
   }
 });
 
@@ -1008,6 +1587,11 @@ mockedConversationHistories.forEach((conversation) => {
   conversation.messages.forEach((message) => {
     if (message.role === "agent" && polishedAgentReplies[message.id]) {
       message.text = polishedAgentReplies[message.id];
+    }
+    const enhancement = richMessageEnhancements[message.id];
+    if (message.role === "agent" && enhancement) {
+      message.richBlocks = enhancement.richBlocks;
+      message.followUps = enhancement.followUps;
     }
   });
 });
@@ -1158,6 +1742,7 @@ type SpeechRecognitionLike = {
 type SpeechRecognitionConstructorLike = new () => SpeechRecognitionLike;
 
 const CONVERSATION_LIST_EXIT_MS = 520;
+const CHAT_CLOSE_EXIT_MS = 480;
 
 function getSpeechRecognitionConstructor(): SpeechRecognitionConstructorLike | null {
   const browserWindow = window as Window & {
@@ -1170,6 +1755,7 @@ function getSpeechRecognitionConstructor(): SpeechRecognitionConstructorLike | n
 
 export function CoAppingChatAssistant({
   onClose,
+  onAction,
   labels,
   initialMessages = defaultInitialMessages,
   suggestedTopics = defaultSuggestedTopics,
@@ -1207,6 +1793,7 @@ export function CoAppingChatAssistant({
   const dragStartYRef = useRef(0);
   const conversationListRef = useRef<HTMLDivElement | null>(null);
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
+  const followUpShelfRef = useRef<HTMLDivElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const photosInputRef = useRef<HTMLInputElement | null>(null);
   const filesInputRef = useRef<HTMLInputElement | null>(null);
@@ -1218,6 +1805,13 @@ export function CoAppingChatAssistant({
   const finalTranscriptRef = useRef("");
   const interimTranscriptRef = useRef("");
   const streamingMessageIdRef = useRef<string | null>(null);
+  const followUpDragRef = useRef({
+    pointerId: 0,
+    startX: 0,
+    scrollLeft: 0,
+    active: false,
+    moved: false,
+  });
 
   useEffect(() => {
     return () => {
@@ -1275,7 +1869,7 @@ export function CoAppingChatAssistant({
     setIsClosing(true);
     closeTimeoutRef.current = window.setTimeout(() => {
       onClose();
-    }, 220);
+    }, CHAT_CLOSE_EXIT_MS);
   };
 
   const handleDragStart = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -1392,12 +1986,15 @@ export function CoAppingChatAssistant({
 
     timeoutRef.current = window.setTimeout(async () => {
       const resolvedText = await resolveReply(trimmed, nextMessages);
+      const enhancedReply = getContextualAssistantEnhancement(trimmed, resolvedText);
       const reply: CoAppingChatMessage = {
         id: `agent-${Date.now()}`,
         role: "agent",
-        text: resolvedText,
+        text: enhancedReply.text,
         time: getCurrentTime(),
         createdAt: new Date().toISOString(),
+        richBlocks: enhancedReply.richBlocks,
+        followUps: enhancedReply.followUps,
       };
       setIsTyping(false);
       setThinkingStatusText("");
@@ -1581,6 +2178,26 @@ export function CoAppingChatAssistant({
     sendMessage(draft);
   };
 
+  const handleAction = (action: CoAppingChatAction) => {
+    if (action.type === "navigate") {
+      onAction?.(action);
+      setIsAttachmentMenuOpen(false);
+      setIsMoreMenuOpen(false);
+      return;
+    }
+
+    sendMessage(action.prompt ?? action.label);
+  };
+
+  const handleFollowUpClick = (suggestion: CoAppingFollowUpSuggestion) => {
+    if (suggestion.action) {
+      handleAction(suggestion.action);
+      return;
+    }
+
+    sendMessage(suggestion.prompt ?? suggestion.label);
+  };
+
   const handleDraftChange = (value: string) => {
     setDraft(value);
     if (value.trim() && voiceStatus === "idle") setIsVoiceMode(false);
@@ -1611,6 +2228,51 @@ export function CoAppingChatAssistant({
     if (!node) return;
     node.scrollTo({ top: node.scrollHeight, behavior: "smooth" });
     setShowChatScrollBottom(false);
+  };
+
+  const handleFollowUpPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const node = followUpShelfRef.current;
+    if (!node) return;
+
+    followUpDragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      scrollLeft: node.scrollLeft,
+      active: true,
+      moved: false,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handleFollowUpPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = followUpDragRef.current;
+    const node = followUpShelfRef.current;
+    if (!drag.active || drag.pointerId !== event.pointerId || !node) return;
+
+    const deltaX = event.clientX - drag.startX;
+    if (Math.abs(deltaX) > 3) drag.moved = true;
+    node.scrollLeft = drag.scrollLeft - deltaX;
+  };
+
+  const handleFollowUpPointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = followUpDragRef.current;
+    if (event.currentTarget.hasPointerCapture(drag.pointerId)) {
+      event.currentTarget.releasePointerCapture(drag.pointerId);
+    }
+    drag.active = false;
+  };
+
+  const handleFollowUpChipClick = (
+    event: ReactMouseEvent<HTMLButtonElement>,
+    suggestion: CoAppingFollowUpSuggestion,
+  ) => {
+    if (followUpDragRef.current.moved) {
+      event.preventDefault();
+      followUpDragRef.current.moved = false;
+      return;
+    }
+
+    handleFollowUpClick(suggestion);
   };
 
   const handleAttachmentChoice = (source: AttachmentSource) => {
@@ -1743,6 +2405,11 @@ export function CoAppingChatAssistant({
   const showConversationOptions = isConversationDetailOpen || (isDiscoveryMode && hasActiveConversation);
   const lastMessageId = messages[messages.length - 1]?.id ?? "";
   const lastMessageText = messages[messages.length - 1]?.text ?? "";
+  const latestMessage = messages[messages.length - 1];
+  const activeFollowUps =
+    !isConversationListVisible && !isDiscoveryMode && latestMessage?.role === "agent" && !latestMessage.isStreaming
+      ? (latestMessage.followUps ?? [])
+      : [];
   const sheetStyle = { "--mpc-sheet-offset": `${dragY}px` } as CSSProperties;
 
   useEffect(() => {
@@ -1773,6 +2440,7 @@ export function CoAppingChatAssistant({
       style={sheetStyle}
       aria-label="CZ chatbot"
     >
+      <ChatStatusBar />
       <div
         className="mpc-sheet-grabber"
         aria-label="Drag down to close chat"
@@ -1967,7 +2635,7 @@ export function CoAppingChatAssistant({
             ) : null}
 
             {messages.map((message) => (
-              <BubbleMessage key={message.id} message={message} />
+              <BubbleMessage key={message.id} message={message} onAction={handleAction} />
             ))}
 
             {isTyping && (
@@ -2055,6 +2723,28 @@ export function CoAppingChatAssistant({
             {isVoiceCaptureActive ? (
               <div className="mpc-voice-status" role="status">
                 {voiceStatus === "recording" ? "Recording voice. Tap again to send." : "Parsing voice message..."}
+              </div>
+            ) : null}
+            {activeFollowUps.length > 0 ? (
+              <div
+                className="mpc-follow-up-shelf"
+                ref={followUpShelfRef}
+                onPointerDown={handleFollowUpPointerDown}
+                onPointerMove={handleFollowUpPointerMove}
+                onPointerUp={handleFollowUpPointerEnd}
+                onPointerCancel={handleFollowUpPointerEnd}
+                aria-label="Suggested next actions"
+              >
+                {activeFollowUps.map((suggestion) => (
+                  <button
+                    key={suggestion.id}
+                    type="button"
+                    className="mpc-follow-up-chip"
+                    onClick={(event) => handleFollowUpChipClick(event, suggestion)}
+                  >
+                    {suggestion.label}
+                  </button>
+                ))}
               </div>
             ) : null}
             <form className="mpc-input-row" onSubmit={handleSubmit}>

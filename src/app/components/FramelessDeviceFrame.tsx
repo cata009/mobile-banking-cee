@@ -113,7 +113,7 @@ export default function FramelessDeviceFrame({
         </div>
 
         {/* Native device/browser chrome owns the top system area in QR mode. */}
-        {overlay && <div className="absolute inset-0 z-[100]">{overlay}</div>}
+        {overlay && <div className="pointer-events-none absolute inset-0 z-[100]">{overlay}</div>}
 
         {isCoAppingActive && <ShareScreenGlow />}
       </div>

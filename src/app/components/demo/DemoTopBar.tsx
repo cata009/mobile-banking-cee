@@ -10,7 +10,7 @@ import { FLOW_PREVIEW_ORDER, type FlowPreviewId } from "@/app/registry/flowPrevi
 import { PRODUCT_ORDER } from "@/app/registry/projectModel";
 import { getReleaseBundle } from "@/app/registry/releaseRegistry";
 import { useDemo } from "@/app/state/demoStore";
-import type { CountryId, DesignSystemId, ProductId, ReleaseId } from "@/app/state/demoTypes";
+import type { CountryId, DesignSystemId, ProductId, ReleaseId, Scenario } from "@/app/state/demoTypes";
 import { QRCodeSVG } from "qrcode.react";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import {
@@ -48,6 +48,10 @@ const PRODUCT_CONTEXT_LABELS: Record<ProductId, string> = {
 };
 
 const FUTURE_RELEASE_ORDER: readonly ReleaseId[] = ["release-future-cz-coapping"] as const;
+
+function getScenarioEntryScreen(scenario: Scenario) {
+  return scenario === "active" ? "homepage" : "prelogin-inactive";
+}
 
 function getFutureReleaseOptions(
   product: ProductId,
@@ -104,6 +108,7 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
   const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
   const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
   const [isReleaseDropdownOpen, setIsReleaseDropdownOpen] = useState(false);
+  const [isScenarioDropdownOpen, setIsScenarioDropdownOpen] = useState(false);
   const [isFutureReleaseDropdownOpen, setIsFutureReleaseDropdownOpen] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -113,6 +118,7 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
 
   const productDropdownRef = useRef<HTMLDivElement>(null);
   const releaseDropdownRef = useRef<HTMLDivElement>(null);
+  const scenarioDropdownRef = useRef<HTMLDivElement>(null);
   const futureReleaseDropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedRelease = getReleaseBundle(release);
@@ -128,7 +134,8 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
   const isDesignSystemSelected = currentScreen === "design-system";
   const isFlowLibrarySelected = currentScreen === "flow-library";
   const showContextControls = !isDesignSystemSelected && !isFlowLibrarySelected;
-  const scenarioEntryScreen = scenario === "active" ? "homepage" : "prelogin-inactive";
+  const scenarioEntryScreen = getScenarioEntryScreen(scenario);
+  const selectedScenarioLabel = scenario === "active" ? "Active app" : "Inactive app";
 
   const activePlatformTab: PlatformTabId = isFlowLibrarySelected
     ? "flows"
@@ -145,6 +152,7 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
   const closeAllDropdowns = () => {
     setIsProductDropdownOpen(false);
     setIsReleaseDropdownOpen(false);
+    setIsScenarioDropdownOpen(false);
     setIsFutureReleaseDropdownOpen(false);
   };
 
@@ -152,6 +160,14 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
     if (currentScreen === "design-system" && window.location.hash) {
       window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
     }
+  };
+
+  const handleScenarioSelect = (nextScenario: Scenario) => {
+    closeAllDropdowns();
+    leavePlatformSurface();
+    setScenario(nextScenario);
+    setCoAppingActive(false);
+    window.requestAnimationFrame(() => navigateToAndReset(getScenarioEntryScreen(nextScenario)));
   };
 
   const handleCountrySelect = (countryCode: (typeof COUNTRIES)[number]) => {
@@ -216,6 +232,9 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
       if (releaseDropdownRef.current && !releaseDropdownRef.current.contains(event.target as Node)) {
         setIsReleaseDropdownOpen(false);
       }
+      if (scenarioDropdownRef.current && !scenarioDropdownRef.current.contains(event.target as Node)) {
+        setIsScenarioDropdownOpen(false);
+      }
       if (futureReleaseDropdownRef.current && !futureReleaseDropdownRef.current.contains(event.target as Node)) {
         setIsFutureReleaseDropdownOpen(false);
       }
@@ -227,6 +246,15 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!isFutureReleaseSelected || scenario === "active") return;
+    setScenario("active");
+    setCoAppingActive(false);
+    if (currentScreen === "prelogin-inactive") {
+      window.requestAnimationFrame(() => navigateToAndReset("homepage"));
+    }
+  }, [currentScreen, isFutureReleaseSelected, navigateToAndReset, scenario, setCoAppingActive, setScenario]);
 
   const handleReset = () => {
     setCoAppingActive(false);
@@ -319,56 +347,6 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
             >
               <UniCreditLogo />
             </button>
-
-            <div className="relative shrink-0" ref={productDropdownRef}>
-              <ContextDropdownButton
-                label={selectedAppCountryLabel}
-                expanded={isProductDropdownOpen}
-                onClick={() => setIsProductDropdownOpen(!isProductDropdownOpen)}
-                maxWidthClassName="max-w-[260px]"
-              />
-
-              {isProductDropdownOpen && (
-                <div className="absolute left-0 top-full z-[10000] mt-2 w-[256px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-2 shadow-lg">
-                  <p className="px-4 pb-1 pt-1 font-['UniCredit:Bold',sans-serif] text-[11px] uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
-                    App
-                  </p>
-                  {PRODUCT_ORDER.map((productId) => (
-                    <button
-                      key={productId}
-                      type="button"
-                      onClick={() => handleProductSelect(productId, { keepDropdownOpen: true })}
-                      className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
-                        product === productId
-                          ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
-                          : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
-                      }`}
-                    >
-                      {PRODUCT_SELECTOR_LABELS[productId]}
-                    </button>
-                  ))}
-
-                  <div className="my-1 h-px bg-[var(--uc-border-muted)]" />
-                  <p className="px-4 pb-1 pt-1 font-['UniCredit:Bold',sans-serif] text-[11px] uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
-                    Country
-                  </p>
-                  {COUNTRIES.map((countryCode) => (
-                    <button
-                      key={countryCode}
-                      type="button"
-                      onClick={() => handleCountrySelect(countryCode)}
-                      className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
-                        country === countryCode
-                          ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
-                          : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
-                      }`}
-                    >
-                      {COUNTRY_META[countryCode]?.nameEN || countryCode}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
 
           <nav className="flex min-w-0 items-stretch justify-center gap-2" aria-label="Platform navigation">
@@ -410,6 +388,56 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
         {showContextControls ? (
           <div className="grid min-h-[48px] grid-cols-[1fr_auto_1fr] items-center gap-4 overflow-visible border-t border-[var(--uc-border-muted)] px-6 py-1.5 lg:px-10 xl:px-16">
             <div className="flex min-w-0 items-center gap-3 overflow-visible">
+              <div className="relative shrink-0" ref={productDropdownRef}>
+                <ContextDropdownButton
+                  label={selectedAppCountryLabel}
+                  expanded={isProductDropdownOpen}
+                  onClick={() => setIsProductDropdownOpen(!isProductDropdownOpen)}
+                  maxWidthClassName="max-w-[260px]"
+                />
+
+                {isProductDropdownOpen && (
+                  <div className="absolute left-0 top-full z-[10000] mt-2 w-[256px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-2 shadow-lg">
+                    <p className="px-4 pb-1 pt-1 font-['UniCredit:Bold',sans-serif] text-[11px] uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
+                      App
+                    </p>
+                    {PRODUCT_ORDER.map((productId) => (
+                      <button
+                        key={productId}
+                        type="button"
+                        onClick={() => handleProductSelect(productId, { keepDropdownOpen: true })}
+                        className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
+                          product === productId
+                            ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
+                            : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
+                        }`}
+                      >
+                        {PRODUCT_SELECTOR_LABELS[productId]}
+                      </button>
+                    ))}
+
+                    <div className="my-1 h-px bg-[var(--uc-border-muted)]" />
+                    <p className="px-4 pb-1 pt-1 font-['UniCredit:Bold',sans-serif] text-[11px] uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
+                      Country
+                    </p>
+                    {COUNTRIES.map((countryCode) => (
+                      <button
+                        key={countryCode}
+                        type="button"
+                        onClick={() => handleCountrySelect(countryCode)}
+                        className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
+                          country === countryCode
+                            ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
+                            : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
+                        }`}
+                      >
+                        {COUNTRY_META[countryCode]?.nameEN || countryCode}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="relative shrink-0" ref={releaseDropdownRef}>
                 <ContextDropdownButton
                   label={isFutureReleaseSelected ? "Future App" : "Baseline App"}
@@ -439,6 +467,7 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
                       onClick={() => {
                         const firstFutureRelease = futureReleaseOptions[0];
                         if (!firstFutureRelease) return;
+                        setScenario("active");
                         setRelease(firstFutureRelease);
                         setIsReleaseDropdownOpen(false);
                       }}
@@ -453,6 +482,43 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
                   </div>
                 )}
               </div>
+
+              {!isFutureReleaseSelected && (
+                <div className="relative shrink-0" ref={scenarioDropdownRef}>
+                  <ContextDropdownButton
+                    label={selectedScenarioLabel}
+                    expanded={isScenarioDropdownOpen}
+                    onClick={() => {
+                      setIsReleaseDropdownOpen(false);
+                      setIsFutureReleaseDropdownOpen(false);
+                      setIsScenarioDropdownOpen(!isScenarioDropdownOpen);
+                    }}
+                  />
+
+                  {isScenarioDropdownOpen && (
+                    <div className="absolute left-0 top-full z-[10000] mt-2 min-w-[150px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-1 shadow-lg">
+                      {(["active", "inactive"] as const).map((mode) => {
+                        const label = mode === "active" ? "Active app" : "Inactive app";
+
+                        return (
+                          <button
+                            key={mode}
+                            type="button"
+                            onClick={() => handleScenarioSelect(mode)}
+                            className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
+                              scenario === mode
+                                ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
+                                : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {isFutureReleaseSelected && selectedFutureRelease && (
                 <div className="relative shrink-0" ref={futureReleaseDropdownRef}>
@@ -491,7 +557,7 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
               )}
             </div>
 
-            <ScenarioModeSwitch value={scenario} onChange={setScenario} />
+            <div aria-hidden="true" />
 
             <div className="flex min-w-0 items-center justify-end gap-2">
               <HeaderIconButton icon="demo-reset" label="Refresh" onClick={handleReset} />
@@ -589,6 +655,7 @@ function HeaderMoreMenu({
 }) {
   const itemClassName =
     "cursor-pointer rounded-[6px] px-3 py-2.5 font-['UniCredit:Bold',sans-serif] text-[14px] leading-none text-[var(--uc-text)] focus:bg-[var(--uc-surface-muted)] focus:text-[var(--uc-text)]";
+  const menuRowClassName = `${itemClassName} gap-3`;
   const iconSlotClassName = "grid size-[20px] shrink-0 place-items-center text-[var(--uc-text-muted)]";
 
   return (
@@ -612,7 +679,7 @@ function HeaderMoreMenu({
         className="z-[10000] min-w-[220px] rounded-xl border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-1.5 text-[var(--uc-text)] shadow-xl"
         sideOffset={8}
       >
-        <DropdownMenuItem className={itemClassName} onSelect={onOpenSettings}>
+        <DropdownMenuItem className={menuRowClassName} onSelect={onOpenSettings}>
           <span className={iconSlotClassName}>
             <AppIcon name="demo-settings" size={18} />
           </span>
@@ -620,7 +687,7 @@ function HeaderMoreMenu({
         </DropdownMenuItem>
 
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger className={`${itemClassName} data-[state=open]:bg-[var(--uc-surface-muted)]`}>
+          <DropdownMenuSubTrigger className={`${menuRowClassName} data-[state=open]:bg-[var(--uc-surface-muted)]`}>
             <span className={iconSlotClassName}>
               <AppIcon name="camera" size={18} />
             </span>
@@ -633,7 +700,7 @@ function HeaderMoreMenu({
 
         <DropdownMenuSeparator className="mx-1 bg-[var(--uc-border-muted)]" />
 
-        <DropdownMenuItem className={itemClassName} onSelect={onToggleThemeMode}>
+        <DropdownMenuItem className={menuRowClassName} onSelect={onToggleThemeMode}>
           <span className={iconSlotClassName}>
             <ThemeModeIcon mode={themeMode} />
           </span>
@@ -837,40 +904,5 @@ function HeaderIconButton({
     >
       <AppIcon name={icon} size={20} />
     </button>
-  );
-}
-
-function ScenarioModeSwitch({
-  value,
-  onChange,
-}: {
-  value: "active" | "inactive";
-  onChange: (value: "active" | "inactive") => void;
-}) {
-  return (
-    <div
-      className="flex shrink-0 items-center rounded-[18px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[2px]"
-      aria-label="Scenario mode"
-    >
-      {(["active", "inactive"] as const).map((mode) => {
-        const isActive = value === mode;
-
-        return (
-          <button
-            key={mode}
-            type="button"
-            aria-pressed={isActive}
-            onClick={() => onChange(mode)}
-            className={`rounded-[16px] px-3 py-1 font-['UniCredit:Bold',sans-serif] text-[12px] leading-none transition-colors ${
-              isActive
-                ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm"
-                : "text-[var(--uc-text-muted)] hover:text-[var(--uc-action)]"
-            }`}
-          >
-            {mode === "active" ? "Active" : "Inactive"}
-          </button>
-        );
-      })}
-    </div>
   );
 }

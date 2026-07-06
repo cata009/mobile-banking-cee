@@ -2,6 +2,136 @@
 
 Last updated: 2026-07-06
 
+## 2026-07-06 CZ Chatbot Edge Overlay and Portal Animation
+
+- Latest request handled: user asked to keep the CZ Chatbot right-edge launcher visible/accessibility-safe at `32px`, lower it further on the phone edge, remove the white seam/clipping line, keep the rest of the screen clickable, and make opening/closing feel like the chat expands from and collapses back into that edge tab.
+- Runtime changes:
+  - `src/app/App.tsx` mounts the CZ Chatbot launcher through the phone-frame `overlay` slot instead of inside scrollable screen content, so the tab is no longer clipped by Account/Card/Document scroll regions.
+  - `src/app/components/MobileFrame.tsx` and `src/app/components/FramelessDeviceFrame.tsx` keep the overlay wrapper `pointer-events: none`; `coapping.css` restores `pointer-events: auto` only on the launcher and assistant, so normal screen controls remain clickable.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` sets `.mpc-chat-launcher-edge-tab` to `32px` wide and `top: 604px`, keeps the SVG shape extended past the phone edge to avoid the seam, and scales the inner AI mark to stay centered inside the black shape.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` replaces the simple chat mount animation with `mpcChatSheetIn` / `mpcChatSheetOut`: the assistant now clips, scales, blurs, and expands from the right-edge tab origin, with a short portal glow overlay during entry and collapse.
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` extends the close-unmount delay to match the new `0.48s` collapse animation instead of removing the chat immediately.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and `App` chunk above 500 kB.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - In-app browser computed-style smoke confirmed the overlay wrapper is non-intercepting (`pointer-events: none`), the launcher remains clickable (`pointer-events: auto`), underlying screen elements receive hit tests outside the launcher, and the launcher CSS is `width: 32px`, `height: 108px`, `top: 548px` before the final requested lower placement.
+  - Final placement patch lowers the same edge tab to `top: 604px`; no logic or hit-testing behavior changed after that placement-only edit.
+  - In-app browser animation smoke confirmed opening uses `mpcChatSheetIn` / `mpcChatPortalGlowIn` at `0.54s`; closing applies `mpc-chat-assistant-closing` with `mpcChatSheetOut` at `0.48s` before returning to the launcher.
+- Banana Loop result:
+  - fixed: the overlay no longer blocks unrelated page clicks.
+  - fixed: the tab is rendered in frame overlay space so scrollable content no longer cuts it with a visible seam.
+  - triaged: the Vite `react-vendor` empty chunk and `App` chunk-size warnings remain known performance bananas.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-06 CZ Chatbot Edge Tab Narrowing
+
+- Latest request handled: user asked to make the CZ Chatbot right-edge launcher narrower and lower so it consumes less lateral space and sits closer to thumb reach.
+- Superseded by the later `CZ Chatbot Portal Open/Close Animation` pass: the current launcher width is `32px`, not `28px`.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` narrows the edge tab from `34px` to `28px`, lowers it from `top: 432px` to `top: 492px`, and slightly tightens the gradient glow.
+  - The tab keeps `right: -2px`, so the SVG still overlaps the phone edge and avoids the white seam.
+- Verification:
+  - In-app browser computed-style smoke on CZ Documents confirmed `.mpc-chat-launcher-edge-tab` renders with `cssWidth=28px`, `cssHeight=108px`, `cssTop=492px`, SVG shape, about `26px x 99px` scaled size, `13px` icon, active gradient pseudo-shadow, and `parentGap=-2`.
+- safe to resume: yes
+
+## 2026-07-06 CZ Chatbot Unified Edge Launcher
+
+- Latest request handled: user approved the black side-tab launcher shape and asked to reuse it on Home and all Level 1 pages, add a more AI-like gradient shadow, and remove the tiny white seam on the right edge.
+- Runtime changes:
+  - `src/app/App.tsx` now renders the CZ Chatbot launcher as `edge-tab` on every in-app screen where the chatbot is mounted, including Home, Analytics/Spending, Payments, Products, and More.
+  - The Level 1 screen set is still used for conversation context only: opening the tab from Home/Level 1 clears contextual help and starts the default new-conversation experience.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` moves the edge tab to `right: -2px`, widens the SVG background slightly to overlap the phone edge, and adds a cyan/blue/purple blurred glow under the black tab.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and `App` chunk above 500 kB.
+  - In-app browser computed-style smoke confirmed Home, Analytics/Spending, Payments, Products, More, and Card Detail all render `.mpc-chat-launcher-edge-tab`; no `.mpc-chat-launcher:not(.mpc-chat-launcher-edge-tab)` bubble remains on Level 1, each Level 1 tab has `parentGap=-2`, and the SVG shape plus gradient pseudo-shadow are active.
+  - In-app browser click smoke on Home confirmed the edge tab opens the default new-conversation state with `Good afternoon, Teodora`, six generic topics, and no contextual `How can I help you with ...` title.
+- safe to resume: yes
+
+## 2026-07-06 CZ Chatbot Level 2 Edge Tab Shape
+
+- Latest request handled: user asked to restyle the Level 2 CZ Chatbot right-edge launcher so it matches the existing co-apping side-tab language more closely: narrower, black, smoother, and with a nicer shadow instead of the previous broad notch-like shape.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatLauncher.tsx` now renders the edge-tab background as the same SVG curve used by the existing co-apping side tab, while keeping the normal Level 1 bubble on the previous span/background implementation.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` scales the edge tab to a narrower black `32px x 113px` source size, centers a smaller `15px` AI mark in the visible tab area, and applies a subtle blue/black drop shadow.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and `App` chunk above 500 kB.
+  - In-app browser computed-style smoke on CZ Future Card Detail confirmed `.mpc-chat-launcher-edge-tab` is present, uses an SVG shape (`shapeTag=svg`), renders black (`pathFill=rgb(16,16,16)`), scales to about `29px x 103px` in the phone frame, and the inner AI icon scales to about `14px x 14px`.
+  - In-app browser computed-style smoke on CZ Future Home confirmed the Level 1 launcher remains the bubble variant at about `40px x 40px` in the scaled phone frame with the existing blue background.
+- safe to resume: yes
+
+## 2026-07-06 Stakeholder Header Context Row
+
+- Latest request handled: user asked to move the combined `PI - Czech Republic` app/country selector out of the platform row and into the second header row before `Baseline App` / `Future App`, because product/country context should not sit beside `Flows` and `Design system`.
+- Runtime changes:
+  - `src/app/components/demo/DemoTopBar.tsx` now keeps row one focused on the UniCredit logo, `Demo` / `Flows` / `Design system`, profile, and logout.
+  - The second row now starts with the combined app/country selector, followed by `Baseline App` / `Future App`, then either `Active app` / `Inactive app` for baseline or the compatible future-feature selector for future.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and `App` chunk above 500 kB.
+  - In-app browser smoke on CZ Future Home confirmed row one contains only `Open demo`, `Demo`, `Flows`, `Design system`, profile, and logout; row two starts with `PI - Czech Republic`, then `Future App`, then `CZ - Chatbot`.
+  - In-app browser smoke on Flow Library confirmed the header remains one row and does not show app/country or release controls.
+- safe to resume: yes
+
+## 2026-07-06 CZ Chatbot L1 Launcher Position
+
+- Latest request handled: user asked to lower the default Level 1 CZ Chatbot floating launcher on Home because it felt too high above the bottom navigation.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` lowers the bubble launcher from `bottom: 98px` to `bottom: 76px`.
+  - The Level 2 `edge-tab` launcher remains unchanged because it overrides `bottom` with `bottom: auto`.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and `App` chunk above 500 kB.
+  - In-app browser computed-style smoke confirmed the Home launcher renders at `bottom: 76px`, `44px x 44px`, while the Level 2 launcher remains the `edge-tab` variant with `top: 428px`.
+- safe to resume: yes
+
+## 2026-07-06 CZ Chatbot Rich Investment Responses
+
+- Latest request handled: user asked to implement the next CZ Chatbot phase inspired by Poly.ai / Hey George: richer assistant replies plus contextual follow-up suggestions above the composer, only for relevant topics instead of globally.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/types.ts` extends chat messages with optional rich blocks, follow-up suggestions, and lightweight chat actions.
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now renders rich assistant cards for investment portfolio summary, model allocation, projection scenarios, product surfaces, card controls, and spending/subscription insight.
+  - The assistant now attaches contextual follow-up chips above the composer for selected flows such as savings planning, investment goal setup, portfolio review, performance, top-up, card security, and subscription insight; chips disappear outside eligible latest agent replies.
+  - Generated investment replies now support a Poly-like guided path: start goal -> goal type -> horizon -> starting amount -> monthly amount -> model allocation -> projection/review.
+  - Existing mocked conversations are enriched too, especially `Investment advice for my savings`, card security, and subscription discovery.
+  - `src/app/App.tsx` wires rich-card navigation actions so `Open Investments`, `Open History`, `Open Spending`, and `Open card details` route to the relevant app screens instead of acting as decorative CTAs.
+- Verification:
+  - `npm run build` passed on 2026-07-06; Vite still emits the known empty `react-vendor` warning and now reports `assets/App-BRpVrgvN.js` at `512.73 kB`, so the chunk-size warning remains a known performance banana.
+  - Local dev server on `http://127.0.0.1:3001/` returned HTTP 200.
+  - In-app browser smoke opened CZ Future Chatbot on Home, clicked `Help me plan my savings`, and confirmed a formatted `Savings planning` reply, one investment rich card, and follow-up chips `Start an investment goal`, `Review my portfolio`, and `Learn how it works` above the composer.
+  - In-app browser smoke clicked `Start an investment goal` and confirmed the next contextual chips changed to `Grow my savings`, `Future purchase`, and `Long-term reserve`.
+  - In-app browser smoke clicked a `Portfolio` rich card CTA and confirmed the URL changed to `screen=investments` while the assistant remained open.
+  - Browser console error log after the smoke was empty.
+- Banana Loop result:
+  - fixed: investment/card/spending replies no longer rely only on flat formatted text; they can now carry product-like interactive surfaces and contextual next steps.
+  - triaged: rich-card content is still mock/demo data and not financial advice or backend execution.
+  - triaged: App chunk returned above 500 kB after this feature and remains in the known performance banana queue.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-06 Stakeholder Header Scenario Dropdown
+
+- Latest request handled: user asked to remove the centered `Active` / `Inactive` segmented scenario control from the stakeholder header, hide scenario selection entirely in `Future App`, and expose `Active app` / `Inactive app` as a dropdown only when `Baseline App` is selected.
+- Runtime changes:
+  - `src/app/components/demo/DemoTopBar.tsx` now renders the scenario control as a compact dropdown beside `Baseline App`.
+  - `Future App` mode now hides the scenario dropdown and keeps the compatible future-feature selector beside the release selector.
+  - Selecting `Future App` forces the app scenario back to `active`, preventing an invisible `inactive` state from remaining behind a future-feature preview.
+  - Selecting `Active app` or `Inactive app` from the baseline dropdown resets the phone to the matching scenario entry screen.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known warnings remain for empty `react-vendor` and `App` chunk above 500 kB.
+  - In-app browser smoke on CZ Future with `scenario=inactive` confirmed the URL normalizes to `scenario=active`, the header shows `Future App` and `CZ - Chatbot`, and no `Active app`, `Inactive app`, or old `Scenario mode` segment is present.
+  - In-app browser smoke on CZ Baseline confirmed the header shows `Baseline App` plus `Active app`, opening `Active app` reveals both `Active app` and `Inactive app`, and the old centered scenario segment is absent.
+  - In-app browser smoke selected `Inactive app` and confirmed the URL changes to `scenario=inactive&release=release-current&screen=prelogin-inactive`, then switching back to `Future App` restores `scenario=active` and hides the scenario dropdown.
+- safe to resume: yes
+
 ## 2026-07-06 Stakeholder Header App/Country Consolidation
 
 - Latest request handled: user asked to merge the `PI App` / `SME App` / `Kids App` selector with the country selector, so the first-row label reads like `PI - Czech Republic`, `Kids - Hungary`, or `SME - Serbia`, and to move `Baseline` / `Future` into the old country-control position as `Baseline App` / `Future App`.
