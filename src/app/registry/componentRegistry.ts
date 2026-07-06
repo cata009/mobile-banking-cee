@@ -783,7 +783,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "implemented",
     componentPath: "src/app/components/cards/Card.tsx",
     usedByScreens: ["platform.design-system"],
-    notes: "Figma-extracted 64x40 card artwork component generated from `codex-figma-component-spec/v1` node `0:9261`. The React component keeps the source SVG as a separate design asset and exposes controlled figma, medium, and large size variants without changing runtime screen behavior.",
+    notes: "Figma-mapped 64x40 Mastercard card artwork family sourced from Meniga Harmonization Icons nodes `3039:30713`, `3039:7485`, `3039:8064`, `4161:9198`, `3039:12315`, and `3039:12380`. The React component exposes a variant registry for MC Debit Gold, MC Credit Premium Gold, MC Credit Partner Standard, MC Debit Standard, MC Virtual Standard Electric Violet, and MC Virtual Standard Vibrant Orange, preserving the shared card structure while applying the Figma-sampled color palettes and debit/credit labels. Supports controlled figma, medium, and large sizing without changing runtime screen behavior.",
   },
   "cards.ghost-banner": {
     id: "cards.ghost-banner",
@@ -835,16 +835,6 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     usedByScreens: ["platform.design-system"],
     notes: "Figma-extracted 327x157 teal-gradient promo card generated from `codex-figma-component-spec/v1` node `9104:14611`. Left-to-right `linear-gradient(90deg, #007A91, #44909E)` background, 8px radius, 24px padding. 24px bold white title, 18px regular white body, and an optional white pill (`--uc-static-white`) with a teal `warning-small` glyph and a 12px bold uppercase teal label (e.g. EXPIRING ON 12.04.25). Renders as a button when `onClick` is supplied.",
   },
-  "cards.debit-card": {
-    id: "cards.debit-card",
-    label: "Debit Card",
-    products: ["PI"],
-    designSystems: ["current"],
-    status: "implemented",
-    componentPath: "src/app/components/cards/DebitCard.tsx",
-    usedByScreens: ["platform.design-system"],
-    notes: "Figma-extracted 64x40 payment card artwork generated from `codex-figma-component-spec/v1` node `3039:30713` (Card_MC_Debit_Gold_IND_DIGITAL_SMALL). Keeps the source SVG (gold gradient body, Mastercard symbol, UniCredit and contactless marks) as a separate design asset and exposes a `variant` registry (currently `mc-debit-gold`) plus controlled figma / medium / large sizing at a fixed 8:5 aspect ratio. Decorative by default; `ariaLabel` exposes it as an image.",
-  },
   "cards.card-component": {
     id: "cards.card-component",
     label: "Card Component",
@@ -853,7 +843,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "implemented",
     componentPath: "src/app/components/cards/CardComponent.tsx",
     usedByScreens: ["platform.design-system"],
-    notes: "Figma-extracted 375-wide card management section generated from `codex-figma-component-spec/v1` node `9133:3831` (Card component). Primary/K7 (#F5F5F5) background, vertical layout with 12px gap, clips content. Frame 46 has 24px left padding, 8px gap: a 169-wide text column with 14px bold N5 card-holder name and 18px bold L2 masked card number (both K1, UniCredit Bold). Cards carousel is 351×140 horizontal with 24px gap and 1px left padding; each card slot is 219×138 with 5.67px corner radius, K6 (#E5E5E5) 1px outside border, and a 0 11.265px 11.265px rgba(0,0,0,0.2) drop-shadow. Accepts `cardHolderName`, `cardNumber`, and a `cards` array for carousel items with optional custom `imageSrc`.",
+    notes: "Figma-extracted 375-wide card management section generated from `codex-figma-component-spec/v1` node `9133:3831` (Card component). Primary/K7 (#F5F5F5) background, vertical layout with 12px gap, clips content. Frame 46 has 24px left padding, 8px gap: a 169-wide text column with 14px bold N5 card-holder name and 18px bold L2 masked card number (both K1, UniCredit Bold). Cards carousel is 351x140 horizontal with 24px gap and 1px left padding; each 219x138 card slot renders the shared `cards.card` component variant with 5.67px corner radius and a 0 11.265px 11.265px rgba(0,0,0,0.2) drop-shadow. No card artwork image asset or outside border is used.",
   },
   "more.card-grid": {
     id: "more.card-grid",

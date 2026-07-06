@@ -3,6 +3,7 @@ import type {
   ChangeEvent,
   CSSProperties,
   FormEvent,
+  KeyboardEvent as ReactKeyboardEvent,
   MouseEvent as ReactMouseEvent,
   PointerEvent as ReactPointerEvent,
   UIEvent as ReactUIEvent,
@@ -17,6 +18,7 @@ import {
   AddIcon,
   BackIcon,
   CameraIcon,
+  ChatBubbleIcon,
   CloseIcon,
   ConversationsIcon,
   DeleteActionIcon,
@@ -55,6 +57,8 @@ export interface CoAppingChatAssistantProps {
   typingDelayMs?: number;
   onAction?: (action: CoAppingChatAction) => void;
 }
+
+const MAX_VISIBLE_SUGGESTED_TOPICS = 4;
 
 function getCurrentTime() {
   return new Intl.DateTimeFormat("en-GB", {
@@ -162,6 +166,22 @@ function withConversationMessageDates(messages: CoAppingChatMessage[], subtitle:
     ...message,
     createdAt: message.createdAt ?? getConversationDateFromSubtitle(subtitle, message.time),
   }));
+}
+
+function getConversationGroupDate(messages: CoAppingChatMessage[], subtitle: string) {
+  const latestMessage = messages[messages.length - 1];
+  if (latestMessage?.createdAt) return latestMessage.createdAt;
+  return getConversationDateFromSubtitle(subtitle, latestMessage?.time ?? "12:00");
+}
+
+function getConversationMonthLabel(dateIso: string) {
+  const date = new Date(dateIso);
+  if (Number.isNaN(date.getTime())) return "Recent";
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    year: "numeric",
+  }).format(date);
 }
 
 function getThinkingStatusText(input: string) {
@@ -436,7 +456,6 @@ function RichBlock({
             >
               <strong>{product.title}</strong>
               <span>{product.subtitle}</span>
-              <small>{product.meta}</small>
             </button>
           ))}
         </div>
@@ -864,7 +883,7 @@ const mockedConversationHistories: Array<{
   {
     id: "loan-repayment",
     title: "Can I repay part of my loan early?",
-    subtitle: "14 Jun at 16:05",
+    subtitle: "30 May at 16:05",
     messages: [
       {
         id: "loan-user-1",
@@ -897,7 +916,7 @@ const mockedConversationHistories: Array<{
   {
     id: "subscription-audit",
     title: "Help me find subscriptions in my spending",
-    subtitle: "12 Jun at 09:45",
+    subtitle: "24 May at 09:45",
     messages: [
       {
         id: "subs-user-1",
@@ -930,7 +949,7 @@ const mockedConversationHistories: Array<{
   {
     id: "monthly-savings",
     title: "How much should I move to savings monthly?",
-    subtitle: "10 Jun at 11:30",
+    subtitle: "16 May at 11:30",
     messages: [
       {
         id: "saving-user-1",
@@ -963,7 +982,7 @@ const mockedConversationHistories: Array<{
   {
     id: "card-limit-weekend",
     title: "Can I change my card limits for one weekend?",
-    subtitle: "8 Jun at 19:40",
+    subtitle: "8 May at 19:40",
     messages: [
       {
         id: "limit-user-1",
@@ -996,7 +1015,7 @@ const mockedConversationHistories: Array<{
   {
     id: "standing-order",
     title: "Set up regular rent payment",
-    subtitle: "6 Jun at 14:05",
+    subtitle: "28 Apr at 14:05",
     messages: [
       {
         id: "order-user-1",
@@ -1029,7 +1048,7 @@ const mockedConversationHistories: Array<{
   {
     id: "documents-confirmation",
     title: "Where can I find confirmation documents?",
-    subtitle: "4 Jun at 10:10",
+    subtitle: "17 Apr at 10:10",
     messages: [
       {
         id: "docs-user-1",
@@ -1062,7 +1081,7 @@ const mockedConversationHistories: Array<{
   {
     id: "exchange-fees",
     title: "Will I pay fees abroad?",
-    subtitle: "2 Jun at 13:25",
+    subtitle: "4 Apr at 13:25",
     messages: [
       {
         id: "fees-user-1",
@@ -1587,7 +1606,6 @@ const discoveryHero = {
   body: "Explore low-friction ways to move from idle savings into a planned portfolio, with risk checks before any product step.",
   image:
     "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=760&q=80",
-  tag: "Investments",
 };
 
 const discoveryPromos = [
@@ -1636,7 +1654,6 @@ function DiscoveryFeed() {
       <button type="button" className="mpc-discovery-hero">
         <img src={discoveryHero.image} alt="" loading="lazy" />
         <span className="mpc-discovery-hero-shade" />
-        <span className="mpc-discovery-chip">{discoveryHero.tag}</span>
         <span className="mpc-discovery-hero-copy">
           <span>{discoveryHero.eyebrow}</span>
           <strong>{discoveryHero.title}</strong>
@@ -1767,6 +1784,7 @@ export function CoAppingChatAssistant({
   const conversationListRef = useRef<HTMLDivElement | null>(null);
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
   const followUpShelfRef = useRef<HTMLDivElement | null>(null);
+  const draftInputRef = useRef<HTMLTextAreaElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const photosInputRef = useRef<HTMLInputElement | null>(null);
   const filesInputRef = useRef<HTMLInputElement | null>(null);
@@ -1785,6 +1803,21 @@ export function CoAppingChatAssistant({
     active: false,
     moved: false,
   });
+
+  useEffect(() => {
+    const input = draftInputRef.current;
+    if (!input) return;
+
+    input.style.height = "auto";
+    const computedStyle = window.getComputedStyle(input);
+    const lineHeight = Number.parseFloat(computedStyle.lineHeight) || 22;
+    const verticalPadding =
+      (Number.parseFloat(computedStyle.paddingTop) || 0) + (Number.parseFloat(computedStyle.paddingBottom) || 0);
+    const maxHeight = lineHeight * 5 + verticalPadding;
+    const nextHeight = Math.min(input.scrollHeight, maxHeight);
+    input.style.height = `${nextHeight}px`;
+    input.style.overflowY = input.scrollHeight > maxHeight ? "auto" : "hidden";
+  }, [draft]);
 
   useEffect(() => {
     return () => {
@@ -2151,6 +2184,13 @@ export function CoAppingChatAssistant({
     sendMessage(draft);
   };
 
+  const handleDraftKeyDown = (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
+
+    event.preventDefault();
+    sendMessage(draft);
+  };
+
   const handleAction = (action: CoAppingChatAction) => {
     if (action.type === "navigate") {
       onAction?.(action);
@@ -2190,6 +2230,12 @@ export function CoAppingChatAssistant({
     setShowConversationScrollTop(false);
   };
 
+  const openConversationList = () => {
+    setAssistantMode("search");
+    setIsMoreMenuOpen(false);
+    setIsConversationListOpen(true);
+  };
+
   const handleChatScroll = (event: ReactUIEvent<HTMLDivElement>) => {
     const node = event.currentTarget;
     const distanceFromBottom = node.scrollHeight - node.scrollTop - node.clientHeight;
@@ -2207,6 +2253,12 @@ export function CoAppingChatAssistant({
     const node = followUpShelfRef.current;
     if (!node) return;
 
+    if (event.target instanceof HTMLElement && event.target.closest(".mpc-follow-up-chip")) {
+      followUpDragRef.current.active = false;
+      followUpDragRef.current.moved = false;
+      return;
+    }
+
     followUpDragRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
@@ -2223,7 +2275,7 @@ export function CoAppingChatAssistant({
     if (!drag.active || drag.pointerId !== event.pointerId || !node) return;
 
     const deltaX = event.clientX - drag.startX;
-    if (Math.abs(deltaX) > 3) drag.moved = true;
+    if (Math.abs(deltaX) > 8) drag.moved = true;
     node.scrollLeft = drag.scrollLeft - deltaX;
   };
 
@@ -2272,6 +2324,7 @@ export function CoAppingChatAssistant({
     resetPendingReply();
     setMessages([]);
     setDraft("");
+    setConversationSearch("");
     setIsVoiceMode(false);
     setIsAttachmentMenuOpen(false);
     setIsMoreMenuOpen(false);
@@ -2321,6 +2374,7 @@ export function CoAppingChatAssistant({
             id: "current",
             title: getConversationTitle(messages, "Current conversation"),
             subtitle: getConversationTimeLabel(messages),
+            groupDate: getConversationGroupDate(messages, getConversationTimeLabel(messages)),
             searchText: messages.map((message) => message.text).join(" "),
             onClick: () => setIsConversationListOpen(false),
           },
@@ -2330,6 +2384,10 @@ export function CoAppingChatAssistant({
       id: "intro",
       title: getConversationTitle(savedConversationMessagesRef.current, "Smart Assistant intro"),
       subtitle: getConversationTimeLabel(savedConversationMessagesRef.current),
+      groupDate: getConversationGroupDate(
+        savedConversationMessagesRef.current,
+        getConversationTimeLabel(savedConversationMessagesRef.current),
+      ),
       searchText: savedConversationMessagesRef.current.map((message) => message.text).join(" "),
       onClick: openSavedConversation,
     },
@@ -2337,6 +2395,7 @@ export function CoAppingChatAssistant({
       id: conversation.id,
       title: conversation.title,
       subtitle: conversation.subtitle,
+      groupDate: getConversationGroupDate(conversation.messages, conversation.subtitle),
       searchText: conversation.messages.map((message) => message.text).join(" "),
       onClick: () => {
         resetPendingReply();
@@ -2353,6 +2412,25 @@ export function CoAppingChatAssistant({
     if (!query) return true;
     return `${item.title} ${item.subtitle} ${item.searchText}`.toLowerCase().includes(query);
   });
+  const conversationGroups = conversationItems.reduce<Array<{ id: string; label: string; items: typeof conversationItems }>>(
+    (groups, item) => {
+      const label = getConversationMonthLabel(item.groupDate);
+      const currentGroup = groups[groups.length - 1];
+
+      if (currentGroup?.label === label) {
+        currentGroup.items.push(item);
+      } else {
+        groups.push({
+          id: label,
+          label,
+          items: [item],
+        });
+      }
+
+      return groups;
+    },
+    [],
+  );
 
   const isDraftEmpty = draft.trim().length === 0;
   const isVoiceCaptureActive = voiceStatus !== "idle";
@@ -2368,14 +2446,14 @@ export function CoAppingChatAssistant({
           ? "Listening..."
           : mergedLabels.inputPlaceholder;
   const showSuggestedTopics = messages.length === 0 && !isTyping && !isConversationListVisible && !isDiscoveryMode;
-  const activeSuggestedTopics = entryContext?.suggestedTopics?.length
+  const activeSuggestedTopicsSource = entryContext?.suggestedTopics?.length
     ? entryContext.suggestedTopics
     : suggestedTopics;
+  const activeSuggestedTopics = activeSuggestedTopicsSource.slice(0, MAX_VISIBLE_SUGGESTED_TOPICS);
   const newConversationGreeting = entryContext?.title ?? `${getGreetingLabel()}, ${assistantGreetingName}`;
   const hasActiveConversation = messages.length > 0;
   const isConversationDetailOpen = !isConversationListVisible && !isDiscoveryMode && hasActiveConversation;
   const isNewConversationOpen = !isConversationListVisible && !isDiscoveryMode && !hasActiveConversation;
-  const showConversationOptions = isConversationDetailOpen || (isDiscoveryMode && hasActiveConversation);
   const lastMessageId = messages[messages.length - 1]?.id ?? "";
   const lastMessageText = messages[messages.length - 1]?.text ?? "";
   const latestMessage = messages[messages.length - 1];
@@ -2437,23 +2515,20 @@ export function CoAppingChatAssistant({
           ) : isConversationDetailOpen ? (
             <button
               type="button"
-              onClick={() => {
-                setIsMoreMenuOpen(false);
-                setIsConversationListOpen(true);
-              }}
+              onClick={openConversationList}
               className="mpc-chat-control-button"
               aria-label="Back to conversations"
             >
-              <BackIcon />
+              <ConversationsIcon />
             </button>
           ) : isNewConversationOpen || isDiscoveryMode ? (
             <button
               type="button"
-              onClick={requestClose}
+              onClick={openConversationList}
               className="mpc-chat-control-button"
-              aria-label="Back to app"
+              aria-label="Open conversations"
             >
-              <BackIcon />
+              <ConversationsIcon />
             </button>
           ) : (
             <span className="mpc-chat-control-spacer" aria-hidden="true" />
@@ -2476,7 +2551,7 @@ export function CoAppingChatAssistant({
                 aria-label="Search mode"
                 aria-pressed={assistantMode === "search"}
               >
-                <SearchModeIcon />
+                <ChatBubbleIcon />
               </button>
               <button
                 type="button"
@@ -2501,13 +2576,13 @@ export function CoAppingChatAssistant({
           {isConversationListVisible ? (
             <button
               type="button"
-              onClick={startNewConversation}
+              onClick={requestClose}
               className="mpc-chat-control-button"
-              aria-label="Start new conversation"
+              aria-label="Close assistant"
             >
-              <AddIcon />
+              <CloseIcon />
             </button>
-          ) : showConversationOptions ? (
+          ) : isConversationDetailOpen ? (
             <div className="mpc-more-menu-anchor">
               <button
                 type="button"
@@ -2544,19 +2619,6 @@ export function CoAppingChatAssistant({
                 </div>
               ) : null}
             </div>
-          ) : isNewConversationOpen || isDiscoveryMode ? (
-            <button
-              type="button"
-              onClick={() => {
-                setAssistantMode("search");
-                setIsMoreMenuOpen(false);
-                setIsConversationListOpen(true);
-              }}
-              className="mpc-chat-control-button"
-              aria-label="Open conversations"
-            >
-              <ConversationsIcon />
-            </button>
           ) : (
             <button type="button" onClick={requestClose} className="mpc-chat-control-button" aria-label="Close assistant">
               <CloseIcon />
@@ -2578,11 +2640,18 @@ export function CoAppingChatAssistant({
           <p className="mpc-conversation-title">Conversations</p>
           {conversationItems.length > 0 ? (
             <div className="mpc-conversation-items">
-              {conversationItems.map((item) => (
-                <button key={item.id} type="button" className="mpc-conversation-item" onClick={item.onClick}>
-                  <strong>{item.title}</strong>
-                  <small>{item.subtitle}</small>
-                </button>
+              {conversationGroups.map((group) => (
+                <section key={group.id} className="mpc-conversation-month" aria-label={group.label}>
+                  <p className="mpc-conversation-month-title">{group.label}</p>
+                  <div className="mpc-conversation-month-items">
+                    {group.items.map((item) => (
+                      <button key={item.id} type="button" className="mpc-conversation-item" onClick={item.onClick}>
+                        <strong>{item.title}</strong>
+                        <small>{item.subtitle}</small>
+                      </button>
+                    ))}
+                  </div>
+                </section>
               ))}
             </div>
           ) : (
@@ -2627,7 +2696,12 @@ export function CoAppingChatAssistant({
       {isConversationDetailOpen && showChatScrollBottom ? (
         <button
           type="button"
-          className="mpc-chat-scroll-bottom-button"
+          className={[
+            "mpc-chat-scroll-bottom-button",
+            activeFollowUps.length > 0 ? "mpc-chat-scroll-bottom-button-with-follow-ups" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
           onClick={scrollChatToBottom}
           aria-label="Scroll to latest message"
         >
@@ -2670,25 +2744,35 @@ export function CoAppingChatAssistant({
 
       {!isDiscoveryMode && <div className="mpc-chat-composer">
         {isConversationListVisible ? (
-          <div className="mpc-conversation-search-row">
-            <SearchModeIcon />
-            <input
-              value={conversationSearch}
-              onChange={(event) => setConversationSearch(event.target.value)}
-              className="mpc-conversation-search-input"
-              placeholder="Search conversations"
-              aria-label="Search conversations"
-            />
-            {conversationSearch ? (
-              <button
-                type="button"
-                className="mpc-conversation-search-clear"
-                onClick={() => setConversationSearch("")}
-                aria-label="Clear conversation search"
-              >
-                <CloseIcon />
-              </button>
-            ) : null}
+          <div className="mpc-conversation-search-actions">
+            <div className="mpc-conversation-search-row">
+              <SearchModeIcon />
+              <input
+                value={conversationSearch}
+                onChange={(event) => setConversationSearch(event.target.value)}
+                className="mpc-conversation-search-input"
+                placeholder="Search conversations"
+                aria-label="Search conversations"
+              />
+              {conversationSearch ? (
+                <button
+                  type="button"
+                  className="mpc-conversation-search-clear"
+                  onClick={() => setConversationSearch("")}
+                  aria-label="Clear conversation search"
+                >
+                  <CloseIcon />
+                </button>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              onClick={startNewConversation}
+              className="mpc-chat-control-button mpc-conversation-new-button"
+              aria-label="Start new conversation"
+            >
+              <AddIcon />
+            </button>
           </div>
         ) : (
           <>
@@ -2778,12 +2862,15 @@ export function CoAppingChatAssistant({
                   onChange={resetAttachmentInput}
                 />
               </div>
-              <input
+              <textarea
+                ref={draftInputRef}
                 value={draft}
                 onChange={(event) => handleDraftChange(event.target.value)}
+                onKeyDown={handleDraftKeyDown}
                 className="mpc-chat-input"
                 placeholder={inputPlaceholder}
                 aria-label={mergedLabels.inputPlaceholder}
+                rows={1}
               />
               <button
                 type="button"

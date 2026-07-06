@@ -227,7 +227,6 @@ export type ComponentId =
   | "cards.user-event-card"
   | "cards.helper-card"
   | "cards.pending-action-card"
-  | "cards.debit-card"
   | "cards.card-component"
   | "more.card-grid"
   | "contacts.navigation-card"

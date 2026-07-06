@@ -6,7 +6,6 @@ import AccountTransactionRow from "@/app/components/accounts/AccountTransactionR
 import AccountTransactionMonthDivider from "@/app/components/accounts/AccountTransactionMonthDivider";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import { AppIcon } from "@/app/components/icons";
-import WalletButton from "@/app/components/ui/WalletButton";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
 import { getCountryConfig, formatMoneyNumber } from "@/app/registry/countryConfig";
@@ -16,8 +15,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { getAccountTransactions, groupAccountTransactionsByMonth } from "@/data/accountDetails";
 import type { AccountTransaction } from "@/data/accountDetails";
 import type { Product } from "@/data/products";
-import cardArtworkSrc from "@/assets/design-system/card.svg";
-import debitCardSrc from "@/assets/design-system/debit-card-mc-gold.svg";
+import Card, { type CardVariant } from "@/app/components/cards/Card";
 
 interface CardDetailScreenProps {
   selectedCardId?: string | null;
@@ -47,8 +45,16 @@ function isCardProduct(product: Product): boolean {
   return product.type === "debit_card" || product.type === "credit_card";
 }
 
-function getCardArtSrc(product: Product): string {
-  return product.type === "debit_card" ? debitCardSrc : cardArtworkSrc;
+function getCardVariant(product: Product): CardVariant {
+  if (product.type === "credit_card") {
+    return "mc-credit-partner-standard";
+  }
+
+  if (product.type === "debit_card" && (product.id.endsWith("-2") || product.id === "card-3")) {
+    return "mc-debit-standard";
+  }
+
+  return "mc-debit-gold";
 }
 
 function getCardHolderName(): string {
@@ -93,10 +99,6 @@ function CollapsingCardHeader({
       </div>
     </div>
   );
-}
-
-function AppleWalletButton() {
-  return <WalletButton kind="apple-wallet" size="long" />;
 }
 
 export default function CardDetailScreen({
@@ -454,15 +456,18 @@ export default function CardDetailScreen({
                         width: CARD_WIDTH,
                         height: CARD_HEIGHT,
                         borderRadius: 5.67,
-                        border: "1px solid #E5E5E5",
                         boxShadow: "0 11.265px 11.265px rgba(0,0,0,0.2)",
                       }}
                     >
-                      <img
-                        alt={card.type === "debit_card" ? "Debit card" : "Credit card"}
-                        className="block h-full w-full select-none object-cover"
-                        draggable={false}
-                        src={getCardArtSrc(card)}
+                      <Card
+                        ariaLabel={card.type === "debit_card" ? "Debit card" : "Credit card"}
+                        size="large"
+                        variant={getCardVariant(card)}
+                        style={{
+                          width: CARD_WIDTH,
+                          height: CARD_HEIGHT,
+                          borderRadius: 5.67,
+                        }}
                       />
                     </div>
                   </div>
@@ -482,7 +487,7 @@ export default function CardDetailScreen({
           />
         </div>
 
-        {/* Free to Spend + Show Card Details + Apple Wallet */}
+        {/* Free to Spend + Show Card Details */}
         <div className="flex flex-col items-center gap-[16px] px-[24px] pt-[16px] pb-[16px]">
           <div className="flex w-full flex-col items-start gap-[2px]">
             <span className="uc-type-n5-strong text-[var(--uc-text-muted)]">
@@ -500,8 +505,6 @@ export default function CardDetailScreen({
           >
             {t("runtime.cards.showCardDetails", "Show Card Details")}
           </button>
-
-          <AppleWalletButton />
         </div>
 
         {/* Quick actions */}

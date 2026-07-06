@@ -3,6 +3,7 @@ import { AppIcon } from "@/app/components/icons";
 import ToggleButton from "@/app/components/ToggleButton";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
+import Card from "@/app/components/cards/Card";
 import { COUNTRY_META, COUNTRIES } from "@/app/registry/demoConfig";
 import {
   FLOW_PREVIEW_ORDER,
@@ -12,8 +13,6 @@ import {
 } from "@/app/registry/flowPreviewRegistry";
 import type { CountryId } from "@/app/state/demoTypes";
 import { createPhoneScreenshotBlob } from "@/app/utils/phoneScreenshot";
-import cardArtworkSrc from "@/assets/design-system/card.svg";
-import debitCardSrc from "@/assets/design-system/debit-card-mc-gold.svg";
 
 interface FlowLibraryScreenProps {
   initialFlowId?: FlowPreviewId;
@@ -1094,8 +1093,11 @@ function ConfirmDeactivatePreview() {
   );
 }
 
+function getFlowCardVariant(cardKind: "credit" | "debit") {
+  return cardKind === "credit" ? "mc-credit-partner-standard" : "mc-debit-standard";
+}
+
 function CardsPreview({ cardKind }: { cardKind: "credit" | "debit" }) {
-  const cardArtSrc = cardKind === "credit" ? cardArtworkSrc : debitCardSrc;
   const cardNumber = cardKind === "credit" ? "5123 **** **** 5555" : "5173 **** **** 5678";
   const amount = cardKind === "credit" ? "410.55" : "341.50";
   const quickActions = [
@@ -1115,11 +1117,20 @@ function CardsPreview({ cardKind }: { cardKind: "credit" | "debit" }) {
         </div>
         <div className="mt-[16px] overflow-hidden">
           <div className="flex gap-[24px] pl-[24px]">
-            <div className="h-[138px] w-[219px] shrink-0 overflow-hidden rounded-[6px] border border-[var(--uc-border-muted)] shadow-[0_11px_11px_rgba(0,0,0,0.20)]">
-              <img src={cardArtSrc} alt={cardKind === "credit" ? "Credit card" : "Debit card"} className="h-full w-full object-cover" />
+            <div className="h-[138px] w-[219px] shrink-0 overflow-hidden rounded-[6px] shadow-[0_11px_11px_rgba(0,0,0,0.20)]">
+              <Card
+                ariaLabel={cardKind === "credit" ? "Credit card" : "Debit card"}
+                size="large"
+                variant={getFlowCardVariant(cardKind)}
+                style={{ width: 219, height: 138, borderRadius: 6 }}
+              />
             </div>
-            <div className="mt-[12px] h-[114px] w-[181px] shrink-0 overflow-hidden rounded-[6px] border border-[var(--uc-border-muted)] opacity-60 shadow-[0_9px_9px_rgba(0,0,0,0.16)]">
-              <img src={cardKind === "credit" ? debitCardSrc : cardArtworkSrc} alt="" className="h-full w-full object-cover" />
+            <div className="mt-[12px] h-[114px] w-[181px] shrink-0 overflow-hidden rounded-[6px] opacity-60 shadow-[0_9px_9px_rgba(0,0,0,0.16)]">
+              <Card
+                size="large"
+                variant={cardKind === "credit" ? "mc-debit-standard" : "mc-credit-partner-standard"}
+                style={{ width: 181, height: 114, borderRadius: 6 }}
+              />
             </div>
           </div>
         </div>
@@ -1288,25 +1299,22 @@ function OptionRow({ title, subtitle }: { title: string; subtitle: string }) {
 
 function CardArtwork({ cardKind }: { cardKind: "credit" | "debit" }) {
   return (
-    <div className={`h-[86px] w-[126px] rounded-[5px] p-[8px] text-[var(--uc-static-white)] ${cardKind === "credit" ? "bg-[#d7001f]" : "bg-[#f7f7f7] text-[var(--uc-text)]"}`}>
-      <div className={`h-full rounded-[3px] ${cardKind === "credit" ? "bg-[linear-gradient(135deg,#e4002b,#b40020)]" : "bg-[linear-gradient(135deg,#ffffff,#f2f2f2)]"}`}>
-        <div className="h-full w-full bg-[linear-gradient(135deg,transparent_38%,rgba(255,255,255,.35)_39%,transparent_60%)] p-[6px]">
-          <p className="text-[7px] font-bold">UniCredit</p>
-        </div>
-      </div>
-    </div>
+    <Card
+      ariaLabel={cardKind === "credit" ? "Credit card" : "Debit card"}
+      size="large"
+      variant={getFlowCardVariant(cardKind)}
+      style={{ width: 126, height: 86, borderRadius: 5 }}
+    />
   );
 }
 
 function SmallCardArtwork({ cardKind }: { cardKind: "credit" | "debit" }) {
   return (
-    <div className="h-[32px] w-[52px] overflow-hidden rounded-[3px] border border-[var(--uc-border-muted)]">
-      <img
-        src={cardKind === "credit" ? cardArtworkSrc : debitCardSrc}
-        alt=""
-        className="h-full w-full object-cover"
-      />
-    </div>
+    <Card
+      size="large"
+      variant={getFlowCardVariant(cardKind)}
+      style={{ width: 52, height: 32, borderRadius: 3 }}
+    />
   );
 }
 

@@ -125,7 +125,6 @@ The local component registry currently documents these included component IDs an
 | `cards.user-event-card` | User Event Card | `src/app/components/cards/UserEventCard.tsx` |
 | `cards.helper-card` | Helper Card | `src/app/components/cards/HelperCard.tsx` |
 | `cards.pending-action-card` | Pending Action Card | `src/app/components/cards/PendingActionCard.tsx` |
-| `cards.debit-card` | Debit Card | `src/app/components/cards/DebitCard.tsx` |
 | `cards.card-component` | Card Component | `src/app/components/cards/CardComponent.tsx` |
 | `more.card-grid` | More service card grid | `src/app/screens/more/MoreScreen.tsx` |
 | `contacts.navigation-card` | Contacts navigation card | `src/app/screens/contacts/ContactsNavigationCard.tsx` |
@@ -454,10 +453,12 @@ Sources under `src/app/components/cards/`.
 - Body 18px regular white.
 - Optional white tag pill with teal warning icon and 12px uppercase label.
 
-### DebitCard / Card / CardComponent
+### Card / CardComponent
 
-- These are Figma-extracted SVG/artwork components. Copy their source files and SVG assets as-is.
-- Do not rebuild payment card artwork with CSS rectangles unless explicitly requested.
+- `cards.card` is the official payment-card artwork family. It maps Meniga Mastercard card references into one selector-driven `Card` component with debit, credit, and virtual color variants.
+- `src/app/components/cards/DebitCard.tsx` remains only as a compatibility alias for older imports.
+- Do not replace the card family with PNG screenshots; keep it as reusable SVG/vector artwork and extend the `CARD_VARIANTS` registry when new card designs are approved.
+- The card edge is a single outer container mask. Keep the SVG at `preserveAspectRatio="none"`, avoid internal `clipPath` card masks, and keep the card background/gradient on the outer container so scaled slots such as `219x138` do not reveal white corners or letterbox gaps.
 
 ## Payments Components
 
@@ -568,7 +569,7 @@ Important specimen names included in this package:
 - User Event Card
 - Helper Card
 - Pending Action Card
-- Debit Card
+- Card
 - Card Component
 - Carousel Indicator
 - AccountDetailsInfoField
