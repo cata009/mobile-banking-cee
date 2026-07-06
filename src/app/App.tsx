@@ -107,6 +107,8 @@ const DESIGN_SYSTEM_HASHES = new Set([
 type CzChatHelpArea = "documents" | "account" | "card";
 type CzChatLauncherVariant = "bubble" | "edge-tab";
 
+const CZ_CHAT_USER_NAME = "Teodora";
+
 const CZ_CHAT_LEVEL_ONE_SCREENS = new Set<Screen>([
   "homepage",
   "analytics",
@@ -115,12 +117,16 @@ const CZ_CHAT_LEVEL_ONE_SCREENS = new Set<Screen>([
   "more",
 ]);
 
+function buildCzChatTitle(copy: string): string {
+  return `${CZ_CHAT_USER_NAME}, ${copy}`;
+}
+
 function buildCzChatHelpContext(area: CzChatHelpArea, id: string): CoAppingChatContext {
   switch (area) {
     case "documents":
       return {
         id,
-        title: "How can I help you with Documents?",
+        title: buildCzChatTitle("what document do you need?"),
         suggestedTopics: [
           {
             id: "documents-confirmation",
@@ -147,7 +153,7 @@ function buildCzChatHelpContext(area: CzChatHelpArea, id: string): CoAppingChatC
     case "account":
       return {
         id,
-        title: "How can I help you with this account?",
+        title: buildCzChatTitle("what should we check on this account?"),
         suggestedTopics: [
           {
             id: "account-balance",
@@ -174,7 +180,7 @@ function buildCzChatHelpContext(area: CzChatHelpArea, id: string): CoAppingChatC
     case "card":
       return {
         id,
-        title: "How can I help you with this card?",
+        title: buildCzChatTitle("what should we check on this card?"),
         suggestedTopics: [
           {
             id: "card-security",
@@ -226,7 +232,7 @@ function buildCzChatScreenContext(screen: Screen, id: string): CoAppingChatConte
     case "payment-success":
       return {
         id,
-        title: "How can I help you with this payment?",
+        title: buildCzChatTitle("need a quick payment check?"),
         suggestedTopics: [
           {
             id: "payment-check",
@@ -249,7 +255,7 @@ function buildCzChatScreenContext(screen: Screen, id: string): CoAppingChatConte
     case "investments-history":
       return {
         id,
-        title: "How can I help you with Investments?",
+        title: buildCzChatTitle("where should we start with investments?"),
         suggestedTopics: [
           {
             id: "investments-portfolio",
@@ -271,7 +277,7 @@ function buildCzChatScreenContext(screen: Screen, id: string): CoAppingChatConte
     case "messages":
       return {
         id,
-        title: "How can I help you with Messages?",
+        title: buildCzChatTitle("what message should I help find?"),
         suggestedTopics: [
           {
             id: "messages-find",
@@ -288,7 +294,7 @@ function buildCzChatScreenContext(screen: Screen, id: string): CoAppingChatConte
     case "prime":
       return {
         id,
-        title: "How can I help you with Prime?",
+        title: buildCzChatTitle("how can I help with Prime?"),
         suggestedTopics: [
           {
             id: "prime-benefits",
@@ -305,7 +311,7 @@ function buildCzChatScreenContext(screen: Screen, id: string): CoAppingChatConte
     case "settings":
       return {
         id,
-        title: "How can I help you with Settings?",
+        title: buildCzChatTitle("what setting do you need?"),
         suggestedTopics: [
           {
             id: "settings-security",
@@ -322,7 +328,7 @@ function buildCzChatScreenContext(screen: Screen, id: string): CoAppingChatConte
     case "contacts":
       return {
         id,
-        title: "How can I help you with Contacts?",
+        title: buildCzChatTitle("who do you need to reach?"),
         suggestedTopics: [
           {
             id: "contacts-support",
@@ -339,7 +345,7 @@ function buildCzChatScreenContext(screen: Screen, id: string): CoAppingChatConte
     default:
       return {
         id,
-        title: "How can I help on this screen?",
+        title: buildCzChatTitle("what can I help with here?"),
       };
   }
 }

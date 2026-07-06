@@ -23,7 +23,7 @@ import type {
 
 export const DEFAULT_PRODUCT_COUNTS: ProductCounts = {
   accounts: 2,
-  debitCards: 1,
+  debitCards: 2,
   creditCards: 1,
   mealCards: 0,
   deposits: 1,

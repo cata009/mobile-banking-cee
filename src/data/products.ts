@@ -129,13 +129,26 @@ export const mockProducts: Product[] = [
   {
     id: 'acc-2',
     type: 'current_account',
-    name: 'Savings Account',
+    name: 'Primary Account 2',
     accountNumber: '2345678901234567',
-    balance: 1250.75,
-    currency: 'EUR'
+    balance: 2052.36,
+    currency: 'CZK'
   },
 
   // Cards
+  {
+    id: 'card-2',
+    type: 'credit_card',
+    name: 'Credit Card',
+    accountNumber: '5173500087654321',
+    balance: 3200,
+    currency: 'CZK',
+    cardType: 'Standard',
+    cardNumber: '5173500087654321',
+    expiryDate: '12/29',
+    creditLimit: 5000,
+    availableCredit: 3200
+  },
   {
     id: 'card-1',
     type: 'debit_card',
@@ -143,15 +156,22 @@ export const mockProducts: Product[] = [
     accountNumber: '5173400012345678',
     balance: 0,
     currency: 'CZK',
+    cardType: 'Gold',
+    cardNumber: '5173400012345678',
+    expiryDate: '12/29',
     linkedAccountId: 'acc-1'
   },
   {
-    id: 'card-2',
-    type: 'credit_card',
-    name: 'Credit Card',
-    accountNumber: '5173500087654321',
+    id: 'card-3',
+    type: 'debit_card',
+    name: 'Debit Card Plus',
+    accountNumber: '5173400012345699',
     balance: 0,
-    currency: 'EUR'
+    currency: 'CZK',
+    cardType: 'Standard',
+    cardNumber: '5173400012345699',
+    expiryDate: '12/29',
+    linkedAccountId: 'acc-2'
   },
 
   // Savings and Term Deposits

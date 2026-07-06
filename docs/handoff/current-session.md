@@ -2,6 +2,356 @@
 
 Last updated: 2026-07-06
 
+## 2026-07-06 CZ Chatbot Conversation Detail List Icon
+
+- Latest request handled: user asked to replace the conversation-detail top-left back arrow with the conversation-list icon made of two lines, while keeping the same return-to-conversations behavior.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now renders `ConversationsIcon` for the `isConversationDetailOpen` top-left control; the handler remains `openConversationList`, so the drawer/list behavior is unchanged.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Banana Loop result:
+  - fixed: conversation detail no longer shows a back arrow for the conversation-list action.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-06 CZ Chatbot New Message Glow Removed
+
+- Latest request handled: user rejected the Gemini-inspired new-message glow because it washed the whole chat surface blue and asked to remove it if it could not match the Gemini reference cleanly.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` no longer applies the `mpc-chat-assistant-home-glow` class on default new-conversation states.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` removes the home-glow pseudo-element and its animation, returning the new-message surface to the clean white assistant background.
+  - The previous cap of 4 visible suggested topics remains in place.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - `git diff --check -- package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx package/mobile-pi-coapping-chat-package/src/coapping.css docs/handoff/current-session.md docs/handoff/state-of-the-world.md docs/platform-capability-map/README.md` passed with only normal Windows LF/CRLF warnings.
+  - In-app browser smoke on `screen=homepage` confirmed the open assistant class is only `mpc-chat-assistant`, `mpc-chat-assistant-home-glow` is absent, `::before` has no content/background, the assistant background is `rgb(255, 255, 255)`, and exactly 4 default topics render.
+- Banana Loop result:
+  - fixed: the large blue wash can no longer appear on the new-message state.
+  - triaged: a future Gemini-style bottom gradient should be treated as a fresh isolated design task rather than reusing the removed class.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-06 Account And Debit Card Balance Linking
+
+- Latest request handled: user flagged that generated current accounts shared the same visible balance and asked for Debit Card 1 / Debit Card 2 to reflect Current Account 1 / Current Account 2 respectively, globally for PI country contexts.
+- Runtime changes:
+  - `src/hooks/useProducts.tsx` now gives generated current accounts deterministic per-index balances instead of cloning the same amount for every account.
+  - Generated debit and meal cards now link by index to generated accounts (`acc-1`, `acc-2`, etc.), and the product conversion pass resolves linked balances from the generated product list before falling back to static mock data.
+  - `src/data/products.ts` now gives the static fallback second account a distinct CZK balance and links the second static debit card to `acc-2`.
+- Verification:
+  - In-app browser smoke on CZ Future Home confirmed `Primary Account 1` and `Debit Card 1` both show `2 850.50 CZK`, while `Primary Account 2` and `Debit Card 2` both show `2 052.36 CZK`, with Accounts total recalculated to `4 902.86 CZK`.
+  - In-app browser smoke on `screen=card-detail&card=card-debit-2` confirmed Card Detail `Free To Spend` renders `2 052,36 CZK`.
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - `npm run audit:templates` passed: `template-contract ok: templates=50 codePreviews=50 components=80 screens=28 flows=15`.
+  - `npm run audit:platform` passed: `reference-platform audit ok products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Banana Loop result:
+  - fixed: generated debit-card balances no longer all mirror the first current account.
+  - triaged: card detail transaction lists remain shared mock card transactions and were not expanded into account-specific transaction histories in this change.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-06 CZ Chatbot Conversation Month Groups
+
+- Latest request handled: user asked for the CZ Chatbot conversation-list title to read as secondary gray text, for conversations to be grouped by month (`Jun 2026`, `May 2026`, `Apr 2026` style), and for the old item separator lines to be removed.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now derives a month group from each conversation date/subtitle and renders grouped conversation sections.
+  - Older mocked conversation histories now span May and April so the demo list visibly demonstrates multiple month groups.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` styles the list title and month labels with muted gray text and removes per-item separator borders.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - `git diff --check -- package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx package/mobile-pi-coapping-chat-package/src/coapping.css` passed with only normal Windows LF/CRLF warnings.
+  - In-app browser computed-style check confirmed month labels `Jul 2026`, `Jun 2026`, `May 2026`, and `Apr 2026`, muted title color `rgb(102, 102, 102)`, 16 conversation items, and first item `border-bottom-width: 0px`.
+- Banana Loop result:
+  - fixed: conversation list no longer relies on thin row dividers for scanning and now has month-level anchors.
+  - triaged: no new follow-up banana introduced; existing chunk-size warning remains known.
+- safe to resume: yes
+
+## 2026-07-06 Card Corner Fill Correction
+
+- Latest request handled: user flagged white-looking corner artifacts on the credit card artwork in Card Detail, caused by the SVG card art not covering the rounded slot cleanly.
+- Runtime changes:
+  - `src/app/components/cards/Card.tsx` now uses the outer card container as the single clipping mask, removes the internal SVG `clipPath`, gives the container the card background/gradient, and sets the SVG to `preserveAspectRatio="none"` so non-64:40 runtime slots such as `219x138` are fully filled.
+  - This applies globally anywhere the shared `Card` component renders: Card Detail, Card Component, Design System specimens, and Flow Library previews.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - In-app browser smoke on `screen=card-detail&card=card-credit-1` confirmed the active `mc-credit-partner-standard` card has `preserveAspectRatio="none"`, `clipPath=0`, `clippedGroups=0`, container gradient background, `overflow:hidden`, and `borderRadius=5.67px`.
+  - In-app browser smoke on Design System `#cards` confirmed the `Card Component` `219x138` credit-card specimen has `preserveAspectRatio="none"`, `clipPath=0`, `clippedGroups=0`, `slotBorder=0px`, and the expected gradient background.
+  - `npm run audit:templates` passed: `template-contract ok: templates=50 codePreviews=50 components=80 screens=28 flows=15`.
+  - `npm run audit:platform` passed: `reference-platform audit ok products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Banana Loop result:
+  - fixed: scaled card slots no longer rely on two separate rounded masks or aspect-ratio-preserving SVG letterboxing.
+  - triaged: existing Vite chunk-size warnings remain known and unrelated.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-06 Credit Card Display Balance Correlation
+
+- Latest request handled: user flagged that the Home credit-card row showed `0 .00 CZK` while Card Detail showed a real `Free To Spend` amount; this needed a global data fix, not a CZ/Future-only visual patch.
+- Runtime changes:
+  - `src/data/products.ts` now gives the static credit-card fallback complete card fields plus a real `availableCredit` / `creditLimit` pair in CZK, and static debit cards now carry explicit card metadata.
+  - `src/hooks/useProducts.tsx` now treats credit-card `availableCredit` as the product display balance, converts `availableCredit` and `creditLimit` into the active country currency, and uses the same display amount for product-row formatting and card-category totals.
+  - Debit and meal cards still mirror their linked current account balance.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - In-app browser smoke on CZ Future Home confirmed the Cards section shows `Credit Card ... 3 200 .00 CZK`, followed by the two debit cards, and no `0 .00 CZK` remains in that card section.
+  - In-app browser smoke on `screen=card-detail&card=card-credit-1` confirmed `Free To Spend` renders `3 200,00 CZK`, matching the Home credit-card value.
+  - `npm run audit:templates` passed: `template-contract ok: templates=50 codePreviews=50 components=80 screens=28 flows=15`.
+  - `npm run audit:platform` passed: `reference-platform audit ok products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Banana Loop result:
+  - fixed: Home and Card Detail now derive credit-card display value from the same available-credit source.
+  - triaged: dedicated credit-card business logic for used/available/limit remains a later product task, as requested by the user.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-06 Card Component Asset Cleanup And Second Debit Card
+
+- Latest request handled: user flagged visible card outline/radius mismatch, asked for `Card Component` to use the shared `Card` component artwork instead of the old card image, asked for the old card image to disappear from code, and asked to add one more debit card globally.
+- Runtime changes:
+  - `src/app/components/cards/Card.tsx` now clips card artwork with the source 4px corner radius, aligning the SVG clip with the component radius contract.
+  - `src/app/screens/cards/CardDetailScreen.tsx` removed the outside card border and maps the second generated/static debit card to `mc-debit-standard`; the carousel now shows credit first, then `mc-debit-gold`, then `mc-debit-standard`.
+  - `src/app/components/cards/CardComponent.tsx` now renders shared `Card` variants directly and no longer renders `img` card artwork or exposes `imageSrc` for card art.
+  - `src/app/screens/flow-library/FlowLibraryScreen.tsx` now uses the same shared `Card` component for RO Card PIN previews instead of the removed card SVG assets.
+  - `src/app/state/demoStore.tsx` now defaults to two debit cards globally; `src/data/products.ts` adds a static `Debit Card Plus` fallback after the credit card and first debit card.
+  - Removed the old card artwork files `src/assets/design-system/card.svg` and `src/assets/design-system/debit-card-mc-gold.svg`.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - In-app browser smoke on Card Detail confirmed 3 rendered `Card` instances: `mc-credit-partner-standard`, `mc-debit-gold`, and `mc-debit-standard`; parent slot border width is `0px` and Apple Wallet text is absent.
+  - In-app browser smoke on Design System `Card Component` confirmed `imgCountInsideCardComponent=0`, two rendered shared `Card` instances, and slot border width `0px`.
+  - In-app browser smoke on Home confirmed the Cards section shows `Credit Card`, `Debit Card 1`, and `Debit Card 2` in that order.
+- Banana Loop result:
+  - fixed: the card image asset can no longer leak back into Card Component or Flow Library.
+  - fixed: card slots no longer draw the extra outside border that created the visible stroke/radius mismatch.
+  - fixed: default mock product data now includes the extra debit card requested globally.
+  - triaged: existing Vite chunk-size warnings remain known and unrelated.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-06 CZ Chatbot Conversation Search Rail Height
+
+- Latest request handled: user asked to align the conversation-list bottom search rail and adjacent new-conversation plus button with the default new-message composer height so transitions between states do not visually jump.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` sets `.mpc-conversation-search-row` to the same `46px` height and `24px` radius as the default `.mpc-input-row`.
+  - `.mpc-conversation-new-button` now uses a matching `46px` square hitbox, while the normal new-message composer still keeps its growing multi-line behavior.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - In-app browser computed-style check confirmed the conversation search row, new-conversation button, and default new-message composer all resolve to matching `46px` CSS height / `41.98px` scaled rendered height, with the search row and plus button sharing the same vertical center.
+- safe to resume: yes
+
+## 2026-07-06 Global Card Ordering And Detail Artwork
+
+- Latest request handled: user clarified that the credit/debit card ordering and Card Detail artwork change is global across Baseline/Future and all countries, not only the CZ Future Chatbot preview.
+- Runtime changes:
+  - `src/hooks/useProducts.tsx` now generates credit-card products before debit-card products globally, so generated product lists put credit cards first on Home and detail flows.
+  - `src/data/products.ts` now keeps the static mock card fallback in the same credit-before-debit order for direct category consumers.
+  - `src/app/screens/cards/CardDetailScreen.tsx` now renders carousel artwork through the shared Design System `Card` component; credit cards use `mc-credit-partner-standard` and debit cards use `mc-debit-gold`.
+  - Card Detail no longer renders the `Add to Apple wallet` CTA.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - In-app browser smoke on Home confirmed the Cards section renders `Credit Card` before `Debit Card`.
+  - In-app browser smoke on `screen=card-detail&card=card-credit-1` confirmed no Apple Wallet text is present and the first carousel artwork is `data-card-variant="mc-credit-partner-standard"` from Figma node `3039:8064`, followed by the debit card artwork.
+- Banana Loop result:
+  - fixed: credit card ordering no longer depends on the CZ Future preview route.
+  - fixed: Card Detail no longer uses the old generic card artwork for credit cards.
+  - triaged: existing Vite chunk-size warnings remain known and unrelated.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-06 CZ Chatbot Home Glow and Hidden Home Indicator
+
+- Latest request handled: user asked to remove the visible system/home indicator bar under the CZ Chatbot composer while keeping natural bottom spacing, and to add a Gemini-like elegant moving bottom gradient on the assistant Home/new-conversation state.
+- Superseded: the Gemini-like gradient was later removed because the live result made the entire assistant surface look blue instead of clean white. The hidden home-indicator spacing remains.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now adds `mpc-chat-assistant-home-glow` only when the assistant is in the default new-conversation/home state, not in contextual entry states or existing conversations.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` adds a soft animated blue/white bottom gradient behind the Home/new-conversation composer and topic list.
+  - The internal `.mpc-home-indicator` keeps its bottom spacing, but the visible black pill is hidden with `opacity: 0`.
+  - The gradient respects `prefers-reduced-motion` by disabling the animation when reduced motion is requested.
+- Verification:
+  - `npm run build` passed on 2026-07-06; the known Vite `App` chunk-size warning remains.
+  - In-app browser computed-style check on `screen=homepage` confirmed the assistant class is `mpc-chat-assistant mpc-chat-assistant-home-glow`, the `::before` gradient uses `mpcHomeGradientDrift`, composer background is transparent over the glow, and the home-indicator pill remains in layout but has `opacity: 0`.
+- Banana Loop result:
+  - fixed: the black internal system bar is no longer visible under the composer.
+  - fixed: the default assistant Home now has a subtle moving bottom glow without applying it to contextual/detail chat states.
+  - triaged: no new follow-up banana introduced; existing chunk-size warning remains known.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-06 Design System Card Logo Polish
+
+- Latest request handled: user flagged that the new Design System `Card` artwork had an incorrect UniCredit logo and oversized `debit` / `credit` labels under the Mastercard mark.
+- Runtime changes:
+  - `src/app/components/cards/Card.tsx` now reuses the real UniCredit SVG path data from the stakeholder header import (`src/imports/svg-pn3y56bdut.ts`) for the card logo instead of the temporary circle plus Arial text approximation.
+  - Card `debit` / `credit` labels were reduced from `3.6` to `2.55` SVG font size with tighter letter spacing, so they read closer to the Meniga card references.
+- Figma sources inspected:
+  - Logo reference node `3039:8612` (`buddy_logo`) in Meniga Harmonization Icons confirmed the red UniCredit mark and white wordmark path structure.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - In-app browser smoke on `#cards` confirmed the selected `MC Credit Premium Gold` card maps to Figma node `3039:7485`, the logo renders as 12 SVG paths, and the `credit` label renders with `font-size="2.55"` and `letter-spacing="0.18"`.
+- Banana Loop result:
+  - fixed: Card no longer approximates the UniCredit logo with custom text.
+  - fixed: Card debit/credit labels are no longer visually oversized versus the Mastercard mark.
+- safe to resume: yes
+
+## 2026-07-06 CZ Chatbot Composer Alignment and Scroll Button Offset
+
+- Latest request handled: user flagged that the composer add/mic/send controls were not vertically aligned in the default composer state, and that the `Scroll to latest message` button could overlap the contextual suggestion chips.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` now gives the composer row balanced vertical padding and centers the add, microphone, and send/voice controls with explicit grid centering and zero native button padding.
+  - The microphone button now uses the same `32px` hitbox as the add/send controls while keeping a `16px` icon, so the default composer controls share the same visual axis.
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` adds a modifier class to the scroll-to-bottom button whenever follow-up suggestions are active.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` raises the scroll-to-bottom offset from the default `118px` to `168px` in the follow-up state, placing it above the suggestion shelf instead of on top of it.
+- Verification:
+  - `npm run build` passed on 2026-07-06; the known Vite `App` chunk-size warning remains.
+  - In-app browser computed-style check confirmed the default composer add/mic/send controls all render as `display: grid`, `padding: 0`, with matching `32px` CSS hitboxes and less than `1px` center delta from the composer row center.
+  - In-app browser computed-style check with a multi-line composer confirmed the textarea grows while all three controls keep the same bottom gap inside the composer row.
+- Banana Loop result:
+  - fixed: default composer icon alignment no longer depends on native button padding or mismatched mic hitbox size.
+  - fixed: scroll-to-bottom now has a separate follow-up-aware offset.
+  - triaged: no new follow-up banana introduced; existing chunk-size warning remains known.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-06 Design System Card Variants
+
+- Latest request handled: user asked to rename the Design System `Debit Card` component to `Card` and enrich it with additional Mastercard card variants from Meniga Harmonization Icons Figma nodes.
+- Runtime changes:
+  - `src/app/components/cards/Card.tsx` now owns the payment-card artwork family with a `CARD_VARIANTS` registry and selector-ready variants: MC Debit Gold, MC Credit Premium Gold, MC Credit Partner Standard, MC Debit Standard, MC Virtual Standard Electric Violet, and MC Virtual Standard Vibrant Orange.
+  - `src/app/screens/design-system/DesignSystemPage.tsx` now exposes these variants under the existing `Card` specimen; the separate visible `Debit Card` specimen was removed.
+  - `src/app/components/cards/DebitCard.tsx` remains as a compatibility alias for older imports, while `cards.card` is the official component registry entry.
+  - `src/app/registry/componentRegistry.ts`, `src/app/state/demoTypes.ts`, `docs/design-system/component-implementation-handoff/components-handoff.md`, `docs/handoff/state-of-the-world.md`, and `docs/platform-capability-map/README.md` were updated for the new Card family mapping.
+- Figma sources inspected:
+  - Existing small card source `3039:30713`.
+  - New requested nodes `3039:7485`, `3039:8064`, `4161:9198`, `3039:12315`, and `3039:12380`.
+  - Figma screenshots were sampled for the core palettes: credit red/gold, credit red, debit white/red, electric violet, and vibrant orange.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - In-app browser smoke passed at `http://127.0.0.1:3001/?product=PI&country=CZ&scenario=active&ds=current&release=release-future-cz-coapping&bank=retail-single-account&theme=light&lang=en&screen=design-system#cards`: the visible specimen is `Card`, no separate `Debit Card` specimen is exposed, `#card-variant-select` has 6 options, and selecting `MC Virtual Standard Vibrant Orange` renders 3 card sizes mapped to Figma node `3039:12380`.
+  - `npm run audit:templates` passed: `template-contract ok: templates=50 codePreviews=50 components=80 screens=28 flows=15`.
+  - `npm run audit:platform` passed: `reference-platform audit ok products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed for touched runtime/docs files; Git reported only existing LF-to-CRLF normalization warnings.
+- Banana Loop result:
+  - fixed: Design System no longer exposes a `Debit Card` component name for the card artwork family.
+  - fixed: the Card dropdown is no longer single-value and now includes the requested debit, credit, and virtual variants.
+  - triaged: no new follow-up banana introduced; existing Vite chunk warnings remain known.
+- safe to resume: yes
+
+## 2026-07-06 CZ Chatbot Personalized Context Titles
+
+- Latest request handled: user asked for contextual CZ Chatbot entry copy to address the user by name, using `Teodora`, and to make the section prompts shorter and smarter than generic `How can I help you with this account?` copy.
+- Runtime changes:
+  - `src/app/App.tsx` now centralizes the CZ Chatbot demo user name in `CZ_CHAT_USER_NAME`.
+  - Contextual Level 2/3 assistant entry titles now use `Teodora, ...` phrasing for Documents, Account Detail, Card Detail, Payments, Investments, Messages, Prime, Settings, Contacts, and the fallback context.
+  - Example account entry copy is now `Teodora, what should we check on this account?`; card and investment entries use similarly short contextual prompts.
+- Verification:
+  - Source check confirmed all contextual titles pass through `buildCzChatTitle(...)` and no old generic `How can I help you with ...` / `How can I help on this screen ...` copy remains in `src/app/App.tsx`.
+  - `npm run build` passed on 2026-07-06; the known Vite `App` chunk-size warning remains.
+- Banana Loop result:
+  - fixed: contextual chatbot openings no longer feel anonymous on deeper app screens.
+  - triaged: no new follow-up banana introduced; existing chunk-size warning remains known.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-06 CZ Chatbot Conversation Drawer Controls
+
+- Latest request handled: user asked to move the conversation-list `Start new conversation` action from the top-right header into the bottom search rail, replace the list top-right action with an X that closes the assistant, and keep the new-conversation/contextual header aligned with `Open conversations` on the left and `Close assistant` on the right.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now uses a dedicated `openConversationList()` handler so the left header control opens the conversation drawer from new/discovery/contextual entry states.
+  - Conversation-list header now keeps `Back to new conversation` on the left and uses `Close assistant` on the right; `Start new conversation` moved into the bottom search composer as an icon-only button beside a slightly narrower search rail.
+  - The conversation drawer animation now opens and closes from the left (`translateX(-36px)` / `translateX(-30px)`) so its motion matches the new left-side `Open conversations` trigger.
+  - Starting a new conversation from the moved bottom icon also clears the conversation search query.
+- Verification:
+  - `npm run build` passed twice on 2026-07-06; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - In-app browser smoke confirmed the new-chat header exposes `Open conversations` on the left and `Close assistant` on the right, with no browser console errors.
+  - In-app browser smoke opened the conversation list and confirmed the header exposes `Back to new conversation` plus `Close assistant`, the bottom rail contains `.mpc-conversation-search-actions`, the search row is narrowed to make room for `Start new conversation`, and no old floating `New+` button remains.
+  - In-app browser smoke clicked the moved bottom `Start new conversation` button and confirmed the assistant returned to the new-conversation greeting with `Open conversations` / `Close assistant` header controls.
+  - CSS/source check confirmed `mpcConversationDrawerIn` now starts at `translateX(-36px)` and `mpcConversationDrawerOut` exits to `translateX(-30px)`.
+  - Production deploy was published with `npx vercel deploy --prod --yes`: deployment `dpl_6qwASFsympHox8AJZz1twjRgTMVG`, production URL `https://mobile-banking-7b9cnpyv1-imc-uci.vercel.app`, alias `https://mobile-banking-cee.vercel.app`, Vercel status `Ready`.
+  - Post-deploy quick check confirmed `https://mobile-banking-cee.vercel.app/` returns HTTP `200`; `vercel inspect` confirmed target `production`, status `Ready`, and the remote build produced `assets/App-DmkHPm9A.js` at `516.06 kB`.
+- Banana Loop result:
+  - fixed: the top-right plus no longer conflicts with close semantics; conversation creation now lives near search where the user requested it.
+  - fixed: the drawer direction now follows the moved left-side trigger.
+  - triaged: existing Vite chunk warnings remain in `known-bananas.md`.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-06 Phone Chrome Status Bar Alignment
+
+- Latest request handled: user asked to fix the global top phone system bar because the time/network/battery cluster looked vertically too low versus the Dynamic Island notch, and to make the notch slightly less tall.
+- Runtime changes:
+  - `src/app/components/StatusBar.tsx` removes the small internal top padding on the time and levels clusters and shifts the shared status bar row upward by reducing top padding from `21px` to `14px`.
+  - `src/app/components/DynamicIsland.tsx` reduces the notch from `110x30` to `106x28`, moves it to `top: 11px`, and scales the two internal sensor dots from `6px` to `5.5px`.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - In-app browser computed-style smoke on CZ Future Home confirmed the time cluster, right-side levels cluster, and Dynamic Island all center at `22.8px` relative to the phone screen top after scaling.
+- Banana Loop result:
+  - fixed: phone system chrome is now vertically aligned around the notch center instead of visually sitting low.
+  - triaged: no new follow-up banana introduced; existing Vite chunk warnings remain known.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
 ## 2026-07-06 CZ Chatbot Edge Overlay and Portal Animation
 
 - Latest request handled: user asked to keep the CZ Chatbot right-edge launcher visible/accessibility-safe at `32px`, lower it further on the phone edge, remove the white seam/clipping line, keep the rest of the screen clickable, and make opening/closing feel like the chat expands from and collapses back into that edge tab.
@@ -98,13 +448,26 @@ Last updated: 2026-07-06
   - Generated investment replies now support a Poly-like guided path: start goal -> goal type -> horizon -> starting amount -> monthly amount -> model allocation -> projection/review.
   - Existing mocked conversations are enriched too, especially `Investment advice for my savings`, card security, and subscription discovery.
   - `src/app/App.tsx` wires rich-card navigation actions so `Open Investments`, `Open History`, `Open Spending`, and `Open card details` route to the relevant app screens instead of acting as decorative CTAs.
+  - Follow-up polish keeps the phone's existing `StatusBar` / `DynamicIsland` chrome above the CZ Chatbot overlay instead of drawing a duplicate in the chat package.
+  - Follow-up suggestions are horizontally scrollable/draggable above the composer with more bottom breathing room, and rich product cards no longer render placeholder image/art strips.
+  - Follow-up chip taps are protected from the custom drag-scroll handler, so a normal tap on `Start an investment goal` triggers the guided reply instead of being treated as a shelf drag.
+  - Composer input is now an auto-growing textarea: it starts as a compact one-line composer, grows with wrapped or multi-line text up to five visible rows, then scrolls internally while the attachment, mic, and send controls stay bottom-aligned.
+  - Discovery feed polish removed the overlapping `Investments` pill from the hero image and aligned the Discovery hero plus `Recommended next` cards to an 8px radius.
 - Verification:
-  - `npm run build` passed on 2026-07-06; Vite still emits the known empty `react-vendor` warning and now reports `assets/App-BRpVrgvN.js` at `512.73 kB`, so the chunk-size warning remains a known performance banana.
+  - `npm run build` passed on 2026-07-06; Vite still emits the known empty `react-vendor` warning and now reports the `App` chunk at `515.95 kB`, so the chunk-size warning remains a known performance banana.
+  - Follow-up tap regression build also passed on 2026-07-06; Vite still emits the known empty `react-vendor` warning and reports `assets/App-DRGM5jmK.js` at `516.00 kB`.
   - Local dev server on `http://127.0.0.1:3001/` returned HTTP 200.
   - In-app browser smoke opened CZ Future Chatbot on Home, clicked `Help me plan my savings`, and confirmed a formatted `Savings planning` reply, one investment rich card, and follow-up chips `Start an investment goal`, `Review my portfolio`, and `Learn how it works` above the composer.
   - In-app browser smoke clicked `Start an investment goal` and confirmed the next contextual chips changed to `Grow my savings`, `Future purchase`, and `Long-term reserve`.
   - In-app browser smoke clicked a `Portfolio` rich card CTA and confirmed the URL changed to `screen=investments` while the assistant remained open.
+  - Follow-up in-app browser smoke on `screen=investments` clicked `Review portfolio context` and confirmed `.mpc-follow-up-shelf` can scroll (`scrollWidth=458`, `clientWidth=343`, `overflow-x: auto`, `touch-action: pan-x`, `padding-bottom: 14px`), investment product cards have no `.mpc-product-card-art`, and the real phone chrome stays above the overlay (`StatusBar z=50`, `DynamicIsland z=45`, chat overlay z=43).
+  - Follow-up in-app browser smoke filled the composer with a long message and confirmed the input is now a `TEXTAREA`, grows to the five-row cap (`height=122px`, `max-height=122px`), switches to internal scrolling (`scrollHeight=166`, `overflow-y: auto`), and keeps plus/send bottom-aligned (`bottomDelta=0`).
+  - Quick in-app browser smoke after final polish confirmed follow-up chips have no drop shadow (`box-shadow: none`), the first mode-segment icon is now the chat bubble instead of search, investment product cards render without action captions (`PortfolioValue, performance, allocation` / `HistoryOrders and confirmations`, `smallCount=0`), and browser console errors were empty.
   - Browser console error log after the smoke was empty.
+  - Regression smoke after the follow-up tap fix clicked `Help me plan my savings`, confirmed chips `Start an investment goal`, `Review my portfolio`, and `Learn how it works`, clicked `Start an investment goal`, and confirmed the next chips changed to `Grow my savings`, `Future purchase`, and `Long-term reserve`; browser console errors were empty.
+  - Latest production deploy was published with `npx vercel deploy --prod --yes`: deployment `dpl_2VmVegfLWXffrvogeVcxv6gtuxQf`, production URL `https://mobile-banking-n0x0l7ph1-imc-uci.vercel.app`, alias `https://mobile-banking-cee.vercel.app`, Vercel status `Ready`.
+  - Post-deploy quick check confirmed `https://mobile-banking-cee.vercel.app/` returns HTTP `200`; `vercel inspect` confirmed target `production`, status `Ready`, and the remote build produced `assets/App-B8BTVFce.js` at `516.00 kB`.
+  - The Discovery 8px-radius micro-fix and follow-up chip tap regression fix are included in this latest production deploy.
 - Banana Loop result:
   - fixed: investment/card/spending replies no longer rely only on flat formatted text; they can now carry product-like interactive surfaces and contextual next steps.
   - triaged: rich-card content is still mock/demo data and not financial advice or backend execution.
@@ -2960,13 +3323,11 @@ Latest code-derived Figma JSON export:
 
 Previous Figma-extracted Design System component:
 
-- `src/assets/design-system/card.svg`
-  - generated from the attached `codex-figma-component-spec/v1` JSON root asset `root-card-svg-27`
-  - preserves the Figma component's `64x40` SVG export with mask, 4px corner radius, bitmap artwork, top overlay, and logo
+- The original `src/assets/design-system/card.svg` bitmap-style card asset was removed after the Meniga-mapped React `Card` component became the canonical source for card artwork.
 - `src/app/components/cards/Card.tsx`
-  - adds a reusable `Card` React component that imports the SVG as a design asset instead of embedding a large SVG blob in TSX
+  - owns the reusable Meniga-mapped `Card` React component and renders its card artwork inline from the variant registry instead of importing a card image asset
   - exposes controlled `figma`, `medium`, and `large` size variants
-  - stores the source schema, Figma component name, source node `0:9261`, dimensions, and corner radius in `CARD_SOURCE`
+  - stores the source schema, Figma component name, Meniga node ids, dimensions, and corner radius in `CARD_SOURCE`
 - Design System / registry wiring:
   - `src/app/screens/design-system/DesignSystemPage.tsx` now shows a `Card` specimen in `#cards` with `64x40`, `96x60`, and `160x100` previews
   - `src/app/state/demoTypes.ts` and `src/app/registry/componentRegistry.ts` register `cards.card` for AI/catalog reuse

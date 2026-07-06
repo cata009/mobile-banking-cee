@@ -34,13 +34,12 @@ import ProductAccordion from "@/app/components/ProductAccordion";
 import ProductAccordionAnimated from "@/app/components/ProductAccordionAnimated";
 import AccordionSection from "@/app/components/AccordionSection";
 import ProductCard, { PRODUCT_CARD_EVOLUTION_SOURCE } from "@/app/components/ProductCard";
-import FigmaCard, { CARD_SOURCE, type CardSize } from "@/app/components/cards/Card";
+import FigmaCard, { CARD_SOURCE, CARD_VARIANTS, type CardSize, type CardVariant } from "@/app/components/cards/Card";
 import GhostBanner, { GHOST_BANNER_SOURCE } from "@/app/components/cards/GhostBanner";
 import InfoBanner, { INFO_BANNER_SOURCE } from "@/app/components/cards/InfoBanner";
 import UserEventCard, { USER_EVENT_CARD_SOURCE } from "@/app/components/cards/UserEventCard";
 import HelperCard, { HELPER_CARD_SOURCE } from "@/app/components/cards/HelperCard";
 import PendingActionCard, { PENDING_ACTION_CARD_SOURCE } from "@/app/components/cards/PendingActionCard";
-import DebitCard, { DEBIT_CARD_SOURCE, DEBIT_CARD_VARIANTS, type DebitCardSize, type DebitCardVariant } from "@/app/components/cards/DebitCard";
 import CardComponent, { CARD_COMPONENT_SOURCE } from "@/app/components/cards/CardComponent";
 import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
@@ -117,7 +116,7 @@ const activeComponentFiles = [
   "AccordionSection", "AppIcon", "BottomNavigation", "CoAppingSessionScreen", "DynamicIsland", "EdgeLoadingAnimation",
   "FloatingCoAppingButton", "LanguageSelector", "LogoutConfirmDialog", "MobileFrame", "PageHeader", "SectionHeadingDivider",
   "PanelOverlay", "PanelWithTranslations", "PanelWithoutCoAppingTranslations", "PreLoginActiveScreen",
-  "PreLoginScreen", "PrimaryButton", "ProductAccordion", "ProductAccordionAnimated", "ProductCard", "Card", "GhostBanner", "InfoBanner", "UserEventCard", "HelperCard", "PendingActionCard", "DebitCard", "CardComponent",
+  "PreLoginScreen", "PrimaryButton", "ProductAccordion", "ProductAccordionAnimated", "ProductCard", "Card", "GhostBanner", "InfoBanner", "UserEventCard", "HelperCard", "PendingActionCard", "CardComponent",
   "ProductMenuCard", "ProductsList", "StatusBar", "TerminateSessionPopup", "TextField", "AmountField", "CodeField", "NavigationRow", "ToggleButton", "TotalRow", "UniCreditLogo", "PaymentHeroCard",
   "ProfileAvatar",
   "AccountBalanceCard", "AccountActionBar", "AccountCarouselIndicator", "AccountDetailsInfoField", "AccountSearchBar", "AccountTransactionRow", "AccountTransactionMonthDivider",
@@ -810,18 +809,33 @@ function VariantSelector({
 }
 
 function CardVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState<CardVariant>("mc-debit-gold");
   const sizes: readonly { id: CardSize; label: string }[] = [
     { id: "figma", label: "64x40" },
     { id: "medium", label: "96x60" },
     { id: "large", label: "160x100" },
   ];
+  const variantOptions = Object.entries(CARD_VARIANTS).map(([id, art]) => ({
+    id,
+    label: `${art.label} (${art.network})`,
+  }));
 
   return (
     <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="card-variant-select"
+        value={selectedVariant}
+        onChange={(value) => setSelectedVariant(value as CardVariant)}
+        options={variantOptions}
+      />
       <div className="flex flex-wrap items-end gap-6">
         {sizes.map((size) => (
           <div key={size.id} className="flex flex-col gap-2">
-            <FigmaCard ariaLabel={`Card ${size.label}`} size={size.id} />
+            <FigmaCard
+              ariaLabel={`${CARD_VARIANTS[selectedVariant].label} ${size.label}`}
+              size={size.id}
+              variant={selectedVariant}
+            />
             <p className="font-['UniCredit:Regular',sans-serif] text-[12px] text-[var(--uc-text-muted)]">
               {size.label}
             </p>
@@ -945,38 +959,6 @@ function UserEventCardVariantSpecimen() {
           onActionClick={() => undefined}
           onOptionsClick={() => undefined}
         />
-      </div>
-    </div>
-  );
-}
-
-function DebitCardVariantSpecimen() {
-  const [selectedVariant, setSelectedVariant] = useState<DebitCardVariant>("mc-debit-gold");
-  const sizes: readonly { id: DebitCardSize; label: string }[] = [
-    { id: "figma", label: "64x40" },
-    { id: "medium", label: "96x60" },
-    { id: "large", label: "160x100" },
-  ];
-  const variantOptions = Object.entries(DEBIT_CARD_VARIANTS).map(([id, art]) => ({
-    id,
-    label: `${art.label} (${art.network})`,
-  }));
-
-  return (
-    <div className="flex flex-col gap-4">
-      <VariantSelector
-        id="debit-card-variant-select"
-        value={selectedVariant}
-        onChange={(value) => setSelectedVariant(value as DebitCardVariant)}
-        options={variantOptions}
-      />
-      <div className="flex flex-wrap items-end gap-6">
-        {sizes.map((size) => (
-          <div key={size.id} className="flex flex-col gap-2">
-            <DebitCard ariaLabel={`${DEBIT_CARD_VARIANTS[selectedVariant].label} ${size.label}`} variant={selectedVariant} size={size.id} />
-            <p className="font-['UniCredit:Regular',sans-serif] text-[12px] text-[var(--uc-text-muted)]">{size.label}</p>
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -4181,7 +4163,12 @@ export default function DesignSystemPage() {
 
           <Section id="cards" title="Cards and content blocks" description="Active cards, contact cards, banners, lists, and reusable content blocks.">
             <div className="grid gap-5">
-              <Specimen name="Card" source="components/cards/Card.tsx" note={`${CARD_SOURCE.schema} / ${CARD_SOURCE.sourceNodeId}`} specs={["64x40 Figma base", "4px corner radius", "SVG artwork asset", "controlled figma / medium / large sizing"]}>
+              <Specimen
+                name="Card"
+                source="components/cards/Card.tsx"
+                note={`${CARD_SOURCE.schema} / ${Object.values(CARD_SOURCE.sourceNodeIds).join(" · ")}`}
+                specs={["64x40 Figma base", "8:5 aspect ratio", "dropdown variant selector", "6 Mastercard debit/credit/virtual variants", "duplicated card structure with Figma-sampled color palettes", "controlled figma / medium / large sizing", "decorative by default / ariaLabel exposes as image"]}
+              >
                 <CardVariantSpecimen />
               </Specimen>
               <Specimen name="Products offer card" source="components/products/ProductOfferCard.tsx" specs={["327x157", "dropdown variant selector", "16px text-to-image gutter", "100px image column", "title 22px bold / 2 lines", "subtitle 18px regular / 3 lines", "family + light/normal tones"]}>
@@ -4219,10 +4206,7 @@ export default function DesignSystemPage() {
               <Specimen name="Pending Action Card" source="components/cards/PendingActionCard.tsx" note={`${PENDING_ACTION_CARD_SOURCE.schema} / ${PENDING_ACTION_CARD_SOURCE.sourceNodeId}`} tone="gray" specs={["327x157 Figma base", "teal gradient 90deg #007A91 to #44909E", "8px radius", "padding 24px", "title 24px bold white", "title-to-body gap 8px", "body 18px regular white", "optional white tag pill", "tag warning-small glyph teal", "tag label 12px bold uppercase teal", "renders as button when onClick is set"]}>
                 <PendingActionCardVariantSpecimen />
               </Specimen>
-              <Specimen name="Debit Card" source="components/cards/DebitCard.tsx" note={`${DEBIT_CARD_SOURCE.schema} / ${DEBIT_CARD_SOURCE.sourceNodeId}`} specs={["64x40 Figma base", "8:5 aspect ratio", "SVG artwork asset", "variant registry (mc-debit-gold)", "Mastercard symbol + UniCredit + contactless marks", "controlled figma / medium / large sizing", "decorative by default / ariaLabel exposes as image"]}>
-                <DebitCardVariantSpecimen />
-              </Specimen>
-              <Specimen name="Card Component" source="components/cards/CardComponent.tsx" note={`${CARD_COMPONENT_SOURCE.schema} / ${CARD_COMPONENT_SOURCE.sourceNodeId}`} tone="gray" specs={["375-wide Figma base", "Primary/K7 (#F5F5F5) background", "vertical gap 12px / clips content", "Frame 46: 24px left padding / 8px gap", "card-holder 14px bold N5 / K1", "card-number 18px bold L2 / K1", "carousel 351x140 / horizontal gap 24px", "card slot 219x138 / 5.67px radius", "K6 (#E5E5E5) 1px outside border", "drop-shadow 0 11.265px 11.265px rgba(0,0,0,0.2)", "accepts cardHolderName / cardNumber / cards array"]}>
+              <Specimen name="Card Component" source="components/cards/CardComponent.tsx" note={`${CARD_COMPONENT_SOURCE.schema} / ${CARD_COMPONENT_SOURCE.sourceNodeId}`} tone="gray" specs={["375-wide Figma base", "Primary/K7 (#F5F5F5) background", "vertical gap 12px / clips content", "Frame 46: 24px left padding / 8px gap", "card-holder 14px bold N5 / K1", "card-number 18px bold L2 / K1", "carousel 351x140 / horizontal gap 24px", "card slot 219x138 / 5.67px radius", "renders shared Card variants", "no outside border / no card image asset", "drop-shadow 0 11.265px 11.265px rgba(0,0,0,0.2)"]}>
                 <div className="w-[375px]">
                   <CardComponent />
                 </div>

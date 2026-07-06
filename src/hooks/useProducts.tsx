@@ -46,16 +46,6 @@ const PRODUCT_COUNT_DEFINITIONS: ProductCountDefinition[] = [
     accountSeed: "1234567890123456",
   },
   {
-    key: "debitCards",
-    categoryKey: "cards",
-    targetType: "debit_card",
-    sourceTypes: ["debit_card"],
-    fallbackType: "debit_card",
-    title: "Debit Card",
-    idPrefix: "card-debit",
-    accountSeed: "5173400012345678",
-  },
-  {
     key: "creditCards",
     categoryKey: "cards",
     targetType: "credit_card",
@@ -64,6 +54,16 @@ const PRODUCT_COUNT_DEFINITIONS: ProductCountDefinition[] = [
     title: "Credit Card",
     idPrefix: "card-credit",
     accountSeed: "5173500087654321",
+  },
+  {
+    key: "debitCards",
+    categoryKey: "cards",
+    targetType: "debit_card",
+    sourceTypes: ["debit_card"],
+    fallbackType: "debit_card",
+    title: "Debit Card",
+    idPrefix: "card-debit",
+    accountSeed: "5173400012345678",
   },
   {
     key: "mealCards",
@@ -127,6 +127,8 @@ const PRODUCT_COUNT_DEFINITIONS: ProductCountDefinition[] = [
   },
 ];
 
+const CURRENT_ACCOUNT_BALANCE_FACTORS = [1, 0.72, 1.28, 0.54, 1.62];
+
 function replaceTailDigits(seed: string, index: number): string {
   const suffix = String(index + 1).padStart(2, "0");
   return `${seed.slice(0, -2)}${suffix}`;
@@ -144,6 +146,11 @@ function sourceForDefinition(definition: ProductCountDefinition, allProducts: Pr
   );
 }
 
+function indexedCurrentAccountBalance(baseBalance: number, index: number): number {
+  const factor = CURRENT_ACCOUNT_BALANCE_FACTORS[index] ?? Math.max(0.35, 1 - index * 0.13);
+  return roundMoney(baseBalance * factor);
+}
+
 function cloneProductForCount(
   definition: ProductCountDefinition,
   allProducts: Product[],
@@ -151,6 +158,7 @@ function cloneProductForCount(
   index: number,
 ): Product {
   const source = sourceForDefinition(definition, allProducts);
+  const sourceCreditCard = source.type === "credit_card" ? source : undefined;
   const accountNumber = replaceTailDigits(definition.accountSeed, index);
   const id = `${definition.idPrefix}-${index + 1}`;
   const baseProduct = {
@@ -166,7 +174,7 @@ function cloneProductForCount(
     case "meal_card":
       return {
         ...baseProduct,
-        linkedAccountId: "acc-1",
+        linkedAccountId: `acc-${index + 1}`,
         cardType: "Standard",
         cardNumber: accountNumber,
         expiryDate: "12/29",
@@ -178,11 +186,16 @@ function cloneProductForCount(
         cardType: "Standard",
         cardNumber: accountNumber,
         expiryDate: "12/29",
-        creditLimit: 5000,
-        availableCredit: 3200,
-        balance: 0,
+        creditLimit: sourceCreditCard?.creditLimit ?? 5000,
+        availableCredit: sourceCreditCard?.availableCredit ?? 3200,
+        balance: sourceCreditCard?.availableCredit ?? 3200,
       } as Product;
     case "current_account":
+      return {
+        ...baseProduct,
+        balance: indexedCurrentAccountBalance(baseProduct.balance, index),
+        iban: accountNumber,
+      } as Product;
     case "saving_account":
       return {
         ...baseProduct,
@@ -217,6 +230,10 @@ function cloneProductForCount(
   }
 }
 
+function getDisplayBalance(product: Product): number {
+  return product.type === "credit_card" ? product.availableCredit : product.balance;
+}
+
 function applyProductCounts(categories: ProductCategory[], productCounts: ProductCounts): ProductCategory[] {
   const allProducts = categories.flatMap((category) => category.products);
 
@@ -248,9 +265,11 @@ function applyProductCounts(categories: ProductCategory[], productCounts: Produc
 export function useProducts() {
   const { country, productCounts } = useProductData();
   const localCurrency = getCountryCurrency(country);
+  const countedCategories = applyProductCounts(getProductsByCategory(), productCounts);
+  const countedProducts = countedCategories.flatMap(category => category.products);
   
   // Get base categories and convert all products to local currency
-  const categories = applyProductCounts(getProductsByCategory(), productCounts).map(category => ({
+  const categories = countedCategories.map(category => ({
     ...category,
     products: category.products.map(product => {
       const isCard = product.type === 'debit_card' || product.type === 'credit_card' || product.type === 'meal_card';
@@ -260,16 +279,33 @@ export function useProducts() {
 
       // Debit cards mirror the balance of their linked current account
       const linkedAccount = product.type === 'debit_card' || product.type === 'meal_card'
-        ? mockProducts.find(p => p.id === product.linkedAccountId)
+        ? countedProducts.find(p => p.id === product.linkedAccountId) ??
+          countedProducts.find(p => p.type === 'current_account') ??
+          mockProducts.find(p => p.id === product.linkedAccountId)
         : undefined;
       const sourceBalance = linkedAccount ? linkedAccount.balance : product.balance;
       const sourceCurrency = linkedAccount ? linkedAccount.currency : product.currency;
+      const convertedBalance = roundMoney(convertCurrency(sourceBalance, sourceCurrency, localCurrency));
+
+      if (product.type === "credit_card") {
+        const availableCredit = roundMoney(convertCurrency(product.availableCredit, sourceCurrency, localCurrency));
+        const creditLimit = roundMoney(convertCurrency(product.creditLimit, sourceCurrency, localCurrency));
+
+        return {
+          ...product,
+          accountNumber: formattedAccountNumber,
+          balance: availableCredit,
+          availableCredit,
+          creditLimit,
+          currency: localCurrency
+        };
+      }
 
       return {
         ...product,
         accountNumber: formattedAccountNumber,
         // Convert balance to local currency
-        balance: roundMoney(convertCurrency(sourceBalance, sourceCurrency, localCurrency)),
+        balance: convertedBalance,
         // Update currency to local
         currency: localCurrency
       };
@@ -335,7 +371,7 @@ export function useProducts() {
   };
 
   const formatProductAmount = (product: Product) => {
-    return formatAmount(product.balance, product.currency);
+    return formatAmount(getDisplayBalance(product), product.currency);
   };
 
   const getProductDisplayNumber = (product: Product): string => {
@@ -353,7 +389,7 @@ export function useProducts() {
   } => {
     // Sum all products (all already converted to local currency)
     const total = products.reduce((sum, product) => {
-      return sum + product.balance;
+      return sum + getDisplayBalance(product);
     }, 0);
 
     return formatAmount(total, localCurrency);
