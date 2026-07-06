@@ -28,6 +28,7 @@ interface AccountDetailScreenProps {
   onDetailsClick: (product: Product) => void;
   onOptionsClick: () => void;
   onTransactionClick?: (transaction: AccountTransaction, product: Product) => void;
+  onHelpClick?: () => void;
 }
 
 const ACCOUNT_CARD_WIDTH = 311;
@@ -69,10 +70,12 @@ function CollapsingAccountHeader({
   title,
   progress,
   onBack,
+  onHelpClick,
 }: {
   title: string;
   progress: number;
   onBack: () => void;
+  onHelpClick?: () => void;
 }) {
   return (
     <div className="sticky top-0 z-30 bg-[var(--uc-app-bg)] pt-[var(--uc-phone-top-reserve,54px)]">
@@ -93,7 +96,17 @@ function CollapsingAccountHeader({
         >
           {title}
         </h1>
-        <div className="h-[40px] w-[40px]" />
+        {onHelpClick ? (
+          <button
+            onClick={onHelpClick}
+            className="flex h-[40px] w-[40px] items-center justify-center"
+            aria-label="Help"
+          >
+            <AppIcon name="help-circle" color="var(--uc-text)" />
+          </button>
+        ) : (
+          <div className="h-[40px] w-[40px]" />
+        )}
       </div>
     </div>
   );
@@ -105,6 +118,7 @@ export default function AccountDetailScreen({
   onDetailsClick,
   onOptionsClick,
   onTransactionClick,
+  onHelpClick,
 }: AccountDetailScreenProps) {
   const { country, amountsHidden } = useDemo();
   const { t } = useLanguage();
@@ -456,7 +470,7 @@ export default function AccountDetailScreen({
   if (!activeProduct) {
     return (
       <div className="h-full w-full bg-[var(--uc-surface)]">
-        <CollapsingAccountHeader title={t("runtime.accounts.title", "Accounts")} progress={1} onBack={onBack} />
+        <CollapsingAccountHeader title={t("runtime.accounts.title", "Accounts")} progress={1} onBack={onBack} onHelpClick={onHelpClick} />
       </div>
     );
   }
@@ -479,7 +493,7 @@ export default function AccountDetailScreen({
         className="h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] pb-[32px] scrollbar-hide"
         onScroll={handlePageScroll}
       >
-        <CollapsingAccountHeader title={t("runtime.accounts.title", "Accounts")} progress={headerProgress} onBack={onBack} />
+        <CollapsingAccountHeader title={t("runtime.accounts.title", "Accounts")} progress={headerProgress} onBack={onBack} onHelpClick={onHelpClick} />
 
         <div className="bg-[var(--uc-app-bg)]">
         <div

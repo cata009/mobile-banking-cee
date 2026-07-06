@@ -1,6 +1,124 @@
 # Current Session
 
-Last updated: 2026-07-05
+Last updated: 2026-07-06
+
+## 2026-07-06 Stakeholder Header More Menu And Focus Preview
+
+- Latest request handled: user asked to consolidate the top-right stakeholder controls into a `More` menu containing `Settings`, `Screenshots`, and `Light mode`, and to add a Play icon before Share that opens the demo in a large modal-style preview.
+- Runtime changes:
+  - `src/app/components/demo/DemoTopBar.tsx` now keeps the right-side action row focused as `Refresh`, `Open large demo`, `Share`, and `More actions`.
+  - `Settings`, screenshot/JSON export, and the current Light/Dark appearance control now live inside the `More actions` dropdown; screenshot options are exposed through a `Screenshots` submenu and reuse the existing PNG/Figma JSON export implementation.
+  - `src/app/components/demo/DemoShell.tsx` now supports a large focus preview mode triggered by the Play icon. It repositions the existing demo frame into a fixed dialog-like overlay, preserves the active app state, supports close and Escape, and removes the double stakeholder header from the demo viewing area.
+  - `src/app/components/demo/DemoShell.tsx` now also stretches the normal preview body as a real flex column, so `MobileFrame` receives the full available desktop height instead of collapsing to its content height; Account Detail and other Level 2 screens no longer leave a large empty band under the phone and the phone frame scales larger.
+  - `src/app/components/icons/AppIcon.tsx` adds a centralized `play` icon entry so the topbar does not import lucide directly.
+- Verification:
+  - `npm run build` passed on 2026-07-06 after the focus-preview/layout fix; the known empty `react-vendor` chunk warning remains.
+  - In-app browser smoke on `http://127.0.0.1:3001/` confirmed the header buttons expose `Refresh`, `Open large demo`, `Share`, and `More actions`, with no separate Screenshot, Light/Dark, or Settings buttons.
+  - In-app browser smoke confirmed `More actions` opens a menu with `Settings`, `Screenshots`, and `Light mode`; hovering `Screenshots` opens the existing `Capture entire screen`, `Capture visible screen`, `Generate visible JSON`, and `Generate entire screen JSON` actions.
+  - In-app browser smoke confirmed Play opens `[data-demo-focus-mode="true"]` as an aria-modal dialog with a visible close control and the phone demo inside, and Close returns to the normal two-line header layout.
+  - In-app browser geometry check on CZ Account Detail confirmed the preview container now fills the full available area (`795px` tall), the phone screen scales to `741px` tall, and top/bottom gaps are balanced at `27px` instead of leaving the large empty bottom region.
+- safe to resume: yes
+
+## 2026-07-06 CZ Chatbot Header/Floating Actions
+
+- Latest request handled: user asked for the conversation-list open/close transition to feel slower and smoother instead of snapping cheaply.
+- Runtime changes:
+  - Renamed the visible future feature from `CZ Co-Apping Chatbot` to `CZ - Chatbot` in the stakeholder Future dropdown and current registries.
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now treats the conversation-list header as a local chat-history page: left Back returns to the new-conversation home, the center Search/Discovery segment is hidden, and the right-side Close/X is replaced by a spacer.
+  - Discovery/Explore mode now keeps the same top controls as new chat: Back on the left, Search/Discovery toggle centered, and Conversations on the right.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` now positions conversation-list floating actions across the full assistant width: scroll-to-latest/top is centered on the phone, while `New+` stays right-aligned and raised above the search bar.
+  - Chat header controls and composer action buttons were tightened to 32x32 controls with 18px icons, and the composer row was reduced to a 44px minimum height so the phone UI no longer reads oversized.
+  - The conversation-list trigger now uses a cleaner two-line drawer icon, and the conversation list opens with a right-to-left drawer-style transition that respects reduced-motion preferences.
+  - The Search/Discovery segment was tightened further to a compact 112x30 control with 15px icons and a neutral hover treatment, while the drawer transition remains slowed/smoothed, back-to-chat content eases in, and suggested topic rows keep the added vertical spacing.
+  - Agent replies in existing and newly generated CZ chatbot conversations now render with a richer AI-response format: bold section headings, tighter paragraphs, inline emphasis, bullet rows, and numbered steps instead of a flat text block.
+  - The chat scroll-to-latest affordance was raised above the composer so it keeps a visible gap instead of sitting directly on the input rail.
+  - Agent response typography was tuned to 16px headings and 14px minimum body/list text, with neutral gray bullets/number badges and a neutral gray scroll-to-latest affordance instead of teal emphasis.
+  - The conversation `More` menu now matches the attachment menu pattern by adding icons for Share, Rename conversation, and Delete conversation, while keeping Delete in the same neutral text treatment as the rest of the menu.
+  - Conversation-list `New+` was removed from the floating bottom action area and replaced with an icon-only `Start new conversation` control in the top-right header, keeping the bottom area dedicated to search and optional scroll-to-top only.
+  - New outgoing mocked CZ chatbot messages now show a semantic working state before the reply resolves, replacing the generic three-dot typing pill with contextual status copy such as `Checking payment options and account limits...` or `Reviewing savings and investment context...`.
+  - `package/mobile-pi-coapping-chat-package/src/icons.tsx` adds a small sparkle status icon and `package/mobile-pi-coapping-chat-package/src/coapping.css` styles the working state as a neutral 14px inline row with reduced-motion support.
+  - The supplied `export-icon.svg` mark is now implemented as `ExportIcon` with mono/color variants: mono renders white inside the level-1 floating launcher, while the new-conversation empty state uses a non-teal purple/pink/blue/orange gradient variant.
+  - The level-1 floating launcher is a smaller 44px statusless bubble with a proportional 24px white mono `ExportIcon`; the old green online-status dot no longer renders.
+  - The new-conversation assistant screen now centers the color `ExportIcon` above a time-aware greeting for `Teodora`; the greeting uses morning/afternoon/evening copy based on the current browser time.
+  - Default suggested topics now contain six banking prompts, adding savings planning and document search, with matching mocked formatted replies.
+  - New-conversation suggested topics now use one generic document-style icon for every row instead of topic-specific icons; Discovery article icons remain variant-specific.
+  - The empty-state AI mark has a subtle float/glow/sparkle animation and respects reduced-motion preferences; the mark, title, and topics disappear as soon as the user sends the first message.
+  - Conversation detail now uses a continuous white assistant/chat/composer surface, removes the header bottom separator/shadow, and renders user bubbles as neutral gray `#f1f2f2` with no extra shadow.
+  - New-conversation topic rows now render at 16px with 21px line height and an 18px grid gap so the six suggested topics read less cramped.
+  - Newly generated mocked agent replies now stream into the conversation word-by-word at a fast AI-like cadence; feedback controls and the final timestamp appear only after the response finishes composing.
+  - Chat messages now support optional `createdAt` timestamps; generated user/agent messages stamp the current date, mocked history derives dates from conversation subtitles, and rendered labels show `Today HH:mm`, `Yesterday HH:mm`, or `D Mon HH:mm` as appropriate.
+  - New-conversation generic topic icons now use a thinner custom SVG stroke and softer neutral color; composer send, attachment menu, and More-menu action icons were reduced to lighter 16-17px glyphs with neutral 28px icon wells.
+  - The empty-state `ExportIcon` color variant now ties the main star to the audio-button family through cyan/green-blue/blue stops, while the small accent star uses the blue chat/send entrypoint palette.
+  - Conversation list now uses `overscroll-behavior: contain` and a smaller `92px` bottom padding, reducing the empty space that appeared above the fixed search rail at the end of the list.
+  - The conversation-list scroll-to-top button now uses the same neutral white/gray treatment as the header controls instead of teal.
+  - Discovery mode now preserves the conversation `More options` action on the right whenever an active conversation exists, instead of swapping to `Open conversations`.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` now defines dark-mode `--mpc-*` tokens under `[data-uc-theme="dark"]` and routes the chatbot surface, controls, menus, composer, conversation list, and formatted reply colors through theme-aware variables.
+  - Documents, Account Detail, and Card Detail Help icons now open the CZ chatbot directly into a contextual new-conversation state with page-specific titles and suggested topics.
+  - `CoAppingChatLauncher` now supports controlled open state, a contextual `entryContext`, and `bubble` / `edge-tab` launcher variants; normal level-1 bubble opens clear context so the default chat remains unchanged, while non-L1 in-app screens render a slim right-edge tab using the same `ExportIcon`.
+  - CZ Chatbot launcher classification treats Home, Spending/Analytics, Payments, Products, and More as Level 1 bubble screens; every other in-app screen where the launcher is mounted uses the edge tab and opens with contextual topics where available.
+  - The chatbot reply resolver now includes an account-help branch and keeps card-specific prompts ahead of generic transaction matching so Card Detail topics return card guidance.
+  - New-conversation suggested-topic shelf now uses asymmetric margins so its topic icons align with the composer `+` control instead of reading as a centered floating block.
+  - Conversation-list open/close now uses a real drawer lifecycle: the list enters from the right over `0.56s`, remains mounted during a `0.52s` exit animation with `mpc-conversation-list-exiting`, and only then returns to the new-conversation/chat surface.
+- Verification:
+  - `npm run build` passed twenty-nine times on 2026-07-06; the known empty `react-vendor` chunk warning remains.
+  - In-app browser on `http://127.0.0.1:3001/?product=PI&country=CZ&scenario=active&ds=current&release=release-future-cz-coapping&bank=retail-single-account&theme=light&lang=en&screen=homepage` confirmed conversation-list header has Back to new conversation, no Close assistant button, and no mode segment.
+  - Browser geometry check after scrolling confirmed assistant center `x=611`, scroll button center `x=611`, `New+` raised above search (`New+ bottom=769`, search top=802), and Back returns to the new-chat home.
+  - Browser reload cleared a hot-reload-only boot error and confirmed the Future dropdown label is `CZ - Chatbot`; opening Explore confirmed assistant aria label `CZ chatbot`, Back on the left, Discovery active in the centered toggle, Conversations on the right, and no Close assistant button.
+  - Browser measurement on the conversation detail confirmed header buttons and composer buttons compute to 32x32 CSS pixels, rendering about 29x29 in the scaled phone frame, with no boot error.
+  - Browser DOM check confirmed the conversation trigger SVG has exactly two rounded-line paths and opening it mounts the list with `mpcConversationDrawerIn`.
+  - Browser DOM check after the compact polish confirmed the segment computes to 132x34 CSS pixels (about 120x31 in the scaled phone), mode icons are 16px, suggested-topic gap is 22px, conversation drawer animation is `0.36s`, and back-to-chat content animation is `0.32s`.
+  - Static coverage check confirmed all 35 existing mock agent messages have polished formatted-response replacements (`missing=[]`).
+  - In-app browser smoke opened the existing `Investment advice for my savings` conversation and confirmed 7 formatted agent headings, 13 bullet rows, 10 numbered steps, and 12 paragraphs; the scroll-to-latest button computed to `bottom: 118px` with a 22px gap above the composer.
+  - Browser computed-style check confirmed headings render at `16px`, paragraphs/list rows at `14px`, bullet markers use neutral `rgb(118, 118, 118)`, number badges use neutral gray on `#f1f2f2`, the scroll-to-latest button uses neutral gray text/border, and all three `More` menu rows have one icon each with neutral text including Delete.
+  - Browser DOM/geometry check on the conversation list confirmed `Start new conversation` renders as a top-right 32px header icon, `New+` no longer appears (`oldNewCount=0`), and the search row remains unobstructed at the bottom.
+  - In-app browser smoke on the new-message path confirmed the assistant shows `Checking payment options and account limits...` immediately after `How do payments work?`, with 14px neutral gray status text and a muted status icon, then removes the working state once the formatted `Payment route` reply appears.
+  - In-app browser style/DOM check confirmed the launcher renders as a scaled 44px CSS button with a statusless 24px white mono `ExportIcon`, the empty-state mark is centered on the assistant x-axis, and the mark is absent immediately after the first suggested-topic message is sent.
+  - Browser DOM/style check confirmed the new-conversation title is `Good morning, Teodora`, the color mark uses voice/send-aligned gradient stops with `mpcAiMarkFloat` / `mpcAiMarkSparkle` animations, six topic rows render, all topic icons are the same generic SVG (`uniqueTopicIconCount=1`), and topic layout computes to `15px` gap with `15px` row text.
+  - Browser computed-style check after sending `How do payments work?` confirmed assistant/header/chat/composer backgrounds are all white, header `box-shadow` is `none`, header bottom border is `0px`, the user bubble background is `rgb(241, 242, 242)`, user bubble shadow is `none`, and the mocked `Payment route` reply still resolves after the thinking state.
+  - Browser computed-style check on the new-conversation topic list confirmed `topicCount=6`, `rowFontSize=16px`, `rowLineHeight=21px`, `listGap=18px`, and a remaining 13px gap above the composer.
+  - Browser computed-style check on the level-1 launcher confirmed `launcherWidth=44px`, `launcherHeight=44px`, `svgWidth=24px`, `svgHeight=24px`, and `.mpc-chat-launcher-status` count `0`.
+  - Browser streaming check sent `How do payments work?` from a fresh new conversation and confirmed the generated agent reply had partial text plus streaming cursor and no meta at the first sample, longer partial text after 260ms, then final text with `streamingCount=0`, `cursorCount=0`, one meta row, and two feedback buttons.
+  - Browser check after the timestamp/segment update confirmed the Search/Discovery segment uses `flex-basis: 112px`, measured about `102x27px` inside the scaled phone, and the `How do payments work?` historical conversation rendered contextual labels `Yesterday 17:41`, `Yesterday 17:42`, `Yesterday 17:44`, and `Yesterday 17:45`.
+  - Browser style check after icon polish confirmed topic icons render about `18.25px` in the scaled phone with `rgba(38, 38, 38, 0.68)`, send/attachment/more SVGs render about `14.6px`, menu icon wells render about `25.5px`, and the empty-state mark keeps explicit SVG gradient stops.
+  - Browser conversation-list check confirmed `paddingBottom=92px`, `overscrollBehavior=contain`, max/actual scroll both `660`, last-item-to-search gap about `91px`, and scroll-to-top button colors `rgba(255,255,255,0.96)` / `rgba(38,38,38,0.72)` with neutral border.
+  - Browser empty-state check confirmed the hero is present, the main `ExportIcon` star uses `#00a7b3`, `#008c95`, `#0072ce` to match the voice button family, and the small accent star uses `#004f95`, `#0072ce` to match the blue chat/send entrypoint family.
+  - Browser dark-mode check on `theme=dark` confirmed assistant/header/control/promo surfaces compute to dark tokens (`assistantBg=rgb(23,23,23)`, `assistantColor=rgb(245,245,245)`, `controlBg=rgb(36,36,36)`) and active-conversation Discovery shows `rightButtonAria="More options"` with zero `Open conversations` buttons.
+  - Browser coordinate-click smoke confirmed the dark conversation list can still mount from the header (`Back to new conversation` / `Start new conversation`, `theme=dark`) after the theme-token changes.
+  - Browser smoke on direct Level 2 URLs confirmed Documents Help opens `How can I help you with Documents?` with four document topics in dark mode, Account Detail Help opens `How can I help you with this account?` with four account topics, and Card Detail Help opens `How can I help you with this card?` with four card topics.
+  - Browser L1/L2 launcher smoke confirmed Home renders the compact bubble launcher, Account Detail renders `.mpc-chat-launcher-edge-tab` as a right-edge black tab and opens `How can I help you with this account?`, and Messages renders the same edge tab with `How can I help you with Messages?` fallback topics.
+  - Browser geometry check on the new-conversation screen confirmed `.mpc-topic-shelf` computes to `margin-left: 28px` and `margin-right: 16px`; the first topic icon center and composer `+` center align exactly (`delta=0`).
+  - Browser topic smoke confirmed `Review card transactions` sends the prompt, hides suggested topics, streams a formatted reply, and resolves to `Card and security checks` with feedback buttons.
+  - Browser transition check confirmed conversation-list enter uses `mpcConversationDrawerIn` at `0.56s` with `cubic-bezier(0.16, 1, 0.3, 1)`, Back applies `mpc-conversation-list-exiting` with `mpcConversationDrawerOut` at `0.52s`, and after exit the list is unmounted while the new-conversation hero/topics return.
+- Limitations:
+  - Interactive product cards/CTAs remain intentionally deferred for follow-up discussion.
+  - Adaptive L1/L2+ launcher behavior and contextual Level 2 Help are wired for the CZ Future chatbot preview only; non-CZ/non-Future contexts keep their existing behavior.
+  - No committed visual regression test exists for the Co-Apping package yet; this remains covered by build plus browser smoke.
+- safe to resume: yes
+
+## 2026-07-06 CZ Chatbot And Preview Commit Closeout
+
+- Latest request handled: user asked to fix the empty bottom space under the phone on CZ Account Detail and then commit all uncommitted work locally, without publishing to Vercel.
+- Commit scope:
+  - all currently modified project files are intended to be staged and committed in one local closeout package.
+  - scope includes the CZ chatbot UI/interaction polish, contextual Level 2 Help entry points, adaptive L1/L2 launcher behavior, stakeholder top-bar More/Play preview changes, the normal preview-height fix, and updated handoff/capability docs.
+  - no Vercel deploy/publish action is part of this closeout.
+- Verification:
+  - `npm run build` passed on 2026-07-06; the known empty `react-vendor` chunk warning remains.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=81 screens=28 flows=15`.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - In-app browser geometry check on CZ Account Detail confirmed the preview container now fills the available desktop area (`795px` tall), phone screen height is `741px`, and top/bottom gaps are balanced at `27px`.
+- Banana Loop result:
+  - fixed: the normal desktop preview body no longer collapses under Level 2 screens, removing the blank bottom band and letting the phone frame scale larger.
+  - triaged: no automated visual regression exists yet for desktop preview auto-fit; this remains covered by existing next-task visual-regression work.
+  - already known: oversized image assets and empty `react-vendor` chunk remain non-blocking known bananas.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
 
 ## 2026-07-05 Full Workspace Commit Closeout
 

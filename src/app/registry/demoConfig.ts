@@ -82,7 +82,7 @@ export const FEATURE_META: Record<FeatureId, FeatureMeta> = {
 
   fx_czCoAppingSmartAssistant: {
     id: "fx_czCoAppingSmartAssistant",
-    label: "CZ Co-Apping Chatbot",
+    label: "CZ - Chatbot",
     description: "Pinned Czech Republic feature preview for the portable Co-Apping Smart Assistant chat.",
     kind: "release",
     scope: "countries",

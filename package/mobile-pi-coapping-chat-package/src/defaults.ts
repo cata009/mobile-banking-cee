@@ -25,6 +25,8 @@ export const defaultSuggestedTopics: CoAppingSuggestedTopic[] = [
   { id: "products", label: "Show me product offers" },
   { id: "cards", label: "Is my card secure?" },
   { id: "insights", label: "Explain spending insights" },
+  { id: "savings", label: "Help me plan my savings" },
+  { id: "documents", label: "Find my confirmation documents" },
 ];
 
 export const defaultPanelLabels: CoAppingPanelLabels = {
@@ -58,11 +60,11 @@ export function defaultReplyResolver(input: string) {
   const normalized = input.toLowerCase();
 
   if (normalized.includes("payment") || normalized.includes("transfer")) {
-    return "In the demo you can start from Payments, choose a domestic transfer, review the recipient and amount, then sign the payment. I can also guide you through each step.";
+    return "### Payment route\nStart from **Payments** and keep the flow clear:\n1. Choose the transfer type.\n2. Add recipient and amount.\n3. Review fees, limits, and execution date.\n4. Sign before submission.\nI can also guide the user through each step as a focused assistant flow.";
   }
 
   if (normalized.includes("product") || normalized.includes("offer")) {
-    return "The Products area groups accounts, cards, loans, protection, investments, and contextual offers. Each card is meant to explain the next best action without leaving the banking flow.";
+    return "### Product discovery\nThe Products area groups accounts, cards, loans, protection, investments, and contextual offers.\n- Use cards for clear next-best actions.\n- Keep offer eligibility visible.\n- Let the user continue without leaving the banking flow.";
   }
 
   if (
@@ -70,7 +72,16 @@ export function defaultReplyResolver(input: string) {
     normalized.includes("secure") ||
     normalized.includes("security")
   ) {
-    return "For cards and security, the demo highlights card details, transaction review, consent, messages, and support access. In a real app, sensitive actions would require strong authentication.";
+    return "### Card and security checks\nThe assistant can explain the safe route:\n1. Review card details and recent transactions.\n2. Check limits, online payments, and contactless settings.\n3. Use support access for suspicious activity.\nSensitive actions still require strong authentication.";
+  }
+
+  if (
+    normalized.includes("account") ||
+    normalized.includes("balance") ||
+    normalized.includes("iban") ||
+    normalized.includes("transaction")
+  ) {
+    return "### Account help\nI can help narrow the account task before you continue.\n1. Check whether you need **balance**, **details**, or **transactions**.\n2. Use search or filters when the transaction list is long.\n3. Open account details for IBAN, account number, and sharing information.\nSensitive account actions should stay inside the authenticated banking flow.";
   }
 
   if (
@@ -78,8 +89,24 @@ export function defaultReplyResolver(input: string) {
     normalized.includes("insight") ||
     normalized.includes("budget")
   ) {
-    return "Spending insights summarize categories, recent movements, and patterns so the customer can understand where money goes before choosing a product or payment action.";
+    return "### Spending insight summary\nSpending insights should explain what changed, not just show numbers.\n- categories\n- recent movements\n- recurring patterns\n- unusual card payments\nThis helps the customer understand where money goes before choosing the next action.";
   }
 
-  return "I can help with accounts, payments, products, cards, security, and how this simulation is structured. Pick a topic below or ask a specific question.";
+  if (
+    normalized.includes("saving") ||
+    normalized.includes("savings") ||
+    normalized.includes("invest")
+  ) {
+    return "### Savings planning\nStart with the goal and the time horizon before choosing a product.\n1. Keep short-term money in lower-volatility options.\n2. Separate emergency reserve from planned investing.\n3. Review fees, currency, and product risk before committing.\nA recurring amount can help build the habit without forcing a perfect entry day.";
+  }
+
+  if (
+    normalized.includes("document") ||
+    normalized.includes("confirmation") ||
+    normalized.includes("statement")
+  ) {
+    return "### Document search\nI can help narrow the search before opening Documents.\n- confirmations\n- statements\n- product documents\n- legal notices\nUse the newest date first, then filter by account or product if the list is long.";
+  }
+
+  return "### I can help with\n- Accounts and balance explanations\n- Payments and confirmations\n- Products, offers, and investments\n- Cards, limits, and security\nPick a topic below or ask a specific question.";
 }

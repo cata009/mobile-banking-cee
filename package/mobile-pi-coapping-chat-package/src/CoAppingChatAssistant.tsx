@@ -18,18 +18,24 @@ import {
   CameraIcon,
   CloseIcon,
   ConversationsIcon,
+  DeleteActionIcon,
   DiscoveryModeIcon,
+  ExportIcon,
   FileAttachmentIcon,
   MicrophoneIcon,
   MoreIcon,
   PhotosIcon,
+  RenameActionIcon,
   SearchModeIcon,
   SendIcon,
+  ShareActionIcon,
   SuggestedTopicIcon,
+  ThinkingStatusIcon,
   VoiceModeIcon,
 } from "./icons";
 import type {
   CoAppingChatLabels,
+  CoAppingChatContext,
   CoAppingChatMessage,
   CoAppingReplyResolver,
   CoAppingSuggestedTopic,
@@ -40,6 +46,7 @@ export interface CoAppingChatAssistantProps {
   labels?: Partial<CoAppingChatLabels>;
   initialMessages?: CoAppingChatMessage[];
   suggestedTopics?: CoAppingSuggestedTopic[];
+  entryContext?: CoAppingChatContext | null;
   resolveReply?: CoAppingReplyResolver;
   typingDelayMs?: number;
 }
@@ -50,6 +57,146 @@ function getCurrentTime() {
     minute: "2-digit",
     hour12: false,
   }).format(new Date());
+}
+
+function formatClockTime(date: Date) {
+  return new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+function getLocalDayKey(date: Date) {
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+}
+
+function addDays(date: Date, amount: number) {
+  const nextDate = new Date(date);
+  nextDate.setDate(nextDate.getDate() + amount);
+  return nextDate;
+}
+
+function isSameLocalDay(firstDate: Date, secondDate: Date) {
+  return getLocalDayKey(firstDate) === getLocalDayKey(secondDate);
+}
+
+function parseClockTime(time: string) {
+  const match = time.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return null;
+  return { hours: Number(match[1]), minutes: Number(match[2]) };
+}
+
+function withClockTime(date: Date, time: string) {
+  const parsedTime = parseClockTime(time);
+  const nextDate = new Date(date);
+  if (parsedTime) {
+    nextDate.setHours(parsedTime.hours, parsedTime.minutes, 0, 0);
+  }
+  return nextDate;
+}
+
+function formatMessageTimeLabel(message: CoAppingChatMessage) {
+  if (!message.createdAt) return message.time;
+
+  const messageDate = new Date(message.createdAt);
+  if (Number.isNaN(messageDate.getTime())) return message.time;
+
+  const now = new Date();
+  const clockTime = formatClockTime(messageDate);
+
+  if (isSameLocalDay(messageDate, now)) {
+    return `Today ${clockTime}`;
+  }
+
+  if (isSameLocalDay(messageDate, addDays(now, -1))) {
+    return `Yesterday ${clockTime}`;
+  }
+
+  const dateLabel = new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    ...(messageDate.getFullYear() !== now.getFullYear() ? { year: "numeric" } : {}),
+  }).format(messageDate);
+
+  return `${dateLabel} ${clockTime}`;
+}
+
+function getConversationDateFromSubtitle(subtitle: string, time: string) {
+  const today = new Date();
+
+  if (/^Yesterday\b/i.test(subtitle)) {
+    return withClockTime(addDays(today, -1), time).toISOString();
+  }
+
+  const datedMatch = subtitle.match(/^(\d{1,2})\s+([A-Za-z]{3})\b/);
+  if (datedMatch) {
+    const monthIndex = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"].indexOf(
+      datedMatch[2].toLowerCase(),
+    );
+    if (monthIndex >= 0) {
+      const date = withClockTime(new Date(today.getFullYear(), monthIndex, Number(datedMatch[1])), time);
+      if (date.getTime() > today.getTime()) date.setFullYear(date.getFullYear() - 1);
+      return date.toISOString();
+    }
+  }
+
+  const weekdayMatch = subtitle.match(/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b/i);
+  if (weekdayMatch) {
+    const weekdays = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    const targetDay = weekdays.indexOf(weekdayMatch[1].toLowerCase());
+    const dayDelta = (today.getDay() - targetDay + 7) % 7;
+    return withClockTime(addDays(today, -dayDelta), time).toISOString();
+  }
+
+  return withClockTime(today, time).toISOString();
+}
+
+function withConversationMessageDates(messages: CoAppingChatMessage[], subtitle: string) {
+  return messages.map((message) => ({
+    ...message,
+    createdAt: message.createdAt ?? getConversationDateFromSubtitle(subtitle, message.time),
+  }));
+}
+
+function getThinkingStatusText(input: string) {
+  const normalizedInput = input.toLowerCase();
+
+  if (/\b(card|pin|secure|security|lost|limit|blocked)\b/.test(normalizedInput)) {
+    return "Checking card functions and security settings...";
+  }
+
+  if (/\b(payment|payments|transfer|rent|loan|repay)\b/.test(normalizedInput)) {
+    return "Checking payment options and account limits...";
+  }
+
+  if (/\b(invest|investment|savings|saving|fund|portfolio|fees)\b/.test(normalizedInput)) {
+    return "Reviewing savings and investment context...";
+  }
+
+  if (/\b(spending|subscriptions|subscription|balance|budget|cash)\b/.test(normalizedInput)) {
+    return "Reviewing spending patterns and account activity...";
+  }
+
+  if (/\b(offer|offers|cashback|product|products|travel)\b/.test(normalizedInput)) {
+    return "Looking up relevant offers and product options...";
+  }
+
+  if (/\b(document|documents|confirmation)\b/.test(normalizedInput)) {
+    return "Checking documents and recent account activity...";
+  }
+
+  return "Checking your banking context...";
+}
+
+function splitReplyStreamTokens(text: string) {
+  return text.match(/\S+\s*/g) ?? (text ? [text] : []);
+}
+
+function getReplyStreamDelayMs(tokenCount: number) {
+  if (tokenCount > 80) return 24;
+  if (tokenCount > 45) return 30;
+  return 36;
 }
 
 function ScrollTopIcon() {
@@ -96,24 +243,93 @@ function ThumbsDownFeedbackIcon() {
   );
 }
 
+function InlineFormattedText({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/(\*\*[^*]+\*\*)/g).map((part, index) => {
+        if (part.startsWith("**") && part.endsWith("**")) {
+          return <strong key={`${part}-${index}`}>{part.slice(2, -2)}</strong>;
+        }
+        return part.replace(/\*\*/g, "");
+      })}
+    </>
+  );
+}
+
+function AgentFormattedResponse({ text, isStreaming = false }: { text: string; isStreaming?: boolean }) {
+  const lines = text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  return (
+    <div className={["mpc-agent-copy", isStreaming ? "mpc-agent-copy-streaming" : ""].filter(Boolean).join(" ")}>
+      {lines.map((line, index) => {
+        if (line.startsWith("### ")) {
+          return (
+            <h3 key={`${line}-${index}`} className="mpc-agent-heading">
+              <InlineFormattedText text={line.slice(4)} />
+            </h3>
+          );
+        }
+
+        if (line.startsWith("- ")) {
+          return (
+            <div key={`${line}-${index}`} className="mpc-agent-list-row">
+              <span className="mpc-agent-list-marker" aria-hidden="true" />
+              <span>
+                <InlineFormattedText text={line.slice(2)} />
+              </span>
+            </div>
+          );
+        }
+
+        const numberedMatch = line.match(/^(\d+)\.\s+(.+)$/);
+        if (numberedMatch) {
+          return (
+            <div key={`${line}-${index}`} className="mpc-agent-step-row">
+              <span className="mpc-agent-step-marker" aria-hidden="true">
+                {numberedMatch[1]}
+              </span>
+              <span>
+                <InlineFormattedText text={numberedMatch[2]} />
+              </span>
+            </div>
+          );
+        }
+
+        return (
+          <p key={`${line}-${index}`} className="mpc-agent-paragraph">
+            <InlineFormattedText text={line} />
+          </p>
+        );
+      })}
+      {isStreaming ? <span className="mpc-agent-stream-cursor" aria-hidden="true" /> : null}
+    </div>
+  );
+}
+
 function BubbleMessage({ message }: { message: CoAppingChatMessage }) {
   const isAgent = message.role === "agent";
+  const timeLabel = formatMessageTimeLabel(message);
 
   if (isAgent) {
     return (
-      <div className="mpc-message mpc-message-agent">
-        <div className="mpc-agent-copy">{message.text}</div>
-        <div className="mpc-agent-meta">
-          <div className="mpc-response-feedback" aria-label="Response feedback">
-            <button type="button" className="mpc-feedback-button" aria-label="Good response">
-              <ThumbsUpFeedbackIcon />
-            </button>
-            <button type="button" className="mpc-feedback-button" aria-label="Bad response">
-              <ThumbsDownFeedbackIcon />
-            </button>
+      <div className="mpc-message mpc-message-agent" aria-live={message.isStreaming ? "polite" : undefined}>
+        <AgentFormattedResponse text={message.text} isStreaming={message.isStreaming} />
+        {!message.isStreaming ? (
+          <div className="mpc-agent-meta">
+            <div className="mpc-response-feedback" aria-label="Response feedback">
+              <button type="button" className="mpc-feedback-button" aria-label="Good response">
+                <ThumbsUpFeedbackIcon />
+              </button>
+              <button type="button" className="mpc-feedback-button" aria-label="Bad response">
+                <ThumbsDownFeedbackIcon />
+              </button>
+            </div>
+            <div className="mpc-message-time mpc-message-time-agent">{timeLabel}</div>
           </div>
-          <div className="mpc-message-time mpc-message-time-agent">{message.time}</div>
-        </div>
+        ) : null}
       </div>
     );
   }
@@ -121,7 +337,7 @@ function BubbleMessage({ message }: { message: CoAppingChatMessage }) {
   return (
     <div className="mpc-message mpc-message-user">
       <div className="mpc-bubble mpc-bubble-user">{message.text}</div>
-      <div className="mpc-message-time">{message.time}</div>
+      <div className="mpc-message-time">{timeLabel}</div>
     </div>
   );
 }
@@ -706,9 +922,107 @@ const mockedConversationHistories: Array<{
   },
 ];
 
-const suggestedTopicIconVariants = ["payments", "offers", "security", "insights"] as const;
+const polishedAgentReplies: Record<string, string> = {
+  "intro-hi": "### Welcome back\nI am ready to help with banking tasks, product questions, and this CZ future chatbot preview.",
+  "intro-help":
+    "### What I can help with\n- **Payments:** transfers, templates, limits, and confirmation documents.\n- **Cards:** security, limits, travel usage, and lost-card actions.\n- **Spending:** subscriptions, budget signals, and balance explanations.\n- **Products:** investments, loans, offers, and next-best actions.",
+  "payments-agent-1":
+    "### Payment flow\nStart from **Payments** and move through the flow step by step:\n1. Choose the payment type.\n2. Add beneficiary and amount details.\n3. Review fees, limits, and execution date.\n4. Confirm with the standard signing step.\nThe assistant should keep the user oriented before each irreversible action.",
+  "payments-agent-2":
+    "### Template reuse\nYes, when the payment type supports it.\n- After success, expose **Save as template** as a secondary action.\n- Keep it available from Payments for repeated transfers.\n- Let the user edit details before sending again.",
+  "investments-agent-1":
+    "### Before you invest\nI can help you prepare, but this is **not personal financial advice**.\nStart with three checks:\n1. What is the money for?\n2. When might you need it?\n3. How much movement in value can you tolerate?",
+  "investments-agent-2":
+    "### Long-term goal check\nFor a longer-term goal, compare the basics before choosing a product:\n- **Emergency reserve:** money you may need soon should stay easier to access.\n- **Time horizon:** longer horizons can absorb more movement, but not unlimited risk.\n- **Volatility preference:** lower volatility may feel safer, higher potential return usually moves more.\nIn Investments, compare portfolio value, product type, currency exposure, and performance history.",
+  "investments-agent-3":
+    "### Go to Investments\nYes. Open **Investments** to review:\n- Portfolio value\n- Available funds\n- Product type distribution\n- Investment history\n**Placeholder action:** Go to Investments. A deeper contextual link can be wired once the final destination contract is defined.",
+  "investments-agent-4":
+    "### Compare more than recent performance\nGood instinct. A strong recent month is context, not a decision by itself.\n1. Start with the objective: emergency reserve, short-term purchase, medium-term goal, or long-term growth.\n2. Compare risk profile, holding period, currency, and product category.\n3. Check whether the investment can move up and down in value.\nIf the money may be needed soon, a lower-volatility option is usually easier to live with.",
+  "investments-agent-5":
+    "### Fees and recurring investing\nBefore committing, check product documents and fee information.\n- A recurring investment can reduce the pressure of choosing a perfect entry day.\n- Each recurring order still buys at the market conditions available at that time.\n- In the app, compare fund category, current value, historical evolution, currency exposure, and order type support.",
+  "investments-agent-6":
+    "### Review your portfolio first\nStart with the summary, then move into details:\n1. Check total value and performance.\n2. Review product type and currency distribution.\n3. Look for concentration in one category or currency.\n4. Open each position for amount, currency, gain/loss, order type, and pending orders.\nThe decision path should stay clear: **goal -> product -> risk -> decision**.",
+  "investments-agent-7":
+    "### Suggested next step\nOpen **Investments** and start from the Performance tab.\n- Review Product Type and Currency tabs.\n- Open a single fund only after checking the portfolio shape.\n- Future deep link placeholder: app://investments/overview?source=smart-assistant&topic=investment-readiness",
+  "security-agent-1":
+    "### Card security controls\nOnline card security should be visible, not hidden.\n- Online payments\n- Contactless payments\n- Temporary block or freeze\n- Card limits\n- Transaction notifications\nThe card details page should make these actions easy to verify.",
+  "security-agent-2":
+    "### If you suspect fraud\n1. Block or freeze the card first.\n2. Review recent transactions.\n3. Contact support for anything unfamiliar.\nThe assistant can guide the route, but sensitive servicing still needs the proper authorization flow.",
+  "insights-agent-1":
+    "### Why the budget changed\nSpending insights compare current transactions with previous patterns.\nLook for:\n- category changes\n- recurring payments\n- upcoming obligations\n- unusually large card payments\nThese are the signals that make a balance or budget explanation credible.",
+  "insights-agent-2":
+    "### Subscription discovery\nYes. Subscriptions are a strong AI prompt because they connect analysis with action:\n- review the merchant\n- pause or update where supported\n- cancel outside the banking app when needed\n- keep only what still matters",
+  "balance-agent-1":
+    "### Available vs total balance\nThe difference usually comes from money that is visible but not fully available.\nCommon causes:\n- card reservations\n- pending payments\n- blocked amounts\n- overdraft rules\nThe assistant should point to transaction details as evidence.",
+  "balance-agent-2":
+    "### Show pending first\nYes. Pending card transactions are often the clearest explanation.\nShow them before less common causes like reserved funds or manual restrictions, so the answer feels grounded in real activity.",
+  "travel-agent-1":
+    "### Travel budget setup\nBefore the trip, check:\n1. available balance\n2. expected card payments\n3. recurring payments due while away\nThen set a temporary card limit matching the amount you are comfortable spending.",
+  "travel-agent-2":
+    "### Keep it temporary\nThat is the cleanest approach.\n- Use a limit only for the travel days.\n- Keep notifications on.\n- Review currency conversion and ATM fees before using the card abroad.",
+  "lost-card-agent-1":
+    "### First action: freeze the card\nFreeze or block the card first so it cannot be used.\nThen:\n1. Check recent transactions.\n2. Mark anything unfamiliar.\n3. Contact support if needed.",
+  "lost-card-agent-2":
+    "### If you find it later\nIf the app offers a **temporary freeze**, you can usually unfreeze it.\nIf the card was permanently blocked, the safer route is normally a replacement card flow.",
+  "offers-agent-1":
+    "### Choose offers intentionally\nPrefer offers that match planned purchases, not offers that create new spending.\nCheck:\n- merchant\n- cashback percentage\n- minimum amount\n- expiry date\n- online vs in-store eligibility",
+  "offers-agent-2":
+    "### Location and filters\nYes. A future assistant can filter by location, category, active status, and expiry.\nFor now, open **Products > ShopSmart** and narrow the list with filters.",
+  "loan-agent-1":
+    "### Early repayment checks\nPartial repayment can reduce interest, but review the trade-offs first:\n- loan type\n- remaining amount\n- fees\n- whether the change affects installment, duration, or both",
+  "loan-agent-2":
+    "### Where to start\nOpen the loan detail page first.\nThe assistant can later route directly to repayment options once the product contract and eligible loan rules are confirmed.",
+  "subs-agent-1":
+    "### Find forgotten subscriptions\nStart with recurring card payments and repeated merchants.\nLook for:\n- similar monthly amounts\n- repeated merchant names\n- stable billing cadence\nThen decide whether to keep, update, or cancel outside the banking app when needed.",
+  "subs-agent-2":
+    "### Filter by category\nYes, once categories are available.\nThe assistant can combine merchant names, category tags, and recurring cadence to surface a focused subscription list.",
+  "saving-agent-1":
+    "### Find a realistic monthly amount\nStart with a simple affordability check:\n1. income\n2. fixed costs\n3. subscriptions\n4. average card spending\nChoose an amount that still leaves a buffer for unexpected expenses.",
+  "saving-agent-2":
+    "### Make it automatic\nYes. Use recurring savings or a standing order where available.\nA future assistant can suggest an amount based on spending history and balance patterns.",
+  "limit-agent-1":
+    "### Temporary card limits\nTemporary limits are safer than permanent changes when the higher amount is only needed briefly.\nSet:\n- amount\n- channel\n- duration\nThen confirm before authorizing.",
+  "limit-agent-2":
+    "### Keep channels separate\nYes. Increase only the limit you actually need.\nIf the purchase is online, avoid raising ATM withdrawal limits at the same time.",
+  "order-agent-1":
+    "### Template or standing order?\nUse a **standing order** when the amount and date are predictable.\nUse a **template** when you want to review and manually send each payment.",
+  "order-agent-2":
+    "### Later changes\nYes. Regular payment instructions should be reviewable from the payments management area.\nExpected actions: edit, pause, cancel, or reactivate.",
+  "docs-agent-1":
+    "### Find a confirmation\nOpen transaction history, find the payment, then look for details or document actions.\nIf generated, the confirmation should also appear in **Documents**.",
+  "docs-agent-2":
+    "### Sharing documents\nYes, when the share action is available.\nThe assistant should guide the user to the correct source, not expose documents directly inside the chat.",
+  "fees-agent-1":
+    "### Card fees abroad\nIt depends on:\n- card type\n- currency conversion\n- ATM usage\n- merchant conversion choice\nBefore travelling, review fees, exchange rates, and dynamic currency conversion guidance.",
+  "fees-agent-2":
+    "### Pay in local currency\nIn many cases, paying in local currency avoids merchant conversion markup.\nThe assistant can explain the pattern, while final fee information should come from official pricing documents.",
+};
+
+fallbackConversationMessages.forEach((message) => {
+  if (message.role === "agent" && polishedAgentReplies[message.id]) {
+    message.text = polishedAgentReplies[message.id];
+  }
+});
+
+mockedConversationHistories.forEach((conversation) => {
+  conversation.messages.forEach((message) => {
+    if (message.role === "agent" && polishedAgentReplies[message.id]) {
+      message.text = polishedAgentReplies[message.id];
+    }
+  });
+});
+
 type AttachmentSource = "camera" | "photos" | "files";
 type VoiceCaptureStatus = "idle" | "recording" | "transcribing";
+
+const assistantGreetingName = "Teodora";
+
+function getGreetingLabel(date = new Date()) {
+  const hour = date.getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
 
 const discoveryHero = {
   eyebrow: "Featured for Czech customers",
@@ -843,6 +1157,8 @@ type SpeechRecognitionLike = {
 
 type SpeechRecognitionConstructorLike = new () => SpeechRecognitionLike;
 
+const CONVERSATION_LIST_EXIT_MS = 520;
+
 function getSpeechRecognitionConstructor(): SpeechRecognitionConstructorLike | null {
   const browserWindow = window as Window & {
     SpeechRecognition?: SpeechRecognitionConstructorLike;
@@ -857,8 +1173,9 @@ export function CoAppingChatAssistant({
   labels,
   initialMessages = defaultInitialMessages,
   suggestedTopics = defaultSuggestedTopics,
+  entryContext = null,
   resolveReply = defaultReplyResolver,
-  typingDelayMs = 650,
+  typingDelayMs = 1150,
 }: CoAppingChatAssistantProps) {
   const mergedLabels = { ...defaultChatLabels, ...labels };
   const savedConversationMessagesRef = useRef<CoAppingChatMessage[]>(
@@ -867,11 +1184,14 @@ export function CoAppingChatAssistant({
   const [messages, setMessages] = useState<CoAppingChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
+  const [thinkingStatusText, setThinkingStatusText] = useState("");
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [dragY, setDragY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isConversationListOpen, setIsConversationListOpen] = useState(false);
+  const [isConversationListExiting, setIsConversationListExiting] = useState(false);
   const [assistantMode, setAssistantMode] = useState<"search" | "discovery">("search");
   const [conversationSearch, setConversationSearch] = useState("");
   const [isAttachmentMenuOpen, setIsAttachmentMenuOpen] = useState(false);
@@ -880,7 +1200,10 @@ export function CoAppingChatAssistant({
   const [showConversationScrollTop, setShowConversationScrollTop] = useState(false);
   const [showChatScrollBottom, setShowChatScrollBottom] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const streamTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const conversationListExitTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const wasConversationListOpenRef = useRef(false);
   const dragStartYRef = useRef(0);
   const conversationListRef = useRef<HTMLDivElement | null>(null);
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
@@ -894,11 +1217,14 @@ export function CoAppingChatAssistant({
   const voiceChunksRef = useRef<Blob[]>([]);
   const finalTranscriptRef = useRef("");
   const interimTranscriptRef = useRef("");
+  const streamingMessageIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     return () => {
       if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+      if (streamTimeoutRef.current) window.clearTimeout(streamTimeoutRef.current);
       if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
+      if (conversationListExitTimeoutRef.current) window.clearTimeout(conversationListExitTimeoutRef.current);
       try {
         speechRecognitionRef.current?.abort();
       } catch {
@@ -920,6 +1246,27 @@ export function CoAppingChatAssistant({
     conversationListRef.current?.scrollTo({ top: 0 });
     setShowConversationScrollTop(false);
   }, [conversationSearch, isConversationListOpen]);
+
+  useEffect(() => {
+    if (isConversationListOpen) {
+      if (conversationListExitTimeoutRef.current) {
+        window.clearTimeout(conversationListExitTimeoutRef.current);
+        conversationListExitTimeoutRef.current = null;
+      }
+      wasConversationListOpenRef.current = true;
+      setIsConversationListExiting(false);
+      return;
+    }
+
+    if (!wasConversationListOpenRef.current) return;
+
+    setIsConversationListExiting(true);
+    wasConversationListOpenRef.current = false;
+    conversationListExitTimeoutRef.current = window.setTimeout(() => {
+      setIsConversationListExiting(false);
+      conversationListExitTimeoutRef.current = null;
+    }, CONVERSATION_LIST_EXIT_MS);
+  }, [isConversationListOpen]);
 
   const requestClose = () => {
     if (isClosing) return;
@@ -960,15 +1307,76 @@ export function CoAppingChatAssistant({
     setDragY(0);
   };
 
+  const stopReplyStream = () => {
+    if (streamTimeoutRef.current) {
+      window.clearTimeout(streamTimeoutRef.current);
+      streamTimeoutRef.current = null;
+    }
+    streamingMessageIdRef.current = null;
+    setStreamingMessageId(null);
+  };
+
+  const startReplyStream = (reply: CoAppingChatMessage) => {
+    stopReplyStream();
+
+    const tokens = splitReplyStreamTokens(reply.text);
+    const streamDelayMs = getReplyStreamDelayMs(tokens.length);
+    let tokenIndex = Math.min(1, tokens.length);
+    const replyId = reply.id;
+
+    streamingMessageIdRef.current = replyId;
+    setStreamingMessageId(replyId);
+    setMessages((currentMessages) => [
+      ...currentMessages,
+      {
+        ...reply,
+        text: tokens.slice(0, tokenIndex).join(""),
+        isStreaming: true,
+      },
+    ]);
+
+    const revealNextToken = () => {
+      if (streamingMessageIdRef.current !== replyId) return;
+
+      tokenIndex += 1;
+      const isComplete = tokenIndex >= tokens.length;
+      const nextText = isComplete ? reply.text : tokens.slice(0, tokenIndex).join("");
+
+      setMessages((currentMessages) =>
+        currentMessages.map((message) =>
+          message.id === replyId
+            ? {
+                ...message,
+                text: nextText,
+                isStreaming: !isComplete,
+              }
+            : message,
+        ),
+      );
+
+      if (isComplete) {
+        streamingMessageIdRef.current = null;
+        streamTimeoutRef.current = null;
+        setStreamingMessageId(null);
+        return;
+      }
+
+      streamTimeoutRef.current = window.setTimeout(revealNextToken, streamDelayMs);
+    };
+
+    streamTimeoutRef.current = window.setTimeout(revealNextToken, streamDelayMs);
+  };
+
   const sendMessage = (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed || isTyping) return;
+    if (!trimmed || isTyping || streamingMessageId) return;
 
     const userMessage: CoAppingChatMessage = {
       id: `user-${Date.now()}`,
       role: "user",
       text: trimmed,
       time: getCurrentTime(),
+      createdAt: new Date().toISOString(),
     };
 
     const nextMessages = [...messages, userMessage];
@@ -979,6 +1387,7 @@ export function CoAppingChatAssistant({
     setIsAttachmentMenuOpen(false);
     setIsMoreMenuOpen(false);
     setVoiceStatus("idle");
+    setThinkingStatusText(getThinkingStatusText(trimmed));
     setIsTyping(true);
 
     timeoutRef.current = window.setTimeout(async () => {
@@ -988,9 +1397,11 @@ export function CoAppingChatAssistant({
         role: "agent",
         text: resolvedText,
         time: getCurrentTime(),
+        createdAt: new Date().toISOString(),
       };
-      setMessages((currentMessages) => [...currentMessages, reply]);
       setIsTyping(false);
+      setThinkingStatusText("");
+      startReplyStream(reply);
       timeoutRef.current = null;
     }, typingDelayMs);
   };
@@ -1071,7 +1482,7 @@ export function CoAppingChatAssistant({
   };
 
   const startVoiceCapture = async () => {
-    if (voiceCaptureActiveRef.current || isTyping) return;
+    if (voiceCaptureActiveRef.current || isTyping || streamingMessageId) return;
 
     cancelVoiceCapture();
     setIsAttachmentMenuOpen(false);
@@ -1213,11 +1624,13 @@ export function CoAppingChatAssistant({
 
   const resetPendingReply = () => {
     cancelVoiceCapture();
+    stopReplyStream();
     if (timeoutRef.current) {
       window.clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
     setIsTyping(false);
+    setThinkingStatusText("");
   };
 
   const startNewConversation = () => {
@@ -1230,6 +1643,21 @@ export function CoAppingChatAssistant({
     setIsConversationListOpen(false);
     setAssistantMode("search");
   };
+
+  useEffect(() => {
+    if (!entryContext) return;
+
+    resetPendingReply();
+    setMessages([]);
+    setDraft("");
+    setIsVoiceMode(false);
+    setIsAttachmentMenuOpen(false);
+    setIsMoreMenuOpen(false);
+    setIsConversationListOpen(false);
+    setAssistantMode("search");
+    setConversationSearch("");
+    setShowChatScrollBottom(false);
+  }, [entryContext?.id]);
 
   const openSavedConversation = () => {
     resetPendingReply();
@@ -1246,8 +1674,8 @@ export function CoAppingChatAssistant({
   };
 
   const getConversationTimeLabel = (conversationMessages: CoAppingChatMessage[]) => {
-    return conversationMessages[conversationMessages.length - 1]?.time
-      ? conversationMessages[conversationMessages.length - 1].time
+    return conversationMessages[conversationMessages.length - 1]
+      ? formatMessageTimeLabel(conversationMessages[conversationMessages.length - 1])
       : "No messages yet";
   };
 
@@ -1277,7 +1705,7 @@ export function CoAppingChatAssistant({
       searchText: conversation.messages.map((message) => message.text).join(" "),
       onClick: () => {
         resetPendingReply();
-        setMessages(conversation.messages);
+        setMessages(withConversationMessageDates(conversation.messages, conversation.subtitle));
         setDraft("");
         setIsVoiceMode(false);
         setIsAttachmentMenuOpen(false);
@@ -1294,6 +1722,7 @@ export function CoAppingChatAssistant({
   const isDraftEmpty = draft.trim().length === 0;
   const isVoiceCaptureActive = voiceStatus !== "idle";
   const showVoiceAction = isDraftEmpty || isVoiceCaptureActive;
+  const isConversationListVisible = isConversationListOpen || isConversationListExiting;
   const isDiscoveryMode = assistantMode === "discovery";
   const inputPlaceholder =
     voiceStatus === "recording"
@@ -1303,11 +1732,17 @@ export function CoAppingChatAssistant({
         : isVoiceMode
           ? "Listening..."
           : mergedLabels.inputPlaceholder;
-  const showSuggestedTopics = messages.length === 0 && !isTyping && !isConversationListOpen && !isDiscoveryMode;
+  const showSuggestedTopics = messages.length === 0 && !isTyping && !isConversationListVisible && !isDiscoveryMode;
+  const activeSuggestedTopics = entryContext?.suggestedTopics?.length
+    ? entryContext.suggestedTopics
+    : suggestedTopics;
+  const newConversationGreeting = entryContext?.title ?? `${getGreetingLabel()}, ${assistantGreetingName}`;
   const hasActiveConversation = messages.length > 0;
-  const isConversationDetailOpen = !isConversationListOpen && !isDiscoveryMode && hasActiveConversation;
-  const isNewConversationOpen = !isConversationListOpen && !isDiscoveryMode && !hasActiveConversation;
+  const isConversationDetailOpen = !isConversationListVisible && !isDiscoveryMode && hasActiveConversation;
+  const isNewConversationOpen = !isConversationListVisible && !isDiscoveryMode && !hasActiveConversation;
+  const showConversationOptions = isConversationDetailOpen || (isDiscoveryMode && hasActiveConversation);
   const lastMessageId = messages[messages.length - 1]?.id ?? "";
+  const lastMessageText = messages[messages.length - 1]?.text ?? "";
   const sheetStyle = { "--mpc-sheet-offset": `${dragY}px` } as CSSProperties;
 
   useEffect(() => {
@@ -1324,7 +1759,7 @@ export function CoAppingChatAssistant({
     });
 
     return () => window.cancelAnimationFrame(frame);
-  }, [isConversationDetailOpen, isTyping, lastMessageId]);
+  }, [isConversationDetailOpen, isTyping, lastMessageId, lastMessageText]);
 
   return (
     <section
@@ -1336,7 +1771,7 @@ export function CoAppingChatAssistant({
         .filter(Boolean)
         .join(" ")}
       style={sheetStyle}
-      aria-label="Co-apping AI chat"
+      aria-label="CZ chatbot"
     >
       <div
         className="mpc-sheet-grabber"
@@ -1350,7 +1785,16 @@ export function CoAppingChatAssistant({
       </div>
       <header className="mpc-chat-header">
         <div className="mpc-chat-header-row">
-          {isConversationDetailOpen ? (
+          {isConversationListVisible ? (
+            <button
+              type="button"
+              onClick={startNewConversation}
+              className="mpc-chat-control-button"
+              aria-label="Back to new conversation"
+            >
+              <BackIcon />
+            </button>
+          ) : isConversationDetailOpen ? (
             <button
               type="button"
               onClick={() => {
@@ -1362,7 +1806,7 @@ export function CoAppingChatAssistant({
             >
               <BackIcon />
             </button>
-          ) : isNewConversationOpen ? (
+          ) : isNewConversationOpen || isDiscoveryMode ? (
             <button
               type="button"
               onClick={requestClose}
@@ -1375,42 +1819,55 @@ export function CoAppingChatAssistant({
             <span className="mpc-chat-control-spacer" aria-hidden="true" />
           )}
 
-          <div className="mpc-mode-segment" aria-label="Assistant mode">
-            <button
-              type="button"
-              onClick={() => {
-                setAssistantMode("search");
-                setIsMoreMenuOpen(false);
-                setIsConversationListOpen(false);
-              }}
-              className={["mpc-mode-button", assistantMode === "search" ? "mpc-mode-button-active" : ""]
-                .filter(Boolean)
-                .join(" ")}
-              aria-label="Search mode"
-              aria-pressed={assistantMode === "search"}
-            >
-              <SearchModeIcon />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setAssistantMode("discovery");
-                setIsConversationListOpen(false);
-                setIsAttachmentMenuOpen(false);
-                setIsMoreMenuOpen(false);
-                cancelVoiceCapture();
-              }}
-              className={["mpc-mode-button", assistantMode === "discovery" ? "mpc-mode-button-active" : ""]
-                .filter(Boolean)
-                .join(" ")}
-              aria-label="Discovery mode"
-              aria-pressed={assistantMode === "discovery"}
-            >
-              <DiscoveryModeIcon />
-            </button>
-          </div>
+          {isConversationListVisible ? (
+            <span className="mpc-chat-header-center-spacer" aria-hidden="true" />
+          ) : (
+            <div className="mpc-mode-segment" aria-label="Assistant mode">
+              <button
+                type="button"
+                onClick={() => {
+                  setAssistantMode("search");
+                  setIsMoreMenuOpen(false);
+                  setIsConversationListOpen(false);
+                }}
+                className={["mpc-mode-button", assistantMode === "search" ? "mpc-mode-button-active" : ""]
+                  .filter(Boolean)
+                  .join(" ")}
+                aria-label="Search mode"
+                aria-pressed={assistantMode === "search"}
+              >
+                <SearchModeIcon />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAssistantMode("discovery");
+                  setIsConversationListOpen(false);
+                  setIsAttachmentMenuOpen(false);
+                  setIsMoreMenuOpen(false);
+                  cancelVoiceCapture();
+                }}
+                className={["mpc-mode-button", assistantMode === "discovery" ? "mpc-mode-button-active" : ""]
+                  .filter(Boolean)
+                  .join(" ")}
+                aria-label="Discovery mode"
+                aria-pressed={assistantMode === "discovery"}
+              >
+                <DiscoveryModeIcon />
+              </button>
+            </div>
+          )}
 
-          {isConversationDetailOpen ? (
+          {isConversationListVisible ? (
+            <button
+              type="button"
+              onClick={startNewConversation}
+              className="mpc-chat-control-button"
+              aria-label="Start new conversation"
+            >
+              <AddIcon />
+            </button>
+          ) : showConversationOptions ? (
             <div className="mpc-more-menu-anchor">
               <button
                 type="button"
@@ -1427,18 +1884,27 @@ export function CoAppingChatAssistant({
               {isMoreMenuOpen ? (
                 <div className="mpc-more-menu" role="menu" aria-label="Conversation options">
                   <button type="button" role="menuitem" className="mpc-more-menu-item">
-                    Share
+                    <span className="mpc-more-menu-item-icon">
+                      <ShareActionIcon />
+                    </span>
+                    <span>Share</span>
                   </button>
                   <button type="button" role="menuitem" className="mpc-more-menu-item">
-                    Rename conversation
+                    <span className="mpc-more-menu-item-icon">
+                      <RenameActionIcon />
+                    </span>
+                    <span>Rename conversation</span>
                   </button>
-                  <button type="button" role="menuitem" className="mpc-more-menu-item mpc-more-menu-item-danger">
-                    Delete conversation
+                  <button type="button" role="menuitem" className="mpc-more-menu-item">
+                    <span className="mpc-more-menu-item-icon">
+                      <DeleteActionIcon />
+                    </span>
+                    <span>Delete conversation</span>
                   </button>
                 </div>
               ) : null}
             </div>
-          ) : isNewConversationOpen ? (
+          ) : isNewConversationOpen || isDiscoveryMode ? (
             <button
               type="button"
               onClick={() => {
@@ -1461,8 +1927,14 @@ export function CoAppingChatAssistant({
 
       {isDiscoveryMode ? (
         <DiscoveryFeed />
-      ) : isConversationListOpen ? (
-        <div className="mpc-conversation-list" ref={conversationListRef} onScroll={handleConversationListScroll}>
+      ) : isConversationListVisible ? (
+        <div
+          className={["mpc-conversation-list", isConversationListExiting ? "mpc-conversation-list-exiting" : ""]
+            .filter(Boolean)
+            .join(" ")}
+          ref={conversationListRef}
+          onScroll={handleConversationListScroll}
+        >
           <p className="mpc-conversation-title">Conversations</p>
           {conversationItems.length > 0 ? (
             <div className="mpc-conversation-items">
@@ -1482,17 +1954,29 @@ export function CoAppingChatAssistant({
         </div>
       ) : (
         <div className="mpc-chat-scroll" ref={chatScrollRef} onScroll={handleChatScroll}>
-          <div className="mpc-chat-stack">
+          <div
+            className={["mpc-chat-stack", showSuggestedTopics ? "mpc-chat-stack-empty" : ""].filter(Boolean).join(" ")}
+          >
+            {showSuggestedTopics ? (
+              <div className="mpc-new-conversation-hero">
+                <div className="mpc-new-conversation-mark" aria-hidden="true">
+                  <ExportIcon variant="color" />
+                </div>
+                <h2 className="mpc-new-conversation-title">{newConversationGreeting}</h2>
+              </div>
+            ) : null}
+
             {messages.map((message) => (
               <BubbleMessage key={message.id} message={message} />
             ))}
 
             {isTyping && (
               <div className="mpc-message mpc-message-agent">
-                <div className="mpc-typing">
-                  <span />
-                  <span />
-                  <span />
+                <div className="mpc-thinking-status" role="status" aria-live="polite">
+                  <span className="mpc-thinking-status-icon">
+                    <ThinkingStatusIcon />
+                  </span>
+                  <span>{thinkingStatusText || "Checking your banking context..."}</span>
                 </div>
               </div>
             )}
@@ -1511,7 +1995,7 @@ export function CoAppingChatAssistant({
         </button>
       ) : null}
 
-      {isConversationListOpen ? (
+      {isConversationListVisible ? (
         <div className="mpc-conversation-floating-actions" aria-label="Conversation shortcuts">
           {showConversationScrollTop ? (
             <button
@@ -1523,23 +2007,20 @@ export function CoAppingChatAssistant({
               <ScrollTopIcon />
             </button>
           ) : null}
-          <button type="button" className="mpc-new-conversation-button" onClick={startNewConversation}>
-            New+
-          </button>
         </div>
       ) : null}
 
       {showSuggestedTopics && (
         <div className="mpc-topic-area mpc-topic-shelf">
           <div className="mpc-topic-list">
-            {suggestedTopics.map((topic, index) => (
+            {activeSuggestedTopics.map((topic) => (
               <button
                 key={topic.id}
                 type="button"
                 onClick={() => sendMessage(topic.prompt ?? topic.label)}
                 className="mpc-topic-row"
               >
-                <SuggestedTopicIcon variant={suggestedTopicIconVariants[index % suggestedTopicIconVariants.length]} />
+                <SuggestedTopicIcon />
                 <span>{topic.label}</span>
               </button>
             ))}
@@ -1548,7 +2029,7 @@ export function CoAppingChatAssistant({
       )}
 
       {!isDiscoveryMode && <div className="mpc-chat-composer">
-        {isConversationListOpen ? (
+        {isConversationListVisible ? (
           <div className="mpc-conversation-search-row">
             <SearchModeIcon />
             <input

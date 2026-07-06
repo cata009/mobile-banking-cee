@@ -140,7 +140,7 @@ export const RELEASES: Record<ReleaseId, ReleaseMeta> = {
   },
   "release-future-cz-coapping": {
     id: "release-future-cz-coapping",
-    label: "CZ Co-Apping Chatbot",
+    label: "CZ - Chatbot",
     description: "Pinned future feature preview based on the current CZ Mobile PI baseline.",
     status: "active",
   },

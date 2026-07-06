@@ -2,6 +2,12 @@
 
 This log records bananas found and how they were triaged.
 
+## 2026-07-06
+
+| Banana | Triage | Evidence |
+| --- | --- | --- |
+| Normal desktop preview body did not stretch as a flex column, so Level 2 screens such as Account Detail could leave a large empty band below the phone frame | Fixed by making the normal `DemoShell` preview wrapper a flex column so `MobileFrame` receives the full available height and scales the phone larger | `src/app/components/demo/DemoShell.tsx`; in-app browser geometry check confirmed preview container `795px`, phone screen `741px`, balanced top/bottom gaps `27px`; `npm run build`; `npm run audit:templates`; `npm run audit:platform`; `git diff --check` |
+
 ## 2026-06-30
 
 | Banana | Triage | Evidence |

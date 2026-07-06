@@ -7,12 +7,20 @@ export interface CoAppingChatMessage {
   role: CoAppingChatRole;
   text: string;
   time: string;
+  createdAt?: string;
+  isStreaming?: boolean;
 }
 
 export interface CoAppingSuggestedTopic {
   id: string;
   label: string;
   prompt?: string;
+}
+
+export interface CoAppingChatContext {
+  id: string;
+  title: string;
+  suggestedTopics?: CoAppingSuggestedTopic[];
 }
 
 export interface CoAppingChatLabels {
