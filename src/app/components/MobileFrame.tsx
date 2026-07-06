@@ -125,7 +125,7 @@ export default function MobileFrame({
               <DynamicIsland variant={statusBarVariant} />
 
               {overlay && (
-                <div className="pointer-events-none absolute inset-0 z-[100]">
+                <div className="pointer-events-none absolute inset-0 z-[43]">
                   {overlay}
                 </div>
               )}
