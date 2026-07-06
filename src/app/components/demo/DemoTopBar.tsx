@@ -13,13 +13,27 @@ import { useDemo } from "@/app/state/demoStore";
 import type { CountryId, DesignSystemId, ProductId, ReleaseId } from "@/app/state/demoTypes";
 import { QRCodeSVG } from "qrcode.react";
 import { AppIcon, type IconName } from "@/app/components/icons";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/app/components/ui/dropdown-menu";
 import { withFramelessParam, withShareAccessTokenParam } from "@/app/utils/deepLink";
 import { DemoFeatureSidePanel } from "./DemoFeatureSidePanel";
-import { PhoneScreenshotControl } from "./PhoneScreenshotControl";
+import { PhoneScreenshotMenuItems } from "./PhoneScreenshotControl";
 import svgPaths from "@/imports/svg-pn3y56bdut";
 
 type PlatformTabId = "demo" | "flows" | "design-system";
 type PlatformNavIcon = IconName | "demo-app";
+
+interface DemoTopBarProps {
+  onOpenFocusMode?: () => void;
+}
 
 const PRODUCT_SELECTOR_LABELS: Record<ProductId, string> = {
   PI: "PI App",
@@ -65,7 +79,7 @@ function getLocalShareAccessToken() {
   return import.meta.env.DEV ? "local-dev-share-access" : null;
 }
 
-export function DemoTopBar() {
+export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
   const {
     product,
     country,
@@ -476,9 +490,11 @@ export function DemoTopBar() {
             <ScenarioModeSwitch value={scenario} onChange={setScenario} />
 
             <div className="flex min-w-0 items-center justify-end gap-2">
-              <PhoneScreenshotControl />
-
               <HeaderIconButton icon="demo-reset" label="Refresh" onClick={handleReset} />
+
+              {onOpenFocusMode && (
+                <HeaderIconButton icon="play" label="Open large demo" onClick={onOpenFocusMode} />
+              )}
 
               <div className="relative" ref={shareRef}>
                 <HeaderIconButton
@@ -537,16 +553,11 @@ export function DemoTopBar() {
                 )}
               </div>
 
-              <ThemeModeButton
-                mode={themeMode}
-                onClick={() => setThemeMode(themeMode === "light" ? "dark" : "light")}
-              />
-
-              <HeaderIconButton
-                icon="demo-settings"
-                label="Settings"
+              <HeaderMoreMenu
                 active={isControlPanelOpen}
-                onClick={() => setIsControlPanelOpen(!isControlPanelOpen)}
+                themeMode={themeMode}
+                onToggleThemeMode={() => setThemeMode(themeMode === "light" ? "dark" : "light")}
+                onOpenSettings={() => setIsControlPanelOpen(true)}
               />
             </div>
           </div>
@@ -558,6 +569,74 @@ export function DemoTopBar() {
         onClose={() => setIsControlPanelOpen(false)}
       />
     </>
+  );
+}
+
+function HeaderMoreMenu({
+  active,
+  themeMode,
+  onToggleThemeMode,
+  onOpenSettings,
+}: {
+  active: boolean;
+  themeMode: "light" | "dark";
+  onToggleThemeMode: () => void;
+  onOpenSettings: () => void;
+}) {
+  const itemClassName =
+    "cursor-pointer rounded-[6px] px-3 py-2.5 font-['UniCredit:Bold',sans-serif] text-[14px] leading-none text-[var(--uc-text)] focus:bg-[var(--uc-surface-muted)] focus:text-[var(--uc-text)]";
+  const iconSlotClassName = "grid size-[20px] shrink-0 place-items-center text-[var(--uc-text-muted)]";
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label="More actions"
+          title="More actions"
+          className={`grid size-[36px] place-items-center rounded-[6px] transition-colors ${
+            active
+              ? "bg-[color-mix(in_srgb,var(--uc-action)_12%,var(--uc-surface))] text-[var(--uc-action)]"
+              : "text-[var(--uc-text)] hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-action)]"
+          }`}
+        >
+          <AppIcon name="more-horizontal" size={20} />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="z-[10000] min-w-[220px] rounded-xl border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-1.5 text-[var(--uc-text)] shadow-xl"
+        sideOffset={8}
+      >
+        <DropdownMenuItem className={itemClassName} onSelect={onOpenSettings}>
+          <span className={iconSlotClassName}>
+            <AppIcon name="demo-settings" size={18} />
+          </span>
+          <span>Settings</span>
+        </DropdownMenuItem>
+
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className={`${itemClassName} data-[state=open]:bg-[var(--uc-surface-muted)]`}>
+            <span className={iconSlotClassName}>
+              <AppIcon name="camera" size={18} />
+            </span>
+            <span>Screenshots</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="z-[10001] min-w-[218px] rounded-xl border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-1.5 text-[var(--uc-text)] shadow-xl">
+            <PhoneScreenshotMenuItems itemClassName={itemClassName} />
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+
+        <DropdownMenuSeparator className="mx-1 bg-[var(--uc-border-muted)]" />
+
+        <DropdownMenuItem className={itemClassName} onSelect={onToggleThemeMode}>
+          <span className={iconSlotClassName}>
+            <ThemeModeIcon mode={themeMode} />
+          </span>
+          <span>{themeMode === "light" ? "Light mode" : "Dark mode"}</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

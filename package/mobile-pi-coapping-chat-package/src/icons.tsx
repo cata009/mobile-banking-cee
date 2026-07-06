@@ -10,15 +10,18 @@ import {
   Landmark,
   LineChart,
   MapPin,
-  MessageSquareText,
   Mic,
   MonitorUp,
   MoreHorizontal,
+  Pencil,
   Plus,
   Search,
   Send,
   ShieldCheck,
+  Share2,
+  Sparkles,
   Tag,
+  Trash2,
   X,
 } from "lucide-react";
 
@@ -53,6 +56,38 @@ export function ChatBubbleIcon() {
   );
 }
 
+export function ExportIcon({ variant = "mono" }: { variant?: "mono" | "color" } = {}) {
+  const isColor = variant === "color";
+  const mainFill = isColor ? "url(#mpc-export-main-gradient)" : "currentColor";
+  const accentFill = isColor ? "url(#mpc-export-accent-gradient)" : "currentColor";
+
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72" fill="none" aria-hidden="true">
+      {isColor ? (
+        <defs>
+          <linearGradient id="mpc-export-main-gradient" x1="12" y1="8" x2="58" y2="64" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#00a7b3" />
+            <stop offset="0.52" stopColor="#008c95" />
+            <stop offset="1" stopColor="#0072ce" />
+          </linearGradient>
+          <linearGradient id="mpc-export-accent-gradient" x1="55" y1="4" x2="70" y2="20" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#004f95" />
+            <stop offset="1" stopColor="#0072ce" />
+          </linearGradient>
+        </defs>
+      ) : null}
+      <path
+        d="M36 0C40.1009 27.3466 44.6534 31.8991 72 36C44.6534 40.1009 40.1009 44.6534 36 72C31.8991 44.6534 27.3466 40.1009 0 36C27.3466 31.8991 31.8991 27.3466 36 0Z"
+        fill={mainFill}
+      />
+      <path
+        d="M62.1468 4.5459C63.0102 10.3031 63.9686 11.2615 69.7258 12.1248C63.9686 12.9882 63.0102 13.9466 62.1468 19.7038C61.2835 13.9466 60.3251 12.9882 54.5679 12.1248C60.3251 11.2615 61.2835 10.3031 62.1468 4.5459Z"
+        fill={accentFill}
+      />
+    </svg>
+  );
+}
+
 export function BackIcon() {
   return <ArrowLeft size={24} strokeWidth={3} aria-hidden="true" />;
 }
@@ -62,19 +97,19 @@ export function AddIcon() {
 }
 
 export function CameraIcon() {
-  return <Camera size={18} strokeWidth={2.4} aria-hidden="true" />;
+  return <Camera size={16} strokeWidth={1.9} aria-hidden="true" />;
 }
 
 export function PhotosIcon() {
-  return <Images size={18} strokeWidth={2.4} aria-hidden="true" />;
+  return <Images size={16} strokeWidth={1.9} aria-hidden="true" />;
 }
 
 export function FileAttachmentIcon() {
-  return <FileText size={18} strokeWidth={2.4} aria-hidden="true" />;
+  return <FileText size={16} strokeWidth={1.9} aria-hidden="true" />;
 }
 
 export function SendIcon() {
-  return <Send size={20} fill="currentColor" strokeWidth={2.2} aria-hidden="true" />;
+  return <Send size={17} fill="currentColor" strokeWidth={1.8} aria-hidden="true" />;
 }
 
 export function MicrophoneIcon() {
@@ -90,11 +125,32 @@ export function CloseIcon() {
 }
 
 export function ConversationsIcon() {
-  return <MessageSquareText size={22} strokeWidth={2.2} aria-hidden="true" />;
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <path d="M4 6H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M4 12H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
 }
 
 export function MoreIcon() {
   return <MoreHorizontal size={22} strokeWidth={2.4} aria-hidden="true" />;
+}
+
+export function ShareActionIcon() {
+  return <Share2 size={16} strokeWidth={1.9} aria-hidden="true" />;
+}
+
+export function RenameActionIcon() {
+  return <Pencil size={16} strokeWidth={1.9} aria-hidden="true" />;
+}
+
+export function DeleteActionIcon() {
+  return <Trash2 size={16} strokeWidth={1.9} aria-hidden="true" />;
+}
+
+export function ThinkingStatusIcon() {
+  return <Sparkles size={18} strokeWidth={2.4} aria-hidden="true" />;
 }
 
 export function SearchModeIcon() {
@@ -105,7 +161,16 @@ export function DiscoveryModeIcon() {
   return <Compass size={20} strokeWidth={2.3} aria-hidden="true" />;
 }
 
-export function SuggestedTopicIcon({ variant }: { variant: "payments" | "offers" | "security" | "insights" }) {
+export function SuggestedTopicIcon({ variant }: { variant?: "payments" | "offers" | "security" | "insights" } = {}) {
+  if (!variant) {
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+        <rect x="4.5" y="4.9" width="13" height="12.2" rx="2.2" stroke="currentColor" strokeWidth="1.55" />
+        <path d="M8.2 9.1H13.8" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" />
+        <path d="M8.2 13H12.4" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" />
+      </svg>
+    );
+  }
   if (variant === "offers") return <Tag size={22} strokeWidth={2.2} aria-hidden="true" />;
   if (variant === "security") return <ShieldCheck size={22} strokeWidth={2.2} aria-hidden="true" />;
   if (variant === "insights") return <LineChart size={22} strokeWidth={2.2} aria-hidden="true" />;

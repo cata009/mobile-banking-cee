@@ -23,6 +23,7 @@ interface CardDetailScreenProps {
   selectedCardId?: string | null;
   onBack: () => void;
   onTransactionClick?: (transaction: AccountTransaction, product: Product) => void;
+  onHelpClick?: () => void;
 }
 
 const CARD_WIDTH = 219;
@@ -102,6 +103,7 @@ export default function CardDetailScreen({
   selectedCardId,
   onBack,
   onTransactionClick,
+  onHelpClick,
 }: CardDetailScreenProps) {
   const { country, amountsHidden } = useDemo();
   const { t } = useLanguage();
@@ -359,7 +361,7 @@ export default function CardDetailScreen({
   if (!activeCard) {
     return (
       <div className="h-full w-full bg-[var(--uc-surface)]">
-        <CollapsingCardHeader progress={1} onBack={onBack} />
+        <CollapsingCardHeader progress={1} onBack={onBack} onHelpClick={onHelpClick} />
       </div>
     );
   }
@@ -377,7 +379,7 @@ export default function CardDetailScreen({
       className="h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] pb-[32px] scrollbar-hide"
       onScroll={handlePageScroll}
     >
-      <CollapsingCardHeader progress={headerProgress} onBack={onBack} />
+      <CollapsingCardHeader progress={headerProgress} onBack={onBack} onHelpClick={onHelpClick} />
 
       {/* ── Top section: app-bg color ───────────────────────────── */}
       <div className="bg-[var(--uc-app-bg)]">

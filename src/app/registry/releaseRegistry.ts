@@ -68,7 +68,7 @@ export const RELEASE_BUNDLES: Record<ReleaseId, ReleaseBundle> = {
   },
   "release-future-cz-coapping": {
     id: "release-future-cz-coapping",
-    label: "CZ Co-Apping Chatbot",
+    label: "CZ - Chatbot",
     baseline: "baseline-current",
     releaseCode: "FUTURE",
     features: ["fx_czCoAppingSmartAssistant"],

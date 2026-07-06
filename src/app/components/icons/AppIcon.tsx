@@ -17,6 +17,7 @@ import {
   Lock,
   Palette,
   PiggyBank,
+  Play,
   ReceiptText,
   Repeat2,
   Send,
@@ -1477,6 +1478,15 @@ const LUCIDE_ICONS = {
     height: 24,
     component: Camera,
     usage: ["DomesticPaymentFlowScreens"],
+  },
+  play: {
+    source: "lucide",
+    label: "Play",
+    category: "External Lucide",
+    width: 24,
+    height: 24,
+    component: Play,
+    usage: ["DemoTopBar"],
   },
   landmark: {
     source: "lucide",

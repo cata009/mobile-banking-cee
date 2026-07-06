@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { useNavigationContext, NavigationProvider } from "@/app/contexts/NavigationContext";
+import { useNavigationContext, NavigationProvider, type Screen } from "@/app/contexts/NavigationContext";
 import { LanguageProvider, useLanguage } from "@/app/contexts/LanguageContext";
 import { DemoProvider, useDemo } from "@/app/state/demoStore";
 import { isFeatureActive } from "@/app/state/featureResolver";
@@ -68,7 +68,7 @@ import type { FlowPreviewId } from "@/app/registry/flowPreviewRegistry";
 import { isInvestmentsPortfolioAvailable } from "@/app/utils/investmentsAvailability";
 import { preloadMoreCardImages } from "@/app/config/moreCardAssets";
 import { isKidsHomeCountry } from "@/data/kidsMarketHomeConcepts";
-import { CoAppingChatLauncher } from "../../package/mobile-pi-coapping-chat-package/src";
+import { CoAppingChatLauncher, type CoAppingChatContext } from "../../package/mobile-pi-coapping-chat-package/src";
 import "../../package/mobile-pi-coapping-chat-package/src/coapping.css";
 import type { AccountTransaction } from "@/data/accountDetails";
 import {
@@ -99,6 +99,246 @@ const DESIGN_SYSTEM_HASHES = new Set([
   "colors",
   "color-audit",
 ]);
+
+type CzChatHelpArea = "documents" | "account" | "card";
+type CzChatLauncherVariant = "bubble" | "edge-tab";
+
+const CZ_CHAT_LEVEL_ONE_SCREENS = new Set<Screen>([
+  "homepage",
+  "analytics",
+  "payments",
+  "products",
+  "more",
+]);
+
+function buildCzChatHelpContext(area: CzChatHelpArea, id: string): CoAppingChatContext {
+  switch (area) {
+    case "documents":
+      return {
+        id,
+        title: "How can I help you with Documents?",
+        suggestedTopics: [
+          {
+            id: "documents-confirmation",
+            label: "Find a payment confirmation",
+            prompt: "I need help finding a payment confirmation in Documents.",
+          },
+          {
+            id: "documents-statements",
+            label: "Search account statements",
+            prompt: "Help me search account statements and older bank documents.",
+          },
+          {
+            id: "documents-legal",
+            label: "Explain legal documents",
+            prompt: "Which document types are legal notices and what can I do with them?",
+          },
+          {
+            id: "documents-share",
+            label: "Share or download a document",
+            prompt: "Can you guide me to share or download a document safely?",
+          },
+        ],
+      };
+    case "account":
+      return {
+        id,
+        title: "How can I help you with this account?",
+        suggestedTopics: [
+          {
+            id: "account-balance",
+            label: "Explain my balance",
+            prompt: "Help me understand available balance versus current balance on this account.",
+          },
+          {
+            id: "account-transaction",
+            label: "Find a transaction",
+            prompt: "Help me find a specific transaction on this account.",
+          },
+          {
+            id: "account-filters",
+            label: "Filter account activity",
+            prompt: "Guide me through filtering account activity by amount, type, or category.",
+          },
+          {
+            id: "account-details",
+            label: "Find account details",
+            prompt: "Where can I find account number, IBAN, and other account details?",
+          },
+        ],
+      };
+    case "card":
+      return {
+        id,
+        title: "How can I help you with this card?",
+        suggestedTopics: [
+          {
+            id: "card-security",
+            label: "Check card security",
+            prompt: "Help me review this card's security settings and recent activity.",
+          },
+          {
+            id: "card-limits",
+            label: "Change card limits",
+            prompt: "Can I change my card limits temporarily for a purchase?",
+          },
+          {
+            id: "card-pin",
+            label: "Find card PIN options",
+            prompt: "Where can I view or manage the PIN for this card?",
+          },
+          {
+            id: "card-transactions",
+            label: "Review card transactions",
+            prompt: "Help me understand or search recent card transactions.",
+          },
+        ],
+      };
+  }
+}
+
+function getCzChatHelpAreaForScreen(screen: Screen): CzChatHelpArea | null {
+  if (screen === "documents") return "documents";
+  if (
+    screen === "account-detail" ||
+    screen === "account-details-info" ||
+    screen === "account-options" ||
+    screen === "transaction-detail"
+  ) {
+    return "account";
+  }
+  if (screen === "card-detail") return "card";
+  return null;
+}
+
+function buildCzChatScreenContext(screen: Screen, id: string): CoAppingChatContext | null {
+  const helpArea = getCzChatHelpAreaForScreen(screen);
+  if (helpArea) return buildCzChatHelpContext(helpArea, id);
+
+  switch (screen) {
+    case "domestic-payment":
+    case "payment-review":
+    case "payment-sign":
+    case "payment-success":
+      return {
+        id,
+        title: "How can I help you with this payment?",
+        suggestedTopics: [
+          {
+            id: "payment-check",
+            label: "Check this payment step",
+            prompt: "Help me understand what I should check before I continue this payment.",
+          },
+          {
+            id: "payment-limits",
+            label: "Explain limits and fees",
+            prompt: "Explain the relevant payment limits, fees, and timing for this transfer.",
+          },
+          {
+            id: "payment-signing",
+            label: "What happens after signing?",
+            prompt: "What happens after I sign this payment and how can I track it?",
+          },
+        ],
+      };
+    case "investments":
+    case "investments-history":
+      return {
+        id,
+        title: "How can I help you with Investments?",
+        suggestedTopics: [
+          {
+            id: "investments-portfolio",
+            label: "Review portfolio context",
+            prompt: "Help me understand the key things to review in my investment portfolio.",
+          },
+          {
+            id: "investments-history",
+            label: "Explain history filters",
+            prompt: "Explain how I can read and filter my investment history.",
+          },
+          {
+            id: "investments-risk",
+            label: "Compare risk and currency",
+            prompt: "What should I compare before choosing an investment product?",
+          },
+        ],
+      };
+    case "messages":
+      return {
+        id,
+        title: "How can I help you with Messages?",
+        suggestedTopics: [
+          {
+            id: "messages-find",
+            label: "Find a message",
+            prompt: "Help me find a specific inbox or outbox message.",
+          },
+          {
+            id: "messages-explain",
+            label: "Explain message types",
+            prompt: "Explain the difference between inbox, outbox, and bank notifications.",
+          },
+        ],
+      };
+    case "prime":
+      return {
+        id,
+        title: "How can I help you with Prime?",
+        suggestedTopics: [
+          {
+            id: "prime-benefits",
+            label: "Explain Prime benefits",
+            prompt: "Explain what Prime can help with in this banking app.",
+          },
+          {
+            id: "prime-contact",
+            label: "Contact my advisor",
+            prompt: "Help me understand how to contact or prepare questions for my advisor.",
+          },
+        ],
+      };
+    case "settings":
+      return {
+        id,
+        title: "How can I help you with Settings?",
+        suggestedTopics: [
+          {
+            id: "settings-security",
+            label: "Find security settings",
+            prompt: "Help me find and understand the security settings I should review.",
+          },
+          {
+            id: "settings-preferences",
+            label: "Manage app preferences",
+            prompt: "Guide me through the app preferences that matter most.",
+          },
+        ],
+      };
+    case "contacts":
+      return {
+        id,
+        title: "How can I help you with Contacts?",
+        suggestedTopics: [
+          {
+            id: "contacts-support",
+            label: "Find support contact",
+            prompt: "Help me find the right support or branch contact.",
+          },
+          {
+            id: "contacts-advisor",
+            label: "Prepare advisor questions",
+            prompt: "Help me prepare questions before contacting the bank.",
+          },
+        ],
+      };
+    default:
+      return {
+        id,
+        title: "How can I help on this screen?",
+      };
+  }
+}
 
 export default function App() {
   // Parse the shared deep link once, so the whole provider tree boots into the
@@ -197,6 +437,9 @@ function AppContent({
   const isPreloginScreen = currentScreen === "prelogin-inactive" || currentScreen === "prelogin-active";
   const isInAppScreen =
     !isPreloginScreen && currentScreen !== "flow-library" && currentScreen !== "design-system";
+  const czChatLauncherVariant: CzChatLauncherVariant = CZ_CHAT_LEVEL_ONE_SCREENS.has(currentScreen)
+    ? "bubble"
+    : "edge-tab";
   const isPiRuntimeContext = product === "PI" && designSystem === "current";
   const isRoKidsRuntimeContext = product === "KIDS_PI" && country === "RO" && designSystem === "current";
   const isMarketKidsRuntimeContext =
@@ -224,6 +467,8 @@ function AppContent({
   const [selectedFlowPreviewId, setSelectedFlowPreviewId] = useState<FlowPreviewId>(parsedDeepLink?.flowId ?? "ro-round-up");
   const [selectedTransaction, setSelectedTransaction] = useState<AccountTransaction | null>(null);
   const [paymentDraft, setPaymentDraft] = useState<DomesticPaymentDraft | null>(null);
+  const [czChatOpen, setCzChatOpen] = useState(false);
+  const [czChatContext, setCzChatContext] = useState<CoAppingChatContext | null>(null);
   const accountProducts = categories.flatMap((category) => category.products);
   const selectedAccountProduct = accountProducts.find((accountProduct) => accountProduct.id === selectedAccountId) ?? accountProducts[0] ?? null;
 
@@ -542,6 +787,20 @@ function AppContent({
     navigateTo("domestic-payment");
   };
 
+  const openCzChatHelp = (area: CzChatHelpArea) => {
+    setCzChatContext(buildCzChatHelpContext(area, `${area}-${Date.now()}`));
+    setCzChatOpen(true);
+  };
+
+  const handleCzChatLauncherOpen = () => {
+    if (czChatLauncherVariant === "bubble") {
+      setCzChatContext(null);
+      return;
+    }
+
+    setCzChatContext(buildCzChatScreenContext(currentScreen, `${currentScreen}-${Date.now()}`));
+  };
+
   const handleDomesticPaymentNext = (nextDraft: DomesticPaymentDraft) => {
     setPaymentDraft(nextDraft);
     navigateTo("payment-review");
@@ -667,6 +926,7 @@ function AppContent({
             onDetailsClick={handleAccountDetailsClick}
             onOptionsClick={handleAccountOptionsClick}
             onTransactionClick={handleTransactionClick}
+            onHelpClick={isCzCoAppingChatbotPreviewActive ? () => openCzChatHelp("account") : undefined}
           />
         )}
 
@@ -696,6 +956,7 @@ function AppContent({
             selectedCardId={selectedCardId}
             onBack={goBack}
             onTransactionClick={handleTransactionClick}
+            onHelpClick={isCzCoAppingChatbotPreviewActive ? () => openCzChatHelp("card") : undefined}
           />
         )}
 
@@ -721,7 +982,10 @@ function AppContent({
         )}
 
         {currentScreen === "documents" && (
-          <DocumentsScreen onBack={goBack} />
+          <DocumentsScreen
+            onBack={goBack}
+            onHelpClick={isCzCoAppingChatbotPreviewActive ? () => openCzChatHelp("documents") : undefined}
+          />
         )}
 
         {currentScreen === "settings" && (
@@ -814,7 +1078,14 @@ function AppContent({
         )}
         
         {isCzCoAppingChatbotPreviewActive && isInAppScreen && (
-          <CoAppingChatLauncher buttonLabel="Open CZ Co-Apping Chatbot" />
+          <CoAppingChatLauncher
+            buttonLabel="Open CZ - Chatbot"
+            variant={czChatLauncherVariant}
+            open={czChatOpen}
+            onOpenChange={setCzChatOpen}
+            onLauncherOpen={handleCzChatLauncherOpen}
+            entryContext={czChatContext}
+          />
         )}
 
         {/* Terminate Session Popup - overlay peste tot când vrei să termini sesiunea */}

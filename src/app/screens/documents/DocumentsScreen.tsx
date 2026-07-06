@@ -8,6 +8,7 @@ import { getDocumentsConfigForCountry, type DocumentListItem } from "@/app/confi
 
 interface DocumentsScreenProps {
   onBack: () => void;
+  onHelpClick?: () => void;
 }
 
 function DocumentsSectionTitle({ children }: { children: string }) {
@@ -174,7 +175,7 @@ function DocumentListRow({
   );
 }
 
-export default function DocumentsScreen({ onBack }: DocumentsScreenProps) {
+export default function DocumentsScreen({ onBack, onHelpClick }: DocumentsScreenProps) {
   const country = useCountry();
   const { t } = useLanguage();
   const config = getDocumentsConfigForCountry(country);
@@ -264,6 +265,7 @@ export default function DocumentsScreen({ onBack }: DocumentsScreenProps) {
         <PageHeader
           title={t("runtime.documents.title", config.title)}
           onBack={onBack}
+          onHelpClick={onHelpClick}
           collapsedTitleProgress={headerProgress}
           includeSafeArea
         />
