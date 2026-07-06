@@ -6,6 +6,7 @@ This log records bananas found and how they were triaged.
 
 | Banana | Triage | Evidence |
 | --- | --- | --- |
+| CZ Chatbot frame overlay initially captured unrelated screen clicks and the right-edge tab could be visually clipped by scrollable screen content | Fixed by mounting the launcher in the phone-frame overlay, setting the overlay wrapper to `pointer-events: none`, restoring `pointer-events: auto` only on the launcher/assistant, and extending the SVG edge shape past the phone edge | `src/app/App.tsx`; `src/app/components/MobileFrame.tsx`; `src/app/components/FramelessDeviceFrame.tsx`; `package/mobile-pi-coapping-chat-package/src/coapping.css`; `npm run build`; `git diff --check`; in-app browser hit-test smoke |
 | Normal desktop preview body did not stretch as a flex column, so Level 2 screens such as Account Detail could leave a large empty band below the phone frame | Fixed by making the normal `DemoShell` preview wrapper a flex column so `MobileFrame` receives the full available height and scales the phone larger | `src/app/components/demo/DemoShell.tsx`; in-app browser geometry check confirmed preview container `795px`, phone screen `741px`, balanced top/bottom gaps `27px`; `npm run build`; `npm run audit:templates`; `npm run audit:platform`; `git diff --check` |
 
 ## 2026-06-30

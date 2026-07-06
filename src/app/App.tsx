@@ -68,7 +68,11 @@ import type { FlowPreviewId } from "@/app/registry/flowPreviewRegistry";
 import { isInvestmentsPortfolioAvailable } from "@/app/utils/investmentsAvailability";
 import { preloadMoreCardImages } from "@/app/config/moreCardAssets";
 import { isKidsHomeCountry } from "@/data/kidsMarketHomeConcepts";
-import { CoAppingChatLauncher, type CoAppingChatContext } from "../../package/mobile-pi-coapping-chat-package/src";
+import {
+  CoAppingChatLauncher,
+  type CoAppingChatAction,
+  type CoAppingChatContext,
+} from "../../package/mobile-pi-coapping-chat-package/src";
 import "../../package/mobile-pi-coapping-chat-package/src/coapping.css";
 import type { AccountTransaction } from "@/data/accountDetails";
 import {
@@ -437,9 +441,8 @@ function AppContent({
   const isPreloginScreen = currentScreen === "prelogin-inactive" || currentScreen === "prelogin-active";
   const isInAppScreen =
     !isPreloginScreen && currentScreen !== "flow-library" && currentScreen !== "design-system";
-  const czChatLauncherVariant: CzChatLauncherVariant = CZ_CHAT_LEVEL_ONE_SCREENS.has(currentScreen)
-    ? "bubble"
-    : "edge-tab";
+  const isCzChatLevelOneScreen = CZ_CHAT_LEVEL_ONE_SCREENS.has(currentScreen);
+  const czChatLauncherVariant: CzChatLauncherVariant = "edge-tab";
   const isPiRuntimeContext = product === "PI" && designSystem === "current";
   const isRoKidsRuntimeContext = product === "KIDS_PI" && country === "RO" && designSystem === "current";
   const isMarketKidsRuntimeContext =
@@ -793,12 +796,34 @@ function AppContent({
   };
 
   const handleCzChatLauncherOpen = () => {
-    if (czChatLauncherVariant === "bubble") {
+    if (isCzChatLevelOneScreen) {
       setCzChatContext(null);
       return;
     }
 
     setCzChatContext(buildCzChatScreenContext(currentScreen, `${currentScreen}-${Date.now()}`));
+  };
+
+  const handleCzChatAction = (action: CoAppingChatAction) => {
+    if (action.type !== "navigate" || !action.target) return;
+
+    switch (action.target) {
+      case "investments":
+        navigateTo("investments");
+        break;
+      case "investments-history":
+        navigateTo("investments-history");
+        break;
+      case "analytics":
+        navigateTo("analytics");
+        break;
+      case "card-detail":
+        navigateTo("card-detail");
+        break;
+      case "products":
+        navigateTo("products");
+        break;
+    }
   };
 
   const handleDomesticPaymentNext = (nextDraft: DomesticPaymentDraft) => {
@@ -821,6 +846,18 @@ function AppContent({
   // In device mode the app is rendered fullscreen (no bezel); otherwise the
   // desktop preview shows it inside the simulated phone frame.
   const FrameComponent = deviceMode ? FramelessDeviceFrame : MobileFrame;
+  const czChatLayer =
+    isCzCoAppingChatbotPreviewActive && isInAppScreen ? (
+      <CoAppingChatLauncher
+        buttonLabel="Open CZ - Chatbot"
+        variant={czChatLauncherVariant}
+        open={czChatOpen}
+        onOpenChange={setCzChatOpen}
+        onLauncherOpen={handleCzChatLauncherOpen}
+        onAction={handleCzChatAction}
+        entryContext={czChatContext}
+      />
+    ) : null;
 
   return (
     <>
@@ -847,6 +884,7 @@ function AppContent({
       <FrameComponent
         statusBarVariant={getStatusBarVariant()}
         isCoAppingActive={isCoAppingActive && coAppingAvailable}
+        overlay={czChatLayer}
       >
         <Suspense fallback={<ScreenFallback />}>
         {isSupportedRuntimeContext ? (
@@ -1077,17 +1115,6 @@ function AppContent({
           />
         )}
         
-        {isCzCoAppingChatbotPreviewActive && isInAppScreen && (
-          <CoAppingChatLauncher
-            buttonLabel="Open CZ - Chatbot"
-            variant={czChatLauncherVariant}
-            open={czChatOpen}
-            onOpenChange={setCzChatOpen}
-            onLauncherOpen={handleCzChatLauncherOpen}
-            entryContext={czChatContext}
-          />
-        )}
-
         {/* Terminate Session Popup - overlay peste tot când vrei să termini sesiunea */}
         {showTerminatePopup && (
           <TerminateSessionPopup
