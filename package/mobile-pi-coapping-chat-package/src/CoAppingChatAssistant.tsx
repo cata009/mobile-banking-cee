@@ -474,33 +474,6 @@ function RichBlocks({
   );
 }
 
-function ChatStatusBar() {
-  return (
-    <div className="mpc-chat-status-bar" aria-hidden="true">
-      <span className="mpc-chat-status-time">{getCurrentTime()}</span>
-      <span className="mpc-chat-status-island">
-        <span />
-        <span />
-      </span>
-      <span className="mpc-chat-status-icons">
-        <span className="mpc-chat-signal">
-          <span />
-          <span />
-          <span />
-          <span />
-        </span>
-        <span className="mpc-chat-wifi">
-          <span />
-          <span />
-        </span>
-        <span className="mpc-chat-battery">
-          <span />
-        </span>
-      </span>
-    </div>
-  );
-}
-
 function BubbleMessage({
   message,
   onAction,
@@ -2440,7 +2413,6 @@ export function CoAppingChatAssistant({
       style={sheetStyle}
       aria-label="CZ chatbot"
     >
-      <ChatStatusBar />
       <div
         className="mpc-sheet-grabber"
         aria-label="Drag down to close chat"
