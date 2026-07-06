@@ -2,6 +2,45 @@
 
 Last updated: 2026-07-06
 
+## 2026-07-06 Stakeholder Header App/Country Consolidation
+
+- Latest request handled: user asked to merge the `PI App` / `SME App` / `Kids App` selector with the country selector, so the first-row label reads like `PI - Czech Republic`, `Kids - Hungary`, or `SME - Serbia`, and to move `Baseline` / `Future` into the old country-control position as `Baseline App` / `Future App`.
+- Runtime changes:
+  - `src/app/components/demo/DemoTopBar.tsx` now displays a combined app/country selector in row one, using compact labels `PI`, `SME`, and `Kids` plus the selected country name.
+  - The combined selector dropdown now contains two sections, `App` and `Country`, so app level can be selected first and country can be selected from the same open menu.
+  - The old standalone row-two country dropdown was removed.
+  - The release selector now occupies the left side of row two and displays `Baseline App` or `Future App`.
+  - The future-feature selector remains immediately next to the release selector when `Future App` is active.
+- Verification:
+  - `npm run build` passed on 2026-07-06 after the header/docs update; the known empty `react-vendor` chunk warning remains.
+  - In-app browser smoke on CZ Account Detail confirmed header buttons `PI - Czech Republic`, `Future App`, and `CZ - Chatbot`, with no standalone `Czech Republic` selector button.
+  - In-app browser smoke opened the combined selector and confirmed `App`, `Country`, `PI App`, `SME App`, `Kids App`, and `Hungary` are present.
+  - In-app browser smoke selected `Kids App` then `Hungary` from the same dropdown and confirmed the header changed to `Kids - Hungary`, the URL changed to `product=KIDS_PI&country=HU`, and no standalone country button appeared.
+- Banana Loop result:
+  - fixed: duplicate app/country header controls were consolidated into one selector, reducing header clutter without changing the underlying product/country state model.
+  - triaged: no new follow-up banana was introduced; existing automated two-line-header regression coverage remains a next task.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-06 Level 2 Back Navigation Fallbacks
+
+- Latest request handled: user reported that many Level 2 Back buttons looked broken and did not return to the page they came from, especially when opening a deep-linked account-detail URL.
+- Runtime changes:
+  - `src/app/contexts/NavigationContext.tsx` now defines deterministic fallback parents for direct-entry screens when the navigation stack has no previous screen.
+  - Account and Card detail fallback to Home; Account info/options/transaction detail fallback to Account Detail; Documents/Settings/Contacts fallback to More; Payments flow steps fallback through their logical parent screens; Investments History fallback to Investments.
+  - `canGoBack` now reports true for screens with a deterministic fallback, not only for screens with a populated in-memory stack.
+- Verification:
+  - `npm run build` passed on 2026-07-06; the known empty `react-vendor` chunk warning remains.
+  - In-app browser smoke on direct CZ Account Detail URL `screen=account-detail&account=sav-1` confirmed one Back button and Back changes the URL to `screen=homepage`.
+  - In-app browser smoke on direct CZ Documents URL confirmed Back changes the URL to `screen=more`.
+  - In-app browser smoke on direct CZ Account Details Info URL `screen=account-details-info&account=sav-1` confirmed Back changes the URL to `screen=account-detail&account=sav-1`.
+- safe to resume: yes
+
 ## 2026-07-06 Stakeholder Header More Menu And Focus Preview
 
 - Latest request handled: user asked to consolidate the top-right stakeholder controls into a `More` menu containing `Settings`, `Screenshots`, and `Light mode`, and to add a Play icon before Share that opens the demo in a large modal-style preview.
