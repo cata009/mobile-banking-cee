@@ -42,6 +42,7 @@ Last updated: 2026-07-07
   - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
   - `git diff --check` passed on 2026-07-07 with only normal Windows LF/CRLF warnings.
   - In-app browser smoke on `screen=investments` confirmed `Grow my savings` returns `Goal selected` with `In 3-5 years`, `In 5-10 years`, `Not sure yet`; horizon returns amount chips; amount returns monthly chips; monthly returns `Model portfolio preview`; `See projection` returns `Projection preview` and `Goal simulation`.
+  - Resume verification completed the missing sweep: `Future purchase` and `Long-term reserve` also return `Goal selected` with horizon chips and no generic fallback; `Long-term reserve` was tested after dragging the follow-up shelf first, confirming real clicks after swipe are no longer swallowed.
 - safe to resume: yes
 
 ## 2026-07-07 CZ Chatbot For You Carousel Swipe Fix
