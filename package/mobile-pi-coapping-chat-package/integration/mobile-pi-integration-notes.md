@@ -55,7 +55,7 @@ Use `src/demo/AppExample.tsx` as a working composition example.
 
 ## Replacing The Fake Reply Logic
 
-Pass `resolveReply` to `CoAppingChatLauncher`:
+Pass `resolveReply` to `CoAppingChatLauncher`. Returning a string keeps the package's default contextual enhancement behavior:
 
 ```tsx
 <CoAppingChatLauncher
@@ -70,6 +70,37 @@ Pass `resolveReply` to `CoAppingChatLauncher`:
   }}
 />
 ```
+
+Hosts that already know the current screen, product, account, or country can return a structured reply instead:
+
+```tsx
+<CoAppingChatLauncher
+  resolveReply={async (input, history) => ({
+    text: "### Recent documents\nStart in Documents and use the newest year group first.",
+    richBlocks: [
+      {
+        type: "product-cards",
+        title: "Document routes",
+        body: "Statements, notices, and confirmations stay in Documents.",
+        products: [
+          {
+            id: "documents",
+            title: "Documents",
+            subtitle: "Statements, notices, confirmations",
+            meta: "Open list",
+            tone: "blue",
+          },
+        ],
+      },
+    ],
+    followUps: [
+      { id: "find-confirmation", label: "Find confirmation", prompt: "Help me find a payment confirmation." },
+    ],
+  })}
+/>
+```
+
+Use the structured shape when suggested topics need real cards, action chips, or page-specific data. Use the string shape for a simple backend text response.
 
 ## Styling
 
@@ -86,4 +117,3 @@ The portable package uses CSS variables:
 - `--mpc-font`
 
 Override them at the host screen root if the target project has a different design system.
-

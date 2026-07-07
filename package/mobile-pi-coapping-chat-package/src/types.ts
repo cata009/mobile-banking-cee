@@ -7,7 +7,14 @@ export type CoAppingChatActionTarget =
   | "investments-history"
   | "analytics"
   | "card-detail"
-  | "products";
+  | "products"
+  | "payments"
+  | "documents"
+  | "messages"
+  | "settings"
+  | "contacts"
+  | "prime"
+  | "account-detail";
 
 export interface CoAppingChatAction {
   id: string;
@@ -80,6 +87,18 @@ export type CoAppingRichBlock =
       title: string;
       body: string;
       products: CoAppingRichProductCard[];
+    }
+  | {
+      type: "credit-limit-offer";
+      title: string;
+      body: string;
+      cardName: string;
+      cardDescription: string;
+      currentLimitLabel?: string;
+      currentLimit: string;
+      newLimitLabel?: string;
+      newLimit: string;
+      action?: CoAppingChatAction;
     }
   | {
       type: "spending-insight";
@@ -174,10 +193,14 @@ export interface CoAppingTerminateLabels {
   confirm: string;
 }
 
+export type CoAppingReplyResult =
+  | string
+  | Pick<CoAppingChatMessage, "text" | "richBlocks" | "followUps">;
+
 export type CoAppingReplyResolver = (
   input: string,
   history: CoAppingChatMessage[],
-) => string | Promise<string>;
+) => CoAppingReplyResult | Promise<CoAppingReplyResult>;
 
 export interface CoAppingMenuItem {
   id: string;

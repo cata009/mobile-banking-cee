@@ -67,6 +67,12 @@ import {
 } from "@/app/utils/deepLink";
 import type { FlowPreviewId } from "@/app/registry/flowPreviewRegistry";
 import { isInvestmentsPortfolioAvailable } from "@/app/utils/investmentsAvailability";
+import {
+  buildInvestmentDistributionItems,
+  buildInvestmentHistoryOrders,
+  buildInvestmentSecurities,
+} from "@/app/config/investmentsPortfolioConfig";
+import { getProductCardSheetConfig, getProductsMenuForCountry, type ProductsCardId } from "@/app/config/productsMenuConfig";
 import { preloadMoreCardImages } from "@/app/config/moreCardAssets";
 import { isKidsHomeCountry } from "@/data/kidsMarketHomeConcepts";
 import {
@@ -74,19 +80,25 @@ import {
   type CoAppingChatAction,
   type CoAppingAssistantMode,
   type CoAppingChatContext,
+  type CoAppingFollowUpSuggestion,
   type CoAppingOpportunity,
+  type CoAppingReplyResolver,
+  type CoAppingRichBlock,
   type CoAppingSuggestedTopic,
+  defaultReplyResolver,
 } from "../../package/mobile-pi-coapping-chat-package/src";
 import "../../package/mobile-pi-coapping-chat-package/src/coapping.css";
 import type { AccountTransaction } from "@/data/accountDetails";
+import { createSpendingAnalyticsTimeline } from "@/data/spendingAnalytics";
 import {
   createEmptyDomesticPaymentDraft,
   createRedoDomesticPaymentDraft,
   type DomesticPaymentDraft,
 } from "@/data/paymentFlow";
-import { formatMoneyNumber } from "@/app/registry/countryConfig";
+import { formatMoneyNumber, getCountryConfig } from "@/app/registry/countryConfig";
 import { formatMaskedCardNumber } from "@/app/utils/cardNumber";
-import type { CreditCard, Product } from "@/data/products";
+import type { CreditCard, Product, ProductCategory } from "@/data/products";
+import { getDocumentsConfigForCountry } from "@/app/config/documentsConfig";
 
 // Panel components
 import PanelOverlay from "@/app/components/PanelOverlay";
@@ -123,6 +135,13 @@ const CZ_CHAT_LEVEL_ONE_SCREENS = new Set<Screen>([
   "more",
 ]);
 
+const CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX = "open-products-shelf-card-";
+
+type ProductsShelfFocusRequest = {
+  requestId: number;
+  cardId?: ProductsCardId | null;
+};
+
 function buildCzChatTitle(copy: string): string {
   return `${CZ_CHAT_USER_NAME}, ${copy}`;
 }
@@ -143,8 +162,10 @@ function buildCreditCardOpportunities(
   if (!creditCard) return [];
 
   const currency = creditCard.currency;
-  const creditLimit = `${formatMoneyNumber(creditCard.creditLimit, country)} ${currency}`;
-  const proposedCreditLimit = `${formatMoneyNumber(creditCard.creditLimit + 5000, country)} ${currency}`;
+  const creditLimitAmount = formatMoneyNumber(creditCard.creditLimit, country);
+  const proposedCreditLimitAmount = formatMoneyNumber(creditCard.creditLimit + 5000, country);
+  const creditLimit = `${creditLimitAmount} ${currency}`;
+  const proposedCreditLimit = `${proposedCreditLimitAmount} ${currency}`;
 
   return [
     {
@@ -152,8 +173,8 @@ function buildCreditCardOpportunities(
       priority: "primary",
       tone: "credit",
       eyebrow: "Credit card",
-      title: "Credit limit review available",
-      body: `Your card limit could move from ${creditLimit} to ${proposedCreditLimit}. Check options starts the guided review; nothing changes until you confirm.`,
+      title: "New credit limit for you",
+      body: `Limit offer: ${creditLimitAmount} to ${proposedCreditLimit}.`,
       reason: "Credit card limit increase candidate.",
       relatedItem: {
         title: creditCard.name,
@@ -172,12 +193,1196 @@ function buildCreditCardOpportunities(
       ],
       action: {
         id: "start-credit-limit-review",
-        label: "Check options",
+        label: "I'm interested",
         type: "send-message",
-        prompt: "I want to check credit card limit upgrade options for this card.",
+        prompt: "I'm interested in this credit limit offer.",
       },
     },
   ];
+}
+
+type CzChatSmartReplyOptions = {
+  country: CountryId;
+  categories: ProductCategory[];
+  selectedAccountProduct: Product | null;
+  selectedCardProduct: Product | null;
+  creditCardForOpportunity: CreditCard | null;
+};
+
+function buildCzNavigateAction(
+  id: string,
+  label: string,
+  target: NonNullable<CoAppingChatAction["target"]>,
+): CoAppingChatAction {
+  return {
+    id,
+    label,
+    type: "navigate",
+    target,
+  };
+}
+
+function buildCzChatFollowUp(
+  id: string,
+  label: string,
+  prompt = label,
+): CoAppingFollowUpSuggestion {
+  return {
+    id,
+    label,
+    prompt,
+    action: {
+      id,
+      label,
+      type: "send-message",
+      prompt,
+    },
+  };
+}
+
+function buildCzNavigateFollowUp(
+  id: string,
+  label: string,
+  target: NonNullable<CoAppingChatAction["target"]>,
+): CoAppingFollowUpSuggestion {
+  return {
+    id,
+    label,
+    action: buildCzNavigateAction(id, label, target),
+  };
+}
+
+function getProductsShelfFocusCardId(actionId: string): ProductsCardId | null | undefined {
+  if (actionId.startsWith(CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX)) {
+    return actionId.slice(CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX.length) as ProductsCardId;
+  }
+
+  if (actionId === "cz-open-products-shelf") return null;
+
+  return undefined;
+}
+
+function formatCzChatMoney(amount: number, currency: string, country: CountryId): string {
+  return `${formatMoneyNumber(Math.abs(amount), country)} ${currency}`;
+}
+
+function formatCzChatSignedMoney(amount: number, currency: string, country: CountryId): string {
+  const sign = amount > 0 ? "+" : amount < 0 ? "-" : "";
+  return `${sign}${formatCzChatMoney(amount, currency, country)}`;
+}
+
+function formatCzChatTransactionDate(transaction: AccountTransaction): string {
+  return `${transaction.day} ${transaction.month}`;
+}
+
+function formatCzChatDate(dateValue: string): string {
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return "unknown date";
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+}
+
+function getCzLatestDocument(country: CountryId) {
+  const config = getDocumentsConfigForCountry(country);
+  const group = config.groups[0];
+  const document = group?.items[0];
+
+  if (!group || !document) return null;
+
+  return {
+    date: `${document.day} ${document.month} ${group.year}`,
+    description: document.description,
+    isLegal: Boolean(document.isLegal),
+    isNew: document.badge === "NEW",
+    title: document.title,
+  };
+}
+
+function buildCzChatSmartReplyResolver({
+  country,
+  categories,
+  selectedAccountProduct,
+  selectedCardProduct,
+  creditCardForOpportunity,
+}: CzChatSmartReplyOptions): CoAppingReplyResolver {
+  const localCurrency = getCountryConfig(country).currency;
+  const allProducts = categories.flatMap((category) => category.products);
+  const currentAccounts = allProducts.filter((product) => product.type === "current_account");
+  const savingsProducts = allProducts.filter((product) => product.type === "saving_account");
+  const loansAndMortgages = allProducts.filter((product) => product.type === "loan" || product.type === "mortgage");
+  const investmentProducts = allProducts.filter((product) => product.type === "investment_account");
+  const investmentProduct =
+    allProducts.find((product): product is Extract<Product, { type: "investment_account" }> => product.type === "investment_account") ??
+    null;
+  const investmentSecurities = buildInvestmentSecurities(investmentProducts, country);
+  const investmentOrders = buildInvestmentHistoryOrders(investmentSecurities, country);
+  const latestInvestmentOrder = investmentOrders[0] ?? null;
+  const pendingInvestmentOrders = investmentOrders.filter((order) => order.status === "PENDING");
+  const rejectedInvestmentOrders = investmentOrders.filter((order) => order.status === "REJECTED");
+  const executedInvestmentOrders = investmentOrders.filter((order) => order.status === "EXECUTED");
+  const investmentLocalTotal = investmentSecurities.reduce((sum, security) => sum + security.localValue, 0);
+  const topInvestmentSecurity = [...investmentSecurities].sort((first, second) => second.localValue - first.localValue)[0] ?? null;
+  const topInvestmentShare =
+    topInvestmentSecurity && investmentLocalTotal > 0
+      ? `${Math.round((topInvestmentSecurity.localValue / investmentLocalTotal) * 100)}%`
+      : "n/a";
+  const currencyMix = buildInvestmentDistributionItems(investmentSecurities, "currency")
+    .slice(0, 2)
+    .map((item) => `${item.label} ${item.percent}%`)
+    .join(" / ");
+  const assetClassMix = buildInvestmentDistributionItems(investmentSecurities, "asset-class")
+    .slice(0, 2)
+    .map((item) => `${item.label} ${item.percent}%`)
+    .join(" / ");
+  const primaryAccount =
+    selectedAccountProduct?.type === "current_account"
+      ? selectedAccountProduct
+      : currentAccounts[0] ?? selectedAccountProduct ?? null;
+  const primaryCard =
+    (isCreditCardProduct(selectedCardProduct) ? selectedCardProduct : null) ??
+    creditCardForOpportunity ??
+    allProducts.find(isCreditCardProduct) ??
+    null;
+  const selectedLoan =
+    selectedAccountProduct?.type === "loan" || selectedAccountProduct?.type === "mortgage"
+      ? selectedAccountProduct
+      : loansAndMortgages[0] ?? null;
+  const selectedSavings =
+    selectedAccountProduct?.type === "saving_account" || selectedAccountProduct?.type === "term_deposit"
+      ? selectedAccountProduct
+      : savingsProducts[0] ?? null;
+  const latestDocument = getCzLatestDocument(country);
+  const totalAvailableAmount = allProducts.reduce((sum, product) => {
+    if (product.type === "current_account" || product.type === "saving_account") return sum + product.balance;
+    return sum;
+  }, 0);
+  const totalOwedAmount = loansAndMortgages.reduce((sum, product) => sum + Math.abs(product.balance), 0);
+  const totalAvailable = formatCzChatMoney(totalAvailableAmount, localCurrency, country);
+  const totalOwed = formatCzChatMoney(totalOwedAmount, localCurrency, country);
+  const accountBalance = primaryAccount
+    ? formatCzChatMoney(primaryAccount.balance, primaryAccount.currency, country)
+    : totalAvailable;
+  const savingsBalance = selectedSavings
+    ? formatCzChatMoney(selectedSavings.balance, selectedSavings.currency, country)
+    : totalAvailable;
+  const creditAvailable = primaryCard
+    ? formatCzChatMoney(primaryCard.availableCredit, primaryCard.currency, country)
+    : "not available in this demo profile";
+  const creditLimit = primaryCard
+    ? formatCzChatMoney(primaryCard.creditLimit, primaryCard.currency, country)
+    : "not available in this demo profile";
+  const proposedCreditLimit = primaryCard
+    ? formatCzChatMoney(primaryCard.creditLimit + 5000, primaryCard.currency, country)
+    : "not available in this demo profile";
+  const loanBalance = selectedLoan ? formatCzChatMoney(selectedLoan.balance, selectedLoan.currency, country) : totalOwed;
+  const investmentValue = investmentProduct
+    ? formatCzChatMoney(investmentProduct.balance, investmentProduct.currency, country)
+    : "not available in this demo profile";
+  const investmentReturn = investmentProduct
+    ? `${investmentProduct.totalGainLossPercentage >= 0 ? "+" : ""}${investmentProduct.totalGainLossPercentage.toFixed(2)}%`
+    : "n/a";
+  const investmentGainLoss = investmentProduct
+    ? `${investmentProduct.totalGainLoss >= 0 ? "+" : "-"}${formatCzChatMoney(
+        investmentProduct.totalGainLoss,
+        investmentProduct.currency,
+        country,
+      )}`
+    : "n/a";
+  const latestOrderAmount = latestInvestmentOrder
+    ? formatCzChatMoney(latestInvestmentOrder.amount, latestInvestmentOrder.currency, country)
+    : "n/a";
+  const latestOrderSummary = latestInvestmentOrder
+    ? `${latestInvestmentOrder.orderType} ${latestInvestmentOrder.title}, ${latestInvestmentOrder.status.toLowerCase()}, ${latestOrderAmount} on ${formatCzChatDate(
+        latestInvestmentOrder.date,
+      )}`
+    : "No investment orders are present in this mock profile.";
+  const orderStatusSummary = investmentOrders.length
+    ? `${executedInvestmentOrders.length} executed, ${pendingInvestmentOrders.length} pending, ${rejectedInvestmentOrders.length} rejected`
+    : "No orders";
+  const spendingTimeline = createSpendingAnalyticsTimeline(country, allProducts);
+  const currentSpendingSummary = spendingTimeline.summariesByPeriodKey[spendingTimeline.activePeriodKey];
+  const latestHomeTransactions = currentSpendingSummary?.sourceTransactions.slice(0, 5) ?? [];
+  const latestDebitTransactions = latestHomeTransactions.filter((transaction) => transaction.amount < 0);
+  const latestCreditTransactions = latestHomeTransactions.filter((transaction) => transaction.amount > 0);
+  const largestRecentDebit =
+    [...(currentSpendingSummary?.sourceTransactions ?? [])]
+      .filter((transaction) => transaction.amount < 0 && transaction.pfmCategory !== "Internal")
+      .sort((first, second) => Math.abs(second.amount) - Math.abs(first.amount))[0] ?? null;
+  const pendingRecentTransactions =
+    currentSpendingSummary?.sourceTransactions.filter((transaction) => transaction.status === "Pending").slice(0, 3) ?? [];
+  const topMoneyOutCategory = currentSpendingSummary?.moneyOutCategories[0] ?? null;
+  const latestTransactionLines = latestHomeTransactions.length
+    ? latestHomeTransactions
+        .map((transaction, index) => {
+          const sourceName = transaction.sourceProductName || "Account";
+          const status = transaction.status === "Pending" ? ", pending" : "";
+          return `${index + 1}. **${transaction.label}** — ${formatCzChatSignedMoney(
+            transaction.amount,
+            localCurrency,
+            country,
+          )}, ${formatCzChatTransactionDate(transaction)} from ${sourceName}${status}.`;
+        })
+        .join("\n")
+    : "No recent transactions are available in this demo profile.";
+  const latestTransactionSnapshotBlock: CoAppingRichBlock = {
+    type: "spending-insight",
+    title: "Latest transaction readout",
+    body: currentSpendingSummary
+      ? `Latest activity from ${currentSpendingSummary.periodLabel} ${currentSpendingSummary.yearLabel}, grouped across visible account products.`
+      : "Latest account activity across visible products.",
+    metrics: [
+      { label: "Latest shown", value: `${latestHomeTransactions.length}`, helper: "Transactions" },
+      {
+        label: "Money out",
+        value: formatCzChatMoney(currentSpendingSummary?.spendingTotal ?? 0, localCurrency, country),
+        helper: currentSpendingSummary?.periodLabel ?? "Current period",
+      },
+      {
+        label: "Money in",
+        value: formatCzChatMoney(currentSpendingSummary?.incomeTotal ?? 0, localCurrency, country),
+        helper: latestCreditTransactions.length ? `${latestCreditTransactions.length} incoming in latest set` : "No incoming in latest set",
+      },
+    ],
+    action: buildCzNavigateAction("open-account-from-latest-transactions", "Open Account", "account-detail"),
+  };
+  const unusualSpendingBlock: CoAppingRichBlock = {
+    type: "spending-insight",
+    title: "Spending signals",
+    body: "The assistant should call out large, pending, or category-heavy movements before sending the user elsewhere.",
+    metrics: [
+      {
+        label: "Largest debit",
+        value: largestRecentDebit ? formatCzChatMoney(largestRecentDebit.amount, localCurrency, country) : "n/a",
+        helper: largestRecentDebit?.label ?? "No debit found",
+      },
+      {
+        label: "Top category",
+        value: topMoneyOutCategory
+          ? formatCzChatMoney(topMoneyOutCategory.total, localCurrency, country)
+          : "n/a",
+        helper: topMoneyOutCategory ? `${topMoneyOutCategory.category}, ${topMoneyOutCategory.transactionCount} trx` : "No category",
+      },
+      {
+        label: "Pending",
+        value: `${pendingRecentTransactions.length}`,
+        helper: pendingRecentTransactions[0]?.label ?? "No pending movement",
+      },
+    ],
+    action: buildCzNavigateAction("open-spending-from-unusual-spending", "Open Spending", "analytics"),
+  };
+
+  const homeSnapshotBlock: CoAppingRichBlock = {
+    type: "spending-insight",
+    title: "Homepage money signals",
+    body: "A compact read of the visible Home data, with the next action still kept in the app.",
+    metrics: [
+      { label: "Available", value: totalAvailable, helper: "Current and savings money" },
+      { label: "Owed", value: totalOwed, helper: "Loans and mortgage" },
+      { label: "Card room", value: creditAvailable, helper: primaryCard ? primaryCard.name : "No credit card" },
+    ],
+    action: buildCzNavigateAction("open-spending-from-home", "Open Spending", "analytics"),
+  };
+
+  const documentBlock: CoAppingRichBlock = {
+    type: "product-cards",
+    title: "Document routes",
+    body: latestDocument
+      ? `Newest item in this mock profile: ${latestDocument.description}, ${latestDocument.date}.`
+      : "Documents are grouped by year and newest date first.",
+    products: [
+      {
+        id: "documents",
+        title: "Documents",
+        subtitle: "Statements, notices, confirmations",
+        meta: "Open list",
+        tone: "blue",
+        action: buildCzNavigateAction("open-documents", "Open Documents", "documents"),
+      },
+      {
+        id: "messages",
+        title: "Messages",
+        subtitle: "Bank notifications",
+        meta: "Open inbox",
+        tone: "neutral",
+        action: buildCzNavigateAction("open-messages", "Open Messages", "messages"),
+      },
+    ],
+  };
+
+  const paymentBlock: CoAppingRichBlock = {
+    type: "product-cards",
+    title: "Payment handoff",
+    body: "Use chat to prepare the check, then keep creation, review, and signing in Payments.",
+    products: [
+      {
+        id: "new-payment",
+        title: "New payment",
+        subtitle: "Recipient, amount, review",
+        meta: "Open Payments",
+        tone: "blue",
+        action: buildCzNavigateAction("open-payments", "Open Payments", "payments"),
+      },
+      {
+        id: "documents",
+        title: "Confirmation",
+        subtitle: "After payment is processed",
+        meta: "Open Documents",
+        tone: "neutral",
+        action: buildCzNavigateAction("open-payment-documents", "Open Documents", "documents"),
+      },
+    ],
+  };
+
+  const productsMenu = getProductsMenuForCountry(country);
+  const productShelfCards = productsMenu.products;
+  const productShelfTitle = productsMenu.productsTitle || "OUR PRODUCTS";
+  const productShelfLines = productShelfCards.length
+    ? productShelfCards
+        .map((card) => {
+          const title = card.title.replace(/\n/g, " ");
+          const sheetOptions = getProductCardSheetConfig(card.id, country).options.map((option) => option.title).join(", ");
+          return `- **${title}:** ${sheetOptions}.`;
+        })
+        .join("\n")
+    : "This market does not expose product shelf cards in the current demo profile.";
+  const productShelfBlock: CoAppingRichBlock = {
+    type: "product-cards",
+    title: "Product shelf",
+    body: `Open Products > ${productShelfTitle} to continue from the real shelf.`,
+    products: productShelfCards.slice(0, 5).map((card, index) => {
+      const title = card.title.replace(/\n/g, " ");
+      const subtitle = getProductCardSheetConfig(card.id, country)
+        .options.slice(0, 2)
+        .map((option) => option.title)
+        .join(", ");
+
+      return {
+        id: `product-shelf-${card.id}`,
+        title,
+        subtitle,
+        meta: "Open Products",
+        tone: index === 0 ? "blue" : index === 1 ? "dark" : "neutral",
+        action: buildCzNavigateAction(`${CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX}${card.id}`, "Open Products", "products"),
+      };
+    }),
+  };
+
+  const productsBlock: CoAppingRichBlock = {
+    type: "product-cards",
+    title: "Relevant product areas",
+    body: "The assistant should explain the choice first, then hand off to the real product surface.",
+    products: [
+      {
+        id: "products",
+        title: "Products",
+        subtitle: "Accounts, cards, loans, savings",
+        meta: "Open catalog",
+        tone: "blue",
+        action: buildCzNavigateAction("open-products", "Open Products", "products"),
+      },
+      {
+        id: "card-detail",
+        title: "Credit card",
+        subtitle: primaryCard ? `${creditAvailable} free to spend` : "Card controls",
+        meta: "Open card",
+        tone: "dark",
+        action: buildCzNavigateAction("open-card-detail", "Open Card", "card-detail"),
+      },
+    ],
+  };
+
+  const creditLimitOfferBlock: CoAppingRichBlock = {
+    type: "credit-limit-offer",
+    title: "Card limit offer",
+    body: primaryCard
+      ? `For ${primaryCard.name}, ${formatMaskedCardNumber(primaryCard.accountNumber)}.`
+      : "For the selected credit card.",
+    cardName: primaryCard?.name ?? "Credit Card",
+    cardDescription: primaryCard ? formatMaskedCardNumber(primaryCard.accountNumber) : "Selected card",
+    currentLimit: creditLimit,
+    newLimit: proposedCreditLimit,
+    action: buildCzNavigateAction("open-card-detail-from-limit-offer", "Open card details", "card-detail"),
+  };
+
+  const creditLimitAcceptedBlock: CoAppingRichBlock = {
+    type: "credit-limit-offer",
+    title: "Limit upgrade accepted",
+    body: primaryCard
+      ? `Confirmed for ${primaryCard.name}, ${formatMaskedCardNumber(primaryCard.accountNumber)}.`
+      : "Confirmed for the selected credit card.",
+    cardName: primaryCard?.name ?? "Credit Card",
+    cardDescription: primaryCard ? formatMaskedCardNumber(primaryCard.accountNumber) : "Selected card",
+    currentLimitLabel: "Accepted limit",
+    currentLimit: proposedCreditLimit,
+    newLimitLabel: "Status",
+    newLimit: "Accepted",
+    action: buildCzNavigateAction("open-card-detail-after-accept", "Open card details", "card-detail"),
+  };
+
+  const investmentPortfolioBlock: CoAppingRichBlock = {
+    type: "investment-summary",
+    eyebrow: "Investments",
+    title: "Portfolio context",
+    body: topInvestmentSecurity
+      ? `Largest holding is ${topInvestmentSecurity.title}. Use performance, ${currencyMix || "currency mix"}, and ${
+          assetClassMix || "asset class mix"
+        } before opening a product or order.`
+      : "Use the portfolio overview before opening a product or order.",
+    metrics: [
+      { label: "Current value", value: investmentValue, helper: investmentProduct?.name ?? "Demo profile" },
+      { label: "Return", value: investmentReturn, helper: investmentGainLoss },
+      { label: "Largest holding", value: topInvestmentShare, helper: topInvestmentSecurity?.title ?? "No holdings" },
+    ],
+    action: buildCzNavigateAction("open-investments", "Open Investments", "investments"),
+  };
+
+  const investmentGoalPortfolioBlock: CoAppingRichBlock = {
+    ...investmentPortfolioBlock,
+    action: undefined,
+  };
+
+  const investmentOrdersBlock: CoAppingRichBlock = {
+    type: "product-cards",
+    title: "Investment order activity",
+    body: `Latest mock order: ${latestOrderSummary}`,
+    products: [
+      {
+        id: "orders",
+        title: "Orders",
+        subtitle: orderStatusSummary,
+        meta: "Open History",
+        tone: "blue",
+        action: buildCzNavigateAction("open-investment-orders", "Open History", "investments-history"),
+      },
+      {
+        id: "portfolio",
+        title: "Portfolio",
+        subtitle: "Value, mix, performance",
+        meta: "Open overview",
+        tone: "neutral",
+        action: buildCzNavigateAction("open-investments-from-orders", "Open Investments", "investments"),
+      },
+    ],
+  };
+
+  const investmentNextMoveBlock: CoAppingRichBlock = {
+    type: "product-cards",
+    title: "Next move planner",
+    body: "A smarter assistant should turn the portfolio readout into a choice: goal setup, order review, or risk cleanup.",
+    products: [
+      {
+        id: "goal",
+        title: "Goal setup",
+        subtitle: "Horizon, amount, monthly habit",
+        meta: "Plan",
+        tone: "blue",
+        action: {
+          id: "plan-investment-goal",
+          label: "Start goal",
+          type: "send-message",
+          prompt: "Start an investment goal.",
+        },
+      },
+      {
+        id: "orders",
+        title: "Orders",
+        subtitle: "Pending, executed, rejected",
+        meta: "Review",
+        tone: "dark",
+        action: {
+          id: "review-investment-orders",
+          label: "Review orders",
+          type: "send-message",
+          prompt: "Review my investment orders.",
+        },
+      },
+    ],
+  };
+
+  const investmentGoalAllocationBlock: CoAppingRichBlock = {
+    type: "investment-allocation",
+    title: "Goal portfolio preview",
+    body: "Illustrative mix based on the current portfolio shape. Final product selection still needs documents, risk profile, and authorization in Investments.",
+    items: buildInvestmentDistributionItems(investmentSecurities, "asset-class")
+      .slice(0, 4)
+      .map((item) => ({
+        label: item.label,
+        value: item.percent,
+        helper: `${formatCzChatMoney(item.value, item.currency, country)} in this mock portfolio`,
+      })),
+  };
+
+  const investmentGoalProjectionBlock: CoAppingRichBlock = {
+    type: "investment-projection",
+    title: "Goal simulation",
+    body: "Illustrative scenario for 10,000 CZK now plus 1,000 CZK monthly. Not a guarantee.",
+    scenarios: [
+      { label: "Lower", value: "64k CZK", detail: "More conservative market path" },
+      { label: "Expected", value: "78k CZK", detail: "Middle scenario", emphasis: true },
+      { label: "Higher", value: "94k CZK", detail: "Stronger market path" },
+    ],
+  };
+
+  const normalize = (input: string) => input.toLowerCase().replace(/\s+/g, " ").trim();
+  const hasAny = (normalized: string, terms: string[]) => terms.some((term) => normalized.includes(term));
+
+  return (input) => {
+    const normalized = normalize(input);
+
+    if (hasAny(normalized, ["continue to confirmation for this credit limit offer", "continue to confirmation", "review final offer", "continue with this offer"])) {
+      return {
+        text:
+          `### Ready to confirm\n` +
+          `Here is the final demo checkpoint before accepting the offer.\n` +
+          `${primaryCard ? `Card: **${primaryCard.name}**, ${formatMaskedCardNumber(primaryCard.accountNumber)}.` : "Card: selected credit card."}\n` +
+          `Current limit: **${creditLimit}**.\n` +
+          `New limit after acceptance: **${proposedCreditLimit}**.\n` +
+          `In a real app this is where eligibility, terms, and strong customer authentication would be shown. In this prototype, use the next action to complete the offer flow.`,
+        richBlocks: [creditLimitOfferBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-limit-offer-accept-final", "Accept new limit", "Accept the new credit limit offer."),
+          buildCzChatFollowUp("cz-limit-offer-repayment", "Explain repayment impact", "Explain repayment impact for this credit limit offer."),
+          buildCzNavigateFollowUp("cz-open-card-from-confirm", "Open card details", "card-detail"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["accept the new credit limit offer", "accept new limit", "confirm new limit", "confirm this offer"])) {
+      return {
+        text:
+          `### Offer accepted\n` +
+          `Done. In this prototype, the credit-limit offer has been accepted for this card.\n` +
+          `${primaryCard ? `The accepted limit is now **${proposedCreditLimit}** for **${primaryCard.name}**.` : `The accepted limit is now **${proposedCreditLimit}**.`}\n` +
+          `A production flow would now show a confirmation receipt, update the card limit, and keep the confirmation available from card activity or Documents.`,
+        richBlocks: [creditLimitAcceptedBlock],
+        followUps: [
+          buildCzNavigateFollowUp("cz-open-card-after-accepted", "Open card details", "card-detail"),
+          buildCzChatFollowUp("cz-limit-offer-next", "What happens next?", "What happens after the credit limit offer is accepted?"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["what happens after the credit limit offer is accepted", "what happens next"])) {
+      return {
+        text:
+          `### After acceptance\n` +
+          `The customer should see three things: the new limit on the card, a confirmation message or receipt, and a clear route back to card details.\n` +
+          `For this demo, the accepted state is represented in chat so the sales journey can be shown end to end. The real integration would update the card product state and generate the official confirmation.`,
+        richBlocks: [creditLimitAcceptedBlock],
+        followUps: [buildCzNavigateFollowUp("cz-open-card-after-next", "Open card details", "card-detail")],
+      };
+    }
+
+    if (hasAny(normalized, ["repayment impact for this credit limit offer", "repayment impact", "impact if i accept"])) {
+      return {
+        text:
+          `### Repayment impact\n` +
+          `A higher limit does not create a payment by itself. It gives the card more available room, so the important question is whether higher spending would still fit your monthly repayment comfort.\n` +
+          `${primaryCard ? `For this card, the limit could move from **${creditLimit}** to **${proposedCreditLimit}**.` : "The final amount is checked in the card flow."}\n` +
+          `Before accepting, I would check:\n` +
+          `1. Recent card spend and upcoming repayments.\n` +
+          `2. Whether you usually repay the full statement or carry balance.\n` +
+          `3. The final terms shown before confirmation.\n` +
+          `Nothing changes from chat; acceptance stays inside the authenticated card flow.`,
+        richBlocks: [creditLimitOfferBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-limit-offer-continue", "Continue to confirmation", "Continue to confirmation for this credit limit offer."),
+          buildCzChatFollowUp("cz-limit-offer-accept-change", "What changes if I accept?", "What changes if I accept this credit limit offer?"),
+          buildCzNavigateFollowUp("cz-open-card-from-impact", "Open card details", "card-detail"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["what changes if i accept this credit limit offer", "what changes if i accept", "accept this offer"])) {
+      return {
+        text:
+          `### If you accept\n` +
+          `The offer starts a guided card-limit flow. The app shows the final proposed limit, the terms, and any confirmation steps before anything changes.\n` +
+          `${primaryCard ? `In this scenario, your current limit is **${creditLimit}** and the new proposed limit is **${proposedCreditLimit}**.` : ""}\n` +
+          `The right UX is: explore in chat, review details in Card, confirm only after the authenticated final screen.`,
+        richBlocks: [creditLimitOfferBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-limit-offer-continue", "Continue to confirmation", "Continue to confirmation for this credit limit offer."),
+          buildCzChatFollowUp("cz-limit-offer-repayment", "Explain repayment impact", "Explain repayment impact for this credit limit offer."),
+          buildCzNavigateFollowUp("cz-open-card-from-accept", "Open card details", "card-detail"),
+        ],
+      };
+    }
+
+    if (
+      hasAny(normalized, [
+        "i'm interested in this credit limit offer",
+        "interested in this credit limit offer",
+        "interested in this offer",
+        "credit limit offer",
+        "credit card limit upgrade options",
+        "limit upgrade options",
+      ])
+    ) {
+      return {
+        text:
+          `### Explore your offer\n` +
+          `Based on this demo profile, the bank has matched your card usage and spending room with a higher limit offer for this credit card.\n` +
+          `${primaryCard ? `Your current limit is **${creditLimit}**. The proposed new limit is **${proposedCreditLimit}**.` : "The exact limit is confirmed in the card flow."}\n` +
+          `You can review the offer without changing anything. I would check repayment comfort and final eligibility first, then hand you to the authenticated card flow if you want to continue.`,
+        richBlocks: [creditLimitOfferBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-limit-offer-repayment", "Explain repayment impact", "Explain repayment impact for this credit limit offer."),
+          buildCzChatFollowUp("cz-limit-offer-accept-change", "What changes if I accept?", "What changes if I accept this credit limit offer?"),
+          buildCzNavigateFollowUp("cz-open-card-from-offer", "Open card details", "card-detail"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["main things i should notice", "financial overview", "homepage overview"])) {
+      return {
+        text:
+          `### Your Home overview\n` +
+          `I would read this page in three passes:\n` +
+          `1. **Available money:** ${totalAvailable}. This is the money shown as usable now across current and savings balances.\n` +
+          `2. **Money owed:** ${totalOwed}. This keeps borrowing visible instead of mixing it with available cash.\n` +
+          `3. **Card capacity:** ${primaryCard ? `${primaryCard.name} has ${creditAvailable} free to spend from a ${creditLimit} limit.` : "No credit card capacity is shown in this profile."}\n` +
+          `The useful next check is not another generic product pitch. It is to confirm whether the recent movement came from everyday spending, a pending card amount, or a document/confirmation that needs attention.`,
+        richBlocks: [homeSnapshotBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-home-latest-transactions", "Review latest 5", "Show me the latest 5 transactions and which account they came from."),
+          buildCzChatFollowUp("cz-home-unusual-spending", "Spot unusual spending", "Check the largest, pending, or category-heavy movements from my latest account activity."),
+          buildCzNavigateFollowUp("cz-open-spending", "Open Spending", "analytics"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["latest 5 transactions", "latest five transactions", "which account they came from", "recent 5 transactions", "latest transactions"])) {
+      return {
+        text:
+          `### Latest 5 transactions\n` +
+          `Here are the latest visible transactions across this Home profile, with the source account included:\n` +
+          `${latestTransactionLines}\n` +
+          `Read this as activity evidence, not a balance explanation: the latest set has ${latestDebitTransactions.length} outgoing and ${latestCreditTransactions.length} incoming movement${
+            latestHomeTransactions.length === 1 ? "" : "s"
+          }. For dispute, receipt, or document proof, open the transaction or Documents rather than relying only on chat.`,
+        richBlocks: [latestTransactionSnapshotBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-home-unusual-from-latest", "Spot unusual spending", "Check the largest, pending, or category-heavy movements from my latest account activity."),
+          buildCzNavigateFollowUp("cz-open-account-from-latest", "Open Account", "account-detail"),
+          buildCzNavigateFollowUp("cz-open-spending-from-latest", "Open Spending", "analytics"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["unusual spending", "largest, pending", "category-heavy", "latest account activity", "spot unusual", "biggest recent movement"])) {
+      const largestDebitLine = largestRecentDebit
+        ? `The largest recent outgoing movement is **${largestRecentDebit.label}** for ${formatCzChatSignedMoney(
+            largestRecentDebit.amount,
+            localCurrency,
+            country,
+          )} on ${formatCzChatTransactionDate(largestRecentDebit)} from ${largestRecentDebit.sourceProductName}.`
+        : "I do not see a recent outgoing movement in this mock profile.";
+      const pendingLine = pendingRecentTransactions.length
+        ? `Pending items to watch: ${pendingRecentTransactions
+            .map((transaction) => `${transaction.label} ${formatCzChatSignedMoney(transaction.amount, localCurrency, country)} from ${transaction.sourceProductName}`)
+            .join("; ")}.`
+        : "I do not see pending transactions in the latest account-activity set.";
+      const categoryLine = topMoneyOutCategory
+        ? `The heaviest money-out category is **${topMoneyOutCategory.category}** with ${formatCzChatMoney(
+            topMoneyOutCategory.total,
+            localCurrency,
+            country,
+          )} across ${topMoneyOutCategory.transactionCount} transaction${topMoneyOutCategory.transactionCount === 1 ? "" : "s"}.`
+        : "There is no money-out category signal to summarize.";
+
+      return {
+        text:
+          `### Unusual spending check\n` +
+          `${largestDebitLine}\n` +
+          `${categoryLine}\n` +
+          `${pendingLine}\n` +
+          `I would use this topic when the customer asks "what looks different?" because it points to concrete movements first, then lets them open Spending or the account for the full list.`,
+        richBlocks: [unusualSpendingBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-home-latest-from-unusual", "Show latest 5", "Show me the latest 5 transactions and which account they came from."),
+          buildCzNavigateFollowUp("cz-open-spending-from-unusual", "Open Spending", "analytics"),
+          buildCzNavigateFollowUp("cz-open-account-from-unusual", "Open Account", "account-detail"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["available balance, owed amount", "available money", "owed amount"])) {
+      return {
+        text:
+          `### Available money, not just balance\n` +
+          `On this Home profile, the key split is:\n` +
+          `- **Available now:** ${totalAvailable}, led by ${primaryAccount ? `${primaryAccount.name} at ${accountBalance}` : "the visible current account"}${selectedSavings ? ` and savings at ${savingsBalance}` : ""}.\n` +
+          `- **Owed:** ${totalOwed}, shown separately so debt does not make the day-to-day cash picture muddy.\n` +
+          `- **Credit card:** ${primaryCard ? `${creditAvailable} is free to spend, but the full card limit is ${creditLimit}.` : "No credit-card limit is available in this profile."}\n` +
+          `If the customer asks "can I spend this?", the assistant should start with available money and pending card movements, not total product value.`,
+        richBlocks: [homeSnapshotBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-home-card-room", "Explain card room", "Explain what free to spend means on my credit card."),
+          buildCzChatFollowUp("cz-home-documents", "Check documents", "Help me find confirmations, statements, or recent bank documents."),
+          buildCzNavigateFollowUp("cz-open-card", "Open Card", "card-detail"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["homepage, what should i review next", "suggest my next action", "review next in the app"])) {
+      return {
+        text:
+          `### Start with recent activity\n` +
+          `The concrete Home check is the latest account movement, not a vague "next best step".\n` +
+          `${latestTransactionLines}\n` +
+          `${largestRecentDebit ? `The biggest outgoing movement in the current activity set is **${largestRecentDebit.label}** for ${formatCzChatSignedMoney(largestRecentDebit.amount, localCurrency, country)} from ${largestRecentDebit.sourceProductName}.` : ""}\n` +
+          `If one of these looks unfamiliar, open the account activity or Spending before jumping to products or documents.`,
+        richBlocks: [latestTransactionSnapshotBlock, unusualSpendingBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-home-latest-from-legacy-next", "Show latest 5", "Show me the latest 5 transactions and which account they came from."),
+          buildCzChatFollowUp("cz-home-unusual-from-legacy-next", "Spot unusual spending", "Check the largest, pending, or category-heavy movements from my latest account activity."),
+          buildCzNavigateFollowUp("cz-open-spending-from-legacy-next", "Open Spending", "analytics"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["what products can i open", "products can i open", "open from product shelf", "open from products shelf", "product shelf", "our products shelf"])) {
+      return {
+        text:
+          `### Products you can open\n` +
+          `From **Products > ${productShelfTitle}**, this CZ demo shelf currently exposes:\n` +
+          `${productShelfLines}\n` +
+          `Use this as catalogue discovery: chat can summarize what is available, but opening, applying, eligibility checks, documents, and confirmation belong in the Products shelf.`,
+        richBlocks: [productShelfBlock],
+        followUps: [
+          buildCzNavigateFollowUp("cz-open-products-shelf", "Open Products", "products"),
+          buildCzChatFollowUp("cz-products-savings-shelf", "Explain savings options", "Help me understand savings and investment product choices."),
+          buildCzChatFollowUp("cz-products-borrowing-shelf", "Review borrowing options", "Help me understand loan or mortgage options before applying."),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["confirmations, statements", "recent bank documents", "payment confirmation in documents", "search account statements", "share or download a document", "legal notices"])) {
+      const newest = latestDocument
+        ? `${latestDocument.description} from ${latestDocument.date}${latestDocument.isNew ? " marked NEW" : ""}`
+        : "the newest document group";
+      return {
+        text:
+          `### Recent documents\n` +
+          `I would start in **Documents**, not in a broad search.\n` +
+          `The newest visible item in this mock profile is **${newest}**.\n` +
+          `Use the list this way:\n` +
+          `1. Start with the newest year group.\n` +
+          `2. Search by document type: confirmation, statement, receipt, legal notice.\n` +
+          `3. Open the row before sharing or deleting. Legal files should explain restrictions before any destructive action.`,
+        richBlocks: [documentBlock],
+        followUps: [
+          buildCzNavigateFollowUp("cz-open-documents", "Open Documents", "documents"),
+          buildCzChatFollowUp("cz-doc-confirmation", "Find confirmation", "I need help finding a payment confirmation in Documents."),
+          buildCzChatFollowUp("cz-doc-legal", "Explain legal files", "Which document types are legal notices and what can I do with them?"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["where my money went", "this month's spending", "compare my spending categories", "reduce spending", "subscriptions", "recurring payments"])) {
+      return {
+        text:
+          `### Spending readout\n` +
+          `A useful answer should separate signal from noise:\n` +
+          `- Compare card payments and recurring merchants first.\n` +
+          `- Then look for category changes instead of listing every transaction.\n` +
+          `- If the goal is to save money, protect fixed payments first and review subscriptions or price changes second.\n` +
+          `For this preview, the best handoff is Spending because it already owns category and recurring-payment context.`,
+        richBlocks: [homeSnapshotBlock],
+        followUps: [
+          buildCzNavigateFollowUp("cz-open-spending", "Open Spending", "analytics"),
+          buildCzChatFollowUp("cz-review-subscriptions", "Review subscriptions", "Help me spot recurring payments or subscriptions in my spending."),
+          buildCzChatFollowUp("cz-find-savings", "Find saving ideas", "Where could I reduce spending without hurting important payments?"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["start a new payment", "start a payment safely", "payment limits", "fees, timing", "signing", "after i sign", "recurring payment", "template makes sense", "payment step"])) {
+      return {
+        text:
+          `### Payment check\n` +
+          `Before sending money, the assistant should check the exact step:\n` +
+          `1. Recipient and account number.\n` +
+          `2. Amount, currency, due date, and message/reference.\n` +
+          `3. Limits, fees, and whether signing is still required.\n` +
+          `For repeated transfers, use a standing order when date and amount are predictable. Use a template when the user wants to review each transfer manually.`,
+        richBlocks: [paymentBlock],
+        followUps: [
+          buildCzNavigateFollowUp("cz-open-payments", "Open Payments", "payments"),
+          buildCzChatFollowUp("cz-payment-confirmation", "Find confirmation", "Help me find or understand a payment confirmation."),
+          buildCzChatFollowUp("cz-standing-order", "Standing order or template?", "Help me decide whether a recurring payment or template makes sense."),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["compare account", "product offers", "relevant offers", "savings and investment product choices", "loan or mortgage options", "product options", "explore savings and investing", "review loan options"])) {
+      return {
+        text:
+          `### Product choice without pushing\n` +
+          `I would split Products into intent, not a catalogue dump:\n` +
+          `- **Everyday banking:** accounts and cards, based on usage and controls.\n` +
+          `- **Saving:** ${selectedSavings ? `${selectedSavings.name} currently shows ${savingsBalance}.` : "start from goal, access rules, and interest."}\n` +
+          `- **Borrowing:** show instalment, remaining amount, fees, and eligibility before any application.\n` +
+          `- **Investing:** explain risk and documents before product selection.\n` +
+          `The assistant can recommend where to look, but the final product action belongs in Products or the product detail screen.`,
+        richBlocks: [productsBlock],
+        followUps: [
+          buildCzNavigateFollowUp("cz-open-products", "Open Products", "products"),
+          buildCzChatFollowUp("cz-compare-savings", "Compare savings", "Help me compare this savings product with other options in the app."),
+          buildCzChatFollowUp("cz-review-borrowing", "Review borrowing", "Help me understand loan or mortgage options before applying."),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["security settings", "app preferences", "contact the bank", "support route", "branch", "consents", "third-party access", "applications"])) {
+      return {
+        text:
+          `### Service route\n` +
+          `For More, the answer should route the customer by task:\n` +
+          `- Documents for statements, confirmations, contracts, and legal notices.\n` +
+          `- Settings for security and app preferences.\n` +
+          `- Contacts for branch, support, or advisor preparation.\n` +
+          `- Consents and applications for third-party access or active requests.\n` +
+          `That is more useful than listing every More tile in the same order.`,
+        richBlocks: [documentBlock],
+        followUps: [
+          buildCzNavigateFollowUp("cz-open-documents", "Open Documents", "documents"),
+          buildCzNavigateFollowUp("cz-open-settings", "Open Settings", "settings"),
+          buildCzNavigateFollowUp("cz-open-contacts", "Open Contacts", "contacts"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["available balance versus current balance", "specific transaction on this account", "filtering account activity", "account number, iban", "account details"])) {
+      return {
+        text:
+          `### Account help\n` +
+          `${primaryAccount ? `I am looking at **${primaryAccount.name}**, currently ${accountBalance}.` : "Start from the selected account detail."}\n` +
+          `For balance questions, compare available/current balance and then inspect pending or recent transactions.\n` +
+          `For transaction questions, search by merchant, amount, category, or date window.\n` +
+          `For sharing details, open Account details so IBAN/account number copy stays inside the authenticated app surface.`,
+        richBlocks: [homeSnapshotBlock],
+        followUps: [
+          buildCzNavigateFollowUp("cz-open-account", "Open Account", "account-detail"),
+          buildCzChatFollowUp("cz-account-filter", "Filter activity", "Guide me through filtering account activity by amount, type, or category."),
+          buildCzChatFollowUp("cz-account-doc", "Find related document", "Help me find confirmations, statements, or recent bank documents."),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["card security", "security settings and recent activity", "card limits", "temporarily for a purchase", "pin for this card", "card transactions", "free to spend"])) {
+      return {
+        text:
+          `### Card check\n` +
+          `${primaryCard ? `${primaryCard.name} shows ${creditAvailable} free to spend from a ${creditLimit} limit.` : "Start from the selected card detail."}\n` +
+          `The useful checks are:\n` +
+          `1. Recent card transactions and pending reservations.\n` +
+          `2. Online, contactless, ATM, and temporary limit controls.\n` +
+          `3. PIN/security options, with sensitive actions kept behind app authorization.\n` +
+          `${primaryCard ? `If the user is interested, the limit-review path can explain a possible ${proposedCreditLimit} ceiling without changing anything from chat.` : ""}`,
+        richBlocks: [productsBlock],
+        followUps: [
+          buildCzNavigateFollowUp("cz-open-card", "Open Card", "card-detail"),
+          buildCzChatFollowUp("cz-limit-review", "Review limit option", "I'm interested in this credit limit offer."),
+          buildCzChatFollowUp("cz-card-transactions", "Search card activity", "Help me understand or search recent card transactions."),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["savings product", "savings progress", "interest, term", "access rules", "move money to or from", "compare this savings"])) {
+      return {
+        text:
+          `### Savings check\n` +
+          `${selectedSavings ? `${selectedSavings.name} currently shows ${savingsBalance}.` : "Start by identifying which savings product the user means."}\n` +
+          `A realistic assistant answer should cover:\n` +
+          `- progress versus goal or starting amount;\n` +
+          `- interest, term, and access rules;\n` +
+          `- whether moving money affects availability or a term/deposit condition.\n` +
+          `If the customer is comparing products, ask about time horizon before naming a product.`,
+        richBlocks: [productsBlock],
+        followUps: [
+          buildCzNavigateFollowUp("cz-open-products", "Open Products", "products"),
+          buildCzChatFollowUp("cz-savings-transfer", "Move money safely", "Can you guide me before I move money to or from this savings product?"),
+          buildCzChatFollowUp("cz-savings-interest", "Explain interest", "Explain the interest, term, and access rules for this savings product."),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["remaining amount", "monthly payment", "end date", "repaying part", "repay early", "next instalment", "loan contracts", "mortgage contracts", "interest rate", "fixation"])) {
+      return {
+        text:
+          `### Borrowing check\n` +
+          `${selectedLoan ? `${selectedLoan.name} is the visible borrowing item, with ${loanBalance} remaining/owed in this profile.` : `Total owed is ${totalOwed}.`}\n` +
+          `For loans or mortgages, the assistant should not jump straight to an application or repayment action.\n` +
+          `First review remaining amount, instalment, rate/fixation context, fees, and the account used for the next payment.\n` +
+          `Documents are the right place for contracts, schedule changes, and official confirmations.`,
+        richBlocks: [documentBlock],
+        followUps: [
+          buildCzNavigateFollowUp("cz-open-documents", "Open Documents", "documents"),
+          buildCzChatFollowUp("cz-early-repay", "Explain early repayment", "Explain what I should check before repaying part of this loan early."),
+          buildCzChatFollowUp("cz-next-payment", "Review next payment", "Help me review the next mortgage payment and related account activity."),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["start an investment goal", "start investment goal", "set investment goal", "new investment goal"])) {
+      return {
+        text:
+          `### Investment goal setup\n` +
+          `I can help shape the goal before any product choice.\n` +
+          `Start with the purpose, then the assistant can narrow the horizon, starting amount, monthly contribution, and risk comfort.\n` +
+          `In this demo profile the investment portfolio is ${investmentValue} with ${investmentReturn} performance, so I would keep the goal conversation connected to the current portfolio instead of starting from a blank catalogue.\n` +
+          `Nothing is ordered from chat; the final product, documents, suitability, and authorization stay inside Investments.`,
+        richBlocks: [investmentGoalPortfolioBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-goal-grow-savings", "Grow my savings"),
+          buildCzChatFollowUp("cz-goal-future-purchase", "Future purchase"),
+          buildCzChatFollowUp("cz-goal-long-term", "Long-term reserve"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["grow my savings", "future purchase", "long-term reserve", "retirement"])) {
+      const selectedGoal = normalized.includes("future purchase")
+        ? "future purchase"
+        : normalized.includes("long-term") || normalized.includes("retirement")
+          ? "long-term reserve"
+          : "grow my savings";
+
+      return {
+        text:
+          `### Goal selected\n` +
+          `Good, I will treat this as a **${selectedGoal}** goal.\n` +
+          `The next useful input is time horizon. Money needed soon should stay calmer and more accessible; money with a longer horizon can usually tolerate more movement.\n` +
+          `Pick the closest horizon so the preview can stay realistic.`,
+        followUps: [
+          buildCzChatFollowUp("cz-goal-horizon-3-5", "In 3-5 years"),
+          buildCzChatFollowUp("cz-goal-horizon-5-10", "In 5-10 years"),
+          buildCzChatFollowUp("cz-goal-horizon-unsure", "Not sure yet"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["5,000 czk", "5000 czk", "10,000 czk", "10000 czk", "i'm not sure yet", "im not sure yet"])) {
+      return {
+        text:
+          `### Starting amount noted\n` +
+          `A recurring contribution can make the plan less dependent on one perfect entry day.\n` +
+          `For this mock profile, I would keep the contribution modest until the portfolio exposure and any pending orders are reviewed.\n` +
+          `Choose a monthly amount or skip it for now.`,
+        followUps: [
+          buildCzChatFollowUp("cz-goal-monthly-500", "500 CZK monthly"),
+          buildCzChatFollowUp("cz-goal-monthly-1000", "1,000 CZK monthly"),
+          buildCzChatFollowUp("cz-goal-monthly-not-now", "Not now"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["in 3-5 years", "in 5-10 years", "not sure yet"])) {
+      return {
+        text:
+          `### Time horizon captured\n` +
+          `Now choose an initial amount for the simulation.\n` +
+          `This is only used for the demo preview. The real app would still confirm source of funds, product documents, suitability, and authorization before any order.\n` +
+          `The current portfolio context is ${investmentValue} with ${investmentReturn} performance, so I would not start from a blank product catalogue.`,
+        followUps: [
+          buildCzChatFollowUp("cz-goal-amount-5000", "5,000 CZK"),
+          buildCzChatFollowUp("cz-goal-amount-10000", "10,000 CZK"),
+          buildCzChatFollowUp("cz-goal-amount-unsure", "I'm not sure yet"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["500 czk monthly", "1,000 czk monthly", "1000 czk monthly", "not now"])) {
+      return {
+        text:
+          `### Model portfolio preview\n` +
+          `Here is the kind of preview that makes the goal flow useful without pretending to place an order.\n` +
+          `It connects the goal to the existing portfolio: ${investmentValue}, ${investmentReturn} performance, ${topInvestmentShare} in the largest holding, and ${assetClassMix || "the visible asset-class mix"}.\n` +
+          `Before any real product action, the customer still needs documents, risk checks, and authorization inside Investments.`,
+        richBlocks: [investmentGoalAllocationBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-goal-see-projection", "See projection"),
+          buildCzChatFollowUp("cz-goal-why-balanced", "Why this portfolio?"),
+          buildCzChatFollowUp("cz-goal-review-orders", "Review orders", "Review my investment orders."),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["see projection", "simulation", "projection"])) {
+      return {
+        text:
+          `### Projection preview\n` +
+          `This is an illustrative planning view, not a promise.\n` +
+          `The assistant should show a range so the customer understands uncertainty, then keep final product selection and documents in the Investments area.\n` +
+          `Use this after the goal, horizon, starting amount, and monthly habit are clear.`,
+        richBlocks: [investmentGoalProjectionBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-goal-adjust-amount", "Adjust amount", "I want to adjust the starting amount for this investment goal."),
+          buildCzChatFollowUp("cz-goal-why-balanced-next", "Why this portfolio?"),
+          buildCzChatFollowUp("cz-goal-review-portfolio", "Review portfolio", "Review my investment portfolio context."),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["adjust amount", "adjust the starting amount"])) {
+      return {
+        text:
+          `### Adjust starting amount\n` +
+          `Sure. Choose the amount you want to use for the demo simulation.\n` +
+          `This does not create an order; it only changes the preview path.`,
+        followUps: [
+          buildCzChatFollowUp("cz-goal-adjust-5000", "5,000 CZK"),
+          buildCzChatFollowUp("cz-goal-adjust-10000", "10,000 CZK"),
+          buildCzChatFollowUp("cz-goal-adjust-unsure", "I'm not sure yet"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["why this portfolio", "why this mix", "explain risk"])) {
+      return {
+        text:
+          `### Why this portfolio\n` +
+          `For a goal preview, I would explain the mix before naming any product.\n` +
+          `The current portfolio already shows ${assetClassMix || "an asset-class split"} and ${currencyMix || "a currency split"}, with ${topInvestmentSecurity ? `${topInvestmentShare} in ${topInvestmentSecurity.title}` : "no single holding selected"}.\n` +
+          `That gives the assistant a smarter starting point: check whether the goal horizon matches the exposure, then decide whether the next action is a monthly habit, order review, or no action yet.`,
+        richBlocks: [investmentGoalAllocationBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-goal-see-projection-from-why", "See projection"),
+          buildCzChatFollowUp("cz-goal-review-orders-from-why", "Review orders", "Review my investment orders."),
+          buildCzChatFollowUp("cz-goal-plan-next-from-why", "Plan next move", "Help me decide the smartest next investment step using my portfolio, orders, risk, and currency exposure."),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["review my investment portfolio context", "review my portfolio", "review portfolio", "portfolio context", "current portfolio"])) {
+      return {
+        text:
+          `### Portfolio context\n` +
+          `${investmentProduct ? `${investmentProduct.name} currently shows ${investmentValue} and ${investmentReturn} performance.` : "This profile can still explain the portfolio review path."}\n` +
+          `I would review it in this order:\n` +
+          `1. Value and performance: read ${investmentReturn} together with ${investmentGainLoss}, not as a standalone recommendation.\n` +
+          `2. Concentration: ${topInvestmentSecurity ? `${topInvestmentSecurity.title} is the largest holding at ${topInvestmentShare}.` : "check whether one product dominates the portfolio."}\n` +
+          `3. Exposure: ${currencyMix || "check currency distribution"} and ${assetClassMix || "asset class distribution"} before adding money.\n` +
+          `4. Activity: check orders before starting a new buy, because pending or rejected orders can change the next step.`,
+        richBlocks: [investmentPortfolioBlock, investmentOrdersBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-invest-review-orders", "Review my orders", "Review my investment orders."),
+          buildCzChatFollowUp("cz-invest-next-move", "Plan next move", "Help me decide the smartest next investment step using my portfolio, orders, risk, and currency exposure."),
+          buildCzNavigateFollowUp("cz-open-investments", "Open Investments", "investments"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["review my investment orders", "review my orders", "investment orders", "pending orders", "rejected orders", "executed orders", "order status"])) {
+      return {
+        text:
+          `### Investment orders\n` +
+          `Orders are the action trail behind the portfolio. In this mock profile the status mix is **${orderStatusSummary}**.\n` +
+          `Latest order: ${latestOrderSummary}.\n` +
+          `Read them this way:\n` +
+          `1. **Pending** means the portfolio may still change, so do not top up blindly.\n` +
+          `2. **Executed** confirms what already affected holdings and history.\n` +
+          `3. **Rejected** needs a reason check before retrying, especially if price, documents, or suitability changed.\n` +
+          `The right handoff is Investments History on the Orders tab; chat should summarize and prepare the review, not hide the order evidence.`,
+        richBlocks: [investmentOrdersBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-invest-pending-orders", "Pending orders", "Explain my pending investment orders."),
+          buildCzChatFollowUp("cz-invest-rejected-orders", "Rejected orders", "Explain rejected investment orders and what to check before retrying."),
+          buildCzNavigateFollowUp("cz-open-investment-history", "Open History", "investments-history"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["smartest next investment step", "plan next investment move", "plan next move", "next investment step", "risk and currency exposure", "review risk", "reduce currency risk", "rebalance", "set recurring order", "recurring order"])) {
+      return {
+        text:
+          `### Next investment move\n` +
+          `I would not answer this with one product. A smarter next step compares portfolio shape and order activity first.\n` +
+          `- Portfolio: ${investmentValue}, ${investmentReturn} performance, ${topInvestmentSecurity ? `${topInvestmentShare} in ${topInvestmentSecurity.title}` : "largest holding not available"}.\n` +
+          `- Exposure: ${currencyMix || "currency mix needs review"}; ${assetClassMix || "asset-class mix needs review"}.\n` +
+          `- Orders: ${orderStatusSummary}. ${pendingInvestmentOrders.length ? "Resolve pending orders before adding a new one." : "No pending-order blocker appears in the mock order set."}\n` +
+          `Suggested path: define the goal, check whether exposure still fits, then choose between a recurring order, a one-off top-up, or doing nothing until the next review date.`,
+        richBlocks: [investmentPortfolioBlock, investmentOrdersBlock, investmentNextMoveBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-invest-start-goal", "Start a goal", "Start an investment goal."),
+          buildCzChatFollowUp("cz-invest-review-orders-next", "Review orders", "Review my investment orders."),
+          buildCzNavigateFollowUp("cz-open-investments-next", "Open Investments", "investments"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["specific inbox", "outbox message", "message types", "bank notifications"])) {
+      return {
+        text:
+          `### Messages help\n` +
+          `Use Messages for bank communication, not transaction proof.\n` +
+          `Inbox is for received notices, Outbox is for requests or messages sent from the app, and Documents is where durable statements or confirmations should live.\n` +
+          `If the user needs evidence for a payment, route to Documents or the transaction detail instead of only searching messages.`,
+        richBlocks: [documentBlock],
+        followUps: [
+          buildCzNavigateFollowUp("cz-open-messages", "Open Messages", "messages"),
+          buildCzNavigateFollowUp("cz-open-documents", "Open Documents", "documents"),
+          buildCzChatFollowUp("cz-find-confirmation", "Find payment proof", "Help me find or understand a payment confirmation."),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["prime can help", "contact or prepare questions for my advisor", "advisor questions"])) {
+      return {
+        text:
+          `### Prime preparation\n` +
+          `A good Prime answer should help the customer prepare before contacting the advisor.\n` +
+          `Summarize the goal, the amount involved, urgency, risk or borrowing questions, and any documents the advisor should review.\n` +
+          `Then route to Prime or Contacts rather than pretending the chat itself is the advisor.`,
+        followUps: [
+          buildCzNavigateFollowUp("cz-open-prime", "Open Prime", "prime"),
+          buildCzNavigateFollowUp("cz-open-contacts", "Open Contacts", "contacts"),
+          buildCzChatFollowUp("cz-prepare-advisor", "Prepare questions", "Help me prepare questions before contacting the bank."),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["right support", "support or branch contact", "prepare questions before contacting"])) {
+      return {
+        text:
+          `### Contact route\n` +
+          `First decide whether this is servicing, advice, or urgent security.\n` +
+          `- Security issue: card block/support first.\n` +
+          `- Product advice: prepare context and use advisor/Prime where available.\n` +
+          `- Branch/contact search: open Contacts and choose the channel there.\n` +
+          `The assistant should prepare the question, not replace the official contact route.`,
+        followUps: [
+          buildCzNavigateFollowUp("cz-open-contacts", "Open Contacts", "contacts"),
+          buildCzChatFollowUp("cz-card-security", "Card security", "Help me review this card's security settings and recent activity."),
+          buildCzChatFollowUp("cz-documents", "Find documents", "Help me find statements, contracts, confirmations, or legal notices."),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["why should i review the card before documents", "why this order"])) {
+      return {
+        text:
+          `### Why that order\n` +
+          `The card check is action-oriented: it can explain free-to-spend, recent reservations, and the limit-review opportunity.\n` +
+          `Documents are evidence-oriented: useful when the customer needs a statement, receipt, contract, or legal notice.\n` +
+          `So I would start with Card if the question is "what should I do next?", and Documents if the question is "where is the proof?"`,
+        richBlocks: [productsBlock],
+        followUps: [
+          buildCzNavigateFollowUp("cz-open-card", "Open Card", "card-detail"),
+          buildCzNavigateFollowUp("cz-open-documents", "Open Documents", "documents"),
+        ],
+      };
+    }
+
+    return defaultReplyResolver(input);
+  };
 }
 
 function buildCzChatHelpContext(area: CzChatHelpArea, id: string): CoAppingChatContext {
@@ -298,10 +1503,10 @@ function buildCzChatScreenContext(screen: Screen, id: string, accountProduct: Pr
         id,
         title: buildCzChatTitle("what should we look at first?"),
         suggestedTopics: [
-          buildCzChatTopic("home-overview", "Review my financial overview", "Help me understand the main things I should notice on my homepage."),
-          buildCzChatTopic("home-balance", "Explain available money", "Explain my available balance, owed amount, and what changed recently."),
-          buildCzChatTopic("home-next-action", "Suggest my next action", "Based on the homepage, what should I review next in the app?"),
-          buildCzChatTopic("home-documents", "Find recent documents", "Help me find confirmations, statements, or recent bank documents."),
+          buildCzChatTopic("home-overview", "Review today's money snapshot", "Help me understand the main things I should notice on my homepage."),
+          buildCzChatTopic("home-product-shelf", "What products can I open", "What products can I open from the product shelf?"),
+          buildCzChatTopic("home-latest-transactions", "Review latest 5 transactions", "Show me the latest 5 transactions and which account they came from."),
+          buildCzChatTopic("home-unusual-spending", "Spot unusual spending", "Check the largest, pending, or category-heavy movements from my latest account activity."),
         ],
       };
     case "analytics":
@@ -380,19 +1585,24 @@ function buildCzChatScreenContext(screen: Screen, id: string, accountProduct: Pr
         title: buildCzChatTitle("where should we start with investments?"),
         suggestedTopics: [
           {
+            id: "investments-goal",
+            label: "Start an investment goal",
+            prompt: "Start an investment goal.",
+          },
+          {
             id: "investments-portfolio",
             label: "Review portfolio context",
-            prompt: "Help me understand the key things to review in my investment portfolio.",
+            prompt: "Review my investment portfolio context.",
           },
           {
-            id: "investments-history",
-            label: "Explain history filters",
-            prompt: "Explain how I can read and filter my investment history.",
+            id: "investments-orders",
+            label: "Review my orders",
+            prompt: "Review my investment orders.",
           },
           {
-            id: "investments-risk",
-            label: "Compare risk and currency",
-            prompt: "What should I compare before choosing an investment product?",
+            id: "investments-next-move",
+            label: "Plan next investment move",
+            prompt: "Help me decide the smartest next investment step using my portfolio, orders, risk, and currency exposure.",
           },
         ],
       };
@@ -601,6 +1811,7 @@ function AppContent({
   const [czChatOpen, setCzChatOpen] = useState(false);
   const [czChatContext, setCzChatContext] = useState<CoAppingChatContext | null>(null);
   const [czChatInitialMode, setCzChatInitialMode] = useState<CoAppingAssistantMode>("chat");
+  const [productsShelfFocusRequest, setProductsShelfFocusRequest] = useState<ProductsShelfFocusRequest | null>(null);
   const accountProducts = categories.flatMap((category) => category.products);
   const selectedAccountProduct = accountProducts.find((accountProduct) => accountProduct.id === selectedAccountId) ?? accountProducts[0] ?? null;
   const selectedCardProduct =
@@ -611,6 +1822,17 @@ function AppContent({
     ? selectedCardProduct
     : (accountProducts.find(isCreditCardProduct) ?? null);
   const czChatOpportunities = buildCreditCardOpportunities(creditCardForOpportunity, country, currentScreen);
+  const czChatReplyResolver = useMemo<CoAppingReplyResolver>(
+    () =>
+      buildCzChatSmartReplyResolver({
+        country,
+        categories,
+        selectedAccountProduct,
+        selectedCardProduct,
+        creditCardForOpportunity,
+      }),
+    [categories, country, creditCardForOpportunity, selectedAccountProduct, selectedCardProduct],
+  );
 
   useEffect(() => {
     preloadMoreCardImages();
@@ -962,7 +2184,39 @@ function AppContent({
         navigateTo("card-detail");
         break;
       case "products":
+        {
+          const shelfCardId = getProductsShelfFocusCardId(action.id);
+          if (shelfCardId !== undefined) {
+            setProductsShelfFocusRequest({
+              requestId: Date.now(),
+              cardId: shelfCardId,
+            });
+            setCzChatOpen(false);
+          }
+        }
         navigateTo("products");
+        break;
+      case "payments":
+        navigateTo("payments");
+        break;
+      case "documents":
+        navigateTo("documents");
+        break;
+      case "messages":
+        navigateTo("messages");
+        break;
+      case "settings":
+        navigateTo("settings");
+        break;
+      case "contacts":
+        navigateTo("contacts");
+        break;
+      case "prime":
+        navigateTo("prime");
+        break;
+      case "account-detail":
+        if (selectedAccountProduct) setSelectedAccountId(selectedAccountProduct.id);
+        navigateTo("account-detail");
         break;
     }
   };
@@ -999,6 +2253,7 @@ function AppContent({
         entryContext={czChatContext}
         opportunities={czChatOpportunities}
         initialMode={czChatInitialMode}
+        resolveReply={czChatReplyResolver}
       />
     ) : null;
 
@@ -1234,6 +2489,8 @@ function AppContent({
             onMessagesClick={handleMessagesClick}
             onPaymentsClick={handlePaymentsClick}
             onMoreClick={handleMoreClick}
+            productsShelfFocusRequest={productsShelfFocusRequest}
+            onProductsShelfFocusHandled={() => setProductsShelfFocusRequest(null)}
           />
         )}
 

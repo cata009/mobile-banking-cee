@@ -2,13 +2,246 @@
 
 Last updated: 2026-07-07
 
+## 2026-07-07 CZ Chatbot Home Product Shelf Topic
+
+- Latest request handled: user asked urgently to replace Home topic `Find newest bank documents` with `What products can I open`, move it to position 2, and make the click answer show products from the Products shelf with a link to the shelf.
+- Runtime changes:
+  - `src/app/App.tsx` now orders Home CZ Chatbot topics as `Review today's money snapshot`, `What products can I open`, `Review latest 5 transactions`, and `Spot unusual spending`.
+  - The `What products can I open` intent uses `getProductsMenuForCountry(country)` plus `getProductCardSheetConfig(...)`, so it summarizes the same `Products > OUR PRODUCTS` shelf categories and bottom-sheet options shown by the Products screen.
+  - The reply includes a rich `Product shelf` card row and an `Open Products` follow-up/action that navigates to `screen=products`.
+  - Product shelf rich cards now act as real shortcuts: selecting Account/Cards/Borrowing/Insurance/Investments closes chat, navigates to Products, selects the Banking tab, scrolls to `OUR PRODUCTS`, and opens the matching Products bottom sheet.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - In-app browser smoke on the active CZ Future Chatbot Home URL confirmed visible topics are exactly `Review today's money snapshot`, `What products can I open`, `Review latest 5 transactions`, and `Spot unusual spending`; `Find newest bank documents` is absent.
+  - Click smoke confirmed `What products can I open` replies with `Products you can open`, references `Products > OUR PRODUCTS`, lists Account, Cards, Mortgages and loans, Insurance, and Investments and savings with their sheet options, renders Product shelf cards, and shows follow-ups `Open Products`, `Explain savings options`, and `Review borrowing options`.
+  - Click smoke on `Open Products` confirmed navigation to `screen=products` and the `OUR PRODUCTS` shelf is visible.
+  - Click smoke on the `Account` rich card confirmed chat closes, URL becomes `screen=products`, Banking / `OUR PRODUCTS` is visible, and the Account bottom sheet opens with `Current account` and `Account package`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Banana Loop result:
+  - fixed: Home no longer suggests document search as topic 4.
+  - fixed: the new product-opening topic is position 2 and grounded in the Products shelf config, not a static chat-only list.
+  - fixed: product cards inside the assistant answer now redirect into the real Products shelf and open the selected product category instead of behaving like inert cards.
+  - preserved: this is still mock/demo catalogue discovery; no eligibility, application, document signing, or product-opening backend was added.
+- safe to resume: yes
+
+## 2026-07-07 CZ Chatbot Investments Goal Suggestions Repair
+
+- Latest request handled: user said the Investments goal suggestions (`Grow my savings`, etc.) did not continue the already-built options flow.
+- Runtime changes:
+  - `src/app/App.tsx` now owns the Investments goal follow-up chain in the CZ smart resolver: goal type -> horizon -> starting amount -> monthly contribution -> portfolio preview -> projection / explanation.
+  - The flow reuses current CZ mock investment facts for portfolio value, return, asset-class mix, currency mix, and largest holding.
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` clears drag-click suppression shortly after a swipe, so a real chip click after dragging is not swallowed.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - `git diff --check` passed on 2026-07-07 with only normal Windows LF/CRLF warnings.
+  - In-app browser smoke on `screen=investments` confirmed `Grow my savings` returns `Goal selected` with `In 3-5 years`, `In 5-10 years`, `Not sure yet`; horizon returns amount chips; amount returns monthly chips; monthly returns `Model portfolio preview`; `See projection` returns `Projection preview` and `Goal simulation`.
+- safe to resume: yes
+
+## 2026-07-07 CZ Chatbot For You Carousel Swipe Fix
+
+- Latest request handled: user reported that the newly added `For you` carousels did not swipe/drag in the demo.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` adds a shared `HorizontalDragScroller` wrapper for the `Grow your money` hero rail and `Next best conversations` card rail.
+  - The wrapper handles pointer drag for mouse/touch, ignores tiny tap movement, releases back to vertical feed scrolling when the user moves vertically, and suppresses accidental card clicks after a horizontal drag.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` adds carousel grab/grabbing states, mobile touch handling, native momentum scrolling, and disables scroll snap while actively dragging so the card moves immediately.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - `git diff --check` passed on 2026-07-07 with only normal Windows LF/CRLF warnings.
+  - In-app browser smoke on the active CZ Future Chatbot homepage opened `For you`, dragged the `Grow your money` hero carousel from right to left and confirmed `scrollLeft` moved to `327`.
+  - The same smoke dragged the `Next best conversations` promo carousel from right to left and confirmed `scrollLeft` moved from `0` to `176`, while `For you` remained open and no conversation was accidentally launched.
+  - Browser console error log was empty after the carousel drag checks.
+- Banana Loop result:
+  - fixed: the carousels now demonstrate real hidden-behind content through mouse/touch-style horizontal drag, not only static overflow.
+  - preserved: card tap actions remain available; drag no longer fires a topic click.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-07 CZ Chatbot Home Transaction Topic Refinement
+
+- Latest request handled: user rejected Home suggested topics 2 and 3 (`Explain what I can use`, `Pick my next best step`) as weak/generic and asked for a stronger transaction-focused topic, specifically latest 5 transactions with the account they came from, plus another more useful Home topic.
+- Runtime changes:
+  - `src/app/App.tsx` replaces Home topic 2 with `Review latest 5 transactions`, prompting a reply that lists the five latest visible transactions across the Home profile, including signed amount, date, status when pending, and source account/product.
+  - `src/app/App.tsx` replaces Home topic 3 with `Spot unusual spending`, prompting a reply that calls out the largest recent outgoing transaction, the heaviest money-out category, pending movements, and source account/product.
+  - The Home overview follow-up chips now point to `Review latest 5` and `Spot unusual spending` instead of the previous available-money / next-action wording.
+  - The old `next best step` prompt path now returns a concrete recent-activity answer if triggered from stale chat state, avoiding the previous generic next-action copy.
+  - The resolver reuses `createSpendingAnalyticsTimeline(...)` so transaction answers are grounded in the same account transaction model used by Account Detail and Spending.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - In-app browser smoke on `screen=homepage` confirmed the visible Home topics are `Review today's money snapshot`, `Review latest 5 transactions`, `Spot unusual spending`, and `Find newest bank documents`; old labels `Explain what I can use` and `Pick my next best step` are absent.
+  - In-app browser click smoke confirmed `Review latest 5 transactions` replies with `Latest 5 transactions`, real mock transactions such as `ATM UniCredit`, `Seznam.cz`, `Cash deposit`, source accounts such as `Primary Account 1` / `Primary Account 2`, a rich `Latest transaction readout` card, and follow-ups `Spot unusual spending`, `Open Account`, `Open Spending`.
+  - In-app browser click smoke confirmed `Spot unusual spending` replies with `Unusual spending check`, largest debit (`CPI Byty`), top money-out category, pending item (`Alza.cz`), source account, rich `Spending signals` card, and no old `Suggested next action` / `next best step` copy.
+- Banana Loop result:
+  - fixed: Home topic 2 is no longer a vague available-money explanation; it now shows concrete recent transactions and source account.
+  - fixed: Home topic 3 is no longer a generic next-best-step prompt; it now highlights concrete transaction signals.
+  - preserved: transaction data remains mock/demo-driven and uses existing account/spending data builders; no new banking backend or execution capability was introduced.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-07 CZ Chatbot Investments Goal Flow Polish
+
+- Latest request handled: user reviewed the Investments `Start an investment goal` reply and asked to remove the `Open Investments` button from that flow, remove the confusing `Next move planner` card because it duplicated the suggestions below, and fix mouse drag/swipe on the follow-up chips.
+- Coordination:
+  - Scope stayed inside `screen=investments` goal-flow behavior plus the shared follow-up shelf gesture handling.
+  - Home/non-Investments topic ownership from the parallel thread was not changed.
+- Runtime changes:
+  - `src/app/App.tsx` now uses a no-action `Portfolio context` rich block for `Start an investment goal`, so the goal setup reply no longer shows the `Open Investments` CTA.
+  - `Start an investment goal` now renders only the portfolio context card plus the three follow-up chips `Grow my savings`, `Future purchase`, and `Long-term reserve`; the `Next move planner` rich card remains available only in the broader next-move investment conversation.
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` makes follow-up chip shelves drag-scroll with mouse pointer capture, lower movement threshold, click suppression after drag, and explicit dragging state.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` switches the follow-up shelf to custom horizontal drag behavior, disables scroll snap while dragging, and shows a grabbing cursor during the gesture.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - `git diff --check` passed on 2026-07-07 with only normal Windows LF/CRLF warnings.
+  - In-app browser smoke on `screen=investments` opened CZ Chatbot, clicked `Start an investment goal`, and confirmed the final reply has one `Portfolio context` rich card, no `Open Investments` text, no `Next move planner` text, and follow-up chips `Grow my savings`, `Future purchase`, and `Long-term reserve`.
+  - In-app browser drag smoke on the follow-up shelf confirmed horizontal mouse drag changed `scrollLeft` from `2` to `45` without sending a chip message; message count stayed at `2`.
+- Banana Loop result:
+  - fixed: goal setup no longer offers an out-of-place navigation CTA.
+  - fixed: goal setup no longer presents two competing next-step systems.
+  - fixed: follow-up chips can be mouse-dragged/swiped when they overflow.
+  - preserved: no trading/order execution, suitability, or backend integration was introduced.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-07 CZ Chatbot For You Carousel And Spacing Polish
+
+- Latest request handled: user reviewed the CZ Chatbot `For you` management-demo surface and asked for more breathing room around the primary CTA, a one-line credit-limit body, tighter/right-aligned related-card chevron, a carousel behind the `Grow your money` banner with two extra topics, a horizontally scrollable `Next best conversations` carousel with two extra topics, and two additional `Decide with confidence` topics.
+- Runtime changes:
+  - `src/app/App.tsx` shortens the primary opportunity body to `Limit offer: 10 000,00 to 15 000,00 CZK.` so it fits on one line in the current phone width.
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` defines mapped `For you` hero, promo, and article topic lists instead of the previous hardcoded single banner / two-card / two-article blocks.
+  - `Grow your money` now renders a 3-item horizontal carousel: `Make idle money grow`, `Keep the right cash buffer`, and `Check risk before buying`.
+  - `Next best conversations` now renders a 4-item horizontal carousel: `Travel with card controls ready`, `Find subscriptions before they renew`, `Make payments predictable`, and `Move spare cash smarter`.
+  - `Decide with confidence` now shows four article topics, adding `When does a higher card limit make sense?` and `A monthly money check before choosing products`.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` adds scroll-snap carousel styling, visible next-card peeking, more CTA margin, a little extra primary-card bottom space, and moves the related-card chevron closer to the right edge while keeping it inside the row.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - In-app browser DOM smoke on `screen=homepage` opened CZ Chatbot -> `For you` and confirmed: offer body line approximation is `1`, hero carousel has `3` items with `scrollWidth 969 > clientWidth 343`, promo carousel has `4` items with `scrollWidth 692 > clientWidth 343`, article list has `4` rows, all six newly added topic titles are present, CTA margins are `6px` / `4px`, and related chevron right gap is `2px`.
+  - Browser console error log was empty after the smoke check.
+  - `git diff --check` passed on 2026-07-07 with only normal Windows LF/CRLF warnings.
+- Banana Loop result:
+  - fixed: the main CTA no longer feels as cramped vertically.
+  - fixed: the credit-limit body no longer wraps in the reviewed viewport.
+  - fixed: `For you` now visibly demonstrates deeper carousel content behind the first banner/card set instead of looking like a static feed.
+  - preserved: all new carousel topics remain mock front-end conversation starters; no product execution or backend campaign logic was introduced.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-07 CZ Chatbot Investments Topic Upgrade
+
+- Latest request handled: user asked for the Investments chatbot entry to show four topics, with `Start an investment goal` first, replace weak `Explain history filters` with `Review my orders`, and replace `Compare risk and currency` with a smarter investment conversation that has useful suggestions and multiple answer paths.
+- Coordination:
+  - Parallel Home/non-Investments work owns the shared structured `resolveReply` contract and Home suggested-topic replies.
+  - This entry owns only `screen=investments` topic labels and investment-specific reply intents.
+- Runtime changes:
+  - `src/app/App.tsx` now sets the Investments new-conversation topics to `Start an investment goal`, `Review portfolio context`, `Review my orders`, and `Plan next investment move`.
+  - The Investments topic prompts now route into the structured CZ smart reply resolver instead of generic fallback copy.
+  - The resolver builds Investments facts from the same mock portfolio model used by the runtime screen: holdings, currency/asset-class distributions, portfolio value/performance, and mock order statuses from `buildInvestmentSecurities`, `buildInvestmentDistributionItems`, and `buildInvestmentHistoryOrders`.
+  - `Start an investment goal` starts a goal setup conversation with portfolio context, a next-move planner card, and follow-up chips for goal type.
+  - `Review portfolio context` now returns a portfolio review conversation that includes performance, concentration, currency/asset exposure, order activity, rich cards, and follow-ups.
+  - `Review my orders` now discusses executed/pending/rejected investment orders and points to Investments History as the evidence surface.
+  - `Plan next investment move` now combines portfolio shape, orders, risk/currency exposure, and next-step choices rather than only comparing risk and currency.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - `git diff --check` passed on 2026-07-07 with only normal Windows LF/CRLF warnings.
+  - In-app browser DOM smoke on `screen=investments` opened CZ Chatbot and confirmed the four visible topics are exactly `Start an investment goal`, `Review portfolio context`, `Review my orders`, and `Plan next investment move`; old labels `Explain history filters` and `Compare risk and currency` were absent.
+  - In-app browser smoke clicked `Start an investment goal` and confirmed the `Investment goal setup` reply, two rich cards (`Portfolio context`, `Next move planner`), and follow-ups `Grow my savings`, `Future purchase`, and `Long-term reserve`.
+  - In-app browser smoke clicked `Review portfolio context` and confirmed portfolio performance/activity copy, two rich cards, and follow-ups `Review my orders`, `Plan next move`, and `Open Investments`.
+  - In-app browser smoke clicked `Review my orders` and confirmed the `Investment orders` reply, executed/pending/rejected status summary, rich `Investment order activity` card, and follow-ups `Pending orders`, `Rejected orders`, and `Open History`.
+  - In-app browser smoke clicked `Plan next investment move` and confirmed portfolio/exposure/orders copy, three rich cards, and follow-ups `Start a goal`, `Review orders`, and `Open Investments`.
+  - Browser console error log was empty after the Investments chatbot smoke checks.
+- Banana Loop result:
+  - fixed: Investments entry no longer has only three topics.
+  - fixed: `Start an investment goal` is available as the first topic on the Investments page and uses the already-developed goal flow.
+  - fixed: weak history-filter wording is replaced with an order-focused conversation grounded in mock order status data.
+  - fixed: the old risk/currency topic is replaced with a broader next-investment-step conversation with richer suggestions.
+  - preserved: this remains mock/demo-driven; no trading/order execution, suitability, or backend integration was introduced.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-07 CZ Chatbot Home Suggested Topic Real Replies
+
+- Latest request handled: user asked to make the Home CZ Chatbot suggested-topic clicks feel realistic and intelligent instead of returning the same generic assistant answer; user also asked to coordinate with the parallel `Review comment selections` thread so Investments topic work is not overwritten.
+- Coordination:
+  - The parallel thread `Review comment selections` owns `screen=investments` topic labels and investment-specific reply intents.
+  - This session owns Home/non-Investments CZ reply behavior and the shared package resolver contract needed for structured replies.
+  - A coordination note was sent to the parallel thread before verification; Investments branches already present in `src/app/App.tsx` were left intact.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/types.ts` extends `CoAppingReplyResolver` so hosts can return either a plain string or a structured `{ text, richBlocks, followUps }` reply.
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` preserves legacy string resolver behavior through the existing contextual enhancement path, while structured resolver results now render directly with rich cards and follow-up chips.
+  - `src/app/App.tsx` passes a CZ smart resolver into the Co-Apping launcher and handles additional navigation targets used by reply actions (`payments`, `documents`, `messages`, `settings`, `contacts`, `prime`, and `account-detail`).
+  - Home suggested topics now read `Review today's money snapshot`, `Explain what I can use`, `Pick my next best step`, and `Find newest bank documents`; their prompts map to page-aware Home replies rather than the package fallback.
+- Verification:
+  - `npm run build` passed on 2026-07-07 after the final workspace check; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - `git diff --check` passed on 2026-07-07 with only normal Windows LF/CRLF warnings.
+  - In-app browser smoke on `screen=homepage` confirmed the four new Home topic labels render after opening `CZ - Chatbot`.
+  - In-app browser click smoke confirmed all four Home topics return specific headings (`Your Home overview`, `Available money, not just balance`, `Suggested next action`, `Recent documents`), contextual CZ amounts/documents, rich cards/follow-up chips, and no `I can help with Accounts and balance explanations...` generic fallback text.
+- Banana Loop result:
+  - fixed: Home suggested-topic clicks no longer collapse into the one-size-fits-all default answer.
+  - fixed: the package integration contract now documents a structured reply path instead of requiring host apps to squeeze rich answers through plain text.
+  - triaged: Investments topic changes are intentionally owned by the active parallel thread and are not closed out here.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-07 CZ Chatbot For You Offer Category Copy
+
+- Latest request handled: user asked to make the CZ Chatbot `For you` surface clearer for a management demo: rename the main section to `Personalized offers for you`, add a `Grow your money` category above the investment banner, and replace generic editorial headings with smarter titles that communicate sales-oriented conversation starters.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now titles the primary sales area `Personalized offers for you` with subcopy `Offers and conversation starters matched to this moment`.
+  - The discovery/offer support area now starts with a `Grow your money` section heading before the investment banner.
+  - The old `Recommended next` heading is now `Next best conversations`, with subcopy `Prompts that can turn into product actions`.
+  - The old `Useful reads` heading is now `Decide with confidence`, with subcopy `Short guidance before choosing a next step`.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` adds a first-section heading spacing override so the new `Grow your money` category sits cleanly above the banner.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - `git diff --check` passed on 2026-07-07 with only normal Windows LF/CRLF warnings.
+  - In-app browser DOM smoke on `http://127.0.0.1:3001/?product=PI&country=CZ&scenario=active&ds=current&release=release-future-cz-coapping&bank=retail-single-account&theme=light&lang=en&screen=homepage` opened CZ Chatbot -> `For you` and confirmed the headings `Personalized offers for you`, `Grow your money`, `Next best conversations`, and `Decide with confidence`; old labels `Recommended next`, `Useful reads`, `Banking prompts and product stories`, and `Contextual options matched to this moment` were absent from the feed.
+- Banana Loop result:
+  - fixed: the `For you` support content no longer reads like a generic editorial feed; it now communicates offer categories and conversation starters more clearly for management demo review.
+  - preserved: the primary credit-limit offer, investment banner, promo cards, and article actions remain mock-driven front-end conversation starters.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
 ## 2026-07-07 CZ Chatbot For You Credit Card Closeout And Share Rename
 
-- Latest request handled: user asked to finish the CZ Chatbot `For you` credit-card sales execution, shorten the editorial banner copy, remove the gradient-looking treatment from the primary opportunity card, add a card-identification row inside the offer, then rename the shared/default platform title from `UniCredit Mobile Banking - Co-Apping` to `Mobile Banking CEE`.
+- Latest request handled: user asked to finish the CZ Chatbot `For you` credit-card sales execution, shorten the editorial banner copy, remove the gradient-looking treatment from the primary opportunity card, add a card-identification row inside the offer, rename the shared/default platform title from `UniCredit Mobile Banking - Co-Apping` to `Mobile Banking CEE`, then polish the primary offer copy, artwork, stroke, and CTA alignment.
 - Runtime changes:
-  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now renders an opportunity-related card row inside the primary `For you` offer, using a package-local credit-card visual, card name, masked card number, and existing `ForwardIcon` chevron action back to Card Detail.
-  - `src/app/App.tsx` now feeds that related card row from the active mock credit card and keeps the sales copy explicit about the proposed plafon change from `10 000,00 CZK` to `15 000,00 CZK`.
-  - `package/mobile-pi-coapping-chat-package/src/coapping.css` removes the primary opportunity card gradient and keeps it on a clean white surface with the new related-card row styling.
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now renders an opportunity-related card row inside the primary `For you` offer, using the shared Meniga-mapped `Card` component (`mc-credit-partner-standard`), card name, masked card number, and existing `ForwardIcon` chevron action back to Card Detail.
+  - `src/app/App.tsx` now feeds that related card row from the active mock credit card and keeps the sales copy explicit about the proposed plafon change from `10 000,00 CZK` to `15 000,00 CZK`, under the more commercial title `New credit limit for you`.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` removes the primary opportunity card gradient/stroke and keeps it on a clean white surface with the new related-card row styling.
+  - The primary opportunity CTA now uses the shared `LinkButton`, is labeled `I'm interested`, and is centered in the card container instead of left-aligned.
   - Follow-up polish replaced the temporary arrow on the related card row with the shared DS chevron path and removed the metric-card indentation so `Current limit` / `New limit` align to the same left axis as the offer title and body copy.
   - The Discovery-style hero below the primary opportunity now uses shorter copy: `Invest smarter`, `Make idle money grow`, and `Risk checks first. Start when ready.`
   - `index.html` and `public/manifest.webmanifest` now expose `Mobile Banking CEE` as the browser/share/PWA title instead of the previous Co-Apping-specific name.
@@ -17,6 +250,7 @@ Last updated: 2026-07-07
   - `git diff --check` passed on 2026-07-07 with only normal Windows LF/CRLF warnings.
   - In-app browser smoke on `screen=card-detail&card=card-credit-1` confirmed the page title is `Mobile Banking CEE`, no `App boot error` appears after reload, `FIND OUT MORE` opens `For you`, the primary opportunity background image is `none`, the related card row renders `Credit Card` plus `5173 **** **** 4301`, the old `Featured for Czech customers` copy is absent, and the new hero copy is present.
   - Follow-up in-app browser bounding-box smoke confirmed the offer title/body, related-card row, and `Current limit` / `New limit` metrics share the same left coordinate, metric padding is `0px`, and the related-card chevron path matches the shared DS `chevron-link` path.
+  - Follow-up in-app browser DOM/layout smoke confirmed the primary opportunity title is `New credit limit for you`, body is trimmed to the plafon move only, the CTA text is `I'm interested`, the old `Check options` copy is absent, the primary border is transparent, the related card uses `data-card-variant="mc-credit-partner-standard"`, and the CTA center offset inside the card is `0px`.
 - Banana Loop result:
   - fixed: `For you` no longer crashes due to the stray `ChevronRightIcon` reference.
   - fixed: the primary offer now identifies the exact credit card before pushing the limit-review CTA.
