@@ -1,21 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { DragEvent, MouseEvent, PointerEvent, RefObject, UIEvent } from "react";
-import { BottomSheet } from "@/app/components/BottomSheet";
 import BottomNavigation from "@/app/components/BottomNavigation";
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
 import { AppIcon } from "@/app/components/icons";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
-import NavigationRow from "@/app/components/NavigationRow";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
+import ProductCardBottomSheet, {
+  type ProductDetailSelection,
+} from "@/app/components/products/ProductCardBottomSheet";
 import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
 import ShopsmartOfferCard from "@/app/components/shopsmart/ShopsmartOfferCard";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useCountry } from "@/app/state/demoStore";
 import {
-  getProductCardSheetConfig,
   getProductsMenuForCountry,
-  type ProductCardSheetOption,
   type ProductsCard,
   type ProductsCardId,
   type ProductsMenuTab,
@@ -46,9 +45,12 @@ interface ProductsScreenProps {
   onMessagesClick?: () => void;
   onPaymentsClick?: () => void;
   onMoreClick?: () => void;
+  onProductDetailOpen?: (selection: ProductDetailSelection) => void;
   productsShelfFocusRequest?: ProductsShelfFocusRequest | null;
   onProductsShelfFocusHandled?: () => void;
 }
+
+export type { ProductDetailSelection };
 
 export interface ProductsShelfFocusRequest {
   requestId: number;
@@ -591,47 +593,6 @@ function ShopSmartSectionHeading({ children }: { children: string }) {
   );
 }
 
-function ProductCardBottomSheet({
-  card,
-  country,
-  onClose,
-}: {
-  card: ProductsCard;
-  country: Parameters<typeof getProductCardSheetConfig>[1];
-  onClose: () => void;
-}) {
-  const sheetConfig = getProductCardSheetConfig(card.id, country);
-  const sheetTitle = sheetConfig.title ?? card.title.replace(/\n/g, " ");
-
-  const handleOptionClick = (option: ProductCardSheetOption) => {
-    console.log(`Products sheet option clicked: ${card.id}/${option.id}`);
-  };
-
-  return (
-    <BottomSheet
-      title={sheetTitle}
-      className="px-0 pb-[24px] pt-[24px]"
-      headerClassName="px-[24px]"
-      bodyClassName="w-full"
-      onClose={onClose}
-    >
-      <div className="flex w-full flex-col" data-products-card-sheet="true">
-        {sheetConfig.options.map((option) => (
-          <NavigationRow
-            key={option.id}
-            title={option.title}
-            trailingAccessory="chevron"
-            className="pr-[16px]"
-            titleClassName="text-[18px] leading-normal tracking-[0.3px]"
-            titleStyle={{ fontSize: "18px", lineHeight: "normal", letterSpacing: "0.3px" }}
-            onClick={() => handleOptionClick(option)}
-          />
-        ))}
-      </div>
-    </BottomSheet>
-  );
-}
-
 export default function ProductsScreen({
   onHomeClick,
   onAnalyticsClick,
@@ -639,6 +600,7 @@ export default function ProductsScreen({
   onMessagesClick,
   onPaymentsClick,
   onMoreClick,
+  onProductDetailOpen,
   productsShelfFocusRequest,
   onProductsShelfFocusHandled,
 }: ProductsScreenProps) {
@@ -752,6 +714,7 @@ export default function ProductsScreen({
           card={selectedProductCard}
           country={country}
           onClose={() => setSelectedProductCard(null)}
+          onProductOptionClick={onProductDetailOpen}
         />
       ) : null}
     </div>

@@ -16,6 +16,7 @@ import {
   defaultSuggestedTopics,
 } from "./defaults";
 import FigmaCard from "@/app/components/cards/Card";
+import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
 import LinkButton from "@/app/components/ui/LinkButton";
 import discoveryHeroImage from "@/assets/investments/fund-banner-plant-unsplash.jpg";
 import discoverySubscriptionsImage from "@/assets/shopsmart/shopsmart-english-home.png";
@@ -57,6 +58,7 @@ import type {
   CoAppingReplyResolver,
   CoAppingReplyResult,
   CoAppingRichBlock,
+  CoAppingRichMetric,
   CoAppingSuggestedTopic,
 } from "./types";
 
@@ -369,14 +371,37 @@ function RichActionButton({
   );
 }
 
-function RichMetricGrid({ metrics }: { metrics: Array<{ label: string; value: string; helper?: string }> }) {
+function RichMetricGrid({
+  metrics,
+  layout = "grid",
+}: {
+  metrics: CoAppingRichMetric[];
+  layout?: "grid" | "calculation";
+}) {
+  const isCalculationLayout = layout === "calculation";
+
   return (
-    <div className="mpc-rich-metric-grid">
+    <div className={["mpc-rich-metric-grid", isCalculationLayout ? "mpc-rich-metric-grid-list" : ""].filter(Boolean).join(" ")}>
       {metrics.map((metric) => (
-        <div key={`${metric.label}-${metric.value}`} className="mpc-rich-metric">
-          <span>{metric.label}</span>
-          <strong>{metric.value}</strong>
-          {metric.helper ? <small>{metric.helper}</small> : null}
+        <div key={`${metric.label}-${metric.value}`} className={["mpc-rich-metric", isCalculationLayout ? "mpc-rich-metric-row" : ""].filter(Boolean).join(" ")}>
+          {isCalculationLayout ? (
+            <>
+              <span className="mpc-rich-metric-icon" aria-hidden="true">
+                {metric.icon ? <PfmCategoryIcon category={metric.icon} size={22} /> : null}
+              </span>
+              <span className="mpc-rich-metric-copy">
+                <span>{metric.label}</span>
+                {metric.helper ? <small>{metric.helper}</small> : null}
+              </span>
+              <strong>{metric.value}</strong>
+            </>
+          ) : (
+            <>
+              <span>{metric.label}</span>
+              <strong>{metric.value}</strong>
+              {metric.helper ? <small>{metric.helper}</small> : null}
+            </>
+          )}
         </div>
       ))}
     </div>
@@ -409,7 +434,7 @@ function RichBlock({
       <div className="mpc-rich-card">
         <div className="mpc-rich-card-head">
           <strong>{block.title}</strong>
-          <span>{block.body}</span>
+          {block.body.trim() ? <span>{block.body}</span> : null}
         </div>
         <div className="mpc-allocation-list">
           {block.items.map((item) => (
@@ -457,28 +482,60 @@ function RichBlock({
   }
 
   if (block.type === "product-cards") {
+    const isBlockInteractive = block.interactive !== false;
+
     return (
-      <div className="mpc-rich-card mpc-rich-card-products">
-        <div className="mpc-rich-card-head">
-          <strong>{block.title}</strong>
-          <span>{block.body}</span>
-        </div>
-        <div className="mpc-product-card-row">
-          {block.products.map((product) => (
-            <button
-              key={product.id}
-              type="button"
-              className={["mpc-product-card", product.tone ? `mpc-product-card-${product.tone}` : ""]
+      <>
+        <div className="mpc-rich-card mpc-rich-card-products">
+          <div className="mpc-rich-card-head">
+            <strong>{block.title}</strong>
+            <span>{block.body}</span>
+          </div>
+          <div className={["mpc-product-card-row", block.variant ? `mpc-product-card-row-${block.variant}` : ""].filter(Boolean).join(" ")}>
+            {block.products.map((product) => {
+              const isInteractive = isBlockInteractive && Boolean(product.action);
+              const productClassName = [
+                "mpc-product-card",
+                product.tone ? `mpc-product-card-${product.tone}` : "",
+                !isInteractive ? "mpc-product-card-static" : "",
+              ]
                 .filter(Boolean)
-                .join(" ")}
-              onClick={() => product.action && onAction?.(product.action)}
-            >
-              <strong>{product.title}</strong>
-              <span>{product.subtitle}</span>
-            </button>
-          ))}
+                .join(" ");
+              const productContent = (
+                <>
+                  {product.icon ? (
+                    <span className="mpc-product-card-icon" aria-hidden="true">
+                      <PfmCategoryIcon category={product.icon} size={24} />
+                    </span>
+                  ) : null}
+                  <strong>{product.title}</strong>
+                  <span>{product.subtitle}</span>
+                </>
+              );
+
+              if (isInteractive) {
+                return (
+                  <button
+                    key={product.id}
+                    type="button"
+                    className={productClassName}
+                    onClick={() => product.action && onAction?.(product.action)}
+                  >
+                    {productContent}
+                  </button>
+                );
+              }
+
+              return (
+                <div key={product.id} className={productClassName}>
+                  {productContent}
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+        {block.footer ? <p className="mpc-rich-card-footer">{block.footer}</p> : null}
+      </>
     );
   }
 
@@ -487,7 +544,7 @@ function RichBlock({
       <div className="mpc-rich-card mpc-rich-card-limit-offer">
         <div className="mpc-rich-card-head">
           <strong>{block.title}</strong>
-          <span>{block.body}</span>
+          {block.body.trim() ? <span>{block.body}</span> : null}
         </div>
         <div className="mpc-limit-offer-card-row">
           <span className="mpc-limit-offer-card-visual" aria-hidden="true">
@@ -519,7 +576,7 @@ function RichBlock({
         <strong>{block.title}</strong>
         <span>{block.body}</span>
       </div>
-      <RichMetricGrid metrics={block.metrics} />
+      <RichMetricGrid metrics={block.metrics} layout={block.metricLayout ?? "grid"} />
       <RichActionButton action={block.action} onAction={onAction} />
     </div>
   );
@@ -1347,7 +1404,7 @@ const investmentSummaryBlock: CoAppingRichBlock = {
   title: "Investment review",
   body: "Use this as a review surface before opening a specific fund or order flow.",
   metrics: [
-    { label: "Current value", value: "5,620 EUR", helper: "Demo portfolio" },
+    { label: "Current value", value: "5,620 EUR", helper: "Simulation portfolio" },
     { label: "Return", value: "+12.4%", helper: "+620 EUR since start" },
     { label: "Next review", value: "Jul 2026", helper: "Planned check-in" },
   ],
@@ -1500,7 +1557,7 @@ function getContextualAssistantEnhancement(
   if (/\b(3-5|5-10|not sure yet)\b/.test(normalized)) {
     return {
       text:
-        "### Time horizon captured\nNow choose an initial amount for the simulation.\nThis amount is only used for the demo projection; the real app would confirm source of funds, product documents, and risk profile before any order.",
+        "### Time horizon captured\nNow choose an initial amount for the simulation.\nThis amount is only used for the simulation projection; the real app would confirm source of funds, product documents, and risk profile before any order.",
       followUps: investmentAmountFollowUps,
     };
   }
@@ -1560,7 +1617,7 @@ function getContextualAssistantEnhancement(
   if (/\b(top up|add money|increase investment)\b/.test(normalized)) {
     return {
       text:
-        "### Top-up amount\nBefore opening an order flow, ask for an amount and keep the user aware that product documents and risk checks still apply.\nFor demo purposes, choose one of the quick amounts or type a custom value.",
+        "### Top-up amount\nBefore opening an order flow, ask for an amount and keep the user aware that product documents and risk checks still apply.\nFor simulation purposes, choose one of the quick amounts or type a custom value.",
       followUps: [
         followUp("topup-500", "500 CZK"),
         followUp("topup-1000", "1,000 CZK"),
@@ -2225,6 +2282,7 @@ export function CoAppingChatAssistant({
   const finalTranscriptRef = useRef("");
   const interimTranscriptRef = useRef("");
   const streamingMessageIdRef = useRef<string | null>(null);
+  const shouldAutoScrollChatRef = useRef(true);
   const followUpDragRef = useRef({
     pointerId: 0,
     startX: 0,
@@ -2411,6 +2469,7 @@ export function CoAppingChatAssistant({
     };
 
     const nextMessages = [...messages, userMessage];
+    shouldAutoScrollChatRef.current = true;
     setActiveConversationId("current");
     setConversationListReturnTarget("conversation");
     setIsConversationListOpen(false);
@@ -2686,12 +2745,14 @@ export function CoAppingChatAssistant({
   const handleChatScroll = (event: ReactUIEvent<HTMLDivElement>) => {
     const node = event.currentTarget;
     const distanceFromBottom = node.scrollHeight - node.scrollTop - node.clientHeight;
+    shouldAutoScrollChatRef.current = distanceFromBottom <= 96;
     setShowChatScrollBottom(distanceFromBottom > 96);
   };
 
   const scrollChatToBottom = () => {
     const node = chatScrollRef.current;
     if (!node) return;
+    shouldAutoScrollChatRef.current = true;
     node.scrollTo({ top: node.scrollHeight, behavior: "smooth" });
     setShowChatScrollBottom(false);
   };
@@ -2980,13 +3041,23 @@ export function CoAppingChatAssistant({
   useEffect(() => {
     if (!isConversationDetailOpen) {
       setShowChatScrollBottom(false);
+      shouldAutoScrollChatRef.current = true;
       return;
     }
 
     const frame = window.requestAnimationFrame(() => {
       const node = chatScrollRef.current;
       if (!node) return;
+      const distanceFromBottom = node.scrollHeight - node.scrollTop - node.clientHeight;
+      const shouldAutoScroll = shouldAutoScrollChatRef.current || distanceFromBottom <= 96;
+
+      if (!shouldAutoScroll) {
+        setShowChatScrollBottom(true);
+        return;
+      }
+
       node.scrollTo({ top: node.scrollHeight, behavior: "auto" });
+      shouldAutoScrollChatRef.current = true;
       setShowChatScrollBottom(false);
     });
 

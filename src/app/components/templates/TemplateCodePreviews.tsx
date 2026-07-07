@@ -36,12 +36,13 @@ import {
   ProductsTabs,
   ShopSmartContent,
 } from "@/app/screens/products/ProductsScreen";
+import ProductDetailScreen from "@/app/screens/products/ProductDetailScreen";
 import { ACCOUNT_OPTION_ITEMS, ACCOUNT_PRODUCT_OPTIONS } from "@/data/accountDetails";
 
 export type TemplateCodePreviewId =
   | "messages-inbox"
   | "recurrent-payment"
-  | "product-bottom-sheet"
+  | "product-detail"
   | "sign-pin"
   | "generate-token"
   | "message-detail"
@@ -146,7 +147,6 @@ const feedbackBody = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, s
 const productSelectionOptions: RadioOption[] = [
   { title: "Current account", subtitle: "EUR - 59378215528495028873", selected: true },
   { title: "Debit card", subtitle: "Mastercard - 4322 **** **** 6546" },
-  { title: "Account package", subtitle: "U konto" },
 ];
 
 const accountSelectionOptions: RadioOption[] = [
@@ -1726,55 +1726,18 @@ function LogoutConfirmationTemplate({ interactive }: { interactive: boolean }) {
   );
 }
 
-function ProductBottomSheetTemplate({ interactive }: { interactive: boolean }) {
+function ProductDetailTemplate({ interactive }: { interactive: boolean }) {
   return (
-    <TemplatePhoneSurface statusBarVariant="dark">
-      <div className="absolute inset-0 bg-[var(--uc-surface)]">
-        <TemplateTopChrome title="Product" interactive={interactive} />
-      </div>
-      <div className="absolute inset-0 bg-[rgb(var(--uc-static-black-rgb)_/_0.45)]" />
-      <section
-        className="absolute inset-x-0 bottom-0 flex h-[780px] flex-col rounded-t-[10px] bg-[var(--uc-sheet-bg)] px-[24px] pb-[24px] pt-[24px]"
-        aria-label="Product name sheet"
-      >
-        <div className="mb-[23px] flex items-start justify-between gap-[16px]">
-          <h1 className="font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">
-            Product name
-          </h1>
-          <TemplateAction className="grid size-[32px] place-items-center text-[var(--uc-text)]" ariaLabel="Close" interactive={interactive}>
-            <AppIcon name="close-x" color="currentColor" />
-          </TemplateAction>
-        </div>
-
-        <div className="grid h-[161px] place-items-center rounded-[8px] bg-[var(--uc-surface-muted)]">
-          <p className="font-['UniCredit',sans-serif] text-[28px] font-bold italic leading-normal text-[var(--uc-border-muted)]">
-            IMG/GIF
-          </p>
-        </div>
-
-        <h2 className="mt-[25px] font-['UniCredit',sans-serif] text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">
-          Lorem ipsum dolor sit amet
-        </h2>
-
-        <div className="mt-[24px] space-y-[22px] font-['UniCredit',sans-serif] text-[16px] font-normal leading-[20px] text-[var(--uc-text)]">
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-          </p>
-          <p>
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-          </p>
-        </div>
-
-        <div className="mt-auto">
-          {interactive ? (
-            <PrimaryButton className="w-full">Button</PrimaryButton>
-          ) : (
-            <div className="flex h-[48px] w-full items-center justify-center rounded bg-[var(--uc-action)] font-['UniCredit',sans-serif] text-base font-bold text-[var(--uc-static-white)]">
-              Button
-            </div>
-          )}
-        </div>
-      </section>
+    <TemplatePhoneSurface>
+      <ProductDetailScreen
+        title="Product name"
+        cardId="account"
+        optionId="current-account"
+        actionLabel="Button"
+        includeSafeArea={false}
+        onBack={() => undefined}
+        onActionClick={interactive ? () => undefined : undefined}
+      />
     </TemplatePhoneSurface>
   );
 }
@@ -2941,8 +2904,8 @@ export function TemplateCodePreview({ previewId, presentationOnly = false }: Tem
       return <DocumentsTemplate interactive={interactive} />;
     case "recurrent-payment":
       return <RecurrentPaymentTemplate interactive={interactive} />;
-    case "product-bottom-sheet":
-      return <ProductBottomSheetTemplate interactive={interactive} />;
+    case "product-detail":
+      return <ProductDetailTemplate interactive={interactive} />;
     case "account-options":
       return <AccountOptionsTemplate interactive={interactive} />;
     case "activate-mtoken":

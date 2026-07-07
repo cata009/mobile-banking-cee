@@ -132,6 +132,8 @@ export function normalizeScreen(screen: Screen, hasCard: boolean): Screen {
   switch (screen) {
     case "transaction-detail":
       return hasCard ? "card-detail" : "account-detail";
+    case "product-detail":
+      return "products";
     case "domestic-payment":
     case "payment-review":
     case "payment-sign":

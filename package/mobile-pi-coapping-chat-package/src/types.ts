@@ -7,6 +7,7 @@ export type CoAppingChatActionTarget =
   | "investments-history"
   | "analytics"
   | "card-detail"
+  | "product-detail"
   | "products"
   | "payments"
   | "documents"
@@ -35,6 +36,7 @@ export interface CoAppingRichMetric {
   label: string;
   value: string;
   helper?: string;
+  icon?: string;
 }
 
 export interface CoAppingRichAllocationItem {
@@ -56,6 +58,7 @@ export interface CoAppingRichProductCard {
   subtitle: string;
   meta: string;
   tone?: "blue" | "dark" | "neutral";
+  icon?: string;
   action?: CoAppingChatAction;
 }
 
@@ -87,6 +90,9 @@ export type CoAppingRichBlock =
       title: string;
       body: string;
       products: CoAppingRichProductCard[];
+      variant?: "compact";
+      footer?: string;
+      interactive?: boolean;
     }
   | {
       type: "credit-limit-offer";
@@ -105,6 +111,7 @@ export type CoAppingRichBlock =
       title: string;
       body: string;
       metrics: CoAppingRichMetric[];
+      metricLayout?: "grid" | "calculation";
       action?: CoAppingChatAction;
     };
 
