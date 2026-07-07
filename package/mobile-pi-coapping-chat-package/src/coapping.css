@@ -537,9 +537,11 @@
 
 .mpc-new-conversation-hero {
   display: flex;
+  width: min(100%, 300px);
   flex-direction: column;
   align-items: center;
   gap: 12px;
+  margin-inline: auto;
   text-align: center;
   transform: translateY(6px);
 }
@@ -579,11 +581,14 @@
 
 .mpc-new-conversation-title {
   margin: 0;
+  max-width: 280px;
   color: var(--mpc-text);
   font-size: 22px;
   font-weight: 700;
   line-height: 28px;
   letter-spacing: 0;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 
 .mpc-conversation-list {
@@ -1386,9 +1391,14 @@
 
 .mpc-rich-card-head > span {
   color: var(--mpc-muted);
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 16px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 19px;
+}
+
+.mpc-rich-card-products .mpc-rich-card-head > span {
+  color: var(--mpc-copy-body);
+  font-weight: 400;
 }
 
 .mpc-rich-card-head > strong {
@@ -1434,6 +1444,57 @@
   font-size: 15px;
   font-weight: 800;
   line-height: 18px;
+}
+
+.mpc-rich-metric-grid-list {
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.mpc-rich-metric-row {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 54px;
+  padding: 9px 10px;
+}
+
+.mpc-rich-metric-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--mpc-menu-bg);
+  box-shadow: inset 0 0 0 1px rgba(38, 38, 38, 0.08);
+}
+
+.mpc-rich-metric-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.mpc-rich-metric-row .mpc-rich-metric-copy > span {
+  color: var(--mpc-muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 15px;
+}
+
+.mpc-rich-metric-row .mpc-rich-metric-copy > small {
+  color: var(--mpc-muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 14px;
+}
+
+.mpc-rich-metric-row > strong {
+  max-width: 112px;
+  text-align: right;
+  font-size: 16px;
+  line-height: 19px;
 }
 
 .mpc-rich-action {
@@ -1557,6 +1618,14 @@
   display: none;
 }
 
+.mpc-product-card-row-compact {
+  grid-auto-flow: initial;
+  grid-auto-columns: initial;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  overflow-x: visible;
+  padding-bottom: 0;
+}
+
 .mpc-product-card {
   display: grid;
   min-height: 94px;
@@ -1573,10 +1642,37 @@
   text-align: left;
 }
 
+.mpc-product-card-row-compact .mpc-product-card {
+  min-width: 0;
+  min-height: 118px;
+  align-content: start;
+  gap: 6px;
+  padding: 11px 10px;
+}
+
+.mpc-product-card-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--mpc-menu-bg);
+  box-shadow: inset 0 0 0 1px rgba(38, 38, 38, 0.08);
+}
+
 .mpc-product-card:hover,
 .mpc-product-card:focus-visible {
   background: var(--mpc-menu-bg);
   outline: none;
+}
+
+.mpc-product-card-static {
+  cursor: default;
+}
+
+.mpc-product-card-static:hover,
+.mpc-product-card-static:focus-visible {
+  background: var(--mpc-control-bg);
 }
 
 .mpc-product-card strong {
@@ -1597,6 +1693,14 @@
   font-size: 12px;
   font-weight: 700;
   line-height: 16px;
+}
+
+.mpc-rich-card-footer {
+  margin: -2px 0 0;
+  color: var(--mpc-copy-body);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
 }
 
 .mpc-rich-card-limit-offer {

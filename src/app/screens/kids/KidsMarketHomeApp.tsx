@@ -16,7 +16,6 @@ import { BottomSheet } from "@/app/components/BottomSheet";
 import BottomNavigation from "@/app/components/BottomNavigation";
 import Card from "@/app/components/cards/Card";
 import FaceIdAnimation from "@/app/components/FaceIdAnimation";
-import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
 import PageHeader from "@/app/components/PageHeader";
 import StatusBar from "@/app/components/StatusBar";
 import { useDemo } from "@/app/state/demoStore";
@@ -26,6 +25,9 @@ import NewPaymentDiscoverBanner from "@/app/components/payments/NewPaymentDiscov
 import PaymentHeroCard from "@/app/components/payments/PaymentHeroCard";
 import PaymentOtherShortcut from "@/app/components/payments/PaymentOtherShortcut";
 import PrimaryButton from "@/app/components/PrimaryButton";
+import ProductCardBottomSheet, {
+  type ProductDetailSelection,
+} from "@/app/components/products/ProductCardBottomSheet";
 import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProfileAvatar from "@/app/components/ProfileAvatar";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
@@ -55,6 +57,7 @@ import { SettingsCard } from "@/app/screens/more/cards/SettingsCard";
 import { TutorialCard } from "@/app/screens/more/cards/TutorialCard";
 import MessagesScreen from "@/app/screens/messages/MessagesScreen";
 import ContactsScreen from "@/app/screens/contacts/ContactsScreen";
+import ProductDetailScreen from "@/app/screens/products/ProductDetailScreen";
 import { TransactionDetailScreen } from "@/app/screens/payments/DomesticPaymentFlowScreens";
 import SettingsScreen from "@/app/screens/settings/SettingsScreen";
 import huLearnAskHelpSrc from "../../../assets/kids/learn/hu-learn-ask-help.png";
@@ -95,12 +98,12 @@ import {
   type KidsMarketHomeConcept,
 } from "@/data/kidsMarketHomeConcepts";
 import {
-  RO_KIDS_GOALS,
-  RO_KIDS_LEARN_MODULES,
+  HU_KIDS_GOALS,
+  HU_KIDS_LEARN_MODULES,
   goalProgress,
   type LearnModule,
   type SavingGoal,
-} from "@/data/roKidsBanking";
+} from "@/data/huKidsBanking";
 import type { CountryId } from "@/app/state/demoTypes";
 
 interface KidsMarketHomeAppProps {
@@ -133,42 +136,6 @@ const SK_MORE_ITEMS = [
   { title: "My family", icon: "users", tone: "orange" },
 ] as const;
 
-type RsKidsNavId = "home" | "analytics" | "payments" | "products" | "more";
-type RsKidsActionId = "ask" | "goal" | "freeze" | "more";
-
-const RS_KIDS_RUNTIME_COUNTRY: Extract<CountryId, "RS"> = "RS";
-
-const RS_KIDS_ACTIONS: Array<{ id: RsKidsActionId; label: string; icon: IconName }> = [
-  { id: "ask", label: "Ask family", icon: "circle-dollar-sign" },
-  { id: "goal", label: "Add to goal", icon: "piggy-bank" },
-  { id: "freeze", label: "Freeze card", icon: "shield-check" },
-  { id: "more", label: "More", icon: "nav-more" },
-];
-
-const RS_KIDS_MONEY_MOMENTS = [
-  { label: "Allowance", value: "2 days", detail: "5,000 RSD lands Friday", icon: "calendar-days" },
-  { label: "Request", value: "Ready", detail: "School trip note for Mum", icon: "send" },
-  { label: "Safety", value: "On", detail: "Online payments are off", icon: "shield-check" },
-] as const;
-
-const RS_KIDS_EARN_TASKS = [
-  { title: "Math worksheet", reward: 400, status: "Due today", icon: "book-open" },
-  { title: "Take out recycling", reward: 300, status: "Ready after school", icon: "clipboard-check" },
-] as const;
-
-const RS_KIDS_SAFETY_ITEMS = [
-  { label: "Card", value: "Active", icon: "credit-card" },
-  { label: "Online", value: "Off", icon: "lock" },
-  { label: "Weekly limit", value: "5,000 RSD", icon: "shield-check" },
-  { label: "Parent view", value: "Payments", icon: "users" },
-] as const;
-
-const RS_KIDS_SPENDING_CATEGORIES = [
-  { label: "Food", amount: 460, width: 34, toneClassName: "bg-[var(--uc-product-pink)]" },
-  { label: "School", amount: 890, width: 66, toneClassName: "bg-[var(--uc-product-blue)]" },
-  { label: "Fun", amount: 0, width: 12, toneClassName: "bg-[var(--uc-yellow-gold)]" },
-] as const;
-
 export default function KidsMarketHomeApp({ country }: KidsMarketHomeAppProps) {
   const resolvedCountry = isKidsHomeCountry(country) ? country : "SK";
   const concept = getKidsHomeConcept(resolvedCountry);
@@ -191,10 +158,6 @@ export default function KidsMarketHomeApp({ country }: KidsMarketHomeAppProps) {
 
   if (concept.style === "hu-smart-fintech") {
     return <HuCeeLightRestyleApp concept={concept} />;
-  }
-
-  if (concept.style === "rs-safe-spend-coach") {
-    return <RsKidsSafeSpendApp concept={concept} />;
   }
 
   return (
@@ -247,771 +210,6 @@ export default function KidsMarketHomeApp({ country }: KidsMarketHomeAppProps) {
         style={concept.style}
         onTabChange={setActiveTab}
       />
-    </div>
-  );
-}
-
-function RsKidsSafeSpendApp({ concept }: { concept: KidsMarketHomeConcept }) {
-  const [activeNav, setActiveNav] = useState<RsKidsNavId>("home");
-  const [showAmounts, setShowAmounts] = useState(true);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    root.style.setProperty("--uc-phone-status-fg", "var(--uc-static-white)");
-    root.style.setProperty(
-      "--uc-phone-dynamic-island-bg",
-      "color-mix(in srgb, var(--uc-static-black) 84%, var(--uc-teal-blue))",
-    );
-    root.style.setProperty(
-      "--uc-phone-dynamic-island-sensor-bg",
-      "color-mix(in srgb, var(--uc-static-black) 92%, transparent)",
-    );
-    root.style.setProperty(
-      "--uc-phone-system-bar-bg",
-      "linear-gradient(180deg, color-mix(in srgb, var(--uc-static-black) 26%, transparent) 0%, color-mix(in srgb, var(--uc-static-black) 8%, transparent) 62%, transparent 100%)",
-    );
-
-    return () => {
-      root.style.removeProperty("--uc-phone-status-fg");
-      root.style.removeProperty("--uc-phone-dynamic-island-bg");
-      root.style.removeProperty("--uc-phone-dynamic-island-sensor-bg");
-      root.style.removeProperty("--uc-phone-system-bar-bg");
-    };
-  }, []);
-
-  return (
-    <RsKidsShell>
-      {activeNav === "home" ? (
-        <div className="scrollbar-hide relative z-[1] flex-1 overflow-y-auto pb-[104px]" data-rs-kids-page="home">
-          <RsKidsHomePage
-            concept={concept}
-            onNavChange={setActiveNav}
-            onToggleAmounts={() => setShowAmounts((current) => !current)}
-            showAmounts={showAmounts}
-          />
-        </div>
-      ) : null}
-
-      {activeNav === "analytics" ? <RsKidsSpendingPage concept={concept} showAmounts={showAmounts} /> : null}
-      {activeNav === "payments" ? <RsKidsPaymentsPage /> : null}
-      {activeNav === "products" ? <RsKidsProductsPage /> : null}
-      {activeNav === "more" ? <RsKidsMorePage /> : null}
-
-      <RsKidsBottomNav activeNav={activeNav} onChange={setActiveNav} />
-    </RsKidsShell>
-  );
-}
-
-function RsKidsShell({ children }: { children: ReactNode }) {
-  return (
-    <div
-      className="relative flex h-full w-full flex-col overflow-hidden text-[var(--uc-text)]"
-      data-rs-kids-experience="safe-spend-coach"
-      style={
-        {
-          "--rs-kids-accent": "var(--uc-teal-blue)",
-          "--rs-kids-accent-2": "var(--uc-product-blue)",
-          "--rs-kids-reward": "var(--uc-yellow-gold)",
-          "--rs-kids-page-bg":
-            "linear-gradient(180deg, color-mix(in srgb, var(--uc-primary-k1) 82%, var(--uc-teal-blue)) 0px, color-mix(in srgb, var(--uc-primary-k1) 70%, var(--uc-product-blue)) 310px, color-mix(in srgb, var(--uc-app-bg) 88%, var(--uc-teal-soft)) 430px, var(--uc-app-bg) 610px)",
-          "--rs-kids-card-bg": "color-mix(in srgb, var(--uc-surface) 92%, var(--uc-teal-soft))",
-          "--rs-kids-nav-bg": "color-mix(in srgb, var(--uc-bottom-bar-bg) 88%, var(--uc-teal-blue))",
-        } as CSSProperties
-      }
-    >
-      <div className="absolute inset-0" style={{ background: "var(--rs-kids-page-bg)" }} />
-      <div aria-hidden="true" className="rs-kids-ambient-field pointer-events-none absolute inset-x-0 top-0 h-[420px]" />
-      {children}
-    </div>
-  );
-}
-
-function RsKidsHomePage({
-  concept,
-  onNavChange,
-  onToggleAmounts,
-  showAmounts,
-}: {
-  concept: KidsMarketHomeConcept;
-  onNavChange: (nav: RsKidsNavId) => void;
-  onToggleAmounts: () => void;
-  showAmounts: boolean;
-}) {
-  return (
-    <>
-      <div className="px-[24px] pt-[54px]">
-        <RsKidsHeader concept={concept} onToggleAmounts={onToggleAmounts} showAmounts={showAmounts} />
-        <RsKidsHero concept={concept} showAmounts={showAmounts} />
-      </div>
-
-      <RsKidsActionRail onNavChange={onNavChange} />
-
-      <div className="mt-[22px] space-y-[16px] px-[24px]">
-        <RsKidsMoneyMomentCard concept={concept} />
-        <RsKidsGoalSpotlight concept={concept} showAmounts={showAmounts} />
-        <RsKidsEarnNextCard showAmounts={showAmounts} />
-        <RsKidsCardSafetyCard concept={concept} />
-        <RsKidsActivityCard concept={concept} showAmounts={showAmounts} />
-        <RsKidsMoneyMapCard concept={concept} showAmounts={showAmounts} />
-      </div>
-    </>
-  );
-}
-
-function RsKidsHeader({
-  concept,
-  onToggleAmounts,
-  showAmounts,
-}: {
-  concept: KidsMarketHomeConcept;
-  onToggleAmounts: () => void;
-  showAmounts: boolean;
-}) {
-  return (
-    <header className="flex h-[40px] items-center justify-between text-[var(--uc-static-white)]">
-      <UniCreditLogo className="h-[24px] w-auto" textColor="var(--uc-static-white)" />
-      <div className="flex items-center gap-[10px]">
-        <button
-          aria-label={showAmounts ? "Hide amounts" : "Show amounts"}
-          className="grid size-[30px] place-items-center rounded-full border border-[color-mix(in_srgb,var(--uc-static-white)_18%,transparent)] bg-[color-mix(in_srgb,var(--uc-static-white)_12%,transparent)]"
-          onClick={onToggleAmounts}
-          type="button"
-        >
-          <AppIcon name={showAmounts ? "amount-hide" : "amount-show"} size={18} />
-        </button>
-        <button
-          aria-label="Messages"
-          className="relative grid size-[30px] place-items-center rounded-full border border-[color-mix(in_srgb,var(--uc-static-white)_18%,transparent)] bg-[color-mix(in_srgb,var(--uc-static-white)_12%,transparent)]"
-          type="button"
-        >
-          <AppIcon name="header-messages" size={20} />
-          <span className="absolute right-[5px] top-[5px] size-[7px] rounded-full bg-[var(--uc-red-main)]" />
-        </button>
-        <ProfileAvatar initials={concept.avatar} size={36} />
-      </div>
-    </header>
-  );
-}
-
-function RsKidsHero({
-  concept,
-  showAmounts,
-}: {
-  concept: KidsMarketHomeConcept;
-  showAmounts: boolean;
-}) {
-  const totalBalance = showAmounts ? formatKidsMoney(concept.balance, concept.country) : "****";
-  const safeToday = showAmounts ? formatKidsMoney(concept.safeToday, concept.country) : "****";
-
-  return (
-    <section className="relative mt-[30px] overflow-hidden rounded-[24px] border border-[color-mix(in_srgb,var(--uc-static-white)_14%,transparent)] bg-[color-mix(in_srgb,var(--uc-primary-k1)_84%,var(--uc-teal-blue))] p-[18px] text-[var(--uc-static-white)] shadow-[0_20px_54px_color-mix(in_srgb,var(--uc-static-black)_26%,transparent)]">
-      <div aria-hidden="true" className="rs-kids-signal-field absolute inset-[-22%]" />
-      <div className="relative z-[1]">
-        <div className="flex items-start justify-between gap-[12px]">
-          <div className="min-w-0">
-            <p className="text-[13px] font-bold uppercase leading-[15px] tracking-[0] text-[color-mix(in_srgb,var(--uc-static-white)_68%,transparent)]">
-              {concept.childName}'s money signal
-            </p>
-            <h1 className="mt-[8px] text-[40px] font-bold leading-[42px] tracking-[0]">
-              {safeToday}
-            </h1>
-            <p className="mt-[7px] text-[16px] font-bold leading-[20px] tracking-[0]">
-              {concept.heroTitle}
-            </p>
-          </div>
-          <span className="inline-flex shrink-0 items-center gap-[6px] rounded-full bg-[color-mix(in_srgb,var(--uc-green-success)_22%,var(--uc-static-black))] px-[10px] py-[7px] text-[12px] font-bold leading-[14px] text-[var(--uc-static-white)]">
-            <AppIcon name="prime-check" size={15} />
-            On track
-          </span>
-        </div>
-
-        <p className="mt-[14px] text-[14px] font-normal leading-[18px] tracking-[0] text-[color-mix(in_srgb,var(--uc-static-white)_74%,transparent)]">
-          Total balance {totalBalance}. Hoodie goal stays safe if lunch stays under plan.
-        </p>
-
-        <div className="mt-[16px] grid grid-cols-3 gap-[8px]">
-          {concept.metrics.map((metric) => (
-            <div key={metric.label} className="min-h-[76px] rounded-[16px] bg-[color-mix(in_srgb,var(--uc-static-white)_12%,transparent)] p-[10px] backdrop-blur-sm">
-              <p className="text-[16px] font-bold leading-[19px] tracking-[0]">{metric.value}</p>
-              <p className="mt-[5px] text-[11px] font-bold leading-[13px] tracking-[0] text-[color-mix(in_srgb,var(--uc-static-white)_70%,transparent)]">
-                {metric.label}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function RsKidsActionRail({ onNavChange }: { onNavChange: (nav: RsKidsNavId) => void }) {
-  const handleAction = (actionId: RsKidsActionId) => {
-    if (actionId === "more") {
-      onNavChange("more");
-    }
-  };
-
-  return (
-    <section className="mt-[22px] px-[24px]">
-      <div className="grid grid-cols-4 gap-[14px]">
-        {RS_KIDS_ACTIONS.map((action) => (
-          <button
-            key={action.id}
-            className="flex min-w-0 flex-col items-center gap-[9px]"
-            onClick={() => handleAction(action.id)}
-            type="button"
-          >
-            <span className="grid size-[62px] place-items-center rounded-full bg-[color-mix(in_srgb,var(--uc-surface)_82%,var(--rs-kids-accent))] text-[var(--uc-text)] shadow-sm">
-              <AppIcon name={action.icon} size={26} />
-            </span>
-            <span className="min-h-[32px] text-center text-[12px] font-bold leading-[14px] tracking-[0] text-[color-mix(in_srgb,var(--uc-static-white)_76%,transparent)]">
-              {action.label}
-            </span>
-          </button>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function RsKidsMoneyMomentCard({ concept }: { concept: KidsMarketHomeConcept }) {
-  return (
-    <section className="rounded-[18px] bg-[var(--rs-kids-card-bg)] px-[16px] py-[16px] shadow-sm">
-      <div className="flex items-start justify-between gap-[12px]">
-        <div className="min-w-0">
-          <h2 className="text-[17px] font-bold leading-[21px] tracking-[0] text-[var(--uc-text)]">Next money moment</h2>
-          <p className="mt-[5px] text-[13px] font-normal leading-[17px] tracking-[0] text-[var(--uc-text-muted)]">
-            {concept.coach[1]?.body}
-          </p>
-        </div>
-        <span className="grid size-[42px] shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--rs-kids-accent)_14%,var(--uc-surface))] text-[var(--rs-kids-accent)]">
-          <AppIcon name="calendar-days" size={21} />
-        </span>
-      </div>
-
-      <div className="mt-[14px] space-y-[8px]">
-        {RS_KIDS_MONEY_MOMENTS.map((moment) => (
-          <div key={moment.label} className="flex items-center gap-[10px] rounded-[14px] bg-[color-mix(in_srgb,var(--uc-surface)_82%,var(--rs-kids-accent))] p-[10px]">
-            <span className="grid size-[34px] shrink-0 place-items-center rounded-full bg-[var(--uc-surface)] text-[var(--rs-kids-accent)]">
-              <AppIcon name={moment.icon} size={17} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[14px] font-bold leading-[17px] tracking-[0] text-[var(--uc-text)]">{moment.label}</p>
-              <p className="truncate text-[12px] font-normal leading-[15px] tracking-[0] text-[var(--uc-text-muted)]">{moment.detail}</p>
-            </div>
-            <span className="shrink-0 text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--rs-kids-accent)]">{moment.value}</span>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function RsKidsGoalSpotlight({
-  concept,
-  showAmounts,
-}: {
-  concept: KidsMarketHomeConcept;
-  showAmounts: boolean;
-}) {
-  const goal = concept.pockets[0];
-  const progress = getPocketProgress(goal);
-  const savedAmount = showAmounts ? formatKidsMoney(goal.savedAmount, concept.country) : "****";
-  const targetAmount = showAmounts ? formatKidsMoney(goal.targetAmount, concept.country) : "****";
-
-  return (
-    <section className="rounded-[18px] bg-[var(--uc-surface)] px-[16px] py-[16px] shadow-sm">
-      <div className="flex items-center gap-[14px]">
-        <div
-          className="grid size-[92px] shrink-0 place-items-center rounded-full"
-          style={{
-            background: `conic-gradient(var(--rs-kids-accent) ${progress}%, color-mix(in srgb, var(--uc-surface-muted) 78%, var(--rs-kids-accent)) 0)`,
-          }}
-        >
-          <div className="grid size-[68px] place-items-center rounded-full bg-[var(--uc-surface)] text-center">
-            <p className="text-[20px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">{progress}%</p>
-            <p className="text-[10px] font-bold uppercase leading-[12px] tracking-[0] text-[var(--uc-text-muted)]">{goal.emojiLabel}</p>
-          </div>
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-bold uppercase leading-[15px] tracking-[0] text-[var(--rs-kids-accent)]">Goal spotlight</p>
-          <h2 className="mt-[4px] text-[19px] font-bold leading-[23px] tracking-[0] text-[var(--uc-text)]">{goal.title}</h2>
-          <p className="mt-[5px] text-[13px] font-normal leading-[17px] tracking-[0] text-[var(--uc-text-muted)]">{goal.helper}</p>
-          <p className="mt-[8px] text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--uc-text)]">
-            {savedAmount} of {targetAmount}
-          </p>
-        </div>
-      </div>
-      <button className="mt-[14px] flex h-[38px] w-full items-center justify-center rounded-full bg-[var(--rs-kids-accent)] text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--uc-text-inverse)]" type="button">
-        Boost goal
-      </button>
-    </section>
-  );
-}
-
-function RsKidsEarnNextCard({ showAmounts }: { showAmounts: boolean }) {
-  const totalReward = RS_KIDS_EARN_TASKS.reduce((sum, task) => sum + task.reward, 0);
-
-  return (
-    <section className="rounded-[18px] bg-[color-mix(in_srgb,var(--uc-surface)_90%,var(--uc-yellow-gold))] px-[16px] py-[16px] shadow-sm">
-      <div className="flex items-start justify-between gap-[12px]">
-        <div>
-          <h2 className="text-[17px] font-bold leading-[21px] tracking-[0] text-[var(--uc-text)]">Earn next</h2>
-          <p className="mt-[5px] text-[13px] font-normal leading-[17px] tracking-[0] text-[var(--uc-text-muted)]">
-            {showAmounts ? `${totalReward} RSD waiting in tasks` : "Rewards hidden"}
-          </p>
-        </div>
-        <span className="grid size-[42px] place-items-center rounded-full bg-[color-mix(in_srgb,var(--uc-yellow-gold)_26%,var(--uc-surface))] text-[var(--uc-primary-k1)]">
-          <AppIcon name="trophy" size={21} />
-        </span>
-      </div>
-
-      <div className="mt-[14px] space-y-[10px]">
-        {RS_KIDS_EARN_TASKS.map((task) => (
-          <div key={task.title} className="flex items-center gap-[11px] rounded-[14px] bg-[var(--uc-surface)] p-[11px]">
-            <span className="grid size-[36px] shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--uc-yellow-gold)_20%,var(--uc-surface))] text-[var(--uc-primary-k1)]">
-              <AppIcon name={task.icon} size={18} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[14px] font-bold leading-[17px] tracking-[0] text-[var(--uc-text)]">{task.title}</p>
-              <p className="text-[12px] font-normal leading-[15px] tracking-[0] text-[var(--uc-text-muted)]">{task.status}</p>
-            </div>
-            <span className="shrink-0 text-[13px] font-bold leading-[16px] tracking-[0] text-[var(--uc-text)]">
-              {showAmounts ? `+${task.reward}` : "+****"}
-            </span>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function RsKidsCardSafetyCard({ concept }: { concept: KidsMarketHomeConcept }) {
-  return (
-    <section className="rounded-[18px] bg-[var(--uc-surface)] px-[16px] py-[16px] shadow-sm">
-      <div className="flex items-start gap-[14px]">
-        <div className="shrink-0 rounded-[10px] bg-[var(--uc-surface-muted)] p-[8px]">
-          <Card ariaLabel="Serbia Kids card" size="medium" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-[17px] font-bold leading-[21px] tracking-[0] text-[var(--uc-text)]">Card safety</h2>
-          <p className="mt-[5px] text-[13px] font-normal leading-[17px] tracking-[0] text-[var(--uc-text-muted)]">{concept.cardStatus}</p>
-          <p className="mt-[8px] text-[12px] font-bold leading-[15px] tracking-[0] text-[var(--rs-kids-accent)]">Mum can review payments, not private goal names.</p>
-        </div>
-      </div>
-
-      <div className="mt-[14px] grid grid-cols-2 gap-[8px]">
-        {RS_KIDS_SAFETY_ITEMS.map((item) => (
-          <div key={item.label} className="rounded-[14px] bg-[color-mix(in_srgb,var(--uc-surface-muted)_78%,var(--rs-kids-accent))] p-[10px]">
-            <div className="flex items-center gap-[7px] text-[var(--rs-kids-accent)]">
-              <AppIcon name={item.icon} size={16} />
-              <span className="text-[11px] font-bold uppercase leading-[13px] tracking-[0]">{item.label}</span>
-            </div>
-            <p className="mt-[6px] text-[14px] font-bold leading-[17px] tracking-[0] text-[var(--uc-text)]">{item.value}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function RsKidsActivityCard({
-  concept,
-  showAmounts,
-}: {
-  concept: KidsMarketHomeConcept;
-  showAmounts: boolean;
-}) {
-  return (
-    <section className="rounded-[18px] bg-[var(--uc-surface)] px-[16px] py-[16px] shadow-sm">
-      <div className="flex items-center justify-between gap-[12px]">
-        <h2 className="text-[17px] font-bold leading-[21px] tracking-[0] text-[var(--uc-text)]">Recent activity</h2>
-        <button className="text-[12px] font-bold uppercase leading-[15px] tracking-[0] text-[var(--rs-kids-accent)]" type="button">
-          See all
-        </button>
-      </div>
-      <div className="mt-[14px] space-y-[12px]">
-        {concept.feed.map((item) => (
-          <RsKidsActivityRow key={`${item.title}-${item.time}`} item={item} country={concept.country} showAmounts={showAmounts} />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function RsKidsActivityRow({
-  country,
-  item,
-  showAmounts,
-}: {
-  country: KidsHomeCountry;
-  item: KidsHomeFeedItem;
-  showAmounts: boolean;
-}) {
-  const isPositive = item.amount >= 0;
-  const icon: IconName = item.category === "Family" ? "users" : item.category === "School" ? "book-open" : "receipt-text";
-
-  return (
-    <div className="flex items-center gap-[12px]">
-      <span
-        className={cn(
-          "grid size-[36px] shrink-0 place-items-center rounded-full text-[var(--uc-static-white)]",
-          isPositive ? "bg-[var(--uc-green-olive)]" : "bg-[var(--uc-product-pink)]",
-        )}
-      >
-        <AppIcon name={icon} size={18} />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[14px] font-bold leading-[17px] tracking-[0] text-[var(--uc-text)]">{item.title}</p>
-        <p className="mt-[3px] text-[12px] font-normal leading-[15px] tracking-[0] text-[var(--uc-text-muted)]">
-          {item.category} · {item.time}
-        </p>
-      </div>
-      <p className={cn("shrink-0 text-right text-[14px] font-bold leading-[17px] tracking-[0]", isPositive ? "text-[var(--uc-green-olive)]" : "text-[var(--uc-text)]")}>
-        {showAmounts ? formatSignedKidsMoney(item.amount, country) : isPositive ? "+****" : "-****"}
-      </p>
-    </div>
-  );
-}
-
-function RsKidsMoneyMapCard({
-  concept,
-  showAmounts,
-}: {
-  concept: KidsMarketHomeConcept;
-  showAmounts: boolean;
-}) {
-  const goalsTotal = concept.pockets.reduce((sum, pocket) => sum + pocket.savedAmount, 0);
-
-  return (
-    <section className="rounded-[18px] bg-[var(--uc-surface)] px-[16px] py-[16px] shadow-sm">
-      <h2 className="text-[17px] font-bold leading-[21px] tracking-[0] text-[var(--uc-text)]">Money map</h2>
-      <div className="mt-[14px] space-y-[12px]">
-        <RsKidsMoneyMapRow icon="wallet-cards" label="Spend today" value={showAmounts ? formatKidsMoney(concept.safeToday, concept.country) : "****"} />
-        <RsKidsMoneyMapRow icon="piggy-bank" label="Goals" value={showAmounts ? formatKidsMoney(goalsTotal, concept.country) : "****"} />
-        <RsKidsMoneyMapRow icon="lock" label="Parent-safe reserve" value={showAmounts ? formatKidsMoney(concept.balance - concept.safeToday, concept.country) : "****"} />
-      </div>
-    </section>
-  );
-}
-
-function RsKidsMoneyMapRow({
-  icon,
-  label,
-  value,
-}: {
-  icon: IconName;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-center gap-[12px]">
-      <span className="grid size-[36px] shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--rs-kids-accent)_13%,var(--uc-surface))] text-[var(--rs-kids-accent)]">
-        <AppIcon name={icon} size={18} />
-      </span>
-      <p className="min-w-0 flex-1 text-[14px] font-bold leading-[17px] tracking-[0] text-[var(--uc-text)]">{label}</p>
-      <p className="shrink-0 text-right text-[14px] font-bold leading-[17px] tracking-[0] text-[var(--uc-text)]">{value}</p>
-    </div>
-  );
-}
-
-function RsKidsSpendingPage({
-  concept,
-  showAmounts,
-}: {
-  concept: KidsMarketHomeConcept;
-  showAmounts: boolean;
-}) {
-  return (
-    <RsKidsMenuFrame subtitle="A coach view for daily choices." title="Spending coach">
-      <div className="space-y-[14px] px-[20px] pt-[16px]">
-        <section className="rounded-[18px] bg-[var(--uc-surface)] p-[16px] shadow-sm">
-          <p className="text-[13px] font-bold uppercase leading-[15px] tracking-[0] text-[var(--rs-kids-accent)]">Today decision</p>
-          <h2 className="mt-[6px] text-[24px] font-bold leading-[28px] tracking-[0] text-[var(--uc-text)]">
-            {showAmounts ? formatKidsMoney(concept.safeToday, concept.country) : "****"} is safe before Friday
-          </h2>
-          <p className="mt-[8px] text-[13px] font-normal leading-[17px] tracking-[0] text-[var(--uc-text-muted)]">
-            If lunch stays under 600 RSD, the Concert hoodie target remains on pace.
-          </p>
-        </section>
-
-        <section className="rounded-[18px] bg-[var(--uc-surface)] p-[16px] shadow-sm">
-          <h2 className="text-[17px] font-bold leading-[21px] tracking-[0] text-[var(--uc-text)]">This week by category</h2>
-          <div className="mt-[14px] space-y-[13px]">
-            {RS_KIDS_SPENDING_CATEGORIES.map((category) => (
-              <div key={category.label}>
-                <div className="flex items-center justify-between text-[13px] font-bold leading-[16px] tracking-[0]">
-                  <span className="text-[var(--uc-text)]">{category.label}</span>
-                  <span className="text-[var(--uc-text-muted)]">{showAmounts ? `${category.amount} RSD` : "****"}</span>
-                </div>
-                <div className="mt-[7px] h-[9px] overflow-hidden rounded-full bg-[var(--uc-surface-muted)]">
-                  <div className={cn("h-full rounded-full", category.toneClassName)} style={{ width: `${category.width}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <RsKidsMoneyMomentCard concept={concept} />
-      </div>
-    </RsKidsMenuFrame>
-  );
-}
-
-function RsKidsMenuFrame({
-  children,
-  subtitle,
-  title,
-}: {
-  children: ReactNode;
-  subtitle?: string;
-  title: string;
-}) {
-  return (
-    <div className="relative z-[1] flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--uc-app-bg)] text-[var(--uc-text)]">
-      <div className="bg-[color-mix(in_srgb,var(--uc-primary-k1)_86%,var(--rs-kids-accent))] px-[24px] pb-[22px] pt-[54px] text-[var(--uc-static-white)]">
-        <div className="flex min-h-[40px] items-start justify-between gap-[12px]">
-          <div className="min-w-0">
-            <h1 className="text-[28px] font-bold leading-[32px] tracking-[0]">{title}</h1>
-            {subtitle ? (
-              <p className="mt-[5px] text-[13px] font-normal leading-[17px] tracking-[0] text-[color-mix(in_srgb,var(--uc-static-white)_72%,transparent)]">
-                {subtitle}
-              </p>
-            ) : null}
-          </div>
-          <HeaderActionRail>
-            <HeaderActionButton icon="contact-phone" label="Contact phone" onClick={() => undefined} />
-            <HeaderActionButton icon="messages" label="Messages" onClick={() => undefined} />
-          </HeaderActionRail>
-        </div>
-      </div>
-      <div className="scrollbar-hide min-h-0 flex-1 overflow-y-auto pb-[104px]">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function RsKidsPaymentHeroSheet({
-  config,
-  heroId,
-  onClose,
-}: {
-  config: NewPaymentSheetConfig;
-  heroId: PaymentHeroItem["id"];
-  onClose: () => void;
-}) {
-  const { t } = useLanguage();
-  const localizedConfig: NewPaymentSheetConfig = {
-    ...config,
-    title: t(`runtime.payments.primaryItems.${heroId}.title`, config.title),
-    actions: config.actions.map((action) => ({
-      ...action,
-      title: t(`runtime.payments.newPayment.actions.${action.id}.title`, action.title),
-      description: t(`runtime.payments.newPayment.actions.${action.id}.description`, action.description),
-    })),
-    infoBanner: {
-      title: t("runtime.payments.newPayment.infoBanner.title", config.infoBanner.title),
-      description: t("runtime.payments.newPayment.infoBanner.description", config.infoBanner.description),
-    },
-  };
-  const handleActionSelect = (_action: NewPaymentAction) => {
-    onClose();
-  };
-
-  return (
-    <BottomSheet title={localizedConfig.title} onClose={onClose}>
-      <div className="flex flex-col">
-        {localizedConfig.actions.map((action) => (
-          <NewPaymentActionListItem key={action.id} action={action} onSelect={handleActionSelect} />
-        ))}
-      </div>
-      <NewPaymentDiscoverBanner
-        title={localizedConfig.infoBanner.title}
-        description={localizedConfig.infoBanner.description}
-      />
-    </BottomSheet>
-  );
-}
-
-function RsKidsPaymentsPage() {
-  const { t } = useLanguage();
-  const menu = getPaymentsMenuForCountry(RS_KIDS_RUNTIME_COUNTRY);
-  const [selectedPrimaryItemId, setSelectedPrimaryItemId] = useState<PaymentHeroItem["id"] | null>(null);
-  const selectedHeroSheet = selectedPrimaryItemId ? menu.heroSheets[selectedPrimaryItemId] : null;
-  const localizedPrimaryItems = menu.primaryItems.map((item) => ({
-    ...item,
-    title: t(`runtime.payments.primaryItems.${item.id}.title`, item.title),
-    description: t(`runtime.payments.primaryItems.${item.id}.description`, item.description),
-  }));
-  const localizedOtherItems = menu.otherItems.map((item) => ({
-    ...item,
-    label: t(`runtime.payments.otherItems.${item.id}`, item.label),
-  }));
-
-  return (
-    <>
-      <RsKidsMenuFrame subtitle="Payments stay supervised in Kids mode." title={t("runtime.payments.title", menu.title)}>
-        <div className="flex flex-col gap-[13px] px-[20px] pt-[16px]">
-          {localizedPrimaryItems.map((item) => (
-            <PaymentHeroCard
-              key={item.id}
-              item={item}
-              onSelect={(selectedItem) => setSelectedPrimaryItemId(selectedItem.id)}
-            />
-          ))}
-        </div>
-
-        <section className="px-[20px] pt-[16px]">
-          <SectionHeadingDivider title={t("runtime.payments.other", menu.otherTitle)} />
-          <div className="scrollbar-hide overflow-x-auto overflow-y-hidden pt-[8px]">
-            <div className="flex w-max gap-[18px] pr-[20px]">
-              {localizedOtherItems.map((item) => (
-                <PaymentOtherShortcut key={item.id} item={item} onClick={() => undefined} />
-              ))}
-            </div>
-          </div>
-        </section>
-      </RsKidsMenuFrame>
-
-      {selectedHeroSheet && selectedPrimaryItemId ? (
-        <RsKidsPaymentHeroSheet
-          config={selectedHeroSheet}
-          heroId={selectedPrimaryItemId}
-          onClose={() => setSelectedPrimaryItemId(null)}
-        />
-      ) : null}
-    </>
-  );
-}
-
-function RsKidsProductsPage() {
-  const { t } = useLanguage();
-  const config = getProductsMenuForCountry(RS_KIDS_RUNTIME_COUNTRY);
-  const localizedProducts = config.products.map((card) => ({
-    ...card,
-    title: t(`runtime.productsMenu.cards.${getHuKidsProductCardTranslationId(card)}`, card.title),
-  }));
-  const localizedOffers = config.offers.map((offer) => ({
-    ...offer,
-    title: t(`runtime.productsMenu.offers.${offer.id}.title`, offer.title),
-    description: t(`runtime.productsMenu.offers.${offer.id}.description`, offer.description),
-  }));
-
-  return (
-    <RsKidsMenuFrame subtitle="Products are shown as Kids-safe discovery cards." title={t("runtime.productsMenu.title", config.title)}>
-      {localizedOffers.length > 0 ? (
-        <section className="px-[20px] pt-[16px]">
-          <SectionHeadingDivider title={t("runtime.productsMenu.offersForYou", config.offersTitle)} />
-          <div className="mt-[12px] grid gap-[10px]">
-            {localizedOffers.slice(0, 2).map((offer) => (
-              <button
-                key={offer.id}
-                className="rounded-[14px] bg-[var(--uc-surface)] p-[14px] text-left shadow-sm"
-                onClick={() => handleHuKidsOfferClick(offer)}
-                type="button"
-              >
-                <span className="block whitespace-pre-line text-[17px] font-bold leading-[21px] tracking-[0] text-[var(--uc-text)]">
-                  {offer.title}
-                </span>
-                <span className="mt-[7px] block whitespace-pre-line text-[13px] font-normal leading-[17px] tracking-[0] text-[var(--uc-text-muted)]">
-                  {offer.description}
-                </span>
-              </button>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      <section className="px-[20px] pt-[16px]">
-        {config.productsTitle ? (
-          <SectionHeadingDivider title={t("runtime.productsMenu.ourProducts", config.productsTitle)} />
-        ) : null}
-        <div className="grid grid-cols-[repeat(2,164px)] justify-center gap-[16px] pt-[16px]">
-          {localizedProducts.map((card) => (
-            <ProductMenuCard
-              key={card.id}
-              card={card}
-              variant="standard"
-              onClick={handleHuKidsProductClick}
-            />
-          ))}
-        </div>
-      </section>
-    </RsKidsMenuFrame>
-  );
-}
-
-function RsKidsMorePage() {
-  const { t } = useLanguage();
-  const availableCards = getMoreCardsForCountry(RS_KIDS_RUNTIME_COUNTRY);
-  const documentsCount = getDocumentsCountForCountry(RS_KIDS_RUNTIME_COUNTRY);
-  const cardLabels: Record<MoreCardType, string> = {
-    contacts: t("more.cards.contacts", "Contacts"),
-    documents: t("more.cards.documents", "Documents"),
-    settings: t("more.cards.settings", "Settings"),
-    "gdpr-consent": t("more.cards.gdprConsent", "GDPR Consent"),
-    "third-party-consent": t("more.cards.thirdPartyConsent", "Consent to third parties"),
-    "digital-activities": t("more.cards.digitalActivities", "Digital activity record"),
-    "my-requests": t("more.cards.myRequests", "My applications"),
-    tutorial: t("more.cards.tutorial", "Tutorials"),
-  };
-
-  const renderCard = (cardType: MoreCardType) => {
-    switch (cardType) {
-      case "contacts":
-        return <ContactsCard key="contacts" title={cardLabels.contacts} onClick={() => undefined} />;
-      case "documents":
-        return (
-          <DocumentsCard
-            key="documents"
-            title={cardLabels.documents}
-            badgeCount={documentsCount}
-            onClick={() => undefined}
-          />
-        );
-      case "settings":
-        return <SettingsCard key="settings" title={cardLabels.settings} onClick={() => undefined} />;
-      case "third-party-consent":
-        return <SettingsCard key="third-party-consent" title={cardLabels["third-party-consent"]} onClick={() => undefined} />;
-      case "my-requests":
-        return <MyRequestsCard key="my-requests" title={cardLabels["my-requests"]} onClick={() => undefined} />;
-      case "tutorial":
-        return <TutorialCard key="tutorial" title={cardLabels.tutorial} onClick={() => undefined} />;
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <RsKidsMenuFrame subtitle="Family visibility, documents, and settings." title={t("more.title", "More")}>
-      <div className="px-[16px] pt-[16px]">
-        <div className="grid grid-cols-2 gap-x-[15px] gap-y-[16px]">
-          {availableCards.map((cardType) => renderCard(cardType))}
-        </div>
-      </div>
-    </RsKidsMenuFrame>
-  );
-}
-
-function RsKidsBottomNav({
-  activeNav,
-  onChange,
-}: {
-  activeNav: RsKidsNavId;
-  onChange: (tab: RsKidsNavId) => void;
-}) {
-  return (
-    <div
-      className="absolute inset-x-0 bottom-0 z-10 flex items-center justify-center border-t border-[var(--uc-border-muted)] bg-[var(--rs-kids-nav-bg)] shadow-[0_-10px_28px_color-mix(in_srgb,var(--uc-static-black)_12%,transparent)] backdrop-blur-md"
-      style={
-        {
-          "--uc-action": "var(--rs-kids-accent)",
-          "--uc-bottom-bar-bg": "var(--rs-kids-nav-bg)",
-        } as CSSProperties
-      }
-    >
-      <BottomNavigation activeTab={activeNav} onTabChange={onChange} />
     </div>
   );
 }
@@ -1192,15 +390,9 @@ const HU_KIDS_INITIAL_TASKS: HuKidsTask[] = [
   { id: "finish-homework", title: "Finish your homework", recurrence: "Weekly", reward: 1000, status: "todo" },
 ];
 
-const HU_KIDS_INITIAL_GOALS: SavingGoal[] = RO_KIDS_GOALS.map((goal) => ({
-  ...goal,
-  childId: "child-alexandra",
-  currency: "HUF",
-  savedAmount: goal.savedAmount * 100,
-  targetAmount: goal.targetAmount * 100,
-}));
+const HU_KIDS_INITIAL_GOALS: SavingGoal[] = HU_KIDS_GOALS.map((goal) => ({ ...goal }));
 
-const HU_KIDS_INITIAL_LEARN_MODULES: LearnModule[] = RO_KIDS_LEARN_MODULES.map((module) => ({ ...module }));
+const HU_KIDS_INITIAL_LEARN_MODULES: LearnModule[] = HU_KIDS_LEARN_MODULES.map((module) => ({ ...module }));
 
 const HU_LEARN_TOPICS: HuLearnTopic[] = [
   {
@@ -4068,10 +3260,6 @@ function HuKidsPaymentsPage({
   );
 }
 
-function handleHuKidsProductClick(_card: ProductsCard) {
-  return undefined;
-}
-
 function handleHuKidsOfferClick(_offer: ProductsOffer) {
   return undefined;
 }
@@ -4087,6 +3275,8 @@ function getHuKidsProductCardTranslationId(card: ProductsCard) {
 function HuKidsProductsPage({ onMessages, theme }: { onMessages?: () => void; theme: HuThemePreset }) {
   const { t } = useLanguage();
   const config = getProductsMenuForCountry(HU_KIDS_SIMPLIFIED_MENU_SHAPE_COUNTRY);
+  const [selectedProductCard, setSelectedProductCard] = useState<ProductsCard | null>(null);
+  const [selectedProductDetail, setSelectedProductDetail] = useState<ProductDetailSelection | null>(null);
   const localizedProducts = config.products.map((card) => ({
     ...card,
     title: t(`runtime.productsMenu.cards.${getHuKidsProductCardTranslationId(card)}`, card.title),
@@ -4097,48 +3287,70 @@ function HuKidsProductsPage({ onMessages, theme }: { onMessages?: () => void; th
     description: t(`runtime.productsMenu.offers.${offer.id}.description`, offer.description),
   }));
 
+  if (selectedProductDetail) {
+    return (
+      <ProductDetailScreen
+        title={selectedProductDetail.title}
+        cardId={selectedProductDetail.cardId}
+        optionId={selectedProductDetail.optionId}
+        onBack={() => setSelectedProductDetail(null)}
+      />
+    );
+  }
+
   return (
-    <HuKidsPiMenuFrame onMessages={onMessages} theme={theme} title={t("runtime.productsMenu.title", config.title)}>
-      {localizedOffers.length > 0 ? (
+    <>
+      <HuKidsPiMenuFrame onMessages={onMessages} theme={theme} title={t("runtime.productsMenu.title", config.title)}>
+        {localizedOffers.length > 0 ? (
+          <section className="pt-[16px]">
+            <SectionHeadingDivider title={t("runtime.productsMenu.offersForYou", config.offersTitle)} className="px-[24px]" />
+            <div className="grid grid-cols-[327px] justify-center gap-[12px] px-[24px] pt-[16px]">
+              {localizedOffers.map((offer) => (
+                <button
+                  key={offer.id}
+                  className="rounded-[8px] p-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
+                  onClick={() => handleHuKidsOfferClick(offer)}
+                  style={{ background: "var(--pi-offer-card-bg, var(--uc-surface-muted))" }}
+                  type="button"
+                >
+                  <span className="block whitespace-pre-line text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">
+                    {offer.title}
+                  </span>
+                  <span className="mt-[8px] block whitespace-pre-line text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
+                    {offer.description}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
         <section className="pt-[16px]">
-          <SectionHeadingDivider title={t("runtime.productsMenu.offersForYou", config.offersTitle)} className="px-[24px]" />
-          <div className="grid grid-cols-[327px] justify-center gap-[12px] px-[24px] pt-[16px]">
-            {localizedOffers.map((offer) => (
-              <button
-                key={offer.id}
-                className="rounded-[8px] p-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
-                onClick={() => handleHuKidsOfferClick(offer)}
-                style={{ background: "var(--pi-offer-card-bg, var(--uc-surface-muted))" }}
-                type="button"
-              >
-                <span className="block whitespace-pre-line text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">
-                  {offer.title}
-                </span>
-                <span className="mt-[8px] block whitespace-pre-line text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
-                  {offer.description}
-                </span>
-              </button>
+          {config.productsTitle ? (
+            <SectionHeadingDivider title={t("runtime.productsMenu.ourProducts", config.productsTitle)} className="px-[24px]" />
+          ) : null}
+          <div className="grid grid-cols-[repeat(2,164px)] justify-center gap-[16px] pt-[16px]">
+            {localizedProducts.map((card) => (
+              <ProductMenuCard
+                key={card.id}
+                card={card}
+                variant="standard"
+                onClick={setSelectedProductCard}
+              />
             ))}
           </div>
         </section>
-      ) : null}
+      </HuKidsPiMenuFrame>
 
-      <section className="pt-[16px]">
-        {config.productsTitle ? (
-          <SectionHeadingDivider title={t("runtime.productsMenu.ourProducts", config.productsTitle)} className="px-[24px]" />
-        ) : null}
-        <div className="grid grid-cols-[repeat(2,164px)] justify-center gap-[16px] pt-[16px]">
-          {localizedProducts.map((card) => (
-            <ProductMenuCard
-              key={card.id}
-              card={card}
-              variant="standard"
-              onClick={handleHuKidsProductClick}
-            />
-          ))}
-        </div>
-      </section>
-    </HuKidsPiMenuFrame>
+      {selectedProductCard ? (
+        <ProductCardBottomSheet
+          card={selectedProductCard}
+          country={HU_KIDS_SIMPLIFIED_MENU_SHAPE_COUNTRY}
+          onClose={() => setSelectedProductCard(null)}
+          onProductOptionClick={setSelectedProductDetail}
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -6319,7 +5531,7 @@ function HuKidsGoalsPage({
             <div className="min-w-0">
               <h1 className="text-[20px] font-bold leading-[24px] tracking-[0] text-[var(--uc-text)]">Save for what matters</h1>
               <p className="mt-[6px] text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
-                The full Kids RO goals model is now available in HU Kids.
+                The HU Kids goals model is available in the Saving area.
               </p>
             </div>
           </div>

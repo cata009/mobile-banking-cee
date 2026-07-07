@@ -20,14 +20,6 @@ import {
 } from "@/data/paymentFlow";
 import type { CountryId } from "@/app/state/demoTypes";
 
-function HomeIndicator() {
-  return (
-    <div className="flex h-[34px] shrink-0 items-center justify-center bg-[var(--uc-surface)]">
-      <div className="h-[5px] w-[134px] rounded-full bg-[var(--uc-static-black)]" />
-    </div>
-  );
-}
-
 function SectionTitle({ children }: { children: string }) {
   return <SectionHeadingDivider title={children} className="pt-[30px]" />;
 }
@@ -232,7 +224,6 @@ export function TransactionDetailScreen({
           </button>
         </section>
       </div>
-      <HomeIndicator />
     </div>
   );
 }
@@ -355,10 +346,9 @@ export function DomesticPaymentCreateScreen({
         </p>
         </div>
       </div>
-      <div className="px-[24px] pb-[8px]">
+      <div className="px-[24px] pb-[42px]">
         <PrimaryButton onClick={() => onNext(form)}>{t("runtime.actions.next", "Next")}</PrimaryButton>
       </div>
-      <HomeIndicator />
     </div>
   );
 }
@@ -417,10 +407,9 @@ export function PaymentReviewScreen({
         </div>
         </div>
       </div>
-      <div className="px-[24px] pb-[8px]">
+      <div className="px-[24px] pb-[42px]">
         <PrimaryButton onClick={onSign}>{t("runtime.actions.sign", "Sign")}</PrimaryButton>
       </div>
-      <HomeIndicator />
     </div>
   );
 }
@@ -447,10 +436,9 @@ export function PaymentSignScreen({
           visualState="on-focus"
         />
       </div>
-      <div className="px-[24px] pb-[8px]">
+      <div className="px-[24px] pb-[42px]">
         <PrimaryButton onClick={onSign}>{t("runtime.actions.sign", "Sign")}</PrimaryButton>
       </div>
-      <HomeIndicator />
     </div>
   );
 }
@@ -474,10 +462,9 @@ export function PaymentSuccessScreen({ onDone }: { onDone: () => void }) {
           {t("runtime.payments.domesticFlow.paymentSentToBank", "Your payment has been successfully sent to the bank")}
         </p>
       </div>
-      <div className="px-[24px] pb-[8px]">
+      <div className="px-[24px] pb-[42px]">
         <PrimaryButton onClick={onDone}>{t("runtime.actions.okGotIt", "Ok, got it")}</PrimaryButton>
       </div>
-      <HomeIndicator />
     </div>
   );
 }

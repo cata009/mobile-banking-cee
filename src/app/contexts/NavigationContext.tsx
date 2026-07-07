@@ -15,6 +15,7 @@ export type Screen =
   | "messages" // Messages inbox/outbox
   | "payments" // Payments menu
   | "products" // Products menu
+  | "product-detail" // Product detail opened from Products bottom sheet
   | "investments" // Investments portfolio
   | "investments-history" // Investments history transactions/orders flow
   | "prime" // Prime screen
@@ -70,6 +71,8 @@ function getBackFallbackScreen(screen: Screen): Screen {
     case "investments":
     case "prime":
       return "homepage";
+    case "product-detail":
+      return "products";
     case "documents":
     case "settings":
     case "contacts":

@@ -139,15 +139,14 @@ export type ScreenId =
   | "pi.payment.success"
   | "pi.investments.portfolio"
   | "pi.products.overview"
+  | "pi.products.detail"
   | "pi.prime.overview"
   | "pi.more.overview"
   | "pi.documents.overview"
   | "pi.settings.overview"
   | "pi.contacts.overview"
-  | "kids.ro.prototype"
   | "kids.sk.home-concept"
   | "kids.hu.home-concept"
-  | "kids.rs.home-concept"
   | "platform.design-system"
   | "platform.flow-library";
 
@@ -233,7 +232,6 @@ export type ComponentId =
   | "prime.advisor-tab"
   | "prime.benefits-tab"
   | "dialogs.logout-confirmation"
-  | "kids.ro-prototype"
   | "kids.market-home-concepts";
 
 /**
@@ -253,7 +251,6 @@ export type FlowId =
   | "pi.home-to-more-to-contacts"
   | "pi.home-to-more-to-documents"
   | "pi.home-to-more-to-settings"
-  | "kids.ro.ask-money-parent-approval"
   | "kids.market-home-bottom-nav";
 
 /**

@@ -2,20 +2,138 @@
 
 Last updated: 2026-07-07
 
-## 2026-07-07 CZ Chatbot Home Saving Capacity Five-Topic Flow
+## 2026-07-07 Full Workspace Closeout For CZ Chatbot And Product Detail Deploy
 
-- Latest request handled: user asked to add a new Home CZ Chatbot option, first in the list, around `How much money can I save`, with a guided savings flow: calculate monthly saving capacity from expenses, income, and current-account cash; ask how the user wants to save; offer Saving account / Term deposit with saving split percentages; ask how much to save now; then show `Open now`.
+- Latest request handled: user asked to commit everything currently in the workspace and publish the result to Vercel after the latest CZ Chatbot savings-interest polish.
+- Commit scope:
+  - Full current workspace state is intentionally included, per user request to commit everything.
+  - Scope includes CZ Chatbot Home savings/product-shelf/credit-limit polish, savings interest preview calculations, Product detail page and product-sheet routing, active Kids cleanup after deleting RO/RS runtime apps, related registries, product assets, capability-map updates, and handoff docs.
+- Verification before commit:
+  - `npm run audit:templates` passed: `template-contract ok: templates=50 codePreviews=50 components=79 screens=27 flows=14`.
+  - `npm run audit:platform` passed: `reference-platform audit ok products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `npm run build` passed; known Vite warnings remain for empty `react-vendor` and chunks above 500 kB.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Banana Loop result:
+  - fixed/triaged: all currently modified and untracked product/runtime/docs files are being closed out together instead of remaining hidden local work.
+  - already known: Vite empty `react-vendor`, chunk-size warnings, oversized image assets, and missing local typecheck/lint/test scripts remain documented known bananas.
+  - preserved: the deployed app remains a mock-driven stakeholder demo; chatbot savings/product/card flows do not perform real banking execution, eligibility, regulated advice, SCA, signature capture, or backend state changes.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes after commit, push, and Vercel production deploy complete.
+- safe to resume: yes after commit, push, and Vercel production deploy complete.
+
+## 2026-07-07 CZ Chatbot Saving Capacity Detail Handoff Polish
+
+- Latest request handled: user asked to refine the Home `How much can I save?` response: reuse existing colored Spending/PFM icons, remove bold emphasis from the `How to save it` explanatory copy, add a linking question before the follow-up chips, make the saving product cards presentation-only, and route final `Open now` to the new Saving account product detail page.
 - Runtime changes:
-  - `src/app/App.tsx` now includes `How much can I save?` as the first Home CZ Chatbot topic.
-  - The structured reply calculates a cautious monthly target from the current mock Spending timeline and current-account balances, then presents Saving account at `70%` and Term deposit at `30%` of the plan.
-  - The flow continues through product choice, amount chips, a final `Ready to open` response, and `Open now` navigation into Products focused on `Investments and savings` / `Saving and investing`.
-  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now allows up to five visible suggested topics so the existing Home topics remain visible instead of dropping `Spot unusual spending`.
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now renders rich metric/product icons through the existing `PfmCategoryIcon` registry instead of local/recreated SVG glyphs.
+  - Savings-capacity metrics use PFM categories `Income`, `Shopping`, and `Finance`; the saving product cards use `Wallet` and `Investments`.
+  - Product rich cards now support `interactive: false` and `footer`; the `How to save it` saving-option cards render as static presentation cards, while the selectable actions remain only in the follow-up chip shelf.
+  - `src/app/App.tsx` now adds the connector question `Choose your preferred saving type.` and routes final saving `Open now` actions to `product-detail` with the selected `Saving account` / `Term deposit` option instead of reopening the Products shelf bottom sheet.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` sets product-card explanatory body copy to normal weight and styles static product cards/icons/footer.
 - Verification:
   - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and chunks above 500 kB.
-  - Chrome smoke on the local CZ Future Chatbot Home URL confirmed five visible topics in order: `How much can I save?`, `Review today's money snapshot`, `What products can I open`, `Review latest 5 transactions`, and `Spot unusual spending`.
-  - Chrome smoke clicked `How much can I save?` and confirmed the reply includes monthly saving capacity, expenses, income, current-account cash, Saving account / Term deposit options, and `70%` / `30%` split cards.
-  - Chrome smoke clicked `Saving account`, then `2 000,00 CZK`, confirmed the final `Ready to open` answer and `Open now` chip, then clicked `Open now`; the app navigated to `screen=products`, closed chat, kept `OUR PRODUCTS` visible, and opened the Saving and investing sheet with `Term deposit` and `Saving account`.
-  - Chrome console error log was empty after the savings flow smoke.
+  - In-app browser smoke on the local CZ Future Chatbot Home URL confirmed the first topic `How much can I save?` renders PFM icons `Income`, `Shopping`, `Finance`, `Wallet`, and `Investments`, the `How to save it` body is `font-weight: 400`, the saving product cards are static non-button cards, `Choose your preferred saving type.` appears under the product cards, and no lowercase `demo` copy appears.
+  - In-app browser smoke clicked `Saving account`, confirmed no repeated `Monthly saving capacity` card after selection, clicked through to final `Ready to open`, then clicked the follow-up `Open now`; chat closed and the phone showed the `Saving account` Product detail page with no Products bottom sheet, header `Saving account`, heading `Keep money aside while staying flexible`, and CTA `Find out more`.
+- Banana Loop result:
+  - fixed: saving option cards no longer create duplicate click paths.
+  - fixed: final saving handoff now opens the product detail page instead of the category shelf.
+  - preserved: this remains a front-end simulation; no real product opening, eligibility, legal-rate quote, documents, or backend confirmation was added.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-07 Products Product Detail Page And Sheet Cleanup
+
+- Latest request handled: user asked to repair the Design System `Product` template header, globally open a Level 1 Product detail page from Products `OUR PRODUCTS` bottom-sheet rows, populate the new pages with Figma illustrations from Meniga Harmonization Icons, move the `Find out more` CTA lower like Domestic payment, replace lorem ipsum with meaningful product copy, and remove invalid product options.
+- Runtime changes:
+  - Added shared `src/app/screens/products/ProductDetailScreen.tsx` using the standard `PageHeader`, Figma-sourced `327x160` illustrations, product-aware heading/body copy keyed by `optionId`/`cardId`, and a bottom footer CTA (`Find out more`) aligned to the lower phone area.
+  - Added shared `src/app/components/products/ProductCardBottomSheet.tsx`; Products bottom-sheet rows now close the sheet and open the Product detail page with the selected row title, e.g. `Current account`.
+  - Wired `product-detail` navigation through `src/app/App.tsx`, `NavigationContext`, deep-link normalization, Design System template preview, registries, project packs, and the Products flow metadata.
+  - Wired the same shared Product bottom sheet/detail path into the HU Kids PI-shaped Products page without broadening other Kids surfaces.
+  - Downloaded the supplied Meniga Harmonization Icons `Pictures` node illustrations into `src/assets/products/detail/` and mapped them across the Product detail options.
+  - Cleaned Products bottom-sheet option lists globally: `Account package`, `Switch account`, `Digital wallets`, `Refinance loan`, and `Loan calculator` were removed; `Round Up` now appears only in Romania's `Saving and investing` sheet.
+  - Removed the visible `Account package` option from the reconstructed Product selection template and removed `Current account packages` from the old BA/BA_BL pre-login product accordion.
+  - Removed the refinancing tutorial from `More -> Tutorials` so no visible app surface keeps a refinance-loan entry after the Products cleanup.
+  - Removed the simulated OS home-indicator bar from Domestic payment create/review/sign/success and preserved the intended CTA vertical position with footer padding; Product detail uses the same no-bar footer position.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and chunks above 500 kB.
+  - `npm run audit:templates` passed: `template-contract ok: templates=50 codePreviews=50 components=79 screens=27 flows=14`.
+  - `npm run audit:platform` passed: `reference-platform audit ok products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - In-app browser smoke on Design System Templates selected `Product` and confirmed the preview uses `ProductDetailScreen`, standard Back/Help header actions, and a loaded `327x160` Figma illustration.
+  - Static Products config audit confirmed the removed option labels are absent from `productsMenuConfig.ts`, default Saving options are `Term deposit`, `Saving account`, `Mutual funds`, and Romania keeps exactly one `Round Up`.
+  - `rg` confirmed no `Account package`, `Switch account`, `Digital wallets`, `Loan calculator`, `Refinance loan`, `Refinancing`, `current-account-packages`, `account-package`, `switch-account`, `digital-wallets`, `loan-calculator`, or `refinance-loan` references remain in `src/app`, `src/data`, or `src/translations`.
+- Banana Loop result:
+  - fixed: Product template no longer uses the broken bottom-sheet-style header.
+  - fixed: Product sheet row titles now become detail page titles instead of generic `Product name` in runtime flows.
+  - fixed: invalid Products sheet options were removed globally, and `Round Up` is Romania-only.
+  - fixed: the Product detail and Domestic payment fixed CTA area no longer depends on a visible simulated OS bottom bar.
+  - preserved: Product detail pages remain mock-driven; no real eligibility, pricing, application submission, legal documents, or backend product opening was added.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-07 Delete Romania/Serbia Kids Apps
+
+- Latest request handled: user explicitly approved deleting the Serbia Kids app and Romania Kids app because they do not produce value, then clarified this must be deletion, not hiding.
+- Runtime changes:
+  - Deleted `src/app/screens/kids/RoKidsApp.tsx`, `src/data/roKidsBanking.ts`, and the temporary `src/app/screens/kids/rs/` Serbia Kids extraction files.
+  - Added `src/data/huKidsBanking.ts` so HU Kids Saving/Learn uses HU-owned mock data instead of importing `RO_KIDS_*` data.
+  - Updated `src/app/App.tsx` so Mobile PI Kids runtime is active only for supported Kids concept countries from `kidsMarketHomeConcepts` (`SK`, `HU`). RO/RS Kids now fall through to the honest planned-state placeholder.
+  - Removed `kids.ro.*`, `kids.rs.*`, and `kids.ro-prototype` IDs from demo types, screen/component/flow registries, project-pack runtime coverage, and capability references.
+  - Removed Serbia Kids concept data and RS-specific CSS motion hooks.
+  - Updated `docs/handoff/state-of-the-world.md`, `docs/handoff/next-tasks.md`, `docs/platform-capability-map/README.md`, and `docs/architecture/PROJECT_MODEL.md` so active Kids coverage is SK/HU only and RO/RS are documented as retired/deleted.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and chunks above 500 kB.
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `npm run audit:templates` passed: `templates=50 codePreviews=50 components=79 screens=26 flows=14`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - `rg` over `src` found no `RoKidsApp`, `roKidsBanking`, `RO_KIDS`, `kids.ro`, `kids.rs`, `rs-safe-spend-coach`, or `rs-kids` references.
+- Banana Loop result:
+  - fixed: RO/RS Kids were deleted from source/runtime/registries/docs instead of hidden behind flags.
+  - fixed: HU Kids no longer depends on a Romania-named data file.
+  - preserved: unrelated pre-existing workspace changes outside this scope were not reverted.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-07 CZ Chatbot Home Saving Capacity Five-Topic Flow
+
+- Latest request handled: user asked to add and then polish the first Home CZ Chatbot option around `How much money can I save`: calculate monthly saving capacity from expenses, income, and current-account cash; ask how the user wants to save; offer Saving account / Term deposit with realistic illustrative rates; ask how much to save now; then show `Open now`.
+- Runtime changes:
+  - `src/app/App.tsx` now includes `How much can I save?` as the first Home CZ Chatbot topic.
+  - The structured reply calculates a cautious monthly target from the current mock Spending timeline and current-account balances, then presents Saving account at `3.5% p.a.` and Term deposit at `5% p.a.`.
+  - The initial savings answer now places the monthly-capacity card between the money-signal paragraphs and the `How to save it` product-choice card; the capacity card uses vertical icon rows with right-aligned amounts, while the saving product cards use compact two-column sizing and product glyphs.
+  - Savings/chatbot visible copy now uses `simulation` instead of `demo` so the flow does not read as an internal prototype script.
+  - The savings-capacity card no longer has an `Open Spending` action, and the initial savings answer no longer offers an `Open Spending` follow-up chip.
+  - After the user selects Saving account or Term deposit, the bot asks for an amount directly and no longer repeats the monthly-capacity card.
+  - The flow continues through product choice, amount chips, a final `Ready to open` response, and `Open now` navigation into Products focused on `Investments and savings` / `Saving and investing`.
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now allows up to five visible suggested topics so the existing Home topics remain visible instead of dropping `Spot unusual spending`.
+  - Chat streaming now preserves the user's reading position when they have scrolled away from the bottom; auto-scroll continues only while the user is already at the bottom or sends a new message/action.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and chunks above 500 kB.
+  - In-app browser smoke on the local CZ Future Chatbot Home URL confirmed five visible topics in order: `How much can I save?`, `Review today's money snapshot`, `What products can I open`, `Review latest 5 transactions`, and `Spot unusual spending`.
+  - In-app browser smoke clicked `How much can I save?` and confirmed the reply includes `3.5% p.a.` for Saving account, `5% p.a.` for Term deposit, no `70% plan` / `30% plan`, no `Open Spending` text, and zero rich-card actions.
+  - Follow-up in-app browser smoke confirmed no visible chatbot `demo` copy, `simulation` copy present, `Monthly saving capacity` metric subtitle text at `14px`, three vertical icon metric rows with right-aligned amounts, compact saving product cards with icons, and no horizontal overflow in the two-card product row.
+  - In-app browser smoke clicked `Saving account` and confirmed the latest bot reply no longer repeats the `Monthly saving capacity` card and instead shows amount chips `1 000,00 CZK`, `2 000,00 CZK`, and `3 000,00 CZK`.
+  - In-app browser smoke clicked `2 000,00 CZK` and confirmed `Ready to open`; the completed chat remained away from the bottom with `distanceFromBottom=260` and the `Scroll to latest message` button visible, so stream completion did not force the user's reading position to the bottom.
+  - In-app browser console error log was empty after the savings flow smoke.
 - Banana Loop result:
   - fixed: adding the new first Home topic no longer hides the existing fifth Home topic because the visible-topic cap is now five.
   - preserved: this is still a mock-driven savings guidance demo; no real product opening, eligibility, interest-rate quote, documents, or backend persistence was added.
@@ -5756,6 +5874,70 @@ Continue with product evolution work:
   - The captured audio blob is not uploaded to a backend yet because the current CZ Co-Apping feature remains a front-end future-preview mock. The sent message is the parsed transcript.
 - Verification:
   - `npm run build` passed; the known Vite chunk-size warning remains.
+- safe to resume: yes.
+
+## 2026-07-07 CZ Chatbot Credit-Limit Offer Polish
+
+- Latest request handled: user asked to tighten CZ Chatbot empty-state title wrapping and polish the Card Detail / For You credit-limit offer flow.
+- Implementation:
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` constrains the new-conversation hero/title width so longer greetings wrap earlier and do not sit against the phone edges.
+  - `src/app/App.tsx` rewrites the Card Detail `For you` primary offer copy to a more commercial limit-increase message and replaces the `ceiling` helper with `Your current card limit`.
+  - The `For you` related credit-card row now closes the assistant when navigating back to Card Detail, so the card page is visible after the click.
+  - Chat rich credit-limit cards no longer show the redundant `For Credit Card...` body or an internal `Open card details` button.
+  - The final confirmation and post-acceptance credit-limit replies no longer repeat the rich offer card; the acceptance reply now says the offer was accepted in chat but the new limit is not active until final terms, strong customer authentication, and the user's signature are completed.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - In-app browser smoke on `http://127.0.0.1:3001/?product=PI&country=CZ&scenario=active&ds=current&release=release-future-cz-coapping&bank=retail-single-account&theme=light&lang=en&screen=homepage` confirmed the empty-state title has `max-width: 280px`, `text-wrap: balance`, and the expected Home topics.
+  - In-app browser smoke on Card Detail / For You confirmed the offer text is `Increase your card limit from 10 000,00 CZK to 15 000,00 CZK...`, the current-limit helper is `Your current card limit`, the related credit-card row is a clickable button, clicking it closes the assistant and leaves the user on `screen=card-detail&card=card-credit-1`.
+  - In-app browser smoke through `I'm interested` -> `What changes if I accept?` -> `Continue to confirmation` -> `Accept new limit` confirmed no redundant rich card appears on the final confirmation or accepted states, no `prototype` copy appears, and the accepted state says `Signature required`, `not active yet`, and mentions signature.
+- Limitation:
+  - This remains a front-end simulation conversation; it does not perform real card-limit eligibility, signing, SCA, or limit update.
+- safe to resume: yes.
+
+## 2026-07-07 CZ Chatbot Savings Card Polish
+
+- Latest request handled: user asked for the CZ Chatbot savings-capacity rich cards to use normal-weight descriptive text, move the `Choose your preferred saving type.` connector question outside the card, and prevent the final Term deposit/Saving account product card from being clickable.
+- Implementation:
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` changes rich-card descriptive spans and the card footer text to normal font weight.
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now renders `product-cards` footer text outside the bordered card, as a separate paragraph under the card.
+  - `src/app/App.tsx` marks the final `Ready to open` product card as presentation-only (`interactive: false`), leaving only the follow-up chips (`Open now`, `Adjust amount`, `Compare products`) actionable.
+- Verification:
+  - `npm run build` passed; the known Vite chunk-size warning remains.
+  - `git diff --check` passed for the touched app/chat/CSS files with only normal Windows LF/CRLF warnings.
+  - In-app browser smoke on CZ Future Chatbot Home confirmed the savings card head descriptions compute to `font-weight: 400`, the `Choose your preferred saving type.` paragraph is outside `.mpc-rich-card`, and the final Term deposit card renders as a static `DIV` with `cursor: default`, no rich action button, and only the lower chips actionable.
+  - Browser warning/error logs were empty after the smoke.
+- safe to resume: yes.
+
+## 2026-07-07 CZ Chatbot Credit-Limit Sign Follow-Up Polish
+
+- Latest request handled: user asked to keep the post-acceptance `After acceptance` option, add `Sign now`, and make the `After acceptance` explanation offer `Sign now` again.
+- Implementation:
+  - `src/app/App.tsx` now replaces the old single `What happens next?` chip after `Accept new limit` with `After acceptance` and `Sign now`.
+  - The `After acceptance` response now explains final terms, strong customer authentication, signature, and receipt/update behavior, then leaves a single `Sign now` chip.
+  - The new `Sign now` response tells the user to open the secure signing step, review final terms, confirm with strong customer authentication, and sign before the limit becomes active.
+- Verification:
+  - `npm run build` passed; the known Vite empty `react-vendor` and chunk-size warnings remain.
+  - In-app browser smoke on the CZ Future Chatbot Card Detail URL clicked `For you` -> `I'm interested` -> `What changes if I accept?` -> `Continue to confirmation` -> `Accept new limit` and confirmed follow-up chips `After acceptance` and `Sign now`, with no `What happens next?`.
+  - The same smoke clicked `After acceptance` and confirmed the next follow-up shelf contains exactly `Sign now`, then clicked `Sign now` and confirmed the secure signing/final terms/SCA/signature copy appears.
+  - Browser warning/error logs were empty after the smoke.
+- Limitation:
+  - This remains a front-end simulation conversation; it does not perform real card-limit eligibility, SCA, signature capture, or limit activation.
+- safe to resume: yes.
+
+## 2026-07-07 CZ Chatbot Savings Interest Preview Polish
+
+- Latest request handled: user asked for the final savings `Ready to open` answer to connect the selected amount with the previously selected product interest rate, so the customer sees what the money could earn.
+- Implementation:
+  - `src/app/App.tsx` now keeps numeric rates for Saving account (`3.5% p.a.`) and Term deposit (`5% p.a.`) in the CZ Chatbot savings resolver.
+  - The final selected-amount branch calculates an approximate interest preview from the chosen amount and product: Saving account shows monthly interest, while Term deposit shows annual interest.
+  - The same preview is repeated in the final presentation card body/subtitle, while the final card remains non-clickable and only the lower chips act.
+- Verification:
+  - `npm run build` passed; the known Vite empty `react-vendor` and chunk-size warnings remain.
+  - In-app browser smoke on the CZ Future Chatbot Home URL clicked `How much can I save?` -> `Saving account` -> `3 000,00 CZK` and confirmed the final answer/card show `3.5% p.a.` plus approx. `8,75 CZK per month`.
+  - The same smoke reloaded and clicked `How much can I save?` -> `Term deposit` -> `3 000,00 CZK`, confirming `5% p.a.` plus approx. `150,00 CZK per year`.
+  - Browser warning/error logs were empty after the smoke.
+- Limitation:
+  - This remains a front-end simulation preview before tax/fees; it does not perform real savings/deposit eligibility, pricing, opening, or regulated advice.
 - safe to resume: yes.
 
 ## Constitutional Check

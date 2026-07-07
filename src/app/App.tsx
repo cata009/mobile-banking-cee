@@ -33,11 +33,11 @@ const MoreScreen = lazy(() => import("@/app/screens/more/MoreScreen"));
 const DocumentsScreen = lazy(() => import("@/app/screens/documents/DocumentsScreen"));
 const PaymentsScreen = lazy(() => import("@/app/screens/payments/PaymentsScreen"));
 const ProductsScreen = lazy(() => import("@/app/screens/products/ProductsScreen"));
+const ProductDetailScreen = lazy(() => import("@/app/screens/products/ProductDetailScreen"));
 const InvestmentsPortfolioScreen = lazy(() => import("@/app/screens/investments/InvestmentsPortfolioScreen"));
 const InvestmentsHistoryScreen = lazy(() => import("@/app/screens/investments/InvestmentsHistoryScreen"));
 const SettingsScreen = lazy(() => import("@/app/screens/settings/SettingsScreen"));
 const KidsMarketHomeApp = lazy(() => import("@/app/screens/kids/KidsMarketHomeApp"));
-const RoKidsApp = lazy(() => import("@/app/screens/kids/RoKidsApp"));
 
 // Contacts component - available for all countries
 const ContactsScreen = lazy(() => import("@/app/screens/contacts/ContactsScreen"));
@@ -99,6 +99,7 @@ import { formatMoneyNumber, getCountryConfig } from "@/app/registry/countryConfi
 import { formatMaskedCardNumber } from "@/app/utils/cardNumber";
 import type { CreditCard, Product, ProductCategory } from "@/data/products";
 import { getDocumentsConfigForCountry } from "@/app/config/documentsConfig";
+import type { ProductDetailSelection } from "@/app/components/products/ProductCardBottomSheet";
 
 // Panel components
 import PanelOverlay from "@/app/components/PanelOverlay";
@@ -136,6 +137,7 @@ const CZ_CHAT_LEVEL_ONE_SCREENS = new Set<Screen>([
 ]);
 
 const CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX = "open-products-shelf-card-";
+const CZ_CHAT_PRODUCT_DETAIL_ACTION_PREFIX = "open-product-detail-";
 
 type ProductsShelfFocusRequest = {
   requestId: number;
@@ -174,7 +176,7 @@ function buildCreditCardOpportunities(
       tone: "credit",
       eyebrow: "Credit card",
       title: "New credit limit for you",
-      body: `Limit offer: ${creditLimitAmount} to ${proposedCreditLimit}.`,
+      body: `Increase your card limit from ${creditLimit} to ${proposedCreditLimit} for more flexibility when you need it.`,
       reason: "Credit card limit increase candidate.",
       relatedItem: {
         title: creditCard.name,
@@ -188,7 +190,7 @@ function buildCreditCardOpportunities(
         },
       },
       metrics: [
-        { label: "Current limit", value: creditLimit, helper: "Your current credit card ceiling" },
+        { label: "Current limit", value: creditLimit, helper: "Your current card limit" },
         { label: "New limit", value: proposedCreditLimit, helper: "Available after successful review" },
       ],
       action: {
@@ -252,6 +254,14 @@ function buildCzNavigateFollowUp(
   };
 }
 
+function buildCzSavingsProductDetailAction(
+  productLabel: "Saving account" | "Term deposit",
+  label = "Open now",
+): CoAppingChatAction {
+  const optionId = productLabel === "Term deposit" ? "term-deposit" : "saving-account";
+  return buildCzNavigateAction(`${CZ_CHAT_PRODUCT_DETAIL_ACTION_PREFIX}${optionId}`, label, "product-detail");
+}
+
 function getProductsShelfFocusCardId(actionId: string): ProductsCardId | null | undefined {
   if (actionId.startsWith(CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX)) {
     return actionId.slice(CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX.length) as ProductsCardId;
@@ -260,6 +270,23 @@ function getProductsShelfFocusCardId(actionId: string): ProductsCardId | null | 
   if (actionId === "cz-open-products-shelf") return null;
 
   return undefined;
+}
+
+function getCzSavingsProductDetailSelection(actionId: string, country: CountryId): ProductDetailSelection | null {
+  if (!actionId.startsWith(CZ_CHAT_PRODUCT_DETAIL_ACTION_PREFIX)) return null;
+
+  const optionId = actionId.slice(CZ_CHAT_PRODUCT_DETAIL_ACTION_PREFIX.length);
+  if (optionId !== "saving-account" && optionId !== "term-deposit") return null;
+
+  const sheetConfig = getProductCardSheetConfig("investments-savings", country);
+  const option = sheetConfig.options.find((item) => item.id === optionId);
+
+  return {
+    cardId: "investments-savings",
+    categoryTitle: sheetConfig.title ?? "Saving and investing",
+    optionId,
+    title: option?.title ?? (optionId === "term-deposit" ? "Term deposit" : "Saving account"),
+  };
 }
 
 function formatCzChatMoney(amount: number, currency: string, country: CountryId): string {
@@ -377,17 +404,17 @@ function buildCzChatSmartReplyResolver({
     : totalAvailable;
   const creditAvailable = primaryCard
     ? formatCzChatMoney(primaryCard.availableCredit, primaryCard.currency, country)
-    : "not available in this demo profile";
+    : "not available in this simulation profile";
   const creditLimit = primaryCard
     ? formatCzChatMoney(primaryCard.creditLimit, primaryCard.currency, country)
-    : "not available in this demo profile";
+    : "not available in this simulation profile";
   const proposedCreditLimit = primaryCard
     ? formatCzChatMoney(primaryCard.creditLimit + 5000, primaryCard.currency, country)
-    : "not available in this demo profile";
+    : "not available in this simulation profile";
   const loanBalance = selectedLoan ? formatCzChatMoney(selectedLoan.balance, selectedLoan.currency, country) : totalOwed;
   const investmentValue = investmentProduct
     ? formatCzChatMoney(investmentProduct.balance, investmentProduct.currency, country)
-    : "not available in this demo profile";
+    : "not available in this simulation profile";
   const investmentReturn = investmentProduct
     ? `${investmentProduct.totalGainLossPercentage >= 0 ? "+" : ""}${investmentProduct.totalGainLossPercentage.toFixed(2)}%`
     : "n/a";
@@ -422,10 +449,10 @@ function buildCzChatSmartReplyResolver({
   const suggestedMonthlySavingAmount = roundCzChatSavingAmount(
     suggestedMonthlySavingRaw > 0 ? suggestedMonthlySavingRaw : currentAccountMoneyAmount * 0.2,
   );
-  const savingAccountSharePercent = 70;
-  const termDepositSharePercent = 30;
-  const savingAccountMonthlyAmount = roundCzChatSavingAmount(suggestedMonthlySavingAmount * (savingAccountSharePercent / 100));
-  const termDepositMonthlyAmount = roundCzChatSavingAmount(suggestedMonthlySavingAmount * (termDepositSharePercent / 100));
+  const savingAccountAnnualRate = 0.035;
+  const termDepositAnnualRate = 0.05;
+  const savingAccountRate = "3.5% p.a.";
+  const termDepositRate = "5% p.a.";
   const savingStartAmountOptions = [
     {
       key: "light",
@@ -450,8 +477,6 @@ function buildCzChatSmartReplyResolver({
   const monthlySpending = formatCzChatMoney(monthlySpendingAmount, localCurrency, country);
   const currentAccountMoney = formatCzChatMoney(currentAccountMoneyAmount, localCurrency, country);
   const suggestedMonthlySaving = formatCzChatMoney(suggestedMonthlySavingAmount, localCurrency, country);
-  const savingAccountMonthly = formatCzChatMoney(savingAccountMonthlyAmount, localCurrency, country);
-  const termDepositMonthly = formatCzChatMoney(termDepositMonthlyAmount, localCurrency, country);
   const savingPeriodLabel = currentSpendingSummary
     ? `${currentSpendingSummary.periodLabel} ${currentSpendingSummary.yearLabel}`
     : "the current period";
@@ -477,7 +502,7 @@ function buildCzChatSmartReplyResolver({
           )}, ${formatCzChatTransactionDate(transaction)} from ${sourceName}${status}.`;
         })
         .join("\n")
-    : "No recent transactions are available in this demo profile.";
+    : "No recent transactions are available in this simulation profile.";
   const latestTransactionSnapshotBlock: CoAppingRichBlock = {
     type: "spending-insight",
     title: "Latest transaction readout",
@@ -540,24 +565,28 @@ function buildCzChatSmartReplyResolver({
     type: "spending-insight",
     title: "Monthly saving capacity",
     body: `Based on ${savingPeriodLabel} activity and current account money, a cautious monthly target is ${suggestedMonthlySaving}.`,
+    metricLayout: "calculation",
     metrics: [
-      { label: "Income", value: monthlyIncome, helper: savingPeriodLabel },
-      { label: "Spending", value: monthlySpending, helper: "Card, bills, cash, categories" },
-      { label: "Current accounts", value: currentAccountMoney, helper: "Money available now" },
+      { label: "Income", value: monthlyIncome, helper: savingPeriodLabel, icon: "Income" },
+      { label: "Spending", value: monthlySpending, helper: "Card, bills, cash, categories", icon: "Shopping" },
+      { label: "Current accounts", value: currentAccountMoney, helper: "Money available now", icon: "Finance" },
     ],
-    action: buildCzNavigateAction("open-spending-from-savings-capacity", "Open Spending", "analytics"),
   };
   const savingsProductChoiceBlock: CoAppingRichBlock = {
     type: "product-cards",
     title: "How to save it",
-    body: `Suggested split for the ${suggestedMonthlySaving} monthly habit. Choose what you want to open first.`,
+    body: `That keeps the recommendation cautious: it does not move every free crown, and it still leaves room for bills, card payments, and unexpected spending. Rates are illustrative for this simulation.`,
+    variant: "compact",
+    footer: "Choose your preferred saving type.",
+    interactive: false,
     products: [
       {
         id: "saving-account-plan",
         title: "Saving account",
-        subtitle: `${savingAccountSharePercent}% plan, ${savingAccountMonthly}/month`,
+        subtitle: `${savingAccountRate} interest, flexible access`,
         meta: "Flexible",
         tone: "blue",
+        icon: "Wallet",
         action: {
           id: "choose-saving-account-plan",
           label: "Choose",
@@ -568,9 +597,10 @@ function buildCzChatSmartReplyResolver({
       {
         id: "term-deposit-plan",
         title: "Term deposit",
-        subtitle: `${termDepositSharePercent}% plan, ${termDepositMonthly}/month`,
+        subtitle: `${termDepositRate} interest, fixed term`,
         meta: "Fixed term",
         tone: "neutral",
+        icon: "Investments",
         action: {
           id: "choose-term-deposit-plan",
           label: "Choose",
@@ -650,7 +680,7 @@ function buildCzChatSmartReplyResolver({
           return `- **${title}:** ${sheetOptions}.`;
         })
         .join("\n")
-    : "This market does not expose product shelf cards in the current demo profile.";
+    : "This market does not expose product shelf cards in the current simulation profile.";
   const productShelfBlock: CoAppingRichBlock = {
     type: "product-cards",
     title: "Product shelf",
@@ -700,29 +730,11 @@ function buildCzChatSmartReplyResolver({
   const creditLimitOfferBlock: CoAppingRichBlock = {
     type: "credit-limit-offer",
     title: "Card limit offer",
-    body: primaryCard
-      ? `For ${primaryCard.name}, ${formatMaskedCardNumber(primaryCard.accountNumber)}.`
-      : "For the selected credit card.",
+    body: "",
     cardName: primaryCard?.name ?? "Credit Card",
     cardDescription: primaryCard ? formatMaskedCardNumber(primaryCard.accountNumber) : "Selected card",
     currentLimit: creditLimit,
     newLimit: proposedCreditLimit,
-    action: buildCzNavigateAction("open-card-detail-from-limit-offer", "Open card details", "card-detail"),
-  };
-
-  const creditLimitAcceptedBlock: CoAppingRichBlock = {
-    type: "credit-limit-offer",
-    title: "Limit upgrade accepted",
-    body: primaryCard
-      ? `Confirmed for ${primaryCard.name}, ${formatMaskedCardNumber(primaryCard.accountNumber)}.`
-      : "Confirmed for the selected credit card.",
-    cardName: primaryCard?.name ?? "Credit Card",
-    cardDescription: primaryCard ? formatMaskedCardNumber(primaryCard.accountNumber) : "Selected card",
-    currentLimitLabel: "Accepted limit",
-    currentLimit: proposedCreditLimit,
-    newLimitLabel: "Status",
-    newLimit: "Accepted",
-    action: buildCzNavigateAction("open-card-detail-after-accept", "Open card details", "card-detail"),
   };
 
   const investmentPortfolioBlock: CoAppingRichBlock = {
@@ -735,7 +747,7 @@ function buildCzChatSmartReplyResolver({
         } before opening a product or order.`
       : "Use the portfolio overview before opening a product or order.",
     metrics: [
-      { label: "Current value", value: investmentValue, helper: investmentProduct?.name ?? "Demo profile" },
+      { label: "Current value", value: investmentValue, helper: investmentProduct?.name ?? "Simulation profile" },
       { label: "Return", value: investmentReturn, helper: investmentGainLoss },
       { label: "Largest holding", value: topInvestmentShare, helper: topInvestmentSecurity?.title ?? "No holdings" },
     ],
@@ -834,21 +846,29 @@ function buildCzChatSmartReplyResolver({
 
   return (input) => {
     const normalized = normalize(input);
+    const afterAcceptanceFollowUp = buildCzChatFollowUp(
+      "cz-limit-offer-after-acceptance",
+      "After acceptance",
+      "What happens after the credit limit offer is accepted?",
+    );
+    const signNowFollowUp = buildCzChatFollowUp(
+      "cz-limit-offer-sign-now",
+      "Sign now",
+      "Sign the credit limit offer now.",
+    );
 
     if (hasAny(normalized, ["continue to confirmation for this credit limit offer", "continue to confirmation", "review final offer", "continue with this offer"])) {
       return {
         text:
           `### Ready to confirm\n` +
-          `Here is the final demo checkpoint before accepting the offer.\n` +
+          `Here is the final simulation checkpoint before accepting the offer.\n` +
           `${primaryCard ? `Card: **${primaryCard.name}**, ${formatMaskedCardNumber(primaryCard.accountNumber)}.` : "Card: selected credit card."}\n` +
           `Current limit: **${creditLimit}**.\n` +
           `New limit after acceptance: **${proposedCreditLimit}**.\n` +
-          `In a real app this is where eligibility, terms, and strong customer authentication would be shown. In this prototype, use the next action to complete the offer flow.`,
-        richBlocks: [creditLimitOfferBlock],
+          `Before anything changes, the authenticated card flow still needs eligibility, final terms, strong customer authentication, and your signature.`,
         followUps: [
           buildCzChatFollowUp("cz-limit-offer-accept-final", "Accept new limit", "Accept the new credit limit offer."),
           buildCzChatFollowUp("cz-limit-offer-repayment", "Explain repayment impact", "Explain repayment impact for this credit limit offer."),
-          buildCzNavigateFollowUp("cz-open-card-from-confirm", "Open card details", "card-detail"),
         ],
       };
     }
@@ -856,26 +876,32 @@ function buildCzChatSmartReplyResolver({
     if (hasAny(normalized, ["accept the new credit limit offer", "accept new limit", "confirm new limit", "confirm this offer"])) {
       return {
         text:
-          `### Offer accepted\n` +
-          `Done. In this prototype, the credit-limit offer has been accepted for this card.\n` +
-          `${primaryCard ? `The accepted limit is now **${proposedCreditLimit}** for **${primaryCard.name}**.` : `The accepted limit is now **${proposedCreditLimit}**.`}\n` +
-          `A production flow would now show a confirmation receipt, update the card limit, and keep the confirmation available from card activity or Documents.`,
-        richBlocks: [creditLimitAcceptedBlock],
-        followUps: [
-          buildCzNavigateFollowUp("cz-open-card-after-accepted", "Open card details", "card-detail"),
-          buildCzChatFollowUp("cz-limit-offer-next", "What happens next?", "What happens after the credit limit offer is accepted?"),
-        ],
+          `### Signature required\n` +
+          `You accepted the credit-limit offer in chat, but the new limit is not active yet.\n` +
+          `${primaryCard ? `The limit prepared for signing is **${proposedCreditLimit}** for **${primaryCard.name}**.` : `The limit prepared for signing is **${proposedCreditLimit}**.`}\n` +
+          `Next, the authenticated card flow should show the final terms, strong customer authentication, and your signature before the card limit is changed.`,
+        followUps: [afterAcceptanceFollowUp, signNowFollowUp],
       };
     }
 
-    if (hasAny(normalized, ["what happens after the credit limit offer is accepted", "what happens next"])) {
+    if (hasAny(normalized, ["sign the credit limit offer now", "sign now", "start signing", "continue to signing", "complete the signature"])) {
+      return {
+        text:
+          `### Sign now\n` +
+          `${primaryCard ? `Open the secure signing step for **${primaryCard.name}**.` : "Open the secure signing step for this card."}\n` +
+          `Review the final terms for the **${proposedCreditLimit}** limit, confirm with strong customer authentication, and sign.\n` +
+          `The new card limit should become active only after that signature is completed.`,
+        followUps: [afterAcceptanceFollowUp],
+      };
+    }
+
+    if (hasAny(normalized, ["what happens after the credit limit offer is accepted", "what happens next", "after acceptance"])) {
       return {
         text:
           `### After acceptance\n` +
-          `The customer should see three things: the new limit on the card, a confirmation message or receipt, and a clear route back to card details.\n` +
-          `For this demo, the accepted state is represented in chat so the sales journey can be shown end to end. The real integration would update the card product state and generate the official confirmation.`,
-        richBlocks: [creditLimitAcceptedBlock],
-        followUps: [buildCzNavigateFollowUp("cz-open-card-after-next", "Open card details", "card-detail")],
+          `The customer should see three things before the limit changes: final terms, strong customer authentication, and a signature step.\n` +
+          `After signing, the app can show a confirmation receipt, update the card limit, and keep the confirmation available from card activity or Documents.`,
+        followUps: [signNowFollowUp],
       };
     }
 
@@ -894,7 +920,6 @@ function buildCzChatSmartReplyResolver({
         followUps: [
           buildCzChatFollowUp("cz-limit-offer-continue", "Continue to confirmation", "Continue to confirmation for this credit limit offer."),
           buildCzChatFollowUp("cz-limit-offer-accept-change", "What changes if I accept?", "What changes if I accept this credit limit offer?"),
-          buildCzNavigateFollowUp("cz-open-card-from-impact", "Open card details", "card-detail"),
         ],
       };
     }
@@ -910,7 +935,6 @@ function buildCzChatSmartReplyResolver({
         followUps: [
           buildCzChatFollowUp("cz-limit-offer-continue", "Continue to confirmation", "Continue to confirmation for this credit limit offer."),
           buildCzChatFollowUp("cz-limit-offer-repayment", "Explain repayment impact", "Explain repayment impact for this credit limit offer."),
-          buildCzNavigateFollowUp("cz-open-card-from-accept", "Open card details", "card-detail"),
         ],
       };
     }
@@ -928,14 +952,13 @@ function buildCzChatSmartReplyResolver({
       return {
         text:
           `### Explore your offer\n` +
-          `Based on this demo profile, the bank has matched your card usage and spending room with a higher limit offer for this credit card.\n` +
+          `Based on this simulation profile, the bank has matched your card usage and spending room with a higher limit offer for this credit card.\n` +
           `${primaryCard ? `Your current limit is **${creditLimit}**. The proposed new limit is **${proposedCreditLimit}**.` : "The exact limit is confirmed in the card flow."}\n` +
           `You can review the offer without changing anything. I would check repayment comfort and final eligibility first, then hand you to the authenticated card flow if you want to continue.`,
         richBlocks: [creditLimitOfferBlock],
         followUps: [
           buildCzChatFollowUp("cz-limit-offer-repayment", "Explain repayment impact", "Explain repayment impact for this credit limit offer."),
           buildCzChatFollowUp("cz-limit-offer-accept-change", "What changes if I accept?", "What changes if I accept this credit limit offer?"),
-          buildCzNavigateFollowUp("cz-open-card-from-offer", "Open card details", "card-detail"),
         ],
       };
     }
@@ -963,14 +986,11 @@ function buildCzChatSmartReplyResolver({
         text:
           `### How much you can save\n` +
           `Based on this Home profile, I would start with about **${suggestedMonthlySaving} per month**.\n` +
-          `I used three signals: expenses of **${monthlySpending}**, income of **${monthlyIncome}**, and **${currentAccountMoney}** currently sitting in current accounts.\n` +
-          `That keeps the recommendation cautious: it does not move every free crown, and it still leaves room for bills, card payments, and unexpected spending.\n` +
-          `How do you want to save it?`,
+          `I used three signals: expenses of **${monthlySpending}**, income of **${monthlyIncome}**, and **${currentAccountMoney}** currently sitting in current accounts.`,
         richBlocks: [savingsCapacityBlock, savingsProductChoiceBlock],
         followUps: [
           buildCzChatFollowUp("cz-saving-account-plan", "Saving account", "Use Saving account for my savings plan."),
           buildCzChatFollowUp("cz-term-deposit-plan", "Term deposit", "Use Term deposit for my savings plan."),
-          buildCzNavigateFollowUp("cz-open-spending-from-saving-capacity", "Open Spending", "analytics"),
         ],
       };
     }
@@ -988,26 +1008,30 @@ function buildCzChatSmartReplyResolver({
         savingStartAmountOptions.find((option) => option.key === selectedSavingAmountKey) ?? savingStartAmountOptions[1];
       const productLabel = hasAny(normalized, ["term deposit"]) ? "Term deposit" : "Saving account";
       const selectedStartAmount = formatCzChatMoney(selectedOption.amount, localCurrency, country);
-      const productHelper =
+      const interestAmount =
         productLabel === "Term deposit"
-          ? "fixed term deposit option from the saving and investing shelf"
-          : "flexible saving account option from the saving and investing shelf";
+          ? formatCzChatMoney(selectedOption.amount * termDepositAnnualRate, localCurrency, country)
+          : formatCzChatMoney((selectedOption.amount * savingAccountAnnualRate) / 12, localCurrency, country);
+      const selectedRate = productLabel === "Term deposit" ? termDepositRate : savingAccountRate;
+      const interestCadence = productLabel === "Term deposit" ? "per year" : "per month";
+      const interestPreview =
+        productLabel === "Term deposit"
+          ? `At ${selectedRate}, ${selectedStartAmount} would earn about ${interestAmount} per year before tax/fees if held for the full term.`
+          : `At ${selectedRate}, ${selectedStartAmount} would earn about ${interestAmount} per month before tax/fees while it stays available.`;
       const savingsOpenNowBlock: CoAppingRichBlock = {
         type: "product-cards",
         title: "Ready to open",
-        body: `Start with ${selectedStartAmount} now, then keep the monthly habit around ${suggestedMonthlySaving}.`,
+        body: `Start with ${selectedStartAmount} now. ${selectedRate} means about ${interestAmount} ${interestCadence} on this amount before tax/fees.`,
+        interactive: false,
         products: [
           {
             id: "open-selected-savings-product",
             title: productLabel,
-            subtitle: productHelper,
+            subtitle: `${selectedRate}; approx. ${interestAmount} ${interestCadence}`,
             meta: "Open now",
             tone: "blue",
-            action: buildCzNavigateAction(
-              `${CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX}investments-savings`,
-              "Open now",
-              "products",
-            ),
+            icon: productLabel === "Term deposit" ? "Investments" : "Wallet",
+            action: buildCzSavingsProductDetailAction(productLabel),
           },
         ],
       };
@@ -1016,11 +1040,16 @@ function buildCzChatSmartReplyResolver({
         text:
           `### Ready to open\n` +
           `Perfect. We can start **${productLabel}** with **${selectedStartAmount}** now.\n` +
+          `${interestPreview}\n` +
           `The monthly target stays around **${suggestedMonthlySaving}**, based on spending of **${monthlySpending}**, income of **${monthlyIncome}**, and **${currentAccountMoney}** in current accounts.\n` +
           `Chat should stop at this point. Final product terms, rate, eligibility, documents, and confirmation belong in the Products shelf.`,
         richBlocks: [savingsOpenNowBlock],
         followUps: [
-          buildCzNavigateFollowUp(`${CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX}investments-savings`, "Open now", "products"),
+          {
+            id: `cz-open-now-${productLabel === "Term deposit" ? "term-deposit" : "saving-account"}`,
+            label: "Open now",
+            action: buildCzSavingsProductDetailAction(productLabel),
+          },
           buildCzChatFollowUp("cz-adjust-saving-amount", "Adjust amount", `Use ${productLabel} for my savings plan.`),
           buildCzChatFollowUp("cz-compare-saving-products", "Compare products", "How should I choose between Saving account and Term deposit?"),
         ],
@@ -1031,9 +1060,8 @@ function buildCzChatSmartReplyResolver({
       return {
         text:
           `### Saving account selected\n` +
-          `Good choice for the flexible part of the plan. I would route about **${savingAccountSharePercent}%** of the monthly habit here, roughly **${savingAccountMonthly} per month**, because the money stays accessible.\n` +
+          `Good choice for the flexible option. This simulation uses **${savingAccountRate}** for the Saving account, so the money stays accessible while still earning interest.\n` +
           `How much do you want to save now?`,
-        richBlocks: [savingsCapacityBlock],
         followUps: buildSavingsAmountFollowUps("Saving account"),
       };
     }
@@ -1042,9 +1070,8 @@ function buildCzChatSmartReplyResolver({
       return {
         text:
           `### Term deposit selected\n` +
-          `This works for the part you do not need immediately. I would route about **${termDepositSharePercent}%** of the monthly habit here, roughly **${termDepositMonthly} per month**, because the money is less flexible but can be more disciplined.\n` +
+          `This works for money you can lock for a while. This simulation uses **${termDepositRate}** for the Term deposit, with less flexibility but a stronger rate.\n` +
           `How much do you want to save now?`,
-        richBlocks: [savingsCapacityBlock],
         followUps: buildSavingsAmountFollowUps("Term deposit"),
       };
     }
@@ -1054,8 +1081,8 @@ function buildCzChatSmartReplyResolver({
         text:
           `### Saving account or term deposit?\n` +
           `For this profile I would not make it a generic product pitch.\n` +
-          `Use **Saving account** for the flexible reserve, about **${savingAccountSharePercent}%** of the monthly target (**${savingAccountMonthly}**).\n` +
-          `Use **Term deposit** for the part you can lock, about **${termDepositSharePercent}%** (**${termDepositMonthly}**).\n` +
+          `Use **Saving account** if flexibility matters; the simulation rate is **${savingAccountRate}**.\n` +
+          `Use **Term deposit** if you can lock the money; the simulation rate is **${termDepositRate}**.\n` +
           `The starting monthly target remains **${suggestedMonthlySaving}**, grounded in income, spending, and current-account cash.`,
         richBlocks: [savingsProductChoiceBlock],
         followUps: [
@@ -1159,7 +1186,7 @@ function buildCzChatSmartReplyResolver({
       return {
         text:
           `### Products you can open\n` +
-          `From **Products > ${productShelfTitle}**, this CZ demo shelf currently exposes:\n` +
+          `From **Products > ${productShelfTitle}**, this CZ product shelf currently exposes:\n` +
           `${productShelfLines}\n` +
           `Use this as catalogue discovery: chat can summarize what is available, but opening, applying, eligibility checks, documents, and confirmation belong in the Products shelf.`,
         richBlocks: [productShelfBlock],
@@ -1293,7 +1320,7 @@ function buildCzChatSmartReplyResolver({
           `1. Recent card transactions and pending reservations.\n` +
           `2. Online, contactless, ATM, and temporary limit controls.\n` +
           `3. PIN/security options, with sensitive actions kept behind app authorization.\n` +
-          `${primaryCard ? `If the user is interested, the limit-review path can explain a possible ${proposedCreditLimit} ceiling without changing anything from chat.` : ""}`,
+          `${primaryCard ? `If the user is interested, the limit-review path can explain a possible ${proposedCreditLimit} limit without changing anything from chat.` : ""}`,
         richBlocks: [productsBlock],
         followUps: [
           buildCzNavigateFollowUp("cz-open-card", "Open Card", "card-detail"),
@@ -1345,7 +1372,7 @@ function buildCzChatSmartReplyResolver({
           `### Investment goal setup\n` +
           `I can help shape the goal before any product choice.\n` +
           `Start with the purpose, then the assistant can narrow the horizon, starting amount, monthly contribution, and risk comfort.\n` +
-          `In this demo profile the investment portfolio is ${investmentValue} with ${investmentReturn} performance, so I would keep the goal conversation connected to the current portfolio instead of starting from a blank catalogue.\n` +
+          `In this simulation profile the investment portfolio is ${investmentValue} with ${investmentReturn} performance, so I would keep the goal conversation connected to the current portfolio instead of starting from a blank catalogue.\n` +
           `Nothing is ordered from chat; the final product, documents, suitability, and authorization stay inside Investments.`,
         richBlocks: [investmentGoalPortfolioBlock],
         followUps: [
@@ -1397,7 +1424,7 @@ function buildCzChatSmartReplyResolver({
         text:
           `### Time horizon captured\n` +
           `Now choose an initial amount for the simulation.\n` +
-          `This is only used for the demo preview. The real app would still confirm source of funds, product documents, suitability, and authorization before any order.\n` +
+          `This is only used for the simulation preview. The real app would still confirm source of funds, product documents, suitability, and authorization before any order.\n` +
           `The current portfolio context is ${investmentValue} with ${investmentReturn} performance, so I would not start from a blank product catalogue.`,
         followUps: [
           buildCzChatFollowUp("cz-goal-amount-5000", "5,000 CZK"),
@@ -1443,7 +1470,7 @@ function buildCzChatSmartReplyResolver({
       return {
         text:
           `### Adjust starting amount\n` +
-          `Sure. Choose the amount you want to use for the demo simulation.\n` +
+          `Sure. Choose the amount you want to use for the simulation.\n` +
           `This does not create an order; it only changes the preview path.`,
         followUps: [
           buildCzChatFollowUp("cz-goal-adjust-5000", "5,000 CZK"),
@@ -1991,12 +2018,10 @@ function AppContent({
   const isCzChatLevelOneScreen = CZ_CHAT_LEVEL_ONE_SCREENS.has(currentScreen);
   const czChatLauncherVariant: CzChatLauncherVariant = "edge-tab";
   const isPiRuntimeContext = product === "PI" && designSystem === "current";
-  const isRoKidsRuntimeContext = product === "KIDS_PI" && country === "RO" && designSystem === "current";
   const isMarketKidsRuntimeContext =
     product === "KIDS_PI" && designSystem === "current" && isKidsHomeCountry(country);
-  const isKidsRuntimeContext = isRoKidsRuntimeContext || isMarketKidsRuntimeContext;
-  const isThemedKidsRuntimeContext =
-    product === "KIDS_PI" && (country === "HU" || country === "RS") && designSystem === "current";
+  const isKidsRuntimeContext = isMarketKidsRuntimeContext;
+  const isThemedKidsRuntimeContext = product === "KIDS_PI" && country === "HU" && designSystem === "current";
   const isSupportedRuntimeContext = isPiRuntimeContext || isKidsRuntimeContext;
   const investmentsPortfolioAvailable = isInvestmentsPortfolioAvailable(product, country);
   
@@ -2021,6 +2046,7 @@ function AppContent({
   const [czChatContext, setCzChatContext] = useState<CoAppingChatContext | null>(null);
   const [czChatInitialMode, setCzChatInitialMode] = useState<CoAppingAssistantMode>("chat");
   const [productsShelfFocusRequest, setProductsShelfFocusRequest] = useState<ProductsShelfFocusRequest | null>(null);
+  const [selectedProductDetail, setSelectedProductDetail] = useState<ProductDetailSelection | null>(null);
   const accountProducts = categories.flatMap((category) => category.products);
   const selectedAccountProduct = accountProducts.find((accountProduct) => accountProduct.id === selectedAccountId) ?? accountProducts[0] ?? null;
   const selectedCardProduct =
@@ -2148,6 +2174,7 @@ function AppContent({
       case 'payment-success':
         return 'light';
       case 'products':
+      case 'product-detail':
       case 'investments':
       case 'investments-history':
         return 'light';
@@ -2297,6 +2324,11 @@ function AppContent({
     navigateTo("products");
   };
 
+  const handleProductDetailOpen = (selection: ProductDetailSelection) => {
+    setSelectedProductDetail(selection);
+    navigateTo("product-detail");
+  };
+
   const handleInvestmentsClick = () => {
     if (!investmentsPortfolioAvailable) return;
 
@@ -2390,7 +2422,18 @@ function AppContent({
         break;
       case "card-detail":
         if (creditCardForOpportunity) setSelectedCardId(creditCardForOpportunity.id);
+        setCzChatOpen(false);
         navigateTo("card-detail");
+        break;
+      case "product-detail":
+        {
+          const productDetailSelection = getCzSavingsProductDetailSelection(action.id, country);
+          if (!productDetailSelection) break;
+
+          setSelectedProductDetail(productDetailSelection);
+          setCzChatOpen(false);
+          navigateTo("product-detail");
+        }
         break;
       case "products":
         {
@@ -2497,9 +2540,7 @@ function AppContent({
         {isSupportedRuntimeContext ? (
         <>
         {isKidsRuntimeContext ? (
-          isRoKidsRuntimeContext ? (
-            <RoKidsApp />
-          ) : isKidsHomeCountry(country) ? (
+          isKidsHomeCountry(country) ? (
             <KidsMarketHomeApp country={country} />
           ) : null
         ) : (
@@ -2698,8 +2739,18 @@ function AppContent({
             onMessagesClick={handleMessagesClick}
             onPaymentsClick={handlePaymentsClick}
             onMoreClick={handleMoreClick}
+            onProductDetailOpen={handleProductDetailOpen}
             productsShelfFocusRequest={productsShelfFocusRequest}
             onProductsShelfFocusHandled={() => setProductsShelfFocusRequest(null)}
+          />
+        )}
+
+        {currentScreen === "product-detail" && (
+          <ProductDetailScreen
+            title={selectedProductDetail?.title ?? "Product name"}
+            cardId={selectedProductDetail?.cardId}
+            optionId={selectedProductDetail?.optionId}
+            onBack={goBack}
           />
         )}
 

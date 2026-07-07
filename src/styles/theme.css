@@ -635,55 +635,6 @@
     opacity: 0.75;
   }
 
-  @keyframes rs-kids-ambient-drift {
-    from {
-      transform: translate3d(-2%, -1%, 0) scale(1);
-      filter: saturate(1);
-    }
-
-    to {
-      transform: translate3d(2%, 1.5%, 0) scale(1.05);
-      filter: saturate(1.12);
-    }
-  }
-
-  @keyframes rs-kids-signal-breathe {
-    0% {
-      transform: translate3d(-2%, 0, 0) rotate(-1deg) scale(1);
-      opacity: 0.74;
-    }
-
-    55% {
-      opacity: 0.96;
-    }
-
-    100% {
-      transform: translate3d(2%, 1%, 0) rotate(1deg) scale(1.04);
-      opacity: 0.82;
-    }
-  }
-
-  .rs-kids-ambient-field {
-    animation: rs-kids-ambient-drift 24s ease-in-out infinite alternate;
-    background:
-      radial-gradient(58% 32% at 82% 20%, color-mix(in srgb, var(--uc-yellow-gold) 46%, transparent), transparent 72%),
-      radial-gradient(70% 42% at 18% 22%, color-mix(in srgb, var(--uc-teal-bright) 34%, transparent), transparent 74%),
-      linear-gradient(128deg, transparent 28%, color-mix(in srgb, var(--uc-product-blue) 24%, transparent) 50%, transparent 76%);
-    mix-blend-mode: screen;
-    opacity: 0.68;
-    will-change: transform, filter;
-  }
-
-  .rs-kids-signal-field {
-    animation: rs-kids-signal-breathe 18s ease-in-out infinite alternate;
-    background:
-      radial-gradient(40% 28% at 78% 72%, color-mix(in srgb, var(--uc-yellow-gold) 78%, transparent), transparent 72%),
-      linear-gradient(112deg, transparent 24%, color-mix(in srgb, var(--uc-teal-bright) 38%, transparent) 46%, color-mix(in srgb, var(--uc-product-blue) 24%, transparent) 60%, transparent 78%),
-      radial-gradient(88% 70% at 28% 18%, color-mix(in srgb, var(--uc-teal-blue) 42%, transparent), transparent 72%);
-    mix-blend-mode: screen;
-    will-change: transform, opacity;
-  }
-
   @keyframes hu-motion-breathe {
     from {
       transform: scale(1);
@@ -828,9 +779,7 @@
     .hu-nordlys-silk-b,
     .hu-nordlys-glint,
     .hu-nordlys-ember,
-    [class*="hu-motion-"],
-    .rs-kids-ambient-field,
-    .rs-kids-signal-field {
+    [class*="hu-motion-"] {
       animation: none;
     }
   }

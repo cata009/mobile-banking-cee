@@ -60,7 +60,7 @@ export const PRODUCTS: Record<ProductId, ProductMeta> = {
   KIDS_PI: {
     id: "KIDS_PI",
     label: "Mobile PI Kids",
-    description: "Romania-first kids-focused personal individual mobile banking demo layer.",
+    description: "Kids-focused personal individual mobile banking demo layer with selected active market concepts.",
     status: "active",
     selectorVisibility: "visible",
   },

@@ -97,7 +97,6 @@ const DEFAULT_PRODUCT_CARD_SHEET: ProductCardSheetConfig = {
   options: [
     { id: "term-deposit", title: "Term deposit" },
     { id: "saving-account", title: "Saving account" },
-    { id: "round-up", title: "Round Up" },
     { id: "mutual-funds", title: "Mutual funds" },
   ],
 };
@@ -106,9 +105,7 @@ const PRODUCT_CARD_SHEETS: Partial<Record<ProductsCardId, ProductCardSheetConfig
   account: {
     options: [
       { id: "current-account", title: "Current account" },
-      { id: "account-package", title: "Account package" },
       { id: "overdraft", title: "Overdraft" },
-      { id: "switch-account", title: "Switch account" },
     ],
   },
   cards: {
@@ -116,7 +113,6 @@ const PRODUCT_CARD_SHEETS: Partial<Record<ProductsCardId, ProductCardSheetConfig
       { id: "debit-card", title: "Debit card" },
       { id: "credit-card", title: "Credit card" },
       { id: "virtual-card", title: "Virtual card" },
-      { id: "digital-wallets", title: "Digital wallets" },
     ],
   },
   "mortgages-loans": {
@@ -124,8 +120,6 @@ const PRODUCT_CARD_SHEETS: Partial<Record<ProductsCardId, ProductCardSheetConfig
     options: [
       { id: "mortgage-loan", title: "Mortgage loan" },
       { id: "personal-loan", title: "Personal loan" },
-      { id: "refinance-loan", title: "Refinance loan" },
-      { id: "loan-calculator", title: "Loan calculator" },
     ],
   },
   insurance: {
@@ -181,6 +175,15 @@ const RO_PRODUCT_CARD_SHEETS: Partial<Record<ProductsCardId, ProductCardSheetCon
       { id: "my-car", title: "My Car" },
       { id: "umbrella", title: "Umbrella" },
       { id: "start-invest", title: "Start invest" },
+    ],
+  },
+  "investments-savings": {
+    title: "Saving and investing",
+    options: [
+      { id: "term-deposit", title: "Term deposit" },
+      { id: "saving-account", title: "Saving account" },
+      { id: "round-up", title: "Round Up" },
+      { id: "mutual-funds", title: "Mutual funds" },
     ],
   },
 };

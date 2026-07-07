@@ -95,11 +95,6 @@ export const COUNTRY_PRODUCTS: CountryProducts = {
       title: "Credit cards",
       description: LOREM_SHORT,
     },
-    {
-      id: "current-account-packages",
-      title: "Current account packages",
-      description: LOREM_SHORT,
-    },
   ],
 
   // Bosnia Banja Luka - duplicate of Bosnia
@@ -117,11 +112,6 @@ export const COUNTRY_PRODUCTS: CountryProducts = {
     {
       id: "credit-cards",
       title: "Credit cards",
-      description: LOREM_SHORT,
-    },
-    {
-      id: "current-account-packages",
-      title: "Current account packages",
       description: LOREM_SHORT,
     },
   ],

@@ -585,7 +585,7 @@ const CUSTOM_ICONS = {
     width: 32,
     height: 32,
     viewBox: "0 0 32 32",
-    usage: ["AccountDetailsInfoScreen", "AccountOptionsScreen", "ContactsNavigationCard", "NavigationLink", "NewPaymentActionListItem", "PrimeIconLabelValue", "ProductAccordion", "RoKidsApp", "TemplateCodePreviews"],
+    usage: ["AccountDetailsInfoScreen", "AccountOptionsScreen", "ContactsNavigationCard", "NavigationLink", "NewPaymentActionListItem", "PrimeIconLabelValue", "ProductAccordion", "KidsMarketHomeApp", "TemplateCodePreviews"],
     render: () => (
       <path
         id="Icon"
@@ -730,7 +730,7 @@ const CUSTOM_ICONS = {
     width: 32,
     height: 32,
     viewBox: "0 0 32 32",
-    usage: ["BottomSheet", "DemoFeatureSidePanel", "HelperCard", "NewPaymentDiscoverBanner", "RoKidsApp", "TemplateCodePreviews"],
+    usage: ["BottomSheet", "DemoFeatureSidePanel", "HelperCard", "NewPaymentDiscoverBanner", "KidsMarketHomeApp", "TemplateCodePreviews"],
     notes: "Custom close icon replacing the old lucide X wrapper.",
     render: () => (
       <path
@@ -1450,7 +1450,7 @@ const LUCIDE_ICONS = {
     width: 32,
     height: 32,
     component: WalletCards,
-    usage: ["Payments wallet illustration", "AccountOptionsScreen", "RoKidsApp"],
+    usage: ["Payments wallet illustration", "AccountOptionsScreen", "KidsMarketHomeApp"],
   },
   "shopping-bag": {
     source: "lucide",
@@ -1459,7 +1459,7 @@ const LUCIDE_ICONS = {
     width: 32,
     height: 32,
     component: ShoppingBag,
-    usage: ["ProductMenuCard", "RoKidsApp"],
+    usage: ["ProductMenuCard", "KidsMarketHomeApp"],
   },
   "arrow-right": {
     source: "lucide",
@@ -1549,7 +1549,7 @@ const LUCIDE_ICONS = {
     width: 20,
     height: 20,
     component: Send,
-    usage: ["QuickActions", "RoKidsApp"],
+    usage: ["QuickActions", "KidsMarketHomeApp"],
   },
   bike: {
     source: "lucide",
@@ -1558,7 +1558,7 @@ const LUCIDE_ICONS = {
     width: 24,
     height: 24,
     component: Bike,
-    usage: ["RoKidsApp"],
+    usage: ["KidsMarketHomeApp"],
   },
   "book-open": {
     source: "lucide",
@@ -1567,7 +1567,7 @@ const LUCIDE_ICONS = {
     width: 24,
     height: 24,
     component: BookOpen,
-    usage: ["RoKidsApp"],
+    usage: ["KidsMarketHomeApp"],
   },
   "calendar-days": {
     source: "lucide",
@@ -1576,7 +1576,7 @@ const LUCIDE_ICONS = {
     width: 24,
     height: 24,
     component: CalendarDays,
-    usage: ["RoKidsApp"],
+    usage: ["KidsMarketHomeApp"],
   },
   "circle-dollar-sign": {
     source: "lucide",
@@ -1585,7 +1585,7 @@ const LUCIDE_ICONS = {
     width: 24,
     height: 24,
     component: CircleDollarSign,
-    usage: ["RoKidsApp"],
+    usage: ["KidsMarketHomeApp"],
   },
   "clipboard-check": {
     source: "lucide",
@@ -1594,7 +1594,7 @@ const LUCIDE_ICONS = {
     width: 24,
     height: 24,
     component: ClipboardCheck,
-    usage: ["RoKidsApp"],
+    usage: ["KidsMarketHomeApp"],
   },
   eye: {
     source: "lucide",
@@ -1603,7 +1603,7 @@ const LUCIDE_ICONS = {
     width: 24,
     height: 24,
     component: Eye,
-    usage: ["RoKidsApp"],
+    usage: ["KidsMarketHomeApp"],
   },
   "eye-off": {
     source: "lucide",
@@ -1612,7 +1612,7 @@ const LUCIDE_ICONS = {
     width: 24,
     height: 24,
     component: EyeOff,
-    usage: ["RoKidsApp"],
+    usage: ["KidsMarketHomeApp"],
   },
   gift: {
     source: "lucide",
@@ -1621,7 +1621,7 @@ const LUCIDE_ICONS = {
     width: 24,
     height: 24,
     component: Gift,
-    usage: ["RoKidsApp"],
+    usage: ["KidsMarketHomeApp"],
   },
   palette: {
     source: "lucide",
@@ -1630,7 +1630,7 @@ const LUCIDE_ICONS = {
     width: 24,
     height: 24,
     component: Palette,
-    usage: ["RoKidsApp"],
+    usage: ["KidsMarketHomeApp"],
   },
   "piggy-bank": {
     source: "lucide",
@@ -1639,7 +1639,7 @@ const LUCIDE_ICONS = {
     width: 24,
     height: 24,
     component: PiggyBank,
-    usage: ["RoKidsApp"],
+    usage: ["KidsMarketHomeApp"],
   },
   "receipt-text": {
     source: "lucide",
@@ -1648,7 +1648,7 @@ const LUCIDE_ICONS = {
     width: 24,
     height: 24,
     component: ReceiptText,
-    usage: ["RoKidsApp"],
+    usage: ["KidsMarketHomeApp"],
   },
   "shield-check": {
     source: "lucide",
@@ -1657,7 +1657,7 @@ const LUCIDE_ICONS = {
     width: 24,
     height: 24,
     component: ShieldCheck,
-    usage: ["RoKidsApp"],
+    usage: ["KidsMarketHomeApp"],
   },
   "sliders-horizontal": {
     source: "lucide",
@@ -1666,7 +1666,7 @@ const LUCIDE_ICONS = {
     width: 24,
     height: 24,
     component: SlidersHorizontal,
-    usage: ["RoKidsApp"],
+    usage: ["KidsMarketHomeApp"],
   },
   trophy: {
     source: "lucide",
@@ -1675,7 +1675,7 @@ const LUCIDE_ICONS = {
     width: 24,
     height: 24,
     component: Trophy,
-    usage: ["RoKidsApp"],
+    usage: ["KidsMarketHomeApp"],
   },
   "user-round": {
     source: "lucide",
@@ -1684,7 +1684,7 @@ const LUCIDE_ICONS = {
     width: 24,
     height: 24,
     component: UserRound,
-    usage: ["RoKidsApp"],
+    usage: ["KidsMarketHomeApp"],
   },
   users: {
     source: "lucide",
@@ -1693,7 +1693,7 @@ const LUCIDE_ICONS = {
     width: 24,
     height: 24,
     component: Users,
-    usage: ["RoKidsApp"],
+    usage: ["KidsMarketHomeApp"],
   },
 } satisfies Record<string, LucideIconDefinition>;
 

@@ -49,16 +49,6 @@ const COMMON_TUTORIALS: BankingTutorial[] = [
     ),
   },
   {
-    id: "refinance-loan-card",
-    title: "HOW TO REFINANCE A LOAN OR CREDIT CARD 100% ONLINE, DIRECTLY FROM MOBILE BANKING",
-    shortTitle: "Refinancing",
-    accent: "#7C3AED",
-    slides: buildSlides(
-      "Refinancing",
-      "Compare the refinancing offer, add the loan or card you want to refinance, then review and sign the request.",
-    ),
-  },
-  {
     id: "salary-transfer",
     title: "HOW DO I TRANSFER MY SALARY TO UNICREDIT BANK, DIRECTLY FROM MOBILE BANKING",
     shortTitle: "Salary transfer",

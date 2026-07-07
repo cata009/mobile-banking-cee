@@ -42,7 +42,7 @@ Current target values:
 - `SME`: small and medium enterprise mobile banking;
 - `KIDS_PI`: kids-focused PI application layer, surfaced in runtime as Mobile PI Kids.
 
-Current runtime note: `KIDS_PI` has a Romania-only, current-design-system RO Kids prototype with deep Kid/Parent mock flows. It also has current-design-system homepage plus bottom-navigation concept variants for Czech Republic, Slovakia, Hungary, Bosnia, Bosnia Banja Luka, and Slovenia. Slovakia is currently rebuilt from the Bulbank Teen/Kids document direction with Products, Education, Tasks, and More pages. Serbia and future-design-system Kids contexts still render the honest planned-state placeholder until their separate concepts are implemented.
+Current runtime note: `KIDS_PI` now has active current-design-system Kids concepts only for Slovakia and Hungary. Romania Kids and Serbia Kids runtime apps were deleted on 2026-07-07; RO, RS, CZ, BA, BA_BL, SI, and future-design-system Kids contexts render the honest planned-state placeholder until a new approved concept is implemented. Slovakia is currently rebuilt from the Bulbank Teen/Kids document direction with Products, Education, Tasks, and More pages.
 
 Rule: product differences must be explicit. Do not hide PI/SME divergence inside generic component conditionals without metadata.
 
@@ -289,10 +289,10 @@ This is a target contract, not current runtime behavior.
 | Banking scenario and entitlements model | implemented as mock-driven control-plane infrastructure | `src/app/platform/banking/bankingScenarioRegistry.ts`, `src/app/platform/effectiveAppContext.ts`, `src/app/components/demo/DemoFeatureSidePanel.tsx` |
 | Contract-ready mock repositories | implemented as adapter-ready mock repositories | `src/app/platform/data/bankingRepositories.ts` |
 | Project packs | implemented for all 24 product/country combinations | `src/app/registry/projectPackRegistry.ts` |
-| PI/SME/KIDS_PI product model | implemented as runtime selector; SME and unsupported Kids contexts use planned-state placeholders, while RO/current DS Mobile PI Kids renders a mock-driven prototype and CZ/SK/HU/BA/BA_BL/SI current DS Kids contexts render homepage/navigation concept variants, with SK currently rebuilt from the Bulbank Teen/Kids document direction | `src/app/registry/projectModel.ts`, `src/app/components/demo/DemoTopBar.tsx`, `src/app/App.tsx`, `src/app/components/UnsupportedContextScreen.tsx`, `src/app/screens/kids/RoKidsApp.tsx`, `src/app/screens/kids/KidsMarketHomeApp.tsx`, `src/data/kidsMarketHomeConcepts.ts` |
+| PI/SME/KIDS_PI product model | implemented as runtime selector; SME and unsupported Kids contexts use planned-state placeholders, while SK/HU current DS Mobile PI Kids contexts render homepage/navigation concept variants, with SK currently rebuilt from the Bulbank Teen/Kids document direction | `src/app/registry/projectModel.ts`, `src/app/components/demo/DemoTopBar.tsx`, `src/app/App.tsx`, `src/app/components/UnsupportedContextScreen.tsx`, `src/app/screens/kids/KidsMarketHomeApp.tsx`, `src/data/kidsMarketHomeConcepts.ts` |
 | Screen registry | foundation only | `src/app/registry/screenRegistry.ts` |
-| Flow registry | foundation plus RO Kids core-flow entry and six-market Kids homepage bottom-nav comparison flow | `src/app/registry/flowRegistry.ts` |
-| Component registry | foundation plus RO Kids contained-module entry and six-market Kids homepage component entry | `src/app/registry/componentRegistry.ts` |
+| Flow registry | foundation plus SK/HU Kids homepage bottom-nav comparison flow | `src/app/registry/flowRegistry.ts` |
+| Component registry | foundation plus SK/HU Kids homepage component entry | `src/app/registry/componentRegistry.ts` |
 | AI catalog export | foundation only | `src/app/registry/aiCatalog.ts` |
 | Next design system | implemented as runtime selector with planned-state placeholder | `src/app/registry/projectModel.ts`, `src/app/components/demo/DemoFeatureSidePanel.tsx`, `src/app/components/UnsupportedContextScreen.tsx` |
 | Larger platform export | foundation only | `src/app/registry/aiCatalog.ts` |
