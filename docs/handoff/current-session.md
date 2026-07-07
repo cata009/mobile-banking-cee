@@ -2,6 +2,29 @@
 
 Last updated: 2026-07-07
 
+## 2026-07-07 CZ Chatbot Investment Follow-Up Click Fix
+
+- Latest request handled: user reported that the Investments suggested next actions (`Grow my savings`, `Future purchase`, `Long-term reserve`) could not be clicked and asked to fix and deploy to Vercel.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now captures follow-up shelf pointer gestures on the chip element when a gesture starts on a chip, instead of forcing the parent shelf to own the whole pointer lifecycle.
+  - Follow-up chips now handle simple pointer taps on `pointerup` and keep the existing `click` path for keyboard/accessibility, with a short guard to prevent duplicate sends.
+  - Drag suppression still blocks accidental chip activation after a real horizontal drag.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and chunks above 500 kB.
+  - In-app browser smoke on `screen=investments` opened CZ Chatbot, clicked `Start an investment goal`, clicked `Grow my savings`, and confirmed the user message plus `Goal selected` reply appeared.
+  - The same browser smoke clicked `In 3-5 years` and confirmed the flow advanced to `Time horizon captured` with amount chips `5,000 CZK`, `10,000 CZK`, and `I'm not sure yet`.
+  - Browser console error log was empty after the follow-up click checks.
+- Banana Loop result:
+  - fixed: Investments goal follow-up chips are tappable/clickable again while preserving drag-scroll behavior.
+  - preserved: no investment execution, suitability, trading, or backend behavior was added.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
 ## 2026-07-07 CZ Chatbot Investments Closeout And Production Deploy
 
 - Latest request handled: user asked to resume and finish the unfinished Investments chatbot task, then commit everything and publish to Vercel.
