@@ -75,7 +75,7 @@ export interface CoAppingChatAssistantProps {
   onAction?: (action: CoAppingChatAction) => void;
 }
 
-const MAX_VISIBLE_SUGGESTED_TOPICS = 4;
+const MAX_VISIBLE_SUGGESTED_TOPICS = 5;
 
 type ConversationListReturnTarget = "new" | "conversation" | "for-you";
 

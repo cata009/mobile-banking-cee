@@ -2,6 +2,31 @@
 
 Last updated: 2026-07-07
 
+## 2026-07-07 CZ Chatbot Home Saving Capacity Five-Topic Flow
+
+- Latest request handled: user asked to add a new Home CZ Chatbot option, first in the list, around `How much money can I save`, with a guided savings flow: calculate monthly saving capacity from expenses, income, and current-account cash; ask how the user wants to save; offer Saving account / Term deposit with saving split percentages; ask how much to save now; then show `Open now`.
+- Runtime changes:
+  - `src/app/App.tsx` now includes `How much can I save?` as the first Home CZ Chatbot topic.
+  - The structured reply calculates a cautious monthly target from the current mock Spending timeline and current-account balances, then presents Saving account at `70%` and Term deposit at `30%` of the plan.
+  - The flow continues through product choice, amount chips, a final `Ready to open` response, and `Open now` navigation into Products focused on `Investments and savings` / `Saving and investing`.
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now allows up to five visible suggested topics so the existing Home topics remain visible instead of dropping `Spot unusual spending`.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and chunks above 500 kB.
+  - Chrome smoke on the local CZ Future Chatbot Home URL confirmed five visible topics in order: `How much can I save?`, `Review today's money snapshot`, `What products can I open`, `Review latest 5 transactions`, and `Spot unusual spending`.
+  - Chrome smoke clicked `How much can I save?` and confirmed the reply includes monthly saving capacity, expenses, income, current-account cash, Saving account / Term deposit options, and `70%` / `30%` split cards.
+  - Chrome smoke clicked `Saving account`, then `2 000,00 CZK`, confirmed the final `Ready to open` answer and `Open now` chip, then clicked `Open now`; the app navigated to `screen=products`, closed chat, kept `OUR PRODUCTS` visible, and opened the Saving and investing sheet with `Term deposit` and `Saving account`.
+  - Chrome console error log was empty after the savings flow smoke.
+- Banana Loop result:
+  - fixed: adding the new first Home topic no longer hides the existing fifth Home topic because the visible-topic cap is now five.
+  - preserved: this is still a mock-driven savings guidance demo; no real product opening, eligibility, interest-rate quote, documents, or backend persistence was added.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
 ## 2026-07-07 CZ Chatbot For You Carousel Click Repair
 
 - Latest request handled: user reported that `For you` carousel cards, including `Grow your money` and `Next best conversations`, no longer opened conversations on click and asked to fix, commit, and deploy.
