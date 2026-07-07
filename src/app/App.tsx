@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useNavigationContext, NavigationProvider, type Screen } from "@/app/contexts/NavigationContext";
 import { LanguageProvider, useLanguage } from "@/app/contexts/LanguageContext";
 import { DemoProvider, useDemo } from "@/app/state/demoStore";
+import type { CountryId } from "@/app/state/demoTypes";
 import { isFeatureActive } from "@/app/state/featureResolver";
 import { DemoShell } from "@/app/components/demo/DemoShell";
 import { DemoNavigationSync } from "@/app/components/demo/DemoNavigationSync";
@@ -71,7 +72,10 @@ import { isKidsHomeCountry } from "@/data/kidsMarketHomeConcepts";
 import {
   CoAppingChatLauncher,
   type CoAppingChatAction,
+  type CoAppingAssistantMode,
   type CoAppingChatContext,
+  type CoAppingOpportunity,
+  type CoAppingSuggestedTopic,
 } from "../../package/mobile-pi-coapping-chat-package/src";
 import "../../package/mobile-pi-coapping-chat-package/src/coapping.css";
 import type { AccountTransaction } from "@/data/accountDetails";
@@ -80,7 +84,9 @@ import {
   createRedoDomesticPaymentDraft,
   type DomesticPaymentDraft,
 } from "@/data/paymentFlow";
-import type { Product } from "@/data/products";
+import { formatMoneyNumber } from "@/app/registry/countryConfig";
+import { formatMaskedCardNumber } from "@/app/utils/cardNumber";
+import type { CreditCard, Product } from "@/data/products";
 
 // Panel components
 import PanelOverlay from "@/app/components/PanelOverlay";
@@ -104,7 +110,7 @@ const DESIGN_SYSTEM_HASHES = new Set([
   "color-audit",
 ]);
 
-type CzChatHelpArea = "documents" | "account" | "card";
+type CzChatHelpArea = "documents" | "account" | "card" | "savings" | "loan" | "mortgage";
 type CzChatLauncherVariant = "bubble" | "edge-tab";
 
 const CZ_CHAT_USER_NAME = "Teodora";
@@ -119,6 +125,59 @@ const CZ_CHAT_LEVEL_ONE_SCREENS = new Set<Screen>([
 
 function buildCzChatTitle(copy: string): string {
   return `${CZ_CHAT_USER_NAME}, ${copy}`;
+}
+
+function buildCzChatTopic(id: string, label: string, prompt: string): CoAppingSuggestedTopic {
+  return { id, label, prompt };
+}
+
+function isCreditCardProduct(product: Product | null | undefined): product is CreditCard {
+  return product?.type === "credit_card";
+}
+
+function buildCreditCardOpportunities(
+  creditCard: CreditCard | null,
+  country: CountryId,
+  _currentScreen: Screen,
+): CoAppingOpportunity[] {
+  if (!creditCard) return [];
+
+  const currency = creditCard.currency;
+  const creditLimit = `${formatMoneyNumber(creditCard.creditLimit, country)} ${currency}`;
+  const proposedCreditLimit = `${formatMoneyNumber(creditCard.creditLimit + 5000, country)} ${currency}`;
+
+  return [
+    {
+      id: "credit-limit-review",
+      priority: "primary",
+      tone: "credit",
+      eyebrow: "Credit card",
+      title: "Credit limit review available",
+      body: `Your card limit could move from ${creditLimit} to ${proposedCreditLimit}. Check options starts the guided review; nothing changes until you confirm.`,
+      reason: "Credit card limit increase candidate.",
+      relatedItem: {
+        title: creditCard.name,
+        description: formatMaskedCardNumber(creditCard.accountNumber),
+        visualKind: "credit-card",
+        action: {
+          id: "open-credit-card-detail",
+          label: "Open card detail",
+          type: "navigate",
+          target: "card-detail",
+        },
+      },
+      metrics: [
+        { label: "Current limit", value: creditLimit, helper: "Your current credit card ceiling" },
+        { label: "New limit", value: proposedCreditLimit, helper: "Available after successful review" },
+      ],
+      action: {
+        id: "start-credit-limit-review",
+        label: "Check options",
+        type: "send-message",
+        prompt: "I want to check credit card limit upgrade options for this card.",
+      },
+    },
+  ];
 }
 
 function buildCzChatHelpContext(area: CzChatHelpArea, id: string): CoAppingChatContext {
@@ -155,26 +214,10 @@ function buildCzChatHelpContext(area: CzChatHelpArea, id: string): CoAppingChatC
         id,
         title: buildCzChatTitle("what should we check on this account?"),
         suggestedTopics: [
-          {
-            id: "account-balance",
-            label: "Explain my balance",
-            prompt: "Help me understand available balance versus current balance on this account.",
-          },
-          {
-            id: "account-transaction",
-            label: "Find a transaction",
-            prompt: "Help me find a specific transaction on this account.",
-          },
-          {
-            id: "account-filters",
-            label: "Filter account activity",
-            prompt: "Guide me through filtering account activity by amount, type, or category.",
-          },
-          {
-            id: "account-details",
-            label: "Find account details",
-            prompt: "Where can I find account number, IBAN, and other account details?",
-          },
+          buildCzChatTopic("account-balance", "Explain my balance", "Help me understand available balance versus current balance on this account."),
+          buildCzChatTopic("account-transaction", "Find a transaction", "Help me find a specific transaction on this account."),
+          buildCzChatTopic("account-filters", "Filter account activity", "Guide me through filtering account activity by amount, type, or category."),
+          buildCzChatTopic("account-details", "Find account details", "Where can I find account number, IBAN, and other account details?"),
         ],
       };
     case "card":
@@ -182,32 +225,56 @@ function buildCzChatHelpContext(area: CzChatHelpArea, id: string): CoAppingChatC
         id,
         title: buildCzChatTitle("what should we check on this card?"),
         suggestedTopics: [
-          {
-            id: "card-security",
-            label: "Check card security",
-            prompt: "Help me review this card's security settings and recent activity.",
-          },
-          {
-            id: "card-limits",
-            label: "Change card limits",
-            prompt: "Can I change my card limits temporarily for a purchase?",
-          },
-          {
-            id: "card-pin",
-            label: "Find card PIN options",
-            prompt: "Where can I view or manage the PIN for this card?",
-          },
-          {
-            id: "card-transactions",
-            label: "Review card transactions",
-            prompt: "Help me understand or search recent card transactions.",
-          },
+          buildCzChatTopic("card-security", "Check card security", "Help me review this card's security settings and recent activity."),
+          buildCzChatTopic("card-limits", "Change card limits", "Can I change my card limits temporarily for a purchase?"),
+          buildCzChatTopic("card-pin", "Find card PIN options", "Where can I view or manage the PIN for this card?"),
+          buildCzChatTopic("card-transactions", "Review card transactions", "Help me understand or search recent card transactions."),
+        ],
+      };
+    case "savings":
+      return {
+        id,
+        title: buildCzChatTitle("what should we check on your savings?"),
+        suggestedTopics: [
+          buildCzChatTopic("savings-progress", "Review savings progress", "Help me understand how this savings product is progressing."),
+          buildCzChatTopic("savings-interest", "Explain interest", "Explain the interest, term, and access rules for this savings product."),
+          buildCzChatTopic("savings-transfer", "Move money safely", "Can you guide me before I move money to or from this savings product?"),
+          buildCzChatTopic("savings-options", "Compare savings options", "Help me compare this savings product with other options in the app."),
+        ],
+      };
+    case "loan":
+      return {
+        id,
+        title: buildCzChatTitle("what should we check on this loan?"),
+        suggestedTopics: [
+          buildCzChatTopic("loan-balance", "Explain loan balance", "Help me understand remaining amount, monthly payment, and end date for this loan."),
+          buildCzChatTopic("loan-repay-early", "Can I repay early?", "Explain what I should check before repaying part of this loan early."),
+          buildCzChatTopic("loan-next-payment", "Review next payment", "Help me find the next instalment and what happens if it changes."),
+          buildCzChatTopic("loan-documents", "Find loan documents", "Where can I find loan contracts, statements, or confirmations?"),
+        ],
+      };
+    case "mortgage":
+      return {
+        id,
+        title: buildCzChatTitle("what should we check on this mortgage?"),
+        suggestedTopics: [
+          buildCzChatTopic("mortgage-balance", "Explain mortgage balance", "Help me understand remaining mortgage amount, monthly payment, and end date."),
+          buildCzChatTopic("mortgage-rate", "Check interest rate", "Explain the interest rate and what I should watch before the next fixation or review."),
+          buildCzChatTopic("mortgage-next-payment", "Review next payment", "Help me review the next mortgage payment and related account activity."),
+          buildCzChatTopic("mortgage-documents", "Find mortgage documents", "Where can I find mortgage contracts, statements, or confirmations?"),
         ],
       };
   }
 }
 
-function getCzChatHelpAreaForScreen(screen: Screen): CzChatHelpArea | null {
+function getCzChatHelpAreaForAccountProduct(product: Product | null): CzChatHelpArea {
+  if (product?.type === "saving_account" || product?.type === "term_deposit") return "savings";
+  if (product?.type === "loan") return "loan";
+  if (product?.type === "mortgage") return "mortgage";
+  return "account";
+}
+
+function getCzChatHelpAreaForScreen(screen: Screen, accountProduct: Product | null = null): CzChatHelpArea | null {
   if (screen === "documents") return "documents";
   if (
     screen === "account-detail" ||
@@ -215,17 +282,72 @@ function getCzChatHelpAreaForScreen(screen: Screen): CzChatHelpArea | null {
     screen === "account-options" ||
     screen === "transaction-detail"
   ) {
-    return "account";
+    return getCzChatHelpAreaForAccountProduct(accountProduct);
   }
   if (screen === "card-detail") return "card";
   return null;
 }
 
-function buildCzChatScreenContext(screen: Screen, id: string): CoAppingChatContext | null {
-  const helpArea = getCzChatHelpAreaForScreen(screen);
+function buildCzChatScreenContext(screen: Screen, id: string, accountProduct: Product | null = null): CoAppingChatContext | null {
+  const helpArea = getCzChatHelpAreaForScreen(screen, accountProduct);
   if (helpArea) return buildCzChatHelpContext(helpArea, id);
 
   switch (screen) {
+    case "homepage":
+      return {
+        id,
+        title: buildCzChatTitle("what should we look at first?"),
+        suggestedTopics: [
+          buildCzChatTopic("home-overview", "Review my financial overview", "Help me understand the main things I should notice on my homepage."),
+          buildCzChatTopic("home-balance", "Explain available money", "Explain my available balance, owed amount, and what changed recently."),
+          buildCzChatTopic("home-next-action", "Suggest my next action", "Based on the homepage, what should I review next in the app?"),
+          buildCzChatTopic("home-documents", "Find recent documents", "Help me find confirmations, statements, or recent bank documents."),
+        ],
+      };
+    case "analytics":
+      return {
+        id,
+        title: buildCzChatTitle("what spending insight do you need?"),
+        suggestedTopics: [
+          buildCzChatTopic("spending-month", "Explain this month's spending", "Help me understand where my money went this month."),
+          buildCzChatTopic("spending-subscriptions", "Find subscriptions", "Help me spot recurring payments or subscriptions in my spending."),
+          buildCzChatTopic("spending-categories", "Compare categories", "Compare my spending categories and highlight what changed."),
+          buildCzChatTopic("spending-save", "Find saving opportunities", "Where could I reduce spending without hurting important payments?"),
+        ],
+      };
+    case "payments":
+      return {
+        id,
+        title: buildCzChatTitle("what payment do you need help with?"),
+        suggestedTopics: [
+          buildCzChatTopic("payments-new", "Start a payment safely", "Guide me through the safest way to start a new payment."),
+          buildCzChatTopic("payments-limits", "Check limits and fees", "Explain payment limits, fees, timing, and signing before I continue."),
+          buildCzChatTopic("payments-confirmation", "Find payment confirmation", "Help me find or understand a payment confirmation."),
+          buildCzChatTopic("payments-repeat", "Set up recurring payment", "Help me decide whether a recurring payment or template makes sense."),
+        ],
+      };
+    case "products":
+      return {
+        id,
+        title: buildCzChatTitle("what product should we explore?"),
+        suggestedTopics: [
+          buildCzChatTopic("products-compare", "Compare product options", "Help me compare account, card, loan, savings, and investment options."),
+          buildCzChatTopic("products-offers", "Find relevant offers", "Which product offers are relevant and what should I check first?"),
+          buildCzChatTopic("products-savings", "Explore savings and investing", "Help me understand savings and investment product choices."),
+          buildCzChatTopic("products-borrowing", "Review loan options", "Help me understand loan or mortgage options before applying."),
+        ],
+      };
+    case "more":
+      return {
+        id,
+        title: buildCzChatTitle("what service do you need?"),
+        suggestedTopics: [
+          buildCzChatTopic("more-documents", "Find documents", "Help me find statements, contracts, confirmations, or legal notices."),
+          buildCzChatTopic("more-settings", "Review settings", "Guide me to the settings that matter for security and preferences."),
+          buildCzChatTopic("more-support", "Contact the bank", "Help me find the right contact, branch, or support route."),
+          buildCzChatTopic("more-consents", "Manage consents", "Explain where to review consents, applications, and third-party access."),
+        ],
+      };
     case "domestic-payment":
     case "payment-review":
     case "payment-sign":
@@ -478,8 +600,17 @@ function AppContent({
   const [paymentDraft, setPaymentDraft] = useState<DomesticPaymentDraft | null>(null);
   const [czChatOpen, setCzChatOpen] = useState(false);
   const [czChatContext, setCzChatContext] = useState<CoAppingChatContext | null>(null);
+  const [czChatInitialMode, setCzChatInitialMode] = useState<CoAppingAssistantMode>("chat");
   const accountProducts = categories.flatMap((category) => category.products);
   const selectedAccountProduct = accountProducts.find((accountProduct) => accountProduct.id === selectedAccountId) ?? accountProducts[0] ?? null;
+  const selectedCardProduct =
+    accountProducts.find((cardProduct) => cardProduct.id === selectedCardId) ??
+    accountProducts.find((cardProduct) => cardProduct.type === "credit_card") ??
+    null;
+  const creditCardForOpportunity = isCreditCardProduct(selectedCardProduct)
+    ? selectedCardProduct
+    : (accountProducts.find(isCreditCardProduct) ?? null);
+  const czChatOpportunities = buildCreditCardOpportunities(creditCardForOpportunity, country, currentScreen);
 
   useEffect(() => {
     preloadMoreCardImages();
@@ -797,17 +928,20 @@ function AppContent({
   };
 
   const openCzChatHelp = (area: CzChatHelpArea) => {
+    setCzChatInitialMode("chat");
     setCzChatContext(buildCzChatHelpContext(area, `${area}-${Date.now()}`));
     setCzChatOpen(true);
   };
 
   const handleCzChatLauncherOpen = () => {
-    if (isCzChatLevelOneScreen) {
-      setCzChatContext(null);
-      return;
-    }
+    setCzChatInitialMode("chat");
+    setCzChatContext(buildCzChatScreenContext(currentScreen, `${currentScreen}-${Date.now()}`, selectedAccountProduct));
+  };
 
-    setCzChatContext(buildCzChatScreenContext(currentScreen, `${currentScreen}-${Date.now()}`));
+  const openCzChatForYou = () => {
+    setCzChatInitialMode("for-you");
+    setCzChatContext(buildCzChatScreenContext(currentScreen, `${currentScreen}-${Date.now()}`, selectedAccountProduct));
+    setCzChatOpen(true);
   };
 
   const handleCzChatAction = (action: CoAppingChatAction) => {
@@ -824,6 +958,7 @@ function AppContent({
         navigateTo("analytics");
         break;
       case "card-detail":
+        if (creditCardForOpportunity) setSelectedCardId(creditCardForOpportunity.id);
         navigateTo("card-detail");
         break;
       case "products":
@@ -862,6 +997,8 @@ function AppContent({
         onLauncherOpen={handleCzChatLauncherOpen}
         onAction={handleCzChatAction}
         entryContext={czChatContext}
+        opportunities={czChatOpportunities}
+        initialMode={czChatInitialMode}
       />
     ) : null;
 
@@ -970,7 +1107,11 @@ function AppContent({
             onDetailsClick={handleAccountDetailsClick}
             onOptionsClick={handleAccountOptionsClick}
             onTransactionClick={handleTransactionClick}
-            onHelpClick={isCzCoAppingChatbotPreviewActive ? () => openCzChatHelp("account") : undefined}
+            onHelpClick={
+              isCzCoAppingChatbotPreviewActive
+                ? () => openCzChatHelp(getCzChatHelpAreaForAccountProduct(selectedAccountProduct))
+                : undefined
+            }
           />
         )}
 
@@ -1001,6 +1142,16 @@ function AppContent({
             onBack={goBack}
             onTransactionClick={handleTransactionClick}
             onHelpClick={isCzCoAppingChatbotPreviewActive ? () => openCzChatHelp("card") : undefined}
+            aiOpportunityNudge={
+              isCzCoAppingChatbotPreviewActive && isCreditCardProduct(selectedCardProduct)
+                ? {
+                    title: "Upgrade your credit limit to 15 000 CZK",
+                    body: "You have a personalized offer ready. Review the new limit first; nothing changes unless you continue.",
+                    ctaLabel: "FIND OUT MORE",
+                  }
+                : null
+            }
+            onAiOpportunityClick={openCzChatForYou}
           />
         )}
 

@@ -14,17 +14,21 @@ import {
   defaultReplyResolver,
   defaultSuggestedTopics,
 } from "./defaults";
+import discoveryHeroImage from "@/assets/investments/fund-banner-plant-unsplash.jpg";
+import discoverySubscriptionsImage from "@/assets/shopsmart/shopsmart-english-home.png";
+import discoveryCardControlsImage from "../../../screenshots/Cards.jpg";
 import {
   AddIcon,
-  BackIcon,
   CameraIcon,
+  ChevronLinkIcon,
   ChatBubbleIcon,
   CloseIcon,
   ConversationsIcon,
   DeleteActionIcon,
-  DiscoveryModeIcon,
   ExportIcon,
   FileAttachmentIcon,
+  ForYouModeIcon,
+  ForwardIcon,
   MicrophoneIcon,
   MoreIcon,
   PhotosIcon,
@@ -42,10 +46,13 @@ import type {
   CoAppingChatContext,
   CoAppingChatMessage,
   CoAppingFollowUpSuggestion,
+  CoAppingOpportunity,
   CoAppingReplyResolver,
   CoAppingRichBlock,
   CoAppingSuggestedTopic,
 } from "./types";
+
+export type CoAppingAssistantMode = "chat" | "for-you";
 
 export interface CoAppingChatAssistantProps {
   onClose: () => void;
@@ -53,12 +60,16 @@ export interface CoAppingChatAssistantProps {
   initialMessages?: CoAppingChatMessage[];
   suggestedTopics?: CoAppingSuggestedTopic[];
   entryContext?: CoAppingChatContext | null;
+  opportunities?: CoAppingOpportunity[];
+  initialMode?: CoAppingAssistantMode;
   resolveReply?: CoAppingReplyResolver;
   typingDelayMs?: number;
   onAction?: (action: CoAppingChatAction) => void;
 }
 
 const MAX_VISIBLE_SUGGESTED_TOPICS = 4;
+
+type ConversationListReturnTarget = "new" | "conversation" | "for-you";
 
 function getCurrentTime() {
   return new Intl.DateTimeFormat("en-GB", {
@@ -1351,10 +1362,10 @@ const cardSecurityProductBlock: CoAppingRichBlock = {
   body: "For secure card tasks, the assistant should expose the exact destination and keep strong authentication in the app.",
   products: [
     {
-      id: "debit-card",
-      title: "Debit Card",
-      subtitle: "5173 **** **** 5601",
-      meta: "Limits, online payments, freeze",
+      id: "card-detail",
+      title: "Credit card",
+      subtitle: "Limit, online payments, freeze",
+      meta: "Open controls",
       tone: "blue",
       action: navigateCardAction,
     },
@@ -1520,6 +1531,19 @@ function getContextualAssistantEnhancement(
     };
   }
 
+  if (/\b(credit limit|card limit|limit upgrade|limit review|increase.*limit|check.*options)\b/.test(normalized)) {
+    return {
+      text:
+        "### Credit limit review\nI can help you check the option without changing anything from chat.\nA responsible review should explain:\n- current available credit\n- the requested limit range\n- repayment impact\n- eligibility and final approval checks\nThe next step should stay inside the authenticated card flow.",
+      richBlocks: [cardSecurityProductBlock],
+      followUps: [
+        followUp("estimate-limit-need", "Estimate my need", "Help me estimate what credit limit would be useful."),
+        followUp("repayment-impact", "Explain repayment impact", "Explain what I should check before increasing a credit card limit."),
+        navigateFollowUp("open-card-detail", navigateCardAction),
+      ],
+    };
+  }
+
   if (/\b(learn how it works|how it works|why this portfolio|explain risk)\b/.test(normalized)) {
     return {
       text:
@@ -1600,64 +1624,99 @@ function getGreetingLabel(date = new Date()) {
   return "Good evening";
 }
 
-const discoveryHero = {
-  eyebrow: "Featured for Czech customers",
-  title: "Build an investment habit without leaving daily banking",
-  body: "Explore low-friction ways to move from idle savings into a planned portfolio, with risk checks before any product step.",
-  image:
-    "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=760&q=80",
-};
-
-const discoveryPromos = [
-  {
-    id: "travel-card-controls",
-    title: "Travel with card controls ready",
-    body: "Review limits, freeze options, and card security before the next trip.",
-    image:
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=420&q=80",
-    tag: "Cards",
-  },
-  {
-    id: "subscriptions",
-    title: "Find subscriptions before they renew",
-    body: "Spot recurring payments and decide what to keep, pause, or review.",
-    image:
-      "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=420&q=80",
-    tag: "Spending",
-  },
-];
-
-const discoveryArticles = [
-  {
-    id: "emergency-buffer",
-    title: "How much cash should stay outside investments?",
-    meta: "3 min read",
-    icon: "security" as const,
-  },
-  {
-    id: "card-safety",
-    title: "Five card settings worth checking after payday",
-    meta: "Security guide",
-    icon: "payments" as const,
-  },
-  {
-    id: "offers",
-    title: "Product offers that match active banking moments",
-    meta: "Personalized ideas",
-    icon: "offers" as const,
-  },
-];
-
-function DiscoveryFeed() {
+function ForYouOpportunityCard({
+  opportunity,
+  primary = false,
+  onAction,
+}: {
+  opportunity: CoAppingOpportunity;
+  primary?: boolean;
+  onAction: (action: CoAppingChatAction) => void;
+}) {
   return (
-    <div className="mpc-discovery-feed">
-      <button type="button" className="mpc-discovery-hero">
-        <img src={discoveryHero.image} alt="" loading="lazy" />
-        <span className="mpc-discovery-hero-shade" />
+    <article
+      className={[
+        "mpc-for-you-card",
+        primary ? "mpc-for-you-card-primary" : "",
+        opportunity.tone ? `mpc-for-you-card-${opportunity.tone}` : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      <div className="mpc-for-you-card-head">
+        <span className="mpc-for-you-eyebrow">{opportunity.eyebrow}</span>
+        <strong>{opportunity.title}</strong>
+        <p>{opportunity.body}</p>
+      </div>
+
+      {opportunity.relatedItem ? (
+        <button
+          type="button"
+          className="mpc-for-you-related-card"
+          onClick={() => {
+            if (opportunity.relatedItem?.action) onAction(opportunity.relatedItem.action);
+          }}
+          aria-label={opportunity.relatedItem.title}
+        >
+          {opportunity.relatedItem.visual ? (
+            <span className="mpc-for-you-related-visual">{opportunity.relatedItem.visual}</span>
+          ) : opportunity.relatedItem.visualKind === "credit-card" ? (
+            <span className="mpc-for-you-related-visual mpc-for-you-related-card-art" aria-hidden="true">
+              <span className="mpc-for-you-related-card-art-logo">UniCredit</span>
+              <span className="mpc-for-you-related-card-art-mark" />
+              <span className="mpc-for-you-related-card-art-label">credit</span>
+            </span>
+          ) : null}
+          <span className="mpc-for-you-related-copy">
+            <strong>{opportunity.relatedItem.title}</strong>
+            <span>{opportunity.relatedItem.description}</span>
+          </span>
+          <ChevronLinkIcon />
+        </button>
+      ) : null}
+
+      {opportunity.metrics?.length ? (
+        <div className="mpc-for-you-metrics" aria-label={`${opportunity.title} details`}>
+          {opportunity.metrics.map((metric) => (
+            <div key={metric.label} className="mpc-for-you-metric">
+              <span>{metric.label}</span>
+              <strong>{metric.value}</strong>
+              {metric.helper ? <small>{metric.helper}</small> : null}
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      {opportunity.action ? (
+        <button type="button" className="mpc-for-you-action" onClick={() => onAction(opportunity.action!)}>
+          {opportunity.action.label}
+        </button>
+      ) : null}
+    </article>
+  );
+}
+
+function ForYouDiscoveryContent({ onAction }: { onAction: (action: CoAppingChatAction) => void }) {
+  return (
+    <div className="mpc-for-you-discovery">
+      <button
+        type="button"
+        className="mpc-discovery-hero"
+        onClick={() =>
+          onAction({
+            id: "for-you-investment-habit",
+            label: "Explore investments",
+            type: "send-message",
+            prompt: "Show me low-friction ways to move idle savings into investments.",
+          })
+        }
+      >
+        <img src={discoveryHeroImage} alt="" />
+        <span className="mpc-discovery-hero-shade" aria-hidden="true" />
         <span className="mpc-discovery-hero-copy">
-          <span>{discoveryHero.eyebrow}</span>
-          <strong>{discoveryHero.title}</strong>
-          <small>{discoveryHero.body}</small>
+          <span>Invest smarter</span>
+          <strong>Make idle money grow</strong>
+          <small>Risk checks first. Start when ready.</small>
         </span>
       </button>
 
@@ -1667,16 +1726,45 @@ function DiscoveryFeed() {
       </div>
 
       <div className="mpc-discovery-promo-grid">
-        {discoveryPromos.map((promo) => (
-          <button key={promo.id} type="button" className="mpc-discovery-promo">
-            <img src={promo.image} alt="" loading="lazy" />
-            <span className="mpc-discovery-promo-copy">
-              <small>{promo.tag}</small>
-              <strong>{promo.title}</strong>
-              <span>{promo.body}</span>
-            </span>
-          </button>
-        ))}
+        <button
+          type="button"
+          className="mpc-discovery-promo"
+          onClick={() =>
+            onAction({
+              id: "for-you-card-controls",
+              label: "Travel with card controls ready",
+              type: "send-message",
+              prompt: "Help me review card controls, limits, freeze options, and card security before a trip.",
+            })
+          }
+        >
+          <img src={discoveryCardControlsImage} alt="" />
+          <span className="mpc-discovery-promo-copy">
+            <small>Cards</small>
+            <strong>Travel with card controls ready</strong>
+            <span>Review limits, freeze options, and card security before the next trip.</span>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          className="mpc-discovery-promo"
+          onClick={() =>
+            onAction({
+              id: "for-you-subscriptions",
+              label: "Find subscriptions before they renew",
+              type: "send-message",
+              prompt: "Help me find subscriptions and recurring payments before they renew.",
+            })
+          }
+        >
+          <img src={discoverySubscriptionsImage} alt="" />
+          <span className="mpc-discovery-promo-copy">
+            <small>Spending</small>
+            <strong>Find subscriptions before they renew</strong>
+            <span>Spot recurring payments and decide what to keep, pause, or review.</span>
+          </span>
+        </button>
       </div>
 
       <div className="mpc-discovery-section-head mpc-discovery-section-head-tight">
@@ -1684,18 +1772,89 @@ function DiscoveryFeed() {
       </div>
 
       <div className="mpc-discovery-article-list">
-        {discoveryArticles.map((article) => (
-          <button key={article.id} type="button" className="mpc-discovery-article">
-            <span className="mpc-discovery-article-icon">
-              <SuggestedTopicIcon variant={article.icon} />
-            </span>
-            <span>
-              <strong>{article.title}</strong>
-              <small>{article.meta}</small>
-            </span>
-          </button>
-        ))}
+        <button
+          type="button"
+          className="mpc-discovery-article"
+          onClick={() =>
+            onAction({
+              id: "for-you-cash-outside-investments",
+              label: "Cash outside investments",
+              type: "send-message",
+              prompt: "How much cash should stay outside investments?",
+            })
+          }
+        >
+          <span className="mpc-discovery-article-icon">
+            <SuggestedTopicIcon variant="security" />
+          </span>
+          <span>
+            <strong>How much cash should stay outside investments?</strong>
+            <small>3 min read</small>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          className="mpc-discovery-article"
+          onClick={() =>
+            onAction({
+              id: "for-you-card-settings-payday",
+              label: "Card settings after payday",
+              type: "send-message",
+              prompt: "Which card settings are worth checking after payday?",
+            })
+          }
+        >
+          <span className="mpc-discovery-article-icon">
+            <SuggestedTopicIcon variant="payments" />
+          </span>
+          <span>
+            <strong>Five card settings worth checking after payday</strong>
+            <small>Security guide</small>
+          </span>
+        </button>
       </div>
+    </div>
+  );
+}
+
+function ForYouFeed({
+  opportunities,
+  onAction,
+}: {
+  opportunities: CoAppingOpportunity[];
+  onAction: (action: CoAppingChatAction) => void;
+}) {
+  const [primaryOpportunity, ...secondaryOpportunities] = opportunities;
+
+  return (
+    <div className="mpc-for-you-feed">
+      <div className="mpc-for-you-section-head">
+        <strong>For you</strong>
+        <span>Contextual options matched to this moment</span>
+      </div>
+
+      {primaryOpportunity ? (
+        <>
+          <ForYouOpportunityCard opportunity={primaryOpportunity} primary onAction={onAction} />
+          {secondaryOpportunities.length ? (
+            <div className="mpc-for-you-secondary-list" aria-label="Other relevant options">
+              {secondaryOpportunities.map((opportunity) => (
+                <ForYouOpportunityCard key={opportunity.id} opportunity={opportunity} onAction={onAction} />
+              ))}
+            </div>
+          ) : null}
+          <ForYouDiscoveryContent onAction={onAction} />
+        </>
+      ) : (
+        <div className="mpc-for-you-empty" role="status">
+          <span className="mpc-for-you-empty-icon">
+            <ForYouModeIcon />
+          </span>
+          <strong>No tailored options right now</strong>
+          <p>I will show relevant options here when they match what you are doing.</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -1750,6 +1909,8 @@ export function CoAppingChatAssistant({
   initialMessages = defaultInitialMessages,
   suggestedTopics = defaultSuggestedTopics,
   entryContext = null,
+  opportunities = [],
+  initialMode = "chat",
   resolveReply = defaultReplyResolver,
   typingDelayMs = 1150,
 }: CoAppingChatAssistantProps) {
@@ -1768,7 +1929,11 @@ export function CoAppingChatAssistant({
   const [isDragging, setIsDragging] = useState(false);
   const [isConversationListOpen, setIsConversationListOpen] = useState(false);
   const [isConversationListExiting, setIsConversationListExiting] = useState(false);
-  const [assistantMode, setAssistantMode] = useState<"search" | "discovery">("search");
+  const [conversationListReturnTarget, setConversationListReturnTarget] =
+    useState<ConversationListReturnTarget>("new");
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [assistantMode, setAssistantMode] = useState<CoAppingAssistantMode>(initialMode);
+  const showForYouModeNotification = opportunities.length > 0 && assistantMode !== "for-you";
   const [conversationSearch, setConversationSearch] = useState("");
   const [isAttachmentMenuOpen, setIsAttachmentMenuOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
@@ -1980,6 +2145,8 @@ export function CoAppingChatAssistant({
     };
 
     const nextMessages = [...messages, userMessage];
+    setActiveConversationId("current");
+    setConversationListReturnTarget("conversation");
     setIsConversationListOpen(false);
     setMessages(nextMessages);
     setDraft("");
@@ -2199,6 +2366,7 @@ export function CoAppingChatAssistant({
       return;
     }
 
+    setAssistantMode("chat");
     sendMessage(action.prompt ?? action.label);
   };
 
@@ -2231,9 +2399,19 @@ export function CoAppingChatAssistant({
   };
 
   const openConversationList = () => {
-    setAssistantMode("search");
+    setConversationListReturnTarget(
+      assistantMode === "for-you" ? "for-you" : messages.length > 0 ? "conversation" : "new",
+    );
+    setAssistantMode("chat");
     setIsMoreMenuOpen(false);
     setIsConversationListOpen(true);
+  };
+
+  const returnFromConversationList = () => {
+    setIsMoreMenuOpen(false);
+    setIsAttachmentMenuOpen(false);
+    setAssistantMode(conversationListReturnTarget === "for-you" ? "for-you" : "chat");
+    setIsConversationListOpen(false);
   };
 
   const handleChatScroll = (event: ReactUIEvent<HTMLDivElement>) => {
@@ -2323,13 +2501,15 @@ export function CoAppingChatAssistant({
   const startNewConversation = () => {
     resetPendingReply();
     setMessages([]);
+    setActiveConversationId(null);
+    setConversationListReturnTarget("new");
     setDraft("");
     setConversationSearch("");
     setIsVoiceMode(false);
     setIsAttachmentMenuOpen(false);
     setIsMoreMenuOpen(false);
     setIsConversationListOpen(false);
-    setAssistantMode("search");
+    setAssistantMode("chat");
   };
 
   useEffect(() => {
@@ -2337,19 +2517,33 @@ export function CoAppingChatAssistant({
 
     resetPendingReply();
     setMessages([]);
+    setActiveConversationId(null);
+    setConversationListReturnTarget("new");
     setDraft("");
     setIsVoiceMode(false);
     setIsAttachmentMenuOpen(false);
     setIsMoreMenuOpen(false);
     setIsConversationListOpen(false);
-    setAssistantMode("search");
+    setAssistantMode("chat");
     setConversationSearch("");
     setShowChatScrollBottom(false);
   }, [entryContext?.id]);
 
+  useEffect(() => {
+    setAssistantMode(initialMode);
+    if (initialMode === "for-you") {
+      setIsConversationListOpen(false);
+      setIsAttachmentMenuOpen(false);
+      setIsMoreMenuOpen(false);
+      cancelVoiceCapture();
+    }
+  }, [initialMode]);
+
   const openSavedConversation = () => {
     resetPendingReply();
     setMessages(savedConversationMessagesRef.current);
+    setActiveConversationId("intro");
+    setConversationListReturnTarget("conversation");
     setDraft("");
     setIsVoiceMode(false);
     setIsAttachmentMenuOpen(false);
@@ -2368,7 +2562,7 @@ export function CoAppingChatAssistant({
   };
 
   const conversationItems = [
-    ...(messages.length > 0
+    ...(messages.length > 0 && activeConversationId === "current"
       ? [
           {
             id: "current",
@@ -2376,7 +2570,11 @@ export function CoAppingChatAssistant({
             subtitle: getConversationTimeLabel(messages),
             groupDate: getConversationGroupDate(messages, getConversationTimeLabel(messages)),
             searchText: messages.map((message) => message.text).join(" "),
-            onClick: () => setIsConversationListOpen(false),
+            onClick: () => {
+              setActiveConversationId("current");
+              setConversationListReturnTarget("conversation");
+              setIsConversationListOpen(false);
+            },
           },
         ]
       : []),
@@ -2400,6 +2598,8 @@ export function CoAppingChatAssistant({
       onClick: () => {
         resetPendingReply();
         setMessages(withConversationMessageDates(conversation.messages, conversation.subtitle));
+        setActiveConversationId(conversation.id);
+        setConversationListReturnTarget("conversation");
         setDraft("");
         setIsVoiceMode(false);
         setIsAttachmentMenuOpen(false);
@@ -2436,7 +2636,9 @@ export function CoAppingChatAssistant({
   const isVoiceCaptureActive = voiceStatus !== "idle";
   const showVoiceAction = isDraftEmpty || isVoiceCaptureActive;
   const isConversationListVisible = isConversationListOpen || isConversationListExiting;
-  const isDiscoveryMode = assistantMode === "discovery";
+  const isForYouMode = assistantMode === "for-you";
+  const selectedConversationId =
+    conversationListReturnTarget === "conversation" && activeConversationId ? activeConversationId : null;
   const inputPlaceholder =
     voiceStatus === "recording"
       ? "Listening... speak in English"
@@ -2445,20 +2647,21 @@ export function CoAppingChatAssistant({
         : isVoiceMode
           ? "Listening..."
           : mergedLabels.inputPlaceholder;
-  const showSuggestedTopics = messages.length === 0 && !isTyping && !isConversationListVisible && !isDiscoveryMode;
+  const showSuggestedTopics = messages.length === 0 && !isTyping && !isConversationListVisible && !isForYouMode;
   const activeSuggestedTopicsSource = entryContext?.suggestedTopics?.length
     ? entryContext.suggestedTopics
     : suggestedTopics;
   const activeSuggestedTopics = activeSuggestedTopicsSource.slice(0, MAX_VISIBLE_SUGGESTED_TOPICS);
   const newConversationGreeting = entryContext?.title ?? `${getGreetingLabel()}, ${assistantGreetingName}`;
   const hasActiveConversation = messages.length > 0;
-  const isConversationDetailOpen = !isConversationListVisible && !isDiscoveryMode && hasActiveConversation;
-  const isNewConversationOpen = !isConversationListVisible && !isDiscoveryMode && !hasActiveConversation;
+  const isConversationDetailOpen = !isConversationListVisible && !isForYouMode && hasActiveConversation;
+  const isNewConversationOpen = !isConversationListVisible && !isForYouMode && !hasActiveConversation;
+  const showAssistantModeSegment = isNewConversationOpen || isForYouMode;
   const lastMessageId = messages[messages.length - 1]?.id ?? "";
   const lastMessageText = messages[messages.length - 1]?.text ?? "";
   const latestMessage = messages[messages.length - 1];
   const activeFollowUps =
-    !isConversationListVisible && !isDiscoveryMode && latestMessage?.role === "agent" && !latestMessage.isStreaming
+    !isConversationListVisible && !isForYouMode && latestMessage?.role === "agent" && !latestMessage.isStreaming
       ? (latestMessage.followUps ?? [])
       : [];
   const sheetStyle = { "--mpc-sheet-offset": `${dragY}px` } as CSSProperties;
@@ -2504,14 +2707,7 @@ export function CoAppingChatAssistant({
       <header className="mpc-chat-header">
         <div className="mpc-chat-header-row">
           {isConversationListVisible ? (
-            <button
-              type="button"
-              onClick={startNewConversation}
-              className="mpc-chat-control-button"
-              aria-label="Back to new conversation"
-            >
-              <BackIcon />
-            </button>
+            <span className="mpc-chat-list-brand">OneAI</span>
           ) : isConversationDetailOpen ? (
             <button
               type="button"
@@ -2521,7 +2717,7 @@ export function CoAppingChatAssistant({
             >
               <ConversationsIcon />
             </button>
-          ) : isNewConversationOpen || isDiscoveryMode ? (
+          ) : isNewConversationOpen || isForYouMode ? (
             <button
               type="button"
               onClick={openConversationList}
@@ -2534,41 +2730,44 @@ export function CoAppingChatAssistant({
             <span className="mpc-chat-control-spacer" aria-hidden="true" />
           )}
 
-          {isConversationListVisible ? (
+          {isConversationListVisible || !showAssistantModeSegment ? (
             <span className="mpc-chat-header-center-spacer" aria-hidden="true" />
           ) : (
             <div className="mpc-mode-segment" aria-label="Assistant mode">
               <button
                 type="button"
                 onClick={() => {
-                  setAssistantMode("search");
+                  setAssistantMode("chat");
                   setIsMoreMenuOpen(false);
                   setIsConversationListOpen(false);
                 }}
-                className={["mpc-mode-button", assistantMode === "search" ? "mpc-mode-button-active" : ""]
+                className={["mpc-mode-button", assistantMode === "chat" ? "mpc-mode-button-active" : ""]
                   .filter(Boolean)
                   .join(" ")}
-                aria-label="Search mode"
-                aria-pressed={assistantMode === "search"}
+                aria-label="Chat"
+                aria-pressed={assistantMode === "chat"}
               >
                 <ChatBubbleIcon />
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  setAssistantMode("discovery");
+                  setAssistantMode("for-you");
                   setIsConversationListOpen(false);
                   setIsAttachmentMenuOpen(false);
                   setIsMoreMenuOpen(false);
                   cancelVoiceCapture();
                 }}
-                className={["mpc-mode-button", assistantMode === "discovery" ? "mpc-mode-button-active" : ""]
+                className={["mpc-mode-button", assistantMode === "for-you" ? "mpc-mode-button-active" : ""]
                   .filter(Boolean)
                   .join(" ")}
-                aria-label="Discovery mode"
-                aria-pressed={assistantMode === "discovery"}
+                aria-label="For you"
+                aria-pressed={assistantMode === "for-you"}
               >
-                <DiscoveryModeIcon />
+                <ForYouModeIcon />
+                {showForYouModeNotification ? (
+                  <span className="mpc-mode-button-badge" aria-hidden="true" />
+                ) : null}
               </button>
             </div>
           )}
@@ -2576,48 +2775,64 @@ export function CoAppingChatAssistant({
           {isConversationListVisible ? (
             <button
               type="button"
-              onClick={requestClose}
+              onClick={returnFromConversationList}
               className="mpc-chat-control-button"
-              aria-label="Close assistant"
+              aria-label={
+                conversationListReturnTarget === "conversation"
+                  ? "Return to selected conversation"
+                  : conversationListReturnTarget === "for-you"
+                    ? "Return to For you"
+                  : "Return to new conversation"
+              }
             >
-              <CloseIcon />
+              <ForwardIcon />
             </button>
           ) : isConversationDetailOpen ? (
-            <div className="mpc-more-menu-anchor">
+            <div className="mpc-chat-header-actions">
+              <div className="mpc-more-menu-anchor">
+                <button
+                  type="button"
+                  onClick={() => setIsMoreMenuOpen((isOpen) => !isOpen)}
+                  className={["mpc-chat-control-button", isMoreMenuOpen ? "mpc-chat-control-button-active" : ""]
+                    .filter(Boolean)
+                    .join(" ")}
+                  aria-label="More options"
+                  aria-expanded={isMoreMenuOpen}
+                  aria-haspopup="menu"
+                >
+                  <MoreIcon />
+                </button>
+                {isMoreMenuOpen ? (
+                  <div className="mpc-more-menu" role="menu" aria-label="Conversation options">
+                    <button type="button" role="menuitem" className="mpc-more-menu-item">
+                      <span className="mpc-more-menu-item-icon">
+                        <ShareActionIcon />
+                      </span>
+                      <span>Share</span>
+                    </button>
+                    <button type="button" role="menuitem" className="mpc-more-menu-item">
+                      <span className="mpc-more-menu-item-icon">
+                        <RenameActionIcon />
+                      </span>
+                      <span>Rename conversation</span>
+                    </button>
+                    <button type="button" role="menuitem" className="mpc-more-menu-item">
+                      <span className="mpc-more-menu-item-icon">
+                        <DeleteActionIcon />
+                      </span>
+                      <span>Delete conversation</span>
+                    </button>
+                  </div>
+                ) : null}
+              </div>
               <button
                 type="button"
-                onClick={() => setIsMoreMenuOpen((isOpen) => !isOpen)}
-                className={["mpc-chat-control-button", isMoreMenuOpen ? "mpc-chat-control-button-active" : ""]
-                  .filter(Boolean)
-                  .join(" ")}
-                aria-label="More options"
-                aria-expanded={isMoreMenuOpen}
-                aria-haspopup="menu"
+                onClick={requestClose}
+                className="mpc-chat-control-button"
+                aria-label="Close assistant"
               >
-                <MoreIcon />
+                <CloseIcon />
               </button>
-              {isMoreMenuOpen ? (
-                <div className="mpc-more-menu" role="menu" aria-label="Conversation options">
-                  <button type="button" role="menuitem" className="mpc-more-menu-item">
-                    <span className="mpc-more-menu-item-icon">
-                      <ShareActionIcon />
-                    </span>
-                    <span>Share</span>
-                  </button>
-                  <button type="button" role="menuitem" className="mpc-more-menu-item">
-                    <span className="mpc-more-menu-item-icon">
-                      <RenameActionIcon />
-                    </span>
-                    <span>Rename conversation</span>
-                  </button>
-                  <button type="button" role="menuitem" className="mpc-more-menu-item">
-                    <span className="mpc-more-menu-item-icon">
-                      <DeleteActionIcon />
-                    </span>
-                    <span>Delete conversation</span>
-                  </button>
-                </div>
-              ) : null}
             </div>
           ) : (
             <button type="button" onClick={requestClose} className="mpc-chat-control-button" aria-label="Close assistant">
@@ -2627,8 +2842,8 @@ export function CoAppingChatAssistant({
         </div>
       </header>
 
-      {isDiscoveryMode ? (
-        <DiscoveryFeed />
+      {isForYouMode ? (
+        <ForYouFeed opportunities={opportunities} onAction={handleAction} />
       ) : isConversationListVisible ? (
         <div
           className={["mpc-conversation-list", isConversationListExiting ? "mpc-conversation-list-exiting" : ""]
@@ -2645,7 +2860,18 @@ export function CoAppingChatAssistant({
                   <p className="mpc-conversation-month-title">{group.label}</p>
                   <div className="mpc-conversation-month-items">
                     {group.items.map((item) => (
-                      <button key={item.id} type="button" className="mpc-conversation-item" onClick={item.onClick}>
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={[
+                          "mpc-conversation-item",
+                          selectedConversationId === item.id ? "mpc-conversation-item-active" : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                        onClick={item.onClick}
+                        aria-current={selectedConversationId === item.id ? "true" : undefined}
+                      >
                         <strong>{item.title}</strong>
                         <small>{item.subtitle}</small>
                       </button>
@@ -2742,7 +2968,7 @@ export function CoAppingChatAssistant({
         </div>
       )}
 
-      {!isDiscoveryMode && <div className="mpc-chat-composer">
+      {!isForYouMode && <div className="mpc-chat-composer">
         {isConversationListVisible ? (
           <div className="mpc-conversation-search-actions">
             <div className="mpc-conversation-search-row">

@@ -146,7 +146,7 @@ export const mockProducts: Product[] = [
     cardType: 'Standard',
     cardNumber: '5173500087654321',
     expiryDate: '12/29',
-    creditLimit: 5000,
+    creditLimit: 10000,
     availableCredit: 3200
   },
   {

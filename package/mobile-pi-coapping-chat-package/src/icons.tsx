@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  ArrowRight,
   AudioLines,
   Building2,
   Camera,
@@ -92,6 +93,21 @@ export function BackIcon() {
   return <ArrowLeft size={24} strokeWidth={3} aria-hidden="true" />;
 }
 
+export function ForwardIcon() {
+  return <ArrowRight size={24} strokeWidth={3} aria-hidden="true" />;
+}
+
+export function ChevronLinkIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <path
+        d="M13.2901 10.71C12.9001 11.1 12.9001 11.73 13.2901 12.12L17.1701 16L13.2901 19.88C12.9001 20.27 12.9001 20.9 13.2901 21.29C13.6801 21.68 14.3101 21.68 14.7001 21.29L19.2901 16.7C19.6801 16.31 19.6801 15.68 19.2901 15.29L14.7001 10.7C14.3201 10.32 13.6801 10.32 13.2901 10.71Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export function AddIcon() {
   return <Plus size={24} strokeWidth={3} aria-hidden="true" />;
 }
@@ -159,6 +175,27 @@ export function SearchModeIcon() {
 
 export function DiscoveryModeIcon() {
   return <Compass size={20} strokeWidth={2.3} aria-hidden="true" />;
+}
+
+export function ForYouModeIcon() {
+  return (
+    <svg
+      className="mpc-for-you-mode-icon"
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M11.9895 1.99683C12.4693 1.52708 13.1698 1.32731 13.8196 1.48707L19.6604 2.93726C19.79 2.96722 19.91 3.00732 20.0197 3.06715L18.4797 4.60719C17.7598 4.26739 16.8694 4.38731 16.2795 4.98707C15.52 5.73689 15.5202 6.96661 16.2795 7.71656C16.6594 8.09646 17.1598 8.28677 17.6496 8.28687C18.1396 8.28687 18.64 8.09656 19.01 7.71656C19.6097 7.12656 19.7298 6.23622 19.3899 5.51637L20.9299 3.9773C20.9897 4.08701 21.0297 4.21701 21.0696 4.33668L22.51 10.1765C22.6699 10.8263 22.4799 11.5266 22.0002 12.0066L11.5901 22.4265C10.8401 23.1865 9.60959 23.1865 8.85959 22.4265L1.56955 15.1365C0.81028 14.3865 0.810019 13.1568 1.56955 12.407L11.9895 1.99683ZM17.6496 5.70679C17.8095 5.70679 17.9798 5.76744 18.0998 5.89722C18.3495 6.14712 18.3494 6.55642 18.0998 6.8064C17.8498 7.0564 17.4397 7.0564 17.1897 6.8064C16.9404 6.55645 16.9402 6.14705 17.1897 5.89722C17.3195 5.76744 17.4798 5.70688 17.6496 5.70679ZM21.8996 1.18726C22.1495 0.93754 22.5598 0.937618 22.8098 1.18726C23.0595 1.43717 23.0594 1.84647 22.8098 2.09644L20.9397 3.96656L20.0295 3.0564L21.8996 1.18726Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
 }
 
 export function SuggestedTopicIcon({ variant }: { variant?: "payments" | "offers" | "security" | "insights" } = {}) {

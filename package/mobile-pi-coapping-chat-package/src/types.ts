@@ -106,6 +106,33 @@ export interface CoAppingSuggestedTopic {
   prompt?: string;
 }
 
+export interface CoAppingOpportunityMetric {
+  label: string;
+  value: string;
+  helper?: string;
+}
+
+export interface CoAppingOpportunityRelatedItem {
+  title: string;
+  description: string;
+  visualKind?: "credit-card";
+  visual?: ReactNode;
+  action?: CoAppingChatAction;
+}
+
+export interface CoAppingOpportunity {
+  id: string;
+  eyebrow: string;
+  title: string;
+  body: string;
+  reason: string;
+  priority?: "primary" | "secondary";
+  tone?: "credit" | "savings" | "investment" | "support" | "neutral";
+  relatedItem?: CoAppingOpportunityRelatedItem;
+  metrics?: CoAppingOpportunityMetric[];
+  action?: CoAppingChatAction;
+}
+
 export interface CoAppingChatContext {
   id: string;
   title: string;

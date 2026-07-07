@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import { AppIcon, type IconName } from "@/app/components/icons";
 import { cn } from "@/app/components/ui/utils";
@@ -16,12 +16,16 @@ export interface UserEventCardProps {
   description?: string;
   /** Avatar glyph rendered white inside the 48x48 teal circle. */
   iconName?: IconName;
+  /** Optional custom avatar glyph rendered inside the same 48x48 teal circle. */
+  iconNode?: ReactNode;
   /** Optional teal text link (e.g. "FIND OUT MORE"). */
   actionLabel?: string;
   onActionClick?: () => void;
   /** Show the trailing 32x32 overflow/options control. */
   showOptions?: boolean;
   onOptionsClick?: () => void;
+  optionsIconName?: IconName;
+  optionsIconColor?: string;
   optionsAriaLabel?: string;
   className?: string;
   style?: CSSProperties;
@@ -39,10 +43,13 @@ export default function UserEventCard({
   title,
   description,
   iconName = "user-event-badge",
+  iconNode,
   actionLabel,
   onActionClick,
   showOptions = false,
   onOptionsClick,
+  optionsIconName = "more-horizontal",
+  optionsIconColor = "var(--uc-action)",
   optionsAriaLabel = "More options",
   className,
   style,
@@ -64,7 +71,7 @@ export default function UserEventCard({
         className="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-full bg-[var(--uc-action)]"
         data-ds-label="UserEventCard avatar 48x48"
       >
-        <AppIcon name={iconName} size={24} color="var(--uc-static-white)" />
+        {iconNode ?? <AppIcon name={iconName} size={24} color="var(--uc-static-white)" />}
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-[8px]">
         <div className="flex flex-col">
@@ -95,7 +102,7 @@ export default function UserEventCard({
           className="flex h-[32px] w-[32px] shrink-0 items-center justify-center"
           data-ds-label="UserEventCard options 32x32"
         >
-          <AppIcon name="more-horizontal" color="var(--uc-action)" />
+          <AppIcon name={optionsIconName} color={optionsIconColor} />
         </button>
       )}
     </div>
