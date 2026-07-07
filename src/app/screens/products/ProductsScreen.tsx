@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { DragEvent, MouseEvent, PointerEvent, UIEvent } from "react";
+import type { DragEvent, MouseEvent, PointerEvent, RefObject, UIEvent } from "react";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import BottomNavigation from "@/app/components/BottomNavigation";
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
@@ -17,6 +17,7 @@ import {
   getProductsMenuForCountry,
   type ProductCardSheetOption,
   type ProductsCard,
+  type ProductsCardId,
   type ProductsMenuTab,
   type ProductsOffer,
   type ShopSmartOfferCard,
@@ -45,6 +46,13 @@ interface ProductsScreenProps {
   onMessagesClick?: () => void;
   onPaymentsClick?: () => void;
   onMoreClick?: () => void;
+  productsShelfFocusRequest?: ProductsShelfFocusRequest | null;
+  onProductsShelfFocusHandled?: () => void;
+}
+
+export interface ProductsShelfFocusRequest {
+  requestId: number;
+  cardId?: ProductsCardId | null;
 }
 
 export function ProductsHeader({
@@ -430,6 +438,7 @@ export function BankingContent({
   otherSolutionsTitle,
   otherSolutions,
   onProductCardClick,
+  productsSectionRef,
 }: {
   offersTitle: string;
   offers: readonly ProductsOffer[];
@@ -438,6 +447,7 @@ export function BankingContent({
   otherSolutionsTitle: string;
   otherSolutions: readonly ProductsCard[];
   onProductCardClick: (card: ProductsCard) => void;
+  productsSectionRef?: RefObject<HTMLElement | null>;
 }) {
   return (
     <>
@@ -448,7 +458,7 @@ export function BankingContent({
         </section>
       )}
 
-      <section className="pt-[16px]">
+      <section ref={productsSectionRef} className="pt-[16px]" data-products-banking-shelf="true">
         {productsTitle ? <SectionHeading>{productsTitle}</SectionHeading> : null}
         <div className="grid grid-cols-[repeat(2,164px)] justify-center gap-[16px] pt-[16px]">
           {products.map((card) => (
@@ -629,6 +639,8 @@ export default function ProductsScreen({
   onMessagesClick,
   onPaymentsClick,
   onMoreClick,
+  productsShelfFocusRequest,
+  onProductsShelfFocusHandled,
 }: ProductsScreenProps) {
   const country = useCountry();
   const { t } = useLanguage();
@@ -648,12 +660,42 @@ export default function ProductsScreen({
   };
   const [activeTab, setActiveTab] = useState<ProductsMenuTab>("banking");
   const [selectedProductCard, setSelectedProductCard] = useState<ProductsCard | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const productsSectionRef = useRef<HTMLElement | null>(null);
   const visibleTab = config.hasShopSmartTab ? activeTab : "banking";
 
   const handleProductCardClick = (card: ProductsCard) => {
     console.log(`Products card clicked: ${card.id}`);
     setSelectedProductCard(card);
   };
+
+  useEffect(() => {
+    if (!productsShelfFocusRequest) return;
+
+    setActiveTab("banking");
+    setSelectedProductCard(null);
+
+    const focusTimeout = window.setTimeout(() => {
+      const shelf = productsSectionRef.current;
+      const scroller = scrollContainerRef.current;
+
+      if (shelf && scroller) {
+        scroller.scrollTo({
+          top: Math.max(shelf.offsetTop - 8, 0),
+          behavior: "smooth",
+        });
+      }
+
+      if (productsShelfFocusRequest.cardId) {
+        const targetCard = config.products.find((card) => card.id === productsShelfFocusRequest.cardId);
+        if (targetCard) setSelectedProductCard(localizeCard(targetCard));
+      }
+
+      onProductsShelfFocusHandled?.();
+    }, 100);
+
+    return () => window.clearTimeout(focusTimeout);
+  }, [productsShelfFocusRequest?.requestId]);
 
   const handleTabChange = (tab: NavItem) => {
     console.log(`Bottom nav tab clicked from products: ${tab}`);
@@ -681,7 +723,7 @@ export default function ProductsScreen({
         />
       )}
 
-      <div className="relative z-0 flex-1 overflow-y-auto scrollbar-hide pb-[92px]">
+      <div ref={scrollContainerRef} className="relative z-0 flex-1 overflow-y-auto scrollbar-hide pb-[92px]">
         {visibleTab === "banking" ? (
           <BankingContent
             offersTitle={t("runtime.productsMenu.offersForYou", config.offersTitle)}
@@ -691,6 +733,7 @@ export default function ProductsScreen({
             otherSolutionsTitle={t("runtime.productsMenu.otherSolutionsForYou", config.otherSolutionsTitle)}
             otherSolutions={config.otherSolutions.map(localizeCard)}
             onProductCardClick={handleProductCardClick}
+            productsSectionRef={productsSectionRef}
           />
         ) : (
           <ShopSmartContent

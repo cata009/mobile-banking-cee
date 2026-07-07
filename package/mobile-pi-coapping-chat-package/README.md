@@ -50,3 +50,28 @@ No Mobile PI aliases are required by the portable version.
 
 The chat reply logic is local and deterministic by default. For a real assistant, pass a `resolveReply` prop to call your backend or AI runtime.
 
+`resolveReply` can return either a plain string or a structured reply:
+
+```tsx
+<CoAppingChatLauncher
+  resolveReply={async () => ({
+    text: "### Your Home overview\nAvailable money, owed money, and card room are the three signals to check first.",
+    richBlocks: [
+      {
+        type: "spending-insight",
+        title: "Homepage money signals",
+        body: "A compact summary from the host app.",
+        metrics: [
+          { label: "Available", value: "19 902,86 CZK" },
+          { label: "Owed", value: "2 895 000,00 CZK" },
+        ],
+      },
+    ],
+    followUps: [
+      { id: "open-documents", label: "Open Documents", prompt: "Help me find recent bank documents." },
+    ],
+  })}
+/>
+```
+
+String replies still use the package's default contextual enhancement path. Structured replies render as provided, including `richBlocks` and `followUps`.

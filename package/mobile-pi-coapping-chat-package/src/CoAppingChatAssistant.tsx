@@ -6,6 +6,7 @@ import type {
   KeyboardEvent as ReactKeyboardEvent,
   MouseEvent as ReactMouseEvent,
   PointerEvent as ReactPointerEvent,
+  ReactNode,
   UIEvent as ReactUIEvent,
 } from "react";
 import {
@@ -14,9 +15,15 @@ import {
   defaultReplyResolver,
   defaultSuggestedTopics,
 } from "./defaults";
+import FigmaCard from "@/app/components/cards/Card";
+import LinkButton from "@/app/components/ui/LinkButton";
 import discoveryHeroImage from "@/assets/investments/fund-banner-plant-unsplash.jpg";
 import discoverySubscriptionsImage from "@/assets/shopsmart/shopsmart-english-home.png";
 import discoveryCardControlsImage from "../../../screenshots/Cards.jpg";
+import discoveryInvestmentsImage from "../../../screenshots/investments.png";
+import discoveryMarketHedgingImage from "../../../screenshots/market-hedging.png";
+import discoveryPaymentImage from "../../../screenshots/Payment.png";
+import discoveryAccountImage from "../../../screenshots/account.png";
 import {
   AddIcon,
   CameraIcon,
@@ -48,6 +55,7 @@ import type {
   CoAppingFollowUpSuggestion,
   CoAppingOpportunity,
   CoAppingReplyResolver,
+  CoAppingReplyResult,
   CoAppingRichBlock,
   CoAppingSuggestedTopic,
 } from "./types";
@@ -470,6 +478,37 @@ function RichBlock({
             </button>
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (block.type === "credit-limit-offer") {
+    return (
+      <div className="mpc-rich-card mpc-rich-card-limit-offer">
+        <div className="mpc-rich-card-head">
+          <strong>{block.title}</strong>
+          <span>{block.body}</span>
+        </div>
+        <div className="mpc-limit-offer-card-row">
+          <span className="mpc-limit-offer-card-visual" aria-hidden="true">
+            <FigmaCard size="figma" variant="mc-credit-partner-standard" />
+          </span>
+          <span className="mpc-limit-offer-card-copy">
+            <strong>{block.cardName}</strong>
+            <span>{block.cardDescription}</span>
+          </span>
+        </div>
+        <div className="mpc-limit-offer-metrics" aria-label={`${block.title} details`}>
+          <div className="mpc-limit-offer-metric">
+            <span>{block.currentLimitLabel ?? "Current limit"}</span>
+            <strong>{block.currentLimit}</strong>
+          </div>
+          <div className="mpc-limit-offer-metric mpc-limit-offer-metric-new">
+            <span>{block.newLimitLabel ?? "New limit"}</span>
+            <strong>{block.newLimit}</strong>
+          </div>
+        </div>
+        <RichActionButton action={block.action} onAction={onAction} />
       </div>
     );
   }
@@ -1534,11 +1573,10 @@ function getContextualAssistantEnhancement(
   if (/\b(credit limit|card limit|limit upgrade|limit review|increase.*limit|check.*options)\b/.test(normalized)) {
     return {
       text:
-        "### Credit limit review\nI can help you check the option without changing anything from chat.\nA responsible review should explain:\n- current available credit\n- the requested limit range\n- repayment impact\n- eligibility and final approval checks\nThe next step should stay inside the authenticated card flow.",
-      richBlocks: [cardSecurityProductBlock],
+        "### Explore the offer\nI can help you understand a card-limit offer before anything changes.\nA good flow should show:\n- the current card limit\n- the proposed new limit\n- repayment impact\n- final eligibility and confirmation steps\nThe decision should stay inside the authenticated card flow.",
       followUps: [
-        followUp("estimate-limit-need", "Estimate my need", "Help me estimate what credit limit would be useful."),
-        followUp("repayment-impact", "Explain repayment impact", "Explain what I should check before increasing a credit card limit."),
+        followUp("repayment-impact", "Explain repayment impact", "Explain repayment impact for this credit limit offer."),
+        followUp("accept-offer-impact", "What changes if I accept?", "What changes if I accept this credit limit offer?"),
         navigateFollowUp("open-card-detail", navigateCardAction),
       ],
     };
@@ -1588,6 +1626,10 @@ function getContextualAssistantEnhancement(
   return { text: fallbackText };
 }
 
+function normalizeReplyResult(reply: CoAppingReplyResult): Pick<CoAppingChatMessage, "text" | "richBlocks" | "followUps"> {
+  return typeof reply === "string" ? { text: reply } : reply;
+}
+
 fallbackConversationMessages.forEach((message) => {
   if (message.role === "agent" && polishedAgentReplies[message.id]) {
     message.text = polishedAgentReplies[message.id];
@@ -1616,6 +1658,236 @@ type AttachmentSource = "camera" | "photos" | "files";
 type VoiceCaptureStatus = "idle" | "recording" | "transcribing";
 
 const assistantGreetingName = "Teodora";
+
+const forYouHeroTopics = [
+  {
+    id: "for-you-investment-habit",
+    label: "Explore investments",
+    prompt: "Show me low-friction ways to move idle savings into investments.",
+    image: discoveryHeroImage,
+    eyebrow: "Invest smarter",
+    title: "Make idle money grow",
+    body: "Risk checks first. Start when ready.",
+  },
+  {
+    id: "for-you-safety-reserve",
+    label: "Build a reserve",
+    prompt: "Help me decide how much money to keep as a safety reserve before investing.",
+    image: discoveryInvestmentsImage,
+    imagePosition: "50% 18%",
+    eyebrow: "Plan first",
+    title: "Keep the right cash buffer",
+    body: "Balance safety money and growth money.",
+  },
+  {
+    id: "for-you-market-check",
+    label: "Review market timing",
+    prompt: "Help me review risk, currency, and market timing before my next investment step.",
+    image: discoveryMarketHedgingImage,
+    imagePosition: "50% 34%",
+    eyebrow: "Next move",
+    title: "Check risk before buying",
+    body: "Compare exposure before you commit.",
+  },
+] as const;
+
+const forYouPromoTopics = [
+  {
+    id: "for-you-card-controls",
+    label: "Travel with card controls ready",
+    prompt: "Help me review card controls, limits, freeze options, and card security before a trip.",
+    image: discoveryCardControlsImage,
+    category: "Cards",
+    title: "Travel with card controls ready",
+    body: "Review limits, freeze options, and card security before the next trip.",
+  },
+  {
+    id: "for-you-subscriptions",
+    label: "Find subscriptions before they renew",
+    prompt: "Help me find subscriptions and recurring payments before they renew.",
+    image: discoverySubscriptionsImage,
+    category: "Spending",
+    title: "Find subscriptions before they renew",
+    body: "Spot recurring payments and decide what to keep, pause, or review.",
+  },
+  {
+    id: "for-you-payment-routine",
+    label: "Make payments predictable",
+    prompt: "Help me review recurring payments, due dates, and payment habits I could automate.",
+    image: discoveryPaymentImage,
+    imagePosition: "50% 20%",
+    category: "Payments",
+    title: "Make payments predictable",
+    body: "Review upcoming payments and turn repeat tasks into routines.",
+  },
+  {
+    id: "for-you-savings-sweep",
+    label: "Move spare cash smarter",
+    prompt: "Help me find spare money that could move into savings or investments.",
+    image: discoveryAccountImage,
+    imagePosition: "50% 14%",
+    category: "Savings",
+    title: "Move spare cash smarter",
+    body: "Check what can stay liquid and what can work harder.",
+  },
+] as const;
+
+const forYouArticleTopics = [
+  {
+    id: "for-you-cash-outside-investments",
+    label: "Cash outside investments",
+    prompt: "How much cash should stay outside investments?",
+    icon: "security",
+    title: "How much cash should stay outside investments?",
+    meta: "3 min read",
+  },
+  {
+    id: "for-you-card-settings-payday",
+    label: "Card settings after payday",
+    prompt: "Which card settings are worth checking after payday?",
+    icon: "payments",
+    title: "Five card settings worth checking after payday",
+    meta: "Security guide",
+  },
+  {
+    id: "for-you-limit-review-timing",
+    label: "Credit limit timing",
+    prompt: "When does it make sense to review my credit card limit?",
+    icon: "offers",
+    title: "When does a higher card limit make sense?",
+    meta: "Offer guide",
+  },
+  {
+    id: "for-you-monthly-money-check",
+    label: "Monthly money check",
+    prompt: "Help me run a monthly money check before choosing a banking product.",
+    icon: "insights",
+    title: "A monthly money check before choosing products",
+    meta: "Smart checklist",
+  },
+] as const;
+
+type HorizontalDragState = {
+  pointerId: number | null;
+  startX: number;
+  startY: number;
+  scrollLeft: number;
+  moved: boolean;
+  ignoreClick: boolean;
+};
+
+function HorizontalDragScroller({
+  className,
+  ariaLabel,
+  children,
+}: {
+  className: string;
+  ariaLabel: string;
+  children: ReactNode;
+}) {
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const dragRef = useRef<HorizontalDragState>({
+    pointerId: null,
+    startX: 0,
+    startY: 0,
+    scrollLeft: 0,
+    moved: false,
+    ignoreClick: false,
+  });
+  const [isDragging, setIsDragging] = useState(false);
+
+  const finishDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const pointerId = dragRef.current.pointerId;
+    if (pointerId !== null && event.currentTarget.hasPointerCapture(pointerId)) {
+      event.currentTarget.releasePointerCapture(pointerId);
+    }
+    dragRef.current.pointerId = null;
+    setIsDragging(false);
+  };
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0) return;
+
+    const node = scrollerRef.current;
+    if (!node || node.scrollWidth <= node.clientWidth) return;
+
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      scrollLeft: node.scrollLeft,
+      moved: false,
+      ignoreClick: false,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const node = scrollerRef.current;
+    const drag = dragRef.current;
+    if (!node || drag.pointerId !== event.pointerId) return;
+
+    const deltaX = event.clientX - drag.startX;
+    const deltaY = event.clientY - drag.startY;
+    const horizontalDistance = Math.abs(deltaX);
+    const verticalDistance = Math.abs(deltaY);
+
+    if (!drag.moved && horizontalDistance < 5 && verticalDistance < 5) return;
+    if (!drag.moved && verticalDistance > horizontalDistance) {
+      finishDrag(event);
+      return;
+    }
+
+    if (!drag.moved) {
+      drag.moved = true;
+      drag.ignoreClick = true;
+      setIsDragging(true);
+    }
+
+    node.scrollLeft = drag.scrollLeft - deltaX;
+    event.preventDefault();
+  };
+
+  const handlePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const moved = dragRef.current.moved;
+    finishDrag(event);
+
+    if (moved) {
+      window.setTimeout(() => {
+        dragRef.current.ignoreClick = false;
+      }, 0);
+    }
+  };
+
+  const handlePointerCancel = (event: ReactPointerEvent<HTMLDivElement>) => {
+    finishDrag(event);
+  };
+
+  const handleClickCapture = (event: ReactMouseEvent<HTMLDivElement>) => {
+    if (!dragRef.current.ignoreClick) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    dragRef.current.ignoreClick = false;
+  };
+
+  return (
+    <div
+      ref={scrollerRef}
+      className={[className, isDragging ? "mpc-horizontal-drag-active" : ""].filter(Boolean).join(" ")}
+      role="group"
+      aria-label={ariaLabel}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
+      onLostPointerCapture={handlePointerCancel}
+      onClickCapture={handleClickCapture}
+    >
+      {children}
+    </div>
+  );
+}
 
 function getGreetingLabel(date = new Date()) {
   const hour = date.getHours();
@@ -1661,10 +1933,8 @@ function ForYouOpportunityCard({
           {opportunity.relatedItem.visual ? (
             <span className="mpc-for-you-related-visual">{opportunity.relatedItem.visual}</span>
           ) : opportunity.relatedItem.visualKind === "credit-card" ? (
-            <span className="mpc-for-you-related-visual mpc-for-you-related-card-art" aria-hidden="true">
-              <span className="mpc-for-you-related-card-art-logo">UniCredit</span>
-              <span className="mpc-for-you-related-card-art-mark" />
-              <span className="mpc-for-you-related-card-art-label">credit</span>
+            <span className="mpc-for-you-related-visual" aria-hidden="true">
+              <FigmaCard size="figma" variant="mc-credit-partner-standard" />
             </span>
           ) : null}
           <span className="mpc-for-you-related-copy">
@@ -1688,9 +1958,9 @@ function ForYouOpportunityCard({
       ) : null}
 
       {opportunity.action ? (
-        <button type="button" className="mpc-for-you-action" onClick={() => onAction(opportunity.action!)}>
+        <LinkButton className="mpc-for-you-action" onClick={() => onAction(opportunity.action!)}>
           {opportunity.action.label}
-        </button>
+        </LinkButton>
       ) : null}
     </article>
   );
@@ -1699,120 +1969,104 @@ function ForYouOpportunityCard({
 function ForYouDiscoveryContent({ onAction }: { onAction: (action: CoAppingChatAction) => void }) {
   return (
     <div className="mpc-for-you-discovery">
-      <button
-        type="button"
-        className="mpc-discovery-hero"
-        onClick={() =>
-          onAction({
-            id: "for-you-investment-habit",
-            label: "Explore investments",
-            type: "send-message",
-            prompt: "Show me low-friction ways to move idle savings into investments.",
-          })
-        }
-      >
-        <img src={discoveryHeroImage} alt="" />
-        <span className="mpc-discovery-hero-shade" aria-hidden="true" />
-        <span className="mpc-discovery-hero-copy">
-          <span>Invest smarter</span>
-          <strong>Make idle money grow</strong>
-          <small>Risk checks first. Start when ready.</small>
-        </span>
-      </button>
+      <div className="mpc-discovery-section-head mpc-discovery-section-head-first">
+        <strong>Grow your money</strong>
+        <span>Savings and investment conversations ready to start</span>
+      </div>
+
+      <HorizontalDragScroller className="mpc-discovery-hero-carousel" ariaLabel="Grow your money topics">
+        {forYouHeroTopics.map((topic) => (
+          <button
+            key={topic.id}
+            type="button"
+            className="mpc-discovery-hero"
+            onClick={() =>
+              onAction({
+                id: topic.id,
+                label: topic.label,
+                type: "send-message",
+                prompt: topic.prompt,
+              })
+            }
+          >
+            <img
+              src={topic.image}
+              alt=""
+              style={"imagePosition" in topic ? ({ objectPosition: topic.imagePosition } as CSSProperties) : undefined}
+            />
+            <span className="mpc-discovery-hero-shade" aria-hidden="true" />
+            <span className="mpc-discovery-hero-copy">
+              <span>{topic.eyebrow}</span>
+              <strong>{topic.title}</strong>
+              <small>{topic.body}</small>
+            </span>
+          </button>
+        ))}
+      </HorizontalDragScroller>
 
       <div className="mpc-discovery-section-head">
-        <strong>Recommended next</strong>
-        <span>Banking prompts and product stories</span>
+        <strong>Next best conversations</strong>
+        <span>Prompts that can turn into product actions</span>
       </div>
 
-      <div className="mpc-discovery-promo-grid">
-        <button
-          type="button"
-          className="mpc-discovery-promo"
-          onClick={() =>
-            onAction({
-              id: "for-you-card-controls",
-              label: "Travel with card controls ready",
-              type: "send-message",
-              prompt: "Help me review card controls, limits, freeze options, and card security before a trip.",
-            })
-          }
-        >
-          <img src={discoveryCardControlsImage} alt="" />
-          <span className="mpc-discovery-promo-copy">
-            <small>Cards</small>
-            <strong>Travel with card controls ready</strong>
-            <span>Review limits, freeze options, and card security before the next trip.</span>
-          </span>
-        </button>
-
-        <button
-          type="button"
-          className="mpc-discovery-promo"
-          onClick={() =>
-            onAction({
-              id: "for-you-subscriptions",
-              label: "Find subscriptions before they renew",
-              type: "send-message",
-              prompt: "Help me find subscriptions and recurring payments before they renew.",
-            })
-          }
-        >
-          <img src={discoverySubscriptionsImage} alt="" />
-          <span className="mpc-discovery-promo-copy">
-            <small>Spending</small>
-            <strong>Find subscriptions before they renew</strong>
-            <span>Spot recurring payments and decide what to keep, pause, or review.</span>
-          </span>
-        </button>
-      </div>
+      <HorizontalDragScroller className="mpc-discovery-promo-carousel" ariaLabel="Next best conversation topics">
+        {forYouPromoTopics.map((topic) => (
+          <button
+            key={topic.id}
+            type="button"
+            className="mpc-discovery-promo"
+            onClick={() =>
+              onAction({
+                id: topic.id,
+                label: topic.label,
+                type: "send-message",
+                prompt: topic.prompt,
+              })
+            }
+          >
+            <img
+              src={topic.image}
+              alt=""
+              style={"imagePosition" in topic ? ({ objectPosition: topic.imagePosition } as CSSProperties) : undefined}
+            />
+            <span className="mpc-discovery-promo-copy">
+              <small>{topic.category}</small>
+              <strong>{topic.title}</strong>
+              <span>{topic.body}</span>
+            </span>
+          </button>
+        ))}
+      </HorizontalDragScroller>
 
       <div className="mpc-discovery-section-head mpc-discovery-section-head-tight">
-        <strong>Useful reads</strong>
+        <strong>Decide with confidence</strong>
+        <span>Short guidance before choosing a next step</span>
       </div>
 
       <div className="mpc-discovery-article-list">
-        <button
-          type="button"
-          className="mpc-discovery-article"
-          onClick={() =>
-            onAction({
-              id: "for-you-cash-outside-investments",
-              label: "Cash outside investments",
-              type: "send-message",
-              prompt: "How much cash should stay outside investments?",
-            })
-          }
-        >
-          <span className="mpc-discovery-article-icon">
-            <SuggestedTopicIcon variant="security" />
-          </span>
-          <span>
-            <strong>How much cash should stay outside investments?</strong>
-            <small>3 min read</small>
-          </span>
-        </button>
-
-        <button
-          type="button"
-          className="mpc-discovery-article"
-          onClick={() =>
-            onAction({
-              id: "for-you-card-settings-payday",
-              label: "Card settings after payday",
-              type: "send-message",
-              prompt: "Which card settings are worth checking after payday?",
-            })
-          }
-        >
-          <span className="mpc-discovery-article-icon">
-            <SuggestedTopicIcon variant="payments" />
-          </span>
-          <span>
-            <strong>Five card settings worth checking after payday</strong>
-            <small>Security guide</small>
-          </span>
-        </button>
+        {forYouArticleTopics.map((topic) => (
+          <button
+            key={topic.id}
+            type="button"
+            className="mpc-discovery-article"
+            onClick={() =>
+              onAction({
+                id: topic.id,
+                label: topic.label,
+                type: "send-message",
+                prompt: topic.prompt,
+              })
+            }
+          >
+            <span className="mpc-discovery-article-icon">
+              <SuggestedTopicIcon variant={topic.icon} />
+            </span>
+            <span>
+              <strong>{topic.title}</strong>
+              <small>{topic.meta}</small>
+            </span>
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -1830,8 +2084,8 @@ function ForYouFeed({
   return (
     <div className="mpc-for-you-feed">
       <div className="mpc-for-you-section-head">
-        <strong>For you</strong>
-        <span>Contextual options matched to this moment</span>
+        <strong>Personalized offers for you</strong>
+        <span>Offers and conversation starters matched to this moment</span>
       </div>
 
       {primaryOpportunity ? (
@@ -1940,10 +2194,12 @@ export function CoAppingChatAssistant({
   const [voiceStatus, setVoiceStatus] = useState<VoiceCaptureStatus>("idle");
   const [showConversationScrollTop, setShowConversationScrollTop] = useState(false);
   const [showChatScrollBottom, setShowChatScrollBottom] = useState(false);
+  const [isFollowUpDragging, setIsFollowUpDragging] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
   const streamTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
   const conversationListExitTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const followUpDragResetTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
   const wasConversationListOpenRef = useRef(false);
   const dragStartYRef = useRef(0);
   const conversationListRef = useRef<HTMLDivElement | null>(null);
@@ -1990,6 +2246,7 @@ export function CoAppingChatAssistant({
       if (streamTimeoutRef.current) window.clearTimeout(streamTimeoutRef.current);
       if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
       if (conversationListExitTimeoutRef.current) window.clearTimeout(conversationListExitTimeoutRef.current);
+      if (followUpDragResetTimeoutRef.current) window.clearTimeout(followUpDragResetTimeoutRef.current);
       try {
         speechRecognitionRef.current?.abort();
       } catch {
@@ -2158,8 +2415,11 @@ export function CoAppingChatAssistant({
     setIsTyping(true);
 
     timeoutRef.current = window.setTimeout(async () => {
-      const resolvedText = await resolveReply(trimmed, nextMessages);
-      const enhancedReply = getContextualAssistantEnhancement(trimmed, resolvedText);
+      const resolvedReply = await resolveReply(trimmed, nextMessages);
+      const enhancedReply =
+        typeof resolvedReply === "string"
+          ? getContextualAssistantEnhancement(trimmed, resolvedReply)
+          : normalizeReplyResult(resolvedReply);
       const reply: CoAppingChatMessage = {
         id: `agent-${Date.now()}`,
         role: "agent",
@@ -2430,11 +2690,11 @@ export function CoAppingChatAssistant({
   const handleFollowUpPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     const node = followUpShelfRef.current;
     if (!node) return;
-
-    if (event.target instanceof HTMLElement && event.target.closest(".mpc-follow-up-chip")) {
-      followUpDragRef.current.active = false;
-      followUpDragRef.current.moved = false;
-      return;
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    if (node.scrollWidth <= node.clientWidth) return;
+    if (followUpDragResetTimeoutRef.current) {
+      window.clearTimeout(followUpDragResetTimeoutRef.current);
+      followUpDragResetTimeoutRef.current = null;
     }
 
     followUpDragRef.current = {
@@ -2453,16 +2713,27 @@ export function CoAppingChatAssistant({
     if (!drag.active || drag.pointerId !== event.pointerId || !node) return;
 
     const deltaX = event.clientX - drag.startX;
-    if (Math.abs(deltaX) > 8) drag.moved = true;
+    if (Math.abs(deltaX) > 4) {
+      drag.moved = true;
+      setIsFollowUpDragging(true);
+      event.preventDefault();
+    }
     node.scrollLeft = drag.scrollLeft - deltaX;
   };
 
   const handleFollowUpPointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
     const drag = followUpDragRef.current;
-    if (event.currentTarget.hasPointerCapture(drag.pointerId)) {
+    if (drag.active && event.currentTarget.hasPointerCapture(drag.pointerId)) {
       event.currentTarget.releasePointerCapture(drag.pointerId);
     }
     drag.active = false;
+    setIsFollowUpDragging(false);
+    if (drag.moved) {
+      followUpDragResetTimeoutRef.current = window.setTimeout(() => {
+        followUpDragRef.current.moved = false;
+        followUpDragResetTimeoutRef.current = null;
+      }, 120);
+    }
   };
 
   const handleFollowUpChipClick = (
@@ -3009,12 +3280,15 @@ export function CoAppingChatAssistant({
             ) : null}
             {activeFollowUps.length > 0 ? (
               <div
-                className="mpc-follow-up-shelf"
+                className={["mpc-follow-up-shelf", isFollowUpDragging ? "mpc-follow-up-shelf-dragging" : ""]
+                  .filter(Boolean)
+                  .join(" ")}
                 ref={followUpShelfRef}
                 onPointerDown={handleFollowUpPointerDown}
                 onPointerMove={handleFollowUpPointerMove}
                 onPointerUp={handleFollowUpPointerEnd}
                 onPointerCancel={handleFollowUpPointerEnd}
+                onLostPointerCapture={handleFollowUpPointerEnd}
                 aria-label="Suggested next actions"
               >
                 {activeFollowUps.map((suggestion) => (
