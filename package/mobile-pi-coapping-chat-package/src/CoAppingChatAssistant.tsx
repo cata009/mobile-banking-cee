@@ -2200,6 +2200,7 @@ export function CoAppingChatAssistant({
   const closeTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
   const conversationListExitTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
   const followUpDragResetTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const followUpPointerClickHandledRef = useRef(false);
   const wasConversationListOpenRef = useRef(false);
   const dragStartYRef = useRef(0);
   const conversationListRef = useRef<HTMLDivElement | null>(null);
@@ -2223,6 +2224,7 @@ export function CoAppingChatAssistant({
     scrollLeft: 0,
     active: false,
     moved: false,
+    captureElement: null as HTMLElement | null,
   });
 
   useEffect(() => {
@@ -2697,14 +2699,18 @@ export function CoAppingChatAssistant({
       followUpDragResetTimeoutRef.current = null;
     }
 
+    const targetElement = event.target instanceof HTMLElement ? event.target : null;
+    const captureElement = targetElement?.closest(".mpc-follow-up-chip") as HTMLElement | null;
+
     followUpDragRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
       scrollLeft: node.scrollLeft,
       active: true,
       moved: false,
+      captureElement: captureElement ?? event.currentTarget,
     };
-    event.currentTarget.setPointerCapture(event.pointerId);
+    followUpDragRef.current.captureElement?.setPointerCapture(event.pointerId);
   };
 
   const handleFollowUpPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -2723,10 +2729,11 @@ export function CoAppingChatAssistant({
 
   const handleFollowUpPointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
     const drag = followUpDragRef.current;
-    if (drag.active && event.currentTarget.hasPointerCapture(drag.pointerId)) {
-      event.currentTarget.releasePointerCapture(drag.pointerId);
+    if (drag.active && drag.captureElement?.hasPointerCapture(drag.pointerId)) {
+      drag.captureElement.releasePointerCapture(drag.pointerId);
     }
     drag.active = false;
+    drag.captureElement = null;
     setIsFollowUpDragging(false);
     if (drag.moved) {
       followUpDragResetTimeoutRef.current = window.setTimeout(() => {
@@ -2740,6 +2747,11 @@ export function CoAppingChatAssistant({
     event: ReactMouseEvent<HTMLButtonElement>,
     suggestion: CoAppingFollowUpSuggestion,
   ) => {
+    if (followUpPointerClickHandledRef.current) {
+      event.preventDefault();
+      return;
+    }
+
     if (followUpDragRef.current.moved) {
       event.preventDefault();
       followUpDragRef.current.moved = false;
@@ -2747,6 +2759,27 @@ export function CoAppingChatAssistant({
     }
 
     handleFollowUpClick(suggestion);
+  };
+
+  const handleFollowUpChipPointerUp = (
+    event: ReactPointerEvent<HTMLButtonElement>,
+    suggestion: CoAppingFollowUpSuggestion,
+  ) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    if (followUpDragRef.current.moved) {
+      event.preventDefault();
+      event.stopPropagation();
+      followUpDragRef.current.moved = false;
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    followUpPointerClickHandledRef.current = true;
+    handleFollowUpClick(suggestion);
+    window.setTimeout(() => {
+      followUpPointerClickHandledRef.current = false;
+    }, 0);
   };
 
   const handleAttachmentChoice = (source: AttachmentSource) => {
@@ -3296,6 +3329,7 @@ export function CoAppingChatAssistant({
                     key={suggestion.id}
                     type="button"
                     className="mpc-follow-up-chip"
+                    onPointerUp={(event) => handleFollowUpChipPointerUp(event, suggestion)}
                     onClick={(event) => handleFollowUpChipClick(event, suggestion)}
                   >
                     {suggestion.label}
