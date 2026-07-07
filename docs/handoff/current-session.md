@@ -23,6 +23,12 @@ Last updated: 2026-07-07
   - fixed: the new product-opening topic is position 2 and grounded in the Products shelf config, not a static chat-only list.
   - fixed: product cards inside the assistant answer now redirect into the real Products shelf and open the selected product category instead of behaving like inert cards.
   - preserved: this is still mock/demo catalogue discovery; no eligibility, application, document signing, or product-opening backend was added.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
 - safe to resume: yes
 
 ## 2026-07-07 CZ Chatbot Investments Goal Suggestions Repair
