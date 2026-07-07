@@ -287,6 +287,11 @@ function formatCzChatDate(dateValue: string): string {
   }).format(date);
 }
 
+function roundCzChatSavingAmount(amount: number, step = 500): number {
+  const rounded = Math.round(Math.max(0, amount) / step) * step;
+  return Math.max(step, rounded);
+}
+
 function getCzLatestDocument(country: CountryId) {
   const config = getDocumentsConfigForCountry(country);
   const group = config.groups[0];
@@ -406,6 +411,50 @@ function buildCzChatSmartReplyResolver({
     : "No orders";
   const spendingTimeline = createSpendingAnalyticsTimeline(country, allProducts);
   const currentSpendingSummary = spendingTimeline.summariesByPeriodKey[spendingTimeline.activePeriodKey];
+  const monthlyIncomeAmount = currentSpendingSummary?.incomeTotal ?? 0;
+  const monthlySpendingAmount = currentSpendingSummary?.spendingTotal ?? 0;
+  const netMonthlyAmount = Math.max(0, monthlyIncomeAmount - monthlySpendingAmount);
+  const currentAccountMoneyAmount = currentAccounts.reduce((sum, product) => sum + product.balance, 0);
+  const suggestedMonthlySavingRaw = Math.min(
+    Math.max(netMonthlyAmount * 0.35, monthlyIncomeAmount * 0.05),
+    Math.max(currentAccountMoneyAmount * 0.45, 500),
+  );
+  const suggestedMonthlySavingAmount = roundCzChatSavingAmount(
+    suggestedMonthlySavingRaw > 0 ? suggestedMonthlySavingRaw : currentAccountMoneyAmount * 0.2,
+  );
+  const savingAccountSharePercent = 70;
+  const termDepositSharePercent = 30;
+  const savingAccountMonthlyAmount = roundCzChatSavingAmount(suggestedMonthlySavingAmount * (savingAccountSharePercent / 100));
+  const termDepositMonthlyAmount = roundCzChatSavingAmount(suggestedMonthlySavingAmount * (termDepositSharePercent / 100));
+  const savingStartAmountOptions = [
+    {
+      key: "light",
+      label: "Light start",
+      amount: roundCzChatSavingAmount(suggestedMonthlySavingAmount * 0.5),
+    },
+    {
+      key: "recommended",
+      label: "Recommended",
+      amount: suggestedMonthlySavingAmount,
+    },
+    {
+      key: "stretch",
+      label: "Build buffer",
+      amount: Math.max(
+        suggestedMonthlySavingAmount + 500,
+        roundCzChatSavingAmount(Math.min(currentAccountMoneyAmount * 0.6, suggestedMonthlySavingAmount * 1.5)),
+      ),
+    },
+  ] as const;
+  const monthlyIncome = formatCzChatMoney(monthlyIncomeAmount, localCurrency, country);
+  const monthlySpending = formatCzChatMoney(monthlySpendingAmount, localCurrency, country);
+  const currentAccountMoney = formatCzChatMoney(currentAccountMoneyAmount, localCurrency, country);
+  const suggestedMonthlySaving = formatCzChatMoney(suggestedMonthlySavingAmount, localCurrency, country);
+  const savingAccountMonthly = formatCzChatMoney(savingAccountMonthlyAmount, localCurrency, country);
+  const termDepositMonthly = formatCzChatMoney(termDepositMonthlyAmount, localCurrency, country);
+  const savingPeriodLabel = currentSpendingSummary
+    ? `${currentSpendingSummary.periodLabel} ${currentSpendingSummary.yearLabel}`
+    : "the current period";
   const latestHomeTransactions = currentSpendingSummary?.sourceTransactions.slice(0, 5) ?? [];
   const latestDebitTransactions = latestHomeTransactions.filter((transaction) => transaction.amount < 0);
   const latestCreditTransactions = latestHomeTransactions.filter((transaction) => transaction.amount > 0);
@@ -487,6 +536,58 @@ function buildCzChatSmartReplyResolver({
     ],
     action: buildCzNavigateAction("open-spending-from-home", "Open Spending", "analytics"),
   };
+  const savingsCapacityBlock: CoAppingRichBlock = {
+    type: "spending-insight",
+    title: "Monthly saving capacity",
+    body: `Based on ${savingPeriodLabel} activity and current account money, a cautious monthly target is ${suggestedMonthlySaving}.`,
+    metrics: [
+      { label: "Income", value: monthlyIncome, helper: savingPeriodLabel },
+      { label: "Spending", value: monthlySpending, helper: "Card, bills, cash, categories" },
+      { label: "Current accounts", value: currentAccountMoney, helper: "Money available now" },
+    ],
+    action: buildCzNavigateAction("open-spending-from-savings-capacity", "Open Spending", "analytics"),
+  };
+  const savingsProductChoiceBlock: CoAppingRichBlock = {
+    type: "product-cards",
+    title: "How to save it",
+    body: `Suggested split for the ${suggestedMonthlySaving} monthly habit. Choose what you want to open first.`,
+    products: [
+      {
+        id: "saving-account-plan",
+        title: "Saving account",
+        subtitle: `${savingAccountSharePercent}% plan, ${savingAccountMonthly}/month`,
+        meta: "Flexible",
+        tone: "blue",
+        action: {
+          id: "choose-saving-account-plan",
+          label: "Choose",
+          type: "send-message",
+          prompt: "Use Saving account for my savings plan.",
+        },
+      },
+      {
+        id: "term-deposit-plan",
+        title: "Term deposit",
+        subtitle: `${termDepositSharePercent}% plan, ${termDepositMonthly}/month`,
+        meta: "Fixed term",
+        tone: "neutral",
+        action: {
+          id: "choose-term-deposit-plan",
+          label: "Choose",
+          type: "send-message",
+          prompt: "Use Term deposit for my savings plan.",
+        },
+      },
+    ],
+  };
+  const buildSavingsAmountFollowUps = (productLabel: "Saving account" | "Term deposit"): CoAppingFollowUpSuggestion[] =>
+    savingStartAmountOptions.map((option) =>
+      buildCzChatFollowUp(
+        `cz-save-now-${productLabel === "Saving account" ? "saving-account" : "term-deposit"}-${option.key}`,
+        formatCzChatMoney(option.amount, localCurrency, country),
+        `Start with ${option.key} amount in ${productLabel}.`,
+      ),
+    );
 
   const documentBlock: CoAppingRichBlock = {
     type: "product-cards",
@@ -853,6 +954,113 @@ function buildCzChatSmartReplyResolver({
           buildCzChatFollowUp("cz-home-latest-transactions", "Review latest 5", "Show me the latest 5 transactions and which account they came from."),
           buildCzChatFollowUp("cz-home-unusual-spending", "Spot unusual spending", "Check the largest, pending, or category-heavy movements from my latest account activity."),
           buildCzNavigateFollowUp("cz-open-spending", "Open Spending", "analytics"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["how much money can i save", "how much can i save", "monthly saving capacity", "how much should i save"])) {
+      return {
+        text:
+          `### How much you can save\n` +
+          `Based on this Home profile, I would start with about **${suggestedMonthlySaving} per month**.\n` +
+          `I used three signals: expenses of **${monthlySpending}**, income of **${monthlyIncome}**, and **${currentAccountMoney}** currently sitting in current accounts.\n` +
+          `That keeps the recommendation cautious: it does not move every free crown, and it still leaves room for bills, card payments, and unexpected spending.\n` +
+          `How do you want to save it?`,
+        richBlocks: [savingsCapacityBlock, savingsProductChoiceBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-saving-account-plan", "Saving account", "Use Saving account for my savings plan."),
+          buildCzChatFollowUp("cz-term-deposit-plan", "Term deposit", "Use Term deposit for my savings plan."),
+          buildCzNavigateFollowUp("cz-open-spending-from-saving-capacity", "Open Spending", "analytics"),
+        ],
+      };
+    }
+
+    const selectedSavingAmountKey = hasAny(normalized, ["light amount"])
+      ? "light"
+      : hasAny(normalized, ["recommended amount"])
+        ? "recommended"
+        : hasAny(normalized, ["stretch amount", "build buffer amount"])
+          ? "stretch"
+          : null;
+
+    if (selectedSavingAmountKey && hasAny(normalized, ["saving account", "term deposit"])) {
+      const selectedOption =
+        savingStartAmountOptions.find((option) => option.key === selectedSavingAmountKey) ?? savingStartAmountOptions[1];
+      const productLabel = hasAny(normalized, ["term deposit"]) ? "Term deposit" : "Saving account";
+      const selectedStartAmount = formatCzChatMoney(selectedOption.amount, localCurrency, country);
+      const productHelper =
+        productLabel === "Term deposit"
+          ? "fixed term deposit option from the saving and investing shelf"
+          : "flexible saving account option from the saving and investing shelf";
+      const savingsOpenNowBlock: CoAppingRichBlock = {
+        type: "product-cards",
+        title: "Ready to open",
+        body: `Start with ${selectedStartAmount} now, then keep the monthly habit around ${suggestedMonthlySaving}.`,
+        products: [
+          {
+            id: "open-selected-savings-product",
+            title: productLabel,
+            subtitle: productHelper,
+            meta: "Open now",
+            tone: "blue",
+            action: buildCzNavigateAction(
+              `${CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX}investments-savings`,
+              "Open now",
+              "products",
+            ),
+          },
+        ],
+      };
+
+      return {
+        text:
+          `### Ready to open\n` +
+          `Perfect. We can start **${productLabel}** with **${selectedStartAmount}** now.\n` +
+          `The monthly target stays around **${suggestedMonthlySaving}**, based on spending of **${monthlySpending}**, income of **${monthlyIncome}**, and **${currentAccountMoney}** in current accounts.\n` +
+          `Chat should stop at this point. Final product terms, rate, eligibility, documents, and confirmation belong in the Products shelf.`,
+        richBlocks: [savingsOpenNowBlock],
+        followUps: [
+          buildCzNavigateFollowUp(`${CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX}investments-savings`, "Open now", "products"),
+          buildCzChatFollowUp("cz-adjust-saving-amount", "Adjust amount", `Use ${productLabel} for my savings plan.`),
+          buildCzChatFollowUp("cz-compare-saving-products", "Compare products", "How should I choose between Saving account and Term deposit?"),
+        ],
+      };
+    }
+
+    if (hasAny(normalized, ["use saving account for my savings plan", "choose saving account", "saving account plan"])) {
+      return {
+        text:
+          `### Saving account selected\n` +
+          `Good choice for the flexible part of the plan. I would route about **${savingAccountSharePercent}%** of the monthly habit here, roughly **${savingAccountMonthly} per month**, because the money stays accessible.\n` +
+          `How much do you want to save now?`,
+        richBlocks: [savingsCapacityBlock],
+        followUps: buildSavingsAmountFollowUps("Saving account"),
+      };
+    }
+
+    if (hasAny(normalized, ["use term deposit for my savings plan", "choose term deposit", "term deposit plan"])) {
+      return {
+        text:
+          `### Term deposit selected\n` +
+          `This works for the part you do not need immediately. I would route about **${termDepositSharePercent}%** of the monthly habit here, roughly **${termDepositMonthly} per month**, because the money is less flexible but can be more disciplined.\n` +
+          `How much do you want to save now?`,
+        richBlocks: [savingsCapacityBlock],
+        followUps: buildSavingsAmountFollowUps("Term deposit"),
+      };
+    }
+
+    if (hasAny(normalized, ["choose between saving account and term deposit", "compare saving products", "saving account and term deposit"])) {
+      return {
+        text:
+          `### Saving account or term deposit?\n` +
+          `For this profile I would not make it a generic product pitch.\n` +
+          `Use **Saving account** for the flexible reserve, about **${savingAccountSharePercent}%** of the monthly target (**${savingAccountMonthly}**).\n` +
+          `Use **Term deposit** for the part you can lock, about **${termDepositSharePercent}%** (**${termDepositMonthly}**).\n` +
+          `The starting monthly target remains **${suggestedMonthlySaving}**, grounded in income, spending, and current-account cash.`,
+        richBlocks: [savingsProductChoiceBlock],
+        followUps: [
+          buildCzChatFollowUp("cz-saving-account-plan-after-compare", "Saving account", "Use Saving account for my savings plan."),
+          buildCzChatFollowUp("cz-term-deposit-plan-after-compare", "Term deposit", "Use Term deposit for my savings plan."),
         ],
       };
     }
@@ -1503,6 +1711,7 @@ function buildCzChatScreenContext(screen: Screen, id: string, accountProduct: Pr
         id,
         title: buildCzChatTitle("what should we look at first?"),
         suggestedTopics: [
+          buildCzChatTopic("home-saving-capacity", "How much can I save?", "How much money can I save every month?"),
           buildCzChatTopic("home-overview", "Review today's money snapshot", "Help me understand the main things I should notice on my homepage."),
           buildCzChatTopic("home-product-shelf", "What products can I open", "What products can I open from the product shelf?"),
           buildCzChatTopic("home-latest-transactions", "Review latest 5 transactions", "Show me the latest 5 transactions and which account they came from."),

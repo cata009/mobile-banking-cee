@@ -2,6 +2,33 @@
 
 Last updated: 2026-07-07
 
+## 2026-07-07 CZ Chatbot For You Carousel Click Repair
+
+- Latest request handled: user reported that `For you` carousel cards, including `Grow your money` and `Next best conversations`, no longer opened conversations on click and asked to fix, commit, and deploy.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now delays pointer capture in the shared `HorizontalDragScroller` until a real horizontal drag starts.
+  - Simple taps/clicks on carousel card buttons remain owned by the button, so their `send-message` action opens the conversation as before.
+  - Real horizontal drags still capture the pointer, disable card pointer events while dragging, move the rail, and suppress the accidental click that follows a drag.
+  - Commit scope also includes the already-present local `src/app/App.tsx` CZ Home saving-capacity work: `How much can I save?` appears as a Home topic and resolves into monthly saving capacity, saving-account / term-deposit choice, amount follow-ups, and `Open now` handoff.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and chunks above 500 kB.
+  - In-app browser smoke on `screen=homepage` opened CZ Chatbot -> `For you`, clicked `Make idle money grow`, and confirmed a chat opened with the user prompt plus structured `Savings planning` reply.
+  - In-app browser smoke clicked `Travel with card controls ready` from `Next best conversations` using the real promo-card button and confirmed a chat opened with the card-control prompt plus structured `Card check` reply.
+  - In-app browser drag smoke moved the `Grow your money` rail from `scrollLeft 0` to `327` without creating a chat message.
+  - After the drag, clicking the now-visible `Keep the right cash buffer` hero card opened the expected safety-reserve conversation.
+  - Browser console error log was empty after the carousel click/drag checks.
+- Banana Loop result:
+  - fixed: `For you` cards again behave as conversation starters on click.
+  - fixed: swipe/drag remains available and no longer steals simple taps.
+  - preserved: all `For you` content remains mock-driven conversation guidance; no product execution, order placement, or backend CRM integration was added.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
 ## 2026-07-07 CZ Chatbot Investment Follow-Up Click Fix
 
 - Latest request handled: user reported that the Investments suggested next actions (`Grow my savings`, `Future purchase`, `Long-term reserve`) could not be clicked and asked to fix and deploy to Vercel.

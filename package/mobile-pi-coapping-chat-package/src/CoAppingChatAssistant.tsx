@@ -1774,6 +1774,7 @@ type HorizontalDragState = {
   scrollLeft: number;
   moved: boolean;
   ignoreClick: boolean;
+  hasCapture: boolean;
 };
 
 function HorizontalDragScroller({
@@ -1793,15 +1794,17 @@ function HorizontalDragScroller({
     scrollLeft: 0,
     moved: false,
     ignoreClick: false,
+    hasCapture: false,
   });
   const [isDragging, setIsDragging] = useState(false);
 
   const finishDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     const pointerId = dragRef.current.pointerId;
-    if (pointerId !== null && event.currentTarget.hasPointerCapture(pointerId)) {
+    if (pointerId !== null && dragRef.current.hasCapture && event.currentTarget.hasPointerCapture(pointerId)) {
       event.currentTarget.releasePointerCapture(pointerId);
     }
     dragRef.current.pointerId = null;
+    dragRef.current.hasCapture = false;
     setIsDragging(false);
   };
 
@@ -1818,8 +1821,8 @@ function HorizontalDragScroller({
       scrollLeft: node.scrollLeft,
       moved: false,
       ignoreClick: false,
+      hasCapture: false,
     };
-    event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -1841,6 +1844,10 @@ function HorizontalDragScroller({
     if (!drag.moved) {
       drag.moved = true;
       drag.ignoreClick = true;
+      if (!drag.hasCapture) {
+        event.currentTarget.setPointerCapture(event.pointerId);
+        drag.hasCapture = true;
+      }
       setIsDragging(true);
     }
 
