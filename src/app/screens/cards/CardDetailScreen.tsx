@@ -16,12 +16,19 @@ import { getAccountTransactions, groupAccountTransactionsByMonth } from "@/data/
 import type { AccountTransaction } from "@/data/accountDetails";
 import type { Product } from "@/data/products";
 import Card, { type CardVariant } from "@/app/components/cards/Card";
+import UserEventCard from "@/app/components/cards/UserEventCard";
 
 interface CardDetailScreenProps {
   selectedCardId?: string | null;
   onBack: () => void;
   onTransactionClick?: (transaction: AccountTransaction, product: Product) => void;
   onHelpClick?: () => void;
+  aiOpportunityNudge?: {
+    title: string;
+    body: string;
+    ctaLabel: string;
+  } | null;
+  onAiOpportunityClick?: () => void;
 }
 
 const CARD_WIDTH = 219;
@@ -59,6 +66,21 @@ function getCardVariant(product: Product): CardVariant {
 
 function getCardHolderName(): string {
   return "PETER JAGODIĆ";
+}
+
+function AiOpportunityGlyph() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 72 72" fill="none" aria-hidden="true">
+      <path
+        d="M36 0C40.1009 27.3466 44.6534 31.8991 72 36C44.6534 40.1009 40.1009 44.6534 36 72C31.8991 44.6534 27.3466 40.1009 0 36C27.3466 31.8991 31.8991 27.3466 36 0Z"
+        fill="currentColor"
+      />
+      <path
+        d="M62.1468 4.5459C63.0102 10.3031 63.9686 11.2615 69.7258 12.1248C63.9686 12.9882 63.0102 13.9466 62.1468 19.7038C61.2835 13.9466 60.3251 12.9882 54.5679 12.1248C60.3251 11.2615 61.2835 10.3031 62.1468 4.5459Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
 }
 
 function CollapsingCardHeader({
@@ -106,6 +128,8 @@ export default function CardDetailScreen({
   onBack,
   onTransactionClick,
   onHelpClick,
+  aiOpportunityNudge = null,
+  onAiOpportunityClick,
 }: CardDetailScreenProps) {
   const { country, amountsHidden } = useDemo();
   const { t } = useLanguage();
@@ -136,6 +160,7 @@ export default function CardDetailScreen({
   const mouseDragCleanupRef = useRef<(() => void) | null>(null);
   const suppressClickRef = useRef(false);
   const [isCarouselDragging, setIsCarouselDragging] = useState(false);
+  const [isAiOpportunityDismissed, setIsAiOpportunityDismissed] = useState(false);
 
   const activeCard = cardProducts[activeIndex] ?? cardProducts[0];
   const config = getCountryConfig(country);
@@ -167,6 +192,7 @@ export default function CardDetailScreen({
   const hasSearch = normalizedSearch.length > 0;
   const headerThreshold = 64;
   const largeTitleOpacity = 1 - headerProgress * 0.9;
+  const showAiOpportunityNudge = Boolean(aiOpportunityNudge) && !isAiOpportunityDismissed;
 
   // ── Free to Spend amount ─────────────────────────────────────────
   // For credit cards use availableCredit; for debit use balance (treat as positive display)
@@ -358,6 +384,10 @@ export default function CardDetailScreen({
     carouselRef.current.scrollTo({ left: getCardScrollLeft(activeIndex) });
   }, []);
 
+  useEffect(() => {
+    setIsAiOpportunityDismissed(false);
+  }, [activeCard?.id, aiOpportunityNudge?.title]);
+
   useEffect(() => removeMouseListeners, []);
 
   if (!activeCard) {
@@ -513,6 +543,28 @@ export default function CardDetailScreen({
 
       {/* ── Transactions section ─────────────────────────────────── */}
       <div className="bg-[var(--uc-surface)]">
+        {showAiOpportunityNudge && aiOpportunityNudge ? (
+          <div className="bg-gradient-to-b from-[var(--uc-app-bg)] to-[var(--uc-surface)] px-[16px] pt-[18px] pb-[18px]">
+            <UserEventCard
+              title={aiOpportunityNudge.title}
+              description={aiOpportunityNudge.body}
+              actionLabel={aiOpportunityNudge.ctaLabel}
+              onActionClick={onAiOpportunityClick}
+              showOptions
+              onOptionsClick={() => setIsAiOpportunityDismissed(true)}
+              optionsAriaLabel="Dismiss AI suggestion"
+              optionsIconName="close-x"
+              optionsIconColor="var(--uc-text-muted)"
+              className="shadow-[0_8px_22px_rgba(0,0,0,0.12)]"
+              iconNode={
+                <span className="text-[var(--uc-static-white)]">
+                  <AiOpportunityGlyph />
+                </span>
+              }
+            />
+          </div>
+        ) : null}
+
         <div
           ref={searchContainerRef}
           className="sticky z-20 bg-[var(--uc-surface)] px-[16px] pt-[24px]"

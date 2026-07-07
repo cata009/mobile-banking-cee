@@ -1,6 +1,205 @@
 # Current Session
 
-Last updated: 2026-07-06
+Last updated: 2026-07-07
+
+## 2026-07-07 CZ Chatbot For You Credit Card Closeout And Share Rename
+
+- Latest request handled: user asked to finish the CZ Chatbot `For you` credit-card sales execution, shorten the editorial banner copy, remove the gradient-looking treatment from the primary opportunity card, add a card-identification row inside the offer, then rename the shared/default platform title from `UniCredit Mobile Banking - Co-Apping` to `Mobile Banking CEE`.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now renders an opportunity-related card row inside the primary `For you` offer, using a package-local credit-card visual, card name, masked card number, and existing `ForwardIcon` chevron action back to Card Detail.
+  - `src/app/App.tsx` now feeds that related card row from the active mock credit card and keeps the sales copy explicit about the proposed plafon change from `10 000,00 CZK` to `15 000,00 CZK`.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` removes the primary opportunity card gradient and keeps it on a clean white surface with the new related-card row styling.
+  - Follow-up polish replaced the temporary arrow on the related card row with the shared DS chevron path and removed the metric-card indentation so `Current limit` / `New limit` align to the same left axis as the offer title and body copy.
+  - The Discovery-style hero below the primary opportunity now uses shorter copy: `Invest smarter`, `Make idle money grow`, and `Risk checks first. Start when ready.`
+  - `index.html` and `public/manifest.webmanifest` now expose `Mobile Banking CEE` as the browser/share/PWA title instead of the previous Co-Apping-specific name.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - `git diff --check` passed on 2026-07-07 with only normal Windows LF/CRLF warnings.
+  - In-app browser smoke on `screen=card-detail&card=card-credit-1` confirmed the page title is `Mobile Banking CEE`, no `App boot error` appears after reload, `FIND OUT MORE` opens `For you`, the primary opportunity background image is `none`, the related card row renders `Credit Card` plus `5173 **** **** 4301`, the old `Featured for Czech customers` copy is absent, and the new hero copy is present.
+  - Follow-up in-app browser bounding-box smoke confirmed the offer title/body, related-card row, and `Current limit` / `New limit` metrics share the same left coordinate, metric padding is `0px`, and the related-card chevron path matches the shared DS `chevron-link` path.
+- Banana Loop result:
+  - fixed: `For you` no longer crashes due to the stray `ChevronRightIcon` reference.
+  - fixed: the primary offer now identifies the exact credit card before pushing the limit-review CTA.
+  - fixed: share/browser naming no longer overfits the platform to Co-Apping.
+  - triaged: the real CRM campaign engine, suppression rules, eligibility API, and multi-product ranking remain the existing future task.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-07 CZ Chatbot Conversation Detail Header Simplification
+
+- Latest request handled: user asked to remove the assistant mode toggle from conversation detail because it does not yet add enough value there; the toggle should remain available only on new conversation / non-detail assistant entry.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now renders the `Chat` / `For you` segment only for new conversation and `For you` states.
+  - Conversation detail now keeps the center header area as a passive spacer, leaving only the conversation-list button on the left and `More options` plus close on the right.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - `git diff --check` passed on 2026-07-07; only existing LF/CRLF warnings were reported.
+  - In-app browser smoke confirmed new chat still shows one `.mpc-mode-segment`; after starting a conversation, conversation detail shows zero `.mpc-mode-segment` nodes and header buttons `Back to conversations`, `More options`, and `Close assistant`.
+- Banana Loop result:
+  - fixed: conversation detail no longer exposes a low-value mode toggle.
+  - preserved: new conversation still exposes the segment where mode choice is useful.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-07 CZ Chatbot Scroll Button Offset Tuning
+
+- Latest request handled: user asked to move the conversation-list scroll-to-latest button and chat scroll-to-bottom button slightly lower, while still keeping the message scroll button safely above follow-up suggestions when suggestion chips are visible.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` lowers `.mpc-conversation-floating-actions` from `126px` to `108px`.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` lowers the default `.mpc-chat-scroll-bottom-button` offset from `118px` to `104px`.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` lowers the follow-up-aware scroll offset from `168px` to `150px`, preserving extra clearance above suggestion chips.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - `git diff --check` passed on 2026-07-07; only existing LF/CRLF warnings were reported.
+  - In-app browser stylesheet inspection confirmed the active CSS rules now use `108px`, `104px`, and `150px`.
+- Banana Loop result:
+  - fixed: scroll buttons no longer sit with an oversized visual gap from the composer/search area.
+  - preserved: the follow-up suggestion variant still reserves extra vertical space to avoid overlap.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-07 CZ Chatbot Credit Card Nudge Commercial Copy
+
+- Latest request handled: user asked to rewrite the Card Detail proactive credit-limit nudge copy to be more commercial while keeping the `FIND OUT MORE` action unchanged and ideally mentioning the proposed new limit.
+- Runtime changes:
+  - `src/app/App.tsx` now titles the dismissible credit-card nudge `Upgrade your credit limit to 15 000 CZK`.
+  - The nudge body now frames the message as a personalized offer that can be reviewed first, with no change unless the client continues.
+  - CTA remains `FIND OUT MORE`.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+  - In-app browser DOM check on `screen=card-detail&card=card-credit-1` confirmed the new title/body render, the old generic nudge copy is absent, and `FIND OUT MORE` remains present.
+- Banana Loop result:
+  - fixed: the previous generic support-like copy no longer undersells the credit-limit sales opportunity.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-07 CZ Chatbot For You Segment Indicator Refinement
+
+- Latest request handled: user rejected the red dot on the floating AI launcher, asked to move that attention cue into the assistant segment switch, then rejected the first segment-dot styling as visually ugly; follow-ups replaced the `For you` segment glyph with the user-provided 24x24 tag/opportunity icon, balanced it visually at `17px`, restored old editorial banners below the primary contextual credit-card opportunity, removed the internal `Why this appears` CRM explanation, and changed the credit-limit metrics to current/new plafon.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatLauncher.tsx` no longer supports or renders launcher notification badges.
+  - `src/app/App.tsx` now opens the assistant launcher into clean `Chat` mode even when contextual opportunities exist.
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` renders a small red indicator on the `For you` segment button when opportunities are available and the assistant is currently in `Chat`.
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now renders `For you` as a hybrid surface: the primary CRM credit-limit-review card remains at the top, while old Discovery-style banner/read content returns below it.
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` no longer renders the client-facing `Why this appears` block on opportunity cards.
+  - `package/mobile-pi-coapping-chat-package/src/coapping.css` removes launcher-badge styling and now uses a controlled `14px` segment-dot without the previous halo/glow, keeping the cue visible without returning to the oversized blob effect on the mode switch.
+  - `package/mobile-pi-coapping-chat-package/src/icons.tsx` now renders the `For you` mode icon from the supplied SVG path with `currentColor`; `coapping.css` renders it at a balanced `17px` inside the segment switch so its filled visual weight aligns with the outline chat icon.
+  - `src/app/App.tsx` no longer generates the weak secondary credit-card opportunities `Review card protection` and `Set a repayment reminder`; the primary card now shows `Current limit` and `New limit` rather than available credit.
+  - `src/data/products.ts` sets the mock credit-card plafon to `10 000 CZK` while retaining `3 200 CZK` available credit, so the proposed `New limit` can credibly show `15 000 CZK`.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - In-app browser smoke on `screen=card-detail&card=card-credit-1` confirmed the floating launcher has no `.mpc-chat-launcher-badge`, opens clean `Chat`, and shows card-support topics rather than the sales feed.
+  - In-app browser smoke confirmed the `For you` segment button carries one `.mpc-mode-button-badge` while `Chat` is active and opportunities exist, then removes that badge once `For you` is opened.
+  - In-app browser smoke confirmed `FIND OUT MORE` on the card opportunity still opens `For you` directly without reintroducing a launcher badge.
+  - Follow-up badge/icon polish: `npm run build` passed and `git diff --check` passed on 2026-07-07; in-app browser automation timed out during the follow-up visual read, so final badge/icon polish still needs human visual acceptance on the already-open Products chat screen.
+  - Follow-up For you content fix: `npm run build` passed and `git diff --check` passed on 2026-07-07; in-app browser DOM check confirmed one primary opportunity card, zero `Review card protection`, zero `Set a repayment reminder`, one Discovery hero, two promo banners, and two useful-read rows.
+  - Follow-up plafon copy fix: `npm run build` passed and `git diff --check` passed on 2026-07-07; in-app browser DOM check confirmed no `Why this appears`, no `Available credit` metric, and metrics labeled `Current limit` / `New limit` with values `10 000,00 CZK` / `15 000,00 CZK`.
+- Banana Loop result:
+  - fixed: the unattractive launcher-level red dot and its open-to-offers behavior were removed.
+  - fixed: the attention cue now lives inside the assistant mode switch, closer to the destination surface, and the first oversized segment-dot treatment was reduced to a subtle dot.
+  - fixed: weak secondary sales cards were removed from `For you`; the area now uses the primary CRM card plus broader banner/read content.
+  - fixed: client-facing opportunity copy no longer exposes internal CRM trigger language and no longer confuses available credit with credit-card plafon.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-07 CZ Chatbot For You Credit Card Sales Surface
+
+- Latest request handled: user asked to turn the universal second CZ Chatbot tab into a non-aggressive contextual sales surface, starting from Credit Card Detail with `3 200 CZK` available credit and a proactive credit-limit-review opportunity.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` replaces the old static Discovery feed rendering with a `For you` opportunity surface fed by structured opportunities.
+  - `package/mobile-pi-coapping-chat-package/src/types.ts` adds `CoAppingOpportunity` contracts; `CoAppingChatLauncher.tsx` adds a notification badge; `icons.tsx` adds the `For you` mode icon.
+  - `src/app/App.tsx` now builds a CZ credit-card opportunity set from the active mock credit card (`availableCredit` / `creditLimit`), passes it into the chatbot, and distinguishes clean support entry (`Chat`) from opportunity entry (`For you`).
+  - `src/app/screens/cards/CardDetailScreen.tsx` now shows a dismissible Teodora nudge above the transactions/search area for eligible credit cards; its CTA opens the assistant directly in `For you`.
+  - The `For you` primary credit card opportunity starts a guarded conversational sales flow: it explains credit-limit review inputs and keeps final changes inside the authenticated card flow.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - In-app browser smoke on `screen=card-detail&card=card-credit-1` confirmed: assistant is initially closed, the proactive nudge renders, launcher badge renders, old `.mpc-discovery-feed` is absent, and `See options` opens `For you`.
+  - In-app browser smoke confirmed `For you` shows `Credit limit review available`, `Available credit 3 200,00 CZK`, `Current limit 5 000,00 CZK`, and supporting opportunities.
+  - In-app browser smoke confirmed `Check options` switches to `Chat` and starts the credit-limit-review conversation with follow-ups; the Card Detail Help button still opens clean card-support topics without showing `For you`.
+- Banana Loop result:
+  - fixed: the second chatbot tab is no longer a universal Czech editorial Discovery feed unrelated to the current card context.
+  - fixed: credit-card sales is separated from support; Help opens `Chat`, while nudge/badge opens `For you`.
+  - triaged: this is still a mock CRM/opportunity catalog with one credit-card scenario; a real campaign engine, suppression rules, eligibility API, and full multi-product ranking remain future work.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-07 CZ Chatbot Contextual New-Conversation Topics
+
+- Latest request handled: user asked for the four new-chat suggested topics to be contextual by entry page, instead of Home, Spending, Payments, Products, and More all showing the same generic prompts; deeper product contexts such as accounts, cards, savings, loans, and mortgages also needed product-aware topics.
+- Runtime changes:
+  - `src/app/App.tsx` now builds explicit CZ Chatbot entry contexts for Level 1 pages: Home, Spending/Analytics, Payments, Products, and More.
+  - Account-detail chatbot context now resolves by selected product type: current accounts keep account topics, saving accounts/term deposits get savings topics, loans get loan topics, and mortgages get mortgage topics.
+  - The Account Detail help action now uses the same selected-product resolver, so opening help from `loan-1` or `mort-1` no longer falls back to current-account copy.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - In-app browser smoke confirmed distinct four-topic sets for `homepage`, `analytics`, `payments`, `products`, and `more`.
+  - In-app browser smoke confirmed `account-detail&account=loan-1` shows loan topics, `account-detail&account=sav-1` shows savings topics, and `account-detail&account=mort-1` shows mortgage topics.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Banana Loop result:
+  - fixed: Level 1 chatbot entry no longer reuses the same generic topic list.
+  - fixed: loan and mortgage detail contexts no longer receive current-account suggested topics.
+  - triaged: follow-up chip behavior after selecting these new entry topics still depends on the existing mocked reply resolver coverage.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-06 CZ Chatbot Conversation Navigation Header
+
+- Latest request handled: user asked to polish CZ Chatbot navigation between new chat, conversation list, and conversation detail.
+- Runtime changes:
+  - `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx` now tracks the conversation-list return target (`new`, `conversation`, or `discovery`) and the active conversation id.
+  - Conversation list opened from new chat shows `OneAI` in the top-left header, a forward/right arrow in the top-right, and no selected conversation row.
+  - Conversation list opened from a selected conversation highlights that conversation with a neutral gray background and the top-right forward/right arrow returns to that conversation.
+  - Conversation detail keeps the conversation-list two-line icon on the top-left and now renders two top-right actions: `More options` followed by `Close assistant`.
+  - `package/mobile-pi-coapping-chat-package/src/icons.tsx` adds a `ForwardIcon`; `package/mobile-pi-coapping-chat-package/src/coapping.css` centers the header using a three-column grid and styles the active conversation row.
+- Verification:
+  - `npm run build` passed on 2026-07-06; known Vite warnings remain for empty `react-vendor` and the `App` chunk above 500 kB.
+  - In-app browser smoke on `screen=homepage` confirmed: new-chat header remains unchanged with 4 topics; list opened from new chat shows `OneAI`, one return-to-new arrow, and 0 active rows; selecting `How do payments work?` opens detail with conversation-list button plus `more` and `X`; reopening list from detail shows 1 active row with `aria-current="true"` and the return arrow restores detail.
+- Banana Loop result:
+  - fixed: conversation list no longer acts like a close-only surface and now preserves navigation context from either new chat or selected conversation.
+  - triaged: visual drawer direction remains the existing right-to-left/list transition and was not otherwise changed.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
 
 ## 2026-07-06 CZ Chatbot Conversation Detail List Icon
 

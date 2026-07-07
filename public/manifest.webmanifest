@@ -1,7 +1,7 @@
 {
-  "name": "UniCredit Mobile Banking Demo",
-  "short_name": "UniCredit Demo",
-  "description": "UniCredit CEE mobile banking stakeholder demo.",
+  "name": "Mobile Banking CEE",
+  "short_name": "Mobile Banking CEE",
+  "description": "Mobile Banking CEE stakeholder demo.",
   "start_url": "/?frame=0",
   "scope": "/",
   "display": "standalone",
