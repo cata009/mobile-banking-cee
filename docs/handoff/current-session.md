@@ -2,6 +2,32 @@
 
 Last updated: 2026-07-07
 
+## 2026-07-07 CZ Chatbot Investments Closeout And Production Deploy
+
+- Latest request handled: user asked to resume and finish the unfinished Investments chatbot task, then commit everything and publish to Vercel.
+- Closeout:
+  - Final product code changes for Investments goal suggestions were already in place and verified before closeout; this closeout only added handoff evidence after the deploy completed.
+  - Commit `6a41c72` recorded the Investments goal-suggestion verification and next-task update.
+  - Production deploy completed on Vercel as `Ready`: `https://mobile-banking-imhu72rzi-imc-uci.vercel.app`, with aliases `https://mobile-banking-cee.vercel.app`, `https://mobile-banking-cee-imc-uci.vercel.app`, and `https://mobile-banking-cee-mihaicataliniacob-9004-imc-uci.vercel.app`.
+- Verification:
+  - `npm run build` passed on 2026-07-07; known Vite warnings remain for empty `react-vendor` and chunks above 500 kB.
+  - `git diff --check` passed on 2026-07-07 with only normal Windows LF/CRLF warnings.
+  - `npx vercel --prod --yes` completed a production deployment.
+  - `npx vercel inspect https://mobile-banking-imhu72rzi-imc-uci.vercel.app` confirmed target `production`, status `Ready`, and deployment id `dpl_EKXue3Jyf7QbiVXr6q8LUAiULDC8`.
+  - `npx vercel logs https://mobile-banking-imhu72rzi-imc-uci.vercel.app` returned `No logs found`, so no runtime error logs were reported immediately after deploy.
+- Banana Loop result:
+  - fixed: the previously unfinished Investments goal-suggestion smoke sweep is documented and committed.
+  - fixed: production Vercel publication is confirmed and recorded with the deployment URL.
+  - already known: Vite chunk-size and empty `react-vendor` warnings remain non-blocking known bananas.
+  - already known: Git reports too many unreachable loose objects during auto-packing; repository cleanup is deferred as intentional maintenance.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
 ## 2026-07-07 CZ Chatbot Home Product Shelf Topic
 
 - Latest request handled: user asked urgently to replace Home topic `Find newest bank documents` with `What products can I open`, move it to position 2, and make the click answer show products from the Products shelf with a link to the shelf.
