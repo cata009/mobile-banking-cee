@@ -16,6 +16,7 @@ Last updated: 2026-07-07
   - Click smoke confirmed `What products can I open` replies with `Products you can open`, references `Products > OUR PRODUCTS`, lists Account, Cards, Mortgages and loans, Insurance, and Investments and savings with their sheet options, renders Product shelf cards, and shows follow-ups `Open Products`, `Explain savings options`, and `Review borrowing options`.
   - Click smoke on `Open Products` confirmed navigation to `screen=products` and the `OUR PRODUCTS` shelf is visible.
   - Click smoke on the `Account` rich card confirmed chat closes, URL becomes `screen=products`, Banking / `OUR PRODUCTS` is visible, and the Account bottom sheet opens with `Current account` and `Account package`.
+  - Follow-up full sweep confirmed all five rich cards (`Account`, `Cards`, `Mortgages and loans`, `Insurance`, `Investments and savings`) close chat, navigate to `screen=products`, keep Banking / `OUR PRODUCTS` visible, and open the matching bottom sheet with the expected first options; browser console errors stayed empty.
   - `git diff --check` passed with only normal Windows LF/CRLF warnings.
 - Banana Loop result:
   - fixed: Home no longer suggests document search as topic 4.
