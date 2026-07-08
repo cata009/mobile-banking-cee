@@ -224,6 +224,10 @@ export default function InvestmentPortfolioChart({
   const chartData = useMemo(() => buildChartData(points), [points]);
   const domainPadding = valueRange * 0.08;
   const yDomain: [number, number] = [minValue - domainPadding, maxValue + domainPadding];
+  const yTicks = useMemo(() => {
+    const [domainMin, domainMax] = yDomain;
+    return [0, 1, 2, 3].map((step) => domainMin + ((domainMax - domainMin) * step) / 3);
+  }, [yDomain]);
   const activeDatum = activePoint ? chartData[activePoint.index] : undefined;
   const tooltipX = activePoint ? Math.min(236, Math.max(6, activePoint.coordinate.x - 45)) : 0;
   const tooltipY = activePoint
@@ -325,7 +329,7 @@ export default function InvestmentPortfolioChart({
             domain={yDomain}
             axisLine={false}
             tickLine={false}
-            tickCount={4}
+            ticks={yTicks}
             tickFormatter={(value) => formatAxisValue(Number(value), valueRange)}
             tick={{ fill: "var(--uc-text-muted)", fontSize: 12, fontWeight: 700 }}
           />

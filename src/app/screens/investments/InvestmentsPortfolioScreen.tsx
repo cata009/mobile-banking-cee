@@ -99,14 +99,29 @@ function PortfolioSummary({
   totalValue,
   performanceAmount,
   performancePercentLabel,
+  performanceAmountValue,
+  performancePercentValue,
+  amountsHidden,
   currency,
 }: {
   totalValue: InvestmentAmountParts;
   performanceAmount: InvestmentAmountParts;
   performancePercentLabel: string;
+  performanceAmountValue: number;
+  performancePercentValue: number;
+  amountsHidden: boolean;
   currency: string;
 }) {
   const { t } = useLanguage();
+  const performanceColor = (() => {
+    const signed = performanceAmountValue !== 0 ? performanceAmountValue : performancePercentValue;
+    if (signed > 0) return "#3D7D43";
+    if (signed < 0) return "#CF3524";
+    return "#262626";
+  })();
+  const signedPercentLabel = amountsHidden || performancePercentValue === 0
+    ? performancePercentLabel
+    : `${performancePercentValue > 0 ? "+" : "-"}${performancePercentLabel}`;
 
   return (
     <div className="px-[16px] pt-[16px]">
@@ -124,10 +139,10 @@ function PortfolioSummary({
           <span className="text-[14px] font-bold leading-normal text-[var(--uc-text)]">
             {t("runtime.investments.performance", "Performance")}:
           </span>
-          <span className="text-[#262626]">
+          <span style={{ color: performanceColor }}>
             <span className="text-center text-[14px] font-bold leading-normal">{performanceAmount.integer}</span>
             <span className="text-center text-[14px] font-bold leading-normal">{performanceAmount.decimal} {performanceAmount.currency || currency}</span>
-            <span className="text-center text-[14px] font-bold leading-normal"> / {performancePercentLabel}</span>
+            <span className="text-center text-[14px] font-bold leading-normal"> / {signedPercentLabel}</span>
           </span>
         </div>
       </div>
@@ -327,6 +342,9 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
             totalValue={totalValueParts}
             performanceAmount={performanceParts}
             performancePercentLabel={totalPerformancePercentLabel}
+            performanceAmountValue={totalPerformanceAmount}
+            performancePercentValue={totalPerformancePercent}
+            amountsHidden={amountsHidden}
             currency={portfolioCurrency}
           />
           {selectedTabId === "performance" ? (

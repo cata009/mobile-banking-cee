@@ -79,7 +79,7 @@ export function ProductsHeader({
         <div className="flex min-h-[32px] items-start gap-[8px]">
           <h1
             className="uc-type-n1 flex-1 min-w-0 text-[var(--uc-text)]"
-            style={{ fontSize: "30px", lineHeight: "36px" }}
+            style={{ fontSize: "28px", lineHeight: "36px" }}
           >
             {title}
           </h1>

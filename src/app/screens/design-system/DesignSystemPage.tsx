@@ -41,6 +41,7 @@ import UserEventCard, { USER_EVENT_CARD_SOURCE } from "@/app/components/cards/Us
 import HelperCard, { HELPER_CARD_SOURCE } from "@/app/components/cards/HelperCard";
 import PendingActionCard, { PENDING_ACTION_CARD_SOURCE } from "@/app/components/cards/PendingActionCard";
 import CardComponent, { CARD_COMPONENT_SOURCE } from "@/app/components/cards/CardComponent";
+import NavigationCardArt from "@/app/components/cards/NavigationCardArt";
 import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
 import ShopsmartOfferCard, { SHOPSMART_OFFER_CARD_SOURCE } from "@/app/components/shopsmart/ShopsmartOfferCard";
@@ -1984,17 +1985,6 @@ function NavigationFaqIcon() {
   return (
     <span className="flex size-[32px] items-center justify-center" aria-hidden="true">
       <AppIcon name="help-circle" size={16} color="var(--uc-text)" />
-    </span>
-  );
-}
-
-function NavigationCardArt() {
-  return (
-    <span className="relative block h-[40px] w-[64px] overflow-hidden rounded-[4px] bg-[var(--uc-neutral-100)] shadow-[0_1px_1px_rgba(0,0,0,0.25)]" aria-hidden="true">
-      <span className="absolute left-[-7px] top-[-2px] h-[48px] w-[28px] skew-x-[-14deg] bg-[var(--uc-red-main)]" />
-      <span className="absolute left-[20px] top-[5px] text-[4px] font-bold leading-none text-[var(--uc-text)]">UniCredit</span>
-      <span className="absolute bottom-[9px] right-[8px] size-[10px] rounded-full bg-[var(--uc-orange-main)]" />
-      <span className="absolute bottom-[9px] right-[14px] size-[10px] rounded-full bg-[var(--uc-red-main)] opacity-90" />
     </span>
   );
 }

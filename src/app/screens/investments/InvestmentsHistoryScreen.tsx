@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type UIEvent } from "react";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
+import BrandLogo from "@/app/components/brand-logo/BrandLogo";
 import { AppIcon } from "@/app/components/icons";
 import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
 import PageHeader from "@/app/components/PageHeader";
@@ -608,6 +609,11 @@ function InvestmentHistoryDetailScreen({
             maxHeight: `${280 * (1 - headerProgress)}px`,
           }}
         >
+          {item.logoId ? (
+            <div className="mb-[8px] flex justify-center">
+              <BrandLogo logoId={item.logoId} size={40} />
+            </div>
+          ) : null}
           <h2 className="text-[28px] font-bold leading-[31px] text-[var(--uc-text)]">{item.title}</h2>
           <AmountHero
             amount={amount}
@@ -723,7 +729,8 @@ export default function InvestmentsHistoryScreen({ onBack }: InvestmentsHistoryS
     setFilterMode(null);
     setInfoMode(null);
     setSelectedItem(null);
-  }, [country, defaultFilters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [country]);
 
   useEffect(() => {
     setDraftFilters((current) => resetFilterTypesForTab(current, activeTab));

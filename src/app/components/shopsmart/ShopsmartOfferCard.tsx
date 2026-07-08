@@ -102,21 +102,21 @@ export default function ShopsmartOfferCard({
 
       <div className="flex min-h-[121px] flex-col gap-[16px] px-[16px] pb-[13px] pt-[9px]">
         <div className="flex flex-col">
-          <span className="text-[15px] font-bold leading-[20px] tracking-[0.3px] text-[var(--uc-action)]">
+          <span className="text-[14px] font-bold leading-[20px] tracking-[0.3px] text-[var(--uc-action)]">
             {merchant}
           </span>
-          <span className="mt-[1px] whitespace-pre-line text-[21px] font-bold leading-[25px] tracking-[0.42px] text-[var(--uc-text)]">
+          <span className="mt-[1px] whitespace-pre-line text-[20px] font-bold leading-[25px] tracking-[0.42px] text-[var(--uc-text)]">
             {title}
           </span>
         </div>
 
         <div className="flex min-h-[32px] items-center justify-between gap-[8px]">
-          <span className="min-w-0 text-[11px] font-normal leading-[16px] tracking-[1px] text-[var(--uc-text)]">
+          <span className="min-w-0 text-[14px] font-normal leading-[16px] tracking-[1px] text-[var(--uc-text)]">
             {statusText}
           </span>
           <span className="flex h-[32px] shrink-0 items-center gap-[4px]">
             {distance ? (
-              <span className="text-[11px] font-bold leading-[16px] tracking-[0.22px] text-[var(--uc-text)]">
+              <span className="text-[14px] font-bold leading-[16px] tracking-[0.22px] text-[var(--uc-text)]">
                 {distance}
               </span>
             ) : null}

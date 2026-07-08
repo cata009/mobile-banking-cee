@@ -1,6 +1,7 @@
 import type { CountryId } from "@/app/state/demoTypes";
 import { convertCurrency, getCountryCurrency, roundMoney } from "@/data/exchangeRates";
 import type { Currency, Product } from "@/data/products";
+import type { BrandLogoId } from "@/app/config/brandLogos";
 
 export type InvestmentPortfolioTabId = "performance" | "product-type" | "currency" | "asset-class" | "account-list";
 export type InvestmentPeriodId = "1m" | "3m" | "6m" | "1y" | "3y" | "max";
@@ -54,6 +55,8 @@ export interface InvestmentSecurity {
   assetClass: InvestmentAssetClass;
   performanceAmount: number;
   performancePercent: number;
+  /** Brand-logo id from the mocked brand-logo database. */
+  logoId?: BrandLogoId;
 }
 
 export interface InvestmentDistributionItem {
@@ -79,6 +82,8 @@ export interface InvestmentHistoryTransaction {
   currency: Currency;
   type: InvestmentHistoryTransactionType;
   tone: "positive" | "negative" | "neutral";
+  /** Brand-logo id inherited from the source security. */
+  logoId?: BrandLogoId;
 }
 
 export interface InvestmentHistoryOrder {
@@ -90,6 +95,8 @@ export interface InvestmentHistoryOrder {
   orderType: "BUY" | "SELL";
   status: InvestmentHistoryOrderStatus;
   tone: "positive" | "negative" | "neutral";
+  /** Brand-logo id inherited from the source security. */
+  logoId?: BrandLogoId;
 }
 
 export interface InvestmentHistoryFilterState {
@@ -111,6 +118,7 @@ interface InvestmentSecuritySeed {
   securityAccountCurrency: Currency;
   productType: InvestmentProductType;
   assetClass: InvestmentAssetClass;
+  logoId?: BrandLogoId;
 }
 
 export const INVESTMENT_PORTFOLIO_TABS: readonly InvestmentPortfolioTabOption[] = [
@@ -154,12 +162,13 @@ export const INVESTMENT_HISTORY_TRANSACTION_TYPES: readonly InvestmentHistoryTra
 const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
   {
     id: "balanced-income",
-    title: "UNICREDIT BALANCED INCOME FUND",
+    title: "UniCredit Balanced Income Fund",
     status: "active",
     contributionType: "RECURRENT",
     weight: 34,
     performancePercent: 1.8,
     instrumentCurrency: "EUR",
+    logoId: "unicredit",
     securityAccountId: "sec-eur",
     securityAccountName: "EUR Securities Account",
     securityAccountCurrency: "EUR",
@@ -168,12 +177,13 @@ const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
   },
   {
     id: "cee-bonds",
-    title: "CEE GOVERNMENT BOND FUND",
+    title: "CEE Government Bond Fund",
     status: "active",
     contributionType: "ONE OFF",
     weight: 24,
     performancePercent: 0.9,
     instrumentCurrency: "CZK",
+    logoId: "unicredit",
     securityAccountId: "sec-local",
     securityAccountName: "Local Currency Securities Account",
     securityAccountCurrency: "CZK",
@@ -182,12 +192,13 @@ const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
   },
   {
     id: "europe-equity",
-    title: "EUROPE EQUITY OPPORTUNITIES",
+    title: "Europe Equity Opportunities",
     status: "active",
     contributionType: "RECURRENT",
     weight: 18,
     performancePercent: 2.6,
     instrumentCurrency: "USD",
+    logoId: "unicredit",
     securityAccountId: "sec-usd",
     securityAccountName: "USD Securities Account",
     securityAccountCurrency: "USD",
@@ -196,12 +207,13 @@ const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
   },
   {
     id: "global-growth",
-    title: "GLOBAL GROWTH PORTFOLIO",
+    title: "Global Growth Portfolio",
     status: "inactive",
     contributionType: "ONE OFF",
     weight: 14,
     performancePercent: 0,
     instrumentCurrency: "EUR",
+    logoId: "unicredit",
     securityAccountId: "sec-eur",
     securityAccountName: "EUR Securities Account",
     securityAccountCurrency: "EUR",
@@ -210,12 +222,13 @@ const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
   },
   {
     id: "money-market",
-    title: "SHORT TERM MONEY MARKET FUND",
+    title: "Short Term Money Market Fund",
     status: "inactive",
     contributionType: "RECURRENT",
     weight: 10,
     performancePercent: 0,
     instrumentCurrency: "GBP",
+    logoId: "unicredit",
     securityAccountId: "sec-gbp",
     securityAccountName: "GBP Securities Account",
     securityAccountCurrency: "GBP",
@@ -301,6 +314,7 @@ export function buildInvestmentSecurities(
       assetClass: seed.assetClass,
       performanceAmount: roundMoney((localValue * seed.performancePercent) / 100),
       performancePercent: seed.performancePercent,
+      logoId: seed.logoId,
     };
   });
 }
@@ -427,33 +441,65 @@ export function buildInvestmentHistoryTransactions(
   securities: readonly InvestmentSecurity[],
   country: CountryId,
 ): InvestmentHistoryTransaction[] {
+  if (securities.length === 0) return [];
   const countryCurrency = getCountryCurrency(country) as Currency;
-  const transactionTypes: readonly InvestmentHistoryTransactionType[] = ["COUPON", "BUY", "OTHER WITHDRAWAL", "SELL", "SELL"];
+  const transactionTypes: readonly InvestmentHistoryTransactionType[] = [
+    "COUPON",
+    "BUY",
+    "OTHER WITHDRAWAL",
+    "COUPON",
+    "BUY",
+    "SELL",
+    "OTHER WITHDRAWAL",
+    "COUPON",
+    "BUY",
+    "SELL",
+    "SELL",
+    "OTHER WITHDRAWAL",
+    "COUPON",
+    "BUY",
+    "SELL",
+    "SELL",
+  ];
   const dates = [
+    buildIsoDate(2026, 5, 18),
+    buildIsoDate(2026, 5, 7),
+    buildIsoDate(2026, 4, 29),
+    buildIsoDate(2026, 3, 15),
+    buildIsoDate(2026, 2, 22),
+    buildIsoDate(2026, 1, 19),
+    buildIsoDate(2025, 11, 12),
+    buildIsoDate(2025, 10, 24),
     buildIsoDate(2025, 9, 11),
     buildIsoDate(2025, 9, 10),
     buildIsoDate(2025, 9, 9),
-    buildIsoDate(2024, 8, 29),
+    buildIsoDate(2025, 7, 4),
+    buildIsoDate(2025, 5, 28),
+    buildIsoDate(2025, 4, 16),
+    buildIsoDate(2024, 11, 5),
     buildIsoDate(2024, 8, 20),
   ];
+  const total = dates.length;
 
-  return securities.slice(0, 5).map((security, index) => {
+  return dates.map((date, index) => {
+    const security = securities[index % securities.length];
     const type = transactionTypes[index] ?? "BUY";
     const currency = index % 2 === 0 ? countryCurrency : security.instrumentCurrency;
     const sourceAmount = type === "COUPON"
       ? Math.max(12, Math.abs(security.performanceAmount || security.localValue * 0.008))
-      : security.localValue * (index === 4 ? 0.18 : 0.12);
+      : security.localValue * (index >= total - 4 ? 0.18 : 0.12);
     const amount = roundMoney(convertCurrency(sourceAmount, security.localCurrency, currency));
     const isPositive = type === "COUPON";
 
     return {
       id: `trx-${security.id}-${index}`,
-      date: dates[index] ?? buildIsoDate(2024, 8, 20),
+      date,
       title: security.title,
       amount: isPositive ? amount : -amount,
       currency,
       type,
       tone: isPositive ? "positive" : "negative",
+      logoId: security.logoId,
     };
   });
 }
@@ -463,30 +509,72 @@ export function buildInvestmentHistoryOrders(
   country: CountryId,
 ): InvestmentHistoryOrder[] {
   const countryCurrency = getCountryCurrency(country) as Currency;
-  const statuses: readonly InvestmentHistoryOrderStatus[] = ["EXECUTED", "PENDING", "REJECTED", "EXECUTED"];
-  const orderTypes: readonly ("BUY" | "SELL")[] = ["BUY", "BUY", "SELL", "SELL"];
+  const statuses: readonly InvestmentHistoryOrderStatus[] = [
+    "EXECUTED",
+    "PENDING",
+    "EXECUTED",
+    "EXECUTED",
+    "PENDING",
+    "REJECTED",
+    "EXECUTED",
+    "PENDING",
+    "EXECUTED",
+    "REJECTED",
+    "EXECUTED",
+    "PENDING",
+    "EXECUTED",
+    "EXECUTED",
+  ];
+  const orderTypes: readonly ("BUY" | "SELL")[] = [
+    "BUY",
+    "BUY",
+    "SELL",
+    "BUY",
+    "SELL",
+    "SELL",
+    "BUY",
+    "SELL",
+    "BUY",
+    "SELL",
+    "BUY",
+    "SELL",
+    "BUY",
+    "SELL",
+  ];
   const dates = [
+    buildIsoDate(2026, 5, 22),
+    buildIsoDate(2026, 5, 14),
+    buildIsoDate(2026, 4, 30),
+    buildIsoDate(2026, 3, 18),
+    buildIsoDate(2026, 2, 9),
+    buildIsoDate(2026, 1, 27),
+    buildIsoDate(2025, 11, 20),
+    buildIsoDate(2025, 10, 30),
     buildIsoDate(2025, 9, 17),
     buildIsoDate(2025, 9, 16),
-    buildIsoDate(2024, 8, 27),
+    buildIsoDate(2025, 8, 11),
+    buildIsoDate(2025, 6, 25),
+    buildIsoDate(2024, 11, 14),
     buildIsoDate(2024, 8, 19),
   ];
 
-  return securities.slice(0, 4).map((security, index) => {
+  return dates.map((date, index) => {
+    const security = securities[index % securities.length];
     const orderType = orderTypes[index] ?? "BUY";
     const status = statuses[index] ?? "EXECUTED";
     const currency = index % 2 === 0 ? countryCurrency : security.instrumentCurrency;
-    const amount = roundMoney(convertCurrency(security.localValue * (0.08 + index * 0.02), security.localCurrency, currency));
+    const amount = roundMoney(convertCurrency(security.localValue * (0.08 + (index % 4) * 0.02), security.localCurrency, currency));
 
     return {
       id: `ord-${security.id}-${index}`,
-      date: dates[index] ?? buildIsoDate(2024, 8, 19),
+      date,
       title: security.title,
       amount,
       currency,
       orderType,
       status,
       tone: status === "REJECTED" ? "negative" : "positive",
+      logoId: security.logoId,
     };
   });
 }

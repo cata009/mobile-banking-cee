@@ -16,6 +16,20 @@ interface InvestmentProductCardProps {
 }
 
 const INVESTMENT_TEXT_COLOR = "#262626";
+const POSITIVE_COLOR = "#3D7D43";
+const NEGATIVE_COLOR = "#CF3524";
+
+function formatSignedPercent(value: number) {
+  const rounded = value.toFixed(1).replace(".", ",");
+  const sign = value > 0 ? "+" : value < 0 ? "-" : "";
+  return `${sign}${rounded}%`;
+}
+
+function performanceColor(value: number) {
+  if (value > 0) return POSITIVE_COLOR;
+  if (value < 0) return NEGATIVE_COLOR;
+  return INVESTMENT_TEXT_COLOR;
+}
 
 export default function InvestmentProductCard({
   security,
@@ -27,6 +41,7 @@ export default function InvestmentProductCard({
   const valueText = `${valueParts.integer}${valueParts.decimal} ${valueParts.currency}`;
   const contributionLabel = security.contributionType.trim();
   const showContribution = contributionLabel.length > 0 && contributionLabel.toLowerCase() !== "standard";
+  const isRecurring = contributionLabel.toUpperCase() === "RECURRENT";
 
   return (
     <article
@@ -48,10 +63,10 @@ export default function InvestmentProductCard({
       <div className="flex min-h-[18px] items-center justify-between gap-[8px]">
         <span className="flex min-w-0 items-center gap-[5px] text-[14px] font-normal leading-[18px] text-[#262626]">
           {showContribution ? <span className="truncate uppercase">{contributionLabel}</span> : null}
-          {showContribution ? <AppIcon name="user-event-refresh" size={18} color={INVESTMENT_TEXT_COLOR} /> : null}
+          {showContribution && isRecurring ? <AppIcon name="recurring-contribution" size={18} color={INVESTMENT_TEXT_COLOR} /> : null}
         </span>
-        <span className="shrink-0 text-right text-[14px] font-bold leading-[18px]" style={{ color: INVESTMENT_TEXT_COLOR }}>
-          {security.performancePercent.toFixed(1).replace(".", ",")}%
+        <span className="shrink-0 text-right text-[14px] font-bold leading-[18px]" style={{ color: performanceColor(security.performancePercent) }}>
+          {formatSignedPercent(security.performancePercent)}
         </span>
       </div>
     </article>

@@ -2,6 +2,35 @@
 
 Last updated: 2026-07-08
 
+## 2026-07-08 Investments Logo And Distribution Chart Deploy Closeout
+
+- Latest request handled: user asked to commit everything still uncommitted and publish to Vercel.
+- Workspace scope:
+  - `main` already contained local commit `e2cda65` ahead of `origin/main`.
+  - A new set of local edits appeared after that commit and is intentionally included in this closeout, per user request to commit everything.
+- Commit scope:
+  - Investments distribution donut chart leader lines now use dynamic geometry based on each slice midpoint, with per-slice colors and side-aware label placement instead of fixed connector lines.
+  - Investments data now carries a mocked brand-logo id, expands history transactions/orders, adds brand logos in detail headers, and uses improved title casing.
+  - Added shared `BrandLogo` rendering backed by `src/app/config/brandLogos.ts` and shared `NavigationCardArt` for reusable card thumbnails.
+  - Portfolio/history UI polish includes recurring contribution icon, chart ticks, filter chip width behavior, summary performance color/sign handling, fund banner positioning, account-details card art reuse, ShopSmart typography tuning, and Products header title sizing.
+  - Included `.zcode/plans/plan-sess_c1feec4c-9fc0-4d9d-a40e-d30419c7535a.md` as the working plan for the donut leader-line repair.
+- Verification before commit:
+  - `npm run build` passed on 2026-07-08; known Vite warnings remain for empty `react-vendor` and chunks above 500 kB.
+  - `npm run audit:templates` passed: `template-contract ok: templates=47 codePreviews=47 components=79 screens=27 flows=14`.
+  - `npm run audit:platform` passed: `reference-platform audit ok products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Banana Loop result:
+  - fixed/triaged: the second wave of local Investments/brand-logo/Design System edits is being committed together instead of remaining hidden workspace drift.
+  - already known: Vite empty `react-vendor`, chunk-size warnings, oversized assets, missing typecheck/lint/test scripts, and git loose-object housekeeping remain known bananas.
+  - preserved: Investments remain mock-driven UI/data; no trading, suitability, portfolio backend, real brand-rights workflow, or order execution was added.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes after commit, push, and Vercel production deploy complete.
+- safe to resume: yes after commit, push, and Vercel production deploy complete.
+
 ## 2026-07-08 Investments And Design System Unification Commit
 
 - Latest request handled: user asked to commit everything currently uncommitted so the workspace is unified.

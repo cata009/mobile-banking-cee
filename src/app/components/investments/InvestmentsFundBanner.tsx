@@ -37,10 +37,10 @@ export default function InvestmentsFundBanner({
       data-ds-label="Investments fund banner"
     >
       <div className="relative z-10 max-w-[223px]">
-        <h2 className="text-[24px] font-bold leading-[26px] tracking-[0.2px] text-[#262626]">
+        <h2 className="text-[22px] font-bold leading-[26px] tracking-[0.2px] text-[#262626]">
           {title}
         </h2>
-        <p className="mt-[16px] text-[18px] font-normal leading-normal text-[#262626]">
+        <p className="mt-[8px] text-[18px] font-normal leading-normal text-[#262626]">
           {description}
         </p>
         <span className="mt-[18px] inline-flex items-center gap-[4px] text-[14px] font-bold uppercase leading-normal text-[#262626]">

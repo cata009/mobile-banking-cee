@@ -6,6 +6,7 @@ Status legend: `todo` / `in_progress` / `done` / `blocked`
 
 | Status | Task | Evidence / Notes |
 | --- | --- | --- |
+| done | Commit and publish Investments logo/distribution chart polish | Closeout requested on 2026-07-08; `npm run build`, `npm run audit:templates` (`templates=47 codePreviews=47 components=79 screens=27 flows=14`), `npm run audit:platform`, and `git diff --check` passed before commit/deploy. |
 | done | Commit current Investments and Design System unification edits | Closeout requested on 2026-07-08; `npm run build`, `npm run audit:templates` (`templates=47 codePreviews=47 components=79 screens=27 flows=14`), `npm run audit:platform`, and `git diff --check` passed before commit. |
 | done | Close out and publish current CZ Chatbot/Product detail workspace package | Full workspace closeout requested on 2026-07-07; `npm run audit:templates`, `npm run audit:platform`, `npm run build`, and `git diff --check` passed before commit/deploy. |
 | done | Install AI Contributor Operating System docs | `agents.md`, `docs/handoff/*` |
