@@ -1,6 +1,34 @@
 # Current Session
 
-Last updated: 2026-07-07
+Last updated: 2026-07-08
+
+## 2026-07-08 Investments And Design System Unification Commit
+
+- Latest request handled: user asked to commit everything currently uncommitted so the workspace is unified.
+- Workspace scope:
+  - `C:\Users\mihai\Desktop\Mobile Banking - CEE` is the active Git repository on `main`; all current modified files are included in this closeout.
+  - `C:\Users\mihai\Desktop\Creator` was checked and is not a Git repository, so there is nothing to commit there from Git.
+- Commit scope:
+  - Investments Portfolio / History polish: neutral performance color/sign display, adjusted distribution spacing, cleaner history/order rows, custom trade/order-detail/ex-ante icons, refined detail header collapse, local detail rows, and simplified order detail content.
+  - Investment mock data polish: local seed performance values adjusted to avoid negative display in the reviewed examples.
+  - Design System cleanup: removed three obsolete code-only template previews (`Account details info`, `Prime advisor`, `Account search results`) and matching registry entries; current template audit now expects `47` templates/code previews.
+  - Design System visual specimen polish: removed extra specimen background wrappers and swapped the mini product icon to the new `accounts-coins` app icon.
+- Verification before commit:
+  - `npm run build` passed on 2026-07-08; known Vite warnings remain for empty `react-vendor` and chunks above 500 kB.
+  - `npm run audit:templates` passed: `template-contract ok: templates=47 codePreviews=47 components=79 screens=27 flows=14`.
+  - `npm run audit:platform` passed: `reference-platform audit ok products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`.
+  - `git diff --check` passed with only normal Windows LF/CRLF warnings.
+- Banana Loop result:
+  - fixed/triaged: the current local Investments/Design System edits are being committed together instead of remaining hidden workspace drift.
+  - documented: the Design System current template/code-preview count is now `47`, not the older `50` figure from previous sessions.
+  - already known: Vite empty `react-vendor`, chunk-size warnings, oversized assets, missing typecheck/lint/test scripts, and git loose-object housekeeping remain known bananas.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes after commit completes.
+- safe to resume: yes after commit completes.
 
 ## 2026-07-07 Full Workspace Closeout For CZ Chatbot And Product Detail Deploy
 

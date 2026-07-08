@@ -875,7 +875,7 @@ function GhostBannerVariantSpecimen() {
           { id: "long-description", label: "Long description" },
         ]}
       />
-      <div className="flex w-[375px] flex-col gap-[16px] bg-[var(--uc-app-bg)] p-[16px]">
+      <div className="flex w-[375px] flex-col gap-[16px] p-[16px]">
         <GhostBanner title={active.title} description={active.description} onClick={() => undefined} />
       </div>
     </div>
@@ -913,7 +913,7 @@ function InfoBannerVariantSpecimen() {
           { id: "title-only", label: "Title and action" },
         ]}
       />
-      <div className="flex w-[375px] flex-col gap-[16px] bg-[var(--uc-app-bg)] p-[16px]">
+      <div className="flex w-[375px] flex-col gap-[16px] p-[16px]">
         <InfoBanner
           title={active.title}
           description={active.description}
@@ -949,7 +949,7 @@ function UserEventCardVariantSpecimen() {
           { id: "plain", label: "Without link and options" },
         ]}
       />
-      <div className="flex w-[375px] flex-col gap-[16px] bg-[var(--uc-app-bg)] p-[16px]">
+      <div className="flex w-[375px] flex-col gap-[16px] p-[16px]">
         <UserEventCard
           title="Expenses higher than usual"
           description={"Track your spending and try to get\nthe most our of your money."}
@@ -983,7 +983,7 @@ function HelperCardVariantSpecimen() {
           { id: "plain", label: "Without link" },
         ]}
       />
-      <div className="flex w-[375px] flex-col gap-[16px] bg-[var(--uc-app-bg)] p-[16px]">
+      <div className="flex w-[375px] flex-col gap-[16px] p-[16px]">
         <HelperCard
           title="Details"
           description="Use Details to view more information."
@@ -1012,7 +1012,7 @@ function PendingActionCardVariantSpecimen() {
           { id: "no-tag", label: "Without tag" },
         ]}
       />
-      <div className="flex w-[375px] flex-col gap-[16px] bg-[var(--uc-app-bg)] p-[16px]">
+      <div className="flex w-[375px] flex-col gap-[16px] p-[16px]">
         <PendingActionCard
           title="Pending Action"
           description="You have to reject or confirm a pending payment"
@@ -1578,7 +1578,7 @@ function PillSortingVariantSpecimen() {
 function MiniProductIcon() {
   return (
     <div className="flex size-[32px] items-center justify-center rounded-full bg-[var(--uc-action-soft)]">
-      <AppIcon name="account-details" size={20} color="var(--uc-action)" />
+      <AppIcon name="accounts-coins" size={20} color="var(--uc-action)" />
     </div>
   );
 }
@@ -2316,7 +2316,7 @@ function AccountCarouselIndicatorVariantSpecimen() {
           { id: "7-last", label: "7 items / last" },
         ]}
       />
-      <div className="flex w-[375px] flex-col gap-3 bg-[var(--uc-app-bg)] py-4">
+      <div className="flex w-[375px] flex-col gap-3 py-4">
         <AccountCarouselIndicator
           count={activeVariant.count}
           activeIndex={activeVariant.activeIndex}

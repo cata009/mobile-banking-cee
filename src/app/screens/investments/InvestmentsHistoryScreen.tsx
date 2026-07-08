@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useState, type UIEvent } from "react";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
-import AccountDetailsInfoField from "@/app/components/accounts/AccountDetailsInfoField";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import { AppIcon } from "@/app/components/icons";
 import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
-import NavigationRow from "@/app/components/NavigationRow";
 import PageHeader from "@/app/components/PageHeader";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import { cn } from "@/app/components/ui/utils";
@@ -47,7 +45,7 @@ const HISTORY_TABS = [
   { id: "orders", label: "Orders" },
 ] as const;
 
-function formatAmountParts(amount: number, country: CountryId, currency: string) {
+function formatAmountParts(amount: number, country: CountryId, currency: string, signed = true) {
   const config = getCountryConfig(country);
   const absoluteAmount = Math.abs(amount);
   const formatter = new Intl.NumberFormat(config.locale, {
@@ -61,7 +59,7 @@ function formatAmountParts(amount: number, country: CountryId, currency: string)
     .join("");
   const decimalSeparator = parts.find((part) => part.type === "decimal")?.value ?? ",";
   const fraction = parts.find((part) => part.type === "fraction")?.value ?? "00";
-  const sign = amount > 0 ? "+" : amount < 0 ? "-" : "";
+  const sign = signed ? (amount > 0 ? "+" : amount < 0 ? "-" : "") : "";
 
   return {
     integer: `${sign}${integer || "0"}`,
@@ -70,8 +68,8 @@ function formatAmountParts(amount: number, country: CountryId, currency: string)
   };
 }
 
-function formatAmountLabel(amount: number, country: CountryId, currency: string, hidden: boolean) {
-  const amountParts = formatAmountParts(amount, country, currency);
+function formatAmountLabel(amount: number, country: CountryId, currency: string, hidden: boolean, signed = true) {
+  const amountParts = formatAmountParts(amount, country, currency, signed);
   const masked = maskAmountParts({ integer: amountParts.integer, decimals: amountParts.decimal, currency }, hidden);
 
   return `${masked.integer}${masked.decimals} ${masked.currency}`;
@@ -101,11 +99,33 @@ function InvestmentAmountLabel({
   );
 }
 
+function AmountHero({
+  amount,
+  country,
+  currency,
+  amountsHidden,
+}: {
+  amount: number;
+  country: CountryId;
+  currency: string;
+  amountsHidden: boolean;
+}) {
+  const amountParts = formatAmountParts(amount, country, currency);
+  const masked = maskAmountParts({ integer: amountParts.integer, decimals: amountParts.decimal, currency }, amountsHidden);
+
+  return (
+    <p className="mt-[10px] text-[30px] font-bold leading-[33px] text-[#262626]">
+      <span>{masked.integer}</span>
+      <span className="text-[20px] font-normal"> {masked.decimals} {masked.currency}</span>
+    </p>
+  );
+}
+
 function formatDateParts(date: string, country: CountryId) {
   const parsed = new Date(date);
   const config = getCountryConfig(country);
   return {
-    day: new Intl.DateTimeFormat(config.locale, { day: "2-digit", timeZone: "UTC" }).format(parsed),
+    day: new Intl.DateTimeFormat(config.locale, { day: "2-digit", timeZone: "UTC" }).format(parsed).replace(/[.\s]+$/, ""),
     month: new Intl.DateTimeFormat("en-US", { month: "short", timeZone: "UTC" }).format(parsed).toUpperCase(),
     year: new Intl.DateTimeFormat(config.locale, { year: "numeric", timeZone: "UTC" }).format(parsed),
     long: new Intl.DateTimeFormat(config.locale, { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(parsed),
@@ -181,10 +201,10 @@ function DateBlock({ date, country }: { date: string; country: CountryId }) {
 
 function TradeIcon({ type }: { type: "BUY" | "SELL" | InvestmentHistoryTransactionType }) {
   const isBuy = type === "BUY" || type === "COUPON";
-  const color = isBuy ? "#3D7D43" : "#E2001A";
+  const color = isBuy ? "#3D7D43" : "#CF3524";
   return (
     <span className="grid size-[32px] shrink-0 place-items-center" aria-hidden="true">
-      <AppIcon name={isBuy ? "chevron-up" : "chevron-down"} color={color} size={18} />
+      <AppIcon name={isBuy ? "trade-buy" : "trade-sell"} color={color} size={28} />
     </span>
   );
 }
@@ -209,7 +229,7 @@ function InvestmentHistoryTransactionRow({
     >
       <DateBlock date={item.date} country={country} />
       <TradeIcon type={item.type} />
-      <div className="ml-[16px] flex min-w-0 flex-1 flex-col items-end border-b border-[#E5E5E5] py-[10px] text-right">
+      <div className="ml-[16px] flex min-w-0 flex-1 flex-col items-end py-[10px] text-right">
         <p className="w-full truncate text-right text-[14px] font-normal leading-[17px] text-[#262626]">{item.title}</p>
         <InvestmentAmountLabel
           amount={item.amount}
@@ -243,7 +263,7 @@ function InvestmentHistoryOrderRow({
       data-investment-history-row="order"
     >
       <TradeIcon type={item.orderType} />
-      <div className="ml-[16px] flex min-w-0 flex-1 flex-col items-end border-b border-[#E5E5E5] py-[10px] text-right">
+      <div className="ml-[16px] flex min-w-0 flex-1 flex-col items-end py-[10px] text-right">
         <p className="w-full truncate text-right text-[14px] font-normal leading-[17px] text-[#262626]">{item.title}</p>
         <InvestmentAmountLabel
           amount={item.orderType === "SELL" ? -item.amount : item.amount}
@@ -336,7 +356,7 @@ function FilterTextFieldRow({
         <div className="h-px w-[295px] bg-[var(--uc-border)]" />
       </div>
       <span className="absolute left-[331px] top-[20px] grid size-[32px] place-items-center" aria-hidden="true">
-        <AppIcon name="chevron-link" color="var(--uc-text)" size={20} />
+        <AppIcon name="chevron-link" color="var(--uc-text)" size={32} />
       </span>
     </button>
   );
@@ -344,7 +364,7 @@ function FilterTextFieldRow({
 
 function FilterDivider({ title }: { title: string }) {
   return (
-    <div className="relative flex h-[32px] w-full items-center bg-[var(--uc-surface)] pl-[24px] pr-[16px] pt-[6px]">
+    <div className="relative mb-[16px] flex h-[32px] w-full items-center bg-[var(--uc-surface)] pl-[24px] pr-[16px] pt-[6px]">
       <p className="w-[335px] text-[18px] font-bold leading-[22px] text-[var(--uc-text)]">{title}</p>
       <div className="absolute bottom-0 left-[16px] h-px w-[343px] bg-[var(--uc-border)]" />
     </div>
@@ -469,11 +489,11 @@ function FilterScaffold({
 }) {
   return (
     <div className="relative flex h-full w-full flex-col bg-[rgba(0,0,0,0.51)] text-[var(--uc-text)]" data-investment-filter-screen={title}>
-      <div className="absolute inset-x-0 bottom-0 top-[26px] flex flex-col rounded-t-[12px] bg-[var(--uc-surface)] pt-[24px]">
+      <div className="absolute inset-x-0 bottom-0 top-[var(--uc-phone-top-reserve,54px)] flex flex-col rounded-t-[12px] bg-[var(--uc-surface)] pt-[24px]">
         <div className="flex shrink-0 items-start justify-between px-[24px]">
           <h1 className="w-[287px] text-[28px] font-bold leading-[32px] tracking-[0.3px] text-[var(--uc-text)]">{title}</h1>
           <button type="button" onClick={onBack} className="grid size-[32px] place-items-center" aria-label="Close filters">
-            <AppIcon name="close-x" color="var(--uc-text)" size={14} />
+            <AppIcon name="close-x" color="var(--uc-text)" size={24} />
           </button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto pt-[24px] scrollbar-hide">{children}</div>
@@ -532,8 +552,11 @@ function InfoScreen({
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border-b border-[var(--uc-border)]">
-      <AccountDetailsInfoField title={label} subtitle={value} />
+    <div className="flex h-[80px] w-full items-center" data-account-details-info-field data-account-details-info-field-variant="default">
+      <div className="flex min-w-0 flex-col gap-[4px]">
+        <p className="uc-type-n4 text-[var(--uc-text)]">{label}</p>
+        <p className="uc-type-n4-strong break-words text-[var(--uc-text)]">{value}</p>
+      </div>
     </div>
   );
 }
@@ -557,9 +580,9 @@ function InvestmentHistoryDetailScreen({
   const dateParts = formatDateParts(item.date, country);
   const productId = `${country}${item.id.replace(/[^a-z0-9]/gi, "").slice(0, 10).toUpperCase()}`;
   const isin = `XS${String(Math.abs(productId.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0))).padStart(10, "0")}`;
-  const detailsTitle = isOrder ? "ORDER DETAILS" : "TRANSACTION DETAILS";
+  const detailsTitle = isOrder ? "Order details" : "Transaction details";
   const feeLabel = isOrder ? "Estimated fee" : actionType === "SELL" ? "Exit fee" : "Entry fee";
-  const feeAmount = formatAmountLabel(Math.max(1, Math.abs(amount) * 0.004), country, item.currency, amountsHidden);
+  const feeAmount = formatAmountLabel(Math.max(1, Math.abs(amount) * 0.004), country, item.currency, amountsHidden, false);
 
   const handleScroll = (event: UIEvent<HTMLDivElement>) => {
     setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64)));
@@ -574,19 +597,29 @@ function InvestmentHistoryDetailScreen({
           variant="gray"
           includeSafeArea
           showHelp={false}
+          compact
           collapsedTitleProgress={1}
           largeTitleAlign="center"
         />
-        <section className="bg-[var(--uc-app-bg)] px-[24px] pb-[24px] pt-[8px] text-center" style={{ opacity: 1 - headerProgress }}>
+        <section
+          className="overflow-hidden bg-[var(--uc-app-bg)] px-[24px] pb-[24px] text-center"
+          style={{
+            opacity: 1 - headerProgress,
+            maxHeight: `${280 * (1 - headerProgress)}px`,
+          }}
+        >
           <h2 className="text-[28px] font-bold leading-[31px] text-[var(--uc-text)]">{item.title}</h2>
-          <p className={cn("mt-[10px] text-[30px] font-bold leading-[33px]", amount < 0 ? "text-[var(--uc-danger)]" : "text-[#3D7D43]")}>
-            {formatAmountLabel(amount, country, item.currency, amountsHidden)}
-          </p>
+          <AmountHero
+            amount={amount}
+            country={country}
+            currency={item.currency}
+            amountsHidden={amountsHidden}
+          />
           <p className="mt-[6px] text-[14px] font-bold leading-[15px] text-[var(--uc-text-muted)]">255 PCS</p>
           <p className="mt-[10px] text-[14px] font-bold leading-[15px] text-[var(--uc-text-muted)]">{actionType}</p>
           <p className="mt-[10px] text-[14px] font-bold leading-[15px] text-[var(--uc-text-muted)]">{dateParts.long}</p>
           {isOrder ? (
-            <p className={cn("mx-auto mt-[14px] inline-flex rounded-full px-[12px] py-[4px] text-[13px] font-bold", item.status === "REJECTED" ? "bg-[rgba(207,53,36,0.12)] text-[var(--uc-danger)]" : "bg-[rgba(0,122,145,0.12)] text-[var(--uc-action)]")}>
+            <p className="mx-auto mt-[14px] inline-flex rounded-[16px] border border-[var(--uc-border)] bg-[var(--uc-static-white)] px-[12px] py-[4px] text-[13px] font-bold text-[#262626]">
               {item.status}
             </p>
           ) : null}
@@ -594,32 +627,23 @@ function InvestmentHistoryDetailScreen({
         {isOrder ? (
           <AccountActionBar
             items={[
-              { id: "more-details", iconName: "account-details", label: "More\ndetails" },
-              { id: "standing", iconName: "landmark", label: "More\nDetails" },
-              { id: "ex-ante", iconName: "info-circle", label: "Ex-Ante\ncost" },
+              { id: "more-details", iconName: "investment-more-details", label: "More\ndetails" },
+              { id: "ex-ante", iconName: "investment-ex-ante", label: "Ex-Ante\ncost" },
               { id: "documents", iconName: "account-option-statement", label: "Documents" },
             ]}
           />
         ) : null}
         <section className="px-[24px] pt-[22px]">
-          <SectionHeadingDivider title={detailsTitle} variant="medium-title" />
+          <h2 className="uc-type-n2-strong text-[20px] leading-none text-[var(--uc-text)]">{detailsTitle}</h2>
           <div className="pt-[12px]">
-            <DetailRow label="Product ID" value={productId} />
+            <DetailRow label="Product id" value={productId} />
             <DetailRow label="ISIN" value={isin} />
             <DetailRow label={isOrder ? "Order date" : "Settlement date"} value={dateParts.long} />
-            <DetailRow label="Price" value={formatAmountLabel(Math.max(1, Math.abs(amount) / 255), country, item.currency, amountsHidden)} />
+            <DetailRow label="Price" value={formatAmountLabel(Math.max(1, Math.abs(amount) / 255), country, item.currency, amountsHidden, false)} />
             <DetailRow label={feeLabel} value={feeAmount} />
           </div>
         </section>
-        {isOrder ? (
-          <section className="px-[24px] pb-[26px] pt-[14px]">
-            <SectionHeadingDivider title="ORDER DOCUMENTS" variant="medium-title" />
-            <NavigationRow title="Product Document" description={`${country} document`} onClick={() => undefined} trailingAccessory="chevron" />
-            <NavigationRow title="Cost document" description="Ex-Ante cost" onClick={() => undefined} trailingAccessory="chevron" />
-          </section>
-        ) : (
-          <div className="h-[26px]" />
-        )}
+        <div className="h-[26px]" />
       </div>
       <div className="flex h-[34px] shrink-0 items-center justify-center bg-[var(--uc-surface)]">
         <div className="h-[5px] w-[134px] rounded-full bg-[var(--uc-static-black)]" />

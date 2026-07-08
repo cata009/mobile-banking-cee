@@ -76,9 +76,7 @@ export type TemplateCodePreviewId =
   | "products-menu"
   | "more-menu"
   | "contacts-directory"
-  | "account-details-info"
   | "messages-outbox"
-  | "prime-advisor"
   | "prime-benefits"
   | "prelogin-inactive"
   | "prelogin-active"
@@ -86,7 +84,6 @@ export type TemplateCodePreviewId =
   | "more-panel-menu"
   | "co-apping-session"
   | "account-transactions-list"
-  | "account-search-results"
   | "spending-money-out"
   | "products-shopsmart"
   | "logout-confirmation";
@@ -198,15 +195,6 @@ const moreCardMeta: Record<MoreCardType, { title: string; description: string; i
   },
 };
 
-const accountDetailsInfoRows: Array<{ label: string; value: string; copy?: boolean }> = [
-  { label: "Account number", value: "RO49 AAAA 1B31 0075 9384 0000", copy: true },
-  { label: "Account owner", value: "Robert Ionescu" },
-  { label: "Account currency", value: "RON" },
-  { label: "Available balance", value: "12.250,00 RON" },
-  { label: "Booked balance", value: "12.240,00 RON" },
-  { label: "Branch", value: "UniCredit Bank Bucharest" },
-];
-
 const preloginProducts: Array<{ title: string; description: string; icon: IconName }> = [
   { title: "Accounts", description: "Everyday banking and balances", icon: "wallet-cards" },
   { title: "Cards", description: "Debit and credit card services", icon: "credit-card" },
@@ -223,11 +211,6 @@ const accountTransactionTemplateRows: Array<{ title: string; category: string; a
   { title: "Salary", category: "Incoming payment", amount: "+8.200,00 RON", icon: "landmark" },
   { title: "Online card payment", category: "Shopping", amount: "-74,50 RON", icon: "shopping-bag" },
   { title: "Transfer to savings", category: "Internal transfer", amount: "-500,00 RON", icon: "repeat" },
-];
-
-const filteredTransactionRows: Array<{ title: string; category: string; amount: string; icon: IconName }> = [
-  { title: "Carrefour Market", category: "Groceries", amount: "-153,80 RON", icon: "shopping-bag" },
-  { title: "Carrefour Online", category: "Shopping", amount: "-89,90 RON", icon: "credit-card" },
 ];
 
 const spendingMoneyOutRows: Array<{ title: string; amount: string; share: string; icon: IconName; barClass: string }> = [
@@ -1238,35 +1221,6 @@ function ContactsDirectoryTemplate({ interactive }: { interactive: boolean }) {
   );
 }
 
-function AccountDetailsInfoTemplate({ interactive }: { interactive: boolean }) {
-  return (
-    <TemplatePhoneSurface>
-      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[32px] scrollbar-hide">
-        <TemplateTopChrome title="Details" showHelp={false} interactive={interactive} />
-        <main className="px-[24px] pt-[20px] font-['UniCredit',sans-serif]">
-          <AccountBalancePreviewCard />
-          <section className="pt-[24px]">
-            <SectionHeadingDivider title="ACCOUNT DETAILS" />
-            <div className="pt-[8px]">
-              {accountDetailsInfoRows.map((row) => (
-                <TemplateReadOnlyRow key={row.label} label={row.label} value={row.value} copy={row.copy} />
-              ))}
-            </div>
-          </section>
-          <TemplateAction
-            ariaLabel="Share account info"
-            interactive={interactive}
-            className="mt-[14px] flex h-[48px] w-full items-center justify-center gap-[10px] rounded bg-[var(--uc-action)] font-['UniCredit',sans-serif] text-[16px] font-bold text-[var(--uc-static-white)]"
-          >
-            <AppIcon name="share-filled" color="currentColor" />
-            Share account info
-          </TemplateAction>
-        </main>
-      </div>
-    </TemplatePhoneSurface>
-  );
-}
-
 function MessagesOutboxTemplate({ interactive }: { interactive: boolean }) {
   return (
     <TemplatePhoneSurface>
@@ -1278,36 +1232,6 @@ function MessagesOutboxTemplate({ interactive }: { interactive: boolean }) {
         {outboxRows.map((row) => (
           <MessageListRow key={row.id} row={row} interactive={interactive} />
         ))}
-      </div>
-    </TemplatePhoneSurface>
-  );
-}
-
-function PrimeAdvisorTemplate({ interactive }: { interactive: boolean }) {
-  return (
-    <TemplatePhoneSurface>
-      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[32px] scrollbar-hide">
-        <TemplateTopChrome title="Your advisor" interactive={interactive} />
-        <main className="px-[24px] pt-[26px] font-['UniCredit',sans-serif] text-[var(--uc-text)]">
-          <section className="rounded-[8px] bg-[var(--uc-surface-muted)] p-[20px] text-center">
-            <div className="mx-auto grid size-[92px] place-items-center rounded-full bg-[var(--uc-action-soft)] text-[var(--uc-action)]">
-              <AppIcon name="header-profile" size={52} color="currentColor" />
-            </div>
-            <h2 className="mt-[16px] text-[24px] font-bold leading-[28px]">Andrei Popescu</h2>
-            <p className="mt-[4px] text-[15px] font-normal leading-[19px] text-[var(--uc-text-muted)]">
-              UniCredit Personal Banking Advisor
-            </p>
-          </section>
-          <section className="pt-[24px]">
-            <SectionHeadingDivider title="CONTACT OPTIONS" />
-            <div className="pt-[14px]">
-              <TemplateReadOnlyRow label="Phone" value="+40 21 200 2020" copy />
-              <TemplateReadOnlyRow label="Email" value="andrei.popescu@unicredit.ro" copy />
-              <TemplateReadOnlyRow label="Branch" value="Bucharest Dorobanti" />
-            </div>
-          </section>
-          <TemplateBottomButton label="Book appointment" interactive={interactive} bottom={32} />
-        </main>
       </div>
     </TemplatePhoneSurface>
   );
@@ -1586,47 +1510,6 @@ function AccountTransactionsListTemplate({ interactive }: { interactive: boolean
               <TemplateTransactionRow key={row.title} {...row} />
             ))}
           </div>
-        </main>
-      </div>
-      <TemplateFiveBottomNavigation active="Home" />
-    </TemplatePhoneSurface>
-  );
-}
-
-function AccountSearchResultsTemplate({ interactive }: { interactive: boolean }) {
-  return (
-    <TemplatePhoneSurface>
-      <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[88px] scrollbar-hide">
-        <TemplateTopChrome title="Search results" showHelp={false} interactive={interactive} />
-        <main className="px-[24px] pt-[18px] font-['UniCredit',sans-serif]">
-          <div className="flex h-[36px] items-center justify-between rounded-[10px] bg-[var(--uc-app-bg)]">
-            <span className="flex min-w-0 flex-1 items-center gap-[8px]">
-              <span className="grid size-[32px] place-items-center">
-                <AppIcon name="search" color="var(--uc-text)" />
-              </span>
-              <span className="font-['UniCredit',sans-serif] text-[14px] font-bold text-[var(--uc-text)]">
-                Carrefour
-              </span>
-            </span>
-            <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Clear search" interactive={interactive}>
-              <AppIcon name="clear-results" color="var(--uc-text)" />
-            </TemplateAction>
-          </div>
-          <p className="mt-[18px] text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
-            2 transactions found in My RON Account.
-          </p>
-          <div className="pt-[18px]">
-            {filteredTransactionRows.map((row) => (
-              <TemplateTransactionRow key={row.title} {...row} />
-            ))}
-          </div>
-          <TemplateAction
-            ariaLabel="Clear results"
-            interactive={interactive}
-            className="mt-[24px] flex h-[44px] w-full items-center justify-center font-['UniCredit',sans-serif] text-[14px] font-bold uppercase text-[var(--uc-action)]"
-          >
-            CLEAR RESULTS
-          </TemplateAction>
         </main>
       </div>
       <TemplateFiveBottomNavigation active="Home" />
@@ -2872,12 +2755,8 @@ export function TemplateCodePreview({ previewId, presentationOnly = false }: Tem
       return <MoreMenuTemplate interactive={interactive} />;
     case "contacts-directory":
       return <ContactsDirectoryTemplate interactive={interactive} />;
-    case "account-details-info":
-      return <AccountDetailsInfoTemplate interactive={interactive} />;
     case "messages-outbox":
       return <MessagesOutboxTemplate interactive={interactive} />;
-    case "prime-advisor":
-      return <PrimeAdvisorTemplate interactive={interactive} />;
     case "prime-benefits":
       return <PrimeBenefitsTemplate interactive={interactive} />;
     case "prelogin-inactive":
@@ -2892,8 +2771,6 @@ export function TemplateCodePreview({ previewId, presentationOnly = false }: Tem
       return <CoAppingSessionTemplate interactive={interactive} />;
     case "account-transactions-list":
       return <AccountTransactionsListTemplate interactive={interactive} />;
-    case "account-search-results":
-      return <AccountSearchResultsTemplate interactive={interactive} />;
     case "spending-money-out":
       return <SpendingMoneyOutTemplate interactive={interactive} />;
     case "products-shopsmart":

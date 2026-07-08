@@ -18,7 +18,7 @@ const DONUT_CIRCUMFERENCE = 2 * Math.PI * DONUT_RADIUS;
 
 const LABEL_POSITIONS = [
   "left-[25px] top-[5px] text-left",
-  "right-[24px] top-[1px] text-right",
+  "right-[24px] top-[8px] text-right",
   "right-[24px] top-[88px] text-right",
   "left-[25px] top-[108px] text-left",
 ];
@@ -129,10 +129,10 @@ export default function InvestmentDistributionChart({
         ))}
       </div>
 
-      <div className="px-[23px]">
+      <div className="mt-[24px] px-[23px]">
         <h2 className="uc-type-n4-strong text-[#262626]">{title}</h2>
       </div>
-      <div className="mt-[18px] border-t border-[#E5E5E5]">
+      <div className="mt-[18px]">
         {items.map((item) => {
           const amount = formatAmount(item.value, item.currency);
 
@@ -141,7 +141,7 @@ export default function InvestmentDistributionChart({
               key={item.id}
               type="button"
               onClick={() => onItemClick?.(item)}
-              className="flex min-h-[80px] w-full items-start justify-between gap-[14px] border-b border-[#E5E5E5] px-[16px] py-[13px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
+              className="flex min-h-[80px] w-full items-start justify-between gap-[14px] px-[23px] py-[13px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
             >
               <div className="flex min-w-0 gap-[10px]">
                 <span
