@@ -10,53 +10,114 @@ interface InvestmentDistributionChartProps {
 }
 
 const CHART_TEXT_COLOR = "#262626";
-const CONNECTOR_STROKES = ["#00A3E0", "#5BC199", "#074861", "#885BC1"];
 const DONUT_SIZE = 179;
 const DONUT_STROKE_WIDTH = 54;
 const DONUT_RADIUS = (DONUT_SIZE - DONUT_STROKE_WIDTH) / 2;
 const DONUT_CIRCUMFERENCE = 2 * Math.PI * DONUT_RADIUS;
 
-const LABEL_POSITIONS = [
-  "left-[25px] top-[5px] text-left",
-  "right-[24px] top-[8px] text-right",
-  "right-[24px] top-[88px] text-right",
-  "left-[25px] top-[108px] text-left",
-];
+// Leader-line overlay coordinate space. The 179px donut is centered
+// horizontally inside the 375-wide overlay, so its center in overlay coords is
+// (CHART_WIDTH / 2, DONUT_SIZE / 2).
+const CHART_WIDTH = 375;
+const CHART_HEIGHT = 179;
+const DONUT_CENTER_X = CHART_WIDTH / 2;
+const DONUT_CENTER_Y = DONUT_SIZE / 2;
+const DONUT_RING_RADIUS = DONUT_RADIUS + DONUT_STROKE_WIDTH / 2; // outer edge of the ring
 
-const CONNECTOR_LINES = [
-  "M88 3 L123 29",
-  "M252 30 L291 3",
-  "M254 118 L282 143",
-  "M89 146 L119 132",
-];
+// Leader horizontal terminations, just outside the ring on each side.
+const LEADER_EDGE_LEFT = 23;
+const LEADER_EDGE_RIGHT = 352;
 
-const CONNECTOR_HORIZONTAL_LINES = [
-  "M23 3 H88",
-  "M291 3 H351",
-  "M282 143 H351",
-  "M23 146 H89",
-];
+type Side = "left" | "right";
 
-function getLabelPosition(index: number) {
-  return LABEL_POSITIONS[index % LABEL_POSITIONS.length];
+interface SliceLeader {
+  side: Side;
+  ringX: number;
+  ringY: number;
+  outerX: number;
+  outerY: number;
+  slotY: number;
 }
 
-function buildSvgSegments(items: readonly InvestmentDistributionItem[]) {
+function degToRad(deg: number): number {
+  return (deg * Math.PI) / 180;
+}
+
+function pointOnRing(angleDeg: number, radius: number): { x: number; y: number } {
+  // 0deg = top (12 o'clock), clockwise. Ring center in overlay coords.
+  const rad = degToRad(angleDeg);
+  return {
+    x: DONUT_CENTER_X + radius * Math.sin(rad),
+    y: DONUT_CENTER_Y - radius * Math.cos(rad),
+  };
+}
+
+/**
+ * Walks the slices exactly like buildSvgSegments (cumulative offset, same gap)
+ * and returns, per item, the midpoint angle plus the leader anchor points.
+ * Vertical label slots are assigned per side so same-side labels never overlap.
+ */
+function buildSliceLeaders(items: readonly InvestmentDistributionItem[]): SliceLeader[] {
   let offset = 0;
   const gap = DONUT_CIRCUMFERENCE * 0.006;
 
-  return items.map((item) => {
+  const partial = items.map((item) => {
     const rawLength = (Math.max(0, item.percent) / 100) * DONUT_CIRCUMFERENCE;
     const length = Math.max(0, rawLength - gap);
-    const segment = {
-      color: item.color,
-      dashArray: `${length} ${DONUT_CIRCUMFERENCE - length}`,
-      dashOffset: -offset,
-    };
-
+    const startAngle = (offset / DONUT_CIRCUMFERENCE) * 360;
+    const spanAngle = (length / DONUT_CIRCUMFERENCE) * 360;
+    const midAngle = startAngle + spanAngle / 2;
     offset += rawLength;
-    return segment;
+
+    const ring = pointOnRing(midAngle, DONUT_RING_RADIUS);
+    const outer = pointOnRing(midAngle, DONUT_RING_RADIUS + 10);
+    const side: Side = midAngle > 0 && midAngle < 180 ? "right" : "left";
+
+    return {
+      side,
+      midAngle,
+      ringX: ring.x,
+      ringY: ring.y,
+      outerX: outer.x,
+      outerY: outer.y,
+    };
   });
+
+  // Assign vertical slots per side: sort by ring Y (top -> bottom), then spread
+  // the labels evenly across the container height.
+  const slotHeight = CHART_HEIGHT / 4;
+  const assignSideSlots = (filterSide: Side) => {
+    const onSide = partial
+      .map((entry, index) => ({ entry, index }))
+      .filter(({ entry }) => entry.side === filterSide)
+      .sort((a, b) => a.entry.ringY - b.entry.ringY);
+
+    onSide.forEach((value, slotIndex) => {
+      const center = slotHeight * (slotIndex + 0.5);
+      partial[value.index].slotY = Math.round(center);
+    });
+  };
+
+  assignSideSlots("left");
+  assignSideSlots("right");
+
+  // Fallback: any item that ended up without a slot (e.g. 0%) gets centered.
+  return partial.map((entry) => ({
+    side: entry.side,
+    ringX: entry.ringX,
+    ringY: entry.ringY,
+    outerX: entry.outerX,
+    outerY: entry.outerY,
+    slotY: entry.slotY ?? Math.round(CHART_HEIGHT / 2),
+  }));
+}
+
+function leaderPath(leader: SliceLeader): string {
+  // Radial elbow from the slice ring -> just outside the ring -> horizontal run
+  // at the label's slot height out to the side edge next to the label.
+  const turnX = leader.outerX;
+  const edgeX = leader.side === "right" ? LEADER_EDGE_RIGHT : LEADER_EDGE_LEFT;
+  return `M ${leader.ringX.toFixed(1)} ${leader.ringY.toFixed(1)} L ${leader.outerX.toFixed(1)} ${leader.outerY.toFixed(1)} L ${turnX.toFixed(1)} ${leader.slotY.toFixed(1)} L ${edgeX} ${leader.slotY.toFixed(1)}`;
 }
 
 export default function InvestmentDistributionChart({
@@ -68,22 +129,33 @@ export default function InvestmentDistributionChart({
 }: InvestmentDistributionChartProps) {
   const donutSegments = buildSvgSegments(items);
   const visibleLabels = items.slice(0, 4);
+  const leaders = buildSliceLeaders(visibleLabels);
 
   return (
     <section className="pt-[18px] text-[#262626]" data-ds-label="Investments distribution chart">
       <div className="relative h-[179px] w-full overflow-hidden" aria-label={`100% ${totalLabel}`}>
         <svg
           className="pointer-events-none absolute inset-0 h-[179px] w-full"
-          viewBox="0 0 375 179"
+          viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
           fill="none"
           aria-hidden="true"
         >
-          {visibleLabels.map((item, index) => (
-            <g key={`connector-${item.id}`} stroke={CONNECTOR_STROKES[index]} strokeWidth="2" strokeLinecap="square">
-              <path d={CONNECTOR_LINES[index]} />
-              <path d={CONNECTOR_HORIZONTAL_LINES[index]} />
-            </g>
-          ))}
+          {visibleLabels.map((item, index) => {
+            const leader = leaders[index];
+            if (!leader) return null;
+
+            return (
+              <path
+                key={`leader-${item.id}`}
+                d={leaderPath(leader)}
+                stroke={item.color}
+                strokeWidth={2}
+                strokeLinecap="square"
+                strokeLinejoin="miter"
+                fill="none"
+              />
+            );
+          })}
         </svg>
 
         <svg
@@ -117,16 +189,27 @@ export default function InvestmentDistributionChart({
           <circle cx={DONUT_SIZE / 2} cy={DONUT_SIZE / 2} r="36" fill="#FFFFFF" />
         </svg>
 
-        {visibleLabels.map((item, index) => (
-          <div key={item.id} className={`absolute max-w-[76px] ${getLabelPosition(index)}`}>
-            <p className="line-clamp-2 text-[14px] font-normal leading-[16px] tracking-[0.2px]" style={{ color: CHART_TEXT_COLOR }}>
-              {item.label}
-            </p>
-            <p className="text-[20px] font-bold leading-[24px]" style={{ color: CHART_TEXT_COLOR }}>
-              {item.percent}%
-            </p>
-          </div>
-        ))}
+        {visibleLabels.map((item, index) => {
+          const leader = leaders[index];
+          if (!leader) return null;
+          // Full literal class strings so Tailwind can detect them at build time.
+          const sideClass = leader.side === "right" ? "right-[24px] text-right" : "left-[24px] text-left";
+
+          return (
+            <div
+              key={item.id}
+              className={`absolute max-w-[76px] ${sideClass}`}
+              style={{ top: `${leader.slotY - 18}px` }}
+            >
+              <p className="line-clamp-2 text-[14px] font-normal leading-[16px] tracking-[0.2px]" style={{ color: CHART_TEXT_COLOR }}>
+                {item.label}
+              </p>
+              <p className="text-[20px] font-bold leading-[24px]" style={{ color: CHART_TEXT_COLOR }}>
+                {item.percent}%
+              </p>
+            </div>
+          );
+        })}
       </div>
 
       <div className="mt-[24px] px-[23px]">
@@ -166,4 +249,22 @@ export default function InvestmentDistributionChart({
       </div>
     </section>
   );
+}
+
+function buildSvgSegments(items: readonly InvestmentDistributionItem[]) {
+  let offset = 0;
+  const gap = DONUT_CIRCUMFERENCE * 0.006;
+
+  return items.map((item) => {
+    const rawLength = (Math.max(0, item.percent) / 100) * DONUT_CIRCUMFERENCE;
+    const length = Math.max(0, rawLength - gap);
+    const segment = {
+      color: item.color,
+      dashArray: `${length} ${DONUT_CIRCUMFERENCE - length}`,
+      dashOffset: -offset,
+    };
+
+    offset += rawLength;
+    return segment;
+  });
 }

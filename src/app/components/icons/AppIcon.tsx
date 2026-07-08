@@ -1152,6 +1152,24 @@ const CUSTOM_ICONS = {
       />
     ),
   },
+  "recurring-contribution": {
+    source: "custom",
+    label: "Recurring contribution",
+    category: "System",
+    width: 18,
+    height: 18,
+    viewBox: "0 0 18 18",
+    usage: ["InvestmentProductCard recurring contribution"],
+    notes: "Calendar-with-refresh glyph marking recurring investment contributions. Color passed via AppIcon color prop (#262626).",
+    render: () => (
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12.375 3.9375V2.8125H11.25V3.9375H6.75V2.8125H5.625V3.9375H5.0625C4.44118 3.9375 3.9375 4.44118 3.9375 5.0625V12.9375C3.9375 13.5588 4.44118 14.0625 5.0625 14.0625H10.125C9.765 13.7531 9.48375 13.3706 9.28125 12.9375H5.0625V7.3125H12.9375V8.20687C13.3369 8.26875 13.7194 8.40375 14.0625 8.61188V5.0625C14.0625 4.44118 13.5588 3.9375 12.9375 3.9375H12.375ZM12.375 9.28125V8.4375L11.1094 9.70312L12.375 10.9688V10.125C13.4156 10.125 14.0962 11.2275 13.635 12.1613L14.2481 12.7744C15.2381 11.2781 14.1694 9.28125 12.375 9.28125ZM12.375 13.7812V14.625L13.6406 13.3594L12.375 12.0938V12.9375C11.3344 12.9375 10.6537 11.835 11.115 10.9012L10.5019 10.2881C9.51188 11.7844 10.5806 13.7812 12.375 13.7812ZM5.0625 6.1875H12.9375V5.0625H5.0625V6.1875Z"
+        fill="currentColor"
+      />
+    ),
+  },
   mcash: {
     source: "custom",
     label: "mCash",

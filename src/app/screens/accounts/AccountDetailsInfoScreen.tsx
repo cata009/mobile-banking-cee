@@ -1,5 +1,6 @@
 import PageHeader from "@/app/components/PageHeader";
 import { AppIcon } from "@/app/components/icons";
+import NavigationCardArt from "@/app/components/cards/NavigationCardArt";
 import AccountDetailsInfoField from "@/app/components/accounts/AccountDetailsInfoField";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
@@ -28,22 +29,11 @@ const PRODUCT_TITLE_KEYS_BY_TYPE: Record<Product["type"], string> = {
   investment_account: "investmentAccount",
 };
 
-function CardThumbnail() {
-  return (
-    <div className="relative h-[40px] w-[64px] shrink-0 overflow-hidden rounded-[3px] bg-[var(--uc-app-bg)] shadow-[0_1px_4px_rgb(var(--uc-shadow-rgb)_/_0.14)]">
-      <div className="absolute left-[8px] top-[10px] h-[20px] w-[20px] rotate-45 border-r-[6px] border-t-[6px] border-[var(--uc-brand)]" />
-      <div className="absolute left-[22px] top-[10px] h-[20px] w-[20px] rotate-45 border-r-[6px] border-t-[6px] border-[var(--uc-brand)]" />
-      <div className="absolute right-[8px] top-[17px] h-[10px] w-[10px] rounded-full bg-[var(--uc-brand)]" />
-      <div className="absolute right-[3px] top-[17px] h-[10px] w-[10px] rounded-full bg-[var(--uc-orange-bright)] opacity-90" />
-    </div>
-  );
-}
-
 function ConnectedCardRow() {
   const { t } = useLanguage();
   return (
     <button className="grid w-full grid-cols-[64px_1fr_24px] items-center gap-[16px] py-[18px] text-left">
-      <CardThumbnail />
+      <NavigationCardArt />
       <div className="min-w-0">
         <p className="uc-type-h2 uppercase leading-[22px] text-[var(--uc-text)]">
           {t("runtime.accounts.detailsInfo.mastercardStandardDebit", "Mastercard Standard Debit")}
