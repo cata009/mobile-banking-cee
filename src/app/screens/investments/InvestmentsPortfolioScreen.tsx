@@ -56,7 +56,7 @@ const DISTRIBUTION_TITLE_TRANSLATION_KEYS: Record<Exclude<InvestmentPortfolioTab
   "account-list": "accountList",
 };
 
-function formatAmountParts(amount: number, country: CountryId, currency: string, signed = false): InvestmentAmountParts {
+function formatAmountParts(amount: number, country: CountryId, currency: string): InvestmentAmountParts {
   const config = getCountryConfig(country);
   const absoluteAmount = Math.abs(amount);
   const formatter = new Intl.NumberFormat(config.locale, {
@@ -70,10 +70,9 @@ function formatAmountParts(amount: number, country: CountryId, currency: string,
     .join("");
   const decimalSeparator = parts.find((part) => part.type === "decimal")?.value ?? ",";
   const fraction = parts.find((part) => part.type === "fraction")?.value ?? "00";
-  const sign = signed && amount > 0 ? "+" : signed && amount < 0 ? "-" : "";
 
   return {
-    integer: `${sign}${integer || "0"}`,
+    integer: `${integer || "0"}`,
     decimal: `${decimalSeparator}${fraction}`,
     currency,
   };
@@ -108,7 +107,6 @@ function PortfolioSummary({
   currency: string;
 }) {
   const { t } = useLanguage();
-  const performanceColor = performanceAmount.integer.startsWith("-") ? "text-[var(--uc-danger)]" : "text-[#3D7D43]";
 
   return (
     <div className="px-[16px] pt-[16px]">
@@ -126,7 +124,7 @@ function PortfolioSummary({
           <span className="text-[14px] font-bold leading-normal text-[var(--uc-text)]">
             {t("runtime.investments.performance", "Performance")}:
           </span>
-          <span className={performanceColor}>
+          <span className="text-[#262626]">
             <span className="text-center text-[14px] font-bold leading-normal">{performanceAmount.integer}</span>
             <span className="text-center text-[14px] font-bold leading-normal">{performanceAmount.decimal} {performanceAmount.currency || currency}</span>
             <span className="text-center text-[14px] font-bold leading-normal"> / {performancePercentLabel}</span>
@@ -186,7 +184,7 @@ function DistributionCategoryDetailScreen({
         className="flex h-[80px] w-full items-center justify-between bg-[#FFFFFF] px-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
         data-investment-category-row={security.id}
       >
-        <div className="min-w-0 flex-1 border-b border-[#E5E5E5] py-[14px] pr-[12px]">
+        <div className="min-w-0 flex-1 py-[14px] pr-[12px]">
           <p className="truncate text-[14px] font-bold leading-[17px] text-[#262626]">{security.title}</p>
           <p className="mt-[10px] truncate text-[#262626]">
             <span className="text-[20px] font-bold leading-[24px]">{primaryAmount.integer}</span>
@@ -199,7 +197,7 @@ function DistributionCategoryDetailScreen({
           </p>
         </div>
         <span className="grid size-[32px] shrink-0 place-items-center" aria-hidden="true">
-          <AppIcon name="chevron-link" color="#262626" size={20} />
+          <AppIcon name="chevron-link" color="#262626" size={28} />
         </span>
       </button>
     );
@@ -266,10 +264,10 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
   );
 
   const totalValueParts = maskInvestmentAmount(formatAmountParts(totalValue, country, portfolioCurrency), amountsHidden);
-  const performanceParts = maskInvestmentAmount(formatAmountParts(totalPerformanceAmount, country, portfolioCurrency, true), amountsHidden);
+  const performanceParts = maskInvestmentAmount(formatAmountParts(totalPerformanceAmount, country, portfolioCurrency), amountsHidden);
   const totalPerformancePercentLabel = amountsHidden
     ? "**,**%"
-    : `${totalPerformancePercent > 0 ? "+" : ""}${totalPerformancePercent.toFixed(2).replace(".", ",")}%`;
+    : `${totalPerformancePercent.toFixed(2).replace(".", ",")}%`;
 
   const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
     const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64));
@@ -281,7 +279,7 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
       key={security.id}
       security={security}
       valueParts={maskInvestmentAmount(formatAmountParts(security.value, country, security.currency), amountsHidden)}
-      performanceParts={maskInvestmentAmount(formatAmountParts(security.performanceAmount, country, security.localCurrency, true), amountsHidden)}
+      performanceParts={maskInvestmentAmount(formatAmountParts(security.performanceAmount, country, security.localCurrency), amountsHidden)}
       valueLabel={t("runtime.investments.value", "Value")}
       performanceLabel={t("runtime.investments.performance", "Performance")}
     />

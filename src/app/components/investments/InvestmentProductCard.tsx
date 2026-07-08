@@ -16,14 +16,6 @@ interface InvestmentProductCardProps {
 }
 
 const INVESTMENT_TEXT_COLOR = "#262626";
-const INVESTMENT_POSITIVE_COLOR = "#3D7D43";
-const INVESTMENT_NEGATIVE_COLOR = "#E2001A";
-
-function performanceColor(value: number): string {
-  if (value > 0) return INVESTMENT_POSITIVE_COLOR;
-  if (value < 0) return INVESTMENT_NEGATIVE_COLOR;
-  return INVESTMENT_TEXT_COLOR;
-}
 
 export default function InvestmentProductCard({
   security,
@@ -32,8 +24,6 @@ export default function InvestmentProductCard({
   valueLabel,
   performanceLabel,
 }: InvestmentProductCardProps) {
-  const toneColor = performanceColor(security.performanceAmount);
-  const percentPrefix = security.performancePercent > 0 ? "+" : "";
   const valueText = `${valueParts.integer}${valueParts.decimal} ${valueParts.currency}`;
   const contributionLabel = security.contributionType.trim();
   const showContribution = contributionLabel.length > 0 && contributionLabel.toLowerCase() !== "standard";
@@ -50,7 +40,7 @@ export default function InvestmentProductCard({
         <p className="min-w-0 flex-1 truncate text-[14px] font-normal leading-[18px] text-[#262626]" aria-label={valueLabel}>
           {valueText}
         </p>
-        <p className="shrink-0 text-right" style={{ color: toneColor }} aria-label={performanceLabel}>
+        <p className="shrink-0 text-right" style={{ color: INVESTMENT_TEXT_COLOR }} aria-label={performanceLabel}>
           <span className="text-[20px] font-bold leading-[22px]">{performanceParts.integer}</span>
           <span className="text-[14px] font-normal leading-normal">{performanceParts.decimal} {performanceParts.currency}</span>
         </p>
@@ -60,8 +50,8 @@ export default function InvestmentProductCard({
           {showContribution ? <span className="truncate uppercase">{contributionLabel}</span> : null}
           {showContribution ? <AppIcon name="user-event-refresh" size={18} color={INVESTMENT_TEXT_COLOR} /> : null}
         </span>
-        <span className="shrink-0 text-right text-[14px] font-bold leading-[18px]" style={{ color: toneColor }}>
-          {percentPrefix}{security.performancePercent.toFixed(1).replace(".", ",")}%
+        <span className="shrink-0 text-right text-[14px] font-bold leading-[18px]" style={{ color: INVESTMENT_TEXT_COLOR }}>
+          {security.performancePercent.toFixed(1).replace(".", ",")}%
         </span>
       </div>
     </article>
