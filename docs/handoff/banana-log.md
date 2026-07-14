@@ -2,6 +2,12 @@
 
 This log records bananas found and how they were triaged.
 
+## 2026-07-14
+
+| Banana | Triage | Evidence |
+| --- | --- | --- |
+| A direct Vercel API smoke call created an empty ERROR deployment before the Git-integrated deployment ran | Superseded immediately by the READY production deployment built from commit `9acd88a`; the canonical production alias points to the READY artifact and runtime-error scan is clean | Vercel deployments `dpl_HLrspbWLMuDjQA3py7nwuenD1iJo` (ERROR) and `dpl_ERD6QX3XnWdNy6ojT7AvQuQmuy8G` (READY); `get_runtime_errors` returned no errors |
+
 ## 2026-07-06
 
 | Banana | Triage | Evidence |

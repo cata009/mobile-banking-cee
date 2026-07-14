@@ -7,7 +7,7 @@ Status legend: `todo` / `in_progress` / `done` / `blocked`
 | Status | Task | Evidence / Notes |
 | --- | --- | --- |
 | done | Align account filters and Connected cards heading | Account transaction filters use the shared safe-area reserve and Account Details Info uses `SectionHeadingDivider`, matching the rest of the app. |
-| in_progress | Commit and publish complete workspace | Final closeout commit and Vercel production deployment are in progress; deployment URL and commit SHA will be recorded in `current-session.md` before handoff. |
+| done | Commit and publish complete workspace | Commit `9acd88a` was pushed to `origin/main`; Vercel production deployment `dpl_ERD6QX3XnWdNy6ojT7AvQuQmuy8G` is READY at `https://mobile-banking-cee.vercel.app`. |
 | done | Add global debit/credit Card Details and Card Options foundation | CardDetail quick actions now route to selected-card-aware safe-area screens for both card types and all countries; exact option row behavior remains a follow-up when product details arrive. |
 | done | Align demo header Play icon with supplied Design System SVG | `AppIcon` owns the exact 24x24 circular glyph and `DemoTopBar` renders it at native size in the existing button slot; browser smoke confirmed the path, `#262626` color, and visible Design System inventory entries. |
 | done | Unify Investments negative-state red | History transaction/order negative values now use exact `#CF3524`, matching negative performance and sell states. |
