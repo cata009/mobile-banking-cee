@@ -21,6 +21,8 @@ import UserEventCard from "@/app/components/cards/UserEventCard";
 interface CardDetailScreenProps {
   selectedCardId?: string | null;
   onBack: () => void;
+  onCardDetailsClick?: (card: Product) => void;
+  onCardOptionsClick?: (card: Product) => void;
   onTransactionClick?: (transaction: AccountTransaction, product: Product) => void;
   onHelpClick?: () => void;
   aiOpportunityNudge?: {
@@ -126,6 +128,8 @@ function CollapsingCardHeader({
 export default function CardDetailScreen({
   selectedCardId,
   onBack,
+  onCardDetailsClick,
+  onCardOptionsClick,
   onTransactionClick,
   onHelpClick,
   aiOpportunityNudge = null,
@@ -399,8 +403,8 @@ export default function CardDetailScreen({
   }
 
   const cardQuickActions = [
-    { id: "card-details", iconName: "account-details" as const, label: t("runtime.cards.actions.details", "Card Details") },
-    { id: "options", iconName: "account-options" as const, label: t("runtime.cards.actions.options", "Options") },
+    { id: "card-details", iconName: "account-details" as const, label: t("runtime.cards.actions.details", "Card Details"), onClick: () => onCardDetailsClick?.(activeCard) },
+    { id: "options", iconName: "account-options" as const, label: t("runtime.cards.actions.options", "Options"), onClick: () => onCardOptionsClick?.(activeCard) },
     { id: "block-card", iconName: "block-card" as const, label: t("runtime.cards.actions.blockCard", "Block Card") },
     { id: "view-pin", iconName: "view-pin" as const, label: t("runtime.cards.actions.viewPin", "View PIN") },
   ];

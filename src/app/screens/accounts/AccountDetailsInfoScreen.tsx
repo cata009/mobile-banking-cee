@@ -2,6 +2,7 @@ import PageHeader from "@/app/components/PageHeader";
 import { AppIcon } from "@/app/components/icons";
 import NavigationCardArt from "@/app/components/cards/NavigationCardArt";
 import AccountDetailsInfoField from "@/app/components/accounts/AccountDetailsInfoField";
+import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
 import { formatMoneyNumber, getCountryConfig } from "@/app/registry/countryConfig";
@@ -35,10 +36,10 @@ function ConnectedCardRow() {
     <button className="grid w-full grid-cols-[64px_1fr_24px] items-center gap-[16px] py-[18px] text-left">
       <NavigationCardArt />
       <div className="min-w-0">
-        <p className="uc-type-h2 uppercase leading-[22px] text-[var(--uc-text)]">
+        <p className="uc-type-n4-strong leading-[20px] text-[var(--uc-text)]">
           {t("runtime.accounts.detailsInfo.mastercardStandardDebit", "Mastercard Standard Debit")}
         </p>
-        <p className="uc-type-n2 mt-[2px] leading-[24px] text-[var(--uc-text-muted)]">
+        <p className="uc-type-n5 mt-[2px] leading-[15px] text-[var(--uc-text-muted)]">
           5545 XXXX XXXX 3250
         </p>
       </div>
@@ -129,9 +130,7 @@ export default function AccountDetailsInfoScreen({
         </div>
 
         <section>
-          <h2 className="border-b border-[var(--uc-neutral-500)] pb-[8px] font-['UniCredit',sans-serif] text-[22px] leading-[28px] font-bold uppercase text-[var(--uc-text)]">
-            {t("runtime.accounts.detailsInfo.connectedCards", "Connected cards")}
-          </h2>
+          <SectionHeadingDivider title={t("runtime.accounts.detailsInfo.connectedCards", "Connected cards")} />
           <ConnectedCardRow />
         </section>
       </div>

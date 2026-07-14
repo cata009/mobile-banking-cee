@@ -35,6 +35,7 @@ export interface InvestmentChartPoint {
   dateLabel: string;
   yearLabel: string;
   value: number;
+  showDot?: boolean;
 }
 
 export interface InvestmentSecurity {
@@ -57,6 +58,16 @@ export interface InvestmentSecurity {
   performancePercent: number;
   /** Brand-logo id from the mocked brand-logo database. */
   logoId?: BrandLogoId;
+}
+
+export interface InvestmentCatalogSecurity extends InvestmentSecurity {
+  owned: boolean;
+  productId: string;
+  marketPrice: number;
+  quantity: number;
+  inceptionDate: string;
+  lastUpdate: string;
+  description: string;
 }
 
 export interface InvestmentDistributionItem {
@@ -101,8 +112,11 @@ export interface InvestmentHistoryOrder {
 
 export interface InvestmentHistoryFilterState {
   datePreset: InvestmentHistoryDatePreset;
+  customStartDate: string;
+  customEndDate: string;
   selectedTypes: InvestmentHistoryTransactionType[];
   selectedCurrencies: Currency[];
+  selectedStatuses: InvestmentHistoryOrderStatus[];
 }
 
 interface InvestmentSecuritySeed {
@@ -237,15 +251,57 @@ const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
   },
 ];
 
+const CATALOG_ONLY_SEEDS: readonly InvestmentSecuritySeed[] = [
+  {
+    id: "climate-focus",
+    title: "Amundi Climate Focus Fund",
+    status: "active",
+    contributionType: "ONE OFF",
+    weight: 16,
+    performancePercent: 2.21,
+    instrumentCurrency: "EUR",
+    logoId: "unicredit",
+    securityAccountId: "catalog-eur",
+    securityAccountName: "Available funds",
+    securityAccountCurrency: "EUR",
+    productType: "Fund",
+    assetClass: "Equity",
+  },
+  {
+    id: "sustainable-future",
+    title: "Sustainable Future Mixed Fund",
+    status: "active",
+    contributionType: "RECURRENT",
+    weight: 12,
+    performancePercent: 3.75,
+    instrumentCurrency: "USD",
+    logoId: "unicredit",
+    securityAccountId: "catalog-usd",
+    securityAccountName: "Available funds",
+    securityAccountCurrency: "USD",
+    productType: "Fund",
+    assetClass: "Balanced",
+  },
+];
+
 const DISTRIBUTION_COLORS = ["#00A3E0", "#5BC199", "#074861", "#885BC1", "#535453", "#24A06B"];
 
 const PERIOD_MULTIPLIERS: Record<InvestmentPeriodId, readonly number[]> = {
-  "1m": [0.982, 0.988, 0.981, 0.996, 0.991, 1],
-  "3m": [0.956, 0.972, 0.966, 0.982, 0.991, 1],
-  "6m": [0.934, 0.948, 0.962, 0.956, 0.984, 1],
-  "1y": [0.92, 0.934, 0.948, 0.938, 0.976, 1],
-  "3y": [0.82, 0.852, 0.872, 0.914, 0.962, 1],
-  max: [0.74, 0.78, 0.81, 0.86, 0.93, 1],
+  "1m": [0.982, 0.986, 0.989, 0.991, 0.987, 0.981, 0.978, 0.984, 0.991, 0.995, 0.992, 0.988, 0.987, 0.992, 0.994, 0.998, 0.999, 1],
+  "3m": [0.956, 0.965, 0.971, 0.976, 0.971, 0.967, 0.965, 0.972, 0.981, 0.987, 0.983, 0.979, 0.979, 0.986, 0.991, 0.995, 0.998, 1],
+  "6m": [0.934, 0.944, 0.953, 0.958, 0.953, 0.948, 0.945, 0.953, 0.965, 0.974, 0.969, 0.964, 0.961, 0.969, 0.976, 0.988, 0.996, 1],
+  "1y": [0.92, 0.932, 0.941, 0.948, 0.943, 0.937, 0.932, 0.944, 0.958, 0.968, 0.962, 0.956, 0.951, 0.961, 0.971, 0.982, 0.993, 1],
+  "3y": [0.82, 0.842, 0.86, 0.872, 0.858, 0.844, 0.836, 0.854, 0.888, 0.914, 0.903, 0.892, 0.883, 0.899, 0.916, 0.938, 0.972, 1],
+  max: [0.74, 0.77, 0.795, 0.81, 0.795, 0.782, 0.77, 0.79, 0.835, 0.87, 0.858, 0.846, 0.84, 0.856, 0.875, 0.904, 0.96, 1],
+};
+
+const PERIOD_ANCHOR_INDICES: Record<InvestmentPeriodId, readonly number[]> = {
+  "1m": [0, 3, 6, 9, 12, 17],
+  "3m": [0, 3, 6, 9, 12, 17],
+  "6m": [0, 3, 6, 9, 12, 17],
+  "1y": [0, 3, 6, 9, 12, 17],
+  "3y": [0, 3, 6, 9, 12, 17],
+  max: [0, 3, 6, 9, 12, 17],
 };
 
 const PERIOD_DATE_LABELS: Record<InvestmentPeriodId, readonly string[]> = {
@@ -319,6 +375,51 @@ export function buildInvestmentSecurities(
   });
 }
 
+function enrichCatalogSecurity(security: InvestmentSecurity, country: CountryId, owned: boolean, index: number): InvestmentCatalogSecurity {
+  const countryCode = country.replace(/[^A-Z]/g, "").slice(0, 2).padEnd(2, "X");
+  const stableId = security.id.replace(/[^a-z0-9]/gi, "").toUpperCase().slice(0, 9).padEnd(9, "0");
+
+  const marketPrice = roundMoney(Math.max(1, security.value * (0.74 + (index % 4) * 0.03)));
+
+  return {
+    ...security,
+    owned,
+    productId: `${countryCode}${stableId}${index + 1}`,
+    marketPrice,
+    quantity: owned ? roundMoney(security.value / marketPrice) : 0,
+    inceptionDate: `${String(19 + (index % 8)).padStart(2, "0")}.07.${2020 + (index % 4)}`,
+    lastUpdate: `03.0${(index % 8) + 1}.2026`,
+    description: `${security.title} is a ${security.assetClass.toLowerCase()} ${security.productType.toLowerCase()} denominated in ${security.instrumentCurrency}. Review its objectives, risk profile, fees and official product documents before placing an order.`,
+  };
+}
+
+export function buildInvestmentSecurityCatalog(
+  ownedSecurities: readonly InvestmentSecurity[],
+  country: CountryId,
+): InvestmentCatalogSecurity[] {
+  const localCurrency = getCountryCurrency(country) as Currency;
+  const referenceLocalValue = Math.max(500, ownedSecurities.reduce((sum, item) => sum + item.localValue, 0) / Math.max(1, ownedSecurities.length));
+  const ownedCatalog = ownedSecurities.map((security, index) => enrichCatalogSecurity(security, country, true, index));
+  const availableCatalog = CATALOG_ONLY_SEEDS.map((seed, index) => {
+    const localValue = roundMoney(referenceLocalValue * (0.72 + index * 0.18));
+    const value = roundMoney(convertCurrency(localValue, localCurrency, seed.instrumentCurrency));
+    const security: InvestmentSecurity = {
+      ...seed,
+      sourceProductName: "Investment catalogue",
+      value,
+      currency: seed.instrumentCurrency,
+      localValue,
+      localCurrency,
+      performanceAmount: roundMoney((localValue * seed.performancePercent) / 100),
+      instrumentCurrency: seed.instrumentCurrency,
+      securityAccountCurrency: seed.securityAccountCurrency,
+    };
+    return enrichCatalogSecurity(security, country, false, ownedCatalog.length + index);
+  });
+
+  return [...ownedCatalog, ...availableCatalog];
+}
+
 export function buildInvestmentChartPoints(
   totalValue: number,
   periodId: InvestmentPeriodId,
@@ -326,13 +427,21 @@ export function buildInvestmentChartPoints(
   const multipliers = PERIOD_MULTIPLIERS[periodId];
   const dateLabels = PERIOD_DATE_LABELS[periodId];
   const yearLabels = PERIOD_YEAR_LABELS[periodId];
+  const anchorIndices = PERIOD_ANCHOR_INDICES[periodId];
 
-  return multipliers.map((multiplier, index) => ({
-    label: `${dateLabels[index] ?? ""} ${yearLabels[index] ?? ""}`.trim(),
-    dateLabel: dateLabels[index] ?? "",
-    yearLabel: yearLabels[index] ?? "",
-    value: roundMoney(totalValue * multiplier),
-  }));
+  return multipliers.map((multiplier, index) => {
+    const anchorPosition = anchorIndices.indexOf(index);
+    const dateLabel = anchorPosition >= 0 ? dateLabels[anchorPosition] ?? "" : "";
+    const yearLabel = anchorPosition >= 0 ? yearLabels[anchorPosition] ?? "" : "";
+
+    return {
+      label: `${dateLabel} ${yearLabel}`.trim(),
+      dateLabel,
+      yearLabel,
+      value: roundMoney(totalValue * multiplier),
+      showDot: anchorPosition >= 0,
+    };
+  });
 }
 
 export function sortInvestmentSecurities(

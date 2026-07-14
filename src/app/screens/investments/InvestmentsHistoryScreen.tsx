@@ -6,7 +6,9 @@ import { AppIcon } from "@/app/components/icons";
 import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
 import PageHeader from "@/app/components/PageHeader";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
+import { Calendar } from "@/app/components/ui/calendar";
 import { cn } from "@/app/components/ui/utils";
+import type { DateRange } from "react-day-picker";
 import {
   INVESTMENT_HISTORY_DATE_OPTIONS,
   INVESTMENT_HISTORY_TRANSACTION_TYPES,
@@ -18,6 +20,7 @@ import {
   type InvestmentHistoryDatePreset,
   type InvestmentHistoryFilterState,
   type InvestmentHistoryOrder,
+  type InvestmentHistoryOrderStatus,
   type InvestmentHistoryTabId,
   type InvestmentHistoryTransaction,
   type InvestmentHistoryTransactionType,
@@ -34,7 +37,7 @@ type HistoryItem =
   | { kind: "transaction"; item: InvestmentHistoryTransaction }
   | { kind: "order"; item: InvestmentHistoryOrder };
 
-type FilterMode = "main" | "type" | "currency" | null;
+type FilterMode = "main" | "type" | "status" | "currency" | "calendar" | null;
 type InfoMode = "transactions" | "orders" | null;
 
 interface InvestmentsHistoryScreenProps {
@@ -45,6 +48,25 @@ const HISTORY_TABS = [
   { id: "transactions", label: "Transactions" },
   { id: "orders", label: "Orders" },
 ] as const;
+
+const INVESTMENT_HISTORY_ORDER_STATUSES: readonly InvestmentHistoryOrderStatus[] = ["EXECUTED", "PENDING", "REJECTED"];
+
+function toIsoDateOnly(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function parseIsoDateOnly(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, Math.max(0, month - 1), day);
+}
+
+function formatFilterDate(value: string, country: CountryId) {
+  return new Intl.DateTimeFormat(getCountryConfig(country).locale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(parseIsoDateOnly(value));
+}
 
 function formatAmountParts(amount: number, country: CountryId, currency: string, signed = true) {
   const config = getCountryConfig(country);
@@ -153,15 +175,17 @@ function historyRowMatchesSearch(item: InvestmentHistoryTransaction | Investment
   return fields.some((field) => String(field).toLowerCase().includes(normalized));
 }
 
-function historyRowMatchesDate(itemDate: string, preset: InvestmentHistoryDatePreset, latestDate: Date) {
-  if (preset === "define") {
-    const start = Date.UTC(2024, 8, 1);
-    const end = Date.UTC(2025, 9, 31);
+function historyRowMatchesDate(itemDate: string, filters: InvestmentHistoryFilterState, latestDate: Date) {
+  if (filters.datePreset === "define") {
+    const start = parseIsoDateOnly(filters.customStartDate).getTime();
+    const endDate = parseIsoDateOnly(filters.customEndDate);
+    endDate.setHours(23, 59, 59, 999);
+    const end = endDate.getTime();
     const current = new Date(itemDate).getTime();
     return current >= start && current <= end;
   }
 
-  const days = preset === "last-month" ? 31 : preset === "last-6-months" ? 183 : 366;
+  const days = filters.datePreset === "last-month" ? 31 : filters.datePreset === "last-6-months" ? 183 : 366;
   const cutoff = new Date(latestDate);
   cutoff.setUTCDate(cutoff.getUTCDate() - days);
   return new Date(itemDate).getTime() >= cutoff.getTime();
@@ -177,7 +201,7 @@ function normalizeFiltersForTab(filters: InvestmentHistoryFilterState, tab: Inve
 
   return {
     ...filters,
-    selectedTypes: selectedTypes.length > 0 ? selectedTypes : [...availableTypes],
+    selectedTypes,
   };
 }
 
@@ -186,6 +210,17 @@ function resetFilterTypesForTab(filters: InvestmentHistoryFilterState, tab: Inve
     ...filters,
     selectedTypes: [...getHistoryTypesForTab(tab)],
   };
+}
+
+function sameSelection<T extends string>(first: readonly T[], second: readonly T[]) {
+  return first.length === second.length && first.every((item) => second.includes(item));
+}
+
+function filtersMatchDefaults(filters: InvestmentHistoryFilterState, defaults: InvestmentHistoryFilterState, tab: InvestmentHistoryTabId) {
+  return filters.datePreset === defaults.datePreset
+    && sameSelection(filters.selectedTypes, defaults.selectedTypes)
+    && sameSelection(filters.selectedCurrencies, defaults.selectedCurrencies)
+    && (tab !== "orders" || sameSelection(filters.selectedStatuses, defaults.selectedStatuses));
 }
 
 function DateBlock({ date, country }: { date: string; country: CountryId }) {
@@ -237,7 +272,7 @@ function InvestmentHistoryTransactionRow({
           country={country}
           currency={item.currency}
           hidden={amountsHidden}
-          className={item.tone === "positive" ? "text-[#3D7D43]" : "text-[#E2001A]"}
+          className={item.tone === "positive" ? "text-[#3D7D43]" : "text-[#CF3524]"}
         />
         <p className="w-full truncate text-right text-[14px] font-normal leading-[17px] text-[#666666]">{item.type}</p>
       </div>
@@ -271,7 +306,7 @@ function InvestmentHistoryOrderRow({
           country={country}
           currency={item.currency}
           hidden={amountsHidden}
-          className={item.orderType === "SELL" ? "text-[#E2001A]" : "text-[#262626]"}
+          className={item.orderType === "SELL" ? "text-[#CF3524]" : "text-[#262626]"}
         />
         <p className="w-full truncate text-right text-[14px] font-normal uppercase leading-[17px] text-[#666666]">{item.status}</p>
       </div>
@@ -279,31 +314,22 @@ function InvestmentHistoryOrderRow({
   );
 }
 
-function ActiveFilterRail({
-  filters,
-  onRemove,
-}: {
-  filters: InvestmentHistoryFilterState;
-  onRemove: () => void;
-}) {
-  const chips = [
-    INVESTMENT_HISTORY_DATE_OPTIONS.find((option) => option.id === filters.datePreset)?.label ?? "Last year",
-    ...filters.selectedTypes,
-    ...filters.selectedCurrencies,
-  ];
-
+function ActiveFilterRail({ chips, onRemoveAll }: { chips: readonly { id: string; label: string; onRemove: () => void }[]; onRemoveAll: () => void }) {
   return (
     <div className="px-[16px] pt-[14px]" data-investment-history-filter-summary="true">
       <div className="flex gap-[8px] overflow-x-auto pb-[8px] scrollbar-hide">
         {chips.map((chip) => (
-          <span key={chip} className="uc-type-n5-strong shrink-0 rounded-full bg-[var(--uc-app-bg)] px-[12px] py-[6px] text-[var(--uc-text)]">
-            {chip}
+          <span key={chip.id} className="flex h-[30px] shrink-0 items-center gap-[6px] rounded-[3px] border border-[var(--uc-action)] px-[6px] text-[14px] font-bold text-[var(--uc-action)]">
+            {chip.label}
+            <button type="button" onClick={chip.onRemove} className="grid size-[20px] place-items-center" aria-label={`Remove ${chip.label} filter`}>
+              <AppIcon name="close-x" color="var(--uc-action)" size={16} />
+            </button>
           </span>
         ))}
       </div>
       <button
         type="button"
-        onClick={onRemove}
+        onClick={onRemoveAll}
         className="uc-type-n5-strong w-full py-[6px] text-right text-[var(--uc-action)]"
       >
         REMOVE FILTERS
@@ -329,8 +355,21 @@ function CheckRow({
       aria-pressed={selected}
     >
       <span className="grid size-[32px] shrink-0 place-items-center" aria-hidden="true">
-        <span className={cn("grid size-[22px] place-items-center rounded-full border", selected ? "border-[var(--uc-action)] bg-[var(--uc-action)]" : "border-[var(--uc-border-strong)] bg-[var(--uc-surface)]")}>
-          {selected ? <AppIcon name="prime-check" color="var(--uc-static-white)" size={13} /> : null}
+        <span className="grid size-[22px] place-items-center rounded-[3px] border border-[var(--uc-text)] bg-[var(--uc-surface)]">
+          {selected ? <AppIcon name="prime-check" color="var(--uc-action)" size={15} /> : null}
+        </span>
+      </span>
+      <span className="ml-[8px] text-[16px] font-bold leading-[18px] text-[var(--uc-text)]">{label}</span>
+    </button>
+  );
+}
+
+function RadioRow({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className="flex h-[64px] w-full items-center bg-[var(--uc-surface)] p-[16px] text-left" aria-pressed={selected}>
+      <span className="grid size-[32px] shrink-0 place-items-center" aria-hidden="true">
+        <span className="grid size-[22px] place-items-center rounded-full border border-[var(--uc-text)] bg-[var(--uc-surface)]">
+          {selected ? <span className="size-[10px] rounded-full bg-[var(--uc-action)]" /> : null}
         </span>
       </span>
       <span className="ml-[8px] text-[16px] font-bold leading-[18px] text-[var(--uc-text)]">{label}</span>
@@ -342,10 +381,12 @@ function FilterTextFieldRow({
   title,
   value,
   onClick,
+  icon = "chevron-link",
 }: {
   title: string;
   value: string;
   onClick: () => void;
+  icon?: "chevron-link" | "calendar-days";
 }) {
   return (
     <button type="button" onClick={onClick} className="relative h-[96px] w-full bg-[var(--uc-surface)] text-left">
@@ -357,9 +398,95 @@ function FilterTextFieldRow({
         <div className="h-px w-[295px] bg-[var(--uc-border)]" />
       </div>
       <span className="absolute left-[331px] top-[20px] grid size-[32px] place-items-center" aria-hidden="true">
-        <AppIcon name="chevron-link" color="var(--uc-text)" size={32} />
+        <AppIcon name={icon} color="var(--uc-text)" size={icon === "calendar-days" ? 22 : 32} />
       </span>
     </button>
+  );
+}
+
+function CalendarRangePanel({
+  country,
+  draftFilters,
+  onDraftChange,
+  onBack,
+}: {
+  country: CountryId;
+  draftFilters: InvestmentHistoryFilterState;
+  onDraftChange: (filters: InvestmentHistoryFilterState) => void;
+  onBack: () => void;
+}) {
+  const [range, setRange] = useState<DateRange | undefined>({
+    from: parseIsoDateOnly(draftFilters.customStartDate),
+    to: parseIsoDateOnly(draftFilters.customEndDate),
+  });
+  const startLabel = range?.from ? formatFilterDate(toIsoDateOnly(range.from), country) : "—";
+  const endLabel = range?.to ? formatFilterDate(toIsoDateOnly(range.to), country) : "—";
+
+  const confirmRange = () => {
+    if (!range?.from || !range.to) return;
+    onDraftChange({
+      ...draftFilters,
+      datePreset: "define",
+      customStartDate: toIsoDateOnly(range.from),
+      customEndDate: toIsoDateOnly(range.to),
+    });
+    onBack();
+  };
+
+  const selectToday = () => {
+    const today = new Date();
+    setRange({ from: today, to: today });
+  };
+
+  return (
+    <div className="absolute inset-0 z-[60] flex h-full w-full flex-col bg-[rgba(0,0,0,0.28)] text-[var(--uc-text)]" data-investment-filter-screen="Select interval">
+      <div className="absolute inset-x-0 bottom-0 top-[164px] flex flex-col rounded-t-[4px] bg-[var(--uc-surface)] px-[16px] pt-[10px]">
+        <button type="button" onClick={onBack} className="mx-auto grid h-[28px] w-[48px] place-items-center" aria-label="Back to filters">
+          <AppIcon name="chevron-down" color="var(--uc-text)" size={24} />
+        </button>
+        <h1 className="mt-[10px] text-[28px] font-bold leading-[32px]">Select interval</h1>
+        <div className="mt-[28px] grid grid-cols-2 gap-[24px]">
+          <div><p className="text-[12px] font-bold">START DATE</p><p className="mt-[6px] text-[16px]">{startLabel}</p></div>
+          <div className="text-right"><p className="text-[12px] font-bold">END DATE</p><p className="mt-[6px] text-[16px]">{endLabel}</p></div>
+        </div>
+        <Calendar
+          mode="range"
+          selected={range}
+          onSelect={setRange}
+          defaultMonth={range?.from}
+          numberOfMonths={1}
+          className="mt-[18px] w-full shrink-0 p-0"
+          classNames={{
+            months: "flex w-full shrink-0",
+            month: "flex w-full shrink-0 flex-col gap-[14px]",
+            caption: "relative flex h-[40px] w-full items-center justify-center",
+            caption_label: "text-[26px] font-bold",
+            nav: "flex items-center gap-[4px]",
+            nav_button: "grid size-[32px] place-items-center border-0 bg-transparent p-0 opacity-100",
+            nav_button_previous: "absolute left-0",
+            nav_button_next: "absolute right-0",
+            table: "w-full table-fixed border-collapse",
+            head_row: "grid w-full grid-cols-7",
+            head_cell: "grid h-[32px] min-w-0 place-items-center text-[12px] font-bold text-[var(--uc-text-muted)]",
+            row: "mt-[2px] grid w-full grid-cols-7",
+            cell: "relative grid h-[44px] min-w-0 place-items-center p-0 text-center",
+            day: "grid h-[40px] w-full min-w-0 place-items-center rounded-none border-0 bg-transparent p-0 text-[14px] font-bold text-[var(--uc-text)]",
+            day_range_start: "day-range-start rounded-l-full bg-[var(--uc-action)] text-[var(--uc-static-white)]",
+            day_range_end: "day-range-end rounded-r-full bg-[var(--uc-action)] text-[var(--uc-static-white)]",
+            day_selected: "bg-[var(--uc-action)] text-[var(--uc-static-white)]",
+            day_range_middle: "rounded-none bg-[var(--uc-action)] text-[var(--uc-static-white)]",
+            day_today: "border border-[var(--uc-text)]",
+            day_outside: "text-[var(--uc-text-muted)] opacity-40",
+            day_disabled: "text-[var(--uc-text-muted)] opacity-30",
+          }}
+        />
+        <div className="mt-auto flex items-center gap-[24px] pb-[15px]">
+          <button type="button" onClick={selectToday} className="h-[48px] text-[12px] font-bold text-[var(--uc-action)]">TODAY</button>
+          <button type="button" onClick={() => setRange(undefined)} className="h-[48px] text-[12px] font-bold text-[var(--uc-action)]">RESET</button>
+          <button type="button" disabled={!range?.from || !range.to} onClick={confirmRange} className="ml-auto h-[48px] w-[172px] rounded-[4px] bg-[var(--uc-action)] text-[18px] font-bold text-[var(--uc-static-white)] disabled:opacity-40">Confirm</button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -377,6 +504,7 @@ function FilterPanel({
   draftFilters,
   currencies,
   historyTab,
+  country,
   onBack,
   onApply,
   onDraftChange,
@@ -386,12 +514,16 @@ function FilterPanel({
   draftFilters: InvestmentHistoryFilterState;
   currencies: readonly Currency[];
   historyTab: InvestmentHistoryTabId;
+  country: CountryId;
   onBack: () => void;
   onApply: () => void;
   onDraftChange: (filters: InvestmentHistoryFilterState) => void;
   onModeChange: (mode: FilterMode) => void;
 }) {
   const availableTypes = getHistoryTypesForTab(historyTab);
+  const localCurrency = getCountryConfig(country).currency as Currency;
+  const primaryCurrencies = [localCurrency, "EUR", "USD"].filter((value, index, values): value is Currency => currencies.includes(value as Currency) && values.indexOf(value) === index);
+  const otherCurrencies = currencies.filter((currency) => !primaryCurrencies.includes(currency));
 
   const toggleType = (type: InvestmentHistoryTransactionType) => {
     const selectedTypes = draftFilters.selectedTypes.includes(type)
@@ -405,6 +537,21 @@ function FilterPanel({
       ? draftFilters.selectedCurrencies.filter((item) => item !== currency)
       : [...draftFilters.selectedCurrencies, currency];
     onDraftChange({ ...draftFilters, selectedCurrencies });
+  };
+
+  const toggleOtherCurrencies = () => {
+    const allOtherSelected = otherCurrencies.every((currency) => draftFilters.selectedCurrencies.includes(currency));
+    const selectedCurrencies = allOtherSelected
+      ? draftFilters.selectedCurrencies.filter((currency) => !otherCurrencies.includes(currency))
+      : [...new Set([...draftFilters.selectedCurrencies, ...otherCurrencies])];
+    onDraftChange({ ...draftFilters, selectedCurrencies });
+  };
+
+  const toggleStatus = (status: InvestmentHistoryOrderStatus) => {
+    const selectedStatuses = draftFilters.selectedStatuses.includes(status)
+      ? draftFilters.selectedStatuses.filter((item) => item !== status)
+      : [...draftFilters.selectedStatuses, status];
+    onDraftChange({ ...draftFilters, selectedStatuses });
   };
 
   if (mode === "type") {
@@ -436,44 +583,72 @@ function FilterPanel({
             CLEAR
           </button>
         </div>
-        {currencies.map((currency) => (
+        {primaryCurrencies.map((currency) => (
           <CheckRow key={currency} label={currency} selected={draftFilters.selectedCurrencies.includes(currency)} onClick={() => toggleCurrency(currency)} />
+        ))}
+        {otherCurrencies.length > 0 ? (
+          <CheckRow label="Other currencies" selected={otherCurrencies.every((currency) => draftFilters.selectedCurrencies.includes(currency))} onClick={toggleOtherCurrencies} />
+        ) : null}
+      </FilterScaffold>
+    );
+  }
+
+  if (mode === "status") {
+    return (
+      <FilterScaffold title="Select order status" onBack={() => onModeChange("main")} onApply={onApply}>
+        <div className="flex items-center justify-between border-b border-[var(--uc-border)] px-[24px] py-[12px]">
+          <button type="button" className="text-[14px] font-bold text-[var(--uc-action)]" onClick={() => onDraftChange({ ...draftFilters, selectedStatuses: [...INVESTMENT_HISTORY_ORDER_STATUSES] })}>SELECT ALL</button>
+          <button type="button" className="text-[14px] font-bold text-[var(--uc-action)]" onClick={() => onDraftChange({ ...draftFilters, selectedStatuses: [] })}>CLEAR</button>
+        </div>
+        {INVESTMENT_HISTORY_ORDER_STATUSES.map((status) => (
+          <CheckRow key={status} label={status} selected={draftFilters.selectedStatuses.includes(status)} onClick={() => toggleStatus(status)} />
         ))}
       </FilterScaffold>
     );
   }
 
   return (
-    <FilterScaffold title="Apply filters" onBack={onBack} onApply={onApply}>
+    <div className="relative h-full w-full">
+      <FilterScaffold title="Apply filters" onBack={onBack} onApply={onApply}>
       <div className="flex w-full flex-col gap-[24px]">
         <div>
           <FilterDivider title="BY DATE" />
           <div className="flex flex-col">
             {INVESTMENT_HISTORY_DATE_OPTIONS.map((option) => (
-              <CheckRow
+              <RadioRow
                 key={option.id}
                 label={option.label}
                 selected={draftFilters.datePreset === option.id}
-                onClick={() => onDraftChange({ ...draftFilters, datePreset: option.id as InvestmentHistoryDatePreset })}
+                onClick={() => {
+                  onDraftChange({ ...draftFilters, datePreset: option.id as InvestmentHistoryDatePreset });
+                  if (option.id === "define") onModeChange("calendar");
+                }}
               />
             ))}
+            {draftFilters.datePreset === "define" ? (
+              <FilterTextFieldRow
+                title="From - To"
+                value={`${formatFilterDate(draftFilters.customStartDate, country)} - ${formatFilterDate(draftFilters.customEndDate, country)}`}
+                icon="calendar-days"
+                onClick={() => onModeChange("calendar")}
+              />
+            ) : null}
           </div>
         </div>
         <div>
           <FilterDivider title="OTHER FILTERS" />
           <div>
-            <FilterTextFieldRow title="By type" value={draftFilters.selectedTypes.length === availableTypes.length ? "All" : `${draftFilters.selectedTypes.length} selected`} onClick={() => onModeChange("type")} />
-            <FilterTextFieldRow title="By currency" value={draftFilters.selectedCurrencies.length === currencies.length ? "All" : `${draftFilters.selectedCurrencies.length} selected`} onClick={() => onModeChange("currency")} />
+            <FilterTextFieldRow title="By type" value={draftFilters.selectedTypes.length === availableTypes.length ? "All" : draftFilters.selectedTypes.join(", ") || "None"} onClick={() => onModeChange("type")} />
+            {historyTab === "orders" ? <FilterTextFieldRow title="By status" value={draftFilters.selectedStatuses.length === INVESTMENT_HISTORY_ORDER_STATUSES.length ? "All" : draftFilters.selectedStatuses.join(", ") || "None"} onClick={() => onModeChange("status")} /> : null}
+            <FilterTextFieldRow title="By currency" value={draftFilters.selectedCurrencies.length === currencies.length ? "All" : draftFilters.selectedCurrencies.join(", ") || "None"} onClick={() => onModeChange("currency")} />
           </div>
         </div>
       </div>
-      {draftFilters.datePreset === "define" ? (
-        <div className="mx-[24px] mt-[18px] rounded-[8px] border border-[var(--uc-border)] p-[14px]">
-          <p className="text-[14px] font-bold text-[var(--uc-text-muted)]">From - To</p>
-          <p className="mt-[4px] text-[18px] font-bold text-[var(--uc-text)]">01 Sep 2024 - 31 Oct 2025</p>
-        </div>
+      </FilterScaffold>
+      {mode === "calendar" ? (
+        <CalendarRangePanel country={country} draftFilters={draftFilters} onDraftChange={onDraftChange} onBack={() => onModeChange("main")} />
       ) : null}
-    </FilterScaffold>
+    </div>
   );
 }
 
@@ -681,8 +856,11 @@ export default function InvestmentsHistoryScreen({ onBack }: InvestmentsHistoryS
   const allCurrenciesKey = allCurrencies.join("|");
   const defaultFilters = useMemo<InvestmentHistoryFilterState>(() => ({
     datePreset: "last-year",
+    customStartDate: "2025-09-01",
+    customEndDate: "2026-06-30",
     selectedTypes: [...INVESTMENT_HISTORY_TRANSACTION_TYPES],
     selectedCurrencies: allCurrencies,
+    selectedStatuses: [...INVESTMENT_HISTORY_ORDER_STATUSES],
   }), [allCurrenciesKey]);
   const [appliedFilters, setAppliedFilters] = useState<InvestmentHistoryFilterState | null>(null);
   const [draftFilters, setDraftFilters] = useState<InvestmentHistoryFilterState>(defaultFilters);
@@ -691,19 +869,21 @@ export default function InvestmentsHistoryScreen({ onBack }: InvestmentsHistoryS
   const orders = useMemo(() => buildInvestmentHistoryOrders(securities, country), [country, securities]);
   const latestTransactionDate = useMemo(() => new Date(Math.max(...transactions.map((item) => new Date(item.date).getTime()))), [transactions]);
   const latestOrderDate = useMemo(() => new Date(Math.max(...orders.map((item) => new Date(item.date).getTime()))), [orders]);
-  const effectiveFilters = appliedFilters ?? defaultFilters;
+  const tabDefaults = useMemo(() => resetFilterTypesForTab(defaultFilters, activeTab), [activeTab, defaultFilters]);
+  const effectiveFilters = appliedFilters ?? tabDefaults;
 
   const filteredTransactions = transactions.filter((item) =>
     historyRowMatchesSearch(item, searchQuery) &&
-    historyRowMatchesDate(item.date, effectiveFilters.datePreset, latestTransactionDate) &&
+    historyRowMatchesDate(item.date, effectiveFilters, latestTransactionDate) &&
     effectiveFilters.selectedTypes.includes(item.type) &&
     effectiveFilters.selectedCurrencies.includes(item.currency)
   );
   const filteredOrders = orders.filter((item) =>
     historyRowMatchesSearch(item, searchQuery) &&
-    historyRowMatchesDate(item.date, effectiveFilters.datePreset, latestOrderDate) &&
+    historyRowMatchesDate(item.date, effectiveFilters, latestOrderDate) &&
     effectiveFilters.selectedTypes.includes(item.orderType) &&
-    effectiveFilters.selectedCurrencies.includes(item.currency)
+    effectiveFilters.selectedCurrencies.includes(item.currency) &&
+    effectiveFilters.selectedStatuses.includes(item.status)
   );
   const activeRows = activeTab === "transactions" ? filteredTransactions : filteredOrders;
   const filterActive = appliedFilters !== null;
@@ -713,18 +893,19 @@ export default function InvestmentsHistoryScreen({ onBack }: InvestmentsHistoryS
   };
 
   const openFilters = () => {
-    setDraftFilters(normalizeFiltersForTab(appliedFilters ?? defaultFilters, activeTab));
+    setDraftFilters(normalizeFiltersForTab(appliedFilters ?? tabDefaults, activeTab));
     setFilterMode("main");
   };
 
   const applyFilters = () => {
-    setAppliedFilters(normalizeFiltersForTab(draftFilters, activeTab));
+    const normalized = normalizeFiltersForTab(draftFilters, activeTab);
+    setAppliedFilters(filtersMatchDefaults(normalized, tabDefaults, activeTab) ? null : normalized);
     setFilterMode(null);
   };
 
   useEffect(() => {
     setAppliedFilters(null);
-    setDraftFilters(defaultFilters);
+    setDraftFilters(tabDefaults);
     setSearchQuery("");
     setFilterMode(null);
     setInfoMode(null);
@@ -734,8 +915,66 @@ export default function InvestmentsHistoryScreen({ onBack }: InvestmentsHistoryS
 
   useEffect(() => {
     setDraftFilters((current) => resetFilterTypesForTab(current, activeTab));
-    setAppliedFilters((current) => (current ? resetFilterTypesForTab(current, activeTab) : current));
-  }, [activeTab]);
+    setAppliedFilters((current) => {
+      if (!current) return current;
+      const next = resetFilterTypesForTab(current, activeTab);
+      return filtersMatchDefaults(next, tabDefaults, activeTab) ? null : next;
+    });
+  }, [activeTab, tabDefaults]);
+
+  const updateAppliedFilters = (next: InvestmentHistoryFilterState) => {
+    setAppliedFilters(filtersMatchDefaults(next, tabDefaults, activeTab) ? null : next);
+  };
+
+  const activeFilterChips = appliedFilters ? (() => {
+    const chips: { id: string; label: string; onRemove: () => void }[] = [];
+    const availableTypes = getHistoryTypesForTab(activeTab);
+
+    if (appliedFilters.datePreset !== "last-year") {
+      const dateLabel = appliedFilters.datePreset === "define"
+        ? `${formatFilterDate(appliedFilters.customStartDate, country)} - ${formatFilterDate(appliedFilters.customEndDate, country)}`
+        : INVESTMENT_HISTORY_DATE_OPTIONS.find((option) => option.id === appliedFilters.datePreset)?.label ?? "Date";
+      chips.push({ id: "date", label: dateLabel, onRemove: () => updateAppliedFilters({ ...appliedFilters, datePreset: "last-year" }) });
+    }
+
+    if (!sameSelection(appliedFilters.selectedTypes, availableTypes)) {
+      if (appliedFilters.selectedTypes.length === 0) {
+        chips.push({ id: "types-none", label: "No types", onRemove: () => updateAppliedFilters({ ...appliedFilters, selectedTypes: [...availableTypes] }) });
+      } else {
+        appliedFilters.selectedTypes.forEach((type) => chips.push({
+          id: `type-${type}`,
+          label: type,
+          onRemove: () => updateAppliedFilters({ ...appliedFilters, selectedTypes: appliedFilters.selectedTypes.filter((item) => item !== type) }),
+        }));
+      }
+    }
+
+    if (activeTab === "orders" && !sameSelection(appliedFilters.selectedStatuses, INVESTMENT_HISTORY_ORDER_STATUSES)) {
+      if (appliedFilters.selectedStatuses.length === 0) {
+        chips.push({ id: "statuses-none", label: "No statuses", onRemove: () => updateAppliedFilters({ ...appliedFilters, selectedStatuses: [...INVESTMENT_HISTORY_ORDER_STATUSES] }) });
+      } else {
+        appliedFilters.selectedStatuses.forEach((status) => chips.push({
+          id: `status-${status}`,
+          label: status,
+          onRemove: () => updateAppliedFilters({ ...appliedFilters, selectedStatuses: appliedFilters.selectedStatuses.filter((item) => item !== status) }),
+        }));
+      }
+    }
+
+    if (!sameSelection(appliedFilters.selectedCurrencies, allCurrencies)) {
+      if (appliedFilters.selectedCurrencies.length === 0) {
+        chips.push({ id: "currencies-none", label: "No currencies", onRemove: () => updateAppliedFilters({ ...appliedFilters, selectedCurrencies: [...allCurrencies] }) });
+      } else {
+        appliedFilters.selectedCurrencies.forEach((currency) => chips.push({
+          id: `currency-${currency}`,
+          label: currency,
+          onRemove: () => updateAppliedFilters({ ...appliedFilters, selectedCurrencies: appliedFilters.selectedCurrencies.filter((item) => item !== currency) }),
+        }));
+      }
+    }
+
+    return chips;
+  })() : [];
 
   if (selectedItem) {
     return (
@@ -759,6 +998,7 @@ export default function InvestmentsHistoryScreen({ onBack }: InvestmentsHistoryS
         draftFilters={draftFilters}
         currencies={allCurrencies}
         historyTab={activeTab}
+        country={country}
         onBack={() => setFilterMode(null)}
         onApply={applyFilters}
         onDraftChange={setDraftFilters}
@@ -795,7 +1035,7 @@ export default function InvestmentsHistoryScreen({ onBack }: InvestmentsHistoryS
           onRemoveFilters={() => setAppliedFilters(null)}
         />
       </div>
-      {filterActive ? <ActiveFilterRail filters={effectiveFilters} onRemove={() => setAppliedFilters(null)} /> : null}
+      {filterActive ? <ActiveFilterRail chips={activeFilterChips} onRemoveAll={() => setAppliedFilters(null)} /> : null}
       {totalValue <= 0 || activeRows.length === 0 ? (
         <div className="px-[24px] pt-[26px]">
           <p className="text-[18px] font-bold leading-[24px] text-[var(--uc-text)]">

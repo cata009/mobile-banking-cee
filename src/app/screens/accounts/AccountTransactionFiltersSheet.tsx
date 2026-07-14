@@ -74,7 +74,7 @@ export default function AccountTransactionFiltersSheet({
   return (
     <BottomSheet
       title="Apply filters"
-      maxHeightOffsetPx={26}
+      maxHeightOffsetPx={54}
       className="flex max-h-none flex-col overflow-hidden px-0 pb-0 pt-[24px]"
       headerClassName="mb-[16px] px-[24px]"
       bodyClassName="flex min-h-0 flex-1 flex-col"

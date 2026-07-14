@@ -1,6 +1,147 @@
 # Current Session
 
-Last updated: 2026-07-08
+Last updated: 2026-07-13
+
+## 2026-07-14 Closeout And Vercel Publication
+
+- Latest request handled: commit the complete current workspace and publish the latest build to Vercel production.
+- Scope: all currently tracked and untracked product, Design System, Investments, card, filter-sheet, chatbot, and handoff changes were intentionally included; no unrelated files were discarded.
+- Verification before publication: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and `git diff --check` passed. Known Vite empty `react-vendor` and chunk-size warnings remain documented in `docs/handoff/known-bananas.md`.
+- Publication: pending the final commit SHA and Vercel production deployment URL.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-07-13 Investments Portfolio Header Safe-Area Regression
+
+- Latest request handled: restore the Investments portfolio header's normal initial state and keep the compact title below the phone system bar while scrolling.
+- Runtime changes: shared `PageHeader` now keeps the sticky header anchored at `top: 0` and applies the phone top reserve inside the header; this removes the duplicated offset that created the large blank block while preserving scroll collapse.
+- Files changed: `src/app/components/PageHeader.tsx`, handoff/capability docs.
+- Verification: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and `git diff --check`; in-app browser smoke confirmed the initial large left title, centered compact title after scroll, and no warning/error logs.
+- safe to resume: yes
+
+## 2026-07-13 Account Filter Sheet And Card Details/Options Foundation
+
+- Latest request handled: align the account transaction filters sheet to the shared safe-area bottom-sheet geometry, repair the Connected cards heading, and add reusable debit/credit Card details and Card options routes for all supported countries.
+- Runtime changes: account filters now use the standard 54px top reserve; Account Details Info reuses `SectionHeadingDivider`; CardDetail quick actions route to safe-area `CardDetailsInfoScreen` and `CardOptionsScreen`, preserving selected-card context and masking sensitive values.
+- Files changed: `src/app/screens/accounts/AccountTransactionFiltersSheet.tsx`, `src/app/screens/accounts/AccountDetailsInfoScreen.tsx`, `src/app/screens/cards/CardDetailScreen.tsx`, `src/app/screens/cards/CardDetailsInfoScreen.tsx`, `src/app/screens/cards/CardOptionsScreen.tsx`, `src/app/App.tsx`, `src/app/contexts/NavigationContext.tsx`, handoff/capability docs.
+- Verification: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and `git diff --check`; in-app browser smoke confirmed the filters sheet clears the system bar and both debit/credit Card Details and Card Options routes render without browser warning/error logs.
+- Limitation: Card option rows are intentionally presentational until the user provides the exact product behaviors and data model.
+- safe to resume: yes
+
+## 2026-07-13 Tutorial Detail Bottom-Sheet Header Alignment
+
+- Latest request handled: repair the More -> Tutorials detail bottom-sheet header so it no longer overlaps the phone system/status bar and uses the correct shared back glyph.
+- Runtime changes: `TutorialsFlow` anchors the detail sheet at `--uc-phone-top-reserve` with a 54px fallback and renders the header back action with the shared `back-heavy` icon at 20px; tutorial content and navigation remain unchanged.
+- Files changed: `src/app/screens/more/tutorials/TutorialsFlow.tsx`, handoff/capability docs.
+- Verification: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and `git diff --check`; in-app browser smoke confirmed the header clears the status bar, the standard icon/viewBox is used, and no warning/error logs were reported.
+- safe to resume: yes
+
+## 2026-07-13 Demo Header Play Icon Alignment
+
+- Latest request handled: replace the demo header Play control with the supplied 24x24 circular SVG glyph and expose the same icon through the Design System inventory.
+- Runtime changes: `AppIcon` now owns the custom `play` path with the supplied `0 0 24 24` viewBox, and `DemoTopBar` renders it at its native 24px size while preserving the shared 36px button slot.
+- Files changed: `src/app/components/icons/AppIcon.tsx`, `src/app/components/demo/DemoTopBar.tsx`, handoff docs.
+- Verification: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and `git diff --check`; browser smoke should confirm the header glyph and Design System inventory entry.
+- safe to resume: yes
+
+## 2026-07-13 Investments Negative-State Color Unification
+
+- Latest request handled: make every negative/red value in Investments use the exact design-system red `#CF3524`.
+- Runtime changes: Investments History transaction and order amounts now use `#CF3524` for negative states, matching the existing negative performance values, sell glyphs, and product-card negative percentages.
+- Files changed: `src/app/screens/investments/InvestmentsHistoryScreen.tsx`, handoff/capability docs.
+- Verification: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and `git diff --check`; browser smoke should confirm negative transaction/order values render with the exact RGB value.
+- safe to resume: yes
+
+## 2026-07-13 Investments Product Detail System-Bar Clearance
+
+- Latest request handled: prevent the collapsed owned-product detail title from overlapping the phone system/status bar while scrolling.
+- Runtime changes: `PageHeader` keeps the original initial layout, anchors the sticky header at `top: 0`, and reserves the phone safe area inside the header; the Investments product-detail header remains sticky below the status bar at deep scroll. The initial hero title remains visible and the compact title stays hidden until scroll collapse.
+- Files changed: `src/app/components/PageHeader.tsx`, `src/app/screens/investments/InvestmentSecurityScreens.tsx`, handoff/capability docs.
+- Verification: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and `git diff --check` passed. In-app browser smoke confirmed the sticky title remains below the status-bar bottom at deep scroll and no runtime errors were reported.
+- safe to resume: yes
+
+## 2026-07-13 Investments Catalogue Visual Consistency Fixes
+
+- Latest request handled: make security-list logos true `32x32`, standardize positive Investments values to `#3D7D43`, and restore the catalogue header's large left-aligned initial state before scroll collapse.
+- Runtime changes: `BrandLogo` now scales its authored SVG to the requested wrapper size; catalogue, detail, and chart positive values use the exact same green; the security list owns its scroll state so the shared `PageHeader` transitions from the large left title to the centered compact title.
+- Files changed: `src/app/components/brand-logo/BrandLogo.tsx`, `src/app/screens/investments/InvestmentSecurityScreens.tsx`, `src/app/components/investments/InvestmentPortfolioChart.tsx`, handoff/capability docs.
+- Verification: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and `git diff --check` passed. In-app browser smoke confirmed the initial 24px large left title, the centered 16px sticky title after scroll, exact `rgb(61, 125, 67)` positive text, and the scaled 32px logo wrapper (rendered at the phone's fit scale); no runtime errors were reported.
+- safe to resume: yes
+
+## 2026-07-13 Investments Distribution and History Overlay Fixes
+
+- Latest request handled: remove the extra short leader segment from each distribution label, repair the custom interval calendar selectors, and keep the Apply filters sheet visible beneath the calendar overlay.
+- Runtime changes: donut leaders now stop at the side rail before the label; calendar rows/cells/buttons use an explicit seven-column fixed grid with stable sizing and visible day text; `Select interval` is rendered as a layered overlay above `Apply filters` with a translucent backdrop.
+- Files changed: `src/app/components/investments/InvestmentDistributionChart.tsx`, `src/app/screens/investments/InvestmentsHistoryScreen.tsx`, handoff/capability docs.
+- Verification: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and `git diff --check` passed. In-app browser smoke confirmed clean donut leaders, visible September 2025 day selectors including selected day 15, the Apply filters sheet visible behind the calendar, and no runtime console errors.
+- safe to resume: yes
+
+## 2026-07-13 Investments Product Detail Data Corrections
+
+- Latest request handled: remove the detail Help icon, replace the hardcoded hero date with the security's generated last-update date, and align the owned-detail hero amount with the client-portfolio value shown in `MY SECURITY`.
+- Runtime changes: product detail passes `showHelp={false}` to the shared PageHeader; the hero now renders `(last update ...)` from `security.lastUpdate`; owned products display `localValue`/`localCurrency` in the hero while catalogue-only products retain their instrument amount/currency.
+- Files changed: `src/app/screens/investments/InvestmentSecurityScreens.tsx`, handoff/capability docs.
+- Verification: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and `git diff --check` passed. In-app browser smoke confirmed no visible Help action, generated `last update 03.01.2026`, and an owned hero value of `3.116,77 RON` matching `MY SECURITY`.
+- safe to resume: yes
+
+## 2026-07-13 Investments Visual Feedback Fixes
+
+- Latest request handled: refine Investments charts and product-detail visual behavior from browser comments without changing the overall design.
+- Runtime changes: Performance chart data now has dense intermediate historical points rendered with a monotone curve; intermediate points remain tooltip-selectable while only the six anchor dates show dots/labels. Trade glyphs render at native 32px, Buy uses `#007A91`, Sell remains black, and the detail action bar is followed by a 24px spacer. Product detail now suppresses the duplicate PageHeader large title, keeps the large hero title at the top, and exposes the centered small title only as the scroll collapse progresses.
+- Files changed: `src/app/config/investmentsPortfolioConfig.ts`, `src/app/components/investments/InvestmentPortfolioChart.tsx`, `src/app/components/icons/AppIcon.tsx`, `src/app/components/PageHeader.tsx`, `src/app/screens/investments/InvestmentSecurityScreens.tsx`, handoff/capability docs.
+- Verification: `npm run build` and `git diff --check` passed. In-app browser verification confirmed the initial product detail has one visible hero title and a hidden sticky title at scrollTop 0; the browser session was also reconnected and the RO Investments route rendered successfully.
+- Limitations: browser scroll automation was intermittent after the detail transition; no backend trade execution or data persistence was added.
+- safe to resume: yes
+
+## 2026-07-10 Investments Chart Visual Cleanup
+
+- Latest request handled: remove the visually broken auxiliary lines from all Investments charts after browser review.
+- Runtime changes: distribution tabs retain their donut labels and colored leader paths, now routed from the donut's outer edge onto side rails and stopped before the text so they neither cross the donut nor overlap labels; the Performance chart no longer renders a dotted horizontal grid, while preserving its curve, points, axes, and tooltip interaction. Its mock historical series now includes moderate gains and pullbacks across every period instead of a near-linear climb; the displayed current value and layout stay unchanged.
+- Files changed: `src/app/components/investments/InvestmentDistributionChart.tsx`, `src/app/components/investments/InvestmentPortfolioChart.tsx`, capability/handoff docs.
+- Verification: `npm run build`, `npm run audit:templates` (`templates=47 codePreviews=47 components=79 screens=27 flows=14`), `npm run audit:platform`, and `git diff --check` passed. Known empty `react-vendor`, chunk-size, and normal Windows LF/CRLF warnings remain.
+- safe to resume: yes
+
+## 2026-07-10 Investments History Advanced Filters
+
+- Latest request handled: complete the Investments History filter behavior from Figma node `9264:14637`, including custom date selection, calendar behavior, secondary selectors, applied-filter state, and Orders-specific status filtering.
+- Runtime changes:
+  - `Apply filters` now uses radio-style date presets for Last Month, Last 6 Months, Last year, and Define;
+  - `Define` opens a `Select interval` sheet backed by the shared calendar component, with month navigation, range selection, localized start/end dates, Today, Reset, and Confirm;
+  - custom date filtering now uses the selected inclusive interval instead of the former hardcoded range, with local date serialization to avoid CEE timezone day shifts;
+  - transaction/order type and currency selectors use square checkbox rows with SELECT ALL, CLEAR, and Apply; currencies follow the Figma local/EUR/USD/Other currencies grouping while filtering the actual underlying currency values;
+  - Orders adds a dedicated status selector for EXECUTED, PENDING, and REJECTED and filters the order rows accordingly;
+  - the main filter sheet shows selected names instead of generic counts, and the Orders sheet exposes Type, Status, and Currency;
+  - applied filters render only effective filter chips, each with its own remove action, plus REMOVE FILTERS; removing the final effective difference returns the screen to its default unfiltered state;
+  - empty selections are preserved and correctly produce an empty result instead of silently reverting to Select All.
+- Files changed: `src/app/screens/investments/InvestmentsHistoryScreen.tsx`, `src/app/config/investmentsPortfolioConfig.ts`, capability/handoff docs.
+- Verification: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and `git diff --check` passed; known empty `react-vendor`, chunk-size, and normal Windows LF/CRLF warnings remain.
+- Browser limitation remains unchanged: authenticated runtime click-through requires the access password and an available browser-control bridge; no credentials were inspected or bypassed.
+- safe to resume: yes
+
+## 2026-07-10 Investments Security Catalogue And Product Detail
+
+- Latest request handled: enrich Mobile PI Investments for every CEE country from the supplied Figma security-list and owned/not-owned product-detail sources, including compatibility with the CZ Future chatbot overlay.
+- Runtime changes:
+  - the Performance `Invest` action now opens a searchable/filterable `List of securities` catalogue;
+  - portfolio security cards open an owned-product detail, while catalogue-only products open the not-owned detail variant;
+  - both variants reuse shared PageHeader, AccountSearchBar, BottomSheet, AccountActionBar, BrandLogo, chart, period-chip, and section-divider components;
+  - owned detail adds `MY SECURITY` portfolio value and quantity; both variants expose the Figma-derived hero, performance, History/Documents/Sell/Buy action bar, market price chart, Product ID, fund type, meaningful description, last update, and purchase options;
+  - catalogue values, currencies, identifiers, dates, and ownership are deterministic and resolve for RO/CZ/SK/HU/RS/BA/BA_BL/SI through the shared PI Investments screen;
+  - CZ Future remains on the same `investments` runtime route, so the existing contextual chatbot launcher/topics and rich portfolio/history replies remain available on the enriched flow.
+- Files changed: `src/app/config/investmentsPortfolioConfig.ts`, `src/app/components/investments/InvestmentProductCard.tsx`, `src/app/screens/investments/InvestmentsPortfolioScreen.tsx`, `src/app/screens/investments/InvestmentSecurityScreens.tsx`, capability/handoff docs.
+- Verification:
+  - `npm run build` passed; known empty `react-vendor` and chunk-size warnings remain;
+  - `npm run audit:templates` passed: `templates=47 codePreviews=47 components=79 screens=27 flows=14`;
+  - `npm run audit:platform` passed: `products=3 countries=8 projectPackCombinations=24 bankingScenarios=7 repositories=6`;
+  - `git diff --check` passed with normal Windows LF/CRLF warnings only;
+  - local Vite server returned HTTP 200 on `http://127.0.0.1:4173/`;
+  - visual browser automation was unavailable because neither the bundled `agent-browser` CLI nor the browser-control execution bridge was exposed in this runtime; isolated Chrome headless reached the local app but correctly stopped at `Enter password to continue`, so no credentials were inspected or bypassed; an authenticated click-through remains recorded as follow-up evidence, not silently claimed as passed.
+- Limitations: catalogue/order values remain mock-driven; Buy/Sell/Documents actions are presentational in this supplied screen scope and do not execute trades, suitability checks, document retrieval, signatures, or backend changes.
+- safe to resume: yes
 
 ## 2026-07-08 Investments Logo And Distribution Chart Deploy Closeout
 

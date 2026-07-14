@@ -1,4 +1,5 @@
 import { getBrandLogo, type BrandLogoId } from "@/app/config/brandLogos";
+import { cn } from "@/app/components/ui/utils";
 
 interface BrandLogoProps {
   /** Logo id from the mocked brand-logo database. */
@@ -23,7 +24,7 @@ export default function BrandLogo({ logoId, size = 40, label, className }: Brand
 
   return (
     <div
-      className={className}
+      className={cn("grid shrink-0 place-items-center [&>svg]:block [&>svg]:h-full [&>svg]:w-full", className)}
       style={{ width: size, height: size }}
       aria-label={label ?? entry.name}
       role="img"

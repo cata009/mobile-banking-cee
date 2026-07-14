@@ -47,6 +47,8 @@ const AccountDetailScreen = lazy(() => import("@/app/screens/accounts/AccountDet
 const AccountDetailsInfoScreen = lazy(() => import("@/app/screens/accounts/AccountDetailsInfoScreen"));
 const AccountOptionsScreen = lazy(() => import("@/app/screens/accounts/AccountOptionsScreen"));
 const CardDetailScreen = lazy(() => import("@/app/screens/cards/CardDetailScreen"));
+const CardDetailsInfoScreen = lazy(() => import("@/app/screens/cards/CardDetailsInfoScreen"));
+const CardOptionsScreen = lazy(() => import("@/app/screens/cards/CardOptionsScreen"));
 
 // DomesticPaymentFlowScreens exports 5 named exports from one module. They
 // stay as a static import because they already share one module file (one
@@ -2372,6 +2374,18 @@ function AppContent({
     navigateTo("account-options");
   };
 
+  const handleCardDetailsClick = (product: Product) => {
+    if (product.type !== "debit_card" && product.type !== "credit_card") return;
+    setSelectedCardId(product.id);
+    navigateTo("card-details-info");
+  };
+
+  const handleCardOptionsClick = (product: Product) => {
+    if (product.type !== "debit_card" && product.type !== "credit_card") return;
+    setSelectedCardId(product.id);
+    navigateTo("card-options");
+  };
+
   const handleTransactionClick = (transaction: AccountTransaction, productForTransaction: Product) => {
     setSelectedAccountId(productForTransaction.id);
     setSelectedTransaction(transaction);
@@ -2641,10 +2655,20 @@ function AppContent({
           <AccountOptionsScreen onBack={goBack} />
         )}
 
+        {currentScreen === "card-details-info" && (
+          <CardDetailsInfoScreen selectedCardId={selectedCardId} onBack={goBack} />
+        )}
+
+        {currentScreen === "card-options" && (
+          <CardOptionsScreen selectedCardId={selectedCardId} onBack={goBack} />
+        )}
+
         {currentScreen === "card-detail" && (
           <CardDetailScreen
             selectedCardId={selectedCardId}
             onBack={goBack}
+            onCardDetailsClick={handleCardDetailsClick}
+            onCardOptionsClick={handleCardOptionsClick}
             onTransactionClick={handleTransactionClick}
             onHelpClick={isCzCoAppingChatbotPreviewActive ? () => openCzChatHelp("card") : undefined}
             aiOpportunityNudge={

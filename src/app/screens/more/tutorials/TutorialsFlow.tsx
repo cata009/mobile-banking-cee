@@ -107,7 +107,7 @@ function TutorialDetailOverlay({ tutorial, stepIndex, onStepChange, onBack, onCl
       <section
         aria-label={`${tutorial.shortTitle} tutorial`}
         aria-modal="true"
-        className="absolute inset-x-0 bottom-0 top-[32px] flex flex-col bg-[var(--uc-surface)] text-[var(--uc-text)]"
+        className="absolute inset-x-0 bottom-0 top-[var(--uc-phone-top-reserve,54px)] flex flex-col bg-[var(--uc-surface)] text-[var(--uc-text)]"
         role="dialog"
       >
         <div className="flex h-[44px] shrink-0 items-center border-b border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[8px]">
@@ -117,7 +117,7 @@ function TutorialDetailOverlay({ tutorial, stepIndex, onStepChange, onBack, onCl
             onClick={onBack}
             type="button"
           >
-            <AppIcon name="chevron-left" color="currentColor" size={32} />
+            <AppIcon name="back-heavy" color="currentColor" size={20} />
           </button>
           <div className="min-w-0 flex-1 px-[8px] text-center">
             <h2 className="truncate font-['UniCredit:Bold',sans-serif] text-[14px] font-bold leading-[18px]">
