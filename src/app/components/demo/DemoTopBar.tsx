@@ -902,7 +902,7 @@ function HeaderIconButton({
           : "text-[var(--uc-text)] hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-action)]"
       }`}
     >
-      <AppIcon name={icon} size={20} />
+      <AppIcon name={icon} size={icon === "play" ? 24 : 20} />
     </button>
   );
 }

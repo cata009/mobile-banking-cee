@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import {
   Area,
   AreaChart,
-  CartesianGrid,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -13,6 +12,8 @@ import {
 import type { InvestmentChartPoint } from "@/app/config/investmentsPortfolioConfig";
 import { getCountryConfig } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
+
+const INVESTMENT_POSITIVE_COLOR = "#3D7D43";
 
 interface InvestmentPortfolioChartProps {
   points: readonly InvestmentChartPoint[];
@@ -149,7 +150,7 @@ function InvestmentChartTooltip({
   if (!active || !payload?.[0]?.payload) return null;
 
   const point = payload[0].payload as ChartDatum;
-  const performanceColor = point.performanceAmount < 0 ? "var(--uc-danger)" : "var(--uc-green-success)";
+  const performanceColor = point.performanceAmount < 0 ? "var(--uc-danger)" : INVESTMENT_POSITIVE_COLOR;
 
   return (
     <div
@@ -298,12 +299,6 @@ export default function InvestmentPortfolioChart({
               <stop offset="100%" stopColor="var(--uc-action)" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid
-            vertical={false}
-            stroke="var(--uc-border-muted)"
-            strokeDasharray="2 4"
-            strokeLinecap="round"
-          />
           <XAxis
             dataKey="label"
             interval={0}
@@ -350,14 +345,17 @@ export default function InvestmentPortfolioChart({
             wrapperStyle={{ outline: "none", pointerEvents: "none", transition: "none" }}
           />
           <Area
-            type="linear"
+            type="monotone"
             dataKey="value"
             fill="url(#investmentChartFill)"
             stroke="var(--uc-action)"
             strokeWidth={3}
             activeDot={false}
             dot={(props) => {
-              const { key, ...dotProps } = props;
+              const { key, payload, ...dotProps } = props;
+              if (payload && typeof payload === "object" && "showDot" in payload && payload.showDot === false) {
+                return null;
+              }
               return (
                 <InvestmentChartDot
                   key={key}

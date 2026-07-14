@@ -11,6 +11,7 @@ interface PageHeaderProps {
   showHelp?: boolean;
   showBack?: boolean;
   compact?: boolean;
+  renderLargeTitle?: boolean;
   collapsedTitleProgress?: number;
   includeSafeArea?: boolean;
   rightActionIcon?: ReactNode;
@@ -28,6 +29,7 @@ export default function PageHeader({
   showHelp = true,
   showBack = true,
   compact = false,
+  renderLargeTitle = true,
   collapsedTitleProgress = 0,
   includeSafeArea = false,
   rightActionIcon,
@@ -45,7 +47,7 @@ export default function PageHeader({
       : "bg-[var(--uc-surface)]";
   const titleProgress = Math.min(1, Math.max(0, collapsedTitleProgress));
   const largeTitleOpacity = 1 - titleProgress;
-  const shouldRenderLargeTitle = !(compact && titleProgress >= 0.999);
+  const shouldRenderLargeTitle = renderLargeTitle && !(compact && titleProgress >= 0.999);
 
   const stickyBgStyle = variant === "dark"
     ? {
@@ -85,7 +87,8 @@ export default function PageHeader({
     <>
       <div
         className={cn(
-          "sticky top-0 z-10 w-full transition-shadow duration-200",
+          "sticky z-10 w-full transition-shadow duration-200",
+          "top-0",
           variant !== "dark" && variant !== "gray" ? bgColor : "",
           includeSafeArea ? "pt-[var(--uc-phone-top-reserve,54px)]" : ""
         )}

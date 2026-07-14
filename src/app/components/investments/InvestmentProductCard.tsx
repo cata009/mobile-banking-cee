@@ -13,6 +13,7 @@ interface InvestmentProductCardProps {
   performanceParts: InvestmentAmountParts;
   valueLabel: string;
   performanceLabel: string;
+  onClick?: () => void;
 }
 
 const INVESTMENT_TEXT_COLOR = "#262626";
@@ -37,6 +38,7 @@ export default function InvestmentProductCard({
   performanceParts,
   valueLabel,
   performanceLabel,
+  onClick,
 }: InvestmentProductCardProps) {
   const valueText = `${valueParts.integer}${valueParts.decimal} ${valueParts.currency}`;
   const contributionLabel = security.contributionType.trim();
@@ -44,8 +46,10 @@ export default function InvestmentProductCard({
   const isRecurring = contributionLabel.toUpperCase() === "RECURRENT";
 
   return (
-    <article
-      className="flex min-h-[95px] flex-col gap-[4px] bg-[#FFFFFF] py-[16px] pl-[16px] pr-[24px]"
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex min-h-[95px] w-full flex-col gap-[4px] bg-[#FFFFFF] py-[16px] pl-[16px] pr-[24px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-focus-ring)]"
       data-ds-label="Investment product card"
     >
       <h3 className="truncate text-[14px] font-bold leading-[15px] text-[#262626]">
@@ -69,6 +73,6 @@ export default function InvestmentProductCard({
           {formatSignedPercent(security.performancePercent)}
         </span>
       </div>
-    </article>
+    </button>
   );
 }

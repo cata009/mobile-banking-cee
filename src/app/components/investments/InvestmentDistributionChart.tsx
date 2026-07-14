@@ -9,115 +9,84 @@ interface InvestmentDistributionChartProps {
   onItemClick?: (item: InvestmentDistributionItem) => void;
 }
 
-const CHART_TEXT_COLOR = "#262626";
 const DONUT_SIZE = 179;
 const DONUT_STROKE_WIDTH = 54;
 const DONUT_RADIUS = (DONUT_SIZE - DONUT_STROKE_WIDTH) / 2;
 const DONUT_CIRCUMFERENCE = 2 * Math.PI * DONUT_RADIUS;
-
-// Leader-line overlay coordinate space. The 179px donut is centered
-// horizontally inside the 375-wide overlay, so its center in overlay coords is
-// (CHART_WIDTH / 2, DONUT_SIZE / 2).
 const CHART_WIDTH = 375;
 const CHART_HEIGHT = 179;
 const DONUT_CENTER_X = CHART_WIDTH / 2;
 const DONUT_CENTER_Y = DONUT_SIZE / 2;
-const DONUT_RING_RADIUS = DONUT_RADIUS + DONUT_STROKE_WIDTH / 2; // outer edge of the ring
-
-// Leader horizontal terminations, just outside the ring on each side.
-const LEADER_EDGE_LEFT = 23;
-const LEADER_EDGE_RIGHT = 352;
+const DONUT_OUTER_RADIUS = DONUT_RADIUS + DONUT_STROKE_WIDTH / 2;
 
 type Side = "left" | "right";
 
 interface SliceLeader {
   side: Side;
-  ringX: number;
-  ringY: number;
-  outerX: number;
-  outerY: number;
+  anchorX: number;
+  anchorY: number;
   slotY: number;
 }
 
-function degToRad(deg: number): number {
-  return (deg * Math.PI) / 180;
-}
+function pointOnDonutEdge(angleDeg: number) {
+  const radians = (angleDeg * Math.PI) / 180;
 
-function pointOnRing(angleDeg: number, radius: number): { x: number; y: number } {
-  // 0deg = top (12 o'clock), clockwise. Ring center in overlay coords.
-  const rad = degToRad(angleDeg);
   return {
-    x: DONUT_CENTER_X + radius * Math.sin(rad),
-    y: DONUT_CENTER_Y - radius * Math.cos(rad),
+    x: DONUT_CENTER_X + DONUT_OUTER_RADIUS * Math.sin(radians),
+    y: DONUT_CENTER_Y - DONUT_OUTER_RADIUS * Math.cos(radians),
   };
 }
 
-/**
- * Walks the slices exactly like buildSvgSegments (cumulative offset, same gap)
- * and returns, per item, the midpoint angle plus the leader anchor points.
- * Vertical label slots are assigned per side so same-side labels never overlap.
- */
 function buildSliceLeaders(items: readonly InvestmentDistributionItem[]): SliceLeader[] {
   let offset = 0;
   const gap = DONUT_CIRCUMFERENCE * 0.006;
-
-  const partial = items.map((item) => {
+  const leaders = items.map((item) => {
     const rawLength = (Math.max(0, item.percent) / 100) * DONUT_CIRCUMFERENCE;
-    const length = Math.max(0, rawLength - gap);
-    const startAngle = (offset / DONUT_CIRCUMFERENCE) * 360;
-    const spanAngle = (length / DONUT_CIRCUMFERENCE) * 360;
-    const midAngle = startAngle + spanAngle / 2;
+    const visibleLength = Math.max(0, rawLength - gap);
+    const midpoint = ((offset + visibleLength / 2) / DONUT_CIRCUMFERENCE) * 360;
+    const anchor = pointOnDonutEdge(midpoint);
     offset += rawLength;
 
-    const ring = pointOnRing(midAngle, DONUT_RING_RADIUS);
-    const outer = pointOnRing(midAngle, DONUT_RING_RADIUS + 10);
-    const side: Side = midAngle > 0 && midAngle < 180 ? "right" : "left";
-
     return {
-      side,
-      midAngle,
-      ringX: ring.x,
-      ringY: ring.y,
-      outerX: outer.x,
-      outerY: outer.y,
+      side: midpoint > 0 && midpoint < 180 ? "right" as const : "left" as const,
+      anchorX: anchor.x,
+      anchorY: anchor.y,
+      slotY: 0,
     };
   });
 
-  // Assign vertical slots per side: sort by ring Y (top -> bottom), then spread
-  // the labels evenly across the container height.
-  const slotHeight = CHART_HEIGHT / 4;
-  const assignSideSlots = (filterSide: Side) => {
-    const onSide = partial
-      .map((entry, index) => ({ entry, index }))
-      .filter(({ entry }) => entry.side === filterSide)
-      .sort((a, b) => a.entry.ringY - b.entry.ringY);
+  (["left", "right"] as const).forEach((side) => {
+    const onSide = leaders
+      .map((leader, index) => ({ leader, index }))
+      .filter(({ leader }) => leader.side === side)
+      .sort((first, second) => first.leader.anchorY - second.leader.anchorY);
 
-    onSide.forEach((value, slotIndex) => {
-      const center = slotHeight * (slotIndex + 0.5);
-      partial[value.index].slotY = Math.round(center);
+    const slotsByCount: Record<number, readonly number[]> = {
+      1: [90],
+      2: [38, 126],
+      3: [24, 90, 156],
+      4: [20, 66, 112, 158],
+    };
+    const slots = slotsByCount[onSide.length] ?? slotsByCount[4];
+
+    onSide.forEach(({ index }, slotIndex) => {
+      leaders[index].slotY = slots[slotIndex] ?? 90;
     });
-  };
+  });
 
-  assignSideSlots("left");
-  assignSideSlots("right");
-
-  // Fallback: any item that ended up without a slot (e.g. 0%) gets centered.
-  return partial.map((entry) => ({
-    side: entry.side,
-    ringX: entry.ringX,
-    ringY: entry.ringY,
-    outerX: entry.outerX,
-    outerY: entry.outerY,
-    slotY: entry.slotY ?? Math.round(CHART_HEIGHT / 2),
-  }));
+  return leaders;
 }
 
 function leaderPath(leader: SliceLeader): string {
-  // Radial elbow from the slice ring -> just outside the ring -> horizontal run
-  // at the label's slot height out to the side edge next to the label.
-  const turnX = leader.outerX;
-  const edgeX = leader.side === "right" ? LEADER_EDGE_RIGHT : LEADER_EDGE_LEFT;
-  return `M ${leader.ringX.toFixed(1)} ${leader.ringY.toFixed(1)} L ${leader.outerX.toFixed(1)} ${leader.outerY.toFixed(1)} L ${turnX.toFixed(1)} ${leader.slotY.toFixed(1)} L ${edgeX} ${leader.slotY.toFixed(1)}`;
+  // The connector always leaves horizontally from the donut's outer edge,
+  // travels on a rail outside the circle, then stops before the label. This
+  // prevents it from cutting through the donut or through the label itself.
+  const railX = leader.side === "right" ? 303 : 72;
+  return [
+    `M ${leader.anchorX.toFixed(1)} ${leader.anchorY.toFixed(1)}`,
+    `L ${railX} ${leader.anchorY.toFixed(1)}`,
+    `L ${railX} ${leader.slotY}`,
+  ].join(" ");
 }
 
 export default function InvestmentDistributionChart({
@@ -150,14 +119,12 @@ export default function InvestmentDistributionChart({
                 d={leaderPath(leader)}
                 stroke={item.color}
                 strokeWidth={2}
-                strokeLinecap="square"
-                strokeLinejoin="miter"
-                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
             );
           })}
         </svg>
-
         <svg
           className="absolute left-1/2 top-0 h-[179px] w-[179px] -translate-x-1/2"
           viewBox={`0 0 ${DONUT_SIZE} ${DONUT_SIZE}`}
@@ -188,25 +155,21 @@ export default function InvestmentDistributionChart({
           ))}
           <circle cx={DONUT_SIZE / 2} cy={DONUT_SIZE / 2} r="36" fill="#FFFFFF" />
         </svg>
-
         {visibleLabels.map((item, index) => {
           const leader = leaders[index];
           if (!leader) return null;
-          // Full literal class strings so Tailwind can detect them at build time.
-          const sideClass = leader.side === "right" ? "right-[24px] text-right" : "left-[24px] text-left";
+          const sideClass = leader.side === "right" ? "right-[16px] text-right" : "left-[16px] text-left";
 
           return (
             <div
               key={item.id}
-              className={`absolute max-w-[76px] ${sideClass}`}
-              style={{ top: `${leader.slotY - 18}px` }}
+              className={`absolute max-w-[70px] ${sideClass}`}
+              style={{ top: `${leader.slotY - 20}px` }}
             >
-              <p className="line-clamp-2 text-[14px] font-normal leading-[16px] tracking-[0.2px]" style={{ color: CHART_TEXT_COLOR }}>
+              <p className="line-clamp-2 text-[14px] font-normal leading-[16px] tracking-[0.2px] text-[#262626]">
                 {item.label}
               </p>
-              <p className="text-[20px] font-bold leading-[24px]" style={{ color: CHART_TEXT_COLOR }}>
-                {item.percent}%
-              </p>
+              <p className="text-[20px] font-bold leading-[24px] text-[#262626]">{item.percent}%</p>
             </div>
           );
         })}

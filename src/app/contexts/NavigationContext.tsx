@@ -26,6 +26,8 @@ export type Screen =
   | "account-detail" // Account details and transactions
   | "account-details-info" // Account details information
   | "account-options" // Account options menu
+  | "card-details-info" // Card details information
+  | "card-options" // Card options menu
   | "transaction-detail" // Transaction details and redo payment entry
   | "card-detail" // Card details, carousel, and transactions
   | "domestic-payment" // Domestic payment create form
@@ -84,6 +86,9 @@ function getBackFallbackScreen(screen: Screen): Screen {
     case "account-options":
     case "transaction-detail":
       return "account-detail";
+    case "card-details-info":
+    case "card-options":
+      return "card-detail";
     case "investments-history":
       return "investments";
     case "domestic-payment":

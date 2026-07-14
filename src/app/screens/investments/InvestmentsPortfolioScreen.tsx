@@ -8,6 +8,7 @@ import InvestmentPortfolioTabs from "@/app/components/investments/InvestmentPort
 import InvestmentProductCard, { type InvestmentAmountParts } from "@/app/components/investments/InvestmentProductCard";
 import InvestmentProductsAccordion from "@/app/components/investments/InvestmentProductsAccordion";
 import InvestmentsFundBanner from "@/app/components/investments/InvestmentsFundBanner";
+import { InvestmentSecurityDetailScreen, InvestmentSecurityListScreen } from "@/app/screens/investments/InvestmentSecurityScreens";
 import { AppIcon } from "@/app/components/icons";
 import PageHeader from "@/app/components/PageHeader";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
@@ -18,6 +19,7 @@ import {
   buildInvestmentDistributionItems,
   buildInvestmentChartPoints,
   buildInvestmentSecurities,
+  buildInvestmentSecurityCatalog,
   calculateInvestmentProductsTotalValue,
   getInvestmentDistributionGroupKey,
   getInvestmentDistributionTitle,
@@ -27,6 +29,7 @@ import {
   type InvestmentPortfolioTabId,
   type InvestmentPeriodId,
   type InvestmentSecurity,
+  type InvestmentCatalogSecurity,
   type InvestmentSortId,
 } from "@/app/config/investmentsPortfolioConfig";
 import { getCountryConfig } from "@/app/registry/countryConfig";
@@ -261,11 +264,14 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
   const [selectedPeriodId, setSelectedPeriodId] = useState<InvestmentPeriodId>("max");
   const [selectedSortId, setSelectedSortId] = useState<InvestmentSortId>("max-value");
   const [selectedDistributionItem, setSelectedDistributionItem] = useState<InvestmentDistributionItem | null>(null);
+  const [securityListOpen, setSecurityListOpen] = useState(false);
+  const [selectedSecurity, setSelectedSecurity] = useState<InvestmentCatalogSecurity | null>(null);
 
   const allProducts = useMemo(() => categories.flatMap((category) => category.products), [categories]);
   const investmentProducts = useMemo(() => getInvestmentProducts(allProducts), [allProducts]);
   const totalValue = useMemo(() => calculateInvestmentProductsTotalValue(investmentProducts), [investmentProducts]);
   const securities = useMemo(() => buildInvestmentSecurities(investmentProducts, country), [country, investmentProducts]);
+  const securityCatalog = useMemo(() => buildInvestmentSecurityCatalog(securities, country), [country, securities]);
   const sortedSecurities = useMemo(() => sortInvestmentSecurities(securities, selectedSortId), [securities, selectedSortId]);
   const activeSecurities = sortedSecurities.filter((security) => security.status === "active");
   const inactiveSecurities = sortedSecurities.filter((security) => security.status === "inactive");
@@ -297,11 +303,36 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
       performanceParts={maskInvestmentAmount(formatAmountParts(security.performanceAmount, country, security.localCurrency), amountsHidden)}
       valueLabel={t("runtime.investments.value", "Value")}
       performanceLabel={t("runtime.investments.performance", "Performance")}
+      onClick={() => setSelectedSecurity(securityCatalog.find((item) => item.id === security.id) ?? null)}
     />
   );
 
   const formatDistributionAmount = (value: number, itemCurrency: string) =>
     maskInvestmentAmount(formatAmountParts(value, country, itemCurrency), amountsHidden);
+
+  if (selectedSecurity) {
+    return (
+      <InvestmentSecurityDetailScreen
+        security={selectedSecurity}
+        country={country}
+        amountsHidden={amountsHidden}
+        onBack={() => setSelectedSecurity(null)}
+        onHistoryClick={onHistoryClick}
+      />
+    );
+  }
+
+  if (securityListOpen) {
+    return (
+      <InvestmentSecurityListScreen
+        securities={securityCatalog}
+        country={country}
+        amountsHidden={amountsHidden}
+        onBack={() => setSecurityListOpen(false)}
+        onSelect={setSelectedSecurity}
+      />
+    );
+  }
 
   if (selectedDistributionItem && selectedTabId !== "performance") {
     return (
@@ -396,6 +427,7 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
                   },
                 ]}
                 investLabel={t("runtime.investments.actions.invest", "Invest")}
+                onInvestClick={() => setSecurityListOpen(true)}
               />
               <SectionHeadingDivider
                 title={t("runtime.investments.allProducts", "ALL PRODUCTS")}
