@@ -7,7 +7,7 @@ Last updated: 2026-07-13
 - Latest request handled: commit the complete current workspace and publish the latest build to Vercel production.
 - Scope: all currently tracked and untracked product, Design System, Investments, card, filter-sheet, chatbot, and handoff changes were intentionally included; no unrelated files were discarded.
 - Verification before publication: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and `git diff --check` passed. Known Vite empty `react-vendor` and chunk-size warnings remain documented in `docs/handoff/known-bananas.md`.
-- Publication: commit `9acd88a` is live on Vercel production as deployment `dpl_ERD6QX3XnWdNy6ojT7AvQuQmuy8G`; canonical URL is `https://mobile-banking-cee.vercel.app` and the deployment URL is `https://mobile-banking-mup57x02r-imc-uci.vercel.app`.
+- Publication: commit `e507361` is live on Vercel production as deployment `dpl_7CYWa2Hfz87WrfW8cjmGHCexwcxw`; canonical URL is `https://mobile-banking-cee.vercel.app` and the deployment URL is `https://mobile-banking-ox4hswubc-imc-uci.vercel.app`.
 - constitutional check:
   - scope preserved: yes
   - docs updated: yes
