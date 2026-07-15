@@ -4306,7 +4306,7 @@ function HuKidsCopyToast({ toast }: { toast: { message: string; visible: boolean
           toast.visible ? "translate-y-0 opacity-100" : "translate-y-[10px] opacity-0",
         )}
       >
-        <p className="min-w-0 flex-1 truncate text-left text-[14px] font-bold leading-[20px] tracking-[0] text-[var(--uc-static-white)]">
+        <p className="min-w-0 flex-1 truncate text-center text-[14px] font-bold leading-[20px] tracking-[0] text-[var(--uc-static-white)]">
           {toast.message}
         </p>
       </div>

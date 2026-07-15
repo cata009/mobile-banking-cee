@@ -134,6 +134,10 @@ function replaceTailDigits(seed: string, index: number): string {
   return `${seed.slice(0, -2)}${suffix}`;
 }
 
+function cardSecurityCode(index: number): string {
+  return String((214 + index * 137) % 1000).padStart(3, "0");
+}
+
 function productName(baseName: string, count: number, index: number): string {
   return count === 1 ? baseName : `${baseName} ${index + 1}`;
 }
@@ -178,6 +182,8 @@ function cloneProductForCount(
         cardType: "Standard",
         cardNumber: accountNumber,
         expiryDate: "12/29",
+        cardHolderName: "PETER JAGODIĆ",
+        securityCode: cardSecurityCode(index),
         balance: 0,
       } as Product;
     case "credit_card":
@@ -186,6 +192,8 @@ function cloneProductForCount(
         cardType: "Standard",
         cardNumber: accountNumber,
         expiryDate: "12/29",
+        cardHolderName: "PETER JAGODIĆ",
+        securityCode: cardSecurityCode(index),
         creditLimit: sourceCreditCard?.creditLimit ?? 5000,
         availableCredit: sourceCreditCard?.availableCredit ?? 3200,
         balance: sourceCreditCard?.availableCredit ?? 3200,

@@ -1,5 +1,6 @@
 import type { KeyboardEventHandler } from "react";
 import type { AccountIdentity } from "@/data/accountDetails";
+import type { ProductType } from "@/data/products";
 import { AppIcon } from "@/app/components/icons";
 
 export interface AccountBalanceCardProps {
@@ -9,8 +10,25 @@ export interface AccountBalanceCardProps {
   currency: string;
   currentBalance: string;
   onClick?: () => void;
+  onCopy?: () => void;
   active?: boolean;
   showSubAccount?: boolean;
+  productType?: ProductType;
+}
+
+function resolveBalanceLabels(productType?: ProductType) {
+  switch (productType) {
+    case "saving_account":
+      return { availableLabel: "Available funds", showCurrent: false, currentLabel: "" };
+    case "term_deposit":
+      return { availableLabel: "Deposit amount", showCurrent: true, currentLabel: "Maturity amount" };
+    case "loan":
+    case "mortgage":
+      return { availableLabel: "Remaining loan amount", showCurrent: true, currentLabel: "Next installment" };
+    case "current_account":
+    default:
+      return { availableLabel: "Available balance", showCurrent: true, currentLabel: "Current balance" };
+  }
 }
 
 export default function AccountBalanceCard({
@@ -20,10 +38,13 @@ export default function AccountBalanceCard({
   currency,
   currentBalance,
   onClick,
+  onCopy,
   active = true,
   showSubAccount = true,
+  productType,
 }: AccountBalanceCardProps) {
   const hasSubAccount = showSubAccount && Boolean(account.subAccount);
+  const { availableLabel, showCurrent, currentLabel } = resolveBalanceLabels(productType);
   const handleKeyDown: KeyboardEventHandler<HTMLElement> = (event) => {
     if (!onClick || (event.key !== "Enter" && event.key !== " ")) return;
 
@@ -60,9 +81,18 @@ export default function AccountBalanceCard({
           >
             {account.accountNumber}
           </p>
-          <span className="h-[32px] w-[32px] shrink-0" data-ds-label="Copy icon 32x32">
+          <button
+            type="button"
+            aria-label="Copy account number"
+            className="flex h-[32px] w-[32px] shrink-0 cursor-pointer items-center justify-center pointer-events-auto"
+            data-ds-label="Copy icon 32x32"
+            onClick={(event) => {
+              event.stopPropagation();
+              onCopy?.();
+            }}
+          >
             <AppIcon name="copy-documents" color="var(--uc-icon)" />
-          </span>
+          </button>
         </div>
 
         {hasSubAccount ? (
@@ -78,7 +108,7 @@ export default function AccountBalanceCard({
       <div className="flex h-[80px] shrink-0 flex-col items-start gap-[8px] self-stretch">
         <div>
           <p className="uc-type-n5-strong text-[var(--uc-text-muted)]">
-            Available balance
+            {availableLabel}
           </p>
           <p className="uc-type-n1 whitespace-nowrap leading-none text-[var(--uc-text)]">
             {availableInteger}
@@ -90,14 +120,16 @@ export default function AccountBalanceCard({
 
         <div className="flex h-[1px] w-[279px] shrink-0 items-center justify-center bg-[var(--uc-border)]" />
 
-        <div className="flex items-center gap-[4px]">
-          <p className="uc-type-n5-strong text-[var(--uc-text-muted)]">
-            Current balance
-          </p>
-          <p className="uc-type-n5-strong text-[var(--uc-text)]" data-ds-label="Current balance value 14px">
-            {currentBalance} {currency}
-          </p>
-        </div>
+        {showCurrent ? (
+          <div className="flex items-center gap-[4px]">
+            <p className="uc-type-n5-strong text-[var(--uc-text-muted)]">
+              {currentLabel}
+            </p>
+            <p className="uc-type-n5-strong text-[var(--uc-text)]" data-ds-label="Current balance value 14px">
+              {currentBalance} {currency}
+            </p>
+          </div>
+        ) : null}
       </div>
     </div>
   );

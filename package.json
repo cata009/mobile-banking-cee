@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "audit:card-details": "node scripts/audit-card-details-flow.mjs",
+    "audit:investments": "node scripts/audit-investments-portfolio.mjs",
     "audit:figma-bridge": "node scripts/audit-figma-bridge.mjs",
     "audit:templates": "node scripts/audit-template-contract.mjs",
     "audit:platform": "node scripts/audit-reference-platform.mjs"

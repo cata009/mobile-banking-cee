@@ -45,8 +45,8 @@ interface InvestmentsHistoryScreenProps {
 }
 
 const HISTORY_TABS = [
-  { id: "transactions", label: "Transactions" },
-  { id: "orders", label: "Orders" },
+  { id: "transactions", label: "TRANSACTIONS" },
+  { id: "orders", label: "ORDERS" },
 ] as const;
 
 const INVESTMENT_HISTORY_ORDER_STATUSES: readonly InvestmentHistoryOrderStatus[] = ["EXECUTED", "PENDING", "REJECTED"];
@@ -730,8 +730,8 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex h-[80px] w-full items-center" data-account-details-info-field data-account-details-info-field-variant="default">
       <div className="flex min-w-0 flex-col gap-[4px]">
-        <p className="uc-type-n4 text-[var(--uc-text)]">{label}</p>
-        <p className="uc-type-n4-strong break-words text-[var(--uc-text)]">{value}</p>
+        <p className="text-[14px] font-normal leading-[16px] text-[var(--uc-text-muted)]">{label}</p>
+        <p className="text-[16px] font-bold leading-[20px] break-words text-[var(--uc-text)]">{value}</p>
       </div>
     </div>
   );

@@ -2,6 +2,34 @@
 
 Last updated: 2026-07-15
 
+## 2026-07-15 Mobile PI Card Details Face ID and Figma Alignment
+
+- Latest request handled: make `SHOW CARD DETAILS` work globally as a gated Face ID reveal and then show the Figma Card details screen for all Mobile PI debit and credit cards.
+- Runtime changes: both `SHOW CARD DETAILS` and the Card Details quick action now start shared `FaceIdAnimation`; only its completion routes to the selected card. The destination reuses `PageHeader` and maps Card number, Card CVV2/CVC2, Card holder, and Card validity. The Card number copy action writes the unmasked value through the shared clipboard hook and shows the same bottom toast used by Account Details.
+- Data changes: debit and credit products now carry mock cardholder/CVC fields; generated card-count variants receive deterministic values so the complete flow remains valid for all eight Mobile PI countries and scenario combinations.
+- Figma evidence: Meniga Harmonization Design System `FKbbStgBIP9bFAMl3DPKHF`, node `7375:10660`.
+- Files changed: `src/app/screens/cards/CardDetailScreen.tsx`, `src/app/screens/cards/CardDetailsInfoScreen.tsx`, `src/hooks/useProducts.tsx`, `src/data/products.ts`, `src/app/components/icons/AppIcon.tsx`, `scripts/audit-card-details-flow.mjs`, `package.json`, and the linked handoff/spec/plan documents.
+- Verification: `npm run audit:card-details`, `npm run build` (3,910 modules), `npm run audit:templates`, `npm run audit:platform`, and `git diff --check` passed. Build retains the already-triaged empty `react-vendor` and large-chunk warnings.
+- Limitation: the Face ID gate and card data are mock front-end behaviour; no biometric verification, secure card-data API, or persistence is implied.
+- Banana Loop: the only remaining build warnings are already triaged in `known-bananas.md`; no untracked temporary outputs remain outside the intentional audits, copy primitives, and implementation/spec documents.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
+
+## 2026-07-15 Investments Portfolio Financial Consistency
+
+- Latest request handled: make the mocked Investments holdings genuinely reconcile across Performance, Product Type, Currency, Asset Class, Account List, product detail and History for every Mobile PI country/application variant.
+- Runtime changes: one canonical portfolio now creates 12 owned securities: 10 active positions (four Funds, two Bonds, two Stocks, one ETF and one Money market) and two zero-balance inactive legacy positions retained for demo coverage. Every active position carries a deterministic instrument market price, derived quantity, local portfolio value and return. Performance totals/chart and all four distribution tabs consume exactly those active positions; inactive positions remain visible only in the inactive accordion/catalogue and do not affect financial aggregates or history.
+- Guardrail: `npm run audit:investments` loads the TypeScript portfolio builders through Vite SSR for `RO`, `CZ`, `SK`, `HU`, `RS`, `BA`, `BA_BL`, and `SI`; it checks counts, local total reconciliation, price × quantity, inactive zero balance, distribution totals/percentages, and Product Type counts.
+- Files changed: `src/app/config/investmentsPortfolioConfig.ts`, `src/app/screens/investments/InvestmentsPortfolioScreen.tsx`, `scripts/audit-investments-portfolio.mjs`, `package.json`, `docs/superpowers/specs/2026-07-15-investments-portfolio-consistency-design.md`, `docs/superpowers/plans/2026-07-15-investments-portfolio-consistency.md`, and handoff/capability documentation.
+- Verification: `npm run audit:investments` passed (`countries=8 active=10 inactive=2`); `npm run audit:templates`, `npm run audit:platform`, `npm run build` (3,908 modules), and `git diff --check` passed. Local dev server responded with HTTP 200 on port 4001; automated in-app-browser reload was blocked by the browser URL policy, so no policy workaround was used. The already-triaged empty `react-vendor` and large-chunk Vite warnings remain non-blocking.
+- Limitation: all investment values remain deterministic front-end mock data; no market feed, trading execution, or persistence is implied.
+- safe to resume: yes
+
 ## 2026-07-15 Investments Distribution Controls Publication
 
 - Latest request handled: include every current workspace change in Git and publish the updated application to Vercel production.

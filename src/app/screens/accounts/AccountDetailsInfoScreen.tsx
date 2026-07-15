@@ -2,11 +2,13 @@ import PageHeader from "@/app/components/PageHeader";
 import { AppIcon } from "@/app/components/icons";
 import NavigationCardArt from "@/app/components/cards/NavigationCardArt";
 import AccountDetailsInfoField from "@/app/components/accounts/AccountDetailsInfoField";
+import CopyToast from "@/app/components/accounts/CopyToast";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
 import { formatMoneyNumber, getCountryConfig } from "@/app/registry/countryConfig";
 import { maskFormattedAmount } from "@/app/utils/amountPrivacy";
+import { useCopyToClipboard } from "@/app/utils/useCopyToClipboard";
 import { useProducts } from "@/hooks/useProducts";
 import { isAccountDetailProduct } from "@/data/products";
 import { useState } from "react";
@@ -63,6 +65,7 @@ export default function AccountDetailsInfoScreen({
   const products = categories.flatMap((category) => category.products);
   const product = getAccountDetailsProduct(products, selectedProductId);
   const config = getCountryConfig(country);
+  const { toast: copyToast, copy: copyToClipboard } = useCopyToClipboard();
   const [headerProgress, setHeaderProgress] = useState(0);
 
   const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
@@ -72,7 +75,7 @@ export default function AccountDetailsInfoScreen({
 
   if (!product) {
     return (
-      <div className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] scrollbar-hide" onScroll={handlePageScroll}>
+      <div className="relative h-full w-full overflow-y-auto bg-[var(--uc-surface)] scrollbar-hide" onScroll={handlePageScroll}>
         <PageHeader
           title={t("runtime.accounts.detailsInfo.title", "Account Details")}
           onBack={onBack}
@@ -104,7 +107,16 @@ export default function AccountDetailsInfoScreen({
           <AccountDetailsInfoField
             title={t("runtime.accounts.detailsInfo.accountNumber", "Account number")}
             subtitle={product.accountNumber}
-            trailingIcon={<AppIcon name="copy-documents" color="var(--uc-text)" />}
+            trailingIcon={
+              <button
+                type="button"
+                aria-label="Copy account number"
+                className="flex h-[40px] w-[40px] items-center justify-center"
+                onClick={() => copyToClipboard(product.accountNumber, "Account number")}
+              >
+                <AppIcon name="copy-documents" color="var(--uc-text)" />
+              </button>
+            }
           />
           <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.availableFunds", "Available funds")} subtitle={availableFunds} />
           <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.currentBalance", "Current balance")} subtitle={currentBalance} />
@@ -134,6 +146,7 @@ export default function AccountDetailsInfoScreen({
           <ConnectedCardRow />
         </section>
       </div>
+      <CopyToast toast={copyToast} />
     </div>
   );
 }

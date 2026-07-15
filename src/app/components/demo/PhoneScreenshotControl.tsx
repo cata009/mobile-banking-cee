@@ -3,8 +3,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/app/components/ui/dropdown-menu";
+import { AppIcon } from "@/app/components/icons";
 import {
   createPhoneFigmaJson,
   downloadPhoneScreenshot,
@@ -18,16 +20,13 @@ interface PhoneScreenshotControlProps {
 
 interface PhoneScreenshotMenuItemsProps extends PhoneScreenshotControlProps {
   itemClassName?: string;
+  /** When true, includes the "Download screen JSON" action. */
+  showDownloadJson?: boolean;
 }
 
 const SCREENSHOT_OPTIONS: Array<{ mode: PhoneScreenshotMode; label: string }> = [
   { mode: "full", label: "Capture entire screen" },
   { mode: "visible", label: "Capture visible screen" },
-];
-
-const FIGMA_JSON_OPTIONS: Array<{ mode: PhoneScreenshotMode; label: string }> = [
-  { mode: "visible", label: "Generate visible JSON" },
-  { mode: "full", label: "Generate entire screen JSON" },
 ];
 
 function getDefaultPhoneScreenElement() {
@@ -76,6 +75,7 @@ export function PhoneScreenshotMenuItems({
   disabled = false,
   getScreenElement = getDefaultPhoneScreenElement,
   itemClassName,
+  showDownloadJson = false,
 }: PhoneScreenshotMenuItemsProps) {
   const [isCapturing, setIsCapturing] = useState(false);
   const isDisabled = disabled || isCapturing;
@@ -100,7 +100,7 @@ export function PhoneScreenshotMenuItems({
     }
   };
 
-  const handleGenerateFigmaJson = async (mode: PhoneScreenshotMode) => {
+  const handleDownloadScreenJson = async () => {
     if (isDisabled) return;
 
     const screenElement = getScreenElement();
@@ -108,11 +108,9 @@ export function PhoneScreenshotMenuItems({
 
     setIsCapturing(true);
     try {
-      const delivery = await deliverGeneratedJson(
-        () => createPhoneFigmaJson({ screenElement, mode }),
-        `unicredit-${mode}-screen.json`,
-      );
-      console.log(`Figma screen JSON ${delivery === "clipboard" ? "copied to clipboard" : "downloaded"} (${mode}).`);
+      const json = await createPhoneFigmaJson({ screenElement, mode: "full" });
+      downloadTextFile(json, "unicredit-screen.json");
+      console.log("Figma screen JSON downloaded.");
     } catch (error) {
       console.error("Phone Figma JSON export failed", error);
       window.alert("Figma JSON could not be generated. Please try again.");
@@ -133,16 +131,19 @@ export function PhoneScreenshotMenuItems({
           {option.label}
         </DropdownMenuItem>
       ))}
-      {FIGMA_JSON_OPTIONS.map((option) => (
-        <DropdownMenuItem
-          key={`json-${option.mode}`}
-          className={menuItemClassName}
-          disabled={isDisabled}
-          onSelect={() => void handleGenerateFigmaJson(option.mode)}
-        >
-          {option.label}
-        </DropdownMenuItem>
-      ))}
+      {showDownloadJson ? (
+        <>
+          <DropdownMenuSeparator className="my-1 bg-[var(--uc-border-muted)]" />
+          <DropdownMenuItem
+            className={menuItemClassName}
+            disabled={isDisabled}
+            onSelect={() => void handleDownloadScreenJson()}
+          >
+            <AppIcon name="download" size={16} />
+            <span className="ml-[8px]">Download screen JSON</span>
+          </DropdownMenuItem>
+        </>
+      ) : null}
     </>
   );
 }
@@ -170,61 +171,6 @@ function ScreenshotOptionsIcon() {
       />
     </svg>
   );
-}
-
-async function deliverGeneratedJson(createJson: () => Promise<string>, fileName: string) {
-  const jsonPromise = createJson();
-
-  if (navigator.clipboard?.write && typeof ClipboardItem !== "undefined") {
-    try {
-      await navigator.clipboard.write([
-        new ClipboardItem({
-          "text/plain": jsonPromise.then((json) => new Blob([json], { type: "text/plain" })),
-        }),
-      ]);
-      await jsonPromise;
-      return "clipboard" as const;
-    } catch {
-      // Fall through to direct text copy or file download when browser permissions block async clipboard writes.
-    }
-  }
-
-  const json = await jsonPromise;
-  try {
-    await copyTextToClipboard(json);
-    return "clipboard" as const;
-  } catch {
-    downloadTextFile(json, fileName);
-    return "download" as const;
-  }
-}
-
-async function copyTextToClipboard(text: string) {
-  if (navigator.clipboard?.writeText) {
-    try {
-      await navigator.clipboard.writeText(text);
-      return;
-    } catch {
-      // Fall through to the legacy copy path when browser permissions block Clipboard API.
-    }
-  }
-
-  const textArea = document.createElement("textarea");
-  textArea.value = text;
-  textArea.setAttribute("readonly", "readonly");
-  textArea.style.position = "fixed";
-  textArea.style.left = "-9999px";
-  document.body.appendChild(textArea);
-  textArea.select();
-
-  try {
-    const copied = document.execCommand("copy");
-    if (!copied) {
-      throw new Error("Clipboard fallback copy command failed.");
-    }
-  } finally {
-    textArea.remove();
-  }
 }
 
 function downloadTextFile(text: string, fileName: string) {

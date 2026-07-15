@@ -51,8 +51,8 @@ function formatPercent(value: number) {
 function FieldRow({ label, value, multiline = false }: { label: string; value: string; multiline?: boolean }) {
   return (
     <div className={`flex w-full flex-col gap-[4px] px-[24px] py-[16px] ${multiline ? "min-h-[132px]" : "min-h-[80px] justify-center"}`}>
-      <p className="text-[16px] font-normal leading-[20px] text-[var(--uc-text)]">{label}</p>
-      <p className="text-[18px] font-bold leading-[22px] text-[var(--uc-text)]">{value}</p>
+      <p className="text-[14px] font-normal leading-[16px] text-[var(--uc-text-muted)]">{label}</p>
+      <p className="text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{value}</p>
     </div>
   );
 }

@@ -33,6 +33,8 @@ export interface DebitCard extends BaseProduct {
   cardType: CardType;
   cardNumber: string;
   expiryDate: string;
+  cardHolderName?: string;
+  securityCode?: string;
   linkedAccountId: string;
 }
 
@@ -41,6 +43,8 @@ export interface CreditCard extends BaseProduct {
   cardType: CardType;
   cardNumber: string;
   expiryDate: string;
+  cardHolderName?: string;
+  securityCode?: string;
   creditLimit: number;
   availableCredit: number;
 }
@@ -146,6 +150,8 @@ export const mockProducts: Product[] = [
     cardType: 'Standard',
     cardNumber: '5173500087654321',
     expiryDate: '12/29',
+    cardHolderName: 'PETER JAGODIĆ',
+    securityCode: '990',
     creditLimit: 10000,
     availableCredit: 3200
   },
@@ -159,6 +165,8 @@ export const mockProducts: Product[] = [
     cardType: 'Gold',
     cardNumber: '5173400012345678',
     expiryDate: '12/29',
+    cardHolderName: 'PETER JAGODIĆ',
+    securityCode: '214',
     linkedAccountId: 'acc-1'
   },
   {
@@ -171,6 +179,8 @@ export const mockProducts: Product[] = [
     cardType: 'Standard',
     cardNumber: '5173400012345699',
     expiryDate: '12/29',
+    cardHolderName: 'PETER JAGODIĆ',
+    securityCode: '782',
     linkedAccountId: 'acc-2'
   },
 

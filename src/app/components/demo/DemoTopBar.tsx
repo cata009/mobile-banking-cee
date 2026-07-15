@@ -694,7 +694,7 @@ function HeaderMoreMenu({
             <span>Screenshots</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="z-[10001] min-w-[218px] rounded-xl border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-1.5 text-[var(--uc-text)] shadow-xl">
-            <PhoneScreenshotMenuItems itemClassName={itemClassName} />
+            <PhoneScreenshotMenuItems itemClassName={itemClassName} showDownloadJson />
           </DropdownMenuSubContent>
         </DropdownMenuSub>
 

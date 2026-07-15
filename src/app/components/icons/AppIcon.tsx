@@ -1220,7 +1220,7 @@ const CUSTOM_ICONS = {
     width: 20,
     height: 20,
     viewBox: "7 6 18 20",
-    usage: ["AccountBalanceCard", "AccountDetailsInfoScreen"],
+    usage: ["AccountBalanceCard", "AccountDetailsInfoScreen", "CardDetailsInfoScreen"],
     notes: "Deduplicated exact account copy icon.",
     render: () => (
       <path d="M22 10.375C23.3806 10.375 24.5 11.4944 24.5 12.875V26H14.5C13.1194 26 12 24.8806 12 23.5V10.375H22ZM17 6C18.3806 6 19.5 7.11937 19.5 8.5V9.125H10.75V21.625H9.5C8.11937 21.625 7 20.5056 7 19.125V6H17Z" fill="currentColor" />
