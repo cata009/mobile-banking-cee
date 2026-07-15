@@ -136,6 +136,17 @@ interface InvestmentSecuritySeed {
   logoId?: BrandLogoId;
 }
 
+type NonEmptyReadonlyArray<T> = readonly [T, ...T[]];
+
+function isNonEmpty<T>(items: readonly T[]): items is NonEmptyReadonlyArray<T> {
+  return items.length > 0;
+}
+
+function getCyclicItem<T>(items: NonEmptyReadonlyArray<T>, index: number): T {
+  const normalizedIndex = ((index % items.length) + items.length) % items.length;
+  return items[normalizedIndex] ?? items[0];
+}
+
 export const INVESTMENT_PORTFOLIO_TABS: readonly InvestmentPortfolioTabOption[] = [
   { id: "performance", label: "PERFORMANCE" },
   { id: "product-type", label: "PRODUCT TYPE" },
@@ -404,7 +415,14 @@ const CATALOG_ONLY_SEEDS: readonly InvestmentSecuritySeed[] = [
   },
 ];
 
-const DISTRIBUTION_COLORS = ["#00A3E0", "#5BC199", "#074861", "#885BC1", "#535453", "#24A06B"];
+const DISTRIBUTION_COLORS: NonEmptyReadonlyArray<string> = [
+  "#00A3E0",
+  "#5BC199",
+  "#074861",
+  "#885BC1",
+  "#535453",
+  "#24A06B",
+];
 
 const PERIOD_MULTIPLIERS: Record<InvestmentPeriodId, readonly number[]> = {
   "1m": [0.982, 0.986, 0.989, 0.991, 0.987, 0.981, 0.978, 0.984, 0.991, 0.995, 0.992, 0.988, 0.987, 0.992, 0.994, 0.998, 0.999, 1],
@@ -649,7 +667,7 @@ export function buildInvestmentDistributionItems(
       percent: 0,
       value: security.localValue,
       currency: security.localCurrency,
-      color: DISTRIBUTION_COLORS[groups.size % DISTRIBUTION_COLORS.length],
+      color: getCyclicItem(DISTRIBUTION_COLORS, groups.size),
       secondaryLabel: getDistributionSecondaryLabel(security, tabId),
     });
   });
@@ -668,7 +686,7 @@ export function buildInvestmentDistributionItems(
 
   return items.map((item, index) => ({
     ...item,
-    color: DISTRIBUTION_COLORS[index % DISTRIBUTION_COLORS.length],
+    color: getCyclicItem(DISTRIBUTION_COLORS, index),
   }));
 }
 
@@ -681,9 +699,9 @@ export function buildInvestmentHistoryTransactions(
   country: CountryId,
 ): InvestmentHistoryTransaction[] {
   const financialSecurities = securities.filter((security) => security.status === "active" && security.localValue > 0);
-  if (financialSecurities.length === 0) return [];
+  if (!isNonEmpty(financialSecurities)) return [];
   const countryCurrency = getCountryCurrency(country) as Currency;
-  const transactionTypes: readonly InvestmentHistoryTransactionType[] = [
+  const transactionTypes: NonEmptyReadonlyArray<InvestmentHistoryTransactionType> = [
     "COUPON",
     "BUY",
     "OTHER WITHDRAWAL",
@@ -722,8 +740,8 @@ export function buildInvestmentHistoryTransactions(
   const total = dates.length;
 
   return dates.map((date, index) => {
-    const security = financialSecurities[index % financialSecurities.length];
-    const type = transactionTypes[index] ?? "BUY";
+    const security = getCyclicItem(financialSecurities, index);
+    const type = getCyclicItem(transactionTypes, index);
     const currency = index % 2 === 0 ? countryCurrency : security.instrumentCurrency;
     const sourceAmount = type === "COUPON"
       ? Math.max(12, Math.abs(security.performanceAmount || security.localValue * 0.008))
@@ -749,9 +767,9 @@ export function buildInvestmentHistoryOrders(
   country: CountryId,
 ): InvestmentHistoryOrder[] {
   const financialSecurities = securities.filter((security) => security.status === "active" && security.localValue > 0);
-  if (financialSecurities.length === 0) return [];
+  if (!isNonEmpty(financialSecurities)) return [];
   const countryCurrency = getCountryCurrency(country) as Currency;
-  const statuses: readonly InvestmentHistoryOrderStatus[] = [
+  const statuses: NonEmptyReadonlyArray<InvestmentHistoryOrderStatus> = [
     "EXECUTED",
     "PENDING",
     "EXECUTED",
@@ -767,7 +785,7 @@ export function buildInvestmentHistoryOrders(
     "EXECUTED",
     "EXECUTED",
   ];
-  const orderTypes: readonly ("BUY" | "SELL")[] = [
+  const orderTypes: NonEmptyReadonlyArray<"BUY" | "SELL"> = [
     "BUY",
     "BUY",
     "SELL",
@@ -801,9 +819,9 @@ export function buildInvestmentHistoryOrders(
   ];
 
   return dates.map((date, index) => {
-    const security = financialSecurities[index % financialSecurities.length];
-    const orderType = orderTypes[index] ?? "BUY";
-    const status = statuses[index] ?? "EXECUTED";
+    const security = getCyclicItem(financialSecurities, index);
+    const orderType = getCyclicItem(orderTypes, index);
+    const status = getCyclicItem(statuses, index);
     const currency = index % 2 === 0 ? countryCurrency : security.instrumentCurrency;
     const amount = roundMoney(convertCurrency(security.localValue * (0.08 + (index % 4) * 0.02), security.localCurrency, currency));
 
