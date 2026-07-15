@@ -3,7 +3,8 @@
  * Global context for app navigation state
  */
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import { ROUTE_POLICY } from "@/app/navigation/routePolicy";
 
 export type Screen =
@@ -107,39 +108,33 @@ export function NavigationProvider({
     history: [firstRoute],
   });
 
-  const navigateTo = (destination: NavigationDestination) => {
+  const navigateTo = useCallback((destination: NavigationDestination) => {
     const route = resolveDestination(destination);
-    console.log("🔵 navigateTo called with screen:", route.screen);
     setState((prev) => {
-      console.log("🔵 Previous state:", prev);
       const newState = {
         ...prev,
         currentScreen: route.screen,
         currentRoute: route,
         history: [...prev.history, route],
       };
-      console.log("🔵 New state:", newState);
       return newState;
     });
-  };
+  }, []);
 
-  const navigateToAndReset = (destination: NavigationDestination) => {
+  const navigateToAndReset = useCallback((destination: NavigationDestination) => {
     const route = resolveDestination(destination);
-    console.log("🔵 navigateToAndReset called with screen:", route.screen);
     setState((prev) => {
-      console.log("🔵 Previous state:", prev);
       const newState = {
         ...prev,
         currentScreen: route.screen,
         currentRoute: route,
         history: [route], // Reset history to only include new screen
       };
-      console.log("🔵 New state (reset):", newState);
       return newState;
     });
-  };
+  }, []);
 
-  const goBack = () => {
+  const goBack = useCallback(() => {
     setState((prev) => {
       if (prev.history.length <= 1) {
         const fallbackScreen = ROUTE_POLICY[prev.currentScreen].backFallback;
@@ -164,27 +159,28 @@ export function NavigationProvider({
         history: newHistory,
       };
     });
-  };
+  }, []);
 
-  const setCoAppingActive = (active: boolean) => {
+  const setCoAppingActive = useCallback((active: boolean) => {
     setState((prev) => ({
       ...prev,
       isCoAppingActive: active,
     }));
-  };
+  }, []);
 
   const canGoBack = state.history.length > 1 || ROUTE_POLICY[state.currentScreen].backFallback !== state.currentScreen;
+  const value = useMemo<NavigationContextValue>(() => ({
+    ...state,
+    navigateTo,
+    navigateToAndReset,
+    goBack,
+    setCoAppingActive,
+    canGoBack,
+  }), [canGoBack, goBack, navigateTo, navigateToAndReset, setCoAppingActive, state]);
 
   return (
     <NavigationContext.Provider
-      value={{
-        ...state,
-        navigateTo,
-        navigateToAndReset,
-        goBack,
-        setCoAppingActive,
-        canGoBack,
-      }}
+      value={value}
     >
       {children}
     </NavigationContext.Provider>
