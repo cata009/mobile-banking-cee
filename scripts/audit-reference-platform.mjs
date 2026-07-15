@@ -97,7 +97,14 @@ scenarios.forEach((scenario) => {
 repositoriesExpected.forEach((repository) => assertIncludes(repositories, repository, "repository export"));
 effectiveFields.forEach((field) => assertIncludes(effectiveContext, field, "effective context field"));
 
-["Banking Scenario", "Data Snapshot", "Rights", "Release Features", "Unplanned Features"].forEach((panelSection) => {
+[
+  "Banking Scenario",
+  "Product count overrides",
+  "Reset to scenario",
+  "Rights",
+  "Release Features",
+  "Unplanned Features",
+].forEach((panelSection) => {
   assertIncludes(sidePanel, panelSection, "control panel section");
 });
 
