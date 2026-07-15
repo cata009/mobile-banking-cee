@@ -206,6 +206,16 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
     }));
   }, []);
 
+  const resetProductCountsToScenario = useCallback(() => {
+    setState(prev => {
+      if (prev.product !== "PI" || !isPIProductScenarioId(prev.bankingScenario)) return prev;
+      return {
+        ...prev,
+        productCounts: resolveProductDataAuthority(prev.bankingScenario, {}).baselineCounts,
+      };
+    });
+  }, []);
+
   const setFlag = useCallback((featureId: FeatureId, enabled: boolean) => {
     setState(prev => {
       const contextKey = getContextKey(prev);
@@ -270,6 +280,7 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
       setRelease,
       setBankingScenario,
       setProductCount,
+      resetProductCountsToScenario,
       setFlag,
       toggleAmountsHidden,
       setAmountsHidden,
@@ -288,6 +299,7 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
       setRelease,
       setBankingScenario,
       setProductCount,
+      resetProductCountsToScenario,
       setFlag,
       toggleAmountsHidden,
       setAmountsHidden,

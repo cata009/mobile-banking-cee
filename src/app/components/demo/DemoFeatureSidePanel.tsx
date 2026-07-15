@@ -89,6 +89,7 @@ export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelPr
     bankingScenario,
     setBankingScenario,
     setProductCount,
+    resetProductCountsToScenario,
     setFlag,
   } = demoState;
   const effectiveContext = resolveEffectiveAppContext(demoState);
@@ -149,8 +150,15 @@ export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelPr
 
           <section className="border border-[var(--uc-border-muted)] rounded-md p-4">
             <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-3">
-              Data Snapshot
+              Product count overrides
             </h4>
+            <button
+              type="button"
+              onClick={resetProductCountsToScenario}
+              className="mb-3 text-xs font-semibold text-[var(--uc-action)] hover:underline"
+            >
+              Reset to scenario
+            </button>
             <ProductCountEditor
               values={productCountOverrides}
               onChange={setProductCount}

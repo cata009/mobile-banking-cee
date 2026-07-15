@@ -29,6 +29,8 @@ import type {
   DemoState,
   DesignSystemId,
   ProductId,
+  ProductCountKey,
+  ProductCounts,
   ReleaseId,
   Scenario,
   ThemeMode,
@@ -48,6 +50,7 @@ export interface DeepLinkState {
   flowId?: FlowPreviewId | null;
   accountId?: string | null;
   cardId?: string | null;
+  productCounts?: ProductCounts;
   /** Frameless "real device" mode — render the app fullscreen, no phone bezel. */
   deviceMode?: boolean;
 }
@@ -72,6 +75,18 @@ const PARAM = {
   frame: "frame",
   shareAccessToken: "access_token",
 } as const;
+
+const PRODUCT_COUNT_PARAM: Record<ProductCountKey, string> = {
+  accounts: "count_accounts",
+  debitCards: "count_debit_cards",
+  creditCards: "count_credit_cards",
+  mealCards: "count_meal_cards",
+  deposits: "count_deposits",
+  savingsAccounts: "count_savings",
+  loans: "count_loans",
+  mortgages: "count_mortgages",
+  investments: "count_investments",
+};
 
 /** Banking scenario chosen when a product is set but no scenario is supplied. */
 const DEFAULT_BANKING_SCENARIO_BY_PRODUCT: Record<ProductId, BankingScenarioId> = {
@@ -110,7 +125,8 @@ export function normalizeScreen(screen: Screen, hasCard: boolean): Screen {
 export function parseDeepLinkFromUrl(search: string = window.location.search): ParsedDeepLink | null {
   const params = new URLSearchParams(search);
 
-  const hasAnyParam = Object.values(PARAM).some((key) => params.has(key));
+  const hasAnyParam = [...Object.values(PARAM), ...Object.values(PRODUCT_COUNT_PARAM)]
+    .some((key) => params.has(key));
   if (!hasAnyParam) return null;
 
   const parsed: ParsedDeepLink = {};
@@ -164,6 +180,15 @@ export function parseDeepLinkFromUrl(search: string = window.location.search): P
   const cardId = params.get(PARAM.cardId);
   if (cardId) parsed.cardId = cardId;
 
+  const productCountEntries = Object.entries(PRODUCT_COUNT_PARAM) as Array<[ProductCountKey, string]>;
+  if (productCountEntries.every(([, param]) => params.has(param))) {
+    parsed.productCounts = Object.fromEntries(productCountEntries.map(([key, param]) => {
+      const value = Number(params.get(param));
+      const normalized = Number.isFinite(value) ? Math.max(0, Math.min(9, Math.trunc(value))) : 0;
+      return [key, normalized];
+    })) as ProductCounts;
+  }
+
   // frame=0 → frameless "real device" mode.
   if (params.get(PARAM.frame) === "0") parsed.deviceMode = true;
 
@@ -198,6 +223,7 @@ export function deepLinkToDemoInitialState(parsed: ParsedDeepLink | null): Parti
 
   if (parsed.themeMode) init.themeMode = parsed.themeMode;
   if (parsed.amountsHidden !== undefined) init.amountsHidden = parsed.amountsHidden;
+  if (parsed.productCounts) init.productCounts = parsed.productCounts;
 
   return init;
 }
@@ -221,6 +247,12 @@ export function buildDeepLinkUrl(state: DeepLinkState): string {
   params.set(PARAM.themeMode, state.themeMode);
   params.set(PARAM.language, state.language);
   params.set(PARAM.screen, normalizedScreen);
+
+  if (state.productCounts) {
+    for (const [key, param] of Object.entries(PRODUCT_COUNT_PARAM) as Array<[ProductCountKey, string]>) {
+      params.set(param, String(Math.max(0, Math.min(9, Math.trunc(state.productCounts[key])))));
+    }
+  }
 
   if (state.amountsHidden) params.set(PARAM.amountsHidden, "1");
 

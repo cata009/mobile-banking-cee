@@ -3,6 +3,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import {
   buildDeepLinkUrl,
+  deepLinkToDemoInitialState,
   normalizeScreen,
   parseDeepLinkFromUrl,
 } from '@/app/utils/deepLink'
@@ -44,6 +45,18 @@ describe('deep-link screen normalization', () => {
 })
 
 describe('deep-link parse and build contracts', () => {
+  it('round trips all nine product-count overrides', () => {
+    const productCounts = {
+      accounts: 9, debitCards: 8, creditCards: 7, mealCards: 6, deposits: 5,
+      savingsAccounts: 4, loans: 3, mortgages: 2, investments: 1,
+    }
+    const url = new URL(buildDeepLinkUrl({ ...baseState, productCounts }))
+    const parsed = parseDeepLinkFromUrl(url.search)
+
+    expect(parsed?.productCounts).toEqual(productCounts)
+    expect(deepLinkToDemoInitialState(parsed).productCounts).toEqual(productCounts)
+  })
+
   it('preserves validated product, country, release, theme, and language', () => {
     const parsed = parseDeepLinkFromUrl(
       '?product=PI&country=CZ&scenario=active&ds=current&release=release-current&bank=retail-single-account&theme=dark&lang=cs&screen=account-detail&account=acc-1',

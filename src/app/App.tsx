@@ -16,6 +16,7 @@ import {
   isRouteEligibleForProductContext,
   resolveRouteStatusBarVariant,
 } from "@/app/navigation/routePolicy";
+import { getUnavailableProductRouteFallback } from "@/app/navigation/productRouteAvailability";
 
 // --- Screens (lazy-loaded for code-splitting) ---
 const PreLoginScreen = lazy(() => import("@/app/components/PreLoginScreen"));
@@ -208,6 +209,7 @@ function AppContent({
     currentRoute,
     isCoAppingActive,
     navigateTo,
+    navigateToAndReset,
     goBack,
     setCoAppingActive,
   } = useNavigationContext();
@@ -222,6 +224,7 @@ function AppContent({
     release,
     baseline,
     bankingScenario,
+    productCounts,
     amountsHidden,
   } = demoState;
   const { language } = useLanguage();
@@ -264,7 +267,22 @@ function AppContent({
     if ("cardId" in currentRoute && currentRoute.cardId) setSelectedCardId(currentRoute.cardId);
     if ("accountId" in currentRoute && currentRoute.accountId) setSelectedAccountId(currentRoute.accountId);
   }, [currentRoute]);
-  const accountProducts = categories.flatMap((category) => category.products);
+  const accountProducts = useMemo(
+    () => categories.flatMap((category) => category.products),
+    [categories],
+  );
+
+  useEffect(() => {
+    const fallback = getUnavailableProductRouteFallback(
+      currentRoute,
+      new Set(accountProducts.map(({ id }) => id)),
+      accountProducts.some(({ type }) => type === "investment_account"),
+    );
+    if (!fallback) return;
+    setSelectedAccountId(null);
+    setSelectedCardId(null);
+    navigateToAndReset(fallback);
+  }, [accountProducts, currentRoute, navigateToAndReset]);
   const selectedAccountProduct = accountProducts.find((accountProduct) => accountProduct.id === selectedAccountId) ?? accountProducts[0] ?? null;
   const selectedCardProduct =
     accountProducts.find((cardProduct) => cardProduct.id === selectedCardId) ??
@@ -321,6 +339,7 @@ function AppContent({
       bankingScenario,
       themeMode,
       amountsHidden,
+      productCounts,
       language,
       screen: currentScreen,
       flowId: currentRoutePolicy.deepLink.payload === "flow" ? selectedFlowPreviewId : null,
@@ -339,6 +358,7 @@ function AppContent({
     bankingScenario,
     themeMode,
     amountsHidden,
+    productCounts,
     language,
     currentScreen,
     selectedFlowPreviewId,
