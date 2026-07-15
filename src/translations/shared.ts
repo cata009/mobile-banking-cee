@@ -6,6 +6,12 @@ type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends Record<string, unknown> ? DeepPartial<T[K]> : T[K];
 };
 
+type UnknownRecord = Record<string, unknown>;
+
+function isUnknownRecord(value: unknown): value is UnknownRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 const EN_RUNTIME: RuntimeTranslations = {
   actions: {
     back: "Back",
@@ -403,83 +409,28 @@ const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslatio
   },
 };
 
-function mergeRuntime(base: RuntimeTranslations, override?: DeepPartial<RuntimeTranslations>): RuntimeTranslations {
-  if (!override) return base;
+function mergeDefined(base: unknown, override: unknown): unknown {
+  if (override === undefined) return base;
+  if (!isUnknownRecord(base) || !isUnknownRecord(override)) return override;
 
-  return {
-    ...base,
-    ...override,
-    actions: { ...base.actions, ...override.actions },
-    accounts: {
-      ...base.accounts,
-      ...override.accounts,
-      actions: { ...base.accounts.actions, ...override.accounts?.actions },
-      detailsInfo: { ...base.accounts.detailsInfo, ...override.accounts?.detailsInfo },
-      productTitles: { ...base.accounts.productTitles, ...override.accounts?.productTitles },
-    },
-    analytics: {
-      ...base.analytics,
-      ...override.analytics,
-      categories: { ...base.analytics.categories, ...override.analytics?.categories },
-    },
-    payments: {
-      ...base.payments,
-      ...override.payments,
-      primaryItems: { ...base.payments.primaryItems, ...override.payments?.primaryItems },
-      otherItems: { ...base.payments.otherItems, ...override.payments?.otherItems },
-      newPayment: {
-        ...base.payments.newPayment,
-        ...override.payments?.newPayment,
-        actions: { ...base.payments.newPayment.actions, ...override.payments?.newPayment?.actions },
-        infoBanner: { ...base.payments.newPayment.infoBanner, ...override.payments?.newPayment?.infoBanner },
-      },
-      domesticFlow: { ...base.payments.domesticFlow, ...override.payments?.domesticFlow },
-    },
-    productsMenu: {
-      ...base.productsMenu,
-      ...override.productsMenu,
-      cards: { ...base.productsMenu.cards, ...override.productsMenu?.cards },
-      offers: { ...base.productsMenu.offers, ...override.productsMenu?.offers },
-    },
-    investments: {
-      ...base.investments,
-      ...override.investments,
-      tabs: { ...base.investments.tabs, ...override.investments?.tabs },
-      distributionTitles: { ...base.investments.distributionTitles, ...override.investments?.distributionTitles },
-      actions: { ...base.investments.actions, ...override.investments?.actions },
-      fundBanner: { ...base.investments.fundBanner, ...override.investments?.fundBanner },
-    },
-    messages: {
-      ...base.messages,
-      ...override.messages,
-      rows: { ...base.messages.rows, ...override.messages?.rows },
-    },
-    documents: {
-      ...base.documents,
-      ...override.documents,
-      rows: { ...base.documents.rows, ...override.documents?.rows },
-      deleteDialog: { ...base.documents.deleteDialog, ...override.documents?.deleteDialog },
-      legalDeleteDialog: { ...base.documents.legalDeleteDialog, ...override.documents?.legalDeleteDialog },
-    },
-    settings: {
-      ...base.settings,
-      ...override.settings,
-      sections: { ...base.settings.sections, ...override.settings?.sections },
-      items: { ...base.settings.items, ...override.settings?.items },
-    },
-    contacts: {
-      ...base.contacts,
-      ...override.contacts,
-      sections: { ...base.contacts.sections, ...override.contacts?.sections },
-      cards: { ...base.contacts.cards, ...override.contacts?.cards },
-    },
-    dialogs: { ...base.dialogs, ...override.dialogs },
-    unsupported: { ...base.unsupported, ...override.unsupported },
-  };
+  const merged: UnknownRecord = { ...base };
+  for (const [key, overrideValue] of Object.entries(override)) {
+    merged[key] = mergeDefined(base[key], overrideValue);
+  }
+  return merged;
+}
+
+export function mergeRuntimeTranslations(
+  base: RuntimeTranslations,
+  override?: DeepPartial<RuntimeTranslations>,
+): RuntimeTranslations {
+  // The complete base supplies every required leaf; mergeDefined only replaces
+  // those leaves with defined values from the structurally compatible override.
+  return mergeDefined(base, override) as RuntimeTranslations;
 }
 
 export function createSharedTranslations(language: AppLanguage): Pick<TranslationKeys, "runtime"> {
   return {
-    runtime: mergeRuntime(EN_RUNTIME, LOCAL_OVERRIDES[language]),
+    runtime: mergeRuntimeTranslations(EN_RUNTIME, LOCAL_OVERRIDES[language]),
   };
 }
