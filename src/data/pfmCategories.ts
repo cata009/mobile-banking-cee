@@ -27,6 +27,12 @@ export interface PfmCategoryDefinition {
   fallbackInitial: string;
 }
 
+const UNCATEGORIZED_CATEGORY: PfmCategoryDefinition = {
+  name: "Uncategorized",
+  colorVar: "--uc-pfm-uncategorized",
+  fallbackInitial: "?",
+};
+
 export const PFM_CATEGORIES: PfmCategoryDefinition[] = [
   { name: "Taxes and Penalties", colorVar: "--uc-pfm-taxes-penalties", fallbackInitial: "T" },
   { name: "Income", colorVar: "--uc-pfm-income", fallbackInitial: "I" },
@@ -46,7 +52,7 @@ export const PFM_CATEGORIES: PfmCategoryDefinition[] = [
   { name: "Wallet", colorVar: "--uc-pfm-wallet", fallbackInitial: "W" },
   { name: "Transfers", colorVar: "--uc-pfm-transfers", fallbackInitial: "T" },
   { name: "Finance", colorVar: "--uc-pfm-finance", fallbackInitial: "F" },
-  { name: "Uncategorized", colorVar: "--uc-pfm-uncategorized", fallbackInitial: "?" },
+  UNCATEGORIZED_CATEGORY,
 ];
 
 const normalizeCategoryKey = (value: string) => value.trim().toLowerCase();
@@ -110,5 +116,9 @@ export function normalizePfmCategory(category?: string | null): PfmCategoryName 
 }
 
 export function getPfmCategory(category?: string | null): PfmCategoryDefinition {
-  return PFM_CATEGORY_BY_NAME.get(normalizePfmCategory(category)) ?? PFM_CATEGORIES[PFM_CATEGORIES.length - 1];
+  return PFM_CATEGORY_BY_NAME.get(normalizePfmCategory(category)) ?? UNCATEGORIZED_CATEGORY;
+}
+
+export function isInternalTransferCategory(category?: string | null): boolean {
+  return normalizeCategoryKey(category ?? "") === "internal";
 }
