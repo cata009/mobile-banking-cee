@@ -62,6 +62,12 @@ export function BottomSheet({
       const firstElement = focusableElements[0];
       const lastElement = focusableElements[focusableElements.length - 1];
 
+      if (!firstElement || !lastElement) {
+        event.preventDefault();
+        dialog?.focus();
+        return;
+      }
+
       if (event.shiftKey && document.activeElement === firstElement) {
         event.preventDefault();
         lastElement.focus();

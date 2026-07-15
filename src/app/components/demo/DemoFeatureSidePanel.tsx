@@ -54,7 +54,7 @@ function isFeatureAvailableForCountry(meta: FeatureMeta, currentCountry: Country
 }
 
 function statusLabel(status: string | undefined): string {
-  return status ? status.replaceAll("_", " ") : "not mapped";
+  return status ? status.replace(/_/g, " ") : "not mapped";
 }
 
 function statusStyles(status: string | undefined): string {

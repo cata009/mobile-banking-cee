@@ -829,28 +829,6 @@ function PlatformNavButton({
   );
 }
 
-function ThemeModeButton({
-  mode,
-  onClick,
-}: {
-  mode: "light" | "dark";
-  onClick: () => void;
-}) {
-  const label = mode === "light" ? "Switch to dark mode" : "Switch to light mode";
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      title={label}
-      className="grid size-[36px] place-items-center rounded-[6px] text-[var(--uc-text)] transition-colors hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-action)]"
-    >
-      <ThemeModeIcon mode={mode} />
-    </button>
-  );
-}
-
 function ContextDropdownButton({
   label,
   expanded,

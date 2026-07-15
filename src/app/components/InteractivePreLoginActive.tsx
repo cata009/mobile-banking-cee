@@ -1,7 +1,5 @@
 import { useEffect } from "react";
 import { useLanguage } from "@/app/contexts/LanguageContext";
-import Panel from "@/imports/Panel";
-import PanelWithoutCoApping from "@/app/components/PanelWithoutCoApping";
 import PanelWithTranslations from "@/app/components/PanelWithTranslations";
 import PanelWithoutCoAppingTranslations from "@/app/components/PanelWithoutCoAppingTranslations";
 import { useCountry } from "@/app/state/demoStore";

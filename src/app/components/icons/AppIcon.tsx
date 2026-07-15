@@ -1994,8 +1994,9 @@ function getInventorySizeLabel(name: IconName, definition: IconDefinition) {
 
 export const ICON_INVENTORY: IconInventoryItem[] = Object.entries(ICON_REGISTRY)
   .filter(([rawName]) => !ICON_INVENTORY_EXCLUDED_NAMES.has(rawName))
-  .map(([rawName, definition]) => {
+  .map(([rawName, registeredDefinition]) => {
     const name = rawName as IconName;
+    const definition: IconDefinition = registeredDefinition;
     const defaultDimensions = resolveDefaultDimensions(name, definition);
 
     return {
@@ -2092,7 +2093,7 @@ export function AppIcon({
   ...svgProps
 }: AppIconProps) {
   const resolvedName = name in ICON_REGISTRY ? name : "help-circle";
-  const definition = ICON_REGISTRY[resolvedName];
+  const definition: IconDefinition = ICON_REGISTRY[resolvedName];
   const dimensions = resolveSize(resolvedName, definition, size, width, height);
   const normalizedClassName = normalizeSvgDisplayClassName(className);
 

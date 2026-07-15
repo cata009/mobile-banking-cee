@@ -10,8 +10,12 @@ interface LanguageSelectorProps {
   onBack: () => void;
 }
 
+function isUnknownRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 export default function LanguageSelector({ onBack }: LanguageSelectorProps) {
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const country = useCountry(); // Get current country from demo state
   const [tempLanguage, setTempLanguage] = useState<Language>(language);
 
@@ -37,9 +41,9 @@ export default function LanguageSelector({ onBack }: LanguageSelectorProps) {
     
     // Navigate through nested object: 'languageSelector.selectLanguage'
     const keys = key.split('.');
-    let value: any = translations;
+    let value: unknown = translations;
     for (const k of keys) {
-      if (value && typeof value === 'object' && k in value) {
+      if (isUnknownRecord(value) && Object.prototype.hasOwnProperty.call(value, k)) {
         value = value[k];
       } else {
         return key;
