@@ -32,7 +32,6 @@ import CodeField from "@/app/components/CodeField";
 import { TemplateCodePreview } from "@/app/components/templates/TemplateCodePreviews";
 import ProductAccordion from "@/app/components/ProductAccordion";
 import ProductAccordionAnimated from "@/app/components/ProductAccordionAnimated";
-import AccordionSection from "@/app/components/AccordionSection";
 import ProductCard, { PRODUCT_CARD_EVOLUTION_SOURCE } from "@/app/components/ProductCard";
 import FigmaCard, { CARD_SOURCE, CARD_VARIANTS, type CardSize, type CardVariant } from "@/app/components/cards/Card";
 import GhostBanner, { GHOST_BANNER_SOURCE } from "@/app/components/cards/GhostBanner";
@@ -56,7 +55,6 @@ import productCardShopSmartImage from "../../../../screenshots/shopsmart.png";
 import shopsmartDsOffers1Image from "@/assets/shopsmart/shopsmart-ds-offers-1.png";
 import shopsmartDsOffers2Image from "@/assets/shopsmart/shopsmart-ds-offers-2.png";
 import ProductsList from "@/app/components/ProductsList";
-import TotalRow from "@/app/components/TotalRow";
 import AccountBalanceCard from "@/app/components/accounts/AccountBalanceCard";
 import AccountActionBar, { type AccountActionBarItem } from "@/app/components/accounts/AccountActionBar";
 import AccountCarouselIndicator from "@/app/components/accounts/AccountCarouselIndicator";
@@ -150,6 +148,9 @@ const accountCardSamples = {
   SI: { integer: "5.206", decimals: ",80", current: "4.806,80" },
 };
 
+type InventorySectionLink = readonly [string, string];
+type InventorySectionLinks = readonly [InventorySectionLink, ...InventorySectionLink[]];
+
 const componentSectionLinks = [
   ["headers", "Headers"],
   ["navigation", "Navigation"],
@@ -158,25 +159,25 @@ const componentSectionLinks = [
   ["cards", "Cards"],
   ["products", "Products"],
   ["overlays", "Overlays"],
-];
+] satisfies InventorySectionLinks;
 
-const templateSectionLinks = [["templates", "Templates"]];
+const templateSectionLinks = [["templates", "Templates"]] satisfies InventorySectionLinks;
 
 const iconSectionLinks = [
   ["icons", "Icon registry"],
   ["pfm-icons", "PFM icons"],
-];
+] satisfies InventorySectionLinks;
 
 const colorSectionLinks = [
   ["colors", "Palettes"],
   ["color-audit", "App color map"],
-];
+] satisfies InventorySectionLinks;
 
-const typographySectionLinks = [["typography", "Typography"]];
+const typographySectionLinks = [["typography", "Typography"]] satisfies InventorySectionLinks;
 
 type InventoryTab = "components" | "templates" | "icons" | "colors" | "typography";
 
-const inventorySectionLinks: Record<InventoryTab, readonly (readonly [string, string])[]> = {
+const inventorySectionLinks: Record<InventoryTab, InventorySectionLinks> = {
   components: componentSectionLinks,
   templates: templateSectionLinks,
   icons: iconSectionLinks,
@@ -190,14 +191,6 @@ const inventoryTabLabels: Record<InventoryTab, string> = {
   icons: "Icons",
   colors: "Colors",
   typography: "Typography",
-};
-
-const inventoryTabDescriptions: Record<InventoryTab, string> = {
-  components: "Reusable runtime building blocks",
-  templates: "Code-backed template references",
-  icons: "Centralized symbol inventory",
-  colors: "Color tokens and app usage",
-  typography: "Type tokens and text styles",
 };
 
 const inventoryTabCounts: Record<InventoryTab, number> = {
@@ -220,7 +213,7 @@ function getInventoryTabForHash(hash: string): InventoryTab {
 }
 
 function getDefaultSectionForInventoryTab(tab: InventoryTab) {
-  return inventorySectionLinks[tab][0]?.[0] ?? "headers";
+  return inventorySectionLinks[tab][0][0];
 }
 
 function getSectionForHash(hash: string) {
@@ -230,8 +223,8 @@ function getSectionForHash(hash: string) {
   return isKnownSection ? sectionId : getDefaultSectionForInventoryTab(tab);
 }
 
-type SelectorOption = {
-  id: string;
+type SelectorOption<Value extends string = string> = {
+  id: Value;
   label: string;
 };
 
@@ -774,7 +767,7 @@ function Specimen({ name, children, tone = "light", showThemeControl = true }: {
   );
 }
 
-function VariantSelector({
+function VariantSelector<Value extends string>({
   id,
   label = "Variant",
   value,
@@ -784,9 +777,9 @@ function VariantSelector({
 }: {
   id: string;
   label?: string;
-  value: string;
-  options: readonly SelectorOption[];
-  onChange: (value: string) => void;
+  value: Value;
+  options: readonly SelectorOption<Value>[];
+  onChange: (value: Value) => void;
   extras?: React.ReactNode;
 }) {
   return (
@@ -795,7 +788,10 @@ function VariantSelector({
         id={id}
         aria-label={label}
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) => {
+          const selectedOption = options.find((option) => option.id === event.target.value);
+          if (selectedOption) onChange(selectedOption.id);
+        }}
         className="h-[36px] min-w-[210px] rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-3 text-[14px] text-[var(--uc-text)]"
       >
         {options.map((option) => (
@@ -847,22 +843,31 @@ function CardVariantSpecimen() {
   );
 }
 
+type GhostBannerVariant = "title-and-description" | "title-only" | "long-description";
+
+const GHOST_BANNER_VARIANTS: Record<GhostBannerVariant, { title: string; description?: string }> = {
+  "title-and-description": {
+    title: "Apply for a loan",
+    description: "Check out our best loan offers with\nfixed and variable interest rate",
+  },
+  "title-only": {
+    title: "Apply for a loan",
+  },
+  "long-description": {
+    title: "Open a savings account",
+    description: "Set money aside automatically and earn interest with no monthly fees or hidden costs.",
+  },
+};
+
+const GHOST_BANNER_VARIANT_OPTIONS = [
+  { id: "title-and-description", label: "Title and description" },
+  { id: "title-only", label: "Title only" },
+  { id: "long-description", label: "Long description" },
+] satisfies readonly SelectorOption<GhostBannerVariant>[];
+
 function GhostBannerVariantSpecimen() {
-  const [selectedVariant, setSelectedVariant] = useState("title-and-description");
-  const variants: Record<string, { title: string; description?: string }> = {
-    "title-and-description": {
-      title: "Apply for a loan",
-      description: "Check out our best loan offers with\nfixed and variable interest rate",
-    },
-    "title-only": {
-      title: "Apply for a loan",
-    },
-    "long-description": {
-      title: "Open a savings account",
-      description: "Set money aside automatically and earn interest with no monthly fees or hidden costs.",
-    },
-  };
-  const active = variants[selectedVariant];
+  const [selectedVariant, setSelectedVariant] = useState<GhostBannerVariant>("title-and-description");
+  const active = GHOST_BANNER_VARIANTS[selectedVariant];
 
   return (
     <div className="flex flex-col gap-4">
@@ -870,11 +875,7 @@ function GhostBannerVariantSpecimen() {
         id="ghost-banner-variant-select"
         value={selectedVariant}
         onChange={setSelectedVariant}
-        options={[
-          { id: "title-and-description", label: "Title and description" },
-          { id: "title-only", label: "Title only" },
-          { id: "long-description", label: "Long description" },
-        ]}
+        options={GHOST_BANNER_VARIANT_OPTIONS}
       />
       <div className="flex w-[375px] flex-col gap-[16px] p-[16px]">
         <GhostBanner title={active.title} description={active.description} onClick={() => undefined} />
@@ -883,24 +884,33 @@ function GhostBannerVariantSpecimen() {
   );
 }
 
+type InfoBannerVariant = "with-action" | "no-action" | "title-only";
+
+const INFO_BANNER_VARIANTS: Record<InfoBannerVariant, { title: string; description?: string; actionLabel?: string }> = {
+  "with-action": {
+    title: "We are completing your investment account opening.",
+    description: "It can take up to one business day. Come back again to start investing and grow your money.",
+    actionLabel: "EDIT",
+  },
+  "no-action": {
+    title: "We are completing your investment account opening.",
+    description: "It can take up to one business day. Come back again to start investing and grow your money.",
+  },
+  "title-only": {
+    title: "Your statement is ready to download.",
+    actionLabel: "VIEW",
+  },
+};
+
+const INFO_BANNER_VARIANT_OPTIONS = [
+  { id: "with-action", label: "Title, description and action" },
+  { id: "no-action", label: "Title and description" },
+  { id: "title-only", label: "Title and action" },
+] satisfies readonly SelectorOption<InfoBannerVariant>[];
+
 function InfoBannerVariantSpecimen() {
-  const [selectedVariant, setSelectedVariant] = useState("with-action");
-  const variants: Record<string, { title: string; description?: string; actionLabel?: string }> = {
-    "with-action": {
-      title: "We are completing your investment account opening.",
-      description: "It can take up to one business day. Come back again to start investing and grow your money.",
-      actionLabel: "EDIT",
-    },
-    "no-action": {
-      title: "We are completing your investment account opening.",
-      description: "It can take up to one business day. Come back again to start investing and grow your money.",
-    },
-    "title-only": {
-      title: "Your statement is ready to download.",
-      actionLabel: "VIEW",
-    },
-  };
-  const active = variants[selectedVariant];
+  const [selectedVariant, setSelectedVariant] = useState<InfoBannerVariant>("with-action");
+  const active = INFO_BANNER_VARIANTS[selectedVariant];
 
   return (
     <div className="flex flex-col gap-4">
@@ -908,11 +918,7 @@ function InfoBannerVariantSpecimen() {
         id="info-banner-variant-select"
         value={selectedVariant}
         onChange={setSelectedVariant}
-        options={[
-          { id: "with-action", label: "Title, description and action" },
-          { id: "no-action", label: "Title and description" },
-          { id: "title-only", label: "Title and action" },
-        ]}
+        options={INFO_BANNER_VARIANT_OPTIONS}
       />
       <div className="flex w-[375px] flex-col gap-[16px] p-[16px]">
         <InfoBanner
@@ -926,18 +932,26 @@ function InfoBannerVariantSpecimen() {
   );
 }
 
+type UserEventCardVariant = "link-and-options" | "plain";
+type UserEventCardVariantData = {
+  iconName: "user-event-badge" | "user-event-refresh";
+  actionLabel?: string;
+  showOptions?: boolean;
+};
+
+const USER_EVENT_CARD_VARIANTS: Record<UserEventCardVariant, UserEventCardVariantData> = {
+  "link-and-options": { iconName: "user-event-badge", actionLabel: "FIND OUT MORE", showOptions: true },
+  "plain": { iconName: "user-event-refresh" },
+};
+
+const USER_EVENT_CARD_VARIANT_OPTIONS = [
+  { id: "link-and-options", label: "With link and options" },
+  { id: "plain", label: "Without link and options" },
+] satisfies readonly SelectorOption<UserEventCardVariant>[];
+
 function UserEventCardVariantSpecimen() {
-  const [selectedVariant, setSelectedVariant] = useState("link-and-options");
-  type EventVariant = {
-    iconName: "user-event-badge" | "user-event-refresh";
-    actionLabel?: string;
-    showOptions?: boolean;
-  };
-  const variants: Record<string, EventVariant> = {
-    "link-and-options": { iconName: "user-event-badge", actionLabel: "FIND OUT MORE", showOptions: true },
-    "plain": { iconName: "user-event-refresh" },
-  };
-  const active = variants[selectedVariant];
+  const [selectedVariant, setSelectedVariant] = useState<UserEventCardVariant>("link-and-options");
+  const active = USER_EVENT_CARD_VARIANTS[selectedVariant];
 
   return (
     <div className="flex flex-col gap-4">
@@ -945,10 +959,7 @@ function UserEventCardVariantSpecimen() {
         id="user-event-card-variant-select"
         value={selectedVariant}
         onChange={setSelectedVariant}
-        options={[
-          { id: "link-and-options", label: "With link and options" },
-          { id: "plain", label: "Without link and options" },
-        ]}
+        options={USER_EVENT_CARD_VARIANT_OPTIONS}
       />
       <div className="flex w-[375px] flex-col gap-[16px] p-[16px]">
         <UserEventCard
@@ -965,13 +976,21 @@ function UserEventCardVariantSpecimen() {
   );
 }
 
+type HelperCardVariant = "with-link" | "plain";
+
+const HELPER_CARD_VARIANTS: Record<HelperCardVariant, { actionLabel?: string; dismissible?: boolean }> = {
+  "with-link": { actionLabel: "SEE DETAILS", dismissible: false },
+  "plain": { dismissible: false },
+};
+
+const HELPER_CARD_VARIANT_OPTIONS = [
+  { id: "with-link", label: "With link" },
+  { id: "plain", label: "Without link" },
+] satisfies readonly SelectorOption<HelperCardVariant>[];
+
 function HelperCardVariantSpecimen() {
-  const [selectedVariant, setSelectedVariant] = useState("with-link");
-  const variants: Record<string, { actionLabel?: string; dismissible?: boolean }> = {
-    "with-link": { actionLabel: "SEE DETAILS", dismissible: false },
-    "plain": { dismissible: false },
-  };
-  const active = variants[selectedVariant];
+  const [selectedVariant, setSelectedVariant] = useState<HelperCardVariant>("with-link");
+  const active = HELPER_CARD_VARIANTS[selectedVariant];
 
   return (
     <div className="flex flex-col gap-4">
@@ -979,10 +998,7 @@ function HelperCardVariantSpecimen() {
         id="helper-card-variant-select"
         value={selectedVariant}
         onChange={setSelectedVariant}
-        options={[
-          { id: "with-link", label: "With link" },
-          { id: "plain", label: "Without link" },
-        ]}
+        options={HELPER_CARD_VARIANT_OPTIONS}
       />
       <div className="flex w-[375px] flex-col gap-[16px] p-[16px]">
         <HelperCard
@@ -1105,7 +1121,7 @@ function ShopsmartOfferCardVariantSpecimen() {
 }
 
 function ProductMenuCardVariantSpecimen() {
-  const cards: ProductsMenuCardData[] = [
+  const cards = [
     {
       id: "account",
       title: "Current\naccounts",
@@ -1162,12 +1178,11 @@ function ProductMenuCardVariantSpecimen() {
       illustration: "arrow",
       imageSrc: productCardPartnerOffersImage,
     },
-  ];
-  const [selectedCardId, setSelectedCardId] = useState(cards[0]?.id ?? "account");
+  ] as const satisfies readonly [ProductsMenuCardData, ...ProductsMenuCardData[]];
+  type ProductMenuCardSampleId = (typeof cards)[number]["id"];
+  const [selectedCardId, setSelectedCardId] = useState<ProductMenuCardSampleId>(cards[0].id);
   const [selectedSize, setSelectedSize] = useState<"standard" | "compact">("standard");
   const selectedCard = cards.find((card) => card.id === selectedCardId) ?? cards[0];
-
-  if (!selectedCard) return null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -1190,7 +1205,7 @@ function ProductMenuCardVariantSpecimen() {
         <VariantSelector
           id="product-menu-card-size-select"
           value={selectedSize}
-          onChange={(value) => setSelectedSize(value as "standard" | "compact")}
+          onChange={setSelectedSize}
           options={[
             { id: "standard", label: "Standard 120px" },
             { id: "compact", label: "Compact 72px" },
@@ -1386,7 +1401,7 @@ function PaymentHeroCardVariantSpecimen() {
         id="payment-hero-card-select"
         label="Card"
         value={selectedVariant.id}
-        onChange={(value) => setSelectedVariantId(value as PaymentHeroImageVariant)}
+        onChange={setSelectedVariantId}
         options={PAYMENT_HERO_CARD_IMAGE_VARIANTS.map((variant) => ({ id: variant.id, label: variant.label }))}
       />
       <div className="w-full max-w-[327px]">
@@ -1421,7 +1436,7 @@ function RadioButtonVariantSpecimen() {
   );
 }
 
-function PrimaryButtonVariantSpecimen({ themeMode }: { themeMode: ThemeMode }) {
+function PrimaryButtonVariantSpecimen() {
   return (
     <div className="w-[327px]">
       <PrimaryButton variant="action" labelSize="16" className="w-full">
@@ -4052,7 +4067,7 @@ export default function DesignSystemPage() {
           <Section id="buttons" title="Buttons" description="Custom button components and shared UI registry variants.">
             <div className="grid gap-5 lg:grid-cols-2">
               <Specimen name="Primary button" source="components/PrimaryButton.tsx + components/ui/PrimaryButton.tsx" specs={["327x48", "radius 4px", "Primary Action / Light", "Primary Action / Dark", "16px bold label"]}>
-                {(themeMode) => <PrimaryButtonVariantSpecimen themeMode={themeMode} />}
+                {() => <PrimaryButtonVariantSpecimen />}
               </Specimen>
               <Specimen name="Link button" source="components/ui/LinkButton.tsx" specs={["flex w-fit", "text-chevron gap 0", "label 13px bold uppercase / 16px line", "chevron-link 24px", "uses current action color"]}>
                 <div className="flex min-h-[72px] items-center justify-center rounded-[8px] bg-[var(--uc-surface)] p-[16px]">
