@@ -80,7 +80,6 @@ import {
   buildInvestmentSecurities,
 } from "@/app/config/investmentsPortfolioConfig";
 import { getProductCardSheetConfig, getProductsMenuForCountry, type ProductsCardId } from "@/app/config/productsMenuConfig";
-import { preloadMoreCardImages } from "@/app/config/moreCardAssets";
 import { isKidsHomeCountry } from "@/data/kidsMarketHomeConcepts";
 import {
   CoAppingChatLauncher,
@@ -2077,10 +2076,6 @@ function AppContent({
       }),
     [categories, country, creditCardForOpportunity, selectedAccountProduct, selectedCardProduct],
   );
-
-  useEffect(() => {
-    preloadMoreCardImages();
-  }, []);
 
   useEffect(() => {
     const syncDesignSystemHash = () => {
