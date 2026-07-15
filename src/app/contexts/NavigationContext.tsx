@@ -4,6 +4,7 @@
  */
 
 import { createContext, useContext, useState, ReactNode } from "react";
+import { ROUTE_POLICY } from "@/app/navigation/routePolicy";
 
 export type Screen =
   | "prelogin-inactive"
@@ -61,51 +62,6 @@ interface NavigationProviderProps {
   initialCoAppingActive?: boolean;
 }
 
-function getBackFallbackScreen(screen: Screen): Screen {
-  switch (screen) {
-    case "language-selector":
-    case "co-apping-session":
-      return "prelogin-active";
-    case "analytics":
-    case "messages":
-    case "payments":
-    case "products":
-    case "investments":
-    case "prime":
-      return "homepage";
-    case "product-detail":
-      return "products";
-    case "documents":
-    case "settings":
-    case "contacts":
-      return "more";
-    case "account-detail":
-    case "card-detail":
-      return "homepage";
-    case "account-details-info":
-    case "account-options":
-    case "transaction-detail":
-      return "account-detail";
-    case "card-details-info":
-    case "card-options":
-      return "card-detail";
-    case "investments-history":
-      return "investments";
-    case "domestic-payment":
-    case "payment-success":
-      return "payments";
-    case "payment-review":
-      return "domestic-payment";
-    case "payment-sign":
-      return "payment-review";
-    case "flow-library":
-    case "design-system":
-      return "homepage";
-    default:
-      return screen;
-  }
-}
-
 export function NavigationProvider({ 
   children, 
   initialScreen = "prelogin-inactive",
@@ -148,7 +104,7 @@ export function NavigationProvider({
   const goBack = () => {
     setState((prev) => {
       if (prev.history.length <= 1) {
-        const fallbackScreen = getBackFallbackScreen(prev.currentScreen);
+        const fallbackScreen = ROUTE_POLICY[prev.currentScreen].backFallback;
         if (fallbackScreen === prev.currentScreen) return prev;
 
         return {
@@ -160,7 +116,7 @@ export function NavigationProvider({
 
       const newHistory = [...prev.history];
       newHistory.pop(); // Remove current screen
-      const previousScreen = newHistory[newHistory.length - 1] ?? getBackFallbackScreen(prev.currentScreen);
+      const previousScreen = newHistory[newHistory.length - 1] ?? ROUTE_POLICY[prev.currentScreen].backFallback;
 
       return {
         ...prev,
@@ -177,7 +133,7 @@ export function NavigationProvider({
     }));
   };
 
-  const canGoBack = state.history.length > 1 || getBackFallbackScreen(state.currentScreen) !== state.currentScreen;
+  const canGoBack = state.history.length > 1 || ROUTE_POLICY[state.currentScreen].backFallback !== state.currentScreen;
 
   return (
     <NavigationContext.Provider

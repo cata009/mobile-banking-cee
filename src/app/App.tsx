@@ -12,6 +12,11 @@ import FramelessDeviceFrame from "@/app/components/FramelessDeviceFrame";
 import { isCoAppingAvailable } from "@/app/utils/coAppingAvailability";
 import EdgeLoadingAnimation from "@/app/components/EdgeLoadingAnimation";
 import UnsupportedContextScreen from "@/app/components/UnsupportedContextScreen";
+import {
+  ROUTE_POLICY,
+  isRouteEligibleForProductContext,
+  resolveRouteStatusBarVariant,
+} from "@/app/navigation/routePolicy";
 
 // --- Screens (lazy-loaded for code-splitting) ---
 const PreLoginScreen = lazy(() => import("@/app/components/PreLoginScreen"));
@@ -2007,16 +2012,17 @@ function AppContent({
   const { categories } = useProducts();
   const coAppingAvailable = isCoAppingAvailable(country);
   const isCzCoAppingChatbotPreviewActive = isFeatureActive(demoState, "fx_czCoAppingSmartAssistant");
-  const isPreloginScreen = currentScreen === "prelogin-inactive" || currentScreen === "prelogin-active";
-  const isInAppScreen =
-    !isPreloginScreen && currentScreen !== "flow-library" && currentScreen !== "design-system";
+  const currentRoutePolicy = ROUTE_POLICY[currentScreen];
+  const isInAppScreen = currentRoutePolicy.surface === "app";
   const czChatLauncherVariant: CzChatLauncherVariant = "edge-tab";
-  const isPiRuntimeContext = product === "PI" && designSystem === "current";
   const isMarketKidsRuntimeContext =
     product === "KIDS_PI" && designSystem === "current" && isKidsHomeCountry(country);
   const isKidsRuntimeContext = isMarketKidsRuntimeContext;
-  const isThemedKidsRuntimeContext = product === "KIDS_PI" && country === "HU" && designSystem === "current";
-  const isSupportedRuntimeContext = isPiRuntimeContext || isKidsRuntimeContext;
+  const isSupportedRuntimeContext = isRouteEligibleForProductContext(currentScreen, {
+    product,
+    country,
+    designSystem,
+  });
   const investmentsPortfolioAvailable = isInvestmentsPortfolioAvailable(product, country);
   
   const [showTerminatePopup, setShowTerminatePopup] = useState(false);
@@ -2100,7 +2106,7 @@ function AppContent({
       amountsHidden,
       language,
       screen: currentScreen,
-      flowId: currentScreen === "flow-library" ? selectedFlowPreviewId : null,
+      flowId: currentRoutePolicy.deepLink.payload === "flow" ? selectedFlowPreviewId : null,
       accountId: selectedAccountId,
       cardId: selectedCardId,
       deviceMode,
@@ -2124,70 +2130,12 @@ function AppContent({
     deviceMode,
   ]);
 
-  // Determină varianta status bar-ului bazat pe ecranul curent
-  const getStatusBarVariant = (): 'light' | 'dark' | 'theme' => {
-    if (isThemedKidsRuntimeContext) {
-      return "theme";
-    }
-
-    if (isKidsRuntimeContext) {
-      return "light";
-    }
-
-    if (
-      themeMode === "dark" &&
-      currentScreen !== "prelogin-inactive" &&
-      currentScreen !== "prelogin-active" &&
-      currentScreen !== "prime"
-    ) {
-      return "dark";
-    }
-
-    switch (currentScreen) {
-      case 'prelogin-inactive':
-        return 'dark'; // fundal întunecat cu imagine
-      case 'language-selector':
-        return 'light'; // fundal alb
-      case 'prelogin-active':
-        return 'dark'; // overlay semi-transparent peste fundal întunecat
-      case 'co-apping-session':
-        return 'light'; // fundal alb - full screen ca language selector
-      case 'homepage':
-        return 'light'; // fundal gri deschis (var(--uc-app-bg)) - text și iconițe trebuie negre
-      case 'analytics':
-      case 'messages':
-        return 'light';
-      case 'payments':
-      case 'domestic-payment':
-      case 'payment-review':
-      case 'payment-sign':
-      case 'payment-success':
-        return 'light';
-      case 'products':
-      case 'product-detail':
-      case 'investments':
-      case 'investments-history':
-        return 'light';
-      case 'prime':
-        return 'dark'; // fundal gradient întunecat - text și iconițe albe
-      case 'more':
-      case 'documents':
-      case 'settings':
-        return 'light'; // fundal alb - text și iconițe negre
-      case 'contacts':
-        return 'light'; // fundal alb - text și iconițe negre
-      case 'account-detail':
-      case 'account-details-info':
-      case 'account-options':
-      case 'transaction-detail':
-      case 'card-detail':
-        return 'light';
-      case 'design-system':
-        return 'light';
-      default:
-        return 'dark';
-    }
-  };
+  const statusBarVariant = resolveRouteStatusBarVariant(currentScreen, {
+    product,
+    country,
+    designSystem,
+    themeMode,
+  });
 
   // Handler pentru click pe butonul OTHER - deschide panel-ul
   const handleOtherClick = () => {
@@ -2514,9 +2462,9 @@ function AppContent({
         </Suspense>
       )}
 
-      {currentScreen !== "design-system" && currentScreen !== "flow-library" && (
+      {currentRoutePolicy.surface !== "platform" && (
       <FrameComponent
-        statusBarVariant={getStatusBarVariant()}
+        statusBarVariant={statusBarVariant}
         isCoAppingActive={isCoAppingActive && coAppingAvailable}
         overlay={czChatLayer}
       >
