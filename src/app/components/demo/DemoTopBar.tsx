@@ -86,7 +86,8 @@ async function requestShareAccessToken() {
 }
 
 function getLocalShareAccessToken() {
-  return import.meta.env.DEV ? "local-dev-share-access" : null;
+  const token = import.meta.env.DEV ? import.meta.env.VITE_LOCAL_SHARE_ACCESS_TOKEN || "" : "";
+  return token.length > 0 ? token : null;
 }
 
 export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
