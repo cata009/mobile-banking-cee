@@ -1,16 +1,17 @@
 // @vitest-environment jsdom
 
 import { act, renderHook } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { useNavigation } from '@/app/hooks/useNavigation'
+import type { PropsWithChildren } from 'react'
+import { describe, expect, it } from 'vitest'
+import { NavigationProvider, useNavigationContext } from '@/app/contexts/NavigationContext'
+
+function wrapper({ children }: PropsWithChildren) {
+  return <NavigationProvider>{children}</NavigationProvider>
+}
 
 describe('legacy navigation', () => {
-  beforeEach(() => {
-    vi.spyOn(console, 'log').mockImplementation(() => undefined)
-  })
-
   it('keeps root back-navigation as a no-op', () => {
-    const { result } = renderHook(() => useNavigation())
+    const { result } = renderHook(() => useNavigationContext(), { wrapper })
 
     act(() => result.current.goBack())
 
@@ -19,7 +20,7 @@ describe('legacy navigation', () => {
   })
 
   it('returns to root after navigating to another screen', () => {
-    const { result } = renderHook(() => useNavigation())
+    const { result } = renderHook(() => useNavigationContext(), { wrapper })
 
     act(() => result.current.navigateTo('homepage'))
     expect(result.current.currentScreen).toBe('homepage')
@@ -31,7 +32,7 @@ describe('legacy navigation', () => {
   })
 
   it('stays safe after repeated root back-navigation', () => {
-    const { result } = renderHook(() => useNavigation())
+    const { result } = renderHook(() => useNavigationContext(), { wrapper })
 
     act(() => {
       result.current.goBack()
