@@ -223,7 +223,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     designSystems: ["current"],
     status: "implemented",
     componentPath: "src/app/components/ui/LinkButton.tsx",
-    usedByScreens: ["kids-pi-hu", "platform.design-system"],
+    usedByScreens: ["kids.hu.home-concept", "platform.design-system"],
     notes: "Reusable text action with chevron-link accessory: centered flex w-fit button, zero text-to-chevron gap, 13px bold uppercase label with 16px line-height, 24px chevron icon, current action color, and focus-visible ring.",
   },
   "ui.pill": {

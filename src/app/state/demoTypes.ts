@@ -288,6 +288,9 @@ export type FeatureId =
   | "fx_enhancedAnalytics"
   | "fx_quickActionsRedesign";
 
+/** Runtime-sparse manual feature overrides for one demo context. */
+export type FeatureFlagOverrides = Partial<Record<FeatureId, boolean>>;
+
 /**
  * Feature scope types
  * - global: Feature applies to all countries
@@ -384,7 +387,7 @@ export interface DemoState {
    *   "PI:CZ:current:baseline-current:release-v1:retail-multi-account-card": { fx_unplannedBanner: false },
    * }
    */
-  flagsByContext: Record<string, Record<FeatureId, boolean>>;
+  flagsByContext: Record<string, FeatureFlagOverrides>;
 
   /** Whether account/card/product amounts are hidden across the mobile app. */
   amountsHidden: boolean;
