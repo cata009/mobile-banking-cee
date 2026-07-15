@@ -83,7 +83,7 @@ export interface KidsMarketHomeConcept {
   cardStatus: string;
   metrics: KidsHomeMetric[];
   actions: KidsHomeAction[];
-  pockets: KidsHomePocket[];
+  pockets: [KidsHomePocket, ...KidsHomePocket[]];
   feed: KidsHomeFeedItem[];
   coach: KidsHomeCoachItem[];
   nav: KidsBottomNavItem[];

@@ -242,7 +242,7 @@ type HuLightView =
   | "learn"
   | "learn-topic"
   | "learn-lesson";
-type HuThemeId = "default" | "nordlys" | "blue-lines" | "bubbles" | "aurora" | "garden" | "solar";
+export type HuThemeId = "default" | "nordlys" | "blue-lines" | "bubbles" | "aurora" | "garden" | "solar";
 type HuMoneyReason = "Food" | "School" | "Transport" | "Fun" | "Other";
 type HuSendContact = "Anna" | "David" | "More contacts";
 type HuPendingActionFlow = "request-money" | "send-money";
@@ -292,7 +292,7 @@ type HuGoalContribution = {
   createdAt: string;
   tone: "self" | "parent";
 };
-type HuKidsCard = {
+export type HuKidsCard = {
   id: string;
   title: string;
   lastDigits: string;
@@ -1734,14 +1734,14 @@ const HU_PENDING_ACTIONS: HuPendingAction[] = [
   },
 ];
 
-const HU_KIDS_CARDS: HuKidsCard[] = [
-  {
-    id: "alexandra-standard-main",
-    title: "Mastercard Standard",
-    lastDigits: "5678",
-    holderName: "ALEXANDRA ALBON",
-  },
-];
+export const HU_DEFAULT_KIDS_CARD: HuKidsCard = {
+  id: "alexandra-standard-main",
+  title: "Mastercard Standard",
+  lastDigits: "5678",
+  holderName: "ALEXANDRA ALBON",
+};
+
+export const HU_KIDS_CARDS: readonly [HuKidsCard, ...HuKidsCard[]] = [HU_DEFAULT_KIDS_CARD];
 
 const HU_KIDS_TOTAL_MONEY = 35628;
 const HU_KIDS_WEEKLY_LIMIT = 75000;
@@ -2204,7 +2204,7 @@ type HuThemeMotionLayerSpec = {
   opacity?: number;
 };
 
-type HuThemePreset = {
+export type HuThemePreset = {
   id: HuThemeId;
   name: string;
   hint: string;
@@ -2231,21 +2231,23 @@ type HuThemePreset = {
   heroControlBorder?: string;
 };
 
-const HU_THEME_PRESETS: HuThemePreset[] = [
-  {
-    id: "default",
-    name: "Standard",
-    hint: "no theme",
-    accent: "var(--uc-action)",
-    accent2: "var(--uc-surface)",
-    accent3: "var(--uc-text-muted)",
-    pageBackground: "var(--uc-app-bg)",
-    motionBackground: "none",
-    swatchBackground:
-      "linear-gradient(135deg, var(--uc-surface) 0%, var(--uc-app-bg) 58%, var(--uc-border) 100%)",
-    surfaceWeight: 100,
-    navWeight: 100,
-  },
+export const HU_DEFAULT_THEME: HuThemePreset = {
+  id: "default",
+  name: "Standard",
+  hint: "no theme",
+  accent: "var(--uc-action)",
+  accent2: "var(--uc-surface)",
+  accent3: "var(--uc-text-muted)",
+  pageBackground: "var(--uc-app-bg)",
+  motionBackground: "none",
+  swatchBackground:
+    "linear-gradient(135deg, var(--uc-surface) 0%, var(--uc-app-bg) 58%, var(--uc-border) 100%)",
+  surfaceWeight: 100,
+  navWeight: 100,
+};
+
+export const HU_THEME_PRESETS: readonly [HuThemePreset, ...HuThemePreset[]] = [
+  HU_DEFAULT_THEME,
   {
     id: "nordlys",
     name: "Nordlys",
@@ -2515,8 +2517,8 @@ const HU_THEME_PRESETS: HuThemePreset[] = [
   },
 ];
 
-function getHuTheme(themeId: HuThemeId) {
-  return HU_THEME_PRESETS.find((theme) => theme.id === themeId) ?? HU_THEME_PRESETS[0];
+export function getHuTheme(themeId: HuThemeId) {
+  return HU_THEME_PRESETS.find((theme) => theme.id === themeId) ?? HU_DEFAULT_THEME;
 }
 
 function getHuThemeStyle(theme: HuThemePreset): CSSProperties {
@@ -2621,12 +2623,12 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
   const [showAmounts, setShowAmounts] = useState(true);
   const [view, setView] = useState<HuLightView>("home");
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false);
-  const [appliedThemeId, setAppliedThemeId] = useState<HuThemeId>("default");
-  const [draftThemeId, setDraftThemeId] = useState<HuThemeId>("default");
+  const [appliedThemeId, setAppliedThemeId] = useState<HuThemeId>(HU_DEFAULT_THEME.id);
+  const [draftThemeId, setDraftThemeId] = useState<HuThemeId>(HU_DEFAULT_THEME.id);
   const [motionProgress, setMotionProgress] = useState(0);
   const [pendingActions, setPendingActions] = useState<HuPendingAction[]>(HU_PENDING_ACTIONS);
   const [selectedPendingActionId, setSelectedPendingActionId] = useState(HU_PENDING_ACTIONS[0]?.id ?? "");
-  const [selectedCardId, setSelectedCardId] = useState(HU_KIDS_CARDS[0]?.id ?? "");
+  const [selectedCardId, setSelectedCardId] = useState(HU_DEFAULT_KIDS_CARD.id);
   const [selectedTransaction, setSelectedTransaction] = useState<AccountTransaction | null>(null);
   const [transactionReturnView, setTransactionReturnView] = useState<HuTransactionReturnView>("home");
   const [goals, setGoals] = useState<SavingGoal[]>(HU_KIDS_INITIAL_GOALS);
@@ -3007,7 +3009,7 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
     }
 
     if (view === "card-details") {
-      const selectedCard = HU_KIDS_CARDS.find((card) => card.id === selectedCardId) ?? HU_KIDS_CARDS[0];
+      const selectedCard = HU_KIDS_CARDS.find((card) => card.id === selectedCardId) ?? HU_DEFAULT_KIDS_CARD;
 
       return (
         <HuKidsCardDetailsPage
@@ -3026,7 +3028,7 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
     }
 
     if (view === "card-settings") {
-      const selectedCard = HU_KIDS_CARDS.find((card) => card.id === selectedCardId) ?? HU_KIDS_CARDS[0];
+      const selectedCard = HU_KIDS_CARDS.find((card) => card.id === selectedCardId) ?? HU_DEFAULT_KIDS_CARD;
 
       return (
         <HuKidsCardSettingsPage
@@ -4677,7 +4679,7 @@ function HuHomeContent({
     <main className={cn(preview ? "pointer-events-none" : undefined)}>
         <HuLightBalance concept={concept} showAmounts={showAmounts} />
         <HuLightActionRail
-          onCardDetails={() => onCardDetails(HU_KIDS_CARDS[0]?.id ?? "")}
+          onCardDetails={() => onCardDetails(HU_DEFAULT_KIDS_CARD.id)}
           onMoreOptions={onMoreOptions}
           onRequestMoney={onRequestMoney}
           onSendMoney={onSendMoney}
@@ -4729,7 +4731,7 @@ function HuSavingContent({
     <main>
         <HuSavingBalance showAmounts={showAmounts} />
         <HuSavingActionRail
-          onCardDetails={() => onCardDetails(HU_KIDS_CARDS[0]?.id ?? "")}
+          onCardDetails={() => onCardDetails(HU_DEFAULT_KIDS_CARD.id)}
           onMoreOptions={onMoreOptions}
           onRequestMoney={onRequestMoney}
           onSaveMoney={onOpenGoals}
@@ -7484,11 +7486,7 @@ function HuMerchantLogoMark({ merchant }: { merchant: HuMerchantLogoId }) {
 }
 
 function HuCardsPanel({ onCardDetails }: { onCardDetails: (cardId: string) => void }) {
-  const card = HU_KIDS_CARDS[0];
-
-  if (!card) {
-    return null;
-  }
+  const card = HU_DEFAULT_KIDS_CARD;
 
   return (
     <section className="h-[102px] rounded-[8px] bg-[var(--hu-theme-card-bg)] p-[16px] shadow-sm" data-hu-cards-panel>
@@ -8133,7 +8131,8 @@ function SkBulbankCardSection({ concept }: { concept: KidsMarketHomeConcept }) {
 }
 
 function SkBulbankOffer({ concept }: { concept: KidsMarketHomeConcept }) {
-  const progress = getPocketProgress(concept.pockets[0]);
+  const primaryPocket = concept.pockets[0];
+  const progress = getPocketProgress(primaryPocket);
 
   return (
     <section className="overflow-hidden rounded-[8px] bg-[var(--uc-orange-main)] text-[var(--uc-static-white)] shadow-sm">
@@ -8141,7 +8140,7 @@ function SkBulbankOffer({ concept }: { concept: KidsMarketHomeConcept }) {
         <div className="min-w-0">
           <p className="text-[24px] font-bold leading-[27px] tracking-[0]">Get a savings</p>
           <p className="mt-[4px] text-[13px] font-bold leading-[16px] tracking-[0] text-[color-mix(in_srgb,var(--uc-static-white)_82%,transparent)]">
-            {concept.pockets[0]?.helper}
+            {primaryPocket.helper}
           </p>
         </div>
         <span className="grid size-[52px] shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--uc-static-white)_18%,transparent)]">
