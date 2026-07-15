@@ -12,7 +12,7 @@ export default function InvestmentFilterChips({
   onChange,
 }: InvestmentFilterChipsProps) {
   return (
-    <div className="flex w-full justify-start gap-[8px] overflow-x-auto px-[24px] py-[18px] scrollbar-hide" data-ds-label="Investments sorting chips">
+    <div className="flex w-full justify-center gap-[8px] overflow-x-auto px-[24px] py-[18px] scrollbar-hide" data-ds-label="Investments sorting chips">
       {options.map((option) => {
         const selected = option.id === selectedOptionId;
 

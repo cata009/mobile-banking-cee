@@ -10,6 +10,8 @@ Latest Investments data note: product-detail Help is hidden, the hero date comes
 
 Latest Investments history note: distribution leader rails now stop before labels without the extra short segment, and the custom interval calendar uses a stable seven-column day grid while layering above the visible Apply filters sheet.
 
+Latest Investments distribution-controls note: four-slice donuts use a stable two-left/two-right leader layout, sorting chips are centered, and the shared portfolio action bar is rendered below both Performance and distribution charts.
+
 Latest account/cards note: Account transaction filters reserve the shared phone safe-area inset, Connected cards uses the shared section-heading divider, and debit/credit Card Details plus Card Options are available through selected-card-aware routes for every country. Card Options now follows the RO Enablers credit/debit compositions globally: no card identity block, exact product-specific row sets, no row separators, the shared section divider, and registered exact Apple Pay/Mastercard/Card registrations/Card limits/Change name/Delivery address/Reissue SVGs. Card Detail reserves 24px vertically around `SHOW CARD DETAILS`. Option rows remain presentational pending downstream product behavior details.
 
 Latest Investments color note: negative transaction/order amounts and other negative states use the exact `#CF3524` red.

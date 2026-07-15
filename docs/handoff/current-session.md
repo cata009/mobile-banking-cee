@@ -2,6 +2,21 @@
 
 Last updated: 2026-07-15
 
+## 2026-07-15 Investments Distribution Controls Publication
+
+- Latest request handled: include every current workspace change in Git and publish the updated application to Vercel production.
+- Runtime scope: four-item Investments distributions now keep a stable two-labels-left/two-labels-right connector layout; sorting chips are centered; and the shared History/To approve/Download Report/Invest action bar is available below both Performance and distribution charts.
+- Files changed: `src/app/components/investments/InvestmentDistributionChart.tsx`, `src/app/components/investments/InvestmentFilterChips.tsx`, `src/app/screens/investments/InvestmentsPortfolioScreen.tsx`, plus handoff/capability documentation.
+- Verification commands: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and `git diff --check` passed. Build transformed 3,908 modules; the known empty `react-vendor` and large-chunk warnings remain triaged.
+- Publication plan: commit the complete worktree on `main`, push it to `origin/main`, wait for the Git-integrated Vercel production deployment to reach `READY`, verify the canonical production URL, then record the final deployment result in a follow-up documentation commit.
+- Limitation: Investments data and approval/download/invest actions remain mock/demo behavior unless their existing local navigation explicitly handles the action.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes after the production deployment reaches `READY`
+
 ## 2026-07-15 Complete Workspace Checkpoint
 
 - Latest request handled: commit every tracked and untracked change in the current workspace so the repository is clean at the current reviewed version.

@@ -6,6 +6,7 @@ This log records bananas found and how they were triaged.
 
 | Banana | Triage | Evidence |
 | --- | --- | --- |
+| Three reviewed Investments changes appeared after the previous clean checkpoint | Preserved in the requested all-files commit, documented in handoff/capability state, and gated by build/template/platform/diff verification before publication | `git diff`, `npm run build`, `npm run audit:templates`, `npm run audit:platform`, `git diff --check` |
 | The requested clean checkpoint combined several already-approved Card Options and HU Kids UX passes in one dirty worktree | Intentionally preserved as one complete local snapshot; no existing product work was discarded or split, and no push/deploy was inferred | `git status --short`, `docs/handoff/current-session.md`, requested local commit on `main` |
 | The new HU Kids frost photograph builds to about 2.09 MB | Kept for visual fidelity in this checkpoint and converted into a future optimization task/known banana | `npm run build`, `docs/handoff/known-bananas.md`, `docs/handoff/next-tasks.md` |
 

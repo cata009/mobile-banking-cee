@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { InvestmentDistributionItem } from "@/app/config/investmentsPortfolioConfig";
 import type { InvestmentAmountParts } from "@/app/components/investments/InvestmentProductCard";
 
@@ -7,6 +8,8 @@ interface InvestmentDistributionChartProps {
   formatAmount: (value: number, currency: string) => InvestmentAmountParts;
   totalLabel: string;
   onItemClick?: (item: InvestmentDistributionItem) => void;
+  /** Extra content rendered between the donut chart and the section title. */
+  headerExtra?: ReactNode;
 }
 
 const DONUT_SIZE = 179;
@@ -38,22 +41,45 @@ function pointOnDonutEdge(angleDeg: number) {
 }
 
 function buildSliceLeaders(items: readonly InvestmentDistributionItem[]): SliceLeader[] {
-  let offset = 0;
-  const gap = DONUT_CIRCUMFERENCE * 0.006;
-  const leaders = items.map((item) => {
-    const rawLength = (Math.max(0, item.percent) / 100) * DONUT_CIRCUMFERENCE;
-    const visibleLength = Math.max(0, rawLength - gap);
-    const midpoint = ((offset + visibleLength / 2) / DONUT_CIRCUMFERENCE) * 360;
-    const anchor = pointOnDonutEdge(midpoint);
-    offset += rawLength;
+  // When there are exactly 4 slices, balance them 2-left / 2-right using fixed
+  // anchor points on each side. Otherwise a skewed distribution (e.g. 48/24/18/10)
+  // crams 3 labels on one side and leaves the other nearly empty, with the
+  // green slice connector spilling outside the chart.
+  let leaders: SliceLeader[];
+  if (items.length === 4) {
+    // Two anchors on each side, vertically separated. The anchor sits on the
+    // donut edge so the connector stays short and never crosses the donut.
+    const leftAnchors = [pointOnDonutEdge(225), pointOnDonutEdge(315)];
+    const rightAnchors = [pointOnDonutEdge(135), pointOnDonutEdge(45)];
 
-    return {
-      side: midpoint > 0 && midpoint < 180 ? "right" as const : "left" as const,
-      anchorX: anchor.x,
-      anchorY: anchor.y,
-      slotY: 0,
-    };
-  });
+    leaders = items.map((item, index) => {
+      const isLeft = index < 2;
+      const anchor = isLeft ? leftAnchors[index] : rightAnchors[index - 2];
+      return {
+        side: (isLeft ? "left" : "right") as Side,
+        anchorX: anchor.x,
+        anchorY: anchor.y,
+        slotY: 0,
+      };
+    });
+  } else {
+    let offset = 0;
+    const gap = DONUT_CIRCUMFERENCE * 0.006;
+    leaders = items.map((item) => {
+      const rawLength = (Math.max(0, item.percent) / 100) * DONUT_CIRCUMFERENCE;
+      const visibleLength = Math.max(0, rawLength - gap);
+      const midpoint = ((offset + visibleLength / 2) / DONUT_CIRCUMFERENCE) * 360;
+      const anchor = pointOnDonutEdge(midpoint);
+      offset += rawLength;
+
+      return {
+        side: (midpoint > 0 && midpoint < 180 ? "right" : "left") as Side,
+        anchorX: anchor.x,
+        anchorY: anchor.y,
+        slotY: 0,
+      };
+    });
+  }
 
   (["left", "right"] as const).forEach((side) => {
     const onSide = leaders
@@ -95,6 +121,7 @@ export default function InvestmentDistributionChart({
   formatAmount,
   totalLabel,
   onItemClick,
+  headerExtra,
 }: InvestmentDistributionChartProps) {
   const donutSegments = buildSvgSegments(items);
   const visibleLabels = items.slice(0, 4);
@@ -174,6 +201,8 @@ export default function InvestmentDistributionChart({
           );
         })}
       </div>
+
+      {headerExtra ? <div className="mt-[8px]">{headerExtra}</div> : null}
 
       <div className="mt-[24px] px-[23px]">
         <h2 className="uc-type-n4-strong text-[#262626]">{title}</h2>
