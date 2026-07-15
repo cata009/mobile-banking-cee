@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { useNavigationContext, NavigationProvider, type Screen } from "@/app/contexts/NavigationContext";
+import { useNavigationContext, NavigationProvider, type NavigationRoute, type Screen } from "@/app/contexts/NavigationContext";
 import { LanguageProvider, useLanguage } from "@/app/contexts/LanguageContext";
 import { DemoProvider, useDemo } from "@/app/state/demoStore";
 import type { CountryId } from "@/app/state/demoTypes";
@@ -1957,6 +1957,12 @@ function AppWithNavigation({
         ? "homepage"
         : "prelogin-inactive";
   const initialCoAppingActive = !shouldOpenDesignSystem && scenario === "active";
+  const initialRoute: NavigationRoute =
+    initialScreen === "card-detail" || initialScreen === "card-details-info" || initialScreen === "card-options"
+      ? { screen: initialScreen, cardId: parsedDeepLink?.cardId }
+      : initialScreen === "account-detail" || initialScreen === "account-details-info" || initialScreen === "account-options"
+        ? { screen: initialScreen, accountId: parsedDeepLink?.accountId }
+        : { screen: initialScreen };
 
   // Frameless "real device" mode (opened from the Share QR): render the app
   // fullscreen without the desktop demo shell / phone bezel.
@@ -1971,6 +1977,7 @@ function AppWithNavigation({
     <div data-uc-theme={themeMode} className={shellClassName}>
       <NavigationProvider
         initialScreen={initialScreen}
+        initialRoute={initialRoute}
         initialCoAppingActive={initialCoAppingActive}
       >
         <LanguageProvider initialLanguage={parsedDeepLink?.language}>
@@ -1990,6 +1997,7 @@ function AppContent({
 }) {
   const {
     currentScreen,
+    currentRoute,
     isCoAppingActive,
     navigateTo,
     goBack,
@@ -2043,6 +2051,11 @@ function AppContent({
   const [czChatInitialMode, setCzChatInitialMode] = useState<CoAppingAssistantMode>("chat");
   const [productsShelfFocusRequest, setProductsShelfFocusRequest] = useState<ProductsShelfFocusRequest | null>(null);
   const [selectedProductDetail, setSelectedProductDetail] = useState<ProductDetailSelection | null>(null);
+
+  useEffect(() => {
+    if ("cardId" in currentRoute && currentRoute.cardId) setSelectedCardId(currentRoute.cardId);
+    if ("accountId" in currentRoute && currentRoute.accountId) setSelectedAccountId(currentRoute.accountId);
+  }, [currentRoute]);
   const accountProducts = categories.flatMap((category) => category.products);
   const selectedAccountProduct = accountProducts.find((accountProduct) => accountProduct.id === selectedAccountId) ?? accountProducts[0] ?? null;
   const selectedCardProduct =
@@ -2276,32 +2289,32 @@ function AppContent({
   const handleAccountClick = (product: Product) => {
     if (product.type === "debit_card" || product.type === "credit_card") {
       setSelectedCardId(product.id);
-      navigateTo("card-detail");
+      navigateTo({ screen: "card-detail", cardId: product.id });
       return;
     }
     setSelectedAccountId(product.id);
-    navigateTo("account-detail");
+    navigateTo({ screen: "account-detail", accountId: product.id });
   };
 
   const handleAccountDetailsClick = (product: Product) => {
     setSelectedAccountId(product.id);
-    navigateTo("account-details-info");
+    navigateTo({ screen: "account-details-info", accountId: product.id });
   };
 
   const handleAccountOptionsClick = () => {
-    navigateTo("account-options");
+    navigateTo({ screen: "account-options", accountId: selectedAccountId });
   };
 
   const handleCardDetailsClick = (product: Product) => {
     if (product.type !== "debit_card" && product.type !== "credit_card") return;
     setSelectedCardId(product.id);
-    navigateTo("card-details-info");
+    navigateTo({ screen: "card-details-info", cardId: product.id });
   };
 
   const handleCardOptionsClick = (product: Product) => {
     if (product.type !== "debit_card" && product.type !== "credit_card") return;
     setSelectedCardId(product.id);
-    navigateTo("card-options");
+    navigateTo({ screen: "card-options", cardId: product.id });
   };
 
   const handleTransactionClick = (transaction: AccountTransaction, productForTransaction: Product) => {
@@ -2355,7 +2368,11 @@ function AppContent({
       case "card-detail":
         if (creditCardForOpportunity) setSelectedCardId(creditCardForOpportunity.id);
         setCzChatOpen(false);
-        navigateTo("card-detail");
+        navigateTo(
+          creditCardForOpportunity
+            ? { screen: "card-detail", cardId: creditCardForOpportunity.id }
+            : "card-detail",
+        );
         break;
       case "product-detail":
         {
@@ -2400,7 +2417,11 @@ function AppContent({
         break;
       case "account-detail":
         if (selectedAccountProduct) setSelectedAccountId(selectedAccountProduct.id);
-        navigateTo("account-detail");
+        navigateTo(
+          selectedAccountProduct
+            ? { screen: "account-detail", accountId: selectedAccountProduct.id }
+            : "account-detail",
+        );
         break;
     }
   };

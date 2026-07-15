@@ -51,8 +51,8 @@ const BACK_FALLBACKS: Record<Screen, Screen> = {
 
 const RESTORABLE_ROUTES: Screen[] = [
   'prelogin-inactive', 'prelogin-active', 'homepage', 'analytics', 'messages', 'payments', 'products',
-  'investments', 'prime', 'more', 'documents', 'settings', 'contacts', 'account-detail',
-  'account-details-info', 'account-options', 'card-detail', 'flow-library', 'design-system',
+  'investments', 'investments-history', 'prime', 'more', 'documents', 'settings', 'contacts', 'account-detail',
+  'account-details-info', 'account-options', 'card-details-info', 'card-options', 'card-detail', 'flow-library', 'design-system',
 ]
 
 describe('exhaustive route policy', () => {
@@ -71,7 +71,7 @@ describe('exhaustive route policy', () => {
     }
   })
 
-  it('preserves the current 19 directly restorable routes', () => {
+  it('owns the stable directly restorable routes', () => {
     expect(ALL_ROUTES.filter((route) => ROUTE_POLICY[route].deepLink.restorable)).toEqual(RESTORABLE_ROUTES)
   })
 

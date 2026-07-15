@@ -36,7 +36,7 @@ describe('deep-link screen normalization', () => {
     ['payment-review', false, 'payments'],
     ['payment-sign', false, 'payments'],
     ['payment-success', false, 'payments'],
-    ['investments-history', false, 'investments'],
+    ['investments-history', false, 'investments-history'],
     ['co-apping-session', false, 'homepage'],
   ] as const)('normalizes %s with card=%s to %s', (screen, hasCard, expected) => {
     expect(normalizeScreen(screen, hasCard)).toBe(expected)
