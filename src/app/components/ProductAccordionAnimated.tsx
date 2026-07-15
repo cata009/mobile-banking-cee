@@ -101,13 +101,17 @@ export default function ProductAccordionAnimated({ welcomeText, products, findOu
     setProductOrder(newOrder);
   };
 
-  // Safety check: ensure productOrder indices are valid
-  const validProductOrder = productOrder.filter(index => index < products.length);
-  if (validProductOrder.length === 0) {
+  // Safety check: resolve only entries whose product still exists.
+  const validProductEntries = productOrder.flatMap((index) => {
+    const product = products[index];
+    return product ? [{ index, product }] : [];
+  });
+  const expandedEntry = validProductEntries[0];
+  if (!expandedEntry) {
     return null; // Don't render if no valid products
   }
 
-  const currentExpandedId = products[validProductOrder[0]].id;
+  const currentExpandedId = expandedEntry.product.id;
 
   return (
     <div className="w-full overflow-hidden">
@@ -130,13 +134,13 @@ export default function ProductAccordionAnimated({ welcomeText, products, findOu
           
           {/* Accordion */}
           <div className="flex flex-col w-full gap-[24px]">
-            <ExpandedProduct product={products[validProductOrder[0]]} findOutMoreText={findOutMoreText} />
+            <ExpandedProduct product={expandedEntry.product} findOutMoreText={findOutMoreText} />
             <div className="flex flex-col w-full">
-              {validProductOrder.slice(1).map((productIndex) => (
+              {validProductEntries.slice(1).map(({ index, product }) => (
                 <CollapsedProduct
-                  key={products[productIndex].id}
-                  product={products[productIndex]}
-                  onClick={() => handleProductClick(productIndex)}
+                  key={product.id}
+                  product={product}
+                  onClick={() => handleProductClick(index)}
                 />
               ))}
             </div>

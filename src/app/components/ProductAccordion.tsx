@@ -114,18 +114,28 @@ export default function ProductAccordion({
     onProductClick(clickedIndex);
   };
 
+  const productEntries = productOrder.flatMap((index) => {
+    const product = products[index];
+    return product ? [{ index, product }] : [];
+  });
+  const expandedEntry = productEntries[0];
+
+  if (!expandedEntry) {
+    return null;
+  }
+
   return (
     <div className="flex flex-col w-full gap-[24px]">
       {/* Expanded Product (first in order) */}
-      <ExpandedProduct product={products[productOrder[0]]} />
+      <ExpandedProduct product={expandedEntry.product} />
       
       {/* Collapsed Products (remaining) - wrapped to maintain gap */}
       <div className="flex flex-col w-full">
-        {productOrder.slice(1).map((productIndex) => (
+        {productEntries.slice(1).map(({ index, product }) => (
           <CollapsedProduct
-            key={products[productIndex].id}
-            product={products[productIndex]}
-            onClick={() => handleProductClick(productIndex)}
+            key={product.id}
+            product={product}
+            onClick={() => handleProductClick(index)}
           />
         ))}
       </div>

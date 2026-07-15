@@ -108,7 +108,7 @@ export default function CoAppingHomePage() {
         </div>
 
         {/* Dynamic Product Categories */}
-        {categories.map((category, index) => {
+        {categories.map((category) => {
           // Determine if this category should show totals (exclude cards)
           const shouldShowTotal = category.key !== 'cards';
           const totalData = shouldShowTotal && category.products.length >= 2 

@@ -79,7 +79,7 @@ export default function AccountActionBar({
   onOptionsClick,
 }: AccountActionBarProps) {
   const { t } = useLanguage();
-  const defaultActions = [
+  const defaultActions: AccountActionBarItem[] = [
     { id: "details", iconName: "account-details" as const, label: t("runtime.accounts.actions.details", "Details"), onClick: onDetailsClick },
     { id: "options", iconName: "account-options" as const, label: t("runtime.accounts.actions.options", "Options"), onClick: onOptionsClick },
     { id: "add-money", iconName: "add-money" as const, label: t("runtime.accounts.actions.addMoney", "Add money") },
