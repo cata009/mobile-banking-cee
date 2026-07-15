@@ -1,0 +1,8 @@
+Asset: hu-card-frost-window-cc0.jpg
+Title: Frost On A Window
+Author: Petr Kratochvil
+Source: https://www.publicdomainpictures.net/en/view-image.php?image=111167&picture=frost-on-a-window
+License: CC0 Public Domain
+Downloaded: 2026-07-14
+
+This image is used as the photographic frost layer for the Hungary Kids card-freeze interaction.

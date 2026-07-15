@@ -1,11 +1,10 @@
 import { useState } from "react";
 import type { UIEvent } from "react";
+import NavigationRow from "@/app/components/NavigationRow";
 import PageHeader from "@/app/components/PageHeader";
-import Card, { type CardVariant } from "@/app/components/cards/Card";
-import { AppIcon, type IconName } from "@/app/components/icons";
-import { useDemo } from "@/app/state/demoStore";
+import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
+import type { IconName } from "@/app/components/icons";
 import { useProducts } from "@/hooks/useProducts";
-import { formatMaskedCardNumber } from "@/app/utils/cardNumber";
 import type { CreditCard, DebitCard, Product } from "@/data/products";
 
 interface CardOptionsScreenProps {
@@ -13,25 +12,114 @@ interface CardOptionsScreenProps {
   onBack: () => void;
 }
 
+interface CardOptionItem {
+  id: string;
+  icon: IconName;
+  title: string;
+  description: string;
+}
+
 function isCardProduct(product: Product): product is DebitCard | CreditCard {
   return product.type === "debit_card" || product.type === "credit_card";
 }
 
-function getCardVariant(card: DebitCard | CreditCard): CardVariant {
-  if (card.type === "credit_card") return "mc-credit-partner-standard";
-  return card.id.endsWith("-2") || card.id === "card-3" ? "mc-debit-standard" : "mc-debit-gold";
-}
-
-const CARD_OPTION_ITEMS: readonly { id: string; icon: IconName; title: string; description: string }[] = [
-  { id: "view-pin", icon: "view-pin", title: "View PIN", description: "Reveal or change your card PIN securely" },
-  { id: "block-card", icon: "block-card", title: "Block card", description: "Temporarily block this card" },
-  { id: "limits", icon: "account-options", title: "Card limits", description: "Manage spending and cash withdrawal limits" },
-  { id: "notifications", icon: "account-option-push-notifications", title: "Push notifications", description: "Choose which card alerts you receive" },
-  { id: "share", icon: "account-option-share-info", title: "Share card details", description: "Share non-sensitive card information" },
+const CARD_PROGRAM_ITEMS: readonly CardOptionItem[] = [
+  {
+    id: "apple-pay",
+    icon: "card-options-apple-pay",
+    title: "APPLE PAY",
+    description: "Active",
+  },
+  {
+    id: "mastercard-priceless",
+    icon: "card-options-mastercard",
+    title: "MASTERCARD PRICELESS",
+    description: "Discover all the advantages of the program",
+  },
+  {
+    id: "card-registrations",
+    icon: "card-options-registrations",
+    title: "CARD REGISTRATIONS",
+    description: "Subscriptions and saved card",
+  },
 ];
 
+const COMMON_SETTINGS_ITEMS: readonly CardOptionItem[] = [
+  {
+    id: "view-pin",
+    icon: "view-pin",
+    title: "VIEW PIN",
+    description: "View or change your card’s PIN",
+  },
+  {
+    id: "card-limits",
+    icon: "card-options-limits",
+    title: "CARD LIMITS",
+    description: "Manage your card limits",
+  },
+  {
+    id: "push-notifications",
+    icon: "account-option-push-notifications",
+    title: "PUSH NOTIFICATIONS",
+    description: "Manage app notifications",
+  },
+];
+
+const CREDIT_SETTINGS_ITEMS: readonly CardOptionItem[] = [
+  {
+    id: "credit-card-statement",
+    icon: "account-option-statement",
+    title: "CREDIT CARD STATEMENT",
+    description: "View your statement",
+  },
+  {
+    id: "change-card-name",
+    icon: "card-options-change-name",
+    title: "CHANGE CARD NAME",
+    description: "Name your card",
+  },
+  {
+    id: "share-details",
+    icon: "account-option-share-info",
+    title: "SHARE DETAILS",
+    description: "Send the card details through email",
+  },
+];
+
+const DEBIT_SETTINGS_ITEMS: readonly CardOptionItem[] = [
+  {
+    id: "card-delivery-address",
+    icon: "card-options-delivery-address",
+    title: "CARD DELIVERY ADDRESS",
+    description: "Select the address to deliver the card",
+  },
+  {
+    id: "reissue-card",
+    icon: "card-options-reissue",
+    title: "REISSUE CARD",
+    description: "Request the reissue of this card",
+  },
+];
+
+function CardOptionRows({ items }: { items: readonly CardOptionItem[] }) {
+  return (
+    <div className="flex flex-col" role="list">
+      {items.map((item) => (
+        <div key={item.id} role="listitem" data-card-option={item.id}>
+          <NavigationRow
+            title={item.title}
+            description={item.description}
+            leadingIconName={item.icon}
+            trailingAccessory="chevron"
+            rowHeight={80}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function CardOptionsScreen({ selectedCardId, onBack }: CardOptionsScreenProps) {
-  const { amountsHidden } = useDemo();
   const { categories } = useProducts();
   const [headerProgress, setHeaderProgress] = useState(0);
   const cards = categories.flatMap((category) => category.products).filter(isCardProduct);
@@ -45,8 +133,15 @@ export default function CardOptionsScreen({ selectedCardId, onBack }: CardOption
     return <div className="h-full w-full bg-[var(--uc-surface)]" />;
   }
 
+  const settingsItems = card.type === "credit_card"
+    ? [...COMMON_SETTINGS_ITEMS, ...CREDIT_SETTINGS_ITEMS]
+    : [...COMMON_SETTINGS_ITEMS, ...DEBIT_SETTINGS_ITEMS];
+
   return (
-    <div className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] scrollbar-hide" onScroll={handlePageScroll}>
+    <div
+      className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] scrollbar-hide"
+      onScroll={handlePageScroll}
+    >
       <PageHeader
         title="Card options"
         onBack={onBack}
@@ -55,41 +150,18 @@ export default function CardOptionsScreen({ selectedCardId, onBack }: CardOption
         includeSafeArea
       />
 
-      <div className="px-[24px] pb-[40px] pt-[30px]">
-        <div className="flex items-center gap-[16px] border-b border-[var(--uc-border)] pb-[24px]">
-          <Card ariaLabel={`${card.name} card`} size="medium" variant={getCardVariant(card)} />
-          <div className="min-w-0">
-            <p className="uc-type-n4-strong truncate text-[var(--uc-text)]">{card.name}</p>
-            <p className="uc-type-n5 mt-[4px] text-[var(--uc-text-muted)]">{formatMaskedCardNumber(card.cardNumber)}</p>
-          </div>
-        </div>
+      <main className="pb-[40px]">
+        <CardOptionRows items={CARD_PROGRAM_ITEMS} />
 
-        <div className="pt-[24px]">
-          <h2 className="uc-type-n5-strong uppercase text-[var(--uc-text-muted)]">General settings</h2>
-          <div className="mt-[8px] h-px w-full bg-[var(--uc-border)]" />
-          <div className="pt-[16px]">
-            {CARD_OPTION_ITEMS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className="grid min-h-[72px] w-full grid-cols-[32px_minmax(0,1fr)_24px] items-center gap-[16px] border-b border-[var(--uc-border-muted)] text-left"
-              >
-                <span className="flex size-[32px] items-center justify-center">
-                  <AppIcon name={item.icon} color="var(--uc-text)" />
-                </span>
-                <span className="min-w-0">
-                  <span className="uc-type-n5-strong block text-[var(--uc-text)]">{item.title}</span>
-                  <span className="uc-type-n5 mt-[2px] block text-[var(--uc-text-muted)]">{item.description}</span>
-                </span>
-                <AppIcon name="chevron-link" color="var(--uc-text)" />
-              </button>
-            ))}
+        <section className="mt-[16px]" aria-label="General settings">
+          <div className="px-[24px]">
+            <SectionHeadingDivider title="GENERAL SETTINGS" />
           </div>
-          <p className="uc-type-n5 mt-[24px] text-[var(--uc-text-muted)]">
-            {amountsHidden ? "Sensitive card information is hidden." : "Some actions may require additional verification."}
-          </p>
-        </div>
-      </div>
+          <div className="pt-[16px]">
+            <CardOptionRows items={settingsItems} />
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

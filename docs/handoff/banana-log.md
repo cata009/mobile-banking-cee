@@ -2,6 +2,13 @@
 
 This log records bananas found and how they were triaged.
 
+## 2026-07-15
+
+| Banana | Triage | Evidence |
+| --- | --- | --- |
+| The requested clean checkpoint combined several already-approved Card Options and HU Kids UX passes in one dirty worktree | Intentionally preserved as one complete local snapshot; no existing product work was discarded or split, and no push/deploy was inferred | `git status --short`, `docs/handoff/current-session.md`, requested local commit on `main` |
+| The new HU Kids frost photograph builds to about 2.09 MB | Kept for visual fidelity in this checkpoint and converted into a future optimization task/known banana | `npm run build`, `docs/handoff/known-bananas.md`, `docs/handoff/next-tasks.md` |
+
 ## 2026-07-14
 
 | Banana | Triage | Evidence |

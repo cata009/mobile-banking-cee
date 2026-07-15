@@ -1,6 +1,6 @@
 interface AccountTransactionMonthDividerProps {
   title: string;
-  total: string;
+  total?: string;
   currency: string;
 }
 
@@ -18,9 +18,11 @@ export default function AccountTransactionMonthDivider({
         <h2 className="uc-type-n5-strong uppercase text-[var(--uc-text-muted)]">
           {title}
         </h2>
-        <p className="uc-type-n5-strong text-right uppercase text-[var(--uc-text)]">
-          {total} {currency}
-        </p>
+        {total ? (
+          <p className="uc-type-n5-strong text-right uppercase text-[var(--uc-text)]">
+            {total} {currency}
+          </p>
+        ) : null}
       </div>
       <div className="flex flex-col items-center gap-[10px] self-stretch">
         <div className="h-px w-full bg-[var(--uc-border)]" />

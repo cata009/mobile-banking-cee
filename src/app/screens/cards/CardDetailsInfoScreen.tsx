@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { UIEvent } from "react";
 import PageHeader from "@/app/components/PageHeader";
-import Card, { type CardVariant } from "@/app/components/cards/Card";
 import AccountDetailsInfoField from "@/app/components/accounts/AccountDetailsInfoField";
 import { useDemo } from "@/app/state/demoStore";
 import { useProducts } from "@/hooks/useProducts";
@@ -17,11 +16,6 @@ interface CardDetailsInfoScreenProps {
 
 function isCardProduct(product: Product): product is DebitCard | CreditCard {
   return product.type === "debit_card" || product.type === "credit_card";
-}
-
-function getCardVariant(card: DebitCard | CreditCard): CardVariant {
-  if (card.type === "credit_card") return "mc-credit-partner-standard";
-  return card.id.endsWith("-2") || card.id === "card-3" ? "mc-debit-standard" : "mc-debit-gold";
 }
 
 export default function CardDetailsInfoScreen({ selectedCardId, onBack }: CardDetailsInfoScreenProps) {
@@ -54,16 +48,8 @@ export default function CardDetailsInfoScreen({ selectedCardId, onBack }: CardDe
         includeSafeArea
       />
 
-      <div className="px-[24px] pb-[40px] pt-[30px]">
-        <div className="flex items-center gap-[16px] border-b border-[var(--uc-border)] pb-[24px]">
-          <Card ariaLabel={`${card.name} card`} size="medium" variant={getCardVariant(card)} />
-          <div className="min-w-0">
-            <p className="uc-type-n4-strong truncate text-[var(--uc-text)]">{card.name}</p>
-            <p className="uc-type-n5 mt-[4px] text-[var(--uc-text-muted)]">{cardNumber}</p>
-          </div>
-        </div>
-
-        <div className="pt-[16px]">
+      <div className="px-[24px] pb-[40px]">
+        <div className="pt-[8px]">
           <AccountDetailsInfoField title="Card type" subtitle={card.cardType} />
           <AccountDetailsInfoField title="Card number" subtitle={cardNumber} />
           <AccountDetailsInfoField title="Expiry date" subtitle={card.expiryDate} />
