@@ -26,10 +26,6 @@ import NewPaymentDiscoverBanner from "@/app/components/payments/NewPaymentDiscov
 import PaymentHeroCard from "@/app/components/payments/PaymentHeroCard";
 import PaymentOtherShortcut from "@/app/components/payments/PaymentOtherShortcut";
 import PrimaryButton from "@/app/components/PrimaryButton";
-import ProductCardBottomSheet, {
-  type ProductDetailSelection,
-} from "@/app/components/products/ProductCardBottomSheet";
-import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProfileAvatar from "@/app/components/ProfileAvatar";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import UniCreditLogo from "@/app/components/UniCreditLogo";
@@ -43,14 +39,8 @@ import {
   type NewPaymentSheetConfig,
   type PaymentHeroItem,
 } from "@/app/config/paymentsMenuConfig";
-import {
-  getProductsMenuForCountry,
-  type ProductsCard,
-  type ProductsOffer,
-} from "@/app/config/productsMenuConfig";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { formatMoney, formatMoneyNumber } from "@/app/registry/countryConfig";
-import { MoreHeader } from "@/app/screens/more/MoreHeader";
 import { ContactsCard } from "@/app/screens/more/cards/ContactsCard";
 import { DocumentsCard } from "@/app/screens/more/cards/DocumentsCard";
 import { MyRequestsCard } from "@/app/screens/more/cards/MyRequestsCard";
@@ -58,7 +48,6 @@ import { SettingsCard } from "@/app/screens/more/cards/SettingsCard";
 import { TutorialCard } from "@/app/screens/more/cards/TutorialCard";
 import MessagesScreen from "@/app/screens/messages/MessagesScreen";
 import ContactsScreen from "@/app/screens/contacts/ContactsScreen";
-import ProductDetailScreen from "@/app/screens/products/ProductDetailScreen";
 import { TransactionDetailScreen } from "@/app/screens/payments/DomesticPaymentFlowScreens";
 import SettingsScreen from "@/app/screens/settings/SettingsScreen";
 import huLearnAskHelpSrc from "../../../assets/kids/learn/hu-learn-ask-help.png";
@@ -2646,7 +2635,6 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
   const [selectedGoalId, setSelectedGoalId] = useState(HU_KIDS_INITIAL_GOALS[0]?.id ?? "");
   const [tasks, setTasks] = useState<HuKidsTask[]>(HU_KIDS_INITIAL_TASKS);
   const [selectedTaskId, setSelectedTaskId] = useState("");
-  const [learnModules] = useState<LearnModule[]>(HU_KIDS_INITIAL_LEARN_MODULES);
   const [completedLearnLessonIds, setCompletedLearnLessonIds] = useState<string[]>(() =>
     getHuLearnInitialCompletedLessonIds(HU_KIDS_INITIAL_LEARN_MODULES),
   );
@@ -3022,17 +3010,13 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
           onTransactionClick={(transaction) => handleOpenTransactionDetail(transaction, "card-details")}
           onManageCard={() => setView("card-settings")}
           showAmounts={showAmounts}
-          theme={appliedTheme}
         />
       );
     }
 
     if (view === "card-settings") {
-      const selectedCard = HU_KIDS_CARDS.find((card) => card.id === selectedCardId) ?? HU_DEFAULT_KIDS_CARD;
-
       return (
         <HuKidsCardSettingsPage
-          card={selectedCard}
           onBack={() => {
             setView("card-details");
             setMotionProgress(0);
@@ -3248,13 +3232,11 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
                 <HuHomeContent
                   concept={concept}
                   onCardDetails={handleOpenCardDetails}
-                  onMessages={handleOpenMessages}
                   onMoreOptions={() => setIsMoreSheetOpen(true)}
                   onRequestMoney={handleOpenRequestMoney}
                   onSendMoney={handleOpenSendMoney}
                   onTransactionClick={(transaction) => handleOpenTransactionDetail(transaction, "home")}
                   pendingActions={pendingActions}
-                  onToggleAmounts={() => setShowAmounts((current) => !current)}
                   showAmounts={showAmounts}
                 />
               ) : activeNav === "analytics" ? (
@@ -3263,24 +3245,19 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
                   onOpenLearn={handleOpenLearn}
                   onSelectTopic={handleOpenLearnTopic}
                   onSelectTask={handleSelectTask}
-                  onToggleAmounts={() => setShowAmounts((current) => !current)}
                   showAmounts={showAmounts}
                   tasks={tasks}
                   topics={learnTopics}
                 />
               ) : activeNav === "products" ? (
                 <HuSavingContent
-                  concept={concept}
                   goals={goals}
                   onCardDetails={handleOpenCardDetails}
-                  onMessages={handleOpenMessages}
                   onCreateGoal={handleOpenCreateGoal}
                   onMoreOptions={() => setIsMoreSheetOpen(true)}
                   onOpenGoals={handleOpenGoals}
                   onRequestMoney={handleOpenRequestMoney}
                   onSelectGoal={handleSelectGoal}
-                  onSendMoney={handleOpenSendMoney}
-                  onToggleAmounts={() => setShowAmounts((current) => !current)}
                   showAmounts={showAmounts}
                 />
               ) : null}
@@ -3566,100 +3543,6 @@ function HuKidsPaymentsPage({
           config={selectedHeroSheet}
           heroId={selectedPrimaryItemId}
           onClose={() => setSelectedPrimaryItemId(null)}
-        />
-      ) : null}
-    </>
-  );
-}
-
-function handleHuKidsOfferClick(_offer: ProductsOffer) {
-  return undefined;
-}
-
-function getHuKidsProductCardTranslationId(card: ProductsCard) {
-  if (card.id === "account") return "account";
-  if (card.id === "cards") return "cards";
-  if (card.id === "mortgages-loans") return "mortgages-loans";
-  if (card.id === "investments-savings") return "investments-savings";
-  return card.id;
-}
-
-function HuKidsProductsPage({ onMessages, theme }: { onMessages?: () => void; theme: HuThemePreset }) {
-  const { t } = useLanguage();
-  const config = getProductsMenuForCountry(HU_KIDS_SIMPLIFIED_MENU_SHAPE_COUNTRY);
-  const [selectedProductCard, setSelectedProductCard] = useState<ProductsCard | null>(null);
-  const [selectedProductDetail, setSelectedProductDetail] = useState<ProductDetailSelection | null>(null);
-  const localizedProducts = config.products.map((card) => ({
-    ...card,
-    title: t(`runtime.productsMenu.cards.${getHuKidsProductCardTranslationId(card)}`, card.title),
-  }));
-  const localizedOffers = config.offers.map((offer) => ({
-    ...offer,
-    title: t(`runtime.productsMenu.offers.${offer.id}.title`, offer.title),
-    description: t(`runtime.productsMenu.offers.${offer.id}.description`, offer.description),
-  }));
-
-  if (selectedProductDetail) {
-    return (
-      <ProductDetailScreen
-        title={selectedProductDetail.title}
-        cardId={selectedProductDetail.cardId}
-        optionId={selectedProductDetail.optionId}
-        onBack={() => setSelectedProductDetail(null)}
-      />
-    );
-  }
-
-  return (
-    <>
-      <HuKidsPiMenuFrame onMessages={onMessages} theme={theme} title={t("runtime.productsMenu.title", config.title)}>
-        {localizedOffers.length > 0 ? (
-          <section className="pt-[16px]">
-            <SectionHeadingDivider title={t("runtime.productsMenu.offersForYou", config.offersTitle)} className="px-[24px]" />
-            <div className="grid grid-cols-[327px] justify-center gap-[12px] px-[24px] pt-[16px]">
-              {localizedOffers.map((offer) => (
-                <button
-                  key={offer.id}
-                  className="rounded-[8px] p-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
-                  onClick={() => handleHuKidsOfferClick(offer)}
-                  style={{ background: "var(--pi-offer-card-bg, var(--uc-surface-muted))" }}
-                  type="button"
-                >
-                  <span className="block whitespace-pre-line text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">
-                    {offer.title}
-                  </span>
-                  <span className="mt-[8px] block whitespace-pre-line text-[14px] font-normal leading-[18px] tracking-[0] text-[var(--uc-text-muted)]">
-                    {offer.description}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        <section className="pt-[16px]">
-          {config.productsTitle ? (
-            <SectionHeadingDivider title={t("runtime.productsMenu.ourProducts", config.productsTitle)} className="px-[24px]" />
-          ) : null}
-          <div className="grid grid-cols-[repeat(2,164px)] justify-center gap-[16px] pt-[16px]">
-            {localizedProducts.map((card) => (
-              <ProductMenuCard
-                key={card.id}
-                card={card}
-                variant="standard"
-                onClick={setSelectedProductCard}
-              />
-            ))}
-          </div>
-        </section>
-      </HuKidsPiMenuFrame>
-
-      {selectedProductCard ? (
-        <ProductCardBottomSheet
-          card={selectedProductCard}
-          country={HU_KIDS_SIMPLIFIED_MENU_SHAPE_COUNTRY}
-          onClose={() => setSelectedProductCard(null)}
-          onProductOptionClick={setSelectedProductDetail}
         />
       ) : null}
     </>
@@ -4079,7 +3962,7 @@ function HuKidsCardOptionRows({ items }: { items: readonly { id: string; icon: I
   );
 }
 
-function HuKidsCardSettingsPage({ card, onBack }: { card: HuKidsCard; onBack: () => void }) {
+function HuKidsCardSettingsPage({ onBack }: { onBack: () => void }) {
   const [headerProgress, setHeaderProgress] = useState(0);
 
   const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
@@ -4127,14 +4010,12 @@ function HuKidsCardDetailsPage({
   onTransactionClick,
   onManageCard,
   showAmounts,
-  theme,
 }: {
   card: HuKidsCard;
   onBack: () => void;
   onTransactionClick: (transaction: AccountTransaction) => void;
   onManageCard: () => void;
   showAmounts: boolean;
-  theme: HuThemePreset;
 }) {
   const [transactionSearch, setTransactionSearch] = useState("");
   const [isCardBackVisible, setIsCardBackVisible] = useState(false);
@@ -4650,31 +4531,30 @@ function HuKidsCardTransactionsPanel({
   );
 }
 
+type HuHomeContentProps = {
+  concept: KidsMarketHomeConcept;
+  onCardDetails: (cardId: string) => void;
+  onMoreOptions: () => void;
+  onRequestMoney: () => void;
+  onSendMoney: () => void;
+  pendingActions?: HuPendingAction[];
+  showAmounts: boolean;
+} & (
+  | { preview: true; onTransactionClick?: never }
+  | { preview?: false; onTransactionClick: (transaction: AccountTransaction) => void }
+);
+
 function HuHomeContent({
   concept,
   onCardDetails,
-  onMessages,
   onMoreOptions,
   onRequestMoney,
   onSendMoney,
   onTransactionClick,
-  onToggleAmounts,
   pendingActions,
   preview = false,
   showAmounts,
-}: {
-  concept: KidsMarketHomeConcept;
-  onCardDetails: (cardId: string) => void;
-  onMessages: () => void;
-  onMoreOptions: () => void;
-  onRequestMoney: () => void;
-  onSendMoney: () => void;
-  onTransactionClick: (transaction: AccountTransaction) => void;
-  onToggleAmounts: () => void;
-  pendingActions?: HuPendingAction[];
-  preview?: boolean;
-  showAmounts: boolean;
-}) {
+}: HuHomeContentProps) {
   return (
     <main className={cn(preview ? "pointer-events-none" : undefined)}>
         <HuLightBalance concept={concept} showAmounts={showAmounts} />
@@ -4693,7 +4573,10 @@ function HuHomeContent({
         <div className="mt-[24px] space-y-[24px] px-[24px]">
           <HuSpendingCard showAmounts={showAmounts} />
           <HuCardsPanel onCardDetails={onCardDetails} />
-          <HuTransactionsCard onTransactionClick={onTransactionClick} showAmounts={showAmounts} />
+          <HuTransactionsCard
+            onTransactionClick={preview ? undefined : onTransactionClick}
+            showAmounts={showAmounts}
+          />
           <HuAllMoneyCard showAmounts={showAmounts} />
         </div>
     </main>
@@ -4701,30 +4584,22 @@ function HuHomeContent({
 }
 
 function HuSavingContent({
-  concept,
   goals,
   onCardDetails,
-  onMessages,
   onCreateGoal,
   onMoreOptions,
   onOpenGoals,
   onRequestMoney,
   onSelectGoal,
-  onSendMoney,
-  onToggleAmounts,
   showAmounts,
 }: {
-  concept: KidsMarketHomeConcept;
   goals: SavingGoal[];
   onCardDetails: (cardId: string) => void;
-  onMessages: () => void;
   onCreateGoal: () => void;
   onMoreOptions: () => void;
   onOpenGoals: () => void;
   onRequestMoney: () => void;
   onSelectGoal: (goalId: string) => void;
-  onSendMoney: () => void;
-  onToggleAmounts: () => void;
   showAmounts: boolean;
 }) {
   return (
@@ -4756,7 +4631,6 @@ function HuEarningContent({
   onOpenLearn,
   onSelectTopic,
   onSelectTask,
-  onToggleAmounts,
   showAmounts,
   tasks,
   topics,
@@ -4765,7 +4639,6 @@ function HuEarningContent({
   onOpenLearn: () => void;
   onSelectTopic: (topicId: string) => void;
   onSelectTask: (taskId: string) => void;
-  onToggleAmounts: () => void;
   showAmounts: boolean;
   tasks: HuKidsTask[];
   topics: HuLearnTopic[];
@@ -5202,12 +5075,10 @@ function HuHomePreview({
                 <HuHomeContent
                   concept={concept}
                   onCardDetails={() => undefined}
-                  onMessages={() => undefined}
                   onMoreOptions={() => undefined}
                   onRequestMoney={() => undefined}
                   onSendMoney={() => undefined}
                   pendingActions={HU_PENDING_ACTIONS}
-                  onToggleAmounts={() => undefined}
                   preview
                   showAmounts={showAmounts}
                 />
@@ -6328,7 +6199,7 @@ function HuKidsLearnPage({
           compact
           onBack={onBack}
           onRightActionClick={onMessages}
-          rightActionIcon={<AppIcon name="messages" size={20} />}
+          rightActionIcon={<AppIcon name="header-messages" size={20} />}
           rightActionLabel="Messages"
           showHelp={false}
           title="Learn"
@@ -6700,8 +6571,6 @@ function HuKidsLearnLessonPage({
     );
   }
 
-  const lessonIndex = topic.lessons.findIndex((item) => item.id === lesson.id);
-  const progress = ((lessonIndex + 1) / topic.lessons.length) * 100;
   const imageSrc = getHuLearnLessonImageSrc(lesson);
 
   const totalSlides = (lesson.slides?.length ?? 0) + 1; // slides + quiz page
@@ -8176,7 +8045,7 @@ function SkEducationPreview() {
             <div className="h-full w-[34%] rounded-full bg-[var(--uc-orange-main)]" />
           </div>
           <span className="grid size-[24px] place-items-center rounded-full bg-[var(--uc-green-status)] text-[var(--uc-static-white)]">
-            <AppIcon name="check" size={14} />
+            <AppIcon name="prime-check" size={14} />
           </span>
         </div>
         <p className="uc-type-p2 mt-[12px] text-center text-[var(--uc-text-muted)]">

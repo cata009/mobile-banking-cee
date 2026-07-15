@@ -31,8 +31,12 @@ function AppProviders({ children }: PropsWithChildren) {
   )
 }
 
+function renderKids(country: 'HU' | 'SK') {
+  return render(<KidsMarketHomeApp country={country} />, { wrapper: AppProviders })
+}
+
 function renderHuKids() {
-  return render(<KidsMarketHomeApp country="HU" />, { wrapper: AppProviders })
+  return renderKids('HU')
 }
 
 beforeAll(() => {
@@ -120,8 +124,87 @@ describe('HU Kids default theme and card behavior', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Open Mastercard Standard ending 5678' }))
 
     expect(container.querySelector('[data-hu-card-details-actions]')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Manage card' })).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Mastercard Standard card ending 5678' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Manage card' }))
+    expect(container.querySelector('[data-hu-kids-theme-scope="card-settings"]')).toBeInTheDocument()
+  })
+
+  it('keeps header-owned amount and Messages controls wired', () => {
+    const { container } = renderHuKids()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide amounts' }))
+    expect(screen.getByRole('button', { name: 'Show amounts' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Messages' }))
+    expect(container.querySelector('[data-hu-kids-theme-scope="messages"]')).toBeInTheDocument()
+  })
+
+  it('keeps Saving on the active savings surface rather than the removed legacy Products island', () => {
+    renderHuKids()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Saving' }))
+
+    expect(screen.getByText('All your savings')).toBeInTheDocument()
+    expect(screen.getByText('Saving goals')).toBeInTheDocument()
+    expect(screen.queryByText('Products')).not.toBeInTheDocument()
+  })
+
+  it('keeps live transactions interactive while theme-preview transactions stay inert', () => {
+    const live = renderHuKids()
+    const liveTransaction = screen.getByRole('button', { name: /From Dad.*Salary November/ })
+
+    fireEvent.click(liveTransaction)
+    expect(screen.getByText('Transaction details')).toBeInTheDocument()
+    live.unmount()
+
+    renderHuKids()
+    fireEvent.click(screen.getByRole('button', { name: 'More Options' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Change theme' }))
+
+    expect(screen.getByText('From Dad').closest('button')).toBeNull()
+    expect(screen.queryByRole('button', { name: /From Dad.*Salary November/ })).not.toBeInTheDocument()
+  })
+
+  it('renders the semantic Learn Messages and SK Education completion icon geometry', () => {
+    const hu = renderHuKids()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Earning' }))
+    fireEvent.click(screen.getByRole('button', { name: 'SHOW MORE' }))
+
+    expect(screen.getByRole('button', { name: 'Messages' }).querySelector('svg'))
+      .toHaveAttribute('viewBox', '5 8 22 15')
+    hu.unmount()
+
+    renderKids('SK')
+    fireEvent.click(screen.getByRole('button', { name: 'Education' }))
+
+    const education = screen.getByText('Financial education').closest('section')
+    expect(education?.querySelector('svg')).toHaveAttribute('viewBox', '6 9 20 14')
+  })
+
+  it('preserves Learn completion and segmented lesson progression', () => {
+    const { container } = renderHuKids()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Earning' }))
+    fireEvent.click(screen.getByRole('button', { name: 'SHOW MORE' }))
+    fireEvent.click(screen.getByRole('button', { name: /Saving goals/ }))
+
+    const completedLesson = screen.getByRole('button', { name: /Pick a clear target.*Completed/ })
+    expect(completedLesson.querySelector('svg')).toHaveAttribute('viewBox', '6 9 20 14')
+    fireEvent.click(completedLesson)
+
+    const lesson = container.querySelector('[data-hu-learn-lesson="saving-goals-target"]')
+    const segments = lesson?.querySelectorAll('div.h-\\[4px\\].flex-1') ?? []
+    expect(segments).toHaveLength(4)
+    expect(Array.from(segments).filter((segment) => segment.classList.contains('bg-[var(--hu-theme-accent-strong)]')))
+      .toHaveLength(1)
+    expect(screen.getByText(/Slide 1 of 3/)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+
+    expect(screen.getByText(/Slide 2 of 3/)).toBeInTheDocument()
+    expect(Array.from(segments).filter((segment) => segment.classList.contains('bg-[var(--hu-theme-accent-strong)]')))
+      .toHaveLength(2)
   })
 
   it('selects and applies every published theme without changing its mapping', () => {
