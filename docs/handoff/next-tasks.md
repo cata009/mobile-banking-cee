@@ -6,6 +6,7 @@ Status legend: `todo` / `in_progress` / `done` / `blocked`
 
 | Status | Task | Evidence / Notes |
 | --- | --- | --- |
+| in_progress | Publish the 2026-07-15 Investments distribution-controls update | Build/template/platform/diff checks passed. Commit and `origin/main` push are next; close only after the Vercel Git deployment is `READY` and the canonical production URL is verified. |
 | done | Close and commit the complete 2026-07-15 workspace | All tracked/untracked Card Options, Card Details, HU Kids, frost asset/license, and documentation changes are included in the requested local `main` checkpoint; build, template audit, platform audit, and diff check passed. No push or deployment was requested. |
 | done | Replace HU Kids procedural freeze polygons with photographic frost | `KidsMarketHomeApp` now uses a local CC0 window-frost asset at 40% final opacity; the full-surface animation resolves from blurred depth toward the viewer, the available-to-spend amount is hidden only while frozen, Block/Unblock browser smoke passed, and `npm run build` passed on 2026-07-14. |
 | todo | Optimize HU Kids frost asset delivery without changing the approved visual | The photographic frost source builds to about 2.09 MB. Preserve its current 40% visual treatment while evaluating lossless/visually equivalent compression in a dedicated asset-performance pass. |

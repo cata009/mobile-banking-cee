@@ -346,6 +346,32 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
     );
   }
 
+  const investmentActionBar = (
+    <InvestmentActionBar
+      actions={[
+        {
+          id: "history",
+          iconName: "investment-history",
+          label: t("runtime.investments.actions.history", "History"),
+          onClick: onHistoryClick,
+        },
+        {
+          id: "to-approve",
+          iconName: "investment-to-approve",
+          label: t("runtime.investments.actions.toApprove", "To approve"),
+          badgeCount: 20,
+        },
+        {
+          id: "download-report",
+          iconName: "investment-download-report",
+          label: t("runtime.investments.actions.downloadReport", "Download\nReport"),
+        },
+      ]}
+      investLabel={t("runtime.investments.actions.invest", "Invest")}
+      onInvestClick={() => setSecurityListOpen(true)}
+    />
+  );
+
   return (
     <div
       className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide"
@@ -402,33 +428,12 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
               formatAmount={formatDistributionAmount}
               totalLabel={t("runtime.investments.total", "Total")}
               onItemClick={setSelectedDistributionItem}
+              headerExtra={investmentActionBar}
             />
           )}
           {selectedTabId === "performance" ? (
             <>
-              <InvestmentActionBar
-                actions={[
-                  {
-                    id: "history",
-                    iconName: "investment-history",
-                    label: t("runtime.investments.actions.history", "History"),
-                    onClick: onHistoryClick,
-                  },
-                  {
-                    id: "to-approve",
-                    iconName: "investment-to-approve",
-                    label: t("runtime.investments.actions.toApprove", "To approve"),
-                    badgeCount: 20,
-                  },
-                  {
-                    id: "download-report",
-                    iconName: "investment-download-report",
-                    label: t("runtime.investments.actions.downloadReport", "Download\nReport"),
-                  },
-                ]}
-                investLabel={t("runtime.investments.actions.invest", "Invest")}
-                onInvestClick={() => setSecurityListOpen(true)}
-              />
+              {investmentActionBar}
               <SectionHeadingDivider
                 title={t("runtime.investments.allProducts", "ALL PRODUCTS")}
                 count={securities.length}
