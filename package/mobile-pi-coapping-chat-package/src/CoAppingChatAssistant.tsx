@@ -160,21 +160,24 @@ function getConversationDateFromSubtitle(subtitle: string, time: string) {
   }
 
   const datedMatch = subtitle.match(/^(\d{1,2})\s+([A-Za-z]{3})\b/);
-  if (datedMatch) {
+  const dayToken = datedMatch?.[1];
+  const monthToken = datedMatch?.[2];
+  if (dayToken && monthToken) {
     const monthIndex = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"].indexOf(
-      datedMatch[2].toLowerCase(),
+      monthToken.toLowerCase(),
     );
     if (monthIndex >= 0) {
-      const date = withClockTime(new Date(today.getFullYear(), monthIndex, Number(datedMatch[1])), time);
+      const date = withClockTime(new Date(today.getFullYear(), monthIndex, Number(dayToken)), time);
       if (date.getTime() > today.getTime()) date.setFullYear(date.getFullYear() - 1);
       return date.toISOString();
     }
   }
 
   const weekdayMatch = subtitle.match(/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b/i);
-  if (weekdayMatch) {
+  const weekdayToken = weekdayMatch?.[1];
+  if (weekdayToken) {
     const weekdays = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-    const targetDay = weekdays.indexOf(weekdayMatch[1].toLowerCase());
+    const targetDay = weekdays.indexOf(weekdayToken.toLowerCase());
     const dayDelta = (today.getDay() - targetDay + 7) % 7;
     return withClockTime(addDays(today, -dayDelta), time).toISOString();
   }
@@ -331,14 +334,16 @@ function AgentFormattedResponse({ text, isStreaming = false }: { text: string; i
         }
 
         const numberedMatch = line.match(/^(\d+)\.\s+(.+)$/);
-        if (numberedMatch) {
+        const stepNumber = numberedMatch?.[1];
+        const stepText = numberedMatch?.[2];
+        if (stepNumber && stepText) {
           return (
             <div key={`${line}-${index}`} className="mpc-agent-step-row">
               <span className="mpc-agent-step-marker" aria-hidden="true">
-                {numberedMatch[1]}
+                {stepNumber}
               </span>
               <span>
-                <InlineFormattedText text={numberedMatch[2]} />
+                <InlineFormattedText text={stepText} />
               </span>
             </div>
           );
@@ -1688,8 +1693,9 @@ function normalizeReplyResult(reply: CoAppingReplyResult): Pick<CoAppingChatMess
 }
 
 fallbackConversationMessages.forEach((message) => {
-  if (message.role === "agent" && polishedAgentReplies[message.id]) {
-    message.text = polishedAgentReplies[message.id];
+  const polishedReply = polishedAgentReplies[message.id];
+  if (message.role === "agent" && polishedReply !== undefined) {
+    message.text = polishedReply;
   }
   const enhancement = richMessageEnhancements[message.id];
   if (message.role === "agent" && enhancement) {
@@ -1700,8 +1706,9 @@ fallbackConversationMessages.forEach((message) => {
 
 mockedConversationHistories.forEach((conversation) => {
   conversation.messages.forEach((message) => {
-    if (message.role === "agent" && polishedAgentReplies[message.id]) {
-      message.text = polishedAgentReplies[message.id];
+    const polishedReply = polishedAgentReplies[message.id];
+    if (message.role === "agent" && polishedReply !== undefined) {
+      message.text = polishedReply;
     }
     const enhancement = richMessageEnhancements[message.id];
     if (message.role === "agent" && enhancement) {
@@ -2259,11 +2266,11 @@ export function CoAppingChatAssistant({
   const [showConversationScrollTop, setShowConversationScrollTop] = useState(false);
   const [showChatScrollBottom, setShowChatScrollBottom] = useState(false);
   const [isFollowUpDragging, setIsFollowUpDragging] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
-  const streamTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
-  const closeTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
-  const conversationListExitTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
-  const followUpDragResetTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const timeoutRef = useRef<number | null>(null);
+  const streamTimeoutRef = useRef<number | null>(null);
+  const closeTimeoutRef = useRef<number | null>(null);
+  const conversationListExitTimeoutRef = useRef<number | null>(null);
+  const followUpDragResetTimeoutRef = useRef<number | null>(null);
   const followUpPointerClickHandledRef = useRef(false);
   const wasConversationListOpenRef = useRef(false);
   const dragStartYRef = useRef(0);
@@ -2278,6 +2285,8 @@ export function CoAppingChatAssistant({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const voiceCaptureActiveRef = useRef(false);
+  const mountedRef = useRef(true);
+  const replyGenerationRef = useRef(0);
   const voiceChunksRef = useRef<Blob[]>([]);
   const finalTranscriptRef = useRef("");
   const interimTranscriptRef = useRef("");
@@ -2308,12 +2317,16 @@ export function CoAppingChatAssistant({
   }, [draft]);
 
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
-      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
-      if (streamTimeoutRef.current) window.clearTimeout(streamTimeoutRef.current);
-      if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
-      if (conversationListExitTimeoutRef.current) window.clearTimeout(conversationListExitTimeoutRef.current);
-      if (followUpDragResetTimeoutRef.current) window.clearTimeout(followUpDragResetTimeoutRef.current);
+      mountedRef.current = false;
+      voiceCaptureActiveRef.current = false;
+      replyGenerationRef.current += 1;
+      if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);
+      if (streamTimeoutRef.current !== null) window.clearTimeout(streamTimeoutRef.current);
+      if (closeTimeoutRef.current !== null) window.clearTimeout(closeTimeoutRef.current);
+      if (conversationListExitTimeoutRef.current !== null) window.clearTimeout(conversationListExitTimeoutRef.current);
+      if (followUpDragResetTimeoutRef.current !== null) window.clearTimeout(followUpDragResetTimeoutRef.current);
       try {
         speechRecognitionRef.current?.abort();
       } catch {
@@ -2338,7 +2351,7 @@ export function CoAppingChatAssistant({
 
   useEffect(() => {
     if (isConversationListOpen) {
-      if (conversationListExitTimeoutRef.current) {
+      if (conversationListExitTimeoutRef.current !== null) {
         window.clearTimeout(conversationListExitTimeoutRef.current);
         conversationListExitTimeoutRef.current = null;
       }
@@ -2397,7 +2410,7 @@ export function CoAppingChatAssistant({
   };
 
   const stopReplyStream = () => {
-    if (streamTimeoutRef.current) {
+    if (streamTimeoutRef.current !== null) {
       window.clearTimeout(streamTimeoutRef.current);
       streamTimeoutRef.current = null;
     }
@@ -2482,8 +2495,12 @@ export function CoAppingChatAssistant({
     setThinkingStatusText(getThinkingStatusText(trimmed));
     setIsTyping(true);
 
+    const replyGeneration = ++replyGenerationRef.current;
     timeoutRef.current = window.setTimeout(async () => {
+      timeoutRef.current = null;
       const resolvedReply = await resolveReply(trimmed, nextMessages);
+      if (!mountedRef.current || replyGenerationRef.current !== replyGeneration) return;
+
       const enhancedReply =
         typeof resolvedReply === "string"
           ? getContextualAssistantEnhancement(trimmed, resolvedReply)
@@ -2500,7 +2517,6 @@ export function CoAppingChatAssistant({
       setIsTyping(false);
       setThinkingStatusText("");
       startReplyStream(reply);
-      timeoutRef.current = null;
     }, typingDelayMs);
   };
 
@@ -2597,6 +2613,10 @@ export function CoAppingChatAssistant({
 
     try {
       const mediaStream = await navigator.mediaDevices?.getUserMedia?.({ audio: true });
+      if (!mountedRef.current || !voiceCaptureActiveRef.current) {
+        mediaStream?.getTracks().forEach((track) => track.stop());
+        return;
+      }
       if (mediaStream) {
         hasAudioCapture = true;
         mediaStreamRef.current = mediaStream;
@@ -2614,6 +2634,8 @@ export function CoAppingChatAssistant({
       hasAudioCapture = false;
     }
 
+    if (!mountedRef.current || !voiceCaptureActiveRef.current) return;
+
     const RecognitionConstructor = getSpeechRecognitionConstructor();
     if (RecognitionConstructor) {
       try {
@@ -2628,6 +2650,7 @@ export function CoAppingChatAssistant({
 
           for (let index = event.resultIndex; index < event.results.length; index += 1) {
             const result = event.results[index];
+            if (!result) continue;
             const transcriptPart = result[0]?.transcript ?? "";
 
             if (result.isFinal) {
@@ -2762,7 +2785,7 @@ export function CoAppingChatAssistant({
     if (!node) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
     if (node.scrollWidth <= node.clientWidth) return;
-    if (followUpDragResetTimeoutRef.current) {
+    if (followUpDragResetTimeoutRef.current !== null) {
       window.clearTimeout(followUpDragResetTimeoutRef.current);
       followUpDragResetTimeoutRef.current = null;
     }
@@ -2795,7 +2818,7 @@ export function CoAppingChatAssistant({
     node.scrollLeft = drag.scrollLeft - deltaX;
   };
 
-  const handleFollowUpPointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
+  const handleFollowUpPointerEnd = () => {
     const drag = followUpDragRef.current;
     if (drag.active && drag.captureElement?.hasPointerCapture(drag.pointerId)) {
       drag.captureElement.releasePointerCapture(drag.pointerId);
@@ -2860,9 +2883,10 @@ export function CoAppingChatAssistant({
   };
 
   const resetPendingReply = () => {
+    replyGenerationRef.current += 1;
     cancelVoiceCapture();
     stopReplyStream();
-    if (timeoutRef.current) {
+    if (timeoutRef.current !== null) {
       window.clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
@@ -2928,9 +2952,8 @@ export function CoAppingChatAssistant({
   };
 
   const getConversationTimeLabel = (conversationMessages: CoAppingChatMessage[]) => {
-    return conversationMessages[conversationMessages.length - 1]
-      ? formatMessageTimeLabel(conversationMessages[conversationMessages.length - 1])
-      : "No messages yet";
+    const lastMessage = conversationMessages[conversationMessages.length - 1];
+    return lastMessage ? formatMessageTimeLabel(lastMessage) : "No messages yet";
   };
 
   const conversationItems = [
