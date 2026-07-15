@@ -142,5 +142,15 @@ describe('effective product authority integration', () => {
     }
   })
 
-  it.todo('normalizes an already-selected account, card, or investment route when its effective holding disappears')
+  it('resets edited counts to the selected scenario baseline on demand', () => {
+    const { result } = renderHook(() => useDemo(), { wrapper: wrapperWith() })
+    act(() => result.current.setProductCount('accounts', 9))
+    expect(result.current.productCounts.accounts).toBe(9)
+
+    act(() => result.current.resetProductCountsToScenario())
+    expect(result.current.productCounts).toEqual({
+      accounts: 1, debitCards: 0, creditCards: 0, mealCards: 0, deposits: 0,
+      savingsAccounts: 0, loans: 0, mortgages: 0, investments: 0,
+    })
+  })
 })

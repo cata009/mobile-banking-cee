@@ -431,6 +431,9 @@ export interface DemoStore extends DemoState {
 
   /** Update one editable product count in the mock portfolio. */
   setProductCount: (key: ProductCountKey, value: number) => void;
+
+  /** Replace edited product counts with the selected banking scenario baseline. */
+  resetProductCountsToScenario: () => void;
   
   /** Toggle or set a feature flag */
   setFlag: (featureId: FeatureId, enabled: boolean) => void;
