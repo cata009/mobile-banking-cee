@@ -535,7 +535,7 @@ export default function CardDetailScreen({
 
           <button
             type="button"
-            className="uc-type-n5-strong text-[var(--uc-action)] tracking-[0.08em] uppercase"
+            className="uc-type-n5-strong py-[24px] text-[var(--uc-action)] tracking-[0.08em] uppercase"
           >
             {t("runtime.cards.showCardDetails", "Show Card Details")}
           </button>

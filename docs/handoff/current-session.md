@@ -1,6 +1,34 @@
 # Current Session
 
-Last updated: 2026-07-13
+Last updated: 2026-07-15
+
+## 2026-07-15 Complete Workspace Checkpoint
+
+- Latest request handled: commit every tracked and untracked change in the current workspace so the repository is clean at the current reviewed version.
+- Scope intentionally included: global Mobile PI Card Options/Card Details alignment, the registered card-option SVG inventory, HU Kids transaction/card-management enrichment, and the HU Kids photographic frozen-card state with its CC0 asset/license and related handoff/capability documentation.
+- Decisions: preserve all operator-approved changes as one coherent checkpoint on `main`; do not discard or split existing work; do not push, deploy, tag, or release because none of those actions were requested.
+- Verification commands: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and `git diff --check` passed on 2026-07-15. Build evidence: 3,908 modules transformed; template audit reports 47 templates/47 code previews/79 components/27 screens/14 flows; platform audit reports 3 products/8 countries/24 project packs/7 banking scenarios/6 repositories.
+- Limitations: Card Options rows and HU Kids Block/Unblock remain front-end mock interactions without backend execution or persistence. Vite still reports the already-triaged empty `react-vendor` chunk and large-chunk warning; the 2.09 MB frost photo is tracked under the asset-size banana for a future non-visual optimization pass.
+- Banana Loop: no untracked temporary files or hidden scope were found; existing bundle/asset warnings remain visible in `known-bananas.md`, and the frost optimization follow-up is recorded in `next-tasks.md`.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+- safe to resume: yes
+
+## 2026-07-14 Global Card Options Figma Alignment
+
+- Latest request handled: align Mobile PI Card Options with the RO Enablers credit/debit references for every supported country.
+- Runtime changes: removed the card artwork/name/number block; replaced the placeholder menu with the exact shared, credit-specific, and debit-specific option sets; removed dividers between option rows; and restored the shared 14px `SectionHeadingDivider` for `GENERAL SETTINGS`.
+- Design System changes: added the exact supplied Apple Pay, Mastercard, Card registrations, Card limits, Change card name, Card delivery address, and Reissue card SVGs to `AppIcon`. All seven icons are exposed through the Design System icon inventory.
+- Card detail polish: the shared `SHOW CARD DETAILS` action now has 24px vertical padding so it no longer crowds the amount and quick-action rail.
+- Files changed: `src/app/screens/cards/CardOptionsScreen.tsx`, `src/app/screens/cards/CardDetailScreen.tsx`, `src/app/components/icons/AppIcon.tsx`, handoff/capability docs.
+- Verification: `npm run build`, `npm run audit:templates`, `npm run audit:platform`, and `git diff --check` passed. In-app browser smoke confirmed the exact debit and credit row sets, native 22/32px icon viewBoxes, zero row separators, standard 14px section heading, no card identity artwork, exact Change card name path, 24px top/bottom Card Details CTA padding, and no browser errors.
+- Limitation: rows remain navigation-preview entries until each downstream product workflow and data contract is specified.
+- safe to resume: yes
 
 ## 2026-07-14 Closeout And Vercel Publication
 
@@ -6148,3 +6176,18 @@ constitutional check:
 - safe to resume: yes
 
 safe to resume: yes, the latest closeout scope is documented and the remaining work is future product/regression coverage as outlined in `docs/handoff/next-tasks.md`.
+
+## 2026-07-14 HU Kids Photographic Card Frost
+
+- Latest request handled: replace the cartoon-like procedural freeze polygons with a realistic frozen-surface treatment, keep the final frost layer at the user-approved `40%` opacity, and make the animation resolve from behind the card toward the viewer instead of moving left-to-right or bottom-to-top.
+- Implementation:
+  - `src/app/screens/kids/KidsMarketHomeApp.tsx` now renders a licensed photographic window-frost layer rather than generated SVG facets/crack paths.
+  - The front-card available-to-spend amount and its label fade out while frozen and return after Unblock; holder, last digits, logo, card type, and Mastercard mark remain visible.
+  - `src/styles/theme.css` makes the frost emerge across the full card from a smaller, blurred depth state, then sharpen and settle at `opacity: 0.4`; the original card artwork, identity, and Mastercard branding remain readable underneath while the available-to-spend amount stays hidden until Unblock.
+  - `src/assets/kids/hu-card-frost-window-cc0.jpg` is the local raster frost source and `src/assets/kids/hu-card-frost-window-cc0.LICENSE.txt` records its CC0 source/author/license.
+- Verification:
+  - `npm run build` passed; the existing empty `react-vendor` and chunk-size warnings remain.
+  - In-app browser smoke on the Hungary Kids `Your cards` detail verified Block -> Unblock behavior, the full-surface depth animation, the photographic frost film, and preserved card readability; the final requested opacity was then raised to 40%.
+- Limitation:
+  - This remains local mock state; Block/Unblock is not connected to a card backend or persisted after reload.
+- safe to resume: yes.
