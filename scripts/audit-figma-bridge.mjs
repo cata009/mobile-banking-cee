@@ -2,6 +2,9 @@ import fs from "node:fs";
 import vm from "node:vm";
 import ts from "typescript";
 
+// Internal verification mode: bypass ignored compiled output and audit tracked TypeScript.
+const sourceOnly = process.argv.includes("--source-only");
+
 const plugins = [
   {
     label: "UniCredit Build UI Bridge",
@@ -39,22 +42,29 @@ function readFixtureJson(plugin, fileName) {
 
 function loadPluginCode(plugin) {
   const compiledPath = `${plugin.base}/code.js`;
-  if (fs.existsSync(compiledPath)) {
-    return readText(compiledPath);
+  if (!sourceOnly && fs.existsSync(compiledPath)) {
+    return { code: readText(compiledPath), codeSource: "javascript" };
   }
 
   const sourcePath = `${plugin.base}/code.ts`;
-  return ts.transpileModule(readText(sourcePath), {
-    compilerOptions: {
-      target: ts.ScriptTarget.ES2020,
-      module: ts.ModuleKind.None,
-    },
-    fileName: sourcePath,
-  }).outputText;
+  if (!fs.existsSync(sourcePath)) {
+    return { code: readText(compiledPath), codeSource: "javascript" };
+  }
+
+  return {
+    code: ts.transpileModule(readText(sourcePath), {
+      compilerOptions: {
+        target: ts.ScriptTarget.ES2020,
+        module: ts.ModuleKind.None,
+      },
+      fileName: sourcePath,
+    }).outputText,
+    codeSource: "typescript",
+  };
 }
 
 function auditStatic(plugin) {
-  const code = loadPluginCode(plugin);
+  const { code, codeSource } = loadPluginCode(plugin);
   const ui = readText(`${plugin.base}/ui.html`);
   const manifest = readJson(`${plugin.base}/manifest.json`);
 
@@ -98,7 +108,7 @@ function auditStatic(plugin) {
     });
   }
 
-  return checks.length;
+  return { checks: checks.length, codeSource };
 }
 
 function auditAppExporterStatic() {
@@ -305,7 +315,7 @@ async function runMessageExpectError(figma, uiMessages, message, expectedText) {
 }
 
 async function auditVm(plugin) {
-  const code = loadPluginCode(plugin);
+  const { code } = loadPluginCode(plugin);
   const { figma, page, uiMessages, createdSvg, createdImages, makeNode } = createFigmaStub();
   const context = {
     figma,
@@ -592,12 +602,12 @@ const appExporterStaticCount = auditAppExporterStatic();
 const summaries = [];
 
 for (const plugin of plugins) {
-  const staticCount = auditStatic(plugin);
+  const staticSummary = auditStatic(plugin);
   const vmSummary = await auditVm(plugin);
-  summaries.push(`${plugin.label}: static=${staticCount}, vm=${JSON.stringify(vmSummary)}`);
+  summaries.push(`${plugin.label}: codeSource=${staticSummary.codeSource}, static=${staticSummary.checks}, vm=${JSON.stringify(vmSummary)}`);
 }
 
-console.log(`figma-bridge audit ok plugins=${plugins.length} appExporterStatic=${appExporterStaticCount}`);
+console.log(`figma-bridge audit ok plugins=${plugins.length} appExporterStatic=${appExporterStaticCount} codeMode=${sourceOnly ? "source-preferred" : "compiled-preferred"}`);
 for (const summary of summaries) {
   console.log(summary);
 }
