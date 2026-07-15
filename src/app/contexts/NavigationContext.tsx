@@ -38,15 +38,45 @@ export type Screen =
   | "flow-library" // Full-width future flow preview library
   | "design-system"; // Full-width component inventory
 
+type CardRouteScreen = "card-detail" | "card-details-info" | "card-options";
+type AccountRouteScreen = "account-detail" | "account-details-info" | "account-options";
+
+export type NavigationRoute =
+  | { screen: CardRouteScreen; cardId?: string | null }
+  | { screen: AccountRouteScreen; accountId?: string | null }
+  | { screen: Exclude<Screen, CardRouteScreen | AccountRouteScreen> };
+
+type NavigationDestination = Screen | NavigationRoute;
+
+function routeFromScreen(screen: Screen): NavigationRoute {
+  switch (screen) {
+    case "card-detail":
+    case "card-details-info":
+    case "card-options":
+      return { screen };
+    case "account-detail":
+    case "account-details-info":
+    case "account-options":
+      return { screen };
+    default:
+      return { screen };
+  }
+}
+
+function resolveDestination(destination: NavigationDestination): NavigationRoute {
+  return typeof destination === "string" ? routeFromScreen(destination) : destination;
+}
+
 interface NavigationState {
   currentScreen: Screen;
+  currentRoute: NavigationRoute;
   isCoAppingActive: boolean;
-  history: Screen[];
+  history: NavigationRoute[];
 }
 
 interface NavigationContextValue extends NavigationState {
-  navigateTo: (screen: Screen) => void;
-  navigateToAndReset: (screen: Screen) => void;
+  navigateTo: (destination: NavigationDestination) => void;
+  navigateToAndReset: (destination: NavigationDestination) => void;
   goBack: () => void;
   setCoAppingActive: (active: boolean) => void;
   canGoBack: boolean;
@@ -59,42 +89,50 @@ const NavigationContext = createContext<NavigationContextValue | undefined>(
 interface NavigationProviderProps {
   children: ReactNode;
   initialScreen?: Screen;
+  initialRoute?: NavigationRoute;
   initialCoAppingActive?: boolean;
 }
 
 export function NavigationProvider({ 
   children, 
   initialScreen = "prelogin-inactive",
+  initialRoute,
   initialCoAppingActive = false,
 }: NavigationProviderProps) {
+  const firstRoute = initialRoute ?? routeFromScreen(initialScreen);
   const [state, setState] = useState<NavigationState>({
-    currentScreen: initialScreen,
+    currentScreen: firstRoute.screen,
+    currentRoute: firstRoute,
     isCoAppingActive: initialCoAppingActive,
-    history: [initialScreen],
+    history: [firstRoute],
   });
 
-  const navigateTo = (screen: Screen) => {
-    console.log("🔵 navigateTo called with screen:", screen);
+  const navigateTo = (destination: NavigationDestination) => {
+    const route = resolveDestination(destination);
+    console.log("🔵 navigateTo called with screen:", route.screen);
     setState((prev) => {
       console.log("🔵 Previous state:", prev);
       const newState = {
         ...prev,
-        currentScreen: screen,
-        history: [...prev.history, screen],
+        currentScreen: route.screen,
+        currentRoute: route,
+        history: [...prev.history, route],
       };
       console.log("🔵 New state:", newState);
       return newState;
     });
   };
 
-  const navigateToAndReset = (screen: Screen) => {
-    console.log("🔵 navigateToAndReset called with screen:", screen);
+  const navigateToAndReset = (destination: NavigationDestination) => {
+    const route = resolveDestination(destination);
+    console.log("🔵 navigateToAndReset called with screen:", route.screen);
     setState((prev) => {
       console.log("🔵 Previous state:", prev);
       const newState = {
         ...prev,
-        currentScreen: screen,
-        history: [screen], // Reset history to only include new screen
+        currentScreen: route.screen,
+        currentRoute: route,
+        history: [route], // Reset history to only include new screen
       };
       console.log("🔵 New state (reset):", newState);
       return newState;
@@ -110,17 +148,19 @@ export function NavigationProvider({
         return {
           ...prev,
           currentScreen: fallbackScreen,
-          history: [fallbackScreen],
+          currentRoute: routeFromScreen(fallbackScreen),
+          history: [routeFromScreen(fallbackScreen)],
         };
       }
 
       const newHistory = [...prev.history];
       newHistory.pop(); // Remove current screen
-      const previousScreen = newHistory[newHistory.length - 1] ?? ROUTE_POLICY[prev.currentScreen].backFallback;
+      const previousRoute = newHistory[newHistory.length - 1] ?? routeFromScreen(ROUTE_POLICY[prev.currentScreen].backFallback);
 
       return {
         ...prev,
-        currentScreen: previousScreen,
+        currentScreen: previousRoute.screen,
+        currentRoute: previousRoute,
         history: newHistory,
       };
     });

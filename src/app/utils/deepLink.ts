@@ -97,6 +97,7 @@ const VALID_FLOW_PREVIEWS = new Set<string>(FLOW_PREVIEW_ORDER);
 export function normalizeScreen(screen: Screen, hasCard: boolean): Screen {
   if (!Object.prototype.hasOwnProperty.call(ROUTE_POLICY, screen)) return "homepage";
   const deepLinkPolicy = ROUTE_POLICY[screen].deepLink;
+  if (deepLinkPolicy.payload === "card" && !hasCard) return "homepage";
   if (deepLinkPolicy.restorable) return screen;
   return hasCard && deepLinkPolicy.fallbackWithCard ? deepLinkPolicy.fallbackWithCard : deepLinkPolicy.fallback;
 }
