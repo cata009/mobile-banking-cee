@@ -7,7 +7,7 @@
 import { useDemo } from "@/app/state/demoStore";
 import { isFeatureActive } from "@/app/state/featureResolver";
 import { FEATURE_META } from "@/app/registry/demoConfig";
-import type { FeatureId, FeatureMeta } from "@/app/state/demoTypes";
+import type { CountryId, FeatureId, FeatureMeta } from "@/app/state/demoTypes";
 
 /**
  * Get scope label for display
@@ -32,14 +32,14 @@ function getScopeLabel(meta: FeatureMeta): string {
  */
 function isFeatureAvailableForCountry(
   meta: FeatureMeta,
-  currentCountry: string
+  currentCountry: CountryId
 ): boolean {
   if (meta.scope === "global") {
     return true;
   }
   
   if (meta.scope === "countries") {
-    return meta.countries?.includes(currentCountry as any) ?? false;
+    return meta.countries?.includes(currentCountry) ?? false;
   }
   
   return false;

@@ -1,10 +1,15 @@
-import { useState, ReactNode, Children, isValidElement, cloneElement, ReactElement } from 'react';
+import { Children, cloneElement, isValidElement, useState, type ReactNode } from 'react';
 import { AppIcon } from "@/app/components/icons";
 
 interface AccordionSectionProps {
   title: string;
   children: ReactNode;
   defaultOpen?: boolean;
+}
+
+interface AccordionChildProps {
+  children?: ReactNode;
+  isOpen?: boolean;
 }
 
 export default function AccordionSection({ 
@@ -20,7 +25,7 @@ export default function AccordionSection({
   const firstChild = childrenArray[0];
   let productCount = 0;
   
-  if (isValidElement(firstChild) && firstChild.props && firstChild.props.children) {
+  if (isValidElement<AccordionChildProps>(firstChild) && firstChild.props.children) {
     const products = Children.toArray(firstChild.props.children);
     productCount = products.length;
   }
@@ -30,8 +35,8 @@ export default function AccordionSection({
 
   // Clone children and pass isOpen state
   const childrenWithProps = Children.map(children, child => {
-    if (isValidElement(child)) {
-      return cloneElement(child as ReactElement<any>, { isOpen });
+    if (isValidElement<AccordionChildProps>(child) && typeof child.type !== 'string') {
+      return cloneElement(child, { isOpen });
     }
     return child;
   });
