@@ -132,7 +132,7 @@ function AmountHero({
   const masked = maskAmountParts({ integer: amountParts.integer, decimals: amountParts.decimal, currency }, amountsHidden);
 
   return (
-    <p className="mt-[10px] text-[30px] font-bold leading-[33px] text-[#262626]">
+    <p className="mt-[10px] text-[30px] font-bold leading-[33px] text-[var(--uc-text)]">
       <span>{masked.integer}</span>
       <span className="text-[20px] font-normal"> {masked.decimals} {masked.currency}</span>
     </p>
@@ -223,8 +223,8 @@ function DateBlock({ date, country }: { date: string; country: CountryId }) {
   return (
     <div className="flex w-[48px] shrink-0 items-center">
       <div className="w-[28px] text-left">
-        <p className="text-[18px] font-bold leading-[20px] text-[#262626]">{parts.day}</p>
-        <p className="text-[14px] font-bold leading-[15px] text-[#666666]">{parts.month}</p>
+        <p className="text-[18px] font-bold leading-[20px] text-[var(--uc-text)]">{parts.day}</p>
+        <p className="text-[14px] font-bold leading-[15px] text-[var(--uc-text-muted)]">{parts.month}</p>
       </div>
     </div>
   );
@@ -232,7 +232,7 @@ function DateBlock({ date, country }: { date: string; country: CountryId }) {
 
 function TradeIcon({ type }: { type: "BUY" | "SELL" | InvestmentHistoryTransactionType }) {
   const isBuy = type === "BUY" || type === "COUPON";
-  const color = isBuy ? "#3D7D43" : "#CF3524";
+  const color = isBuy ? "var(--uc-green-olive)" : "var(--uc-status-red)";
   return (
     <span className="grid size-[32px] shrink-0 place-items-center" aria-hidden="true">
       <AppIcon name={isBuy ? "trade-buy" : "trade-sell"} color={color} size={28} />
@@ -255,21 +255,21 @@ function InvestmentHistoryTransactionRow({
     <button
       type="button"
       onClick={onClick}
-      className="flex h-[80px] w-full items-center bg-[#FFFFFF] px-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
+      className="flex h-[80px] w-full items-center bg-[var(--uc-surface)] px-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
       data-investment-history-row="transaction"
     >
       <DateBlock date={item.date} country={country} />
       <TradeIcon type={item.type} />
       <div className="ml-[16px] flex min-w-0 flex-1 flex-col items-end py-[10px] text-right">
-        <p className="w-full truncate text-right text-[14px] font-normal leading-[17px] text-[#262626]">{item.title}</p>
+        <p className="w-full truncate text-right text-[14px] font-normal leading-[17px] text-[var(--uc-text)]">{item.title}</p>
         <InvestmentAmountLabel
           amount={item.amount}
           country={country}
           currency={item.currency}
           hidden={amountsHidden}
-          className={item.tone === "positive" ? "text-[#3D7D43]" : "text-[#CF3524]"}
+          className={item.tone === "positive" ? "text-[var(--uc-green-olive)]" : "text-[var(--uc-status-red)]"}
         />
-        <p className="w-full truncate text-right text-[14px] font-normal leading-[17px] text-[#666666]">{item.type}</p>
+        <p className="w-full truncate text-right text-[14px] font-normal leading-[17px] text-[var(--uc-text-muted)]">{item.type}</p>
       </div>
     </button>
   );
@@ -290,20 +290,20 @@ function InvestmentHistoryOrderRow({
     <button
       type="button"
       onClick={onClick}
-      className="flex h-[80px] w-full items-center bg-[#FFFFFF] px-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
+      className="flex h-[80px] w-full items-center bg-[var(--uc-surface)] px-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
       data-investment-history-row="order"
     >
       <TradeIcon type={item.orderType} />
       <div className="ml-[16px] flex min-w-0 flex-1 flex-col items-end py-[10px] text-right">
-        <p className="w-full truncate text-right text-[14px] font-normal leading-[17px] text-[#262626]">{item.title}</p>
+        <p className="w-full truncate text-right text-[14px] font-normal leading-[17px] text-[var(--uc-text)]">{item.title}</p>
         <InvestmentAmountLabel
           amount={item.orderType === "SELL" ? -item.amount : item.amount}
           country={country}
           currency={item.currency}
           hidden={amountsHidden}
-          className={item.orderType === "SELL" ? "text-[#CF3524]" : "text-[#262626]"}
+          className={item.orderType === "SELL" ? "text-[var(--uc-status-red)]" : "text-[var(--uc-text)]"}
         />
-        <p className="w-full truncate text-right text-[14px] font-normal uppercase leading-[17px] text-[#666666]">{item.status}</p>
+        <p className="w-full truncate text-right text-[14px] font-normal uppercase leading-[17px] text-[var(--uc-text-muted)]">{item.status}</p>
       </div>
     </button>
   );
@@ -811,7 +811,7 @@ function InvestmentHistoryDetailScreen({
           <p className="mt-[10px] text-[14px] font-bold leading-[15px] text-[var(--uc-text-muted)]">{actionType}</p>
           <p className="mt-[10px] text-[14px] font-bold leading-[15px] text-[var(--uc-text-muted)]">{dateParts.long}</p>
           {detail.status ? (
-            <p className="mx-auto mt-[14px] inline-flex rounded-[16px] border border-[var(--uc-border)] bg-[var(--uc-static-white)] px-[12px] py-[4px] text-[13px] font-bold text-[#262626]">
+            <p className="mx-auto mt-[14px] inline-flex rounded-[16px] border border-[var(--uc-border)] bg-[var(--uc-static-white)] px-[12px] py-[4px] text-[13px] font-bold text-[var(--uc-static-black)]">
               {detail.status}
             </p>
           ) : null}

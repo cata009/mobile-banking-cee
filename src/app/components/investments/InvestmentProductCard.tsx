@@ -16,9 +16,9 @@ interface InvestmentProductCardProps {
   onClick?: () => void;
 }
 
-const INVESTMENT_TEXT_COLOR = "#262626";
-const POSITIVE_COLOR = "#3D7D43";
-const NEGATIVE_COLOR = "#CF3524";
+const INVESTMENT_TEXT_COLOR = "var(--uc-text)";
+const POSITIVE_COLOR = "var(--uc-green-olive)";
+const NEGATIVE_COLOR = "var(--uc-status-red)";
 
 function formatSignedPercent(value: number) {
   const rounded = value.toFixed(1).replace(".", ",");
@@ -49,14 +49,14 @@ export default function InvestmentProductCard({
     <button
       type="button"
       onClick={onClick}
-      className="flex min-h-[95px] w-full flex-col gap-[4px] bg-[#FFFFFF] py-[16px] pl-[16px] pr-[24px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-focus-ring)]"
+      className="flex min-h-[95px] w-full flex-col gap-[4px] bg-[var(--uc-surface)] py-[16px] pl-[16px] pr-[24px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-focus-ring)]"
       data-ds-label="Investment product card"
     >
-      <h3 className="truncate text-[14px] font-bold leading-[15px] text-[#262626]">
+      <h3 className="truncate text-[14px] font-bold leading-[15px] text-[var(--uc-text)]">
         {security.title}
       </h3>
       <div className="flex min-h-[22px] items-center gap-[8px]">
-        <p className="min-w-0 flex-1 truncate text-[14px] font-normal leading-[18px] text-[#262626]" aria-label={valueLabel}>
+        <p className="min-w-0 flex-1 truncate text-[14px] font-normal leading-[18px] text-[var(--uc-text)]" aria-label={valueLabel}>
           {valueText}
         </p>
         <p className="shrink-0 text-right" style={{ color: INVESTMENT_TEXT_COLOR }} aria-label={performanceLabel}>
@@ -65,7 +65,7 @@ export default function InvestmentProductCard({
         </p>
       </div>
       <div className="flex min-h-[18px] items-center justify-between gap-[8px]">
-        <span className="flex min-w-0 items-center gap-[5px] text-[14px] font-normal leading-[18px] text-[#262626]">
+        <span className="flex min-w-0 items-center gap-[5px] text-[14px] font-normal leading-[18px] text-[var(--uc-text)]">
           {showContribution ? <span className="truncate uppercase">{contributionLabel}</span> : null}
           {showContribution && isRecurring ? <AppIcon name="recurring-contribution" size={18} color={INVESTMENT_TEXT_COLOR} /> : null}
         </span>

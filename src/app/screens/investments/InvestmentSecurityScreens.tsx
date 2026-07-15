@@ -34,7 +34,7 @@ interface InvestmentSecurityDetailScreenProps extends SharedProps {
   onHistoryClick?: () => void;
 }
 
-const INVESTMENT_POSITIVE_COLOR = "#3D7D43";
+const INVESTMENT_POSITIVE_COLOR = "var(--uc-green-olive)";
 
 function formatMoney(value: number, country: CountryId, currency: string, hidden: boolean, digits = 2) {
   const formatted = new Intl.NumberFormat(getCountryConfig(country).locale, {
@@ -119,7 +119,7 @@ export function InvestmentSecurityListScreen({
                 <span className="text-[20px] font-bold leading-[24px]">{formatMoney(security.value, country, security.currency, amountsHidden).replace(` ${security.currency}`, "")}</span>
                 <span className="text-[14px] leading-[17px]"> {security.currency}</span>
               </span>
-              <span className="text-[14px] font-bold leading-[17px] text-[#3D7D43]">{formatPercent(security.performancePercent)} <span className="text-[var(--uc-text)]">(1Y)</span></span>
+              <span className="text-[14px] font-bold leading-[17px] text-[var(--uc-green-olive)]">{formatPercent(security.performancePercent)} <span className="text-[var(--uc-text)]">(1Y)</span></span>
             </span>
           </button>
         ))}
@@ -165,7 +165,7 @@ export function InvestmentSecurityDetailScreen({
   const heroValue = security.owned ? security.localValue : security.value;
   const heroCurrency = security.owned ? security.localCurrency : security.currency;
   const chartPoints = useMemo(() => buildInvestmentChartPoints(marketPrice, period), [marketPrice, period]);
-  const performanceColor = security.performancePercent < 0 ? "#CF3524" : security.performancePercent > 0 ? INVESTMENT_POSITIVE_COLOR : "var(--uc-text)";
+  const performanceColor = security.performancePercent < 0 ? "var(--uc-status-red)" : security.performancePercent > 0 ? INVESTMENT_POSITIVE_COLOR : "var(--uc-text)";
 
   const handleScroll = (event: UIEvent<HTMLDivElement>) => {
     setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 96)));
@@ -205,8 +205,8 @@ export function InvestmentSecurityDetailScreen({
         items={[
           { id: "history", iconName: "investment-history", label: "History", onClick: onHistoryClick },
           { id: "documents", iconName: "account-option-statement", label: "Documents" },
-          { id: "sell", iconName: "trade-sell", label: "Sell", hidden: !security.owned, iconColor: "#262626" },
-          { id: "buy", iconName: "trade-buy", label: "Buy", iconColor: "#007A91" },
+          { id: "sell", iconName: "trade-sell", label: "Sell", hidden: !security.owned, iconColor: "var(--uc-text)" },
+          { id: "buy", iconName: "trade-buy", label: "Buy", iconColor: "var(--uc-action)" },
         ]}
       />
       <div className="h-[24px]" aria-hidden="true" />

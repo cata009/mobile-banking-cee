@@ -117,9 +117,9 @@ function PortfolioSummary({
   const { t } = useLanguage();
   const performanceColor = (() => {
     const signed = performanceAmountValue !== 0 ? performanceAmountValue : performancePercentValue;
-    if (signed > 0) return "#3D7D43";
-    if (signed < 0) return "#CF3524";
-    return "#262626";
+    if (signed > 0) return "var(--uc-green-olive)";
+    if (signed < 0) return "var(--uc-status-red)";
+    return "var(--uc-text)";
   })();
   const signedPercentLabel = amountsHidden || performancePercentValue === 0
     ? performancePercentLabel
@@ -198,30 +198,30 @@ function DistributionCategoryDetailScreen({
       <button
         key={security.id}
         type="button"
-        className="flex h-[80px] w-full items-center justify-between bg-[#FFFFFF] px-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
+        className="flex h-[80px] w-full items-center justify-between bg-[var(--uc-surface)] px-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
         data-investment-category-row={security.id}
       >
         <div className="min-w-0 flex-1 py-[14px] pr-[12px]">
-          <p className="truncate text-[14px] font-bold leading-[17px] text-[#262626]">{security.title}</p>
-          <p className="mt-[10px] truncate text-[#262626]">
+          <p className="truncate text-[14px] font-bold leading-[17px] text-[var(--uc-text)]">{security.title}</p>
+          <p className="mt-[10px] truncate text-[var(--uc-text)]">
             <span className="text-[20px] font-bold leading-[24px]">{primaryAmount.integer}</span>
             <span className="text-[14px] font-normal leading-[17px]">{primaryAmount.decimal} {primaryAmount.currency}</span>
             {showLocalAmount ? (
-              <span className="text-[14px] font-normal leading-[17px] text-[#666666]">
+              <span className="text-[14px] font-normal leading-[17px] text-[var(--uc-text-muted)]">
                 {" "}({localAmount.integer}{localAmount.decimal} {localAmount.currency})
               </span>
             ) : null}
           </p>
         </div>
         <span className="grid size-[32px] shrink-0 place-items-center" aria-hidden="true">
-          <AppIcon name="chevron-link" color="#262626" size={28} />
+          <AppIcon name="chevron-link" color="var(--uc-text)" size={28} />
         </span>
       </button>
     );
   };
 
   return (
-    <div className="h-full w-full overflow-y-auto bg-[#FFFFFF] text-[#262626] scrollbar-hide" onScroll={handleScroll} data-investment-distribution-detail={item.id}>
+    <div className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide" onScroll={handleScroll} data-investment-distribution-detail={item.id}>
       <PageHeader
         title=""
         onBack={onBack}
@@ -231,11 +231,11 @@ function DistributionCategoryDetailScreen({
       <section className="px-[16px] pt-[10px]">
         <div className="flex items-center gap-[14px]">
           <span className="size-[20px] shrink-0 rounded-full" style={{ backgroundColor: item.color }} aria-hidden="true" />
-          <h1 className="text-[24px] font-bold leading-[28px] tracking-[0.2px] text-[#262626]" data-investment-category-title="true">{categoryTitle}</h1>
+          <h1 className="text-[24px] font-bold leading-[28px] tracking-[0.2px] text-[var(--uc-text)]" data-investment-category-title="true">{categoryTitle}</h1>
         </div>
         <div className="pt-[44px]">
-          <p className="text-[14px] font-bold leading-[16px] text-[#262626]">Total value</p>
-          <p className="mt-[14px] text-[#262626]" aria-label={`${item.label} total value`}>
+          <p className="text-[14px] font-bold leading-[16px] text-[var(--uc-text)]">Total value</p>
+          <p className="mt-[14px] text-[var(--uc-text)]" aria-label={`${item.label} total value`}>
             <span className="text-[30px] font-bold leading-[34px]">{totalParts.integer}</span>
             <span className="text-[18px] font-normal leading-[22px]">{totalParts.decimal} {totalParts.currency}</span>
           </p>
@@ -245,7 +245,7 @@ function DistributionCategoryDetailScreen({
         {matchingSecurities.map(renderCategoryRow)}
         {matchingSecurities.length === 0 ? (
           <div className="px-[16px] py-[20px]">
-            <p className="text-[16px] font-bold leading-[20px] text-[#262626]">No securities in this category</p>
+            <p className="text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">No securities in this category</p>
           </div>
         ) : null}
       </section>

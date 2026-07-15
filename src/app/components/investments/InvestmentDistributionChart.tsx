@@ -130,7 +130,7 @@ export default function InvestmentDistributionChart({
   const leaders = buildSliceLeaders(visibleLabels);
 
   return (
-    <section className="pt-[18px] text-[#262626]" data-ds-label="Investments distribution chart">
+    <section className="pt-[18px] text-[var(--uc-text)]" data-ds-label="Investments distribution chart">
       <div className="relative h-[179px] w-full overflow-hidden" aria-label={`100% ${totalLabel}`}>
         <svg
           className="pointer-events-none absolute inset-0 h-[179px] w-full"
@@ -182,7 +182,7 @@ export default function InvestmentDistributionChart({
               transform={`rotate(-90 ${DONUT_SIZE / 2} ${DONUT_SIZE / 2})`}
             />
           ))}
-          <circle cx={DONUT_SIZE / 2} cy={DONUT_SIZE / 2} r="36" fill="#FFFFFF" />
+          <circle cx={DONUT_SIZE / 2} cy={DONUT_SIZE / 2} r="36" fill="var(--uc-surface)" />
         </svg>
         {visibleLabels.map((item, index) => {
           const leader = leaders[index];
@@ -195,10 +195,10 @@ export default function InvestmentDistributionChart({
               className={`absolute max-w-[70px] ${sideClass}`}
               style={{ top: `${leader.slotY - 20}px` }}
             >
-              <p className="line-clamp-2 text-[14px] font-normal leading-[16px] tracking-[0.2px] text-[#262626]">
+              <p className="line-clamp-2 text-[14px] font-normal leading-[16px] tracking-[0.2px] text-[var(--uc-text)]">
                 {item.label}
               </p>
-              <p className="text-[20px] font-bold leading-[24px] text-[#262626]">{item.percent}%</p>
+              <p className="text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">{item.percent}%</p>
             </div>
           );
         })}
@@ -207,7 +207,7 @@ export default function InvestmentDistributionChart({
       {headerExtra ? <div className="mt-[8px]">{headerExtra}</div> : null}
 
       <div className="mt-[24px] px-[23px]">
-        <h2 className="uc-type-n4-strong text-[#262626]">{title}</h2>
+        <h2 className="uc-type-n4-strong text-[var(--uc-text)]">{title}</h2>
       </div>
       <div className="mt-[18px]">
         {items.map((item) => {
@@ -226,17 +226,17 @@ export default function InvestmentDistributionChart({
                   style={{ backgroundColor: item.color }}
                 />
                 <div className="min-w-0">
-                  <h3 className="uc-type-n4-strong truncate text-[#262626]">{item.label}</h3>
-                  <p className="uc-type-n4 mt-[3px] text-[#262626]">
+                  <h3 className="uc-type-n4-strong truncate text-[var(--uc-text)]">{item.label}</h3>
+                  <p className="uc-type-n4 mt-[3px] text-[var(--uc-text)]">
                     <span>{amount.integer}</span>
                     <span>{amount.decimal} {amount.currency}</span>
                   </p>
                   {item.secondaryLabel && (
-                    <p className="uc-type-n5 mt-[2px] truncate text-[#666666]">{item.secondaryLabel}</p>
+                    <p className="uc-type-n5 mt-[2px] truncate text-[var(--uc-text-muted)]">{item.secondaryLabel}</p>
                   )}
                 </div>
               </div>
-              <p className="shrink-0 text-[20px] font-bold leading-[22px] text-[#262626]">{item.percent}%</p>
+              <p className="shrink-0 text-[20px] font-bold leading-[22px] text-[var(--uc-text)]">{item.percent}%</p>
             </button>
           );
         })}
