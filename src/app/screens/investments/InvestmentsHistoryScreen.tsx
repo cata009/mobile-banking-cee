@@ -29,6 +29,7 @@ import { getCountryConfig } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import { useDemo } from "@/app/state/demoStore";
 import { maskAmountParts } from "@/app/utils/amountPrivacy";
+import { parseIsoDateOnly } from "@/app/utils/dateOnly";
 import type { Currency } from "@/data/products";
 import { useProducts } from "@/hooks/useProducts";
 
@@ -52,41 +53,6 @@ const INVESTMENT_HISTORY_ORDER_STATUSES: readonly InvestmentHistoryOrderStatus[]
 
 function toIsoDateOnly(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
-function parseIsoDateOnly(value: string) {
-  const [yearText, monthText, dayText] = value.split("-");
-  if (
-    !yearText
-    || !monthText
-    || !dayText
-    || !/^\d{4}$/.test(yearText)
-    || !/^\d{2}$/.test(monthText)
-    || !/^\d{2}$/.test(dayText)
-  ) {
-    throw new Error(`Invalid ISO date-only value: "${value}"`);
-  }
-
-  const year = Number(yearText);
-  const month = Number(monthText);
-  const day = Number(dayText);
-  const parsed = new Date(0);
-  parsed.setHours(0, 0, 0, 0);
-  parsed.setFullYear(year, month - 1, day);
-
-  if (
-    month < 1
-    || month > 12
-    || day < 1
-    || day > 31
-    || parsed.getFullYear() !== year
-    || parsed.getMonth() !== month - 1
-    || parsed.getDate() !== day
-  ) {
-    throw new Error(`Invalid ISO date-only value: "${value}"`);
-  }
-
-  return parsed;
 }
 
 function formatFilterDate(value: string, country: CountryId) {
