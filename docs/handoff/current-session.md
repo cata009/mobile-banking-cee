@@ -2,6 +2,23 @@
 
 Last updated: 2026-07-15
 
+## 2026-07-15 Product Health Hardening Closeout
+
+- Scope: completed the approved nine-direction hardening pass on isolated branch `codex/product-health-hardening`, preserving the original workspace and keeping each direction independently revertible.
+- Outcomes: stakeholder access hardened; reproducible type/lint/test/audit/build gates added; TypeScript and ESLint reduced to zero errors; navigation centralized and typed; product UI/repositories aligned to one scenario authority; disappearing product routes recover safely; CZ Chat orchestration extracted from `App.tsx`; HU Kids theme/card domains extracted; panel menu duplicates consolidated; Investments made non-empty-safe and moved to semantic colors.
+- Asset/PNG safety: no tracked raster/vector asset changed from baseline `453e7e2`. `npm run audit:assets` inventories 159 assets and now fails closed if any tracked image path/blob differs from `scripts/asset-baseline.json`. The 36 conservative unreferenced candidates and four duplicate groups were reported only; nothing was deleted, converted, or recompressed.
+- Verification: `npm run typecheck`, `npm run lint`, 38 test files / 231 tests, `npm run audit:all`, `npm run build` (3,918 modules), and `git diff --check` passed. The first aggregate run exposed one stale `Data Snapshot` audit literal; `ef5c106` aligned it and the audit rerun passed.
+- Browser smoke: CZ Home, CZ Card Detail, RO Investments, HU Kids Home, and CZ Future loaded on a fresh local server with meaningful screen content, no Vite overlay, and no browser warning/error logs.
+- Revert evidence: `docs/handoff/product-health-revert-map.md` maps every direction to its independent commits.
+- Limitations: the existing empty `react-vendor` and >500 kB App chunk warnings remain triaged. Asset candidates require explicit visual approval before any future deletion/compression.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes.
+
 ## 2026-07-15 Mobile PI Card Details Face ID and Figma Alignment
 
 - Latest request handled: make `SHOW CARD DETAILS` work globally as a gated Face ID reveal and then show the Figma Card details screen for all Mobile PI debit and credit cards.

@@ -6,6 +6,9 @@ This log records bananas found and how they were triaged.
 
 | Banana | Triage | Evidence |
 | --- | --- | --- |
+| Broad hardening could silently alter images or make rollback impractical | Work ran in an isolated branch with per-direction commits; image path/blob baseline is locked and zero image diffs exist from `453e7e2` | `scripts/asset-baseline.json`, `npm run audit:assets`, `docs/handoff/product-health-revert-map.md` |
+| Product-count overrides could leave a removed account/card/investment route selected | Added typed availability normalization to Home plus regression tests and deep-link round-trip coverage for all nine counts | `f3ea71f`, 37 focused tests, full 231-test suite |
+| Platform audit still expected the old `Data Snapshot` label | Fixed the source contract to require `Product count overrides` and `Reset to scenario`; rerun passed | `ef5c106`, `npm run audit:platform` |
 | Publication state could drift if the final handoff commit were not deployed after the product commit | Final handoff is committed/pushed separately, and its Git-integrated production deployment is verified before closeout | product deployment `dpl_GciexcyciAbjBhUw2dEMwHFcYh9w`, `docs/handoff/current-session.md`, final Vercel deployment check |
 | Three reviewed Investments changes appeared after the previous clean checkpoint | Preserved in the requested all-files commit, documented in handoff/capability state, and gated by build/template/platform/diff verification before publication | `git diff`, `npm run build`, `npm run audit:templates`, `npm run audit:platform`, `git diff --check` |
 | The requested clean checkpoint combined several already-approved Card Options and HU Kids UX passes in one dirty worktree | Intentionally preserved as one complete local snapshot; no existing product work was discarded or split, and no push/deploy was inferred | `git status --short`, `docs/handoff/current-session.md`, requested local commit on `main` |
