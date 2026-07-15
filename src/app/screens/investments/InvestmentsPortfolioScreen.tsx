@@ -20,7 +20,6 @@ import {
   buildInvestmentChartPoints,
   buildInvestmentSecurities,
   buildInvestmentSecurityCatalog,
-  calculateInvestmentProductsTotalValue,
   getInvestmentDistributionGroupKey,
   getInvestmentDistributionTitle,
   getInvestmentProducts,
@@ -269,19 +268,23 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
 
   const allProducts = useMemo(() => categories.flatMap((category) => category.products), [categories]);
   const investmentProducts = useMemo(() => getInvestmentProducts(allProducts), [allProducts]);
-  const totalValue = useMemo(() => calculateInvestmentProductsTotalValue(investmentProducts), [investmentProducts]);
   const securities = useMemo(() => buildInvestmentSecurities(investmentProducts, country), [country, investmentProducts]);
   const securityCatalog = useMemo(() => buildInvestmentSecurityCatalog(securities, country), [country, securities]);
+  const financialSecurities = useMemo(
+    () => securities.filter((security) => security.status === "active" && security.localValue > 0),
+    [securities],
+  );
   const sortedSecurities = useMemo(() => sortInvestmentSecurities(securities, selectedSortId), [securities, selectedSortId]);
   const activeSecurities = sortedSecurities.filter((security) => security.status === "active");
   const inactiveSecurities = sortedSecurities.filter((security) => security.status === "inactive");
   const portfolioCurrency = getCountryConfig(country).currency;
-  const totalPerformanceAmount = securities.reduce((sum, security) => sum + security.performanceAmount, 0);
+  const totalValue = financialSecurities.reduce((sum, security) => sum + security.localValue, 0);
+  const totalPerformanceAmount = financialSecurities.reduce((sum, security) => sum + security.performanceAmount, 0);
   const totalPerformancePercent = totalValue > 0 ? (totalPerformanceAmount / totalValue) * 100 : 0;
   const chartPoints = useMemo(() => buildInvestmentChartPoints(totalValue, selectedPeriodId), [selectedPeriodId, totalValue]);
   const distributionItems = useMemo(
-    () => buildInvestmentDistributionItems(securities, selectedTabId),
-    [securities, selectedTabId],
+    () => buildInvestmentDistributionItems(financialSecurities, selectedTabId),
+    [financialSecurities, selectedTabId],
   );
 
   const totalValueParts = maskInvestmentAmount(formatAmountParts(totalValue, country, portfolioCurrency), amountsHidden);
@@ -339,7 +342,7 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
       <DistributionCategoryDetailScreen
         item={selectedDistributionItem}
         tabId={selectedTabId}
-        securities={securities}
+        securities={financialSecurities}
         onBack={() => setSelectedDistributionItem(null)}
         formatDistributionAmount={formatDistributionAmount}
       />

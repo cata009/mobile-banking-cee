@@ -54,6 +54,8 @@ export interface InvestmentSecurity {
   securityAccountCurrency: Currency;
   productType: InvestmentProductType;
   assetClass: InvestmentAssetClass;
+  marketPrice: number;
+  quantity: number;
   performanceAmount: number;
   performancePercent: number;
   /** Brand-logo id from the mocked brand-logo database. */
@@ -63,8 +65,6 @@ export interface InvestmentSecurity {
 export interface InvestmentCatalogSecurity extends InvestmentSecurity {
   owned: boolean;
   productId: string;
-  marketPrice: number;
-  quantity: number;
   inceptionDate: string;
   lastUpdate: string;
   description: string;
@@ -125,6 +125,7 @@ interface InvestmentSecuritySeed {
   status: InvestmentSecurityStatus;
   contributionType: InvestmentContributionType;
   weight: number;
+  marketPrice: number;
   performancePercent: number;
   instrumentCurrency: Currency;
   securityAccountId: string;
@@ -179,7 +180,8 @@ const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
     title: "UniCredit Balanced Income Fund",
     status: "active",
     contributionType: "RECURRENT",
-    weight: 34,
+    weight: 13,
+    marketPrice: 29.84,
     performancePercent: 1.8,
     instrumentCurrency: "EUR",
     logoId: "unicredit",
@@ -190,11 +192,60 @@ const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
     assetClass: "Balanced",
   },
   {
+    id: "climate-focus",
+    title: "Amundi Climate Focus Fund",
+    status: "active",
+    contributionType: "ONE OFF",
+    weight: 10,
+    marketPrice: 42.68,
+    performancePercent: 2.21,
+    instrumentCurrency: "EUR",
+    logoId: "unicredit",
+    securityAccountId: "sec-eur",
+    securityAccountName: "EUR Securities Account",
+    securityAccountCurrency: "EUR",
+    productType: "Fund",
+    assetClass: "Equity",
+  },
+  {
+    id: "sustainable-future",
+    title: "Sustainable Future Mixed Fund",
+    status: "active",
+    contributionType: "RECURRENT",
+    weight: 8,
+    marketPrice: 35.27,
+    performancePercent: 3.75,
+    instrumentCurrency: "USD",
+    logoId: "unicredit",
+    securityAccountId: "sec-usd",
+    securityAccountName: "USD Securities Account",
+    securityAccountCurrency: "USD",
+    productType: "Fund",
+    assetClass: "Balanced",
+  },
+  {
+    id: "global-dividend",
+    title: "Global Dividend Fund",
+    status: "active",
+    contributionType: "ONE OFF",
+    weight: 7,
+    marketPrice: 54.12,
+    performancePercent: 1.14,
+    instrumentCurrency: "EUR",
+    logoId: "unicredit",
+    securityAccountId: "sec-eur",
+    securityAccountName: "EUR Securities Account",
+    securityAccountCurrency: "EUR",
+    productType: "Fund",
+    assetClass: "Equity",
+  },
+  {
     id: "cee-bonds",
     title: "CEE Government Bond Fund",
     status: "active",
     contributionType: "ONE OFF",
-    weight: 24,
+    weight: 12,
+    marketPrice: 103.45,
     performancePercent: 0.9,
     instrumentCurrency: "CZK",
     logoId: "unicredit",
@@ -205,12 +256,45 @@ const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
     assetClass: "Fixed income",
   },
   {
+    id: "euro-green-bonds",
+    title: "Euro Green Bond Fund",
+    status: "active",
+    contributionType: "RECURRENT",
+    weight: 10,
+    marketPrice: 101.9,
+    performancePercent: 1.03,
+    instrumentCurrency: "EUR",
+    logoId: "unicredit",
+    securityAccountId: "sec-eur",
+    securityAccountName: "EUR Securities Account",
+    securityAccountCurrency: "EUR",
+    productType: "Bond",
+    assetClass: "Fixed income",
+  },
+  {
     id: "europe-equity",
     title: "Europe Equity Opportunities",
     status: "active",
     contributionType: "RECURRENT",
-    weight: 18,
+    weight: 9,
+    marketPrice: 293.27,
     performancePercent: 2.6,
+    instrumentCurrency: "USD",
+    logoId: "unicredit",
+    securityAccountId: "sec-usd",
+    securityAccountName: "USD Securities Account",
+    securityAccountCurrency: "USD",
+    productType: "Stock",
+    assetClass: "Equity",
+  },
+  {
+    id: "global-tech-leaders",
+    title: "Global Tech Leaders",
+    status: "active",
+    contributionType: "ONE OFF",
+    weight: 7,
+    marketPrice: 187.65,
+    performancePercent: -0.65,
     instrumentCurrency: "USD",
     logoId: "unicredit",
     securityAccountId: "sec-usd",
@@ -222,10 +306,11 @@ const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
   {
     id: "global-growth",
     title: "Global Growth Portfolio",
-    status: "inactive",
+    status: "active",
     contributionType: "ONE OFF",
     weight: 14,
-    performancePercent: 0,
+    marketPrice: 115.42,
+    performancePercent: 0.72,
     instrumentCurrency: "EUR",
     logoId: "unicredit",
     securityAccountId: "sec-eur",
@@ -237,10 +322,11 @@ const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
   {
     id: "money-market",
     title: "Short Term Money Market Fund",
-    status: "inactive",
+    status: "active",
     contributionType: "RECURRENT",
     weight: 10,
-    performancePercent: 0,
+    marketPrice: 10.05,
+    performancePercent: 0.38,
     instrumentCurrency: "GBP",
     logoId: "unicredit",
     securityAccountId: "sec-gbp",
@@ -248,6 +334,38 @@ const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
     securityAccountCurrency: "GBP",
     productType: "Money market",
     assetClass: "Liquidity",
+  },
+  {
+    id: "legacy-balanced",
+    title: "Legacy Balanced Income Fund",
+    status: "inactive",
+    contributionType: "ONE OFF",
+    weight: 0,
+    marketPrice: 27.4,
+    performancePercent: 0,
+    instrumentCurrency: "EUR",
+    logoId: "unicredit",
+    securityAccountId: "sec-eur",
+    securityAccountName: "EUR Securities Account",
+    securityAccountCurrency: "EUR",
+    productType: "Fund",
+    assetClass: "Balanced",
+  },
+  {
+    id: "legacy-corporate-bond",
+    title: "Legacy Corporate Bond Fund",
+    status: "inactive",
+    contributionType: "ONE OFF",
+    weight: 0,
+    marketPrice: 98.75,
+    performancePercent: 0,
+    instrumentCurrency: "EUR",
+    logoId: "unicredit",
+    securityAccountId: "sec-eur",
+    securityAccountName: "EUR Securities Account",
+    securityAccountCurrency: "EUR",
+    productType: "Bond",
+    assetClass: "Fixed income",
   },
 ];
 
@@ -258,6 +376,7 @@ const CATALOG_ONLY_SEEDS: readonly InvestmentSecuritySeed[] = [
     status: "active",
     contributionType: "ONE OFF",
     weight: 16,
+    marketPrice: 42.68,
     performancePercent: 2.21,
     instrumentCurrency: "EUR",
     logoId: "unicredit",
@@ -273,6 +392,7 @@ const CATALOG_ONLY_SEEDS: readonly InvestmentSecuritySeed[] = [
     status: "active",
     contributionType: "RECURRENT",
     weight: 12,
+    marketPrice: 35.27,
     performancePercent: 3.75,
     instrumentCurrency: "USD",
     logoId: "unicredit",
@@ -339,18 +459,25 @@ export function buildInvestmentSecurities(
   const totalValue = calculateInvestmentProductsTotalValue(investmentProducts);
   if (totalValue <= 0) return [];
 
-  const currency = getCountryCurrency(country);
+  const currency = getCountryCurrency(country) as Currency;
   const sourceProductName = investmentProducts.map((product) => product.name).join(" + ") || "Investment Portfolio";
-  const totalWeight = SECURITY_SEEDS.reduce((sum, seed) => sum + seed.weight, 0);
-  let assignedValue = 0;
+  const activeSeeds = SECURITY_SEEDS.filter((seed) => seed.status === "active");
+  const totalActiveWeight = activeSeeds.reduce((sum, seed) => sum + seed.weight, 0);
+  let assignedActiveValue = 0;
 
-  return SECURITY_SEEDS.map((seed, index) => {
-    const isLast = index === SECURITY_SEEDS.length - 1;
-    const localValue = isLast
-      ? roundMoney(totalValue - assignedValue)
-      : roundMoney((totalValue * seed.weight) / totalWeight);
-    assignedValue = roundMoney(assignedValue + localValue);
-    const value = roundMoney(convertCurrency(localValue, currency as Currency, seed.instrumentCurrency));
+  return SECURITY_SEEDS.map((seed) => {
+    const isActive = seed.status === "active";
+    const isLastActive = isActive && seed.id === activeSeeds.at(-1)?.id;
+    const localValue = !isActive
+      ? 0
+      : isLastActive
+        ? roundMoney(totalValue - assignedActiveValue)
+        : roundMoney((totalValue * seed.weight) / totalActiveWeight);
+    if (isActive) {
+      assignedActiveValue = roundMoney(assignedActiveValue + localValue);
+    }
+    const value = roundMoney(convertCurrency(localValue, currency, seed.instrumentCurrency));
+    const quantity = value > 0 ? Number((value / seed.marketPrice).toFixed(6)) : 0;
 
     return {
       id: seed.id,
@@ -362,13 +489,15 @@ export function buildInvestmentSecurities(
       currency: seed.instrumentCurrency,
       instrumentCurrency: seed.instrumentCurrency,
       localValue,
-      localCurrency: currency as Currency,
+      localCurrency: currency,
       securityAccountId: seed.securityAccountId,
       securityAccountName: seed.securityAccountName,
-      securityAccountCurrency: seed.securityAccountCurrency === "CZK" ? (currency as Currency) : seed.securityAccountCurrency,
+      securityAccountCurrency: seed.securityAccountCurrency === "CZK" ? currency : seed.securityAccountCurrency,
       productType: seed.productType,
       assetClass: seed.assetClass,
-      performanceAmount: roundMoney((localValue * seed.performancePercent) / 100),
+      marketPrice: seed.marketPrice,
+      quantity,
+      performanceAmount: isActive ? roundMoney((localValue * seed.performancePercent) / 100) : 0,
       performancePercent: seed.performancePercent,
       logoId: seed.logoId,
     };
@@ -379,14 +508,11 @@ function enrichCatalogSecurity(security: InvestmentSecurity, country: CountryId,
   const countryCode = country.replace(/[^A-Z]/g, "").slice(0, 2).padEnd(2, "X");
   const stableId = security.id.replace(/[^a-z0-9]/gi, "").toUpperCase().slice(0, 9).padEnd(9, "0");
 
-  const marketPrice = roundMoney(Math.max(1, security.value * (0.74 + (index % 4) * 0.03)));
-
   return {
     ...security,
     owned,
     productId: `${countryCode}${stableId}${index + 1}`,
-    marketPrice,
-    quantity: owned ? roundMoney(security.value / marketPrice) : 0,
+    quantity: owned ? security.quantity : 0,
     inceptionDate: `${String(19 + (index % 8)).padStart(2, "0")}.07.${2020 + (index % 4)}`,
     lastUpdate: `03.0${(index % 8) + 1}.2026`,
     description: `${security.title} is a ${security.assetClass.toLowerCase()} ${security.productType.toLowerCase()} denominated in ${security.instrumentCurrency}. Review its objectives, risk profile, fees and official product documents before placing an order.`,
@@ -398,7 +524,8 @@ export function buildInvestmentSecurityCatalog(
   country: CountryId,
 ): InvestmentCatalogSecurity[] {
   const localCurrency = getCountryCurrency(country) as Currency;
-  const referenceLocalValue = Math.max(500, ownedSecurities.reduce((sum, item) => sum + item.localValue, 0) / Math.max(1, ownedSecurities.length));
+  const financialOwnedSecurities = ownedSecurities.filter((security) => security.status === "active" && security.localValue > 0);
+  const referenceLocalValue = Math.max(500, financialOwnedSecurities.reduce((sum, item) => sum + item.localValue, 0) / Math.max(1, financialOwnedSecurities.length));
   const ownedCatalog = ownedSecurities.map((security, index) => enrichCatalogSecurity(security, country, true, index));
   const availableCatalog = CATALOG_ONLY_SEEDS.map((seed, index) => {
     const localValue = roundMoney(referenceLocalValue * (0.72 + index * 0.18));
@@ -413,6 +540,8 @@ export function buildInvestmentSecurityCatalog(
       performanceAmount: roundMoney((localValue * seed.performancePercent) / 100),
       instrumentCurrency: seed.instrumentCurrency,
       securityAccountCurrency: seed.securityAccountCurrency,
+      marketPrice: seed.marketPrice,
+      quantity: Number((value / seed.marketPrice).toFixed(6)),
     };
     return enrichCatalogSecurity(security, country, false, ownedCatalog.length + index);
   });
@@ -499,12 +628,13 @@ export function buildInvestmentDistributionItems(
   securities: readonly InvestmentSecurity[],
   tabId: InvestmentPortfolioTabId,
 ): InvestmentDistributionItem[] {
-  const totalValue = securities.reduce((sum, security) => sum + security.localValue, 0);
+  const financialSecurities = securities.filter((security) => security.status === "active" && security.localValue > 0);
+  const totalValue = financialSecurities.reduce((sum, security) => sum + security.localValue, 0);
   if (totalValue <= 0 || tabId === "performance") return [];
 
   const groups = new Map<string, InvestmentDistributionItem>();
 
-  securities.forEach((security) => {
+  financialSecurities.forEach((security) => {
     const id = getInvestmentDistributionGroupKey(security, tabId);
     const existing = groups.get(id);
 
@@ -550,7 +680,8 @@ export function buildInvestmentHistoryTransactions(
   securities: readonly InvestmentSecurity[],
   country: CountryId,
 ): InvestmentHistoryTransaction[] {
-  if (securities.length === 0) return [];
+  const financialSecurities = securities.filter((security) => security.status === "active" && security.localValue > 0);
+  if (financialSecurities.length === 0) return [];
   const countryCurrency = getCountryCurrency(country) as Currency;
   const transactionTypes: readonly InvestmentHistoryTransactionType[] = [
     "COUPON",
@@ -591,7 +722,7 @@ export function buildInvestmentHistoryTransactions(
   const total = dates.length;
 
   return dates.map((date, index) => {
-    const security = securities[index % securities.length];
+    const security = financialSecurities[index % financialSecurities.length];
     const type = transactionTypes[index] ?? "BUY";
     const currency = index % 2 === 0 ? countryCurrency : security.instrumentCurrency;
     const sourceAmount = type === "COUPON"
@@ -617,6 +748,8 @@ export function buildInvestmentHistoryOrders(
   securities: readonly InvestmentSecurity[],
   country: CountryId,
 ): InvestmentHistoryOrder[] {
+  const financialSecurities = securities.filter((security) => security.status === "active" && security.localValue > 0);
+  if (financialSecurities.length === 0) return [];
   const countryCurrency = getCountryCurrency(country) as Currency;
   const statuses: readonly InvestmentHistoryOrderStatus[] = [
     "EXECUTED",
@@ -668,7 +801,7 @@ export function buildInvestmentHistoryOrders(
   ];
 
   return dates.map((date, index) => {
-    const security = securities[index % securities.length];
+    const security = financialSecurities[index % financialSecurities.length];
     const orderType = orderTypes[index] ?? "BUY";
     const status = statuses[index] ?? "EXECUTED";
     const currency = index % 2 === 0 ? countryCurrency : security.instrumentCurrency;

@@ -17,6 +17,7 @@ import type { AccountTransaction } from "@/data/accountDetails";
 import type { Product } from "@/data/products";
 import Card, { type CardVariant } from "@/app/components/cards/Card";
 import UserEventCard from "@/app/components/cards/UserEventCard";
+import FaceIdAnimation from "@/app/components/FaceIdAnimation";
 
 interface CardDetailScreenProps {
   selectedCardId?: string | null;
@@ -165,6 +166,7 @@ export default function CardDetailScreen({
   const suppressClickRef = useRef(false);
   const [isCarouselDragging, setIsCarouselDragging] = useState(false);
   const [isAiOpportunityDismissed, setIsAiOpportunityDismissed] = useState(false);
+  const [isCardDetailsFaceIdVisible, setIsCardDetailsFaceIdVisible] = useState(false);
 
   const activeCard = cardProducts[activeIndex] ?? cardProducts[0];
   const config = getCountryConfig(country);
@@ -209,6 +211,15 @@ export default function CardDetailScreen({
   }, [activeCard, country]);
 
   const maskedFreeToSpend = maskFormattedAmount(freeToSpendAmount, amountsHidden);
+
+  const handleShowCardDetails = () => {
+    setIsCardDetailsFaceIdVisible(true);
+  };
+
+  const completeCardDetailsFaceId = () => {
+    setIsCardDetailsFaceIdVisible(false);
+    onCardDetailsClick?.(activeCard);
+  };
 
   // ── Scroll handlers ──────────────────────────────────────────────
   const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
@@ -403,7 +414,7 @@ export default function CardDetailScreen({
   }
 
   const cardQuickActions = [
-    { id: "card-details", iconName: "account-details" as const, label: t("runtime.cards.actions.details", "Card Details"), onClick: () => onCardDetailsClick?.(activeCard) },
+    { id: "card-details", iconName: "account-details" as const, label: t("runtime.cards.actions.details", "Card Details"), onClick: handleShowCardDetails },
     { id: "options", iconName: "account-options" as const, label: t("runtime.cards.actions.options", "Options"), onClick: () => onCardOptionsClick?.(activeCard) },
     { id: "block-card", iconName: "block-card" as const, label: t("runtime.cards.actions.blockCard", "Block Card") },
     { id: "view-pin", iconName: "view-pin" as const, label: t("runtime.cards.actions.viewPin", "View PIN") },
@@ -412,7 +423,7 @@ export default function CardDetailScreen({
   return (
     <div
       ref={pageRef}
-      className="h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] pb-[32px] scrollbar-hide"
+      className="relative h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] pb-[32px] scrollbar-hide"
       onScroll={handlePageScroll}
     >
       <CollapsingCardHeader progress={headerProgress} onBack={onBack} onHelpClick={onHelpClick} />
@@ -430,7 +441,7 @@ export default function CardDetailScreen({
         {/* Card holder name + masked number */}
         <div className="flex flex-col gap-[2px] px-[24px] pt-[4px] pb-[8px]">
           <span className="text-[14px] font-bold leading-none text-[var(--uc-text)]" style={{ fontFamily: "UniCredit, sans-serif" }}>
-            {getCardHolderName()}
+            {activeCard.cardHolderName ?? getCardHolderName()}
           </span>
           <span className="text-[18px] font-bold leading-none text-[var(--uc-text)]" style={{ fontFamily: "UniCredit, sans-serif" }}>
             {formatMaskedCardNumber(activeCard.accountNumber)}
@@ -535,6 +546,7 @@ export default function CardDetailScreen({
 
           <button
             type="button"
+            onClick={handleShowCardDetails}
             className="uc-type-n5-strong py-[24px] text-[var(--uc-action)] tracking-[0.08em] uppercase"
           >
             {t("runtime.cards.showCardDetails", "Show Card Details")}
@@ -611,6 +623,7 @@ export default function CardDetailScreen({
           )}
         </div>
       </div>
+      {isCardDetailsFaceIdVisible ? <FaceIdAnimation onComplete={completeCardDetailsFaceId} /> : null}
     </div>
   );
 }

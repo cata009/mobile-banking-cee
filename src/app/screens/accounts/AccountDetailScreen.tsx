@@ -3,6 +3,7 @@ import type { DragEvent, KeyboardEvent, MouseEvent, PointerEvent, UIEvent } from
 import AccountBalanceCard from "@/app/components/accounts/AccountBalanceCard";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
 import AccountCarouselIndicator from "@/app/components/accounts/AccountCarouselIndicator";
+import CopyToast from "@/app/components/accounts/CopyToast";
 import AccountTransactionRow from "@/app/components/accounts/AccountTransactionRow";
 import AccountTransactionMonthDivider from "@/app/components/accounts/AccountTransactionMonthDivider";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
@@ -16,6 +17,7 @@ import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
 import { getCountryConfig, formatMoneyNumber } from "@/app/registry/countryConfig";
 import { maskAmountParts, maskFormattedAmount } from "@/app/utils/amountPrivacy";
+import { useCopyToClipboard } from "@/app/utils/useCopyToClipboard";
 import { useProducts } from "@/hooks/useProducts";
 import { getAccountTransactionProfileIndex, getAccountTransactions, groupAccountTransactionsByMonth } from "@/data/accountDetails";
 import type { AccountTransaction } from "@/data/accountDetails";
@@ -132,6 +134,7 @@ export default function AccountDetailScreen({
     0,
     accountProducts.findIndex((product) => product.id === selectedProductId),
   );
+  const { toast: copyToast, copy: copyToClipboard } = useCopyToClipboard();
   const [activeIndex, setActiveIndex] = useState(selectedIndex === -1 ? 0 : selectedIndex);
   const [headerProgress, setHeaderProgress] = useState(0);
   const [transactionSearch, setTransactionSearch] = useState("");
@@ -578,6 +581,8 @@ export default function AccountDetailScreen({
                       currentBalance={maskFormattedAmount(formatMoneyNumber(product.balance * 0.92, country), amountsHidden)}
                       active={isActiveCard}
                       showSubAccount={false}
+                      productType={product.type}
+                      onCopy={() => copyToClipboard(product.accountNumber, "Account number")}
                     />
                   </div>
                 </div>
@@ -598,53 +603,55 @@ export default function AccountDetailScreen({
         <AccountActionBar onDetailsClick={() => onDetailsClick(activeProduct)} onOptionsClick={onOptionsClick} />
       </div>
 
-        <div className="bg-[var(--uc-surface)]">
-          <div
-            ref={searchContainerRef}
-            className="sticky z-20 bg-[var(--uc-surface)] px-[16px] pt-[24px]"
-            style={{ top: `${ACCOUNT_DETAIL_HEADER_HEIGHT}px` }}
-          >
-            <AccountSearchBar
-              value={transactionSearch}
-              onClick={activateTransactionSearch}
-              onFilterClick={() => setFilterSheetOpen(true)}
-              onRemoveFilters={handleRemoveFilters}
-              onValueChange={handleTransactionSearchChange}
-              onFocus={activateTransactionSearch}
-              filtersActive={filtersActive}
-            />
-          </div>
+        {activeProduct?.type !== "term_deposit" ? (
+          <div className="bg-[var(--uc-surface)]">
+            <div
+              ref={searchContainerRef}
+              className="sticky z-20 bg-[var(--uc-surface)] px-[16px] pt-[24px]"
+              style={{ top: `${ACCOUNT_DETAIL_HEADER_HEIGHT}px` }}
+            >
+              <AccountSearchBar
+                value={transactionSearch}
+                onClick={activateTransactionSearch}
+                onFilterClick={() => setFilterSheetOpen(true)}
+                onRemoveFilters={handleRemoveFilters}
+                onValueChange={handleTransactionSearchChange}
+                onFocus={activateTransactionSearch}
+                filtersActive={filtersActive}
+              />
+            </div>
 
-          <div className="pt-[24px]">
-            {transactionGroups.length > 0 ? (
-              transactionGroups.map((group, index) => (
-                <div key={group.monthTitle} className={index > 0 ? "pt-[16px]" : undefined}>
-                  <AccountTransactionMonthDivider
-                    title={group.monthTitle}
-                    total={formatMoneyNumber(group.monthlyTotal, country)}
-                    currency={config.currency}
-                  />
+            <div className="pt-[24px]">
+              {transactionGroups.length > 0 ? (
+                transactionGroups.map((group, index) => (
+                  <div key={group.monthTitle} className={index > 0 ? "pt-[16px]" : undefined}>
+                    <AccountTransactionMonthDivider
+                      title={group.monthTitle}
+                      total={formatMoneyNumber(group.monthlyTotal, country)}
+                      currency={config.currency}
+                    />
 
-                  <div className="pt-[16px]">
-                    {group.transactions.map((transaction) => (
-                      <AccountTransactionRow
-                        key={transaction.id}
-                        transaction={transaction}
-                        formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
-                        currency={config.currency}
-                        onClick={(selectedTransaction) => onTransactionClick?.(selectedTransaction, activeProduct)}
-                      />
-                    ))}
+                    <div className="pt-[16px]">
+                      {group.transactions.map((transaction) => (
+                        <AccountTransactionRow
+                          key={transaction.id}
+                          transaction={transaction}
+                          formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
+                          currency={config.currency}
+                          onClick={(selectedTransaction) => onTransactionClick?.(selectedTransaction, activeProduct)}
+                        />
+                      ))}
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="uc-type-n4-strong px-[16px] py-[32px] text-center text-[var(--uc-text-muted)]">
+                  {hasTransactionSearch || filtersActive ? t("runtime.accounts.noTransactionsFound", "No transactions found") : null}
                 </div>
-              ))
-            ) : (
-              <div className="uc-type-n4-strong px-[16px] py-[32px] text-center text-[var(--uc-text-muted)]">
-                {hasTransactionSearch || filtersActive ? t("runtime.accounts.noTransactionsFound", "No transactions found") : null}
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
 
       {filterSheetOpen ? (
@@ -655,6 +662,7 @@ export default function AccountDetailScreen({
           onClose={() => setFilterSheetOpen(false)}
         />
       ) : null}
+      <CopyToast toast={copyToast} />
     </div>
   );
 }
