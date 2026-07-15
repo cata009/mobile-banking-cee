@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type UIEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type UIEvent } from "react";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import BrandLogo from "@/app/components/brand-logo/BrandLogo";
@@ -25,7 +25,6 @@ import {
   type InvestmentHistoryTransaction,
   type InvestmentHistoryTransactionType,
 } from "@/app/config/investmentsPortfolioConfig";
-import { useLanguage } from "@/app/contexts/LanguageContext";
 import { getCountryConfig } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import { useDemo } from "@/app/state/demoStore";
@@ -56,8 +55,38 @@ function toIsoDateOnly(date: Date) {
 }
 
 function parseIsoDateOnly(value: string) {
-  const [year, month, day] = value.split("-").map(Number);
-  return new Date(year, Math.max(0, month - 1), day);
+  const [yearText, monthText, dayText] = value.split("-");
+  if (
+    !yearText
+    || !monthText
+    || !dayText
+    || !/^\d{4}$/.test(yearText)
+    || !/^\d{2}$/.test(monthText)
+    || !/^\d{2}$/.test(dayText)
+  ) {
+    throw new Error(`Invalid ISO date-only value: "${value}"`);
+  }
+
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const parsed = new Date(0);
+  parsed.setHours(0, 0, 0, 0);
+  parsed.setFullYear(year, month - 1, day);
+
+  if (
+    month < 1
+    || month > 12
+    || day < 1
+    || day > 31
+    || parsed.getFullYear() !== year
+    || parsed.getMonth() !== month - 1
+    || parsed.getDate() !== day
+  ) {
+    throw new Error(`Invalid ISO date-only value: "${value}"`);
+  }
+
+  return parsed;
 }
 
 function formatFilterDate(value: string, country: CountryId) {
@@ -749,15 +778,31 @@ function InvestmentHistoryDetailScreen({
   onBack: () => void;
 }) {
   const [headerProgress, setHeaderProgress] = useState(0);
-  const isOrder = selected.kind === "order";
-  const item = selected.item;
-  const amount = isOrder && item.orderType === "SELL" ? -item.amount : item.amount;
-  const actionType = isOrder ? item.orderType : item.type === "COUPON" || item.type === "OTHER WITHDRAWAL" ? item.type : item.type;
+  const detail = selected.kind === "order"
+    ? {
+        item: selected.item,
+        amount: selected.item.orderType === "SELL" ? -selected.item.amount : selected.item.amount,
+        actionType: selected.item.orderType,
+        detailsTitle: "Order details",
+        dateLabel: "Order date",
+        feeLabel: "Estimated fee",
+        status: selected.item.status,
+        showsOrderActions: true,
+      }
+    : {
+        item: selected.item,
+        amount: selected.item.amount,
+        actionType: selected.item.type,
+        detailsTitle: "Transaction details",
+        dateLabel: "Settlement date",
+        feeLabel: selected.item.type === "SELL" ? "Exit fee" : "Entry fee",
+        status: null,
+        showsOrderActions: false,
+      };
+  const { item, amount, actionType } = detail;
   const dateParts = formatDateParts(item.date, country);
   const productId = `${country}${item.id.replace(/[^a-z0-9]/gi, "").slice(0, 10).toUpperCase()}`;
   const isin = `XS${String(Math.abs(productId.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0))).padStart(10, "0")}`;
-  const detailsTitle = isOrder ? "Order details" : "Transaction details";
-  const feeLabel = isOrder ? "Estimated fee" : actionType === "SELL" ? "Exit fee" : "Entry fee";
   const feeAmount = formatAmountLabel(Math.max(1, Math.abs(amount) * 0.004), country, item.currency, amountsHidden, false);
 
   const handleScroll = (event: UIEvent<HTMLDivElement>) => {
@@ -799,13 +844,13 @@ function InvestmentHistoryDetailScreen({
           <p className="mt-[6px] text-[14px] font-bold leading-[15px] text-[var(--uc-text-muted)]">255 PCS</p>
           <p className="mt-[10px] text-[14px] font-bold leading-[15px] text-[var(--uc-text-muted)]">{actionType}</p>
           <p className="mt-[10px] text-[14px] font-bold leading-[15px] text-[var(--uc-text-muted)]">{dateParts.long}</p>
-          {isOrder ? (
+          {detail.status ? (
             <p className="mx-auto mt-[14px] inline-flex rounded-[16px] border border-[var(--uc-border)] bg-[var(--uc-static-white)] px-[12px] py-[4px] text-[13px] font-bold text-[#262626]">
-              {item.status}
+              {detail.status}
             </p>
           ) : null}
         </section>
-        {isOrder ? (
+        {detail.showsOrderActions ? (
           <AccountActionBar
             items={[
               { id: "more-details", iconName: "investment-more-details", label: "More\ndetails" },
@@ -815,13 +860,13 @@ function InvestmentHistoryDetailScreen({
           />
         ) : null}
         <section className="px-[24px] pt-[22px]">
-          <h2 className="uc-type-n2-strong text-[20px] leading-none text-[var(--uc-text)]">{detailsTitle}</h2>
+          <h2 className="uc-type-n2-strong text-[20px] leading-none text-[var(--uc-text)]">{detail.detailsTitle}</h2>
           <div className="pt-[12px]">
             <DetailRow label="Product id" value={productId} />
             <DetailRow label="ISIN" value={isin} />
-            <DetailRow label={isOrder ? "Order date" : "Settlement date"} value={dateParts.long} />
+            <DetailRow label={detail.dateLabel} value={dateParts.long} />
             <DetailRow label="Price" value={formatAmountLabel(Math.max(1, Math.abs(amount) / 255), country, item.currency, amountsHidden, false)} />
-            <DetailRow label={feeLabel} value={feeAmount} />
+            <DetailRow label={detail.feeLabel} value={feeAmount} />
           </div>
         </section>
         <div className="h-[26px]" />
@@ -842,18 +887,32 @@ export default function InvestmentsHistoryScreen({ onBack }: InvestmentsHistoryS
   const [filterMode, setFilterMode] = useState<FilterMode>(null);
   const [infoMode, setInfoMode] = useState<InfoMode>(null);
   const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
+  const previousCountryRef = useRef(country);
 
   const allProducts = useMemo(() => categories.flatMap((category) => category.products), [categories]);
   const investmentProducts = useMemo(() => getInvestmentProducts(allProducts), [allProducts]);
   const securities = useMemo(() => buildInvestmentSecurities(investmentProducts, country), [country, investmentProducts]);
   const totalValue = useMemo(() => calculateInvestmentProductsTotalValue(investmentProducts), [investmentProducts]);
   const countryCurrency = getCountryConfig(country).currency as Currency;
+  const allCurrenciesKey = [countryCurrency, ...securities.map((security) => security.instrumentCurrency)].join("|");
   const allCurrencies = useMemo(() => {
-    const currencies = new Set<Currency>([countryCurrency]);
-    securities.forEach((security) => currencies.add(security.instrumentCurrency));
+    const currencies = new Set<Currency>();
+    allCurrenciesKey.split("|").forEach((currency) => {
+      if (
+        currency === "CZK"
+        || currency === "EUR"
+        || currency === "USD"
+        || currency === "GBP"
+        || currency === "RON"
+        || currency === "BAM"
+        || currency === "HUF"
+        || currency === "RSD"
+      ) {
+        currencies.add(currency);
+      }
+    });
     return [...currencies];
-  }, [countryCurrency, securities]);
-  const allCurrenciesKey = allCurrencies.join("|");
+  }, [allCurrenciesKey]);
   const defaultFilters = useMemo<InvestmentHistoryFilterState>(() => ({
     datePreset: "last-year",
     customStartDate: "2025-09-01",
@@ -861,7 +920,7 @@ export default function InvestmentsHistoryScreen({ onBack }: InvestmentsHistoryS
     selectedTypes: [...INVESTMENT_HISTORY_TRANSACTION_TYPES],
     selectedCurrencies: allCurrencies,
     selectedStatuses: [...INVESTMENT_HISTORY_ORDER_STATUSES],
-  }), [allCurrenciesKey]);
+  }), [allCurrencies]);
   const [appliedFilters, setAppliedFilters] = useState<InvestmentHistoryFilterState | null>(null);
   const [draftFilters, setDraftFilters] = useState<InvestmentHistoryFilterState>(defaultFilters);
 
@@ -904,14 +963,15 @@ export default function InvestmentsHistoryScreen({ onBack }: InvestmentsHistoryS
   };
 
   useEffect(() => {
+    if (previousCountryRef.current === country) return;
+    previousCountryRef.current = country;
     setAppliedFilters(null);
     setDraftFilters(tabDefaults);
     setSearchQuery("");
     setFilterMode(null);
     setInfoMode(null);
     setSelectedItem(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [country]);
+  }, [country, tabDefaults]);
 
   useEffect(() => {
     setDraftFilters((current) => resetFilterTypesForTab(current, activeTab));
