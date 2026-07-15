@@ -1,8 +1,8 @@
-import { createContext, useContext, useState, ReactNode, useCallback, useEffect, useRef } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import type { ReactNode } from 'react';
 import { useCountry } from '@/app/state/demoStore';
 import { getTranslations } from '@/translations';
 import type { AppLanguage } from '@/app/registry/languageByCountry';
-import { getAvailableLanguages, LOCAL_LANGUAGE_BY_COUNTRY } from '@/app/registry/languageByCountry';
 import type { TranslationKeys } from '@/translations/types';
 
 export type Language = AppLanguage;
@@ -15,6 +15,10 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+function isUnknownRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 
 export function LanguageProvider({
   children,
@@ -61,9 +65,9 @@ export function LanguageProvider({
     const keys = key.split('.');
     
     // Navigate through nested object
-    let value: any = translations;
+    let value: unknown = translations;
     for (const k of keys) {
-      if (value && typeof value === 'object' && k in value) {
+      if (isUnknownRecord(value) && Object.prototype.hasOwnProperty.call(value, k)) {
         value = value[k];
       } else {
         // Key not found - return the key itself as fallback
