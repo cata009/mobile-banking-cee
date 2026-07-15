@@ -10,7 +10,7 @@ import type { InvestmentChartPoint } from "@/app/config/investmentsPortfolioConf
 import { getCountryConfig } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 
-const INVESTMENT_POSITIVE_COLOR = "#3D7D43";
+const INVESTMENT_POSITIVE_COLOR = "var(--uc-green-olive)";
 
 interface InvestmentPortfolioChartProps {
   points: readonly InvestmentChartPoint[];
@@ -173,7 +173,7 @@ function InvestmentChartTooltip({
 
   return (
     <div
-      className="min-w-[91px] rounded-[6px] bg-[var(--uc-surface)] px-[8px] py-[8px] shadow-[0_2px_10px_rgba(0,0,0,0.25)]"
+      className="min-w-[91px] rounded-[6px] bg-[var(--uc-surface)] px-[8px] py-[8px] shadow-[0_2px_10px_rgb(var(--uc-shadow-rgb)_/_0.25)]"
       data-ds-label="Investments chart point tooltip"
     >
       <p className="text-[14px] leading-[16px] text-[var(--uc-text)]">{point.label}</p>
