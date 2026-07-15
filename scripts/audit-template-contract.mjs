@@ -19,7 +19,7 @@ function collectUnion(typeName, source) {
 }
 
 function collectObjectKeys(source) {
-  return new Set([...source.matchAll(/\n  "([^"]+)": \{/g)].map((entry) => entry[1]));
+  return new Set([...source.matchAll(/\n {2}"([^"]+)": \{/g)].map((entry) => entry[1]));
 }
 
 function collectTemplateBlocks(source) {

@@ -42,4 +42,12 @@ describe('AppIcon registry', () => {
     expect(icon).toHaveAttribute('stroke-width', '1.75')
     expect(icon.querySelector('title')).toHaveTextContent('Wallet artwork')
   })
+
+  it.each(['header-profile', 'header-messages'] as const)('renders the semantic %s icon contract', (name) => {
+    expect(ICON_REGISTRY[name]).toBeDefined()
+
+    render(<AppIcon name={name} title={name} />)
+
+    expect(screen.getByRole('img', { name })).toBeInTheDocument()
+  })
 })
