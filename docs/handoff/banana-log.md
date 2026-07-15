@@ -6,6 +6,8 @@ This log records bananas found and how they were triaged.
 
 | Banana | Triage | Evidence |
 | --- | --- | --- |
+| Asset baseline failed on a clean Windows checkout because one SVG received automatic LF-to-CRLF conversion | Reproduced to one clean tracked SVG, changed the audit to hash Git-filtered canonical bytes while still including unstaged content, added a regression test, and retained all 159 asset blobs unchanged | `scripts/audit-assets.mjs`, `tests/audits/asset-audit.test.mjs`, `npm run audit:assets`, `git diff 453e7e2..HEAD --` for asset extensions |
+| Production access variables were absent after the source fallback was removed | Configured `ACCESS_PASSWORD` and a separately generated `ACCESS_COOKIE_SECRET` as sensitive Vercel Production variables before deployment; `.env.local` remains ignored | `npx vercel env ls`, `.gitignore`, `api/access.js`, `tests/security/access.test.ts` |
 | Broad hardening could silently alter images or make rollback impractical | Work ran in an isolated branch with per-direction commits; image path/blob baseline is locked and zero image diffs exist from `453e7e2` | `scripts/asset-baseline.json`, `npm run audit:assets`, `docs/handoff/product-health-revert-map.md` |
 | Product-count overrides could leave a removed account/card/investment route selected | Added typed availability normalization to Home plus regression tests and deep-link round-trip coverage for all nine counts | `f3ea71f`, 37 focused tests, full 231-test suite |
 | Platform audit still expected the old `Data Snapshot` label | Fixed the source contract to require `Product count overrides` and `Reset to scenario`; rerun passed | `ef5c106`, `npm run audit:platform` |

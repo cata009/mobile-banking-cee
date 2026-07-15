@@ -2,6 +2,21 @@
 
 Last updated: 2026-07-15
 
+## 2026-07-15 Product Health Publication Closeout
+
+- Latest request handled: commit every intentional workspace change, push `main` to GitHub, and publish the verified product-health hardening build to Vercel production.
+- Access configuration: Vercel Production now stores `ACCESS_PASSWORD` and an independently generated `ACCESS_COOKIE_SECRET` as sensitive environment variables. The requested password remains local/Vercel configuration only; `.env.local` stays ignored and no credential is committed.
+- Asset guard correction: the first full verification exposed that the new asset audit hashed platform-specific worktree line endings. `scripts/audit-assets.mjs` now hashes Git-filtered canonical asset bytes, including unstaged content, and `tests/audits/asset-audit.test.mjs` covers Windows CRLF versus canonical Git bytes. The baseline is the reproducible canonical manifest for the same 159 assets at `453e7e2`; no PNG, JPG, SVG, or other asset file was edited.
+- Files changed: `scripts/audit-assets.mjs`, `scripts/asset-baseline.json`, `tests/audits/asset-audit.test.mjs`, and closeout handoff documentation only.
+- Verification: `npm run verify` passed after the guard correction: typecheck, ESLint, 38 test files / 233 tests, all six audits, and the Vite production build (3,918 modules). `npm run audit:assets` reports 159 assets, 123 referenced assets, 36 review-only candidates, four exact duplicate groups, and canonical aggregate `2452305fa59ecd0691d15d0a0b4540e85cd6326ddd96461f31dd3767ea0e13db`. Existing empty `react-vendor` and >500 kB chunk warnings remain triaged.
+- Banana Loop: the broken cross-platform asset hash was fixed rather than bypassed; the production access variables are configured rather than relying on source fallback; all image candidates remain review-only; no image was changed, removed, converted, or recompressed.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes after commit, push, production deployment, and post-deploy access smoke complete.
+
 ## 2026-07-15 Product Health Hardening Closeout
 
 - Scope: completed the approved nine-direction hardening pass on isolated branch `codex/product-health-hardening`, preserving the original workspace and keeping each direction independently revertible.

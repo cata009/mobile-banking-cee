@@ -97,4 +97,18 @@ describe("tracked asset audit", () => {
     });
     expect(reads.sort()).toEqual([...trackedFiles].sort());
   });
+
+  it("can hash canonical Git asset bytes instead of platform-specific worktree bytes", () => {
+    const trackedFiles = ["src/assets/icon.svg"];
+    const report = buildAssetAudit({
+      trackedFiles,
+      readFile: () => Buffer.from("<svg>\r\n  <path />\r\n</svg>\r\n"),
+      readAssetFile: () => Buffer.from("<svg>\n  <path />\n</svg>\n"),
+    });
+    const canonicalSha = createHash("sha256")
+      .update("<svg>\n  <path />\n</svg>\n")
+      .digest("hex");
+
+    expect(report.assets[0].sha256).toBe(canonicalSha);
+  });
 });
