@@ -100,15 +100,43 @@ function header(response: ResponseHarness, name: string) {
   return match?.[1];
 }
 
-function forgeAccessCookie(secret: string) {
-  const encoded = Buffer.from(
-    JSON.stringify({ expiresAt: Date.now() + 60_000 }),
-  ).toString("base64url");
+function cookieValues(response: ResponseHarness) {
+  const setCookie = header(response, "Set-Cookie");
+  if (setCookie === undefined) return [];
+  return Array.isArray(setCookie) ? setCookie : [setCookie];
+}
+
+function cookiePair(response: ResponseHarness, name: string) {
+  return cookieValues(response)
+    .find((value) => value.startsWith(`${name}=`))
+    ?.split(";")[0];
+}
+
+function forgeSignedPayload(payload: object, secret: string) {
+  const encoded = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const signature = crypto
     .createHmac("sha256", secret)
     .update(encoded)
     .digest("base64url");
-  return `mb_access=${encodeURIComponent(`${encoded}.${signature}`)}`;
+  return `${encoded}.${signature}`;
+}
+
+function forgeAccessCookie(secret: string) {
+  const value = forgeSignedPayload(
+    { expiresAt: Date.now() + 60_000 },
+    secret,
+  );
+  return `mb_access=${encodeURIComponent(value)}`;
+}
+
+function forgeShareToken(secret: string) {
+  return forgeSignedPayload(
+    {
+      purpose: "demo-share-access",
+      expiresAt: Date.now() + 60_000,
+    },
+    secret,
+  );
 }
 
 beforeEach(() => {
@@ -123,25 +151,81 @@ afterEach(() => {
 });
 
 describe("stakeholder access gate security contract", () => {
-  test("fails closed when access credentials are not configured", async () => {
+  test.each([
+    ["configuration is entirely missing", undefined, undefined],
+    ["password is missing", undefined, "test-cookie-secret-0123456789abcdef"],
+    ["cookie secret is missing", "test-password", undefined],
+    ["cookie secret is shorter than 32 characters", "test-password", "too-short"],
+  ])("fails closed when the %s", async (_label, password, cookieSecret) => {
+    if (password !== undefined) process.env.ACCESS_PASSWORD = password;
+    if (cookieSecret !== undefined) process.env.ACCESS_COOKIE_SECRET = cookieSecret;
     const handler = await loadHandler();
     const response = await invoke(handler);
 
-    expect(response.statusCode).toBe(503);
+    expect.soft(response.statusCode).toBe(503);
+    expect.soft(cookiePair(response, "mb_access")).toBeUndefined();
+  });
+
+  test("fails closed for an unconfigured login without issuing access", async () => {
+    const handler = await loadHandler();
+    const response = await invoke(handler, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: { password: "CE&EE2025-" },
+    });
+
+    expect.soft(response.statusCode).toBe(503);
+    expect.soft(cookiePair(response, "mb_access")).toBeUndefined();
   });
 
   test("rejects an access cookie forged with the former fallback secret", async () => {
+    configureAccess();
     const handler = await loadHandler();
     const response = await invoke(handler, {
       headers: { cookie: forgeAccessCookie("CE&EE2025-") },
     });
 
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual({ authenticated: false });
+  });
+
+  test.each([
+    ["malformed payload", "not-a-valid-payload.not-a-valid-signature"],
+    [
+      "malformed signature",
+      `${Buffer.from(JSON.stringify({ expiresAt: Date.now() + 60_000 })).toString("base64url")}.%%%`,
+    ],
+    [
+      "unequal-length signature",
+      `${Buffer.from(JSON.stringify({ expiresAt: Date.now() + 60_000 })).toString("base64url")}.x`,
+    ],
+  ])("treats a cookie with a %s as unauthenticated", async (_label, value) => {
+    configureAccess();
+    const handler = await loadHandler();
+    const response = await invoke(handler, {
+      headers: { cookie: `mb_access=${encodeURIComponent(value)}` },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual({ authenticated: false });
+  });
+
+  test("treats malformed cookie percent-encoding as unauthenticated", async () => {
+    configureAccess();
+    const handler = await loadHandler();
+    const response = await invoke(handler, {
+      headers: { cookie: "mb_access=%E0%A4%A" },
+    });
+
+    expect(response.statusCode).toBe(200);
     expect(response.body).toEqual({ authenticated: false });
   });
 
   test.each([
     ["backslash", "/\\evil.example"],
-    ["control character", "/dashboard\r\nX-Test: injected"],
+    ["embedded backslash", "/dashboard\\evil.example"],
+    ["CRLF control characters", "/dashboard\r\nX-Test: injected"],
+    ["null control character", "/dashboard\u0000details"],
     ["absolute URL", "https://evil.example/phish"],
     ["protocol-relative URL", "//evil.example/phish"],
     ["API route", "/api/access"],
@@ -170,7 +254,7 @@ describe("stakeholder access gate security contract", () => {
 
     expect.soft(response.statusCode).toBe(401);
     expect.soft(response.body).not.toHaveProperty("remainingAttempts");
-    expect.soft(header(response, "Set-Cookie")).toBeUndefined();
+    expect.soft(cookieValues(response)).toEqual([]);
   });
 
   test("authenticates with independently configured credentials", async () => {
@@ -185,17 +269,56 @@ describe("stakeholder access gate security contract", () => {
     expect(login.statusCode).toBe(200);
     expect(login.body).toMatchObject({ ok: true });
 
-    const setCookie = header(login, "Set-Cookie");
-    expect(Array.isArray(setCookie)).toBe(true);
-    const accessCookie = (setCookie as string[]).find((value) =>
-      value.startsWith("mb_access="),
-    );
+    const accessCookie = cookiePair(login, "mb_access");
     expect(accessCookie).toBeDefined();
 
     const authenticated = await invoke(handler, {
-      headers: { cookie: accessCookie?.split(";")[0] },
+      headers: { cookie: accessCookie },
     });
     expect(authenticated.statusCode).toBe(200);
     expect(authenticated.body).toEqual({ authenticated: true });
+  });
+
+  test("issues and consumes a share token under independent configuration", async () => {
+    configureAccess();
+    const handler = await loadHandler();
+    const login = await invoke(handler, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: { password: "test-password" },
+    });
+    const accessCookie = cookiePair(login, "mb_access");
+    expect(accessCookie).toBeDefined();
+
+    const issued = await invoke(handler, {
+      url: "/api/access?mode=share-token",
+      headers: { cookie: accessCookie },
+    });
+    const shareToken = (issued.body as { token?: unknown }).token;
+    expect(issued.statusCode).toBe(200);
+    expect(typeof shareToken).toBe("string");
+
+    const consumed = await invoke(handler, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: { shareToken },
+    });
+    expect(consumed.statusCode).toBe(200);
+    expect(consumed.body).toMatchObject({ ok: true, tokenAccess: true });
+    expect(cookiePair(consumed, "mb_access")).toBeDefined();
+  });
+
+  test("rejects a share token forged with the former fallback secret", async () => {
+    configureAccess();
+    const handler = await loadHandler();
+    const response = await invoke(handler, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: { shareToken: forgeShareToken("CE&EE2025-") },
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body).not.toHaveProperty("tokenAccess");
+    expect(cookiePair(response, "mb_access")).toBeUndefined();
   });
 });
