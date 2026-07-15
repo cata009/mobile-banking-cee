@@ -57,8 +57,12 @@ function getReferenceTokens(assetPath) {
   return [...tokens];
 }
 
-export function buildAssetAudit({ trackedFiles, readFile }) {
-  if (!Array.isArray(trackedFiles) || typeof readFile !== "function") {
+export function buildAssetAudit({ trackedFiles, readFile, readAssetFile = readFile }) {
+  if (
+    !Array.isArray(trackedFiles) ||
+    typeof readFile !== "function" ||
+    typeof readAssetFile !== "function"
+  ) {
     throw new TypeError("buildAssetAudit requires trackedFiles and a readFile function");
   }
 
@@ -69,7 +73,7 @@ export function buildAssetAudit({ trackedFiles, readFile }) {
 
   const buffers = new Map();
   for (const path of normalizedTrackedFiles) {
-    const value = readFile(path);
+    const value = isTrackedAssetPath(path) ? readAssetFile(path) : readFile(path);
     if (!Buffer.isBuffer(value) && !(value instanceof Uint8Array)) {
       throw new TypeError(`readFile must return bytes for ${path}`);
     }
@@ -131,6 +135,18 @@ export function auditTrackedAssets(root = process.cwd()) {
   return buildAssetAudit({
     trackedFiles,
     readFile: (path) => readFileSync(resolve(root, path)),
+    readAssetFile: (path) => {
+      const objectId = execFileSync(
+        "git",
+        ["hash-object", `--path=${path}`, "--", path],
+        { cwd: root, encoding: "utf8" },
+      ).trim();
+      return execFileSync("git", ["cat-file", "blob", objectId], {
+        cwd: root,
+        encoding: null,
+        maxBuffer: 100 * 1024 * 1024,
+      });
+    },
   });
 }
 
