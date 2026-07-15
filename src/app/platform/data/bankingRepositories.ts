@@ -8,7 +8,7 @@ import {
   resolveBankingScenario,
   type BankingHolding,
 } from "@/app/platform/banking/bankingScenarioRegistry";
-import { resolveEffectiveAppContext } from "@/app/platform/effectiveAppContext";
+import { resolveEffectiveAppContext, resolveEffectiveBankingScenario } from "@/app/platform/effectiveAppContext";
 import type { BankingActionId, BankingHoldingType, BankingScenarioId, DemoState } from "@/app/state/demoTypes";
 
 export interface RepositoryResult<T> {
@@ -86,7 +86,7 @@ export const entitlementsRepository: EntitlementsRepository = {
 
 export const scenarioRepository: ScenarioRepository = {
   listScenarios: () => result(Object.keys(BANKING_SCENARIOS) as BankingScenarioId[]),
-  resolveScenario: (state) => resolveBankingScenario(state),
+  resolveScenario: (state) => resolveEffectiveBankingScenario(state),
 };
 
 export const BANKING_REPOSITORIES = {

@@ -536,9 +536,15 @@ function resolveAction(
   return null;
 }
 
-export function resolveBankingScenario(state: DemoState): ResolvedBankingScenario {
+export function resolveBankingScenario(
+  state: DemoState,
+  holdingOverrides?: readonly BankingHoldingTemplate[],
+): ResolvedBankingScenario {
   const scenario = getBankingScenario(state.bankingScenario);
-  const holdings = materializeHoldings(scenario, state.country);
+  const holdings = materializeHoldings(
+    holdingOverrides ? { ...scenario, holdings: holdingOverrides } : scenario,
+    state.country,
+  );
   const limits = resolveLimits(scenario.limits, state.country);
   const disabledActions = Object.values(BANKING_ACTION_CATALOG)
     .map((action) => resolveAction(action, state, scenario, holdings, limits))
