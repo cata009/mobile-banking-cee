@@ -458,7 +458,7 @@ async function createPhoneCaptureClone(screenElement: HTMLElement, mode: PhoneSc
     .filter((pair): pair is ScrollablePair => Boolean(pair))
     .sort((a, b) => b.extraHeight - a.extraHeight);
 
-  await inlineComputedStyles(pairs);
+  inlineComputedStyles(pairs);
   copyFormState(pairs);
 
   const width = screenElement.clientWidth || SCREEN_WIDTH_FALLBACK;
@@ -1415,7 +1415,7 @@ function toScrollablePair(pair: ElementPair): ScrollablePair | null {
   };
 }
 
-async function inlineComputedStyles(pairs: ElementPair[]) {
+function inlineComputedStyles(pairs: ElementPair[]) {
   for (const { source, clone, computedStyle } of pairs) {
     if (!(clone instanceof HTMLElement || clone instanceof SVGElement)) continue;
 
