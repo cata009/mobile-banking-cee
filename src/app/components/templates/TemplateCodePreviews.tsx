@@ -13,8 +13,6 @@ import PaymentHeroCard from "@/app/components/payments/PaymentHeroCard";
 import PaymentOtherShortcut from "@/app/components/payments/PaymentOtherShortcut";
 import PanelWithTranslations from "@/app/components/PanelWithTranslations";
 import PageHeader from "@/app/components/PageHeader";
-import ProductMenuCard from "@/app/components/products/ProductMenuCard";
-import ProductOfferCard from "@/app/components/products/ProductOfferCard";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import StatusBar from "@/app/components/StatusBar";
@@ -518,7 +516,7 @@ function TemplateFormLine({ field }: { field: FieldLine }) {
   const fieldValue = field.value ?? field.placeholder ?? "";
 
   if (field.label.toLowerCase().includes("amount")) {
-    const [amount, currency = "RON"] = fieldValue.split(" ");
+    const [amount = "", currency = "RON"] = fieldValue.split(" ");
     return (
       <div className="pt-[22px]">
         <AmountField
@@ -1125,7 +1123,7 @@ function NewPaymentSheetTemplate({ interactive }: { interactive: boolean }) {
   );
 }
 
-function ProductsMenuTemplate({ interactive }: { interactive: boolean }) {
+function ProductsMenuTemplate() {
   const menu = getProductsMenuForCountry("RO");
   const { t } = useLanguage();
   const localizeOffer = (offer: (typeof menu.offers)[number]) => ({
@@ -1162,6 +1160,7 @@ function ProductsMenuTemplate({ interactive }: { interactive: boolean }) {
             products={menu.products.map(localizeCard)}
             otherSolutionsTitle={t("runtime.productsMenu.otherSolutionsForYou", menu.otherSolutionsTitle)}
             otherSolutions={menu.otherSolutions.map(localizeCard)}
+            onProductCardClick={() => undefined}
           />
         </div>
 
@@ -1567,7 +1566,7 @@ function SpendingMoneyOutTemplate({ interactive }: { interactive: boolean }) {
   );
 }
 
-function ProductsShopSmartTemplate({ interactive }: { interactive: boolean }) {
+function ProductsShopSmartTemplate() {
   const menu = getProductsMenuForCountry("RO");
   const { t } = useLanguage();
 
@@ -1778,7 +1777,7 @@ function AnalyticsChartTemplate() {
   );
 }
 
-function AnalyticsOverviewTemplate({ interactive }: { interactive: boolean }) {
+function AnalyticsOverviewTemplate() {
   return (
     <TemplatePhoneSurface>
       <div className="h-full overflow-y-auto bg-[var(--uc-surface)] pb-[90px] scrollbar-hide">
@@ -2750,7 +2749,7 @@ export function TemplateCodePreview({ previewId, presentationOnly = false }: Tem
     case "new-payment-sheet":
       return <NewPaymentSheetTemplate interactive={interactive} />;
     case "products-menu":
-      return <ProductsMenuTemplate interactive={interactive} />;
+      return <ProductsMenuTemplate />;
     case "more-menu":
       return <MoreMenuTemplate interactive={interactive} />;
     case "contacts-directory":
@@ -2774,7 +2773,7 @@ export function TemplateCodePreview({ previewId, presentationOnly = false }: Tem
     case "spending-money-out":
       return <SpendingMoneyOutTemplate interactive={interactive} />;
     case "products-shopsmart":
-      return <ProductsShopSmartTemplate interactive={interactive} />;
+      return <ProductsShopSmartTemplate />;
     case "logout-confirmation":
       return <LogoutConfirmationTemplate interactive={interactive} />;
     case "documents":
@@ -2788,7 +2787,7 @@ export function TemplateCodePreview({ previewId, presentationOnly = false }: Tem
     case "activate-mtoken":
       return <ActivateMtokenTemplate interactive={interactive} />;
     case "analytics-overview":
-      return <AnalyticsOverviewTemplate interactive={interactive} />;
+      return <AnalyticsOverviewTemplate />;
     case "cards-overview":
       return <CardsOverviewTemplate interactive={interactive} />;
     case "contact-info-sheet":

@@ -27,7 +27,7 @@ interface JourneyStep {
   screen: FlowScreenKind;
 }
 
-interface ScenarioContent {
+export interface ScenarioContent {
   label: string;
   description: string;
   steps: JourneyStep[];
@@ -38,7 +38,7 @@ interface SpecItem {
   body: string;
 }
 
-interface FlowContent {
+export interface FlowContent {
   defaultScenarioId: string;
   uxSpec: readonly SpecItem[];
   scenarios: Record<string, ScenarioContent>;
@@ -249,6 +249,35 @@ const FLOW_LIBRARY_CONTENT: Record<FlowPreviewId, FlowContent> = {
   "ro-card-pin": CARD_PIN_CONTENT,
 };
 
+const EMPTY_SCENARIO: ScenarioContent = {
+  label: "No scenarios",
+  description: "No scenarios are configured for this flow preview yet.",
+  steps: [],
+};
+
+export function resolveFlowScenario(
+  content: FlowContent,
+  requestedScenarioId: string,
+): { scenarioId: string; scenario: ScenarioContent } {
+  const requestedScenario = content.scenarios[requestedScenarioId];
+  if (requestedScenario) {
+    return { scenarioId: requestedScenarioId, scenario: requestedScenario };
+  }
+
+  const defaultScenario = content.scenarios[content.defaultScenarioId];
+  if (defaultScenario) {
+    return { scenarioId: content.defaultScenarioId, scenario: defaultScenario };
+  }
+
+  const firstScenario = Object.entries(content.scenarios)[0];
+  if (firstScenario) {
+    const [scenarioId, scenario] = firstScenario;
+    return { scenarioId, scenario };
+  }
+
+  return { scenarioId: "__empty__", scenario: EMPTY_SCENARIO };
+}
+
 export default function FlowLibraryScreen({
   initialFlowId = "ro-round-up",
   selectedFlowId: controlledFlowId,
@@ -258,9 +287,12 @@ export default function FlowLibraryScreen({
   const selectedFlowId = controlledFlowId ?? internalFlowId;
   const flow = getFlowPreviewMeta(selectedFlowId);
   const flowContent = FLOW_LIBRARY_CONTENT[selectedFlowId];
-  const [selectedScenarioId, setSelectedScenarioId] = useState(flowContent.defaultScenarioId);
-  const selectedScenario = flowContent.scenarios[selectedScenarioId] ?? flowContent.scenarios[flowContent.defaultScenarioId];
-  const [selectedCountries, setSelectedCountries] = useState<CountryId[]>([flow.countryScope[0]]);
+  const [requestedScenarioId, setRequestedScenarioId] = useState(flowContent.defaultScenarioId);
+  const { scenarioId: selectedScenarioId, scenario: selectedScenario } = resolveFlowScenario(
+    flowContent,
+    requestedScenarioId,
+  );
+  const [selectedCountries, setSelectedCountries] = useState<CountryId[]>([...flow.countryScope]);
   const [flowSearchQuery, setFlowSearchQuery] = useState("");
   const [activeSection, setActiveSection] = useState<FlowLibrarySection>("overview");
   const [activeDemoStepIndex, setActiveDemoStepIndex] = useState(0);
@@ -288,7 +320,7 @@ export default function FlowLibraryScreen({
   }, [initialFlowId]);
 
   useEffect(() => {
-    setSelectedScenarioId(flowContent.defaultScenarioId);
+    setRequestedScenarioId(flowContent.defaultScenarioId);
     setSelectedCountries([...flow.countryScope]);
     setActiveDemoStepIndex(0);
   }, [flow.countryScope, flowContent.defaultScenarioId, selectedFlowId]);
@@ -341,7 +373,7 @@ export default function FlowLibraryScreen({
             scenarios={flowContent.scenarios}
             selectedCountries={selectedCountries}
             activeDemoStepIndex={activeDemoStepIndex}
-            onScenarioSelect={setSelectedScenarioId}
+            onScenarioSelect={setRequestedScenarioId}
             onStepSelect={setActiveDemoStepIndex}
           />
         ) : null}
@@ -354,7 +386,7 @@ export default function FlowLibraryScreen({
             selectedScenario={selectedScenario}
             scenarios={flowContent.scenarios}
             selectedCountries={selectedCountries}
-            onScenarioSelect={setSelectedScenarioId}
+            onScenarioSelect={setRequestedScenarioId}
           />
         ) : null}
       </div>
@@ -861,7 +893,7 @@ function HomeEntryPreview() {
       <div className="bg-[var(--uc-surface)] px-[16px] pb-[12px] pt-[4px]">
         <div className="flex justify-between">
           <span className="rounded-[12px] bg-[var(--uc-static-black)] px-[8px] py-[4px] text-[9px] font-bold text-[var(--uc-static-white)]">Prime</span>
-          <span className="flex gap-[10px]"><AppIcon name="profile" /><AppIcon name="messages" /></span>
+          <span className="flex gap-[10px]"><AppIcon name="header-profile" /><AppIcon name="header-messages" /></span>
         </div>
         <h1 className="mt-[10px] text-[18px] font-bold leading-[22px]">Your Homepage</h1>
       </div>
@@ -1294,17 +1326,6 @@ function OptionRow({ title, subtitle }: { title: string; subtitle: string }) {
       </div>
       <AppIcon name="chevron-link" size={28} />
     </div>
-  );
-}
-
-function CardArtwork({ cardKind }: { cardKind: "credit" | "debit" }) {
-  return (
-    <Card
-      ariaLabel={cardKind === "credit" ? "Credit card" : "Debit card"}
-      size="large"
-      variant={getFlowCardVariant(cardKind)}
-      style={{ width: 126, height: 86, borderRadius: 5 }}
-    />
   );
 }
 
