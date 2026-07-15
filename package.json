@@ -19,7 +19,8 @@
     "audit:figma-bridge": "node scripts/audit-figma-bridge.mjs",
     "audit:templates": "node scripts/audit-template-contract.mjs",
     "audit:platform": "node scripts/audit-reference-platform.mjs",
-    "audit:all": "npm run audit:card-details && npm run audit:investments && npm run audit:figma-bridge && npm run audit:templates && npm run audit:platform",
+    "audit:assets": "node scripts/audit-assets.mjs",
+    "audit:all": "npm run audit:card-details && npm run audit:investments && npm run audit:figma-bridge && npm run audit:templates && npm run audit:platform && npm run audit:assets",
     "verify": "npm run typecheck && npm run lint && npm test && npm run audit:all && npm run build"
   },
   "dependencies": {
