@@ -57,6 +57,8 @@ export function useNavigation() {
       const newHistory = [...prev.history];
       newHistory.pop(); // Remove current screen
       const previousScreen = newHistory[newHistory.length - 1];
+
+      if (!previousScreen) return prev;
       
       return {
         ...prev,

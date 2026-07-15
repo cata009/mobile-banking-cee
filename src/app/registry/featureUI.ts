@@ -9,6 +9,7 @@ import type { FeatureId } from "@/app/state/demoTypes";
  * UI location identifiers where features can be applied
  */
 export type UILocation =
+  | "app.assistant"
   | "home.header"
   | "home.accountSummary"
   | "home.quickActions"
@@ -38,6 +39,12 @@ export interface FeatureUIConfig {
  * of feature impact across the application.
  */
 export const FEATURE_UI_MAP: Record<FeatureId, FeatureUIConfig> = {
+  fx_czCoAppingSmartAssistant: {
+    id: "fx_czCoAppingSmartAssistant",
+    locations: ["app.assistant"],
+    description: "Adds the portable Co-Apping Smart Assistant to supported app screens",
+  },
+
   // ─── RELEASE FEATURES ────────────────────────────────────────
   fx_newPaymentsHub: {
     id: "fx_newPaymentsHub",

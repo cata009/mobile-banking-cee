@@ -10,6 +10,7 @@ import type {
   BankingScenarioId,
   CountryId,
   DesignSystemId,
+  FeatureFlagOverrides,
   FeatureId,
   ProductCountKey,
   ProductCounts,
@@ -64,7 +65,7 @@ export function getContextKey(
  * // { fx_transactionsFilters: true }
  * ```
  */
-export function getCurrentFlags(state: DemoState): Record<FeatureId, boolean> {
+export function getCurrentFlags(state: DemoState): FeatureFlagOverrides {
   const contextKey = getContextKey(state);
   return state.flagsByContext[contextKey] || {};
 }
@@ -416,6 +417,7 @@ export type {
   BankingScenarioId,
   CountryId,
   DesignSystemId,
+  FeatureFlagOverrides,
   FeatureId,
   ProductCountKey,
   ProductCounts,
