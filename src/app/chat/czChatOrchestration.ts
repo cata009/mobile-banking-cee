@@ -1604,7 +1604,6 @@ export function buildCzChatHelpContext(area: CzChatHelpArea, id: string): CoAppi
       };
   }
 }
-
 export function getCzChatHelpAreaForAccountProduct(product: Product | null): CzChatHelpArea {
   if (product?.type === "saving_account" || product?.type === "term_deposit") return "savings";
   if (product?.type === "loan") return "loan";
@@ -1815,4 +1814,3 @@ export function buildCzChatScreenContext(screen: Screen, id: string, accountProd
       };
   }
 }
-

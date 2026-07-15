@@ -1,5 +1,5 @@
 import { readFileSync, readdirSync } from "node:fs";
-import { resolve } from "node:path";
+import { dirname, relative, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   buildCreditCardOpportunities,
@@ -22,6 +22,26 @@ function collectSourceFiles(directory: string): string[] {
   });
 }
 
+function collectAppDependencies(source: string, importerPath: string): string[] {
+  const staticImports = source.matchAll(
+    /(?:import|export)\s+(?:type\s+)?(?:[^"'`;]*?\s+from\s+)?["']([^"']+)["']/gs,
+  );
+  const dynamicImports = source.matchAll(/import\s*\(\s*["']([^"']+)["']\s*\)/g);
+  const appDirectory = resolve(workspaceRoot, "src/app");
+
+  return [...staticImports, ...dynamicImports]
+    .sort((left, right) => (left.index ?? 0) - (right.index ?? 0))
+    .map((match) => match[1])
+    .filter((specifier): specifier is string => Boolean(specifier))
+    .filter((specifier) => {
+      if (specifier.startsWith("@/app/")) return true;
+      if (!specifier.startsWith(".")) return false;
+      const target = resolve(dirname(importerPath), specifier);
+      const pathFromApp = relative(appDirectory, target);
+      return pathFromApp === "" || (!pathFromApp.startsWith("..") && !resolve(pathFromApp).startsWith(".."));
+    });
+}
+
 describe("CZ chat app orchestration", () => {
   it("preserves help and screen entry contexts with their exact topic mapping", () => {
     expect(buildCzChatHelpContext("card", "card-help")).toEqual({
@@ -35,15 +55,17 @@ describe("CZ chat app orchestration", () => {
       ],
     });
 
-    const homeContext = buildCzChatScreenContext("homepage", "home-entry");
-    expect(homeContext?.title).toBe("Teodora, what should we look at first?");
-    expect(homeContext?.suggestedTopics?.map(({ id }) => id)).toEqual([
-      "home-saving-capacity",
-      "home-overview",
-      "home-product-shelf",
-      "home-latest-transactions",
-      "home-unusual-spending",
-    ]);
+    expect(buildCzChatScreenContext("homepage", "home-entry")).toEqual({
+      id: "home-entry",
+      title: "Teodora, what should we look at first?",
+      suggestedTopics: [
+        { id: "home-saving-capacity", label: "How much can I save?", prompt: "How much money can I save every month?" },
+        { id: "home-overview", label: "Review today's money snapshot", prompt: "Help me understand the main things I should notice on my homepage." },
+        { id: "home-product-shelf", label: "What products can I open", prompt: "What products can I open from the product shelf?" },
+        { id: "home-latest-transactions", label: "Review latest 5 transactions", prompt: "Show me the latest 5 transactions and which account they came from." },
+        { id: "home-unusual-spending", label: "Spot unusual spending", prompt: "Check the largest, pending, or category-heavy movements from my latest account activity." },
+      ],
+    });
   });
 
   it("preserves credit opportunity copy, metrics, and navigation action", () => {
@@ -62,17 +84,31 @@ describe("CZ chat app orchestration", () => {
     };
 
     expect(buildCreditCardOpportunities(card, "CZ", "card-detail")).toEqual([
-      expect.objectContaining({
+      {
         id: "credit-limit-review",
+        priority: "primary",
+        tone: "credit",
+        eyebrow: "Credit card",
         title: "New credit limit for you",
         body: "Increase your card limit from 10\u00a0000,00 CZK to 15\u00a0000,00 CZK for more flexibility when you need it.",
-        action: expect.objectContaining({ id: "start-credit-limit-review", type: "send-message" }),
-        relatedItem: expect.objectContaining({
+        reason: "Credit card limit increase candidate.",
+        relatedItem: {
           title: "Credit Card",
           description: "5173 **** **** 4321",
-          action: expect.objectContaining({ target: "card-detail" }),
-        }),
-      }),
+          visualKind: "credit-card",
+          action: { id: "open-credit-card-detail", label: "Open card detail", type: "navigate", target: "card-detail" },
+        },
+        metrics: [
+          { label: "Current limit", value: "10\u00a0000,00 CZK", helper: "Your current card limit" },
+          { label: "New limit", value: "15\u00a0000,00 CZK", helper: "Available after successful review" },
+        ],
+        action: {
+          id: "start-credit-limit-review",
+          label: "I'm interested",
+          type: "send-message",
+          prompt: "I'm interested in this credit limit offer.",
+        },
+      },
     ]);
   });
 
@@ -106,6 +142,16 @@ describe("CZ chat app orchestration", () => {
         expect.objectContaining({ id: "cz-goal-long-term", label: "Long-term reserve" }),
       ],
     }));
+
+    const overlappingPrompt = await resolveReply("I'm not sure yet", []);
+    expect(overlappingPrompt).toEqual(expect.objectContaining({
+      text: expect.stringContaining("### Starting amount noted"),
+      followUps: [
+        expect.objectContaining({ id: "cz-goal-monthly-500", label: "500 CZK monthly" }),
+        expect.objectContaining({ id: "cz-goal-monthly-1000", label: "1,000 CZK monthly" }),
+        expect.objectContaining({ id: "cz-goal-monthly-not-now", label: "Not now" }),
+      ],
+    }));
   });
 
   it("makes App a thin consumer and adds no package-to-app reverse dependency", () => {
@@ -115,18 +161,21 @@ describe("CZ chat app orchestration", () => {
     expect(appSource).not.toMatch(/function buildCzChatHelpContext/);
 
     const packageDirectory = resolve(workspaceRoot, "package/mobile-pi-coapping-chat-package/src");
+    expect(collectAppDependencies(
+      `import value from '@/app/value';\nexport { other }\n  from "@/app/other";\nconst lazy = import('@/app/lazy');\nimport local from '../../../../src/app/local';`,
+      resolve(packageDirectory, "nested/example.ts"),
+    )).toEqual(["@/app/value", "@/app/other", "@/app/lazy", "../../../../src/app/local"]);
+
     const reverseImports = collectSourceFiles(packageDirectory).flatMap((filePath) => {
       const relativePath = filePath.slice(packageDirectory.length + 1).replace(/\\/g, "/");
-      return readFileSync(filePath, "utf8")
-        .split(/\r?\n/)
-        .filter((line) => line.includes('from "@/app/'))
-        .map((line) => `${relativePath}:${line.trim()}`);
+      return collectAppDependencies(readFileSync(filePath, "utf8"), filePath)
+        .map((specifier) => `${relativePath}:${specifier}`);
     });
 
     expect(reverseImports).toEqual([
-      'CoAppingChatAssistant.tsx:import FigmaCard from "@/app/components/cards/Card";',
-      'CoAppingChatAssistant.tsx:import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";',
-      'CoAppingChatAssistant.tsx:import LinkButton from "@/app/components/ui/LinkButton";',
+      "CoAppingChatAssistant.tsx:@/app/components/cards/Card",
+      "CoAppingChatAssistant.tsx:@/app/components/pfm/PfmCategoryIcon",
+      "CoAppingChatAssistant.tsx:@/app/components/ui/LinkButton",
     ]);
   });
 });
