@@ -22,6 +22,7 @@ import { BANKING_SCENARIOS } from "@/app/platform/banking/bankingScenarioRegistr
 import { getAvailableLanguages, type AppLanguage } from "@/app/registry/languageByCountry";
 import { FLOW_PREVIEW_ORDER, type FlowPreviewId } from "@/app/registry/flowPreviewRegistry";
 import type { Screen } from "@/app/contexts/NavigationContext";
+import { ROUTE_POLICY } from "@/app/navigation/routePolicy";
 import type {
   BankingScenarioId,
   CountryId,
@@ -90,60 +91,14 @@ const VALID_THEMES = new Set<string>(["light", "dark"]);
 const VALID_FLOW_PREVIEWS = new Set<string>(FLOW_PREVIEW_ORDER);
 
 /**
- * Screens that can be restored directly from a link. Transient / object-driven
- * screens (payment flow steps, transaction detail) are remapped to their
- * nearest stable parent so a shared link never lands on a blank screen.
- */
-const RESTORABLE_SCREENS: ReadonlySet<Screen> = new Set<Screen>([
-  "prelogin-inactive",
-  "prelogin-active",
-  "homepage",
-  "analytics",
-  "messages",
-  "payments",
-  "products",
-  "investments",
-  "prime",
-  "more",
-  "documents",
-  "settings",
-  "contacts",
-  "account-detail",
-  "account-details-info",
-  "account-options",
-  "card-detail",
-  "flow-library",
-  "design-system",
-]);
-
-const ACCOUNT_CONTEXT_SCREENS: ReadonlySet<Screen> = new Set<Screen>([
-  "account-detail",
-  "account-details-info",
-  "account-options",
-]);
-
-/**
  * Map any screen to a directly restorable one. Transient screens fall back to
  * their nearest stable parent.
  */
 export function normalizeScreen(screen: Screen, hasCard: boolean): Screen {
-  if (RESTORABLE_SCREENS.has(screen)) return screen;
-
-  switch (screen) {
-    case "transaction-detail":
-      return hasCard ? "card-detail" : "account-detail";
-    case "product-detail":
-      return "products";
-    case "domestic-payment":
-    case "payment-review":
-    case "payment-sign":
-    case "payment-success":
-      return "payments";
-    case "investments-history":
-      return "investments";
-    default:
-      return "homepage";
-  }
+  if (!Object.prototype.hasOwnProperty.call(ROUTE_POLICY, screen)) return "homepage";
+  const deepLinkPolicy = ROUTE_POLICY[screen].deepLink;
+  if (deepLinkPolicy.restorable) return screen;
+  return hasCard && deepLinkPolicy.fallbackWithCard ? deepLinkPolicy.fallbackWithCard : deepLinkPolicy.fallback;
 }
 
 /**
@@ -253,6 +208,7 @@ export function deepLinkToDemoInitialState(parsed: ParsedDeepLink | null): Parti
  */
 export function buildDeepLinkUrl(state: DeepLinkState): string {
   const normalizedScreen = normalizeScreen(state.screen, Boolean(state.cardId));
+  const payloadPolicy = ROUTE_POLICY[normalizedScreen].deepLink.payload;
   const params = new URLSearchParams();
 
   params.set(PARAM.product, state.product);
@@ -267,14 +223,14 @@ export function buildDeepLinkUrl(state: DeepLinkState): string {
 
   if (state.amountsHidden) params.set(PARAM.amountsHidden, "1");
 
-  if (state.flowId && normalizedScreen === "flow-library") {
+  if (state.flowId && payloadPolicy === "flow") {
     params.set(PARAM.flowId, state.flowId);
   }
 
-  if (state.accountId && ACCOUNT_CONTEXT_SCREENS.has(normalizedScreen)) {
+  if (state.accountId && payloadPolicy === "account") {
     params.set(PARAM.accountId, state.accountId);
   }
-  if (state.cardId && normalizedScreen === "card-detail") {
+  if (state.cardId && payloadPolicy === "card") {
     params.set(PARAM.cardId, state.cardId);
   }
 
