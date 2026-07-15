@@ -172,7 +172,7 @@ function createScreen() {
     }
   }
   document.body.appendChild(screen)
-  return { screen, text, scroll }
+  return { screen, text, image }
 }
 
 describe('phone screenshot public exporters', () => {
@@ -205,11 +205,12 @@ describe('phone screenshot public exporters', () => {
   })
 
   it('exports the single prepared clone with stable text, asset order, shadows, and full-scroll associations', async () => {
-    const { screen, text } = createScreen()
+    const { screen, text, image } = createScreen()
 
     const exportPromise = createPhoneFigmaJson({ screenElement: screen, mode: 'full' })
     text.textContent = 'Live DOM changed after capture started'
     text.style.fontWeight = '400'
+    image.src = 'data:image/png;base64,TElWRS1PTkxZ'
     const liveOnly = document.createElement('aside')
     liveOnly.textContent = 'Live-only insertion'
     liveOnly.setAttribute('data-test-rect', '0,0,10,10')
@@ -228,6 +229,7 @@ describe('phone screenshot public exporters', () => {
     ])
     expect(findLayer(payload.root.children, 'Ordered vector')?.assetRef).toBe('svg-1-1-2')
     expect(findLayer(payload.root.children, 'Ordered image')?.assetRef).toBe('image-1-1-3')
+    expect(payload.assets.find((asset) => asset.id === 'image-1-1-3')?.content).toBe('SU1H')
     expect(findLayer(payload.root.children, 'Asset card')?.styles?.effects?.map((effect) => effect.offset)).toEqual([
       { x: 0, y: 2 },
       { x: 1, y: 3 },
