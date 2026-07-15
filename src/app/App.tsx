@@ -131,14 +131,6 @@ type CzChatLauncherVariant = "bubble" | "edge-tab";
 
 const CZ_CHAT_USER_NAME = "Teodora";
 
-const CZ_CHAT_LEVEL_ONE_SCREENS = new Set<Screen>([
-  "homepage",
-  "analytics",
-  "payments",
-  "products",
-  "more",
-]);
-
 const CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX = "open-products-shelf-card-";
 const CZ_CHAT_PRODUCT_DETAIL_ACTION_PREFIX = "open-product-detail-";
 
@@ -2018,7 +2010,6 @@ function AppContent({
   const isPreloginScreen = currentScreen === "prelogin-inactive" || currentScreen === "prelogin-active";
   const isInAppScreen =
     !isPreloginScreen && currentScreen !== "flow-library" && currentScreen !== "design-system";
-  const isCzChatLevelOneScreen = CZ_CHAT_LEVEL_ONE_SCREENS.has(currentScreen);
   const czChatLauncherVariant: CzChatLauncherVariant = "edge-tab";
   const isPiRuntimeContext = product === "PI" && designSystem === "current";
   const isMarketKidsRuntimeContext =
@@ -2032,12 +2023,8 @@ function AppContent({
   const [showPanel, setShowPanel] = useState(false);
   // Track de unde am pornit co-apping session (pentru a ne întoarce corect)
   const [coAppingOriginScreen, setCoAppingOriginScreen] = useState<'prelogin-inactive' | 'prelogin-active'>('prelogin-inactive');
-  // Track logout dialog state pentru a ascunde home indicator-ul
-  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   // Track edge loading animation state
   const [showEdgeAnimation, setShowEdgeAnimation] = useState(false);
-  // Track if content should be hidden during animation
-  const [hideContentDuringAnimation, setHideContentDuringAnimation] = useState(false);
   // Track if FAB should slide in
   const [showFABSlideIn, setShowFABSlideIn] = useState(false);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(parsedDeepLink?.accountId ?? null);
@@ -2241,8 +2228,6 @@ function AppContent({
   const handleContinueCoApping = () => {
     console.log(`✅ Co-Apping activated - returning to origin screen: ${coAppingOriginScreen}`);
     setCoAppingActive(true);
-    // Hide content during animation
-    setHideContentDuringAnimation(true);
     // Start edge loading animation
     setShowEdgeAnimation(true);
     // Enable FAB slide in
@@ -2254,13 +2239,7 @@ function AppContent({
   // Handler when animation completes
   const handleAnimationComplete = () => {
     setShowEdgeAnimation(false);
-    setHideContentDuringAnimation(false);
     setShowFABSlideIn(false);
-  };
-
-  // Handler when animation starts
-  const handleAnimationStart = () => {
-    setHideContentDuringAnimation(true);
   };
   
   // Handler pentru click pe butonul floating verde
@@ -2354,11 +2333,6 @@ function AppContent({
     }
     setSelectedAccountId(product.id);
     navigateTo("account-detail");
-  };
-
-  const handleCardClick = (product: Product) => {
-    setSelectedCardId(product.id);
-    navigateTo("card-detail");
   };
 
   const handleAccountDetailsClick = (product: Product) => {
@@ -2794,8 +2768,6 @@ function AppContent({
           <PanelOverlay 
             onClose={handleClosePanel}
             onStartCoApping={handleStartCoApping}
-            onPrimeClick={handlePrimeClick}
-            onMoreClick={handleMoreClick}
           />
         )}
 
@@ -2820,7 +2792,6 @@ function AppContent({
         {showEdgeAnimation && (
           <EdgeLoadingAnimation 
             onComplete={handleAnimationComplete}
-            onAnimationStart={handleAnimationStart}
           />
         )}
         </>

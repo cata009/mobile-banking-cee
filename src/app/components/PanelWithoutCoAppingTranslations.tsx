@@ -182,7 +182,11 @@ function Frame8({ aboutSmartBanking, exchangeRates, findAtmBranches, onClose }: 
 export default function PanelWithoutCoAppingTranslations({ aboutSmartBanking, exchangeRates, findAtmBranches, onClose }: PanelWithoutCoAppingTranslationsProps) {
   return (
     <div className="relative size-full" data-name="Panel">
-      <div className="absolute backdrop-blur-[5.939px] bg-[var(--uc-static-black)] inset-0 opacity-51" data-name="Screen Dimming" />
+      <div
+        className="absolute backdrop-blur-[5.939px] bg-[var(--uc-static-black)] inset-0 opacity-51"
+        data-name="Screen Dimming"
+        onClick={onClose}
+      />
       <Frame8 aboutSmartBanking={aboutSmartBanking} exchangeRates={exchangeRates} findAtmBranches={findAtmBranches} onClose={onClose} />
     </div>
   );
