@@ -55,8 +55,8 @@ type CarouselDragState = {
 function splitFormattedNumber(value: string) {
   const match = value.match(/^(.+?)([,.]\d{2})$/);
   return {
-    integer: match ? match[1] : value,
-    decimals: match ? match[2] : ",00",
+    integer: match?.[1] ?? value,
+    decimals: match?.[2] ?? ",00",
   };
 }
 

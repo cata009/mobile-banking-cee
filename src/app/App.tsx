@@ -2346,11 +2346,6 @@ function AppContent({
     navigateTo("investments-history");
   };
 
-  // Handler pentru înapoi din More
-  const handleMoreBack = () => {
-    goBack();
-  };
-
   const handleAccountClick = (product: Product) => {
     if (product.type === "debit_card" || product.type === "credit_card") {
       setSelectedCardId(product.id);
@@ -2693,7 +2688,6 @@ function AppContent({
         {/* More Screen - EXACT ca Language Selector (NO animation) */}
         {currentScreen === "more" && (
           <MoreScreen 
-            onBack={handleMoreBack} 
             onHomeClick={() => navigateTo('homepage')}
             onAnalyticsClick={handleAnalyticsClick}
             onMessagesClick={handleMessagesClick}

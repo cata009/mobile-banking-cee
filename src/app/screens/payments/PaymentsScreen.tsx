@@ -251,7 +251,7 @@ export default function PaymentsScreen({
         <BottomNavigation activeTab="payments" onTabChange={handleTabChange} />
       </div>
 
-      {selectedHeroSheet && (
+      {selectedPrimaryItemId && selectedHeroSheet && (
         <PaymentHeroSheet
           config={selectedHeroSheet}
           heroId={selectedPrimaryItemId}

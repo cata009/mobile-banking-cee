@@ -9,12 +9,14 @@ export interface BankingTutorialSlide {
   kind: BankingTutorialSlideKind;
 }
 
+export type BankingTutorialSlides = readonly [BankingTutorialSlide, ...BankingTutorialSlide[]];
+
 export interface BankingTutorial {
   id: string;
   title: string;
   shortTitle: string;
   accent: string;
-  slides: BankingTutorialSlide[];
+  slides: BankingTutorialSlides;
 }
 
 const COMMON_TUTORIALS: BankingTutorial[] = [
@@ -100,7 +102,7 @@ const COMMON_TUTORIALS: BankingTutorial[] = [
   },
 ];
 
-function buildSlides(topic: string, body: string): BankingTutorialSlide[] {
+function buildSlides(topic: string, body: string): BankingTutorialSlides {
   return [
     {
       title: topic,

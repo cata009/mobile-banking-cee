@@ -14,7 +14,7 @@ import { formatMaskedCardNumber } from "@/app/utils/cardNumber";
 import { useProducts } from "@/hooks/useProducts";
 import { getAccountTransactions, groupAccountTransactionsByMonth } from "@/data/accountDetails";
 import type { AccountTransaction } from "@/data/accountDetails";
-import type { Product } from "@/data/products";
+import type { CreditCard, DebitCard, Product } from "@/data/products";
 import Card, { type CardVariant } from "@/app/components/cards/Card";
 import UserEventCard from "@/app/components/cards/UserEventCard";
 import FaceIdAnimation from "@/app/components/FaceIdAnimation";
@@ -51,7 +51,7 @@ type CarouselDragState = {
   startX: number;
 };
 
-function isCardProduct(product: Product): boolean {
+function isCardProduct(product: Product): product is DebitCard | CreditCard {
   return product.type === "debit_card" || product.type === "credit_card";
 }
 
@@ -218,6 +218,7 @@ export default function CardDetailScreen({
 
   const completeCardDetailsFaceId = () => {
     setIsCardDetailsFaceIdVisible(false);
+    if (!activeCard) return;
     onCardDetailsClick?.(activeCard);
   };
 

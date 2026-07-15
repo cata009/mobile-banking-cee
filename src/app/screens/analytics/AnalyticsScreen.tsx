@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { DragEvent, MouseEvent, PointerEvent, UIEvent } from "react";
 import BottomNavigation from "@/app/components/BottomNavigation";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
-import { AppIcon } from "@/app/components/icons";
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
 import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
 import { useLanguage } from "@/app/contexts/LanguageContext";
@@ -10,6 +9,7 @@ import { useCountry } from "@/app/state/demoStore";
 import { formatMoneyNumber } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import {
+  createSpendingAnalytics,
   createSpendingAnalyticsTimeline,
   type SpendingAnalyticsPeriod,
   type SpendingAnalyticsSummary,
@@ -68,7 +68,7 @@ function buildCenteredIndicator(periods: SpendingAnalyticsPeriod[], activeIndex:
   }
 
   let start = Math.max(0, activeIndex - 2);
-  let end = Math.min(periods.length, start + 5);
+  const end = Math.min(periods.length, start + 5);
 
   if (end - start < 5) {
     start = Math.max(0, end - 5);
@@ -214,8 +214,10 @@ function AnalyticsHeroCarousel({
     const carousel = carouselRef.current;
     if (!carousel) return;
     const nextIndex = getNearestPeriodIndex(carousel.scrollLeft);
+    const nextPeriod = periods[nextIndex];
+    if (!nextPeriod) return;
     scrollToPeriod(nextIndex);
-    onPeriodChange(periods[nextIndex].key);
+    onPeriodChange(nextPeriod.key);
   };
 
   const removeMouseDragListeners = () => {
@@ -396,8 +398,9 @@ function AnalyticsHeroCarousel({
       }}
     >
         <div className="flex">
-          {periods.map((period, index) => {
+          {periods.map((period) => {
             const summary = summariesByPeriodKey[period.key];
+            if (!summary) return null;
 
             return (
               <div
@@ -639,9 +642,12 @@ export default function AnalyticsScreen({
 
   const activePeriodIndex = Math.max(timeline.periods.findIndex((period) => period.key === selectedPeriodKey), 0);
   const indicatorKeys = buildCenteredIndicator(timeline.periods as SpendingAnalyticsPeriod[], activePeriodIndex);
+  const firstPeriod = timeline.periods[0];
   const summary =
     timeline.summariesByPeriodKey[selectedPeriodKey] ??
-    timeline.summariesByPeriodKey[timeline.activePeriodKey];
+    timeline.summariesByPeriodKey[timeline.activePeriodKey] ??
+    (firstPeriod ? timeline.summariesByPeriodKey[firstPeriod.key] : undefined) ??
+    createSpendingAnalytics(country, products);
 
   const handleTabChange = (tab: NavItem) => {
     if (tab === "home") onHomeClick?.();
