@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { basename, extname, resolve } from "node:path";
+import { basename, dirname, extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const TRACKED_ASSET_EXTENSIONS = new Set([
@@ -146,7 +146,23 @@ export function formatAssetAuditReport(report) {
   }, null, 2);
 }
 
+export function assertAssetBaseline(report, baseline) {
+  if (
+    report.assetCount !== baseline.assetCount ||
+    report.pathBlobSha256Aggregate !== baseline.pathBlobSha256Aggregate
+  ) {
+    throw new Error(
+      `Asset baseline mismatch: expected ${baseline.assetCount}/${baseline.pathBlobSha256Aggregate}, ` +
+      `received ${report.assetCount}/${report.pathBlobSha256Aggregate}`,
+    );
+  }
+}
+
 const invokedPath = process.argv[1] ? resolve(process.argv[1]) : null;
 if (invokedPath === fileURLToPath(import.meta.url)) {
-  console.log(formatAssetAuditReport(auditTrackedAssets()));
+  const report = auditTrackedAssets();
+  const baselinePath = resolve(dirname(fileURLToPath(import.meta.url)), "asset-baseline.json");
+  const baseline = JSON.parse(readFileSync(baselinePath, "utf8"));
+  assertAssetBaseline(report, baseline);
+  console.log(formatAssetAuditReport(report));
 }

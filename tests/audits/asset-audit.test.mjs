@@ -2,10 +2,19 @@ import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import {
   buildAssetAudit,
+  assertAssetBaseline,
   isTrackedAssetPath,
 } from "../../scripts/audit-assets.mjs";
 
 describe("tracked asset audit", () => {
+  it("fails closed when a tracked asset path or blob changes from the approved baseline", () => {
+    const report = { assetCount: 2, pathBlobSha256Aggregate: "approved" };
+    expect(() => assertAssetBaseline(report, { assetCount: 2, pathBlobSha256Aggregate: "approved" }))
+      .not.toThrow();
+    expect(() => assertAssetBaseline(report, { assetCount: 2, pathBlobSha256Aggregate: "changed" }))
+      .toThrow(/baseline mismatch/i);
+  });
+
   it("recognizes supported raster and vector assets without treating source files as assets", () => {
     expect([
       "src/assets/card.PNG",
