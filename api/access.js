@@ -1,15 +1,35 @@
 import crypto from "node:crypto";
 
 const ACCESS_COOKIE = "mb_access";
-const ATTEMPTS_COOKIE = "mb_access_attempts";
-const PASSWORD = process.env.ACCESS_PASSWORD || "CE&EE2025-";
-const COOKIE_SECRET = process.env.ACCESS_COOKIE_SECRET || process.env.ACCESS_PASSWORD || "CE&EE2025-";
 const ONE_MONTH_SECONDS = 60 * 60 * 24 * 31;
 const SIX_MONTHS_SECONDS = 60 * 60 * 24 * 183;
 const SHARE_TOKEN_SECONDS = 60 * 60 * 24 * 7;
-const BLOCK_SECONDS = 60 * 60 * 24;
-const MAX_ATTEMPTS = 10;
 const SHARE_TOKEN_PURPOSE = "demo-share-access";
+const MIN_COOKIE_SECRET_LENGTH = 32;
+
+function readConfiguration() {
+  const password = process.env.ACCESS_PASSWORD;
+  const cookieSecret = process.env.ACCESS_COOKIE_SECRET;
+
+  if (
+    typeof password !== "string" ||
+    password.length === 0 ||
+    typeof cookieSecret !== "string" ||
+    cookieSecret.length < MIN_COOKIE_SECRET_LENGTH
+  ) {
+    return null;
+  }
+
+  return { password, cookieSecret };
+}
+
+function safeEqual(left, right) {
+  if (typeof left !== "string" || typeof right !== "string") return false;
+
+  const leftBuffer = Buffer.from(left, "utf8");
+  const rightBuffer = Buffer.from(right, "utf8");
+  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
 
 function toBase64Url(value) {
   return Buffer.from(value).toString("base64url");
@@ -19,20 +39,23 @@ function fromBase64Url(value) {
   return Buffer.from(value, "base64url").toString("utf8");
 }
 
-function sign(value) {
-  return crypto.createHmac("sha256", COOKIE_SECRET).update(value).digest("base64url");
+function sign(value, secret) {
+  return crypto.createHmac("sha256", secret).update(value).digest("base64url");
 }
 
-function encodeCookiePayload(payload) {
+function encodeSignedPayload(payload, secret) {
   const encoded = toBase64Url(JSON.stringify(payload));
-  return `${encoded}.${sign(encoded)}`;
+  return `${encoded}.${sign(encoded, secret)}`;
 }
 
-function decodeCookiePayload(value) {
+function decodeSignedPayload(value, secret) {
   if (!value || typeof value !== "string") return null;
 
-  const [encoded, signature] = value.split(".");
-  if (!encoded || !signature || sign(encoded) !== signature) return null;
+  const parts = value.split(".");
+  if (parts.length !== 2) return null;
+
+  const [encoded, signature] = parts;
+  if (!encoded || !signature || !safeEqual(sign(encoded, secret), signature)) return null;
 
   try {
     return JSON.parse(fromBase64Url(encoded));
@@ -41,33 +64,44 @@ function decodeCookiePayload(value) {
   }
 }
 
-function encodeAccessCookie(expiresAt) {
-  return encodeCookiePayload({ expiresAt });
+function encodeAccessCookie(expiresAt, secret) {
+  return encodeSignedPayload({ expiresAt }, secret);
 }
 
-function encodeShareToken() {
-  return encodeCookiePayload({
-    purpose: SHARE_TOKEN_PURPOSE,
-    expiresAt: Date.now() + SHARE_TOKEN_SECONDS * 1000,
-  });
+function encodeShareToken(secret) {
+  return encodeSignedPayload(
+    {
+      purpose: SHARE_TOKEN_PURPOSE,
+      expiresAt: Date.now() + SHARE_TOKEN_SECONDS * 1000,
+    },
+    secret,
+  );
 }
 
-function isShareTokenValid(token) {
-  const payload = decodeCookiePayload(token);
+function isShareTokenValid(token, secret) {
+  const payload = decodeSignedPayload(token, secret);
   return Boolean(
     payload?.purpose === SHARE_TOKEN_PURPOSE &&
-    payload.expiresAt &&
-    payload.expiresAt > Date.now()
+      Number.isFinite(payload.expiresAt) &&
+      payload.expiresAt > Date.now(),
   );
 }
 
 function parseCookies(cookieHeader = "") {
-  return cookieHeader.split(";").reduce((cookies, part) => {
+  const cookies = {};
+
+  for (const part of cookieHeader.split(";")) {
     const [rawName, ...rawValue] = part.trim().split("=");
-    if (!rawName) return cookies;
-    cookies[rawName] = decodeURIComponent(rawValue.join("="));
-    return cookies;
-  }, {});
+    if (!rawName) continue;
+
+    try {
+      cookies[rawName] = decodeURIComponent(rawValue.join("="));
+    } catch {
+      // Ignore malformed values. A broken cookie must never crash the access endpoint.
+    }
+  }
+
+  return cookies;
 }
 
 function serializeCookie(name, value, maxAge, req) {
@@ -88,28 +122,23 @@ function serializeCookie(name, value, maxAge, req) {
   return parts.join("; ");
 }
 
-function clearCookie(name, req) {
-  return serializeCookie(name, "", 0, req);
-}
-
-function isAccessValid(cookies) {
-  const payload = decodeCookiePayload(cookies[ACCESS_COOKIE]);
-  return Boolean(payload?.expiresAt && payload.expiresAt > Date.now());
-}
-
-function getAttemptState(cookies) {
-  const payload = decodeCookiePayload(cookies[ATTEMPTS_COOKIE]);
-  if (!payload) return { count: 0, blockedUntil: 0 };
-
-  return {
-    count: Number.isFinite(payload.count) ? payload.count : 0,
-    blockedUntil: Number.isFinite(payload.blockedUntil) ? payload.blockedUntil : 0,
-  };
+function isAccessValid(cookies, secret) {
+  const payload = decodeSignedPayload(cookies[ACCESS_COOKIE], secret);
+  return Boolean(Number.isFinite(payload?.expiresAt) && payload.expiresAt > Date.now());
 }
 
 function safeReturnTo(value) {
   if (typeof value !== "string") return "/";
   if (!value.startsWith("/") || value.startsWith("//")) return "/";
+  if (
+    value.includes("\\") ||
+    Array.from(value).some((character) => {
+      const codePoint = character.codePointAt(0);
+      return codePoint !== undefined && (codePoint <= 31 || codePoint === 127);
+    })
+  ) {
+    return "/";
+  }
   if (value.startsWith("/api/") || value.startsWith("/access.html")) return "/";
   return value;
 }
@@ -156,13 +185,10 @@ function isFormRequest(req) {
   return contentType.includes("application/x-www-form-urlencoded");
 }
 
-function redirectToAccess(res, error, returnTo, cookies = []) {
+function redirectToAccess(res, returnTo) {
   const target = new URL("/access.html", "https://local.app");
-  target.searchParams.set("error", error);
+  target.searchParams.set("error", "incorrect");
   target.searchParams.set("returnTo", returnTo);
-  if (cookies.length > 0) {
-    res.setHeader("Set-Cookie", cookies);
-  }
   res.statusCode = 303;
   res.setHeader("Location", `${target.pathname}${target.search}`);
   res.end();
@@ -185,6 +211,13 @@ function sendJson(res, status, payload, cookies = []) {
 }
 
 export default async function handler(req, res) {
+  const configuration = readConfiguration();
+  if (!configuration) {
+    sendJson(res, 503, { ok: false, message: "Access service is not configured." });
+    return;
+  }
+
+  const { password: configuredPassword, cookieSecret } = configuration;
   const cookies = parseCookies(req.headers.cookie);
 
   if (req.method === "GET") {
@@ -192,20 +225,20 @@ export default async function handler(req, res) {
     const mode = url.searchParams.get("mode");
 
     if (mode === "share-token") {
-      if (!isAccessValid(cookies)) {
+      if (!isAccessValid(cookies, cookieSecret)) {
         sendJson(res, 401, { ok: false, message: "Access required." });
         return;
       }
 
       sendJson(res, 200, {
         ok: true,
-        token: encodeShareToken(),
+        token: encodeShareToken(cookieSecret),
         expiresIn: SHARE_TOKEN_SECONDS,
       });
       return;
     }
 
-    sendJson(res, 200, { authenticated: isAccessValid(cookies) });
+    sendJson(res, 200, { authenticated: isAccessValid(cookies, cookieSecret) });
     return;
   }
 
@@ -215,76 +248,53 @@ export default async function handler(req, res) {
     return;
   }
 
-  const attemptState = getAttemptState(cookies);
-  const now = Date.now();
-
-  if (attemptState.blockedUntil > now) {
-    sendJson(res, 423, {
-      ok: false,
-      blocked: true,
-      message: "Access temporarily blocked. Please contact the local UX designer for support.",
-    });
-    return;
-  }
-
   const body = await readRequestBody(req);
   const shareToken = body.shareToken;
-  if (typeof shareToken === "string" && isShareTokenValid(shareToken)) {
+  const now = Date.now();
+  if (typeof shareToken === "string" && isShareTokenValid(shareToken, cookieSecret)) {
     const maxAge = SIX_MONTHS_SECONDS;
     const expiresAt = now + maxAge * 1000;
-    const successCookies = [
-      serializeCookie(ACCESS_COOKIE, encodeAccessCookie(expiresAt), maxAge, req),
-      clearCookie(ATTEMPTS_COOKIE, req),
-    ];
+    const accessCookie = serializeCookie(
+      ACCESS_COOKIE,
+      encodeAccessCookie(expiresAt, cookieSecret),
+      maxAge,
+      req,
+    );
 
-    sendJson(res, 200, { ok: true, expiresAt, tokenAccess: true }, successCookies);
+    sendJson(res, 200, { ok: true, expiresAt, tokenAccess: true }, [accessCookie]);
     return;
   }
 
-  const password = body.password;
+  const submittedPassword = body.password;
   const remember = body.remember === true || body.remember === "on" || body.remember === "true";
   const returnTo = safeReturnTo(body.returnTo);
 
-  if (password !== PASSWORD) {
-    const nextCount = attemptState.count + 1;
-    const blockedUntil = nextCount >= MAX_ATTEMPTS ? now + BLOCK_SECONDS * 1000 : 0;
-    const attemptPayload = encodeCookiePayload({ count: nextCount, blockedUntil });
-    const message =
-      blockedUntil > 0
-        ? "Access temporarily blocked. Please contact the local UX designer for support."
-        : nextCount >= 7
-          ? "Multiple failed attempts. Access will be temporarily blocked after 10 attempts."
-          : "Incorrect password. Please check the password and try again.";
-
-    const attemptsCookie = serializeCookie(ATTEMPTS_COOKIE, attemptPayload, ONE_MONTH_SECONDS, req);
-
+  if (!safeEqual(submittedPassword, configuredPassword)) {
     if (isFormRequest(req)) {
-      redirectToAccess(res, blockedUntil > 0 ? "blocked" : "incorrect", returnTo, [attemptsCookie]);
+      redirectToAccess(res, returnTo);
       return;
     }
 
-    sendJson(res, blockedUntil > 0 ? 423 : 401, {
+    sendJson(res, 401, {
       ok: false,
-      blocked: blockedUntil > 0,
-      remainingAttempts: Math.max(MAX_ATTEMPTS - nextCount, 0),
-      message,
-    }, [attemptsCookie]);
+      message: "Incorrect password. Please check the password and try again.",
+    });
     return;
   }
 
   const maxAge = remember ? SIX_MONTHS_SECONDS : ONE_MONTH_SECONDS;
   const expiresAt = now + maxAge * 1000;
-  const accessPayload = encodeAccessCookie(expiresAt);
-
-  const successCookies = [
-    serializeCookie(ACCESS_COOKIE, accessPayload, maxAge, req),
-    clearCookie(ATTEMPTS_COOKIE, req),
-  ];
+  const accessCookie = serializeCookie(
+    ACCESS_COOKIE,
+    encodeAccessCookie(expiresAt, cookieSecret),
+    maxAge,
+    req,
+  );
 
   if (isFormRequest(req)) {
-    redirectAfterLogin(res, returnTo, successCookies);
+    redirectAfterLogin(res, returnTo, [accessCookie]);
     return;
   }
 
-  sendJson(res, 200, { ok: true, expiresAt }, successCookies);
+  sendJson(res, 200, { ok: true, expiresAt }, [accessCookie]);
 }

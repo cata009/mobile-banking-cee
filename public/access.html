@@ -99,12 +99,6 @@
         display: block;
       }
 
-      .message[data-strong="true"] {
-        padding: 10px 12px;
-        border-radius: 6px;
-        background: #fff1f1;
-      }
-
       .helper {
         margin: 0;
         color: #666666;
@@ -130,12 +124,20 @@
     <script>
       const params = new URLSearchParams(window.location.search);
       const returnTo = params.get("returnTo");
-      const safeReturnTo = returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//") ? returnTo : "/";
+
+      function normalizeReturnTo(value) {
+        if (typeof value !== "string") return "/";
+        if (!value.startsWith("/") || value.startsWith("//")) return "/";
+        if (/[\\\u0000-\u001F\u007F]/u.test(value)) return "/";
+        if (value.startsWith("/api/") || value.startsWith("/access.html")) return "/";
+        return value;
+      }
+
+      const safeReturnTo = normalizeReturnTo(returnTo);
       document.getElementById("returnTo").value = safeReturnTo;
 
       const messageByError = {
         incorrect: "Incorrect password. Please check the password and try again.",
-        blocked: "Access temporarily blocked. Please contact the local UX designer for support.",
       };
       const error = params.get("error");
       const message = messageByError[error];
@@ -143,7 +145,6 @@
         const messageNode = document.getElementById("message");
         messageNode.textContent = message;
         messageNode.dataset.visible = "true";
-        messageNode.dataset.strong = error === "blocked" ? "true" : "false";
       }
     </script>
   </body>

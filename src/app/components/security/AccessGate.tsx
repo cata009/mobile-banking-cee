@@ -1,4 +1,4 @@
-import { FormEvent, ReactNode, CSSProperties, useEffect, useMemo, useState } from "react";
+import { FormEvent, ReactNode, CSSProperties, useEffect, useState } from "react";
 
 type AccessGateProps = {
   children: ReactNode;
@@ -7,20 +7,15 @@ type AccessGateProps = {
 type AccessStatus = "checking" | "locked" | "unlocked";
 
 const LOCAL_ACCESS_KEY = "mb-local-access";
-const LOCAL_ATTEMPTS_KEY = "mb-local-access-attempts";
 const SHARE_ACCESS_PARAM = "access_token";
-const LOCAL_DEV_PASSWORD = import.meta.env.DEV ? "CE&EE2025-" : "";
-const LOCAL_SHARE_ACCESS_TOKEN = import.meta.env.DEV ? "local-dev-share-access" : "";
+const LOCAL_DEV_PASSWORD = import.meta.env.DEV ? import.meta.env.VITE_LOCAL_ACCESS_PASSWORD || "" : "";
+const LOCAL_SHARE_ACCESS_TOKEN = import.meta.env.DEV
+  ? import.meta.env.VITE_LOCAL_SHARE_ACCESS_TOKEN || ""
+  : "";
 const ONE_MONTH_MS = 31 * 24 * 60 * 60 * 1000;
 const SIX_MONTHS_MS = 183 * 24 * 60 * 60 * 1000;
-const BLOCK_MS = 24 * 60 * 60 * 1000;
-const MAX_ATTEMPTS = 10;
-const BLOCKED_MESSAGE = "Access temporarily blocked. Please contact the local UX designer for support.";
-
-type LocalAttemptState = {
-  count: number;
-  blockedUntil: number;
-};
+const LOCAL_CONFIGURATION_MESSAGE =
+  "Local access is not configured. Add VITE_LOCAL_ACCESS_PASSWORD to .env.local and restart Vite.";
 
 function readLocalJson<T>(key: string, fallback: T): T {
   try {
@@ -36,21 +31,12 @@ function isLocalAccessValid() {
   return Boolean(access.expiresAt && access.expiresAt > Date.now());
 }
 
-function getLocalAttemptState(): LocalAttemptState {
-  return readLocalJson<LocalAttemptState>(LOCAL_ATTEMPTS_KEY, { count: 0, blockedUntil: 0 });
-}
-
-function setLocalAttemptState(state: LocalAttemptState) {
-  localStorage.setItem(LOCAL_ATTEMPTS_KEY, JSON.stringify(state));
-}
-
 function setLocalAccess(remember: boolean) {
   const now = Date.now();
   localStorage.setItem(
     LOCAL_ACCESS_KEY,
     JSON.stringify({ expiresAt: now + (remember ? SIX_MONTHS_MS : ONE_MONTH_MS) })
   );
-  localStorage.removeItem(LOCAL_ATTEMPTS_KEY);
 }
 
 async function checkServerAccess() {
@@ -76,11 +62,10 @@ async function submitServerAccess(password: string, remember: boolean) {
     body: JSON.stringify({ password, remember }),
     credentials: "same-origin",
   });
-  const data = (await response.json().catch(() => ({}))) as { ok?: boolean; blocked?: boolean; message?: string };
+  const data = (await response.json().catch(() => ({}))) as { ok?: boolean; message?: string };
 
   return {
     ok: response.ok && Boolean(data.ok),
-    blocked: Boolean(data.blocked),
     message: data.message,
   };
 }
@@ -95,11 +80,10 @@ async function submitServerShareAccess(shareToken: string) {
     body: JSON.stringify({ shareToken }),
     credentials: "same-origin",
   });
-  const data = (await response.json().catch(() => ({}))) as { ok?: boolean; blocked?: boolean; message?: string };
+  const data = (await response.json().catch(() => ({}))) as { ok?: boolean; message?: string };
 
   return {
     ok: response.ok && Boolean(data.ok),
-    blocked: Boolean(data.blocked),
     message: data.message,
   };
 }
@@ -124,32 +108,19 @@ function removeShareAccessTokenFromUrl() {
 }
 
 function submitLocalAccess(password: string, remember: boolean) {
-  const attemptState = getLocalAttemptState();
-  const now = Date.now();
-
-  if (attemptState.blockedUntil > now) {
-    return { ok: false, blocked: true, message: BLOCKED_MESSAGE };
+  if (!LOCAL_DEV_PASSWORD) {
+    return { ok: false, message: LOCAL_CONFIGURATION_MESSAGE };
   }
 
   if (password !== LOCAL_DEV_PASSWORD) {
-    const count = attemptState.count + 1;
-    const blockedUntil = count >= MAX_ATTEMPTS ? now + BLOCK_MS : 0;
-    setLocalAttemptState({ count, blockedUntil });
-
     return {
       ok: false,
-      blocked: blockedUntil > 0,
-      message:
-        blockedUntil > 0
-          ? BLOCKED_MESSAGE
-          : count >= 7
-            ? "Multiple failed attempts. Access will be temporarily blocked after 10 attempts."
-            : "Incorrect password. Please check the password and try again.",
+      message: "Incorrect password. Please check the password and try again.",
     };
   }
 
   setLocalAccess(remember);
-  return { ok: true, blocked: false, message: "" };
+  return { ok: true, message: "" };
 }
 
 export default function AccessGate({ children }: AccessGateProps) {
@@ -159,8 +130,8 @@ export default function AccessGate({ children }: AccessGateProps) {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [usesLocalFallback, setUsesLocalFallback] = useState(false);
-  const formDisabled = status === "checking" || isSubmitting || message === BLOCKED_MESSAGE;
-  const helperText = useMemo(() => "For support, contact the local UX designer", []);
+  const localConfigurationMissing = usesLocalFallback && !LOCAL_DEV_PASSWORD;
+  const formDisabled = status === "checking" || isSubmitting || localConfigurationMissing;
 
   useEffect(() => {
     let isMounted = true;
@@ -168,15 +139,34 @@ export default function AccessGate({ children }: AccessGateProps) {
     const checkAccess = async () => {
       const shareToken = readShareAccessToken();
 
-      try {
-        if (import.meta.env.DEV && shareToken === LOCAL_SHARE_ACCESS_TOKEN) {
-          setLocalAccess(true);
+      if (import.meta.env.DEV) {
+        setUsesLocalFallback(true);
+
+        if (shareToken) {
           removeShareAccessTokenFromUrl();
-          if (!isMounted) return;
-          setStatus("unlocked");
+          if (LOCAL_SHARE_ACCESS_TOKEN && shareToken === LOCAL_SHARE_ACCESS_TOKEN) {
+            setLocalAccess(true);
+            if (isMounted) setStatus("unlocked");
+            return;
+          }
+
+          if (isMounted) {
+            setMessage("This local share link is not configured or is invalid. Enter the local password.");
+          }
+        }
+
+        if (!isMounted) return;
+        if (!LOCAL_DEV_PASSWORD) {
+          setMessage(LOCAL_CONFIGURATION_MESSAGE);
+          setStatus("locked");
           return;
         }
 
+        setStatus(isLocalAccessValid() ? "unlocked" : "locked");
+        return;
+      }
+
+      try {
         if (shareToken) {
           const result = await submitServerShareAccess(shareToken);
           removeShareAccessTokenFromUrl();
@@ -195,12 +185,6 @@ export default function AccessGate({ children }: AccessGateProps) {
         setStatus(authenticated ? "unlocked" : "locked");
       } catch {
         if (!isMounted) return;
-        if (import.meta.env.DEV) {
-          setUsesLocalFallback(true);
-          setStatus(isLocalAccessValid() ? "unlocked" : "locked");
-          return;
-        }
-
         setMessage("Access service unavailable. Please contact the local UX designer for support.");
         setStatus("locked");
       }
@@ -271,15 +255,11 @@ export default function AccessGate({ children }: AccessGateProps) {
           />
           Remember my password
         </label>
-        {message && (
-          <p role="alert" style={message === BLOCKED_MESSAGE ? styles.errorStrong : styles.error}>
-            {message}
-          </p>
-        )}
+        {message && <p role="alert" style={styles.error}>{message}</p>}
         <button type="submit" disabled={formDisabled} style={formDisabled ? styles.buttonDisabled : styles.button}>
           {isSubmitting || status === "checking" ? "Checking..." : "Continue"}
         </button>
-        <p style={styles.helper}>{helperText}</p>
+        <p style={styles.helper}>For support, contact the local UX designer</p>
       </form>
     </main>
   );
@@ -343,15 +323,6 @@ const styles = {
   },
   error: {
     margin: 0,
-    fontSize: 13,
-    lineHeight: "18px",
-    color: "#B00020",
-  },
-  errorStrong: {
-    margin: 0,
-    padding: "10px 12px",
-    borderRadius: 6,
-    background: "#FFF1F1",
     fontSize: 13,
     lineHeight: "18px",
     color: "#B00020",
