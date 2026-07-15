@@ -216,7 +216,11 @@ function Frame8({ aboutSmartBanking, exchangeRates, findAtmBranches, startCoAppi
 export default function PanelWithTranslations({ aboutSmartBanking, exchangeRates, findAtmBranches, startCoAppingSession, onClose, onStartCoApping }: PanelWithTranslationsProps) {
   return (
     <div className="relative size-full" data-name="Panel">
-      <div className="absolute backdrop-blur-[5.939px] bg-[var(--uc-static-black)] inset-0 opacity-51" data-name="Screen Dimming" />
+      <div
+        className="absolute backdrop-blur-[5.939px] bg-[var(--uc-static-black)] inset-0 opacity-51"
+        data-name="Screen Dimming"
+        onClick={onClose}
+      />
       <Frame8 aboutSmartBanking={aboutSmartBanking} exchangeRates={exchangeRates} findAtmBranches={findAtmBranches} startCoAppingSession={startCoAppingSession} onClose={onClose} onStartCoApping={onStartCoApping} />
     </div>
   );
