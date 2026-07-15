@@ -3,11 +3,8 @@ import {
   Area,
   AreaChart,
   ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
-  type DotProps,
-  type TooltipProps,
 } from "recharts";
 import type { InvestmentChartPoint } from "@/app/config/investmentsPortfolioConfig";
 import { getCountryConfig } from "@/app/registry/countryConfig";
@@ -35,6 +32,30 @@ interface ChartDatum extends InvestmentChartPoint {
   index: number;
   performanceAmount: number;
   performancePercent: number;
+}
+
+interface RuntimeDotAdapter {
+  cx?: unknown;
+  cy?: unknown;
+  index?: unknown;
+  payload?: unknown;
+}
+
+interface InvestmentChartDotProps {
+  cx: number;
+  cy: number;
+  index: number;
+  activeIndex: number | null;
+  onPointSelect: (index: number, coordinate: { x: number; y: number }) => void;
+  onClear: () => void;
+}
+
+interface RuntimeAxisTickAdapter {
+  x?: unknown;
+  y?: unknown;
+  payload?: {
+    index?: unknown;
+  };
 }
 
 function formatAxisValue(value: number, valueRange: number): string {
@@ -137,19 +158,17 @@ function getNearestPointFromTouch(
 }
 
 function InvestmentChartTooltip({
-  active,
-  payload,
+  point,
   country,
   currency,
   amountsHidden,
-}: TooltipProps<number, string> & {
+}: {
+  point: ChartDatum | undefined;
   country: CountryId;
   currency: string;
   amountsHidden: boolean;
 }) {
-  if (!active || !payload?.[0]?.payload) return null;
-
-  const point = payload[0].payload as ChartDatum;
+  if (!point) return null;
   const performanceColor = point.performanceAmount < 0 ? "var(--uc-danger)" : INVESTMENT_POSITIVE_COLOR;
 
   return (
@@ -173,15 +192,9 @@ function InvestmentChartDot({
   cy,
   index,
   activeIndex,
-  onSelect,
+  onPointSelect,
   onClear,
-}: DotProps & {
-  activeIndex: number | null;
-  onSelect: (index: number, coordinate: { x: number; y: number }) => void;
-  onClear: () => void;
-}) {
-  if (typeof cx !== "number" || typeof cy !== "number" || typeof index !== "number") return null;
-
+}: InvestmentChartDotProps) {
   const selected = index === activeIndex;
 
   return (
@@ -189,11 +202,11 @@ function InvestmentChartDot({
       aria-hidden="true"
       className="cursor-pointer outline-none"
       focusable="false"
-      onMouseDown={() => onSelect(index, { x: cx, y: cy })}
-      onMouseUp={onClear}
+      onPointerDown={() => onPointSelect(index, { x: cx, y: cy })}
+      onPointerUp={onClear}
       onPointerCancel={onClear}
       onTouchEnd={onClear}
-      onTouchStart={() => onSelect(index, { x: cx, y: cy })}
+      onTouchStart={() => onPointSelect(index, { x: cx, y: cy })}
     >
       <circle cx={cx} cy={cy} r={18} fill="transparent" />
       <circle
@@ -266,7 +279,7 @@ export default function InvestmentPortfolioChart({
   return (
     <div
       ref={chartRef}
-      className="mt-[18px] h-[210px] w-full touch-none select-none [&_.recharts-surface]:outline-none [&_.recharts-tooltip-wrapper]:!transition-none [&_.recharts-wrapper]:outline-none"
+      className="relative mt-[18px] h-[210px] w-full touch-none select-none [&_.recharts-surface]:outline-none [&_.recharts-tooltip-wrapper]:!transition-none [&_.recharts-wrapper]:outline-none"
       data-ds-label="Investments portfolio chart"
       onTouchCancel={clearActivePoint}
       onTouchEnd={clearActivePoint}
@@ -306,11 +319,16 @@ export default function InvestmentPortfolioChart({
             tickLine={false}
             height={42}
             padding={{ left: 24, right: 24 }}
-            tick={({ x, y, payload }) => {
-              const point = chartData[payload.index] ?? chartData[0];
+            tick={(tickProps: RuntimeAxisTickAdapter) => {
+              const { x, y, payload } = tickProps;
+              const index = typeof payload?.index === "number" ? payload.index : -1;
+              const point = chartData[index] ?? chartData[0];
+              if (!point) return <g aria-hidden="true" />;
+              const tickX = typeof x === "number" ? x : 0;
+              const tickY = typeof y === "number" ? y : 0;
 
               return (
-                <g transform={`translate(${x},${y + 10})`}>
+                <g transform={`translate(${tickX},${tickY + 10})`}>
                   <text textAnchor="middle" fill="var(--uc-text-muted)" fontSize={12} fontWeight={700}>
                     <tspan x={0} dy={0}>{point.dateLabel}</tspan>
                     <tspan x={0} dy={14}>{point.yearLabel}</tspan>
@@ -328,22 +346,6 @@ export default function InvestmentPortfolioChart({
             tickFormatter={(value) => formatAxisValue(Number(value), valueRange)}
             tick={{ fill: "var(--uc-text-muted)", fontSize: 12, fontWeight: 700 }}
           />
-          <Tooltip
-            active={!!activePoint}
-            allowEscapeViewBox={{ x: true, y: true }}
-            content={
-              <InvestmentChartTooltip
-                country={country}
-                currency={currency}
-                amountsHidden={amountsHidden}
-              />
-            }
-            cursor={false}
-            isAnimationActive={false}
-            payload={activeDatum ? [{ name: "value", value: activeDatum.value, payload: activeDatum }] : []}
-            position={{ x: tooltipX, y: tooltipY }}
-            wrapperStyle={{ outline: "none", pointerEvents: "none", transition: "none" }}
-          />
           <Area
             type="monotone"
             dataKey="value"
@@ -351,22 +353,34 @@ export default function InvestmentPortfolioChart({
             stroke="var(--uc-action)"
             strokeWidth={3}
             activeDot={false}
-            dot={(props) => {
-              const { key, payload, ...dotProps } = props;
-              if (payload && typeof payload === "object" && "showDot" in payload && payload.showDot === false) {
-                return null;
+            dot={(props: RuntimeDotAdapter) => {
+              const { cx, cy, index, payload } = props;
+              const showDot = !(
+                typeof payload === "object"
+                && payload !== null
+                && "showDot" in payload
+                && payload.showDot === false
+              );
+              const validGeometry = typeof cx === "number" && typeof cy === "number" && typeof index === "number";
+
+              if (!showDot || !validGeometry) {
+                const hiddenKey = typeof index === "number" ? index : "invalid";
+                return <g key={`investment-dot-${hiddenKey}`} aria-hidden="true" />;
               }
+
               return (
                 <InvestmentChartDot
-                  key={key}
-                  {...dotProps}
+                  key={`investment-dot-${index}`}
+                  cx={cx}
+                  cy={cy}
+                  index={index}
                   activeIndex={activePoint?.index ?? null}
                   onClear={clearActivePoint}
-                  onSelect={(index, coordinate) => {
-                    const point = chartData[index];
+                  onPointSelect={(selectedIndex, coordinate) => {
+                    const point = chartData[selectedIndex];
                     if (!point) return;
                     setIsPointerActive(true);
-                    setActivePoint({ point, index, coordinate });
+                    setActivePoint({ point, index: selectedIndex, coordinate });
                   }}
                 />
               );
@@ -374,6 +388,19 @@ export default function InvestmentPortfolioChart({
           />
         </AreaChart>
       </ResponsiveContainer>
+      {activePoint ? (
+        <div
+          className="recharts-tooltip-wrapper pointer-events-none absolute z-[1] outline-none"
+          style={{ left: `${tooltipX}px`, top: `${tooltipY}px`, transition: "none" }}
+        >
+          <InvestmentChartTooltip
+            point={activeDatum}
+            country={country}
+            currency={currency}
+            amountsHidden={amountsHidden}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

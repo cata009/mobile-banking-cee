@@ -49,19 +49,17 @@ function buildSliceLeaders(items: readonly InvestmentDistributionItem[]): SliceL
   if (items.length === 4) {
     // Two anchors on each side, vertically separated. The anchor sits on the
     // donut edge so the connector stays short and never crosses the donut.
-    const leftAnchors = [pointOnDonutEdge(225), pointOnDonutEdge(315)];
-    const rightAnchors = [pointOnDonutEdge(135), pointOnDonutEdge(45)];
+    const firstLeftAnchor = pointOnDonutEdge(225);
+    const secondLeftAnchor = pointOnDonutEdge(315);
+    const firstRightAnchor = pointOnDonutEdge(135);
+    const secondRightAnchor = pointOnDonutEdge(45);
 
-    leaders = items.map((item, index) => {
-      const isLeft = index < 2;
-      const anchor = isLeft ? leftAnchors[index] : rightAnchors[index - 2];
-      return {
-        side: (isLeft ? "left" : "right") as Side,
-        anchorX: anchor.x,
-        anchorY: anchor.y,
-        slotY: 0,
-      };
-    });
+    leaders = [
+      { side: "left", anchorX: firstLeftAnchor.x, anchorY: firstLeftAnchor.y, slotY: 0 },
+      { side: "left", anchorX: secondLeftAnchor.x, anchorY: secondLeftAnchor.y, slotY: 0 },
+      { side: "right", anchorX: firstRightAnchor.x, anchorY: firstRightAnchor.y, slotY: 0 },
+      { side: "right", anchorX: secondRightAnchor.x, anchorY: secondRightAnchor.y, slotY: 0 },
+    ];
   } else {
     let offset = 0;
     const gap = DONUT_CIRCUMFERENCE * 0.006;
@@ -87,16 +85,20 @@ function buildSliceLeaders(items: readonly InvestmentDistributionItem[]): SliceL
       .filter(({ leader }) => leader.side === side)
       .sort((first, second) => first.leader.anchorY - second.leader.anchorY);
 
-    const slotsByCount: Record<number, readonly number[]> = {
+    const fallbackSlots: readonly [number, number, number, number] = [20, 66, 112, 158];
+    const slotsByCount: Partial<Record<number, readonly number[]>> = {
       1: [90],
       2: [38, 126],
       3: [24, 90, 156],
-      4: [20, 66, 112, 158],
+      4: fallbackSlots,
     };
-    const slots = slotsByCount[onSide.length] ?? slotsByCount[4];
+    const slots = slotsByCount[onSide.length] ?? fallbackSlots;
 
     onSide.forEach(({ index }, slotIndex) => {
-      leaders[index].slotY = slots[slotIndex] ?? 90;
+      const leader = leaders[index];
+      const slotY = slots[slotIndex] ?? 90;
+      if (!leader) return;
+      leader.slotY = slotY;
     });
   });
 
