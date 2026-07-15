@@ -72,4 +72,24 @@ describe('shared runtime translations', () => {
     expect(base).toEqual(baseSnapshot)
     expect(merged).not.toBe(base)
   })
+
+  it('keeps a safe prototype when an override contains an own __proto__ data property', () => {
+    const base = createSharedTranslations('en').runtime
+    const override = {
+      actions: {
+        search: 'Safe search',
+      },
+    }
+    Object.defineProperty(override, '__proto__', {
+      configurable: true,
+      enumerable: true,
+      value: { polluted: 'inherited pollution' },
+    })
+
+    const merged = mergeRuntimeTranslations(base, override)
+
+    expect(Object.getPrototypeOf(merged)).toBe(Object.prototype)
+    expect(Object.prototype.hasOwnProperty.call(merged, '__proto__')).toBe(true)
+    expect('polluted' in merged).toBe(false)
+  })
 })
