@@ -24,7 +24,6 @@ import { useLanguage } from '@/app/contexts/LanguageContext';
 import { preloadMoreCardImages } from '@/app/config/moreCardAssets';
 
 interface MoreScreenProps {
-  onBack: () => void;
   onHomeClick?: () => void;
   onAnalyticsClick?: () => void;
   onMessagesClick?: () => void;
@@ -37,7 +36,6 @@ interface MoreScreenProps {
 }
 
 export default function MoreScreen({
-  onBack,
   onHomeClick,
   onAnalyticsClick,
   onMessagesClick,

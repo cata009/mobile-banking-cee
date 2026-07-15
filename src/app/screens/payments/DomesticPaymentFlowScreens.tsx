@@ -168,7 +168,7 @@ export function TransactionDetailScreen({
               10,334.22 {currencyLabel}
             </p>
           </div>
-          <SectionTitle>{t("runtime.transactionDetail.breakdownFor", "BREAKDOWN FOR")} {detail.categoryTag}</SectionTitle>
+          <SectionTitle>{`${t("runtime.transactionDetail.breakdownFor", "BREAKDOWN FOR")} ${detail.categoryTag}`}</SectionTitle>
           <div className="mt-[34px] h-[150px] border-b border-[var(--uc-border)]">
             <div className="flex h-full items-end justify-between px-[18px]">
               {[118, 74, 47, 86, 69, 51, 82].map((height, index) => (

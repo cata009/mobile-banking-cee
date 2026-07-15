@@ -4,13 +4,14 @@
  */
 
 import type { CountryId } from "@/app/state/demoTypes";
+import type { Currency } from "@/data/products";
 
 /**
  * Country-specific configuration
  */
 export interface CountryConfig {
   /** ISO currency code */
-  currency: string;
+  currency: Currency;
   
   /** BCP 47 locale identifier */
   locale: string;

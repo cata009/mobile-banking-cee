@@ -449,7 +449,7 @@ export function BankingContent({
   otherSolutionsTitle: string;
   otherSolutions: readonly ProductsCard[];
   onProductCardClick: (card: ProductsCard) => void;
-  productsSectionRef?: RefObject<HTMLElement | null>;
+  productsSectionRef?: RefObject<HTMLElement>;
 }) {
   return (
     <>
@@ -623,7 +623,7 @@ export default function ProductsScreen({
   const [activeTab, setActiveTab] = useState<ProductsMenuTab>("banking");
   const [selectedProductCard, setSelectedProductCard] = useState<ProductsCard | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const productsSectionRef = useRef<HTMLElement | null>(null);
+  const productsSectionRef = useRef<HTMLElement>(null);
   const visibleTab = config.hasShopSmartTab ? activeTab : "banking";
 
   const handleProductCardClick = (card: ProductsCard) => {
