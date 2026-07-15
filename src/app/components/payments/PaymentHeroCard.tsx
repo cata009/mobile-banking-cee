@@ -21,7 +21,7 @@ type PaymentHeroImagePreset = {
   imageClassName: string;
 };
 
-export const PAYMENT_HERO_CARD_IMAGE_VARIANTS: readonly PaymentHeroImagePreset[] = [
+export const PAYMENT_HERO_CARD_IMAGE_VARIANTS = [
   {
     id: "payments-1",
     label: "Payments 1 / Wallet",
@@ -94,7 +94,7 @@ export const PAYMENT_HERO_CARD_IMAGE_VARIANTS: readonly PaymentHeroImagePreset[]
     src: paymentHeroImage9,
     imageClassName: "bottom-0 right-0 h-[104px] w-[118px]",
   },
-];
+] as const satisfies readonly [PaymentHeroImagePreset, ...PaymentHeroImagePreset[]];
 
 const PAYMENT_HERO_CARD_IMAGE_PRESETS = PAYMENT_HERO_CARD_IMAGE_VARIANTS.reduce(
   (acc, preset) => {
