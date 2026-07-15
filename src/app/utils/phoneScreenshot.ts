@@ -99,6 +99,8 @@ export type FigmaReadyLayer = {
   children?: FigmaReadyLayer[];
 };
 
+type FigmaReadyText = NonNullable<FigmaReadyLayer["text"]>;
+
 export type FigmaReadyAsset = {
   id: string;
   kind: "svg" | "image";
@@ -467,7 +469,7 @@ async function createPhoneCaptureClone(screenElement: HTMLElement, mode: PhoneSc
   prepareRootClone(clone, width, height);
 
   if (mode === "full") {
-    expandScrollableContent(scrollablePairs, screenElement, clone, height);
+    expandScrollableContent(scrollablePairs, pairs, screenElement, clone, height);
   } else {
     preserveVisibleScrollOffsets(scrollablePairs);
   }
@@ -476,16 +478,6 @@ async function createPhoneCaptureClone(screenElement: HTMLElement, mode: PhoneSc
   await inlineBackgroundImages(pairs);
 
   return { clone, width, height };
-}
-
-function getTallestScrollableHeight(screenElement: HTMLElement) {
-  const visibleHeight = screenElement.clientHeight || SCREEN_HEIGHT_FALLBACK;
-  const scrollableElements = [screenElement, ...Array.from(screenElement.querySelectorAll("*"))]
-    .filter((element): element is HTMLElement => element instanceof HTMLElement)
-    .map((element) => element.scrollHeight)
-    .filter((scrollHeight) => scrollHeight > visibleHeight);
-
-  return Math.max(visibleHeight, ...scrollableElements);
 }
 
 async function extractFigmaLayers(screenElement: HTMLElement, mode: PhoneScreenshotMode) {
@@ -651,7 +643,8 @@ function inferFigmaReadyLayout(parent: PhoneFigmaLayer, children: FigmaReadyLaye
   if (candidates.length === 0) return null;
 
   candidates.sort((a, b) => b.score - a.score);
-  return candidates[0].layout;
+  const firstCandidate = candidates[0];
+  return firstCandidate?.layout ?? null;
 }
 
 type LayoutCandidate = {
@@ -679,12 +672,16 @@ function buildLayoutCandidate(
 
   if (hasPrimaryOverlap) return null;
 
-  const gaps = sorted.slice(1).map((child, index) => {
-    const previous = sorted[index];
-    return mode === "VERTICAL"
+  const gaps: number[] = [];
+  for (let index = 1; index < sorted.length; index += 1) {
+    const child = sorted[index];
+    const previous = sorted[index - 1];
+    if (!child || !previous) return null;
+
+    gaps.push(mode === "VERTICAL"
       ? child.bounds.y - (previous.bounds.y + previous.bounds.height)
-      : child.bounds.x - (previous.bounds.x + previous.bounds.width);
-  });
+      : child.bounds.x - (previous.bounds.x + previous.bounds.width));
+  }
   if (gaps.some((gap) => gap < -AUTOLAYOUT_TOLERANCE)) return null;
 
   const gap = getConsistentGap(gaps);
@@ -1046,7 +1043,8 @@ function parseDropShadowEffect(shadow: string): FigmaReadyEffect | null {
     .match(/-?\d+(?:\.\d+)?px/g)
     ?.map((value) => parsePixelNumber(value, 0)) ?? [];
 
-  if (numericValues.length < 2) return null;
+  const [offsetX, offsetY, radius = 0, spread = 0] = numericValues;
+  if (offsetX === undefined || offsetY === undefined) return null;
 
   return {
     type: "DROP_SHADOW",
@@ -1059,11 +1057,11 @@ function parseDropShadowEffect(shadow: string): FigmaReadyEffect | null {
       },
     },
     offset: {
-      x: numericValues[0],
-      y: numericValues[1],
+      x: offsetX,
+      y: offsetY,
     },
-    radius: numericValues[2] ?? 0,
-    spread: numericValues[3] ?? 0,
+    radius,
+    spread,
     visible: true,
     blendMode: "NORMAL",
   };
@@ -1100,7 +1098,7 @@ function getCornerRadius(value: string | undefined, width: number, height: numbe
   return parsePixelNumber(value.split(" ")[0], 0);
 }
 
-function getFigmaReadyFontStyle(fontWeight: string | undefined): FigmaReadyLayer["text"]["fontName"]["style"] {
+function getFigmaReadyFontStyle(fontWeight: string | undefined): FigmaReadyText["fontName"]["style"] {
   const weight = Number(fontWeight);
   if (!Number.isFinite(weight)) return "Regular";
   if (weight >= 700) return "Bold";
@@ -1109,7 +1107,7 @@ function getFigmaReadyFontStyle(fontWeight: string | undefined): FigmaReadyLayer
   return "Regular";
 }
 
-function getFigmaReadyTextAlign(textAlign: string | undefined): FigmaReadyLayer["text"]["textAlignHorizontal"] {
+function getFigmaReadyTextAlign(textAlign: string | undefined): FigmaReadyText["textAlignHorizontal"] {
   if (textAlign === "center") return "CENTER";
   if (textAlign === "right" || textAlign === "end") return "RIGHT";
   return "LEFT";
@@ -1125,7 +1123,9 @@ function parseCssColor(value: string | undefined) {
 
   const hexMatch = value.match(/^#([0-9a-fA-F]{3,8})$/);
   if (hexMatch) {
-    const hex = expandHexColor(hexMatch[1]);
+    const hexValue = hexMatch[1];
+    if (!hexValue) return null;
+    const hex = expandHexColor(hexValue);
     if (!hex) return null;
 
     return {
@@ -1140,15 +1140,18 @@ function parseCssColor(value: string | undefined) {
   const rgbMatch = value.match(/^rgba?\(([^)]+)\)$/);
   if (!rgbMatch) return null;
 
-  const parts = rgbMatch[1].includes(",")
-    ? rgbMatch[1].split(",").map((part) => part.trim())
-    : rgbMatch[1].replace("/", " ").split(/\s+/).filter(Boolean);
-  if (parts.length < 3) return null;
+  const rgbValue = rgbMatch[1];
+  if (!rgbValue) return null;
+  const parts = rgbValue.includes(",")
+    ? rgbValue.split(",").map((part) => part.trim())
+    : rgbValue.replace("/", " ").split(/\s+/).filter(Boolean);
+  const [red, green, blue, alpha] = parts;
+  if (red === undefined || green === undefined || blue === undefined) return null;
 
-  const r = Number.parseFloat(parts[0]);
-  const g = Number.parseFloat(parts[1]);
-  const b = Number.parseFloat(parts[2]);
-  const a = parts[3] === undefined ? 1 : Number.parseFloat(parts[3]);
+  const r = Number.parseFloat(red);
+  const g = Number.parseFloat(green);
+  const b = Number.parseFloat(blue);
+  const a = alpha === undefined ? 1 : Number.parseFloat(alpha);
 
   if (![r, g, b, a].every(Number.isFinite)) return null;
 
@@ -1353,7 +1356,9 @@ async function getLayerAsset(element: Element, computedStyle: CSSStyleDeclaratio
   const urlMatch = backgroundImage.match(/url\(["']?([^"')]+)["']?\)/);
   if (!urlMatch) return undefined;
 
-  const dataUrl = await resourceToDataUrl(urlMatch[1]);
+  const backgroundUrl = urlMatch[1];
+  if (!backgroundUrl) return undefined;
+  const dataUrl = await resourceToDataUrl(backgroundUrl);
   return dataUrl ? { mimeType: getImageMimeType(dataUrl), dataUrl } : undefined;
 }
 
@@ -1416,7 +1421,8 @@ async function inlineComputedStyles(pairs: ElementPair[]) {
 
     let cssText = "";
     for (let index = 0; index < computedStyle.length; index += 1) {
-      const propertyName = computedStyle[index];
+      const propertyName = computedStyle.item(index);
+      if (!propertyName) continue;
       const propertyValue = computedStyle.getPropertyValue(propertyName);
       const propertyPriority = computedStyle.getPropertyPriority(propertyName);
       cssText += `${propertyName}:${propertyValue}${propertyPriority ? ` !${propertyPriority}` : ""};`;
@@ -1474,17 +1480,15 @@ function prepareRootClone(clone: HTMLElement, width: number, height: number) {
 
 function expandScrollableContent(
   scrollablePairs: ScrollablePair[],
+  pairs: ElementPair[],
   screenElement: HTMLElement,
   screenClone: HTMLElement,
   outputHeight: number,
 ) {
   const primaryScrollable = scrollablePairs[0];
-  const cloneBySource = new Map<Element, Element>();
-  const sourceElements = [screenElement, ...Array.from(screenElement.querySelectorAll("*"))];
-  const cloneElements = [screenClone, ...Array.from(screenClone.querySelectorAll("*"))];
-  sourceElements.forEach((source, index) => {
-    cloneBySource.set(source, cloneElements[index]);
-  });
+  const cloneBySource = new Map<Element, Element>(
+    pairs.map(({ source, clone }) => [source, clone]),
+  );
 
   for (const pair of scrollablePairs) {
     if (!(pair.clone instanceof HTMLElement)) continue;
@@ -1636,9 +1640,11 @@ async function inlineBackgroundImages(pairs: ElementPair[]) {
 
       let nextBackgroundImage = backgroundImage;
       for (const match of urls) {
-        const dataUrl = await resourceToDataUrl(match[1]);
+        const backgroundUrl = match[1];
+        if (!backgroundUrl) continue;
+        const dataUrl = await resourceToDataUrl(backgroundUrl);
         if (dataUrl) {
-          nextBackgroundImage = nextBackgroundImage.replace(match[1], dataUrl);
+          nextBackgroundImage = nextBackgroundImage.replace(backgroundUrl, dataUrl);
         }
       }
 
