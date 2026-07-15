@@ -2225,7 +2225,7 @@ function ProfileAvatarVariantSpecimen() {
 }
 
 function AccountBalanceCardCountrySpecimen() {
-  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
+  const [selectedCountry, setSelectedCountry] = useState<(typeof COUNTRIES)[number]>(COUNTRIES[0]);
   const sample = accountCardSamples[selectedCountry];
   const countryMeta = COUNTRY_META[selectedCountry];
 
@@ -2235,7 +2235,7 @@ function AccountBalanceCardCountrySpecimen() {
         id="account-balance-country-select"
         label="Country"
         value={selectedCountry}
-        onChange={(value) => setSelectedCountry(value as (typeof COUNTRIES)[number])}
+        onChange={setSelectedCountry}
         options={COUNTRIES.map((country) => ({ id: country, label: `${COUNTRY_META[country].nameEN} / ${COUNTRY_META[country].currency}` }))}
       />
       <div className="flex flex-col gap-2">
@@ -2291,18 +2291,29 @@ function AccountActionBarVariantSpecimen() {
 }
 
 function AccountCarouselIndicatorVariantSpecimen() {
-  const [selectedVariant, setSelectedVariant] = useState("4-first");
-  const variants: Record<string, { count: number; activeIndex: number }> = {
-    "4-first": { count: 4, activeIndex: 0 },
-    "4-next": { count: 4, activeIndex: 1 },
-    "4-more": { count: 4, activeIndex: 2 },
-    "4-last": { count: 4, activeIndex: 3 },
-    "7-first": { count: 7, activeIndex: 0 },
-    "7-next": { count: 7, activeIndex: 1 },
-    "7-more": { count: 7, activeIndex: 3 },
-    "7-last": { count: 7, activeIndex: 6 },
-  };
-  const activeVariant = variants[selectedVariant];
+  const variants = [
+    { id: "4-first", label: "4 items / first", count: 4, activeIndex: 0 },
+    { id: "4-next", label: "4 items / next", count: 4, activeIndex: 1 },
+    { id: "4-more", label: "4 items / further", count: 4, activeIndex: 2 },
+    { id: "4-last", label: "4 items / last", count: 4, activeIndex: 3 },
+    { id: "7-first", label: "7 items / first", count: 7, activeIndex: 0 },
+    { id: "7-next", label: "7 items / next", count: 7, activeIndex: 1 },
+    { id: "7-more", label: "7 items / further", count: 7, activeIndex: 3 },
+    { id: "7-last", label: "7 items / last", count: 7, activeIndex: 6 },
+  ] as const satisfies readonly [SelectorOption & { count: number; activeIndex: number }, ...(SelectorOption & { count: number; activeIndex: number })[]];
+  type AccountCarouselVariant = (typeof variants)[number]["id"];
+  const variantsById = {
+    "4-first": variants[0],
+    "4-next": variants[1],
+    "4-more": variants[2],
+    "4-last": variants[3],
+    "7-first": variants[4],
+    "7-next": variants[5],
+    "7-more": variants[6],
+    "7-last": variants[7],
+  } satisfies Record<AccountCarouselVariant, (typeof variants)[number]>;
+  const [selectedVariant, setSelectedVariant] = useState<AccountCarouselVariant>("4-first");
+  const activeVariant = variantsById[selectedVariant];
 
   return (
     <div className="flex flex-col gap-4">
@@ -2310,16 +2321,7 @@ function AccountCarouselIndicatorVariantSpecimen() {
         id="account-carousel-indicator-variant-select"
         value={selectedVariant}
         onChange={setSelectedVariant}
-        options={[
-          { id: "4-first", label: "4 items / first" },
-          { id: "4-next", label: "4 items / next" },
-          { id: "4-more", label: "4 items / further" },
-          { id: "4-last", label: "4 items / last" },
-          { id: "7-first", label: "7 items / first" },
-          { id: "7-next", label: "7 items / next" },
-          { id: "7-more", label: "7 items / further" },
-          { id: "7-last", label: "7 items / last" },
-        ]}
+        options={variants}
       />
       <div className="flex w-[375px] flex-col gap-3 py-4">
         <AccountCarouselIndicator
@@ -2535,15 +2537,42 @@ const sectionHeadingDividerVariants = [
   { id: "light-title", label: "Light Restyle / Title", title: "ALL PRODUCTS", secondaryText: "N" },
   { id: "light-date", label: "Light Restyle / Date", title: "15 JULY 2022" },
   { id: "light-small-title-data", label: "Light Restyle / Small + data", title: "TRANSACTION FEE", secondaryText: "500,00 CZK" },
-] satisfies readonly (SelectorOption & {
+] as const satisfies readonly [SelectorOption<Exclude<SectionHeadingDividerVariant, "section">> & {
   title: string;
   secondaryText?: string;
   count?: number;
-})[];
+}, ...(SelectorOption<Exclude<SectionHeadingDividerVariant, "section">> & {
+  title: string;
+  secondaryText?: string;
+  count?: number;
+})[]];
+
+type SectionHeadingDividerSpecimen = SelectorOption<Exclude<SectionHeadingDividerVariant, "section">> & {
+  title: string;
+  secondaryText?: string;
+  count?: number;
+};
+type SectionHeadingDividerSpecimenId = (typeof sectionHeadingDividerVariants)[number]["id"];
+
+const sectionHeadingDividerVariantsById = {
+  "small-title-data": sectionHeadingDividerVariants[0],
+  "small-two-line-title-data": sectionHeadingDividerVariants[1],
+  "medium-title": sectionHeadingDividerVariants[2],
+  "with-counter": sectionHeadingDividerVariants[3],
+  "medium-two-line-title": sectionHeadingDividerVariants[4],
+  "large-title": sectionHeadingDividerVariants[5],
+  "large-two-line-title": sectionHeadingDividerVariants[6],
+  "action-date": sectionHeadingDividerVariants[7],
+  "name-action": sectionHeadingDividerVariants[8],
+  "action-date-checkbox": sectionHeadingDividerVariants[9],
+  "light-title": sectionHeadingDividerVariants[10],
+  "light-date": sectionHeadingDividerVariants[11],
+  "light-small-title-data": sectionHeadingDividerVariants[12],
+} satisfies Record<SectionHeadingDividerSpecimenId, SectionHeadingDividerSpecimen>;
 
 function SectionHeadingDividerVariantSpecimen() {
-  const [selectedVariant, setSelectedVariant] = useState(sectionHeadingDividerVariants[0].id);
-  const activeVariant = sectionHeadingDividerVariants.find((variant) => variant.id === selectedVariant) ?? sectionHeadingDividerVariants[0];
+  const [selectedVariant, setSelectedVariant] = useState<SectionHeadingDividerSpecimenId>(sectionHeadingDividerVariants[0].id);
+  const activeVariant: SectionHeadingDividerSpecimen = sectionHeadingDividerVariantsById[selectedVariant];
 
   return (
     <div className="flex flex-col gap-4">
@@ -2555,7 +2584,7 @@ function SectionHeadingDividerVariantSpecimen() {
       />
       <div className="flex min-h-[96px] w-[375px] items-start bg-[var(--uc-app-bg)] py-[16px]">
         <SectionHeadingDivider
-          variant={activeVariant.id as SectionHeadingDividerVariant}
+          variant={activeVariant.id}
           title={activeVariant.title}
           secondaryText={activeVariant.secondaryText}
           count={activeVariant.count}
@@ -2570,7 +2599,7 @@ function ProductAccordionCountrySpecimen({
 }: {
   animated?: boolean;
 }) {
-  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
+  const [selectedCountry, setSelectedCountry] = useState<(typeof COUNTRIES)[number]>(COUNTRIES[0]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -2578,7 +2607,7 @@ function ProductAccordionCountrySpecimen({
         id={animated ? "product-accordion-animated-country-select" : "product-accordion-country-select"}
         label="Country"
         value={selectedCountry}
-        onChange={(value) => setSelectedCountry(value as (typeof COUNTRIES)[number])}
+        onChange={setSelectedCountry}
         options={COUNTRIES.map((country) => ({ id: country, label: COUNTRY_META[country].nameEN }))}
       />
       <div className="w-[375px] rounded-[8px] border border-[color-mix(in_srgb,var(--uc-static-white)_20%,transparent)] p-6">
@@ -2597,95 +2626,126 @@ function ProductAccordionCountrySpecimen({
   );
 }
 
+const shadcnFamilyOptions = [
+  { id: "button", label: "Button" },
+  { id: "badge", label: "Badge" },
+  { id: "input", label: "Input" },
+  { id: "checkbox", label: "Checkbox" },
+  { id: "toggle", label: "Toggle" },
+  { id: "toggle-group", label: "Toggle group" },
+  { id: "slider", label: "Slider" },
+  { id: "progress", label: "Progress" },
+  { id: "separator", label: "Separator" },
+  { id: "skeleton", label: "Skeleton" },
+  { id: "alert", label: "Alert" },
+  { id: "tabs", label: "Tabs" },
+] as const satisfies readonly [SelectorOption, ...SelectorOption[]];
+
+const shadcnButtonVariantOptions = [
+  { id: "default", label: "Default" },
+  { id: "secondary", label: "Secondary" },
+  { id: "outline", label: "Outline" },
+  { id: "ghost", label: "Ghost" },
+  { id: "destructive", label: "Destructive" },
+] as const satisfies readonly [SelectorOption, ...SelectorOption[]];
+const shadcnBadgeVariantOptions = [
+  { id: "default", label: "Default" },
+  { id: "secondary", label: "Secondary" },
+] as const satisfies readonly [SelectorOption, ...SelectorOption[]];
+const shadcnCheckboxVariantOptions = [
+  { id: "checked", label: "Checked" },
+  { id: "unchecked", label: "Unchecked" },
+] as const satisfies readonly [SelectorOption, ...SelectorOption[]];
+const shadcnToggleVariantOptions = [
+  { id: "pressed", label: "Pressed" },
+  { id: "unpressed", label: "Unpressed" },
+] as const satisfies readonly [SelectorOption, ...SelectorOption[]];
+const shadcnToggleGroupVariantOptions = [
+  { id: "left", label: "Left active" },
+  { id: "center", label: "Center active" },
+  { id: "right", label: "Right active" },
+] as const satisfies readonly [SelectorOption, ...SelectorOption[]];
+const shadcnProgressVariantOptions = [
+  { id: "64", label: "64%" },
+  { id: "32", label: "32%" },
+] as const satisfies readonly [SelectorOption, ...SelectorOption[]];
+const shadcnTabsVariantOptions = [
+  { id: "current", label: "Current" },
+  { id: "variant", label: "Variant" },
+  { id: "audit", label: "Audit" },
+] as const satisfies readonly [SelectorOption, ...SelectorOption[]];
+
+type ShadcnFamily = (typeof shadcnFamilyOptions)[number]["id"];
+type ShadcnVariant =
+  | (typeof shadcnButtonVariantOptions)[number]["id"]
+  | (typeof shadcnBadgeVariantOptions)[number]["id"]
+  | (typeof shadcnCheckboxVariantOptions)[number]["id"]
+  | (typeof shadcnToggleVariantOptions)[number]["id"]
+  | (typeof shadcnToggleGroupVariantOptions)[number]["id"]
+  | (typeof shadcnProgressVariantOptions)[number]["id"]
+  | (typeof shadcnTabsVariantOptions)[number]["id"];
+type NonEmptySelectorOptions<Value extends string> = readonly [SelectorOption<Value>, ...SelectorOption<Value>[]];
+
+const shadcnVariantOptionsByFamily: Partial<Record<ShadcnFamily, NonEmptySelectorOptions<ShadcnVariant>>> = {
+  button: shadcnButtonVariantOptions,
+  badge: shadcnBadgeVariantOptions,
+  checkbox: shadcnCheckboxVariantOptions,
+  toggle: shadcnToggleVariantOptions,
+  "toggle-group": shadcnToggleGroupVariantOptions,
+  progress: shadcnProgressVariantOptions,
+  tabs: shadcnTabsVariantOptions,
+};
+
+function resolveSelectorVariant<Value extends string>(options: NonEmptySelectorOptions<Value>, requestedVariant: string): Value {
+  return options.find((option) => option.id === requestedVariant)?.id ?? options[0].id;
+}
+
 function ShadcnSpecimens() {
-  const [selectedFamily, setSelectedFamily] = useState("button");
-  const [selectedVariant, setSelectedVariant] = useState("default");
-
-  const familyOptions = [
-    { id: "button", label: "Button" },
-    { id: "badge", label: "Badge" },
-    { id: "input", label: "Input" },
-    { id: "checkbox", label: "Checkbox" },
-    { id: "toggle", label: "Toggle" },
-    { id: "toggle-group", label: "Toggle group" },
-    { id: "slider", label: "Slider" },
-    { id: "progress", label: "Progress" },
-    { id: "separator", label: "Separator" },
-    { id: "skeleton", label: "Skeleton" },
-    { id: "alert", label: "Alert" },
-    { id: "tabs", label: "Tabs" },
-  ] as const;
-
-  const variantOptionsByFamily: Partial<Record<(typeof familyOptions)[number]["id"], readonly SelectorOption[]>> = {
-    button: [
-      { id: "default", label: "Default" },
-      { id: "secondary", label: "Secondary" },
-      { id: "outline", label: "Outline" },
-      { id: "ghost", label: "Ghost" },
-      { id: "destructive", label: "Destructive" },
-    ],
-    badge: [
-      { id: "default", label: "Default" },
-      { id: "secondary", label: "Secondary" },
-    ],
-    checkbox: [
-      { id: "checked", label: "Checked" },
-      { id: "unchecked", label: "Unchecked" },
-    ],
-    toggle: [
-      { id: "pressed", label: "Pressed" },
-      { id: "unpressed", label: "Unpressed" },
-    ],
-    "toggle-group": [
-      { id: "left", label: "Left active" },
-      { id: "center", label: "Center active" },
-      { id: "right", label: "Right active" },
-    ],
-    progress: [
-      { id: "64", label: "64%" },
-      { id: "32", label: "32%" },
-    ],
-    tabs: [
-      { id: "current", label: "Current" },
-      { id: "variant", label: "Variant" },
-      { id: "audit", label: "Audit" },
-    ],
-  };
-
-  const activeVariantOptions = variantOptionsByFamily[selectedFamily];
+  const [selectedFamily, setSelectedFamily] = useState<ShadcnFamily>("button");
+  const [selectedVariant, setSelectedVariant] = useState<ShadcnVariant>("default");
+  const activeVariantOptions = shadcnVariantOptionsByFamily[selectedFamily];
+  const renderedVariant = activeVariantOptions
+    ? resolveSelectorVariant(activeVariantOptions, selectedVariant)
+    : selectedVariant;
 
   useEffect(() => {
-    if (!activeVariantOptions || activeVariantOptions.some((option) => option.id === selectedVariant)) return;
-    setSelectedVariant(activeVariantOptions[0].id);
-  }, [activeVariantOptions, selectedVariant]);
+    if (!activeVariantOptions || renderedVariant === selectedVariant) return;
+    setSelectedVariant(renderedVariant);
+  }, [activeVariantOptions, renderedVariant, selectedVariant]);
 
   const renderFamily = () => {
     switch (selectedFamily) {
       case "button":
-        return (
-          <Button variant={selectedVariant as "default" | "secondary" | "outline" | "ghost" | "destructive"}>
-            {selectedVariant[0].toUpperCase() + selectedVariant.slice(1)}
-          </Button>
-        );
+        {
+          const buttonVariant = resolveSelectorVariant(shadcnButtonVariantOptions, renderedVariant);
+          return (
+            <Button variant={buttonVariant}>
+              {buttonVariant.charAt(0).toUpperCase() + buttonVariant.slice(1)}
+            </Button>
+          );
+        }
       case "badge":
-        return (
-          <Badge variant={selectedVariant as "default" | "secondary"}>
-            {selectedVariant === "secondary" ? "Secondary badge" : "Badge"}
-          </Badge>
-        );
+        {
+          const badgeVariant = resolveSelectorVariant(shadcnBadgeVariantOptions, renderedVariant);
+          return (
+            <Badge variant={badgeVariant}>
+              {badgeVariant === "secondary" ? "Secondary badge" : "Badge"}
+            </Badge>
+          );
+        }
       case "input":
         return <Input placeholder="Input specimen" />;
       case "checkbox":
-        return <Checkbox defaultChecked={selectedVariant === "checked"} />;
+        return <Checkbox defaultChecked={resolveSelectorVariant(shadcnCheckboxVariantOptions, renderedVariant) === "checked"} />;
       case "toggle":
         return (
-          <Toggle aria-label="Bold toggle" pressed={selectedVariant === "pressed"}>
+          <Toggle aria-label="Bold toggle" pressed={resolveSelectorVariant(shadcnToggleVariantOptions, renderedVariant) === "pressed"}>
             B
           </Toggle>
         );
       case "toggle-group":
         return (
-          <ToggleGroup type="single" value={selectedVariant}>
+          <ToggleGroup type="single" value={resolveSelectorVariant(shadcnToggleGroupVariantOptions, renderedVariant)}>
             <ToggleGroupItem value="left">L</ToggleGroupItem>
             <ToggleGroupItem value="center">C</ToggleGroupItem>
             <ToggleGroupItem value="right">R</ToggleGroupItem>
@@ -2694,7 +2754,7 @@ function ShadcnSpecimens() {
       case "slider":
         return <Slider defaultValue={[42]} max={100} step={1} />;
       case "progress":
-        return <Progress value={Number(selectedVariant)} />;
+        return <Progress value={Number(resolveSelectorVariant(shadcnProgressVariantOptions, renderedVariant))} />;
       case "separator":
         return <Separator />;
       case "skeleton":
@@ -2713,7 +2773,7 @@ function ShadcnSpecimens() {
         );
       case "tabs":
         return (
-          <Tabs value={selectedVariant} className="w-full">
+          <Tabs value={resolveSelectorVariant(shadcnTabsVariantOptions, renderedVariant)} className="w-full">
             <TabsList>
               <TabsTrigger value="current">Current</TabsTrigger>
               <TabsTrigger value="variant">Variant</TabsTrigger>
@@ -2749,14 +2809,14 @@ function ShadcnSpecimens() {
               label="Family"
               value={selectedFamily}
               onChange={setSelectedFamily}
-              options={familyOptions}
+              options={shadcnFamilyOptions}
             />
           </div>
           {activeVariantOptions ? (
             <div className="min-w-[220px] flex-1">
               <VariantSelector
                 id="shadcn-variant-select"
-                value={selectedVariant}
+                value={renderedVariant}
                 onChange={setSelectedVariant}
                 options={activeVariantOptions}
               />
@@ -2995,10 +3055,10 @@ function ColorAuditRow({ item }: { item: (typeof APP_COLOR_AUDIT)[number] }) {
 }
 
 function ColorInventory() {
-  const [selectedPalette, setSelectedPalette] = useState<ColorPaletteId>(COLOR_PALETTES[0].id);
+  const [selectedPaletteMeta, setSelectedPaletteMeta] = useState<(typeof COLOR_PALETTES)[number]>(COLOR_PALETTES[0]);
   const [copiedValue, setCopiedValue] = useState<string | null>(null);
   const [colorSearchQuery, setColorSearchQuery] = useState("");
-  const selectedPaletteMeta = COLOR_PALETTES.find((palette) => palette.id === selectedPalette) ?? COLOR_PALETTES[0];
+  const selectedPalette: ColorPaletteId = selectedPaletteMeta.id;
   const normalizedColorQuery = colorSearchQuery.trim().toLowerCase();
   const matchesColorQuery = (values: string[]) =>
     normalizedColorQuery.length === 0 || values.join(" ").toLowerCase().includes(normalizedColorQuery);
@@ -3048,7 +3108,7 @@ function ColorInventory() {
                   type="button"
                   role="tab"
                   aria-selected={isActive}
-                  onClick={() => setSelectedPalette(palette.id)}
+                  onClick={() => setSelectedPaletteMeta(palette)}
                   className={`rounded-full border px-4 py-2 text-left text-[13px] transition-colors ${
                     isActive
                       ? "border-[var(--uc-action)] bg-[var(--uc-action)] text-[var(--uc-static-white)]"
@@ -3927,7 +3987,10 @@ export default function DesignSystemPage() {
       .map(([id]) => document.getElementById(id))
       .filter((section): section is HTMLElement => section instanceof HTMLElement);
 
-    if (sections.length === 0) return;
+    const firstSection = sections[0];
+    if (!firstSection) return;
+    const lastSection = sections[sections.length - 1];
+    if (!lastSection) return;
 
     let frameId = 0;
 
@@ -3938,7 +4001,7 @@ export default function DesignSystemPage() {
       const activationLine = containerRect.top + 148;
       const nearBottom = scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 24;
 
-      let nextActiveSection = sections[0].id;
+      let nextActiveSection = firstSection.id;
       for (const section of sections) {
         if (section.getBoundingClientRect().top <= activationLine) {
           nextActiveSection = section.id;
@@ -3948,7 +4011,7 @@ export default function DesignSystemPage() {
       }
 
       if (nearBottom) {
-        nextActiveSection = sections[sections.length - 1].id;
+        nextActiveSection = lastSection.id;
       }
 
       setActiveSection((current) => {

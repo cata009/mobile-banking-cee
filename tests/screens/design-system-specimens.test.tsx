@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 
 import '@testing-library/jest-dom/vitest'
-import { cleanup, fireEvent, render, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, within } from '@testing-library/react'
 import type { PropsWithChildren } from 'react'
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, expectTypeOf, it, vi } from 'vitest'
 import DesignSystemPage from '@/app/screens/design-system/DesignSystemPage'
 import { PAYMENT_HERO_CARD_IMAGE_VARIANTS } from '@/app/components/payments/PaymentHeroCard'
 import { LanguageProvider } from '@/app/contexts/LanguageContext'
+import { COLOR_PALETTES, type DesignSystemPalette } from '@/app/registry/colorRegistry'
+import { COUNTRIES } from '@/app/registry/demoConfig'
 import { DemoProvider } from '@/app/state/demoStore'
 
 function AppProviders({ children }: PropsWithChildren) {
@@ -31,6 +33,20 @@ function selectorSpecimen(select: HTMLSelectElement) {
   const specimen = select.closest('.flex.flex-col.gap-4')
   if (!(specimen instanceof HTMLElement)) throw new Error(`Missing specimen for #${select.id}`)
   return specimen
+}
+
+function domRectAt(top: number): DOMRect {
+  return {
+    x: 0,
+    y: top,
+    width: 0,
+    height: 0,
+    top,
+    right: 0,
+    bottom: top,
+    left: 0,
+    toJSON: () => ({}),
+  }
 }
 
 beforeAll(() => {
@@ -62,6 +78,118 @@ afterEach(() => {
 })
 
 describe('Design System specimen selectors', () => {
+  it('keeps country and palette registries non-empty and in their published order', () => {
+    expectTypeOf(COUNTRIES).toEqualTypeOf<readonly ['RO', 'CZ', 'SK', 'HU', 'RS', 'BA', 'BA_BL', 'SI']>()
+    expectTypeOf(COLOR_PALETTES).toMatchTypeOf<readonly [DesignSystemPalette, ...DesignSystemPalette[]]>()
+
+    expect(COUNTRIES).toEqual(['RO', 'CZ', 'SK', 'HU', 'RS', 'BA', 'BA_BL', 'SI'])
+    expect(COLOR_PALETTES.map(({ id }) => id)).toEqual([
+      'neutral',
+      'action-teal',
+      'brand-red',
+      'product',
+      'semantic-green',
+      'warning-orange',
+      'peach',
+      'pfm',
+      'utility',
+    ])
+  })
+
+  it('defaults country specimens to Romania and switches through the exact country contract', () => {
+    const { container } = renderInventory()
+    const countrySelect = selector(container, 'account-balance-country-select')
+
+    expect(countrySelect).toHaveValue('RO')
+    expect(Array.from(countrySelect.options).map((option) => option.value)).toEqual(COUNTRIES)
+    expect(selectorSpecimen(countrySelect)).toHaveTextContent('Romania / RON')
+
+    fireEvent.change(countrySelect, { target: { value: 'SI' } })
+    expect(countrySelect).toHaveValue('SI')
+    expect(selectorSpecimen(countrySelect)).toHaveTextContent('Slovenia / EUR')
+  })
+
+  it('renders the published 7-last account carousel state as account seven', () => {
+    const { container } = renderInventory()
+    const carouselSelect = selector(container, 'account-carousel-indicator-variant-select')
+    const specimen = selectorSpecimen(carouselSelect)
+
+    fireEvent.change(carouselSelect, { target: { value: '7-last' } })
+
+    expect(carouselSelect).toHaveValue('7-last')
+    expect(within(specimen).getByRole('button', { name: 'Go to account 7' })).toHaveAttribute('aria-current', 'true')
+    expect(within(specimen).getAllByRole('button')).toHaveLength(4)
+  })
+
+  it('preserves all 13 Meniga divider variants, order, and counter specimen', () => {
+    const { container } = renderInventory()
+    const dividerSelect = selector(container, 'section-heading-divider-variant-select')
+    const specimen = selectorSpecimen(dividerSelect)
+    const expectedVariants = [
+      'small-title-data',
+      'small-two-line-title-data',
+      'medium-title',
+      'with-counter',
+      'medium-two-line-title',
+      'large-title',
+      'large-two-line-title',
+      'action-date',
+      'name-action',
+      'action-date-checkbox',
+      'light-title',
+      'light-date',
+      'light-small-title-data',
+    ]
+
+    expect(Array.from(dividerSelect.options).map((option) => option.value)).toEqual(expectedVariants)
+    for (const variant of expectedVariants) {
+      fireEvent.change(dividerSelect, { target: { value: variant } })
+      expect(specimen.querySelector('[data-divider-variant]')).toHaveAttribute('data-divider-variant', variant)
+    }
+
+    fireEvent.change(dividerSelect, { target: { value: 'with-counter' } })
+    expect(specimen).toHaveTextContent('18')
+  })
+
+  it('resolves a valid Shadcn variant synchronously when families change', () => {
+    const { container } = renderInventory()
+    const familySelect = selector(container, 'shadcn-family-select')
+    let variantSelect = selector(container, 'shadcn-variant-select')
+
+    expect(Array.from(variantSelect.options).map((option) => option.value)).toEqual([
+      'default', 'secondary', 'outline', 'ghost', 'destructive',
+    ])
+    fireEvent.change(variantSelect, { target: { value: 'destructive' } })
+    fireEvent.change(familySelect, { target: { value: 'badge' } })
+
+    variantSelect = selector(container, 'shadcn-variant-select')
+    expect(variantSelect).toHaveValue('default')
+    expect(Array.from(variantSelect.options).map((option) => option.value)).toEqual(['default', 'secondary'])
+    expect(container).toHaveTextContent('Badge')
+
+    fireEvent.change(familySelect, { target: { value: 'input' } })
+    expect(container.querySelector('#shadcn-variant-select')).not.toBeInTheDocument()
+    fireEvent.change(familySelect, { target: { value: 'button' } })
+    expect(selector(container, 'shadcn-variant-select')).toHaveValue('default')
+  })
+
+  it('keeps neutral as the default palette and PFM content under the colors hash', () => {
+    const { getAllByRole, getByRole } = renderInventory()
+    const [colorsTab] = getAllByRole('tab', { name: /^Colors/ })
+    if (!colorsTab) throw new Error('Missing Colors inventory tab')
+    fireEvent.click(colorsTab)
+
+    const neutral = getByRole('tab', { name: /^Neutral \/ Primary/ })
+    expect(neutral).toHaveAttribute('aria-selected', 'true')
+    expect(window.location.hash).toBe('#colors')
+
+    const pfm = getByRole('tab', { name: /^PFM Categories/ })
+    fireEvent.click(pfm)
+    expect(pfm).toHaveAttribute('aria-selected', 'true')
+    expect(window.location.hash).toBe('#colors')
+    expect(getByRole('heading', { name: 'PFM Taxes and Penalties' })).toBeInTheDocument()
+  })
+
   it('ignores an invalid raw selector value without crashing or changing the specimen', () => {
     const { container } = renderInventory()
     const select = selector(container, 'ghost-banner-variant-select')
@@ -164,6 +292,80 @@ describe('Design System specimen selectors', () => {
       if (!tab) throw new Error(`Missing inventory tab ${label}`)
       fireEvent.click(tab)
       expect(window.location.hash).toBe(hash)
+    }
+  })
+
+  it('tracks the activation line and pins the final component section near the scroll bottom', () => {
+    const scheduledFrames: FrameRequestCallback[] = []
+    const requestAnimationFrame = vi.mocked(window.requestAnimationFrame)
+    requestAnimationFrame.mockImplementation((callback) => {
+      scheduledFrames.push(callback)
+      return scheduledFrames.length
+    })
+
+    try {
+      const { container } = renderInventory()
+      const scrollContainer = container.firstElementChild
+      if (!(scrollContainer instanceof HTMLElement)) throw new Error('Missing Design System scroll container')
+
+      Object.defineProperties(scrollContainer, {
+        scrollTop: { configurable: true, writable: true, value: 100 },
+        clientHeight: { configurable: true, value: 400 },
+        scrollHeight: { configurable: true, value: 1000 },
+      })
+      vi.spyOn(scrollContainer, 'getBoundingClientRect').mockReturnValue(domRectAt(0))
+
+      const sectionTops = new Map([
+        ['headers', 0],
+        ['navigation', 50],
+        ['buttons', 100],
+        ['forms', 200],
+        ['cards', 300],
+        ['products', 400],
+        ['overlays', 500],
+      ])
+      for (const [id, top] of sectionTops) {
+        const section = container.querySelector<HTMLElement>(`#${id}`)
+        if (!section) throw new Error(`Missing Design System section #${id}`)
+        vi.spyOn(section, 'getBoundingClientRect').mockReturnValue(domRectAt(top))
+      }
+
+      act(() => scheduledFrames.shift()?.(0))
+      expect(window.location.hash).toBe('#buttons')
+
+      scrollContainer.scrollTop = 600
+      fireEvent.scroll(scrollContainer)
+      act(() => scheduledFrames.shift()?.(1))
+      expect(window.location.hash).toBe('#overlays')
+    } finally {
+      requestAnimationFrame.mockImplementation(() => 1)
+    }
+  })
+
+  it('keeps a tab default hash stable when no sections are available to observe', () => {
+    const scheduledFrames: FrameRequestCallback[] = []
+    const requestAnimationFrame = vi.mocked(window.requestAnimationFrame)
+    requestAnimationFrame.mockImplementation((callback) => {
+      scheduledFrames.push(callback)
+      return scheduledFrames.length
+    })
+
+    const { getAllByRole } = renderInventory()
+    act(() => scheduledFrames.shift()?.(0))
+    const originalGetElementById = document.getElementById.bind(document)
+    const sectionLookup = vi.spyOn(document, 'getElementById').mockImplementation((id) =>
+      id === 'colors' || id === 'color-audit' ? null : originalGetElementById(id),
+    )
+
+    try {
+      const [colorsTab] = getAllByRole('tab', { name: /^Colors/ })
+      if (!colorsTab) throw new Error('Missing Colors inventory tab')
+      expect(() => fireEvent.click(colorsTab)).not.toThrow()
+      act(() => scheduledFrames.shift()?.(1))
+      expect(window.location.hash).toBe('#colors')
+    } finally {
+      sectionLookup.mockRestore()
+      requestAnimationFrame.mockImplementation(() => 1)
     }
   })
 

@@ -5,7 +5,7 @@
 
 import type { CountryId, Scenario, FeatureId, FeatureMeta } from "@/app/state/demoTypes";
 
-export const COUNTRIES: readonly CountryId[] = [
+export const COUNTRIES = [
   "RO",
   "CZ",
   "SK",
@@ -14,7 +14,7 @@ export const COUNTRIES: readonly CountryId[] = [
   "BA",
   "BA_BL",
   "SI",
-] as const;
+] as const satisfies readonly [CountryId, ...CountryId[]];
 
 export const COUNTRY_META: Record<CountryId, { name: string; nameEN: string; flag: string; currency: string }> = {
   RO: { name: "Romania", nameEN: "Romania", flag: "RO", currency: "RON" },
