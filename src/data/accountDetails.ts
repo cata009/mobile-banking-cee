@@ -116,6 +116,16 @@ const MONTH_NAMES = [
 
 const MONTH_SHORT = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
+function getRequiredIndexedValue<T>(values: readonly T[], index: number, label: string): T {
+  const value = values[index];
+
+  if (value === undefined) {
+    throw new Error(`${label} invariant failed at index ${index}`);
+  }
+
+  return value;
+}
+
 interface CountryTransactionProfile {
   salaryPayer: string;
   freelancePayer: string;
@@ -392,18 +402,21 @@ function makeTransaction(
 ): AccountTransaction {
   const amount = money(baseEurAmount, currency);
   const pfmCategory = normalizePfmCategory(category);
+  const monthIndex = date.getMonth();
+  const month = getRequiredIndexedValue(MONTH_SHORT, monthIndex, "Transaction short month");
+  const monthName = getRequiredIndexedValue(MONTH_NAMES, monthIndex, "Transaction month name");
 
   return {
     id: `${country}-${accountIndex}-${sequence}`,
     day: date.getDate().toString().padStart(2, "0"),
-    month: MONTH_SHORT[date.getMonth()],
-    monthKey: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`,
-    monthTitle: `${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`,
+    month,
+    monthKey: `${date.getFullYear()}-${String(monthIndex + 1).padStart(2, "0")}`,
+    monthTitle: `${monthName} ${date.getFullYear()}`,
     label,
     details,
     amount,
     type: amount >= 0 ? "credit" : "debit",
-    category: pfmCategory,
+    category,
     pfmCategory,
     pfmSubcategory,
     status,
@@ -567,7 +580,8 @@ export function getAccountTransactionProfileIndex(product: Product, productIndex
 
 export function getAccountIdentity(country: Country, index: number): AccountIdentity {
   const identities = ACCOUNT_IDENTITIES[country];
-  return identities[index % identities.length];
+  const identityIndex = index % identities.length;
+  return getRequiredIndexedValue(identities, identityIndex, `Account identity for ${country}`);
 }
 
 export function getAccountTransactions(

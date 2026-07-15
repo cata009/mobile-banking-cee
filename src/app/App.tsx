@@ -92,6 +92,7 @@ import {
 import "../../package/mobile-pi-coapping-chat-package/src/coapping.css";
 import type { AccountTransaction } from "@/data/accountDetails";
 import { createSpendingAnalyticsTimeline } from "@/data/spendingAnalytics";
+import { isInternalTransferCategory } from "@/data/pfmCategories";
 import {
   createEmptyDomesticPaymentDraft,
   createRedoDomesticPaymentDraft,
@@ -487,7 +488,7 @@ function buildCzChatSmartReplyResolver({
   const latestCreditTransactions = latestHomeTransactions.filter((transaction) => transaction.amount > 0);
   const largestRecentDebit =
     [...(currentSpendingSummary?.sourceTransactions ?? [])]
-      .filter((transaction) => transaction.amount < 0 && transaction.pfmCategory !== "Internal")
+      .filter((transaction) => transaction.amount < 0 && !isInternalTransferCategory(transaction.category))
       .sort((first, second) => Math.abs(second.amount) - Math.abs(first.amount))[0] ?? null;
   const pendingRecentTransactions =
     currentSpendingSummary?.sourceTransactions.filter((transaction) => transaction.status === "Pending").slice(0, 3) ?? [];

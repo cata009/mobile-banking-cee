@@ -143,11 +143,16 @@ function productName(baseName: string, count: number, index: number): string {
 }
 
 function sourceForDefinition(definition: ProductCountDefinition, allProducts: Product[]): Product {
-  return (
+  const source =
     allProducts.find((product) => definition.sourceTypes.includes(product.type)) ??
     allProducts.find((product) => product.type === definition.fallbackType) ??
-    allProducts[0]
-  );
+    allProducts[0];
+
+  if (!source) {
+    throw new Error(`Product source invariant failed for count key "${definition.key}"`);
+  }
+
+  return source;
 }
 
 function indexedCurrentAccountBalance(baseBalance: number, index: number): number {
@@ -168,28 +173,44 @@ function cloneProductForCount(
   const baseProduct = {
     ...source,
     id,
-    type: definition.targetType,
     name: productName(definition.title, count, index),
     accountNumber,
-  } as Product;
+  };
 
   switch (definition.targetType) {
-    case "debit_card":
-    case "meal_card":
-      return {
+    case "debit_card": {
+      const product = {
         ...baseProduct,
+        type: "debit_card" as const,
         linkedAccountId: `acc-${index + 1}`,
-        cardType: "Standard",
+        cardType: "Standard" as const,
         cardNumber: accountNumber,
         expiryDate: "12/29",
         cardHolderName: "PETER JAGODIĆ",
         securityCode: cardSecurityCode(index),
         balance: 0,
-      } as Product;
-    case "credit_card":
-      return {
+      };
+      return product;
+    }
+    case "meal_card": {
+      const product = {
         ...baseProduct,
-        cardType: "Standard",
+        type: "meal_card" as const,
+        linkedAccountId: `acc-${index + 1}`,
+        cardType: "Standard" as const,
+        cardNumber: accountNumber,
+        expiryDate: "12/29",
+        cardHolderName: "PETER JAGODIĆ",
+        securityCode: cardSecurityCode(index),
+        balance: 0,
+      };
+      return product;
+    }
+    case "credit_card": {
+      const product = {
+        ...baseProduct,
+        type: "credit_card" as const,
+        cardType: "Standard" as const,
         cardNumber: accountNumber,
         expiryDate: "12/29",
         cardHolderName: "PETER JAGODIĆ",
@@ -197,44 +218,66 @@ function cloneProductForCount(
         creditLimit: sourceCreditCard?.creditLimit ?? 5000,
         availableCredit: sourceCreditCard?.availableCredit ?? 3200,
         balance: sourceCreditCard?.availableCredit ?? 3200,
-      } as Product;
-    case "current_account":
-      return {
+      };
+      return product;
+    }
+    case "current_account": {
+      const product = {
         ...baseProduct,
+        type: "current_account" as const,
         balance: indexedCurrentAccountBalance(baseProduct.balance, index),
         iban: accountNumber,
-      } as Product;
-    case "saving_account":
-      return {
+      };
+      return product;
+    }
+    case "saving_account": {
+      const product = {
         ...baseProduct,
+        type: "saving_account" as const,
         iban: accountNumber,
-      } as Product;
-    case "loan":
-      return {
+      };
+      return product;
+    }
+    case "term_deposit": {
+      const product = {
         ...baseProduct,
+        type: "term_deposit" as const,
+      };
+      return product;
+    }
+    case "loan": {
+      const product = {
+        ...baseProduct,
+        type: "loan" as const,
         balance: -Math.abs(baseProduct.balance || 45000),
         loanAmount: Math.abs(baseProduct.balance || 45000),
         remainingAmount: Math.abs(baseProduct.balance || 45000),
         monthlyPayment: 900,
-      } as Product;
-    case "mortgage":
-      return {
+      };
+      return product;
+    }
+    case "mortgage": {
+      const product = {
         ...baseProduct,
+        type: "mortgage" as const,
         balance: -Math.abs(baseProduct.balance || 2850000),
         loanAmount: Math.abs(baseProduct.balance || 2850000),
         remainingAmount: Math.abs(baseProduct.balance || 2850000),
         propertyValue: Math.abs(baseProduct.balance || 2850000) * 1.2,
         monthlyPayment: 3500,
-      } as Product;
-    case "investment_account":
-      return {
+      };
+      return product;
+    }
+    case "investment_account": {
+      const product = {
         ...baseProduct,
+        type: "investment_account" as const,
         portfolioValue: Math.abs(baseProduct.balance || 42500),
         totalGainLoss: 728.45,
         totalGainLossPercentage: 1.74,
-      } as Product;
-    default:
-      return baseProduct;
+      };
+      return product;
+    }
   }
 }
 

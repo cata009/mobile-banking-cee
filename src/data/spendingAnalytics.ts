@@ -5,7 +5,12 @@ import {
   type AccountTransaction,
 } from "@/data/accountDetails";
 import { convertCurrency, EXCHANGE_RATE_DATE, getCountryCurrency, roundMoney } from "@/data/exchangeRates";
-import { getPfmCategory, normalizePfmCategory, type PfmCategoryName } from "@/data/pfmCategories";
+import {
+  getPfmCategory,
+  isInternalTransferCategory,
+  normalizePfmCategory,
+  type PfmCategoryName,
+} from "@/data/pfmCategories";
 import { isAccountDetailProduct, type Product } from "@/data/products";
 
 export interface SpendingCategorySummary {
@@ -76,10 +81,6 @@ function toCategorySummaries(
     .sort((a, b) => b.total - a.total || a.category.localeCompare(b.category));
 }
 
-function getTitleCaseMonth(monthTitle: string) {
-  return monthTitle.toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
 function getYearFromMonthKey(monthKey: string) {
   return monthKey.split("-")[0] ?? "2026";
 }
@@ -123,17 +124,16 @@ function summarizeTransactions(
 ): SpendingAnalyticsSummary {
   const outCategoryTotals = new Map<PfmCategoryName, { total: number; transactionCount: number }>();
   const inCategoryTotals = new Map<PfmCategoryName, { total: number; transactionCount: number }>();
+  const includedTransactions = transactions.filter(
+    (transaction) => !isInternalTransferCategory(transaction.category),
+  );
 
   let incomeTotal = 0;
   let spendingTotal = 0;
   let cashWithdrawalTotal = 0;
 
-  transactions.forEach((transaction) => {
+  includedTransactions.forEach((transaction) => {
     const category = normalizePfmCategory(transaction.pfmCategory || transaction.category);
-
-    if (category === "Internal") {
-      return;
-    }
 
     const amount = roundMoney(transaction.amount);
 
@@ -170,7 +170,7 @@ function summarizeTransactions(
     netTotal: roundMoney(incomeTotal - spendingTotal),
     moneyOutCategories: toCategorySummaries(outCategoryTotals),
     moneyInCategories: toCategorySummaries(inCategoryTotals),
-    sourceTransactions: transactions.sort((a, b) => Number(b.day) - Number(a.day)),
+    sourceTransactions: includedTransactions.sort((a, b) => Number(b.day) - Number(a.day)),
     exchangeRateDate: EXCHANGE_RATE_DATE,
   };
 }
@@ -258,5 +258,11 @@ export function createSpendingAnalytics(
     ? selectedPeriodKey
     : timeline.activePeriodKey;
 
-  return timeline.summariesByPeriodKey[resolvedKey];
+  const summary = timeline.summariesByPeriodKey[resolvedKey];
+
+  if (!summary) {
+    throw new Error(`Spending analytics summary invariant failed for period "${resolvedKey}"`);
+  }
+
+  return summary;
 }

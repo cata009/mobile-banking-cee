@@ -25,7 +25,6 @@ export interface BaseProduct {
 
 export interface CurrentAccount extends BaseProduct {
   type: 'current_account';
-  iban: string;
 }
 
 export interface DebitCard extends BaseProduct {
@@ -59,34 +58,18 @@ export interface MealCard extends BaseProduct {
 
 export interface SavingAccount extends BaseProduct {
   type: 'saving_account';
-  interestRate: number;
-  iban: string;
 }
 
 export interface TermDeposit extends BaseProduct {
   type: 'term_deposit';
-  interestRate: number;
-  maturityDate: string;
-  initialDeposit: number;
 }
 
 export interface Loan extends BaseProduct {
   type: 'loan';
-  loanAmount: number;
-  remainingAmount: number;
-  interestRate: number;
-  monthlyPayment: number;
-  endDate: string;
 }
 
 export interface Mortgage extends BaseProduct {
   type: 'mortgage';
-  propertyValue: number;
-  loanAmount: number;
-  remainingAmount: number;
-  interestRate: number;
-  monthlyPayment: number;
-  endDate: string;
 }
 
 export interface InvestmentAccount extends BaseProduct {
@@ -96,6 +79,11 @@ export interface InvestmentAccount extends BaseProduct {
   totalGainLossPercentage: number;
 }
 
+/**
+ * Product-list summary contract backed by the current mock registry.
+ * Product-detail flows must define a separate authoritative detail model
+ * instead of assuming fields that are absent from these summaries.
+ */
 export type Product = 
   | CurrentAccount 
   | DebitCard 
