@@ -47,7 +47,7 @@ export const COLOR_SOURCE_AUDIT = {
   gradientGroups: 1,
 };
 
-export const COLOR_PALETTES: DesignSystemPalette[] = [
+export const COLOR_PALETTES = [
   {
     id: "neutral",
     label: "Neutral / Primary",
@@ -94,7 +94,7 @@ export const COLOR_PALETTES: DesignSystemPalette[] = [
     label: "Utility",
     description: "Special status and audit-only colors from the source SVG.",
   },
-];
+] as const satisfies readonly [DesignSystemPalette, ...DesignSystemPalette[]];
 
 export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
   {
