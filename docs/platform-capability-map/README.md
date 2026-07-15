@@ -4,6 +4,8 @@ Status legend: `implemented` / `partial` / `missing` / `placeholder` / `mock-dri
 
 Scope: this map is based on repository source and existing docs. It reflects the current PI runtime, Flow Library previews, stakeholder Baseline/Future controls, CZ Chatbot future preview, Design System Inventory, active SK/HU Mobile PI Kids concepts, and the 2026-07-07 deletion of the Romania Kids and Serbia Kids runtime apps rather than hiding them behind flags. Evidence links point to repo files.
 
+Latest product-health note: the repository now has reproducible `typecheck`, `lint`, `test`, `audit:all`, and `build` gates; navigation and selected-product restoration are typed; effective PI product counts drive both visible UI and banking repositories; CZ Chat pure orchestration is outside `App.tsx`; panel menu rendering is shared behind compatible wrappers; and tracked image paths/blobs are locked by a read-only 159-asset baseline audit. The destructive PNG optimization pass was intentionally not performed.
+
 Latest Investments visual note: the Performance chart now uses a denser mock time series with monotone natural curvatures, while retaining six readable anchor labels/dots and tooltip access to intermediate points. Product-detail trade glyphs render at native 32px, Buy uses `#007A91`, Sell stays black, the action bar has a 24px separation before section headings, and the detail hero title collapses into the centered sticky PageHeader title on scroll without an initial duplicate.
 
 Latest Investments data note: product-detail Help is hidden, the hero date comes from each security's generated `lastUpdate`, and owned-detail hero totals use the same client-currency `localValue` shown in `MY SECURITY`; catalogue-only details retain their instrument-currency amount.
@@ -723,11 +725,13 @@ CZ Chatbot savings interest preview smoke on http://127.0.0.1:3001/
 # passed on 2026-07-07: selected PI + CZ + Future App / CZ Chatbot; opened `How much can I save?`, then Saving account + `3 000,00 CZK` and confirmed the final answer/card show `3.5% p.a.` plus approx. `8,75 CZK per month`; reloaded and repeated Term deposit + `3 000,00 CZK`, confirming `5% p.a.` plus approx. `150,00 CZK per year`. Browser warning/error logs were empty.
 ```
 
-Unavailable checks:
+Current automated checks:
 
-- `typecheck`: no script and no top-level `typescript` package were present. Evidence: [`package.json`](../../package.json).
-- `lint`: no script present. Evidence: [`package.json`](../../package.json).
-- `test`: no script or test suite present. Evidence: [`package.json`](../../package.json).
+- `npm run typecheck`: local TypeScript CLI, zero diagnostics at closeout.
+- `npm run lint`: ESLint across source, API, scripts, tests, and build configuration, zero errors at closeout.
+- `npm test`: Vitest, 38 files / 231 tests passed at closeout.
+- `npm run audit:all`: card details, investments, Figma bridge, templates, platform, and locked asset baseline passed.
+- `npm run build`: Vite production build passed with 3,918 transformed modules.
 
 ## 18. Final Diagnostic Summary
 
