@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import vm from "node:vm";
+import ts from "typescript";
 
 const plugins = [
   {
@@ -36,8 +37,24 @@ function readFixtureJson(plugin, fileName) {
   return readJson(`${plugin.base}/smoke-fixtures/${fileName}`);
 }
 
+function loadPluginCode(plugin) {
+  const compiledPath = `${plugin.base}/code.js`;
+  if (fs.existsSync(compiledPath)) {
+    return readText(compiledPath);
+  }
+
+  const sourcePath = `${plugin.base}/code.ts`;
+  return ts.transpileModule(readText(sourcePath), {
+    compilerOptions: {
+      target: ts.ScriptTarget.ES2020,
+      module: ts.ModuleKind.None,
+    },
+    fileName: sourcePath,
+  }).outputText;
+}
+
 function auditStatic(plugin) {
-  const code = readText(`${plugin.base}/code.js`);
+  const code = loadPluginCode(plugin);
   const ui = readText(`${plugin.base}/ui.html`);
   const manifest = readJson(`${plugin.base}/manifest.json`);
 
@@ -288,7 +305,7 @@ async function runMessageExpectError(figma, uiMessages, message, expectedText) {
 }
 
 async function auditVm(plugin) {
-  const code = readText(`${plugin.base}/code.js`);
+  const code = loadPluginCode(plugin);
   const { figma, page, uiMessages, createdSvg, createdImages, makeNode } = createFigmaStub();
   const context = {
     figma,
