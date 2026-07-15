@@ -119,8 +119,9 @@ describe('HU Kids default theme and card behavior', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Open Mastercard Standard ending 5678' }))
 
-    expect(screen.getByRole('heading', { name: 'Your cards' })).toBeInTheDocument()
-    expect(screen.getAllByText('Mastercard Standard')).not.toHaveLength(0)
+    expect(container.querySelector('[data-hu-card-details-actions]')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Manage card' })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Mastercard Standard card ending 5678' })).toBeInTheDocument()
   })
 
   it('selects and applies every published theme without changing its mapping', () => {
