@@ -415,7 +415,13 @@ function mergeDefined(base: unknown, override: unknown): unknown {
 
   const merged: UnknownRecord = { ...base };
   for (const [key, overrideValue] of Object.entries(override)) {
-    merged[key] = mergeDefined(base[key], overrideValue);
+    const baseValue = Object.prototype.hasOwnProperty.call(base, key) ? base[key] : undefined;
+    Object.defineProperty(merged, key, {
+      configurable: true,
+      enumerable: true,
+      value: mergeDefined(baseValue, overrideValue),
+      writable: true,
+    });
   }
   return merged;
 }
