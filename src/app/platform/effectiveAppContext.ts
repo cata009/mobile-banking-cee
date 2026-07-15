@@ -9,6 +9,7 @@ import { getReleaseBundle, getReleaseDiff, getReleasePromotionReadiness } from "
 import { SCREEN_REGISTRY } from "@/app/registry/screenRegistry";
 import { getActiveFeatures } from "@/app/state/featureResolver";
 import { resolveBankingScenario } from "@/app/platform/banking/bankingScenarioRegistry";
+import { isPIProductScenarioId, resolveProductDataAuthority } from "@/app/platform/banking/productDataAuthority";
 import type {
   BankingActionId,
   BankingHoldingType,
@@ -79,7 +80,7 @@ function resolveDataSnapshot(holdings: EffectiveAppContext["holdings"]): Effecti
 }
 
 export function resolveEffectiveAppContext(state: DemoState): EffectiveAppContext {
-  const bankingScenario = resolveBankingScenario(state);
+  const bankingScenario = resolveEffectiveBankingScenario(state);
   const holdings = bankingScenario.holdings;
 
   return {
@@ -99,4 +100,11 @@ export function resolveEffectiveAppContext(state: DemoState): EffectiveAppContex
     dataSnapshot: resolveDataSnapshot(holdings),
     projectPack: getProjectPack(state.product, state.country),
   };
+}
+
+export function resolveEffectiveBankingScenario(state: DemoState) {
+  const productAuthority = state.product === "PI" && isPIProductScenarioId(state.bankingScenario)
+    ? resolveProductDataAuthority(state.bankingScenario, state.productCounts)
+    : null;
+  return resolveBankingScenario(state, productAuthority?.resolvedHoldings);
 }

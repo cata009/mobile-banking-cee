@@ -5,6 +5,11 @@
 
 import { createContext, useCallback, useContext, useMemo, useState, ReactNode } from "react";
 import { getReleaseBundle } from "@/app/registry/releaseRegistry";
+import {
+  DEFAULT_VISIBLE_PRODUCT_OVERRIDES,
+  isPIProductScenarioId,
+  resolveProductDataAuthority,
+} from "@/app/platform/banking/productDataAuthority";
 import type {
   BaselineId,
   BankingScenarioId,
@@ -23,15 +28,7 @@ import type {
 } from "./demoTypes";
 
 export const DEFAULT_PRODUCT_COUNTS: ProductCounts = {
-  accounts: 2,
-  debitCards: 2,
-  creditCards: 1,
-  mealCards: 0,
-  deposits: 1,
-  savingsAccounts: 1,
-  loans: 1,
-  mortgages: 1,
-  investments: 1,
+  ...DEFAULT_VISIBLE_PRODUCT_OVERRIDES,
 };
 
 /**
@@ -73,7 +70,7 @@ export function getCurrentFlags(state: DemoState): FeatureFlagOverrides {
 /**
  * Default demo state with empty flags by context
  */
-const DEFAULT_DEMO_STATE: DemoState = {
+export const DEFAULT_DEMO_STATE: DemoState = {
   product: "PI",
   country: "RO",
   scenario: "active",
@@ -111,6 +108,8 @@ const CountryContext = createContext<CountryId | null>(null);
 interface ProductDataSlice {
   country: CountryId;
   productCounts: ProductCounts;
+  productCountOverrides: ProductCounts;
+  resolvedProductCounts: ProductCounts;
 }
 const ProductDataContext = createContext<ProductDataSlice | null>(null);
 
@@ -303,8 +302,18 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
   // slice so its identity is stable when unrelated fields change.
   const countryValue = state.country;
   const productDataValue = useMemo<ProductDataSlice>(
-    () => ({ country: state.country, productCounts: state.productCounts }),
-    [state.country, state.productCounts],
+    () => {
+      const resolvedProductCounts = state.product === "PI" && isPIProductScenarioId(state.bankingScenario)
+        ? resolveProductDataAuthority(state.bankingScenario, state.productCounts).counts
+        : state.productCounts;
+      return {
+        country: state.country,
+        productCounts: state.productCounts,
+        productCountOverrides: state.productCounts,
+        resolvedProductCounts,
+      };
+    },
+    [state.bankingScenario, state.country, state.product, state.productCounts],
   );
 
   return (

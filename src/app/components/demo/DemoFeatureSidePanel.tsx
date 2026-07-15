@@ -4,7 +4,7 @@
  */
 
 import { AppIcon } from "@/app/components/icons";
-import { useDemo } from "@/app/state/demoStore";
+import { useDemo, useProductData } from "@/app/state/demoStore";
 import { isFeatureActive } from "@/app/state/featureResolver";
 import { FEATURE_META } from "@/app/registry/demoConfig";
 import { BANKING_SCENARIOS } from "@/app/platform/banking/bankingScenarioRegistry";
@@ -83,10 +83,10 @@ interface DemoFeatureSidePanelProps {
 
 export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelProps) {
   const demoState = useDemo();
+  const { productCountOverrides } = useProductData();
   const {
     scenario,
     bankingScenario,
-    productCounts,
     setBankingScenario,
     setProductCount,
     setFlag,
@@ -152,7 +152,7 @@ export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelPr
               Data Snapshot
             </h4>
             <ProductCountEditor
-              values={productCounts}
+              values={productCountOverrides}
               onChange={setProductCount}
             />
           </section>

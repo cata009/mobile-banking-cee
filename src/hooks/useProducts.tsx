@@ -4,8 +4,7 @@ import {
   ProductCategory,
   ProductType,
   getProductsByCategory,
-  formatAmount,
-  mockProducts
+  formatAmount
 } from '@/data/products';
 import svgPaths from '@/imports/svg-wan58807zo';
 import { useProductData } from '@/app/state/demoStore';
@@ -314,9 +313,9 @@ function applyProductCounts(categories: ProductCategory[], productCounts: Produc
 }
 
 export function useProducts() {
-  const { country, productCounts } = useProductData();
+  const { country, resolvedProductCounts } = useProductData();
   const localCurrency = getCountryCurrency(country);
-  const countedCategories = applyProductCounts(getProductsByCategory(), productCounts);
+  const countedCategories = applyProductCounts(getProductsByCategory(), resolvedProductCounts);
   const countedProducts = countedCategories.flatMap(category => category.products);
   
   // Get base categories and convert all products to local currency
@@ -331,10 +330,13 @@ export function useProducts() {
       // Debit cards mirror the balance of their linked current account
       const linkedAccount = product.type === 'debit_card' || product.type === 'meal_card'
         ? countedProducts.find(p => p.id === product.linkedAccountId) ??
-          countedProducts.find(p => p.type === 'current_account') ??
-          mockProducts.find(p => p.id === product.linkedAccountId)
+          countedProducts.find(p => p.type === 'current_account')
         : undefined;
-      const sourceBalance = linkedAccount ? linkedAccount.balance : product.balance;
+      const sourceBalance = linkedAccount
+        ? linkedAccount.balance
+        : isCard && product.type !== "credit_card"
+          ? 0
+          : product.balance;
       const sourceCurrency = linkedAccount ? linkedAccount.currency : product.currency;
       const convertedBalance = roundMoney(convertCurrency(sourceBalance, sourceCurrency, localCurrency));
 
