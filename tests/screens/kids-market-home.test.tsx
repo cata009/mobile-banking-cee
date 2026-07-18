@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import '@testing-library/jest-dom/vitest'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import type { PropsWithChildren } from 'react'
 import { afterEach, beforeAll, describe, expect, expectTypeOf, it } from 'vitest'
 import KidsMarketHomeApp, {
@@ -37,6 +37,15 @@ function renderKids(country: 'HU' | 'SK') {
 
 function renderHuKids() {
   return renderKids('HU')
+}
+
+// Earning shows two `SHOW MORE` links: one on the Tasks card, one on the
+// Education card. Target the Education one so the query stays unambiguous as
+// either card's content grows.
+function openLearnFromEarning(container: HTMLElement) {
+  const educationCard = container.querySelector('[data-hu-learn-education-card]')
+  if (!educationCard) throw new Error('Education card was not rendered on Earning')
+  fireEvent.click(within(educationCard as HTMLElement).getByRole('button', { name: 'SHOW MORE' }))
 }
 
 beforeAll(() => {
@@ -169,10 +178,15 @@ describe('HU Kids default theme and card behavior', () => {
     const hu = renderHuKids()
 
     fireEvent.click(screen.getByRole('button', { name: 'Earning' }))
-    fireEvent.click(screen.getByRole('button', { name: 'SHOW MORE' }))
 
+    // Messages lives in the Earning header; the Learn page swaps that header for
+    // the menu frame, so assert the glyph before navigating away from it.
     expect(screen.getByRole('button', { name: 'Messages' }).querySelector('svg'))
       .toHaveAttribute('viewBox', '5 8 22 15')
+
+    openLearnFromEarning(hu.container)
+    expect(hu.container.querySelector('[data-hu-kids-theme-scope]'))
+      .toHaveAttribute('data-hu-kids-theme-scope', 'learn')
     hu.unmount()
 
     renderKids('SK')
@@ -186,7 +200,7 @@ describe('HU Kids default theme and card behavior', () => {
     const { container } = renderHuKids()
 
     fireEvent.click(screen.getByRole('button', { name: 'Earning' }))
-    fireEvent.click(screen.getByRole('button', { name: 'SHOW MORE' }))
+    openLearnFromEarning(container)
     fireEvent.click(screen.getByRole('button', { name: /Saving goals/ }))
 
     const completedLesson = screen.getByRole('button', { name: /Pick a clear target.*Completed/ })
@@ -198,11 +212,12 @@ describe('HU Kids default theme and card behavior', () => {
     expect(segments).toHaveLength(4)
     expect(Array.from(segments).filter((segment) => segment.classList.contains('bg-[var(--hu-theme-accent-strong)]')))
       .toHaveLength(1)
-    expect(screen.getByText(/Slide 1 of 3/)).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    // The lesson player advances through the segment rail; the old "Slide n of m"
+    // caption was dropped when the player was redesigned, so the rail is the
+    // progress contract.
+    fireEvent.click(screen.getByRole('button', { name: 'NEXT' }))
 
-    expect(screen.getByText(/Slide 2 of 3/)).toBeInTheDocument()
     expect(Array.from(segments).filter((segment) => segment.classList.contains('bg-[var(--hu-theme-accent-strong)]')))
       .toHaveLength(2)
   })
