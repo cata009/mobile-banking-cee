@@ -101,7 +101,7 @@ const en: TranslationKeys = {
     cards: {
       contacts: 'Contact',
       documents: 'Documents',
-      settings: 'settings',
+      settings: 'Settings',
       gdprConsent: 'GDPR Consent',
       thirdPartyConsent: 'Third party consents',
       digitalActivities: 'Digital activity record',

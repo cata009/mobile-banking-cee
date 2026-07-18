@@ -85,7 +85,10 @@ interface TutorialDetailOverlayProps {
   onClose: () => void;
 }
 
-function TutorialDetailOverlay({ tutorial, stepIndex, onStepChange, onBack, onClose }: TutorialDetailOverlayProps) {
+// `onBack` (return to the tutorial list without closing the sheet) is supplied
+// by the caller, but the header currently renders only a close control, so it is
+// intentionally not destructured here.
+function TutorialDetailOverlay({ tutorial, stepIndex, onStepChange, onClose }: TutorialDetailOverlayProps) {
   const currentStep = tutorial.slides[stepIndex] ?? tutorial.slides[0];
   const isLastStep = stepIndex === tutorial.slides.length - 1;
 
@@ -107,18 +110,11 @@ function TutorialDetailOverlay({ tutorial, stepIndex, onStepChange, onBack, onCl
       <section
         aria-label={`${tutorial.shortTitle} tutorial`}
         aria-modal="true"
-        className="absolute inset-x-0 bottom-0 top-[var(--uc-phone-top-reserve,54px)] flex flex-col bg-[var(--uc-surface)] text-[var(--uc-text)]"
+        className="absolute inset-x-0 bottom-0 top-[var(--uc-phone-top-reserve,54px)] flex flex-col rounded-t-[12px] bg-[var(--uc-surface)] text-[var(--uc-text)]"
         role="dialog"
       >
         <div className="flex h-[44px] shrink-0 items-center border-b border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[8px]">
-          <button
-            aria-label="Back to tutorials"
-            className="grid size-[32px] place-items-center bg-transparent text-[var(--uc-icon)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
-            onClick={onBack}
-            type="button"
-          >
-            <AppIcon name="back-heavy" color="currentColor" size={20} />
-          </button>
+          <span className="size-[32px] shrink-0" aria-hidden="true" />
           <div className="min-w-0 flex-1 px-[8px] text-center">
             <h2 className="truncate font-['UniCredit:Bold',sans-serif] text-[14px] font-bold leading-[18px]">
               {tutorial.shortTitle}
@@ -158,7 +154,7 @@ function TutorialDetailOverlay({ tutorial, stepIndex, onStepChange, onBack, onCl
           ))}
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 flex h-[50px] items-center justify-between border-t border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[16px]">
+        <div className="absolute inset-x-0 bottom-0 flex h-[72px] items-center justify-between border-t border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[16px]">
           <button
             aria-label="Previous tutorial step"
             className="grid size-[32px] place-items-center bg-transparent text-[var(--uc-icon)] disabled:opacity-30"
@@ -166,7 +162,7 @@ function TutorialDetailOverlay({ tutorial, stepIndex, onStepChange, onBack, onCl
             onClick={goPrevious}
             type="button"
           >
-            <AppIcon name="chevron-left" color="currentColor" size={32} />
+            <AppIcon name="chevron-left" color="currentColor" size={24} />
           </button>
           <button
             className="font-['UniCredit:Bold',sans-serif] text-[14px] font-bold leading-[18px] text-[var(--uc-action)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
@@ -226,7 +222,7 @@ function TutorialTextBlock({ slide }: { slide: BankingTutorialSlide }) {
       <h3 className="font-['UniCredit:Bold',sans-serif] text-[24px] font-bold leading-[31px] text-[var(--uc-text)]">
         {slide.title}
       </h3>
-      <p className="font-['UniCredit:Regular',sans-serif] text-[18px] leading-[24px] text-[var(--uc-text)]">
+      <p className="font-['UniCredit:Regular',sans-serif] text-[16px] leading-[22px] text-[var(--uc-text)]">
         {slide.body}
       </p>
       <p className="font-['UniCredit:Regular',sans-serif] text-[14px] leading-[20px] text-[var(--uc-text-muted)]">
