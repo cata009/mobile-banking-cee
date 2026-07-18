@@ -9,6 +9,27 @@ Last updated: 2026-07-18
 - [2026-07](archive/sessions-2026-07.md) — 135 sessions
 - [2026-06](archive/sessions-2026-06.md) — 74 sessions
 
+## 2026-07-19 Monolith Split
+
+- Latest request handled: split all six remaining monolith files, finishing the job rather than stopping at the largest.
+- Result, one commit each so any of them can be reverted alone:
+
+  | file | before | after |
+  | --- | ---: | ---: |
+  | `DesignSystemPage.tsx` | 4,371 | 462 |
+  | `TemplateCodePreviews.tsx` | 2,836 | 138 |
+  | `KidsMarketHomeApp.tsx` | 2,725 | 977 |
+  | `AppIcon.tsx` | 2,135 | 249 |
+  | `czChatOrchestration.ts` | 1,816 | 1,335 |
+  | `phoneScreenshot.ts` | 1,744 | 309 |
+
+- Every split was verified as a pure move: each original declaration is byte-identical in its new home, none missing, none added, no import cycles, and `npm run verify` green before moving on. Public surfaces were preserved by re-exporting moved names from the original paths, so no consumer changed.
+- Two audits were taught the new layout without changing what they assert: `audit-template-contract.mjs` now reads the preview-id union from `templateData.ts` (it still reads the `case` arms from the dispatcher), and `audit-figma-bridge.mjs` now reads the whole exporter folder for its seven static checks. Both report the same numbers as before.
+- Tooling bug found and fixed mid-way: the extraction script's declaration pattern did not recognise `export async function`, so on `phoneScreenshot.ts` the three exported entry points were absorbed into the preceding constant's block and moved out with it. The pattern now handles `async`, that split was redone from scratch, and the three earlier splits were checked and contain no top-level async functions, so they were unaffected.
+- Deliberately not done: `buildCzChatSmartReplyResolver` is a single 1,285-line function with 87 inner bindings. Splitting it means restructuring a function body, which forfeits the byte-identical guarantee every other step relied on, so it was left for a dedicated pass.
+- Verification: `npm run verify` passes end to end - 0 type errors, ESLint clean, 234/234 tests, six audits, production build.
+- safe to resume: yes.
+
 ## 2026-07-18 Project Health Pass
 
 - Latest request handled: after the Kids split, execute the four project-health items — delete the dead `src/imports` dump, enforce the quality gate in CI, shrink the oversized shipped images without losing anything, and split the session log. Verification of every claim was demanded before any execution.
