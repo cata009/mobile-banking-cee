@@ -112,7 +112,16 @@ function auditStatic(plugin) {
 }
 
 function auditAppExporterStatic() {
-  const source = readText("src/app/utils/phoneScreenshot.ts");
+  // The exporter is split across a module folder. These checks are about the
+  // exporter as a whole, so read every file that makes it up.
+  const source = [
+    "src/app/utils/phoneScreenshot.ts",
+    "src/app/utils/phoneScreenshot/constants.ts",
+    "src/app/utils/phoneScreenshot/figmaTypes.ts",
+    "src/app/utils/phoneScreenshot/figmaValidation.ts",
+    "src/app/utils/phoneScreenshot/figmaLayers.ts",
+    "src/app/utils/phoneScreenshot/domCapture.ts",
+  ].map((path) => readText(path)).join("\n");
   const checks = [
     ["schema export", source.includes('schema: "build-ui.screen.v1"')],
     ["app preflight validator", source.includes("function validateGeneratedFigmaPayload")],
