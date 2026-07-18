@@ -8,6 +8,7 @@ interface BottomSheetProps {
   meta?: ReactNode;
   children: ReactNode;
   maxHeightOffsetPx?: number;
+  fillHeight?: boolean;
   className?: string;
   headerClassName?: string;
   bodyClassName?: string;
@@ -20,6 +21,7 @@ export function BottomSheet({
   meta,
   children,
   maxHeightOffsetPx = 54,
+  fillHeight = false,
   className,
   headerClassName,
   bodyClassName,
@@ -98,11 +100,12 @@ export function BottomSheet({
         aria-modal="true"
         className={cn(
           "relative w-full overflow-y-auto rounded-t-[12px] bg-[var(--uc-sheet-bg)] p-[16px] shadow-[0_-8px_24px_rgb(var(--uc-shadow-rgb)_/_0.18)] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          fillHeight && "flex flex-col overflow-hidden",
           className,
         )}
         ref={dialogRef}
         role="dialog"
-        style={{ maxHeight: `calc(100% - ${maxHeightOffsetPx}px)` }}
+        style={{ [fillHeight ? "height" : "maxHeight"]: `calc(100% - ${maxHeightOffsetPx}px)` }}
         tabIndex={-1}
       >
         <div className={cn("mb-[24px] flex items-start justify-between gap-[16px]", headerClassName)}>

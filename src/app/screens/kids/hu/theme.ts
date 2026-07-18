@@ -382,7 +382,7 @@ export function getHuThemeStyle(theme: HuThemePreset): CSSProperties {
     "--hu-theme-control-fg": "var(--uc-text)",
     "--hu-theme-progress-bg": "var(--uc-surface-muted)",
     "--hu-learn-card-bg": isStandard
-      ? "linear-gradient(135deg, var(--uc-app-bg) 0%, color-mix(in srgb, var(--uc-app-bg) 62%, var(--uc-neutral-400)) 100%)"
+      ? "var(--uc-surface)"
       : "linear-gradient(135deg, color-mix(in srgb, var(--uc-neutral-white) 94%, var(--hu-theme-accent)) 0%, color-mix(in srgb, var(--uc-neutral-white) 90%, var(--hu-theme-accent-2)) 58%, color-mix(in srgb, var(--uc-neutral-white) 86%, var(--hu-theme-accent-3)) 100%)",
     "--hu-learn-card-border": isStandard
       ? "color-mix(in srgb, var(--uc-text) 8%, transparent)"
