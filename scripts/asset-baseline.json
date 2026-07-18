@@ -1,5 +1,6 @@
 {
   "baselineCommit": "453e7e2",
+  "baselineNote": "Re-locked on 2026-07-18 after lossless PNG re-compression of three oversized Figma exports (40.61 MB -> 34.28 MB). Pixel data is unchanged: each file was decoded before and after and the SHA-256 of the raw samples matched. Only deflate settings, row filters, and an eXIf metadata chunk differ. Asset count is unchanged at 159 - no image was added, removed, resized, converted, or regenerated.",
   "assetCount": 159,
-  "pathBlobSha256Aggregate": "2452305fa59ecd0691d15d0a0b4540e85cd6326ddd96461f31dd3767ea0e13db"
+  "pathBlobSha256Aggregate": "eb450645cc7aae56dbcc8b147dc5f941fd720a041a85d03962a5870c74af1f99"
 }
