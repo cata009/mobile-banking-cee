@@ -189,6 +189,8 @@ Capability evidence:
 
 If a change alters product behavior, architecture, demo state, feature coverage, or integration assumptions, update the relevant docs in the same session.
 
+`docs/handoff/current-session.md` holds only the most recent sessions; older ones move to `docs/handoff/archive/sessions-YYYY-MM.md`. Keep the active file small enough to actually be read at the start of a session — it grew to 690 KB once, which put it past the point where any agent could open it. When it passes roughly the last dozen sessions, archive the tail rather than letting it grow.
+
 Documentation should include evidence:
 
 - files changed;
