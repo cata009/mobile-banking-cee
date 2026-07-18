@@ -3,7 +3,10 @@ import fs from "node:fs";
 const read = (path) => fs.readFileSync(path, "utf8");
 
 const templateRegistry = read("src/app/registry/templateRegistry.ts");
+// The dispatcher still owns the `case` arms; the id union moved next to the
+// preview fixture data when TemplateCodePreviews.tsx was split up.
 const templatePreviews = read("src/app/components/templates/TemplateCodePreviews.tsx");
+const templateData = read("src/app/components/templates/templateData.ts");
 const demoTypes = read("src/app/state/demoTypes.ts");
 const componentRegistry = read("src/app/registry/componentRegistry.ts");
 const screenRegistry = read("src/app/registry/screenRegistry.ts");
@@ -72,7 +75,7 @@ const screenIds = collectUnion("ScreenId", demoTypes);
 const screenRegistryIds = collectObjectKeys(screenRegistry);
 const flowIds = collectUnion("FlowId", demoTypes);
 const flowRegistryIds = collectObjectKeys(flowRegistry);
-const previewIds = collectUnion("TemplateCodePreviewId", templatePreviews);
+const previewIds = collectUnion("TemplateCodePreviewId", templateData);
 const previewCases = new Set([...templatePreviews.matchAll(/case "([^"]+)":/g)].map((entry) => entry[1]));
 const blocks = collectTemplateBlocks(templateRegistry);
 
