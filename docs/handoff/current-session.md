@@ -1,6 +1,6 @@
 # Current Session
 
-Last updated: 2026-07-18
+Last updated: 2026-07-19
 
 > Older sessions live in [`archive/`](archive/). This file keeps the most recent 12.
 
@@ -8,6 +8,23 @@ Last updated: 2026-07-18
 
 - [2026-07](archive/sessions-2026-07.md) — 135 sessions
 - [2026-06](archive/sessions-2026-06.md) — 74 sessions
+
+## 2026-07-19 Unified Git and Production Publication Closeout
+
+- Latest request handled: unify every completed local change on `main`, publish it to GitHub and Vercel Production, and leave no hidden worktree, stash, side branch, or uncommitted publication work.
+- Starting state was audited before publication: exactly one worktree on local `main`, no stash entries, no secondary local branches, a clean index/worktree, and 14 verified commits ahead of `origin/main`. The only secondary remote branch, `origin/codex/product-health-hardening`, was already fully merged into `main`.
+- GitHub publication: the 14 commits through `bb8257d` were pushed to `origin/main`; the fully merged `codex/product-health-hardening` remote branch was deleted. This closeout documentation is the final follow-up commit and is pushed to the same branch before the explicit Production deployment.
+- Fresh verification immediately before publication: `npm run verify` passed end to end - 0 type errors, ESLint clean, 39 test files / 234 tests, all six audits, and the Vite production build (3,956 modules). The asset audit still locks all 159 tracked assets at aggregate `eb450645cc7aae56dbcc8b147dc5f941fd720a041a85d03962a5870c74af1f99`.
+- Image safety: no image was edited during this closeout. PNG optimization remains an explicitly controlled future task; the already committed lossless pass retains identical decoded samples and the same 159-asset inventory.
+- Known limitations are not hidden: the successful build still reports the documented empty `react-vendor` chunk and `App` chunk-size warning. Product backlog remains in `next-tasks.md` / `known-bananas.md`; neither warning blocks publication and neither was expanded into last-minute scope.
+- Commands/evidence: `git worktree list --porcelain`, `git stash list`, `git branch -vv`, `git branch -r --no-merged main`, `git status --short`, `git rev-list --left-right --count origin/main...HEAD`, `npm run verify`, `git push origin main`, and `git push origin --delete codex/product-health-hardening`.
+- Banana Loop: all publication-state risks were either removed or recorded; there is no untriaged local work. Final gates are the closeout commit/push, explicit Vercel Production deployment, authenticated production smoke, GitHub Actions result, and a final clean-state audit.
+- Constitutional Check:
+  - scope preserved: yes - closeout/publication only; no new product or PNG work
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes after the final gates listed above succeed
 
 ## 2026-07-19 Monolith Split
 
