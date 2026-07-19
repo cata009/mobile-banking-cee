@@ -18,13 +18,14 @@ Last updated: 2026-07-19
 - Image safety: no image was edited during this closeout. PNG optimization remains an explicitly controlled future task; the already committed lossless pass retains identical decoded samples and the same 159-asset inventory.
 - Known limitations are not hidden: the successful build still reports the documented empty `react-vendor` chunk and `App` chunk-size warning. Product backlog remains in `next-tasks.md` / `known-bananas.md`; neither warning blocks publication and neither was expanded into last-minute scope.
 - Commands/evidence: `git worktree list --porcelain`, `git stash list`, `git branch -vv`, `git branch -r --no-merged main`, `git status --short`, `git rev-list --left-right --count origin/main...HEAD`, `npm run verify`, `git push origin main`, and `git push origin --delete codex/product-health-hardening`.
-- Banana Loop: all publication-state risks were either removed or recorded; there is no untriaged local work. Final gates are the closeout commit/push, explicit Vercel Production deployment, authenticated production smoke, GitHub Actions result, and a final clean-state audit.
+- Publication evidence: Vercel Production deployment `dpl_9FvgW2YuCKxRMwPWgmPVnfbYnebC` reached `READY` on the canonical `https://mobile-banking-cee.vercel.app` alias. Production access smoke passed unauthenticated -> login -> authenticated, and the authenticated app document returned HTTP 200 with its root mount. GitHub Actions `verify` run `29687079235` completed successfully for `da6895e`.
+- Banana Loop: all publication-state risks were either removed or recorded; there is no untriaged local work. The successful CI run emitted a non-blocking Node 20 action-runtime deprecation notice; it is recorded in `banana-log.md` and `next-tasks.md` rather than expanded into this closeout.
 - Constitutional Check:
   - scope preserved: yes - closeout/publication only; no new product or PNG work
   - docs updated: yes
   - verification recorded: yes
   - bananas triaged: yes
-  - safe to resume: yes after the final gates listed above succeed
+  - safe to resume: yes
 
 ## 2026-07-19 Monolith Split
 
