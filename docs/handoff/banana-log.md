@@ -2,6 +2,14 @@
 
 This log records bananas found and how they were triaged.
 
+## 2026-07-19
+
+| Banana | Triage | Evidence |
+| --- | --- | --- |
+| Fourteen verified commits existed only on local `main`, so the clean-looking worktree did not mean the work was published | Ran the complete quality gate, pushed all 14 commits through `bb8257d` to `origin/main`, then added this explicit closeout checkpoint | `git rev-list --left-right --count origin/main...HEAD` changed from `0 14`; `npm run verify`; `git push origin main` |
+| A stale remote hardening branch made repository state look split even though its work was already unified | Verified that no remote branch was unmerged into `main`, then deleted `origin/codex/product-health-hardening` | `git branch -r --no-merged main`; `git push origin --delete codex/product-health-hardening` |
+| A final documentation commit could be left outside the deployed artifact | The closeout commit is pushed first, then that exact `main` state is explicitly deployed to Vercel Production and checked with authenticated smoke | final `origin/main` parity check, Vercel inspection, production access smoke |
+
 ## 2026-07-15
 
 | Banana | Triage | Evidence |
