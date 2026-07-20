@@ -6,9 +6,9 @@ interface ThemeModeSegmentProps {
   ariaLabel?: string;
 }
 
-function SunIcon() {
+function SunIcon({ size = 14 }: { size?: number }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" aria-hidden="true">
       <path
         d="M10 4.375V1.875M10 18.125V15.625M4.375 10H1.875M18.125 10H15.625M5.15625 5.15625L3.4375 3.4375M16.5625 16.5625L14.8438 14.8438M14.8438 5.15625L16.5625 3.4375M3.4375 16.5625L5.15625 14.8438"
         stroke="currentColor"
@@ -23,9 +23,9 @@ function SunIcon() {
   );
 }
 
-function MoonIcon() {
+function MoonIcon({ size = 14 }: { size?: number }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" aria-hidden="true">
       <path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -43,7 +43,7 @@ export default function ThemeModeSegment({
 }: ThemeModeSegmentProps) {
   return (
     <div
-      className="inline-flex items-center rounded-[18px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[2px]"
+      className="inline-flex items-center gap-[2px] rounded-[14px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[2px]"
       aria-label={ariaLabel}
     >
       {(["light", "dark"] as const).map((mode) => {
@@ -56,7 +56,7 @@ export default function ThemeModeSegment({
             aria-label={mode === "light" ? "Light mode" : "Dark mode"}
             aria-pressed={isActive}
             onClick={() => onChange(mode)}
-            className={`grid size-[28px] place-items-center rounded-[16px] transition-colors ${
+            className={`grid size-[24px] place-items-center rounded-[10px] transition-colors ${
               isActive
                 ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm"
                 : "text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]"

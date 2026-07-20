@@ -4,6 +4,7 @@ import '@testing-library/jest-dom/vitest'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { CoAppingChatAssistant } from '../../package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant'
+import type { CoAppingChatMessage } from '../../package/mobile-pi-coapping-chat-package/src/types'
 
 type Deferred<T> = {
   promise: Promise<T>
@@ -117,6 +118,93 @@ afterEach(() => {
   removeSpeechRecognition()
   setMediaDevices()
   Reflect.deleteProperty(HTMLElement.prototype, 'scrollTo')
+})
+
+describe('CZ Chat investment product summary', () => {
+  const investmentSummaryMessage: CoAppingChatMessage = {
+    id: 'investment-summary-message',
+    role: 'agent',
+    text: 'Product context',
+    time: '15:30',
+    richBlocks: [
+      {
+        type: 'investment-summary',
+        logoId: 'unicredit',
+        title: 'UniCredit Balanced Income Fund',
+        body: 'Balanced fund in EUR.',
+        metricLayout: 'stack',
+        metrics: [
+          { label: 'Holding value', value: '5 525,00 CZK', helper: '7,625 PCS' },
+          { label: 'Performance', value: '+1.80%', helper: 'Current product snapshot' },
+          { label: 'Market price', value: '29,84 EUR', helper: 'Updated 19.07.2026' },
+        ],
+      },
+    ],
+  }
+
+  async function openInvestmentSummary(
+    followUps: NonNullable<CoAppingChatMessage['followUps']> = [],
+    resolveReply = vi.fn(async () => ({
+      text: 'Ready',
+      richBlocks: investmentSummaryMessage.richBlocks,
+      followUps,
+    })),
+  ) {
+    const view = render(
+      <CoAppingChatAssistant
+        onClose={() => undefined}
+        suggestedTopics={[]}
+        resolveReply={resolveReply}
+        typingDelayMs={0}
+      />,
+    )
+
+    const input = screen.getByRole('textbox', { name: 'Ask me anything' })
+    fireEvent.change(input, { target: { value: 'Explain this product' } })
+    fireEvent.submit(input.closest('form')!)
+    await screen.findByText('Ready')
+    await waitFor(() => expect(view.container.querySelector('.mpc-agent-copy-streaming')).toBeNull())
+
+    return { resolveReply, view }
+  }
+
+  it('renders the canonical 32px logo, no eyebrow, and vertically stacked metrics', async () => {
+    const { view } = await openInvestmentSummary()
+
+    const summaryCard = view.container.querySelector('.mpc-rich-card-summary')
+    const logo = screen.getByRole('img', { name: 'UniCredit' })
+
+    expect(summaryCard).not.toBeNull()
+    expect(logo).toHaveStyle({ width: '32px', height: '32px' })
+    expect(summaryCard?.querySelector('.mpc-rich-card-head > span')).toBeNull()
+    expect(summaryCard?.querySelector('.mpc-rich-metric-grid-stack')).not.toBeNull()
+  })
+
+  it.each([
+    ['Review performance', 'How is my position in UniCredit Balanced Income Fund performing?'],
+    ['Review risk', 'Explain the risk, liquidity, and currency exposure of UniCredit Balanced Income Fund.'],
+    ['What documents matter?', 'What documents should I review for UniCredit Balanced Income Fund?'],
+  ])('sends the real product prompt when %s is clicked', async (label, prompt) => {
+    const followUps: NonNullable<CoAppingChatMessage['followUps']> = [
+      {
+        id: `follow-up-${label}`,
+        label,
+        action: { id: `action-${label}`, label, type: 'send-message', prompt },
+      },
+    ]
+    const resolveReply = vi.fn(async (input: string) =>
+      input === 'Explain this product'
+        ? { text: 'Ready', richBlocks: investmentSummaryMessage.richBlocks, followUps }
+        : { text: `Resolved: ${input}` },
+    )
+
+    await openInvestmentSummary(followUps, resolveReply)
+    resolveReply.mockClear()
+
+    fireEvent.click(screen.getByRole('button', { name: label }))
+
+    await waitFor(() => expect(resolveReply).toHaveBeenCalledWith(prompt, expect.any(Array)))
+  })
 })
 
 describe('CZ Chat voice capture', () => {

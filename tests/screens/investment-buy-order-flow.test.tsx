@@ -82,10 +82,10 @@ describe("InvestmentBuyOrderFlow", () => {
 
     expect(screen.getAllByText("One off BUY Order")).not.toHaveLength(0);
     fireEvent.change(screen.getByRole("textbox", { name: "Quantity" }), { target: { value: "4" } });
-    expect(screen.getByText("100,00 EUR")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
 
     expect(screen.getAllByText("Review Data")).not.toHaveLength(0);
+    expect(screen.getByText("100,00 EUR")).toBeInTheDocument();
     const buyButton = screen.getByRole("button", { name: "Buy" });
     expect(buyButton).toBeDisabled();
     fireEvent.click(screen.getByRole("switch", { name: "Accept terms and conditions" }));

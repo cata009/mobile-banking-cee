@@ -65,10 +65,12 @@ export interface CoAppingRichProductCard {
 export type CoAppingRichBlock =
   | {
       type: "investment-summary";
-      eyebrow: string;
+      eyebrow?: string;
+      logoId?: string;
       title: string;
       body: string;
       metrics: CoAppingRichMetric[];
+      metricLayout?: "grid" | "stack";
       action?: CoAppingChatAction;
     }
   | {

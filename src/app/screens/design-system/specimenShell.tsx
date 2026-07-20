@@ -144,7 +144,7 @@ export function VariantSelector<Value extends string>({
           const selectedOption = options.find((option) => option.id === event.target.value);
           if (selectedOption) onChange(selectedOption.id);
         }}
-        className="h-[36px] min-w-[210px] rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-3 text-[14px] text-[var(--uc-text)]"
+        className="uc-select h-[36px] min-w-[210px] rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] pl-3 text-[14px] text-[var(--uc-text)]"
       >
         {options.map((option) => (
           <option key={option.id} value={option.id}>

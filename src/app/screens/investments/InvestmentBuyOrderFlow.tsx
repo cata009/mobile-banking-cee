@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode, type UIEvent } from "react";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
@@ -43,6 +43,30 @@ function compactAccountNumber(value: string) {
   return `${value.slice(0, 4)} •••• ${value.slice(-4)}`;
 }
 
+/**
+ * Small green dot bullet used in PRODUCT EVALUATION attributes.
+ * Spec: 32×32 SVG viewBox, solid filled circle in --uc-green-olive.
+ */
+function ProductEvaluationBullet() {
+  return (
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M20 16C20 18.2088 18.2084 20 16 20C13.7908 20 12 18.2088 12 16C12 13.7912 13.7908 12 16 12C18.2084 12 20 13.7912 20 16Z"
+        fill="var(--uc-green-olive)"
+      />
+    </svg>
+  );
+}
+
 function FlowFrame({
   title,
   onBack,
@@ -58,14 +82,26 @@ function FlowFrame({
   actionDisabled?: boolean;
   onAction: () => void;
 }) {
+  const [headerProgress, setHeaderProgress] = useState(0);
+  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
+    setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64)));
+  };
+
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)] text-[var(--uc-text)]">
-      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide">
-        <PageHeader title={title} onBack={onBack} includeSafeArea showHelp={false} compact />
+      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide" onScroll={handleScroll}>
+        <PageHeader
+          title={title}
+          onBack={onBack}
+          includeSafeArea
+          showHelp={false}
+          compact
+          collapsedTitleProgress={headerProgress}
+        />
         {children}
         <div className="h-[24px]" aria-hidden="true" />
       </div>
-      <div className="border-t border-[var(--uc-border)] bg-[var(--uc-surface)] px-[24px] pb-[34px] pt-[12px]">
+      <div className="bg-[var(--uc-surface)] px-[24px] pb-[34px] pt-[12px]">
         <PrimaryButton disabled={actionDisabled} onClick={onAction}>
           {actionLabel}
         </PrimaryButton>
@@ -90,6 +126,17 @@ export default function InvestmentBuyOrderFlow({
 
   const selectedAccount = accounts.find((account) => account.id === selectedAccountId) ?? accounts[0] ?? null;
   const quantity = parseInvestmentOrderQuantity(quantityValue);
+  // The displayed buy-order price is always "yesterday's" price snapshot,
+  // formatted consistently as DD.MM.YYYY across all countries.
+  const priceUpdatedAt = useMemo(() => {
+    const yesterday = new Date();
+    yesterday.setHours(0, 0, 0, 0);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const dd = String(yesterday.getDate()).padStart(2, "0");
+    const mm = String(yesterday.getMonth() + 1).padStart(2, "0");
+    const yyyy = yesterday.getFullYear();
+    return `${dd}.${mm}.${yyyy}`;
+  }, []);
   const quote = useMemo(
     () => (selectedAccount && quantity ? buildInvestmentBuyOrderQuote(security, selectedAccount, quantity) : null),
     [quantity, security, selectedAccount],
@@ -191,7 +238,22 @@ export default function InvestmentBuyOrderFlow({
       <section className="pt-[16px]">
         <SectionHeadingDivider title="PRODUCT EVALUATION" className="px-[24px]" />
         <InvestmentDetailField label="Product" value={security.title} />
-        <InvestmentDetailField label="Status" value={security.status === "active" ? "Tradable" : "Unavailable"} strong={false} />
+        {security.riskLevel ? (
+          <div className="flex items-center px-[24px] py-[8px]">
+            <ProductEvaluationBullet />
+            <span className="ml-[8px] text-[14px] font-normal leading-[20px] text-[var(--uc-text)]">
+              Risk level: {security.riskLevel}
+            </span>
+          </div>
+        ) : null}
+        {security.liquidity ? (
+          <div className="flex items-center px-[24px] py-[8px]">
+            <ProductEvaluationBullet />
+            <span className="ml-[8px] text-[14px] font-normal leading-[20px] text-[var(--uc-text)]">
+              Liquidity: {security.liquidity}
+            </span>
+          </div>
+        ) : null}
       </section>
 
       <section className="pt-[24px]">
@@ -199,6 +261,8 @@ export default function InvestmentBuyOrderFlow({
         <InvestmentDetailField label="Product ID" value={security.productId} />
         <InvestmentDetailField label="Product type" value={security.productType} />
         <InvestmentDetailField label="Asset class" value={security.assetClass} />
+        <InvestmentDetailField label="Market price" value={formatMoney(security.marketPrice, security.instrumentCurrency, country, amountsHidden)} />
+        <InvestmentDetailField label="Price updated at" value={priceUpdatedAt} />
       </section>
 
       <section className="pt-[24px]">
@@ -219,7 +283,7 @@ export default function InvestmentBuyOrderFlow({
             <TextField
               label="Cash account"
               ariaLabel={`Cash account, ${selectedAccount.name}`}
-              value={compactAccountNumber(selectedAccount.accountNumber)}
+              value={selectedAccount.accountNumber}
               onChange={() => undefined}
               helperText={selectedAccount.name}
               helperText2={`Available balance ${formatMoney(selectedAccount.balance, selectedAccount.currency, country, amountsHidden)}`}
@@ -233,15 +297,6 @@ export default function InvestmentBuyOrderFlow({
         )}
         <div className="min-h-[96px] px-[24px] py-[16px]">
           <TextField
-            label="Market price"
-            ariaLabel="Market price"
-            value={formatMoney(security.marketPrice, security.instrumentCurrency, country, amountsHidden)}
-            onChange={() => undefined}
-            readOnly
-          />
-        </div>
-        <div className="min-h-[96px] px-[24px] py-[16px]">
-          <TextField
             label="Quantity"
             ariaLabel="Quantity"
             value={quantityValue}
@@ -252,11 +307,7 @@ export default function InvestmentBuyOrderFlow({
             errorText={quantityValidation ?? undefined}
           />
         </div>
-        <InvestmentDetailField label="Frequency" value="One off" strong={false} />
-        {quote ? <InvestmentDetailField label="Estimated amount" value={formatMoney(quote.productAmount, quote.productCurrency, country, amountsHidden)} /> : null}
-        {quote && selectedAccount && quote.accountCurrency !== quote.productCurrency ? (
-          <InvestmentDetailField label="Estimated account debit" value={formatMoney(quote.debitAmount, quote.accountCurrency, country, amountsHidden)} />
-        ) : null}
+        <InvestmentDetailField label="Frequency" value="One off" />
         {balanceValidation ? <p className="px-[24px] py-[12px] uc-type-n5 text-[var(--uc-status-red)]">{balanceValidation}</p> : null}
       </section>
 

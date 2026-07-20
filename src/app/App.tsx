@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigationContext, NavigationProvider, type NavigationRoute } from "@/app/contexts/NavigationContext";
 import { LanguageProvider, useLanguage } from "@/app/contexts/LanguageContext";
 import { DemoProvider, useDemo } from "@/app/state/demoStore";
@@ -108,6 +108,7 @@ import {
 } from "@/data/paymentFlow";
 import type { PaymentTemplateSelection } from "@/data/paymentTemplates";
 import type { Product } from "@/data/products";
+import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
 import type { ProductDetailSelection } from "@/app/components/products/ProductCardBottomSheet";
 
 // Panel components
@@ -266,6 +267,8 @@ function AppContent({
   const [czChatOpen, setCzChatOpen] = useState(false);
   const [czChatContext, setCzChatContext] = useState<CoAppingChatContext | null>(null);
   const [czChatInitialMode, setCzChatInitialMode] = useState<CoAppingAssistantMode>("chat");
+  const [selectedInvestmentSecurity, setSelectedInvestmentSecurity] = useState<InvestmentCatalogSecurity | null>(null);
+  const [historyFilterByTitle, setHistoryFilterByTitle] = useState<string | null>(null);
   const [productsShelfFocusRequest, setProductsShelfFocusRequest] = useState<ProductsShelfFocusRequest | null>(null);
   const [selectedProductDetail, setSelectedProductDetail] = useState<ProductDetailSelection | null>(null);
 
@@ -306,9 +309,14 @@ function AppContent({
         selectedAccountProduct,
         selectedCardProduct,
         creditCardForOpportunity,
+        selectedInvestmentSecurity,
       }),
-    [categories, country, creditCardForOpportunity, selectedAccountProduct, selectedCardProduct],
+    [categories, country, creditCardForOpportunity, selectedAccountProduct, selectedCardProduct, selectedInvestmentSecurity],
   );
+
+  const handleSelectedInvestmentSecurityChange = useCallback((security: InvestmentCatalogSecurity | null) => {
+    setSelectedInvestmentSecurity(security);
+  }, []);
 
   useEffect(() => {
     const syncDesignSystemHash = () => {
@@ -509,10 +517,10 @@ function AppContent({
     navigateTo("investments");
   };
 
-  const handleInvestmentsHistoryClick = () => {
+  const handleInvestmentsHistoryClick = (filterByTitle?: string) => {
     if (!investmentsPortfolioAvailable) return;
 
-    console.log("Investments history clicked - navigating to Investments history screen");
+    setHistoryFilterByTitle(filterByTitle ?? null);
     navigateTo("investments-history");
   };
 
@@ -601,12 +609,22 @@ function AppContent({
 
   const handleCzChatLauncherOpen = () => {
     setCzChatInitialMode("chat");
-    setCzChatContext(buildCzChatScreenContext(currentScreen, `${currentScreen}-${Date.now()}`, selectedAccountProduct));
+    setCzChatContext(buildCzChatScreenContext(
+      currentScreen,
+      `${currentScreen}-${Date.now()}`,
+      selectedAccountProduct,
+      selectedInvestmentSecurity,
+    ));
   };
 
   const openCzChatForYou = () => {
     setCzChatInitialMode("for-you");
-    setCzChatContext(buildCzChatScreenContext(currentScreen, `${currentScreen}-${Date.now()}`, selectedAccountProduct));
+    setCzChatContext(buildCzChatScreenContext(
+      currentScreen,
+      `${currentScreen}-${Date.now()}`,
+      selectedAccountProduct,
+      selectedInvestmentSecurity,
+    ));
     setCzChatOpen(true);
   };
 
@@ -987,11 +1005,15 @@ function AppContent({
         )}
 
         {currentScreen === "investments" && investmentsPortfolioAvailable && (
-          <InvestmentsPortfolioScreen onBack={goBack} onHistoryClick={handleInvestmentsHistoryClick} />
+          <InvestmentsPortfolioScreen
+            onBack={goBack}
+            onHistoryClick={handleInvestmentsHistoryClick}
+            onSelectedSecurityChange={handleSelectedInvestmentSecurityChange}
+          />
         )}
 
         {currentScreen === "investments-history" && investmentsPortfolioAvailable && (
-          <InvestmentsHistoryScreen onBack={goBack} />
+          <InvestmentsHistoryScreen onBack={goBack} historyFilterByTitle={historyFilterByTitle} />
         )}
 
         {/* Contacts Screen - EXACT ca Language Selector (NO animation) */}
