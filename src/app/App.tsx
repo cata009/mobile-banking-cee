@@ -99,6 +99,7 @@ import {
 import "../../package/mobile-pi-coapping-chat-package/src/coapping.css";
 import type { AccountTransaction } from "@/data/accountDetails";
 import type { PfmCategorySelection } from "@/data/pfmCategories";
+import type { SpendingAnalyticsTransaction } from "@/data/spendingAnalytics";
 import {
   createEmptyDomesticPaymentDraft,
   createRedoDomesticPaymentDraft,
@@ -550,6 +551,11 @@ function AppContent({
     navigateTo("transaction-detail");
   };
 
+  const handleAnalyticsTransactionClick = (transaction: SpendingAnalyticsTransaction) => {
+    const sourceProduct = accountProducts.find((productItem) => productItem.id === transaction.sourceProductId);
+    if (sourceProduct) handleTransactionClick(transaction, sourceProduct);
+  };
+
   const handleTransactionCategoryChange = (
     transaction: AccountTransaction,
     selection: PfmCategorySelection,
@@ -802,6 +808,8 @@ function AppContent({
             onPaymentsClick={handlePaymentsClick}
             onProductsClick={handleProductsClick}
             onMoreClick={handleMoreClick}
+            transactionCategoryOverrides={transactionCategoryOverrides}
+            onTransactionClick={handleAnalyticsTransactionClick}
           />
         )}
 

@@ -194,6 +194,7 @@ export type ComponentId =
   | "home.account-balance-card"
   | "home.unplanned-banner"
   | "analytics.spendings"
+  | "analytics.category-details"
   | "pfm.category-icon"
   | "pfm.category-change-sheet"
   | "messages.mailbox-tabs"

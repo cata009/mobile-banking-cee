@@ -2,6 +2,15 @@
 
 This log records bananas found and how they were triaged.
 
+## 2026-07-20
+
+| Banana | Triage | Evidence |
+| --- | --- | --- |
+| The initial Financial bubble geometry used absolute coordinates, so four subcategories overlapped and the lower circles were clipped | Replaced the coordinates with a bounded proportional flex/wrap layout and added a regression contract for interactive bubbles | `src/app/components/pfm/PfmCategoryBubbleChart.tsx`; `tests/screens/pfm-spending-category-details.test.tsx`; `npm run verify` |
+| Category bubbles initially looked interactive but were exposed as one static image and did not filter totals or transactions | Converted every removable bubble into a semantic button and routed exclusion through `createSpendingCategoryDetail`, keeping hero total, divider total, bubbles, and rows on one filtered detail model | `src/app/screens/analytics/PfmCategoryDetailScreen.tsx`; `src/data/spendingAnalytics.ts`; focused 12/12 tests |
+| Adding separate Loan and Mortgage sources could double-count one reused mock profile or make the two bubbles indistinguishable | Assigned deterministic distinct profile IDs and explicit `LOANS`/`MORTGAGE` taxonomy mappings, then asserted both in the same Financial detail | `src/data/accountDetails.ts`; `src/data/pfmCategories.ts`; `tests/data/spending-analytics.test.ts` |
+| The supplied `Add Transaction` affordance has no approved transaction-creation flow | Kept it as a presentational shared action and recorded the boundary instead of inventing product behavior | `docs/handoff/known-bananas.md`; `PfmCategoryDetailScreen.tsx` |
+
 ## 2026-07-19
 
 | Banana | Triage | Evidence |

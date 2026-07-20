@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { COUNTRIES, COUNTRY_META } from '@/app/registry/demoConfig'
-import { createSpendingAnalytics, createSpendingAnalyticsTimeline } from '@/data/spendingAnalytics'
+import {
+  createSpendingAnalytics,
+  createSpendingAnalyticsTimeline,
+  createSpendingCategoryDetail,
+} from '@/data/spendingAnalytics'
 import { mockProducts, type Product } from '@/data/products'
 
 describe('spending analytics data', () => {
@@ -53,5 +57,116 @@ describe('spending analytics data', () => {
     expect(outgoingTotal).toBeCloseTo(summary.spendingTotal, 2)
     expect(incomingTotal).toBeCloseTo(summary.incomeTotal, 2)
     expect(summary.netTotal).toBeCloseTo(summary.incomeTotal - summary.spendingTotal, 2)
+  })
+
+  it('applies session recategorization before analytics aggregation and category drill-down', () => {
+    const account = mockProducts.find((product) => product.type === 'current_account')
+    expect(account).toBeDefined()
+
+    const baseline = createSpendingAnalytics('RO', account ? [account] : [], '2026-04')
+    const shoppingTransaction = baseline.sourceTransactions.find(
+      (transaction) => transaction.pfmCategory === 'Shopping',
+    )
+    expect(shoppingTransaction).toBeDefined()
+
+    const timeline = createSpendingAnalyticsTimeline(
+      'RO',
+      account ? [account] : [],
+      shoppingTransaction
+        ? {
+            [shoppingTransaction.id]: {
+              groupId: 'financial',
+              groupLabel: 'FINANCIAL',
+              category: 'Finance',
+              subcategory: 'MORTGAGE',
+            },
+          }
+        : {},
+    )
+    const summary = timeline.summariesByPeriodKey['2026-04']
+    expect(summary).toBeDefined()
+
+    const detail = summary ? createSpendingCategoryDetail(summary, 'Finance', 'out') : undefined
+    expect(detail?.transactions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: shoppingTransaction?.id, pfmCategory: 'Finance', pfmSubcategory: 'MORTGAGE' }),
+      ]),
+    )
+    expect(detail?.subcategories).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: 'MORTGAGE', transactionCount: 1 }),
+        expect.objectContaining({ label: 'BANK FEES' }),
+      ]),
+    )
+    expect(summary?.moneyOutCategories.find((category) => category.category === 'Shopping')).toBeUndefined()
+    expect(detail?.subcategories.reduce((total, subcategory) => total + subcategory.total, 0)).toBeCloseTo(
+      detail?.total ?? 0,
+      2,
+    )
+  })
+
+  it('keeps income drill-down labels outside the expense recategorization taxonomy', () => {
+    const account = mockProducts.find((product) => product.type === 'current_account')
+    const summary = createSpendingAnalytics('RO', account ? [account] : [], '2026-04')
+    const income = createSpendingCategoryDetail(summary, 'Income', 'in')
+    const incomeAsOutflow = createSpendingCategoryDetail(summary, 'Income', 'out')
+
+    expect(income.total).toBeCloseTo(summary.moneyInCategories.find((item) => item.category === 'Income')?.total ?? 0, 2)
+    expect(income.subcategories).toEqual([
+      expect.objectContaining({ label: 'SALARY', transactionCount: 1 }),
+    ])
+    expect(income.transactions.every((transaction) => transaction.amount > 0)).toBe(true)
+    expect(incomeAsOutflow).toMatchObject({ total: 0, subcategories: [], transactions: [] })
+  })
+
+  it('maps production category labels for shopping, income, loans, and mortgages', () => {
+    const april = createSpendingAnalytics('RO', mockProducts, '2026-04')
+    const shopping = createSpendingCategoryDetail(april, 'Shopping', 'out')
+    const income = createSpendingCategoryDetail(april, 'Income', 'in')
+    const finance = createSpendingCategoryDetail(april, 'Finance', 'out')
+
+    expect(shopping.subcategories).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: 'ELECTRONICS & COMPUTERS' }),
+        expect.objectContaining({ label: 'SHOPPING (OTHER)' }),
+      ]),
+    )
+    expect(income.subcategories).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: 'SALARY' }),
+        expect.objectContaining({ label: 'INCOME (OTHER)' }),
+      ]),
+    )
+    expect(finance.subcategories).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: 'LOANS' }),
+        expect.objectContaining({ label: 'MORTGAGE' }),
+      ]),
+    )
+  })
+
+  it('orders yearly drill-down transactions by month and then by day', () => {
+    const summary = createSpendingAnalytics('RO', mockProducts, 'year-2026')
+    const monthDayKeys = summary.sourceTransactions.map(
+      (transaction) => `${transaction.monthKey}-${transaction.day}`,
+    )
+
+    expect(monthDayKeys).toEqual([...monthDayKeys].sort((a, b) => b.localeCompare(a)))
+  })
+
+  it('recalculates category totals and transactions when a subcategory is filtered out', () => {
+    const summary = createSpendingAnalytics('RO', mockProducts, '2026-04')
+    const fullDetail = createSpendingCategoryDetail(summary, 'Finance', 'out')
+    const withoutMortgage = createSpendingCategoryDetail(
+      summary,
+      'Finance',
+      'out',
+      new Set(['MORTGAGE']),
+    )
+    const mortgageTotal = fullDetail.subcategories.find((item) => item.label === 'MORTGAGE')?.total ?? 0
+
+    expect(withoutMortgage.subcategories.some((item) => item.label === 'MORTGAGE')).toBe(false)
+    expect(withoutMortgage.transactions.some((item) => item.pfmSubcategory === 'Mortgage repayment')).toBe(false)
+    expect(withoutMortgage.total).toBeCloseTo(fullDetail.total - mortgageTotal, 2)
   })
 })

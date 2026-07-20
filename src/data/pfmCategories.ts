@@ -359,7 +359,7 @@ const SUBCATEGORY_ALIASES: Record<string, readonly [string, string]> = {
   "child expenses": ["children", "CHILDREN (OTHER)"],
   "fuel and transport": ["cars-transportation", "GAS & FUEL"],
   "public transport": ["cars-transportation", "PUBLIC TRANSPORT"],
-  "online purchase": ["shopping", "SHOPPING (OTHER)"],
+  "online purchase": ["shopping", "ELECTRONICS & COMPUTERS"],
   "retail purchase": ["shopping", "SHOPPING (OTHER)"],
   subscriptions: ["shopping", "SUBSCRIPTIONS & DIGITAL MEDIA"],
   "taxes and fees": ["taxes-fines", "TAX PAYMENT"],
@@ -376,6 +376,7 @@ const SUBCATEGORY_ALIASES: Record<string, readonly [string, string]> = {
   "needs category": ["uncategorized-expenses", "UNCATEGORIZED EXPENSES (OTHER)"],
   courses: ["education", "TUITION & COURSES"],
   "loan repayment": ["financial", "LOANS"],
+  "mortgage repayment": ["financial", "MORTGAGE"],
   interest: ["financial", "FINANCIAL (OTHER)"],
 };
 
