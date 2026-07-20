@@ -10,10 +10,40 @@ import {
   getCzSavingsProductDetailSelection,
   getProductsShelfFocusCardId,
 } from "@/app/chat/czChatOrchestration";
+import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
 import type { CreditCard, Product } from "@/data/products";
 
 const workspaceRoot = process.cwd();
 const appSource = readFileSync(resolve(workspaceRoot, "src/app/App.tsx"), "utf8");
+
+const selectedInvestmentSecurity: InvestmentCatalogSecurity = {
+  id: "balanced-income",
+  title: "UniCredit Balanced Income Fund",
+  sourceProductName: "Investment Portfolio",
+  status: "active",
+  contributionType: "RECURRENT",
+  value: 185,
+  currency: "EUR",
+  instrumentCurrency: "EUR",
+  localValue: 5525,
+  localCurrency: "CZK",
+  securityAccountId: "sec-eur",
+  securityAccountName: "EUR Securities Account",
+  securityAccountCurrency: "EUR",
+  productType: "Fund",
+  assetClass: "Balanced",
+  riskLevel: "Medium",
+  liquidity: "Monthly",
+  marketPrice: 29.84,
+  quantity: 7.625,
+  performanceAmount: 99.45,
+  performancePercent: 1.8,
+  owned: true,
+  productId: "CZBALANCED1",
+  inceptionDate: "19.07.2020",
+  lastUpdate: "19.07.2026",
+  description: "A balanced fund denominated in EUR.",
+};
 
 function collectSourceFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -154,6 +184,288 @@ describe("CZ chat app orchestration", () => {
     }));
   });
 
+  it("offers only the two distinct product-specific entry topics", () => {
+    expect(buildCzChatScreenContext("investments", "investment-detail", null, selectedInvestmentSecurity)).toEqual({
+      id: "investment-detail",
+      title: "Teodora, what should we check on UniCredit Balanced Income Fund?",
+      suggestedTopics: [
+        {
+          id: "investment-product-explain",
+          label: "Explain this product",
+          prompt: "Explain UniCredit Balanced Income Fund and the position shown in my portfolio.",
+        },
+        {
+          id: "investment-product-performance",
+          label: "Review my performance",
+          prompt: "How is my position in UniCredit Balanced Income Fund performing?",
+        },
+      ],
+    });
+  });
+
+  it("resolves the two product entry topics to different product-grounded answers", async () => {
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: [],
+      selectedAccountProduct: null,
+      selectedCardProduct: null,
+      creditCardForOpportunity: null,
+      selectedInvestmentSecurity,
+    });
+
+    const explanation = await resolveReply(
+      "Explain UniCredit Balanced Income Fund and the position shown in my portfolio.",
+      [],
+    );
+    const performance = await resolveReply(
+      "How is my position in UniCredit Balanced Income Fund performing?",
+      [],
+    );
+
+    if (typeof explanation === "string" || typeof performance === "string") {
+      throw new Error("Expected structured investment-product replies");
+    }
+    expect(explanation.text).toContain("### What UniCredit Balanced Income Fund is");
+    expect(explanation.text).toContain("pools investors' money");
+    expect(explanation.text).toContain("equities");
+    expect(explanation.text).toContain("bonds");
+    expect(explanation.text).toContain("can rise or fall");
+    expect(explanation.text).toContain("monthly dealing rules");
+    expect(explanation.text).toContain("exact asset mix");
+    expect(explanation.text).toContain("Review my performance");
+    expect(explanation.text).not.toContain("The visible holding is");
+    expect(explanation.text).not.toMatch(/5.?525,00 CZK/);
+    expect(explanation.text).not.toContain("+1.80%");
+    expect(explanation.text).not.toContain("29,84 EUR");
+    expect(explanation.richBlocks).toEqual([
+      expect.objectContaining({
+        type: "investment-summary",
+        logoId: "unicredit",
+        title: "UniCredit Balanced Income Fund",
+        metrics: [
+          expect.objectContaining({ label: "Structure", value: "Balanced fund" }),
+          expect.objectContaining({ label: "Currency", value: "EUR" }),
+          expect.objectContaining({ label: "Dealing", value: "Monthly" }),
+        ],
+      }),
+    ]);
+    expect(performance.text).toContain("### UniCredit Balanced Income Fund performance");
+    expect(explanation.text).not.toBe(performance.text);
+  });
+
+  it("grounds product opinions in the selected holding without giving a buy or sell recommendation", async () => {
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: [],
+      selectedAccountProduct: null,
+      selectedCardProduct: null,
+      creditCardForOpportunity: null,
+      selectedInvestmentSecurity,
+    });
+
+    const result = await resolveReply("What do you think about this product?", []);
+    if (typeof result === "string") throw new Error("Expected a structured investment-product reply");
+    expect(result).toEqual(expect.objectContaining({
+      text: expect.stringContaining("### UniCredit Balanced Income Fund"),
+      followUps: [
+        expect.objectContaining({ id: "cz-investment-product-performance", label: "Review performance" }),
+        expect.objectContaining({ id: "cz-investment-product-risk", label: "Review risk" }),
+        expect.objectContaining({ id: "cz-investment-product-documents", label: "What documents matter?" }),
+      ],
+    }));
+    expect(result.text).toMatch(/5.?525,00 CZK/);
+    expect(result.text).toContain("+1.80%");
+    expect(result.text).toContain("29,84 EUR");
+    expect(result.text).toContain("Medium risk");
+    expect(result.text).toContain("Monthly liquidity");
+    expect(result.text).toContain("not a personalized buy, sell, or hold recommendation");
+  });
+
+  it("keeps the selected investment summary informational without an Open Investments action", async () => {
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: [],
+      selectedAccountProduct: null,
+      selectedCardProduct: null,
+      creditCardForOpportunity: null,
+      selectedInvestmentSecurity,
+    });
+
+    const result = await resolveReply("How is my position in UniCredit Balanced Income Fund performing?", []);
+    if (typeof result === "string") throw new Error("Expected a structured investment-product reply");
+    const selectedHoldingBlock = result.richBlocks?.find((block) => block.type === "investment-summary");
+
+    expect(selectedHoldingBlock).toEqual(expect.objectContaining({
+      type: "investment-summary",
+      logoId: "unicredit",
+      metricLayout: "stack",
+    }));
+    expect(selectedHoldingBlock).not.toHaveProperty("eyebrow");
+    expect(selectedHoldingBlock).not.toHaveProperty("action");
+  });
+
+  it("shows the selected investment card only on the first product answer in a conversation", async () => {
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: [],
+      selectedAccountProduct: null,
+      selectedCardProduct: null,
+      creditCardForOpportunity: null,
+      selectedInvestmentSecurity,
+    });
+
+    const explanation = await resolveReply(
+      "Explain UniCredit Balanced Income Fund and the position shown in my portfolio.",
+      [],
+    );
+    if (typeof explanation === "string") throw new Error("Expected a structured investment-product reply");
+    expect(explanation.richBlocks).toHaveLength(1);
+
+    const risk = await resolveReply(
+      "Explain the risk, liquidity, and currency exposure of UniCredit Balanced Income Fund.",
+      [
+        { id: "user-1", role: "user", text: "Explain this product", time: "15:30" },
+        {
+          id: "agent-1",
+          role: "agent",
+          text: explanation.text,
+          time: "15:30",
+          richBlocks: explanation.richBlocks,
+          followUps: explanation.followUps,
+        },
+        { id: "user-2", role: "user", text: "Review risk", time: "15:31" },
+      ],
+    );
+    if (typeof risk === "string") throw new Error("Expected a structured investment-product reply");
+
+    expect(risk.text).toContain("### UniCredit Balanced Income Fund risk context");
+    expect(risk.richBlocks).toBeUndefined();
+    expect(risk.followUps).toHaveLength(3);
+  });
+
+  it("resolves every primary product follow-up to its own product-specific answer", async () => {
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: [],
+      selectedAccountProduct: null,
+      selectedCardProduct: null,
+      creditCardForOpportunity: null,
+      selectedInvestmentSecurity,
+    });
+
+    const explanation = await resolveReply("Explain UniCredit Balanced Income Fund and the position shown in my portfolio.", []);
+    if (typeof explanation === "string") throw new Error("Expected a structured investment-product reply");
+
+    const expectedHeadingByLabel = new Map([
+      ["Review performance", "### UniCredit Balanced Income Fund performance"],
+      ["Review risk", "### UniCredit Balanced Income Fund risk context"],
+      ["What documents matter?", "### Documents for UniCredit Balanced Income Fund"],
+    ]);
+
+    expect(explanation.followUps?.map((followUp) => followUp.label)).toEqual([...expectedHeadingByLabel.keys()]);
+    for (const followUp of explanation.followUps ?? []) {
+      const prompt = followUp.action?.prompt ?? followUp.prompt;
+      const reply = await resolveReply(prompt ?? "", []);
+      if (typeof reply === "string") throw new Error(`Expected a structured reply for ${followUp.label}`);
+      expect(reply.text).toContain(expectedHeadingByLabel.get(followUp.label));
+    }
+  });
+
+  it("keeps every selected-product follow-up in chat and resolves it to a distinct scenario", async () => {
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: [],
+      selectedAccountProduct: null,
+      selectedCardProduct: null,
+      creditCardForOpportunity: null,
+      selectedInvestmentSecurity,
+    });
+
+    const performance = await resolveReply("How is my position in UniCredit Balanced Income Fund performing?", []);
+    if (typeof performance === "string") throw new Error("Expected a structured investment-product reply");
+
+    const expectedHeadingByLabel = new Map([
+      ["Review risk", "### UniCredit Balanced Income Fund risk context"],
+      ["What should I consider?", "### UniCredit Balanced Income Fund review checklist"],
+      ["Review portfolio", "### UniCredit Balanced Income Fund in your portfolio"],
+    ]);
+
+    expect(performance.followUps?.map((followUp) => followUp.label)).toEqual([...expectedHeadingByLabel.keys()]);
+    for (const followUp of performance.followUps ?? []) {
+      expect(followUp.action).toEqual(expect.objectContaining({ type: "send-message" }));
+      const prompt = followUp.action?.prompt ?? followUp.prompt;
+      expect(prompt).toBeTruthy();
+      const reply = await resolveReply(prompt ?? "", []);
+      if (typeof reply === "string") throw new Error(`Expected a structured reply for ${followUp.label}`);
+      expect(reply.text).toContain(expectedHeadingByLabel.get(followUp.label));
+      expect(reply.text).not.toContain("### I can help with");
+    }
+  });
+
+  it("provides a dedicated selected-product documents scenario", async () => {
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: [],
+      selectedAccountProduct: null,
+      selectedCardProduct: null,
+      creditCardForOpportunity: null,
+      selectedInvestmentSecurity,
+    });
+
+    const result = await resolveReply("What documents should I review for UniCredit Balanced Income Fund?", []);
+    if (typeof result === "string") throw new Error("Expected a structured investment-product reply");
+
+    expect(result.text).toContain("### Documents for UniCredit Balanced Income Fund");
+    expect(result.text).toContain("Key Information Document");
+    expect(result.text).toContain("prospectus");
+    expect(result.text).toContain("fee");
+  });
+
+  it("recovers a named investment follow-up from the canonical portfolio when the screen snapshot is gone", async () => {
+    const investmentProduct: Product = {
+      id: "inv-1",
+      type: "investment_account",
+      name: "Investment Portfolio",
+      accountNumber: "7890123456789012",
+      balance: 42500,
+      currency: "CZK",
+      portfolioValue: 42500,
+      totalGainLoss: 728.45,
+      totalGainLossPercentage: 1.74,
+    };
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: [{ key: "investments", title: "Investments", products: [investmentProduct] }],
+      selectedAccountProduct: null,
+      selectedCardProduct: null,
+      creditCardForOpportunity: null,
+      selectedInvestmentSecurity: null,
+    });
+
+    const result = await resolveReply("Review UniCredit Balanced Income Fund in my portfolio context.", []);
+    if (typeof result === "string") throw new Error("Expected a structured investment-product reply");
+
+    expect(result.text).toContain("### UniCredit Balanced Income Fund in your portfolio");
+    expect(result.text).not.toContain("### Account help");
+    expect(result.richBlocks?.[0]).not.toHaveProperty("action");
+  });
+
+  it("describes a catalogue product without inventing a customer holding", async () => {
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: [],
+      selectedAccountProduct: null,
+      selectedCardProduct: null,
+      creditCardForOpportunity: null,
+      selectedInvestmentSecurity: { ...selectedInvestmentSecurity, owned: false, quantity: 0, localValue: 0 },
+    });
+
+    const result = await resolveReply("Explain this product.", []);
+    if (typeof result === "string") throw new Error("Expected a structured investment-product reply");
+    expect(result.text).toContain("not currently shown as one of your holdings");
+    expect(result.text).not.toContain("Your position is");
+  });
+
   it("makes App a thin consumer and adds no package-to-app reverse dependency", () => {
     expect(appSource).toContain('from "@/app/chat/czChatOrchestration"');
     expect(appSource).not.toMatch(/function buildCzChatSmartReplyResolver/);
@@ -174,6 +486,7 @@ describe("CZ chat app orchestration", () => {
 
     expect(reverseImports).toEqual([
       "CoAppingChatAssistant.tsx:@/app/components/cards/Card",
+      "CoAppingChatAssistant.tsx:@/app/components/brand-logo/BrandLogo",
       "CoAppingChatAssistant.tsx:@/app/components/pfm/PfmCategoryIcon",
       "CoAppingChatAssistant.tsx:@/app/components/ui/LinkButton",
     ]);

@@ -2,6 +2,7 @@ import {
   buildInvestmentDistributionItems,
   buildInvestmentHistoryOrders,
   buildInvestmentSecurities,
+  buildInvestmentSecurityCatalog,
 } from "@/app/config/investmentsPortfolioConfig";
 import { getProductCardSheetConfig, getProductsMenuForCountry } from "@/app/config/productsMenuConfig";
 import { getCountryConfig } from "@/app/registry/countryConfig";
@@ -55,6 +56,7 @@ export function buildCzChatSmartReplyResolver({
   selectedAccountProduct,
   selectedCardProduct,
   creditCardForOpportunity,
+  selectedInvestmentSecurity = null,
 }: CzChatSmartReplyOptions): CoAppingReplyResolver {
   const localCurrency = getCountryConfig(country).currency;
   const allProducts = categories.flatMap((category) => category.products);
@@ -66,6 +68,7 @@ export function buildCzChatSmartReplyResolver({
     allProducts.find((product): product is Extract<Product, { type: "investment_account" }> => product.type === "investment_account") ??
     null;
   const investmentSecurities = buildInvestmentSecurities(investmentProducts, country);
+  const investmentSecurityCatalog = buildInvestmentSecurityCatalog(investmentSecurities, country);
   const investmentOrders = buildInvestmentHistoryOrders(investmentSecurities, country);
   const latestInvestmentOrder = investmentOrders[0] ?? null;
   const pendingInvestmentOrders = investmentOrders.filter((order) => order.status === "PENDING");
@@ -139,6 +142,31 @@ export function buildCzChatSmartReplyResolver({
         country,
       )}`
     : "n/a";
+  const selectedInvestmentValue = selectedInvestmentSecurity?.owned
+    ? formatCzChatMoney(selectedInvestmentSecurity.localValue, selectedInvestmentSecurity.localCurrency, country)
+    : null;
+  const selectedInvestmentMarketPrice = selectedInvestmentSecurity
+    ? formatCzChatMoney(selectedInvestmentSecurity.marketPrice, selectedInvestmentSecurity.instrumentCurrency, country)
+    : null;
+  const selectedInvestmentPerformance = selectedInvestmentSecurity
+    ? `${selectedInvestmentSecurity.performancePercent >= 0 ? "+" : "-"}${Math.abs(selectedInvestmentSecurity.performancePercent).toFixed(2)}%`
+    : null;
+  const selectedInvestmentQuantity = selectedInvestmentSecurity
+    ? new Intl.NumberFormat(getCountryConfig(country).locale, {
+        minimumFractionDigits: 3,
+        maximumFractionDigits: 3,
+      }).format(selectedInvestmentSecurity.quantity)
+    : null;
+  const selectedInvestmentRisk = selectedInvestmentSecurity?.riskLevel
+    ? `${selectedInvestmentSecurity.riskLevel} risk`
+    : "Risk level not available";
+  const selectedInvestmentLiquidity = selectedInvestmentSecurity?.liquidity
+    ? `${selectedInvestmentSecurity.liquidity} liquidity`
+    : "Liquidity not available";
+  const selectedInvestmentPortfolioShare =
+    selectedInvestmentSecurity?.owned && investmentLocalTotal > 0
+      ? `${Math.round((selectedInvestmentSecurity.localValue / investmentLocalTotal) * 100)}%`
+      : null;
   const latestOrderAmount = latestInvestmentOrder
     ? formatCzChatMoney(latestInvestmentOrder.amount, latestInvestmentOrder.currency, country)
     : "n/a";
@@ -468,6 +496,56 @@ export function buildCzChatSmartReplyResolver({
     action: buildCzNavigateAction("open-investments", "Open Investments", "investments"),
   };
 
+  const selectedInvestmentProductBlock: CoAppingRichBlock | null = selectedInvestmentSecurity
+    ? {
+        type: "investment-summary",
+        logoId: selectedInvestmentSecurity.logoId ?? "unicredit",
+        title: selectedInvestmentSecurity.title,
+        body: `${selectedInvestmentSecurity.assetClass} ${selectedInvestmentSecurity.productType.toLowerCase()} in ${selectedInvestmentSecurity.instrumentCurrency}. ${selectedInvestmentRisk}; ${selectedInvestmentLiquidity}.`,
+        metricLayout: "stack",
+        metrics: selectedInvestmentSecurity.owned
+          ? [
+              { label: "Holding value", value: selectedInvestmentValue ?? "n/a", helper: `${selectedInvestmentQuantity ?? "0"} PCS` },
+              { label: "Performance", value: selectedInvestmentPerformance ?? "n/a", helper: "Current product snapshot" },
+              { label: "Market price", value: selectedInvestmentMarketPrice ?? "n/a", helper: `Updated ${selectedInvestmentSecurity.lastUpdate}` },
+            ]
+          : [
+              { label: "Market price", value: selectedInvestmentMarketPrice ?? "n/a", helper: `Updated ${selectedInvestmentSecurity.lastUpdate}` },
+              { label: "Performance", value: selectedInvestmentPerformance ?? "n/a", helper: "Product snapshot" },
+              { label: "Ownership", value: "Not held", helper: "Available in the catalogue" },
+            ],
+      }
+    : null;
+
+  const selectedInvestmentExplanationBlock: CoAppingRichBlock | null = selectedInvestmentSecurity
+    ? {
+        type: "investment-summary",
+        logoId: selectedInvestmentSecurity.logoId ?? "unicredit",
+        title: selectedInvestmentSecurity.title,
+        body: "Product structure and access characteristics. Exact holdings, costs, and dealing terms come from the official fund documents.",
+        metricLayout: "stack",
+        metrics: [
+          {
+            label: "Structure",
+            value: `${selectedInvestmentSecurity.assetClass} ${selectedInvestmentSecurity.productType.toLowerCase()}`,
+            helper: "Diversified investment product",
+          },
+          {
+            label: "Currency",
+            value: selectedInvestmentSecurity.instrumentCurrency,
+            helper: selectedInvestmentSecurity.owned
+              ? `Portfolio value displayed in ${selectedInvestmentSecurity.localCurrency}`
+              : "Instrument denomination",
+          },
+          {
+            label: "Dealing",
+            value: selectedInvestmentLiquidity.replace(/\s+liquidity$/i, ""),
+            helper: "Subject to the fund's redemption rules",
+          },
+        ],
+      }
+    : null;
+
   const investmentGoalPortfolioBlock: CoAppingRichBlock = {
     ...investmentPortfolioBlock,
     action: undefined,
@@ -557,9 +635,39 @@ export function buildCzChatSmartReplyResolver({
 
   const normalize = (input: string) => input.toLowerCase().replace(/\s+/g, " ").trim();
   const hasAny = (normalized: string, terms: string[]) => terms.some((term) => normalized.includes(term));
+  const selectedInvestmentNameNormalized = selectedInvestmentSecurity
+    ? normalize(selectedInvestmentSecurity.title)
+    : "";
 
-  return (input) => {
+  return (input, messages) => {
     const normalized = normalize(input);
+    const namedInvestmentSecurity = investmentSecurityCatalog.find((security) =>
+      normalized.includes(normalize(security.title)),
+    );
+
+    if (namedInvestmentSecurity && namedInvestmentSecurity.id !== selectedInvestmentSecurity?.id) {
+      return buildCzChatSmartReplyResolver({
+        country,
+        categories,
+        selectedAccountProduct,
+        selectedCardProduct,
+        creditCardForOpportunity,
+        selectedInvestmentSecurity: namedInvestmentSecurity,
+      })(input, messages);
+    }
+
+    const hasShownSelectedInvestmentCard = Boolean(
+      selectedInvestmentSecurity &&
+        messages.some((message) =>
+          message.role === "agent" &&
+          message.richBlocks?.some(
+            (block) => block.type === "investment-summary" && block.title === selectedInvestmentSecurity.title,
+          ),
+        ),
+    );
+    const showSelectedInvestmentCardOnce = (block: CoAppingRichBlock | null) =>
+      block && !hasShownSelectedInvestmentCard ? [block] : undefined;
+
     const afterAcceptanceFollowUp = buildCzChatFollowUp(
       "cz-limit-offer-after-acceptance",
       "After acceptance",
@@ -1076,6 +1184,203 @@ export function buildCzChatSmartReplyResolver({
           buildCzNavigateFollowUp("cz-open-documents", "Open Documents", "documents"),
           buildCzChatFollowUp("cz-early-repay", "Explain early repayment", "Explain what I should check before repaying part of this loan early."),
           buildCzChatFollowUp("cz-next-payment", "Review next payment", "Help me review the next mortgage payment and related account activity."),
+        ],
+      };
+    }
+
+    if (
+      selectedInvestmentSecurity &&
+      (normalized.startsWith(`explain ${selectedInvestmentNameNormalized} and the position`) ||
+        hasAny(normalized, ["explain this product", "explain this fund"]))
+    ) {
+      return {
+        text:
+          `### What ${selectedInvestmentSecurity.title} is\n` +
+          `${selectedInvestmentSecurity.title} is a **${selectedInvestmentSecurity.assetClass.toLowerCase()} ${selectedInvestmentSecurity.productType.toLowerCase()}** denominated in **${selectedInvestmentSecurity.instrumentCurrency}**. A balanced fund pools investors' money and is designed to combine growth assets such as **equities** with income-oriented or defensive assets such as **bonds**. The aim is to diversify between sources of return rather than depend on one security or one asset class.\n` +
+          `Diversification can soften some movements, but it does not remove risk: the fund-unit value can rise or fall and the invested capital is not guaranteed.${
+            selectedInvestmentSecurity.owned && selectedInvestmentSecurity.localCurrency !== selectedInvestmentSecurity.instrumentCurrency
+              ? ` Because this holding is displayed in ${selectedInvestmentSecurity.localCurrency}, changes between ${selectedInvestmentSecurity.instrumentCurrency} and ${selectedInvestmentSecurity.localCurrency} can also affect the displayed value.`
+              : ""
+          }\n` +
+          `**${selectedInvestmentLiquidity}** means access follows the fund's monthly dealing rules rather than an instant bank-account withdrawal. The exact asset mix, investment objective, recommended holding period, fees, and redemption cut-offs must be confirmed in the latest KID/KIID, prospectus, and factsheet.\n` +
+          `${selectedInvestmentSecurity.owned ? `This explains the product itself. Choose **Review my performance** for the value, units, and return of your own position.` : "This product is not currently shown as one of your holdings, so this explains the product itself without inventing a customer position."} It is not a personalized buy, sell, or hold recommendation.`,
+        richBlocks: showSelectedInvestmentCardOnce(selectedInvestmentExplanationBlock),
+        followUps: [
+          buildCzChatFollowUp("cz-investment-product-performance", "Review performance", `How is my position in ${selectedInvestmentSecurity.title} performing?`),
+          buildCzChatFollowUp("cz-investment-product-risk", "Review risk", `Explain the risk, liquidity, and currency exposure of ${selectedInvestmentSecurity.title}.`),
+          buildCzChatFollowUp("cz-investment-product-documents", "What documents matter?", `What documents should I review for ${selectedInvestmentSecurity.title}?`),
+        ],
+      };
+    }
+
+    if (
+      selectedInvestmentSecurity &&
+      hasAny(normalized, [
+        "how is my position",
+        "review my performance",
+        "position performing",
+        "product performing",
+        "holding performing",
+        "performance of this",
+      ])
+    ) {
+      const positionSummary = selectedInvestmentSecurity.owned
+        ? `The visible holding is **${selectedInvestmentValue}** across **${selectedInvestmentQuantity} PCS**.`
+        : "This product is not currently shown as one of your holdings, so there is no customer-position return to calculate.";
+
+      return {
+        text:
+          `### ${selectedInvestmentSecurity.title} performance\n` +
+          `${positionSummary}\n` +
+          `The product snapshot shows **${selectedInvestmentPerformance}** performance and an actual market price of **${selectedInvestmentMarketPrice}**, updated ${selectedInvestmentSecurity.lastUpdate}.\n` +
+          `Read that together with the time period, fees, currency exposure, and official product documents. A positive snapshot is not a forecast or a personalized buy, sell, or hold recommendation.`,
+        richBlocks: showSelectedInvestmentCardOnce(selectedInvestmentProductBlock),
+        followUps: [
+          buildCzChatFollowUp("cz-investment-product-risk", "Review risk", `Explain the risk, liquidity, and currency exposure of ${selectedInvestmentSecurity.title}.`),
+          buildCzChatFollowUp("cz-investment-product-considerations", "What should I consider?", `What should I consider when reviewing ${selectedInvestmentSecurity.title}?`),
+          buildCzChatFollowUp("cz-investment-product-portfolio", "Review portfolio", `Review ${selectedInvestmentSecurity.title} in my portfolio context.`),
+        ],
+      };
+    }
+
+    if (
+      selectedInvestmentSecurity &&
+      hasAny(normalized, [
+        "review risk",
+        "explain the risk",
+        "risk and liquidity",
+        "liquidity and currency",
+        "currency exposure of",
+      ])
+    ) {
+      return {
+        text:
+          `### ${selectedInvestmentSecurity.title} risk context\n` +
+          `The product is a **${selectedInvestmentSecurity.assetClass} ${selectedInvestmentSecurity.productType.toLowerCase()}** denominated in **${selectedInvestmentSecurity.instrumentCurrency}**. ` +
+          `Its current demo attributes are **${selectedInvestmentRisk}** and **${selectedInvestmentLiquidity}**.\n` +
+          `${selectedInvestmentSecurity.owned ? `Your holding is valued in ${selectedInvestmentSecurity.localCurrency}, so instrument-currency movement can affect the local result.` : "Because this is a catalogue product, review how its instrument currency would interact with the rest of the portfolio before investing."}\n` +
+          `Risk level is only a summary. Objectives, volatility, fees, redemption rules, and the official documents still matter, and this is not a personalized buy, sell, or hold recommendation.`,
+        richBlocks: showSelectedInvestmentCardOnce(selectedInvestmentProductBlock),
+        followUps: [
+          buildCzChatFollowUp("cz-investment-product-performance", "Review performance", `How is my position in ${selectedInvestmentSecurity.title} performing?`),
+          buildCzChatFollowUp("cz-investment-product-documents", "What documents matter?", `What documents should I review for ${selectedInvestmentSecurity.title}?`),
+          buildCzChatFollowUp("cz-investment-product-portfolio", "Review portfolio", `Review ${selectedInvestmentSecurity.title} in my portfolio context.`),
+        ],
+      };
+    }
+
+    if (
+      selectedInvestmentSecurity &&
+      hasAny(normalized, [
+        "documents should i review",
+        "documents matter",
+        "what documents",
+        "key information document",
+        "prospectus",
+      ])
+    ) {
+      return {
+        text:
+          `### Documents for ${selectedInvestmentSecurity.title}\n` +
+          `Before making a decision, review the **Key Information Document (KID/KIID)** for objectives, risk class, scenarios, and costs.\n` +
+          `Use the **prospectus** for the investment policy, eligible assets, valuation, subscription, and redemption rules. Check the latest **factsheet** for allocation and historical performance, the **fee schedule** for one-off and ongoing charges, and the latest periodic report for material portfolio changes.\n` +
+          `${selectedInvestmentSecurity.owned ? "For this holding, also compare the trade confirmation and account statement with the quantity and value shown here." : "Because this product is not held, there is no position statement or trade confirmation to review yet."}\n` +
+          `Documents provide product facts; they do not turn this explanation into a personalized buy, sell, or hold recommendation.`,
+        richBlocks: showSelectedInvestmentCardOnce(selectedInvestmentProductBlock),
+        followUps: [
+          buildCzChatFollowUp("cz-investment-product-performance", "Review performance", `How is my position in ${selectedInvestmentSecurity.title} performing?`),
+          buildCzChatFollowUp("cz-investment-product-risk", "Review risk", `Explain the risk, liquidity, and currency exposure of ${selectedInvestmentSecurity.title}.`),
+          buildCzChatFollowUp("cz-investment-product-portfolio", "Review portfolio", `Review ${selectedInvestmentSecurity.title} in my portfolio context.`),
+        ],
+      };
+    }
+
+    if (
+      selectedInvestmentSecurity &&
+      hasAny(normalized, [
+        "what should i consider",
+        "review checklist",
+        "decision factors",
+        "before deciding",
+      ])
+    ) {
+      return {
+        text:
+          `### ${selectedInvestmentSecurity.title} review checklist\n` +
+          `Use these connected checks before deciding:\n` +
+          `1. **Goal and horizon:** whether the product objective and expected holding period match when the money is needed.\n` +
+          `2. **Portfolio fit:** ${selectedInvestmentSecurity.owned ? `the holding is ${selectedInvestmentValue}${selectedInvestmentPortfolioShare ? `, about ${selectedInvestmentPortfolioShare} of the current investment value` : ""}` : "the product is not held, so assess what exposure it would add"}.\n` +
+          `3. **Risk and access:** the current attributes are ${selectedInvestmentRisk} and ${selectedInvestmentLiquidity}; confirm redemption timing and possible loss.\n` +
+          `4. **Currency:** the instrument is in ${selectedInvestmentSecurity.instrumentCurrency}${selectedInvestmentSecurity.owned ? ` while the holding is viewed in ${selectedInvestmentSecurity.localCurrency}` : ""}.\n` +
+          `5. **Costs and documents:** compare entry, ongoing, and exit fees against the KID/KIID, prospectus, and latest factsheet.\n` +
+          `This checklist is product-specific decision support, not a personalized buy, sell, or hold recommendation.`,
+        richBlocks: showSelectedInvestmentCardOnce(selectedInvestmentProductBlock),
+        followUps: [
+          buildCzChatFollowUp("cz-investment-product-performance", "Review performance", `How is my position in ${selectedInvestmentSecurity.title} performing?`),
+          buildCzChatFollowUp("cz-investment-product-risk", "Review risk", `Explain the risk, liquidity, and currency exposure of ${selectedInvestmentSecurity.title}.`),
+          buildCzChatFollowUp("cz-investment-product-documents", "What documents matter?", `What documents should I review for ${selectedInvestmentSecurity.title}?`),
+        ],
+      };
+    }
+
+    if (
+      selectedInvestmentSecurity &&
+      hasAny(normalized, [
+        "in my portfolio context",
+        "review portfolio",
+        "portfolio fit",
+        "portfolio context for",
+      ])
+    ) {
+      const portfolioFit = selectedInvestmentSecurity.owned
+        ? `The holding is **${selectedInvestmentValue}**${selectedInvestmentPortfolioShare ? `, about **${selectedInvestmentPortfolioShare}** of the current investment value` : ""}.`
+        : "This product is not currently held, so the useful question is what concentration, asset-class, and currency exposure it would add.";
+
+      return {
+        text:
+          `### ${selectedInvestmentSecurity.title} in your portfolio\n` +
+          `${portfolioFit}\n` +
+          `${topInvestmentSecurity ? `The largest current holding is **${topInvestmentSecurity.title}** at **${topInvestmentShare}**.` : "The wider portfolio concentration is not available in this context, so I will not invent a comparison."}\n` +
+          `${currencyMix || assetClassMix ? `The leading portfolio exposures are **${currencyMix || "currency mix unavailable"}** and **${assetClassMix || "asset-class mix unavailable"}**.` : "Review the portfolio Currency and Asset Class tabs before adding or reducing exposure."}\n` +
+          `Use this alongside the product's ${selectedInvestmentRisk.toLowerCase()}, ${selectedInvestmentLiquidity.toLowerCase()}, fees, and official documents. This is concentration context, not a personalized buy, sell, or hold recommendation.`,
+        richBlocks: showSelectedInvestmentCardOnce(selectedInvestmentProductBlock),
+        followUps: [
+          buildCzChatFollowUp("cz-investment-product-performance", "Review performance", `How is my position in ${selectedInvestmentSecurity.title} performing?`),
+          buildCzChatFollowUp("cz-investment-product-risk", "Review risk", `Explain the risk, liquidity, and currency exposure of ${selectedInvestmentSecurity.title}.`),
+          buildCzChatFollowUp("cz-investment-product-considerations", "What should I consider?", `What should I consider when reviewing ${selectedInvestmentSecurity.title}?`),
+        ],
+      };
+    }
+
+    if (
+      selectedInvestmentSecurity &&
+      (normalized.includes(selectedInvestmentNameNormalized) ||
+        hasAny(normalized, [
+          "this investment product",
+          "this fund",
+          "think about this product",
+          "think of this product",
+          "opinion about this product",
+          "should i buy",
+          "should i sell",
+          "should i keep",
+        ]))
+    ) {
+      const ownershipSummary = selectedInvestmentSecurity.owned
+        ? `The visible holding is **${selectedInvestmentValue}** across **${selectedInvestmentQuantity} PCS**.`
+        : "This product is not currently shown as one of your holdings, so I will discuss the product rather than inventing a position.";
+
+      return {
+        text:
+          `### ${selectedInvestmentSecurity.title}\n` +
+          `${ownershipSummary}\n` +
+          `It is a **${selectedInvestmentSecurity.assetClass} ${selectedInvestmentSecurity.productType.toLowerCase()}** in **${selectedInvestmentSecurity.instrumentCurrency}**. The current snapshot is **${selectedInvestmentPerformance}** performance at **${selectedInvestmentMarketPrice}**, with **${selectedInvestmentRisk}** and **${selectedInvestmentLiquidity}**.\n` +
+          `My view is to judge it against the customer's time horizon, portfolio concentration, currency exposure, fees, redemption rules, and official documents instead of treating one performance number as the answer. This is product-specific decision support, not a personalized buy, sell, or hold recommendation.`,
+        richBlocks: showSelectedInvestmentCardOnce(selectedInvestmentProductBlock),
+        followUps: [
+          buildCzChatFollowUp("cz-investment-product-performance", "Review performance", `How is my position in ${selectedInvestmentSecurity.title} performing?`),
+          buildCzChatFollowUp("cz-investment-product-risk", "Review risk", `Explain the risk, liquidity, and currency exposure of ${selectedInvestmentSecurity.title}.`),
+          buildCzChatFollowUp("cz-investment-product-documents", "What documents matter?", `What documents should I review for ${selectedInvestmentSecurity.title}?`),
         ],
       };
     }

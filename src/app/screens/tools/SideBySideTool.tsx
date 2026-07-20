@@ -124,44 +124,39 @@ export function SideBySideTool() {
 
           <div>
             <FieldLabel>Screen</FieldLabel>
-            <div className="mt-[8px] flex flex-wrap gap-[8px]">
+            <select
+              value={selectedScreen}
+              onChange={(event) => setSelectedScreen(event.target.value as Screen)}
+              className="uc-select mt-[8px] w-full max-w-[360px] cursor-pointer rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] py-[8px] pl-[12px] text-[13px] font-bold leading-[16px] text-[var(--uc-text)] outline-none transition-colors hover:border-[var(--uc-action)] focus:border-[var(--uc-action)]"
+            >
               {screenOptions.map((option) => (
-                <SelectionChip
-                  key={option.screen}
-                  active={selectedScreen === option.screen}
-                  onClick={() => setSelectedScreen(option.screen)}
-                >
+                <option key={option.screen} value={option.screen}>
                   {option.label}
-                </SelectionChip>
+                </option>
               ))}
-            </div>
+            </select>
           </div>
 
           <div>
             <FieldLabel>Language</FieldLabel>
-            <div className="mt-[8px] flex flex-wrap gap-[8px]">
-              <SelectionChip active={languageMode === "local"} onClick={() => setLanguageMode("local")}>
-                Local language
-              </SelectionChip>
-              <SelectionChip active={languageMode === "en"} onClick={() => setLanguageMode("en")}>
-                English
-              </SelectionChip>
-            </div>
+            <select
+              value={languageMode}
+              onChange={(event) => setLanguageMode(event.target.value as "local" | "en")}
+              className="uc-select mt-[8px] w-full max-w-[360px] cursor-pointer rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] py-[8px] pl-[12px] text-[13px] font-bold leading-[16px] text-[var(--uc-text)] outline-none transition-colors hover:border-[var(--uc-action)] focus:border-[var(--uc-action)]"
+            >
+              <option value="local">Local language</option>
+              <option value="en">English</option>
+            </select>
           </div>
-
-          <p className="text-[13px] leading-[18px] text-[var(--uc-text-muted)]">
-            Every phone below is the live application — click inside any frame to navigate deeper, then use
-            “Reload frames” to bring all countries back to the selected screen.
-          </p>
         </div>
       </ToolPanel>
 
-      <div className="flex flex-wrap items-start gap-[24px]">
+      <div className="flex flex-wrap items-start justify-center gap-[24px]">
         {orderedSelection.map((country) => {
           const url = buildFrameUrl(country);
           return (
             <div key={country} className="min-w-0" data-side-by-side-frame={country}>
-              <div className="flex items-center justify-between gap-[8px] pb-[8px]" style={{ width: FRAME_WIDTH * scale }}>
+              <div className="flex items-center justify-between gap-[8px] pb-[8px]" style={{ width: FRAME_WIDTH * scale + 8 }}>
                 <div className="min-w-0">
                   <span className="block truncate text-[13px] font-bold leading-[16px] text-[var(--uc-text)]">
                     {COUNTRY_META[country].name}
@@ -181,16 +176,22 @@ export function SideBySideTool() {
                 </a>
               </div>
               <div
-                className="overflow-hidden rounded-[18px] border border-[var(--uc-border)] bg-[var(--uc-surface)] shadow-lg"
-                style={{ width: FRAME_WIDTH * scale, height: FRAME_HEIGHT * scale }}
+                className="scrollbar-hide overflow-hidden rounded-[28px] bg-[var(--uc-static-black)] p-[4px] shadow-[0_10px_30px_-8px_rgba(0,0,0,0.35)]"
+                style={{ width: FRAME_WIDTH * scale + 8, height: FRAME_HEIGHT * scale + 8 }}
               >
-                <iframe
-                  key={`${country}-${frameNonce}`}
-                  title={`${COUNTRY_META[country].name} preview`}
-                  src={url}
-                  className="origin-top-left border-0"
-                  style={{ width: FRAME_WIDTH, height: FRAME_HEIGHT, transform: `scale(${scale})` }}
-                />
+                <div
+                  className="scrollbar-hide overflow-hidden rounded-[24px]"
+                  style={{ width: FRAME_WIDTH * scale, height: FRAME_HEIGHT * scale }}
+                >
+                  <iframe
+                    key={`${country}-${frameNonce}`}
+                    title={`${COUNTRY_META[country].name} preview`}
+                    src={url}
+                    scrolling="no"
+                    className="scrollbar-hide origin-top-left border-0"
+                    style={{ width: FRAME_WIDTH, height: FRAME_HEIGHT, transform: `scale(${scale})` }}
+                  />
+                </div>
               </div>
             </div>
           );

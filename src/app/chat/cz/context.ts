@@ -5,6 +5,7 @@
  * Extracted verbatim from czChatOrchestration.ts.
  */
 import type { Screen } from "@/app/contexts/NavigationContext";
+import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
 import { buildCzChatTitle, buildCzChatTopic, type CzChatHelpArea } from "./helpers";
 import type { Product } from "@/data/products";
 import type { CoAppingChatContext } from "../../../../package/mobile-pi-coapping-chat-package/src";
@@ -117,7 +118,12 @@ export function getCzChatHelpAreaForScreen(screen: Screen, accountProduct: Produ
   return null;
 }
 
-export function buildCzChatScreenContext(screen: Screen, id: string, accountProduct: Product | null = null): CoAppingChatContext | null {
+export function buildCzChatScreenContext(
+  screen: Screen,
+  id: string,
+  accountProduct: Product | null = null,
+  selectedInvestmentSecurity: InvestmentCatalogSecurity | null = null,
+): CoAppingChatContext | null {
   const helpArea = getCzChatHelpAreaForScreen(screen, accountProduct);
   if (helpArea) return buildCzChatHelpContext(helpArea, id);
 
@@ -205,6 +211,27 @@ export function buildCzChatScreenContext(screen: Screen, id: string, accountProd
       };
     case "investments":
     case "investments-history":
+      if (screen === "investments" && selectedInvestmentSecurity) {
+        const productName = selectedInvestmentSecurity.title;
+
+        return {
+          id,
+          title: buildCzChatTitle(`what should we check on ${productName}?`),
+          suggestedTopics: [
+            buildCzChatTopic(
+              "investment-product-explain",
+              "Explain this product",
+              `Explain ${productName} and the position shown in my portfolio.`,
+            ),
+            buildCzChatTopic(
+              "investment-product-performance",
+              "Review my performance",
+              `How is my position in ${productName} performing?`,
+            ),
+          ],
+        };
+      }
+
       return {
         id,
         title: buildCzChatTitle("where should we start with investments?"),

@@ -5,6 +5,7 @@
  * Extracted verbatim from czChatOrchestration.ts.
  */
 import type { Screen } from "@/app/contexts/NavigationContext";
+import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
 import { getProductCardSheetConfig, type ProductsCardId } from "@/app/config/productsMenuConfig";
 import type { ProductDetailSelection } from "@/app/components/products/ProductCardBottomSheet";
 import { getDocumentsConfigForCountry } from "@/app/config/documentsConfig";
@@ -99,6 +100,7 @@ export type CzChatSmartReplyOptions = {
   selectedAccountProduct: Product | null;
   selectedCardProduct: Product | null;
   creditCardForOpportunity: CreditCard | null;
+  selectedInvestmentSecurity?: InvestmentCatalogSecurity | null;
 };
 
 export function buildCzNavigateAction(

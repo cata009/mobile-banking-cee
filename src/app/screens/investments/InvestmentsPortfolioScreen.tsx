@@ -1,4 +1,4 @@
-import { useMemo, useState, type UIEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type UIEvent } from "react";
 import InvestmentDistributionChart from "@/app/components/investments/InvestmentDistributionChart";
 import InvestmentActionBar from "@/app/components/investments/InvestmentActionBar";
 import InvestmentFilterChips from "@/app/components/investments/InvestmentFilterChips";
@@ -42,7 +42,8 @@ import type { CurrentAccount } from "@/data/products";
 
 interface InvestmentsPortfolioScreenProps {
   onBack: () => void;
-  onHistoryClick?: () => void;
+  onHistoryClick?: (filterByTitle?: string) => void;
+  onSelectedSecurityChange?: (security: InvestmentCatalogSecurity | null) => void;
 }
 
 const TAB_TRANSLATION_KEYS: Record<InvestmentPortfolioTabId, string> = {
@@ -233,7 +234,7 @@ function DistributionCategoryDetailScreen({
       <section className="px-[16px] pt-[10px]">
         <div className="flex items-center gap-[14px]">
           <span className="size-[20px] shrink-0 rounded-full" style={{ backgroundColor: item.color }} aria-hidden="true" />
-          <h1 className="text-[24px] font-bold leading-[28px] tracking-[0.2px] text-[var(--uc-text)]" data-investment-category-title="true">{categoryTitle}</h1>
+          <h1 className="uc-type-h1 tracking-[0.2px] text-[var(--uc-text)]" data-investment-category-title="true">{categoryTitle}</h1>
         </div>
         <div className="pt-[44px]">
           <p className="text-[14px] font-bold leading-[16px] text-[var(--uc-text)]">Total value</p>
@@ -256,7 +257,11 @@ function DistributionCategoryDetailScreen({
   );
 }
 
-export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: InvestmentsPortfolioScreenProps) {
+export default function InvestmentsPortfolioScreen({
+  onBack,
+  onHistoryClick,
+  onSelectedSecurityChange,
+}: InvestmentsPortfolioScreenProps) {
   const { country, amountsHidden } = useDemo();
   const { categories } = useProducts();
   const { t } = useLanguage();
@@ -268,6 +273,19 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
   const [securityListOpen, setSecurityListOpen] = useState(false);
   const [selectedSecurity, setSelectedSecurity] = useState<InvestmentCatalogSecurity | null>(null);
   const [buyOrderOpen, setBuyOrderOpen] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // Returning to portfolio home (all sub-screens closed) should always show
+  // the page scrolled to top with the large header title visible, regardless
+  // of where the user had scrolled before opening a sub-screen.
+  const isOnPortfolioHome = !selectedDistributionItem && !securityListOpen && !selectedSecurity && !buyOrderOpen;
+  useEffect(() => {
+    if (!isOnPortfolioHome) return;
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ top: 0 });
+    }
+    setHeaderProgress(0);
+  }, [isOnPortfolioHome]);
 
   const allProducts = useMemo(() => categories.flatMap((category) => category.products), [categories]);
   const currentAccounts = useMemo(
@@ -300,6 +318,18 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
     ? "**,**%"
     : `${Math.abs(totalPerformancePercent).toFixed(2).replace(".", ",")}%`;
 
+  useEffect(
+    () => () => {
+      onSelectedSecurityChange?.(null);
+    },
+    [onSelectedSecurityChange],
+  );
+
+  const selectSecurity = (security: InvestmentCatalogSecurity | null) => {
+    setSelectedSecurity(security);
+    onSelectedSecurityChange?.(security);
+  };
+
   const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
     const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64));
     setHeaderProgress(progress);
@@ -313,7 +343,7 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
       performanceParts={maskInvestmentAmount(formatAmountParts(security.performanceAmount, country, security.localCurrency), amountsHidden)}
       valueLabel={t("runtime.investments.value", "Value")}
       performanceLabel={t("runtime.investments.performance", "Performance")}
-      onClick={() => setSelectedSecurity(securityCatalog.find((item) => item.id === security.id) ?? null)}
+      onClick={() => selectSecurity(securityCatalog.find((item) => item.id === security.id) ?? null)}
     />
   );
 
@@ -330,7 +360,7 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
         onBack={() => setBuyOrderOpen(false)}
         onComplete={() => {
           setBuyOrderOpen(false);
-          setSelectedSecurity(null);
+          selectSecurity(null);
           setSecurityListOpen(false);
         }}
       />
@@ -343,8 +373,8 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
         security={selectedSecurity}
         country={country}
         amountsHidden={amountsHidden}
-        onBack={() => setSelectedSecurity(null)}
-        onHistoryClick={onHistoryClick}
+        onBack={() => selectSecurity(null)}
+        onHistoryClick={() => onHistoryClick?.(selectedSecurity.title)}
         onBuyClick={() => setBuyOrderOpen(true)}
       />
     );
@@ -357,7 +387,7 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
         country={country}
         amountsHidden={amountsHidden}
         onBack={() => setSecurityListOpen(false)}
-        onSelect={setSelectedSecurity}
+        onSelect={selectSecurity}
       />
     );
   }
@@ -402,6 +432,7 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
 
   return (
     <div
+      ref={scrollContainerRef}
       className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide"
       onScroll={handlePageScroll}
     >
@@ -410,7 +441,8 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
         onBack={onBack}
         collapsedTitleProgress={headerProgress}
         includeSafeArea
-        showHelp={false}
+        showHelp
+        onHelpClick={() => undefined}
       />
       <InvestmentPortfolioTabs
         tabs={INVESTMENT_PORTFOLIO_TABS.map((tab) => ({

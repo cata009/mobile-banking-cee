@@ -16,6 +16,7 @@ import {
   defaultSuggestedTopics,
 } from "./defaults";
 import FigmaCard from "@/app/components/cards/Card";
+import BrandLogo from "@/app/components/brand-logo/BrandLogo";
 import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
 import LinkButton from "@/app/components/ui/LinkButton";
 import discoveryHeroImage from "@/assets/investments/fund-banner-plant-unsplash.jpg";
@@ -381,12 +382,21 @@ function RichMetricGrid({
   layout = "grid",
 }: {
   metrics: CoAppingRichMetric[];
-  layout?: "grid" | "calculation";
+  layout?: "grid" | "calculation" | "stack";
 }) {
   const isCalculationLayout = layout === "calculation";
+  const isStackLayout = layout === "stack";
 
   return (
-    <div className={["mpc-rich-metric-grid", isCalculationLayout ? "mpc-rich-metric-grid-list" : ""].filter(Boolean).join(" ")}>
+    <div
+      className={[
+        "mpc-rich-metric-grid",
+        isCalculationLayout ? "mpc-rich-metric-grid-list" : "",
+        isStackLayout ? "mpc-rich-metric-grid-stack" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       {metrics.map((metric) => (
         <div key={`${metric.label}-${metric.value}`} className={["mpc-rich-metric", isCalculationLayout ? "mpc-rich-metric-row" : ""].filter(Boolean).join(" ")}>
           {isCalculationLayout ? (
@@ -424,11 +434,12 @@ function RichBlock({
     return (
       <div className="mpc-rich-card mpc-rich-card-summary">
         <div className="mpc-rich-card-head">
-          <span>{block.eyebrow}</span>
+          {block.logoId ? <BrandLogo logoId={block.logoId} size={32} className="mpc-rich-card-logo" /> : null}
+          {block.eyebrow ? <span>{block.eyebrow}</span> : null}
           <strong>{block.title}</strong>
         </div>
         <p>{block.body}</p>
-        <RichMetricGrid metrics={block.metrics} />
+        <RichMetricGrid metrics={block.metrics} layout={block.metricLayout} />
         <RichActionButton action={block.action} onAction={onAction} />
       </div>
     );

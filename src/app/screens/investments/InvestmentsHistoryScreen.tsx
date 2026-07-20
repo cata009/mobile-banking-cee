@@ -42,6 +42,13 @@ type InfoMode = "transactions" | "orders" | null;
 
 interface InvestmentsHistoryScreenProps {
   onBack: () => void;
+  /**
+   * Optional security title used to pre-filter history when arriving from
+   * a security-detail screen. Consumed once on mount; cleared on country change
+   * via the existing reset effect. The search filter is then preserved across
+   * Transactions/Orders tab switches by default.
+   */
+  historyFilterByTitle?: string | null;
 }
 
 const HISTORY_TABS = [
@@ -844,13 +851,22 @@ function InvestmentHistoryDetailScreen({
   );
 }
 
-export default function InvestmentsHistoryScreen({ onBack }: InvestmentsHistoryScreenProps) {
+export default function InvestmentsHistoryScreen({ onBack, historyFilterByTitle }: InvestmentsHistoryScreenProps) {
   const { country, amountsHidden } = useDemo();
   const { categories } = useProducts();
   const [headerProgress, setHeaderProgress] = useState(0);
   const [activeTab, setActiveTab] = useState<InvestmentHistoryTabId>("transactions");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterMode, setFilterMode] = useState<FilterMode>(null);
+
+  // Pre-filter by the originating security's title (arrival from security detail).
+  // Runs once on mount; the existing country-change effect clears searchQuery
+  // when the country changes, which is the desired reset behaviour.
+  useEffect(() => {
+    if (historyFilterByTitle) {
+      setSearchQuery(historyFilterByTitle);
+    }
+  }, [historyFilterByTitle]);
   const [infoMode, setInfoMode] = useState<InfoMode>(null);
   const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
   const previousCountryRef = useRef(country);

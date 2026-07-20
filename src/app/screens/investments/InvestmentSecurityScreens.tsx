@@ -32,7 +32,7 @@ interface InvestmentSecurityListScreenProps extends SharedProps {
 interface InvestmentSecurityDetailScreenProps extends SharedProps {
   security: InvestmentCatalogSecurity;
   onBack: () => void;
-  onHistoryClick?: () => void;
+  onHistoryClick?: (filterByTitle?: string) => void;
   onBuyClick?: () => void;
 }
 
@@ -198,7 +198,7 @@ export function InvestmentSecurityDetailScreen({
 
       <AccountActionBar
         items={[
-          { id: "history", iconName: "investment-history", label: "History", onClick: onHistoryClick },
+          { id: "history", iconName: "investment-history", label: "History", onClick: () => onHistoryClick?.(security.title) },
           { id: "documents", iconName: "account-option-statement", label: "Documents" },
           { id: "sell", iconName: "trade-sell", label: "Sell", hidden: !canSell, iconColor: "var(--uc-text)" },
           { id: "buy", iconName: "trade-buy", label: "Buy", hidden: security.status !== "active", iconColor: "var(--uc-action)", onClick: onBuyClick },

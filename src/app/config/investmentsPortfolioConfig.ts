@@ -10,10 +10,27 @@ export type InvestmentSecurityStatus = "active" | "inactive";
 export type InvestmentContributionType = "ONE OFF" | "RECURRENT";
 export type InvestmentProductType = "Fund" | "Stock" | "Bond" | "ETF" | "Money market";
 export type InvestmentAssetClass = "Balanced" | "Equity" | "Fixed income" | "Liquidity";
+export type InvestmentRiskLevel = "Low" | "Medium" | "High";
+export type InvestmentLiquidity = "Daily" | "Weekly" | "Monthly";
 export type InvestmentHistoryTabId = "transactions" | "orders";
 export type InvestmentHistoryTransactionType = "COUPON" | "BUY" | "SELL" | "OTHER WITHDRAWAL";
 export type InvestmentHistoryOrderStatus = "EXECUTED" | "PENDING" | "REJECTED";
 export type InvestmentHistoryDatePreset = "last-month" | "last-6-months" | "last-year" | "define";
+
+/**
+ * "Yesterday's" date as DD.MM.YYYY, computed once at module load.
+ * All investment securities share this as their last-update snapshot date,
+ * matching the buy-order "Price updated at" behaviour (always yesterday's price).
+ */
+const YESTERDAY_DATE_STRING: string = (() => {
+  const yesterday = new Date();
+  yesterday.setHours(0, 0, 0, 0);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const dd = String(yesterday.getDate()).padStart(2, "0");
+  const mm = String(yesterday.getMonth() + 1).padStart(2, "0");
+  const yyyy = yesterday.getFullYear();
+  return `${dd}.${mm}.${yyyy}`;
+})();
 
 export interface InvestmentPeriodOption {
   id: InvestmentPeriodId;
@@ -54,6 +71,8 @@ export interface InvestmentSecurity {
   securityAccountCurrency: Currency;
   productType: InvestmentProductType;
   assetClass: InvestmentAssetClass;
+  riskLevel?: InvestmentRiskLevel;
+  liquidity?: InvestmentLiquidity;
   marketPrice: number;
   quantity: number;
   performanceAmount: number;
@@ -133,6 +152,8 @@ interface InvestmentSecuritySeed {
   securityAccountCurrency: Currency;
   productType: InvestmentProductType;
   assetClass: InvestmentAssetClass;
+  riskLevel?: InvestmentRiskLevel;
+  liquidity?: InvestmentLiquidity;
   logoId?: BrandLogoId;
 }
 
@@ -470,6 +491,25 @@ export function calculateInvestmentProductsTotalValue(products: readonly Product
   );
 }
 
+/**
+ * Deterministic mock mapping from product type / asset class to risk level
+ * and liquidity. Keeps the same value stable per security across renders.
+ */
+function deriveRiskLevel(seed: InvestmentSecuritySeed): InvestmentRiskLevel {
+  if (seed.riskLevel) return seed.riskLevel;
+  if (seed.assetClass === "Liquidity" || seed.productType === "Money market") return "Low";
+  if (seed.assetClass === "Fixed income" || seed.productType === "Bond") return "Low";
+  if (seed.assetClass === "Balanced") return "Medium";
+  return "High";
+}
+
+function deriveLiquidity(seed: InvestmentSecuritySeed): InvestmentLiquidity {
+  if (seed.liquidity) return seed.liquidity;
+  if (seed.assetClass === "Liquidity" || seed.productType === "Money market") return "Daily";
+  if (seed.assetClass === "Fixed income" || seed.productType === "Bond") return "Weekly";
+  return "Monthly";
+}
+
 export function buildInvestmentSecurities(
   investmentProducts: readonly Product[],
   country: CountryId,
@@ -513,6 +553,8 @@ export function buildInvestmentSecurities(
       securityAccountCurrency: seed.securityAccountCurrency === "CZK" ? currency : seed.securityAccountCurrency,
       productType: seed.productType,
       assetClass: seed.assetClass,
+      riskLevel: deriveRiskLevel(seed),
+      liquidity: deriveLiquidity(seed),
       marketPrice: seed.marketPrice,
       quantity,
       performanceAmount: isActive ? roundMoney((localValue * seed.performancePercent) / 100) : 0,
@@ -532,7 +574,7 @@ function enrichCatalogSecurity(security: InvestmentSecurity, country: CountryId,
     productId: `${countryCode}${stableId}${index + 1}`,
     quantity: owned ? security.quantity : 0,
     inceptionDate: `${String(19 + (index % 8)).padStart(2, "0")}.07.${2020 + (index % 4)}`,
-    lastUpdate: `03.0${(index % 8) + 1}.2026`,
+    lastUpdate: YESTERDAY_DATE_STRING,
     description: `${security.title} is a ${security.assetClass.toLowerCase()} ${security.productType.toLowerCase()} denominated in ${security.instrumentCurrency}. Review its objectives, risk profile, fees and official product documents before placing an order.`,
   };
 }
@@ -544,7 +586,10 @@ export function buildInvestmentSecurityCatalog(
   const localCurrency = getCountryCurrency(country) as Currency;
   const financialOwnedSecurities = ownedSecurities.filter((security) => security.status === "active" && security.localValue > 0);
   const referenceLocalValue = Math.max(500, financialOwnedSecurities.reduce((sum, item) => sum + item.localValue, 0) / Math.max(1, financialOwnedSecurities.length));
-  const ownedCatalog = ownedSecurities.map((security, index) => enrichCatalogSecurity(security, country, true, index));
+  // The buy catalogue lists only active holdings with real value.
+  // Legacy/inactive holdings (weight 0) are historical positions and must not
+  // appear as purchasable products with a 0,00 price.
+  const ownedCatalog = financialOwnedSecurities.map((security, index) => enrichCatalogSecurity(security, country, true, index));
   const availableCatalog = CATALOG_ONLY_SEEDS.map((seed, index) => {
     const localValue = roundMoney(referenceLocalValue * (0.72 + index * 0.18));
     const value = roundMoney(convertCurrency(localValue, localCurrency, seed.instrumentCurrency));
@@ -560,6 +605,8 @@ export function buildInvestmentSecurityCatalog(
       securityAccountCurrency: seed.securityAccountCurrency,
       marketPrice: seed.marketPrice,
       quantity: Number((value / seed.marketPrice).toFixed(6)),
+      riskLevel: seed.riskLevel ?? deriveRiskLevel(seed),
+      liquidity: seed.liquidity ?? deriveLiquidity(seed),
     };
     const catalogSecurity = enrichCatalogSecurity(security, country, false, ownedCatalog.length + index);
     return {

@@ -131,12 +131,12 @@ export default function PageHeader({
           )}
           style={{
             width: "375px",
-            padding: compact ? "0 24px" : "8px 16px",
+            padding: "8px 16px",
             opacity: largeTitleOpacity,
           }}
         >
           <h1
-            className={cn(compact ? "uc-type-l1" : "uc-type-h1", textColor)}
+            className={cn("uc-type-h1", textColor)}
             style={{
               display: "-webkit-box",
               WebkitLineClamp: 2,

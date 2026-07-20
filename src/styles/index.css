@@ -11,3 +11,16 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Native <select> with a custom chevron and breathing room on the right,
+   so the selected text never collides with the browser's dropdown arrow.
+   Usage: pair with explicit text/border/bg classes; this only owns the arrow. */
+.uc-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'><path fill-rule='evenodd' clip-rule='evenodd' d='M4.41 6.08c.4-.4 1.04-.4 1.44 0l4.15 4.16 4.16-4.16c.4-.4 1.04-.4 1.44 0 .4.4.4 1.05 0 1.45l-4.88 4.88c-.4.4-1.04.4-1.44 0L4.4 7.53c-.4-.4-.4-1.05 0-1.45Z' fill='%23666666'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}

@@ -190,29 +190,21 @@ export function TranslationTesterTool() {
     <div className="grid gap-[20px] xl:grid-cols-[320px_1fr]" data-tool-translation-tester="true">
       <div className="grid content-start gap-[20px]">
         <ToolPanel title="Component">
-          <div className="grid gap-[8px]">
-            {TESTABLE_COMPONENTS.map((entry) => {
-              const active = entry.id === componentId;
-              return (
-                <button
-                  key={entry.id}
-                  type="button"
-                  onClick={() => selectComponent(entry.id)}
-                  data-testable-component={entry.id}
-                  className={`rounded-[6px] border px-[12px] py-[10px] text-left transition-colors ${
-                    active
-                      ? "border-[var(--uc-action)] bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))]"
-                      : "border-[var(--uc-border)] bg-[var(--uc-surface)] hover:border-[var(--uc-action)]"
-                  }`}
-                >
-                  <span className="block text-[14px] font-bold leading-[18px] text-[var(--uc-text)]">{entry.label}</span>
-                  <span className="mt-[2px] block text-[12px] leading-[16px] text-[var(--uc-text-muted)]">
-                    {entry.description}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <select
+            value={componentId}
+            onChange={(event) => selectComponent(event.target.value)}
+            data-testable-component-select="true"
+            className="uc-select w-full cursor-pointer rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] py-[8px] pl-[12px] text-[13px] font-bold leading-[16px] text-[var(--uc-text)] outline-none transition-colors hover:border-[var(--uc-action)] focus:border-[var(--uc-action)]"
+          >
+            {TESTABLE_COMPONENTS.map((entry) => (
+              <option key={entry.id} value={entry.id}>
+                {entry.label}
+              </option>
+            ))}
+          </select>
+          <p className="mt-[8px] text-[12px] leading-[16px] text-[var(--uc-text-muted)]">
+            {component?.description}
+          </p>
 
           {component.slots.length > 1 ? (
             <div className="mt-[16px]">

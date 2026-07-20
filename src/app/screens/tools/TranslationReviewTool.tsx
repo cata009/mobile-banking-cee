@@ -102,7 +102,7 @@ export function TranslationReviewTool() {
               value={namespace}
               onChange={(event) => setNamespace(event.target.value)}
               data-translation-review-namespace="true"
-              className="mt-[8px] w-full rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[12px] py-[9px] text-[14px] leading-[18px] text-[var(--uc-text)] outline-none focus:border-[var(--uc-action)]"
+              className="uc-select mt-[8px] w-full rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] py-[9px] pl-[12px] text-[14px] leading-[18px] text-[var(--uc-text)] outline-none focus:border-[var(--uc-action)]"
             >
               {TRANSLATION_NAMESPACES.map((entry) => (
                 <option key={entry} value={entry}>
@@ -117,7 +117,7 @@ export function TranslationReviewTool() {
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              className="mt-[8px] w-full rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[12px] py-[9px] text-[14px] leading-[18px] text-[var(--uc-text)] outline-none focus:border-[var(--uc-action)]"
+              className="uc-select mt-[8px] w-full rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] py-[9px] pl-[12px] text-[14px] leading-[18px] text-[var(--uc-text)] outline-none focus:border-[var(--uc-action)]"
               placeholder="Search key or text in any language…"
             />
           </div>
