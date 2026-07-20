@@ -15,6 +15,11 @@ import {
   type SpendingAnalyticsSummary,
 } from "@/data/spendingAnalytics";
 import { useProducts } from "@/hooks/useProducts";
+import type { PfmCategoryName, PfmCategorySelection } from "@/data/pfmCategories";
+import type { SpendingAnalyticsTransaction } from "@/data/spendingAnalytics";
+import AnalyticsPeriodIndicator, { buildCenteredPeriodIndicator } from "./AnalyticsPeriodIndicator";
+import PfmCategoryDetailScreen from "./PfmCategoryDetailScreen";
+import { getAnalyticsCategoryDisplayLabel } from "./analyticsCategoryLabels";
 
 type NavItem = "home" | "analytics" | "payments" | "products" | "more";
 const HERO_PANEL_WIDTH = 375;
@@ -33,48 +38,8 @@ interface AnalyticsScreenProps {
   onPaymentsClick?: () => void;
   onProductsClick?: () => void;
   onMoreClick?: () => void;
-}
-
-function getCategoryDisplayLabel(category: string, t: (key: string, fallback?: string) => string) {
-  const labels: Record<string, string> = {
-    Finance: "FINANCIAL",
-    Shopping: "SHOPPING",
-    Healthcare: "HEALTH & BEAUTY",
-    Uncategorized: "UNCATEGORIZED EXPENSES",
-    Home: "HOUSEHOLD",
-    Groceries: "GROCERIES",
-    Transportation: "CARS & TRANSPORTATION",
-    "Leisure time": "LEISURE",
-    "Taxes and Penalties": "TAXES & FINES",
-    Income: "INCOME",
-    Utilities: "UTILITIES",
-    Insurance: "INSURANCE",
-    Education: "SCHOOL & EDUCATION",
-    Children: "CHILDREN",
-    Wallet: "WALLET",
-    Transfers: "TRANSFERS",
-    Investments: "INVESTMENTS",
-    ATM: "ATM",
-    FX: "EXCHANGE",
-    "Exclude from budget": "EXCLUDED",
-  };
-
-  return t(`runtime.analytics.categories.${category}`, labels[category] ?? category.toUpperCase());
-}
-
-function buildCenteredIndicator(periods: SpendingAnalyticsPeriod[], activeIndex: number) {
-  if (periods.length <= 5) {
-    return periods.map((period) => period.key);
-  }
-
-  let start = Math.max(0, activeIndex - 2);
-  const end = Math.min(periods.length, start + 5);
-
-  if (end - start < 5) {
-    start = Math.max(0, end - 5);
-  }
-
-  return periods.slice(start, end).map((period) => period.key);
+  transactionCategoryOverrides?: Readonly<Record<string, PfmCategorySelection>>;
+  onTransactionClick?: (transaction: SpendingAnalyticsTransaction) => void;
 }
 
 function splitAmount(value: string) {
@@ -445,28 +410,6 @@ function CardTransactionAction() {
   );
 }
 
-function AnalyticsPeriodIndicator({
-  activePeriodKey,
-  periodKeys,
-}: {
-  activePeriodKey: string;
-  periodKeys: string[];
-}) {
-  return (
-    <div className="flex justify-center pb-[14px] pt-[7px]">
-      <div className="flex items-center gap-[10px]">
-        {periodKeys.map((periodKey) =>
-          periodKey === activePeriodKey ? (
-            <span key={periodKey} className="h-[6px] w-[30px] rounded-full bg-[var(--uc-action)]" />
-          ) : (
-            <span key={periodKey} className="size-[6px] rounded-full bg-[var(--uc-text-subtle)]" />
-          ),
-        )}
-      </div>
-    </div>
-  );
-}
-
 function AnalyticsSummaryBars({
   country,
   summary,
@@ -554,12 +497,14 @@ function MoneyCategorySection({
   country,
   currency,
   direction,
+  onCategoryClick,
 }: {
   title: string;
   categories: SpendingAnalyticsSummary["moneyOutCategories"];
   country: CountryId;
   currency: string;
   direction: "out" | "in";
+  onCategoryClick: (category: PfmCategoryName, direction: "out" | "in") => void;
 }) {
   const { t } = useLanguage();
   const maxCategoryTotal = Math.max(...categories.map((category) => category.total), 1);
@@ -577,11 +522,14 @@ function MoneyCategorySection({
             const pillWidth = Math.round(104 + ratio * 178);
 
             return (
-              <div
+              <button
+                type="button"
                 key={`${direction}-${category.category}`}
-                className="relative min-h-[92px] pl-[44px]"
+                className="relative min-h-[92px] w-full pl-[44px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
                 data-pfm-category-row={category.category}
                 data-pfm-category-total={category.total}
+                aria-label={`${t("runtime.analytics.openCategoryDetails", "Open category details")}: ${getAnalyticsCategoryDisplayLabel(category.category, t)}`}
+                onClick={() => onCategoryClick(category.category, direction)}
               >
                 <div className="absolute left-0 top-1/2 -translate-y-1/2">
                   <PfmCategoryIcon category={category.category} size={32} />
@@ -599,7 +547,7 @@ function MoneyCategorySection({
 
                   <div className="relative z-[1] max-w-[255px] py-[8px] text-right">
                     <p className="uc-type-n5-strong uppercase leading-normal tracking-[0.4px] text-[var(--uc-text-muted)]">
-                      {getCategoryDisplayLabel(category.category, t)}
+                      {getAnalyticsCategoryDisplayLabel(category.category, t)}
                     </p>
                     <CategoryAmount
                       amount={category.total}
@@ -609,7 +557,7 @@ function MoneyCategorySection({
                     />
                   </div>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -628,20 +576,32 @@ export default function AnalyticsScreen({
   onPaymentsClick,
   onProductsClick,
   onMoreClick,
+  transactionCategoryOverrides = {},
+  onTransactionClick,
 }: AnalyticsScreenProps) {
   const country = useCountry();
   const { t } = useLanguage();
   const { categories } = useProducts();
   const products = useMemo(() => categories.flatMap((category) => category.products), [categories]);
-  const timeline = useMemo(() => createSpendingAnalyticsTimeline(country, products), [country, products]);
+  const timeline = useMemo(
+    () => createSpendingAnalyticsTimeline(country, products, transactionCategoryOverrides),
+    [country, products, transactionCategoryOverrides],
+  );
   const [selectedPeriodKey, setSelectedPeriodKey] = useState(timeline.activePeriodKey);
+  const [selectedCategory, setSelectedCategory] = useState<{
+    category: PfmCategoryName;
+    direction: "out" | "in";
+  } | null>(null);
 
   useEffect(() => {
     setSelectedPeriodKey(timeline.activePeriodKey);
   }, [timeline.activePeriodKey]);
 
   const activePeriodIndex = Math.max(timeline.periods.findIndex((period) => period.key === selectedPeriodKey), 0);
-  const indicatorKeys = buildCenteredIndicator(timeline.periods as SpendingAnalyticsPeriod[], activePeriodIndex);
+  const indicatorKeys = buildCenteredPeriodIndicator(
+    timeline.periods.map((period) => period.key),
+    activePeriodIndex,
+  );
   const firstPeriod = timeline.periods[0];
   const summary =
     timeline.summariesByPeriodKey[selectedPeriodKey] ??
@@ -655,6 +615,20 @@ export default function AnalyticsScreen({
     if (tab === "products") onProductsClick?.();
     if (tab === "more") onMoreClick?.();
   };
+
+  if (selectedCategory) {
+    return (
+      <PfmCategoryDetailScreen
+        category={selectedCategory.category}
+        direction={selectedCategory.direction}
+        timeline={timeline}
+        activePeriodKey={selectedPeriodKey}
+        onPeriodChange={setSelectedPeriodKey}
+        onBack={() => setSelectedCategory(null)}
+        onTransactionClick={onTransactionClick}
+      />
+    );
+  }
 
   return (
     <div className="relative flex h-full w-full flex-col bg-[var(--uc-app-bg)] text-[var(--uc-text)]">
@@ -682,6 +656,7 @@ export default function AnalyticsScreen({
             country={country}
             currency={summary.currency}
             direction="out"
+            onCategoryClick={(category, direction) => setSelectedCategory({ category, direction })}
           />
           <MoneyCategorySection
             title={t("runtime.analytics.moneyIn", "Money in")}
@@ -689,6 +664,7 @@ export default function AnalyticsScreen({
             country={country}
             currency={summary.currency}
             direction="in"
+            onCategoryClick={(category, direction) => setSelectedCategory({ category, direction })}
           />
         </div>
       </div>

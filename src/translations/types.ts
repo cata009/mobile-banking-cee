@@ -95,6 +95,14 @@ export interface TranslationKeys {
       spendings: string;
       moneyOut: string;
       moneyIn: string;
+      showingDataFor: string;
+      addTransaction: string;
+      subcategoryBreakdown: string;
+      filterOutSubcategory: string;
+      openCategoryDetails: string;
+      uncategorizedTransaction: string;
+      uncategorizedTransactionDescription: string;
+      dismissUncategorizedTip: string;
       noTransactionsForPeriod: string;
       categories: Record<string, string>;
     };

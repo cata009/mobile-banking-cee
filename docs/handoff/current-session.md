@@ -9,6 +9,25 @@ Last updated: 2026-07-20
 - [2026-07](archive/sessions-2026-07.md) — 135 sessions
 - [2026-06](archive/sessions-2026-06.md) — 74 sessions
 
+## 2026-07-20 PFM Spending Category Drill-downs
+
+- Latest request handled: reproduce the production-reference category pages opened from Analytics / My Spendings `Money out` and `Money in`, then correct the supplied Financial feedback so bubbles never overlap/crop and tapping a bubble filters that subcategory out of the whole detail view.
+- Product behavior: every populated PFM category row is now a semantic button that opens a category-colored detail surface for the selected month/year. The page keeps the shared period carousel/indicator, shows connected category totals, proportional subcategory bubbles, the shared `Add Transaction` action presentation, the shared transaction month divider/rows, and the supplied dismissible Uncategorized helper. Transaction rows continue into the existing Transaction Detail screen.
+- Connected data: `spendingAnalytics.ts` is the single aggregation authority for overview totals, drill-down subcategories, transactions, and session recategorization overrides. Shopping maps online purchases to `ELECTRONICS & COMPUTERS`, income maps Salary/Social Transfers/other income explicitly, Personal Loan and Mortgage profiles remain distinct, and yearly transactions sort by month then day. A recategorized transaction immediately changes both overview and drill-down aggregation.
+- Bubble feedback fix: bubbles use a bounded flex/wrap layout rather than absolute coordinates, so Financial `LOANS`, `MORTGAGE`, `FINANCIAL (OTHER)`, and `BANK FEES` remain fully visible without collision. Each bubble is a keyboard-accessible button. Tapping it removes that subcategory and its transactions and recalculates both hero/divider totals from the remaining data; the last remaining bubble is protected. The local filter resets on period/category change or re-entry.
+- Design-system decision: reused `PageHeader`, `AnalyticsPeriodIndicator`, `AccountActionBar`, `AccountTransactionMonthDivider`, `AccountTransactionRow`, `HelperCard`, PFM icon/color tokens, and runtime translations; extended Analytics/category aggregation with backward-compatible props; created only the domain-specific `PfmCategoryDetailScreen`, `PfmCategoryBubbleChart`, and label/period helpers. Registered evidence is `analytics.category-details`.
+- Reference evidence: all 13 production captures under `To do/` are included in this checkpoint: the nine `PFM categs` captures used for this implementation and four `Payments` captures retained as reference-only material outside this task's product scope. The exact production app is not a runtime dependency.
+- TDD evidence: focused RED/GREEN coverage proves override-before-aggregation, expense/income taxonomy, distinct Loan/Mortgage data, chronological yearly ordering, overview-to-detail/back navigation, Uncategorized helper dismissal, transaction navigation, and bubble exclusion with the Shopping total changing from `599,21 RON` to `208,99 RON`. Final focused result: 12/12.
+- Browser evidence: local RO smoke verified Shopping bubbles/transactions, Financial `LOANS` + `MORTGAGE` + `BANK FEES`, Income `SALARY` + `INCOME (OTHER)`, and no browser console errors before the final bubble-layout feedback. The final filtering behavior is covered by the integration test; Browser automation could not reactivate a category row after the user-comment overlay/session was reclaimed, while normal manual interaction and React tests remain functional.
+- Full verification: `npm run verify` passed after the final feedback: TypeScript, ESLint, 50 files / 307 tests, all six audits, and production build. Known baseline notices remain Recharts zero-size output in jsdom, empty `react-vendor`, and the >500 kB App chunk.
+- Limitations: state is mock/session-local; bubble exclusions reset rather than persist; `Add Transaction` remains presentational because no transaction-creation behavior was supplied; no API, ledger mutation, or audit history was added.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
 ## 2026-07-20 Stakeholder Tools Tab and Flow Export
 
 - Latest request handled: add a stakeholder `Tools` platform tab hosting the approved tool set — side-by-side country comparison, component translation tester, translation review table — plus PDF/Word export for Flow Library journeys. Only the explicitly approved tools were implemented.

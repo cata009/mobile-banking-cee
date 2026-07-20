@@ -425,6 +425,7 @@ function makeTransaction(
 
 const SAVINGS_TRANSFER_PROFILE_INDEX = 100;
 const CREDIT_PRODUCT_PROFILE_INDEX = 200;
+const MORTGAGE_PROFILE_INDEX = 201;
 
 function createTransactionFactory(country: Country, currency: Currency, accountIndex: number) {
   let sequence = 1;
@@ -550,15 +551,18 @@ function getCreditProductTransactions(
   profile: CountryTransactionProfile,
 ): AccountTransaction[] {
   const t = createTransactionFactory(country, currency, accountIndex);
+  const isMortgage = accountIndex === MORTGAGE_PROFILE_INDEX;
+  const repaymentLabel = isMortgage ? "Mortgage repayment" : "Loan repayment";
+  const interestDetails = isMortgage ? "Mortgage interest" : "Loan interest";
 
   return [
-    t(new Date(2026, 3, 22), "Monthly repayment", "Account payment", -260, "Transfers", "Loan repayment"),
-    t(new Date(2026, 3, 22), "Interest charge", "Loan interest", -42.4, "Finance", "Interest"),
+    t(new Date(2026, 3, 22), "Monthly repayment", "Account payment", -260, "Finance", repaymentLabel),
+    t(new Date(2026, 3, 22), "Interest charge", interestDetails, -42.4, "Finance", "Interest"),
     t(new Date(2026, 3, 15), profile.insurance, "Loan insurance", -18.5, "Insurance", "Insurance premium"),
-    t(new Date(2026, 2, 22), "Monthly repayment", "Account payment", -260, "Transfers", "Loan repayment"),
-    t(new Date(2026, 2, 22), "Interest charge", "Loan interest", -44.1, "Finance", "Interest"),
-    t(new Date(2026, 1, 22), "Monthly repayment", "Account payment", -260, "Transfers", "Loan repayment"),
-    t(new Date(2025, 11, 22), "Monthly repayment", "Account payment", -260, "Transfers", "Loan repayment"),
+    t(new Date(2026, 2, 22), "Monthly repayment", "Account payment", -260, "Finance", repaymentLabel),
+    t(new Date(2026, 2, 22), "Interest charge", interestDetails, -44.1, "Finance", "Interest"),
+    t(new Date(2026, 1, 22), "Monthly repayment", "Account payment", -260, "Finance", repaymentLabel),
+    t(new Date(2025, 11, 22), "Monthly repayment", "Account payment", -260, "Finance", repaymentLabel),
   ];
 }
 
@@ -571,8 +575,12 @@ export function getAccountTransactionProfileIndex(product: Product, productIndex
     return SAVINGS_TRANSFER_PROFILE_INDEX;
   }
 
-  if (product.type === "loan" || product.type === "mortgage") {
+  if (product.type === "loan") {
     return CREDIT_PRODUCT_PROFILE_INDEX;
+  }
+
+  if (product.type === "mortgage") {
+    return MORTGAGE_PROFILE_INDEX;
   }
 
   return productIndex;
@@ -595,7 +603,7 @@ export function getAccountTransactions(
     return getSavingsTransferTransactions(country, currency, accountIndex);
   }
 
-  if (accountIndex === CREDIT_PRODUCT_PROFILE_INDEX) {
+  if (accountIndex === CREDIT_PRODUCT_PROFILE_INDEX || accountIndex === MORTGAGE_PROFILE_INDEX) {
     return getCreditProductTransactions(country, currency, accountIndex, profile);
   }
 

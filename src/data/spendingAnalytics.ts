@@ -6,10 +6,12 @@ import {
 } from "@/data/accountDetails";
 import { convertCurrency, EXCHANGE_RATE_DATE, getCountryCurrency, roundMoney } from "@/data/exchangeRates";
 import {
+  getPfmCategorySelection,
   getPfmCategory,
   isInternalTransferCategory,
   normalizePfmCategory,
   type PfmCategoryName,
+  type PfmCategorySelection,
 } from "@/data/pfmCategories";
 import { isAccountDetailProduct, type Product } from "@/data/products";
 
@@ -56,6 +58,22 @@ export interface SpendingAnalyticsTimeline {
   summariesByPeriodKey: Record<string, SpendingAnalyticsSummary>;
 }
 
+export interface SpendingSubcategorySummary {
+  label: string;
+  total: number;
+  transactionCount: number;
+}
+
+export interface SpendingCategoryDetail {
+  category: PfmCategoryName;
+  direction: "out" | "in";
+  total: number;
+  subcategories: SpendingSubcategorySummary[];
+  transactions: SpendingAnalyticsTransaction[];
+}
+
+export type SpendingCategoryOverrides = Readonly<Record<string, PfmCategorySelection>>;
+
 function addCategoryTotal(
   categoryTotals: Map<PfmCategoryName, { total: number; transactionCount: number }>,
   categoryName: PfmCategoryName,
@@ -85,7 +103,11 @@ function getYearFromMonthKey(monthKey: string) {
   return monthKey.split("-")[0] ?? "2026";
 }
 
-function collectAnalyticsTransactions(country: CountryId, products: Product[]) {
+function collectAnalyticsTransactions(
+  country: CountryId,
+  products: Product[],
+  categoryOverrides: SpendingCategoryOverrides = {},
+) {
   const reportingCurrency = getCountryCurrency(country);
   const accountProducts = products.filter(isAccountDetailProduct);
   const seenProfiles = new Set<number>();
@@ -101,10 +123,13 @@ function collectAnalyticsTransactions(country: CountryId, products: Product[]) {
     seenProfiles.add(profileIndex);
 
     getAccountTransactions(country, profileIndex, product.currency).forEach((transaction) => {
+      const override = categoryOverrides[transaction.id];
       allTransactions.push({
         ...transaction,
         amount: roundMoney(convertCurrency(transaction.amount, product.currency, reportingCurrency)),
-        pfmCategory: normalizePfmCategory(transaction.pfmCategory || transaction.category),
+        category: override?.groupLabel ?? transaction.category,
+        pfmCategory: override?.category ?? normalizePfmCategory(transaction.pfmCategory || transaction.category),
+        pfmSubcategory: override?.subcategory ?? transaction.pfmSubcategory,
         sourceProductId: product.id,
         sourceProductName: product.name,
       });
@@ -170,7 +195,9 @@ function summarizeTransactions(
     netTotal: roundMoney(incomeTotal - spendingTotal),
     moneyOutCategories: toCategorySummaries(outCategoryTotals),
     moneyInCategories: toCategorySummaries(inCategoryTotals),
-    sourceTransactions: includedTransactions.sort((a, b) => Number(b.day) - Number(a.day)),
+    sourceTransactions: includedTransactions.sort(
+      (a, b) => b.monthKey.localeCompare(a.monthKey) || Number(b.day) - Number(a.day),
+    ),
     exchangeRateDate: EXCHANGE_RATE_DATE,
   };
 }
@@ -178,8 +205,9 @@ function summarizeTransactions(
 export function createSpendingAnalyticsTimeline(
   country: CountryId,
   products: Product[],
+  categoryOverrides: SpendingCategoryOverrides = {},
 ): SpendingAnalyticsTimeline {
-  const { reportingCurrency, allTransactions } = collectAnalyticsTransactions(country, products);
+  const { reportingCurrency, allTransactions } = collectAnalyticsTransactions(country, products, categoryOverrides);
 
   const monthKeysDesc = Array.from(new Set(allTransactions.map((transaction) => transaction.monthKey))).sort((a, b) =>
     b.localeCompare(a),
@@ -252,8 +280,9 @@ export function createSpendingAnalytics(
   country: CountryId,
   products: Product[],
   selectedPeriodKey?: string,
+  categoryOverrides: SpendingCategoryOverrides = {},
 ): SpendingAnalyticsSummary {
-  const timeline = createSpendingAnalyticsTimeline(country, products);
+  const timeline = createSpendingAnalyticsTimeline(country, products, categoryOverrides);
   const resolvedKey = selectedPeriodKey && timeline.summariesByPeriodKey[selectedPeriodKey]
     ? selectedPeriodKey
     : timeline.activePeriodKey;
@@ -265,4 +294,61 @@ export function createSpendingAnalytics(
   }
 
   return summary;
+}
+
+function getAnalyticsSubcategoryLabel(transaction: SpendingAnalyticsTransaction) {
+  const rawLabel = transaction.pfmSubcategory?.trim();
+
+  if (transaction.pfmCategory === "Income") {
+    const normalizedLabel = rawLabel?.toLocaleLowerCase();
+
+    if (normalizedLabel === "salary") {
+      return "SALARY";
+    }
+
+    if (normalizedLabel === "social transfer" || normalizedLabel === "social transfers") {
+      return "SOCIAL TRANSFERS";
+    }
+
+    return "INCOME (OTHER)";
+  }
+
+  return getPfmCategorySelection(transaction.pfmCategory, rawLabel).subcategory;
+}
+
+export function createSpendingCategoryDetail(
+  summary: SpendingAnalyticsSummary,
+  category: PfmCategoryName,
+  direction: "out" | "in",
+  excludedSubcategories: ReadonlySet<string> = new Set(),
+): SpendingCategoryDetail {
+  const transactions = summary.sourceTransactions.filter((transaction) => {
+    const matchesDirection = direction === "out" ? transaction.amount < 0 : transaction.amount > 0;
+    const matchesCategory = transaction.pfmCategory === category;
+    return matchesDirection
+      && matchesCategory
+      && !excludedSubcategories.has(getAnalyticsSubcategoryLabel(transaction));
+  });
+  const subcategoryTotals = new Map<string, { total: number; transactionCount: number }>();
+
+  transactions.forEach((transaction) => {
+    const label = getAnalyticsSubcategoryLabel(transaction);
+    const current = subcategoryTotals.get(label) ?? { total: 0, transactionCount: 0 };
+    subcategoryTotals.set(label, {
+      total: roundMoney(current.total + Math.abs(transaction.amount)),
+      transactionCount: current.transactionCount + 1,
+    });
+  });
+
+  const subcategories = Array.from(subcategoryTotals.entries())
+    .map(([label, data]) => ({ label, ...data }))
+    .sort((a, b) => b.total - a.total || a.label.localeCompare(b.label));
+
+  return {
+    category,
+    direction,
+    total: roundMoney(transactions.reduce((total, transaction) => total + Math.abs(transaction.amount), 0)),
+    subcategories,
+    transactions,
+  };
 }

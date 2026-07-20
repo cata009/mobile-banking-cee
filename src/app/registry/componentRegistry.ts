@@ -446,7 +446,17 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "mock-driven",
     componentPath: "src/app/screens/analytics/AnalyticsScreen.tsx",
     usedByScreens: ["pi.analytics.overview"],
-    notes: "Screenshot-inspired My Spendings screen with transaction-derived inflow/outflow bars, cash transaction banner, and PFM-category Money Out / Money In summaries.",
+    notes: "Screenshot-inspired My Spendings screen with transaction-derived inflow/outflow bars, cash transaction banner, interactive PFM-category Money Out / Money In summaries, and session recategorization reflected in its aggregates.",
+  },
+  "analytics.category-details": {
+    id: "analytics.category-details",
+    label: "PFM spending category details",
+    products: ["PI"],
+    designSystems: ["current"],
+    status: "mock-driven",
+    componentPath: "src/app/screens/analytics/PfmCategoryDetailScreen.tsx",
+    usedByScreens: ["pi.analytics.overview", "pi.transaction.detail"],
+    notes: "Production-reference-derived Money Out/Money In category drill-down with connected period totals, proportional subcategory bubbles, Add Transaction action, matching transaction rows, and the dismissible Uncategorized helper. Data is session-local and mock-driven.",
   },
   "pfm.category-icon": {
     id: "pfm.category-icon",

@@ -6,6 +6,7 @@ Known bananas are triaged risks that can sabotage a future session if forgotten.
 
 | Banana | Impact | Triage |
 | --- | --- | --- |
+| PFM Spending category-detail filters and recategorization are session-local, and `Add Transaction` is presentational | Reloading/re-entering resets bubble exclusions and recategorization; the reference action does not create a ledger entry | Keep the mock boundary explicit until persistence, audit, and transaction-creation contracts are approved; do not infer backend behavior from the demo affordance |
 | Platform capability map says there is no product handoff/audit workflow | This remains true for product features, but repo-level AI handoff now exists | Do not treat AI OS docs as a banking product capability |
 | Several active UI strings are hardcoded in English | Country/language confidence is lower than translation docs imply | Keep as task until translation coverage is expanded |
 | Feature registry contains features that are not all rendered by active screens | Demo panel may imply more coverage than UI currently provides | Use feature coverage metadata and control panel warnings |
