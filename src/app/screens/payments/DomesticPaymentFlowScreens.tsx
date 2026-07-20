@@ -9,9 +9,13 @@ import ToggleButton from "@/app/components/ToggleButton";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import PageHeader from "@/app/components/PageHeader";
 import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
+import PfmCategoryChangeSheet from "@/app/components/pfm/PfmCategoryChangeSheet";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import TextField from "@/app/components/TextField";
+import StandardSignScreen from "@/app/components/flow/StandardSignScreen";
+import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
 import type { AccountTransaction } from "@/data/accountDetails";
+import { getPfmCategorySelection, type PfmCategorySelection } from "@/data/pfmCategories";
 import type { Product } from "@/data/products";
 import {
   createTransactionDetailData,
@@ -74,16 +78,19 @@ export function TransactionDetailScreen({
   transaction,
   onBack,
   onRedoPayment,
+  onCategoryChange,
 }: {
   country: CountryId;
   product?: Product | null;
   transaction: AccountTransaction;
   onBack: () => void;
   onRedoPayment: () => void;
+  onCategoryChange?: (transaction: AccountTransaction, selection: PfmCategorySelection) => void;
 }) {
   const { t } = useLanguage();
   const [headerProgress, setHeaderProgress] = useState(0);
   const [areDetailsExpanded, setAreDetailsExpanded] = useState(false);
+  const [categorySheetOpen, setCategorySheetOpen] = useState(false);
 
   const handlePageScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 48));
@@ -96,7 +103,12 @@ export function TransactionDetailScreen({
   );
   const currencyLabel = detail.amount.split(" ").slice(-1)[0];
   const transactionActionItems: AccountActionBarItem[] = [
-    { id: "change-category", iconName: "grid-2x2", label: t("runtime.transactionDetail.actions.changeCategory", "Change\ncategory") },
+    {
+      id: "change-category",
+      iconName: "grid-2x2",
+      label: t("runtime.transactionDetail.actions.changeCategory", "Change\ncategory"),
+      onClick: onCategoryChange ? () => setCategorySheetOpen(true) : undefined,
+    },
     { id: "standing-order", iconName: "standing-order", label: t("runtime.transactionDetail.actions.createStandingOrder", "Create\nStanding order") },
     { id: "redo-payment", iconName: "redo-payment", label: t("runtime.transactionDetail.actions.redoPayment", "Redo\npayment"), onClick: onRedoPayment },
     { id: "send-payment", iconName: "send-payment", label: t("runtime.transactionDetail.actions.sendPayment", "Send\npayment") },
@@ -224,6 +236,16 @@ export function TransactionDetailScreen({
           </button>
         </section>
       </div>
+      {categorySheetOpen ? (
+        <PfmCategoryChangeSheet
+          currentSelection={getPfmCategorySelection(transaction.pfmCategory, transaction.pfmSubcategory)}
+          onClose={() => setCategorySheetOpen(false)}
+          onConfirm={(selection) => {
+            onCategoryChange?.(transaction, selection);
+            setCategorySheetOpen(false);
+          }}
+        />
+      ) : null}
     </div>
   );
 }
@@ -422,49 +444,26 @@ export function PaymentSignScreen({
   onSign: () => void;
 }) {
   const { t } = useLanguage();
-  const [pin, setPin] = useState("******");
-
   return (
-    <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">
-      <PageHeader title={t("runtime.actions.sign", "Sign")} onBack={onBack} includeSafeArea showHelp={false} />
-      <div className="min-h-0 flex-1 px-[24px] pt-[150px]">
-        <TextField
-          label={t("runtime.payments.domesticFlow.enterPinCode", "Enter pin code")}
-          value={pin}
-          onChange={setPin}
-          helperText={t("runtime.payments.domesticFlow.pinPrivacyHint", "Be sure that nobody is watching you")}
-          visualState="on-focus"
-        />
-      </div>
-      <div className="px-[24px] pb-[42px]">
-        <PrimaryButton onClick={onSign}>{t("runtime.actions.sign", "Sign")}</PrimaryButton>
-      </div>
-    </div>
+    <StandardSignScreen
+      title={t("runtime.actions.sign", "Sign")}
+      pinLabel={t("runtime.payments.domesticFlow.enterPinCode", "Enter pin code")}
+      pinHelper={t("runtime.payments.domesticFlow.pinPrivacyHint", "Be sure that nobody is watching you")}
+      actionLabel={t("runtime.actions.sign", "Sign")}
+      onBack={onBack}
+      onSign={onSign}
+    />
   );
 }
 
 export function PaymentSuccessScreen({ onDone }: { onDone: () => void }) {
   const { t } = useLanguage();
   return (
-    <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">
-      <div className="px-[24px] pt-[84px]">
-        <h1 className="uc-type-h1 text-[var(--uc-text)]">
-          {t("runtime.payments.domesticFlow.successfulPayment", "Successful payment")}
-        </h1>
-      </div>
-      <div className="flex min-h-0 flex-1 flex-col px-[24px]">
-        <div className="flex justify-center pt-[58px]">
-          <div className="grid size-[100px] place-items-center rounded-full border-[6px] border-[var(--uc-green-olive)]">
-            <AppIcon name="prime-check" size={64} color="var(--uc-green-olive)" />
-          </div>
-        </div>
-        <p className="uc-type-n4 pt-[58px] leading-[22px] text-[var(--uc-text)]">
-          {t("runtime.payments.domesticFlow.paymentSentToBank", "Your payment has been successfully sent to the bank")}
-        </p>
-      </div>
-      <div className="px-[24px] pb-[42px]">
-        <PrimaryButton onClick={onDone}>{t("runtime.actions.okGotIt", "Ok, got it")}</PrimaryButton>
-      </div>
-    </div>
+    <StandardSuccessScreen
+      title={t("runtime.payments.domesticFlow.successfulPayment", "Successful payment")}
+      body={t("runtime.payments.domesticFlow.paymentSentToBank", "Your payment has been successfully sent to the bank")}
+      actionLabel={t("runtime.actions.okGotIt", "Ok, got it")}
+      onDone={onDone}
+    />
   );
 }

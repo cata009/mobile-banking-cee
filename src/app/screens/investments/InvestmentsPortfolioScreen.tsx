@@ -8,6 +8,7 @@ import InvestmentPortfolioTabs from "@/app/components/investments/InvestmentPort
 import InvestmentProductCard, { type InvestmentAmountParts } from "@/app/components/investments/InvestmentProductCard";
 import InvestmentProductsAccordion from "@/app/components/investments/InvestmentProductsAccordion";
 import InvestmentsFundBanner from "@/app/components/investments/InvestmentsFundBanner";
+import InvestmentBuyOrderFlow from "@/app/screens/investments/InvestmentBuyOrderFlow";
 import { InvestmentSecurityDetailScreen, InvestmentSecurityListScreen } from "@/app/screens/investments/InvestmentSecurityScreens";
 import { AppIcon } from "@/app/components/icons";
 import PageHeader from "@/app/components/PageHeader";
@@ -37,6 +38,7 @@ import type { CountryId } from "@/app/state/demoTypes";
 import { useDemo } from "@/app/state/demoStore";
 import { maskAmountParts } from "@/app/utils/amountPrivacy";
 import { useProducts } from "@/hooks/useProducts";
+import type { CurrentAccount } from "@/data/products";
 
 interface InvestmentsPortfolioScreenProps {
   onBack: () => void;
@@ -265,8 +267,13 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
   const [selectedDistributionItem, setSelectedDistributionItem] = useState<InvestmentDistributionItem | null>(null);
   const [securityListOpen, setSecurityListOpen] = useState(false);
   const [selectedSecurity, setSelectedSecurity] = useState<InvestmentCatalogSecurity | null>(null);
+  const [buyOrderOpen, setBuyOrderOpen] = useState(false);
 
   const allProducts = useMemo(() => categories.flatMap((category) => category.products), [categories]);
+  const currentAccounts = useMemo(
+    () => allProducts.filter((product): product is CurrentAccount => product.type === "current_account"),
+    [allProducts],
+  );
   const investmentProducts = useMemo(() => getInvestmentProducts(allProducts), [allProducts]);
   const securities = useMemo(() => buildInvestmentSecurities(investmentProducts, country), [country, investmentProducts]);
   const securityCatalog = useMemo(() => buildInvestmentSecurityCatalog(securities, country), [country, securities]);
@@ -291,7 +298,7 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
   const performanceParts = maskInvestmentAmount(formatAmountParts(totalPerformanceAmount, country, portfolioCurrency), amountsHidden);
   const totalPerformancePercentLabel = amountsHidden
     ? "**,**%"
-    : `${totalPerformancePercent.toFixed(2).replace(".", ",")}%`;
+    : `${Math.abs(totalPerformancePercent).toFixed(2).replace(".", ",")}%`;
 
   const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
     const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64));
@@ -313,6 +320,23 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
   const formatDistributionAmount = (value: number, itemCurrency: string) =>
     maskInvestmentAmount(formatAmountParts(value, country, itemCurrency), amountsHidden);
 
+  if (selectedSecurity && buyOrderOpen) {
+    return (
+      <InvestmentBuyOrderFlow
+        security={selectedSecurity}
+        accounts={currentAccounts}
+        country={country}
+        amountsHidden={amountsHidden}
+        onBack={() => setBuyOrderOpen(false)}
+        onComplete={() => {
+          setBuyOrderOpen(false);
+          setSelectedSecurity(null);
+          setSecurityListOpen(false);
+        }}
+      />
+    );
+  }
+
   if (selectedSecurity) {
     return (
       <InvestmentSecurityDetailScreen
@@ -321,6 +345,7 @@ export default function InvestmentsPortfolioScreen({ onBack, onHistoryClick }: I
         amountsHidden={amountsHidden}
         onBack={() => setSelectedSecurity(null)}
         onHistoryClick={onHistoryClick}
+        onBuyClick={() => setBuyOrderOpen(true)}
       />
     );
   }

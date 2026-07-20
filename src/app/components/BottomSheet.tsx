@@ -12,6 +12,9 @@ interface BottomSheetProps {
   className?: string;
   headerClassName?: string;
   bodyClassName?: string;
+  showCloseButton?: boolean;
+  showDragHandle?: boolean;
+  closeLabel?: string;
   onClose: () => void;
 }
 
@@ -25,6 +28,9 @@ export function BottomSheet({
   className,
   headerClassName,
   bodyClassName,
+  showCloseButton = true,
+  showDragHandle = false,
+  closeLabel = "Close",
   onClose,
 }: BottomSheetProps) {
   const titleId = useId();
@@ -108,6 +114,16 @@ export function BottomSheet({
         style={{ [fillHeight ? "height" : "maxHeight"]: `calc(100% - ${maxHeightOffsetPx}px)` }}
         tabIndex={-1}
       >
+        {showDragHandle ? (
+          <button
+            aria-label={closeLabel}
+            className="mx-auto mb-[24px] flex h-[16px] w-[64px] items-center justify-center"
+            onClick={onClose}
+            type="button"
+          >
+            <span className="h-[4px] w-[32px] rounded-full bg-[var(--uc-border)]" />
+          </button>
+        ) : null}
         <div className={cn("mb-[24px] flex items-start justify-between gap-[16px]", headerClassName)}>
           <div className="min-w-0">
             {title ? (
@@ -125,14 +141,16 @@ export function BottomSheet({
             ) : null}
             {meta ? <div className="mt-[4px]">{meta}</div> : null}
           </div>
-          <button
-            aria-label="Close"
-            className="grid size-[32px] shrink-0 place-items-center bg-transparent text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-sheet-bg)]"
-            onClick={onClose}
-            type="button"
-          >
-            <AppIcon name="close-x" color="var(--uc-icon)" />
-          </button>
+          {showCloseButton ? (
+            <button
+              aria-label={closeLabel}
+              className="grid size-[32px] shrink-0 place-items-center bg-transparent text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-sheet-bg)]"
+              onClick={onClose}
+              type="button"
+            >
+              <AppIcon name="close-x" color="var(--uc-icon)" />
+            </button>
+          ) : null}
         </div>
         <div className={bodyClassName}>{children}</div>
       </section>

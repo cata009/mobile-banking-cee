@@ -10,9 +10,11 @@ import {
   FLOW_PREVIEWS,
   getFlowPreviewMeta,
   type FlowPreviewId,
+  type FlowPreviewMeta,
 } from "@/app/registry/flowPreviewRegistry";
 import type { CountryId } from "@/app/state/demoTypes";
 import { createPhoneScreenshotBlob } from "@/app/utils/phoneScreenshot";
+import { captureFlowStepImages, exportFlowAsPdf, exportFlowAsWord } from "./flowExport";
 
 interface FlowLibraryScreenProps {
   initialFlowId?: FlowPreviewId;
@@ -382,6 +384,8 @@ export default function FlowLibraryScreen({
 
         {activeSection === "flow" ? (
           <ScenarioJourneyPanel
+            flow={flow}
+            uxSpec={flowContent.uxSpec}
             selectedScenarioId={selectedScenarioId}
             selectedScenario={selectedScenario}
             scenarios={flowContent.scenarios}
@@ -654,20 +658,98 @@ function InteractiveDemoPanel({
 }
 
 function ScenarioJourneyPanel({
+  flow,
+  uxSpec,
   selectedScenarioId,
   selectedScenario,
   scenarios,
   selectedCountries,
   onScenarioSelect,
 }: {
+  flow: FlowPreviewMeta;
+  uxSpec: readonly { title: string; body: string }[];
   selectedScenarioId: string;
   selectedScenario: ScenarioContent;
   scenarios: Record<string, ScenarioContent>;
   selectedCountries: CountryId[];
   onScenarioSelect: (scenarioId: string) => void;
 }) {
+  const journeyRef = useRef<HTMLDivElement>(null);
+  const [exportKind, setExportKind] = useState<"pdf" | "word" | null>(null);
+
+  const handleExport = async (kind: "pdf" | "word") => {
+    const container = journeyRef.current;
+    if (!container || exportKind) return;
+
+    setExportKind(kind);
+    try {
+      const stepElements = Array.from(container.querySelectorAll<HTMLElement>("[data-flow-screen-capture]"));
+      const captured = await captureFlowStepImages(
+        stepElements,
+        selectedScenario.steps.map((step) => ({ title: step.title, description: step.description })),
+      );
+      if (captured.length === 0) return;
+
+      const meta = {
+        flowTitle: flow.title,
+        flowLabel: flow.label,
+        scenarioLabel: selectedScenario.label,
+        scenarioDescription: selectedScenario.description,
+        countryScope: flow.countryScope.join(", "),
+        figmaFile: flow.figmaFile,
+        sourceUrl: flow.sourceUrl,
+      };
+
+      if (kind === "pdf") {
+        exportFlowAsPdf(meta, captured, uxSpec);
+      } else {
+        exportFlowAsWord(
+          meta,
+          captured,
+          uxSpec,
+          `flow-${slugify(flow.title)}-${slugify(selectedScenario.label)}-${createTimestamp()}.doc`,
+        );
+      }
+    } catch (error) {
+      console.error("Flow export failed", error);
+    } finally {
+      setExportKind(null);
+    }
+  };
+
+  const exportButtonClassName =
+    "flex items-center gap-[6px] rounded-[20px] bg-[var(--uc-surface-muted)] px-[14px] py-[8px] text-[13px] font-bold leading-[16px] text-[var(--uc-text)] transition-colors hover:bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface-muted))] disabled:cursor-not-allowed disabled:opacity-50";
+
   return (
-    <Panel title="Journey">
+    <Panel
+      title="Journey"
+      action={
+        <div className="flex flex-wrap gap-[8px]">
+          <button
+            type="button"
+            className={exportButtonClassName}
+            onClick={() => void handleExport("pdf")}
+            disabled={exportKind !== null}
+            data-flow-export-pdf="true"
+            title="Export this scenario's screens and UX spec as a printable PDF"
+          >
+            <AppIcon name="download" size={15} color="currentColor" />
+            {exportKind === "pdf" ? "Preparing…" : "Export PDF"}
+          </button>
+          <button
+            type="button"
+            className={exportButtonClassName}
+            onClick={() => void handleExport("word")}
+            disabled={exportKind !== null}
+            data-flow-export-word="true"
+            title="Download this scenario's screens and UX spec as a Word document"
+          >
+            <AppIcon name="download" size={15} color="currentColor" />
+            {exportKind === "word" ? "Preparing…" : "Export Word"}
+          </button>
+        </div>
+      }
+    >
       <div className="flex flex-wrap gap-[8px] pb-[8px]">
         {Object.entries(scenarios).map(([scenarioId, scenario]) => {
           const active = selectedScenarioId === scenarioId;
@@ -690,7 +772,7 @@ function ScenarioJourneyPanel({
 
       <p className="max-w-[860px] text-[14px] leading-[20px] text-[var(--uc-text-muted)]">{selectedScenario.description}</p>
 
-      <div className="mt-[20px] overflow-x-auto pb-[12px]">
+      <div ref={journeyRef} className="mt-[20px] overflow-x-auto pb-[12px]">
         <div className="flex min-w-max items-start gap-[10px]">
           {selectedScenario.steps.map((step, index) => (
             <div key={step.id} className="flex items-start gap-[10px]">
@@ -704,10 +786,13 @@ function ScenarioJourneyPanel({
   );
 }
 
-function Panel({ title, children }: { title: string; children: ReactNode }) {
+function Panel({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   return (
     <section className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[20px] shadow-sm">
-      <h2 className="text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">{title}</h2>
+      <div className="flex flex-wrap items-center justify-between gap-[12px]">
+        <h2 className="text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">{title}</h2>
+        {action ?? null}
+      </div>
       <div className="mt-[16px]">{children}</div>
     </section>
   );

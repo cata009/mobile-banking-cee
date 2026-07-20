@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { DragEvent, KeyboardEvent, MouseEvent, PointerEvent, UIEvent } from "react";
 import AccountBalanceCard from "@/app/components/accounts/AccountBalanceCard";
-import AccountActionBar from "@/app/components/accounts/AccountActionBar";
+import AccountActionBar, { type AccountActionBarItem } from "@/app/components/accounts/AccountActionBar";
 import AccountCarouselIndicator from "@/app/components/accounts/AccountCarouselIndicator";
 import CopyToast from "@/app/components/accounts/CopyToast";
 import AccountTransactionRow from "@/app/components/accounts/AccountTransactionRow";
@@ -13,6 +13,7 @@ import AccountTransactionFiltersSheet, {
   type AccountTransactionFilterState,
 } from "@/app/screens/accounts/AccountTransactionFiltersSheet";
 import { AppIcon } from "@/app/components/icons";
+import PfmCategoryChangeSheet from "@/app/components/pfm/PfmCategoryChangeSheet";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
 import { getCountryConfig, formatMoneyNumber } from "@/app/registry/countryConfig";
@@ -21,6 +22,8 @@ import { useCopyToClipboard } from "@/app/utils/useCopyToClipboard";
 import { useProducts } from "@/hooks/useProducts";
 import { getAccountTransactionProfileIndex, getAccountTransactions, groupAccountTransactionsByMonth } from "@/data/accountDetails";
 import type { AccountTransaction } from "@/data/accountDetails";
+import { getPfmCategorySelection, type PfmCategorySelection } from "@/data/pfmCategories";
+import { getLoanDetails, getTermDepositDetails } from "@/data/accountProductDetails";
 import { isAccountDetailProduct } from "@/data/products";
 import type { Product } from "@/data/products";
 
@@ -30,6 +33,8 @@ interface AccountDetailScreenProps {
   onDetailsClick: (product: Product) => void;
   onOptionsClick: () => void;
   onTransactionClick?: (transaction: AccountTransaction, product: Product) => void;
+  transactionCategoryOverrides?: Readonly<Record<string, PfmCategorySelection>>;
+  onTransactionCategoryChange?: (transaction: AccountTransaction, selection: PfmCategorySelection) => void;
   onHelpClick?: () => void;
 }
 
@@ -120,6 +125,8 @@ export default function AccountDetailScreen({
   onDetailsClick,
   onOptionsClick,
   onTransactionClick,
+  transactionCategoryOverrides = {},
+  onTransactionCategoryChange,
   onHelpClick,
 }: AccountDetailScreenProps) {
   const { country, amountsHidden } = useDemo();
@@ -139,6 +146,7 @@ export default function AccountDetailScreen({
   const [headerProgress, setHeaderProgress] = useState(0);
   const [transactionSearch, setTransactionSearch] = useState("");
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [categorySheetTransaction, setCategorySheetTransaction] = useState<AccountTransaction | null>(null);
   const [appliedFilters, setAppliedFilters] = useState<AccountTransactionFilterState>(EMPTY_ACCOUNT_TRANSACTION_FILTERS);
   const pageRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -154,16 +162,64 @@ export default function AccountDetailScreen({
   const suppressClickRef = useRef(false);
   const [isCarouselDragging, setIsCarouselDragging] = useState(false);
   const activeProduct = accountProducts[activeIndex] ?? accountProducts[0];
+  const accountActionItems = useMemo<AccountActionBarItem[]>(() => {
+    if (!activeProduct) return [];
+    const productType = activeProduct?.type;
+    const baseItems: AccountActionBarItem[] = [
+      { id: "details", iconName: "account-details", label: t("runtime.accounts.actions.details", "Details"), onClick: () => onDetailsClick(activeProduct) },
+      { id: "options", iconName: "account-options", label: t("runtime.accounts.actions.options", "Options"), onClick: onOptionsClick },
+      { id: "add-money", iconName: "add-money", label: t("runtime.accounts.actions.addMoney", "Add money") },
+      { id: "mcash", iconName: "mcash", label: t("runtime.accounts.actions.internalTransfer", "Internal transfer") },
+    ];
+
+    if (productType === "saving_account") {
+      // Add money is hidden on saving accounts; no empty slot remains.
+      return baseItems.map((item) => (item.id === "add-money" ? { ...item, hidden: true } : item));
+    }
+
+    if (productType === "term_deposit") {
+      // Options hidden; Add money -> Open term deposit; mCash -> Close term deposit.
+      return baseItems.map((item) => {
+        if (item.id === "options") return { ...item, hidden: true };
+        if (item.id === "add-money") return { ...item, label: t("runtime.accounts.actions.openTermDeposit", "Open term deposit") };
+        if (item.id === "mcash") return { ...item, label: t("runtime.accounts.actions.closeTermDeposit", "Close term deposit") };
+        return item;
+      });
+    }
+
+    if (productType === "loan" || productType === "mortgage") {
+      // Options + Add money hidden; mCash -> Reimbursement.
+      return baseItems.map((item) => {
+        if (item.id === "options" || item.id === "add-money") return { ...item, hidden: true };
+        if (item.id === "mcash") return { ...item, label: t("runtime.accounts.actions.reimbursement", "Reimbursement") };
+        return item;
+      });
+    }
+
+    return baseItems;
+  }, [activeProduct, onDetailsClick, onOptionsClick, t]);
+  const currentAccountNumber = accountProducts.find((product) => product.type === "current_account")?.accountNumber ?? "";
   const config = getCountryConfig(country);
   const transactionProfileIndex = activeProduct ? getAccountTransactionProfileIndex(activeProduct, activeIndex) : 0;
-  const transactions = useMemo(
-    () => getAccountTransactions(
+  const transactions = useMemo(() => {
+    const baseTransactions = getAccountTransactions(
       country,
       transactionProfileIndex,
       config.currency,
-    ),
-    [config.currency, country, transactionProfileIndex],
-  );
+    );
+
+    return baseTransactions.map((transaction) => {
+      const override = transactionCategoryOverrides[transaction.id];
+      return override
+        ? {
+            ...transaction,
+            category: override.groupLabel,
+            pfmCategory: override.category,
+            pfmSubcategory: override.subcategory,
+          }
+        : transaction;
+    });
+  }, [config.currency, country, transactionCategoryOverrides, transactionProfileIndex]);
   const normalizedTransactionSearch = transactionSearch.trim().toLowerCase();
   const filtersActive = hasAccountTransactionFilters(appliedFilters);
   const filteredTransactions = useMemo(() => {
@@ -473,7 +529,7 @@ export default function AccountDetailScreen({
   if (!activeProduct) {
     return (
       <div className="h-full w-full bg-[var(--uc-surface)]">
-        <CollapsingAccountHeader title={t("runtime.accounts.title", "Accounts")} progress={1} onBack={onBack} onHelpClick={onHelpClick} />
+        <CollapsingAccountHeader title={t("runtime.accounts.myProductsTitle", "My Products")} progress={1} onBack={onBack} onHelpClick={onHelpClick} />
       </div>
     );
   }
@@ -496,7 +552,7 @@ export default function AccountDetailScreen({
         className="h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] pb-[32px] scrollbar-hide"
         onScroll={handlePageScroll}
       >
-        <CollapsingAccountHeader title={t("runtime.accounts.title", "Accounts")} progress={headerProgress} onBack={onBack} onHelpClick={onHelpClick} />
+        <CollapsingAccountHeader title={t("runtime.accounts.myProductsTitle", "My Products")} progress={headerProgress} onBack={onBack} onHelpClick={onHelpClick} />
 
         <div className="bg-[var(--uc-app-bg)]">
         <div
@@ -504,7 +560,7 @@ export default function AccountDetailScreen({
           style={{ opacity: largeTitleOpacity }}
         >
           <h1 className="uc-type-h1 text-[var(--uc-text)]">
-            {t("runtime.accounts.title", "Accounts")}
+            {t("runtime.accounts.myProductsTitle", "My Products")}
           </h1>
         </div>
 
@@ -533,7 +589,17 @@ export default function AccountDetailScreen({
             }}
           >
             {accountProducts.map((product, index) => {
-              const availableParts = splitFormattedNumber(formatMoneyNumber(product.balance, country));
+              const termDepositDetails = product.type === "term_deposit"
+                ? getTermDepositDetails(product, currentAccountNumber)
+                : null;
+              const loanDetails = product.type === "loan" || product.type === "mortgage"
+                ? getLoanDetails(product)
+                : null;
+              const primaryBalance = loanDetails?.ownedAmount ?? product.balance;
+              const availableParts = splitFormattedNumber(formatMoneyNumber(primaryBalance, country));
+              const secondaryBalance = termDepositDetails?.maturityAmount
+                ?? loanDetails?.nextInstallment
+                ?? product.balance * 0.92;
               const displayedAvailable = maskAmountParts(
                 { ...availableParts, currency: config.currency },
                 amountsHidden,
@@ -557,6 +623,7 @@ export default function AccountDetailScreen({
                   onPointerUp={handleCarouselPointerUp}
                   aria-pressed={isActiveCard}
                   data-account-carousel-card-state={isActiveCard ? "active" : "inactive"}
+                  data-account-product-id={product.id}
                   data-account-carousel-visual-height={
                     isActiveCard
                       ? ACCOUNT_CARD_HEIGHT
@@ -574,14 +641,28 @@ export default function AccountDetailScreen({
                     }}
                   >
                     <AccountBalanceCard
-                      account={getProductAccountIdentity(product)}
+                      account={termDepositDetails ? {
+                        ...getProductAccountIdentity(product),
+                        accountNumber: `Maturity date ${termDepositDetails.maturityDate}`,
+                      } : getProductAccountIdentity(product)}
                       availableInteger={displayedAvailable.integer}
                       availableDecimals={displayedAvailable.decimals}
                       currency={displayedAvailable.currency}
-                      currentBalance={maskFormattedAmount(formatMoneyNumber(product.balance * 0.92, country), amountsHidden)}
+                      currentBalance={maskFormattedAmount(formatMoneyNumber(secondaryBalance, country), amountsHidden)}
                       active={isActiveCard}
                       showSubAccount={false}
                       productType={product.type}
+                      progress={termDepositDetails?.progress ?? loanDetails?.progress}
+                      progressLabel={
+                        product.type === "term_deposit"
+                          ? "Term deposit maturity progress"
+                          : product.type === "loan"
+                            ? "Personal loan repayment progress"
+                            : product.type === "mortgage"
+                              ? "Mortgage repayment progress"
+                              : undefined
+                      }
+                      showCopy={product.type !== "term_deposit"}
                       onCopy={() => copyToClipboard(product.accountNumber, "Account number")}
                     />
                   </div>
@@ -600,7 +681,7 @@ export default function AccountDetailScreen({
           />
         </div>
 
-        <AccountActionBar onDetailsClick={() => onDetailsClick(activeProduct)} onOptionsClick={onOptionsClick} />
+        <AccountActionBar items={accountActionItems} />
       </div>
 
         {activeProduct?.type !== "term_deposit" ? (
@@ -638,8 +719,9 @@ export default function AccountDetailScreen({
                           transaction={transaction}
                           formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
                           currency={config.currency}
-                          onClick={(selectedTransaction) => onTransactionClick?.(selectedTransaction, activeProduct)}
-                        />
+                           onClick={(selectedTransaction) => onTransactionClick?.(selectedTransaction, activeProduct)}
+                           onCategoryClick={onTransactionCategoryChange ? setCategorySheetTransaction : undefined}
+                         />
                       ))}
                     </div>
                   </div>
@@ -660,6 +742,19 @@ export default function AccountDetailScreen({
           filters={appliedFilters}
           onApply={handleApplyFilters}
           onClose={() => setFilterSheetOpen(false)}
+        />
+      ) : null}
+      {categorySheetTransaction ? (
+        <PfmCategoryChangeSheet
+          currentSelection={getPfmCategorySelection(
+            categorySheetTransaction.pfmCategory,
+            categorySheetTransaction.pfmSubcategory,
+          )}
+          onClose={() => setCategorySheetTransaction(null)}
+          onConfirm={(selection) => {
+            onTransactionCategoryChange?.(categorySheetTransaction, selection);
+            setCategorySheetTransaction(null);
+          }}
         />
       ) : null}
       <CopyToast toast={copyToast} />

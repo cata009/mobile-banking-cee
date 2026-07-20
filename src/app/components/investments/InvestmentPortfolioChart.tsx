@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import {
   Area,
   AreaChart,
+  CartesianGrid,
+  ReferenceLine,
   ResponsiveContainer,
   XAxis,
   YAxis,
@@ -236,6 +238,10 @@ export default function InvestmentPortfolioChart({
   const maxValue = Math.max(...values);
   const valueRange = maxValue - minValue || 1;
   const chartData = useMemo(() => buildChartData(points), [points]);
+  const verticalGridLines = useMemo(
+    () => chartData.filter((point) => point.showDot !== false && point.dateLabel).map((point) => point.label),
+    [chartData],
+  );
   const domainPadding = valueRange * 0.08;
   const yDomain: [number, number] = [minValue - domainPadding, maxValue + domainPadding];
   const yTicks = useMemo(() => {
@@ -346,6 +352,23 @@ export default function InvestmentPortfolioChart({
             tickFormatter={(value) => formatAxisValue(Number(value), valueRange)}
             tick={{ fill: "var(--uc-text-muted)", fontSize: 12, fontWeight: 700 }}
           />
+          <CartesianGrid
+            horizontal
+            vertical={false}
+            stroke="var(--uc-border-muted)"
+            strokeDasharray="2 4"
+            strokeLinecap="round"
+          />
+          {verticalGridLines.map((label) => (
+            <ReferenceLine
+              key={label}
+              x={label}
+              stroke="var(--uc-border-muted)"
+              strokeDasharray="2 4"
+              strokeLinecap="round"
+              ifOverflow="extendDomain"
+            />
+          ))}
           <Area
             type="monotone"
             dataKey="value"

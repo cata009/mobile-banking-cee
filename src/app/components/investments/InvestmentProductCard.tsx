@@ -21,7 +21,7 @@ const POSITIVE_COLOR = "var(--uc-green-olive)";
 const NEGATIVE_COLOR = "var(--uc-status-red)";
 
 function formatSignedPercent(value: number) {
-  const rounded = value.toFixed(1).replace(".", ",");
+  const rounded = Math.abs(value).toFixed(1).replace(".", ",");
   const sign = value > 0 ? "+" : value < 0 ? "-" : "";
   return `${sign}${rounded}%`;
 }

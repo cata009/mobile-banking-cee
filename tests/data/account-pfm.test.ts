@@ -10,6 +10,7 @@ import {
   isInternalTransferCategory,
   normalizePfmCategory,
   PFM_CATEGORIES,
+  PFM_CATEGORY_GROUPS,
 } from '@/data/pfmCategories'
 import type { Currency } from '@/data/products'
 
@@ -106,5 +107,54 @@ describe('account and PFM data', () => {
     expect(isInternalTransferCategory('Transfers')).toBe(false)
     expect(isInternalTransferCategory(' transfers ')).toBe(false)
     expect(isInternalTransferCategory(undefined)).toBe(false)
+  })
+
+  it('maps the complete production recategorization taxonomy in screenshot order', () => {
+    const expectedGroups = [
+      ['household', 'HOUSEHOLD', 11, 'Home', 'Home'],
+      ['utilities', 'UTILITIES', 5, 'Utilities', 'Utilities'],
+      ['cars-transportation', 'CARS & TRANSPORTATION', 9, 'Transportation', 'Transportation'],
+      ['children', 'CHILDREN', 10, 'Children', 'Children'],
+      ['health-beauty', 'HEALTH & BEAUTY', 8, 'Healthcare', 'Healthcare'],
+      ['shopping', 'SHOPPING', 10, 'Shopping', 'Shopping'],
+      ['leisure', 'LEISURE', 9, 'Lifestyle', 'Lifestyle'],
+      ['education', 'EDUCATION', 4, 'Education', 'Education'],
+      ['vacation-travel', 'VACATION & TRAVEL', 5, 'Leisure time', 'Leisure time'],
+      ['investments-savings', 'INVESTMENTS & SAVINGS', 7, 'Investments', 'Investments'],
+      ['uncategorized-expenses', 'UNCATEGORIZED EXPENSES', 1, 'Uncategorized', 'Uncategorized'],
+      ['groceries', 'GROCERIES', 1, 'Groceries', 'Groceries'],
+      ['exclude-budget', 'EXCLUDE FROM BUDGET', 2, 'Exclude from budget', 'Exclude from budget'],
+      ['insurance', 'INSURANCE', 5, 'Insurance', 'Insurance'],
+      ['financial', 'FINANCIAL', 7, 'Finance', 'Finance'],
+      ['transfers', 'TRANSFERS', 4, 'Transfers', 'Transfers'],
+      ['taxes-fines', 'TAXES & FINES', 3, 'Taxes and Penalties', 'Taxes and Penalties'],
+      ['wallet', 'WALLET', 2, 'Wallet', 'Wallet'],
+    ]
+
+    expect(PFM_CATEGORY_GROUPS.map((group) => [
+      group.id,
+      group.label,
+      group.subcategories.length,
+      group.category,
+      group.iconCategory,
+    ])).toEqual(expectedGroups)
+
+    const subcategories = PFM_CATEGORY_GROUPS.flatMap((group) => group.subcategories)
+    expect(subcategories).toHaveLength(103)
+    expect(new Set(subcategories).size).toBe(103)
+    expect(PFM_CATEGORY_GROUPS[0]?.subcategories).toEqual([
+      'HOME SERVICES',
+      'RENT',
+      'FURNITURE',
+      'BUILDING & GARDEN',
+      'HOME SECURITY',
+      'HOME IMPROVEMENTS & REPAIRS',
+      'PETS',
+      'COMMUNAL WASTE',
+      'VETERINARY SERVICES',
+      'ELECTRONICS & APPLIANCES',
+      'HOME (OTHER)',
+    ])
+    expect(PFM_CATEGORY_GROUPS.at(-1)?.subcategories).toEqual(['ATM WITHDRAWAL', 'CASH WITHDRAWAL'])
   })
 })

@@ -26,6 +26,7 @@ export interface TranslationKeys {
     };
     accounts: {
       title: string;
+      myProductsTitle: string;
       noTransactionsFound: string;
       actions: {
         details: string;
@@ -45,6 +46,33 @@ export interface TranslationKeys {
         offerValue: string;
         connectedCards: string;
         mastercardStandardDebit: string;
+        termDeposit: {
+          maturityAmount: string;
+          interestAmountBeforeTax: string;
+          maturityDate: string;
+          rollover: string;
+          accountOwner: string;
+          depositAmount: string;
+          startValueDate: string;
+          maturityPeriod: string;
+          interestRatePerYear: string;
+          currentAccountNumber: string;
+          decreaseAmountBy: string;
+          reinvestInterest: string;
+        };
+        loan: {
+          nextInstallment: string;
+          nextInstallmentDate: string;
+          interestRate: string;
+          overdueAmount: string;
+          overdueInterestRate: string;
+          ownedAmount: string;
+          originalAmount: string;
+          iban: string;
+          accountOwner: string;
+          startDate: string;
+          finalPayment: string;
+        };
       };
       productTitles: {
         currentAccount: string;
@@ -69,6 +97,18 @@ export interface TranslationKeys {
       moneyIn: string;
       noTransactionsForPeriod: string;
       categories: Record<string, string>;
+    };
+    pfmCategoryChange: {
+      title: string;
+      recommendedCategories: string;
+      tapToChoose: string;
+      categoryGroups: string;
+      categoryCount: string;
+      categoriesCount: string;
+      confirm: string;
+      close: string;
+      search: string;
+      noResults: string;
     };
     payments: {
       title: string;

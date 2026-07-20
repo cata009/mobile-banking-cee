@@ -30,6 +30,7 @@ interface AccountSearchBarProps {
   filtersActive?: boolean;
   showRemoveFiltersAction?: boolean;
   removeFiltersLabel?: string;
+  showTrailingAction?: boolean;
 }
 
 export default function AccountSearchBar({
@@ -44,6 +45,7 @@ export default function AccountSearchBar({
   filtersActive = false,
   showRemoveFiltersAction = true,
   removeFiltersLabel = "REMOVE FILTERS",
+  showTrailingAction = true,
 }: AccountSearchBarProps) {
   const { t } = useLanguage();
   const resolvedPlaceholder = placeholder ?? t("runtime.actions.search", "Search");
@@ -98,20 +100,22 @@ export default function AccountSearchBar({
             className="uc-type-n5-strong h-[32px] min-w-0 flex-1 appearance-none bg-transparent text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)] [&::-webkit-search-cancel-button]:hidden"
           />
         </label>
-        <button
-          type="button"
-          onClick={hasSearchValue ? handleClearClick : onFilterClick}
-          className="grid h-[32px] w-[32px] shrink-0 place-items-center"
-          aria-label={hasSearchValue ? "Clear search results" : t("runtime.actions.filters", "Filters")}
-          aria-pressed={!hasSearchValue && filtersActive ? true : undefined}
-          data-ds-label={hasSearchValue ? "Clear results icon 32x32" : "Filter icon 32x32"}
-        >
-          {hasSearchValue ? (
-            <AppIcon name="clear-results" color="var(--uc-text)" />
-          ) : (
-            <AppIcon name="filters" color={filtersActive ? "var(--uc-action)" : "var(--uc-text)"} />
-          )}
-        </button>
+        {showTrailingAction || hasSearchValue ? (
+          <button
+            type="button"
+            onClick={hasSearchValue ? handleClearClick : onFilterClick}
+            className="grid h-[32px] w-[32px] shrink-0 place-items-center"
+            aria-label={hasSearchValue ? "Clear search results" : t("runtime.actions.filters", "Filters")}
+            aria-pressed={!hasSearchValue && filtersActive ? true : undefined}
+            data-ds-label={hasSearchValue ? "Clear results icon 32x32" : "Filter icon 32x32"}
+          >
+            {hasSearchValue ? (
+              <AppIcon name="clear-results" color="var(--uc-text)" />
+            ) : (
+              <AppIcon name="filters" color={filtersActive ? "var(--uc-action)" : "var(--uc-text)"} />
+            )}
+          </button>
+        ) : null}
       </div>
       {showRemoveFilters ? (
         <button

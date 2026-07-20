@@ -14,6 +14,9 @@ export interface AccountBalanceCardProps {
   active?: boolean;
   showSubAccount?: boolean;
   productType?: ProductType;
+  progress?: number;
+  progressLabel?: string;
+  showCopy?: boolean;
 }
 
 function resolveBalanceLabels(productType?: ProductType) {
@@ -42,6 +45,9 @@ export default function AccountBalanceCard({
   active = true,
   showSubAccount = true,
   productType,
+  progress,
+  progressLabel = "Product progress",
+  showCopy = true,
 }: AccountBalanceCardProps) {
   const hasSubAccount = showSubAccount && Boolean(account.subAccount);
   const { availableLabel, showCurrent, currentLabel } = resolveBalanceLabels(productType);
@@ -81,18 +87,20 @@ export default function AccountBalanceCard({
           >
             {account.accountNumber}
           </p>
-          <button
-            type="button"
-            aria-label="Copy account number"
-            className="flex h-[32px] w-[32px] shrink-0 cursor-pointer items-center justify-center pointer-events-auto"
-            data-ds-label="Copy icon 32x32"
-            onClick={(event) => {
-              event.stopPropagation();
-              onCopy?.();
-            }}
-          >
-            <AppIcon name="copy-documents" color="var(--uc-icon)" />
-          </button>
+          {showCopy ? (
+            <button
+              type="button"
+              aria-label="Copy account number"
+              className="flex h-[32px] w-[32px] shrink-0 cursor-pointer items-center justify-center pointer-events-auto"
+              data-ds-label="Copy icon 32x32"
+              onClick={(event) => {
+                event.stopPropagation();
+                onCopy?.();
+              }}
+            >
+              <AppIcon name="copy-documents" color="var(--uc-icon)" />
+            </button>
+          ) : null}
         </div>
 
         {hasSubAccount ? (
@@ -118,7 +126,24 @@ export default function AccountBalanceCard({
           </p>
         </div>
 
-        <div className="flex h-[1px] w-[279px] shrink-0 items-center justify-center bg-[var(--uc-border)]" />
+        {typeof progress === "number" ? (
+          <div
+            role="progressbar"
+            aria-label={progressLabel}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(Math.min(1, Math.max(0, progress)) * 100)}
+            className="h-[4px] w-[279px] shrink-0 overflow-hidden rounded-full bg-[var(--uc-border)]"
+          >
+            <div
+              aria-hidden="true"
+              className="h-full rounded-full bg-[var(--uc-action)]"
+              style={{ width: `${Math.min(1, Math.max(0, progress)) * 100}%` }}
+            />
+          </div>
+        ) : (
+          <div className="flex h-[1px] w-[279px] shrink-0 items-center justify-center bg-[var(--uc-border)]" />
+        )}
 
         {showCurrent ? (
           <div className="flex items-center gap-[4px]">

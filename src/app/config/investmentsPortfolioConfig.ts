@@ -434,12 +434,12 @@ const PERIOD_MULTIPLIERS: Record<InvestmentPeriodId, readonly number[]> = {
 };
 
 const PERIOD_ANCHOR_INDICES: Record<InvestmentPeriodId, readonly number[]> = {
-  "1m": [0, 3, 6, 9, 12, 17],
-  "3m": [0, 3, 6, 9, 12, 17],
-  "6m": [0, 3, 6, 9, 12, 17],
-  "1y": [0, 3, 6, 9, 12, 17],
-  "3y": [0, 3, 6, 9, 12, 17],
-  max: [0, 3, 6, 9, 12, 17],
+  "1m": [0, 3, 7, 10, 14, 17],
+  "3m": [0, 3, 7, 10, 14, 17],
+  "6m": [0, 3, 7, 10, 14, 17],
+  "1y": [0, 3, 7, 10, 14, 17],
+  "3y": [0, 3, 7, 10, 14, 17],
+  max: [0, 3, 7, 10, 14, 17],
 };
 
 const PERIOD_DATE_LABELS: Record<InvestmentPeriodId, readonly string[]> = {
@@ -561,7 +561,11 @@ export function buildInvestmentSecurityCatalog(
       marketPrice: seed.marketPrice,
       quantity: Number((value / seed.marketPrice).toFixed(6)),
     };
-    return enrichCatalogSecurity(security, country, false, ownedCatalog.length + index);
+    const catalogSecurity = enrichCatalogSecurity(security, country, false, ownedCatalog.length + index);
+    return {
+      ...catalogSecurity,
+      id: `catalog-${catalogSecurity.id}`,
+    };
   });
 
   return [...ownedCatalog, ...availableCatalog];
