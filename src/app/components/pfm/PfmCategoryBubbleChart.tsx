@@ -9,7 +9,10 @@ interface PfmCategoryBubbleChartProps {
   currency: string;
   ariaLabel: string;
   excludeAriaLabel: string;
-  onExclude: (subcategoryLabel: string) => void;
+  includeAriaLabel?: string;
+  inactiveSubcategories?: ReadonlySet<string>;
+  onExclude?: (subcategoryLabel: string) => void;
+  onToggle?: (subcategoryLabel: string) => void;
 }
 
 function getBubbleDiameter(total: number, maxTotal: number, count: number) {
@@ -28,9 +31,16 @@ export default function PfmCategoryBubbleChart({
   currency,
   ariaLabel,
   excludeAriaLabel,
+  includeAriaLabel,
+  inactiveSubcategories = new Set(),
   onExclude,
+  onToggle,
 }: PfmCategoryBubbleChartProps) {
   const maxTotal = Math.max(...subcategories.map((subcategory) => subcategory.total), 1);
+  const activeCount = subcategories.filter(
+    (subcategory) => !inactiveSubcategories.has(subcategory.label),
+  ).length;
+  const handleToggle = onToggle ?? onExclude;
 
   return (
     <div
@@ -41,6 +51,7 @@ export default function PfmCategoryBubbleChart({
     >
       {subcategories.map((subcategory) => {
         const diameter = getBubbleDiameter(subcategory.total, maxTotal, subcategories.length);
+        const isInactive = inactiveSubcategories.has(subcategory.label);
         const visibleLabel = subcategory.label.length > 24
           ? `${subcategory.label.slice(0, 21).trim()}…`
           : subcategory.label;
@@ -53,14 +64,16 @@ export default function PfmCategoryBubbleChart({
             style={{
               width: diameter,
               height: diameter,
-              backgroundColor: `var(${colorVar})`,
+              backgroundColor: isInactive ? "var(--uc-neutral-400)" : `var(${colorVar})`,
             }}
-            aria-label={`${excludeAriaLabel}: ${subcategory.label}`}
+            aria-label={`${isInactive && includeAriaLabel ? includeAriaLabel : excludeAriaLabel}: ${subcategory.label}`}
+            aria-pressed={isInactive}
             title={`${subcategory.label}: ${formatMoneyNumber(subcategory.total, country)} ${currency}`}
             data-pfm-subcategory-bubble={subcategory.label}
             data-pfm-subcategory-total={subcategory.total}
-            disabled={subcategories.length <= 1}
-            onClick={() => onExclude(subcategory.label)}
+            data-pfm-subcategory-active={isInactive ? "false" : "true"}
+            disabled={!handleToggle || (!isInactive && activeCount <= 1)}
+            onClick={() => handleToggle?.(subcategory.label)}
           >
             <span className="uc-type-n5-strong max-w-full uppercase leading-[16px]">
               {visibleLabel}

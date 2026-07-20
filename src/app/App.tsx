@@ -103,8 +103,10 @@ import type { SpendingAnalyticsTransaction } from "@/data/spendingAnalytics";
 import {
   createEmptyDomesticPaymentDraft,
   createRedoDomesticPaymentDraft,
+  createTemplateDomesticPaymentDraft,
   type DomesticPaymentDraft,
 } from "@/data/paymentFlow";
+import type { PaymentTemplateSelection } from "@/data/paymentTemplates";
 import type { Product } from "@/data/products";
 import type { ProductDetailSelection } from "@/app/components/products/ProductCardBottomSheet";
 
@@ -586,6 +588,11 @@ function AppContent({
     navigateTo("domestic-payment");
   };
 
+  const handlePaymentTemplateSelect = (selection: PaymentTemplateSelection) => {
+    setPaymentDraft(createTemplateDomesticPaymentDraft(selection, country, selectedAccountProduct));
+    navigateTo("domestic-payment");
+  };
+
   const openCzChatHelp = (area: CzChatHelpArea) => {
     setCzChatInitialMode("chat");
     setCzChatContext(buildCzChatHelpContext(area, `${area}-${Date.now()}`));
@@ -925,6 +932,7 @@ function AppContent({
             onProductsClick={handleProductsClick}
             onMoreClick={handleMoreClick}
             onDomesticPaymentClick={handleDomesticPaymentClick}
+            onTemplateSelect={handlePaymentTemplateSelect}
           />
         )}
 

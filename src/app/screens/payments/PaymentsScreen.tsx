@@ -7,6 +7,8 @@ import NewPaymentDiscoverBanner from "@/app/components/payments/NewPaymentDiscov
 import PaymentHeroCard from "@/app/components/payments/PaymentHeroCard";
 import PaymentOtherShortcut from "@/app/components/payments/PaymentOtherShortcut";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
+import ExchangeRatesScreen from "@/app/screens/payments/ExchangeRatesScreen";
+import PaymentTemplatesScreen from "@/app/screens/payments/PaymentTemplatesScreen";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { resolveEffectiveAppContext } from "@/app/platform/effectiveAppContext";
 import { useDemo, useCountry } from "@/app/state/demoStore";
@@ -18,6 +20,7 @@ import {
   type PaymentHeroItem,
   type PaymentOtherItem,
 } from "@/app/config/paymentsMenuConfig";
+import type { PaymentTemplateSelection } from "@/data/paymentTemplates";
 
 type NavItem = "home" | "analytics" | "payments" | "products" | "more";
 
@@ -29,6 +32,7 @@ interface PaymentsScreenProps {
   onProductsClick?: () => void;
   onMoreClick?: () => void;
   onDomesticPaymentClick?: () => void;
+  onTemplateSelect?: (selection: PaymentTemplateSelection) => void;
 }
 
 function PaymentsHeader({
@@ -70,10 +74,6 @@ function PaymentsHeader({
       </div>
     </div>
   );
-}
-
-function handleOtherPaymentActionClick(item: PaymentOtherItem) {
-  console.log(`Payment other action clicked: ${item.id}`);
 }
 
 function getActionForHeroItem(item: PaymentHeroItem): BankingActionId {
@@ -157,6 +157,7 @@ export default function PaymentsScreen({
   onProductsClick,
   onMoreClick,
   onDomesticPaymentClick,
+  onTemplateSelect,
 }: PaymentsScreenProps) {
   const demoState = useDemo();
   const { country } = demoState;
@@ -185,7 +186,22 @@ export default function PaymentsScreen({
     ? menu.otherTitle
     : t(menu.otherTitleTranslationKey ?? "runtime.payments.other", menu.otherTitle);
   const [selectedPrimaryItemId, setSelectedPrimaryItemId] = useState<PaymentHeroItem["id"] | null>(null);
+  const [activeChildView, setActiveChildView] = useState<"overview" | "templates" | "exchange-rates">("overview");
   const selectedHeroSheet = selectedPrimaryItemId ? menu.heroSheets[selectedPrimaryItemId] : null;
+
+  const handleOtherPaymentActionClick = (item: PaymentOtherItem) => {
+    if (item.id === "templates") {
+      setActiveChildView("templates");
+      return;
+    }
+
+    if (item.id === "exchange-rates") {
+      setActiveChildView("exchange-rates");
+      return;
+    }
+
+    console.log(`Payment other action clicked: ${item.id}`);
+  };
 
   const handlePrimaryItemSelect = (item: PaymentHeroItem) => {
     console.log(`Payment hero action selected: ${item.id}`);
@@ -207,6 +223,19 @@ export default function PaymentsScreen({
       onProductsClick?.();
     }
   };
+
+  if (activeChildView === "templates") {
+    return (
+      <PaymentTemplatesScreen
+        onBack={() => setActiveChildView("overview")}
+        onSelect={(selection) => onTemplateSelect?.(selection)}
+      />
+    );
+  }
+
+  if (activeChildView === "exchange-rates") {
+    return <ExchangeRatesScreen onBack={() => setActiveChildView("overview")} />;
+  }
 
   return (
     <div className="relative flex h-full w-full flex-col bg-[var(--uc-surface)] text-[var(--uc-text)]">

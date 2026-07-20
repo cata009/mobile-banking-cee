@@ -99,6 +99,7 @@ export interface TranslationKeys {
       addTransaction: string;
       subcategoryBreakdown: string;
       filterOutSubcategory: string;
+      includeSubcategory: string;
       openCategoryDetails: string;
       uncategorizedTransaction: string;
       uncategorizedTransactionDescription: string;
@@ -137,6 +138,29 @@ export interface TranslationKeys {
         beneficiary: string;
         paymentDetails: string;
         paymentOrder: string;
+      };
+      templates: {
+        title: string;
+        selectTemplate: string;
+        chooseBeneficiary: string;
+        noResults: string;
+        useTemplate: string;
+        useBeneficiary: string;
+        forBeneficiary: string;
+      };
+      exchangeRates: {
+        title: string;
+        lastUpdated: string;
+        chooseCurrencyAndAmount: string;
+        amount: string;
+        currency: string;
+        tapForRates: string;
+        chooseCurrency: string;
+        selectFromList: string;
+        apply: string;
+        closeChooser: string;
+        currentCurrency: string;
+        equals: string;
       };
     };
     productsMenu: {
