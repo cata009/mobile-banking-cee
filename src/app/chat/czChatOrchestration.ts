@@ -9,7 +9,11 @@ import { getCountryConfig } from "@/app/registry/countryConfig";
 import { formatMaskedCardNumber } from "@/app/utils/cardNumber";
 import { createSpendingAnalyticsTimeline } from "@/data/spendingAnalytics";
 import { isInternalTransferCategory } from "@/data/pfmCategories";
-import type { Product } from "@/data/products";
+import type { CurrentAccount, Product } from "@/data/products";
+import {
+  buildInvestmentBuyOrderQuote,
+  getInvestmentBuyOrderValidation,
+} from "@/app/screens/investments/investmentBuyOrderModel";
 import {
   type CoAppingFollowUpSuggestion,
   type CoAppingReplyResolver,
@@ -60,7 +64,9 @@ export function buildCzChatSmartReplyResolver({
 }: CzChatSmartReplyOptions): CoAppingReplyResolver {
   const localCurrency = getCountryConfig(country).currency;
   const allProducts = categories.flatMap((category) => category.products);
-  const currentAccounts = allProducts.filter((product) => product.type === "current_account");
+  const currentAccounts = allProducts.filter(
+    (product): product is CurrentAccount => product.type === "current_account",
+  );
   const savingsProducts = allProducts.filter((product) => product.type === "saving_account");
   const loansAndMortgages = allProducts.filter((product) => product.type === "loan" || product.type === "mortgage");
   const investmentProducts = allProducts.filter((product) => product.type === "investment_account");
@@ -665,8 +671,144 @@ export function buildCzChatSmartReplyResolver({
           ),
         ),
     );
-    const showSelectedInvestmentCardOnce = (block: CoAppingRichBlock | null) =>
+  const showSelectedInvestmentCardOnce = (block: CoAppingRichBlock | null) =>
       block && !hasShownSelectedInvestmentCard ? [block] : undefined;
+
+    const buildInvestmentBuyQuantityFollowUps = (): CoAppingFollowUpSuggestion[] =>
+      [1, 5, 10].map((quantity) =>
+        buildCzChatFollowUp(
+          `cz-investment-buy-quantity-${selectedInvestmentSecurity?.id ?? "product"}-${quantity}`,
+          `${quantity} PCS`,
+          `Buy ${quantity} PCS of ${selectedInvestmentSecurity?.title ?? "this investment product"}.`,
+        ),
+      );
+
+    const compactInvestmentBuyAccount = (account: CurrentAccount) =>
+      `${account.name} ending ${account.accountNumber.slice(-4)}`;
+
+    const buildInvestmentBuyAccountFollowUps = (quantity: number): CoAppingFollowUpSuggestion[] =>
+      currentAccounts.map((account) =>
+        buildCzChatFollowUp(
+          `cz-investment-buy-account-${selectedInvestmentSecurity?.id ?? "product"}-${account.id}-${quantity}`,
+          `${account.name} · ${formatCzChatMoney(account.balance, account.currency, country)}`,
+          `Use ${compactInvestmentBuyAccount(account)} for ${quantity} PCS of ${selectedInvestmentSecurity?.title ?? "this investment product"}.`,
+        ),
+      );
+
+    const latestAgentMessage = [...messages].reverse().find((message) => message.role === "agent") ?? null;
+    const isQuantityAnswer = Boolean(
+      selectedInvestmentSecurity &&
+      latestAgentMessage?.text.includes("### Choose quantity") &&
+      latestAgentMessage.text.includes(selectedInvestmentSecurity.title) &&
+      /^[+-]?\d+(?:[.,]\d+)?$/.test(normalized),
+    );
+    const buyQuantityMatch = normalized.match(/\bbuy\s+([^\s]+)\s+pcs\s+of\s+/i);
+    const buyQuantityCandidate = buyQuantityMatch?.[1] ?? (isQuantityAnswer ? normalized : null);
+    const buyQuantity = buyQuantityCandidate && /^\d+$/.test(buyQuantityCandidate)
+      ? Number(buyQuantityCandidate)
+      : null;
+    const accountQuantityMatch = normalized.match(/\bfor\s+(\d+)\s+pcs\s+of\s+/i);
+    const accountQuantity = accountQuantityMatch ? Number(accountQuantityMatch[1]) : null;
+    const selectedBuyAccount = currentAccounts.find((account) =>
+      normalized.includes(normalize(compactInvestmentBuyAccount(account))),
+    ) ?? null;
+
+    if (
+      selectedInvestmentSecurity &&
+      normalized === normalize(`Start a buy order for ${selectedInvestmentSecurity.title}.`)
+    ) {
+      return {
+        text:
+          `### Choose quantity\n` +
+          `How many whole units of **${selectedInvestmentSecurity.title}** would you like to buy?\n` +
+          `Choose a quick option below or type another positive whole number in the message field. The market price remains indicative until Review Data.`,
+        followUps: buildInvestmentBuyQuantityFollowUps(),
+      };
+    }
+
+    if (selectedInvestmentSecurity && buyQuantityCandidate !== null) {
+      if (!buyQuantity || !Number.isSafeInteger(buyQuantity) || buyQuantity <= 0) {
+        return {
+          text:
+            `### Choose quantity\n` +
+            `Enter a **positive whole number** of units for ${selectedInvestmentSecurity.title}. Fractions, zero, and negative quantities are not supported in this one-off demo order.`,
+          followUps: buildInvestmentBuyQuantityFollowUps(),
+        };
+      }
+
+      if (currentAccounts.length === 0) {
+        return {
+          text:
+            `### No cash account available\n` +
+            `I cannot prepare Review Data because this profile has no current account that can fund the order. No order has been created.`,
+        };
+      }
+
+      return {
+        text:
+          `### Choose cash account\n` +
+          `You selected **${buyQuantity} PCS** of **${selectedInvestmentSecurity.title}**. Which current account should fund the one-off order? Available balances below use the same account data as Investments.`,
+        followUps: buildInvestmentBuyAccountFollowUps(buyQuantity),
+      };
+    }
+
+    if (selectedInvestmentSecurity && selectedBuyAccount && accountQuantity && accountQuantity > 0) {
+      const quote = buildInvestmentBuyOrderQuote(
+        selectedInvestmentSecurity,
+        selectedBuyAccount,
+        accountQuantity,
+      );
+      const balanceValidation = getInvestmentBuyOrderValidation(quote, selectedBuyAccount);
+
+      if (balanceValidation) {
+        return {
+          text:
+            `### Insufficient balance\n` +
+            `**${selectedBuyAccount.name}** cannot fund ${accountQuantity} PCS of ${selectedInvestmentSecurity.title}. ${balanceValidation}\n` +
+            `Choose another cash account below or enter a smaller quantity.`,
+          followUps: [
+            ...buildInvestmentBuyAccountFollowUps(accountQuantity),
+            buildCzChatFollowUp(
+              `cz-investment-buy-change-quantity-${selectedInvestmentSecurity.id}`,
+              "Change quantity",
+              `Start a buy order for ${selectedInvestmentSecurity.title}.`,
+            ),
+          ],
+        };
+      }
+
+      const buildExecutionAction = (
+        executionTiming: "today" | "next-business-day",
+        label: string,
+      ): CoAppingFollowUpSuggestion => ({
+        id: `cz-investment-buy-execution-${selectedInvestmentSecurity.id}-${executionTiming}`,
+        label,
+        action: {
+          id: `cz-investment-buy-execution-${selectedInvestmentSecurity.id}-${executionTiming}`,
+          label,
+          type: "navigate",
+          target: "investment-buy",
+          securityId: selectedInvestmentSecurity.id,
+          investmentBuyDraft: {
+            quantity: accountQuantity,
+            accountId: selectedBuyAccount.id,
+            frequency: "one-off",
+            executionTiming,
+          },
+        },
+      });
+
+      return {
+        text:
+          `### Choose execution timing\n` +
+          `The draft is **${accountQuantity} PCS** of **${selectedInvestmentSecurity.title}**, funded from **${selectedBuyAccount.name}**. The estimated debit is **${formatCzChatMoney(quote.debitAmount, quote.accountCurrency, country)}**.\n` +
+          `Choose when to send this one-off order. Your choice opens Review Data; nothing is placed until you accept the terms and sign.`,
+        followUps: [
+          buildExecutionAction("today", "Today"),
+          buildExecutionAction("next-business-day", "Next business day"),
+        ],
+      };
+    }
 
     const afterAcceptanceFollowUp = buildCzChatFollowUp(
       "cz-limit-offer-after-acceptance",
@@ -1224,18 +1366,26 @@ export function buildCzChatSmartReplyResolver({
         "performance of this",
       ])
     ) {
-      const positionSummary = selectedInvestmentSecurity.owned
-        ? `The visible holding is **${selectedInvestmentValue}** across **${selectedInvestmentQuantity} PCS**.`
-        : "This product is not currently shown as one of your holdings, so there is no customer-position return to calculate.";
+      const buyLabel = selectedInvestmentSecurity.owned && selectedInvestmentSecurity.quantity > 0 ? "Buy more" : "Buy";
 
       return {
         text:
           `### ${selectedInvestmentSecurity.title} performance\n` +
-          `${positionSummary}\n` +
-          `The product snapshot shows **${selectedInvestmentPerformance}** performance and an actual market price of **${selectedInvestmentMarketPrice}**, updated ${selectedInvestmentSecurity.lastUpdate}.\n` +
-          `Read that together with the time period, fees, currency exposure, and official product documents. A positive snapshot is not a forecast or a personalized buy, sell, or hold recommendation.`,
+          `Use the snapshot above as a point-in-time view, not a forecast. Read it together with the period shown in product history, the fees and dealing rules in the official documents, and the currency exposure that can affect the customer's local result.\n` +
+          `The next useful checks are risk, liquidity, portfolio fit, and the latest KID/KIID or factsheet. This is product-specific information, not a personalized buy, sell, or hold recommendation.`,
+        richBlocksPosition: "before-text",
         richBlocks: showSelectedInvestmentCardOnce(selectedInvestmentProductBlock),
         followUps: [
+          {
+            id: `cz-investment-product-buy-${selectedInvestmentSecurity.id}`,
+            label: buyLabel,
+            action: {
+              id: `cz-investment-product-buy-${selectedInvestmentSecurity.id}`,
+              label: buyLabel,
+              type: "send-message",
+              prompt: `Start a buy order for ${selectedInvestmentSecurity.title}.`,
+            },
+          },
           buildCzChatFollowUp("cz-investment-product-risk", "Review risk", `Explain the risk, liquidity, and currency exposure of ${selectedInvestmentSecurity.title}.`),
           buildCzChatFollowUp("cz-investment-product-considerations", "What should I consider?", `What should I consider when reviewing ${selectedInvestmentSecurity.title}?`),
           buildCzChatFollowUp("cz-investment-product-portfolio", "Review portfolio", `Review ${selectedInvestmentSecurity.title} in my portfolio context.`),

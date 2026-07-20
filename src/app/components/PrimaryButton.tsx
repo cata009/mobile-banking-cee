@@ -34,7 +34,7 @@ export default function PrimaryButton({
         ${className}
       `}
     >
-      {children}
+      <span className="block max-w-full truncate">{children}</span>
     </button>
   );
 }

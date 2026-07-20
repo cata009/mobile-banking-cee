@@ -64,11 +64,11 @@ export default function GhostBanner({
           <AppIcon name={iconName} color={iconColor} />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-[4px]">
-          <span className="uc-type-h2 leading-[20px] text-[var(--uc-text)]">
+          <span className="uc-type-h2 line-clamp-2 leading-[20px] text-[var(--uc-text)]">
             {title}
           </span>
           {description && (
-            <span className="uc-type-n4 whitespace-pre-line leading-[18px] text-[var(--uc-text)]">
+            <span className="uc-type-n4 line-clamp-4 whitespace-pre-line leading-[18px] text-[var(--uc-text)]">
               {description}
             </span>
           )}

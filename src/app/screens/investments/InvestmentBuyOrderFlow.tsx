@@ -13,6 +13,7 @@ import { getCountryConfig } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import { maskFormattedAmount } from "@/app/utils/amountPrivacy";
 import type { CurrentAccount } from "@/data/products";
+import type { CoAppingInvestmentBuyDraft } from "../../../../package/mobile-pi-coapping-chat-package/src";
 import {
   buildInvestmentBuyOrderQuote,
   getInvestmentBuyOrderValidation,
@@ -26,6 +27,7 @@ interface InvestmentBuyOrderFlowProps {
   accounts: readonly CurrentAccount[];
   country: CountryId;
   amountsHidden: boolean;
+  initialDraft?: CoAppingInvestmentBuyDraft | null;
   onBack: () => void;
   onComplete: () => void;
 }
@@ -41,6 +43,33 @@ function formatMoney(value: number, currency: string, country: CountryId, hidden
 function compactAccountNumber(value: string) {
   if (value.length <= 8) return value;
   return `${value.slice(0, 4)} •••• ${value.slice(-4)}`;
+}
+
+function getValidatedInitialDraft(
+  initialDraft: CoAppingInvestmentBuyDraft | null | undefined,
+  security: InvestmentCatalogSecurity,
+  accounts: readonly CurrentAccount[],
+): CoAppingInvestmentBuyDraft | null {
+  if (
+    !initialDraft ||
+    initialDraft.frequency !== "one-off" ||
+    !["today", "next-business-day"].includes(initialDraft.executionTiming) ||
+    !Number.isSafeInteger(initialDraft.quantity) ||
+    initialDraft.quantity <= 0 ||
+    security.status !== "active"
+  ) {
+    return null;
+  }
+
+  const account = accounts.find((candidate) => candidate.id === initialDraft.accountId);
+  if (!account) return null;
+
+  const quote = buildInvestmentBuyOrderQuote(security, account, initialDraft.quantity);
+  return getInvestmentBuyOrderValidation(quote, account) ? null : initialDraft;
+}
+
+function formatExecutionTiming(value: CoAppingInvestmentBuyDraft["executionTiming"]) {
+  return value === "next-business-day" ? "Next business day" : "Today";
 }
 
 /**
@@ -115,12 +144,17 @@ export default function InvestmentBuyOrderFlow({
   accounts,
   country,
   amountsHidden,
+  initialDraft,
   onBack,
   onComplete,
 }: InvestmentBuyOrderFlowProps) {
-  const [step, setStep] = useState<InvestmentBuyOrderStep>("order-data");
-  const [quantityValue, setQuantityValue] = useState("1");
-  const [selectedAccountId, setSelectedAccountId] = useState(accounts[0]?.id ?? "");
+  const validatedInitialDraft = getValidatedInitialDraft(initialDraft, security, accounts);
+  const [step, setStep] = useState<InvestmentBuyOrderStep>(validatedInitialDraft ? "review" : "order-data");
+  const [quantityValue, setQuantityValue] = useState(String(validatedInitialDraft?.quantity ?? 1));
+  const [selectedAccountId, setSelectedAccountId] = useState(validatedInitialDraft?.accountId ?? accounts[0]?.id ?? "");
+  const [executionTiming] = useState<CoAppingInvestmentBuyDraft["executionTiming"]>(
+    validatedInitialDraft?.executionTiming ?? "today",
+  );
   const [accountSheetOpen, setAccountSheetOpen] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
@@ -186,6 +220,7 @@ export default function InvestmentBuyOrderFlow({
           <InvestmentDetailField label="Product ID" value={security.productId} />
           <InvestmentDetailField label="Order type" value="One off BUY" />
           <InvestmentDetailField label="Quantity" value={`${quote.quantity} PCS`} />
+          <InvestmentDetailField label="Execution" value={formatExecutionTiming(executionTiming)} />
           <InvestmentDetailField label="Market price" value={formatMoney(quote.marketPrice, quote.productCurrency, country, amountsHidden)} />
           <InvestmentDetailField label="Estimated amount" value={formatMoney(quote.productAmount, quote.productCurrency, country, amountsHidden)} />
         </section>
@@ -308,6 +343,7 @@ export default function InvestmentBuyOrderFlow({
           />
         </div>
         <InvestmentDetailField label="Frequency" value="One off" />
+        <InvestmentDetailField label="Execution" value={formatExecutionTiming(executionTiming)} />
         {balanceValidation ? <p className="px-[24px] py-[12px] uc-type-n5 text-[var(--uc-status-red)]">{balanceValidation}</p> : null}
       </section>
 

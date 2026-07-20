@@ -627,10 +627,25 @@ function BubbleMessage({
   const timeLabel = formatMessageTimeLabel(message);
 
   if (isAgent) {
+    const formattedResponse = <AgentFormattedResponse text={message.text} isStreaming={message.isStreaming} />;
+    const richBlocks = !message.isStreaming ? <RichBlocks blocks={message.richBlocks} onAction={onAction} /> : null;
+
     return (
-      <div className="mpc-message mpc-message-agent" aria-live={message.isStreaming ? "polite" : undefined}>
-        <AgentFormattedResponse text={message.text} isStreaming={message.isStreaming} />
-        {!message.isStreaming ? <RichBlocks blocks={message.richBlocks} onAction={onAction} /> : null}
+      <div
+        className={`mpc-message mpc-message-agent${message.richBlocksPosition === "before-text" ? " mpc-message-agent-rich-first" : ""}`}
+        aria-live={message.isStreaming ? "polite" : undefined}
+      >
+        {message.richBlocksPosition === "before-text" ? (
+          <>
+            {richBlocks}
+            {formattedResponse}
+          </>
+        ) : (
+          <>
+            {formattedResponse}
+            {richBlocks}
+          </>
+        )}
         {!message.isStreaming ? (
           <div className="mpc-agent-meta">
             <div className="mpc-response-feedback" aria-label="Response feedback">
@@ -1550,7 +1565,7 @@ const richMessageEnhancements: Record<string, Pick<CoAppingChatMessage, "richBlo
 function getContextualAssistantEnhancement(
   input: string,
   fallbackText: string,
-): Pick<CoAppingChatMessage, "text" | "richBlocks" | "followUps"> {
+): Pick<CoAppingChatMessage, "text" | "richBlocks" | "richBlocksPosition" | "followUps"> {
   const normalized = input.toLowerCase();
 
   if (/\b(start|create|new)\b.*\b(goal|investment)\b|\bstart an investment goal\b/.test(normalized)) {
@@ -1699,7 +1714,9 @@ function getContextualAssistantEnhancement(
   return { text: fallbackText };
 }
 
-function normalizeReplyResult(reply: CoAppingReplyResult): Pick<CoAppingChatMessage, "text" | "richBlocks" | "followUps"> {
+function normalizeReplyResult(
+  reply: CoAppingReplyResult,
+): Pick<CoAppingChatMessage, "text" | "richBlocks" | "richBlocksPosition" | "followUps"> {
   return typeof reply === "string" ? { text: reply } : reply;
 }
 
@@ -2523,6 +2540,7 @@ export function CoAppingChatAssistant({
         time: getCurrentTime(),
         createdAt: new Date().toISOString(),
         richBlocks: enhancedReply.richBlocks,
+        richBlocksPosition: enhancedReply.richBlocksPosition,
         followUps: enhancedReply.followUps,
       };
       setIsTyping(false);

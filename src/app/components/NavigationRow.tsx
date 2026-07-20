@@ -103,11 +103,11 @@ function NavigationRowContent({
         ) : null}
 
         <div className={cn("min-w-0", centerContent ? "flex-none" : "flex-1")}>
-          <p className={cn("uc-type-n4-strong", titleColor, titleClassName)} style={titleStyle}>
+          <p className={cn("uc-type-n4-strong line-clamp-2", titleColor, titleClassName)} style={titleStyle}>
             {title}
           </p>
           {description ? (
-            <p className={cn("uc-type-n4 mt-[4px] text-[var(--uc-text)]", descriptionClassName)}>
+            <p className={cn("uc-type-n4 mt-[4px] line-clamp-2 text-[var(--uc-text)]", descriptionClassName)}>
               {description}
             </p>
           ) : null}

@@ -4,6 +4,7 @@ export type CoAppingChatRole = "agent" | "user";
 
 export type CoAppingChatActionTarget =
   | "investments"
+  | "investment-buy"
   | "investments-history"
   | "analytics"
   | "card-detail"
@@ -17,12 +18,21 @@ export type CoAppingChatActionTarget =
   | "prime"
   | "account-detail";
 
+export interface CoAppingInvestmentBuyDraft {
+  quantity: number;
+  accountId: string;
+  frequency: "one-off";
+  executionTiming: "today" | "next-business-day";
+}
+
 export interface CoAppingChatAction {
   id: string;
   label: string;
   type: "send-message" | "navigate";
   prompt?: string;
   target?: CoAppingChatActionTarget;
+  securityId?: string;
+  investmentBuyDraft?: CoAppingInvestmentBuyDraft;
 }
 
 export interface CoAppingFollowUpSuggestion {
@@ -125,6 +135,7 @@ export interface CoAppingChatMessage {
   createdAt?: string;
   isStreaming?: boolean;
   richBlocks?: CoAppingRichBlock[];
+  richBlocksPosition?: "before-text" | "after-text";
   followUps?: CoAppingFollowUpSuggestion[];
 }
 
@@ -204,7 +215,7 @@ export interface CoAppingTerminateLabels {
 
 export type CoAppingReplyResult =
   | string
-  | Pick<CoAppingChatMessage, "text" | "richBlocks" | "followUps">;
+  | Pick<CoAppingChatMessage, "text" | "richBlocks" | "richBlocksPosition" | "followUps">;
 
 export type CoAppingReplyResolver = (
   input: string,

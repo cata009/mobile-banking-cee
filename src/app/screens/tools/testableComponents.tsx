@@ -11,7 +11,15 @@ import NavigationRow from "@/app/components/NavigationRow";
 import TextField from "@/app/components/TextField";
 import InfoBanner from "@/app/components/cards/InfoBanner";
 import GhostBanner from "@/app/components/cards/GhostBanner";
+import HelperCard from "@/app/components/cards/HelperCard";
+import PendingActionCard from "@/app/components/cards/PendingActionCard";
+import UserEventCard from "@/app/components/cards/UserEventCard";
+import ProductMenuCard from "@/app/components/products/ProductMenuCard";
+import ProductOfferCard from "@/app/components/products/ProductOfferCard";
+import PaymentHeroCard from "@/app/components/payments/PaymentHeroCard";
+import { ContactsNavigationCard } from "@/app/screens/contacts/ContactsNavigationCard";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
+import type { ProductsCard } from "@/app/config/productsMenuConfig";
 
 /**
  * How the specimen sits inside the 375px phone width:
@@ -120,6 +128,158 @@ export const TESTABLE_COMPONENTS: readonly TestableComponentMeta[] = [
     ],
     render: (texts) => (
       <SectionHeadingDivider title={texts.title ?? ""} secondaryText={texts.secondaryText || undefined} />
+    ),
+  },
+  {
+    id: "helper-card",
+    label: "HelperCard",
+    description: "Teal helper card with icon, message and optional link",
+    container: "plain",
+    slots: [
+      { id: "title", label: "Title", defaultText: "Details" },
+      { id: "description", label: "Description", defaultText: "Use Details to view more information." },
+      { id: "actionLabel", label: "Action label", defaultText: "SEE DETAILS" },
+    ],
+    render: (texts) => (
+      <HelperCard
+        title={texts.title ?? ""}
+        description={texts.description || undefined}
+        actionLabel={texts.actionLabel || undefined}
+        onActionClick={noop}
+      />
+    ),
+  },
+  {
+    id: "pending-action-card",
+    label: "PendingActionCard",
+    description: "Gradient card for pending actions with optional expiring tag",
+    container: "plain",
+    slots: [
+      { id: "title", label: "Title", defaultText: "Pending Action" },
+      {
+        id: "description",
+        label: "Description",
+        defaultText: "You have to reject or confirm a pending payment",
+      },
+      { id: "tagLabel", label: "Tag label", defaultText: "EXPIRING ON 12.04.25" },
+    ],
+    render: (texts) => (
+      <PendingActionCard
+        title={texts.title ?? ""}
+        description={texts.description || undefined}
+        tagLabel={texts.tagLabel || undefined}
+        onClick={noop}
+      />
+    ),
+  },
+  {
+    id: "user-event-card",
+    label: "UserEventCard",
+    description: "Avatar card for user events with optional link and options",
+    container: "plain",
+    slots: [
+      { id: "title", label: "Title", defaultText: "Expenses higher than usual" },
+      {
+        id: "description",
+        label: "Description",
+        defaultText: "Track your spending and try to get the most our of your money.",
+      },
+      { id: "actionLabel", label: "Action label", defaultText: "FIND OUT MORE" },
+    ],
+    render: (texts) => (
+      <UserEventCard
+        title={texts.title ?? ""}
+        description={texts.description || undefined}
+        actionLabel={texts.actionLabel || undefined}
+        onActionClick={noop}
+        showOptions
+      />
+    ),
+  },
+  {
+    id: "product-offer-card",
+    label: "ProductOfferCard",
+    description: "Product offer banner with title, description and chevron",
+    container: "plain",
+    slots: [
+      { id: "title", label: "Title", defaultText: "Premium current account offer" },
+      {
+        id: "description",
+        label: "Description",
+        defaultText: "Enjoy zero monthly fee and smart everyday banking benefits.",
+      },
+    ],
+    render: (texts) => (
+      <ProductOfferCard
+        offer={{
+          id: "tester-offer",
+          title: texts.title ?? "",
+          description: texts.description ?? "",
+        }}
+        onClick={noop}
+      />
+    ),
+  },
+  {
+    id: "product-menu-card",
+    label: "ProductMenuCard",
+    description: "Product menu entry card with title and illustration",
+    container: "plain",
+    slots: [{ id: "title", label: "Title", defaultText: "Current accounts" }],
+    render: (texts) => {
+      const card: ProductsCard = {
+        id: "account",
+        title: texts.title ?? "",
+        background: "var(--uc-product-blue-deep)",
+        illustration: "branch",
+      };
+      return <ProductMenuCard card={card} onClick={noop} />;
+    },
+  },
+  {
+    id: "payment-hero-card",
+    label: "PaymentHeroCard",
+    description: "Payments hero card with title and description",
+    container: "plain",
+    slots: [
+      { id: "title", label: "Title", defaultText: "Make a payment" },
+      {
+        id: "description",
+        label: "Description",
+        defaultText: "Lorem ipsum dolor sit amet, consectetur adipiscing",
+      },
+    ],
+    render: (texts) => (
+      <PaymentHeroCard
+        item={{
+          id: "new-payment",
+          title: texts.title ?? "",
+          description: texts.description ?? "",
+          illustration: "wallet",
+        }}
+        onSelect={noop}
+      />
+    ),
+  },
+  {
+    id: "contacts-navigation-card",
+    label: "ContactsNavigationCard",
+    description: "Contacts entry card with icon, title, value and subtitle",
+    container: "plain",
+    slots: [
+      { id: "title", label: "Title", defaultText: "Phone" },
+      { id: "subtitle", label: "Subtitle", defaultText: "Mon–Fri 08:00–20:00" },
+      { id: "value", label: "Value", defaultText: "+40 21 200 2020" },
+    ],
+    render: (texts) => (
+      <ContactsNavigationCard
+        icon="phone"
+        title={texts.title ?? ""}
+        subtitle={texts.subtitle || undefined}
+        value={texts.value || undefined}
+        hasChevron
+        onClick={noop}
+      />
     ),
   },
 ];
