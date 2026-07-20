@@ -57,4 +57,108 @@ describe("investment product chat context handoff", () => {
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(onSelectedSecurityChange).toHaveBeenLastCalledWith(null);
   });
+
+  it("opens the buy order for the exact held security requested by chat", async () => {
+    const onBuyRequestConsumed = vi.fn();
+
+    render(
+      <InvestmentsPortfolioScreen
+        onBack={() => undefined}
+        buyRequest={{ requestId: 1, securityId: "balanced-income" }}
+        onBuyRequestConsumed={onBuyRequestConsumed}
+      />,
+      { wrapper: AppProviders },
+    );
+
+    expect(await screen.findAllByText("One off BUY Order")).toHaveLength(2);
+    expect(screen.getByText("UniCredit Balanced Income Fund")).toBeInTheDocument();
+    expect(onBuyRequestConsumed).toHaveBeenCalledWith(1);
+  });
+
+  it("opens Review Data with the exact complete draft collected by chat", async () => {
+    render(
+      <InvestmentsPortfolioScreen
+        onBack={() => undefined}
+        buyRequest={{
+          requestId: 11,
+          securityId: "balanced-income",
+          draft: {
+            quantity: 2,
+            accountId: "acc-2",
+            frequency: "one-off",
+            executionTiming: "next-business-day",
+          },
+        }}
+      />,
+      { wrapper: AppProviders },
+    );
+
+    expect(await screen.findAllByText("Review Data")).toHaveLength(2);
+    expect(screen.getByText("UniCredit Balanced Income Fund")).toBeInTheDocument();
+    expect(screen.getByText("2 PCS")).toBeInTheDocument();
+    expect(screen.getByText(/Primary Account 2/)).toBeInTheDocument();
+    expect(screen.getByText("Next business day")).toBeInTheDocument();
+  });
+
+  it("falls back to Order Data when a chat draft names an invalid cash account", async () => {
+    render(
+      <InvestmentsPortfolioScreen
+        onBack={() => undefined}
+        buyRequest={{
+          requestId: 12,
+          securityId: "balanced-income",
+          draft: {
+            quantity: 2,
+            accountId: "missing-account",
+            frequency: "one-off",
+            executionTiming: "today",
+          },
+        }}
+      />,
+      { wrapper: AppProviders },
+    );
+
+    expect(await screen.findAllByText("One off BUY Order")).toHaveLength(2);
+    expect(screen.queryByText("Review Data")).not.toBeInTheDocument();
+  });
+
+  it("opens the buy order for an exact catalogue security that is not yet held", async () => {
+    render(
+      <InvestmentsPortfolioScreen
+        onBack={() => undefined}
+        buyRequest={{ requestId: 2, securityId: "catalog-climate-focus" }}
+      />,
+      { wrapper: AppProviders },
+    );
+
+    expect(await screen.findAllByText("One off BUY Order")).toHaveLength(2);
+    expect(screen.getByText("Amundi Climate Focus Fund")).toBeInTheDocument();
+  });
+
+  it("consumes an unknown or repeated buy request without opening the wrong product", async () => {
+    const onBuyRequestConsumed = vi.fn();
+    const { rerender } = render(
+      <InvestmentsPortfolioScreen
+        onBack={() => undefined}
+        buyRequest={{ requestId: 3, securityId: "missing-security" }}
+        onBuyRequestConsumed={onBuyRequestConsumed}
+      />,
+      { wrapper: AppProviders },
+    );
+
+    expect(await screen.findAllByRole("heading", { name: "Investment" })).toHaveLength(2);
+    expect(screen.queryAllByText("One off BUY Order")).toHaveLength(0);
+    expect(onBuyRequestConsumed).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <InvestmentsPortfolioScreen
+        onBack={() => undefined}
+        buyRequest={{ requestId: 3, securityId: "balanced-income" }}
+        onBuyRequestConsumed={onBuyRequestConsumed}
+      />,
+    );
+
+    expect(screen.queryAllByText("One off BUY Order")).toHaveLength(0);
+    expect(onBuyRequestConsumed).toHaveBeenCalledTimes(1);
+  });
 });

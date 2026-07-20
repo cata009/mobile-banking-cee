@@ -11,7 +11,7 @@ import {
   getProductsShelfFocusCardId,
 } from "@/app/chat/czChatOrchestration";
 import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
-import type { CreditCard, Product } from "@/data/products";
+import type { CreditCard, Product, ProductCategory } from "@/data/products";
 
 const workspaceRoot = process.cwd();
 const appSource = readFileSync(resolve(workspaceRoot, "src/app/App.tsx"), "utf8");
@@ -44,6 +44,29 @@ const selectedInvestmentSecurity: InvestmentCatalogSecurity = {
   lastUpdate: "19.07.2026",
   description: "A balanced fund denominated in EUR.",
 };
+
+const investmentBuyAccounts: Product[] = [
+  {
+    id: "acc-1",
+    type: "current_account",
+    name: "Primary Account",
+    accountNumber: "1234567890123456",
+    balance: 2850.5,
+    currency: "CZK",
+  },
+  {
+    id: "acc-2",
+    type: "current_account",
+    name: "Primary Account 2",
+    accountNumber: "2345678901234567",
+    balance: 2052.36,
+    currency: "CZK",
+  },
+];
+
+const investmentBuyCategories: ProductCategory[] = [
+  { key: "accounts", title: "Accounts", products: investmentBuyAccounts },
+];
 
 function collectSourceFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -304,6 +327,131 @@ describe("CZ chat app orchestration", () => {
     expect(selectedHoldingBlock).not.toHaveProperty("action");
   });
 
+  it("keeps performance figures in the card and offers Buy more for the exact held security", async () => {
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: investmentBuyCategories,
+      selectedAccountProduct: null,
+      selectedCardProduct: null,
+      creditCardForOpportunity: null,
+      selectedInvestmentSecurity,
+    });
+
+    const result = await resolveReply("How is my position in UniCredit Balanced Income Fund performing?", []);
+    if (typeof result === "string") throw new Error("Expected a structured investment-product reply");
+
+    expect(result.richBlocksPosition).toBe("before-text");
+    expect(result.richBlocks?.[0]).toEqual(expect.objectContaining({
+      type: "investment-summary",
+      title: "UniCredit Balanced Income Fund",
+      metrics: expect.arrayContaining([
+        expect.objectContaining({ label: "Holding value", value: expect.stringMatching(/5.?525,00 CZK/) }),
+        expect.objectContaining({ label: "Performance", value: "+1.80%" }),
+        expect.objectContaining({ label: "Market price", value: "29,84 EUR" }),
+      ]),
+    }));
+    expect(result.text).not.toMatch(/5.?525,00 CZK/);
+    expect(result.text).not.toContain("7,625 PCS");
+    expect(result.text).not.toContain("+1.80%");
+    expect(result.text).not.toContain("29,84 EUR");
+    expect(result.text).not.toContain("19.07.2026");
+    expect(result.followUps).toContainEqual(expect.objectContaining({
+      label: "Buy more",
+      action: expect.objectContaining({
+        type: "send-message",
+        prompt: "Start a buy order for UniCredit Balanced Income Fund.",
+      }),
+    }));
+  });
+
+  it("collects quantity, cash account, and execution timing before creating the exact BUY review handoff", async () => {
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: investmentBuyCategories,
+      selectedAccountProduct: null,
+      selectedCardProduct: null,
+      creditCardForOpportunity: null,
+      selectedInvestmentSecurity,
+    });
+
+    const start = await resolveReply("Start a buy order for UniCredit Balanced Income Fund.", []);
+    if (typeof start === "string") throw new Error("Expected a structured quantity reply");
+    expect(start.text).toContain("### Choose quantity");
+    expect(start.followUps?.map((item) => item.label)).toEqual(["1 PCS", "5 PCS", "10 PCS"]);
+    expect(start.followUps).not.toContainEqual(expect.objectContaining({
+      action: expect.objectContaining({ type: "navigate" }),
+    }));
+
+    const typedQuantity = await resolveReply("7", [
+      { id: "agent-quantity", role: "agent", text: start.text, time: "17:20" },
+    ]);
+    if (typeof typedQuantity === "string") throw new Error("Expected a structured typed-quantity reply");
+    expect(typedQuantity.text).toContain("### Choose cash account");
+    expect(typedQuantity.text).toContain("7 PCS");
+
+    const account = await resolveReply("Buy 1 PCS of UniCredit Balanced Income Fund.", []);
+    if (typeof account === "string") throw new Error("Expected a structured account reply");
+    expect(account.text).toContain("### Choose cash account");
+    expect(account.text).toContain("1 PCS");
+    expect(account.followUps?.map((item) => item.label)).toEqual([
+      expect.stringContaining("Primary Account"),
+      expect.stringContaining("Primary Account 2"),
+    ]);
+    expect(account.followUps).not.toContainEqual(expect.objectContaining({
+      action: expect.objectContaining({ type: "navigate" }),
+    }));
+
+    const execution = await resolveReply(
+      "Use Primary Account ending 3456 for 1 PCS of UniCredit Balanced Income Fund.",
+      [],
+    );
+    if (typeof execution === "string") throw new Error("Expected a structured execution reply");
+    expect(execution.text).toContain("### Choose execution timing");
+    expect(execution.followUps?.map((item) => item.label)).toEqual(["Today", "Next business day"]);
+    expect(execution.followUps).toContainEqual(expect.objectContaining({
+      label: "Today",
+      action: expect.objectContaining({
+        type: "navigate",
+        target: "investment-buy",
+        securityId: "balanced-income",
+        investmentBuyDraft: {
+          quantity: 1,
+          accountId: "acc-1",
+          frequency: "one-off",
+          executionTiming: "today",
+        },
+      }),
+    }));
+  });
+
+  it("keeps invalid quantity and insufficient balance inside the BUY conversation", async () => {
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: investmentBuyCategories,
+      selectedAccountProduct: null,
+      selectedCardProduct: null,
+      creditCardForOpportunity: null,
+      selectedInvestmentSecurity,
+    });
+
+    const invalidQuantity = await resolveReply("Buy 0 PCS of UniCredit Balanced Income Fund.", []);
+    if (typeof invalidQuantity === "string") throw new Error("Expected a structured validation reply");
+    expect(invalidQuantity.text).toContain("positive whole number");
+    expect(invalidQuantity.followUps).not.toContainEqual(expect.objectContaining({
+      action: expect.objectContaining({ type: "navigate" }),
+    }));
+
+    const insufficient = await resolveReply(
+      "Use Primary Account ending 3456 for 100000 PCS of UniCredit Balanced Income Fund.",
+      [],
+    );
+    if (typeof insufficient === "string") throw new Error("Expected a structured balance reply");
+    expect(insufficient.text).toContain("Insufficient balance");
+    expect(insufficient.followUps).not.toContainEqual(expect.objectContaining({
+      action: expect.objectContaining({ type: "navigate" }),
+    }));
+  });
+
   it("shows the selected investment card only on the first product answer in a conversation", async () => {
     const resolveReply = buildCzChatSmartReplyResolver({
       country: "CZ",
@@ -385,13 +533,15 @@ describe("CZ chat app orchestration", () => {
     if (typeof performance === "string") throw new Error("Expected a structured investment-product reply");
 
     const expectedHeadingByLabel = new Map([
+      ["Buy more", "### Choose quantity"],
       ["Review risk", "### UniCredit Balanced Income Fund risk context"],
       ["What should I consider?", "### UniCredit Balanced Income Fund review checklist"],
       ["Review portfolio", "### UniCredit Balanced Income Fund in your portfolio"],
     ]);
 
-    expect(performance.followUps?.map((followUp) => followUp.label)).toEqual([...expectedHeadingByLabel.keys()]);
-    for (const followUp of performance.followUps ?? []) {
+    const conversationalFollowUps = performance.followUps?.filter((followUp) => followUp.action?.type === "send-message") ?? [];
+    expect(conversationalFollowUps.map((followUp) => followUp.label)).toEqual([...expectedHeadingByLabel.keys()]);
+    for (const followUp of conversationalFollowUps) {
       expect(followUp.action).toEqual(expect.objectContaining({ type: "send-message" }));
       const prompt = followUp.action?.prompt ?? followUp.prompt;
       expect(prompt).toBeTruthy();
@@ -464,6 +614,30 @@ describe("CZ chat app orchestration", () => {
     if (typeof result === "string") throw new Error("Expected a structured investment-product reply");
     expect(result.text).toContain("not currently shown as one of your holdings");
     expect(result.text).not.toContain("Your position is");
+  });
+
+  it("offers Buy instead of Buy more for a catalogue-only security", async () => {
+    const catalogueSecurity = { ...selectedInvestmentSecurity, owned: false, quantity: 0, localValue: 0 };
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: [],
+      selectedAccountProduct: null,
+      selectedCardProduct: null,
+      creditCardForOpportunity: null,
+      selectedInvestmentSecurity: catalogueSecurity,
+    });
+
+    const result = await resolveReply("How is this product performing?", []);
+    if (typeof result === "string") throw new Error("Expected a structured investment-product reply");
+
+    expect(result.followUps).toContainEqual(expect.objectContaining({
+      label: "Buy",
+      action: expect.objectContaining({
+        type: "send-message",
+        prompt: "Start a buy order for UniCredit Balanced Income Fund.",
+      }),
+    }));
+    expect(result.followUps).not.toContainEqual(expect.objectContaining({ label: "Buy more" }));
   });
 
   it("makes App a thin consumer and adds no package-to-app reverse dependency", () => {

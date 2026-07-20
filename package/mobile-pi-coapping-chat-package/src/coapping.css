@@ -1374,6 +1374,11 @@
   margin-top: 6px;
 }
 
+.mpc-message-agent-rich-first > .mpc-rich-stack {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
 .mpc-rich-card {
   display: grid;
   gap: 12px;

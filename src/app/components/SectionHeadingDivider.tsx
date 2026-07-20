@@ -75,7 +75,7 @@ export default function SectionHeadingDivider({
       {alignCountToEnd && typeof count === "number" ? (
         <>
           <div className="flex items-center justify-between gap-[8px]">
-            <h2 className="uc-type-n5-strong uppercase text-[var(--uc-text-muted)]">
+            <h2 className="uc-type-n5-strong line-clamp-2 uppercase text-[var(--uc-text-muted)]">
               {title}
             </h2>
             <span className="uc-type-n5-strong text-[var(--uc-text-muted)]" aria-label={`${title} count ${count}`}>
@@ -87,7 +87,7 @@ export default function SectionHeadingDivider({
       ) : (
         <>
           <div className="flex items-center gap-[8px]">
-            <h2 className="uc-type-n5-strong uppercase text-[var(--uc-text-muted)]">
+            <h2 className="uc-type-n5-strong line-clamp-2 uppercase text-[var(--uc-text-muted)]">
               {title}
             </h2>
             {typeof count === "number" ? (

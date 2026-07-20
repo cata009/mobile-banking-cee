@@ -149,6 +149,7 @@ describe('CZ Chat investment product summary', () => {
       richBlocks: investmentSummaryMessage.richBlocks,
       followUps,
     })),
+    expectedText = 'Ready',
   ) {
     const view = render(
       <CoAppingChatAssistant
@@ -162,7 +163,7 @@ describe('CZ Chat investment product summary', () => {
     const input = screen.getByRole('textbox', { name: 'Ask me anything' })
     fireEvent.change(input, { target: { value: 'Explain this product' } })
     fireEvent.submit(input.closest('form')!)
-    await screen.findByText('Ready')
+    await screen.findByText(expectedText)
     await waitFor(() => expect(view.container.querySelector('.mpc-agent-copy-streaming')).toBeNull())
 
     return { resolveReply, view }
@@ -178,6 +179,36 @@ describe('CZ Chat investment product summary', () => {
     expect(logo).toHaveStyle({ width: '32px', height: '32px' })
     expect(summaryCard?.querySelector('.mpc-rich-card-head > span')).toBeNull()
     expect(summaryCard?.querySelector('.mpc-rich-metric-grid-stack')).not.toBeNull()
+  })
+
+  it('renders opted-in rich product context before the interpretation text', async () => {
+    const { view } = await openInvestmentSummary(
+      [],
+      vi.fn(async () => ({
+        text: 'Interpretation after card',
+        richBlocks: investmentSummaryMessage.richBlocks,
+        richBlocksPosition: 'before-text' as const,
+        followUps: [],
+      })),
+      'Interpretation after card',
+    )
+
+    const summaryCard = view.container.querySelector('.mpc-rich-card-summary')
+    const interpretation = screen.getByText('Interpretation after card').closest('.mpc-agent-copy')
+
+    expect(summaryCard).not.toBeNull()
+    expect(interpretation).not.toBeNull()
+    expect(summaryCard!.compareDocumentPosition(interpretation!)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+  })
+
+  it('keeps the existing interpretation-before-card order by default', async () => {
+    const { view } = await openInvestmentSummary()
+    const summaryCard = view.container.querySelector('.mpc-rich-card-summary')
+    const interpretation = screen.getByText('Ready').closest('.mpc-agent-copy')
+
+    expect(summaryCard).not.toBeNull()
+    expect(interpretation).not.toBeNull()
+    expect(interpretation!.compareDocumentPosition(summaryCard!)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
   })
 
   it.each([

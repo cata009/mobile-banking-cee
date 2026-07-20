@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigationContext, NavigationProvider, type NavigationRoute } from "@/app/contexts/NavigationContext";
 import { LanguageProvider, useLanguage } from "@/app/contexts/LanguageContext";
 import { DemoProvider, useDemo } from "@/app/state/demoStore";
@@ -109,6 +109,7 @@ import {
 import type { PaymentTemplateSelection } from "@/data/paymentTemplates";
 import type { Product } from "@/data/products";
 import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
+import type { InvestmentBuyRequest } from "@/app/screens/investments/InvestmentsPortfolioScreen";
 import type { ProductDetailSelection } from "@/app/components/products/ProductCardBottomSheet";
 
 // Panel components
@@ -268,6 +269,8 @@ function AppContent({
   const [czChatContext, setCzChatContext] = useState<CoAppingChatContext | null>(null);
   const [czChatInitialMode, setCzChatInitialMode] = useState<CoAppingAssistantMode>("chat");
   const [selectedInvestmentSecurity, setSelectedInvestmentSecurity] = useState<InvestmentCatalogSecurity | null>(null);
+  const [investmentBuyRequest, setInvestmentBuyRequest] = useState<InvestmentBuyRequest | null>(null);
+  const investmentBuyRequestSequenceRef = useRef(0);
   const [historyFilterByTitle, setHistoryFilterByTitle] = useState<string | null>(null);
   const [productsShelfFocusRequest, setProductsShelfFocusRequest] = useState<ProductsShelfFocusRequest | null>(null);
   const [selectedProductDetail, setSelectedProductDetail] = useState<ProductDetailSelection | null>(null);
@@ -316,6 +319,12 @@ function AppContent({
 
   const handleSelectedInvestmentSecurityChange = useCallback((security: InvestmentCatalogSecurity | null) => {
     setSelectedInvestmentSecurity(security);
+  }, []);
+
+  const handleInvestmentBuyRequestConsumed = useCallback((requestId: number) => {
+    setInvestmentBuyRequest((currentRequest) =>
+      currentRequest?.requestId === requestId ? null : currentRequest,
+    );
   }, []);
 
   useEffect(() => {
@@ -633,6 +642,17 @@ function AppContent({
 
     switch (action.target) {
       case "investments":
+        navigateTo("investments");
+        break;
+      case "investment-buy":
+        if (!action.securityId) break;
+        investmentBuyRequestSequenceRef.current += 1;
+        setInvestmentBuyRequest({
+          requestId: investmentBuyRequestSequenceRef.current,
+          securityId: action.securityId,
+          draft: action.investmentBuyDraft,
+        });
+        setCzChatOpen(false);
         navigateTo("investments");
         break;
       case "investments-history":
@@ -1009,6 +1029,8 @@ function AppContent({
             onBack={goBack}
             onHistoryClick={handleInvestmentsHistoryClick}
             onSelectedSecurityChange={handleSelectedInvestmentSecurityChange}
+            buyRequest={investmentBuyRequest}
+            onBuyRequestConsumed={handleInvestmentBuyRequestConsumed}
           />
         )}
 

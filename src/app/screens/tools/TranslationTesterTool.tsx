@@ -121,6 +121,15 @@ export function TranslationTesterTool() {
 
   const activeSlot = component?.slots.find((slot) => slot.id === activeSlotId) ?? component?.slots[0];
 
+  // Realistic per-component character caps. Only applied to single-line button
+  // labels (PrimaryButton) where long copy fundamentally breaks the layout;
+  // multi-line components (NavigationRow, banners, SectionHeadingDivider) are
+  // bounded visually via line-clamp in the components themselves, not here.
+  const SLOT_MAX_LENGTH: Record<string, number> = {
+    "primary-button": 40,
+  };
+  const slotMaxLength = component?.id ? SLOT_MAX_LENGTH[component.id] : undefined;
+
   const selectComponent = (id: string) => {
     const nextComponent = TESTABLE_COMPONENTS.find((entry) => entry.id === id);
     setComponentId(id);
@@ -236,6 +245,7 @@ export function TranslationTesterTool() {
                 value={customText}
                 onChange={(event) => setCustomText(event.target.value)}
                 rows={3}
+                maxLength={slotMaxLength ?? undefined}
                 data-tester-custom-text="true"
                 className="w-full resize-y rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[12px] py-[10px] text-[14px] leading-[20px] text-[var(--uc-text)] outline-none focus:border-[var(--uc-action)]"
                 placeholder={`Text for “${activeSlot.label}”`}
@@ -248,7 +258,7 @@ export function TranslationTesterTool() {
                 ))}
               </div>
               <p className="text-[12px] leading-[17px] text-[var(--uc-text-muted)]">
-                {customText.length} characters
+                {customText.length} characters{slotMaxLength ? ` · max ${slotMaxLength}` : ""}
               </p>
             </div>
           ) : (

@@ -66,6 +66,32 @@ afterAll(() => vi.unstubAllGlobals());
 afterEach(cleanup);
 
 describe("InvestmentBuyOrderFlow", () => {
+  it("starts directly on Review Data with a validated draft collected by chat", () => {
+    render(
+      <InvestmentBuyOrderFlow
+        security={security}
+        accounts={accounts}
+        country="RO"
+        amountsHidden={false}
+        initialDraft={{
+          quantity: 4,
+          accountId: "account-2",
+          frequency: "one-off",
+          executionTiming: "next-business-day",
+        }}
+        onBack={() => undefined}
+        onComplete={() => undefined}
+      />,
+    );
+
+    expect(screen.getAllByText("Review Data")).not.toHaveLength(0);
+    expect(screen.getByText("4 PCS")).toBeInTheDocument();
+    expect(screen.getByText(/Daily account/)).toBeInTheDocument();
+    expect(screen.getByText("Next business day")).toBeInTheDocument();
+    expect(screen.getByText("100,00 EUR")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Buy" })).toBeDisabled();
+  });
+
   it("completes a one-off buy order from order data to success", () => {
     const onComplete = vi.fn();
 

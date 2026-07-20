@@ -116,7 +116,7 @@ export default function TextField({
         {shouldFloatLabel ? (
           <label
             htmlFor={inputId}
-            className="uc-type-n5 block"
+            className="uc-type-n5 line-clamp-2 block"
             style={{ color: labelColor }}
           >
             {label}

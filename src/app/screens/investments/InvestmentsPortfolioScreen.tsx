@@ -39,11 +39,20 @@ import { useDemo } from "@/app/state/demoStore";
 import { maskAmountParts } from "@/app/utils/amountPrivacy";
 import { useProducts } from "@/hooks/useProducts";
 import type { CurrentAccount } from "@/data/products";
+import type { CoAppingInvestmentBuyDraft } from "../../../../package/mobile-pi-coapping-chat-package/src";
+
+export interface InvestmentBuyRequest {
+  requestId: number;
+  securityId: string;
+  draft?: CoAppingInvestmentBuyDraft;
+}
 
 interface InvestmentsPortfolioScreenProps {
   onBack: () => void;
   onHistoryClick?: (filterByTitle?: string) => void;
   onSelectedSecurityChange?: (security: InvestmentCatalogSecurity | null) => void;
+  buyRequest?: InvestmentBuyRequest | null;
+  onBuyRequestConsumed?: (requestId: number) => void;
 }
 
 const TAB_TRANSLATION_KEYS: Record<InvestmentPortfolioTabId, string> = {
@@ -261,6 +270,8 @@ export default function InvestmentsPortfolioScreen({
   onBack,
   onHistoryClick,
   onSelectedSecurityChange,
+  buyRequest,
+  onBuyRequestConsumed,
 }: InvestmentsPortfolioScreenProps) {
   const { country, amountsHidden } = useDemo();
   const { categories } = useProducts();
@@ -273,7 +284,9 @@ export default function InvestmentsPortfolioScreen({
   const [securityListOpen, setSecurityListOpen] = useState(false);
   const [selectedSecurity, setSelectedSecurity] = useState<InvestmentCatalogSecurity | null>(null);
   const [buyOrderOpen, setBuyOrderOpen] = useState(false);
+  const [buyOrderDraft, setBuyOrderDraft] = useState<CoAppingInvestmentBuyDraft | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const consumedBuyRequestIdRef = useRef<number | null>(null);
 
   // Returning to portfolio home (all sub-screens closed) should always show
   // the page scrolled to top with the large header title visible, regardless
@@ -330,6 +343,20 @@ export default function InvestmentsPortfolioScreen({
     onSelectedSecurityChange?.(security);
   };
 
+  useEffect(() => {
+    if (!buyRequest || consumedBuyRequestIdRef.current === buyRequest.requestId) return;
+
+    consumedBuyRequestIdRef.current = buyRequest.requestId;
+    const requestedSecurity = securityCatalog.find((security) => security.id === buyRequest.securityId) ?? null;
+    if (requestedSecurity) {
+      setSelectedSecurity(requestedSecurity);
+      onSelectedSecurityChange?.(requestedSecurity);
+      setBuyOrderDraft(buyRequest.draft ?? null);
+      setBuyOrderOpen(true);
+    }
+    onBuyRequestConsumed?.(buyRequest.requestId);
+  }, [buyRequest, onBuyRequestConsumed, onSelectedSecurityChange, securityCatalog]);
+
   const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
     const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64));
     setHeaderProgress(progress);
@@ -357,9 +384,14 @@ export default function InvestmentsPortfolioScreen({
         accounts={currentAccounts}
         country={country}
         amountsHidden={amountsHidden}
-        onBack={() => setBuyOrderOpen(false)}
+        initialDraft={buyOrderDraft}
+        onBack={() => {
+          setBuyOrderOpen(false);
+          setBuyOrderDraft(null);
+        }}
         onComplete={() => {
           setBuyOrderOpen(false);
+          setBuyOrderDraft(null);
           selectSecurity(null);
           setSecurityListOpen(false);
         }}
@@ -375,7 +407,10 @@ export default function InvestmentsPortfolioScreen({
         amountsHidden={amountsHidden}
         onBack={() => selectSecurity(null)}
         onHistoryClick={() => onHistoryClick?.(selectedSecurity.title)}
-        onBuyClick={() => setBuyOrderOpen(true)}
+        onBuyClick={() => {
+          setBuyOrderDraft(null);
+          setBuyOrderOpen(true);
+        }}
       />
     );
   }
