@@ -136,7 +136,7 @@ describe('small-screen empty and invalid state guards', () => {
       { wrapper: AppProviders },
     )
 
-    expect(screen.getByText('Accounts')).toBeInTheDocument()
+    expect(screen.getByText('My Products')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Details' })).not.toBeInTheDocument()
     expect(onAccountDetails).not.toHaveBeenCalled()
     account.unmount()

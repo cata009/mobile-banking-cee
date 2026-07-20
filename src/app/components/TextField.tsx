@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useId, useMemo, useRef, useState, type HTMLAttributes } from "react";
 import { AppIcon, type IconName } from "@/app/components/icons";
 
 export type TextFieldVisualState =
@@ -26,6 +26,11 @@ interface TextFieldProps {
   trailingIconColor?: string;
   multipleValues?: string[];
   multipleCount?: number;
+  ariaLabel?: string;
+  inputMode?: HTMLAttributes<HTMLInputElement>["inputMode"];
+  readOnly?: boolean;
+  suffix?: string;
+  onActivate?: () => void;
 }
 
 const DISABLED_COLOR = "var(--uc-neutral-650)";
@@ -45,9 +50,15 @@ export default function TextField({
   trailingIconColor,
   multipleValues,
   multipleCount,
+  ariaLabel,
+  inputMode,
+  readOnly = false,
+  suffix,
+  onActivate,
 }: TextFieldProps) {
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = useId();
 
   const derivedState: TextFieldVisualState = useMemo(() => {
     if (visualState) return visualState;
@@ -96,10 +107,15 @@ export default function TextField({
       : "placeholder:text-[var(--uc-text)]";
 
   return (
-    <div className="w-full">
+    <div
+      className="w-full"
+      data-component="TextField"
+      onClick={onActivate}
+    >
       <div className="relative">
         {shouldFloatLabel ? (
           <label
+            htmlFor={inputId}
             className="uc-type-n5 block"
             style={{ color: labelColor }}
           >
@@ -141,17 +157,32 @@ export default function TextField({
             ) : (
               <input
                 ref={inputRef}
+                id={inputId}
                 type="text"
+                aria-label={ariaLabel ?? label}
+                inputMode={inputMode}
+                readOnly={readOnly}
                 value={hasValue ? value : ""}
                 onChange={(event) => onChange(event.target.value)}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
+                onKeyDown={(event) => {
+                  if (onActivate && (event.key === "Enter" || event.key === " ")) {
+                    event.preventDefault();
+                    onActivate();
+                  }
+                }}
                 placeholder={inputPlaceholder}
                 disabled={isDisabled}
                 className={`uc-type-p1 min-w-0 flex-1 bg-transparent outline-none disabled:cursor-default ${placeholderColorClass}`}
                 style={{ color: valueColor }}
               />
             )}
+            {suffix ? (
+              <span className="uc-type-p1 ml-[8px] shrink-0" style={{ color: valueColor }}>
+                {suffix}
+              </span>
+            ) : null}
           </div>
 
           <span className="ml-[12px] grid h-[32px] w-[32px] shrink-0 place-items-center" aria-hidden={!trailingIconName}>

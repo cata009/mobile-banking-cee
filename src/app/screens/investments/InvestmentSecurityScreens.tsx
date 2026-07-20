@@ -5,6 +5,7 @@ import BrandLogo from "@/app/components/brand-logo/BrandLogo";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import InvestmentPeriodChips from "@/app/components/investments/InvestmentPeriodChips";
 import InvestmentPortfolioChart from "@/app/components/investments/InvestmentPortfolioChart";
+import InvestmentDetailField from "@/app/components/investments/InvestmentDetailField";
 import PageHeader from "@/app/components/PageHeader";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import {
@@ -32,6 +33,7 @@ interface InvestmentSecurityDetailScreenProps extends SharedProps {
   security: InvestmentCatalogSecurity;
   onBack: () => void;
   onHistoryClick?: () => void;
+  onBuyClick?: () => void;
 }
 
 const INVESTMENT_POSITIVE_COLOR = "var(--uc-green-olive)";
@@ -46,15 +48,6 @@ function formatMoney(value: number, country: CountryId, currency: string, hidden
 
 function formatPercent(value: number) {
   return `${value > 0 ? "+" : value < 0 ? "-" : ""}${Math.abs(value).toFixed(2).replace(".", ",")}%`;
-}
-
-function FieldRow({ label, value, multiline = false }: { label: string; value: string; multiline?: boolean }) {
-  return (
-    <div className={`flex w-full flex-col gap-[4px] px-[24px] py-[16px] ${multiline ? "min-h-[132px]" : "min-h-[80px] justify-center"}`}>
-      <p className="text-[14px] font-normal leading-[16px] text-[var(--uc-text-muted)]">{label}</p>
-      <p className="text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{value}</p>
-    </div>
-  );
 }
 
 export function InvestmentSecurityListScreen({
@@ -158,6 +151,7 @@ export function InvestmentSecurityDetailScreen({
   amountsHidden,
   onBack,
   onHistoryClick,
+  onBuyClick,
 }: InvestmentSecurityDetailScreenProps) {
   const [period, setPeriod] = useState<InvestmentPeriodId>("3y");
   const [headerProgress, setHeaderProgress] = useState(0);
@@ -166,6 +160,7 @@ export function InvestmentSecurityDetailScreen({
   const heroCurrency = security.owned ? security.localCurrency : security.currency;
   const chartPoints = useMemo(() => buildInvestmentChartPoints(marketPrice, period), [marketPrice, period]);
   const performanceColor = security.performancePercent < 0 ? "var(--uc-status-red)" : security.performancePercent > 0 ? INVESTMENT_POSITIVE_COLOR : "var(--uc-text)";
+  const canSell = security.owned && security.status === "active" && security.quantity > 0;
 
   const handleScroll = (event: UIEvent<HTMLDivElement>) => {
     setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 96)));
@@ -205,8 +200,8 @@ export function InvestmentSecurityDetailScreen({
         items={[
           { id: "history", iconName: "investment-history", label: "History", onClick: onHistoryClick },
           { id: "documents", iconName: "account-option-statement", label: "Documents" },
-          { id: "sell", iconName: "trade-sell", label: "Sell", hidden: !security.owned, iconColor: "var(--uc-text)" },
-          { id: "buy", iconName: "trade-buy", label: "Buy", iconColor: "var(--uc-action)" },
+          { id: "sell", iconName: "trade-sell", label: "Sell", hidden: !canSell, iconColor: "var(--uc-text)" },
+          { id: "buy", iconName: "trade-buy", label: "Buy", hidden: security.status !== "active", iconColor: "var(--uc-action)", onClick: onBuyClick },
         ]}
       />
       <div className="h-[24px]" aria-hidden="true" />
@@ -214,23 +209,23 @@ export function InvestmentSecurityDetailScreen({
       {security.owned ? (
         <section>
           <SectionHeadingDivider title="MY SECURITY" className="px-[24px]" />
-          <FieldRow label="Total value in portfolio / client currency" value={formatMoney(security.localValue, country, security.localCurrency, amountsHidden)} />
-          <FieldRow label="Quantity" value={`${amountsHidden ? "*,***" : security.quantity.toFixed(3).replace(".", ",")} PCS`} />
+          <InvestmentDetailField label="Total value in portfolio / client currency" value={formatMoney(security.localValue, country, security.localCurrency, amountsHidden)} />
+          <InvestmentDetailField label="Quantity" value={`${amountsHidden ? "*,***" : security.quantity.toFixed(3).replace(".", ",")} PCS`} />
         </section>
       ) : null}
 
       <section>
         <SectionHeadingDivider title="MARKET INFO" className="px-[24px]" />
-        <FieldRow label="Actual market price" value={formatMoney(marketPrice, country, security.currency, amountsHidden)} />
+        <InvestmentDetailField label="Actual market price" value={formatMoney(marketPrice, country, security.currency, amountsHidden)} />
         <div className="px-[8px]">
           <InvestmentPortfolioChart points={chartPoints} country={country} currency={security.currency} amountsHidden={amountsHidden} />
           <InvestmentPeriodChips periods={INVESTMENT_PERIODS.filter((item) => item.id !== "6m")} selectedPeriodId={period} onChange={setPeriod} />
         </div>
-        <FieldRow label="Product ID" value={security.productId} />
-        <FieldRow label="Fund type" value={security.productType === "Fund" ? "Funds" : security.productType} />
-        <FieldRow label="Security description" value={security.description} multiline />
-        <FieldRow label="Last update" value={security.lastUpdate} />
-        <FieldRow label="Purchase options" value={security.contributionType === "RECURRENT" ? "One off and recurrent order" : "One off order"} />
+        <InvestmentDetailField label="Product ID" value={security.productId} />
+        <InvestmentDetailField label="Fund type" value={security.productType === "Fund" ? "Funds" : security.productType} />
+        <InvestmentDetailField label="Security description" value={security.description} multiline />
+        <InvestmentDetailField label="Last update" value={security.lastUpdate} />
+        <InvestmentDetailField label="Purchase options" value={security.contributionType === "RECURRENT" ? "One off and recurrent order" : "One off order"} />
       </section>
       <div className="h-[34px]" />
     </div>

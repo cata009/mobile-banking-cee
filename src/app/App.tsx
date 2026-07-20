@@ -48,6 +48,7 @@ const KidsMarketHomeApp = lazy(() => import("@/app/screens/kids/KidsMarketHomeAp
 const ContactsScreen = lazy(() => import("@/app/screens/contacts/ContactsScreen"));
 const DesignSystemPage = lazy(() => import("@/app/screens/design-system/DesignSystemPage"));
 const FlowLibraryScreen = lazy(() => import("@/app/screens/flow-library/FlowLibraryScreen"));
+const ToolsScreen = lazy(() => import("@/app/screens/tools/ToolsScreen"));
 const AccountDetailScreen = lazy(() => import("@/app/screens/accounts/AccountDetailScreen"));
 const AccountDetailsInfoScreen = lazy(() => import("@/app/screens/accounts/AccountDetailsInfoScreen"));
 const AccountOptionsScreen = lazy(() => import("@/app/screens/accounts/AccountOptionsScreen"));
@@ -97,6 +98,7 @@ import {
 } from "../../package/mobile-pi-coapping-chat-package/src";
 import "../../package/mobile-pi-coapping-chat-package/src/coapping.css";
 import type { AccountTransaction } from "@/data/accountDetails";
+import type { PfmCategorySelection } from "@/data/pfmCategories";
 import {
   createEmptyDomesticPaymentDraft,
   createRedoDomesticPaymentDraft,
@@ -256,6 +258,7 @@ function AppContent({
   const [selectedCardId, setSelectedCardId] = useState<string | null>(parsedDeepLink?.cardId ?? null);
   const [selectedFlowPreviewId, setSelectedFlowPreviewId] = useState<FlowPreviewId>(parsedDeepLink?.flowId ?? "ro-round-up");
   const [selectedTransaction, setSelectedTransaction] = useState<AccountTransaction | null>(null);
+  const [transactionCategoryOverrides, setTransactionCategoryOverrides] = useState<Record<string, PfmCategorySelection>>({});
   const [paymentDraft, setPaymentDraft] = useState<DomesticPaymentDraft | null>(null);
   const [czChatOpen, setCzChatOpen] = useState(false);
   const [czChatContext, setCzChatContext] = useState<CoAppingChatContext | null>(null);
@@ -547,6 +550,24 @@ function AppContent({
     navigateTo("transaction-detail");
   };
 
+  const handleTransactionCategoryChange = (
+    transaction: AccountTransaction,
+    selection: PfmCategorySelection,
+  ) => {
+    const updatedTransaction: AccountTransaction = {
+      ...transaction,
+      category: selection.groupLabel,
+      pfmCategory: selection.category,
+      pfmSubcategory: selection.subcategory,
+    };
+
+    setTransactionCategoryOverrides((current) => ({
+      ...current,
+      [transaction.id]: selection,
+    }));
+    setSelectedTransaction((current) => current?.id === transaction.id ? updatedTransaction : current);
+  };
+
   const handleRedoPaymentClick = () => {
     if (!selectedTransaction) return;
 
@@ -707,6 +728,12 @@ function AppContent({
         </Suspense>
       )}
 
+      {currentScreen === "tools" && (
+        <Suspense fallback={<ScreenFallback />}>
+          <ToolsScreen />
+        </Suspense>
+      )}
+
       {currentRoutePolicy.surface !== "platform" && (
       <FrameComponent
         statusBarVariant={statusBarVariant}
@@ -789,6 +816,8 @@ function AppContent({
             onDetailsClick={handleAccountDetailsClick}
             onOptionsClick={handleAccountOptionsClick}
             onTransactionClick={handleTransactionClick}
+            transactionCategoryOverrides={transactionCategoryOverrides}
+            onTransactionCategoryChange={handleTransactionCategoryChange}
             onHelpClick={
               isCzCoAppingChatbotPreviewActive
                 ? () => openCzChatHelp(getCzChatHelpAreaForAccountProduct(selectedAccountProduct))
@@ -804,6 +833,7 @@ function AppContent({
             transaction={selectedTransaction}
             onBack={goBack}
             onRedoPayment={handleRedoPaymentClick}
+            onCategoryChange={handleTransactionCategoryChange}
           />
         )}
 

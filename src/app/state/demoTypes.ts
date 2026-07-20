@@ -153,7 +153,8 @@ export type ScreenId =
   | "kids.sk.home-concept"
   | "kids.hu.home-concept"
   | "platform.design-system"
-  | "platform.flow-library";
+  | "platform.flow-library"
+  | "platform.tools";
 
 /**
  * Addressable component identifiers for AI catalog and reuse mapping.
@@ -194,6 +195,7 @@ export type ComponentId =
   | "home.unplanned-banner"
   | "analytics.spendings"
   | "pfm.category-icon"
+  | "pfm.category-change-sheet"
   | "messages.mailbox-tabs"
   | "messages.inbox-list"
   | "accounts.action-bar"

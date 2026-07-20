@@ -54,6 +54,7 @@ export const ROUTE_POLICY = {
   "payment-success": route({ surface: "app", registryIds: ["pi.payment.success"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "payments", payload: "none", deepLink: { restorable: false, fallback: "payments", payload: "none" } }),
   "flow-library": route({ surface: "platform", registryIds: ["platform.flow-library"], productEligibility: "unrestricted", statusBar: "dark", backFallback: "homepage", payload: "flow", deepLink: { restorable: true, fallback: "flow-library", payload: "flow" } }),
   "design-system": route({ surface: "platform", registryIds: ["platform.design-system"], productEligibility: "unrestricted", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "design-system", payload: "none" } }),
+  tools: route({ surface: "platform", registryIds: ["platform.tools"], productEligibility: "unrestricted", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "tools", payload: "none" } }),
 } satisfies Record<Screen, RoutePolicy>;
 
 export interface ProductRouteContext {

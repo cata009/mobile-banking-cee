@@ -37,7 +37,8 @@ export type Screen =
   | "payment-sign" // Domestic payment sign screen
   | "payment-success" // Domestic payment success screen
   | "flow-library" // Full-width future flow preview library
-  | "design-system"; // Full-width component inventory
+  | "design-system" // Full-width component inventory
+  | "tools"; // Full-width stakeholder tools (side-by-side, translation tools)
 
 type CardRouteScreen = "card-detail" | "card-details-info" | "card-options";
 type AccountRouteScreen = "account-detail" | "account-details-info" | "account-options";

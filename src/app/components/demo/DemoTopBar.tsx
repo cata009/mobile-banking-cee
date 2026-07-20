@@ -28,7 +28,7 @@ import { DemoFeatureSidePanel } from "./DemoFeatureSidePanel";
 import { PhoneScreenshotMenuItems } from "./PhoneScreenshotControl";
 import svgPaths from "@/imports/svg-pn3y56bdut";
 
-type PlatformTabId = "demo" | "flows" | "design-system";
+type PlatformTabId = "demo" | "flows" | "design-system" | "tools";
 type PlatformNavIcon = IconName | "demo-app";
 
 interface DemoTopBarProps {
@@ -134,7 +134,8 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
       : null;
   const isDesignSystemSelected = currentScreen === "design-system";
   const isFlowLibrarySelected = currentScreen === "flow-library";
-  const showContextControls = !isDesignSystemSelected && !isFlowLibrarySelected;
+  const isToolsSelected = currentScreen === "tools";
+  const showContextControls = !isDesignSystemSelected && !isFlowLibrarySelected && !isToolsSelected;
   const scenarioEntryScreen = getScenarioEntryScreen(scenario);
   const selectedScenarioLabel = scenario === "active" ? "Active app" : "Inactive app";
 
@@ -142,7 +143,9 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
     ? "flows"
     : isDesignSystemSelected
       ? "design-system"
-      : "demo";
+      : isToolsSelected
+        ? "tools"
+        : "demo";
 
   useEffect(() => {
     if (release === "release-current") return;
@@ -172,7 +175,8 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
   };
 
   const handleCountrySelect = (countryCode: (typeof COUNTRIES)[number]) => {
-    const shouldReturnToDemo = currentScreen === "design-system" || currentScreen === "flow-library";
+    const shouldReturnToDemo =
+      currentScreen === "design-system" || currentScreen === "flow-library" || currentScreen === "tools";
     closeAllDropdowns();
     leavePlatformSurface();
     setCountry(countryCode);
@@ -223,6 +227,13 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
       window.dispatchEvent(new CustomEvent<FlowPreviewId>("flow-preview-select", { detail: firstFlow }));
     }
     window.requestAnimationFrame(() => navigateToAndReset("flow-library"));
+  };
+
+  const handleToolsSelect = () => {
+    closeAllDropdowns();
+    leavePlatformSurface();
+    setCoAppingActive(false);
+    window.requestAnimationFrame(() => navigateToAndReset("tools"));
   };
 
   useEffect(() => {
@@ -368,6 +379,12 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
               icon="palette"
               label="Design system"
               onClick={handleDesignSystemSelect}
+            />
+            <PlatformNavButton
+              active={activePlatformTab === "tools"}
+              icon="sliders-horizontal"
+              label="Tools"
+              onClick={handleToolsSelect}
             />
           </nav>
 

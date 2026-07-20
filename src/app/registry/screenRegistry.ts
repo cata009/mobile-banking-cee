@@ -30,7 +30,8 @@ export type LayoutFamily =
   | "contacts"
   | "kids"
   | "design-system"
-  | "flow-library";
+  | "flow-library"
+  | "tools";
 
 export interface ScreenMeta {
   id: ScreenId;
@@ -470,6 +471,20 @@ export const SCREEN_REGISTRY: Record<ScreenId, ScreenMeta> = {
     features: [],
     screenshots: [],
     similarTo: ["pi.products.overview", "pi.account.detail", "platform.design-system"],
+  },
+  "platform.tools": {
+    id: "platform.tools",
+    label: "Stakeholder tools",
+    runtimeScreen: "tools",
+    products: ["PI"],
+    countries: ALL_COUNTRIES,
+    designSystems: ["current"],
+    status: "implemented",
+    layoutFamily: "tools",
+    componentPath: "src/app/screens/tools/ToolsScreen.tsx",
+    features: [],
+    screenshots: [],
+    similarTo: ["platform.design-system", "platform.flow-library"],
   },
 };
 

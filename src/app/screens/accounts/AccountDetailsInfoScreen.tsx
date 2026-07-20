@@ -10,6 +10,7 @@ import { formatMoneyNumber, getCountryConfig } from "@/app/registry/countryConfi
 import { maskFormattedAmount } from "@/app/utils/amountPrivacy";
 import { useCopyToClipboard } from "@/app/utils/useCopyToClipboard";
 import { useProducts } from "@/hooks/useProducts";
+import { getLoanDetails, getTermDepositDetails } from "@/data/accountProductDetails";
 import { isAccountDetailProduct } from "@/data/products";
 import { useState } from "react";
 import type { UIEvent } from "react";
@@ -87,9 +88,32 @@ export default function AccountDetailsInfoScreen({
     );
   }
 
-  const availableFunds = `${maskFormattedAmount(formatMoneyNumber(product.balance, country), amountsHidden)} ${config.currency}`;
-  const currentBalance = `${maskFormattedAmount(formatMoneyNumber(product.balance * 0.92, country), amountsHidden)} ${config.currency}`;
-  const zeroAmount = `${maskFormattedAmount(formatMoneyNumber(0, country), amountsHidden)} ${config.currency}`;
+  const formatProductAmount = (amount: number) =>
+    `${maskFormattedAmount(formatMoneyNumber(amount, country), amountsHidden)} ${config.currency}`;
+  const availableFunds = formatProductAmount(product.balance);
+  const currentBalance = formatProductAmount(
+    product.type === "saving_account" ? product.balance : product.balance * 0.92,
+  );
+  const zeroAmount = formatProductAmount(0);
+  const isSavingAccount = product.type === "saving_account";
+  const isTermDeposit = product.type === "term_deposit";
+  const currentAccountNumber = products.find((item) => item.type === "current_account")?.accountNumber
+    ?? product.accountNumber;
+  const termDepositDetails = isTermDeposit
+    ? getTermDepositDetails(product, currentAccountNumber)
+    : null;
+  const loanDetails = product.type === "loan" || product.type === "mortgage"
+    ? getLoanDetails(product)
+    : null;
+  const accountTitleField = (
+    <AccountDetailsInfoField
+      title={t("runtime.accounts.detailsInfo.accountTitle", "Account title")}
+      subtitle={t(
+        `runtime.accounts.productTitles.${PRODUCT_TITLE_KEYS_BY_TYPE[product.type]}`,
+        product.type.replace(/_/g, " ").toUpperCase(),
+      )}
+    />
+  );
 
   return (
     <div className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] scrollbar-hide" onScroll={handlePageScroll}>
@@ -104,47 +128,99 @@ export default function AccountDetailsInfoScreen({
 
       <div className="px-[24px] pb-[40px] pt-[46px]">
         <div className="flex flex-col">
-          <AccountDetailsInfoField
-            title={t("runtime.accounts.detailsInfo.accountNumber", "Account number")}
-            subtitle={product.accountNumber}
-            trailingIcon={
-              <button
-                type="button"
-                aria-label="Copy account number"
-                className="flex h-[40px] w-[40px] items-center justify-center"
-                onClick={() => copyToClipboard(product.accountNumber, "Account number")}
-              >
-                <AppIcon name="copy-documents" color="var(--uc-text)" />
+          {termDepositDetails ? (
+            <>
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.termDeposit.maturityAmount", "Maturity amount")} subtitle={formatProductAmount(termDepositDetails.maturityAmount)} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.termDeposit.interestAmountBeforeTax", "Interest amount before tax")} subtitle={formatProductAmount(termDepositDetails.interestAmountBeforeTax)} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.termDeposit.maturityDate", "Maturity date")} subtitle={termDepositDetails.maturityDate} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.termDeposit.rollover", "Rollover")} subtitle={termDepositDetails.rollover} />
+              {accountTitleField}
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.termDeposit.accountOwner", "Account owner")} subtitle={termDepositDetails.accountOwner} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.termDeposit.depositAmount", "Deposit Amount")} subtitle={formatProductAmount(termDepositDetails.depositAmount)} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.termDeposit.startValueDate", "Start/Value Date")} subtitle={termDepositDetails.startValueDate} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.termDeposit.maturityPeriod", "Maturity period")} subtitle={termDepositDetails.maturityPeriod} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.termDeposit.interestRatePerYear", "Interest rate/year")} subtitle={termDepositDetails.interestRatePerYear} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.termDeposit.currentAccountNumber", "Current account number")} subtitle={termDepositDetails.currentAccountNumber} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.termDeposit.decreaseAmountBy", "Decrease amount by")} subtitle={formatProductAmount(termDepositDetails.decreaseAmountBy)} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.termDeposit.reinvestInterest", "Reinvest the interest")} subtitle={termDepositDetails.reinvestInterest} />
+            </>
+          ) : loanDetails ? (
+            <>
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.loan.nextInstallment", "Next installment")} subtitle={formatProductAmount(loanDetails.nextInstallment)} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.loan.nextInstallmentDate", "Next installment date")} subtitle={loanDetails.nextInstallmentDate} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.loan.interestRate", "Interest rate")} subtitle={loanDetails.interestRate} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.loan.overdueAmount", "Overdue amount")} subtitle={formatProductAmount(loanDetails.overdueAmount)} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.loan.overdueInterestRate", "Overdue interest rate")} subtitle={loanDetails.overdueInterestRate} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.loan.ownedAmount", "Owned amount")} subtitle={formatProductAmount(loanDetails.ownedAmount)} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.loan.originalAmount", "Original amount")} subtitle={formatProductAmount(loanDetails.originalAmount)} />
+              {accountTitleField}
+              <AccountDetailsInfoField
+                title={t("runtime.accounts.detailsInfo.loan.iban", "IBAN")}
+                subtitle={loanDetails.iban}
+                trailingIcon={
+                  <button
+                    type="button"
+                    aria-label="Copy IBAN"
+                    className="flex h-[40px] w-[40px] items-center justify-center"
+                    onClick={() => copyToClipboard(loanDetails.iban, "IBAN")}
+                  >
+                    <AppIcon name="copy-documents" color="var(--uc-text)" />
+                  </button>
+                }
+              />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.loan.accountOwner", "Account owner")} subtitle={loanDetails.accountOwner} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.loan.startDate", "Start date")} subtitle={loanDetails.startDate} />
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.loan.finalPayment", "Final payment")} subtitle={loanDetails.finalPayment} />
+            </>
+          ) : (
+            <>
+              <AccountDetailsInfoField
+                title={t("runtime.accounts.detailsInfo.accountNumber", "Account number")}
+                subtitle={product.accountNumber}
+                trailingIcon={
+                  <button
+                    type="button"
+                    aria-label="Copy account number"
+                    className="flex h-[40px] w-[40px] items-center justify-center"
+                    onClick={() => copyToClipboard(product.accountNumber, "Account number")}
+                  >
+                    <AppIcon name="copy-documents" color="var(--uc-text)" />
+                  </button>
+                }
+              />
+              {isSavingAccount ? accountTitleField : (
+                <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.availableFunds", "Available funds")} subtitle={availableFunds} />
+              )}
+              <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.currentBalance", "Current balance")} subtitle={currentBalance} />
+              {!isSavingAccount ? (
+                <>
+                  <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.blockedReservedAmount", "Blocked/reserved amount")} subtitle={zeroAmount} />
+                  <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.overdraft", "Overdraft")} subtitle={zeroAmount} />
+                  {accountTitleField}
+                  <AccountDetailsInfoField
+                    title={t("runtime.accounts.detailsInfo.offer", "Offer")}
+                    subtitle={t("runtime.accounts.detailsInfo.offerValue", "Account under favorable conditions")}
+                  />
+                </>
+              ) : null}
+            </>
+          )}
+        </div>
+
+        {!isSavingAccount && !isTermDeposit && !loanDetails ? (
+          <>
+            <div className="flex justify-center py-[48px]">
+              <button className="uc-type-n4-strong leading-[20px] uppercase text-[var(--uc-action)]">
+                {t("runtime.actions.showLess", "Show less")}
               </button>
-            }
-          />
-          <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.availableFunds", "Available funds")} subtitle={availableFunds} />
-          <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.currentBalance", "Current balance")} subtitle={currentBalance} />
-          <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.blockedReservedAmount", "Blocked/reserved amount")} subtitle={zeroAmount} />
-          <AccountDetailsInfoField title={t("runtime.accounts.detailsInfo.overdraft", "Overdraft")} subtitle={zeroAmount} />
-          <AccountDetailsInfoField
-            title={t("runtime.accounts.detailsInfo.accountTitle", "Account title")}
-            subtitle={t(
-              `runtime.accounts.productTitles.${PRODUCT_TITLE_KEYS_BY_TYPE[product.type]}`,
-              product.type.replace(/_/g, " ").toUpperCase(),
-            )}
-          />
-          <AccountDetailsInfoField
-            title={t("runtime.accounts.detailsInfo.offer", "Offer")}
-            subtitle={t("runtime.accounts.detailsInfo.offerValue", "Account under favorable conditions")}
-          />
-        </div>
+            </div>
 
-        <div className="flex justify-center py-[48px]">
-          <button className="uc-type-n4-strong leading-[20px] uppercase text-[var(--uc-action)]">
-            {t("runtime.actions.showLess", "Show less")}
-          </button>
-        </div>
-
-        <section>
-          <SectionHeadingDivider title={t("runtime.accounts.detailsInfo.connectedCards", "Connected cards")} />
-          <ConnectedCardRow />
-        </section>
+            <section>
+              <SectionHeadingDivider title={t("runtime.accounts.detailsInfo.connectedCards", "Connected cards")} />
+              <ConnectedCardRow />
+            </section>
+          </>
+        ) : null}
       </div>
       <CopyToast toast={copyToast} />
     </div>

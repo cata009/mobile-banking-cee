@@ -13,7 +13,7 @@ const ALL_ROUTES: Screen[] = [
   'investments-history', 'prime', 'more', 'documents', 'settings', 'contacts', 'account-detail',
   'account-details-info', 'account-options', 'card-details-info', 'card-options', 'transaction-detail',
   'card-detail', 'domestic-payment', 'payment-review', 'payment-sign', 'payment-success',
-  'flow-library', 'design-system',
+  'flow-library', 'design-system', 'tools',
 ]
 
 const BACK_FALLBACKS: Record<Screen, Screen> = {
@@ -47,16 +47,18 @@ const BACK_FALLBACKS: Record<Screen, Screen> = {
   'payment-success': 'payments',
   'flow-library': 'homepage',
   'design-system': 'homepage',
+  tools: 'homepage',
 }
 
 const RESTORABLE_ROUTES: Screen[] = [
   'prelogin-inactive', 'prelogin-active', 'homepage', 'analytics', 'messages', 'payments', 'products',
   'investments', 'investments-history', 'prime', 'more', 'documents', 'settings', 'contacts', 'account-detail',
   'account-details-info', 'account-options', 'card-details-info', 'card-options', 'card-detail', 'flow-library', 'design-system',
+  'tools',
 ]
 
 describe('exhaustive route policy', () => {
-  it('owns exactly the 30 runtime routes and their existing back fallbacks', () => {
+  it('owns exactly the 31 runtime routes and their existing back fallbacks', () => {
     expect(Object.keys(ROUTE_POLICY)).toEqual(ALL_ROUTES)
     expect(Object.fromEntries(ALL_ROUTES.map((route) => [route, ROUTE_POLICY[route].backFallback]))).toEqual(
       BACK_FALLBACKS,

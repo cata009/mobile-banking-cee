@@ -88,7 +88,7 @@ export function DemoNavigationSync() {
       };
 
       setCoAppingActive(false);
-      if (hasDesignSystemHash() || currentScreen === "flow-library") {
+      if (hasDesignSystemHash() || currentScreen === "flow-library" || currentScreen === "tools") {
         return;
       }
 

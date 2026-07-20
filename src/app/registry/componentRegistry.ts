@@ -458,6 +458,16 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     usedByScreens: ["pi.account.detail", "pi.analytics.overview"],
     notes: "Token-driven PFM category icon mapped from screenshots/PFM-icons.svg; Taxes and Penalties, Income, Home, Utilities, Transportation, Children, Healthcare, Shopping, Lifestyle, Education, Leisure time, Investments, Uncategorized, Groceries, Exclude from budget, Insurance, Finance, Wallet, and Transfers render real 20x20 SVG glyphs inside a 32x32 container, while remaining categories still fall back to initials.",
   },
+  "pfm.category-change-sheet": {
+    id: "pfm.category-change-sheet",
+    label: "PFM category change sheet",
+    products: ["PI"],
+    designSystems: ["current"],
+    status: "mock-driven",
+    componentPath: "src/app/components/pfm/PfmCategoryChangeSheet.tsx",
+    usedByScreens: ["pi.account.detail", "pi.transaction.detail"],
+    notes: "Production-screenshot-derived recategorization sheet with 18 initially collapsed expense groups, 103 mapped subcategories, search, single radio selection, and a guarded confirmation action. It updates deterministic demo-session transaction presentation only; no backend persistence is implied.",
+  },
   "messages.mailbox-tabs": {
     id: "messages.mailbox-tabs",
     label: "Messages mailbox tabs",
@@ -526,7 +536,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "implemented",
     componentPath: "src/app/components/accounts/AccountTransactionRow.tsx",
     usedByScreens: ["pi.account.detail"],
-    notes: "Renders account transactions with a PFM category badge sourced from the shared PFM category map, fixed date/icon spacing, 18px transaction label line-height, 22px amount line-height, and 16px list spacing around month dividers in Account Detail.",
+    notes: "Renders account transactions with a PFM category badge sourced from the shared PFM category map, fixed date/icon spacing, 18px transaction label line-height, 22px amount line-height, and 16px list spacing around month dividers in Account Detail. Its optional split-interaction mode opens PFM recategorization from the icon while the detail column preserves Transaction Details navigation.",
   },
   "transactions.detail": {
     id: "transactions.detail",
@@ -536,7 +546,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "implemented",
     componentPath: "src/app/screens/payments/DomesticPaymentFlowScreens.tsx",
     usedByScreens: ["pi.transaction.detail"],
-    notes: "Shows transaction amount, a transaction-derived PFM category pill with the shared PFM icon glyph, category actions, spending insight, details, and a Redo payment entry into domestic payment.",
+    notes: "Shows transaction amount, a transaction-derived PFM category pill with the shared PFM icon glyph, category actions, spending insight, details, a connected Change category sheet, and a Redo payment entry into domestic payment.",
   },
   "payments.menu": {
     id: "payments.menu",
