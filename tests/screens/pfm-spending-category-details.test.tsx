@@ -91,7 +91,7 @@ describe('PFM Spending category details', () => {
     expect(screen.queryByText('Uncategorized transaction')).not.toBeInTheDocument()
   })
 
-  it('removes a tapped bubble and recalculates the category total and transaction list', () => {
+  it('toggles a bubble inactive and active while recalculating the category total and transaction list', () => {
     const timeline = createSpendingAnalyticsTimeline('RO', mockProducts)
 
     render(
@@ -109,13 +109,57 @@ describe('PFM Spending category details', () => {
     expect(screen.getAllByText('599,21 RON').length).toBeGreaterThan(0)
     expect(screen.getByText('06')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', {
+    const electronicsBubble = screen.getByRole('button', {
       name: 'Filter out subcategory: ELECTRONICS & COMPUTERS',
-    }))
+    })
+    fireEvent.click(electronicsBubble)
 
-    expect(screen.queryByText('ELECTRONICS & COMPUTERS')).not.toBeInTheDocument()
+    const inactiveElectronicsBubble = screen.getByRole('button', {
+      name: 'Include subcategory: ELECTRONICS & COMPUTERS',
+    })
+    expect(inactiveElectronicsBubble).toHaveAttribute('aria-pressed', 'true')
+    expect(inactiveElectronicsBubble).toHaveAttribute('data-pfm-subcategory-active', 'false')
     expect(screen.queryByText('06')).not.toBeInTheDocument()
     expect(screen.getAllByText('208,99 RON').length).toBeGreaterThan(0)
+
+    fireEvent.click(inactiveElectronicsBubble)
+
+    const restoredElectronicsBubble = screen.getByRole('button', {
+      name: 'Filter out subcategory: ELECTRONICS & COMPUTERS',
+    })
+    expect(restoredElectronicsBubble).toHaveAttribute('aria-pressed', 'false')
+    expect(restoredElectronicsBubble).toHaveAttribute('data-pfm-subcategory-active', 'true')
+    expect(screen.getByText('06')).toBeInTheDocument()
+    expect(screen.getAllByText('599,21 RON').length).toBeGreaterThan(0)
+  })
+
+  it('drags the category period carousel from the latest month to the current-year summary', () => {
+    const timeline = createSpendingAnalyticsTimeline('RO', mockProducts)
+    const onPeriodChange = vi.fn()
+
+    const { container } = render(
+      <PfmCategoryDetailScreen
+        category="Finance"
+        direction="out"
+        timeline={timeline}
+        activePeriodKey="2026-04"
+        onPeriodChange={onPeriodChange}
+        onBack={() => undefined}
+      />,
+      { wrapper: Providers },
+    )
+
+    const carousel = container.querySelector<HTMLElement>('[data-pfm-period-carousel]')
+    expect(carousel).not.toBeNull()
+
+    const activeIndex = timeline.periods.findIndex((period) => period.key === '2026-04')
+    carousel!.scrollLeft = activeIndex * 375
+
+    fireEvent.mouseDown(carousel!, { button: 0, clientX: 300 })
+    fireEvent.mouseMove(document, { buttons: 1, clientX: -100 })
+    fireEvent.mouseUp(document)
+
+    expect(onPeriodChange).toHaveBeenCalledWith('year-2026')
   })
 
   it('opens Money Out and Money In category pages from the analytics overview and returns with Back', () => {

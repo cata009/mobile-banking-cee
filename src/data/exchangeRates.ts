@@ -18,6 +18,23 @@ export const EUR_REFERENCE_RATES: Record<Currency, number> = {
   GBP: 0.86618,
 };
 
+export const EXCHANGE_CURRENCIES: readonly Currency[] = [
+  "RON",
+  "EUR",
+  "USD",
+  "GBP",
+  "CZK",
+  "HUF",
+  "RSD",
+  "BAM",
+];
+
+export interface ExchangeRateRow {
+  currency: Currency;
+  unitRate: number;
+  convertedAmount: number;
+}
+
 export function getCountryCurrency(country: CountryId): Currency {
   return getCountryConfig(country).currency as Currency;
 }
@@ -39,4 +56,19 @@ export function convertCurrency(amount: number, fromCurrency: Currency, toCurren
 
 export function roundMoney(amount: number): number {
   return Math.round(amount * 100) / 100;
+}
+
+export function getExchangeRateRows(
+  amount: number,
+  sourceCurrency: Currency,
+): ExchangeRateRow[] {
+  const safeAmount = Number.isFinite(amount) && amount > 0 ? amount : 0;
+
+  return EXCHANGE_CURRENCIES
+    .filter((currency) => currency !== sourceCurrency)
+    .map((currency) => ({
+      currency,
+      unitRate: convertCurrency(1, currency, sourceCurrency),
+      convertedAmount: convertCurrency(safeAmount, sourceCurrency, currency),
+    }));
 }

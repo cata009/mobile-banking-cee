@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { UIEvent } from "react";
+import type { DragEvent, MouseEvent, PointerEvent, UIEvent } from "react";
 import PageHeader from "@/app/components/PageHeader";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
 import AccountTransactionMonthDivider from "@/app/components/accounts/AccountTransactionMonthDivider";
@@ -31,6 +31,14 @@ interface PfmCategoryDetailScreenProps {
 
 const PANEL_WIDTH = 375;
 
+type PeriodCarouselDragState = {
+  didMove: boolean;
+  input: "mouse" | "pointer" | null;
+  pointerId: number | null;
+  startScrollLeft: number;
+  startX: number;
+};
+
 function formatPeriodTitle(period: SpendingAnalyticsPeriod) {
   if (period.kind === "year") return period.year;
   const month = period.label.toLocaleLowerCase();
@@ -49,7 +57,17 @@ export default function PfmCategoryDetailScreen({
   const country = useCountry();
   const { t } = useLanguage();
   const carouselRef = useRef<HTMLDivElement>(null);
+  const dragStateRef = useRef<PeriodCarouselDragState>({
+    didMove: false,
+    input: null,
+    pointerId: null,
+    startScrollLeft: 0,
+    startX: 0,
+  });
+  const mouseDragCleanupRef = useRef<(() => void) | null>(null);
   const scrollTimerRef = useRef<number | null>(null);
+  const suppressClickRef = useRef(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [showUncategorizedTip, setShowUncategorizedTip] = useState(true);
   const [excludedSubcategories, setExcludedSubcategories] = useState<ReadonlySet<string>>(() => new Set());
   const categoryDefinition = getPfmCategory(category);
@@ -64,29 +82,182 @@ export default function PfmCategoryDetailScreen({
     carouselRef.current?.scrollTo({ left: activeIndex * PANEL_WIDTH, behavior: "auto" });
   }, [activeIndex]);
 
-  useEffect(() => () => {
-    if (scrollTimerRef.current !== null) window.clearTimeout(scrollTimerRef.current);
-  }, []);
-
   useEffect(() => {
     setExcludedSubcategories(new Set());
   }, [activePeriodKey, category, direction]);
 
-  const handleExcludeSubcategory = (subcategoryLabel: string) => {
-    setExcludedSubcategories((current) => new Set([...current, subcategoryLabel]));
+  const handleToggleSubcategory = (subcategoryLabel: string) => {
+    setExcludedSubcategories((current) => {
+      const next = new Set(current);
+      if (next.has(subcategoryLabel)) next.delete(subcategoryLabel);
+      else next.add(subcategoryLabel);
+      return next;
+    });
+  };
+
+  const clampPeriodIndex = (index: number) => Math.max(0, Math.min(timeline.periods.length - 1, index));
+
+  const getNearestPeriodIndex = (scrollLeft: number) => {
+    if (timeline.periods.length <= 1) return 0;
+    return clampPeriodIndex(Math.round(scrollLeft / PANEL_WIDTH));
+  };
+
+  const scrollToPeriod = (index: number, behavior: ScrollBehavior = "smooth") => {
+    carouselRef.current?.scrollTo({
+      left: clampPeriodIndex(index) * PANEL_WIDTH,
+      behavior,
+    });
+  };
+
+  const snapCarouselToNearestPeriod = () => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+    const nextIndex = getNearestPeriodIndex(carousel.scrollLeft);
+    const nextPeriod = timeline.periods[nextIndex];
+    if (!nextPeriod) return;
+    scrollToPeriod(nextIndex);
+    if (nextPeriod.key !== activePeriodKey) onPeriodChange(nextPeriod.key);
+  };
+
+  const removeMouseDragListeners = () => {
+    mouseDragCleanupRef.current?.();
+    mouseDragCleanupRef.current = null;
+  };
+
+  const clearScrollTimer = () => {
+    if (scrollTimerRef.current === null) return;
+    window.clearTimeout(scrollTimerRef.current);
+    scrollTimerRef.current = null;
+  };
+
+  const resetCarouselDrag = () => {
+    removeMouseDragListeners();
+    dragStateRef.current = {
+      didMove: false,
+      input: null,
+      pointerId: null,
+      startScrollLeft: 0,
+      startX: 0,
+    };
+    setIsDragging(false);
+  };
+
+  const beginCarouselDrag = (
+    clientX: number,
+    input: PeriodCarouselDragState["input"],
+    pointerId: number | null = null,
+  ) => {
+    const carousel = carouselRef.current;
+    if (!carousel || timeline.periods.length <= 1 || dragStateRef.current.input) return false;
+
+    dragStateRef.current = {
+      didMove: false,
+      input,
+      pointerId,
+      startScrollLeft: carousel.scrollLeft,
+      startX: clientX,
+    };
+    return true;
+  };
+
+  const moveCarouselDrag = (clientX: number) => {
+    const carousel = carouselRef.current;
+    const dragState = dragStateRef.current;
+    if (!carousel || !dragState.input) return false;
+
+    const deltaX = clientX - dragState.startX;
+    if (!dragState.didMove && Math.abs(deltaX) < 4) return false;
+
+    dragState.didMove = true;
+    suppressClickRef.current = true;
+    setIsDragging(true);
+    carousel.scrollLeft = dragState.startScrollLeft - deltaX;
+    return true;
+  };
+
+  const finishCarouselDrag = () => {
+    const didMove = dragStateRef.current.didMove;
+    if (didMove) {
+      snapCarouselToNearestPeriod();
+      window.setTimeout(() => {
+        suppressClickRef.current = false;
+      }, 80);
+    }
+    resetCarouselDrag();
   };
 
   const handleScroll = (_event: UIEvent<HTMLDivElement>) => {
-    if (scrollTimerRef.current !== null) window.clearTimeout(scrollTimerRef.current);
-    scrollTimerRef.current = window.setTimeout(() => {
-      const nextIndex = Math.max(
-        0,
-        Math.min(timeline.periods.length - 1, Math.round((carouselRef.current?.scrollLeft ?? 0) / PANEL_WIDTH)),
-      );
-      const nextPeriod = timeline.periods[nextIndex];
-      if (nextPeriod && nextPeriod.key !== activePeriodKey) onPeriodChange(nextPeriod.key);
-    }, 120);
+    if (dragStateRef.current.input) return;
+    clearScrollTimer();
+    scrollTimerRef.current = window.setTimeout(snapCarouselToNearestPeriod, 120);
   };
+
+  const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    if (beginCarouselDrag(event.clientX, "pointer", event.pointerId)) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+  };
+
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const dragState = dragStateRef.current;
+    if (dragState.input !== "pointer" || dragState.pointerId !== event.pointerId) return;
+    if (moveCarouselDrag(event.clientX)) event.preventDefault();
+  };
+
+  const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    const dragState = dragStateRef.current;
+    if (dragState.input !== "pointer" || dragState.pointerId !== event.pointerId) return;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    finishCarouselDrag();
+  };
+
+  const handlePointerCancel = (event: PointerEvent<HTMLDivElement>) => {
+    if (dragStateRef.current.input !== "pointer" || dragStateRef.current.pointerId !== event.pointerId) return;
+    resetCarouselDrag();
+    suppressClickRef.current = false;
+  };
+
+  const handleMouseDown = (event: MouseEvent<HTMLDivElement>) => {
+    if (event.button !== 0 || !beginCarouselDrag(event.clientX, "mouse")) return;
+
+    const handleMouseMove = (mouseEvent: globalThis.MouseEvent) => {
+      if (dragStateRef.current.input !== "mouse") return;
+      if (mouseEvent.buttons !== 1) {
+        finishCarouselDrag();
+        return;
+      }
+      if (moveCarouselDrag(mouseEvent.clientX)) mouseEvent.preventDefault();
+    };
+
+    const handleMouseUp = () => {
+      if (dragStateRef.current.input === "mouse") finishCarouselDrag();
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+    mouseDragCleanupRef.current = () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  };
+
+  const handleClickCapture = (event: MouseEvent<HTMLDivElement>) => {
+    if (!suppressClickRef.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const handleDragStart = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
+
+  useEffect(() => () => {
+    removeMouseDragListeners();
+    clearScrollTimer();
+  }, []);
 
   return (
     <div className="relative flex h-full w-full flex-col bg-[var(--uc-app-bg)] text-[var(--uc-text)]">
@@ -102,9 +273,17 @@ export default function PfmCategoryDetailScreen({
       <div className="flex-1 overflow-x-hidden overflow-y-auto scrollbar-hide">
         <div
           ref={carouselRef}
-          className="flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden scrollbar-hide"
+          data-pfm-period-carousel
+          className={`flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden scrollbar-hide select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
           onScroll={handleScroll}
-          style={{ WebkitOverflowScrolling: "touch" }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerCancel}
+          onMouseDown={handleMouseDown}
+          onClickCapture={handleClickCapture}
+          onDragStart={handleDragStart}
+          style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
         >
           {timeline.periods.map((period) => {
             const summary = timeline.summariesByPeriodKey[period.key];
@@ -115,6 +294,7 @@ export default function PfmCategoryDetailScreen({
               direction,
               excludedSubcategories,
             );
+            const completeDetail = createSpendingCategoryDetail(summary, category, direction);
 
             return (
               <section
@@ -134,13 +314,15 @@ export default function PfmCategoryDetailScreen({
                 </div>
 
                 <PfmCategoryBubbleChart
-                  subcategories={detail.subcategories}
+                  subcategories={completeDetail.subcategories}
                   colorVar={categoryDefinition.colorVar}
                   country={country}
                   currency={summary.currency}
                   ariaLabel={t("runtime.analytics.subcategoryBreakdown", "Subcategory breakdown")}
                   excludeAriaLabel={t("runtime.analytics.filterOutSubcategory", "Filter out subcategory")}
-                  onExclude={handleExcludeSubcategory}
+                  includeAriaLabel={t("runtime.analytics.includeSubcategory", "Include subcategory")}
+                  inactiveSubcategories={excludedSubcategories}
+                  onToggle={handleToggleSubcategory}
                 />
               </section>
             );

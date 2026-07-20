@@ -4,6 +4,7 @@ import type { AccountTransaction } from "@/data/accountDetails";
 import { getPfmCategory, normalizePfmCategory } from "@/data/pfmCategories";
 import type { PfmCategoryName } from "@/data/pfmCategories";
 import type { Product } from "@/data/products";
+import type { PaymentTemplateSelection } from "@/data/paymentTemplates";
 
 export type DomesticPaymentEntry = "new" | "redo";
 
@@ -138,6 +139,23 @@ export function createEmptyDomesticPaymentDraft(
     expressPayment: false,
     informationForBeneficiary: "",
     informationForMe: "",
+  };
+}
+
+export function createTemplateDomesticPaymentDraft(
+  selection: PaymentTemplateSelection,
+  country: CountryId,
+  product?: Product | null,
+): DomesticPaymentDraft {
+  return {
+    ...createEmptyDomesticPaymentDraft(country, product),
+    beneficiaryName: selection.beneficiaryName,
+    accountNumber: selection.accountNumber,
+    bankCode: selection.bankCode,
+    bankName: selection.bankName,
+    amount: selection.kind === "template" ? selection.amount : "",
+    currency: selection.currency,
+    informationForBeneficiary: selection.kind === "template" ? selection.paymentNote : "",
   };
 }
 
