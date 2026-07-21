@@ -23,7 +23,7 @@ Last updated: 2026-07-21
   - full verification and browser evidence recorded: yes
   - bananas triaged: yes
   - safe to resume: yes
-- Publication evidence: pending the authorized Git push and Vercel Production deployment at the end of this closeout; exact commit/deployment identifiers are recorded in a final documentation checkpoint after they reach their terminal state.
+- Publication evidence: unified product commit `38a6201` plus the two preceding local commits were pushed to `origin/main` with local/remote parity confirmed. Vercel Production deployment `dpl_FWW19HHFS8mmUwP1DKwHza4UwTJE` reached `READY` and received the canonical `https://mobile-banking-cee.vercel.app` alias. The canonical URL returned HTTP `200` with the application root mount; the immutable URL returned HTTP `200` with Vercel's protected Login page, so it is recorded as access-gated rather than misreported as an app-root smoke. Deployment-scoped error and HTTP-500 log queries returned no entries. This handoff checkpoint is pushed separately and its exact final `main` HEAD is explicitly rebuilt/redeployed before closeout.
 - safe to resume: yes
 
 ## 2026-07-21 Design System Component Details Pages + Multi-Lane Investment Polish
