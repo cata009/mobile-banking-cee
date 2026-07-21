@@ -33,6 +33,8 @@ export interface ProductsOffer {
   id: string;
   title: string;
   description: string;
+  /** Short one-line note shown under the description in the compact card variant only. */
+  caption?: string;
   colorFamily?: ProductBannerColorFamily;
   lightVersion?: boolean;
 }

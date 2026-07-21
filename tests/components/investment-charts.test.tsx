@@ -159,7 +159,7 @@ describe('InvestmentDistributionChart', () => {
   it.each([
     { count: 0, expectedSlots: [] },
     { count: 1, expectedSlots: ['70px'] },
-    { count: 4, expectedSlots: ['106px', '18px', '106px', '18px'] },
+    { count: 4, expectedSlots: ['70px', '136px', '70px', '4px'] },
   ])('renders finite geometry and stable labels for $count items', ({ count, expectedSlots }) => {
     const items = DISTRIBUTION_ITEMS.slice(0, count)
     const { container } = render(
@@ -186,8 +186,8 @@ describe('InvestmentDistributionChart', () => {
     }
 
     if (count === 4) {
-      expect(labels.filter((label) => label.className.includes('left-[16px]'))).toHaveLength(2)
-      expect(labels.filter((label) => label.className.includes('right-[16px]'))).toHaveLength(2)
+      expect(labels.filter((label) => label.className.includes('left-[16px]'))).toHaveLength(3)
+      expect(labels.filter((label) => label.className.includes('right-[16px]'))).toHaveLength(1)
       expect(new Set(paths.map((path) => path.getAttribute('d'))).size).toBe(4)
     }
   })

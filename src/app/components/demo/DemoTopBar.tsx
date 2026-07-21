@@ -3,7 +3,7 @@
  * Two-line stakeholder header with platform navigation, context controls, and demo actions.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef, useState, type ComponentPropsWithoutRef } from "react";
 import { useNavigationContext } from "@/app/contexts/NavigationContext";
 import { COUNTRIES, COUNTRY_META, FEATURE_META } from "@/app/registry/demoConfig";
 import { FLOW_PREVIEW_ORDER, type FlowPreviewId } from "@/app/registry/flowPreviewRegistry";
@@ -117,7 +117,6 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
   const shareResetTimeoutRef = useRef<number | null>(null);
   const shareRef = useRef<HTMLDivElement>(null);
 
-  const productDropdownRef = useRef<HTMLDivElement>(null);
   const releaseDropdownRef = useRef<HTMLDivElement>(null);
   const scenarioDropdownRef = useRef<HTMLDivElement>(null);
   const futureReleaseDropdownRef = useRef<HTMLDivElement>(null);
@@ -174,36 +173,20 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
     window.requestAnimationFrame(() => navigateToAndReset(getScenarioEntryScreen(nextScenario)));
   };
 
-  const handleCountrySelect = (countryCode: (typeof COUNTRIES)[number]) => {
+  const handleAppCountrySelect = (productId: ProductId, countryCode: (typeof COUNTRIES)[number]) => {
     const shouldReturnToDemo =
       currentScreen === "design-system" || currentScreen === "flow-library" || currentScreen === "tools";
     closeAllDropdowns();
     leavePlatformSurface();
-    setCountry(countryCode);
-    if (isFutureReleaseSelected && !getFutureReleaseOptions(product, countryCode, designSystem).includes(release)) {
-      setRelease("release-current");
-    }
-
-    if (shouldReturnToDemo) {
-      setCoAppingActive(false);
-      window.requestAnimationFrame(() => navigateToAndReset(scenarioEntryScreen));
-    }
-  };
-
-  const handleProductSelect = (productId: ProductId, options?: { keepDropdownOpen?: boolean }) => {
-    if (options?.keepDropdownOpen) {
-      setIsReleaseDropdownOpen(false);
-      setIsFutureReleaseDropdownOpen(false);
-    } else {
-      closeAllDropdowns();
-    }
-    leavePlatformSurface();
     setProduct(productId);
-    if (isFutureReleaseSelected && !getFutureReleaseOptions(productId, country, designSystem).includes(release)) {
+    setCountry(countryCode);
+    if (isFutureReleaseSelected && !getFutureReleaseOptions(productId, countryCode, designSystem).includes(release)) {
       setRelease("release-current");
     }
     setCoAppingActive(false);
-    window.requestAnimationFrame(() => navigateToAndReset(scenarioEntryScreen));
+    if (shouldReturnToDemo || productId !== product || countryCode !== country) {
+      window.requestAnimationFrame(() => navigateToAndReset(scenarioEntryScreen));
+    }
   };
 
   const handleDemoSelect = () => {
@@ -238,9 +221,6 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (productDropdownRef.current && !productDropdownRef.current.contains(event.target as Node)) {
-        setIsProductDropdownOpen(false);
-      }
       if (releaseDropdownRef.current && !releaseDropdownRef.current.contains(event.target as Node)) {
         setIsReleaseDropdownOpen(false);
       }
@@ -406,55 +386,57 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
         {showContextControls ? (
           <div className="grid min-h-[48px] grid-cols-[1fr_auto_1fr] items-center gap-4 overflow-visible border-t border-[var(--uc-border-muted)] px-6 py-1.5 lg:px-10 xl:px-16">
             <div className="flex min-w-0 items-center gap-3 overflow-visible">
-              <div className="relative shrink-0" ref={productDropdownRef}>
-                <ContextDropdownButton
-                  label={selectedAppCountryLabel}
-                  expanded={isProductDropdownOpen}
-                  onClick={() => setIsProductDropdownOpen(!isProductDropdownOpen)}
-                  maxWidthClassName="max-w-[260px]"
-                />
-
-                {isProductDropdownOpen && (
-                  <div className="absolute left-0 top-full z-[10000] mt-2 w-[256px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-2 shadow-lg">
-                    <p className="px-4 pb-1 pt-1 font-['UniCredit:Bold',sans-serif] text-[11px] uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
-                      App
-                    </p>
-                    {PRODUCT_ORDER.map((productId) => (
-                      <button
-                        key={productId}
-                        type="button"
-                        onClick={() => handleProductSelect(productId, { keepDropdownOpen: true })}
-                        className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
-                          product === productId
-                            ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
-                            : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
+              <DropdownMenu open={isProductDropdownOpen} onOpenChange={setIsProductDropdownOpen}>
+                <DropdownMenuTrigger asChild>
+                  <ContextDropdownButton
+                    label={selectedAppCountryLabel}
+                    expanded={isProductDropdownOpen}
+                    onPointerDown={(event) => event.preventDefault()}
+                    onClick={() => setIsProductDropdownOpen((open) => !open)}
+                    maxWidthClassName="max-w-[220px]"
+                  />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  sideOffset={8}
+                  className="z-[10000] w-[184px] rounded-xl border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-1.5 text-[var(--uc-text)] shadow-xl"
+                >
+                  <p className="px-2 pb-1 pt-1 font-['UniCredit:Bold',sans-serif] text-[11px] uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
+                    App
+                  </p>
+                  {PRODUCT_ORDER.map((productId) => (
+                    <DropdownMenuSub key={productId}>
+                      <DropdownMenuSubTrigger
+                        className={`min-h-[40px] cursor-pointer rounded-[6px] px-3 py-2.5 font-['UniCredit:Bold',sans-serif] text-[14px] leading-none text-[var(--uc-text)] focus:bg-[var(--uc-surface-muted)] focus:text-[var(--uc-text)] data-[state=open]:bg-[var(--uc-surface-muted)] data-[state=open]:text-[var(--uc-text)] ${
+                          product === productId ? "bg-[var(--uc-surface-muted)]" : ""
                         }`}
                       >
                         {PRODUCT_SELECTOR_LABELS[productId]}
-                      </button>
-                    ))}
-
-                    <div className="my-1 h-px bg-[var(--uc-border-muted)]" />
-                    <p className="px-4 pb-1 pt-1 font-['UniCredit:Bold',sans-serif] text-[11px] uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
-                      Country
-                    </p>
-                    {COUNTRIES.map((countryCode) => (
-                      <button
-                        key={countryCode}
-                        type="button"
-                        onClick={() => handleCountrySelect(countryCode)}
-                        className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
-                          country === countryCode
-                            ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
-                            : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
-                        }`}
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent
+                        sideOffset={6}
+                        alignOffset={-6}
+                        className="z-[10001] w-[190px] rounded-xl border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-1.5 text-[var(--uc-text)] shadow-xl"
                       >
-                        {COUNTRY_META[countryCode]?.nameEN || countryCode}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+                        <p className="px-2 pb-1 pt-1 font-['UniCredit:Bold',sans-serif] text-[11px] uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
+                          Country
+                        </p>
+                        {COUNTRIES.map((countryCode) => (
+                          <DropdownMenuItem
+                            key={countryCode}
+                            onSelect={() => handleAppCountrySelect(productId, countryCode)}
+                            className={`min-h-[40px] cursor-pointer rounded-[6px] px-3 py-2.5 font-['UniCredit:Bold',sans-serif] text-[14px] leading-none text-[var(--uc-text)] focus:bg-[var(--uc-surface-muted)] focus:text-[var(--uc-text)] ${
+                              country === countryCode && product === productId ? "bg-[var(--uc-surface-muted)]" : ""
+                            }`}
+                          >
+                            {COUNTRY_META[countryCode]?.nameEN || countryCode}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               <div className="relative shrink-0" ref={releaseDropdownRef}>
                 <ContextDropdownButton
@@ -846,21 +828,21 @@ function PlatformNavButton({
   );
 }
 
-function ContextDropdownButton({
-  label,
-  expanded,
-  onClick,
-  maxWidthClassName = "max-w-[220px]",
-}: {
+const ContextDropdownButton = forwardRef<HTMLButtonElement, Omit<ComponentPropsWithoutRef<"button">, "children"> & {
   label: string;
   expanded: boolean;
-  onClick: () => void;
   maxWidthClassName?: string;
-}) {
+}>(function ContextDropdownButton({
+  label,
+  expanded,
+  maxWidthClassName = "max-w-[220px]",
+  ...buttonProps
+}, ref) {
   return (
     <button
+      {...buttonProps}
+      ref={ref}
       type="button"
-      onClick={onClick}
       aria-expanded={expanded}
       className={`flex h-[34px] ${maxWidthClassName} items-center gap-1 rounded-[6px] px-2 font-['UniCredit:Bold',sans-serif] text-[14px] leading-none text-[var(--uc-text)] transition-colors hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-action)]`}
     >
@@ -870,7 +852,7 @@ function ContextDropdownButton({
       </span>
     </button>
   );
-}
+});
 
 function HeaderIconButton({
   icon,

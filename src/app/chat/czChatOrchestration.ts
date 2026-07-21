@@ -539,11 +539,16 @@ export function buildCzChatSmartReplyResolver({
       }
     : null;
 
+  const selectedInvestmentMarketPriceFormatted = selectedInvestmentSecurity
+    ? formatCzChatMoney(selectedInvestmentSecurity.marketPrice, selectedInvestmentSecurity.instrumentCurrency, country)
+    : "";
+
   const selectedInvestmentExplanationBlock: CoAppingRichBlock | null = selectedInvestmentSecurity
     ? {
         type: "investment-summary",
         logoId: selectedInvestmentSecurity.logoId ?? "unicredit",
         title: selectedInvestmentSecurity.title,
+        eyebrow: `Actual market price: ${selectedInvestmentMarketPriceFormatted}`,
         body: "",
         metricLayout: "stack",
         metrics: [
@@ -1453,10 +1458,28 @@ export function buildCzChatSmartReplyResolver({
         text:
           `### Documents for ${selectedInvestmentSecurity.title}\n` +
           `Before making a decision, review the **Key Information Document (KID/KIID)** for objectives, risk class, scenarios, and costs.\n` +
-          `Use the **prospectus** for the investment policy, eligible assets, valuation, subscription, and redemption rules. Check the latest **factsheet** for allocation and historical performance, the **fee schedule** for one-off and ongoing charges, and the latest periodic report for material portfolio changes.\n` +
+          `Use the **prospectus** for the investment policy, eligible assets, valuation, subscription, and redemption rules. Check the **fee schedule** for one-off and ongoing charges, and the latest periodic report for material portfolio changes.\n` +
           `${selectedInvestmentSecurity.owned ? "For this holding, also compare the trade confirmation and account statement with the quantity and value shown here." : "Because this product is not held, there is no position statement or trade confirmation to review yet."}\n` +
           `Documents provide product facts; they do not turn this explanation into a personalized buy, sell, or hold recommendation.`,
-        richBlocks: showSelectedInvestmentCardOnce(selectedInvestmentProductBlock),
+        richBlocks: [
+          {
+            type: "product-cards",
+            title: "Product documents",
+            body: "",
+            variant: "compact",
+            interactive: false,
+            products: [
+              {
+                id: "kid-kiid",
+                title: `${selectedInvestmentSecurity.title} — KID/KIID`,
+                subtitle: "Key Information Document",
+                meta: "PDF · 2 pages",
+                tone: "neutral",
+                icon: "app:account-option-statement",
+              },
+            ],
+          },
+        ],
         followUps: [
           buildCzChatFollowUp("cz-investment-product-performance", "Review performance", `How is my position in ${selectedInvestmentSecurity.title} performing?`),
           buildCzChatFollowUp("cz-investment-product-risk", "Review risk", `Explain the risk, liquidity, and currency exposure of ${selectedInvestmentSecurity.title}.`),

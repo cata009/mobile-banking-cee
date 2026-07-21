@@ -22,7 +22,28 @@ const DONUT_CENTER_X = CHART_WIDTH / 2;
 const DONUT_CENTER_Y = DONUT_SIZE / 2;
 const DONUT_OUTER_RADIUS = DONUT_RADIUS + DONUT_STROKE_WIDTH / 2;
 
+/**
+ * The donut visually shows at most this many slices. Any further distribution
+ * rows remain in the list below but are not drawn on the donut, so a 5-row
+ * distribution (e.g. Fund/Bond/Stock/ETF/Money market) renders 4 slices and a
+ * grey remainder instead of cramming five thin labels around the chart.
+ */
+const MAX_VISIBLE_SLICES = 4;
+
+/**
+ * Small visible gap between slices, expressed as a fraction of the
+ * circumference. Keeps neighbouring colors from touching at high zoom.
+ */
+const SLICE_GAP_FRACTION = 0.006;
+
 type Side = "left" | "right";
+
+interface SliceGeometry {
+  color: string;
+  dashArray: string;
+  dashOffset: number;
+  midpointAngle: number;
+}
 
 interface SliceLeader {
   side: Side;
@@ -40,45 +61,58 @@ function pointOnDonutEdge(angleDeg: number) {
   };
 }
 
-function buildSliceLeaders(items: readonly InvestmentDistributionItem[]): SliceLeader[] {
-  // When there are exactly 4 slices, balance them 2-left / 2-right using fixed
-  // anchor points on each side. Otherwise a skewed distribution (e.g. 48/24/18/10)
-  // crams 3 labels on one side and leaves the other nearly empty, with the
-  // green slice connector spilling outside the chart.
-  let leaders: SliceLeader[];
-  if (items.length === 4) {
-    // Two anchors on each side, vertically separated. The anchor sits on the
-    // donut edge so the connector stays short and never crosses the donut.
-    const firstLeftAnchor = pointOnDonutEdge(225);
-    const secondLeftAnchor = pointOnDonutEdge(315);
-    const firstRightAnchor = pointOnDonutEdge(135);
-    const secondRightAnchor = pointOnDonutEdge(45);
+/**
+ * Compute each slice's SVG stroke geometry and its midpoint angle on a single
+ * pass, so the connector anchors always line up with where the slice is
+ * actually drawn. Percentages are taken as-is (not renormalized) so a 34%
+ * slice occupies exactly 34% of the ring; when fewer than `MAX_VISIBLE_SLICES`
+ * slices are shown, the remaining arc stays as the grey track underneath.
+ */
+function buildSliceGeometry(items: readonly InvestmentDistributionItem[]): SliceGeometry[] {
+  let cumulativeLength = 0;
+  let cumulativeAngle = 0;
+  const gap = DONUT_CIRCUMFERENCE * SLICE_GAP_FRACTION;
 
-    leaders = [
-      { side: "left", anchorX: firstLeftAnchor.x, anchorY: firstLeftAnchor.y, slotY: 0 },
-      { side: "left", anchorX: secondLeftAnchor.x, anchorY: secondLeftAnchor.y, slotY: 0 },
-      { side: "right", anchorX: firstRightAnchor.x, anchorY: firstRightAnchor.y, slotY: 0 },
-      { side: "right", anchorX: secondRightAnchor.x, anchorY: secondRightAnchor.y, slotY: 0 },
-    ];
-  } else {
-    let offset = 0;
-    const gap = DONUT_CIRCUMFERENCE * 0.006;
-    leaders = items.map((item) => {
-      const rawLength = (Math.max(0, item.percent) / 100) * DONUT_CIRCUMFERENCE;
-      const visibleLength = Math.max(0, rawLength - gap);
-      const midpoint = ((offset + visibleLength / 2) / DONUT_CIRCUMFERENCE) * 360;
-      const anchor = pointOnDonutEdge(midpoint);
-      offset += rawLength;
+  return items.map((item) => {
+    const rawLength = (Math.max(0, item.percent) / 100) * DONUT_CIRCUMFERENCE;
+    const visibleLength = Math.max(0, rawLength - gap);
 
-      return {
-        side: (midpoint > 0 && midpoint < 180 ? "right" : "left") as Side,
-        anchorX: anchor.x,
-        anchorY: anchor.y,
-        slotY: 0,
-      };
-    });
-  }
+    const startAngle = cumulativeAngle;
+    const sweptAngle = (rawLength / DONUT_CIRCUMFERENCE) * 360;
+    const midpointAngle = startAngle + sweptAngle / 2;
 
+    const geometry: SliceGeometry = {
+      color: item.color,
+      dashArray: `${visibleLength} ${DONUT_CIRCUMFERENCE - visibleLength}`,
+      dashOffset: -cumulativeLength,
+      midpointAngle,
+    };
+
+    cumulativeLength += rawLength;
+    cumulativeAngle += sweptAngle;
+    return geometry;
+  });
+}
+
+function buildSliceLeaders(geometry: readonly SliceGeometry[]): SliceLeader[] {
+  // Each leader is anchored at the real midpoint of its slice on the donut
+  // edge. Side is derived from that midpoint so the connector leaves the slice
+  // on the side of the chart where the slice actually lives.
+  const leaders: SliceLeader[] = geometry.map((slice) => {
+    const anchor = pointOnDonutEdge(slice.midpointAngle);
+    const side: Side = slice.midpointAngle > 0 && slice.midpointAngle < 180 ? "right" : "left";
+
+    return {
+      side,
+      anchorX: anchor.x,
+      anchorY: anchor.y,
+      slotY: 0,
+    };
+  });
+
+  // Per side, sort leaders by their real anchor Y and assign fixed vertical
+  // slots. This keeps labels vertically separated even when two slices share
+  // roughly the same height on the donut.
   (["left", "right"] as const).forEach((side) => {
     const onSide = leaders
       .map((leader, index) => ({ leader, index }))
@@ -106,9 +140,9 @@ function buildSliceLeaders(items: readonly InvestmentDistributionItem[]): SliceL
 }
 
 function leaderPath(leader: SliceLeader): string {
-  // The connector always leaves horizontally from the donut's outer edge,
-  // travels on a rail outside the circle, then stops before the label. This
-  // prevents it from cutting through the donut or through the label itself.
+  // Connector leaves the donut edge horizontally, runs along an outer rail,
+  // then stops at the label slot. Keeps it from crossing the donut body or the
+  // label itself.
   const railX = leader.side === "right" ? 303 : 72;
   return [
     `M ${leader.anchorX.toFixed(1)} ${leader.anchorY.toFixed(1)}`,
@@ -125,9 +159,9 @@ export default function InvestmentDistributionChart({
   onItemClick,
   headerExtra,
 }: InvestmentDistributionChartProps) {
-  const donutSegments = buildSvgSegments(items);
-  const visibleLabels = items.slice(0, 4);
-  const leaders = buildSliceLeaders(visibleLabels);
+  const visibleItems = items.slice(0, MAX_VISIBLE_SLICES);
+  const sliceGeometry = buildSliceGeometry(visibleItems);
+  const leaders = buildSliceLeaders(sliceGeometry);
 
   return (
     <section className="pt-[18px] text-[var(--uc-text)]" data-ds-label="Investments distribution chart">
@@ -138,7 +172,7 @@ export default function InvestmentDistributionChart({
           fill="none"
           aria-hidden="true"
         >
-          {visibleLabels.map((item, index) => {
+          {visibleItems.map((item, index) => {
             const leader = leaders[index];
             if (!leader) return null;
 
@@ -168,23 +202,23 @@ export default function InvestmentDistributionChart({
             stroke="#F2F2F2"
             strokeWidth={DONUT_STROKE_WIDTH}
           />
-          {donutSegments.map((segment, index) => (
+          {sliceGeometry.map((slice, index) => (
             <circle
-              key={`${items[index]?.id ?? index}-segment`}
+              key={`${visibleItems[index]?.id ?? index}-segment`}
               cx={DONUT_SIZE / 2}
               cy={DONUT_SIZE / 2}
               r={DONUT_RADIUS}
               fill="none"
-              stroke={segment.color}
+              stroke={slice.color}
               strokeWidth={DONUT_STROKE_WIDTH}
-              strokeDasharray={segment.dashArray}
-              strokeDashoffset={segment.dashOffset}
+              strokeDasharray={slice.dashArray}
+              strokeDashoffset={slice.dashOffset}
               transform={`rotate(-90 ${DONUT_SIZE / 2} ${DONUT_SIZE / 2})`}
             />
           ))}
           <circle cx={DONUT_SIZE / 2} cy={DONUT_SIZE / 2} r="36" fill="var(--uc-surface)" />
         </svg>
-        {visibleLabels.map((item, index) => {
+        {visibleItems.map((item, index) => {
           const leader = leaders[index];
           if (!leader) return null;
           const sideClass = leader.side === "right" ? "right-[16px] text-right" : "left-[16px] text-left";
@@ -243,22 +277,4 @@ export default function InvestmentDistributionChart({
       </div>
     </section>
   );
-}
-
-function buildSvgSegments(items: readonly InvestmentDistributionItem[]) {
-  let offset = 0;
-  const gap = DONUT_CIRCUMFERENCE * 0.006;
-
-  return items.map((item) => {
-    const rawLength = (Math.max(0, item.percent) / 100) * DONUT_CIRCUMFERENCE;
-    const length = Math.max(0, rawLength - gap);
-    const segment = {
-      color: item.color,
-      dashArray: `${length} ${DONUT_CIRCUMFERENCE - length}`,
-      dashOffset: -offset,
-    };
-
-    offset += rawLength;
-    return segment;
-  });
 }

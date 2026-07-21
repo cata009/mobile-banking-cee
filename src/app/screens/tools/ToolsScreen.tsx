@@ -29,7 +29,7 @@ const TOOLS: readonly ToolMeta[] = [
     label: "Side-by-side countries",
     icon: "grid-2x2",
     description:
-      "Render the same screen for 2–4 countries as live app frames in parallel and compare the CEE differences directly.",
+      "Render the same screen for 2–3 countries as live app frames in parallel and compare the CEE differences directly.",
     audience: "Business · Management · BA",
   },
   {

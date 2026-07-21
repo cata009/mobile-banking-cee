@@ -55,6 +55,21 @@ beforeAll(() => {
 afterEach(cleanup)
 
 describe('InvestmentsHistoryScreen details', () => {
+  it('ignores an invalid incoming title filter instead of crashing the history list', () => {
+    const invalidClickPayload = { type: 'click' }
+
+    render(
+      <InvestmentsHistoryScreen
+        onBack={() => undefined}
+        historyFilterByTitle={invalidClickPayload as unknown as string}
+      />,
+      { wrapper: AppProviders },
+    )
+
+    expect(screen.getByRole('tab', { name: 'TRANSACTIONS' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('searchbox', { name: 'Search' })).toHaveValue('')
+  })
+
   it('keeps a transaction detail signed and transaction-specific', () => {
     const { container } = renderHistory()
     const transaction = getHistoryRows(container, 'transaction')[0]

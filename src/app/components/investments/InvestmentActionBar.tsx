@@ -54,7 +54,7 @@ export default function InvestmentActionBar({
       <button
         type="button"
         onClick={onInvestClick}
-        className="flex h-[56px] w-[56px] flex-col items-center justify-center gap-0 rounded-full bg-[var(--uc-action)] px-[12px] py-[4px] text-[var(--uc-static-white)]"
+        className="flex h-[56px] w-[56px] flex-col items-center justify-center gap-0 rounded-full bg-[var(--uc-action)] px-[12px] py-[4px] text-[var(--uc-static-white)] shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
         aria-label={investLabel}
         data-ds-label="Investments invest action"
       >
