@@ -1,6 +1,71 @@
 # Current Session
 
-Last updated: 2026-07-20
+Last updated: 2026-07-21
+
+## 2026-07-21 Investment Chat Chart Completion + Unified Publication
+
+- Latest request handled: finish the interrupted selected-investment chatbot chart, including the missing connected period selectors, then preserve every current Codex/ZCode/GLM workspace change in Git and publish the exact final `main` state to Vercel Production.
+- Product result: the first selected-product explanation card now renders the canonical Investments performance chart with `1 M`, `3 M`, `1 Y`, `3 Y`, and `ALL`; `3 Y` is selected by default and every selector switches to its own deterministic series. The chart uses the exact selected security's market price and instrument currency, a compact phone-card layout, readable anchor labels, and the shared Investments period controls.
+- Architecture decision: the portable co-apping package owns only a typed chart payload (`CoAppingInvestmentChart`) and an optional renderer slot. `App` injects `InvestmentChatChart`, which composes the application-owned `InvestmentPortfolioChart` and `InvestmentPeriodChips`. This removes the interrupted implementation's package-to-app reverse imports, unknown-array cast, one-period payload, and hard-coded EUR fallback while keeping the package reusable.
+- Data and advice boundary: all five series are deterministic mock histories derived from the canonical selected-security snapshot; they are not live prices, forecasts, personalized advice, or order execution. The existing terms/signature boundary for BUY remains unchanged.
+- TDD evidence: focused chat orchestration/renderer tests first failed on the missing typed series and selector behavior, then passed 2 files / 33 tests. The regression locks the five period keys, `3 Y` default state, currency propagation, and the real UI click transition from `3 Y` to `1 M`.
+- Visual evidence: in-app browser verification on CZ Future / Global Growth Portfolio confirmed the canonical logo/title card, full-width compact SVG, all five controls on one row, `3 Y` selected on entry, `1 M` selectable and reversible, and no overlapping axis labels. Measured card width was about `298px`; the chart region/SVG was about `287px`.
+- Unified verification: a fresh `npm run verify` passed TypeScript, ESLint, 53/53 test files and 345/345 tests, all six audits, the locked asset inventory, and the Vite production build. The first complete run exposed only two stale parallel contracts: the intentional ShopSmart 18px title markup hash and a brittle Design System specimen ancestor traversal. Both were updated to the current intended DOM, their focused 17/17 tests passed, and the complete gate then passed.
+- Known non-blocking notices: jsdom still emits the already-triaged Recharts zero-size messages; the build still reports the empty `react-vendor` and large App/lazy syntax-highlighter chunks; the older Investments `ReferenceLine` NaN browser-log entry predates this chat-chart smoke and remains tracked in `known-bananas.md`.
+- Files central to this change: `package/mobile-pi-coapping-chat-package/src/types.ts`, `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx`, `package/mobile-pi-coapping-chat-package/src/coapping.css`, `src/app/components/investments/InvestmentChatChart.tsx`, `src/app/components/investments/InvestmentPortfolioChart.tsx`, `src/app/chat/czChatOrchestration.ts`, `src/app/App.tsx`, and the focused chat tests. The requested unified checkpoint also preserves all other tracked and untracked Design System, Tools, Payments, Products, Messages, ShopSmart, dependency, test, and plan deltas present in the workspace.
+- Banana Loop result:
+  - fixed: interrupted reverse dependency, untyped chart data, hard-coded currency, missing periods, missing default/interactive period state, and cramped chat rendering;
+  - fixed: two stale regression contracts exposed by the all-workspace gate without reverting their parallel product changes;
+  - triaged: deterministic-data/advice boundary and existing non-blocking warnings are explicit rather than hidden.
+- Constitutional check:
+  - scope preserved: yes
+  - docs/capability map updated: yes
+  - full verification and browser evidence recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+- Publication evidence: pending the authorized Git push and Vercel Production deployment at the end of this closeout; exact commit/deployment identifiers are recorded in a final documentation checkpoint after they reach their terminal state.
+- safe to resume: yes
+
+## 2026-07-21 Design System Component Details Pages + Multi-Lane Investment Polish
+
+- Latest request handled: user asked for design-system specimen cards to become clickable, opening a dedicated "Component Details" page with View/Code tabs. Code tab has 3 language segments: React (real source), Swift (SwiftUI port), Kotlin (Jetpack Compose port). Target: all ~70 reusable components.
+- Foundation delivered:
+  - `src/app/components/CodeBlock.tsx` — syntax-highlighted code viewer via shiki v4.3.1 (lazy-loaded highlighter, supports tsx/swift/kotlin, copy-to-clipboard button, dark theme).
+  - `src/app/screens/design-system/ComponentDetailScreen.tsx` — detail page with back button, component metadata (label, componentPath, notes from COMPONENT_REGISTRY), variant selector (when available), View/Code toggle, and 3 language segments (React/Swift/Kotlin). View tab renders live preview via TESTABLE_COMPONENTS where available; Code tab renders CodeBlock with the selected language. Disclaimers clearly label Swift/Kotlin as reference ports.
+  - `src/app/registry/componentCodeSamples.ts` — central code-sample registry with `ComponentCodeSample` interface (react + swift + kotlin + optional variants). `resolveComponentCodeSample()` helper for variant-aware resolution. **69 entries** authored across 7 batches (headers/nav, buttons, forms, cards/banners, products, investments/payments, overlays/prime). Total: ~7,265 lines of real code samples.
+  - `src/app/screens/design-system/inventoryNav.ts` — added `parseComponentDetailHash()` and `buildComponentDetailHref()` helpers for `#component/<id>` deep links.
+  - `src/app/screens/design-system/DesignSystemPage.tsx` — added `detailComponentId` state, `closeComponentDetail()` handler, and conditional rendering of `<ComponentDetailScreen>` when a detail hash is active. Hash routing synchronized via existing `hashchange` listener.
+  - `src/app/App.tsx` — extended `shouldOpenDesignSystem` and `syncDesignSystemHash` to recognize `component/` prefix hashes for cold deep-link support.
+  - `src/app/components/demo/DemoNavigationSync.tsx` — extended `hasDesignSystemHash()` to recognize `component/` prefix.
+  - `src/app/screens/design-system/specimenShell.tsx` — added optional `detailsHref` prop to `<Specimen>`, rendering a "Details →" link next to the title.
+- Specimen wiring: **31 specimen cards** in DesignSystemPage.tsx and cardSpecimens.tsx now have `detailsHref` linking to their component detail pages (PageHeader, BottomNavigation, PrimaryButton, LinkButton, Pill, LanguageSelectorButton, NavigationLink, Prelogin, Status bar, Text field, Info Banner, Ghost Banner, Helper Card, Pending Action Card, User Event Card, Card Component, Carousel Indicator, AccountDetailsInfoField, MessagesMailboxTabs, AccountTransactionRow, Payments hero card, Contacts navigation, Products offer card, Products menu card, AccountBalanceCard, AccountActionBar, RadioButton, Floating Co-Apping, LogoutConfirmDialog, ProductAccordion, ProductAccordionAnimated).
+- Also delivered during this session (parallel investment/tools polish):
+  - Investment portfolio chart: vertical grid lines restored (ReferenceLine per labeled point), CartesianGrid horizontal lines restored, Y-axis 4-tick forced ticks, chart anchor indices corrected for even spacing.
+  - Investment history: trade direction icons (trade-buy/trade-sell SVGs in AppIcon), date day punctuation removed (--0,7% double-minus fixed), history filter from security detail (title-based searchQuery pre-seed, persisted across Transactions/Orders tabs).
+  - Account detail: AccountActionBar per-product-type actions (saving=Add money hidden, term deposit=Options hidden + Open/Close term deposit, loan/mortgage=Options+Add money hidden + Reimbursement). `hidden` items removed from render, not left as placeholders.
+  - Investment buy order flow: header fixed (collapsedTitleProgress + largeTitleAlign), Market price moved to read-only InvestmentDetailField under Asset class, Price updated at (yesterday, DD.MM.YYYY bold), Status/Tradable removed, separator above Next removed, Frequency bold, Estimated amount/debit removed from order-data (kept on review), cash account IBAN full.
+  - Tools side-by-side: Screen/Language dropdowns (native select), phone frame with bezel (thin 4px, rounded-[28px] outer / [24px] screen), scrollbar hidden, dashed empty-country placeholders, remove-country buttons (X per frame), back button + tool detail header, Comparison setup consolidated panel (dropdowns + frames inside one ToolPanel).
+  - Component translation tester: 7 new components added (HelperCard, PendingActionCard, UserEventCard, ProductOfferCard, ProductMenuCard, PaymentHeroCard, ContactsNavigationCard). Line-clamp on PrimaryButton (1 line), NavigationRow/TextField/InfoBanner/GhostBanner/SectionHeadingDivider (2 lines title), InfoBanner/GhostBanner description (4 lines). Character limit on PrimaryButton label (40 chars).
+  - Native select chevron fix: `.uc-select` CSS utility class (appearance: none + custom SVG background chevron + 36px padding-right). Applied to all 6 native selects in the tools + all Design System variant selectors.
+- Verification:
+  - `npm run build` passed on 2026-07-21; known Vite warnings remain for empty `react-vendor` and chunks above 500 kB (shiki adds a ~780kB emacs-lisp chunk loaded lazily only when CodeBlock mounts).
+  - `npx tsc --noEmit` passed with 0 errors.
+  - `npm run audit:templates` passed: `templates=47 codePreviews=47 components=86 screens=33 flows=14`.
+- Limitations (honest):
+  - Swift and Kotlin code samples are **reference ports** (no native source exists in this repo — 0 Swift, 0 Kotlin files confirmed). They are production-faithful SwiftUI/Compose translations of the real React component, labeled "Reference port — adapt to your native project conventions" in the UI. Not originals.
+  - ~17 components (complex charts, PFM icons, demo/template-specific) do not have code samples yet — their detail page shows "Code samples pending" (honest placeholder, not empty code).
+  - React samples are hand-curated snippets (imports + types + main render body; large SVG path data tables trimmed with ellipsis comments for readability). Not raw `?raw` imports — by design, for developer consumption.
+- Banana Loop result:
+  - fixed: 69 components now have complete React/Swift/Kotlin code samples, wired to 31 specimen cards via clickable Details links.
+  - triaged: ~17 remaining components documented as "pending" — intentional, not hidden.
+  - preserved: this remains a stakeholder demo; code samples are for developer reference, not production native code.
+- Constitutional check:
+  - scope preserved: yes
+  - docs updated: yes (this entry)
+  - verification recorded: yes (build + typecheck + audit)
+  - bananas triaged: yes
+  - safe to resume: yes
+- safe to resume: yes
 
 ## 2026-07-20 CZ Chatbot Investment Product Context
 

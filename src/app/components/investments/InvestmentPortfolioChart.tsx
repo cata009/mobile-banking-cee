@@ -19,6 +19,7 @@ interface InvestmentPortfolioChartProps {
   country: CountryId;
   currency: string;
   amountsHidden: boolean;
+  compact?: boolean;
 }
 
 interface ActivePointState {
@@ -229,6 +230,7 @@ export default function InvestmentPortfolioChart({
   country,
   currency,
   amountsHidden,
+  compact = false,
 }: InvestmentPortfolioChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);
   const [activePoint, setActivePoint] = useState<ActivePointState | null>(null);
@@ -285,7 +287,9 @@ export default function InvestmentPortfolioChart({
   return (
     <div
       ref={chartRef}
-      className="relative mt-[18px] h-[210px] w-full touch-none select-none [&_.recharts-surface]:outline-none [&_.recharts-tooltip-wrapper]:!transition-none [&_.recharts-wrapper]:outline-none"
+      className={`relative w-full touch-none select-none [&_.recharts-surface]:outline-none [&_.recharts-tooltip-wrapper]:!transition-none [&_.recharts-wrapper]:outline-none ${
+        compact ? "mt-[8px] h-[190px]" : "mt-[18px] h-[210px]"
+      }`}
       data-ds-label="Investments portfolio chart"
       onTouchCancel={clearActivePoint}
       onTouchEnd={clearActivePoint}
@@ -300,7 +304,9 @@ export default function InvestmentPortfolioChart({
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={chartData}
-          margin={{ top: 8, right: 10, bottom: 36, left: 0 }}
+          margin={compact
+            ? { top: 8, right: 4, bottom: 34, left: -6 }
+            : { top: 8, right: 10, bottom: 36, left: 0 }}
           onMouseDown={(event) => {
             setIsPointerActive(true);
             selectActivePoint(getActivePointFromChartEvent(event));
@@ -323,8 +329,8 @@ export default function InvestmentPortfolioChart({
             interval={0}
             axisLine={false}
             tickLine={false}
-            height={42}
-            padding={{ left: 24, right: 24 }}
+            height={compact ? 38 : 42}
+            padding={compact ? { left: 18, right: 18 } : { left: 24, right: 24 }}
             tick={(tickProps: RuntimeAxisTickAdapter) => {
               const { x, y, payload } = tickProps;
               const index = typeof payload?.index === "number" ? payload.index : -1;
@@ -335,22 +341,22 @@ export default function InvestmentPortfolioChart({
 
               return (
                 <g transform={`translate(${tickX},${tickY + 10})`}>
-                  <text textAnchor="middle" fill="var(--uc-text-muted)" fontSize={12} fontWeight={700}>
+                  <text textAnchor="middle" fill="var(--uc-text-muted)" fontSize={compact ? 10 : 12} fontWeight={700}>
                     <tspan x={0} dy={0}>{point.dateLabel}</tspan>
-                    <tspan x={0} dy={14}>{point.yearLabel}</tspan>
+                    <tspan x={0} dy={compact ? 12 : 14}>{point.yearLabel}</tspan>
                   </text>
                 </g>
               );
             }}
           />
           <YAxis
-            width={44}
+            width={compact ? 38 : 44}
             domain={yDomain}
             axisLine={false}
             tickLine={false}
             ticks={yTicks}
             tickFormatter={(value) => formatAxisValue(Number(value), valueRange)}
-            tick={{ fill: "var(--uc-text-muted)", fontSize: 12, fontWeight: 700 }}
+            tick={{ fill: "var(--uc-text-muted)", fontSize: compact ? 11 : 12, fontWeight: 700 }}
           />
           <CartesianGrid
             horizontal

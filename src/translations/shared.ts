@@ -151,19 +151,19 @@ const EN_RUNTIME: RuntimeTranslations = {
     primaryItems: {
       "new-payment": {
         title: "New payment",
-        description: "Start a transfer, pay an invoice, or create a new payment order.",
+        description: "Start a transfer, pay an invoice,\nor create a new payment order.",
       },
       "between-accounts": {
         title: "Between my accounts",
-        description: "Move money between your current, savings, or card accounts.",
+        description: "Move money between your current,\nsavings, or card accounts.",
       },
       "recurrent-payments": {
         title: "Recurrent payments",
-        description: "Set up and manage regular payments for everyday obligations.",
+        description: "Set up and manage regular payments\nfor everyday obligations.",
       },
       "scan-pay": {
         title: "Scan & pay",
-        description: "Scan a QR code or payment slip and fill details automatically.",
+        description: "Scan a QR code or payment slip\nand fill details automatically.",
       },
     },
     otherItems: {

@@ -29,9 +29,10 @@ import PanelWithoutCoAppingTranslations from "@/app/components/PanelWithoutCoApp
 import { Button } from "@/app/components/ui/button";
 import { InspectModeContext, noop } from "./inspect/MeasurementSurface";
 import { Section, Specimen } from "./specimenShell";
-import { getDefaultSectionForInventoryTab, getInventoryTabForHash, getSectionForHash, inventorySectionLinks, type InventoryTab } from "./inventoryNav";
+import { getDefaultSectionForInventoryTab, getInventoryTabForHash, getSectionForHash, inventorySectionLinks, parseComponentDetailHash, type InventoryTab } from "./inventoryNav";
 import { ShadcnSpecimens } from "./shadcnSpecimens";
 import { ColorInventory, IconInventory, InventoryTabs, TypographyInventory } from "./inventories";
+import ComponentDetailScreen from "./ComponentDetailScreen";
 import { TemplateInventory } from "./templateInventory";
 import { BarVariantSpecimen, BottomNavigationVariantSpecimen, ButtonRegistryVariantSpecimen, CardVariantSpecimen, DateFilterVariantSpecimen, GhostBannerVariantSpecimen, HelperCardVariantSpecimen, HomeHeaderSpecimen, InfoBannerVariantSpecimen, MoreHeaderSpecimen, PageHeaderSpecimen, PaymentHeroCardVariantSpecimen, PendingActionCardVariantSpecimen, PillSortingVariantSpecimen, PrimaryButtonVariantSpecimen, ProductMenuCardVariantSpecimen, ProductOfferCardVariantSpecimen, RadioButtonVariantSpecimen, ShopsmartOfferCardVariantSpecimen, StatusBarVariantSpecimen, UserEventCardVariantSpecimen, WalletButtonVariantSpecimen } from "./specimens/cardSpecimens";
 import { AccountActionBarVariantSpecimen, AccountBalanceCardCountrySpecimen, AccountCarouselIndicatorVariantSpecimen, AccountDetailsInfoFieldVariantSpecimen, AccountSearchBarVariantSpecimen, AccountTransactionRowVariantSpecimen, AmountFieldSpecimens, CodeFieldSpecimens, ContactsNavigationCardVariantSpecimen, MessagesMailboxTabsVariantSpecimen, MoreCardVariantSpecimen, NavigationRowVariantSpecimen, PillVariantSpecimen, ProductAccordionCountrySpecimen, ProductCardListTotalRowEvolutionSpecimen, ProfileAvatarVariantSpecimen, SectionHeadingDividerVariantSpecimen, TextFieldSpecimens, ToastMessageVariantSpecimen, ToggleButtonVariantSpecimen } from "./specimens/fieldSpecimens";
@@ -48,6 +49,10 @@ export default function DesignSystemPage() {
     if (typeof window === "undefined") return getDefaultSectionForInventoryTab("components");
     return getSectionForHash(window.location.hash);
   });
+  const [detailComponentId, setDetailComponentId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return parseComponentDetailHash(window.location.hash);
+  });
   const sectionLinks = inventorySectionLinks[inventoryTab];
   const handleInventoryTabChange = (nextTab: InventoryTab) => {
     const nextSectionId = getDefaultSectionForInventoryTab(nextTab);
@@ -61,6 +66,7 @@ export default function DesignSystemPage() {
 
   useEffect(() => {
     const syncInventoryTabFromHash = () => {
+      setDetailComponentId(parseComponentDetailHash(window.location.hash));
       setInventoryTab(getInventoryTabForHash(window.location.hash));
       setActiveSection(getSectionForHash(window.location.hash));
     };
@@ -69,6 +75,15 @@ export default function DesignSystemPage() {
     window.addEventListener("hashchange", syncInventoryTabFromHash);
     return () => window.removeEventListener("hashchange", syncInventoryTabFromHash);
   }, []);
+
+  const closeComponentDetail = () => {
+    const restoreSection = activeSection ?? "headers";
+    setDetailComponentId(null);
+    window.history.replaceState(null, "", `#${restoreSection}`);
+    window.requestAnimationFrame(() => {
+      document.getElementById(restoreSection)?.scrollIntoView({ block: "start" });
+    });
+  };
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -161,7 +176,12 @@ export default function DesignSystemPage() {
         </aside>
 
         <main className="min-w-0 flex-1">
-          {inventoryTab === "templates" ? (
+          {detailComponentId ? (
+            <ComponentDetailScreen
+              componentId={detailComponentId}
+              onBack={closeComponentDetail}
+            />
+          ) : inventoryTab === "templates" ? (
             <TemplateInventory />
           ) : inventoryTab === "icons" ? (
             <IconInventory />
@@ -182,7 +202,7 @@ export default function DesignSystemPage() {
 
           <Section id="navigation" title="Navigation" description="Navigation menus and links, including bottom navigation across every active tab.">
             <div className="grid gap-5">
-              <Specimen name="BottomNavigation / all active states" source="components/BottomNavigation.tsx" specs={["container 375x54", "icons 32px", "labels 14px / 15px line", "active bar 24x2", "0 gap bar/icon/label"]}>
+              <Specimen name="BottomNavigation / all active states" source="components/BottomNavigation.tsx" specs={["container 375x54", "icons 32px", "labels 14px / 15px line", "active bar 24x2", "0 gap bar/icon/label"]} detailsHref="#component/shell.bottom-navigation">
                 <BottomNavigationVariantSpecimen />
               </Specimen>
               <Specimen
@@ -202,16 +222,16 @@ export default function DesignSystemPage() {
                 <BarVariantSpecimen />
               </Specimen>
               <div className="grid gap-5 lg:grid-cols-2">
-                <Specimen name="LanguageSelectorButton" source="components/ui/LanguageSelectorButton.tsx" tone="dark">
+                <Specimen name="LanguageSelectorButton" source="components/ui/LanguageSelectorButton.tsx" tone="dark" detailsHref="#component/ui.language-selector-button">
                   <LanguageSelectorButton onClick={noop} language="en" />
                 </Specimen>
-                <Specimen name="NavigationLink" source="components/ui/NavigationLink.tsx" tone="dark">
+                <Specimen name="NavigationLink" source="components/ui/NavigationLink.tsx" tone="dark" detailsHref="#component/ui.navigation-link">
                   <NavigationLink text="FIND OUT MORE" onClick={noop} />
                 </Specimen>
-                <Specimen name="Prelogin" source="components/ui/PreLoginHeading.tsx" tone="dark">
+                <Specimen name="Prelogin" source="components/ui/PreLoginHeading.tsx" tone="dark" detailsHref="#component/ui.prelogin-heading">
                   <div className="w-[327px]"><PreLoginHeading h1="New look, & more services." h2="Open an account" h3="Open an account quickly and easily from the comfort of your home." /></div>
                 </Specimen>
-                <Specimen name="RadioButton" source="components/common/RadioButton.tsx">
+                <Specimen name="RadioButton" source="components/common/RadioButton.tsx" detailsHref="#component/ui.radio-button">
                   <RadioButtonVariantSpecimen />
                 </Specimen>
               </div>
@@ -220,10 +240,10 @@ export default function DesignSystemPage() {
 
           <Section id="buttons" title="Buttons" description="Custom button components and shared UI registry variants.">
             <div className="grid gap-5 lg:grid-cols-2">
-              <Specimen name="Primary button" source="components/PrimaryButton.tsx + components/ui/PrimaryButton.tsx" specs={["327x48", "radius 4px", "Primary Action / Light", "Primary Action / Dark", "16px bold label"]}>
+              <Specimen name="Primary button" source="components/PrimaryButton.tsx + components/ui/PrimaryButton.tsx" specs={["327x48", "radius 4px", "Primary Action / Light", "Primary Action / Dark", "16px bold label"]} detailsHref="#component/ui.primary-button">
                 {() => <PrimaryButtonVariantSpecimen />}
               </Specimen>
-              <Specimen name="Link button" source="components/ui/LinkButton.tsx" specs={["flex w-fit", "text-chevron gap 0", "label 13px bold uppercase / 16px line", "chevron-link 24px", "uses current action color"]}>
+              <Specimen name="Link button" source="components/ui/LinkButton.tsx" specs={["flex w-fit", "text-chevron gap 0", "label 13px bold uppercase / 16px line", "chevron-link 24px", "uses current action color"]} detailsHref="#component/ui.link-button">
                 <div className="flex min-h-[72px] items-center justify-center rounded-[8px] bg-[var(--uc-surface)] p-[16px]">
                   <LinkButton onClick={noop}>SEE MORE TRANSACTIONS</LinkButton>
                 </div>
@@ -236,13 +256,13 @@ export default function DesignSystemPage() {
               >
                 <WalletButtonVariantSpecimen />
               </Specimen>
-              <Specimen name="Pill" source="components/ui/Pill.tsx" specs={["120x36", "18px radius", "8px horizontal padding", "N5 bold 14px label", "0 2 2 shadow", "16px success/loading icons", "8px icon-label gap"]}>
+              <Specimen name="Pill" source="components/ui/Pill.tsx" specs={["120x36", "18px radius", "8px horizontal padding", "N5 bold 14px label", "0 2 2 shadow", "16px success/loading icons", "8px icon-label gap"]} detailsHref="#component/ui.pill">
                 <PillVariantSpecimen />
               </Specimen>
               <Specimen name="Button registry variants" source="components/ui/button.tsx">
                 <ButtonRegistryVariantSpecimen />
               </Specimen>
-              <Specimen name="Floating Co-Apping Button" source="components/FloatingCoAppingButton.tsx">
+              <Specimen name="Floating Co-Apping Button" source="components/FloatingCoAppingButton.tsx" detailsHref="#component/co-apping.floating-button">
                 <div className="relative h-[170px] w-[120px] rounded border bg-[var(--uc-app-bg)]">
                   <FloatingCoAppingButton onClick={noop} />
                 </div>
@@ -256,7 +276,7 @@ export default function DesignSystemPage() {
                 <Specimen name="Dropdown" source="components/TextField.tsx">
                   <TextFieldSpecimens withChevron />
                 </Specimen>
-                <Specimen name="Text field" source="components/TextField.tsx">
+                <Specimen name="Text field" source="components/TextField.tsx" detailsHref="#component/ui.text-field">
                   <TextFieldSpecimens withChevron={false} />
                 </Specimen>
                 <Specimen
@@ -330,7 +350,7 @@ export default function DesignSystemPage() {
               >
                 <CardVariantSpecimen />
               </Specimen>
-              <Specimen name="Products offer card" source="components/products/ProductOfferCard.tsx" specs={["327x157", "dropdown variant selector", "16px text-to-image gutter", "100px image column", "title 22px bold / 2 lines", "subtitle 18px regular / 3 lines", "family + light/normal tones"]}>
+              <Specimen name="Products offer card" source="components/products/ProductOfferCard.tsx" specs={["327x157", "dropdown variant selector", "16px text-to-image gutter", "100px image column", "title 22px bold / 2 lines", "subtitle 18px regular / 3 lines", "family + light/normal tones"]} detailsHref="#component/products.offer-card">
                 <ProductOfferCardVariantSpecimen />
               </Specimen>
               <Specimen
@@ -341,42 +361,42 @@ export default function DesignSystemPage() {
               >
                 <ShopsmartOfferCardVariantSpecimen />
               </Specimen>
-              <Specimen name="Products menu card" source="components/products/ProductMenuCard.tsx" specs={["164x120 standard", "164x72 compact", "dropdown card + size selectors", "title 18px standard / 16px compact", "config-driven background", "optional imageSrc with per-card placement"]}>
+              <Specimen name="Products menu card" source="components/products/ProductMenuCard.tsx" specs={["164x120 standard", "164x72 compact", "dropdown card + size selectors", "title 18px standard / 16px compact", "config-driven background", "optional imageSrc with per-card placement"]} detailsHref="#component/products.product-card">
                 <ProductMenuCardVariantSpecimen />
               </Specimen>
-              <Specimen name="AccountBalanceCard / all countries" source="components/accounts/AccountBalanceCard.tsx" tone="gray" specs={["311x197", "padding 16px", "radius 6px", "soft layered shadow", "title 20px", "IBAN 16px", "copy 32x32", "optional sub-account", "amount 30px + decimals 20px", "current balance gap 4px"]}>
+              <Specimen name="AccountBalanceCard / all countries" source="components/accounts/AccountBalanceCard.tsx" tone="gray" specs={["311x197", "padding 16px", "radius 6px", "soft layered shadow", "title 20px", "IBAN 16px", "copy 32x32", "optional sub-account", "amount 30px + decimals 20px", "current balance gap 4px"]} detailsHref="#component/home.account-balance-card">
                 <AccountBalanceCardCountrySpecimen />
               </Specimen>
-              <Specimen name="AccountActionBar" source="components/accounts/AccountActionBar.tsx" tone="gray" specs={["supports 1-4 items", "align start / center / end / between", "container padding 8px 16px", "item flex 1 0 0 when between", "icon box 32x32", "label 14px regular / 15px line"]}>
+              <Specimen name="AccountActionBar" source="components/accounts/AccountActionBar.tsx" tone="gray" specs={["supports 1-4 items", "align start / center / end / between", "container padding 8px 16px", "item flex 1 0 0 when between", "icon box 32x32", "label 14px regular / 15px line"]} detailsHref="#component/accounts.action-bar">
                 <AccountActionBarVariantSpecimen />
               </Specimen>
-              <Specimen name="Ghost Banner" source="components/cards/GhostBanner.tsx" note={`${GHOST_BANNER_SOURCE.schema} / ${GHOST_BANNER_SOURCE.sourceNodeId}`} tone="gray" specs={["327x92 Figma base", "dashed border 1px var(--uc-text)", "8px corner radius", "padding 16px", "icon-to-text gap 8px", "icon box 32x32 / add-circle teal var(--uc-action)", "title 18px bold / 20px line", "title-to-description gap 4px", "description 16px regular / preserves newlines", "renders as button when onClick is set"]}>
+              <Specimen name="Ghost Banner" source="components/cards/GhostBanner.tsx" note={`${GHOST_BANNER_SOURCE.schema} / ${GHOST_BANNER_SOURCE.sourceNodeId}`} tone="gray" specs={["327x92 Figma base", "dashed border 1px var(--uc-text)", "8px corner radius", "padding 16px", "icon-to-text gap 8px", "icon box 32x32 / add-circle teal var(--uc-action)", "title 18px bold / 20px line", "title-to-description gap 4px", "description 16px regular / preserves newlines", "renders as button when onClick is set"]} detailsHref="#component/cards.ghost-banner">
                 <GhostBannerVariantSpecimen />
               </Specimen>
-              <Specimen name="Info Banner" source="components/cards/InfoBanner.tsx" note={`${INFO_BANNER_SOURCE.schema} / ${INFO_BANNER_SOURCE.sourceNodeId}`} tone="gray" specs={["327x153 Figma base", "solid border 1px var(--uc-text)", "8px corner radius", "padding 16px", "icon-to-text gap 8px", "icon box 32x32 / info-circle var(--uc-text)", "title 18px bold / 20px line", "title-to-description gap 4px", "description 16px regular / preserves newlines", "text-block-to-action gap 8px", "optional action 14px bold teal var(--uc-action)"]}>
+              <Specimen name="Info Banner" source="components/cards/InfoBanner.tsx" note={`${INFO_BANNER_SOURCE.schema} / ${INFO_BANNER_SOURCE.sourceNodeId}`} tone="gray" specs={["327x153 Figma base", "solid border 1px var(--uc-text)", "8px corner radius", "padding 16px", "icon-to-text gap 8px", "icon box 32x32 / info-circle var(--uc-text)", "title 18px bold / 20px line", "title-to-description gap 4px", "description 16px regular / preserves newlines", "text-block-to-action gap 8px", "optional action 14px bold teal var(--uc-action)"]} detailsHref="#component/cards.info-banner">
                 <InfoBannerVariantSpecimen />
               </Specimen>
-              <Specimen name="User Event Card" source="components/cards/UserEventCard.tsx" note={`${USER_EVENT_CARD_SOURCE.schema} / ${USER_EVENT_CARD_SOURCE.sourceNodeIds.full} · ${USER_EVENT_CARD_SOURCE.sourceNodeIds.compact}`} tone="gray" specs={["343 wide Figma base", "white var(--uc-surface)", "8px radius", "shadow 0 4px 16px rgba(0,0,0,0.08)", "padding 16px", "avatar 48x48 circle teal var(--uc-action) / white 24x24 glyph", "avatar-to-text gap 8px", "title 14px bold", "description 14px regular / preserves newlines", "optional link 14px bold teal", "optional 32x32 more-horizontal options", "items center without link / start with link"]}>
+              <Specimen name="User Event Card" source="components/cards/UserEventCard.tsx" note={`${USER_EVENT_CARD_SOURCE.schema} / ${USER_EVENT_CARD_SOURCE.sourceNodeIds.full} · ${USER_EVENT_CARD_SOURCE.sourceNodeIds.compact}`} tone="gray" specs={["343 wide Figma base", "white var(--uc-surface)", "8px radius", "shadow 0 4px 16px rgba(0,0,0,0.08)", "padding 16px", "avatar 48x48 circle teal var(--uc-action) / white 24x24 glyph", "avatar-to-text gap 8px", "title 14px bold", "description 14px regular / preserves newlines", "optional link 14px bold teal", "optional 32x32 more-horizontal options", "items center without link / start with link"]} detailsHref="#component/cards.user-event-card">
                 <UserEventCardVariantSpecimen />
               </Specimen>
-              <Specimen name="Helper Card" source="components/cards/HelperCard.tsx" note={`${HELPER_CARD_SOURCE.schema} / ${HELPER_CARD_SOURCE.sourceNodeIds.plain} · ${HELPER_CARD_SOURCE.sourceNodeIds.withLink}`} tone="gray" specs={["343 wide Figma base", "solid teal var(--uc-action)", "4px radius", "padding 16px", "icon-to-text gap 8px", "icon box 32x32 / white info-circle", "title 18px bold white", "description 18px regular white / preserves newlines", "optional white link 14px bold", "optional close-x top-right", "white text via var(--uc-static-white)"]}>
+              <Specimen name="Helper Card" source="components/cards/HelperCard.tsx" note={`${HELPER_CARD_SOURCE.schema} / ${HELPER_CARD_SOURCE.sourceNodeIds.plain} · ${HELPER_CARD_SOURCE.sourceNodeIds.withLink}`} tone="gray" specs={["343 wide Figma base", "solid teal var(--uc-action)", "4px radius", "padding 16px", "icon-to-text gap 8px", "icon box 32x32 / white info-circle", "title 18px bold white", "description 18px regular white / preserves newlines", "optional white link 14px bold", "optional close-x top-right", "white text via var(--uc-static-white)"]} detailsHref="#component/cards.helper-card">
                 <HelperCardVariantSpecimen />
               </Specimen>
-              <Specimen name="Pending Action Card" source="components/cards/PendingActionCard.tsx" note={`${PENDING_ACTION_CARD_SOURCE.schema} / ${PENDING_ACTION_CARD_SOURCE.sourceNodeId}`} tone="gray" specs={["327x157 Figma base", "teal gradient 90deg #007A91 to #44909E", "8px radius", "padding 24px", "title 24px bold white", "title-to-body gap 8px", "body 18px regular white", "optional white tag pill", "tag warning-small glyph teal", "tag label 12px bold uppercase teal", "renders as button when onClick is set"]}>
+              <Specimen name="Pending Action Card" source="components/cards/PendingActionCard.tsx" note={`${PENDING_ACTION_CARD_SOURCE.schema} / ${PENDING_ACTION_CARD_SOURCE.sourceNodeId}`} tone="gray" specs={["327x157 Figma base", "teal gradient 90deg #007A91 to #44909E", "8px radius", "padding 24px", "title 24px bold white", "title-to-body gap 8px", "body 18px regular white", "optional white tag pill", "tag warning-small glyph teal", "tag label 12px bold uppercase teal", "renders as button when onClick is set"]} detailsHref="#component/cards.pending-action-card">
                 <PendingActionCardVariantSpecimen />
               </Specimen>
-              <Specimen name="Card Component" source="components/cards/CardComponent.tsx" note={`${CARD_COMPONENT_SOURCE.schema} / ${CARD_COMPONENT_SOURCE.sourceNodeId}`} tone="gray" specs={["375-wide Figma base", "Primary/K7 (#F5F5F5) background", "vertical gap 12px / clips content", "Frame 46: 24px left padding / 8px gap", "card-holder 14px bold N5 / K1", "card-number 18px bold L2 / K1", "carousel 351x140 / horizontal gap 24px", "card slot 219x138 / 5.67px radius", "renders shared Card variants", "no outside border / no card image asset", "drop-shadow 0 11.265px 11.265px rgba(0,0,0,0.2)"]}>
+              <Specimen name="Card Component" source="components/cards/CardComponent.tsx" note={`${CARD_COMPONENT_SOURCE.schema} / ${CARD_COMPONENT_SOURCE.sourceNodeId}`} tone="gray" specs={["375-wide Figma base", "Primary/K7 (#F5F5F5) background", "vertical gap 12px / clips content", "Frame 46: 24px left padding / 8px gap", "card-holder 14px bold N5 / K1", "card-number 18px bold L2 / K1", "carousel 351x140 / horizontal gap 24px", "card slot 219x138 / 5.67px radius", "renders shared Card variants", "no outside border / no card image asset", "drop-shadow 0 11.265px 11.265px rgba(0,0,0,0.2)"]} detailsHref="#component/cards.card-component">
                 <div className="w-[375px]">
                   <CardComponent />
                 </div>
               </Specimen>
-              <Specimen name="Carousel Indicator" source="components/accounts/AccountCarouselIndicator.tsx" tone="gray" specs={["height 32px", "backdrop blur 13.591px", "inline-flex", "gap 6px", "active 30x6", "inactive 6x6", "mini 4x4 when count > 4"]}>
+              <Specimen name="Carousel Indicator" source="components/accounts/AccountCarouselIndicator.tsx" tone="gray" specs={["height 32px", "backdrop blur 13.591px", "inline-flex", "gap 6px", "active 30x6", "inactive 6x6", "mini 4x4 when count > 4"]} detailsHref="#component/accounts.carousel-indicator">
                 <AccountCarouselIndicatorVariantSpecimen />
               </Specimen>
-              <Specimen name="AccountDetailsInfoField" source="components/accounts/AccountDetailsInfoField.tsx" tone="gray" specs={["height 80px", "outside gap 0", "title 16px regular / normal", "subtitle 16px bold / normal", "title-to-subtitle gap 4px", "optional trailing icon variant"]}>
+              <Specimen name="AccountDetailsInfoField" source="components/accounts/AccountDetailsInfoField.tsx" tone="gray" specs={["height 80px", "outside gap 0", "title 16px regular / normal", "subtitle 16px bold / normal", "title-to-subtitle gap 4px", "optional trailing icon variant"]} detailsHref="#component/accounts.details-info-field">
                 <AccountDetailsInfoFieldVariantSpecimen />
               </Specimen>
-              <Specimen name="MessagesMailboxTabs" source="components/messages/MessagesMailboxTabs.tsx" tone="gray" specs={["height 48px", "2 columns", "optional leading new dot 12px", "inactive label muted", "bottom active indicator 2px"]}>
+              <Specimen name="MessagesMailboxTabs" source="components/messages/MessagesMailboxTabs.tsx" tone="gray" specs={["height 48px", "2 columns", "optional leading new dot 12px", "inactive label muted", "bottom active indicator 2px"]} detailsHref="#component/messages.mailbox-tabs">
                 <MessagesMailboxTabsVariantSpecimen />
               </Specimen>
               <Specimen
@@ -388,16 +408,16 @@ export default function DesignSystemPage() {
               >
                 <AccountSearchBarVariantSpecimen />
               </Specimen>
-              <Specimen name="AccountTransactionRow" source="components/accounts/AccountTransactionRow.tsx" specs={["375x80", "padding 20px 16px", "day 18px/20px bold", "date gap 2px", "month 14px/15px bold", "date-to-icon gap 16px", "icon box 32px", "details column 247px", "label 16px/18px", "label-to-amount gap 4px", "amount line 22px", "amount 20px + decimals 14px", "divider L3 14px bold uppercase", "divider left muted / right K1", "divider-to-row gap 16px", "row-to-next-divider gap 16px"]}>
+              <Specimen name="AccountTransactionRow" source="components/accounts/AccountTransactionRow.tsx" specs={["375x80", "padding 20px 16px", "day 18px/20px bold", "date gap 2px", "month 14px/15px bold", "date-to-icon gap 16px", "icon box 32px", "details column 247px", "label 16px/18px", "label-to-amount gap 4px", "amount line 22px", "amount 20px + decimals 14px", "divider L3 14px bold uppercase", "divider left muted / right K1", "divider-to-row gap 16px", "row-to-next-divider gap 16px"]} detailsHref="#component/accounts.transaction-row">
                 <AccountTransactionRowVariantSpecimen />
               </Specimen>
-              <Specimen name="Payments hero card" source="components/payments/PaymentHeroCard.tsx" specs={["327x120", "9 screenshot-backed image variants", "title 24px bold / respects newline titles", "title top gap 16px", "description 14px regular", "title-to-description gap 16px single-line / 8px multiline", "optional imageSrc override"]}>
+              <Specimen name="Payments hero card" source="components/payments/PaymentHeroCard.tsx" specs={["327x120", "9 screenshot-backed image variants", "title 24px bold / respects newline titles", "title top gap 16px", "description 14px regular", "title-to-description gap 16px single-line / 8px multiline", "optional imageSrc override"]} detailsHref="#component/payments.hero-card">
                 <PaymentHeroCardVariantSpecimen />
               </Specimen>
-              <Specimen name="More cards / all concrete card components" source="screens/more/cards/*" specs={["120px height", "8px radius", "individual image positioning"]}>
+              <Specimen name="More cards / all concrete card components" source="screens/more/cards/*" specs={["120px height", "8px radius", "individual image positioning"]} detailsHref="#component/cards.card-component">
                 <MoreCardVariantSpecimen />
               </Specimen>
-              <Specimen name="Contacts navigation cards / all icons" source="components/NavigationRow.tsx + screens/contacts/ContactsNavigationCard.tsx" specs={["80px row", "32px icons", "title 16px bold", "value 14px teal", "contact wrapper maps icon variants to shared NavigationRow"]}>
+              <Specimen name="Contacts navigation cards / all icons" source="components/NavigationRow.tsx + screens/contacts/ContactsNavigationCard.tsx" specs={["80px row", "32px icons", "title 16px bold", "value 14px teal", "contact wrapper maps icon variants to shared NavigationRow"]} detailsHref="#component/contacts.navigation-card">
                 <ContactsNavigationCardVariantSpecimen />
               </Specimen>
             </div>
@@ -414,10 +434,10 @@ export default function DesignSystemPage() {
               >
                 <ProductCardListTotalRowEvolutionSpecimen />
               </Specimen>
-              <Specimen name="ProductAccordion / all countries" source="components/ProductAccordion.tsx" tone="dark">
+              <Specimen name="ProductAccordion / all countries" source="components/ProductAccordion.tsx" tone="dark" detailsHref="#component/products.product-card-list-total">
                 <ProductAccordionCountrySpecimen />
               </Specimen>
-              <Specimen name="ProductAccordionAnimated / all countries" source="components/ProductAccordionAnimated.tsx" tone="dark">
+              <Specimen name="ProductAccordionAnimated / all countries" source="components/ProductAccordionAnimated.tsx" tone="dark" detailsHref="#component/products.product-card-list-total">
                 <ProductAccordionCountrySpecimen animated />
               </Specimen>
             </div>
@@ -433,7 +453,7 @@ export default function DesignSystemPage() {
               >
                 <ToastMessageVariantSpecimen />
               </Specimen>
-              <Specimen name="LogoutConfirmDialog" source="components/LogoutConfirmDialog.tsx">
+              <Specimen name="LogoutConfirmDialog" source="components/LogoutConfirmDialog.tsx" detailsHref="#component/dialogs.logout-confirm">
                 <div className="relative h-[260px] w-[375px] overflow-hidden rounded border bg-[var(--uc-app-bg)]">
                   <Button onClick={() => setShowLogout(true)} className="m-4">Open logout dialog</Button>
                   <LogoutConfirmDialog isOpen={showLogout} onClose={() => setShowLogout(false)} onConfirm={noop} />

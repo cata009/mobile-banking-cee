@@ -265,6 +265,17 @@ describe("CZ chat app orchestration", () => {
         type: "investment-summary",
         logoId: "unicredit",
         title: "UniCredit Balanced Income Fund",
+        chart: {
+          currency: "EUR",
+          defaultPeriod: "3y",
+          series: {
+            "1m": expect.arrayContaining([expect.objectContaining({ value: expect.any(Number) })]),
+            "3m": expect.arrayContaining([expect.objectContaining({ value: expect.any(Number) })]),
+            "1y": expect.arrayContaining([expect.objectContaining({ value: expect.any(Number) })]),
+            "3y": expect.arrayContaining([expect.objectContaining({ value: expect.any(Number) })]),
+            max: expect.arrayContaining([expect.objectContaining({ value: expect.any(Number) })]),
+          },
+        },
         metrics: [
           expect.objectContaining({ label: "Structure", value: "Balanced fund" }),
           expect.objectContaining({ label: "Currency", value: "EUR" }),

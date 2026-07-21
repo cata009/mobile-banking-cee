@@ -26,7 +26,8 @@ const DESIGN_SYSTEM_HASHES = new Set([
 ]);
 
 function hasDesignSystemHash() {
-  return DESIGN_SYSTEM_HASHES.has(window.location.hash.replace(/^#/, ""));
+  const section = window.location.hash.replace(/^#/, "");
+  return DESIGN_SYSTEM_HASHES.has(section) || section.startsWith("component/");
 }
 
 export function DemoNavigationSync() {

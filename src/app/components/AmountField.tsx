@@ -17,6 +17,8 @@ interface AmountFieldProps {
   multipleValues?: string[];
   multipleCount?: number;
   currencyIconName?: IconName;
+  /** Hide the currency selector chevron (for domestic payments where currency is fixed). */
+  hideCurrencySelector?: boolean;
 }
 
 const DISABLED_COLOR = "var(--uc-neutral-650)";
@@ -37,6 +39,7 @@ export default function AmountField({
   multipleValues,
   multipleCount,
   currencyIconName = "chevron-down-wide",
+  hideCurrencySelector = false,
 }: AmountFieldProps) {
   const isDisabled = disabled || visualState === "disabled-empty" || visualState === "disabled-filled";
   const currencyColor = isDisabled ? DISABLED_COLOR : "var(--uc-text)";
@@ -80,9 +83,11 @@ export default function AmountField({
             {currency}
           </span>
         </span>
-        <span className="mt-[21px] grid h-[32px] w-[32px] shrink-0 place-items-center">
-          <AppIcon name={currencyIconName} color={currencyColor} />
-        </span>
+        {!hideCurrencySelector && (
+          <span className="mt-[21px] grid h-[32px] w-[32px] shrink-0 place-items-center">
+            <AppIcon name={currencyIconName} color={currencyColor} />
+          </span>
+        )}
       </button>
     </div>
   );

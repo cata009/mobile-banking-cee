@@ -129,9 +129,11 @@ export default function MessagesScreen({ onBack }: MessagesScreenProps) {
         collapsedTitleProgress={headerProgress}
         includeSafeArea
       />
-      <MessagesMailboxTabs tabs={mailboxTabs} activeTabId={activeMailbox} onChange={(tabId) => setActiveMailbox(tabId as MessageMailbox)} />
-      <div className="px-[16px] py-[26px]">
-        <AccountSearchBar value={searchQuery} onValueChange={setSearchQuery} />
+      <div className="sticky z-20 bg-[var(--uc-surface)]" style={{ top: "calc(var(--uc-phone-top-reserve, 54px) + 48px)" }}>
+        <MessagesMailboxTabs tabs={mailboxTabs} activeTabId={activeMailbox} onChange={(tabId) => setActiveMailbox(tabId as MessageMailbox)} />
+        <div className="px-[16px] pt-[8px] pb-[8px]">
+          <AccountSearchBar value={searchQuery} onValueChange={setSearchQuery} />
+        </div>
       </div>
       <MessagesSectionTitle>{t("runtime.messages.sectionTitle", config.sectionTitle)}</MessagesSectionTitle>
       <div className="pt-[20px] pb-[24px]">

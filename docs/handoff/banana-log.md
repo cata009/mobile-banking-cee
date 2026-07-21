@@ -2,6 +2,14 @@
 
 This log records bananas found and how they were triaged.
 
+## 2026-07-21
+
+| Banana | Triage | Evidence |
+| --- | --- | --- |
+| The interrupted chat-chart pass used an unknown array, only one visible period, hard-coded EUR, and imported application components/store state back into the portable package | Replaced it with a typed five-series payload and an application-injected renderer that reuses the canonical chart/chips, defaults to `3 Y`, and propagates the selected security's price/currency | focused RED/GREEN 33/33; browser `3 Y -> 1 M -> 3 Y` interaction; package-boundary source assertion |
+| The complete all-workspace gate found a stale ShopSmart markup hash and a Design System test coupled to a fixed three-parent DOM walk after intentional parallel UI changes | Preserved the intended 18px ShopSmart title and specimen composition, updated the exact hash, and anchored the specimen test on a stable `data-ds-specimen` contract | focused 17/17 followed by full `npm run verify`, 53 files / 345 tests |
+| Historical Recharts zero-size/`ReferenceLine` console output could be confused with a new selected-chat regression | Confirmed the final chat interaction added no new entry and kept the older portfolio warning explicitly triaged rather than hiding it | browser log timestamps; `docs/handoff/known-bananas.md` |
+
 ## 2026-07-20
 
 | Banana | Triage | Evidence |

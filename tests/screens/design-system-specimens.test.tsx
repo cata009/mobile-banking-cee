@@ -372,7 +372,7 @@ describe('Design System specimen selectors', () => {
   it('keeps the Primary button specimen theme control functional', () => {
     const { getByRole } = renderInventory()
     const heading = getByRole('heading', { name: 'Primary button' })
-    const specimen = heading.parentElement?.parentElement?.parentElement
+    const specimen = heading.closest('[data-ds-specimen="Primary button"]')
     if (!(specimen instanceof HTMLElement)) throw new Error('Missing Primary button specimen')
 
     const darkMode = within(specimen).getByRole('button', { name: 'Dark mode' })

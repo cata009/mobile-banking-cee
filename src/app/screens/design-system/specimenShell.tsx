@@ -85,7 +85,7 @@ export function InventoryStatGrid({ items }: { items: Array<[string, React.React
 
 export type ThemeMode = "light" | "dark";
 
-export function Specimen({ name, children, tone = "light", showThemeControl = true }: {
+export function Specimen({ name, children, tone = "light", showThemeControl = true, detailsHref }: {
   name: string;
   source?: string;
   note?: string;
@@ -94,6 +94,11 @@ export function Specimen({ name, children, tone = "light", showThemeControl = tr
   specs?: string[];
   headerControl?: React.ReactNode;
   showThemeControl?: boolean;
+  /**
+   * When set, renders a "Details" link in the specimen header that deep-links
+   * to the component detail page (hash: `#component/<id>`).
+   */
+  detailsHref?: string;
 }) {
   const [themeMode, setThemeMode] = useState<ThemeMode>("light");
   const isDark = themeMode === "dark";
@@ -101,10 +106,24 @@ export function Specimen({ name, children, tone = "light", showThemeControl = tr
   const renderedChildren = typeof children === "function" ? children(themeMode) : children;
 
   return (
-      <div className="overflow-hidden rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)]">
+      <div
+        className="overflow-hidden rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)]"
+        data-ds-specimen={name}
+      >
         <div className="border-b border-[var(--uc-border-muted)] px-4 py-3">
-          <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <h3 className="uc-type-n4-strong text-[var(--uc-text)]">{name}</h3>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <h3 className="uc-type-n4-strong text-[var(--uc-text)]">{name}</h3>
+              {detailsHref ? (
+                <a
+                  href={detailsHref}
+                  className="inline-flex items-center gap-[4px] text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--uc-action)] hover:underline"
+                >
+                  Details
+                  <AppIcon name="arrow-right" size={12} color="currentColor" />
+                </a>
+              ) : null}
+            </div>
             {showThemeControl && (
               <ThemeModeSegment value={themeMode} onChange={setThemeMode} ariaLabel={`${name} theme mode`} />
             )}

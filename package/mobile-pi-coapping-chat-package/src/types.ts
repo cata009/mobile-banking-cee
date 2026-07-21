@@ -49,6 +49,22 @@ export interface CoAppingRichMetric {
   icon?: string;
 }
 
+export type CoAppingInvestmentChartPeriod = "1m" | "3m" | "1y" | "3y" | "max";
+
+export interface CoAppingInvestmentChartPoint {
+  label: string;
+  dateLabel: string;
+  yearLabel: string;
+  value: number;
+  showDot?: boolean;
+}
+
+export interface CoAppingInvestmentChart {
+  currency: string;
+  defaultPeriod: CoAppingInvestmentChartPeriod;
+  series: Readonly<Record<CoAppingInvestmentChartPeriod, readonly CoAppingInvestmentChartPoint[]>>;
+}
+
 export interface CoAppingRichAllocationItem {
   label: string;
   value: number;
@@ -82,6 +98,7 @@ export type CoAppingRichBlock =
       metrics: CoAppingRichMetric[];
       metricLayout?: "grid" | "stack";
       action?: CoAppingChatAction;
+      chart?: CoAppingInvestmentChart;
     }
   | {
       type: "investment-allocation";

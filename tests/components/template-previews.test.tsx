@@ -72,7 +72,7 @@ afterEach(() => {
 describe('static template previews', () => {
   it.each([
     ['products-menu', 18, '37891886a02b66e4fe1a5c26f8a9def78c1d53e6b3a152ccad88d31b4dc16c55'],
-    ['products-shopsmart', 15, 'd139acf5df5f8d9fe3252d8bf0e882794af8fe48d6ba887c57d892528c1b99d7'],
+    ['products-shopsmart', 15, 'e3c740aecf93237dcbb38fe794f3fc3cd57dbf326f1bb65891592649403aa319'],
     ['analytics-overview', 0, '647a8a3dcd449c096d32a105d26bf3a06aa4da5e9abe83df7c9bf64aaccf686e'],
   ] as const)('preserves %s markup in normal and presentation-only modes', (previewId, buttonCount, expectedHash) => {
     const normal = renderPreview(previewId, false)

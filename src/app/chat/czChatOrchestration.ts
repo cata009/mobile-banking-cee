@@ -1,4 +1,5 @@
 import {
+  buildInvestmentChartPoints,
   buildInvestmentDistributionItems,
   buildInvestmentHistoryOrders,
   buildInvestmentSecurities,
@@ -16,6 +17,7 @@ import {
 } from "@/app/screens/investments/investmentBuyOrderModel";
 import {
   type CoAppingFollowUpSuggestion,
+  type CoAppingInvestmentChart,
   type CoAppingReplyResolver,
   type CoAppingRichBlock,
   defaultReplyResolver,
@@ -523,12 +525,26 @@ export function buildCzChatSmartReplyResolver({
       }
     : null;
 
+  const selectedInvestmentChart: CoAppingInvestmentChart | null = selectedInvestmentSecurity
+    ? {
+        currency: selectedInvestmentSecurity.instrumentCurrency,
+        defaultPeriod: "3y",
+        series: {
+          "1m": buildInvestmentChartPoints(selectedInvestmentSecurity.marketPrice, "1m"),
+          "3m": buildInvestmentChartPoints(selectedInvestmentSecurity.marketPrice, "3m"),
+          "1y": buildInvestmentChartPoints(selectedInvestmentSecurity.marketPrice, "1y"),
+          "3y": buildInvestmentChartPoints(selectedInvestmentSecurity.marketPrice, "3y"),
+          max: buildInvestmentChartPoints(selectedInvestmentSecurity.marketPrice, "max"),
+        },
+      }
+    : null;
+
   const selectedInvestmentExplanationBlock: CoAppingRichBlock | null = selectedInvestmentSecurity
     ? {
         type: "investment-summary",
         logoId: selectedInvestmentSecurity.logoId ?? "unicredit",
         title: selectedInvestmentSecurity.title,
-        body: "Product structure and access characteristics. Exact holdings, costs, and dealing terms come from the official fund documents.",
+        body: "",
         metricLayout: "stack",
         metrics: [
           {
@@ -1344,9 +1360,13 @@ export function buildCzChatSmartReplyResolver({
               ? ` Because this holding is displayed in ${selectedInvestmentSecurity.localCurrency}, changes between ${selectedInvestmentSecurity.instrumentCurrency} and ${selectedInvestmentSecurity.localCurrency} can also affect the displayed value.`
               : ""
           }\n` +
-          `**${selectedInvestmentLiquidity}** means access follows the fund's monthly dealing rules rather than an instant bank-account withdrawal. The exact asset mix, investment objective, recommended holding period, fees, and redemption cut-offs must be confirmed in the latest KID/KIID, prospectus, and factsheet.\n` +
+          `The monthly dealing rules govern when subscriptions and redemptions are processed; the official KID/KIID or factsheet remains the source for the exact asset mix, charges, objectives, and redemption terms.\n` +
           `${selectedInvestmentSecurity.owned ? `This explains the product itself. Choose **Review my performance** for the value, units, and return of your own position.` : "This product is not currently shown as one of your holdings, so this explains the product itself without inventing a customer position."} It is not a personalized buy, sell, or hold recommendation.`,
-        richBlocks: showSelectedInvestmentCardOnce(selectedInvestmentExplanationBlock),
+        richBlocks: showSelectedInvestmentCardOnce(
+          selectedInvestmentExplanationBlock
+            ? { ...selectedInvestmentExplanationBlock, chart: selectedInvestmentChart ?? undefined }
+            : null,
+        ),
         followUps: [
           buildCzChatFollowUp("cz-investment-product-performance", "Review performance", `How is my position in ${selectedInvestmentSecurity.title} performing?`),
           buildCzChatFollowUp("cz-investment-product-risk", "Review risk", `Explain the risk, liquidity, and currency exposure of ${selectedInvestmentSecurity.title}.`),
