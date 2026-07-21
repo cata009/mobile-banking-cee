@@ -127,7 +127,7 @@ export function TransactionDetailScreen({
           showHelp={false}
         />
 
-        <div className="bg-[var(--uc-app-bg)] pb-[24px]">
+        <div className="bg-[var(--uc-app-bg)] pb-[8px]">
           <section className="px-[24px] pt-[8px] text-center" style={{ opacity: 1 - headerProgress }}>
             <p className="uc-type-n5-strong mt-[8px] text-[var(--uc-text-muted)]">
               {detail.bookingDate}
@@ -136,7 +136,7 @@ export function TransactionDetailScreen({
               {detail.amount}
             </p>
             <p className="mt-[18px] font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text-muted)]">
-              {t("runtime.transactionDetail.pfmCategory", "PFM CATEGORY")}
+              {detail.pfmCategoryLabel.toUpperCase()}
             </p>
             <div
               className="mt-[8px] inline-flex items-center justify-center gap-[8px] rounded-full border px-[16px] py-[4px]"
@@ -149,7 +149,7 @@ export function TransactionDetailScreen({
             >
               <PfmCategoryIcon category={detail.pfmCategory} size={20} />
               <span className="text-[12px] font-bold leading-normal">
-                {detail.pfmCategoryLabel.toUpperCase()}
+                {detail.pfmSubcategoryLabel.toUpperCase()}
               </span>
             </div>
           </section>
@@ -181,15 +181,18 @@ export function TransactionDetailScreen({
             </p>
           </div>
           <SectionTitle>{`${t("runtime.transactionDetail.breakdownFor", "BREAKDOWN FOR")} ${detail.categoryTag}`}</SectionTitle>
-          <div className="mt-[34px] h-[150px] border-b border-[var(--uc-border)]">
-            <div className="flex h-full items-end justify-between px-[18px]">
+          <div className="mt-[34px]">
+            <div className="flex h-[120px] items-end justify-between px-[18px]">
               {[118, 74, 47, 86, 69, 51, 82].map((height, index) => (
-                <div key={index} className="flex flex-col items-center gap-[14px]">
-                  <div className="w-[16px] rounded-t-full bg-[var(--uc-action)]" style={{ height }} />
-                  <span className="text-[11px] font-bold text-[var(--uc-text-muted)]">
-                    {["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL"][index]}
-                  </span>
-                </div>
+                <div key={index} className="w-[16px] rounded-t-full bg-[var(--uc-action)]" style={{ height }} />
+              ))}
+            </div>
+            <div className="h-px w-full bg-[var(--uc-border)]" />
+            <div className="flex justify-between px-[18px] pt-[14px]">
+              {["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL"].map((label) => (
+                <span key={label} className="text-[11px] font-bold text-[var(--uc-text-muted)]">
+                  {label}
+                </span>
               ))}
             </div>
           </div>
@@ -266,6 +269,13 @@ export function DomesticPaymentCreateScreen({
     setForm((current) => ({ ...current, [key]: value }));
   };
 
+  const isFormValid =
+    form.beneficiaryName.trim().length > 0 &&
+    form.prefix.trim().length > 0 &&
+    form.accountNumber.trim().length > 0 &&
+    form.bankCode.trim().length > 0 &&
+    form.amount.trim().length > 0;
+
   const handlePageScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 48));
     setHeaderProgress(progress);
@@ -326,6 +336,7 @@ export function DomesticPaymentCreateScreen({
             value={form.amount}
             onChange={(value) => update("amount", formatAmountInput(value))}
             currency={form.currency}
+            hideCurrencySelector
           />
         </FlowField>
 
@@ -369,7 +380,7 @@ export function DomesticPaymentCreateScreen({
         </div>
       </div>
       <div className="px-[24px] pb-[42px]">
-        <PrimaryButton onClick={() => onNext(form)}>{t("runtime.actions.next", "Next")}</PrimaryButton>
+        <PrimaryButton disabled={!isFormValid} onClick={() => onNext(form)}>{t("runtime.actions.next", "Next")}</PrimaryButton>
       </div>
     </div>
   );

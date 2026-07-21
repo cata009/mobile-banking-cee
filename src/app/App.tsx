@@ -110,6 +110,7 @@ import type { PaymentTemplateSelection } from "@/data/paymentTemplates";
 import type { Product } from "@/data/products";
 import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
 import type { InvestmentBuyRequest } from "@/app/screens/investments/InvestmentsPortfolioScreen";
+import InvestmentChatChart from "@/app/components/investments/InvestmentChatChart";
 import type { ProductDetailSelection } from "@/app/components/products/ProductCardBottomSheet";
 
 // Panel components
@@ -161,7 +162,7 @@ function AppWithNavigation({
 }) {
   const { scenario, themeMode } = useDemo();
   const hashSection = typeof window === "undefined" ? "" : window.location.hash.replace(/^#/, "");
-  const shouldOpenDesignSystem = DESIGN_SYSTEM_HASHES.has(hashSection);
+  const shouldOpenDesignSystem = DESIGN_SYSTEM_HASHES.has(hashSection) || hashSection.startsWith("component/");
 
   // Determine initial screen: a shared deep link wins, else fall back to the
   // existing hash/scenario-driven default.
@@ -330,7 +331,7 @@ function AppContent({
   useEffect(() => {
     const syncDesignSystemHash = () => {
       const hashSection = window.location.hash.replace(/^#/, "");
-      if (DESIGN_SYSTEM_HASHES.has(hashSection) && currentScreen !== "design-system") {
+      if ((DESIGN_SYSTEM_HASHES.has(hashSection) || hashSection.startsWith("component/")) && currentScreen !== "design-system") {
         navigateTo("design-system");
       }
     };
@@ -755,6 +756,13 @@ function AppContent({
         opportunities={czChatOpportunities}
         initialMode={czChatInitialMode}
         resolveReply={czChatReplyResolver}
+        renderInvestmentChart={(chart) => (
+          <InvestmentChatChart
+            chart={chart}
+            country={country}
+            amountsHidden={amountsHidden}
+          />
+        )}
       />
     ) : null;
 
@@ -874,7 +882,7 @@ function AppContent({
             onHelpClick={
               isCzCoAppingChatbotPreviewActive
                 ? () => openCzChatHelp(getCzChatHelpAreaForAccountProduct(selectedAccountProduct))
-                : undefined
+                : () => undefined
             }
           />
         )}

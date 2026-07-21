@@ -517,7 +517,7 @@ export function ShopSmartContent({
     <section className="flex flex-col gap-[16px] pt-[16px]" data-products-shopsmart-content="true">
       <ShopSmartSummaryBlock summary={summary} />
       <div className="flex flex-col gap-[16px]">
-        <ShopSmartSectionHeading>{t("runtime.productsMenu.allOffers", "ALL OFFERS")}</ShopSmartSectionHeading>
+        <SectionHeading>{t("runtime.productsMenu.allOffers", "ALL OFFERS")}</SectionHeading>
         <div className="px-[16px] py-[2px]">
           <AccountSearchBar
             value={searchQuery}
@@ -568,10 +568,10 @@ function ShopSmartSummaryBlock({ summary }: { summary: ShopSmartSummary }) {
         <span className="text-[14px] font-bold uppercase leading-[20px] tracking-[1px] text-[var(--uc-text-muted)]">
           ACTIVATED OFFERS:{summary.activatedOffers}
         </span>
-        <span className="mt-[2px] text-[24px] font-bold leading-[30px] tracking-[0] text-[var(--uc-text)]">
+        <span className="mt-[2px] text-[18px] font-bold leading-[24px] tracking-[0] text-[var(--uc-text)]">
           {summary.totalSavedLabel}
         </span>
-        <span className="mt-[1px] text-[18px] font-normal leading-[24px] tracking-[0] text-[var(--uc-text)]">
+        <span className="mt-[1px] text-[16px] font-normal leading-[20px] tracking-[0] text-[var(--uc-text)]">
           {summary.totalSavedAmount}
         </span>
       </span>
@@ -579,17 +579,6 @@ function ShopSmartSummaryBlock({ summary }: { summary: ShopSmartSummary }) {
         <AppIcon name="chevron-link" color="currentColor" />
       </span>
     </button>
-  );
-}
-
-function ShopSmartSectionHeading({ children }: { children: string }) {
-  return (
-    <div className="relative h-[32px] px-[24px]">
-      <h2 className="text-[18px] font-bold uppercase leading-[22px] tracking-[2px] text-[var(--uc-text)]">
-        {children}
-      </h2>
-      <span aria-hidden="true" className="absolute bottom-0 left-0 h-px w-full bg-[var(--uc-border-muted)]" />
-    </div>
   );
 }
 

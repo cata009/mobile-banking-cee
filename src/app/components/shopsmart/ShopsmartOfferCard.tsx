@@ -105,7 +105,7 @@ export default function ShopsmartOfferCard({
           <span className="text-[14px] font-bold leading-[20px] tracking-[0.3px] text-[var(--uc-action)]">
             {merchant}
           </span>
-          <span className="mt-[1px] whitespace-pre-line text-[20px] font-bold leading-[25px] tracking-[0.42px] text-[var(--uc-text)]">
+          <span className="mt-[1px] whitespace-pre-line text-[18px] font-bold leading-[23px] tracking-[0.42px] text-[var(--uc-text)]">
             {title}
           </span>
         </div>

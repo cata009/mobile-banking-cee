@@ -485,7 +485,7 @@ function HeaderPreviewFrame({
 
 export function StatusBarVariantSpecimen() {
   return (
-    <Specimen name="Status bar">
+    <Specimen name="Status bar" detailsHref="#component/shell.status-bar">
       {(themeMode) => {
         const isDark = themeMode === "dark";
 
@@ -589,7 +589,7 @@ function PageHeaderVariantSpecimen({
 
 export function PageHeaderSpecimen() {
   return (
-    <Specimen name="PageHeader">
+    <Specimen name="PageHeader" detailsHref="#component/shell.page-header">
       {(themeMode) => <PageHeaderVariantSpecimen themeMode={themeMode} />}
     </Specimen>
   );

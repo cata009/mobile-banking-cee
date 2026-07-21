@@ -278,7 +278,7 @@ export const DEFAULT_SHOPSMART_OFFER_CARDS: readonly ShopSmartOfferCard[] = [
   },
   {
     id: "shopsmart-english-home",
-    merchant: "English home - I9969693...",
+    merchant: "English home",
     title: "10% cashback peste 100 de Lei",
     statusText: "Until 31-December-2025",
     imageSrc: shopsmartEnglishHomeImage,

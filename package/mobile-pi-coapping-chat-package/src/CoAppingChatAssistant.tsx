@@ -53,6 +53,7 @@ import type {
   CoAppingChatAction,
   CoAppingChatLabels,
   CoAppingChatContext,
+  CoAppingInvestmentChart,
   CoAppingChatMessage,
   CoAppingFollowUpSuggestion,
   CoAppingOpportunity,
@@ -75,9 +76,9 @@ export interface CoAppingChatAssistantProps {
   initialMode?: CoAppingAssistantMode;
   resolveReply?: CoAppingReplyResolver;
   typingDelayMs?: number;
+  renderInvestmentChart?: (chart: CoAppingInvestmentChart) => ReactNode;
   onAction?: (action: CoAppingChatAction) => void;
 }
-
 const MAX_VISIBLE_SUGGESTED_TOPICS = 5;
 
 type ConversationListReturnTarget = "new" | "conversation" | "for-you";
@@ -89,7 +90,6 @@ function getCurrentTime() {
     hour12: false,
   }).format(new Date());
 }
-
 function formatClockTime(date: Date) {
   return new Intl.DateTimeFormat("en-GB", {
     hour: "2-digit",
@@ -97,11 +97,9 @@ function formatClockTime(date: Date) {
     hour12: false,
   }).format(date);
 }
-
 function getLocalDayKey(date: Date) {
   return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 }
-
 function addDays(date: Date, amount: number) {
   const nextDate = new Date(date);
   nextDate.setDate(nextDate.getDate() + amount);
@@ -259,7 +257,6 @@ function ScrollTopIcon() {
     </svg>
   );
 }
-
 function ScrollBottomIcon() {
   return (
     <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -426,9 +423,11 @@ function RichMetricGrid({
 function RichBlock({
   block,
   onAction,
+  renderInvestmentChart,
 }: {
   block: CoAppingRichBlock;
   onAction?: (action: CoAppingChatAction) => void;
+  renderInvestmentChart?: (chart: CoAppingInvestmentChart) => ReactNode;
 }) {
   if (block.type === "investment-summary") {
     return (
@@ -438,7 +437,8 @@ function RichBlock({
           {block.eyebrow ? <span>{block.eyebrow}</span> : null}
           <strong>{block.title}</strong>
         </div>
-        <p>{block.body}</p>
+        {block.body.trim() ? <p>{block.body}</p> : null}
+        {block.chart && renderInvestmentChart ? renderInvestmentChart(block.chart) : null}
         <RichMetricGrid metrics={block.metrics} layout={block.metricLayout} />
         <RichActionButton action={block.action} onAction={onAction} />
       </div>
@@ -601,16 +601,23 @@ function RichBlock({
 function RichBlocks({
   blocks,
   onAction,
+  renderInvestmentChart,
 }: {
   blocks?: CoAppingRichBlock[];
   onAction?: (action: CoAppingChatAction) => void;
+  renderInvestmentChart?: (chart: CoAppingInvestmentChart) => ReactNode;
 }) {
   if (!blocks?.length) return null;
 
   return (
     <div className="mpc-rich-stack">
       {blocks.map((block, index) => (
-        <RichBlock key={`${block.type}-${index}`} block={block} onAction={onAction} />
+        <RichBlock
+          key={`${block.type}-${index}`}
+          block={block}
+          onAction={onAction}
+          renderInvestmentChart={renderInvestmentChart}
+        />
       ))}
     </div>
   );
@@ -619,16 +626,24 @@ function RichBlocks({
 function BubbleMessage({
   message,
   onAction,
+  renderInvestmentChart,
 }: {
   message: CoAppingChatMessage;
   onAction?: (action: CoAppingChatAction) => void;
+  renderInvestmentChart?: (chart: CoAppingInvestmentChart) => ReactNode;
 }) {
   const isAgent = message.role === "agent";
   const timeLabel = formatMessageTimeLabel(message);
 
   if (isAgent) {
     const formattedResponse = <AgentFormattedResponse text={message.text} isStreaming={message.isStreaming} />;
-    const richBlocks = !message.isStreaming ? <RichBlocks blocks={message.richBlocks} onAction={onAction} /> : null;
+    const richBlocks = !message.isStreaming ? (
+      <RichBlocks
+        blocks={message.richBlocks}
+        onAction={onAction}
+        renderInvestmentChart={renderInvestmentChart}
+      />
+    ) : null;
 
     return (
       <div
@@ -2266,6 +2281,7 @@ export function CoAppingChatAssistant({
   initialMode = "chat",
   resolveReply = defaultReplyResolver,
   typingDelayMs = 1150,
+  renderInvestmentChart,
 }: CoAppingChatAssistantProps) {
   const mergedLabels = { ...defaultChatLabels, ...labels };
   const savedConversationMessagesRef = useRef<CoAppingChatMessage[]>(
@@ -3336,7 +3352,12 @@ export function CoAppingChatAssistant({
             ) : null}
 
             {messages.map((message) => (
-              <BubbleMessage key={message.id} message={message} onAction={handleAction} />
+              <BubbleMessage
+                key={message.id}
+                message={message}
+                onAction={handleAction}
+                renderInvestmentChart={renderInvestmentChart}
+              />
             ))}
 
             {isTyping && (

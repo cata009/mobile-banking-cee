@@ -5,6 +5,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { CoAppingChatAssistant } from '../../package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant'
 import type { CoAppingChatMessage } from '../../package/mobile-pi-coapping-chat-package/src/types'
+import InvestmentChatChart from '@/app/components/investments/InvestmentChatChart'
 
 type Deferred<T> = {
   promise: Promise<T>
@@ -53,6 +54,12 @@ class FakeMediaRecorder {
     this.state = 'inactive'
     this.onstop?.()
   }
+}
+
+class FakeResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
 }
 
 type RecognitionResultHandler = (event: {
@@ -109,6 +116,10 @@ beforeEach(() => {
     configurable: true,
     value: FakeMediaRecorder,
   })
+  Object.defineProperty(globalThis, 'ResizeObserver', {
+    configurable: true,
+    value: FakeResizeObserver,
+  })
 })
 
 afterEach(() => {
@@ -118,6 +129,7 @@ afterEach(() => {
   removeSpeechRecognition()
   setMediaDevices()
   Reflect.deleteProperty(HTMLElement.prototype, 'scrollTo')
+  Reflect.deleteProperty(globalThis, 'ResizeObserver')
 })
 
 describe('CZ Chat investment product summary', () => {
@@ -133,6 +145,32 @@ describe('CZ Chat investment product summary', () => {
         title: 'UniCredit Balanced Income Fund',
         body: 'Balanced fund in EUR.',
         metricLayout: 'stack',
+        chart: {
+          currency: 'EUR',
+          defaultPeriod: '3y',
+          series: {
+            '1m': [
+              { label: '01 Jul 2026', dateLabel: '01 Jul', yearLabel: '2026', value: 28.9, showDot: true },
+              { label: '21 Jul 2026', dateLabel: '21 Jul', yearLabel: '2026', value: 29.84, showDot: true },
+            ],
+            '3m': [
+              { label: '21 Apr 2026', dateLabel: '21 Apr', yearLabel: '2026', value: 27.4, showDot: true },
+              { label: '21 Jul 2026', dateLabel: '21 Jul', yearLabel: '2026', value: 29.84, showDot: true },
+            ],
+            '1y': [
+              { label: '21 Jul 2025', dateLabel: '21 Jul', yearLabel: '2025', value: 25.3, showDot: true },
+              { label: '21 Jul 2026', dateLabel: '21 Jul', yearLabel: '2026', value: 29.84, showDot: true },
+            ],
+            '3y': [
+              { label: '21 Jul 2023', dateLabel: '21 Jul', yearLabel: '2023', value: 24.1, showDot: true },
+              { label: '21 Jul 2026', dateLabel: '21 Jul', yearLabel: '2026', value: 29.84, showDot: true },
+            ],
+            max: [
+              { label: '19 Jul 2020', dateLabel: '19 Jul', yearLabel: '2020', value: 20.2, showDot: true },
+              { label: '21 Jul 2026', dateLabel: '21 Jul', yearLabel: '2026', value: 29.84, showDot: true },
+            ],
+          },
+        },
         metrics: [
           { label: 'Holding value', value: '5 525,00 CZK', helper: '7,625 PCS' },
           { label: 'Performance', value: '+1.80%', helper: 'Current product snapshot' },
@@ -157,6 +195,9 @@ describe('CZ Chat investment product summary', () => {
         suggestedTopics={[]}
         resolveReply={resolveReply}
         typingDelayMs={0}
+        renderInvestmentChart={(chart) => (
+          <InvestmentChatChart chart={chart} country="CZ" amountsHidden={false} />
+        )}
       />,
     )
 
@@ -179,6 +220,19 @@ describe('CZ Chat investment product summary', () => {
     expect(logo).toHaveStyle({ width: '32px', height: '32px' })
     expect(summaryCard?.querySelector('.mpc-rich-card-head > span')).toBeNull()
     expect(summaryCard?.querySelector('.mpc-rich-metric-grid-stack')).not.toBeNull()
+  })
+
+  it('renders all canonical investment periods and switches the selected chart series', async () => {
+    const { view } = await openInvestmentSummary()
+
+    expect(view.container.querySelector('[data-ds-label="Investments period chips"]')).not.toBeNull()
+    expect(screen.getByRole('button', { name: '3 Y' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getAllByRole('button', { name: /^(1 M|3 M|1 Y|3 Y|ALL)$/ })).toHaveLength(5)
+
+    fireEvent.click(screen.getByRole('button', { name: '1 M' }))
+
+    expect(screen.getByRole('button', { name: '1 M' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: '3 Y' })).toHaveAttribute('aria-pressed', 'false')
   })
 
   it('renders opted-in rich product context before the interpretation text', async () => {

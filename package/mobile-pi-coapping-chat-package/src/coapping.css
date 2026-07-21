@@ -1424,6 +1424,24 @@
   line-height: 20px;
 }
 
+.mpc-investment-chart {
+  display: grid;
+  gap: 6px;
+  margin-inline: -8px;
+  padding-block: 2px 4px;
+}
+
+.mpc-investment-chart [data-ds-label="Investments period chips"] {
+  flex-wrap: nowrap;
+  gap: 6px;
+  padding-inline: 2px;
+}
+
+.mpc-investment-chart [data-ds-label="Investments period chips"] > button {
+  min-width: 34px;
+  padding-inline: 7px;
+}
+
 .mpc-rich-metric-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

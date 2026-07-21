@@ -104,12 +104,31 @@ export const inventoryTabCounts: Record<InventoryTab, number> = {
 export function getInventoryTabForHash(hash: string): InventoryTab {
   const sectionId = hash.replace(/^#/, "");
 
+  if (parseComponentDetailHash(hash)) return "components";
   if (templateSectionLinks.some(([id]) => id === sectionId)) return "templates";
   if (iconSectionLinks.some(([id]) => id === sectionId)) return "icons";
   if (colorSectionLinks.some(([id]) => id === sectionId)) return "colors";
   if (typographySectionLinks.some(([id]) => id === sectionId)) return "typography";
 
   return "components";
+}
+
+/**
+ * Parses a component-detail deep link of the form `#component/<componentId>`
+ * (with an optional `?<variantId>` suffix). Returns the component id, or null
+ * when the hash is not a component-detail link.
+ */
+export function parseComponentDetailHash(hash: string): string | null {
+  const raw = hash.replace(/^#/, "");
+  if (!raw.startsWith("component/")) return null;
+  const rest = raw.slice("component/".length);
+  if (!rest) return null;
+  const [componentId] = rest.split("?");
+  return componentId || null;
+}
+
+export function buildComponentDetailHref(componentId: string, variantId?: string): string {
+  return variantId ? `#component/${componentId}?${variantId}` : `#component/${componentId}`;
 }
 
 export function getDefaultSectionForInventoryTab(tab: InventoryTab) {
