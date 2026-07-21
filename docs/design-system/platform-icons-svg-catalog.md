@@ -1,6 +1,6 @@
 # Platform Icons SVG Catalog
 
-Generated from the platform icon registries on 2026-06-28T18:57:35.030Z.
+Generated from the platform icon registries on 2026-07-21T18:44:48.962Z.
 
 Sources:
 - `src/app/components/icons/AppIcon.tsx`
@@ -8,7 +8,7 @@ Sources:
 - `src/data/pfmCategories.ts`
 
 Scope:
-- AppIcon registry: 100 icons.
+- AppIcon registry: 125 icons.
 - PFM category registry: 19 icons.
 - Excluded by design: generated Figma imports, brand wordmarks, phone chrome, decorative textures, and shadcn internal lucide slots that are not owned by the platform icon registry.
 
@@ -25,6 +25,7 @@ node scripts/export-platform-icon-catalog.mjs
 | header-profile | Header profile | Header | custom | 32x32 slot / 20x20 glyph | 0 0 20 20 |
 | header-messages | Header messages | Header | custom | 32x32 slot / 20x20 glyph | 5 8 22 15 |
 | help-circle | Help circle | Header | custom | 32x32 slot / 20x20 glyph | 0 0 20 20 |
+| play | Play | Header | custom | 32x32 slot / 20x20 glyph | 0 0 24 24 |
 | logout | Logout | Header | custom | 32x32 slot / 20x20 glyph | 0 0 20 19 |
 | nav-home | Bottom nav home | Navigation | custom | 32x32 slot / 20x20 glyph | 6 5 20 21 |
 | nav-analytics | Bottom nav analytics | Navigation | custom | 32x32 slot / 20x20 glyph | 6 6 20 20 |
@@ -55,6 +56,8 @@ node scripts/export-platform-icon-catalog.mjs
 | chevron-down | Chevron down | Actions | custom | 32x32 slot / 20x20 glyph | 10 12 12 8 |
 | chevron-down-wide | Chevron down wide | Actions | custom | 32x32 slot / 20x20 glyph | 9 12 14 8 |
 | chevron-up | Chevron up | Actions | custom | 32x32 slot / 20x20 glyph | 9 12 14 8 |
+| trade-buy | Trade buy / positive | Actions | custom | 32x32 | 0 0 32 32 |
+| trade-sell | Trade sell | Actions | custom | 32x32 | 0 0 32 32 |
 | back-heavy | Back heavy | Navigation | custom | 32x32 slot / 20x20 glyph | 6 1 12.5 22.1 |
 | back-line | Back line | Navigation | custom | 32x32 slot / 20x20 glyph | 10 6 8 20 |
 | info-circle | Info circle | System | custom | 32x32 slot / 20x20 glyph | 0 0 20 20 |
@@ -65,6 +68,7 @@ node scripts/export-platform-icon-catalog.mjs
 | prime-check | Prime check | Prime | custom | 32x32 slot / 20x20 glyph | 6 9 20 14 |
 | prime-direction | Prime direction | Prime | custom | 32x32 slot / 20x20 glyph | 6 6 20 20 |
 | prime-email | Prime email | Prime | custom | 32x32 slot / 20x20 glyph | 1 5 22 14 |
+| accounts-coins | Accounts (stacked coins) | Accounts | custom | 32x32 slot / 20x20 glyph | 0 0 32 32 |
 | account-details | Account details | Accounts | custom | 32x32 slot / 20x20 glyph | 6 6 20 20 |
 | account-options | Account options | Accounts | custom | 32x32 slot / 20x20 glyph | 6 6 20 20 |
 | account-option-share-info | Share account info | Accounts | custom | 32x32 slot / 20x20 glyph | 0 0 17 20 |
@@ -81,6 +85,8 @@ node scripts/export-platform-icon-catalog.mjs
 | more-horizontal | More options (horizontal) | System | custom | 32x32 slot / 20x20 glyph | 0 0 20 20 |
 | user-event-badge | User event badge | System | custom | 18x24 | 0 0 18 24 |
 | user-event-refresh | User event refresh | System | custom | 24x24 | 0 0 24 24 |
+| recurring-contribution | Recurring contribution | System | custom | 32x32 slot / 20x20 glyph | 0 0 18 18 |
+| refresh | Refresh | System | custom | 32x32 slot / 20x20 glyph | 0 0 20 20 |
 | mcash | mCash | Accounts | custom | 32x32 slot / 20x20 glyph | 0 0 20 20 |
 | copy-documents | Copy documents | Accounts | custom | 32x32 slot / 20x20 glyph | 7 6 18 20 |
 | share-filled | Share filled | Actions | custom | 32x32 slot / 20x20 glyph | 3 2 18 20 |
@@ -94,7 +100,25 @@ node scripts/export-platform-icon-catalog.mjs
 | contact-website | Contact website | Contacts | custom | 32x32 slot / 20x20 glyph | 6 7 20 18 |
 | contact-youtube | Contact YouTube | Contacts | custom | 32x32 slot / 20x20 glyph | 6 6 20 20 |
 | contact-x | Contact X | Contacts | custom | 32x32 slot / 20x20 glyph | 6 6 20 20 |
-| grid-2x2 | Change Category | Actions | custom | 32x32 slot / 20x20 glyph | 0 0 32 32 |
+| grid-2x2 | Change Category | Actions | custom | 32x32 slot / 20x20 glyph | 4 5 23.82 22 |
+| block-card | Block card | Actions | custom | 32x32 slot / 20x20 glyph | 0 0 24 24 |
+| show-card-details | Show card details | Actions | custom | 32x32 slot / 20x20 glyph | 0 0 24 24 |
+| view-pin | View PIN | Actions | custom | 32x32 slot / 20x20 glyph | 0 0 20 19 |
+| standing-order | Create standing order | Actions | custom | 32x32 slot / 20x20 glyph | 5 5 22 22 |
+| redo-payment | Redo payment | Actions | custom | 22x18 | -0.5 -0.5 25.04 21 |
+| send-payment | Send payment | Actions | custom | 32x32 slot / 20x20 glyph | 0 0 20 20 |
+| investment-more-details | Investment more details | Actions | custom | 32x32 slot / 20x20 glyph | 7 5 18 22 |
+| investment-ex-ante | Investment ex-ante cost | Actions | custom | 15x20 | 0 0 15 20 |
+| investment-documents | Investment documents | Actions | custom | 32x32 | 0 0 32 32 |
+| investment-important-info | Investment important information | Actions | custom | 32x32 | 0 0 32 32 |
+| investment-disclaimer | Investment disclaimer | Actions | custom | 32x32 | 0 0 32 32 |
+| card-options-apple-pay | Card options Apple Pay active | Actions | custom | 22x22 | 0 0 22 22 |
+| card-options-mastercard | Card options Mastercard | Actions | custom | 32x32 | 0 0 32 32 |
+| card-options-registrations | Card options registrations | Actions | custom | 32x32 | 0 0 32 32 |
+| card-options-limits | Card options limits | Actions | custom | 32x32 | 0 0 32 32 |
+| card-options-change-name | Card options change card name | Actions | custom | 32x32 | 0 0 32 32 |
+| card-options-delivery-address | Card options delivery address | Actions | custom | 32x32 | 0 0 32 32 |
+| card-options-reissue | Card options reissue card | Actions | custom | 32x32 | 0 0 32 32 |
 | wallet-cards | Wallet cards | External Lucide | lucide | 32x32 slot / 20x20 glyph | lucide-react |
 | shopping-bag | Shopping bag | External Lucide | lucide | 32x32 slot / 20x20 glyph | lucide-react |
 | arrow-right | Arrow right | External Lucide | lucide | 32x32 slot / 20x20 glyph | lucide-react |
@@ -111,6 +135,7 @@ node scripts/export-platform-icon-catalog.mjs
 | calendar-days | Calendar days | External Lucide | lucide | 32x32 slot / 20x20 glyph | lucide-react |
 | circle-dollar-sign | Circle dollar sign | External Lucide | lucide | 32x32 slot / 20x20 glyph | lucide-react |
 | clipboard-check | Clipboard check | External Lucide | lucide | 32x32 slot / 20x20 glyph | lucide-react |
+| check | Check | Actions | lucide | 32x32 slot / 20x20 glyph | lucide-react |
 | eye | Eye | External Lucide | lucide | 32x32 slot / 20x20 glyph | lucide-react |
 | eye-off | Eye off | External Lucide | lucide | 32x32 slot / 20x20 glyph | lucide-react |
 | gift | Gift | External Lucide | lucide | 32x32 slot / 20x20 glyph | lucide-react |
@@ -193,6 +218,23 @@ node scripts/export-platform-icon-catalog.mjs
 ```svg
 <svg aria-hidden="true" color="currentColor" fill="none" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M13.125 7.03187C13.125 6.99563 13.1175 6.96438 13.1163 6.92875C13.0731 8.0425 12.58 8.92437 11.5631 9.6875L11.195 9.9675C10.7419 10.3181 10.5556 10.5344 10.4544 10.8381V11.0844C10.4544 11.9294 9.84188 12.6175 9.08875 12.6175H8.43625L8.45062 10.9981C8.46875 9.965 8.69063 9.68 9.71313 8.82375L10.1594 8.5C10.8806 7.97937 11.0825 7.50937 11.115 6.98562C11.0813 6.305 10.6894 6.00812 9.8125 6.00812C9.4625 6.00812 9.06312 6.08687 8.65 6.175C8.34062 6.24312 8.04625 6.20312 7.77313 6.05813C7.35687 5.88875 7.05062 5.5425 6.93375 5.09312L6.875 4.8675L8.62438 4.45125C9.04438 4.36188 9.53687 4.31187 9.99875 4.31187C11.9725 4.31187 13.0712 5.24375 13.1163 6.92875C13.1187 6.87562 13.125 6.82438 13.125 6.77V7.03187ZM9.4145 16.25C8.80138 16.25 8.302 15.7475 8.302 15.1306C8.302 14.5131 8.80138 14.0112 9.4145 14.0112C10.0289 14.0112 10.5289 14.5131 10.5289 15.1306C10.5289 15.7475 10.0289 16.25 9.4145 16.25ZM10 0C4.4775 0 0 4.4775 0 10C0 15.5225 4.4775 20 10 20C15.5225 20 20 15.5225 20 10C20 4.4775 15.5225 0 10 0Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### play
+
+- Label: Play
+- Category: Header
+- Source: custom
+- Default size: 32x32 slot / 20x20 glyph
+- ViewBox: 0 0 24 24
+- Usage: DemoTopBar, DesignSystemPage Icons inventory
+- Notes: 24x24 circular play control from the supplied UniCredit header SVG.
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M12 23C5.92487 23 1 18.0751 1 12C1 5.92487 5.92487 1 12 1C18.0751 1 23 5.92487 23 12C23 18.0751 18.0751 23 12 23ZM9.09199 7.32853V16.6715H9.09258L18.0103 11.9999L9.09199 7.32853Z" fill="currentColor">
 </path>
 </svg>
 ```
@@ -462,7 +504,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: custom
 - Default size: 32x32
 - ViewBox: 0 0 32 32
-- Usage: AccountDetailsInfoScreen, AccountOptionsScreen, ContactsNavigationCard, NavigationLink, NewPaymentActionListItem, PrimeIconLabelValue, ProductAccordion, RoKidsApp, TemplateCodePreviews
+- Usage: AccountDetailsInfoScreen, AccountOptionsScreen, ContactsNavigationCard, NavigationLink, NewPaymentActionListItem, PrimeIconLabelValue, ProductAccordion, KidsMarketHomeApp, TemplateCodePreviews
 
 ```svg
 <svg aria-hidden="true" color="currentColor" fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg">
@@ -531,6 +573,44 @@ node scripts/export-platform-icon-catalog.mjs
 ```svg
 <svg aria-hidden="true" color="currentColor" fill="none" height="20" viewBox="9 12 14 8" width="20" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M23 12.6759C22.0651 11.7747 20.5478 11.7747 19.612 12.6759L16 15.9391L12.388 12.6759C11.4522 11.7747 9.93578 11.7747 9 12.6759L16 19L23 12.6759Z" fill="currentColor" transform="rotate(180 16 16)">
+</path>
+</svg>
+```
+
+### trade-buy
+
+- Label: Trade buy / positive
+- Category: Actions
+- Source: custom
+- Default size: 32x32
+- ViewBox: 0 0 32 32
+- Usage: InvestmentHistoryScreen trade direction
+- Notes: Arrow-up glyph for investment buys/positive movements. Color passed via AppIcon color prop (#3D7D43).
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M15.2836 9.7076C15.9136 9.07763 16.9907 9.5238 16.9907 10.4147L16.9907 23.0005C16.9907 23.5528 16.543 24.0005 15.9907 24.0005C15.4384 24.0005 14.9907 23.5528 14.9907 23.0005L14.9907 10.4147C14.9907 10.1495 15.0961 9.89513 15.2836 9.7076Z" fill="currentColor">
+</path>
+<path d="M15.072 8.38948C15.5413 7.91119 16.2896 7.87254 16.8039 8.27836L16.9283 8.3901L23.7049 15.305C24.0915 15.6995 24.0851 16.3326 23.6906 16.7192C23.3265 17.076 22.759 17.098 22.3698 16.789L22.2765 16.7049L15.999 10.2995L9.71375 16.7054C9.35669 17.0692 8.78974 17.1023 8.39459 16.801L8.2996 16.7187C7.93573 16.3616 7.90265 15.7947 8.20395 15.3995L8.28625 15.3046L15.072 8.38948Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### trade-sell
+
+- Label: Trade sell
+- Category: Actions
+- Source: custom
+- Default size: 32x32
+- ViewBox: 0 0 32 32
+- Usage: InvestmentHistoryScreen trade direction
+- Notes: Arrow-down glyph for investment sells. Color passed via AppIcon color prop (#CF3524).
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M15.9907 22C16.543 22 16.9907 21.5523 16.9907 21L16.9907 9C16.9907 8.44772 16.543 8 15.9907 8C15.4384 8 14.9907 8.44772 14.9907 9L14.9907 21C14.9907 21.5523 15.4384 22 15.9907 22Z" fill="currentColor">
+</path>
+<path d="M15.072 23.611C15.5413 24.0893 16.2896 24.128 16.8039 23.7221L16.9283 23.6104L23.7049 16.6955C24.0915 16.301 24.0851 15.6679 23.6906 15.2813C23.3265 14.9245 22.759 14.9025 22.3698 15.2115L22.2765 15.2956L15.999 21.701L9.71375 15.2951C9.35669 14.9313 8.78974 14.8982 8.39459 15.1995L8.2996 15.2818C7.93573 15.6389 7.90265 16.2058 8.20395 16.6009L8.28625 16.6959L15.072 23.611Z" fill="currentColor">
 </path>
 </svg>
 ```
@@ -665,12 +745,326 @@ node scripts/export-platform-icon-catalog.mjs
 - Category: Actions
 - Source: custom
 - Default size: 32x32 slot / 20x20 glyph
-- ViewBox: 0 0 32 32
+- ViewBox: 4 5 23.82 22
 - Usage: TransactionDetailScreen
 
 ```svg
-<svg aria-hidden="true" color="currentColor" fill="none" height="20" viewBox="0 0 32 32" width="20" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M17 17H26V22.4C26 24.3882 24.3882 26 22.4 26H17V17ZM21.1415 6L26 15H19.1442C17.4959 15 16.4659 13.2232 17.2901 11.8007L21.1415 6ZM6 21.4996C6.00022 19.0145 8.01495 17 10.5001 17C12.9853 17 14.9999 19.0147 15 21.4998C15.0001 23.985 12.9856 25.9998 10.5005 26C8.01498 26 6.00009 23.9851 6 21.4996ZM9.6 6H15V15H6V9.6C6 7.61178 7.61178 6 9.6 6Z" fill="currentColor">
+<svg aria-hidden="true" color="currentColor" fill="none" height="20" viewBox="4 5 23.82 22" width="20" xmlns="http://www.w3.org/2000/svg">
+<path d="M26.5117 23.5029C26.5117 23.8308 26.4426 24.156 26.3076 24.459C26.1727 24.7617 25.9748 25.0368 25.7256 25.2686C25.4762 25.5004 25.1794 25.6841 24.8535 25.8096C24.5277 25.935 24.1788 26 23.8262 26H17.1113V17.2607H26.5117V23.5029ZM8.11426 17.6436C8.96238 17.317 9.89557 17.231 10.7959 17.3975C11.6964 17.564 12.5236 17.9755 13.1729 18.5791C13.822 19.1827 14.2642 19.9519 14.4434 20.7891C14.6224 21.6261 14.5309 22.4938 14.1797 23.2822C13.8284 24.0709 13.2331 24.7454 12.4697 25.2197C11.7064 25.6939 10.8087 25.9472 9.89062 25.9473C8.65936 25.9472 7.47806 25.4921 6.60742 24.6826C5.73699 23.8733 5.2482 22.7754 5.24805 21.6309C5.24813 20.7773 5.52015 19.9421 6.03027 19.2324C6.5404 18.5228 7.26607 17.9702 8.11426 17.6436ZM26.8174 15.1084H19.5723C17.8301 15.1084 16.7413 13.3554 17.6123 11.9521L21.6826 6.23047L26.8174 15.1084ZM14.7812 15.0938H5V8.59863C5.00006 7.90948 5.29422 7.24804 5.81836 6.76074C6.34249 6.27346 7.0537 6.00007 7.79492 6H14.7812V15.0938Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### block-card
+
+- Label: Block card
+- Category: Actions
+- Source: custom
+- Default size: 32x32 slot / 20x20 glyph
+- ViewBox: 0 0 24 24
+- Usage: CardDetailScreen, HuKidsCardDetailsActionRail
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M19.3293 4.71663L19.3273 9.9375H17.3279L17.3293 4.71663C17.3293 3.80431 16.6099 3.0625 15.7253 3.0625H8.26661C7.38195 3.0625 6.66261 3.80431 6.66261 4.71663V9.9375H4.66261V4.71663C4.66261 2.66719 6.27928 1 8.26661 1H15.7253C17.7126 1 19.3293 2.66719 19.3293 4.71663ZM12.9054 17.2023V18.8544C12.9054 19.3301 12.5321 19.7144 12.0721 19.7144C11.6114 19.7144 11.2381 19.3301 11.2381 18.8544V17.2023C10.7908 16.9149 10.4928 16.4034 10.4928 15.8191C10.4928 14.9205 11.2001 14.1911 12.0721 14.1911C12.9441 14.1911 13.6508 14.9205 13.6508 15.8191C13.6508 16.4034 13.3528 16.9149 12.9054 17.2023ZM3.99609 11.3125V23H17.9774C19.0928 23 19.9961 21.9921 19.9961 20.7498V11.3125H3.99609Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### show-card-details
+
+- Label: Show card details
+- Category: Actions
+- Source: custom
+- Default size: 32x32 slot / 20x20 glyph
+- ViewBox: 0 0 24 24
+- Usage: HuKidsCardDetailsActionRail
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M11.9906 15.4375C9.56988 15.4375 7.56513 14.5045 5.46688 12C6.80407 10.4036 8.10413 9.45074 9.497 8.96536C8.92019 9.58068 8.55994 10.4022 8.55994 11.3125C8.55994 13.2107 10.0986 14.75 11.9961 14.75C13.8943 14.75 15.4329 13.2107 15.4329 11.3125C15.4329 10.4119 15.0795 9.59993 14.513 8.98668C15.8901 9.48443 17.1798 10.4442 18.5294 12C16.3947 14.4606 14.4113 15.4375 11.9906 15.4375ZM11.996 10.625C12.376 10.625 12.6831 10.9328 12.6831 11.3121C12.6831 11.6914 12.376 11.9993 11.996 11.9993C11.6174 11.9993 11.3089 11.6914 11.3089 11.3121C11.3089 10.9328 11.6174 10.625 11.996 10.625ZM11.9971 1C5.92232 1 0.99707 5.92525 0.99707 12C0.99707 18.0754 5.92232 23 11.9971 23C18.0718 23 22.9971 18.0754 22.9971 12C22.9971 5.92525 18.0718 1 11.9971 1Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### view-pin
+
+- Label: View PIN
+- Category: Actions
+- Source: custom
+- Default size: 32x32 slot / 20x20 glyph
+- ViewBox: 0 0 20 19
+- Usage: CardDetailScreen
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="20" viewBox="0 0 20 19" width="20" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M15.5752 0C17.9913 0 19.9502 1.95891 19.9502 4.375C19.9502 6.79109 17.9913 8.75 15.5752 8.75C13.1588 8.75 11.2002 6.79109 11.2002 4.375C11.2002 1.95891 13.1588 0 15.5752 0ZM15.165 3.38477L14.125 2.34473L13.5449 2.9248L14.585 3.96484H13.1143V4.78516H14.585L13.5449 5.8252L14.125 6.40527L15.165 5.36523V6.83594H15.9854V5.36523L17.0254 6.40527L17.6055 5.8252L16.5654 4.78516H18.0361V3.96484H16.5654L17.6055 2.9248L17.0254 2.34473L15.9854 3.38477V1.91406H15.165V3.38477ZM18.125 15.625H15V13.75H18.125V15.625ZM10.625 15.625H13.75V13.75H10.625V15.625ZM9.375 15.625H6.25V13.75H9.375V15.625ZM2.61687 11.0156C2.20688 11.0156 1.875 10.6838 1.875 10.2731V8.24181C1.875 7.83244 2.20688 7.49994 2.61687 7.49994H6.02437C6.43437 7.49994 6.76625 7.83244 6.76625 8.24181V10.2731C6.76625 10.6838 6.43437 11.0156 6.02437 11.0156H2.61687ZM5 15.625H1.875V13.75H5V15.625ZM15.625 10C12.5181 10 10 7.48181 10 4.37495H1.875C0.84375 4.37495 0 5.21869 0 6.24994V16.25C0 17.2812 0.84375 18.125 1.875 18.125H18.125C19.1562 18.125 20 17.2812 20 16.25V7.90681C18.9688 9.1825 17.3931 10 15.625 10Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### standing-order
+
+- Label: Create standing order
+- Category: Actions
+- Source: custom
+- Default size: 32x32 slot / 20x20 glyph
+- ViewBox: 5 5 22 22
+- Usage: TransactionDetailScreen
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="20" viewBox="5 5 22 22" width="20" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M12.4555 13.6987L8.61138 16.3399L8.13203 16.6686H6V9.88865V7.66667C6 6.746 6.74668 6 7.66669 6H11.5554H16.0001V11.2633L13.3908 13.056V10.868C13.3908 10.766 13.3668 10.696 13.3195 10.654C13.2735 10.6147 13.2015 10.596 13.0935 10.596H12.7775C12.6435 10.596 12.5281 10.6227 12.4348 10.674L11.5534 11.1433C11.4928 11.176 11.4541 11.2206 11.4394 11.2746C11.4234 11.332 11.4361 11.396 11.4754 11.4633L11.6294 11.752C11.6961 11.86 11.8054 11.8826 11.9281 11.8153L12.4555 11.5433V13.6987ZM7.9467 7.11133C7.56269 7.11133 7.25202 7.42199 7.25202 7.80533C7.25202 8.18866 7.56269 8.49999 7.9467 8.49999C8.33071 8.49999 8.64071 8.18866 8.64071 7.80533C8.64071 7.42199 8.33071 7.11133 7.9467 7.11133ZM7.9607 14.4093H7.96003C7.9167 14.568 7.98003 14.684 8.1327 14.7267C8.47537 14.834 8.83671 14.8887 9.20472 14.8887C9.76006 14.8887 10.1741 14.77 10.4354 14.5347C10.6774 14.3113 10.7994 14.004 10.7994 13.6233V13.522C10.7994 13.0447 10.6121 12.724 10.2414 12.5653C10.5407 12.4067 10.6914 12.1073 10.6914 11.6726V11.602C10.6914 11.23 10.5601 10.9493 10.3014 10.7673C10.0787 10.616 9.76539 10.5393 9.36939 10.5393C8.98605 10.5393 8.60405 10.618 8.23337 10.7733C8.1147 10.8233 8.06537 10.9267 8.10003 11.0566L8.18203 11.362C8.20337 11.4306 8.23804 11.476 8.28737 11.498C8.33737 11.52 8.39537 11.5166 8.45937 11.488C8.75271 11.3613 9.02339 11.298 9.26139 11.298C9.42939 11.298 9.55406 11.322 9.63006 11.368C9.71539 11.4233 9.75673 11.5166 9.75673 11.6533V11.698C9.75673 11.8946 9.70206 12.0273 9.59073 12.1027C9.45473 12.192 9.26539 12.2373 9.02739 12.2373H8.86871C8.78471 12.2373 8.72605 12.2567 8.69138 12.2947C8.65805 12.3307 8.64205 12.3867 8.64205 12.464V12.7867C8.64205 12.8673 8.65738 12.92 8.69071 12.952C8.72405 12.986 8.77871 13.0013 8.86271 13.0013H9.11539C9.40272 13.0013 9.60206 13.0427 9.70806 13.126C9.8114 13.2053 9.86407 13.342 9.86407 13.5347V13.5847C9.86407 13.7707 9.8194 13.9047 9.72873 13.984C9.62006 14.082 9.42673 14.1313 9.15405 14.1313C8.87938 14.1313 8.60405 14.0813 8.33271 13.9827C8.24737 13.9547 8.18203 13.956 8.13537 13.9867C8.09003 14.016 8.05737 14.0713 8.03003 14.162L7.9607 14.4093ZM14.1941 7.11133C14.5781 7.11133 14.8888 7.42199 14.8888 7.80533C14.8888 8.18866 14.5781 8.49999 14.1941 8.49999C13.8101 8.49999 13.5001 8.18866 13.5001 7.80533C13.5001 7.42199 13.8101 7.11133 14.1941 7.11133ZM17.2819 24.5033L8.66638 18.58V26H23.3079C24.9233 26 26 24.9233 26 23.3073V18.58L17.2819 24.5033ZM17.2821 12.0001L9.36659 17.4381L17.2821 22.8767L25.1975 17.4381L17.2821 12.0001Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### redo-payment
+
+- Label: Redo payment
+- Category: Actions
+- Source: custom
+- Default size: 22x18
+- ViewBox: -0.5 -0.5 25.04 21
+- Usage: TransactionDetailScreen
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="18" viewBox="-0.5 -0.5 25.04 21" width="22" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M18.8428 9.61426C15.9748 9.61426 13.6499 11.9392 13.6499 14.8072C13.6499 17.6751 15.9748 20 18.8428 20C21.7115 20 24.0357 17.6751 24.0357 14.8072C24.0357 11.9392 21.7115 9.61426 18.8428 9.61426ZM20.8289 12.8905C20.3432 12.3833 19.6687 12.0871 18.9463 12.0871C17.5064 12.0871 16.3391 13.2544 16.3391 14.6943C16.3391 16.1342 17.5064 17.3015 18.9463 17.3015C20.1167 17.3015 21.1341 16.5237 21.4525 15.415L20.4374 15.1235C20.2482 15.7824 19.6426 16.2454 18.9463 16.2454C18.0896 16.2454 17.3952 15.551 17.3952 14.6943C17.3952 13.8376 18.0896 13.1432 18.9463 13.1432C19.3842 13.1432 19.7913 13.3253 20.0817 13.6374L19.4008 14.3194H21.5011V12.2191L20.8289 12.8905Z" fill="currentColor">
+</path>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M1.48368 13.3531V2.96724H0V14.8368H11.8703C11.8764 14.3273 11.9327 13.831 12.0338 13.3531H1.48368ZM21.6589 8.70814C17.8834 6.61981 14.0116 8.50994 12.5146 11.8696H2.96749V0H19.2879L23.7389 5.93479L21.6589 8.70814ZM13.0326 3.95648C12.4968 3.41049 12.4968 2.52529 13.0326 1.97824L16.9192 5.93471L13.0326 9.89121C12.4968 9.34522 12.4968 8.45895 13.0326 7.91297L14.2887 6.63424H6.92441L6.92385 5.23575H14.2887L13.0326 3.95648Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### send-payment
+
+- Label: Send payment
+- Category: Actions
+- Source: custom
+- Default size: 32x32 slot / 20x20 glyph
+- ViewBox: 0 0 20 20
+- Usage: TransactionDetailScreen
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg">
+<path d="M9.53052 11.6155H9.501C9.41836 11.6155 9.33376 11.6201 9.24718 11.6277C9.18029 11.6323 9.14684 11.667 9.14684 11.7324V13.7667C9.14684 13.8525 9.17832 13.8974 9.24128 13.9015C9.29244 13.9051 9.38098 13.9071 9.50691 13.9071H9.53642C9.7686 13.9071 9.94125 13.8484 10.0559 13.73C10.2059 13.5742 10.2802 13.2908 10.2802 12.8782V12.6265C10.2802 12.2098 10.2133 11.9305 10.08 11.787C9.97323 11.6732 9.79024 11.6155 9.53052 11.6155Z" fill="currentColor">
+</path>
+<path d="M5.75356 11.4724H5.65124C5.54631 11.4724 5.43087 11.4768 5.30495 11.4852C5.26297 11.4902 5.24199 11.5168 5.24199 11.5657V12.6182H5.65124C5.93458 12.6182 6.12871 12.5805 6.23365 12.5044C6.3281 12.4384 6.37532 12.3073 6.37532 12.1119V11.9454C6.37532 11.7816 6.33072 11.6634 6.24152 11.5923C6.14708 11.5124 5.98442 11.4724 5.75356 11.4724Z" fill="currentColor">
+</path>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M2.49719 0.833252H13.0094L16.6639 4.52856V19.1666H5.33053C3.76596 19.1666 2.49719 17.8844 2.49719 16.302V0.833252ZM12.1305 1.97909V5.41659H15.5305L12.1305 1.97909ZM15.1662 11.4551C15.1973 11.4253 15.2138 11.3675 15.2138 11.2798V10.7848C15.2138 10.7029 15.1985 10.645 15.1696 10.6129C15.1401 10.5809 15.0778 10.5648 14.9826 10.5648H13.1188C12.8156 10.5648 12.6094 10.6244 12.5 10.7436C12.419 10.8306 12.3663 10.9143 12.3442 10.9945C12.3209 11.0747 12.3096 11.1996 12.3096 11.3698V14.7929C12.3096 14.8892 12.3249 14.9505 12.3544 14.9751C12.3838 15.0009 12.4524 15.0129 12.5618 15.0129H13.201C13.3092 15.0129 13.3789 15.0009 13.4084 14.9751C13.4378 14.9505 13.452 14.8892 13.452 14.7929V13.2186H14.8058C14.8919 13.2186 14.9486 13.2048 14.9758 13.1773C15.0024 13.1498 15.0166 13.0948 15.0166 13.0123V12.566C15.0166 12.4738 15.0024 12.4153 14.9758 12.3901C14.9486 12.3649 14.8919 12.3517 14.8058 12.3517H13.452V11.6029C13.452 11.5342 13.4866 11.4998 13.5546 11.4998H14.9826C15.0732 11.4998 15.1344 11.4849 15.1662 11.4551ZM11.1202 14.5111C11.442 14.1994 11.6024 13.6838 11.6024 12.9642V12.566C11.6024 11.8596 11.4443 11.3486 11.127 11.0323C10.796 10.7115 10.2401 10.5511 9.46096 10.5511H9.36576C8.97136 10.5511 8.61493 10.5671 8.29816 10.5992C8.18029 10.6129 8.09983 10.6439 8.05676 10.692C8.01313 10.7401 7.99216 10.8306 7.99216 10.9636V14.7173C7.99216 14.8777 8.07829 14.9671 8.25056 14.9854C8.40923 15.0038 8.72203 15.0129 9.18896 15.0129H9.33176C10.1795 15.0129 10.7756 14.8456 11.1202 14.5111ZM6.97896 13.2254C7.26456 13.0146 7.40736 12.6525 7.40736 12.1392V11.9054C7.40736 11.4563 7.30536 11.124 7.10136 10.9086C6.83843 10.6381 6.36016 10.5029 5.66656 10.5029H5.58496C5.06363 10.5029 4.68056 10.5144 4.43576 10.5373C4.31789 10.5465 4.23856 10.5728 4.19776 10.6164C4.15696 10.6599 4.13656 10.7367 4.13656 10.8473V14.7998C4.13656 14.8777 4.15469 14.9327 4.19096 14.9648C4.22723 14.9975 4.28843 15.0129 4.37456 15.0129H5.04096C5.19963 15.0129 5.27896 14.9419 5.27896 14.7998V13.5554H5.60536C6.22643 13.5554 6.68429 13.4454 6.97896 13.2254Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### investment-more-details
+
+- Label: Investment more details
+- Category: Actions
+- Source: custom
+- Default size: 32x32 slot / 20x20 glyph
+- ViewBox: 7 5 18 22
+- Usage: InvestmentsHistoryScreen, DesignSystemPage Icons inventory
+- Notes: Investment order details glyph (document with info circle).
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="20" viewBox="7 5 18 22" width="20" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M19.5944 6H8V22.875C8 24.6009 9.39911 26 11.125 26H23.625V10.0312L19.5944 6ZM16.0001 16.2773C15.4808 16.2773 15.0601 15.8565 15.0601 15.3373C15.0601 14.8185 15.4808 14.3973 16.0001 14.3973C16.5193 14.3973 16.9401 14.8185 16.9401 15.3373C16.9401 15.8565 16.5193 16.2773 16.0001 16.2773ZM16.7746 20.1088C16.7746 20.8923 16.5185 21.6031 15.2362 21.6031V17.4312H16.7746V20.1088ZM16 13C13.2385 13 11 15.2388 11 18C11 20.7615 13.2385 23 16 23C18.7615 23 21 20.7615 21 18C21 15.2388 18.7615 13 16 13ZM18.625 7.25V11H22.375L18.625 7.25Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### investment-ex-ante
+
+- Label: Investment ex-ante cost
+- Category: Actions
+- Source: custom
+- Default size: 15x20
+- ViewBox: 0 0 15 20
+- Usage: InvestmentsHistoryScreen, DesignSystemPage Icons inventory
+- Notes: Investment ex-ante cost glyph (keypad/grid). Non-square glyph kept at native 15x20.
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="20" viewBox="0 0 15 20" width="15" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M2.5 5.625H12.5V3.125H2.5V5.625ZM11.25 10C10.5594 10 10 9.44063 10 8.75C10 8.06 10.5594 7.5 11.25 7.5C11.94 7.5 12.5 8.06 12.5 8.75C12.5 9.44063 11.94 10 11.25 10ZM11.25 13.75C10.5594 13.75 10 13.1906 10 12.5C10 11.81 10.5594 11.25 11.25 11.25C11.94 11.25 12.5 11.81 12.5 12.5C12.5 13.1906 11.94 13.75 11.25 13.75ZM11.25 17.5C10.5594 17.5 10 16.9406 10 16.25C10 15.56 10.5594 15 11.25 15C11.94 15 12.5 15.56 12.5 16.25C12.5 16.9406 11.94 17.5 11.25 17.5ZM7.5 10C6.80937 10 6.25 9.44063 6.25 8.75C6.25 8.06 6.80937 7.5 7.5 7.5C8.19063 7.5 8.75 8.06 8.75 8.75C8.75 9.44063 8.19063 10 7.5 10ZM7.5 13.75C6.80937 13.75 6.25 13.1906 6.25 12.5C6.25 11.81 6.80937 11.25 7.5 11.25C8.19063 11.25 8.75 11.81 8.75 12.5C8.75 13.1906 8.19063 13.75 7.5 13.75ZM7.5 17.5C6.80937 17.5 6.25 16.9406 6.25 16.25C6.25 15.56 6.80937 15 7.5 15C8.19063 15 8.75 15.56 8.75 16.25C8.75 16.9406 8.19063 17.5 7.5 17.5ZM3.75 10C3.05938 10 2.5 9.44063 2.5 8.75C2.5 8.06 3.05938 7.5 3.75 7.5C4.44063 7.5 5 8.06 5 8.75C5 9.44063 4.44063 10 3.75 10ZM3.75 13.75C3.05938 13.75 2.5 13.1906 2.5 12.5C2.5 11.81 3.05938 11.25 3.75 11.25C4.44063 11.25 5 11.81 5 12.5C5 13.1906 4.44063 13.75 3.75 13.75ZM3.75 17.5C3.05938 17.5 2.5 16.9406 2.5 16.25C2.5 15.56 3.05938 15 3.75 15C4.44063 15 5 15.56 5 16.25C5 16.9406 4.44063 17.5 3.75 17.5ZM2.5 0C1.11937 0 0 1.11937 0 2.5V20H12.5C13.8806 20 15 18.8806 15 17.5V0H2.5Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### investment-documents
+
+- Label: Investment documents
+- Category: Actions
+- Source: custom
+- Default size: 32x32
+- ViewBox: 0 0 32 32
+- Usage: InvestmentBuyOrderFlow
+- Notes: Product documents glyph (stacked document with lines) for the Documents and terms accordion.
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M11.8065 15.25C11.8065 15.94 12.3839 16.5 13.0968 16.5H23.4194C23.4194 15.8094 22.8413 15.25 22.129 15.25H11.8065ZM11.8065 18.375C11.8065 19.065 12.3839 19.625 13.0968 19.625H23.4194C23.4194 18.9344 22.8413 18.375 22.129 18.375H11.8065ZM11.8065 21.5C11.8065 22.19 12.3839 22.75 13.0968 22.75H23.4194C23.4194 22.0594 22.8413 21.5 22.129 21.5H11.8065ZM16.3226 13.375H11.8065V9H16.3226V13.375ZM9.87097 6.5H23.4194C24.4884 6.5 25.3548 7.33937 25.3548 8.375V26.5H11.8065C10.7374 26.5 9.87097 25.6606 9.87097 24.625V6.5ZM7.93548 8.375V24.625C7.93548 25.6606 8.80194 26.5 9.87097 26.5H7.93548C6.86645 26.5 6 25.6606 6 24.625V8.375H7.93548Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### investment-important-info
+
+- Label: Investment important information
+- Category: Actions
+- Source: custom
+- Default size: 32x32
+- ViewBox: 0 0 32 32
+- Usage: InvestmentBuyOrderFlow
+- Notes: Bell glyph for the 'Important information' row in the Documents and terms accordion.
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M17.7688 8.01122V6H15.2305V8.01117C13.2572 8.44299 11.6853 9.86021 11.122 11.6836H11.1195L9 22.2498H24L21.8799 11.6836H21.8767C21.314 9.86028 19.7423 8.4431 17.7688 8.01122ZM13.9614 23.5C13.9861 24.8844 15.1106 26 16.4997 26C17.8881 26 19.0133 24.8844 19.0379 23.5H13.9614Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### investment-disclaimer
+
+- Label: Investment disclaimer
+- Category: Actions
+- Source: custom
+- Default size: 32x32
+- ViewBox: 0 0 32 32
+- Usage: InvestmentBuyOrderFlow
+- Notes: Exclamation-in-circle glyph for the 'Investment disclaimer' row in the Documents and terms accordion.
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M16.7082 18.8106H15.2919L14.5844 11.7319C14.5844 10.1681 15.8519 8.90062 17.4163 8.90062L16.7082 18.8106ZM16.0001 23.4119C15.2182 23.4119 14.5844 22.7775 14.5844 21.9962C14.5844 21.2144 15.2182 20.5806 16.0001 20.5806C16.7819 20.5806 17.4163 21.2144 17.4163 21.9962C17.4163 22.7775 16.7819 23.4119 16.0001 23.4119ZM16 6C10.4769 6 6 10.4769 6 16C6 21.5225 10.4769 26 16 26C21.5231 26 26 21.5225 26 16C26 10.4769 21.5231 6 16 6Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### card-options-apple-pay
+
+- Label: Card options Apple Pay active
+- Category: Actions
+- Source: custom
+- Default size: 22x22
+- ViewBox: 0 0 22 22
+- Usage: CardOptionsScreen, DesignSystemPage Icons inventory
+- Notes: Approved Apple Pay active glyph supplied for Mobile PI Card options.
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="22" viewBox="0 0 22 22" width="22" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M14.8727 8.16475C15.6764 7.36175 16.9785 7.36175 17.7808 8.16475L10.1447 15.8125L4.8125 10.4809C5.6155 9.67794 6.91762 9.67794 7.72062 10.4809L10.1447 12.9044L14.8727 8.16475ZM11 0C4.92456 0 0 4.92456 0 11C0 17.0748 4.92456 22 11 22C17.0754 22 22 17.0748 22 11C22 4.92456 17.0754 0 11 0Z" fill="#3D7D43">
+</path>
+</svg>
+```
+
+### card-options-mastercard
+
+- Label: Card options Mastercard
+- Category: Actions
+- Source: custom
+- Default size: 32x32
+- ViewBox: 0 0 32 32
+- Usage: CardOptionsScreen, DesignSystemPage Icons inventory
+- Notes: Official full-color Mastercard mark supplied for Mobile PI Card options.
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg">
+<rect x="13.2959" y="11.3282" width="5.40809" height="9.76779" fill="#FF5F00">
+</rect>
+<path d="M13.6395 16.2121C13.6378 14.306 14.5083 12.505 16.0002 11.3282C13.4661 9.3263 9.82683 9.61767 7.64007 11.9976C5.45331 14.3775 5.45331 18.0468 7.64007 20.4267C9.82683 22.8066 13.4661 23.0979 16.0002 21.096C14.5083 19.9192 13.6378 18.1182 13.6395 16.2121Z" fill="#EB001B">
+</path>
+<path d="M25.9998 16.2121C25.9998 18.5904 24.6489 20.76 22.5206 21.7994C20.3923 22.8389 17.8604 22.5658 16 21.096C17.4905 19.9181 18.3606 18.1178 18.3606 16.2121C18.3606 14.3065 17.4905 12.5062 16 11.3282C17.8604 9.85851 20.3923 9.58537 22.5206 10.6248C24.6489 11.6643 25.9998 13.8339 25.9998 16.2121Z" fill="#F79E1B">
+</path>
+<path d="M25.4101 20.0615V19.8615H25.4903V19.8207H25.286V19.8615H25.3663V20.0615H25.4101Z" fill="#F79E1B">
+</path>
+<path d="M25.8071 20.0614V19.8203H25.7444L25.6724 19.9862L25.6003 19.8203H25.5377V20.0614H25.5819V19.8796L25.6495 20.0364H25.6953L25.7629 19.8792V20.0614H25.8071Z" fill="#F79E1B">
+</path>
+</svg>
+```
+
+### card-options-registrations
+
+- Label: Card options registrations
+- Category: Actions
+- Source: custom
+- Default size: 32x32
+- ViewBox: 0 0 32 32
+- Usage: CardOptionsScreen, DesignSystemPage Icons inventory
+- Notes: Card registrations glyph supplied for Mobile PI Card options.
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M24.7499 12.25C24.7499 12.94 24.1899 13.5 23.4999 13.5C22.8099 13.5 22.2499 12.94 22.2499 12.25C22.2499 12.94 21.6899 13.5 20.9999 13.5C20.3099 13.5 19.7499 12.94 19.7499 12.25C19.7499 12.94 19.1899 13.5 18.4999 13.5C17.8099 13.5 17.2499 12.94 17.2499 12.25C17.2499 12.94 16.6899 13.5 15.9999 13.5C15.3099 13.5 14.7499 12.94 14.7499 12.25C14.7499 12.94 14.1899 13.5 13.4999 13.5C12.8099 13.5 12.2499 12.94 12.2499 12.25C12.2499 12.94 11.6899 13.5 10.9999 13.5C10.3099 13.5 9.74991 12.94 9.74991 12.25C9.74991 12.94 9.18991 13.5 8.49991 13.5C7.80991 13.5 7.24991 12.94 7.24991 12.25V9.125H24.7499V12.25ZM19.7501 21.1787H24.7501V15.375H19.7501V21.1787ZM14.1249 23.5H17.8749V15.375H14.1249V23.5ZM7.24991 21.1787H12.2499V15.375H7.24991V21.1787ZM8.5 7.25C7.11937 7.25 6 8.36937 6 9.75V24.75H23.5C24.8806 24.75 26 23.6306 26 22.25V7.25H8.5Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### card-options-limits
+
+- Label: Card options limits
+- Category: Actions
+- Source: custom
+- Default size: 32x32
+- ViewBox: 0 0 32 32
+- Usage: CardOptionsScreen, DesignSystemPage Icons inventory
+- Notes: Card limits glyph supplied for Mobile PI Card options.
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg">
+<path d="M16.2603 11.463C16.2603 14.5699 18.7784 17.088 21.8853 17.088C23.6533 17.088 25.229 16.2708 26.2603 14.9952V23.338C26.2603 24.3693 25.4165 25.213 24.3853 25.213H8.13525C7.104 25.213 6.26025 24.3693 6.26025 23.338V13.338C6.26025 12.3068 7.104 11.463 8.13525 11.463H16.2603ZM8.13525 20.838V22.713H11.2603V20.838H8.13525ZM12.5103 20.838V22.713H15.6353V20.838H12.5103ZM16.8853 20.838V22.713H20.0103V20.838H16.8853ZM21.2603 20.838V22.713H24.3853V20.838H21.2603ZM8.87744 14.588C8.46744 14.588 8.13525 14.9208 8.13525 15.3302V17.3615C8.13542 17.7719 8.46755 18.1036 8.87744 18.1036H12.2847C12.6945 18.1036 13.0267 17.7719 13.0269 17.3615V15.3302C13.0269 14.9208 12.6947 14.588 12.2847 14.588H8.87744ZM21.8853 7.08801C24.2979 7.08801 26.2603 9.05034 26.2603 11.463C26.2603 13.8757 24.2979 15.838 21.8853 15.838C19.4732 15.838 17.5103 13.8757 17.5103 11.463C17.5103 9.05034 19.4732 7.08801 21.8853 7.08801ZM23.4985 12.4054C23.1287 12.7259 22.5602 12.9288 21.9243 12.9288C21.2886 12.9287 20.7208 12.7258 20.3511 12.4054C20.3474 12.4223 20.3455 12.4398 20.3462 12.4572C20.3462 12.9049 20.9956 13.3994 21.9243 13.3995C22.8533 13.3995 23.5034 12.9049 23.5034 12.4572C23.5041 12.4398 23.5023 12.4223 23.4985 12.4054ZM23.4351 11.5148C23.3712 11.5684 23.3018 11.6143 23.228 11.6515C23.1532 11.6989 23.0748 11.7404 22.9937 11.7745C22.6537 11.9162 22.2903 11.9879 21.9243 11.9865C21.5585 11.9879 21.1957 11.9161 20.856 11.7745C20.7748 11.7404 20.6965 11.6989 20.6216 11.6515C20.5478 11.6143 20.4784 11.5684 20.4146 11.5148C20.3916 11.5002 20.3701 11.4828 20.3511 11.463C20.3474 11.48 20.3455 11.4974 20.3462 11.5148C20.3454 11.5322 20.3474 11.5496 20.3511 11.5665C20.3607 11.6512 20.3904 11.7319 20.437 11.8019C20.473 11.8725 20.5213 11.9358 20.5806 11.9865C20.8465 12.2551 21.3293 12.4571 21.9243 12.4572C22.5196 12.4572 23.003 12.2551 23.269 11.9865C23.3283 11.9358 23.3767 11.8725 23.4126 11.8019C23.4592 11.7319 23.4889 11.6512 23.4985 11.5665C23.5022 11.5496 23.5042 11.5321 23.5034 11.5148C23.5041 11.4974 23.5023 11.48 23.4985 11.463C23.4795 11.4828 23.458 11.5002 23.4351 11.5148ZM21.9243 9.63C20.9956 9.63016 20.3462 10.1248 20.3462 10.5724C20.3455 10.5898 20.3474 10.6072 20.3511 10.6241C20.3607 10.7088 20.3904 10.7895 20.437 10.8595C20.473 10.9301 20.5213 10.9934 20.5806 11.0441C20.663 11.1269 20.7559 11.1981 20.856 11.256C20.9568 11.3116 21.0624 11.3575 21.1714 11.3927C21.4146 11.4752 21.6696 11.5161 21.9253 11.5148C22.1808 11.5161 22.4352 11.4752 22.6782 11.3927C22.7872 11.3575 22.8928 11.3116 22.9937 11.256C23.0938 11.198 23.1865 11.127 23.269 11.0441C23.3283 10.9934 23.3766 10.9301 23.4126 10.8595C23.4592 10.7895 23.4889 10.7088 23.4985 10.6241C23.5023 10.6072 23.5042 10.5898 23.5034 10.5724C23.5034 10.1247 22.8533 9.63 21.9243 9.63Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### card-options-change-name
+
+- Label: Card options change card name
+- Category: Actions
+- Source: custom
+- Default size: 32x32
+- ViewBox: 0 0 32 32
+- Usage: CardOptionsScreen, DesignSystemPage Icons inventory
+- Notes: Approved Change card name glyph supplied for Mobile PI Card options.
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M17.2504 12.1869C17.2504 12.8806 17.8129 13.4367 18.5003 13.4367H23.8439C23.8439 12.7493 23.2876 12.1869 22.5939 12.1869H17.2504ZM17.2504 15.3115C17.2504 16.0052 17.8129 16.5614 18.5003 16.5614H23.8439C23.8439 15.8739 23.2876 15.3115 22.5939 15.3115H17.2504ZM8.15709 15.3115V18.6736H16.0005C16.0005 16.8176 14.4943 15.3115 12.6381 15.3115H8.15709ZM14.1318 12.1369C14.1318 10.9996 13.2131 10.0809 12.0756 10.0809C10.9382 10.0809 10.0195 10.9996 10.0195 12.1369C10.0195 13.268 10.9382 14.1929 12.0756 14.1929C13.2131 14.1929 14.1318 13.268 14.1318 12.1369ZM7.87579 7.5H24.1251C25.1563 7.5 26 8.34364 26 9.37476V19.3735C26 20.4046 25.1563 21.2483 24.1251 21.2483H7.87579C6.84459 21.2483 6.00087 20.4046 6.00087 19.3735V9.37476C6.00087 8.34364 6.84459 7.5 7.87579 7.5ZM7.87492 23.1252H24.1242C25.1554 23.1252 25.9991 22.2816 25.9991 21.2504V23.1252C25.9991 24.1564 25.1554 25 24.1242 25H7.87492C6.84371 25 6 24.1564 6 23.1252V21.2504C6 22.2816 6.84371 23.1252 7.87492 23.1252Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### card-options-delivery-address
+
+- Label: Card options delivery address
+- Category: Actions
+- Source: custom
+- Default size: 32x32
+- ViewBox: 0 0 32 32
+- Usage: CardOptionsScreen, DesignSystemPage Icons inventory
+- Notes: Card delivery address glyph supplied for Mobile PI Card options.
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M13.375 13.5019C13.375 11.7756 14.7739 10.3762 16.4997 10.3762C18.2261 10.3762 19.625 11.7756 19.625 13.5019C19.625 15.2281 18.2261 16.6275 16.4997 16.6275C14.7739 16.6275 13.375 15.2281 13.375 13.5019ZM22.3068 18.2494C23.3652 16.9563 24 15.3037 24 13.5019C24 9.35875 20.6423 6 16.4997 6C12.3578 6 9 9.35875 9 13.5019C9 15.2587 9.60483 16.8725 10.6158 18.1512L16.4953 26L22.3068 18.2494Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### card-options-reissue
+
+- Label: Card options reissue card
+- Category: Actions
+- Source: custom
+- Default size: 32x32
+- ViewBox: 0 0 32 32
+- Usage: CardOptionsScreen, DesignSystemPage Icons inventory
+- Notes: Reissue card glyph supplied for Mobile PI Card options.
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M21.625 7C19.2087 7 17.25 8.95876 17.25 11.375C17.25 13.7913 19.2087 15.75 21.625 15.75C24.0419 15.75 26 13.7913 26 11.375C26 8.95876 24.0419 7 21.625 7ZM23.2983 9.76025C22.8891 9.33294 22.3209 9.08333 21.7122 9.08333C20.4991 9.08333 19.5156 10.0668 19.5156 11.2799C19.5156 12.4931 20.4991 13.4765 21.7122 13.4765C22.6982 13.4765 23.5554 12.8212 23.8237 11.8871L22.9685 11.6416C22.8091 12.1967 22.2988 12.5867 21.7122 12.5867C20.9905 12.5867 20.4054 12.0017 20.4054 11.2799C20.4054 10.5582 20.9905 9.97309 21.7122 9.97309C22.0812 9.97309 22.4241 10.1265 22.6688 10.3895L22.0951 10.964H23.8646V9.19455L23.2983 9.76025ZM24.125 22.625H21V20.75H24.125V22.625ZM16.625 22.625H19.75V20.75H16.625V22.625ZM15.375 22.625H12.25V20.75H15.375V22.625ZM8.61687 18.0156C8.20688 18.0156 7.875 17.6838 7.875 17.2731V15.2418C7.875 14.8324 8.20688 14.4999 8.61687 14.4999H12.0244C12.4344 14.4999 12.7663 14.8324 12.7663 15.2418V17.2731C12.7663 17.6838 12.4344 18.0156 12.0244 18.0156H8.61687ZM11 22.625H7.875V20.75H11V22.625ZM21.625 17C18.5181 17 16 14.4818 16 11.3749H7.875C6.84375 11.3749 6 12.2187 6 13.2499V23.25C6 24.2812 6.84375 25.125 7.875 25.125H24.125C25.1562 25.125 26 24.2812 26 23.25V14.9068C24.9688 16.1825 23.3931 17 21.625 17Z" fill="currentColor">
 </path>
 </svg>
 ```
@@ -692,6 +1086,22 @@ node scripts/export-platform-icon-catalog.mjs
 </polyline>
 <line x1="12" x2="12" y1="15" y2="3">
 </line>
+</svg>
+```
+
+### check
+
+- Label: Check
+- Category: Actions
+- Source: lucide
+- Default size: 32x32 slot / 20x20 glyph
+- ViewBox: lucide-react
+- Usage: InvestmentBuyOrderFlow suitability table
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check" aria-hidden="true">
+<path d="M20 6 9 17l-5-5">
+</path>
 </svg>
 ```
 
@@ -744,6 +1154,22 @@ node scripts/export-platform-icon-catalog.mjs
 ```svg
 <svg aria-hidden="true" color="currentColor" fill="none" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M9.99181 12.8646C7.97457 12.8646 6.30395 12.0872 4.55541 10C5.66973 8.66972 6.75311 7.87566 7.91384 7.47118C7.43317 7.98394 7.13296 8.66857 7.13296 9.42711C7.13296 11.0089 8.41514 12.2917 9.99639 12.2917C11.5782 12.2917 12.8604 11.0089 12.8604 9.42711C12.8604 8.67659 12.5659 7.99998 12.0938 7.48894C13.2414 7.90373 14.3162 8.70352 15.4408 10C13.6619 12.0505 12.0091 12.8646 9.99181 12.8646ZM9.99634 8.85421C10.313 8.85421 10.5689 9.11074 10.5689 9.42682C10.5689 9.74289 10.313 9.99942 9.99634 9.99942C9.68083 9.99942 9.42373 9.74289 9.42373 9.42682C9.42373 9.11074 9.68083 8.85421 9.99634 8.85421ZM9.99723 0.833374C4.93494 0.833374 0.830566 4.93775 0.830566 10C0.830566 15.0629 4.93494 19.1667 9.99723 19.1667C15.0595 19.1667 19.1639 15.0629 19.1639 10C19.1639 4.93775 15.0595 0.833374 9.99723 0.833374Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### accounts-coins
+
+- Label: Accounts (stacked coins)
+- Category: Accounts
+- Source: custom
+- Default size: 32x32 slot / 20x20 glyph
+- ViewBox: 0 0 32 32
+- Usage: DesignSystemPage, useProducts
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="20" viewBox="0 0 32 32" width="20" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M15.2001 12.3748C15.2 10.7719 12.8961 9 9.60034 9C6.30454 9 4.00065 10.7719 4.00065 12.375C3.99804 12.4373 4.00343 12.4998 4.01668 12.5606C4.05084 12.8639 4.15523 13.1537 4.32066 13.4044C4.44825 13.6573 4.62227 13.8809 4.83258 14.0623C5.12527 14.3591 5.45335 14.6144 5.80857 14.822C6.16681 15.0213 6.54183 15.1851 6.9288 15.3113C7.79155 15.6068 8.69354 15.7549 9.60061 15.75C10.5077 15.7549 11.4097 15.6068 12.2724 15.3113C12.6592 15.185 13.0341 15.0212 13.3921 14.822C13.7474 14.6145 14.0754 14.3591 14.3682 14.0623C14.5785 13.8809 14.7525 13.6571 14.8802 13.4042C15.0456 13.1535 15.15 12.8637 15.1842 12.5604C15.1974 12.4996 15.2028 12.4372 15.2001 12.3748ZM22.3995 12.375C25.6954 12.375 27.9992 14.1469 27.9994 15.7499C28.002 15.8122 27.9966 15.8746 27.9834 15.9354C27.9492 16.2387 27.8448 16.5285 27.6794 16.7792C27.5518 17.0322 27.3778 17.2559 27.1674 17.4373C26.8747 17.7341 26.5466 17.9895 26.1913 18.197C25.8333 18.3962 25.4584 18.5601 25.0717 18.6863C24.2089 18.9818 23.3069 19.1299 22.3998 19.1251C21.4927 19.1299 20.5908 18.9818 19.728 18.6863C19.341 18.5601 18.966 18.3963 18.6078 18.197C18.2526 17.9895 17.9245 17.7341 17.6318 17.4373C17.4215 17.2559 17.2475 17.0323 17.1199 16.7794C16.9545 16.5287 16.8501 16.2389 16.8159 15.9356C16.8027 15.8748 16.7973 15.8124 16.7999 15.75C16.7999 14.1469 19.1037 12.375 22.3995 12.375ZM27.9832 18.9392C27.9965 19.0001 28.0019 19.0625 27.9993 19.1249C28.0019 19.1872 27.9965 19.2497 27.9832 19.3104C27.9491 19.6137 27.8447 19.9035 27.6793 20.1542C27.5517 20.4073 27.3776 20.6311 27.1672 20.8125C26.2234 21.7744 24.5115 22.5 22.3995 22.5C20.2877 22.5 18.5757 21.7744 17.6319 20.8123C17.4215 20.6309 17.2475 20.4072 17.1199 20.1542C16.9545 19.9034 16.8501 19.6136 16.8159 19.3103C16.8027 19.2495 16.7973 19.187 16.7999 19.1247C16.7973 19.0625 16.8027 19.0001 16.8159 18.9394C16.8834 19.0103 16.9585 19.0724 17.0398 19.1247C17.2667 19.317 17.5137 19.4814 17.7759 19.6146C18.0415 19.7843 18.3198 19.931 18.6078 20.0534C19.8139 20.5605 21.1011 20.8184 22.3995 20.813C23.6979 20.8184 24.9853 20.5605 26.1913 20.0534C26.4794 19.931 26.7577 19.7843 27.0233 19.6146C27.2854 19.4814 27.5324 19.317 27.7592 19.1247C27.8406 19.0724 27.9157 19.0102 27.9832 18.9392ZM15.2 19.1247C15.2026 19.0624 15.1972 18.9999 15.1839 18.9391C13.872 20.0866 11.8562 20.8122 9.60034 20.8125C7.34446 20.8125 5.32862 20.0869 4.01668 18.9394C4.00345 19.0001 3.99806 19.0625 4.00065 19.1247C4.00065 20.7281 6.30454 22.5 9.60034 22.5C12.8961 22.5 15.2 20.7281 15.2 19.1247ZM15.184 15.5642C15.1973 15.6251 15.2026 15.6875 15.2001 15.7499C15.2026 15.8122 15.1973 15.8746 15.184 15.9354C15.1498 16.2387 15.0454 16.5285 14.88 16.7792C14.7525 17.0323 14.5784 17.256 14.368 17.4375C13.4241 18.3994 11.7123 19.125 9.60034 19.125C7.48844 19.125 5.77653 18.3994 4.83265 17.4373C4.62229 17.2559 4.44825 17.0322 4.32066 16.7792C4.15527 16.5286 4.05087 16.2389 4.01668 15.9356C4.0034 15.8747 3.99801 15.8122 4.00065 15.7497C3.99806 15.6875 4.00345 15.6251 4.01668 15.5644C4.08414 15.6353 4.15931 15.6974 4.24063 15.7497C4.4675 15.942 4.71446 16.1064 4.9767 16.2396C5.24233 16.4093 5.52052 16.556 5.80857 16.6784C7.01467 17.1855 8.30195 17.4434 9.60034 17.438C10.8987 17.4434 12.186 17.1855 13.3921 16.6784C13.6802 16.556 13.9584 16.4093 14.2241 16.2396C14.4862 16.1063 14.7332 15.942 14.96 15.7497C15.0414 15.6974 15.1165 15.6352 15.184 15.5642Z" fill="currentColor">
 </path>
 </svg>
 ```
@@ -901,7 +1327,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: custom
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: 7 6 18 20
-- Usage: AccountBalanceCard, AccountDetailsInfoScreen
+- Usage: AccountBalanceCard, AccountDetailsInfoScreen, CardDetailsInfoScreen
 - Notes: Deduplicated exact account copy icon.
 
 ```svg
@@ -1020,7 +1446,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: custom
 - Default size: 32x32
 - ViewBox: 0 0 32 32
-- Usage: BottomSheet, DemoFeatureSidePanel, HelperCard, NewPaymentDiscoverBanner, RoKidsApp, TemplateCodePreviews
+- Usage: BottomSheet, DemoFeatureSidePanel, HelperCard, NewPaymentDiscoverBanner, KidsMarketHomeApp, TemplateCodePreviews
 - Notes: Custom close icon replacing the old lucide X wrapper.
 
 ```svg
@@ -1094,6 +1520,40 @@ node scripts/export-platform-icon-catalog.mjs
 ```svg
 <svg aria-hidden="true" color="currentColor" fill="none" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
 <path d="M24 0V7.6084C23.2523 7.6084 21.8939 6.77867 21.8936 5.66211L21.9072 3.94531L12.5312 13.6484L8.83008 9.85059L3.56445 15.2734C4.79351 16.9281 6.75956 17.9999 8.97559 18C12.4773 18 15.355 15.3232 15.6865 11.8994L17.8105 9.70117C17.8975 10.2059 17.9521 10.7213 17.9521 11.25C17.9521 12.843 17.5353 14.3373 16.8115 15.6348C16.8093 15.6391 16.8075 15.644 16.8047 15.6484L20.4668 19.3379C21.7155 20.5994 21.5464 22.8098 20.3682 24L14.6611 18.2529C13.156 19.5001 11.2428 20.2499 9.15723 20.25L9.17676 20.2402C9.10934 20.2417 9.04375 20.25 8.97559 20.25C4.01828 20.2498 0 16.2208 0 11.25C2.17182e-05 6.27992 4.01829 2.25022 8.97559 2.25C11.7318 2.25 14.1955 3.49777 15.8418 5.45898L14.2764 7.06738C13.0419 5.49239 11.1288 4.47656 8.97559 4.47656C5.25128 4.47679 2.23242 7.50441 2.23242 11.2393C2.23249 12.1937 2.43123 13.1015 2.78711 13.9248C2.67241 13.6555 2.57362 13.3775 2.49414 13.0918L2.49707 13.0938L8.83008 6.58105L12.5312 10.3652L20.4287 2.25098L18.6836 2.24512C17.5963 2.24474 16.8301 0.749904 16.8301 0H24Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### recurring-contribution
+
+- Label: Recurring contribution
+- Category: System
+- Source: custom
+- Default size: 32x32 slot / 20x20 glyph
+- ViewBox: 0 0 18 18
+- Usage: InvestmentProductCard recurring contribution
+- Notes: Calendar-with-refresh glyph marking recurring investment contributions. Color passed via AppIcon color prop (#262626).
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="20" viewBox="0 0 18 18" width="20" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M12.375 3.9375V2.8125H11.25V3.9375H6.75V2.8125H5.625V3.9375H5.0625C4.44118 3.9375 3.9375 4.44118 3.9375 5.0625V12.9375C3.9375 13.5588 4.44118 14.0625 5.0625 14.0625H10.125C9.765 13.7531 9.48375 13.3706 9.28125 12.9375H5.0625V7.3125H12.9375V8.20687C13.3369 8.26875 13.7194 8.40375 14.0625 8.61188V5.0625C14.0625 4.44118 13.5588 3.9375 12.9375 3.9375H12.375ZM12.375 9.28125V8.4375L11.1094 9.70312L12.375 10.9688V10.125C13.4156 10.125 14.0962 11.2275 13.635 12.1613L14.2481 12.7744C15.2381 11.2781 14.1694 9.28125 12.375 9.28125ZM12.375 13.7812V14.625L13.6406 13.3594L12.375 12.0938V12.9375C11.3344 12.9375 10.6537 11.835 11.115 10.9012L10.5019 10.2881C9.51188 11.7844 10.5806 13.7812 12.375 13.7812ZM5.0625 6.1875H12.9375V5.0625H5.0625V6.1875Z" fill="currentColor">
+</path>
+</svg>
+```
+
+### refresh
+
+- Label: Refresh
+- Category: System
+- Source: custom
+- Default size: 32x32 slot / 20x20 glyph
+- ViewBox: 0 0 20 20
+- Usage: SideBySideTool reload frames
+- Notes: Circular two-arrow refresh glyph for general reload/reset actions. Color via AppIcon color prop.
+
+```svg
+<svg aria-hidden="true" color="currentColor" fill="none" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M4.3064 6.58828C5.5363 4.72748 7.6202 3.5 10 3.5C12.5412 3.5 14.7518 4.90369 15.9317 7H13.5C13.0858 7 12.75 7.33579 12.75 7.75C12.75 8.16421 13.0858 8.5 13.5 8.5H17.25C17.6642 8.5 18 8.16421 18 7.75V4C18 3.58579 17.6642 3.25 17.25 3.25C16.8358 3.25 16.5 3.58579 16.5 4V5.79937C15.029 3.90369 12.6594 2.75 10 2.75C6.89546 2.75 4.16929 4.44847 2.7081 6.97663C2.5246 7.29361 2.73363 7.6882 3.09961 7.75353C3.39152 7.80568 3.67842 7.65736 3.83005 7.40197C3.97976 7.14954 4.13818 6.90349 4.3064 6.58828ZM3.09961 12.2465C2.73363 12.3118 2.5246 12.7064 2.7081 13.0234C4.16929 15.5515 6.89546 17.25 10 17.25C12.6594 17.25 15.029 16.0963 16.5 14.2006V16C16.5 16.4142 16.8358 16.75 17.25 16.75C17.6642 16.75 18 16.4142 18 16V12.25C18 11.8358 17.6642 11.5 17.25 11.5H13.5C13.0858 11.5 12.75 11.8358 12.75 12.25C12.75 12.6642 13.0858 13 13.5 13H15.9317C14.7518 15.0963 12.5412 16.5 10 16.5C7.6202 16.5 5.5363 15.2725 4.3064 13.4117C4.13818 13.0965 3.97976 12.8505 3.83005 12.598C3.67842 12.3426 3.39152 12.1943 3.09961 12.2465Z" fill="currentColor">
 </path>
 </svg>
 ```
@@ -1426,7 +1886,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: Payments wallet illustration, AccountOptionsScreen, RoKidsApp
+- Usage: Payments wallet illustration, AccountOptionsScreen, KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet-cards" aria-hidden="true">
@@ -1446,7 +1906,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: ProductMenuCard, RoKidsApp
+- Usage: ProductMenuCard, KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag" aria-hidden="true">
@@ -1606,7 +2066,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: QuickActions, RoKidsApp
+- Usage: QuickActions, KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send" aria-hidden="true">
@@ -1624,7 +2084,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: RoKidsApp
+- Usage: KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bike" aria-hidden="true">
@@ -1646,7 +2106,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: RoKidsApp
+- Usage: KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open" aria-hidden="true">
@@ -1664,7 +2124,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: RoKidsApp
+- Usage: KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days" aria-hidden="true">
@@ -1698,7 +2158,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: RoKidsApp
+- Usage: KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-dollar-sign" aria-hidden="true">
@@ -1718,7 +2178,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: RoKidsApp
+- Usage: KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard-check" aria-hidden="true">
@@ -1738,7 +2198,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: RoKidsApp
+- Usage: KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye" aria-hidden="true">
@@ -1756,7 +2216,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: RoKidsApp
+- Usage: KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-off" aria-hidden="true">
@@ -1778,7 +2238,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: RoKidsApp
+- Usage: KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gift" aria-hidden="true">
@@ -1800,7 +2260,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: RoKidsApp
+- Usage: KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-palette" aria-hidden="true">
@@ -1824,7 +2284,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: RoKidsApp
+- Usage: KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-piggy-bank" aria-hidden="true">
@@ -1844,7 +2304,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: RoKidsApp
+- Usage: KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-receipt-text" aria-hidden="true">
@@ -1866,7 +2326,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: RoKidsApp
+- Usage: KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check" aria-hidden="true">
@@ -1884,7 +2344,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: RoKidsApp
+- Usage: KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sliders-horizontal" aria-hidden="true">
@@ -1916,7 +2376,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: RoKidsApp
+- Usage: KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trophy" aria-hidden="true">
@@ -1942,7 +2402,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: RoKidsApp
+- Usage: KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round" aria-hidden="true">
@@ -1960,7 +2420,7 @@ node scripts/export-platform-icon-catalog.mjs
 - Source: lucide
 - Default size: 32x32 slot / 20x20 glyph
 - ViewBox: lucide-react
-- Usage: RoKidsApp
+- Usage: KidsMarketHomeApp
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users" aria-hidden="true">

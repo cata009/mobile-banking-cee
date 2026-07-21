@@ -444,12 +444,12 @@ export default function CardDetailScreen({
           <span className="text-[14px] font-bold leading-none text-[var(--uc-text)]" style={{ fontFamily: "UniCredit, sans-serif" }}>
             {activeCard.cardHolderName ?? getCardHolderName()}
           </span>
-          <span className="text-[18px] font-bold leading-none text-[var(--uc-text)]" style={{ fontFamily: "UniCredit, sans-serif" }}>
+          <span className="text-[16px] font-bold leading-none text-[var(--uc-text)]" style={{ fontFamily: "UniCredit, sans-serif" }}>
             {formatMaskedCardNumber(activeCard.accountNumber)}
           </span>
         </div>
 
-        {/* Card carousel */}
+        {/* Card carousel — wrapper scrolls on X, inner container holds cards + shadow without clipping */}
         <div
           ref={carouselRef}
           onScroll={handleCarouselScroll}
@@ -459,12 +459,15 @@ export default function CardDetailScreen({
           onPointerCancel={handlePointerCancel}
           onMouseDown={handleMouseDown}
           onClickCapture={handleClickCapture}
-          className={`overflow-x-auto overflow-y-visible pt-[8px] pb-[24px] scrollbar-hide select-none ${
+          className={`overflow-x-auto scrollbar-hide select-none ${
             isCarouselDragging ? "cursor-grabbing" : "cursor-grab"
           }`}
           style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
         >
-          <div className="flex gap-[24px]" style={{ paddingLeft: `${CAROUSEL_EDGE_GUTTER}px` }}>
+          <div
+            className="flex gap-[24px] pt-[8px] pb-[8px]"
+            style={{ paddingLeft: `${CAROUSEL_EDGE_GUTTER}px` }}
+          >
             {cardProducts.map((card, index) => {
               const isActive = index === activeIndex;
               return (
@@ -524,17 +527,8 @@ export default function CardDetailScreen({
           </div>
         </div>
 
-        {/* Carousel indicator */}
-        <div className="-mt-[8px]">
-          <AccountCarouselIndicator
-            count={cardProducts.length}
-            activeIndex={activeIndex}
-            onSelect={scrollToCard}
-          />
-        </div>
-
         {/* Free to Spend + Show Card Details */}
-        <div className="flex flex-col items-center gap-[16px] px-[24px] pt-[16px] pb-[16px]">
+        <div className="flex flex-col items-center gap-[16px] px-[24px] pt-[16px] pb-[4px]">
           <div className="flex w-full flex-col items-start gap-[2px]">
             <span className="uc-type-n5-strong text-[var(--uc-text-muted)]">
               {t("runtime.cards.freeToSpend", "Free To Spend")}
@@ -548,10 +542,19 @@ export default function CardDetailScreen({
           <button
             type="button"
             onClick={handleShowCardDetails}
-            className="uc-type-n5-strong py-[24px] text-[var(--uc-action)] tracking-[0.08em] uppercase"
+            className="uc-type-n5-strong py-[8px] text-[var(--uc-action)] tracking-[0.08em] uppercase"
           >
             {t("runtime.cards.showCardDetails", "Show Card Details")}
           </button>
+
+          {/* Carousel indicator */}
+          <div>
+            <AccountCarouselIndicator
+              count={cardProducts.length}
+              activeIndex={activeIndex}
+              onSelect={scrollToCard}
+            />
+          </div>
         </div>
 
         {/* Quick actions */}

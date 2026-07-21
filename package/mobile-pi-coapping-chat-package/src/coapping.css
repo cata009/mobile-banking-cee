@@ -1658,6 +1658,12 @@
   padding-bottom: 0;
 }
 
+/* When a compact row holds a single card, let it span the full width
+   instead of leaving an empty column on the right. */
+.mpc-product-card-row-compact:has(> .mpc-product-card:only-child) {
+  grid-template-columns: 1fr;
+}
+
 .mpc-product-card {
   display: grid;
   min-height: 94px;
@@ -1964,7 +1970,6 @@
   scrollbar-width: none;
   scroll-snap-type: x proximity;
   touch-action: pan-y;
-  cursor: grab;
   user-select: none;
   -webkit-overflow-scrolling: touch;
 }

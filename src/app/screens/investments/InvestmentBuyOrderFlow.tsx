@@ -14,6 +14,7 @@ import type { CountryId } from "@/app/state/demoTypes";
 import { maskFormattedAmount } from "@/app/utils/amountPrivacy";
 import type { CurrentAccount } from "@/data/products";
 import type { CoAppingInvestmentBuyDraft } from "../../../../package/mobile-pi-coapping-chat-package/src";
+import InvestmentOrderDocumentsAccordion from "./InvestmentOrderDocumentsAccordion";
 import {
   buildInvestmentBuyOrderQuote,
   getInvestmentBuyOrderValidation,
@@ -76,7 +77,7 @@ function formatExecutionTiming(value: CoAppingInvestmentBuyDraft["executionTimin
  * Small green dot bullet used in PRODUCT EVALUATION attributes.
  * Spec: 32×32 SVG viewBox, solid filled circle in --uc-green-olive.
  */
-function ProductEvaluationBullet() {
+export function ProductEvaluationBullet() {
   return (
     <svg
       width="32"
@@ -236,19 +237,7 @@ export default function InvestmentBuyOrderFlow({
 
         <section className="pt-[24px]">
           <SectionHeadingDivider title="DOCUMENTS AND TERMS" className="px-[24px]" />
-          <div className="space-y-[1px] bg-[var(--uc-border)]">
-            {[
-              "Ex-Ante cost information",
-              "Product documents",
-              "Important information",
-              "Investment disclaimer",
-            ].map((item) => (
-              <button key={item} type="button" className="flex min-h-[56px] w-full items-center justify-between bg-[var(--uc-surface)] px-[24px] text-left uc-type-n4-strong">
-                <span>{item}</span>
-                <span aria-hidden="true" className="text-[var(--uc-action)]">›</span>
-              </button>
-            ))}
-          </div>
+          <InvestmentOrderDocumentsAccordion currency={quote.productCurrency} />
           <div className="flex items-center justify-between gap-[20px] px-[24px] py-[20px]">
             <p className="uc-type-n4 flex-1">I have read and accept the terms and conditions.</p>
             <ToggleButton

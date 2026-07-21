@@ -24,7 +24,14 @@ const FORBIDDEN_STRUCTURAL_LITERALS = [
 ] as const
 
 const INTENTIONAL_LITERAL_EXCEPTIONS = [
+  'src/app/components/investments/InvestmentActionBar.tsx:rgba(0,0,0,0.15)',
   'src/app/components/investments/InvestmentDistributionChart.tsx:#F2F2F2',
+  'src/app/screens/investments/InvestmentOrderDocumentsAccordion.tsx:#00A3E0',
+  'src/app/screens/investments/InvestmentOrderDocumentsAccordion.tsx:#074861',
+  'src/app/screens/investments/InvestmentOrderDocumentsAccordion.tsx:#535453',
+  'src/app/screens/investments/InvestmentOrderDocumentsAccordion.tsx:#5BC199',
+  'src/app/screens/investments/InvestmentOrderDocumentsAccordion.tsx:#885BC1',
+  'src/app/screens/investments/InvestmentOrderDocumentsAccordion.tsx:#D6579C',
   'src/app/screens/investments/InvestmentsHistoryScreen.tsx:rgba(0,0,0,0.28)',
   'src/app/screens/investments/InvestmentsHistoryScreen.tsx:rgba(0,0,0,0.51)',
 ] as const

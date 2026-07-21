@@ -2,6 +2,114 @@
 
 Last updated: 2026-07-21
 
+## 2026-07-21 Full Workspace Git Unification (Git Only)
+
+- Latest request handled: consolidate every tracked and untracked workspace change into one Git publication, explicitly without a Vercel deployment.
+- Unified scope: selected-investment chatbot/chart/document/buy-flow refinements; Investments order-document accordion and distribution geometry; History crash hardening; Demo topbar App+Country selector; Card Details spacing/shadow; Tools side-by-side refinements; icon, Design System, registry, product-card, message-tab, test, generated icon-catalog, and ZCode plan updates already present in the shared worktree.
+- Final integration fixes before publication:
+  - restored the product-explanation structure/currency/dealing metrics and official dealing/document context that a parallel chatbot edit had removed;
+  - restored visual-first performance order (`richBlocksPosition: before-text`) and removed duplicated position figures from the interpretation copy;
+  - aligned chat reverse-import, donut real-midpoint geometry, and intentional investment-color allowlist tests with the approved implementation;
+  - guarded Investments History against click-event payloads and wrapped the History action callback so a React event cannot become a title filter;
+  - replaced the temporary App+Country push panel with the final compact Radix root/submenu behavior, using the More menu's surface, border, radius, shadow, text, and state colors; added a focused regression.
+- Verification evidence: initial `npm run verify` reproduced 5 integration failures across 3 suites; focused fixes then passed 30/30 tests. Final `npm run verify` passed TypeScript, ESLint, 54 suites / 347 tests, all six audits, and the production build. Browser smoke passed for the History route and the compact App+Country root + country submenu. Build retains only the known empty `react-vendor` and >500 kB chunk warnings; jsdom Recharts zero-size warnings remain test-environment noise already tracked in Known Bananas.
+- Publication boundary: Git/GitHub only. No Vercel command, deployment, promotion, or alias mutation was run.
+- Banana Loop result: integration failures were fixed; existing asset candidates, bundle warnings, and Recharts test warnings remain explicitly triaged in `known-bananas.md`; no new untriaged blocker remains.
+- Constitutional check:
+  - scope preserved: yes (whole-worktree consolidation explicitly authorized; no Vercel publication)
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-07-21 Investments Order Documents Accordion Polish
+
+- Latest request handled: five visual fixes on the Investments buy-order "DOCUMENTS AND TERMS" accordion (`InvestmentOrderDocumentsAccordion.tsx`): broken Ex-Ante icon aspect ratio, oversized section titles, accordion row separators not matching the "DOCUMENTS AND TERMS" heading separator, oversized chevron vs the original component, and expanded-content inner separators stretching full-width plus the leading icon not recoloring on open.
+- Changes:
+  - **Ex-Ante icon aspect ratio**: `iconSize={32}` was forcing the non-square 15×20 `investment-ex-ante` glyph into a 32×32 square, distorting it. Added `iconWidth`/`iconHeight` props to `DocumentsAccordionSection` (preserving the existing `iconSize` for square glyphs) and the Ex-Ante call site now uses `iconWidth={24} iconHeight={32}` so it scales to the same height as the other 32×32 glyphs but keeps its native 15:20 aspect ratio.
+  - **Section title size**: changed the row title from `uc-type-h2` (18px Bold) to `uc-type-n4-strong` (16px Bold) per request.
+  - **Row separators**: the row wrapper used `border-b` edge-to-edge, which did not match the `SectionHeadingDivider` heading separator above (which lives in a `px-[24px]` wrapper). Removed the wrapper border and added a dedicated `<div className="mx-[24px] h-px w-auto bg-[var(--uc-border)]" />` separator under each row header, so all section separators (heading + rows) now share the same 24px-inset line treatment.
+  - **Chevron size**: swapped `chevron-down-wide` (viewBox `9 12 14 8`, visually larger) for `chevron-down` (viewBox `10 12 12 8`, closer to the original component's narrower chevron).
+  - **Leading icon color on open**: the leading glyph was hardcoded `color="var(--uc-text)"` regardless of open state. It now follows the same `isOpen ? "var(--uc-action)" : "var(--uc-text)"` rule as the title/subtitle/chevron, so the whole row recolors coherently when expanded.
+  - **Inner separators inset**: inside `CostBreakdownBlock` (Ex-Ante and Disclaimer sections) and inside the Performance scenarios block, the `ENTRY`/`TOTAL`/`NET INVESTMENT AMOUNT`/`NET RETURN` group separators were full-width while their sibling rows use `px-[24px]` content padding. Added `mx-[24px]` to those four separator wrappers so they align with the content inset instead of spanning the full container.
+- Files central to this change: `src/app/screens/investments/InvestmentOrderDocumentsAccordion.tsx` (only file touched).
+- Verification evidence: `npm run build` passed (only the pre-existing chunk-size warning); `npm run audit:investments` passed (countries=8, active=10, inactive=2); `npm run audit:templates` passed (templates=47, codePreviews=47, components=86, screens=33, flows=14). `typecheck`, `lint`, and `test` remain blocked by missing local scripts/tooling in this environment.
+- Banana Loop result:
+  - fixed: Ex-Ante icon distortion, oversized titles, mismatched row separators, oversized chevron, non-recoloring leading icon, full-width inner separators;
+  - triaged: no automated browser regression yet for the accordion visual contract (icon aspect ratio, title size, separator inset alignment, open-state recolor).
+- Constitutional check:
+  - scope preserved: yes (visual polish inside the already-approved Investments order-documents accordion; no new screens/flows/data/integration contracts)
+  - docs/capability map updated: not required — no new capability, screen, flow, or integration contract
+  - full verification and evidence recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-07-21 Demo Topbar App+Country Push Drill-Down
+
+- Latest request handled: the demo topbar `App + Country` dropdown was one long flat menu (APP section with 3 buttons, divider, COUNTRY section with 8 buttons — ~15 rows visible at once), which the user found ugly and inconsistent. Refactored it into a two-level push drill-down: level 1 shows only the 3 apps with a right chevron; tapping an app pushes a level 2 view (with a back arrow + the app name as title) listing the 8 countries; tapping a country applies both selections atomically and closes the dropdown.
+- Design choice: implemented as an extension of the existing hand-rolled panel (kept click-outside, `z-[10000]`, positioning, row styling, and the same look as the sibling release/scenario/future-release dropdowns). Did NOT switch to Radix `DropdownMenuSub` because that does a hover-triggered lateral fly-out, not a push drill-down that covers level 1 — the user explicitly referenced the "More with arrow" drill-down pattern.
+- Selection semantics: tapping an app on level 1 no longer changes demo state immediately. Instead the app is staged in local `drillDownProduct` state; the actual `setProduct` + `setCountry` run together only when the user taps a country on level 2. This makes the flow atomic — the user can back out with the back arrow without leaving the app they were on. Product is applied before country so the product's default `bankingScenario` reset lands before country effects run.
+- Escape handling: Escape on level 2 returns to level 1; Escape on level 1 closes the dropdown. Click-outside closes the whole dropdown. `closeAllDropdowns()` now also clears `drillDownProduct` so reopening always starts at the app list.
+- Highlight logic: the level-1 app row highlights when it matches the active `product`; the level-2 country row highlights only when it matches the active `country` AND the staged app matches the active `product` (so you don't see a false-positive highlight while drilling into a different app).
+- Files central to this change: `src/app/components/demo/DemoTopBar.tsx` (new `drillDownProduct` state, `closeAllDropdowns` reset, and the rewritten product dropdown panel with two conditional branches). No other files touched; no new dependencies; no new primitives exported.
+- Verification evidence: `npm run build` passed (only the pre-existing chunk-size warning); `npm run audit:platform` passed (products=3, countries=8, projectPackCombinations=24, bankingScenarios=7, repositories=6 — unchanged). `typecheck`, `lint`, and `test` remain blocked by missing local scripts/tooling in this environment. Browser smoke (open dropdown, see 3 apps with chevrons, tap PI → country list with back header, tap RO → applies + closes, label updates) is recommended manual follow-up.
+- Banana Loop result:
+  - fixed: ugly long flat App+Country menu replaced with a compact two-level push drill-down matching the requested "More with arrow" pattern;
+  - triaged: no automated browser regression yet for the new drill-down (level transitions, Escape semantics, atomic product→country application, click-outside reset).
+- Constitutional check:
+  - scope preserved: yes (UI refinement of the already-approved demo topbar selector; no new screens/flows/data; the 8-country × 3-app matrix and deep-link `?product=&country=` contract are unchanged)
+  - docs/capability map updated: not required — no new capability, screen, flow, or integration contract
+  - full verification and evidence recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-07-21 Tools Side-by-Side Compact Header + Refresh Icon
+
+- Latest request handled: on the stakeholder Tools / Side-by-Side comparison screen, turn the `Reload frames` text button into a compact refresh icon button aligned to the right edge of the panel, reduce the country capacity from 2–4 to 2–3, and remove the redundant `COUNTRIES (2–3)` field label while keeping the country selection chips themselves.
+- Changes:
+  - Added a new general-purpose `refresh` icon to `customIcons.tsx`: 20×20 two-circular-arrows glyph, `System` category, registered through `AppIcon` so it appears in the Design System Icons inventory (catalog now reports 125 app icons). Color is passed via the standard `AppIcon` color prop.
+  - `SideBySideTool.tsx`: replaced the `SelectionChip` reload action with an icon-only 32×32 round button (`AppIcon name="refresh" size={16}`) using the same border/hover treatment as the existing per-frame remove buttons; kept `title` + `aria-label="Reload frames"` for accessibility. The `ToolPanel` header is `flex justify-between`, so the icon naturally aligns to the right edge of the panel, which matches the right edge of the countries chip row (both share the panel's `p-[20px]`).
+  - `MAX_COUNTRIES` 4 → 3 and the component docstring updated. Frame grid scaling for 1/2/3 selections is unchanged (3 countries still use the existing `0.58` scale).
+  - Removed the `Countries (2–3)` `FieldLabel` heading above the country chips. The chips themselves (and `SelectionChip` import) stay — this was an iteration correction after a first pass accidentally removed the whole countries block; the final state removes only the redundant label so the chip row self-describes.
+- Files central to this change: `src/app/components/icons/customIcons.tsx` and `src/app/screens/tools/SideBySideTool.tsx`.
+- Verification evidence: `npm run build` passed (only the pre-existing chunk-size warning); `node scripts/export-platform-icon-catalog.mjs` reported `AppIcon: 125` (refresh included); `npm run audit:templates` passed (templates=47, codePreviews=47, components=86, screens=33, flows=14). `typecheck`, `lint`, and `test` remain blocked by missing local scripts/tooling in this environment.
+- Banana Loop result:
+  - fixed: oversized `Reload frames` text button replaced with a compact refresh glyph aligned to the panel's right edge;
+  - fixed: 4-country capacity reduced to 3 to compact the comparison grid;
+  - fixed: first-pass regression that removed the entire countries chip block was corrected to remove only the redundant `Countries (2–3)` label;
+  - triaged: no automated browser regression yet for the new header layout or the 3-country capacity (manual visual check recommended).
+- Constitutional check:
+  - scope preserved: yes (UI refinement inside the already-approved Tools surface, plus one new reusable icon in the AppIcon registry; no new screens/flows/data/integration contracts)
+  - docs/capability map updated: not required — no new capability, screen, flow, or integration contract; the new icon is auto-inventoried by the existing icon catalog export
+  - full verification and evidence recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-07-21 Card Detail Spacing Fix + Investments Distribution Donut Rewrite
+
+- Latest request handled: (1) tighten Card Details spacing — `Free To Spend` ↔ `Show Card Details` ↔ carousel indicator ↔ quick actions gaps were too large; (2) fix the Card Details card carousel bottom shadow being clipped; (3) rebuild the Investments distribution donut so each connector/label attaches to the correct slice with the slice's own color, and cap the donut to at most 4 visible slices across the Product Type / Currency / Asset Class / Account List tabs.
+- Card Details result:
+  - Carousel no longer clips its card shadow. Root cause: the scroll container had `overflow-x-auto` and `overflow-y-visible` on the same element, so CSS spec forced `visible` to `auto` and clipped the 11px drop shadow. Refactored into a two-layer structure — outer wrapper keeps `overflow-x-auto` + drag/scroll handlers, inner flex container holds cards with natural overflow so the shadow renders freely. Inner container padding is `pt-[8px] pb-[8px]` (symmetrical, gives the 11px shadow full room).
+  - Tightened the bottom stack: `Free To Spend` block unchanged; `Show Card Details` button padding reduced from `py-[24px]` to `py-[8px]`; carousel indicator wrapper dropped its `-mt-[8px]` offset; container bottom padding reduced from `pb-[16px]` to `pb-[4px]` so the dots ↔ quick actions gap is `4 + 8 (AccountActionBar pt)` = 12px.
+  - Final gaps: amount ↔ button = 16+8 = 24px; button ↔ dots = 16+8 = 24px; dots ↔ quick actions = 12px. Above/below carousel gaps are now symmetrical.
+- Investments distribution donut result:
+  - Root cause of the "green Bond connector on blue Fund slice" complaint: the previous `buildSliceLeaders` used a special-cased branch for `items.length === 4` with hard-coded anchor angles (225°/315°/135°/45°) that did not match the slices' real midpoint angles. For Fund 34% / Bond 24% / Stock 18% / ETF 14% the real midpoints are 61°/166°/241°/299°, so every connector landed on the wrong slice.
+  - Removed the hard-coded 4-slice branch. New `buildSliceGeometry` computes each slice's SVG stroke geometry and its real midpoint angle in a single pass; `buildSliceLeaders` anchors each connector at `pointOnDonutEdge(midpointAngle)` and derives `side` (`left`/`right`) from that midpoint. Slot assignment per side is unchanged (sorted by anchor Y, fixed vertical slots).
+  - Capped donut to `MAX_VISIBLE_SLICES = 4`. The list below the chart still renders every distribution row (e.g. Product Type shows Fund/Bond/Stock/ETF/Money market in the list, but only the top 4 on the donut).
+  - Numeric verification (node one-liner): Fund→right-top, Bond→right-bottom, Stock→left-bottom, ETF→left-top — every connector now visually lands on its own slice with its own color.
+- Files central to this change: `src/app/screens/cards/CardDetailScreen.tsx` and `src/app/components/investments/InvestmentDistributionChart.tsx`.
+- Verification evidence: `npm run build` passed (only the pre-existing chunk-size warning); `npm run audit:investments` passed (countries=8, active=10, inactive=2); `npm run audit:templates` passed (templates=47, codePreviews=47, components=86, screens=33, flows=14); `npm run audit:platform` passed (products=3, countries=8, projectPackCombinations=24, bankingScenarios=7, repositories=6). `typecheck`, `lint`, and `test` remain blocked by missing local scripts/tooling in this environment.
+- Banana Loop result:
+  - fixed: hard-coded 4-slice anchor geometry that mismatched real slice midpoints;
+  - fixed: card carousel shadow clipping caused by conflicting `overflow-x-auto` + `overflow-y-visible` on the same element;
+  - triaged: no automated browser regression yet for the new connector geometry (manual visual check recommended); no automated regression for Card Details spacing.
+- Constitutional check:
+  - scope preserved: yes (visible-UX refinement inside already-approved Card Details and Investments surfaces, no new screens/flows/data)
+  - docs/capability map updated: not required — no new capability, screen, flow, or integration contract
+  - full verification and evidence recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
 ## 2026-07-21 Investment Chat Chart Completion + Unified Publication
 
 - Latest request handled: finish the interrupted selected-investment chatbot chart, including the missing connected period selectors, then preserve every current Codex/ZCode/GLM workspace change in Git and publish the exact final `main` state to Vercel Production.

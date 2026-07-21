@@ -20,6 +20,7 @@ import PaymentHeroCard from "@/app/components/payments/PaymentHeroCard";
 import { ContactsNavigationCard } from "@/app/screens/contacts/ContactsNavigationCard";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import type { ProductsCard } from "@/app/config/productsMenuConfig";
+import productCardAccountImage from "../../../../screenshots/account.png";
 
 /**
  * How the specimen sits inside the 375px phone width:
@@ -221,6 +222,33 @@ export const TESTABLE_COMPONENTS: readonly TestableComponentMeta[] = [
     ),
   },
   {
+    id: "product-offer-card-compact",
+    label: "ProductOfferCard (compact)",
+    description: "Compact offer banner: 20px title, 16px description, plus a 14px one-line caption",
+    container: "plain",
+    slots: [
+      { id: "title", label: "Title", defaultText: "Premium current account offer" },
+      {
+        id: "description",
+        label: "Description",
+        defaultText: "Enjoy zero monthly fee and smart everyday banking benefits.",
+      },
+      { id: "caption", label: "Caption", defaultText: "Limited-time offer, terms apply" },
+    ],
+    render: (texts) => (
+      <ProductOfferCard
+        variant="compact"
+        offer={{
+          id: "tester-offer-compact",
+          title: texts.title ?? "",
+          description: texts.description ?? "",
+          caption: texts.caption || undefined,
+        }}
+        onClick={noop}
+      />
+    ),
+  },
+  {
     id: "product-menu-card",
     label: "ProductMenuCard",
     description: "Product menu entry card with title and illustration",
@@ -231,7 +259,8 @@ export const TESTABLE_COMPONENTS: readonly TestableComponentMeta[] = [
         id: "account",
         title: texts.title ?? "",
         background: "var(--uc-product-blue-deep)",
-        illustration: "branch",
+        illustration: "flowers",
+        imageSrc: productCardAccountImage,
       };
       return <ProductMenuCard card={card} onClick={noop} />;
     },
@@ -256,7 +285,9 @@ export const TESTABLE_COMPONENTS: readonly TestableComponentMeta[] = [
           title: texts.title ?? "",
           description: texts.description ?? "",
           illustration: "wallet",
+          imageVariant: "payments-1",
         }}
+        imageVariant="payments-1"
         onSelect={noop}
       />
     ),

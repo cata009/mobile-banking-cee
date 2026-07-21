@@ -18,6 +18,7 @@ import {
 import FigmaCard from "@/app/components/cards/Card";
 import BrandLogo from "@/app/components/brand-logo/BrandLogo";
 import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
+import { AppIcon } from "@/app/components/icons";
 import LinkButton from "@/app/components/ui/LinkButton";
 import discoveryHeroImage from "@/assets/investments/fund-banner-plant-unsplash.jpg";
 import discoverySubscriptionsImage from "@/assets/shopsmart/shopsmart-english-home.png";
@@ -434,8 +435,12 @@ function RichBlock({
       <div className="mpc-rich-card mpc-rich-card-summary">
         <div className="mpc-rich-card-head">
           {block.logoId ? <BrandLogo logoId={block.logoId} size={32} className="mpc-rich-card-logo" /> : null}
-          {block.eyebrow ? <span>{block.eyebrow}</span> : null}
           <strong>{block.title}</strong>
+          {block.eyebrow ? (
+            <span>
+              {block.eyebrow.split(":")[0]}: <strong>{block.eyebrow.split(":").slice(1).join(":").trim()}</strong>
+            </span>
+          ) : null}
         </div>
         {block.body.trim() ? <p>{block.body}</p> : null}
         {block.chart && renderInvestmentChart ? renderInvestmentChart(block.chart) : null}
@@ -521,7 +526,11 @@ function RichBlock({
                 <>
                   {product.icon ? (
                     <span className="mpc-product-card-icon" aria-hidden="true">
-                      <PfmCategoryIcon category={product.icon} size={24} />
+                      {product.icon.startsWith("app:") ? (
+                        <AppIcon name={product.icon.slice(4) as never} size={20} color="var(--uc-text-muted)" />
+                      ) : (
+                        <PfmCategoryIcon category={product.icon} size={24} />
+                      )}
                     </span>
                   ) : null}
                   <strong>{product.title}</strong>

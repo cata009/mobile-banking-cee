@@ -282,6 +282,7 @@ export function PendingActionCardVariantSpecimen() {
 
 export function ProductOfferCardVariantSpecimen() {
   const [selectedToneId, setSelectedToneId] = useState(PRODUCT_BANNER_TONE_OPTIONS[0]?.id ?? "green-normal");
+  const [selectedSize, setSelectedSize] = useState<"standard" | "compact">("standard");
   const selectedTone =
     PRODUCT_BANNER_TONE_OPTIONS.find((tone) => tone.id === selectedToneId) ?? PRODUCT_BANNER_TONE_OPTIONS[0];
 
@@ -289,32 +290,45 @@ export function ProductOfferCardVariantSpecimen() {
 
   return (
     <div className="flex flex-col gap-4">
-      <VariantSelector
-        id="product-offer-tone-select"
-        value={selectedTone.id}
-        onChange={setSelectedToneId}
-        options={PRODUCT_BANNER_TONE_OPTIONS.map((tone) => ({ id: tone.id, label: tone.label }))}
-        extras={
-          <div className="flex items-center gap-3 text-[12px] text-[var(--uc-text-muted)]">
-          <span className="flex items-center gap-1.5">
-            <span className="size-3 rounded-[3px] border border-[var(--uc-border)]" style={{ backgroundColor: selectedTone.backgroundColor }} />
-            bg
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="size-3 rounded-[3px] border border-[var(--uc-border)]" style={{ backgroundColor: selectedTone.chevronColor }} />
-            chevron
-          </span>
-        </div>
-        }
-      />
+      <div className="flex flex-wrap gap-3">
+        <VariantSelector
+          id="product-offer-tone-select"
+          value={selectedTone.id}
+          onChange={setSelectedToneId}
+          options={PRODUCT_BANNER_TONE_OPTIONS.map((tone) => ({ id: tone.id, label: tone.label }))}
+          extras={
+            <div className="flex items-center gap-3 text-[12px] text-[var(--uc-text-muted)]">
+            <span className="flex items-center gap-1.5">
+              <span className="size-3 rounded-[3px] border border-[var(--uc-border)]" style={{ backgroundColor: selectedTone.backgroundColor }} />
+              bg
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-3 rounded-[3px] border border-[var(--uc-border)]" style={{ backgroundColor: selectedTone.chevronColor }} />
+              chevron
+            </span>
+          </div>
+          }
+        />
+        <VariantSelector
+          id="product-offer-size-select"
+          value={selectedSize}
+          onChange={setSelectedSize}
+          options={[
+            { id: "standard", label: "Standard 22/18px" },
+            { id: "compact", label: "Compact 20/16/14px" },
+          ]}
+        />
+      </div>
 
       <ProductOfferCard
+        variant={selectedSize}
         colorFamily={selectedTone.family}
         lightVersion={selectedTone.lightVersion}
         offer={{
           id: "ds-offer-sample",
           title: "Premium current\naccount offer",
           description: "Enjoy zero monthly fee\nand smart everyday\nbanking benefits.",
+          caption: "Limited-time offer, terms apply",
         }}
       />
     </div>

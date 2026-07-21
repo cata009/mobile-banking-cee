@@ -811,7 +811,7 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     status: "implemented",
     componentPath: "src/app/components/products/ProductOfferCard.tsx",
     usedByScreens: ["pi.products.overview"],
-    notes: "Reusable 327x157 offer carousel card with centered vertical chevron background, a text area that fills to 16px before the fixed 100px right image column, 22px bold title clamped to 2 lines, 18px regular subtitle clamped to 3 lines, and selectable family/light-tone pairs covering green, yellow, orange, pink, red, blue, and grey banner variants.",
+    notes: "Reusable 327x157 offer carousel card with centered vertical chevron background, a text area that fills to 16px before the fixed 100px right image column, and selectable family/light-tone pairs covering green, yellow, orange, pink, red, blue, and grey banner variants. Two size variants: \"standard\" (22px bold title / 2 lines, 18px regular subtitle / 3 lines) and \"compact\" (20px bold title / 2 lines, 16px regular subtitle / 3 lines, plus an optional 14px one-line caption below the subtitle).",
   },
   "products.shopsmart-offer-card": {
     id: "products.shopsmart-offer-card",

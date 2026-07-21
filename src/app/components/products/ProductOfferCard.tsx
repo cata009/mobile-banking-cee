@@ -6,6 +6,12 @@ interface ProductOfferCardProps {
   onClick?: (offer: ProductsOffer) => void;
   colorFamily?: ProductBannerColorFamily;
   lightVersion?: boolean;
+  /**
+   * "standard" (default): 22px title / 18px description.
+   * "compact": 20px title / 16px description, plus an optional 14px
+   * one-line caption below the description.
+   */
+  variant?: "standard" | "compact";
 }
 
 function ProductOfferChevronBackground({ fillColor }: { fillColor: string }) {
@@ -31,8 +37,10 @@ export default function ProductOfferCard({
   onClick,
   colorFamily = "green",
   lightVersion = false,
+  variant = "standard",
 }: ProductOfferCardProps) {
   const tone = getProductBannerTone(colorFamily, lightVersion);
+  const isCompact = variant === "compact";
 
   return (
     <button
@@ -40,6 +48,7 @@ export default function ProductOfferCard({
       className="relative h-[157px] w-[327px] shrink-0 overflow-hidden rounded-[8px] text-left cursor-pointer"
       style={{ backgroundColor: tone.backgroundColor, color: tone.textColor }}
       data-product-offer-card-tone={tone.id}
+      data-product-offer-card-variant={variant}
       onClick={() => onClick?.(offer)}
     >
       <ProductOfferChevronBackground fillColor={tone.chevronColor} />
@@ -55,16 +64,26 @@ export default function ProductOfferCard({
         <div className="flex min-w-0 flex-1 flex-col items-start gap-[8px]">
           <h3
             className="self-stretch overflow-hidden whitespace-pre-line font-['UniCredit',sans-serif] font-bold [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
-            style={{ color: tone.textColor, fontSize: "22px", lineHeight: "normal" }}
+            style={{ color: tone.textColor, fontSize: isCompact ? "20px" : "22px", lineHeight: "normal" }}
           >
             {offer.title}
           </h3>
           <p
-            className="uc-type-p1 self-stretch overflow-hidden whitespace-pre-line [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]"
+            className={`self-stretch overflow-hidden whitespace-pre-line [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] ${
+              isCompact ? "uc-type-n4" : "uc-type-p1"
+            }`}
             style={{ color: tone.textColor }}
           >
             {offer.description}
           </p>
+          {isCompact && offer.caption ? (
+            <p
+              className="uc-type-p2 block w-full overflow-hidden text-ellipsis whitespace-nowrap"
+              style={{ color: tone.textColor }}
+            >
+              {offer.caption}
+            </p>
+          ) : null}
         </div>
       </div>
     </button>

@@ -357,8 +357,9 @@ export function useProducts() {
       return {
         ...product,
         accountNumber: formattedAccountNumber,
-        // Convert balance to local currency
-        balance: convertedBalance,
+        // Convert balance to local currency and add 20,000 local currency boost
+        // (demo-only uplift so the current account shows a comfortable balance)
+        balance: product.type === "current_account" ? roundMoney(convertedBalance + 20000) : convertedBalance,
         // Update currency to local
         currency: localCurrency
       };

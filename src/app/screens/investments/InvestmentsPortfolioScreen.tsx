@@ -446,7 +446,7 @@ export default function InvestmentsPortfolioScreen({
           id: "history",
           iconName: "investment-history",
           label: t("runtime.investments.actions.history", "History"),
-          onClick: onHistoryClick,
+          onClick: () => onHistoryClick?.(),
         },
         {
           id: "to-approve",

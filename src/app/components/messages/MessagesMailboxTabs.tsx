@@ -44,10 +44,20 @@ export default function MessagesMailboxTabs({
   useEffect(() => {
     if (!isScrollable) return;
 
-    activeTabRef.current?.scrollIntoView({
+    const list = tabListRef.current;
+    const tab = activeTabRef.current;
+    if (!list || !tab) return;
+
+    // Scroll the tab list's own scrollLeft directly instead of
+    // Element.scrollIntoView(), which walks every scrollable ancestor
+    // (including ones with overflow:hidden) and can drag unrelated
+    // parents sideways if they happen to have stray content overflow.
+    const target = tab.offsetLeft - (list.clientWidth - tab.offsetWidth) / 2;
+    const maxScrollLeft = list.scrollWidth - list.clientWidth;
+    const clamped = Math.max(0, Math.min(target, maxScrollLeft));
+    list.scrollTo({
+      left: clamped,
       behavior: "smooth",
-      block: "nearest",
-      inline: "center",
     });
   }, [activeTabId, isScrollable]);
 
@@ -104,7 +114,7 @@ export default function MessagesMailboxTabs({
   return (
     <div
       ref={tabListRef}
-      className={`${withTopMargin ? "mt-[22px]" : "mt-0"} h-[48px] shrink-0 border-b border-[var(--uc-border)] ${
+      className={`relative ${withTopMargin ? "mt-[22px]" : "mt-0"} h-[48px] shrink-0 border-b border-[var(--uc-border)] ${
         isScrollable ? "flex cursor-grab touch-pan-x select-none overflow-x-auto overscroll-x-contain scrollbar-hide active:cursor-grabbing" : "grid grid-cols-2"
       } ${className}`}
       role="tablist"

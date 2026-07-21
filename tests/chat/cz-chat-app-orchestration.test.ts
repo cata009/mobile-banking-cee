@@ -673,6 +673,7 @@ describe("CZ chat app orchestration", () => {
       "CoAppingChatAssistant.tsx:@/app/components/cards/Card",
       "CoAppingChatAssistant.tsx:@/app/components/brand-logo/BrandLogo",
       "CoAppingChatAssistant.tsx:@/app/components/pfm/PfmCategoryIcon",
+      "CoAppingChatAssistant.tsx:@/app/components/icons",
       "CoAppingChatAssistant.tsx:@/app/components/ui/LinkButton",
     ]);
   });

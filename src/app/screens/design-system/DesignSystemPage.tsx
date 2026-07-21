@@ -350,7 +350,7 @@ export default function DesignSystemPage() {
               >
                 <CardVariantSpecimen />
               </Specimen>
-              <Specimen name="Products offer card" source="components/products/ProductOfferCard.tsx" specs={["327x157", "dropdown variant selector", "16px text-to-image gutter", "100px image column", "title 22px bold / 2 lines", "subtitle 18px regular / 3 lines", "family + light/normal tones"]} detailsHref="#component/products.offer-card">
+              <Specimen name="Products offer card" source="components/products/ProductOfferCard.tsx" specs={["327x157", "standard / compact size selector", "16px text-to-image gutter", "100px image column", "standard: title 22px bold / 2 lines, subtitle 18px regular / 3 lines", "compact: title 20px bold / 2 lines, subtitle 16px regular / 3 lines, + 14px 1-line caption", "family + light/normal tones"]} detailsHref="#component/products.offer-card">
                 <ProductOfferCardVariantSpecimen />
               </Specimen>
               <Specimen

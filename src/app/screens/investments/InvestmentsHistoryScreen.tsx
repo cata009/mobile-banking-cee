@@ -863,7 +863,7 @@ export default function InvestmentsHistoryScreen({ onBack, historyFilterByTitle 
   // Runs once on mount; the existing country-change effect clears searchQuery
   // when the country changes, which is the desired reset behaviour.
   useEffect(() => {
-    if (historyFilterByTitle) {
+    if (typeof historyFilterByTitle === "string" && historyFilterByTitle.trim()) {
       setSearchQuery(historyFilterByTitle);
     }
   }, [historyFilterByTitle]);
