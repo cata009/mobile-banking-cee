@@ -225,7 +225,7 @@ const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
   },
   {
     id: "climate-focus",
-    title: "Amundi Climate Focus Fund",
+    title: "onemarkets Climate Focus Fund",
     status: "active",
     contributionType: "ONE OFF",
     weight: 10,
@@ -404,7 +404,7 @@ const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
 const CATALOG_ONLY_SEEDS: readonly InvestmentSecuritySeed[] = [
   {
     id: "climate-focus",
-    title: "Amundi Climate Focus Fund",
+    title: "onemarkets Climate Focus Fund",
     status: "active",
     contributionType: "ONE OFF",
     weight: 16,

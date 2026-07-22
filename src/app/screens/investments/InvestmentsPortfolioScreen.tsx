@@ -52,10 +52,16 @@ export interface InvestmentBuyRequest {
   draft?: CoAppingInvestmentBuyDraft;
 }
 
+export interface InvestmentFundsRequest {
+  requestId: number;
+  collectionId?: InvestmentFundCollectionId;
+}
+
 interface InvestmentsPortfolioScreenProps {
   onBack: () => void;
   onHistoryClick?: (filterByTitle?: string) => void;
   onSelectedSecurityChange?: (security: InvestmentCatalogSecurity | null) => void;
+  fundsWindowRequest?: InvestmentFundsRequest | null;
   buyRequest?: InvestmentBuyRequest | null;
   onBuyRequestConsumed?: (requestId: number) => void;
 }
@@ -275,6 +281,7 @@ export default function InvestmentsPortfolioScreen({
   onBack,
   onHistoryClick,
   onSelectedSecurityChange,
+  fundsWindowRequest,
   buyRequest,
   onBuyRequestConsumed,
 }: InvestmentsPortfolioScreenProps) {
@@ -293,6 +300,7 @@ export default function InvestmentsPortfolioScreen({
   const [buyOrderOpen, setBuyOrderOpen] = useState(false);
   const [buyOrderDraft, setBuyOrderDraft] = useState<CoAppingInvestmentBuyDraft | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const consumedFundsRequestIdRef = useRef<number | null>(null);
   const consumedBuyRequestIdRef = useRef<number | null>(null);
 
   // Returning to portfolio home (all sub-screens closed) should always show
@@ -354,6 +362,23 @@ export default function InvestmentsPortfolioScreen({
     setSelectedSecurity(security);
     onSelectedSecurityChange?.(security);
   };
+
+  useEffect(() => {
+    if (
+      !fundsWindowRequest
+      || consumedFundsRequestIdRef.current === fundsWindowRequest.requestId
+    ) return;
+
+    consumedFundsRequestIdRef.current = fundsWindowRequest.requestId;
+    setSelectedDistributionItem(null);
+    setSecurityListOpen(false);
+    setSelectedFundCollectionId(fundsWindowRequest.collectionId ?? null);
+    setSelectedSecurity(null);
+    setBuyOrderOpen(false);
+    setBuyOrderDraft(null);
+    onSelectedSecurityChange?.(null);
+    setFundsWindowOpen(!fundsWindowRequest.collectionId);
+  }, [fundsWindowRequest, onSelectedSecurityChange]);
 
   useEffect(() => {
     if (!buyRequest || consumedBuyRequestIdRef.current === buyRequest.requestId) return;

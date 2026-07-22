@@ -12,7 +12,7 @@ import {
 const securities: InvestmentCatalogSecurity[] = [
   {
     id: "one-off-fund",
-    title: "Amundi Climate Focus Fund",
+    title: "onemarkets Climate Focus Fund",
     sourceProductName: "Investment catalogue",
     status: "active",
     contributionType: "ONE OFF",
@@ -144,7 +144,7 @@ describe("Investments funds window", () => {
     expect(within(oneOffSection).getByText("1")).toBeTruthy();
     expect(within(regularSection).getByText("1")).toBeTruthy();
 
-    fireEvent.click(within(oneOffSection).getByRole("button", { name: /Amundi Climate Focus Fund/i }));
+    fireEvent.click(within(oneOffSection).getByRole("button", { name: /onemarkets Climate Focus Fund/i }));
     expect(onSelectSecurity).toHaveBeenCalledWith(securities[0]);
   });
 

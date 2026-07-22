@@ -2,6 +2,61 @@
 
 Last updated: 2026-07-22
 
+## 2026-07-22 Risk-Matched Funds Handoff
+
+- Latest request handled: make `Explore matching funds` honor the risk comfort already collected by the investment-goal conversation instead of reopening the generic `Our funds selection` banner storefront.
+- Behavior: the goal summary carries a typed collection ID through the portable chat action, `App`, and a correlated Investments request object. `Prefer less movement` opens `Conservative funds`, `Balanced` opens `Balanced funds`, and `Accept more movement` opens `Equity funds`. The portfolio discovery banner remains unchanged and still opens the general storefront.
+- Navigation boundary: the matched collection reuses the existing collection detail, fund rows, security detail, BUY, Review Data, terms, Face ID Sign, and Success path. Back from a direct chatbot handoff returns to the Investments portfolio rather than inserting the unrelated storefront.
+- TDD evidence: the new action-metadata and direct-collection tests first failed on the missing collection ID and ignored request, then passed after the typed handoff. Focused orchestration/screen coverage passed 33/33, the Funds window suite passed 5/5, and `npx tsc --noEmit` passed.
+- Live port-4001 evidence: completed `Grow my savings -> In 3-5 years -> 10,000 CZK -> 500 CZK monthly -> Balanced -> Explore matching funds`. The resulting runtime contained exactly one `investment-fund-collection-balanced`, one `Balanced funds` heading, and zero `investment-funds-selection` storefronts. The screenshot confirmed the existing sticky Balanced collection header and fund list. The historical Investments `ReferenceLine` NaN console warning remains the already-triaged chart banana and is unrelated to this handoff.
+- Final repository gate: fresh `npm run verify` passed TypeScript, ESLint, all 56 test files / 367 tests, all six audits, the locked 179-asset baseline, and the 4,397-module production build. Existing jsdom Recharts zero-size diagnostics, the browser `ReferenceLine` warning, the empty `react-vendor` chunk, and large-chunk warnings remain the already-triaged non-blocking notices.
+- Files central to this correction: portable chat action types, `src/app/chat/cz/investmentGoal.ts`, `src/app/chat/cz/helpers.ts`, `src/app/chat/czChatOrchestration.ts`, `src/app/App.tsx`, `src/app/screens/investments/InvestmentsPortfolioScreen.tsx`, the two focused tests, and the handoff/capability/design docs.
+- Limitation: this is deterministic demo routing from the selected comfort label, not suitability, personalized advice, ranking, persistence, or a recommendation backend.
+- Banana Loop result: the misleading generic-storefront destination was corrected at the typed handoff boundary; the portfolio banner's generic discovery route is preserved. No new untriaged banana was introduced.
+- constitutional check:
+  - scope preserved: yes (only the approved matching-funds handoff)
+  - docs updated: yes
+  - verification recorded: yes (RED/GREEN, focused suites, live browser, and fresh full gate)
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-07-22 Shared Sign Face ID Gate
+
+- Latest request handled: make the primary action on runtime Sign screens show the established Face ID effect before navigating to Success, using the same animation already present at active login instead of leaving the PIN screen visually empty.
+- Shared behavior: `StandardSignScreen` now owns a local authentication state. Pressing its primary action mounts the existing `FaceIdAnimation`, disables the action and guards retriggering; only the animation's `onComplete` releases the supplied `onSign` callback. The shared public props remain unchanged.
+- Coverage: domestic payment signing, investment BUY-order signing, and the new CZ credit-limit signing flow already consume `StandardSignScreen`, so all three inherit the same `Sign -> Face ID -> Success` sequence without separate implementations.
+- TDD evidence: the new regression first failed because `onSign` was called immediately with the click event. After the shared change, the component test proves no callback at click or 839 ms and exactly one callback at 840 ms. Investment and credit-limit end-to-end tests now also prove their Success headings are absent during Face ID and present only after completion. The focused suite passed 3 files / 16 tests.
+- Live port-4001 evidence: completed CZ Card Detail -> For you -> `I'm interested` -> `Review offer` -> terms -> `Sign change`. Immediate inspection returned `authenticating: true`, a mounted Face ID overlay, and `successVisible: false`; after completion exactly one `Limit updated` heading was visible and the Sign screen was gone. The screenshot confirmed the existing black Face ID tile over a dimmed/blurred phone surface. Browser error logs were empty.
+- Final repository gate: fresh `npm run verify` passed TypeScript, ESLint, all 56 test files / 366 tests, all six audits, the locked 179-asset baseline, and the 4,397-module production build. Existing jsdom Recharts zero-size diagnostics, the empty `react-vendor` chunk, and large-chunk warnings remain the already-triaged non-blocking warnings.
+- Files central to this change: `src/app/components/flow/StandardSignScreen.tsx`, `tests/screens/standard-flow-screens.test.tsx`, `tests/screens/investment-buy-order-flow.test.tsx`, `tests/screens/credit-limit-offer-flow.test.tsx`, the handoff/capability docs, and the authored design/plan under `docs/superpowers/`.
+- Limitation: Face ID remains a deterministic 840 ms local visual simulation. This change adds no biometric validation, failure/retry/cancel path, authentication backend, persistence, or security-policy claim.
+- Banana Loop result: the missing authentication handoff was fixed at its shared source rather than patched per product. No new untriaged banana was found; the existing Recharts and bundle warnings remain documented and unrelated.
+- constitutional check:
+  - scope preserved: yes (the approved shared Sign transition only)
+  - docs updated: yes
+  - verification recorded: yes (RED/GREEN, live browser sequence, fresh full gate)
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-07-22 Investment Goal and Credit-Limit Completion
+
+- Latest request handled: turn `Start an investment goal` and the `New credit limit for you` opportunity into clear end-to-end demo stories, while preserving the shared conversation-local option-consumption contract and eliminating circular choices.
+- Investment goal: the assistant now collects five qualified inputs in order (purpose, horizon, starting amount, monthly contribution, and risk comfort), builds a deterministic illustrative projection from the selected values, renders a concise recap, and offers only `Explore matching funds` or terminal `I'm done`. `Not sure yet` is tied to its exact step and can no longer fall into another branch through ambiguous text matching.
+- Investment handoff: `Explore matching funds` uses the typed `investment-funds` action target and now opens the risk-matched collection directly; the later correction is documented above. Funds collection, security detail, BUY Review Data, terms, PIN, and Success remain the existing transaction authority.
+- Credit-limit conversation: `I'm interested` now offers `Check repayment impact`, `Review offer`, or terminal `Not now`. Impact converges to Review/Not now and does not repeat itself. Stable semantic IDs let the portable assistant consume every selected option across later surfaces in the same conversation.
+- Credit-limit action flow: `Review offer` opens a dedicated review with current/new/increase values, requires explicit terms acceptance, then reuses the standard PIN/sign and success screens. Only leaving Success applies the new limit. The accepted limit and +5,000 CZK available-credit delta are session-only; the card nudge and `For you` opportunity disappear after success, while reload intentionally restores mock data.
+- Safety boundary: goal projections are explicitly illustrative and incomplete inputs produce no invented numeric range. The credit offer remains mock/session-only and adds no underwriting, eligibility service, persistence, document generation, or banking backend.
+- Verification evidence before the final repository gate: focused TypeScript and 42 relevant tests passed. Live port-4001 smoke completed credit `I'm interested -> impact -> Review -> terms -> PIN -> Success -> Back to card`, confirmed the selected impact action disappeared, Free To Spend changed from 3,200 to 8,200 CZK, and the nudge/opportunity disappeared. The investment smoke completed all five questions, rendered the selected-value simulation, and confirmed `Explore matching funds` closed chat and opened `Our funds selection` with Search and the exact collection banners. No Vite overlay was present.
+- Final repository gate: after triaging and re-locking the prior Funds asset delta, fresh `npm run verify` passed TypeScript, ESLint, all 56 test files / 366 tests, all six audits, the 179-asset fail-closed baseline (`127` referenced; the existing `52` review candidates unchanged), and the 4,397-module production build. Only the already-triaged jsdom Recharts diagnostics, empty `react-vendor` chunk, and large-chunk warnings remain.
+- Files central to this change: `src/app/chat/cz/investmentGoal.ts`, `src/app/chat/czChatOrchestration.ts`, `src/app/App.tsx`, `src/app/screens/cards/CreditLimitOfferFlow.tsx`, `src/app/screens/cards/CardDetailScreen.tsx`, `src/app/screens/investments/InvestmentsPortfolioScreen.tsx`, portable chat action types, the focused chat/screen tests, and the authored design/implementation docs under `docs/superpowers/`.
+- Banana Loop result: the browser check initially compared a locale-formatted non-breaking space to a regular space; inspecting the actual `Free To Spend` line confirmed the correct 8,200.00 CZK session value. The first full gate also exposed that the previous approved Funds commit added seven referenced Figma images without refreshing the fail-closed asset baseline. The audited 172 -> 179 delta was exactly those six collection banners plus the Amundi logo, so the baseline was re-locked without deleting, replacing, or optimizing assets. Existing Recharts jsdom zero-size and production chunk-size warnings remain the already-triaged non-blocking warnings.
+- constitutional check:
+  - scope preserved: yes (approved Variant A only; no backend or persistence expansion)
+  - docs updated: yes
+  - verification recorded: yes (focused RED/GREEN, end-to-end browser smoke, and fresh full `npm run verify`)
+  - bananas triaged: yes
+  - safe to resume: yes
+
 ## 2026-07-22 Investments Funds Window and Collection Drill-Down
 
 - Latest request handled: connect the existing `Find out the best fund for you` portfolio banner to the Figma `Our funds selection` storefront, add the six supplied collection-banner variants to the shared `Investments fund banner` Design System component, and connect every collection to a Figma-aligned collection detail that reuses the existing fund-detail route.

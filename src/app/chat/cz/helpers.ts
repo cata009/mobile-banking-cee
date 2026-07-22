@@ -107,12 +107,14 @@ export function buildCzNavigateAction(
   id: string,
   label: string,
   target: NonNullable<CoAppingChatAction["target"]>,
+  details: Pick<CoAppingChatAction, "investmentFundCollectionId"> = {},
 ): CoAppingChatAction {
   return {
     id,
     label,
     type: "navigate",
     target,
+    ...details,
   };
 }
 
@@ -138,11 +140,12 @@ export function buildCzNavigateFollowUp(
   id: string,
   label: string,
   target: NonNullable<CoAppingChatAction["target"]>,
+  details: Pick<CoAppingChatAction, "investmentFundCollectionId"> = {},
 ): CoAppingFollowUpSuggestion {
   return {
     id,
     label,
-    action: buildCzNavigateAction(id, label, target),
+    action: buildCzNavigateAction(id, label, target, details),
   };
 }
 

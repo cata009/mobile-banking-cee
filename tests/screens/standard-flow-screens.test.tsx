@@ -2,7 +2,7 @@
 
 import "@testing-library/jest-dom/vitest";
 import type { ReactNode } from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import StandardSignScreen from "@/app/components/flow/StandardSignScreen";
 import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
@@ -18,10 +18,14 @@ function PaymentProviders({ children }: { children: ReactNode }) {
   );
 }
 
-afterEach(cleanup);
+afterEach(() => {
+  vi.useRealTimers();
+  cleanup();
+});
 
 describe("standard flow screens", () => {
-  it("renders customizable investment signing copy and actions", () => {
+  it("authenticates with Face ID before completing a standard sign action", () => {
+    vi.useFakeTimers();
     const onBack = vi.fn();
     const onSign = vi.fn();
 
@@ -42,6 +46,11 @@ describe("standard flow screens", () => {
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
     fireEvent.click(screen.getByRole("button", { name: "Sign order" }));
     expect(onBack).toHaveBeenCalledOnce();
+
+    expect(onSign).not.toHaveBeenCalled();
+    act(() => vi.advanceTimersByTime(839));
+    expect(onSign).not.toHaveBeenCalled();
+    act(() => vi.advanceTimersByTime(1));
     expect(onSign).toHaveBeenCalledOnce();
   });
 

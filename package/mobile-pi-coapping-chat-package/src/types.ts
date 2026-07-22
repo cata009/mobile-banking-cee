@@ -4,10 +4,12 @@ export type CoAppingChatRole = "agent" | "user";
 
 export type CoAppingChatActionTarget =
   | "investments"
+  | "investment-funds"
   | "investment-buy"
   | "investments-history"
   | "analytics"
   | "card-detail"
+  | "credit-limit-review"
   | "product-detail"
   | "products"
   | "payments"
@@ -25,6 +27,14 @@ export interface CoAppingInvestmentBuyDraft {
   executionTiming: "today" | "next-business-day";
 }
 
+export type CoAppingInvestmentFundCollectionId =
+  | "onemarket"
+  | "selection-plus"
+  | "featured"
+  | "equity"
+  | "balanced"
+  | "conservative";
+
 export interface CoAppingChatAction {
   id: string;
   label: string;
@@ -33,6 +43,7 @@ export interface CoAppingChatAction {
   target?: CoAppingChatActionTarget;
   securityId?: string;
   investmentBuyDraft?: CoAppingInvestmentBuyDraft;
+  investmentFundCollectionId?: CoAppingInvestmentFundCollectionId;
 }
 
 export interface CoAppingFollowUpSuggestion {

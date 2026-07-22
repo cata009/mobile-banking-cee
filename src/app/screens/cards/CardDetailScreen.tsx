@@ -21,6 +21,7 @@ import FaceIdAnimation from "@/app/components/FaceIdAnimation";
 
 interface CardDetailScreenProps {
   selectedCardId?: string | null;
+  creditLimitOverrides?: Readonly<Record<string, number>>;
   onBack: () => void;
   onCardDetailsClick?: (card: Product) => void;
   onCardOptionsClick?: (card: Product) => void;
@@ -128,6 +129,7 @@ function CollapsingCardHeader({
 
 export default function CardDetailScreen({
   selectedCardId,
+  creditLimitOverrides = {},
   onBack,
   onCardDetailsClick,
   onCardOptionsClick,
@@ -141,8 +143,20 @@ export default function CardDetailScreen({
   const { categories } = useProducts();
 
   const cardProducts = useMemo(
-    () => categories.flatMap((cat) => cat.products).filter(isCardProduct),
-    [categories],
+    () => categories
+      .flatMap((cat) => cat.products)
+      .filter(isCardProduct)
+      .map((card) => {
+        if (card.type !== "credit_card") return card;
+        const overriddenLimit = creditLimitOverrides[card.id];
+        if (overriddenLimit == null || overriddenLimit === card.creditLimit) return card;
+        return {
+          ...card,
+          creditLimit: overriddenLimit,
+          availableCredit: card.availableCredit + (overriddenLimit - card.creditLimit),
+        };
+      }),
+    [categories, creditLimitOverrides],
   );
 
   const selectedIndex = Math.max(

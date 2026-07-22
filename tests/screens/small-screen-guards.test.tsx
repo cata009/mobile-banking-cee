@@ -123,6 +123,29 @@ describe('small-screen empty and invalid state guards', () => {
     expect(onCardOptionsClick).toHaveBeenCalledWith(expect.objectContaining({ id: 'card-2' }))
   })
 
+  it('applies a session credit-limit override to the active card and its available balance', () => {
+    const creditCard = mockProducts.find((product) => product.type === 'credit_card')
+    if (!creditCard || creditCard.type !== 'credit_card') throw new Error('Expected a credit card fixture')
+    setProducts([creditCard])
+    const onCardOptionsClick = vi.fn()
+
+    render(
+      <CardDetailScreen
+        selectedCardId={creditCard.id}
+        creditLimitOverrides={{ [creditCard.id]: creditCard.creditLimit + 5000 }}
+        onBack={() => undefined}
+        onCardOptionsClick={onCardOptionsClick}
+      />,
+      { wrapper: AppProviders },
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Options' }))
+    expect(onCardOptionsClick).toHaveBeenCalledWith(expect.objectContaining({
+      creditLimit: creditCard.creditLimit + 5000,
+      availableCredit: creditCard.availableCredit + 5000,
+    }))
+  })
+
   it('renders header-only account and card screens for zero products without detail actions', () => {
     setProducts([])
     const onAccountDetails = vi.fn()

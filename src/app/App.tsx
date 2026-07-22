@@ -53,6 +53,7 @@ const AccountDetailScreen = lazy(() => import("@/app/screens/accounts/AccountDet
 const AccountDetailsInfoScreen = lazy(() => import("@/app/screens/accounts/AccountDetailsInfoScreen"));
 const AccountOptionsScreen = lazy(() => import("@/app/screens/accounts/AccountOptionsScreen"));
 const CardDetailScreen = lazy(() => import("@/app/screens/cards/CardDetailScreen"));
+const CreditLimitOfferFlow = lazy(() => import("@/app/screens/cards/CreditLimitOfferFlow"));
 const CardDetailsInfoScreen = lazy(() => import("@/app/screens/cards/CardDetailsInfoScreen"));
 const CardOptionsScreen = lazy(() => import("@/app/screens/cards/CardOptionsScreen"));
 
@@ -107,9 +108,12 @@ import {
   type DomesticPaymentDraft,
 } from "@/data/paymentFlow";
 import type { PaymentTemplateSelection } from "@/data/paymentTemplates";
-import type { Product } from "@/data/products";
+import type { CreditCard, Product } from "@/data/products";
 import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
-import type { InvestmentBuyRequest } from "@/app/screens/investments/InvestmentsPortfolioScreen";
+import type {
+  InvestmentBuyRequest,
+  InvestmentFundsRequest,
+} from "@/app/screens/investments/InvestmentsPortfolioScreen";
 import InvestmentChatChart from "@/app/components/investments/InvestmentChatChart";
 import type { ProductDetailSelection } from "@/app/components/products/ProductCardBottomSheet";
 
@@ -272,6 +276,10 @@ function AppContent({
   const [selectedInvestmentSecurity, setSelectedInvestmentSecurity] = useState<InvestmentCatalogSecurity | null>(null);
   const [investmentBuyRequest, setInvestmentBuyRequest] = useState<InvestmentBuyRequest | null>(null);
   const investmentBuyRequestSequenceRef = useRef(0);
+  const [investmentFundsRequest, setInvestmentFundsRequest] = useState<InvestmentFundsRequest | null>(null);
+  const investmentFundsRequestSequenceRef = useRef(0);
+  const [creditLimitOverrides, setCreditLimitOverrides] = useState<Record<string, number>>({});
+  const [creditLimitOfferFlowCardId, setCreditLimitOfferFlowCardId] = useState<string | null>(null);
   const [historyFilterByTitle, setHistoryFilterByTitle] = useState<string | null>(null);
   const [productsShelfFocusRequest, setProductsShelfFocusRequest] = useState<ProductsShelfFocusRequest | null>(null);
   const [selectedProductDetail, setSelectedProductDetail] = useState<ProductDetailSelection | null>(null);
@@ -301,9 +309,16 @@ function AppContent({
     accountProducts.find((cardProduct) => cardProduct.id === selectedCardId) ??
     accountProducts.find((cardProduct) => cardProduct.type === "credit_card") ??
     null;
-  const creditCardForOpportunity = isCreditCardProduct(selectedCardProduct)
+  const selectedCreditCardForOpportunity = isCreditCardProduct(selectedCardProduct)
     ? selectedCardProduct
     : (accountProducts.find(isCreditCardProduct) ?? null);
+  const creditCardForOpportunity = selectedCreditCardForOpportunity
+    && creditLimitOverrides[selectedCreditCardForOpportunity.id] == null
+    ? selectedCreditCardForOpportunity
+    : null;
+  const creditLimitOfferFlowCard = accountProducts.find(
+    (product): product is CreditCard => product.id === creditLimitOfferFlowCardId && isCreditCardProduct(product),
+  );
   const czChatOpportunities = buildCreditCardOpportunities(creditCardForOpportunity, country, currentScreen);
   const czChatReplyResolver = useMemo<CoAppingReplyResolver>(
     () =>
@@ -645,6 +660,15 @@ function AppContent({
       case "investments":
         navigateTo("investments");
         break;
+      case "investment-funds":
+        investmentFundsRequestSequenceRef.current += 1;
+        setInvestmentFundsRequest({
+          requestId: investmentFundsRequestSequenceRef.current,
+          collectionId: action.investmentFundCollectionId,
+        });
+        setCzChatOpen(false);
+        navigateTo("investments");
+        break;
       case "investment-buy":
         if (!action.securityId) break;
         investmentBuyRequestSequenceRef.current += 1;
@@ -670,6 +694,13 @@ function AppContent({
             ? { screen: "card-detail", cardId: creditCardForOpportunity.id }
             : "card-detail",
         );
+        break;
+      case "credit-limit-review":
+        if (!creditCardForOpportunity) break;
+        setSelectedCardId(creditCardForOpportunity.id);
+        setCreditLimitOfferFlowCardId(creditCardForOpportunity.id);
+        setCzChatOpen(false);
+        navigateTo({ screen: "card-detail", cardId: creditCardForOpportunity.id });
         break;
       case "product-detail":
         {
@@ -917,16 +948,31 @@ function AppContent({
           <CardOptionsScreen selectedCardId={selectedCardId} onBack={goBack} />
         )}
 
-        {currentScreen === "card-detail" && (
+        {currentScreen === "card-detail" && creditLimitOfferFlowCard && (
+          <CreditLimitOfferFlow
+            card={creditLimitOfferFlowCard}
+            country={country}
+            onCancel={() => setCreditLimitOfferFlowCardId(null)}
+            onComplete={(cardId, newLimit) => {
+              setCreditLimitOverrides((current) => ({ ...current, [cardId]: newLimit }));
+              setCreditLimitOfferFlowCardId(null);
+            }}
+          />
+        )}
+
+        {currentScreen === "card-detail" && !creditLimitOfferFlowCard && (
           <CardDetailScreen
             selectedCardId={selectedCardId}
+            creditLimitOverrides={creditLimitOverrides}
             onBack={goBack}
             onCardDetailsClick={handleCardDetailsClick}
             onCardOptionsClick={handleCardOptionsClick}
             onTransactionClick={handleTransactionClick}
             onHelpClick={isCzCoAppingChatbotPreviewActive ? () => openCzChatHelp("card") : undefined}
             aiOpportunityNudge={
-              isCzCoAppingChatbotPreviewActive && isCreditCardProduct(selectedCardProduct)
+              isCzCoAppingChatbotPreviewActive
+                && isCreditCardProduct(selectedCardProduct)
+                && creditLimitOverrides[selectedCardProduct.id] == null
                 ? {
                     title: "Upgrade your credit limit to 15 000 CZK",
                     body: "You have a personalized offer ready. Review the new limit first; nothing changes unless you continue.",
@@ -1037,6 +1083,7 @@ function AppContent({
             onBack={goBack}
             onHistoryClick={handleInvestmentsHistoryClick}
             onSelectedSecurityChange={handleSelectedInvestmentSecurityChange}
+            fundsWindowRequest={investmentFundsRequest}
             buyRequest={investmentBuyRequest}
             onBuyRequestConsumed={handleInvestmentBuyRequestConsumed}
           />
