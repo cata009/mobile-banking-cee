@@ -2,7 +2,6 @@ import { useState } from "react";
 import CodeBlock, { type CodeLanguage } from "@/app/components/CodeBlock";
 import type { ComponentCodeSample } from "@/app/registry/componentCodeSamples";
 import type { ComponentImplementationPackage as ImplementationPackageData } from "@/app/registry/componentImplementationPackages";
-import { getComponentStatePreview } from "./componentStatePreviews";
 
 type CodeSegment = "react" | "swift" | "kotlin";
 
@@ -19,15 +18,7 @@ const FILE_NAME_BY_SEGMENT: Record<CodeSegment, (path: string) => string> = {
   kotlin: () => "Component.kt",
 };
 
-function Section({
-  title,
-  eyebrow,
-  children,
-}: {
-  title: string;
-  eyebrow: string;
-  children: React.ReactNode;
-}) {
+function Section({ title, eyebrow, children }: { title: string; eyebrow: string; children: React.ReactNode }) {
   return (
     <section className="rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5 shadow-sm">
       <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--uc-action)]">{eyebrow}</p>
@@ -37,36 +28,7 @@ function Section({
   );
 }
 
-function ComponentStates({ componentId, data }: { componentId: string; data: ImplementationPackageData }) {
-  return (
-    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-      {data.states.map((state) => {
-        const preview = getComponentStatePreview(componentId, state.id);
-        return (
-          <article
-            key={state.id}
-            className="flex min-h-[148px] flex-col rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-app-bg)] p-4"
-          >
-            <div>
-              <h3 className="text-[14px] font-bold text-[var(--uc-text)]">{state.label}</h3>
-              <p className="mt-1 min-h-[36px] text-[12px] leading-[18px] text-[var(--uc-text-muted)]">{state.description}</p>
-            </div>
-            <div className="mt-auto pt-4">
-              {preview ?? (
-                <div className="flex h-[48px] items-center justify-center rounded-[4px] border border-dashed border-[var(--uc-border)] px-4 text-center text-[12px] text-[var(--uc-text-muted)]">
-                  Not part of the current public component contract.
-                </div>
-              )}
-            </div>
-          </article>
-        );
-      })}
-    </div>
-  );
-}
-
 export default function ComponentImplementationPackage({
-  componentId,
   componentPath,
   code,
   data,
@@ -127,10 +89,6 @@ export default function ComponentImplementationPackage({
         </dl>
       </Section>
 
-      <Section eyebrow="03 / Behavior" title="States">
-        <ComponentStates componentId={componentId} data={data} />
-      </Section>
-
       <Section eyebrow="04 / Interaction" title="Motion">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {data.motionSpecifications.map((item) => (
@@ -140,27 +98,6 @@ export default function ComponentImplementationPackage({
               {item.detail ? <p className="mt-1 text-[12px] leading-[18px] text-[var(--uc-text-muted)]">{item.detail}</p> : null}
             </div>
           ))}
-        </div>
-      </Section>
-
-      <Section eyebrow="05 / Inclusive use" title="Accessibility">
-        <ul className="grid gap-3 md:grid-cols-2">
-          {data.accessibilitySpecifications.map((item) => (
-            <li key={item} className="flex gap-3 rounded-[8px] bg-[var(--uc-surface-muted)] p-4 text-[13px] leading-[19px] text-[var(--uc-text)]">
-              <span aria-hidden="true" className="mt-[2px] grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full bg-[var(--uc-action)] text-[11px] font-bold text-[var(--uc-text-inverse)]">✓</span>
-              {item}
-            </li>
-          ))}
-        </ul>
-      </Section>
-
-      <Section eyebrow="06 / Dependencies" title="Assets">
-        <div className="flex items-start gap-4 rounded-[8px] bg-[var(--uc-surface-muted)] p-4">
-          <div className="grid h-[40px] w-[40px] shrink-0 place-items-center rounded-full bg-[var(--uc-surface)] text-[18px]" aria-hidden="true">∅</div>
-          <div>
-            <p className="text-[14px] font-bold text-[var(--uc-text)]">{data.assets.required ? "Assets required" : "No external assets"}</p>
-            <p className="mt-1 text-[13px] leading-[19px] text-[var(--uc-text-muted)]">{data.assets.summary}</p>
-          </div>
         </div>
       </Section>
     </div>

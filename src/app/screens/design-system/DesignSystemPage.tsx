@@ -27,11 +27,11 @@ import { LogoutConfirmDialog } from "@/app/components/LogoutConfirmDialog";
 import PanelWithTranslations from "@/app/components/PanelWithTranslations";
 import PanelWithoutCoAppingTranslations from "@/app/components/PanelWithoutCoAppingTranslations";
 import { Button } from "@/app/components/ui/button";
-import { InspectModeContext, noop } from "./inspect/MeasurementSurface";
-import { Section, Specimen } from "./specimenShell";
-import { getDefaultSectionForInventoryTab, getInventoryTabForHash, getSectionForHash, inventorySectionLinks, parseComponentDetailHash, type InventoryTab } from "./inventoryNav";
+import { noop } from "./inspect/MeasurementSurface";
+import { InventorySearchField, Section, Specimen } from "./specimenShell";
+import { getDefaultSectionForInventoryTab, getInventoryTabForHash, getSectionForHash, inventorySectionLinks, inventoryTabLabels, parseComponentDetailHash, type InventoryTab } from "./inventoryNav";
 import { ShadcnSpecimens } from "./shadcnSpecimens";
-import { ColorInventory, IconInventory, InventoryTabs, TypographyInventory } from "./inventories";
+import { ColorInventory, IconInventory, TypographyInventory } from "./inventories";
 import ComponentDetailScreen from "./ComponentDetailScreen";
 import { TemplateInventory } from "./templateInventory";
 import { BarVariantSpecimen, BottomNavigationVariantSpecimen, ButtonRegistryVariantSpecimen, CardVariantSpecimen, DateFilterVariantSpecimen, GhostBannerVariantSpecimen, HelperCardVariantSpecimen, HomeHeaderSpecimen, InfoBannerVariantSpecimen, InvestmentsFundBannerVariantSpecimen, MoreHeaderSpecimen, PageHeaderSpecimen, PaymentHeroCardVariantSpecimen, PendingActionCardVariantSpecimen, PillSortingVariantSpecimen, PrimaryButtonVariantSpecimen, ProductMenuCardVariantSpecimen, ProductOfferCardVariantSpecimen, RadioButtonVariantSpecimen, ShopsmartOfferCardVariantSpecimen, StatusBarVariantSpecimen, UserEventCardVariantSpecimen, WalletButtonVariantSpecimen } from "./specimens/cardSpecimens";
@@ -39,8 +39,9 @@ import { AccountActionBarVariantSpecimen, AccountBalanceCardCountrySpecimen, Acc
 
 export default function DesignSystemPage() {
   const [showLogout, setShowLogout] = useState(false);
-  const [inspectMode, setInspectMode] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const componentsContentRef = useRef<HTMLDivElement | null>(null);
+  const [componentSearchQuery, setComponentSearchQuery] = useState("");
   const [inventoryTab, setInventoryTab] = useState<InventoryTab>(() => {
     if (typeof window === "undefined") return "components";
     return getInventoryTabForHash(window.location.hash);
@@ -84,6 +85,16 @@ export default function DesignSystemPage() {
       document.getElementById(restoreSection)?.scrollIntoView({ block: "start" });
     });
   };
+
+  // Reset the scroll position to the top whenever a component detail page opens,
+  // so the user lands on the header instead of inheriting the scroll offset they
+  // had on the specimen grid (where they clicked "Details").
+  useEffect(() => {
+    if (!detailComponentId) return;
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+    scrollContainer.scrollTo({ top: 0 });
+  }, [detailComponentId]);
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -147,33 +158,51 @@ export default function DesignSystemPage() {
     };
   }, [sectionLinks]);
 
+  // Filter component specimens by name. Hides non-matching specimen cards and
+  // hides any section whose specimens are all hidden. Operates on the rendered
+  // DOM via data-ds-specimen so the static JSX sections stay untouched.
+  useEffect(() => {
+    const root = componentsContentRef.current;
+    if (!root) return;
+    const normalizedQuery = componentSearchQuery.trim().toLowerCase();
+    const sections = Array.from(root.querySelectorAll<HTMLElement>("section[id]"));
+    for (const section of sections) {
+      const specimens = Array.from(section.querySelectorAll<HTMLElement>("[data-ds-specimen]"));
+      let visibleCount = 0;
+      for (const specimen of specimens) {
+        const name = (specimen.getAttribute("data-ds-specimen") ?? "").toLowerCase();
+        const matches = normalizedQuery === "" || name.includes(normalizedQuery);
+        specimen.style.display = matches ? "" : "none";
+        if (matches) visibleCount += 1;
+      }
+      section.style.display = normalizedQuery === "" || visibleCount > 0 ? "" : "none";
+    }
+  }, [componentSearchQuery, inventoryTab, detailComponentId]);
+
   return (
-    <InspectModeContext.Provider value={inspectMode}>
     <div ref={scrollContainerRef} className="h-full w-full self-stretch overflow-y-auto bg-[var(--uc-surface-muted)] text-[var(--uc-text)]">
-      <div className="mx-auto flex w-full max-w-[1440px] gap-6 px-6 py-8 xl:gap-8 xl:px-8">
-        <aside className="sticky top-[32px] hidden h-[calc(100vh-64px)] w-[272px] shrink-0 overflow-y-auto rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-4 lg:block xl:w-[288px]">
-          <InventoryTabs
-            activeTab={inventoryTab}
-            activeSection={activeSection}
-            sectionLinks={sectionLinks}
-            onChange={handleInventoryTabChange}
-            placement="sidebar"
-          />
-          <div className="mt-5 rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-app-bg)] p-4" data-inspector-ui="true">
-            <p className="uc-type-n4-strong text-[var(--uc-text)]">Inspector</p>
-            <button
-              onClick={() => setInspectMode((value) => !value)}
-              className={`mt-3 w-full rounded-[6px] px-3 py-2 font-['UniCredit:Bold',sans-serif] text-[14px] transition-colors ${
-                inspectMode ? "bg-[var(--uc-action)] text-[var(--uc-static-white)]" : "border border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)]"
-              }`}
-            >
-              {inspectMode ? "Inspector ON" : "Inspector OFF"}
-            </button>
-            <p className="mt-3 text-[12px] leading-5 text-[var(--uc-text-muted)]">
-              Hover or click elements to inspect size, font, padding, margin, gap, parent distance, and neighboring-element spacing.
-            </p>
-          </div>
-        </aside>
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-[24px] px-6 py-8 xl:px-8">
+        {/* Horizontal tabs (Flows-style) */}
+        <div className="flex flex-wrap gap-[8px] border-b border-[var(--uc-border)]" role="tablist" aria-label="Design system inventory tabs">
+          {(["components", "templates", "icons", "colors", "typography"] as const).map((tab) => {
+            const isActive = inventoryTab === tab;
+            return (
+              <button
+                key={tab}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => handleInventoryTabChange(tab)}
+                className={`relative min-h-[44px] px-[18px] text-[14px] font-bold leading-[18px] transition-colors ${
+                  isActive ? "text-[var(--uc-text)]" : "text-[var(--uc-text-muted)] hover:text-[var(--uc-action)]"
+                }`}
+              >
+                {inventoryTabLabels[tab]}
+                {isActive ? <span className="absolute inset-x-[10px] bottom-0 h-[3px] rounded-t-[3px] bg-[var(--uc-action)]" /> : null}
+              </button>
+            );
+          })}
+        </div>
 
         <main className="min-w-0 flex-1">
           {detailComponentId ? (
@@ -190,9 +219,35 @@ export default function DesignSystemPage() {
           ) : inventoryTab === "typography" ? (
             <TypographyInventory />
           ) : (
-            <>
+            <div ref={componentsContentRef}>
+            <div className="sticky top-0 z-20 -mx-6 mb-2 bg-[var(--uc-surface-muted)] px-6 py-3 xl:-mx-8 xl:px-8">
+            <InventorySearchField
+              value={componentSearchQuery}
+              onChange={setComponentSearchQuery}
+              placeholder="Search components"
+              label="Search components"
+            />
+            <div className="flex flex-wrap gap-2 pt-3" role="tablist" aria-label="Component sections">
+              {sectionLinks.map(([id, label]) => {
+                const isActive = activeSection === id;
+                return (
+                  <a
+                    key={id}
+                    href={`#${id}`}
+                    className={`rounded-full border px-4 py-2 text-left text-[13px] transition-colors ${
+                      isActive
+                        ? "border-[var(--uc-action)] bg-[var(--uc-action)] text-[var(--uc-static-white)]"
+                        : "border-[var(--uc-border)] bg-[var(--uc-app-bg)] text-[var(--uc-text-muted)] hover:border-[var(--uc-action)]"
+                    }`}
+                  >
+                    <span className="font-['UniCredit:Bold',sans-serif]">{label}</span>
+                  </a>
+                );
+              })}
+            </div>
+            </div>
           <Section id="headers" title="Headers" description="Active header components and their variants, isolated from the current app screens.">
-            <div className="grid gap-5 xl:grid-cols-2">
+            <div className="grid gap-5 lg:grid-cols-2">
               <PageHeaderSpecimen />
               <HomeHeaderSpecimen />
               <MoreHeaderSpecimen />
@@ -201,7 +256,7 @@ export default function DesignSystemPage() {
           </Section>
 
           <Section id="navigation" title="Navigation" description="Navigation menus and links, including bottom navigation across every active tab.">
-            <div className="grid gap-5">
+            <div className="grid gap-5 lg:grid-cols-2">
               <Specimen name="BottomNavigation / all active states" source="components/BottomNavigation.tsx" specs={["container 375x54", "icons 32px", "labels 14px / 15px line", "active bar 24x2", "0 gap bar/icon/label"]} detailsHref="#component/shell.bottom-navigation">
                 <BottomNavigationVariantSpecimen />
               </Specimen>
@@ -274,7 +329,7 @@ export default function DesignSystemPage() {
           </Section>
 
           <Section id="forms" title="Forms and controls" description="Custom inputs and reusable control primitives that can be consolidated.">
-            <div className="grid gap-5">
+            <div className="grid gap-5 lg:grid-cols-2">
               <div className="grid gap-5 lg:grid-cols-2">
                 <Specimen name="Dropdown" source="components/TextField.tsx" detailsHref="#component/ui.text-field">
                   <TextFieldSpecimens withChevron />
@@ -351,7 +406,7 @@ export default function DesignSystemPage() {
           </Section>
 
           <Section id="cards" title="Cards and content blocks" description="Active cards, contact cards, banners, lists, and reusable content blocks.">
-            <div className="grid gap-5">
+            <div className="grid gap-5 lg:grid-cols-2">
               <Specimen
                 name="Card"
                 source="components/cards/Card.tsx"
@@ -440,7 +495,7 @@ export default function DesignSystemPage() {
           </Section>
 
           <Section id="products" title="Products and country variants" description="Product accordions and product-family country variants, so regional differences can be reviewed in one place.">
-            <div className="grid gap-5">
+            <div className="grid gap-5 lg:grid-cols-2">
               <Specimen
                 name="Product card / list / total row - evolution"
                 source="components/ProductCard.tsx + ProductsList.tsx + TotalRow.tsx"
@@ -490,11 +545,10 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-            </>
+            </div>
           )}
         </main>
       </div>
     </div>
-    </InspectModeContext.Provider>
   );
 }

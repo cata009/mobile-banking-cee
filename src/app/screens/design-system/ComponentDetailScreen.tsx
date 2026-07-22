@@ -18,10 +18,10 @@ import {
   resolveComponentCodeSample,
   type ComponentCodeSample,
 } from "@/app/registry/componentCodeSamples";
-import ThemeModeSegment from "@/app/components/ThemeModeSegment";
 import ComponentImplementationPackage from "./ComponentImplementationPackage";
+import ComponentOverviewSections from "./ComponentOverviewSections";
 import { getComponentImplementationPackage } from "@/app/registry/componentImplementationPackages";
-import { getComponentLivePreview } from "./componentLivePreviews";
+import { InspectModeContext, MeasurementSurface } from "./inspect/MeasurementSurface";
 
 type CodeSegment = "react" | "swift" | "kotlin";
 type DetailTab = "view" | "code" | "package";
@@ -46,9 +46,10 @@ export default function ComponentDetailScreen({
   onBack,
 }: ComponentDetailScreenProps) {
   const implementationPackage = getComponentImplementationPackage(componentId);
-  const [tab, setTab] = useState<DetailTab>(() => implementationPackage ? "package" : "code");
+  const [tab, setTab] = useState<DetailTab>("view");
   const [segment, setSegment] = useState<CodeSegment>("react");
   const [themeMode, setThemeMode] = useState<"light" | "dark">("light");
+  const [inspectMode, setInspectMode] = useState(false);
 
   const meta = getComponentMeta(componentId as keyof typeof COMPONENT_REGISTRY);
   const sample: ComponentCodeSample | undefined = COMPONENT_CODE_SAMPLES[componentId];
@@ -56,11 +57,6 @@ export default function ComponentDetailScreen({
   const resolved = useMemo(
     () => resolveComponentCodeSample(sample, variantId),
     [sample, variantId],
-  );
-
-  const livePreview = useMemo(
-    () => getComponentLivePreview(componentId, themeMode),
-    [componentId, themeMode],
   );
 
   if (!meta) {
@@ -101,10 +97,6 @@ export default function ComponentDetailScreen({
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="text-[28px] font-bold leading-[32px] text-[var(--uc-text)]">{meta.label}</h1>
-          <p className="mt-2 font-mono text-[13px] text-[var(--uc-text-muted)]">{meta.componentPath}</p>
-          {meta.notes ? (
-            <p className="mt-3 max-w-[760px] text-[14px] leading-[20px] text-[var(--uc-text-muted)]">{meta.notes}</p>
-          ) : null}
         </div>
         {variantOptions.length > 0 && onVariantChange ? (
           <label className="flex items-center gap-2">
@@ -123,49 +115,55 @@ export default function ComponentDetailScreen({
         ) : null}
       </header>
 
-      {/* View / Code toggle */}
-      <div className="mt-6 inline-flex rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[2px]">
-        {detailTabs.map((entry) => (
-          <button
-            key={entry}
-            type="button"
-            onClick={() => setTab(entry)}
-            className={`rounded-[8px] px-[16px] py-[6px] text-[13px] font-bold uppercase tracking-wide transition-colors ${
-              tab === entry
-                ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm"
-                : "text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]"
-            }`}
-          >
-            {entry === "package" ? "Implementation package" : entry}
-          </button>
-        ))}
+      {/* View / Code toggle + Inspector toggle */}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="inline-flex rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[2px]">
+          {detailTabs.map((entry) => (
+            <button
+              key={entry}
+              type="button"
+              onClick={() => setTab(entry)}
+              className={`rounded-[8px] px-[16px] py-[6px] text-[13px] font-bold uppercase tracking-wide transition-colors ${
+                tab === entry
+                  ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm"
+                  : "text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]"
+              }`}
+            >
+              {entry === "package" ? "Implementation package" : entry}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => setInspectMode((value) => !value)}
+          data-inspector-ui="true"
+          className={`rounded-[6px] px-3 py-2 font-['UniCredit:Bold',sans-serif] text-[14px] transition-colors ${
+            inspectMode
+              ? "bg-[var(--uc-action)] text-[var(--uc-static-white)]"
+              : "border border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)]"
+          }`}
+        >
+          {inspectMode ? "Inspector ON" : "Inspector OFF"}
+        </button>
       </div>
 
       {/* Body */}
       <div className="mt-6">
         {tab === "view" ? (
-          <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <span className="text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
-                Live preview
-              </span>
-              <ThemeModeSegment value={themeMode} onChange={setThemeMode} ariaLabel={`${meta.label} preview theme`} />
-            </div>
-            <div className={`${themeMode === "dark" ? "dark" : ""} ${themeMode === "dark" ? "bg-[var(--uc-static-black)]" : "bg-[var(--uc-app-bg)]"} rounded-[12px] p-5`}>
-              {livePreview ? (
-                <div className="mx-auto w-full max-w-[375px]">{livePreview}</div>
-              ) : (
-                <div className="py-12 text-center">
-                  <p className="text-[14px] text-[var(--uc-text-muted)]">
-                    No isolated live preview for this component yet.
-                  </p>
-                  <p className="mt-1 text-[13px] text-[var(--uc-text-muted)]">
-                    See it in context in the Components tab.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
+          <InspectModeContext.Provider value={inspectMode}>
+            {implementationPackage ? (
+              <div className="mt-5">
+                <MeasurementSurface>
+                  <ComponentOverviewSections
+                    componentId={componentId}
+                    data={implementationPackage}
+                    themeMode={themeMode}
+                    onThemeModeChange={setThemeMode}
+                  />
+                </MeasurementSurface>
+              </div>
+            ) : null}
+          </InspectModeContext.Provider>
         ) : tab === "package" && implementationPackage && resolved ? (
           <ComponentImplementationPackage
             componentId={componentId}

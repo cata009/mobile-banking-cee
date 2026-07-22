@@ -1,4 +1,4 @@
-import { useMemo, useState, type UIEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type DragEvent, type MouseEvent, type PointerEvent, type UIEvent } from "react";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import BrandLogo from "@/app/components/brand-logo/BrandLogo";
@@ -43,6 +43,27 @@ interface InvestmentSecurityDetailScreenProps extends SharedProps {
 }
 
 const INVESTMENT_POSITIVE_COLOR = "var(--uc-green-olive)";
+
+// Drag state for the basket funds carousel. Mirrors the inline drag model used
+// by the Account / Card / Analytics / PFM / Products carousels so the basket
+// shelf can be dragged horizontally while its vertically-scrolling parent keeps
+// handling vertical pan (touch-action: pan-y).
+type BasketDragState = {
+  didMove: boolean;
+  input: "mouse" | "pointer" | null;
+  pointerId: number | null;
+  startScrollLeft: number;
+  startX: number;
+};
+
+// Basket carousel geometry. Matches the Account carousel's look: a 16px left
+// gutter (so the first card "peeks" from the edge like a real mobile carousel),
+// 16px between cards, and an explicit smooth-snap to the nearest card on drag
+// end instead of a hard CSS snap-mandatory that feels clipped.
+const BASKET_CARD_WIDTH = 260;
+const BASKET_CARD_GAP = 16;
+const BASKET_CARD_STEP = BASKET_CARD_WIDTH + BASKET_CARD_GAP;
+const BASKET_CAROUSEL_EDGE_GUTTER = 16;
 
 function formatMoney(value: number, country: CountryId, currency: string, hidden: boolean, digits = 2) {
   const formatted = new Intl.NumberFormat(getCountryConfig(country).locale, {
@@ -100,6 +121,179 @@ export function InvestmentSecurityListScreen({
     setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64)));
   };
 
+  const basketCarouselRef = useRef<HTMLDivElement>(null);
+  const basketDragStateRef = useRef<BasketDragState>({
+    didMove: false,
+    input: null,
+    pointerId: null,
+    startScrollLeft: 0,
+    startX: 0,
+  });
+  const basketMouseDragCleanupRef = useRef<(() => void) | null>(null);
+  const basketSuppressClickRef = useRef(false);
+  const [isBasketDragging, setIsBasketDragging] = useState(false);
+
+  const removeBasketMouseDragListeners = () => {
+    basketMouseDragCleanupRef.current?.();
+    basketMouseDragCleanupRef.current = null;
+  };
+
+  const clampBasketScrollLeft = (scrollLeft: number) => {
+    const carousel = basketCarouselRef.current;
+    if (!carousel) return scrollLeft;
+    const maxScrollLeft = Math.max(0, carousel.scrollWidth - carousel.clientWidth);
+    return Math.max(0, Math.min(maxScrollLeft, scrollLeft));
+  };
+
+  const getBasketScrollLeft = (index: number) => {
+    const carousel = basketCarouselRef.current;
+    if (!carousel || index <= 0) return 0;
+    // Each card sits at edgeGutter + index * step. Align the card's left edge to
+    // the left gutter so it lands exactly where the first card started.
+    return clampBasketScrollLeft(index * BASKET_CARD_STEP);
+  };
+
+  const getNearestBasketIndex = (scrollLeft: number) => {
+    const count = visibleBaskets.length;
+    if (count <= 1) return 0;
+    let nearestIndex = 0;
+    let nearestDistance = Math.abs(scrollLeft - getBasketScrollLeft(0));
+    for (let index = 1; index < count; index += 1) {
+      const distance = Math.abs(scrollLeft - getBasketScrollLeft(index));
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestIndex = index;
+      }
+    }
+    return nearestIndex;
+  };
+
+  const snapBasketToNearest = () => {
+    const carousel = basketCarouselRef.current;
+    if (!carousel || visibleBaskets.length <= 1) return;
+    const nearestIndex = getNearestBasketIndex(carousel.scrollLeft);
+    carousel.scrollTo({ left: getBasketScrollLeft(nearestIndex), behavior: "smooth" });
+  };
+
+  const beginBasketDrag = (
+    clientX: number,
+    input: BasketDragState["input"],
+    pointerId: number | null = null,
+  ) => {
+    const carousel = basketCarouselRef.current;
+    if (!carousel || basketDragStateRef.current.input) return false;
+
+    basketDragStateRef.current = {
+      didMove: false,
+      input,
+      pointerId,
+      startScrollLeft: carousel.scrollLeft,
+      startX: clientX,
+    };
+    return true;
+  };
+
+  const moveBasketDrag = (clientX: number) => {
+    const carousel = basketCarouselRef.current;
+    const dragState = basketDragStateRef.current;
+    if (!carousel || !dragState.input) return false;
+
+    const deltaX = clientX - dragState.startX;
+    if (!dragState.didMove && Math.abs(deltaX) < 4) return false;
+
+    dragState.didMove = true;
+    basketSuppressClickRef.current = true;
+    setIsBasketDragging(true);
+    carousel.scrollLeft = dragState.startScrollLeft - deltaX;
+    return true;
+  };
+
+  const resetBasketDrag = () => {
+    removeBasketMouseDragListeners();
+    basketDragStateRef.current = {
+      didMove: false,
+      input: null,
+      pointerId: null,
+      startScrollLeft: 0,
+      startX: 0,
+    };
+    setIsBasketDragging(false);
+  };
+
+  const finishBasketDrag = () => {
+    const didMove = basketDragStateRef.current.didMove;
+    if (didMove) {
+      // Smooth-snap to the nearest card (mirrors the Account carousel), so the
+      // shelf settles elegantly instead of landing mid-card. A click-suppression
+      // window prevents the drag from also opening a card.
+      snapBasketToNearest();
+      window.setTimeout(() => {
+        basketSuppressClickRef.current = false;
+      }, 80);
+    }
+    resetBasketDrag();
+  };
+
+  const handleBasketPointerDown = (event: PointerEvent<HTMLElement>) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    if (beginBasketDrag(event.clientX, "pointer", event.pointerId)) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+  };
+  const handleBasketPointerMove = (event: PointerEvent<HTMLElement>) => {
+    const dragState = basketDragStateRef.current;
+    if (dragState.input !== "pointer" || dragState.pointerId !== event.pointerId) return;
+    if (moveBasketDrag(event.clientX)) event.preventDefault();
+  };
+  const handleBasketPointerUp = (event: PointerEvent<HTMLElement>) => {
+    const dragState = basketDragStateRef.current;
+    if (dragState.input !== "pointer" || dragState.pointerId !== event.pointerId) return;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    finishBasketDrag();
+  };
+  const handleBasketPointerCancel = (event: PointerEvent<HTMLElement>) => {
+    if (basketDragStateRef.current.input !== "pointer" || basketDragStateRef.current.pointerId !== event.pointerId) return;
+    resetBasketDrag();
+    basketSuppressClickRef.current = false;
+  };
+
+  const handleBasketMouseDown = (event: MouseEvent<HTMLElement>) => {
+    if (event.button !== 0 || !beginBasketDrag(event.clientX, "mouse")) return;
+
+    const handleMouseMove = (mouseEvent: globalThis.MouseEvent) => {
+      if (basketDragStateRef.current.input !== "mouse") return;
+      if (mouseEvent.buttons !== 1) {
+        finishBasketDrag();
+        return;
+      }
+      if (moveBasketDrag(mouseEvent.clientX)) mouseEvent.preventDefault();
+    };
+    const handleMouseUp = () => {
+      if (basketDragStateRef.current.input === "mouse") finishBasketDrag();
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+    basketMouseDragCleanupRef.current = () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  };
+
+  const handleBasketClickCapture = (event: MouseEvent<HTMLElement>) => {
+    if (!basketSuppressClickRef.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const handleBasketDragStart = (event: DragEvent<HTMLElement>) => {
+    event.preventDefault();
+  };
+
+  useEffect(() => removeBasketMouseDragListeners, []);
+
   if (basketFundsAvailable && basketFundsOpen) {
     return (
       <InvestmentBasketFundsScreen
@@ -110,7 +304,7 @@ export function InvestmentSecurityListScreen({
   }
 
   return (
-    <div className="relative h-full w-full overflow-y-auto bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide" onScroll={handleScroll} data-investment-security-list="true">
+    <div className="relative h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide" onScroll={handleScroll} data-investment-security-list="true">
       <PageHeader title={basketFundsAvailable ? "Buy securities" : "List of securities"} onBack={onBack} includeSafeArea compact collapsedTitleProgress={headerProgress} />
       {basketFundsAvailable ? (
         <MessagesMailboxTabs
@@ -121,10 +315,10 @@ export function InvestmentSecurityListScreen({
           activeTabId={catalogueTab}
           onChange={(tabId) => setCatalogueTab(tabId === "regular" ? "regular" : "all")}
           ariaLabel="Investment catalogue type"
-          withTopMargin={false}
+          withTopMargin
         />
       ) : null}
-      <div className="px-[16px] py-[8px]">
+      <div className="px-[16px] py-[16px]">
         <AccountSearchBar
           value={query}
           onValueChange={setQuery}
@@ -140,24 +334,43 @@ export function InvestmentSecurityListScreen({
           <SectionHeadingDivider
             title="BASKET FUNDS"
             count={CZ_INVESTMENT_BASKETS.length}
-            variant="with-counter"
-            className="[&_h2]:text-[18px] [&_span]:text-[18px]"
+            countAlign="end"
+            className="px-[24px] pt-[8px]"
           />
           {visibleBaskets.length > 0 ? (
             <div
-              className="flex snap-x snap-mandatory gap-[12px] overflow-x-auto px-[16px] py-[24px] scrollbar-hide"
+              ref={basketCarouselRef}
+              onPointerDown={handleBasketPointerDown}
+              onPointerMove={handleBasketPointerMove}
+              onPointerUp={handleBasketPointerUp}
+              onPointerCancel={handleBasketPointerCancel}
+              onMouseDown={handleBasketMouseDown}
+              onClickCapture={handleBasketClickCapture}
+              onDragStart={handleBasketDragStart}
+              className={`overflow-x-auto overflow-y-visible py-[24px] scrollbar-hide select-none ${
+                isBasketDragging ? "cursor-grabbing" : "cursor-grab"
+              }`}
               role="region"
               aria-label="Basket funds carousel"
               data-investment-basket-carousel="true"
+              style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
             >
-              {visibleBaskets.map((basket) => (
-                <InvestmentBasketFundCard
-                  key={basket.id}
-                  basket={basket}
-                  onSelect={() => setBasketFundsOpen(true)}
-                />
-              ))}
-              <div className="w-[4px] shrink-0" aria-hidden="true" />
+              <div className="flex gap-[16px]" style={{ paddingLeft: BASKET_CAROUSEL_EDGE_GUTTER, paddingRight: BASKET_CAROUSEL_EDGE_GUTTER }}>
+                {visibleBaskets.map((basket) => (
+                  <InvestmentBasketFundCard
+                    key={basket.id}
+                    basket={basket}
+                    onSelect={() => setBasketFundsOpen(true)}
+                    onPointerDown={handleBasketPointerDown}
+                    onPointerMove={handleBasketPointerMove}
+                    onPointerUp={handleBasketPointerUp}
+                    onPointerCancel={handleBasketPointerCancel}
+                    onMouseDown={handleBasketMouseDown}
+                    onClickCapture={handleBasketClickCapture}
+                    onDragStart={handleBasketDragStart}
+                  />
+                ))}
+              </div>
             </div>
           ) : (
             <p className="px-[24px] py-[24px] text-[14px] text-[var(--uc-text-muted)]">No basket funds found.</p>
@@ -169,8 +382,7 @@ export function InvestmentSecurityListScreen({
           </div>
           <SectionHeadingDivider
             title="ALL SECURITIES"
-            variant="with-counter"
-            className="[&_h2]:text-[18px] [&_span]:text-[18px]"
+            className="px-[24px] pt-[8px]"
           />
         </section>
       ) : null}

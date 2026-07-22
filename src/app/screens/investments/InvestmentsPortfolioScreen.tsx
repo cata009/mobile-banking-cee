@@ -551,7 +551,7 @@ export default function InvestmentsPortfolioScreen({
   return (
     <div
       ref={scrollContainerRef}
-      className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide"
+      className="h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide"
       onScroll={handlePageScroll}
     >
       <PageHeader

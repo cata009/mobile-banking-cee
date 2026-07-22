@@ -17,19 +17,30 @@ describe('portable component implementation package', () => {
       />,
     )
 
-    expect(screen.getByRole('button', { name: 'Implementation package' })).toBeInTheDocument()
+    // View is the default tab; switch to the Implementation package to assert its content.
+    fireEvent.click(screen.getByRole('button', { name: 'Implementation package' }))
     expect(screen.getByRole('heading', { name: 'Implementation code' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Visual specifications' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'States' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Motion' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Accessibility' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Assets' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'React' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Swift' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Kotlin' })).toBeInTheDocument()
 
     const renderedText = document.body.textContent ?? ''
     expect(renderedText).not.toMatch(/asseco|asee|adaptive elements/i)
+  })
+
+  it('renders States, Accessibility and Assets under the View tab', () => {
+    render(
+      <ComponentDetailScreen
+        componentId="ui.primary-button"
+        onBack={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'view' }))
+
+    expect(screen.getByRole('heading', { name: 'States' })).toBeInTheDocument()
   })
 
   it('keeps the existing Code mode for components without a package', () => {
@@ -54,7 +65,9 @@ describe('portable component implementation package', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'view' }))
 
-    expect(screen.getByRole('button', { name: 'Continue' })).toBeInTheDocument()
+    // The View tab now also renders the States section, so the PrimaryButton
+    // appears in both the live preview and the state previews.
+    expect(screen.getAllByRole('button', { name: 'Continue' }).length).toBeGreaterThan(0)
     expect(screen.queryByText(/No isolated live preview/i)).not.toBeInTheDocument()
   })
 
