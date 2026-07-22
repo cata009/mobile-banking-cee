@@ -8,14 +8,14 @@ Last updated: 2026-07-22
 - Included scope: the component-detail information architecture now opens on View with inspectable state previews and keeps implementation code/specifications/motion in the portable package; the Design System catalogue/inventories were reconciled and unused shadcn UI source modules were removed; the CZ Basket Funds shelf now implements pointer/mouse drag, nearest-card snap, click suppression after drag, keyboard activation, and card-level event forwarding; associated Design System and Investments regression tests plus the authored ZCode plan are included.
 - Verification: the first `npm run verify` passed typecheck, lint, and the test suite but stopped in the asset audit because unstaged deleted files still appeared in `git ls-files`. Since the user explicitly authorized the complete worktree, all changes were staged and the gate was rerun on the exact publish snapshot. The fresh rerun passed typecheck, repository ESLint, 61 test files / 606 tests, all six audits (`card-details`, `investments`, `figma-bridge`, `templates`, `platform`, `assets`), and the production Vite build.
 - Known non-blocking output: the established Recharts zero-size diagnostics in jsdom, empty `react-vendor` chunk, and Vite large-chunk notice remain visible and triaged; no failing check is hidden.
-- Publication workflow: create and push a source checkpoint first, deploy it to Vercel Production, record its Git/deployment/HTTP evidence in a documentation-only checkpoint, then push and redeploy final `main` so source, handoff, GitHub, and Production are aligned.
-- Banana Loop: the asset-audit/staging interaction is documented rather than bypassed; all local files are intentionally in scope; final Git parity, worktree cleanliness, Vercel readiness, canonical HTTP response, and recent error logs must be checked before closeout.
+- Publication evidence: source checkpoint `26fd27d` (`Polish design system and investment carousels`) was pushed to `origin/main`. Vercel Production deployment `dpl_3XfcSSifncbkhiytwGAEFntZXzWV` reached `READY`, updated `https://mobile-banking-cee.vercel.app`, exposed the expected `api/access` function, returned HTTP 200 / 1,134 bytes through the canonical alias, and had no error logs in the preceding hour. This publication-evidence-only handoff update is committed and the final documentation checkpoint is redeployed so GitHub and Production end on the same HEAD.
+- Banana Loop: the asset-audit/staging interaction is documented rather than bypassed; all local files are intentionally in scope; Vercel readiness, canonical HTTP response, and recent error logs are proven above. Final Git parity and worktree cleanliness are checked after the documentation checkpoint is pushed and redeployed.
 - constitutional check:
   - scope preserved: yes (the user explicitly requested every uncommitted file)
   - docs updated: yes
   - verification recorded: yes
   - bananas triaged: yes
-  - safe to resume: yes after commit, push, production deployment, canonical smoke, and final cleanliness checks complete
+  - safe to resume: yes after the final documentation checkpoint is pushed, redeployed, and confirmed clean
 
 ## 2026-07-22 Unified Git and Vercel Publication Closeout
 
