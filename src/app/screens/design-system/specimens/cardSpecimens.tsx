@@ -20,6 +20,13 @@ import InfoBanner from "@/app/components/cards/InfoBanner";
 import UserEventCard from "@/app/components/cards/UserEventCard";
 import HelperCard from "@/app/components/cards/HelperCard";
 import PendingActionCard from "@/app/components/cards/PendingActionCard";
+import InvestmentsFundBanner, {
+  type InvestmentsFundBannerVariantId,
+} from "@/app/components/investments/InvestmentsFundBanner";
+import {
+  INVESTMENT_FUND_COLLECTIONS,
+  getInvestmentFundCollection,
+} from "@/app/config/investmentFundCollections";
 import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
 import ShopsmartOfferCard from "@/app/components/shopsmart/ShopsmartOfferCard";
@@ -164,6 +171,35 @@ export function InfoBannerVariantSpecimen() {
           description={active.description}
           actionLabel={active.actionLabel}
           onActionClick={() => undefined}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function InvestmentsFundBannerVariantSpecimen() {
+  const [selectedVariant, setSelectedVariant] = useState<InvestmentsFundBannerVariantId>("discovery");
+  const collection = selectedVariant === "discovery" ? null : getInvestmentFundCollection(selectedVariant);
+  const variantOptions = [
+    { id: "discovery", label: "Fund discovery" },
+    ...INVESTMENT_FUND_COLLECTIONS.map(({ id, title }) => ({ id, label: title })),
+  ] satisfies readonly SelectorOption<InvestmentsFundBannerVariantId>[];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <VariantSelector
+        id="investments-fund-banner-variant-select"
+        value={selectedVariant}
+        onChange={setSelectedVariant}
+        options={variantOptions}
+      />
+      <div className="flex w-[375px] flex-col gap-[16px] p-[16px]">
+        <InvestmentsFundBanner
+          title={collection?.title ?? "Find out the best fund for you"}
+          description={collection?.subtitle ?? "Discover our suggestions"}
+          actionLabel={collection ? "FIND OUT MORE" : "GO TO FUNDS WINDOW"}
+          variant={selectedVariant}
+          onClick={() => undefined}
         />
       </div>
     </div>

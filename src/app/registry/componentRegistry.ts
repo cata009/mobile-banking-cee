@@ -780,8 +780,8 @@ export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = {
     designSystems: ["current"],
     status: "implemented",
     componentPath: "src/app/components/investments/InvestmentsFundBanner.tsx",
-    usedByScreens: ["pi.investments.portfolio"],
-    notes: "Reusable CTA banner for fund discovery with title, description, tertiary action, and decorative finance illustration.",
+    usedByScreens: ["pi.investments.portfolio", "platform.design-system"],
+    notes: "Reusable fund CTA with one portfolio discovery variant and six selectable Figma-backed collection variants for Onemarket, Selection+, featured, equity, balanced, and conservative funds. Collection banners use a 126px minimum height and hug multiline title/subtitle content instead of clipping it into a fixed-height card.",
   },
   "templates.reconstructed-code": {
     id: "templates.reconstructed-code",

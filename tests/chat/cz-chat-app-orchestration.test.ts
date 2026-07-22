@@ -248,14 +248,12 @@ describe("CZ chat app orchestration", () => {
     if (typeof explanation === "string" || typeof performance === "string") {
       throw new Error("Expected structured investment-product replies");
     }
-    expect(explanation.text).toContain("### What UniCredit Balanced Income Fund is");
-    expect(explanation.text).toContain("pools investors' money");
-    expect(explanation.text).toContain("equities");
-    expect(explanation.text).toContain("bonds");
-    expect(explanation.text).toContain("can rise or fall");
-    expect(explanation.text).toContain("monthly dealing rules");
-    expect(explanation.text).toContain("exact asset mix");
-    expect(explanation.text).toContain("Review my performance");
+    expect(explanation.text).toContain("### A quick look at UniCredit Balanced Income Fund");
+    expect(explanation.text).toContain("balanced exposure");
+    expect(explanation.text).toContain("EUR fund");
+    expect(explanation.text).toContain("monthly liquidity");
+    expect(explanation.text).toContain("value can fall");
+    expect(explanation.text).toContain("Choose what matters to you next");
     expect(explanation.text).not.toContain("The visible holding is");
     expect(explanation.text).not.toMatch(/5.?525,00 CZK/);
     expect(explanation.text).not.toContain("+1.80%");
@@ -283,7 +281,7 @@ describe("CZ chat app orchestration", () => {
         ],
       }),
     ]);
-    expect(performance.text).toContain("### UniCredit Balanced Income Fund performance");
+    expect(performance.text).toContain("### Your position at a glance");
     expect(explanation.text).not.toBe(performance.text);
   });
 
@@ -300,19 +298,19 @@ describe("CZ chat app orchestration", () => {
     const result = await resolveReply("What do you think about this product?", []);
     if (typeof result === "string") throw new Error("Expected a structured investment-product reply");
     expect(result).toEqual(expect.objectContaining({
-      text: expect.stringContaining("### UniCredit Balanced Income Fund"),
+      text: expect.stringContaining("### Your quick product view"),
       followUps: [
-        expect.objectContaining({ id: "cz-investment-product-performance", label: "Review performance" }),
-        expect.objectContaining({ id: "cz-investment-product-risk", label: "Review risk" }),
-        expect.objectContaining({ id: "cz-investment-product-documents", label: "What documents matter?" }),
+        expect.objectContaining({ id: "cz-investment-product-performance", label: "How is it doing for me?" }),
+        expect.objectContaining({ id: "cz-investment-product-risk", label: "What could affect my return?" }),
+        expect.objectContaining({ id: "cz-investment-product-documents", label: "Show me the essentials" }),
       ],
     }));
     expect(result.text).toMatch(/5.?525,00 CZK/);
     expect(result.text).toContain("+1.80%");
-    expect(result.text).toContain("29,84 EUR");
-    expect(result.text).toContain("Medium risk");
-    expect(result.text).toContain("Monthly liquidity");
-    expect(result.text).toContain("not a personalized buy, sell, or hold recommendation");
+    expect(result.text).not.toContain("29,84 EUR");
+    expect(result.text).toContain("medium risk");
+    expect(result.text).toContain("monthly liquidity");
+    expect(result.text).toContain("not a personal recommendation");
   });
 
   it("keeps the selected investment summary informational without an Open Investments action", async () => {
@@ -338,7 +336,7 @@ describe("CZ chat app orchestration", () => {
     expect(selectedHoldingBlock).not.toHaveProperty("action");
   });
 
-  it("keeps performance figures in the card and offers Buy more for the exact held security", async () => {
+  it("keeps performance figures in the card and offers Explore adding more for the exact held security", async () => {
     const resolveReply = buildCzChatSmartReplyResolver({
       country: "CZ",
       categories: investmentBuyCategories,
@@ -367,7 +365,7 @@ describe("CZ chat app orchestration", () => {
     expect(result.text).not.toContain("29,84 EUR");
     expect(result.text).not.toContain("19.07.2026");
     expect(result.followUps).toContainEqual(expect.objectContaining({
-      label: "Buy more",
+      label: "Explore adding more",
       action: expect.objectContaining({
         type: "send-message",
         prompt: "Start a buy order for UniCredit Balanced Income Fund.",
@@ -375,7 +373,7 @@ describe("CZ chat app orchestration", () => {
     }));
   });
 
-  it("collects quantity, cash account, and execution timing before creating the exact BUY review handoff", async () => {
+  it("collects quantity, cash account, and execution timing before the pre-review confirmation", async () => {
     const resolveReply = buildCzChatSmartReplyResolver({
       country: "CZ",
       categories: investmentBuyCategories,
@@ -422,6 +420,56 @@ describe("CZ chat app orchestration", () => {
     expect(execution.followUps).toContainEqual(expect.objectContaining({
       label: "Today",
       action: expect.objectContaining({
+        type: "send-message",
+        prompt: expect.stringContaining("Set timing to Today"),
+      }),
+    }));
+    expect(execution.followUps?.filter((item) => item.action?.type === "navigate")).toHaveLength(0);
+  });
+
+  it("adds a pre-review confirmation for each execution timing", async () => {
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: investmentBuyCategories,
+      selectedAccountProduct: null,
+      selectedCardProduct: null,
+      creditCardForOpportunity: null,
+      selectedInvestmentSecurity,
+    });
+    const execution = await resolveReply(
+      "Use Primary Account ending 3456 for 1 PCS of UniCredit Balanced Income Fund.",
+      [],
+    );
+    if (typeof execution === "string") throw new Error("Expected a structured execution reply");
+
+    const expectedTimingByLabel = new Map([
+      ["Today", "today"],
+      ["Next business day", "next-business-day"],
+    ] as const);
+
+    for (const timingFollowUp of execution.followUps ?? []) {
+      expect(timingFollowUp.action).toEqual(expect.objectContaining({
+        type: "send-message",
+        prompt: expect.any(String),
+      }));
+      const confirmation = await resolveReply(timingFollowUp.action?.prompt ?? "", []);
+      if (typeof confirmation === "string") throw new Error("Expected a structured pre-review reply");
+
+      expect(confirmation.text).toContain("### Ready to review");
+      expect(confirmation.text).toContain("UniCredit Balanced Income Fund");
+      expect(confirmation.text).toContain("1 PCS");
+      expect(confirmation.text).toContain("Primary Account");
+      expect(confirmation.text).toContain(timingFollowUp.label);
+      expect(confirmation.text).toContain("Estimated debit");
+      expect(confirmation.followUps?.map((item) => item.label)).toEqual([
+        "Review order",
+        "Change timing",
+        "Change account",
+        "Change quantity",
+      ]);
+
+      const reviewOrder = confirmation.followUps?.find((item) => item.label === "Review order");
+      expect(reviewOrder?.action).toEqual(expect.objectContaining({
         type: "navigate",
         target: "investment-buy",
         securityId: "balanced-income",
@@ -429,10 +477,11 @@ describe("CZ chat app orchestration", () => {
           quantity: 1,
           accountId: "acc-1",
           frequency: "one-off",
-          executionTiming: "today",
+          executionTiming: expectedTimingByLabel.get(timingFollowUp.label as "Today" | "Next business day"),
         },
-      }),
-    }));
+      }));
+      expect(confirmation.followUps?.filter((item) => item.action?.type === "navigate")).toHaveLength(1);
+    }
   });
 
   it("keeps invalid quantity and insufficient balance inside the BUY conversation", async () => {
@@ -497,9 +546,9 @@ describe("CZ chat app orchestration", () => {
     );
     if (typeof risk === "string") throw new Error("Expected a structured investment-product reply");
 
-    expect(risk.text).toContain("### UniCredit Balanced Income Fund risk context");
+    expect(risk.text).toContain("### What can move your return");
     expect(risk.richBlocks).toBeUndefined();
-    expect(risk.followUps).toHaveLength(3);
+    expect(risk.followUps).toHaveLength(4);
   });
 
   it("resolves every primary product follow-up to its own product-specific answer", async () => {
@@ -516,9 +565,9 @@ describe("CZ chat app orchestration", () => {
     if (typeof explanation === "string") throw new Error("Expected a structured investment-product reply");
 
     const expectedHeadingByLabel = new Map([
-      ["Review performance", "### UniCredit Balanced Income Fund performance"],
-      ["Review risk", "### UniCredit Balanced Income Fund risk context"],
-      ["What documents matter?", "### Documents for UniCredit Balanced Income Fund"],
+      ["How is it doing for me?", "### Your position at a glance"],
+      ["What could affect my return?", "### What can move your return"],
+      ["Show me the essentials", "### Check these 3 things"],
     ]);
 
     expect(explanation.followUps?.map((followUp) => followUp.label)).toEqual([...expectedHeadingByLabel.keys()]);
@@ -544,10 +593,10 @@ describe("CZ chat app orchestration", () => {
     if (typeof performance === "string") throw new Error("Expected a structured investment-product reply");
 
     const expectedHeadingByLabel = new Map([
-      ["Buy more", "### Choose quantity"],
-      ["Review risk", "### UniCredit Balanced Income Fund risk context"],
-      ["What should I consider?", "### UniCredit Balanced Income Fund review checklist"],
-      ["Review portfolio", "### UniCredit Balanced Income Fund in your portfolio"],
+      ["Explore adding more", "### Choose quantity"],
+      ["See portfolio fit", "### How it fits your portfolio"],
+      ["What could affect my return?", "### What can move your return"],
+      ["I'm done", "### All set"],
     ]);
 
     const conversationalFollowUps = performance.followUps?.filter((followUp) => followUp.action?.type === "send-message") ?? [];
@@ -576,10 +625,132 @@ describe("CZ chat app orchestration", () => {
     const result = await resolveReply("What documents should I review for UniCredit Balanced Income Fund?", []);
     if (typeof result === "string") throw new Error("Expected a structured investment-product reply");
 
-    expect(result.text).toContain("### Documents for UniCredit Balanced Income Fund");
-    expect(result.text).toContain("Key Information Document");
-    expect(result.text).toContain("prospectus");
-    expect(result.text).toContain("fee");
+    expect(result.text).toContain("### Check these 3 things");
+    expect(result.text).toContain("Potential gain or loss");
+    expect(result.text).toContain("Total cost");
+    expect(result.text).toContain("Access to money");
+    expect(result.richBlocks?.[0]).toEqual(expect.objectContaining({
+      title: "Key information at a glance",
+      interactive: false,
+    }));
+  });
+
+  it("returns to the product overview and closes the guided story without another loop", async () => {
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: [],
+      selectedAccountProduct: null,
+      selectedCardProduct: null,
+      creditCardForOpportunity: null,
+      selectedInvestmentSecurity,
+    });
+
+    const overview = await resolveReply("Give me the product overview for UniCredit Balanced Income Fund.", []);
+    if (typeof overview === "string") throw new Error("Expected a structured investment-product reply");
+    expect(overview.text).toContain("### A quick look at UniCredit Balanced Income Fund");
+
+    const closeout = await resolveReply("I have what I need for UniCredit Balanced Income Fund.", []);
+    if (typeof closeout === "string") throw new Error("Expected a structured investment-product reply");
+    expect(closeout.text).toContain("### All set");
+    expect(closeout.text).toContain("Nothing was ordered or changed");
+    expect(closeout.followUps).toBeUndefined();
+  });
+
+  it("consumes guided-story branches after selection and resets them for a new conversation", async () => {
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: [],
+      selectedAccountProduct: null,
+      selectedCardProduct: null,
+      creditCardForOpportunity: null,
+      selectedInvestmentSecurity,
+    });
+
+    const explanation = await resolveReply(
+      "Explain UniCredit Balanced Income Fund and the position shown in my portfolio.",
+      [{ id: "user-explain", role: "user", text: "Explain this product", time: "15:30" }],
+    );
+    if (typeof explanation === "string") throw new Error("Expected a structured investment-product reply");
+
+    const essentialsPrompt = "Show me the essential information I should check for UniCredit Balanced Income Fund.";
+    const essentialsMessages = [
+      { id: "user-explain", role: "user" as const, text: "Explain this product", time: "15:30" },
+      { id: "agent-explain", role: "agent" as const, text: explanation.text, time: "15:30" },
+      { id: "user-essentials", role: "user" as const, text: essentialsPrompt, time: "15:31" },
+    ];
+    const essentials = await resolveReply(essentialsPrompt, essentialsMessages);
+    if (typeof essentials === "string") throw new Error("Expected a structured essentials reply");
+
+    const overviewPrompt = "Give me the product overview for UniCredit Balanced Income Fund.";
+    const consumedMessages = [
+      ...essentialsMessages,
+      { id: "agent-essentials", role: "agent" as const, text: essentials.text, time: "15:31" },
+      { id: "user-overview", role: "user" as const, text: overviewPrompt, time: "15:32" },
+    ];
+    const returnedOverview = await resolveReply(overviewPrompt, consumedMessages);
+    if (typeof returnedOverview === "string") throw new Error("Expected a structured overview reply");
+
+    expect(returnedOverview.followUps?.map((followUp) => followUp.label)).toEqual([
+      "How is it doing for me?",
+      "What could affect my return?",
+    ]);
+
+    const riskPrompt = "What could affect my return from UniCredit Balanced Income Fund?";
+    const risk = await resolveReply(riskPrompt, [
+      ...consumedMessages,
+      { id: "agent-overview", role: "agent", text: returnedOverview.text, time: "15:32" },
+      { id: "user-risk", role: "user", text: riskPrompt, time: "15:33" },
+    ]);
+    if (typeof risk === "string") throw new Error("Expected a structured risk reply");
+    expect(risk.followUps?.map((followUp) => followUp.label)).not.toContain("Summarize the key document");
+
+    const freshConversation = await resolveReply(
+      "Explain UniCredit Balanced Income Fund and the position shown in my portfolio.",
+      [{ id: "fresh-user-explain", role: "user", text: "Explain this product", time: "16:00" }],
+    );
+    if (typeof freshConversation === "string") throw new Error("Expected a structured fresh-conversation reply");
+    expect(freshConversation.followUps?.map((followUp) => followUp.label)).toEqual([
+      "How is it doing for me?",
+      "What could affect my return?",
+      "Show me the essentials",
+    ]);
+  });
+
+  it("keeps the guided investment story concise and client-oriented", async () => {
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: [],
+      selectedAccountProduct: null,
+      selectedCardProduct: null,
+      creditCardForOpportunity: null,
+      selectedInvestmentSecurity,
+    });
+    const prompts = [
+      "Explain UniCredit Balanced Income Fund and the position shown in my portfolio.",
+      "How is UniCredit Balanced Income Fund doing for me?",
+      "What could affect my return from UniCredit Balanced Income Fund?",
+      "Show me the essential information I should check for UniCredit Balanced Income Fund.",
+    ];
+    const replies = await Promise.all(prompts.map((prompt) => resolveReply(prompt, [])));
+    if (replies.some((reply) => typeof reply === "string")) {
+      throw new Error("Expected structured guided-story replies");
+    }
+    const [explanation, performance, risk, essentials] = replies as [
+      Exclude<(typeof replies)[number], string>,
+      Exclude<(typeof replies)[number], string>,
+      Exclude<(typeof replies)[number], string>,
+      Exclude<(typeof replies)[number], string>,
+    ];
+
+    expect(explanation.text).toContain("### A quick look at UniCredit Balanced Income Fund");
+    expect(explanation.text).toContain("Why it may fit");
+    expect(explanation.text.length).toBeLessThanOrEqual(650);
+    expect(performance.text).toContain("### Your position at a glance");
+    expect(performance.text.length).toBeLessThanOrEqual(550);
+    expect(risk.text).toContain("### What can move your return");
+    expect(risk.text.length).toBeLessThanOrEqual(550);
+    expect(essentials.text).toContain("### Check these 3 things");
+    expect(essentials.text.length).toBeLessThanOrEqual(700);
   });
 
   it("recovers a named investment follow-up from the canonical portfolio when the screen snapshot is gone", async () => {
@@ -606,7 +777,7 @@ describe("CZ chat app orchestration", () => {
     const result = await resolveReply("Review UniCredit Balanced Income Fund in my portfolio context.", []);
     if (typeof result === "string") throw new Error("Expected a structured investment-product reply");
 
-    expect(result.text).toContain("### UniCredit Balanced Income Fund in your portfolio");
+    expect(result.text).toContain("### How it fits your portfolio");
     expect(result.text).not.toContain("### Account help");
     expect(result.richBlocks?.[0]).not.toHaveProperty("action");
   });
@@ -623,11 +794,11 @@ describe("CZ chat app orchestration", () => {
 
     const result = await resolveReply("Explain this product.", []);
     if (typeof result === "string") throw new Error("Expected a structured investment-product reply");
-    expect(result.text).toContain("not currently shown as one of your holdings");
+    expect(result.text).toContain("do not hold it yet");
     expect(result.text).not.toContain("Your position is");
   });
 
-  it("offers Buy instead of Buy more for a catalogue-only security", async () => {
+  it("offers Explore investing instead of Explore adding more for a catalogue-only security", async () => {
     const catalogueSecurity = { ...selectedInvestmentSecurity, owned: false, quantity: 0, localValue: 0 };
     const resolveReply = buildCzChatSmartReplyResolver({
       country: "CZ",
@@ -642,13 +813,13 @@ describe("CZ chat app orchestration", () => {
     if (typeof result === "string") throw new Error("Expected a structured investment-product reply");
 
     expect(result.followUps).toContainEqual(expect.objectContaining({
-      label: "Buy",
+      label: "Explore investing",
       action: expect.objectContaining({
         type: "send-message",
         prompt: "Start a buy order for UniCredit Balanced Income Fund.",
       }),
     }));
-    expect(result.followUps).not.toContainEqual(expect.objectContaining({ label: "Buy more" }));
+    expect(result.followUps).not.toContainEqual(expect.objectContaining({ label: "Explore adding more" }));
   });
 
   it("makes App a thin consumer and adds no package-to-app reverse dependency", () => {

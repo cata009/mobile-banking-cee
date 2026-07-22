@@ -9,6 +9,10 @@ import InvestmentProductCard, { type InvestmentAmountParts } from "@/app/compone
 import InvestmentProductsAccordion from "@/app/components/investments/InvestmentProductsAccordion";
 import InvestmentsFundBanner from "@/app/components/investments/InvestmentsFundBanner";
 import InvestmentBuyOrderFlow from "@/app/screens/investments/InvestmentBuyOrderFlow";
+import {
+  InvestmentFundCollectionScreen,
+  InvestmentFundsSelectionScreen,
+} from "@/app/screens/investments/InvestmentFundsWindowScreens";
 import { InvestmentSecurityDetailScreen, InvestmentSecurityListScreen } from "@/app/screens/investments/InvestmentSecurityScreens";
 import { AppIcon } from "@/app/components/icons";
 import PageHeader from "@/app/components/PageHeader";
@@ -32,6 +36,7 @@ import {
   type InvestmentCatalogSecurity,
   type InvestmentSortId,
 } from "@/app/config/investmentsPortfolioConfig";
+import type { InvestmentFundCollectionId } from "@/app/config/investmentFundCollections";
 import { getCountryConfig } from "@/app/registry/countryConfig";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import type { CountryId } from "@/app/state/demoTypes";
@@ -282,6 +287,8 @@ export default function InvestmentsPortfolioScreen({
   const [selectedSortId, setSelectedSortId] = useState<InvestmentSortId>("max-value");
   const [selectedDistributionItem, setSelectedDistributionItem] = useState<InvestmentDistributionItem | null>(null);
   const [securityListOpen, setSecurityListOpen] = useState(false);
+  const [fundsWindowOpen, setFundsWindowOpen] = useState(false);
+  const [selectedFundCollectionId, setSelectedFundCollectionId] = useState<InvestmentFundCollectionId | null>(null);
   const [selectedSecurity, setSelectedSecurity] = useState<InvestmentCatalogSecurity | null>(null);
   const [buyOrderOpen, setBuyOrderOpen] = useState(false);
   const [buyOrderDraft, setBuyOrderDraft] = useState<CoAppingInvestmentBuyDraft | null>(null);
@@ -291,7 +298,12 @@ export default function InvestmentsPortfolioScreen({
   // Returning to portfolio home (all sub-screens closed) should always show
   // the page scrolled to top with the large header title visible, regardless
   // of where the user had scrolled before opening a sub-screen.
-  const isOnPortfolioHome = !selectedDistributionItem && !securityListOpen && !selectedSecurity && !buyOrderOpen;
+  const isOnPortfolioHome = !selectedDistributionItem
+    && !securityListOpen
+    && !fundsWindowOpen
+    && !selectedFundCollectionId
+    && !selectedSecurity
+    && !buyOrderOpen;
   useEffect(() => {
     if (!isOnPortfolioHome) return;
     if (scrollContainerRef.current) {
@@ -427,6 +439,29 @@ export default function InvestmentsPortfolioScreen({
     );
   }
 
+  if (selectedFundCollectionId) {
+    return (
+      <InvestmentFundCollectionScreen
+        collectionId={selectedFundCollectionId}
+        securities={securityCatalog}
+        country={country}
+        amountsHidden={amountsHidden}
+        onBack={() => setSelectedFundCollectionId(null)}
+        onSelectSecurity={selectSecurity}
+      />
+    );
+  }
+
+  if (fundsWindowOpen) {
+    return (
+      <InvestmentFundsSelectionScreen
+        onBack={() => setFundsWindowOpen(false)}
+        onSearch={() => setSecurityListOpen(true)}
+        onSelectCollection={setSelectedFundCollectionId}
+      />
+    );
+  }
+
   if (selectedDistributionItem && selectedTabId !== "performance") {
     return (
       <DistributionCategoryDetailScreen
@@ -457,7 +492,7 @@ export default function InvestmentsPortfolioScreen({
         {
           id: "download-report",
           iconName: "investment-download-report",
-          label: t("runtime.investments.actions.downloadReport", "Download\nReport"),
+          label: t("runtime.investments.actions.downloadReport", "Consolidated\nreport"),
         },
       ]}
       investLabel={t("runtime.investments.actions.invest", "Invest")}
@@ -558,6 +593,7 @@ export default function InvestmentsPortfolioScreen({
                 title={t("runtime.investments.fundBanner.title", "Find out the best fund for you")}
                 description={t("runtime.investments.fundBanner.description", "Discover our suggestions")}
                 actionLabel={t("runtime.investments.fundBanner.action", "GO TO FUNDS WINDOW")}
+                onClick={() => setFundsWindowOpen(true)}
               />
             </>
           ) : null}

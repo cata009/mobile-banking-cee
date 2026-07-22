@@ -135,6 +135,23 @@ describe("investment product chat context handoff", () => {
     expect(screen.getByText("Amundi Climate Focus Fund")).toBeInTheDocument();
   });
 
+  it("navigates from the portfolio banner through a fund collection to the existing fund detail", () => {
+    render(<InvestmentsPortfolioScreen onBack={() => undefined} />, { wrapper: AppProviders });
+
+    fireEvent.click(screen.getByRole("button", { name: /Find out the best fund for you/i }));
+    expect(screen.getByTestId("investment-funds-selection")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Our Onemarket funds/i }));
+    expect(screen.getByTestId("investment-fund-collection-onemarket")).toBeInTheDocument();
+
+    const firstFund = screen.getByRole("button", { name: /Amundi Climate Focus Fund/i });
+    fireEvent.click(firstFund);
+    expect(screen.getAllByRole("heading", { name: "Amundi Climate Focus Fund" })).not.toHaveLength(0);
+
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByTestId("investment-fund-collection-onemarket")).toBeInTheDocument();
+  });
+
   it("consumes an unknown or repeated buy request without opening the wrong product", async () => {
     const onBuyRequestConsumed = vi.fn();
     const { rerender } = render(

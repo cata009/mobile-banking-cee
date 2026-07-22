@@ -2,6 +2,13 @@
 
 This log records bananas found and how they were triaged.
 
+## 2026-07-22
+
+| Banana | Triage | Evidence |
+| --- | --- | --- |
+| Collection-detail headers retained the correct fixed behavior but a 188px minimum hero consumed almost half the phone viewport | Replaced the content-driven minimum with a fixed 132px hero, clamped title/subtitle to a one-plus-three-line budget, and retained `object-cover` cropping plus the existing independent fund-content scroll | focused RED/GREEN 5/5; live Balanced-detail class, geometry, background-color, and screenshot evidence |
+| Brainstorm preview runtime state under `.superpowers/` appeared as untracked publish scope | Added the generated runtime directory to `.gitignore`; retained the authored design specs/plans under `docs/superpowers/` as intentional source documentation | pre-stage `git status --short` and `.gitignore` |
+
 ## 2026-07-21
 
 | Banana | Triage | Evidence |
