@@ -3,11 +3,15 @@ import AccountActionBar from "@/app/components/accounts/AccountActionBar";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import BrandLogo from "@/app/components/brand-logo/BrandLogo";
 import { BottomSheet } from "@/app/components/BottomSheet";
+import InvestmentBasketFundCard from "@/app/components/investments/InvestmentBasketFundCard";
 import InvestmentPeriodChips from "@/app/components/investments/InvestmentPeriodChips";
 import InvestmentPortfolioChart from "@/app/components/investments/InvestmentPortfolioChart";
 import InvestmentDetailField from "@/app/components/investments/InvestmentDetailField";
+import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
 import PageHeader from "@/app/components/PageHeader";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
+import LinkButton from "@/app/components/ui/LinkButton";
+import { CZ_INVESTMENT_BASKETS } from "@/app/config/investmentBasketFundsConfig";
 import {
   INVESTMENT_PERIODS,
   buildInvestmentChartPoints,
@@ -17,6 +21,7 @@ import {
 import { getCountryConfig } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import { maskFormattedAmount } from "@/app/utils/amountPrivacy";
+import InvestmentBasketFundsScreen from "@/app/screens/investments/InvestmentBasketFundsScreen";
 
 interface SharedProps {
   country: CountryId;
@@ -33,6 +38,7 @@ interface InvestmentSecurityDetailScreenProps extends SharedProps {
   security: InvestmentCatalogSecurity;
   onBack: () => void;
   onHistoryClick?: (filterByTitle?: string) => void;
+  onSellClick?: () => void;
   onBuyClick?: () => void;
 }
 
@@ -57,21 +63,33 @@ export function InvestmentSecurityListScreen({
   onBack,
   onSelect,
 }: InvestmentSecurityListScreenProps) {
+  const basketFundsAvailable = country === "CZ";
   const [query, setQuery] = useState("");
   const [headerProgress, setHeaderProgress] = useState(0);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [ownedOnly, setOwnedOnly] = useState(false);
   const [currency, setCurrency] = useState<string | null>(null);
+  const [catalogueTab, setCatalogueTab] = useState<"all" | "regular">("all");
+  const [basketFundsOpen, setBasketFundsOpen] = useState(false);
   const currencies = useMemo(() => [...new Set(securities.map((item) => item.instrumentCurrency))], [securities]);
   const filtersActive = ownedOnly || currency !== null;
   const visibleSecurities = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return securities.filter((security) => {
+      if (basketFundsAvailable && catalogueTab === "regular" && security.contributionType !== "RECURRENT") return false;
       if (ownedOnly && !security.owned) return false;
       if (currency && security.instrumentCurrency !== currency) return false;
       return !normalizedQuery || `${security.title} ${security.productId}`.toLowerCase().includes(normalizedQuery);
     });
-  }, [currency, ownedOnly, query, securities]);
+  }, [basketFundsAvailable, catalogueTab, currency, ownedOnly, query, securities]);
+  const visibleBaskets = useMemo(() => {
+    if (!basketFundsAvailable) return [];
+    const normalizedQuery = query.trim().toLowerCase();
+    return CZ_INVESTMENT_BASKETS.filter((basket) => {
+      if (catalogueTab === "regular" && basket.contributionType !== "RECURRENT") return false;
+      return !normalizedQuery || `${basket.title} ${basket.description}`.toLowerCase().includes(normalizedQuery);
+    });
+  }, [basketFundsAvailable, catalogueTab, query]);
 
   const clearFilters = () => {
     setOwnedOnly(false);
@@ -82,9 +100,30 @@ export function InvestmentSecurityListScreen({
     setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64)));
   };
 
+  if (basketFundsAvailable && basketFundsOpen) {
+    return (
+      <InvestmentBasketFundsScreen
+        baskets={CZ_INVESTMENT_BASKETS}
+        onBack={() => setBasketFundsOpen(false)}
+      />
+    );
+  }
+
   return (
     <div className="relative h-full w-full overflow-y-auto bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide" onScroll={handleScroll} data-investment-security-list="true">
-      <PageHeader title="List of securities" onBack={onBack} includeSafeArea compact collapsedTitleProgress={headerProgress} />
+      <PageHeader title={basketFundsAvailable ? "Buy securities" : "List of securities"} onBack={onBack} includeSafeArea compact collapsedTitleProgress={headerProgress} />
+      {basketFundsAvailable ? (
+        <MessagesMailboxTabs
+          tabs={[
+            { id: "all", label: "All products" },
+            { id: "regular", label: "Regular Plan" },
+          ]}
+          activeTabId={catalogueTab}
+          onChange={(tabId) => setCatalogueTab(tabId === "regular" ? "regular" : "all")}
+          ariaLabel="Investment catalogue type"
+          withTopMargin={false}
+        />
+      ) : null}
       <div className="px-[16px] py-[8px]">
         <AccountSearchBar
           value={query}
@@ -95,6 +134,46 @@ export function InvestmentSecurityListScreen({
           placeholder="Search"
         />
       </div>
+
+      {basketFundsAvailable ? (
+        <section className="pt-[16px]" aria-label="Basket funds">
+          <SectionHeadingDivider
+            title="BASKET FUNDS"
+            count={CZ_INVESTMENT_BASKETS.length}
+            variant="with-counter"
+            className="[&_h2]:text-[18px] [&_span]:text-[18px]"
+          />
+          {visibleBaskets.length > 0 ? (
+            <div
+              className="flex snap-x snap-mandatory gap-[12px] overflow-x-auto px-[16px] py-[24px] scrollbar-hide"
+              role="region"
+              aria-label="Basket funds carousel"
+              data-investment-basket-carousel="true"
+            >
+              {visibleBaskets.map((basket) => (
+                <InvestmentBasketFundCard
+                  key={basket.id}
+                  basket={basket}
+                  onSelect={() => setBasketFundsOpen(true)}
+                />
+              ))}
+              <div className="w-[4px] shrink-0" aria-hidden="true" />
+            </div>
+          ) : (
+            <p className="px-[24px] py-[24px] text-[14px] text-[var(--uc-text-muted)]">No basket funds found.</p>
+          )}
+          <div className="flex justify-center pb-[24px]">
+            <LinkButton aria-label="See all basket funds" onClick={() => setBasketFundsOpen(true)}>
+              See all basket funds
+            </LinkButton>
+          </div>
+          <SectionHeadingDivider
+            title="ALL SECURITIES"
+            variant="with-counter"
+            className="[&_h2]:text-[18px] [&_span]:text-[18px]"
+          />
+        </section>
+      ) : null}
       <div>
         {visibleSecurities.map((security) => (
           <button
@@ -151,6 +230,7 @@ export function InvestmentSecurityDetailScreen({
   amountsHidden,
   onBack,
   onHistoryClick,
+  onSellClick,
   onBuyClick,
 }: InvestmentSecurityDetailScreenProps) {
   const [period, setPeriod] = useState<InvestmentPeriodId>("3y");
@@ -200,7 +280,7 @@ export function InvestmentSecurityDetailScreen({
         items={[
           { id: "history", iconName: "investment-history", label: "History", onClick: () => onHistoryClick?.(security.title) },
           { id: "documents", iconName: "account-option-statement", label: "Documents" },
-          { id: "sell", iconName: "trade-sell", label: "Sell", hidden: !canSell, iconColor: "var(--uc-text)" },
+          { id: "sell", iconName: "trade-sell", label: "Sell", hidden: !canSell, iconColor: "var(--uc-text)", onClick: onSellClick },
           { id: "buy", iconName: "trade-buy", label: "Buy", hidden: security.status !== "active", iconColor: "var(--uc-action)", onClick: onBuyClick },
         ]}
       />

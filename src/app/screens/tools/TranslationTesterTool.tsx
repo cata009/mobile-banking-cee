@@ -113,13 +113,18 @@ export function TranslationTesterTool() {
 
   const [activeSlotId, setActiveSlotId] = useState<string>(component?.slots[0]?.id ?? "");
   const [mode, setMode] = useState<"custom" | "key">("custom");
-  const [customText, setCustomText] = useState<string>(component?.slots[0]?.defaultText ?? "");
+  const [customTexts, setCustomTexts] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    for (const slot of component?.slots ?? []) initial[slot.id] = slot.defaultText;
+    return initial;
+  });
   const [keyQuery, setKeyQuery] = useState("");
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [worstColumnId, setWorstColumnId] = useState<string | null>(null);
   const [metricsByKey, setMetricsByKey] = useState<Record<string, SpecimenMetrics>>({});
 
   const activeSlot = component?.slots.find((slot) => slot.id === activeSlotId) ?? component?.slots[0];
+  const activeCustomText = activeSlot ? customTexts[activeSlot.id] ?? "" : "";
 
   // Realistic per-component character caps. Only applied to single-line button
   // labels (PrimaryButton) where long copy fundamentally breaks the layout;
@@ -135,20 +140,27 @@ export function TranslationTesterTool() {
     setComponentId(id);
     const nextSlot = nextComponent?.slots[0];
     setActiveSlotId(nextSlot?.id ?? "");
-    setCustomText(nextSlot?.defaultText ?? "");
+    setCustomTexts(() => {
+      const next: Record<string, string> = {};
+      for (const slot of nextComponent?.slots ?? []) next[slot.id] = slot.defaultText;
+      return next;
+    });
     setWorstColumnId(null);
   };
 
   const selectSlot = (slotId: string) => {
     setActiveSlotId(slotId);
-    const slot = component?.slots.find((entry) => entry.id === slotId);
-    if (mode === "custom") setCustomText(slot?.defaultText ?? "");
     setWorstColumnId(null);
+  };
+
+  const setSlotCustomText = (value: string) => {
+    if (!activeSlot) return;
+    setCustomTexts((current) => ({ ...current, [activeSlot.id]: value }));
   };
 
   useEffect(() => {
     setMetricsByKey({});
-  }, [componentId, activeSlotId, mode, customText, selectedKey]);
+  }, [componentId, activeSlotId, mode, customTexts, selectedKey]);
 
   const handleMetrics = useCallback((key: string, metrics: SpecimenMetrics) => {
     setMetricsByKey((current) => {
@@ -171,7 +183,13 @@ export function TranslationTesterTool() {
   const renderTexts = (slotValue: string): Record<string, string> => {
     const texts: Record<string, string> = {};
     for (const slot of component?.slots ?? []) {
-      texts[slot.id] = slot.id === activeSlot?.id ? slotValue : slot.defaultText;
+      if (slot.id === activeSlot?.id) {
+        texts[slot.id] = slotValue;
+      } else {
+        // Preserve each slot's own edited text in custom mode; fall back to the
+        // slot default in key mode (only the active slot carries the live value).
+        texts[slot.id] = mode === "custom" ? customTexts[slot.id] ?? slot.defaultText : slot.defaultText;
+      }
     }
     return texts;
   };
@@ -242,8 +260,8 @@ export function TranslationTesterTool() {
           {mode === "custom" ? (
             <div className="mt-[16px] grid gap-[10px]">
               <textarea
-                value={customText}
-                onChange={(event) => setCustomText(event.target.value)}
+                value={activeCustomText}
+                onChange={(event) => setSlotCustomText(event.target.value)}
                 rows={3}
                 maxLength={slotMaxLength ?? undefined}
                 data-tester-custom-text="true"
@@ -252,13 +270,13 @@ export function TranslationTesterTool() {
               />
               <div className="flex flex-wrap gap-[8px]">
                 {TEXT_PRESETS.map((preset) => (
-                  <SelectionChip key={preset.label} onClick={() => setCustomText(preset.value)}>
+                  <SelectionChip key={preset.label} onClick={() => setSlotCustomText(preset.value)}>
                     {preset.label}
                   </SelectionChip>
                 ))}
               </div>
               <p className="text-[12px] leading-[17px] text-[var(--uc-text-muted)]">
-                {customText.length} characters{slotMaxLength ? ` · max ${slotMaxLength}` : ""}
+                {activeCustomText.length} characters{slotMaxLength ? ` · max ${slotMaxLength}` : ""}
               </p>
             </div>
           ) : (
@@ -320,17 +338,17 @@ export function TranslationTesterTool() {
           <div className="inline-block overflow-hidden rounded-[8px] border border-[var(--uc-border)]">
             <div className="flex items-center justify-between gap-[12px] border-b border-[var(--uc-border-muted)] bg-[var(--uc-surface-muted)] px-[12px] py-[8px]">
               <span className="text-[12px] font-bold leading-[16px] text-[var(--uc-text)]">
-                Custom · {customText.length} chars
+                Custom · {activeCustomText.length} chars
               </span>
               {specimenBadge(metricsByKey.custom, null)}
             </div>
             <MeasuredSpecimen
               measureKey="custom"
-              signature={`${componentId}:${activeSlot.id}:${customText}`}
+              signature={`${componentId}:${activeSlot.id}:${activeCustomText}`}
               onMetrics={handleMetrics}
             >
               <SpecimenSurface container={component.container}>
-                {component.render(renderTexts(customText))}
+                {component.render(renderTexts(activeCustomText))}
               </SpecimenSurface>
             </MeasuredSpecimen>
           </div>

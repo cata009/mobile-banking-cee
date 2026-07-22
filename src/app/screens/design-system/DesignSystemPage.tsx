@@ -210,6 +210,7 @@ export default function DesignSystemPage() {
                 source="components/SectionHeadingDivider.tsx"
                 note={`${SECTION_HEADING_DIVIDER_SOURCE.schema} / ${SECTION_HEADING_DIVIDER_SOURCE.sourceNodeIds.menigaDivider}`}
                 specs={["13 mapped Meniga states", "375px standard width", "343px Light Restyle width", "14px N5 strong labels", "20px N2 large titles", "1px divider line", "action/counter/data variants"]}
+                detailsHref="#component/ui.section-heading-divider"
               >
                 <SectionHeadingDividerVariantSpecimen />
               </Specimen>
@@ -218,6 +219,7 @@ export default function DesignSystemPage() {
                 source="components/ui/Bar.tsx"
                 note={`${BAR_SOURCE.schema} / ${BAR_SOURCE.sourceNodeId}`}
                 specs={["6 mapped statuses", "375x8 standard states", "24px left inset", "teal active fill", "279x1 thin state"]}
+                detailsHref="#component/ui.bar"
               >
                 <BarVariantSpecimen />
               </Specimen>
@@ -253,13 +255,14 @@ export default function DesignSystemPage() {
                 source="components/ui/WalletButton.tsx"
                 note={`${WALLET_BUTTON_SOURCE.schema} / ${WALLET_BUTTON_SOURCE.sourceNodeIds.googleWallet} · ${WALLET_BUTTON_SOURCE.sourceNodeIds.appleWallet} · ${WALLET_BUTTON_SOURCE.sourceNodeIds.clickToPay}`}
                 specs={["Google wallet", "Apple wallet", "Click to Pay", "48px height", "condensed and 327px long states", "Google EN/HU/SK/CZ labels"]}
+                detailsHref="#component/ui.wallet-button"
               >
                 <WalletButtonVariantSpecimen />
               </Specimen>
               <Specimen name="Pill" source="components/ui/Pill.tsx" specs={["120x36", "18px radius", "8px horizontal padding", "N5 bold 14px label", "0 2 2 shadow", "16px success/loading icons", "8px icon-label gap"]} detailsHref="#component/ui.pill">
                 <PillVariantSpecimen />
               </Specimen>
-              <Specimen name="Button registry variants" source="components/ui/button.tsx">
+              <Specimen name="Button registry variants" source="components/ui/button.tsx" detailsHref="#component/ui.button-registry">
                 <ButtonRegistryVariantSpecimen />
               </Specimen>
               <Specimen name="Floating Co-Apping Button" source="components/FloatingCoAppingButton.tsx" detailsHref="#component/co-apping.floating-button">
@@ -273,7 +276,7 @@ export default function DesignSystemPage() {
           <Section id="forms" title="Forms and controls" description="Custom inputs and reusable control primitives that can be consolidated.">
             <div className="grid gap-5">
               <div className="grid gap-5 lg:grid-cols-2">
-                <Specimen name="Dropdown" source="components/TextField.tsx">
+                <Specimen name="Dropdown" source="components/TextField.tsx" detailsHref="#component/ui.text-field">
                   <TextFieldSpecimens withChevron />
                 </Specimen>
                 <Specimen name="Text field" source="components/TextField.tsx" detailsHref="#component/ui.text-field">
@@ -283,6 +286,7 @@ export default function DesignSystemPage() {
                   name="Amount field"
                   source="components/AmountField.tsx"
                   specs={["same states as Text field", "24px text-to-currency gap", "currency title 14px", "currency value 18px", "chevron 32x32 / 0 gap"]}
+                  detailsHref="#component/ui.amount-field"
                 >
                   <AmountFieldSpecimens />
                 </Specimen>
@@ -290,6 +294,7 @@ export default function DesignSystemPage() {
                   name="Code field"
                   source="components/CodeField.tsx"
                   specs={["327px wrapper", "224px centered slot row", "4 slots 44x64", "16px slot gap", "8px radius / 1px border", "N1 30px bold digit", "error message 224px / gap 3px"]}
+                  detailsHref="#component/ui.code-field"
                 >
                   <CodeFieldSpecimens />
                 </Specimen>
@@ -298,6 +303,7 @@ export default function DesignSystemPage() {
                   source="components/ui/DateFilter.tsx"
                   note={`${DATE_FILTER_SOURCE.schema} / ${DATE_FILTER_SOURCE.sourceNodeId}`}
                   specs={["238x24 wrapper", "4-item and 5-item states", "15px chip gap", "35x22 chips", "3.5px radius", "14px bold label", "teal selected chip"]}
+                  detailsHref="#component/ui.date-filter"
                 >
                   <DateFilterVariantSpecimen />
                 </Specimen>
@@ -306,6 +312,7 @@ export default function DesignSystemPage() {
                   source="components/ui/PillSorting.tsx"
                   note={`${PILL_SORTING_SOURCE.schema} / ${PILL_SORTING_SOURCE.sourceNodeId}`}
                   specs={["375x40 rail", "8px gap", "24px chip height", "14.5px radius", "14px regular idle labels", "black selected chip with bold white label"]}
+                  detailsHref="#component/ui.pill-sorting"
                 >
                   <PillSortingVariantSpecimen />
                 </Specimen>
@@ -314,6 +321,7 @@ export default function DesignSystemPage() {
                   source="components/ToggleButton.tsx"
                   note={`${TOGGLE_BUTTON_SOURCE.schema} / ${TOGGLE_BUTTON_SOURCE.sourceNodeIds.unchecked} · ${TOGGLE_BUTTON_SOURCE.sourceNodeIds.checked}`}
                   specs={["60x30", "off/on variants", "white surface", "2px border", "22x22 knob", "role=switch"]}
+                  detailsHref="#component/ui.toggle-button"
                 >
                   <ToggleButtonVariantSpecimen />
                 </Specimen>
@@ -322,6 +330,7 @@ export default function DesignSystemPage() {
                   source="components/NavigationRow.tsx"
                   note={`${NAVIGATION_ROW_SOURCE.schema} / ${NAVIGATION_ROW_SOURCE.sourceNodeIds.textDescriptionToggle} · ${NAVIGATION_ROW_SOURCE.sourceNodeIds.textLinkToggle} · ${NAVIGATION_ROW_SOURCE.sourceNodeIds.iconDescriptionChevron}`}
                   specs={["18 mapped Meniga cases", "375px wide", "64px or 80px row height", "16px layout gap", "optional 32px leading visual", "optional 64x40 card art", "title 16px bold / description 16px", "CTA 14px teal", "chevron or shared ToggleButton accessory"]}
+                  detailsHref="#component/ui.navigation-row"
                 >
                   <NavigationRowVariantSpecimen />
                 </Specimen>
@@ -330,11 +339,12 @@ export default function DesignSystemPage() {
                   source="components/ProfileAvatar.tsx"
                   note={`${PROFILE_AVATAR_SOURCE.schema} / ${PROFILE_AVATAR_SOURCE.sourceNodeIds.photoFull} · ${PROFILE_AVATAR_SOURCE.sourceNodeIds.photoWithNotification} · ${PROFILE_AVATAR_SOURCE.sourceNodeIds.initials} · ${PROFILE_AVATAR_SOURCE.sourceNodeIds.ai}`}
                   specs={["40x40 base", "full photo or inset profile photo", "optional 8px notification dot", "initials 16px bold on K1", "AI glyph 24px on neutral circle", "supports real imageSrc + controlled size"]}
+                  detailsHref="#component/ui.profile-avatar"
                 >
                   <ProfileAvatarVariantSpecimen />
                 </Specimen>
               </div>
-              <Specimen name="Generic UI controls" source="components/ui/*">
+              <Specimen name="Generic UI controls" source="components/ui/*" detailsHref="#component/ui.generic-controls">
                 <ShadcnSpecimens />
               </Specimen>
             </div>
@@ -347,6 +357,7 @@ export default function DesignSystemPage() {
                 source="components/cards/Card.tsx"
                 note={`${CARD_SOURCE.schema} / ${Object.values(CARD_SOURCE.sourceNodeIds).join(" · ")}`}
                 specs={["64x40 Figma base", "8:5 aspect ratio", "dropdown variant selector", "6 Mastercard debit/credit/virtual variants", "duplicated card structure with Figma-sampled color palettes", "controlled figma / medium / large sizing", "decorative by default / ariaLabel exposes as image"]}
+                detailsHref="#component/cards.card"
               >
                 <CardVariantSpecimen />
               </Specimen>
@@ -358,6 +369,7 @@ export default function DesignSystemPage() {
                 source="components/shopsmart/ShopsmartOfferCard.tsx"
                 note={`${SHOPSMART_OFFER_CARD_SOURCE.schema} / ${SHOPSMART_OFFER_CARD_SOURCE.sourceNodeIds.offers1} + ${SHOPSMART_OFFER_CARD_SOURCE.sourceNodeIds.offers2}`}
                 specs={["327px wide", "8px radius + #666 border", "image top 130/143px", "merchant 15px bold teal", "title 21px bold", "footer 11px metadata", "Offers 1 CTA pill", "Offers 2 orange tag"]}
+                detailsHref="#component/products.shopsmart-offer-card"
               >
                 <ShopsmartOfferCardVariantSpecimen />
               </Specimen>
@@ -408,6 +420,7 @@ export default function DesignSystemPage() {
                 note={`${ACCOUNT_SEARCH_BAR_SOURCE.schema} / ${ACCOUNT_SEARCH_BAR_SOURCE.sourceNodeIds.activeRemoveFilters}`}
                 tone="gray"
                 specs={["32px normal search row", "63px active-remove-filters state", "padding 16px x / 2px y when filters active", "gap 8px", "search/filter icon slots 32px", "input 14px bold", "remove filters 14px bold teal"]}
+                detailsHref="#component/accounts.transaction-search"
               >
                 <AccountSearchBarVariantSpecimen />
               </Specimen>
@@ -434,6 +447,7 @@ export default function DesignSystemPage() {
                 note={`${PRODUCT_CARD_EVOLUTION_SOURCE.schema} / ${PRODUCT_CARD_EVOLUTION_SOURCE.sourceNodeId} (requested ${PRODUCT_CARD_EVOLUTION_SOURCE.originalRequestedNodeId})`}
                 tone="gray"
                 specs={["327px Figma width", "PI + SME styles", "Default / Accordion / Open", "card padding 16px", "icon 32px", "amount 24px + decimals 14px", "total amount 20px + decimals 14px"]}
+                detailsHref="#component/products.product-card-list-total"
               >
                 <ProductCardListTotalRowEvolutionSpecimen />
               </Specimen>
@@ -453,21 +467,22 @@ export default function DesignSystemPage() {
                 source="components/ui/ToastMessage.tsx"
                 note={`${TOAST_MESSAGE_SOURCE.schema} / ${TOAST_MESSAGE_SOURCE.sourceNodeId}`}
                 specs={["3 mapped Meniga states", "327x32 Aware + Action required", "174x35 Google Pay hug variant", "16px radius", "32px icon slot / 8px red dot", "20px icon-to-text gap", "14px bold UniCredit message"]}
+                detailsHref="#component/ui.toast-message"
               >
                 <ToastMessageVariantSpecimen />
               </Specimen>
-              <Specimen name="LogoutConfirmDialog" source="components/LogoutConfirmDialog.tsx" detailsHref="#component/dialogs.logout-confirm">
+              <Specimen name="LogoutConfirmDialog" source="components/LogoutConfirmDialog.tsx" detailsHref="#component/dialogs.logout-confirmation">
                 <div className="relative h-[260px] w-[375px] overflow-hidden rounded border bg-[var(--uc-app-bg)]">
                   <Button onClick={() => setShowLogout(true)} className="m-4">Open logout dialog</Button>
                   <LogoutConfirmDialog isOpen={showLogout} onClose={() => setShowLogout(false)} onConfirm={noop} />
                 </div>
               </Specimen>
-              <Specimen name="PanelWithTranslations" source="components/PanelWithTranslations.tsx">
+              <Specimen name="PanelWithTranslations" source="components/PanelWithTranslations.tsx" detailsHref="#component/prelogin.other-panel">
                 <div className="relative h-[430px] w-[375px] overflow-hidden rounded border">
                   <PanelWithTranslations aboutSmartBanking="ABOUT SMART BANKING" exchangeRates="EXCHANGE RATES" findAtmBranches="FIND ATM & BRANCHES" startCoAppingSession="START CO-APPING SESSION" onClose={noop} onStartCoApping={noop} />
                 </div>
               </Specimen>
-              <Specimen name="PanelWithoutCoAppingTranslations" source="components/PanelWithoutCoAppingTranslations.tsx">
+              <Specimen name="PanelWithoutCoAppingTranslations" source="components/PanelWithoutCoAppingTranslations.tsx" detailsHref="#component/prelogin.other-panel-basic">
                 <div className="relative h-[350px] w-[375px] overflow-hidden rounded border">
                   <PanelWithoutCoAppingTranslations aboutSmartBanking="ABOUT SMART BANKING" exchangeRates="EXCHANGE RATES" findAtmBranches="FIND ATM & BRANCHES" onClose={noop} />
                 </div>

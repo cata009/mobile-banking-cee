@@ -58,6 +58,17 @@ describe("investment product chat context handoff", () => {
     expect(onSelectedSecurityChange).toHaveBeenLastCalledWith(null);
   });
 
+  it("opens the Sell Order flow for an owned security", () => {
+    render(<InvestmentsPortfolioScreen onBack={() => undefined} />, { wrapper: AppProviders });
+
+    const productButton = screen.getByText("UniCredit Balanced Income Fund").closest("button");
+    expect(productButton).not.toBeNull();
+    fireEvent.click(productButton!);
+    fireEvent.click(screen.getByRole("button", { name: "Sell" }));
+
+    expect(screen.getAllByText("Sell Order")).not.toHaveLength(0);
+  });
+
   it("opens the buy order for the exact held security requested by chat", async () => {
     const onBuyRequestConsumed = vi.fn();
 

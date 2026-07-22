@@ -106,6 +106,30 @@ describe("ToolsScreen", () => {
     expect(screen.getByText(/47 characters/)).toBeInTheDocument();
   });
 
+  it("keeps each slot's edited custom text when switching between slots", () => {
+    const { container } = renderTools();
+    fireEvent.click(container.querySelector('[data-tool-card="translation-tester"]') as HTMLElement);
+
+    // Pick a multi-slot component (InfoBanner: Title + Description).
+    fireEvent.change(container.querySelector<HTMLSelectElement>('[data-testable-component-select]') as HTMLSelectElement, {
+      target: { value: "info-banner" },
+    });
+
+    const textArea = () => container.querySelector<HTMLTextAreaElement>("[data-tester-custom-text]")!;
+
+    // Edit the Title slot.
+    fireEvent.change(textArea(), { target: { value: "My custom title text" } });
+
+    // Switch to the Description slot, which must NOT carry the title's text.
+    fireEvent.click(screen.getByRole("button", { name: "Description" }));
+    expect(textArea().value).toBe("Payments will be unavailable on Sunday between 02:00 and 04:00.");
+    fireEvent.change(textArea(), { target: { value: "My custom description text" } });
+
+    // Switch back to Title: the earlier edit must survive the round-trip.
+    fireEvent.click(screen.getByRole("button", { name: "Title" }));
+    expect(textArea().value).toBe("My custom title text");
+  });
+
   it("opens the translation review table with rows and namespace selector", () => {
     const { container } = renderTools();
     fireEvent.click(container.querySelector('[data-tool-card="translation-review"]') as HTMLElement);

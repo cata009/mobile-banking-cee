@@ -5,7 +5,7 @@
  */
 
 import { BOTTOM_NAVIGATION_SELECTOR, SCREEN_WIDTH_FALLBACK } from "./constants";
-import type { ElementPair, PhoneFigmaLayer, PhoneFigmaLayerAsset, PhoneFigmaLayerType, ScrollablePair } from "./figmaTypes";
+import type { ElementPair, HorizontalScrollablePair, PhoneFigmaLayer, PhoneFigmaLayerAsset, PhoneFigmaLayerType, ScrollablePair } from "./figmaTypes";
 export function waitForLayoutFrame() {
   return new Promise<void>((resolve) => {
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve()));
@@ -144,6 +144,24 @@ export function toScrollablePair(pair: ElementPair): ScrollablePair | null {
   };
 }
 
+export function toHorizontalScrollablePair(pair: ElementPair): HorizontalScrollablePair | null {
+  if (!(pair.source instanceof HTMLElement)) return null;
+
+  const overflowX = pair.computedStyle.overflowX;
+  const canScroll = overflowX === "auto" || overflowX === "scroll" || overflowX === "overlay";
+  const extraWidth = pair.source.scrollWidth - pair.source.clientWidth;
+
+  if (!canScroll || extraWidth <= 1) return null;
+
+  return {
+    ...pair,
+    clientWidth: pair.source.clientWidth,
+    extraWidth,
+    scrollWidth: pair.source.scrollWidth,
+    scrollLeft: pair.source.scrollLeft,
+  };
+}
+
 export function inlineComputedStyles(pairs: ElementPair[]) {
   for (const { source, clone, computedStyle } of pairs) {
     if (!(clone instanceof HTMLElement || clone instanceof SVGElement)) continue;
@@ -160,7 +178,16 @@ export function inlineComputedStyles(pairs: ElementPair[]) {
     const existingStyle = clone.getAttribute("style");
     clone.setAttribute("style", existingStyle ? `${existingStyle};${cssText}` : cssText);
 
-    if (source instanceof HTMLElement && clone instanceof HTMLElement) {
+    // Iterating computed style properties reports the declared `transform` (often "none")
+    // and misses the effective value for SVG elements positioned via the legacy
+    // `transform="translate(...)"` presentation attribute (used pervasively by chart
+    // libraries like recharts for axis ticks, gridlines, etc.). Re-read `transform` through
+    // the named accessor, which resolves the attribute-driven value, and inline that instead
+    // so the clone doesn't collapse every attribute-transformed element back to the origin.
+    if (
+      (source instanceof HTMLElement && clone instanceof HTMLElement) ||
+      (source instanceof SVGElement && clone instanceof SVGElement)
+    ) {
       clone.style.transform = computedStyle.transform === "none" ? "" : computedStyle.transform;
       clone.style.transformOrigin = computedStyle.transformOrigin;
     }
@@ -323,6 +350,44 @@ export function preserveVisibleScrollOffsets(scrollablePairs: ScrollablePair[]) 
     shiftedWrapper.style.transform = `translateY(-${pair.scrollTop}px)`;
     shiftedWrapper.style.transformOrigin = "top left";
     shiftedWrapper.style.width = "100%";
+
+    cloneChildren.forEach((child, index) => {
+      const sourceChild = sourceChildren[index];
+      const shouldStayPinned =
+        sourceChild instanceof Element &&
+        (window.getComputedStyle(sourceChild).position === "sticky" ||
+          window.getComputedStyle(sourceChild).position === "fixed");
+
+      if (!shouldStayPinned) {
+        shiftedWrapper.appendChild(child);
+      }
+    });
+
+    pair.clone.appendChild(shiftedWrapper);
+  }
+}
+
+/**
+ * Horizontally-scrolled containers (card carousels, chip rows, etc.) never got their
+ * scroll offset captured: cloneNode(true) always starts a fresh clone at scrollLeft 0,
+ * so a screenshot taken after scrolling a carousel silently snapped back to its first
+ * item. Shift the clone's content the same way `preserveVisibleScrollOffsets` does for
+ * vertical scroll, so whatever the user actually has in view is what gets captured.
+ * Applies regardless of capture mode — "full" only expands vertical page length.
+ */
+export function preserveVisibleHorizontalScrollOffsets(scrollablePairs: HorizontalScrollablePair[]) {
+  for (const pair of scrollablePairs) {
+    if (!(pair.source instanceof HTMLElement) || !(pair.clone instanceof HTMLElement)) continue;
+    if (pair.scrollLeft <= 0) continue;
+
+    pair.clone.style.overflow = "hidden";
+    pair.clone.style.overflowX = "hidden";
+
+    const cloneChildren = Array.from(pair.clone.childNodes);
+    const sourceChildren = Array.from(pair.source.childNodes);
+    const shiftedWrapper = document.createElement("div");
+    shiftedWrapper.style.transform = `translateX(-${pair.scrollLeft}px)`;
+    shiftedWrapper.style.transformOrigin = "top left";
 
     cloneChildren.forEach((child, index) => {
       const sourceChild = sourceChildren[index];

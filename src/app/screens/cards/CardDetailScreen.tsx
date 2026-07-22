@@ -18,12 +18,14 @@ import type { CreditCard, DebitCard, Product } from "@/data/products";
 import Card, { type CardVariant } from "@/app/components/cards/Card";
 import UserEventCard from "@/app/components/cards/UserEventCard";
 import FaceIdAnimation from "@/app/components/FaceIdAnimation";
+import CardSensitiveDetailsScreen from "@/app/screens/cards/CardSensitiveDetailsScreen";
 
 interface CardDetailScreenProps {
   selectedCardId?: string | null;
   creditLimitOverrides?: Readonly<Record<string, number>>;
   onBack: () => void;
   onCardDetailsClick?: (card: Product) => void;
+  onShowCardDetailsClick?: (card: Product) => void;
   onCardOptionsClick?: (card: Product) => void;
   onTransactionClick?: (transaction: AccountTransaction, product: Product) => void;
   onHelpClick?: () => void;
@@ -132,6 +134,7 @@ export default function CardDetailScreen({
   creditLimitOverrides = {},
   onBack,
   onCardDetailsClick,
+  onShowCardDetailsClick,
   onCardOptionsClick,
   onTransactionClick,
   onHelpClick,
@@ -181,6 +184,7 @@ export default function CardDetailScreen({
   const [isCarouselDragging, setIsCarouselDragging] = useState(false);
   const [isAiOpportunityDismissed, setIsAiOpportunityDismissed] = useState(false);
   const [isCardDetailsFaceIdVisible, setIsCardDetailsFaceIdVisible] = useState(false);
+  const [isSensitiveCardDetailsVisible, setIsSensitiveCardDetailsVisible] = useState(false);
 
   const activeCard = cardProducts[activeIndex] ?? cardProducts[0];
   const config = getCountryConfig(country);
@@ -233,7 +237,8 @@ export default function CardDetailScreen({
   const completeCardDetailsFaceId = () => {
     setIsCardDetailsFaceIdVisible(false);
     if (!activeCard) return;
-    onCardDetailsClick?.(activeCard);
+    setIsSensitiveCardDetailsVisible(true);
+    onShowCardDetailsClick?.(activeCard);
   };
 
   // ── Scroll handlers ──────────────────────────────────────────────
@@ -428,8 +433,17 @@ export default function CardDetailScreen({
     );
   }
 
+  if (isSensitiveCardDetailsVisible) {
+    return (
+      <CardSensitiveDetailsScreen
+        card={activeCard}
+        onBack={() => setIsSensitiveCardDetailsVisible(false)}
+      />
+    );
+  }
+
   const cardQuickActions = [
-    { id: "card-details", iconName: "account-details" as const, label: t("runtime.cards.actions.details", "Card Details"), onClick: handleShowCardDetails },
+    { id: "card-details", iconName: "account-details" as const, label: t("runtime.cards.actions.details", "Card Details"), onClick: () => onCardDetailsClick?.(activeCard) },
     { id: "options", iconName: "account-options" as const, label: t("runtime.cards.actions.options", "Options"), onClick: () => onCardOptionsClick?.(activeCard) },
     { id: "block-card", iconName: "block-card" as const, label: t("runtime.cards.actions.blockCard", "Block Card") },
     { id: "view-pin", iconName: "view-pin" as const, label: t("runtime.cards.actions.viewPin", "View PIN") },
@@ -473,7 +487,8 @@ export default function CardDetailScreen({
           onPointerCancel={handlePointerCancel}
           onMouseDown={handleMouseDown}
           onClickCapture={handleClickCapture}
-          className={`overflow-x-auto scrollbar-hide select-none ${
+          data-card-carousel
+          className={`relative z-10 -mb-[20px] overflow-x-auto pb-[20px] scrollbar-hide select-none ${
             isCarouselDragging ? "cursor-grabbing" : "cursor-grab"
           }`}
           style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}

@@ -189,3 +189,10 @@ export type ScrollablePair = ElementPair & {
   scrollHeight: number;
   scrollTop: number;
 };
+
+export type HorizontalScrollablePair = ElementPair & {
+  clientWidth: number;
+  extraWidth: number;
+  scrollWidth: number;
+  scrollLeft: number;
+};

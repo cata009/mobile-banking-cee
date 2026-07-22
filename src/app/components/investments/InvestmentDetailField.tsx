@@ -1,6 +1,7 @@
 interface InvestmentDetailFieldProps {
   label: string;
   value: string;
+  secondaryValue?: string;
   multiline?: boolean;
   strong?: boolean;
 }
@@ -8,6 +9,7 @@ interface InvestmentDetailFieldProps {
 export default function InvestmentDetailField({
   label,
   value,
+  secondaryValue,
   multiline = false,
   strong = true,
 }: InvestmentDetailFieldProps) {
@@ -18,6 +20,7 @@ export default function InvestmentDetailField({
     >
       <p className="text-[14px] font-normal leading-[16px] text-[var(--uc-text-muted)]">{label}</p>
       <p className={`text-[16px] leading-[20px] text-[var(--uc-text)] ${strong ? "font-bold" : "font-normal"}`}>{value}</p>
+      {secondaryValue ? <p className="text-[14px] font-normal leading-[16px] text-[var(--uc-text-muted)]">{secondaryValue}</p> : null}
     </div>
   );
 }

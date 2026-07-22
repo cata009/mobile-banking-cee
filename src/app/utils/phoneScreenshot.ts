@@ -1,9 +1,9 @@
 
 import { CANVAS_SCALE, SCREEN_HEIGHT_FALLBACK, SCREEN_WIDTH_FALLBACK } from "./phoneScreenshot/constants";
-import { blobToDataUrl, inlineComputedStyles, canvasToBlob, copyFormState, createTimestamp, downloadBlob, expandScrollableContent, findPrimaryScrollableElement, getDirectElementText, getImageMimeType, getLayerName, inferFigmaLayerType, isRectOutsideFrame, loadImage, pickSerializableStyles, prepareRootClone, preserveVisibleScrollOffsets, round, toScrollablePair, waitForLayoutFrame } from "./phoneScreenshot/domCapture";
+import { blobToDataUrl, inlineComputedStyles, canvasToBlob, copyFormState, createTimestamp, downloadBlob, expandScrollableContent, findPrimaryScrollableElement, getDirectElementText, getImageMimeType, getLayerName, inferFigmaLayerType, isRectOutsideFrame, loadImage, pickSerializableStyles, prepareRootClone, preserveVisibleHorizontalScrollOffsets, preserveVisibleScrollOffsets, round, toHorizontalScrollablePair, toScrollablePair, waitForLayoutFrame } from "./phoneScreenshot/domCapture";
 import { createFixedRootLayout, getFigmaReadyRootBackground, toFigmaReadyLayer } from "./phoneScreenshot/figmaLayers";
 import { validateGeneratedFigmaPayload } from "./phoneScreenshot/figmaValidation";
-import type { ElementPair, ScrollablePair, CreatePhoneFigmaJsonOptions, CreatePhoneScreenshotBlobOptions, DownloadPhoneScreenshotOptions, FigmaReadyAsset, FigmaReadyLayer, PhoneFigmaJsonPayload, PhoneFigmaLayer, PhoneScreenshotMode } from "./phoneScreenshot/figmaTypes";
+import type { ElementPair, HorizontalScrollablePair, ScrollablePair, CreatePhoneFigmaJsonOptions, CreatePhoneScreenshotBlobOptions, DownloadPhoneScreenshotOptions, FigmaReadyAsset, FigmaReadyLayer, PhoneFigmaJsonPayload, PhoneFigmaLayer, PhoneScreenshotMode } from "./phoneScreenshot/figmaTypes";
 export type { PhoneScreenshotMode, PhoneFigmaJsonPayload, PhoneFigmaLayer, FigmaReadyLayer, FigmaJsonQualityReport } from "./phoneScreenshot/figmaTypes";
 export async function downloadPhoneScreenshot({
   screenElement,
@@ -104,6 +104,10 @@ async function createPhoneCaptureClone(screenElement: HTMLElement, mode: PhoneSc
     .filter((pair): pair is ScrollablePair => Boolean(pair))
     .sort((a, b) => b.extraHeight - a.extraHeight);
 
+  const horizontalScrollablePairs = pairs
+    .map(toHorizontalScrollablePair)
+    .filter((pair): pair is HorizontalScrollablePair => Boolean(pair));
+
   inlineComputedStyles(pairs);
   copyFormState(pairs);
 
@@ -119,6 +123,9 @@ async function createPhoneCaptureClone(screenElement: HTMLElement, mode: PhoneSc
   } else {
     preserveVisibleScrollOffsets(scrollablePairs);
   }
+  // Horizontal carousels (card carousel, chip rows, etc.) keep whatever position they're
+  // scrolled to regardless of vertical capture mode — "full" only expands page length.
+  preserveVisibleHorizontalScrollOffsets(horizontalScrollablePairs);
 
   await inlineImageSources(pairs);
   await inlineBackgroundImages(pairs);
