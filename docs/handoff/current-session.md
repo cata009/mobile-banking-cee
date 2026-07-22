@@ -2,6 +2,102 @@
 
 Last updated: 2026-07-22
 
+## 2026-07-22 Unified Git and Vercel Publication Closeout
+
+- Latest request handled: unify the complete shared workspace, commit every tracked and untracked product/documentation change, publish the resulting `main` branch to GitHub, and deploy that exact state to Vercel Production.
+- Included scope: the complete Design System implementation-package rollout, CZ Basket Funds catalogue, all-country Investments Sell Order, Card Details sensitive/non-sensitive boundary and carousel-shadow correction, Translation Tester updates, and phone-screenshot/Figma-export improvements already present in the workspace.
+- Pre-publication verification: fresh `npm run verify` passed TypeScript, repository ESLint, 61 test files / 603 tests, all six audits (`card-details`, `investments`, `figma-bridge`, `templates`, `platform`, `assets`), and the production Vite build. Known Recharts zero-size diagnostics, the empty `react-vendor` chunk, and large-chunk notices remain the previously triaged non-blocking warnings.
+- Banana Loop: the transient Design System coverage failure observed while concurrent authoring was still writing package entries was rerun after the workspace stabilized; its dedicated suite passed 206/206 and the complete repository gate then passed. No failing gate is being hidden from publication.
+- Publication evidence: pending in this closeout while Git push and Vercel Production deployment are executed; the final commit/deployment identifiers will be recorded before the task is closed.
+- constitutional check:
+  - scope preserved: yes (the user explicitly requested the whole workspace)
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: no (publication is still in progress)
+
+## 2026-07-22 Implementation Package Rollout to All Design System Components
+
+- Latest request handled: extend the `ui.primary-button` portable Implementation Package pilot to every component shown in Design System -> Components, with 100% coverage, no leftover "Code" tab or "No isolated live preview" placeholders, and a fail-closed automated test guarding future additions.
+- Architecture generalized: `ComponentImplementationPackage.tsx` no longer special-cases Primary Button — its States section now calls `getComponentStatePreview(componentId, stateId)` (new `componentStatePreviews.tsx`), falling back to the existing "Not part of the current public component contract" placeholder only when a state genuinely has no mapped preview. `ComponentDetailScreen.tsx`'s View tab now calls `getComponentLivePreview(componentId, themeMode)` (new `componentLivePreviews.tsx`) instead of the old fragile `TESTABLE_COMPONENTS` suffix-matching; most entries simply reuse the exact `*VariantSpecimen` components already rendered in the Components catalog (so the catalog card and the detail page can never drift apart), with a handful of thin inline adapters for components only ever inlined directly in `DesignSystemPage.tsx` (StatusBar/DynamicIsland, HomeHeader, MoreHeader, LanguageSelectorButton, NavigationLink, PreLoginHeading, FloatingCoAppingButton, PanelWithTranslations/PanelWithoutCoAppingTranslations, LogoutConfirmDialog, the shadcn generic-controls kit).
+- Registry reconciliation: added 10 new `COMPONENT_REGISTRY`/`ComponentId` entries that specimens referenced but the registry lacked (`shell.status-bar`, `shell.home-header`, `shell.more-header`, `ui.language-selector-button`, `ui.navigation-link`, `ui.prelogin-heading`, `ui.button-registry`, `ui.generic-controls`, `accounts.carousel-indicator`, `prelogin.other-panel-basic`), and fixed two id mismatches between registry/specimen-href/code-sample keys (`dialogs.logout-confirm` -> `dialogs.logout-confirmation`, `accounts.search-bar` -> `accounts.transaction-search`). `COMPONENT_REGISTRY` grew from 86 to 96 entries.
+- Specimen wiring: every `<Specimen>` in `DesignSystemPage.tsx`, `specimens/cardSpecimens.tsx`, and `specimens/fieldSpecimens.tsx` now carries a `detailsHref`. Content authored directly (no sub-agents — see Banana Loop note): 51 `COMPONENT_IMPLEMENTATION_PACKAGES` entries (summary, visual specifications read from real source, real supported states with live-component previews, motion values taken from real source or explicit "None", accessibility facts true of that component, asset requirements) plus React/Swift/Kotlin code samples for the 6 components that had none yet (`shell.home-header`, `shell.more-header`, `ui.button-registry`, `ui.generic-controls`, `prelogin.other-panel`, `prelogin.other-panel-basic`); the other 45 already had samples from earlier sessions and were left untouched.
+- Vendor-neutrality: the package/code-sample text for every component was checked against the forbidden-term list (Asseco/ASEE/Adaptive Elements/Reply); none matched. UniCredit tokens and Figma node references stay, since they are part of the product, not a vendor.
+- TDD evidence: `tests/screens/component-implementation-package-coverage.test.tsx` parses every `<Specimen>` in the three catalog source files via a regex-split extractor (robust against literal `>` characters inside `specs={[...]}` strings), derives the componentId set from `detailsHref`, and asserts for each one: a complete package, non-empty React/Swift/Kotlin samples (plus every declared variant resolves), a non-null live preview in both themes, and no forbidden vendor terms. It started RED (56/202 failing, only `ui.primary-button` covered) and finished GREEN at 206/206 after the full rollout; the pre-existing pilot test's "keeps the existing Code mode" case was repointed from `shell.page-header` (now covered) to `analytics.spendings` (a screen composite outside the Components tab, still package-less by design).
+- Verification evidence: the rollout's dedicated coverage suite passed 206/206; the final unified `npm run verify` passed typecheck, lint, 61 files / 603 tests, all six audits (`audit:templates` reports `components=96`), and build. `git diff --check` reported only LF/CRLF conversion warnings, no real whitespace errors.
+- Live port-`localhost` evidence (own dev-server instance on an auto-assigned port, since another session already held 5173): verified 3 simple components (`ui.radio-button`, `ui.link-button`, `ui.language-selector-button`), 3 complex compositions (`ui.navigation-row`, `cards.card-component`, `products.product-card-list-total` — the last one's States section renders the real `ProductCard`/`ProductsList`/`TotalRow` composition end-to-end with a working Open/Accordion/Default set), a 6-variant component (`cards.card`, all six Mastercard SVG palettes), an image-bearing component (`payments.hero-card`, three real `screenshots/paymentsN.png` states, confirmed 200 OK on the network tab), and an interactive component (`ui.toggle-button`, real `role="switch"` toggling `aria-checked` true/false on click with zero console errors). Confirmed `ui.primary-button` is not regressed (both View and Implementation package tabs, all 6 package sections, Swift/Kotlin code switching). Light/Dark theme toggling and the View/Implementation-package tab switch were confirmed working end-to-end via a dispatched click (the sandboxed Browser pane's pointer-click delivery was itself intermittently unreliable in this session — confirmed independently on an unrelated, unmodified specimen's own theme toggle — so click-driven checks were cross-verified with a dispatched DOM click event where the tool's synthetic pointer click did not land).
+- Banana Loop result: the originally-planned 50-agent Workflow for authoring this content was stopped mid-run after explicit user feedback that it was excessive token spend for this repo (see the reinforced `design-system-ui-skill` memory); all package/sample authoring was redone directly by reading each real component's source. No other new untriaged banana was introduced.
+- constitutional check:
+  - scope preserved: yes (exactly the requested catalog-wide rollout; no runtime component behavior changed except adding two `export` keywords in `cardSpecimens.tsx` to reuse existing internal helpers)
+  - docs updated: yes
+  - verification recorded: yes (RED/GREEN coverage suite, full local gate, live browser evidence)
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-07-22 CZ Basket Funds Catalogue
+
+- Latest request handled: reproduce the Figma Basket Funds carousel and Basket Funds list inside the Investments securities catalogue, only for Czech Republic, including present and future releases.
+- Behavior: CZ `Invest` now opens `Buy securities` with `All products` / `Regular Plan`, the shared Search control, a 20-card horizontal Basket Funds carousel, `See all basket funds`, and the existing securities list below. `Regular Plan` filters both baskets and securities to recurrent products. Other countries retain the existing `List of securities` screen with no Basket Funds content.
+- Basket Funds page: `See all basket funds` and a basket card open the Figma-derived `Basket Funds` surface with explanatory copy, six one-off baskets, fourteen regular-investment baskets, four initially visible rows per group, and independent `See more` / `See less` expansion. Back returns to the catalogue without losing the selected tab or search/filter context.
+- Scope rule: availability is derived only from `country === "CZ"`; it is intentionally independent of release ID, so CZ current and future releases inherit the feature while RO/SK/HU/RS/BA/BA_BL/SI do not.
+- Design evidence: implementation was derived from Figma section `10738:58235` and inspected child nodes `10738:71476`, `10738:72982`, `10738:58263`, and `10738:72190`. Existing PageHeader, mailbox tabs, Search, section divider, BrandLogo, and LinkButton components were reused.
+- Verification: focused RED/GREEN coverage passed 4/4 Basket Funds tests; the related Investments regression set passed 6 files / 60 tests; focused ESLint, `npm run typecheck`, and the production build passed. Live port-4001 checks confirmed 20 cards on CZ current, 20 on CZ Future, 14 basket cards plus six securities under Regular Plan, independent 6/4 group expansion, and zero Basket Funds cards/carousel on RO.
+- Final unified gate: after the concurrent Design System rollout stabilized, fresh `npm run verify` passed 61 test files / 603 tests, all audits, and build; the Basket Funds suite remains green at 4/4.
+- Files central to this change: `src/app/config/investmentBasketFundsConfig.ts`, `src/app/components/investments/InvestmentBasketFundCard.tsx`, `src/app/screens/investments/InvestmentBasketFundsScreen.tsx`, `src/app/screens/investments/InvestmentSecurityScreens.tsx`, and `tests/screens/investment-basket-funds.test.tsx`.
+- Limitation: Basket Funds and their descriptions are deterministic front-end mock catalogue data. This adds no backend catalogue, suitability logic, recommendation ranking, order placement, or persistence.
+- Banana Loop result: country leakage, release coupling, tab/filter drift, Back-state loss, and linked group expansion all have explicit regression coverage. The earlier transient concurrent-edit blocker is resolved and the final full gate is green; no Basket Funds banana remains untriaged.
+- safe to resume: yes
+
+## 2026-07-22 Investments Sell Order
+
+- Latest request handled: connect Product Detail `Sell` to the Figma-derived Sell Order journey for every supported Mobile PI country and include the two requested CTS validation outcomes.
+- Behavior: an owned, active position now opens `Sell Order` with product evaluation/details, portfolio account, Units/Amount selection, unit or amount input, Sell all, cash-account selection, inline validation, Review Data, terms acceptance, shared Face ID Sign, and `Order accepted` success. Back navigation remains local to the coordinator and completion returns to Investments.
+- CTS simulations: `UniCredit Balanced Income Fund` exposes Units only and shows a generic explanation that amount selling is unavailable. Other eligible positions expose both modes; their deterministic mock CTS amount ceiling is 65% of the current position value, and exceeding it shows a generic maximum-amount error without exposing the backend reason.
+- Country scope: the same coordinator and canonical security enrichment are shared by `RO`, `CZ`, `SK`, `HU`, `RS`, `BA`, `BA_BL`, and `SI`; currency formatting and account conversion continue to follow the selected country/account.
+- Design evidence: implementation was derived from Figma nodes `12163:83967`, `12163:86135`, and `12163:83940`, reusing the existing PageHeader, section divider, detail field, TextField, Toggle, BottomSheet, PrimaryButton, order-documents, Sign, Face ID, and Success components.
+- TDD evidence: Sell-action wiring and portfolio integration were first observed failing, then passed after implementation. Fresh focused verification passed 3 files / 33 tests; focused ESLint, the eight-country Investments audit, and the production build also passed.
+- Live port-4001 evidence: amount mode rejected `999999` with the CTS maximum error and kept Next disabled; Balanced Income rendered Units with no Amount control and the generic availability message; a 2-unit order reached Review, terms, Face ID, and `Order accepted`.
+- Final unified gate: the concurrent Design System TypeScript errors were completed and resolved before publication; fresh `npm run verify` passed 61 test files / 603 tests, all audits, and build.
+- Files central to this change: `src/app/screens/investments/InvestmentSellOrderFlow.tsx`, `src/app/screens/investments/InvestmentsPortfolioScreen.tsx`, `src/app/screens/investments/InvestmentSecurityScreens.tsx`, `src/app/config/investmentsPortfolioConfig.ts`, `src/app/components/investments/InvestmentDetailField.tsx`, and `tests/screens/investment-sell-order-flow.test.tsx`.
+- Limitation: this remains deterministic front-end simulation. It does not call CTS, execute or persist a trade, update holdings/balances, or add an order to History.
+- Banana Loop result: the new Sell path has explicit guards for quantity above holdings, CTS amount ceiling, units-only eligibility, terms gating, and shared authentication. The temporary concurrent-edit blocker is resolved and the final full gate is green.
+- safe to resume: yes
+
+## 2026-07-22 Card Details Boundary and Carousel Shadow
+
+- Latest request handled: separate the non-sensitive `Card Details` quick action from the authenticated `Show Card Details` reveal, and stop the card carousel from clipping its drop shadow against the content below.
+- Root cause: both entry controls were wired to `handleShowCardDetails`, so both mounted Face ID and reused the sensitive number/CVV/holder/validity surface. Separately, horizontal overflow made the carousel a vertical clipping context while its 8px bottom reserve was smaller than the card shadow.
+- Behavior: the quick action now navigates directly to the existing `card-details-info` route, whose composition mirrors Account Details and shows only product, status, masked reference, available-to-spend, and credit-limit/linked-account information. `Show Card Details` alone mounts Face ID; after its 840ms completion, a dedicated local sensitive-detail screen reveals the full number, CVV, holder, and validity and returns locally to Card Detail.
+- Visual correction: the real horizontal carousel now owns a 20px shadow lane, a matching negative bottom margin, and a raised stacking context. The following content keeps its position while the card shadow remains visible above it instead of ending at the scroll container boundary.
+- TDD evidence: three regressions first failed on the shared handler, missing shadow lane, and sensitive direct-details content, then passed after the split. Focused Card Detail, small-screen, and route-restoration coverage passed 3 files / 21 tests. The complete `npm run verify` gate then passed TypeScript, ESLint, 58 test files / 374 tests, card-details and product audits, asset checks, and the production build.
+- Live port-4001 evidence: direct `Card Details` rendered `Card product` and `Card status` with no CVV or full number. `Show Card Details` exposed no sensitive content immediately, then rendered the CVV surface only after Face ID. The carousel reported the expected raised 20px shadow lane and the screenshot confirmed the shadow continues below the card edge.
+- Files central to this correction: `src/app/screens/cards/CardDetailScreen.tsx`, `src/app/screens/cards/CardDetailsInfoScreen.tsx`, `src/app/screens/cards/CardSensitiveDetailsScreen.tsx`, and `tests/screens/card-detail-boundaries.test.tsx`.
+- Limitation: both surfaces remain mock-driven; Face ID is still the existing deterministic local animation rather than real authentication.
+- Banana Loop result: the previously open carousel-shadow regression task now has an automated guard. No new untriaged banana was introduced.
+- constitutional check:
+  - scope preserved: yes (the two requested Card Detail corrections only)
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-07-22 Primary Button Portable Implementation Package Pilot
+
+- Latest request handled: transform the Design System `Primary button` detail into a supplier-neutral implementation handoff that developers can use directly, without documenting an unknown vendor implementation, alleged defects, or an acceptance checklist.
+- Product behavior: `ui.primary-button` now opens with `View` and `Implementation package` tabs. View renders the real shared `PrimaryButton` through the existing testable-component registry instead of the prior missing-preview placeholder. The package combines the live React reference, native SwiftUI and Jetpack Compose references, exact visual values and semantic tokens, interactive states, motion, accessibility, and asset requirements on one page. Other component details keep their existing `View` / `Code` behavior.
+- Neutrality boundary: the package contains no supplier, Adaptive Elements, or implementation-platform branding. It describes the component contract only and does not claim drop-in compatibility with an unknown host application.
+- Code-reference correction: the React sample now includes its `ReactNode` import and matches the real focus-ring offsets. The Kotlin sample includes the required `remember` import and implements the documented 200 ms pressed-scale transition through `animateFloatAsState`; native color tokens remain explicit integration dependencies. The live state previews reuse the actual `PrimaryButton` component rather than drawing lookalikes.
+- TDD evidence: the package-detail test first failed on the missing package route and then on incomplete code samples. After implementation it proves all six package sections, all three language selectors, vendor-neutral copy, and preservation of the old Code tab on unrelated components.
+- Final verification: `npm run typecheck`, `npm run lint -- --quiet`, all 57 test files / 371 tests, and `npm run build` passed after the live-preview correction. Existing Recharts zero-size diagnostics and production chunk-size notices remain unrelated, previously triaged warnings.
+- Files central to this pilot: `src/app/registry/componentImplementationPackages.ts`, `src/app/screens/design-system/ComponentImplementationPackage.tsx`, `src/app/screens/design-system/ComponentDetailScreen.tsx`, `src/app/registry/componentCodeSamples.ts`, and `tests/screens/component-implementation-package.test.tsx`.
+- Banana Loop result: the pilot is intentionally limited to Primary Button so its usefulness can be reviewed before applying the format to the wider catalog. No new untriaged banana was introduced.
+- constitutional check:
+  - scope preserved: yes (Primary Button pilot only)
+  - docs updated: yes
+  - verification recorded: yes (RED/GREEN plus complete local checks)
+  - bananas triaged: yes
+  - safe to resume: yes
+
 ## 2026-07-22 Risk-Matched Funds Handoff
 
 - Latest request handled: make `Explore matching funds` honor the risk comfort already collected by the investment-goal conversation instead of reopening the generic `Our funds selection` banner storefront.

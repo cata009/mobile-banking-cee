@@ -18,11 +18,13 @@ import {
   resolveComponentCodeSample,
   type ComponentCodeSample,
 } from "@/app/registry/componentCodeSamples";
-import { TESTABLE_COMPONENTS } from "@/app/screens/tools/testableComponents";
 import ThemeModeSegment from "@/app/components/ThemeModeSegment";
+import ComponentImplementationPackage from "./ComponentImplementationPackage";
+import { getComponentImplementationPackage } from "@/app/registry/componentImplementationPackages";
+import { getComponentLivePreview } from "./componentLivePreviews";
 
 type CodeSegment = "react" | "swift" | "kotlin";
-type DetailTab = "view" | "code";
+type DetailTab = "view" | "code" | "package";
 
 interface ComponentDetailScreenProps {
   componentId: string;
@@ -43,7 +45,8 @@ export default function ComponentDetailScreen({
   onVariantChange,
   onBack,
 }: ComponentDetailScreenProps) {
-  const [tab, setTab] = useState<DetailTab>("code");
+  const implementationPackage = getComponentImplementationPackage(componentId);
+  const [tab, setTab] = useState<DetailTab>(() => implementationPackage ? "package" : "code");
   const [segment, setSegment] = useState<CodeSegment>("react");
   const [themeMode, setThemeMode] = useState<"light" | "dark">("light");
 
@@ -55,9 +58,9 @@ export default function ComponentDetailScreen({
     [sample, variantId],
   );
 
-  const testable = useMemo(
-    () => TESTABLE_COMPONENTS.find((entry) => entry.id === componentId),
-    [componentId],
+  const livePreview = useMemo(
+    () => getComponentLivePreview(componentId, themeMode),
+    [componentId, themeMode],
   );
 
   if (!meta) {
@@ -79,6 +82,7 @@ export default function ComponentDetailScreen({
   }
 
   const variantOptions = sample?.variants ? Object.keys(sample.variants) : [];
+  const detailTabs: readonly DetailTab[] = implementationPackage ? ["view", "package"] : ["view", "code"];
 
   return (
     <div className="px-6 py-8 lg:px-10">
@@ -121,7 +125,7 @@ export default function ComponentDetailScreen({
 
       {/* View / Code toggle */}
       <div className="mt-6 inline-flex rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[2px]">
-        {(["view", "code"] as const).map((entry) => (
+        {detailTabs.map((entry) => (
           <button
             key={entry}
             type="button"
@@ -132,7 +136,7 @@ export default function ComponentDetailScreen({
                 : "text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]"
             }`}
           >
-            {entry}
+            {entry === "package" ? "Implementation package" : entry}
           </button>
         ))}
       </div>
@@ -148,10 +152,8 @@ export default function ComponentDetailScreen({
               <ThemeModeSegment value={themeMode} onChange={setThemeMode} ariaLabel={`${meta.label} preview theme`} />
             </div>
             <div className={`${themeMode === "dark" ? "dark" : ""} ${themeMode === "dark" ? "bg-[var(--uc-static-black)]" : "bg-[var(--uc-app-bg)]"} rounded-[12px] p-5`}>
-              {testable ? (
-                <div className="mx-auto w-full max-w-[375px]">
-                  <testable.render {...Object.fromEntries(testable.slots.map((slot) => [slot.id, slot.defaultText]))} />
-                </div>
+              {livePreview ? (
+                <div className="mx-auto w-full max-w-[375px]">{livePreview}</div>
               ) : (
                 <div className="py-12 text-center">
                   <p className="text-[14px] text-[var(--uc-text-muted)]">
@@ -164,6 +166,13 @@ export default function ComponentDetailScreen({
               )}
             </div>
           </div>
+        ) : tab === "package" && implementationPackage && resolved ? (
+          <ComponentImplementationPackage
+            componentId={componentId}
+            componentPath={meta.componentPath}
+            code={resolved}
+            data={implementationPackage}
+          />
         ) : (
           <div>
             {/* Language segments */}

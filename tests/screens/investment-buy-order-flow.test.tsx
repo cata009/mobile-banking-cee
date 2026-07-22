@@ -254,6 +254,23 @@ describe("investment product detail", () => {
     expect(onBuy).toHaveBeenCalledOnce();
   });
 
+  it("starts the sell order flow from the Sell action", () => {
+    const onSell = vi.fn();
+
+    render(
+      <InvestmentSecurityDetailScreen
+        security={{ ...security, owned: true, quantity: 10 }}
+        country="RO"
+        amountsHidden={false}
+        onBack={() => undefined}
+        onSellClick={onSell}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Sell" }));
+    expect(onSell).toHaveBeenCalledOnce();
+  });
+
   it("shows Sell only for an active portfolio position with positive quantity", () => {
     const { rerender } = render(
       <InvestmentSecurityDetailScreen

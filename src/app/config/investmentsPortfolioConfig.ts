@@ -87,6 +87,10 @@ export interface InvestmentCatalogSecurity extends InvestmentSecurity {
   inceptionDate: string;
   lastUpdate: string;
   description: string;
+  /** CTS-backed redemption modes exposed by the Sell Order demo. */
+  sellOrderMode?: "units-and-amount" | "units-only";
+  /** Maximum product-currency amount CTS accepts for amount-based redemption. */
+  sellAmountLimit?: number;
 }
 
 export interface InvestmentDistributionItem {
@@ -576,6 +580,8 @@ function enrichCatalogSecurity(security: InvestmentSecurity, country: CountryId,
     inceptionDate: `${String(19 + (index % 8)).padStart(2, "0")}.07.${2020 + (index % 4)}`,
     lastUpdate: YESTERDAY_DATE_STRING,
     description: `${security.title} is a ${security.assetClass.toLowerCase()} ${security.productType.toLowerCase()} denominated in ${security.instrumentCurrency}. Review its objectives, risk profile, fees and official product documents before placing an order.`,
+    sellOrderMode: security.id === "balanced-income" ? "units-only" : "units-and-amount",
+    sellAmountLimit: security.id === "balanced-income" ? undefined : roundMoney(security.value * 0.65),
   };
 }
 

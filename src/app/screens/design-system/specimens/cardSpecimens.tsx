@@ -507,7 +507,7 @@ export function ProductMenuCardVariantSpecimen() {
   );
 }
 
-function HeaderPreviewFrame({
+export function HeaderPreviewFrame({
   children,
   tone = "surface",
   height,
@@ -552,7 +552,7 @@ export function StatusBarVariantSpecimen() {
 
 export function HomeHeaderSpecimen() {
   return (
-    <Specimen name="Home">
+    <Specimen name="Home" detailsHref="#component/shell.home-header">
       <HeaderPreviewFrame tone="app">
         <div className="pt-[24px]">
           <HomeHeader onPrimeClick={noop} onMessagesClick={noop} />
@@ -564,7 +564,7 @@ export function HomeHeaderSpecimen() {
 
 export function MoreHeaderSpecimen() {
   return (
-    <Specimen name="More">
+    <Specimen name="More" detailsHref="#component/shell.more-header">
       <HeaderPreviewFrame tone="surface">
         <div className="pt-[24px]">
           <MoreHeader onProfile={noop} onMessages={noop} onLogout={noop} messageCount={7} />
@@ -582,7 +582,7 @@ const PAGE_HEADER_VARIANTS = [
   { id: "collapsed", label: "Collapsed" },
 ] satisfies readonly SelectorOption[];
 
-function PageHeaderVariantSpecimen({
+export function PageHeaderVariantSpecimen({
   themeMode,
 }: {
   themeMode: "light" | "dark";

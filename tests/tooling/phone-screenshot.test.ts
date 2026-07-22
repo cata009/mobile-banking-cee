@@ -7,6 +7,7 @@ import {
   type FigmaReadyLayer,
   type PhoneFigmaJsonPayload,
 } from '../../src/app/utils/phoneScreenshot'
+import { preserveVisibleHorizontalScrollOffsets, toHorizontalScrollablePair } from '../../src/app/utils/phoneScreenshot/domCapture'
 
 type RectTuple = [x: number, y: number, width: number, height: number]
 
@@ -288,5 +289,62 @@ describe('phone screenshot public exporters', () => {
     expect(drawImage).toHaveBeenNthCalledWith(1, expect.any(DeterministicImage), 0, 0, 375, 200)
     expect(drawImage).toHaveBeenNthCalledWith(2, expect.any(DeterministicImage), 0, 0, 375, 400)
     expect(screen.outerHTML).toBe(originalDom)
+  })
+})
+
+function makeHorizontalScrollFixture(scrollLeft: number) {
+  const source = document.createElement('div')
+  const clone = document.createElement('div')
+  Object.defineProperty(source, 'clientWidth', { value: 200, configurable: true })
+  Object.defineProperty(source, 'scrollWidth', { value: 500, configurable: true })
+  Object.defineProperty(source, 'scrollLeft', { value: scrollLeft, configurable: true })
+  source.style.overflowX = 'auto'
+
+  const pinned = document.createElement('div')
+  pinned.style.position = 'sticky'
+  pinned.textContent = 'pinned'
+  const scrolling = document.createElement('div')
+  scrolling.textContent = 'card row'
+  source.append(pinned, scrolling)
+
+  const clonedPinned = pinned.cloneNode(true)
+  const clonedScrolling = scrolling.cloneNode(true)
+  clone.append(clonedPinned, clonedScrolling)
+
+  return { source, clone, computedStyle: window.getComputedStyle(source) }
+}
+
+describe('preserveVisibleHorizontalScrollOffsets', () => {
+  it('leaves an unscrolled carousel untouched', () => {
+    const pair = makeHorizontalScrollFixture(0)
+    const scrollablePair = toHorizontalScrollablePair(pair)
+    expect(scrollablePair).not.toBeNull()
+
+    preserveVisibleHorizontalScrollOffsets(scrollablePair ? [scrollablePair] : [])
+
+    expect(pair.clone.children).toHaveLength(2)
+    expect((pair.clone as HTMLElement).style.overflowX).toBe('')
+  })
+
+  it('shifts a scrolled carousel into a translateX wrapper and keeps pinned children out of it', () => {
+    const pair = makeHorizontalScrollFixture(120)
+    const scrollablePair = toHorizontalScrollablePair(pair)
+    expect(scrollablePair?.scrollLeft).toBe(120)
+    expect(scrollablePair?.extraWidth).toBe(300)
+
+    preserveVisibleHorizontalScrollOffsets(scrollablePair ? [scrollablePair] : [])
+
+    expect((pair.clone as HTMLElement).style.overflowX).toBe('hidden')
+    // Pinned (sticky/fixed) children stay direct children; only the scrolling content moves into the wrapper.
+    expect(pair.clone.children).toHaveLength(2)
+    const wrapper = pair.clone.children[1] as HTMLElement
+    expect(wrapper.style.transform).toBe('translateX(-120px)')
+    expect(wrapper.textContent).toBe('card row')
+  })
+
+  it('returns null for elements without horizontal overflow', () => {
+    const pair = makeHorizontalScrollFixture(0)
+    Object.defineProperty(pair.source, 'scrollWidth', { value: 200, configurable: true })
+    expect(toHorizontalScrollablePair(pair)).toBeNull()
   })
 })

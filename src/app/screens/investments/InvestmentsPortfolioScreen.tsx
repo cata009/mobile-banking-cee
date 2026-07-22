@@ -9,6 +9,7 @@ import InvestmentProductCard, { type InvestmentAmountParts } from "@/app/compone
 import InvestmentProductsAccordion from "@/app/components/investments/InvestmentProductsAccordion";
 import InvestmentsFundBanner from "@/app/components/investments/InvestmentsFundBanner";
 import InvestmentBuyOrderFlow from "@/app/screens/investments/InvestmentBuyOrderFlow";
+import InvestmentSellOrderFlow from "@/app/screens/investments/InvestmentSellOrderFlow";
 import {
   InvestmentFundCollectionScreen,
   InvestmentFundsSelectionScreen,
@@ -298,6 +299,7 @@ export default function InvestmentsPortfolioScreen({
   const [selectedFundCollectionId, setSelectedFundCollectionId] = useState<InvestmentFundCollectionId | null>(null);
   const [selectedSecurity, setSelectedSecurity] = useState<InvestmentCatalogSecurity | null>(null);
   const [buyOrderOpen, setBuyOrderOpen] = useState(false);
+  const [sellOrderOpen, setSellOrderOpen] = useState(false);
   const [buyOrderDraft, setBuyOrderDraft] = useState<CoAppingInvestmentBuyDraft | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const consumedFundsRequestIdRef = useRef<number | null>(null);
@@ -311,7 +313,8 @@ export default function InvestmentsPortfolioScreen({
     && !fundsWindowOpen
     && !selectedFundCollectionId
     && !selectedSecurity
-    && !buyOrderOpen;
+    && !buyOrderOpen
+    && !sellOrderOpen;
   useEffect(() => {
     if (!isOnPortfolioHome) return;
     if (scrollContainerRef.current) {
@@ -375,6 +378,7 @@ export default function InvestmentsPortfolioScreen({
     setSelectedFundCollectionId(fundsWindowRequest.collectionId ?? null);
     setSelectedSecurity(null);
     setBuyOrderOpen(false);
+    setSellOrderOpen(false);
     setBuyOrderDraft(null);
     onSelectedSecurityChange?.(null);
     setFundsWindowOpen(!fundsWindowRequest.collectionId);
@@ -389,6 +393,7 @@ export default function InvestmentsPortfolioScreen({
       setSelectedSecurity(requestedSecurity);
       onSelectedSecurityChange?.(requestedSecurity);
       setBuyOrderDraft(buyRequest.draft ?? null);
+      setSellOrderOpen(false);
       setBuyOrderOpen(true);
     }
     onBuyRequestConsumed?.(buyRequest.requestId);
@@ -436,6 +441,23 @@ export default function InvestmentsPortfolioScreen({
     );
   }
 
+  if (selectedSecurity && sellOrderOpen) {
+    return (
+      <InvestmentSellOrderFlow
+        security={selectedSecurity}
+        accounts={currentAccounts}
+        country={country}
+        amountsHidden={amountsHidden}
+        onBack={() => setSellOrderOpen(false)}
+        onComplete={() => {
+          setSellOrderOpen(false);
+          selectSecurity(null);
+          setSecurityListOpen(false);
+        }}
+      />
+    );
+  }
+
   if (selectedSecurity) {
     return (
       <InvestmentSecurityDetailScreen
@@ -444,6 +466,7 @@ export default function InvestmentsPortfolioScreen({
         amountsHidden={amountsHidden}
         onBack={() => selectSecurity(null)}
         onHistoryClick={() => onHistoryClick?.(selectedSecurity.title)}
+        onSellClick={() => setSellOrderOpen(true)}
         onBuyClick={() => {
           setBuyOrderDraft(null);
           setBuyOrderOpen(true);

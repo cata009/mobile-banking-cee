@@ -59,6 +59,773 @@ const sample = (
 
 export const COMPONENT_CODE_SAMPLES: Record<string, ComponentCodeSample> = {
   // ============================================================
+  // BATCH 8 — Implementation package coverage completion
+  // ============================================================
+
+  "shell.home-header": sample(
+    // --- React (real, from src/app/screens/home/HomeHeader.tsx) ---
+    `import AmountVisibilityButton from "@/app/components/AmountVisibilityButton";
+import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
+import { PrimeDiamondMark } from "@/app/components/prime/PrimeDiamondMark";
+import { useDemo } from "@/app/state/demoStore";
+
+interface HomeHeaderProps {
+  onPrimeClick?: () => void;
+  onMessagesClick?: () => void;
+  showActions?: boolean;
+  showTitle?: boolean;
+  title?: string;
+}
+
+export default function HomeHeader({
+  onPrimeClick, onMessagesClick,
+  showActions = true, showTitle = true, title = "Your Homepage",
+}: HomeHeaderProps) {
+  const { amountsHidden, toggleAmountsHidden } = useDemo();
+
+  return (
+    <div className="w-full">
+      {showActions && (
+        <div className="flex h-[56px] items-start justify-between px-[24px] pb-[24px]">
+          <button onClick={onPrimeClick}
+            className="flex items-center gap-[6px] rounded-[16px] px-[12px] py-[8px] hover:opacity-80">
+            <PrimeDiamondMark color="var(--uc-static-white)" />
+            <span className="uc-type-n5-strong text-[var(--uc-static-white)]" style={{ lineHeight: "16px" }}>
+              Prime
+            </span>
+          </button>
+
+          <HeaderActionRail>
+            <AmountVisibilityButton hidden={amountsHidden} onToggle={toggleAmountsHidden} />
+            <HeaderActionButton icon="profile" label="Profile" />
+            <HeaderActionButton icon="messages" label="Messages" onClick={onMessagesClick} />
+          </HeaderActionRail>
+        </div>
+      )}
+
+      {showTitle && (
+        <div className="px-[24px] pb-[24px]">
+          <h1 className="uc-type-h1 text-[var(--uc-text)]">{title}</h1>
+        </div>
+      )}
+    </div>
+  );
+}`,
+    // --- Swift (SwiftUI port) ---
+    `import SwiftUI
+
+struct HomeHeader: View {
+    var onPrimeClick: (() -> Void)? = nil
+    var onMessagesClick: (() -> Void)? = nil
+    var showActions: Bool = true
+    var showTitle: Bool = true
+    var title: String = "Your Homepage"
+
+    // Integration dependency: swap for the app's real amount-visibility state.
+    @State private var amountsHidden: Bool = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if showActions {
+                HStack(alignment: .top) {
+                    Button(action: { onPrimeClick?() }) {
+                        HStack(spacing: 6) {
+                            PrimeDiamondMark(color: .white) // integration dependency: native diamond glyph
+                            Text("Prime")
+                                .font(.ucN5Strong)
+                                .foregroundColor(.white)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(
+                            LinearGradient(colors: [Color("ucProductBlue"), Color.black], startPoint: .top, endPoint: .bottom)
+                        )
+                        .cornerRadius(16)
+                    }
+
+                    Spacer()
+
+                    HStack(spacing: 16) {
+                        AmountVisibilityButton(hidden: amountsHidden, onToggle: { amountsHidden.toggle() })
+                        HeaderActionButton(icon: "profile", label: "Profile", action: {})
+                        HeaderActionButton(icon: "messages", label: "Messages", action: { onMessagesClick?() })
+                    }
+                }
+                .frame(height: 56)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
+            }
+
+            if showTitle {
+                Text(title)
+                    .font(.ucH1)
+                    .foregroundColor(Color("ucText"))
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 24)
+            }
+        }
+    }
+}`,
+    // --- Kotlin (Jetpack Compose port) ---
+    `import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun HomeHeader(
+    onPrimeClick: () -> Unit = {},
+    onMessagesClick: () -> Unit = {},
+    showActions: Boolean = true,
+    showTitle: Boolean = true,
+    title: String = "Your Homepage",
+) {
+    // Integration dependency: swap for the app's real amount-visibility state.
+    var amountsHidden by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        if (showActions) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp),
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Brush.verticalGradient(listOf(UcColors.productBlue, Color.Black)))
+                        .clickable(onClick = onPrimeClick)
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    PrimeDiamondMark(color = Color.White) // integration dependency
+                    Text("Prime", style = UcType.n5Strong, color = Color.White)
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    AmountVisibilityButton(hidden = amountsHidden, onToggle = { amountsHidden = !amountsHidden })
+                    HeaderActionButton(icon = "profile", label = "Profile")
+                    HeaderActionButton(icon = "messages", label = "Messages", onClick = onMessagesClick)
+                }
+            }
+        }
+
+        if (showTitle) {
+            Text(
+                text = title,
+                style = UcType.h1,
+                modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 24.dp),
+            )
+        }
+    }
+}`,
+  ),
+
+  "shell.more-header": sample(
+    // --- React (real, from src/app/screens/more/MoreHeader.tsx) ---
+    `import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
+import { useLanguage } from "@/app/contexts/LanguageContext";
+
+interface MoreHeaderProps {
+  onProfile: () => void;
+  onContactPhone?: () => void;
+  onMessages: () => void;
+  onLogout: () => void;
+  actionVariant?: "default" | "contact-messages";
+  messageCount?: number;
+}
+
+export function MoreHeader({
+  onProfile, onContactPhone, onMessages, onLogout,
+  actionVariant = "default", messageCount = 0,
+}: MoreHeaderProps) {
+  const { t } = useLanguage();
+  const usesContactMessages = actionVariant === "contact-messages";
+
+  return (
+    <div className="w-full">
+      <div className="px-[24px] pb-[24px]">
+        <div className="flex min-h-[32px] items-start gap-[8px]">
+          <h1 className="uc-type-h1 flex-1 min-w-0 text-[var(--uc-text)]">{t("more.title")}</h1>
+
+          <HeaderActionRail>
+            {usesContactMessages ? (
+              <HeaderActionButton icon="contact-phone" label="Contact phone" onClick={onContactPhone} />
+            ) : (
+              <HeaderActionButton icon="profile" label="Profile" onClick={onProfile} />
+            )}
+            <HeaderActionButton icon="messages" label="Messages" onClick={onMessages} badgeCount={messageCount} />
+            {usesContactMessages ? null : (
+              <HeaderActionButton icon="logout" label="Logout" onClick={onLogout} />
+            )}
+          </HeaderActionRail>
+        </div>
+      </div>
+    </div>
+  );
+}`,
+    // --- Swift (SwiftUI port) ---
+    `import SwiftUI
+
+struct MoreHeader: View {
+    let onProfile: () -> Void
+    var onContactPhone: (() -> Void)? = nil
+    let onMessages: () -> Void
+    let onLogout: () -> Void
+    var actionVariant: ActionVariant = .default
+    var messageCount: Int = 0
+
+    enum ActionVariant { case \`default\`, contactMessages }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text(NSLocalizedString("more.title", comment: "More screen title"))
+                .font(.ucH1)
+                .foregroundColor(Color("ucText"))
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            HStack(spacing: 16) {
+                if actionVariant == .contactMessages {
+                    HeaderActionButton(icon: "contact-phone", label: "Contact phone", action: { onContactPhone?() })
+                } else {
+                    HeaderActionButton(icon: "profile", label: "Profile", action: onProfile)
+                }
+                HeaderActionButton(icon: "messages", label: "Messages", badgeCount: messageCount, action: onMessages)
+                if actionVariant != .contactMessages {
+                    HeaderActionButton(icon: "logout", label: "Logout", action: onLogout)
+                }
+            }
+        }
+        .frame(minHeight: 32)
+        .padding(.horizontal, 24)
+        .padding(.bottom, 24)
+    }
+}`,
+    // --- Kotlin (Jetpack Compose port) ---
+    `import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+
+enum class MoreHeaderActionVariant { DEFAULT, CONTACT_MESSAGES }
+
+@Composable
+fun MoreHeader(
+    onProfile: () -> Unit,
+    onContactPhone: () -> Unit = {},
+    onMessages: () -> Unit,
+    onLogout: () -> Unit,
+    actionVariant: MoreHeaderActionVariant = MoreHeaderActionVariant.DEFAULT,
+    messageCount: Int = 0,
+) {
+    val usesContactMessages = actionVariant == MoreHeaderActionVariant.CONTACT_MESSAGES
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 24.dp)
+            .heightIn(min = 32.dp),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = stringResource(id = R.string.more_title), // integration dependency: "more.title" translation key
+            style = UcType.h1,
+            modifier = Modifier.weight(1f),
+        )
+
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            if (usesContactMessages) {
+                HeaderActionButton(icon = "contact-phone", label = "Contact phone", onClick = onContactPhone)
+            } else {
+                HeaderActionButton(icon = "profile", label = "Profile", onClick = onProfile)
+            }
+            HeaderActionButton(icon = "messages", label = "Messages", badgeCount = messageCount, onClick = onMessages)
+            if (!usesContactMessages) {
+                HeaderActionButton(icon = "logout", label = "Logout", onClick = onLogout)
+            }
+        }
+    }
+}`,
+  ),
+
+  "ui.button-registry": sample(
+    // --- React (real, from src/app/components/ui/button.tsx) ---
+    `import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "./utils";
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:ring-[3px]",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive: "bg-destructive text-white hover:bg-destructive/90",
+        outline: "border bg-background text-foreground hover:bg-accent",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-9 px-4 py-2",
+        sm: "h-8 rounded-md gap-1.5 px-3",
+        lg: "h-10 rounded-md px-6",
+        icon: "size-9 rounded-md",
+      },
+    },
+    defaultVariants: { variant: "default", size: "default" },
+  },
+);
+
+function Button({
+  className, variant, size, asChild = false, ...props
+}: React.ComponentProps<"button"> & VariantProps<typeof buttonVariants> & { asChild?: boolean }) {
+  const Comp = asChild ? Slot : "button";
+  return <Comp data-slot="button" className={cn(buttonVariants({ variant, size, className }))} {...props} />;
+}
+
+export { Button, buttonVariants };`,
+    // --- Swift (SwiftUI port) ---
+    `import SwiftUI
+
+enum ButtonVariant { case primary, secondary, outline, ghost, destructive, link }
+
+struct GenericButton: View {
+    let title: String
+    var variant: ButtonVariant = .primary
+    var isDisabled: Bool = false
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 14, weight: .medium))
+                .padding(.horizontal, 16)
+                .frame(height: 36)
+        }
+        .background(backgroundColor)
+        .foregroundColor(foregroundColor)
+        .overlay(
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(variant == .outline ? Color("ucBorder") : .clear, lineWidth: 1)
+        )
+        .cornerRadius(6)
+        .opacity(isDisabled ? 0.5 : 1)
+        .disabled(isDisabled)
+    }
+
+    private var backgroundColor: Color {
+        switch variant {
+        case .primary: return Color("ucAction")
+        case .secondary: return Color("ucSurfaceMuted")
+        case .destructive: return Color("ucError")
+        case .outline, .ghost, .link: return .clear
+        }
+    }
+
+    private var foregroundColor: Color {
+        switch variant {
+        case .primary, .destructive: return .white
+        default: return Color("ucText")
+        }
+    }
+}`,
+    // --- Kotlin (Jetpack Compose port) ---
+    `import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+enum class GenericButtonVariant { DEFAULT, SECONDARY, OUTLINE, GHOST, DESTRUCTIVE, LINK }
+
+@Composable
+fun GenericButton(
+    label: String,
+    variant: GenericButtonVariant = GenericButtonVariant.DEFAULT,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+) {
+    when (variant) {
+        GenericButtonVariant.OUTLINE -> OutlinedButton(onClick = onClick, enabled = enabled, modifier = Modifier.height(36.dp)) {
+            Text(label)
+        }
+        GenericButtonVariant.GHOST, GenericButtonVariant.LINK -> TextButton(onClick = onClick, enabled = enabled, modifier = Modifier.height(36.dp)) {
+            Text(label)
+        }
+        GenericButtonVariant.DESTRUCTIVE -> Button(
+            onClick = onClick,
+            enabled = enabled,
+            colors = ButtonDefaults.buttonColors(containerColor = UcColors.error, contentColor = UcColors.staticWhite),
+            modifier = Modifier.height(36.dp),
+        ) { Text(label) }
+        GenericButtonVariant.SECONDARY -> Button(
+            onClick = onClick,
+            enabled = enabled,
+            colors = ButtonDefaults.buttonColors(containerColor = UcColors.surfaceMuted, contentColor = UcColors.text),
+            modifier = Modifier.height(36.dp),
+        ) { Text(label) }
+        GenericButtonVariant.DEFAULT -> Button(
+            onClick = onClick,
+            enabled = enabled,
+            colors = ButtonDefaults.buttonColors(containerColor = UcColors.action, contentColor = UcColors.staticWhite),
+            modifier = Modifier.height(36.dp).padding(horizontal = 0.dp),
+        ) { Text(label) }
+    }
+}`,
+  ),
+
+  "ui.generic-controls": sample(
+    // --- React (real, from src/app/components/ui/button.tsx — representative primitive of the kit) ---
+    `import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "./utils";
+
+// Same vendored Button primitive as "ui.button-registry"; the other kit members
+// (Badge, Input, Checkbox, Toggle, Toggle group, Slider, Progress, Separator,
+// Skeleton, Alert, Tabs) live alongside it in src/app/components/ui/*.tsx and
+// follow the same cva()-driven variant pattern.
+const buttonVariants = cva(
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        outline: "border bg-background text-foreground hover:bg-accent",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        destructive: "bg-destructive text-white hover:bg-destructive/90",
+      },
+    },
+    defaultVariants: { variant: "default" },
+  },
+);
+
+export function Button({
+  className, variant, ...props
+}: React.ComponentProps<"button"> & VariantProps<typeof buttonVariants>) {
+  return <button className={cn(buttonVariants({ variant }), className)} {...props} />;
+}`,
+    // --- Swift (SwiftUI port) ---
+    `import SwiftUI
+
+// Representative port for the generic-controls kit. Badge/Input/Checkbox/Toggle/
+// Slider/Progress/Separator/Skeleton/Alert/Tabs map onto native SwiftUI equivalents
+// (Text+background, TextField, Toggle-as-checkbox, Toggle, Slider, ProgressView,
+// Divider, redacted(reason: .placeholder), a custom banner view, and TabView).
+struct GenericControlsButton: View {
+    let title: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(title, action: action)
+            .buttonStyle(.borderedProminent)
+    }
+}`,
+    // --- Kotlin (Jetpack Compose port) ---
+    `import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+
+// Representative port for the generic-controls kit. Badge/Input/Checkbox/Toggle/
+// Slider/Progress/Separator/Skeleton/Alert/Tabs map onto Compose Material3
+// equivalents (AssistChip/Badge, OutlinedTextField, Checkbox, Switch, Slider,
+// LinearProgressIndicator, HorizontalDivider, a shimmer placeholder, a custom
+// banner Composable, and TabRow).
+@Composable
+fun GenericControlsButton(label: String, onClick: () -> Unit) {
+    Button(onClick = onClick) {
+        Text(label)
+    }
+}`,
+  ),
+
+  "prelogin.other-panel": sample(
+    // --- React (real, from src/app/components/PanelWithTranslations.tsx + PanelMenuSheet.tsx) ---
+    `import PanelMenuSheet from "@/app/components/PanelMenuSheet";
+
+interface PanelWithTranslationsProps {
+  aboutSmartBanking: string;
+  exchangeRates: string;
+  findAtmBranches: string;
+  startCoAppingSession: string;
+  onClose?: () => void;
+  onStartCoApping?: () => void;
+}
+
+// Translated panel variant with the optional Co-Apping action enabled.
+export default function PanelWithTranslations(props: PanelWithTranslationsProps) {
+  return <PanelMenuSheet {...props} />;
+}
+
+// PanelMenuSheet renders: a dimmed backdrop, a bottom sheet with a drag handle,
+// and one 375x80 row per label (icon + single-line text), plus the Co-Apping
+// row only when startCoAppingSession is supplied.`,
+    // --- Swift (SwiftUI port) ---
+    `import SwiftUI
+
+struct OtherPanelMenu: View {
+    let aboutSmartBanking: String
+    let exchangeRates: String
+    let findAtmBranches: String
+    let startCoAppingSession: String
+    var onClose: (() -> Void)? = nil
+    var onStartCoApping: (() -> Void)? = nil
+
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            Color.black.opacity(0.51)
+                .background(.ultraThinMaterial)
+                .onTapGesture { onClose?() }
+
+            VStack(spacing: 8) {
+                Capsule()
+                    .fill(Color("ucBorderMuted"))
+                    .frame(width: 40, height: 5)
+                    .padding(.top, 10)
+                    .onTapGesture { onClose?() }
+
+                PanelMenuRow(icon: "panel-smart-banking", label: aboutSmartBanking, action: nil)
+                PanelMenuRow(icon: "payment-exchange-rates", label: exchangeRates, action: nil)
+                PanelMenuRow(icon: "contact-location", label: findAtmBranches, action: nil)
+                PanelMenuRow(icon: "panel-share-screen", label: startCoAppingSession, action: onStartCoApping)
+            }
+            .padding(.vertical, 24)
+            .background(Color("ucText"))
+            .cornerRadius(12, corners: [.topLeft, .topRight])
+        }
+    }
+}
+
+private struct PanelMenuRow: View {
+    let icon: String
+    let label: String
+    let action: (() -> Void)?
+
+    var body: some View {
+        HStack(spacing: 16) {
+            AppIcon(name: icon, color: .white) // integration dependency: shared icon registry
+                .frame(width: 32, height: 32)
+            Text(label)
+                .font(.system(size: 14))
+                .foregroundColor(.white)
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .frame(height: 80)
+        .contentShape(Rectangle())
+        .onTapGesture { action?() }
+    }
+}`,
+    // --- Kotlin (Jetpack Compose port) ---
+    `import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun OtherPanelMenu(
+    aboutSmartBanking: String,
+    exchangeRates: String,
+    findAtmBranches: String,
+    startCoAppingSession: String,
+    onClose: () -> Unit = {},
+    onStartCoApping: () -> Unit = {},
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.51f))
+                .clickable(onClick = onClose),
+        )
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(UcColors.text, RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                .padding(vertical = 24.dp),
+        ) {
+            PanelMenuRow(icon = "panel-smart-banking", label = aboutSmartBanking, onClick = null)
+            PanelMenuRow(icon = "payment-exchange-rates", label = exchangeRates, onClick = null)
+            PanelMenuRow(icon = "contact-location", label = findAtmBranches, onClick = null)
+            PanelMenuRow(icon = "panel-share-screen", label = startCoAppingSession, onClick = onStartCoApping)
+        }
+    }
+}
+
+@Composable
+private fun PanelMenuRow(icon: String, label: String, onClick: (() -> Unit)?) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp)
+            .let { if (onClick != null) it.clickable(onClick = onClick) else it }
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        AppIcon(name = icon, tint = Color.White) // integration dependency: shared icon registry
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(label, color = Color.White)
+    }
+}`,
+  ),
+
+  "prelogin.other-panel-basic": sample(
+    // --- React (real, from src/app/components/PanelWithoutCoAppingTranslations.tsx + PanelMenuSheet.tsx) ---
+    `import PanelMenuSheet from "@/app/components/PanelMenuSheet";
+
+interface PanelWithoutCoAppingTranslationsProps {
+  aboutSmartBanking: string;
+  exchangeRates: string;
+  findAtmBranches: string;
+  onClose?: () => void;
+}
+
+// Translated panel variant for countries where Co-Apping is unavailable: the
+// same PanelMenuSheet without a startCoAppingSession label omits its row entirely.
+export default function PanelWithoutCoAppingTranslations(
+  props: PanelWithoutCoAppingTranslationsProps,
+) {
+  return <PanelMenuSheet {...props} />;
+}`,
+    // --- Swift (SwiftUI port) ---
+    `import SwiftUI
+
+struct OtherPanelMenuBasic: View {
+    let aboutSmartBanking: String
+    let exchangeRates: String
+    let findAtmBranches: String
+    var onClose: (() -> Void)? = nil
+
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            Color.black.opacity(0.51)
+                .background(.ultraThinMaterial)
+                .onTapGesture { onClose?() }
+
+            VStack(spacing: 8) {
+                Capsule()
+                    .fill(Color("ucBorderMuted"))
+                    .frame(width: 40, height: 5)
+                    .padding(.top, 10)
+                    .onTapGesture { onClose?() }
+
+                PanelMenuRowBasic(icon: "panel-smart-banking", label: aboutSmartBanking)
+                PanelMenuRowBasic(icon: "payment-exchange-rates", label: exchangeRates)
+                PanelMenuRowBasic(icon: "contact-location", label: findAtmBranches)
+            }
+            .padding(.vertical, 24)
+            .background(Color("ucText"))
+            .cornerRadius(12, corners: [.topLeft, .topRight])
+        }
+    }
+}
+
+private struct PanelMenuRowBasic: View {
+    let icon: String
+    let label: String
+
+    var body: some View {
+        HStack(spacing: 16) {
+            AppIcon(name: icon, color: .white) // integration dependency
+                .frame(width: 32, height: 32)
+            Text(label).font(.system(size: 14)).foregroundColor(.white)
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .frame(height: 80)
+    }
+}`,
+    // --- Kotlin (Jetpack Compose port) ---
+    `import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun OtherPanelMenuBasic(
+    aboutSmartBanking: String,
+    exchangeRates: String,
+    findAtmBranches: String,
+    onClose: () -> Unit = {},
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.51f))
+                .clickable(onClick = onClose),
+        )
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(UcColors.text, RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                .padding(vertical = 24.dp),
+        ) {
+            PanelMenuRowBasic(icon = "panel-smart-banking", label = aboutSmartBanking)
+            PanelMenuRowBasic(icon = "payment-exchange-rates", label = exchangeRates)
+            PanelMenuRowBasic(icon = "contact-location", label = findAtmBranches)
+        }
+    }
+}
+
+@Composable
+private fun PanelMenuRowBasic(icon: String, label: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth().height(80.dp).padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        AppIcon(name = icon, tint = Color.White) // integration dependency
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(label, color = Color.White)
+    }
+}`,
+  ),
+
+  // ============================================================
   // BATCH 1 — Headers / Navigation / Chrome
   // ============================================================
 
@@ -533,8 +1300,10 @@ fun MobileFrame(content: @Composable () -> Unit) {
 
   "ui.primary-button": sample(
     `// src/app/components/PrimaryButton.tsx (real)
+import type { ReactNode } from "react";
+
 interface PrimaryButtonProps {
-  children: React.ReactNode;
+  children: ReactNode;
   onClick?: () => void;
   disabled?: boolean;
   className?: string;
@@ -557,8 +1326,9 @@ export default function PrimaryButton({
         \${labelSize === "18" ? "uc-type-h2" : "uc-type-n4-strong"}
         transition-all duration-200
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]
+        focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]
         \${disabled ? 'opacity-30 cursor-not-allowed'
-                    : 'cursor-pointer hover:bg-[var(--uc-action-hover)] active:scale-[0.98]'}
+                    : \`opacity-100 cursor-pointer \${isAction ? "hover:bg-[var(--uc-action-hover)]" : "hover:opacity-90"} active:scale-[0.98]\`}
         \${className}
       \`}>
       <span className="block max-w-full truncate">{children}</span>
@@ -608,6 +1378,8 @@ struct ScaleButtonStyle: ButtonStyle {
 }`,
     `package com.unicredit.bank.designsystem
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -616,6 +1388,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -643,12 +1416,17 @@ fun PrimaryButton(
 ) {
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
+    val pressedScale by animateFloatAsState(
+        targetValue = if (pressed && !disabled) 0.98f else 1f,
+        animationSpec = tween(durationMillis = 200),
+        label = "PrimaryButtonScale",
+    )
     Button(
         onClick = onClick,
         enabled = !disabled,
         modifier = modifier
             .width(327.dp).height(48.dp)
-            .scale(if (pressed) 0.98f else 1f)
+            .scale(pressedScale)
             .alpha(if (disabled) 0.3f else 1f),
         colors = ButtonDefaults.buttonColors(
             containerColor = variant.bg,
@@ -4851,7 +5629,7 @@ fun MessagesMailboxTabs(
   ),
 
   // ---- AccountSearchBar ----
-  "accounts.search-bar": sample(
+  "accounts.transaction-search": sample(
     `// src/app/components/accounts/AccountSearchBar.tsx (curated)
 import { AppIcon } from "@/app/components/icons";
 import { cn } from "@/app/components/ui/utils";
@@ -6171,7 +6949,7 @@ fun ContactsNavigationCard(
   // ============================================================
 
   // ---- LogoutConfirmDialog ----
-  "dialogs.logout-confirm": sample(
+  "dialogs.logout-confirmation": sample(
     `// src/app/components/LogoutConfirmDialog.tsx (curated)
 export default function LogoutConfirmDialog({
   open, onConfirm, onCancel,
