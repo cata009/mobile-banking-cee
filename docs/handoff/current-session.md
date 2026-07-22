@@ -8,13 +8,14 @@ Last updated: 2026-07-22
 - Included scope: the complete Design System implementation-package rollout, CZ Basket Funds catalogue, all-country Investments Sell Order, Card Details sensitive/non-sensitive boundary and carousel-shadow correction, Translation Tester updates, and phone-screenshot/Figma-export improvements already present in the workspace.
 - Pre-publication verification: fresh `npm run verify` passed TypeScript, repository ESLint, 61 test files / 603 tests, all six audits (`card-details`, `investments`, `figma-bridge`, `templates`, `platform`, `assets`), and the production Vite build. Known Recharts zero-size diagnostics, the empty `react-vendor` chunk, and large-chunk notices remain the previously triaged non-blocking warnings.
 - Banana Loop: the transient Design System coverage failure observed while concurrent authoring was still writing package entries was rerun after the workspace stabilized; its dedicated suite passed 206/206 and the complete repository gate then passed. No failing gate is being hidden from publication.
-- Publication evidence: pending in this closeout while Git push and Vercel Production deployment are executed; the final commit/deployment identifiers will be recorded before the task is closed.
+- Publication evidence: unified source commit `eea7c9c` (`Unify design system, investments, and card flows`) was pushed from local `main` to `origin/main`. Vercel Production deployment `dpl_2vaoZje5JFPtcKGuCJQJ59Q5gBcs` reached `READY` at `https://mobile-banking-2tbzx3lu1-imc-uci.vercel.app` and updated the canonical alias `https://mobile-banking-cee.vercel.app`.
+- Post-deploy evidence: Vercel inspection reported target `production`, status `Ready`, and the expected `api/access` function; the canonical alias returned HTTP 200 and the deployment error-log query for the preceding hour returned no entries. This publication-evidence-only handoff update is committed and redeployed immediately after the product commit so final `main` and Production remain aligned.
 - constitutional check:
   - scope preserved: yes (the user explicitly requested the whole workspace)
   - docs updated: yes
   - verification recorded: yes
   - bananas triaged: yes
-  - safe to resume: no (publication is still in progress)
+  - safe to resume: yes
 
 ## 2026-07-22 Implementation Package Rollout to All Design System Components
 
