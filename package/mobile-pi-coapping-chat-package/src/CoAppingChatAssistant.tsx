@@ -362,11 +362,13 @@ function AgentFormattedResponse({ text, isStreaming = false }: { text: string; i
 function RichActionButton({
   action,
   onAction,
+  isActionConsumed,
 }: {
   action?: CoAppingChatAction;
   onAction?: (action: CoAppingChatAction) => void;
+  isActionConsumed?: (action: CoAppingChatAction) => boolean;
 }) {
-  if (!action) return null;
+  if (!action || isActionConsumed?.(action)) return null;
 
   return (
     <button type="button" className="mpc-rich-action" onClick={() => onAction?.(action)}>
@@ -424,10 +426,12 @@ function RichMetricGrid({
 function RichBlock({
   block,
   onAction,
+  isActionConsumed,
   renderInvestmentChart,
 }: {
   block: CoAppingRichBlock;
   onAction?: (action: CoAppingChatAction) => void;
+  isActionConsumed?: (action: CoAppingChatAction) => boolean;
   renderInvestmentChart?: (chart: CoAppingInvestmentChart) => ReactNode;
 }) {
   if (block.type === "investment-summary") {
@@ -445,7 +449,7 @@ function RichBlock({
         {block.body.trim() ? <p>{block.body}</p> : null}
         {block.chart && renderInvestmentChart ? renderInvestmentChart(block.chart) : null}
         <RichMetricGrid metrics={block.metrics} layout={block.metricLayout} />
-        <RichActionButton action={block.action} onAction={onAction} />
+        <RichActionButton action={block.action} onAction={onAction} isActionConsumed={isActionConsumed} />
       </div>
     );
   }
@@ -471,7 +475,7 @@ function RichBlock({
             </div>
           ))}
         </div>
-        <RichActionButton action={block.action} onAction={onAction} />
+        <RichActionButton action={block.action} onAction={onAction} isActionConsumed={isActionConsumed} />
       </div>
     );
   }
@@ -497,7 +501,7 @@ function RichBlock({
             </div>
           ))}
         </div>
-        <RichActionButton action={block.action} onAction={onAction} />
+        <RichActionButton action={block.action} onAction={onAction} isActionConsumed={isActionConsumed} />
       </div>
     );
   }
@@ -514,7 +518,8 @@ function RichBlock({
           </div>
           <div className={["mpc-product-card-row", block.variant ? `mpc-product-card-row-${block.variant}` : ""].filter(Boolean).join(" ")}>
             {block.products.map((product) => {
-              const isInteractive = isBlockInteractive && Boolean(product.action);
+              const isInteractive =
+                isBlockInteractive && Boolean(product.action) && !isActionConsumed?.(product.action!);
               const productClassName = [
                 "mpc-product-card",
                 product.tone ? `mpc-product-card-${product.tone}` : "",
@@ -590,7 +595,7 @@ function RichBlock({
             <strong>{block.newLimit}</strong>
           </div>
         </div>
-        <RichActionButton action={block.action} onAction={onAction} />
+        <RichActionButton action={block.action} onAction={onAction} isActionConsumed={isActionConsumed} />
       </div>
     );
   }
@@ -602,7 +607,7 @@ function RichBlock({
         <span>{block.body}</span>
       </div>
       <RichMetricGrid metrics={block.metrics} layout={block.metricLayout ?? "grid"} />
-      <RichActionButton action={block.action} onAction={onAction} />
+      <RichActionButton action={block.action} onAction={onAction} isActionConsumed={isActionConsumed} />
     </div>
   );
 }
@@ -610,10 +615,12 @@ function RichBlock({
 function RichBlocks({
   blocks,
   onAction,
+  isActionConsumed,
   renderInvestmentChart,
 }: {
   blocks?: CoAppingRichBlock[];
   onAction?: (action: CoAppingChatAction) => void;
+  isActionConsumed?: (action: CoAppingChatAction) => boolean;
   renderInvestmentChart?: (chart: CoAppingInvestmentChart) => ReactNode;
 }) {
   if (!blocks?.length) return null;
@@ -625,6 +632,7 @@ function RichBlocks({
           key={`${block.type}-${index}`}
           block={block}
           onAction={onAction}
+          isActionConsumed={isActionConsumed}
           renderInvestmentChart={renderInvestmentChart}
         />
       ))}
@@ -635,10 +643,12 @@ function RichBlocks({
 function BubbleMessage({
   message,
   onAction,
+  isActionConsumed,
   renderInvestmentChart,
 }: {
   message: CoAppingChatMessage;
   onAction?: (action: CoAppingChatAction) => void;
+  isActionConsumed?: (action: CoAppingChatAction) => boolean;
   renderInvestmentChart?: (chart: CoAppingInvestmentChart) => ReactNode;
 }) {
   const isAgent = message.role === "agent";
@@ -650,6 +660,7 @@ function BubbleMessage({
       <RichBlocks
         blocks={message.richBlocks}
         onAction={onAction}
+        isActionConsumed={isActionConsumed}
         renderInvestmentChart={renderInvestmentChart}
       />
     ) : null;
@@ -2023,10 +2034,12 @@ function ForYouOpportunityCard({
   opportunity,
   primary = false,
   onAction,
+  isOptionConsumed,
 }: {
   opportunity: CoAppingOpportunity;
   primary?: boolean;
   onAction: (action: CoAppingChatAction) => void;
+  isOptionConsumed?: (optionId: string) => boolean;
 }) {
   return (
     <article
@@ -2044,7 +2057,8 @@ function ForYouOpportunityCard({
         <p>{opportunity.body}</p>
       </div>
 
-      {opportunity.relatedItem ? (
+      {opportunity.relatedItem &&
+      (!opportunity.relatedItem.action || !isOptionConsumed?.(opportunity.relatedItem.action.id)) ? (
         <button
           type="button"
           className="mpc-for-you-related-card"
@@ -2080,7 +2094,7 @@ function ForYouOpportunityCard({
         </div>
       ) : null}
 
-      {opportunity.action ? (
+      {opportunity.action && !isOptionConsumed?.(opportunity.action.id) ? (
         <LinkButton className="mpc-for-you-action" onClick={() => onAction(opportunity.action!)}>
           {opportunity.action.label}
         </LinkButton>
@@ -2089,7 +2103,13 @@ function ForYouOpportunityCard({
   );
 }
 
-function ForYouDiscoveryContent({ onAction }: { onAction: (action: CoAppingChatAction) => void }) {
+function ForYouDiscoveryContent({
+  onAction,
+  isOptionConsumed,
+}: {
+  onAction: (action: CoAppingChatAction) => void;
+  isOptionConsumed?: (optionId: string) => boolean;
+}) {
   return (
     <div className="mpc-for-you-discovery">
       <div className="mpc-discovery-section-head mpc-discovery-section-head-first">
@@ -2098,7 +2118,7 @@ function ForYouDiscoveryContent({ onAction }: { onAction: (action: CoAppingChatA
       </div>
 
       <HorizontalDragScroller className="mpc-discovery-hero-carousel" ariaLabel="Grow your money topics">
-        {forYouHeroTopics.map((topic) => (
+        {forYouHeroTopics.filter((topic) => !isOptionConsumed?.(topic.id)).map((topic) => (
           <button
             key={topic.id}
             type="button"
@@ -2133,7 +2153,7 @@ function ForYouDiscoveryContent({ onAction }: { onAction: (action: CoAppingChatA
       </div>
 
       <HorizontalDragScroller className="mpc-discovery-promo-carousel" ariaLabel="Next best conversation topics">
-        {forYouPromoTopics.map((topic) => (
+        {forYouPromoTopics.filter((topic) => !isOptionConsumed?.(topic.id)).map((topic) => (
           <button
             key={topic.id}
             type="button"
@@ -2167,7 +2187,7 @@ function ForYouDiscoveryContent({ onAction }: { onAction: (action: CoAppingChatA
       </div>
 
       <div className="mpc-discovery-article-list">
-        {forYouArticleTopics.map((topic) => (
+        {forYouArticleTopics.filter((topic) => !isOptionConsumed?.(topic.id)).map((topic) => (
           <button
             key={topic.id}
             type="button"
@@ -2198,9 +2218,11 @@ function ForYouDiscoveryContent({ onAction }: { onAction: (action: CoAppingChatA
 function ForYouFeed({
   opportunities,
   onAction,
+  isOptionConsumed,
 }: {
   opportunities: CoAppingOpportunity[];
   onAction: (action: CoAppingChatAction) => void;
+  isOptionConsumed?: (optionId: string) => boolean;
 }) {
   const [primaryOpportunity, ...secondaryOpportunities] = opportunities;
 
@@ -2213,15 +2235,25 @@ function ForYouFeed({
 
       {primaryOpportunity ? (
         <>
-          <ForYouOpportunityCard opportunity={primaryOpportunity} primary onAction={onAction} />
+          <ForYouOpportunityCard
+            opportunity={primaryOpportunity}
+            primary
+            onAction={onAction}
+            isOptionConsumed={isOptionConsumed}
+          />
           {secondaryOpportunities.length ? (
             <div className="mpc-for-you-secondary-list" aria-label="Other relevant options">
               {secondaryOpportunities.map((opportunity) => (
-                <ForYouOpportunityCard key={opportunity.id} opportunity={opportunity} onAction={onAction} />
+                <ForYouOpportunityCard
+                  key={opportunity.id}
+                  opportunity={opportunity}
+                  onAction={onAction}
+                  isOptionConsumed={isOptionConsumed}
+                />
               ))}
             </div>
           ) : null}
-          <ForYouDiscoveryContent onAction={onAction} />
+          <ForYouDiscoveryContent onAction={onAction} isOptionConsumed={isOptionConsumed} />
         </>
       ) : (
         <div className="mpc-for-you-empty" role="status">
@@ -2297,6 +2329,7 @@ export function CoAppingChatAssistant({
     initialMessages.length > 0 ? initialMessages : fallbackConversationMessages,
   );
   const [messages, setMessages] = useState<CoAppingChatMessage[]>([]);
+  const [consumedOptionIds, setConsumedOptionIds] = useState<ReadonlySet<string>>(() => new Set());
   const [draft, setDraft] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
@@ -2325,6 +2358,7 @@ export function CoAppingChatAssistant({
   const conversationListExitTimeoutRef = useRef<number | null>(null);
   const followUpDragResetTimeoutRef = useRef<number | null>(null);
   const followUpPointerClickHandledRef = useRef(false);
+  const consumedOptionIdsRef = useRef<ReadonlySet<string>>(new Set());
   const wasConversationListOpenRef = useRef(false);
   const dragStartYRef = useRef(0);
   const conversationListRef = useRef<HTMLDivElement | null>(null);
@@ -2524,7 +2558,7 @@ export function CoAppingChatAssistant({
 
   const sendMessage = (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed || isTyping || streamingMessageId) return;
+    if (!trimmed || isTyping || streamingMessageId) return false;
 
     const userMessage: CoAppingChatMessage = {
       id: `user-${Date.now()}`,
@@ -2572,6 +2606,8 @@ export function CoAppingChatAssistant({
       setThinkingStatusText("");
       startReplyStream(reply);
     }, typingDelayMs);
+
+    return true;
   };
 
   const stopMediaStream = () => {
@@ -2763,8 +2799,29 @@ export function CoAppingChatAssistant({
     sendMessage(draft);
   };
 
+  const isOptionConsumed = (optionId: string) => consumedOptionIds.has(optionId);
+
+  const consumeOption = (optionId: string) => {
+    if (consumedOptionIdsRef.current.has(optionId)) return false;
+
+    const nextConsumedOptionIds = new Set(consumedOptionIdsRef.current);
+    nextConsumedOptionIds.add(optionId);
+    consumedOptionIdsRef.current = nextConsumedOptionIds;
+    setConsumedOptionIds(nextConsumedOptionIds);
+    return true;
+  };
+
+  const resetConsumedOptions = () => {
+    const emptyConsumedOptionIds = new Set<string>();
+    consumedOptionIdsRef.current = emptyConsumedOptionIds;
+    setConsumedOptionIds(emptyConsumedOptionIds);
+  };
+
   const handleAction = (action: CoAppingChatAction) => {
+    if (consumedOptionIdsRef.current.has(action.id)) return;
+
     if (action.type === "navigate") {
+      consumeOption(action.id);
       onAction?.(action);
       setIsAttachmentMenuOpen(false);
       setIsMoreMenuOpen(false);
@@ -2772,7 +2829,9 @@ export function CoAppingChatAssistant({
     }
 
     setAssistantMode("chat");
-    sendMessage(action.prompt ?? action.label);
+    if (sendMessage(action.prompt ?? action.label)) {
+      consumeOption(action.id);
+    }
   };
 
   const handleFollowUpClick = (suggestion: CoAppingFollowUpSuggestion) => {
@@ -2781,7 +2840,17 @@ export function CoAppingChatAssistant({
       return;
     }
 
-    sendMessage(suggestion.prompt ?? suggestion.label);
+    if (consumedOptionIdsRef.current.has(suggestion.id)) return;
+    if (sendMessage(suggestion.prompt ?? suggestion.label)) {
+      consumeOption(suggestion.id);
+    }
+  };
+
+  const handleSuggestedTopicClick = (topic: CoAppingSuggestedTopic) => {
+    if (consumedOptionIdsRef.current.has(topic.id)) return;
+    if (sendMessage(topic.prompt ?? topic.label)) {
+      consumeOption(topic.id);
+    }
   };
 
   const handleDraftChange = (value: string) => {
@@ -2911,15 +2980,17 @@ export function CoAppingChatAssistant({
     suggestion: CoAppingFollowUpSuggestion,
   ) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
-    if (followUpDragRef.current.moved) {
+    const drag = followUpDragRef.current;
+    const releasedAfterDrag =
+      drag.moved ||
+      (drag.active && drag.pointerId === event.pointerId && Math.abs(event.clientX - drag.startX) > 4);
+    if (releasedAfterDrag) {
+      drag.moved = true;
       event.preventDefault();
-      event.stopPropagation();
-      followUpDragRef.current.moved = false;
       return;
     }
 
     event.preventDefault();
-    event.stopPropagation();
     followUpPointerClickHandledRef.current = true;
     handleFollowUpClick(suggestion);
     window.setTimeout(() => {
@@ -2950,6 +3021,7 @@ export function CoAppingChatAssistant({
 
   const startNewConversation = () => {
     resetPendingReply();
+    resetConsumedOptions();
     setMessages([]);
     setActiveConversationId(null);
     setConversationListReturnTarget("new");
@@ -2966,6 +3038,7 @@ export function CoAppingChatAssistant({
     if (!entryContext) return;
 
     resetPendingReply();
+    resetConsumedOptions();
     setMessages([]);
     setActiveConversationId(null);
     setConversationListReturnTarget("new");
@@ -2991,6 +3064,7 @@ export function CoAppingChatAssistant({
 
   const openSavedConversation = () => {
     resetPendingReply();
+    resetConsumedOptions();
     setMessages(savedConversationMessagesRef.current);
     setActiveConversationId("intro");
     setConversationListReturnTarget("conversation");
@@ -3100,7 +3174,9 @@ export function CoAppingChatAssistant({
   const activeSuggestedTopicsSource = entryContext?.suggestedTopics?.length
     ? entryContext.suggestedTopics
     : suggestedTopics;
-  const activeSuggestedTopics = activeSuggestedTopicsSource.slice(0, MAX_VISIBLE_SUGGESTED_TOPICS);
+  const activeSuggestedTopics = activeSuggestedTopicsSource
+    .filter((topic) => !isOptionConsumed(topic.id))
+    .slice(0, MAX_VISIBLE_SUGGESTED_TOPICS);
   const newConversationGreeting = entryContext?.title ?? `${getGreetingLabel()}, ${assistantGreetingName}`;
   const hasActiveConversation = messages.length > 0;
   const isConversationDetailOpen = !isConversationListVisible && !isForYouMode && hasActiveConversation;
@@ -3111,7 +3187,9 @@ export function CoAppingChatAssistant({
   const latestMessage = messages[messages.length - 1];
   const activeFollowUps =
     !isConversationListVisible && !isForYouMode && latestMessage?.role === "agent" && !latestMessage.isStreaming
-      ? (latestMessage.followUps ?? [])
+      ? (latestMessage.followUps ?? []).filter(
+          (suggestion) => !isOptionConsumed(suggestion.action?.id ?? suggestion.id),
+        )
       : [];
   const sheetStyle = { "--mpc-sheet-offset": `${dragY}px` } as CSSProperties;
 
@@ -3302,7 +3380,11 @@ export function CoAppingChatAssistant({
       </header>
 
       {isForYouMode ? (
-        <ForYouFeed opportunities={opportunities} onAction={handleAction} />
+        <ForYouFeed
+          opportunities={opportunities}
+          onAction={handleAction}
+          isOptionConsumed={isOptionConsumed}
+        />
       ) : isConversationListVisible ? (
         <div
           className={["mpc-conversation-list", isConversationListExiting ? "mpc-conversation-list-exiting" : ""]
@@ -3365,6 +3447,7 @@ export function CoAppingChatAssistant({
                 key={message.id}
                 message={message}
                 onAction={handleAction}
+                isActionConsumed={(action) => isOptionConsumed(action.id)}
                 renderInvestmentChart={renderInvestmentChart}
               />
             ))}
@@ -3421,7 +3504,7 @@ export function CoAppingChatAssistant({
               <button
                 key={topic.id}
                 type="button"
-                onClick={() => sendMessage(topic.prompt ?? topic.label)}
+                onClick={() => handleSuggestedTopicClick(topic)}
                 className="mpc-topic-row"
               >
                 <SuggestedTopicIcon />

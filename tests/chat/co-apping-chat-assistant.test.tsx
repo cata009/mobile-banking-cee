@@ -62,6 +62,17 @@ class FakeResizeObserver {
   disconnect() {}
 }
 
+class FakePointerEvent extends MouseEvent {
+  pointerId: number
+  pointerType: string
+
+  constructor(type: string, init: PointerEventInit = {}) {
+    super(type, init)
+    this.pointerId = init.pointerId ?? 0
+    this.pointerType = init.pointerType ?? ''
+  }
+}
+
 type RecognitionResultHandler = (event: {
   resultIndex: number
   results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal: boolean }>
@@ -108,6 +119,22 @@ function makeStream(stop = vi.fn()) {
 beforeEach(() => {
   removeSpeechRecognition()
   setMediaDevices()
+  Object.defineProperty(window, 'PointerEvent', {
+    configurable: true,
+    value: FakePointerEvent,
+  })
+  Object.defineProperty(HTMLElement.prototype, 'setPointerCapture', {
+    configurable: true,
+    value: vi.fn(),
+  })
+  Object.defineProperty(HTMLElement.prototype, 'hasPointerCapture', {
+    configurable: true,
+    value: vi.fn(() => true),
+  })
+  Object.defineProperty(HTMLElement.prototype, 'releasePointerCapture', {
+    configurable: true,
+    value: vi.fn(),
+  })
   Object.defineProperty(HTMLElement.prototype, 'scrollTo', {
     configurable: true,
     value: vi.fn(),
@@ -128,6 +155,10 @@ afterEach(() => {
   vi.restoreAllMocks()
   removeSpeechRecognition()
   setMediaDevices()
+  Reflect.deleteProperty(window, 'PointerEvent')
+  Reflect.deleteProperty(HTMLElement.prototype, 'setPointerCapture')
+  Reflect.deleteProperty(HTMLElement.prototype, 'hasPointerCapture')
+  Reflect.deleteProperty(HTMLElement.prototype, 'releasePointerCapture')
   Reflect.deleteProperty(HTMLElement.prototype, 'scrollTo')
   Reflect.deleteProperty(globalThis, 'ResizeObserver')
 })
@@ -266,9 +297,9 @@ describe('CZ Chat investment product summary', () => {
   })
 
   it.each([
-    ['Review performance', 'How is my position in UniCredit Balanced Income Fund performing?'],
-    ['Review risk', 'Explain the risk, liquidity, and currency exposure of UniCredit Balanced Income Fund.'],
-    ['What documents matter?', 'What documents should I review for UniCredit Balanced Income Fund?'],
+    ['How is it doing for me?', 'How is UniCredit Balanced Income Fund doing for me?'],
+    ['What could affect my return?', 'What could affect my return from UniCredit Balanced Income Fund?'],
+    ['Show me the essentials', 'Show me the essential information I should check for UniCredit Balanced Income Fund.'],
   ])('sends the real product prompt when %s is clicked', async (label, prompt) => {
     const followUps: NonNullable<CoAppingChatMessage['followUps']> = [
       {
@@ -289,6 +320,176 @@ describe('CZ Chat investment product summary', () => {
     fireEvent.click(screen.getByRole('button', { name: label }))
 
     await waitFor(() => expect(resolveReply).toHaveBeenCalledWith(prompt, expect.any(Array)))
+  })
+
+  it('consumes selected options globally when a later reply repeats the same action id', async () => {
+    const selectedPrompt = 'Review the risk of this product.'
+    const repeatedOption: NonNullable<CoAppingChatMessage['followUps']>[number] = {
+      id: 'follow-up-review-risk',
+      label: 'Review risk',
+      action: {
+        id: 'action-review-risk',
+        label: 'Review risk',
+        type: 'send-message',
+        prompt: selectedPrompt,
+      },
+    }
+    const nextOption: NonNullable<CoAppingChatMessage['followUps']>[number] = {
+      id: 'follow-up-next-step',
+      label: 'Next step',
+      action: {
+        id: 'action-next-step',
+        label: 'Next step',
+        type: 'send-message',
+        prompt: 'Continue to the next step.',
+      },
+    }
+    const resolveReply = vi.fn(async (input: string) =>
+      input === 'Explain this product'
+        ? { text: 'Ready', richBlocks: investmentSummaryMessage.richBlocks, followUps: [repeatedOption] }
+        : { text: 'Risk reviewed', followUps: [repeatedOption, nextOption] },
+    )
+
+    const { view } = await openInvestmentSummary([repeatedOption], resolveReply)
+    fireEvent.click(screen.getByRole('button', { name: 'Review risk' }))
+
+    await screen.findByText('Risk reviewed')
+    await waitFor(() => expect(view.container.querySelector('.mpc-agent-copy-streaming')).toBeNull())
+    expect(screen.queryByRole('button', { name: 'Review risk' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Next step' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Back to conversations' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Start new conversation' }))
+    const input = await screen.findByRole('textbox', { name: 'Ask me anything' })
+    fireEvent.change(input, { target: { value: 'Explain this product' } })
+    fireEvent.submit(input.closest('form')!)
+
+    await screen.findByText('Ready')
+    await waitFor(() => expect(view.container.querySelector('.mpc-agent-copy-streaming')).toBeNull())
+    expect(screen.getByRole('button', { name: 'Review risk' })).toBeInTheDocument()
+  })
+
+  it('releases pointer capture after selecting a follow-up chip', async () => {
+    const followUps: NonNullable<CoAppingChatMessage['followUps']> = [
+      {
+        id: 'follow-up-review-risk',
+        label: 'Review risk',
+        action: {
+          id: 'action-review-risk',
+          label: 'Review risk',
+          type: 'send-message',
+          prompt: 'Explain the risk of this product.',
+        },
+      },
+    ]
+    const resolveReply = vi.fn(async (input: string) =>
+      input === 'Explain this product'
+        ? { text: 'Ready', richBlocks: investmentSummaryMessage.richBlocks, followUps }
+        : { text: `Resolved: ${input}` },
+    )
+    const { view } = await openInvestmentSummary(followUps, resolveReply)
+    const shelf = view.container.querySelector<HTMLElement>('.mpc-follow-up-shelf')
+    const chip = screen.getByRole('button', { name: 'Review risk' })
+
+    expect(shelf).not.toBeNull()
+    Object.defineProperty(shelf, 'scrollWidth', { configurable: true, value: 320 })
+    Object.defineProperty(shelf, 'clientWidth', { configurable: true, value: 180 })
+
+    fireEvent.pointerDown(chip, { pointerId: 7, pointerType: 'mouse', button: 0, clientX: 120 })
+    fireEvent.pointerUp(chip, { pointerId: 7, pointerType: 'mouse', button: 0, clientX: 120 })
+
+    expect(HTMLElement.prototype.setPointerCapture).toHaveBeenCalledWith(7)
+    expect(HTMLElement.prototype.releasePointerCapture).toHaveBeenCalledWith(7)
+    await waitFor(() => {
+      expect(resolveReply).toHaveBeenCalledWith('Explain the risk of this product.', expect.any(Array))
+    })
+  })
+
+  it('does not select a follow-up chip when pointer release completes a drag', async () => {
+    const prompt = 'Review this product in my portfolio.'
+    const followUps: NonNullable<CoAppingChatMessage['followUps']> = [
+      {
+        id: 'follow-up-review-portfolio',
+        label: 'Review portfolio',
+        action: {
+          id: 'action-review-portfolio',
+          label: 'Review portfolio',
+          type: 'send-message',
+          prompt,
+        },
+      },
+    ]
+    const resolveReply = vi.fn(async (input: string) =>
+      input === 'Explain this product'
+        ? { text: 'Ready', richBlocks: investmentSummaryMessage.richBlocks, followUps }
+        : { text: `Resolved: ${input}` },
+    )
+    const { view } = await openInvestmentSummary(followUps, resolveReply)
+    const shelf = view.container.querySelector<HTMLElement>('.mpc-follow-up-shelf')
+    const chip = screen.getByRole('button', { name: 'Review portfolio' })
+
+    expect(shelf).not.toBeNull()
+    Object.defineProperty(shelf, 'scrollWidth', { configurable: true, value: 320 })
+    Object.defineProperty(shelf, 'clientWidth', { configurable: true, value: 180 })
+    resolveReply.mockClear()
+
+    fireEvent.pointerDown(chip, { pointerId: 9, pointerType: 'mouse', button: 0, clientX: 140 })
+    fireEvent.pointerMove(chip, { pointerId: 9, pointerType: 'mouse', button: 0, clientX: 100 })
+    fireEvent.pointerUp(chip, { pointerId: 9, pointerType: 'mouse', button: 0, clientX: 100 })
+    fireEvent.click(chip)
+
+    expect(shelf).toHaveProperty('scrollLeft', 40)
+    expect(screen.queryByText(prompt)).not.toBeInTheDocument()
+    expect(resolveReply).not.toHaveBeenCalled()
+  })
+
+  it('does not select the chip under pointer release when a drag crosses chips', async () => {
+    const firstPrompt = 'Review this product in my portfolio.'
+    const secondPrompt = 'Show me the documents that matter.'
+    const followUps: NonNullable<CoAppingChatMessage['followUps']> = [
+      {
+        id: 'follow-up-review-portfolio',
+        label: 'Review portfolio',
+        action: {
+          id: 'action-review-portfolio',
+          label: 'Review portfolio',
+          type: 'send-message',
+          prompt: firstPrompt,
+        },
+      },
+      {
+        id: 'follow-up-review-documents',
+        label: 'Review documents',
+        action: {
+          id: 'action-review-documents',
+          label: 'Review documents',
+          type: 'send-message',
+          prompt: secondPrompt,
+        },
+      },
+    ]
+    const resolveReply = vi.fn(async (input: string) =>
+      input === 'Explain this product'
+        ? { text: 'Ready', richBlocks: investmentSummaryMessage.richBlocks, followUps }
+        : { text: `Resolved: ${input}` },
+    )
+    const { view } = await openInvestmentSummary(followUps, resolveReply)
+    const shelf = view.container.querySelector<HTMLElement>('.mpc-follow-up-shelf')
+    const firstChip = screen.getByRole('button', { name: 'Review portfolio' })
+    const releaseChip = screen.getByRole('button', { name: 'Review documents' })
+
+    expect(shelf).not.toBeNull()
+    Object.defineProperty(shelf, 'scrollWidth', { configurable: true, value: 360 })
+    Object.defineProperty(shelf, 'clientWidth', { configurable: true, value: 180 })
+    resolveReply.mockClear()
+
+    fireEvent.pointerDown(firstChip, { pointerId: 10, pointerType: 'mouse', button: 0, clientX: 160 })
+    fireEvent.pointerUp(releaseChip, { pointerId: 10, pointerType: 'mouse', button: 0, clientX: 100 })
+    fireEvent.click(releaseChip)
+
+    expect(screen.queryByText(firstPrompt)).not.toBeInTheDocument()
+    expect(screen.queryByText(secondPrompt)).not.toBeInTheDocument()
+    expect(resolveReply).not.toHaveBeenCalled()
   })
 })
 

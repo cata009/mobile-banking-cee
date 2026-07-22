@@ -17,10 +17,12 @@ interface CostSummaryRowProps {
   emphasize?: ScenarioEmphasis;
 }
 
-/** "ON-GOING / ENTRY / TOTAL"-style row: label on the left, percent + amount stacked on the right. */
+/** "ON-GOING / ENTRY / TOTAL"-style row: label on the left, percent + amount stacked on the right.
+ *  No horizontal padding here — the parent wrapper supplies the 24px inset so
+ *  the separator line and the row content stay aligned to the same edge. */
 function CostSummaryRow({ label, percent, amount, emphasize = "value" }: CostSummaryRowProps) {
   return (
-    <div className="flex items-start justify-between px-[24px] py-[10px]">
+    <div className="flex items-start justify-between py-[10px]">
       <p className="uc-type-n4-strong uppercase text-[var(--uc-text)]">{label}</p>
       <div className="text-right">
         {emphasize === "value" ? (
@@ -46,17 +48,20 @@ interface CostSubFeeRowProps {
   percent: string;
 }
 
-/** Indented "TRANSACTION FEE / (P)"-style sub-row under a CostSummaryRow. */
+/** Indented "TRANSACTION FEE / (P)"-style sub-row under a CostSummaryRow.
+ *  16px left indent relative to the parent's 24px inset = 40px visual indent.
+ *  Labels stay muted+bold; the values (amount + percent) are black+bold so
+ *  the numbers stand out from their descriptive labels. */
 function CostSubFeeRow({ label, amount, percentLabel, percent }: CostSubFeeRowProps) {
   return (
-    <div className="pl-[40px] pr-[24px]">
+    <div className="pl-[16px]">
       <div className="flex items-center justify-between py-[3px]">
-        <p className="uc-type-n5 text-[var(--uc-text-muted)]">{label}</p>
-        <p className="uc-type-n5 text-[var(--uc-text-muted)]">{amount}</p>
+        <p className="uc-type-n5-strong text-[var(--uc-text-muted)]">{label}</p>
+        <p className="uc-type-n5-strong text-[var(--uc-text)]">{amount}</p>
       </div>
       <div className="flex items-center justify-between py-[3px]">
-        <p className="uc-type-n5 text-[var(--uc-text-muted)]">{percentLabel}</p>
-        <p className="uc-type-n5 text-[var(--uc-text-muted)]">{percent}</p>
+        <p className="uc-type-n5-strong text-[var(--uc-text-muted)]">{percentLabel}</p>
+        <p className="uc-type-n5-strong text-[var(--uc-text)]">{percent}</p>
       </div>
     </div>
   );
@@ -66,16 +71,18 @@ function CostSubFeeRow({ label, amount, percentLabel, percent }: CostSubFeeRowPr
 function CostBreakdownBlock({ currency, emphasize }: { currency: string; emphasize?: ScenarioEmphasis }) {
   return (
     <div className="flex flex-col">
-      <CostSummaryRow label="ON-GOING" percent="9,30%" amount={`1 000,00 ${currency}`} emphasize={emphasize} />
-      <CostSubFeeRow label="TRANSACTION FEE" amount={`500,00 ${currency}`} percentLabel="(P)" percent="4,15%" />
-      <CostSubFeeRow label="BANK FEE" amount={`500,00 ${currency}`} percentLabel="(P)" percent="4,15%" />
+      <div className="px-[24px]">
+        <CostSummaryRow label="ON-GOING" percent="9,30%" amount={`1 000,00 ${currency}`} emphasize={emphasize} />
+        <CostSubFeeRow label="TRANSACTION FEE" amount={`500,00 ${currency}`} percentLabel="(P)" percent="4,15%" />
+        <CostSubFeeRow label="BANK FEE" amount={`500,00 ${currency}`} percentLabel="(P)" percent="4,15%" />
+      </div>
 
-      <div className="mx-[24px] mt-[10px] border-t border-[var(--uc-border)] pt-[10px]">
+      <div className="px-[24px]">
         <CostSummaryRow label="ENTRY" percent="9,30%" amount={`1 000,00 ${currency}`} emphasize={emphasize} />
         <CostSubFeeRow label="TRANSACTION FEE" amount={`500,00 ${currency}`} percentLabel="(P)" percent="4,15%" />
       </div>
 
-      <div className="mx-[24px] mt-[10px] border-t border-[var(--uc-border)] pt-[10px]">
+      <div className="px-[24px]">
         <CostSummaryRow label="TOTAL" percent="9,30%" amount={`1 000,00 ${currency}`} emphasize={emphasize} />
       </div>
     </div>
@@ -147,10 +154,10 @@ function DocumentsAccordionSection({
           </span>
         </span>
         <span
-          className="grid size-[32px] shrink-0 place-items-center transition-transform duration-200"
+          className="grid size-[24px] shrink-0 place-items-center transition-transform duration-200"
           style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
         >
-          <AppIcon name="chevron-down" color={isOpen ? "var(--uc-action)" : "var(--uc-icon)"} />
+          <AppIcon name="chevron-down" size={16} color={isOpen ? "var(--uc-action)" : "var(--uc-icon)"} />
         </span>
       </button>
       <div
@@ -169,13 +176,41 @@ function DocumentsAccordionSection({
   );
 }
 
-const PRODUCT_DOCUMENT_TITLES = ["Product Document 1", "Product Document 2", "Advisory Report"] as const;
+interface ProductDocumentEntry {
+  id: string;
+  title: string;
+  description: string;
+}
+
+const PRODUCT_DOCUMENTS: readonly ProductDocumentEntry[] = [
+  {
+    id: "kid",
+    title: "Key Information Document (KID)",
+    description: "Standardised risks, costs and performance profile",
+  },
+  {
+    id: "prospectus",
+    title: "Prospectus",
+    description: "Official fund objectives, terms and conditions",
+  },
+  {
+    id: "advisory-report",
+    title: "Investment Advisory Report",
+    description: "Personalised recommendation and rationale",
+  },
+];
 
 function ProductDocumentsContent() {
   return (
     <div className="flex flex-col">
-      {PRODUCT_DOCUMENT_TITLES.map((title) => (
-        <NavigationRow key={title} title={title} description="Lorem Ipsum" trailingAccessory="chevron" rowHeight={80} />
+      {PRODUCT_DOCUMENTS.map((document) => (
+        <NavigationRow
+          key={document.id}
+          title={document.title}
+          description={document.description}
+          trailingAccessory="chevron"
+          rowHeight={80}
+        />
       ))}
     </div>
   );
@@ -272,7 +307,7 @@ function ScenarioViewToggle({
   onChange: (value: ScenarioEmphasis) => void;
 }) {
   return (
-    <div className="flex items-center gap-[24px]" role="tablist" aria-label="Performance scenario view">
+    <div className="flex items-center justify-center gap-[24px]" role="tablist" aria-label="Performance scenario view">
       {(["percent", "value"] as const).map((id) => {
         const active = id === value;
 
@@ -303,16 +338,36 @@ function ScenarioViewToggle({
   );
 }
 
-const CHART_GRID_LABELS = ["113%", "56,50%", "0", "-56,50%"] as const;
+const CHART_GRID_LABELS_PERCENT = ["113%", "56,50%", "0", "-56,50%"] as const;
+/** Base amount used to derive currency axis values from the percentage grid. */
+const CHART_VALUE_BASE = 10000;
+
+/** Compact K-suffixed currency formatting for the chart axis:
+ *  11300 -> "11.3K", 110000 -> "110K", 5650 -> "5.7K", 0 -> "0". Keeps axis
+ *  labels short so they don't crowd the plot area. */
+function formatAxisValueK(amount: number): string {
+  if (amount === 0) return "0";
+  const thousands = amount / 1000;
+  // Trim trailing .0 so round thousands render as "110K" not "110.0K".
+  const suffix = Number.isInteger(thousands) ? thousands.toString() : thousands.toFixed(1);
+  return `${suffix}K`;
+}
+
+const CHART_GRID_LABELS_VALUE = (currency: string): readonly string[] => [
+  `${formatAxisValueK(CHART_VALUE_BASE * 1.13)} ${currency}`,
+  `${formatAxisValueK(CHART_VALUE_BASE * 0.565)} ${currency}`,
+  `0 ${currency}`,
+  `-${formatAxisValueK(CHART_VALUE_BASE * 0.565)} ${currency}`,
+];
 const CHART_ROW_GAP = 56;
-const CHART_PLOT_HEIGHT = CHART_ROW_GAP * (CHART_GRID_LABELS.length - 1);
+const CHART_PLOT_HEIGHT = CHART_ROW_GAP * (CHART_GRID_LABELS_PERCENT.length - 1);
 const CHART_BASELINE_TOP = CHART_ROW_GAP * 2; // the "0" gridline is the 3rd label
 
 interface ScenarioBar {
   id: string;
   label: string;
-  labelColor: string;
-  totalHeight: number;
+  /** Bar height as a fraction of CHART_BASELINE_TOP (the positive axis range). */
+  heightFraction: number;
   segments: readonly number[];
   segmentColor: (index: number) => string;
   segmentOpacity: number;
@@ -320,10 +375,9 @@ interface ScenarioBar {
 
 const SCENARIO_BARS: readonly ScenarioBar[] = [
   {
-    id: "bad",
-    label: "BAD",
-    labelColor: "var(--uc-text)",
-    totalHeight: CHART_BASELINE_TOP,
+    id: "negative",
+    label: "NEGATIVE",
+    heightFraction: 1,
     segments: [0.3, 0.25, 0.2, 0.15, 0.1],
     segmentColor: (index) => CHART_COLORS[index % CHART_COLORS.length] ?? CHART_COLORS[0],
     segmentOpacity: 1,
@@ -331,8 +385,7 @@ const SCENARIO_BARS: readonly ScenarioBar[] = [
   {
     id: "neutral",
     label: "NEUTRAL",
-    labelColor: "var(--uc-action)",
-    totalHeight: CHART_ROW_GAP,
+    heightFraction: 0.5,
     segments: [0.4, 0.35, 0.25],
     segmentColor: (index) => CHART_COLORS[index % CHART_COLORS.length] ?? CHART_COLORS[0],
     segmentOpacity: 0.4,
@@ -340,8 +393,7 @@ const SCENARIO_BARS: readonly ScenarioBar[] = [
   {
     id: "positive",
     label: "POSITIVE",
-    labelColor: POSITIVE_SCENARIO_COLOR,
-    totalHeight: CHART_ROW_GAP * 0.35,
+    heightFraction: 0.35,
     segments: [1],
     segmentColor: () => POSITIVE_SCENARIO_COLOR,
     segmentOpacity: 1,
@@ -349,64 +401,117 @@ const SCENARIO_BARS: readonly ScenarioBar[] = [
 ];
 
 const SCENARIO_CHART_LEGEND = [
-  { label: "Net investment amount", color: CHART_COLORS[0] },
-  { label: "Lorem Ipsum", color: CHART_COLORS[1] },
-  { label: "Lorem Ipsum", color: CHART_COLORS[2] },
-  { label: "Lorem Ipsum", color: CHART_COLORS[3] },
-  { label: "Lorem Ipsum", color: CHART_COLORS[4] },
+  { label: "Stress scenario", color: CHART_COLORS[0] },
+  { label: "Unfavourable", color: CHART_COLORS[1] },
+  { label: "Moderate", color: CHART_COLORS[2] },
+  { label: "Favourable", color: CHART_COLORS[3] },
+  { label: "Optimistic", color: CHART_COLORS[4] },
 ] as const;
 
 /**
  * Illustrative PRIIPs-style performance-scenario chart: three stacked bars
- * (bad / neutral / positive) against a 113% .. -56,50% grid. Segment weights
- * are representative example proportions, not computed figures.
+ * (negative / neutral / positive) growing upward from the "0" gridline
+ * against a 113% .. -56,50% grid. When `view` is "value" the left axis shows
+ * currency amounts derived from CHART_VALUE_BASE; when "percent" it shows the
+ * raw percentages. Segment weights are representative example proportions,
+ * not computed figures.
  */
-function PerformanceScenarioChart() {
+function PerformanceScenarioChart({
+  view,
+  currency,
+  periodIndex,
+  onPeriodChange,
+}: {
+  view: ScenarioEmphasis;
+  currency: string;
+  periodIndex: number;
+  onPeriodChange: (index: number) => void;
+}) {
+  const gridLabels =
+    view === "percent" ? CHART_GRID_LABELS_PERCENT : CHART_GRID_LABELS_VALUE(currency);
+  // Percent labels are short ("113%"); value labels are K-suffixed ("11.3K USD").
+  // Both fit comfortably in 72px, keeping the plot area wide.
+  const axisLabelWidth = 72;
+  const barsInset = axisLabelWidth + 8;
+  const barWidth = 56;
+
   return (
     <div className="mt-[20px] px-[24px]">
       <div className="relative" style={{ height: CHART_PLOT_HEIGHT }}>
-        {CHART_GRID_LABELS.map((label, index) => (
+        {gridLabels.map((label, index) => (
           <div
-            key={label}
+            key={index}
             className="absolute inset-x-0 flex items-center gap-[8px]"
             style={{ top: index * CHART_ROW_GAP }}
           >
-            <span className="w-[52px] shrink-0 uc-type-n5 text-[var(--uc-text-muted)]">{label}</span>
+            <span
+              className="shrink-0 uc-type-n5 text-[var(--uc-text-muted)]"
+              style={{ width: `${axisLabelWidth}px` }}
+            >
+              {label}
+            </span>
             <span className="h-px flex-1 bg-[var(--uc-border-muted)]" aria-hidden="true" />
           </div>
         ))}
 
+        {/* Bars grow upward from the "0" gridline. The container spans the
+            positive axis range (top 0 .. CHART_BASELINE_TOP) and uses
+            items-end so each bar's base sits exactly on the "0" gridline
+            (top: CHART_BASELINE_TOP), with no gap. */}
         <div
-          className="absolute inset-x-[52px] bottom-0 flex items-end justify-around"
-          style={{ height: CHART_BASELINE_TOP }}
+          className="absolute flex items-end justify-between"
+          style={{ left: barsInset, right: 8, top: 0, height: CHART_BASELINE_TOP }}
         >
-          {SCENARIO_BARS.map((bar) => (
-            <div key={bar.id} className="flex flex-col items-center">
-              <span className="uc-type-n5-strong mb-[6px]" style={{ color: bar.labelColor }}>
-                {bar.label}
-              </span>
-              <div
-                className="flex w-[40px] flex-col-reverse overflow-hidden rounded-t-[2px]"
-                style={{ height: bar.totalHeight }}
-              >
-                {bar.segments.map((fraction, segmentIndex) => (
-                  <div
-                    key={segmentIndex}
-                    aria-hidden="true"
-                    style={{
-                      height: `${fraction * 100}%`,
-                      backgroundColor: bar.segmentColor(segmentIndex),
-                      opacity: bar.segmentOpacity,
-                    }}
-                  />
-                ))}
+          {SCENARIO_BARS.map((bar) => {
+            const barHeight = Math.round(bar.heightFraction * CHART_BASELINE_TOP);
+            return (
+              <div key={bar.id} className="flex flex-col items-center">
+                <div
+                  className="flex flex-col overflow-hidden rounded-t-[2px]"
+                  style={{ height: barHeight, width: barWidth }}
+                >
+                  {bar.segments.map((fraction, segmentIndex) => (
+                    <div
+                      key={segmentIndex}
+                      aria-hidden="true"
+                      style={{
+                        height: `${fraction * 100}%`,
+                        backgroundColor: bar.segmentColor(segmentIndex),
+                        opacity: bar.segmentOpacity,
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      <div className="mt-[20px] grid grid-cols-2 gap-x-[16px] gap-y-[10px]">
+      {/* Scenario labels, placed under the whole plot (below the last gridline),
+          aligned to the same edges as the bars above. All labels use the same
+          text color so the three scenarios read as a neutral legend, not as
+          color-coded categories. */}
+      <div
+        className="mt-[20px] flex justify-between"
+        style={{ marginLeft: barsInset, marginRight: 8 }}
+      >
+        {SCENARIO_BARS.map((bar) => (
+          <span
+            key={bar.id}
+            className="uc-type-n5-strong text-center text-[var(--uc-text)]"
+            style={{ width: barWidth }}
+          >
+            {bar.label}
+          </span>
+        ))}
+      </div>
+
+      {/* Period selector sits above the legend so the user picks the horizon
+          before reading the scenario legend below. */}
+      <ScenarioPeriodChips selectedIndex={periodIndex} onSelect={onPeriodChange} />
+
+      <div className="mt-[32px] grid grid-cols-2 gap-x-[16px] gap-y-[10px]">
         {SCENARIO_CHART_LEGEND.map((item, index) => (
           <div key={index} className="flex items-center gap-[8px]">
             <span
@@ -422,7 +527,7 @@ function PerformanceScenarioChart() {
   );
 }
 
-const SCENARIO_PERIODS = ["0Y", "1Y", "3Y", "3Y"] as const;
+const SCENARIO_PERIODS = ["0Y", "1Y", "3Y", "5Y", "7Y", "10Y"] as const;
 
 function ScenarioPeriodChips({
   selectedIndex,
@@ -432,7 +537,7 @@ function ScenarioPeriodChips({
   onSelect: (index: number) => void;
 }) {
   return (
-    <div className="mt-[20px] flex items-center justify-center gap-[8px] px-[24px]">
+    <div className="mt-[20px] flex items-center justify-center gap-[8px]">
       {SCENARIO_PERIODS.map((label, index) => {
         const selected = index === selectedIndex;
 
@@ -466,19 +571,23 @@ function InvestmentDisclaimerContent({ currency }: { currency: string }) {
       <div className="px-[24px]">
         <ScenarioViewToggle value={scenarioView} onChange={setScenarioView} />
       </div>
-      <PerformanceScenarioChart />
-      <ScenarioPeriodChips selectedIndex={selectedPeriodIndex} onSelect={setSelectedPeriodIndex} />
+      <PerformanceScenarioChart
+        view={scenarioView}
+        currency={currency}
+        periodIndex={selectedPeriodIndex}
+        onPeriodChange={setSelectedPeriodIndex}
+      />
 
       <div className="mt-[20px]">
         <CostBreakdownBlock currency={currency} emphasize={scenarioView} />
       </div>
 
-      <div className="mx-[24px] mt-[10px] border-t border-[var(--uc-border)] pt-[10px]">
+      <div className="px-[24px]">
         <CostSummaryRow label="NET INVESTMENT AMOUNT" percent="9,30%" amount={`1 000,00 ${currency}`} emphasize={scenarioView} />
         <CostSummaryRow label="NET RETURN" percent="9,30%" amount={`1 000,00 ${currency}`} emphasize={scenarioView} />
       </div>
 
-      <div className="mx-[24px] mt-[10px] border-t border-[var(--uc-border)] pt-[10px]">
+      <div className="px-[24px]">
         <CostSummaryRow label="TOTAL" percent="9,30%" amount={`1 000,00 ${currency}`} emphasize={scenarioView} />
       </div>
     </div>

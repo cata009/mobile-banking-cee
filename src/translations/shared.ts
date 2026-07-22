@@ -279,7 +279,7 @@ const EN_RUNTIME: RuntimeTranslations = {
     actions: {
       history: "History",
       toApprove: "To approve",
-      downloadReport: "Download\nReport",
+      downloadReport: "Consolidated\nreport",
       invest: "Invest",
     },
     fundBanner: {

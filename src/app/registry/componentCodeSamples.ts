@@ -5819,6 +5819,184 @@ fun InvestmentActionBar(actions: List<InvestmentActionItem>, modifier: Modifier 
 }`,
   ),
 
+  // ---- InvestmentsFundBanner (title / description / action / illustration CTA) ----
+  "investments.fund-banner": sample(
+    `// src/app/components/investments/InvestmentsFundBanner.tsx (curated)
+import { AppIcon } from "@/app/components/icons";
+import fundBannerPlant from "@/assets/investments/fund-banner-plant-unsplash.jpg";
+
+interface InvestmentsFundBannerProps {
+  title: string;
+  description: string;
+  actionLabel: string;
+  onClick?: () => void;
+}
+
+function FundBannerIllustration() {
+  return (
+    <div className="absolute right-0 top-0 h-full w-[179px] overflow-hidden" aria-hidden="true">
+      <img
+        src={fundBannerPlant}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ objectPosition: "32px center" }}
+        draggable={false}
+      />
+      <div className="absolute inset-y-0 left-0 w-[88px] bg-gradient-to-r from-[var(--uc-surface-muted)] via-[color-mix(in_srgb,var(--uc-surface-muted)_90%,transparent)] to-transparent" />
+    </div>
+  );
+}
+
+export default function InvestmentsFundBanner({
+  title, description, actionLabel, onClick,
+}: InvestmentsFundBannerProps) {
+  return (
+    <button type="button" onClick={onClick}
+      className="relative mx-[16px] mt-[24px] block h-[157px] w-[calc(100%-32px)] overflow-hidden rounded-[8px] bg-[var(--uc-surface-muted)] p-[16px] text-left shadow-none"
+      data-ds-label="Investments fund banner">
+      <div className="relative z-10 max-w-[223px]">
+        <h2 className="text-[22px] font-bold leading-[26px] tracking-[0.2px] text-[var(--uc-text)]">{title}</h2>
+        <p className="mt-[8px] text-[18px] font-normal leading-normal text-[var(--uc-text)]">{description}</p>
+        <span className="mt-[18px] inline-flex items-center gap-[4px] text-[14px] font-bold uppercase leading-normal text-[var(--uc-text)]">
+          {actionLabel}
+          <AppIcon name="arrow-right" size={12} color="var(--uc-text)" strokeWidth={3} />
+        </span>
+      </div>
+      <FundBannerIllustration />
+    </button>
+  );
+}`,
+    `import SwiftUI
+
+// Reference port — adapt to your native project conventions.
+struct InvestmentsFundBanner: View {
+    let title: String
+    let description: String
+    let actionLabel: String
+    var onClick: (() -> Void)? = nil
+
+    var body: some View {
+        Button(action: { onClick?() }) {
+            ZStack(alignment: .topTrailing) {
+                // Decorative illustration on the right edge
+                Image("fund-banner-plant")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 179)
+                    .clipped()
+                    .accessibilityHidden(true)
+                // Left gradient fade into the muted surface
+                LinearGradient(
+                    gradient: Gradient(colors: [Color(UcTokens.SurfaceMuted), Color(UcTokens.SurfaceMuted).opacity(0)]),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .frame(width: 88)
+                .frame(maxHeight: .infinity, alignment: .leading)
+                .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(title)
+                        .font(.system(size: 22, weight: .bold))
+                        .tracking(0.2)
+                        .lineSpacing(4)
+                    Text(description)
+                        .font(.system(size: 18))
+                        .padding(.top, 8)
+                    HStack(spacing: 4) {
+                        Text(actionLabel)
+                            .font(.system(size: 14, weight: .bold))
+                            .textCase(.uppercase)
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 12, weight: .bold))
+                    }
+                    .padding(.top, 18)
+                }
+                .foregroundStyle(Color(UcTokens.Text))
+                .frame(maxWidth: 223, alignment: .leading)
+                .padding(16)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            }
+            .frame(height: 157)
+            .background(Color(UcTokens.SurfaceMuted))
+            .cornerRadius(8)
+        }
+    }
+}`,
+    `package com.unicredit.bank.designsystem
+
+// Reference port — adapt to your native project conventions.
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.toUpperCase
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+@Composable
+fun InvestmentsFundBanner(
+    title: String,
+    description: String,
+    actionLabel: String,
+    onClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(157.dp)
+            .background(UcTokens.SurfaceMuted, RoundedCornerShape(8.dp))
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
+            .padding(16.dp)
+    ) {
+        // Decorative illustration anchored to the right edge
+        Image(
+            painter = painterResource("fund-banner-plant"),
+            contentDescription = null,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .width(179.dp)
+                .matchParentSize(),
+        )
+        // Left gradient fade into the muted surface
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .width(88.dp)
+                .matchParentSize()
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(UcTokens.SurfaceMuted, Color.Transparent)
+                    )
+                )
+        )
+
+        Column(modifier = Modifier.width(223.dp)) {
+            Text(title, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = UcTokens.Text)
+            Text(description, fontSize = 18.sp, color = UcTokens.Text, modifier = Modifier.padding(top = 8.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(top = 18.dp),
+            ) {
+                Text(actionLabel.uppercase(), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = UcTokens.Text)
+                Icon(painterResource("arrow-right"), contentDescription = null, modifier = Modifier.size(12.dp))
+            }
+        }
+    }
+}`,
+  ),
+
   // ---- PaymentHeroCard (curated; image paths elided) ----
   "payments.hero-card": sample(
     `// src/app/components/payments/PaymentHeroCard.tsx (curated)
