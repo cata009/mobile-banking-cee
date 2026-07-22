@@ -1,6 +1,6 @@
 {
-  "baselineCommit": "b4cc1ea",
-  "baselineNote": "Re-locked on 2026-07-20 after the explicit reference checkpoint added 13 untouched production-reference JPEG captures under To do/ (nine PFM and four Payments). The previously approved 159 product/repository assets and their blobs are unchanged; this baseline expansion records the newly tracked reference material instead of excluding it from the fail-closed audit.",
-  "assetCount": 172,
-  "pathBlobSha256Aggregate": "1147bb46435a865e9cc0b4b1fd16230e6193687af64861e88865b6691579623c"
+  "baselineCommit": "4fb5987",
+  "baselineNote": "Re-locked on 2026-07-22 after the approved Investments Funds Window change added seven exact Figma assets: six collection banners and the Amundi fund logo. All seven are referenced by the implemented storefront/detail components; no existing image was deleted, replaced, or optimized.",
+  "assetCount": 179,
+  "pathBlobSha256Aggregate": "6bbb0011ce0c62bc5eda2a5b73e75a51f83f511da0ea4e9ef98d44d8523d1ff3"
 }

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import "@testing-library/jest-dom/vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import InvestmentBuyOrderFlow from "@/app/screens/investments/InvestmentBuyOrderFlow";
 import { InvestmentSecurityDetailScreen } from "@/app/screens/investments/InvestmentSecurityScreens";
@@ -63,7 +63,10 @@ beforeAll(() => {
 });
 
 afterAll(() => vi.unstubAllGlobals());
-afterEach(cleanup);
+afterEach(() => {
+  vi.useRealTimers();
+  cleanup();
+});
 
 describe("InvestmentBuyOrderFlow", () => {
   it("starts directly on Review Data with a validated draft collected by chat", () => {
@@ -93,6 +96,7 @@ describe("InvestmentBuyOrderFlow", () => {
   });
 
   it("completes a one-off buy order from order data to success", () => {
+    vi.useFakeTimers();
     const onComplete = vi.fn();
 
     render(
@@ -119,6 +123,9 @@ describe("InvestmentBuyOrderFlow", () => {
 
     expect(screen.getAllByRole("heading", { name: "Sign order" })).not.toHaveLength(0);
     fireEvent.click(screen.getByRole("button", { name: "Sign order" }));
+    expect(document.querySelector('[data-face-id-authenticating="true"]')).not.toBeNull();
+    expect(screen.queryByRole("heading", { name: "Order accepted" })).not.toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(840));
     expect(screen.getByRole("heading", { name: "Order accepted" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Back to investments" }));
     expect(onComplete).toHaveBeenCalledOnce();

@@ -38,6 +38,15 @@ import {
   roundCzChatSavingAmount,
   type CzChatSmartReplyOptions,
 } from "./cz/helpers";
+import {
+  buildInvestmentGoalProjectionBlock,
+  extractInvestmentGoalDraft,
+  formatInvestmentGoalHorizon,
+  formatInvestmentGoalPurpose,
+  formatInvestmentGoalRisk,
+  getInvestmentGoalFundCollectionId,
+  getInvestmentGoalNextStep,
+} from "./cz/investmentGoal";
 
 export {
   CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX,
@@ -637,30 +646,6 @@ export function buildCzChatSmartReplyResolver({
     ],
   };
 
-  const investmentGoalAllocationBlock: CoAppingRichBlock = {
-    type: "investment-allocation",
-    title: "Goal portfolio preview",
-    body: "Illustrative mix based on the current portfolio shape. Final product selection still needs documents, risk profile, and authorization in Investments.",
-    items: buildInvestmentDistributionItems(investmentSecurities, "asset-class")
-      .slice(0, 4)
-      .map((item) => ({
-        label: item.label,
-        value: item.percent,
-        helper: `${formatCzChatMoney(item.value, item.currency, country)} in this mock portfolio`,
-      })),
-  };
-
-  const investmentGoalProjectionBlock: CoAppingRichBlock = {
-    type: "investment-projection",
-    title: "Goal simulation",
-    body: "Illustrative scenario for 10,000 CZK now plus 1,000 CZK monthly. Not a guarantee.",
-    scenarios: [
-      { label: "Lower", value: "64k CZK", detail: "More conservative market path" },
-      { label: "Expected", value: "78k CZK", detail: "Middle scenario", emphasis: true },
-      { label: "Higher", value: "94k CZK", detail: "Stronger market path" },
-    ],
-  };
-
   const normalize = (input: string) => input.toLowerCase().replace(/\s+/g, " ").trim();
   const hasAny = (normalized: string, terms: string[]) => terms.some((term) => normalized.includes(term));
   const selectedInvestmentNameNormalized = selectedInvestmentSecurity
@@ -669,6 +654,8 @@ export function buildCzChatSmartReplyResolver({
 
   return (input, messages) => {
     const normalized = normalize(input);
+    const investmentGoalDraft = extractInvestmentGoalDraft(messages);
+    const investmentGoalNextStep = getInvestmentGoalNextStep(investmentGoalDraft);
     const namedInvestmentSecurity = investmentSecurityCatalog.find((security) =>
       normalized.includes(normalize(security.title)),
     );
@@ -975,96 +962,33 @@ export function buildCzChatSmartReplyResolver({
       };
     }
 
-    const afterAcceptanceFollowUp = buildCzChatFollowUp(
-      "cz-limit-offer-after-acceptance",
-      "After acceptance",
-      "What happens after the credit limit offer is accepted?",
+    const creditLimitReviewFollowUp = buildCzNavigateFollowUp(
+      "cz-limit-review",
+      "Review offer",
+      "credit-limit-review",
     );
-    const signNowFollowUp = buildCzChatFollowUp(
-      "cz-limit-offer-sign-now",
-      "Sign now",
-      "Sign the credit limit offer now.",
+    const creditLimitNotNowFollowUp = buildCzChatFollowUp(
+      "cz-limit-not-now",
+      "Not now",
+      "Finish this credit limit conversation without changing anything.",
     );
 
-    if (hasAny(normalized, ["continue to confirmation for this credit limit offer", "continue to confirmation", "review final offer", "continue with this offer"])) {
+    if (hasAny(normalized, ["finish this credit limit conversation without changing anything", "leave this credit limit offer unchanged"])) {
       return {
         text:
-          `### Ready to confirm\n` +
-          `Here is the final simulation checkpoint before accepting the offer.\n` +
-          `${primaryCard ? `Card: **${primaryCard.name}**, ${formatMaskedCardNumber(primaryCard.accountNumber)}.` : "Card: selected credit card."}\n` +
-          `Current limit: **${creditLimit}**.\n` +
-          `New limit after acceptance: **${proposedCreditLimit}**.\n` +
-          `Before anything changes, the authenticated card flow still needs eligibility, final terms, strong customer authentication, and your signature.`,
-        followUps: [
-          buildCzChatFollowUp("cz-limit-offer-accept-final", "Accept new limit", "Accept the new credit limit offer."),
-          buildCzChatFollowUp("cz-limit-offer-repayment", "Explain repayment impact", "Explain repayment impact for this credit limit offer."),
-        ],
+          `### Offer left unchanged\n` +
+          `Nothing changed on your card. You can review a future eligible offer from the card page.`,
       };
     }
 
-    if (hasAny(normalized, ["accept the new credit limit offer", "accept new limit", "confirm new limit", "confirm this offer"])) {
-      return {
-        text:
-          `### Signature required\n` +
-          `You accepted the credit-limit offer in chat, but the new limit is not active yet.\n` +
-          `${primaryCard ? `The limit prepared for signing is **${proposedCreditLimit}** for **${primaryCard.name}**.` : `The limit prepared for signing is **${proposedCreditLimit}**.`}\n` +
-          `Next, the authenticated card flow should show the final terms, strong customer authentication, and your signature before the card limit is changed.`,
-        followUps: [afterAcceptanceFollowUp, signNowFollowUp],
-      };
-    }
-
-    if (hasAny(normalized, ["sign the credit limit offer now", "sign now", "start signing", "continue to signing", "complete the signature"])) {
-      return {
-        text:
-          `### Sign now\n` +
-          `${primaryCard ? `Open the secure signing step for **${primaryCard.name}**.` : "Open the secure signing step for this card."}\n` +
-          `Review the final terms for the **${proposedCreditLimit}** limit, confirm with strong customer authentication, and sign.\n` +
-          `The new card limit should become active only after that signature is completed.`,
-        followUps: [afterAcceptanceFollowUp],
-      };
-    }
-
-    if (hasAny(normalized, ["what happens after the credit limit offer is accepted", "what happens next", "after acceptance"])) {
-      return {
-        text:
-          `### After acceptance\n` +
-          `The customer should see three things before the limit changes: final terms, strong customer authentication, and a signature step.\n` +
-          `After signing, the app can show a confirmation receipt, update the card limit, and keep the confirmation available from card activity or Documents.`,
-        followUps: [signNowFollowUp],
-      };
-    }
-
-    if (hasAny(normalized, ["repayment impact for this credit limit offer", "repayment impact", "impact if i accept"])) {
+    if (hasAny(normalized, ["check repayment impact for this credit limit offer", "repayment impact for this credit limit offer", "repayment impact", "impact if i accept"])) {
       return {
         text:
           `### Repayment impact\n` +
-          `A higher limit does not create a payment by itself. It gives the card more available room, so the important question is whether higher spending would still fit your monthly repayment comfort.\n` +
-          `${primaryCard ? `For this card, the limit could move from **${creditLimit}** to **${proposedCreditLimit}**.` : "The final amount is checked in the card flow."}\n` +
-          `Before accepting, I would check:\n` +
-          `1. Recent card spend and upcoming repayments.\n` +
-          `2. Whether you usually repay the full statement or carry balance.\n` +
-          `3. The final terms shown before confirmation.\n` +
-          `Nothing changes from chat; acceptance stays inside the authenticated card flow.`,
-        richBlocks: [creditLimitOfferBlock],
-        followUps: [
-          buildCzChatFollowUp("cz-limit-offer-continue", "Continue to confirmation", "Continue to confirmation for this credit limit offer."),
-          buildCzChatFollowUp("cz-limit-offer-accept-change", "What changes if I accept?", "What changes if I accept this credit limit offer?"),
-        ],
-      };
-    }
-
-    if (hasAny(normalized, ["what changes if i accept this credit limit offer", "what changes if i accept", "accept this offer"])) {
-      return {
-        text:
-          `### If you accept\n` +
-          `The offer starts a guided card-limit flow. The app shows the final proposed limit, the terms, and any confirmation steps before anything changes.\n` +
-          `${primaryCard ? `In this scenario, your current limit is **${creditLimit}** and the new proposed limit is **${proposedCreditLimit}**.` : ""}\n` +
-          `The right UX is: explore in chat, review details in Card, confirm only after the authenticated final screen.`,
-        richBlocks: [creditLimitOfferBlock],
-        followUps: [
-          buildCzChatFollowUp("cz-limit-offer-continue", "Continue to confirmation", "Continue to confirmation for this credit limit offer."),
-          buildCzChatFollowUp("cz-limit-offer-repayment", "Explain repayment impact", "Explain repayment impact for this credit limit offer."),
-        ],
+          `A higher limit does not create a charge by itself. It only adds spending room, so keep any extra use within an amount you can comfortably repay.\n` +
+          `${primaryCard ? `This offer moves **${primaryCard.name}** from **${creditLimit}** to **${proposedCreditLimit}**.` : "The exact amounts are confirmed in the secure card flow."}\n` +
+          `Review the final terms before signing; nothing changes from this conversation.`,
+        followUps: [creditLimitReviewFollowUp, creditLimitNotNowFollowUp],
       };
     }
 
@@ -1080,14 +1004,14 @@ export function buildCzChatSmartReplyResolver({
     ) {
       return {
         text:
-          `### Explore your offer\n` +
-          `Based on this simulation profile, the bank has matched your card usage and spending room with a higher limit offer for this credit card.\n` +
-          `${primaryCard ? `Your current limit is **${creditLimit}**. The proposed new limit is **${proposedCreditLimit}**.` : "The exact limit is confirmed in the card flow."}\n` +
-          `You can review the offer without changing anything. I would check repayment comfort and final eligibility first, then hand you to the authenticated card flow if you want to continue.`,
+          `### Your limit offer\n` +
+          `${primaryCard ? `Increase **${primaryCard.name}** from **${creditLimit}** to **${proposedCreditLimit}** for extra flexibility when you need it.` : "Review the eligible limit prepared for your card."}\n` +
+          `You can check the repayment impact here or open the secure review. Nothing changes until you accept the terms and sign.`,
         richBlocks: [creditLimitOfferBlock],
         followUps: [
-          buildCzChatFollowUp("cz-limit-offer-repayment", "Explain repayment impact", "Explain repayment impact for this credit limit offer."),
-          buildCzChatFollowUp("cz-limit-offer-accept-change", "What changes if I accept?", "What changes if I accept this credit limit offer?"),
+          buildCzChatFollowUp("cz-limit-impact", "Check repayment impact", "Check repayment impact for this credit limit offer."),
+          creditLimitReviewFollowUp,
+          creditLimitNotNowFollowUp,
         ],
       };
     }
@@ -1762,132 +1686,116 @@ export function buildCzChatSmartReplyResolver({
       };
     }
 
-    if (hasAny(normalized, ["start an investment goal", "start investment goal", "set investment goal", "new investment goal"])) {
+    if (["start an investment goal", "start an investment goal.", "start investment goal", "new investment goal"].includes(normalized)) {
       return {
         text:
           `### Investment goal setup\n` +
-          `I can help shape the goal before any product choice.\n` +
-          `Start with the purpose, then the assistant can narrow the horizon, starting amount, monthly contribution, and risk comfort.\n` +
-          `In this simulation profile the investment portfolio is ${investmentValue} with ${investmentReturn} performance, so I would keep the goal conversation connected to the current portfolio instead of starting from a blank catalogue.\n` +
-          `Nothing is ordered from chat; the final product, documents, suitability, and authorization stay inside Investments.`,
+          `Let's build a useful brief before looking at funds.\n` +
+          `We will cover purpose, timing, amount, monthly habit, and risk comfort, then continue into the existing Funds window.\n` +
+          `Nothing is ordered from chat; product documents, suitability, and authorization remain inside Investments.`,
         richBlocks: [investmentGoalPortfolioBlock],
         followUps: [
-          buildCzChatFollowUp("cz-goal-grow-savings", "Grow my savings"),
-          buildCzChatFollowUp("cz-goal-future-purchase", "Future purchase"),
-          buildCzChatFollowUp("cz-goal-long-term", "Long-term reserve"),
+          buildCzChatFollowUp("cz-goal-purpose-grow-savings", "Grow my savings", "Set investment goal purpose to grow savings."),
+          buildCzChatFollowUp("cz-goal-purpose-future-purchase", "Future purchase", "Set investment goal purpose to future purchase."),
+          buildCzChatFollowUp("cz-goal-purpose-long-term-reserve", "Long-term reserve", "Set investment goal purpose to long-term reserve."),
         ],
       };
     }
 
-    if (hasAny(normalized, ["grow my savings", "future purchase", "long-term reserve", "retirement"])) {
-      const selectedGoal = normalized.includes("future purchase")
-        ? "future purchase"
-        : normalized.includes("long-term") || normalized.includes("retirement")
-          ? "long-term reserve"
-          : "grow my savings";
-
+    if (normalized === "finish this investment goal conversation" || normalized === "finish this investment goal conversation.") {
       return {
         text:
-          `### Goal selected\n` +
-          `Good, I will treat this as a **${selectedGoal}** goal.\n` +
-          `The next useful input is time horizon. Money needed soon should stay calmer and more accessible; money with a longer horizon can usually tolerate more movement.\n` +
-          `Pick the closest horizon so the preview can stay realistic.`,
-        followUps: [
-          buildCzChatFollowUp("cz-goal-horizon-3-5", "In 3-5 years"),
-          buildCzChatFollowUp("cz-goal-horizon-5-10", "In 5-10 years"),
-          buildCzChatFollowUp("cz-goal-horizon-unsure", "Not sure yet"),
-        ],
+          `### Goal plan complete\n` +
+          `Your planning brief stays in this conversation. No goal or order was created.\n` +
+          `You can start a new conversation whenever you want to explore funds or adjust the plan.`,
+        followUps: [],
       };
     }
 
-    if (hasAny(normalized, ["5,000 czk", "5000 czk", "10,000 czk", "10000 czk", "i'm not sure yet", "im not sure yet"])) {
-      return {
-        text:
-          `### Starting amount noted\n` +
-          `A recurring contribution can make the plan less dependent on one perfect entry day.\n` +
-          `For this mock profile, I would keep the contribution modest until the portfolio exposure and any pending orders are reviewed.\n` +
-          `Choose a monthly amount or skip it for now.`,
-        followUps: [
-          buildCzChatFollowUp("cz-goal-monthly-500", "500 CZK monthly"),
-          buildCzChatFollowUp("cz-goal-monthly-1000", "1,000 CZK monthly"),
-          buildCzChatFollowUp("cz-goal-monthly-not-now", "Not now"),
-        ],
-      };
-    }
+    if (normalized.startsWith("set investment goal ")) {
+      if (investmentGoalNextStep === "horizon") {
+        return {
+          text:
+            `### Choose your horizon\n` +
+            `Your purpose is **${formatInvestmentGoalPurpose(investmentGoalDraft.purpose)}**.\n` +
+            `Choose when you may need the money. A longer horizon can absorb more movement, but it does not remove risk.`,
+          followUps: [
+            buildCzChatFollowUp("cz-goal-horizon-3-5", "In 3-5 years", "Set investment goal horizon to 3-5 years."),
+            buildCzChatFollowUp("cz-goal-horizon-5-10", "In 5-10 years", "Set investment goal horizon to 5-10 years."),
+            buildCzChatFollowUp("cz-goal-horizon-undecided", "Not sure yet", "Set investment goal horizon to not sure yet."),
+          ],
+        };
+      }
 
-    if (hasAny(normalized, ["in 3-5 years", "in 5-10 years", "not sure yet"])) {
-      return {
-        text:
-          `### Time horizon captured\n` +
-          `Now choose an initial amount for the simulation.\n` +
-          `This is only used for the simulation preview. The real app would still confirm source of funds, product documents, suitability, and authorization before any order.\n` +
-          `The current portfolio context is ${investmentValue} with ${investmentReturn} performance, so I would not start from a blank product catalogue.`,
-        followUps: [
-          buildCzChatFollowUp("cz-goal-amount-5000", "5,000 CZK"),
-          buildCzChatFollowUp("cz-goal-amount-10000", "10,000 CZK"),
-          buildCzChatFollowUp("cz-goal-amount-unsure", "I'm not sure yet"),
-        ],
-      };
-    }
+      if (investmentGoalNextStep === "starting-amount") {
+        return {
+          text:
+            `### Choose a starting amount\n` +
+            `Horizon: **${formatInvestmentGoalHorizon(investmentGoalDraft.horizon)}**.\n` +
+            `This amount is used only for the illustration. No money moves from chat.`,
+          followUps: [
+            buildCzChatFollowUp("cz-goal-starting-5000", "5,000 CZK", "Set investment goal starting amount to 5,000 CZK."),
+            buildCzChatFollowUp("cz-goal-starting-10000", "10,000 CZK", "Set investment goal starting amount to 10,000 CZK."),
+            buildCzChatFollowUp("cz-goal-starting-undecided", "I'm not sure yet", "Set investment goal starting amount to not sure yet."),
+          ],
+        };
+      }
 
-    if (hasAny(normalized, ["500 czk monthly", "1,000 czk monthly", "1000 czk monthly", "not now"])) {
-      return {
-        text:
-          `### Model portfolio preview\n` +
-          `Here is the kind of preview that makes the goal flow useful without pretending to place an order.\n` +
-          `It connects the goal to the existing portfolio: ${investmentValue}, ${investmentReturn} performance, ${topInvestmentShare} in the largest holding, and ${assetClassMix || "the visible asset-class mix"}.\n` +
-          `Before any real product action, the customer still needs documents, risk checks, and authorization inside Investments.`,
-        richBlocks: [investmentGoalAllocationBlock],
-        followUps: [
-          buildCzChatFollowUp("cz-goal-see-projection", "See projection"),
-          buildCzChatFollowUp("cz-goal-why-balanced", "Why this portfolio?"),
-          buildCzChatFollowUp("cz-goal-review-orders", "Review orders", "Review my investment orders."),
-        ],
-      };
-    }
+      if (investmentGoalNextStep === "monthly-contribution") {
+        return {
+          text:
+            `### Add a monthly contribution\n` +
+            `A regular contribution can reduce dependence on one entry day.\n` +
+            `Choose a comfortable illustration amount, or leave it at zero for now.`,
+          followUps: [
+            buildCzChatFollowUp("cz-goal-monthly-500", "500 CZK monthly", "Set investment goal monthly contribution to 500 CZK."),
+            buildCzChatFollowUp("cz-goal-monthly-1000", "1,000 CZK monthly", "Set investment goal monthly contribution to 1,000 CZK."),
+            buildCzChatFollowUp("cz-goal-monthly-none", "Not now", "Set investment goal monthly contribution to not now."),
+          ],
+        };
+      }
 
-    if (hasAny(normalized, ["see projection", "simulation", "projection"])) {
-      return {
-        text:
-          `### Projection preview\n` +
-          `This is an illustrative planning view, not a promise.\n` +
-          `The assistant should show a range so the customer understands uncertainty, then keep final product selection and documents in the Investments area.\n` +
-          `Use this after the goal, horizon, starting amount, and monthly habit are clear.`,
-        richBlocks: [investmentGoalProjectionBlock],
-        followUps: [
-          buildCzChatFollowUp("cz-goal-adjust-amount", "Adjust amount", "I want to adjust the starting amount for this investment goal."),
-          buildCzChatFollowUp("cz-goal-why-balanced-next", "Why this portfolio?"),
-          buildCzChatFollowUp("cz-goal-review-portfolio", "Review portfolio", "Review my investment portfolio context."),
-        ],
-      };
-    }
+      if (investmentGoalNextStep === "risk-comfort") {
+        return {
+          text:
+            `### Choose your risk comfort\n` +
+            `This does not determine suitability. It only changes the illustrative range and helps frame the Funds review.\n` +
+            `Choose the description closest to how much movement you are comfortable seeing.`,
+          followUps: [
+            buildCzChatFollowUp("cz-goal-risk-calm", "Prefer less movement", "Set investment goal risk comfort to prefer less movement."),
+            buildCzChatFollowUp("cz-goal-risk-balanced", "Balanced", "Set investment goal risk comfort to balanced."),
+            buildCzChatFollowUp("cz-goal-risk-growth", "Accept more movement", "Set investment goal risk comfort to accept more movement."),
+          ],
+        };
+      }
 
-    if (hasAny(normalized, ["adjust amount", "adjust the starting amount"])) {
-      return {
-        text:
-          `### Adjust starting amount\n` +
-          `Sure. Choose the amount you want to use for the simulation.\n` +
-          `This does not create an order; it only changes the preview path.`,
-        followUps: [
-          buildCzChatFollowUp("cz-goal-adjust-5000", "5,000 CZK"),
-          buildCzChatFollowUp("cz-goal-adjust-10000", "10,000 CZK"),
-          buildCzChatFollowUp("cz-goal-adjust-unsure", "I'm not sure yet"),
-        ],
-      };
-    }
+      const startingAmountLabel = investmentGoalDraft.startingAmount
+        ? `${investmentGoalDraft.startingAmount.toLocaleString("en-US")} CZK`
+        : "Not decided yet";
+      const monthlyContributionLabel = investmentGoalDraft.monthlyContribution
+        ? `${investmentGoalDraft.monthlyContribution.toLocaleString("en-US")} CZK monthly`
+        : "No monthly contribution yet";
 
-    if (hasAny(normalized, ["why this portfolio", "why this mix", "explain risk"])) {
       return {
         text:
-          `### Why this portfolio\n` +
-          `For a goal preview, I would explain the mix before naming any product.\n` +
-          `The current portfolio already shows ${assetClassMix || "an asset-class split"} and ${currencyMix || "a currency split"}, with ${topInvestmentSecurity ? `${topInvestmentShare} in ${topInvestmentSecurity.title}` : "no single holding selected"}.\n` +
-          `That gives the assistant a smarter starting point: check whether the goal horizon matches the exposure, then decide whether the next action is a monthly habit, order review, or no action yet.`,
-        richBlocks: [investmentGoalAllocationBlock],
+          `### Your goal plan\n` +
+          `Purpose: **${formatInvestmentGoalPurpose(investmentGoalDraft.purpose)}**.\n` +
+          `Horizon: **${formatInvestmentGoalHorizon(investmentGoalDraft.horizon)}**.\n` +
+          `Starting amount: **${startingAmountLabel}**.\n` +
+          `Monthly contribution: **${monthlyContributionLabel}**.\n` +
+          `Risk comfort: **${formatInvestmentGoalRisk(investmentGoalDraft.riskComfort)}**.\n` +
+          `This is an illustrative brief, not advice or an order. Continue to Funds to compare real products and documents.`,
+        richBlocks: [buildInvestmentGoalProjectionBlock(investmentGoalDraft)],
         followUps: [
-          buildCzChatFollowUp("cz-goal-see-projection-from-why", "See projection"),
-          buildCzChatFollowUp("cz-goal-review-orders-from-why", "Review orders", "Review my investment orders."),
-          buildCzChatFollowUp("cz-goal-plan-next-from-why", "Plan next move", "Help me decide the smartest next investment step using my portfolio, orders, risk, and currency exposure."),
+          buildCzNavigateFollowUp(
+            "cz-goal-explore-funds",
+            "Explore matching funds",
+            "investment-funds",
+            {
+              investmentFundCollectionId: getInvestmentGoalFundCollectionId(investmentGoalDraft.riskComfort),
+            },
+          ),
+          buildCzChatFollowUp("cz-goal-done", "I'm done", "Finish this investment goal conversation."),
         ],
       };
     }

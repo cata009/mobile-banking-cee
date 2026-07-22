@@ -10,11 +10,21 @@ import {
   getCzSavingsProductDetailSelection,
   getProductsShelfFocusCardId,
 } from "@/app/chat/czChatOrchestration";
+import { getInvestmentGoalFundCollectionId } from "@/app/chat/cz/investmentGoal";
 import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
 import type { CreditCard, Product, ProductCategory } from "@/data/products";
+import type { CoAppingChatMessage } from "../../package/mobile-pi-coapping-chat-package/src";
 
 const workspaceRoot = process.cwd();
 const appSource = readFileSync(resolve(workspaceRoot, "src/app/App.tsx"), "utf8");
+
+describe("investment goal fund matching", () => {
+  it("maps every risk comfort choice to its matching fund collection", () => {
+    expect(getInvestmentGoalFundCollectionId("calm")).toBe("conservative");
+    expect(getInvestmentGoalFundCollectionId("balanced")).toBe("balanced");
+    expect(getInvestmentGoalFundCollectionId("growth")).toBe("equity");
+  });
+});
 
 const selectedInvestmentSecurity: InvestmentCatalogSecurity = {
   id: "balanced-income",
@@ -177,7 +187,7 @@ describe("CZ chat app orchestration", () => {
     expect(getCzChatHelpAreaForAccountProduct(null)).toBe("account");
   });
 
-  it("preserves investment-goal reply resolution and follow-up order", async () => {
+  it("collects an investment goal in unambiguous steps and summarizes the selected values", async () => {
     const resolveReply = buildCzChatSmartReplyResolver({
       country: "CZ",
       categories: [],
@@ -190,21 +200,134 @@ describe("CZ chat app orchestration", () => {
     expect(result).toEqual(expect.objectContaining({
       text: expect.stringContaining("### Investment goal setup"),
       followUps: [
-        expect.objectContaining({ id: "cz-goal-grow-savings", label: "Grow my savings" }),
-        expect.objectContaining({ id: "cz-goal-future-purchase", label: "Future purchase" }),
-        expect.objectContaining({ id: "cz-goal-long-term", label: "Long-term reserve" }),
+        expect.objectContaining({
+          id: "cz-goal-purpose-grow-savings",
+          label: "Grow my savings",
+          prompt: "Set investment goal purpose to grow savings.",
+        }),
+        expect.objectContaining({
+          id: "cz-goal-purpose-future-purchase",
+          label: "Future purchase",
+          prompt: "Set investment goal purpose to future purchase.",
+        }),
+        expect.objectContaining({
+          id: "cz-goal-purpose-long-term-reserve",
+          label: "Long-term reserve",
+          prompt: "Set investment goal purpose to long-term reserve.",
+        }),
       ],
     }));
 
-    const overlappingPrompt = await resolveReply("I'm not sure yet", []);
-    expect(overlappingPrompt).toEqual(expect.objectContaining({
-      text: expect.stringContaining("### Starting amount noted"),
-      followUps: [
-        expect.objectContaining({ id: "cz-goal-monthly-500", label: "500 CZK monthly" }),
-        expect.objectContaining({ id: "cz-goal-monthly-1000", label: "1,000 CZK monthly" }),
-        expect.objectContaining({ id: "cz-goal-monthly-not-now", label: "Not now" }),
-      ],
-    }));
+    const messages: CoAppingChatMessage[] = [];
+    let sequence = 0;
+    const answer = async (text: string) => {
+      messages.push({
+        id: `goal-user-${sequence += 1}`,
+        role: "user",
+        text,
+        time: "12:00",
+        createdAt: `2026-07-22T12:00:0${sequence}.000Z`,
+      });
+      const reply = await resolveReply(text, messages);
+      if (typeof reply === "string") throw new Error("Expected a structured investment-goal reply");
+      return reply;
+    };
+
+    const purpose = await answer("Set investment goal purpose to future purchase.");
+    expect(purpose.text).toContain("### Choose your horizon");
+
+    const horizon = await answer("Set investment goal horizon to not sure yet.");
+    expect(horizon.text).toContain("### Choose a starting amount");
+    expect(horizon.text).not.toContain("Starting amount noted");
+
+    const startingAmount = await answer("Set investment goal starting amount to 10,000 CZK.");
+    expect(startingAmount.text).toContain("### Add a monthly contribution");
+
+    const monthly = await answer("Set investment goal monthly contribution to 500 CZK.");
+    expect(monthly.text).toContain("### Choose your risk comfort");
+
+    const summary = await answer("Set investment goal risk comfort to balanced.");
+    expect(summary.text).toContain("### Your goal plan");
+    expect(summary.text).toContain("Future purchase");
+    expect(summary.text).toContain("Not decided yet");
+    expect(summary.text).toContain("10,000 CZK");
+    expect(summary.text).toContain("500 CZK monthly");
+    expect(summary.text).toContain("Balanced");
+    expect(summary.richBlocks).toEqual([
+      expect.objectContaining({
+        type: "investment-projection",
+        body: expect.stringContaining("10,000 CZK now plus 500 CZK monthly"),
+      }),
+    ]);
+    expect(summary.followUps).toEqual([
+      expect.objectContaining({
+        id: "cz-goal-explore-funds",
+        label: "Explore matching funds",
+        action: expect.objectContaining({
+          type: "navigate",
+          target: "investment-funds",
+          investmentFundCollectionId: "balanced",
+        }),
+      }),
+      expect.objectContaining({ id: "cz-goal-done", label: "I'm done" }),
+    ]);
+  });
+
+  it("converges the credit-limit conversation on review without circular options", async () => {
+    const card: CreditCard = {
+      id: "card-credit-1",
+      type: "credit_card",
+      name: "Credit Card",
+      accountNumber: "5173500087654321",
+      balance: 3200,
+      currency: "CZK",
+      cardType: "Standard",
+      cardNumber: "5173500087654321",
+      expiryDate: "12/29",
+      creditLimit: 10000,
+      availableCredit: 3200,
+    };
+    const resolveReply = buildCzChatSmartReplyResolver({
+      country: "CZ",
+      categories: [],
+      selectedAccountProduct: card,
+      selectedCardProduct: card,
+      creditCardForOpportunity: card,
+    });
+
+    const entry = await resolveReply("I'm interested in this credit limit offer.", []);
+    if (typeof entry === "string") throw new Error("Expected a structured credit-limit reply");
+    expect(entry.text).toContain("### Your limit offer");
+    expect(entry.followUps).toEqual([
+      expect.objectContaining({
+        id: "cz-limit-impact",
+        label: "Check repayment impact",
+        action: expect.objectContaining({ type: "send-message", prompt: "Check repayment impact for this credit limit offer." }),
+      }),
+      expect.objectContaining({
+        id: "cz-limit-review",
+        label: "Review offer",
+        action: expect.objectContaining({ type: "navigate", target: "credit-limit-review" }),
+      }),
+      expect.objectContaining({ id: "cz-limit-not-now", label: "Not now" }),
+    ]);
+
+    const impact = await resolveReply("Check repayment impact for this credit limit offer.", []);
+    if (typeof impact === "string") throw new Error("Expected a structured repayment-impact reply");
+    expect(impact.text).toContain("### Repayment impact");
+    expect(impact.followUps).toEqual([
+      expect.objectContaining({
+        id: "cz-limit-review",
+        action: expect.objectContaining({ type: "navigate", target: "credit-limit-review" }),
+      }),
+      expect.objectContaining({ id: "cz-limit-not-now" }),
+    ]);
+    expect(impact.followUps).not.toContainEqual(expect.objectContaining({ id: "cz-limit-impact" }));
+
+    const dismissed = await resolveReply("Finish this credit limit conversation without changing anything.", []);
+    if (typeof dismissed === "string") throw new Error("Expected a structured terminal reply");
+    expect(dismissed.text).toContain("### Offer left unchanged");
+    expect(dismissed.followUps ?? []).toHaveLength(0);
   });
 
   it("offers only the two distinct product-specific entry topics", () => {

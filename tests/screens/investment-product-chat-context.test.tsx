@@ -132,7 +132,7 @@ describe("investment product chat context handoff", () => {
     );
 
     expect(await screen.findAllByText("One off BUY Order")).toHaveLength(2);
-    expect(screen.getByText("Amundi Climate Focus Fund")).toBeInTheDocument();
+    expect(screen.getByText("onemarkets Climate Focus Fund")).toBeInTheDocument();
   });
 
   it("navigates from the portfolio banner through a fund collection to the existing fund detail", () => {
@@ -144,12 +144,26 @@ describe("investment product chat context handoff", () => {
     fireEvent.click(screen.getByRole("button", { name: /Our Onemarket funds/i }));
     expect(screen.getByTestId("investment-fund-collection-onemarket")).toBeInTheDocument();
 
-    const firstFund = screen.getByRole("button", { name: /Amundi Climate Focus Fund/i });
+    const firstFund = screen.getByRole("button", { name: /onemarkets Climate Focus Fund/i });
     fireEvent.click(firstFund);
-    expect(screen.getAllByRole("heading", { name: "Amundi Climate Focus Fund" })).not.toHaveLength(0);
+    expect(screen.getAllByRole("heading", { name: "onemarkets Climate Focus Fund" })).not.toHaveLength(0);
 
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByTestId("investment-fund-collection-onemarket")).toBeInTheDocument();
+  });
+
+  it("opens the matching fund collection when the chatbot goal hands off to Investments", async () => {
+    render(
+      <InvestmentsPortfolioScreen
+        onBack={() => undefined}
+        fundsWindowRequest={{ requestId: 7, collectionId: "balanced" }}
+      />,
+      { wrapper: AppProviders },
+    );
+
+    expect(await screen.findByTestId("investment-fund-collection-balanced")).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { name: "Balanced funds" })).not.toHaveLength(0);
+    expect(screen.queryByTestId("investment-funds-selection")).not.toBeInTheDocument();
   });
 
   it("consumes an unknown or repeated buy request without opening the wrong product", async () => {
