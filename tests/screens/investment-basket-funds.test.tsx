@@ -2,7 +2,7 @@
 
 import "@testing-library/jest-dom/vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
 import { InvestmentSecurityListScreen } from "@/app/screens/investments/InvestmentSecurityScreens";
 
@@ -62,6 +62,33 @@ const securities: InvestmentCatalogSecurity[] = [
     description: "Regular fund",
   },
 ];
+
+class FakePointerEvent extends MouseEvent {
+  pointerId: number;
+  pointerType: string;
+
+  constructor(type: string, init: PointerEventInit = {}) {
+    super(type, init);
+    this.pointerId = init.pointerId ?? 0;
+    this.pointerType = init.pointerType ?? "";
+  }
+}
+
+beforeEach(() => {
+  Object.defineProperty(window, "PointerEvent", { configurable: true, value: FakePointerEvent });
+  Object.defineProperty(HTMLElement.prototype, "setPointerCapture", { configurable: true, value: vi.fn() });
+  Object.defineProperty(HTMLElement.prototype, "hasPointerCapture", { configurable: true, value: vi.fn(() => true) });
+  Object.defineProperty(HTMLElement.prototype, "releasePointerCapture", { configurable: true, value: vi.fn() });
+  Object.defineProperty(HTMLElement.prototype, "scrollTo", { configurable: true, value: vi.fn() });
+});
+
+afterEach(() => {
+  Reflect.deleteProperty(window, "PointerEvent");
+  Reflect.deleteProperty(HTMLElement.prototype, "setPointerCapture");
+  Reflect.deleteProperty(HTMLElement.prototype, "hasPointerCapture");
+  Reflect.deleteProperty(HTMLElement.prototype, "releasePointerCapture");
+  Reflect.deleteProperty(HTMLElement.prototype, "scrollTo");
+});
 
 afterEach(cleanup);
 
@@ -154,5 +181,48 @@ describe("CZ Basket Funds catalogue", () => {
 
     expect(screen.getByRole("tab", { name: "Regular Plan" })).toHaveAttribute("aria-selected", "true");
     expect(screen.getByText("Regular Sustainable Fund")).toBeInTheDocument();
+  });
+
+  it("drags the basket carousel horizontally past the 4px threshold", () => {
+    renderCatalogue();
+    const carousel = screen.getByRole("region", { name: "Basket funds carousel" });
+    // jsdom reports a 0-size surface; set scrollWidth/clientWidth so the carousel
+    // has something to scroll and scrollLeft is meaningful.
+    Object.defineProperty(carousel, "scrollWidth", { configurable: true, value: 2000 });
+    Object.defineProperty(carousel, "clientWidth", { configurable: true, value: 375 });
+
+    fireEvent.pointerDown(carousel, { pointerId: 7, pointerType: "mouse", button: 0, clientX: 100 });
+    // A sub-threshold move must NOT start a drag yet.
+    fireEvent.pointerMove(carousel, { pointerId: 7, clientX: 103 });
+    expect(carousel.scrollLeft).toBe(0);
+
+    // Past the 4px threshold the drag engages and scrollLeft follows the delta.
+    fireEvent.pointerMove(carousel, { pointerId: 7, clientX: 160 });
+    expect(carousel.scrollLeft).toBe(-60);
+
+    fireEvent.pointerUp(carousel, { pointerId: 7 });
+    expect(HTMLElement.prototype.setPointerCapture).toHaveBeenCalledWith(7);
+    expect(HTMLElement.prototype.releasePointerCapture).toHaveBeenCalledWith(7);
+  });
+
+  it("opens the basket funds page on a stationary card click but not after a drag", () => {
+    renderCatalogue();
+    const carousel = screen.getByRole("region", { name: "Basket funds carousel" });
+    Object.defineProperty(carousel, "scrollWidth", { configurable: true, value: 2000 });
+    Object.defineProperty(carousel, "clientWidth", { configurable: true, value: 375 });
+    const firstCard = within(carousel).getAllByRole("button")[0]!;
+
+    // Stationary click (no drag) opens the basket funds page.
+    fireEvent.click(firstCard);
+    expect(screen.getAllByText("Basket Funds")).not.toHaveLength(0);
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+
+    // A drag followed by a pointer-up-leaving suppress-click must NOT open it.
+    fireEvent.pointerDown(firstCard, { pointerId: 3, pointerType: "mouse", button: 0, clientX: 50 });
+    fireEvent.pointerMove(firstCard, { pointerId: 3, clientX: 120 });
+    fireEvent.pointerUp(firstCard, { pointerId: 3 });
+    fireEvent.click(firstCard);
+
+    expect(screen.queryByText("Basket Funds")).not.toBeInTheDocument();
   });
 });

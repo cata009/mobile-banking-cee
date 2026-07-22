@@ -2,6 +2,21 @@
 
 Last updated: 2026-07-22
 
+## 2026-07-22 Design System and Basket Carousel Clean Publication
+
+- Latest request handled: commit every remaining tracked and untracked workspace change, push the resulting `main` checkpoint to GitHub, deploy that exact state to Vercel Production, and finish with a clean repository.
+- Included scope: the component-detail information architecture now opens on View with inspectable state previews and keeps implementation code/specifications/motion in the portable package; the Design System catalogue/inventories were reconciled and unused shadcn UI source modules were removed; the CZ Basket Funds shelf now implements pointer/mouse drag, nearest-card snap, click suppression after drag, keyboard activation, and card-level event forwarding; associated Design System and Investments regression tests plus the authored ZCode plan are included.
+- Verification: the first `npm run verify` passed typecheck, lint, and the test suite but stopped in the asset audit because unstaged deleted files still appeared in `git ls-files`. Since the user explicitly authorized the complete worktree, all changes were staged and the gate was rerun on the exact publish snapshot. The fresh rerun passed typecheck, repository ESLint, 61 test files / 606 tests, all six audits (`card-details`, `investments`, `figma-bridge`, `templates`, `platform`, `assets`), and the production Vite build.
+- Known non-blocking output: the established Recharts zero-size diagnostics in jsdom, empty `react-vendor` chunk, and Vite large-chunk notice remain visible and triaged; no failing check is hidden.
+- Publication workflow: create and push a source checkpoint first, deploy it to Vercel Production, record its Git/deployment/HTTP evidence in a documentation-only checkpoint, then push and redeploy final `main` so source, handoff, GitHub, and Production are aligned.
+- Banana Loop: the asset-audit/staging interaction is documented rather than bypassed; all local files are intentionally in scope; final Git parity, worktree cleanliness, Vercel readiness, canonical HTTP response, and recent error logs must be checked before closeout.
+- constitutional check:
+  - scope preserved: yes (the user explicitly requested every uncommitted file)
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes after commit, push, production deployment, canonical smoke, and final cleanliness checks complete
+
 ## 2026-07-22 Unified Git and Vercel Publication Closeout
 
 - Latest request handled: unify the complete shared workspace, commit every tracked and untracked product/documentation change, publish the resulting `main` branch to GitHub, and deploy that exact state to Vercel Production.

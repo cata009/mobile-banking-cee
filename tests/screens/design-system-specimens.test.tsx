@@ -369,17 +369,14 @@ describe('Design System specimen selectors', () => {
     }
   })
 
-  it('keeps the Primary button specimen theme control functional', () => {
+  it('renders the Primary button specimen without a theme toggle', () => {
     const { getByRole } = renderInventory()
     const heading = getByRole('heading', { name: 'Primary button' })
     const specimen = heading.closest('[data-ds-specimen="Primary button"]')
     if (!(specimen instanceof HTMLElement)) throw new Error('Missing Primary button specimen')
 
-    const darkMode = within(specimen).getByRole('button', { name: 'Dark mode' })
-    expect(darkMode).toHaveAttribute('aria-pressed', 'false')
-    fireEvent.click(darkMode)
-    expect(darkMode).toHaveAttribute('aria-pressed', 'true')
+    // The per-card light/dark control was removed; the specimen renders in light mode by default.
+    expect(within(specimen).queryByRole('button', { name: 'Dark mode' })).not.toBeInTheDocument()
     expect(within(specimen).getByRole('button', { name: 'Continue' })).toBeInTheDocument()
-    expect(specimen.querySelector('.dark')).toBeInTheDocument()
   })
 })

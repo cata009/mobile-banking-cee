@@ -7,7 +7,6 @@
 import { useState } from "react";
 import ThemeModeSegment from "@/app/components/ThemeModeSegment";
 import { AppIcon } from "@/app/components/icons";
-import { MeasurementSurface } from "./inspect/MeasurementSurface";
 
 export type SelectorOption<Value extends string = string> = {
   id: Value;
@@ -85,7 +84,7 @@ export function InventoryStatGrid({ items }: { items: Array<[string, React.React
 
 export type ThemeMode = "light" | "dark";
 
-export function Specimen({ name, children, tone = "light", showThemeControl = true, detailsHref }: {
+export function Specimen({ name, children, tone = "light", showThemeControl = false, detailsHref }: {
   name: string;
   source?: string;
   note?: string;
@@ -130,9 +129,7 @@ export function Specimen({ name, children, tone = "light", showThemeControl = tr
           </div>
         </div>
         <div className={`${isDark ? "dark" : ""} ${bg} relative p-5`}>
-          <MeasurementSurface>
-            {renderedChildren}
-        </MeasurementSurface>
+          {renderedChildren}
       </div>
     </div>
   );

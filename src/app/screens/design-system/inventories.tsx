@@ -138,7 +138,7 @@ export function CopyHexButton({
 export function ColorSwatch({ color, label }: { color: string; label: string }) {
   return (
     <span
-      className="block h-[40px] w-full rounded-[6px] border border-[var(--uc-border)]"
+      className="block h-[28px] w-full rounded-[4px] border border-[var(--uc-border)]"
       style={{ backgroundColor: color }}
       aria-label={label}
     />
@@ -185,28 +185,23 @@ export function ColorCard({
   onCopy: (value: string) => void;
 }) {
   return (
-    <article className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-3">
-      <div className="grid grid-cols-2 gap-2">
+    <article className="flex flex-col rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-2" title={color.usage}>
+      <div className="grid grid-cols-2 gap-1">
         <ColorSwatch color={color.lightHex} label={`${color.name} light ${color.lightHex}`} />
         <ColorSwatch color={color.darkHex} label={`${color.name} dark ${color.darkHex}`} />
       </div>
-      <div className="mt-3">
-        <h3 className="font-['UniCredit:Bold',sans-serif] text-[16px] text-[var(--uc-text)]">{color.name}</h3>
-        <code className="mt-1 block break-all rounded bg-[var(--uc-app-bg)] px-2 py-1 text-[11px] text-[var(--uc-text-muted)]">
-          {color.cssVariable}
-        </code>
-      </div>
-      <div className="mt-2 grid gap-1.5">
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-[12px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Light</span>
+      <h3 className="mt-2 truncate font-['UniCredit:Bold',sans-serif] text-[12px] text-[var(--uc-text)]">{color.name}</h3>
+      <code className="mt-0.5 block truncate rounded bg-[var(--uc-app-bg)] px-1.5 py-0.5 text-[10px] text-[var(--uc-text-muted)]">{color.cssVariable}</code>
+      <div className="mt-1.5 grid gap-1">
+        <div className="flex items-center justify-between gap-1">
+          <span className="text-[10px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">L</span>
           <CopyHexButton value={color.lightHex} label="light" copiedValue={copiedValue} onCopy={onCopy} />
         </div>
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-[12px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">Dark</span>
+        <div className="flex items-center justify-between gap-1">
+          <span className="text-[10px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">D</span>
           <CopyHexButton value={color.darkHex} label="dark" copiedValue={copiedValue} onCopy={onCopy} />
         </div>
       </div>
-      <p className="mt-2 text-[12px] leading-5 text-[var(--uc-text-muted)]">{color.usage}</p>
     </article>
   );
 }
@@ -271,6 +266,7 @@ export function ColorInventory() {
         title="Color palettes"
         description="Colors extracted from screenshots/Colors.svg, normalized into the canonical light-mode registry and proposed dark-mode mapping. The list is filtered by palette to keep the page compact and easy to scan."
       >
+        <div className="sticky top-0 z-20 -mx-6 mb-6 bg-[var(--uc-surface-muted)] px-6 py-3 xl:-mx-8 xl:px-8">
         <InventorySearchField
           value={colorSearchQuery}
           onChange={setColorSearchQuery}
@@ -278,8 +274,7 @@ export function ColorInventory() {
           label="Search colors"
         />
 
-        <div className="mb-6 rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-4">
-          <div className="mb-4 flex flex-wrap gap-2" role="tablist" aria-label="Color palettes">
+          <div className="flex flex-wrap gap-2 pt-3" role="tablist" aria-label="Color palettes">
             {COLOR_PALETTES.map((palette) => {
               const count = DESIGN_SYSTEM_COLORS.filter((color) => color.paletteId === palette.id).length;
               const isActive = selectedPalette === palette.id;
@@ -302,17 +297,9 @@ export function ColorInventory() {
               );
             })}
           </div>
-          <div className="rounded-[8px] bg-[var(--uc-app-bg)] p-4">
-            <p className="font-['UniCredit:Bold',sans-serif] text-[18px] text-[var(--uc-text)]">
-              {selectedPaletteMeta.label}
-            </p>
-            <p className="mt-1 max-w-[860px] text-[14px] leading-6 text-[var(--uc-text-muted)]">
-              {selectedPaletteMeta.description}
-            </p>
-          </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(170px,1fr))]">
           {selectedColors.length > 0 ? (
             selectedColors.map((color) => (
               <ColorCard key={color.id} color={color} copiedValue={copiedValue} onCopy={handleCopy} />
@@ -330,7 +317,7 @@ export function ColorInventory() {
         title="App color map"
         description="App color usage mapped back to design-system tokens. Remaining exceptions are treated as decorative or brand-like assets, not reusable UI colors."
       >
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(170px,1fr))]">
           {visibleAuditRows.length > 0 ? (
             visibleAuditRows.map((item) => (
               <ColorAuditRow key={`${item.sourceColor}-${item.targetToken}`} item={item} />
@@ -384,7 +371,7 @@ export function TypographyInventory() {
       />
 
       {visibleTypographyTokens.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(170px,1fr))]">
           {visibleTypographyTokens.map((token) => (
             <TypographyTokenCard key={token.id} token={token} />
           ))}
