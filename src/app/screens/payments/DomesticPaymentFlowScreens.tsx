@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import type { ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import PrimaryButton from "@/app/components/PrimaryButton";
@@ -88,14 +89,10 @@ export function TransactionDetailScreen({
   onCategoryChange?: (transaction: AccountTransaction, selection: PfmCategorySelection) => void;
 }) {
   const { t } = useLanguage();
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(48);
   const [areDetailsExpanded, setAreDetailsExpanded] = useState(false);
   const [categorySheetOpen, setCategorySheetOpen] = useState(false);
 
-  const handlePageScroll = (event: React.UIEvent<HTMLDivElement>) => {
-    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 48));
-    setHeaderProgress(progress);
-  };
 
   const detail = useMemo(
     () => createTransactionDetailData(transaction, country, product),
@@ -264,7 +261,7 @@ export function DomesticPaymentCreateScreen({
 }) {
   const { t } = useLanguage();
   const [form, setForm] = useState(draft);
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(48);
   const update = (key: keyof DomesticPaymentDraft, value: string | boolean) => {
     setForm((current) => ({ ...current, [key]: value }));
   };
@@ -276,10 +273,6 @@ export function DomesticPaymentCreateScreen({
     form.bankCode.trim().length > 0 &&
     form.amount.trim().length > 0;
 
-  const handlePageScroll = (event: React.UIEvent<HTMLDivElement>) => {
-    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 48));
-    setHeaderProgress(progress);
-  };
 
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">
@@ -397,13 +390,9 @@ export function PaymentReviewScreen({
 }) {
   const { t } = useLanguage();
   const [saveAsTemplate, setSaveAsTemplate] = useState(false);
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(48);
   const beneficiaryAccount = [draft.prefix, draft.accountNumber, draft.bankCode].filter(Boolean).join("-");
 
-  const handlePageScroll = (event: React.UIEvent<HTMLDivElement>) => {
-    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 48));
-    setHeaderProgress(progress);
-  };
 
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">

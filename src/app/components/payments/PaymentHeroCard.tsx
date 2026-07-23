@@ -196,7 +196,6 @@ export default function PaymentHeroCard({
       return;
     }
 
-    console.log(`Payment menu item clicked: ${item.id}`);
     onSelect?.(item);
   };
 

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { DragEvent, MouseEvent, PointerEvent, UIEvent } from "react";
+import type { UIEvent } from "react";
+import { useDragCarousel } from "@/hooks/useDragCarousel";
 import BottomNavigation from "@/app/components/BottomNavigation";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
@@ -23,14 +24,6 @@ import { getAnalyticsCategoryDisplayLabel } from "./analyticsCategoryLabels";
 
 type NavItem = "home" | "analytics" | "payments" | "products" | "more";
 const HERO_PANEL_WIDTH = 375;
-
-type HeroCarouselDragState = {
-  didMove: boolean;
-  input: "mouse" | "pointer" | null;
-  pointerId: number | null;
-  startScrollLeft: number;
-  startX: number;
-};
 
 interface AnalyticsScreenProps {
   onHomeClick?: () => void;
@@ -58,8 +51,7 @@ function splitAmount(value: string) {
 
 function AnalyticsHeader({ onMessagesClick }: { onMessagesClick?: () => void }) {
   const { t } = useLanguage();
-  const handleAction = (action: string) => {
-    console.log(`Analytics ${action} clicked`);
+  const handleAction = (_action: string) => {
   };
 
   return (
@@ -142,17 +134,7 @@ function AnalyticsHeroCarousel({
   onPeriodChange: (periodKey: string) => void;
 }) {
   const carouselRef = useRef<HTMLDivElement>(null);
-  const dragStateRef = useRef<HeroCarouselDragState>({
-    didMove: false,
-    input: null,
-    pointerId: null,
-    startScrollLeft: 0,
-    startX: 0,
-  });
-  const mouseDragCleanupRef = useRef<(() => void) | null>(null);
   const scrollSnapTimeoutRef = useRef<number | null>(null);
-  const suppressClickRef = useRef(false);
-  const [isDragging, setIsDragging] = useState(false);
 
   const clampPeriodIndex = (index: number) => Math.max(0, Math.min(periods.length - 1, index));
 
@@ -185,154 +167,22 @@ function AnalyticsHeroCarousel({
     onPeriodChange(nextPeriod.key);
   };
 
-  const removeMouseDragListeners = () => {
-    mouseDragCleanupRef.current?.();
-    mouseDragCleanupRef.current = null;
-  };
-
   const clearScrollSnapTimeout = () => {
     if (scrollSnapTimeoutRef.current === null) return;
     window.clearTimeout(scrollSnapTimeoutRef.current);
     scrollSnapTimeoutRef.current = null;
   };
 
-  const resetCarouselDrag = () => {
-    removeMouseDragListeners();
-    dragStateRef.current = {
-      didMove: false,
-      input: null,
-      pointerId: null,
-      startScrollLeft: 0,
-      startX: 0,
-    };
-    setIsDragging(false);
-  };
-
-  const beginCarouselDrag = (
-    clientX: number,
-    input: HeroCarouselDragState["input"],
-    pointerId: number | null = null,
-  ) => {
-    const carousel = carouselRef.current;
-    if (!carousel || periods.length <= 1 || dragStateRef.current.input) return false;
-
-    dragStateRef.current = {
-      didMove: false,
-      input,
-      pointerId,
-      startScrollLeft: carousel.scrollLeft,
-      startX: clientX,
-    };
-
-    return true;
-  };
-
-  const moveCarouselDrag = (clientX: number) => {
-    const carousel = carouselRef.current;
-    const dragState = dragStateRef.current;
-    if (!carousel || !dragState.input) return false;
-
-    const deltaX = clientX - dragState.startX;
-    if (!dragState.didMove && Math.abs(deltaX) < 4) return false;
-
-    dragState.didMove = true;
-    suppressClickRef.current = true;
-    setIsDragging(true);
-    carousel.scrollLeft = dragState.startScrollLeft - deltaX;
-    return true;
-  };
-
-  const finishCarouselDrag = () => {
-    const didMove = dragStateRef.current.didMove;
-
-    if (didMove) {
-      snapCarouselToNearestPeriod();
-      window.setTimeout(() => {
-        suppressClickRef.current = false;
-      }, 80);
-    }
-
-    resetCarouselDrag();
-  };
+  const { isDragging, isPressActiveRef, dragHandlers } = useDragCarousel({
+    carouselRef,
+    onSettle: snapCarouselToNearestPeriod,
+    enabled: periods.length > 1,
+  });
 
   const handleCarouselScroll = (_event: UIEvent<HTMLDivElement>) => {
-    if (dragStateRef.current.input) return;
+    if (isPressActiveRef.current) return;
     clearScrollSnapTimeout();
     scrollSnapTimeoutRef.current = window.setTimeout(snapCarouselToNearestPeriod, 120);
-  };
-
-  const handleCarouselPointerDown = (event: PointerEvent<HTMLElement>) => {
-    if (event.pointerType === "mouse" && event.button !== 0) return;
-
-    if (beginCarouselDrag(event.clientX, "pointer", event.pointerId)) {
-      event.currentTarget.setPointerCapture(event.pointerId);
-    }
-  };
-
-  const handleCarouselPointerMove = (event: PointerEvent<HTMLElement>) => {
-    const dragState = dragStateRef.current;
-    if (dragState.input !== "pointer" || dragState.pointerId !== event.pointerId) return;
-
-    if (moveCarouselDrag(event.clientX)) {
-      event.preventDefault();
-    }
-  };
-
-  const handleCarouselPointerUp = (event: PointerEvent<HTMLElement>) => {
-    const dragState = dragStateRef.current;
-    if (dragState.input !== "pointer" || dragState.pointerId !== event.pointerId) return;
-
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-
-    finishCarouselDrag();
-  };
-
-  const handleCarouselPointerCancel = (event: PointerEvent<HTMLElement>) => {
-    if (dragStateRef.current.input !== "pointer" || dragStateRef.current.pointerId !== event.pointerId) return;
-    resetCarouselDrag();
-    suppressClickRef.current = false;
-  };
-
-  const handleCarouselMouseDown = (event: MouseEvent<HTMLElement>) => {
-    if (event.button !== 0 || !beginCarouselDrag(event.clientX, "mouse")) return;
-
-    const handleMouseMove = (mouseEvent: globalThis.MouseEvent) => {
-      if (dragStateRef.current.input !== "mouse") return;
-
-      if (mouseEvent.buttons !== 1) {
-        finishCarouselDrag();
-        return;
-      }
-
-      if (moveCarouselDrag(mouseEvent.clientX)) {
-        mouseEvent.preventDefault();
-      }
-    };
-
-    const handleMouseUp = () => {
-      if (dragStateRef.current.input === "mouse") {
-        finishCarouselDrag();
-      }
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-    mouseDragCleanupRef.current = () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  };
-
-  const handleCarouselClickCapture = (event: MouseEvent<HTMLElement>) => {
-    if (!suppressClickRef.current) return;
-    event.preventDefault();
-    event.stopPropagation();
-  };
-
-  const handleCarouselDragStart = (event: DragEvent<HTMLElement>) => {
-    event.preventDefault();
   };
 
   useEffect(() => {
@@ -342,7 +192,6 @@ function AnalyticsHeroCarousel({
   }, [activePeriodKey, periods]);
 
   useEffect(() => () => {
-    removeMouseDragListeners();
     clearScrollSnapTimeout();
   }, []);
 
@@ -350,12 +199,7 @@ function AnalyticsHeroCarousel({
     <div
       ref={carouselRef}
       onScroll={handleCarouselScroll}
-      onPointerDown={handleCarouselPointerDown}
-      onPointerMove={handleCarouselPointerMove}
-      onPointerUp={handleCarouselPointerUp}
-      onPointerCancel={handleCarouselPointerCancel}
-      onMouseDown={handleCarouselMouseDown}
-      onClickCapture={handleCarouselClickCapture}
+      {...dragHandlers}
       className={`overflow-x-auto overflow-y-hidden scrollbar-hide select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
       style={{
         WebkitOverflowScrolling: "touch",
@@ -371,13 +215,7 @@ function AnalyticsHeroCarousel({
               <div
               key={period.key}
               className="w-[375px] shrink-0"
-              onClickCapture={handleCarouselClickCapture}
-              onDragStart={handleCarouselDragStart}
-              onMouseDown={handleCarouselMouseDown}
-              onPointerCancel={handleCarouselPointerCancel}
-              onPointerDown={handleCarouselPointerDown}
-              onPointerMove={handleCarouselPointerMove}
-              onPointerUp={handleCarouselPointerUp}
+              {...dragHandlers}
             >
                 <AnalyticsHeroPanel
                   activePeriodKey={period.key}

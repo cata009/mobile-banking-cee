@@ -13,12 +13,10 @@ export function YourAdvisorTab() {
   const { t } = useLanguage();
 
   const handleCallNow = () => {
-    console.log('📞 Call now clicked');
     // Future: window.location.href = `tel:${t('prime.advisor.phone')}`;
   };
 
   const handleSendEmail = () => {
-    console.log('✉️ Send email clicked');
     // Future: window.location.href = `mailto:${t('prime.advisor.emailAddress')}`;
   };
 

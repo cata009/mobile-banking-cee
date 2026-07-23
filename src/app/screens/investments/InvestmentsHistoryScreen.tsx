@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState, type UIEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import BrandLogo from "@/app/components/brand-logo/BrandLogo";
@@ -750,7 +751,7 @@ function InvestmentHistoryDetailScreen({
   amountsHidden: boolean;
   onBack: () => void;
 }) {
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(64);
   const detail = selected.kind === "order"
     ? {
         item: selected.item,
@@ -778,9 +779,6 @@ function InvestmentHistoryDetailScreen({
   const isin = `XS${String(Math.abs(productId.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0))).padStart(10, "0")}`;
   const feeAmount = formatAmountLabel(Math.max(1, Math.abs(amount) * 0.004), country, item.currency, amountsHidden, false);
 
-  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
-    setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64)));
-  };
 
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)] text-[var(--uc-text)]" data-investment-history-detail={selected.kind}>
@@ -854,7 +852,7 @@ function InvestmentHistoryDetailScreen({
 export default function InvestmentsHistoryScreen({ onBack, historyFilterByTitle }: InvestmentsHistoryScreenProps) {
   const { country, amountsHidden } = useDemo();
   const { categories } = useProducts();
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(64);
   const [activeTab, setActiveTab] = useState<InvestmentHistoryTabId>("transactions");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterMode, setFilterMode] = useState<FilterMode>(null);
@@ -929,9 +927,6 @@ export default function InvestmentsHistoryScreen({ onBack, historyFilterByTitle 
   const activeRows = activeTab === "transactions" ? filteredTransactions : filteredOrders;
   const filterActive = appliedFilters !== null;
 
-  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
-    setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64)));
-  };
 
   const openFilters = () => {
     setDraftFilters(normalizeFiltersForTab(appliedFilters ?? tabDefaults, activeTab));

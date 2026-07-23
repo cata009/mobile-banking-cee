@@ -25,7 +25,6 @@ export function PrimeIconLabelValue({
     if (onNavigate) {
       onNavigate();
     } else if (url) {
-      console.log(`🔗 Navigate to: ${url}`);
       // Future: window.open(url, '_blank');
     }
   };

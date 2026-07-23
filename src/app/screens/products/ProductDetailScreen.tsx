@@ -1,4 +1,5 @@
-import { useMemo, useState, type UIEvent } from "react";
+import { useMemo } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import activateAccountImage from "@/assets/products/detail/img_illustration_activateaccount.png";
@@ -367,13 +368,9 @@ export default function ProductDetailScreen({
   includeSafeArea = true,
   onActionClick,
 }: ProductDetailScreenProps) {
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(64);
   const imageSrc = useMemo(() => getProductDetailImageSrc(optionId, cardId), [cardId, optionId]);
   const content = useMemo(() => getProductDetailContent(optionId, cardId, title), [cardId, optionId, title]);
-
-  const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
-    setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64)));
-  };
 
   return (
     <div

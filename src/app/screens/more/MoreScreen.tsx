@@ -70,22 +70,18 @@ export default function MoreScreen({
   };
 
   const handleProfileClick = () => {
-    console.log('👤 Profile clicked');
     // Future: navigate to profile
   };
 
   const handleMessagesClick = () => {
-    console.log('💬 Messages clicked');
     // Future: navigate to messages
   };
 
   const handleContactPhoneClick = () => {
-    console.log('Contact phone clicked');
     onContactsClick?.();
   };
 
   const handleLogoutClick = () => {
-    console.log('🚪 Logout clicked');
     setShowLogoutDialog(true);
   };
 
@@ -93,14 +89,12 @@ export default function MoreScreen({
     setShowLogoutDialog(false);
   };
 
-  const handleCardClick = (cardName: string) => {
-    console.log(`📋 ${cardName} card clicked`);
+  const handleCardClick = (_cardName: string) => {
     // Future: navigate to respective screen
   };
 
   // Handler for bottom navigation
   const handleTabChange = (tab: 'home' | 'analytics' | 'payments' | 'products' | 'more') => {
-    console.log(`📱 Bottom nav tab clicked: ${tab}`);
     if (tab === 'home' && onHomeClick) {
       onHomeClick();
     }

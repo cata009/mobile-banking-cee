@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { DragEvent, KeyboardEvent, MouseEvent, PointerEvent, UIEvent } from "react";
+import type { KeyboardEvent } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
+import { useDragCarousel } from "@/hooks/useDragCarousel";
 import AccountCarouselIndicator from "@/app/components/accounts/AccountCarouselIndicator";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
 import AccountTransactionRow from "@/app/components/accounts/AccountTransactionRow";
@@ -45,14 +47,6 @@ const CAROUSEL_EDGE_GUTTER = 24;
 const CARD_INACTIVE_VERTICAL_INSET = 12;
 const CARD_INACTIVE_SCALE_Y = (CARD_HEIGHT - CARD_INACTIVE_VERTICAL_INSET * 2) / CARD_HEIGHT;
 const CARD_DETAIL_HEADER_HEIGHT = 102;
-
-type CarouselDragState = {
-  didMove: boolean;
-  input: "mouse" | "pointer" | null;
-  pointerId: number | null;
-  startScrollLeft: number;
-  startX: number;
-};
 
 function isCardProduct(product: Product): product is DebitCard | CreditCard {
   return product.type === "debit_card" || product.type === "credit_card";
@@ -167,21 +161,11 @@ export default function CardDetailScreen({
     cardProducts.findIndex((p) => p.id === selectedCardId),
   );
   const [activeIndex, setActiveIndex] = useState(selectedIndex === -1 ? 0 : selectedIndex);
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(64);
   const [transactionSearch, setTransactionSearch] = useState("");
   const pageRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
-  const dragStateRef = useRef<CarouselDragState>({
-    didMove: false,
-    input: null,
-    pointerId: null,
-    startScrollLeft: 0,
-    startX: 0,
-  });
-  const mouseDragCleanupRef = useRef<(() => void) | null>(null);
-  const suppressClickRef = useRef(false);
-  const [isCarouselDragging, setIsCarouselDragging] = useState(false);
   const [isAiOpportunityDismissed, setIsAiOpportunityDismissed] = useState(false);
   const [isCardDetailsFaceIdVisible, setIsCardDetailsFaceIdVisible] = useState(false);
   const [isSensitiveCardDetailsVisible, setIsSensitiveCardDetailsVisible] = useState(false);
@@ -214,7 +198,6 @@ export default function CardDetailScreen({
   );
 
   const hasSearch = normalizedSearch.length > 0;
-  const headerThreshold = 64;
   const largeTitleOpacity = 1 - headerProgress * 0.9;
   const showAiOpportunityNudge = Boolean(aiOpportunityNudge) && !isAiOpportunityDismissed;
 
@@ -241,11 +224,6 @@ export default function CardDetailScreen({
     onShowCardDetailsClick?.(activeCard);
   };
 
-  // ── Scroll handlers ──────────────────────────────────────────────
-  const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
-    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / headerThreshold));
-    setHeaderProgress(progress);
-  };
 
   const activateSearch = () => {
     const page = pageRef.current;
@@ -310,103 +288,10 @@ export default function CardDetailScreen({
     scrollToCard(getNearestIndex(carousel.scrollLeft));
   };
 
-  const removeMouseListeners = () => {
-    mouseDragCleanupRef.current?.();
-    mouseDragCleanupRef.current = null;
-  };
-
-  const beginDrag = (clientX: number, input: CarouselDragState["input"], pointerId: number | null = null) => {
-    const carousel = carouselRef.current;
-    if (!carousel || dragStateRef.current.input) return false;
-    dragStateRef.current = { didMove: false, input, pointerId, startScrollLeft: carousel.scrollLeft, startX: clientX };
-    return true;
-  };
-
-  const moveDrag = (clientX: number) => {
-    const carousel = carouselRef.current;
-    const dragState = dragStateRef.current;
-    if (!carousel || !dragState.input) return false;
-    const deltaX = clientX - dragState.startX;
-    if (!dragState.didMove && Math.abs(deltaX) < 4) return false;
-    dragState.didMove = true;
-    suppressClickRef.current = true;
-    setIsCarouselDragging(true);
-    carousel.scrollLeft = dragState.startScrollLeft - deltaX;
-    return true;
-  };
-
-  const finishDrag = () => {
-    if (dragStateRef.current.didMove) {
-      snapToNearest();
-      window.setTimeout(() => { suppressClickRef.current = false; }, 80);
-    }
-    resetDrag();
-  };
-
-  const resetDrag = () => {
-    removeMouseListeners();
-    dragStateRef.current = { didMove: false, input: null, pointerId: null, startScrollLeft: 0, startX: 0 };
-    setIsCarouselDragging(false);
-  };
-
-  const handlePointerDown = (event: PointerEvent<HTMLElement>) => {
-    if (event.pointerType === "mouse" && event.button !== 0) return;
-    if (beginDrag(event.clientX, "pointer", event.pointerId)) {
-      event.currentTarget.setPointerCapture(event.pointerId);
-    }
-  };
-
-  const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
-    const ds = dragStateRef.current;
-    if (ds.input !== "pointer" || ds.pointerId !== event.pointerId) return;
-    if (moveDrag(event.clientX)) event.preventDefault();
-  };
-
-  const handlePointerUp = (event: PointerEvent<HTMLElement>) => {
-    const ds = dragStateRef.current;
-    if (ds.input !== "pointer" || ds.pointerId !== event.pointerId) return;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-    finishDrag();
-  };
-
-  const handlePointerCancel = (event: PointerEvent<HTMLElement>) => {
-    if (dragStateRef.current.input !== "pointer" || dragStateRef.current.pointerId !== event.pointerId) return;
-    resetDrag();
-    suppressClickRef.current = false;
-  };
-
-  const handleMouseDown = (event: MouseEvent<HTMLElement>) => {
-    if (event.button !== 0 || !beginDrag(event.clientX, "mouse")) return;
-
-    const handleMouseMove = (e: globalThis.MouseEvent) => {
-      if (dragStateRef.current.input !== "mouse") return;
-      if (e.buttons !== 1) { finishDrag(); return; }
-      if (moveDrag(e.clientX)) e.preventDefault();
-    };
-
-    const handleMouseUp = () => {
-      if (dragStateRef.current.input === "mouse") finishDrag();
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-    mouseDragCleanupRef.current = () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  };
-
-  const handleClickCapture = (event: MouseEvent<HTMLElement>) => {
-    if (!suppressClickRef.current) return;
-    event.preventDefault();
-    event.stopPropagation();
-  };
-
-  const handleDragStart = (event: DragEvent<HTMLElement>) => {
-    event.preventDefault();
-  };
+  const { isDragging: isCarouselDragging, dragHandlers } = useDragCarousel({
+    carouselRef,
+    onSettle: snapToNearest,
+  });
 
   const handleCardKeyDown = (event: KeyboardEvent<HTMLElement>, index: number) => {
     if (event.key !== "Enter" && event.key !== " ") return;
@@ -422,8 +307,6 @@ export default function CardDetailScreen({
   useEffect(() => {
     setIsAiOpportunityDismissed(false);
   }, [activeCard?.id, aiOpportunityNudge?.title]);
-
-  useEffect(() => removeMouseListeners, []);
 
   if (!activeCard) {
     return (
@@ -481,12 +364,7 @@ export default function CardDetailScreen({
         <div
           ref={carouselRef}
           onScroll={handleCarouselScroll}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerCancel}
-          onMouseDown={handleMouseDown}
-          onClickCapture={handleClickCapture}
+          {...dragHandlers}
           data-card-carousel
           className={`relative z-10 -mb-[20px] overflow-x-auto pb-[20px] scrollbar-hide select-none ${
             isCarouselDragging ? "cursor-grabbing" : "cursor-grab"
@@ -506,14 +384,8 @@ export default function CardDetailScreen({
                   role="button"
                   tabIndex={0}
                   onClick={() => scrollToCard(index)}
-                  onClickCapture={handleClickCapture}
-                  onDragStart={handleDragStart}
                   onKeyDown={(e) => handleCardKeyDown(e, index)}
-                  onMouseDown={handleMouseDown}
-                  onPointerCancel={handlePointerCancel}
-                  onPointerDown={handlePointerDown}
-                  onPointerMove={handlePointerMove}
-                  onPointerUp={handlePointerUp}
+                  {...dragHandlers}
                   aria-pressed={isActive}
                   style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
                 >

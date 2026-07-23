@@ -40,8 +40,6 @@ export default function PreLoginScreen({
     return product;
   });
 
-  console.log("🟡 PreLoginScreen rendered");
-  console.log("🟡 onOtherClick prop:", onOtherClick);
 
   return (
     <div className="w-full h-full relative bg-[var(--uc-static-black)]">
@@ -99,12 +97,11 @@ export default function PreLoginScreen({
           {/* Bottom Navigation - 3 links */}
           <div 
             className="flex items-center justify-between w-full"
-            onClick={() => console.log("🔴 CONTAINER CLICKED!")}
+            onClick={() => {}}
           >
-            <NavigationLink text={t('preLogin.contacts')} onClick={() => console.log("🔵 CONTACTS link clicked")} />
-            <NavigationLink text={t('preLogin.mtoken')} onClick={() => console.log("🔵 MTOKEN link clicked")} />
+            <NavigationLink text={t('preLogin.contacts')} onClick={() => {}} />
+            <NavigationLink text={t('preLogin.mtoken')} onClick={() => {}} />
             <NavigationLink text={t('preLogin.other')} onClick={() => {
-              console.log("🔵 OTHER link clicked - calling onOtherClick");
               onOtherClick();
             }} />
           </div>

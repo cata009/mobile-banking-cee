@@ -22,7 +22,6 @@ export default function InteractivePreLoginActive({
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        console.log("✅ ESC pressed - closing overlay");
         onClose();
       }
     };
@@ -35,7 +34,6 @@ export default function InteractivePreLoginActive({
   const handleBackdropClick = (e: React.MouseEvent) => {
     // Dacă click-ul este direct pe backdrop div (nu pe copiii săi), închide
     if (e.target === e.currentTarget) {
-      console.log("✅ Clicked on backdrop - closing overlay");
       onClose();
     }
   };
@@ -43,8 +41,6 @@ export default function InteractivePreLoginActive({
   const handlePanelAreaClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     
-    console.log("Clicked in panel area:", target);
-    console.log("Data-name:", target.getAttribute("data-name"));
     
     // Caută în părinți pentru data-name specific
     let element: HTMLElement | null = target;
@@ -56,7 +52,6 @@ export default function InteractivePreLoginActive({
       
       // 1. Click pe drop icon (handle de închidere)
       if (dataName === "11 Native/ContainerStatusBar/More") {
-        console.log("✅ Drop icon clicked - closing overlay");
         e.stopPropagation();
         onClose();
         return;
@@ -68,7 +63,6 @@ export default function InteractivePreLoginActive({
         
         // Click specific pe START CO-APPING SESSION
         if (text.includes("START CO-APPING SESSION")) {
-          console.log("✅ Start Co-Apping button clicked - proceeding to next screen");
           e.stopPropagation();
           onStartCoApping();
           return;
@@ -82,7 +76,6 @@ export default function InteractivePreLoginActive({
         if (text.includes("ABOUT SMART BANKING") || 
             text.includes("EXCHANGE RATES") || 
             text.includes("FIND ATM")) {
-          console.log("ℹ️ Inactive menu item clicked - no action (only hover effect)");
           e.stopPropagation();
           return; // Stop propagation pentru a preveni orice acțiune
         }
@@ -96,7 +89,6 @@ export default function InteractivePreLoginActive({
     // Dacă click-ul este pe panel (nu pe backdrop), nu face nimic
     const isPanelClick = (e.target as HTMLElement).closest('[data-name*="Panel"]');
     if (isPanelClick) {
-      console.log("ℹ️ Clicked on panel area (not on any interactive element) - no action");
       e.stopPropagation();
       return;
     }

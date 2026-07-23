@@ -31,7 +31,6 @@ export default function ProductCardBottomSheet({
   const sheetTitle = sheetConfig.title ?? card.title.replace(/\n/g, " ");
 
   const handleOptionClick = (option: ProductCardSheetOption) => {
-    console.log(`Products sheet option clicked: ${card.id}/${option.id}`);
     onClose();
     onProductOptionClick?.({
       cardId: card.id,

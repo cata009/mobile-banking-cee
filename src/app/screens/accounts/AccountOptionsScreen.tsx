@@ -2,8 +2,7 @@ import PageHeader from "@/app/components/PageHeader";
 import { AppIcon } from "@/app/components/icons";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { ACCOUNT_OPTION_ITEMS, ACCOUNT_PRODUCT_OPTIONS } from "@/data/accountDetails";
-import { useState } from "react";
-import type { UIEvent } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import imgDeposit from "figma:asset/612ac7960c2d43bfdada538aae6f3cf27be44d99.png";
 import imgRoundup from "figma:asset/f4db1d1cdcbf6f7ad5674a0b74b6af74a9706415.png";
 import imgVirtualCard from "figma:asset/40072ac1587e0a070d3bd6c437a557892e0687a0.png";
@@ -37,12 +36,7 @@ function OptionIcon({ id }: { id: string }) {
 
 export default function AccountOptionsScreen({ onBack }: AccountOptionsScreenProps) {
   const { t } = useLanguage();
-  const [headerProgress, setHeaderProgress] = useState(0);
-
-  const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
-    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64));
-    setHeaderProgress(progress);
-  };
+  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(64);
 
   return (
     <div className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] scrollbar-hide" onScroll={handlePageScroll}>

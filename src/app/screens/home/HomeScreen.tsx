@@ -31,7 +31,6 @@ export default function HomeScreen({ onPrimeClick, onAnalyticsClick, onMessagesC
 
   // Handler for bottom navigation tab changes
   const handleTabChange = (tab: 'home' | 'analytics' | 'payments' | 'products' | 'more') => {
-    console.log(`📱 Bottom nav tab clicked: ${tab}`);
     if (tab === 'more' && onMoreClick) {
       onMoreClick();
     }

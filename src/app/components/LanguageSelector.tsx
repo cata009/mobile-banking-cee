@@ -23,9 +23,7 @@ export default function LanguageSelector({ onBack }: LanguageSelectorProps) {
   const availableLanguages = getAvailableLanguages(country);
 
   const handleSave = () => {
-    console.log('🌐 Saving language:', tempLanguage);
     setLanguage(tempLanguage);
-    console.log('✅ Language set to:', tempLanguage);
     onBack();
   };
 

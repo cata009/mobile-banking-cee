@@ -1,4 +1,5 @@
-import { useMemo, useState, type PointerEvent, type UIEvent } from "react";
+import { useMemo, useState, type PointerEvent } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import { AppIcon } from "@/app/components/icons";
 import PageHeader from "@/app/components/PageHeader";
@@ -180,18 +181,13 @@ export default function DocumentsScreen({ onBack, onHelpClick }: DocumentsScreen
   const { t } = useLanguage();
   const config = getDocumentsConfigForCountry(country);
   const [searchQuery, setSearchQuery] = useState("");
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(64);
   const [openActionId, setOpenActionId] = useState<string | null>(null);
   const [deletedDocumentIds, setDeletedDocumentIds] = useState<ReadonlySet<string>>(() => new Set());
   const [pendingDeleteItem, setPendingDeleteItem] = useState<DocumentListItem | null>(null);
   const [isLegalInfoOpen, setIsLegalInfoOpen] = useState(false);
 
   const getDocumentStateKey = (item: DocumentListItem) => `${country}:${item.id}`;
-
-  const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
-    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64));
-    setHeaderProgress(progress);
-  };
 
   const handleCancelDelete = () => {
     setPendingDeleteItem(null);

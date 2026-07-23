@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState, type UIEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import InvestmentDistributionChart from "@/app/components/investments/InvestmentDistributionChart";
 import InvestmentActionBar from "@/app/components/investments/InvestmentActionBar";
 import InvestmentFilterChips from "@/app/components/investments/InvestmentFilterChips";
@@ -204,14 +205,11 @@ function DistributionCategoryDetailScreen({
   onBack: () => void;
   formatDistributionAmount: (value: number, itemCurrency: string) => InvestmentAmountParts;
 }) {
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(64);
   const matchingSecurities = securities.filter((security) => getInvestmentDistributionGroupKey(security, tabId) === item.id);
   const totalParts = formatDistributionAmount(item.value, item.currency);
   const categoryTitle = item.label.toUpperCase();
 
-  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
-    setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64)));
-  };
 
   const renderCategoryRow = (security: InvestmentSecurity) => {
     const primaryAmount = formatDistributionAmount(security.value, security.currency);
@@ -289,7 +287,7 @@ export default function InvestmentsPortfolioScreen({
   const { country, amountsHidden } = useDemo();
   const { categories } = useProducts();
   const { t } = useLanguage();
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handlePageScroll, setProgress: setHeaderProgress } = useCollapsingHeader(64);
   const [selectedTabId, setSelectedTabId] = useState<InvestmentPortfolioTabId>("performance");
   const [selectedPeriodId, setSelectedPeriodId] = useState<InvestmentPeriodId>("max");
   const [selectedSortId, setSelectedSortId] = useState<InvestmentSortId>("max-value");
@@ -399,10 +397,6 @@ export default function InvestmentsPortfolioScreen({
     onBuyRequestConsumed?.(buyRequest.requestId);
   }, [buyRequest, onBuyRequestConsumed, onSelectedSecurityChange, securityCatalog]);
 
-  const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
-    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64));
-    setHeaderProgress(progress);
-  };
 
   const renderSecurity = (security: InvestmentSecurity) => (
     <InvestmentProductCard

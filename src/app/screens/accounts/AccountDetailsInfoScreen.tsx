@@ -12,8 +12,7 @@ import { useCopyToClipboard } from "@/app/utils/useCopyToClipboard";
 import { useProducts } from "@/hooks/useProducts";
 import { getLoanDetails, getTermDepositDetails } from "@/data/accountProductDetails";
 import { isAccountDetailProduct } from "@/data/products";
-import { useState } from "react";
-import type { UIEvent } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import type { Product } from "@/data/products";
 
 interface AccountDetailsInfoScreenProps {
@@ -67,12 +66,7 @@ export default function AccountDetailsInfoScreen({
   const product = getAccountDetailsProduct(products, selectedProductId);
   const config = getCountryConfig(country);
   const { toast: copyToast, copy: copyToClipboard } = useCopyToClipboard();
-  const [headerProgress, setHeaderProgress] = useState(0);
-
-  const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
-    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64));
-    setHeaderProgress(progress);
-  };
+  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(64);
 
   if (!product) {
     return (

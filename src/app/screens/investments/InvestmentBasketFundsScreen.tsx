@@ -1,4 +1,5 @@
-import { useState, type UIEvent } from "react";
+import { useState } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import BrandLogo from "@/app/components/brand-logo/BrandLogo";
 import PageHeader from "@/app/components/PageHeader";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
@@ -64,13 +65,9 @@ function BasketGroup({
 }
 
 export default function InvestmentBasketFundsScreen({ baskets, onBack }: InvestmentBasketFundsScreenProps) {
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(64);
   const oneOffBaskets = baskets.filter((basket) => basket.contributionType === "ONE OFF");
   const regularBaskets = baskets.filter((basket) => basket.contributionType === "RECURRENT");
-
-  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
-    setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64)));
-  };
 
   return (
     <div
