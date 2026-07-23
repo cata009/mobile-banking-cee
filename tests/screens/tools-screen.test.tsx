@@ -78,7 +78,7 @@ describe("ToolsScreen", () => {
   it("renders the overview with all tool cards", () => {
     const { container } = renderTools();
     expect(screen.getByRole("heading", { name: "Tools", level: 1 })).toBeInTheDocument();
-    expect(container.querySelectorAll("[data-tool-card]")).toHaveLength(5);
+    expect(container.querySelectorAll("[data-tool-card]")).toHaveLength(6);
   });
 
   it("opens the side-by-side tool with two live country frames by default", () => {
