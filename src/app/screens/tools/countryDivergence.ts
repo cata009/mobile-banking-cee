@@ -15,7 +15,6 @@ import { isCoAppingAvailable } from "@/app/utils/coAppingAvailability";
 import { isInvestmentsPortfolioAvailable } from "@/app/utils/investmentsAvailability";
 import { isKidsHomeCountry } from "@/data/kidsMarketHomeConcepts";
 import type { CountryId, FeatureId } from "@/app/state/demoTypes";
-import { getAllLeafPaths, getTranslationValue } from "./translationCorpus";
 
 export type CellKind = "yes" | "no" | "neutral";
 
@@ -41,46 +40,6 @@ function byCountry(compute: (country: CountryId) => DivergenceCell): Record<Coun
     CountryId,
     DivergenceCell
   >;
-}
-
-interface LocalCoverage {
-  pct: number;
-  translated: number;
-  identicalToEn: number;
-  missing: number;
-  total: number;
-}
-
-const coverageCache = new Map<CountryId, LocalCoverage>();
-
-function localCoverage(country: CountryId): LocalCoverage {
-  const cached = coverageCache.get(country);
-  if (cached) return cached;
-
-  const language = LOCAL_LANGUAGE_BY_COUNTRY[country];
-  const paths = getAllLeafPaths();
-  let translated = 0;
-  let identicalToEn = 0;
-  let missing = 0;
-
-  for (const path of paths) {
-    const local = getTranslationValue(country, language, path);
-    const english = getTranslationValue(country, "en", path);
-    if (local === undefined) missing += 1;
-    else if (english !== undefined && local === english) identicalToEn += 1;
-    else translated += 1;
-  }
-
-  const total = paths.length;
-  const result: LocalCoverage = {
-    pct: total > 0 ? Math.round((translated / total) * 100) : 0,
-    translated,
-    identicalToEn,
-    missing,
-    total,
-  };
-  coverageCache.set(country, result);
-  return result;
 }
 
 /** Whether a country is inside a feature's product/design-system/country scope. */
@@ -149,28 +108,6 @@ export function computeDivergenceRows(): DivergenceRow[] {
       values: byCountry((country) => (isFeatureInScope(featureId, country) ? yes() : no())),
     });
   }
-
-  // Translation coverage in the local language
-  rows.push({
-    id: "l10n.coverage",
-    category: "Translation (local language)",
-    label: "Localized coverage",
-    hint: "Share of keys with a local value that differs from the English baseline.",
-    values: byCountry((country) => text(`${localCoverage(country).pct}%`)),
-  });
-  rows.push({
-    id: "l10n.identical",
-    category: "Translation (local language)",
-    label: "Identical to English",
-    hint: "Keys whose local value equals the English text (often not yet localized).",
-    values: byCountry((country) => text(String(localCoverage(country).identicalToEn))),
-  });
-  rows.push({
-    id: "l10n.missing",
-    category: "Translation (local language)",
-    label: "Missing keys",
-    values: byCountry((country) => text(String(localCoverage(country).missing))),
-  });
 
   return rows;
 }
