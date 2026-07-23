@@ -44,7 +44,7 @@ const TOOLS: readonly ToolMeta[] = [
     label: "Country divergence explorer",
     icon: "sliders-horizontal",
     description:
-      "A matrix of every dimension that differs across the 8 countries — currency, capabilities, feature scope, localization — against the majority or a reference country.",
+      "A matrix of every dimension that differs across the 8 countries — currency, locale, capabilities and feature scope — against the majority or a reference country.",
     audience: "BA · Product owners",
   },
   {
