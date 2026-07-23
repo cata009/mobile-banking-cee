@@ -14,12 +14,14 @@ import { TranslationTesterTool } from "./TranslationTesterTool";
 import { TranslationReviewTool } from "./TranslationReviewTool";
 import { CountryDivergenceTool } from "./CountryDivergenceTool";
 import { LocalizationSignoffTool } from "./LocalizationSignoffTool";
+import { LocalizationCoverageTool } from "./LocalizationCoverageTool";
 
 type ToolId =
   | "side-by-side"
   | "country-divergence"
   | "translation-tester"
   | "translation-review"
+  | "localization-coverage"
   | "localization-signoff";
 
 interface ToolMeta {
@@ -62,6 +64,14 @@ const TOOLS: readonly ToolMeta[] = [
     description:
       "Every string of a translation namespace across all languages, with overflow-risk highlighting and CSV export.",
     audience: "BA · Local market teams",
+  },
+  {
+    id: "localization-coverage",
+    label: "Localization coverage",
+    icon: "receipt-text",
+    description:
+      "Honest per-language completeness across every namespace — translated vs inherited-from-English vs missing — so the gaps are located, not hidden behind one percentage.",
+    audience: "BA · Local market teams · PM",
   },
   {
     id: "localization-signoff",
@@ -145,6 +155,8 @@ export default function ToolsScreen() {
                 <TranslationTesterTool />
               ) : activeToolId === "translation-review" ? (
                 <TranslationReviewTool />
+              ) : activeToolId === "localization-coverage" ? (
+                <LocalizationCoverageTool />
               ) : (
                 <LocalizationSignoffTool />
               )}

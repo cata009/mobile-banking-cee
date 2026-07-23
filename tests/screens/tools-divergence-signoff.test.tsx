@@ -22,6 +22,13 @@ import {
   loadSignoff,
   updateEntry,
 } from "@/app/screens/tools/localizationSignoff";
+import {
+  LOCAL_COLUMNS,
+  buildCoverageCsv,
+  languageCoverage,
+  namespaceCoverage,
+  translatedPct,
+} from "@/app/screens/tools/localizationCoverage";
 
 function AppProviders({ children }: PropsWithChildren) {
   return (
@@ -113,6 +120,36 @@ describe("localization sign-off store", () => {
   });
 });
 
+describe("localization coverage model", () => {
+  it("covers the 7 local-language columns", () => {
+    expect(LOCAL_COLUMNS).toHaveLength(7);
+    expect(LOCAL_COLUMNS.every((column) => !column.isEnglish)).toBe(true);
+  });
+
+  it("buckets every key into translated, inherited, or missing with no leakage", () => {
+    for (const column of LOCAL_COLUMNS) {
+      const counts = languageCoverage(column);
+      expect(counts.total).toBeGreaterThan(0);
+      expect(counts.translated + counts.inherited + counts.missing).toBe(counts.total);
+    }
+  });
+
+  it("computes a bounded translated percentage", () => {
+    const runtime = namespaceCoverage(LOCAL_COLUMNS[0]!, "runtime");
+    const pct = translatedPct(runtime);
+    expect(pct).toBeGreaterThanOrEqual(0);
+    expect(pct).toBeLessThanOrEqual(100);
+  });
+
+  it("exports a BOM CSV with a row per language × namespace", () => {
+    const csv = buildCoverageCsv();
+    expect(csv.charCodeAt(0)).toBe(0xfeff);
+    const header = csv.slice(1).split("\r\n")[0] ?? "";
+    expect(header).toContain('"Inherited from EN"');
+    expect(header).toContain('"Translated %"');
+  });
+});
+
 describe("Tools surface — new cards", () => {
   it("opens the country divergence matrix with 8 country columns", () => {
     const { container } = render(<ToolsScreen />, { wrapper: AppProviders });
@@ -122,6 +159,16 @@ describe("Tools surface — new cards", () => {
     expect(tool).not.toBeNull();
     expect(tool?.querySelectorAll("thead th")).toHaveLength(9); // Dimension + 8 countries
     expect(container.querySelector("[data-divergence-export]")).not.toBeNull();
+  });
+
+  it("opens the localization coverage dashboard with 7 language rows", () => {
+    const { container } = render(<ToolsScreen />, { wrapper: AppProviders });
+    fireEvent.click(container.querySelector('[data-tool-card="localization-coverage"]') as HTMLElement);
+
+    const tool = container.querySelector("[data-tool-localization-coverage]");
+    expect(tool).not.toBeNull();
+    expect(tool?.querySelectorAll("[data-coverage-language]")).toHaveLength(7);
+    expect(container.querySelector("[data-coverage-export]")).not.toBeNull();
   });
 
   it("opens the localization sign-off tool and approves a string", () => {
