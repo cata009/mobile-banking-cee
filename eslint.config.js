@@ -41,6 +41,18 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': 'off',
       'no-debugger': 'error',
       'no-constant-binary-expression': 'error',
+      // Keep debug logs out of the shipped demo; error/warn stay for real diagnostics.
+      'no-console': ['error', { allow: ['error', 'warn'] }],
+    },
+  },
+  {
+    // Node-side dev scripts and API handlers legitimately log progress/results.
+    files: [
+      'api/**/*.js',
+      'scripts/**/*.{js,mjs,cjs}',
+    ],
+    rules: {
+      'no-console': 'off',
     },
   },
 )

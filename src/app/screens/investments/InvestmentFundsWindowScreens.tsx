@@ -1,4 +1,4 @@
-import { useState, type UIEvent } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import { AppIcon } from "@/app/components/icons";
 import InvestmentsFundBanner, {
   INVESTMENTS_FUND_BANNER_VARIANTS,
@@ -134,10 +134,7 @@ export function InvestmentFundsSelectionScreen({
   onSearch,
   onSelectCollection,
 }: InvestmentFundsSelectionScreenProps) {
-  const [headerProgress, setHeaderProgress] = useState(0);
-  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
-    setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 96)));
-  };
+  const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(96);
 
   return (
     <div

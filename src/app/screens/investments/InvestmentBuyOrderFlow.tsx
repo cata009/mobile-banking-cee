@@ -1,4 +1,5 @@
-import { useMemo, useState, type ReactNode, type UIEvent } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
@@ -112,10 +113,7 @@ function FlowFrame({
   actionDisabled?: boolean;
   onAction: () => void;
 }) {
-  const [headerProgress, setHeaderProgress] = useState(0);
-  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
-    setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64)));
-  };
+  const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(64);
 
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)] text-[var(--uc-text)]">

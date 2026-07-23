@@ -70,7 +70,6 @@ import {
 } from "@/app/screens/payments/DomesticPaymentFlowScreens";
 import { useProducts } from "@/hooks/useProducts";
 import {
-  buildDeepLinkUrl,
   deepLinkToDemoInitialState,
   parseDeepLinkFromUrl,
 } from "@/app/utils/deepLink";
@@ -99,15 +98,10 @@ import {
 } from "../../package/mobile-pi-coapping-chat-package/src";
 import "../../package/mobile-pi-coapping-chat-package/src/coapping.css";
 import type { AccountTransaction } from "@/data/accountDetails";
-import type { PfmCategorySelection } from "@/data/pfmCategories";
 import type { SpendingAnalyticsTransaction } from "@/data/spendingAnalytics";
-import {
-  createEmptyDomesticPaymentDraft,
-  createRedoDomesticPaymentDraft,
-  createTemplateDomesticPaymentDraft,
-  type DomesticPaymentDraft,
-} from "@/data/paymentFlow";
-import type { PaymentTemplateSelection } from "@/data/paymentTemplates";
+import { useDeepLinkUrlSync } from "@/hooks/useDeepLinkUrlSync";
+import { usePaymentFlow } from "@/hooks/usePaymentFlow";
+import { useTransactionCategoryOverrides } from "@/hooks/useTransactionCategoryOverrides";
 import type { CreditCard, Product } from "@/data/products";
 import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
 import type {
@@ -234,7 +228,6 @@ function AppContent({
     designSystem,
     themeMode,
     release,
-    baseline,
     bankingScenario,
     productCounts,
     amountsHidden,
@@ -268,8 +261,8 @@ function AppContent({
   const [selectedCardId, setSelectedCardId] = useState<string | null>(parsedDeepLink?.cardId ?? null);
   const [selectedFlowPreviewId, setSelectedFlowPreviewId] = useState<FlowPreviewId>(parsedDeepLink?.flowId ?? "ro-round-up");
   const [selectedTransaction, setSelectedTransaction] = useState<AccountTransaction | null>(null);
-  const [transactionCategoryOverrides, setTransactionCategoryOverrides] = useState<Record<string, PfmCategorySelection>>({});
-  const [paymentDraft, setPaymentDraft] = useState<DomesticPaymentDraft | null>(null);
+  const { transactionCategoryOverrides, handleTransactionCategoryChange } =
+    useTransactionCategoryOverrides({ setSelectedTransaction });
   const [czChatOpen, setCzChatOpen] = useState(false);
   const [czChatContext, setCzChatContext] = useState<CoAppingChatContext | null>(null);
   const [czChatInitialMode, setCzChatInitialMode] = useState<CoAppingAssistantMode>("chat");
@@ -305,6 +298,19 @@ function AppContent({
     navigateToAndReset(fallback);
   }, [accountProducts, currentRoute, navigateToAndReset]);
   const selectedAccountProduct = accountProducts.find((accountProduct) => accountProduct.id === selectedAccountId) ?? accountProducts[0] ?? null;
+  const {
+    paymentDraft,
+    handleRedoPaymentClick,
+    handleDomesticPaymentClick,
+    handlePaymentTemplateSelect,
+    handleDomesticPaymentNext,
+    handlePaymentDone,
+  } = usePaymentFlow({
+    country,
+    selectedAccountProduct,
+    selectedTransaction,
+    setSelectedTransaction,
+  });
   const selectedCardProduct =
     accountProducts.find((cardProduct) => cardProduct.id === selectedCardId) ??
     accountProducts.find((cardProduct) => cardProduct.type === "credit_card") ??
@@ -366,45 +372,24 @@ function AppContent({
     return () => window.removeEventListener("flow-preview-select", handleFlowPreviewSelect);
   }, []);
 
-  // Keep the browser URL in sync with the current state, so the address bar is
-  // always a live deep link (refresh/bookmark/Share all work everywhere).
-  useEffect(() => {
-    const url = buildDeepLinkUrl({
-      product,
-      country,
-      scenario,
-      designSystem,
-      release,
-      bankingScenario,
-      themeMode,
-      amountsHidden,
-      productCounts,
-      language,
-      screen: currentScreen,
-      flowId: currentRoutePolicy.deepLink.payload === "flow" ? selectedFlowPreviewId : null,
-      accountId: selectedAccountId,
-      cardId: selectedCardId,
-      deviceMode,
-    });
-    window.history.replaceState(window.history.state, "", url);
-  }, [
+  // Keep the browser URL a live deep link (refresh/bookmark/Share work everywhere).
+  useDeepLinkUrlSync({
     product,
     country,
     scenario,
     designSystem,
     release,
-    baseline,
     bankingScenario,
     themeMode,
     amountsHidden,
     productCounts,
     language,
-    currentScreen,
-    selectedFlowPreviewId,
-    selectedAccountId,
-    selectedCardId,
+    screen: currentScreen,
+    flowId: currentRoutePolicy.deepLink.payload === "flow" ? selectedFlowPreviewId : null,
+    accountId: selectedAccountId,
+    cardId: selectedCardId,
     deviceMode,
-  ]);
+  });
 
   const statusBarVariant = resolveRouteStatusBarVariant(currentScreen, {
     product,
@@ -415,19 +400,16 @@ function AppContent({
 
   // Handler pentru click pe butonul OTHER - deschide panel-ul
   const handleOtherClick = () => {
-    console.log("🟢 OTHER clicked - opening panel menu");
     setShowPanel(true);
   };
 
   // Handler pentru închidere panel
   const handleClosePanel = () => {
-    console.log("🟢 Closing panel menu");
     setShowPanel(false);
   };
 
   // Handler pentru click pe language selector
   const handleLanguageClick = () => {
-    console.log("Language selector clicked - navigating to language screen");
     navigateTo("language-selector");
   };
 
@@ -438,11 +420,9 @@ function AppContent({
 
   // Handler pentru start co-apping
   const handleStartCoApping = () => {
-    console.log("Starting co-apping session");
     // Salvează de unde am pornit (inactive sau active)
     const originScreen = currentScreen === 'prelogin-inactive' ? 'prelogin-inactive' : 'prelogin-active';
     setCoAppingOriginScreen(originScreen);
-    console.log(`🎯 Co-Apping origin screen saved: ${originScreen}`);
     
     setShowPanel(false); // Close panel first
     navigateTo("co-apping-session");
@@ -450,7 +430,6 @@ function AppContent({
 
   // Handler pentru continuare din co-apping session
   const handleContinueCoApping = () => {
-    console.log(`✅ Co-Apping activated - returning to origin screen: ${coAppingOriginScreen}`);
     setCoAppingActive(true);
     // Start edge loading animation
     setShowEdgeAnimation(true);
@@ -489,13 +468,11 @@ function AppContent({
 
   // Handler pentru login cu Face ID
   const handleLoginClick = () => {
-    console.log("🔐 Login completed - navigating to Homepage");
     navigateTo("homepage");
   };
 
   // Handler pentru navigare la Prime
   const handlePrimeClick = () => {
-    console.log("💎 Prime clicked - navigating to Prime screen");
     navigateTo("prime");
   };
 
@@ -506,27 +483,22 @@ function AppContent({
 
   // Handler pentru navigare la More
   const handleMoreClick = () => {
-    console.log("📋 More clicked - navigating to More screen");
     navigateTo("more");
   };
 
   const handlePaymentsClick = () => {
-    console.log("Payments clicked - navigating to Payments screen");
     navigateTo("payments");
   };
 
   const handleAnalyticsClick = () => {
-    console.log("Analytics clicked - navigating to Analytics screen");
     navigateTo("analytics");
   };
 
   const handleMessagesClick = () => {
-    console.log("Messages clicked - navigating to Messages screen");
     navigateTo("messages");
   };
 
   const handleProductsClick = () => {
-    console.log("Products clicked - navigating to Products screen");
     navigateTo("products");
   };
 
@@ -538,7 +510,6 @@ function AppContent({
   const handleInvestmentsClick = () => {
     if (!investmentsPortfolioAvailable) return;
 
-    console.log("Investments clicked - navigating to Investments portfolio screen");
     navigateTo("investments");
   };
 
@@ -589,41 +560,6 @@ function AppContent({
   const handleAnalyticsTransactionClick = (transaction: SpendingAnalyticsTransaction) => {
     const sourceProduct = accountProducts.find((productItem) => productItem.id === transaction.sourceProductId);
     if (sourceProduct) handleTransactionClick(transaction, sourceProduct);
-  };
-
-  const handleTransactionCategoryChange = (
-    transaction: AccountTransaction,
-    selection: PfmCategorySelection,
-  ) => {
-    const updatedTransaction: AccountTransaction = {
-      ...transaction,
-      category: selection.groupLabel,
-      pfmCategory: selection.category,
-      pfmSubcategory: selection.subcategory,
-    };
-
-    setTransactionCategoryOverrides((current) => ({
-      ...current,
-      [transaction.id]: selection,
-    }));
-    setSelectedTransaction((current) => current?.id === transaction.id ? updatedTransaction : current);
-  };
-
-  const handleRedoPaymentClick = () => {
-    if (!selectedTransaction) return;
-
-    setPaymentDraft(createRedoDomesticPaymentDraft(selectedTransaction, country, selectedAccountProduct));
-    navigateTo("domestic-payment");
-  };
-
-  const handleDomesticPaymentClick = () => {
-    setPaymentDraft(createEmptyDomesticPaymentDraft(country, selectedAccountProduct));
-    navigateTo("domestic-payment");
-  };
-
-  const handlePaymentTemplateSelect = (selection: PaymentTemplateSelection) => {
-    setPaymentDraft(createTemplateDomesticPaymentDraft(selection, country, selectedAccountProduct));
-    navigateTo("domestic-payment");
   };
 
   const openCzChatHelp = (area: CzChatHelpArea) => {
@@ -754,20 +690,8 @@ function AppContent({
     }
   };
 
-  const handleDomesticPaymentNext = (nextDraft: DomesticPaymentDraft) => {
-    setPaymentDraft(nextDraft);
-    navigateTo("payment-review");
-  };
-
-  const handlePaymentDone = () => {
-    setPaymentDraft(null);
-    setSelectedTransaction(null);
-    navigateTo("payments");
-  };
-
   // Handler pentru logout confirmation
   const handleLogoutConfirm = () => {
-    console.log('🚪 Logout confirmed - navigating to PreLogin Active');
     navigateTo('prelogin-active');
   };
 

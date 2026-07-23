@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { DragEvent, KeyboardEvent, MouseEvent, PointerEvent, UIEvent } from "react";
+import type { KeyboardEvent } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
+import { useDragCarousel } from "@/hooks/useDragCarousel";
 import AccountBalanceCard from "@/app/components/accounts/AccountBalanceCard";
 import AccountActionBar, { type AccountActionBarItem } from "@/app/components/accounts/AccountActionBar";
 import AccountCarouselIndicator from "@/app/components/accounts/AccountCarouselIndicator";
@@ -48,14 +50,6 @@ const ACCOUNT_CARD_INACTIVE_SCALE_Y = (
   ACCOUNT_CARD_HEIGHT - ACCOUNT_CARD_INACTIVE_VERTICAL_INSET * 2
 ) / ACCOUNT_CARD_HEIGHT;
 const ACCOUNT_DETAIL_HEADER_HEIGHT = 102;
-
-type CarouselDragState = {
-  didMove: boolean;
-  input: "mouse" | "pointer" | null;
-  pointerId: number | null;
-  startScrollLeft: number;
-  startX: number;
-};
 
 function splitFormattedNumber(value: string) {
   const match = value.match(/^(.+?)([,.]\d{2})$/);
@@ -143,7 +137,7 @@ export default function AccountDetailScreen({
   );
   const { toast: copyToast, copy: copyToClipboard } = useCopyToClipboard();
   const [activeIndex, setActiveIndex] = useState(selectedIndex === -1 ? 0 : selectedIndex);
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(64);
   const [transactionSearch, setTransactionSearch] = useState("");
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [categorySheetTransaction, setCategorySheetTransaction] = useState<AccountTransaction | null>(null);
@@ -151,16 +145,6 @@ export default function AccountDetailScreen({
   const pageRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
-  const dragStateRef = useRef<CarouselDragState>({
-    didMove: false,
-    input: null,
-    pointerId: null,
-    startScrollLeft: 0,
-    startX: 0,
-  });
-  const mouseDragCleanupRef = useRef<(() => void) | null>(null);
-  const suppressClickRef = useRef(false);
-  const [isCarouselDragging, setIsCarouselDragging] = useState(false);
   const activeProduct = accountProducts[activeIndex] ?? accountProducts[0];
   const accountActionItems = useMemo<AccountActionBarItem[]>(() => {
     if (!activeProduct) return [];
@@ -284,13 +268,7 @@ export default function AccountDetailScreen({
     [filteredTransactions],
   );
   const hasTransactionSearch = normalizedTransactionSearch.length > 0;
-  const headerThreshold = 64;
   const largeTitleOpacity = 1 - headerProgress * 0.9;
-
-  const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
-    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / headerThreshold));
-    setHeaderProgress(progress);
-  };
 
   const activateTransactionSearch = () => {
     const page = pageRef.current;
@@ -373,144 +351,10 @@ export default function AccountDetailScreen({
     scrollToAccount(getNearestAccountIndex(carousel.scrollLeft));
   };
 
-  const removeMouseDragListeners = () => {
-    mouseDragCleanupRef.current?.();
-    mouseDragCleanupRef.current = null;
-  };
-
-  const beginCarouselDrag = (
-    clientX: number,
-    input: CarouselDragState["input"],
-    pointerId: number | null = null,
-  ) => {
-    const carousel = carouselRef.current;
-    if (!carousel || dragStateRef.current.input) return false;
-
-    dragStateRef.current = {
-      didMove: false,
-      input,
-      pointerId,
-      startScrollLeft: carousel.scrollLeft,
-      startX: clientX,
-    };
-
-    return true;
-  };
-
-  const moveCarouselDrag = (clientX: number) => {
-    const carousel = carouselRef.current;
-    const dragState = dragStateRef.current;
-    if (!carousel || !dragState.input) return false;
-
-    const deltaX = clientX - dragState.startX;
-    if (!dragState.didMove && Math.abs(deltaX) < 4) return false;
-
-    dragState.didMove = true;
-    suppressClickRef.current = true;
-    setIsCarouselDragging(true);
-    carousel.scrollLeft = dragState.startScrollLeft - deltaX;
-    return true;
-  };
-
-  const finishCarouselDrag = () => {
-    const didMove = dragStateRef.current.didMove;
-
-    if (didMove) {
-      snapCarouselToNearestAccount();
-      window.setTimeout(() => {
-        suppressClickRef.current = false;
-      }, 80);
-    }
-
-    resetCarouselDrag();
-  };
-
-  const resetCarouselDrag = () => {
-    removeMouseDragListeners();
-    dragStateRef.current = {
-      didMove: false,
-      input: null,
-      pointerId: null,
-      startScrollLeft: 0,
-      startX: 0,
-    };
-    setIsCarouselDragging(false);
-  };
-
-  const handleCarouselPointerDown = (event: PointerEvent<HTMLElement>) => {
-    if (event.pointerType === "mouse" && event.button !== 0) return;
-
-    if (beginCarouselDrag(event.clientX, "pointer", event.pointerId)) {
-      event.currentTarget.setPointerCapture(event.pointerId);
-    }
-  };
-
-  const handleCarouselPointerMove = (event: PointerEvent<HTMLElement>) => {
-    const dragState = dragStateRef.current;
-    if (dragState.input !== "pointer" || dragState.pointerId !== event.pointerId) return;
-
-    if (moveCarouselDrag(event.clientX)) {
-      event.preventDefault();
-    }
-  };
-
-  const handleCarouselPointerUp = (event: PointerEvent<HTMLElement>) => {
-    const dragState = dragStateRef.current;
-    if (dragState.input !== "pointer" || dragState.pointerId !== event.pointerId) return;
-
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-
-    finishCarouselDrag();
-  };
-
-  const handleCarouselPointerCancel = (event: PointerEvent<HTMLElement>) => {
-    if (dragStateRef.current.input !== "pointer" || dragStateRef.current.pointerId !== event.pointerId) return;
-    resetCarouselDrag();
-    suppressClickRef.current = false;
-  };
-
-  const handleCarouselMouseDown = (event: MouseEvent<HTMLElement>) => {
-    if (event.button !== 0 || !beginCarouselDrag(event.clientX, "mouse")) return;
-
-    const handleMouseMove = (mouseEvent: globalThis.MouseEvent) => {
-      if (dragStateRef.current.input !== "mouse") return;
-
-      if (mouseEvent.buttons !== 1) {
-        finishCarouselDrag();
-        return;
-      }
-
-      if (moveCarouselDrag(mouseEvent.clientX)) {
-        mouseEvent.preventDefault();
-      }
-    };
-
-    const handleMouseUp = () => {
-      if (dragStateRef.current.input === "mouse") {
-        finishCarouselDrag();
-      }
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-    mouseDragCleanupRef.current = () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  };
-
-  const handleCarouselClickCapture = (event: MouseEvent<HTMLElement>) => {
-    if (!suppressClickRef.current) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-  };
-
-  const handleCarouselDragStart = (event: DragEvent<HTMLElement>) => {
-    event.preventDefault();
-  };
+  const { isDragging: isCarouselDragging, dragHandlers } = useDragCarousel({
+    carouselRef,
+    onSettle: snapCarouselToNearestAccount,
+  });
 
   const handleAccountCardKeyDown = (event: KeyboardEvent<HTMLElement>, index: number) => {
     if (event.key !== "Enter" && event.key !== " ") return;
@@ -523,8 +367,6 @@ export default function AccountDetailScreen({
     if (!carouselRef.current) return;
     carouselRef.current.scrollTo({ left: getAccountScrollLeft(activeIndex) });
   }, []);
-
-  useEffect(() => removeMouseDragListeners, []);
 
   if (!activeProduct) {
     return (
@@ -567,12 +409,7 @@ export default function AccountDetailScreen({
         <div
           ref={carouselRef}
           onScroll={handleCarouselScroll}
-          onPointerDown={handleCarouselPointerDown}
-          onPointerMove={handleCarouselPointerMove}
-          onPointerUp={handleCarouselPointerUp}
-          onPointerCancel={handleCarouselPointerCancel}
-          onMouseDown={handleCarouselMouseDown}
-          onClickCapture={handleCarouselClickCapture}
+          {...dragHandlers}
           className={`overflow-x-auto overflow-y-visible pt-[16px] pb-[34px] scrollbar-hide select-none ${
             isCarouselDragging ? "cursor-grabbing" : "cursor-grab"
           }`}
@@ -613,14 +450,8 @@ export default function AccountDetailScreen({
                   role="button"
                   tabIndex={0}
                   onClick={() => scrollToAccount(index)}
-                  onClickCapture={handleCarouselClickCapture}
-                  onDragStart={handleCarouselDragStart}
                   onKeyDown={(event) => handleAccountCardKeyDown(event, index)}
-                  onMouseDown={handleCarouselMouseDown}
-                  onPointerCancel={handleCarouselPointerCancel}
-                  onPointerDown={handleCarouselPointerDown}
-                  onPointerMove={handleCarouselPointerMove}
-                  onPointerUp={handleCarouselPointerUp}
+                  {...dragHandlers}
                   aria-pressed={isActiveCard}
                   data-account-carousel-card-state={isActiveCard ? "active" : "inactive"}
                   data-account-product-id={product.id}

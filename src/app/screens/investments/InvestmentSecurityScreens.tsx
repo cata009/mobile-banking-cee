@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useRef, useState, type DragEvent, type MouseEvent, type PointerEvent, type UIEvent } from "react";
+import { useMemo, useRef, useState } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
+import { useDragCarousel } from "@/hooks/useDragCarousel";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import BrandLogo from "@/app/components/brand-logo/BrandLogo";
@@ -44,18 +46,6 @@ interface InvestmentSecurityDetailScreenProps extends SharedProps {
 
 const INVESTMENT_POSITIVE_COLOR = "var(--uc-green-olive)";
 
-// Drag state for the basket funds carousel. Mirrors the inline drag model used
-// by the Account / Card / Analytics / PFM / Products carousels so the basket
-// shelf can be dragged horizontally while its vertically-scrolling parent keeps
-// handling vertical pan (touch-action: pan-y).
-type BasketDragState = {
-  didMove: boolean;
-  input: "mouse" | "pointer" | null;
-  pointerId: number | null;
-  startScrollLeft: number;
-  startX: number;
-};
-
 // Basket carousel geometry. Matches the Account carousel's look: a 16px left
 // gutter (so the first card "peeks" from the edge like a real mobile carousel),
 // 16px between cards, and an explicit smooth-snap to the nearest card on drag
@@ -86,7 +76,7 @@ export function InvestmentSecurityListScreen({
 }: InvestmentSecurityListScreenProps) {
   const basketFundsAvailable = country === "CZ";
   const [query, setQuery] = useState("");
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(64);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [ownedOnly, setOwnedOnly] = useState(false);
   const [currency, setCurrency] = useState<string | null>(null);
@@ -117,26 +107,8 @@ export function InvestmentSecurityListScreen({
     setCurrency(null);
   };
 
-  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
-    setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64)));
-  };
 
   const basketCarouselRef = useRef<HTMLDivElement>(null);
-  const basketDragStateRef = useRef<BasketDragState>({
-    didMove: false,
-    input: null,
-    pointerId: null,
-    startScrollLeft: 0,
-    startX: 0,
-  });
-  const basketMouseDragCleanupRef = useRef<(() => void) | null>(null);
-  const basketSuppressClickRef = useRef(false);
-  const [isBasketDragging, setIsBasketDragging] = useState(false);
-
-  const removeBasketMouseDragListeners = () => {
-    basketMouseDragCleanupRef.current?.();
-    basketMouseDragCleanupRef.current = null;
-  };
 
   const clampBasketScrollLeft = (scrollLeft: number) => {
     const carousel = basketCarouselRef.current;
@@ -175,124 +147,10 @@ export function InvestmentSecurityListScreen({
     carousel.scrollTo({ left: getBasketScrollLeft(nearestIndex), behavior: "smooth" });
   };
 
-  const beginBasketDrag = (
-    clientX: number,
-    input: BasketDragState["input"],
-    pointerId: number | null = null,
-  ) => {
-    const carousel = basketCarouselRef.current;
-    if (!carousel || basketDragStateRef.current.input) return false;
-
-    basketDragStateRef.current = {
-      didMove: false,
-      input,
-      pointerId,
-      startScrollLeft: carousel.scrollLeft,
-      startX: clientX,
-    };
-    return true;
-  };
-
-  const moveBasketDrag = (clientX: number) => {
-    const carousel = basketCarouselRef.current;
-    const dragState = basketDragStateRef.current;
-    if (!carousel || !dragState.input) return false;
-
-    const deltaX = clientX - dragState.startX;
-    if (!dragState.didMove && Math.abs(deltaX) < 4) return false;
-
-    dragState.didMove = true;
-    basketSuppressClickRef.current = true;
-    setIsBasketDragging(true);
-    carousel.scrollLeft = dragState.startScrollLeft - deltaX;
-    return true;
-  };
-
-  const resetBasketDrag = () => {
-    removeBasketMouseDragListeners();
-    basketDragStateRef.current = {
-      didMove: false,
-      input: null,
-      pointerId: null,
-      startScrollLeft: 0,
-      startX: 0,
-    };
-    setIsBasketDragging(false);
-  };
-
-  const finishBasketDrag = () => {
-    const didMove = basketDragStateRef.current.didMove;
-    if (didMove) {
-      // Smooth-snap to the nearest card (mirrors the Account carousel), so the
-      // shelf settles elegantly instead of landing mid-card. A click-suppression
-      // window prevents the drag from also opening a card.
-      snapBasketToNearest();
-      window.setTimeout(() => {
-        basketSuppressClickRef.current = false;
-      }, 80);
-    }
-    resetBasketDrag();
-  };
-
-  const handleBasketPointerDown = (event: PointerEvent<HTMLElement>) => {
-    if (event.pointerType === "mouse" && event.button !== 0) return;
-    if (beginBasketDrag(event.clientX, "pointer", event.pointerId)) {
-      event.currentTarget.setPointerCapture(event.pointerId);
-    }
-  };
-  const handleBasketPointerMove = (event: PointerEvent<HTMLElement>) => {
-    const dragState = basketDragStateRef.current;
-    if (dragState.input !== "pointer" || dragState.pointerId !== event.pointerId) return;
-    if (moveBasketDrag(event.clientX)) event.preventDefault();
-  };
-  const handleBasketPointerUp = (event: PointerEvent<HTMLElement>) => {
-    const dragState = basketDragStateRef.current;
-    if (dragState.input !== "pointer" || dragState.pointerId !== event.pointerId) return;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-    finishBasketDrag();
-  };
-  const handleBasketPointerCancel = (event: PointerEvent<HTMLElement>) => {
-    if (basketDragStateRef.current.input !== "pointer" || basketDragStateRef.current.pointerId !== event.pointerId) return;
-    resetBasketDrag();
-    basketSuppressClickRef.current = false;
-  };
-
-  const handleBasketMouseDown = (event: MouseEvent<HTMLElement>) => {
-    if (event.button !== 0 || !beginBasketDrag(event.clientX, "mouse")) return;
-
-    const handleMouseMove = (mouseEvent: globalThis.MouseEvent) => {
-      if (basketDragStateRef.current.input !== "mouse") return;
-      if (mouseEvent.buttons !== 1) {
-        finishBasketDrag();
-        return;
-      }
-      if (moveBasketDrag(mouseEvent.clientX)) mouseEvent.preventDefault();
-    };
-    const handleMouseUp = () => {
-      if (basketDragStateRef.current.input === "mouse") finishBasketDrag();
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-    basketMouseDragCleanupRef.current = () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  };
-
-  const handleBasketClickCapture = (event: MouseEvent<HTMLElement>) => {
-    if (!basketSuppressClickRef.current) return;
-    event.preventDefault();
-    event.stopPropagation();
-  };
-
-  const handleBasketDragStart = (event: DragEvent<HTMLElement>) => {
-    event.preventDefault();
-  };
-
-  useEffect(() => removeBasketMouseDragListeners, []);
+  const { isDragging: isBasketDragging, dragHandlers: basketDragHandlers } = useDragCarousel({
+    carouselRef: basketCarouselRef,
+    onSettle: snapBasketToNearest,
+  });
 
   if (basketFundsAvailable && basketFundsOpen) {
     return (
@@ -340,13 +198,7 @@ export function InvestmentSecurityListScreen({
           {visibleBaskets.length > 0 ? (
             <div
               ref={basketCarouselRef}
-              onPointerDown={handleBasketPointerDown}
-              onPointerMove={handleBasketPointerMove}
-              onPointerUp={handleBasketPointerUp}
-              onPointerCancel={handleBasketPointerCancel}
-              onMouseDown={handleBasketMouseDown}
-              onClickCapture={handleBasketClickCapture}
-              onDragStart={handleBasketDragStart}
+              {...basketDragHandlers}
               className={`overflow-x-auto overflow-y-visible py-[24px] scrollbar-hide select-none ${
                 isBasketDragging ? "cursor-grabbing" : "cursor-grab"
               }`}
@@ -361,13 +213,7 @@ export function InvestmentSecurityListScreen({
                     key={basket.id}
                     basket={basket}
                     onSelect={() => setBasketFundsOpen(true)}
-                    onPointerDown={handleBasketPointerDown}
-                    onPointerMove={handleBasketPointerMove}
-                    onPointerUp={handleBasketPointerUp}
-                    onPointerCancel={handleBasketPointerCancel}
-                    onMouseDown={handleBasketMouseDown}
-                    onClickCapture={handleBasketClickCapture}
-                    onDragStart={handleBasketDragStart}
+                    {...basketDragHandlers}
                   />
                 ))}
               </div>
@@ -446,7 +292,7 @@ export function InvestmentSecurityDetailScreen({
   onBuyClick,
 }: InvestmentSecurityDetailScreenProps) {
   const [period, setPeriod] = useState<InvestmentPeriodId>("3y");
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(96);
   const marketPrice = security.marketPrice;
   const heroValue = security.owned ? security.localValue : security.value;
   const heroCurrency = security.owned ? security.localCurrency : security.currency;
@@ -454,9 +300,6 @@ export function InvestmentSecurityDetailScreen({
   const performanceColor = security.performancePercent < 0 ? "var(--uc-status-red)" : security.performancePercent > 0 ? INVESTMENT_POSITIVE_COLOR : "var(--uc-text)";
   const canSell = security.owned && security.status === "active" && security.quantity > 0;
 
-  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
-    setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 96)));
-  };
 
   return (
     <div className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide" onScroll={handleScroll} data-investment-product-detail={security.owned ? "owned" : "not-owned"}>

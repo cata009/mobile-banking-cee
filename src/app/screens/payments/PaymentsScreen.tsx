@@ -47,8 +47,7 @@ function PaymentsHeader({
   const country = useCountry();
   const { t } = useLanguage();
   const usesBosniaHeaderActions = country === "BA" || country === "BA_BL";
-  const handleAction = (action: string) => {
-    console.log(`Payments ${action} clicked`);
+  const handleAction = (_action: string) => {
   };
 
   return (
@@ -200,16 +199,13 @@ export default function PaymentsScreen({
       return;
     }
 
-    console.log(`Payment other action clicked: ${item.id}`);
   };
 
   const handlePrimaryItemSelect = (item: PaymentHeroItem) => {
-    console.log(`Payment hero action selected: ${item.id}`);
     setSelectedPrimaryItemId(item.id);
   };
 
   const handleTabChange = (tab: NavItem) => {
-    console.log(`Bottom nav tab clicked from payments: ${tab}`);
     if (tab === "home") {
       onHomeClick?.();
     }

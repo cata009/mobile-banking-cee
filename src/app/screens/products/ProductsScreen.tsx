@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { DragEvent, MouseEvent, PointerEvent, RefObject, UIEvent } from "react";
+import type { RefObject, UIEvent } from "react";
+import { useDragCarousel } from "@/hooks/useDragCarousel";
 import BottomNavigation from "@/app/components/BottomNavigation";
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
 import { AppIcon } from "@/app/components/icons";
@@ -29,14 +30,6 @@ const OFFER_CARD_WIDTH = 327;
 const OFFER_CARD_GAP = 12;
 const OFFER_CARD_STEP = OFFER_CARD_WIDTH + OFFER_CARD_GAP;
 const OFFER_CAROUSEL_EDGE_GUTTER = 24;
-
-type OfferCarouselDragState = {
-  didMove: boolean;
-  input: "mouse" | "pointer" | null;
-  pointerId: number | null;
-  startScrollLeft: number;
-  startX: number;
-};
 
 interface ProductsScreenProps {
   onHomeClick?: () => void;
@@ -69,8 +62,7 @@ export function ProductsHeader({
   const country = useCountry();
   const { t } = useLanguage();
   const usesBosniaHeaderActions = country === "BA" || country === "BA_BL";
-  const handleAction = (action: string) => {
-    console.log(`Products ${action} clicked`);
+  const handleAction = (_action: string) => {
   };
 
   return (
@@ -142,23 +134,12 @@ export function SectionHeading({ children }: { children: string }) {
   return <SectionHeadingDivider title={children} className="px-[24px]" />;
 }
 
-function handleOfferClick(offer: ProductsOffer) {
-  console.log(`Products offer clicked: ${offer.id}`);
+function handleOfferClick(_offer: ProductsOffer) {
 }
 
 export function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
   const carouselRef = useRef<HTMLDivElement>(null);
-  const dragStateRef = useRef<OfferCarouselDragState>({
-    didMove: false,
-    input: null,
-    pointerId: null,
-    startScrollLeft: 0,
-    startX: 0,
-  });
-  const mouseDragCleanupRef = useRef<(() => void) | null>(null);
   const scrollSnapTimeoutRef = useRef<number | null>(null);
-  const suppressClickRef = useRef(false);
-  const [isDragging, setIsDragging] = useState(false);
 
   const clampOfferIndex = (index: number) => Math.max(0, Math.min(offers.length - 1, index));
 
@@ -214,11 +195,6 @@ export function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
     scrollToOffer(getNearestOfferIndex(carousel.scrollLeft));
   };
 
-  const removeMouseDragListeners = () => {
-    mouseDragCleanupRef.current?.();
-    mouseDragCleanupRef.current = null;
-  };
-
   const clearScrollSnapTimeout = () => {
     if (scrollSnapTimeoutRef.current === null) return;
 
@@ -226,144 +202,16 @@ export function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
     scrollSnapTimeoutRef.current = null;
   };
 
-  const resetCarouselDrag = () => {
-    removeMouseDragListeners();
-    dragStateRef.current = {
-      didMove: false,
-      input: null,
-      pointerId: null,
-      startScrollLeft: 0,
-      startX: 0,
-    };
-    setIsDragging(false);
-  };
-
-  const beginCarouselDrag = (
-    clientX: number,
-    input: OfferCarouselDragState["input"],
-    pointerId: number | null = null,
-  ) => {
-    const carousel = carouselRef.current;
-    if (!carousel || offers.length <= 1 || dragStateRef.current.input) return false;
-
-    dragStateRef.current = {
-      didMove: false,
-      input,
-      pointerId,
-      startScrollLeft: carousel.scrollLeft,
-      startX: clientX,
-    };
-
-    return true;
-  };
-
-  const moveCarouselDrag = (clientX: number) => {
-    const carousel = carouselRef.current;
-    const dragState = dragStateRef.current;
-    if (!carousel || !dragState.input) return false;
-
-    const deltaX = clientX - dragState.startX;
-    if (!dragState.didMove && Math.abs(deltaX) < 4) return false;
-
-    dragState.didMove = true;
-    suppressClickRef.current = true;
-    setIsDragging(true);
-    carousel.scrollLeft = dragState.startScrollLeft - deltaX;
-    return true;
-  };
-
-  const finishCarouselDrag = () => {
-    const didMove = dragStateRef.current.didMove;
-
-    if (didMove) {
-      snapCarouselToNearestOffer();
-      window.setTimeout(() => {
-        suppressClickRef.current = false;
-      }, 80);
-    }
-
-    resetCarouselDrag();
-  };
+  const { isDragging, isPressActiveRef, dragHandlers } = useDragCarousel({
+    carouselRef,
+    onSettle: snapCarouselToNearestOffer,
+    enabled: offers.length > 1,
+  });
 
   const handleCarouselScroll = (_event: UIEvent<HTMLDivElement>) => {
-    if (dragStateRef.current.input) return;
+    if (isPressActiveRef.current) return;
     clearScrollSnapTimeout();
     scrollSnapTimeoutRef.current = window.setTimeout(snapCarouselToNearestOffer, 120);
-  };
-
-  const handleCarouselPointerDown = (event: PointerEvent<HTMLElement>) => {
-    if (event.pointerType === "mouse" && event.button !== 0) return;
-
-    if (beginCarouselDrag(event.clientX, "pointer", event.pointerId)) {
-      event.currentTarget.setPointerCapture(event.pointerId);
-    }
-  };
-
-  const handleCarouselPointerMove = (event: PointerEvent<HTMLElement>) => {
-    const dragState = dragStateRef.current;
-    if (dragState.input !== "pointer" || dragState.pointerId !== event.pointerId) return;
-
-    if (moveCarouselDrag(event.clientX)) {
-      event.preventDefault();
-    }
-  };
-
-  const handleCarouselPointerUp = (event: PointerEvent<HTMLElement>) => {
-    const dragState = dragStateRef.current;
-    if (dragState.input !== "pointer" || dragState.pointerId !== event.pointerId) return;
-
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-
-    finishCarouselDrag();
-  };
-
-  const handleCarouselPointerCancel = (event: PointerEvent<HTMLElement>) => {
-    if (dragStateRef.current.input !== "pointer" || dragStateRef.current.pointerId !== event.pointerId) return;
-    resetCarouselDrag();
-    suppressClickRef.current = false;
-  };
-
-  const handleCarouselMouseDown = (event: MouseEvent<HTMLElement>) => {
-    if (event.button !== 0 || !beginCarouselDrag(event.clientX, "mouse")) return;
-
-    const handleMouseMove = (mouseEvent: globalThis.MouseEvent) => {
-      if (dragStateRef.current.input !== "mouse") return;
-
-      if (mouseEvent.buttons !== 1) {
-        finishCarouselDrag();
-        return;
-      }
-
-      if (moveCarouselDrag(mouseEvent.clientX)) {
-        mouseEvent.preventDefault();
-      }
-    };
-
-    const handleMouseUp = () => {
-      if (dragStateRef.current.input === "mouse") {
-        finishCarouselDrag();
-      }
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-    mouseDragCleanupRef.current = () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  };
-
-  const handleCarouselClickCapture = (event: MouseEvent<HTMLElement>) => {
-    if (!suppressClickRef.current) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-  };
-
-  const handleCarouselDragStart = (event: DragEvent<HTMLElement>) => {
-    event.preventDefault();
   };
 
   useEffect(() => {
@@ -371,7 +219,6 @@ export function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
   }, [offers]);
 
   useEffect(() => () => {
-    removeMouseDragListeners();
     clearScrollSnapTimeout();
   }, []);
 
@@ -379,12 +226,7 @@ export function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
     <div
       ref={carouselRef}
       onScroll={handleCarouselScroll}
-      onPointerDown={handleCarouselPointerDown}
-      onPointerMove={handleCarouselPointerMove}
-      onPointerUp={handleCarouselPointerUp}
-      onPointerCancel={handleCarouselPointerCancel}
-      onMouseDown={handleCarouselMouseDown}
-      onClickCapture={handleCarouselClickCapture}
+      {...dragHandlers}
       className={`overflow-x-auto scrollbar-hide select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
       style={{
         WebkitOverflowScrolling: "touch",
@@ -395,13 +237,7 @@ export function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
         {offers.map((offer, index) => (
           <div
             key={offer.id}
-            onClickCapture={handleCarouselClickCapture}
-            onDragStart={handleCarouselDragStart}
-            onMouseDown={handleCarouselMouseDown}
-            onPointerCancel={handleCarouselPointerCancel}
-            onPointerDown={handleCarouselPointerDown}
-            onPointerMove={handleCarouselPointerMove}
-            onPointerUp={handleCarouselPointerUp}
+            {...dragHandlers}
           >
             <ProductOfferCard
               offer={offer}
@@ -522,7 +358,7 @@ export function ShopSmartContent({
           <AccountSearchBar
             value={searchQuery}
             onValueChange={setSearchQuery}
-            onFilterClick={() => console.log("ShopSmart filters clicked")}
+            onFilterClick={() => {}}
             placeholder={t("runtime.actions.search", "Search")}
           />
         </div>
@@ -553,8 +389,7 @@ export function ShopSmartContent({
   );
 }
 
-function handleShopSmartOfferClick(offer: ShopSmartOfferCard) {
-  console.log(`ShopSmart offer clicked: ${offer.id}`);
+function handleShopSmartOfferClick(_offer: ShopSmartOfferCard) {
 }
 
 function ShopSmartSummaryBlock({ summary }: { summary: ShopSmartSummary }) {
@@ -562,7 +397,7 @@ function ShopSmartSummaryBlock({ summary }: { summary: ShopSmartSummary }) {
     <button
       type="button"
       className="grid min-h-[80px] grid-cols-[1fr_32px] items-center gap-[16px] px-[24px] text-left"
-      onClick={() => console.log("ShopSmart summary clicked")}
+      onClick={() => {}}
     >
       <span className="flex min-w-0 flex-col">
         <span className="text-[14px] font-bold uppercase leading-[20px] tracking-[1px] text-[var(--uc-text-muted)]">
@@ -616,7 +451,6 @@ export default function ProductsScreen({
   const visibleTab = config.hasShopSmartTab ? activeTab : "banking";
 
   const handleProductCardClick = (card: ProductsCard) => {
-    console.log(`Products card clicked: ${card.id}`);
     setSelectedProductCard(card);
   };
 
@@ -649,7 +483,6 @@ export default function ProductsScreen({
   }, [productsShelfFocusRequest?.requestId]);
 
   const handleTabChange = (tab: NavItem) => {
-    console.log(`Bottom nav tab clicked from products: ${tab}`);
     if (tab === "home") onHomeClick?.();
     if (tab === "analytics") onAnalyticsClick?.();
     if (tab === "payments") onPaymentsClick?.();

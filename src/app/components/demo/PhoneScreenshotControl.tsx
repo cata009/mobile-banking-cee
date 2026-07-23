@@ -110,7 +110,6 @@ export function PhoneScreenshotMenuItems({
     try {
       const json = await createPhoneFigmaJson({ screenElement, mode: "full" });
       downloadTextFile(json, "unicredit-screen.json");
-      console.log("Figma screen JSON downloaded.");
     } catch (error) {
       console.error("Phone Figma JSON export failed", error);
       window.alert("Figma JSON could not be generated. Please try again.");

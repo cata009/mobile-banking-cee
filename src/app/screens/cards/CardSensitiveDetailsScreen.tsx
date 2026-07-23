@@ -1,5 +1,4 @@
-import { useState } from "react";
-import type { UIEvent } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import PageHeader from "@/app/components/PageHeader";
 import CopyToast from "@/app/components/accounts/CopyToast";
 import { AppIcon } from "@/app/components/icons";
@@ -28,13 +27,13 @@ function SensitiveCardField({ label, value, onCopy }: { label: string; value: st
 }
 
 export default function CardSensitiveDetailsScreen({ card, onBack }: CardSensitiveDetailsScreenProps) {
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(64);
   const { toast: copyToast, copy: copyToClipboard } = useCopyToClipboard();
 
   return (
     <div
       className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] scrollbar-hide"
-      onScroll={(event: UIEvent<HTMLDivElement>) => setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64)))}
+      onScroll={handleScroll}
     >
       <PageHeader title="Card details" onBack={onBack} collapsedTitleProgress={headerProgress} includeSafeArea />
       <div className="px-[24px] pb-[40px] pt-[10px]">

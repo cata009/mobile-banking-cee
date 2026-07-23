@@ -1,4 +1,4 @@
-import { useState, type UIEvent } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import NavigationRow from "@/app/components/NavigationRow";
 import PageHeader from "@/app/components/PageHeader";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
@@ -11,12 +11,7 @@ interface SettingsScreenProps {
 
 export default function SettingsScreen({ onBack }: SettingsScreenProps) {
   const { t } = useLanguage();
-  const [headerProgress, setHeaderProgress] = useState(0);
-
-  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
-    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64));
-    setHeaderProgress(progress);
-  };
+  const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(64);
 
   return (
     <div

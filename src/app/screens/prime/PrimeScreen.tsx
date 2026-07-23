@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import type { UIEvent } from 'react';
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import { useLanguage } from '@/app/contexts/LanguageContext';
 import { YourAdvisorTab } from './YourAdvisorTab';
 import { YourBenefitsTab } from './YourBenefitsTab';
@@ -19,12 +19,7 @@ interface PrimeScreenProps {
 export default function PrimeScreen({ onBack }: PrimeScreenProps) {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<'advisor' | 'benefits'>('advisor');
-  const [headerProgress, setHeaderProgress] = useState(0);
-
-  const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
-    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 48));
-    setHeaderProgress(progress);
-  };
+  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(48);
 
   return (
     <div className="w-full h-full relative flex flex-col">

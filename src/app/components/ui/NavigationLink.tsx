@@ -6,19 +6,9 @@ interface NavigationLinkProps {
 }
 
 export default function NavigationLink({ text, onClick }: NavigationLinkProps) {
-  const handleClick = () => {
-    console.log("🟡 NavigationLink clicked:", text);
-    if (onClick) {
-      console.log("🟡 Calling onClick handler for:", text);
-      onClick();
-    } else {
-      console.log("🟡 No onClick handler for:", text);
-    }
-  };
-
   return (
     <button
-      onClick={handleClick}
+      onClick={onClick}
       className="flex items-center gap-[1px] cursor-pointer hover:opacity-80 transition-opacity"
       type="button"
     >

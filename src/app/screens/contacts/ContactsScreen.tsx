@@ -1,4 +1,4 @@
-import { useState, type UIEvent } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import PageHeader from '@/app/components/PageHeader';
 import SectionHeadingDivider from '@/app/components/SectionHeadingDivider';
 import { useLanguage } from '@/app/contexts/LanguageContext';
@@ -12,20 +12,13 @@ interface ContactsScreenProps {
 
 export default function ContactsScreen({ onBack, onPrimeClick }: ContactsScreenProps) {
   const { t } = useLanguage();
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(64);
 
-  const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
-    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64));
-    setHeaderProgress(progress);
-  };
-
-  const handleCardClick = (cardName: string) => {
-    console.log(`📞 ${cardName} clicked`);
+  const handleCardClick = (_cardName: string) => {
     // Future: navigate to respective screen
   };
 
   const handleHelpClick = () => {
-    console.log('❓ Help clicked from Contacts');
     // Future: open help/FAQ
   };
 

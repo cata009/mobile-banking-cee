@@ -12,7 +12,6 @@ export function YourBenefitsTab() {
   const { t } = useLanguage();
 
   const handleTermsClick = () => {
-    console.log('📄 Terms & Conditions clicked');
     // Future: navigate to terms URL
   };
 

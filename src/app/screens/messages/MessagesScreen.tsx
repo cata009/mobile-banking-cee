@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { UIEvent } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
 import PageHeader from "@/app/components/PageHeader";
@@ -77,7 +77,7 @@ export default function MessagesScreen({ onBack }: MessagesScreenProps) {
   const config = getMessagesConfigForCountry(country);
   const [activeMailbox, setActiveMailbox] = useState<MessageMailbox>("inbox");
   const [searchQuery, setSearchQuery] = useState("");
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(64);
   const messages = activeMailbox === "inbox" ? config.inbox : config.outbox;
   const mailboxTabs = [
       { id: "inbox" as MessageMailbox, label: t("runtime.messages.inbox", config.tabs.inbox), hasNewItems: true },
@@ -93,10 +93,6 @@ export default function MessagesScreen({ onBack }: MessagesScreenProps) {
     };
   };
 
-  const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
-    const progress = Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64));
-    setHeaderProgress(progress);
-  };
 
   const filteredMessages = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();

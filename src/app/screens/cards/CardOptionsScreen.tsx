@@ -1,5 +1,4 @@
-import { useState } from "react";
-import type { UIEvent } from "react";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import NavigationRow from "@/app/components/NavigationRow";
 import PageHeader from "@/app/components/PageHeader";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
@@ -121,13 +120,9 @@ function CardOptionRows({ items }: { items: readonly CardOptionItem[] }) {
 
 export default function CardOptionsScreen({ selectedCardId, onBack }: CardOptionsScreenProps) {
   const { categories } = useProducts();
-  const [headerProgress, setHeaderProgress] = useState(0);
+  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(64);
   const cards = categories.flatMap((category) => category.products).filter(isCardProduct);
   const card = cards.find((candidate) => candidate.id === selectedCardId) ?? cards[0];
-
-  const handlePageScroll = (event: UIEvent<HTMLDivElement>) => {
-    setHeaderProgress(Math.min(1, Math.max(0, event.currentTarget.scrollTop / 64)));
-  };
 
   if (!card) {
     return <div className="h-full w-full bg-[var(--uc-surface)]" />;

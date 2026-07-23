@@ -4,7 +4,6 @@ import {
   buildInvestmentHistoryOrders,
   buildInvestmentSecurities,
   buildInvestmentSecurityCatalog,
-  type InvestmentCatalogSecurity,
 } from "@/app/config/investmentsPortfolioConfig";
 import { getProductCardSheetConfig, getProductsMenuForCountry } from "@/app/config/productsMenuConfig";
 import { getCountryConfig } from "@/app/registry/countryConfig";
@@ -47,6 +46,13 @@ import {
   getInvestmentGoalFundCollectionId,
   getInvestmentGoalNextStep,
 } from "./cz/investmentGoal";
+import {
+  buildInvestmentCommercialFollowUp,
+  buildInvestmentDoneFollowUp,
+  buildInvestmentEssentialsFollowUp,
+  buildInvestmentPortfolioFollowUp,
+  buildInvestmentRiskFollowUp,
+} from "./cz/investmentFollowUps";
 
 export {
   CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX,
@@ -682,51 +688,6 @@ export function buildCzChatSmartReplyResolver({
     );
     const showSelectedInvestmentCardOnce = (block: CoAppingRichBlock | null) =>
       block && !hasShownSelectedInvestmentCard ? [block] : undefined;
-
-    const buildInvestmentCommercialFollowUp = (security: InvestmentCatalogSecurity): CoAppingFollowUpSuggestion => {
-      const label = security.owned && security.quantity > 0 ? "Explore adding more" : "Explore investing";
-      return {
-        id: `cz-investment-product-buy-${security.id}`,
-        label,
-        action: {
-          id: `cz-investment-product-buy-${security.id}`,
-          label,
-          type: "send-message",
-          prompt: `Start a buy order for ${security.title}.`,
-        },
-      };
-    };
-
-    const buildInvestmentRiskFollowUp = (security: InvestmentCatalogSecurity) =>
-      buildCzChatFollowUp(
-        "cz-investment-product-risk",
-        "What could affect my return?",
-        `What could affect my return from ${security.title}?`,
-      );
-
-    const buildInvestmentEssentialsFollowUp = (
-      security: InvestmentCatalogSecurity,
-      label = "Summarize the key document",
-    ) =>
-      buildCzChatFollowUp(
-        "cz-investment-product-documents",
-        label,
-        `Show me the essential information I should check for ${security.title}.`,
-      );
-
-    const buildInvestmentPortfolioFollowUp = (security: InvestmentCatalogSecurity) =>
-      buildCzChatFollowUp(
-        "cz-investment-product-portfolio",
-        "See portfolio fit",
-        `Review ${security.title} in my portfolio context.`,
-      );
-
-    const buildInvestmentDoneFollowUp = (security: InvestmentCatalogSecurity) =>
-      buildCzChatFollowUp(
-        "cz-investment-product-done",
-        "I'm done",
-        `I have what I need for ${security.title}.`,
-      );
 
     const normalizedInvestmentUserMessages = messages
       .filter((message) => message.role === "user")

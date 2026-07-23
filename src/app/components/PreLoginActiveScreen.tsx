@@ -36,17 +36,14 @@ export default function PreLoginActiveScreen({
   const { t, language } = useLanguage();
   const [showFaceId, setShowFaceId] = useState(false);
 
-  console.log("🟢 PreLoginActiveScreen rendered");
 
   // Handler pentru click pe Login
   const handleLoginClick = () => {
-    console.log("🔐 Login button clicked - starting Face ID animation");
     setShowFaceId(true);
   };
 
   // Handler pentru finalizare Face ID
   const handleFaceIdComplete = () => {
-    console.log("✅ Face ID complete - triggering navigation to Homepage");
     setShowFaceId(false);
     // Trigger navigation to Homepage
     if (onLoginClick) {
@@ -115,16 +112,15 @@ export default function PreLoginActiveScreen({
           <div className="flex items-center justify-between w-full">
             <NavigationLink 
               text={t('preLoginActive.contacts')} 
-              onClick={() => console.log("🔵 CONTACTS link clicked")} 
+              onClick={() => {}} 
             />
             <NavigationLink 
               text={t('preLoginActive.mtoken')} 
-              onClick={() => console.log("🔵 MTOKEN link clicked")} 
+              onClick={() => {}} 
             />
             <NavigationLink 
               text={t('preLoginActive.other')} 
               onClick={() => {
-                console.log("🔵 OTHER link clicked - calling onOtherClick");
                 onOtherClick();
               }} 
             />
