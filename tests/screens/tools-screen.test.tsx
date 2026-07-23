@@ -75,10 +75,10 @@ describe("translation corpus", () => {
 });
 
 describe("ToolsScreen", () => {
-  it("renders the overview with the three tool cards", () => {
+  it("renders the overview with all tool cards", () => {
     const { container } = renderTools();
     expect(screen.getByRole("heading", { name: "Tools", level: 1 })).toBeInTheDocument();
-    expect(container.querySelectorAll("[data-tool-card]")).toHaveLength(3);
+    expect(container.querySelectorAll("[data-tool-card]")).toHaveLength(5);
   });
 
   it("opens the side-by-side tool with two live country frames by default", () => {

@@ -1,6 +1,16 @@
 # Current Session
 
-Last updated: 2026-07-22
+Last updated: 2026-07-23
+
+## 2026-07-23 Stakeholder Tools — Country Divergence & Localization Sign-off
+
+- Latest request handled: extend the stakeholder `Tools` tab with two new tools the user selected after rejecting the inspection-style ideas — a country divergence explorer and a localization sign-off workflow. The demo-storyline and usability-runner ideas were explicitly deferred.
+- Country divergence explorer (`country-divergence` card): a matrix of every dimension that varies across the 8 countries — currency/locale/local language, capability availability (Co-Apping = CZ/SK, Kids app = HU/SK, Investments), feature-flag country scope from `FEATURE_META`, and local-language translation coverage/identical-to-EN/missing counts. Divergent cells are highlighted against either the majority value or a chosen reference country; an "Only differences" filter hides rows where every country agrees; per-country divergence counts and CSV export. All values read live from `demoConfig`, `countryConfig`, `languageByCountry`, the availability utils, and `translationCorpus`. Pure read model in `countryDivergence.ts`.
+- Localization sign-off workflow (`localization-signoff` card): turns the read-only translation review into an accountable process — a reviewer picks one of the 7 local-language columns and a namespace, then marks each string Approved / Needs change (with a note revealed on Needs change). State persists in `localStorage` under `uc-l10n-signoff-v1`, survives reloads, shows per-namespace progress (approved/needs-change/pending + bar), status filter and search, and exports a per-language CSV report. Store logic in `localizationSignoff.ts` (client-only; not a source of truth the app consumes).
+- Design-system decision: both tools reuse the existing Tools primitives (`ToolPanel`, `SelectionChip`, `FieldLabel`, `StatusBadge`, `downloadTextFile`, `uc-select`, `ToolErrorBoundary`) and the already-shipped `translationCorpus` module; no design-system component was modified, no new dependency, and no icon-registry change (reused `sliders-horizontal` and `shield-check`). Only `ToolsScreen.tsx` was edited to register the two cards.
+- Files added: `src/app/screens/tools/countryDivergence.ts`, `CountryDivergenceTool.tsx`, `localizationSignoff.ts`, `LocalizationSignoffTool.tsx`, `tests/screens/tools-divergence-signoff.test.tsx` (11 tests). Files changed: `src/app/screens/tools/ToolsScreen.tsx` (5 cards now), `tests/screens/tools-screen.test.tsx` (card count 3 → 5).
+- Verification: `npm run verify` passed end to end (typecheck, ESLint, full Vitest suite, all six audits, production build). Browser-verified on the live app: divergence matrix renders 8 country columns / 4 categories, Co-Apping shows Yes only for CZ+SK, reference-country mode re-highlights against RO; sign-off marks approved/needs-change with note input, progress updates (1 approved / 1 needs change / 279 pending) and — the key value — survives a full page reload from `localStorage`. Console clean; the test sign-off marks were cleared afterwards. The embedded preview pane cannot composite a screenshot (infra limitation), so proof is DOM-level.
+- No dependency, backend, persistence-beyond-localStorage, or release action. Committed on the user's standing request to keep the repo clean.
 
 ## 2026-07-22 Design System and Basket Carousel Clean Publication
 

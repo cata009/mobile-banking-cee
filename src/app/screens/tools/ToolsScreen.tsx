@@ -12,8 +12,15 @@ import { ToolErrorBoundary } from "./toolsUi";
 import { SideBySideTool } from "./SideBySideTool";
 import { TranslationTesterTool } from "./TranslationTesterTool";
 import { TranslationReviewTool } from "./TranslationReviewTool";
+import { CountryDivergenceTool } from "./CountryDivergenceTool";
+import { LocalizationSignoffTool } from "./LocalizationSignoffTool";
 
-type ToolId = "side-by-side" | "translation-tester" | "translation-review";
+type ToolId =
+  | "side-by-side"
+  | "country-divergence"
+  | "translation-tester"
+  | "translation-review"
+  | "localization-signoff";
 
 interface ToolMeta {
   id: ToolId;
@@ -33,6 +40,14 @@ const TOOLS: readonly ToolMeta[] = [
     audience: "Business · Management · BA",
   },
   {
+    id: "country-divergence",
+    label: "Country divergence explorer",
+    icon: "sliders-horizontal",
+    description:
+      "A matrix of every dimension that differs across the 8 countries — currency, capabilities, feature scope, localization — against the majority or a reference country.",
+    audience: "BA · Product owners",
+  },
+  {
     id: "translation-tester",
     label: "Component translation tester",
     icon: "clipboard-check",
@@ -47,6 +62,14 @@ const TOOLS: readonly ToolMeta[] = [
     description:
       "Every string of a translation namespace across all languages, with overflow-risk highlighting and CSV export.",
     audience: "BA · Local market teams",
+  },
+  {
+    id: "localization-signoff",
+    label: "Localization sign-off",
+    icon: "shield-check",
+    description:
+      "Approve or flag each local translation with a note, tracked per language and persisted across reloads, exportable as a release sign-off report.",
+    audience: "Local market teams · BA",
   },
 ];
 
@@ -116,10 +139,14 @@ export default function ToolsScreen() {
             <ToolErrorBoundary key={activeToolId} toolLabel={activeTool?.label ?? "Tool"}>
               {activeToolId === "side-by-side" ? (
                 <SideBySideTool />
+              ) : activeToolId === "country-divergence" ? (
+                <CountryDivergenceTool />
               ) : activeToolId === "translation-tester" ? (
                 <TranslationTesterTool />
-              ) : (
+              ) : activeToolId === "translation-review" ? (
                 <TranslationReviewTool />
+              ) : (
+                <LocalizationSignoffTool />
               )}
             </ToolErrorBoundary>
           </div>
