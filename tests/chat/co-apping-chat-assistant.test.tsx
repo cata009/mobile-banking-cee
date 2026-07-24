@@ -640,3 +640,59 @@ describe('CZ Chat async lifecycle', () => {
     expect(currentConversation).not.toHaveTextContent('No messages yet')
   })
 })
+
+describe('CoAppingChatAssistant reply feedback', () => {
+  afterEach(() => cleanup())
+
+  async function sendAndAwaitReply(onFeedback?: (feedback: { rating: string; messageId: string }) => void) {
+    render(
+      <CoAppingChatAssistant
+        onClose={() => undefined}
+        suggestedTopics={[]}
+        resolveReply={async () => ({ text: 'Here is a helpful answer.' })}
+        typingDelayMs={0}
+        onFeedback={onFeedback}
+      />,
+    )
+    const input = screen.getByRole('textbox', { name: 'Ask me anything' })
+    fireEvent.change(input, { target: { value: 'How do payments work?' } })
+    fireEvent.submit(input.closest('form')!)
+    await screen.findByText(/helpful answer/)
+    await waitFor(() => expect(document.querySelector('.mpc-agent-copy-streaming')).toBeNull())
+  }
+
+  it('records a thumbs-up rating, reflects it visually, and reports it once', async () => {
+    const onFeedback = vi.fn()
+    await sendAndAwaitReply(onFeedback)
+
+    const goodButton = screen.getByRole('button', { name: 'Good response' })
+    expect(goodButton).toHaveAttribute('aria-pressed', 'false')
+
+    fireEvent.click(goodButton)
+    expect(goodButton).toHaveAttribute('aria-pressed', 'true')
+    expect(goodButton.className).toContain('mpc-feedback-button-active')
+    expect(onFeedback).toHaveBeenCalledTimes(1)
+    expect(onFeedback).toHaveBeenCalledWith(
+      expect.objectContaining({ rating: 'up', messageId: expect.any(String) }),
+    )
+  })
+
+  it('switches up→down and toggles off without a duplicate report', async () => {
+    const onFeedback = vi.fn()
+    await sendAndAwaitReply(onFeedback)
+
+    const goodButton = screen.getByRole('button', { name: 'Good response' })
+    const badButton = screen.getByRole('button', { name: 'Bad response' })
+
+    fireEvent.click(goodButton)
+    fireEvent.click(badButton)
+    expect(goodButton).toHaveAttribute('aria-pressed', 'false')
+    expect(badButton).toHaveAttribute('aria-pressed', 'true')
+
+    // Toggling the active rating off is silent (no host report).
+    fireEvent.click(badButton)
+    expect(badButton).toHaveAttribute('aria-pressed', 'false')
+    expect(onFeedback).toHaveBeenCalledTimes(2)
+    expect(onFeedback.mock.calls.map((call) => call[0].rating)).toEqual(['up', 'down'])
+  })
+})

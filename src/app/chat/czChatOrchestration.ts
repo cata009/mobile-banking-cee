@@ -19,9 +19,11 @@ import {
   type CoAppingFollowUpSuggestion,
   type CoAppingInvestmentChart,
   type CoAppingReplyResolver,
+  type CoAppingReplyResult,
   type CoAppingRichBlock,
   defaultReplyResolver,
 } from "../../../package/mobile-pi-coapping-chat-package/src";
+import { resolveIntent, type IntentMatch } from "./nlu";
 import {
   CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX,
   buildCzChatFollowUp,
@@ -71,6 +73,22 @@ export {
 } from "./cz/context";
 
 export type { CzChatHelpArea, CzChatLauncherVariant } from "./cz/helpers";
+
+/**
+ * "Did you mean…" reply built from the NLU's close-scoring intents. Tapping a
+ * chip replays the exact scripted `canonicalPrompt`, re-entering the proven
+ * deterministic path — so disambiguation never invents an answer.
+ */
+function buildNluDisambiguationReply(alternatives: IntentMatch[]): CoAppingReplyResult {
+  return {
+    text:
+      `### Let me point you to the right place\n` +
+      `I can help with a few things here. Which one did you mean?`,
+    followUps: alternatives.map((match) =>
+      buildCzChatFollowUp(`cz-nlu-${match.intent.id}`, match.intent.label, match.intent.canonicalPrompt),
+    ),
+  };
+}
 
 export function buildCzChatSmartReplyResolver({
   country,
@@ -658,10 +676,25 @@ export function buildCzChatSmartReplyResolver({
     ? normalize(selectedInvestmentSecurity.title)
     : "";
 
-  return (input, messages) => {
+  const baseResolver: CoAppingReplyResolver = (input, messages) => {
     const normalized = normalize(input);
     const investmentGoalDraft = extractInvestmentGoalDraft(messages);
     const investmentGoalNextStep = getInvestmentGoalNextStep(investmentGoalDraft);
+    // Detect a free-typed amount answer during an active goal flow: the amount
+    // step was open *before* this message and is now filled *including* it.
+    // (Chip prompts are handled by the `startsWith` guard below; this adds free
+    // text like "10k" / "7 500 Kč" / "skip" without disturbing that path.)
+    const lastGoalMessage = messages[messages.length - 1];
+    const priorGoalMessages =
+      lastGoalMessage?.role === "user" && lastGoalMessage.text === input ? messages.slice(0, -1) : messages;
+    const goalDraftBeforeInput = extractInvestmentGoalDraft(priorGoalMessages);
+    const goalStepBeforeInput = getInvestmentGoalNextStep(goalDraftBeforeInput);
+    const isFreeTypedGoalAmountAnswer =
+      !normalized.startsWith("set investment goal ") &&
+      goalDraftBeforeInput.purpose !== null &&
+      ((goalStepBeforeInput === "starting-amount" &&
+        (investmentGoalDraft.startingAmount !== null || investmentGoalDraft.startingAmountUndecided)) ||
+        (goalStepBeforeInput === "monthly-contribution" && investmentGoalDraft.monthlyContribution !== null));
     const namedInvestmentSecurity = investmentSecurityCatalog.find((security) =>
       normalized.includes(normalize(security.title)),
     );
@@ -1673,7 +1706,7 @@ export function buildCzChatSmartReplyResolver({
       };
     }
 
-    if (normalized.startsWith("set investment goal ")) {
+    if (normalized.startsWith("set investment goal ") || isFreeTypedGoalAmountAnswer) {
       if (investmentGoalNextStep === "horizon") {
         return {
           text:
@@ -1883,4 +1916,33 @@ export function buildCzChatSmartReplyResolver({
 
     return defaultReplyResolver(input);
   };
+
+  // ── NLU front-layer ──────────────────────────────────────────────────────
+  // The base resolver returns a structured object for every scripted branch and
+  // a plain string ONLY when it falls through to `defaultReplyResolver`. That
+  // string-vs-object distinction is a zero-risk seam: if any branch matched we
+  // return it untouched (the scripted chip happy-path is never re-routed); only
+  // for genuine fall-through do we run the NLU layer to recover free text,
+  // typos, and Czech by mapping to the canonical scripted prompt.
+  const resolveWithNlu: CoAppingReplyResolver = (input, messages) => {
+    const direct = baseResolver(input, messages);
+    if (typeof direct !== "string") return direct;
+
+    const resolution = resolveIntent(input, {
+      hasSelectedSecurity: Boolean(selectedInvestmentSecurity),
+    });
+
+    if (resolution.status === "route" && resolution.best) {
+      const rewritten = baseResolver(resolution.best.intent.canonicalPrompt, messages);
+      // Only adopt the rewrite if it actually reached a scripted branch.
+      if (typeof rewritten !== "string") return rewritten;
+    } else if (resolution.status === "disambiguate" && resolution.alternatives.length >= 2) {
+      return buildNluDisambiguationReply(resolution.alternatives);
+    }
+
+    // Nothing better than the engine's own topical fallback.
+    return direct;
+  };
+
+  return resolveWithNlu;
 }

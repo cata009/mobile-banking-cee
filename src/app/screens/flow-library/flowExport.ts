@@ -2,24 +2,64 @@
  * Flow export helpers — PDF and Word, dependency-free by design (adding
  * packages requires separate approval in this repo).
  *
- * PDF: a print-formatted HTML document (cover, one page per step, UX spec
- * appendix) opens in a new tab and triggers the browser print dialog, where
- * stakeholders pick "Save as PDF".
+ * PDF: a print-formatted HTML document (cover, per-step screen + spec tables, and
+ * a flow-spec appendix) opens in a new tab and triggers the browser print dialog,
+ * where stakeholders pick "Save as PDF".
  *
- * Word: the same document is wrapped in the MHTML container format that
- * Microsoft Word opens natively (`.doc`), with every captured step screen
- * embedded as a base64 image part.
+ * Word: the same document is wrapped in the MHTML container format that Microsoft
+ * Word opens natively (`.doc`), with every captured step screen embedded as a
+ * base64 image part.
+ *
+ * The structured `spec`/`overview` inputs are optional and additive: when omitted,
+ * the document renders exactly as before (screens + prose appendix).
  */
 
 import { createPhoneScreenshotBlob } from "@/app/utils/phoneScreenshot";
 
+export interface ExportFieldSpec {
+  name: string;
+  type: string;
+  required?: boolean;
+  validation?: string;
+  notes?: string;
+}
+
+export interface ExportActionSpec {
+  label: string;
+  result: string;
+}
+
+/** Per-step specification rendered as tables under each screen. */
+export interface ExportStepSpec {
+  purpose?: string;
+  states?: readonly string[];
+  fields?: readonly ExportFieldSpec[];
+  actions?: readonly ExportActionSpec[];
+  back?: string;
+  edgeCases?: readonly string[];
+  acceptance?: readonly string[];
+}
+
 export interface FlowExportStep {
   title: string;
   description: string;
+  spec?: ExportStepSpec;
 }
 
 export interface CapturedFlowStep extends FlowExportStep {
   pngBase64: string;
+}
+
+/** Flow-level structured spec rendered as front-matter tables. */
+export interface ExportOverview {
+  purpose?: string;
+  entryPoints?: readonly { label: string; intent: string }[];
+  preconditions?: readonly string[];
+  businessRules?: readonly string[];
+  signing?: string;
+  successDestinations?: readonly string[];
+  analyticsEvents?: readonly string[];
+  openQuestions?: readonly string[];
 }
 
 export interface FlowExportMeta {
@@ -30,6 +70,8 @@ export interface FlowExportMeta {
   countryScope: string;
   figmaFile: string;
   sourceUrl: string;
+  status?: string;
+  domain?: string;
 }
 
 export interface FlowExportSpecItem {
@@ -51,7 +93,8 @@ function blobToBase64(blob: Blob): Promise<string> {
 
 /**
  * Capture the already-rendered journey step screens (in DOM order) as PNGs.
- * `stepElements[i]` must be the capture root of `steps[i]`.
+ * `stepElements[i]` must be the capture root of `steps[i]`. Any structured spec on
+ * a step is carried through to the captured result.
  */
 export async function captureFlowStepImages(
   stepElements: readonly HTMLElement[],
@@ -84,6 +127,76 @@ function paragraphs(value: string): string {
     .join("");
 }
 
+function bulletList(items: readonly string[]): string {
+  if (items.length === 0) return "";
+  return `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+}
+
+function keyValueTable(rows: readonly { label: string; value: string }[]): string {
+  const body = rows
+    .filter((row) => row.value)
+    .map((row) => `<tr><td class="k">${escapeHtml(row.label)}</td><td>${escapeHtml(row.value)}</td></tr>`)
+    .join("");
+  return body ? `<table class="spec-table">${body}</table>` : "";
+}
+
+function fieldsTable(fields: readonly ExportFieldSpec[]): string {
+  if (fields.length === 0) return "";
+  const head = `<tr><th>Field</th><th>Type</th><th>Required</th><th>Validation</th></tr>`;
+  const rows = fields
+    .map(
+      (field) =>
+        `<tr><td>${escapeHtml(field.name)}</td><td>${escapeHtml(field.type)}</td><td>${
+          field.required ? "Yes" : "No"
+        }</td><td>${escapeHtml([field.validation, field.notes].filter(Boolean).join(" — ") || "—")}</td></tr>`,
+    )
+    .join("");
+  return `<table class="spec-table"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
+}
+
+function actionsTable(actions: readonly ExportActionSpec[]): string {
+  if (actions.length === 0) return "";
+  const head = `<tr><th>Action</th><th>Result</th></tr>`;
+  const rows = actions
+    .map((action) => `<tr><td>${escapeHtml(action.label)}</td><td>${escapeHtml(action.result)}</td></tr>`)
+    .join("");
+  return `<table class="spec-table"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
+}
+
+function stepSpecHtml(spec: ExportStepSpec | undefined): string {
+  if (!spec) return "";
+  const parts: string[] = [];
+  if (spec.purpose) parts.push(`<p class="spec-purpose">${escapeHtml(spec.purpose)}</p>`);
+  if (spec.states?.length) parts.push(`<h4>UI states</h4>${bulletList(spec.states)}`);
+  if (spec.fields?.length) parts.push(`<h4>Fields</h4>${fieldsTable(spec.fields)}`);
+  if (spec.actions?.length) parts.push(`<h4>Actions</h4>${actionsTable(spec.actions)}`);
+  if (spec.back) parts.push(`<h4>Back behavior</h4><p>${escapeHtml(spec.back)}</p>`);
+  if (spec.edgeCases?.length) parts.push(`<h4>Edge cases</h4>${bulletList(spec.edgeCases)}`);
+  if (spec.acceptance?.length) parts.push(`<h4>Acceptance criteria</h4>${bulletList(spec.acceptance)}`);
+  return parts.length ? `<div class="step-spec">${parts.join("")}</div>` : "";
+}
+
+function overviewHtml(overview: ExportOverview | undefined): string {
+  if (!overview) return "";
+  const sections: string[] = [];
+  if (overview.purpose) sections.push(`<h3>Purpose</h3><p>${escapeHtml(overview.purpose)}</p>`);
+  if (overview.entryPoints?.length) {
+    sections.push(
+      `<h3>Entry points</h3>${keyValueTable(
+        overview.entryPoints.map((entry) => ({ label: entry.label, value: entry.intent })),
+      )}`,
+    );
+  }
+  if (overview.preconditions?.length) sections.push(`<h3>Preconditions</h3>${bulletList(overview.preconditions)}`);
+  if (overview.businessRules?.length) sections.push(`<h3>Business rules</h3>${bulletList(overview.businessRules)}`);
+  if (overview.signing) sections.push(`<h3>Signing</h3><p>${escapeHtml(overview.signing)}</p>`);
+  if (overview.successDestinations?.length)
+    sections.push(`<h3>Success destinations</h3>${bulletList(overview.successDestinations)}`);
+  if (overview.analyticsEvents?.length) sections.push(`<h3>Analytics events</h3>${bulletList(overview.analyticsEvents)}`);
+  if (overview.openQuestions?.length) sections.push(`<h3>Open questions</h3>${bulletList(overview.openQuestions)}`);
+  return sections.length ? `<section class="step"><h2>Flow specification</h2>${sections.join("")}</section>` : "";
+}
+
 /**
  * The shared export document. `imageSrc(index)` decides how step images are
  * referenced: a data URL for the print/PDF tab, a part location for Word MHTML.
@@ -94,6 +207,7 @@ export function buildFlowDocumentHtml(
   spec: readonly FlowExportSpecItem[],
   imageSrc: (index: number) => string,
   options: { autoPrint: boolean },
+  overview?: ExportOverview,
 ): string {
   const generatedOn = new Date().toLocaleDateString("en-GB", {
     day: "2-digit",
@@ -108,7 +222,8 @@ export function buildFlowDocumentHtml(
       <p class="kicker">Step ${index + 1} of ${steps.length}</p>
       <h2>${escapeHtml(step.title)}</h2>
       <p class="description">${escapeHtml(step.description)}</p>
-      <img src="${imageSrc(index)}" alt="${escapeHtml(step.title)}" width="320" />
+      <img src="${imageSrc(index)}" alt="${escapeHtml(step.title)}" width="300" />
+      ${stepSpecHtml(step.spec)}
     </section>`,
     )
     .join("\n");
@@ -118,9 +233,7 @@ export function buildFlowDocumentHtml(
       ? `
     <section class="step">
       <h2>UX specification</h2>
-      ${spec
-        .map((item) => `<h3>${escapeHtml(item.title)}</h3>${paragraphs(item.body)}`)
-        .join("\n")}
+      ${spec.map((item) => `<h3>${escapeHtml(item.title)}</h3>${paragraphs(item.body)}`).join("\n")}
     </section>`
       : "";
 
@@ -140,12 +253,20 @@ export function buildFlowDocumentHtml(
   h1 { font-size: 26px; margin: 6px 0 10px; }
   h2 { font-size: 18px; margin: 0 0 8px; }
   h3 { font-size: 14px; margin: 14px 0 4px; }
+  h4 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #454545; margin: 12px 0 4px; }
   p { font-size: 12px; line-height: 1.55; margin: 0 0 8px; }
+  ul { font-size: 12px; line-height: 1.55; margin: 0 0 8px; padding-left: 18px; }
   .description { color: #454545; max-width: 460px; }
+  .spec-purpose { color: #454545; }
   .meta-table { margin-top: 14px; border-collapse: collapse; }
   .meta-table td { font-size: 12px; padding: 3px 14px 3px 0; vertical-align: top; }
   .meta-table td.label { color: #666666; text-transform: uppercase; font-size: 10px; letter-spacing: 0.06em; padding-top: 5px; }
+  .spec-table { border-collapse: collapse; width: 100%; max-width: 520px; margin: 4px 0 10px; }
+  .spec-table th, .spec-table td { border: 1px solid #d8d8d8; font-size: 11px; line-height: 1.45; padding: 5px 8px; text-align: left; vertical-align: top; }
+  .spec-table th { background: #f5f5f5; text-transform: uppercase; letter-spacing: 0.04em; font-size: 10px; }
+  .spec-table td.k { color: #666666; width: 34%; }
   .step { page-break-before: always; padding-top: 8px; }
+  .step-spec { margin-top: 10px; }
   img { border: 1px solid #d8d8d8; }
   .print-hint { background: #f5f5f5; padding: 8px 10px; font-size: 11px; color: #454545; margin-top: 18px; }
   @media print { .print-hint { display: none; } }
@@ -160,6 +281,8 @@ ${autoPrintScript}
     <table class="meta-table">
       <tr><td class="label">Flow</td><td>${escapeHtml(meta.flowLabel)}</td></tr>
       <tr><td class="label">Scenario</td><td>${escapeHtml(meta.scenarioLabel)}</td></tr>
+      ${meta.domain ? `<tr><td class="label">Domain</td><td>${escapeHtml(meta.domain)}</td></tr>` : ""}
+      ${meta.status ? `<tr><td class="label">Status</td><td>${escapeHtml(meta.status)}</td></tr>` : ""}
       <tr><td class="label">Countries</td><td>${escapeHtml(meta.countryScope)}</td></tr>
       <tr><td class="label">Figma</td><td>${escapeHtml(meta.figmaFile)}</td></tr>
       <tr><td class="label">Source</td><td>${escapeHtml(meta.sourceUrl)}</td></tr>
@@ -168,6 +291,7 @@ ${autoPrintScript}
     </table>
     ${options.autoPrint ? `<p class="print-hint">Choose “Save as PDF” in the print dialog. If the dialog did not open automatically, press Ctrl+P.</p>` : ""}
   </section>
+${overviewHtml(overview)}
 ${stepsHtml}
 ${specHtml}
 </body>
@@ -206,6 +330,7 @@ export function exportFlowAsPdf(
   meta: FlowExportMeta,
   steps: readonly CapturedFlowStep[],
   spec: readonly FlowExportSpecItem[],
+  overview?: ExportOverview,
 ): void {
   const html = buildFlowDocumentHtml(
     meta,
@@ -213,6 +338,7 @@ export function exportFlowAsPdf(
     spec,
     (index) => `data:image/png;base64,${steps[index]?.pngBase64 ?? ""}`,
     { autoPrint: true },
+    overview,
   );
   const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
   const printWindow = window.open(url, "_blank");
@@ -229,10 +355,16 @@ export function exportFlowAsWord(
   steps: readonly CapturedFlowStep[],
   spec: readonly FlowExportSpecItem[],
   filename: string,
+  overview?: ExportOverview,
 ): void {
-  const html = buildFlowDocumentHtml(meta, steps, spec, (index) => `step-${index + 1}.png`, {
-    autoPrint: false,
-  });
+  const html = buildFlowDocumentHtml(
+    meta,
+    steps,
+    spec,
+    (index) => `step-${index + 1}.png`,
+    { autoPrint: false },
+    overview,
+  );
   const blob = new Blob([buildFlowWordFile(html, steps)], { type: "application/msword" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");

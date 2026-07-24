@@ -2,6 +2,16 @@
 
 This log records bananas found and how they were triaged.
 
+## 2026-07-24
+
+| Banana | Triage | Evidence |
+| --- | --- | --- |
+| The standalone `Creator Mobile` Expo project appeared as a large untracked directory inside the main banking repository and could be committed accidentally | Added `Creator Mobile/` to the root ignore while preserving the complete physical directory for extraction into its future Creator host project | root `.gitignore`; `git status --untracked-files=all` contains no `Creator Mobile` path |
+| A zero-byte Windows-reserved `nul` artifact appeared as untracked publish scope | Removed the exact artifact through its validated extended path; no product source was touched | root directory inspection followed by clean `git status` exclusion check |
+| The first unified typecheck found JSX in `src/app/screens/kids/rs/learn/artwork.ts` | Renamed the module to `.tsx`; imports remain extensionless and behavior is unchanged | `npm run typecheck` passed |
+| Flow Library preview destructuring allowed missing decimals to reach a required string prop | Added deterministic `0`/`00` defaults at the destructuring boundary | `npm run typecheck`; 66 files / 662 tests |
+| Sandbox read restrictions prevented esbuild from reading the workspace parent during Vitest/Vite-based checks | Reran the same repository commands outside the restricted sandbox rather than weakening any test or audit | `npm test`, `npm run audit:all`, and `npm run build` all passed |
+
 ## 2026-07-22
 
 | Banana | Triage | Evidence |

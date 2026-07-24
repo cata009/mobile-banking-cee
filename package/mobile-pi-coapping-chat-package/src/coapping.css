@@ -1851,6 +1851,12 @@
   color: var(--mpc-text);
 }
 
+.mpc-feedback-button-active,
+.mpc-feedback-button-active:hover {
+  background: var(--mpc-accent, #e6002e);
+  color: #fff;
+}
+
 .mpc-bubble {
   max-width: 100%;
   border-radius: 16px;

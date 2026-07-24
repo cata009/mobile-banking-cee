@@ -1,11 +1,13 @@
 import type { CountryId } from "@/app/state/demoTypes";
 
-export type KidsHomeCountry = Extract<CountryId, "SK" | "HU">;
+export type KidsHomeCountry = Extract<CountryId, "SK" | "HU" | "RO" | "RS">;
 
 export type KidsHomeStyle =
   | "sk-guided-flow"
   | "sk-bulbank-kids"
-  | "hu-smart-fintech";
+  | "hu-smart-fintech"
+  | "ro-teen-fintech"
+  | "rs-teen-fintech";
 
 export type KidsBottomNavId =
   | "home"
@@ -89,7 +91,7 @@ export interface KidsMarketHomeConcept {
   nav: KidsBottomNavItem[];
 }
 
-export const KIDS_HOME_COUNTRIES: readonly KidsHomeCountry[] = ["SK", "HU"] as const;
+export const KIDS_HOME_COUNTRIES: readonly KidsHomeCountry[] = ["SK", "HU", "RO", "RS"] as const;
 
 export const KIDS_MARKET_HOME_CONCEPTS: Record<KidsHomeCountry, KidsMarketHomeConcept> = {
   SK: {
@@ -189,6 +191,108 @@ export const KIDS_MARKET_HOME_CONCEPTS: Record<KidsHomeCountry, KidsMarketHomeCo
       { id: "card", label: "Card", icon: "credit-card" },
       { id: "insights", label: "Insights", icon: "receipt-text" },
       { id: "more", label: "Profile", icon: "user-round" },
+    ],
+  },
+  RO: {
+    country: "RO",
+    style: "ro-teen-fintech",
+    conceptLabel: "RO Teens (14-18)",
+    childName: "Andrei",
+    childAge: 16,
+    avatar: "AP",
+    greeting: "Salut, Andrei",
+    heroTitle: "disponibili acum pentru tine",
+    heroSubtitle: "Aplicație pentru adolescenți: plăți simple către o listă aprobată, cu confirmarea părintelui.",
+    balance: 428.5,
+    safeToday: 250,
+    parentName: "Mama",
+    allowanceLabel: "Alocație săptămânală",
+    allowanceAmount: 60,
+    allowanceNext: "luni, 3 zile",
+    approvalCopy: "Plățile mari și cererile de bani merg la Mama pentru aprobare înainte să plece banii.",
+    cardStatus: "Mastercard Teen activ",
+    metrics: [
+      { label: "Limită", value: "47%", hint: "din limita săptămânală" },
+      { label: "Obiective", value: "3 active", hint: "economii pornite" },
+      { label: "Aprobări", value: "2 în așteptare", hint: "la Mama" },
+    ],
+    actions: [
+      { label: "Plătește", detail: "Listă aprobată", icon: "nav-payments", tone: "blue" },
+      { label: "Trimite", detail: "Prieteni & familie", icon: "send", tone: "teal" },
+      { label: "Cere bani", detail: "De la Mama", icon: "circle-dollar-sign", tone: "green" },
+      { label: "Card", detail: "Blochează instant", icon: "shield-check", tone: "neutral" },
+    ],
+    pockets: [
+      { title: "iPhone nou", savedAmount: 1200, targetAmount: 4500, emojiLabel: "GOAL", helper: "Economisești 120 RON pe săptămână" },
+      { title: "Bilet Untold", savedAmount: 210, targetAmount: 350, emojiLabel: "FEST", helper: "Aproape acolo — mai ai 140 RON" },
+      { title: "Skateboard", savedAmount: 150, targetAmount: 600, emojiLabel: "SKATE", helper: "Rotunjirile sunt pornite" },
+    ],
+    feed: [
+      { title: "De la Mama", amount: 60, category: "Venituri", time: "Azi" },
+      { title: "Glovo", amount: -38.9, category: "Mâncare", time: "Azi" },
+      { title: "Către Vlad", amount: -25, category: "Prieteni", time: "Ieri" },
+    ],
+    coach: [
+      { title: "Plăți fără bătăi de cap", body: "Sub 50 RON către persoane de încredere pleacă instant.", value: "Instant" },
+      { title: "Mama e în buclă", body: "Plățile mari și cererile așteaptă aprobarea ei.", value: "Sigur" },
+      { title: "Aproape de obiectiv", body: "Mai ai 140 RON până la biletul de festival.", value: "60%" },
+    ],
+    nav: [
+      { id: "home", label: "Acasă", icon: "nav-home" },
+      { id: "requests", label: "Plăți", icon: "nav-payments" },
+      { id: "goals", label: "Obiective", icon: "piggy-bank" },
+      { id: "card", label: "Card", icon: "credit-card" },
+      { id: "profile", label: "Profil", icon: "user-round" },
+    ],
+  },
+  RS: {
+    country: "RS",
+    style: "rs-teen-fintech",
+    conceptLabel: "RS Teens (12-18)",
+    childName: "Nikola",
+    childAge: 14,
+    avatar: "NP",
+    greeting: "Dobar dan, Nikola",
+    heroTitle: "dostupno sada za tebe",
+    heroSubtitle: "Aplikacija za tinejdžere: jednostavna plaćanja ka odobrenom spisku, sa Tatinom potvrdom.",
+    balance: 12850,
+    safeToday: 1150,
+    parentName: "Tata Milan",
+    allowanceLabel: "Nedeljni džeparac",
+    allowanceAmount: 1500,
+    allowanceNext: "ponedeljak, 4 dana",
+    approvalCopy: "Veća plaćanja i zahtevi za novac idu Tati na odobrenje pre nego što novac krene.",
+    cardStatus: "Mastercard Teen aktivan",
+    metrics: [
+      { label: "Limit", value: "38%", hint: "od nedeljnog limita" },
+      { label: "Ciljevi", value: "3 aktivna", hint: "štednja u toku" },
+      { label: "Uči", value: "0%", hint: "počni da učiš" },
+    ],
+    actions: [
+      { label: "Plati", detail: "Odobreni spisak", icon: "nav-payments", tone: "blue" },
+      { label: "Pošalji", detail: "Prijatelji & porodica", icon: "send", tone: "teal" },
+      { label: "Traži novac", detail: "Od Tate", icon: "circle-dollar-sign", tone: "green" },
+      { label: "Uči", detail: "Zaradi dok učiš", icon: "hu-kids-learn", tone: "yellow" },
+    ],
+    pockets: [
+      { title: "Novi telefon", savedAmount: 42000, targetAmount: 60000, emojiLabel: "TEL", helper: "Štediš 1.500 RSD nedeljno" },
+    ],
+    feed: [
+      { title: "Od Tate", amount: 1500, category: "Prihod", time: "Danas" },
+      { title: "Maxi", amount: -435, category: "Hrana", time: "Danas" },
+      { title: "Ka Luki", amount: -305, category: "Prijatelji", time: "Juče" },
+    ],
+    coach: [
+      { title: "Plaćanja bez brige", body: "Ispod 500 RSD ka odobrenim osobama ide odmah.", value: "Instant" },
+      { title: "Tata je u petlji", body: "Veća plaćanja i zahtevi čekaju njegovu potvrdu.", value: "Sigurno" },
+      { title: "Uči i zaradi", body: "Završi lekcije i osvoji nagrade u RSD.", value: "+1.640 RSD" },
+    ],
+    nav: [
+      { id: "home", label: "Početak", icon: "nav-home" },
+      { id: "learn", label: "Uči", icon: "hu-kids-learn" },
+      { id: "requests", label: "Plaćanja", icon: "nav-payments" },
+      { id: "card", label: "Kartica", icon: "credit-card" },
+      { id: "profile", label: "Profil", icon: "user-round" },
     ],
   },
 };

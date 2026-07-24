@@ -31,7 +31,7 @@ function AppProviders({ children }: PropsWithChildren) {
   )
 }
 
-function renderKids(country: 'HU' | 'SK') {
+function renderKids(country: 'HU' | 'SK' | 'RO' | 'RS') {
   return render(<KidsMarketHomeApp country={country} />, { wrapper: AppProviders })
 }
 
@@ -120,7 +120,62 @@ describe('HU Kids invariant registries', () => {
         helper: 'Auto-save 700 Ft weekly',
         progress: 33,
       },
+      {
+        country: 'RO',
+        title: 'iPhone nou',
+        helper: 'Economisești 120 RON pe săptămână',
+        progress: 27,
+      },
+      {
+        country: 'RS',
+        title: 'Novi telefon',
+        helper: 'Štediš 1.500 RSD nedeljno',
+        progress: 70,
+      },
     ])
+  })
+})
+
+describe('RO Teens app', () => {
+  it('renders the Romanian payments-first teens app for RO', () => {
+    renderKids('RO')
+
+    expect(screen.getByText('disponibili acum pentru tine')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Plăți' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Cere bani' })).toBeInTheDocument()
+  })
+
+  it('opens the curated-payee pay flow with no free IBAN entry', () => {
+    renderKids('RO')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Plătește' }))
+
+    expect(
+      screen.getByText(/Toți sunt pe lista aprobată de Mama/),
+    ).toBeInTheDocument()
+  })
+})
+
+describe('RS Teens app', () => {
+  it('renders the Serbian teens app for RS with hero and nav', () => {
+    renderKids('RS')
+
+    expect(screen.getByText(/Dobar dan, Nikola/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Plaćanja' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Uči' })).toBeInTheDocument()
+  })
+
+  it('opens the curated-payee pay flow with the approved-list explainer', () => {
+    renderKids('RS')
+
+    // Nav centre "Plaćanja" opens the payments hub.
+    fireEvent.click(screen.getByRole('button', { name: 'Plaćanja' }))
+    // The hub's "Plati" action opens the curated payee picker.
+    fireEvent.click(screen.getByRole('button', { name: 'Plati' }))
+
+    expect(
+      screen.getByText(/bez IBAN-a/),
+    ).toBeInTheDocument()
   })
 })
 

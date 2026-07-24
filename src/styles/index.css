@@ -1,6 +1,7 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
+@import './rs-kids.css';
 
 /* Hide scrollbar but keep functionality */
 .scrollbar-hide {
