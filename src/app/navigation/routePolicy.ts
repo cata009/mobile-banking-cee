@@ -67,7 +67,10 @@ export function isRouteEligibleForProductContext(screen: Screen, context: Produc
   if (ROUTE_POLICY[screen].productEligibility === "unrestricted") return true;
   if (context.designSystem !== "current") return false;
   if (context.product === "PI") return true;
-  return context.product === "KIDS_PI" && (context.country === "HU" || context.country === "SK");
+  return (
+    context.product === "KIDS_PI" &&
+    (context.country === "HU" || context.country === "SK" || context.country === "RO" || context.country === "RS")
+  );
 }
 
 export function resolveRouteStatusBarVariant(
@@ -75,6 +78,8 @@ export function resolveRouteStatusBarVariant(
   context: ProductRouteContext & { themeMode: ThemeMode },
 ): RouteStatusBarVariant {
   if (context.product === "KIDS_PI" && context.designSystem === "current" && context.country === "HU") return "theme";
+  if (context.product === "KIDS_PI" && context.designSystem === "current" && context.country === "RO") return "theme";
+  if (context.product === "KIDS_PI" && context.designSystem === "current" && context.country === "RS") return "theme";
   if (context.product === "KIDS_PI" && context.designSystem === "current" && context.country === "SK") return "light";
   if (context.themeMode === "dark" && screen !== "prelogin-inactive" && screen !== "prelogin-active" && screen !== "prime") return "dark";
   return ROUTE_POLICY[screen].statusBar;

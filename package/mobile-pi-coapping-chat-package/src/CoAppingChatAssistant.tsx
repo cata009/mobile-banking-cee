@@ -54,6 +54,8 @@ import type {
   CoAppingChatAction,
   CoAppingChatLabels,
   CoAppingChatContext,
+  CoAppingFeedbackEvent,
+  CoAppingFeedbackRating,
   CoAppingInvestmentChart,
   CoAppingChatMessage,
   CoAppingFollowUpSuggestion,
@@ -79,6 +81,8 @@ export interface CoAppingChatAssistantProps {
   typingDelayMs?: number;
   renderInvestmentChart?: (chart: CoAppingInvestmentChart) => ReactNode;
   onAction?: (action: CoAppingChatAction) => void;
+  /** Fired when the user rates an assistant reply (thumbs up/down). */
+  onFeedback?: (feedback: CoAppingFeedbackEvent) => void;
 }
 const MAX_VISIBLE_SUGGESTED_TOPICS = 5;
 
@@ -645,11 +649,15 @@ function BubbleMessage({
   onAction,
   isActionConsumed,
   renderInvestmentChart,
+  feedbackRating,
+  onFeedback,
 }: {
   message: CoAppingChatMessage;
   onAction?: (action: CoAppingChatAction) => void;
   isActionConsumed?: (action: CoAppingChatAction) => boolean;
   renderInvestmentChart?: (chart: CoAppingInvestmentChart) => ReactNode;
+  feedbackRating?: CoAppingFeedbackRating;
+  onFeedback?: (rating: CoAppingFeedbackRating) => void;
 }) {
   const isAgent = message.role === "agent";
   const timeLabel = formatMessageTimeLabel(message);
@@ -684,10 +692,22 @@ function BubbleMessage({
         {!message.isStreaming ? (
           <div className="mpc-agent-meta">
             <div className="mpc-response-feedback" aria-label="Response feedback">
-              <button type="button" className="mpc-feedback-button" aria-label="Good response">
+              <button
+                type="button"
+                className={`mpc-feedback-button${feedbackRating === "up" ? " mpc-feedback-button-active" : ""}`}
+                aria-label="Good response"
+                aria-pressed={feedbackRating === "up"}
+                onClick={() => onFeedback?.("up")}
+              >
                 <ThumbsUpFeedbackIcon />
               </button>
-              <button type="button" className="mpc-feedback-button" aria-label="Bad response">
+              <button
+                type="button"
+                className={`mpc-feedback-button${feedbackRating === "down" ? " mpc-feedback-button-active" : ""}`}
+                aria-label="Bad response"
+                aria-pressed={feedbackRating === "down"}
+                onClick={() => onFeedback?.("down")}
+              >
                 <ThumbsDownFeedbackIcon />
               </button>
             </div>
@@ -2323,12 +2343,14 @@ export function CoAppingChatAssistant({
   resolveReply = defaultReplyResolver,
   typingDelayMs = 1150,
   renderInvestmentChart,
+  onFeedback,
 }: CoAppingChatAssistantProps) {
   const mergedLabels = { ...defaultChatLabels, ...labels };
   const savedConversationMessagesRef = useRef<CoAppingChatMessage[]>(
     initialMessages.length > 0 ? initialMessages : fallbackConversationMessages,
   );
   const [messages, setMessages] = useState<CoAppingChatMessage[]>([]);
+  const [messageFeedback, setMessageFeedback] = useState<Record<string, CoAppingFeedbackRating>>({});
   const [consumedOptionIds, setConsumedOptionIds] = useState<ReadonlySet<string>>(() => new Set());
   const [draft, setDraft] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -2608,6 +2630,19 @@ export function CoAppingChatAssistant({
     }, typingDelayMs);
 
     return true;
+  };
+
+  const handleFeedback = (message: CoAppingChatMessage, rating: CoAppingFeedbackRating) => {
+    const wasActive = messageFeedback[message.id] === rating;
+    setMessageFeedback((current) => {
+      const next = { ...current };
+      if (wasActive) delete next[message.id];
+      else next[message.id] = rating;
+      return next;
+    });
+    // Toggling a rating off is intentionally silent; only an active rating is
+    // reported to the host so telemetry counts real feedback.
+    if (!wasActive) onFeedback?.({ messageId: message.id, rating, message });
   };
 
   const stopMediaStream = () => {
@@ -3449,6 +3484,8 @@ export function CoAppingChatAssistant({
                 onAction={handleAction}
                 isActionConsumed={(action) => isOptionConsumed(action.id)}
                 renderInvestmentChart={renderInvestmentChart}
+                feedbackRating={messageFeedback[message.id]}
+                onFeedback={(rating) => handleFeedback(message, rating)}
               />
             ))}
 

@@ -6,6 +6,7 @@ test-results/
 .claude/
 .superpowers/
 mini/
+Creator Mobile/
 
 *.log
 vite-*.log

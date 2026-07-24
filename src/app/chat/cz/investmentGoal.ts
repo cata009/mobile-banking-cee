@@ -3,6 +3,7 @@ import type {
   CoAppingInvestmentFundCollectionId,
   CoAppingRichBlock,
 } from "../../../../package/mobile-pi-coapping-chat-package/src";
+import { parseMoneyAmount } from "../nlu";
 
 export type InvestmentGoalPurpose = "grow-savings" | "future-purchase" | "long-term-reserve";
 export type InvestmentGoalHorizon = "3-5" | "5-10" | "undecided";
@@ -11,11 +12,20 @@ export type InvestmentGoalRiskComfort = "calm" | "balanced" | "growth";
 export type InvestmentGoalDraft = {
   purpose: InvestmentGoalPurpose | null;
   horizon: InvestmentGoalHorizon | null;
-  startingAmount: 5000 | 10000 | null;
+  // Widened from the chip-only unions (5000|10000 / 0|500|1000) so the flow can
+  // also accept a free-typed amount ("10k", "7 500 Kč") parsed by the NLU.
+  startingAmount: number | null;
   startingAmountUndecided: boolean;
-  monthlyContribution: 0 | 500 | 1000 | null;
+  monthlyContribution: number | null;
   riskComfort: InvestmentGoalRiskComfort | null;
 };
+
+/** Free-text ways of declining/deferring a step, per open step. */
+function isGoalSkipAnswer(prompt: string, step: "starting-amount" | "monthly-contribution"): boolean {
+  const undecided = /\b(not sure|unsure|dunno|later|decide later|skip|nevim|nevím|pozdeji|později|preskocit|přeskočit)\b/.test(prompt);
+  if (step === "starting-amount") return undecided;
+  return undecided || /\b(not now|none|no monthly|zero|zadny|žádný|ted ne|teď ne|nyni ne)\b/.test(prompt);
+}
 
 export type InvestmentGoalStep =
   | "purpose"
@@ -44,6 +54,9 @@ export function extractInvestmentGoalDraft(messages: readonly CoAppingChatMessag
   messages.forEach((message) => {
     if (message.role !== "user") return;
     const prompt = normalizeGoalPrompt(message.text);
+    // The step that was open when the user sent this message, used to scope
+    // free-typed amount parsing so a stray number can never fill the wrong slot.
+    const stepBefore = getInvestmentGoalNextStep(draft);
 
     if (prompt === "set investment goal purpose to grow savings") draft.purpose = "grow-savings";
     if (prompt === "set investment goal purpose to future purchase") draft.purpose = "future-purchase";
@@ -73,6 +86,18 @@ export function extractInvestmentGoalDraft(messages: readonly CoAppingChatMessag
     if (prompt === "set investment goal risk comfort to prefer less movement") draft.riskComfort = "calm";
     if (prompt === "set investment goal risk comfort to balanced") draft.riskComfort = "balanced";
     if (prompt === "set investment goal risk comfort to accept more movement") draft.riskComfort = "growth";
+
+    // Free-typed amounts (e.g. "10k", "7 500 Kč"), only for the step this
+    // message answered and only if an exact chip above did not already set it.
+    if (stepBefore === "starting-amount" && draft.startingAmount === null && !draft.startingAmountUndecided) {
+      const amount = parseMoneyAmount(message.text);
+      if (amount !== null) draft.startingAmount = amount;
+      else if (isGoalSkipAnswer(prompt, "starting-amount")) draft.startingAmountUndecided = true;
+    } else if (stepBefore === "monthly-contribution" && draft.monthlyContribution === null) {
+      const amount = parseMoneyAmount(message.text);
+      if (amount !== null) draft.monthlyContribution = amount;
+      else if (isGoalSkipAnswer(prompt, "monthly-contribution")) draft.monthlyContribution = 0;
+    }
   });
 
   return draft;

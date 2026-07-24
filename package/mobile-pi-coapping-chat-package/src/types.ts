@@ -250,6 +250,15 @@ export type CoAppingReplyResolver = (
   history: CoAppingChatMessage[],
 ) => CoAppingReplyResult | Promise<CoAppingReplyResult>;
 
+export type CoAppingFeedbackRating = "up" | "down";
+
+/** Emitted when the user rates an assistant reply with the thumbs controls. */
+export interface CoAppingFeedbackEvent {
+  messageId: string;
+  rating: CoAppingFeedbackRating;
+  message: CoAppingChatMessage;
+}
+
 export interface CoAppingMenuItem {
   id: string;
   label: string;

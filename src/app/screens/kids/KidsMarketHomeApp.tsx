@@ -29,6 +29,8 @@ import {
   PocketSection,
 } from "./sk/ConceptShell";
 import { SkBulbankContent } from "./sk/SkBulbankScreens";
+import RoTeensApp from "./ro/RoTeensApp";
+import RsTeensApp from "./rs/RsTeensApp";
 import { HuEarningContent, HuHomeContent, HuSavingContent } from "./hu/screens/homeContent";
 import { HuKidsMorePage, HuKidsPaymentsPage } from "./hu/screens/menuPages";
 import { HuRequestMoneyScreen, HuSendMoneyScreen } from "./hu/screens/moneyFlows";
@@ -66,6 +68,14 @@ export default function KidsMarketHomeApp({ country }: KidsMarketHomeAppProps) {
 
   if (concept.style === "hu-smart-fintech") {
     return <HuCeeLightRestyleApp concept={concept} />;
+  }
+
+  if (concept.style === "ro-teen-fintech") {
+    return <RoTeensApp />;
+  }
+
+  if (concept.style === "rs-teen-fintech") {
+    return <RsTeensApp />;
   }
 
   return (

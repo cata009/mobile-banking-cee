@@ -1,47 +1,52 @@
-import type { CountryId } from "@/app/state/demoTypes";
+/**
+ * Flow preview meta registry.
+ *
+ * Meta is DERIVED from the flow definitions in
+ * `@/app/screens/flow-library/flows` so there is a single source of truth: adding
+ * or editing a flow happens in one data module, and this registry (consumed by the
+ * app shell, the top-bar and deep-link parsing) stays automatically in sync.
+ */
 
-export type FlowPreviewId = "ro-round-up" | "ro-card-pin";
+import { FLOW_DEFINITIONS, FLOW_ORDER } from "@/app/screens/flow-library/flows";
+import type { CountryId } from "@/app/state/demoTypes";
+import type { FlowPreviewId, FlowStatus } from "@/app/screens/flow-library/flows/types";
+
+export type { FlowPreviewId } from "@/app/screens/flow-library/flows/types";
 
 export interface FlowPreviewMeta {
   id: FlowPreviewId;
   title: string;
   label: string;
   countryScope: readonly CountryId[];
-  status: "future-release-preview";
+  status: FlowStatus;
+  domain: string;
   figmaFile: string;
   figmaNodeId: string;
   sourceUrl: string;
   summary: string;
 }
 
-export const FLOW_PREVIEW_ORDER: readonly FlowPreviewId[] = ["ro-round-up", "ro-card-pin"] as const;
+export const FLOW_PREVIEW_ORDER: readonly FlowPreviewId[] = FLOW_ORDER;
 
-export const FLOW_PREVIEWS: Record<FlowPreviewId, FlowPreviewMeta> = {
-  "ro-round-up": {
-    id: "ro-round-up",
-    title: "Round Up",
-    label: "RO Round Up",
-    countryScope: ["RO"],
-    status: "future-release-preview",
-    figmaFile: "RO Enablers",
-    figmaNodeId: "2344:10093",
-    sourceUrl: "https://www.figma.com/design/sQcjbRC5p4CmldGUqh0mrn/RO-Enablers?node-id=2344-10093",
-    summary:
-      "Future Romania-only savings flow for rounding eligible card payments and moving spare change into a savings account.",
+export const FLOW_PREVIEWS: Record<FlowPreviewId, FlowPreviewMeta> = FLOW_ORDER.reduce(
+  (acc, id) => {
+    const flow = FLOW_DEFINITIONS[id];
+    acc[id] = {
+      id: flow.id,
+      title: flow.title,
+      label: flow.label,
+      countryScope: flow.countryScope,
+      status: flow.status,
+      domain: flow.domain,
+      figmaFile: flow.figmaFile,
+      figmaNodeId: flow.figmaNodeId,
+      sourceUrl: flow.sourceUrl,
+      summary: flow.summary,
+    };
+    return acc;
   },
-  "ro-card-pin": {
-    id: "ro-card-pin",
-    title: "View / Reset PIN",
-    label: "RO Card PIN",
-    countryScope: ["RO"],
-    status: "future-release-preview",
-    figmaFile: "RO Enablers",
-    figmaNodeId: "2247:16744",
-    sourceUrl: "https://www.figma.com/design/sQcjbRC5p4CmldGUqh0mrn/RO-Enablers?node-id=2247-16744",
-    summary:
-      "Romania PI card flow for viewing a card PIN after Face ID and changing the PIN through Set PIN, Sign, and success states.",
-  },
-};
+  {} as Record<FlowPreviewId, FlowPreviewMeta>,
+);
 
 export function getFlowPreviewMeta(flowId: FlowPreviewId): FlowPreviewMeta {
   return FLOW_PREVIEWS[flowId];
