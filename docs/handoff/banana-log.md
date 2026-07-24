@@ -6,6 +6,7 @@ This log records bananas found and how they were triaged.
 
 | Banana | Triage | Evidence |
 | --- | --- | --- |
+| The HU Kids goal-funding handoff said typecheck, lint, and tests were unavailable, while the repository already exposed all three scripts; a real typecheck then found an unused import and two unsafe indexed accesses | Corrected the implementation and handoff instead of accepting build-only evidence; expressed the mock account list as non-empty and guarded calculator tokens | `npm run verify`: typecheck, lint, 66 files / 662 tests, six audits, build |
 | The standalone `Creator Mobile` Expo project appeared as a large untracked directory inside the main banking repository and could be committed accidentally | Added `Creator Mobile/` to the root ignore while preserving the complete physical directory for extraction into its future Creator host project | root `.gitignore`; `git status --untracked-files=all` contains no `Creator Mobile` path |
 | A zero-byte Windows-reserved `nul` artifact appeared as untracked publish scope | Removed the exact artifact through its validated extended path; no product source was touched | root directory inspection followed by clean `git status` exclusion check |
 | The first unified typecheck found JSX in `src/app/screens/kids/rs/learn/artwork.ts` | Renamed the module to `.tsx`; imports remain extensionless and behavior is unchanged | `npm run typecheck` passed |

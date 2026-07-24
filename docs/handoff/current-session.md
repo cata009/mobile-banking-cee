@@ -2,6 +2,70 @@
 
 Last updated: 2026-07-24
 
+## 2026-07-24 Clean Checkpoint — HU Kids Goal Funding
+
+- Latest request handled: commit every accumulated main-project development and return the repository to a clean local state while keeping `Creator Mobile/` excluded.
+- Unified scope:
+  - HU Kids Goal Detail now uses a three-action rail; Add Money opens the dedicated goal-funding screen, while Withdrawal and Settings remain explicit placeholders.
+  - The Add Money screen provides goal context, source-account selection, balance-aware validation, preset amounts, a numeric keypad, arithmetic operators, and direct application to the selected goal.
+  - The shared icon registry includes the keypad backspace glyph, and the HU Kids view/data types include the new route and mock source accounts.
+  - The associated ZCode implementation plan is retained as development evidence.
+- Closeout corrections:
+  - removed one unused import;
+  - made calculator token parsing safe under `noUncheckedIndexedAccess`;
+  - expressed `HU_KIDS_ACCOUNTS` as a statically non-empty tuple so the initial account cannot be `undefined`;
+  - corrected the earlier handoff claim that typecheck, lint, and tests were unavailable: all repository scripts are present and pass.
+- Files in this checkpoint: `.zcode/plans/plan-sess_dfbbdd9d-e795-4ed6-a726-06087f0ae80c.md`, `src/app/components/icons/customIcons.tsx`, `src/app/screens/kids/KidsMarketHomeApp.tsx`, `src/app/screens/kids/hu/goals.tsx`, `src/app/screens/kids/hu/types.ts`, `src/data/huKidsBanking.ts`, and the handoff/capability documentation.
+- Verification evidence: fresh `npm run verify` passed typecheck, lint, 66 test files / 662 tests, all six repository audits, and the production build. The build retains the pre-existing large-chunk warning; chart tests retain their pre-existing zero-size jsdom warnings.
+- Banana Loop result:
+  - fixed: the three new TypeScript failures described above;
+  - corrected: stale verification documentation;
+  - triaged: source accounts remain mock fixtures; Withdrawal and Settings remain placeholders; no focused regression currently exercises the complete Add Money calculator/account-picker interaction.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-07-24 HU Kids Add Money — Revolut-Style Calculator Screen
+
+- Latest request handled: tap "Add Money" on the HU Kids Goal Detail action rail now opens a full-screen Revolut-style Add-money surface — header with goal context, large amount display, source-account picker (bottom sheet), and a custom numeric keypad with arithmetic operators (+ − × ÷) and presets (+1000/+2500/+5000), a clear (C), an evaluate (=), and an "Add X HUF" submit button that fires only when the evaluated amount is greater than zero.
+- Scope decisions (made with best judgment after the user skipped the clarifying questions): (a) account source is a new mock list `HU_KIDS_ACCOUNTS` in `huKidsBanking.ts` (3 fixtures: Spending account 35.628 HUF, Savings account 5.000 HUF, Pocket money 1.200 HUF) — `useProducts` is NOT used by kids and was intentionally left out; (b) the calculator is fully functional with operators and an inline expression evaluator (two-pass: ×÷ then +−, returns NaN on dangling operators or divide-by-zero); (c) submit is direct — tap "Add" applies `onAddMoney(amount)` via the existing `handleAddGoalMoney` (clamps to target, prepends a contribution) and returns to Goal Detail, no review step.
+- Files central to this change:
+  - `src/data/huKidsBanking.ts` — new `HuKidsAccount` type + `HU_KIDS_ACCOUNTS` fixtures.
+  - `src/app/screens/kids/hu/types.ts` — `"add-money"` added to `HuLightView`.
+  - `src/app/screens/kids/hu/goals.tsx` — new exported `HuKidsAddMoneyPage` (keypad + account sheet + `evaluateExpression` helper + `OPERATOR_RE`/`TRAILING_OPERATOR_RE` module constants), `HuKidsGoalDetailPage` gained `onOpenAddMoney` prop, action-rail "Add Money" now calls `onOpenAddMoney` instead of `onAddMoney(0)`.
+  - `src/app/screens/kids/KidsMarketHomeApp.tsx` — new `handleOpenAddMoney` handler, `onOpenAddMoney={handleOpenAddMoney}` passed to Goal Detail, new `view === "add-money"` branch rendering `HuKidsAddMoneyPage` with back → goal-detail and submit → apply + goal-detail.
+- Build notes: first two build attempts failed on TSX parsing of regex literals — `/[+\-*/]/` inside JSX expression position and inside a `/** */` block comment both confuse esbuild (the `*/` in the char class prematurely closes the comment). Fixed by hoisting the regexes to module-level `const OPERATOR_RE` / `TRAILING_OPERATOR_RE` and shortening the comment to a `//` line comment. Worth recording because inline operator regexes in TSX are a recurring footgun in this file.
+- Verification evidence: the later clean-checkpoint pass ran the full `npm run verify` successfully: typecheck, lint, 66 test files / 662 tests, all six audits, and production build. Browser smoke remains recommended for the complete keypad/account-picker interaction.
+- Banana Loop result:
+  - fixed: Goal Detail Add Money now opens a real amount-entry screen instead of a no-op `onAddMoney(0)`;
+  - triaged: the Kids accounts are mock fixtures, not real `useProducts` data; the evaluator is a tiny hand-rolled parser, not a math library (no parentheses, no exponent); Withdrawal and Settings remain no-op.
+- Constitutional check:
+  - scope preserved: yes (new full-screen sub-page inside the already-approved HU Kids Goal Detail flow; new mock data type + fixtures; no new screens outside Kids, no new dependencies, no new integration contracts)
+  - docs/capability map updated: not required — no new capability/screen/flow at the platform level; this is a Kids-surface UX addition
+  - full verification and evidence recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-07-24 HU Kids Goal Detail Action Rail
+
+- Latest request handled: add a 3-button action rail to the HU Kids Goal Detail screen, placed directly under the "Saved so far" card and above the existing "Add money" section. Styled after the HU Kids Card Details action rail (Card details / Block card / Manage card) for cross-surface visual consistency.
+- Actions: Add Money (`add-money` icon, wired to the existing `onAddMoney` callback); Withdrawal and Settings (both no-op placeholders for now). Withdrawal and Settings reuse the existing `account-options` gear glyph as an approved proxy because no dedicated withdrawal/settings icons exist in the registry; Add Money duplicates the existing "Add money" section intentionally — the rail acts as a quick shortcut while the detailed section below keeps the +1.000/+2.500/+5.000 custom-amount flow.
+- Implementation: inline `goalActions` array + a new `<section data-hu-goal-actions="true">` inserted in `HuKidsGoalDetailPage` between the "Saved so far" card and the "Add money" card. Styling matches the Card Details rail contract: container `grid grid-cols-3 gap-[18px]`, button `flex min-w-0 flex-col items-center gap-[10px]`, icon circle `size-[64px] rounded-full bg-[var(--uc-surface)] shadow-sm`, label `text-[14px] font-medium text-[var(--uc-text-muted)]` with two-line split via `block h-[16px]` spans.
+- Files central to this change: `src/app/screens/kids/hu/goals.tsx` (only file touched).
+- Verification evidence: `npm run build` passed (only the pre-existing chunk-size warning). Browser smoke recommended: HU Kids → Saving → tap a goal → verify the 3-button rail under "Saved so far", above the "Add money" section; Add Money functional, Withdrawal/Settings visual only. `typecheck`, `lint`, and `test` remain blocked by missing local scripts/tooling in this environment.
+- Banana Loop result:
+  - fixed: Goal Detail now has a consistent action rail matching the Card Details pattern, addressing the missing quick-action surface;
+  - triaged: Withdrawal and Settings are no-op placeholders — their mock flows are not implemented; only Add Money is connected.
+- Constitutional check:
+  - scope preserved: yes (visible-UX addition inside the already-approved HU Kids Goal Detail surface; no new screens/flows/data/integration contracts; no new dependencies or icons)
+  - docs/capability map updated: not required — no new capability, screen, flow, or integration contract
+  - full verification and evidence recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
 ## 2026-07-24 Unified Workspace Checkpoint — Creator Mobile Excluded
 
 - Latest request handled: unify the accumulated main-project developments into one clean repository state while excluding `Creator Mobile`, which will be moved to and maintained in a separate Creator project.

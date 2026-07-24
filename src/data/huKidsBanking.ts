@@ -51,6 +51,24 @@ export const HU_KIDS_GOALS: SavingGoal[] = [
   },
 ];
 
+/**
+ * Kids accounts shown in the Add-money source-account picker. Mock data — the
+ * HU Kids surface does not consume `useProducts`; these are standalone fixtures
+ * so the Revolut-style Add-money screen has a real account selector to show.
+ */
+export interface HuKidsAccount {
+  id: string;
+  name: string;
+  balance: number;
+  currency: HuKidsCurrency;
+}
+
+export const HU_KIDS_ACCOUNTS = [
+  { id: "kid-spending", name: "Spending account", balance: 35628, currency: "HUF" },
+  { id: "kid-savings", name: "Savings account", balance: 5000, currency: "HUF" },
+  { id: "kid-pocket", name: "Pocket money", balance: 1200, currency: "HUF" },
+] as const satisfies readonly [HuKidsAccount, ...HuKidsAccount[]];
+
 export const HU_KIDS_LEARN_MODULES: LearnModule[] = [
   {
     id: "learn-balance",

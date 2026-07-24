@@ -26,6 +26,7 @@ export type HuLightView =
   | "goals"
   | "goal-detail"
   | "create-goal"
+  | "add-money"
   | "learn"
   | "learn-topic"
   | "learn-lesson"
