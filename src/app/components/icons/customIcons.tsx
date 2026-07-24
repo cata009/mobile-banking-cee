@@ -1125,6 +1125,24 @@ export const CUSTOM_ICONS = {
       />
     ),
   },
+  "keypad-backspace": {
+    source: "custom",
+    label: "Keypad backspace",
+    category: "System",
+    width: 32,
+    height: 32,
+    viewBox: "0 0 32 32",
+    usage: ["HuKidsAddMoneyPage keypad"],
+    notes: "Backspace glyph for numeric keypads. Color via AppIcon color prop.",
+    render: () => (
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M6 8L0 16L6 24H32V8H6ZM13.14 19.66L12.99 19.81L13.14 19.96L14.01 20.83L14.16 20.98L14.31 20.83L17.97 17.17L21.63 20.83L21.78 20.98L21.93 20.83L22.8 19.96L22.95 19.81L22.8 19.66L19.14 16L22.8 12.34L22.95 12.19L22.8 12.04L21.93 11.17L21.78 11.02L21.63 11.17L17.97 14.83L14.31 11.17L14.16 11.02L14.01 11.17L13.14 12.04L12.99 12.19L13.14 12.34L16.8 16L13.14 19.66Z"
+        fill="currentColor"
+      />
+    ),
+  },
   mcash: {
     source: "custom",
     label: "mCash",

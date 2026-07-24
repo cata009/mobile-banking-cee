@@ -11,7 +11,7 @@ import { HU_DEFAULT_KIDS_CARD, HU_KIDS_CARDS } from "./hu/cards";
 import { HU_DEFAULT_THEME, getHuTheme, type HuThemeId } from "./hu/theme";
 import { HU_KIDS_INITIAL_GOALS, HU_KIDS_INITIAL_LEARN_MODULES, HU_KIDS_INITIAL_TASKS, HU_KIDS_RUNTIME_COUNTRY, HU_PENDING_ACTIONS, HU_SEND_APPROVAL_THRESHOLD } from "./hu/data";
 import { HU_LEARN_TOPICS, getHuLearnInitialCompletedLessonIds } from "./hu/learnTopics";
-import { HuKidsCreateGoalPage, HuKidsGoalDetailPage, HuKidsGoalsPage } from "./hu/goals";
+import { HuKidsAddMoneyPage, HuKidsCreateGoalPage, HuKidsGoalDetailPage, HuKidsGoalsPage } from "./hu/goals";
 import { HuKidsCardDetailsPage, HuKidsCardSettingsPage } from "./hu/cardDetails";
 import { HuLightBottomNav, HuLightHeader, HuThemeShell } from "./hu/chrome";
 import { HuKidsLearnLessonPage, HuKidsLearnPage, HuKidsLearnTopicPage } from "./hu/learnScreens";
@@ -228,6 +228,13 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
     setMotionProgress(0);
     setActiveNav("analytics");
     setView("goal-detail");
+  };
+
+  const handleOpenAddMoney = () => {
+    setIsMoreSheetOpen(false);
+    setMotionProgress(0);
+    setActiveNav("analytics");
+    setView("add-money");
   };
 
   const handleOpenLearnTopic = (topicId: string) => {
@@ -628,12 +635,6 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
         <HuKidsGoalDetailPage
           contributions={goalContributions.filter((contribution) => contribution.goalId === selectedGoal?.id)}
           goal={selectedGoal}
-          onAddMoney={(amount) => {
-            if (selectedGoal) {
-              handleAddGoalMoney(selectedGoal.id, amount);
-            }
-          }}
-          onAskParent={handleOpenRequestMoney}
           onBack={() => {
             setView("goals");
             setActiveNav("analytics");
@@ -644,6 +645,7 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
               handleCompleteGoal(selectedGoal.id);
             }
           }}
+          onOpenAddMoney={handleOpenAddMoney}
           onTerminateGoal={() => {
             if (selectedGoal) {
               handleTerminateGoal(selectedGoal.id);
@@ -664,6 +666,30 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
             setMotionProgress(0);
           }}
           onCreateGoal={handleCreateGoal}
+          theme={appliedTheme}
+        />
+      );
+    }
+
+    if (view === "add-money") {
+      const selectedGoal = goals.find((goal) => goal.id === selectedGoalId) ?? goals[0] ?? null;
+      return (
+        <HuKidsAddMoneyPage
+          goal={selectedGoal}
+          onBack={() => {
+            setView("goal-detail");
+            setActiveNav("analytics");
+            setMotionProgress(0);
+          }}
+          onSubmit={(amount) => {
+            if (selectedGoal) {
+              handleAddGoalMoney(selectedGoal.id, amount);
+            }
+            setView("goal-detail");
+            setActiveNav("analytics");
+            setMotionProgress(0);
+          }}
+          showAmounts={showAmounts}
           theme={appliedTheme}
         />
       );
