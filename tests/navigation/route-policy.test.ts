@@ -93,7 +93,6 @@ describe('exhaustive route policy', () => {
     expect(isRouteEligibleForProductContext('payments', { product: 'PI', country: 'CZ', designSystem: 'current' })).toBe(true)
     expect(isRouteEligibleForProductContext('payments', { product: 'KIDS_PI', country: 'HU', designSystem: 'current' })).toBe(true)
     expect(isRouteEligibleForProductContext('payments', { product: 'KIDS_PI', country: 'RO', designSystem: 'current' })).toBe(true)
-    expect(isRouteEligibleForProductContext('payments', { product: 'KIDS_PI', country: 'RS', designSystem: 'current' })).toBe(true)
     expect(isRouteEligibleForProductContext('payments', { product: 'SME', country: 'CZ', designSystem: 'current' })).toBe(false)
     expect(isRouteEligibleForProductContext('payments', { product: 'PI', country: 'CZ', designSystem: 'next' })).toBe(false)
     expect(isRouteEligibleForProductContext('design-system', { product: 'SME', country: 'CZ', designSystem: 'next' })).toBe(true)

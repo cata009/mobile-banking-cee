@@ -11,5 +11,16 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['tests/**/*.test.{ts,tsx,mjs}'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'text-summary'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/**/*.d.ts',
+        'src/imports/**',
+        'src/app/registry/componentCodeSamples/**',
+        'src/app/registry/componentImplementationPackages.ts',
+      ],
+    },
   },
 })

@@ -42,7 +42,7 @@ Current target values:
 - `SME`: small and medium enterprise mobile banking;
 - `KIDS_PI`: kids-focused PI application layer, surfaced in runtime as Mobile PI Kids.
 
-Current runtime note: `KIDS_PI` now has active current-design-system Kids concepts only for Slovakia and Hungary. Romania Kids and Serbia Kids runtime apps were deleted on 2026-07-07; RO, RS, CZ, BA, BA_BL, SI, and future-design-system Kids contexts render the honest planned-state placeholder until a new approved concept is implemented. Slovakia is currently rebuilt from the Bulbank Teen/Kids document direction with Products, Education, Tasks, and More pages.
+Current runtime note: `KIDS_PI` has active current-design-system Kids concepts for Slovakia, Hungary, and the newer Romania Teens implementation. Both Serbia Kids experiments are retired; RS, CZ, BA, BA_BL, SI, and future-design-system Kids contexts render the honest planned-state placeholder until a new approved concept is implemented. Slovakia is currently rebuilt from the Bulbank Teen/Kids document direction with Products, Education, Tasks, and More pages.
 
 Rule: product differences must be explicit. Do not hide PI/SME divergence inside generic component conditionals without metadata.
 
