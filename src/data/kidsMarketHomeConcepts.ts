@@ -1,13 +1,12 @@
 import type { CountryId } from "@/app/state/demoTypes";
 
-export type KidsHomeCountry = Extract<CountryId, "SK" | "HU" | "RO" | "RS">;
+export type KidsHomeCountry = Extract<CountryId, "SK" | "HU" | "RO">;
 
 export type KidsHomeStyle =
   | "sk-guided-flow"
   | "sk-bulbank-kids"
   | "hu-smart-fintech"
-  | "ro-teen-fintech"
-  | "rs-teen-fintech";
+  | "ro-teen-fintech";
 
 export type KidsBottomNavId =
   | "home"
@@ -91,7 +90,7 @@ export interface KidsMarketHomeConcept {
   nav: KidsBottomNavItem[];
 }
 
-export const KIDS_HOME_COUNTRIES: readonly KidsHomeCountry[] = ["SK", "HU", "RO", "RS"] as const;
+export const KIDS_HOME_COUNTRIES: readonly KidsHomeCountry[] = ["SK", "HU", "RO"] as const;
 
 export const KIDS_MARKET_HOME_CONCEPTS: Record<KidsHomeCountry, KidsMarketHomeConcept> = {
   SK: {
@@ -242,56 +241,6 @@ export const KIDS_MARKET_HOME_CONCEPTS: Record<KidsHomeCountry, KidsMarketHomeCo
       { id: "requests", label: "Plăți", icon: "nav-payments" },
       { id: "goals", label: "Obiective", icon: "piggy-bank" },
       { id: "card", label: "Card", icon: "credit-card" },
-      { id: "profile", label: "Profil", icon: "user-round" },
-    ],
-  },
-  RS: {
-    country: "RS",
-    style: "rs-teen-fintech",
-    conceptLabel: "RS Teens (12-18)",
-    childName: "Nikola",
-    childAge: 14,
-    avatar: "NP",
-    greeting: "Dobar dan, Nikola",
-    heroTitle: "dostupno sada za tebe",
-    heroSubtitle: "Aplikacija za tinejdžere: jednostavna plaćanja ka odobrenom spisku, sa Tatinom potvrdom.",
-    balance: 12850,
-    safeToday: 1150,
-    parentName: "Tata Milan",
-    allowanceLabel: "Nedeljni džeparac",
-    allowanceAmount: 1500,
-    allowanceNext: "ponedeljak, 4 dana",
-    approvalCopy: "Veća plaćanja i zahtevi za novac idu Tati na odobrenje pre nego što novac krene.",
-    cardStatus: "Mastercard Teen aktivan",
-    metrics: [
-      { label: "Limit", value: "38%", hint: "od nedeljnog limita" },
-      { label: "Ciljevi", value: "3 aktivna", hint: "štednja u toku" },
-      { label: "Uči", value: "0%", hint: "počni da učiš" },
-    ],
-    actions: [
-      { label: "Plati", detail: "Odobreni spisak", icon: "nav-payments", tone: "blue" },
-      { label: "Pošalji", detail: "Prijatelji & porodica", icon: "send", tone: "teal" },
-      { label: "Traži novac", detail: "Od Tate", icon: "circle-dollar-sign", tone: "green" },
-      { label: "Uči", detail: "Zaradi dok učiš", icon: "hu-kids-learn", tone: "yellow" },
-    ],
-    pockets: [
-      { title: "Novi telefon", savedAmount: 42000, targetAmount: 60000, emojiLabel: "TEL", helper: "Štediš 1.500 RSD nedeljno" },
-    ],
-    feed: [
-      { title: "Od Tate", amount: 1500, category: "Prihod", time: "Danas" },
-      { title: "Maxi", amount: -435, category: "Hrana", time: "Danas" },
-      { title: "Ka Luki", amount: -305, category: "Prijatelji", time: "Juče" },
-    ],
-    coach: [
-      { title: "Plaćanja bez brige", body: "Ispod 500 RSD ka odobrenim osobama ide odmah.", value: "Instant" },
-      { title: "Tata je u petlji", body: "Veća plaćanja i zahtevi čekaju njegovu potvrdu.", value: "Sigurno" },
-      { title: "Uči i zaradi", body: "Završi lekcije i osvoji nagrade u RSD.", value: "+1.640 RSD" },
-    ],
-    nav: [
-      { id: "home", label: "Početak", icon: "nav-home" },
-      { id: "learn", label: "Uči", icon: "hu-kids-learn" },
-      { id: "requests", label: "Plaćanja", icon: "nav-payments" },
-      { id: "card", label: "Kartica", icon: "credit-card" },
       { id: "profile", label: "Profil", icon: "user-round" },
     ],
   },

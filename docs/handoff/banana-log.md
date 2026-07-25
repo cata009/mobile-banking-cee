@@ -2,6 +2,14 @@
 
 This log records bananas found and how they were triaged.
 
+## 2026-07-25
+
+| Banana | Triage | Evidence |
+| --- | --- | --- |
+| The interrupted ZCode closeout left two unused HU goal-management symbols and an outdated template markup hash | Removed the obsolete contract/handler and re-locked the intentional analytics typography markup | fresh staged `npm run verify`: typecheck, lint, 65 files / 651 tests, six audits, build |
+| The asset audit reads Git's tracked-file view and therefore tried to open the intentionally deleted, unstaged RS design spec | Staged the explicitly authorized complete snapshot before rerunning the unchanged fail-closed audit | `npm run audit:assets` passed with 179 assets and the locked aggregate unchanged |
+| Current capability documentation still advertised RS Teens after its source, routes, registries, tests, and CSS had been deleted | Replaced the active claim with an archived/retired record and kept Serbia PI retail support explicit | capability map, state-of-the-world, project model, registry sweep |
+
 ## 2026-07-24
 
 | Banana | Triage | Evidence |

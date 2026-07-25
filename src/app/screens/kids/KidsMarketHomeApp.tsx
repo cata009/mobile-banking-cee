@@ -11,12 +11,12 @@ import { HU_DEFAULT_KIDS_CARD, HU_KIDS_CARDS } from "./hu/cards";
 import { HU_DEFAULT_THEME, getHuTheme, type HuThemeId } from "./hu/theme";
 import { HU_KIDS_INITIAL_GOALS, HU_KIDS_INITIAL_LEARN_MODULES, HU_KIDS_INITIAL_TASKS, HU_KIDS_RUNTIME_COUNTRY, HU_PENDING_ACTIONS, HU_SEND_APPROVAL_THRESHOLD } from "./hu/data";
 import { HU_LEARN_TOPICS, getHuLearnInitialCompletedLessonIds } from "./hu/learnTopics";
-import { HuKidsAddMoneyPage, HuKidsCreateGoalPage, HuKidsGoalDetailPage, HuKidsGoalsPage } from "./hu/goals";
+import { HuKidsAddMoneyPage, HuKidsCreateGoalPage, HuKidsGoalDetailPage, HuKidsGoalsPage, formatScheduleSummary } from "./hu/goals";
 import { HuKidsCardDetailsPage, HuKidsCardSettingsPage } from "./hu/cardDetails";
 import { HuLightBottomNav, HuLightHeader, HuThemeShell } from "./hu/chrome";
 import { HuKidsLearnLessonPage, HuKidsLearnPage, HuKidsLearnTopicPage } from "./hu/learnScreens";
 import { formatHuKidsAmount } from "./hu/money";
-import type { HuGoalContribution, HuKidsTask, HuLightNavId, HuLightView, HuMoneyReason, HuPendingAction, HuSendContact, HuSendMoneyTransfer, HuTransactionReturnView } from "./hu/types";
+import type { HuGoalContribution, HuKidsTask, HuLightNavId, HuLightView, HuMoneyReason, HuPendingAction, HuSendContact, HuSendMoneyTransfer, HuTransactionReturnView, ScheduleConfig } from "./hu/types";
 // The SK / legacy concept tree lives in ./sk so this file only dispatches to it.
 import {
   ActionGrid,
@@ -30,7 +30,6 @@ import {
 } from "./sk/ConceptShell";
 import { SkBulbankContent } from "./sk/SkBulbankScreens";
 import RoTeensApp from "./ro/RoTeensApp";
-import RsTeensApp from "./rs/RsTeensApp";
 import { HuEarningContent, HuHomeContent, HuSavingContent } from "./hu/screens/homeContent";
 import { HuKidsMorePage, HuKidsPaymentsPage } from "./hu/screens/menuPages";
 import { HuRequestMoneyScreen, HuSendMoneyScreen } from "./hu/screens/moneyFlows";
@@ -72,10 +71,6 @@ export default function KidsMarketHomeApp({ country }: KidsMarketHomeAppProps) {
 
   if (concept.style === "ro-teen-fintech") {
     return <RoTeensApp />;
-  }
-
-  if (concept.style === "rs-teen-fintech") {
-    return <RsTeensApp />;
   }
 
   return (
@@ -370,26 +365,27 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
     ]);
   };
 
-  const handleCompleteGoal = (goalId: string) => {
-    setGoals((current) =>
-      current.map((goal) =>
-        goal.id === goalId
-          ? { ...goal, savedAmount: goal.targetAmount }
-          : goal,
-      ),
-    );
+  const handleScheduleAdd = (goalId: string, amount: number, schedule: ScheduleConfig) => {
+    if (amount <= 0) {
+      return;
+    }
     setGoalContributions((current) => [
       {
-        id: `goal-contribution-complete-${Date.now()}`,
+        id: `goal-contribution-${Date.now()}`,
         goalId,
-        title: "Goal completed",
-        subtitle: "Just now",
-        amount: 0,
+        title: "Scheduled transfer",
+        subtitle: formatScheduleSummary(schedule),
+        amount,
         createdAt: "Just now",
         tone: "self",
+        schedule,
       },
       ...current,
     ]);
+  };
+
+  const handleDeleteContribution = (contributionId: string) => {
+    setGoalContributions((current) => current.filter((entry) => entry.id !== contributionId));
   };
 
   const handleTerminateGoal = (goalId: string) => {
@@ -402,6 +398,16 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
     setView("goals");
     setActiveNav("analytics");
     setMotionProgress(0);
+  };
+
+  const handleRenameGoal = (goalId: string, title: string) => {
+    setGoals((current) => current.map((goal) => (goal.id === goalId ? { ...goal, title } : goal)));
+  };
+
+  const handleModifyGoal = (goalId: string, targetAmount: number) => {
+    setGoals((current) =>
+      current.map((goal) => (goal.id === goalId ? { ...goal, targetAmount, savedAmount: Math.min(goal.savedAmount, targetAmount) } : goal)),
+    );
   };
 
   const handleSelectTask = (taskId: string) => {
@@ -640,12 +646,18 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
             setActiveNav("analytics");
             setMotionProgress(0);
           }}
-          onCompleteGoal={() => {
+          onDeleteContribution={handleDeleteContribution}
+          onModifyGoal={(targetAmount) => {
             if (selectedGoal) {
-              handleCompleteGoal(selectedGoal.id);
+              handleModifyGoal(selectedGoal.id, targetAmount);
             }
           }}
           onOpenAddMoney={handleOpenAddMoney}
+          onRenameGoal={(title) => {
+            if (selectedGoal) {
+              handleRenameGoal(selectedGoal.id, title);
+            }
+          }}
           onTerminateGoal={() => {
             if (selectedGoal) {
               handleTerminateGoal(selectedGoal.id);
@@ -684,6 +696,14 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
           onSubmit={(amount) => {
             if (selectedGoal) {
               handleAddGoalMoney(selectedGoal.id, amount);
+            }
+            setView("goal-detail");
+            setActiveNav("analytics");
+            setMotionProgress(0);
+          }}
+          onScheduleAdd={(amount, schedule) => {
+            if (selectedGoal) {
+              handleScheduleAdd(selectedGoal.id, amount, schedule);
             }
             setView("goal-detail");
             setActiveNav("analytics");

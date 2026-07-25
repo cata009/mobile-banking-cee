@@ -1,6 +1,39 @@
 # Current Session
 
-Last updated: 2026-07-24
+Last updated: 2026-07-25
+
+## 2026-07-25 Complete ZCode Workspace Closeout
+
+- Latest request handled: preserve and commit every remaining ZCode development on local `main`, with `Creator Mobile/` still excluded.
+- Unified product scope:
+  - retired the complete Serbia Kids / RS Teens experiment from source, registries, routes, CSS, tests, and its design spec while preserving Serbia PI retail banking;
+  - expanded HU Kids goal management with scheduled transfers, schedule detail/deletion, goal rename/target modification/closure, and connected local state updates;
+  - migrated Access Gate and reconstructed template previews from raw color/typography values to shared Design System tokens;
+  - added the optional `npm run test:coverage` command with V8 coverage configuration.
+- Closeout fixes:
+  - removed the obsolete HU goal-completion callback/state left unused by the new goal-management composition;
+  - updated the intentional `analytics-overview` markup hash after its typography-token migration;
+  - staged the authorized deletion snapshot before the asset audit because that audit intentionally reads Git's tracked-file view.
+- Verification evidence: fresh staged `npm run verify` passed typecheck, lint, 65 test files / 651 tests, all six audits, and the production build (`4,456` modules). The new `npm run test:coverage` command also passed all 651 tests and reported 75.83% statements/lines, 77.93% branches, and 60.37% functions; no threshold is enforced. Template audit reports 47 templates / 47 code previews / 96 components / 33 screens / 14 flows; platform audit remains 3 products / 8 countries / 24 project-pack combinations / 7 banking scenarios / 6 repositories. Existing jsdom chart-size messages, empty `react-vendor`, and large-chunk warnings remain non-blocking and previously triaged.
+- Banana Loop result:
+  - fixed: two HU Kids TypeScript failures and one intentional template snapshot mismatch;
+  - fixed: current capability documentation no longer claims the deleted RS Teens concept is active;
+  - triaged: scheduled transfers and goal edits are session-local mock behavior; coverage reporting is optional and has no enforcement threshold.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes
+
+## 2026-07-24 Remove Serbia Kids (RS Teens) — Experiment Retired
+
+- Latest request handled: the Serbia Kids experiment failed and was completely removed from the codebase. All RS Teens code, data, registries, tests, CSS, and design spec were deleted. Serbia as a general PI retail banking country remains unchanged.
+- Deleted: `src/app/screens/kids/rs/` (25 files, ~5,250 lines), `src/styles/rs-kids.css` + its import in `src/styles/index.css`, `docs/superpowers/specs/2026-07-24-kids-serbia-teens-design.md`, `tests/screens/rs-kids-decide-payment.test.ts`.
+- Cleaned references in: `src/data/kidsMarketHomeConcepts.ts` (RS type/union/array/concept entry), `src/app/registry/projectPackRegistry.ts` (KIDS_MARKET_CONCEPT_COUNTRIES + screen map), `src/app/registry/screenRegistry.ts` (kids.rs.home-concept entry), `src/app/registry/flowRegistry.ts` (countries + step), `src/app/state/demoTypes.ts` (ScreenId union), `src/app/navigation/routePolicy.ts` (eligibility + status bar variant), `src/app/screens/kids/KidsMarketHomeApp.tsx` (import + dispatcher), `tests/screens/kids-market-home.test.tsx` (RS render type + test block), `tests/navigation/route-policy.test.ts` (RS assertion).
+- Preserved: Serbia as a general PI country in `demoConfig.ts`, `projectModel.ts`, `countryConfig.ts`, `accountDetails.ts`, `paymentFlow.ts`, `template-rs-travel-insurance`, `translations/RS/`. The Kids concept countries are now `["SK", "HU"]` only (RS removed from `KIDS_MARKET_CONCEPT_COUNTRIES` and `KIDS_HOME_COUNTRIES`).
+- Verification evidence: `npm run build` passed (only chunk-size warning); `npm run audit:platform` passed (products=3, countries=8, projectPackCombinations=24 — unchanged because RS PI pack remains); final `grep` sweep for `rs-teen-fintech`/`RsTeensApp`/`kids.rs.home-concept`/`rs-kids.css` across `src/` and `tests/` returned zero matches.
+- Safe to resume: yes
 
 ## 2026-07-24 Clean Checkpoint — HU Kids Goal Funding
 

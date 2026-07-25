@@ -85,17 +85,17 @@ export function AnalyticsChartTemplate() {
       <div className="absolute bottom-[72px] left-[224px] h-[140px] w-[31px] rounded-t-full bg-[var(--uc-surface-muted)]" />
       <div className="absolute bottom-[72px] left-[224px] h-[72px] w-[31px] bg-[var(--uc-text)]" />
       <div className="absolute bottom-[95px] left-[62px] text-right">
-        <p className="text-[14px] font-bold uppercase leading-[17px] text-[var(--uc-text-muted)]">Inflow</p>
-        <p className="mt-[7px] text-[16px] font-bold leading-[18px] text-[var(--uc-text)]">100,000.00<br />RSD</p>
+        <p className="uc-type-n5-strong uppercase leading-[17px] text-[var(--uc-text-muted)]">Inflow</p>
+        <p className="mt-[7px] uc-type-n4-strong leading-[18px] text-[var(--uc-text)]">100,000.00<br />RSD</p>
       </div>
       <div className="absolute bottom-[108px] left-[270px] w-[160px]">
-        <p className="text-[14px] font-bold uppercase leading-[17px] text-[var(--uc-text-muted)]">Credit card payments</p>
-        <p className="text-[16px] font-bold leading-[18px] text-[var(--uc-text)]">20,000.00 RSD</p>
-        <p className="mt-[16px] text-[14px] font-bold uppercase leading-[17px] text-[var(--uc-text-muted)]">Booked transaction</p>
-        <p className="text-[16px] font-bold leading-[18px] text-[var(--uc-text)]">50,000.00 RSD</p>
+        <p className="uc-type-n5-strong uppercase leading-[17px] text-[var(--uc-text-muted)]">Credit card payments</p>
+        <p className="uc-type-n4-strong leading-[18px] text-[var(--uc-text)]">20,000.00 RSD</p>
+        <p className="mt-[16px] uc-type-n5-strong uppercase leading-[17px] text-[var(--uc-text-muted)]">Booked transaction</p>
+        <p className="uc-type-n4-strong leading-[18px] text-[var(--uc-text)]">50,000.00 RSD</p>
       </div>
-      <div className="absolute bottom-[28px] left-[122px] text-[16px] font-bold uppercase text-[var(--uc-text)]">Incomes</div>
-      <div className="absolute bottom-[28px] left-[248px] text-[16px] font-bold uppercase text-[var(--uc-text)]">Spendings</div>
+      <div className="absolute bottom-[28px] left-[122px] uc-type-n4-strong uppercase text-[var(--uc-text)]">Incomes</div>
+      <div className="absolute bottom-[28px] left-[248px] uc-type-n4-strong uppercase text-[var(--uc-text)]">Spendings</div>
       <div className="absolute bottom-0 left-1/2 flex -translate-x-1/2 items-center gap-[10px]">
         <span className="h-[8px] w-[60px] rounded-full bg-[var(--uc-action)]" />
         <span className="size-[8px] rounded-full bg-[var(--uc-text-muted)]" />
@@ -118,7 +118,7 @@ export function AnalyticsOverviewTemplate() {
               <AppIcon name="help-circle" color="var(--uc-text)" />
             </span>
           </div>
-          <p className="mt-[60px] font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text-muted)]">Data For</p>
+          <p className="mt-[60px] font-['UniCredit',sans-serif] uc-type-h1 leading-normal text-[var(--uc-text-muted)]">Data For</p>
           <h2 className="mt-[10px] font-['UniCredit',sans-serif] text-[48px] font-bold leading-none text-[var(--uc-text)]">March 2025</h2>
         </header>
         <AnalyticsChartTemplate />
@@ -127,7 +127,7 @@ export function AnalyticsOverviewTemplate() {
             <span className="grid size-[42px] place-items-center rounded-full bg-[var(--uc-text)] text-[var(--uc-static-white)]">
               <AppIcon name="add-money" color="currentColor" />
             </span>
-            <span className="text-[20px] font-normal leading-[22px] text-[var(--uc-text)]">Card<br />Transaction</span>
+            <span className="uc-type-n2 leading-[22px] text-[var(--uc-text)]">Card<br />Transaction</span>
           </div>
         </section>
         <section className="mx-[33px] mt-[26px] rounded-[6px] bg-[var(--uc-action)] p-[22px] font-['UniCredit',sans-serif] text-[var(--uc-static-white)]">
@@ -136,7 +136,7 @@ export function AnalyticsOverviewTemplate() {
               <AppIcon name="info-circle" color="currentColor" />
             </span>
             <span>
-              <span className="block text-[28px] font-bold leading-[32px]">Add cash transaction</span>
+              <span className="block uc-type-h1 leading-[32px]">Add cash transaction</span>
               <span className="mt-[12px] block text-[28px] font-normal leading-[32px]">Keep track of your cash transactions.</span>
             </span>
             <span className="grid size-[32px] place-items-center text-[var(--uc-static-white)]">
@@ -173,12 +173,12 @@ export function TemplateMockCard() {
       <span className="absolute bottom-[-64px] left-[-50px] size-[180px] rounded-full bg-[rgb(var(--uc-static-black-rgb)_/_0.18)]" />
       <div className="relative flex h-full flex-col justify-between font-['UniCredit',sans-serif]">
         <div className="flex items-center justify-between">
-          <span className="text-[20px] font-bold">UniCredit</span>
+          <span className="uc-type-n2-strong">UniCredit</span>
           <span className="h-[26px] w-[42px] rounded-[6px] border border-[rgb(var(--uc-static-white-rgb)_/_0.72)]" />
         </div>
         <div>
           <p className="text-[13px] font-normal leading-[16px]">Peter Jagodic</p>
-          <p className="mt-[8px] text-[18px] font-bold leading-[20px]">•••• 2531</p>
+          <p className="mt-[8px] uc-type-h2 leading-[20px]">•••• 2531</p>
         </div>
       </div>
     </div>
@@ -227,10 +227,10 @@ export function TemplateTransactionRow({
         <AppIcon name={icon} strokeWidth={2.6} color="currentColor" />
       </span>
       <span className="min-w-0">
-        <span className="block truncate text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{title}</span>
-        <span className="mt-[2px] block text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">{category}</span>
+        <span className="block truncate uc-type-n4-strong leading-[20px] text-[var(--uc-text)]">{title}</span>
+        <span className="mt-[2px] block uc-type-n5 leading-[18px] text-[var(--uc-text-muted)]">{category}</span>
       </span>
-      <span className="text-right text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{amount}</span>
+      <span className="text-right uc-type-n4-strong leading-[20px] text-[var(--uc-text)]">{amount}</span>
     </div>
   );
 }
@@ -242,7 +242,7 @@ export function CardsOverviewTemplate({ interactive }: { interactive: boolean })
         <TemplateSystemHeaderSpacer />
         <header className="px-[24px] pt-[40px]">
           <div className="flex items-center justify-between">
-            <h1 className="font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">Cards</h1>
+            <h1 className="font-['UniCredit',sans-serif] uc-type-h1 leading-normal text-[var(--uc-text)]">Cards</h1>
             <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Help" interactive={interactive}>
               <AppIcon name="help-circle" color="var(--uc-text)" />
             </TemplateAction>
@@ -259,7 +259,7 @@ export function CardsOverviewTemplate({ interactive }: { interactive: boolean })
         </div>
 
         <section className="px-[24px] pt-[22px] font-['UniCredit',sans-serif] text-[var(--uc-text)]">
-          <p className="text-[14px] font-bold uppercase leading-[18px] text-[var(--uc-text-muted)]">Free To Spend</p>
+          <p className="uc-type-n5-strong uppercase leading-[18px] text-[var(--uc-text-muted)]">Free To Spend</p>
           <div className="mt-[7px] flex items-end justify-between gap-[16px]">
             <p className="text-[32px] font-bold leading-none">1.200.00 <span className="text-[20px]">RSD</span></p>
             <TemplateAction className="text-[13px] font-bold uppercase leading-[16px] text-[var(--uc-action)]" ariaLabel="Show card details" interactive={interactive}>
@@ -317,7 +317,7 @@ export function ContactInfoCard({
         <AppIcon name={icon} color="currentColor" />
       </span>
       <span className="min-w-0 font-['UniCredit',sans-serif]">
-        <span className="block text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{title}</span>
+        <span className="block uc-type-n4-strong leading-[20px] text-[var(--uc-text)]">{title}</span>
         <span className="mt-[2px] block text-[13px] font-normal leading-[16px] text-[var(--uc-text-muted)]">{description}</span>
         <span className="mt-[5px] block text-[12px] font-bold uppercase leading-[15px] text-[var(--uc-action)]">{action}</span>
       </span>
@@ -334,7 +334,7 @@ export function ContactInfoSheetTemplate({ interactive }: { interactive: boolean
       <div className="absolute inset-0 bg-[var(--uc-surface)]">
         <TemplateSystemHeaderSpacer />
         <header className="px-[24px] pt-[40px] font-['UniCredit',sans-serif]">
-          <h1 className="text-[28px] font-bold leading-normal text-[var(--uc-text)]">Contact</h1>
+          <h1 className="uc-type-h1 leading-normal text-[var(--uc-text)]">Contact</h1>
           <div className="mt-[24px] space-y-[14px]">
             <div className="h-[82px] rounded-[6px] bg-[var(--uc-surface-muted)]" />
             <div className="h-[82px] rounded-[6px] bg-[var(--uc-surface-muted)]" />
@@ -367,7 +367,7 @@ export function AccountBalancePreviewCard() {
     <div className="rounded-[8px] bg-[var(--uc-surface-muted)] p-[18px] font-['UniCredit',sans-serif] shadow-[0_10px_22px_rgb(var(--uc-shadow-rgb)_/_0.12)]">
       <div className="flex items-start justify-between gap-[12px]">
         <div>
-          <p className="text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">My RON Account</p>
+          <p className="uc-type-n2-strong leading-[24px] text-[var(--uc-text)]">My RON Account</p>
           <p className="mt-[6px] text-[13px] font-normal leading-[16px] text-[var(--uc-text-muted)]">RO49AAAA1B31007593840000</p>
         </div>
         <span className="grid size-[32px] place-items-center">
@@ -387,7 +387,7 @@ export function AccountDetailHomepageTemplate({ interactive }: { interactive: bo
         <TemplateSystemHeaderSpacer />
         <header className="px-[24px] pt-[40px]">
           <div className="flex items-center justify-between">
-            <h1 className="font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">Accounts</h1>
+            <h1 className="font-['UniCredit',sans-serif] uc-type-h1 leading-normal text-[var(--uc-text)]">Accounts</h1>
             <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Help" interactive={interactive}>
               <AppIcon name="help-circle" color="var(--uc-text)" />
             </TemplateAction>
@@ -405,7 +405,7 @@ export function AccountDetailHomepageTemplate({ interactive }: { interactive: bo
           </div>
           <TemplateSearchStrip interactive={interactive} />
           <section className="px-[24px]">
-            <h2 className="border-b border-[var(--uc-border)] pb-[7px] font-['UniCredit',sans-serif] text-[18px] font-bold uppercase leading-normal text-[var(--uc-text)]">
+            <h2 className="border-b border-[var(--uc-border)] pb-[7px] font-['UniCredit',sans-serif] uc-type-h2 uppercase leading-normal text-[var(--uc-text)]">
               APRIL 2026
             </h2>
             <TemplateTransactionRow title="Kindergarten 45" category="School fees" amount="-24.700,00 RON" icon="account-option-statement" />
@@ -444,8 +444,8 @@ export function DomesticPaymentFormTemplate({ interactive }: { interactive: bool
           </div>
           <div className="mt-[24px] flex items-center justify-between border-t border-[var(--uc-border-muted)] pt-[18px]">
             <div>
-              <p className="text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">Instant Payment</p>
-              <p className="mt-[3px] text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">Send now if available.</p>
+              <p className="uc-type-n4-strong leading-[20px] text-[var(--uc-text)]">Instant Payment</p>
+              <p className="mt-[3px] uc-type-n5 leading-[18px] text-[var(--uc-text-muted)]">Send now if available.</p>
             </div>
             <TemplateToggle checked />
           </div>
@@ -489,8 +489,8 @@ export function ReviewDataTemplate({ interactive }: { interactive: boolean }) {
           ))}
           <div className="flex items-center justify-between border-t border-[var(--uc-border-muted)] py-[18px]">
             <div>
-              <p className="text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">Save as template</p>
-              <p className="mt-[3px] text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">Reuse this payment later.</p>
+              <p className="uc-type-n4-strong leading-[20px] text-[var(--uc-text)]">Save as template</p>
+              <p className="mt-[3px] uc-type-n5 leading-[18px] text-[var(--uc-text-muted)]">Reuse this payment later.</p>
             </div>
             <TemplateToggle checked={false} />
           </div>
@@ -504,7 +504,7 @@ export function ReviewDataTemplate({ interactive }: { interactive: boolean }) {
 export function SpendingInsightMiniChart() {
   return (
     <div className="relative h-[150px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[16px] font-['UniCredit',sans-serif]" aria-hidden="true">
-      <p className="text-[14px] font-bold uppercase leading-[18px] text-[var(--uc-text-muted)]">Spending Insight</p>
+      <p className="uc-type-n5-strong uppercase leading-[18px] text-[var(--uc-text-muted)]">Spending Insight</p>
       <div className="absolute bottom-[24px] left-[22px] right-[22px] flex h-[80px] items-end justify-between">
         <span className="h-[34px] w-[26px] rounded-t-full bg-[var(--uc-action)]" />
         <span className="h-[58px] w-[26px] rounded-t-full bg-[var(--uc-product-pink)]" />
@@ -535,8 +535,8 @@ export function TransactionDetailTemplate({ interactive }: { interactive: boolea
               </span>
             </span>
             <h2 className="mt-[14px] text-[24px] font-bold leading-[28px] text-[var(--uc-text)]">Kindergarten 45</h2>
-            <p className="mt-[4px] text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">School fees</p>
-            <p className="mt-[14px] text-[28px] font-bold leading-none text-[var(--uc-text)]">-24.700,00 <span className="text-[18px]">CZK</span></p>
+            <p className="mt-[4px] uc-type-n5 leading-[18px] text-[var(--uc-text-muted)]">School fees</p>
+            <p className="mt-[14px] uc-type-h1 leading-none text-[var(--uc-text)]">-24.700,00 <span className="text-[18px]">CZK</span></p>
           </section>
           <div className={`mt-[24px] bg-[var(--uc-app-bg)] ${interactive ? "" : "pointer-events-none"}`}>
             <AccountActionBar items={transactionActionItems} align="center" />
@@ -552,7 +552,7 @@ export function TransactionDetailTemplate({ interactive }: { interactive: boolea
           <TemplateAction
             ariaLabel="Show less"
             interactive={interactive}
-            className="mx-auto mt-[8px] flex h-[44px] items-center justify-center font-['UniCredit',sans-serif] text-[14px] font-bold uppercase leading-[18px] text-[var(--uc-action)]"
+            className="mx-auto mt-[8px] flex h-[44px] items-center justify-center font-['UniCredit',sans-serif] uc-type-n5-strong uppercase leading-[18px] text-[var(--uc-action)]"
           >
             SHOW LESS
           </TemplateAction>
@@ -570,10 +570,10 @@ export function SignPinTemplate({ interactive }: { interactive: boolean }) {
         <label className="block text-[12px] font-bold uppercase leading-[15px] tracking-[0.08em] text-[var(--uc-text-muted)]">
           Enter pin code
         </label>
-        <div className="mt-[13px] flex h-[32px] items-center border-b-[2px] border-[var(--uc-action)] text-[28px] font-bold leading-none tracking-[8px] text-[var(--uc-text)]">
+        <div className="mt-[13px] flex h-[32px] items-center border-b-[2px] border-[var(--uc-action)] uc-type-h1 leading-none tracking-[8px] text-[var(--uc-text)]">
           <span aria-hidden="true">******</span>
         </div>
-        <p className="mt-[12px] text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
+        <p className="mt-[12px] uc-type-n5 leading-[18px] text-[var(--uc-text-muted)]">
           You are signing a pending payment request.
         </p>
       </section>
@@ -588,7 +588,7 @@ export function GenerateTokenTemplate({ interactive }: { interactive: boolean })
     <TemplatePhoneSurface>
       <TemplateSystemHeaderSpacer />
       <div className="flex h-[40px] items-center justify-end gap-[11px] px-[19px]">
-        <span className="font-['UniCredit',sans-serif] text-[14px] font-bold uppercase leading-[18px] text-[var(--uc-text)]">
+        <span className="font-['UniCredit',sans-serif] uc-type-n5-strong uppercase leading-[18px] text-[var(--uc-text)]">
           Logout
         </span>
         <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Help" interactive={interactive}>
@@ -596,7 +596,7 @@ export function GenerateTokenTemplate({ interactive }: { interactive: boolean })
         </TemplateAction>
       </div>
       <div className="px-[24px] pt-[1px]">
-        <h1 className="font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">
+        <h1 className="font-['UniCredit',sans-serif] uc-type-h1 leading-normal text-[var(--uc-text)]">
           Generate Token
         </h1>
       </div>
@@ -616,7 +616,7 @@ export function GenerateTokenTemplate({ interactive }: { interactive: boolean })
       </section>
 
       <div className="mx-[24px] mt-[18px] border-b border-[var(--uc-border-muted)] pb-[22px]">
-        <p className="font-['UniCredit',sans-serif] text-[14px] font-bold uppercase leading-[18px] text-[var(--uc-action)]">
+        <p className="font-['UniCredit',sans-serif] uc-type-n5-strong uppercase leading-[18px] text-[var(--uc-action)]">
           Find out more
         </p>
       </div>
@@ -637,11 +637,11 @@ export function MessageDetailTemplate({ interactive }: { interactive: boolean })
     <TemplatePhoneSurface>
       <TemplateTopChrome title="Message title" showHelp={false} interactive={interactive} />
       <main className="px-[24px] pt-[9px] font-['UniCredit',sans-serif]">
-        <p className="text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">18.04.2024</p>
+        <p className="uc-type-n5 leading-[18px] text-[var(--uc-text-muted)]">18.04.2024</p>
         <div className="mt-[22px] grid h-[161px] place-items-center rounded-[8px] bg-[var(--uc-surface-muted)]">
-          <p className="text-[28px] font-bold italic leading-normal text-[var(--uc-border)]">IMG/GIF</p>
+          <p className="uc-type-h1 italic leading-normal text-[var(--uc-border)]">IMG/GIF</p>
         </div>
-        <div className="mt-[25px] space-y-[20px] text-[16px] font-normal leading-[20px] text-[var(--uc-text)]">
+        <div className="mt-[25px] space-y-[20px] uc-type-n4 leading-[20px] text-[var(--uc-text)]">
           <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
           </p>
@@ -651,7 +651,7 @@ export function MessageDetailTemplate({ interactive }: { interactive: boolean })
         </div>
       </main>
       <TemplateBottomButton label="Find out more" interactive={interactive} bottom={86} />
-      <div className="absolute bottom-[39px] left-[24px] right-[24px] text-center font-['UniCredit',sans-serif] text-[16px] font-bold leading-[20px] text-[var(--uc-action)]">
+      <div className="absolute bottom-[39px] left-[24px] right-[24px] text-center font-['UniCredit',sans-serif] uc-type-n4-strong leading-[20px] text-[var(--uc-action)]">
         Link button
       </div>
       <TemplateHomeIndicator />
@@ -666,7 +666,7 @@ export function PushRequestFormTemplate({ interactive }: { interactive: boolean 
       <main className="px-[24px] pt-[18px] font-['UniCredit',sans-serif]">
         {pushRequestSections.map((section) => (
           <section key={section.title} className="mb-[16px]">
-            <h2 className="border-b border-[var(--uc-border-muted)] pb-[5px] text-[18px] font-bold uppercase leading-normal text-[var(--uc-text)]">
+            <h2 className="border-b border-[var(--uc-border-muted)] pb-[5px] uc-type-h2 uppercase leading-normal text-[var(--uc-text)]">
               {section.title}
             </h2>
             <div>
@@ -690,7 +690,7 @@ export function AccountSelectionPanelTemplate({ interactive }: { interactive: bo
       </div>
       <section className="absolute inset-x-0 bottom-0 flex h-[674px] flex-col rounded-t-[12px] bg-[var(--uc-sheet-bg)] p-[24px]">
         <div className="flex items-start justify-between gap-[16px]">
-          <h1 className="font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">
+          <h1 className="font-['UniCredit',sans-serif] uc-type-h1 leading-normal text-[var(--uc-text)]">
             My Accounts
           </h1>
           <TemplateAction className="grid size-[32px] place-items-center" ariaLabel="Close" interactive={interactive}>
@@ -730,7 +730,7 @@ export function ApplePayPhoneHero() {
         <div className="absolute left-[14px] top-[17px] h-[16px] w-[26px] rounded-[4px] border border-[var(--uc-neutral-400)]" />
         <div className="absolute bottom-[16px] left-[14px] h-[9px] w-[76px] rounded-full bg-[rgb(var(--uc-static-white-rgb)_/_0.55)]" />
       </div>
-      <div className="absolute bottom-[10px] right-[10px] rounded-[10px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[17px] py-[8px] font-['UniCredit',sans-serif] text-[18px] font-bold text-[var(--uc-text)] shadow-[0_8px_20px_rgb(var(--uc-shadow-rgb)_/_0.15)]">
+      <div className="absolute bottom-[10px] right-[10px] rounded-[10px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[17px] py-[8px] font-['UniCredit',sans-serif] uc-type-h2 text-[var(--uc-text)] shadow-[0_8px_20px_rgb(var(--uc-shadow-rgb)_/_0.15)]">
         Pay
       </div>
     </div>
@@ -752,8 +752,8 @@ export function ApplePayActivationTemplate({ interactive }: { interactive: boole
       </div>
 
       <section className="px-[32px] pt-[38px] text-center font-['UniCredit',sans-serif] text-[var(--uc-text)]">
-        <h1 className="text-[28px] font-bold leading-normal">Apple Pay</h1>
-        <p className="mt-[12px] text-[16px] font-normal leading-[20px]">
+        <h1 className="uc-type-h1 leading-normal">Apple Pay</h1>
+        <p className="mt-[12px] uc-type-n4 leading-[20px]">
           Add your card to Apple Pay and pay easily in stores, apps, and on the web.
         </p>
       </section>
@@ -770,7 +770,7 @@ export function SuccessfulPaymentTemplate({ interactive }: { interactive: boolea
       <TemplateSystemHeaderSpacer />
       <div className="h-[40px]" />
       <div className="px-[24px] pt-[1px]">
-        <h1 className="font-['UniCredit',sans-serif] text-[28px] font-bold leading-normal text-[var(--uc-text)]">
+        <h1 className="font-['UniCredit',sans-serif] uc-type-h1 leading-normal text-[var(--uc-text)]">
           Successful payment
         </h1>
       </div>
@@ -780,8 +780,8 @@ export function SuccessfulPaymentTemplate({ interactive }: { interactive: boolea
         </div>
       </div>
       <section className="px-[24px] pt-[61px] font-['UniCredit',sans-serif] text-[var(--uc-text)]">
-        <h2 className="text-[16px] font-bold leading-[20px]">Payment sent</h2>
-        <p className="mt-[2px] text-[16px] font-normal leading-[20px]">
+        <h2 className="uc-type-n4-strong leading-[20px]">Payment sent</h2>
+        <p className="mt-[2px] uc-type-n4 leading-[20px]">
           Your payment has been signed and sent for processing. You can check the status in your transaction list.
         </p>
       </section>
@@ -829,8 +829,8 @@ export function TutorialIntroTemplate({ interactive }: { interactive: boolean })
       </section>
 
       <section className="px-[24px] pt-[27px] font-['UniCredit',sans-serif] text-[var(--uc-text)]">
-        <h1 className="text-[28px] font-bold leading-normal">Explore the new app</h1>
-        <p className="mt-[9px] text-[16px] font-normal leading-[20px]">
+        <h1 className="uc-type-h1 leading-normal">Explore the new app</h1>
+        <p className="mt-[9px] uc-type-n4 leading-[20px]">
           See how the main banking actions work and continue when you are ready.
         </p>
         <div className="mt-[24px] flex justify-center gap-[8px]" aria-hidden="true">
@@ -841,7 +841,7 @@ export function TutorialIntroTemplate({ interactive }: { interactive: boolean })
       </section>
 
       <div className="absolute bottom-[23px] left-[24px] right-[24px] grid grid-cols-[1fr_48px_48px] items-center gap-[12px] font-['UniCredit',sans-serif]">
-        <TemplateAction className="text-left text-[16px] font-bold leading-[20px] text-[var(--uc-action)]" ariaLabel="Skip" interactive={interactive}>
+        <TemplateAction className="text-left uc-type-n4-strong leading-[20px] text-[var(--uc-action)]" ariaLabel="Skip" interactive={interactive}>
           Skip
         </TemplateAction>
         <TemplateAction className="grid size-[48px] place-items-center rounded-full border border-[var(--uc-border)]" ariaLabel="Back" interactive={interactive}>
@@ -871,7 +871,7 @@ export function ProductSelectionTemplate({ interactive }: { interactive: boolean
             <p className="text-[12px] font-bold uppercase leading-[15px] tracking-[0.08em] text-[var(--uc-text-muted)]">
               Set as default
             </p>
-            <p className="mt-[5px] text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
+            <p className="mt-[5px] uc-type-n5 leading-[18px] text-[var(--uc-text-muted)]">
               Use this product for quick access.
             </p>
           </div>
@@ -964,10 +964,10 @@ export function TravelInsuranceDetailTemplate({ interactive }: { interactive: bo
       <TemplateTopChrome title="Travel Insurance" interactive={interactive} />
       <main className="px-[24px] pt-[23px] font-['UniCredit',sans-serif] text-[var(--uc-text)]">
         <TravelHeroScene />
-        <h2 className="mt-[29px] text-[16px] font-bold leading-[20px]">
+        <h2 className="mt-[29px] uc-type-n4-strong leading-[20px]">
           Have a safe trip with travel insurance
         </h2>
-        <div className="mt-[18px] space-y-[18px] text-[16px] font-normal leading-[20px]">
+        <div className="mt-[18px] space-y-[18px] uc-type-n4 leading-[20px]">
           <p>
             Choose protection for medical expenses, luggage, and unexpected travel events before you leave.
           </p>
@@ -1048,8 +1048,8 @@ export function FeedbackStatusTemplate({
       </div>
 
       <section className="px-[24px] pt-[56px] font-['UniCredit',sans-serif] text-[var(--uc-text)]">
-        <h2 className="text-[16px] font-bold leading-[20px]">{config.heading}</h2>
-        <p className="mt-[2px] text-[16px] font-normal leading-[20px]">{config.body}</p>
+        <h2 className="uc-type-n4-strong leading-[20px]">{config.heading}</h2>
+        <p className="mt-[2px] uc-type-n4 leading-[20px]">{config.body}</p>
       </section>
 
       <div className="absolute bottom-[32px] left-[24px] right-[24px]">

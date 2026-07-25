@@ -82,6 +82,18 @@ export type HuKidsTask = {
   parentNote?: string;
 };
 
+export type ScheduleRepeat = "never" | "daily" | "weekly" | "biweekly" | "monthly" | "yearly";
+
+export type ScheduleEnd =
+  | { type: "never" }
+  | { type: "on-date"; date: string };
+
+export interface ScheduleConfig {
+  startDate: string;
+  repeat: ScheduleRepeat;
+  endsOn: ScheduleEnd;
+}
+
 export type HuGoalContribution = {
   id: string;
   goalId: string;
@@ -90,6 +102,7 @@ export type HuGoalContribution = {
   amount: number;
   createdAt: string;
   tone: "self" | "parent";
+  schedule?: ScheduleConfig;
 };
 
 export type HuSendMoneyTransfer = {
