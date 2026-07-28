@@ -6,9 +6,10 @@ Last updated: 2026-07-28
 
 - Updated the ETHOCA Journey `Current screen` review surface to use the stronger neutral-200 background (`#E5E5E5`) and a restrained border. This creates a clear visual boundary around the unchanged white Mobile PI phone, without introducing a new product screen or changing the phone content.
 - Added regression coverage for the exact Journey review-surface token and a stable `journey-current-screen-container` test hook.
-- The user explicitly requested a complete workspace checkpoint. The forthcoming commit therefore includes every tracked and untracked modification present in the workspace, not only the visual adjustment above.
+- The user explicitly requested a complete workspace checkpoint. Commit `c637efc` (`feat: finalize Mobile PI flow and transaction experiences`) includes every tracked and untracked modification present in the workspace, not only the visual adjustment above.
 - Verification: test-first assertion failed before the review-surface implementation, then `npm test -- --run tests/screens/flow-library.test.tsx` passed (23 tests). Fresh full `npm test`, `npm run typecheck`, `npm run lint`, `npm run audit:all`, and `npm run build` pass. The build retains only the already-triaged empty-`react-vendor` and >500 kB chunk warnings.
 - Banana Loop: no new banana was introduced. Existing asset-audit candidates, the empty vendor chunk, and large-chunk warnings remain tracked in `docs/handoff/next-tasks.md`; no destructive asset operation was performed.
+- Publication: Vercel Production deployment `dpl_9abkEAvad3J4kdHqbmLyHPXZGQW4` is `READY` at [`https://mobile-banking-cee.vercel.app`](https://mobile-banking-cee.vercel.app) (canonical HTTP smoke: `200`). Vercel error-log query returned no errors. The cloud build also completed successfully, retaining the known empty-`react-vendor` build warning only. No GitHub push was requested or performed.
 - constitutional check:
   - scope preserved: yes
   - docs updated: yes
