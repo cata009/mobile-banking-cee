@@ -50,7 +50,7 @@ const MiniPhone = forwardRef<HTMLDivElement, MiniPhoneProps>(function MiniPhone(
       }}
       aria-hidden={scrollable ? undefined : true}
       data-flow-preview-scrollable={scrollable ? "true" : undefined}
-      className={`relative shrink-0 overflow-hidden ${className ?? ""}`}
+      className={`relative shrink-0 ${scrollable ? "overflow-x-hidden overflow-y-auto overscroll-contain scrollbar-hide" : "overflow-hidden"} ${className ?? ""}`}
       style={{ width: SCREEN_WIDTH * scale, height: SCREEN_HEIGHT * scale, touchAction: scrollable ? "pan-y" : undefined }}
     >
       <div

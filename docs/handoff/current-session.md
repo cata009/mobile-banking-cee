@@ -2,6 +2,23 @@
 
 Last updated: 2026-07-28
 
+## 2026-07-28 ETHOCA Journey Transaction-List Scroll Resilience
+
+- Reinvestigated the UniCredit-network report that the ETHOCA `Enriched card list` and `Enriched account list` showed their phone content above Search but not the transaction rows below it. The transaction records are local, deterministic Flow Library fixtures; there is no runtime API or merchant-image request in this part of the preview.
+- Found the contradictory common-frame behaviour: a `MiniPhone` marked `scrollable` still applied `overflow-hidden` to its outer phone frame. With a scaled real mobile screen inside, this could clip content after Search instead of giving the reviewer a reliable vertical scroll path. The common frame now uses hidden horizontal overflow plus native vertical scroll only when `scrollable` is true; static capture previews retain their hidden frame.
+- Added a regression assertion for the interactive ETHOCA phone: it must expose vertical scrolling and must not retain the hidden-overflow class. The test was first observed failing against the old class, then passed after the fix.
+- Re-locked the asset integrity baseline to the already-approved 181 tracked assets. The previously published official Carrefour/eMAG merchant marks were missing from the old 179-asset baseline, so the full quality gate stopped at the asset audit even though the assets were tracked and referenced.
+- Files changed: `src/app/screens/flow-library/components/MiniPhone.tsx`, `tests/screens/flow-library.test.tsx`, `scripts/asset-baseline.json`, `docs/handoff/current-session.md`, `docs/handoff/next-tasks.md`, and `docs/platform-capability-map/README.md`.
+- Verification: the focused regression suite passed `25/25`; after re-locking the approved asset manifest, fresh `npm run verify` passed TypeScript, ESLint, all `65` test files / `682` tests, all six audits (including the 181-asset audit), and the production build. The build retains only the already-triaged empty-`react-vendor` and >500 kB chunk warnings.
+- Publication: Vercel Production deployment `dpl_5yCW5XttdVYRe4KxMTZvyQcpuSr9` is `READY` at [`https://mobile-banking-cee.vercel.app`](https://mobile-banking-cee.vercel.app). Live Journey smoke confirms Card Detail and Current Account list previews expose `overflow-y: auto`, render the expected Carrefour / YouTube Premium rows and the expected Carrefour / Enel Energie / YouTube Premium rows below Search, and report no browser console errors.
+- Limitation: the UniCredit firewall/browser combination cannot be simulated locally. The production smoke must still be repeated from that network after publication, but the transaction data is local and the phone frame no longer clips its lower scrollable content.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes — corporate-network smoke remains a precise follow-up
+  - safe to resume: yes — the source-level clip is fixed, verified and published; only the external corporate-network smoke remains.
+
 ## 2026-07-28 ETHOCA Corporate-Network Resilience and Flow Library Entry Fix
 
 - Diagnosed the UniCredit-network-only ETHOCA Journey failure as a presentation dependency, not a missing transaction-record problem: the affected Carrefour and eMAG merchant marks were requested at runtime from third-party merchant domains. Those requests can be blocked by a corporate firewall even though the Vercel app and the same Journey load on a personal network.
