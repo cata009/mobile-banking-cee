@@ -331,6 +331,8 @@ describe('flow-library screen', () => {
     expect(preview).toBeInTheDocument()
     expect(preview).not.toHaveAttribute('aria-hidden')
     expect(preview).not.toHaveAttribute('inert')
+    expect(preview).toHaveClass('overflow-y-auto')
+    expect(preview).not.toHaveClass('overflow-hidden')
   })
 
   it('uses a stronger neutral review surface around the current Journey phone', () => {
