@@ -260,6 +260,9 @@ function AppContent({
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(parsedDeepLink?.accountId ?? null);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(parsedDeepLink?.cardId ?? null);
   const [selectedFlowPreviewId, setSelectedFlowPreviewId] = useState<FlowPreviewId>(parsedDeepLink?.flowId ?? "ro-round-up");
+  const [flowLibraryEntryView, setFlowLibraryEntryView] = useState<"index" | "detail">(
+    parsedDeepLink?.flowId ? "detail" : "index",
+  );
   const [selectedTransaction, setSelectedTransaction] = useState<AccountTransaction | null>(null);
   const { transactionCategoryOverrides, handleTransactionCategoryChange } =
     useTransactionCategoryOverrides({ setSelectedTransaction });
@@ -365,11 +368,19 @@ function AppContent({
   useEffect(() => {
     const handleFlowPreviewSelect = (event: Event) => {
       const flowId = (event as CustomEvent<FlowPreviewId>).detail;
-      if (flowId) setSelectedFlowPreviewId(flowId);
+      if (flowId) {
+        setSelectedFlowPreviewId(flowId);
+        setFlowLibraryEntryView("detail");
+      }
     };
+    const handleFlowLibraryOpenIndex = () => setFlowLibraryEntryView("index");
 
     window.addEventListener("flow-preview-select", handleFlowPreviewSelect);
-    return () => window.removeEventListener("flow-preview-select", handleFlowPreviewSelect);
+    window.addEventListener("flow-library-open-index", handleFlowLibraryOpenIndex);
+    return () => {
+      window.removeEventListener("flow-preview-select", handleFlowPreviewSelect);
+      window.removeEventListener("flow-library-open-index", handleFlowLibraryOpenIndex);
+    };
   }, []);
 
   // Keep the browser URL a live deep link (refresh/bookmark/Share work everywhere).
@@ -385,7 +396,9 @@ function AppContent({
     productCounts,
     language,
     screen: currentScreen,
-    flowId: currentRoutePolicy.deepLink.payload === "flow" ? selectedFlowPreviewId : null,
+    flowId: currentRoutePolicy.deepLink.payload === "flow" && flowLibraryEntryView === "detail"
+      ? selectedFlowPreviewId
+      : null,
     accountId: selectedAccountId,
     cardId: selectedCardId,
     deviceMode,
@@ -736,8 +749,13 @@ function AppContent({
         <Suspense fallback={<ScreenFallback />}>
           <FlowLibraryScreen
             initialFlowId={parsedDeepLink?.flowId ?? "ro-round-up"}
+            initialView={flowLibraryEntryView}
             selectedFlowId={selectedFlowPreviewId}
-            onFlowChange={setSelectedFlowPreviewId}
+            onFlowChange={(flowId) => {
+              setSelectedFlowPreviewId(flowId);
+              setFlowLibraryEntryView("detail");
+            }}
+            onViewChange={setFlowLibraryEntryView}
           />
         </Suspense>
       )}

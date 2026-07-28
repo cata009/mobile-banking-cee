@@ -16,20 +16,25 @@ import { getFlowDefinition } from "./flows";
 
 interface FlowLibraryScreenProps {
   initialFlowId?: FlowPreviewId;
+  /** Global navigation lands in the index; a direct flow link can open its detail. */
+  initialView?: LibraryView;
   /** Controlled selection from the app shell (deep-link / top-bar flow picker). */
   selectedFlowId?: FlowPreviewId;
   onFlowChange?: (flowId: FlowPreviewId) => void;
+  onViewChange?: (view: LibraryView) => void;
 }
 
 type LibraryView = "index" | "detail";
 
 export default function FlowLibraryScreen({
   initialFlowId = "ro-round-up",
+  initialView = "detail",
   selectedFlowId: controlledFlowId,
   onFlowChange,
+  onViewChange,
 }: FlowLibraryScreenProps) {
   const [internalFlowId, setInternalFlowId] = useState<FlowPreviewId>(initialFlowId);
-  const [view, setView] = useState<LibraryView>("detail");
+  const [view, setView] = useState<LibraryView>(initialView);
 
   const openFlowId = controlledFlowId ?? internalFlowId;
   const flow = getFlowDefinition(openFlowId);
@@ -38,10 +43,15 @@ export default function FlowLibraryScreen({
     setInternalFlowId(initialFlowId);
   }, [initialFlowId]);
 
+  useEffect(() => {
+    setView(initialView);
+  }, [initialView]);
+
   const openFlow = (flowId: FlowPreviewId) => {
     if (!controlledFlowId) setInternalFlowId(flowId);
     onFlowChange?.(flowId);
     setView("detail");
+    onViewChange?.("detail");
   };
 
   return (
@@ -54,7 +64,14 @@ export default function FlowLibraryScreen({
           <FlowLibraryIndex onOpenFlow={openFlow} />
         ) : (
           <ToolErrorBoundary toolLabel="Flow preview">
-            <FlowDetail key={flow.id} flow={flow} onBackToIndex={() => setView("index")} />
+            <FlowDetail
+              key={flow.id}
+              flow={flow}
+              onBackToIndex={() => {
+                setView("index");
+                onViewChange?.("index");
+              }}
+            />
           </ToolErrorBoundary>
         )}
       </div>
