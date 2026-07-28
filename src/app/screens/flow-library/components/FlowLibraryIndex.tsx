@@ -1,12 +1,8 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { AppIcon } from "@/app/components/icons";
-import { SelectionChip, StatusBadge } from "@/app/screens/tools/toolsUi";
+import { SelectionChip } from "@/app/screens/tools/toolsUi";
 import { FLOW_DEFINITIONS, FLOW_ORDER } from "../flows";
-import type { FlowDefinition, FlowPreviewId, FlowStatus } from "../flows/types";
-
-function statusBadgeTone(status: FlowStatus): "ok" | "warn" | "risk" {
-  return status === "baseline-candidate" ? "ok" : "warn";
-}
+import type { FlowDefinition, FlowPreviewId } from "../flows/types";
 
 function stepCount(flow: FlowDefinition): number {
   const screens = new Set(flow.scenarios.flatMap((scenario) => scenario.steps.map((step) => step.screen)));
@@ -15,15 +11,10 @@ function stepCount(flow: FlowDefinition): number {
 
 export default function FlowLibraryIndex({ onOpenFlow }: { onOpenFlow: (flowId: FlowPreviewId) => void }) {
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<FlowStatus | "all">("all");
   const [countryFilter, setCountryFilter] = useState<string>("all");
 
   const flows = useMemo(() => FLOW_ORDER.map((id) => FLOW_DEFINITIONS[id]), []);
 
-  const statuses = useMemo(
-    () => Array.from(new Set(flows.map((flow) => flow.status))),
-    [flows],
-  );
   const countries = useMemo(
     () => Array.from(new Set(flows.flatMap((flow) => flow.countryScope))),
     [flows],
@@ -32,15 +23,14 @@ export default function FlowLibraryIndex({ onOpenFlow }: { onOpenFlow: (flowId: 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return flows.filter((flow) => {
-      if (statusFilter !== "all" && flow.status !== statusFilter) return false;
       if (countryFilter !== "all" && !flow.countryScope.includes(countryFilter as never)) return false;
       if (!normalizedQuery) return true;
-      return [flow.title, flow.label, flow.summary, flow.domain, flow.countryScope.join(" "), flow.status]
+      return [flow.title, flow.label, flow.summary, flow.domain, flow.countryScope.join(" ")]
         .join(" ")
         .toLowerCase()
         .includes(normalizedQuery);
     });
-  }, [flows, query, statusFilter, countryFilter]);
+  }, [flows, query, countryFilter]);
 
   const groupedByDomain = useMemo(() => {
     const groups = new Map<string, FlowDefinition[]>();
@@ -55,11 +45,9 @@ export default function FlowLibraryIndex({ onOpenFlow }: { onOpenFlow: (flowId: 
   return (
     <div className="grid gap-[24px]">
       <header className="max-w-[760px]">
-        <p className="uc-type-n5-strong uppercase tracking-[0.04em] text-[var(--uc-action)]">Flow library</p>
-        <h1 className="mt-[8px] text-[34px] font-bold leading-[40px] text-[var(--uc-text)]">Future flows, spec-ready</h1>
+        <h1 className="text-[34px] font-bold leading-[40px] text-[var(--uc-text)]">Future flows, spec-ready</h1>
         <p className="mt-[12px] uc-type-n4 text-[var(--uc-text-muted)]">
-          Review not-yet-baseline journeys built from the real design system. Open a flow to walk its screens and lift
-          the structured specification — screens, states, fields, rules and acceptance criteria — for business analysis.
+          Explore each journey visually, then use its clear screen-by-screen notes to align product, design and delivery.
         </p>
       </header>
 
@@ -77,16 +65,6 @@ export default function FlowLibraryIndex({ onOpenFlow }: { onOpenFlow: (flowId: 
       </div>
 
       <div className="flex flex-wrap gap-[16px]">
-        <FacetGroup label="Status">
-          <SelectionChip active={statusFilter === "all"} onClick={() => setStatusFilter("all")}>
-            All
-          </SelectionChip>
-          {statuses.map((status) => (
-            <SelectionChip key={status} active={statusFilter === status} onClick={() => setStatusFilter(status)}>
-              {status.replace(/-/g, " ")}
-            </SelectionChip>
-          ))}
-        </FacetGroup>
         {countries.length > 1 ? (
           <FacetGroup label="Country">
             <SelectionChip active={countryFilter === "all"} onClick={() => setCountryFilter("all")}>
@@ -138,10 +116,7 @@ function FlowCard({ flow, onOpen }: { flow: FlowDefinition; onOpen: () => void }
       onClick={onOpen}
       className="group flex h-full flex-col rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[20px] text-left shadow-sm transition-colors hover:border-[var(--uc-action)]"
     >
-      <div className="flex items-start justify-between gap-[12px]">
-        <h3 className="uc-type-h2 text-[var(--uc-text)]">{flow.title}</h3>
-        <StatusBadge tone={statusBadgeTone(flow.status)}>{flow.status.replace(/-/g, " ")}</StatusBadge>
-      </div>
+      <h3 className="uc-type-h2 text-[var(--uc-text)]">{flow.title}</h3>
       <p className="mt-[10px] flex-1 uc-type-n5 text-[var(--uc-text-muted)]">{flow.summary}</p>
       <div className="mt-[16px] flex flex-wrap items-center gap-[8px]">
         {flow.countryScope.map((country) => (

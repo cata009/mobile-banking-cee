@@ -1,12 +1,13 @@
 import { useRef, useState, type ReactNode } from "react";
 import { AppIcon } from "@/app/components/icons";
-import { SelectionChip, StatusBadge, downloadTextFile } from "@/app/screens/tools/toolsUi";
+import { SelectionChip } from "@/app/screens/tools/toolsUi";
 import { COUNTRY_META } from "@/app/registry/demoConfig";
 import { createPhoneScreenshotBlob } from "@/app/utils/phoneScreenshot";
 import MiniPhone from "./MiniPhone";
 import { renderFlowPreview } from "./flowPreviews";
 import { resolveScenario } from "../flows";
 import type {
+  FlowBusinessAnalysisSpec,
   FlowDefinition,
   FlowScenario,
   FlowScreenSpec,
@@ -35,14 +36,11 @@ const SCENARIO_TONE: Record<FlowScenario["kind"], { label: string; className: st
   error: { label: "Error path", className: "text-[var(--uc-red-main)]" },
 };
 
-function statusBadgeTone(status: FlowDefinition["status"]): "ok" | "warn" | "risk" {
-  return status === "baseline-candidate" ? "ok" : "warn";
-}
-
 function toExportOverview(flow: FlowDefinition): ExportOverview {
   const { overview } = flow;
   return {
     purpose: overview.purpose,
+    businessAnalysis: overview.businessAnalysis,
     entryPoints: overview.entryPoints,
     preconditions: overview.preconditions,
     businessRules: overview.businessRules,
@@ -140,19 +138,25 @@ export default function FlowDetail({
 
   return (
     <div className="flex flex-col gap-[24px]">
+      <button
+        type="button"
+        onClick={onBackToIndex}
+        className="inline-flex w-fit items-center gap-[6px] uc-type-n5-strong text-[var(--uc-action)] hover:underline"
+      >
+        <AppIcon name="back-heavy" size={16} color="currentColor" />
+        Flow library
+      </button>
+
       <FlowHeader
         flow={flow}
         exportKind={exportKind}
         exportError={exportError}
         onExport={handleExport}
-        onBackToIndex={onBackToIndex}
       />
 
       <DetailTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {activeTab === "overview" ? (
-        <OverviewPanel flow={flow} onOpenScenario={(scenarioId) => { selectScenario(scenarioId); setActiveTab("journey"); }} />
-      ) : null}
+      {activeTab === "overview" ? <OverviewPanel flow={flow} /> : null}
 
       {activeTab === "journey" ? (
         <JourneyPanel
@@ -195,58 +199,42 @@ function FlowHeader({
   exportKind,
   exportError,
   onExport,
-  onBackToIndex,
 }: {
   flow: FlowDefinition;
   exportKind: "pdf" | "word" | null;
   exportError: string | null;
   onExport: (kind: "pdf" | "word") => void;
-  onBackToIndex: () => void;
 }) {
   return (
     <header className="rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[24px] shadow-sm">
-      <button
-        type="button"
-        onClick={onBackToIndex}
-        className="mb-[12px] inline-flex items-center gap-[6px] uc-type-n5-strong text-[var(--uc-action)] hover:underline"
-      >
-        <AppIcon name="back-heavy" size={16} color="currentColor" />
-        Flow library
-      </button>
-
-      <div className="flex flex-wrap items-start justify-between gap-[20px]">
-        <div className="max-w-[760px]">
+      <div className="flex flex-wrap items-start justify-between gap-[20px] sm:flex-nowrap">
+        <div className="min-w-0 flex-1">
           <p className="uc-type-n5-strong uppercase tracking-[0.04em] text-[var(--uc-action)]">{flow.domain}</p>
           <h1 className="mt-[6px] text-[32px] font-bold leading-[38px] text-[var(--uc-text)]">{flow.title}</h1>
           <p className="mt-[10px] uc-type-n4 text-[var(--uc-text-muted)]">{flow.summary}</p>
-          <div className="mt-[14px] flex flex-wrap items-center gap-[8px]">
-            <StatusBadge tone={statusBadgeTone(flow.status)}>{flow.status.replace(/-/g, " ")}</StatusBadge>
-            {flow.countryScope.map((country) => (
-              <MetaChip key={country}>{country}</MetaChip>
-            ))}
+        </div>
+
+        <div className="flex shrink-0 flex-col items-end gap-[8px]">
+          <div className="flex items-center gap-[8px]">
             <a
               href={flow.sourceUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-[6px] rounded-[16px] border border-[var(--uc-border)] px-[12px] py-[6px] uc-type-n5-strong text-[var(--uc-action)] hover:border-[var(--uc-action)]"
+              aria-label="Open Figma source"
+              title="Open Figma source"
+              data-flow-document-action="figma"
+              className="grid size-[40px] place-items-center rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] shadow-sm transition-colors hover:border-[#7B61FF] hover:bg-[var(--uc-surface)]"
             >
-              Figma {flow.figmaNodeId}
+              <FigmaDocumentIcon />
             </a>
-          </div>
-        </div>
-
-        <div className="flex flex-col items-end gap-[8px]">
-          <div className="flex flex-wrap gap-[8px]">
-            <ExportButton label="Export PDF" busy={exportKind === "pdf"} disabled={exportKind !== null} onClick={() => onExport("pdf")} testId="flow-export-pdf" />
-            <ExportButton label="Export Word" busy={exportKind === "word"} disabled={exportKind !== null} onClick={() => onExport("word")} testId="flow-export-word" />
+            <ExportButton kind="pdf" busy={exportKind === "pdf"} disabled={exportKind !== null} onClick={() => onExport("pdf")} testId="flow-export-pdf" />
+            <ExportButton kind="word" busy={exportKind === "word"} disabled={exportKind !== null} onClick={() => onExport("word")} testId="flow-export-word" />
           </div>
           {exportError ? (
             <p role="alert" className="max-w-[280px] text-right uc-type-n5 text-[var(--uc-red-main)]">
               {exportError}
             </p>
-          ) : (
-            <p className="uc-type-n5 text-[var(--uc-text-muted)]">Screens + full spec, ready for handoff.</p>
-          )}
+          ) : null}
         </div>
       </div>
     </header>
@@ -254,29 +242,65 @@ function FlowHeader({
 }
 
 function ExportButton({
-  label,
+  kind,
   busy,
   disabled,
   onClick,
   testId,
 }: {
-  label: string;
+  kind: "pdf" | "word";
   busy: boolean;
   disabled: boolean;
   onClick: () => void;
   testId: string;
 }) {
+  const label = kind === "pdf" ? "Export flow as PDF" : "Export flow as Word";
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
       data-testid={testId}
-      className="inline-flex items-center gap-[6px] rounded-[20px] bg-[var(--uc-action)] px-[16px] py-[9px] uc-type-n5-strong text-[var(--uc-text-inverse)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+      aria-label={busy ? `Preparing ${kind.toUpperCase()} export` : label}
+      aria-busy={busy || undefined}
+      title={label}
+      data-flow-document-action={kind}
+      data-export-document="current-flow"
+      className={`grid size-[40px] place-items-center rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] shadow-sm transition-colors hover:bg-[var(--uc-surface)] disabled:cursor-not-allowed disabled:opacity-50 ${
+        kind === "pdf" ? "hover:border-[#D92D20]" : "hover:border-[#185ABD]"
+      }`}
     >
-      <AppIcon name="download" size={15} color="currentColor" />
-      {busy ? "Preparing…" : label}
+      <DesktopDocumentIcon kind={kind} />
     </button>
+  );
+}
+
+function FigmaDocumentIcon() {
+  return (
+    <svg data-testid="flow-document-icon-figma" width="18" height="24" viewBox="0 0 19 29" fill="none" aria-hidden="true">
+      <path d="M4.75 0H9.5v9.5H4.75a4.75 4.75 0 1 1 0-9.5Z" fill="#F24E1E" />
+      <path d="M9.5 0h4.75a4.75 4.75 0 1 1 0 9.5H9.5V0Z" fill="#FF7262" />
+      <path d="M4.75 9.5H9.5V19H4.75a4.75 4.75 0 1 1 0-9.5Z" fill="#A259FF" />
+      <circle cx="14.25" cy="14.25" r="4.75" fill="#1ABCFE" />
+      <path d="M0 23.75A4.75 4.75 0 0 1 4.75 19H9.5v4.75a4.75 4.75 0 1 1-9.5 0Z" fill="#0ACF83" />
+    </svg>
+  );
+}
+
+function DesktopDocumentIcon({ kind }: { kind: "pdf" | "word" }) {
+  const isPdf = kind === "pdf";
+  const accent = isPdf ? "#E81123" : "#185ABD";
+  const label = isPdf ? "PDF" : "W";
+
+  return (
+    <svg data-testid={`flow-document-icon-${kind}`} width="20" height="24" viewBox="0 0 20 24" fill="none" aria-hidden="true">
+      <path d="M3 1.25h9l5 5v15.5A1.25 1.25 0 0 1 15.75 23h-12a1.25 1.25 0 0 1-1.25-1.25V2.5A1.25 1.25 0 0 1 3.75 1.25Z" fill="#FFF" stroke="#BFC6CF" />
+      <path d="M12 1.25v5h5" fill="#EEF1F5" stroke="#BFC6CF" strokeLinejoin="round" />
+      <rect x="1" y="10" width="15" height="7" rx="1.5" fill={accent} />
+      <text x={isPdf ? "2.25" : "6.1"} y="15.25" fill="#FFF" fontFamily="Arial, sans-serif" fontSize={isPdf ? "4.1" : "7.2"} fontWeight="700">
+        {label}
+      </text>
+    </svg>
   );
 }
 
@@ -306,23 +330,15 @@ function DetailTabs({ activeTab, onTabChange }: { activeTab: DetailTab; onTabCha
   );
 }
 
-function Panel({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
+function Panel({ title, action, children, compact = false }: { title: string; action?: ReactNode; children: ReactNode; compact?: boolean }) {
   return (
-    <section role="tabpanel" className="rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[20px] shadow-sm">
+    <section role="tabpanel" className={`rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] shadow-sm ${compact ? "p-[16px]" : "p-[20px]"}`}>
       <div className="flex flex-wrap items-center justify-between gap-[12px]">
         <h2 className="uc-type-h2 text-[var(--uc-text)]">{title}</h2>
         {action ?? null}
       </div>
-      <div className="mt-[16px]">{children}</div>
+      <div className={compact ? "mt-[12px]" : "mt-[16px]"}>{children}</div>
     </section>
-  );
-}
-
-function MetaChip({ children }: { children: ReactNode }) {
-  return (
-    <span className="rounded-[16px] bg-[var(--uc-surface-muted)] px-[12px] py-[6px] uc-type-n5-strong text-[var(--uc-text)]">
-      {children}
-    </span>
   );
 }
 
@@ -351,19 +367,31 @@ function ScenarioChips({
   );
 }
 
-function OverviewPanel({ flow, onOpenScenario }: { flow: FlowDefinition; onOpenScenario: (scenarioId: string) => void }) {
+function OverviewPanel({ flow }: { flow: FlowDefinition }) {
   const { overview } = flow;
+  const marketCount = flow.countryScope.length;
   return (
     <div className="grid gap-[24px]">
-      <Panel title="At a glance">
-        <div className="grid gap-px overflow-hidden rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-border)] sm:grid-cols-2 lg:grid-cols-4">
-          <MetaCell label="Status" value={flow.status.replace(/-/g, " ")} />
+      <Panel title="At a glance" compact>
+        <div data-testid="flow-overview-meta" className="grid grid-cols-2 gap-px overflow-hidden rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-border)] sm:grid-cols-3">
           <MetaCell label="Domain" value={flow.domain} />
-          <MetaCell label="Country scope" value={flow.countryScope.join(", ")} />
-          <MetaCell label="Scenarios" value={String(flow.scenarios.length)} />
+          <MetaCell
+            label="Markets"
+            value={`${marketCount} market${marketCount === 1 ? "" : "s"}`}
+            detail={flow.countryScope.join(" · ")}
+            testId="flow-overview-country-summary"
+          />
+          <MetaCell label="Journey paths" value={`${flow.scenarios.length} path${flow.scenarios.length === 1 ? "" : "s"}`} />
         </div>
-        <p className="mt-[16px] max-w-[860px] uc-type-n4 text-[var(--uc-text)]">{overview.purpose}</p>
-        <p className="mt-[8px] max-w-[860px] uc-type-n5 text-[var(--uc-text-muted)]">{overview.scopeNote}</p>
+
+        <div className="mt-[12px] grid gap-[10px]">
+          <OverviewNarrative title="Purpose" className="border-[var(--uc-border)] bg-[var(--uc-surface-muted)] text-[var(--uc-text)]">
+            {overview.purpose}
+          </OverviewNarrative>
+          <OverviewNarrative title="Scope and demo note" className="border-[var(--uc-border)] bg-[var(--uc-surface-muted)] text-[var(--uc-text-muted)]">
+            {overview.scopeNote}
+          </OverviewNarrative>
+        </div>
       </Panel>
 
       <Panel title="Entry points">
@@ -377,47 +405,34 @@ function OverviewPanel({ flow, onOpenScenario }: { flow: FlowDefinition; onOpenS
         </div>
       </Panel>
 
-      <Panel title="Scenarios">
-        <p className="mb-[12px] uc-type-n5 text-[var(--uc-text-muted)]">
-          A scenario is one path through the flow; a step is one screen. Open a scenario to walk its screens and read the
-          per-screen spec.
-        </p>
-        <div className="grid gap-[10px]">
-          {flow.scenarios.map((scenario) => {
-            const tone = SCENARIO_TONE[scenario.kind];
-            return (
-              <button
-                key={scenario.id}
-                type="button"
-                onClick={() => onOpenScenario(scenario.id)}
-                className="flex items-center justify-between gap-[16px] rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[16px] py-[14px] text-left transition-colors hover:border-[var(--uc-action)]"
-              >
-                <span className="min-w-0">
-                  <span className="flex items-center gap-[8px]">
-                    <span className="uc-type-n4-strong text-[var(--uc-text)]">{scenario.label}</span>
-                    <span className={`uc-type-n5-strong ${tone.className}`}>{tone.label}</span>
-                  </span>
-                  <span className="mt-[2px] block uc-type-n5 text-[var(--uc-text-muted)]">{scenario.description}</span>
-                </span>
-                <span className="flex shrink-0 items-center gap-[8px] uc-type-n5-strong text-[var(--uc-text-muted)]">
-                  {scenario.steps.length} steps
-                  <AppIcon name="chevron-link" size={20} color="var(--uc-action)" />
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </Panel>
     </div>
   );
 }
 
-function MetaCell({ label, value }: { label: string; value: string }) {
+function MetaCell({ label, value, detail, testId }: { label: string; value: string; detail?: string; testId?: string }) {
   return (
-    <div className="bg-[var(--uc-surface)] p-[14px]">
+    <div data-testid={testId} className="bg-[var(--uc-surface)] p-[10px]">
       <p className="uc-type-n5-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">{label}</p>
-      <p className="mt-[4px] uc-type-n4-strong capitalize text-[var(--uc-text)]">{value}</p>
+      <p className="mt-[2px] uc-type-n5-strong text-[var(--uc-text)]">{value}</p>
+      {detail ? <p className="mt-[2px] uc-type-n6 text-[var(--uc-text-muted)]">{detail}</p> : null}
     </div>
+  );
+}
+
+function OverviewNarrative({
+  title,
+  className,
+  children,
+}: {
+  title: string;
+  className: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className={`rounded-[8px] border-l-[3px] px-[12px] py-[10px] ${className}`}>
+      <p className="uc-type-n5-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">{title}</p>
+      <p className="mt-[3px] max-w-[980px] uc-type-n5">{children}</p>
+    </section>
   );
 }
 
@@ -441,6 +456,8 @@ function JourneyPanel({
   onJourneyViewChange: (view: JourneyView) => void;
 }) {
   const activeStep = scenario.steps[activeStepIndex] ?? scenario.steps[0];
+  const focusedScreenRef = useRef<HTMLDivElement>(null);
+  const isEthocaFlow = flow.id === "mobile-pi-ethoca";
 
   return (
     <Panel
@@ -453,13 +470,13 @@ function JourneyPanel({
               type="button"
               aria-pressed={journeyView === view}
               onClick={() => onJourneyViewChange(view)}
-              className={`rounded-[8px] px-[14px] py-[6px] uc-type-n5-strong capitalize transition-colors ${
+              className={`rounded-[8px] px-[14px] py-[6px] uc-type-n5-strong transition-colors ${
                 journeyView === view
                   ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm"
                   : "text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]"
               }`}
             >
-              {view}
+              {view === "focused" ? "Current screen" : "All screens"}
             </button>
           ))}
         </div>
@@ -467,6 +484,11 @@ function JourneyPanel({
     >
       <ScenarioChips scenarios={flow.scenarios} selectedScenarioId={scenario.id} onSelect={onScenarioSelect} />
       <p className="mt-[10px] max-w-[860px] uc-type-n5 text-[var(--uc-text-muted)]">{scenario.description}</p>
+      {isEthocaFlow ? (
+        <p className="mt-[8px] max-w-[860px] uc-type-n5 text-[var(--uc-text-muted)]" role="note">
+          Review map: Card Detail and the linked Current Account are independent transaction-list entry points. They do not navigate into one another.
+        </p>
+      ) : null}
 
       {scenario.steps.length === 0 ? (
         <EmptyState message="No steps are configured for this scenario yet." />
@@ -502,30 +524,164 @@ function JourneyPanel({
               );
             })}
           </div>
-          <div className="flex min-h-[540px] items-center justify-center rounded-[8px] bg-[var(--uc-surface-muted)] p-[24px]">
+          <div
+            className="relative flex min-h-[540px] items-center justify-center rounded-[8px] border border-[var(--uc-border-muted)] bg-[var(--uc-neutral-200)] p-[24px]"
+            data-testid="journey-current-screen-container"
+          >
             {activeStep ? (
-              <MiniPhone scale={0.82}>{renderFlowPreview(activeStep.screen, { countryName })}</MiniPhone>
+              <>
+                <MiniPhone ref={focusedScreenRef} scale={0.82} scrollable>{renderFlowPreview(activeStep.screen, { countryName })}</MiniPhone>
+                <FlowScreenDownloadButton screenRef={focusedScreenRef} step={activeStep} index={activeStepIndex} placement="container" />
+              </>
             ) : null}
           </div>
         </div>
       ) : (
-        <div className="mt-[20px] overflow-x-auto pb-[12px]">
-          <div className="flex min-w-max items-start gap-[12px]">
-            {scenario.steps.map((step, index) => (
-              <div key={step.id} className="flex items-start gap-[12px]">
-                <FilmstripCard step={step} index={index} countryName={countryName} />
-                {index < scenario.steps.length - 1 ? <JourneyArrow /> : null}
-              </div>
-            ))}
+        isEthocaFlow ? (
+          <EthocaJourneyGallery scenario={scenario} countryName={countryName} />
+        ) : (
+          <div className="mt-[20px] overflow-x-auto pb-[12px]">
+            <div className="flex min-w-max items-start gap-[12px]">
+              {scenario.steps.map((step, index) => (
+                <div key={step.id} className="flex items-start gap-[12px]">
+                  <FilmstripCard step={step} index={index} countryName={countryName} />
+                  {index < scenario.steps.length - 1 ? <JourneyArrow /> : null}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )
       )}
     </Panel>
   );
 }
 
-function FilmstripCard({ step, index, countryName }: { step: FlowStep; index: number; countryName: string }) {
+function EthocaJourneyGallery({ scenario, countryName }: { scenario: FlowScenario; countryName: string }) {
+  const entrySteps = scenario.steps.filter((step) => step.id.includes("list"));
+  const detailSteps = scenario.steps.filter((step) => !step.id.includes("list"));
+  const hasIndependentEntryPoints = entrySteps.length > 1;
+
+  return (
+    <div className="mt-[20px] grid gap-[20px]" data-testid="ethoca-journey-gallery">
+      <section className="rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[16px]" data-testid="ethoca-entry-points">
+        <div className="max-w-[820px]">
+          <p className="uc-type-n5-strong text-[var(--uc-text)]">
+            {hasIndependentEntryPoints ? "Independent transaction-list entry points" : "Transaction-list entry point"}
+          </p>
+          <p className="mt-[3px] uc-type-n5 text-[var(--uc-text-muted)]">
+            {hasIndependentEntryPoints
+              ? "The same card purchase can be found from Card Detail or from its linked Current Account. These are alternative entry points, not a navigation sequence."
+              : "This list is an entry point for the card transaction shown in the detail examples below."}
+          </p>
+        </div>
+        <div className="mt-[16px] overflow-x-auto pb-[4px]">
+          <div className="flex min-w-max items-start gap-[20px]">
+            {entrySteps.map((step) => {
+              const index = scenario.steps.indexOf(step);
+              return (
+                <FilmstripCard
+                  key={step.id}
+                  step={step}
+                  index={index}
+                  countryName={countryName}
+                  contextLabel={ethocaEntryContext(step)}
+                  testId={ethocaEntryTestId(step)}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {detailSteps.length > 0 ? (
+        <section className="rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[16px]" data-testid="ethoca-detail-examples">
+          <div className="max-w-[820px]">
+            <p className="uc-type-n5-strong text-[var(--uc-text)]">Transaction detail examples</p>
+            <p className="mt-[3px] uc-type-n5 text-[var(--uc-text-muted)]">
+              {hasIndependentEntryPoints
+                ? "Open an ETHOCA-enriched card purchase from either transaction list to see the matching detail. In-store and online purchases use the appropriate detail blocks."
+                : "Open the selected card transaction to see the relevant detail treatment."}
+            </p>
+          </div>
+          <div className="mt-[16px] overflow-x-auto pb-[4px]">
+            <div className="flex min-w-max items-start gap-[20px]">
+              {detailSteps.map((step) => {
+                const index = scenario.steps.indexOf(step);
+                return (
+                  <FilmstripCard
+                    key={step.id}
+                    step={step}
+                    index={index}
+                    countryName={countryName}
+                    contextLabel="Transaction detail"
+                  />
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
+function ethocaEntryContext(step: FlowStep) {
+  if (step.id === "card-list" || step.id === "pending-card-list") return "Card Detail transaction list";
+  if (step.id === "account-list" || step.id === "pending-account-list") return "Current Account card-transaction list";
+  return "Card Detail transaction list";
+}
+
+function ethocaEntryTestId(step: FlowStep) {
+  if (step.id === "card-list") return "ethoca-entry-card-list";
+  if (step.id === "account-list") return "ethoca-entry-account-list";
+  return undefined;
+}
+
+function FilmstripCard({
+  step,
+  index,
+  countryName,
+  contextLabel,
+  testId,
+}: {
+  step: FlowStep;
+  index: number;
+  countryName: string;
+  contextLabel?: string;
+  testId?: string;
+}) {
   const screenRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <article className="w-[200px] shrink-0" data-testid={testId}>
+      <div className="group relative">
+        <MiniPhone ref={screenRef} scale={0.5} scrollable>
+          {renderFlowPreview(step.screen, { countryName })}
+        </MiniPhone>
+        <FlowScreenDownloadButton screenRef={screenRef} step={step} index={index} showOnHover />
+      </div>
+      {contextLabel ? <p className="mt-[12px] uc-type-n5-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">{contextLabel}</p> : null}
+      <h3 className={`${contextLabel ? "mt-[4px]" : "mt-[12px]"} uc-type-n5-strong text-[var(--uc-text)]`}>
+        {index + 1}. {step.title}
+      </h3>
+      <p className="mt-[4px] uc-type-n5 text-[var(--uc-text-muted)]">{step.description}</p>
+    </article>
+  );
+}
+
+function FlowScreenDownloadButton({
+  screenRef,
+  step,
+  index,
+  showOnHover = false,
+  placement = "preview",
+}: {
+  screenRef: { current: HTMLDivElement | null };
+  step: FlowStep;
+  index: number;
+  showOnHover?: boolean;
+  placement?: "preview" | "container";
+}) {
   const [busy, setBusy] = useState(false);
 
   const handleDownload = async () => {
@@ -533,7 +689,7 @@ function FilmstripCard({ step, index, countryName }: { step: FlowStep; index: nu
     if (!element || busy) return;
     setBusy(true);
     try {
-      const { blob } = await createPhoneScreenshotBlob({ screenElement: element, mode: "visible" });
+      const { blob } = await createPhoneScreenshotBlob({ screenElement: element, mode: "full" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -550,33 +706,28 @@ function FilmstripCard({ step, index, countryName }: { step: FlowStep; index: nu
   };
 
   return (
-    <article className="w-[200px] shrink-0">
-      <div className="relative">
-        <MiniPhone ref={screenRef} scale={0.5}>
-          {renderFlowPreview(step.screen, { countryName })}
-        </MiniPhone>
-        <button
-          type="button"
-          onClick={handleDownload}
-          disabled={busy}
-          className="absolute right-[8px] top-[8px] z-20 grid size-[30px] place-items-center rounded-full border border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-md hover:border-[var(--uc-action)] hover:text-[var(--uc-action)] disabled:opacity-50"
-          aria-label={`Download ${step.title} screen`}
-          title={`Download ${step.title}`}
-        >
-          <AppIcon name="download" size={16} color="currentColor" />
-        </button>
-      </div>
-      <h3 className="mt-[12px] uc-type-n5-strong text-[var(--uc-text)]">
-        {index + 1}. {step.title}
-      </h3>
-      <p className="mt-[4px] uc-type-n5 text-[var(--uc-text-muted)]">{step.description}</p>
-    </article>
+    <button
+      type="button"
+      onClick={handleDownload}
+      disabled={busy}
+      data-flow-download-mode="full"
+      data-flow-download-placement={placement}
+      className={`absolute ${placement === "container" ? "right-[16px] top-[16px]" : "right-[8px] top-[8px]"} z-20 grid size-[30px] place-items-center rounded-full border border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-md transition-[opacity,border-color,color] hover:border-[var(--uc-action)] hover:text-[var(--uc-action)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] disabled:cursor-not-allowed disabled:opacity-50 ${
+        showOnHover
+          ? "pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 focus:pointer-events-auto focus:opacity-100"
+          : ""
+      }`}
+      aria-label={`Download ${step.title} screen`}
+      title={`Download complete ${step.title} screen`}
+    >
+      <AppIcon name="download" size={16} color="currentColor" />
+    </button>
   );
 }
 
 function JourneyArrow() {
   return (
-    <div className="mt-[190px] flex h-[32px] w-[28px] items-center justify-center text-[var(--uc-action)]" aria-hidden="true">
+    <div className="mt-[190px] flex h-[32px] w-[28px] items-center justify-center text-[var(--uc-action)]" aria-hidden="true" data-testid="journey-arrow">
       <div className="h-[2px] w-[24px] bg-[var(--uc-action)]" />
       <div className="ml-[-7px] h-[10px] w-[10px] rotate-45 border-r-[2px] border-t-[2px] border-[var(--uc-action)]" />
     </div>
@@ -598,27 +749,21 @@ function SpecPanel({
   onScenarioSelect: (scenarioId: string) => void;
   onStepSelect: (index: number) => void;
 }) {
-  const spec = activeStep ? flow.screenSpecs[activeStep.screen] : undefined;
+  const analysis = flow.overview.businessAnalysis;
 
-  const handleCopy = () => {
-    downloadTextFile(`flow-${flow.id}-spec.txt`, buildSpecText(flow), "text/plain");
-  };
+  if (analysis) {
+    return (
+      <Panel title="Business analysis specification">
+        <BusinessAnalysisContent analysis={analysis} />
+      </Panel>
+    );
+  }
+
+  const spec = activeStep ? flow.screenSpecs[activeStep.screen] : undefined;
 
   return (
     <div className="grid gap-[24px]">
-      <Panel
-        title="Screen spec"
-        action={
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="inline-flex items-center gap-[6px] rounded-[20px] bg-[var(--uc-surface-muted)] px-[14px] py-[8px] uc-type-n5-strong text-[var(--uc-text)] hover:bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface-muted))]"
-          >
-            <AppIcon name="download" size={15} color="currentColor" />
-            Download .txt
-          </button>
-        }
-      >
+      <Panel title="Screen spec">
         <ScenarioChips scenarios={flow.scenarios} selectedScenarioId={scenario.id} onSelect={onScenarioSelect} />
         {scenario.steps.length > 0 ? (
           <div className="mt-[12px] flex flex-wrap gap-[8px]">
@@ -720,22 +865,24 @@ function ScreenSpecView({ step, spec }: { step: FlowStep; spec: FlowScreenSpec }
 
 function FlowLevelSpec({ flow }: { flow: FlowDefinition }) {
   const { overview } = flow;
+
   return (
     <Panel title="Flow specification">
-      <div className="grid gap-[18px]">
-        <SpecBlock title="Business rules">
-          <BulletList items={overview.businessRules} />
+      <p className="max-w-[860px] uc-type-n5 text-[var(--uc-text-muted)]">
+        A practical reference for review and implementation. Each rule describes the expected customer-facing outcome and
+        the data that must stay unchanged.
+      </p>
+      <div className="mt-[14px] grid gap-[12px]">
+        <SpecBlock title="Key decision rules" description="What must happen consistently across the supported Mobile PI markets.">
+          <BusinessRuleList items={overview.businessRules} />
         </SpecBlock>
-        <SpecBlock title="Preconditions">
+        <SpecBlock title="Preconditions" description="Data and ledger conditions that must be true before enrichment is shown.">
           <BulletList items={overview.preconditions} />
         </SpecBlock>
-        <SpecBlock title="Signing">
-          <p className="uc-type-n5 text-[var(--uc-text)]">{overview.signing}</p>
-        </SpecBlock>
-        <SpecBlock title="Success destinations">
+        <SpecBlock title="Expected result" description="Where customers see the completed experience.">
           <BulletList items={overview.successDestinations} />
         </SpecBlock>
-        <SpecBlock title="Analytics events">
+        <SpecBlock title="Analytics events" description="Events available for delivery and adoption monitoring.">
           <div className="flex flex-wrap gap-[8px]">
             {overview.analyticsEvents.map((event) => (
               <code key={event} className="rounded-[6px] bg-[var(--uc-surface-muted)] px-[8px] py-[4px] font-mono text-[12px] text-[var(--uc-text)]">
@@ -744,11 +891,11 @@ function FlowLevelSpec({ flow }: { flow: FlowDefinition }) {
             ))}
           </div>
         </SpecBlock>
-        <SpecBlock title="Open questions">
+        <SpecBlock title="Questions to close" description="Items that require a product or delivery decision before release.">
           <BulletList items={overview.openQuestions} />
         </SpecBlock>
         {overview.notes.map((note) => (
-          <SpecBlock key={note.title} title={note.title}>
+          <SpecBlock key={note.title} title={note.title} description="Additional implementation context.">
             <p className="whitespace-pre-line uc-type-n5 text-[var(--uc-text-muted)]">{note.body}</p>
           </SpecBlock>
         ))}
@@ -757,25 +904,173 @@ function FlowLevelSpec({ flow }: { flow: FlowDefinition }) {
   );
 }
 
-function SpecBlock({ title, children }: { title: string; children: ReactNode }) {
+function BusinessAnalysisContent({ analysis }: { analysis: FlowBusinessAnalysisSpec }) {
   return (
-    <div>
-      <h3 className="uc-type-n5-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">{title}</h3>
-      <div className="mt-[8px]">{children}</div>
+    <div data-testid="business-analysis-document" className="max-w-[1120px]">
+      <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] px-[14px] py-[12px]">
+        <p className="uc-type-n5-strong text-[var(--uc-text)]">Reading guide</p>
+        <p className="mt-[3px] uc-type-n5 text-[var(--uc-text-muted)]">
+          One review document for product, design and delivery. Shared rules appear once; booked, pending, account,
+          detail and fallback specifics sit in their relevant section. Credentials, service topology and live operational data are excluded.
+        </p>
+      </div>
+      <div className="mt-[14px] grid gap-[12px]">
+        <BusinessAnalysisSection number="01" title="General information" description="The shared business context for product, design and delivery review.">
+          <div className="grid overflow-hidden rounded-[8px] border border-[var(--uc-border)] sm:grid-cols-2">
+            {analysis.generalInformation.map((fact) => (
+              <div key={fact.label} className="border-b border-[var(--uc-border)] bg-[var(--uc-surface)] p-[12px] last:border-b-0 sm:[&:nth-last-child(-n+2)]:border-b-0 sm:[&:nth-odd]:border-r">
+                <p className="uc-type-n6-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">{fact.label}</p>
+                <p className="mt-[3px] uc-type-n5 text-[var(--uc-text)]">{fact.value}</p>
+              </div>
+            ))}
+          </div>
+        </BusinessAnalysisSection>
+        <BusinessAnalysisSection number="02" title="Version history" description="A compact document history aligned to the BA structure.">
+          <div className="overflow-x-auto rounded-[8px] border border-[var(--uc-border)]">
+          <table className="w-full min-w-[520px] border-collapse text-left">
+            <thead>
+              <tr className="bg-[var(--uc-surface-muted)]">
+                {['Version', 'Date', 'Detail'].map((heading) => (
+                  <th key={heading} className="border-b border-r border-[var(--uc-border)] px-[12px] py-[8px] text-left uc-type-n6-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)] last:border-r-0">{heading}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {analysis.versionHistory.map((entry) => (
+                <tr key={`${entry.version}-${entry.date}`}>
+                  <td className="border-b border-r border-[var(--uc-border)] px-[12px] py-[9px] uc-type-n5-strong text-[var(--uc-text)]">{entry.version}</td>
+                  <td className="border-b border-r border-[var(--uc-border)] px-[12px] py-[9px] uc-type-n5 text-[var(--uc-text)]">{entry.date}</td>
+                  <td className="border-b border-[var(--uc-border)] px-[12px] py-[9px] uc-type-n5 text-[var(--uc-text)]">{entry.detail}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          </div>
+        </BusinessAnalysisSection>
+        <BusinessAnalysisSection number="03" title="Version & change context" description="How this review artifact relates to the existing BA outline.">
+          <p className="uc-type-n5 text-[var(--uc-text)]">{analysis.versionContext}</p>
+        </BusinessAnalysisSection>
+        <BusinessAnalysisSection number="04" title="Open issues" description="Scope boundaries and decisions to close before a production release.">
+          <div className="grid gap-[8px]">
+            {analysis.openIssues.map((issue) => (
+              <article key={issue.reference} className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[12px]">
+                <div className="flex flex-wrap items-center gap-[8px]">
+                  <span className="rounded-[4px] bg-[var(--uc-surface-muted)] px-[7px] py-[3px] font-mono text-[11px] font-bold text-[var(--uc-text-muted)]">{issue.reference}</span>
+                  <span className="rounded-[4px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] px-[7px] py-[3px] uc-type-n6-strong text-[var(--uc-text-muted)]">{issue.status}</span>
+                  <h4 className="uc-type-n5-strong text-[var(--uc-text)]">{issue.title}</h4>
+                </div>
+                <p className="mt-[6px] uc-type-n5 text-[var(--uc-text)]">{issue.detail}</p>
+              </article>
+            ))}
+          </div>
+        </BusinessAnalysisSection>
+        <AnalysisSectionList number="05" title="Requirement" description="The customer and ledger outcomes that the flow must preserve." sections={analysis.requirements} />
+        <AnalysisSectionList number="06" title="Current status" description="What the existing Mobile PI experience already provides and what stays unchanged." sections={analysis.currentStatus} />
+        <AnalysisSectionList number="07" title="Proposed solution" description="One decision system, with the specific customer states grouped where a BA expects to find them." sections={analysis.proposedSolution} />
+        <AnalysisSectionList number="08" title="Non-functional requirements" description="Delivery guardrails that make the experience reliable, inclusive and safe to evolve." sections={analysis.nonFunctionalRequirements} />
+      </div>
     </div>
+  );
+}
+
+function AnalysisSectionList({ number, title, description, sections }: { number: string; title: string; description: string; sections: FlowBusinessAnalysisSpec['requirements'] }) {
+  return (
+    <BusinessAnalysisSection number={number} title={title} description={description}>
+      <div className="grid gap-[10px]">
+        {sections.map((section) => (
+          <section key={section.title} className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[12px]">
+            <h4 className="uc-type-n5-strong text-[var(--uc-text)]">{section.title}</h4>
+            {section.description ? <p className="mt-[3px] uc-type-n5 text-[var(--uc-text-muted)]">{section.description}</p> : null}
+            <div className="mt-[8px]"><BulletList items={section.items} /></div>
+          </section>
+        ))}
+      </div>
+    </BusinessAnalysisSection>
+  );
+}
+
+function BusinessAnalysisSection({
+  number,
+  title,
+  description,
+  children,
+}: {
+  number: string;
+  title: string;
+  description: string;
+  children: ReactNode;
+}) {
+  return (
+    <section data-ba-section={number} className="overflow-hidden rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface)]">
+      <header className="flex flex-wrap items-start gap-[10px] border-b border-[var(--uc-border)] bg-[var(--uc-surface-muted)] px-[14px] py-[12px]">
+        <span className="mt-[1px] rounded-[4px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[6px] py-[2px] font-mono text-[11px] font-bold text-[var(--uc-text-muted)]">{number}</span>
+        <div className="min-w-0 flex-1">
+          <h3 className="uc-type-n5-strong text-[var(--uc-text)]">{title}</h3>
+          <p className="mt-[2px] uc-type-n5 text-[var(--uc-text-muted)]">{description}</p>
+        </div>
+      </header>
+      <div className="p-[14px]">{children}</div>
+    </section>
+  );
+}
+
+function SpecBlock({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+  return (
+    <section className="rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[14px]">
+      <h3 className="uc-type-n5-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">{title}</h3>
+      {description ? <p className="mt-[3px] uc-type-n5 text-[var(--uc-text-muted)]">{description}</p> : null}
+      <div className="mt-[8px]">{children}</div>
+    </section>
   );
 }
 
 function BulletList({ items }: { items: readonly string[] }) {
   return (
-    <ul className="grid list-disc gap-[6px] pl-[18px]">
-      {items.map((item) => (
-        <li key={item} className="uc-type-n5 text-[var(--uc-text)]">
-          {item}
-        </li>
-      ))}
+    <ul className="grid gap-[8px]">
+      {items.map((item) => {
+        const { lead, detail } = splitLeadingSentence(item);
+        return (
+          <li key={item} className="flex gap-[8px] uc-type-n5 text-[var(--uc-text)]">
+            <span aria-hidden="true" className="mt-[8px] size-[5px] shrink-0 rounded-full bg-[var(--uc-text-muted)]" />
+            <span>
+              <strong className="font-bold">{lead}</strong>
+              {detail ? ` ${detail}` : null}
+            </span>
+          </li>
+        );
+      })}
     </ul>
   );
+}
+
+function BusinessRuleList({ items }: { items: readonly string[] }) {
+  return (
+    <ol className="grid gap-[8px]">
+      {items.map((item, index) => {
+        const { lead, detail } = splitLeadingSentence(item);
+        return (
+          <li key={item} className="grid gap-[8px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[10px] sm:grid-cols-[auto_1fr]">
+            <span className="h-fit w-fit rounded-full bg-[var(--uc-action-soft)] px-[8px] py-[3px] uc-type-n6-strong text-[var(--uc-action)]">
+              Rule {index + 1}
+            </span>
+            <p className="uc-type-n5 text-[var(--uc-text)]">
+              <strong className="font-bold">{lead}</strong>
+              {detail ? ` ${detail}` : null}
+            </p>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function splitLeadingSentence(value: string) {
+  const match = value.match(/^(.+?[.!?])(?:\s+|$)([\s\S]*)$/);
+  if (!match) {
+    return { lead: value, detail: "" };
+  }
+
+  return { lead: match[1], detail: match[2] };
 }
 
 function EmptyState({ message }: { message: string }) {
@@ -784,20 +1079,4 @@ function EmptyState({ message }: { message: string }) {
       {message}
     </div>
   );
-}
-
-function buildSpecText(flow: FlowDefinition): string {
-  const lines: string[] = [`${flow.title} — flow specification`, ""];
-  lines.push(`Purpose: ${flow.overview.purpose}`, "");
-  lines.push("Business rules:");
-  flow.overview.businessRules.forEach((rule) => lines.push(`  - ${rule}`));
-  lines.push("", "Scenarios:");
-  flow.scenarios.forEach((scenario) => {
-    lines.push(`  ${scenario.label} (${scenario.kind}) — ${scenario.description}`);
-    scenario.steps.forEach((step, index) => {
-      const spec = flow.screenSpecs[step.screen];
-      lines.push(`    ${index + 1}. ${step.title}${spec ? ` — ${spec.purpose}` : ""}`);
-    });
-  });
-  return lines.join("\n");
 }

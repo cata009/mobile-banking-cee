@@ -24,6 +24,7 @@ const NON_STANDARD_ICON_NAMES = new Set([
   "investment-disclaimer",
   // Non-square glyph — forcing it into the 20×20 standard box would letterbox it
   "redo-payment",
+  "request-chargeback",
   "investment-ex-ante",
   "trade-buy",
   "trade-sell",

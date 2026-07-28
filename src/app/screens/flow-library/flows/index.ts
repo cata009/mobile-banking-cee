@@ -1,4 +1,5 @@
 import { CARD_PIN_FLOW } from "./cardPin";
+import { ETHOCA_FLOW } from "./ethoca";
 import { ROUND_UP_FLOW } from "./roundUp";
 import type { FlowDefinition, FlowPreviewId, FlowScenario } from "./types";
 
@@ -6,10 +7,11 @@ import type { FlowDefinition, FlowPreviewId, FlowScenario } from "./types";
 export const FLOW_DEFINITIONS: Record<FlowPreviewId, FlowDefinition> = {
   "ro-round-up": ROUND_UP_FLOW,
   "ro-card-pin": CARD_PIN_FLOW,
+  "mobile-pi-ethoca": ETHOCA_FLOW,
 };
 
 /** Display order. Adding a flow = add a data module + one entry here. */
-export const FLOW_ORDER: readonly FlowPreviewId[] = ["ro-round-up", "ro-card-pin"];
+export const FLOW_ORDER: readonly FlowPreviewId[] = ["mobile-pi-ethoca", "ro-round-up", "ro-card-pin"];
 
 export function getFlowDefinition(id: FlowPreviewId): FlowDefinition {
   return FLOW_DEFINITIONS[id];

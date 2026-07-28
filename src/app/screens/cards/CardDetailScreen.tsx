@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { KeyboardEvent } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import { useDragCarousel } from "@/hooks/useDragCarousel";
 import AccountCarouselIndicator from "@/app/components/accounts/AccountCarouselIndicator";
@@ -14,7 +14,7 @@ import { getCountryConfig, formatMoneyNumber } from "@/app/registry/countryConfi
 import { maskFormattedAmount } from "@/app/utils/amountPrivacy";
 import { formatMaskedCardNumber } from "@/app/utils/cardNumber";
 import { useProducts } from "@/hooks/useProducts";
-import { getAccountTransactions, groupAccountTransactionsByMonth } from "@/data/accountDetails";
+import { getCardTransactions, groupAccountTransactionsByMonth } from "@/data/accountDetails";
 import type { AccountTransaction } from "@/data/accountDetails";
 import type { CreditCard, DebitCard, Product } from "@/data/products";
 import Card, { type CardVariant } from "@/app/components/cards/Card";
@@ -37,6 +37,12 @@ interface CardDetailScreenProps {
     ctaLabel: string;
   } | null;
   onAiOpportunityClick?: () => void;
+  /** Optional presentation-only overrides used by Flow Library specifications. */
+  transactionRowPresentation?: {
+    displayLabel?: (transaction: AccountTransaction) => string | undefined;
+    leadingVisual?: (transaction: AccountTransaction) => ReactNode | undefined;
+    transactionFilter?: (transaction: AccountTransaction) => boolean;
+  };
 }
 
 const CARD_WIDTH = 219;
@@ -134,6 +140,7 @@ export default function CardDetailScreen({
   onHelpClick,
   aiOpportunityNudge = null,
   onAiOpportunityClick,
+  transactionRowPresentation,
 }: CardDetailScreenProps) {
   const { country, amountsHidden } = useDemo();
   const { t } = useLanguage();
@@ -172,17 +179,31 @@ export default function CardDetailScreen({
 
   const activeCard = cardProducts[activeIndex] ?? cardProducts[0];
   const config = getCountryConfig(country);
+  const currentAccounts = useMemo(
+    () => categories.flatMap((category) => category.products).filter((product) => product.type === "current_account"),
+    [categories],
+  );
+  const firstDebitCard = cardProducts.find((card) => card.type === "debit_card");
+  const firstCurrentAccountId = currentAccounts[0]?.id;
+  const linkedAccountIndex = activeCard?.type === "debit_card"
+    ? Math.max(0, currentAccounts.findIndex((account) => account.id === activeCard.linkedAccountId))
+    : 0;
 
-  // Use transaction profile 0 for all cards (card transactions)
   const transactions = useMemo(
-    () => getAccountTransactions(country, 0, config.currency),
-    [config.currency, country],
+    () => activeCard ? getCardTransactions(country, activeCard, config.currency, linkedAccountIndex) : [],
+    [activeCard, config.currency, country, linkedAccountIndex],
   );
 
   const normalizedSearch = transactionSearch.trim().toLowerCase();
+  const scopedTransactions = useMemo(
+    () => transactionRowPresentation?.transactionFilter
+      ? transactions.filter(transactionRowPresentation.transactionFilter)
+      : transactions,
+    [transactionRowPresentation, transactions],
+  );
   const filteredTransactions = useMemo(() => {
-    if (!normalizedSearch) return transactions;
-    return transactions.filter((tx) => {
+    if (!normalizedSearch) return scopedTransactions;
+    return scopedTransactions.filter((tx) => {
       const formattedAmount = `${tx.amount < 0 ? "-" : "+"} ${formatMoneyNumber(Math.abs(tx.amount), country)} ${config.currency}`;
       return [tx.label, tx.details, tx.category, tx.status, tx.day, tx.month, tx.monthTitle, formattedAmount]
         .filter(Boolean)
@@ -190,12 +211,17 @@ export default function CardDetailScreen({
         .toLowerCase()
         .includes(normalizedSearch);
     });
-  }, [config.currency, country, normalizedSearch, transactions]);
+  }, [config.currency, country, normalizedSearch, scopedTransactions]);
 
   const transactionGroups = useMemo(
-    () => groupAccountTransactionsByMonth(filteredTransactions),
+    () => groupAccountTransactionsByMonth(filteredTransactions.filter((transaction) => transaction.status === "Booked")),
     [filteredTransactions],
   );
+  const pendingTransactions = activeCard?.type === "debit_card"
+    && activeCard.id === firstDebitCard?.id
+    && activeCard.linkedAccountId === firstCurrentAccountId
+    ? filteredTransactions.filter((transaction) => transaction.status === "Pending")
+    : [];
 
   const hasSearch = normalizedSearch.length > 0;
   const largeTitleOpacity = 1 - headerProgress * 0.9;
@@ -300,8 +326,9 @@ export default function CardDetailScreen({
   };
 
   useEffect(() => {
-    if (!carouselRef.current) return;
-    carouselRef.current.scrollTo({ left: getCardScrollLeft(activeIndex) });
+    const carousel = carouselRef.current;
+    if (!carousel || typeof carousel.scrollTo !== "function") return;
+    carousel.scrollTo({ left: getCardScrollLeft(activeIndex) });
   }, []);
 
   useEffect(() => {
@@ -500,6 +527,24 @@ export default function CardDetailScreen({
         </div>
 
         <div className="pt-[24px]">
+          {pendingTransactions.length > 0 ? (
+            <section data-pending-transactions data-pending-count={pendingTransactions.length} className="pb-[8px]">
+              <AccountTransactionMonthDivider title="Pending" currency={config.currency} />
+              <div className="pt-[16px]">
+                    {pendingTransactions.map((transaction) => (
+                      <AccountTransactionRow
+                        key={transaction.id}
+                        transaction={transaction}
+                    formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
+                        currency={config.currency}
+                        displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
+                        leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
+                        onClick={(selectedTransaction) => onTransactionClick?.(selectedTransaction, activeCard)}
+                  />
+                ))}
+              </div>
+            </section>
+          ) : null}
           {transactionGroups.length > 0 ? (
             transactionGroups.map((group, index) => (
               <div key={group.monthTitle} className={index > 0 ? "pt-[16px]" : undefined}>
@@ -509,13 +554,15 @@ export default function CardDetailScreen({
                   currency={config.currency}
                 />
                 <div className="pt-[16px]">
-                  {group.transactions.map((tx) => (
-                    <AccountTransactionRow
+                    {group.transactions.map((tx) => (
+                      <AccountTransactionRow
                       key={tx.id}
                       transaction={tx}
                       formattedAmount={formatMoneyNumber(Math.abs(tx.amount), country)}
-                      currency={config.currency}
-                      onClick={(selectedTx) => onTransactionClick?.(selectedTx, activeCard)}
+                        currency={config.currency}
+                        displayLabel={transactionRowPresentation?.displayLabel?.(tx)}
+                        leadingVisual={transactionRowPresentation?.leadingVisual?.(tx)}
+                        onClick={(selectedTx) => onTransactionClick?.(selectedTx, activeCard)}
                     />
                   ))}
                 </div>

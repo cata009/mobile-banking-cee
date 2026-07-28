@@ -2,7 +2,7 @@ import type { Country } from "@/app/state/demoTypes";
 import { normalizePfmCategory } from "@/data/pfmCategories";
 import type { PfmCategoryName } from "@/data/pfmCategories";
 import type { Currency } from "@/data/products";
-import type { Product } from "@/data/products";
+import type { CreditCard, DebitCard, Product } from "@/data/products";
 
 export interface AccountIdentity {
   accountName: string;
@@ -24,9 +24,11 @@ export interface AccountTransaction {
   pfmCategory: PfmCategoryName;
   pfmSubcategory: string;
   status: "Booked" | "Pending";
+  source?: "account" | "card";
 }
 
 export interface AccountTransactionMonthGroup {
+  monthKey: string;
   monthTitle: string;
   transactions: AccountTransaction[];
   monthlyTotal: number;
@@ -399,6 +401,7 @@ function makeTransaction(
   category: string,
   pfmSubcategory: string,
   status: "Booked" | "Pending" = "Booked",
+  source: AccountTransaction["source"] = "account",
 ): AccountTransaction {
   const amount = money(baseEurAmount, currency);
   const pfmCategory = normalizePfmCategory(category);
@@ -420,12 +423,14 @@ function makeTransaction(
     pfmCategory,
     pfmSubcategory,
     status,
+    source,
   };
 }
 
 const SAVINGS_TRANSFER_PROFILE_INDEX = 100;
 const CREDIT_PRODUCT_PROFILE_INDEX = 200;
 const MORTGAGE_PROFILE_INDEX = 201;
+const CREDIT_CARD_TRANSACTION_PROFILE_INDEX = 300;
 
 function createTransactionFactory(country: Country, currency: Currency, accountIndex: number) {
   let sequence = 1;
@@ -438,6 +443,7 @@ function createTransactionFactory(country: Country, currency: Currency, accountI
     category: string,
     pfmSubcategory: string,
     status: AccountTransaction["status"] = "Booked",
+    source: AccountTransaction["source"] = "account",
   ) =>
     makeTransaction(
       country,
@@ -451,6 +457,7 @@ function createTransactionFactory(country: Country, currency: Currency, accountI
       category,
       pfmSubcategory,
       status,
+      source,
     );
 }
 
@@ -465,17 +472,19 @@ function getPrimaryCurrentAccountTransactions(
   return [
     t(new Date(2026, 3, 29), profile.salaryPayer, "Salary April", 1250, "Income", "Salary"),
     t(new Date(2026, 3, 27), profile.home, "Standing order", -320, "Home", "Rent and housing"),
-    t(new Date(2026, 3, 24), profile.groceries, "Card payment", -86.4, "Groceries", "Supermarket"),
-    t(new Date(2026, 3, 22), profile.restaurant, "Card payment", -34.8, "Lifestyle", "Restaurants"),
+    t(new Date(2026, 3, 24), profile.groceries, "Card payment", -86.4, "Groceries", "Supermarket", "Booked", "card"),
+    t(new Date(2026, 3, 22), profile.restaurant, "Card payment", -34.8, "Lifestyle", "Restaurants", "Booked", "card"),
     t(new Date(2026, 3, 20), profile.utility, "Account payment", -72.3, "Utilities", "Utility bill"),
     t(new Date(2026, 3, 18), profile.person, "Incoming transfer", 120, "Transfers", "Incoming transfer"),
-    t(new Date(2026, 3, 16), profile.healthcare, "Card payment", -28.5, "Healthcare", "Medical care"),
+    t(new Date(2026, 3, 16), profile.healthcare, "Card payment", -28.5, "Healthcare", "Medical care", "Booked", "card"),
     t(new Date(2026, 3, 14), profile.insurance, "Direct debit", -39.2, "Insurance", "Insurance premium"),
     t(new Date(2026, 3, 12), profile.education, "Account payment", -58, "Education", "School fee"),
     t(new Date(2026, 3, 10), profile.childcare, "Account payment", -95, "Children", "Childcare"),
-    t(new Date(2026, 3, 8), profile.fuel, "Card payment", -51.2, "Transportation", "Fuel and transport"),
-    t(new Date(2026, 3, 6), profile.shopping, "Online card payment", -74.5, "Shopping", "Online purchase", "Pending"),
-    t(new Date(2026, 3, 4), profile.subscription, "Card payment", -12.99, "Leisure time", "Subscriptions"),
+    t(new Date(2026, 3, 8), profile.fuel, "Card payment", -51.2, "Transportation", "Fuel and transport", "Booked", "card"),
+    t(new Date(2026, 3, 7), profile.coffee, "Card payment", -8.9, "Lifestyle", "Coffee shop", "Pending", "card"),
+    t(new Date(2026, 3, 6), profile.shopping, "Online card payment", -74.5, "Shopping", "Online purchase", "Booked", "card"),
+    t(new Date(2026, 3, 5), profile.shopping, "Card payment", -29.5, "Shopping", "Pending card payment", "Pending", "card"),
+    t(new Date(2026, 3, 4), profile.subscription, "Card payment", -12.99, "Leisure time", "Subscriptions", "Booked", "card"),
     t(new Date(2026, 3, 2), profile.publicInstitution, "Account payment", -210, "Taxes and Penalties", "Taxes and fees"),
     t(new Date(2026, 3, 30), profile.atm, "Cash withdrawal", -60, "ATM", "Cash withdrawal"),
     t(new Date(2026, 3, 28), "Cash deposit", "Branch cash deposit", 75, "Wallet", "Cash deposit"),
@@ -485,9 +494,9 @@ function getPrimaryCurrentAccountTransactions(
     t(new Date(2026, 3, 19), profile.fxOffice, "Currency exchange", -8.2, "FX", "Currency exchange"),
     t(new Date(2026, 3, 17), "Transfer to savings", "Own account transfer", -220, "Internal", "Own account transfer"),
     t(new Date(2026, 3, 15), profile.charity, "Excluded from budget", -25, "Exclude from budget", "Excluded payment"),
-    t(new Date(2026, 3, 13), profile.uncategorized, "Card payment", -14.6, "Uncategorized", "Needs category"),
+    t(new Date(2026, 3, 13), profile.uncategorized, "Card payment", -14.6, "Uncategorized", "Needs category", "Booked", "card"),
     t(new Date(2025, 11, 18), profile.salaryPayer, "Year-end bonus", 840, "Income", "Salary"),
-    t(new Date(2025, 11, 12), profile.shopping, "Holiday shopping", -190.4, "Shopping", "Retail purchase"),
+    t(new Date(2025, 11, 12), profile.shopping, "Holiday shopping", -190.4, "Shopping", "Retail purchase", "Booked", "card"),
     t(new Date(2025, 10, 27), profile.home, "Standing order", -320, "Home", "Rent and housing"),
     t(new Date(2025, 10, 19), profile.utility, "Account payment", -68.2, "Utilities", "Utility bill"),
   ];
@@ -504,15 +513,15 @@ function getSecondaryCurrentAccountTransactions(
   return [
     t(new Date(2026, 3, 28), profile.freelancePayer, "Invoice payment", 640, "Income", "Freelance income"),
     t(new Date(2026, 3, 26), profile.secondaryPerson, "Shared rent transfer", 160, "Transfers", "Incoming transfer"),
-    t(new Date(2026, 3, 23), profile.publicTransport, "Monthly pass", -27.5, "Transportation", "Public transport"),
-    t(new Date(2026, 3, 21), profile.coffee, "Card payment", -9.8, "Lifestyle", "Coffee shop"),
-    t(new Date(2026, 3, 19), profile.groceries, "Card payment", -48.6, "Groceries", "Supermarket"),
+    t(new Date(2026, 3, 23), profile.publicTransport, "Monthly pass", -27.5, "Transportation", "Public transport", "Booked", "card"),
+    t(new Date(2026, 3, 21), profile.coffee, "Card payment", -9.8, "Lifestyle", "Coffee shop", "Booked", "card"),
+    t(new Date(2026, 3, 19), profile.groceries, "Card payment", -48.6, "Groceries", "Supermarket", "Booked", "card"),
     t(new Date(2026, 3, 17), profile.utility, "Direct debit", -54.4, "Utilities", "Utility bill"),
-    t(new Date(2026, 3, 15), profile.shopping, "Card payment", -39.9, "Shopping", "Retail purchase"),
-    t(new Date(2026, 3, 13), profile.healthcare, "Card payment", -18.4, "Healthcare", "Pharmacy"),
+    t(new Date(2026, 3, 15), profile.shopping, "Card payment", -39.9, "Shopping", "Retail purchase", "Booked", "card"),
+    t(new Date(2026, 3, 13), profile.healthcare, "Card payment", -18.4, "Healthcare", "Pharmacy", "Booked", "card"),
     t(new Date(2026, 3, 11), profile.insurance, "Account payment", -22.6, "Insurance", "Policy payment"),
     t(new Date(2026, 3, 9), profile.publicInstitution, "Account payment", -76, "Taxes and Penalties", "Local tax"),
-    t(new Date(2026, 3, 7), profile.wallet, "Card-linked wallet", -30, "Wallet", "Wallet payment"),
+    t(new Date(2026, 3, 7), profile.wallet, "Card-linked wallet", -30, "Wallet", "Wallet payment", "Booked", "card"),
     t(new Date(2026, 3, 5), profile.investments, "Recurring investment", -80, "Investments", "Investment plan"),
     t(new Date(2026, 2, 29), profile.childcare, "Account payment", -64, "Children", "Child expenses"),
     t(new Date(2026, 2, 25), profile.education, "Course fee", -42, "Education", "Courses"),
@@ -521,11 +530,11 @@ function getSecondaryCurrentAccountTransactions(
     t(new Date(2026, 2, 12), profile.fxOffice, "POS currency conversion", -5.8, "FX", "Currency exchange"),
     t(new Date(2026, 2, 8), "Transfer to Emergency Fund", "Own account transfer", -140, "Internal", "Own account transfer"),
     t(new Date(2026, 1, 27), profile.atm, "Cash withdrawal", -40, "ATM", "Cash withdrawal"),
-    t(new Date(2026, 1, 20), profile.uncategorized, "Card payment", -11.4, "Uncategorized", "Needs category"),
+    t(new Date(2026, 1, 20), profile.uncategorized, "Card payment", -11.4, "Uncategorized", "Needs category", "Booked", "card"),
     t(new Date(2025, 11, 22), profile.freelancePayer, "Freelance payout", 420, "Income", "Freelance income"),
-    t(new Date(2025, 11, 8), profile.healthcare, "Card payment", -96.5, "Healthcare", "Medical care"),
+    t(new Date(2025, 11, 8), profile.healthcare, "Card payment", -96.5, "Healthcare", "Medical care", "Booked", "card"),
     t(new Date(2025, 10, 23), profile.publicTransport, "Transport pass", -48.3, "Transportation", "Public transport"),
-    t(new Date(2025, 10, 11), profile.groceries, "Card payment", -72.8, "Groceries", "Supermarket"),
+    t(new Date(2025, 10, 11), profile.groceries, "Card payment", -72.8, "Groceries", "Supermarket", "Booked", "card"),
   ];
 }
 
@@ -563,6 +572,23 @@ function getCreditProductTransactions(
     t(new Date(2026, 2, 22), "Interest charge", interestDetails, -44.1, "Finance", "Interest"),
     t(new Date(2026, 1, 22), "Monthly repayment", "Account payment", -260, "Finance", repaymentLabel),
     t(new Date(2025, 11, 22), "Monthly repayment", "Account payment", -260, "Finance", repaymentLabel),
+  ];
+}
+
+function getCreditCardTransactions(
+  country: Country,
+  currency: Currency,
+  profile: CountryTransactionProfile,
+): AccountTransaction[] {
+  const t = createTransactionFactory(country, currency, CREDIT_CARD_TRANSACTION_PROFILE_INDEX);
+
+  return [
+    t(new Date(2026, 3, 29), profile.shopping, "Card payment", -120, "Shopping", "Retail purchase", "Booked", "card"),
+    t(new Date(2026, 3, 27), profile.home, "Card payment", -320, "Home", "Rent and housing", "Booked", "card"),
+    t(new Date(2026, 3, 22), profile.restaurant, "Card payment", -46, "Lifestyle", "Restaurants", "Booked", "card"),
+    t(new Date(2026, 3, 16), profile.fuel, "Card payment", -54, "Transportation", "Fuel and transport", "Booked", "card"),
+    t(new Date(2026, 2, 28), profile.subscription, "Card payment", -12.99, "Leisure time", "Subscriptions", "Booked", "card"),
+    t(new Date(2026, 2, 18), profile.groceries, "Card payment", -72, "Groceries", "Supermarket", "Booked", "card"),
   ];
 }
 
@@ -614,6 +640,20 @@ export function getAccountTransactions(
   return getPrimaryCurrentAccountTransactions(country, currency, accountIndex, profile);
 }
 
+export function getCardTransactions(
+  country: Country,
+  card: DebitCard | CreditCard,
+  currency: Currency,
+  linkedAccountIndex = 0,
+): AccountTransaction[] {
+  if (card.type === "debit_card") {
+    return getAccountTransactions(country, linkedAccountIndex, currency)
+      .filter((transaction) => transaction.source === "card");
+  }
+
+  return getCreditCardTransactions(country, currency, COUNTRY_TRANSACTION_PROFILES[country]);
+}
+
 export function groupAccountTransactionsByMonth(
   transactions: AccountTransaction[],
 ): AccountTransactionMonthGroup[] {
@@ -628,6 +668,7 @@ export function groupAccountTransactionsByMonth(
     }
 
     groups.set(transaction.monthKey, {
+      monthKey: transaction.monthKey,
       monthTitle: transaction.monthTitle,
       transactions: [transaction],
       monthlyTotal: transaction.amount,

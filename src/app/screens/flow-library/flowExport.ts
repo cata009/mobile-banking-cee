@@ -15,6 +15,7 @@
  */
 
 import { createPhoneScreenshotBlob } from "@/app/utils/phoneScreenshot";
+import type { FlowBusinessAnalysisSpec } from "./flows/types";
 
 export interface ExportFieldSpec {
   name: string;
@@ -53,6 +54,7 @@ export interface CapturedFlowStep extends FlowExportStep {
 /** Flow-level structured spec rendered as front-matter tables. */
 export interface ExportOverview {
   purpose?: string;
+  businessAnalysis?: FlowBusinessAnalysisSpec;
   entryPoints?: readonly { label: string; intent: string }[];
   preconditions?: readonly string[];
   businessRules?: readonly string[];
@@ -176,8 +178,32 @@ function stepSpecHtml(spec: ExportStepSpec | undefined): string {
   return parts.length ? `<div class="step-spec">${parts.join("")}</div>` : "";
 }
 
+function businessAnalysisHtml(analysis: FlowBusinessAnalysisSpec): string {
+  const sections = [
+    `<h3>General information</h3>${keyValueTable(analysis.generalInformation)}`,
+    `<h3>Version history</h3>${keyValueTable(analysis.versionHistory.map((entry) => ({ label: `${entry.version} · ${entry.date}`, value: entry.detail })) )}`,
+    `<h3>Version &amp; change context</h3><p>${escapeHtml(analysis.versionContext)}</p>`,
+    `<h3>Open issues</h3>${bulletList(analysis.openIssues.map((issue) => `${issue.reference} [${issue.status}] ${issue.title}. ${issue.detail}`))}`,
+    analysisSectionsHtml("Requirement", analysis.requirements),
+    analysisSectionsHtml("Current status", analysis.currentStatus),
+    analysisSectionsHtml("Proposed solution", analysis.proposedSolution),
+    analysisSectionsHtml("Non-functional requirements", analysis.nonFunctionalRequirements),
+  ];
+  return `<section class="step"><h2>Business analysis specification</h2>${sections.join("")}</section>`;
+}
+
+function analysisSectionsHtml(title: string, sections: FlowBusinessAnalysisSpec['requirements']): string {
+  return `<h3>${escapeHtml(title)}</h3>${sections
+    .map(
+      (section) =>
+        `<h4>${escapeHtml(section.title)}</h4>${section.description ? `<p>${escapeHtml(section.description)}</p>` : ""}${bulletList(section.items)}`,
+    )
+    .join("")}`;
+}
+
 function overviewHtml(overview: ExportOverview | undefined): string {
   if (!overview) return "";
+  if (overview.businessAnalysis) return businessAnalysisHtml(overview.businessAnalysis);
   const sections: string[] = [];
   if (overview.purpose) sections.push(`<h3>Purpose</h3><p>${escapeHtml(overview.purpose)}</p>`);
   if (overview.entryPoints?.length) {

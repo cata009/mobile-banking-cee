@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { AccountTransaction } from "@/data/accountDetails";
 import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
 
@@ -6,6 +7,10 @@ interface AccountTransactionRowProps {
   formattedAmount: string;
   currency: string;
   showDate?: boolean;
+  /** Optional merchant visual for card-enrichment surfaces; default remains the PFM category icon. */
+  leadingVisual?: ReactNode;
+  /** Optional clean merchant name; the ledger label remains untouched in the data source. */
+  displayLabel?: string;
   onClick?: (transaction: AccountTransaction) => void;
   onCategoryClick?: (transaction: AccountTransaction) => void;
 }
@@ -36,10 +41,15 @@ export default function AccountTransactionRow({
   formattedAmount,
   currency,
   showDate = true,
+  leadingVisual,
+  displayLabel,
   onClick,
   onCategoryClick,
 }: AccountTransactionRowProps) {
-  const amountColor = transaction.type === "credit" ? "var(--uc-action)" : "var(--uc-text)";
+  const isPending = transaction.status === "Pending";
+  const amountColor = isPending
+    ? "var(--uc-text-muted)"
+    : transaction.type === "credit" ? "var(--uc-action)" : "var(--uc-text)";
   const sign = transaction.amount < 0 ? "- " : "+ ";
   const amountParts = splitAmount(formattedAmount);
 
@@ -55,8 +65,8 @@ export default function AccountTransactionRow({
   ) : null;
   const details = (
     <div className="flex w-[247px] shrink-0 flex-col items-end gap-[4px]">
-        <p className="uc-type-n4 text-right leading-[18px] text-[var(--uc-text)]">
-          {transaction.label}
+        <p className={`uc-type-n4 text-right leading-[18px] ${isPending ? "text-[var(--uc-text-muted)]" : "text-[var(--uc-text)]"}`}>
+          {displayLabel ?? transaction.label}
         </p>
         <p
           className="uc-type-n2-strong text-right leading-[22px]"
@@ -66,25 +76,33 @@ export default function AccountTransactionRow({
           <span className="tracking-[0.3px]">{amountParts.separator}</span>
           <span className="uc-type-n5 uppercase">{amountParts.decimals} {currency}</span>
         </p>
+        {isPending ? (
+          <span className="flex items-center gap-[7px] uc-type-n5-strong uppercase text-[var(--uc-text-muted)]" data-pending-status>
+            <span className="size-[8px] rounded-full bg-[var(--uc-orange-status)]" aria-hidden="true" />
+            Pending
+          </span>
+        ) : null}
     </div>
   );
 
   if (onCategoryClick) {
     return (
       <div
-        className="flex h-[80px] w-[375px] items-center justify-between bg-transparent px-[16px] py-[20px] text-left"
+        className={`flex w-[375px] items-center justify-between bg-transparent px-[16px] py-[20px] text-left ${isPending ? "h-[92px]" : "h-[80px]"}`}
         data-ds-label="AccountTransactionRow 375x80"
       >
         <div className="flex shrink-0 items-center gap-[16px]">
           {date}
-          <button
-            type="button"
-            aria-label={`Change category for ${transaction.label}`}
-            className="grid size-[32px] place-items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
-            onClick={() => onCategoryClick(transaction)}
-          >
-            <TransactionIcon transaction={transaction} />
-          </button>
+          {!isPending || leadingVisual ? (
+            <button
+              type="button"
+              aria-label={`Change category for ${transaction.label}`}
+              className="grid size-[32px] place-items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
+              onClick={() => onCategoryClick(transaction)}
+            >
+              {leadingVisual ?? <TransactionIcon transaction={transaction} />}
+            </button>
+          ) : null}
         </div>
         <button
           type="button"
@@ -102,12 +120,13 @@ export default function AccountTransactionRow({
     <button
       type="button"
       onClick={() => onClick?.(transaction)}
-      className="flex h-[80px] w-[375px] items-center justify-between bg-transparent px-[16px] py-[20px] text-left"
+      className={`flex w-[375px] items-center justify-between bg-transparent px-[16px] py-[20px] text-left ${isPending ? "h-[92px]" : "h-[80px]"}`}
+      data-pending-transaction-row={isPending ? "true" : undefined}
       data-ds-label="AccountTransactionRow 375x80"
     >
       <div className="flex shrink-0 items-center gap-[16px]">
         {date}
-        <TransactionIcon transaction={transaction} />
+          {!isPending || leadingVisual ? (leadingVisual ?? <TransactionIcon transaction={transaction} />) : null}
       </div>
       {details}
     </button>

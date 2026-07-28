@@ -4,10 +4,12 @@ import type { ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import AccountActionBar, { type AccountActionBarItem } from "@/app/components/accounts/AccountActionBar";
+import CardNavigationRow from "@/app/components/cards/CardNavigationRow";
 import { AppIcon } from "@/app/components/icons";
 import AmountField from "@/app/components/AmountField";
 import ToggleButton from "@/app/components/ToggleButton";
 import { useLanguage } from "@/app/contexts/LanguageContext";
+import { useProducts } from "@/hooks/useProducts";
 import PageHeader from "@/app/components/PageHeader";
 import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
 import PfmCategoryChangeSheet from "@/app/components/pfm/PfmCategoryChangeSheet";
@@ -17,7 +19,7 @@ import StandardSignScreen from "@/app/components/flow/StandardSignScreen";
 import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
 import type { AccountTransaction } from "@/data/accountDetails";
 import { getPfmCategorySelection, type PfmCategorySelection } from "@/data/pfmCategories";
-import type { Product } from "@/data/products";
+import type { CreditCard, DebitCard, Product } from "@/data/products";
 import {
   createTransactionDetailData,
   formatDraftAmount,
@@ -73,6 +75,69 @@ function formatAmountInput(value: string) {
   return value.replace(/\s/g, "");
 }
 
+export interface CardTransactionMerchantEnrichment {
+  cleanMerchantName: string;
+  /** A trusted merchant-logo node supplied by the caller; absent means no logo is rendered. */
+  merchantLogo?: ReactNode;
+  location?: {
+    label: string;
+    address: string;
+  };
+  mcc?: string;
+}
+
+function MerchantLocationDetail({ location }: { location: NonNullable<CardTransactionMerchantEnrichment["location"]> }) {
+  return (
+    <section
+      className="mb-[8px] w-full overflow-hidden rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] text-left"
+      aria-label={`${location.label}: ${location.address}`}
+    >
+      <div
+        className="relative h-[118px] overflow-hidden bg-[#e7ebe5]"
+        data-testid="merchant-location-static-map"
+        role="img"
+        aria-label={`Map showing ${location.address}`}
+      >
+        <svg className="h-full w-full" viewBox="0 0 340 118" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <rect width="340" height="118" fill="#E8ECE6" />
+          <path d="M-12 104C38 81 70 72 114 77C160 82 189 102 229 94C269 86 292 60 356 54V132H-12Z" fill="#DDE7D8" />
+          <path d="M257 -8C250 20 257 42 276 61C291 76 298 97 306 126" fill="none" stroke="#ACD3E6" strokeWidth="12" />
+          <path d="M257 -8C250 20 257 42 276 61C291 76 298 97 306 126" fill="none" stroke="#D4EEF8" strokeWidth="5" />
+          <path d="M-18 26C40 29 67 46 105 57C156 72 204 67 249 37C282 15 314 12 358 19" fill="none" stroke="#FFFDF8" strokeWidth="20" />
+          <path d="M-18 26C40 29 67 46 105 57C156 72 204 67 249 37C282 15 314 12 358 19" fill="none" stroke="#D4D4CE" strokeWidth="2" />
+          <path d="M11 129C32 92 64 80 102 64C151 44 182 19 208 -12" fill="none" stroke="#FFFDF8" strokeWidth="15" />
+          <path d="M11 129C32 92 64 80 102 64C151 44 182 19 208 -12" fill="none" stroke="#D4D4CE" strokeWidth="2" />
+          <path d="M66 -6C78 29 91 49 125 75C149 93 178 104 221 122" fill="none" stroke="#FFFDF8" strokeWidth="10" />
+          <path d="M66 -6C78 29 91 49 125 75C149 93 178 104 221 122" fill="none" stroke="#D4D4CE" strokeWidth="1.5" />
+          <g fill="#D4D1C7">
+            <rect x="22" y="41" width="25" height="13" rx="2" transform="rotate(12 22 41)" />
+            <rect x="47" y="62" width="23" height="12" rx="2" transform="rotate(12 47 62)" />
+            <rect x="108" y="24" width="25" height="14" rx="2" transform="rotate(-18 108 24)" />
+            <rect x="138" y="39" width="20" height="12" rx="2" transform="rotate(-18 138 39)" />
+            <rect x="175" y="73" width="23" height="13" rx="2" transform="rotate(8 175 73)" />
+            <rect x="206" y="76" width="27" height="15" rx="2" transform="rotate(8 206 76)" />
+            <rect x="287" y="35" width="23" height="13" rx="2" transform="rotate(16 287 35)" />
+            <rect x="313" y="47" width="20" height="12" rx="2" transform="rotate(16 313 47)" />
+          </g>
+        </svg>
+      </div>
+      <div className="flex items-center gap-[10px] px-[12px] py-[11px]">
+        <span data-testid="merchant-location-pin" data-icon-color="standard">
+          <AppIcon name="contact-location" size={20} color="var(--uc-text)" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="uc-type-n5-strong uppercase text-[var(--uc-text-muted)]">{location.label}</p>
+          <p className="mt-[2px] truncate uc-type-n5 text-[var(--uc-text)]">{location.address}</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function isPhysicalCard(product?: Product | null): product is DebitCard | CreditCard {
+  return product?.type === "debit_card" || product?.type === "credit_card";
+}
+
 export function TransactionDetailScreen({
   country,
   product,
@@ -80,6 +145,7 @@ export function TransactionDetailScreen({
   onBack,
   onRedoPayment,
   onCategoryChange,
+  merchantEnrichment,
 }: {
   country: CountryId;
   product?: Product | null;
@@ -87,8 +153,11 @@ export function TransactionDetailScreen({
   onBack: () => void;
   onRedoPayment: () => void;
   onCategoryChange?: (transaction: AccountTransaction, selection: PfmCategorySelection) => void;
+  /** Optional ETHOCA-style enrichment; omitted in the current baseline runtime. */
+  merchantEnrichment?: CardTransactionMerchantEnrichment;
 }) {
   const { t } = useLanguage();
+  const { categories } = useProducts();
   const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(48);
   const [areDetailsExpanded, setAreDetailsExpanded] = useState(false);
   const [categorySheetOpen, setCategorySheetOpen] = useState(false);
@@ -99,15 +168,28 @@ export function TransactionDetailScreen({
     [country, product, transaction],
   );
   const currencyLabel = detail.amount.split(" ").slice(-1)[0];
-  const transactionActionItems: AccountActionBarItem[] = [
+  const isPending = transaction.status === "Pending";
+  const cardUsed = isPhysicalCard(product)
+    ? product
+    : product?.type === "current_account" && transaction.source === "card"
+      ? categories
+          .flatMap((category) => category.products)
+          .find((candidate): candidate is DebitCard => candidate.type === "debit_card" && candidate.linkedAccountId === product.id) ?? null
+      : null;
+  const isCardTransaction = cardUsed !== null;
+  const transactionActionItems: AccountActionBarItem[] = isPending ? [] : [
     {
       id: "change-category",
       iconName: "grid-2x2",
       label: t("runtime.transactionDetail.actions.changeCategory", "Change\ncategory"),
       onClick: onCategoryChange ? () => setCategorySheetOpen(true) : undefined,
     },
-    { id: "standing-order", iconName: "standing-order", label: t("runtime.transactionDetail.actions.createStandingOrder", "Create\nStanding order") },
-    { id: "redo-payment", iconName: "redo-payment", label: t("runtime.transactionDetail.actions.redoPayment", "Redo\npayment"), onClick: onRedoPayment },
+    isCardTransaction
+      ? { id: "standing-order-slot", iconName: "standing-order", label: "Create\nStanding order", hidden: true }
+      : { id: "standing-order", iconName: "standing-order", label: t("runtime.transactionDetail.actions.createStandingOrder", "Create\nStanding order") },
+    isCardTransaction
+      ? { id: "request-chargeback", iconName: "request-chargeback", label: "Request\nchargeback" }
+      : { id: "redo-payment", iconName: "redo-payment", label: t("runtime.transactionDetail.actions.redoPayment", "Redo\npayment"), onClick: onRedoPayment },
     { id: "send-payment", iconName: "send-payment", label: t("runtime.transactionDetail.actions.sendPayment", "Send\npayment") },
   ];
 
@@ -115,7 +197,7 @@ export function TransactionDetailScreen({
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">
       <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide" onScroll={handlePageScroll}>
         <PageHeader
-          title={detail.title}
+          title={merchantEnrichment?.cleanMerchantName ?? detail.title}
           onBack={onBack}
           variant="gray"
           largeTitleAlign="center"
@@ -126,37 +208,50 @@ export function TransactionDetailScreen({
 
         <div className="bg-[var(--uc-app-bg)] pb-[8px]">
           <section className="px-[24px] pt-[8px] text-center" style={{ opacity: 1 - headerProgress }}>
+            {merchantEnrichment?.merchantLogo ? (
+              <div className="mx-auto mb-[10px] flex w-fit items-center justify-center">{merchantEnrichment.merchantLogo}</div>
+            ) : null}
             <p className="uc-type-n5-strong mt-[8px] text-[var(--uc-text-muted)]">
               {detail.bookingDate}
             </p>
             <p className="mt-[8px] font-['UniCredit',sans-serif] text-[22px] font-bold leading-normal text-[var(--uc-text)]">
               {detail.amount}
             </p>
-            <p className="mt-[18px] font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text-muted)]">
-              {detail.pfmCategoryLabel.toUpperCase()}
-            </p>
-            <div
-              className="mt-[8px] inline-flex items-center justify-center gap-[8px] rounded-full border px-[16px] py-[4px]"
-              style={{
-                borderColor: `var(${detail.pfmCategoryColorVar})`,
-                color: `var(${detail.pfmCategoryColorVar})`,
-              }}
-              data-transaction-pfm-category={detail.pfmCategory}
-              data-transaction-pfm-subcategory={detail.pfmSubcategoryLabel}
-            >
-              <PfmCategoryIcon category={detail.pfmCategory} size={20} />
-              <span className="text-[12px] font-bold leading-normal">
-                {detail.pfmSubcategoryLabel.toUpperCase()}
-              </span>
-            </div>
+            {isPending ? (
+              <p className="mt-[18px] inline-flex items-center gap-[7px] uc-type-n5-strong uppercase text-[var(--uc-text-muted)]" data-pending-status>
+                <span className="size-[8px] rounded-full bg-[var(--uc-orange-status)]" aria-hidden="true" />
+                Pending
+              </p>
+            ) : (
+              <>
+                <p className="mt-[18px] font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text-muted)]">
+                  {detail.pfmCategoryLabel.toUpperCase()}
+                </p>
+                <div
+                  className="mt-[8px] inline-flex items-center justify-center gap-[8px] rounded-full border px-[16px] py-[4px]"
+                  style={{
+                    borderColor: `var(${detail.pfmCategoryColorVar})`,
+                    color: `var(${detail.pfmCategoryColorVar})`,
+                  }}
+                  data-testid="transaction-pfm-summary"
+                  data-transaction-pfm-category={detail.pfmCategory}
+                  data-transaction-pfm-subcategory={detail.pfmSubcategoryLabel}
+                >
+                  <PfmCategoryIcon category={detail.pfmCategory} size={20} />
+                  <span className="text-[12px] font-bold leading-normal">
+                    {detail.pfmSubcategoryLabel.toUpperCase()}
+                  </span>
+                </div>
+              </>
+            )}
           </section>
 
-          <section className="mt-[31px]">
+          {!isPending ? <section className="mt-[31px]">
             <AccountActionBar items={transactionActionItems} />
-          </section>
+          </section> : null}
         </div>
 
-        <section className="px-[22px] pt-[23px]">
+        {!isPending ? <section className="px-[22px] pt-[23px]">
           <h2 className="font-['UniCredit',sans-serif] text-[22px] font-bold leading-normal text-[var(--uc-text)]">
             {t("runtime.transactionDetail.spendingInsight", "Spending Insight")}
           </h2>
@@ -193,36 +288,71 @@ export function TransactionDetailScreen({
               ))}
             </div>
           </div>
-        </section>
+        </section> : null}
 
         <section className="px-[24px] pt-[30px]">
           <h2 className="font-['UniCredit',sans-serif] text-[22px] font-bold leading-normal text-[var(--uc-text)]">
             {t("runtime.transactionDetail.title", "Transaction details")}
           </h2>
           <div className="pt-[20px]">
-            <DetailRow label={t("runtime.accounts.detailsInfo.accountNumber", "Account number")} value={detail.accountNumber} copy />
-            <DetailRow label={t("runtime.accounts.detailsInfo.accountTitle", "Account title")} value={detail.accountTitle} />
-            <DetailRow label={t("runtime.transactionDetail.accountOwner", "Account owner")} value={detail.accountOwner} />
-            <AnimatePresence initial={false}>
-              {areDetailsExpanded ? (
-                <motion.div
-                  key="extra-transaction-details"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                  style={{ overflow: "hidden" }}
-                >
-                  <DetailRow label={t("runtime.transactionDetail.bookingDate", "Booking date")} value={detail.bookingDate} />
-                  <DetailRow label={t("runtime.transactionDetail.beneficiaryName", "Beneficiary Name")} value={detail.beneficiaryName} />
-                  <DetailRow label={t("runtime.transactionDetail.beneficiaryBankName", "Beneficiary Bank Name")} value={detail.beneficiaryBankName} />
-                  <DetailRow label={t("runtime.transactionDetail.beneficiaryAccountNumber", "Beneficiary account number")} value={detail.beneficiaryAccountNumber} copy />
-                  <DetailRow label={t("runtime.transactionDetail.amount", "Amount")} value={detail.amount} />
-                  <DetailRow label={t("runtime.payments.domesticFlow.paymentDetails", "Payment details")} value={detail.paymentDetails} />
-                  <DetailRow label={t("runtime.transactionDetail.referenceNumber", "Reference number")} value={detail.referenceNumber} />
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
+            {isCardTransaction ? (
+              <>
+                {merchantEnrichment?.location ? <MerchantLocationDetail location={merchantEnrichment.location} /> : null}
+                <DetailRow
+                  label={t("runtime.cardTransactionDetail.description", "Transaction description")}
+                  value={merchantEnrichment?.cleanMerchantName ?? transaction.label}
+                />
+                <DetailRow label={t("runtime.transactionDetail.amount", "Amount")} value={detail.amount} />
+                <DetailRow
+                  label={t("runtime.cardTransactionDetail.postingDate", "Posting date")}
+                  value={detail.bookingDate}
+                />
+                <AnimatePresence initial={false}>
+                  {areDetailsExpanded ? (
+                    <motion.div
+                      key="card-transaction-date"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <DetailRow
+                        label={t("runtime.cardTransactionDetail.transactionDate", "Transaction date")}
+                        value={detail.bookingDate}
+                      />
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+                {merchantEnrichment?.mcc ? <DetailRow label="Merchant Category Code (MCC)" value={merchantEnrichment.mcc} /> : null}
+              </>
+            ) : (
+              <>
+                <DetailRow label={t("runtime.accounts.detailsInfo.accountNumber", "Account number")} value={detail.accountNumber} copy />
+                <DetailRow label={t("runtime.accounts.detailsInfo.accountTitle", "Account title")} value={detail.accountTitle} />
+                <DetailRow label={t("runtime.transactionDetail.accountOwner", "Account owner")} value={detail.accountOwner} />
+                <AnimatePresence initial={false}>
+                  {areDetailsExpanded ? (
+                    <motion.div
+                      key="extra-transaction-details"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <DetailRow label={t("runtime.transactionDetail.bookingDate", "Booking date")} value={detail.bookingDate} />
+                      <DetailRow label={t("runtime.transactionDetail.beneficiaryName", "Beneficiary Name")} value={detail.beneficiaryName} />
+                      <DetailRow label={t("runtime.transactionDetail.beneficiaryBankName", "Beneficiary Bank Name")} value={detail.beneficiaryBankName} />
+                      <DetailRow label={t("runtime.transactionDetail.beneficiaryAccountNumber", "Beneficiary account number")} value={detail.beneficiaryAccountNumber} copy />
+                      <DetailRow label={t("runtime.transactionDetail.amount", "Amount")} value={detail.amount} />
+                      <DetailRow label={t("runtime.payments.domesticFlow.paymentDetails", "Payment details")} value={detail.paymentDetails} />
+                      <DetailRow label={t("runtime.transactionDetail.referenceNumber", "Reference number")} value={detail.referenceNumber} />
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+              </>
+            )}
           </div>
           <button
             type="button"
@@ -234,6 +364,12 @@ export function TransactionDetailScreen({
               ? t("runtime.actions.showLess", "Show less")
               : t("runtime.actions.showMore", "Show more")}
           </button>
+          {cardUsed ? (
+            <section className="pt-[14px]" data-card-used>
+              <SectionHeadingDivider title={t("runtime.cardTransactionDetail.cardUsed", "Card used")} />
+              <CardNavigationRow card={cardUsed} />
+            </section>
+          ) : null}
         </section>
       </div>
       {categorySheetOpen ? (

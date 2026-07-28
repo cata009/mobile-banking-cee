@@ -47,6 +47,39 @@ afterEach(() => {
 })
 
 describe('PFM transaction recategorization entry points', () => {
+  it('shows a completed-month report for current accounts but never for saving accounts', () => {
+    const current = render(
+      <AccountDetailScreen
+        selectedProductId="acc-1"
+        onBack={() => undefined}
+        onDetailsClick={() => undefined}
+        onOptionsClick={() => undefined}
+      />,
+      { wrapper: Providers },
+    )
+
+    expect(current.container.querySelectorAll('[data-monthly-account-report]')).not.toHaveLength(0)
+    const decemberReport = current.container.querySelector<HTMLElement>('[data-monthly-account-report="2025-12"]')
+    expect(decemberReport).toHaveTextContent('Monthly report')
+    expect(decemberReport).toHaveTextContent(/4\.399,84\s*RON/)
+    expect(decemberReport).not.toHaveClass('border-b')
+    expect(decemberReport?.querySelector('[data-monthly-cash-flow-chart]')).toHaveClass('mx-auto')
+    expect(decemberReport?.querySelector('[data-cash-flow-total="inflow"]')).toHaveTextContent('4.399,84 RON')
+    current.unmount()
+
+    const saving = render(
+      <AccountDetailScreen
+        selectedProductId="sav-1"
+        onBack={() => undefined}
+        onDetailsClick={() => undefined}
+        onOptionsClick={() => undefined}
+      />,
+      { wrapper: Providers },
+    )
+
+    expect(saving.container.querySelectorAll('[data-monthly-account-report]')).toHaveLength(0)
+  })
+
   it('opens the category sheet from a list icon without invoking transaction navigation', () => {
     const onTransactionClick = vi.fn()
     render(
@@ -115,5 +148,57 @@ describe('PFM transaction recategorization entry points', () => {
       subcategory: 'MORTGAGE',
     })
     expect(screen.queryByRole('dialog', { name: 'Change category' })).not.toBeInTheDocument()
+  })
+
+  it('keeps two pending transactions above booked activity on only the first current account', () => {
+    const firstCurrent = render(
+      <AccountDetailScreen
+        selectedProductId="acc-1"
+        onBack={() => undefined}
+        onDetailsClick={() => undefined}
+        onOptionsClick={() => undefined}
+      />,
+      { wrapper: Providers },
+    )
+
+    const pendingSection = firstCurrent.container.querySelector<HTMLElement>('[data-pending-transactions]')
+    expect(pendingSection).toHaveAttribute('data-pending-count', '2')
+    expect(pendingSection?.querySelectorAll('[data-pending-transaction-row]')).toHaveLength(2)
+    expect(pendingSection).toHaveTextContent('Pending')
+    expect(pendingSection?.querySelectorAll('[aria-label^="Change category"]')).toHaveLength(0)
+    firstCurrent.unmount()
+
+    const secondCurrent = render(
+      <AccountDetailScreen
+        selectedProductId="acc-2"
+        onBack={() => undefined}
+        onDetailsClick={() => undefined}
+        onOptionsClick={() => undefined}
+      />,
+      { wrapper: Providers },
+    )
+
+    expect(secondCurrent.container.querySelector('[data-pending-transactions]')).toBeNull()
+  })
+
+  it('removes PFM content and category actions from a pending transaction detail', () => {
+    const pendingTransaction = getAccountTransactions('RO', 0, 'RON').find((item) => item.status === 'Pending')
+    if (!pendingTransaction) throw new Error('RO fixture must expose a pending transaction')
+
+    render(
+      <TransactionDetailScreen
+        country="RO"
+        transaction={pendingTransaction}
+        onBack={() => undefined}
+        onRedoPayment={() => undefined}
+        onCategoryChange={() => undefined}
+      />,
+      { wrapper: Providers },
+    )
+
+    expect(screen.getByText('Pending')).toBeInTheDocument()
+    expect(screen.queryByTestId('transaction-pfm-summary')).not.toBeInTheDocument()
+    expect(screen.queryByText('Spending Insight')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Change category' })).not.toBeInTheDocument()
   })
 })
