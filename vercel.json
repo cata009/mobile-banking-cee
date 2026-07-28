@@ -44,16 +44,60 @@
           "value": "no-store, max-age=0, must-revalidate"
         }
       ]
+    },
+    {
+      "source": "/assets/index-:hash.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/assets/index-:hash.css",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/assets/icons-CHuwSjWY.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/assets/radix-C94obw6Y.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0, must-revalidate"
+        }
+      ]
     }
   ],
   "rewrites": [
     {
-      "source": "/assets/index-BFn-Zxi0.js",
+      "source": "/assets/index-:hash.js",
       "destination": "/assets/app.js"
     },
     {
-      "source": "/assets/index-BnjweOiM.css",
+      "source": "/assets/index-:hash.css",
       "destination": "/assets/app.css"
+    },
+    {
+      "source": "/assets/icons-CHuwSjWY.js",
+      "destination": "/assets/chunks/icons.js"
+    },
+    {
+      "source": "/assets/radix-C94obw6Y.js",
+      "destination": "/assets/chunks/radix.js"
     }
   ]
 }

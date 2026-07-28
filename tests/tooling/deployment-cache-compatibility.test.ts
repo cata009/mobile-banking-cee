@@ -22,7 +22,7 @@ describe("production cache compatibility", () => {
     expect(assetFileNames({ names: ["merchant-logo.svg"] })).toBe("assets/[name]-[hash][extname]");
   });
 
-  it("prevents stale corporate HTML from losing the application entrypoint", () => {
+  it("recovers every previously published Vite entrypoint retained by a corporate proxy", () => {
     const configPath = resolve(process.cwd(), "vercel.json");
 
     expect(existsSync(configPath)).toBe(true);
@@ -43,12 +43,38 @@ describe("production cache compatibility", () => {
             { key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" },
           ]),
         }),
+        expect.objectContaining({
+          source: "/assets/index-:hash.js",
+          headers: expect.arrayContaining([
+            { key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" },
+          ]),
+        }),
+        expect.objectContaining({
+          source: "/assets/index-:hash.css",
+          headers: expect.arrayContaining([
+            { key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" },
+          ]),
+        }),
+        expect.objectContaining({
+          source: "/assets/icons-CHuwSjWY.js",
+          headers: expect.arrayContaining([
+            { key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" },
+          ]),
+        }),
+        expect.objectContaining({
+          source: "/assets/radix-C94obw6Y.js",
+          headers: expect.arrayContaining([
+            { key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" },
+          ]),
+        }),
       ]),
     );
     expect(config.rewrites).toEqual(
       expect.arrayContaining([
-        { source: "/assets/index-BFn-Zxi0.js", destination: "/assets/app.js" },
-        { source: "/assets/index-BnjweOiM.css", destination: "/assets/app.css" },
+        { source: "/assets/index-:hash.js", destination: "/assets/app.js" },
+        { source: "/assets/index-:hash.css", destination: "/assets/app.css" },
+        { source: "/assets/icons-CHuwSjWY.js", destination: "/assets/chunks/icons.js" },
+        { source: "/assets/radix-C94obw6Y.js", destination: "/assets/chunks/radix.js" },
       ]),
     );
   });
