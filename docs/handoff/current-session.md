@@ -2,9 +2,28 @@
 
 Last updated: 2026-07-28
 
+## 2026-07-28 First-Publication Corporate Cache Compatibility
+
+- Reconstructed every Vercel production shell published today instead of assuming the most recent stale shell was the one retained inside UniCredit. The first publication referenced `/assets/index-DKFOWmyK.js`, `/assets/icons-CHuwSjWY.js`, `/assets/radix-C94obw6Y.js`, and `/assets/index-BnjweOiM.css`; later publications referenced `index-BFn-Zxi0.js`, then `index-Di4MThIN.js` and `index-B8kfKeOq.css`. Before this correction, the first and third entry generations plus both first-shell preload chunks returned `404` from the canonical deployment. This explains the complete blank page: the previous correction protected only the intermediate `BFn` shell, not the first shell retained by the corporate proxy.
+- Replaced the two exact legacy-entry rewrites with pattern compatibility for every `/assets/index-:hash.js` and `/assets/index-:hash.css` request. Added explicit compatibility rewrites for the first shell's icons and Radix preload chunks. Every legacy source URL receives `no-store, max-age=0, must-revalidate` and resolves to the equivalent stable current entry/chunk.
+- Added regression coverage for arbitrary retained Vite hashes and the two first-publication preload chunks. The preload assertions were observed failing before the compatibility routes were added and pass after implementation.
+- Files changed: `vercel.json`, `tests/tooling/deployment-cache-compatibility.test.ts`, `docs/handoff/current-session.md`, `docs/handoff/next-tasks.md`, and `docs/platform-capability-map/README.md`.
+- Verification: fresh `npm run verify` passed TypeScript, ESLint, all `66` test files / `684` tests, all six audits (including the 181-asset audit), and the production build. `npx vercel build --prod` accepted the route syntax and completed successfully. Existing empty-`react-vendor`, large-chunk, chart-test sizing, and dependency-script warnings remain unchanged and triaged.
+- Publication: Vercel Production deployment `dpl_7Nsux4FEaF2qbox7nxRVdQsQjqzn` is `READY` and aliased to [`https://mobile-banking-cee.vercel.app`](https://mobile-banking-cee.vercel.app).
+- Live HTTP evidence: canonical HTML, stable `app.js`/`app.css`, all three historical JS entries, both historical CSS entries, both first-shell preload chunks, and arbitrary test hashes return `200` with the correct JavaScript/CSS content type and `no-store` policy. This validates the exact first-publication shell and future retained Vite entry hashes at the public boundary.
+- Live browser evidence: the canonical ETHOCA deep link mounts one React root from `/assets/app.js` and renders ETHOCA, Journey, Carrefour, YouTube Premium, and Enel Energie content.
+- Limitation: the UniCredit proxy itself cannot be executed locally. Public compatibility now covers the complete observed publication chain rather than one guessed shell; the remaining external confirmation is one open from the corporate network.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes — corporate-network confirmation remains a precise environmental follow-up
+  - safe to resume: yes — every observed stale shell asset has a live compatibility response and arbitrary legacy entry hashes are covered.
+
 ## 2026-07-28 Corporate Proxy Stale-Entrypoint Recovery
 
-- Reproduced the production failure at the HTTP-asset boundary rather than in the ETHOCA transaction renderer. A UniCredit corporate proxy can retain the previous deployment's `index.html`, which references `/assets/index-BFn-Zxi0.js` and `/assets/index-BnjweOiM.css`; both URLs returned `404` from the current canonical deployment, so React never mounted and the entire page stayed blank. The current page and transaction fixtures render normally when fresh HTML reaches the browser, and Vercel runtime logs contain no application error.
+- Superseded by the complete publication-chain recovery above. This first pass correctly located the failure at the HTTP-asset boundary but covered only the intermediate shell, not the first publication retained by the corporate proxy.
+- Reproduced the production failure at the HTTP-asset boundary rather than in the ETHOCA transaction renderer. A UniCredit corporate proxy can retain a previous deployment's `index.html`, which references deployment-specific JS/CSS URLs; when those URLs return `404`, React never mounts and the entire page stays blank. The current page and transaction fixtures render normally when fresh HTML reaches the browser, and Vercel runtime logs contain no application error.
 - Changed the Vite production contract to stable application entrypoints: `/assets/app.js`, `/assets/app.css`, and stable named JavaScript chunks. Added `no-store, max-age=0, must-revalidate` response policy for HTML and executable entry assets so intermediaries are explicitly told not to retain a deployment shell that can outlive its bundles.
 - Added compatibility rewrites from the two previously published hashed entry URLs to the new stable JS/CSS entrypoints. This allows the exact stale HTML already observed on the corporate network to recover immediately after the compatible deployment instead of requiring a proxy-cache purge.
 - Added `tests/tooling/deployment-cache-compatibility.test.ts`. The regression was observed red before implementation because Vite still emitted hashed entries and `vercel.json` did not exist; it passed after the stable-entry and compatibility policy were added.
