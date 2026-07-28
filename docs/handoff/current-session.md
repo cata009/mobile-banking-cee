@@ -1,6 +1,165 @@
 # Current Session
 
-Last updated: 2026-07-25
+Last updated: 2026-07-28
+
+## 2026-07-28 Mobile PI Flow Review Contrast and Release Closeout
+
+- Updated the ETHOCA Journey `Current screen` review surface to use the stronger neutral-200 background (`#E5E5E5`) and a restrained border. This creates a clear visual boundary around the unchanged white Mobile PI phone, without introducing a new product screen or changing the phone content.
+- Added regression coverage for the exact Journey review-surface token and a stable `journey-current-screen-container` test hook.
+- The user explicitly requested a complete workspace checkpoint. The forthcoming commit therefore includes every tracked and untracked modification present in the workspace, not only the visual adjustment above.
+- Verification: test-first assertion failed before the review-surface implementation, then `npm test -- --run tests/screens/flow-library.test.tsx` passed (23 tests). Fresh full `npm test`, `npm run typecheck`, `npm run lint`, `npm run audit:all`, and `npm run build` pass. The build retains only the already-triaged empty-`react-vendor` and >500 kB chunk warnings.
+- Banana Loop: no new banana was introduced. Existing asset-audit candidates, the empty vendor chunk, and large-chunk warnings remain tracked in `docs/handoff/next-tasks.md`; no destructive asset operation was performed.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes — the visual change is isolated, fully verified, and release closeout is proceeding.
+
+## 2026-07-28 ETHOCA Journey Entry-Point Correction
+
+- Corrected the ETHOCA `All screens` review semantics: `Enriched card list` (Card Detail) and `Enriched account list` (the linked Current Account) are now displayed as independent transaction-list entry points, not as consecutive navigation screens. The relevant in-store/online transaction details sit in a separate `Transaction detail examples` group, with no arrows implying that one list opens the other.
+- The focused Journey view now makes the same relationship explicit for reviewers. Merchant-available and pending scenario descriptions state that their card and account lists are separate entry points, while the fallback scenario keeps its single list entry point.
+- Regression coverage asserts the independent-entry-point grouping, exact entry labels, separated detail examples, and absence of a journey arrow within ETHOCA's grouped gallery.
+- Files changed: `src/app/screens/flow-library/components/FlowDetail.tsx`, `src/app/screens/flow-library/flows/ethoca.ts`, `tests/screens/flow-library.test.tsx`, `docs/handoff/current-session.md`, and `docs/platform-capability-map/README.md`.
+- Verification: test-first assertion failed before the grouped ETHOCA gallery existed; `npm test -- --run tests/screens/flow-library.test.tsx` then passed (22 tests). `npm run typecheck`, `npm run lint`, `npm run build`, and `git diff --check` also pass. Vite retains only the already-triaged empty-`react-vendor` and >500 kB chunk warnings; `git diff --check` reports existing LF-to-CRLF worktree warnings only.
+
+## 2026-07-28 Flow Library BA Document Polish and Current Exports
+
+- Restyled the ETHOCA Overview purpose block and Spec tab with neutral, Confluence-like document surfaces. The BA document now has a reading guide and numbered, softly separated sections for general information, version history, change context, open issues, requirements, current status, proposed solution, and non-functional requirements; the underlying business content is unchanged.
+- Removed the redundant Screen Spec `.txt` action. PDF and Word remain the two document outputs; each action builds its document from the current typed flow, scenario and BA overview at the moment of export, rather than from a saved screen-spec snapshot.
+- Replaced the generic action glyphs with a coloured Figma mark and Windows-style PDF/Word document marks, while preserving the existing neutral icon-card treatment, accessible labels and Figma/PDF/Word interactions.
+- Files changed: `src/app/screens/flow-library/components/FlowDetail.tsx`, `tests/screens/flow-library.test.tsx`, `tests/screens/flow-export.test.ts`, `docs/handoff/current-session.md`, and `docs/platform-capability-map/README.md`.
+- Verification: test-first Flow Library regressions initially failed for the neutral Purpose block, document marks/current-export contract, and removed `.txt` action; then `npm test -- --run tests/screens/flow-library.test.tsx tests/screens/flow-export.test.ts` passed (26 tests). `npm run typecheck`, `npm run lint`, `npm run build`, and `git diff --check` also pass. Vite retains its known empty-`react-vendor` and large-chunk warnings only.
+
+## 2026-07-28 ETHOCA Unified BA-Aligned Specification
+
+- Reframed the ETHOCA Spec tab as one BA document with no scenario or screen selector controls. It now follows the familiar sequence: General information, Version history, Version & change context, Open issues, Requirement, Current status, Proposed solution, and Non-functional requirements. The new structure is populated from the typed flow definition rather than hard-coded screen copy, so it remains a single reusable source of truth.
+- Consolidated the state-specific rules in their BA-relevant sections instead of repeating them across selectable screen specs: Transaction lists covers booked, pending and account-only treatment; Transaction details covers header, in-store, online, MCC and Card used; Partial data and fallback covers unavailable logo/location and resilient PFM presentation. Journey remains the single place to inspect the real screens.
+- Synthesised the supplied BA material into management-ready, demo-safe content: customer scope, card-only eligibility, ledger/PFM invariants, clean-name and logo precedence, pending parity, field-availability rules, historical/digital-receipt/location-confidence decisions, performance/resilience, privacy, accessibility and business measurement. It deliberately omits credentials, endpoint/service names, raw payloads, live operational data and implementation topology.
+- PDF and Word exports now render the same BA-aligned structure for ETHOCA; other Flow Library items retain their existing generic flow-spec export structure.
+- Files changed: `src/app/screens/flow-library/flows/types.ts`, `src/app/screens/flow-library/flows/ethoca.ts`, `src/app/screens/flow-library/components/FlowDetail.tsx`, `src/app/screens/flow-library/flowExport.ts`, `tests/screens/flow-library.test.tsx`, `tests/screens/flow-export.test.ts`, `docs/handoff/current-session.md`, and `docs/platform-capability-map/README.md`.
+- Verification: the unified-document UI and export regressions were first observed failing, then `npm test -- --run tests/screens/flow-library.test.tsx tests/screens/flow-export.test.ts` passed (25 tests). `npm run typecheck` and `npm run lint` passed.
+
+## 2026-07-28 Flow Library Current-Screen Export Placement
+
+- Moved the Current screen PNG export control out of the rendered Mobile PI phone preview and into the upper-right corner of its surrounding neutral-grey review container. The action remains available and exports the same complete, full-height mobile screen without covering phone content.
+- All screens gallery export controls remain associated with their individual previews and retain their hover/keyboard-focus reveal behaviour.
+- Files changed: `src/app/screens/flow-library/components/FlowDetail.tsx`, `tests/screens/flow-library.test.tsx`, `docs/handoff/current-session.md`, and `docs/platform-capability-map/README.md`.
+- Verification: a regression assertion first failed because the Current screen download control had no container placement. `npm test -- --run tests/screens/flow-library.test.tsx` then passed (19 tests).
+
+## 2026-07-28 Flow Library Index Simplification and All-Screens Scroll
+
+- Simplified Flow Library discovery by removing the redundant eyebrow label, all release-status filters and the release-status badges from flow cards. The page now leads directly with its main title, a friendlier delivery-focused subtitle, search and country filtering. Flow metadata still remains in the underlying definition/export data where needed.
+- Removed the status cell from Flow Detail's business-review summary, leaving Domain, Markets and Journey paths as the visible decision context.
+- All Journey screens in the All screens view now use the same interactive native vertical-scroll behaviour as Current screen. Reviewers can inspect content below the initially visible phone viewport instead of treating the filmstrip as static/inert imagery.
+- Files changed: src/app/screens/flow-library/components/FlowLibraryIndex.tsx, src/app/screens/flow-library/components/FlowDetail.tsx, tests/screens/flow-library.test.tsx, docs/handoff/current-session.md, and docs/platform-capability-map/README.md.
+- Verification: test-first Flow Library coverage failed before the status-free index, three-column summary and interactive gallery previews existed, then npm test -- --run tests/screens/flow-library.test.tsx passed (19 tests). npm run typecheck, npm run lint, npm run build and git diff --check passed. The local development server is running on http://localhost:4001. Vite retains its existing empty-react-vendor and large-chunk warnings only.
+
+## 2026-07-28 ETHOCA Flow Library Business-Review Readability
+
+- Reworked the ETHOCA Overview into a business-review summary: Status, Domain, Markets and Journey paths are now compact, scannable metadata; Purpose and Scope/demo context are separated into clearly labelled reading blocks. The previous Overview Scenarios panel was removed because Journey is the single place to inspect scenarios and screens.
+- Reframed the Flow specification for business analysis. Decision rules are now numbered cards with the lead decision emphasised, while Preconditions, Expected result, analytics, questions and additional context are separated into labelled, readable sections. No ETHOCA rule, ledger fact, country scope or runtime behaviour changed.
+- Restyled the Figma, PDF and Word header actions as neutral grey document cards with their individual brand-colour icon treatment, replacing the all-teal controls. Existing accessible names, source navigation and document-export behaviour are unchanged.
+- Files changed: src/app/screens/flow-library/components/FlowDetail.tsx, tests/screens/flow-library.test.tsx, docs/handoff/current-session.md, and docs/platform-capability-map/README.md.
+- Verification: regression coverage was first added for the Overview labels, duplicate-scenario removal, neutral document actions and numbered decision rules; npm test -- --run tests/screens/flow-library.test.tsx passed (18 tests), as did npm run typecheck, npm run lint and npm run build. A live ETHOCA Flow Library smoke confirmed the compact overview, neutral header actions and numbered decision-rule cards. Vite retains its existing empty-react-vendor and large-chunk warnings only.
+
+## 2026-07-28 ETHOCA Marker-Free Static Location Map
+
+- Removed the decorative red map marker from the ETHOCA static merchant-location illustration. The map now conveys only neutral local context and does not imply an exact merchant coordinate.
+- The standard black locator remains in the location summary row; the address, static/non-interactive behavior, and no-external-map policy are unchanged.
+- Files changed: `src/app/screens/payments/DomesticPaymentFlowScreens.tsx` and `tests/screens/card-detail-boundaries.test.tsx`.
+- Verification: the regression first failed against the existing red `#D53A3A` marker, then `npm run test -- tests/screens/card-detail-boundaries.test.tsx` passed (8 tests).
+
+## 2026-07-28 Flow Library Complete Journey Screen Downloads
+
+- Journey display controls are now named `Current screen` and `All screens`, replacing the ambiguous `focused` and `filmstrip` labels.
+- Every Journey screen can now be exported as a complete PNG, including the mobile content that sits below the visible scroll position. The current-screen review shows its download control at the phone's upper right; each All screens preview reveals its corresponding control on hover or keyboard focus.
+- Files changed: `src/app/screens/flow-library/components/FlowDetail.tsx` and `tests/screens/flow-library.test.tsx`.
+- Verification: test-first coverage failed before the controls and labels existed, then `npm run test -- tests/screens/flow-library.test.tsx` passed (15 tests). `npm run typecheck`, `npm run lint`, `npm run build`, and `git diff --check` also passed. The diff check reports only pre-existing LF-to-CRLF warnings from the dirty workspace; Vite retains its known empty-`react-vendor` and large-chunk warnings.
+- Limitation: exports are generated in-browser from the rendered preview and remain dependent on browser canvas/image capabilities; they do not create a server-side asset archive.
+
+## 2026-07-28 ETHOCA Scenario Coverage and Specification Alignment
+
+- Reworked the ETHOCA Journey around existing Mobile PI screens only. The compact `Merchant data available` card list now shows only Carrefour and YouTube Premium; it no longer includes eMAG, OMV Petrom, Regina Maria, or the December 2025 group.
+- Added `Enriched account list`, rendered by the existing `AccountDetailScreen`: linked card transactions retain their ETHOCA merchant logos while the account-only Enel Energie payment uses the existing PFM glyph in the grey `#F5F5F5` / K7 circle.
+- Expanded the Pending scenario with `Pending card list`, `Pending account list`, and `Pending transaction detail`. Both list screens retain the existing orange Pending status and logo/PFM decision; the eMAG pending detail uses the existing PFM-free pending detail composition.
+- Made the unavailable path explicit: `Partial data without logo or map` shows Piata Obor with a safe clean name and MCC, but deliberately omits the merchant logo and the static location card. The full fallback detail remains separately visible.
+- Removed the ETHOCA Signing section and `ethoca_location_opened` analytics event from the Flow specification. The in-store location card is documented as static/non-interactive, matching the screen and avoiding any external-map/deep-link claim.
+- Extended the existing Card Detail and Account Detail presentation hooks with a Flow-only transaction filter/visual override. This keeps all runtime data and baseline components intact while allowing concise review fixtures. Account Detail also follows the Card Detail defensive `scrollTo` guard for non-browser preview/test environments.
+- Files changed: `src/app/screens/flow-library/flows/ethoca.ts`, `types.ts`, `components/FlowDetail.tsx`, `components/flowPreviews.tsx`, existing `AccountDetailScreen.tsx` and `CardDetailScreen.tsx`, and `tests/screens/flow-library.test.tsx`.
+- Verification: red-to-green `npm run test -- tests/screens/flow-library.test.tsx` now passes 14 tests, including explicit coverage for the new account, pending, partial-data, compact-list, and no-Signing states. `npm run typecheck`, `npm run lint`, `npm run build`, and `git diff --check` also pass. Vite retains only its known empty-`react-vendor` and >500 kB chunk warnings.
+- Limitation: all ETHOCA views remain Flow Library fixtures based on deterministic front-end ledger records; no production ETHOCA payload, image-hosting contract, location service, or booking lifecycle is connected.
+
+## 2026-07-28 ETHOCA Verified Merchant Location Map
+
+- Replaced the temporary Google Maps embed with a self-contained static location illustration for the ETHOCA in-store merchant-location card. It retains a realistic road, waterway, green-area, building-block, and red location-marker composition for Carrefour Băneasa while removing all external-map chrome, attribution, controls, and network dependency.
+- The location summary row is now static rather than a button: its right chevron is removed and the left locator uses the standard Mobile PI black icon. The location card remains the first item under `Transaction details` only when `merchantEnrichment.location` is present; online and addressless merchant examples remain location-free. Existing ETHOCA merchant identity, PFM, MCC, and transaction-detail behavior is unchanged.
+- Files changed: `src/app/screens/payments/DomesticPaymentFlowScreens.tsx` and `tests/screens/card-detail-boundaries.test.tsx`.
+- Verification: test-first coverage for the static map, absence of external-map UI, absence of the chevron, and standard locator treatment was observed failing before the final control hook was added. `npm run test -- tests/screens/card-detail-boundaries.test.tsx` (8 tests), `npm run test -- tests/screens/flow-library.test.tsx` (12 tests), `npm run typecheck`, `npm run lint`, `npm run build`, and `git diff --check` pass.
+- Limitation: this is intentionally a presentation-only map for the Flow prototype. It is drawn from the ETHOCA location payload and is not a navigable or geocoded map service.
+
+## 2026-07-28 ETHOCA Real Merchant Brand Assets
+
+- Replaced the temporary letter stand-ins in the ETHOCA Flow with real merchant brand assets: Carrefour uses Carrefour Romania's published logo asset and eMAG uses the official eMAG SVG served by its public website. The existing YouTube Simple Icons vector remains the real YouTube mark.
+- A merchant visual is shown only where a known asset is available. The demo-only `Bar Magenta` label has no merchant asset, so it now follows the documented unavailable-logo path and renders the existing PFM glyph in the grey `#F5F5F5` circle instead of a fabricated `M` logo.
+- Files changed: `src/app/screens/flow-library/components/flowPreviews.tsx` and `tests/screens/flow-library.test.tsx`.
+- Verification: test-first brand-source assertions were added and observed red before the asset replacement. `npm run test -- tests/screens/flow-library.test.tsx` (12 tests), `npm run typecheck`, `npm run lint`, `npm run build`, and `git diff --check` pass. The live Flow Library preview confirms both official image assets loaded (`150x100` Carrefour and `300x80` eMAG).
+
+## 2026-07-28 ETHOCA Preview Visual Evidence and Scroll Review
+
+- The focused Journey phone preview is now interactive and vertically scrollable so reviewers can inspect the complete existing Mobile PI Card Detail and Transaction Detail screens. Filmstrip previews remain static/inert snapshots.
+- ETHOCA list states now expose the enrichment decision in the actual reused mobile components: `YouTube Premium`, `Carrefour`, `eMAG`, and `Bar Magenta` render a `32x32` circular merchant visual; normal card rows without an enrichment visual render the existing PFM category glyph inside the required `#F5F5F5` circular `32x32` fallback container. The dedicated fallback scenario renders the same PFM fallback for every row, while the pending scenario retains its orange dot and Pending label alongside merchant visuals.
+- Enriched Carrefour and YouTube transaction-detail headers use the matching `64x64` merchant identity slot. These slot dimensions and the grey fallback treatment were cross-checked against the supplied RO Enablers Figma examples; the existing Card Detail, Transaction Detail, PFM, Spending Insight, and linked-card UI remains the source composition.
+- Files changed: `src/app/screens/flow-library/components/MiniPhone.tsx`, `FlowDetail.tsx`, `flowPreviews.tsx`, and `tests/screens/flow-library.test.tsx`.
+- Verification: test-first coverage for scrollability and merchant/fallback visibility was observed red before implementation. `npm run test -- tests/screens/flow-library.test.tsx` (12 tests), `npm run typecheck`, `npm run lint`, `npm run build`, and `git diff --check` pass. Browser smoke on the ETHOCA deep-link confirmed both mixed merchant/PFM visual states and the forced fallback state. Vite retains only the pre-existing empty-`react-vendor` and large-chunk warnings.
+
+## 2026-07-28 Flow Library Detail Header Compaction
+
+- Flow detail navigation now sits above and outside the header card. The header card contains only the flow domain, title, summary, and the three right-aligned icon actions (Figma, PDF, Word).
+- Removed the redundant status and country-scope chips from the header card. Those values remain in `At a glance`, which is now a compact four-column desktop summary with reduced cell/content spacing.
+- Files changed: `src/app/screens/flow-library/components/FlowDetail.tsx` and `tests/screens/flow-library.test.tsx`.
+- Verification: test-first regression added and observed failing before implementation; focused Flow Library suite passes (10 tests), `npm run typecheck`, `npm run lint`, `npm run build`, and `git diff --check` pass. Visual smoke at the RO Round Up Flow Library deep-link confirms the requested layout. The build retains its pre-existing Vite chunk-size warnings.
+
+## 2026-07-28 ETHOCA Merchant Enrichment Flow Specification
+
+- Added the new Flow Library item `Mobile PI ETHOCA`, sourced from RO Enablers node `3707:18057` and explicitly scoped to all eight Mobile PI countries: RO, CZ, SK, HU, RS, BA, BA_BL, and SI. The Flow Library now captures the Mastercard ETHOCA reference states for in-country/out-of-country merchant purchases, online purchases, unavailable logos, and merchant-logo/PFM-fallback transaction lists.
+- The specification documents the full UI decision system: card-originated transactions use clean ETHOCA merchant names and a circular merchant logo at `32x32` in Card Detail and linked Current Account lists, plus a `64x64` merchant identity mark in enriched detail headers. Pending transactions retain the orange dot and label. Invalid, absent, or non-renderable merchant logos fall back to the current PFM glyph inside the required circular K7 `#F5F5F5` `32x32` container. Account-only payments and receipts remain out of scope.
+- In-store card details show a location card as the first item under Transaction details only when verified service location exists; online/addressless transactions omit it. `Merchant Category Code (MCC)` is the final row immediately after Posting date when delivered. PFM category, Spending Insight, card linkage, and ledger facts stay independent of ETHOCA enrichment.
+- Each ETHOCA Journey screen now reuses an existing Mobile PI composition rather than a hand-drawn Flow mock: the list is `CardDetailScreen` and transaction details are `TransactionDetailScreen`. Only the ETHOCA slots are optional extensions on those existing components: list clean-name/merchant visual, 64x64 header identity, verified location card and MCC row. Existing PFM actions, Spending Insight, Card used, list geometry and product data remain visible.
+- Preview data comes directly from the RO transaction ledger (`YouTube Premium`, `Bar Magenta`, `Carrefour`, and `Piata Obor`). Address/MCC are deliberately illustrative ETHOCA payload values because the current ledger mock does not yet expose an enrichment object. This is a Flow Library handoff/specification only and does not change the baseline runtime transaction feed.
+- Files changed: `src/app/screens/flow-library/flows/ethoca.ts`, `types.ts`, `index.ts`, `components/flowPreviews.tsx`, the existing `CardDetailScreen`, shared `AccountTransactionRow`, existing `TransactionDetailScreen`, focused Flow Library tests, and capability/handoff documentation.
+- Verification: `npm run typecheck`; `npm run test -- tests/screens/flow-library.test.tsx` (9 tests); `npm run lint`; `npm run build`; and `git diff --check` all passed. The ETHOCA deep-link browser smoke was checked at `screen=flow-library&flow=mobile-pi-ethoca`. Vite retains only the pre-existing empty-`react-vendor` and large-chunk warnings.
+
+## 2026-07-28 Linked Debit Transactions and Compact Card Detail
+
+- Debit-card purchases are now marked as card-origin records in the first linked current-account ledger, so the same booked transaction is shown in both the debit card and its current-account detail. Credit cards retain their own deterministic transaction feed. Existing account-only payments and receipts remain current-account-only.
+- Regular card transaction screens retain their full PFM category pill, action icons, and Spending Insight. Only the lower `Transaction details` section is card-specific: Transaction description, Amount, and Posting date are shown initially; Transaction date is revealed by `Show more` and hidden by `Show less`. Pending details remain PFM-free as specified for provisional reservations.
+- Card transaction actions preserve the shared four-slot geometry: `Create Standing order` is an invisible second-slot placeholder, so Change category, Request chargeback, and Send payment stay in the original first, third, and fourth positions. The third slot replaces Redo payment with the supplied 32px Request chargeback SVG; account-payment details keep their original actions.
+- The bottom of every card-originated transaction detail now adds `Card used`, reusing the existing compact connected-card navigation row (artwork, masked PAN, label, chevron). A card transaction opened through its linked current-account ledger resolves that debit card from `linkedAccountId`, so it shows the same card; account-only payments never show this section.
+- Verification: live RO card-detail smoke confirmed the restored PFM/action/Spending Insight composition and compact card fields. Focused suites passed (26 tests): card-detail boundaries, PFM recategorization, spending analytics, and account PFM. The action-slot follow-up reran card-detail boundaries plus PFM recategorization (12 tests), `npm run typecheck`, `npm run build`, and `git diff --check`; all passed. Vite retains only the existing empty-`react-vendor` and large-chunk warnings.
+- Follow-up verification: `tests/screens/card-detail-boundaries.test.tsx` plus `tests/screens/account-details-info.test.tsx` passed (14 tests, including the linked-account card resolution), `npm run typecheck`, `npm run lint`, `npm run build`, and `git diff --check` passed. Vite retains only the existing empty-`react-vendor` and large-chunk warnings.
+- Limitation: linked card/account data and dates are deterministic front-end mock records; no ledger persistence or card booking lifecycle is simulated.
+
+## 2026-07-28 Mobile PI Pending Transactions
+
+- Every Mobile PI country now exposes exactly two deterministic Pending card transactions above booked activity for the first current account and only for the first debit card that is linked to that account. Other current accounts, debit cards, credit cards, and all other product types never render this section.
+- Pending rows reuse the standard transaction layout but remove the PFM icon/category control, use neutral gray copy, and add the orange dot plus `Pending` status. Pending items are excluded from PFM Spending aggregation and from completed-month totals.
+- Pending transaction details omit the PFM category pill, PFM actions, and Spending Insight. They retain the existing transaction-detail shell and neutral pending status.
+- Files changed: `src/data/accountDetails.ts`, `src/data/spendingAnalytics.ts`, shared transaction row, account/card detail lists, transaction detail, targeted tests, and capability/handoff documentation.
+- Verification: red-green tests passed for account pending scope, debit-card linkage scope, and PFM-free pending details; focused suite `tests/screens/pfm-transaction-recategorization.test.tsx`, `tests/screens/card-detail-boundaries.test.tsx`, and `tests/data/spending-analytics.test.ts` passed (18 tests). `npm run typecheck` passed. `npm run build` passed with existing empty-`react-vendor` and large-chunk warnings only.
+- Limitation: pending entries are deterministic front-end mock reservations; no booking lifecycle or backend ledger is simulated.
+
+## 2026-07-28 Flow Library Actions and Current-Account Monthly Report
+
+- Flow Library detail headers now keep three icon-only actions on the upper right: Figma source, PDF export, and Word export. The old Figma node-ID label, download glyphs, and `Screens + full spec, ready for handoff.` copy were removed; every icon control retains an accessible name and tooltip.
+- Mobile PI Account Detail now inserts a monthly Inflow/Outflow bar report directly below each closed-month divider for the selected `current_account` only. Totals are calculated from that account's booked transaction group, including all incoming and outgoing account movements; saving accounts, deposits, loans, mortgages, and cards never render this report. Search and active filters suppress the report so a partial transaction list cannot be presented as a full-month total.
+- The established Spending bar visualization is now shared through `CashFlowSummaryBars`; both Spending and Account Detail use the same visual contract while the Account Detail totals remain scoped to its selected account.
+- The Account Detail report chart is constrained and centered within the phone viewport, and its closing divider was removed so the following transaction remains visually connected to the completed-month report.
+- Inflow now mirrors Outflow's two-line label/value layout: its amount and currency stay together on the value row.
+- Files changed: `src/app/screens/flow-library/components/FlowDetail.tsx`, the shared icon registry, `src/app/components/analytics/CashFlowSummaryBars.tsx`, `src/app/components/accounts/AccountMonthlyReport.tsx`, `src/app/screens/accounts/AccountDetailScreen.tsx`, `src/data/accountDetails.ts`, targeted tests, and capability/handoff documentation.
+- Verification: red-green focused tests passed (`tests/screens/flow-library.test.tsx` and `tests/screens/pfm-transaction-recategorization.test.tsx`: 11 tests); the monthly-report regression confirms its centered chart hook and no lower border, while a live card-detail check confirms no report renders on cards. Earlier live local checks confirmed Flow Library actions at one shared top-right y-position and RO current-account December totals of `4.399,84 RON` inflow / `997,30 RON` outflow; `npm run typecheck` and `npm run build` passed. Existing Vite empty-`react-vendor` and large-chunk warnings remain non-blocking.
+- Limitation: monthly reports use deterministic front-end mock transactions and do not represent a persisted ledger or backend statement.
 
 ## 2026-07-25 Complete ZCode Workspace Closeout
 

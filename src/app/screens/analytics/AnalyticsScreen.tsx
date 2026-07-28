@@ -3,6 +3,7 @@ import type { UIEvent } from "react";
 import { useDragCarousel } from "@/hooks/useDragCarousel";
 import BottomNavigation from "@/app/components/BottomNavigation";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
+import CashFlowSummaryBars from "@/app/components/analytics/CashFlowSummaryBars";
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
 import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
 import { useLanguage } from "@/app/contexts/LanguageContext";
@@ -115,7 +116,12 @@ function AnalyticsHeroPanel({
   return (
     <>
       <MonthSelector activePeriodKey={activePeriodKey} summary={summary} />
-      <AnalyticsSummaryBars country={country} summary={summary} />
+      <CashFlowSummaryBars
+        country={country}
+        currency={summary.currency}
+        incomeTotal={summary.incomeTotal}
+        spendingTotal={summary.spendingTotal}
+      />
     </>
   );
 }
@@ -245,58 +251,6 @@ function CardTransactionAction() {
       ]}
       style={{ padding: "0 24px 18px" }}
     />
-  );
-}
-
-function AnalyticsSummaryBars({
-  country,
-  summary,
-}: {
-  country: CountryId;
-  summary: SpendingAnalyticsSummary;
-}) {
-  const { t } = useLanguage();
-  const maxTotal = Math.max(summary.incomeTotal, summary.spendingTotal, 1);
-  const incomeHeight = Math.max(18, Math.round((summary.incomeTotal / maxTotal) * 104));
-  const spendingHeight = Math.max(18, Math.round((summary.spendingTotal / maxTotal) * 104));
-  const baselineTop = 120;
-
-  return (
-    <section className="relative h-[172px] px-[24px] pt-[18px]">
-      <div className="absolute left-[24px] right-[24px] top-[120px] border-t border-dashed border-[var(--uc-border)]" />
-
-      <div className="absolute left-[52px] top-[58px] w-[92px] font-['UniCredit',sans-serif]">
-        <p className="uc-type-n5-strong uppercase text-[var(--uc-text-muted)]">{t("runtime.analytics.inflow", "Inflow")}</p>
-        <p className="uc-type-n5-strong mt-[6px] text-[var(--uc-text)]">
-          {formatMoneyNumber(summary.incomeTotal, country)}
-        </p>
-        <p className="uc-type-n5-strong text-[var(--uc-text)]">{summary.currency}</p>
-      </div>
-
-      <div
-        className="absolute left-[154px] w-[16px] rounded-t-full bg-[var(--uc-action)]"
-        style={{ height: `${incomeHeight}px`, top: `${baselineTop - incomeHeight}px` }}
-      />
-
-      <div
-        className="absolute left-[184px] w-[16px] rounded-t-full bg-[var(--uc-text)]"
-        style={{ height: `${spendingHeight}px`, top: `${baselineTop - spendingHeight}px` }}
-      />
-
-      <div className="absolute left-[214px] top-[74px] w-[132px] font-['UniCredit',sans-serif]">
-        <p className="uc-type-n5-strong uppercase text-[var(--uc-text-muted)]">{t("runtime.analytics.outflow", "Outflow")}</p>
-        <p className="uc-type-n5-strong mt-[4px] text-[var(--uc-text)]">
-          {formatMoneyNumber(summary.spendingTotal, country)} {summary.currency}
-        </p>
-      </div>
-
-      <div className="uc-type-n5-strong absolute left-[104px] top-[136px] w-[68px] text-right uppercase text-[var(--uc-text)]">
-        {t("runtime.analytics.incomes", "Incomes")}
-      </div>
-      <div className="uc-type-n5-strong absolute left-[182px] top-[136px] text-left uppercase text-[var(--uc-text)]">
-        {t("runtime.analytics.spendings", "Spendings")}
-      </div>
-    </section>
   );
 }
 

@@ -105,6 +105,7 @@ export const FLOW_DEMO = {
     period: "October 2025",
     rows: [{ day: "1", month: "OCT", title: "Transaction Details", amount: "-50.00 RON" }],
   },
+
 } as const;
 
 export type FlowDemoData = typeof FLOW_DEMO;

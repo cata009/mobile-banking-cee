@@ -46,6 +46,59 @@ describe("flow export document", () => {
     expect(html).toContain("Save as PDF");
   });
 
+  it("exports the BA-aligned section structure without technical integration details", () => {
+    const html = buildFlowDocumentHtml(META, STEPS, SPEC, () => "ignored.png", { autoPrint: false }, {
+      businessAnalysis: {
+        generalInformation: [{ label: "Customer scope", value: "Card-originated purchases only." }],
+        versionContext: "Demo BA v1.0",
+        versionHistory: [{ version: "1.0", date: "28 Jul 2026", detail: "Demo review baseline" }],
+        openIssues: [
+          {
+            reference: "002",
+            status: "Info",
+            title: "Digital receipts",
+            detail: "Digital receipts are out of scope for this demo.",
+          },
+        ],
+        requirements: [{ title: "Business requirement", items: ["Keep the ledger amount unchanged."] }],
+        currentStatus: [{ title: "Mobile Banking", items: ["PFM remains the categorisation authority."] }],
+        proposedSolution: [{ title: "Transaction lists", items: ["Show a clean merchant identity."] }],
+        nonFunctionalRequirements: [{ title: "Resilience", items: ["Avoid broken image states."] }],
+      },
+    });
+
+    expect(html).toContain("Business analysis specification");
+    expect(html).toContain("General information");
+    expect(html).toContain("Version history");
+    expect(html).toContain("Version &amp; change context");
+    expect(html).toContain("Transaction lists");
+    expect(html).toContain("Open issues");
+    expect(html).toContain("Non-functional requirements");
+    expect(html).toContain("Digital receipts are out of scope for this demo.");
+    expect(html).not.toContain("Card_GetMerchantDetails");
+    expect(html).not.toContain("OAuth");
+  });
+
+  it("uses the current BA source passed at export time instead of a stored document snapshot", () => {
+    const html = buildFlowDocumentHtml(META, STEPS, SPEC, () => "ignored.png", { autoPrint: false }, {
+      businessAnalysis: {
+        generalInformation: [{ label: "Customer scope", value: "Pending debit-card purchases." }],
+        versionContext: "Demo BA v1.1",
+        versionHistory: [{ version: "1.1", date: "29 Jul 2026", detail: "Latest delivery review" }],
+        openIssues: [],
+        requirements: [{ title: "Business requirement", items: ["Keep the latest ledger amount unchanged."] }],
+        currentStatus: [],
+        proposedSolution: [],
+        nonFunctionalRequirements: [],
+      },
+    });
+
+    expect(html).toContain("Pending debit-card purchases.");
+    expect(html).toContain("Demo BA v1.1");
+    expect(html).toContain("Latest delivery review");
+    expect(html).not.toContain("Demo BA v1.0");
+  });
+
   it("wraps the document as Word-compatible MHTML with one image part per step", () => {
     const html = buildFlowDocumentHtml(META, STEPS, SPEC, (index) => `step-${index + 1}.png`, {
       autoPrint: false,

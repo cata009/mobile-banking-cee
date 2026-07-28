@@ -7,8 +7,11 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { LanguageProvider } from '@/app/contexts/LanguageContext'
 import CardDetailScreen from '@/app/screens/cards/CardDetailScreen'
 import CardDetailsInfoScreen from '@/app/screens/cards/CardDetailsInfoScreen'
+import { TransactionDetailScreen } from '@/app/screens/payments/DomesticPaymentFlowScreens'
 import { DemoProvider } from '@/app/state/demoStore'
+import { getAccountTransactions, getCardTransactions } from '@/data/accountDetails'
 import { mockProducts, type Product } from '@/data/products'
+import { formatMaskedCardNumber } from '@/app/utils/cardNumber'
 
 const mockedProductState = vi.hoisted(() => ({
   categories: [] as Array<{ key: string; title: string; products: Product[] }>,
@@ -28,6 +31,16 @@ function AppProviders({ children }: PropsWithChildren) {
 
 const creditCard = mockProducts.find((product) => product.type === 'credit_card')
 if (!creditCard || creditCard.type !== 'credit_card') throw new Error('Expected credit-card fixture')
+const firstDebitCard = mockProducts.find((product) => product.type === 'debit_card')
+const secondDebitCard = mockProducts.filter((product) => product.type === 'debit_card')[1]
+const firstCurrentAccount = mockProducts.find((product) => product.type === 'current_account')
+if (
+  !firstDebitCard || firstDebitCard.type !== 'debit_card' ||
+  !secondDebitCard || secondDebitCard.type !== 'debit_card' ||
+  !firstCurrentAccount || firstCurrentAccount.type !== 'current_account'
+) {
+  throw new Error('Expected linked current-account and debit-card fixtures')
+}
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'scrollTo', {
@@ -94,5 +107,125 @@ describe('card-detail action boundaries', () => {
     expect(screen.getByText('Credit limit')).toBeInTheDocument()
     expect(screen.queryByText(creditCard.cardNumber)).not.toBeInTheDocument()
     expect(screen.queryByText(creditCard.securityCode ?? '')).not.toBeInTheDocument()
+  })
+
+  it('shows pending transactions only for the first debit card linked to the first current account', () => {
+    mockedProductState.categories = [{ key: 'cards', title: 'Cards', products: mockProducts }]
+
+    const firstDebit = render(
+      <CardDetailScreen selectedCardId={firstDebitCard.id} onBack={() => undefined} />,
+      { wrapper: AppProviders },
+    )
+
+    expect(firstDebit.container.querySelector('[data-pending-transactions]')).toHaveAttribute('data-pending-count', '2')
+    firstDebit.unmount()
+
+    const secondDebit = render(
+      <CardDetailScreen selectedCardId={secondDebitCard.id} onBack={() => undefined} />,
+      { wrapper: AppProviders },
+    )
+
+    expect(secondDebit.container.querySelector('[data-pending-transactions]')).toBeNull()
+  })
+
+  it('shares debit-card transactions with the linked current account but keeps credit-card activity separate', () => {
+    const accountTransactions = getAccountTransactions('RO', 0, 'RON')
+    const debitTransactions = getCardTransactions('RO', firstDebitCard, 'RON', 0)
+    const creditTransactions = getCardTransactions('RO', creditCard, 'RON', 0)
+    const accountTransactionIds = new Set(accountTransactions.map((transaction) => transaction.id))
+
+    expect(debitTransactions.length).toBeGreaterThan(0)
+    expect(debitTransactions.every((transaction) => transaction.source === 'card')).toBe(true)
+    expect(debitTransactions.every((transaction) => accountTransactionIds.has(transaction.id))).toBe(true)
+    expect(creditTransactions.every((transaction) => accountTransactionIds.has(transaction.id))).toBe(false)
+  })
+
+  it('uses a compact card transaction detail and reveals only the transaction date on Show more', () => {
+    const transaction = getAccountTransactions('RO', 0, 'RON').find((item) => item.source === 'card')
+    if (!transaction) throw new Error('Expected a debit-card transaction in the linked current account')
+
+    render(
+      <TransactionDetailScreen
+        country="RO"
+        product={firstDebitCard}
+        transaction={transaction}
+        onBack={() => undefined}
+        onRedoPayment={() => undefined}
+      />,
+      { wrapper: AppProviders },
+    )
+
+    expect(screen.getByText('Transaction description')).toBeInTheDocument()
+    expect(screen.getByText('Amount')).toBeInTheDocument()
+    expect(screen.getByText('Posting date')).toBeInTheDocument()
+    expect(screen.queryByText('Account number')).not.toBeInTheDocument()
+    expect(screen.getByText('Spending Insight')).toBeInTheDocument()
+    expect(screen.getByTestId('transaction-pfm-summary')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Change category' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Create Standing order' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Redo payment' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Request chargeback' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Send payment' })).toBeInTheDocument()
+    const actionBar = document.querySelector<HTMLElement>('[data-ds-label="AccountActionBar"]')
+    expect(actionBar).not.toBeNull()
+    const actionButtons = actionBar?.querySelectorAll('button')
+    expect(actionButtons).toHaveLength(4)
+    expect(actionButtons?.[1]).toHaveClass('invisible')
+    expect(screen.getByText('Card used')).toBeInTheDocument()
+    expect(screen.getByText(formatMaskedCardNumber(firstDebitCard.cardNumber))).toBeInTheDocument()
+    expect(screen.queryByText('Transaction date')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show more' }))
+    expect(screen.getByText('Transaction date')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Show less' })).toBeInTheDocument()
+  })
+
+  it('renders a verified merchant location as a clean static map with no external-map chrome', () => {
+    const transaction = getAccountTransactions('RO', 0, 'RON').find((item) => item.label === 'Carrefour')
+    if (!transaction) throw new Error('Expected the Carrefour card transaction fixture')
+
+    render(
+      <TransactionDetailScreen
+        country="RO"
+        product={firstDebitCard}
+        transaction={transaction}
+        merchantEnrichment={{
+          cleanMerchantName: 'Carrefour',
+          location: {
+            label: 'Merchant location',
+            address: 'Carrefour Băneasa · Șos. București-Ploiești 42D, Bucharest',
+          },
+        }}
+        onBack={() => undefined}
+        onRedoPayment={() => undefined}
+      />,
+      { wrapper: AppProviders },
+    )
+
+    expect(screen.getByTestId('merchant-location-static-map')).toBeInTheDocument()
+    expect(screen.getByTestId('merchant-location-static-map').querySelector('[fill="#D53A3A"]')).not.toBeInTheDocument()
+    expect(screen.getByTestId('merchant-location-pin')).toHaveAttribute('data-icon-color', 'standard')
+    expect(screen.queryByTitle('Google Maps — Merchant location')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('merchant-location-chevron')).not.toBeInTheDocument()
+  })
+
+  it('identifies the linked debit card when its transaction is opened from the current account', () => {
+    const transaction = getAccountTransactions('RO', 0, 'RON').find((item) => item.source === 'card')
+    if (!transaction) throw new Error('Expected a debit-card transaction in the linked current account')
+    mockedProductState.categories = [{ key: 'products', title: 'Products', products: [firstCurrentAccount, firstDebitCard] }]
+
+    render(
+      <TransactionDetailScreen
+        country="RO"
+        product={firstCurrentAccount}
+        transaction={transaction}
+        onBack={() => undefined}
+        onRedoPayment={() => undefined}
+      />,
+      { wrapper: AppProviders },
+    )
+
+    expect(screen.getByText('Card used')).toBeInTheDocument()
+    expect(screen.getByText(formatMaskedCardNumber(firstDebitCard.cardNumber))).toBeInTheDocument()
   })
 })

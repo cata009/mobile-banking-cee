@@ -22,11 +22,13 @@ export interface MiniPhoneProps {
   statusBarVariant?: "light" | "dark";
   /** Top inset reserved for the status bar, exposed to PageHeader via --uc-phone-top-reserve. */
   topReserve?: number;
+  /** Lets the active Journey preview receive native vertical scrolling. */
+  scrollable?: boolean;
   className?: string;
 }
 
 const MiniPhone = forwardRef<HTMLDivElement, MiniPhoneProps>(function MiniPhone(
-  { children, scale = 0.62, statusBarVariant = "light", topReserve = 44, className },
+  { children, scale = 0.62, statusBarVariant = "light", topReserve = 44, scrollable = false, className },
   ref,
 ) {
   const frameStyle = {
@@ -39,13 +41,17 @@ const MiniPhone = forwardRef<HTMLDivElement, MiniPhoneProps>(function MiniPhone(
 
   return (
     <div
-      // Inert wrapper: the preview is a snapshot, not an interactive surface.
+      // Filmstrip/export previews stay inert; the focused Journey preview keeps the
+      // real screen's native vertical scrolling available for review.
       ref={(node) => {
-        if (node) node.inert = true;
+        if (!node) return;
+        if (scrollable) node.removeAttribute("inert");
+        else node.inert = true;
       }}
-      aria-hidden="true"
+      aria-hidden={scrollable ? undefined : true}
+      data-flow-preview-scrollable={scrollable ? "true" : undefined}
       className={`relative shrink-0 overflow-hidden ${className ?? ""}`}
-      style={{ width: SCREEN_WIDTH * scale, height: SCREEN_HEIGHT * scale }}
+      style={{ width: SCREEN_WIDTH * scale, height: SCREEN_HEIGHT * scale, touchAction: scrollable ? "pan-y" : undefined }}
     >
       <div
         ref={ref}

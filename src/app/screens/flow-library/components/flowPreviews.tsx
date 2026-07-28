@@ -2,6 +2,11 @@ import type { ReactNode } from "react";
 import AccountBalanceCard from "@/app/components/accounts/AccountBalanceCard";
 import Card from "@/app/components/cards/Card";
 import NavigationRow from "@/app/components/NavigationRow";
+import AccountDetailScreen from "@/app/screens/accounts/AccountDetailScreen";
+import CardDetailScreen from "@/app/screens/cards/CardDetailScreen";
+import { TransactionDetailScreen } from "@/app/screens/payments/DomesticPaymentFlowScreens";
+import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
+import { HuMerchantLogoMark } from "@/app/screens/kids/hu/merchantLogos";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
@@ -12,6 +17,8 @@ import { AppIcon, type IconName } from "@/app/components/icons";
 import { PreviewSafeTop } from "./MiniPhone";
 import { FLOW_DEMO } from "../flows/demoData";
 import type { FlowScreenKind } from "../flows/types";
+import { getAccountTransactions, type AccountTransaction } from "@/data/accountDetails";
+import { mockProducts, type CurrentAccount, type DebitCard } from "@/data/products";
 
 /**
  * Flow Library previews — high-fidelity compositions of the REAL design-system
@@ -686,6 +693,183 @@ function SuccessStep({ title, body }: { title: string; body: string }) {
   return <StandardSuccessScreen title={title} body={body} actionLabel="Ok, I got it" onDone={noop} />;
 }
 
+// --------------------------------------------------------- ETHOCA merchant enrichment
+
+const ETHOCA_DEBIT_CARD = mockProducts.find((product): product is DebitCard => product.type === "debit_card")!;
+const ETHOCA_CURRENT_ACCOUNT = mockProducts.find((product): product is CurrentAccount => product.type === "current_account")!;
+const ETHOCA_RO_TRANSACTIONS = getAccountTransactions("RO", 0, "RON");
+
+function demoTransaction(label: string, status?: AccountTransaction["status"]): AccountTransaction {
+  const transaction = ETHOCA_RO_TRANSACTIONS.find(
+    (candidate) => candidate.label === label && candidate.source === "card" && (!status || candidate.status === status),
+  );
+  if (!transaction) throw new Error(`ETHOCA Flow fixture is missing the ${label} card transaction.`);
+  return transaction;
+}
+
+type EthocaMerchantId = "youtube" | "carrefour" | "emag";
+
+/** Existing merchant-logo asset reused from the current Mobile PI Kids implementation. */
+function ExistingMerchantLogo({ merchant, size = 32 }: { merchant: "youtube" | "netflix"; size?: 32 | 64 }) {
+  const scale = size / 34;
+  return (
+    <div className="grid shrink-0 place-items-center overflow-visible" data-ethoca-visual="merchant-logo" style={{ width: size, height: size }}>
+      <div style={{ transform: `scale(${scale})` }}><HuMerchantLogoMark merchant={merchant} /></div>
+    </div>
+  );
+}
+
+/**
+ * ETHOCA uses the merchant's supplied brand asset, never a letter-based stand-in.
+ * Carrefour is its Romania web asset and eMAG is the logo served by emag.ro.
+ * The existing Mobile PI YouTube vector is a real Simple Icons mark.
+ */
+function EthocaMerchantLogo({ merchant, size = 32 }: { merchant: EthocaMerchantId; size?: 32 | 64 }) {
+  if (merchant === "youtube") return <ExistingMerchantLogo merchant="youtube" size={size} />;
+
+  const config = merchant === "carrefour"
+    ? {
+        label: "Carrefour",
+        source: "official-carrefour",
+        src: "https://cdn-static.carrefour.ro/unified/assets/images/dist/logo/default/carrefour.png",
+      }
+    : {
+        label: "eMAG",
+        source: "official-emag",
+        src: "https://s13emagst.akamaized.net/layout/ro/images/logo//59/88362.svg",
+      };
+
+  return (
+    <span
+      aria-label={`${config.label} merchant logo`}
+      className="grid shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--uc-static-white)] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--uc-static-black)_12%,transparent)]"
+      data-ethoca-visual="merchant-logo"
+      data-ethoca-logo-source={config.source}
+      data-testid={`merchant-logo-${merchant}`}
+      role="img"
+      style={{ width: size, height: size }}
+    >
+      <img
+        alt=""
+        className="h-full w-full object-contain p-[12%]"
+        src={config.src}
+      />
+    </span>
+  );
+}
+
+function ExistingPfmFallback({ transaction }: { transaction: AccountTransaction }) {
+  return (
+    <span className="grid size-[32px] shrink-0 place-items-center rounded-full bg-[#F5F5F5]" aria-label="PFM category fallback" data-ethoca-visual="pfm-fallback">
+      <PfmCategoryIcon category={transaction.pfmCategory} size={20} />
+    </span>
+  );
+}
+
+function merchantLogoFor(transaction: AccountTransaction) {
+  if (transaction.label === "YouTube Premium") return <EthocaMerchantLogo merchant="youtube" />;
+  if (transaction.label === "Carrefour") return <EthocaMerchantLogo merchant="carrefour" />;
+  if (transaction.label === "eMAG") return <EthocaMerchantLogo merchant="emag" />;
+  return undefined;
+}
+
+function EthocaListPreview({ state }: { state: "available" | "pending" | "fallback" }) {
+  const transactionFilter = (transaction: AccountTransaction) => {
+    if (state === "pending") return transaction.status === "Pending";
+    if (state === "fallback") return transaction.status === "Booked" && transaction.label === "Piata Obor";
+    return transaction.status === "Booked" && ["Carrefour", "YouTube Premium"].includes(transaction.label);
+  };
+
+  return (
+    <CardDetailScreen
+      selectedCardId="card-debit-1"
+      onBack={noop}
+      onCardDetailsClick={noop}
+      onShowCardDetailsClick={noop}
+      onCardOptionsClick={noop}
+      onTransactionClick={noop}
+      transactionRowPresentation={{
+        displayLabel: (transaction) => transaction.label,
+        transactionFilter,
+        leadingVisual: (transaction) => {
+          if (state === "fallback") return <ExistingPfmFallback transaction={transaction} />;
+          return merchantLogoFor(transaction) ?? <ExistingPfmFallback transaction={transaction} />;
+        },
+      }}
+    />
+  );
+}
+
+function EthocaAccountListPreview({ state }: { state: "available" | "pending" }) {
+  const transactionFilter = (transaction: AccountTransaction) => {
+    if (state === "pending") return transaction.status === "Pending";
+    return transaction.status === "Booked" && ["Carrefour", "YouTube Premium", "Enel Energie"].includes(transaction.label);
+  };
+
+  return (
+    <AccountDetailScreen
+      selectedProductId={ETHOCA_CURRENT_ACCOUNT.id}
+      onBack={noop}
+      onDetailsClick={noop}
+      onOptionsClick={noop}
+      onTransactionClick={noop}
+      transactionRowPresentation={{
+        displayLabel: (transaction) => transaction.label,
+        transactionFilter,
+        leadingVisual: (transaction) => transaction.source === "card"
+          ? merchantLogoFor(transaction) ?? <ExistingPfmFallback transaction={transaction} />
+          : <ExistingPfmFallback transaction={transaction} />,
+      }}
+    />
+  );
+}
+
+function EthocaTransactionDetailPreview({ mode }: { mode: "in-store" | "online" | "pending" | "partial-data" | "no-logo" }) {
+  const transaction = mode === "in-store"
+    ? demoTransaction("Carrefour")
+    : mode === "online"
+      ? demoTransaction("YouTube Premium")
+      : mode === "pending"
+        ? demoTransaction("eMAG", "Pending")
+      : demoTransaction("Piata Obor");
+  const enrichment = mode === "in-store"
+    ? {
+        cleanMerchantName: "Carrefour",
+        merchantLogo: <EthocaMerchantLogo merchant="carrefour" size={64} />,
+        location: { label: "Merchant location", address: "Carrefour Băneasa · Șos. București-Ploiești 42D, Bucharest" },
+        mcc: "5411 · Grocery stores, supermarkets",
+      }
+    : mode === "online"
+      ? {
+          cleanMerchantName: "YouTube Premium",
+          merchantLogo: <EthocaMerchantLogo merchant="youtube" size={64} />,
+          mcc: "4899 · Cable, satellite and other pay television",
+        }
+      : mode === "pending"
+        ? {
+            cleanMerchantName: "eMAG",
+            merchantLogo: <EthocaMerchantLogo merchant="emag" size={64} />,
+          }
+        : mode === "partial-data"
+          ? {
+              cleanMerchantName: "Piata Obor",
+              mcc: "5411 · Grocery stores, supermarkets",
+            }
+          : undefined;
+
+  return (
+    <TransactionDetailScreen
+      country="RO"
+      product={ETHOCA_DEBIT_CARD}
+      transaction={transaction}
+      merchantEnrichment={enrichment}
+      onBack={noop}
+      onRedoPayment={noop}
+      onCategoryChange={noop}
+    />
+  );
+}
+
 // ----------------------------------------------------------------- dispatcher
 
 export interface PreviewContext {
@@ -767,6 +951,26 @@ export function renderFlowPreview(kind: FlowScreenKind, _context: PreviewContext
       return <CardOptionsPreview cardKind="credit" overlay="popup" />;
     case "pin-not-eligible-debit":
       return <CardOptionsPreview cardKind="debit" overlay="popup" />;
+    case "ethoca-list-merchant-logo":
+      return <EthocaListPreview state="available" />;
+    case "ethoca-account-list-merchant-logo":
+      return <EthocaAccountListPreview state="available" />;
+    case "ethoca-list-pending-merchant-logo":
+      return <EthocaListPreview state="pending" />;
+    case "ethoca-account-list-pending-merchant-logo":
+      return <EthocaAccountListPreview state="pending" />;
+    case "ethoca-detail-pending-merchant-logo":
+      return <EthocaTransactionDetailPreview mode="pending" />;
+    case "ethoca-list-pfm-fallback":
+      return <EthocaListPreview state="fallback" />;
+    case "ethoca-detail-partial-data":
+      return <EthocaTransactionDetailPreview mode="partial-data" />;
+    case "ethoca-detail-in-store":
+      return <EthocaTransactionDetailPreview mode="in-store" />;
+    case "ethoca-detail-online":
+      return <EthocaTransactionDetailPreview mode="online" />;
+    case "ethoca-detail-logo-unavailable":
+      return <EthocaTransactionDetailPreview mode="no-logo" />;
     default:
       return null;
   }

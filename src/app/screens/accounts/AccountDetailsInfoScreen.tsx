@@ -1,6 +1,6 @@
 import PageHeader from "@/app/components/PageHeader";
 import { AppIcon } from "@/app/components/icons";
-import NavigationCardArt from "@/app/components/cards/NavigationCardArt";
+import CardNavigationRow from "@/app/components/cards/CardNavigationRow";
 import AccountDetailsInfoField from "@/app/components/accounts/AccountDetailsInfoField";
 import CopyToast from "@/app/components/accounts/CopyToast";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
@@ -13,7 +13,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { getLoanDetails, getTermDepositDetails } from "@/data/accountProductDetails";
 import { isAccountDetailProduct } from "@/data/products";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
-import type { Product } from "@/data/products";
+import type { DebitCard, Product } from "@/data/products";
 
 interface AccountDetailsInfoScreenProps {
   selectedProductId?: string | null;
@@ -32,24 +32,6 @@ const PRODUCT_TITLE_KEYS_BY_TYPE: Record<Product["type"], string> = {
   investment_account: "investmentAccount",
 };
 
-function ConnectedCardRow() {
-  const { t } = useLanguage();
-  return (
-    <button className="grid w-full grid-cols-[64px_1fr_24px] items-center gap-[16px] py-[18px] text-left">
-      <NavigationCardArt />
-      <div className="min-w-0">
-        <p className="uc-type-n4-strong leading-[20px] text-[var(--uc-text)]">
-          {t("runtime.accounts.detailsInfo.mastercardStandardDebit", "Mastercard Standard Debit")}
-        </p>
-        <p className="uc-type-n5 mt-[2px] leading-[15px] text-[var(--uc-text-muted)]">
-          5545 XXXX XXXX 3250
-        </p>
-      </div>
-      <AppIcon name="chevron-link" color="var(--uc-text)" />
-    </button>
-  );
-}
-
 function getAccountDetailsProduct(products: Product[], selectedProductId?: string | null) {
   const accountProducts = products.filter(isAccountDetailProduct);
   return accountProducts.find((product) => product.id === selectedProductId) ?? accountProducts[0];
@@ -64,6 +46,9 @@ export default function AccountDetailsInfoScreen({
   const { categories } = useProducts();
   const products = categories.flatMap((category) => category.products);
   const product = getAccountDetailsProduct(products, selectedProductId);
+  const connectedCard = product?.type === "current_account"
+    ? products.find((candidate): candidate is DebitCard => candidate.type === "debit_card" && candidate.linkedAccountId === product.id)
+    : null;
   const config = getCountryConfig(country);
   const { toast: copyToast, copy: copyToClipboard } = useCopyToClipboard();
   const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(64);
@@ -211,7 +196,7 @@ export default function AccountDetailsInfoScreen({
 
             <section>
               <SectionHeadingDivider title={t("runtime.accounts.detailsInfo.connectedCards", "Connected cards")} />
-              <ConnectedCardRow />
+              <CardNavigationRow card={connectedCard} />
             </section>
           </>
         ) : null}

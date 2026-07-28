@@ -122,7 +122,9 @@ function collectAnalyticsTransactions(
 
     seenProfiles.add(profileIndex);
 
-    getAccountTransactions(country, profileIndex, product.currency).forEach((transaction) => {
+    getAccountTransactions(country, profileIndex, product.currency)
+      .filter((transaction) => transaction.status === "Booked")
+      .forEach((transaction) => {
       const override = categoryOverrides[transaction.id];
       allTransactions.push({
         ...transaction,
@@ -337,7 +339,7 @@ export function createSpendingCategoryDetail(
     subcategoryTotals.set(label, {
       total: roundMoney(current.total + Math.abs(transaction.amount)),
       transactionCount: current.transactionCount + 1,
-    });
+      });
   });
 
   const subcategories = Array.from(subcategoryTotals.entries())

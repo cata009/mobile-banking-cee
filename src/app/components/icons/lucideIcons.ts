@@ -18,6 +18,7 @@ import {
   Download,
   Eye,
   EyeOff,
+  Figma,
   Gift,
   Landmark,
   Lock,
@@ -117,6 +118,15 @@ export const LUCIDE_ICONS = {
     height: 20,
     component: CreditCard,
     usage: ["QuickActions"],
+  },
+  figma: {
+    source: "lucide",
+    label: "Figma",
+    category: "External Lucide",
+    width: 20,
+    height: 20,
+    component: Figma,
+    usage: ["FlowLibraryScreen source action"],
   },
   download: {
     source: "lucide",

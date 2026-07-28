@@ -14,7 +14,7 @@
 import type { CountryId } from "@/app/state/demoTypes";
 
 /** Stable ids for the flows shipped in the library. */
-export type FlowPreviewId = "ro-round-up" | "ro-card-pin";
+export type FlowPreviewId = "ro-round-up" | "ro-card-pin" | "mobile-pi-ethoca";
 
 /**
  * Screen kinds a preview step can render. Each maps to a DS-composed preview in
@@ -53,7 +53,20 @@ export type CardPinScreenKind =
   | "pin-not-eligible-credit"
   | "pin-not-eligible-debit";
 
-export type FlowScreenKind = RoundUpScreenKind | CardPinScreenKind;
+/** Global card-transaction enrichment states sourced from Mastercard Ethoca. */
+export type EthocaScreenKind =
+  | "ethoca-list-merchant-logo"
+  | "ethoca-account-list-merchant-logo"
+  | "ethoca-list-pending-merchant-logo"
+  | "ethoca-account-list-pending-merchant-logo"
+  | "ethoca-detail-pending-merchant-logo"
+  | "ethoca-list-pfm-fallback"
+  | "ethoca-detail-partial-data"
+  | "ethoca-detail-in-store"
+  | "ethoca-detail-online"
+  | "ethoca-detail-logo-unavailable";
+
+export type FlowScreenKind = RoundUpScreenKind | CardPinScreenKind | EthocaScreenKind;
 
 /** Where a flow sits on the road to production. Drives the status chip + filtering. */
 export type FlowStatus = "future-release-preview" | "in-review" | "baseline-candidate";
@@ -124,6 +137,50 @@ export interface FlowNote {
   body: string;
 }
 
+/** A concise fact rendered in the BA-style General information section. */
+export interface FlowAnalysisFact {
+  label: string;
+  value: string;
+}
+
+/** A concise entry for the BA-style document history. */
+export interface FlowAnalysisVersion {
+  version: string;
+  date: string;
+  detail: string;
+}
+
+/** An open BA decision with the familiar reference and review status. */
+export interface FlowAnalysisOpenIssue {
+  reference: string;
+  status: "Open" | "Info";
+  title: string;
+  detail: string;
+}
+
+/** A named BA subsection, replacing duplicated scenario-specific spec tabs. */
+export interface FlowAnalysisSection {
+  title: string;
+  description?: string;
+  items: readonly string[];
+}
+
+/**
+ * A business-analysis companion structure for flows that need to mirror the
+ * established BA document shape without exposing implementation credentials,
+ * service names, or live production data.
+ */
+export interface FlowBusinessAnalysisSpec {
+  generalInformation: readonly FlowAnalysisFact[];
+  versionContext: string;
+  versionHistory: readonly FlowAnalysisVersion[];
+  openIssues: readonly FlowAnalysisOpenIssue[];
+  requirements: readonly FlowAnalysisSection[];
+  currentStatus: readonly FlowAnalysisSection[];
+  proposedSolution: readonly FlowAnalysisSection[];
+  nonFunctionalRequirements: readonly FlowAnalysisSection[];
+}
+
 /**
  * Flow-level structured specification — the handoff a BA lifts to write the spec.
  * Concise structured fields up top; rich narrative preserved in `notes`.
@@ -131,10 +188,13 @@ export interface FlowNote {
 export interface FlowOverviewSpec {
   purpose: string;
   scopeNote: string;
+  /** Optional BA-aligned presentation for complex cross-functional flows. */
+  businessAnalysis?: FlowBusinessAnalysisSpec;
   entryPoints: FlowEntryPoint[];
   preconditions: string[];
   businessRules: string[];
-  signing: string;
+  /** Present only for flows that require an explicit signing step. */
+  signing?: string;
   successDestinations: string[];
   analyticsEvents: string[];
   openQuestions: string[];

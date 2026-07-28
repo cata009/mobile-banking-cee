@@ -5,9 +5,21 @@ import {
   createSpendingAnalyticsTimeline,
   createSpendingCategoryDetail,
 } from '@/data/spendingAnalytics'
-import { mockProducts, type Product } from '@/data/products'
+import { getAccountTransactions } from '@/data/accountDetails'
+import { mockProducts, type Currency, type Product } from '@/data/products'
 
 describe('spending analytics data', () => {
+  it('provides two PFM-excluded pending reservations for the primary current-account profile in every country', () => {
+    for (const country of COUNTRIES) {
+      const pending = getAccountTransactions(country, 0, COUNTRY_META[country].currency as Currency)
+        .filter((transaction) => transaction.status === 'Pending')
+      const analytics = createSpendingAnalytics(country, mockProducts, '2026-04')
+
+      expect(pending, `${country}/pending`).toHaveLength(2)
+      expect(analytics.sourceTransactions.some((transaction) => transaction.status === 'Pending')).toBe(false)
+    }
+  })
+
   it('provides an active country summary and falls back from an invalid selection', () => {
     for (const country of COUNTRIES) {
       const timeline = createSpendingAnalyticsTimeline(country, mockProducts)
