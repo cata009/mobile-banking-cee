@@ -2,6 +2,24 @@
 
 Last updated: 2026-07-28
 
+## 2026-07-28 Corporate Proxy Stale-Entrypoint Recovery
+
+- Reproduced the production failure at the HTTP-asset boundary rather than in the ETHOCA transaction renderer. A UniCredit corporate proxy can retain the previous deployment's `index.html`, which references `/assets/index-BFn-Zxi0.js` and `/assets/index-BnjweOiM.css`; both URLs returned `404` from the current canonical deployment, so React never mounted and the entire page stayed blank. The current page and transaction fixtures render normally when fresh HTML reaches the browser, and Vercel runtime logs contain no application error.
+- Changed the Vite production contract to stable application entrypoints: `/assets/app.js`, `/assets/app.css`, and stable named JavaScript chunks. Added `no-store, max-age=0, must-revalidate` response policy for HTML and executable entry assets so intermediaries are explicitly told not to retain a deployment shell that can outlive its bundles.
+- Added compatibility rewrites from the two previously published hashed entry URLs to the new stable JS/CSS entrypoints. This allows the exact stale HTML already observed on the corporate network to recover immediately after the compatible deployment instead of requiring a proxy-cache purge.
+- Added `tests/tooling/deployment-cache-compatibility.test.ts`. The regression was observed red before implementation because Vite still emitted hashed entries and `vercel.json` did not exist; it passed after the stable-entry and compatibility policy were added.
+- Files changed: `vite.config.ts`, `vercel.json`, `tests/tooling/deployment-cache-compatibility.test.ts`, `docs/handoff/current-session.md`, `docs/handoff/next-tasks.md`, and `docs/platform-capability-map/README.md`.
+- Verification: fresh `npm run verify` passed TypeScript, ESLint, all `66` test files / `684` tests, all six audits (including the 181-asset audit), and the production build. The build retains only the already-triaged chart-test sizing, empty-`react-vendor`, and >500 kB chunk warnings.
+- Publication: Vercel Production deployment `dpl_E4SQq7CZpuBfyiycmvjE5nZ19QBK` is `READY` and aliased to [`https://mobile-banking-cee.vercel.app`](https://mobile-banking-cee.vercel.app). Canonical HTML, `/assets/app.js`, `/assets/app.css`, and a stable application chunk return `200`; HTML and stable executable entries return the intended no-store policy. The exact stale corporate URLs `/assets/index-BFn-Zxi0.js` and `/assets/index-BnjweOiM.css` now return `200` as JavaScript and CSS instead of `404`.
+- Live browser evidence: the canonical ETHOCA deep link mounts one React root, loads `/assets/app.js`, selects Journey, renders measurable visible Carrefour, YouTube Premium, and Enel Energie transaction labels, and reports zero browser console errors.
+- Limitation: the exact UniCredit proxy implementation cannot be executed locally. The specific stale-entry failure is repaired and verified at the public boundary; a final open from the corporate network remains external confirmation.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes — corporate-network confirmation remains a precise follow-up
+  - safe to resume: yes — the stale shell has live compatibility assets and the canonical ETHOCA Journey renders without errors.
+
 ## 2026-07-28 ETHOCA Journey Transaction-List Scroll Resilience
 
 - Reinvestigated the UniCredit-network report that the ETHOCA `Enriched card list` and `Enriched account list` showed their phone content above Search but not the transaction rows below it. The transaction records are local, deterministic Flow Library fixtures; there is no runtime API or merchant-image request in this part of the preview.
