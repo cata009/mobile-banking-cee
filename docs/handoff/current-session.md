@@ -2,6 +2,22 @@
 
 Last updated: 2026-07-28
 
+## 2026-07-28 ETHOCA Corporate-Network Resilience and Flow Library Entry Fix
+
+- Diagnosed the UniCredit-network-only ETHOCA Journey failure as a presentation dependency, not a missing transaction-record problem: the affected Carrefour and eMAG merchant marks were requested at runtime from third-party merchant domains. Those requests can be blocked by a corporate firewall even though the Vercel app and the same Journey load on a personal network.
+- Bundled the official Carrefour and eMAG artwork with the Flow Library build, so the ETHOCA Journey no longer needs those merchant domains at runtime. The existing error path now renders the documented grey PFM fallback if a bundled visual still cannot be decoded, leaving every transaction row usable instead of blank or broken.
+- Corrected the global `Flows` header destination. It now opens the Flow Library index with all available flows; a direct `screen=flow-library&flow=...` link still opens its requested flow detail. The old behavior selected the first flow (`ETHOCA`) whenever the global destination was clicked.
+- Files changed: `src/assets/ethoca/carrefour-official.svg`, `src/assets/ethoca/emag-official.svg`, `src/app/screens/flow-library/components/flowPreviews.tsx`, `src/app/screens/flow-library/FlowLibraryScreen.tsx`, `src/app/components/demo/DemoTopBar.tsx`, `src/app/App.tsx`, `tests/screens/flow-library.test.tsx`, `tests/components/demo-top-bar.test.tsx`, and handoff/capability documentation.
+- Verification: red-to-green tests cover bundled non-network merchant sources, PFM fallback after an image failure, Flow Library index entry, and the global header event. Fresh `npm test` passed; `npm run typecheck`, `npm run lint`, `npm run audit:all`, and `npm run build` also passed. The build retains only the already-triaged empty-`react-vendor` and >500 kB chunk warnings.
+- Publication: Vercel Production deployment `dpl_gZVymCBxWookfbBJcoQvWxJRPs7Z` is `READY` and aliased to [`https://mobile-banking-cee.vercel.app`](https://mobile-banking-cee.vercel.app). Live production smoke confirms that the global `Flows` destination opens the Flow Library index, while a direct flow URL still opens ETHOCA detail. The live ETHOCA Journey renders its Carrefour mark from a bundled data URI and reports no external HTTP merchant-image source.
+- Limitation: the exact corporate firewall cannot be emulated locally. Post-publication confirmation from the UniCredit network remains the final environmental smoke, while the former third-party image requests are removed from this rendering path.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes — corporate-network confirmation is a specific follow-up task
+  - safe to resume: yes — the source-level firewall dependency is removed and all local quality gates pass.
+
 ## 2026-07-28 Mobile PI Flow Review Contrast and Release Closeout
 
 - Updated the ETHOCA Journey `Current screen` review surface to use the stronger neutral-200 background (`#E5E5E5`) and a restrained border. This creates a clear visual boundary around the unchanged white Mobile PI phone, without introducing a new product screen or changing the phone content.

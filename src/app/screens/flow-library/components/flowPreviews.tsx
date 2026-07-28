@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import AccountBalanceCard from "@/app/components/accounts/AccountBalanceCard";
 import Card from "@/app/components/cards/Card";
 import NavigationRow from "@/app/components/NavigationRow";
@@ -19,6 +19,8 @@ import { FLOW_DEMO } from "../flows/demoData";
 import type { FlowScreenKind } from "../flows/types";
 import { getAccountTransactions, type AccountTransaction } from "@/data/accountDetails";
 import { mockProducts, type CurrentAccount, type DebitCard } from "@/data/products";
+import carrefourOfficialLogo from "@/assets/ethoca/carrefour-official.svg";
+import emagOfficialLogo from "@/assets/ethoca/emag-official.svg";
 
 /**
  * Flow Library previews — high-fidelity compositions of the REAL design-system
@@ -720,23 +722,33 @@ function ExistingMerchantLogo({ merchant, size = 32 }: { merchant: "youtube" | "
 }
 
 /**
- * ETHOCA uses the merchant's supplied brand asset, never a letter-based stand-in.
- * Carrefour is its Romania web asset and eMAG is the logo served by emag.ro.
- * The existing Mobile PI YouTube vector is a real Simple Icons mark.
+ * ETHOCA uses a merchant-supplied brand asset, never a letter-based stand-in.
+ * The assets are bundled with the demo rather than requested from merchant CDNs
+ * at runtime, so corporate firewalls cannot blank the transaction presentation.
  */
-function EthocaMerchantLogo({ merchant, size = 32 }: { merchant: EthocaMerchantId; size?: 32 | 64 }) {
+function EthocaMerchantLogo({
+  merchant,
+  transaction,
+  size = 32,
+}: {
+  merchant: EthocaMerchantId;
+  transaction: AccountTransaction;
+  size?: 32 | 64;
+}) {
+  const [imageFailed, setImageFailed] = useState(false);
   if (merchant === "youtube") return <ExistingMerchantLogo merchant="youtube" size={size} />;
+  if (imageFailed) return <ExistingPfmFallback transaction={transaction} />;
 
   const config = merchant === "carrefour"
     ? {
         label: "Carrefour",
-        source: "official-carrefour",
-        src: "https://cdn-static.carrefour.ro/unified/assets/images/dist/logo/default/carrefour.png",
+        source: "bundled-official-carrefour",
+        src: carrefourOfficialLogo,
       }
     : {
         label: "eMAG",
-        source: "official-emag",
-        src: "https://s13emagst.akamaized.net/layout/ro/images/logo//59/88362.svg",
+        source: "bundled-official-emag",
+        src: emagOfficialLogo,
       };
 
   return (
@@ -752,6 +764,7 @@ function EthocaMerchantLogo({ merchant, size = 32 }: { merchant: EthocaMerchantI
       <img
         alt=""
         className="h-full w-full object-contain p-[12%]"
+        onError={() => setImageFailed(true)}
         src={config.src}
       />
     </span>
@@ -767,9 +780,9 @@ function ExistingPfmFallback({ transaction }: { transaction: AccountTransaction 
 }
 
 function merchantLogoFor(transaction: AccountTransaction) {
-  if (transaction.label === "YouTube Premium") return <EthocaMerchantLogo merchant="youtube" />;
-  if (transaction.label === "Carrefour") return <EthocaMerchantLogo merchant="carrefour" />;
-  if (transaction.label === "eMAG") return <EthocaMerchantLogo merchant="emag" />;
+  if (transaction.label === "YouTube Premium") return <EthocaMerchantLogo merchant="youtube" transaction={transaction} />;
+  if (transaction.label === "Carrefour") return <EthocaMerchantLogo merchant="carrefour" transaction={transaction} />;
+  if (transaction.label === "eMAG") return <EthocaMerchantLogo merchant="emag" transaction={transaction} />;
   return undefined;
 }
 
@@ -835,20 +848,20 @@ function EthocaTransactionDetailPreview({ mode }: { mode: "in-store" | "online" 
   const enrichment = mode === "in-store"
     ? {
         cleanMerchantName: "Carrefour",
-        merchantLogo: <EthocaMerchantLogo merchant="carrefour" size={64} />,
+        merchantLogo: <EthocaMerchantLogo merchant="carrefour" transaction={transaction} size={64} />,
         location: { label: "Merchant location", address: "Carrefour Băneasa · Șos. București-Ploiești 42D, Bucharest" },
         mcc: "5411 · Grocery stores, supermarkets",
       }
     : mode === "online"
       ? {
           cleanMerchantName: "YouTube Premium",
-          merchantLogo: <EthocaMerchantLogo merchant="youtube" size={64} />,
+          merchantLogo: <EthocaMerchantLogo merchant="youtube" transaction={transaction} size={64} />,
           mcc: "4899 · Cable, satellite and other pay television",
         }
       : mode === "pending"
         ? {
             cleanMerchantName: "eMAG",
-            merchantLogo: <EthocaMerchantLogo merchant="emag" size={64} />,
+            merchantLogo: <EthocaMerchantLogo merchant="emag" transaction={transaction} size={64} />,
           }
         : mode === "partial-data"
           ? {

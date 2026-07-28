@@ -6,7 +6,6 @@
 import { forwardRef, useEffect, useRef, useState, type ComponentPropsWithoutRef } from "react";
 import { useNavigationContext } from "@/app/contexts/NavigationContext";
 import { COUNTRIES, COUNTRY_META, FEATURE_META } from "@/app/registry/demoConfig";
-import { FLOW_PREVIEW_ORDER, type FlowPreviewId } from "@/app/registry/flowPreviewRegistry";
 import { PRODUCT_ORDER } from "@/app/registry/projectModel";
 import { getReleaseBundle } from "@/app/registry/releaseRegistry";
 import { useDemo } from "@/app/state/demoStore";
@@ -203,12 +202,9 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
   };
 
   const handleFlowLibrarySelect = () => {
-    const firstFlow = FLOW_PREVIEW_ORDER[0];
     closeAllDropdowns();
     setCoAppingActive(false);
-    if (firstFlow) {
-      window.dispatchEvent(new CustomEvent<FlowPreviewId>("flow-preview-select", { detail: firstFlow }));
-    }
+    window.dispatchEvent(new Event("flow-library-open-index"));
     window.requestAnimationFrame(() => navigateToAndReset("flow-library"));
   };
 

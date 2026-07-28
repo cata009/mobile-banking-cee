@@ -63,6 +63,17 @@ describe('flow definitions integrity', () => {
 })
 
 describe('flow-library screen', () => {
+  it('opens the library index when entered from the global Flows destination', () => {
+    render(
+      <DemoProvider>
+        <FlowLibraryScreen initialFlowId="mobile-pi-ethoca" initialView="index" />
+      </DemoProvider>,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Future flows, spec-ready' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'ETHOCA Merchant Enrichment', level: 1 })).not.toBeInTheDocument()
+  })
+
   it('opens on the selected flow and exposes capturable step screens', () => {
     renderFlowLibrary('ro-round-up')
 
@@ -243,7 +254,7 @@ describe('flow-library screen', () => {
     expect(screen.getAllByText('Merchant Category Code (MCC)').length).toBeGreaterThan(0)
   })
 
-  it('makes merchant-logo and grey PFM fallback decisions visible in every ETHOCA list state', () => {
+  it('keeps ETHOCA merchant logos local and shows the grey PFM fallback in every list state', () => {
     renderFlowLibrary('mobile-pi-ethoca')
 
     fireEvent.click(screen.getByRole('tab', { name: 'Journey' }))
@@ -254,16 +265,35 @@ describe('flow-library screen', () => {
     expect(focusedPreview().queryByText('OMV Petrom')).not.toBeInTheDocument()
     expect(focusedPreview().queryByText('Regina Maria')).not.toBeInTheDocument()
     expect(focusedPreview().queryByText('DECEMBER 2025')).not.toBeInTheDocument()
-    expect(focusedPreview().getByTestId('merchant-logo-carrefour')).toHaveAttribute('data-ethoca-logo-source', 'official-carrefour')
+    const carrefourLogo = focusedPreview().getByTestId('merchant-logo-carrefour')
+    expect(carrefourLogo).toHaveAttribute('data-ethoca-logo-source', 'bundled-official-carrefour')
+    expect(carrefourLogo.querySelector('img')).toHaveAttribute('src', expect.not.stringMatching(/^https?:\/\//))
 
     fireEvent.click(screen.getByRole('button', { name: 'Pending card transaction' }))
     expect(focusedPreview().getAllByLabelText('eMAG merchant logo').length).toBeGreaterThan(0)
-    expect(focusedPreview().getAllByTestId('merchant-logo-emag')[0]).toHaveAttribute('data-ethoca-logo-source', 'official-emag')
+    const emagLogo = focusedPreview().getAllByTestId('merchant-logo-emag')[0]!
+    expect(emagLogo).toHaveAttribute('data-ethoca-logo-source', 'bundled-official-emag')
+    expect(emagLogo.querySelector('img')).toHaveAttribute('src', expect.not.stringMatching(/^https?:\/\//))
     expect(focusedPreview().queryByLabelText('Bar Magenta merchant logo')).not.toBeInTheDocument()
     expect(focusedPreview().getAllByLabelText('PFM category fallback').length).toBeGreaterThan(0)
 
     fireEvent.click(screen.getByRole('button', { name: 'Logo unavailable fallback' }))
     expect(focusedPreview().getAllByLabelText('PFM category fallback').length).toBeGreaterThan(0)
+  })
+
+  it('shows the PFM fallback if a bundled ETHOCA merchant logo cannot be rendered', () => {
+    renderFlowLibrary('mobile-pi-ethoca')
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Journey' }))
+    const focusedPreview = () => within(document.querySelector('[data-flow-preview-scrollable="true"]') as HTMLElement)
+    const carrefourLogo = focusedPreview().getByTestId('merchant-logo-carrefour')
+    const logoImage = carrefourLogo.querySelector('img')
+
+    expect(logoImage).not.toBeNull()
+    fireEvent.error(logoImage as HTMLImageElement)
+
+    expect(focusedPreview().queryByLabelText('Carrefour merchant logo')).not.toBeInTheDocument()
+    expect(focusedPreview().getByLabelText('PFM category fallback')).toBeInTheDocument()
   })
 
   it('shows the account and pending ETHOCA states using the existing account and transaction-detail screens', () => {

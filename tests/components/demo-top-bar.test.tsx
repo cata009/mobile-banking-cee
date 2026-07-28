@@ -20,6 +20,25 @@ function renderTopBar() {
 }
 
 describe('DemoTopBar app and country selector', () => {
+  it('opens the Flows library index instead of preselecting a flow', () => {
+    const receivedEvents: string[] = []
+    const recordLibraryIndex = () => receivedEvents.push('library-index')
+    const recordFlowSelection = () => receivedEvents.push('flow-selection')
+    window.addEventListener('flow-library-open-index', recordLibraryIndex)
+    window.addEventListener('flow-preview-select', recordFlowSelection)
+
+    try {
+      renderTopBar()
+
+      fireEvent.click(screen.getByRole('button', { name: 'Flows' }))
+
+      expect(receivedEvents).toEqual(['library-index'])
+    } finally {
+      window.removeEventListener('flow-library-open-index', recordLibraryIndex)
+      window.removeEventListener('flow-preview-select', recordFlowSelection)
+    }
+  })
+
   it('keeps the compact app menu visible while opening countries in a separate submenu', () => {
     renderTopBar()
 
