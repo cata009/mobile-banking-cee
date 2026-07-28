@@ -36,6 +36,16 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
+        // Keep executable entrypoints stable so a corporate proxy that retains
+        // an older index.html never points at files removed by a new deployment.
+        entryFileNames: 'assets/app.js',
+        chunkFileNames: 'assets/chunks/[name].js',
+        assetFileNames(assetInfo) {
+          const names = assetInfo.names ?? []
+          return names.some((name) => name.endsWith('.css'))
+            ? 'assets/app.css'
+            : 'assets/[name]-[hash][extname]'
+        },
         // Split the previously-monolithic ~2 MB App chunk into stable vendor
         // groups that cache independently and load in parallel. This is purely
         // a chunking change — no runtime behavior is affected.
