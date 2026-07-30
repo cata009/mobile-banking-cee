@@ -61,6 +61,7 @@ import AccountTransactionRow from "@/app/components/accounts/AccountTransactionR
 import PaymentHeroCard, { PAYMENT_HERO_CARD_IMAGE_VARIANTS } from "@/app/components/payments/PaymentHeroCard";
 import { ContactsNavigationCard } from "@/app/screens/contacts/ContactsNavigationCard";
 import ProductCard from "@/app/components/ProductCard";
+import { buildFutureCzAccountCardActions } from "@/app/components/productCardFixtures";
 import ProductsList from "@/app/components/ProductsList";
 import CardComponent from "@/app/components/cards/CardComponent";
 import ToastMessage from "@/app/components/ui/ToastMessage";
@@ -874,6 +875,33 @@ export const COMPONENT_STATE_PREVIEWS: StatePreviewMap = {
   },
 
   "products.product-card-list-total": {
+    "pi-account-actions": () => (
+      <div className="flex w-full flex-col gap-[20px] bg-[var(--uc-surface)] px-[24px] py-[16px]">
+        <ProductCard
+          icon={<MiniProductIcon />}
+          title="Primary Account"
+          accountNumber="CZ43 BACX 1234 5678 9012 3401"
+          amount="22 850"
+          decimals=".50"
+          currency="CZK"
+          variant="evolution"
+          productStyle="pi"
+          stackRole="single"
+          actions={buildFutureCzAccountCardActions()}
+        />
+        <ProductCard
+          icon={<MiniProductIcon />}
+          title="Primary Account"
+          accountNumber="CZ43 BACX 1234 5678 9012 3401"
+          amount="22 850"
+          decimals=".50"
+          currency="CZK"
+          variant="evolution"
+          productStyle="pi"
+          stackRole="single"
+        />
+      </div>
+    ),
     "pi-default": () => (
       <div className="w-full py-[16px] bg-[var(--uc-surface)]">
         <div className="px-[24px]">

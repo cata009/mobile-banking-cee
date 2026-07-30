@@ -5,6 +5,7 @@ interface AccordionSectionProps {
   title: string;
   children: ReactNode;
   defaultOpen?: boolean;
+  titleClassName?: string;
 }
 
 interface AccordionChildProps {
@@ -15,7 +16,8 @@ interface AccordionChildProps {
 export default function AccordionSection({ 
   title, 
   children, 
-  defaultOpen = true 
+  defaultOpen = true,
+  titleClassName = "uc-type-l1",
 }: AccordionSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
@@ -54,7 +56,7 @@ export default function AccordionSection({
           }}
         >
           {/* Title */}
-          <h2 className="uc-type-l1 text-[var(--uc-text)]">
+          <h2 className={`${titleClassName} text-[var(--uc-text)]`}>
             {title}
           </h2>
         </div>
@@ -69,7 +71,7 @@ export default function AccordionSection({
           }}
         >
           {/* Title */}
-          <h2 className="uc-type-l1 text-[var(--uc-text)]">
+          <h2 className={`${titleClassName} text-[var(--uc-text)]`}>
             {title}
           </h2>
 

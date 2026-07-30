@@ -144,6 +144,12 @@ export const RELEASES: Record<ReleaseId, ReleaseMeta> = {
     description: "Pinned future feature preview based on the current CZ Mobile PI baseline.",
     status: "active",
   },
+  "release-future-cz-robo": {
+    id: "release-future-cz-robo",
+    label: "CZ - Robo",
+    description: "Pinned future Robo Advisor preview based on the current CZ Mobile PI Investments baseline.",
+    status: "active",
+  },
   "release-v1": {
     id: "release-v1",
     label: "Release R1",

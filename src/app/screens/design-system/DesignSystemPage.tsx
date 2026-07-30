@@ -501,7 +501,7 @@ export default function DesignSystemPage() {
                 source="components/ProductCard.tsx + ProductsList.tsx + TotalRow.tsx"
                 note={`${PRODUCT_CARD_EVOLUTION_SOURCE.schema} / ${PRODUCT_CARD_EVOLUTION_SOURCE.sourceNodeId} (requested ${PRODUCT_CARD_EVOLUTION_SOURCE.originalRequestedNodeId})`}
                 tone="gray"
-                specs={["327px Figma width", "PI + SME styles", "Default / Accordion / Open", "card padding 16px", "icon 32px", "amount 24px + decimals 14px", "total amount 20px + decimals 14px"]}
+                specs={["327px Figma width", "PI + SME styles", "Future CZ with / without quick actions", "Default / Accordion / Open", "card padding 16px", "icon 32px", "amount 24px + decimals 14px", "total amount 20px + decimals 14px"]}
                 detailsHref="#component/products.product-card-list-total"
               >
                 <ProductCardListTotalRowEvolutionSpecimen />

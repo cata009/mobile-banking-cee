@@ -101,6 +101,23 @@ export const FEATURE_META: Record<FeatureId, FeatureMeta> = {
     ],
   },
 
+  fx_czRoboAdvisor: {
+    id: "fx_czRoboAdvisor",
+    label: "CZ - Robo",
+    description: "Pinned Czech Republic Future preview for the Investments goal-based Robo Advisor journey.",
+    kind: "release",
+    scope: "countries",
+    countries: ["CZ"],
+    releases: ["release-future-cz-robo"],
+    products: ["PI"],
+    designSystems: ["current"],
+    lifecycleStatus: "implemented",
+    coverageStatus: "mock-driven",
+    introducedIn: "release-future-cz-robo",
+    baselineFrom: null,
+    affectedScreens: ["pi.investments.portfolio"],
+  },
+
   fx_quickActionsRedesign: {
     id: "fx_quickActionsRedesign",
     label: "Quick Actions Redesign",

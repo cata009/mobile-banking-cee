@@ -51,4 +51,15 @@ describe('DemoTopBar app and country selector', () => {
     expect(screen.getByText('Romania')).toBeInTheDocument()
     expect(screen.getByText('Czech Republic')).toBeInTheDocument()
   })
+
+  it('lists Chatbot and Robo as separate CZ Future previews', () => {
+    renderTopBar()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Baseline App' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Future App' }))
+    fireEvent.click(screen.getByRole('button', { name: 'CZ - Chatbot' }))
+
+    expect(screen.getAllByRole('button', { name: 'CZ - Chatbot' }).length).toBeGreaterThan(0)
+    expect(screen.getByRole('button', { name: 'CZ - Robo' })).toBeInTheDocument()
+  })
 })

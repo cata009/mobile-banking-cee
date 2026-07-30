@@ -210,6 +210,7 @@ function buildProjectPack(product: ProductId, country: CountryId): ProjectPack {
     releases: [
       "release-current",
       "release-future-cz-coapping",
+      "release-future-cz-robo",
       "release-v1",
       "release-v2",
       "release-v3",

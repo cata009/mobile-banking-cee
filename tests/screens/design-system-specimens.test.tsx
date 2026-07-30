@@ -78,6 +78,32 @@ afterEach(() => {
 })
 
 describe('Design System specimen selectors', () => {
+  it('publishes the Future CZ account card with and without quick actions', () => {
+    window.history.replaceState(null, '', '#products')
+    const { container } = renderInventory()
+    const variantSelect = selector(container, 'product-card-list-row-variant-select')
+    const specimen = selectorSpecimen(variantSelect)
+
+    expect(Array.from(variantSelect.options).map((option) => option.value)).toContain('pi-account-actions')
+    fireEvent.change(variantSelect, { target: { value: 'pi-account-actions' } })
+
+    expect(within(specimen).getByText('WITH QUICK ACTIONS')).toBeInTheDocument()
+    expect(within(specimen).getByText('WITHOUT QUICK ACTIONS')).toBeInTheDocument()
+    expect(specimen.querySelectorAll('[data-product-card-evolution]')).toHaveLength(2)
+    expect(specimen.querySelectorAll('[data-product-card-actions]')).toHaveLength(1)
+    expect(within(specimen).getByRole('button', { name: 'New payment' })).toBeInTheDocument()
+    expect(within(specimen).getByRole('button', { name: 'Scan QR code' })).toBeInTheDocument()
+    expect(within(specimen).getByRole('button', { name: 'Create QR code' })).toBeInTheDocument()
+    expect(within(specimen).getByRole('button', { name: 'Account info' })).toBeInTheDocument()
+
+    const newPaymentIcon = within(specimen).getByRole('button', { name: 'New payment' }).querySelector('svg')
+    expect(newPaymentIcon).toHaveAttribute('viewBox', '0 0 24 24')
+    expect(newPaymentIcon?.querySelector('path')).toHaveAttribute(
+      'd',
+      'M10.9248 5.125C10.9248 6.85062 9.58194 8.25 7.92473 8.25C6.26812 8.25 4.92471 6.85062 4.92471 5.125C4.92471 3.39875 6.26812 2 7.92473 2C9.58194 2 10.9248 3.39875 10.9248 5.125Z',
+    )
+  })
+
   it('keeps country and palette registries non-empty and in their published order', () => {
     expectTypeOf(COUNTRIES).toEqualTypeOf<readonly ['RO', 'CZ', 'SK', 'HU', 'RS', 'BA', 'BA_BL', 'SI']>()
     expectTypeOf(COLOR_PALETTES).toMatchTypeOf<readonly [DesignSystemPalette, ...DesignSystemPalette[]]>()

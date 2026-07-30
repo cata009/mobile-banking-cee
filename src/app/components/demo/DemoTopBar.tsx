@@ -46,7 +46,10 @@ const PRODUCT_CONTEXT_LABELS: Record<ProductId, string> = {
   KIDS_PI: "Kids",
 };
 
-const FUTURE_RELEASE_ORDER: readonly ReleaseId[] = ["release-future-cz-coapping"] as const;
+const FUTURE_RELEASE_ORDER: readonly ReleaseId[] = [
+  "release-future-cz-coapping",
+  "release-future-cz-robo",
+] as const;
 
 function getScenarioEntryScreen(scenario: Scenario) {
   return scenario === "active" ? "homepage" : "prelogin-inactive";

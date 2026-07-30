@@ -13,6 +13,7 @@ interface ProductsListProps {
     decimals: string;
     currency: string;
   };
+  totalLabel?: string;
 }
 
 export default function ProductsList({
@@ -22,6 +23,7 @@ export default function ProductsList({
   variant = 'legacy',
   productStyle = 'pi',
   totalData,
+  totalLabel,
 }: ProductsListProps) {
   const childrenArray = Children.toArray(children);
   const productCount = childrenArray.length;
@@ -77,6 +79,7 @@ export default function ProductsList({
                   integer={totalData.integer}
                   decimals={totalData.decimals}
                   currency={totalData.currency}
+                  label={totalLabel}
                 />
               ) : (
                 <div
@@ -91,6 +94,7 @@ export default function ProductsList({
                     integer={totalData.integer}
                     decimals={totalData.decimals}
                     currency={totalData.currency}
+                    label={totalLabel}
                   />
                 </div>
               )

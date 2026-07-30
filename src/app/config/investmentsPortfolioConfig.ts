@@ -440,6 +440,201 @@ const CATALOG_ONLY_SEEDS: readonly InvestmentSecuritySeed[] = [
   },
 ];
 
+const ROBO_GOAL_SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
+  {
+    id: "robo-apple",
+    title: "Apple",
+    status: "active",
+    contributionType: "ONE OFF",
+    weight: 30,
+    marketPrice: 213.76,
+    performancePercent: -1.8,
+    instrumentCurrency: "USD",
+    logoId: "unicredit",
+    securityAccountId: "robo-sec-usd",
+    securityAccountName: "Investment goals USD portfolio",
+    securityAccountCurrency: "USD",
+    productType: "Stock",
+    assetClass: "Equity",
+  },
+  {
+    id: "robo-tesla",
+    title: "Tesla",
+    status: "active",
+    contributionType: "ONE OFF",
+    weight: 20,
+    marketPrice: 302.63,
+    performancePercent: 1.8,
+    instrumentCurrency: "USD",
+    logoId: "unicredit",
+    securityAccountId: "robo-sec-usd",
+    securityAccountName: "Investment goals USD portfolio",
+    securityAccountCurrency: "USD",
+    productType: "Stock",
+    assetClass: "Equity",
+  },
+  {
+    id: "robo-microsoft",
+    title: "Microsoft",
+    status: "active",
+    contributionType: "ONE OFF",
+    weight: 20,
+    marketPrice: 511.2,
+    performancePercent: 1.8,
+    instrumentCurrency: "USD",
+    logoId: "unicredit",
+    securityAccountId: "robo-sec-usd",
+    securityAccountName: "Investment goals USD portfolio",
+    securityAccountCurrency: "USD",
+    productType: "Stock",
+    assetClass: "Equity",
+  },
+  {
+    id: "robo-amundi-global-opportunity",
+    title: "Amundi Funds Global Opportunity",
+    status: "active",
+    contributionType: "RECURRENT",
+    weight: 18,
+    marketPrice: 184.45,
+    performancePercent: 1.8,
+    instrumentCurrency: "USD",
+    logoId: "unicredit",
+    securityAccountId: "robo-sec-usd",
+    securityAccountName: "Investment goals USD portfolio",
+    securityAccountCurrency: "USD",
+    productType: "Fund",
+    assetClass: "Equity",
+  },
+  {
+    id: "robo-sustainability-bond-2032",
+    title: "Sustainability Bond 2032",
+    status: "active",
+    contributionType: "ONE OFF",
+    weight: 4,
+    marketPrice: 102.14,
+    performancePercent: 1.8,
+    instrumentCurrency: "EUR",
+    logoId: "unicredit",
+    securityAccountId: "robo-sec-eur",
+    securityAccountName: "Investment goals EUR portfolio",
+    securityAccountCurrency: "EUR",
+    productType: "Bond",
+    assetClass: "Fixed income",
+  },
+  {
+    id: "robo-green-bond-europe-2030",
+    title: "Green Bond Europe 2030",
+    status: "active",
+    contributionType: "ONE OFF",
+    weight: 2,
+    marketPrice: 99.82,
+    performancePercent: 1.8,
+    instrumentCurrency: "EUR",
+    logoId: "unicredit",
+    securityAccountId: "robo-sec-eur",
+    securityAccountName: "Investment goals EUR portfolio",
+    securityAccountCurrency: "EUR",
+    productType: "Bond",
+    assetClass: "Fixed income",
+  },
+  {
+    id: "robo-climate-transition-bond-2031",
+    title: "Climate Transition Bond 2031",
+    status: "active",
+    contributionType: "ONE OFF",
+    weight: 6,
+    marketPrice: 101.33,
+    performancePercent: 1.8,
+    instrumentCurrency: "EUR",
+    logoId: "unicredit",
+    securityAccountId: "robo-sec-eur",
+    securityAccountName: "Investment goals EUR portfolio",
+    securityAccountCurrency: "EUR",
+    productType: "Bond",
+    assetClass: "Fixed income",
+  },
+  {
+    id: "robo-amundi-global-multi-asset",
+    title: "Amundi Global Multi-Asset",
+    status: "active",
+    contributionType: "RECURRENT",
+    weight: 36,
+    marketPrice: 142.5,
+    performancePercent: 1.8,
+    instrumentCurrency: "EUR",
+    logoId: "unicredit",
+    securityAccountId: "robo-sec-eur",
+    securityAccountName: "Investment goals EUR portfolio",
+    securityAccountCurrency: "EUR",
+    productType: "Fund",
+    assetClass: "Balanced",
+  },
+  {
+    id: "robo-european-aggregate-bond",
+    title: "European Aggregate Bond",
+    status: "active",
+    contributionType: "RECURRENT",
+    weight: 20,
+    marketPrice: 104.18,
+    performancePercent: 1.8,
+    instrumentCurrency: "EUR",
+    logoId: "unicredit",
+    securityAccountId: "robo-sec-eur",
+    securityAccountName: "Investment goals EUR portfolio",
+    securityAccountCurrency: "EUR",
+    productType: "Bond",
+    assetClass: "Fixed income",
+  },
+  {
+    id: "robo-cash-reserve",
+    title: "Cash reserve",
+    status: "active",
+    contributionType: "RECURRENT",
+    weight: 15,
+    marketPrice: 1,
+    performancePercent: 0.1,
+    instrumentCurrency: "CZK",
+    logoId: "unicredit",
+    securityAccountId: "robo-sec-local",
+    securityAccountName: "Investment goals cash reserve",
+    securityAccountCurrency: "CZK",
+    productType: "Money market",
+    assetClass: "Liquidity",
+  },
+  {
+    id: "robo-amundi-defensive-allocation",
+    title: "Amundi Defensive Allocation",
+    status: "active",
+    contributionType: "RECURRENT",
+    weight: 15,
+    marketPrice: 118.9,
+    performancePercent: 1.2,
+    instrumentCurrency: "EUR",
+    logoId: "unicredit",
+    securityAccountId: "robo-sec-eur",
+    securityAccountName: "Investment goals EUR portfolio",
+    securityAccountCurrency: "EUR",
+    productType: "Fund",
+    assetClass: "Balanced",
+  },
+  {
+    id: "robo-czech-short-duration-bond",
+    title: "Czech Short Duration Bond",
+    status: "active",
+    contributionType: "RECURRENT",
+    weight: 25,
+    marketPrice: 100.72,
+    performancePercent: 0.9,
+    instrumentCurrency: "CZK",
+    logoId: "unicredit",
+    securityAccountId: "robo-sec-local",
+    securityAccountName: "Investment goals CZK portfolio",
+    securityAccountCurrency: "CZK",
+    productType: "Bond",
+    assetClass: "Fixed income",
+  },
+];
+
 const DISTRIBUTION_COLORS: NonEmptyReadonlyArray<string> = [
   "#00A3E0",
   "#5BC199",
@@ -588,6 +783,7 @@ function enrichCatalogSecurity(security: InvestmentSecurity, country: CountryId,
 export function buildInvestmentSecurityCatalog(
   ownedSecurities: readonly InvestmentSecurity[],
   country: CountryId,
+  options: { includeRoboGoals?: boolean } = {},
 ): InvestmentCatalogSecurity[] {
   const localCurrency = getCountryCurrency(country) as Currency;
   const financialOwnedSecurities = ownedSecurities.filter((security) => security.status === "active" && security.localValue > 0);
@@ -596,6 +792,26 @@ export function buildInvestmentSecurityCatalog(
   // Legacy/inactive holdings (weight 0) are historical positions and must not
   // appear as purchasable products with a 0,00 price.
   const ownedCatalog = financialOwnedSecurities.map((security, index) => enrichCatalogSecurity(security, country, true, index));
+  const roboGoalCatalog = (options.includeRoboGoals ? ROBO_GOAL_SECURITY_SEEDS : []).map((seed, index) => {
+    const localValue = roundMoney(referenceLocalValue * (0.7 + index * 0.11));
+    const value = roundMoney(convertCurrency(localValue, localCurrency, seed.instrumentCurrency));
+    const security: InvestmentSecurity = {
+      ...seed,
+      sourceProductName: "Investment goals",
+      value,
+      currency: seed.instrumentCurrency,
+      localValue,
+      localCurrency,
+      performanceAmount: roundMoney((localValue * seed.performancePercent) / 100),
+      instrumentCurrency: seed.instrumentCurrency,
+      securityAccountCurrency: seed.securityAccountCurrency === "CZK" ? localCurrency : seed.securityAccountCurrency,
+      marketPrice: seed.marketPrice,
+      quantity: Number((value / seed.marketPrice).toFixed(6)),
+      riskLevel: seed.riskLevel ?? deriveRiskLevel(seed),
+      liquidity: seed.liquidity ?? deriveLiquidity(seed),
+    };
+    return enrichCatalogSecurity(security, country, true, ownedCatalog.length + index);
+  });
   const availableCatalog = CATALOG_ONLY_SEEDS.map((seed, index) => {
     const localValue = roundMoney(referenceLocalValue * (0.72 + index * 0.18));
     const value = roundMoney(convertCurrency(localValue, localCurrency, seed.instrumentCurrency));
@@ -614,14 +830,19 @@ export function buildInvestmentSecurityCatalog(
       riskLevel: seed.riskLevel ?? deriveRiskLevel(seed),
       liquidity: seed.liquidity ?? deriveLiquidity(seed),
     };
-    const catalogSecurity = enrichCatalogSecurity(security, country, false, ownedCatalog.length + index);
+    const catalogSecurity = enrichCatalogSecurity(
+      security,
+      country,
+      false,
+      ownedCatalog.length + roboGoalCatalog.length + index,
+    );
     return {
       ...catalogSecurity,
       id: `catalog-${catalogSecurity.id}`,
     };
   });
 
-  return [...ownedCatalog, ...availableCatalog];
+  return [...ownedCatalog, ...roboGoalCatalog, ...availableCatalog];
 }
 
 export function buildInvestmentChartPoints(

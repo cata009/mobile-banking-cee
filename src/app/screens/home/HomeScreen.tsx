@@ -16,13 +16,28 @@ interface HomeScreenProps {
   onAnalyticsClick?: () => void;
   onMessagesClick?: () => void;
   onPaymentsClick?: () => void;
+  onDomesticPaymentClick?: () => void;
   onProductsClick?: () => void;
   onMoreClick?: () => void;
   onAccountClick?: (product: Product) => void;
+  onAccountInfoClick?: (product: Product) => void;
   onInvestmentsClick?: () => void;
+  onInvestmentGoalsClick?: () => void;
 }
 
-export default function HomeScreen({ onPrimeClick, onAnalyticsClick, onMessagesClick, onPaymentsClick, onProductsClick, onMoreClick, onAccountClick, onInvestmentsClick }: HomeScreenProps) {
+export default function HomeScreen({
+  onPrimeClick,
+  onAnalyticsClick,
+  onMessagesClick,
+  onPaymentsClick,
+  onDomesticPaymentClick,
+  onProductsClick,
+  onMoreClick,
+  onAccountClick,
+  onAccountInfoClick,
+  onInvestmentsClick,
+  onInvestmentGoalsClick,
+}: HomeScreenProps) {
   const demoState = useDemo();
   const { scenario } = demoState;
 
@@ -72,6 +87,9 @@ export default function HomeScreen({ onPrimeClick, onAnalyticsClick, onMessagesC
           showRedesign={features.cardsRedesign}
           onAccountClick={onAccountClick}
           onInvestmentsClick={onInvestmentsClick}
+          onInvestmentGoalsClick={onInvestmentGoalsClick}
+          onDomesticPaymentClick={onDomesticPaymentClick}
+          onAccountInfoClick={onAccountInfoClick}
         />
 
         {/* Unplanned Banner (conditional) */}

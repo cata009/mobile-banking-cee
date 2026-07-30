@@ -7,7 +7,9 @@ import type { AccountTransaction } from "@/data/accountDetails";
 import { getKidsHomeConcept, getPocketProgress, isKidsHomeCountry, type KidsBottomNavId, type KidsMarketHomeConcept } from "@/data/kidsMarketHomeConcepts";
 import type { SavingGoal } from "@/data/huKidsBanking";
 import type { CountryId } from "@/app/state/demoTypes";
-import { HU_DEFAULT_KIDS_CARD, HU_KIDS_CARDS } from "./hu/cards";
+import { HU_DEFAULT_KIDS_CARD, HU_KIDS_CARD_DETAIL_PRODUCT, HU_KIDS_CARDS } from "./hu/cards";
+import { getHuKidsCardMerchantEnrichment } from "./hu/cardTransactionEnrichment";
+import { HuKidsCardUsedRow } from "./hu/HuKidsCardUsedRow";
 import { HU_DEFAULT_THEME, getHuTheme, type HuThemeId } from "./hu/theme";
 import { HU_KIDS_INITIAL_GOALS, HU_KIDS_INITIAL_LEARN_MODULES, HU_KIDS_INITIAL_TASKS, HU_KIDS_RUNTIME_COUNTRY, HU_PENDING_ACTIONS, HU_SEND_APPROVAL_THRESHOLD } from "./hu/data";
 import { HU_LEARN_TOPICS, getHuLearnInitialCompletedLessonIds } from "./hu/learnTopics";
@@ -792,14 +794,18 @@ function HuCeeLightRestyleApp({ concept }: { concept: KidsMarketHomeConcept }) {
     }
 
     if (view === "transaction-detail" && selectedTransaction) {
+      const merchantEnrichment = getHuKidsCardMerchantEnrichment(selectedTransaction);
+
       return (
         <div className="relative z-[1] min-h-0 flex-1 overflow-hidden">
           <TransactionDetailScreen
             country={HU_KIDS_RUNTIME_COUNTRY}
-            product={null}
+            product={merchantEnrichment ? HU_KIDS_CARD_DETAIL_PRODUCT : null}
             transaction={selectedTransaction}
             onBack={() => setView(transactionReturnView)}
             onRedoPayment={() => undefined}
+            merchantEnrichment={merchantEnrichment}
+            cardUsedContent={merchantEnrichment ? <HuKidsCardUsedRow /> : undefined}
           />
         </div>
       );

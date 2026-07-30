@@ -203,3 +203,14 @@ export function HuMerchantLogoMark({ merchant }: { merchant: HuMerchantLogoId })
     </span>
   );
 }
+
+/** Reuses the exact Kids merchant mark in the 64px card-detail identity slot. */
+export function HuMerchantDetailLogo({ merchant }: { merchant: HuMerchantLogoId }) {
+  return (
+    <span className="grid size-[64px] place-items-center" data-hu-merchant-detail-logo>
+      <span className="scale-[1.88]">
+        <HuMerchantLogoMark merchant={merchant} />
+      </span>
+    </span>
+  );
+}

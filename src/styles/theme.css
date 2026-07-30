@@ -64,6 +64,11 @@
   --uc-red-card: #B91823;
   --uc-red-deep: #9A000B;
   --uc-red-brown: #961414;
+  --uc-brand-tesla: #E82127;
+  --uc-brand-microsoft-red: #F25022;
+  --uc-brand-microsoft-green: #7FBA00;
+  --uc-brand-microsoft-blue: #00A4EF;
+  --uc-brand-microsoft-yellow: #FFB900;
   --uc-product-blue-deep: #244858;
   --uc-product-slate: #5E6F73;
   --uc-product-blue: #3F6A8B;
@@ -136,6 +141,12 @@
   --uc-pfm-atm: #388BCA;
   --uc-pfm-fx: #244858;
   --uc-pfm-internal: #0D5870;
+  --uc-robo-scenario-higher: var(--uc-green-status);
+  --uc-robo-scenario-estimated: var(--uc-pfm-lifestyle);
+  --uc-robo-scenario-lower: #3D1FAB;
+  --uc-robo-scenario-higher-fill: #E1F1E3;
+  --uc-robo-scenario-estimated-fill: #E1EEF7;
+  --uc-robo-scenario-lower-fill: #E2DDF2;
 
   --uc-app-bg: var(--uc-neutral-100);
   --uc-surface: var(--uc-neutral-white);

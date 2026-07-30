@@ -57,4 +57,23 @@ describe('demo state feature flags', () => {
     expect(isFeatureActive(result.current, 'fx_newPaymentsHub')).toBe(false)
     expect(isFeatureActive(result.current, 'fx_transactionsFilters')).toBe(false)
   })
+
+  it('isolates CZ Robo from baseline and the CZ Chatbot future preview', () => {
+    const { result } = renderHook(() => useDemo(), {
+      wrapper: ({ children }) => (
+        <DemoProvider initialState={{ product: 'PI', country: 'CZ', scenario: 'active' }}>
+          {children}
+        </DemoProvider>
+      ),
+    })
+
+    expect(isFeatureActive(result.current, 'fx_czRoboAdvisor')).toBe(false)
+
+    act(() => result.current.setRelease('release-future-cz-robo'))
+    expect(isFeatureActive(result.current, 'fx_czRoboAdvisor')).toBe(true)
+    expect(isFeatureActive(result.current, 'fx_czCoAppingSmartAssistant')).toBe(false)
+
+    act(() => result.current.setCountry('RO'))
+    expect(isFeatureActive(result.current, 'fx_czRoboAdvisor')).toBe(false)
+  })
 })

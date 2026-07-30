@@ -6,6 +6,8 @@ import imgRectangle1 from "figma:asset/6f4a518088433560480f90c7a7448fdc1d294def.
 import AccordionSection from "@/app/components/AccordionSection";
 import ProductsList from "@/app/components/ProductsList";
 import ProductCard from "@/app/components/ProductCard";
+import { AppIcon } from "@/app/components/icons";
+import { buildFutureCzAccountCardActions } from "@/app/components/productCardFixtures";
 import { useProducts } from "@/hooks/useProducts";
 import { useDemo } from "@/app/state/demoStore";
 import { getCurrencySymbol } from "@/app/registry/countryConfig";
@@ -13,15 +15,28 @@ import { maskAmountParts } from "@/app/utils/amountPrivacy";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { isInvestmentsPortfolioAvailable } from "@/app/utils/investmentsAvailability";
 import { isAccountDetailProduct } from "@/data/products";
+import { formatAmount } from "@/data/products";
 import type { Product } from "@/data/products";
+
+const FUTURE_CZ_INVESTMENT_GOALS_VALUE = 151_241.33;
 
 interface AccountSummaryProps {
   showRedesign?: boolean;
   onAccountClick?: (product: Product) => void;
   onInvestmentsClick?: () => void;
+  onInvestmentGoalsClick?: () => void;
+  onDomesticPaymentClick?: () => void;
+  onAccountInfoClick?: (product: Product) => void;
 }
 
-export default function AccountSummary({ showRedesign = false, onAccountClick, onInvestmentsClick }: AccountSummaryProps) {
+export default function AccountSummary({
+  showRedesign = false,
+  onAccountClick,
+  onInvestmentsClick,
+  onInvestmentGoalsClick,
+  onDomesticPaymentClick,
+  onAccountInfoClick,
+}: AccountSummaryProps) {
   const { 
     categories, 
     getProductIcon, 
@@ -33,8 +48,12 @@ export default function AccountSummary({ showRedesign = false, onAccountClick, o
   } = useProducts();
   
   const { t } = useLanguage();
-  const { country, amountsHidden, product: selectedProduct } = useDemo();
+  const { country, amountsHidden, product: selectedProduct, release } = useDemo();
   const investmentsAvailable = isInvestmentsPortfolioAvailable(selectedProduct, country);
+  const useFutureProductCards =
+    selectedProduct === "PI" &&
+    country === "CZ" &&
+    release === "release-future-cz-robo";
 
   // Calculate totals for the main card
   const totalAvailable = calculateTotalAvailable();
@@ -109,30 +128,70 @@ export default function AccountSummary({ showRedesign = false, onAccountClick, o
       {/* Dynamic Product Categories */}
       {categories.map((category) => {
         const shouldShowTotal = category.key !== 'cards';
-        const totalData = shouldShowTotal && category.products.length >= 2 
-          ? calculateTotal(category.products) 
+        const isFutureInvestmentCategory =
+          useFutureProductCards &&
+          category.key === "investments" &&
+          category.products.length > 0;
+        const renderedProductCount = category.products.length + (isFutureInvestmentCategory ? 1 : 0);
+        const hasEvolutionTotal =
+          useFutureProductCards &&
+          shouldShowTotal &&
+          renderedProductCount >= 2;
+        const totalData = shouldShowTotal && renderedProductCount >= 2
+          ? isFutureInvestmentCategory
+            ? formatAmount(
+                category.products.reduce((sum, product) => sum + product.balance, FUTURE_CZ_INVESTMENT_GOALS_VALUE),
+                "CZK",
+              )
+            : calculateTotal(category.products)
           : undefined;
 
         return (
           <div key={category.key} className="pt-[24px]">
-            <AccordionSection title={category.title} defaultOpen={false}>
+            <AccordionSection
+              title={category.title}
+              defaultOpen={false}
+              titleClassName={useFutureProductCards ? "text-[20px] font-bold leading-[24px]" : undefined}
+            >
               <ProductsList 
                 isOpen={false} 
                 showTotal={shouldShowTotal}
+                variant={useFutureProductCards ? "evolution" : "legacy"}
+                productStyle="pi"
                 totalData={totalData ? maskAmountParts(totalData, amountsHidden) : undefined}
+                totalLabel={isFutureInvestmentCategory ? "Total investments" : undefined}
               >
-                {category.products.map((product) => {
+                {category.products.map((product, productIndex) => {
                   const formatted = formatProductAmount(product);
                   const displayedAmount = maskAmountParts(formatted, amountsHidden);
+                  const accountActions =
+                    useFutureProductCards && product.type === "current_account"
+                      ? buildFutureCzAccountCardActions({
+                          onNewPayment: onDomesticPaymentClick,
+                          onAccountInfo: () => onAccountInfoClick?.(product),
+                        })
+                      : undefined;
+                  const stackRole =
+                    renderedProductCount === 1
+                      ? "single"
+                      : productIndex === 0
+                        ? "first"
+                        : productIndex === renderedProductCount - 1 && !hasEvolutionTotal
+                          ? "last"
+                          : "middle";
                   return (
                     <ProductCard
                       key={product.id}
                       icon={getProductIcon(product)}
-                      title={product.name}
+                      title={isFutureInvestmentCategory ? "Security Portfolio" : product.name}
                       accountNumber={getProductDisplayNumber(product)}
                       amount={displayedAmount.integer}
                       decimals={displayedAmount.decimals}
                       currency={displayedAmount.currency}
+                      variant={useFutureProductCards ? "evolution" : "legacy"}
+                      productStyle="pi"
+                      stackRole={stackRole}
+                      actions={accountActions}
                       onClick={
                         product.type === "investment_account" && investmentsAvailable
                           ? onInvestmentsClick
@@ -143,6 +202,21 @@ export default function AccountSummary({ showRedesign = false, onAccountClick, o
                     />
                   );
                 })}
+                {isFutureInvestmentCategory ? (
+                  <ProductCard
+                    key="future-cz-investment-goals"
+                    icon={<AppIcon name="investment-goals-product" size={32} />}
+                    title="Investment goals"
+                    accountNumber=""
+                    amount="151 241"
+                    decimals=".33"
+                    currency="CZK"
+                    variant="evolution"
+                    productStyle="pi"
+                    stackRole={hasEvolutionTotal ? "middle" : "last"}
+                    onClick={onInvestmentGoalsClick}
+                  />
+                ) : null}
               </ProductsList>
             </AccordionSection>
           </div>

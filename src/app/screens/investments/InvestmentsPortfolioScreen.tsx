@@ -11,6 +11,11 @@ import InvestmentProductsAccordion from "@/app/components/investments/Investment
 import InvestmentsFundBanner from "@/app/components/investments/InvestmentsFundBanner";
 import InvestmentBuyOrderFlow from "@/app/screens/investments/InvestmentBuyOrderFlow";
 import InvestmentSellOrderFlow from "@/app/screens/investments/InvestmentSellOrderFlow";
+import CzFutureRoboAdvisorFlow from "@/app/screens/investments/CzFutureRoboAdvisorFlow";
+import CzInvestmentGoalsScreen, {
+  INITIAL_CZ_ROBO_GOALS,
+} from "@/app/screens/investments/CzInvestmentGoalsScreen";
+import type { RoboExistingGoal } from "@/app/screens/investments/czFutureRoboAdvisorModel";
 import {
   InvestmentFundCollectionScreen,
   InvestmentFundsSelectionScreen,
@@ -46,6 +51,7 @@ import { useDemo } from "@/app/state/demoStore";
 import { maskAmountParts } from "@/app/utils/amountPrivacy";
 import { useProducts } from "@/hooks/useProducts";
 import type { CurrentAccount } from "@/data/products";
+import { convertCurrency, roundMoney } from "@/data/exchangeRates";
 import type { CoAppingInvestmentBuyDraft } from "../../../../package/mobile-pi-coapping-chat-package/src";
 
 export interface InvestmentBuyRequest {
@@ -61,6 +67,8 @@ export interface InvestmentFundsRequest {
 
 interface InvestmentsPortfolioScreenProps {
   onBack: () => void;
+  roboAdvisorEnabled?: boolean;
+  initialView?: "portfolio" | "goals";
   onHistoryClick?: (filterByTitle?: string) => void;
   onSelectedSecurityChange?: (security: InvestmentCatalogSecurity | null) => void;
   fundsWindowRequest?: InvestmentFundsRequest | null;
@@ -278,13 +286,14 @@ function DistributionCategoryDetailScreen({
 
 export default function InvestmentsPortfolioScreen({
   onBack,
+  initialView = "portfolio",
   onHistoryClick,
   onSelectedSecurityChange,
   fundsWindowRequest,
   buyRequest,
   onBuyRequestConsumed,
 }: InvestmentsPortfolioScreenProps) {
-  const { country, amountsHidden } = useDemo();
+  const { country, amountsHidden, release } = useDemo();
   const { categories } = useProducts();
   const { t } = useLanguage();
   const { progress: headerProgress, onScroll: handlePageScroll, setProgress: setHeaderProgress } = useCollapsingHeader(64);
@@ -298,6 +307,11 @@ export default function InvestmentsPortfolioScreen({
   const [selectedSecurity, setSelectedSecurity] = useState<InvestmentCatalogSecurity | null>(null);
   const [buyOrderOpen, setBuyOrderOpen] = useState(false);
   const [sellOrderOpen, setSellOrderOpen] = useState(false);
+  const [roboAdvisorView, setRoboAdvisorView] = useState<"closed" | "goals" | "create" | "detail">(
+    initialView === "goals" ? "goals" : "closed",
+  );
+  const [selectedRoboGoal, setSelectedRoboGoal] = useState<RoboExistingGoal | null>(null);
+  const [roboGoals, setRoboGoals] = useState<readonly RoboExistingGoal[]>(INITIAL_CZ_ROBO_GOALS);
   const [buyOrderDraft, setBuyOrderDraft] = useState<CoAppingInvestmentBuyDraft | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const consumedFundsRequestIdRef = useRef<number | null>(null);
@@ -312,7 +326,8 @@ export default function InvestmentsPortfolioScreen({
     && !selectedFundCollectionId
     && !selectedSecurity
     && !buyOrderOpen
-    && !sellOrderOpen;
+    && !sellOrderOpen
+    && roboAdvisorView === "closed";
   useEffect(() => {
     if (!isOnPortfolioHome) return;
     if (scrollContainerRef.current) {
@@ -328,7 +343,12 @@ export default function InvestmentsPortfolioScreen({
   );
   const investmentProducts = useMemo(() => getInvestmentProducts(allProducts), [allProducts]);
   const securities = useMemo(() => buildInvestmentSecurities(investmentProducts, country), [country, investmentProducts]);
-  const securityCatalog = useMemo(() => buildInvestmentSecurityCatalog(securities, country), [country, securities]);
+  const securityCatalog = useMemo(
+    () => buildInvestmentSecurityCatalog(securities, country, {
+      includeRoboGoals: release === "release-future-cz-robo",
+    }),
+    [country, release, securities],
+  );
   const financialSecurities = useMemo(
     () => securities.filter((security) => security.status === "active" && security.localValue > 0),
     [securities],
@@ -464,6 +484,66 @@ export default function InvestmentsPortfolioScreen({
         onBuyClick={() => {
           setBuyOrderDraft(null);
           setBuyOrderOpen(true);
+        }}
+      />
+    );
+  }
+
+  if (roboAdvisorView === "goals") {
+    return (
+      <CzInvestmentGoalsScreen
+        goals={roboGoals}
+        onBack={() => {
+          if (initialView === "goals") onBack();
+          else setRoboAdvisorView("closed");
+        }}
+        onCreateGoal={() => setRoboAdvisorView("create")}
+        onOpenGoal={(goal) => {
+          setSelectedRoboGoal(goal);
+          setRoboAdvisorView("detail");
+        }}
+      />
+    );
+  }
+
+  if (roboAdvisorView === "create" || roboAdvisorView === "detail") {
+    return (
+      <CzFutureRoboAdvisorFlow
+        initialGoal={roboAdvisorView === "detail" ? selectedRoboGoal ?? undefined : undefined}
+        onOpenSecurity={({ securityId, localValue, performancePercent }) => {
+          const security = securityCatalog.find((item) => item.id === securityId);
+          if (!security) {
+            selectSecurity(null);
+            return;
+          }
+
+          const value = roundMoney(convertCurrency(
+            localValue,
+            security.localCurrency,
+            security.instrumentCurrency,
+          ));
+          selectSecurity({
+            ...security,
+            value,
+            localValue,
+            performancePercent,
+            performanceAmount: roundMoney((localValue * performancePercent) / 100),
+            quantity: Number((value / security.marketPrice).toFixed(6)),
+          });
+        }}
+        onGoalUpdated={(updatedGoal) => {
+          setRoboGoals((goals) => goals.map((goal) => (
+            goal.id === updatedGoal.id ? updatedGoal : goal
+          )));
+          setSelectedRoboGoal(updatedGoal);
+        }}
+        onBack={() => {
+          setSelectedRoboGoal(null);
+          setRoboAdvisorView("goals");
+        }}
+        onExit={() => {
+          setSelectedRoboGoal(null);
+          setRoboAdvisorView("goals");
         }}
       />
     );

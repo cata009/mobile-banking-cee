@@ -146,6 +146,7 @@ export function TransactionDetailScreen({
   onRedoPayment,
   onCategoryChange,
   merchantEnrichment,
+  cardUsedContent,
 }: {
   country: CountryId;
   product?: Product | null;
@@ -155,6 +156,8 @@ export function TransactionDetailScreen({
   onCategoryChange?: (transaction: AccountTransaction, selection: PfmCategorySelection) => void;
   /** Optional ETHOCA-style enrichment; omitted in the current baseline runtime. */
   merchantEnrichment?: CardTransactionMerchantEnrichment;
+  /** Optional market-specific representation for the linked physical card. */
+  cardUsedContent?: ReactNode;
 }) {
   const { t } = useLanguage();
   const { categories } = useProducts();
@@ -367,7 +370,7 @@ export function TransactionDetailScreen({
           {cardUsed ? (
             <section className="pt-[14px]" data-card-used>
               <SectionHeadingDivider title={t("runtime.cardTransactionDetail.cardUsed", "Card used")} />
-              <CardNavigationRow card={cardUsed} />
+              {cardUsedContent ?? <CardNavigationRow card={cardUsed} />}
             </section>
           ) : null}
         </section>
