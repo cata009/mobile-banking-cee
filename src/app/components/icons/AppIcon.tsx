@@ -22,6 +22,8 @@ const NON_STANDARD_ICON_NAMES = new Set([
   "investment-documents",
   "investment-important-info",
   "investment-disclaimer",
+  "investment-goals-product",
+  "robo-goal-settings",
   // Non-square glyph — forcing it into the 20×20 standard box would letterbox it
   "redo-payment",
   "request-chargeback",

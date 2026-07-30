@@ -236,6 +236,7 @@ function AppContent({
   const { categories } = useProducts();
   const coAppingAvailable = isCoAppingAvailable(country);
   const isCzCoAppingChatbotPreviewActive = isFeatureActive(demoState, "fx_czCoAppingSmartAssistant");
+  const isCzRoboAdvisorPreviewActive = isFeatureActive(demoState, "fx_czRoboAdvisor");
   const currentRoutePolicy = ROUTE_POLICY[currentScreen];
   const isInAppScreen = currentRoutePolicy.surface === "app";
   const czChatLauncherVariant: CzChatLauncherVariant = "edge-tab";
@@ -279,6 +280,7 @@ function AppContent({
   const [historyFilterByTitle, setHistoryFilterByTitle] = useState<string | null>(null);
   const [productsShelfFocusRequest, setProductsShelfFocusRequest] = useState<ProductsShelfFocusRequest | null>(null);
   const [selectedProductDetail, setSelectedProductDetail] = useState<ProductDetailSelection | null>(null);
+  const [investmentsInitialView, setInvestmentsInitialView] = useState<"portfolio" | "goals">("portfolio");
 
   useEffect(() => {
     if ("cardId" in currentRoute && currentRoute.cardId) setSelectedCardId(currentRoute.cardId);
@@ -523,6 +525,14 @@ function AppContent({
   const handleInvestmentsClick = () => {
     if (!investmentsPortfolioAvailable) return;
 
+    setInvestmentsInitialView("portfolio");
+    navigateTo("investments");
+  };
+
+  const handleInvestmentGoalsClick = () => {
+    if (!investmentsPortfolioAvailable || !isCzRoboAdvisorPreviewActive) return;
+
+    setInvestmentsInitialView("goals");
     navigateTo("investments");
   };
 
@@ -820,10 +830,13 @@ function AppContent({
             onAnalyticsClick={handleAnalyticsClick}
             onMessagesClick={handleMessagesClick}
             onPaymentsClick={handlePaymentsClick}
+            onDomesticPaymentClick={handleDomesticPaymentClick}
             onProductsClick={handleProductsClick}
             onMoreClick={handleMoreClick}
             onAccountClick={handleAccountClick}
+            onAccountInfoClick={handleAccountDetailsClick}
             onInvestmentsClick={handleInvestmentsClick}
+            onInvestmentGoalsClick={handleInvestmentGoalsClick}
           />
         )}
 
@@ -1023,6 +1036,8 @@ function AppContent({
         {currentScreen === "investments" && investmentsPortfolioAvailable && (
           <InvestmentsPortfolioScreen
             onBack={goBack}
+            roboAdvisorEnabled={isCzRoboAdvisorPreviewActive}
+            initialView={investmentsInitialView}
             onHistoryClick={handleInvestmentsHistoryClick}
             onSelectedSecurityChange={handleSelectedInvestmentSecurityChange}
             fundsWindowRequest={investmentFundsRequest}

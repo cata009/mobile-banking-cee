@@ -200,6 +200,37 @@ describe('HU Kids default theme and card behavior', () => {
     expect(screen.queryByRole('button', { name: /From Dad.*Salary November/ })).not.toBeInTheDocument()
   })
 
+  it('uses the shared card detail only for HU Kids merchant purchases', () => {
+    const merchantPurchase = renderHuKids()
+
+    fireEvent.click(screen.getByRole('button', { name: /McDonalds.*Lunch with card/ }))
+
+    expect(screen.getByRole('img', { name: 'McDonalds merchant logo' })).toBeInTheDocument()
+    expect(screen.getByTestId('merchant-location-static-map')).toBeInTheDocument()
+    expect(screen.getByText('Merchant location')).toBeInTheDocument()
+    expect(screen.getByText('Merchant Category Code (MCC)')).toBeInTheDocument()
+    expect(screen.getByText('Card used')).toBeInTheDocument()
+    expect(screen.getByTestId('hu-kids-card-used-row')).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Mastercard Standard card ending 5678' })).toBeInTheDocument()
+    merchantPurchase.unmount()
+
+    const onlinePurchase = renderHuKids()
+    fireEvent.click(screen.getByRole('button', { name: /Spotify.*Monthly plan/ }))
+
+    expect(screen.getByRole('img', { name: 'Spotify merchant logo' })).toBeInTheDocument()
+    expect(screen.queryByTestId('merchant-location-static-map')).not.toBeInTheDocument()
+    expect(screen.getByText('Merchant Category Code (MCC)')).toBeInTheDocument()
+    expect(screen.getByText('Card used')).toBeInTheDocument()
+    onlinePurchase.unmount()
+
+    renderHuKids()
+    fireEvent.click(screen.getByRole('button', { name: /From Dad.*Salary November/ }))
+
+    expect(screen.queryByTestId('merchant-location-static-map')).not.toBeInTheDocument()
+    expect(screen.queryByText('Merchant Category Code (MCC)')).not.toBeInTheDocument()
+    expect(screen.queryByText('Card used')).not.toBeInTheDocument()
+  })
+
   it('renders the semantic Learn Messages and SK Education completion icon geometry', () => {
     const hu = renderHuKids()
 

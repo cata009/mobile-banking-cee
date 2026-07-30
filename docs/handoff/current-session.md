@@ -1,6 +1,256 @@
 # Current Session
 
-Last updated: 2026-07-28
+Last updated: 2026-07-29
+
+## 2026-07-29 CZ Future Robo Product Navigation and Account-card DS Round
+
+- Replaced the Future CZ Homepage `New payment` quick-action glyph with the exact supplied 24x24 four-path SVG while preserving the existing direct Domestic payment routing.
+- Introduced one shared Future CZ account-card action fixture and reused it in both the Homepage and Design System. The dedicated `PI app / Account quick actions` specimen now shows the real Product Card with quick actions and the same Product Card without actions directly below it.
+- Added stable security IDs for every deterministic Robo goal holding. Each Products-tab row in an existing goal now opens the same owned investment security-detail experience used by Buy securities, including Buy/Sell actions and the goal-local value/performance; Back returns to the same selected goal.
+- Scoped the Robo holding catalogue extension to `release-future-cz-robo`, so Baseline and other future releases do not receive synthetic goal securities.
+- Focused verification passes `4` files / `38` tests. Complete verification passes `71` files / `736` tests, TypeScript, ESLint, and the production build; the build retains the known empty `react-vendor` and large-chunk warnings.
+- Browser QA on port `4001` confirmed the exact New payment SVG path/size and both Design System account-card states. The non-semantic Homepage product-card entry cannot be activated by the current browser automation surface, so Goal -> Product -> Back is supported by the real App integration test rather than claimed as browser evidence.
+- Files changed in this pass: `src/app/components/icons/customIcons.tsx`, `src/app/components/productCardFixtures.tsx`, `src/app/screens/home/AccountSummary.tsx`, the Design System specimen files, `src/app/config/investmentsPortfolioConfig.ts`, `src/app/screens/investments/CzFutureRoboAdvisorFlow.tsx`, `src/app/screens/investments/czFutureRoboAdvisorModel.ts`, `src/app/screens/investments/InvestmentsPortfolioScreen.tsx`, related tests, and handoff/capability documentation.
+- Limitation: prices, positions, performance, Buy/Sell execution, and goal persistence remain deterministic demo data pending approved investment/advisory backend contracts.
+- constitutional check:
+  - scope preserved: yes - requested Future CZ account-card icon/DS states and existing-goal product navigation only
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes - live holdings and execution remain explicit external dependencies
+  - safe to resume: yes
+
+## 2026-07-29 CZ Future Robo Goal Naming and Rename Roundtrip
+
+- Replaced all five internal placeholder labels with customer-facing names tied to their purpose: `Build long-term wealth`, `My future home`, `Financial freedom`, `Protect my savings`, and `Keep pace with inflation`.
+- Converted the existing-goal collection from a screen-local constant into container-owned session state so management changes can be reflected consistently in both goal detail and the overview.
+- Repaired `Goal settings -> Rename goal`: the field is now editable and prefilled with the selected goal's current name; blank names keep `Save name` disabled; saving trims the value, returns directly to goal detail, updates its title, and preserves the same name when returning to the overview.
+- TDD evidence: the integration test first failed on the five placeholder names and non-functional rename field, then passed after state and routing were connected. Focused Robo/routing verification passes `29/29`.
+- Complete verification passes `71` files / `732` tests, TypeScript, ESLint, production build, and `git diff --check`.
+- Browser QA on port `4001` confirmed all five default names, prefilled editable Rename, immediate return to the renamed detail, and persistence back in the overview. The review tab is left on the goals overview with the first goal renamed to `A secure future`.
+- Files changed in this pass: `src/app/screens/investments/CzInvestmentGoalsScreen.tsx`, `src/app/screens/investments/InvestmentsPortfolioScreen.tsx`, `src/app/screens/investments/CzFutureRoboAdvisorFlow.tsx`, `tests/screens/home-investment-goals-routing.test.tsx`, and the handoff/capability documentation.
+- Limitation: rename persistence is intentionally scoped to the current deterministic demo session; live persistence requires the approved goal-management service contract.
+- constitutional check:
+  - scope preserved: yes - Future CZ existing-goal naming and rename behavior only
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes - server-backed persistence remains an explicit external dependency
+  - safe to resume: yes
+
+## 2026-07-29 CZ Future Robo Goal Status and Progress Alignment
+
+- Removed the decorative goal-type fallback icon from the goal overview. All five deterministic Future CZ goals now carry and display an explicit `ACTIVE` or `INACTIVE` status badge in the card's top-right position.
+- Aligned the existing-goal detail progress presentation with the overview cards: the percentage is now a white-on-teal pill attached directly to the progress bar, and the separate right-aligned percentage above the bar is removed.
+- Tightened the typed demo contract so every `RoboExistingGoal` must provide a status; missing statuses can no longer silently regress to an unrelated decorative icon.
+- TDD evidence: the two new routing/layout tests first failed on the missing five-card status contract and the absent detail progress-bar badge, then passed after implementation. Focused Robo/Homepage verification passes `34/34`.
+- Complete verification passes `71` files / `731` tests, TypeScript, ESLint, production build, and `git diff --check`.
+- Browser control on port `4001` confirmed the updated build and Homepage goal entry copy. The automation surface could not activate the non-semantic clickable `div` product card, so list/detail visual navigation was not claimed as browser evidence; the real App routing integration suite verifies both states and the exact progress-badge containment.
+- Files changed in this pass: `src/app/screens/investments/CzInvestmentGoalsScreen.tsx`, `src/app/screens/investments/CzFutureRoboAdvisorFlow.tsx`, `src/app/screens/investments/czFutureRoboAdvisorModel.ts`, `tests/screens/home-investment-goals-routing.test.tsx`, and the handoff/capability documentation.
+- constitutional check:
+  - scope preserved: yes - Future CZ existing-goal list/detail presentation only
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes - live statuses and progress remain explicit backend dependencies
+  - safe to resume: yes
+
+## 2026-07-29 CZ Future Robo Investments Entry-point Cleanup
+
+- Removed the redundant `Investment goals` promotional card from the shared Investment Portfolio screen in the isolated `CZ - Robo` release.
+- The expandable `Investment goals` product card on the Homepage remains the single customer entry point into the five-goal overview, creation flow, and existing-goal details.
+- Added a regression contract asserting that enabling the CZ Robo release does not inject goal copy or an `Open investment goals` CTA into the portfolio page, while the normal Investments tabs remain available.
+- Focused verification passes `20/20` across the Investments portfolio and Homepage goal-routing suites. Full verification passes `71` files / `729` tests, TypeScript, ESLint, production build, and `git diff --check`.
+- Browser QA on port `4001` confirms the card copy and CTA are absent and the `PERFORMANCE` tab now follows the standard Investment page title directly, with no residual layout gap.
+- Files changed: `src/app/screens/investments/InvestmentsPortfolioScreen.tsx`, `tests/screens/investment-product-chat-context.test.tsx`, and the handoff/capability documentation.
+- constitutional check:
+  - scope preserved: yes - removed only the duplicate Future CZ portfolio entry point
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes - Homepage remains the tested goal entry route
+  - safe to resume: yes
+
+## 2026-07-29 CZ Future Robo Existing-goal Detail Polish
+
+- Removed the pointer-hover color transition from all five goal cards while preserving their full-surface click target and keyboard focus treatment.
+- Split the existing-goal detail header from the creation journey header: existing goal details now show the standard Help/question-mark action, while the exact 20x20 Close action remains limited to the goal-creation journey as reviewed.
+- Replaced the existing-goal `Withdraw` and `Goal settings` action glyphs with the exact supplied 20x20 and 32x32 SVG geometries. The action layout and behavior remain unchanged.
+- Reduced the goal-detail title-to-purpose/status spacing from 16px to 8px without changing the common spacing on creation screens.
+- TDD evidence: three focused tests first failed on the old hover class, missing Help action, and old action icon geometry; the goals/Robo suites pass `26/26`. Full verification passes `71` files / `729` tests, TypeScript, ESLint, production build, and `git diff --check`.
+- Browser QA on port `4001` confirms the rendered goal-card class has no hover background/transition. The existing-goal header/action/spacing contracts are additionally covered through the real App routing integration test because the Homepage's second Investment card remains below the fixed bottom bar in the isolated browser viewport.
+- Files changed: `src/app/screens/investments/CzInvestmentGoalsScreen.tsx`, `src/app/screens/investments/CzFutureRoboAdvisorFlow.tsx`, `src/app/components/icons/AppIcon.tsx`, `src/app/components/icons/customIcons.tsx`, `tests/screens/home-investment-goals-routing.test.tsx`, and the handoff/capability documentation.
+- constitutional check:
+  - scope preserved: yes - existing Future CZ goal cards and goal detail presentation only
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes - Help remains a non-mutating demo action pending an approved destination
+  - safe to resume: yes
+
+## 2026-07-29 CZ Future Robo Goal-list Detail Routing
+
+- Made every card in the five-goal overview a full-surface accessible action. Each goal now opens the existing Robo goal-detail and management experience instead of remaining a static presentation card.
+- Preserved the selected goal through the Investments container and populated goal detail with that card's name, purpose, status, current value, total return tone/value, target, progress, dates/time left, and deterministic portfolio presentation.
+- Both Back and the Robo close action return from an existing goal detail to the complete goals list. `Create New Goal` continues to start the separate creation journey unchanged.
+- Added shared typed existing-goal data to the Robo model and covered all five cards with routing tests, including the inactive and status-free presentation cases.
+- Files changed in this pass: `src/app/screens/investments/czFutureRoboAdvisorModel.ts`, `src/app/screens/investments/CzInvestmentGoalsScreen.tsx`, `src/app/screens/investments/InvestmentsPortfolioScreen.tsx`, `src/app/screens/investments/CzFutureRoboAdvisorFlow.tsx`, `tests/screens/home-investment-goals-routing.test.tsx`, and the handoff/capability documentation.
+- TDD evidence: the five new routing cases failed before implementation because no goal-card button existed; after the change, the focused goals/Robo suites pass `23/23` and TypeScript passes.
+- Interactive browser QA on port `4001` confirms full-card click targets, correct active-goal data, correct inactive-goal data/time-left, and successful Back/X return to the list. The browser is left on the goals overview for stakeholder review.
+- Limitation: the five goals and their selected portfolio mappings remain deterministic Future demo data; live goal identifiers, values, permissions, product associations, and management eligibility require the approved service contract.
+- constitutional check:
+  - scope preserved: yes - existing Future CZ Robo list-to-detail behavior only
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes - live goal and portfolio data remain explicit backend dependencies
+  - safe to resume: yes
+
+## 2026-07-29 CZ Future Robo Projection and Header Corrections
+
+- Reordered the strategy projection content so `Estimated annual return` is presented before `Projection summary`, matching the reviewed decision hierarchy while keeping both investment controls and the live projection recalculation intact.
+- Applied the requested 8px corner radius to the one-off/monthly amount outputs and to all three projected-value labels drawn inside the SVG chart.
+- Replaced the Robo Help/question-mark action with the exact supplied 20x20 close SVG throughout the goal journey, including the image intro. The close action exits the creation or management journey through the existing flow-level exit handler.
+- Added the standard Mobile PI collapsing-title behavior to every scrollable Robo screen except the image-led intro: the large page title scrolls with the content, then appears as the compact centered header title after the collapse threshold.
+- Scoped the hidden compact-title accessibility behavior to Robo screens through an opt-in `PageHeader` prop, preserving the existing semantic contract for all other Mobile PI consumers.
+- Files changed in this pass: `src/app/components/PageHeader.tsx`, `src/app/components/icons/customIcons.tsx`, `src/app/screens/investments/CzFutureRoboAdvisorFlow.tsx`, `tests/screens/cz-future-robo-advisor-flow.test.tsx`, and the handoff/capability documentation.
+- Verification: the focused Robo suite passes `17/17`; the regression set covering Robo plus existing PageHeader consumers passes `39/39`; the complete suite passes `71` files / `721` tests; TypeScript, full ESLint, production build, and `git diff --check` pass.
+- Interactive browser QA on port `4001` confirms the reviewed content order, 8px output/label radii, exact 20x20 close geometry, absence of Help actions, working exit route, and centered compact title after real scrolling. The QA tab is left on the Projection screen for stakeholder review.
+- Existing Recharts zero-size jsdom warnings and build chunk-size warnings remain non-blocking and unchanged; no Business, Legal, suitability, portfolio-feed, or persistence rule was altered.
+- constitutional check:
+  - scope preserved: yes - Future CZ Robo presentation and navigation only
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes - existing deterministic demo data and external Business/Legal/backend dependencies remain explicit
+  - safe to resume: yes
+
+## 2026-07-29 CZ Future Homepage Investment Goals Entry
+
+- Extended only `PI / CZ / release-future-cz-robo` Homepage with the approved two-card Investment presentation from Figma node `12988:241673`: the existing product is labelled `Security Portfolio`, the new `Investment goals` card uses the supplied 32×32 SVG, and the section total is labelled `Total investments`.
+- The Investment section now has the same expandable accordion behavior as the other multi-product Homepage sections, so the second card remains reachable inside the phone viewport. Future CZ Robo Homepage section titles use the reviewed 20px/24px hierarchy; Baseline, other countries, and `CZ - Chatbot` retain their existing typography and product structure.
+- Added the Figma-derived goals container from node `12928:73948`: total goals value, a five-item goal list, active/inactive states, current/target values, returns, progress and dates, plus the fixed `Create New Goal` action. Homepage `Investment goals` opens this container; its CTA starts the existing Robo creation journey; closing creation returns to the list.
+- Files changed in this pass: `src/app/App.tsx`, `src/app/components/{AccordionSection,ProductsList,TotalRow}.tsx`, `src/app/components/icons/{AppIcon,customIcons}.tsx`, `src/app/screens/home/{AccountSummary,HomeScreen}.tsx`, `src/app/screens/investments/{CzInvestmentGoalsScreen,InvestmentsPortfolioScreen}.tsx`, `tests/screens/{home-account-summary-evolution,home-investment-goals-routing,investment-product-chat-context}.test.tsx`, and the handoff/capability documentation.
+- Verification: TypeScript, full ESLint, production build, focused Homepage/Robo tests (`18/18`), the updated Investments routing test (`11/11`), the complete suite (`71` files / `718` tests), and `git diff --check` pass. Interactive browser QA on port `4001` confirms Investment expand/collapse, both cards, routing into the five-goal container, visible green ACTIVE badges, `Create New Goal` routing, and return-to-list behavior.
+- Limitation: values, statuses, dates, returns and progress in the goals container remain deterministic Future demo data. The service contract, persistence, legal state and cross-device behavior must be supplied before production interpretation.
+- constitutional check:
+  - scope preserved: yes — Future CZ Robo Homepage and its already-approved goal journey only
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes — live goal aggregation and persistence remain explicit production dependencies
+  - safe to resume: yes
+
+## 2026-07-29 CZ Future Homepage Account-card Figma Alignment
+
+- Replaced the legacy Homepage product-card presentation only in `PI / CZ / release-future-cz-robo` with the existing Design System evolution variant, aligned to Figma node `12928:73776`. Baseline, other countries, and the separate CZ Chatbot release remain unchanged.
+- Account cards now use the Figma hierarchy: 16px account title, 14px account number, 32px trailing account mark, a 24px amount with 14px decimals/currency, and four 48px circular quick actions (`New payment`, `Scan QR code`, `Create QR code`, `Account info`).
+- Corrected the reviewed quick-action behavior: `New payment` opens the existing empty Domestic payment form directly, while `Account info` opens the existing dedicated Account Details page for the selected account. `Scan QR code` and `Account info` use the exact supplied 24×24 SVG geometry rather than approximate library icons.
+- Corrected the amount row after browser review: both the integer and decimal/currency parts are left-aligned with the account title and IBAN instead of being pushed to the card's right edge.
+- Added a focused regression suite covering release isolation, both account cards, quick-action visibility, click propagation, payment routing, and the Figma-required left alignment.
+- Files changed in this pass: `src/app/App.tsx`, `src/app/components/ProductCard.tsx`, `src/app/components/icons/customIcons.tsx`, `src/app/components/icons/lucideIcons.ts`, `src/app/screens/home/AccountSummary.tsx`, `src/app/screens/home/HomeScreen.tsx`, `tests/screens/home-account-summary-evolution.test.tsx`, `tests/screens/home-account-quick-action-routing.test.tsx`, `docs/handoff/current-session.md`, and `docs/platform-capability-map/README.md`.
+- Verification: the focused Homepage card and routing suites pass `4/4`; the complete suite passes `70` files / `716` tests; TypeScript, full ESLint, production build, the card-details, Investments, Figma bridge, template, and platform audits, plus focused `git diff --check`, all pass. Browser QA on a separate tab at port `4001` confirms the exact 24×24 SVG geometry, direct Domestic payment routing, selected-account Account Details routing with the expected IBAN, left-aligned balance hierarchy, and clean four-action layout.
+- The repository-wide asset audit remains blocked by the pre-existing Future Robo asset-index mismatch: the edited baseline expects `182/edd83…`, while the normal Git index exposes `181/538e…`; a temporary index including the already-untracked Robo intro image produces `182/54d4…`. This card change adds no raster asset and does not alter that inventory.
+- Limitation: `Scan QR code` and `Create QR code` remain non-mutating Future demo actions pending approved destination behavior.
+- constitutional check:
+  - scope preserved: yes — Future CZ Robo Homepage only
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes — inactive quick-action destinations remain explicit
+  - safe to resume: yes
+
+## 2026-07-29 CZ Future Robo Typography and Goal Detail Alignment
+
+- Normalized the customer-facing subtitle hierarchy across the Robo goal-creation journey to explicit 16px/21px typography, including the intro subtitle, centralized `RoboScreen` descriptions, risk-profile explanation, and goal-option titles.
+- Corrected the strategy carousel's default geometry: the container now preserves the content inset on the left while extending only toward the right edge for the next-card preview. Touch/mouse drag, snap selection, and the nested `See projection` action remain intact.
+- Rebuilt the created-goal detail against Figma node `12928:74558`. The screen no longer repeats the pre-purchase projection scenarios or estimated annual-return panel. It reuses the existing Investments `InvestmentPortfolioChart` and period-chip components for the historical performance surface (`1 M`, `3 M`, `1 Y`, `3 Y`, `MAX`).
+- Replaced the boxed local action grid with the shared `AccountActionBar` pattern used by transaction/account details. `Add money`, `Withdraw`, `History`, and `Goal settings` now use transparent DS action buttons without card containers.
+- Rebuilt `Portfolio allocation` with the existing Investments tabs and sorting pills, a 20px sentence-case section heading, product/asset-class/currency views, recognizable product marks, allocation metadata, current values, and performance values. The product rows use the selected Future portfolio presentation rather than inventing a second holdings source.
+- Files changed in this pass: `src/app/screens/investments/CzFutureRoboAdvisorFlow.tsx`, `tests/screens/cz-future-robo-advisor-flow.test.tsx`, `docs/handoff/current-session.md`, and `docs/platform-capability-map/README.md`.
+- Verification: the Robo flow suite passes `14/14`; TypeScript and targeted ESLint pass; the complete suite passes `68` files / `712` tests; production build and Investments audit pass; focused `git diff --check` passes.
+- Browser evidence on a separate QA tab at port `4001`: intro/profile/risk/goal subtitles resolve to 16px; the first strategy card retains the expected left inset; goal detail contains the shared performance chart and no projection/annual-return scenario content; all action backgrounds are transparent; allocation title resolves to 20px; Products/Asset class/Currency tabs, sorting pills, product marks and values render without horizontal overflow. The user's original tab was not modified.
+- Limitation: goal performance, holding values, product allocations, and returns remain deterministic Future demo data pending approved Comarch/Business feeds.
+- constitutional check:
+  - scope preserved: yes — Future CZ Robo only
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes — live performance/allocation feeds remain an explicit production dependency
+  - safe to resume: yes
+
+## 2026-07-29 CZ Future Robo Advisor Figma Fidelity Corrections
+
+- Reworked the implemented Future CZ Robo Advisor screens against the exact approved Figma nodes for funding method (`12928:81739`), investment setup (`12928:218867`), projection (`12928:155967`), and available portfolios (`12928:158034`), while retaining the existing Mobile PI Back + Help header and Design System primitives.
+- Horizon choices now use the approved 16px bold treatment without row separators, and `Continue` remains disabled until the customer makes a selection. Funding methods now use explicit radio controls and a disabled-until-selected footer action rather than navigation rows that advance immediately.
+- Added selected quick-value suggestions for one-off and monthly investments. Strategy cards are now a working touch/mouse snap carousel, with selection synchronized to the visible card. Pointer capture is owned by the pressed card control, which fixes the regression where `See projection` stopped receiving clicks after drag support was introduced.
+- Rebuilt projection behavior so both `Invest now` and `Invest monthly` controls are always available and both recalculate the lower, estimated, and higher scenarios. Rebuilt available portfolios as selectable Sustainable/Core/Income variants with allocation proportions, expandable `See more`/`See less` product lists, recognizable local/inline product marks, and a strategy-specific selection action.
+- Portfolio names, allocations, products, minimums, and projection assumptions remain deterministic Future demo fixtures. They must be replaced by approved Comarch/Business/Legal feeds and rules before production use; the UI continues to avoid presenting simulated outcomes as guaranteed performance.
+- Files changed in this correction pass: `src/app/screens/investments/CzFutureRoboAdvisorFlow.tsx`, `src/app/screens/investments/czFutureRoboAdvisorModel.ts`, `src/styles/theme.css`, `tests/screens/cz-future-robo-advisor-flow.test.tsx`, `docs/handoff/current-session.md`, and `docs/platform-capability-map/README.md`.
+- Verification: the focused Robo suite passes `12/12`, including the `See projection` pointer-capture regression; semantic investment-color tests pass `4/4`; TypeScript and targeted ESLint pass; the complete suite passes `68` files / `710` tests; the production build and Investments audit pass; `git diff --check` reports only existing line-ending warnings and no whitespace error.
+- Browser evidence: a separate authenticated QA tab on port `4001` confirmed disabled horizon/funding actions, both suggestion sets, all three swipeable strategy cards, successful `See projection` navigation, both projection controls, selectable portfolio variants, allocation/product/logo presentation, and expandable holdings. The user's original browser tab was left untouched.
+- constitutional check:
+  - scope preserved: yes — corrections remain isolated to the existing Future CZ Robo release
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes — Comarch/Business/Legal values remain explicit production dependencies
+  - safe to resume: yes
+
+## 2026-07-29 CZ Future Robo Advisor
+
+- Added a new isolated `Future App -> CZ - Robo` release for Mobile PI Czech Republic. Baseline and the existing `CZ - Chatbot` future preview remain unchanged.
+- Added a Design System-consistent `Investment goals` entry inside the existing Investments portfolio and an end-to-end mock Robo Advisor flow derived from the approved Figma section `Investments CEE DBN / 12928:73212`.
+- The implemented flow covers intro, conditional contact check support, valid/expired/missing MiFID profile states, goal type/name/target/horizon, one-off/monthly/combined funding on one unified screen, 1-3 suitable strategy results, strategy-specific projection, portfolio holdings, conditional Review Data, client-facing document disclosure, terms/sign/processing/success, goal detail, and management actions for adding money, changing the monthly contribution, partial/full withdrawal, history, settings, rename/target/horizon, and close.
+- Reworked the visible flow against the approved Mobile PI/Figma language: all Robo screens reuse the standard Back + Help header, the intro uses the exact approved illustration, the five goal choices use the approved labels/icons, and quick target amounts now prefill the field while retaining a clear selected state.
+- Rebuilt the projection screen from Figma node `12928:155967`: dynamic strategy/horizon copy, lower/estimated/higher curves and end values, annual-return summary, one-off/monthly range controls, concise risk disclosure, and the non-sticky `See suitable portfolios` action. Slider changes recalculate the scenario outputs; Back from suitable portfolios now returns to the configured projection instead of skipping to strategy selection.
+- MiFID guardrails are intentionally non-advisory: an expired or missing investor profile blocks recommendation selection and points to profile update; projections state that they are illustrative and not guaranteed; documents are disclosed before sign. No unconfirmed eligibility, minimum-investment, cost, order, or legal-document rules were invented.
+- The domain logic is separated in `czFutureRoboAdvisorModel.ts`; runtime screens are in `CzFutureRoboAdvisorFlow.tsx`; the feature is wired through the typed release/feature registries and activated in `App.tsx`.
+- Tests were added for future-release isolation, baseline absence, Investments entry/opening, MiFID blocking, all three funding modes, 1/2/3 strategy support, strategy distinction, projection routing, review conditionality, documents, terms/sign, and registry/store/header contracts.
+- Files changed for this scope: `src/app/App.tsx`, `src/app/components/demo/DemoTopBar.tsx`, `src/app/registry/{demoConfig,featureManifestRegistry,featureUI,projectModel,projectPackRegistry,releaseRegistry}.ts`, `src/app/screens/investments/{CzFutureRoboAdvisorFlow,czFutureRoboAdvisorModel,InvestmentsPortfolioScreen}.tsx`, `src/app/state/demoTypes.ts`, Robo/registry/store/header/Investments tests, the Robo design/implementation specs, and handoff/capability documentation.
+- Verification: fresh TypeScript, ESLint, production build, all `68` test files / `703` tests, and the card-details, Investments, Figma bridge, template, and platform audits passed. The asset manifest also passed with `182` assets and aggregate `edd83b8aeb3f56bf4c62d225666c39ce0e980f6b8b1adaf3a3d35c12defe2546` when the new untracked Figma illustration is included. `git diff --check` passed; existing jsdom/Recharts zero-size and build chunk-size warnings remain unchanged.
+- Browser evidence: the authenticated in-app demo on port `4001` was traversed end to end to the projection screen. Visual inspection confirmed the Mobile PI header, two-line projection title, graph/return card/control density, complete lower scroll area, selected `250 000 CZK` quick amount, and no visible overlap or horizontal overflow. Projection -> suitable portfolios -> Back returned to the same projection.
+- Business/Legal inputs still required before production interpretation: the exact first-goal contact-validation trigger/service, MiFID profile-update destination, final horizon presets/range, approved strategy/portfolio feed and eligibility/minimum rules, real cost disclosures, final legal document names/content/read-state rules, and backend status/failure behavior for opening, contributions, withdrawals, and closure.
+- constitutional check:
+  - scope preserved: yes — isolated Future CZ feature only
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes — Business/Legal/backend dependencies remain explicit follow-ups
+  - safe to resume: yes
+
+## 2026-07-28 ETHOCA Merchant-Logo Slot Regression
+
+- Fixed the ETHOCA Journey list layout regression that showed a giant broken-image placeholder over the transaction rows. The previous loading-state change made the logo image `absolute`, but its 32px logo container was not positioned. CSS therefore anchored the image to the nearest phone-level ancestor instead of the merchant-logo slot.
+- Made the merchant-logo container `relative`, preserving the 32px/64px local clipping boundary for both the temporary PFM fallback and the bundled image. No transaction-list data, filtering or host demo state changed.
+- Added a regression test asserting that the 32px Carrefour logo slot is a positioning context.
+- Files changed: `src/app/screens/flow-library/components/flowPreviews.tsx`, `tests/screens/flow-library.test.tsx`, and `docs/handoff/current-session.md`.
+- Verification: `npm test -- --run tests/screens/flow-library.test.tsx` passed (`27/27`); `npm run typecheck` passed.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes — absolute logo placement is now regression-tested
+  - safe to resume: yes
+
+## 2026-07-28 ETHOCA Preview Fixture Isolation
+
+- Fixed an ETHOCA Journey regression exposed when the Flow Library is opened from the HU Kids URL. The reusable Card Detail and Current Account Detail previews were reading the host page's `KIDS_PI/HU` demo context, while their ETHOCA filters intentionally target fixed RO ledger fixtures. This mismatch left the content below Search empty even though the phone header rendered.
+- Wrapped only the ETHOCA list previews in an internal, deterministic `PI/RO` fixture provider. The Flow Library screens now keep their documented RO Card Detail and Current Account rows regardless of the product/country selected in the surrounding demo URL; the host demo remains unchanged.
+- Prevented a visible broken-image state for merchant marks: the documented PFM circle is displayed while a bundled official asset is decoding and remains the fallback if it cannot load. A successfully loaded bundled mark still replaces it.
+- Files changed: `src/app/screens/flow-library/components/flowPreviews.tsx`, `tests/screens/flow-library.test.tsx`, and `docs/handoff/current-session.md`.
+- Verification: `npm test -- --run tests/screens/flow-library.test.tsx` passed (`26/26`) including a dedicated `KIDS_PI/HU` regression; `npm run typecheck` passed; `git diff --check` passed.
+- Limitation: the screen is a fixed RO ETHOCA specification fixture by design, not a live cross-market merchant feed. Any unavailable local merchant asset intentionally renders the documented PFM fallback rather than a broken image.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes — Flow Library fixtures are explicitly isolated from the surrounding demo context
+  - safe to resume: yes
+
+## 2026-07-28 HU Kids Merchant Card Detail Alignment
+
+- Reused the shared Mobile PI card transaction-detail surface for HU Kids purchases that already carry a Kids merchant logo. The mapping is deliberately data-driven: card-originated rows receive the linked HU Kids debit card and merchant enrichment; account-only transfers continue through the existing payment detail.
+- McDonalds demonstrates an in-store transaction with its existing Kids merchant mark, the static merchant-location map as the first Transaction details item, MCC, chargeback action, and Card used. Spotify demonstrates the online variant: it keeps the same card detail, logo, MCC, and Card used, but has no empty map placeholder. `From Dad` remains an account transfer with none of the card-enrichment fields.
+- The shared detail now accepts an optional market-specific Card used row. HU Kids supplies its existing cat-card artwork and the same `Mastercard Standard` / `*5678` identity already shown on Home, instead of the generic Mobile PI debit-card art and number.
+- Files changed: `src/app/screens/kids/KidsMarketHomeApp.tsx`, `src/app/screens/kids/hu/cards.ts`, `src/app/screens/kids/hu/merchantLogos.tsx`, `src/app/screens/kids/hu/cardTransactionEnrichment.tsx`, `src/app/screens/kids/hu/HuKidsCardUsedRow.tsx`, `src/app/screens/payments/DomesticPaymentFlowScreens.tsx`, `tests/screens/kids-market-home.test.tsx`, `docs/handoff/current-session.md`, and `docs/platform-capability-map/README.md`.
+- Verification: focused HU Kids and shared card-boundary tests passed (`21/21`) after asserting the exact Kids card artwork; TypeScript passed. The prior full `npm test` suite, ESLint and production build passed before this isolated presentational refinement. Browser smoke on the HU Kids route confirmed McDonalds renders its logo, static map, MCC and Card used, while Spotify renders the logo without a map and browser console errors were empty.
+- Limitation: merchant descriptions, MCCs and addresses are deterministic demo fixtures; no live merchant service or personal customer data is introduced.
+- Next action: use the same adapter only when a future Kids card purchase has a defined merchant-logo fixture; do not enrich account-only transfers.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes — mock merchant data remains an explicit demo boundary
+  - safe to resume: yes — merchant card and account-transfer variants are covered separately.
 
 ## 2026-07-28 First-Publication Corporate Cache Compatibility
 

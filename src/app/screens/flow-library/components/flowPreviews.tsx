@@ -15,6 +15,7 @@ import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
 import TextField from "@/app/components/TextField";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import { PreviewSafeTop } from "./MiniPhone";
+import { DemoProvider } from "@/app/state/demoStore";
 import { FLOW_DEMO } from "../flows/demoData";
 import type { FlowScreenKind } from "../flows/types";
 import { getAccountTransactions, type AccountTransaction } from "@/data/accountDetails";
@@ -736,6 +737,7 @@ function EthocaMerchantLogo({
   size?: 32 | 64;
 }) {
   const [imageFailed, setImageFailed] = useState(false);
+  const [imageReady, setImageReady] = useState(false);
   if (merchant === "youtube") return <ExistingMerchantLogo merchant="youtube" size={size} />;
   if (imageFailed) return <ExistingPfmFallback transaction={transaction} />;
 
@@ -754,20 +756,45 @@ function EthocaMerchantLogo({
   return (
     <span
       aria-label={`${config.label} merchant logo`}
-      className="grid shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--uc-static-white)] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--uc-static-black)_12%,transparent)]"
+      className="relative grid shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--uc-static-white)] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--uc-static-black)_12%,transparent)]"
       data-ethoca-visual="merchant-logo"
       data-ethoca-logo-source={config.source}
       data-testid={`merchant-logo-${merchant}`}
       role="img"
       style={{ width: size, height: size }}
     >
+      {!imageReady ? (
+        <span className="grid h-full w-full place-items-center rounded-full bg-[#F5F5F5]" aria-hidden="true">
+          <PfmCategoryIcon category={transaction.pfmCategory} size={Math.round(size * 0.625)} />
+        </span>
+      ) : null}
       <img
         alt=""
-        className="h-full w-full object-contain p-[12%]"
+        className={`absolute h-full w-full object-contain p-[12%] ${imageReady ? "opacity-100" : "opacity-0"}`}
+        onLoad={() => setImageReady(true)}
         onError={() => setImageFailed(true)}
         src={config.src}
       />
     </span>
+  );
+}
+
+/**
+ * Flow Library screens are fixed RO fixtures.  They must not inherit the
+ * product/country selected in the host demo URL (for example Kids HU), because
+ * the fixture's merchant filters and its ledger data are intentionally RO.
+ */
+function EthocaRoFixture({ children }: { children: ReactNode }) {
+  return (
+    <DemoProvider
+      initialState={{
+        product: "PI",
+        country: "RO",
+        bankingScenario: "retail-single-account",
+      }}
+    >
+      {children}
+    </DemoProvider>
   );
 }
 
@@ -794,22 +821,24 @@ function EthocaListPreview({ state }: { state: "available" | "pending" | "fallba
   };
 
   return (
-    <CardDetailScreen
-      selectedCardId="card-debit-1"
-      onBack={noop}
-      onCardDetailsClick={noop}
-      onShowCardDetailsClick={noop}
-      onCardOptionsClick={noop}
-      onTransactionClick={noop}
-      transactionRowPresentation={{
-        displayLabel: (transaction) => transaction.label,
-        transactionFilter,
-        leadingVisual: (transaction) => {
-          if (state === "fallback") return <ExistingPfmFallback transaction={transaction} />;
-          return merchantLogoFor(transaction) ?? <ExistingPfmFallback transaction={transaction} />;
-        },
-      }}
-    />
+    <EthocaRoFixture>
+      <CardDetailScreen
+        selectedCardId="card-debit-1"
+        onBack={noop}
+        onCardDetailsClick={noop}
+        onShowCardDetailsClick={noop}
+        onCardOptionsClick={noop}
+        onTransactionClick={noop}
+        transactionRowPresentation={{
+          displayLabel: (transaction) => transaction.label,
+          transactionFilter,
+          leadingVisual: (transaction) => {
+            if (state === "fallback") return <ExistingPfmFallback transaction={transaction} />;
+            return merchantLogoFor(transaction) ?? <ExistingPfmFallback transaction={transaction} />;
+          },
+        }}
+      />
+    </EthocaRoFixture>
   );
 }
 
@@ -820,20 +849,22 @@ function EthocaAccountListPreview({ state }: { state: "available" | "pending" })
   };
 
   return (
-    <AccountDetailScreen
-      selectedProductId={ETHOCA_CURRENT_ACCOUNT.id}
-      onBack={noop}
-      onDetailsClick={noop}
-      onOptionsClick={noop}
-      onTransactionClick={noop}
-      transactionRowPresentation={{
-        displayLabel: (transaction) => transaction.label,
-        transactionFilter,
-        leadingVisual: (transaction) => transaction.source === "card"
-          ? merchantLogoFor(transaction) ?? <ExistingPfmFallback transaction={transaction} />
-          : <ExistingPfmFallback transaction={transaction} />,
-      }}
-    />
+    <EthocaRoFixture>
+      <AccountDetailScreen
+        selectedProductId={ETHOCA_CURRENT_ACCOUNT.id}
+        onBack={noop}
+        onDetailsClick={noop}
+        onOptionsClick={noop}
+        onTransactionClick={noop}
+        transactionRowPresentation={{
+          displayLabel: (transaction) => transaction.label,
+          transactionFilter,
+          leadingVisual: (transaction) => transaction.source === "card"
+            ? merchantLogoFor(transaction) ?? <ExistingPfmFallback transaction={transaction} />
+            : <ExistingPfmFallback transaction={transaction} />,
+        }}
+      />
+    </EthocaRoFixture>
   );
 }
 

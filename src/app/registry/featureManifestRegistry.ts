@@ -105,6 +105,7 @@ export const FEATURE_MANIFESTS: Record<FeatureId, FeatureManifest> = {
   fx_newPaymentsHub: buildManifest("fx_newPaymentsHub", "runtime"),
   fx_cardsRedesign: buildManifest("fx_cardsRedesign", "runtime"),
   fx_czCoAppingSmartAssistant: buildManifest("fx_czCoAppingSmartAssistant", "runtime"),
+  fx_czRoboAdvisor: buildManifest("fx_czRoboAdvisor", "runtime"),
   fx_quickActionsRedesign: buildManifest("fx_quickActionsRedesign", "catalog"),
   fx_unplannedBanner: buildManifest("fx_unplannedBanner", "runtime"),
   fx_transactionsFilters: buildManifest("fx_transactionsFilters", "catalog"),

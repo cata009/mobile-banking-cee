@@ -16,6 +16,20 @@ describe('core registry contracts', () => {
     })
   })
 
+  it('places the isolated CZ Robo preview inside Investments', () => {
+    expect(FEATURE_UI_MAP.fx_czRoboAdvisor).toMatchObject({
+      id: 'fx_czRoboAdvisor',
+      locations: ['investments.robo'],
+    })
+
+    expect(FEATURE_META.fx_czRoboAdvisor).toMatchObject({
+      label: 'CZ - Robo',
+      countries: ['CZ'],
+      releases: ['release-future-cz-robo'],
+      affectedScreens: ['pi.investments.portfolio'],
+    })
+  })
+
   it('references only registered screens from components', () => {
     const invalidReferences = Object.values(COMPONENT_REGISTRY).flatMap((component) =>
       component.usedByScreens

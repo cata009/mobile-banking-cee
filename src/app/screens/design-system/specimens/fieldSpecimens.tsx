@@ -21,6 +21,7 @@ import CodeField from "@/app/components/CodeField";
 import ProductAccordion from "@/app/components/ProductAccordion";
 import ProductAccordionAnimated from "@/app/components/ProductAccordionAnimated";
 import ProductCard from "@/app/components/ProductCard";
+import { buildFutureCzAccountCardActions } from "@/app/components/productCardFixtures";
 import NavigationCardArt from "@/app/components/cards/NavigationCardArt";
 import ProductsList from "@/app/components/ProductsList";
 import AccountBalanceCard from "@/app/components/accounts/AccountBalanceCard";
@@ -100,6 +101,7 @@ export function ProductCardListTotalRowEvolutionSpecimen() {
         onChange={(value) => setSelectedVariant(value as ProductCardEvolutionVariant)}
         options={[
           { id: "pi-default", label: "PI app / Default" },
+          { id: "pi-account-actions", label: "PI app / Account quick actions" },
           { id: "pi-accordion", label: "PI app / Accordion" },
           { id: "pi-open", label: "PI app / Open" },
           { id: "sme-default", label: "SME app / Default" },
@@ -108,7 +110,43 @@ export function ProductCardListTotalRowEvolutionSpecimen() {
         ]}
       />
       <div className={`w-[375px] py-[16px] ${surfaceClass}`}>
-        {type === "default" ? (
+        {type === "account-actions" ? (
+          <div className="flex flex-col gap-[20px] px-[24px]">
+            <div>
+              <p className="mb-[8px] text-[12px] font-bold leading-[16px] text-[var(--uc-text-muted)]">
+                WITH QUICK ACTIONS
+              </p>
+              <ProductCard
+                icon={<MiniProductIcon />}
+                title="Primary Account"
+                accountNumber="CZ43 BACX 1234 5678 9012 3401"
+                amount="22 850"
+                decimals=".50"
+                currency="CZK"
+                variant="evolution"
+                productStyle="pi"
+                stackRole="single"
+                actions={buildFutureCzAccountCardActions()}
+              />
+            </div>
+            <div>
+              <p className="mb-[8px] text-[12px] font-bold leading-[16px] text-[var(--uc-text-muted)]">
+                WITHOUT QUICK ACTIONS
+              </p>
+              <ProductCard
+                icon={<MiniProductIcon />}
+                title="Primary Account"
+                accountNumber="CZ43 BACX 1234 5678 9012 3401"
+                amount="22 850"
+                decimals=".50"
+                currency="CZK"
+                variant="evolution"
+                productStyle="pi"
+                stackRole="single"
+              />
+            </div>
+          </div>
+        ) : type === "default" ? (
           <div className="px-[24px]">{cardA}</div>
         ) : (
           <ProductsList

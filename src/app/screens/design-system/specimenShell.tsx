@@ -13,7 +13,7 @@ export type SelectorOption<Value extends string = string> = {
   label: string;
 };
 
-export type ProductCardEvolutionVariant = "pi-default" | "pi-accordion" | "pi-open" | "sme-default" | "sme-accordion" | "sme-open";
+export type ProductCardEvolutionVariant = "pi-default" | "pi-account-actions" | "pi-accordion" | "pi-open" | "sme-default" | "sme-accordion" | "sme-open";
 
 export function Section({ id, title, description, children }: {
   id: string;

@@ -10,6 +10,7 @@ import type { FeatureId } from "@/app/state/demoTypes";
  */
 export type UILocation =
   | "app.assistant"
+  | "investments.robo"
   | "home.header"
   | "home.accountSummary"
   | "home.quickActions"
@@ -43,6 +44,11 @@ export const FEATURE_UI_MAP: Record<FeatureId, FeatureUIConfig> = {
     id: "fx_czCoAppingSmartAssistant",
     locations: ["app.assistant"],
     description: "Adds the portable Co-Apping Smart Assistant to supported app screens",
+  },
+  fx_czRoboAdvisor: {
+    id: "fx_czRoboAdvisor",
+    locations: ["investments.robo"],
+    description: "Adds the isolated CZ Future goal-based Robo Advisor journey inside Investments",
   },
 
   // ─── RELEASE FEATURES ────────────────────────────────────────

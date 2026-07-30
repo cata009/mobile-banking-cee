@@ -35,6 +35,27 @@ beforeAll(() => {
 afterEach(cleanup);
 
 describe("investment product chat context handoff", () => {
+  it("keeps the Robo Advisor entry out of the baseline Investments portfolio", () => {
+    render(<InvestmentsPortfolioScreen onBack={() => undefined} />, { wrapper: AppProviders });
+
+    expect(screen.queryByRole("button", { name: "Create investment goal" })).not.toBeInTheDocument();
+  });
+
+  it("keeps the redundant Robo Advisor promo out of the Future CZ Investments portfolio", () => {
+    render(
+      <InvestmentsPortfolioScreen
+        onBack={() => undefined}
+        roboAdvisorEnabled
+      />,
+      { wrapper: AppProviders },
+    );
+
+    expect(screen.queryByText("Investment goals")).not.toBeInTheDocument();
+    expect(screen.queryByText("Invest towards what matters")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Open investment goals" })).not.toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "PERFORMANCE" })).toBeInTheDocument();
+  });
+
   it("publishes the selected security and clears it when returning to the portfolio", () => {
     const onSelectedSecurityChange = vi.fn();
 

@@ -435,6 +435,67 @@ export const CUSTOM_ICONS = {
       />
     ),
   },
+  "payment-scan-qr": {
+    source: "custom",
+    label: "Scan QR code",
+    category: "Payments",
+    width: 24,
+    height: 24,
+    viewBox: "0 0 24 24",
+    usage: ["AccountSummary Future CZ account quick actions"],
+    notes: "Exact 24×24 Scan QR glyph supplied for the Future CZ Homepage account card.",
+    render: () => (
+      <>
+        <path d="M5.92339 7.48387H7.85887V5.54839H5.92339V7.48387Z" fill="currentColor" />
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M4.31048 2H11.4073V11.0323H2.375V3.93548C2.375 2.86839 3.24339 2 4.31048 2ZM9.47177 9.09677H4.31048V3.93548H9.47177V9.09677Z"
+          fill="currentColor"
+        />
+        <path d="M5.92339 18.4516H7.85887V16.5161H5.92339V18.4516Z" fill="currentColor" />
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M11.4073 12.9677H2.375V20.0645C2.375 21.1316 3.24339 22 4.31048 22H11.4073V12.9677ZM4.31048 20.0645H9.47177V14.9032H4.31048V20.0645Z"
+          fill="currentColor"
+        />
+        <path d="M16.8911 7.48387H18.8266V5.54839H16.8911V7.48387Z" fill="currentColor" />
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M13.3427 2H20.4395C21.5066 2 22.375 2.86839 22.375 3.93548V11.0323H13.3427V2ZM20.4395 9.09677H15.2782V3.93548H20.4395V9.09677Z"
+          fill="currentColor"
+        />
+        <path d="M15.2782 14.9032H13.3427V12.9677H15.2782V14.9032Z" fill="currentColor" />
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M17.2137 14.9032H15.2782V16.8387H13.3427V20.7097H17.2137V18.7742H19.1492V20.7097H21.0847V16.8387H17.2137V14.9032ZM17.2137 16.8387V18.7742H15.2782V16.8387H17.2137Z"
+          fill="currentColor"
+        />
+        <path d="M17.2137 14.9032V12.9677H21.0847V14.9032H17.2137Z" fill="currentColor" />
+      </>
+    ),
+  },
+  "payment-new": {
+    source: "custom",
+    label: "New payment",
+    category: "Payments",
+    width: 24,
+    height: 24,
+    viewBox: "0 0 24 24",
+    usage: ["Future CZ account card quick actions"],
+    notes: "Exact 24×24 New payment glyph supplied for the Future CZ Homepage account card.",
+    render: () => (
+      <>
+        <path d="M10.9248 5.125C10.9248 6.85062 9.58194 8.25 7.92473 8.25C6.26812 8.25 4.92471 6.85062 4.92471 5.125C4.92471 3.39875 6.26812 2 7.92473 2C9.58194 2 10.9248 3.39875 10.9248 5.125Z" fill="currentColor" />
+        <path d="M20.8595 6.41856C20.8595 7.82356 19.7663 8.96231 18.4175 8.96231C17.0687 8.96231 15.9755 7.82356 15.9755 6.41856C15.9755 5.01356 17.0687 3.87481 18.4175 3.87481C19.7663 3.87481 20.8595 5.01356 20.8595 6.41856Z" fill="currentColor" />
+        <path d="M3.7256 9.5H3.125V22H12.3075V18.4394C12.3075 13.5019 8.46504 9.5 3.7256 9.5Z" fill="currentColor" />
+        <path d="M14.525 17.0612C14.525 13.5131 17.2862 10.6362 20.693 10.6362H21.125V19.7231H14.525V17.0612Z" fill="currentColor" />
+      </>
+    ),
+  },
   "payment-templates": {
     source: "custom",
     label: "Templates",
@@ -726,6 +787,60 @@ export const CUSTOM_ICONS = {
       />
     ),
   },
+  "robo-close": {
+    source: "custom",
+    label: "Close Robo Advisor flow",
+    category: "System",
+    width: 20,
+    height: 20,
+    viewBox: "0 0 20 20",
+    usage: ["CzFutureRoboAdvisorFlow"],
+    notes: "Exact 20x20 close glyph supplied for the CZ Future Robo Advisor flow.",
+    render: () => (
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M18.1431 0L10 8.14313L1.85625 0L0 1.85687L8.14313 10L0 18.1431L1.85625 20L10 11.8569L18.1431 20L20 18.1431L11.8569 10L20 1.85687L18.1431 0Z"
+        fill="currentColor"
+      />
+    ),
+  },
+  "robo-withdraw": {
+    source: "custom",
+    label: "Robo goal withdraw",
+    category: "Actions",
+    width: 20,
+    height: 20,
+    viewBox: "0 0 20 20",
+    usage: ["CzFutureRoboAdvisorFlow"],
+    notes: "Exact 20x20 Withdraw glyph supplied for existing Robo goal detail.",
+    render: () => (
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M19.1424 12.2233C17.9595 11.15 16.0395 11.15 14.8567 12.2233L12.0864 14.7378L12.0864 0.00111154L9.05665 5.6575e-07L9.05666 14.7378L6.28523 12.2233C5.10237 11.15 3.18466 11.15 1.99951 12.2233L10.5709 20L19.1424 12.2233Z"
+        fill="currentColor"
+      />
+    ),
+  },
+  "robo-goal-settings": {
+    source: "custom",
+    label: "Robo goal settings",
+    category: "Actions",
+    width: 32,
+    height: 32,
+    viewBox: "0 0 32 32",
+    usage: ["CzFutureRoboAdvisorFlow"],
+    notes: "Exact 32x32 Goal settings glyph supplied for existing Robo goal detail.",
+    render: () => (
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M17.0212 18.5281C15.6247 19.0923 14.0369 18.4188 13.4712 17.0222C12.9071 15.6255 13.5821 14.036 14.9786 13.4719C16.3752 12.9077 17.963 13.5828 18.527 14.9794C19.0911 16.3761 18.4162 17.964 17.0212 18.5281ZM24.9875 21.1543L25.9807 18.7805L23.7196 16.8052V15.2527L26 13.2887L25.0229 10.9084L22.0161 11.1109L20.9297 10.0228L21.1531 7.01093L18.7794 6.01929L16.7947 8.29187H15.2616L13.2881 6L10.908 6.97718L11.1105 9.98264L10.0241 11.0707L7.01085 10.8457L6.01768 13.2195L8.28043 15.1948V16.749L6 18.7113L6.9771 21.0932L9.95982 20.8907L11.0687 21.9997L10.8453 24.9891L13.2206 25.9823L15.1828 23.7322H16.7577L18.7119 26L21.0904 25.0244L20.8895 22.0399L21.9984 20.9325L24.9875 21.1543Z"
+        fill="currentColor"
+      />
+    ),
+  },
   "panel-smart-banking": {
     source: "custom",
     label: "Panel smart banking",
@@ -834,6 +949,24 @@ export const CUSTOM_ICONS = {
         fillRule="evenodd"
         clipRule="evenodd"
         d="M16.0002 12.5546C14.9617 12.5546 14.1202 11.7131 14.1202 10.6746C14.1202 9.63692 14.9617 8.79462 16.0002 8.79462C17.0386 8.79462 17.8802 9.63692 17.8802 10.6746C17.8802 11.7131 17.0386 12.5546 16.0002 12.5546ZM17.5492 20.2177C17.5492 21.7846 17.0369 23.2062 14.4723 23.2062V14.8623H17.5492V20.2177ZM16 6C10.4769 6 6 10.4777 6 16C6 21.5231 10.4769 26 16 26C21.5231 26 26 21.5231 26 16C26 10.4777 21.5231 6 16 6Z"
+        fill="currentColor"
+      />
+    ),
+  },
+  "account-info": {
+    source: "custom",
+    label: "Account info",
+    category: "Accounts",
+    width: 24,
+    height: 24,
+    viewBox: "0 0 24 24",
+    usage: ["AccountSummary Future CZ account quick actions"],
+    notes: "Exact 24×24 Account info glyph supplied for the Future CZ Homepage account card.",
+    render: () => (
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M11.8747 8.55461C12.9131 8.55461 13.7547 7.71307 13.7547 6.67461C13.7547 5.63692 12.9131 4.79461 11.8747 4.79461C10.8362 4.79461 9.99469 5.63692 9.99469 6.67461C9.99469 7.71307 10.8362 8.55461 11.8747 8.55461ZM10.3258 16.2177C10.3258 17.7846 10.8381 19.2061 13.4027 19.2061V10.8623H10.3258V16.2177ZM11.875 2C17.3981 2 21.875 6.47769 21.875 12C21.875 17.5231 17.3981 22 11.875 22C6.35192 22 1.875 17.5231 1.875 12C1.875 6.47769 6.35192 2 11.875 2Z"
         fill="currentColor"
       />
     ),
@@ -1745,6 +1878,84 @@ export const CUSTOM_ICONS = {
         <path d="M6.5 2.75h7l4 4v14.5H6.5z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
         <path d="M13.5 2.75v4h4" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
         <text x="12" y="16.4" fill="currentColor" fontSize="7" fontWeight="700" textAnchor="middle">W</text>
+      </>
+    ),
+  },
+  "robo-goal-wealth": {
+    source: "custom",
+    label: "Build wealth goal",
+    category: "Actions",
+    width: 24,
+    height: 24,
+    viewBox: "0 0 23.25 19.5",
+    usage: ["CzFutureRoboAdvisorFlow goal selection"],
+    render: () => (
+      <path d="M0 0C1.65675 0 3 1.34325 3 3V16.5H20.25C21.9068 16.5 23.25 17.8432 23.25 19.5H3C1.34325 19.5 0 18.1568 0 16.5V0ZM14.6709 10.8291L13.0801 12.4199L10.0742 9.41406L5.09668 13.7686C4.27868 12.8333 4.37343 11.4112 5.30859 10.5938L10.1758 6.33594L14.6709 10.8291ZM21.748 10.5C20.5053 10.5 19.498 9.49275 19.498 8.25V6.0918L15.4512 10.1396L13.8594 8.54883L17.9072 4.5H15.748C14.5053 4.5 13.498 3.49275 13.498 2.25H21.748V10.5Z" fill="currentColor" />
+    ),
+  },
+  "robo-goal-inflation": {
+    source: "custom",
+    label: "Inflation protection goal",
+    category: "Actions",
+    width: 24,
+    height: 24,
+    viewBox: "0 0 24 18.45",
+    usage: ["CzFutureRoboAdvisorFlow goal selection"],
+    render: () => (
+      <path fillRule="evenodd" clipRule="evenodd" d="M14.4 2.85C14.4 4.42401 13.124 5.7 11.55 5.7C9.97597 5.7 8.69998 4.42401 8.69998 2.85C8.69998 1.27599 9.97597 0 11.55 0C13.124 0 14.4 1.27599 14.4 2.85ZM4.5 5.92496C5.74264 5.92496 6.75 4.88403 6.75 3.59996C6.75 2.3159 5.74264 1.27496 4.5 1.27496C3.25736 1.27496 2.25 2.3159 2.25 3.59996C2.25 4.88403 3.25736 5.92496 4.5 5.92496ZM4.8 10.95C4.8 9.30002 5.625 7.87502 6.9 7.05002H3.6C1.575 7.05002 0 8.70002 0 10.725V16.275H4.8V10.95ZM13.875 12.45V6.89996H10.5C8.025 6.89996 6 8.99996 6 11.55V18.45H12.75C14.175 18.45 15.45 17.775 16.275 16.65C14.775 15.825 13.875 14.175 13.875 12.45ZM19.5 5.775C20.7426 5.775 21.75 4.73406 21.75 3.45C21.75 2.16594 20.7426 1.125 19.5 1.125C18.2574 1.125 17.25 2.16594 17.25 3.45C17.25 4.73406 18.2574 5.775 19.5 5.775ZM20.4 6.89996H15V12.45C15 14.475 16.65 16.125 18.6 16.125H24V10.575C24 8.54996 22.35 6.89996 20.4 6.89996Z" fill="currentColor" />
+    ),
+  },
+  "robo-goal-unforeseen": {
+    source: "custom",
+    label: "Unforeseen circumstances goal",
+    category: "Actions",
+    width: 24,
+    height: 24,
+    viewBox: "0 0 24 20.25",
+    usage: ["CzFutureRoboAdvisorFlow goal selection"],
+    render: () => (
+      <path d="M10.9043 16.1318L12.792 11.1445L13.2637 12.4033H20.2227L12.8154 19.9102C12.3595 20.3632 11.6249 20.3632 11.1787 19.9102L3.76367 12.4033H5.2334L5.80469 11.3076L7.43262 14.6074L8.89746 9.77246L10.9043 16.1318ZM18 0C21.315 0 24 2.71865 24 6.0752C24 7.64081 23.0519 9.16178 23.0352 9.18848C22.7697 9.60463 22.1636 10.3524 21.6934 10.8848H14.2988L12.8008 6.87598L11.0322 11.5488L8.86816 4.6875L7.09863 10.5303L5.84277 7.9834L4.3291 10.8848H2.27051C1.82651 10.4147 1.2437 9.64465 0.918945 9.12598C0.90526 9.10363 3.5376e-06 7.62019 0 6.0752C0 2.71871 2.68492 8.54757e-05 5.99609 0C8.88276 0 11.4262 2.05936 12 4.81055C12.5791 2.06847 15.1178 0 18 0Z" fill="currentColor" />
+    ),
+  },
+  "robo-goal-purchase": {
+    source: "custom",
+    label: "Major purchase goal",
+    category: "Actions",
+    width: 24,
+    height: 24,
+    viewBox: "0 0 21 24",
+    usage: ["CzFutureRoboAdvisorFlow goal selection"],
+    render: () => (
+      <path fillRule="evenodd" clipRule="evenodd" d="M10.5918 0L0 8.25V18.7897C0 21.6675 2.34136 24 5.23005 24H8.24145V17.25C8.24145 16.422 8.91525 15.75 9.74715 15.75H11.2529C12.084 15.75 12.7586 16.422 12.7586 17.25V24H15.7699C18.6586 24 21 21.6675 21 18.7897V8.25L10.5918 0Z" fill="currentColor" />
+    ),
+  },
+  "robo-goal-retirement": {
+    source: "custom",
+    label: "Retirement goal",
+    category: "Actions",
+    width: 24,
+    height: 24,
+    viewBox: "0 0 11.25 22.5",
+    usage: ["CzFutureRoboAdvisorFlow goal selection"],
+    render: () => (
+      <path fillRule="evenodd" clipRule="evenodd" d="M0 6.97199L0.0316423 13.5H1.09668V19.5592C1.09668 21.183 2.45112 22.5 4.12276 22.5H5.07589V13.5L6.19649 8.54549L7.24918 11.25H11.25V8.99999H8.84827L7.10331 4.53448C6.37863 4.00723 5.53277 3.61498 4.59122 3.41398L4.54414 3.40423C2.24352 2.92948 0.084894 4.68823 0 6.97199V6.97199ZM9.70647 22.5H11.25V12H9.70647V22.5ZM8.19073 0.0442297C9.23184 0.26623 9.88938 1.26673 9.66171 2.27773C9.4325 3.28948 8.40296 3.92923 7.36263 3.70723C6.32152 3.48523 5.6632 2.48473 5.89242 1.47298C6.12086 0.46198 7.15039 -0.178521 8.19073 0.0442297V0.0442297Z" fill="currentColor" />
+    ),
+  },
+  "investment-goals-product": {
+    source: "custom",
+    label: "Investment goals product",
+    category: "Accounts",
+    width: 32,
+    height: 32,
+    viewBox: "0 0 32 32",
+    usage: ["Future CZ Robo Homepage Investment goals product card"],
+    notes: "Exact 32x32 artwork supplied with the Future CZ Robo Homepage specification.",
+    render: () => (
+      <>
+        <rect width="32" height="32" fill="var(--uc-surface-raised)" />
+        <path d="M7.83871 22.2308V9.76923C7.83871 8.23992 6.56768 7 5 7V22.2308C5 23.7601 6.27103 25 7.83871 25H27C27 23.4707 25.729 22.2308 24.1613 22.2308H7.83871Z" fill="currentColor" />
+        <path d="M10.023 16.7791C9.13806 17.5337 9.04864 18.8464 9.8229 19.7097L14.5323 15.6901L17.3767 18.4649L18.8819 16.9965L14.6288 12.8482L10.023 16.7791Z" fill="currentColor" />
+        <path d="M23.4496 12.6229V14.6154C23.4496 15.7625 24.4027 16.6923 25.5786 16.6923V9.07692H17.7721C17.7721 10.2241 18.7252 11.1538 19.9012 11.1538H21.9443L18.1142 14.8916L19.6201 16.36L23.4496 12.6229Z" fill="currentColor" />
       </>
     ),
   },

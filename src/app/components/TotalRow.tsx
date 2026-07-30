@@ -5,9 +5,18 @@ interface TotalRowProps {
   variant?: 'legacy' | 'evolution';
   productStyle?: 'pi' | 'sme';
   className?: string;
+  label?: string;
 }
 
-export default function TotalRow({ integer, decimals, currency, variant = 'legacy', productStyle = 'pi', className = '' }: TotalRowProps) {
+export default function TotalRow({
+  integer,
+  decimals,
+  currency,
+  variant = 'legacy',
+  productStyle = 'pi',
+  className = '',
+  label = 'Total',
+}: TotalRowProps) {
   if (variant === 'evolution') {
     return (
       <div
@@ -20,7 +29,7 @@ export default function TotalRow({ integer, decimals, currency, variant = 'legac
       >
         <div className="flex w-full flex-col items-start justify-center gap-[4px]">
           <span className="text-[18px] font-normal leading-[20px] tracking-[0] text-[var(--uc-primary-k0,var(--uc-text))]">
-            Total
+            {label}
           </span>
           <div className="flex h-[20px] w-full items-end justify-end text-right text-[var(--uc-text)]">
             <span className="text-[20px] font-bold leading-[20px] tracking-[0]">
@@ -44,7 +53,7 @@ export default function TotalRow({ integer, decimals, currency, variant = 'legac
           color: 'var(--uc-text)',
         }}
       >
-        Total
+        {label}
       </span>
 
       {/* Amount - using exact same layout as ProductCard */}

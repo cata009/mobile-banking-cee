@@ -18,6 +18,14 @@ function renderFlowLibrary(initialFlowId: Parameters<typeof FlowLibraryScreen>[0
   )
 }
 
+function renderFlowLibraryInKidsHungary() {
+  return render(
+    <DemoProvider initialState={{ product: 'KIDS_PI', country: 'HU', bankingScenario: 'kids-child-preview' }}>
+      <FlowLibraryScreen initialFlowId="mobile-pi-ethoca" />
+    </DemoProvider>,
+  )
+}
+
 describe('flow-library scenario resolution', () => {
   const flow = FLOW_DEFINITIONS['ro-round-up']
 
@@ -378,5 +386,31 @@ describe('flow-library screen', () => {
     expect(within(gallery).getByTestId('ethoca-entry-account-list')).toHaveTextContent('Current Account card-transaction list')
     expect(within(gallery).getByTestId('ethoca-detail-examples')).toHaveTextContent('Transaction detail examples')
     expect(within(gallery).queryByTestId('journey-arrow')).not.toBeInTheDocument()
+  })
+
+  it('keeps ETHOCA list fixtures populated when Flow Library is opened from Kids Hungary', () => {
+    renderFlowLibraryInKidsHungary()
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Journey' }))
+    const focusedPreview = () => within(document.querySelector('[data-flow-preview-scrollable="true"]') as HTMLElement)
+
+    expect(focusedPreview().getByText('Carrefour')).toBeInTheDocument()
+    expect(focusedPreview().getByText('YouTube Premium')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /Enriched account list/ }))
+    expect(focusedPreview().getAllByText('Enel Energie').length).toBeGreaterThan(0)
+    expect(focusedPreview().getByText('Carrefour')).toBeInTheDocument()
+  })
+
+  it('anchors an ETHOCA merchant image inside its 32px list slot', () => {
+    renderFlowLibrary('mobile-pi-ethoca')
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Journey' }))
+    const focusedPreview = document.querySelector('[data-flow-preview-scrollable="true"]') as HTMLElement
+    const logo = within(focusedPreview).getAllByTestId('merchant-logo-carrefour').find(
+      (candidate) => candidate.getAttribute('style')?.includes('width: 32px'),
+    )
+
+    expect(logo).toHaveClass('relative')
   })
 })

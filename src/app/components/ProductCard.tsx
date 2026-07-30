@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, type MouseEvent } from 'react';
 
 export const PRODUCT_CARD_EVOLUTION_SOURCE = {
   schema: "codex-figma-component-spec/v1",
@@ -28,6 +28,15 @@ interface ProductCardProps {
   variant?: 'legacy' | 'evolution';
   productStyle?: 'pi' | 'sme';
   stackRole?: 'single' | 'first' | 'middle' | 'last';
+  actions?: readonly ProductCardAction[];
+  onClick?: () => void;
+}
+
+export interface ProductCardAction {
+  id: string;
+  icon: ReactNode;
+  label: string;
+  ariaLabel?: string;
   onClick?: () => void;
 }
 
@@ -42,10 +51,12 @@ export default function ProductCard({
   variant = 'legacy',
   productStyle = 'pi',
   stackRole = 'single',
+  actions,
   onClick
 }: ProductCardProps) {
   if (variant === 'evolution') {
     const isSme = productStyle === 'sme';
+    const visibleActions = actions?.slice(0, 4) ?? [];
     const radiusClass =
       stackRole === 'first'
         ? 'rounded-t-[4px]'
@@ -57,7 +68,7 @@ export default function ProductCard({
 
     return (
       <div
-        className={`flex w-[327px] flex-col items-end gap-[8px] bg-[var(--uc-surface-raised)] p-[16px] text-[var(--uc-text)] transition-opacity ${radiusClass} ${onClick ? "cursor-pointer hover:opacity-90" : ""}`}
+        className={`flex w-[327px] flex-col items-end bg-[var(--uc-surface-raised)] p-[16px] text-[var(--uc-text)] transition-opacity ${visibleActions.length > 0 ? "gap-[32px]" : "gap-[8px]"} ${radiusClass} ${onClick ? "cursor-pointer hover:opacity-90" : ""}`}
         data-product-card-evolution
         data-product-style={productStyle}
         onClick={onClick}
@@ -65,33 +76,68 @@ export default function ProductCard({
           background: isSme ? "var(--uc-neutral-200)" : "var(--uc-surface-raised)",
         }}
       >
-        <div className="flex w-full items-start gap-[16px]">
-          <div className="flex min-w-0 flex-1 flex-col gap-[4px]">
-            <p className="text-[18px] font-bold leading-[20px] tracking-[0] text-[var(--uc-primary-k0,var(--uc-text))]">
-              {title}
-            </p>
-            <p className="text-[14px] font-normal leading-[16px] tracking-[0] text-[var(--uc-text)]">
-              {accountNumber}
-            </p>
-            {thirdLine ? (
-              <p className="text-[14px] font-normal leading-[16px] tracking-[0] text-[var(--uc-text)]">
-                {thirdLine}
+        <div className="flex w-full flex-col gap-[8px]">
+          <div className="flex w-full items-start gap-[16px]">
+            <div className="flex min-w-0 flex-1 flex-col gap-[4px]">
+              <p className="text-[16px] font-bold leading-[18px] tracking-[0] text-[var(--uc-primary-k0,var(--uc-text))]">
+                {title}
               </p>
-            ) : null}
+              <p className="text-[14px] font-normal leading-[16px] tracking-[0] text-[var(--uc-text)]">
+                {accountNumber}
+              </p>
+              {thirdLine ? (
+                <p className="text-[14px] font-normal leading-[16px] tracking-[0] text-[var(--uc-text)]">
+                  {thirdLine}
+                </p>
+              ) : null}
+            </div>
+            <div className="flex size-[32px] shrink-0 items-center justify-center text-[var(--uc-action)]">
+              {icon}
+            </div>
           </div>
-          <div className="flex size-[32px] shrink-0 items-center justify-center text-[var(--uc-action)]">
-            {icon}
+
+          <div
+            className="flex w-full items-baseline justify-start text-left text-[var(--uc-text)]"
+            data-product-card-amount
+          >
+            <span className="text-[24px] font-bold leading-[28px] tracking-[0]">
+              {amount}
+            </span>
+            <span className="text-[14px] font-normal leading-[16px] tracking-[0]">
+              {decimals} {currency}
+            </span>
           </div>
         </div>
 
-        <div className="flex w-full items-baseline justify-end text-right text-[var(--uc-text)]">
-          <span className="text-[24px] font-bold leading-[28px] tracking-[0]">
-            {amount}
-          </span>
-          <span className="text-[14px] font-normal leading-[16px] tracking-[0]">
-            {decimals} {currency}
-          </span>
-        </div>
+        {visibleActions.length > 0 ? (
+          <div className="flex w-full items-start gap-[8px]" data-product-card-actions>
+            {visibleActions.map((action) => {
+              const handleActionClick = (event: MouseEvent<HTMLButtonElement>) => {
+                event.stopPropagation();
+                action.onClick?.();
+              };
+
+              return (
+                <button
+                  key={action.id}
+                  type="button"
+                  aria-label={action.ariaLabel ?? action.label.replace(/\s+/g, ' ').trim()}
+                  className="flex min-w-0 flex-1 flex-col items-center gap-[6px] text-[var(--uc-text)]"
+                  onClick={handleActionClick}
+                >
+                  <span className="grid size-[48px] place-items-center rounded-full bg-[var(--uc-surface-muted)]">
+                    <span className="grid size-[24px] place-items-center">
+                      {action.icon}
+                    </span>
+                  </span>
+                  <span className="text-center text-[14px] font-normal leading-[16px] whitespace-pre-line">
+                    {action.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
       </div>
     );
   }

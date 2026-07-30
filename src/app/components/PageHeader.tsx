@@ -18,6 +18,7 @@ interface PageHeaderProps {
   rightActionLabel?: string;
   largeTitleAlign?: "left" | "center";
   largeTitleColor?: string;
+  hideCollapsedTitleWhenHidden?: boolean;
 }
 
 export default function PageHeader({
@@ -36,6 +37,7 @@ export default function PageHeader({
   rightActionLabel = "Action",
   largeTitleAlign = "left",
   largeTitleColor,
+  hideCollapsedTitleWhenHidden = false,
 }: PageHeaderProps) {
   const iconColor = variant === "dark" ? "white" : "var(--uc-text)";
   const textColor = variant === "dark" ? "text-[var(--uc-static-white)]" : "text-[var(--uc-text)]";
@@ -110,6 +112,7 @@ export default function PageHeader({
 
           <h1
             className={cn("uc-type-n4-strong pointer-events-none truncate text-center", textColor)}
+            aria-hidden={hideCollapsedTitleWhenHidden && titleProgress === 0}
             style={{
               opacity: titleProgress,
               transform: `translateY(${(1 - titleProgress) * 6}px)`,

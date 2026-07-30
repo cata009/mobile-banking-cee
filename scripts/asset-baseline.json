@@ -1,6 +1,6 @@
 {
-  "baselineCommit": "3a51082",
-  "baselineNote": "Re-locked on 2026-07-28 after the approved ETHOCA corporate-network resilience change added the official Carrefour and eMAG merchant marks. Both assets are bundled and referenced by the Flow Library previews; no existing image was deleted, replaced, or optimized.",
-  "assetCount": 181,
-  "pathBlobSha256Aggregate": "538e51f9f07cf03f26892bd4ad243fafeb5776f00da045a1c20a880a190598c6"
+  "baselineCommit": "28b77d5",
+  "baselineNote": "Re-locked on 2026-07-29 after the approved CZ Future Robo Advisor flow added the exact Figma intro artwork. The bundled image is referenced only by CzFutureRoboAdvisorFlow; no existing image was deleted, replaced, or optimized.",
+  "assetCount": 182,
+  "pathBlobSha256Aggregate": "54d47b1b7afdd71a551d65585cdc31bf963526703792062a357442d5f3235062"
 }
