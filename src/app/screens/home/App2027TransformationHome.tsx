@@ -93,7 +93,7 @@ function categoryProducts(categories: ProductCategory[], key: ProductCategory['k
 }
 
 const SUMMARY_ART: Partial<Record<TransformationTab, { src: string; className: string }>> = {
-  accounts: { src: accountsLighthouse, className: 'bottom-0 right-0 h-[132px] w-[104px]' },
+  accounts: { src: accountsLighthouse, className: 'top-[24px] right-0 h-[116px] w-[96px]' },
   savings: { src: savingsCactus, className: 'bottom-[-48px] right-[-44px] h-[220px] w-[184px]' },
   credits: { src: loansHouse, className: 'bottom-[-10px] right-[-12px] h-[170px] w-[174px]' },
   insurance: { src: insuranceUmbrella, className: 'bottom-[-24px] right-[-38px] h-[186px] w-[210px]' },
@@ -113,14 +113,25 @@ function SummaryBanner({ tab, amount, amountsHidden, secondaryLabel, secondaryVa
         : 'bg-[color-mix(in_srgb,var(--uc-brand)_10%,var(--uc-surface))]';
   const art = SUMMARY_ART[tab];
 
+  const isBaselineAccountsSummary = tab === 'accounts';
+
   return (
-    <section data-home-transformation-summary={tab} className={`relative isolate min-h-[157px] overflow-hidden rounded-[8px] ${tone} px-[24px] py-[22px] text-[var(--uc-text)]`}>
-      <div className="relative z-10 max-w-[calc(100%-112px)] sm:max-w-[66%]">
+    <section
+      data-home-transformation-summary={tab}
+      data-home-summary-variant={isBaselineAccountsSummary ? 'baseline' : undefined}
+      className={`relative isolate overflow-hidden rounded-[8px] ${tone} px-[24px] text-[var(--uc-text)] ${isBaselineAccountsSummary ? 'min-h-[140px] py-[24px]' : 'min-h-[157px] py-[22px]'}`}
+    >
+      <div className={`relative z-10 ${isBaselineAccountsSummary ? 'max-w-[205px]' : 'max-w-[calc(100%-112px)] sm:max-w-[66%]'}`}>
         <p className="text-[14px] font-bold leading-[18px]">{headline}</p>
         <div className="mt-[2px] flex items-baseline whitespace-nowrap">{featured}</div>
-        <div className="my-[9px] h-px w-full bg-[color-mix(in_srgb,var(--uc-text)_35%,transparent)]" />
+        <div
+          data-home-summary-divider
+          className={isBaselineAccountsSummary
+            ? 'my-[4px] h-[0.25px] w-[205px] bg-[var(--uc-text)]'
+            : 'my-[9px] h-px w-full bg-[color-mix(in_srgb,var(--uc-text)_35%,transparent)]'}
+        />
         <p className="text-[14px] font-bold leading-[18px]">{secondaryLabel}</p>
-        <p className="mt-[1px] text-[18px] font-bold leading-[22px]">{typeof secondaryValue === 'string' ? secondaryValue : formatMoney(secondaryValue, amountsHidden)}</p>
+        <p data-home-summary-secondary-amount className={`mt-[1px] font-bold ${isBaselineAccountsSummary ? 'text-[18px] leading-[20px]' : 'text-[18px] leading-[22px]'}`}>{typeof secondaryValue === 'string' ? secondaryValue : formatMoney(secondaryValue, amountsHidden)}</p>
       </div>
       {art ? <img src={art.src} alt="" aria-hidden="true" data-home-summary-art={tab} className={`pointer-events-none absolute z-0 object-contain object-right-bottom drop-shadow-[0_8px_10px_rgb(var(--uc-shadow-rgb)/0.14)] ${art.className}`} /> : null}
     </section>

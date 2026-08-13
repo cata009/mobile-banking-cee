@@ -274,48 +274,13 @@ function ProductRow({
   );
 }
 
-function ProductStackPreview({
-  product,
-  amountsHidden,
-  formatProductAmount,
-  getProductDisplayNumber,
-  onExpand,
-}: {
-  product: Product;
-  amountsHidden: boolean;
-  formatProductAmount: (product: Product) => FormattedAmount;
-  getProductDisplayNumber: (product: Product) => string;
-  onExpand: () => void;
-}) {
-  const amount = maskAmountParts(formatProductAmount(product), amountsHidden);
-  const isCard = product.type === 'debit_card' || product.type === 'credit_card' || product.type === 'meal_card';
-  const cardVariant: CardVariant = product.type === 'credit_card'
-    ? 'mc-credit-premium-gold'
-    : product.type === 'meal_card'
-      ? 'mc-virtual-standard-orange'
-      : 'mc-debit-standard';
-
+function ProductStackPreview() {
   return (
-    <button
-      type="button"
-      onClick={onExpand}
-      className="flex h-[58px] w-full items-center gap-[12px] overflow-hidden rounded-b-[4px] border-t-[0.5px] border-[var(--uc-border-muted)] bg-[var(--uc-surface-raised)] px-[16px] text-left text-[var(--uc-text)] shadow-[0_8px_14px_rgb(0_0_0/0.05)] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-action)]"
+    <span
+      aria-hidden="true"
+      className="relative z-0 -mt-[7px] block h-[10px] w-[calc(100%-16px)] self-center rounded-b-[4px] bg-[var(--uc-surface-raised)] shadow-[0_7px_11px_rgb(0_0_0/0.10)]"
       data-home-product-stack-preview
-      aria-label={`Show ${product.name}`}
-    >
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[14px] font-bold leading-[17px]">{product.name}</span>
-        <span className="mt-[2px] block truncate text-[12px] leading-[15px] text-[var(--uc-text-muted)]">
-          {getProductDisplayNumber(product)}
-        </span>
-      </span>
-      <span className="shrink-0 text-right">
-        <Amount amount={amount} hidden={amountsHidden} size="header" />
-      </span>
-      <span className={`grid shrink-0 place-items-center ${isCard ? 'h-[28px] w-[46px]' : 'size-[30px]'}`} aria-hidden="true">
-        {isCard ? <NavigationCardArt variant={cardVariant} /> : <CurrencyBadge currency={product.currency} />}
-      </span>
-    </button>
+    />
   );
 }
 
@@ -483,13 +448,7 @@ export default function App2027ProductAccordions({
                   );
                 })}
                 {hasCollapsedProductStack && !isOpen && category.products[1] ? (
-                  <ProductStackPreview
-                    product={category.products[1]}
-                    amountsHidden={amountsHidden}
-                    formatProductAmount={formatProductAmount}
-                    getProductDisplayNumber={getProductDisplayNumber}
-                    onExpand={() => setOpenGroups((current) => ({ ...current, [key]: true }))}
-                  />
+                  <ProductStackPreview />
                 ) : null}
               </div>
             ) : null}

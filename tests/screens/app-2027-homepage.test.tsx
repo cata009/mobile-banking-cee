@@ -115,7 +115,10 @@ describe('2027 Home Transformation', () => {
 
     const accountCards = accountsGroup.querySelectorAll('[data-product-card-evolution]')
     expect(accountCards).toHaveLength(1)
-    expect(accountsGroup.querySelector('[data-home-product-stack-preview]')).toBeInTheDocument()
+    const accountStackPreview = accountsGroup.querySelector('[data-home-product-stack-preview]') as HTMLElement
+    expect(accountStackPreview).toBeInTheDocument()
+    expect(accountStackPreview).toHaveAttribute('aria-hidden', 'true')
+    expect(accountStackPreview).not.toHaveTextContent('Euro account')
 
     fireEvent.click(within(accountsGroup).getByRole('button', { name: /^Accounts$/ }))
     const expandedAccountCards = accountsGroup.querySelectorAll('[data-product-card-evolution]')
@@ -137,6 +140,21 @@ describe('2027 Home Transformation', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Insurance' }))
     expect(screen.getByRole('button', { name: /^Insurance$/ })).toHaveAttribute('data-home-product-group-header', 'compact')
+  })
+
+  it('uses the Baseline balance-card composition and hides account details inside the collapsed stack layer', () => {
+    const { container } = renderHome('CZ', 'release-future-evo-2027')
+    const summary = container.querySelector('[data-home-transformation-summary="accounts"]') as HTMLElement
+    const accountsGroup = container.querySelector('[data-home-product-group="accounts"]') as HTMLElement
+    const stackPreview = accountsGroup.querySelector('[data-home-product-stack-preview]') as HTMLElement
+
+    expect(summary).toHaveAttribute('data-home-summary-variant', 'baseline')
+    expect(summary).toHaveClass('min-h-[140px]')
+    expect(summary.querySelector('[data-home-summary-art="accounts"]')).toHaveClass('top-[24px]')
+    expect(summary.querySelector('[data-home-summary-divider]')).toHaveClass('h-[0.25px]', 'w-[205px]')
+    expect(summary.querySelector('[data-home-summary-secondary-amount]')).toHaveClass('text-[18px]')
+    expect(stackPreview).toHaveClass('h-[10px]')
+    expect(stackPreview).not.toHaveTextContent('620')
   })
 
   it('uses the shared glass navigation for Evo destinations, not only Home', () => {

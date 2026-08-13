@@ -1,5 +1,13 @@
 # Current Session
 
+## 2026-08-13 Evo Accounts Baseline Summary and Stack Follow-up
+
+- Corrected only the Evo Home Accounts presentation from the newest visual annotations. The Accounts summary now follows the existing Baseline lighthouse composition: 24px inset, 140px minimum height, `205px` / `0.25px` divider, Baseline art position, and mapped `Total Available` / `Spent this week` values. The app header, category tabs, data, and glass bottom navigation remain unchanged.
+- Collapsed Evo Accounts now renders one full actionable account card followed by a non-interactive 10px depth layer. It no longer exposes the Euro account's name, balance, currency flag, or a hidden tap target. The standard Accounts header is the single expander and continues to reveal all account cards and quick actions.
+- TDD: focused Home regression was added first and failed on the old visible `Show Euro account` preview and custom summary. After the scoped change, `tests/screens/app-2027-homepage.test.tsx` passes (`9/9`), as do `npm run typecheck`, `npm run lint -- --quiet`, and scoped `git diff --check`.
+- Local visual QA at `http://localhost:4004` on the CZ Evo Accounts Home confirms one visible full account card, decorative under-card depth only, no visible Euro-account text, Baseline summary marker/art/divider/secondary typography, and no error overlay.
+- Closeout: this follow-up is ready for the user's already requested commit/publish workflow; concurrent HU Kids and business-requirements workspace changes remain excluded.
+
 ## 2026-08-13 Evo 2027 Home Visual Follow-up
 
 - Scoped only the Home composition inside the existing Evo 2027 tabbed content: Accounts and Cards now share the compact Baseline accordion header; Savings, Credits, Loans & Mortgages, and Insurance use the same compact heading treatment. The application header and glass bottom navigation remain untouched.
