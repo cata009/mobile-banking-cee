@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { AppIcon, type IconName } from "@/app/components/icons";
+import App2027PrimaryNavigation from "@/app/components/navigation/App2027PrimaryNavigation";
+import { useDemo } from "@/app/state/demoStore";
+import { getFeatureFlags } from "@/app/state/featureHelpers";
 
 type NavItem = "home" | "analytics" | "payments" | "products" | "more";
 
@@ -31,6 +34,7 @@ export default function BottomNavigation({
   onTabChange,
 }: BottomNavigationProps) {
   const { t } = useLanguage();
+  const demoState = useDemo();
   const [internalActiveTab, setInternalActiveTab] = useState<NavItem>("home");
   const activeTab = controlledActiveTab ?? internalActiveTab;
 
@@ -42,6 +46,17 @@ export default function BottomNavigation({
 
     setInternalActiveTab(tab);
   };
+
+  if (getFeatureFlags(demoState).app2027Homepage) {
+    return (
+      <App2027PrimaryNavigation
+        activeTab={activeTab}
+        labels={labelOverrides}
+        onTabChange={handleTabClick}
+        selectionMotion
+      />
+    );
+  }
 
   return (
     <div

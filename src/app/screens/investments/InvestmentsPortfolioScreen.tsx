@@ -286,6 +286,7 @@ function DistributionCategoryDetailScreen({
 
 export default function InvestmentsPortfolioScreen({
   onBack,
+  roboAdvisorEnabled = false,
   initialView = "portfolio",
   onHistoryClick,
   onSelectedSecurityChange,
@@ -293,7 +294,7 @@ export default function InvestmentsPortfolioScreen({
   buyRequest,
   onBuyRequestConsumed,
 }: InvestmentsPortfolioScreenProps) {
-  const { country, amountsHidden, release } = useDemo();
+  const { country, amountsHidden } = useDemo();
   const { categories } = useProducts();
   const { t } = useLanguage();
   const { progress: headerProgress, onScroll: handlePageScroll, setProgress: setHeaderProgress } = useCollapsingHeader(64);
@@ -308,7 +309,7 @@ export default function InvestmentsPortfolioScreen({
   const [buyOrderOpen, setBuyOrderOpen] = useState(false);
   const [sellOrderOpen, setSellOrderOpen] = useState(false);
   const [roboAdvisorView, setRoboAdvisorView] = useState<"closed" | "goals" | "create" | "detail">(
-    initialView === "goals" ? "goals" : "closed",
+    roboAdvisorEnabled && initialView === "goals" ? "goals" : "closed",
   );
   const [selectedRoboGoal, setSelectedRoboGoal] = useState<RoboExistingGoal | null>(null);
   const [roboGoals, setRoboGoals] = useState<readonly RoboExistingGoal[]>(INITIAL_CZ_ROBO_GOALS);
@@ -345,9 +346,9 @@ export default function InvestmentsPortfolioScreen({
   const securities = useMemo(() => buildInvestmentSecurities(investmentProducts, country), [country, investmentProducts]);
   const securityCatalog = useMemo(
     () => buildInvestmentSecurityCatalog(securities, country, {
-      includeRoboGoals: release === "release-future-cz-robo",
+      includeRoboGoals: roboAdvisorEnabled,
     }),
-    [country, release, securities],
+    [country, roboAdvisorEnabled, securities],
   );
   const financialSecurities = useMemo(
     () => securities.filter((security) => security.status === "active" && security.localValue > 0),

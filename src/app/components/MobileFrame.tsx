@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import StatusBar, { type PhoneChromeVariant } from '@/app/components/StatusBar';
 import DynamicIsland from '@/app/components/DynamicIsland';
 import ShareScreenGlow from '@/app/components/ShareScreenGlow';
+import { useDevicePreview } from '@/app/components/demo/DevicePreview';
 
 interface MobileFrameProps {
   children: React.ReactNode;
@@ -13,17 +14,13 @@ interface MobileFrameProps {
 export const SAFE_AREA_TOP = 70;
 export const SAFE_AREA_BOTTOM = 34;
 
-const SCREEN_WIDTH = 375;
-const SCREEN_HEIGHT = 812;
 const PHONE_BEZEL = 12;
-const PHONE_FRAME_WIDTH = SCREEN_WIDTH + PHONE_BEZEL * 2;
-const PHONE_FRAME_HEIGHT = SCREEN_HEIGHT + PHONE_BEZEL * 2;
 const PREVIEW_HORIZONTAL_PADDING = 96;
 const PREVIEW_VERTICAL_PADDING = 32;
 const MIN_PREVIEW_SCALE = 0.5;
 const MAX_PREVIEW_SCALE = 1.18;
 
-function getBoundedPreviewScale(width: number, height: number) {
+function getBoundedPreviewScale(width: number, height: number, frameWidth: number, frameHeight: number) {
   if (width <= 0 || height <= 0) {
     return 0.7;
   }
@@ -31,8 +28,8 @@ function getBoundedPreviewScale(width: number, height: number) {
   const availableWidth = Math.max(width - PREVIEW_HORIZONTAL_PADDING, 0);
   const availableHeight = Math.max(height - PREVIEW_VERTICAL_PADDING, 0);
   const fitScale = Math.min(
-    availableWidth / PHONE_FRAME_WIDTH,
-    availableHeight / PHONE_FRAME_HEIGHT,
+    availableWidth / frameWidth,
+    availableHeight / frameHeight,
   );
 
   return Math.min(MAX_PREVIEW_SCALE, Math.max(MIN_PREVIEW_SCALE, fitScale));
@@ -44,6 +41,9 @@ export default function MobileFrame({
   overlay,
   isCoAppingActive,
 }: MobileFrameProps) {
+  const { profile, orientation, viewport } = useDevicePreview();
+  const phoneFrameWidth = viewport.width + PHONE_BEZEL * 2;
+  const phoneFrameHeight = viewport.height + PHONE_BEZEL * 2;
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const screenSurfaceRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -57,6 +57,8 @@ export default function MobileFrame({
       const nextScale = getBoundedPreviewScale(
         previewContainer.clientWidth,
         previewContainer.clientHeight,
+        phoneFrameWidth,
+        phoneFrameHeight,
       );
 
       setPreviewScale((currentScale) => (
@@ -66,11 +68,12 @@ export default function MobileFrame({
 
     applyPreviewScale();
 
+    if (typeof ResizeObserver === 'undefined') return;
     const resizeObserver = new ResizeObserver(applyPreviewScale);
     resizeObserver.observe(previewContainer);
 
     return () => resizeObserver.disconnect();
-  }, []);
+  }, [phoneFrameHeight, phoneFrameWidth]);
 
   return (
     <div
@@ -80,15 +83,15 @@ export default function MobileFrame({
       <div
         className="relative shrink-0"
         style={{
-          width: PHONE_FRAME_WIDTH * previewScale,
-          height: PHONE_FRAME_HEIGHT * previewScale,
+          width: phoneFrameWidth * previewScale,
+          height: phoneFrameHeight * previewScale,
         }}
       >
         <div
           className="relative"
           style={{
-            width: PHONE_FRAME_WIDTH,
-            height: PHONE_FRAME_HEIGHT,
+            width: phoneFrameWidth,
+            height: phoneFrameHeight,
             transform: `scale(${previewScale})`,
             transformOrigin: 'top left',
           }}
@@ -98,8 +101,22 @@ export default function MobileFrame({
           <div className="relative bg-[var(--uc-static-black)] rounded-[48px] p-3 shadow-2xl">
             <div
               ref={screenSurfaceRef}
-              className="relative rounded-[36px] overflow-hidden w-[375px] h-[812px] bg-[var(--uc-static-black)]"
+              className="relative overflow-hidden bg-[var(--uc-static-black)]"
               data-phone-screen="true"
+              data-testid="device-preview-screen"
+              data-device-profile={profile.id}
+              data-device-kind={profile.kind}
+              data-device-orientation={orientation}
+              style={{
+                width: viewport.width,
+                height: viewport.height,
+                borderRadius: profile.kind === 'foldable-main' ? 24 : 36,
+                containerType: 'size',
+                ...({
+                  '--uc-preview-width': `${viewport.width}px`,
+                  '--uc-preview-height': `${viewport.height}px`,
+                } as CSSProperties),
+              }}
             >
               <div
                 ref={scrollContainerRef}

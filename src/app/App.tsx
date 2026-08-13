@@ -62,6 +62,7 @@ const CardOptionsScreen = lazy(() => import("@/app/screens/cards/CardOptionsScre
 // emitted chunk). Wrapping 5 named exports via React.lazy would add complexity
 // without splitting the chunk further.
 import {
+  type CardTransactionMerchantEnrichment,
   DomesticPaymentCreateScreen,
   PaymentReviewScreen,
   PaymentSignScreen,
@@ -265,6 +266,7 @@ function AppContent({
     parsedDeepLink?.flowId ? "detail" : "index",
   );
   const [selectedTransaction, setSelectedTransaction] = useState<AccountTransaction | null>(null);
+  const [selectedMerchantEnrichment, setSelectedMerchantEnrichment] = useState<CardTransactionMerchantEnrichment | undefined>();
   const { transactionCategoryOverrides, handleTransactionCategoryChange } =
     useTransactionCategoryOverrides({ setSelectedTransaction });
   const [czChatOpen, setCzChatOpen] = useState(false);
@@ -574,9 +576,25 @@ function AppContent({
     navigateTo({ screen: "card-options", cardId: product.id });
   };
 
-  const handleTransactionClick = (transaction: AccountTransaction, productForTransaction: Product) => {
+  const handleTransactionClick = (
+    transaction: AccountTransaction,
+    productForTransaction: Product,
+    merchantEnrichment?: CardTransactionMerchantEnrichment,
+  ) => {
     setSelectedAccountId(productForTransaction.id);
     setSelectedTransaction(transaction);
+    setSelectedMerchantEnrichment(merchantEnrichment);
+    navigateTo("transaction-detail");
+  };
+
+  const handleApp2027TransactionClick = (
+    transaction: AccountTransaction,
+    productForTransaction: Product,
+    merchantEnrichment?: CardTransactionMerchantEnrichment,
+  ) => {
+    setSelectedAccountId(productForTransaction.id);
+    setSelectedTransaction(transaction);
+    setSelectedMerchantEnrichment(merchantEnrichment);
     navigateTo("transaction-detail");
   };
 
@@ -835,8 +853,11 @@ function AppContent({
             onMoreClick={handleMoreClick}
             onAccountClick={handleAccountClick}
             onAccountInfoClick={handleAccountDetailsClick}
+            onCardDetailsClick={handleCardDetailsClick}
+            onCardOptionsClick={handleCardOptionsClick}
             onInvestmentsClick={handleInvestmentsClick}
             onInvestmentGoalsClick={handleInvestmentGoalsClick}
+            onTransactionClick={handleApp2027TransactionClick}
           />
         )}
 
@@ -878,6 +899,7 @@ function AppContent({
             country={country}
             product={selectedAccountProduct}
             transaction={selectedTransaction}
+            merchantEnrichment={selectedMerchantEnrichment}
             onBack={goBack}
             onRedoPayment={handleRedoPaymentClick}
             onCategoryChange={handleTransactionCategoryChange}

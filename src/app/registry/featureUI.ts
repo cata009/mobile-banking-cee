@@ -11,6 +11,7 @@ import type { FeatureId } from "@/app/state/demoTypes";
 export type UILocation =
   | "app.assistant"
   | "investments.robo"
+  | "home.app2027"
   | "home.header"
   | "home.accountSummary"
   | "home.quickActions"
@@ -49,6 +50,16 @@ export const FEATURE_UI_MAP: Record<FeatureId, FeatureUIConfig> = {
     id: "fx_czRoboAdvisor",
     locations: ["investments.robo"],
     description: "Adds the isolated CZ Future goal-based Robo Advisor journey inside Investments",
+  },
+  fx_app2027Homepage: {
+    id: "fx_app2027Homepage",
+    locations: ["home.app2027"],
+    description: "Applies the global App 2027 Homepage presentation",
+  },
+  fx_evo2027Homepage: {
+    id: "fx_evo2027Homepage",
+    locations: ["home.app2027"],
+    description: "Applies the CZ-only Evo 2027 Homepage presentation",
   },
 
   // ─── RELEASE FEATURES ────────────────────────────────────────

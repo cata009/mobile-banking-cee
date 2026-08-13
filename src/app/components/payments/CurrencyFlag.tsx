@@ -34,6 +34,7 @@ export default function CurrencyFlag({ currency }: CurrencyFlagProps) {
       <svg
         data-currency-flag={currency}
         viewBox="0 0 36 24"
+        preserveAspectRatio="xMidYMid slice"
         width="36"
         height="24"
         aria-hidden="true"

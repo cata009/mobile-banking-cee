@@ -6,6 +6,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { AppIcon } from "@/app/components/icons";
 import { DemoTopBar } from "./DemoTopBar";
+import { DevicePreviewProvider } from "./DevicePreview";
 
 interface DemoShellProps {
   children: ReactNode;
@@ -28,6 +29,7 @@ export function DemoShell({ children }: DemoShellProps) {
   }, [isFocusModeOpen]);
 
   return (
+    <DevicePreviewProvider>
     <div className="flex h-screen flex-col overflow-hidden bg-[var(--uc-app-bg)]">
       <DemoTopBar onOpenFocusMode={() => setIsFocusModeOpen(true)} />
 
@@ -66,8 +68,9 @@ export function DemoShell({ children }: DemoShellProps) {
           </div>
         )}
 
-        <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
+        <div className="relative min-h-0 flex-1 overflow-hidden">{children}</div>
       </div>
     </div>
+    </DevicePreviewProvider>
   );
 }

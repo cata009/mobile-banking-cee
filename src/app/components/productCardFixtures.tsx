@@ -42,9 +42,13 @@ export const FUTURE_CZ_ACCOUNT_CARD_ACTIONS: readonly FutureCzAccountCardActionD
 
 export function buildFutureCzAccountCardActions({
   onNewPayment,
+  onScanQrCode,
+  onCreateQrCode,
   onAccountInfo,
 }: {
   onNewPayment?: () => void;
+  onScanQrCode?: () => void;
+  onCreateQrCode?: () => void;
   onAccountInfo?: () => void;
 } = {}): readonly ProductCardAction[] {
   return FUTURE_CZ_ACCOUNT_CARD_ACTIONS.map((action) => ({
@@ -61,6 +65,10 @@ export function buildFutureCzAccountCardActions({
     onClick:
       action.id === "new-payment"
         ? onNewPayment
+        : action.id === "scan-qr"
+          ? onScanQrCode
+          : action.id === "create-qr"
+            ? onCreateQrCode
         : action.id === "account-info"
           ? onAccountInfo
           : undefined,
