@@ -207,18 +207,21 @@ export default function App2027Activity({ country, currency, amountsHidden, onTr
   return (
     <section
       data-home-area="activity"
-      data-home-activity-card
       aria-labelledby="app-2027-activity-heading"
-      className="relative isolate overflow-hidden rounded-[22px] border border-transparent bg-[var(--uc-surface)] px-[16px] pb-[12px] pt-[17px] shadow-none"
+      className="relative isolate"
     >
       <h2
         id="app-2027-activity-heading"
-        className="relative z-10 text-[19px] font-bold leading-[24px] tracking-[-0.018em] text-[var(--uc-text)]"
+        className="text-[22px] font-bold leading-[28px] tracking-[-0.02em] text-[var(--uc-text)]"
       >
         Your recent transactions
       </h2>
 
-      <ul className="relative z-10 mt-[13px]">
+      <div
+        data-home-activity-card
+        className="relative isolate mt-[12px] overflow-hidden rounded-[22px] border border-transparent bg-[var(--uc-surface)] px-[16px] pb-[12px] pt-[4px] shadow-none"
+      >
+      <ul className="relative z-10">
         {ACTIVITY.map((item, index) => (
           <li key={item.id} className={index > 0 ? 'border-t border-[var(--uc-border-muted)]' : undefined}>
             <button
@@ -275,6 +278,7 @@ export default function App2027Activity({ country, currency, amountsHidden, onTr
           />
         </svg>
       </button>
+      </div>
     </section>
   );
 }

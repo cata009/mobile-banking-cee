@@ -20,6 +20,11 @@ function renderPreview() {
   )
 }
 
+function selectDevice(label: string) {
+  fireEvent.click(screen.getByRole('button', { name: /Preview device:/ }))
+  fireEvent.click(screen.getByRole('menuitem', { name: label }))
+}
+
 describe('adaptive device preview', () => {
   it('changes the actual logical viewport for regular, Galaxy Fold8 and Apple passport profiles', () => {
     renderPreview()
@@ -27,26 +32,40 @@ describe('adaptive device preview', () => {
 
     expect(screenSurface).toHaveStyle({ width: '430px', height: '932px' })
 
-    fireEvent.change(screen.getByLabelText('Preview device'), { target: { value: 'galaxy-fold8-closed' } })
+    expect(screen.queryByRole('combobox', { name: 'Preview device' })).not.toBeInTheDocument()
+
+    selectDevice('Galaxy Z Fold8 - closed')
     expect(screenSurface).toHaveStyle({ width: '390px', height: '624px' })
 
-    fireEvent.change(screen.getByLabelText('Preview device'), { target: { value: 'galaxy-fold8-open' } })
+    selectDevice('Galaxy Z Fold8 - open')
     expect(screenSurface).toHaveStyle({ width: '840px', height: '630px' })
 
-    fireEvent.change(screen.getByLabelText('Preview device'), { target: { value: 'apple-foldable-closed' } })
+    selectDevice('Apple passport concept - closed')
     expect(screenSurface).toHaveStyle({ width: '390px', height: '573px' })
 
-    fireEvent.change(screen.getByLabelText('Preview device'), { target: { value: 'apple-foldable-open' } })
+    selectDevice('Apple passport concept - open')
     expect(screenSurface).toHaveStyle({ width: '848px', height: '600px' })
   })
 
   it('rotates by swapping logical dimensions instead of transforming the canvas', () => {
     renderPreview()
-    fireEvent.change(screen.getByLabelText('Preview device'), { target: { value: 'galaxy-fold8-open' } })
+    selectDevice('Galaxy Z Fold8 - open')
     fireEvent.click(screen.getByRole('button', { name: 'Rotate preview' }))
 
     const screenSurface = screen.getByTestId('device-preview-screen')
     expect(screenSurface).toHaveStyle({ width: '630px', height: '840px' })
     expect(screenSurface.style.transform).toBe('')
+  })
+
+  it('renders the Dynamic Island only for the iPhone profile, including after rotation', () => {
+    renderPreview()
+
+    expect(document.querySelector('[data-device-dynamic-island]')).toBeInTheDocument()
+
+    selectDevice('Apple passport concept - closed')
+    expect(document.querySelector('[data-device-dynamic-island]')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate preview' }))
+    expect(document.querySelector('[data-device-dynamic-island]')).not.toBeInTheDocument()
   })
 })

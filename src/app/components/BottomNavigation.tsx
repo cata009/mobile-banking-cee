@@ -47,7 +47,9 @@ export default function BottomNavigation({
     setInternalActiveTab(tab);
   };
 
-  if (getFeatureFlags(demoState).app2027Homepage) {
+  const featureFlags = getFeatureFlags(demoState);
+
+  if (featureFlags.app2027Homepage || featureFlags.evo2027Homepage) {
     return (
       <App2027PrimaryNavigation
         activeTab={activeTab}

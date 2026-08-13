@@ -1,6 +1,6 @@
 {
-  "baselineCommit": "28b77d5",
-  "baselineNote": "Re-locked on 2026-07-29 after the approved CZ Future Robo Advisor flow added the exact Figma intro artwork. The bundled image is referenced only by CzFutureRoboAdvisorFlow; no existing image was deleted, replaced, or optimized.",
-  "assetCount": 182,
-  "pathBlobSha256Aggregate": "54d47b1b7afdd71a551d65585cdc31bf963526703792062a357442d5f3235062"
+  "baselineCommit": "fc0195a",
+  "baselineNote": "Re-locked on 2026-08-13 after the approved CZ Evo 2027 Home work added six referenced Figma-derived category/campaign assets and this follow-up added four referenced campaign images. No existing image was deleted, replaced, or optimized.",
+  "assetCount": 192,
+  "pathBlobSha256Aggregate": "bd9ece9b65b6542ebac077b5ea9326444fa5c221c263146982da6204c4441a7a"
 }
