@@ -6,13 +6,14 @@
 - Reference-only KeyZAP Hungary captures were saved outside the repository at `C:\Users\mihai\Documents\Codex\2026-08-13\realtime-voice-chat\work\keyzap-saving-assets`; they do not alter the application or this commit.
 - Fresh verification: focused App 2027/Evo coverage passes (`18/18`); `npm run typecheck`, `npm run lint`, `npm run audit:all`, and `npm run build` pass. The production build transforms 4,483 modules. Existing empty `react-vendor` and >500 kB chunk warnings remain triaged in `known-bananas.md`.
 - Full `npm test` result: `755/756` tests pass across `73/75` suites. The two remaining failures are the pre-existing PFM currency expectation (`RON` asserted while its existing rendered fixture is `CZK`) and an uncommitted `tests/tooling/business-requirements-registry.test.mjs` file that declares no Vitest suite; neither is included in this commit.
+- Publication: product commit `fc0195a` was pushed to `origin/main`. Its Git-integrated Vercel production deployment `dpl_DJnmFPrqZJKrqEniAvKJHNLE6FEx` reached `READY`; `vercel curl /` returns the Mobile Banking CEE HTML from the deployment. Canonical production alias: `https://mobile-banking-cee.vercel.app`.
 - Banana Loop: no product data, transfer, schedule, or Figma file was changed by the KeyZAP reference capture; no unrelated workspace file is staged for this release.
 - constitutional check:
   - scope preserved: yes
   - docs updated: yes
   - verification recorded: yes
   - bananas triaged: yes
-  - safe to resume: yes after commit, push, production deployment, and production smoke.
+  - safe to resume: yes; commit, push, production deployment, and production smoke are recorded.
 
 ## 2026-08-13 2027 Home Transformation follow-up
 
