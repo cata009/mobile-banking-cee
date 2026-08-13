@@ -68,7 +68,7 @@ export default function ProductCard({
 
     return (
       <div
-        className={`flex w-[327px] flex-col items-end bg-[var(--uc-surface-raised)] p-[16px] text-[var(--uc-text)] transition-opacity ${visibleActions.length > 0 ? "gap-[32px]" : "gap-[8px]"} ${radiusClass} ${onClick ? "cursor-pointer hover:opacity-90" : ""}`}
+        className={`flex w-full max-w-full min-w-0 flex-col items-end bg-[var(--uc-surface-raised)] p-[16px] text-[var(--uc-text)] transition-opacity ${visibleActions.length > 0 ? "gap-[32px]" : "gap-[8px]"} ${radiusClass} ${onClick ? "cursor-pointer hover:opacity-90" : ""}`}
         data-product-card-evolution
         data-product-style={productStyle}
         onClick={onClick}

@@ -12,6 +12,8 @@ import { isFeatureActive } from "./featureResolver";
 export interface FeatureFlags {
   newPaymentsHub: boolean;
   cardsRedesign: boolean;
+  app2027Homepage: boolean;
+  evo2027Homepage: boolean;
   unplannedBanner: boolean;
   transactionsFilters: boolean;
   quickActionsRedesign: boolean;
@@ -46,6 +48,8 @@ export function getFeatureFlags(demoState: DemoState): FeatureFlags {
   return {
     newPaymentsHub: isFeatureActive(demoState, "fx_newPaymentsHub"),
     cardsRedesign: isFeatureActive(demoState, "fx_cardsRedesign"),
+    app2027Homepage: isFeatureActive(demoState, "fx_app2027Homepage"),
+    evo2027Homepage: isFeatureActive(demoState, "fx_evo2027Homepage"),
     unplannedBanner: isFeatureActive(demoState, "fx_unplannedBanner"),
     transactionsFilters: isFeatureActive(demoState, "fx_transactionsFilters"),
     quickActionsRedesign: isFeatureActive(demoState, "fx_quickActionsRedesign"),

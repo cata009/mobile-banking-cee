@@ -107,6 +107,7 @@ const CountryContext = createContext<CountryId | null>(null);
 
 interface ProductDataSlice {
   country: CountryId;
+  release: ReleaseId;
   productCounts: ProductCounts;
   productCountOverrides: ProductCounts;
   resolvedProductCounts: ProductCounts;
@@ -320,12 +321,13 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
         : state.productCounts;
       return {
         country: state.country,
+        release: state.release,
         productCounts: state.productCounts,
         productCountOverrides: state.productCounts,
         resolvedProductCounts,
       };
     },
-    [state.bankingScenario, state.country, state.product, state.productCounts],
+    [state.bankingScenario, state.country, state.product, state.productCounts, state.release],
   );
 
   return (

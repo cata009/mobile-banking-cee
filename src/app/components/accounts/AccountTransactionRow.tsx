@@ -64,7 +64,7 @@ export default function AccountTransactionRow({
     </div>
   ) : null;
   const details = (
-    <div className="flex w-[247px] shrink-0 flex-col items-end gap-[4px]">
+    <div className="flex min-w-0 flex-1 flex-col items-end gap-[4px]">
         <p className={`uc-type-n4 text-right leading-[18px] ${isPending ? "text-[var(--uc-text-muted)]" : "text-[var(--uc-text)]"}`}>
           {displayLabel ?? transaction.label}
         </p>
@@ -88,7 +88,7 @@ export default function AccountTransactionRow({
   if (onCategoryClick) {
     return (
       <div
-        className={`flex w-[375px] items-center justify-between bg-transparent px-[16px] py-[20px] text-left ${isPending ? "h-[92px]" : "h-[80px]"}`}
+        className={`flex w-full items-center justify-between gap-[16px] bg-transparent px-[16px] py-[20px] text-left ${isPending ? "h-[92px]" : "h-[80px]"}`}
         data-ds-label="AccountTransactionRow 375x80"
       >
         <div className="flex shrink-0 items-center gap-[16px]">
@@ -107,7 +107,7 @@ export default function AccountTransactionRow({
         <button
           type="button"
           aria-label={`Open transaction ${transaction.label}`}
-          className="text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
+          className="min-w-0 flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
           onClick={() => onClick?.(transaction)}
         >
           {details}
@@ -120,7 +120,7 @@ export default function AccountTransactionRow({
     <button
       type="button"
       onClick={() => onClick?.(transaction)}
-      className={`flex w-[375px] items-center justify-between bg-transparent px-[16px] py-[20px] text-left ${isPending ? "h-[92px]" : "h-[80px]"}`}
+      className={`flex w-full items-center justify-between gap-[16px] bg-transparent px-[16px] py-[20px] text-left ${isPending ? "h-[92px]" : "h-[80px]"}`}
       data-pending-transaction-row={isPending ? "true" : undefined}
       data-ds-label="AccountTransactionRow 375x80"
     >

@@ -72,6 +72,8 @@ describe('Future CZ Homepage account cards', () => {
 
     const accountCards = container.querySelectorAll('[data-product-card-evolution]')
     expect(accountCards).toHaveLength(2)
+    expect(accountCards[0]).toHaveClass('w-full', 'max-w-full')
+    expect(accountCards[0]).not.toHaveClass('w-[327px]')
     const amountRow = accountCards[0]?.querySelector('[data-product-card-amount]')
     expect(amountRow).toHaveClass('justify-start')
     expect(amountRow).not.toHaveClass('justify-end')

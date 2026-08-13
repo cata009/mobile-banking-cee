@@ -81,9 +81,7 @@ export default function PageHeader({
     >
       <AppIcon name="help-circle" color={iconColor} />
     </button>
-  ) : (
-    <div className="h-[40px] w-[40px]" />
-  );
+  ) : null;
 
   return (
     <>
@@ -133,7 +131,7 @@ export default function PageHeader({
             bgColor
           )}
           style={{
-            width: "375px",
+            width: "100%",
             padding: "8px 16px",
             opacity: largeTitleOpacity,
           }}

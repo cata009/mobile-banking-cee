@@ -128,6 +128,8 @@ function featureSet(product: ProductId): readonly FeatureId[] {
     return [
       "fx_newPaymentsHub",
       "fx_cardsRedesign",
+      "fx_app2027Homepage",
+      "fx_evo2027Homepage",
       "fx_quickActionsRedesign",
       "fx_enhancedAnalytics",
       "fx_unplannedBanner",
@@ -211,6 +213,8 @@ function buildProjectPack(product: ProductId, country: CountryId): ProjectPack {
       "release-current",
       "release-future-cz-coapping",
       "release-future-cz-robo",
+      "release-future-app-2027",
+      ...(product === "PI" && country === "CZ" ? ["release-future-evo-2027" as const] : []),
       "release-v1",
       "release-v2",
       "release-v3",

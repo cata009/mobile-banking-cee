@@ -128,6 +128,32 @@ const PRODUCT_COUNT_DEFINITIONS: ProductCountDefinition[] = [
 
 const CURRENT_ACCOUNT_BALANCE_FACTORS = [1, 0.72, 1.28, 0.54, 1.62];
 
+const CZ_APP_2027_CURRENT_ACCOUNTS: ReadonlyArray<
+  Pick<Product, "id" | "name" | "accountNumber" | "balance" | "currency">
+> = [
+  {
+    id: "acc-1",
+    name: "Everyday account",
+    accountNumber: "123456789/2700",
+    balance: 22850.5,
+    currency: "CZK",
+  },
+  {
+    id: "acc-2",
+    name: "Euro account",
+    accountNumber: "987654321/2700",
+    balance: 620.75,
+    currency: "EUR",
+  },
+  {
+    id: "acc-3",
+    name: "Dollar account",
+    accountNumber: "245813579/2700",
+    balance: 334.39,
+    currency: "USD",
+  },
+];
+
 function replaceTailDigits(seed: string, index: number): string {
   const suffix = String(index + 1).padStart(2, "0");
   return `${seed.slice(0, -2)}${suffix}`;
@@ -312,10 +338,37 @@ function applyProductCounts(categories: ProductCategory[], productCounts: Produc
     .filter((category) => category.products.length > 0);
 }
 
+function applyCzApp2027CurrentAccounts(categories: ProductCategory[]): ProductCategory[] {
+  const sourceAccount = categories
+    .flatMap((category) => category.products)
+    .find((product) => product.type === "current_account");
+
+  if (!sourceAccount) return categories;
+
+  return categories.map((category) => {
+    if (category.key !== "accounts") return category;
+
+    return {
+      ...category,
+      products: CZ_APP_2027_CURRENT_ACCOUNTS.map((account) => ({
+        ...sourceAccount,
+        ...account,
+        type: "current_account" as const,
+      })),
+    };
+  });
+}
+
 export function useProducts() {
-  const { country, resolvedProductCounts } = useProductData();
+  const { country, release, resolvedProductCounts } = useProductData();
   const localCurrency = getCountryCurrency(country);
-  const countedCategories = applyProductCounts(getProductsByCategory(), resolvedProductCounts);
+  const baseCountedCategories = applyProductCounts(getProductsByCategory(), resolvedProductCounts);
+  const isCzApp2027 =
+    country === "CZ" &&
+    (release === "release-future-app-2027" || release === "release-future-evo-2027");
+  const countedCategories = isCzApp2027
+    ? applyCzApp2027CurrentAccounts(baseCountedCategories)
+    : baseCountedCategories;
   const countedProducts = countedCategories.flatMap(category => category.products);
   
   // Get base categories and convert all products to local currency
@@ -323,9 +376,19 @@ export function useProducts() {
     ...category,
     products: category.products.map(product => {
       const isCard = product.type === 'debit_card' || product.type === 'credit_card' || product.type === 'meal_card';
-      const formattedAccountNumber = isCard
+      const preserveCzApp2027Account = isCzApp2027 && product.type === "current_account";
+      const formattedAccountNumber = preserveCzApp2027Account
+        ? product.accountNumber
+        : isCard
         ? product.accountNumber
         : formatProductIban(country, product.id, product.accountNumber);
+
+      if (preserveCzApp2027Account) {
+        return {
+          ...product,
+          accountNumber: formattedAccountNumber,
+        };
+      }
 
       // Debit cards mirror the balance of their linked current account
       const linkedAccount = product.type === 'debit_card' || product.type === 'meal_card'
@@ -435,15 +498,15 @@ export function useProducts() {
     return product.accountNumber;
   };
 
-  // Calculate total for a list of products (all already in local currency)
+  // Calculate total in the market currency. App 2027 CZ preserves the native
+  // currency on its EUR/USD account rows, so totals convert only at aggregation.
   const calculateTotal = (products: Product[]): {
     integer: string;
     decimals: string;
     currency: string;
   } => {
-    // Sum all products (all already converted to local currency)
     const total = products.reduce((sum, product) => {
-      return sum + getDisplayBalance(product);
+      return sum + convertCurrency(getDisplayBalance(product), product.currency, localCurrency);
     }, 0);
 
     return formatAmount(total, localCurrency);
@@ -460,7 +523,7 @@ export function useProducts() {
     // Sum: current_accounts + saving_accounts (NO term_deposit)
     const total = allProducts.reduce((sum, product) => {
       if (product.type === 'current_account' || product.type === 'saving_account') {
-        return sum + product.balance;
+        return sum + convertCurrency(product.balance, product.currency, localCurrency);
       }
       return sum;
     }, 0);
@@ -479,7 +542,7 @@ export function useProducts() {
     // Sum: loans + mortgages (take absolute value since they're negative)
     const total = allProducts.reduce((sum, product) => {
       if (product.type === 'loan' || product.type === 'mortgage') {
-        return sum + Math.abs(product.balance);
+        return sum + Math.abs(convertCurrency(product.balance, product.currency, localCurrency));
       }
       return sum;
     }, 0);

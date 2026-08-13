@@ -1,6 +1,107 @@
 # Current Session
 
-Last updated: 2026-07-29
+## 2026-08-13 Evo 2027 Publication Closeout
+
+- Commit scope: the isolated CZ-only `Evo 2027` release, the App 2027/Evo Home composition and responsive device-preview support, its Figma-derived assets, routing/data/test coverage, and their handoff/specification records. Concurrent HU Kids changes, the unplanned business-requirements registry files, and the `work/` artefacts are deliberately excluded.
+- Reference-only KeyZAP Hungary captures were saved outside the repository at `C:\Users\mihai\Documents\Codex\2026-08-13\realtime-voice-chat\work\keyzap-saving-assets`; they do not alter the application or this commit.
+- Fresh verification: focused App 2027/Evo coverage passes (`18/18`); `npm run typecheck`, `npm run lint`, `npm run audit:all`, and `npm run build` pass. The production build transforms 4,483 modules. Existing empty `react-vendor` and >500 kB chunk warnings remain triaged in `known-bananas.md`.
+- Full `npm test` result: `755/756` tests pass across `73/75` suites. The two remaining failures are the pre-existing PFM currency expectation (`RON` asserted while its existing rendered fixture is `CZK`) and an uncommitted `tests/tooling/business-requirements-registry.test.mjs` file that declares no Vitest suite; neither is included in this commit.
+- Banana Loop: no product data, transfer, schedule, or Figma file was changed by the KeyZAP reference capture; no unrelated workspace file is staged for this release.
+- constitutional check:
+  - scope preserved: yes
+  - docs updated: yes
+  - verification recorded: yes
+  - bananas triaged: yes
+  - safe to resume: yes after commit, push, production deployment, and production smoke.
+
+## 2026-08-13 2027 Home Transformation follow-up
+
+- Replaced only Evo 2027's `Accounts` group header with the existing Baseline/Coapping accordion treatment: a compact `Accounts` title and a plain rotating chevron. The obsolete group icon, `Total available balance`, group total, circular chevron surface, and enclosing card chrome are absent; the reusable CZ Robo account cards, their currency flags/actions, and the fixed app shell are unchanged.
+- TDD evidence: the focused Homepage test was added first and failed because the old accessible header name included the balance label and amount. After the scoped header change, the focused suite passes (`4/4`) and targeted ESLint passes. Authenticated Chrome visual QA on the Evo 2027 / light / iPhone 17 Pro Max preview confirms the compact header, no legacy label/icon, and working collapse (`3` account cards when open, `0` when collapsed) with no application-error overlay.
+- Corrected the Home content only between the product tabs and the existing glass bottom navigation; the App 2027/Evo header and navigation shell are unchanged.
+- Replaced summary glyph substitutes with the exact Figma source art: cactus for Savings, house for Credits/Loans & Mortgages, and umbrella for Insurance. Each asset is bounded and right-aligned so the text column keeps a consistent left gutter without clipping.
+- Rebuilt For your interest and ShopSmart as real horizontal carousels: shared drag behavior, native overflow/snap, keyboard arrows, tap-selectable pagination, and active state. The test-runtime fallback uses `scrollLeft` where `scrollTo` is unavailable.
+- QR quick actions open the existing Payments entry point. Card Details and Card Options now use their matching existing routes; Block card and View PIN enter the existing Card Options context until dedicated journeys are available.
+- Deposit and loan presentation now uses the existing amount-privacy renderer rather than raw amounts.
+- Verification: `npm run typecheck`, focused App 2027 routing/transformation tests (`6/6`), and targeted ESLint pass. The local dev server was restarted and `http://localhost:4004/` returns HTTP `200`.
+- Visual QA completed in the authenticated visible Chrome preview. Light `iPhone 17 Pro Max` confirms the fixed header and glass bottom navigation, Accounts summary/cards, currency flags, and both carousel rails on the K1 canvas; dark mode confirms the same composition on `rgb(9, 11, 13)` with no error overlay. `Galaxy Z Fold8 - closed` (`390x624`) confirms the tabs, baseline-style group header, flag cards, banners, and bottom navigation fit without horizontal page overflow or clipped text.
+- Credits and Insurance were visually checked on the Fold profile: the credits summary uses the house art and the insurance summary uses the umbrella art, both at the right side of their respective summaries while retaining a consistent text gutter. The Insurance summary presents the requested coverage/renewal information.
+- Carousel interaction was verified in the live preview: the For your interest rail has `scrollWidth 1005px` over a `342px` viewport; selecting `Show item 2 of 3` changes the active pagination control and advances native `scrollLeft` from `0` to `339px`. No application error overlay appeared.
+- safe to resume: yes
+
+Last updated: 2026-08-13
+
+## 2026-08-13 2027 Home Transformation (Figma HP frames 1–4)
+
+- Replaced only the App 2027/Evo Home composition below the existing header with the four Figma-aligned category tabs: `Accounts`, `Savings`, `Credits`, and `Insurance`. The existing header, token/theme system, responsive phone shell, and glass bottom navigation are unchanged.
+- Accounts preserves the Baseline-style expandable group heads and reuses the CZ Robo evolution cards with currency badges and four account actions; cards now use canonical card artwork and four existing-card-journey entry actions. Recent transactions, interest cards, and ShopSmart are composed after owned products.
+- Savings, Credits, and Insurance now render their requested summaries, owned-product sections, progress/term/policy details, interest carousel, and contextual acquisition banners for empty owned-product sections. Amounts continue to derive from the existing demo product model and honour amount privacy.
+- Added focused transformation coverage (`3/3`), `npm run typecheck`, and targeted ESLint for all touched files; all pass. The prior test contract was replaced because it asserted the removed quick-action/context-rail composition.
+- Limitation: policy examples and maturity/repaid metadata are deterministic demo presentation because the current product contract has no insurance or term-deposit detail service. Card quick actions enter the existing card detail journey; per-action deep-links remain a follow-up.
+- safe to resume: yes
+
+## 2026-08-13 Evo Accounts Reuse CZ Robo Cards
+
+- Replaced only Evo 2027's `Accounts` product rows with the shared CZ Robo evolution `ProductCard` model, including New payment, Scan QR code, Create QR code, and Account info actions.
+- Preserved the existing Evo currency/country badges as each current-account card's leading visual: `CZK`, `EUR`, and `USD` remain visible instead of the generic account icon.
+- App 2027, CZ Robo, and all non-Accounts Evo groups remain on their existing compositions. The account card component remains responsive via the prior `w-full max-w-full min-w-0` fix.
+- Verification: focused Homepage + CZ Robo evolution suites pass (`28/28`), targeted ESLint passes, `npm run typecheck` passes, and browser smoke confirms 3 Evo account cards, 3 action rows, and the 3 currency badges.
+- Next action: continue the remaining Evo UX specs using this Accounts card contract.
+- safe to resume: yes
+
+## 2026-08-13 Responsive Future CZ Product Cards
+
+- Fixed the Future CZ evolution `ProductCard` width: removed the hardcoded `w-[327px]` from the runtime card and replaced it with `w-full max-w-full min-w-0`, so cards fill the available phone content width between the existing 24px insets.
+- The change applies consistently to account, card, savings, loan, investment, and goal cards rendered through the shared evolution component; legacy cards remain unchanged.
+- Verification: the focused `home-account-summary-evolution` suite passes (`3/3`), targeted ESLint passes, and browser smoke on `CZ - Robo` measured equal card left/right bounds at the default and narrow responsive viewport. Browser was restored to the Evo 2027 URL on port 4004.
+- Next action: continue the Evo 2027 UX specs; no broader test suite was run for this visual-only fix.
+- safe to resume: yes
+
+## 2026-08-13 Evo 2027 CZ Release Duplication
+
+- Added the isolated `Evo 2027` future release for `PI / CZ / current DS` only. The release is registered after `App 2027` and is excluded from non-CZ project packs.
+- Added the independent `fx_evo2027Homepage` feature manifest, UI mapping, metadata, and runtime flag. Evo initially reuses the current App 2027 Homepage composition so the visible content is duplicated while future Evo changes can be gated independently.
+- Preserved the CZ App 2027-compatible product and current-account ledger fixtures for Evo, including the existing CZ Robo feature inheritance.
+- Updated the stakeholder selector so CZ Future exposes exactly `CZ - Chatbot`, `CZ - Robo`, `App 2027`, `Evo 2027`; the Evo option is absent outside CZ.
+- Added the design/spec and implementation plan at [`docs/superpowers/specs/2026-08-13-evo-2027-design.md`](../superpowers/specs/2026-08-13-evo-2027-design.md) and [`docs/superpowers/plans/2026-08-13-evo-2027.md`](../superpowers/plans/2026-08-13-evo-2027.md).
+- Verification: focused registry/top-bar/routing tests pass (`21/21`); existing App 2027 Homepage tests pass (`24/24`); `npm run typecheck` passes; `npm run lint -- --quiet` passes; `npm run build` passes. Full `npm test` remains blocked by two unrelated workspace issues: `tests/tooling/business-requirements-registry.test.mjs` has no Vitest suite, and the existing PFM recategorization test expects `RON` while the rendered fixture is `CZK`.
+- No commit or release action was performed. The local dev server remains on `http://localhost:4004` for UX discussion.
+- safe to resume: yes
+
+## 2026-08-12 App 2027 Appearance Studio and Context Rail Refinement
+
+- Refined the Home quick-action row and context rail after visual review: direct-action cards use a plain elevated surface with no glass gradients, pseudo-lighting, or drop shadows, so their visible edges remain quiet and consistent with Home.
+- Corrected the light-mode contrast after review: the shared Home canvas remains K1 (`#F5F5F5`), while quick-action circles and each Accounts/Cards/Savings/etc. group are white, producing a clear card-on-canvas hierarchy.
+- Applied the same hierarchy to the compact contextual rail and `Your recent transactions`: both are now white cards on the K1 canvas without translucent/gradient treatment. Incoming transaction amounts are explicitly green, while outgoing amounts remain neutral dark.
+- Removed the distracting pressed-background flash from product-group headers and rows. The compact context cards now use the same explicit 16px corner radius as product groups. Messages has a white, lightly elevated circular surface.
+- Added an opt-in App 2027 primary-navigation selection micro-interaction: a 220ms icon lift with an expanding, low-opacity action-colour halo plays before the selected tab changes. It avoids persistent pills or coloured menu flashes and is disabled under reduced-motion preference.
+- Repaired the contextual rail's geometry: each compact story now occupies the full rail viewport with no inter-card gap or trailing inset. Every swipe snaps the selected card flush to the left rail edge, avoiding the exposed blank strip that appeared between partial cards.
+- Renamed the two shortcuts to `Move money` and `More`. `More` reuses the existing Kids HU three-dot glyph and opens the standard More destination rather than a savings flow. The appearance preview now uses the same labels and glyphs.
+- Replaced the stale nested-phone Home mock in the App 2027 appearance studio with a large, current Home composition: current shortcut set, compact direct-action payment context, and Accounts grouping. The old balance-first preview and its `Review payment` CTA are no longer rendered.
+- Renamed the theme journey to `Home appearance`; added the explanatory `Home visual style` title and selected `Classic UniCredit` label; removed the redundant current-mode status badge. The lower Light/Dark/System selector remains the actual appearance control.
+- Reworked the Home contextual rail to use the shared `useDragCarousel` model also used by Products: pointer/mouse drag, drag-click suppression, 120ms scroll-idle settle, and smooth snap-to-nearest-card behavior. Native touch scrolling is now vertical-pan safe.
+- Hardened the appearance studio for environments without `matchMedia` or `scrollIntoView`, so the screen is safe in tests and constrained browser runtimes.
+- Rebalanced the active tall-handset Home breakpoint after visual review: Header → Total available receives 12px scroll inset, and the layout uses one 20px rhythm between overview, quick actions, carousel and Accounts. This specifically makes Quick actions → carousel and carousel → Accounts equal while also opening the Total owed → quick actions separation.
+- Replaced the four Home product-group image assets with the supplied inline 16px SVG glyphs for Accounts, Cards, Savings and Loans, retaining their coloured circular containers. The Home shortcut is now `More options`, explicitly split into `More` and `options` over two lines.
+- Aligned Home privacy masking with the baseline: financial amounts now render as `****.** <currency>` when hidden across the overview, total owed, product groups and rows, contextual payment copy, activity, portfolio and product sheet. Masked account/card identifiers remain separate.
+- Replaced the App 2027 Home header's `PR` initials with the existing Kids HU `ProfileAvatar` photo, using the approved supplied profile image at the same 34px control size; the existing Profile action and accessible `Profile for Peter` label remain intact.
+- Replaced the activity card's generic link chevron with the supplied 16px Figma SVG. `SEE MORE TRANSACTIONS` now follows A3 text-button typography (14px/700/16px/uppercase) and has a precise 4px label-to-chevron gap.
+- Set the incoming Home-activity amount colour to the supplied `#3D7D43`, while keeping outgoing amounts neutral dark.
+- Added clear pagination beneath the Home contextual carousel: one teal pill marks the active card and neutral dots represent the remaining cards, following the established My Spendings slider language. The indicators remain synchronized with swipes and can be tapped to select a specific card.
+- Verification: `npm test -- tests/screens/app-2027-homepage.test.tsx` passes `23/23`; focused ESLint passes for `App2027PrimaryNavigation.tsx`, `BottomNavigation.tsx`, `App2027HomeScreen.tsx`, `App2027ThemePicker.tsx`, `App2027ProductAccordions.tsx`, `App2027Activity.tsx`, `App2027Portfolio.tsx`, and its test; `npm run build` passes. Browser QA on port `4004` confirmed K1 (`rgb(245, 245, 245)`) canvas, white (`rgb(255, 255, 255)`) quick-action/contextual/activity/product cards and Messages, 16px context/product-card radius, no product active-background class, enabled nav selection-motion affordance, and a second carousel card whose left edge has a `0px` gap after snap. With `hidden=1`, Home now shows the baseline-style `****.** <currency>` format with no amount bullets. Browser inspection confirmed the new header photo is a complete 34px `ProfileAvatar` image backed by `woman-profile.png`, the supplied activity-link chevron has its exact 16px path, 4px gap and 14px/700/16px text treatment, and the incoming amount resolves to `rgb(61, 125, 67)` / `#3D7D43`. The contextual carousel now renders four indicators, and selecting the third indicator activates it and scrolls the rail to the third card. There were no browser warnings/errors. Incoming amount remains green; shortcut labels and the Kids More glyph are present. `npx tsc --noEmit` remains blocked only by the pre-existing `AccountDetailScreen.tsx` undefined Product and `App2027ProductAccordions.tsx` missing `calculateGroupTotal` diagnostics.
+- safe to resume: yes
+
+## 2026-08-12 App 2027 Home Light Consistency and Compact Context Rail
+
+- Updated only the App 2027 future Home: its light tokens now reuse the neutral shared L1 palette (`--uc-neutral-100` canvas and `--uc-neutral-white` surfaces), and its floating navigation material no longer carries the prior warm/yellow-beige tint. Live browser inspection confirmed Home and Spending both resolve to `rgb(245, 245, 245)`.
+- Reduced each data-driven contextual card from 206px to 104px logical height, moved the rail before product/account groups, removed the separate textual CTAs, removed decorative cover/orbit treatment, and retained visible next-card affordance plus horizontal swipe/snap behavior.
+- The contextual card itself is now one native, keyboard-focusable action target. Dismiss remains a separate 44px control. A desktop drag handler was corrected so a mouse click opens the existing mortgage account detail instead of being swallowed by the carousel gesture layer.
+- Focused Home regression suite passes: `npm test -- tests/screens/app-2027-homepage.test.tsx` (`11/11`). Focused ESLint passes for `App2027HomeScreen.tsx` and the Home test; `git diff --check` has no whitespace errors (only Git's expected LF/CRLF warning).
+- Browser QA on port `4004` confirmed: neutral Home canvas; compact context rail before Accounts; next card edge visible; no visible `Review payment`; direct payment card navigation opens its existing product detail; no framework error overlay.
+- `npm run typecheck` was attempted but remains blocked by pre-existing current-workspace errors in `AccountDetailScreen.tsx` and `App2027ProductAccordions.tsx`; this change no longer contributes an App 2027 Home/Theme TypeScript diagnostic.
+- Files changed in this pass: `src/app/screens/home/App2027HomeScreen.tsx`, `src/styles/index.css`, `tests/screens/app-2027-homepage.test.tsx`, App 2027 spec/plan, and handoff documentation.
+- Limitation: contextual content and dismissals remain deterministic/session-scoped demo data; live payment schedule, customer eligibility, and persistence need their approved service contracts.
+- safe to resume: yes
 
 ## 2026-07-29 CZ Future Robo Product Navigation and Account-card DS Round
 

@@ -1,0 +1,166 @@
+/* App 2027 adaptive composition.
+   Width assigns the two financial columns; height only tightens spatial rhythm.
+   Typography and interactive target sizes remain owned by the components. */
+
+@container home (min-width: 600px) {
+  [data-app-2027-layout] {
+    grid-template-areas:
+      "overview priorities"
+      "favourites activity"
+      "products activity";
+  }
+
+  [data-home-area="overview"] { grid-area: overview; }
+  [data-home-area="favourites"] { grid-area: favourites; }
+  [data-home-area="products"] { grid-area: products; }
+  [data-home-area="priorities"] { grid-area: priorities; }
+  [data-home-area="activity"] { grid-area: activity; }
+}
+
+/* Rotated open foldable: protect enough width for the story column while the
+   overview, actions and portfolio form one uninterrupted left-hand journey. */
+@container home (min-width: 600px) and (max-width: 679px) {
+  [data-app-2027-layout] {
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+    column-gap: 14px;
+  }
+
+  [data-portfolio-worlds] {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Open foldable in portrait: keep both columns legible in the shallow fold and
+   expose the start of Portfolio beside the complete Today + Activity stack. */
+@container home (min-width: 680px) and (max-height: 650px) {
+  [data-app-2027-header] {
+    min-height: 48px;
+    padding-bottom: 2px;
+  }
+
+  [data-app-2027-scroll] {
+    padding-top: 2px;
+  }
+
+  [data-app-2027-layout] {
+    grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.92fr);
+    column-gap: 18px;
+    row-gap: 14px;
+  }
+
+  [data-money-stage] {
+    padding: 14px 16px;
+  }
+
+  [data-money-stage] > div:nth-of-type(3) {
+    margin-top: 8px;
+  }
+
+  [data-money-stage] > div:nth-of-type(4) {
+    margin-top: 10px;
+  }
+
+  [data-money-stage] > div:nth-of-type(5) {
+    margin-top: 8px;
+  }
+
+  [data-home-area="favourites"] [data-home-section-header] {
+    margin-bottom: 4px;
+  }
+
+  [data-home-area="favourites"] [data-home-favourite] {
+    min-height: 68px;
+    gap: 5px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  [data-home-area="favourites"] [data-home-favourite-icon] {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+  }
+
+  [data-home-area="priorities"] > div:first-child {
+    margin-bottom: 6px;
+  }
+
+  [data-story-tone] {
+    min-height: 174px;
+    padding: 14px 16px;
+  }
+
+  [data-story-tone] > div:nth-child(3) {
+    margin-top: 8px;
+  }
+
+  [data-story-tone] p {
+    display: none;
+  }
+
+  [data-home-area="products"] > div:first-child {
+    margin-bottom: 6px;
+  }
+
+  [data-home-area="activity"] > div:first-child {
+    margin-bottom: 6px;
+  }
+}
+
+/* Closed, short handset: the first viewport is a deliberate three-beat story:
+   overview, all four actions, one Today card. Activity and Portfolio retain
+   their document order immediately below and remain available by scrolling. */
+@container home (min-width: 360px) and (max-width: 599px) and (max-height: 650px) {
+  [data-app-2027-header] {
+    min-height: 44px;
+    padding-bottom: 0;
+  }
+
+  [data-app-2027-scroll] {
+    padding-top: 0;
+    padding-bottom: 82px;
+  }
+
+  [data-app-2027-layout] {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  [data-money-stage] {
+    padding: 12px 14px;
+  }
+
+  [data-money-stage] > div:nth-of-type(3) {
+    margin-top: 4px;
+  }
+
+  [data-money-stage] > div:nth-of-type(4),
+  [data-money-stage] > div:nth-of-type(5) {
+    margin-top: 6px;
+  }
+
+  [data-home-area="favourites"] [data-home-favourite] {
+    min-height: 64px;
+  }
+
+  [data-home-area="priorities"] {
+    min-width: 0;
+  }
+
+  [data-story-tone] {
+    min-height: 132px;
+    padding: 12px 14px;
+  }
+
+  [data-story-tone] > div:nth-child(3) {
+    margin-top: 6px;
+  }
+
+  [data-home-area="activity"] {
+    order: 4;
+  }
+
+  [data-home-area="products"] {
+    order: 5;
+  }
+}

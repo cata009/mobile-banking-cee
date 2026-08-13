@@ -3,6 +3,7 @@
  */
 
 import AccountSummary from "./AccountSummary";
+import App2027HomeScreen from "./App2027HomeScreen";
 import HomeHeader from "./HomeHeader";
 import InactiveState from "./InactiveState";
 import UnplannedBanner from "./UnplannedBanner";
@@ -10,6 +11,8 @@ import BottomNavigation from "@/app/components/BottomNavigation";
 import { useDemo } from "@/app/state/demoStore";
 import { getFeatureFlags } from "@/app/state/featureHelpers";
 import type { Product } from "@/data/products";
+import type { AccountTransaction } from "@/data/accountDetails";
+import type { CardTransactionMerchantEnrichment } from "@/app/screens/payments/DomesticPaymentFlowScreens";
 
 interface HomeScreenProps {
   onPrimeClick?: () => void;
@@ -21,8 +24,15 @@ interface HomeScreenProps {
   onMoreClick?: () => void;
   onAccountClick?: (product: Product) => void;
   onAccountInfoClick?: (product: Product) => void;
+  onCardDetailsClick?: (product: Product) => void;
+  onCardOptionsClick?: (product: Product) => void;
   onInvestmentsClick?: () => void;
   onInvestmentGoalsClick?: () => void;
+  onTransactionClick?: (
+    transaction: AccountTransaction,
+    product: Product,
+    merchantEnrichment?: CardTransactionMerchantEnrichment,
+  ) => void;
 }
 
 export default function HomeScreen({
@@ -35,8 +45,11 @@ export default function HomeScreen({
   onMoreClick,
   onAccountClick,
   onAccountInfoClick,
+  onCardDetailsClick,
+  onCardOptionsClick,
   onInvestmentsClick,
   onInvestmentGoalsClick,
+  onTransactionClick,
 }: HomeScreenProps) {
   const demoState = useDemo();
   const { scenario } = demoState;
@@ -64,6 +77,28 @@ export default function HomeScreen({
   // If scenario is inactive, show inactive state only
   if (scenario === "inactive") {
     return <InactiveState />;
+  }
+
+  if (features.app2027Homepage || features.evo2027Homepage) {
+    return (
+      <App2027HomeScreen
+        onPrimeClick={onPrimeClick}
+        onAnalyticsClick={onAnalyticsClick}
+        onMessagesClick={onMessagesClick}
+        onPaymentsClick={onPaymentsClick}
+        onDomesticPaymentClick={onDomesticPaymentClick}
+        onProductsClick={onProductsClick}
+        onMoreClick={onMoreClick}
+        onAccountClick={onAccountClick}
+        onAccountInfoClick={onAccountInfoClick}
+        onCardDetailsClick={onCardDetailsClick}
+        onCardOptionsClick={onCardOptionsClick}
+        onInvestmentsClick={onInvestmentsClick}
+        onInvestmentGoalsClick={onInvestmentGoalsClick}
+        onTransactionClick={onTransactionClick}
+        useCzRoboAccountCards={features.evo2027Homepage}
+      />
+    );
   }
 
   // Active state - compose all sections

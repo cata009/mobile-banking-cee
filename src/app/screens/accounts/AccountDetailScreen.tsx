@@ -29,13 +29,24 @@ import { getPfmCategorySelection, type PfmCategorySelection } from "@/data/pfmCa
 import { getLoanDetails, getTermDepositDetails } from "@/data/accountProductDetails";
 import { isAccountDetailProduct } from "@/data/products";
 import type { Product } from "@/data/products";
+import {
+  App2027TransactionIdentity,
+  getApp2027ActivityKind,
+  getApp2027ActivityTransactions,
+  getApp2027MerchantEnrichment,
+} from "@/app/screens/home/App2027Activity";
+import type { CardTransactionMerchantEnrichment } from "@/app/screens/payments/DomesticPaymentFlowScreens";
 
 interface AccountDetailScreenProps {
   selectedProductId?: string | null;
   onBack: () => void;
   onDetailsClick: (product: Product) => void;
   onOptionsClick: () => void;
-  onTransactionClick?: (transaction: AccountTransaction, product: Product) => void;
+  onTransactionClick?: (
+    transaction: AccountTransaction,
+    product: Product,
+    merchantEnrichment?: CardTransactionMerchantEnrichment,
+  ) => void;
   transactionCategoryOverrides?: Readonly<Record<string, PfmCategorySelection>>;
   onTransactionCategoryChange?: (transaction: AccountTransaction, selection: PfmCategorySelection) => void;
   onHelpClick?: () => void;
@@ -131,7 +142,7 @@ export default function AccountDetailScreen({
   onHelpClick,
   transactionRowPresentation,
 }: AccountDetailScreenProps) {
-  const { country, amountsHidden } = useDemo();
+  const { country, amountsHidden, release } = useDemo();
   const { t } = useLanguage();
   const { categories } = useProducts();
   const accountProducts = useMemo(() => {
@@ -192,13 +203,30 @@ export default function AccountDetailScreen({
   }, [activeProduct, onDetailsClick, onOptionsClick, t]);
   const currentAccountNumber = accountProducts.find((product) => product.type === "current_account")?.accountNumber ?? "";
   const config = getCountryConfig(country);
+  const activeCurrency = activeProduct?.currency ?? config.currency;
   const transactionProfileIndex = activeProduct ? getAccountTransactionProfileIndex(activeProduct, activeIndex) : 0;
+  const usesApp2027CzLedger =
+    (release === "release-future-app-2027" || release === "release-future-evo-2027")
+    && country === "CZ"
+    && activeProduct?.type === "current_account"
+    && transactionProfileIndex === 0;
   const transactions = useMemo(() => {
-    const baseTransactions = getAccountTransactions(
+    let baseTransactions = getAccountTransactions(
       country,
       transactionProfileIndex,
       config.currency,
     );
+
+    if (usesApp2027CzLedger) {
+      const activityTransactions = getApp2027ActivityTransactions();
+      const activityLabels = new Set(activityTransactions.map((transaction) => transaction.label));
+      baseTransactions = [
+        ...activityTransactions,
+        ...baseTransactions.filter(
+          (transaction) => transaction.status === "Booked" && !activityLabels.has(transaction.label),
+        ),
+      ];
+    }
 
     return baseTransactions.map((transaction) => {
       const override = transactionCategoryOverrides[transaction.id];
@@ -211,7 +239,20 @@ export default function AccountDetailScreen({
           }
         : transaction;
     });
-  }, [config.currency, country, transactionCategoryOverrides, transactionProfileIndex]);
+  }, [config.currency, country, transactionCategoryOverrides, transactionProfileIndex, usesApp2027CzLedger]);
+  const app2027LeadingVisual = (transaction: AccountTransaction) => {
+    if (!usesApp2027CzLedger) return undefined;
+    const kind = getApp2027ActivityKind(transaction);
+    return kind ? <App2027TransactionIdentity kind={kind} size={32} /> : undefined;
+  };
+  const openTransaction = (transaction: AccountTransaction) => {
+    if (!activeProduct) return;
+    onTransactionClick?.(
+      transaction,
+      activeProduct,
+      usesApp2027CzLedger ? getApp2027MerchantEnrichment(transaction, country) : undefined,
+    );
+  };
   const normalizedTransactionSearch = transactionSearch.trim().toLowerCase();
   const filtersActive = hasAccountTransactionFilters(appliedFilters);
   const scopedTransactions = useMemo(
@@ -458,7 +499,7 @@ export default function AccountDetailScreen({
                 ?? loanDetails?.nextInstallment
                 ?? product.balance * 0.92;
               const displayedAvailable = maskAmountParts(
-                { ...availableParts, currency: config.currency },
+                { ...availableParts, currency: product.currency },
                 amountsHidden,
               );
               const isActiveCard = index === activeIndex;
@@ -556,17 +597,17 @@ export default function AccountDetailScreen({
             <div className="pt-[24px]">
               {pendingTransactions.length > 0 ? (
                 <section data-pending-transactions data-pending-count={pendingTransactions.length} className="pb-[8px]">
-                  <AccountTransactionMonthDivider title="Pending" currency={config.currency} />
+                  <AccountTransactionMonthDivider title="Pending" currency={activeCurrency} />
                   <div className="pt-[16px]">
                     {pendingTransactions.map((transaction) => (
                       <AccountTransactionRow
                         key={transaction.id}
                         transaction={transaction}
                         formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
-                        currency={config.currency}
+                        currency={activeCurrency}
                         displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
-                        leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
-                        onClick={(selectedTransaction) => onTransactionClick?.(selectedTransaction, activeProduct)}
+                        leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction) ?? app2027LeadingVisual(transaction)}
+                        onClick={openTransaction}
                       />
                     ))}
                   </div>
@@ -578,11 +619,11 @@ export default function AccountDetailScreen({
                     <AccountTransactionMonthDivider
                       title={group.monthTitle}
                       total={formatMoneyNumber(group.monthlyTotal, country)}
-                      currency={config.currency}
+                      currency={activeCurrency}
                     />
 
                     {showCompletedMonthReports && index > 0 && group.transactions.every((transaction) => transaction.status === "Booked") ? (
-                      <AccountMonthlyReport country={country} currency={config.currency} group={group} />
+                      <AccountMonthlyReport country={country} currency={activeCurrency} group={group} />
                     ) : null}
 
                     <div className="pt-[16px]">
@@ -591,10 +632,10 @@ export default function AccountDetailScreen({
                           key={transaction.id}
                           transaction={transaction}
                           formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
-                          currency={config.currency}
+                          currency={activeCurrency}
                           displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
-                          leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
-                           onClick={(selectedTransaction) => onTransactionClick?.(selectedTransaction, activeProduct)}
+                          leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction) ?? app2027LeadingVisual(transaction)}
+                           onClick={openTransaction}
                            onCategoryClick={onTransactionCategoryChange ? setCategorySheetTransaction : undefined}
                          />
                       ))}

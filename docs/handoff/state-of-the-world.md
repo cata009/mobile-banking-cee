@@ -1,6 +1,6 @@
 # State Of The World
 
-Last updated: 2026-07-28
+Last updated: 2026-08-13
 
 ## What This Project Is
 
@@ -11,6 +11,10 @@ Current runtime supports:
 - country switching across CEE markets, now including separate `BA` Bosnia and `BA_BL` Bosnia Banja Luka application variants;
 - active/inactive app scenario;
 - explicit `Baseline` / `Future` state through the stakeholder release control; `Baseline` is the official current truth, while `Future` opens a compatible future-feature dropdown;
+- PI/CZ/current DS now has an isolated `Future App -> Evo 2027` release immediately after `App 2027`. Its independent homepage feature flag initially reuses the App 2027 Homepage composition and the CZ App 2027-compatible product/ledger fixtures, so Evo can diverge without changing App 2027. Non-CZ project packs do not expose Evo. The stakeholder selector order is `CZ - Chatbot`, `CZ - Robo`, `App 2027`, `Evo 2027`; this remains deterministic demo content with no backend release persistence.
+- Future CZ evolution product cards now use the available phone content width rather than a fixed 327px runtime width. The shared evolution component keeps its Figma spacing and variants while adapting to the device frame and narrow screens; legacy product cards are unchanged.
+- Evo 2027's current-account group now reuses the CZ Robo evolution `ProductCard` model and four account actions. The Evo-specific leading visual remains the responsive currency/country badge for each account (`CZK`, `EUR`, `USD`); App 2027 and other Evo product groups remain unchanged.
+- App 2027 and Evo now share the 2027 Figma Home transformation below their unchanged global header: interactive Accounts/Savings/Credits/Insurance chips, per-tab Figma-style summary banners and expandable groups, data-derived owned-product cards, contextual empty-product banners, interest carousel, and Accounts-only ShopSmart. Existing Future App themes, foldable/responsive shell and glass bottom navigation remain the same. Insurance and supporting product-detail metadata are deterministic prototype data until service contracts exist.
 - Phase 1 release/baseline operating system with a baseline ledger, feature manifests, legacy R1/R2/R3/R4 registry compatibility, release diffs, promotion readiness checks, and flag-retirement candidates; old R1/R2/R3/R4 preview options are no longer exposed in the stakeholder header;
 - Phase 1 project-pack registry covering all 24 product/country combinations across `PI`, `SME`, and `Mobile PI Kids` for `RO`, `CZ`, `SK`, `HU`, `RS`, `BA`, `BA_BL`, and `SI`;
 - Phase 1 banking scenario control with mock holdings, entitlements, limits, enabled actions, disabled-action reasons, and a resolved `effectiveAppContext`;
