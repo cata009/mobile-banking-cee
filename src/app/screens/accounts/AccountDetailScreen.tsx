@@ -15,6 +15,7 @@ import AccountTransactionFiltersSheet, {
   hasAccountTransactionFilters,
   type AccountTransactionFilterState,
 } from "@/app/screens/accounts/AccountTransactionFiltersSheet";
+import SavingAccountAddMoneyFlow from "@/app/screens/accounts/SavingAccountAddMoneyFlow";
 import { AppIcon } from "@/app/components/icons";
 import PfmCategoryChangeSheet from "@/app/components/pfm/PfmCategoryChangeSheet";
 import { useLanguage } from "@/app/contexts/LanguageContext";
@@ -160,11 +161,13 @@ export default function AccountDetailScreen({
   const [transactionSearch, setTransactionSearch] = useState("");
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [categorySheetTransaction, setCategorySheetTransaction] = useState<AccountTransaction | null>(null);
+  const [isSavingAddMoneyOpen, setSavingAddMoneyOpen] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<AccountTransactionFilterState>(EMPTY_ACCOUNT_TRANSACTION_FILTERS);
   const pageRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const activeProduct = accountProducts[activeIndex] ?? accountProducts[0];
+  const isEvoCzSavingAddMoney = release === "release-future-evo-2027" && country === "CZ" && activeProduct?.type === "saving_account";
   const accountActionItems = useMemo<AccountActionBarItem[]>(() => {
     if (!activeProduct) return [];
     const productType = activeProduct?.type;
@@ -176,8 +179,11 @@ export default function AccountDetailScreen({
     ];
 
     if (productType === "saving_account") {
-      // Add money is hidden on saving accounts; no empty slot remains.
-      return baseItems.map((item) => (item.id === "add-money" ? { ...item, hidden: true } : item));
+      return baseItems.map((item) => (
+        item.id === "add-money"
+          ? { ...item, hidden: !isEvoCzSavingAddMoney, onClick: () => setSavingAddMoneyOpen(true) }
+          : item
+      ));
     }
 
     if (productType === "term_deposit") {
@@ -200,7 +206,7 @@ export default function AccountDetailScreen({
     }
 
     return baseItems;
-  }, [activeProduct, onDetailsClick, onOptionsClick, t]);
+  }, [activeProduct, isEvoCzSavingAddMoney, onDetailsClick, onOptionsClick, t]);
   const currentAccountNumber = accountProducts.find((product) => product.type === "current_account")?.accountNumber ?? "";
   const config = getCountryConfig(country);
   const activeCurrency = activeProduct?.currency ?? config.currency;
@@ -671,6 +677,14 @@ export default function AccountDetailScreen({
             onTransactionCategoryChange?.(categorySheetTransaction, selection);
             setCategorySheetTransaction(null);
           }}
+        />
+      ) : null}
+      {isSavingAddMoneyOpen && activeProduct?.type === "saving_account" ? (
+        <SavingAccountAddMoneyFlow
+          savingAccount={activeProduct}
+          sourceAccounts={accountProducts.filter((product): product is Extract<Product, { type: "current_account" }> => product.type === "current_account" && product.currency === activeProduct.currency)}
+          country={country}
+          onBack={() => setSavingAddMoneyOpen(false)}
         />
       ) : null}
       <CopyToast toast={copyToast} />

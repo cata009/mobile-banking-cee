@@ -9,6 +9,11 @@ import { useDragCarousel } from '@/hooks/useDragCarousel';
 import savingsCactus from '@/assets/app2027/home-summary-savings-cactus.png';
 import loansHouse from '@/assets/app2027/home-summary-loans-house.png';
 import insuranceUmbrella from '@/assets/app2027/home-summary-insurance-umbrella.png';
+import accountsLighthouse from '@/assets/6f4a518088433560480f90c7a7448fdc1d294def.png';
+import interestRoundups from '@/assets/app2027/home-interest-roundups.png';
+import interestSafetyNet from '@/assets/app2027/home-interest-safety-net.png';
+import interestNextStep from '@/assets/app2027/home-interest-next-step.jpeg';
+import shopSmartDining from '@/assets/app2027/home-shopsmart-dining.png';
 import App2027Activity from './App2027Activity';
 import App2027ProductAccordions, { CurrencyBadge } from './App2027ProductAccordions';
 
@@ -64,9 +69,23 @@ const INTEREST_CONTENT: Record<TransformationTab, { title: string; body: string;
   },
 };
 
+const INTEREST_MEDIA: Record<TransformationTab, readonly string[]> = {
+  accounts: [interestRoundups, interestNextStep, interestSafetyNet],
+  savings: [interestSafetyNet, interestRoundups, interestNextStep],
+  credits: [interestNextStep, interestRoundups, interestSafetyNet],
+  insurance: [interestNextStep, interestSafetyNet, interestRoundups],
+};
+
+const SHOPSMART_MEDIA = [shopSmartDining, interestRoundups] as const;
+
 function formatMoney(amount: FormattedAmount, hidden: boolean) {
   const display = maskAmountParts(amount, hidden);
   return <><span className="text-[24px] font-bold leading-[27px] tracking-[-0.025em]">{display.integer}</span><span className="text-[16px] font-medium leading-[20px]">{display.decimals} {display.currency}</span></>;
+}
+
+function formatSupportingMoney(amount: FormattedAmount, hidden: boolean) {
+  const display = maskAmountParts(amount, hidden);
+  return <span data-home-supporting-amount className="inline-flex items-baseline whitespace-nowrap text-[16px]"><span className="text-[16px] font-bold leading-[20px] tracking-[-0.018em]">{display.integer}</span><span className="text-[12px] font-medium leading-[16px]">{display.decimals} {display.currency}</span></span>;
 }
 
 function categoryProducts(categories: ProductCategory[], key: ProductCategory['key']) {
@@ -74,6 +93,7 @@ function categoryProducts(categories: ProductCategory[], key: ProductCategory['k
 }
 
 const SUMMARY_ART: Partial<Record<TransformationTab, { src: string; className: string }>> = {
+  accounts: { src: accountsLighthouse, className: 'bottom-0 right-0 h-[132px] w-[104px]' },
   savings: { src: savingsCactus, className: 'bottom-[-48px] right-[-44px] h-[220px] w-[184px]' },
   credits: { src: loansHouse, className: 'bottom-[-10px] right-[-12px] h-[170px] w-[174px]' },
   insurance: { src: insuranceUmbrella, className: 'bottom-[-24px] right-[-38px] h-[186px] w-[210px]' },
@@ -81,9 +101,11 @@ const SUMMARY_ART: Partial<Record<TransformationTab, { src: string; className: s
 
 function SummaryBanner({ tab, amount, amountsHidden, secondaryLabel, secondaryValue, policyCount = 2 }: { tab: TransformationTab; amount?: FormattedAmount; amountsHidden: boolean; secondaryLabel: string; secondaryValue: FormattedAmount | string; policyCount?: number }) {
   const headline = tab === 'insurance' ? "You're covered" : tab === 'credits' ? 'Total owed' : tab === 'savings' ? 'Total savings' : 'Total Available';
-  const featured = tab === 'insurance' ? `${policyCount} active ${policyCount === 1 ? 'policy' : 'policies'}` : amount ? formatMoney(amount, amountsHidden) : null;
+  const featured = tab === 'insurance'
+    ? <span data-home-insurance-policy-count className="text-[14px] font-medium leading-[18px]">{policyCount} active {policyCount === 1 ? 'policy' : 'policies'}</span>
+    : amount ? formatMoney(amount, amountsHidden) : null;
   const tone = tab === 'accounts'
-    ? 'bg-[color-mix(in_srgb,var(--uc-action)_18%,var(--uc-surface))]'
+    ? 'bg-[var(--uc-teal-soft)]'
     : tab === 'savings'
       ? 'bg-[color-mix(in_srgb,var(--uc-brand)_12%,var(--uc-surface))]'
       : tab === 'credits'
@@ -111,25 +133,30 @@ function Group({ title, children, defaultOpen = true, preview }: { title: string
 
   return (
     <section data-home-transformation-group={id}>
-      <button type="button" aria-expanded={isOpen} aria-controls={id} onClick={() => setOpen((value) => !value)} className="flex min-h-[32px] w-full items-center justify-between text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]">
-        <h2 className="text-[22px] font-bold leading-[28px] tracking-[-0.02em] text-[var(--uc-text)]">{title}</h2>
-        <AppIcon name="chevron-down" size={24} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+      <button type="button" data-home-product-group-header="compact" aria-expanded={isOpen} aria-controls={id} onClick={() => setOpen((value) => !value)} className="flex h-[48px] w-full items-center justify-between px-0 text-left transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]">
+        <h2 className="uc-type-l1 text-[var(--uc-text)]">{title}</h2>
+        <span className={`grid size-[32px] place-items-center transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+          <AppIcon name="chevron-down-wide" color="var(--uc-icon)" aria-hidden="true" />
+        </span>
       </button>
       {isOpen ? <div id={id} className="mt-[12px]">{children}</div> : preview ? <div className="mt-[12px]">{preview}</div> : null}
     </section>
   );
 }
 
-function CompactProductCard({ product, amount, amountsHidden, subtitle, onClick }: { product: Product; amount: FormattedAmount; amountsHidden: boolean; subtitle?: string; onClick?: () => void }) {
+function CompactProductCard({ product, amount, amountsHidden, subtitle, onClick, stackRole = 'single' }: { product: Product; amount: FormattedAmount; amountsHidden: boolean; subtitle?: string; onClick?: () => void; stackRole?: 'single' | 'first' | 'middle' | 'last' }) {
   const display = maskAmountParts(amount, amountsHidden);
+  const radiusClass = stackRole === 'first' ? 'rounded-t-[8px]' : stackRole === 'last' ? 'rounded-b-[8px]' : stackRole === 'middle' ? 'rounded-none' : 'rounded-[8px]';
+  const hasSeparator = stackRole === 'middle' || stackRole === 'last';
+
   return (
-    <button type="button" onClick={onClick} className="flex min-h-[112px] w-full items-start gap-[12px] rounded-[8px] bg-[var(--uc-surface)] px-[16px] py-[16px] text-left shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]">
-      <CurrencyBadge currency={product.currency} />
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{product.name}{subtitle ? ` · ${subtitle}` : ''}</span>
+    <button type="button" data-home-compact-product-card={product.type} onClick={onClick} className={`relative flex min-h-[112px] w-full items-start bg-[var(--uc-surface)] px-[16px] py-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${radiusClass} ${hasSeparator ? 'border-t-[0.5px] border-[var(--uc-border-muted)]' : ''}`}>
+      <span className="min-w-0 flex-1 pr-[52px]">
+        <span className="block truncate text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{product.name}{subtitle ? <><span aria-hidden="true"> · </span>{subtitle}</> : null}</span>
         <span className="mt-[3px] block truncate text-[14px] leading-[18px] text-[var(--uc-text-muted)]">{product.accountNumber}</span>
         <span className="mt-[13px] block text-[var(--uc-text)]"><span className="text-[24px] font-bold leading-[26px]">{display.integer}</span><span className="text-[14px]">{display.decimals} {display.currency}</span></span>
       </span>
+      <span className="absolute right-[16px] top-[16px]"><CurrencyBadge currency={product.currency} /></span>
     </button>
   );
 }
@@ -183,6 +210,7 @@ function HorizontalCarousel({ ariaLabel, count, children }: { ariaLabel: string;
 
 function InterestCarousel({ tab, onProductsClick }: { tab: TransformationTab; onProductsClick?: () => void }) {
   const content = INTEREST_CONTENT[tab];
+  const media = INTEREST_MEDIA[tab];
   const cards = [content, { ...content, title: tab === 'insurance' ? 'Cover for what matters' : 'Make your next move easier' }, { ...content, title: tab === 'savings' ? 'Put every crown to work' : 'Discover what is next for you' }];
   return (
     <section data-home-interest-carousel aria-labelledby="interest-heading">
@@ -190,7 +218,9 @@ function InterestCarousel({ tab, onProductsClick }: { tab: TransformationTab; on
       <HorizontalCarousel ariaLabel="For your interest" count={cards.length}>
         {cards.map((card, index) => (
           <button key={index} type="button" onClick={onProductsClick} className="w-[min(327px,calc(100vw-64px))] shrink-0 snap-start overflow-hidden rounded-[8px] bg-[var(--uc-surface)] text-left shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]">
-            <div className={`h-[100px] ${index === 0 ? 'bg-[linear-gradient(135deg,#2e554f,#b8c9a4)]' : index === 1 ? 'bg-[linear-gradient(135deg,#d9d6ce,#a3b29f)]' : 'bg-[linear-gradient(135deg,#9ab1bd,#476a78)]'}`} />
+            <div className="h-[100px] overflow-hidden bg-[var(--uc-surface-muted)]">
+              <img src={media[index]} alt="" aria-hidden="true" data-home-interest-media className="size-full object-cover object-center" />
+            </div>
             <div className="px-[16px] py-[12px]">
               <h3 className="text-[18px] font-bold leading-[23px]">{card.title}</h3>
               <p className="mt-[7px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">{card.body}</p>
@@ -205,13 +235,31 @@ function InterestCarousel({ tab, onProductsClick }: { tab: TransformationTab; on
 
 function ShopSmart({ country, onProductsClick }: { country: CountryId; onProductsClick?: () => void }) {
   const offers = getProductsMenuForCountry(country).shopSmartOffers.slice(0, 2);
+  const [activeFilter, setActiveFilter] = useState<'popular' | 'eshops' | 'electronics'>('popular');
   if (!offers.length) return null;
+  const visibleOffers = activeFilter === 'popular'
+    ? offers
+    : offers.filter((_, index) => index === (activeFilter === 'eshops' ? 0 : 1));
+  const filters: ReadonlyArray<{ id: typeof activeFilter; label: string }> = [
+    { id: 'popular', label: 'Most popular' },
+    { id: 'eshops', label: 'E-shops' },
+    { id: 'electronics', label: 'Electronics' },
+  ];
+
   return (
-    <section data-home-shopsmart>
+    <section data-home-shopsmart data-home-shopsmart-filter={activeFilter}>
       <h2 className="text-[22px] font-bold leading-[28px] tracking-[-0.02em]">Shopsmart</h2>
-      <div className="mt-[12px] flex gap-[8px] overflow-x-auto scrollbar-hide"><span className="rounded-full bg-[var(--uc-action)] px-[13px] py-[10px] text-[14px] font-medium text-[var(--uc-static-white)]">Most popular</span><span className="rounded-full bg-[var(--uc-surface)] px-[13px] py-[10px] text-[14px] text-[var(--uc-text-muted)]">E-shops</span><span className="rounded-full bg-[var(--uc-surface)] px-[13px] py-[10px] text-[14px] text-[var(--uc-text-muted)]">Electronics</span></div>
-      <HorizontalCarousel ariaLabel="ShopSmart offers" count={offers.length}>
-        {offers.map((offer, index) => <button key={offer.id} type="button" onClick={onProductsClick} className="w-[min(327px,calc(100vw-64px))] shrink-0 overflow-hidden rounded-[8px] bg-[var(--uc-surface)] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"><div className={`h-[128px] ${index ? 'bg-[linear-gradient(135deg,#789bb9,#283f62)]' : 'bg-[linear-gradient(135deg,#6f4f35,#d7ad70)]'}`} /><div className="p-[16px]"><p className="text-[14px] font-bold text-[var(--uc-action)]">Alza.cz</p><p className="mt-[5px] text-[20px] font-bold">{offer.title.replace(/\n/g, ' ')}</p><p className="mt-[8px] text-[14px] text-[var(--uc-text-muted)]">Activated offer</p></div></button>)}
+      <div className="mt-[12px] flex gap-[8px] overflow-x-auto scrollbar-hide" aria-label="ShopSmart categories">
+        {filters.map((filter) => {
+          const active = filter.id === activeFilter;
+          return <button key={filter.id} type="button" aria-pressed={active} onClick={() => setActiveFilter(filter.id)} className={`rounded-full px-[13px] py-[10px] text-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${active ? 'bg-[var(--uc-action)] font-medium text-[var(--uc-static-white)]' : 'bg-[var(--uc-surface)] text-[var(--uc-text-muted)]'}`}>{filter.label}</button>;
+        })}
+      </div>
+      <HorizontalCarousel key={activeFilter} ariaLabel="ShopSmart offers" count={visibleOffers.length}>
+        {visibleOffers.map((offer) => {
+          const sourceIndex = offers.findIndex((candidate) => candidate.id === offer.id);
+          return <button key={offer.id} type="button" onClick={onProductsClick} className="w-[min(327px,calc(100vw-64px))] shrink-0 snap-start overflow-hidden rounded-[8px] bg-[var(--uc-surface)] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"><div className="h-[128px] overflow-hidden bg-[var(--uc-surface-muted)]"><img src={SHOPSMART_MEDIA[Math.max(0, sourceIndex) % SHOPSMART_MEDIA.length]} alt="" aria-hidden="true" data-home-shopsmart-media className="size-full object-cover object-center" /></div><div className="p-[16px]"><p className="text-[14px] font-bold text-[var(--uc-action)]">Alza.cz</p><p className="mt-[5px] text-[20px] font-bold">{offer.title.replace(/\n/g, ' ')}</p><p className="mt-[8px] text-[14px] text-[var(--uc-text-muted)]">Activated offer</p></div></button>;
+        })}
       </HorizontalCarousel>
     </section>
   );
@@ -257,7 +305,7 @@ export default function App2027TransformationHome({ categories, country, amounts
 
       {activeTab === 'savings' ? <>
         <SummaryBanner tab="savings" amount={totalSavings} amountsHidden={amountsHidden} secondaryLabel="Growth this year" secondaryValue={savingsGrowth} />
-        <Group title="Saving Accounts">{savings.length ? savings.map((product) => <CompactProductCard key={product.id} product={product} amount={formatProductAmount(product)} amountsHidden={amountsHidden} subtitle="2.5% p.a." onClick={() => onProductClick(product)} />) : <EmptyProducts title="Start saving for what matters" description="Open a saving account and set money aside automatically." onClick={onProductsClick} />}</Group>
+        <Group title="Saving Accounts">{savings.length ? <div data-home-compact-product-list="saving_account" className="overflow-hidden rounded-[8px] shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)]">{savings.map((product, index) => <CompactProductCard key={product.id} product={product} amount={formatProductAmount(product)} amountsHidden={amountsHidden} subtitle="2.5% p.a." onClick={() => onProductClick(product)} stackRole={savings.length === 1 ? 'single' : index === 0 ? 'first' : index === savings.length - 1 ? 'last' : 'middle'} />)}</div> : <EmptyProducts title="Start saving for what matters" description="Open a saving account and set money aside automatically." onClick={onProductsClick} />}</Group>
         <Group title="Deposits">
           {deposits.length ? deposits.map((product) => {
             const current = formatProductAmount(product);
@@ -265,7 +313,7 @@ export default function App2027TransformationHome({ categories, country, amounts
             return <div key={product.id} className="rounded-[8px] bg-[var(--uc-surface)] p-[16px]">
               <button type="button" onClick={() => onProductClick(product)} className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]">
                 <p className="text-[16px] font-bold">{product.name} · 6.5% p.a.</p>
-                <p className="mt-[3px] flex items-baseline gap-[3px] text-[14px] text-[var(--uc-text-muted)]">Maturity amount: {formatMoney(maturity, amountsHidden)}</p>
+                <p data-home-deposit-maturity className="mt-[3px] flex items-baseline gap-[3px] text-[14px] text-[var(--uc-text-muted)]">Maturity amount: {formatSupportingMoney(maturity, amountsHidden)}</p>
                 <p className="mt-[12px] text-[var(--uc-text)]">{formatMoney(current, amountsHidden)}</p>
               </button>
               <div className="mt-[24px] flex justify-between text-[14px]"><span>Period: <b>1 Year</b></span><span>Days to maturity: <b>290</b></span></div>
@@ -280,7 +328,7 @@ export default function App2027TransformationHome({ categories, country, amounts
 
       {activeTab === 'credits' ? <>
         <SummaryBanner tab="credits" amount={debt} amountsHidden={amountsHidden} secondaryLabel="Due this month" secondaryValue={dueThisMonth} />
-        <Group title="Credit Cards">{cards.filter((product) => product.type === 'credit_card').length ? <App2027ProductAccordions categories={creditCategories} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} calculateGroupTotal={calculateTotal} getProductDisplayNumber={getProductDisplayNumber} onProductClick={onProductClick} onCardDetailsClick={onCardDetailsClick} onCardOptionsClick={onCardOptionsClick} useCzRoboAccountCards visibleKeys={['cards']} initialOpenKeys={{ cards: true }} /> : <EmptyProducts title="Discover a credit card" description="Choose benefits that match your everyday spending." onClick={onProductsClick} />}</Group>
+        {cards.filter((product) => product.type === 'credit_card').length ? <App2027ProductAccordions categories={creditCategories} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} calculateGroupTotal={calculateTotal} getProductDisplayNumber={getProductDisplayNumber} onProductClick={onProductClick} onCardDetailsClick={onCardDetailsClick} onCardOptionsClick={onCardOptionsClick} useCzRoboAccountCards visibleKeys={['cards']} initialOpenKeys={{ cards: true }} titleOverrides={{ cards: 'Credit Cards' }} /> : <Group title="Credit Cards"><EmptyProducts title="Discover a credit card" description="Choose benefits that match your everyday spending." onClick={onProductsClick} /></Group>}
         <Group title="Loans & Mortgages">
           {loans.length ? loans.map((product) => {
             const total = Math.abs(product.balance) * 1.45;
@@ -292,7 +340,7 @@ export default function App2027TransformationHome({ categories, country, amounts
             return <div key={product.id} className="rounded-[8px] bg-[var(--uc-surface)] p-[16px]">
               <button type="button" onClick={() => onProductClick(product)} className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]">
                 <p className="text-[16px] font-bold">{product.name}</p>
-                <p className="mt-[4px] flex items-baseline gap-[3px] text-[14px] text-[var(--uc-text-muted)]">Next installment: {formatMoney(installment, amountsHidden)}</p>
+                <p data-home-loan-installment className="mt-[4px] flex items-baseline gap-[3px] text-[14px] text-[var(--uc-text-muted)]">Next installment: {formatSupportingMoney(installment, amountsHidden)}</p>
                 <p className="mt-[10px] text-[var(--uc-text)]">{formatMoney(remaining, amountsHidden)}</p>
               </button>
               <div className="mt-[24px] h-[12px] overflow-hidden rounded-full bg-[var(--uc-surface-muted)]"><div className="h-full w-[31%] rounded-full bg-[var(--uc-action)]" /></div>
@@ -305,7 +353,17 @@ export default function App2027TransformationHome({ categories, country, amounts
 
       {activeTab === 'insurance' ? <>
         <SummaryBanner tab="insurance" amountsHidden={amountsHidden} secondaryLabel="Next renewal" secondaryValue="15 Nov 2026" />
-        <Group title="Insurance" preview={<p className="rounded-[8px] bg-[var(--uc-surface)] p-[16px] text-[14px] text-[var(--uc-text-muted)]">2 active policies</p>}><div className="space-y-[8px]">{[{ title: 'Genius Protect', subtitle: 'Life insurance policy · 3431424', premium: 'Next premium: 70 CZK', payment: 'Last payment: 30/05/2027' }, { title: 'Home Protect', subtitle: 'Home insurance policy · 3431425', premium: 'Next premium: 120 CZK', payment: 'Renewal: 15/11/2026' }].map((policy) => <button key={policy.title} type="button" onClick={onProductsClick} className="w-full rounded-[8px] bg-[var(--uc-surface)] p-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"><div className="flex items-start justify-between gap-[12px]"><span><span className="block text-[16px] font-bold">{policy.title}</span><span className="mt-[4px] block text-[14px] text-[var(--uc-text-muted)]">{policy.subtitle}</span></span><span className="grid h-[40px] w-[72px] place-items-center bg-[#00549f] text-[14px] font-bold text-white">Allianz</span></div><div className="mt-[24px] h-[12px] overflow-hidden rounded-full bg-[var(--uc-surface-muted)]"><div className="h-full w-[30%] rounded-full bg-[var(--uc-action)]" /></div><div className="mt-[12px] flex justify-between gap-[12px] text-[13px] text-[var(--uc-text-muted)]"><span>{policy.premium}</span><span>{policy.payment}</span></div></button>)}</div></Group>
+        <Group title="Insurance" preview={<p className="rounded-[8px] bg-[var(--uc-surface)] p-[16px] text-[14px] text-[var(--uc-text-muted)]">2 active policies</p>}>
+          <div data-home-insurance-policy-list className="overflow-hidden rounded-[8px] bg-[var(--uc-surface)] shadow-[0_10px_24px_rgb(var(--uc-shadow-rgb)/0.05)]">
+            {[{ title: 'Genius Protect', subtitle: 'Life insurance policy · 3431424', premium: 'Next premium: 70 CZK', payment: 'Last payment: 30/05/2027' }, { title: 'Home Protect', subtitle: 'Home insurance policy · 3431425', premium: 'Next premium: 120 CZK', payment: 'Renewal: 15/11/2026' }].map((policy, index) => (
+              <button key={policy.title} data-home-insurance-policy-card type="button" onClick={onProductsClick} className={`w-full p-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${index > 0 ? 'border-t-[0.5px] border-[var(--uc-border-muted)]' : ''}`}>
+                <div className="flex items-start justify-between gap-[12px]"><span><span className="block text-[16px] font-bold">{policy.title}</span><span className="mt-[4px] block text-[14px] text-[var(--uc-text-muted)]">{policy.subtitle}</span></span><span className="grid h-[40px] w-[72px] shrink-0 place-items-center bg-[#00549f] text-[14px] font-bold text-white">Allianz</span></div>
+                <div className="mt-[16px] h-[12px] overflow-hidden rounded-full bg-[var(--uc-surface-muted)]"><div className="h-full w-[30%] rounded-full bg-[var(--uc-action)]" /></div>
+                <div className="mt-[10px] flex justify-between gap-[12px] text-[13px] text-[var(--uc-text-muted)]"><span>{policy.premium}</span><span>{policy.payment}</span></div>
+              </button>
+            ))}
+          </div>
+        </Group>
         <InterestCarousel tab="insurance" onProductsClick={onProductsClick} />
       </> : null}
     </div>

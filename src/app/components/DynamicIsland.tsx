@@ -17,7 +17,7 @@ export default function DynamicIsland({ variant = "dark" }: DynamicIslandProps) 
         : "#0E0E0E";
 
   return (
-    <div className="pointer-events-none absolute left-1/2 top-[11px] z-[45] -translate-x-1/2">
+    <div data-device-dynamic-island className="pointer-events-none absolute left-1/2 top-[11px] z-[45] -translate-x-1/2">
       <div
         className="relative h-[28px] w-[106px] rounded-[14px] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
         style={{ backgroundColor: shellColor }}

@@ -6,6 +6,12 @@ import {
   type ReactNode,
 } from 'react';
 import { AppIcon } from '@/app/components/icons';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/app/components/ui/dropdown-menu';
 
 export type DevicePreviewProfileId =
   | 'iphone-17-pro-max'
@@ -22,6 +28,7 @@ export interface DevicePreviewProfile {
   width: number;
   height: number;
   kind: 'phone' | 'foldable-cover' | 'foldable-main';
+  screenChrome: 'dynamic-island' | 'none';
   status: 'official-reference' | 'concept';
 }
 
@@ -33,6 +40,7 @@ export const DEVICE_PREVIEW_PROFILES: readonly DevicePreviewProfile[] = [
     width: 430,
     height: 932,
     kind: 'phone',
+    screenChrome: 'dynamic-island',
     status: 'official-reference',
   },
   {
@@ -42,6 +50,7 @@ export const DEVICE_PREVIEW_PROFILES: readonly DevicePreviewProfile[] = [
     width: 390,
     height: 624,
     kind: 'foldable-cover',
+    screenChrome: 'none',
     status: 'official-reference',
   },
   {
@@ -51,6 +60,7 @@ export const DEVICE_PREVIEW_PROFILES: readonly DevicePreviewProfile[] = [
     width: 840,
     height: 630,
     kind: 'foldable-main',
+    screenChrome: 'none',
     status: 'official-reference',
   },
   {
@@ -60,6 +70,7 @@ export const DEVICE_PREVIEW_PROFILES: readonly DevicePreviewProfile[] = [
     width: 390,
     height: 573,
     kind: 'foldable-cover',
+    screenChrome: 'none',
     status: 'concept',
   },
   {
@@ -69,6 +80,7 @@ export const DEVICE_PREVIEW_PROFILES: readonly DevicePreviewProfile[] = [
     width: 848,
     height: 600,
     kind: 'foldable-main',
+    screenChrome: 'none',
     status: 'concept',
   },
 ] as const;
@@ -124,29 +136,68 @@ export function useDevicePreview() {
 }
 
 export function DevicePreviewSelector() {
-  const { profile, profileId, orientation, viewport, setProfileId, rotate } = useDevicePreview();
+  const { profile, profileId, orientation, setProfileId, rotate } = useDevicePreview();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <div
-      className="flex items-center gap-[8px] rounded-[10px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-[4px] shadow-sm"
+      className="flex items-center gap-[4px] rounded-[10px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-[4px] shadow-sm"
       data-device-preview-controls
     >
-      <label className="sr-only" htmlFor="device-preview-profile">Preview device</label>
-      <select
-        id="device-preview-profile"
-        aria-label="Preview device"
-        value={profileId}
-        onChange={(event) => setProfileId(event.target.value as DevicePreviewProfileId)}
-        className="h-[36px] w-[204px] rounded-[7px] bg-[var(--uc-surface-muted)] px-[10px] text-[13px] font-bold text-[var(--uc-text)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] xl:w-[228px]"
-      >
-        {DEVICE_PREVIEW_PROFILES.map((item) => (
-          <option key={item.id} value={item.id}>{item.label}</option>
-        ))}
-      </select>
-      <span className="hidden text-[11px] text-[var(--uc-text-muted)] 2xl:block">
-        {viewport.width} x {viewport.height}
-        {profile.status === 'concept' ? ', concept' : ''}
-      </span>
+      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            aria-label={`Preview device: ${profile.label}`}
+            title={`Preview device: ${profile.label}`}
+            onClick={() => setIsMenuOpen((current) => !current)}
+            className="grid size-[36px] place-items-center rounded-[7px] text-[var(--uc-text)] transition-colors hover:bg-[var(--uc-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+            data-device-preview-current-icon={profileId}
+          >
+            <DevicePreviewGlyph kind={profile.kind} />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          side="bottom"
+          sideOffset={8}
+          aria-label="Preview device options"
+          className="z-[10000] w-[248px] rounded-xl border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-1.5 text-[var(--uc-text)] shadow-xl"
+          data-device-preview-menu
+        >
+          <p className="px-2 pb-1 pt-1 font-['UniCredit:Bold',sans-serif] text-[11px] uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
+            Preview device
+          </p>
+          {DEVICE_PREVIEW_PROFILES.map((item) => {
+            const isSelected = item.id === profileId;
+
+            return (
+              <DropdownMenuItem
+                key={item.id}
+                aria-label={item.label}
+                onSelect={() => {
+                  setProfileId(item.id);
+                  setIsMenuOpen(false);
+                }}
+                className={`min-h-[44px] cursor-pointer rounded-[7px] px-2.5 py-2 text-[var(--uc-text)] focus:bg-[var(--uc-surface-muted)] focus:text-[var(--uc-text)] ${
+                  isSelected ? 'bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))]' : ''
+                }`}
+              >
+                <span className="grid size-[28px] shrink-0 place-items-center rounded-[6px] bg-[var(--uc-surface-muted)] text-[var(--uc-text)]">
+                  <DevicePreviewGlyph kind={item.kind} size={18} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-['UniCredit:Bold',sans-serif] text-[13px] leading-[16px]">{item.label}</span>
+                  <span className="mt-0.5 block text-[11px] leading-[14px] text-[var(--uc-text-muted)]">
+                    {item.status === 'concept' ? 'Concept reference' : 'Device reference'}
+                  </span>
+                </span>
+                {isSelected ? <AppIcon name="check" size={16} color="var(--uc-action)" aria-hidden="true" /> : null}
+              </DropdownMenuItem>
+            );
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
       <button
         type="button"
         aria-label="Rotate preview"
@@ -157,5 +208,43 @@ export function DevicePreviewSelector() {
         <AppIcon name="repeat" size={18} />
       </button>
     </div>
+  );
+}
+
+function DevicePreviewGlyph({
+  kind,
+  size = 20,
+}: {
+  kind: DevicePreviewProfile['kind'];
+  size?: number;
+}) {
+  const isOpenFoldable = kind === 'foldable-main';
+  const isCoverFoldable = kind === 'foldable-cover';
+
+  return (
+    <svg
+      aria-hidden="true"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {isOpenFoldable ? (
+        <>
+          <rect x="2.75" y="5.5" width="18.5" height="13" rx="2.2" />
+          <path d="M12 5.5v13" />
+          <path d="M10.2 16.1h3.6" />
+        </>
+      ) : (
+        <>
+          <rect x={isCoverFoldable ? '6.75' : '7.5'} y="2.5" width={isCoverFoldable ? '10.5' : '9'} height="19" rx="2.2" />
+          {isCoverFoldable ? <path d="M12 2.5v19" /> : <path d="M10.25 18.25h3.5" />}
+        </>
+      )}
+    </svg>
   );
 }

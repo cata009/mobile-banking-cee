@@ -28,6 +28,7 @@ export interface App2027ProductAccordionsProps {
   onCardOptionsClick?: (product: Product) => void;
   visibleKeys?: SupportedCategoryKey[];
   initialOpenKeys?: Partial<Record<SupportedCategoryKey, boolean>>;
+  titleOverrides?: Partial<Record<SupportedCategoryKey, string>>;
   className?: string;
 }
 
@@ -190,6 +191,7 @@ function CzRoboCard({
   onProductClick,
   onCardDetailsClick,
   onCardOptionsClick,
+  stackRole,
 }: {
   product: Product;
   amountsHidden: boolean;
@@ -198,6 +200,7 @@ function CzRoboCard({
   onProductClick: (product: Product) => void;
   onCardDetailsClick?: (product: Product) => void;
   onCardOptionsClick?: (product: Product) => void;
+  stackRole: 'single' | 'first' | 'middle' | 'last';
 }) {
   const amount = maskAmountParts(formatProductAmount(product), amountsHidden);
   const cardVariant: CardVariant = product.type === 'credit_card'
@@ -219,6 +222,8 @@ function CzRoboCard({
       currency={amount.currency}
       variant="evolution"
       productStyle="pi"
+      stackRole={stackRole}
+      leadingVisual="card"
       actions={[
         { id: 'card-details', label: 'Card\nDetails', ariaLabel: 'Card details', icon: <AppIcon name="account-info" size={24} />, onClick: openCardDetails },
         { id: 'card-options', label: 'Card\nOptions', ariaLabel: 'Card options', icon: <AppIcon name="account-options" size={24} />, onClick: openCardOptions },
@@ -269,6 +274,51 @@ function ProductRow({
   );
 }
 
+function ProductStackPreview({
+  product,
+  amountsHidden,
+  formatProductAmount,
+  getProductDisplayNumber,
+  onExpand,
+}: {
+  product: Product;
+  amountsHidden: boolean;
+  formatProductAmount: (product: Product) => FormattedAmount;
+  getProductDisplayNumber: (product: Product) => string;
+  onExpand: () => void;
+}) {
+  const amount = maskAmountParts(formatProductAmount(product), amountsHidden);
+  const isCard = product.type === 'debit_card' || product.type === 'credit_card' || product.type === 'meal_card';
+  const cardVariant: CardVariant = product.type === 'credit_card'
+    ? 'mc-credit-premium-gold'
+    : product.type === 'meal_card'
+      ? 'mc-virtual-standard-orange'
+      : 'mc-debit-standard';
+
+  return (
+    <button
+      type="button"
+      onClick={onExpand}
+      className="flex h-[58px] w-full items-center gap-[12px] overflow-hidden rounded-b-[4px] border-t-[0.5px] border-[var(--uc-border-muted)] bg-[var(--uc-surface-raised)] px-[16px] text-left text-[var(--uc-text)] shadow-[0_8px_14px_rgb(0_0_0/0.05)] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-action)]"
+      data-home-product-stack-preview
+      aria-label={`Show ${product.name}`}
+    >
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[14px] font-bold leading-[17px]">{product.name}</span>
+        <span className="mt-[2px] block truncate text-[12px] leading-[15px] text-[var(--uc-text-muted)]">
+          {getProductDisplayNumber(product)}
+        </span>
+      </span>
+      <span className="shrink-0 text-right">
+        <Amount amount={amount} hidden={amountsHidden} size="header" />
+      </span>
+      <span className={`grid shrink-0 place-items-center ${isCard ? 'h-[28px] w-[46px]' : 'size-[30px]'}`} aria-hidden="true">
+        {isCard ? <NavigationCardArt variant={cardVariant} /> : <CurrencyBadge currency={product.currency} />}
+      </span>
+    </button>
+  );
+}
+
 export default function App2027ProductAccordions({
   categories,
   amountsHidden,
@@ -284,6 +334,7 @@ export default function App2027ProductAccordions({
   onCardOptionsClick,
   visibleKeys,
   initialOpenKeys,
+  titleOverrides,
   className,
 }: App2027ProductAccordionsProps) {
   const [openGroups, setOpenGroups] = useState<Record<SupportedCategoryKey, boolean>>({
@@ -292,6 +343,7 @@ export default function App2027ProductAccordions({
     savings_deposits: false,
     mortgages_loans: false,
     ...initialOpenKeys,
+    ...(useCzRoboAccountCards ? { accounts: false, cards: false } : {}),
   });
 
   const visibleGroups = GROUP_ORDER.map((definition) => ({
@@ -308,7 +360,13 @@ export default function App2027ProductAccordions({
         const isOpen = openGroups[key];
         const total = category.products.length ? calculateGroupTotal(category.products) : null;
         const panelId = `app-2027-products-${key}`;
-        const useBaselineHeader = useCzRoboAccountCards && key === 'accounts';
+        const useBaselineHeader = useCzRoboAccountCards;
+        const displayTitle = titleOverrides?.[key] ?? title;
+        const hasCollapsedProductStack = useBaselineHeader && category.products.length > 1;
+        const displayedProducts = hasCollapsedProductStack && !isOpen
+          ? category.products.slice(0, 1)
+          : category.products;
+        const shouldRenderPanel = isOpen || (useBaselineHeader && category.products.length > 0);
 
         return (
           <div
@@ -320,6 +378,7 @@ export default function App2027ProductAccordions({
           >
             <button
               type="button"
+              data-home-product-group-header={useBaselineHeader ? 'compact' : undefined}
               aria-expanded={isOpen}
               aria-controls={panelId}
               onClick={() => setOpenGroups((current) => ({ ...current, [key]: !current[key] }))}
@@ -329,7 +388,7 @@ export default function App2027ProductAccordions({
             >
               {useBaselineHeader ? (
                 <>
-                  <h2 className="uc-type-l1 text-[var(--uc-text)]">{title}</h2>
+                  <h2 className="uc-type-l1 text-[var(--uc-text)]">{displayTitle}</h2>
                   <span className={`grid size-[32px] place-items-center transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
                     <AppIcon name="chevron-down-wide" color="var(--uc-icon)" aria-hidden="true" />
                   </span>
@@ -368,18 +427,18 @@ export default function App2027ProductAccordions({
               )}
             </button>
 
-            {isOpen ? (
+            {shouldRenderPanel ? (
               <div id={panelId} className={useBaselineHeader ? 'pt-[8px]' : 'divide-y divide-[var(--uc-border-muted)] border-t border-[var(--uc-border-muted)]'}>
-                {category.products.map((product, productIndex) => {
-                  if (key === 'accounts' && useCzRoboAccountCards) {
-                    const stackRole = category.products.length === 1
-                      ? 'single'
-                      : productIndex === 0
-                        ? 'first'
-                        : productIndex === category.products.length - 1
-                          ? 'last'
-                          : 'middle';
+                {displayedProducts.map((product, productIndex) => {
+                  const stackRole = displayedProducts.length === 1
+                    ? 'single'
+                    : productIndex === 0
+                      ? 'first'
+                      : productIndex === displayedProducts.length - 1
+                        ? 'last'
+                        : 'middle';
 
+                  if (key === 'accounts' && useCzRoboAccountCards) {
                     return (
                       <CzRoboAccountCard
                         key={product.id}
@@ -407,6 +466,7 @@ export default function App2027ProductAccordions({
                         onProductClick={onProductClick}
                         onCardDetailsClick={onCardDetailsClick}
                         onCardOptionsClick={onCardOptionsClick}
+                        stackRole={stackRole}
                       />
                     );
                   }
@@ -422,6 +482,15 @@ export default function App2027ProductAccordions({
                     />
                   );
                 })}
+                {hasCollapsedProductStack && !isOpen && category.products[1] ? (
+                  <ProductStackPreview
+                    product={category.products[1]}
+                    amountsHidden={amountsHidden}
+                    formatProductAmount={formatProductAmount}
+                    getProductDisplayNumber={getProductDisplayNumber}
+                    onExpand={() => setOpenGroups((current) => ({ ...current, [key]: true }))}
+                  />
+                ) : null}
               </div>
             ) : null}
           </div>

@@ -139,7 +139,7 @@ export default function MobileFrame({
                 />
               )}
               <StatusBar variant={statusBarVariant} />
-              <DynamicIsland variant={statusBarVariant} />
+              {profile.screenChrome === 'dynamic-island' ? <DynamicIsland variant={statusBarVariant} /> : null}
 
               {overlay && (
                 <div className="pointer-events-none absolute inset-0 z-[43]">

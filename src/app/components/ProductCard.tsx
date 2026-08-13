@@ -28,6 +28,7 @@ interface ProductCardProps {
   variant?: 'legacy' | 'evolution';
   productStyle?: 'pi' | 'sme';
   stackRole?: 'single' | 'first' | 'middle' | 'last';
+  leadingVisual?: 'currency' | 'card';
   actions?: readonly ProductCardAction[];
   onClick?: () => void;
 }
@@ -51,6 +52,7 @@ export default function ProductCard({
   variant = 'legacy',
   productStyle = 'pi',
   stackRole = 'single',
+  leadingVisual = 'currency',
   actions,
   onClick
 }: ProductCardProps) {
@@ -64,12 +66,14 @@ export default function ProductCard({
           ? 'rounded-b-[4px]'
           : stackRole === 'middle'
             ? 'rounded-none'
-            : 'rounded-[4px]';
+          : 'rounded-[4px]';
+    const hasSeparator = stackRole === 'middle' || stackRole === 'last';
 
     return (
       <div
-        className={`flex w-full max-w-full min-w-0 flex-col items-end bg-[var(--uc-surface-raised)] p-[16px] text-[var(--uc-text)] transition-opacity ${visibleActions.length > 0 ? "gap-[32px]" : "gap-[8px]"} ${radiusClass} ${onClick ? "cursor-pointer hover:opacity-90" : ""}`}
+        className={`flex w-full max-w-full min-w-0 flex-col items-end bg-[var(--uc-surface-raised)] p-[16px] text-[var(--uc-text)] transition-opacity ${visibleActions.length > 0 ? "gap-[32px]" : "gap-[8px]"} ${hasSeparator ? 'border-t-[0.5px] border-[var(--uc-border-muted)]' : ''} ${radiusClass} ${onClick ? "cursor-pointer hover:opacity-90" : ""}`}
         data-product-card-evolution
+        data-product-card-separator={hasSeparator ? 'true' : undefined}
         data-product-style={productStyle}
         onClick={onClick}
         style={{
@@ -91,7 +95,10 @@ export default function ProductCard({
                 </p>
               ) : null}
             </div>
-            <div className="flex size-[32px] shrink-0 items-center justify-center text-[var(--uc-action)]">
+            <div
+              data-product-card-leading-visual={leadingVisual}
+              className={`flex shrink-0 items-center justify-center text-[var(--uc-action)] ${leadingVisual === 'card' ? 'h-[40px] w-[64px]' : 'size-[40px]'}`}
+            >
               {icon}
             </div>
           </div>
