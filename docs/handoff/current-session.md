@@ -6,7 +6,8 @@
 - Collapsed Evo Accounts now renders one full actionable account card followed by a non-interactive 10px depth layer. It no longer exposes the Euro account's name, balance, currency flag, or a hidden tap target. The standard Accounts header is the single expander and continues to reveal all account cards and quick actions.
 - TDD: focused Home regression was added first and failed on the old visible `Show Euro account` preview and custom summary. After the scoped change, `tests/screens/app-2027-homepage.test.tsx` passes (`9/9`), as do `npm run typecheck`, `npm run lint -- --quiet`, and scoped `git diff --check`.
 - Local visual QA at `http://localhost:4004` on the CZ Evo Accounts Home confirms one visible full account card, decorative under-card depth only, no visible Euro-account text, Baseline summary marker/art/divider/secondary typography, and no error overlay.
-- Closeout: this follow-up is ready for the user's already requested commit/publish workflow; concurrent HU Kids and business-requirements workspace changes remain excluded.
+- Publication: commit `8ed9a1d` (`fix: align Evo accounts with baseline`) is pushed to `origin/main`. Vercel production deployment `dpl_Ce7Y48f4aZKRuDnDBqyhpwDu5gX5` is `READY` at `https://mobile-banking-c5svigb84-imc-uci.vercel.app` and aliased to `https://mobile-banking-cee.vercel.app`; the production alias returned HTTP `200` with `Cache-Control: no-store`.
+- Closeout: concurrent HU Kids and business-requirements workspace changes remain excluded. Safe to resume: yes.
 
 ## 2026-08-13 Evo 2027 Home Visual Follow-up
 
