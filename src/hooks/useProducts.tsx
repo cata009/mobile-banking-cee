@@ -154,6 +154,32 @@ const CZ_APP_2027_CURRENT_ACCOUNTS: ReadonlyArray<
   },
 ];
 
+const CZ_APP_2027_TERM_DEPOSITS: ReadonlyArray<
+  Pick<Product, "id" | "name" | "accountNumber" | "balance" | "currency">
+> = [
+  {
+    id: "term-1",
+    name: "Term Deposits",
+    accountNumber: "4567890123456789",
+    balance: 206414,
+    currency: "CZK",
+  },
+  {
+    id: "term-2",
+    name: "Term Deposits",
+    accountNumber: "4567890123456790",
+    balance: 85000,
+    currency: "CZK",
+  },
+  {
+    id: "term-3",
+    name: "Term Deposits",
+    accountNumber: "4567890123456791",
+    balance: 420000,
+    currency: "CZK",
+  },
+];
+
 function replaceTailDigits(seed: string, index: number): string {
   const suffix = String(index + 1).padStart(2, "0");
   return `${seed.slice(0, -2)}${suffix}`;
@@ -359,15 +385,68 @@ function applyCzApp2027CurrentAccounts(categories: ProductCategory[]): ProductCa
   });
 }
 
+function applyCzApp2027TermDeposits(categories: ProductCategory[]): ProductCategory[] {
+  const sourceDeposit = categories
+    .flatMap((category) => category.products)
+    .find((product) => product.type === "term_deposit");
+
+  if (!sourceDeposit) return categories;
+
+  return categories.map((category) => {
+    if (category.key !== "savings_deposits") return category;
+
+    return {
+      ...category,
+      products: [
+        ...category.products.filter((product) => product.type !== "term_deposit"),
+        ...CZ_APP_2027_TERM_DEPOSITS.map((deposit) => ({
+          ...sourceDeposit,
+          ...deposit,
+          type: "term_deposit" as const,
+        })),
+      ],
+    };
+  });
+}
+
+function applyCzApp2027DebitCards(categories: ProductCategory[]): ProductCategory[] {
+  return categories.map((category) => {
+    if (category.key !== "cards") return category;
+
+    let debitCardIndex = 0;
+    return {
+      ...category,
+      products: category.products.map((product) => {
+        if (product.type !== "debit_card") return product;
+
+        const linkedAccount = CZ_APP_2027_CURRENT_ACCOUNTS[debitCardIndex] ?? CZ_APP_2027_CURRENT_ACCOUNTS[0];
+        debitCardIndex += 1;
+        if (!linkedAccount) return product;
+
+        return {
+          ...product,
+          name: linkedAccount.currency === "CZK" ? "Debit Standard" : `Debit Standard ${linkedAccount.currency}`,
+          currency: linkedAccount.currency,
+          linkedAccountId: linkedAccount.id,
+        };
+      }),
+    };
+  });
+}
+
 export function useProducts() {
   const { country, release, resolvedProductCounts } = useProductData();
   const localCurrency = getCountryCurrency(country);
   const baseCountedCategories = applyProductCounts(getProductsByCategory(), resolvedProductCounts);
   const isCzApp2027 =
     country === "CZ" &&
-    (release === "release-future-app-2027" || release === "release-future-evo-2027");
+    release === "release-future-evo-2027";
   const countedCategories = isCzApp2027
-    ? applyCzApp2027CurrentAccounts(baseCountedCategories)
+    ? applyCzApp2027DebitCards(
+        applyCzApp2027CurrentAccounts(
+          applyCzApp2027TermDeposits(baseCountedCategories),
+        ),
+      )
     : baseCountedCategories;
   const countedProducts = countedCategories.flatMap(category => category.products);
   
@@ -377,6 +456,10 @@ export function useProducts() {
     products: category.products.map(product => {
       const isCard = product.type === 'debit_card' || product.type === 'credit_card' || product.type === 'meal_card';
       const preserveCzApp2027Account = isCzApp2027 && product.type === "current_account";
+      const preserveCzApp2027ForeignDebitCard =
+        isCzApp2027 &&
+        product.type === "debit_card" &&
+        (product.currency === "EUR" || product.currency === "USD");
       const formattedAccountNumber = preserveCzApp2027Account
         ? product.accountNumber
         : isCard
@@ -401,7 +484,9 @@ export function useProducts() {
           ? 0
           : product.balance;
       const sourceCurrency = linkedAccount ? linkedAccount.currency : product.currency;
-      const convertedBalance = roundMoney(convertCurrency(sourceBalance, sourceCurrency, localCurrency));
+      const convertedBalance = preserveCzApp2027ForeignDebitCard
+        ? sourceBalance
+        : roundMoney(convertCurrency(sourceBalance, sourceCurrency, localCurrency));
 
       if (product.type === "credit_card") {
         const availableCredit = roundMoney(convertCurrency(product.availableCredit, sourceCurrency, localCurrency));
@@ -424,7 +509,7 @@ export function useProducts() {
         // (demo-only uplift so the current account shows a comfortable balance)
         balance: product.type === "current_account" ? roundMoney(convertedBalance + 20000) : convertedBalance,
         // Update currency to local
-        currency: localCurrency
+        currency: preserveCzApp2027ForeignDebitCard ? sourceCurrency : localCurrency
       };
     })
   }));
@@ -498,7 +583,7 @@ export function useProducts() {
     return product.accountNumber;
   };
 
-  // Calculate total in the market currency. App 2027 CZ preserves the native
+  // Calculate total in the market currency. Evo 2027 CZ preserves the native
   // currency on its EUR/USD account rows, so totals convert only at aggregation.
   const calculateTotal = (products: Product[]): {
     integer: string;

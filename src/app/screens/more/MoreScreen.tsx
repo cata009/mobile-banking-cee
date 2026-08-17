@@ -135,9 +135,9 @@ export default function MoreScreen({
   };
 
   return (
-    <div className="w-full h-full relative flex flex-col bg-[var(--uc-surface)]">
+    <div className="w-full h-full relative flex flex-col bg-[var(--uc-app-bg)]">
       {/* Status Bar Space - matching HomeScreen exactly */}
-      <div className="h-[54px] flex-shrink-0 bg-[var(--uc-surface)]" />
+      <div className="h-[54px] flex-shrink-0 bg-[var(--uc-app-bg)]" />
 
       {/* Header - directly after status bar, no wrapper */}
       <MoreHeader

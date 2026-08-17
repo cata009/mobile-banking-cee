@@ -152,7 +152,6 @@ Expected: all orchestration tests pass.
 
 **Files:**
 - Modify: `tests/chat/co-apping-chat-assistant.test.tsx`
-- Modify: `docs/handoff/current-session.md`
 - Modify: `docs/platform-capability-map/README.md`
 
 **Interfaces:**
@@ -198,7 +197,7 @@ Expected: distinct answers, no dead options, closeout with no chips, and a hando
 ```bash
 git diff --check
 git status --short
-git diff -- src/app/chat/czChatOrchestration.ts tests/chat/cz-chat-app-orchestration.test.ts tests/chat/co-apping-chat-assistant.test.tsx docs/handoff/current-session.md docs/platform-capability-map/README.md
+git diff -- src/app/chat/czChatOrchestration.ts tests/chat/cz-chat-app-orchestration.test.ts tests/chat/co-apping-chat-assistant.test.tsx docs/platform-capability-map/README.md
 ```
 
 Expected: only intended guided-story changes plus previously existing unrelated workspace edits.
@@ -210,8 +209,6 @@ Expected: only intended guided-story changes plus previously existing unrelated 
 **Files:**
 - Modify: `tests/chat/cz-chat-app-orchestration.test.ts`
 - Modify: `src/app/chat/czChatOrchestration.ts`
-- Modify: `docs/handoff/current-session.md`
-- Modify: `docs/handoff/state-of-the-world.md`
 - Modify: `docs/platform-capability-map/README.md`
 
 **Interfaces:**
@@ -249,8 +246,6 @@ Exercise both `Today` and `Next business day` on port 4001. Each must remain in 
 **Files:**
 - Modify: `tests/chat/co-apping-chat-assistant.test.tsx`
 - Modify: `package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx`
-- Modify: `docs/handoff/current-session.md`
-- Modify: `docs/handoff/state-of-the-world.md`
 - Modify: `docs/platform-capability-map/README.md`
 
 **Interfaces:**

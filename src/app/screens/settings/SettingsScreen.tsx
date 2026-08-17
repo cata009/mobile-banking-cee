@@ -1,9 +1,16 @@
+import { useState } from "react";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import NavigationRow from "@/app/components/NavigationRow";
 import PageHeader from "@/app/components/PageHeader";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { SETTINGS_SECTIONS } from "@/app/config/settingsConfig";
+import {
+  App2027ThemeStudio,
+  getStoredApp2027Theme,
+  storeApp2027Theme,
+  type HomeTheme,
+} from "@/app/screens/home/App2027ThemePicker";
 
 interface SettingsScreenProps {
   onBack: () => void;
@@ -12,6 +19,28 @@ interface SettingsScreenProps {
 export default function SettingsScreen({ onBack }: SettingsScreenProps) {
   const { t } = useLanguage();
   const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(64);
+  const [appearanceOpen, setAppearanceOpen] = useState(false);
+  const [appliedHomeTheme, setAppliedHomeTheme] = useState<HomeTheme>(getStoredApp2027Theme);
+  const [draftHomeTheme, setDraftHomeTheme] = useState<HomeTheme>(getStoredApp2027Theme);
+
+  if (appearanceOpen) {
+    return (
+      <App2027ThemeStudio
+        applied={appliedHomeTheme}
+        draft={draftHomeTheme}
+        onSelect={setDraftHomeTheme}
+        onBack={() => {
+          setDraftHomeTheme(appliedHomeTheme);
+          setAppearanceOpen(false);
+        }}
+        onApply={() => {
+          setAppliedHomeTheme(draftHomeTheme);
+          storeApp2027Theme(draftHomeTheme);
+          setAppearanceOpen(false);
+        }}
+      />
+    );
+  }
 
   return (
     <div
@@ -41,7 +70,12 @@ export default function SettingsScreen({ onBack }: SettingsScreenProps) {
                     description={t(`runtime.settings.items.${item.id}.description`, item.description)}
                     trailingAccessory="chevron"
                     chevronIconName="chevron-link"
-                    onClick={() => undefined}
+                    onClick={item.id === "appearance"
+                      ? () => {
+                        setDraftHomeTheme(appliedHomeTheme);
+                        setAppearanceOpen(true);
+                      }
+                      : undefined}
                   />
                 ))}
               </div>

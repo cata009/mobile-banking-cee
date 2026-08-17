@@ -150,16 +150,10 @@ export const RELEASES: Record<ReleaseId, ReleaseMeta> = {
     description: "Pinned future Robo Advisor preview based on the current CZ Mobile PI Investments baseline.",
     status: "active",
   },
-  "release-future-app-2027": {
-    id: "release-future-app-2027",
-    label: "App 2027",
-    description: "Global App 2027 preview based on the current Mobile PI baseline.",
-    status: "active",
-  },
   "release-future-evo-2027": {
     id: "release-future-evo-2027",
     label: "Evo 2027",
-    description: "Czech-only Evo 2027 preview based on the current Mobile PI App 2027 composition.",
+    description: "Czech-only Evo 2027 preview based on the current Mobile PI baseline.",
     status: "active",
   },
   "release-v1": {

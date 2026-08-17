@@ -9,5 +9,5 @@ import Card, { type CardVariant } from "@/app/components/cards/Card";
  * placeholder. Defaults to the "MC Debit Gold" variant.
  */
 export default function NavigationCardArt({ variant = "mc-debit-gold" }: { variant?: CardVariant } = {}) {
-  return <Card variant={variant} size="figma" ariaLabel="Card" />;
+  return <Card variant={variant} size="figma" ariaLabel="Card" className="drop-shadow-[0_3px_4px_rgb(var(--uc-shadow-rgb)/0.22)]" />;
 }

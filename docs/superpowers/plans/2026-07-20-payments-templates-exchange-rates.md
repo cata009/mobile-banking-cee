@@ -86,14 +86,8 @@
 ### Task 5: Verification and handoff
 
 **Files:**
-- Modify: `docs/handoff/current-session.md`
-- Modify: `docs/handoff/next-tasks.md`
-- Modify: `docs/handoff/banana-log.md`
-- Modify: `docs/handoff/known-bananas.md`
-- Modify: `docs/handoff/state-of-the-world.md`
 - Modify: `docs/platform-capability-map/README.md`
 
 - [x] Run `npm run verify` and record exact results and baseline-only notices.
 - [x] Smoke-test both shortcuts at the 375px phone baseline, including search, prefill handoff, currency chooser, and recalculation.
 - [x] Review TSX changes against React/accessibility best practices.
-- [x] Update capability/handoff evidence, run Banana Loop and Constitutional Check, and leave the completed changes uncommitted unless the user explicitly requests a commit.

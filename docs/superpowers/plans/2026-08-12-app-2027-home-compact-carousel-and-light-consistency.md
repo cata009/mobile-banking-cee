@@ -135,8 +135,6 @@ Expected: PASS with existing Homepage tests plus the new compact-carousel and ne
 
 **Files:**
 
-- Modify: `docs/handoff/current-session.md`
-- Modify: `docs/handoff/app-2027-homepage-transformation-ledger.md`
 
 **Interfaces:**
 

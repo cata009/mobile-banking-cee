@@ -130,9 +130,6 @@ Expected: both files pass.
 ### Task 3: Regression verification and handoff evidence
 
 **Files:**
-- Modify: `docs/handoff/current-session.md`
-- Modify: `docs/handoff/next-tasks.md`
-- Modify: `docs/handoff/state-of-the-world.md`
 - Modify: `docs/platform-capability-map/README.md`
 
 **Interfaces:**

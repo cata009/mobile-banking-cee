@@ -6,6 +6,7 @@ import AccountCarouselIndicator from "@/app/components/accounts/AccountCarouselI
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
 import AccountTransactionRow from "@/app/components/accounts/AccountTransactionRow";
 import AccountTransactionMonthDivider from "@/app/components/accounts/AccountTransactionMonthDivider";
+import { transactionGroupCardClassName } from "@/app/components/accounts/transactionGroupCard";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import { AppIcon } from "@/app/components/icons";
 import { useLanguage } from "@/app/contexts/LanguageContext";
@@ -17,6 +18,8 @@ import { useProducts } from "@/hooks/useProducts";
 import { getCardTransactions, groupAccountTransactionsByMonth } from "@/data/accountDetails";
 import type { AccountTransaction } from "@/data/accountDetails";
 import type { CreditCard, DebitCard, Product } from "@/data/products";
+import { getCardMerchantEnrichment } from "@/app/components/merchants/merchantEnrichment";
+import type { CardTransactionMerchantEnrichment } from "@/app/screens/payments/DomesticPaymentFlowScreens";
 import Card, { type CardVariant } from "@/app/components/cards/Card";
 import UserEventCard from "@/app/components/cards/UserEventCard";
 import FaceIdAnimation from "@/app/components/FaceIdAnimation";
@@ -29,7 +32,11 @@ interface CardDetailScreenProps {
   onCardDetailsClick?: (card: Product) => void;
   onShowCardDetailsClick?: (card: Product) => void;
   onCardOptionsClick?: (card: Product) => void;
-  onTransactionClick?: (transaction: AccountTransaction, product: Product) => void;
+  onTransactionClick?: (
+    transaction: AccountTransaction,
+    product: Product,
+    merchantEnrichment?: CardTransactionMerchantEnrichment,
+  ) => void;
   onHelpClick?: () => void;
   aiOpportunityNudge?: {
     title: string;
@@ -58,9 +65,13 @@ function isCardProduct(product: Product): product is DebitCard | CreditCard {
   return product.type === "debit_card" || product.type === "credit_card";
 }
 
-function getCardVariant(product: Product): CardVariant {
+function getCardVariant(product: Product, isEvo2027: boolean): CardVariant {
   if (product.type === "credit_card") {
     return "mc-credit-partner-standard";
+  }
+
+  if (isEvo2027 && product.type === "debit_card" && product.currency === "EUR") {
+    return "mc-virtual-standard-violet";
   }
 
   if (product.type === "debit_card" && (product.id.endsWith("-2") || product.id === "card-3")) {
@@ -142,7 +153,7 @@ export default function CardDetailScreen({
   onAiOpportunityClick,
   transactionRowPresentation,
 }: CardDetailScreenProps) {
-  const { country, amountsHidden } = useDemo();
+  const { country, amountsHidden, release } = useDemo();
   const { t } = useLanguage();
   const { categories } = useProducts();
 
@@ -179,6 +190,9 @@ export default function CardDetailScreen({
 
   const activeCard = cardProducts[activeIndex] ?? cardProducts[0];
   const config = getCountryConfig(country);
+  /** Evo 2027 groups each month into the same card the home activity list uses. */
+  const usesEvoGroupCards = release === "release-future-evo-2027";
+  const categoryIconVariant = release === "release-future-evo-2027" ? "category-circle" : "glyph";
   const currentAccounts = useMemo(
     () => categories.flatMap((category) => category.products).filter((product) => product.type === "current_account"),
     [categories],
@@ -439,7 +453,7 @@ export default function CardDetailScreen({
                       <Card
                         ariaLabel={card.type === "debit_card" ? "Debit card" : "Credit card"}
                         size="large"
-                        variant={getCardVariant(card)}
+                        variant={getCardVariant(card, release === "release-future-evo-2027")}
                         style={{
                           width: CARD_WIDTH,
                           height: CARD_HEIGHT,
@@ -490,7 +504,7 @@ export default function CardDetailScreen({
       </div>
 
       {/* ── Transactions section ─────────────────────────────────── */}
-      <div className="bg-[var(--uc-surface)]">
+      <div className={usesEvoGroupCards ? "bg-[var(--uc-app-bg)]" : "bg-[var(--uc-surface)]"}>
         {showAiOpportunityNudge && aiOpportunityNudge ? (
           <div className="bg-gradient-to-b from-[var(--uc-app-bg)] to-[var(--uc-surface)] px-[16px] pt-[18px] pb-[18px]">
             <UserEventCard
@@ -515,7 +529,7 @@ export default function CardDetailScreen({
 
         <div
           ref={searchContainerRef}
-          className="sticky z-20 bg-[var(--uc-surface)] px-[16px] pt-[24px]"
+          className={`sticky z-20 px-[16px] pt-[24px] ${usesEvoGroupCards ? "bg-[var(--uc-app-bg)]" : "bg-[var(--uc-surface)]"}`}
           style={{ top: `${CARD_DETAIL_HEADER_HEIGHT}px` }}
         >
           <AccountSearchBar
@@ -523,6 +537,7 @@ export default function CardDetailScreen({
             onClick={activateSearch}
             onValueChange={handleSearchChange}
             onFocus={activateSearch}
+            fieldSurface={usesEvoGroupCards ? "raised" : "muted"}
           />
         </div>
 
@@ -530,30 +545,32 @@ export default function CardDetailScreen({
           {pendingTransactions.length > 0 ? (
             <section data-pending-transactions data-pending-count={pendingTransactions.length} className="pb-[8px]">
               <AccountTransactionMonthDivider title="Pending" currency={config.currency} />
-              <div className="pt-[16px]">
+              <div className={transactionGroupCardClassName(usesEvoGroupCards)}>
                     {pendingTransactions.map((transaction) => (
                       <AccountTransactionRow
                         key={transaction.id}
                         transaction={transaction}
-                    formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
+                        formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
                         currency={config.currency}
                         displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
                         leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
-                        onClick={(selectedTransaction) => onTransactionClick?.(selectedTransaction, activeCard)}
-                  />
-                ))}
+                        categoryIconVariant={categoryIconVariant}
+                        positiveAmountClassName={release === "release-future-evo-2027" ? "text-[#3D7D43]" : undefined}
+                        onClick={(selectedTransaction) => onTransactionClick?.(selectedTransaction, activeCard, getCardMerchantEnrichment(selectedTransaction, country))}
+                      />
+                    ))}
               </div>
             </section>
           ) : null}
           {transactionGroups.length > 0 ? (
             transactionGroups.map((group, index) => (
-              <div key={group.monthTitle} className={index > 0 ? "pt-[16px]" : undefined}>
+              <div key={group.monthTitle} className={index > 0 && !usesEvoGroupCards ? "pt-[16px]" : undefined}>
                 <AccountTransactionMonthDivider
                   title={group.monthTitle}
                   total={formatMoneyNumber(group.monthlyTotal, country)}
                   currency={config.currency}
                 />
-                <div className="pt-[16px]">
+                <div className={transactionGroupCardClassName(usesEvoGroupCards)}>
                     {group.transactions.map((tx) => (
                       <AccountTransactionRow
                       key={tx.id}
@@ -562,7 +579,9 @@ export default function CardDetailScreen({
                         currency={config.currency}
                         displayLabel={transactionRowPresentation?.displayLabel?.(tx)}
                         leadingVisual={transactionRowPresentation?.leadingVisual?.(tx)}
-                        onClick={(selectedTx) => onTransactionClick?.(selectedTx, activeCard)}
+                        categoryIconVariant={categoryIconVariant}
+                        positiveAmountClassName={release === "release-future-evo-2027" ? "text-[#3D7D43]" : undefined}
+                        onClick={(selectedTx) => onTransactionClick?.(selectedTx, activeCard, getCardMerchantEnrichment(selectedTx, country))}
                     />
                   ))}
                 </div>

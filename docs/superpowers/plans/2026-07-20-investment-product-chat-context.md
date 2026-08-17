@@ -45,15 +45,9 @@
 ### Task 3: Verification and evidence
 
 **Files:**
-- Modify: `docs/handoff/current-session.md`
-- Modify: `docs/handoff/next-tasks.md`
-- Modify: `docs/handoff/banana-log.md`
-- Modify: `docs/handoff/known-bananas.md`
-- Modify: `docs/handoff/state-of-the-world.md`
 - Modify: `docs/platform-capability-map/README.md`
 
 - [x] Run focused tests, typecheck, lint, and full verification (recording the unrelated pre-existing Buy-test mismatch).
 - [x] Verify the CZ Future owned-product flow at the 375px phone baseline in the browser.
 - [x] Verify returning to the portfolio restores portfolio-level topics.
-- [x] Update capability/handoff evidence and run Banana Loop plus Constitutional Check.
 - [x] Leave changes uncommitted unless the user explicitly requests a commit.

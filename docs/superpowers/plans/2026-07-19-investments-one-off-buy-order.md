@@ -88,7 +88,6 @@
 ### Task 5: Capability Evidence And Full Verification
 
 **Files:**
-- Modify: `docs/handoff/current-session.md`
 - Modify: `docs/platform-capability-map/README.md`
 
 **Interfaces:**

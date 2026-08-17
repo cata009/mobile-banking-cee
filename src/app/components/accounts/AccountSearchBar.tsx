@@ -31,6 +31,8 @@ interface AccountSearchBarProps {
   showRemoveFiltersAction?: boolean;
   removeFiltersLabel?: string;
   showTrailingAction?: boolean;
+  /** `raised` puts a white field on a page-coloured band, for Evo 2027 lists. */
+  fieldSurface?: "muted" | "raised";
 }
 
 export default function AccountSearchBar({
@@ -46,6 +48,7 @@ export default function AccountSearchBar({
   showRemoveFiltersAction = true,
   removeFiltersLabel = "REMOVE FILTERS",
   showTrailingAction = true,
+  fieldSurface = "muted",
 }: AccountSearchBarProps) {
   const { t } = useLanguage();
   const resolvedPlaceholder = placeholder ?? t("runtime.actions.search", "Search");
@@ -77,13 +80,17 @@ export default function AccountSearchBar({
     inputRef.current?.focus();
   };
 
+  const fieldGround = fieldSurface === "raised"
+    ? "bg-[var(--uc-surface)] shadow-[inset_0_0_0_1px_var(--uc-border-muted)]"
+    : "bg-[var(--uc-app-bg)]";
+
   return (
     <div
-      className={`flex flex-col self-stretch ${showRemoveFilters ? "min-h-[63px] items-end gap-[8px] px-[16px] py-[2px]" : "min-h-[32px] items-start rounded-[10px] bg-[var(--uc-app-bg)] p-0"}`}
+      className={`flex flex-col self-stretch ${showRemoveFilters ? "min-h-[63px] items-end gap-[8px] px-[16px] py-[2px]" : `min-h-[32px] items-start rounded-[10px] p-0 ${fieldGround}`}`}
       data-ds-label="AccountSearchBar 32px"
       data-search-filters-active={showRemoveFilters ? "true" : undefined}
     >
-      <div className={`flex w-full items-center justify-between rounded-[10px] bg-[var(--uc-app-bg)] ${showRemoveFilters ? "h-[36px]" : "h-[32px]"}`}>
+      <div className={`flex w-full items-center justify-between rounded-[10px] ${fieldGround} ${showRemoveFilters ? "h-[36px]" : "h-[32px]"}`}>
         <label className="flex h-[32px] min-w-0 flex-1 items-center gap-[8px] text-left">
           <span className="flex h-[32px] w-[32px] shrink-0 items-center justify-center" data-ds-label="Search icon 32x32">
             <AppIcon name="search" color="var(--uc-text)" />

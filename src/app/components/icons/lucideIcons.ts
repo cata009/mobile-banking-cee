@@ -7,6 +7,7 @@
 import {
   AlertTriangle,
   ArrowRight,
+  BarChart3,
   Bike,
   BookOpen,
   CalendarDays,
@@ -23,6 +24,7 @@ import {
   Landmark,
   Lock,
   Palette,
+  PieChart,
   PiggyBank,
   ReceiptText,
   Repeat2,
@@ -38,6 +40,24 @@ import {
 import type { LucideIconDefinition } from "./iconTypes";
 
 export const LUCIDE_ICONS = {
+  "chart-donut": {
+    source: "lucide",
+    label: "Donut chart",
+    category: "External Lucide",
+    width: 24,
+    height: 24,
+    component: PieChart,
+    usage: ["Evo2027AnalyticsScreen expense chart mode toggle"],
+  },
+  "chart-bars": {
+    source: "lucide",
+    label: "Bar chart",
+    category: "External Lucide",
+    width: 24,
+    height: 24,
+    component: BarChart3,
+    usage: ["Evo2027AnalyticsScreen expense chart mode toggle"],
+  },
   "wallet-cards": {
     source: "lucide",
     label: "Wallet cards",

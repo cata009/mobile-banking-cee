@@ -168,6 +168,11 @@ export interface TranslationKeys {
       banking: string;
       shopSmart: string;
       offersForYou: string;
+      partnerOffers: string;
+      shoppingBenefits: string;
+      bankingProducts: string;
+      searchPlaceholder: string;
+      noProductsFound: string;
       ourProducts: string;
       otherSolutionsForYou: string;
       featuredCategories: string;

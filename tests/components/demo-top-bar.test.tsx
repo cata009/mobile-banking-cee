@@ -69,31 +69,33 @@ describe('DemoTopBar app and country selector', () => {
     expect(Array.from(optionButtons ?? []).map((button) => button.textContent?.trim())).toEqual([
       'CZ - Chatbot',
       'CZ - Robo',
-      'App 2027',
       'Evo 2027',
     ])
+    expect(screen.queryByRole('button', { name: 'App 2027' })).not.toBeInTheDocument()
   })
 
-  it('does not expose Evo 2027 outside Czech Republic', () => {
+  it('does not enable Future App outside Czech Republic', () => {
     renderTopBar('RO')
 
     fireEvent.click(screen.getByRole('button', { name: 'Baseline App' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Future App' }))
-    fireEvent.click(screen.getAllByRole('button', { name: 'App 2027' })[0]!)
-    fireEvent.click(screen.getAllByRole('button', { name: 'App 2027' })[0]!)
-
-    expect(screen.queryByRole('button', { name: 'Evo 2027' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Future App' })).toBeDisabled()
   })
 
-  it.each(COUNTRIES)('lists App 2027 for PI %s on the current design system', (country) => {
+  it.each(COUNTRIES)('limits PI %s to the supported Future previews', (country) => {
     renderTopBar(country)
 
     fireEvent.click(screen.getByRole('button', { name: 'Baseline App' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Future App' }))
+    const futureApp = screen.getByRole('button', { name: 'Future App' })
 
-    const selectedFutureRelease = country === 'CZ' ? 'CZ - Chatbot' : 'App 2027'
-    fireEvent.click(screen.getByRole('button', { name: selectedFutureRelease }))
+    if (country !== 'CZ') {
+      expect(futureApp).toBeDisabled()
+      return
+    }
 
-    expect(screen.getAllByRole('button', { name: 'App 2027' }).length).toBeGreaterThan(0)
+    fireEvent.click(futureApp)
+    fireEvent.click(screen.getByRole('button', { name: 'CZ - Chatbot' }))
+    expect(screen.getByRole('button', { name: 'CZ - Robo' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Evo 2027' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'App 2027' })).not.toBeInTheDocument()
   })
 })

@@ -1,8 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode, type UIEvent } from 'react';
 import { AppIcon, type IconName } from '@/app/components/icons';
-import ProfileAvatar from '@/app/components/ProfileAvatar';
-import UniCreditLogo from '@/app/components/UniCreditLogo';
-import womanProfileSrc from '@/assets/kids/woman-profile.png';
 import { getCountryCurrency } from '@/data/exchangeRates';
 import { formatAmount, type Product, type ProductCategory } from '@/data/products';
 import { useDemo } from '@/app/state/demoStore';
@@ -13,7 +10,8 @@ import App2027Activity from './App2027Activity';
 import App2027Portfolio from './App2027Portfolio';
 import App2027ProductAccordions from './App2027ProductAccordions';
 import App2027TransformationHome from './App2027TransformationHome';
-import App2027ThemePicker, { App2027ThemeStudio, getStoredApp2027Theme, storeApp2027Theme, type HomeTheme } from './App2027ThemePicker';
+import { getStoredApp2027Theme, type HomeTheme } from './App2027ThemePicker';
+import HomeHeader from './HomeHeader';
 import App2027PrimaryNavigation, { type App2027PrimaryNavigationItem } from '@/app/components/navigation/App2027PrimaryNavigation';
 import type { AccountTransaction } from '@/data/accountDetails';
 import type { CardTransactionMerchantEnrichment } from '@/app/screens/payments/DomesticPaymentFlowScreens';
@@ -21,6 +19,7 @@ import type { CardTransactionMerchantEnrichment } from '@/app/screens/payments/D
 interface App2027HomeScreenProps {
   onPrimeClick?: () => void;
   onAnalyticsClick?: () => void;
+  onSeeAllTransactionsClick?: () => void;
   onMessagesClick?: () => void;
   onPaymentsClick?: () => void;
   onDomesticPaymentClick?: () => void;
@@ -88,20 +87,6 @@ function productAmountText(product: Product, parts: { integer: string; decimals:
 function compactProductNumber(displayNumber: string) {
   const digits = displayNumber.replace(/\D/g, '');
   return digits.length >= 4 ? `\u2022\u2022\u2022\u2022 ${digits.slice(-4)}` : displayNumber;
-}
-
-function IconButton({ label, icon, onClick, pressed, surface = false }: { label: string; icon: IconName; onClick?: () => void; pressed?: boolean; surface?: boolean }) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      aria-pressed={pressed}
-      onClick={onClick}
-      className={`grid size-[44px] shrink-0 place-items-center rounded-full text-[var(--uc-text)] transition-[background-color,box-shadow,transform] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-brand)] ${surface ? 'border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] shadow-[0_4px_12px_rgb(var(--uc-shadow-rgb)/0.10)] active:scale-[0.94]' : 'active:bg-[var(--uc-surface-muted)]'}`}
-    >
-      <AppIcon name={icon} size={20} aria-hidden="true" />
-    </button>
-  );
 }
 
 function QuickAction({ label, icon, onClick }: { label: string; icon: IconName; onClick?: () => void }) {
@@ -276,6 +261,7 @@ function HomeSheet({ title, subtitle, onClose, children }: { title: string; subt
 export default function App2027HomeScreen({
   onPrimeClick,
   onAnalyticsClick,
+  onSeeAllTransactionsClick,
   onMessagesClick,
   onPaymentsClick,
   onDomesticPaymentClick,
@@ -307,9 +293,7 @@ export default function App2027HomeScreen({
       return [];
     }
   });
-  const [homeTheme, setHomeTheme] = useState<HomeTheme>(getStoredApp2027Theme);
-  const [draftHomeTheme, setDraftHomeTheme] = useState<HomeTheme>(getStoredApp2027Theme);
-  const [themeStudioOpen, setThemeStudioOpen] = useState(false);
+  const [homeTheme] = useState<HomeTheme>(getStoredApp2027Theme);
 
   const currency = getCountryCurrency(demo.country);
   const products = useMemo(() => categories.flatMap((category) => category.products), [categories]);
@@ -320,7 +304,7 @@ export default function App2027HomeScreen({
   const mortgagePaymentParts = maskAmountParts(formatAmount(3500, currency), demo.amountsHidden);
   const mortgageProduct = products.find((product) => product.type === 'mortgage');
   const savingsProduct = products.find((product) => product.type === 'saving_account' || product.type === 'term_deposit');
-  const showHomeTransformation = demo.release === 'release-future-app-2027' || demo.release === 'release-future-evo-2027';
+  const showHomeTransformation = demo.release === 'release-future-evo-2027';
 
   const openActivityTransaction = (
     transaction: AccountTransaction,
@@ -484,50 +468,19 @@ export default function App2027HomeScreen({
     if (tab === 'more') onMoreClick?.();
   };
 
-  if (themeStudioOpen) {
-    return (
-      <App2027ThemeStudio
-        applied={homeTheme}
-        draft={draftHomeTheme}
-        onSelect={setDraftHomeTheme}
-        onBack={() => {
-          setDraftHomeTheme(homeTheme);
-          setThemeStudioOpen(false);
-        }}
-        onApply={() => {
-          setHomeTheme(draftHomeTheme);
-          storeApp2027Theme(draftHomeTheme);
-          setThemeStudioOpen(false);
-        }}
-      />
-    );
-  }
-
   return (
     <div data-app-2027-home data-home-theme={homeTheme} className="@container/home relative flex h-full w-full min-w-0 flex-col overflow-hidden bg-[var(--uc-app-bg)] text-[var(--uc-text)]" style={{ containerName: 'home', containerType: 'size' }}>
       <div className="h-[var(--uc-phone-top-reserve,54px)] shrink-0" />
 
-      <header data-app-2027-header className="z-20 flex min-h-[54px] shrink-0 items-center justify-between px-[clamp(16px,4vw,24px)] pb-[6px]">
-        <UniCreditLogo className="h-[25px] w-auto max-w-[124px]" textColor="var(--app2027-logo-color,var(--uc-static-white))" />
-        <div className="flex shrink-0 items-center gap-[2px]">
-          <App2027ThemePicker
-            active={homeTheme}
-            onOpen={() => {
-              setDraftHomeTheme(homeTheme);
-              setThemeStudioOpen(true);
-            }}
-          />
-          <IconButton label="Messages" icon="header-messages" onClick={onMessagesClick} surface />
-          <button type="button" aria-label="Profile for Peter" onClick={onPrimeClick} className="ml-[4px] grid size-[44px] shrink-0 place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-brand)]">
-            <ProfileAvatar imageAlt="Peter profile" imageSrc={womanProfileSrc} size={34} variant="photo" />
-          </button>
-        </div>
+      <header data-app-2027-header className="z-20 shrink-0 bg-[var(--uc-app-bg)]">
+        <HomeHeader onPrimeClick={onPrimeClick} onMessagesClick={onMessagesClick} showTitle={false} />
       </header>
 
-      <main data-app-2027-scroll className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-[clamp(16px,4vw,24px)] pb-[84px] pt-[18px] scrollbar-hide">
+      <main data-app-2027-scroll className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-[clamp(16px,4vw,24px)] pb-[16px] pt-[18px] scrollbar-hide">
         <div data-app-2027-layout className="mx-auto grid w-full max-w-[1080px] grid-cols-1 items-start gap-[28px]">
           {showHomeTransformation ? (
             <App2027TransformationHome
+              onSeeAllTransactions={onSeeAllTransactionsClick}
               categories={categories}
               country={demo.country}
               amountsHidden={demo.amountsHidden}
@@ -648,7 +601,7 @@ export default function App2027HomeScreen({
             currency={currency}
             amountsHidden={demo.amountsHidden}
             onTransactionOpen={openActivityTransaction}
-            onSeeMore={onAnalyticsClick}
+            onSeeMore={onSeeAllTransactionsClick ?? onAnalyticsClick}
           />
 
           <App2027Portfolio

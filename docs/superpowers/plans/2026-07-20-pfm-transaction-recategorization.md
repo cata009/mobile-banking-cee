@@ -61,8 +61,6 @@
 **Files:**
 - Modify: `src/app/state/demoTypes.ts`
 - Modify: `src/app/registry/componentRegistry.ts`
-- Modify: `docs/handoff/current-session.md`
-- Modify: `docs/handoff/state-of-the-world.md`
 - Modify: `docs/platform-capability-map/README.md`
 
 - [ ] Register the reusable PFM category sheet and its screen usage.

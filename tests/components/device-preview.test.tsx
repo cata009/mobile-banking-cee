@@ -57,15 +57,23 @@ describe('adaptive device preview', () => {
     expect(screenSurface.style.transform).toBe('')
   })
 
-  it('renders the Dynamic Island only for the iPhone profile, including after rotation', () => {
+  it('reserves rotation for open foldable previews and restores portrait when switching away', () => {
     renderPreview()
 
     expect(document.querySelector('[data-device-dynamic-island]')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Rotate preview' })).not.toBeInTheDocument()
+
+    selectDevice('Galaxy Z Fold8 - closed')
+    expect(screen.queryByRole('button', { name: 'Rotate preview' })).not.toBeInTheDocument()
+    expect(screen.getByTestId('device-preview-screen')).toHaveStyle({ width: '390px', height: '624px' })
+
+    selectDevice('Galaxy Z Fold8 - open')
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate preview' }))
+    expect(screen.getByTestId('device-preview-screen')).toHaveStyle({ width: '630px', height: '840px' })
 
     selectDevice('Apple passport concept - closed')
     expect(document.querySelector('[data-device-dynamic-island]')).not.toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: 'Rotate preview' }))
-    expect(document.querySelector('[data-device-dynamic-island]')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Rotate preview' })).not.toBeInTheDocument()
+    expect(screen.getByTestId('device-preview-screen')).toHaveStyle({ width: '390px', height: '573px' })
   })
 })

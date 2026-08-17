@@ -5,6 +5,8 @@ import imgCoinsLeaves from "figma:asset/612ac7960c2d43bfdada538aae6f3cf27be44d99
 interface ProductMenuCardProps {
   card: ProductsCard;
   variant?: "standard" | "compact";
+  /** Optional count chip next to the title (Evo 2027 partner-offer shelf). */
+  badgeCount?: number;
   onClick?: (card: ProductsCard) => void;
 }
 
@@ -64,7 +66,7 @@ function CardIllustration({ type }: { type: ProductsCardIllustration }) {
   );
 }
 
-export default function ProductMenuCard({ card, variant = "standard", onClick }: ProductMenuCardProps) {
+export default function ProductMenuCard({ card, variant = "standard", badgeCount, onClick }: ProductMenuCardProps) {
   const cardImageSrc = card.imageSrc;
   const isCompact = variant === "compact";
   const imageClassByCardId: Partial<Record<ProductsCard["id"], { standard: string; compact: string }>> = {
@@ -111,7 +113,7 @@ export default function ProductMenuCard({ card, variant = "standard", onClick }:
       className="relative shrink-0 cursor-pointer overflow-hidden rounded-[8px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
       style={{
         display: "flex",
-        width: "164px",
+        width: "100%",
         height: isCompact ? "72px" : "120px",
         maxHeight: isCompact ? "72px" : "120px",
         padding: isCompact ? "12px" : "16px",
@@ -129,6 +131,14 @@ export default function ProductMenuCard({ card, variant = "standard", onClick }:
       >
         {card.title}
       </span>
+      {typeof badgeCount === "number" && badgeCount > 0 ? (
+        <span
+          className="relative z-10 shrink-0 rounded-[2px] bg-[var(--uc-brand)] p-[2px] text-[14px] font-bold leading-[14px] text-[var(--uc-static-white)]"
+          data-product-menu-card-badge
+        >
+          {badgeCount > 99 ? "99+" : badgeCount}
+        </span>
+      ) : null}
       {cardImageSrc ? (
         <img
           src={cardImageSrc}

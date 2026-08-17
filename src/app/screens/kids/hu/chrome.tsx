@@ -5,7 +5,7 @@
  * Extracted verbatim from KidsMarketHomeApp.tsx (kids-split Phase 3).
  */
 import type { CSSProperties, ReactNode, UIEvent } from "react";
-import BottomNavigation from "@/app/components/BottomNavigation";
+import App2027PrimaryNavigation from "@/app/components/navigation/App2027PrimaryNavigation";
 import ProfileAvatar from "@/app/components/ProfileAvatar";
 import { AppIcon } from "@/app/components/icons";
 import { cn } from "@/app/components/ui/utils";
@@ -225,18 +225,20 @@ export function HuLightBottomNav({
 }) {
   return (
     <div
-      className="absolute inset-x-0 bottom-0 z-10 flex items-center justify-center border-t border-[var(--uc-border-muted)] bg-[var(--hu-theme-nav-bg)] shadow-[0_-10px_28px_color-mix(in_srgb,var(--uc-static-black)_12%,transparent)] backdrop-blur-md"
+      className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-end justify-center pb-[8px]"
+      data-app-2027-navigation-dock
       style={
         {
-          "--uc-action": "var(--hu-theme-accent-strong)",
           "--uc-bottom-bar-bg": "var(--hu-theme-nav-bg)",
         } as CSSProperties
       }
     >
-      <BottomNavigation
+      <App2027PrimaryNavigation
         activeTab={activeNav}
+        ariaLabel="Kids primary navigation"
+        className="pointer-events-auto"
         iconOverrides={{ analytics: "hu-kids-learn", products: "hu-kids-saving" }}
-        labelOverrides={{ analytics: "Earning", products: "Saving" }}
+        labels={{ analytics: "Earning", products: "Saving" }}
         onTabChange={onChange}
       />
     </div>

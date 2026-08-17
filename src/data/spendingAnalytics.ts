@@ -151,9 +151,13 @@ function summarizeTransactions(
 ): SpendingAnalyticsSummary {
   const outCategoryTotals = new Map<PfmCategoryName, { total: number; transactionCount: number }>();
   const inCategoryTotals = new Map<PfmCategoryName, { total: number; transactionCount: number }>();
-  const includedTransactions = transactions.filter(
-    (transaction) => !isInternalTransferCategory(transaction.category),
-  );
+  const includedTransactions = transactions.filter((transaction) => {
+    const category = normalizePfmCategory(transaction.pfmCategory || transaction.category);
+
+    return !isInternalTransferCategory(transaction.category)
+      && category !== "Investments"
+      && category !== "Exclude from budget";
+  });
 
   let incomeTotal = 0;
   let spendingTotal = 0;

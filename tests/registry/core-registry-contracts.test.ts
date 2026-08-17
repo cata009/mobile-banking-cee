@@ -31,69 +31,33 @@ describe('core registry contracts', () => {
     expect(FEATURE_META.fx_czRoboAdvisor).toMatchObject({
       label: 'CZ - Robo',
       countries: ['CZ'],
-      releases: ['release-future-cz-robo', 'release-future-app-2027'],
+      releases: [
+        'release-future-cz-robo',
+        'release-future-evo-2027',
+      ],
       affectedScreens: ['pi.investments.portfolio'],
     })
   })
 
-  it('registers App 2027 as a global PI future release while retaining CZ Robo', () => {
-    expect(RELEASE_ORDER).toContain('release-future-app-2027')
-    expect(RELEASE_ORDER.indexOf('release-future-app-2027')).toBe(
-      RELEASE_ORDER.indexOf('release-future-cz-robo') + 1,
+  it('retires App 2027 while retaining the PI/CZ Future releases', () => {
+    expect(RELEASE_ORDER).not.toContain('release-future-app-2027')
+    expect(RELEASE_BUNDLES).not.toHaveProperty('release-future-app-2027')
+    expect(RELEASES).not.toHaveProperty('release-future-app-2027')
+    expect(FEATURE_META).not.toHaveProperty('fx_app2027Homepage')
+    expect(FEATURE_MANIFESTS).not.toHaveProperty('fx_app2027Homepage')
+    expect(FEATURE_UI_MAP).not.toHaveProperty('fx_app2027Homepage')
+    expect(PROJECT_PACKS.find((pack) => pack.product === 'PI' && pack.country === 'CZ')?.releases).toEqual(
+      expect.arrayContaining([
+        'release-future-cz-coapping',
+        'release-future-cz-robo',
+        'release-future-evo-2027',
+      ]),
     )
-
-    expect(RELEASE_BUNDLES['release-future-app-2027']).toMatchObject({
-      label: 'App 2027',
-      baseline: 'baseline-current',
-      releaseCode: 'FUTURE',
-      features: ['fx_czRoboAdvisor', 'fx_app2027Homepage'],
-      introducedFeatures: ['fx_app2027Homepage'],
-      promotionTargetBaseline: null,
-      status: 'release-preview',
-    })
-    expect(RELEASES['release-future-app-2027']).toMatchObject({
-      label: 'App 2027',
-      status: 'active',
-    })
-
-    expect(FEATURE_META.fx_app2027Homepage).toMatchObject({
-      label: 'App 2027 Homepage',
-      scope: 'global',
-      releases: ['release-future-app-2027'],
-      products: ['PI'],
-      designSystems: ['current'],
-      introducedIn: 'release-future-app-2027',
-      affectedScreens: ['pi.home.overview'],
-    })
-    expect(FEATURE_META.fx_czRoboAdvisor.releases).toEqual([
-      'release-future-cz-robo',
-      'release-future-app-2027',
-    ])
-    expect(FEATURE_MANIFESTS.fx_app2027Homepage).toMatchObject({
-      id: 'fx_app2027Homepage',
-      source: 'runtime',
-      introducedIn: 'release-future-app-2027',
-      products: ['PI'],
-      countries: ['RO', 'CZ', 'SK', 'HU', 'RS', 'BA', 'BA_BL', 'SI'],
-      designSystems: ['current'],
-      affectedScreens: ['pi.home.overview'],
-    })
-    expect(FEATURE_UI_MAP.fx_app2027Homepage).toMatchObject({
-      id: 'fx_app2027Homepage',
-      locations: ['home.app2027'],
-    })
-
-    expect(
-      getFeatureFlags({
-        ...DEFAULT_DEMO_STATE,
-        release: 'release-future-app-2027',
-      }).app2027Homepage,
-    ).toBe(true)
   })
 
-  it('registers Evo 2027 as a CZ-only App 2027-compatible future release', () => {
+  it('registers Evo 2027 as the CZ-only 2027 future release', () => {
     expect(RELEASE_ORDER.indexOf('release-future-evo-2027')).toBe(
-      RELEASE_ORDER.indexOf('release-future-app-2027') + 1,
+      RELEASE_ORDER.indexOf('release-future-cz-robo') + 1,
     )
     expect(RELEASE_BUNDLES['release-future-evo-2027']).toMatchObject({
       label: 'Evo 2027',

@@ -71,6 +71,16 @@ describe('spending analytics data', () => {
     expect(summary.netTotal).toBeCloseTo(summary.incomeTotal - summary.spendingTotal, 2)
   })
 
+  it('excludes PFM investment movements from spending aggregates', () => {
+    const account = mockProducts.find((product) => product.type === 'current_account')
+    expect(account).toBeDefined()
+
+    const summary = createSpendingAnalytics('CZ', account ? [account] : ([] as Product[]), '2026-04')
+
+    expect(summary.sourceTransactions.some((transaction) => transaction.pfmCategory === 'Investments')).toBe(false)
+    expect(summary.moneyOutCategories.some((category) => category.category === 'Investments')).toBe(false)
+  })
+
   it('applies session recategorization before analytics aggregation and category drill-down', () => {
     const account = mockProducts.find((product) => product.type === 'current_account')
     expect(account).toBeDefined()

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import "@testing-library/jest-dom/vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import type { PropsWithChildren } from "react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { LanguageProvider } from "@/app/contexts/LanguageContext";
@@ -49,6 +49,15 @@ beforeAll(() => {
 afterEach(cleanup);
 
 describe("AccountDetailsInfoScreen", () => {
+  it("shows the shared dark confirmation toast when the account number is copied from account info", async () => {
+    const { container } = renderDetails("acc-1");
+
+    fireEvent.click(screen.getByRole("button", { name: "Copy account number" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent("Account number successfully copied");
+    expect(container.querySelector("[data-copy-toast]")).toBeInTheDocument();
+  });
+
   it("shows only account number, account title, and current balance for a saving account", () => {
     const { container } = renderDetails("sav-1");
 
@@ -181,5 +190,22 @@ describe("AccountDetailsInfoScreen", () => {
 
     expect(screen.getAllByRole("heading", { name: "My Products" })).not.toHaveLength(0);
     expect(screen.queryByRole("heading", { name: "Accounts" })).not.toBeInTheDocument();
+  });
+
+  it("shows the shared dark confirmation toast when the account number is copied from the product card", async () => {
+    const { container } = render(
+      <AccountDetailScreen
+        selectedProductId="acc-1"
+        onBack={() => undefined}
+        onDetailsClick={() => undefined}
+        onOptionsClick={() => undefined}
+      />,
+      { wrapper: AppProviders },
+    );
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Copy account number" })[0] as HTMLElement);
+
+    expect(await screen.findByRole("status")).toHaveTextContent("Account number successfully copied");
+    expect(container.querySelector("[data-copy-toast]")).toBeInTheDocument();
   });
 });

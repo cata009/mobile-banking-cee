@@ -8,9 +8,11 @@ import { DemoNavigationSync } from "@/app/components/demo/DemoNavigationSync";
 import LanguageSelector from "@/app/components/LanguageSelector";
 import MobileFrame from "@/app/components/MobileFrame";
 import FramelessDeviceFrame from "@/app/components/FramelessDeviceFrame";
+import { useApp2027Theme, type HomeTheme } from "@/app/screens/home/App2027ThemePicker";
 import { isCoAppingAvailable } from "@/app/utils/coAppingAvailability";
 import EdgeLoadingAnimation from "@/app/components/EdgeLoadingAnimation";
 import UnsupportedContextScreen from "@/app/components/UnsupportedContextScreen";
+import { getCardMerchantEnrichment } from "@/app/components/merchants/merchantEnrichment";
 import {
   ROUTE_POLICY,
   isRouteEligibleForProductContext,
@@ -50,6 +52,7 @@ const DesignSystemPage = lazy(() => import("@/app/screens/design-system/DesignSy
 const FlowLibraryScreen = lazy(() => import("@/app/screens/flow-library/FlowLibraryScreen"));
 const ToolsScreen = lazy(() => import("@/app/screens/tools/ToolsScreen"));
 const AccountDetailScreen = lazy(() => import("@/app/screens/accounts/AccountDetailScreen"));
+const TransactionsScreen = lazy(() => import("@/app/screens/accounts/TransactionsScreen"));
 const AccountDetailsInfoScreen = lazy(() => import("@/app/screens/accounts/AccountDetailsInfoScreen"));
 const AccountOptionsScreen = lazy(() => import("@/app/screens/accounts/AccountOptionsScreen"));
 const CardDetailScreen = lazy(() => import("@/app/screens/cards/CardDetailScreen"));
@@ -160,6 +163,7 @@ function AppWithNavigation({
   parsedDeepLink: ReturnType<typeof parseDeepLinkFromUrl>;
 }) {
   const { scenario, themeMode } = useDemo();
+  const app2027Theme = useApp2027Theme();
   const hashSection = typeof window === "undefined" ? "" : window.location.hash.replace(/^#/, "");
   const shouldOpenDesignSystem = DESIGN_SYSTEM_HASHES.has(hashSection) || hashSection.startsWith("component/");
 
@@ -183,7 +187,7 @@ function AppWithNavigation({
   // Frameless "real device" mode (opened from the Share QR): render the app
   // fullscreen without the desktop demo shell / phone bezel.
   const deviceMode = Boolean(parsedDeepLink?.deviceMode);
-  const appContent = <AppContent parsedDeepLink={parsedDeepLink} deviceMode={deviceMode} />;
+  const appContent = <AppContent parsedDeepLink={parsedDeepLink} deviceMode={deviceMode} app2027Theme={app2027Theme} />;
   const shellClassName = [
     themeMode === "dark" ? "dark" : "",
     deviceMode ? "min-h-[100dvh]" : "h-screen",
@@ -207,9 +211,11 @@ function AppWithNavigation({
 function AppContent({
   parsedDeepLink,
   deviceMode,
+  app2027Theme,
 }: {
   parsedDeepLink: ReturnType<typeof parseDeepLinkFromUrl>;
   deviceMode: boolean;
+  app2027Theme: HomeTheme;
 }) {
   const {
     currentScreen,
@@ -281,6 +287,7 @@ function AppContent({
   const [creditLimitOfferFlowCardId, setCreditLimitOfferFlowCardId] = useState<string | null>(null);
   const [historyFilterByTitle, setHistoryFilterByTitle] = useState<string | null>(null);
   const [productsShelfFocusRequest, setProductsShelfFocusRequest] = useState<ProductsShelfFocusRequest | null>(null);
+  const [productsShelfHeroCollapsed, setProductsShelfHeroCollapsed] = useState(false);
   const [selectedProductDetail, setSelectedProductDetail] = useState<ProductDetailSelection | null>(null);
   const [investmentsInitialView, setInvestmentsInitialView] = useState<"portfolio" | "goals">("portfolio");
 
@@ -408,12 +415,23 @@ function AppContent({
     deviceMode,
   });
 
-  const statusBarVariant = resolveRouteStatusBarVariant(currentScreen, {
+  const routeStatusBarVariant = resolveRouteStatusBarVariant(currentScreen, {
     product,
     country,
     designSystem,
+    release,
     themeMode,
   });
+  /**
+   * The Evo 2027 Products hero puts a photo under the status bar, so the route
+   * asks for light system icons. Once that photo is scrolled away the page
+   * behind the status bar is the light app background, and white icons would
+   * disappear — so the variant follows the scroll.
+   */
+  const statusBarVariant =
+    productsShelfHeroCollapsed && routeStatusBarVariant === "dark" && themeMode !== "dark"
+      ? "light"
+      : routeStatusBarVariant;
 
   // Handler pentru click pe butonul OTHER - deschide panel-ul
   const handleOtherClick = () => {
@@ -600,7 +618,9 @@ function AppContent({
 
   const handleAnalyticsTransactionClick = (transaction: SpendingAnalyticsTransaction) => {
     const sourceProduct = accountProducts.find((productItem) => productItem.id === transaction.sourceProductId);
-    if (sourceProduct) handleTransactionClick(transaction, sourceProduct);
+    if (sourceProduct) {
+      handleTransactionClick(transaction, sourceProduct, getCardMerchantEnrichment(transaction, country));
+    }
   };
 
   const openCzChatHelp = (area: CzChatHelpArea) => {
@@ -800,6 +820,12 @@ function AppContent({
         isCoAppingActive={isCoAppingActive && coAppingAvailable}
         overlay={czChatLayer}
       >
+        <div
+          data-app-2027-home={release === "release-future-evo-2027" || undefined}
+          data-app-2027-theme-scope={release === "release-future-evo-2027" || undefined}
+          data-home-theme={release === "release-future-evo-2027" ? app2027Theme : undefined}
+          className="relative h-full w-full overflow-hidden"
+        >
         <Suspense fallback={<ScreenFallback />}>
         {isSupportedRuntimeContext ? (
         <>
@@ -846,6 +872,7 @@ function AppContent({
           <HomeScreen
             onPrimeClick={handlePrimeClick}
             onAnalyticsClick={handleAnalyticsClick}
+            onSeeAllTransactionsClick={() => navigateTo("transactions")}
             onMessagesClick={handleMessagesClick}
             onPaymentsClick={handlePaymentsClick}
             onDomesticPaymentClick={handleDomesticPaymentClick}
@@ -875,6 +902,14 @@ function AppContent({
 
         {currentScreen === "messages" && (
           <MessagesScreen onBack={goBack} />
+        )}
+
+        {currentScreen === "transactions" && (
+          <TransactionsScreen
+            onBack={goBack}
+            onTransactionClick={handleTransactionClick}
+            transactionCategoryOverrides={transactionCategoryOverrides}
+          />
         )}
 
         {currentScreen === "account-detail" && (
@@ -1043,6 +1078,7 @@ function AppContent({
             onProductDetailOpen={handleProductDetailOpen}
             productsShelfFocusRequest={productsShelfFocusRequest}
             onProductsShelfFocusHandled={() => setProductsShelfFocusRequest(null)}
+            onShelfHeroCollapsedChange={setProductsShelfHeroCollapsed}
           />
         )}
 
@@ -1051,6 +1087,10 @@ function AppContent({
             title={selectedProductDetail?.title ?? "Product name"}
             cardId={selectedProductDetail?.cardId}
             optionId={selectedProductDetail?.optionId}
+            heroImage={selectedProductDetail?.heroImage}
+            heroImagePosition={selectedProductDetail?.heroImagePosition}
+            headline={selectedProductDetail?.headline}
+            intro={selectedProductDetail?.intro}
             onBack={goBack}
           />
         )}
@@ -1118,6 +1158,7 @@ function AppContent({
           <UnsupportedContextScreen product={product} designSystem={designSystem} />
         )}
         </Suspense>
+        </div>
       </FrameComponent>
       )}
     </>

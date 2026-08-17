@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { AppIcon } from '@/app/components/icons';
+import PrimaryButton from '@/app/components/PrimaryButton';
 import UniCreditLogo from '@/app/components/UniCreditLogo';
 import { useDemo } from '@/app/state/demoStore';
 import type { ThemeMode } from '@/app/state/demoTypes';
@@ -45,6 +46,7 @@ type HomeAppearance = ThemeMode | 'system';
 
 const APP_2027_APPEARANCE_STORAGE_KEY = 'app-2027-appearance-mode';
 const APP_2027_HOME_THEME_STORAGE_KEY = 'app-2027-home-theme';
+const APP_2027_THEME_CHANGE_EVENT = 'app-2027-theme-change';
 
 function getSystemThemeMode(): ThemeMode {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return 'light';
@@ -90,7 +92,22 @@ export function getStoredApp2027Theme(): HomeTheme {
 }
 
 export function storeApp2027Theme(theme: HomeTheme) {
-  if (typeof window !== 'undefined') window.localStorage.setItem(APP_2027_HOME_THEME_STORAGE_KEY, theme);
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(APP_2027_HOME_THEME_STORAGE_KEY, theme);
+    window.dispatchEvent(new Event(APP_2027_THEME_CHANGE_EVENT));
+  }
+}
+
+export function useApp2027Theme() {
+  const [theme, setTheme] = useState<HomeTheme>(getStoredApp2027Theme);
+
+  useEffect(() => {
+    const syncTheme = () => setTheme(getStoredApp2027Theme());
+    window.addEventListener(APP_2027_THEME_CHANGE_EVENT, syncTheme);
+    return () => window.removeEventListener(APP_2027_THEME_CHANGE_EVENT, syncTheme);
+  }, []);
+
+  return theme;
 }
 
 export default function App2027ThemePicker({ active, onOpen }: App2027ThemePickerProps) {
@@ -119,71 +136,7 @@ export default function App2027ThemePicker({ active, onOpen }: App2027ThemePicke
   );
 }
 
-function CurrentHomePreview({ appearance, theme }: { appearance: ThemeMode; theme: App2027ThemeDefinition }) {
-  return (
-    <section
-      aria-label={`${theme.name} current Home preview in ${appearance} mode`}
-      data-app-2027-current-home-preview
-      className="relative h-[252px] w-full overflow-hidden rounded-[24px] border border-[var(--uc-border-muted)] bg-[var(--uc-app-bg)] shadow-[inset_0_1px_0_rgb(var(--uc-static-white-rgb)/0.48)]"
-    >
-      <div
-        data-app-2027-home
-        data-home-theme={theme.id}
-        className="absolute left-1/2 top-0 isolate h-[812px] w-[375px] -translate-x-1/2 origin-top scale-[0.86] overflow-hidden bg-[var(--uc-app-bg)] text-[var(--uc-text)]"
-        style={{ containerName: 'home', containerType: 'size' }}
-      >
-        <div className="relative z-10">
-          <header className="flex h-[74px] items-end justify-between px-[16px] pb-[10px]">
-            <UniCreditLogo className="h-[25px] w-auto max-w-[150px]" textColor="var(--app2027-logo-color, var(--uc-text))" />
-            <div className="flex items-center gap-[6px]">
-              <span className="grid size-[32px] place-items-center rounded-full bg-[var(--uc-surface-raised)] shadow-[0_2px_8px_rgb(var(--uc-shadow-rgb)/0.12)]"><AppIcon name="palette" size={17} /></span>
-              <span className="grid size-[32px] place-items-center rounded-full bg-[var(--uc-text)] text-[var(--uc-surface)] text-[12px] font-bold">PR</span>
-            </div>
-          </header>
-
-          <main className="px-[16px]">
-            <div className="grid grid-cols-4 gap-[8px]">
-              {([
-                ['nav-payments', 'New payment'],
-                ['payment-scan-qr', 'Scan & pay'],
-                ['transaction-transfer', 'Move money'],
-                ['hu-kids-more-options', 'More'],
-              ] as const).map(([icon, label]) => (
-                <div key={label} className="flex min-w-0 flex-col items-center gap-[5px]">
-                  <span className="grid size-[48px] place-items-center rounded-full border border-[var(--uc-border-muted)] bg-[var(--uc-surface-muted)]"><AppIcon name={icon} size={20} /></span>
-                  <span className="text-center text-[10px] font-medium leading-[12px] text-[var(--uc-text-muted)]">{label}</span>
-                </div>
-              ))}
-            </div>
-
-            <section className="mt-[18px]" data-home-area="priorities">
-              <article className="relative flex min-h-[104px] overflow-hidden rounded-[16px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-[12px]">
-                <span className="grid size-[36px] shrink-0 place-items-center rounded-[12px] bg-[var(--uc-action-soft)] text-[var(--uc-action)]"><AppIcon name="nav-payments" size={19} /></span>
-                <div className="ml-[10px] min-w-0">
-                  <p className="text-[11px] font-bold uppercase leading-[14px] tracking-[0.07em] text-[var(--uc-text-muted)]">Payment due tomorrow</p>
-                  <p className="mt-[7px] text-[16px] font-bold leading-[20px]">3 500 CZK mortgage payment</p>
-                </div>
-              </article>
-            </section>
-
-            <section className="mt-[16px] overflow-hidden rounded-[18px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)]" data-home-area="product-groups">
-              <div className="flex min-h-[64px] items-center gap-[10px] px-[12px]">
-                <span className="grid size-[32px] place-items-center rounded-full bg-[var(--uc-surface-muted)]"><AppIcon name="nav-products" size={18} /></span>
-                <span className="flex-1 text-[17px] font-bold">Accounts</span>
-                <span className="text-[15px] font-bold tabular-nums">59 902.86 CZK</span>
-                <AppIcon name="chevron-down" size={18} />
-              </div>
-            </section>
-          </main>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function ThemePreview({ appearance, theme }: { appearance: ThemeMode; theme: App2027ThemeDefinition }) {
-  if (theme.name.length > 0) return <CurrentHomePreview appearance={appearance} theme={theme} />;
-
   const isLight = appearance === 'light';
   const foreground = isLight ? 'text-[#222426]' : 'text-white';
   const muted = isLight ? 'text-[#565b5d]' : 'text-white/72';
@@ -193,6 +146,7 @@ function ThemePreview({ appearance, theme }: { appearance: ThemeMode; theme: App
 
   return (
     <div
+      data-testid="app-2027-phone-theme-preview"
       aria-label={`${theme.name} Home preview in ${appearance} mode`}
       className="relative h-[339px] w-[162px] shrink-0 overflow-hidden rounded-[35px] border-[5px] border-[#17191a] bg-[#17191a] shadow-[0_22px_58px_rgb(0_0_0/0.34)]"
     >
@@ -425,8 +379,12 @@ export function App2027ThemeStudio({ applied, draft, onApply, onBack, onSelect }
           {(['light', 'dark', 'system'] as const).map((mode) => <button key={mode} type="button" aria-pressed={appearance === mode} onClick={() => selectAppearance(mode)} className={`min-h-[44px] rounded-full px-[15px] text-[14px] font-bold capitalize ${appearance === mode ? 'bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-[0_3px_10px_rgb(var(--uc-shadow-rgb)/0.12)]' : 'text-[var(--uc-text-muted)]'}`}>{mode}</button>)}
         </div>
 
-        <button type="button" onClick={onApply} className="sticky bottom-[4px] z-20 mt-auto min-h-[52px] w-full shrink-0 rounded-[14px] bg-[var(--uc-action)] px-[18px] text-[16px] font-bold text-[var(--uc-static-white)] shadow-[0_12px_30px_color-mix(in_srgb,var(--uc-action)_28%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]">{applied === draft ? 'Apply current theme' : draft === 'standard' ? 'Apply without theme' : `Apply ${draftTheme.name}`}</button>
       </main>
+      <footer className="shrink-0 bg-[var(--uc-app-bg)] px-[24px] pb-[20px] pt-[12px]">
+        <PrimaryButton onClick={onApply} className="!w-full">
+          {applied === draft ? 'Apply current theme' : draft === 'standard' ? 'Apply without theme' : `Apply ${draftTheme.name}`}
+        </PrimaryButton>
+      </footer>
     </div>
   );
 }

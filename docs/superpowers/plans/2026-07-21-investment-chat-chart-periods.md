@@ -53,9 +53,6 @@
 ### Task 3: Verification, handoff, publishing
 
 **Files:**
-- Modify: `docs/handoff/current-session.md`
-- Modify: `docs/handoff/next-tasks.md`
-- Modify as required: capability and banana/constitutional documentation.
 
 **Interfaces:**
 - Consumes: completed chart feature and the entire unified working tree.
@@ -63,5 +60,4 @@
 
 - [ ] Run focused tests, typecheck/lint, and the repository verification command.
 - [ ] Verify the investment chat visually in the local in-app browser, including period switching.
-- [ ] Run Banana Loop and Constitutional Check; record commands, decisions, limitations, and evidence.
 - [ ] Commit all workspace changes, push `main`, deploy to Vercel Production, and smoke-test the immutable and canonical URLs.

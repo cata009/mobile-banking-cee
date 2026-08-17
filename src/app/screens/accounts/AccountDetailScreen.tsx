@@ -8,6 +8,7 @@ import AccountCarouselIndicator from "@/app/components/accounts/AccountCarouselI
 import CopyToast from "@/app/components/accounts/CopyToast";
 import AccountTransactionRow from "@/app/components/accounts/AccountTransactionRow";
 import AccountTransactionMonthDivider from "@/app/components/accounts/AccountTransactionMonthDivider";
+import { transactionGroupCardClassName } from "@/app/components/accounts/transactionGroupCard";
 import AccountMonthlyReport from "@/app/components/accounts/AccountMonthlyReport";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import AccountTransactionFiltersSheet, {
@@ -30,12 +31,8 @@ import { getPfmCategorySelection, type PfmCategorySelection } from "@/data/pfmCa
 import { getLoanDetails, getTermDepositDetails } from "@/data/accountProductDetails";
 import { isAccountDetailProduct } from "@/data/products";
 import type { Product } from "@/data/products";
-import {
-  App2027TransactionIdentity,
-  getApp2027ActivityKind,
-  getApp2027ActivityTransactions,
-  getApp2027MerchantEnrichment,
-} from "@/app/screens/home/App2027Activity";
+import { getApp2027ActivityTransactions } from "@/app/screens/home/App2027Activity";
+import { getCardMerchantEnrichment } from "@/app/components/merchants/merchantEnrichment";
 import type { CardTransactionMerchantEnrichment } from "@/app/screens/payments/DomesticPaymentFlowScreens";
 
 interface AccountDetailScreenProps {
@@ -212,7 +209,7 @@ export default function AccountDetailScreen({
   const activeCurrency = activeProduct?.currency ?? config.currency;
   const transactionProfileIndex = activeProduct ? getAccountTransactionProfileIndex(activeProduct, activeIndex) : 0;
   const usesApp2027CzLedger =
-    (release === "release-future-app-2027" || release === "release-future-evo-2027")
+    release === "release-future-evo-2027"
     && country === "CZ"
     && activeProduct?.type === "current_account"
     && transactionProfileIndex === 0;
@@ -246,18 +243,13 @@ export default function AccountDetailScreen({
         : transaction;
     });
   }, [config.currency, country, transactionCategoryOverrides, transactionProfileIndex, usesApp2027CzLedger]);
-  const app2027LeadingVisual = (transaction: AccountTransaction) => {
-    if (!usesApp2027CzLedger) return undefined;
-    const kind = getApp2027ActivityKind(transaction);
-    return kind ? <App2027TransactionIdentity kind={kind} size={32} /> : undefined;
-  };
+  /** Evo 2027 groups each month into the same card the home activity list uses. */
+  const usesEvoGroupCards = release === "release-future-evo-2027";
   const openTransaction = (transaction: AccountTransaction) => {
     if (!activeProduct) return;
-    onTransactionClick?.(
-      transaction,
-      activeProduct,
-      usesApp2027CzLedger ? getApp2027MerchantEnrichment(transaction, country) : undefined,
-    );
+    // Every card row carries its merchant, so the detail gets the brand header
+    // and the store location regardless of release or market.
+    onTransactionClick?.(transaction, activeProduct, getCardMerchantEnrichment(transaction, country));
   };
   const normalizedTransactionSearch = transactionSearch.trim().toLowerCase();
   const filtersActive = hasAccountTransactionFilters(appliedFilters);
@@ -583,10 +575,10 @@ export default function AccountDetailScreen({
       </div>
 
         {activeProduct?.type !== "term_deposit" ? (
-          <div className="bg-[var(--uc-surface)]">
+          <div className={usesEvoGroupCards ? "bg-[var(--uc-app-bg)]" : "bg-[var(--uc-surface)]"}>
             <div
               ref={searchContainerRef}
-              className="sticky z-20 bg-[var(--uc-surface)] px-[16px] pt-[24px]"
+              className={`sticky z-20 px-[16px] pt-[24px] ${usesEvoGroupCards ? "bg-[var(--uc-app-bg)]" : "bg-[var(--uc-surface)]"}`}
               style={{ top: `${ACCOUNT_DETAIL_HEADER_HEIGHT}px` }}
             >
               <AccountSearchBar
@@ -597,6 +589,7 @@ export default function AccountDetailScreen({
                 onValueChange={handleTransactionSearchChange}
                 onFocus={activateTransactionSearch}
                 filtersActive={filtersActive}
+                fieldSurface={usesEvoGroupCards ? "raised" : "muted"}
               />
             </div>
 
@@ -604,7 +597,7 @@ export default function AccountDetailScreen({
               {pendingTransactions.length > 0 ? (
                 <section data-pending-transactions data-pending-count={pendingTransactions.length} className="pb-[8px]">
                   <AccountTransactionMonthDivider title="Pending" currency={activeCurrency} />
-                  <div className="pt-[16px]">
+                  <div className={transactionGroupCardClassName(usesEvoGroupCards)}>
                     {pendingTransactions.map((transaction) => (
                       <AccountTransactionRow
                         key={transaction.id}
@@ -612,7 +605,9 @@ export default function AccountDetailScreen({
                         formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
                         currency={activeCurrency}
                         displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
-                        leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction) ?? app2027LeadingVisual(transaction)}
+                        leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
+                        categoryIconVariant={release === "release-future-evo-2027" ? "category-circle" : "glyph"}
+                        positiveAmountClassName={release === "release-future-evo-2027" ? "text-[#3D7D43]" : undefined}
                         onClick={openTransaction}
                       />
                     ))}
@@ -621,7 +616,7 @@ export default function AccountDetailScreen({
               ) : null}
               {transactionGroups.length > 0 ? (
                 transactionGroups.map((group, index) => (
-                  <div key={group.monthTitle} className={index > 0 ? "pt-[16px]" : undefined}>
+                  <div key={group.monthTitle} className={index > 0 && !usesEvoGroupCards ? "pt-[16px]" : undefined}>
                     <AccountTransactionMonthDivider
                       title={group.monthTitle}
                       total={formatMoneyNumber(group.monthlyTotal, country)}
@@ -632,19 +627,21 @@ export default function AccountDetailScreen({
                       <AccountMonthlyReport country={country} currency={activeCurrency} group={group} />
                     ) : null}
 
-                    <div className="pt-[16px]">
-                      {group.transactions.map((transaction) => (
-                        <AccountTransactionRow
-                          key={transaction.id}
-                          transaction={transaction}
-                          formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
-                          currency={activeCurrency}
-                          displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
-                          leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction) ?? app2027LeadingVisual(transaction)}
-                           onClick={openTransaction}
-                           onCategoryClick={onTransactionCategoryChange ? setCategorySheetTransaction : undefined}
-                         />
-                      ))}
+                    <div className={transactionGroupCardClassName(usesEvoGroupCards)}>
+                        {group.transactions.map((transaction) => (
+                          <AccountTransactionRow
+                            key={transaction.id}
+                            transaction={transaction}
+                            formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
+                            currency={activeCurrency}
+                            displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
+                            leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
+                            categoryIconVariant={release === "release-future-evo-2027" ? "category-circle" : "glyph"}
+                            positiveAmountClassName={release === "release-future-evo-2027" ? "text-[#3D7D43]" : undefined}
+                            onClick={openTransaction}
+                            onCategoryClick={onTransactionCategoryChange ? setCategorySheetTransaction : undefined}
+                          />
+                        ))}
                     </div>
                   </div>
                 ))

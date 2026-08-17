@@ -17,9 +17,12 @@ export interface GhostBannerProps {
   description?: string;
   iconName?: IconName;
   iconColor?: string;
+  layout?: "horizontal" | "stacked";
   onClick?: () => void;
   ariaLabel?: string;
   className?: string;
+  titleClassName?: string;
+  descriptionClassName?: string;
   style?: CSSProperties;
 }
 
@@ -34,9 +37,12 @@ export default function GhostBanner({
   description,
   iconName = "add-circle",
   iconColor = "var(--uc-action)",
+  layout = "horizontal",
   onClick,
   ariaLabel,
   className,
+  titleClassName,
+  descriptionClassName,
   style,
 }: GhostBannerProps) {
   const interactive = typeof onClick === "function";
@@ -48,7 +54,8 @@ export default function GhostBanner({
       onClick={onClick}
       aria-label={interactive ? (ariaLabel ?? title) : ariaLabel}
       className={cn(
-        "flex w-[327px] max-w-full flex-col items-start gap-[10px] rounded-[8px] border border-dashed border-[var(--uc-text)] bg-transparent p-[16px] text-left",
+        "flex w-[327px] max-w-full flex-col gap-[10px] rounded-[8px] border border-dashed border-[var(--uc-text)] bg-transparent p-[16px]",
+        layout === "stacked" ? "items-center text-center" : "items-start text-left",
         interactive && "cursor-pointer",
         className,
       )}
@@ -56,19 +63,39 @@ export default function GhostBanner({
       data-figma-schema={GHOST_BANNER_SOURCE.schema}
       style={style}
     >
-      <div className="flex w-full items-start gap-[8px]">
+      <div
+        className={cn(
+          "flex w-full",
+          layout === "stacked"
+            ? "h-full flex-col items-center justify-center gap-[6px]"
+            : "items-start gap-[8px]",
+        )}
+      >
         <span
           className="flex h-[32px] w-[32px] shrink-0 items-center justify-center"
           data-ds-label="GhostBanner icon 32x32"
         >
           <AppIcon name={iconName} color={iconColor} />
         </span>
-        <div className="flex min-w-0 flex-1 flex-col gap-[4px]">
-          <span className="uc-type-h2 line-clamp-2 leading-[20px] text-[var(--uc-text)]">
+        <div
+          className={cn(
+            "flex min-w-0 flex-1 flex-col gap-[4px]",
+            layout === "stacked" && "flex-none items-center text-center",
+          )}
+        >
+          <span
+            className={titleClassName ?? (layout === "stacked"
+              ? "text-[12px] font-bold leading-[16px] text-[var(--uc-text)]"
+              : "uc-type-h2 line-clamp-2 leading-[20px] text-[var(--uc-text)]")}
+            data-ghost-banner-title
+          >
             {title}
           </span>
           {description && (
-            <span className="uc-type-n4 line-clamp-4 whitespace-pre-line leading-[18px] text-[var(--uc-text)]">
+            <span
+              className={descriptionClassName ?? "uc-type-n4 line-clamp-4 whitespace-pre-line leading-[18px] text-[var(--uc-text)]"}
+              data-ghost-banner-description
+            >
               {description}
             </span>
           )}

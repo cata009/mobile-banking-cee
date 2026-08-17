@@ -2,19 +2,52 @@
    Width assigns the two financial columns; height only tightens spatial rhythm.
    Typography and interactive target sizes remain owned by the components. */
 
-@container home (min-width: 600px) {
-  [data-app-2027-layout] {
-    grid-template-areas:
-      "overview priorities"
-      "favourites activity"
-      "products activity";
+@container home (min-width: 680px) {
+  /* Transformation is a self-contained tablet composition. It must span the
+     legacy Home grid before forming its own two-column reading rhythm. */
+  [data-app-2027-layout] > [data-home-area="transformation"] {
+    grid-area: auto;
+    grid-column: 1 / -1;
+    min-width: 0;
   }
 
-  [data-home-area="overview"] { grid-area: overview; }
-  [data-home-area="favourites"] { grid-area: favourites; }
-  [data-home-area="products"] { grid-area: products; }
-  [data-home-area="priorities"] { grid-area: priorities; }
-  [data-home-area="activity"] { grid-area: activity; }
+  [data-home-transformation] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    column-gap: 24px;
+    row-gap: 24px;
+  }
+
+  [data-home-transformation] > [data-home-area="product-categories"],
+  [data-home-transformation] > [data-home-transformation-summary] {
+    grid-column: 1 / -1;
+  }
+
+  [data-home-transformation] > * {
+    min-width: 0;
+    margin: 0;
+  }
+
+  [data-home-transformation-summary] {
+    min-height: 176px;
+  }
+}
+
+/* A rotated open foldable has tablet height but phone-like reading width.
+   Keep its content vertical and fully scrollable rather than squeezing cards
+   into artificial columns. */
+@container home (min-width: 600px) and (max-width: 679px) {
+  [data-app-2027-layout] > [data-home-area="transformation"] {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  [data-home-transformation] {
+    width: 100%;
+    max-width: 580px;
+    margin-inline: auto;
+  }
 }
 
 /* Rotated open foldable: protect enough width for the story column while the

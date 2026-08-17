@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mobile PI CEE — Requirements Register</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #1f2730;
+        --muted: #647180;
+        --line: #d9e0e7;
+        --paper: #ffffff;
+        --canvas: #f3f6f8;
+        --brand: #007f75;
+        --brand-deep: #005f58;
+        --brand-pale: #e4f4f1;
+        --focus: #0b76b7;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        color: var(--ink);
+        background: var(--canvas);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .page { max-width: 1720px; margin: 0 auto; padding: 32px 24px 48px; }
+
+      .masthead {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 24px;
+        align-items: end;
+        margin-bottom: 24px;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        color: var(--brand-deep);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+
+      h1 { margin: 0; font-size: clamp(28px, 4vw, 44px); line-height: 1.05; letter-spacing: -.04em; }
+      .intro { max-width: 780px; margin: 14px 0 0; color: var(--muted); font-size: 15px; line-height: 1.55; }
+      .count-card { min-width: 155px; padding: 15px 18px; border: 1px solid #b8e1da; border-radius: 14px; background: var(--brand-pale); }
+      .count-card strong { display: block; color: var(--brand-deep); font-size: 28px; line-height: 1; letter-spacing: -.04em; }
+      .count-card span { display: block; margin-top: 5px; color: #356863; font-size: 12px; font-weight: 700; }
+
+      .controls {
+        display: grid;
+        grid-template-columns: minmax(260px, 2.2fr) repeat(5, minmax(145px, 1fr)) auto;
+        gap: 12px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 16px 16px 0 0;
+        background: var(--paper);
+      }
+
+      .field { min-width: 0; }
+      label { display: block; margin: 0 0 6px; color: var(--muted); font-size: 12px; font-weight: 800; }
+      input, select, button { font: inherit; }
+      input, select {
+        width: 100%;
+        min-height: 42px;
+        padding: 0 12px;
+        border: 1px solid #bfcad4;
+        border-radius: 9px;
+        color: var(--ink);
+        background: #fff;
+      }
+      select[multiple] { min-height: 82px; padding: 5px 6px; }
+      select[multiple] option { padding: 4px 6px; }
+      input:focus, select:focus, button:focus-visible, .sort-button:focus-visible { outline: 3px solid color-mix(in srgb, var(--focus) 28%, transparent); outline-offset: 2px; }
+      .clear-wrap { display: flex; align-items: end; }
+      #clearFilters { min-height: 42px; padding: 0 14px; border: 1px solid #aab8c4; border-radius: 9px; color: var(--ink); background: white; font-weight: 750; cursor: pointer; white-space: nowrap; }
+      #clearFilters:hover { border-color: var(--brand); color: var(--brand-deep); background: var(--brand-pale); }
+
+      .table-shell { overflow: auto; border: 1px solid var(--line); border-top: 0; border-radius: 0 0 16px 16px; background: var(--paper); box-shadow: 0 12px 30px rgba(26, 41, 54, .08); }
+      table { width: 100%; min-width: 1710px; border-collapse: separate; border-spacing: 0; }
+      th, td { border-bottom: 1px solid #e4e9ee; text-align: left; vertical-align: top; }
+      th { position: sticky; z-index: 1; top: 0; padding: 0; background: #eef4f5; color: #263947; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+      td { padding: 16px 14px; font-size: 14px; line-height: 1.5; }
+      tbody tr:last-child td { border-bottom: 0; }
+      tbody tr:hover td { background: #fbfdfd; }
+      th:nth-child(1), td:nth-child(1) { width: 56px; }
+      th:nth-child(2), td:nth-child(2) { width: 180px; }
+      th:nth-child(3), td:nth-child(3) { width: 105px; }
+      th:nth-child(4), td:nth-child(4) { width: 92px; }
+      th:nth-child(5), td:nth-child(5) { min-width: 590px; }
+      th:nth-child(6), td:nth-child(6) { min-width: 365px; }
+      th:nth-child(7), td:nth-child(7) { min-width: 365px; }
+      th:nth-child(8), td:nth-child(8) { width: 135px; }
+      .sort-button { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 8px; padding: 13px 14px; border: 0; color: inherit; background: transparent; font-size: inherit; font-weight: 800; letter-spacing: inherit; text-align: left; text-transform: inherit; cursor: pointer; }
+      .sort-button:hover { color: var(--brand-deep); background: #e2edee; }
+      .sort-mark { color: #78909b; font-size: 15px; line-height: 1; }
+      .number { color: var(--brand-deep); font-variant-numeric: tabular-nums; font-weight: 850; text-align: center; }
+      .category { display: inline-block; padding: 4px 8px; border-radius: 999px; color: #155d56; background: #e5f4f1; font-size: 12px; font-weight: 800; line-height: 1.25; }
+      .country { font-weight: 800; }
+      .segment { font-weight: 800; color: #3d5260; }
+      .segment.empty { color: #a2adb6; font-weight: 600; }
+      .requirement { white-space: pre-line; overflow-wrap: anywhere; }
+      .interpretation { white-space: pre-line; color: #334b58; font-size: 13px; line-height: 1.52; }
+      .impact-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+      .impact-tag { display: inline-flex; align-items: center; min-height: 24px; padding: 3px 7px; border: 1px solid #b9d9d5; border-radius: 999px; color: #1b6059; background: #f0faf8; font-size: 11px; font-weight: 800; line-height: 1.1; }
+      .no-impact { color: #74828d; font-size: 12px; font-style: italic; }
+      .source { color: var(--muted); font-size: 13px; font-weight: 700; }
+      #emptyState { display: none; padding: 36px 20px; color: var(--muted); text-align: center; }
+      .note { margin: 18px 2px 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+
+      @media (max-width: 1050px) {
+        .controls { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .field:first-child { grid-column: span 3; }
+        .clear-wrap { align-items: end; }
+      }
+      @media (max-width: 620px) {
+        .page { padding: 22px 14px 34px; }
+        .masthead { grid-template-columns: 1fr; gap: 16px; }
+        .count-card { width: fit-content; }
+        .controls { grid-template-columns: 1fr 1fr; padding: 13px; }
+        .field:first-child { grid-column: span 2; }
+        .clear-wrap { grid-column: span 2; }
+        #clearFilters { width: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">UniCredit Mobile Banking CEE · cerințe retail</p>
+          <h1>Registru de cerințe</h1>
+          <p class="intro">Câte un rând pentru fiecare cerință originală păstrată. Textul cerințelor rămâne în engleză, exact ca sursa; coloana de interpretare este o opinie UX de lucru, în română.</p>
+        </div>
+        <div class="count-card" aria-live="polite"><strong id="visibleCount">0</strong><span id="countLabel">cerințe afișate</span></div>
+      </header>
+
+      <section class="controls" aria-label="Filter requirements">
+        <div class="field">
+          <label for="textSearch">Caută în textul cerinței originale</label>
+          <input id="textSearch" type="search" placeholder="Scrie un cuvânt sau o expresie…" autocomplete="off" />
+        </div>
+        <div class="field"><label for="categoryFilter">Category</label><select id="categoryFilter" multiple size="4" aria-describedby="multiSelectHint"></select></div>
+        <div class="field"><label for="countryFilter">Country</label><select id="countryFilter" multiple size="4" aria-describedby="multiSelectHint"></select></div>
+        <div class="field"><label for="segmentFilter">Segment</label><select id="segmentFilter" multiple size="4" aria-describedby="multiSelectHint"></select></div>
+        <div class="field"><label for="sourceFilter">Source set</label><select id="sourceFilter" multiple size="4" aria-describedby="multiSelectHint"></select></div>
+        <div class="field"><label for="impactFilter">Impact on · Mobile PI L1</label><select id="impactFilter" multiple size="4" aria-describedby="multiSelectHint"></select></div>
+        <div class="clear-wrap"><button id="clearFilters" type="button">Resetează filtrele</button></div>
+      </section>
+      <p class="note" id="multiSelectHint">În fiecare filtru poți selecta mai multe valori: <kbd>Ctrl</kbd> / <kbd>⌘</kbd> + click pe desktop; fără selecție înseamnă toate valorile.</p>
+
+      <section class="table-shell" aria-label="Requirements table">
+        <table>
+          <thead><tr>
+            <th><button class="sort-button" data-sort="number" aria-label="Numărul cerinței"># <span class="sort-mark" aria-hidden="true">↕</span></button></th>
+            <th><button class="sort-button" data-sort="category">Category <span class="sort-mark" aria-hidden="true">↕</span></button></th>
+            <th><button class="sort-button" data-sort="country">Country <span class="sort-mark" aria-hidden="true">↕</span></button></th>
+            <th><button class="sort-button" data-sort="segment">Segment <span class="sort-mark" aria-hidden="true">↕</span></button></th>
+            <th><button class="sort-button" data-sort="text">Original requirement text <span class="sort-mark" aria-hidden="true">↕</span></button></th>
+            <th><button class="sort-button" data-sort="impacts">Impact on · Mobile PI L1 <span class="sort-mark" aria-hidden="true">↕</span></button></th>
+            <th><button class="sort-button" data-sort="interpretation">Interpretare UX &amp; impact Mobile PI <span class="sort-mark" aria-hidden="true">↕</span></button></th>
+            <th><button class="sort-button" data-sort="source">Source set <span class="sort-mark" aria-hidden="true">↕</span></button></th>
+          </tr></thead>
+          <tbody id="requirementsBody"></tbody>
+        </table>
+        <div id="emptyState">Nicio cerință nu corespunde filtrelor selectate.</div>
+      </section>
+      <p class="note">Hungary Set 2 este exclus intenționat. Cele patru documente atașate sunt distincte, iar lista Bosnia a fost furnizată direct în cerere. Cerințele similare dintre țări rămân rânduri separate. „Fără impact Mobile PI direct” înseamnă că nu recomand inițierea de activitate în aplicația PI fără o decizie ulterioară de convergență de produs.</p>
+    </main>
+
+    <script>
+      const rows = [];
+      const add = (category, country, segment, text, source) => rows.push({ number: rows.length + 1, category, country, segment, text, source });
+
+      // CZ + SK
+      add('CRM / Campaigns / Offers', 'CZ + SK', 'PI', `CRM channel integration with SAS CI 360
+
+1) Integrate the new CRM module with direct channels on a multi-country basis to leverage project synergies.
+2) Implement SAS SDK in the mobile app to enable a) Mobile app as a real-time data source channel and b) Mobile app as a communication channel for real-time push notifications and in-app banners.
+3) Deliver integration with PWS.`, 'CZ + SK');
+      add('Homepage', 'CZ + SK', 'PI', `Home Screen Restyle and Main Bottom Menu Changes
+
+1) Render Home Screen sections progressively as part of a login procedure as backend data becomes available, reducing perceived waiting times after login.
+2) Allow customers to customize the order of displayed sections and order of products in the sections on the Home screen.
+3) Introduce smaller tiles to display more information on the Home screen.
+4) Enhance Payment Card display with cardholder name, validity date, and expiration warnings or inactive card indicatior. Reduce 16 digits card number to max 4 last digits.
+5) Improve visibility of mortgage, PRESTO loan, and Investment products entry points on the Home screen.
+6) Make Investments entry point a dedicated navigation entry point onm the main bottom menu.
+7) Deliver a faster, more personalized, and efficient Home Screen experience.`, 'CZ + SK');
+      add('Kids', 'CZ + SK', 'PI', `Kids App
+
+1) Kids App Mode will offer a dedicated digital banking experience for children and teenagers, helping them develop healthy financial habits.
+12 Solution should contains a children (8-15yo) and teenagers (15-18yo) PI app mode and theme.
+Features may include spending tracking, savings goals, gamification, educational content, and parental controls.
+3) Parents will have visibility and control over selected activities (Payment Limits, Card Payment Limits, Risky or High Amount Payment Approval) while allowing children to gain financial independence.
+4) Bank should have a process or app to be able to define and control the parent-child relationships.
+The solution should supports early customer acquisition and strengthens family banking relationships. It positions the bank competitively against digital-first and neobank offerings.`, 'CZ + SK');
+      add('Platform / PWS', 'CZ + SK', 'PI', `Dark Mode
+
+1) The feature improves user comfort, reduces eye strain, and aligns Smart Banking with modern mobile application standards.
+2) It will support both manual selection (light or dark mode) and automatic switching based on device settings.
+3) The implementation will cover all key customer journeys and ensure consistent accessibility standards.
+Dark Mode is a frequently requested enhancement that improves overall user satisfaction.`, 'CZ + SK');
+      add('Identity / Government services', 'CZ + SK', 'PI', `Government Online Services Overview
+
+1) Users will be able to access important government-related links and access the services from a section on the Home screen (bottom part).
+Government Online Services Overview will provide customers with a centralized view of selected public administration services directly within Smart Banking. The feature should supports the broader Beyond Banking strategy by integrating everyday services into the banking ecosystem. It increases customer engagement and reinforces Smart Banking as a daily utility. Future expansion may include digital identity and e-government integrations.`, 'CZ + SK');
+      add('Spending / Analytics / PFM / Meniga', 'CZ + SK', 'PI', `Planned Payments Overview and Budgeting
+
+1) The feature will provide customers with a clear overview of upcoming payments, standing orders, direct debits, and scheduled transfers.
+2) Combined with budgeting capabilities, it will help users better understand future cash flow and manage personal finances proactively.
+3) Customers will be able to identify periods of higher spending, monitor budget performance, and receive alerts about potential balance shortfalls.
+4) The functionality will leverage transaction categorization and financial insights to support financial well-being.
+This enhancement strengthens Smart Banking's role as a personal financial management tool.`, 'CZ + SK');
+      add('Platform / PWS', 'CZ + SK', '', `Flexible Landing Page Redesign for PRIME and SME
+
+1) Redesign PRIME/SME landing pages with a modern, mobile-first UX aligned to UniCredit Group standards.
+2) Improve navigation and usability through sticky product navigation and reduced scrolling.
+3) Increase lead conversion by simplifying journeys and making key actions immediately accessible.
+5) Add persistent contact channels including callback, appointment booking, and CRM-integrated chat.
+6) Enable personalization and CRM integration with campaign-driven content and contextual customer interactions.
+7) Implement advanced analytics to track conversions, identify drop-offs, and drive continuous optimization.`, 'CZ + SK');
+
+      // Hungary Set 1
+      add('Investments', 'Hungary', 'PI', `Foreign stock market availability (stocks and ETFs)
+Foreign stock market trade availability on e-channels to offer new investment markets for retail customers, at least the most common stock markets (NYSE, London, Paris, Frankfurt, Milan, Vienna, Madrid)`, 'Hungary Set 1');
+      add('CRM / Campaigns / Offers', 'Hungary', 'PI', `Campaign Management System integration (SAS CI360) 2027
+Campaign Management System integration with e-channels: Integration with all remote and digital channels (Genesys, CCP, Aurea, IB), implement new 20 events, deliver fixes for existing problems in CCP`, 'Hungary Set 1');
+      add('Kids', 'Hungary', 'PI', `Kids app - Mobile service for users under 18 yo.
+With joint effort HR, BG, HU collected requirements regarding planed developmentswith priorities. In case of HU the requested development was initially part of 2026 SBL delivery plan, later agreed on postponement to 2027
+https://jira.internal.unicredit.eu/browse/SBL-355122
+https://unicredit-my.sharepoint.com/personal/sevastiyan_vasilev_unicreditgroup_bg/_layouts/15/Doc.aspx?sourcedoc=%7BA8D87AC7-E71E-4010-8D3E-BFCED9C441AD%7D&file=Kids%20Banking.xlsx&action=default&mobileredirect=true&DefaultItemOpen=1`, 'Hungary Set 1');
+      add('Payments', 'Hungary', 'PI', `Account limit modification on remote channels
+Establish trasaction limit modification function in self-service solution (MB, Call Center IVR) [SBL-464938] [HU][mB][PI] Payment modification feature with delayed limit increase - JIRA`, 'Hungary Set 1');
+      add('CRM / Campaigns / Offers', 'Hungary', 'PI', `Digital MGM (Member gets member) 2027
+Continue the developments on Digital MGM (Part 2) in order to 1. roll-out to MB clients (mBanking Business) and 2. launch fully fledged solution with transparent monitoring capabilities on fulfillment of required Referral criteria for PI
+https://jira.internal.unicredit.eu/browse/SBL-458698`, 'Hungary Set 1');
+      add('Investments', 'Hungary', 'PI', `List of mobile investment functionality developments - joint list of CZ/SK and HU
+In June 2026 CZ/SK and HU collected the most important functionalities what could help us to boost investment usage. Common must have items in pririty order:
+1. One-click bulk signing
+2. Realtime / intraday investment data package
+3. Performance overview amendments
+4. Enhanced portfolio charts on main screen
+5. Customer / push notifications after transactions and events
+6. Amendment of product names in mBanking
+7. Adobe Analytics – Investment section
+8. Balance check incl. fees + better error/error status messages
+9. Compliance disclaimer package`, 'Hungary Set 1');
+      add('Savings', 'Hungary', 'PI', `Piggy Bank - Savings pocket
+As mobile banking user I want to be have a “piggy bank” available in mobile app so that each time I make a payment with my debit card, I’ll be able to save some money.
+The Mobile Banking PI will act as an entry point for creation and management of saving pockets (saving goals).
+https://confluence.internal.unicredit.eu/spaces/AACE4/pages/468215529/CZ+SK+BiH+Mostar+-+Saving+Pocket`, 'Hungary Set 1');
+      add('Homepage', 'Hungary', 'PI', `Customer balance harmonization (wealth, IB view)
+The total balance calculation was defined in Mobile 1.0 (before Meniga). With continous developments savings accounts, loan account and investment accounts are visible on the account main page, but the available balance calculation runs based on the old logic. The total balance calculation was defined in Mobile 1.0 (before Meniga). With continous developments savings accounts, loan account and investment accounts are visible on the account main page, but the available balance calculation runs based on the old logic. The aim of the development is presenting a full and updated view on the customers's wealth, eliminate Credit card balance from the total and make available the total weaólth report from Investment module`, 'Hungary Set 1');
+      add('SME / Business Mobile', 'Hungary', 'SME', `DDE SSO integration with Micro app (similar to DXS in PI)
+DDE as a tool for supporting remote sales in Micro and Corporae segment was launched years ago. The usage is still flat in Micro segment and slightly increasing in Corporate segment. The tool is standalone with own login page, not integrated into digital channles, yet. Ez a paralel activity HU extends Micro app to Corporate clients with new functionalities (foreign payment, user selection) in 2026. From 2027 mBanking Business app can be used by companies (Retail and Corp). As a next step the availebility of existing remote sales capability could be simplified and boosted with an integration with our commonly enrolled Mobile channel.`, 'Hungary Set 1');
+      add('CRM / Campaigns / Offers', 'Hungary', 'PI', `Dateio recommendation to boost application and usage (2 user stories)
+Loyalty program results are counted in Digital/Remote sales.Dateio recommended app developments (based on their best practices from other banks/peers) in order to make the solution more visible reach higher number of registered app users.
+https://jira.internal.unicredit.eu/browse/SBL-419569
+https://jira.internal.unicredit.eu/browse/SBL-419566`, 'Hungary Set 1');
+      add('Platform / PWS', 'Hungary', 'PI', `Local MB backlog developments (4 items)
+- [HU][mB][PI] Customizable quick action button on the home screen - As a Mobile Banking customer, I want to customize a prominent quick action button on the Home screen, so that I can quickly access my most frequently used banking function with a single tap. As a Bank I want to be able to mange the default displayed feature depending on current buisness interest.
+- Account change in mBanking - As a user I would like to be able to choose from more current account types and change it in mBanking without any limits and for free whenever I want.
+- Upload of the welcome documents - As a colleague of the Multichannel Team in UniCredit bank I would like to be able to upload the necessary documents to the users which will be appear in mBanking and mToken after the first activation with eBanking credential.
+- Page for the PROD tickets - As a bank colleague I would like to see the mBanking, mBanking Business and eBanking PROD remedy tickets on a page accessible to everyone.
+https://jira.internal.unicredit.eu/browse/SBL-464969`, 'Hungary Set 1');
+      add('Platform / PWS', 'Hungary', 'PI', `AEM (IB2020, PWS) developments (1 for PWS 2 for Internet Banking)
+PWS
+Responsive components
+•Modern, mobile-responsive tables and images both within text components and as standalone content elements
+Introduce a modern, mobile-optimized table component to improve readability, user experience, and content accessibility. Images placed in text components are not mobile friendly. Enhance the responsiveness of text components with images to ensure optimal display, readability, and user experience across all devices.
+•Device-specific images
+Enable separate image uploads for desktop and mobile to ensure optimal display across all devices.
+
+IB2020
+1. Digital Sales Acceleration
+• Product Shelf in eBanking
+  o A new category tab should be implemented to the menu, called „Product Offers” (Termékeink).
+  o If the user opens this menu, there should be 4 columns sorted by main product categories (Borrowing, Banking, Investings, Insurance).
+  o Under each main category, vertically arranged „tiles” should be displayed, each one representing a product. Tiles should be able to be added & modified manually by Business in AEM.
+• Introducing new product applications online
+  o New current account opening, applying for debit/credit card, new securities account opening, etc.
+• Adobe Analytics integration to eBanking
+• Existing CL banner upgrade
+  o A new rotating carousel should be introduced instead of the static banner which can be extended & modified by Business. The banners in the carousel should rotate automatically after a few seconds (similar to PWS main page carousel). Both external links and internal links (eBanking menu items) could be added here (e.g. the user could immediately navigate to „Securities” menu).
+• Login page banner upgrade
+  o A new rotating carousel should be introduced instead of the static banner
+
+2. Investment Services 2.0
+• Introduction of global stock exchange, global trading
+  o Users would be able to buy and sell not only Budapest Stock Exchange securities, but global ones too (Apple, Tesla)
+• Widgets and real-time information for securities, stock exchange
+  o Widget settings would be available for edit in „Settings”`, 'Hungary Set 1');
+
+      // Romania
+      add('Kids', 'Romania', '', `Kids account opening and kids companion app
+Introduces a dedicated kids ecosystem, including minors via the parent’s Mobile Banking app and a companion app integrated with the parent account. The solution enables parental controls, spending supervision, tasks & rewards, savings goals, and controlled payments, delivering a safe, engaging, and fully digital financial experience for minors.`, 'Romania');
+      add('Investments', 'Romania', '', `Brokerage (stocks, Bonds, Fidelis) in Mobile Banking
+Integrate brokerage services into the Mobile Banking app. Clients will gain seamless access to a new Brokerage section, enabling them to view portfolios, monitor balances, access local and international market instruments, and execute buy/sell orders, delivering a fully digital, end-to-end investment experience.`, 'Romania');
+      add('CRM / Campaigns / Offers', 'Romania', '', `Digital marketing and sales funnel tracking -->Appflyier
+Implements end-to-end tracking of digital marketing campaigns by integrating tracking SDKs into Mobile and Business Mobile apps, enabling full visibility of the customer journey and campaign performance, from acquisition to conversion.`, 'Romania');
+      add('CRM / Campaigns / Offers', 'Romania', '', `Member get member E2E digital for PI and Micro
+Introduces a digital referral feature within Mobile Banking, enabling customers to easily invite others, track progress in real time, and follow a simple, transparent end-to-end journey directly in the app.`, 'Romania');
+      add('Investments', 'Romania', '', `Streamline Investments in Mobile Banking
+Improves accessibility and distribution of investment services by enabling referral code for branch and call center channels and removing limitations + availability amount`, 'Romania');
+      add('CRM / Campaigns / Offers', 'Romania', '', `Free forms
+Enables flexible, on-demand customer data collection within the CDP, supporting key use cases such as campaign data capture, lead enrichment, customer feedback, consent updates, customer feedback & surveys, etc. This capability enhances personalization, targeting, and real-time marketing activation, while reducing dependency on complex IT development and accelerating time-to-market for business initiatives.`, 'Romania');
+      add('Assisted sales / Co-apping / Documents', 'Romania', '', `Contact Centre Unlock
+Transforms the Contact Centre into an AI-enabled, intelligent interaction platform, leveraging chatbot and voice bot capabilities, sentiment analysis, and virtual queueing to optimize customer journeys. The initiative enables personalized interactions, real-time intent detection, automated call summarization, and smarter routing, while building a centralized knowledge base to enhance efficiency, service quality, and customer experience.`, 'Romania');
+      add('Assisted sales / Co-apping / Documents', 'Romania', '', `Co App-ing
+Enables remote-assisted digital sales, allowing branch or call center advisors to guide customers in real time through the Mobile Banking app to browse and purchase products, combining human support with a seamless digital experience`, 'Romania');
+      add('SME / Business Mobile', 'Romania', '', `Role Switching Personal / Business
+Enables a unified digital experience for clients acting as both individuals (PI) and business representatives (LE), allowing seamless switching between personal and business profiles within Mobile Banking app, improving convenience, efficiency, and multi-role account management.`, 'Romania');
+      add('Homepage', 'Romania', '', `Mobile Banking UX Improvements
+Enhances the Mobile Banking experience through improved transparency, usability, and communication, including accurate FX display for pending transactions, refined profile data rules, clearer financial views (excluding investments), enhanced downtime messaging, and proactive loyalty notifications, for a more intuitive and customer-centric digital journey.`, 'Romania');
+      add('Payments', 'Romania', '', `Split payment for Mobile Banking
+Enables customers to split payments directly within Mobile Banking, allowing easy sharing of expenses among multiple participants and streamlining group cost settlement through a simple, fast, and fully digital process.`, 'Romania');
+      add('Assisted sales / Co-apping / Documents', 'Romania', '', `Digital document exchange
+Remote assisted sales tool for exchanging and signing documents between the customer and the bank`, 'Romania');
+      add('Regulatory / Security', 'Romania', '', `Live banner for fraud calls in Mobile Banking
+Introduces a real-time fraud alert banner within Mobile Banking, notifying customers of potential fraud calls during app usage, increasing awareness and helping prevent social engineering and unauthorized transactions.`, 'Romania');
+      add('SME / Business Mobile', 'Romania', '', `Self admin user for Business (GBS)
+Enables self-administration capabilities for business clients, allowing designated users to create, manage, and request additional user access directly within Business Mobile, improving autonomy, efficiency, and reducing dependency on bank support channels.`, 'Romania');
+      add('CRM / Campaigns / Offers', 'Romania', '', `Gamification mechanism in Mobile Banking --> CZ (Michal)
+Introduces a gamification framework within Mobile Banking, allowing clients to earn points based on transactional behavior and progress through tiers, unlocking personalized rewards, cashback, and benefits, while increasing engagement, usage, and loyalty through a transparent, goal-driven experience.`, 'Romania');
+      add('Identity / Government services', 'Romania', '', `EIDAS 2.0/Digital Identity Compliance project: accept wallet-based identification/authentication & attributes for private individuals and legal entities`, 'Romania');
+      add('Regulatory / Security', 'Romania', '', `PSD3/PSR Legal Act: EU PSD3 (new Payment Services Directive) and PSR (Payment Services Regulation) proposed June 2023 as part of the EU Digital Finance Strategy; deadline to be clarified`, 'Romania');
+
+      // Serbia
+      add('Assisted sales / Co-apping / Documents', 'Serbia', 'PI', `PolyAI digital channels integration
+Enable PolyAI integration across all digital channels and the Contact Center, allowing customers to initiate AI-powered conversations through mobile banking, online banking, and other supported digital touchpoints to receive instant assistance and self-service support.
+Allow customers contacting the Contact Center to be securely identified and authenticated through the mobile banking application, while enabling seamless handover between AI and human agents, providing a personalized, efficient, and consistent omnichannel customer experience across all interaction channels.`, 'Serbia');
+      add('Onboarding', 'Serbia', 'PI', `Remote consumer finance
+Remote contracting trough applicaotn like blinking or other . Point of sales`, 'Serbia');
+      add('SME / Business Mobile', 'Serbia', 'SME', `SME UCX Onbording
+Enable a Remote Business Account Opening functionality for micro-business customers, allowing the account opening process to be initiated directly from the pre-login area of the mBiz application through a fully digital onboarding journey.
+Allow prospective customers to complete identification, provide required documentation, review and accept contractual documents, and open a business account remotely, with the end-to-end user experience aligned with UniCredit’s UCX principles to ensure a seamless, intuitive, and customer-centric onboarding process.`, 'Serbia');
+      add('Payments', 'Serbia', 'PI', `mBanking fee amount display before payment
+mBanking fee amount display. when filling out the order on the review screen fee amount should be presented. Currently we have this only for IPSI transaction but mandat from National Bank of Serbia is to have for all transactions.`, 'Serbia');
+      add('Payments', 'Serbia', 'PI', `Display and notifications for rejected transactions in mBanking (already exist for IPS)
+We should provide all transaction that is submited by the client using mBanking, even if that transaction is rejected. Currently, we're showing only Instant payment rejected transaction with appropriate Push notification following rejection. As per NBS regulation, we should provide information about standard payment rejected transaction as well with a following push notification. Transaction should contain the same information as instant payment rejected transaction`, 'Serbia');
+      add('Savings', 'Serbia', 'PI', `Mbanking term deposit
+Enable an End-to-End Time Deposit Origination functionality within the retail mobile banking application, allowing customers to open and manage term deposits digitally without visiting a branch.
+Allow customers to select the deposit amount, currency, maturity period, and applicable conditions from bank-defined offerings, review terms and interest rates, and complete the deposit agreement process digitally, while enabling the bank to fully parameterize the available currencies, tenors, pricing, and product conditions presented to customers.`, 'Serbia');
+      add('Kids', 'Serbia', 'PI', `Kids app
+FUN AND REWARDING FIRST STEPS INTO BANKING. TAILORED MOBILE BANKING SERVICES FOR UNDERAGE. PARENTAL CONTROLS`, 'Serbia');
+      add('Spending / Analytics / PFM / Meniga', 'Serbia', 'PI', `Meniga upgrade
+Enable an upgraded Meniga Personal Finance Management (PFM) functionality focused on modernizing transaction categorization and delivering a more seamless, intuitive, and personalized financial management experience.
+Allow customers to benefit from enhanced automated categorization, intelligent spending insights, and predictive cash flow forecasting, helping them better understand future income and expenses, improve financial planning, and make more informed financial decisions.`, 'Serbia');
+      add('Assisted sales / Co-apping / Documents', 'Serbia', 'PI', `Coapping
+Enable co-browsing functionality to support Remote Sales, allowing agents to guide customers in real time throughout the digital sales journey and application process.
+Allow sales agents to join and participate in a customer’s online session, providing assistance, answering questions, and supporting the successful completion of the sales process.`, 'Serbia');
+      add('Onboarding', 'Serbia', 'PI', `mBanking Mortgage requests status monitoring
+Enable integration between the retail mobile banking application and the new Mortgage Management Platform, allowing customers to track the progress of their mortgage application through a transparent and user-friendly digital journey.
+Allow customers to receive real-time notifications on application status changes, view the current stage of the mortgage process, access estimated completion times for each step, and gain clear visibility into the overall application timeline, improving predictability, transparency, and customer understanding throughout the mortgage origination process.`, 'Serbia');
+      add('Regulatory / Security', 'Serbia', 'SME', `3ds confirmation on mbiznis
+Enable 3D Secure (3DS) authentication for online payments made with business cards, allowing transaction approval through a push notification sent to the mBanking Biz application.
+Allow authorized business users to review and approve or decline online card transactions directly within the mBanking Biz app, ensuring secure Strong Customer Authentication (SCA) and a seamless payment experience.`, 'Serbia');
+      add('Cards', 'Serbia', 'SME', `Card management features in SME mobile app
+Card management features in SME mobile app`, 'Serbia');
+      add('Regulatory / Security', 'Serbia', 'PI', `DMFS (Distance Marketing Of Financial Services
+the regulation requires banks to implement a „Cancel Contract“ button across all remote processes & channels during the 14 calendar days that consumers have to withdraw from a distance or off-premises contrac`, 'Serbia');
+      add('Regulatory / Security', 'Serbia', 'PI', `CCD2 (Consumer Credit Directive 2)
+regulation will require changes to creditworthiness assessment and info for clients.`, 'Serbia');
+      add('Savings', 'Serbia', 'PI', `Savings in mbanking-Rounding
+Saving option for client where they will have option to define % of each transaction to be transferred to savings account or to do rounding of card transaction and to transfer to saving`, 'Serbia');
+      add('CRM / Campaigns / Offers', 'Serbia', 'PI', `Referal on mbankingu
+Enable a referral functionality within the mobile banking application that allows existing customers to send a unique referral code to prospective customers, supporting customer acquisition and additional sales generation.
+Allow referred prospects to use the received referral code during onboarding, enabling referral tracking, campaign attribution, and the fulfillment of referral-based sales incentives.`, 'Serbia');
+      add('Investments', 'Serbia', 'PI', `Upgrade of investment on mBanking
+Enable an enhanced Investment Module onboarding process that allows bank customers to subscribe to a new individual investment fund through mBanking, providing a fully digital and streamlined investment journey.
+Allow customers to select and join a specific investment fund, complete all required onboarding steps, review regulatory disclosures, and submit the subscription request digitally, while leveraging the existing fund overview functionality already available in the application.`, 'Serbia');
+      add('SME / Business Mobile', 'Serbia', 'SME', `mBusiness integration with SmartBiz via WebView
+Enable a SmartBiz Underwriting integration within the mBiz application through a dedicated WebView component, allowing micro-business customers to seamlessly access the digital micro-loan origination journey without leaving the application environment.
+Allow customers to initiate, complete, and track micro-loan applications through the embedded SmartBiz underwriting solution, ensuring a consistent user experience, streamlined data exchange between systems, and an efficient end-to-end digital lending process.`, 'Serbia');
+      add('Cards', 'Serbia', 'PI', `mBanking renewal to only Digital card
+Enable card renewal with an option to issue the renewed card as a digital card, allowing customers to continue using the card immediately through digital channels without requiring a physical card.
+Allow customers to select a digital-only card during the renewal process and subsequently order a physical plastic card if needed, providing greater flexibility and supporting digital-first card adoption.`, 'Serbia');
+      add('Cards', 'Serbia', 'PI', `Credit card repayment via mBank
+Enable a dedicated Credit Card Repayment functionality within mBanking that allows customers to repay their outstanding credit card balance through a simplified and user-friendly journey, eliminating the need to create a standard payment order.
+Allow customers to repay the minimum due amount, outstanding balance, or a custom amount with a few clicks using pre-populated account and card details already available to the bank, reducing manual data entry and significantly improving the customer experience.`, 'Serbia');
+      add('SME / Business Mobile', 'Serbia', 'SME', `Mbusines integration with SEF(invoices)
+Enable integration between the mBiz application and the Serbian eInvoice System (SEF), allowing business customers to receive real-time notifications whenever a new incoming invoice is received.
+Allow customers to view invoice details directly within the mBiz application and initiate invoice payment with pre-populated payment data in a single flow, reducing manual entry, improving efficiency, and supporting timely invoice settlement.`, 'Serbia');
+      add('Identity / Government services', 'Serbia', 'PI', `mBanking certificate on cloud issuing (Consent ID) and Enhancement of signature process in mBanking
+Embading option for issuing of Consent ID. Consent ID is certificated on cloud which is issued by Serbian E-government, Enhancement of signature for connection with Consent ID (certificate on cloud) - opportunity to sign documents by qualified signature, not only advanced`, 'Serbia');
+      add('Assisted sales / Co-apping / Documents', 'Serbia', 'PI', `DXS
+Enable a secure Document Exchange functionality within the retail mobile banking application, allowing customers and the bank to exchange documents digitally in support of loan origination, loan servicing, and other customer service processes.
+Allow customers to receive document requests, upload and securely share the required documentation, track submission status, and access exchanged documents directly within the application, reducing paperwork, improving process efficiency, and enhancing the overall customer experience.`, 'Serbia');
+      add('Identity / Government services', 'Serbia', 'PI', `Integration of mBanking with government services
+enable integration between the retail mobile banking application and the national eGovernment platform, allowing customers to securely access and retrieve selected personal data and documents made available by public authorities through a seamless digital experience.
+Allow customers to view and use government-provided information directly within the application, such as tax-related information, fines, official extracts, and other available public records, supporting simplified administration, reduced manual document collection, and enhanced digital service delivery.`, 'Serbia');
+      add('Homepage', 'Serbia', 'PI', `Quick menu on mbanking
+Enable a Quick Menu and Favorites functionality within the retail mobile banking application, allowing customers to personalize the home screen by selecting and prioritizing their most frequently used features and journeys.
+Allow customers to create, manage, and access personalized shortcuts to preferred actions, products, and sections of the application, delivering a faster, more intuitive, and tailored user experience aligned with individual customer needs and usage patterns.`, 'Serbia');
+      add('CRM / Campaigns / Offers', 'Serbia', 'PI', `Loyalty program card transaction cash back
+Enable a Merchant Cashback Partnership functionality within the mobile banking application, allowing customers to receive automatic cashback rewards when making eligible purchases with selected merchant partners.
+Allow customers to discover cashback offers, track earned rewards, and receive cashback automatically after qualifying transactions, creating a seamless loyalty experience, increasing customer engagement, and driving card usage through merchant-funded promotions similar to proven group-wide partnership models.`, 'Serbia');
+
+      // Bosnia
+      add('CRM / Campaigns / Offers', 'Bosnia', 'PI', `CRM channel integration with SAS360 [SBL-59812] [BIH-UBB] CRM Integration for Commercial Engagement in Mobile App+ Banners - JIRA`, 'Bosnia');
+      add('Assisted sales / Co-apping / Documents', 'Bosnia', 'PI', `My advisor/book an appointment on mass clients`, 'Bosnia');
+      add('SME / Business Mobile', 'Bosnia', 'SME', `m-bank BIZ wallets (google pay, apple pay)`, 'Bosnia');
+      add('Cards', 'Bosnia', 'PI', `Full digital card`, 'Bosnia');
+      add('Cards', 'Bosnia', 'PI', `Click to Pay`, 'Bosnia');
+      add('CRM / Campaigns / Offers', 'Bosnia', 'PI', `Custom Offers on MB`, 'Bosnia');
+      add('Homepage', 'Bosnia', 'PI', `Running balance`, 'Bosnia');
+      add('Assisted sales / Co-apping / Documents', 'Bosnia', 'PI', `Upload of documents (proof of payment)`, 'Bosnia');
+      add('Assisted sales / Co-apping / Documents', 'Bosnia', 'SME', `Upload of documents (proof of payment)`, 'Bosnia');
+      add('Assisted sales / Co-apping / Documents', 'Bosnia', 'PI', `Document folder and consent architecture`, 'Bosnia');
+      add('Payments', 'Bosnia', 'PI', `Instant Payment_overlay services - PeerToPeer payment (Request to pay/Split the bill)`, 'Bosnia');
+      add('Payments', 'Bosnia', 'PI', `Instant Payment_overlay services - PhoneBook payments`, 'Bosnia');
+      add('Assisted sales / Co-apping / Documents', 'Bosnia', 'PI', `Chat bot on MB PI`, 'Bosnia');
+      add('SME / Business Mobile', 'Bosnia', 'SME', `Chat bot on MB SME`, 'Bosnia');
+      add('Payments', 'Bosnia', 'PI', `TopUp integrations (Tel. AC Parking PIK..)`, 'Bosnia');
+      add('Products / Product shelf', 'Bosnia', 'PI', `Samsung partnership on Prod shelf for PRIME [SBL-447057] [BiH-UBB] Partnership in MB with Samsung and other partners for PRIME - JIRA`, 'Bosnia');
+      add('Spending / Analytics / PFM / Meniga', 'Bosnia', 'PI', `AI spending tracker and advisor`, 'Bosnia');
+      add('Products / Product shelf', 'Bosnia', 'PI', `Digital sale- Cash Loan, Overdraft, Credit Card`, 'Bosnia');
+      add('Products / Product shelf', 'Bosnia', 'PI', `Digital sale- Packages`, 'Bosnia');
+      add('CRM / Campaigns / Offers', 'Bosnia', 'PI', `FreeForms`, 'Bosnia');
+      add('Platform / PWS', 'Bosnia', 'PI', `Transfer mBa to new device PI`, 'Bosnia');
+      add('Payments', 'Bosnia', 'PI', `QR code payments`, 'Bosnia');
+      add('CRM / Campaigns / Offers', 'Bosnia', 'PI', `MBank Loyalty program`, 'Bosnia');
+      add('Payments', 'Bosnia', 'PI', `Mail template adjustments for payment confirmations (Rejected vs Completed, Recipient name)`, 'Bosnia');
+      add('Payments', 'Bosnia', 'PI', `Payment category adjustment to avoid additional scroll`, 'Bosnia');
+      add('SME / Business Mobile', 'Bosnia', 'SME', `Payment signee not properly defined`, 'Bosnia');
+      add('Assisted sales / Co-apping / Documents', 'Bosnia', 'PI', `co-apping`, 'Bosnia');
+      add('Regulatory / Security', 'Bosnia', 'PI', `Google Pay Push Provisioning API - Google Mandate`, 'Bosnia');
+      add('Cards', 'Bosnia', 'PI', `Merchant Data Enrichment`, 'Bosnia');
+      add('Cards', 'Bosnia', 'PI', `Card trx dispute on Mbak`, 'Bosnia');
+
+      const mobilePiInterpretations = {
+        'CZ + SK': [
+          `Interpretare: motor de personalizare CRM, nu doar bannere.
+Impact Mobile PI: Home (bannere/context), Inbox/push cu deep-link, consimțământ și reguli de eligibilitate; fără campanie afișată până nu există contractul de date.`,
+          `Interpretare: refacere structurată a ecranului Home, nu un simplu restyle vizual.
+Impact Mobile PI: Home/Account Summary, carduri de produs, ordinea secțiunilor, quick actions și navigația de jos cu intrare dedicată Investments.`,
+          `Interpretare: context de produs separat pentru copii și adolescenți, cu control parental real.
+Impact Mobile PI: shell/nav Kids, Home, Cards, Payments/limits, Savings goals, educație și suprafața părintelui pentru aprobare/control.`,
+          `Interpretare: opțiune de temă globală, cu accesibilitate și consistență pe toate fluxurile.
+Impact Mobile PI: token-uri de culoare, phone chrome, componente, Settings și verificare pentru toate ecranele active.`,
+          `Interpretare: punct de acces către servicii publice, nu un serviciu guvernamental construit în aplicație.
+Impact Mobile PI: entry în Home sau More, handoff securizat către serviciu și eventual wallet/identitate; fără flux tranzacțional până există integrarea aprobată.`,
+          `Interpretare: PFM orientat spre viitorul cash-flow, nu doar istoric de tranzacții.
+Impact Mobile PI: Analytics/PFM, planned payments, categorii, bugete, alerte de deficit și sumar Home relevant.`,
+          `Interpretare: pagină PWS/landing pentru PRIME și SME.
+Impact Mobile PI: fără impact Mobile PI direct; eventualele deep-link-uri CRM se tratează doar după definirea țintelor mobile.`
+        ],
+        'Hungary Set 1': [
+          `Interpretare: extindere a universului de investiții cu piețe externe și ETF-uri.
+Impact Mobile PI: Investments catalog/search, securitate detaliu, buy/sell, eligibilitate, disclosure și confirmare ordin.`,
+          `Interpretare: integrare de campaign management și măsurare, cu UX contextual și controlat de consimțământ.
+Impact Mobile PI: event taxonomy, Home/Products/Inbox/push, deep-link-uri de campanie și Privacy/consent; fără UI nou fără conținut aprobat.`,
+          `Interpretare: produs Kids dedicat sub 18 ani, amânat dar nu redus la o temă vizuală.
+Impact Mobile PI: context Kids, Home/nav, cont/card, plăți și limite, goals, educație și controale parentale.`,
+          `Interpretare: autoservire pentru limite de tranzacție cu creștere întârziată și control de risc.
+Impact Mobile PI: Payment settings/limits, confirmare, status pending, mesaje de eroare și notificări; necesită regulile de risc din backend.`,
+          `Interpretare: referral program end-to-end, cu urmărirea eligibilității și a recompensei.
+Impact Mobile PI: Home sau Offers entry, generare/copy cod, onboarding pentru invitat, status referral și notificări.`,
+          `Interpretare: pachet coerent pentru Investments, nu nouă funcții izolate.
+Impact Mobile PI: portofoliu și chart-uri, date intraday, detaliu produs, bulk signing, buy flow, erori/balance check, notificări și disclosures.`,
+          `Interpretare: saving pocket/goal finanțat automat din plățile cu cardul.
+Impact Mobile PI: Savings goals, Home quick action, setare round-up, cont sursă, reguli de alimentare și istoricul contribuțiilor.`,
+          `Interpretare: o singură vedere de wealth corectă, fără sold de credit-card în total.
+Impact Mobile PI: Home balance/Account Summary, Products/Accounts și Investments; respectă amount privacy și explică ce este inclus.`,
+          `Interpretare: integrare DDE pentru Mobile Business/Micro, nu o funcție PI.
+Impact Mobile PI: fără impact Mobile PI direct; păstrarea limitei de produs PI vs. MBO este recomandată.`,
+          `Interpretare: recomandări/loialitate Dateio făcute vizibile și măsurabile.
+Impact Mobile PI: Offers/Products sau Home, consimțământ, merchant context, deep-link-uri și tracking de campanie.`,
+          `Interpretare: backlog mixt; trebuie separat în cerințe livrabile înainte de design.
+Impact Mobile PI: Home quick action configurabil, schimbare cont, documente welcome după activare și o pagină suport PROD; nu se livrează ca un singur ecran.`,
+          `Interpretare: PWS/Internet Banking și AEM, cu o direcție reutilizabilă pentru Product Shelf.
+Impact Mobile PI: fără impact Mobile PI direct; Product Shelf și Investments pot fi referințe, nu cerințe de implementare mobile.`
+        ],
+        'Romania': [
+          `Interpretare: ecosistem Kids conectat la contul părintelui, cu companion app.
+Impact Mobile PI: experiență părinte în PI, setup/legătură copil, controale, supraveghere cheltuieli, tasks/rewards, goals și plăți controlate.`,
+          `Interpretare: brokeraj end-to-end în aplicație, inclusiv instrumente locale și internaționale.
+Impact Mobile PI: Investments, portofoliu, instrument detail, buy/sell, ordine, validări, disclosures și istoric.`,
+          `Interpretare: instrumentare de marketing funnel, nu feature UI pentru client.
+Impact Mobile PI: evenimente analitice pe onboarding și vânzare PI/MBO plus managementul consimțământului; fără ecran nou.`,
+          `Interpretare: referral/MGM digital, urmărit transparent în aplicație.
+Impact Mobile PI: Home/Offers entry, invitație/cod, status progres, onboarding cu cod și comunicări de recompensă.`,
+          `Interpretare: reducerea fricțiunii în distribuția de Investments și vizibilitatea disponibilității.
+Impact Mobile PI: entry Investments, cod referral pentru branch/call center, eligibility/available amount și mesaje de blocaj clare.`,
+          `Interpretare: motor de formulare dinamice pentru CRM/feedback/consimțământ.
+Impact Mobile PI: Inbox, campanii, overlay/form și Settings pentru consimțământ; fără formă generică până nu există schemă și validări.`,
+          `Interpretare: experiență Contact Centre asistată de AI și voice/chat bot.
+Impact Mobile PI: entry de ajutor/chat, context de sesiune, handover la agent, consent și stări de așteptare; nu înlocuiește fluxurile bancare.`,
+          `Interpretare: co-apping pentru vânzare asistată, cu agent în sesiunea clientului.
+Impact Mobile PI: launcher/indicator persistent, consimțământ, joining/leaving session și integrare în journeys de produs; componentă transversală.`,
+          `Interpretare: schimbare între rol personal și business în aceeași aplicație.
+Impact Mobile PI: fără acțiune PI izolată până se aprobă convergența PI/MBO; apoi afectează session context, switcher și boundary de securitate.`,
+          `Interpretare: pachet mixt de micro-îmbunătățiri UX ce trebuie spart pe probleme.
+Impact Mobile PI: Home/conturi, pending FX, Profile, service/downtime messaging și loyalty notifications; fără un singur „UX improvements” ticket.`,
+          `Interpretare: split bill/P2P ca journey de plată, nu doar un buton.
+Impact Mobile PI: Payments compose/review, selectare participanți, status/istoric și deep-link-uri din tranzacții.`,
+          `Interpretare: schimb securizat de documente în vânzare asistată.
+Impact Mobile PI: Documents/Inbox, upload, semnare, status de solicitare și deep-link-uri din aplicațiile de produs.`,
+          `Interpretare: avertizare live pentru apeluri de fraudă, utilă doar cu semnal sigur și wording aprobat.
+Impact Mobile PI: banner/alertă de securitate la nivel de app, entry către ajutor și reguli de dismiss; fără a bloca plăți fără policy.`,
+          `Interpretare: administrare de utilizatori pentru Business Mobile.
+Impact Mobile PI: fără impact Mobile PI direct; aparține Mobile Business/GBS.`,
+          `Interpretare: gamification transversală legată de comportament și beneficii.
+Impact Mobile PI: Home progress/rewards, Offers, tranzacții și notificări; trebuie izolată de fluxurile critice de plată.`,
+          `Interpretare: acceptare a identității/wallet eIDAS în parcursuri eligibile.
+Impact Mobile PI: onboarding, autentificare/semnare și handoff wallet; fără UI final până la contractul de identitate.`,
+          `Interpretare: schimbare legală pentru plăți și consimțăminte, nu un ecran singular.
+Impact Mobile PI: Payments, security/consent, termeni și mesaje de eroare; se proiectează după cerințele juridice detaliate.`
+        ],
+        'Serbia': [
+          `Interpretare: asistență AI omnichannel cu predare la agent și identificare securizată.
+Impact Mobile PI: Help/chat entry, context de sesiune, autentificare/consent și handover; fără a expune date sensibile în conversație.`,
+          `Interpretare: consumer finance contractat remote, posibil cu handoff la POS.
+Impact Mobile PI: Product Shelf/loan entry, preeligibilitate, aplicație, contractare și status; depinde de soluția de identificare.`,
+          `Interpretare: onboarding de cont SME în mBiz.
+Impact Mobile PI: fără impact Mobile PI direct; aparține mBiz.`,
+          `Interpretare: afișare obligatorie a comisionului înainte de confirmarea plății.
+Impact Mobile PI: Payments review pentru toate tipurile eligibile, sumar total, validări și mesaje regulatorii.`,
+          `Interpretare: trasabilitate și notificare pentru plățile respinse, nu doar IPS.
+Impact Mobile PI: Payments review/result, listă tranzacții, detail/status și push notification cu date consecvente.`,
+          `Interpretare: depozit la termen deschis și administrat digital end-to-end.
+Impact Mobile PI: Savings/Product Shelf, configurare sumă/monedă/scadență, review, semnare, succes și poziție în portofoliu.`,
+          `Interpretare: ofertă Kids cu primul contact bancar, recompense și control parental.
+Impact Mobile PI: context Kids, cont/card, plăți/limite, Home și controale pentru părinte.`,
+          `Interpretare: modernizare Meniga către insight-uri și forecast, nu doar categorii.
+Impact Mobile PI: Analytics/PFM, categorii, spending insights, cash-flow forecast și explicarea calității datelor.`,
+          `Interpretare: vânzare asistată prin co-browsing.
+Impact Mobile PI: consent/session layer transversal, indicator agent, start/stop și integrare cu product journeys.`,
+          `Interpretare: timeline transparent pentru cererea de ipotecă.
+Impact Mobile PI: Products/Home entry, mortgage application status, timeline, estimări și notificări de schimbare.`,
+          `Interpretare: 3DS pentru carduri business în mBiz.
+Impact Mobile PI: fără impact Mobile PI direct; aparține mBiz/SME.`,
+          `Interpretare: management de card pentru SME.
+Impact Mobile PI: fără impact Mobile PI direct; aparține aplicației SME.`,
+          `Interpretare: drept legal de anulare în procese de vânzare la distanță.
+Impact Mobile PI: flows de produs/contract, statusul celor 14 zile, CTA Cancel Contract și confirmare; necesită policy juridic exact.`,
+          `Interpretare: adaptare la CCD2 pentru creditworthiness și informații client.
+Impact Mobile PI: loan/credit-card applications, disclosures, explicații de eligibilitate și documente.`,
+          `Interpretare: round-up sau procent din tranzacție către savings.
+Impact Mobile PI: Savings goal, setare regulă, Payments/Cards ca sursă, Home și istoricul alimentărilor.`,
+          `Interpretare: referral digital cu cod și urmărirea conversiei.
+Impact Mobile PI: Home/Offers, share/copy cod, onboarding cu cod, status și reward communications.`,
+          `Interpretare: subscriere digitală la fonduri individuale.
+Impact Mobile PI: Investments onboarding, fund detail, disclosures, semnare, succes și portofoliu.`,
+          `Interpretare: underwriting SmartBiz în WebView pentru micro-loan SME.
+Impact Mobile PI: fără impact Mobile PI direct; aparține mBiz/SME.`,
+          `Interpretare: reînnoire card cu opțiune digital-only și plastic opțional ulterior.
+Impact Mobile PI: Card detail/renewal, digital card provisioning, wallet/activation și status livrare plastic.`,
+          `Interpretare: rambursare credit-card precompletată, fără payment order clasic.
+Impact Mobile PI: Card detail/action, alegere sumă, cont sursă, review, confirmare și receipt.`,
+          `Interpretare: eInvoice SEF pentru mBiz.
+Impact Mobile PI: fără impact Mobile PI direct; aparține mBiz/SME.`,
+          `Interpretare: Consent ID cloud pentru semnătură calificată.
+Impact Mobile PI: semnare în fluxuri de contract/document, identity handoff și stări de retry/failure.`,
+          `Interpretare: document exchange securizat pentru servicii și credite.
+Impact Mobile PI: Documents/Inbox, upload, request status, viewer și deep-link-uri din loan servicing.`,
+          `Interpretare: acces la date și documente eGovernment din aplicație.
+Impact Mobile PI: More/Home entry, consent/identitate, document viewer și handoff guvernamental; fără replicarea portalului în app.`,
+          `Interpretare: favorite configurabile pentru accelerarea Home.
+Impact Mobile PI: Home quick menu, picker/edit/reorder, reguli de eligibilitate și fallback pentru funcții indisponibile.`,
+          `Interpretare: cashback partener ca produs de loyalty, legat de tranzacții card.
+Impact Mobile PI: Offers, merchant/reward detail, card transaction enrichment, earned rewards și notificări.`
+        ],
+        'Bosnia': [
+          `Interpretare: CRM pentru engagement comercial și bannere contextuale.
+Impact Mobile PI: Home/Products/Inbox/push, deep-link-uri, frequency capping și consimțământ.`,
+          `Interpretare: contact cu advisor și programare pentru mass clients.
+Impact Mobile PI: More/Contacts sau Home entry, alegere canal/slot, confirmare și reminder; fără calendar propriu dacă se face handoff.`,
+          `Interpretare: wallet-uri pentru m-bank BIZ.
+Impact Mobile PI: fără impact Mobile PI direct; aparține SME.`,
+          `Interpretare: ciclu de viață digital pentru card, nu doar imaginea unui card.
+Impact Mobile PI: Cards/Card detail, activare, date card protejate, wallet provisioning și status.`,
+          `Interpretare: enrolment Click to Pay pentru card eligibil.
+Impact Mobile PI: Card detail sau Wallet settings, eligibilitate, consent, succes/eroare și management statut.`,
+          `Interpretare: oferte personalizate în Mobile Banking.
+Impact Mobile PI: Home/Products/Inbox, card de ofertă, eligibilitate, CTA/deep-link și dismissal.`,
+          `Interpretare: sold curent explicat în contextul tranzacțiilor.
+Impact Mobile PI: Account detail și transaction list, disponibil vs. running balance, pending și explicații de calcul.`,
+          `Interpretare: upload de dovadă de plată ca parte dintr-un caz/cerere.
+Impact Mobile PI: Payment/transaction detail, Documents upload, validare fișier și status de trimitere.`,
+          `Interpretare: upload de dovadă de plată pentru SME.
+Impact Mobile PI: fără impact Mobile PI direct; aparține SME.`,
+          `Interpretare: spațiu unic pentru documente și consimțăminte.
+Impact Mobile PI: More/Documents, document viewer, consent management, search și deep-link-uri din flows.`,
+          `Interpretare: request-to-pay și split bill ca extensii P2P.
+Impact Mobile PI: Payments, selectare participanți, request status, reminders și transaction history.`,
+          `Interpretare: plăți către contacte prin număr de telefon.
+Impact Mobile PI: New payment, contact permission/selector, verificare destinatar și review.`,
+          `Interpretare: chatbot PI pentru suport sau conversație comercială.
+Impact Mobile PI: chat launcher/Help, context de ecran, handover și reguli de date personale.`,
+          `Interpretare: chatbot pentru Mobile Business.
+Impact Mobile PI: fără impact Mobile PI direct; aparține SME.`,
+          `Interpretare: top-up către servicii/parteneri.
+Impact Mobile PI: Payments/shortcuts, selecție serviciu, formular, review, receipt și istoric.`,
+          `Interpretare: parteneriat Samsung expus în Product Shelf PRIME.
+Impact Mobile PI: Products/Product detail sau Offers, eligibilitate PRIME, CTA extern și tracking.`,
+          `Interpretare: PFM cu asistent de cheltuieli AI.
+Impact Mobile PI: Analytics/PFM, spending insights, recomandări explicabile și entry controlat din Home.`,
+          `Interpretare: vânzare digitală pentru cash loan, overdraft și credit card.
+Impact Mobile PI: Products/Product Shelf, preeligibilitate, aplicație, documente/semnare și status.`,
+          `Interpretare: vânzare digitală de pachete bancare.
+Impact Mobile PI: Products/Product detail, comparație, eligibilitate, aplicare și confirmare.`,
+          `Interpretare: formulare dinamice pentru CRM.
+Impact Mobile PI: Inbox/campanii/feedback, validare, consimțământ și status de trimitere; fără formă generică fără schemă.`,
+          `Interpretare: transfer securizat către un dispozitiv nou.
+Impact Mobile PI: onboarding/access, device binding, mToken/secure confirmation și recovery; nu afectează ecranele bancare de zi cu zi.`,
+          `Interpretare: inițiere și confirmare plată prin QR.
+Impact Mobile PI: Payments scan, permisiune cameră, prefill, review, erori și receipt.`,
+          `Interpretare: program de loialitate în aplicație.
+Impact Mobile PI: Offers/rewards, Home teaser, istoricul beneficiilor și notificări.`,
+          `Interpretare: diferențiere clară între receipt de plată respinsă și finalizată.
+Impact Mobile PI: Payments result, notificări, transaction detail și template de comunicare.`,
+          `Interpretare: reducerea scrollului pentru alegerea categoriei de plată.
+Impact Mobile PI: Payments form/review, taxonomie categorie, picker/search și accesibilitate.`,
+          `Interpretare: definirea semnatarului pentru plăți SME.
+Impact Mobile PI: fără impact Mobile PI direct; aparține SME.`,
+          `Interpretare: co-apping pentru Mobile PI.
+Impact Mobile PI: session layer transversal, consent, indicator agent, start/stop și limitare a zonelor sensibile.`,
+          `Interpretare: Google Pay push provisioning mandatat.
+Impact Mobile PI: Cards/Card detail, wallet enrollment, eligibilitate, auth și confirmation/error state.`,
+          `Interpretare: date merchant mai bogate pentru tranzacții cu cardul.
+Impact Mobile PI: Card/transaction detail, merchant logo/location/category și legătură către Analytics.`,
+          `Interpretare: dispută de tranzacție card inițiată în aplicație.
+Impact Mobile PI: Card transaction detail, eligibility, formular/categorii, upload documente, status caz și mesaje.`
+        ]
+      };
+
+      const impactByRequirementId = {
+        1: ['Homepage', 'Products'], 2: ['Homepage', 'Products'], 3: ['Homepage', 'Payments'], 4: ['Homepage', 'Spending', 'Payments', 'Products'],
+        5: ['Homepage'], 6: ['Homepage', 'Spending', 'Payments'], 7: [], 8: ['Products'], 9: ['Homepage', 'Products'],
+        10: ['Homepage', 'Payments'], 11: ['Payments'], 12: ['Homepage', 'Products'], 13: ['Homepage', 'Products'], 14: ['Homepage', 'Payments', 'Products'],
+        15: ['Homepage', 'Products'], 16: [], 17: ['Homepage', 'Products'], 18: ['Homepage'], 19: [], 20: ['Homepage', 'Payments'],
+        21: ['Homepage', 'Products'], 22: ['Homepage', 'Products'], 23: ['Homepage', 'Products'], 24: ['Products'], 25: [], 26: [],
+        27: ['Homepage', 'Spending', 'Payments', 'Products'], 28: [], 29: ['Homepage', 'Payments'], 30: ['Payments'], 31: ['Products'], 32: ['Homepage', 'Payments'],
+        33: [], 34: ['Homepage', 'Spending', 'Payments'], 35: [], 36: ['Payments'], 37: ['Homepage', 'Spending', 'Payments', 'Products'], 38: ['Products'],
+        39: [], 40: ['Payments'], 41: ['Spending', 'Payments'], 42: ['Homepage', 'Products'], 43: ['Homepage', 'Payments'], 44: ['Homepage', 'Spending'],
+        45: ['Homepage', 'Spending', 'Payments', 'Products'], 46: ['Homepage', 'Products'], 47: [], 48: [], 49: ['Products'], 50: ['Products'],
+        51: ['Homepage', 'Payments', 'Products'], 52: ['Homepage', 'Products'], 53: ['Homepage', 'Products'], 54: [], 55: ['Products'], 56: ['Payments'],
+        57: [], 58: ['Payments', 'Products'], 59: ['Products'], 60: ['Homepage'], 61: ['Homepage'], 62: ['Homepage', 'Spending', 'Products'],
+        63: ['Homepage', 'Products'], 64: ['Homepage'], 65: [], 66: ['Products'], 67: ['Payments'], 68: ['Homepage', 'Products'],
+        69: ['Homepage', 'Spending'], 70: ['Payments'], 71: [], 72: [], 73: ['Payments'], 74: ['Payments'],
+        75: ['Homepage', 'Spending', 'Payments', 'Products'], 76: [], 77: ['Payments'], 78: ['Products'], 79: ['Homepage', 'Spending'],
+        80: ['Products'], 81: ['Products'], 82: [], 83: [], 84: ['Payments'], 85: ['Homepage', 'Spending', 'Products'],
+        86: ['Payments'], 87: ['Payments'], 88: [], 89: ['Homepage', 'Spending', 'Payments', 'Products'], 90: ['Payments'],
+        91: ['Spending'], 92: ['Spending', 'Payments']
+      };
+      const impactAreas = ['Homepage', 'Spending', 'Payments', 'Products'];
+      const sourceIndexes = {};
+      rows.forEach(row => {
+        const index = sourceIndexes[row.source] || 0;
+        row.interpretation = mobilePiInterpretations[row.source][index] || 'Fără interpretare UX disponibilă încă.';
+        row.impacts = impactByRequirementId[row.number] || [];
+        sourceIndexes[row.source] = index + 1;
+      });
+
+      const search = document.querySelector('#textSearch');
+      const categoryFilter = document.querySelector('#categoryFilter');
+      const countryFilter = document.querySelector('#countryFilter');
+      const segmentFilter = document.querySelector('#segmentFilter');
+      const sourceFilter = document.querySelector('#sourceFilter');
+      const impactFilter = document.querySelector('#impactFilter');
+      const body = document.querySelector('#requirementsBody');
+      const emptyState = document.querySelector('#emptyState');
+      const visibleCount = document.querySelector('#visibleCount');
+      const countLabel = document.querySelector('#countLabel');
+      let sort = { key: 'number', direction: 1 };
+
+      const collator = new Intl.Collator('en', { sensitivity: 'base', numeric: true });
+      const option = (value, label = value) => { const item = document.createElement('option'); item.value = value; item.textContent = label; return item; };
+      const unique = (key) => [...new Set(rows.map(row => row[key]).filter(Boolean))].sort(collator.compare);
+      unique('category').forEach(value => categoryFilter.append(option(value)));
+      unique('country').forEach(value => countryFilter.append(option(value)));
+      unique('segment').forEach(value => segmentFilter.append(option(value)));
+      unique('source').forEach(value => sourceFilter.append(option(value)));
+      impactAreas.forEach(value => impactFilter.append(option(value)));
+
+      function cell(className, value) { const td = document.createElement('td'); td.className = className; td.textContent = value || '—'; return td; }
+      function impactCell(impacts) {
+        const td = document.createElement('td');
+        if (!impacts.length) {
+          td.className = 'no-impact';
+          td.textContent = 'Fără impact L1 direct';
+          return td;
+        }
+        td.className = 'impact-tags';
+        impacts.forEach((impact) => {
+          const tag = document.createElement('span');
+          tag.className = 'impact-tag';
+          tag.textContent = impact;
+          td.append(tag);
+        });
+        return td;
+      }
+      function selectedValues(control) { return new Set([...control.selectedOptions].map((item) => item.value)); }
+      function render() {
+        const query = search.value.trim().toLocaleLowerCase();
+        const categories = selectedValues(categoryFilter);
+        const countries = selectedValues(countryFilter);
+        const segments = selectedValues(segmentFilter);
+        const sources = selectedValues(sourceFilter);
+        const impacts = selectedValues(impactFilter);
+        const filtered = rows.filter(row =>
+          (!query || row.text.toLocaleLowerCase().includes(query)) &&
+          (!categories.size || categories.has(row.category)) &&
+          (!countries.size || countries.has(row.country)) &&
+          (!segments.size || segments.has(row.segment)) &&
+          (!sources.size || sources.has(row.source)) &&
+          (!impacts.size || row.impacts.some((impact) => impacts.has(impact)))
+        ).sort((a, b) => {
+          if (sort.key === 'number') return (a.number - b.number) * sort.direction;
+          const aValue = sort.key === 'impacts' ? a.impacts.join(', ') : a[sort.key];
+          const bValue = sort.key === 'impacts' ? b.impacts.join(', ') : b[sort.key];
+          return collator.compare(aValue, bValue) * sort.direction;
+        });
+
+        body.replaceChildren();
+        filtered.forEach(row => {
+          const tr = document.createElement('tr');
+          const category = cell('', row.category); const pill = document.createElement('span'); pill.className = 'category'; pill.textContent = row.category; category.replaceChildren(pill);
+          tr.append(cell('number', String(row.number)), category, cell('country', row.country), cell(`segment${row.segment ? '' : ' empty'}`, row.segment), cell('requirement', row.text), impactCell(row.impacts), cell('interpretation', row.interpretation), cell('source', row.source));
+          body.append(tr);
+        });
+        visibleCount.textContent = filtered.length;
+        countLabel.textContent = `${filtered.length === 1 ? 'cerință' : 'cerințe'} afișate din ${rows.length}`;
+        emptyState.style.display = filtered.length ? 'none' : 'block';
+      }
+
+      [search, categoryFilter, countryFilter, segmentFilter, sourceFilter, impactFilter].forEach(control => {
+        control.addEventListener('input', render);
+        control.addEventListener('change', render);
+      });
+      document.querySelector('#clearFilters').addEventListener('click', () => {
+        search.value = '';
+        [categoryFilter, countryFilter, segmentFilter, sourceFilter, impactFilter].forEach((control) => {
+          [...control.options].forEach((item) => { item.selected = false; });
+        });
+        render();
+        search.focus();
+      });
+      document.querySelectorAll('[data-sort]').forEach(button => button.addEventListener('click', () => { const key = button.dataset.sort; sort = { key, direction: sort.key === key ? sort.direction * -1 : 1 }; document.querySelectorAll('.sort-mark').forEach(mark => mark.textContent = '↕'); button.querySelector('.sort-mark').textContent = sort.direction === 1 ? '↑' : '↓'; render(); }));
+      render();
+    </script>
+  </body>
+</html>

@@ -125,15 +125,11 @@ Expected: known held/unheld requests open the correct Order Data; unknown/replay
 ### Task 4: Documentation and End-to-End Verification
 
 **Files:**
-- Modify: `docs/handoff/current-session.md`
-- Modify: `docs/handoff/next-tasks.md`
-- Modify: `docs/handoff/banana-log.md`
-- Modify: `docs/handoff/state-of-the-world.md`
 - Modify: `docs/platform-capability-map/README.md`
 
 **Interfaces:**
 - Consumes: verified implementation and test evidence from Tasks 1-3.
-- Produces: current behavior, limitation, commands, Banana Loop, and Constitutional Check evidence.
+- Produces: current behavior, limitation, and commands.
 
 - [ ] **Step 1: Run focused verification**
 
@@ -153,7 +149,7 @@ On CZ Future, open an owned Product Detail, launch chat, choose performance, ass
 
 - [ ] **Step 4: Update handoff and capability documentation**
 
-Record files changed, the root cause, the optional compatible contracts, RED/GREEN commands, browser evidence, deterministic front-end limitation, Banana Loop outcome, and `safe to resume` status. Do not commit or publish implementation unless the operator requests closeout.
+Record files changed, the root cause, the optional compatible contracts, RED/GREEN commands, browser evidence, and deterministic front-end limitation.
 
 ### Task 5: Collect BUY Data in Chat and Enter Review Directly
 

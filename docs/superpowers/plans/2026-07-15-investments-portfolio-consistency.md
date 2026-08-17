@@ -98,11 +98,7 @@ Expected: both commands exit `0`.
 ### Task 4: Document and verify the cross-country mock contract
 
 **Files:**
-- Modify: `docs/handoff/current-session.md`
-- Modify: `docs/handoff/next-tasks.md`
-- Modify: `docs/handoff/state-of-the-world.md`
 - Modify: `docs/platform-capability-map/README.md`
-- Modify: `docs/handoff/banana-log.md`
 
 **Interfaces:**
 - Consumes: successful audit/build output.

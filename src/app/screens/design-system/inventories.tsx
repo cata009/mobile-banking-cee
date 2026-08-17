@@ -649,6 +649,13 @@ export function PfmIconInventoryCard({ category }: { category: PfmCategoryDefini
         <div className="grid size-[32px] shrink-0 place-items-center rounded-[6px] border border-[var(--uc-border-muted)] bg-[var(--uc-app-bg)]">
           <PfmCategoryIcon category={category.name} size={32} />
         </div>
+        <div
+          className="grid size-[32px] shrink-0 place-items-center"
+          aria-label={`${category.name} filled category circle, 32 by 32`}
+          data-pfm-icon-variant="category-circle"
+        >
+          <PfmCategoryIcon category={category.name} size={32} variant="category-circle" />
+        </div>
         <div className="min-w-0 flex-1">
           <div className="flex min-h-[22px] items-center gap-2">
             <h3 className="min-w-0 flex-1 truncate font-['UniCredit:Bold',sans-serif] text-[14px] leading-5 text-[var(--uc-text)]" title={category.name}>
@@ -776,7 +783,7 @@ export function IconInventory() {
             <div>
               <h3 className="font-['UniCredit:Bold',sans-serif] text-[22px] leading-7 text-[var(--uc-text)]">PFM icons</h3>
               <p className="mt-1 text-[13px] text-[var(--uc-text-muted)]">
-                Category glyphs from {PFM_ICON_SOURCE}, rendered through PfmCategoryIcon.
+                Category glyphs from {PFM_ICON_SOURCE}, including the reusable 32px filled category-circle option.
               </p>
             </div>
             <span className="ml-auto font-['UniCredit:Bold',sans-serif] text-[18px] text-[var(--uc-text)]">{visiblePfmIcons.length}</span>
