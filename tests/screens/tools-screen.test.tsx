@@ -94,7 +94,7 @@ describe("ToolsScreen", () => {
     }
   });
 
-  it("switches both comparison frames to Evo 2027 and adds a third country only on request", () => {
+  it("selects Baseline and Evo 2027 independently for each comparison frame", () => {
     const { container } = renderTools();
     fireEvent.click(container.querySelector('[data-tool-card="side-by-side"]') as HTMLElement);
 
@@ -102,17 +102,21 @@ describe("ToolsScreen", () => {
     expect(container.querySelectorAll("[data-side-by-side-empty-slot]")).toHaveLength(0);
     expect(screen.queryByText("Add country")).not.toBeInTheDocument();
 
-    fireEvent.change(screen.getByRole("combobox", { name: "App version" }), {
+    fireEvent.change(screen.getByRole("combobox", { name: "App version for Romania" }), {
       target: { value: "release-future-evo-2027" },
     });
 
-    for (const frame of Array.from(container.querySelectorAll("iframe"))) {
-      expect(frame.getAttribute("src")).toContain("release=release-future-evo-2027");
-    }
+    expect(screen.getByTitle("Romania preview").getAttribute("src")).toContain(
+      "release=release-future-evo-2027",
+    );
+    expect(screen.getByTitle("Czech Republic preview").getAttribute("src")).toContain(
+      "release=release-current",
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "Slovakia" }));
     expect(container.querySelectorAll("iframe")).toHaveLength(3);
     expect(container.querySelectorAll("[data-side-by-side-empty-slot]")).toHaveLength(0);
+    expect(screen.getByRole("combobox", { name: "App version for Slovakia" })).toHaveValue("release-current");
   });
 
   it("opens only the two selected countries in a focused side-by-side dialog", () => {
