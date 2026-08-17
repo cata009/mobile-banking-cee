@@ -99,7 +99,8 @@ describe("ToolsScreen", () => {
     fireEvent.click(container.querySelector('[data-tool-card="side-by-side"]') as HTMLElement);
 
     expect(container.querySelectorAll("iframe")).toHaveLength(2);
-    expect(container.querySelectorAll("[data-side-by-side-empty-slot]")).toHaveLength(1);
+    expect(container.querySelectorAll("[data-side-by-side-empty-slot]")).toHaveLength(0);
+    expect(screen.queryByText("Add country")).not.toBeInTheDocument();
 
     fireEvent.change(screen.getByRole("combobox", { name: "App version" }), {
       target: { value: "release-future-evo-2027" },
@@ -109,9 +110,23 @@ describe("ToolsScreen", () => {
       expect(frame.getAttribute("src")).toContain("release=release-future-evo-2027");
     }
 
-    fireEvent.click(screen.getByTitle("Add Slovakia to comparison"));
+    fireEvent.click(screen.getByRole("button", { name: "Slovakia" }));
     expect(container.querySelectorAll("iframe")).toHaveLength(3);
     expect(container.querySelectorAll("[data-side-by-side-empty-slot]")).toHaveLength(0);
+  });
+
+  it("opens only the two selected countries in a focused side-by-side dialog", () => {
+    const { container } = renderTools();
+    fireEvent.click(container.querySelector('[data-tool-card="side-by-side"]') as HTMLElement);
+
+    fireEvent.click(screen.getByRole("button", { name: "Open focused comparison" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Focused country comparison" });
+    expect(dialog.querySelectorAll("iframe")).toHaveLength(2);
+    expect(dialog).toHaveAttribute("data-focused-side-by-side", "true");
+
+    fireEvent.click(screen.getByRole("button", { name: "Close focused comparison" }));
+    expect(screen.queryByRole("dialog", { name: "Focused country comparison" })).not.toBeInTheDocument();
   });
 
   it("opens the translation tester with a custom-text preview", () => {

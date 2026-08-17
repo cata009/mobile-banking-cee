@@ -21,6 +21,7 @@ import { FieldLabel, SelectionChip, ToolPanel } from "./toolsUi";
 const MAX_COUNTRIES = 3;
 const FRAME_WIDTH = 375;
 const FRAME_HEIGHT = 812;
+const FOCUS_SCALE = 0.88;
 
 interface ScreenOption {
   screen: Screen;
@@ -65,6 +66,7 @@ export function SideBySideTool() {
   });
   const [languageMode, setLanguageMode] = useState<"local" | "en">("local");
   const [frameNonce, setFrameNonce] = useState(0);
+  const [isFocusModeOpen, setIsFocusModeOpen] = useState(false);
 
   const toggleCountry = (country: CountryId) => {
     setSelectedCountries((current) => {
@@ -78,7 +80,7 @@ export function SideBySideTool() {
   };
 
   const orderedSelection = COUNTRIES.filter((country) => selectedCountries.includes(country));
-  const scale = orderedSelection.length >= 4 ? 0.5 : orderedSelection.length === 3 ? 0.58 : 0.68;
+  const scale = orderedSelection.length === 3 ? 0.58 : orderedSelection.length === 2 ? 0.84 : 0.9;
 
   const frameLanguage = (country: CountryId) =>
     languageMode === "en" ? "en" : LOCAL_LANGUAGE_BY_COUNTRY[country];
@@ -101,19 +103,32 @@ export function SideBySideTool() {
   };
 
   return (
+    <>
     <div className="grid gap-[20px]" data-tool-side-by-side="true">
       <ToolPanel
         title="Comparison setup"
         action={
-          <button
-            type="button"
-            onClick={() => setFrameNonce((nonce) => nonce + 1)}
-            title="Reset every frame to the selected screen"
-            aria-label="Reload frames"
-            className="grid size-[32px] shrink-0 place-items-center rounded-full border border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)] transition-colors hover:border-[var(--uc-action)] hover:text-[var(--uc-action)]"
-          >
-            <AppIcon name="refresh" size={16} color="currentColor" />
-          </button>
+          <div className="flex items-center gap-[8px]">
+            <button
+              type="button"
+              onClick={() => setIsFocusModeOpen(true)}
+              disabled={orderedSelection.length !== 2}
+              title="Open the two selected countries in focus mode"
+              aria-label="Open focused comparison"
+              className="grid size-[36px] shrink-0 place-items-center rounded-full bg-[var(--uc-action)] text-[var(--uc-static-white)] shadow-sm transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <AppIcon name="play" size={16} color="currentColor" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setFrameNonce((nonce) => nonce + 1)}
+              title="Reset every frame to the selected screen"
+              aria-label="Reload frames"
+              className="grid size-[32px] shrink-0 place-items-center rounded-full border border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)] transition-colors hover:border-[var(--uc-action)] hover:text-[var(--uc-action)]"
+            >
+              <AppIcon name="refresh" size={16} color="currentColor" />
+            </button>
+          </div>
         }
       >
         <div className="grid gap-[16px]">
@@ -222,42 +237,69 @@ export function SideBySideTool() {
               );
             })}
 
-            {Array.from({ length: Math.max(0, MAX_COUNTRIES - orderedSelection.length) }).map((_, index) => {
-              const nextCountry = COUNTRIES.find((country) => !orderedSelection.includes(country));
-              if (!nextCountry) return null;
-              return (
-                <div key={`empty-slot-${index}`} className="min-w-0" data-side-by-side-empty-slot={index}>
-                  <div
-                    className="flex items-center justify-between gap-[8px] pb-[8px]"
-                    style={{ width: FRAME_WIDTH * scale + 8, height: 36 }}
-                    aria-hidden="true"
-                  >
-                    <span className="text-[13px] font-bold leading-[16px] text-transparent">Empty slot</span>
-                  </div>
-                  <div
-                    className="rounded-[28px] bg-[var(--uc-static-black)] p-[4px] shadow-[0_10px_30px_-8px_rgba(0,0,0,0.35)]"
-                    style={{ width: FRAME_WIDTH * scale + 8, height: FRAME_HEIGHT * scale + 8 }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => toggleCountry(nextCountry)}
-                      title={`Add ${COUNTRY_META[nextCountry].name} to comparison`}
-                      className="flex h-full w-full flex-col items-center justify-center rounded-[24px] border-[2px] border-dashed border-[var(--uc-border-strong,var(--uc-border))] bg-[var(--uc-surface-muted)] text-[var(--uc-text-muted)] transition-colors hover:border-[var(--uc-action)] hover:text-[var(--uc-action)]"
-                    >
-                      <span className="grid size-[40px] place-items-center rounded-full border-[2px] border-dashed border-current">
-                        <AppIcon name="add-circle" size={20} color="currentColor" />
-                      </span>
-                      <span className="mt-[10px] text-[12px] font-bold uppercase tracking-[0.04em]">
-                        Add country
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </div>
       </ToolPanel>
     </div>
+
+    {isFocusModeOpen && orderedSelection.length === 2 ? (
+      <div
+        className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/70 p-[16px] backdrop-blur-sm"
+        onClick={() => setIsFocusModeOpen(false)}
+      >
+        <section
+          role="dialog"
+          aria-modal="true"
+          aria-label="Focused country comparison"
+          data-focused-side-by-side="true"
+          className="max-h-[calc(100vh-32px)] max-w-full overflow-auto rounded-[20px] bg-[var(--uc-surface)] p-[16px] shadow-2xl"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div className="sticky top-0 z-10 mb-[12px] flex items-center justify-between gap-[16px] rounded-[12px] bg-[var(--uc-surface)] px-[4px] py-[4px]">
+            <div>
+              <h2 className="text-[18px] font-bold text-[var(--uc-text)]">Focused comparison</h2>
+              <p className="text-[12px] text-[var(--uc-text-muted)]">Two live screens, one shared setup</p>
+            </div>
+            <button
+              type="button"
+              aria-label="Close focused comparison"
+              onClick={() => setIsFocusModeOpen(false)}
+              className="grid size-[36px] shrink-0 place-items-center rounded-full border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] text-[var(--uc-text)]"
+            >
+              <AppIcon name="close-x" size={16} color="currentColor" />
+            </button>
+          </div>
+
+          <div className="flex min-w-max items-start justify-center gap-[20px]">
+            {orderedSelection.map((country) => (
+              <div key={`focused-${country}`}>
+                <div className="pb-[8px] text-[13px] font-bold text-[var(--uc-text)]">
+                  {COUNTRY_META[country].name}
+                </div>
+                <div
+                  className="overflow-hidden rounded-[30px] bg-[var(--uc-static-black)] p-[4px] shadow-[0_16px_40px_-12px_rgba(0,0,0,0.5)]"
+                  style={{ width: FRAME_WIDTH * FOCUS_SCALE + 8, height: FRAME_HEIGHT * FOCUS_SCALE + 8 }}
+                >
+                  <div
+                    className="overflow-hidden rounded-[26px]"
+                    style={{ width: FRAME_WIDTH * FOCUS_SCALE, height: FRAME_HEIGHT * FOCUS_SCALE }}
+                  >
+                    <iframe
+                      key={`focused-${country}-${frameNonce}`}
+                      title={`${COUNTRY_META[country].name} focused preview`}
+                      src={buildFrameUrl(country)}
+                      scrolling="no"
+                      className="origin-top-left border-0"
+                      style={{ width: FRAME_WIDTH, height: FRAME_HEIGHT, transform: `scale(${FOCUS_SCALE})` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    ) : null}
+    </>
   );
 }
