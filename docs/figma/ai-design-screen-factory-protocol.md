@@ -50,21 +50,6 @@ Do not use this protocol for:
 - Committing or deploying.
 - Replacing the design-system strategy without approval.
 
-## Required Local Read Before Work
-
-For every non-trivial task in this repo, Codex must read:
-
-- `agents.md`
-- `docs/handoff/current-session.md`
-- `docs/handoff/work-mode.md`
-- `docs/handoff/approval-rules.md`
-
-If the task changes product behavior, platform capability, runtime screens, registry coverage, or integration assumptions, also read:
-
-- `docs/handoff/product-principles.md`
-- `docs/handoff/state-of-the-world.md`
-- `docs/platform-capability-map/README.md`
-
 ## Required Figma Skills
 
 Before any Figma write operation, Codex must load:
@@ -662,4 +647,3 @@ The first successful LAB experiment created:
 - Added visible Component Source Map and test checklist
 
 This is the reference pattern for future screen batches.
-

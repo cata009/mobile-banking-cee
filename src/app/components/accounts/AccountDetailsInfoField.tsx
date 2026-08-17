@@ -29,7 +29,7 @@ export default function AccountDetailsInfoField({
       </div>
 
       {trailingIcon ? (
-        <div className="flex h-[40px] w-[40px] items-center justify-center" aria-hidden="true">
+        <div className="flex h-[40px] w-[40px] items-center justify-center">
           {trailingIcon}
         </div>
       ) : null}

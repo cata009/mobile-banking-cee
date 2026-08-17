@@ -69,10 +69,12 @@ export default function App2027PrimaryNavigation({
     }, SELECTION_MOTION_DURATION);
   };
 
+  // Glass: translucent fill so the backdrop blur actually reads, a hairline lighter than the fill,
+  // and an inset top highlight for the specular edge. The outer shadow lifts it off the content.
   return (
     <nav
       aria-label={ariaLabel}
-      className={`mx-auto flex h-[68px] w-[calc(100%-12px)] max-w-[540px] items-stretch rounded-[26px] border border-[var(--uc-border-muted)] bg-[var(--uc-bottom-bar-bg)] px-[4px] pb-[5px] pt-[4px] shadow-[0_14px_40px_rgb(0_0_0/0.26)] backdrop-blur-[24px] backdrop-saturate-[1.25] ${className}`.trim()}
+      className={`mx-auto flex h-[68px] w-[calc(100%-12px)] max-w-[540px] items-stretch rounded-[26px] border border-[color-mix(in_srgb,var(--uc-static-white)_55%,var(--uc-border-muted))] bg-[color-mix(in_srgb,var(--uc-bottom-bar-bg)_78%,transparent)] px-[4px] pb-[5px] pt-[4px] shadow-[0_14px_40px_rgb(var(--uc-shadow-rgb)/0.18),0_2px_6px_rgb(var(--uc-shadow-rgb)/0.06),inset_0_1px_0_rgb(var(--uc-static-white-rgb)/0.45),inset_0_-1px_0_rgb(var(--uc-shadow-rgb)/0.04)] backdrop-blur-[32px] backdrop-saturate-[1.8] ${className}`.trim()}
       data-app-2027-bottom-navigation
       data-phone-bottom-navigation="true"
       data-nav-selection-motion={selectionMotion ? 'enabled' : undefined}

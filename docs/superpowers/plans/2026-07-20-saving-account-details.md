@@ -22,8 +22,6 @@
 **Files:**
 - Create: `tests/screens/account-details-info.test.tsx`
 - Modify: `src/app/screens/accounts/AccountDetailsInfoScreen.tsx`
-- Modify: `docs/handoff/current-session.md`
-- Modify: `docs/handoff/state-of-the-world.md`
 - Modify: `docs/platform-capability-map/README.md`
 
 **Interfaces:**
@@ -67,8 +65,6 @@ Do not stage or commit; report only the scoped files and fresh verification evid
 - Modify: `src/translations/types.ts`
 - Modify: `src/translations/shared.ts`
 - Modify: `tests/screens/account-details-info.test.tsx`
-- Modify: `docs/handoff/current-session.md`
-- Modify: `docs/handoff/state-of-the-world.md`
 - Modify: `docs/platform-capability-map/README.md`
 
 **Interfaces:**

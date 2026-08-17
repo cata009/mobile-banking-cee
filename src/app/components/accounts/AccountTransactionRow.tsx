@@ -1,26 +1,28 @@
 import type { ReactNode } from "react";
 import type { AccountTransaction } from "@/data/accountDetails";
-import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
+import TransactionAvatar, { type TransactionAvatarPresentation } from "@/app/components/transactions/TransactionAvatar";
+import { type PfmCategoryIconVariant } from "@/app/components/pfm/PfmCategoryIcon";
 
 interface AccountTransactionRowProps {
   transaction: AccountTransaction;
   formattedAmount: string;
   currency: string;
   showDate?: boolean;
-  /** Optional merchant visual for card-enrichment surfaces; default remains the PFM category icon. */
+  /**
+   * Overrides the leading visual entirely. The default already resolves the
+   * merchant mark for card rows, so this is only for fixtures that need to
+   * force a specific presentation.
+   */
   leadingVisual?: ReactNode;
   /** Optional clean merchant name; the ledger label remains untouched in the data source. */
   displayLabel?: string;
   onClick?: (transaction: AccountTransaction) => void;
   onCategoryClick?: (transaction: AccountTransaction) => void;
-}
-
-function TransactionIcon({ transaction }: { transaction: AccountTransaction }) {
-  return (
-    <span className="flex h-[32px] w-[32px] items-center justify-center" data-ds-label="Transaction icon box 32x32">
-      <PfmCategoryIcon category={transaction.pfmCategory} size={32} />
-    </span>
-  );
+  categoryIconVariant?: PfmCategoryIconVariant;
+  /** `category` forces the PFM icon; PFM surfaces use it, statements do not. */
+  avatarPresentation?: TransactionAvatarPresentation;
+  /** Allows a release-specific transaction list to adopt its own success token. */
+  positiveAmountClassName?: string;
 }
 
 function splitAmount(value: string) {
@@ -45,11 +47,14 @@ export default function AccountTransactionRow({
   displayLabel,
   onClick,
   onCategoryClick,
+  categoryIconVariant = "glyph",
+  avatarPresentation = "identity",
+  positiveAmountClassName = "text-[var(--uc-action)]",
 }: AccountTransactionRowProps) {
   const isPending = transaction.status === "Pending";
-  const amountColor = isPending
-    ? "var(--uc-text-muted)"
-    : transaction.type === "credit" ? "var(--uc-action)" : "var(--uc-text)";
+  const amountClassName = isPending
+    ? "text-[var(--uc-text-muted)]"
+    : transaction.type === "credit" ? positiveAmountClassName : "text-[var(--uc-text)]";
   const sign = transaction.amount < 0 ? "- " : "+ ";
   const amountParts = splitAmount(formattedAmount);
 
@@ -69,8 +74,8 @@ export default function AccountTransactionRow({
           {displayLabel ?? transaction.label}
         </p>
         <p
-          className="uc-type-n2-strong text-right leading-[22px]"
-          style={{ color: amountColor }}
+          className={`uc-type-n2-strong text-right leading-[22px] ${amountClassName}`}
+          data-transaction-amount={transaction.type === "credit" && !isPending ? "positive" : undefined}
         >
           <span>{sign}{amountParts.integer}</span>
           <span className="tracking-[0.3px]">{amountParts.separator}</span>
@@ -93,14 +98,14 @@ export default function AccountTransactionRow({
       >
         <div className="flex shrink-0 items-center gap-[16px]">
           {date}
-          {!isPending || leadingVisual ? (
+          {!isPending || leadingVisual || avatarPresentation === "identity" ? (
             <button
               type="button"
               aria-label={`Change category for ${transaction.label}`}
               className="grid size-[32px] place-items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
               onClick={() => onCategoryClick(transaction)}
             >
-              {leadingVisual ?? <TransactionIcon transaction={transaction} />}
+              {leadingVisual ?? <TransactionAvatar transaction={transaction} pfmVariant={categoryIconVariant} presentation={avatarPresentation} />}
             </button>
           ) : null}
         </div>
@@ -126,7 +131,9 @@ export default function AccountTransactionRow({
     >
       <div className="flex shrink-0 items-center gap-[16px]">
         {date}
-          {!isPending || leadingVisual ? (leadingVisual ?? <TransactionIcon transaction={transaction} />) : null}
+          {!isPending || leadingVisual || avatarPresentation === "identity" ? (
+            leadingVisual ?? <TransactionAvatar transaction={transaction} pfmVariant={categoryIconVariant} presentation={avatarPresentation} />
+          ) : null}
       </div>
       {details}
     </button>

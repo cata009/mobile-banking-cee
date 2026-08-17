@@ -10,7 +10,7 @@ import type { Screen } from '@/app/contexts/NavigationContext'
 const ALL_ROUTES: Screen[] = [
   'prelogin-inactive', 'prelogin-active', 'co-apping-session', 'homepage', 'language-selector',
   'analytics', 'messages', 'payments', 'products', 'product-detail', 'investments',
-  'investments-history', 'prime', 'more', 'documents', 'settings', 'contacts', 'account-detail',
+  'investments-history', 'prime', 'more', 'documents', 'settings', 'contacts', 'transactions', 'account-detail',
   'account-details-info', 'account-options', 'card-details-info', 'card-options', 'transaction-detail',
   'card-detail', 'domestic-payment', 'payment-review', 'payment-sign', 'payment-success',
   'flow-library', 'design-system', 'tools',
@@ -34,6 +34,7 @@ const BACK_FALLBACKS: Record<Screen, Screen> = {
   documents: 'more',
   settings: 'more',
   contacts: 'more',
+  transactions: 'homepage',
   'account-detail': 'homepage',
   'account-details-info': 'account-detail',
   'account-options': 'account-detail',
@@ -52,13 +53,13 @@ const BACK_FALLBACKS: Record<Screen, Screen> = {
 
 const RESTORABLE_ROUTES: Screen[] = [
   'prelogin-inactive', 'prelogin-active', 'homepage', 'analytics', 'messages', 'payments', 'products',
-  'investments', 'investments-history', 'prime', 'more', 'documents', 'settings', 'contacts', 'account-detail',
+  'investments', 'investments-history', 'prime', 'more', 'documents', 'settings', 'contacts', 'transactions', 'account-detail',
   'account-details-info', 'account-options', 'card-details-info', 'card-options', 'card-detail', 'flow-library', 'design-system',
   'tools',
 ]
 
 describe('exhaustive route policy', () => {
-  it('owns exactly the 31 runtime routes and their existing back fallbacks', () => {
+  it('owns exactly the 32 runtime routes and their existing back fallbacks', () => {
     expect(Object.keys(ROUTE_POLICY)).toEqual(ALL_ROUTES)
     expect(Object.fromEntries(ALL_ROUTES.map((route) => [route, ROUTE_POLICY[route].backFallback]))).toEqual(
       BACK_FALLBACKS,

@@ -85,10 +85,6 @@
 ### Task 5: Verification, documentation, and unified commit
 
 **Files:**
-- Modify: `docs/handoff/current-session.md`
-- Modify: `docs/handoff/next-tasks.md`
-- Modify: `docs/handoff/banana-log.md`
-- Modify: `docs/handoff/state-of-the-world.md`
 - Modify: `docs/platform-capability-map/README.md`
 - Include: `To do/**/*.jpeg` (nine PFM implementation references plus four Payments reference-only captures)
 
@@ -98,5 +94,4 @@
 - [x] Review changed TSX files against React/a11y best practices and fix only task-related issues.
 - [x] Run `npm run verify` and `git diff --check`; record exact outcomes.
 - [x] Smoke the full Money Out -> detail -> transaction and Money In -> detail flows at 375px, checking browser logs.
-- [x] Update handoff/capability/banana documentation and run the repository Constitutional Check.
 - [x] Stage every intended source, test, doc, skill/reference capture change; inspect the staged diff; commit with a scoped message; confirm `git status --short` is empty.

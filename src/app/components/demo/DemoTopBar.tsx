@@ -50,7 +50,6 @@ const PRODUCT_CONTEXT_LABELS: Record<ProductId, string> = {
 const FUTURE_RELEASE_ORDER: readonly ReleaseId[] = [
   "release-future-cz-coapping",
   "release-future-cz-robo",
-  "release-future-app-2027",
   "release-future-evo-2027",
 ] as const;
 

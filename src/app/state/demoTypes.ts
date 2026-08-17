@@ -51,7 +51,6 @@ export type ReleaseId =
   | "release-current"
   | "release-future-cz-coapping"
   | "release-future-cz-robo"
-  | "release-future-app-2027"
   | "release-future-evo-2027"
   | "release-v1"
   | "release-v2"
@@ -132,6 +131,7 @@ export type ScreenId =
   | "pi.home.overview"
   | "pi.analytics.overview"
   | "pi.messages.overview"
+  | "pi.transactions.overview"
   | "pi.account.detail"
   | "pi.account.details-info"
   | "pi.account.options"
@@ -210,6 +210,10 @@ export type ComponentId =
   | "analytics.category-details"
   | "pfm.category-icon"
   | "pfm.category-change-sheet"
+  | "merchants.logo"
+  | "transactions.avatar"
+  | "transactions.party-avatar"
+  | "transactions.pair-avatar"
   | "messages.mailbox-tabs"
   | "messages.inbox-list"
   | "accounts.action-bar"
@@ -310,7 +314,6 @@ export type FeatureId =
   | "fx_cardsRedesign"
   | "fx_czCoAppingSmartAssistant"
   | "fx_czRoboAdvisor"
-  | "fx_app2027Homepage"
   | "fx_evo2027Homepage"
   | "fx_unplannedBanner"
   | "fx_transactionsFilters"
@@ -426,6 +429,7 @@ export interface DemoState {
 
   /** Editable mock product counts used to build the visible demo portfolio. */
   productCounts: ProductCounts;
+
 }
 
 /**
@@ -458,7 +462,7 @@ export interface DemoStore extends DemoState {
 
   /** Replace edited product counts with the selected banking scenario baseline. */
   resetProductCountsToScenario: () => void;
-  
+
   /** Toggle or set a feature flag */
   setFlag: (featureId: FeatureId, enabled: boolean) => void;
 

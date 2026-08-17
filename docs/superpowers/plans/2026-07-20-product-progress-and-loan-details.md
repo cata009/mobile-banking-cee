@@ -78,8 +78,6 @@ Run `npm test -- tests/data/account-product-details.test.ts tests/screens/accoun
 ### Task 3: Repository and browser verification
 
 **Files:**
-- Modify: `docs/handoff/current-session.md`
-- Modify: `docs/handoff/state-of-the-world.md`
 - Modify: `docs/platform-capability-map/README.md`
 
 **Interfaces:**

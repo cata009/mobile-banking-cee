@@ -1,6 +1,8 @@
-import { AppIcon } from '@/app/components/icons';
+import TransactionAvatar from '@/app/components/transactions/TransactionAvatar';
+import { getCardMerchantEnrichment } from '@/app/components/merchants/merchantEnrichment';
 import type { CountryId } from '@/app/state/demoTypes';
 import type { AccountTransaction } from '@/data/accountDetails';
+import type { MerchantId } from '@/data/merchantDirectory';
 import type { CardTransactionMerchantEnrichment } from '@/app/screens/payments/DomesticPaymentFlowScreens';
 
 export interface App2027ActivityProps {
@@ -13,6 +15,7 @@ export interface App2027ActivityProps {
   ) => void;
   onSeeMore?: () => void;
   compact?: boolean;
+  homeArea?: boolean;
 }
 
 export type App2027ActivityKind = 'salary' | 'mcdonalds' | 'spotify';
@@ -29,6 +32,8 @@ interface ActivityItem {
   pfmCategory: AccountTransaction['pfmCategory'];
   pfmSubcategory: string;
   source: AccountTransaction['source'];
+  /** Card rows resolve their brand from the shared merchant directory. */
+  merchantId?: MerchantId;
 }
 
 const ACTIVITY: readonly ActivityItem[] = [
@@ -57,6 +62,7 @@ const ACTIVITY: readonly ActivityItem[] = [
     pfmCategory: 'Lifestyle',
     pfmSubcategory: 'Restaurants',
     source: 'card',
+    merchantId: 'mcdonalds',
   },
   {
     id: 'spotify',
@@ -70,62 +76,9 @@ const ACTIVITY: readonly ActivityItem[] = [
     pfmCategory: 'Leisure time',
     pfmSubcategory: 'Subscriptions',
     source: 'card',
+    merchantId: 'spotify',
   },
 ] as const;
-
-const MCDONALDS_LOCATIONS: Record<CountryId, string> = {
-  CZ: "McDonald's \u00b7 V\u00e1clavsk\u00e9 n\u00e1m\u011bst\u00ed 9, Prague",
-  SK: "McDonald's \u00b7 N\u00e1mestie SNP, Bratislava",
-  HU: "McDonald's \u00b7 R\u00e9gi posta utca, Budapest",
-  RO: "McDonald's \u00b7 Pia\u021ba Unirii, Bucharest",
-  RS: "McDonald's \u00b7 Terazije, Belgrade",
-  BA: "McDonald's \u00b7 Ferhadija, Sarajevo",
-  BA_BL: "McDonald's \u00b7 Trg Krajine, Banja Luka",
-  SI: "McDonald's \u00b7 \u010copova ulica, Ljubljana",
-};
-
-export function App2027TransactionIdentity({ kind, size = 42 }: { kind: App2027ActivityKind; size?: 32 | 42 | 64 }) {
-  if (kind === 'mcdonalds') {
-    return (
-      <span
-        aria-label="McDonald's merchant logo"
-        className="grid shrink-0 place-items-center overflow-hidden rounded-full bg-[#da291c] text-[#ffc72c] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--uc-static-white)_30%,transparent),0_5px_14px_rgb(var(--uc-shadow-rgb)/0.16)]"
-        role="img"
-        style={{ width: size, height: size }}
-      >
-        <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" style={{ width: size * 0.55, height: size * 0.55 }}>
-          <path d="M17.243 3.006c2.066 0 3.742 8.714 3.742 19.478H24c0-11.588-3.042-20.968-6.766-20.968-2.127 0-4.007 2.81-5.248 7.227-1.241-4.416-3.121-7.227-5.231-7.227C3.031 1.516 0 10.888 0 22.476h3.014c0-10.763 1.658-19.47 3.724-19.47 2.066 0 3.741 8.05 3.741 17.98h2.997c0-9.93 1.684-17.98 3.75-17.98Z" />
-        </svg>
-      </span>
-    );
-  }
-
-  if (kind === 'spotify') {
-    return (
-      <span
-        aria-label="Spotify merchant logo"
-        className="grid shrink-0 place-items-center overflow-hidden rounded-full bg-[#1db954] text-[var(--uc-static-black)] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--uc-static-white)_28%,transparent),0_5px_14px_rgb(var(--uc-shadow-rgb)/0.16)]"
-        role="img"
-        style={{ width: size, height: size }}
-      >
-        <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" style={{ width: size * 0.53, height: size * 0.53 }}>
-          <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.42 1.56-.299.421-1.02.599-1.559.3z" />
-        </svg>
-      </span>
-    );
-  }
-
-  return (
-    <span
-      aria-label="Incoming salary payment"
-      className="grid shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--uc-action)_18%,var(--uc-surface-raised))] text-[var(--uc-action)] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--uc-action)_36%,transparent),0_5px_14px_rgb(var(--uc-shadow-rgb)/0.14)]"
-      role="img"
-      style={{ width: size, height: size }}
-    >
-      <AppIcon name="add-money" size={22} aria-hidden="true" />
-    </span>
-  );
-}
 
 function activityTransaction(item: ActivityItem): AccountTransaction {
   return {
@@ -143,6 +96,7 @@ function activityTransaction(item: ActivityItem): AccountTransaction {
     pfmSubcategory: item.pfmSubcategory,
     status: 'Booked',
     source: item.source,
+    ...(item.merchantId ? { merchantId: item.merchantId } : {}),
   };
 }
 
@@ -161,25 +115,7 @@ export function getApp2027MerchantEnrichment(
   transaction: AccountTransaction,
   country: CountryId,
 ): CardTransactionMerchantEnrichment | undefined {
-  const kind = getApp2027ActivityKind(transaction);
-  if (kind === 'mcdonalds') {
-    return {
-      cleanMerchantName: "McDonald's",
-      merchantLogo: <App2027TransactionIdentity kind="mcdonalds" size={64} />,
-      location: { label: 'Merchant location', address: MCDONALDS_LOCATIONS[country] },
-      mcc: '5814 \u00b7 Fast food restaurants',
-    };
-  }
-
-  if (kind === 'spotify') {
-    return {
-      cleanMerchantName: 'Spotify',
-      merchantLogo: <App2027TransactionIdentity kind="spotify" size={64} />,
-      mcc: '5815 \u00b7 Digital goods and media',
-    };
-  }
-
-  return undefined;
+  return getCardMerchantEnrichment(transaction, country);
 }
 
 function ActivityAmount({ item, currency, hidden }: { item: ActivityItem; currency: string; hidden: boolean }) {
@@ -203,10 +139,11 @@ function ActivityAmount({ item, currency, hidden }: { item: ActivityItem; curren
   );
 }
 
-export default function App2027Activity({ country, currency, amountsHidden, onTransactionOpen, onSeeMore, compact = false }: App2027ActivityProps) {
+export default function App2027Activity({ country, currency, amountsHidden, onTransactionOpen, onSeeMore, compact = false, homeArea = true }: App2027ActivityProps) {
   return (
     <section
-      data-home-area="activity"
+      data-home-area={homeArea ? 'activity' : undefined}
+      data-home-transformation-activity={homeArea ? undefined : 'true'}
       aria-labelledby="app-2027-activity-heading"
       className="relative isolate"
     >
@@ -233,7 +170,7 @@ export default function App2027Activity({ country, currency, amountsHidden, onTr
               aria-label={`Open ${item.name} transaction, ${amountsHidden ? 'amount hidden' : `${item.amount} ${currency}`}`}
               className="group flex min-h-[82px] w-full items-start gap-[12px] rounded-[12px] py-[12px] text-left transition-[background-color,transform] duration-200 active:scale-[0.99] active:bg-[var(--uc-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-action)] motion-reduce:transition-none"
             >
-              <App2027TransactionIdentity kind={item.id} />
+              <TransactionAvatar transaction={activityTransaction(item)} size={42} elevated />
 
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[16px] font-bold leading-[20px] tracking-[-0.01em] text-[var(--uc-text)]">

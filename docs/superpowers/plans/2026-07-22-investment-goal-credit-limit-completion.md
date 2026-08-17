@@ -285,14 +285,10 @@ Expected: all focused tests PASS with zero failures.
 ### Task 6: Browser Verification and Handoff Documentation
 
 **Files:**
-- Modify: `docs/handoff/current-session.md`
-- Modify: `docs/handoff/next-tasks.md`
-- Modify: `docs/handoff/banana-log.md`
-- Modify: `docs/handoff/state-of-the-world.md`
 - Modify: `docs/platform-capability-map/README.md`
 
 **Interfaces:**
-- Produces: current behavior, evidence, limitations, Banana Loop, and Constitutional Check.
+- Produces: current behavior, evidence, and limitations.
 
 - [ ] **Step 1: Verify investment goal on port 4001**
 

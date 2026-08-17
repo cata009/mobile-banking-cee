@@ -765,7 +765,7 @@ function EthocaMerchantLogo({
     >
       {!imageReady ? (
         <span className="grid h-full w-full place-items-center rounded-full bg-[#F5F5F5]" aria-hidden="true">
-          <PfmCategoryIcon category={transaction.pfmCategory} size={Math.round(size * 0.625)} />
+          <PfmCategoryIcon category={transaction.pfmCategory} size={32} variant="category-circle" />
         </span>
       ) : null}
       <img
@@ -800,8 +800,8 @@ function EthocaRoFixture({ children }: { children: ReactNode }) {
 
 function ExistingPfmFallback({ transaction }: { transaction: AccountTransaction }) {
   return (
-    <span className="grid size-[32px] shrink-0 place-items-center rounded-full bg-[#F5F5F5]" aria-label="PFM category fallback" data-ethoca-visual="pfm-fallback">
-      <PfmCategoryIcon category={transaction.pfmCategory} size={20} />
+    <span className="grid size-[32px] shrink-0 place-items-center" aria-label="PFM category fallback" data-ethoca-visual="pfm-fallback">
+      <PfmCategoryIcon category={transaction.pfmCategory} size={32} variant="category-circle" />
     </span>
   );
 }

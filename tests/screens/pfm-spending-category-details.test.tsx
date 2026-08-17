@@ -106,7 +106,7 @@ describe('PFM Spending category details', () => {
       { wrapper: Providers },
     )
 
-    expect(screen.getAllByText('599,21 RON').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('711,83 RON').length).toBeGreaterThan(0)
     expect(screen.getByText('06')).toBeInTheDocument()
 
     const electronicsBubble = screen.getByRole('button', {
@@ -120,7 +120,7 @@ describe('PFM Spending category details', () => {
     expect(inactiveElectronicsBubble).toHaveAttribute('aria-pressed', 'true')
     expect(inactiveElectronicsBubble).toHaveAttribute('data-pfm-subcategory-active', 'false')
     expect(screen.queryByText('06')).not.toBeInTheDocument()
-    expect(screen.getAllByText('208,99 RON').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('321,61 RON').length).toBeGreaterThan(0)
 
     fireEvent.click(inactiveElectronicsBubble)
 
@@ -130,7 +130,7 @@ describe('PFM Spending category details', () => {
     expect(restoredElectronicsBubble).toHaveAttribute('aria-pressed', 'false')
     expect(restoredElectronicsBubble).toHaveAttribute('data-pfm-subcategory-active', 'true')
     expect(screen.getByText('06')).toBeInTheDocument()
-    expect(screen.getAllByText('599,21 RON').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('711,83 RON').length).toBeGreaterThan(0)
   })
 
   it('drags the category period carousel from the latest month to the current-year summary', () => {

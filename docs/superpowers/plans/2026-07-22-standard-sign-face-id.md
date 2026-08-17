@@ -50,10 +50,6 @@
 ### Task 3: Verify and document the behavior change
 
 **Files:**
-- Modify: `docs/handoff/current-session.md`
-- Modify: `docs/handoff/next-tasks.md`
-- Modify: `docs/handoff/banana-log.md`
-- Modify: `docs/handoff/state-of-the-world.md`
 - Modify: `docs/platform-capability-map/README.md`
 
 **Interfaces:**
@@ -62,4 +58,3 @@
 
 - [x] Run the focused test set, `git diff --check`, and `npm run verify`.
 - [x] In the live CZ credit-limit flow, confirm Sign change shows Face ID before Limit updated.
-- [x] Record changed files, commands, limitations, Banana Loop result, Constitutional Check, and safe-to-resume status.

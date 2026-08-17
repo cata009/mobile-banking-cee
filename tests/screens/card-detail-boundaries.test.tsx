@@ -5,6 +5,7 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import type { PropsWithChildren } from 'react'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { LanguageProvider } from '@/app/contexts/LanguageContext'
+import AccountDetailScreen from '@/app/screens/accounts/AccountDetailScreen'
 import CardDetailScreen from '@/app/screens/cards/CardDetailScreen'
 import CardDetailsInfoScreen from '@/app/screens/cards/CardDetailsInfoScreen'
 import { TransactionDetailScreen } from '@/app/screens/payments/DomesticPaymentFlowScreens'
@@ -21,9 +22,9 @@ vi.mock('@/hooks/useProducts', () => ({
   useProducts: () => mockedProductState,
 }))
 
-function AppProviders({ children }: PropsWithChildren) {
+function AppProviders({ children, release = 'release-current' }: PropsWithChildren<{ release?: 'release-current' | 'release-future-evo-2027' }>) {
   return (
-    <DemoProvider initialState={{ country: 'CZ', product: 'PI' }}>
+    <DemoProvider initialState={{ country: 'CZ', product: 'PI', release }}>
       <LanguageProvider initialLanguage="en">{children}</LanguageProvider>
     </DemoProvider>
   )
@@ -92,6 +93,96 @@ describe('card-detail action boundaries', () => {
 
     const carousel = container.querySelector('[data-card-carousel]')
     expect(carousel).toHaveClass('relative', 'z-10', 'pb-[20px]', '-mb-[20px]')
+  })
+
+  it('uses the Virtual Standard Electric artwork for the EUR debit card in Evo 2027', () => {
+    const euroDebitCard = {
+      ...secondDebitCard,
+      name: 'Debit Standard EUR',
+      currency: 'EUR' as const,
+    }
+    mockedProductState.categories = [{ key: 'cards', title: 'Cards', products: [euroDebitCard] }]
+
+    const { container } = render(
+      <CardDetailScreen selectedCardId={euroDebitCard.id} onBack={() => undefined} />,
+      { wrapper: ({ children }) => <AppProviders release="release-future-evo-2027">{children}</AppProviders> },
+    )
+
+    expect(container.querySelector('[data-card-variant="mc-virtual-standard-violet"]')).toBeInTheDocument()
+  })
+
+  it('circles the category fallback in every release, so it matches the merchant marks beside it', () => {
+    mockedProductState.categories = [{ key: 'cards', title: 'Cards', products: mockProducts }]
+
+    // A card list now leads with merchant marks, which are filled roundels. A
+    // bare category glyph next to them reads as a second icon language, so the
+    // circled variant is the rule on statement surfaces rather than an Evo one.
+    for (const release of ['release-future-evo-2027', undefined] as const) {
+      const rendered = render(
+        <CardDetailScreen selectedCardId={firstDebitCard.id} onBack={() => undefined} />,
+        {
+          wrapper: ({ children }) => release
+            ? <AppProviders release={release}>{children}</AppProviders>
+            : <AppProviders>{children}</AppProviders>,
+        },
+      )
+
+      expect(rendered.container.querySelector('[data-merchant-logo]'), release ?? 'baseline').toBeInTheDocument()
+      expect(
+        rendered.container.querySelector('[data-pfm-icon-variant="category-circle"]'),
+        release ?? 'baseline',
+      ).toBeInTheDocument()
+      rendered.unmount()
+    }
+  })
+
+  it('groups a card month into the shared transaction card in Evo 2027 only', () => {
+    mockedProductState.categories = [{ key: 'cards', title: 'Cards', products: mockProducts }]
+
+    const groupCards = (container: HTMLElement) => Array.from(container.querySelectorAll<HTMLElement>('div'))
+      .filter((element) => element.className.includes('rounded-[22px]') && element.className.includes('mx-[16px]'))
+
+    const evo = render(
+      <CardDetailScreen selectedCardId={firstDebitCard.id} onBack={() => undefined} />,
+      { wrapper: ({ children }) => <AppProviders release="release-future-evo-2027">{children}</AppProviders> },
+    )
+    expect(groupCards(evo.container).length).toBeGreaterThan(0)
+    evo.unmount()
+
+    const current = render(
+      <CardDetailScreen selectedCardId={firstDebitCard.id} onBack={() => undefined} />,
+      { wrapper: AppProviders },
+    )
+    expect(groupCards(current.container)).toHaveLength(0)
+  })
+
+  it('uses the homepage success green for positive transaction rows in Evo 2027 only', () => {
+    mockedProductState.categories = [{ key: 'accounts', title: 'Accounts', products: mockProducts }]
+
+    const evo = render(
+      <AccountDetailScreen
+        selectedProductId={firstCurrentAccount.id}
+        onBack={() => undefined}
+        onDetailsClick={() => undefined}
+        onOptionsClick={() => undefined}
+      />,
+      { wrapper: ({ children }) => <AppProviders release="release-future-evo-2027">{children}</AppProviders> },
+    )
+
+    expect(evo.container.querySelector('[data-transaction-amount="positive"]')).toHaveClass('text-[#3D7D43]')
+    evo.unmount()
+
+    const current = render(
+      <AccountDetailScreen
+        selectedProductId={firstCurrentAccount.id}
+        onBack={() => undefined}
+        onDetailsClick={() => undefined}
+        onOptionsClick={() => undefined}
+      />,
+      { wrapper: AppProviders },
+    )
+
+    expect(current.container.querySelector('[data-transaction-amount="positive"]')).not.toHaveClass('text-[#3D7D43]')
   })
 
   it('keeps the direct Card Details page informational and non-sensitive', () => {

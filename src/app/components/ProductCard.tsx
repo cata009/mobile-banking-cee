@@ -30,6 +30,7 @@ interface ProductCardProps {
   stackRole?: 'single' | 'first' | 'middle' | 'last';
   leadingVisual?: 'currency' | 'card';
   actions?: readonly ProductCardAction[];
+  footer?: ReactNode;
   onClick?: () => void;
 }
 
@@ -54,6 +55,7 @@ export default function ProductCard({
   stackRole = 'single',
   leadingVisual = 'currency',
   actions,
+  footer,
   onClick
 }: ProductCardProps) {
   if (variant === 'evolution') {
@@ -71,7 +73,7 @@ export default function ProductCard({
 
     return (
       <div
-        className={`flex w-full max-w-full min-w-0 flex-col items-end bg-[var(--uc-surface-raised)] p-[16px] text-[var(--uc-text)] transition-opacity ${visibleActions.length > 0 ? "gap-[32px]" : "gap-[8px]"} ${hasSeparator ? 'border-t-[0.5px] border-[var(--uc-border-muted)]' : ''} ${radiusClass} ${onClick ? "cursor-pointer hover:opacity-90" : ""}`}
+        className={`flex w-full max-w-full min-w-0 flex-col items-end bg-[var(--uc-surface-raised)] p-[16px] text-[var(--uc-text)] transition-opacity ${visibleActions.length > 0 ? "gap-[32px]" : footer ? "gap-[16px]" : "gap-[8px]"} ${hasSeparator ? 'border-t-[0.5px] border-[var(--uc-border-muted)]' : ''} ${stackRole === 'single' ? 'relative z-10 shadow-[0_6px_12px_rgb(var(--uc-shadow-rgb)/0.08)]' : ''} ${radiusClass} ${onClick ? "cursor-pointer hover:opacity-90" : ""}`}
         data-product-card-evolution
         data-product-card-separator={hasSeparator ? 'true' : undefined}
         data-product-style={productStyle}
@@ -145,6 +147,7 @@ export default function ProductCard({
             })}
           </div>
         ) : null}
+        {footer ? <div className="w-full" data-product-card-footer>{footer}</div> : null}
       </div>
     );
   }

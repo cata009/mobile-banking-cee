@@ -29,6 +29,7 @@ export interface DevicePreviewProfile {
   height: number;
   kind: 'phone' | 'foldable-cover' | 'foldable-main';
   screenChrome: 'dynamic-island' | 'none';
+  supportsRotation: boolean;
   status: 'official-reference' | 'concept';
 }
 
@@ -41,6 +42,7 @@ export const DEVICE_PREVIEW_PROFILES: readonly DevicePreviewProfile[] = [
     height: 932,
     kind: 'phone',
     screenChrome: 'dynamic-island',
+    supportsRotation: false,
     status: 'official-reference',
   },
   {
@@ -51,6 +53,7 @@ export const DEVICE_PREVIEW_PROFILES: readonly DevicePreviewProfile[] = [
     height: 624,
     kind: 'foldable-cover',
     screenChrome: 'none',
+    supportsRotation: false,
     status: 'official-reference',
   },
   {
@@ -61,6 +64,7 @@ export const DEVICE_PREVIEW_PROFILES: readonly DevicePreviewProfile[] = [
     height: 630,
     kind: 'foldable-main',
     screenChrome: 'none',
+    supportsRotation: true,
     status: 'official-reference',
   },
   {
@@ -71,6 +75,7 @@ export const DEVICE_PREVIEW_PROFILES: readonly DevicePreviewProfile[] = [
     height: 573,
     kind: 'foldable-cover',
     screenChrome: 'none',
+    supportsRotation: false,
     status: 'concept',
   },
   {
@@ -81,6 +86,7 @@ export const DEVICE_PREVIEW_PROFILES: readonly DevicePreviewProfile[] = [
     height: 600,
     kind: 'foldable-main',
     screenChrome: 'none',
+    supportsRotation: true,
     status: 'concept',
   },
 ] as const;
@@ -91,6 +97,7 @@ interface DevicePreviewContextValue {
   profile: DevicePreviewProfile;
   profileId: DevicePreviewProfileId;
   orientation: DevicePreviewOrientation;
+  canRotate: boolean;
   viewport: { width: number; height: number };
   setProfileId: (profileId: DevicePreviewProfileId) => void;
   rotate: () => void;
@@ -107,6 +114,7 @@ export function DevicePreviewProvider({ children }: { children: ReactNode }) {
     profile,
     profileId,
     orientation,
+    canRotate: profile.supportsRotation,
     viewport: orientation === 'portrait'
       ? { width: profile.width, height: profile.height }
       : { width: profile.height, height: profile.width },
@@ -114,7 +122,10 @@ export function DevicePreviewProvider({ children }: { children: ReactNode }) {
       setProfileIdState(nextProfileId);
       setOrientation('portrait');
     },
-    rotate: () => setOrientation((current) => current === 'portrait' ? 'landscape' : 'portrait'),
+    rotate: () => {
+      if (!profile.supportsRotation) return;
+      setOrientation((current) => current === 'portrait' ? 'landscape' : 'portrait');
+    },
   }), [orientation, profile, profileId]);
 
   return <DevicePreviewContext.Provider value={value}>{children}</DevicePreviewContext.Provider>;
@@ -127,6 +138,7 @@ export function useDevicePreview() {
       profile: DEFAULT_DEVICE_PREVIEW_PROFILE,
       profileId: 'iphone-17-pro-max' as const,
       orientation: 'portrait' as const,
+      canRotate: false,
       viewport: { width: 430, height: 932 },
       setProfileId: () => undefined,
       rotate: () => undefined,
@@ -136,7 +148,7 @@ export function useDevicePreview() {
 }
 
 export function DevicePreviewSelector() {
-  const { profile, profileId, orientation, setProfileId, rotate } = useDevicePreview();
+  const { profile, profileId, orientation, canRotate, setProfileId, rotate } = useDevicePreview();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -198,7 +210,7 @@ export function DevicePreviewSelector() {
           })}
         </DropdownMenuContent>
       </DropdownMenu>
-      <button
+      {canRotate ? <button
         type="button"
         aria-label="Rotate preview"
         title={`Rotate to ${orientation === 'portrait' ? 'landscape' : 'portrait'}`}
@@ -206,7 +218,7 @@ export function DevicePreviewSelector() {
         className="grid size-[36px] place-items-center rounded-[7px] text-[var(--uc-text)] transition-colors hover:bg-[var(--uc-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
       >
         <AppIcon name="repeat" size={18} />
-      </button>
+      </button> : null}
     </div>
   );
 }

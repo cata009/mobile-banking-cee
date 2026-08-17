@@ -282,8 +282,10 @@ describe('flow-library screen', () => {
     const emagLogo = focusedPreview().getAllByTestId('merchant-logo-emag')[0]!
     expect(emagLogo).toHaveAttribute('data-ethoca-logo-source', 'bundled-official-emag')
     expect(emagLogo.querySelector('img')).toHaveAttribute('src', expect.not.stringMatching(/^https?:\/\//))
-    expect(focusedPreview().queryByLabelText('Bar Magenta merchant logo')).not.toBeInTheDocument()
-    expect(focusedPreview().getAllByLabelText('PFM category fallback').length).toBeGreaterThan(0)
+    expect(focusedPreview().queryByLabelText('Starbucks merchant logo')).not.toBeInTheDocument()
+    const pfmFallbacks = focusedPreview().getAllByLabelText('PFM category fallback')
+    expect(pfmFallbacks.length).toBeGreaterThan(0)
+    expect(pfmFallbacks[0]?.querySelector('[data-pfm-icon-variant="category-circle"]')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Logo unavailable fallback' }))
     expect(focusedPreview().getAllByLabelText('PFM category fallback').length).toBeGreaterThan(0)
@@ -317,7 +319,7 @@ describe('flow-library screen', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Pending card transaction' }))
     fireEvent.click(screen.getByRole('button', { name: /Pending account list/ }))
-    expect(focusedPreview().getByText('Bar Magenta')).toBeInTheDocument()
+    expect(focusedPreview().getByText('Starbucks')).toBeInTheDocument()
     expect(focusedPreview().getAllByText('Pending').length).toBeGreaterThan(0)
 
     fireEvent.click(screen.getByRole('button', { name: /Pending transaction detail/ }))

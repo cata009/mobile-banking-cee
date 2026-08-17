@@ -12,6 +12,7 @@ import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useProducts } from "@/hooks/useProducts";
 import PageHeader from "@/app/components/PageHeader";
 import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
+import TransactionAvatar from "@/app/components/transactions/TransactionAvatar";
 import PfmCategoryChangeSheet from "@/app/components/pfm/PfmCategoryChangeSheet";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import TextField from "@/app/components/TextField";
@@ -211,9 +212,12 @@ export function TransactionDetailScreen({
 
         <div className="bg-[var(--uc-app-bg)] pb-[8px]">
           <section className="px-[24px] pt-[8px] text-center" style={{ opacity: 1 - headerProgress }}>
-            {merchantEnrichment?.merchantLogo ? (
-              <div className="mx-auto mb-[10px] flex w-fit items-center justify-center">{merchantEnrichment.merchantLogo}</div>
-            ) : null}
+            {/* The header leads with who the transaction was with: the merchant
+                mark when there is one, otherwise the account pair or the
+                counterparty resolved from the row itself. */}
+            <div className="mx-auto mb-[10px] flex w-fit items-center justify-center">
+              {merchantEnrichment?.merchantLogo ?? <TransactionAvatar transaction={transaction} size={64} />}
+            </div>
             <p className="uc-type-n5-strong mt-[8px] text-[var(--uc-text-muted)]">
               {detail.bookingDate}
             </p>
@@ -511,8 +515,8 @@ export function DomesticPaymentCreateScreen({
         </p>
         </div>
       </div>
-      <div className="px-[24px] pb-[42px]">
-        <PrimaryButton disabled={!isFormValid} onClick={() => onNext(form)}>{t("runtime.actions.next", "Next")}</PrimaryButton>
+      <div className="w-full px-[24px] pb-[42px]" data-domestic-payment-footer>
+        <PrimaryButton className="!w-full" disabled={!isFormValid} onClick={() => onNext(form)}>{t("runtime.actions.next", "Next")}</PrimaryButton>
       </div>
     </div>
   );
@@ -568,8 +572,8 @@ export function PaymentReviewScreen({
         </div>
         </div>
       </div>
-      <div className="px-[24px] pb-[42px]">
-        <PrimaryButton onClick={onSign}>{t("runtime.actions.sign", "Sign")}</PrimaryButton>
+      <div className="w-full px-[24px] pb-[42px]" data-domestic-payment-footer>
+        <PrimaryButton className="!w-full" onClick={onSign}>{t("runtime.actions.sign", "Sign")}</PrimaryButton>
       </div>
     </div>
   );

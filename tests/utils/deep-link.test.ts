@@ -76,6 +76,10 @@ describe('deep-link parse and build contracts', () => {
     })
   })
 
+  it('drops the retired App 2027 release from deep links', () => {
+    expect(parseDeepLinkFromUrl('?release=release-future-app-2027')).not.toHaveProperty('release')
+  })
+
   it('builds stable account and card links with only their matching context IDs', () => {
     const accountUrl = new URL(buildDeepLinkUrl({
       ...baseState,

@@ -22,16 +22,5 @@
 
   This is a presentation gate for a stakeholder demo, not an authorization boundary for confidential data: the client bundle and static assets may still be fetched directly, and the application contains mock data. Durable brute-force protection and request throttling must be enforced at the hosting edge/infrastructure layer, where attempts cannot be reset by clearing a browser cookie. The application intentionally returns a uniform authentication failure and keeps no client-controlled attempt counter.
 
-  ## AI Contributor Operating System
-
-  This repository uses repo-level AI operating rules in [`agents.md`](./agents.md).
-
-  Key handoff files live under [`docs/handoff`](./docs/handoff):
-
-  - `current-session.md` for resume state
-  - `next-tasks.md` for next actions
-  - `known-bananas.md` for triaged continuity risks
-  - `work-mode.md` for natural-language mode detection
-
   Architecture foundation lives in [`docs/architecture/PROJECT_MODEL.md`](./docs/architecture/PROJECT_MODEL.md).
   

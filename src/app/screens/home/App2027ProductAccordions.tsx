@@ -1,17 +1,61 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type UIEvent } from 'react';
 import type { Product, ProductCategory } from '@/data/products';
 import { AppIcon } from '@/app/components/icons';
-import ProductCard from '@/app/components/ProductCard';
+import ProductCard, { type ProductCardAction } from '@/app/components/ProductCard';
 import NavigationCardArt from '@/app/components/cards/NavigationCardArt';
-import type { CardVariant } from '@/app/components/cards/Card';
+import Card, { type CardVariant } from '@/app/components/cards/Card';
+import GhostBanner from '@/app/components/cards/GhostBanner';
+import AccountCarouselIndicator from '@/app/components/accounts/AccountCarouselIndicator';
 import { buildFutureCzAccountCardActions } from '@/app/components/productCardFixtures';
 import { maskAmountParts } from '@/app/utils/amountPrivacy';
+import { useDragCarousel } from '@/hooks/useDragCarousel';
+import currencyExchangeIcon from '@/assets/icons/currency-exchange.svg';
+import exchangeRatesIcon from '@/assets/icons/exchange-rates.svg';
 
 type FormattedAmount = {
   integer: string;
   decimals: string;
   currency: string;
 };
+
+function isForeignCurrencyAccount(product: Product): boolean {
+  return product.type === 'current_account' && (product.currency === 'EUR' || product.currency === 'USD');
+}
+
+function getEvoCardVariant(product: Product): CardVariant {
+  if (product.type === 'credit_card') return 'mc-credit-premium-gold';
+  if (product.type === 'meal_card') return 'mc-virtual-standard-orange';
+  if (product.type === 'debit_card' && product.currency === 'EUR') return 'mc-virtual-standard-violet';
+  return 'mc-debit-standard';
+}
+
+function buildCzEvoAccountCardActions({
+  product,
+  onNewPayment,
+  onPaymentsClick,
+  onAccountInfo,
+}: {
+  product: Product;
+  onNewPayment?: () => void;
+  onPaymentsClick?: () => void;
+  onAccountInfo?: () => void;
+}): readonly ProductCardAction[] {
+  if (!isForeignCurrencyAccount(product)) {
+    return buildFutureCzAccountCardActions({
+      onNewPayment,
+      onScanQrCode: onPaymentsClick,
+      onCreateQrCode: onPaymentsClick,
+      onAccountInfo,
+    });
+  }
+
+  return [
+    { id: 'new-payment', label: 'New\npayment', ariaLabel: 'New payment', icon: <AppIcon name="payment-new" size={24} className="text-[var(--uc-text)]" />, onClick: onNewPayment },
+    { id: 'currency-exchange', label: 'Currency\nExchange', ariaLabel: 'Currency Exchange', icon: <img src={currencyExchangeIcon} alt="" aria-hidden="true" className="size-[24px]" />, onClick: onPaymentsClick },
+    { id: 'exchange-rates', label: 'Exchange\nrates', ariaLabel: 'Exchange rates', icon: <img src={exchangeRatesIcon} alt="" aria-hidden="true" className="h-[20px] w-[19px]" />, onClick: onPaymentsClick },
+    { id: 'account-info', label: 'Account\ninfo', ariaLabel: 'Account info', icon: <AppIcon name="account-info" size={24} className="text-[var(--uc-text)]" />, onClick: onAccountInfo },
+  ];
+}
 
 export interface App2027ProductAccordionsProps {
   categories: ProductCategory[];
@@ -99,13 +143,14 @@ function Amount({ amount, hidden, size = 'row' }: { amount: FormattedAmount; hid
   );
 }
 
-export function CurrencyBadge({ currency }: { currency: Product['currency'] }) {
+export function CurrencyBadge({ currency, size = 40 }: { currency: Product['currency']; size?: 32 | 40 }) {
   const clipId = `currency-roundel-${currency.toLowerCase()}`;
   return (
     <span
       aria-label={`${currency} currency`}
       role="img"
-      className="relative grid size-[40px] shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--uc-surface-raised)] shadow-[0_3px_9px_rgb(0_0_0/0.12)]"
+      className="relative grid shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--uc-surface-raised)] shadow-[0_3px_9px_rgb(0_0_0/0.12)]"
+      style={{ width: size, height: size }}
     >
       <svg aria-hidden="true" className="size-full" viewBox="0 0 40 40">
         <defs><clipPath id={clipId}><circle cx="20" cy="20" r="19" /></clipPath></defs>
@@ -172,10 +217,10 @@ function CzRoboAccountCard({
       variant="evolution"
       productStyle="pi"
       stackRole={stackRole}
-      actions={buildFutureCzAccountCardActions({
+      actions={buildCzEvoAccountCardActions({
+        product,
         onNewPayment: onDomesticPaymentClick,
-        onScanQrCode: onPaymentsClick,
-        onCreateQrCode: onPaymentsClick,
+        onPaymentsClick,
         onAccountInfo: () => onAccountInfoClick?.(product),
       })}
       onClick={() => onProductClick(product)}
@@ -203,11 +248,16 @@ function CzRoboCard({
   stackRole: 'single' | 'first' | 'middle' | 'last';
 }) {
   const amount = maskAmountParts(formatProductAmount(product), amountsHidden);
-  const cardVariant: CardVariant = product.type === 'credit_card'
-    ? 'mc-credit-premium-gold'
-    : product.type === 'meal_card'
-      ? 'mc-virtual-standard-orange'
-      : 'mc-debit-standard';
+  const cardVariant = getEvoCardVariant(product);
+  const isCreditCard = product.type === 'credit_card';
+  const creditUsed = isCreditCard ? Math.max(0, product.creditLimit - product.availableCredit) : 0;
+  const creditUtilisation = isCreditCard && product.creditLimit > 0 ? (creditUsed / product.creditLimit) * 100 : 0;
+  const usedAmount = isCreditCard
+    ? maskAmountParts(formatProductAmount({ ...product, balance: creditUsed, availableCredit: creditUsed }), amountsHidden)
+    : null;
+  const limitAmount = isCreditCard
+    ? maskAmountParts(formatProductAmount({ ...product, balance: product.creditLimit, availableCredit: product.creditLimit }), amountsHidden)
+    : null;
   const openCardJourney = () => onProductClick(product);
   const openCardDetails = () => (onCardDetailsClick ?? onProductClick)(product);
   const openCardOptions = () => (onCardOptionsClick ?? onProductClick)(product);
@@ -224,14 +274,221 @@ function CzRoboCard({
       productStyle="pi"
       stackRole={stackRole}
       leadingVisual="card"
-      actions={[
+      actions={isCreditCard ? undefined : [
         { id: 'card-details', label: 'Card\nDetails', ariaLabel: 'Card details', icon: <AppIcon name="account-info" size={24} />, onClick: openCardDetails },
         { id: 'card-options', label: 'Card\nOptions', ariaLabel: 'Card options', icon: <AppIcon name="account-options" size={24} />, onClick: openCardOptions },
         { id: 'block-card', label: 'Block\nCard', ariaLabel: 'Block card', icon: <AppIcon name="block-card" size={24} />, onClick: openCardOptions },
         { id: 'view-pin', label: 'View\nPIN', ariaLabel: 'View PIN', icon: <AppIcon name="view-pin" size={24} />, onClick: openCardOptions },
       ]}
+      footer={isCreditCard && usedAmount && limitAmount ? (
+        <div data-home-credit-limit-details>
+          <div
+            data-home-credit-limit-progress
+            role="progressbar"
+            aria-label="Credit used from limit"
+            aria-valuemin={0}
+            aria-valuemax={product.creditLimit}
+            aria-valuenow={creditUsed}
+            className="h-[12px] overflow-hidden rounded-full bg-[var(--uc-surface-muted)]"
+          >
+            <div className="h-full rounded-full bg-[var(--uc-action)]" style={{ width: `${creditUtilisation}%` }} />
+          </div>
+          <div className="mt-[10px] flex items-start justify-between gap-[12px] text-[14px] leading-[18px]">
+            <span className="text-[var(--uc-text-muted)]">Used credit<br /><b className="flex items-baseline text-[var(--uc-text)]"><span className="text-[16px] leading-[20px]">{usedAmount.integer}</span><span>{usedAmount.decimals} {usedAmount.currency}</span></b></span>
+            <span className="text-right text-[var(--uc-text-muted)]">Credit limit<br /><b className="flex items-baseline justify-end text-[var(--uc-text)]"><span className="text-[16px] leading-[20px]">{limitAmount.integer}</span><span>{limitAmount.decimals} {limitAmount.currency}</span></b></span>
+          </div>
+        </div>
+      ) : undefined}
       onClick={openCardJourney}
     />
+  );
+}
+
+type EvoCardComparisonItem = {
+  id: string;
+  detailProduct: Product;
+  title: string;
+  displayNumber: string;
+  variant: CardVariant;
+};
+
+function getComparisonCardNumber(displayNumber: string): string {
+  return `**** ${displayNumber.replace(/\D/g, '').slice(-4)}`;
+}
+
+function EvoCardComparisonTile({
+  item,
+  onClick,
+  dragHandlers,
+}: {
+  item: EvoCardComparisonItem;
+  onClick: () => void;
+  dragHandlers: ReturnType<typeof useDragCarousel>['dragHandlers'];
+}) {
+  return (
+    <button
+      type="button"
+      data-evo-card-comparison-tile
+      aria-label={`Open ${item.title} card details`}
+      onClick={onClick}
+      {...dragHandlers}
+      className="flex min-h-[120px] w-full flex-col items-center justify-center gap-[8px] rounded-[8px] bg-[var(--uc-surface-raised)] px-[8px] py-[12px] text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+    >
+      <Card
+        variant={item.variant}
+        size="medium"
+        ariaLabel={item.title}
+        className="shadow-[0_3px_6px_rgb(var(--uc-shadow-rgb)/0.22)]"
+        style={{ width: 80, height: 50 }}
+      />
+      <div className="min-w-0 max-w-full">
+        <p className="truncate text-[14px] font-bold leading-[18px] text-[var(--uc-text)]">{item.title}</p>
+        <p className="mt-[2px] truncate text-[14px] leading-[18px] text-[var(--uc-text-muted)]">{item.displayNumber}</p>
+      </div>
+    </button>
+  );
+}
+
+function EvoCardsComparison({
+  products,
+  getProductDisplayNumber,
+  onProductClick,
+}: {
+  products: Product[];
+  getProductDisplayNumber: (product: Product) => string;
+  onProductClick: (product: Product) => void;
+}) {
+  const debitCards = products.filter((product) => product.type === 'debit_card').slice(0, 2);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const scrollSnapTimeoutRef = useRef<number | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [standardCard, euroCard] = debitCards;
+  const comparisonCards: EvoCardComparisonItem[] = standardCard && euroCard ? [
+    {
+      id: standardCard.id,
+      detailProduct: standardCard,
+      title: 'Debit Standard',
+      displayNumber: getComparisonCardNumber(getProductDisplayNumber(standardCard)),
+      variant: 'mc-debit-standard',
+    },
+    {
+      id: `${standardCard.id}-premium-preview`,
+      detailProduct: standardCard,
+      title: 'Debit Premium',
+      displayNumber: '**** 5603',
+      variant: 'mc-debit-gold',
+    },
+    {
+      id: euroCard.id,
+      detailProduct: euroCard,
+      title: 'Debit Standard EUR',
+      displayNumber: getComparisonCardNumber(getProductDisplayNumber(euroCard)),
+      variant: 'mc-virtual-standard-violet',
+    },
+  ] : [];
+  const pages = [
+    { id: 'standard-and-premium', cards: comparisonCards.slice(0, 2), includesGhostBanner: false },
+    { id: 'eur-and-ghost-banner', cards: comparisonCards.slice(2), includesGhostBanner: true },
+  ].filter((page) => page.cards.length > 0);
+
+  const scrollToIndex = useCallback((index: number) => {
+    const rail = carouselRef.current;
+    const item = rail?.firstElementChild as HTMLElement | null;
+    if (!rail || !item) return;
+    const gap = Number.parseFloat(getComputedStyle(rail).gap || '0');
+    const nextIndex = Math.max(0, Math.min(index, pages.length - 1));
+    rail.scrollTo({ left: nextIndex * (item.offsetWidth + gap), behavior: 'smooth' });
+    setActiveIndex(nextIndex);
+  }, [pages.length]);
+
+  const settle = useCallback(() => {
+    const rail = carouselRef.current;
+    const item = rail?.firstElementChild as HTMLElement | null;
+    if (!rail || !item) return;
+    const gap = Number.parseFloat(getComputedStyle(rail).gap || '0');
+    scrollToIndex(Math.round(rail.scrollLeft / (item.offsetWidth + gap)));
+  }, [scrollToIndex]);
+
+  const clearScrollSnapTimeout = useCallback(() => {
+    if (scrollSnapTimeoutRef.current === null) return;
+    window.clearTimeout(scrollSnapTimeoutRef.current);
+    scrollSnapTimeoutRef.current = null;
+  }, []);
+
+  const { dragHandlers, isDragging, isPressActiveRef } = useDragCarousel({
+    carouselRef,
+    enabled: pages.length > 1,
+    onSettle: settle,
+  });
+
+  const handleCarouselScroll = (event: UIEvent<HTMLDivElement>) => {
+    const rail = event.currentTarget;
+    const item = rail.firstElementChild as HTMLElement | null;
+    if (!item) return;
+    const gap = Number.parseFloat(getComputedStyle(rail).gap || '0');
+    setActiveIndex(Math.max(0, Math.min(pages.length - 1, Math.round(rail.scrollLeft / (item.offsetWidth + gap)))));
+    if (isPressActiveRef.current) return;
+    clearScrollSnapTimeout();
+    scrollSnapTimeoutRef.current = window.setTimeout(settle, 120);
+  };
+
+  useEffect(() => () => {
+    clearScrollSnapTimeout();
+  }, [clearScrollSnapTimeout]);
+
+  if (comparisonCards.length < 2) return null;
+
+  return (
+    <section data-evo-card-comparison aria-label="Debit Cards" className="mt-[12px]">
+      <h2 className="uc-type-l1 mb-[8px] text-[var(--uc-text)]">Debit Cards</h2>
+      {/* No bottom padding: the 32px carousel indicator below the rail already carries its own 13px of air. */}
+      <div data-evo-card-carousel-container className="rounded-[8px] bg-[var(--uc-surface)] p-[8px] pb-0 shadow-[0_3px_9px_rgb(var(--uc-shadow-rgb)/0.10)]">
+        <div
+          ref={carouselRef}
+          data-evo-card-carousel
+          data-evo-card-page-count={pages.length}
+          role="region"
+          aria-label="Debit Cards carousel"
+          onScroll={handleCarouselScroll}
+          {...dragHandlers}
+          className={`flex gap-[8px] overflow-x-auto overscroll-x-contain pb-[2px] scrollbar-hide select-none touch-pan-y focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+          style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
+        >
+          {pages.map((page) => (
+            <div
+              key={page.id}
+              data-evo-card-carousel-page
+              className="grid w-full shrink-0 grid-cols-2 items-stretch gap-[8px]"
+            >
+              {page.cards.map((item) => (
+                <EvoCardComparisonTile
+                  key={item.id}
+                  item={item}
+                  onClick={() => onProductClick(item.detailProduct)}
+                  dragHandlers={dragHandlers}
+                />
+              ))}
+              {/* A compact, card-height CTA keeps the secondary action visually subordinate to the debit card. */}
+              {page.includesGhostBanner ? (
+                <div data-evo-card-ghost-banner className="flex min-h-[120px] items-center justify-center">
+                  <GhostBanner
+                    className="h-[120px] w-[136px] !max-w-[136px] !p-[8px]"
+                    layout="stacked"
+                    title="Add a debit card"
+                    description="Explore options"
+                    titleClassName="text-[14px] font-bold leading-[18px] text-[var(--uc-text)]"
+                    descriptionClassName="text-[14px] leading-[18px] text-[var(--uc-text-muted)]"
+                  />
+                </div>
+              ) : null}
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-center" aria-label="Debit Cards pages">
+          <AccountCarouselIndicator count={pages.length} activeIndex={activeIndex} onSelect={scrollToIndex} />
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -278,7 +535,7 @@ function ProductStackPreview() {
   return (
     <span
       aria-hidden="true"
-      className="relative z-0 -mt-[7px] block h-[10px] w-[calc(100%-16px)] self-center rounded-b-[4px] bg-[var(--uc-surface-raised)] shadow-[0_7px_11px_rgb(0_0_0/0.10)]"
+      className="relative z-0 -mt-[6px] block h-[16px] w-full rounded-b-[8px] border-x border-b border-[color-mix(in_srgb,var(--uc-border-muted)_72%,transparent)] bg-[var(--uc-surface-raised)]"
       data-home-product-stack-preview
     />
   );
@@ -322,12 +579,29 @@ export default function App2027ProductAccordions({
       className={['space-y-[12px]', className].filter(Boolean).join(' ')}
     >
       {visibleGroups.map(({ key, title, icon, category }) => {
+        const isEvoDebitCardsGroup = key === 'cards'
+          && useCzRoboAccountCards
+          && category.products.some((product) => product.type === 'debit_card');
+
+        if (isEvoDebitCardsGroup) {
+          return (
+            <div key={key} data-home-product-group={key} className="flex flex-col">
+              <EvoCardsComparison
+                products={category.products}
+                getProductDisplayNumber={getProductDisplayNumber}
+                onProductClick={onProductClick}
+              />
+            </div>
+          );
+        }
+
         const isOpen = openGroups[key];
         const total = category.products.length ? calculateGroupTotal(category.products) : null;
         const panelId = `app-2027-products-${key}`;
         const useBaselineHeader = useCzRoboAccountCards;
         const displayTitle = titleOverrides?.[key] ?? title;
         const hasCollapsedProductStack = useBaselineHeader && category.products.length > 1;
+        const isExpandable = !useBaselineHeader || category.products.length > 1;
         const displayedProducts = hasCollapsedProductStack && !isOpen
           ? category.products.slice(0, 1)
           : category.products;
@@ -341,7 +615,7 @@ export default function App2027ProductAccordions({
               ? 'flex flex-col'
               : 'overflow-hidden rounded-[16px] border border-transparent bg-[var(--uc-surface)] shadow-none dark:border-[var(--uc-border-muted)]'}
           >
-            <button
+            {isExpandable ? <button
               type="button"
               data-home-product-group-header={useBaselineHeader ? 'compact' : undefined}
               aria-expanded={isOpen}
@@ -390,7 +664,9 @@ export default function App2027ProductAccordions({
                   </span>
                 </>
               )}
-            </button>
+            </button> : useBaselineHeader ? <div data-home-product-group-header="static" className="flex h-[48px] w-full items-center px-0">
+              <h2 className="uc-type-l1 text-[var(--uc-text)]">{displayTitle}</h2>
+            </div> : null}
 
             {shouldRenderPanel ? (
               <div id={panelId} className={useBaselineHeader ? 'pt-[8px]' : 'divide-y divide-[var(--uc-border-muted)] border-t border-[var(--uc-border-muted)]'}>

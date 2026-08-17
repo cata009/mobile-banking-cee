@@ -107,6 +107,7 @@ export default function MobileFrame({
               data-device-profile={profile.id}
               data-device-kind={profile.kind}
               data-device-orientation={orientation}
+              data-device-rotation-enabled={profile.supportsRotation ? 'true' : 'false'}
               style={{
                 width: viewport.width,
                 height: viewport.height,

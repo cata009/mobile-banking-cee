@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { AppIcon } from "@/app/components/icons";
 
-type HeaderActionIconName = "profile" | "messages" | "help" | "logout" | "contact-phone";
+type HeaderActionIconName = "profile" | "messages" | "help" | "search" | "logout" | "contact-phone";
 
 interface HeaderActionButtonProps {
   icon: HeaderActionIconName;
@@ -16,6 +16,7 @@ export function HeaderActionIcon({ icon }: { icon: HeaderActionIconName }) {
   if (icon === "messages") return <AppIcon name="header-messages" color="var(--uc-icon)" />;
   if (icon === "logout") return <AppIcon name="logout" color="var(--uc-icon)" />;
   if (icon === "contact-phone") return <AppIcon name="contact-phone" color="var(--uc-icon)" />;
+  if (icon === "search") return <AppIcon name="search" color="var(--uc-icon)" />;
   return <AppIcon name="help-circle" color="var(--uc-icon)" />;
 }
 

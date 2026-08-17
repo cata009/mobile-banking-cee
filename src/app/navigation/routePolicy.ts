@@ -1,5 +1,5 @@
 import type { Screen } from "@/app/contexts/NavigationContext";
-import type { CountryId, DesignSystemId, ProductId, ScreenId, ThemeMode } from "@/app/state/demoTypes";
+import type { CountryId, DesignSystemId, ProductId, ReleaseId, ScreenId, ThemeMode } from "@/app/state/demoTypes";
 
 export type RouteSurface = "prelogin" | "app" | "platform";
 export type RouteStatusBarVariant = "light" | "dark" | "theme";
@@ -41,6 +41,7 @@ export const ROUTE_POLICY = {
   documents: route({ surface: "app", registryIds: ["pi.documents.overview"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "more", payload: "none", deepLink: { restorable: true, fallback: "documents", payload: "none" } }),
   settings: route({ surface: "app", registryIds: ["pi.settings.overview"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "more", payload: "none", deepLink: { restorable: true, fallback: "settings", payload: "none" } }),
   contacts: route({ surface: "app", registryIds: ["pi.contacts.overview"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "more", payload: "none", deepLink: { restorable: true, fallback: "contacts", payload: "none" } }),
+  transactions: route({ surface: "app", registryIds: ["pi.transactions.overview"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "transactions", payload: "none" } }),
   "account-detail": route({ surface: "app", registryIds: ["pi.account.detail"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "account", deepLink: { restorable: true, fallback: "account-detail", payload: "account" } }),
   "account-details-info": route({ surface: "app", registryIds: ["pi.account.details-info"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "account-detail", payload: "account", deepLink: { restorable: true, fallback: "account-details-info", payload: "account" } }),
   "account-options": route({ surface: "app", registryIds: ["pi.account.options"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "account-detail", payload: "account", deepLink: { restorable: true, fallback: "account-options", payload: "account" } }),
@@ -61,6 +62,7 @@ export interface ProductRouteContext {
   product: ProductId;
   country: CountryId;
   designSystem: DesignSystemId;
+  release?: ReleaseId;
 }
 
 export function isRouteEligibleForProductContext(screen: Screen, context: ProductRouteContext): boolean {
@@ -80,6 +82,8 @@ export function resolveRouteStatusBarVariant(
   if (context.product === "KIDS_PI" && context.designSystem === "current" && context.country === "HU") return "theme";
   if (context.product === "KIDS_PI" && context.designSystem === "current" && context.country === "RO") return "theme";
   if (context.product === "KIDS_PI" && context.designSystem === "current" && context.country === "SK") return "light";
+  // Evo 2027 Products opens on a full-bleed photo hero, so the status bar needs light content.
+  if (screen === "products" && context.release === "release-future-evo-2027") return "dark";
   if (context.themeMode === "dark" && screen !== "prelogin-inactive" && screen !== "prelogin-active" && screen !== "prime") return "dark";
   return ROUTE_POLICY[screen].statusBar;
 }

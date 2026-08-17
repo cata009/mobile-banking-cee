@@ -27,3 +27,28 @@ export function getAnalyticsCategoryDisplayLabel(
 
   return t(`runtime.analytics.categories.${category}`, labels[category] ?? category.toUpperCase());
 }
+
+export function getEvoAnalyticsCategoryDisplayLabel(category: PfmCategoryName | string) {
+  const labels: Record<string, string> = {
+    Finance: "Financial",
+    Shopping: "Shopping",
+    Healthcare: "Health & beauty",
+    Uncategorized: "Uncategorized expenses",
+    Home: "Household",
+    Groceries: "Groceries",
+    Transportation: "Cars & transportation",
+    "Leisure time": "Leisure",
+    "Taxes and Penalties": "Taxes & fines",
+    Income: "Income",
+    Utilities: "Utilities",
+    Insurance: "Insurance",
+    Education: "School & education",
+    Children: "Children",
+    Wallet: "Wallet",
+    Transfers: "Transfers",
+    Investments: "Investments",
+    "Exclude from budget": "Excluded",
+  };
+
+  return labels[category] ?? category;
+}

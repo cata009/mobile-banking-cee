@@ -224,7 +224,6 @@ git commit -m "fix: harden stakeholder access gate"
 
 **Files:**
 - Create: `.github/workflows/verify.yml`
-- Modify: `docs/handoff/current-session.md`, `docs/handoff/next-tasks.md`, `docs/handoff/known-bananas.md`, `docs/handoff/state-of-the-world.md`
 
 **Interfaces:**
 - Consumes: Tasks 1-4.
@@ -250,7 +249,7 @@ Expected: exit 0 throughout; only documented empty `react-vendor` and chunk-size
 Document that production remains vulnerable until independent Vercel secrets and the fixed deployment are applied, and static assets remain public because this is a presentation gate.
 
 ```powershell
-git add .github/workflows/verify.yml docs/handoff/current-session.md docs/handoff/next-tasks.md docs/handoff/known-bananas.md docs/handoff/state-of-the-world.md
+git add .github/workflows/verify.yml
 git commit -m "ci: enforce foundation verification"
 ```
 

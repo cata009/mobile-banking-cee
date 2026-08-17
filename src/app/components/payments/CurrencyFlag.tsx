@@ -28,6 +28,31 @@ function FlagArtwork({ currency }: CurrencyFlagProps) {
   }
 }
 
+/**
+ * A round crop of the same flag artwork, used where a currency stands in for a
+ * party — the two-flag mark on a currency exchange, for instance.
+ */
+export function CurrencyFlagRoundel({ currency, size = 22 }: CurrencyFlagProps & { size?: number }) {
+  return (
+    <span
+      className="inline-flex shrink-0 overflow-hidden rounded-full ring-1 ring-black/10"
+      style={{ width: size, height: size }}
+    >
+      <svg
+        data-currency-flag={currency}
+        viewBox="10 0 16 24"
+        preserveAspectRatio="xMidYMid slice"
+        width={size}
+        height={size}
+        aria-hidden="true"
+        focusable="false"
+      >
+        <FlagArtwork currency={currency} />
+      </svg>
+    </span>
+  );
+}
+
 export default function CurrencyFlag({ currency }: CurrencyFlagProps) {
   return (
     <span className="inline-flex h-[24px] w-[36px] shrink-0 overflow-hidden rounded-[2px] ring-1 ring-black/10">

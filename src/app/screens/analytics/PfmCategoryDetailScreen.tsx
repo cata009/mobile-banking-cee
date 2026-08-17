@@ -9,7 +9,7 @@ import HelperCard from "@/app/components/cards/HelperCard";
 import PfmCategoryBubbleChart from "@/app/components/pfm/PfmCategoryBubbleChart";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { formatMoneyNumber } from "@/app/registry/countryConfig";
-import { useCountry } from "@/app/state/demoStore";
+import { useDemo } from "@/app/state/demoStore";
 import { getPfmCategory, type PfmCategoryName } from "@/data/pfmCategories";
 import {
   createSpendingCategoryDetail,
@@ -47,7 +47,7 @@ export default function PfmCategoryDetailScreen({
   onBack,
   onTransactionClick,
 }: PfmCategoryDetailScreenProps) {
-  const country = useCountry();
+  const { country, release } = useDemo();
   const { t } = useLanguage();
   const carouselRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<number | null>(null);
@@ -226,6 +226,8 @@ export default function PfmCategoryDetailScreen({
                     transaction={transaction}
                     formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
                     currency={activeSummary.currency}
+                    positiveAmountClassName={release === "release-future-evo-2027" ? "text-[#3D7D43]" : undefined}
+                    avatarPresentation="category"
                     onClick={(selectedTransaction) => onTransactionClick?.(
                       selectedTransaction as SpendingAnalyticsTransaction,
                     )}

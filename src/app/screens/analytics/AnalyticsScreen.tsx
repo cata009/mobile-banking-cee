@@ -7,7 +7,7 @@ import CashFlowSummaryBars from "@/app/components/analytics/CashFlowSummaryBars"
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
 import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
 import { useLanguage } from "@/app/contexts/LanguageContext";
-import { useCountry } from "@/app/state/demoStore";
+import { useCountry, useDemo } from "@/app/state/demoStore";
 import { formatMoneyNumber } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import {
@@ -22,6 +22,7 @@ import type { SpendingAnalyticsTransaction } from "@/data/spendingAnalytics";
 import AnalyticsPeriodIndicator, { buildCenteredPeriodIndicator } from "./AnalyticsPeriodIndicator";
 import PfmCategoryDetailScreen from "./PfmCategoryDetailScreen";
 import { getAnalyticsCategoryDisplayLabel } from "./analyticsCategoryLabels";
+import Evo2027AnalyticsScreen from "./Evo2027AnalyticsScreen";
 
 type NavItem = "home" | "analytics" | "payments" | "products" | "more";
 const HERO_PANEL_WIDTH = 375;
@@ -362,7 +363,7 @@ function MoneyCategorySection({
   );
 }
 
-export default function AnalyticsScreen({
+function LegacyAnalyticsScreen({
   onHomeClick,
   onMessagesClick,
   onPaymentsClick,
@@ -466,4 +467,14 @@ export default function AnalyticsScreen({
       </div>
     </div>
   );
+}
+
+export default function AnalyticsScreen(props: AnalyticsScreenProps) {
+  const { release } = useDemo();
+
+  if (release === "release-future-evo-2027") {
+    return <Evo2027AnalyticsScreen {...props} />;
+  }
+
+  return <LegacyAnalyticsScreen {...props} />;
 }

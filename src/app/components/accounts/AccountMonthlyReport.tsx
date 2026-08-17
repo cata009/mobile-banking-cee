@@ -25,7 +25,10 @@ export default function AccountMonthlyReport({ country, currency, group }: Accou
     <section
       aria-label={`Monthly report for ${group.monthTitle}`}
       data-monthly-account-report={group.monthKey}
-      className="bg-[var(--uc-surface)] pt-[8px]"
+      // No ground of its own: on the baseline it inherits the white list, and
+      // on Evo 2027 it sits on the page next to the month cards rather than
+      // reading as a white slab between them.
+      className="pt-[8px]"
     >
       <h3 className="px-[24px] uc-type-h2 text-[var(--uc-text)]">Monthly report</h3>
       <CashFlowSummaryBars

@@ -25,6 +25,7 @@ export type Screen =
   | "documents" // Documents screen
   | "settings" // Settings screen
   | "contacts" // Contacts screen
+  | "transactions" // All transactions across the current accounts
   | "account-detail" // Account details and transactions
   | "account-details-info" // Account details information
   | "account-options" // Account options menu

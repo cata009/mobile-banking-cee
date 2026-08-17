@@ -14,9 +14,10 @@ import type { Product } from "@/data/products";
 import type { AccountTransaction } from "@/data/accountDetails";
 import type { CardTransactionMerchantEnrichment } from "@/app/screens/payments/DomesticPaymentFlowScreens";
 
-interface HomeScreenProps {
+export interface HomeScreenProps {
   onPrimeClick?: () => void;
   onAnalyticsClick?: () => void;
+  onSeeAllTransactionsClick?: () => void;
   onMessagesClick?: () => void;
   onPaymentsClick?: () => void;
   onDomesticPaymentClick?: () => void;
@@ -38,6 +39,7 @@ interface HomeScreenProps {
 export default function HomeScreen({
   onPrimeClick,
   onAnalyticsClick,
+  onSeeAllTransactionsClick,
   onMessagesClick,
   onPaymentsClick,
   onDomesticPaymentClick,
@@ -79,11 +81,12 @@ export default function HomeScreen({
     return <InactiveState />;
   }
 
-  if (features.app2027Homepage || features.evo2027Homepage) {
+  if (features.evo2027Homepage) {
     return (
       <App2027HomeScreen
         onPrimeClick={onPrimeClick}
         onAnalyticsClick={onAnalyticsClick}
+        onSeeAllTransactionsClick={onSeeAllTransactionsClick}
         onMessagesClick={onMessagesClick}
         onPaymentsClick={onPaymentsClick}
         onDomesticPaymentClick={onDomesticPaymentClick}

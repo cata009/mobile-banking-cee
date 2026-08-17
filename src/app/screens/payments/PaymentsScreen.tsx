@@ -51,7 +51,7 @@ function PaymentsHeader({
   };
 
   return (
-    <div className="w-full bg-[var(--uc-surface)]">
+    <div className="w-full bg-[var(--uc-app-bg)]">
       <div className="px-[24px] pb-[20px]">
         <div className="flex min-h-[32px] items-start gap-[8px]">
           <h1 className="uc-type-h1 flex-1 min-w-0 text-[var(--uc-text)]">
@@ -234,8 +234,8 @@ export default function PaymentsScreen({
   }
 
   return (
-    <div className="relative flex h-full w-full flex-col bg-[var(--uc-surface)] text-[var(--uc-text)]">
-      <div className="h-[54px] flex-shrink-0 bg-[var(--uc-surface)]" />
+    <div className="relative flex h-full w-full flex-col bg-[var(--uc-app-bg)] text-[var(--uc-text)]">
+      <div className="h-[54px] flex-shrink-0 bg-[var(--uc-app-bg)]" />
       <PaymentsHeader
         title={t("runtime.payments.title", menu.title)}
         onContactsClick={onContactsClick}

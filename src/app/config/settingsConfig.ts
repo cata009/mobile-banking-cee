@@ -16,6 +16,11 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     title: "Mobile app",
     items: [
       {
+        id: "appearance",
+        title: "Appearance",
+        description: "Choose light or dark mode and personalise your Home.",
+      },
+      {
         id: "language",
         title: "Language",
         description: "Choose the app language you want to use every day.",

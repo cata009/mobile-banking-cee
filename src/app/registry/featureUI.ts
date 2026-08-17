@@ -51,15 +51,10 @@ export const FEATURE_UI_MAP: Record<FeatureId, FeatureUIConfig> = {
     locations: ["investments.robo"],
     description: "Adds the isolated CZ Future goal-based Robo Advisor journey inside Investments",
   },
-  fx_app2027Homepage: {
-    id: "fx_app2027Homepage",
-    locations: ["home.app2027"],
-    description: "Applies the global App 2027 Homepage presentation",
-  },
   fx_evo2027Homepage: {
     id: "fx_evo2027Homepage",
     locations: ["home.app2027"],
-    description: "Applies the CZ-only Evo 2027 Homepage presentation",
+    description: "Applies the CZ-only Evo 2027 Homepage presentation through the shared 2027 home components",
   },
 
   // ─── RELEASE FEATURES ────────────────────────────────────────

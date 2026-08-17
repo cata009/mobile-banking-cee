@@ -7,10 +7,15 @@ interface PfmIconPath {
   clipRule?: "evenodd";
 }
 
+export type PfmCategoryIconVariant = "glyph" | "category-circle";
+
 interface PfmCategoryIconProps {
   category?: PfmCategoryName | string | null;
   size?: number;
   className?: string;
+  color?: string;
+  /** The saved 32px Design System option used by Evo 2027 and Ethoca PFM surfaces. */
+  variant?: PfmCategoryIconVariant;
 }
 
 const ICON_GLYPH_SIZE = 20;
@@ -185,24 +190,36 @@ const PFM_CATEGORY_ICONS: Partial<Record<PfmCategoryName, PfmIconPath[]>> = {
   ],
 };
 
-export default function PfmCategoryIcon({ category, size = 32, className = "" }: PfmCategoryIconProps) {
+export default function PfmCategoryIcon({
+  category,
+  size = 32,
+  className = "",
+  color,
+  variant = "glyph",
+}: PfmCategoryIconProps) {
   const definition = getPfmCategory(category);
   const paths = PFM_CATEGORY_ICONS[definition.name];
   const viewBox = PFM_ICON_VIEW_BOXES[definition.name] ?? DEFAULT_ICON_VIEW_BOX;
+  const isCategoryCircle = variant === "category-circle";
+  const glyphColor = isCategoryCircle ? "var(--uc-static-white)" : (color ?? `var(${definition.colorVar})`);
 
   if (paths) {
     return (
       <span
-        className={`inline-flex shrink-0 items-center justify-center ${className}`}
+        className={`inline-flex shrink-0 items-center justify-center ${
+          isCategoryCircle ? "rounded-full" : ""
+        } ${className}`}
         style={{
           width: `${size}px`,
           height: `${size}px`,
           aspectRatio: "1 / 1",
+          backgroundColor: isCategoryCircle ? `var(${definition.colorVar})` : undefined,
         }}
         aria-label={`${definition.name} PFM category`}
         data-pfm-category={definition.name}
         data-pfm-icon-source={PFM_ICON_SOURCE}
         data-pfm-icon-rendering="svg"
+        data-pfm-icon-variant={isCategoryCircle ? "category-circle" : undefined}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -221,7 +238,7 @@ export default function PfmCategoryIcon({ category, size = 32, className = "" }:
             <path
               key={`${definition.name}-${index}`}
               d={path.d}
-              fill={`var(${definition.colorVar})`}
+              fill={glyphColor}
               fillRule={path.fillRule}
               clipRule={path.clipRule}
             />
@@ -245,6 +262,7 @@ export default function PfmCategoryIcon({ category, size = 32, className = "" }:
       aria-label={`${definition.name} PFM category`}
       data-pfm-category={definition.name}
       data-pfm-icon-source={PFM_ICON_SOURCE}
+      data-pfm-icon-variant={isCategoryCircle ? "category-circle" : undefined}
     >
       {definition.fallbackInitial}
     </span>
