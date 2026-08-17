@@ -94,6 +94,26 @@ describe("ToolsScreen", () => {
     }
   });
 
+  it("switches both comparison frames to Evo 2027 and adds a third country only on request", () => {
+    const { container } = renderTools();
+    fireEvent.click(container.querySelector('[data-tool-card="side-by-side"]') as HTMLElement);
+
+    expect(container.querySelectorAll("iframe")).toHaveLength(2);
+    expect(container.querySelectorAll("[data-side-by-side-empty-slot]")).toHaveLength(1);
+
+    fireEvent.change(screen.getByRole("combobox", { name: "App version" }), {
+      target: { value: "release-future-evo-2027" },
+    });
+
+    for (const frame of Array.from(container.querySelectorAll("iframe"))) {
+      expect(frame.getAttribute("src")).toContain("release=release-future-evo-2027");
+    }
+
+    fireEvent.click(screen.getByTitle("Add Slovakia to comparison"));
+    expect(container.querySelectorAll("iframe")).toHaveLength(3);
+    expect(container.querySelectorAll("[data-side-by-side-empty-slot]")).toHaveLength(0);
+  });
+
   it("opens the translation tester with a custom-text preview", () => {
     const { container } = renderTools();
     fireEvent.click(container.querySelector('[data-tool-card="translation-tester"]') as HTMLElement);
