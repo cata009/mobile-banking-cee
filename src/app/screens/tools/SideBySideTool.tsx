@@ -27,6 +27,8 @@ interface ScreenOption {
   label: string;
 }
 
+type ComparisonRelease = "release-current" | "release-future-evo-2027";
+
 function buildScreenOptions(): ScreenOption[] {
   const labelByRuntimeScreen = new Map<string, string>();
   for (const meta of Object.values(SCREEN_REGISTRY)) {
@@ -52,6 +54,11 @@ export function SideBySideTool() {
   const screenOptions = useMemo(buildScreenOptions, []);
 
   const [selectedScreen, setSelectedScreen] = useState<Screen>("homepage");
+  const [selectedRelease, setSelectedRelease] = useState<ComparisonRelease>(() =>
+    new URL(window.location.href).searchParams.get("release") === "release-future-evo-2027"
+      ? "release-future-evo-2027"
+      : "release-current",
+  );
   const [selectedCountries, setSelectedCountries] = useState<CountryId[]>(() => {
     const second = COUNTRIES.find((country) => country !== activeCountry);
     return second ? [activeCountry, second] : [activeCountry];
@@ -85,7 +92,7 @@ export function SideBySideTool() {
     params.set("scenario", selectedScreen === "prelogin-inactive" ? "inactive" : "active");
     params.set("lang", frameLanguage(country));
     params.set("frame", "0");
-    params.set("release", "release-current");
+    params.set("release", selectedRelease);
     params.delete("account");
     params.delete("card");
     params.delete("flow");
@@ -130,7 +137,20 @@ export function SideBySideTool() {
             </div>
           </div>
 
-          <div className="grid gap-[16px] sm:grid-cols-2">
+          <div className="grid gap-[16px] sm:grid-cols-3">
+            <div>
+              <FieldLabel>App version</FieldLabel>
+              <select
+                aria-label="App version"
+                value={selectedRelease}
+                onChange={(event) => setSelectedRelease(event.target.value as ComparisonRelease)}
+                className="uc-select mt-[8px] w-full cursor-pointer rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] py-[8px] pl-[12px] text-[13px] font-bold leading-[16px] text-[var(--uc-text)] outline-none transition-colors hover:border-[var(--uc-action)] focus:border-[var(--uc-action)]"
+              >
+                <option value="release-current">Baseline App</option>
+                <option value="release-future-evo-2027">Future App · Evo 2027</option>
+              </select>
+            </div>
+
             <div>
               <FieldLabel>Screen</FieldLabel>
               <select
