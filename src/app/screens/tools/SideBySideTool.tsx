@@ -51,15 +51,18 @@ function buildScreenOptions(): ScreenOption[] {
 }
 
 export function SideBySideTool() {
-  const { country: activeCountry } = useDemo();
+  const { country: activeCountry, release: activeRelease } = useDemo();
   const screenOptions = useMemo(buildScreenOptions, []);
 
   const [selectedScreen, setSelectedScreen] = useState<Screen>("homepage");
-  const [selectedRelease, setSelectedRelease] = useState<ComparisonRelease>(() =>
-    new URL(window.location.href).searchParams.get("release") === "release-future-evo-2027"
-      ? "release-future-evo-2027"
-      : "release-current",
-  );
+  const [releaseByCountry, setReleaseByCountry] = useState<Record<CountryId, ComparisonRelease>>(() => {
+    const initialRelease: ComparisonRelease =
+      activeRelease === "release-future-evo-2027" ? "release-future-evo-2027" : "release-current";
+    return Object.fromEntries(COUNTRIES.map((country) => [country, initialRelease])) as Record<
+      CountryId,
+      ComparisonRelease
+    >;
+  });
   const [selectedCountries, setSelectedCountries] = useState<CountryId[]>(() => {
     const second = COUNTRIES.find((country) => country !== activeCountry);
     return second ? [activeCountry, second] : [activeCountry];
@@ -94,7 +97,7 @@ export function SideBySideTool() {
     params.set("scenario", selectedScreen === "prelogin-inactive" ? "inactive" : "active");
     params.set("lang", frameLanguage(country));
     params.set("frame", "0");
-    params.set("release", selectedRelease);
+    params.set("release", releaseByCountry[country]);
     params.delete("account");
     params.delete("card");
     params.delete("flow");
@@ -152,20 +155,7 @@ export function SideBySideTool() {
             </div>
           </div>
 
-          <div className="grid gap-[16px] sm:grid-cols-3">
-            <div>
-              <FieldLabel>App version</FieldLabel>
-              <select
-                aria-label="App version"
-                value={selectedRelease}
-                onChange={(event) => setSelectedRelease(event.target.value as ComparisonRelease)}
-                className="uc-select mt-[8px] w-full cursor-pointer rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] py-[8px] pl-[12px] text-[13px] font-bold leading-[16px] text-[var(--uc-text)] outline-none transition-colors hover:border-[var(--uc-action)] focus:border-[var(--uc-action)]"
-              >
-                <option value="release-current">Baseline App</option>
-                <option value="release-future-evo-2027">Future App · Evo 2027</option>
-              </select>
-            </div>
-
+          <div className="grid gap-[16px] sm:grid-cols-2">
             <div>
               <FieldLabel>Screen</FieldLabel>
               <select
@@ -199,21 +189,37 @@ export function SideBySideTool() {
               const url = buildFrameUrl(country);
               return (
                 <div key={country} className="min-w-0" data-side-by-side-frame={country}>
-                  <div className="flex items-center justify-between gap-[8px] pb-[8px]" style={{ width: FRAME_WIDTH * scale + 8, height: 36 }}>
-                    <div className="min-w-0">
-                      <span className="block truncate text-[13px] font-bold leading-[16px] text-[var(--uc-text)]">
-                        {COUNTRY_META[country].name}
-                      </span>
+                  <div className="pb-[8px]" style={{ width: FRAME_WIDTH * scale + 8 }}>
+                    <div className="flex h-[36px] items-center justify-between gap-[8px]">
+                      <div className="min-w-0">
+                        <span className="block truncate text-[13px] font-bold leading-[16px] text-[var(--uc-text)]">
+                          {COUNTRY_META[country].name}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => toggleCountry(country)}
+                        title={`Remove ${COUNTRY_META[country].name} from comparison`}
+                        aria-label={`Remove ${COUNTRY_META[country].name} from comparison`}
+                        className="grid size-[28px] shrink-0 place-items-center rounded-full border border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)] transition-colors hover:border-[var(--uc-status-red)] hover:text-[var(--uc-status-red)]"
+                      >
+                        <AppIcon name="close-x" size={14} color="currentColor" />
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => toggleCountry(country)}
-                      title={`Remove ${COUNTRY_META[country].name} from comparison`}
-                      aria-label={`Remove ${COUNTRY_META[country].name} from comparison`}
-                      className="grid size-[28px] shrink-0 place-items-center rounded-full border border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)] transition-colors hover:border-[var(--uc-status-red)] hover:text-[var(--uc-status-red)]"
+                    <select
+                      aria-label={`App version for ${COUNTRY_META[country].name}`}
+                      value={releaseByCountry[country]}
+                      onChange={(event) =>
+                        setReleaseByCountry((current) => ({
+                          ...current,
+                          [country]: event.target.value as ComparisonRelease,
+                        }))
+                      }
+                      className="uc-select w-full cursor-pointer rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] py-[7px] pl-[10px] text-[12px] font-bold leading-[15px] text-[var(--uc-text)] outline-none transition-colors hover:border-[var(--uc-action)] focus:border-[var(--uc-action)]"
                     >
-                      <AppIcon name="close-x" size={14} color="currentColor" />
-                    </button>
+                      <option value="release-current">Baseline App</option>
+                      <option value="release-future-evo-2027">Future App · Evo 2027</option>
+                    </select>
                   </div>
                   <div
                     className="scrollbar-hide overflow-hidden rounded-[28px] bg-[var(--uc-static-black)] p-[4px] shadow-[0_10px_30px_-8px_rgba(0,0,0,0.35)]"
@@ -224,7 +230,7 @@ export function SideBySideTool() {
                       style={{ width: FRAME_WIDTH * scale, height: FRAME_HEIGHT * scale }}
                     >
                       <iframe
-                        key={`${country}-${frameNonce}`}
+                        key={`${country}-${releaseByCountry[country]}-${frameNonce}`}
                         title={`${COUNTRY_META[country].name} preview`}
                         src={url}
                         scrolling="no"
@@ -275,6 +281,9 @@ export function SideBySideTool() {
               <div key={`focused-${country}`}>
                 <div className="pb-[8px] text-[13px] font-bold text-[var(--uc-text)]">
                   {COUNTRY_META[country].name}
+                  <span className="ml-[6px] font-normal text-[var(--uc-text-muted)]">
+                    · {releaseByCountry[country] === "release-current" ? "Baseline App" : "Future App · Evo 2027"}
+                  </span>
                 </div>
                 <div
                   className="overflow-hidden rounded-[30px] bg-[var(--uc-static-black)] p-[4px] shadow-[0_16px_40px_-12px_rgba(0,0,0,0.5)]"
@@ -285,7 +294,7 @@ export function SideBySideTool() {
                     style={{ width: FRAME_WIDTH * FOCUS_SCALE, height: FRAME_HEIGHT * FOCUS_SCALE }}
                   >
                     <iframe
-                      key={`focused-${country}-${frameNonce}`}
+                      key={`focused-${country}-${releaseByCountry[country]}-${frameNonce}`}
                       title={`${COUNTRY_META[country].name} focused preview`}
                       src={buildFrameUrl(country)}
                       scrolling="no"
