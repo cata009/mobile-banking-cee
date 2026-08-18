@@ -32,6 +32,8 @@ export interface AccountTransaction {
   monthTitle: string;
   label: string;
   details?: string;
+  /** Currency carried by the account ledger, used when an own-account transfer shows its payer. */
+  currency?: Currency;
   amount: number;
   type: "debit" | "credit";
   category: string;
@@ -59,6 +61,13 @@ export interface AccountTransactionMonthGroup {
   monthTitle: string;
   transactions: AccountTransaction[];
   monthlyTotal: number;
+}
+
+export interface AccountTransactionDateGroup {
+  dateKey: string;
+  dateTitle: string;
+  transactions: AccountTransaction[];
+  dailyTotal: number;
 }
 
 export interface AccountOptionItem {
@@ -553,6 +562,7 @@ function makeTransaction(
     monthTitle: `${monthName} ${date.getFullYear()}`,
     label,
     details,
+    currency,
     amount,
     type: amount >= 0 ? "credit" : "debit",
     category,
@@ -703,36 +713,36 @@ function getPrimaryCurrentAccountTransactions(
     t.card(new Date(2026, 3, 23), shop.fastFood, "Card payment", -11.2, "Lifestyle", "Fast food"),
     t.card(new Date(2026, 3, 22), shop.restaurant, "Card payment", -34.8, "Lifestyle", "Restaurants"),
     t.account(new Date(2026, 3, 20), profile.utility, "Account payment", -72.3, "Utilities", "Utility bill"),
-    t.card(new Date(2026, 3, 19), shop.delivery, "Card payment", -23.4, "Lifestyle", "Fast food"),
+    t.card(new Date(2026, 3, 20), shop.delivery, "Card payment", -23.4, "Lifestyle", "Fast food"),
     t.account(new Date(2026, 3, 18), profile.person, "Incoming transfer", 120, "Transfers", "Incoming transfer"),
     t.card(new Date(2026, 3, 16), shop.pharmacy, "Card payment", -28.5, "Healthcare", "Pharmacy"),
     t.account(new Date(2026, 3, 14), profile.insurance, "Direct debit", -39.2, "Insurance", "Insurance premium"),
     t.account(new Date(2026, 3, 12), profile.education, "Account payment", -58, "Education", "School fee"),
-    t.card(new Date(2026, 3, 11), shop.homeStore, "Card payment", -118, "Home", "Furniture"),
+    t.card(new Date(2026, 3, 12), shop.homeStore, "Card payment", -118, "Home", "Furniture"),
     t.account(new Date(2026, 3, 10), profile.childcare, "Account payment", -95, "Children", "Childcare"),
-    t.card(new Date(2026, 3, 9), shop.rideHailing, "Card payment", -9.6, "Transportation", "Public transport"),
+    t.card(new Date(2026, 3, 10), shop.rideHailing, "Card payment", -9.6, "Transportation", "Public transport"),
     t.card(new Date(2026, 3, 8), shop.fuel, "Card payment", -51.2, "Transportation", "Fuel and transport"),
-    t.card(new Date(2026, 3, 7), shop.coffee, "Card payment", -8.9, "Lifestyle", "Coffee shop", "Pending"),
+    t.card(new Date(2026, 3, 8), shop.coffee, "Card payment", -8.9, "Lifestyle", "Coffee shop", "Pending"),
     t.card(new Date(2026, 3, 6), shop.electronics, "Online card payment", -74.5, "Shopping", "Online purchase"),
     // A second order at the same online retailer, still authorising — this is
     // the reference pending card row across the demo.
-    t.card(new Date(2026, 3, 5), shop.electronics, "Card payment", -29.5, "Shopping", "Pending card payment", "Pending"),
+    t.card(new Date(2026, 3, 6), shop.electronics, "Card payment", -29.5, "Shopping", "Pending card payment", "Pending"),
     t.card(new Date(2026, 3, 4), shop.streaming, "Card payment", -12.99, "Leisure time", "Subscriptions"),
-    t.card(new Date(2026, 3, 3), shop.entertainment, "Card payment", -16.5, "Lifestyle", "Music & movies"),
-    t.account(new Date(2026, 3, 2), profile.publicInstitution, "Account payment", -210, "Taxes and Penalties", "Taxes and fees"),
+    t.card(new Date(2026, 3, 4), shop.entertainment, "Card payment", -16.5, "Lifestyle", "Music & movies"),
+    t.account(new Date(2026, 3, 4), profile.publicInstitution, "Account payment", -210, "Taxes and Penalties", "Taxes and fees"),
     t.card(new Date(2026, 3, 1), shop.groceriesAlt, "Card payment", -32.7, "Groceries", "Supermarket"),
     t.account(new Date(2026, 3, 30), profile.atm, "Cash withdrawal", -60, "ATM", "Cash withdrawal"),
-    t.account(new Date(2026, 3, 28), "Cash deposit", "Branch cash deposit", 75, "Wallet", "Cash deposit"),
-    t.account(new Date(2026, 3, 26), profile.wallet, "Mobile wallet top-up", -45, "Wallet", "Wallet top-up"),
-    t.card(new Date(2026, 3, 25), shop.pharmacy, "Card payment", -46, "Healthcare", "Personal care"),
+    t.account(new Date(2026, 3, 29), "Cash deposit", "Branch cash deposit", 75, "Wallet", "Cash deposit"),
+    t.account(new Date(2026, 3, 27), profile.wallet, "Mobile wallet top-up", -45, "Wallet", "Wallet top-up"),
+    t.card(new Date(2026, 3, 24), shop.pharmacy, "Card payment", -46, "Healthcare", "Personal care"),
     t.account(new Date(2026, 3, 23), profile.investments, "Account payment", -150, "Investments", "Broker transfer"),
-    t.account(new Date(2026, 3, 21), profile.bankFee, "Monthly package fee", -4.5, "Finance", "Bank fees"),
-    t.exchange(new Date(2026, 3, 19), "EUR", currency, -8.2),
+    t.account(new Date(2026, 3, 22), profile.bankFee, "Monthly package fee", -4.5, "Finance", "Bank fees"),
+    t.exchange(new Date(2026, 3, 20), "EUR", currency, -8.2),
     t.ownTransfer(new Date(2026, 3, 17), "Transfer to savings", "Own account transfer", -220, "Own account transfer", "current", "savings"),
-    t.account(new Date(2026, 3, 15), profile.charity, "Excluded from budget", -25, "Exclude from budget", "Excluded payment"),
+    t.account(new Date(2026, 3, 16), profile.charity, "Excluded from budget", -25, "Exclude from budget", "Excluded payment"),
     // A market stall takes cards but has no brand behind it, so this row keeps
     // the PFM category icon. It is the reference case for the fallback.
-    t.unbrandedCard(new Date(2026, 3, 13), profile.uncategorized, "Card payment", -14.6, "Uncategorized", "Needs category"),
+    t.unbrandedCard(new Date(2026, 3, 14), profile.uncategorized, "Card payment", -14.6, "Uncategorized", "Needs category"),
     t.account(new Date(2025, 11, 18), profile.salaryPayer, "Year-end bonus", 840, "Income", "Salary"),
     t.card(new Date(2025, 11, 20), shop.electronics, "Online card payment", -260, "Shopping", "Online purchase"),
     t.card(new Date(2025, 11, 12), shop.fashion, "Holiday shopping", -190.4, "Shopping", "Retail purchase"),
@@ -934,6 +944,34 @@ export function groupAccountTransactionsByMonth(
       ...group,
       transactions: group.transactions.sort((a, b) => Number(b.day) - Number(a.day)),
     }));
+}
+
+export function groupAccountTransactionsByDate(
+  transactions: AccountTransaction[],
+): AccountTransactionDateGroup[] {
+  const groups = new Map<string, AccountTransactionDateGroup>();
+
+  transactions.forEach((transaction) => {
+    const dateKey = `${transaction.monthKey}-${String(Number(transaction.day)).padStart(2, "0")}`;
+    const existing = groups.get(dateKey);
+    if (existing) {
+      existing.transactions.push(transaction);
+      existing.dailyTotal += transaction.amount;
+      return;
+    }
+
+    const [year = "", month = "01"] = transaction.monthKey.split("-");
+    groups.set(dateKey, {
+      dateKey,
+      dateTitle: `${Number(transaction.day)} ${MONTH_NAMES[Number(month) - 1] ?? transaction.month} ${year}`,
+      transactions: [transaction],
+      dailyTotal: transaction.amount,
+    });
+  });
+
+  return Array.from(groups.entries())
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([, group]) => group);
 }
 
 export const ACCOUNT_OPTION_ITEMS: AccountOptionItem[] = [

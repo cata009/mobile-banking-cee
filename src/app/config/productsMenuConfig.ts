@@ -10,6 +10,7 @@ import shopsmartLentiamoImage from "@/assets/shopsmart/shopsmart-lentiamo.png";
 import shopsmartValentinoImage from "@/assets/shopsmart/shopsmart-valentino.png";
 
 export type ProductsMenuTab = "banking" | "shopsmart";
+export type ShopSmartOfferCategory = "eshops" | "electronics" | "travel" | "home";
 export type ProductsCardId =
   | "account"
   | "cards"
@@ -47,6 +48,7 @@ export interface ShopSmartSummary {
 
 export interface ShopSmartOfferCard {
   id: string;
+  categories: readonly ShopSmartOfferCategory[];
   merchant: string;
   title: string;
   statusText: string;
@@ -260,6 +262,7 @@ export const DEFAULT_SHOPSMART_SUMMARY: ShopSmartSummary = {
 export const DEFAULT_SHOPSMART_OFFER_CARDS: readonly ShopSmartOfferCard[] = [
   {
     id: "shopsmart-valentino",
+    categories: ["eshops", "travel"],
     merchant: "Valentino.ro",
     title: "Up to 10% cashback peste\n500 de Lei",
     statusText: "Until 31-December-2025",
@@ -270,6 +273,7 @@ export const DEFAULT_SHOPSMART_OFFER_CARDS: readonly ShopSmartOfferCard[] = [
   },
   {
     id: "shopsmart-lentiamo",
+    categories: ["eshops", "electronics"],
     merchant: "Lentiamo.ro",
     title: "50.00 RON peste 500 de Lei",
     statusText: "Until 31-December-2025",
@@ -280,6 +284,7 @@ export const DEFAULT_SHOPSMART_OFFER_CARDS: readonly ShopSmartOfferCard[] = [
   },
   {
     id: "shopsmart-english-home",
+    categories: ["eshops", "home"],
     merchant: "English home",
     title: "10% cashback peste 100 de Lei",
     statusText: "Until 31-December-2025",

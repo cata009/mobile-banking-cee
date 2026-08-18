@@ -41,6 +41,18 @@ afterEach(() => {
 })
 
 describe('Evo 2027 analytics overview', () => {
+  it('can open directly on one account and the requested money direction', () => {
+    const { container } = render(
+      <AnalyticsScreen initialScopeId="acc-1" initialDirection="income" />,
+      { wrapper: Providers },
+    )
+
+    expect(container.querySelector('[data-evo-analytics-summary]')).not.toBeInTheDocument()
+    expect(container.querySelector('[data-evo-analytics-scope-trigger]')).toHaveTextContent('Primary Account')
+    expect(screen.getByRole('heading', { name: 'Income' })).toBeInTheDocument()
+    expect(container.querySelector('[data-evo-expense-chart]')).toBeInTheDocument()
+  })
+
   it('scopes the overview to All accounts or one selected current account', () => {
     const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
 
@@ -69,7 +81,7 @@ describe('Evo 2027 analytics overview', () => {
     expect(container.querySelector('[data-evo-analytics-summary-hero]')).toBeInTheDocument()
     // One card per period in the timeline, so swiping the rail is how the month changes.
     expect(container.querySelectorAll('[data-evo-analytics-period-card]').length).toBeGreaterThan(1)
-    expect(container.querySelector('[data-evo-analytics-month-bars]')).toBeInTheDocument()
+    expect(container.querySelector('[data-evo-analytics-month-bars]')).not.toBeInTheDocument()
     expect(screen.getAllByText('Money out').length).toBeGreaterThan(0)
     expect(screen.getAllByRole('heading', { name: 'Money out' }).length).toBeGreaterThan(0)
     expect(container.querySelectorAll('[data-evo-analytics-top-category]').length).toBeGreaterThan(0)
@@ -85,7 +97,7 @@ describe('Evo 2027 analytics overview', () => {
     expect(firstCategory).toHaveClass('min-h-[80px]', 'items-center')
     expect(firstCategory).toHaveTextContent('Household')
     expect(firstCategory).not.toHaveTextContent('HOUSEHOLD')
-    expect(firstCategory.querySelector('.font-bold')).toBeInTheDocument()
+    expect(firstCategory!.querySelector('.font-bold')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Show next monthly interval' })).not.toBeInTheDocument()
 
     // The chart-tool furniture the other L1 destinations never had.
@@ -93,6 +105,17 @@ describe('Evo 2027 analytics overview', () => {
     expect(screen.queryByText('My Cash Flow')).not.toBeInTheDocument()
     expect(container.querySelector('[data-evo-analytics-kpi]')).not.toBeInTheDocument()
     expect(screen.queryByText(/moved into investments, not spending/)).not.toBeInTheDocument()
+  })
+
+  it('ends the spending period rail at the same 16px inset as the category container', () => {
+    const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
+
+    const rail = container.querySelector<HTMLElement>('[data-evo-analytics-period-carousel] [role="region"]')
+    const cards = container.querySelectorAll('[data-evo-analytics-period-card]')
+
+    expect(rail).toBeInTheDocument()
+    expect(rail).toHaveClass('px-[16px]')
+    expect(rail?.children).toHaveLength(cards.length)
   })
 
   it('shows matching top money-out and money-in sections on the overview', () => {
@@ -170,8 +193,11 @@ describe('Evo 2027 expense chart and split-by breakdown', () => {
 
     expect(screen.getByTestId('evo-expense-donut-chart')).toBeInTheDocument()
     expect(screen.getByText('Transactions split by')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Add transaction' })).toBeInTheDocument()
+    expect(screen.queryByText('Monthly interval')).not.toBeInTheDocument()
+    expect(document.querySelectorAll('[data-evo-analytics-scope-trigger]')).toHaveLength(1)
     expect(breakdownRows().length).toBeGreaterThan(1)
-    expect(screen.queryByRole('button', { name: 'Show next monthly interval' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Show next analytics period' })).toBeInTheDocument()
     expect(screen.queryByTestId('evo-expense-transaction')).not.toBeInTheDocument()
   })
 
@@ -204,15 +230,40 @@ describe('Evo 2027 expense chart and split-by breakdown', () => {
     ])
     expect(Array.from(barsButton.querySelectorAll('path')).every((path) => path.getAttribute('fill') === '#262626')).toBe(true)
 
-    const previous = screen.getByRole('button', { name: 'Show previous monthly interval' })
+    const previous = screen.getByRole('button', { name: 'Show previous analytics period' })
     fireEvent.click(previous)
-    const next = screen.getByRole('button', { name: 'Show next monthly interval' })
+    const next = screen.getByRole('button', { name: 'Show next analytics period' })
     const previousGlyph = previous.querySelector('svg')
     const nextGlyph = next.querySelector('svg')
 
     expect(previousGlyph).toHaveAttribute('viewBox', '12 9 7.25 14')
     expect(nextGlyph).toHaveAttribute('viewBox', previousGlyph?.getAttribute('viewBox'))
     expect(nextGlyph).toHaveClass('rotate-180')
+  })
+
+  it('moves to adjacent periods when the chart itself is swiped', () => {
+    openExpenses()
+
+    const period = document.querySelector<HTMLElement>('[data-evo-analytics-period-key]')
+    const chart = screen.getByLabelText('Expense chart')
+    const initialKey = period?.getAttribute('data-evo-analytics-period-key')
+
+    fireEvent.pointerDown(chart, { pointerType: 'touch', clientX: 220 })
+    fireEvent.pointerUp(chart, { pointerType: 'touch', clientX: 120 })
+
+    expect(period).not.toHaveAttribute('data-evo-analytics-period-key', initialKey ?? '')
+  })
+
+  it('uses the same period rail for Income, including yearly totals', () => {
+    render(<AnalyticsScreen />, { wrapper: Providers })
+    fireEvent.click(screen.getAllByRole('button', { name: 'See all categories' })[1] as HTMLElement)
+
+    expect(document.querySelector('[data-evo-analytics-direction="income"]')).toBeInTheDocument()
+    const next = screen.getByRole('button', { name: 'Show next analytics period' })
+    fireEvent.click(next)
+
+    expect(document.querySelector('[data-evo-expense-interval="year"]')).toBeInTheDocument()
+    expect(screen.queryByText('Monthly interval')).not.toBeInTheDocument()
   })
 
   it('inhibits the other arcs when one category is picked and restores them when it is picked again', () => {
@@ -245,7 +296,7 @@ describe('Evo 2027 expense chart and split-by breakdown', () => {
     const otherButton = donutButtons.find((button) => button.getAttribute('data-evo-expense-category') === 'Other')
     if (!otherButton) throw new Error('Expected an Other donut segment')
 
-    expect(otherButton).toHaveClass('size-[28px]', 'text-[var(--uc-static-white)]')
+    expect(otherButton).toHaveClass('size-[32px]', 'text-[var(--uc-static-white)]')
     expect(otherButton).toHaveStyle({ backgroundColor: 'var(--uc-pfm-finance)' })
     expect(otherButton.querySelector('svg')).toHaveAttribute('width', '16')
     expect(otherButton.querySelector('svg')).toHaveAttribute('height', '16')
@@ -256,7 +307,7 @@ describe('Evo 2027 expense chart and split-by breakdown', () => {
       .filter((key): key is string => Boolean(key))
     const otherKeys = breakdownRows()
       .map((row) => row.getAttribute('data-evo-expense-breakdown-row'))
-      .filter((key): key is string => Boolean(key) && !primaryKeys.includes(key))
+      .filter((key): key is string => key !== null && !primaryKeys.includes(key))
 
     fireEvent.click(otherButton)
 

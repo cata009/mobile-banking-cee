@@ -23,6 +23,12 @@ interface AccountTransactionRowProps {
   avatarPresentation?: TransactionAvatarPresentation;
   /** Allows a release-specific transaction list to adopt its own success token. */
   positiveAmountClassName?: string;
+  /** The compact name/details/amount layout used by the Evo 2027 statements. */
+  evo2027?: boolean;
+  /** Evo 2027 can show the date as a third text line when the parent has no date divider. */
+  showTransactionDate?: boolean;
+  /** Single-day cards use a tighter row so isolated transactions do not float in excess whitespace. */
+  compact?: boolean;
 }
 
 function splitAmount(value: string) {
@@ -49,7 +55,10 @@ export default function AccountTransactionRow({
   onCategoryClick,
   categoryIconVariant = "glyph",
   avatarPresentation = "identity",
-  positiveAmountClassName = "text-[var(--uc-action)]",
+  positiveAmountClassName = "text-[var(--uc-green-success)]",
+  evo2027 = false,
+  showTransactionDate = false,
+  compact = false,
 }: AccountTransactionRowProps) {
   const isPending = transaction.status === "Pending";
   const amountClassName = isPending
@@ -59,7 +68,7 @@ export default function AccountTransactionRow({
   const amountParts = splitAmount(formattedAmount);
 
   const date = showDate ? (
-    <div className="flex flex-col items-center gap-[2px]">
+    <div className="flex flex-col items-center gap-[2px]" data-transaction-date>
       <p className="uc-type-h2 text-center leading-[20px] text-[var(--uc-text)]">
         {transaction.day}
       </p>
@@ -89,6 +98,85 @@ export default function AccountTransactionRow({
         ) : null}
     </div>
   );
+
+  const evoDate = showTransactionDate ? (
+    <p className="uc-type-n5 text-[var(--uc-text-muted)]" data-transaction-date>
+      {transaction.day} {transaction.month}
+    </p>
+  ) : null;
+  const evoDetails = (
+    <div className="flex min-w-0 flex-1 flex-col items-start gap-[2px]" data-transaction-detail={transaction.details ?? undefined}>
+      <p className={`uc-type-n4-strong w-full truncate leading-[20px] ${isPending ? "text-[var(--uc-text-muted)]" : "text-[var(--uc-text)]"}`}>
+        {displayLabel ?? transaction.label}
+      </p>
+      {transaction.details ? (
+        <p className="uc-type-n5 w-full truncate leading-[18px] text-[var(--uc-text-muted)]">
+          {transaction.details}
+        </p>
+      ) : null}
+      {evoDate}
+    </div>
+  );
+  const evoAmount = (
+    <p
+      className={`uc-type-n2-strong shrink-0 text-right leading-[22px] ${amountClassName}`}
+      data-transaction-amount={transaction.type === "credit" && !isPending ? "positive" : undefined}
+    >
+      <span>{sign}{amountParts.integer}</span>
+      <span className="tracking-[0.3px]">{amountParts.separator}</span>
+      <span className="uc-type-n5 uppercase">{amountParts.decimals} {currency}</span>
+    </p>
+  );
+  const evoRowSizing = compact ? "min-h-[64px] py-[8px]" : isPending ? "min-h-[92px] py-[16px]" : "min-h-[80px] py-[16px]";
+
+  if (evo2027) {
+    const leading = !isPending || leadingVisual || avatarPresentation === "identity" ? (
+      leadingVisual ?? <TransactionAvatar transaction={transaction} pfmVariant={categoryIconVariant} presentation={avatarPresentation} />
+    ) : null;
+
+    if (onCategoryClick) {
+      return (
+        <div
+          className={`flex w-full items-center justify-between gap-[12px] bg-transparent px-[16px] text-left ${evoRowSizing}`}
+          data-ds-label="AccountTransactionRow 375x80"
+          data-evo2027-transaction-row
+        >
+          <button
+            type="button"
+            aria-label={`Change category for ${transaction.label}`}
+            className="grid size-[32px] shrink-0 place-items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
+            onClick={() => onCategoryClick(transaction)}
+          >
+            {leading}
+          </button>
+          <button
+            type="button"
+            aria-label={`Open transaction ${transaction.label}`}
+            className="flex min-w-0 flex-1 items-center gap-[12px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
+            onClick={() => onClick?.(transaction)}
+          >
+            {evoDetails}
+            {evoAmount}
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <button
+        type="button"
+        onClick={() => onClick?.(transaction)}
+        className={`flex w-full items-center gap-[12px] bg-transparent px-[16px] text-left ${evoRowSizing}`}
+        data-pending-transaction-row={isPending ? "true" : undefined}
+        data-ds-label="AccountTransactionRow 375x80"
+        data-evo2027-transaction-row
+      >
+        <div className="grid size-[42px] shrink-0 place-items-center">{leading}</div>
+        {evoDetails}
+        {evoAmount}
+      </button>
+    );
+  }
 
   if (onCategoryClick) {
     return (

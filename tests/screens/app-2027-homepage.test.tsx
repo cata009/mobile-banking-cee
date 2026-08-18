@@ -116,10 +116,10 @@ describe('2027 Home Transformation', () => {
     expect(within(cardsGroup).queryByRole('button', { name: /^Cards$/ })).not.toBeInTheDocument()
     const debitCards = cardsGroup.querySelectorAll('[data-evo-card-comparison-tile]')
     expect(debitCards).toHaveLength(3)
-    expect(debitCards[0]).toHaveTextContent('Debit Standard')
-    expect(debitCards[1]).toHaveTextContent('Debit Premium')
-    expect(debitCards[2]).toHaveTextContent('Debit Standard EUR')
-    expect(debitCards[2].querySelector('[data-component="Card"]')).toHaveAttribute(
+    expect(debitCards[0]!).toHaveTextContent('Debit Standard')
+    expect(debitCards[1]!).toHaveTextContent('Debit Premium')
+    expect(debitCards[2]!).toHaveTextContent('Debit Standard EUR')
+    expect(debitCards[2]!.querySelector('[data-component="Card"]')).toHaveAttribute(
       'data-card-variant',
       'mc-virtual-standard-violet',
     )
@@ -138,17 +138,17 @@ describe('2027 Home Transformation', () => {
     const pages = comparison.querySelectorAll('[data-evo-card-carousel-page]')
     expect(tiles).toHaveLength(3)
     expect(pages).toHaveLength(2)
-    expect(pages[0].querySelectorAll('[data-evo-card-comparison-tile]')).toHaveLength(2)
-    expect(pages[1].querySelectorAll('[data-evo-card-comparison-tile]')).toHaveLength(1)
-    expect(tiles[0]).toHaveTextContent('Debit Standard')
-    expect(tiles[0]).toHaveTextContent('**** 5601')
-    expect(tiles[0]).not.toHaveTextContent('5173 **** **** 5601')
-    expect(tiles[1]).toHaveTextContent('Debit Premium')
-    expect(tiles[1]).toHaveTextContent('**** 5603')
-    expect(tiles[1].querySelector('[data-card-variant="mc-debit-gold"]')).toBeInTheDocument()
-    expect(tiles[2]).toHaveTextContent('Debit Standard EUR')
-    expect(tiles[2]).toHaveTextContent('**** 5602')
-    expect(tiles[2].querySelector('[data-card-variant="mc-virtual-standard-violet"]')).toBeInTheDocument()
+    expect(pages[0]!.querySelectorAll('[data-evo-card-comparison-tile]')).toHaveLength(2)
+    expect(pages[1]!.querySelectorAll('[data-evo-card-comparison-tile]')).toHaveLength(1)
+    expect(tiles[0]!).toHaveTextContent('Debit Standard')
+    expect(tiles[0]!).toHaveTextContent('**** 5601')
+    expect(tiles[0]!).not.toHaveTextContent('5173 **** **** 5601')
+    expect(tiles[1]!).toHaveTextContent('Debit Premium')
+    expect(tiles[1]!).toHaveTextContent('**** 5603')
+    expect(tiles[1]!.querySelector('[data-card-variant="mc-debit-gold"]')).toBeInTheDocument()
+    expect(tiles[2]!).toHaveTextContent('Debit Standard EUR')
+    expect(tiles[2]!).toHaveTextContent('**** 5602')
+    expect(tiles[2]!.querySelector('[data-card-variant="mc-virtual-standard-violet"]')).toBeInTheDocument()
     expect(comparison.querySelector('[data-evo-card-carousel]')).toHaveClass('overflow-x-auto', 'overscroll-x-contain', 'pb-[2px]', 'cursor-grab')
     expect(comparison.querySelector('[data-evo-card-carousel]')).not.toHaveClass('snap-x', 'snap-mandatory')
     expect(comparison.querySelector('[data-evo-card-carousel]')).toHaveAttribute('data-evo-card-page-count', '2')
@@ -159,7 +159,7 @@ describe('2027 Home Transformation', () => {
     expect(within(comparison).getAllByRole('button', { name: /Go to account/ })).toHaveLength(2)
     const ghostBanner = comparison.querySelector('[data-evo-card-ghost-banner] [data-component="GhostBanner"]') as HTMLElement
     expect(ghostBanner).toBeInTheDocument()
-    expect(ghostBanner).toHaveClass('h-[120px]', 'w-[136px]', '!p-[8px]')
+    expect(ghostBanner).toHaveClass('h-[120px]', 'w-[136px]', '!p-[4px]')
     expect(ghostBanner).toHaveTextContent('Add a debit card')
     expect(ghostBanner).toHaveTextContent('Explore options')
     expect(ghostBanner).not.toHaveTextContent('Explore more cards')
@@ -167,19 +167,19 @@ describe('2027 Home Transformation', () => {
     expect(ghostBanner.firstElementChild).toHaveClass('flex-col', 'items-center')
     expect(ghostBanner.querySelector('[data-ghost-banner-title]')).toHaveClass('text-[14px]', 'font-bold', 'leading-[18px]')
     expect(ghostBanner.querySelector('[data-ghost-banner-description]')).toHaveClass('text-[14px]', 'leading-[18px]')
-    const title = tiles[0].querySelector('p:first-of-type') as HTMLElement
-    const subtitle = tiles[0].querySelector('p:nth-of-type(2)') as HTMLElement
-    const cardVisual = tiles[0].querySelector('[data-component="Card"]') as HTMLElement
-    expect(tiles[0]).toHaveClass('min-h-[120px]', 'items-center', 'justify-center', 'gap-[8px]')
+    const title = tiles[0]!.querySelector('p:first-of-type') as HTMLElement
+    const subtitle = tiles[0]!.querySelector('p:nth-of-type(2)') as HTMLElement
+    const cardVisual = tiles[0]!.querySelector('[data-component="Card"]') as HTMLElement
+    expect(tiles[0]!).toHaveClass('min-h-[120px]', 'items-center', 'justify-center', 'gap-[8px]')
     expect(cardVisual).toHaveStyle({ width: '80px', height: '50px' })
     expect(title).toHaveClass('text-[14px]')
     expect(subtitle).toHaveClass('text-[14px]')
     expect(within(comparison).queryByRole('button', { name: 'Card details' })).not.toBeInTheDocument()
     expect(within(comparison).queryByText('22 850.50 CZK')).not.toBeInTheDocument()
 
-    fireEvent.click(tiles[0])
-    fireEvent.click(tiles[1])
-    fireEvent.click(tiles[2])
+    fireEvent.click(tiles[0]!)
+    fireEvent.click(tiles[1]!)
+    fireEvent.click(tiles[2]!)
     expect(onAccountClick).toHaveBeenCalledTimes(3)
     expect(onAccountClick).toHaveBeenLastCalledWith(expect.objectContaining({ name: 'Debit Standard EUR', type: 'debit_card' }))
 
@@ -236,9 +236,11 @@ describe('2027 Home Transformation', () => {
     expect(interestRail).toHaveClass('select-none', 'touch-pan-y', 'cursor-grab')
     expect(interestRail).not.toHaveClass('snap-x', 'snap-mandatory')
     expect(interestRail.firstElementChild).toHaveClass('w-[calc(100%-48px)]')
-    expect(container.querySelectorAll('[data-home-shopsmart-media]')).toHaveLength(8)
-    expect(container.querySelector('[data-home-shopsmart-media]')).toHaveClass('size-full', 'object-cover')
-    expect(container.querySelector('[data-home-shopsmart-media]')?.parentElement).toHaveClass('h-[128px]', 'overflow-hidden')
+    const shopSmartMedia = container.querySelectorAll('[data-home-shopsmart] [data-component="ShopsmartOfferCard"] img')
+    expect(shopSmartMedia).toHaveLength(3)
+    expect(shopSmartMedia[0]).toHaveClass('h-full', 'w-full', 'object-cover')
+    expect(shopSmartMedia[0]?.parentElement).toHaveClass('relative', 'w-full', 'overflow-hidden')
+    expect(shopSmartMedia[0]?.parentElement).toHaveStyle({ height: '130px' })
     expect(Array.from(container.querySelectorAll('[data-home-interest-media]')).map((image) => (image as HTMLImageElement).style.objectPosition)).toEqual([
       'center 38%',
       'center 23%',
@@ -292,11 +294,11 @@ describe('2027 Home Transformation', () => {
     const stackPreview = accountsGroup.querySelector('[data-home-product-stack-preview]') as HTMLElement
 
     expect(summary).toHaveAttribute('data-home-summary-variant', 'baseline')
-    expect(summary).toHaveClass('w-full', 'h-[145.25px]', 'rounded-[8px]', 'overflow-hidden', 'flex', 'relative', 'bg-[#94B1BA]')
-    expect(summary.querySelector('[data-home-summary-content]')).toHaveClass('flex-1', 'p-[24px]', 'flex', 'flex-col', 'gap-[4px]')
+    expect(summary).toHaveClass('w-full', 'h-[145.25px]', 'min-h-[145.25px]', 'rounded-[8px]', 'overflow-hidden', 'flex', 'relative', 'bg-[#94B1BA]', 'px-[24px]', 'py-[15px]')
+    expect(summary.querySelector('[data-home-summary-content]')).toHaveClass('relative', 'z-10', 'flex-1', 'flex', 'flex-col')
     expect(summary.querySelector('[data-home-summary-primary-amount]')).toHaveClass('text-[28px]', 'font-bold')
     expect(summary.querySelector('[data-home-summary-art-container]')).toHaveClass('absolute', 'top-[24px]', 'right-0', 'w-[96px]')
-    expect(summary.querySelector('[data-home-summary-divider]')).toHaveClass('h-[0.25px]', 'w-[205px]')
+    expect(summary.querySelector('[data-home-summary-divider]')).toHaveClass('my-[9px]', 'h-px', 'w-full')
     expect(summary.querySelector('[data-home-summary-secondary-amount]')).toHaveClass('uc-type-n2-strong')
     expect(summary).toHaveTextContent('Spent this week')
     expect(stackPreview).not.toHaveTextContent('620')
@@ -492,15 +494,15 @@ describe('2027 Home Transformation', () => {
     fireEvent.click(travelFilter)
     expect(travelFilter).toHaveAttribute('aria-pressed', 'true')
     expect(container.querySelector('[data-home-shopsmart]')).toHaveAttribute('data-home-shopsmart-filter', 'travel')
-    expect(screen.getByText('City breaks made easier')).toBeInTheDocument()
-    expect(screen.getByText('More room for your next escape')).toBeInTheDocument()
+    expect(container.querySelector('[data-home-shopsmart]')).toHaveTextContent('Valentino.ro')
+    expect(container.querySelector('[data-home-shopsmart]')).toHaveTextContent('500 de Lei')
 
     const homeFilter = screen.getByRole('button', { name: 'Home & living' })
     fireEvent.click(homeFilter)
     expect(homeFilter).toHaveAttribute('aria-pressed', 'true')
     expect(container.querySelector('[data-home-shopsmart]')).toHaveAttribute('data-home-shopsmart-filter', 'home')
-    expect(screen.getByText('Make your home work harder')).toBeInTheDocument()
-    expect(screen.getByText('Small upgrades, better everyday')).toBeInTheDocument()
+    expect(container.querySelector('[data-home-shopsmart]')).toHaveTextContent('English home')
+    expect(container.querySelector('[data-home-shopsmart]')).toHaveTextContent('10% cashback peste 100 de Lei')
 
     fireEvent.click(screen.getByRole('tab', { name: 'Savings' }))
     const savingAccount = container.querySelector('[data-home-compact-product-card="saving_account"]') as HTMLElement
@@ -510,6 +512,32 @@ describe('2027 Home Transformation', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Credits' }))
     expect(container.querySelector('[data-home-loan-installment] [data-home-supporting-amount]')).toHaveClass('text-[16px]')
+  })
+
+  it('reuses the Products ShopSmart offer cards in the homepage carousel and keeps category taps actionable', () => {
+    const { container, onProductsClick } = renderHome('CZ', 'release-future-evo-2027')
+    const shopSmart = container.querySelector('[data-home-shopsmart]') as HTMLElement
+
+    expect(shopSmart.querySelectorAll('[data-component="ShopsmartOfferCard"]')).toHaveLength(3)
+    expect(shopSmart).toHaveTextContent('Valentino.ro')
+    expect(shopSmart).toHaveTextContent('Lentiamo.ro')
+
+    const offerRail = shopSmart.querySelector('[data-home-carousel-rail]') as HTMLElement
+    expect(offerRail).toHaveClass('items-stretch')
+    const offerCards = Array.from(shopSmart.querySelectorAll<HTMLElement>('[data-component="ShopsmartOfferCard"]'))
+    expect(offerCards.every((card) => card.className.includes('h-full'))).toBe(true)
+    expect(offerCards.every((card) => !card.className.includes('border-[#666666]'))).toBe(true)
+
+    const electronicsFilter = within(shopSmart).getByRole('button', { name: 'Electronics' })
+    fireEvent.click(electronicsFilter)
+
+    expect(shopSmart).toHaveAttribute('data-home-shopsmart-filter', 'electronics')
+    expect(shopSmart).toHaveTextContent('Lentiamo.ro')
+    expect(shopSmart).not.toHaveTextContent('Valentino.ro')
+
+    const offerCard = shopSmart.querySelector('[data-component="ShopsmartOfferCard"]') as HTMLElement
+    fireEvent.click(offerCard)
+    expect(onProductsClick).toHaveBeenCalledTimes(1)
   })
 
   it('keeps Insurance policies in the same compact stacked treatment as account products', () => {

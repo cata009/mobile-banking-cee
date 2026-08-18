@@ -15,9 +15,10 @@ import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
 import TextField from "@/app/components/TextField";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import { PreviewSafeTop } from "./MiniPhone";
+import { renderRsPropertyInsurancePreview } from "./rsPropertyInsurancePreviews";
 import { DemoProvider } from "@/app/state/demoStore";
 import { FLOW_DEMO } from "../flows/demoData";
-import type { FlowScreenKind } from "../flows/types";
+import type { FlowScreenKind, RsPropertyInsuranceScreenKind } from "../flows/types";
 import { getAccountTransactions, type AccountTransaction } from "@/data/accountDetails";
 import { mockProducts, type CurrentAccount, type DebitCard } from "@/data/products";
 import carrefourOfficialLogo from "@/assets/ethoca/carrefour-official.svg";
@@ -921,6 +922,12 @@ export interface PreviewContext {
 }
 
 export function renderFlowPreview(kind: FlowScreenKind, _context: PreviewContext = {}): ReactNode {
+  // RS Property Insurance keeps its screens in their own module; every one of its
+  // kinds carries the same prefix, so the dispatcher stays one line per flow.
+  if (kind.startsWith("rs-pi-")) {
+    return renderRsPropertyInsurancePreview(kind as RsPropertyInsuranceScreenKind);
+  }
+
   switch (kind) {
     case "home-entry":
       return <HomeEntryPreview />;

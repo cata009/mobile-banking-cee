@@ -71,9 +71,9 @@ afterEach(() => {
 
 describe('static template previews', () => {
   it.each([
-    ['products-menu', 18, '37891886a02b66e4fe1a5c26f8a9def78c1d53e6b3a152ccad88d31b4dc16c55'],
-    ['products-shopsmart', 15, 'e3c740aecf93237dcbb38fe794f3fc3cd57dbf326f1bb65891592649403aa319'],
-    ['analytics-overview', 0, '7939b41505d5eff5586afc11ea0c252d271ec9374db6965a2f63da978cfe25bf'],
+    ['products-menu', 18, '94bcc6cf9c856849395fa935d13af4fdec52da19ea0aae3f111d2806c47757b5'],
+    ['products-shopsmart', 15, 'd599d178e4549596bfaa7131c729de7a201095cc58a3f1ca2b6af0b66abdf8c2'],
+    ['analytics-overview', 0, '41a8ecdf1df04f9f8d0c2723ed45ec295f35798695d36a014dc3ce006e23ec4b'],
   ] as const)('preserves %s markup in normal and presentation-only modes', (previewId, buttonCount, expectedHash) => {
     const normal = renderPreview(previewId, false)
     const normalMarkup = normal.container.innerHTML

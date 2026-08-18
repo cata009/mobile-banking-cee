@@ -28,8 +28,22 @@ export default function TransactionMonthRail({
   const activeMonth = months.find((month) => month.key === activeMonthKey);
 
   useEffect(() => {
-    // Optional-called: jsdom and older engines do not implement scrollIntoView.
-    activeRef.current?.scrollIntoView?.({ block: "nearest", inline: "center" });
+    const active = activeRef.current;
+    const rail = active?.parentElement;
+    if (!active || !rail) return;
+
+    // Scroll only the month rail. scrollIntoView would also scroll any
+    // horizontal ancestors, including the device preview viewport.
+    const left = active.offsetLeft;
+    const right = left + active.offsetWidth;
+    const visibleLeft = rail.scrollLeft;
+    const visibleRight = visibleLeft + rail.clientWidth;
+
+    if (left < visibleLeft) {
+      rail.scrollTo?.({ left, behavior: "smooth" });
+    } else if (right > visibleRight) {
+      rail.scrollTo?.({ left: right - rail.clientWidth, behavior: "smooth" });
+    }
   }, [activeMonthKey]);
 
   if (months.length === 0) return null;
