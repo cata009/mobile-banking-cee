@@ -98,7 +98,11 @@ const MiniPhone = forwardRef<HTMLDivElement, MiniPhoneProps>(function MiniPhone(
             transformOrigin: "top left",
           }}
         >
-          <div aria-hidden="true" className="absolute inset-0 translate-y-8 bg-[rgb(var(--uc-static-black-rgb)_/_0.2)] blur-3xl" />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 translate-y-8 bg-[rgb(var(--uc-static-black-rgb)_/_0.2)] blur-3xl"
+            data-flow-device-shadow="true"
+          />
           <div className="relative rounded-[48px] bg-[var(--uc-static-black)] p-3 shadow-2xl">{screen}</div>
         </div>
       ) : (

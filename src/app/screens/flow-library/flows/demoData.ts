@@ -131,10 +131,11 @@ export const FLOW_DEMO = {
       title: "Property insurance",
       headline: "Your home, covered from tonight",
       intro:
-        "A pipe bursts at 2am. A storm takes a window. Someone gets in while you are away. Home insurance means a bad day stays a bad day — not a bill you did not plan for.",
+        "A pipe bursts at 2am. A storm takes a window. Someone gets in while you are away. Home insurance means a bad day stays a bad day. It does not become a bill you did not plan for.",
       benefitsTitle: "What you are covered for",
+      /** Short on purpose: the acknowledgement below the carousel has to stay on screen. */
       packagesIntro:
-        "All three packages cover the same risks. What changes is how much we pay you when something happens — so pick the one that matches what your home and your things are worth.",
+        "All three cover the same risks. What changes is how much we pay you. You choose your period in the next step.",
       benefits: [
         "Fire, storm, lightning and explosion",
         "Water damage from your own installations",
@@ -143,14 +144,14 @@ export const FLOW_DEMO = {
       ],
       whyHereTitle: "Why buy it here",
       whyHere: [
-        "Two minutes, not an afternoon — we already know who you are.",
+        "Two minutes, not an afternoon. We already know who you are.",
         "Paid straight from your account. No slip to carry anywhere.",
         "Covered the moment the payment goes through.",
       ],
       priceLabel: "From",
       pricePeriod: "for 6 months",
       exclusionsNote:
-        "Some homes cannot be covered — among them unoccupied houses and flats, and buildings mostly made of timber. We will show you the full list before you buy.",
+        "Some homes cannot be covered, including unoccupied houses and flats, and buildings mostly made of timber. We will show you the full list before you buy.",
       cta: "Get covered",
     },
 
@@ -303,6 +304,8 @@ export const FLOW_DEMO = {
         "The insurance cannot cover unoccupied houses or unoccupied flats, houses built from sandwich panels and houses with more than 30% timber in their structure, auxiliary buildings and buildings on water, cash, works of art and antiques.",
       bodyRs:
         "Osiguranjem ne mogu biti pokriveni nenastanjene kuće ili nenastanjeni stanovi, kuće izgrađene od sendvič-panela i kuće koje u svojoj konstrukciji imaju više od 30% drvene građe, pomoćni objekti i objekti na vodi, gotov novac, umetnički predmeti i antikviteti.",
+      /** Shown under the disabled action before anything has been attempted. */
+      hint: "Turn on the acknowledgement above to continue.",
       blockedError: "To continue you must read the information in the Must read section.",
       blockedErrorRs: "Da biste nastavili proces, morate pročitati informaciju u delu Obavezno pročitaj.",
     },
@@ -326,6 +329,8 @@ export const FLOW_DEMO = {
       titleRs: "Hitne intervencije u domaćinstvu",
       optIn: "I also want to arrange emergency home assistance.",
       optInRs: "Dodatno želim da ugovorim hitne intervencije u domaćinstvu.",
+      /** What the customer confirms before the add-on can be carried forward. */
+      acknowledgement: "I have read what emergency assistance covers.",
       intro:
         "A breakdown in your house or flat cannot be predicted, but you can secure the help of a reliable technician at any moment. The service covers the technician's call-out and work, and temporary accommodation for household members when staying in the home is not possible.",
       /** Paket A is the one preselected when the customer opts in. */
@@ -573,10 +578,10 @@ export const FLOW_DEMO = {
 
       successTitle: "Payment order is successfully sent",
       successBody:
-        "Your payment order has been successfully sent to the bank. After the payment is done you will receive the push notification if they are activated in application and on your device.",
+        "Your payment order has been sent to the bank. When the payment is complete, we will send a push notification if notifications are enabled on your device.",
       successBody2:
         "Be on top of your finances! Track your spending per category to have full overview of your financial habits.",
-      successCta: "OK, GOT IT",
+      successCta: "Ok, I got it",
     },
 
     /** Returned by the insurer once the request is registered, before payment. */

@@ -36,6 +36,13 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
   figmaFile: "Mobile PI Baseline · RS (no Figma source yet — built from DS components)",
   figmaNodeId: "",
   sourceUrl: "https://www.generali.rs/fizicka_lica/imovina/osiguranje_kuce_i_stana.891.html",
+  /**
+   * Both halves are needed here. The BA document answers why the flow exists and
+   * what it commits the bank to; the twenty-five screen specs are what design and
+   * delivery build from, and hiding them behind the document would lose every
+   * field, state and acceptance criterion in this specification.
+   */
+  specLayout: "document-and-screens",
 
   overview: {
     purpose:
@@ -53,10 +60,11 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { label: "Demo boundary", value: "Deterministic Flow Library prototype. No live customer, policy, partner-account or integration data is shown." },
       ],
       versionContext:
-        "Demo BA v1.0 · 18 August 2026. Written against the live Generali web-shop journey (steps 1 and 2 captured field by field) and the existing Mobile PI domestic payment flow. Service contracts, credentials and the DBN session topology are intentionally summarised, not reproduced.",
+        "Demo BA v1.1 · 18 August 2026. Written against the live Generali web-shop journey (steps 1 and 2 captured field by field) and the existing Mobile PI domestic payment flow. Service contracts, credentials and the DBN session topology are intentionally summarised, not reproduced.",
       versionHistory: [
         { version: "0.1", date: "17 August 2026", detail: "Initial BA draft: partner services, website walkthrough and the payment deeplink outline." },
         { version: "1.0", date: "18 August 2026", detail: "Design and spec baseline: full screen set, prefill rules, consent gates, settlement and every failure path." },
+        { version: "1.1", date: "18 August 2026", detail: "Design review pass: mandatory reads become acknowledgements that gate their step, the add-on gains its own read, cover detail moves behind one More details sheet per package, the separate payment-method step is dropped, and every screen spec is realigned to the built screens." },
       ],
       openIssues: [
         {
@@ -92,12 +100,19 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         },
         {
           reference: "006",
+          status: "Open",
+          title: "Two reads are acknowledged rather than merely opened",
+          detail:
+            "The web shop treats Must read and Important information as text the customer opens. Mobile PI presents both as acknowledgement toggles that gate the step, and does the same for the add-on's read. It is a deliberate strengthening — it makes the disclosure auditable per customer — and it needs the insurer's agreement that an acknowledgement is acceptable where they specified an open.",
+        },
+        {
+          reference: "007",
           status: "Info",
           title: "Instalment payment",
           detail: "The web shop offers interest-free instalments on partner credit cards. Out of scope here: Mobile PI settles the premium as one domestic payment.",
         },
         {
-          reference: "007",
+          reference: "008",
           status: "Info",
           title: "Language",
           detail: "The previews are written in the demo's English UI language. Production copy is Serbian; the partner's original labels are carried in the screen specs so a translator can map them one to one.",
@@ -152,13 +167,15 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         },
         {
           title: "Configure the policy (partner step 1)",
-          description: "One scrollable screen split into two blocks, matching the web shop's package and duration sections.",
+          description:
+            "The partner's step 1 is split across two screens, because it asks two different questions: which cover, and on what terms. A phone cannot carry both in one scroll without burying the second.",
           items: [
-            "Package selection. Paket A, B and C as selectable cards showing the headline sums; the full eight-row cover table for the selected package sits directly underneath so the comparison is never hidden behind a tab.",
-            "Mandatory read. Must read is a blocking gate exactly as on the web: Continue stays disabled and, if pressed, surfaces the partner's own blocking message until the exclusions sheet has been opened.",
-            "Duration and start date. 3, 6 or 12 months and a start date, with the cover period derived and shown back to the customer.",
-            "Important information. The rule that cover only starts once the premium is recorded is available as its own read, because it is the single most common source of misunderstanding.",
-            "Emergency assistance. Optional add-on with its own two packages, its own service table, its own mandatory read and its own premium line; when it is on, the premium summary shows both lines and a total.",
+            "Choose a package. Package A, B and C as a swipeable carousel. Each card carries the two sums that actually separate the packages — building and contents — one reference price, and a More details action that opens that package's full eight-row cover table on a bottom sheet.",
+            "One price per card, one period question. The cards quote the same reference term so the three are comparable at a glance, and say so on the card; the real period is asked once, on the next screen. Every priced combination stays reachable.",
+            "Mandatory read. The partner's Must read exclusions become an acknowledgement row: a toggle that opens the insurer's text and, once on, records that it has been seen. It starts off, and Continue stays disabled until it is on, with a line underneath saying why.",
+            "Set up your policy. The chosen package carries over as a summary card, then 3, 6 or 12 months and a start date, with the cover period derived and shown back to the customer.",
+            "Important information. The rule that cover only starts once the premium is recorded gets the same acknowledgement treatment, because it is the single most common source of misunderstanding and it changes what the customer's chosen start date actually means.",
+            "Emergency assistance. Optional add-on with its own two packages, its own service table, its own acknowledged read and its own premium line. Turning it on adds a second premium line and a total; turning it off forgets both its package and its read.",
             "Premium summary. Package, duration, cover period and premium with the note that 5% insurance tax is included, pinned above the primary action so it survives scrolling.",
           ],
         },
@@ -175,10 +192,10 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         {
           title: "Check and confirm (partner steps 3 and 4)",
           items: [
-            "Data check. Every entered and prefilled value, grouped as Policy, Insured property and Policyholder, each group with its own edit affordance that returns to the right screen with the data intact.",
-            "Consents. The insurer's terms, the accuracy declaration, the privacy notice and electronic delivery, each individually acknowledged. Confirm stays disabled until all of them are on.",
-            "Payment method. The web shop's payment-order option is replaced by paying from a UniCredit account. The account selector shows available balance, and the premium is checked against it before anything is registered with the insurer.",
-            "Order. Finish purchase registers the request with the insurer, which returns the policy number the payment will reference.",
+            "Data check. Every entered and prefilled value, in the partner's own five blocks — household insurance, emergency assistance when it is on, total, property, policyholder. Each block that owns data carries an Edit that returns to the screen where that data was entered; the total carries none, because it is derived and there is nothing there to correct.",
+            "Documents and consents. The insurer's four documents are listed for reading, then two acknowledgements: terms and Serbian residency, which is required, and marketing contact, which is not. Confirm is enabled on the required one alone, and the partner's Select all shortcut is kept.",
+            "No payment-method step. The web shop's payment page collapses into nothing: the payer account is chosen on the domestic payment screen that follows, which already owns that control and already shows the available balance.",
+            "Order. Confirm registers the request with the insurer, which returns the policy number the premium payment will carry as its reference.",
           ],
         },
         {
@@ -195,11 +212,11 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
           title: "Failure and exit paths",
           description: "Each one is a designed screen, not a generic error toast.",
           items: [
-            "Insufficient funds. Caught before the request is registered, so the customer never ends up with an unpaid policy request they did not expect. Offers switching account.",
+            "Insufficient funds. Caught on the payment screen, where the account is chosen: the shortfall sits on the account field and Next stays disabled until another account is picked. The request is already registered at that point, so walking away here lands on the registered-but-unpaid outcome, which is designed for and resumable.",
             "Registration failed. The insurer could not register the request: no payment is opened and nothing is charged. Retry is offered.",
             "Signing cancelled. The request exists but is unpaid; the customer is told the policy is not active and offered the payment again.",
             "Payment rejected. The insurer is informed, the request is marked unpaid and inactive, and the customer is told what did and did not happen to their money.",
-            "Abandon purchase. The partner's own Cancel purchase action, behind a confirmation that says the entered data will not be kept.",
+            "Leaving the purchase. The partner's Cancel purchase button is not reproduced as a destructive action next to the primary one; leaving is what the header back already does. Backing out of the data steps raises a confirmation that says the entered data will not be kept.",
           ],
         },
       ],
@@ -215,7 +232,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         {
           title: "Resilience",
           items: [
-            "The balance check runs before registration, so a foreseeable failure never leaves an unpaid request behind.",
+            "Registration always happens before the payment is opened, so the policy number the payment references exists before any money moves. A short balance is therefore caught after registration, on the payment screen, and must leave a resumable registered-and-unpaid request rather than an orphan.",
             "Every registered request carries the insurer's policy number, so a payment that succeeds, fails or is abandoned can always be reconciled to exactly one request.",
             "A signing that is cancelled or times out must leave a resumable state, not a duplicate second request.",
           ],
@@ -245,21 +262,26 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       "The Insurances bottom sheet gains exactly one new option in RS. Selecting it opens a product cover page built with the same composition as every other option in that sheet.",
       "The in-app journey covers the same four partner steps — package, insurance data, data check, order — but does not render the partner's step indicator: Mobile PI has no such component, and progress is carried by screen titles and the back stack as everywhere else in the app.",
       "Step 1 is split in two: choose the package from a carousel, then configure it. The insurance period is asked exactly once, on the configuration screen; the cards quote a single reference term and say the period comes next. Every priced combination stays reachable — three packages by three terms for the household policy, two by three for the add-on.",
-      "Continue on the package step is blocked until the Must read exclusions have been opened. The block reproduces the partner's own message; it is not a silent disabled button.",
-      "Cover detail sits behind one More details action per package rather than an info control on every risk row. It is independent of the Must read gate and opening it does not satisfy it.",
+      "Every mandatory read the partner enforces is an acknowledgement row in the design system's shape: a NavigationRow with a toggle, off by default, whose label states what is being acknowledged. Turning it on opens the insurer's text on a bottom sheet and records that the read happened.",
+      "A step that carries an acknowledgement keeps its primary action disabled until the acknowledgement is on, and says why in one line directly above the action. A disabled button with no explanation is not an acceptable rendering of the partner's blocking rule.",
+      "There are three such reads: the household exclusions on the package step, the cover-start rules on the configuration step, and the add-on's covered works when the add-on is on. They are independent — satisfying one says nothing about the others.",
+      "Cover detail sits behind one More details action per package rather than an info control on every risk row. It uses the app's existing link-style action, the same control the activity list uses for See more transactions, and it opens the full cover table on a bottom sheet. It is independent of the acknowledgement and opening it does not satisfy it.",
       "The premium is always shown with the note that 5% insurance tax is included, and is never displayed without the package, duration and cover period it belongs to.",
       "The cover period is derived from the start date and duration and is shown before the customer commits, together with the rule that cover only begins once the premium is recorded.",
       "Emergency home assistance is optional, priced separately per duration, defaults to Paket A when opted into, has its own package choice and its own mandatory read, and adds a second premium line plus a total when selected.",
       "The combined amount the customer pays when the add-on is on is the exact sum of the household premium and the add-on premium; it is never rounded, blended or recalculated separately.",
       "The add-on’s three-insured-events-per-year limit is shown next to its price, because it is what decides whether the cover is worth buying.",
       "First name, last name and JMBG are prefilled from the verified bank profile and are read-only; JMBG is masked. Mobile number and e-mail are prefilled and editable.",
-      "The policyholder address defaults to the insured property address through the partner's checkbox; clearing it reveals the full editable address block.",
+      "Values the bank already holds and the customer cannot change are presented as read-only values in the same shape the data check uses, never as disabled input fields: a greyed-out field still reads as something that could be typed into.",
+      "The policyholder screen is ordered identity, then contact, then address, because the address section is the one that grows. Turning the same-as-property toggle off reveals the same five fields the insured property asks for, scrolls them into view, and holds the primary action until they are complete.",
       "E-mail confirmation is only required when the prefilled e-mail has been changed.",
-      "The data check reproduces the partner's five blocks in order — household insurance, emergency assistance when it is on, total, property, policyholder — each editable in place and returning with the entered data intact.",
+      "The data check reproduces the partner's five blocks in order — household insurance, emergency assistance when it is on, total, property, policyholder. Every block that owns data carries an Edit that returns to the screen where that data was entered, with the entry intact; the total carries none, because it is derived and has nothing of its own to correct.",
+      "Every row on the data check, and every read-only value elsewhere in the flow, uses one presentation: label above, value below, separated by a rule. One shape for read-only data across the whole journey.",
       "The emergency add-on runs from the quotation date rather than the household start date, so the data check shows two different cover periods. The difference is shown, never smoothed over.",
       "The order step presents four documents — important information, household terms, emergency-intervention terms and general terms of use — before any consent can be given.",
       "Two consents are collected: the terms and Serbia-residency acknowledgement, which is required, and marketing contact, which is optional. Confirm is enabled on the required one alone. The partner's Select all control is kept.",
       "The person who pays is the authenticated customer: identity, address, postal code and contact travel with the request from the verified bank profile instead of being retyped or shown back, and no bot check is presented.",
+      "The partner's Cancel purchase button is not reproduced as a destructive action beside the primary one. Leaving is what the header back already does, and backing out of the data steps raises the confirmation that says the entered data will not be kept.",
       "The partner's separate payment-method page is not reproduced: the account is chosen on the domestic payment screen, which already owns that control, and the available balance is checked there against the premium. Adding a step whose only job is to repeat the account picker would be one screen too many.",
       "Confirming the consents registers the request with the insurer; the policy number it returns becomes the reference of the premium payment, and the payment screen opens on it.",
       "The premium payment reuses the Serbian domestic payment screens exactly as they are — create, review and confirmation — and maps onto the fields they already have: From account, Name, Account number, Module, Reference number, Amount, Currency, Payment code, Purpose, Urgent/instant processing and Payment processing date. No field is added for this flow, and beneficiary, amount, module, reference and purpose are read-only because they must reconcile with the registered request.",
@@ -291,6 +313,8 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       "Confirm whether the emergency assistance add-on ships with the first release or follows, since it doubles the pricing logic on the package step.",
       "Confirm whether the premium payment should be forced to urgent processing, given cover only starts once the premium is recorded.",
       "Confirm the per-risk explanation copy shown in the package details sheet. It is a Generali deliverable and is a placeholder in this specification.",
+      "Confirm that presenting Must read, Important information and the add-on read as acknowledgements the customer switches on — rather than as text they merely open — is acceptable to the insurer, and agree what evidence of the acknowledgement is stored with the request.",
+      "Confirm whether the emergency-intervention terms document should still be listed on the order step when the add-on has not been taken.",
       "Confirm the Serbian production copy for every screen; the previews use the demo's English UI language with the partner's original labels kept in the screen specs.",
     ],
     notes: [
@@ -303,6 +327,16 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         title: "Why the partner journey is mirrored rather than redesigned",
         body:
           "The four steps, the package tables, the two mandatory reads, the optional add-on and the four consents are not arbitrary product decisions — they are how the insurer discloses and contracts. Reordering or merging them changes what the customer has been shown before they commit.\n\nThe structure is therefore kept one to one and only the presentation changes: partner tables become design-system rows, the partner's radio lists become selectable cards, its blocking alert becomes an inline error on the primary action, and its eighteen-field page becomes two screens because a phone cannot carry it in one scroll.",
+      },
+      {
+        title: "Nothing here is a new component",
+        body:
+          "The partner journey is full of things Mobile PI has no component for: a four-step wizard indicator, per-row info buttons, blocking alerts, a payment-method page. None of them were rebuilt. Each was mapped onto something the app already owns, and where the app owned nothing, the pattern was extracted from an existing screen rather than invented here.\n\nSo: progress is carried by screen titles and the back stack, because the design system has no step indicator. Every mandatory read is a NavigationRow with a toggle — the shape the app already uses for acknowledgements — and every read opens on the shared BottomSheet. More details uses the link-style action the Evo 2027 activity list already uses for See more transactions; it was inlined there, so it was extracted into a shared component and both screens now use it. Every read-only value in the flow, from the prefilled identity to the data check to the locked payment fields, uses one presentation: label above, value below.\n\nThe practical consequence for the BA is that this flow adds no design debt. What it needs from the design system that did not exist as a component is exactly one thing, and that thing now exists and is shared.",
+      },
+      {
+        title: "Reads the customer switches on, not text they might scroll past",
+        body:
+          "The web shop enforces its disclosure by blocking: press Continue without opening Must read and an alert appears. That works on a page where everything is visible at once. On a phone the customer can be three screens of scroll away from the thing they are being told to open.\n\nSo each read becomes an acknowledgement row: the label states what is being acknowledged — I have read what this insurance cannot cover — the toggle opens the insurer's text, and turning it on records that the read happened. The step's primary action stays disabled until it is on, with a line above it saying which acknowledgement is missing. Nothing is hidden behind a disabled button.\n\nThere are three of them, and they are independent: the household exclusions, the cover-start rule, and — only when the add-on is taken — what emergency assistance actually covers. Turning the add-on off forgets its read as well as its package, because the customer has not agreed to something they removed. This is stricter than the web shop, which is why it is on the open-issues list rather than assumed.",
       },
       {
         title: "Where the account is chosen, and what that costs",
@@ -396,9 +430,9 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         primary: { label: "Continue with the package", to: "rs-pi-duration-premium" },
         back: "rs-pi-product-cover",
         extra: [
-          { label: "Must read", to: "rs-pi-package-must-read" },
-          { label: "More details", to: "rs-pi-risk-info" },
-          { label: "Continue without reading", to: "rs-pi-package-blocked" },
+          { label: "Read the exclusions", to: "rs-pi-package-must-read" },
+          { label: "More details on a package", to: "rs-pi-risk-info" },
+          { label: "Before the acknowledgement", to: "rs-pi-package-blocked" },
         ],
       },
       "rs-pi-package-must-read": {
@@ -410,14 +444,14 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         back: "rs-pi-package-select",
       },
       "rs-pi-package-blocked": {
-        primary: { label: "Open the must read", to: "rs-pi-package-must-read" },
+        primary: { label: "Acknowledge the exclusions", to: "rs-pi-package-must-read" },
         back: "rs-pi-product-cover",
       },
       "rs-pi-duration-premium": {
         primary: { label: "Continue", to: "rs-pi-insured-object" },
         back: "rs-pi-package-select",
         extra: [
-          { label: "Important information", to: "rs-pi-important-info" },
+          { label: "Read when cover starts", to: "rs-pi-important-info" },
           { label: "Add emergency assistance", to: "rs-pi-emergency-addon" },
         ],
       },
@@ -432,33 +466,33 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       },
       "rs-pi-insured-object": {
         primary: { label: "Continue", to: "rs-pi-policyholder" },
-        secondary: { label: "Cancel purchase", to: "rs-pi-abandon-confirm" },
+        secondary: { label: "Leave the purchase", to: "rs-pi-abandon-confirm" },
         back: "rs-pi-duration-premium",
       },
       "rs-pi-policyholder": {
         primary: { label: "Continue with purchase", to: "rs-pi-review" },
-        secondary: { label: "Cancel purchase", to: "rs-pi-abandon-confirm" },
+        secondary: { label: "Leave the purchase", to: "rs-pi-abandon-confirm" },
         back: "rs-pi-insured-object",
         extra: [{ label: "Edit the contact block", to: "rs-pi-policyholder-errors" }],
       },
       "rs-pi-policyholder-errors": {
         primary: { label: "Fix the fields", to: "rs-pi-policyholder" },
-        secondary: { label: "Cancel purchase", to: "rs-pi-abandon-confirm" },
+        secondary: { label: "Leave the purchase", to: "rs-pi-abandon-confirm" },
         back: "rs-pi-insured-object",
       },
       "rs-pi-review": {
         primary: { label: "Continue with purchase", to: "rs-pi-terms-consent" },
-        secondary: { label: "Cancel purchase", to: "rs-pi-abandon-confirm" },
+        secondary: { label: "Leave the purchase", to: "rs-pi-abandon-confirm" },
         back: "rs-pi-policyholder",
       },
       "rs-pi-review-addon": {
         primary: { label: "Continue with purchase", to: "rs-pi-terms-consent" },
-        secondary: { label: "Cancel purchase", to: "rs-pi-abandon-confirm" },
+        secondary: { label: "Leave the purchase", to: "rs-pi-abandon-confirm" },
         back: "rs-pi-emergency-addon",
       },
       "rs-pi-terms-consent": {
         primary: { label: "I confirm", to: "rs-pi-payment-create" },
-        secondary: { label: "Cancel purchase", to: "rs-pi-abandon-confirm" },
+        secondary: { label: "Leave the purchase", to: "rs-pi-abandon-confirm" },
         back: "rs-pi-review",
         extra: [{ label: "Registration fails", to: "rs-pi-submit-failed" }],
       },
@@ -554,111 +588,124 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
     },
     "rs-pi-package-select": {
       purpose: "Choose a package by comparing what each one actually covers — a carousel where every card carries its own full cover table and its price at all three terms.",
-      states: ["Package A / B / C as carousel cards", "Full cover table on every card", "All three term prices on every card", "Must read not yet opened"],
+      states: ["Package A / B / C as carousel cards", "Headline sums on every card", "One reference price per card", "Acknowledgement off, Continue disabled", "Acknowledgement on, Continue enabled"],
       fields: [
         { name: "Package", type: "Single choice", required: true, validation: "Package A, B or C. One is preselected.", notes: "Presented as swipeable cards, not a radio list: the choice is between three sets of insured sums, so the sums have to be on the card." },
-        { name: "Reference price", type: "Amount", required: true, validation: "The 6-month premium, tax included, with its term and currency stated.", notes: "One reference term so the three packages are comparable at a glance. The real period is chosen once, on the next screen — the card says so explicitly." },
+        { name: "Reference price", type: "Amount", required: true, validation: "The 6-month premium, tax included, with its term and currency stated.", notes: "One reference term so the three packages are comparable at a glance. The term, the tax note and the one-line description of who the package suits sit directly under the figure, because they all qualify it. The real period is chosen once, on the next screen, which the intro above the carousel says." },
         { name: "Cover table", type: "Risk / subject / sum rows", required: true, validation: "Eight rows: basic risks, water escape, breakage of built-in equipment, glass, burglary, liability — for building and for contents.", notes: "Sums in RSD, tax-inclusive premiums." },
-        { name: "Headline sums", type: "Two amounts", required: true, validation: "Building and contents sums for that package.", notes: "The two figures that actually separate the three packages; the other six covers are named in one line and detailed behind More details." },
+        { name: "Headline sums", type: "Two amounts", required: true, validation: "Building and contents sums for that package, each with its currency on the row.", notes: "The two figures that separate the three packages, set quieter than the price: they qualify the offer rather than lead it. The other six covers are named in one line and detailed behind More details." },
         { name: "More details", type: "Action", required: true, validation: "One control per card.", notes: "Opens the full cover table for that package. Replaces a per-row info control on every risk, which made the card unreadable." },
-        { name: "Must read", type: "Mandatory read gate", required: true, validation: "Must be opened before Continue is allowed." },
+        { name: "Must read", type: "Acknowledgement row with toggle", required: true, validation: "Off by default. Continue is disabled until it is on.", notes: "Partner: Obavezno pročitaj. Turning it on opens the exclusions; the label states what is being acknowledged — I have read what this insurance cannot cover." },
       ],
       actions: [
         { label: "Package card", result: "Selects that package; the primary action names it so the choice is never ambiguous." },
         { label: "Swipe the carousel", result: "Moves between packages; the dots show which of the three is in view." },
         { label: "More details", result: "Opens the full cover table for the package on the card." },
-        { label: "Must read", result: "Opens the exclusions sheet and satisfies the gate." },
-        { label: "Continue", result: "Blocked until the gate is satisfied; then moves to the duration and premium block." },
+        { label: "Must read toggle", result: "Opens the exclusions on a bottom sheet and records the acknowledgement." },
+        { label: "Continue with <package>", result: "Disabled until the acknowledgement is on; the reason is stated in one line above it. Then moves to the configuration screen, naming the chosen package so the choice is never ambiguous." },
       ],
       back: "Returns to the cover page.",
       edgeCases: [
-        "Switching package after the gate has been satisfied keeps the gate satisfied — the exclusions are the same for all three packages.",
-        "The table must remain readable at large text sizes; sums are labelled rows, not a fixed grid.",
-        "More details must not be confused with the mandatory read: opening the cover table does not satisfy the gate.",
+        "Switching package after the acknowledgement is on keeps it on — the exclusions are the same for all three packages.",
+        "The cover table must remain readable at large text sizes; sums are labelled rows, not a fixed grid.",
+        "More details must not be confused with the mandatory read: opening the cover table does not satisfy the acknowledgement.",
+        "Dragging the carousel must not select a card; only a tap does. A drag that ends on a different card leaves the selection where it was.",
       ],
       acceptance: [
-        "All eight cover rows are present for every package with the partner's own sums.",
-        "Each card shows the building and contents sums, and its full table is one action away.",
-        "Every card carries its headline sums and one reference price, and its full table is one action away.",
-        "The card price is labelled with its term, and the period is never asked on this screen.",
+        "All eight cover rows are present for every package with the partner's own sums, reachable from that package's card.",
+        "Every card carries its building and contents sums and one reference price labelled with its term.",
+        "The period is never asked on this screen, and the card says where it is asked.",
+        "Continue is disabled while the acknowledgement is off, and a line above it says what is missing.",
+        "The dots show which of the three packages is in view.",
       ],
     },
     "rs-pi-risk-info": {
-      purpose: "Explain a single insured risk, opened from the info control on its row in the cover table.",
-      states: ["Sheet open for one risk", "Insurer copy", "Gate unaffected"],
+      purpose: "Everything one package covers, opened by the More details action on its card — the full eight-row table that will not fit on a card the customer is meant to compare at a glance.",
+      states: ["Bottom sheet open for the package on the card", "All eight cover rows", "Insurer explanation pending"],
       fields: [
-        { name: "Risk", type: "Name", required: true, notes: "The row the customer opened, in the partner's own terms." },
-        { name: "Insured subject", type: "Name", required: true, notes: "Building or household contents, as on the row." },
-        { name: "Insured sum", type: "Amount", required: true, notes: "For the currently selected package." },
-        { name: "Explanation", type: "Legal copy", required: true, validation: "Supplied by the insurer; not paraphrased or invented.", notes: "The wording is a Generali deliverable and is a placeholder in this demo." },
+        { name: "Package", type: "Name and headline", required: true, notes: "The package whose card the action was pressed on." },
+        { name: "Cover table", type: "Risk / subject / sum rows", required: true, validation: "All eight rows: basic risks, water escape, breakage of built-in equipment, glass breakage, burglary and robbery, and liability — for the building and for the contents.", notes: "Grouped by risk so the building and contents sums for the same risk sit together." },
+        { name: "Insured sums", type: "Amounts", required: true, validation: "In RSD, for this package only.", notes: "The sums are what separates the three packages, so they are the substance of this sheet." },
+        { name: "Per-risk explanation", type: "Legal copy", validation: "Supplied by the insurer; not paraphrased or invented.", notes: "A Generali deliverable. A placeholder note stands in its place in this demo and is called out as an open question." },
       ],
-      actions: [{ label: "Close", result: "Returns to the cover table with the package selection unchanged." }],
+      actions: [{ label: "Close", result: "Returns to the carousel with the package selection unchanged." }],
       back: "Dismissing the sheet returns to the package step without side effects.",
       edgeCases: [
-        "Opening the details sheet must not satisfy the Must read gate.",
-        "The sum shown must follow the currently selected package, not the one that was selected when the table was first rendered.",
+        "Opening this sheet must not record the mandatory-read acknowledgement: they are different disclosures.",
+        "The sums shown must follow the card the action was pressed on, not whichever package happens to be selected.",
       ],
       acceptance: [
-        "The sheet shows the complete cover table for the package that was open on the card.",
-        "The explanation is the insurer's text, and the flow does not proceed without it being supplied.",
+        "The sheet shows the complete cover table for its package, with the partner's own sums.",
+        "The action that opens it is the app's link-style action, not a bespoke button invented for this flow.",
       ],
     },
     "rs-pi-package-must-read": {
-      purpose: "Show the partner's exclusions, which the customer must open before the purchase can proceed.",
-      states: ["Sheet open", "Gate satisfied on dismiss"],
+      purpose: "The insurer's exclusions, opened by the acknowledgement toggle on the package step — what this insurance cannot cover, before the customer spends time on the form.",
+      states: ["Bottom sheet open over the package carousel", "Acknowledgement already recorded"],
       fields: [
         { name: "Exclusions", type: "Legal copy", required: true, validation: "Reproduced from the insurer, not paraphrased.", notes: "Unoccupied properties, sandwich-panel and heavily timbered houses, auxiliary and water-borne buildings, cash, art and antiques." },
       ],
-      actions: [{ label: "I have read this", result: "Closes the sheet and enables Continue on the package step." }],
-      back: "Dismissing the sheet by scrim also satisfies the gate, as on the partner journey.",
+      actions: [{ label: "I have read this", result: "Closes the sheet. The acknowledgement is already on, so Continue is now available." }],
+      back: "Dismissing by scrim or close leaves the acknowledgement on: it was turned on to open the text, and the customer can turn it off again if they want to.",
+      edgeCases: [
+        "The acknowledgement is what records the read, not the sheet: a customer who dismisses immediately has still turned the toggle on, exactly as on the partner journey where opening the section is enough.",
+        "Turning the acknowledgement off again disables Continue, so the state is genuinely the customer's and not a one-way latch.",
+      ],
       acceptance: [
         "The exclusions text is the insurer's own wording.",
-        "Continue becomes available only after this sheet has been opened at least once.",
+        "The sheet is the shared BottomSheet, the same component every other read in the flow uses.",
       ],
     },
     "rs-pi-package-blocked": {
-      purpose: "Reproduce the partner's blocking behaviour when the customer tries to continue without opening the mandatory read.",
-      states: ["Continue pressed", "Inline error above the action", "Must read highlighted"],
+      purpose: "The package step before the exclusions have been acknowledged: Continue is disabled, and the screen says so in the partner's own words instead of leaving a dead button on the page.",
+      states: ["Acknowledgement off", "Continue disabled", "Reason stated above the action"],
       fields: [
-        { name: "Blocking message", type: "Error", required: true, validation: "The partner's own message: to continue you must read the information in the Must read section." },
+        { name: "Reason", type: "Guidance copy", required: true, validation: "The partner's own message: to continue you must read the information in the Must read section.", notes: "Presented as guidance in muted text, not as an error: nothing has gone wrong and the customer has not done anything invalid yet." },
       ],
       actions: [
-        { label: "Continue", result: "Does not advance; surfaces the blocking message and draws attention to the Must read entry." },
-        { label: "Must read", result: "Opens the exclusions and clears the error." },
+        { label: "Continue with <package>", result: "Disabled. It cannot be pressed, so there is no failed attempt to report — the reason is shown up front instead." },
+        { label: "Must read toggle", result: "Opens the exclusions, records the acknowledgement, removes the reason line and enables Continue." },
       ],
-      edgeCases: ["The error is announced to assistive technology, not only shown in colour."],
+      edgeCases: [
+        "The reason must be readable by assistive technology as the description of the disabled action, not only as loose text near it.",
+        "Choosing a different package while the acknowledgement is off changes nothing about this state: the exclusions are shared.",
+      ],
       acceptance: [
-        "The customer is told why they cannot continue, rather than facing a disabled button with no explanation.",
-        "The error clears as soon as the mandatory read is opened.",
+        "The customer is never left facing a disabled button with no explanation.",
+        "The reason disappears the moment the acknowledgement is on.",
+        "The partner's wording is preserved, only its severity is corrected.",
       ],
     },
     "rs-pi-duration-premium": {
-      purpose: "Set how long the policy runs and when it starts, optionally add emergency assistance, and see the resulting premium before committing.",
-      states: ["3 / 6 / 12 months", "Start date chosen", "Cover period derived", "Add-on off", "Premium summary pinned"],
+      purpose: "Set how long the policy runs and when it starts, decide on emergency assistance, and see the resulting premium before committing to anything.",
+      states: ["3 / 6 / 12 months", "Start date chosen", "Cover period derived", "Cover-start read not yet acknowledged", "Add-on off", "Add-on on with its own read", "Premium summary pinned"],
       fields: [
-        { name: "Chosen package", type: "Carried-over selection", required: true, validation: "Shown as a summary row with a Change action back to the carousel.", notes: "Not re-selectable here: the comparison belongs on the carousel where the sums are visible." },
+        { name: "Chosen package", type: "Carried-over selection", required: true, validation: "Shown as a summary card with the package name and its headline.", notes: "Not re-selectable and not editable here: changing package means comparing sums again, which is what the carousel behind the back arrow is for." },
         { name: "Insurance period", type: "Single choice", required: true, validation: "3, 6 or 12 months. The only place the period is asked.", notes: "Partner: Izaberite trajanje osiguranja — 3 meseca / 6 meseci / 12 meseci." },
         { name: "Start date", type: "Date", required: true, validation: "Today or later.", notes: "Partner: Datum početka osiguranja." },
         { name: "Cover period", type: "Derived range", required: true, notes: "Start date plus duration, shown back to the customer." },
-        { name: "Important information", type: "Mandatory read", required: true, notes: "Cover only starts once the premium is recorded by the insurer." },
-        { name: "Emergency home assistance", type: "Optional add-on", notes: "Partner: Dodatno želim da ugovorim hitne intervencije u domaćinstvu." },
+        { name: "Important information", type: "Acknowledgement row with toggle", required: true, validation: "Off by default. Continue is disabled until it is on.", notes: "Cover only starts once the premium is recorded by the insurer, which is why it is acknowledged rather than merely available: it changes what the chosen start date means." },
+        { name: "Emergency home assistance", type: "Optional add-on toggle", validation: "Off by default. Turning it off again clears its package and its acknowledgement.", notes: "Partner: Dodatno želim da ugovorim hitne intervencije u domaćinstvu." },
         { name: "Premium", type: "Amount", required: true, validation: "RSD, 5% insurance tax included.", notes: "Shown with the package, duration and cover period it belongs to." },
       ],
       actions: [
-        { label: "Duration option", result: "Reprices the premium and recalculates the cover period." },
+        { label: "Duration option", result: "Reprices the premium — and the add-on premium and total when the add-on is on — and recalculates the cover period." },
         { label: "Start date", result: "Opens the date picker and recalculates the cover period." },
-        { label: "Important information", result: "Opens the cover-start rules." },
-        { label: "Emergency home assistance", result: "Expands the add-on block with its own packages and its own mandatory read." },
-        { label: "Continue", result: "Moves to the insured property form." },
+        { label: "Important information toggle", result: "Opens the cover-start rules with their two worked examples, and records the acknowledgement." },
+        { label: "Emergency home assistance toggle", result: "Expands the add-on block with its packages, its service table, its claim limit and its own acknowledged read." },
+        { label: "Continue", result: "Disabled until the cover-start read is acknowledged, and — when the add-on is on — until the add-on read is too. The line above it names whichever one is missing. Then moves to the insured property form." },
       ],
-      back: "Returns to package selection with the selection intact.",
+      back: "Returns to package selection with the package selection and its acknowledgement intact.",
       edgeCases: [
         "A start date in the past is rejected at the picker, not after Continue.",
         "Changing package or duration after the add-on is on must reprice both lines and the total.",
+        "Turning the add-on off and on again must present its read again: the customer has not agreed to something they removed.",
+        "The premium summary is pinned above the action, so a customer who has scrolled the add-on block open still sees what they are about to pay.",
       ],
       acceptance: [
-        "The premium is never shown without the package, duration and cover period.",
+        "The premium is never shown without the package, duration and cover period it belongs to.",
         "The tax-inclusive note accompanies every premium figure.",
+        "Continue states what is missing whenever it is disabled.",
       ],
     },
     "rs-pi-important-info": {
@@ -672,25 +719,25 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       acceptance: ["Both examples are present, because they are what makes the rule concrete."],
     },
     "rs-pi-emergency-addon": {
-      purpose: "Configure the optional emergency home assistance cover, which is a second product with its own packages, sums, mandatory read and premium.",
-      states: ["Add-on on", "Paket A preselected", "Paket B", "Service table for the selected package", "Second premium line and total"],
+      purpose: "Configure the optional emergency home assistance cover — a second product, sold alongside the household policy, with its own packages, sums, mandatory read and premium line.",
+      states: ["Add-on on", "Package A preselected", "Package B", "Service table for the selected package", "Add-on read not yet acknowledged", "Second premium line and total"],
       fields: [
         { name: "Add-on package", type: "Single choice", required: true, validation: "Paket A or Paket B. Paket A is preselected when the customer opts in." },
         { name: "Service table", type: "Service / amount rows", required: true, notes: "Technician assistance, consumables, temporary accommodation. Paket A 6.000 / 6.000 / 24.000, Paket B 12.000 / 12.000 / 36.000 RSD." },
-        { name: "Add-on must read", type: "Mandatory read", required: true, notes: "The seven urgent works covered — plumbing, carpentry, glazing, electrical, locksmith, heating, water removal — plus consumables and temporary accommodation." },
+        { name: "Add-on must read", type: "Acknowledgement row with toggle", required: true, validation: "Off by default. Continue is disabled until it is on, whenever the add-on is on.", notes: "Opens the seven urgent works covered — plumbing, carpentry, glazing, electrical, locksmith, heating and water removal — plus consumables and temporary accommodation, and the three-events limit." },
         { name: "Claim limit", type: "Copy", required: true, validation: "Three insured events over one year of insurance.", notes: "Decides whether the add-on is worth having, so it is surfaced with the price, not buried in the read." },
         { name: "Fee note", type: "Copy", required: true, notes: "No other fees; any excess over the covered amount is paid directly to the provider." },
         { name: "Add-on premium", type: "Amount", required: true, validation: "Priced separately per duration.", notes: "Paket A 592,70 / 6 months and 1.185,41 / 12 months; Paket B 1.165,75 / 6 months." },
         { name: "Total premium", type: "Amount", required: true, validation: "Exact sum of the household premium and the add-on premium, both tax-inclusive." },
       ],
       actions: [
-        { label: "Add-on package card", result: "Selects the add-on package and reprices the second premium line and the total." },
-        { label: "Must read", result: "Opens the add-on's own mandatory read." },
-        { label: "Turn off add-on", result: "Collapses the block and removes the second premium line and the total." },
+        { label: "Add-on package card", result: "Selects the add-on package, swaps the service table and reprices the second premium line and the total." },
+        { label: "Add-on must read toggle", result: "Opens the add-on's own read on a bottom sheet and records its acknowledgement." },
+        { label: "Turn off add-on", result: "Collapses the block, removes the second premium line and the total, and clears both the add-on package and its acknowledgement." },
       ],
       edgeCases: [
         "The add-on's mandatory read is separate from the household one; satisfying one does not satisfy the other.",
-        "Turning the add-on off must clear its selection, not keep it hidden and still priced.",
+        "Turning the add-on off must clear its selection and its acknowledgement, not keep them hidden and still priced.",
         "Changing the duration reprices both the household premium and the add-on premium, so the total must be recomputed rather than cached.",
       ],
       acceptance: [
@@ -698,11 +745,12 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         "The total equals the sum of the two lines exactly, matching the partner's combined line.",
         "The service table matches the selected add-on package.",
         "The three-events-per-year limit is visible next to the price, not only inside the mandatory read.",
+        "The add-on cannot be carried forward until its own read has been acknowledged.",
       ],
     },
     "rs-pi-insured-object": {
       purpose: "Collect the address of the property being insured — the one block the bank cannot prefill, because it is not necessarily where the customer lives.",
-      states: ["Empty", "Partially filled", "Valid", "Step 2 of 4"],
+      states: ["Empty", "Partially filled", "Valid"],
       fields: [
         { name: "Street", type: "Text", required: true, notes: "Partner: Ulica." },
         { name: "House number", type: "Text", required: true, validation: "Up to 10 characters.", notes: "Partner: Kućni broj." },
@@ -712,17 +760,16 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       ],
       actions: [
         { label: "Municipality", result: "Opens a searchable picker over the insurer's municipality list." },
-        { label: "Continue", result: "Moves to the policyholder block; disabled until the required fields are valid." },
-        { label: "Cancel purchase", result: "Opens the abandon confirmation." },
+        { label: "Continue", result: "Moves to the policyholder block; disabled until street, house number, city and municipality are all answered." },
       ],
-      back: "Returns to the duration block with the configuration intact.",
+      back: "Returns to the configuration screen with the package, term, start date and add-on intact. Backing out of the data steps is what raises the leave-purchase confirmation.",
       edgeCases: [
         "The municipality list is long; it needs search, not a raw scroll.",
         "The customer's registered address must not be silently used here — the insured property is a separate fact.",
       ],
       acceptance: [
-        "All five partner fields are present with the same optionality.",
-        "No insured-property field is prefilled from the bank profile.",
+        "All five partner fields are present with the same optionality, and the apartment number is visibly marked optional.",
+        "No insured-property field is prefilled from the bank profile, and the screen says why in one line.",
       ],
     },
     "rs-pi-policyholder": {
@@ -739,9 +786,9 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { name: "Confirm e-mail", type: "E-mail", validation: "Required only once the prefilled e-mail has been edited.", notes: "Partner: Potvrdite e-mail." },
       ],
       actions: [
-        { label: "Turn off the same-address toggle", result: "Opens the five address fields directly beneath it." },
-        { label: "Continue with purchase", result: "Moves to the data check." },
-        { label: "Cancel purchase", result: "Opens the abandon confirmation." },
+        { label: "Turn off the same-address toggle", result: "Opens the five address fields directly beneath it and scrolls them into view, so the customer sees the work that just appeared instead of an apparently unchanged screen." },
+        { label: "Municipality", result: "Opens the insurer's municipality picker for the separate address." },
+        { label: "Continue with purchase", result: "Disabled until a separate address is complete; then moves to the data check." },
       ],
       back: "Returns to the insured property form with its data intact.",
       edgeCases: [
@@ -750,8 +797,10 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       ],
       acceptance: [
         "The order is identity, then contact, then address — the address section is last because it is the one that grows.",
-        "Name and JMBG cannot be edited in this flow and JMBG is masked.",
+        "Name and JMBG are rendered as read-only values in the data-check shape, not as disabled input fields, and JMBG is masked.",
         "The confirmation e-mail field is not demanded when the customer has not touched the prefilled address.",
+        "With the toggle off, the primary action stays disabled until street, number, city and municipality are answered.",
+        "The separate address fields are the same five the insured property asks for, in the same order.",
       ],
     },
     "rs-pi-policyholder-errors": {
@@ -763,7 +812,9 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { name: "Confirm e-mail", type: "E-mail", required: true, validation: "Rejected when it differs from the e-mail field." },
         { name: "Municipality", type: "Single choice", required: true, validation: "Rejected when left unselected on a separate policyholder address." },
       ],
-      actions: [{ label: "Continue with purchase", result: "Blocked; focus moves to the first field in error." }],
+      actions: [
+        { label: "Continue with purchase", result: "Blocked; focus moves to the first field in error and a summary line above the action says the highlighted fields need checking." },
+      ],
       edgeCases: ["Errors resolve per field as the customer corrects them, not only on the next submit."],
       acceptance: [
         "Each error sits on its own field in the insurer's own terms.",
@@ -772,7 +823,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
     },
     "rs-pi-review": {
       purpose: "Let the customer check every value that is about to be sent to the insurer, in the partner's own five blocks — the partner's step 3.",
-      states: ["Household policy block", "Emergency assistance block when the add-on is on", "Total block", "Property block", "Policyholder block", "Step 3 of 4"],
+      states: ["Household policy block", "Emergency assistance block when the add-on is on", "Total block", "Property block", "Policyholder block"],
       fields: [
         { name: "Household insurance", type: "Summary group", required: true, notes: "Partner: Osiguranje domaćinstva. Selected package, duration, cover period, premium with tax included." },
         { name: "Emergency home assistance", type: "Summary group", validation: "Shown only when the add-on is on.", notes: "Partner: Hitne intervencije u domaćinstvu. Its own package, duration, cover period and premium." },
@@ -781,9 +832,11 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { name: "Policyholder", type: "Summary group", required: true, notes: "Partner: Ugovarač. Name, JMBG, mobile, e-mail, then street, house/apartment number, city, municipality." },
       ],
       actions: [
-        { label: "Edit on a group", result: "Returns to the screen that owns that group with the data intact." },
-        { label: "Continue with purchase", result: "Moves to the consents." },
-        { label: "Cancel purchase", result: "Opens the abandon confirmation." },
+        { label: "Edit on the household insurance group", result: "Returns to the configuration screen — package, term, start date — with everything intact." },
+        { label: "Edit on the emergency assistance group", result: "Returns to the configuration screen with the add-on block open." },
+        { label: "Edit on the property group", result: "Returns to the insured property form." },
+        { label: "Edit on the policyholder group", result: "Returns to the policyholder form." },
+        { label: "Continue with purchase", result: "Moves to the documents and consents." },
       ],
       back: "Returns to the policyholder screen.",
       edgeCases: [
@@ -793,7 +846,8 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       acceptance: [
         "Every value that will leave the app is visible on this screen.",
         "The blocks and their order match the partner's data check.",
-        "Each group can be corrected without restarting the journey.",
+        "Each group that owns data can be corrected without restarting the journey, and the Total block carries no Edit.",
+        "Every row uses one read-only presentation: label above, value below.",
       ],
     },
     "rs-pi-review-addon": {
@@ -832,7 +886,6 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { label: "Document", result: "Opens or downloads the insurer's document." },
         { label: "Select all options", result: "Turns both consents on; clearing it turns both off." },
         { label: "I confirm", result: "Enabled once the required consent is on; registers the request with the insurer and opens the prefilled premium payment." },
-        { label: "Cancel purchase", result: "Opens the abandon confirmation." },
       ],
       back: "Returns to the data check with the consents preserved.",
       edgeCases: [
@@ -988,8 +1041,8 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       ],
     },
     "rs-pi-abandon-confirm": {
-      purpose: "Reproduce the partner's Cancel purchase action behind a confirmation, so entered data is never lost by accident.",
-      states: ["Confirmation open", "Data-loss warning"],
+      purpose: "Catch a customer leaving the purchase with data already entered, so nothing is lost to a single accidental tap. This is what the partner's Cancel purchase action does — raised by leaving rather than by a destructive button sitting next to the primary one.",
+      states: ["Confirmation open over the current step", "Data-loss warning"],
       fields: [
         { name: "Warning", type: "Copy", required: true, validation: "States that the entered package, property and policyholder data will not be kept." },
       ],
@@ -997,7 +1050,11 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { label: "Leave purchase", result: "Discards the entry and returns to Products." },
         { label: "Continue purchase", result: "Closes the confirmation and returns to the current step unchanged." },
       ],
-      edgeCases: ["If the request has already been registered, leaving must route to the unpaid-request outcome rather than a silent discard."],
+      edgeCases: [
+        "It is raised by backing out of the data steps, not by a Cancel button beside the primary action.",
+        "If the request has already been registered, leaving must route to the unpaid-request outcome rather than a silent discard.",
+        "Leaving before any data is entered — from the cover page, for instance — needs no confirmation at all.",
+      ],
       acceptance: [
         "The customer cannot lose entered data with a single accidental tap.",
         "Continue purchase returns to exactly the step they were on.",
@@ -1017,14 +1074,14 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { id: "products", title: "Products shelf", description: "The unchanged baseline Products screen; the customer opens the Insurance category.", screen: "rs-pi-products" },
         { id: "sheet", title: "Insurances sheet", description: "The existing bottom sheet, extended with the one new Property insurance option.", screen: "rs-pi-insurance-sheet" },
         { id: "cover", title: "Product cover", description: "What the policy protects, what the packages start at and what is excluded, before any form.", screen: "rs-pi-product-cover" },
-        { id: "package", title: "Choose a package", description: "Paket A, B or C with the full eight-row cover table for the selected package.", screen: "rs-pi-package-select" },
-        { id: "must-read", title: "Must read", description: "The insurer's exclusions, which have to be opened before the purchase can continue.", screen: "rs-pi-package-must-read" },
-        { id: "duration", title: "Duration and premium", description: "Term, start date, derived cover period, the optional add-on and the tax-inclusive premium.", screen: "rs-pi-duration-premium" },
+        { id: "package", title: "Choose a package", description: "Three packages as a carousel, each card carrying the two sums that separate them and one reference price. The full eight-row table is one action away.", screen: "rs-pi-package-select" },
+        { id: "must-read", title: "What is not covered", description: "The insurer's exclusions, acknowledged on a toggle before the purchase can go any further.", screen: "rs-pi-package-must-read" },
+        { id: "duration", title: "Set up your policy", description: "Term, start date and the derived cover period, the acknowledged cover-start rule, the optional add-on, and the tax-inclusive premium pinned above the action.", screen: "rs-pi-duration-premium" },
         { id: "object", title: "Insured property", description: "The address of the property being insured — the only block the bank cannot prefill.", screen: "rs-pi-insured-object" },
         { id: "policyholder", title: "Policyholder", description: "Identity prefilled and locked, address defaulting to the property, contact prefilled and editable.", screen: "rs-pi-policyholder" },
-        { id: "review", title: "Data check", description: "Every value that will reach the insurer, grouped and individually editable.", screen: "rs-pi-review" },
-        { id: "consents", title: "Terms and consents", description: "The four acknowledgements the insurer requires, each accepted individually.", screen: "rs-pi-terms-consent" },
-        { id: "payment", title: "Premium payment", description: "The existing domestic payment screen, prefilled and locked where it must reconcile.", screen: "rs-pi-payment-create" },
+        { id: "review", title: "Check your data", description: "Every value that will reach the insurer, in the partner's five blocks, each one editable straight back to the screen it came from.", screen: "rs-pi-review" },
+        { id: "consents", title: "Terms and consents", description: "The insurer's four documents, then the required terms acknowledgement and the optional marketing one. Confirm registers the request and returns the policy number.", screen: "rs-pi-terms-consent" },
+        { id: "payment", title: "Premium payment", description: "The Serbian domestic payment screen, prefilled with the policy number as its reference and locked wherever a change would break reconciliation.", screen: "rs-pi-payment-create" },
         { id: "payment-review", title: "Review payment", description: "The standard payment review, unchanged.", screen: "rs-pi-payment-review" },
         { id: "sign", title: "Sign", description: "The standard signing step; its result decides whether the policy activates.", screen: "rs-pi-payment-sign" },
         { id: "success", title: "Policy active", description: "Premium paid, policy active, documents delivered by the insurer — and nothing added to the app.", screen: "rs-pi-payment-success" },
@@ -1035,12 +1092,12 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       label: "With emergency assistance",
       kind: "alternate",
       description:
-        "The optional add-on turned on: a second product with its own packages, service table, mandatory read and premium line, and the cover-start rules the customer needs before choosing a date.",
+        "Emergency home assistance turned on. It is a second product sold in the same step — its own packages, service amounts, mandatory read and premium — so the whole configuration screen changes shape around it, and the data check ends up with two cover periods and a total.",
       steps: [
-        { id: "duration-addon", title: "Duration and premium", description: "The starting point: the add-on is off and a single premium line is shown.", screen: "rs-pi-duration-premium" },
-        { id: "important", title: "Important information", description: "When cover actually begins — it depends on the payment being recorded, not on the chosen date.", screen: "rs-pi-important-info" },
-        { id: "addon", title: "Emergency assistance", description: "Add-on packages, service amounts, its own mandatory read and a two-line premium with a total.", screen: "rs-pi-emergency-addon" },
-        { id: "review-addon", title: "Data check with add-on", description: "The add-on appears in the policy group as its own line, with two premiums and a total.", screen: "rs-pi-review-addon" },
+        { id: "duration-addon", title: "Before the add-on", description: "The configuration screen as it starts: add-on off, one premium line, one cover period.", screen: "rs-pi-duration-premium" },
+        { id: "important", title: "When cover actually starts", description: "Not on the date the customer picked, but on the day the premium is recorded — with the insurer's two worked examples. Acknowledged before the step can be left.", screen: "rs-pi-important-info" },
+        { id: "addon", title: "Emergency assistance", description: "Two add-on packages, the service amounts each pays, the three-events-a-year limit next to the price, its own acknowledged read, and a second premium line with a total.", screen: "rs-pi-emergency-addon" },
+        { id: "review-addon", title: "Check your data, with the add-on", description: "Two priced covers with two different cover periods — the add-on runs from the quotation date — and one total that is their exact sum.", screen: "rs-pi-review-addon" },
       ],
     },
     {
@@ -1048,12 +1105,12 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       label: "Gates and validation",
       kind: "alternate",
       description:
-        "The two places the journey deliberately refuses to move: the mandatory read before the package can be confirmed, and the contact validation once the prefilled data is edited.",
+        "Where the journey deliberately refuses to move: the reads that have to be acknowledged before a step can be left, and the validation that appears once the customer edits what the bank prefilled.",
       steps: [
-        { id: "blocked", title: "Continue blocked", description: "The partner's own blocking message when the exclusions have not been opened.", screen: "rs-pi-package-blocked" },
-        { id: "risk-info", title: "Risk explanation", description: "The per-row info control opens the insurer's explanation of one risk — and deliberately does not clear the block.", screen: "rs-pi-risk-info" },
-        { id: "read", title: "Must read", description: "Opening the exclusions clears the block.", screen: "rs-pi-package-must-read" },
-        { id: "errors", title: "Contact validation", description: "JMBG length, the +3816xxxxxxx mobile format, e-mail confirmation and a missing municipality.", screen: "rs-pi-policyholder-errors" },
+        { id: "blocked", title: "Continue not available yet", description: "The acknowledgement is off, so Continue is disabled — and the screen says why, in the insurer's own words, instead of leaving a dead button on the page.", screen: "rs-pi-package-blocked" },
+        { id: "risk-info", title: "More details on a package", description: "The full cover table for one package, opened from its card. It is a different disclosure from the exclusions, so reading it deliberately does not satisfy the acknowledgement.", screen: "rs-pi-risk-info" },
+        { id: "read", title: "Acknowledging the exclusions", description: "The toggle opens the insurer's text and records the read; Continue becomes available and the reason line disappears.", screen: "rs-pi-package-must-read" },
+        { id: "errors", title: "Contact validation", description: "What can still go wrong once prefilled data is edited: the +3816xxxxxxx mobile format, a mismatched e-mail confirmation and a municipality left unselected on a separate address.", screen: "rs-pi-policyholder-errors" },
       ],
     },
     {
@@ -1061,7 +1118,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       label: "Purchase cannot start",
       kind: "error",
       description:
-        "The two ways the premium never leaves the account: the insurer cannot register the request at all, or the chosen account is short once the payment screen opens.",
+        "The two ways the premium never leaves the account. They differ in one important respect: when registration fails nothing exists at all, whereas a short account leaves a registered request waiting to be paid.",
       steps: [
         { id: "submit", title: "Registration failed", description: "The insurer could not register the request, so the payment is never opened and nothing is charged.", screen: "rs-pi-submit-failed" },
         { id: "funds", title: "Insufficient funds", description: "The chosen account cannot cover the premium; the error sits on the account field and Next stays disabled until another account is picked.", screen: "rs-pi-insufficient-funds" },
@@ -1082,9 +1139,10 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       id: "abandon-purchase",
       label: "Abandon purchase",
       kind: "alternate",
-      description: "The partner's Cancel purchase action, behind a confirmation that says what will be lost.",
+      description:
+        "Leaving part-way through. There is no Cancel button beside the primary action; backing out of the data steps is what raises the confirmation, and the confirmation is explicit about what disappears.",
       steps: [
-        { id: "abandon", title: "Leave purchase", description: "Confirmation that the entered package, property and policyholder data will not be kept.", screen: "rs-pi-abandon-confirm" },
+        { id: "abandon", title: "Leave the purchase", description: "Confirmation that the entered package, property and policyholder data will not be kept — and a way back to exactly the step the customer was on.", screen: "rs-pi-abandon-confirm" },
       ],
     },
   ],

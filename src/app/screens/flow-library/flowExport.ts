@@ -55,6 +55,8 @@ export interface CapturedFlowStep extends FlowExportStep {
 export interface ExportOverview {
   purpose?: string;
   businessAnalysis?: FlowBusinessAnalysisSpec;
+  /** Mirrors FlowDefinition.specLayout; decides what follows a BA document. */
+  specLayout?: "document-only" | "document-and-screens";
   entryPoints?: readonly { label: string; intent: string }[];
   preconditions?: readonly string[];
   businessRules?: readonly string[];
@@ -203,7 +205,13 @@ function analysisSectionsHtml(title: string, sections: FlowBusinessAnalysisSpec[
 
 function overviewHtml(overview: ExportOverview | undefined): string {
   if (!overview) return "";
-  if (overview.businessAnalysis) return businessAnalysisHtml(overview.businessAnalysis);
+  // A BA document is the whole export unless the flow asks for both: then the
+  // document carries the business case, and the rules, signing, analytics and
+  // open questions that follow it are what delivery works from.
+  if (overview.businessAnalysis && overview.specLayout !== "document-and-screens") {
+    return businessAnalysisHtml(overview.businessAnalysis);
+  }
+  const analysis = overview.businessAnalysis ? businessAnalysisHtml(overview.businessAnalysis) : "";
   const sections: string[] = [];
   if (overview.purpose) sections.push(`<h3>Purpose</h3><p>${escapeHtml(overview.purpose)}</p>`);
   if (overview.entryPoints?.length) {
@@ -220,7 +228,10 @@ function overviewHtml(overview: ExportOverview | undefined): string {
     sections.push(`<h3>Success destinations</h3>${bulletList(overview.successDestinations)}`);
   if (overview.analyticsEvents?.length) sections.push(`<h3>Analytics events</h3>${bulletList(overview.analyticsEvents)}`);
   if (overview.openQuestions?.length) sections.push(`<h3>Open questions</h3>${bulletList(overview.openQuestions)}`);
-  return sections.length ? `<section class="step"><h2>Flow specification</h2>${sections.join("")}</section>` : "";
+  const flowSpec = sections.length
+    ? `<section class="step"><h2>Flow specification</h2>${sections.join("")}</section>`
+    : "";
+  return `${analysis}${flowSpec}`;
 }
 
 /**

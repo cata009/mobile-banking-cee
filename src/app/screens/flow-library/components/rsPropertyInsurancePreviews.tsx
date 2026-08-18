@@ -1,4 +1,4 @@
-import { useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import { useDragCarousel } from "@/hooks/useDragCarousel";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import NavigationRow from "@/app/components/NavigationRow";
@@ -28,9 +28,8 @@ import type { RsPropertyInsuranceScreenKind } from "../flows/types";
  * Same rules as the rest of the Flow Library: real DS atoms (PageHeader,
  * NavigationRow, TextField, ToggleButton, PrimaryButton, SectionHeadingDivider,
  * StandardSign/SuccessScreen) on --uc-* tokens and uc-type-* classes, static
- * snapshots inside the inert MiniPhone frame, and overlays composed inline with
- * var(--uc-overlay) rather than the portal BottomSheet, which would escape the
- * scaled frame.
+ * snapshots inside the inert MiniPhone frame, and every sheet on the shared
+ * BottomSheet so the reads here look like the reads everywhere else in the app.
  *
  * Every label, sum, package and premium comes from FLOW_DEMO.rsPropertyInsurance
  * so the rendered screens and the on-screen spec cannot drift apart.
@@ -111,21 +110,6 @@ function Overlay({ align = "bottom", children }: { align?: "center" | "bottom"; 
   );
 }
 
-/** Inline sheet that stays inside the scaled frame. */
-function Sheet({ title, onClose, children }: { title: string; onClose?: () => void; children: ReactNode }) {
-  return (
-    <div className="max-h-[76%] w-full overflow-y-auto scrollbar-hide rounded-t-[16px] bg-[var(--uc-surface)] px-[24px] pb-[24px] pt-[20px] shadow-[0_-8px_24px_rgb(var(--uc-shadow-rgb)_/_0.14)]">
-      <div className="mb-[12px] flex items-start justify-between gap-[12px]">
-        <p className="uc-type-h2 text-[var(--uc-text)]">{title}</p>
-        <button type="button" aria-label="Close" onClick={onClose} className="shrink-0">
-          <AppIcon name="close-x" color="var(--uc-text)" />
-        </button>
-      </div>
-      {children}
-    </div>
-  );
-}
-
 /** A read-only summary line: label left, value right. Used inside cards and sheets. */
 function SummaryRow({ label, value, strong = false }: { label: string; value: string; strong?: boolean }) {
   return (
@@ -180,20 +164,29 @@ function PremiumSummary({
 }
 
 /**
- * A benefit line: a 32x32 icon slot beside the text, the footprint the design
- * system uses for iconed rows everywhere else.
+ * A benefit line with the same neutral coverage marker used on every cover claim.
  */
-function BenefitRow({ text, tone }: { text: string; tone: "positive" | "action" }) {
-  const color = tone === "positive" ? "var(--uc-green-status)" : "var(--uc-action)";
+function BenefitRow({ text }: { text: string }) {
   return (
-    <li className="flex items-start gap-[12px]">
-      <span
-        className="grid size-[32px] shrink-0 place-items-center rounded-full"
-        style={{ backgroundColor: `color-mix(in srgb, ${color} 12%, var(--uc-surface))` }}
+    <li className="flex items-start gap-[10px]">
+      <svg
+        aria-hidden="true"
+        className="mt-[1px] size-[24px] shrink-0"
+        data-rs-benefit-icon="true"
+        fill="none"
+        height="24"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
       >
-        <AppIcon name="check" size={18} color={color} />
-      </span>
-      <span className="flex-1 pt-[6px] uc-type-n5 leading-[20px] text-[var(--uc-text)]">{text}</span>
+        <path
+          clipRule="evenodd"
+          d="M17.3708 7.09252C18.9245 5.63583 21.4428 5.63583 22.9966 7.09252L10.2813 19L0.996582 10.311C2.54964 8.85499 5.06864 8.85499 6.62239 10.311L10.2813 13.7251L17.3708 7.09252Z"
+          fill="#262626"
+          fillRule="evenodd"
+        />
+      </svg>
+      <span className="flex-1 uc-type-n5 leading-[20px] text-[var(--uc-text)]">{text}</span>
     </li>
   );
 }
@@ -316,6 +309,7 @@ function MandatoryRead({
     <div className="-mx-[24px] mt-[16px]">
       <NavigationRow
         title={title}
+        className="!pr-[24px]"
         trailingAccessory="toggle"
         toggleChecked={satisfied}
         onToggle={() => onOpen?.()}
@@ -540,14 +534,7 @@ function ProductCoverPreview() {
         <h2 className="mt-[20px] text-[20px] font-bold leading-[25px] tracking-[-0.01em] text-[var(--uc-text)]">
           {cover.headline}
         </h2>
-        <p className="mt-[10px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">{cover.intro}</p>
-
-        <SectionHeadingDivider title={cover.benefitsTitle} className="mt-[18px]" />
-        <ul className="mt-[10px] flex flex-col gap-[12px]">
-          {cover.benefits.map((benefit) => (
-            <BenefitRow key={benefit} tone="positive" text={benefit} />
-          ))}
-        </ul>
+        <p className="mt-[10px] uc-type-n5 leading-normal text-[var(--uc-text-muted)]">{cover.intro}</p>
 
         <div className="mt-[18px] rounded-[10px] bg-[var(--uc-surface-muted)] px-[16px] py-[14px]">
           <p className="uc-type-n5 text-[var(--uc-text-muted)]">{cover.priceLabel}</p>
@@ -560,11 +547,18 @@ function ProductCoverPreview() {
           </p>
         </div>
 
+        <SectionHeadingDivider title={cover.benefitsTitle} className="mt-[18px]" />
+        <ul className="mt-[10px] flex flex-col gap-[12px]">
+          {cover.benefits.map((benefit) => (
+            <BenefitRow key={benefit} text={benefit} />
+          ))}
+        </ul>
+
         {/* The bank's own argument: the same policy, without the web-shop legwork. */}
         <SectionHeadingDivider title={cover.whyHereTitle} className="mt-[18px]" />
         <ul className="mt-[10px] flex flex-col gap-[12px]">
           {cover.whyHere.map((reason) => (
-            <BenefitRow key={reason} tone="action" text={reason} />
+            <BenefitRow key={reason} text={reason} />
           ))}
         </ul>
 
@@ -601,6 +595,8 @@ function useStep1Config(initial?: { packageId?: PackageId; addOn?: boolean }) {
   const [blocked, setBlocked] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
   const [infoSeen, setInfoSeen] = useState(false);
+  const [addOnReadOpen, setAddOnReadOpen] = useState(false);
+  const [addOnReadSeen, setAddOnReadSeen] = useState(false);
 
   const pkg = RS.packages.find((entry) => entry.id === packageId) ?? RS.packages[1];
   const duration = RS.durations.find((entry) => entry.id === durationId) ?? RS.durations[1];
@@ -611,6 +607,15 @@ function useStep1Config(initial?: { packageId?: PackageId; addOn?: boolean }) {
   const addOnPremium = addOnPackage.premiums[durationId];
   const total = addOn ? rsdSum(premium, addOnPremium) : premium;
 
+  const setAddOnWithReset = (next: boolean) => {
+    setAddOn(next);
+    // Off means gone: the read has to be presented again if the customer comes back.
+    if (!next) {
+      setAddOnReadSeen(false);
+      setAddOnPackageId(RS.emergencyAddOn.defaultPackageId as AddOnPackageId);
+    }
+  };
+
   const openMustRead = () => {
     setMustReadOpen(true);
     setMustReadSeen(true);
@@ -620,7 +625,7 @@ function useStep1Config(initial?: { packageId?: PackageId; addOn?: boolean }) {
   return {
     packageId, setPackageId, pkg,
     durationId, setDurationId, duration,
-    addOn, setAddOn,
+    addOn, setAddOn: setAddOnWithReset,
     addOnPackageId, setAddOnPackageId, addOnPackage,
     premium, addOnPremium, total,
     mustReadOpen, setMustReadOpen, mustReadSeen, openMustRead,
@@ -631,6 +636,16 @@ function useStep1Config(initial?: { packageId?: PackageId; addOn?: boolean }) {
       setInfoOpen(true);
       setInfoSeen(true);
     },
+    addOnReadOpen, setAddOnReadOpen, addOnReadSeen,
+    openAddOnRead: () => {
+      setAddOnReadOpen(true);
+      setAddOnReadSeen(true);
+    },
+    /**
+     * The configuration step carries two reads: when cover starts, and — only if
+     * the add-on is on — what the add-on actually covers. Continue waits for both.
+     */
+    configComplete: infoSeen && (!addOn || addOnReadSeen),
   };
 }
 
@@ -660,14 +675,61 @@ function DurationPicker({ value, onChange }: { value: DurationId; onChange: (id:
 
 function MustReadSheet({ onClose }: { onClose: () => void }) {
   return (
-    <Overlay>
-      <Sheet title={RS.mustRead.title} onClose={onClose}>
-        <p className="uc-type-n5 leading-[20px] text-[var(--uc-text)]">{RS.mustRead.body}</p>
-        <div className="pt-[18px]">
+    <BottomSheet
+      fillHeight
+      footer={
+        <div className="border-t border-[var(--uc-border)] pt-[12px]">
           <PrimaryButton className="!w-full" onClick={onClose}>I have read this</PrimaryButton>
         </div>
-      </Sheet>
-    </Overlay>
+      }
+      title={RS.mustRead.title}
+      titleClassName="!text-[28px] !leading-[34px]"
+      className="px-[24px] pb-[24px] pt-[20px]"
+      onClose={onClose}
+    >
+      <p className="uc-type-n5 leading-[20px] text-[var(--uc-text)]">{RS.mustRead.body}</p>
+    </BottomSheet>
+  );
+}
+
+/**
+ * The add-on's own mandatory read. It is a second product with a second set of
+ * exclusions and inclusions, so satisfying the household read says nothing about
+ * this one — the insurer requires both to be presented.
+ */
+function AddOnMustReadSheet({ onClose }: { onClose: () => void }) {
+  const addOn = RS.emergencyAddOn;
+  return (
+    <BottomSheet
+      fillHeight
+      footer={
+        <div className="border-t border-[var(--uc-border)] pt-[12px]">
+          <PrimaryButton className="!w-full" onClick={onClose}>I have read this</PrimaryButton>
+        </div>
+      }
+      title={addOn.title}
+      titleClassName="!text-[28px] !leading-[34px]"
+      className="px-[24px] pb-[24px] pt-[20px]"
+      onClose={onClose}
+    >
+      <div className="w-full pb-[16px]">
+        <p className="uc-type-n5 leading-[20px] text-[var(--uc-text)]">{addOn.mustReadIntro}</p>
+        <ul className="flex flex-col gap-[8px] pt-[10px]">
+          {addOn.mustReadWorks.map((work) => (
+            <li key={work} className="uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">• {work}</li>
+          ))}
+        </ul>
+        <SectionHeadingDivider title="It also includes" className="mt-[16px]" />
+        <ul className="flex flex-col gap-[8px] pt-[10px]">
+          {addOn.mustReadAlsoIncludes.map((item) => (
+            <li key={item} className="uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">• {item}</li>
+          ))}
+        </ul>
+        <div className="mt-[16px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[12px]">
+          <p className="uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">{addOn.claimLimit}</p>
+        </div>
+      </div>
+    </BottomSheet>
   );
 }
 
@@ -681,7 +743,14 @@ function PackageDetailsSheet({ packageId, onClose }: { packageId: PackageId; onC
   const pkg = RS.packages.find((entry) => entry.id === packageId) ?? RS.packages[1];
   return (
     <BottomSheet
+      fillHeight
+      footer={
+        <div className="border-t border-[var(--uc-border)] pt-[12px]">
+          <PrimaryButton className="!w-full" onClick={onClose}>Close</PrimaryButton>
+        </div>
+      }
       title={RS.riskInfo.title}
+      titleClassName="!text-[28px] !leading-[34px]"
       className="px-[24px] pb-[24px] pt-[20px]"
       onClose={onClose}
     >
@@ -698,9 +767,6 @@ function PackageDetailsSheet({ packageId, onClose }: { packageId: PackageId; onC
 
         <div className="mt-[16px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[12px]">
           <p className="uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">{RS.riskInfo.placeholder}</p>
-        </div>
-        <div className="pt-[18px]">
-          <PrimaryButton className="!w-full" onClick={onClose}>Close</PrimaryButton>
         </div>
       </div>
     </BottomSheet>
@@ -754,7 +820,7 @@ function PackageCard({
         selected ? "border-[var(--uc-action)]" : "border-[var(--uc-border)]"
       } ${onSelect ? "cursor-pointer" : ""}`}
     >
-      <div className="px-[18px] pt-[18px]">
+      <div className="px-[16px] pt-[16px]">
         <div className="flex items-start gap-[10px]">
           {/* The radio keeps the choice reachable from the keyboard. */}
           <button
@@ -776,46 +842,57 @@ function PackageCard({
             />
           </button>
           <div className="min-w-0 flex-1">
-            <p className="uc-type-n2-strong text-[var(--uc-text)]">{pkg.name}</p>
+            <p className="uc-type-h2 text-[var(--uc-text)]">{pkg.name}</p>
             {/* A reason to pick this one, so the choice is not price alone. */}
-            <p className="pt-[4px] uc-type-p2 leading-[16px] text-[var(--uc-action)]">{pkg.bestFor}</p>
+            <p className="pt-[2px] uc-type-p2 leading-[16px] text-[var(--uc-action)]">{pkg.bestFor}</p>
           </div>
         </div>
 
-        <p className="pt-[12px] uc-type-n5 leading-[19px] text-[var(--uc-text-muted)]">{pkg.headline}</p>
-
-        {/* One price, with its currency and its term spelled out. */}
-        <div className="flex items-baseline gap-[6px] pt-[18px]">
-          <p className="uc-type-h1 text-[var(--uc-text)]">{pkg.premiums[durationId]}</p>
-          <p className="uc-type-n4-strong text-[var(--uc-text)]">{RS.selection.currency}</p>
+        {/*
+          The price, then everything that qualifies it on one quiet block: the term,
+          the tax note and who the package is for. The description used to sit on a
+          line of its own above the price, which pushed the card past the fold for
+          no gain — it explains the price, so it belongs under it.
+        */}
+        <div className="flex items-baseline gap-[5px] pt-[12px]">
+          <p className="uc-type-n3 text-[var(--uc-text)]">{pkg.premiums[durationId]}</p>
+          <p className="uc-type-n5-strong text-[var(--uc-text)]">{RS.selection.currency}</p>
         </div>
         <p className="pt-[2px] uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">
           for {duration.label} · {RS.taxNote}
           <br />
-          You choose your period in the next step.
+          {pkg.headline}
         </p>
       </div>
 
-      {/* The two sums that actually separate the packages. The rest is one tap away. */}
-      <div className="mx-[18px] mt-[18px] rounded-[10px] bg-[var(--uc-surface-muted)] px-[14px] py-[12px]">
-        <p className="uc-type-p2 uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
-          We pay up to ({RS.selection.currency})
-        </p>
+      {/*
+        The two sums that actually separate the packages. They are a detail of the
+        offer, not its headline, so they are quieter than the price and carry their
+        own currency instead of hiding it in the block title.
+      */}
+      <div className="mx-[16px] mt-[14px] rounded-[10px] bg-[var(--uc-surface-muted)] px-[12px] py-[10px]">
+        <p className="uc-type-p2 uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">We pay up to</p>
         {building ? (
-          <div className="flex items-baseline justify-between gap-[10px] pt-[8px]">
-            <p className="uc-type-n5 text-[var(--uc-text-muted)]">{RS.riskInfo.headlineLabels.building}</p>
-            <p className="uc-type-n3 text-[var(--uc-text)]">{roundSum(building.sums[pkg.id as PackageId])}</p>
+          <div className="flex items-baseline justify-between gap-[10px] pt-[6px]">
+            <p className="uc-type-p2 text-[var(--uc-text-muted)]">{RS.riskInfo.headlineLabels.building}</p>
+            <p className="uc-type-n5-strong text-[var(--uc-text)]">
+              {roundSum(building.sums[pkg.id as PackageId])}{" "}
+              <span className="uc-type-p2 text-[var(--uc-text-muted)]">{RS.selection.currency}</span>
+            </p>
           </div>
         ) : null}
         {contents ? (
-          <div className="flex items-baseline justify-between gap-[10px] pt-[4px]">
-            <p className="uc-type-n5 text-[var(--uc-text-muted)]">{RS.riskInfo.headlineLabels.contents}</p>
-            <p className="uc-type-n3 text-[var(--uc-text)]">{roundSum(contents.sums[pkg.id as PackageId])}</p>
+          <div className="flex items-baseline justify-between gap-[10px] pt-[3px]">
+            <p className="uc-type-p2 text-[var(--uc-text-muted)]">{RS.riskInfo.headlineLabels.contents}</p>
+            <p className="uc-type-n5-strong text-[var(--uc-text)]">
+              {roundSum(contents.sums[pkg.id as PackageId])}{" "}
+              <span className="uc-type-p2 text-[var(--uc-text-muted)]">{RS.selection.currency}</span>
+            </p>
           </div>
         ) : null}
       </div>
 
-      <p className="px-[18px] pt-[12px] uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">
+      <p className="px-[16px] pt-[10px] uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">
         {RS.riskInfo.cardSummary}
       </p>
 
@@ -825,7 +902,7 @@ function PackageCard({
         sheet opens without also switching package under the customer.
       */}
       <div
-        className="px-[18px] pb-[16px] pt-[10px]"
+        className="px-[16px] pb-[12px] pt-[6px]"
         onClick={(event) => event.stopPropagation()}
       >
         <LinkActionButton label={RS.riskInfo.moreDetails} onClick={onDetails} disabled={!onDetails} className="mx-auto" />
@@ -961,12 +1038,13 @@ function PackageSelectPreview({ state = "default" }: { state?: "default" | "bloc
           satisfied={config.mustReadSeen}
           onOpen={config.openMustRead}
         />
-        {showBlocked ? (
-          <p className="pt-[8px] uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">{RS.mustRead.blockedError}</p>
-        ) : null}
       </Body>
       <BottomCta>
-        {showBlocked ? <InlineError>{RS.mustRead.blockedError}</InlineError> : null}
+        {config.mustReadSeen ? null : (
+          <p className="pb-[10px] text-center uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">
+            {showBlocked ? RS.mustRead.blockedError : RS.mustRead.hint}
+          </p>
+        )}
         <PrimaryButton className="!w-full" disabled={!config.mustReadSeen} onClick={nav.primary}>
           Continue with {config.pkg.name}
         </PrimaryButton>
@@ -1011,6 +1089,15 @@ function DurationPremiumPreview({ overlay, addOnOpen = false }: { overlay?: "imp
   const config = useStep1Config({ addOn: addOnOpen });
   const addOn = RS.emergencyAddOn;
   const infoOpen = config.infoOpen || overlay === "important-info";
+  const addOnDetailsRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!config.addOn) return;
+    const frame = window.requestAnimationFrame(() => {
+      addOnDetailsRef.current?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [config.addOn]);
 
   return (
     <Screen>
@@ -1053,11 +1140,12 @@ function DurationPremiumPreview({ overlay, addOnOpen = false }: { overlay?: "imp
             toggleChecked={config.addOn}
             onToggle={config.setAddOn}
             rowHeight={80}
+            className="!pr-[24px]"
           />
         </div>
 
         {config.addOn ? (
-          <div className="pt-[10px]">
+          <div ref={addOnDetailsRef} className="pt-[10px]">
             <p className="uc-type-n5 leading-[19px] text-[var(--uc-text-muted)]">{addOn.intro}</p>
             <div className="flex flex-col gap-[8px] pt-[12px]">
               {addOn.packages.map((pkg) => (
@@ -1084,6 +1172,12 @@ function DurationPremiumPreview({ overlay, addOnOpen = false }: { overlay?: "imp
               Add-on cover runs {config.duration.addOnPeriod}, from the quotation date.
             </p>
             <p className="pt-[8px] uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">{addOn.feeNote}</p>
+            {/* The add-on is a second product, so it carries a second read. */}
+            <MandatoryRead
+              title={addOn.acknowledgement}
+              satisfied={config.addOnReadSeen}
+              onOpen={config.openAddOnRead}
+            />
           </div>
         ) : null}
 
@@ -1106,13 +1200,33 @@ function DurationPremiumPreview({ overlay, addOnOpen = false }: { overlay?: "imp
           total={config.addOn ? `${config.total} ${RS.selection.currency}` : undefined}
           totalLabel={addOn.totalLabel}
         />
+        {config.configComplete ? null : (
+          <p className="pt-[10px] text-center uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">
+            {config.infoSeen
+              ? "Turn on the emergency assistance acknowledgement to continue."
+              : "Turn on the acknowledgement above to continue."}
+          </p>
+        )}
         <div className="pt-[12px]">
-          <PrimaryButton className="!w-full" onClick={nav.primary}>Continue</PrimaryButton>
+          <PrimaryButton className="!w-full" disabled={!config.configComplete} onClick={nav.primary}>
+            Continue
+          </PrimaryButton>
         </div>
       </BottomCta>
       {infoOpen ? (
-        <Overlay>
-          <Sheet title={RS.importantInfo.title} onClose={() => config.setInfoOpen(false)}>
+        <BottomSheet
+          fillHeight
+          footer={
+            <div className="border-t border-[var(--uc-border)] pt-[12px]">
+              <PrimaryButton className="!w-full" onClick={() => config.setInfoOpen(false)}>Got it</PrimaryButton>
+            </div>
+          }
+          title={RS.importantInfo.title}
+          titleClassName="!text-[28px] !leading-[34px]"
+          className="px-[24px] pb-[24px] pt-[20px]"
+          onClose={() => config.setInfoOpen(false)}
+        >
+          <div className="w-full">
             <p className="uc-type-n5 leading-[20px] text-[var(--uc-text)]">{RS.importantInfo.body}</p>
             <p className="mt-[14px] uc-type-n5-strong text-[var(--uc-text)]">For example</p>
             <ul className="mt-[6px] flex flex-col gap-[8px]">
@@ -1120,12 +1234,10 @@ function DurationPremiumPreview({ overlay, addOnOpen = false }: { overlay?: "imp
                 <li key={example} className="uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">• {example}</li>
               ))}
             </ul>
-            <div className="pt-[18px]">
-              <PrimaryButton className="!w-full" onClick={() => config.setInfoOpen(false)}>Got it</PrimaryButton>
-            </div>
-          </Sheet>
-        </Overlay>
+          </div>
+        </BottomSheet>
       ) : null}
+      {config.addOnReadOpen ? <AddOnMustReadSheet onClose={() => config.setAddOnReadOpen(false)} /> : null}
     </Screen>
   );
 }
@@ -1565,7 +1677,6 @@ function PaymentCreatePreview({ state = "default" }: { state?: "default" | "insu
 function PaymentReviewPreview() {
   const nav = useFlowNav();
   const { payerAccount: account, payment, policy, selection, paymentScreens: ui } = RS;
-  const [saveAsTemplate, setSaveAsTemplate] = useState(false);
   return (
     <Screen>
       <Body title={ui.reviewTitle}>
@@ -1580,11 +1691,6 @@ function PaymentReviewPreview() {
         <ReviewRow label={ui.purposeLabel} value={payment.purposeEn} />
         <ReviewRow label={ui.processingDateLabel} value={payment.processingDate} />
         <ReviewRow label={ui.processingMethodLabel} value={payment.processing} />
-
-        <div className="flex items-center justify-between gap-[12px] pt-[22px]">
-          <p className="uc-type-n5-strong text-[var(--uc-text)]">{ui.saveAsTemplate}</p>
-          <ToggleButton checked={saveAsTemplate} onToggle={setSaveAsTemplate} ariaLabel={ui.saveAsTemplate} />
-        </div>
 
         <p className="pt-[22px] text-center uc-type-n5 leading-[19px] text-[var(--uc-text)]">{ui.payNote}</p>
       </Body>
@@ -1645,7 +1751,17 @@ function PaymentSuccessPreview() {
   return (
     <StandardSuccessScreen
       title={RS.paymentScreens.successTitle}
-      body={`${RS.paymentScreens.successBody}\n\nPolicy ${RS.policy.number} is active for ${RS.selection.period}. ${RS.partner} will send the policy and the payment confirmation to ${RS.policyholder.email}.`}
+      body={
+        <div className="space-y-[16px]">
+          <p>{RS.paymentScreens.successBody}</p>
+          <p>
+            <strong>Policy {RS.policy.number} is active</strong> for {RS.selection.period}.
+          </p>
+          <p>
+            {RS.partner} will send the policy and payment confirmation to <strong>{RS.policyholder.email}</strong>.
+          </p>
+        </div>
+      }
       actionLabel={RS.paymentScreens.successCta}
       onDone={nav.primary}
     />

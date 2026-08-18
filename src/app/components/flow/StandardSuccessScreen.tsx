@@ -1,9 +1,10 @@
+import type { ReactNode } from "react";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import { AppIcon } from "@/app/components/icons";
 
 interface StandardSuccessScreenProps {
   title: string;
-  body: string;
+  body: ReactNode;
   actionLabel: string;
   onDone: () => void;
 }
@@ -25,7 +26,7 @@ export default function StandardSuccessScreen({
             <AppIcon name="prime-check" size={64} color="var(--uc-green-olive)" />
           </div>
         </div>
-        <p className="uc-type-n4 pt-[58px] leading-[22px] text-[var(--uc-text)]">{body}</p>
+        <div className="uc-type-n4 pt-[58px] leading-[22px] text-[var(--uc-text)]">{body}</div>
       </div>
       <div className="px-[24px] pb-[42px]">
         <PrimaryButton onClick={onDone}>{actionLabel}</PrimaryButton>
