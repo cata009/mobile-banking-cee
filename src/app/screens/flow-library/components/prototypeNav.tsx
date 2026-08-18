@@ -15,6 +15,10 @@ export interface FlowNav {
   back: () => void;
   /** Jump straight to a named screen, for in-screen shortcuts such as Edit. */
   go: (screen: FlowScreenKind) => void;
+  /** Leave the flow from the header X: back to the start, or via a confirmation. */
+  close: () => void;
+  /** True only where the map declares an exit, so the X appears on those screens alone. */
+  canClose: boolean;
   /** True only inside the Prototype tab, for affordances that would mislead elsewhere. */
   active: boolean;
 }
@@ -24,6 +28,8 @@ const INERT_NAV: FlowNav = {
   secondary: () => {},
   back: () => {},
   go: () => {},
+  close: () => {},
+  canClose: false,
   active: false,
 };
 

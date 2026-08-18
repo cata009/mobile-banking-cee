@@ -75,9 +75,13 @@ function Screen({ children, tone = "surface" }: { children: ReactNode; tone?: "s
  * collapses into the centred compact title, and the body scrolls under it. A
  * clipped body would also silently hide rows a reviewer needs to check.
  */
-function Body({ title, children }: { title?: string; children: ReactNode }) {
+function Body({ title, closable = false, children }: { title?: string; closable?: boolean; children: ReactNode }) {
   const nav = useFlowNav();
   const { progress, onScroll } = useCollapsingHeader(64);
+  // The X only appears where the map says the flow can be left. Outside the
+  // prototype there is nowhere to go, so the slot stays empty rather than showing
+  // a control that would do nothing.
+  const showClose = closable && (!nav.active || nav.canClose);
   return (
     <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide" onScroll={onScroll}>
       {title ? (
@@ -87,6 +91,9 @@ function Body({ title, children }: { title?: string; children: ReactNode }) {
           collapsedTitleProgress={progress}
           includeSafeArea
           showHelp={false}
+          rightActionIcon={showClose ? <AppIcon name="close-flow" size={20} color="var(--uc-text)" /> : undefined}
+          rightActionLabel="Close purchase"
+          onRightActionClick={nav.close}
         />
       ) : null}
       <div className="px-[24px] pb-[18px]">{children}</div>
@@ -168,10 +175,10 @@ function PremiumSummary({
  */
 function BenefitRow({ text }: { text: string }) {
   return (
-    <li className="flex items-start gap-[10px]">
+    <li className="flex items-center gap-[10px]">
       <svg
         aria-hidden="true"
-        className="mt-[1px] size-[24px] shrink-0"
+        className="size-[24px] shrink-0"
         data-rs-benefit-icon="true"
         fill="none"
         height="24"
@@ -450,7 +457,10 @@ function RsBaselineFixture({ children }: { children: ReactNode }) {
 function InsuranceSheetOverlay() {
   const nav = useFlowNav();
   const sheet = getProductCardSheetConfig("insurance", "RS");
-  const options = [...sheet.options, { id: "property-insurance", title: "Property insurance" }];
+  const options = [
+    ...sheet.options.filter((option) => option.id === "travel-insurance"),
+    { id: "property-insurance", title: "Property insurance" },
+  ];
 
   return (
     <BottomSheet
@@ -458,7 +468,6 @@ function InsuranceSheetOverlay() {
       className="px-0 pb-[24px] pt-[24px]"
       headerClassName="px-[24px]"
       bodyClassName="w-full"
-      showCloseButton={false}
       onClose={nav.secondary}
     >
       <div className="flex w-full flex-col">
@@ -582,8 +591,10 @@ function ProductCoverPreview() {
  * two screens: a carousel where every package carries its own full cover table and
  * its price at all three terms, then the configuration of the chosen one.
  */
-function useStep1Config(initial?: { packageId?: PackageId; addOn?: boolean }) {
-  const [packageId, setPackageId] = useState<PackageId>((initial?.packageId ?? RS.selection.packageId) as PackageId);
+function useStep1Config(initial?: { packageId?: PackageId; addOn?: boolean; emptyPackageSelection?: boolean }) {
+  const [packageId, setPackageId] = useState<PackageId | null>(
+    initial?.emptyPackageSelection ? null : (initial?.packageId ?? RS.selection.packageId) as PackageId,
+  );
   const [durationId, setDurationId] = useState<DurationId>("6m");
   const [addOn, setAddOn] = useState(initial?.addOn ?? false);
   const [addOnPackageId, setAddOnPackageId] = useState<AddOnPackageId>(
@@ -678,7 +689,7 @@ function MustReadSheet({ onClose }: { onClose: () => void }) {
     <BottomSheet
       fillHeight
       footer={
-        <div className="border-t border-[var(--uc-border)] pt-[12px]">
+        <div className="pt-[12px]">
           <PrimaryButton className="!w-full" onClick={onClose}>I have read this</PrimaryButton>
         </div>
       }
@@ -703,7 +714,7 @@ function AddOnMustReadSheet({ onClose }: { onClose: () => void }) {
     <BottomSheet
       fillHeight
       footer={
-        <div className="border-t border-[var(--uc-border)] pt-[12px]">
+        <div className="pt-[12px]">
           <PrimaryButton className="!w-full" onClick={onClose}>I have read this</PrimaryButton>
         </div>
       }
@@ -802,7 +813,7 @@ function PackageCard({
   durationId: DurationId;
   selected: boolean;
   onSelect?: () => void;
-  onDetails?: () => void;
+  onDetails?: (packageId: PackageId) => void;
 }) {
   const duration = RS.durations.find((entry) => entry.id === durationId) ?? RS.durations[1];
   const building = COVERAGE_GROUPS[0]?.rows[0];
@@ -905,7 +916,12 @@ function PackageCard({
         className="px-[16px] pb-[12px] pt-[6px]"
         onClick={(event) => event.stopPropagation()}
       >
-        <LinkActionButton label={RS.riskInfo.moreDetails} onClick={onDetails} disabled={!onDetails} className="mx-auto" />
+        <LinkActionButton
+          label={RS.riskInfo.moreDetails}
+          onClick={() => onDetails?.(pkg.id as PackageId)}
+          disabled={!onDetails}
+          className="mx-auto"
+        />
       </div>
     </div>
   );
@@ -919,10 +935,10 @@ function PackageCarousel({
   onDetails,
   onVisibleIndexChange,
 }: {
-  selectedId: PackageId;
+  selectedId: PackageId | null;
   durationId: DurationId;
   onSelect?: (id: PackageId) => void;
-  onDetails?: () => void;
+  onDetails?: (packageId: PackageId) => void;
   onVisibleIndexChange?: (index: number) => void;
 }) {
   const carouselRef = useRef<HTMLDivElement | null>(null);
@@ -938,6 +954,13 @@ function PackageCarousel({
   const { isDragging, isPressActiveRef, dragHandlers } = useDragCarousel({
     carouselRef,
     onSettle: snapToNearest,
+    // The reviewer interacts with a scaled phone frame, where a 4px drift is
+    // common during a tap. Keep small movements as taps so package selection is
+    // reliable while a deliberate swipe still drags the carousel.
+    dragThresholdPx: 10,
+    // Desktop reviewers choose a package with a mouse; keep its movement out of
+    // the drag recognizer so a normal click is never swallowed. Touch still drags.
+    enableMouseDrag: false,
   });
   const settleTimer = useRef<number | null>(null);
 
@@ -1012,45 +1035,64 @@ function CarouselDots({ activeIndex, count }: { activeIndex: number; count: numb
 /** Step 1a — choose a package. */
 function PackageSelectPreview({ state = "default" }: { state?: "default" | "blocked" }) {
   const nav = useFlowNav();
-  const config = useStep1Config();
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const [visibleIndex, setVisibleIndex] = useState(
-    Math.max(0, RS.packages.findIndex((pkg) => pkg.id === RS.selection.packageId)),
-  );
+  const config = useStep1Config({ emptyPackageSelection: true });
+  const [detailsPackageId, setDetailsPackageId] = useState<PackageId | null>(null);
+  const [visibleIndex, setVisibleIndex] = useState(0);
   const showBlocked = state === "blocked" && !config.mustReadSeen;
+  const canContinue = Boolean(config.packageId && config.mustReadSeen);
 
   return (
     <Screen>
-      <Body title={RS.productNameEn}>
+      <Body closable title={RS.productNameEn}>
         <p className="pt-[8px] uc-type-n5 leading-[19px] text-[var(--uc-text-muted)]">{RS.cover.packagesIntro}</p>
+
+        <div className="pt-[16px]">
+          <p className="uc-type-n4-strong text-[var(--uc-text)]">Choose your insurance period</p>
+          <DurationPicker value={config.durationId} onChange={config.setDurationId} />
+        </div>
 
         <PackageCarousel
           selectedId={config.packageId}
-          durationId={REFERENCE_DURATION}
+          durationId={config.durationId}
           onSelect={config.setPackageId}
-          onDetails={() => setDetailsOpen(true)}
+          onDetails={setDetailsPackageId}
           onVisibleIndexChange={setVisibleIndex}
         />
         <CarouselDots activeIndex={visibleIndex} count={RS.packages.length} />
 
+        <Field>
+          <TextField
+            label="Insurance start date"
+            value={RS.selection.startDate}
+            onChange={noop}
+            readOnly
+            visualState="filled"
+            trailingIconName="insurance-calendar"
+            helperText={`Cover period ${config.duration.period}`}
+          />
+        </Field>
+      </Body>
+      <BottomCta>
         <MandatoryRead
           title={RS.mustRead.acknowledgement}
           satisfied={config.mustReadSeen}
           onOpen={config.openMustRead}
         />
-      </Body>
-      <BottomCta>
-        {config.mustReadSeen ? null : (
+        {canContinue ? null : (
           <p className="pb-[10px] text-center uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">
-            {showBlocked ? RS.mustRead.blockedError : RS.mustRead.hint}
+            {!config.packageId
+              ? "Choose a package and read the exclusions to continue."
+              : showBlocked
+                ? RS.mustRead.blockedError
+                : RS.mustRead.hint}
           </p>
         )}
-        <PrimaryButton className="!w-full" disabled={!config.mustReadSeen} onClick={nav.primary}>
-          Continue with {config.pkg.name}
+        <PrimaryButton className="!w-full" disabled={!canContinue} onClick={nav.primary}>
+          {config.packageId ? `Continue with ${config.pkg.name}` : "Continue"}
         </PrimaryButton>
       </BottomCta>
       {config.mustReadOpen ? <MustReadSheet onClose={() => config.setMustReadOpen(false)} /> : null}
-      {detailsOpen ? <PackageDetailsSheet packageId={config.packageId} onClose={() => setDetailsOpen(false)} /> : null}
+      {detailsPackageId ? <PackageDetailsSheet packageId={detailsPackageId} onClose={() => setDetailsPackageId(null)} /> : null}
     </Screen>
   );
 }
@@ -1061,7 +1103,7 @@ function MustReadPreview() {
   const config = useStep1Config();
   return (
     <Screen>
-      <Body title={RS.productNameEn}>
+      <Body closable title={RS.productNameEn}>
         <PackageCarousel selectedId={config.packageId} durationId={REFERENCE_DURATION} />
       </Body>
       <MustReadSheet onClose={nav.back} />
@@ -1075,10 +1117,10 @@ function RiskInfoPreview() {
   const config = useStep1Config();
   return (
     <Screen>
-      <Body title={RS.productNameEn}>
+      <Body closable title={RS.productNameEn}>
         <PackageCarousel selectedId={config.packageId} durationId={REFERENCE_DURATION} />
       </Body>
-      <PackageDetailsSheet packageId={config.packageId} onClose={nav.back} />
+      <PackageDetailsSheet packageId={config.packageId ?? (config.pkg.id as PackageId)} onClose={nav.back} />
     </Screen>
   );
 }
@@ -1101,7 +1143,7 @@ function DurationPremiumPreview({ overlay, addOnOpen = false }: { overlay?: "imp
 
   return (
     <Screen>
-      <Body title="Set up your policy">
+      <Body closable title="Set up your policy">
         {/* The package carries over from the carousel; changing it goes back there. */}
         <div className="mt-[8px] flex items-center gap-[12px] rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[12px]">
           <AppIcon name="shield-check" size={22} color="var(--uc-action)" />
@@ -1110,21 +1152,6 @@ function DurationPremiumPreview({ overlay, addOnOpen = false }: { overlay?: "imp
             <p className="uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">{config.pkg.headline}</p>
           </div>
         </div>
-
-        <SectionHeadingDivider title="Choose your insurance period" className="mt-[18px]" />
-        <DurationPicker value={config.durationId} onChange={config.setDurationId} />
-
-        <Field>
-          <TextField
-            label="Insurance start date"
-            value={RS.selection.startDate}
-            onChange={noop}
-            readOnly
-            visualState="filled"
-            trailingIconName="calendar-days"
-            helperText={`Cover period ${config.duration.period}`}
-          />
-        </Field>
 
         <MandatoryRead
           title={RS.importantInfo.acknowledgement}
@@ -1253,7 +1280,7 @@ function InsuredObjectPreview() {
   const object = RS.insuredObject;
   return (
     <Screen>
-      <Body title="Insured property">
+      <Body closable title="Insured property">
         <p className="pt-[4px] uc-type-n5 leading-[19px] text-[var(--uc-text-muted)]">
           Tell us where the property you want to insure is. This is the only block we cannot fill in for you — the
           insured home is not always your registered address.
@@ -1313,7 +1340,7 @@ function PolicyholderPreview({ state = "default" }: { state?: "default" | "error
 
   return (
     <Screen>
-      <Body title="Policyholder">
+      <Body closable title="Policyholder">
         <SectionHeadingDivider title="Personal data" className="mt-[8px]" />
         <p className="pt-[6px] uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">
           Taken from your verified profile. To change it, update your profile details.
@@ -1417,7 +1444,7 @@ function ReviewPreview({ addOn = false }: { addOn?: boolean }) {
   return (
     <Screen>
       {/* The partner's five blocks, in the partner's order. */}
-      <Body title="Check your data">
+      <Body closable title="Check your data">
         <GroupHeader title={RS.productNameEn} editAt="rs-pi-duration-premium" />
         <ReviewRow label="Selected package" value={selection.packageName} />
         <ReviewRow label="Insurance duration" value={selection.duration} />
@@ -1500,7 +1527,7 @@ function TermsConsentPreview() {
 
   return (
     <Screen>
-      <Body title="Terms and consents">
+      <Body closable title="Terms and consents">
         <p className="pt-[4px] uc-type-n4-strong leading-[22px] text-[var(--uc-text)]">{RS.order.heading}</p>
 
         <div className="pt-[12px]">

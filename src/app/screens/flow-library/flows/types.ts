@@ -151,12 +151,19 @@ export interface FlowPrototypeTransition {
 /**
  * The connections leaving one screen. `primary` is the screen's main action,
  * `secondary` its text action (cancel, not now, try again), `back` the header
- * back control, and `extra` any further branch worth clicking through.
+ * back control, `close` the header X, and `extra` any further branch worth
+ * clicking through.
  */
 export interface FlowPrototypeNode {
   primary?: FlowPrototypeTransition;
   secondary?: FlowPrototypeTransition;
   back?: FlowScreenKind;
+  /**
+   * Where the header X goes. Its presence is what puts the X on the screen, so a
+   * screen outside the abandonable part of a journey simply omits it; screens that
+   * already hold entered data point it at their confirmation rather than the exit.
+   */
+  close?: FlowScreenKind;
   extra?: readonly FlowPrototypeTransition[];
 }
 

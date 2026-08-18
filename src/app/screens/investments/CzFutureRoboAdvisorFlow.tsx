@@ -142,7 +142,7 @@ function RoboScreen({
         showHelp={headerAction === "help"}
         onHelpClick={() => undefined}
         rightActionIcon={headerAction === "close"
-          ? <AppIcon name="robo-close" color="var(--uc-text)" size={20} />
+          ? <AppIcon name="close-flow" color="var(--uc-text)" size={20} />
           : undefined}
         rightActionLabel="Close"
         onRightActionClick={onClose}
@@ -251,7 +251,7 @@ function IntroScreen({ onCreate, onExit }: { onCreate: () => void; onExit: () =>
           onClick={onExit}
           className="absolute right-[8px] top-[calc(var(--uc-phone-top-reserve,54px)+4px)] grid size-[40px] place-items-center"
         >
-          <AppIcon name="robo-close" color="var(--uc-text)" size={20} />
+          <AppIcon name="close-flow" color="var(--uc-text)" size={20} />
         </button>
       </div>
       <div className="flex flex-1 flex-col px-[24px] pb-[34px] pt-[20px]">

@@ -822,21 +822,38 @@ export const CUSTOM_ICONS = {
       />
     ),
   },
-  "robo-close": {
+  "close-flow": {
     source: "custom",
-    label: "Close Robo Advisor flow",
+    label: "Close flow",
     category: "System",
     width: 20,
     height: 20,
     viewBox: "0 0 20 20",
-    usage: ["CzFutureRoboAdvisorFlow"],
-    notes: "Exact 20x20 close glyph supplied for the CZ Future Robo Advisor flow.",
+    usage: ["CzFutureRoboAdvisorFlow", "RsPropertyInsurancePreviews"],
+    notes:
+      "The header X that leaves a multi-step flow. Sharp 20x20 glyph, distinct from close-x, which dismisses a sheet or a panel.",
     render: () => (
       <path
         fillRule="evenodd"
         clipRule="evenodd"
         d="M18.1431 0L10 8.14313L1.85625 0L0 1.85687L8.14313 10L0 18.1431L1.85625 20L10 11.8569L18.1431 20L20 18.1431L11.8569 10L20 1.85687L18.1431 0Z"
         fill="currentColor"
+      />
+    ),
+  },
+  "insurance-calendar": {
+    source: "custom",
+    label: "Insurance calendar",
+    category: "System",
+    width: 32,
+    height: 32,
+    viewBox: "0 0 32 32",
+    usage: ["RsPropertyInsurancePreviews insurance start date"],
+    notes: "Exact 32px calendar glyph supplied for the RS property-insurance start-date field.",
+    render: () => (
+      <path
+        d="M25.125 14.125V23.5C25.125 24.8805 23.9659 25.9998 22.5361 26H7V14.125H25.125ZM9.5 23.708H12.625V20.583H9.5V23.708ZM14.5 23.708H17.625V20.583H14.5V23.708ZM9.5 19.333H12.625V16.208H9.5V19.333ZM14.5 19.333H17.625V16.208H14.5V19.333ZM19.5 19.333H22.625V16.208H19.5V19.333ZM25.125 12.25H7V8.5C7 7.11951 8.15913 6.00022 9.58887 6H25.125V12.25ZM10.2363 7.875C9.52117 7.87515 8.94238 8.43447 8.94238 9.125C8.94238 9.81491 9.52117 10.3748 10.2363 10.375C10.9516 10.375 11.5312 9.815 11.5312 9.125C11.5312 8.43438 10.9516 7.875 10.2363 7.875ZM21.8887 7.875C21.1734 7.875 20.5938 8.43438 20.5938 9.125C20.5938 9.815 21.1734 10.375 21.8887 10.375C22.6038 10.3749 23.1826 9.81491 23.1826 9.125C23.1826 8.43446 22.6038 7.87515 21.8887 7.875Z"
+        fill="#262626"
       />
     ),
   },

@@ -33,9 +33,9 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
   domain: "Insurance",
   countryScope: RS_ONLY,
   status: "in-review",
-  figmaFile: "Mobile PI Baseline · RS (no Figma source yet — built from DS components)",
-  figmaNodeId: "",
-  sourceUrl: "https://www.generali.rs/fizicka_lica/imovina/osiguranje_kuce_i_stana.891.html",
+  figmaFile: "Serbia · DBN · Flows",
+  figmaNodeId: "10431:15613",
+  sourceUrl: "https://www.figma.com/design/LCJ2L7jAYTES68XMyHaCr2/Serbia--DBN---Flows?node-id=10431-15613&t=OYr0KcW1f3NhLTQu-1",
   /**
    * Both halves are needed here. The BA document answers why the flow exists and
    * what it commits the bank to; the twenty-five screen specs are what design and
@@ -281,7 +281,10 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       "The order step presents four documents — important information, household terms, emergency-intervention terms and general terms of use — before any consent can be given.",
       "Two consents are collected: the terms and Serbia-residency acknowledgement, which is required, and marketing contact, which is optional. Confirm is enabled on the required one alone. The partner's Select all control is kept.",
       "The person who pays is the authenticated customer: identity, address, postal code and contact travel with the request from the verified bank profile instead of being retyped or shown back, and no bot check is presented.",
-      "The partner's Cancel purchase button is not reproduced as a destructive action beside the primary one. Leaving is what the header back already does, and backing out of the data steps raises the confirmation that says the entered data will not be kept.",
+      "The purchase carries one exit: an X in the header's right slot, opposite the back control. It appears the moment the purchase begins, on the package step, and stays until the consents are confirmed; from the premium payment onwards it is gone, because a registered request is settled or resumed rather than abandoned.",
+      "Back and the X answer different questions and therefore coexist. Back is one step; the X is the whole journey, and it returns the customer to the Products screen they started from.",
+      "The X asks before it discards, but only when there is something to discard: from the insured property onwards it raises the leave-purchase confirmation, while on the package and configuration steps — where nothing has been typed — it simply leaves.",
+      "The partner's Cancel purchase button is not reproduced as a destructive action beside the primary one; the header X is that action, in the place the app already puts flow-level controls.",
       "The partner's separate payment-method page is not reproduced: the account is chosen on the domestic payment screen, which already owns that control, and the available balance is checked there against the premium. Adding a step whose only job is to repeat the account picker would be one screen too many.",
       "Confirming the consents registers the request with the insurer; the policy number it returns becomes the reference of the premium payment, and the payment screen opens on it.",
       "The premium payment reuses the Serbian domestic payment screens exactly as they are — create, review and confirmation — and maps onto the fields they already have: From account, Name, Account number, Module, Reference number, Amount, Currency, Payment code, Purpose, Urgent/instant processing and Payment processing date. No field is added for this flow, and beneficiary, amount, module, reference and purpose are read-only because they must reconcile with the registered request.",
@@ -331,7 +334,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       {
         title: "Nothing here is a new component",
         body:
-          "The partner journey is full of things Mobile PI has no component for: a four-step wizard indicator, per-row info buttons, blocking alerts, a payment-method page. None of them were rebuilt. Each was mapped onto something the app already owns, and where the app owned nothing, the pattern was extracted from an existing screen rather than invented here.\n\nSo: progress is carried by screen titles and the back stack, because the design system has no step indicator. Every mandatory read is a NavigationRow with a toggle — the shape the app already uses for acknowledgements — and every read opens on the shared BottomSheet. More details uses the link-style action the Evo 2027 activity list already uses for See more transactions; it was inlined there, so it was extracted into a shared component and both screens now use it. Every read-only value in the flow, from the prefilled identity to the data check to the locked payment fields, uses one presentation: label above, value below.\n\nThe practical consequence for the BA is that this flow adds no design debt. What it needs from the design system that did not exist as a component is exactly one thing, and that thing now exists and is shared.",
+          "The partner journey is full of things Mobile PI has no component for: a four-step wizard indicator, per-row info buttons, blocking alerts, a payment-method page. None of them were rebuilt. Each was mapped onto something the app already owns, and where the app owned nothing, the pattern was extracted from an existing screen rather than invented here.\n\nSo: progress is carried by screen titles and the back stack, because the design system has no step indicator. Every mandatory read is a NavigationRow with a toggle — the shape the app already uses for acknowledgements — and every read opens on the shared BottomSheet. More details uses the link-style action the Evo 2027 activity list already uses for See more transactions; it was inlined there, so it was extracted into a shared component and both screens now use it. The purchase's exit is the header's own right-hand slot with the app's flow-close X — the same glyph the CZ Robo Advisor journey exits with, which was named after that flow and is now named for what it does. Every read-only value in the flow, from the prefilled identity to the data check to the locked payment fields, uses one presentation: label above, value below.\n\nThe practical consequence for the BA is that this flow adds no design debt. What it needs from the design system that did not exist as a component is exactly one thing, and that thing now exists and is shared.",
       },
       {
         title: "Reads the customer switches on, not text they might scroll past",
@@ -429,6 +432,8 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       "rs-pi-package-select": {
         primary: { label: "Continue with the package", to: "rs-pi-duration-premium" },
         back: "rs-pi-product-cover",
+        // Nothing has been typed yet, so the X leaves without asking.
+        close: "rs-pi-products",
         extra: [
           { label: "Read the exclusions", to: "rs-pi-package-must-read" },
           { label: "More details on a package", to: "rs-pi-risk-info" },
@@ -438,18 +443,22 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       "rs-pi-package-must-read": {
         primary: { label: "I have read this", to: "rs-pi-package-select" },
         back: "rs-pi-package-select",
+        close: "rs-pi-products",
       },
       "rs-pi-risk-info": {
         primary: { label: "Close", to: "rs-pi-package-select" },
         back: "rs-pi-package-select",
+        close: "rs-pi-products",
       },
       "rs-pi-package-blocked": {
         primary: { label: "Acknowledge the exclusions", to: "rs-pi-package-must-read" },
         back: "rs-pi-product-cover",
+        close: "rs-pi-products",
       },
       "rs-pi-duration-premium": {
         primary: { label: "Continue", to: "rs-pi-insured-object" },
         back: "rs-pi-package-select",
+        close: "rs-pi-products",
         extra: [
           { label: "Read when cover starts", to: "rs-pi-important-info" },
           { label: "Add emergency assistance", to: "rs-pi-emergency-addon" },
@@ -458,41 +467,43 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       "rs-pi-important-info": {
         primary: { label: "Got it", to: "rs-pi-duration-premium" },
         back: "rs-pi-duration-premium",
+        close: "rs-pi-products",
       },
       "rs-pi-emergency-addon": {
         primary: { label: "Continue", to: "rs-pi-insured-object" },
         back: "rs-pi-package-select",
+        close: "rs-pi-products",
         extra: [{ label: "Check the data with the add-on", to: "rs-pi-review-addon" }],
       },
       "rs-pi-insured-object": {
         primary: { label: "Continue", to: "rs-pi-policyholder" },
-        secondary: { label: "Leave the purchase", to: "rs-pi-abandon-confirm" },
+        close: "rs-pi-abandon-confirm",
         back: "rs-pi-duration-premium",
       },
       "rs-pi-policyholder": {
         primary: { label: "Continue with purchase", to: "rs-pi-review" },
-        secondary: { label: "Leave the purchase", to: "rs-pi-abandon-confirm" },
+        close: "rs-pi-abandon-confirm",
         back: "rs-pi-insured-object",
         extra: [{ label: "Edit the contact block", to: "rs-pi-policyholder-errors" }],
       },
       "rs-pi-policyholder-errors": {
         primary: { label: "Fix the fields", to: "rs-pi-policyholder" },
-        secondary: { label: "Leave the purchase", to: "rs-pi-abandon-confirm" },
+        close: "rs-pi-abandon-confirm",
         back: "rs-pi-insured-object",
       },
       "rs-pi-review": {
         primary: { label: "Continue with purchase", to: "rs-pi-terms-consent" },
-        secondary: { label: "Leave the purchase", to: "rs-pi-abandon-confirm" },
+        close: "rs-pi-abandon-confirm",
         back: "rs-pi-policyholder",
       },
       "rs-pi-review-addon": {
         primary: { label: "Continue with purchase", to: "rs-pi-terms-consent" },
-        secondary: { label: "Leave the purchase", to: "rs-pi-abandon-confirm" },
+        close: "rs-pi-abandon-confirm",
         back: "rs-pi-emergency-addon",
       },
       "rs-pi-terms-consent": {
-        primary: { label: "I confirm", to: "rs-pi-payment-create" },
-        secondary: { label: "Leave the purchase", to: "rs-pi-abandon-confirm" },
+        primary: { label: "Pay now", to: "rs-pi-payment-create" },
+        close: "rs-pi-abandon-confirm",
         back: "rs-pi-review",
         extra: [{ label: "Registration fails", to: "rs-pi-submit-failed" }],
       },
@@ -604,7 +615,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { label: "Must read toggle", result: "Opens the exclusions on a bottom sheet and records the acknowledgement." },
         { label: "Continue with <package>", result: "Disabled until the acknowledgement is on; the reason is stated in one line above it. Then moves to the configuration screen, naming the chosen package so the choice is never ambiguous." },
       ],
-      back: "Returns to the cover page.",
+      back: "Back returns to the cover page. This is where the header X first appears, on the right of the header: it leaves the purchase and returns to Products, and because nothing has been entered yet it does not ask first.",
       edgeCases: [
         "Switching package after the acknowledgement is on keeps it on — the exclusions are the same for all three packages.",
         "The cover table must remain readable at large text sizes; sums are labelled rows, not a fixed grid.",
@@ -695,7 +706,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { label: "Emergency home assistance toggle", result: "Expands the add-on block with its packages, its service table, its claim limit and its own acknowledged read." },
         { label: "Continue", result: "Disabled until the cover-start read is acknowledged, and — when the add-on is on — until the add-on read is too. The line above it names whichever one is missing. Then moves to the insured property form." },
       ],
-      back: "Returns to package selection with the package selection and its acknowledgement intact.",
+      back: "Back returns to package selection with the package and its acknowledgement intact. The header X leaves the purchase and returns to Products without asking: nothing has been typed yet.",
       edgeCases: [
         "A start date in the past is rejected at the picker, not after Continue.",
         "Changing package or duration after the add-on is on must reprice both lines and the total.",
@@ -762,7 +773,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { label: "Municipality", result: "Opens a searchable picker over the insurer's municipality list." },
         { label: "Continue", result: "Moves to the policyholder block; disabled until street, house number, city and municipality are all answered." },
       ],
-      back: "Returns to the configuration screen with the package, term, start date and add-on intact. Backing out of the data steps is what raises the leave-purchase confirmation.",
+      back: "Back returns to the configuration screen with the package, term, start date and add-on intact. From this screen onwards the header X raises the leave-purchase confirmation, because there is now entered data to lose.",
       edgeCases: [
         "The municipality list is long; it needs search, not a raw scroll.",
         "The customer's registered address must not be silently used here — the insured property is a separate fact.",
@@ -790,7 +801,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { label: "Municipality", result: "Opens the insurer's municipality picker for the separate address." },
         { label: "Continue with purchase", result: "Disabled until a separate address is complete; then moves to the data check." },
       ],
-      back: "Returns to the insured property form with its data intact.",
+      back: "Back returns to the insured property form with its data intact. The header X raises the leave-purchase confirmation.",
       edgeCases: [
         "A customer who says the prefilled identity is wrong must be routed to profile maintenance, not allowed to type over it.",
         "Turning the same-address toggle back on must discard the separately entered address rather than keep it hidden.",
@@ -838,7 +849,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { label: "Edit on the policyholder group", result: "Returns to the policyholder form." },
         { label: "Continue with purchase", result: "Moves to the documents and consents." },
       ],
-      back: "Returns to the policyholder screen.",
+      back: "Back returns to the policyholder screen. The header X raises the leave-purchase confirmation.",
       edgeCases: [
         "Editing and returning must not reset an unrelated group or lose the mandatory-read state.",
         "With the add-on off, the emergency-assistance block is absent and the total equals the household premium.",
@@ -871,7 +882,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
     },
     "rs-pi-terms-consent": {
       purpose: "Reproduce the partner's order notices: four documents to read and two acknowledgements, one required and one optional.",
-      states: ["Nothing accepted", "Select all on", "Required consent only", "Confirm enabled"],
+      states: ["Nothing accepted", "Select all on", "Required consent only", "Pay now enabled"],
       fields: [
         { name: "Important information for the policyholder", type: "Document", required: true, notes: "Partner: Važne informacije za ugovarača. Downloadable." },
         { name: "Terms for insuring a house or flat and household contents", type: "Document", required: true, notes: "Partner: Uslovi za osiguranje kuće ili stana i stvari domaćinstva." },
@@ -885,17 +896,17 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       actions: [
         { label: "Document", result: "Opens or downloads the insurer's document." },
         { label: "Select all options", result: "Turns both consents on; clearing it turns both off." },
-        { label: "I confirm", result: "Enabled once the required consent is on; registers the request with the insurer and opens the prefilled premium payment." },
+        { label: "Pay now", result: "Enabled once the required consent is on; registers the request with the insurer and opens the prefilled premium payment. It is named for what happens next rather than for the act of agreeing, because the customer is one signature away from paying." },
       ],
-      back: "Returns to the data check with the consents preserved.",
+      back: "Back returns to the data check with the consents preserved. The header X raises the leave-purchase confirmation; this is the last screen that carries it, because the next step registers the request.",
       edgeCases: [
         "The marketing consent is genuinely optional; a design that blocks Confirm until both are on would misrepresent the partner's contract.",
-        "Turning the required consent off after Select all must disable Confirm again and clear the Select all state.",
+        "Turning the required consent off after Select all must disable Pay now again and clear the Select all state.",
         "The emergency-intervention terms document appears because the add-on is a separate product; when the add-on is off, confirm with the insurer whether it is still listed.",
       ],
       acceptance: [
         "All four documents are reachable before the order is placed.",
-        "Confirm is enabled with only the required consent on, and disabled when it is off.",
+        "Pay now is enabled with only the required consent on, and disabled when it is off.",
         "Select all sets and clears both consents together.",
       ],
     },
@@ -959,7 +970,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { label: "From account", result: "Allows switching to another eligible account." },
         { label: "Next", result: "Opens the payment review." },
       ],
-      back: "Leaves the payment. The request stays registered and unpaid.",
+      back: "Back leaves the payment; the request stays registered and unpaid. There is no header X here: once the request exists it is settled or resumed, not abandoned, and the outcomes for an unpaid request are designed screens of their own.",
       edgeCases: [
         "Editing beneficiary, amount, reference or purpose is not possible: it would break reconciliation with the registered request.",
         "Switching the payer account must re-check the balance.",
@@ -1041,7 +1052,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       ],
     },
     "rs-pi-abandon-confirm": {
-      purpose: "Catch a customer leaving the purchase with data already entered, so nothing is lost to a single accidental tap. This is what the partner's Cancel purchase action does — raised by leaving rather than by a destructive button sitting next to the primary one.",
+      purpose: "Catch a customer leaving the purchase with data already entered, so nothing is lost to a single accidental tap. This is what the partner's Cancel purchase action does, raised by the header X rather than by a destructive button sitting next to the primary one.",
       states: ["Confirmation open over the current step", "Data-loss warning"],
       fields: [
         { name: "Warning", type: "Copy", required: true, validation: "States that the entered package, property and policyholder data will not be kept." },
@@ -1051,7 +1062,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { label: "Continue purchase", result: "Closes the confirmation and returns to the current step unchanged." },
       ],
       edgeCases: [
-        "It is raised by backing out of the data steps, not by a Cancel button beside the primary action.",
+        "It is raised by the header X from the insured property step onwards, not by a Cancel button beside the primary action.",
         "If the request has already been registered, leaving must route to the unpaid-request outcome rather than a silent discard.",
         "Leaving before any data is entered — from the cover page, for instance — needs no confirmation at all.",
       ],

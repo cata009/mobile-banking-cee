@@ -813,13 +813,25 @@ function PrototypePanel({
     },
     back: stepBack,
     go,
+    close: () => {
+      if (node?.close) go(node.close);
+    },
+    canClose: Boolean(node?.close),
     active: true,
   };
 
-  // Keep the current stop in view as the reviewer moves along the line.
+  // Keep the current stop in view without asking the browser to scroll every
+  // ancestor. `scrollIntoView` also moved the Flow Library's vertical scroller,
+  // cutting the phone frame off below the fixed app header.
   useEffect(() => {
-    const active = timelineRef.current?.querySelector<HTMLElement>("[data-timeline-active='true']");
-    active?.scrollIntoView?.({ behavior: "smooth", block: "nearest", inline: "center" });
+    const timeline = timelineRef.current;
+    const active = timeline?.querySelector<HTMLElement>("[data-timeline-active='true']");
+    if (!timeline || !active) return;
+
+    timeline.scrollTo?.({
+      left: Math.max(0, active.offsetLeft + active.offsetWidth / 2 - timeline.clientWidth / 2),
+      behavior: "smooth",
+    });
   }, [screen]);
 
   const detours = [
