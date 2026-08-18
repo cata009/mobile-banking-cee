@@ -2,9 +2,11 @@ import { Children, cloneElement, isValidElement, useCallback, useEffect, useMemo
 import { AppIcon } from '@/app/components/icons';
 import AccountCarouselIndicator from '@/app/components/accounts/AccountCarouselIndicator';
 import GhostBanner from '@/app/components/cards/GhostBanner';
+import ShopsmartOfferCard from '@/app/components/shopsmart/ShopsmartOfferCard';
 import { maskAmountParts } from '@/app/utils/amountPrivacy';
 import { formatAmount, type Product, type ProductCategory } from '@/data/products';
 import type { CountryId } from '@/app/state/demoTypes';
+import { getProductsMenuForCountry, type ShopSmartOfferCategory } from '@/app/config/productsMenuConfig';
 import { useDragCarousel } from '@/hooks/useDragCarousel';
 import savingsCactus from '@/assets/app2027/home-summary-savings-cactus.png';
 import loansHouse from '@/assets/app2027/home-summary-loans-house.png';
@@ -15,12 +17,8 @@ import interestSafetyNet from '@/assets/app2027/home-interest-safety-net.png';
 import interestNextStep from '@/assets/app2027/home-interest-next-step.jpeg';
 import homeInsuranceCampaign from '@/assets/products/detail/img_illustration_homeinsurance_RS.png';
 import travelInsuranceCampaign from '@/assets/products/detail/img_illustration_travelinsurance_RS.png';
-import shopSmartDining from '@/assets/app2027/home-shopsmart-dining.png';
 import shopSmartValentino from '@/assets/shopsmart/shopsmart-valentino.png';
-import shopSmartLentiamo from '@/assets/shopsmart/shopsmart-lentiamo.png';
 import shopSmartEnglishHome from '@/assets/shopsmart/shopsmart-english-home.png';
-import shopSmartOffersOne from '@/assets/shopsmart/shopsmart-ds-offers-1.png';
-import shopSmartOffersTwo from '@/assets/shopsmart/shopsmart-ds-offers-2.png';
 import App2027Activity from './App2027Activity';
 import App2027ProductAccordions, { CurrencyBadge } from './App2027ProductAccordions';
 
@@ -85,27 +83,7 @@ const INTEREST_CAMPAIGNS: Record<TransformationTab, readonly InterestCampaign[]>
   ],
 };
 
-type ShopSmartCategory = 'popular' | 'eshops' | 'electronics' | 'travel' | 'home';
-
-type ShopSmartHomeOffer = {
-  id: string;
-  category: Exclude<ShopSmartCategory, 'popular'>;
-  merchant: string;
-  title: string;
-  description: string;
-  image: string;
-};
-
-const SHOPSMART_HOME_OFFERS: readonly ShopSmartHomeOffer[] = [
-  { id: 'alza-weekend', category: 'eshops', merchant: 'Alza.cz', title: 'A better weekend starts at home', description: 'Activate a 10% cashback offer on selected home and lifestyle picks.', image: shopSmartDining },
-  { id: 'mall-everyday', category: 'eshops', merchant: 'Mall.cz', title: 'Everyday picks, extra value', description: 'Save on the items that make the week run more smoothly.', image: shopSmartEnglishHome },
-  { id: 'datart-connected', category: 'electronics', merchant: 'Datart', title: 'Stay connected for less', description: 'Enjoy a special price on headphones, wearables, and smart devices.', image: shopSmartLentiamo },
-  { id: 'czc-tech', category: 'electronics', merchant: 'CZC.cz', title: 'Smart tech for every plan', description: 'Unlock card-linked offers on your next tech upgrade.', image: shopSmartOffersOne },
-  { id: 'booking-city-break', category: 'travel', merchant: 'Booking.com', title: 'City breaks made easier', description: 'Get more from every stay with travel offers selected for you.', image: shopSmartValentino },
-  { id: 'regiojet-escape', category: 'travel', merchant: 'RegioJet', title: 'More room for your next escape', description: 'Enjoy a little extra back when your next journey begins.', image: interestNextStep },
-  { id: 'ikea-living', category: 'home', merchant: 'IKEA', title: 'Make your home work harder', description: 'Refresh your space with an activated offer for your home.', image: shopSmartOffersTwo },
-  { id: 'bonami-upgrades', category: 'home', merchant: 'Bonami', title: 'Small upgrades, better everyday', description: 'Find more value in the details that make a home feel yours.', image: interestSafetyNet },
-];
+type ShopSmartCategory = 'popular' | ShopSmartOfferCategory;
 
 function formatMoney(amount: FormattedAmount, hidden: boolean) {
   const display = maskAmountParts(amount, hidden);
@@ -152,9 +130,9 @@ function SummaryBanner({ tab, amount, amountsHidden, secondaryLabel, secondaryVa
       <section
         data-home-transformation-summary={tab}
         data-home-summary-variant="baseline"
-        className="relative flex h-[145.25px] w-full overflow-hidden rounded-[8px] bg-[#94B1BA]"
+        className="relative flex h-[145.25px] min-h-[145.25px] w-full overflow-hidden rounded-[8px] bg-[#94B1BA] px-[24px] py-[15px]"
       >
-        <div data-home-summary-content className="flex flex-1 flex-col gap-[4px] p-[24px]">
+        <div data-home-summary-content className="relative z-10 flex flex-1 flex-col">
             <div className="flex flex-col gap-[4px]">
               <p className="uc-type-n5-strong text-[var(--uc-text)]">Total Available</p>
               <div className="flex items-baseline gap-[2px]">
@@ -163,7 +141,7 @@ function SummaryBanner({ tab, amount, amountsHidden, secondaryLabel, secondaryVa
               </div>
             </div>
 
-            <div data-home-summary-divider className="h-[0.25px] w-[205px] bg-[var(--uc-text)]" />
+            <div data-home-summary-divider className="my-[9px] h-px w-full bg-[color-mix(in_srgb,var(--uc-text)_35%,transparent)]" />
 
             <div className="flex flex-col gap-[4px]">
               <p className="uc-type-n5-strong text-[var(--uc-text)]">{secondaryLabel}</p>
@@ -174,7 +152,7 @@ function SummaryBanner({ tab, amount, amountsHidden, secondaryLabel, secondaryVa
             </div>
         </div>
 
-        <div data-home-summary-art-container className="absolute right-0 top-[24px] w-[96px]">
+        <div data-home-summary-art-container className="absolute right-0 top-[24px] z-0 w-[96px]">
           <img src={accountsLighthouse} alt="Lighthouse" data-home-summary-art={tab} className="h-auto w-full object-cover" />
         </div>
       </section>
@@ -251,15 +229,17 @@ type DepositPresentation = {
   maturityDate: string;
 };
 
+const DEFAULT_DEPOSIT_PRESENTATION: DepositPresentation = {
+  annualRate: 0.065,
+  periodLabel: '1 Year',
+  termDays: 365,
+  daysToMaturity: 290,
+  startDate: '30/05/2026',
+  maturityDate: '30/05/2027',
+};
+
 const EVO_2027_DEPOSIT_PRESENTATIONS: Record<string, DepositPresentation> = {
-  'term-1': {
-    annualRate: 0.065,
-    periodLabel: '1 Year',
-    termDays: 365,
-    daysToMaturity: 290,
-    startDate: '30/05/2026',
-    maturityDate: '30/05/2027',
-  },
+  'term-1': DEFAULT_DEPOSIT_PRESENTATION,
   'term-2': {
     annualRate: 0.052,
     periodLabel: '6 Months',
@@ -277,8 +257,6 @@ const EVO_2027_DEPOSIT_PRESENTATIONS: Record<string, DepositPresentation> = {
     maturityDate: '09/01/2028',
   },
 };
-
-const DEFAULT_DEPOSIT_PRESENTATION: DepositPresentation = EVO_2027_DEPOSIT_PRESENTATIONS['term-1'];
 
 function depositPresentation(product: Product): DepositPresentation {
   return EVO_2027_DEPOSIT_PRESENTATIONS[product.id] ?? DEFAULT_DEPOSIT_PRESENTATION;
@@ -434,7 +412,7 @@ function HorizontalCarousel({ ariaLabel, count, children }: { ariaLabel: string;
     <div ref={railRef} data-home-carousel-rail role="region" aria-label={ariaLabel} tabIndex={0} onScroll={onScroll} onKeyDown={(event) => {
       if (event.key === 'ArrowRight') { event.preventDefault(); scrollToIndex(activeIndex + 1); }
       if (event.key === 'ArrowLeft') { event.preventDefault(); scrollToIndex(activeIndex - 1); }
-    }} {...dragHandlers} className={`mt-[12px] flex gap-[12px] overflow-x-auto overscroll-x-contain pb-[4px] scrollbar-hide select-none touch-pan-y focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`} style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
+    }} {...dragHandlers} className={`mt-[12px] flex items-stretch gap-[12px] overflow-x-auto overscroll-x-contain pb-[4px] scrollbar-hide select-none touch-pan-y focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`} style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
       {draggableChildren}
     </div>
     {count > 1 ? <div className="mt-[4px] flex justify-center" aria-label={`${ariaLabel} pages`}>
@@ -466,14 +444,14 @@ function InterestCarousel({ tab, onProductsClick }: { tab: TransformationTab; on
   );
 }
 
-function ShopSmart({ onProductsClick }: { onProductsClick?: () => void }) {
+function ShopSmart({ country, onProductsClick }: { country: CountryId; onProductsClick?: () => void }) {
   const [activeFilter, setActiveFilter] = useState<ShopSmartCategory>('popular');
-  const offers = SHOPSMART_HOME_OFFERS;
+  const offers = getProductsMenuForCountry(country).shopSmartOfferCards;
   if (!offers.length) return null;
   const visibleOffers = activeFilter === 'popular'
     ? offers
-    : offers.filter((offer) => offer.category === activeFilter);
-  const filters: ReadonlyArray<{ id: typeof activeFilter; label: string }> = [
+    : offers.filter((offer) => offer.categories.includes(activeFilter));
+  const filters: ReadonlyArray<{ id: ShopSmartCategory; label: string }> = [
     { id: 'popular', label: 'Most popular' },
     { id: 'eshops', label: 'E-shops' },
     { id: 'electronics', label: 'Electronics' },
@@ -498,16 +476,30 @@ function ShopSmart({ onProductsClick }: { onProductsClick?: () => void }) {
       >
         {filters.map((filter) => {
           const active = filter.id === activeFilter;
-          return <button key={filter.id} type="button" aria-pressed={active} onClick={() => setActiveFilter(filter.id)} className={`flex h-[46px] shrink-0 items-center justify-center rounded-full border px-[12px] text-[18px] leading-[20px] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${active ? 'flex-col gap-[2px] border-transparent bg-[var(--uc-action)] py-[8px] font-medium text-[var(--uc-static-white)]' : 'border-transparent bg-[var(--uc-surface)] font-normal text-[var(--uc-text-muted)]'}`}>
+          return <button key={filter.id} type="button" aria-pressed={active} onPointerDown={(event) => event.stopPropagation()} onClick={() => setActiveFilter(filter.id)} className={`flex h-[46px] shrink-0 items-center justify-center rounded-full border px-[12px] text-[18px] leading-[20px] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${active ? 'flex-col gap-[2px] border-transparent bg-[var(--uc-action)] py-[8px] font-medium text-[var(--uc-static-white)]' : 'border-transparent bg-[var(--uc-surface)] font-normal text-[var(--uc-text-muted)]'}`}>
             <span>{filter.label}</span>
             {active ? <span aria-hidden="true" data-home-shopsmart-filter-dot className="size-[4px] rounded-full bg-[var(--uc-static-white)]" /> : null}
           </button>;
         })}
       </div>
       <HorizontalCarousel key={activeFilter} ariaLabel="ShopSmart offers" count={visibleOffers.length}>
-        {visibleOffers.map((offer) => {
-          return <button key={offer.id} type="button" onClick={onProductsClick} className="w-[min(327px,calc(100vw-64px))] shrink-0 snap-start overflow-hidden rounded-[8px] bg-[var(--uc-surface)] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"><div className="h-[128px] overflow-hidden bg-[var(--uc-surface-muted)]"><img src={offer.image} alt="" aria-hidden="true" data-home-shopsmart-media className="size-full object-cover object-center" /></div><div className="p-[16px]"><p className="text-[14px] font-bold text-[var(--uc-action)]">{offer.merchant}</p><p className="mt-[5px] text-[20px] font-bold">{offer.title}</p><p className="mt-[8px] text-[14px] text-[var(--uc-text-muted)]">{offer.description}</p></div></button>;
-        })}
+        {visibleOffers.map((offer) => (
+          <div key={offer.id} className="w-[min(327px,calc(100vw-64px))] shrink-0 snap-start">
+            <ShopsmartOfferCard
+              merchant={offer.merchant}
+              title={offer.title}
+              statusText={offer.statusText}
+              imageSrc={offer.imageSrc}
+              imageHeight={130}
+              pillLabel={offer.pillLabel}
+              pillTone={offer.pillTone}
+              tagLabel={offer.tagLabel}
+              distance={offer.distance}
+              trailingIcon={offer.trailingIcon}
+              onClick={onProductsClick}
+            />
+          </div>
+        ))}
       </HorizontalCarousel>
     </section>
   );
@@ -553,7 +545,7 @@ export default function App2027TransformationHome({ categories, country, amounts
         <App2027ProductAccordions categories={debitCardCategories} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} calculateGroupTotal={calculateTotal} getProductDisplayNumber={getProductDisplayNumber} onProductClick={onProductClick} useCzRoboAccountCards onDomesticPaymentClick={onDomesticPaymentClick} onPaymentsClick={onPaymentsClick} onAccountInfoClick={onAccountInfoClick} onCardDetailsClick={onCardDetailsClick} onCardOptionsClick={onCardOptionsClick} visibleKeys={['accounts', 'cards']} initialOpenKeys={{ accounts: true, cards: true }} />
         {accounts.length ? <App2027Activity country={country} currency={calculateTotal(accounts).currency} amountsHidden={amountsHidden} compact homeArea={false} onTransactionOpen={onTransactionOpen} onSeeMore={onSeeAllTransactions ?? (() => { const firstAccount = accounts[0]; if (firstAccount) onProductClick(firstAccount); })} /> : null}
         <InterestCarousel tab="accounts" onProductsClick={onProductsClick} />
-        <ShopSmart onProductsClick={onProductsClick} />
+        <ShopSmart country={country} onProductsClick={onProductsClick} />
       </> : null}
 
       {activeTab === 'savings' ? <>

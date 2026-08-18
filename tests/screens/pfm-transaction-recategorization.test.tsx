@@ -48,23 +48,41 @@ afterEach(() => {
 
 describe('PFM transaction recategorization entry points', () => {
   it('shows a completed-month report for current accounts but never for saving accounts', () => {
+    const onOpenSpending = vi.fn()
+    const onOpenIncome = vi.fn()
+    const onOpenExpenses = vi.fn()
     const current = render(
       <AccountDetailScreen
         selectedProductId="acc-1"
         onBack={() => undefined}
         onDetailsClick={() => undefined}
         onOptionsClick={() => undefined}
+        onOpenSpending={onOpenSpending}
+        onOpenIncome={onOpenIncome}
+        onOpenExpenses={onOpenExpenses}
       />,
       { wrapper: Providers },
     )
 
     expect(current.container.querySelectorAll('[data-monthly-account-report]')).not.toHaveLength(0)
     const decemberReport = current.container.querySelector<HTMLElement>('[data-monthly-account-report="2025-12"]')
-    expect(decemberReport).toHaveTextContent('Monthly report')
-    expect(decemberReport).toHaveTextContent(/4\.399,84\s*RON/)
+    expect(decemberReport).toHaveTextContent(/Total December 2025/i)
+    expect(decemberReport).toHaveTextContent(/4\.399,84\s*CZK/)
+    expect(decemberReport?.querySelector('h3')).toHaveClass('uc-type-h2')
+    expect(decemberReport).toHaveClass('rounded-[22px]', 'bg-[var(--uc-surface)]')
+    expect(decemberReport?.querySelector('[data-monthly-report-total]')).toHaveClass('uc-type-n2-strong', 'text-[var(--uc-text-muted)]')
+    expect(decemberReport?.querySelector('[data-monthly-report-total]')).toHaveTextContent(/[-+]\s*.*CZK/)
+    expect(decemberReport?.querySelector('[data-ds-label="AccountTransactionMonthDivider"]')).not.toBeInTheDocument()
+    expect(decemberReport?.previousElementSibling).toBeNull()
     expect(decemberReport).not.toHaveClass('border-b')
-    expect(decemberReport?.querySelector('[data-monthly-cash-flow-chart]')).toHaveClass('mx-auto')
-    expect(decemberReport?.querySelector('[data-cash-flow-total="inflow"]')).toHaveTextContent('4.399,84 RON')
+    expect(decemberReport?.querySelector('[data-monthly-cash-flow-chart]')).toHaveClass('mx-auto', 'h-[160px]')
+    expect(decemberReport?.querySelector('[data-cash-flow-total="inflow"]')).toHaveTextContent('4.399,84 CZK')
+    fireEvent.click(decemberReport?.querySelector('[data-monthly-report-open]') as HTMLElement)
+    fireEvent.click(decemberReport?.querySelector('[data-cash-flow-direction="income"]') as HTMLElement)
+    fireEvent.click(decemberReport?.querySelector('[data-cash-flow-direction="expense"]') as HTMLElement)
+    expect(onOpenSpending).toHaveBeenCalledTimes(1)
+    expect(onOpenIncome).toHaveBeenCalledTimes(1)
+    expect(onOpenExpenses).toHaveBeenCalledTimes(1)
     current.unmount()
 
     const saving = render(

@@ -33,6 +33,10 @@ interface AccountSearchBarProps {
   showTrailingAction?: boolean;
   /** `raised` puts a white field on a page-coloured band, for Evo 2027 lists. */
   fieldSurface?: "muted" | "raised";
+  /** Comfortable fields are easier to use in full-page search contexts. */
+  fieldSize?: "compact" | "comfortable";
+  /** Adds breathing room around the 32px icon slots on Evo 2027 list surfaces. */
+  fieldPadding?: "none" | "8";
 }
 
 export default function AccountSearchBar({
@@ -49,6 +53,8 @@ export default function AccountSearchBar({
   removeFiltersLabel = "REMOVE FILTERS",
   showTrailingAction = true,
   fieldSurface = "muted",
+  fieldSize = "compact",
+  fieldPadding = "none",
 }: AccountSearchBarProps) {
   const { t } = useLanguage();
   const resolvedPlaceholder = placeholder ?? t("runtime.actions.search", "Search");
@@ -57,6 +63,7 @@ export default function AccountSearchBar({
   const searchValue = value ?? internalValue;
   const hasSearchValue = searchValue.trim().length > 0;
   const showRemoveFilters = showRemoveFiltersAction && filtersActive && !hasSearchValue;
+  const paddedField = fieldPadding === "8" && !showRemoveFilters;
 
   const updateSearchValue = (nextValue: string) => {
     if (value === undefined) {
@@ -83,16 +90,25 @@ export default function AccountSearchBar({
   const fieldGround = fieldSurface === "raised"
     ? "bg-[var(--uc-surface)] shadow-[inset_0_0_0_1px_var(--uc-border-muted)]"
     : "bg-[var(--uc-app-bg)]";
+  // The padded Evo field owns the single outer stroke. Reapplying the raised
+  // surface to the inner row creates a second inset stroke inside the search.
+  const innerFieldGround = paddedField ? "bg-transparent" : fieldGround;
+  const comfortableField = fieldSize === "comfortable";
+  const fieldHeight = comfortableField ? "h-[40px]" : "h-[32px]";
 
   return (
     <div
-      className={`flex flex-col self-stretch ${showRemoveFilters ? "min-h-[63px] items-end gap-[8px] px-[16px] py-[2px]" : `min-h-[32px] items-start rounded-[10px] p-0 ${fieldGround}`}`}
-      data-ds-label="AccountSearchBar 32px"
+      className={`flex flex-col self-stretch ${showRemoveFilters ? "min-h-[63px] items-end gap-[8px] px-[16px] py-[2px]" : `${paddedField ? "min-h-[48px]" : comfortableField ? "min-h-[40px]" : "min-h-[32px]"} items-start rounded-[10px] ${paddedField ? "p-[8px]" : "p-0"} ${fieldGround}`}`}
+      data-ds-label={`AccountSearchBar ${comfortableField ? "40px" : "32px"}`}
+      data-search-padding={paddedField ? "8px" : undefined}
       data-search-filters-active={showRemoveFilters ? "true" : undefined}
     >
-      <div className={`flex w-full items-center justify-between rounded-[10px] ${fieldGround} ${showRemoveFilters ? "h-[36px]" : "h-[32px]"}`}>
-        <label className="flex h-[32px] min-w-0 flex-1 items-center gap-[8px] text-left">
-          <span className="flex h-[32px] w-[32px] shrink-0 items-center justify-center" data-ds-label="Search icon 32x32">
+      <div
+        className={`flex w-full items-center justify-between rounded-[10px] ${innerFieldGround} ${showRemoveFilters ? "h-[36px]" : fieldHeight}`}
+        data-search-inner-surface={paddedField ? "transparent" : "raised"}
+      >
+        <label className={`flex ${showRemoveFilters ? "h-[32px]" : fieldHeight} min-w-0 flex-1 items-center gap-[8px] text-left`}>
+          <span className={`flex ${showRemoveFilters ? "h-[32px] w-[32px]" : `${fieldHeight} ${comfortableField ? "w-[40px]" : "w-[32px]"}`} shrink-0 items-center justify-center`} data-ds-label={`Search icon ${comfortableField ? "40x40" : "32x32"}`}>
             <AppIcon name="search" color="var(--uc-text)" />
           </span>
           <input
@@ -104,14 +120,14 @@ export default function AccountSearchBar({
             onFocus={handleInputFocus}
             placeholder={resolvedPlaceholder}
             aria-label={resolvedPlaceholder}
-            className="uc-type-n5-strong h-[32px] min-w-0 flex-1 appearance-none bg-transparent text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)] [&::-webkit-search-cancel-button]:hidden"
+            className={`uc-type-n5-strong ${showRemoveFilters ? "h-[32px]" : fieldHeight} min-w-0 flex-1 appearance-none bg-transparent text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)] [&::-webkit-search-cancel-button]:hidden`}
           />
         </label>
         {showTrailingAction || hasSearchValue ? (
           <button
             type="button"
             onClick={hasSearchValue ? handleClearClick : onFilterClick}
-            className="grid h-[32px] w-[32px] shrink-0 place-items-center"
+            className={`grid ${showRemoveFilters ? "h-[32px] w-[32px]" : `${fieldHeight} ${comfortableField ? "w-[40px]" : "w-[32px]"}`} shrink-0 place-items-center`}
             aria-label={hasSearchValue ? "Clear search results" : t("runtime.actions.filters", "Filters")}
             aria-pressed={!hasSearchValue && filtersActive ? true : undefined}
             data-ds-label={hasSearchValue ? "Clear results icon 32x32" : "Filter icon 32x32"}

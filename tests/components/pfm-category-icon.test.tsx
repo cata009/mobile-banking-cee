@@ -23,4 +23,12 @@ describe('PfmCategoryIcon category circle variant', () => {
 
     expect(screen.getByLabelText('Wallet PFM category')).not.toHaveAttribute('data-pfm-icon-variant', 'category-circle')
   })
+
+  it('renders Transfers as arrows only, without the inner white circle path', () => {
+    render(<PfmCategoryIcon category="Transfers" variant="category-circle" />)
+
+    const path = screen.getByLabelText('Transfers PFM category').querySelector('path')
+    expect(path).toBeTruthy()
+    expect(path).not.toHaveAttribute('d', expect.stringContaining('M10 0'))
+  })
 })

@@ -80,7 +80,7 @@ export default function TransactionAvatar({
   const identityPfmVariant: PfmCategoryIconVariant = "category-circle";
 
   if (transaction.transferPair) {
-    return <TransactionPairAvatar pair={transaction.transferPair} size={size} />;
+    return <TransactionPairAvatar pair={transaction.transferPair} size={size} currency={transaction.currency} />;
   }
 
   const merchant = resolveTransactionMerchant(transaction);

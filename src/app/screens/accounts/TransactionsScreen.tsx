@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { UIEvent } from "react";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import PageHeader from "@/app/components/PageHeader";
+import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import AccountTransactionMonthDivider from "@/app/components/accounts/AccountTransactionMonthDivider";
 import AccountTransactionRow from "@/app/components/accounts/AccountTransactionRow";
 import { transactionGroupCardClassName } from "@/app/components/accounts/transactionGroupCard";
@@ -42,6 +43,7 @@ interface TransactionsScreenProps {
 }
 
 interface MonthSection {
+  dateKey: string;
   monthKey: string;
   monthTitle: string;
   rail: TransactionMonthRailItem;
@@ -50,6 +52,7 @@ interface MonthSection {
 }
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 /**
  * Distance from the top of the scroll container, in layout pixels. The device
@@ -73,6 +76,16 @@ function railItem(monthKey: string): TransactionMonthRailItem {
   return { key: monthKey, label: MONTH_LABELS[Number(month) - 1] ?? monthKey, year };
 }
 
+function transactionDateKey(transaction: AccountTransaction) {
+  return `${transaction.monthKey}-${String(Number(transaction.day)).padStart(2, "0")}`;
+}
+
+function transactionDateTitle(transaction: AccountTransaction) {
+  const [, month = "01"] = transaction.monthKey.split("-");
+  const year = transaction.monthKey.split("-")[0] ?? "";
+  return `${Number(transaction.day)} ${MONTH_NAMES[Number(month) - 1] ?? transaction.month} ${year}`;
+}
+
 /**
  * Every transaction the customer has, across their current accounts.
  *
@@ -85,12 +98,14 @@ export default function TransactionsScreen({
   onTransactionClick,
   transactionCategoryOverrides = {},
 }: TransactionsScreenProps) {
-  const { country } = useDemo();
+  const { country, release } = useDemo();
   const { categories } = useProducts();
   const { progress: headerProgress, onScroll: handleHeaderScroll } = useCollapsingHeader(48);
   const [selectedScopeId, setSelectedScopeId] = useState(ALL_ACCOUNTS_SCOPE);
   const [scopeSheetOpen, setScopeSheetOpen] = useState(false);
   const [activeMonthKey, setActiveMonthKey] = useState("");
+  const [transactionSearch, setTransactionSearch] = useState("");
+  const [transactionMonthRailVisible, setTransactionMonthRailVisible] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const stickyBandRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef(new Map<string, HTMLElement>());
@@ -111,6 +126,8 @@ export default function TransactionsScreen({
     [currentAccounts],
   );
   const activeScope = scopes.find((scope) => scope.id === selectedScopeId) ?? scopes[0];
+  const normalizedTransactionSearch = transactionSearch.trim().toLowerCase();
+  const showTransactionSearch = !transactionMonthRailVisible || normalizedTransactionSearch.length > 0;
 
   /** Each transaction keeps the account it belongs to, so opening one can name its product. */
   const { sections, productByTransactionId } = useMemo(() => {
@@ -140,18 +157,41 @@ export default function TransactionsScreen({
       });
     });
 
+    const filteredRows = normalizedTransactionSearch
+      ? rows.filter((transaction) => {
+          const searchableText = [
+            transaction.label,
+            transaction.details,
+            transaction.category,
+            transaction.status,
+            transaction.type,
+            transaction.day,
+            transaction.month,
+            transaction.monthTitle,
+            formatMoneyNumber(Math.abs(transaction.amount), country),
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+
+          return searchableText.includes(normalizedTransactionSearch);
+        })
+      : rows;
+
     const grouped = new Map<string, MonthSection>();
-    rows.forEach((transaction) => {
-      const existing = grouped.get(transaction.monthKey);
+    filteredRows.forEach((transaction) => {
+      const dateKey = transactionDateKey(transaction);
+      const existing = grouped.get(dateKey);
       if (existing) {
         existing.transactions.push(transaction);
         existing.total += transaction.amount;
         return;
       }
 
-      grouped.set(transaction.monthKey, {
+      grouped.set(dateKey, {
+        dateKey,
         monthKey: transaction.monthKey,
-        monthTitle: transaction.monthTitle,
+        monthTitle: transactionDateTitle(transaction),
         rail: railItem(transaction.monthKey),
         total: transaction.amount,
         transactions: [transaction],
@@ -161,20 +201,30 @@ export default function TransactionsScreen({
     return {
       productByTransactionId: owners,
       sections: Array.from(grouped.values())
-        .sort((a, b) => b.monthKey.localeCompare(a.monthKey))
+        .sort((a, b) => b.dateKey.localeCompare(a.dateKey))
         .map((section) => ({
           ...section,
-          transactions: section.transactions.sort((a, b) => Number(b.day) - Number(a.day)),
+          transactions: section.transactions,
         })),
     };
-  }, [activeScope, config.currency, country, currentAccounts, transactionCategoryOverrides]);
+  }, [activeScope, config.currency, country, currentAccounts, normalizedTransactionSearch, transactionCategoryOverrides]);
 
-  const months = useMemo(() => sections.map((section) => section.rail), [sections]);
+  const months = useMemo(() => {
+    const seen = new Set<string>();
+    return sections
+      .map((section) => section.rail)
+      .filter((month) => {
+        if (seen.has(month.key)) return false;
+        seen.add(month.key);
+        return true;
+      });
+  }, [sections]);
 
   useEffect(() => {
     const first = sections[0];
-    if (first && !sections.some((section) => section.monthKey === activeMonthKey)) {
-      setActiveMonthKey(first.monthKey);
+    const nextMonthKey = first?.monthKey ?? "";
+    if (!sections.some((section) => section.monthKey === activeMonthKey)) {
+      setActiveMonthKey(nextMonthKey);
     }
   }, [activeMonthKey, sections]);
 
@@ -192,11 +242,13 @@ export default function TransactionsScreen({
     const container = scrollRef.current;
     if (!container) return;
 
+    setTransactionMonthRailVisible(container.scrollTop > 0);
+
     const threshold = container.scrollTop + stickyOffset() + 24;
     let current = sections[0]?.monthKey ?? '';
 
     sections.forEach((section) => {
-      const element = sectionRefs.current.get(section.monthKey);
+      const element = sectionRefs.current.get(section.dateKey);
       if (element && offsetWithin(element, container) <= threshold) current = section.monthKey;
     });
 
@@ -207,7 +259,8 @@ export default function TransactionsScreen({
     setActiveMonthKey(monthKey);
 
     const container = scrollRef.current;
-    const section = sectionRefs.current.get(monthKey);
+    const sectionForMonth = sections.find((candidate) => candidate.monthKey === monthKey);
+    const section = sectionForMonth ? sectionRefs.current.get(sectionForMonth.dateKey) : undefined;
     if (!container || !section) return;
 
     const top = Math.max(0, offsetWithin(section, container) - stickyOffset());
@@ -259,25 +312,38 @@ export default function TransactionsScreen({
             <AppIcon name="chevron-down-wide" size={18} color="currentColor" aria-hidden="true" />
           </button>
 
-          <div className="mt-[8px]">
-            <TransactionMonthRail months={months} activeMonthKey={activeMonthKey} onMonthSelect={jumpToMonth} />
-          </div>
+          {showTransactionSearch || transactionMonthRailVisible ? <div className="mt-[8px] flex flex-col gap-[8px]" data-transactions-tools>
+            {showTransactionSearch ? <AccountSearchBar
+              value={transactionSearch}
+              onValueChange={setTransactionSearch}
+              placeholder="Search transactions"
+              showTrailingAction={false}
+              fieldSurface="raised"
+              fieldSize="comfortable"
+            /> : null}
+            {transactionMonthRailVisible ? (
+              <TransactionMonthRail months={months} activeMonthKey={activeMonthKey} onMonthSelect={jumpToMonth} />
+            ) : null}
+          </div> : null}
         </div>
 
         <div className="pb-[32px]">
           {sections.length > 0 ? sections.map((section) => (
             <section
-              key={section.monthKey}
-              data-transactions-month-section={section.monthKey}
+              key={section.dateKey}
+              data-transactions-month-section={section.dateKey}
+              data-transactions-date-section={section.dateKey}
+              data-transactions-month={section.monthKey}
               ref={(element) => {
-                if (element) sectionRefs.current.set(section.monthKey, element);
-                else sectionRefs.current.delete(section.monthKey);
+                if (element) sectionRefs.current.set(section.dateKey, element);
+                else sectionRefs.current.delete(section.dateKey);
               }}
             >
               <AccountTransactionMonthDivider
                 title={section.monthTitle}
-                total={formatMoneyNumber(section.total, country)}
+                total={section.transactions.length > 1 ? formatMoneyNumber(section.total, country) : undefined}
                 currency={config.currency}
+                dateSeparator
               />
               <div className={transactionGroupCardClassName(true)}>
               {section.transactions.map((transaction) => (
@@ -286,6 +352,8 @@ export default function TransactionsScreen({
                   transaction={transaction}
                   formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
                   currency={config.currency}
+                  evo2027={release === "release-future-evo-2027"}
+                  showDate={release !== "release-future-evo-2027"}
                   onClick={openTransaction}
                 />
               ))}
@@ -293,7 +361,7 @@ export default function TransactionsScreen({
             </section>
           )) : (
             <p className="px-[16px] py-[32px] text-[16px] leading-[22px] text-[var(--uc-text-muted)]">
-              No transactions on the selected accounts.
+              {normalizedTransactionSearch ? "No transactions match your search." : "No transactions on the selected accounts."}
             </p>
           )}
         </div>

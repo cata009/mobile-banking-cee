@@ -472,7 +472,7 @@ function EvoCardsComparison({
               {page.includesGhostBanner ? (
                 <div data-evo-card-ghost-banner className="flex min-h-[120px] items-center justify-center">
                   <GhostBanner
-                    className="h-[120px] w-[136px] !max-w-[136px] !p-[8px]"
+                    className="h-[120px] w-[136px] !max-w-[136px] !p-[4px]"
                     layout="stacked"
                     title="Add a debit card"
                     description="Explore options"

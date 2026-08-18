@@ -1,15 +1,18 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AppIcon } from "@/app/components/icons";
 import { SelectionChip } from "@/app/screens/tools/toolsUi";
 import { COUNTRY_META } from "@/app/registry/demoConfig";
 import { createPhoneScreenshotBlob } from "@/app/utils/phoneScreenshot";
 import MiniPhone from "./MiniPhone";
 import { renderFlowPreview } from "./flowPreviews";
+import { FlowNavProvider, type FlowNav } from "./prototypeNav";
 import { resolveScenario } from "../flows";
 import type {
   FlowBusinessAnalysisSpec,
   FlowDefinition,
+  FlowPrototypeSpec,
   FlowScenario,
+  FlowScreenKind,
   FlowScreenSpec,
   FlowStep,
 } from "../flows/types";
@@ -21,13 +24,14 @@ import {
   type FlowExportStep,
 } from "../flowExport";
 
-type DetailTab = "overview" | "journey" | "spec";
+type DetailTab = "overview" | "journey" | "spec" | "prototype";
 type JourneyView = "focused" | "filmstrip";
 
 const TABS: Array<{ id: DetailTab; label: string }> = [
   { id: "overview", label: "Overview" },
   { id: "journey", label: "Journey" },
   { id: "spec", label: "Spec" },
+  { id: "prototype", label: "Prototype" },
 ];
 
 const SCENARIO_TONE: Record<FlowScenario["kind"], { label: string; className: string }> = {
@@ -154,7 +158,7 @@ export default function FlowDetail({
         onExport={handleExport}
       />
 
-      <DetailTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      <DetailTabs activeTab={activeTab} onTabChange={setActiveTab} hasPrototype={Boolean(flow.prototype)} />
 
       {activeTab === "overview" ? <OverviewPanel flow={flow} /> : null}
 
@@ -180,6 +184,10 @@ export default function FlowDetail({
           onScenarioSelect={selectScenario}
           onStepSelect={setStepIndex}
         />
+      ) : null}
+
+      {activeTab === "prototype" && flow.prototype ? (
+        <PrototypePanel flow={flow} prototype={flow.prototype} countryName={countryName} />
       ) : null}
 
       {/* Off-screen capture strip: keeps export working from any tab. */}
@@ -304,10 +312,20 @@ function DesktopDocumentIcon({ kind }: { kind: "pdf" | "word" }) {
   );
 }
 
-function DetailTabs({ activeTab, onTabChange }: { activeTab: DetailTab; onTabChange: (tab: DetailTab) => void }) {
+function DetailTabs({
+  activeTab,
+  onTabChange,
+  hasPrototype,
+}: {
+  activeTab: DetailTab;
+  onTabChange: (tab: DetailTab) => void;
+  hasPrototype: boolean;
+}) {
+  // A flow without a clickable map simply does not offer the tab.
+  const tabs = hasPrototype ? TABS : TABS.filter((tab) => tab.id !== "prototype");
   return (
     <div role="tablist" aria-label="Flow sections" className="flex flex-wrap gap-[8px] border-b border-[var(--uc-border)]">
-      {TABS.map((tab) => {
+      {tabs.map((tab) => {
         const active = activeTab === tab.id;
         return (
           <button
@@ -733,6 +751,252 @@ function JourneyArrow() {
     </div>
   );
 }
+
+/**
+ * A clickable walk-through: one phone, the real screens, and the connections
+ * between them. The Journey tab answers "what are the steps"; this one answers
+ * "what happens when I press this", which is the question a filmstrip cannot.
+ */
+/**
+ * A clickable walk-through: one phone, the real screens, and a timeline of the
+ * journey under it. The Journey tab answers "what are the steps"; this one
+ * answers "what happens when I press this", which a filmstrip cannot.
+ */
+function PrototypePanel({
+  flow,
+  prototype,
+  countryName,
+}: {
+  flow: FlowDefinition;
+  prototype: FlowPrototypeSpec;
+  countryName: string;
+}) {
+  const [screen, setScreen] = useState<FlowScreenKind>(prototype.start);
+  const [history, setHistory] = useState<FlowScreenKind[]>([]);
+  const timelineRef = useRef<HTMLDivElement>(null);
+
+  const node = prototype.nodes[screen];
+  const spec = flow.screenSpecs[screen];
+
+  // The happy path is the spine of the timeline; everything else is a detour off it.
+  const spine = useMemo(() => {
+    const main = flow.scenarios.find((scenario) => scenario.id === flow.defaultScenarioId) ?? flow.scenarios[0];
+    return (main?.steps ?? []).map((step) => step.screen);
+  }, [flow]);
+  const spineIndex = spine.indexOf(screen);
+
+  const go = (next: FlowScreenKind) => {
+    setHistory((current) => [...current, screen]);
+    setScreen(next);
+  };
+
+  const stepBack = () => {
+    setHistory((current) => {
+      const previous = current[current.length - 1];
+      // A real back stack first; the map's declared back edge only when it is empty.
+      if (previous) {
+        setScreen(previous);
+        return current.slice(0, -1);
+      }
+      if (node?.back) setScreen(node.back);
+      return current;
+    });
+  };
+
+  const nav: FlowNav = {
+    primary: () => {
+      if (node?.primary) go(node.primary.to);
+    },
+    secondary: () => {
+      if (node?.secondary) go(node.secondary.to);
+    },
+    back: stepBack,
+    go,
+    active: true,
+  };
+
+  // Keep the current stop in view as the reviewer moves along the line.
+  useEffect(() => {
+    const active = timelineRef.current?.querySelector<HTMLElement>("[data-timeline-active='true']");
+    active?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, [screen]);
+
+  const detours = [
+    ...(node?.secondary && node.secondary.to !== node.primary?.to ? [node.secondary] : []),
+    ...(node?.extra ?? []),
+  ];
+  const offSpine = prototype.groups
+    .flatMap((group) => group.screens)
+    .filter((candidate) => !spine.includes(candidate));
+
+  return (
+    // The surface the phone sits on: the same card as every other panel, without a
+    // title row — the tab already says what this is.
+    <div
+      role="tabpanel"
+      className="flex flex-col items-center gap-[18px] rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[24px] shadow-sm"
+    >
+        {/* The same device frame the Demo area uses, so this reads as a phone. */}
+        <FlowNavProvider value={nav}>
+          <MiniPhone scale={0.86} scrollable device>
+            {renderFlowPreview(screen, { countryName })}
+          </MiniPhone>
+        </FlowNavProvider>
+
+        <div className="w-full max-w-[900px]">
+          {/* Prev / timeline / next — the whole control in one line. */}
+          <div className="flex items-center gap-[10px]">
+            <TimelineArrow
+              direction="back"
+              label={history.length ? "Go back" : "Nothing to go back to"}
+              disabled={history.length === 0 && !node?.back}
+              onClick={stepBack}
+            />
+
+            <div ref={timelineRef} className="min-w-0 flex-1 overflow-x-auto scrollbar-hide">
+              <div className="flex items-center">
+                {spine.map((stop, index) => {
+                  const active = stop === screen;
+                  const passed = spineIndex >= 0 && index < spineIndex;
+                  return (
+                    <div key={stop} className="flex items-center">
+                      {index > 0 ? (
+                        <span
+                          aria-hidden="true"
+                          className={`h-px w-[18px] shrink-0 ${passed ? "bg-[var(--uc-action)]" : "bg-[var(--uc-border)]"}`}
+                        />
+                      ) : null}
+                      <button
+                        type="button"
+                        data-timeline-active={active ? "true" : undefined}
+                        aria-current={active ? "step" : undefined}
+                        onClick={() => go(stop)}
+                        title={screenLabel(stop)}
+                        className={`flex shrink-0 items-center gap-[6px] rounded-full border px-[10px] py-[6px] transition-colors ${
+                          active
+                            ? "border-[var(--uc-action)] bg-[var(--uc-action)] text-[var(--uc-text-inverse)]"
+                            : passed
+                              ? "border-[var(--uc-action)] bg-[var(--uc-surface)] text-[var(--uc-action)]"
+                              : "border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text-muted)] hover:border-[var(--uc-action)]"
+                        }`}
+                      >
+                        <span className="uc-type-p2 tabular-nums">{index + 1}</span>
+                        {active ? <span className="uc-type-n5-strong whitespace-nowrap">{screenLabel(stop)}</span> : null}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <TimelineArrow
+              direction="forward"
+              label={node?.primary ? node.primary.label : "This screen ends the flow"}
+              disabled={!node?.primary}
+              onClick={nav.primary}
+            />
+
+            <button
+              type="button"
+              onClick={() => {
+                setHistory([]);
+                setScreen(prototype.start);
+              }}
+              className="shrink-0 rounded-[8px] border border-[var(--uc-border)] px-[12px] py-[9px] uc-type-n5-strong text-[var(--uc-text)] transition-colors hover:border-[var(--uc-action)]"
+            >
+              Restart
+            </button>
+          </div>
+
+          {/* Where you are, and the branches leaving it — one line each. */}
+          <div className="mt-[14px] flex flex-wrap items-baseline gap-x-[10px] gap-y-[6px]">
+            <h3 className="uc-type-n4-strong text-[var(--uc-text)]">{screenLabel(screen)}</h3>
+            {spineIndex < 0 ? (
+              <span className="rounded-full bg-[var(--uc-surface-muted)] px-[8px] py-[2px] uc-type-p2 text-[var(--uc-text-muted)]">
+                off the main path
+              </span>
+            ) : null}
+          </div>
+          {spec ? <p className="mt-[4px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">{spec.purpose}</p> : null}
+
+          {detours.length ? (
+            <p className="mt-[10px] flex flex-wrap items-baseline gap-x-[6px] gap-y-[4px] uc-type-p2 text-[var(--uc-text-muted)]">
+              <span>Also from here:</span>
+              {detours.map((transition, index) => (
+                <span key={`${transition.label}-${transition.to}`}>
+                  <button
+                    type="button"
+                    onClick={() => go(transition.to)}
+                    className="uc-type-n5-strong text-[var(--uc-action)] underline-offset-2 hover:underline"
+                  >
+                    {transition.label}
+                  </button>
+                  {index < detours.length - 1 ? <span className="pl-[6px]">·</span> : null}
+                </span>
+              ))}
+            </p>
+          ) : null}
+
+          {offSpine.length ? (
+            <p className="mt-[10px] flex flex-wrap items-baseline gap-x-[6px] gap-y-[4px] uc-type-p2 text-[var(--uc-text-muted)]">
+              <span>Other states:</span>
+              {offSpine.map((candidate, index) => (
+                <span key={candidate}>
+                  <button
+                    type="button"
+                    onClick={() => go(candidate)}
+                    className={`uc-type-n5-strong hover:underline ${
+                      candidate === screen ? "text-[var(--uc-text)]" : "text-[var(--uc-action)]"
+                    }`}
+                  >
+                    {screenLabel(candidate)}
+                  </button>
+                  {index < offSpine.length - 1 ? <span className="pl-[6px]">·</span> : null}
+                </span>
+              ))}
+            </p>
+          ) : null}
+        </div>
+    </div>
+  );
+}
+
+/** The two ends of the timeline: one step back, one step forward. */
+function TimelineArrow({
+  direction,
+  label,
+  disabled,
+  onClick,
+}: {
+  direction: "back" | "forward";
+  label: string;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      title={label}
+      className="grid size-[40px] shrink-0 place-items-center rounded-full border border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)] transition-colors hover:border-[var(--uc-action)] disabled:opacity-35 disabled:hover:border-[var(--uc-border)]"
+    >
+      <span className={direction === "back" ? "rotate-180" : undefined}>
+        <AppIcon name="chevron-link" color="currentColor" />
+      </span>
+    </button>
+  );
+}
+
+/** A readable name for a screen kind. */
+function screenLabel(screen: FlowScreenKind) {
+  return screen
+    .replace(/^rs-pi-/, "")
+    .replace(/-/g, " ")
+    .replace(/^./, (character) => character.toUpperCase());
+}
+
 
 function SpecPanel({
   flow,

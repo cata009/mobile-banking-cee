@@ -290,6 +290,8 @@ function AppContent({
   const [productsShelfHeroCollapsed, setProductsShelfHeroCollapsed] = useState(false);
   const [selectedProductDetail, setSelectedProductDetail] = useState<ProductDetailSelection | null>(null);
   const [investmentsInitialView, setInvestmentsInitialView] = useState<"portfolio" | "goals">("portfolio");
+  const [analyticsInitialScopeId, setAnalyticsInitialScopeId] = useState<string | null>(null);
+  const [analyticsInitialDirection, setAnalyticsInitialDirection] = useState<"expense" | "income" | null>(null);
 
   useEffect(() => {
     if ("cardId" in currentRoute && currentRoute.cardId) setSelectedCardId(currentRoute.cardId);
@@ -526,6 +528,14 @@ function AppContent({
   };
 
   const handleAnalyticsClick = () => {
+    setAnalyticsInitialScopeId(null);
+    setAnalyticsInitialDirection(null);
+    navigateTo("analytics");
+  };
+
+  const handleAccountAnalyticsClick = (direction: "expense" | "income") => {
+    setAnalyticsInitialScopeId(selectedAccountId);
+    setAnalyticsInitialDirection(direction);
     navigateTo("analytics");
   };
 
@@ -897,6 +907,8 @@ function AppContent({
             onMoreClick={handleMoreClick}
             transactionCategoryOverrides={transactionCategoryOverrides}
             onTransactionClick={handleAnalyticsTransactionClick}
+            initialScopeId={analyticsInitialScopeId ?? undefined}
+            initialDirection={analyticsInitialDirection ?? undefined}
           />
         )}
 
@@ -921,6 +933,9 @@ function AppContent({
             onTransactionClick={handleTransactionClick}
             transactionCategoryOverrides={transactionCategoryOverrides}
             onTransactionCategoryChange={handleTransactionCategoryChange}
+            onOpenSpending={() => handleAccountAnalyticsClick("expense")}
+            onOpenIncome={() => handleAccountAnalyticsClick("income")}
+            onOpenExpenses={() => handleAccountAnalyticsClick("expense")}
             onHelpClick={
               isCzCoAppingChatbotPreviewActive
                 ? () => openCzChatHelp(getCzChatHelpAreaForAccountProduct(selectedAccountProduct))

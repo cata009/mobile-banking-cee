@@ -35,6 +35,9 @@ interface AnalyticsScreenProps {
   onMoreClick?: () => void;
   transactionCategoryOverrides?: Readonly<Record<string, PfmCategorySelection>>;
   onTransactionClick?: (transaction: SpendingAnalyticsTransaction) => void;
+  onAddTransaction?: () => void;
+  initialScopeId?: string;
+  initialDirection?: "expense" | "income";
 }
 
 function splitAmount(value: string) {

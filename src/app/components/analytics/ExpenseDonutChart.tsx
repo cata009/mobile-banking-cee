@@ -30,7 +30,7 @@ const STROKE = 20;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 /** Visual breathing room between neighbouring arcs, on top of what the round caps already add. */
 const ARC_GAP = 8;
-const ICON_SIZE = 28;
+const ICON_SIZE = 32;
 /** Icons orbit just outside the ring so they read as labels for their arc, not as part of it. */
 const ICON_ORBIT = RADIUS + STROKE / 2 + ICON_SIZE / 2 + 2;
 const PLOT = Math.ceil((ICON_ORBIT + ICON_SIZE / 2) * 2);
@@ -126,7 +126,7 @@ export default function ExpenseDonutChart({
             aria-pressed={arc.isSelected}
             data-evo-expense-category={arc.category}
             className={`grid place-items-center rounded-full shadow-[0_0_0_3px_var(--uc-app-bg),0_1px_3px_rgb(var(--uc-shadow-rgb)/0.18)] transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)] focus-visible:ring-offset-2 ${
-              arc.iconCategory ? "" : "size-[28px] text-[var(--uc-static-white)]"
+              arc.iconCategory ? "" : "size-[32px] text-[var(--uc-static-white)]"
             } ${
               arc.isSelected ? "scale-110" : "hover:scale-105"
             }`}

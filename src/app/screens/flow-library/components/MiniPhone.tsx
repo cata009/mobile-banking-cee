@@ -1,4 +1,5 @@
 import { forwardRef, type CSSProperties, type ReactNode } from "react";
+import DynamicIsland from "@/app/components/DynamicIsland";
 import StatusBar from "@/app/components/StatusBar";
 
 /**
@@ -24,20 +25,49 @@ export interface MiniPhoneProps {
   topReserve?: number;
   /** Lets the active Journey preview receive native vertical scrolling. */
   scrollable?: boolean;
+  /**
+   * Wraps the screen in the same device bezel the Demo area uses — black shell,
+   * 48px corner, Dynamic Island — so a prototype reads as a phone rather than a
+   * floating card. Filmstrip and export previews keep the plain surface.
+   */
+  device?: boolean;
   className?: string;
 }
 
+/** Bezel thickness, matching the Demo frame's `p-3`. */
+const BEZEL = 12;
+
 const MiniPhone = forwardRef<HTMLDivElement, MiniPhoneProps>(function MiniPhone(
-  { children, scale = 0.62, statusBarVariant = "light", topReserve = 44, scrollable = false, className },
+  { children, scale = 0.62, statusBarVariant = "light", topReserve = 44, scrollable = false, device = false, className },
   ref,
 ) {
   const frameStyle = {
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
-    transform: `scale(${scale})`,
+    transform: device ? undefined : `scale(${scale})`,
     transformOrigin: "top left",
     "--uc-phone-top-reserve": `${topReserve}px`,
   } as CSSProperties;
+
+  const screen = (
+    <div
+      ref={ref}
+      data-flow-screen-capture="true"
+      className={
+        device
+          ? "relative overflow-hidden bg-[var(--uc-surface)]"
+          : "relative overflow-hidden rounded-[12px] bg-[var(--uc-surface)] shadow-[0_16px_32px_rgb(var(--uc-shadow-rgb)_/_0.10),0_3px_10px_rgb(var(--uc-shadow-rgb)_/_0.06)]"
+      }
+      style={device ? { ...frameStyle, borderRadius: 36 } : frameStyle}
+    >
+      <StatusBar variant={statusBarVariant} />
+      {device ? <DynamicIsland variant="light" /> : null}
+      <div className="h-full w-full overflow-hidden">{children}</div>
+    </div>
+  );
+
+  const outerWidth = (device ? SCREEN_WIDTH + BEZEL * 2 : SCREEN_WIDTH) * scale;
+  const outerHeight = (device ? SCREEN_HEIGHT + BEZEL * 2 : SCREEN_HEIGHT) * scale;
 
   return (
     <div
@@ -50,18 +80,30 @@ const MiniPhone = forwardRef<HTMLDivElement, MiniPhoneProps>(function MiniPhone(
       }}
       aria-hidden={scrollable ? undefined : true}
       data-flow-preview-scrollable={scrollable ? "true" : undefined}
-      className={`relative shrink-0 ${scrollable ? "overflow-x-hidden overflow-y-auto overscroll-contain scrollbar-hide" : "overflow-hidden"} ${className ?? ""}`}
-      style={{ width: SCREEN_WIDTH * scale, height: SCREEN_HEIGHT * scale, touchAction: scrollable ? "pan-y" : undefined }}
+      // The wrapper clips, so it has to carry the bezel's radius too — otherwise a
+      // rectangular clip cuts the phone's rounded corners square.
+      // A device frame never scrolls as a whole — the screen inside it does, the
+      // way a real phone behaves. Only the plain preview surface scrolls, because
+      // there the frame is scaled down and the content can outgrow it.
+      className={`relative shrink-0 ${device ? "overflow-hidden rounded-[48px]" : scrollable ? "overflow-x-hidden overflow-y-auto overscroll-contain scrollbar-hide" : "overflow-hidden"} ${className ?? ""}`}
+      style={{ width: outerWidth, height: outerHeight, touchAction: scrollable ? "pan-y" : undefined }}
     >
-      <div
-        ref={ref}
-        data-flow-screen-capture="true"
-        className="relative overflow-hidden rounded-[12px] bg-[var(--uc-surface)] shadow-[0_16px_32px_rgb(var(--uc-shadow-rgb)_/_0.10),0_3px_10px_rgb(var(--uc-shadow-rgb)_/_0.06)]"
-        style={frameStyle}
-      >
-        <StatusBar variant={statusBarVariant} />
-        <div className="h-full w-full overflow-hidden">{children}</div>
-      </div>
+      {device ? (
+        <div
+          className="relative"
+          style={{
+            width: SCREEN_WIDTH + BEZEL * 2,
+            height: SCREEN_HEIGHT + BEZEL * 2,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+        >
+          <div aria-hidden="true" className="absolute inset-0 translate-y-8 bg-[rgb(var(--uc-static-black-rgb)_/_0.2)] blur-3xl" />
+          <div className="relative rounded-[48px] bg-[var(--uc-static-black)] p-3 shadow-2xl">{screen}</div>
+        </div>
+      ) : (
+        screen
+      )}
     </div>
   );
 });

@@ -25,7 +25,7 @@ import { getCountryConfig, formatMoneyNumber } from "@/app/registry/countryConfi
 import { maskAmountParts, maskFormattedAmount } from "@/app/utils/amountPrivacy";
 import { useCopyToClipboard } from "@/app/utils/useCopyToClipboard";
 import { useProducts } from "@/hooks/useProducts";
-import { getAccountTransactionProfileIndex, getAccountTransactions, groupAccountTransactionsByMonth } from "@/data/accountDetails";
+import { getAccountTransactionProfileIndex, getAccountTransactions, groupAccountTransactionsByDate, groupAccountTransactionsByMonth } from "@/data/accountDetails";
 import type { AccountTransaction } from "@/data/accountDetails";
 import { getPfmCategorySelection, type PfmCategorySelection } from "@/data/pfmCategories";
 import { getLoanDetails, getTermDepositDetails } from "@/data/accountProductDetails";
@@ -47,6 +47,9 @@ interface AccountDetailScreenProps {
   ) => void;
   transactionCategoryOverrides?: Readonly<Record<string, PfmCategorySelection>>;
   onTransactionCategoryChange?: (transaction: AccountTransaction, selection: PfmCategorySelection) => void;
+  onOpenSpending?: () => void;
+  onOpenIncome?: () => void;
+  onOpenExpenses?: () => void;
   onHelpClick?: () => void;
   /** Optional presentation-only overrides used by Flow Library specifications. */
   transactionRowPresentation?: {
@@ -137,6 +140,9 @@ export default function AccountDetailScreen({
   onTransactionClick,
   transactionCategoryOverrides = {},
   onTransactionCategoryChange,
+  onOpenSpending,
+  onOpenIncome,
+  onOpenExpenses,
   onHelpClick,
   transactionRowPresentation,
 }: AccountDetailScreenProps) {
@@ -319,6 +325,15 @@ export default function AccountDetailScreen({
   const transactionGroups = useMemo(
     () => groupAccountTransactionsByMonth(filteredTransactions.filter((transaction) => transaction.status === "Booked")),
     [filteredTransactions],
+  );
+  const currentMonthKey = useMemo(
+    () => scopedTransactions.reduce<string | null>(
+      (latestMonthKey, transaction) => (
+        !latestMonthKey || transaction.monthKey > latestMonthKey ? transaction.monthKey : latestMonthKey
+      ),
+      null,
+    ),
+    [scopedTransactions],
   );
   const firstCurrentAccountId = accountProducts.find((product) => product.type === "current_account")?.id;
   const pendingTransactions = activeProduct?.id === firstCurrentAccountId
@@ -590,6 +605,7 @@ export default function AccountDetailScreen({
                 onFocus={activateTransactionSearch}
                 filtersActive={filtersActive}
                 fieldSurface={usesEvoGroupCards ? "raised" : "muted"}
+                fieldPadding={usesEvoGroupCards ? "8" : "none"}
               />
             </div>
 
@@ -608,6 +624,8 @@ export default function AccountDetailScreen({
                         leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
                         categoryIconVariant={release === "release-future-evo-2027" ? "category-circle" : "glyph"}
                         positiveAmountClassName={release === "release-future-evo-2027" ? "text-[#3D7D43]" : undefined}
+                        evo2027={usesEvoGroupCards}
+                        showDate={!usesEvoGroupCards}
                         onClick={openTransaction}
                       />
                     ))}
@@ -617,32 +635,67 @@ export default function AccountDetailScreen({
               {transactionGroups.length > 0 ? (
                 transactionGroups.map((group, index) => (
                   <div key={group.monthTitle} className={index > 0 && !usesEvoGroupCards ? "pt-[16px]" : undefined}>
-                    <AccountTransactionMonthDivider
-                      title={group.monthTitle}
-                      total={formatMoneyNumber(group.monthlyTotal, country)}
-                      currency={activeCurrency}
-                    />
-
-                    {showCompletedMonthReports && index > 0 && group.transactions.every((transaction) => transaction.status === "Booked") ? (
-                      <AccountMonthlyReport country={country} currency={activeCurrency} group={group} />
+                    {showCompletedMonthReports && group.monthKey !== currentMonthKey && group.transactions.every((transaction) => transaction.status === "Booked") ? (
+                      <AccountMonthlyReport
+                        country={country}
+                        currency={activeCurrency}
+                        group={group}
+                        onOpenSpending={onOpenSpending}
+                        onOpenIncome={onOpenIncome}
+                        onOpenExpenses={onOpenExpenses}
+                      />
+                    ) : group.monthKey !== currentMonthKey ? (
+                      <AccountTransactionMonthDivider
+                        title={group.monthTitle}
+                        currency={activeCurrency}
+                      />
                     ) : null}
 
-                    <div className={transactionGroupCardClassName(usesEvoGroupCards)}>
+                    {usesEvoGroupCards ? groupAccountTransactionsByDate(group.transactions).map((dateGroup) => (
+                      <div key={dateGroup.dateKey} data-transaction-date-group={dateGroup.dateKey}>
+                        <AccountTransactionMonthDivider
+                          title={dateGroup.dateTitle}
+                          total={dateGroup.transactions.length > 1 ? formatMoneyNumber(dateGroup.dailyTotal, country) : undefined}
+                          currency={activeCurrency}
+                          dateSeparator
+                        />
+                        <div className={transactionGroupCardClassName(true)}>
+                          {dateGroup.transactions.map((transaction) => (
+                            <AccountTransactionRow
+                              key={transaction.id}
+                              transaction={transaction}
+                              formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
+                              currency={activeCurrency}
+                              displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
+                              leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
+                              categoryIconVariant="category-circle"
+                              positiveAmountClassName="text-[#3D7D43]"
+                              evo2027
+                              showDate={false}
+                              compact={dateGroup.transactions.length === 1}
+                              onClick={openTransaction}
+                              onCategoryClick={onTransactionCategoryChange ? setCategorySheetTransaction : undefined}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )) : (
+                      <div className={transactionGroupCardClassName(false)}>
                         {group.transactions.map((transaction) => (
-                          <AccountTransactionRow
-                            key={transaction.id}
-                            transaction={transaction}
-                            formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
-                            currency={activeCurrency}
-                            displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
-                            leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
-                            categoryIconVariant={release === "release-future-evo-2027" ? "category-circle" : "glyph"}
-                            positiveAmountClassName={release === "release-future-evo-2027" ? "text-[#3D7D43]" : undefined}
-                            onClick={openTransaction}
-                            onCategoryClick={onTransactionCategoryChange ? setCategorySheetTransaction : undefined}
-                          />
+                        <AccountTransactionRow
+                          key={transaction.id}
+                          transaction={transaction}
+                          formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
+                          currency={activeCurrency}
+                          displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
+                          leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
+                          categoryIconVariant="glyph"
+                          onClick={openTransaction}
+                          onCategoryClick={onTransactionCategoryChange ? setCategorySheetTransaction : undefined}
+                        />
                         ))}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 ))
               ) : (

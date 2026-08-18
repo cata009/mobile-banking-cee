@@ -14,7 +14,7 @@
 import type { CountryId } from "@/app/state/demoTypes";
 
 /** Stable ids for the flows shipped in the library. */
-export type FlowPreviewId = "ro-round-up" | "ro-card-pin" | "mobile-pi-ethoca";
+export type FlowPreviewId = "ro-round-up" | "ro-card-pin" | "mobile-pi-ethoca" | "rs-property-insurance";
 
 /**
  * Screen kinds a preview step can render. Each maps to a DS-composed preview in
@@ -66,7 +66,38 @@ export type EthocaScreenKind =
   | "ethoca-detail-online"
   | "ethoca-detail-logo-unavailable";
 
-export type FlowScreenKind = RoundUpScreenKind | CardPinScreenKind | EthocaScreenKind;
+/**
+ * Serbia property-insurance purchase (Generali "Osiguranje domacinstva") started
+ * from the Mobile PI Baseline product shelf and settled with a domestic payment.
+ */
+export type RsPropertyInsuranceScreenKind =
+  | "rs-pi-products"
+  | "rs-pi-insurance-sheet"
+  | "rs-pi-product-cover"
+  | "rs-pi-package-select"
+  | "rs-pi-package-must-read"
+  | "rs-pi-risk-info"
+  | "rs-pi-package-blocked"
+  | "rs-pi-duration-premium"
+  | "rs-pi-important-info"
+  | "rs-pi-emergency-addon"
+  | "rs-pi-insured-object"
+  | "rs-pi-policyholder"
+  | "rs-pi-policyholder-errors"
+  | "rs-pi-review"
+  | "rs-pi-review-addon"
+  | "rs-pi-terms-consent"
+  | "rs-pi-insufficient-funds"
+  | "rs-pi-submit-failed"
+  | "rs-pi-payment-create"
+  | "rs-pi-payment-review"
+  | "rs-pi-payment-sign"
+  | "rs-pi-payment-success"
+  | "rs-pi-payment-failed"
+  | "rs-pi-payment-cancelled"
+  | "rs-pi-abandon-confirm";
+
+export type FlowScreenKind = RoundUpScreenKind | CardPinScreenKind | EthocaScreenKind | RsPropertyInsuranceScreenKind;
 
 /** Where a flow sits on the road to production. Drives the status chip + filtering. */
 export type FlowStatus = "future-release-preview" | "in-review" | "baseline-candidate";
@@ -106,6 +137,39 @@ export interface FlowScreenSpec {
   edgeCases?: string[];
   /** Testable acceptance criteria. */
   acceptance?: string[];
+}
+
+/**
+ * One outgoing connection from a screen: the control the customer used and where
+ * it lands them.
+ */
+export interface FlowPrototypeTransition {
+  label: string;
+  to: FlowScreenKind;
+}
+
+/**
+ * The connections leaving one screen. `primary` is the screen's main action,
+ * `secondary` its text action (cancel, not now, try again), `back` the header
+ * back control, and `extra` any further branch worth clicking through.
+ */
+export interface FlowPrototypeNode {
+  primary?: FlowPrototypeTransition;
+  secondary?: FlowPrototypeTransition;
+  back?: FlowScreenKind;
+  extra?: readonly FlowPrototypeTransition[];
+}
+
+/**
+ * A clickable map of the whole flow, so a reviewer can walk it screen by screen
+ * instead of reading a filmstrip. Optional: a flow without one simply has no
+ * Prototype tab.
+ */
+export interface FlowPrototypeSpec {
+  start: FlowScreenKind;
+  /** Screens grouped for the jump list, in the order a reviewer thinks about them. */
+  groups: ReadonlyArray<{ title: string; screens: readonly FlowScreenKind[] }>;
+  nodes: Partial<Record<FlowScreenKind, FlowPrototypeNode>>;
 }
 
 /** A step in a scenario: a labelled stop that renders one screen. */
@@ -215,6 +279,8 @@ export interface FlowDefinition {
   figmaNodeId: string;
   sourceUrl: string;
   overview: FlowOverviewSpec;
+  /** Optional clickable map; when present the detail view gains a Prototype tab. */
+  prototype?: FlowPrototypeSpec;
   /** Per-screen specs, keyed by screen kind (documented once, reused across scenarios). */
   screenSpecs: Partial<Record<FlowScreenKind, FlowScreenSpec>>;
   defaultScenarioId: string;

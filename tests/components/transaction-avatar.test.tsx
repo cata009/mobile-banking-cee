@@ -28,9 +28,12 @@ afterEach(cleanup)
 
 describe('transaction avatar', () => {
   it('leads an own-account transfer with the payer behind and the destination in front', () => {
-    const pair = visual(transaction('Transfer to savings')).querySelector('[data-transaction-pair]')
+    const container = visual(transaction('Transfer to savings'))
+    const pair = container.querySelector('[data-transaction-pair]')
 
     expect(pair).toHaveAttribute('aria-label', 'current account to savings account')
+    expect(pair?.querySelector('[data-currency-flag="RON"]')).toBeInTheDocument()
+    expect(pair?.querySelector('[data-transaction-pair-endpoint="savings"]')).toHaveClass('bg-[#007A91]', 'text-[var(--uc-static-white)]')
   })
 
   it('reverses the pair when the money comes back from savings', () => {

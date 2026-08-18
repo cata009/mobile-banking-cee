@@ -156,6 +156,28 @@ describe('card-detail action boundaries', () => {
     expect(groupCards(current.container)).toHaveLength(0)
   })
 
+  it('keeps the month separator and adds one day separator for each card transaction date in Evo 2027', () => {
+    mockedProductState.categories = [{ key: 'cards', title: 'Cards', products: mockProducts }]
+
+    const evo = render(
+      <CardDetailScreen selectedCardId={firstDebitCard.id} onBack={() => undefined} />,
+      { wrapper: ({ children }) => <AppProviders release="release-future-evo-2027">{children}</AppProviders> },
+    )
+
+    const monthSeparators = evo.container.querySelectorAll('[data-ds-label="AccountTransactionMonthDivider"]')
+    const dateSeparators = evo.container.querySelectorAll('[data-transaction-date-separator="true"]')
+    expect(monthSeparators.length).toBeGreaterThan(0)
+    expect(dateSeparators.length).toBeGreaterThan(0)
+    expect(dateSeparators.length).toBeLessThanOrEqual(monthSeparators.length * 31)
+    const monthSeparator = evo.container.querySelector('[data-transaction-month-separator]')
+    expect(monthSeparator?.querySelector('h2')).toHaveClass('uc-type-n4-strong')
+    expect(monthSeparator?.querySelector('p')).not.toBeInTheDocument()
+    expect(Array.from(dateSeparators).some((separator) => /CZK/.test(separator.textContent ?? ''))).toBe(true)
+    expect(Array.from(dateSeparators).some((separator) => !/CZK/.test(separator.textContent ?? ''))).toBe(true)
+    expect(Array.from(dateSeparators).every((separator) => !separator.querySelector('.h-px'))).toBe(true)
+    expect(dateSeparators[0]?.parentElement).not.toHaveClass('rounded-[22px]')
+  })
+
   it('uses the homepage success green for positive transaction rows in Evo 2027 only', () => {
     mockedProductState.categories = [{ key: 'accounts', title: 'Accounts', products: mockProducts }]
 
@@ -183,6 +205,77 @@ describe('card-detail action boundaries', () => {
     )
 
     expect(current.container.querySelector('[data-transaction-amount="positive"]')).not.toHaveClass('text-[#3D7D43]')
+  })
+
+  it('omits the month divider for the current account month in Evo 2027', () => {
+    mockedProductState.categories = [{ key: 'accounts', title: 'Accounts', products: mockProducts }]
+
+    const { container } = render(
+      <AccountDetailScreen
+        selectedProductId={firstCurrentAccount.id}
+        onBack={() => undefined}
+        onDetailsClick={() => undefined}
+        onOptionsClick={() => undefined}
+      />,
+      { wrapper: ({ children }) => <AppProviders release="release-future-evo-2027">{children}</AppProviders> },
+    )
+
+    const currentMonthDate = Array.from(container.querySelectorAll<HTMLElement>('[data-transaction-date-separator="true"]'))
+      .find((separator) => separator.textContent?.includes('AUGUST 2026'))
+    expect(currentMonthDate).toBeInTheDocument()
+    expect(Array.from(container.querySelectorAll<HTMLElement>('[data-transaction-month-separator="true"]'))
+      .some((separator) => separator.textContent?.includes('AUGUST 2026'))).toBe(false)
+  })
+
+  it('compacts single-day Evo 2027 transaction cards', () => {
+    mockedProductState.categories = [{ key: 'accounts', title: 'Accounts', products: mockProducts }]
+
+    const { container } = render(
+      <AccountDetailScreen
+        selectedProductId={firstCurrentAccount.id}
+        onBack={() => undefined}
+        onDetailsClick={() => undefined}
+        onOptionsClick={() => undefined}
+      />,
+      { wrapper: ({ children }) => <AppProviders release="release-future-evo-2027">{children}</AppProviders> },
+    )
+
+    const singleTransactionRow = container.querySelector<HTMLElement>('[data-transaction-date-group="2026-08-11"] [data-evo2027-transaction-row]')
+    expect(singleTransactionRow).toHaveClass('min-h-[64px]', 'py-[8px]')
+  })
+
+  it('adds 8px search breathing room only to Evo 2027 account lists', () => {
+    mockedProductState.categories = [{ key: 'accounts', title: 'Accounts', products: mockProducts }]
+
+    const evo = render(
+      <AccountDetailScreen
+        selectedProductId={firstCurrentAccount.id}
+        onBack={() => undefined}
+        onDetailsClick={() => undefined}
+        onOptionsClick={() => undefined}
+      />,
+      { wrapper: ({ children }) => <AppProviders release="release-future-evo-2027">{children}</AppProviders> },
+    )
+
+    const evoSearch = evo.container.querySelector('[data-search-padding="8px"]')
+    expect(evoSearch).toHaveClass('p-[8px]')
+    expect(evoSearch?.querySelector('[data-search-inner-surface="transparent"]')).toBeInTheDocument()
+    expect(evoSearch?.querySelector('[data-search-inner-surface="transparent"]')).not.toHaveClass(
+      'shadow-[inset_0_0_0_1px_var(--uc-border-muted)]',
+    )
+    evo.unmount()
+
+    const current = render(
+      <AccountDetailScreen
+        selectedProductId={firstCurrentAccount.id}
+        onBack={() => undefined}
+        onDetailsClick={() => undefined}
+        onOptionsClick={() => undefined}
+      />,
+      { wrapper: AppProviders },
+    )
+
+    expect(current.container.querySelector('[data-search-padding="8px"]')).not.toBeInTheDocument()
   })
 
   it('keeps the direct Card Details page informational and non-sensitive', () => {

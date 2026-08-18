@@ -1,6 +1,6 @@
 {
-  "baselineCommit": "fc0195a",
-  "baselineNote": "Re-locked on 2026-08-13 after the approved CZ Evo 2027 Home work added six referenced Figma-derived category/campaign assets and this follow-up added four referenced campaign images. No existing image was deleted, replaced, or optimized.",
-  "assetCount": 192,
-  "pathBlobSha256Aggregate": "bd9ece9b65b6542ebac077b5ea9326444fa5c221c263146982da6204c4441a7a"
+  "baselineCommit": "f95b6af",
+  "baselineNote": "Re-locked on 2026-08-18 to reconcile the complete tracked asset inventory already present on main. This release does not add, delete, replace, or optimize any image file.",
+  "assetCount": 230,
+  "pathBlobSha256Aggregate": "3c4bcc2a0afe73869b11889233a15957262ef36180d15e74213a1110ce2883b7"
 }

@@ -1,3 +1,4 @@
+import LinkActionButton from '@/app/components/LinkActionButton';
 import TransactionAvatar from '@/app/components/transactions/TransactionAvatar';
 import { getCardMerchantEnrichment } from '@/app/components/merchants/merchantEnrichment';
 import type { CountryId } from '@/app/state/demoTypes';
@@ -190,31 +191,12 @@ export default function App2027Activity({ country, currency, amountsHidden, onTr
         ))}
       </ul>
 
-      <button
-        type="button"
+      <LinkActionButton
+        label="See more transactions"
         onClick={onSeeMore}
-        className="group relative z-10 mx-auto mt-[3px] flex min-h-[44px] items-center justify-center gap-[4px] rounded-full px-[14px] text-[14px] font-bold uppercase leading-[16px] tracking-[0] text-[var(--uc-action)] transition-[background-color,transform] duration-200 active:scale-[0.98] active:bg-[color-mix(in_srgb,var(--uc-action)_10%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] motion-reduce:transition-none"
-        aria-label="See more transactions"
-      >
-        See more transactions
-        <svg
-          aria-hidden="true"
-          className="shrink-0 transition-transform duration-200 motion-reduce:transition-none"
-          data-home-see-more-chevron
-          fill="none"
-          height="16"
-          viewBox="0 0 16 16"
-          width="16"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            clipRule="evenodd"
-            d="M4.77635 0.675781C3.74642 1.65524 3.74642 3.24474 4.77635 4.22511L8.50577 8.00911L4.77635 11.7931C3.74642 12.7735 3.74643 14.3621 4.77635 15.3424L12.0039 8.00911L4.77635 0.675781Z"
-            fill="#007A91"
-            fillRule="evenodd"
-          />
-        </svg>
-      </button>
+        className="mx-auto mt-[3px]"
+        chevronTestAttribute="data-home-see-more-chevron"
+      />
       </div>
     </section>
   );

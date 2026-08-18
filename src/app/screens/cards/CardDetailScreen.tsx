@@ -15,7 +15,7 @@ import { getCountryConfig, formatMoneyNumber } from "@/app/registry/countryConfi
 import { maskFormattedAmount } from "@/app/utils/amountPrivacy";
 import { formatMaskedCardNumber } from "@/app/utils/cardNumber";
 import { useProducts } from "@/hooks/useProducts";
-import { getCardTransactions, groupAccountTransactionsByMonth } from "@/data/accountDetails";
+import { getCardTransactions, groupAccountTransactionsByDate, groupAccountTransactionsByMonth } from "@/data/accountDetails";
 import type { AccountTransaction } from "@/data/accountDetails";
 import type { CreditCard, DebitCard, Product } from "@/data/products";
 import { getCardMerchantEnrichment } from "@/app/components/merchants/merchantEnrichment";
@@ -538,6 +538,7 @@ export default function CardDetailScreen({
             onValueChange={handleSearchChange}
             onFocus={activateSearch}
             fieldSurface={usesEvoGroupCards ? "raised" : "muted"}
+            fieldPadding={usesEvoGroupCards ? "8" : "none"}
           />
         </div>
 
@@ -556,6 +557,8 @@ export default function CardDetailScreen({
                         leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
                         categoryIconVariant={categoryIconVariant}
                         positiveAmountClassName={release === "release-future-evo-2027" ? "text-[#3D7D43]" : undefined}
+                        evo2027={usesEvoGroupCards}
+                        showDate={!usesEvoGroupCards}
                         onClick={(selectedTransaction) => onTransactionClick?.(selectedTransaction, activeCard, getCardMerchantEnrichment(selectedTransaction, country))}
                       />
                     ))}
@@ -567,24 +570,51 @@ export default function CardDetailScreen({
               <div key={group.monthTitle} className={index > 0 && !usesEvoGroupCards ? "pt-[16px]" : undefined}>
                 <AccountTransactionMonthDivider
                   title={group.monthTitle}
-                  total={formatMoneyNumber(group.monthlyTotal, country)}
                   currency={config.currency}
                 />
-                <div className={transactionGroupCardClassName(usesEvoGroupCards)}>
+                {usesEvoGroupCards ? groupAccountTransactionsByDate(group.transactions).map((dateGroup) => (
+                  <div key={dateGroup.dateKey} data-transaction-date-group={dateGroup.dateKey}>
+                    <AccountTransactionMonthDivider
+                      title={dateGroup.dateTitle}
+                      total={dateGroup.transactions.length > 1 ? formatMoneyNumber(dateGroup.dailyTotal, country) : undefined}
+                      currency={config.currency}
+                      dateSeparator
+                    />
+                    <div className={transactionGroupCardClassName(true)}>
+                      {dateGroup.transactions.map((tx) => (
+                        <AccountTransactionRow
+                          key={tx.id}
+                          transaction={tx}
+                          formattedAmount={formatMoneyNumber(Math.abs(tx.amount), country)}
+                          currency={config.currency}
+                          displayLabel={transactionRowPresentation?.displayLabel?.(tx)}
+                          leadingVisual={transactionRowPresentation?.leadingVisual?.(tx)}
+                          categoryIconVariant={categoryIconVariant}
+                          positiveAmountClassName="text-[#3D7D43]"
+                          evo2027
+                          showDate={false}
+                          compact={dateGroup.transactions.length === 1}
+                          onClick={(selectedTx) => onTransactionClick?.(selectedTx, activeCard, getCardMerchantEnrichment(selectedTx, country))}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )) : (
+                  <div className={transactionGroupCardClassName(false)}>
                     {group.transactions.map((tx) => (
-                      <AccountTransactionRow
+                    <AccountTransactionRow
                       key={tx.id}
                       transaction={tx}
                       formattedAmount={formatMoneyNumber(Math.abs(tx.amount), country)}
-                        currency={config.currency}
-                        displayLabel={transactionRowPresentation?.displayLabel?.(tx)}
-                        leadingVisual={transactionRowPresentation?.leadingVisual?.(tx)}
-                        categoryIconVariant={categoryIconVariant}
-                        positiveAmountClassName={release === "release-future-evo-2027" ? "text-[#3D7D43]" : undefined}
-                        onClick={(selectedTx) => onTransactionClick?.(selectedTx, activeCard, getCardMerchantEnrichment(selectedTx, country))}
+                      currency={config.currency}
+                      displayLabel={transactionRowPresentation?.displayLabel?.(tx)}
+                      leadingVisual={transactionRowPresentation?.leadingVisual?.(tx)}
+                      categoryIconVariant={categoryIconVariant}
+                      onClick={(selectedTx) => onTransactionClick?.(selectedTx, activeCard, getCardMerchantEnrichment(selectedTx, country))}
                     />
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))
           ) : (
