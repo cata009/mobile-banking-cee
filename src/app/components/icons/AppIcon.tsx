@@ -18,6 +18,7 @@ const NON_STANDARD_ICON_NAMES = new Set([
   "hu-kids-saving",
   // 32×32 container icons — rendered at native size, not the 20×20 standard glyph override
   "close-x",
+  "insurance-calendar",
   "chevron-link",
   "investment-documents",
   "investment-important-info",

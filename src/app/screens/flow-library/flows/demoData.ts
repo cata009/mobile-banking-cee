@@ -138,9 +138,8 @@ export const FLOW_DEMO = {
         "All three cover the same risks. What changes is how much we pay you. You choose your period in the next step.",
       benefits: [
         "Fire, storm, lightning and explosion",
-        "Water damage from your own installations",
-        "Broken windows and built-in equipment",
-        "Burglary, and damage you cause to a neighbour",
+        "Water damage, broken windows and built-in equipment",
+        "Burglary and third-party liability",
       ],
       whyHereTitle: "Why buy it here",
       whyHere: [
@@ -458,8 +457,13 @@ export const FLOW_DEMO = {
         },
       ],
       privacyNote: "You can read more about how we handle your data in our Privacy Policy.",
-      confirmLabel: "I confirm",
-      confirmLabelRs: "Potvrđujem",
+      /**
+       * Named for what happens next, not for the act of agreeing: pressing it
+       * registers the request and opens the premium payment, and the customer is
+       * one signature away from paying. The partner's own word was Potvrđujem.
+       */
+      confirmLabel: "Pay now",
+      confirmLabelRs: "Plati sada",
     },
 
     /**

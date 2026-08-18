@@ -26,8 +26,8 @@ import type {
   RefObject,
 } from "react";
 
-/** Movement, in px, before a press is treated as a drag rather than a tap. */
-const DRAG_MOVE_THRESHOLD_PX = 4;
+/** Default movement, in px, before a press is treated as a drag rather than a tap. */
+const DEFAULT_DRAG_MOVE_THRESHOLD_PX = 4;
 
 /** Default click-suppression window after a drag settles, in ms. */
 const DEFAULT_SUPPRESS_CLICK_MS = 80;
@@ -59,6 +59,10 @@ export interface UseDragCarouselOptions {
    * every press, so it can depend on current state. Defaults to true.
    */
   enabled?: boolean;
+  /** Movement, in px, before a press becomes a drag. Defaults to 4px. */
+  dragThresholdPx?: number;
+  /** Whether mouse input may start a drag. Touch input remains enabled. Defaults to true. */
+  enableMouseDrag?: boolean;
   /** How long clicks stay suppressed after a drag, in ms. Defaults to 80. */
   suppressClickMs?: number;
 }
@@ -95,6 +99,8 @@ export function useDragCarousel({
   carouselRef,
   onSettle,
   enabled = true,
+  dragThresholdPx = DEFAULT_DRAG_MOVE_THRESHOLD_PX,
+  enableMouseDrag = true,
   suppressClickMs = DEFAULT_SUPPRESS_CLICK_MS,
 }: UseDragCarouselOptions): UseDragCarouselResult {
   const [isDragging, setIsDragging] = useState(false);
@@ -111,6 +117,10 @@ export function useDragCarousel({
   onSettleRef.current = onSettle;
   const enabledRef = useRef(enabled);
   enabledRef.current = enabled;
+  const dragThresholdRef = useRef(dragThresholdPx);
+  dragThresholdRef.current = dragThresholdPx;
+  const enableMouseDragRef = useRef(enableMouseDrag);
+  enableMouseDragRef.current = enableMouseDrag;
   const suppressClickMsRef = useRef(suppressClickMs);
   suppressClickMsRef.current = suppressClickMs;
 
@@ -151,7 +161,7 @@ export function useDragCarousel({
       if (!carousel || !dragState.input) return false;
 
       const deltaX = clientX - dragState.startX;
-      if (!dragState.didMove && Math.abs(deltaX) < DRAG_MOVE_THRESHOLD_PX) return false;
+      if (!dragState.didMove && Math.abs(deltaX) < dragThresholdRef.current) return false;
 
       dragState.didMove = true;
       suppressClickRef.current = true;
@@ -174,7 +184,7 @@ export function useDragCarousel({
 
   const onPointerDown = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
-      if (event.pointerType === "mouse" && event.button !== 0) return;
+      if (event.pointerType === "mouse" && (!enableMouseDragRef.current || event.button !== 0)) return;
       if (beginDrag(event.clientX, "pointer", event.pointerId)) {
         event.currentTarget.setPointerCapture(event.pointerId);
       }
@@ -215,7 +225,7 @@ export function useDragCarousel({
 
   const onMouseDown = useCallback(
     (event: ReactMouseEvent<HTMLElement>) => {
-      if (event.button !== 0 || !beginDrag(event.clientX, "mouse")) return;
+      if (!enableMouseDragRef.current || event.button !== 0 || !beginDrag(event.clientX, "mouse")) return;
 
       const handleMouseMove = (mouseEvent: globalThis.MouseEvent) => {
         if (dragStateRef.current.input !== "mouse") return;
