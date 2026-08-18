@@ -279,6 +279,17 @@ export interface FlowDefinition {
   figmaNodeId: string;
   sourceUrl: string;
   overview: FlowOverviewSpec;
+  /**
+   * How the Spec tab and the export present a flow that carries a BA document.
+   *
+   * "document-only" — the default — treats the BA document as the whole
+   * specification, which is what a flow written as one review document wants.
+   * "document-and-screens" adds the per-screen specs and the flow-level rules
+   * underneath it, for a flow whose screens are specified in their own right and
+   * whose reviewer needs both the business case and the screen-by-screen detail.
+   * Without a BA document both layouts are identical.
+   */
+  specLayout?: "document-only" | "document-and-screens";
   /** Optional clickable map; when present the detail view gains a Prototype tab. */
   prototype?: FlowPrototypeSpec;
   /** Per-screen specs, keyed by screen kind (documented once, reused across scenarios). */

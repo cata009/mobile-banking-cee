@@ -4,9 +4,11 @@ import { cn } from "@/app/components/ui/utils";
 
 interface BottomSheetProps {
   title?: string;
+  titleClassName?: string;
   subtitle?: ReactNode;
   meta?: ReactNode;
   children: ReactNode;
+  footer?: ReactNode;
   maxHeightOffsetPx?: number;
   fillHeight?: boolean;
   className?: string;
@@ -20,9 +22,11 @@ interface BottomSheetProps {
 
 export function BottomSheet({
   title,
+  titleClassName,
   subtitle,
   meta,
   children,
+  footer,
   maxHeightOffsetPx = 54,
   fillHeight = false,
   className,
@@ -124,12 +128,12 @@ export function BottomSheet({
             <span className="h-[4px] w-[32px] rounded-full bg-[var(--uc-border)]" />
           </button>
         ) : null}
-        <div className={cn("mb-[24px] flex items-start justify-between gap-[16px]", headerClassName)}>
+        <div className={cn("mb-[24px] flex shrink-0 items-start justify-between gap-[16px]", headerClassName)}>
           <div className="min-w-0">
             {title ? (
               <h1
                 id={titleId}
-                className="uc-type-h1 text-[var(--uc-text)]"
+                className={cn("uc-type-h1 text-[var(--uc-text)]", titleClassName)}
               >
                 {title}
               </h1>
@@ -152,7 +156,12 @@ export function BottomSheet({
             </button>
           ) : null}
         </div>
-        <div className={bodyClassName}>{children}</div>
+        <div className={cn(fillHeight && "min-h-0 flex-1 overflow-y-auto scrollbar-hide", bodyClassName)}>{children}</div>
+        {footer ? (
+          <div className="shrink-0" data-bottom-sheet-footer="true">
+            {footer}
+          </div>
+        ) : null}
       </section>
     </div>
   );

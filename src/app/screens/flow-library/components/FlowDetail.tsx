@@ -45,6 +45,7 @@ function toExportOverview(flow: FlowDefinition): ExportOverview {
   return {
     purpose: overview.purpose,
     businessAnalysis: overview.businessAnalysis,
+    specLayout: flow.specLayout,
     entryPoints: overview.entryPoints,
     preconditions: overview.preconditions,
     businessRules: overview.businessRules,
@@ -818,7 +819,7 @@ function PrototypePanel({
   // Keep the current stop in view as the reviewer moves along the line.
   useEffect(() => {
     const active = timelineRef.current?.querySelector<HTMLElement>("[data-timeline-active='true']");
-    active?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    active?.scrollIntoView?.({ behavior: "smooth", block: "nearest", inline: "center" });
   }, [screen]);
 
   const detours = [
@@ -896,16 +897,18 @@ function PrototypePanel({
               onClick={nav.primary}
             />
 
-            <button
-              type="button"
-              onClick={() => {
-                setHistory([]);
-                setScreen(prototype.start);
-              }}
-              className="shrink-0 rounded-[8px] border border-[var(--uc-border)] px-[12px] py-[9px] uc-type-n5-strong text-[var(--uc-text)] transition-colors hover:border-[var(--uc-action)]"
-            >
-              Restart
-            </button>
+            {screen !== prototype.start ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setHistory([]);
+                  setScreen(prototype.start);
+                }}
+                className="shrink-0 rounded-[8px] border border-[var(--uc-border)] px-[12px] py-[9px] uc-type-n5-strong text-[var(--uc-text)] transition-colors hover:border-[var(--uc-action)]"
+              >
+                Restart
+              </button>
+            ) : null}
           </div>
 
           {/* Where you are, and the branches leaving it — one line each. */}
@@ -1014,8 +1017,13 @@ function SpecPanel({
   onStepSelect: (index: number) => void;
 }) {
   const analysis = flow.overview.businessAnalysis;
+  const spec = activeStep ? flow.screenSpecs[activeStep.screen] : undefined;
+  // A BA document is the whole specification unless the flow says otherwise; a
+  // flow that also specifies its screens shows the document first and the
+  // screen-by-screen detail underneath it.
+  const showScreenSpecs = !analysis || flow.specLayout === "document-and-screens";
 
-  if (analysis) {
+  if (analysis && !showScreenSpecs) {
     return (
       <Panel title="Business analysis specification">
         <BusinessAnalysisContent analysis={analysis} />
@@ -1023,10 +1031,14 @@ function SpecPanel({
     );
   }
 
-  const spec = activeStep ? flow.screenSpecs[activeStep.screen] : undefined;
-
   return (
     <div className="grid gap-[24px]">
+      {analysis ? (
+        <Panel title="Business analysis specification">
+          <BusinessAnalysisContent analysis={analysis} />
+        </Panel>
+      ) : null}
+
       <Panel title="Screen spec">
         <ScenarioChips scenarios={flow.scenarios} selectedScenarioId={scenario.id} onSelect={onScenarioSelect} />
         {scenario.steps.length > 0 ? (

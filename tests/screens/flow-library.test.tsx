@@ -242,6 +242,20 @@ describe('flow-library screen', () => {
     expect(screen.queryByRole('button', { name: /1\. Enriched card list/ })).not.toBeInTheDocument()
   })
 
+  it('renders RS property insurance as a BA document followed by its screen specs', () => {
+    renderFlowLibrary('rs-property-insurance')
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Spec' }))
+
+    // The document, then the screen-by-screen detail and the flow-level rules:
+    // this flow specifies both, and a reviewer needs both.
+    expect(screen.getByText('Business analysis specification')).toBeInTheDocument()
+    expect(screen.getByText('Screen spec')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /4\. Choose a package/ })).toBeInTheDocument()
+    expect(screen.getByText('Key decision rules')).toBeInTheDocument()
+    expect(screen.getByText('Questions to close')).toBeInTheDocument()
+  })
+
   it('navigates to the library index and back', () => {
     renderFlowLibrary('ro-card-pin')
 
