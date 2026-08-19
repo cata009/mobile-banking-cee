@@ -10,9 +10,10 @@ import StandardSignScreen from "@/app/components/flow/StandardSignScreen";
 import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
 import TextField from "@/app/components/TextField";
 import ToggleButton from "@/app/components/ToggleButton";
-import { AppIcon, type IconName } from "@/app/components/icons";
+import { AppIcon } from "@/app/components/icons";
 import { PreviewSafeTop } from "./MiniPhone";
 import { useFlowNav } from "./prototypeNav";
+import { resetRsPurchase, setRsPurchase, useRsSelection } from "./rsPurchaseStore";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import ProductsScreen from "@/app/screens/products/ProductsScreen";
 import { getProductCardSheetConfig } from "@/app/config/productsMenuConfig";
@@ -23,7 +24,7 @@ import type { RsPropertyInsuranceScreenKind } from "../flows/types";
 
 /**
  * RS Property Insurance previews — the Generali household-insurance purchase
- * rebuilt on Mobile PI Baseline.
+ * rebuilt on mBanking.
  *
  * Same rules as the rest of the Flow Library: real DS atoms (PageHeader,
  * NavigationRow, TextField, ToggleButton, PrimaryButton, SectionHeadingDivider,
@@ -42,10 +43,6 @@ type AddOnPackageId = "A" | "B";
 type DurationId = "3m" | "6m" | "12m";
 const noop = () => {};
 
-/** The add-on package preselected when the customer opts in (partner: Paket A). */
-const ADD_ON_PACKAGE = RS.emergencyAddOn.packages[0];
-const ADD_ON_PREMIUM = ADD_ON_PACKAGE.premiums["6m"];
-
 /**
  * Serbian amounts are formatted `1.234,56`. The partner's combined line is an exact
  * sum of the two premiums, so it is computed rather than stored — checked against
@@ -57,7 +54,6 @@ function rsdSum(...amounts: string[]) {
 }
 
 /** Household premium plus the add-on premium — the amount that reaches the payment. */
-const ADD_ON_TOTAL = rsdSum(RS.selection.premium, ADD_ON_PREMIUM);
 
 // ---------------------------------------------------------------- shared bits
 
@@ -75,7 +71,18 @@ function Screen({ children, tone = "surface" }: { children: ReactNode; tone?: "s
  * collapses into the centred compact title, and the body scrolls under it. A
  * clipped body would also silently hide rows a reviewer needs to check.
  */
-function Body({ title, closable = false, children }: { title?: string; closable?: boolean; children: ReactNode }) {
+function Body({
+  title,
+  closable = false,
+  backable = true,
+  children,
+}: {
+  title?: string;
+  closable?: boolean;
+  /** False where the previous screen no longer exists to return to. */
+  backable?: boolean;
+  children: ReactNode;
+}) {
   const nav = useFlowNav();
   const { progress, onScroll } = useCollapsingHeader(64);
   // The X only appears where the map says the flow can be left. Outside the
@@ -83,11 +90,12 @@ function Body({ title, closable = false, children }: { title?: string; closable?
   // a control that would do nothing.
   const showClose = closable && (!nav.active || nav.canClose);
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide" onScroll={onScroll}>
+    <div data-rs-flow-scroller className="min-h-0 flex-1 overflow-y-auto scrollbar-hide" onScroll={onScroll}>
       {title ? (
         <PageHeader
           title={title}
           onBack={nav.back}
+          showBack={backable}
           collapsedTitleProgress={progress}
           includeSafeArea
           showHelp={false}
@@ -105,22 +113,28 @@ function BottomCta({ children }: { children: ReactNode }) {
   return <div className="mt-auto bg-[var(--uc-surface)] px-[24px] pb-[28px] pt-[12px]">{children}</div>;
 }
 
-function Overlay({ align = "bottom", children }: { align?: "center" | "bottom"; children: ReactNode }) {
+/**
+ * The alternative action under a primary one. Same width, same height and the
+ * same label size as PrimaryButton, so the pair reads as one control group
+ * wherever it appears — and it is a real button, not a paragraph that looks like
+ * one.
+ */
+function SecondaryAction({ children, onClick }: { children: ReactNode; onClick?: () => void }) {
   return (
-    <div
-      className={`absolute inset-0 z-[60] flex bg-[var(--uc-overlay)] ${
-        align === "bottom" ? "items-end" : "items-center justify-center px-[24px]"
-      }`}
+    <button
+      type="button"
+      onClick={onClick}
+      className="mt-[10px] flex h-[48px] w-full items-center justify-center rounded px-0 py-3 uc-type-n4-strong text-[var(--uc-action)] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 active:scale-[0.98]"
     >
-      {children}
-    </div>
+      <span className="block max-w-full truncate">{children}</span>
+    </button>
   );
 }
 
 /** A read-only summary line: label left, value right. Used inside cards and sheets. */
-function SummaryRow({ label, value, strong = false }: { label: string; value: string; strong?: boolean }) {
+function SummaryRow({ label, value, strong = false, borderless = false }: { label: string; value: string; strong?: boolean; borderless?: boolean }) {
   return (
-    <div className="flex items-start justify-between gap-[16px] border-b border-[var(--uc-border)] py-[10px]">
+    <div className={`flex items-start justify-between gap-[16px] py-[10px] ${borderless ? "" : "border-b border-[var(--uc-border)]"}`}>
       <p className="uc-type-n5 shrink-0 text-[var(--uc-text-muted)]">{label}</p>
       <p className={`min-w-0 text-right ${strong ? "uc-type-n4-strong" : "uc-type-n5"} text-[var(--uc-text)]`}>{value}</p>
     </div>
@@ -132,11 +146,11 @@ function SummaryRow({ label, value, strong = false }: { label: string; value: st
  * lays its rows out this way, so every screen that asks the customer to check
  * something before committing reads the same.
  */
-function ReviewRow({ label, value }: { label: string; value: string }) {
+function ReviewRow({ label, value, nowrap = false }: { label: string; value: string; nowrap?: boolean }) {
   return (
     <div className="pt-[18px]">
       <p className="uc-type-n5-strong uppercase text-[var(--uc-text)]">{label}</p>
-      <p className="pt-[2px] uc-type-n4 text-[var(--uc-text-muted)]">{value}</p>
+      <p className={`pt-[2px] uc-type-n4 text-[var(--uc-text-muted)] ${nowrap ? "whitespace-nowrap" : ""}`}>{value}</p>
     </div>
   );
 }
@@ -161,8 +175,8 @@ function PremiumSummary({
       ))}
       {total ? (
         <div className="mt-[6px] flex items-baseline justify-between gap-[12px] border-t border-[var(--uc-border)] pt-[8px]">
-          <p className="min-w-0 uc-type-n5-strong leading-[17px] text-[var(--uc-text)]">{totalLabel}</p>
-          <p className="shrink-0 uc-type-n3 text-[var(--uc-text)]">{total}</p>
+          <p className="min-w-0 uc-type-n5-strong leading-[20px] text-[var(--uc-text)]">{totalLabel}</p>
+          <p className="shrink-0 uc-type-n4-strong text-[var(--uc-text)]">{total}</p>
         </div>
       ) : null}
       <p className="mt-[6px] uc-type-p2 text-[var(--uc-text-muted)]">{RS.taxNote}</p>
@@ -193,7 +207,7 @@ function BenefitRow({ text }: { text: string }) {
           fillRule="evenodd"
         />
       </svg>
-      <span className="flex-1 uc-type-n5 leading-[20px] text-[var(--uc-text)]">{text}</span>
+      <span className="flex-1 uc-type-n4 leading-[24px] text-[var(--uc-text)]">{text}</span>
     </li>
   );
 }
@@ -226,7 +240,7 @@ function ChoiceCard({
       <AppIcon name={selected ? "radio-selected" : "radio-unselected"} size={22} color={selected ? "var(--uc-action)" : "var(--uc-text-muted)"} />
       <div className="min-w-0 flex-1">
         <p className="uc-type-n4-strong text-[var(--uc-text)]">{title}</p>
-        {caption ? <p className="uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">{caption}</p> : null}
+        {caption ? <p className="uc-type-p2 leading-[20px] text-[var(--uc-text-muted)]">{caption}</p> : null}
       </div>
       {price ? <p className="shrink-0 uc-type-n5-strong text-[var(--uc-text)]">{price}</p> : null}
     </button>
@@ -277,19 +291,23 @@ function roundSum(value: string) {
 function CoverGroup({ group, packageId }: { group: CoverageGroup; packageId: PackageId }) {
   const single = group.rows.length === 1 ? group.rows[0] : undefined;
   return (
-    <div className="border-b border-[var(--uc-border)] py-[10px]">
-      <div className="flex items-baseline gap-[10px]">
-        <p className="min-w-0 flex-1 uc-type-n5-strong leading-[18px] text-[var(--uc-text)]">{group.risk}</p>
+    <div className="border-b border-[var(--uc-border)] py-[14px]">
+      <div className="flex items-baseline gap-[12px]">
+        <p className="min-w-0 flex-1 uc-type-n4-strong leading-[24px] text-[var(--uc-text)]">{group.risk}</p>
         {single ? (
-          <p className="shrink-0 uc-type-n5-strong text-[var(--uc-text)]">{roundSum(single.sums[packageId])}</p>
+          <p className="shrink-0 uc-type-n4-strong text-[var(--uc-text)]">
+            {roundSum(single.sums[packageId])} <span className="uc-type-n5-strong text-[var(--uc-text)]">{RS.selection.currency}</span>
+          </p>
         ) : null}
       </div>
       {single
         ? null
         : group.rows.map((row) => (
-            <div key={row.subject} className="flex items-baseline justify-between gap-[10px] pt-[4px]">
-              <p className="min-w-0 flex-1 uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">{row.subject}</p>
-              <p className="shrink-0 uc-type-n5-strong text-[var(--uc-text)]">{roundSum(row.sums[packageId])}</p>
+            <div key={row.subject} className="flex items-baseline justify-between gap-[12px] pt-[8px]">
+              <p className="min-w-0 flex-1 uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">{row.subject}</p>
+              <p className="shrink-0 uc-type-n5-strong text-[var(--uc-text)]">
+                {roundSum(row.sums[packageId])} <span className="uc-type-n5-strong text-[var(--uc-text)]">{RS.selection.currency}</span>
+              </p>
             </div>
           ))}
     </div>
@@ -305,11 +323,28 @@ function MandatoryRead({
   title,
   satisfied,
   onOpen,
+  inCard = false,
 }: {
   title: string;
   satisfied: boolean;
   onOpen?: () => void;
+  inCard?: boolean;
 }) {
+  if (inCard) {
+    return (
+      <div className="mt-[10px] border-t border-[var(--uc-border)] pt-[4px]">
+        <NavigationRow
+          title={title}
+          className="!bg-transparent !px-0"
+          trailingAccessory="toggle"
+          toggleChecked={satisfied}
+          onToggle={() => onOpen?.()}
+          rowHeight={64}
+        />
+      </div>
+    );
+  }
+
   return (
     // NavigationRow carries its own 24px gutter, so it sits full-bleed inside the
     // padded body — otherwise its label lands at 48px while the page sits at 24px.
@@ -326,15 +361,6 @@ function MandatoryRead({
   );
 }
 
-function InlineError({ children }: { children: ReactNode }) {
-  return (
-    <div className="mb-[10px] flex items-start gap-[8px] rounded-[8px] bg-[color-mix(in_srgb,var(--uc-red-main)_8%,var(--uc-surface))] p-[10px]">
-      <AppIcon name="alert-triangle" size={18} color="var(--uc-red-main)" />
-      <p className="flex-1 uc-type-p2 leading-[16px] text-[var(--uc-red-main)]">{children}</p>
-    </div>
-  );
-}
-
 function Field({ children }: { children: ReactNode }) {
   return <div className="pt-[14px]">{children}</div>;
 }
@@ -344,13 +370,18 @@ function ConsentRow({
   text,
   checked,
   strong = false,
-  optionalLabel,
+  centered = false,
+  flushTop = false,
+  secondaryText,
   onToggle,
 }: {
   text: string;
   checked: boolean;
   strong?: boolean;
-  optionalLabel?: string;
+  centered?: boolean;
+  /** First row inside a padded card: its own top padding would double the card's. */
+  flushTop?: boolean;
+  secondaryText?: string;
   onToggle?: () => void;
 }) {
   return (
@@ -359,38 +390,151 @@ function ConsentRow({
       onClick={onToggle}
       disabled={!onToggle}
       aria-pressed={checked}
-      className="flex w-full items-start gap-[12px] border-b border-[var(--uc-border)] py-[12px] text-left"
+      className={`flex w-full ${centered ? "items-center" : "items-start"} gap-[12px] ${flushTop ? "pb-[12px]" : "py-[12px]"} text-left`}
     >
       <span
-        className={`mt-[2px] grid size-[20px] shrink-0 place-items-center rounded-[4px] border-2 ${
+        className={`${centered ? "" : "mt-[2px]"} grid size-[20px] shrink-0 place-items-center rounded-[4px] border-2 ${
           checked ? "border-[var(--uc-action)] bg-[var(--uc-action)]" : "border-[var(--uc-text-muted)] bg-[var(--uc-surface)]"
         }`}
       >
         {checked ? <AppIcon name="check" size={14} color="var(--uc-text-inverse)" /> : null}
       </span>
       <div className="min-w-0 flex-1">
-        <p className={`${strong ? "uc-type-n5-strong" : "uc-type-n5"} leading-[18px] text-[var(--uc-text)]`}>{text}</p>
-        {optionalLabel ? (
-          <p className="pt-[2px] uc-type-p2 text-[var(--uc-text-muted)]">{optionalLabel}</p>
-        ) : null}
+        <p className={`${strong ? "uc-type-n4-strong" : "uc-type-n4"} leading-[22px] text-[var(--uc-text)]`}>{text}</p>
+        {secondaryText ? <p className="pt-[4px] uc-type-p2 leading-[20px] text-[var(--uc-text-muted)]">{secondaryText}</p> : null}
       </div>
     </button>
+  );
+}
+
+function PdfDocumentIcon({ className = "mt-[1px] size-[24px] shrink-0 text-[var(--uc-text)]" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
+      <path
+        clipRule="evenodd"
+        d="M16.9132 0H3V20.25C3 22.3211 4.67893 24 6.75 24H21.75V4.8375L16.9132 0ZM6.75 15.75H18V14.25H6.75V15.75ZM18 19.5H6.75V18H18V19.5ZM6.75 12H12.75V10.5H6.75V12ZM15.75 1.5V6H20.25L15.75 1.5Z"
+        fill="currentColor"
+        fillRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function OpenDocumentButton({ title, onOpen }: { title: string; onOpen?: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-label={`Open document ${title}`}
+      onClick={onOpen ?? noop}
+      className="flex items-center gap-[5px] pt-[6px] uc-type-n5-strong uppercase leading-[20px] text-[var(--uc-action)]"
+    >
+      OPEN DOCUMENT
+      <svg aria-hidden="true" fill="none" height="14" viewBox="0 0 14 14" width="14" xmlns="http://www.w3.org/2000/svg">
+        <path clipRule="evenodd" d="M4.50778 1.75C3.74741 2.4512 3.74741 3.58914 4.50778 4.291L7.26114 7L4.50778 9.709C3.74741 10.4109 3.74741 11.5481 4.50778 12.25L9.84375 7L4.50778 1.75Z" fill="currentColor" fillRule="evenodd" />
+      </svg>
+    </button>
+  );
+}
+
+/**
+ * A notice opened in place, on the same sheet every other read in this flow uses.
+ * The insurer's PDF renders in the page area; the flow owns everything around it,
+ * so the save action and the acknowledgement are specified here rather than left
+ * to whatever viewer the phone would otherwise hand the file to.
+ */
+function DocumentSheet({
+  document: doc,
+  onClose,
+}: {
+  document: (typeof RS.order.documents)[number];
+  onClose: () => void;
+}) {
+  const ui = RS.order.documentViewer;
+  return (
+    <BottomSheet
+      fillHeight
+      footer={
+        <div className="pt-[16px]">
+          {/* The save action is the flow's link-style action, the same control
+              Open document and More details use. A second filled button beside
+              the acknowledgement would read as a second way out of the sheet. */}
+          <div className="flex justify-center pb-[16px]">
+            <LinkActionButton
+              label={ui.downloadLabel}
+              ariaLabel={`${ui.downloadLabel}: ${doc.title}`}
+              onClick={noop}
+              className="!min-h-0 !px-0"
+            />
+          </div>
+          <PrimaryButton className="!w-full" onClick={onClose}>{ui.readLabel}</PrimaryButton>
+        </div>
+      }
+      title={doc.title}
+      titleClassName="!text-[24px] !leading-[30px]"
+      className="px-[24px] pb-[24px] pt-[20px]"
+      onClose={onClose}
+    >
+      <div className="flex h-full min-h-0 w-full flex-col">
+        {/* One surface, filling the sheet: this is where the insurer's file is
+            rendered, and the document scrolls inside it. Splitting it into page
+            cards would describe a viewer the build is not going to have. */}
+        <div
+          data-rs-document-surface
+          className="flex min-h-0 flex-1 flex-col items-center justify-center gap-[10px] rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[24px]"
+        >
+          <PdfDocumentIcon className="size-[32px] text-[var(--uc-text-muted)]" />
+          <p className="text-center uc-type-n5-strong leading-[20px] text-[var(--uc-text-muted)]">
+            {ui.surfaceLabel}
+          </p>
+        </div>
+      </div>
+    </BottomSheet>
+  );
+}
+
+/**
+ * The outcome glyphs. Each is a single drawn mark rather than an icon set inside a
+ * ring: the ring and the symbol are one path, so the proportions hold at any size
+ * and cannot drift apart the way a bordered wrapper around a stroked icon does.
+ */
+function OutcomeAlertIcon() {
+  return (
+    <svg aria-hidden="true" width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M50 93.75C25.8375 93.75 6.25 74.1594 6.25 50C6.25 25.8375 25.8375 6.25 50 6.25C74.1625 6.25 93.75 25.8375 93.75 50C93.75 74.1594 74.1625 93.75 50 93.75ZM50 0C22.3844 0 0 22.3844 0 50C0 77.6125 22.3844 100 50 100C77.6156 100 100 77.6125 100 50C100 22.3844 77.6156 0 50 0ZM56.25 15.625L53.125 59.375H46.875L43.75 28.125C43.75 21.2219 49.3469 15.625 56.25 15.625ZM56.25 73.4375C56.25 69.9875 53.45 67.1875 50 67.1875C46.5469 67.1875 43.75 69.9875 43.75 73.4375C43.75 76.8875 46.5469 79.6875 50 79.6875C53.45 79.6875 56.25 76.8875 56.25 73.4375Z"
+        fill="var(--uc-status-red)"
+      />
+    </svg>
+  );
+}
+
+function OutcomeWaitingIcon() {
+  return (
+    <svg aria-hidden="true" width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M0 50C0 22.3844 22.3875 0 50 0C77.6156 0 100 22.3844 100 50C100 77.6125 77.6156 100 50 100C22.3875 100 0 77.6125 0 50ZM6.25 50C6.25 74.1594 25.8375 93.75 50 93.75C74.1656 93.75 93.75 74.1594 93.75 50C93.75 25.8375 74.1656 6.25 50 6.25C25.8375 6.25 6.25 25.8375 6.25 50ZM40.1042 48.5417C40.1042 44.86 43.0892 41.875 46.7708 41.875V51.875C46.7708 55.5567 43.7858 58.5417 40.1042 58.5417V48.5417ZM65.1042 63.5417V50.2083C65.1042 41.9233 58.3892 35.2083 50.1042 35.2083C41.8192 35.2083 35.1042 41.9233 35.1042 50.2083V63.5417H65.1042ZM70.1042 71.875H30.1042V66.875H70.1042V71.875ZM51.7708 28.5417H48.4375V21.875H51.7708V28.5417ZM76.7708 48.5417H70.1042V45.2083H76.7708V48.5417ZM33.2258 27.8967L37.4442 33.0583L34.8642 35.1683L30.6442 30.0067L33.2258 27.8967ZM69.5642 30.0067L65.3442 35.1683L62.7642 33.0583L66.9842 27.8967L69.5642 30.0067ZM30.1042 48.5417H23.4375V45.2083H30.1042V48.5417Z"
+        fill="var(--uc-orange-status)"
+      />
+    </svg>
   );
 }
 
 /** Full-screen outcome used by every failure and interruption state. */
 function OutcomeScreen({
   title,
-  icon,
-  iconColor,
+  tone,
   body,
   rows,
   primaryLabel,
   secondaryLabel,
 }: {
   title: string;
-  icon: IconName;
-  iconColor: string;
+  /** Something went wrong, or the purchase is simply waiting on the customer. */
+  tone: "alert" | "waiting";
   body: string;
   rows?: Array<{ label: string; value: string }>;
   primaryLabel: string;
@@ -402,25 +546,21 @@ function OutcomeScreen({
       <PreviewSafeTop />
       <Body>
         <div className="flex justify-center pt-[56px]">
-          <div className="grid size-[92px] place-items-center rounded-full border-[5px]" style={{ borderColor: iconColor }}>
-            <AppIcon name={icon} size={52} color={iconColor} />
-          </div>
+          {tone === "alert" ? <OutcomeAlertIcon /> : <OutcomeWaitingIcon />}
         </div>
         <h1 className="mt-[32px] text-center uc-type-h1 text-[var(--uc-text)]">{title}</h1>
         <p className="mt-[14px] text-center uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">{body}</p>
         {rows?.length ? (
           <div className="mt-[20px]">
             {rows.map((row) => (
-              <SummaryRow key={row.label} label={row.label} value={row.value} />
+              <SummaryRow key={row.label} label={row.label} value={row.value} strong />
             ))}
           </div>
         ) : null}
       </Body>
       <BottomCta>
         <PrimaryButton className="!w-full" onClick={nav.primary}>{primaryLabel}</PrimaryButton>
-        {secondaryLabel ? (
-          <p className="pt-[14px] text-center uc-type-n5-strong text-[var(--uc-action)]">{secondaryLabel}</p>
-        ) : null}
+        {secondaryLabel ? <SecondaryAction onClick={nav.secondary}>{secondaryLabel}</SecondaryAction> : null}
       </BottomCta>
     </Screen>
   );
@@ -429,9 +569,9 @@ function OutcomeScreen({
 // ------------------------------------------------------------ entry point
 
 /**
- * The entry point is the REAL baseline Products screen, not a redrawing of it:
+ * The entry point is mBanking's real Products screen, not a redrawing of it:
  * the same photo product cards, offer rail and bottom navigation the customer
- * actually sees. Rendered for Serbia on the current release so the Evo 2027 shelf
+ * actually sees. Rendered for Serbia on the current release so the newer shelf
  * stays out of the way.
  */
 function RsBaselineFixture({ children }: { children: ReactNode }) {
@@ -493,6 +633,11 @@ function InsuranceSheetOverlay() {
 
 function ProductsPreview({ sheet = false }: { sheet?: boolean }) {
   const nav = useFlowNav();
+  // Landing on the Products shelf is the start of the journey, so the purchase
+  // begins empty rather than carrying the last run's package into a new one.
+  useEffect(() => {
+    if (!sheet) resetRsPurchase();
+  }, [sheet]);
 
   /**
    * The real Products screen opens its own Insurances sheet, which does not carry
@@ -540,18 +685,18 @@ function ProductCoverPreview() {
           />
         </div>
 
-        <h2 className="mt-[20px] text-[20px] font-bold leading-[25px] tracking-[-0.01em] text-[var(--uc-text)]">
+        <h2 className="mt-[20px] uc-type-n2-strong leading-[28px] tracking-[-0.01em] text-[var(--uc-text)]">
           {cover.headline}
         </h2>
-        <p className="mt-[10px] uc-type-n5 leading-normal text-[var(--uc-text-muted)]">{cover.intro}</p>
+        <p className="mt-[12px] uc-type-n4 leading-[24px] text-[var(--uc-text-muted)]">{cover.intro}</p>
 
         <div className="mt-[18px] rounded-[10px] bg-[var(--uc-surface-muted)] px-[16px] py-[14px]">
-          <p className="uc-type-n5 text-[var(--uc-text-muted)]">{cover.priceLabel}</p>
+          <p className="uc-type-n4 text-[var(--uc-text-muted)]">{cover.priceLabel}</p>
           <p className="pt-[2px]">
             <span className="uc-type-h1 text-[var(--uc-text)]">{cheapest.premiums["6m"]}</span>{" "}
             <span className="uc-type-n4-strong text-[var(--uc-text)]">{RS.selection.currency}</span>
           </p>
-          <p className="pt-[2px] uc-type-p2 text-[var(--uc-text-muted)]">
+          <p className="pt-[4px] uc-type-n5 text-[var(--uc-text-muted)]">
             {cover.pricePeriod} · {RS.taxNote}
           </p>
         </div>
@@ -571,8 +716,8 @@ function ProductCoverPreview() {
           ))}
         </ul>
 
-        <p className="mt-[16px] uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">{cover.exclusionsNote}</p>
-        <p className="pt-[10px] uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">
+        <p className="mt-[20px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">{cover.exclusionsNote}</p>
+        <p className="pt-[10px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">
           Underwritten by {RS.partner}.
         </p>
       </Body>
@@ -591,15 +736,24 @@ function ProductCoverPreview() {
  * two screens: a carousel where every package carries its own full cover table and
  * its price at all three terms, then the configuration of the chosen one.
  */
-function useStep1Config(initial?: { packageId?: PackageId; addOn?: boolean; emptyPackageSelection?: boolean }) {
-  const [packageId, setPackageId] = useState<PackageId | null>(
-    initial?.emptyPackageSelection ? null : (initial?.packageId ?? RS.selection.packageId) as PackageId,
-  );
-  const [durationId, setDurationId] = useState<DurationId>("6m");
-  const [addOn, setAddOn] = useState(initial?.addOn ?? false);
-  const [addOnPackageId, setAddOnPackageId] = useState<AddOnPackageId>(
-    RS.emergencyAddOn.defaultPackageId as AddOnPackageId,
-  );
+function useStep1Config(initial?: { addOn?: boolean; emptyPackageSelection?: boolean }) {
+  // The package, term and add-on live in the shared purchase, so a choice made on
+  // the carousel is the one the configuration screen and everything after it read.
+  const selection = useRsSelection(initial?.addOn ? { addOn: true } : undefined);
+  // Only the carousel starts with nothing chosen; every later screen shows what the
+  // customer actually picked.
+  const [touched, setTouched] = useState(!initial?.emptyPackageSelection);
+  const packageId = touched ? selection.packageId : null;
+  const setPackageId = (next: PackageId) => {
+    setTouched(true);
+    setRsPurchase({ packageId: next });
+  };
+  const durationId = selection.durationId;
+  const setDurationId = (next: DurationId) => setRsPurchase({ durationId: next });
+  const addOn = selection.addOn;
+  const setAddOn = (next: boolean) => setRsPurchase({ addOn: next });
+  const addOnPackageId = selection.addOnPackageId;
+  const setAddOnPackageId = (next: AddOnPackageId) => setRsPurchase({ addOnPackageId: next });
   const [mustReadOpen, setMustReadOpen] = useState(false);
   // The acknowledgement always starts off: the customer has not read anything yet.
   const [mustReadSeen, setMustReadSeen] = useState(false);
@@ -609,13 +763,7 @@ function useStep1Config(initial?: { packageId?: PackageId; addOn?: boolean; empt
   const [addOnReadOpen, setAddOnReadOpen] = useState(false);
   const [addOnReadSeen, setAddOnReadSeen] = useState(false);
 
-  const pkg = RS.packages.find((entry) => entry.id === packageId) ?? RS.packages[1];
-  const duration = RS.durations.find((entry) => entry.id === durationId) ?? RS.durations[1];
-  const addOnPackage =
-    RS.emergencyAddOn.packages.find((entry) => entry.id === addOnPackageId) ?? RS.emergencyAddOn.packages[0];
-
-  const premium = pkg.premiums[durationId];
-  const addOnPremium = addOnPackage.premiums[durationId];
+  const { pkg, duration, addOnPackage, premium, addOnPremium } = selection;
   const total = addOn ? rsdSum(premium, addOnPremium) : premium;
 
   const setAddOnWithReset = (next: boolean) => {
@@ -689,7 +837,7 @@ function MustReadSheet({ onClose }: { onClose: () => void }) {
     <BottomSheet
       fillHeight
       footer={
-        <div className="pt-[12px]">
+        <div className="pt-[20px]">
           <PrimaryButton className="!w-full" onClick={onClose}>I have read this</PrimaryButton>
         </div>
       }
@@ -698,7 +846,7 @@ function MustReadSheet({ onClose }: { onClose: () => void }) {
       className="px-[24px] pb-[24px] pt-[20px]"
       onClose={onClose}
     >
-      <p className="uc-type-n5 leading-[20px] text-[var(--uc-text)]">{RS.mustRead.body}</p>
+      <p className="pt-[4px] uc-type-n4 leading-[24px] text-[var(--uc-text)]">{RS.mustRead.body}</p>
     </BottomSheet>
   );
 }
@@ -714,7 +862,7 @@ function AddOnMustReadSheet({ onClose }: { onClose: () => void }) {
     <BottomSheet
       fillHeight
       footer={
-        <div className="pt-[12px]">
+        <div className="pt-[20px]">
           <PrimaryButton className="!w-full" onClick={onClose}>I have read this</PrimaryButton>
         </div>
       }
@@ -724,23 +872,44 @@ function AddOnMustReadSheet({ onClose }: { onClose: () => void }) {
       onClose={onClose}
     >
       <div className="w-full pb-[16px]">
-        <p className="uc-type-n5 leading-[20px] text-[var(--uc-text)]">{addOn.mustReadIntro}</p>
-        <ul className="flex flex-col gap-[8px] pt-[10px]">
+        <p className="pt-[4px] uc-type-n4 leading-[24px] text-[var(--uc-text)]">{addOn.mustReadIntro}</p>
+
+        <SectionHeadingDivider title={addOn.mustReadWorksTitle} className="mt-[24px]" />
+        <div className="pt-[4px]">
           {addOn.mustReadWorks.map((work) => (
-            <li key={work} className="uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">• {work}</li>
+            <CoveredWorkRow key={work.trade} work={work} />
           ))}
-        </ul>
-        <SectionHeadingDivider title="It also includes" className="mt-[16px]" />
-        <ul className="flex flex-col gap-[8px] pt-[10px]">
+        </div>
+
+        <SectionHeadingDivider title="It also includes" className="mt-[24px]" />
+        <div className="pt-[4px]">
           {addOn.mustReadAlsoIncludes.map((item) => (
-            <li key={item} className="uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">• {item}</li>
+            <CoveredWorkRow key={item.trade} work={item} />
           ))}
-        </ul>
-        <div className="mt-[16px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[12px]">
-          <p className="uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">{addOn.claimLimit}</p>
+        </div>
+
+        <div className="mt-[24px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[16px]">
+          <p className="uc-type-n4 leading-[24px] text-[var(--uc-text)]">{addOn.claimLimit}</p>
         </div>
       </div>
     </BottomSheet>
+  );
+}
+
+/**
+ * One trade per row. The name is the thing the customer scans for, so it leads;
+ * the exception rides underneath the work it qualifies rather than being pooled
+ * into a separate exclusions paragraph nobody maps back.
+ */
+function CoveredWorkRow({ work }: { work: { trade: string; detail: string; exception?: string } }) {
+  return (
+    <div className="border-b border-[var(--uc-border)] py-[14px]">
+      <p className="uc-type-n4-strong leading-[24px] text-[var(--uc-text)]">{work.trade}</p>
+      <p className="pt-[4px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">{work.detail}</p>
+      {work.exception ? (
+        <p className="pt-[6px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">{work.exception}</p>
+      ) : null}
+    </div>
   );
 }
 
@@ -756,8 +925,8 @@ function PackageDetailsSheet({ packageId, onClose }: { packageId: PackageId; onC
     <BottomSheet
       fillHeight
       footer={
-        <div className="border-t border-[var(--uc-border)] pt-[12px]">
-          <PrimaryButton className="!w-full" onClick={onClose}>Close</PrimaryButton>
+        <div className="pt-[20px]">
+          <PrimaryButton className="!w-full" onClick={onClose}>I understand</PrimaryButton>
         </div>
       }
       title={RS.riskInfo.title}
@@ -766,18 +935,18 @@ function PackageDetailsSheet({ packageId, onClose }: { packageId: PackageId; onC
       onClose={onClose}
     >
       <div className="w-full">
-        <p className="uc-type-n3 leading-[24px] text-[var(--uc-text)]">{pkg.name}</p>
-        <p className="pt-[2px] uc-type-n5 leading-[19px] text-[var(--uc-text-muted)]">{pkg.headline}</p>
+        <p className="pt-[4px] uc-type-n3 leading-[32px] text-[var(--uc-text)]">{pkg.name}</p>
+        <p className="pt-[6px] uc-type-n4 leading-[24px] text-[var(--uc-text-muted)]">{pkg.headline}</p>
 
-        <SectionHeadingDivider title={`We pay up to (${RS.selection.currency})`} className="mt-[18px]" />
-        <div className="pt-[4px]">
+        <SectionHeadingDivider title="We pay up to" className="mt-[28px]" />
+        <div className="pt-[8px]">
           {COVERAGE_GROUPS.map((group) => (
             <CoverGroup key={group.risk} group={group} packageId={packageId} />
           ))}
         </div>
 
-        <div className="mt-[16px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[12px]">
-          <p className="uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">{RS.riskInfo.placeholder}</p>
+        <div className="mt-[28px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[16px]">
+          <p className="uc-type-n4 leading-[24px] text-[var(--uc-text-muted)]">{RS.riskInfo.note}</p>
         </div>
       </div>
     </BottomSheet>
@@ -815,7 +984,6 @@ function PackageCard({
   onSelect?: () => void;
   onDetails?: (packageId: PackageId) => void;
 }) {
-  const duration = RS.durations.find((entry) => entry.id === durationId) ?? RS.durations[1];
   const building = COVERAGE_GROUPS[0]?.rows[0];
   const contents = COVERAGE_GROUPS[0]?.rows[1];
 
@@ -854,41 +1022,28 @@ function PackageCard({
           </button>
           <div className="min-w-0 flex-1">
             <p className="uc-type-h2 text-[var(--uc-text)]">{pkg.name}</p>
-            {/* A reason to pick this one, so the choice is not price alone. */}
-            <p className="pt-[2px] uc-type-p2 leading-[16px] text-[var(--uc-action)]">{pkg.bestFor}</p>
           </div>
         </div>
 
-        {/*
-          The price, then everything that qualifies it on one quiet block: the term,
-          the tax note and who the package is for. The description used to sit on a
-          line of its own above the price, which pushed the card past the fold for
-          no gain — it explains the price, so it belongs under it.
-        */}
+        {/* Keep only the package description here; the selected duration and tax note
+          are already shown in the configuration summary, so repeating them makes
+          the comparison card unnecessarily tall. */}
         <div className="flex items-baseline gap-[5px] pt-[12px]">
           <p className="uc-type-n3 text-[var(--uc-text)]">{pkg.premiums[durationId]}</p>
           <p className="uc-type-n5-strong text-[var(--uc-text)]">{RS.selection.currency}</p>
         </div>
-        <p className="pt-[2px] uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">
-          for {duration.label} · {RS.taxNote}
-          <br />
-          {pkg.headline}
-        </p>
+        <p className="pt-[2px] uc-type-p2 leading-[20px] text-[var(--uc-text-muted)]">{pkg.headline}:</p>
       </div>
 
-      {/*
-        The two sums that actually separate the packages. They are a detail of the
-        offer, not its headline, so they are quieter than the price and carry their
-        own currency instead of hiding it in the block title.
-      */}
-      <div className="mx-[16px] mt-[14px] rounded-[10px] bg-[var(--uc-surface-muted)] px-[12px] py-[10px]">
-        <p className="uc-type-p2 uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">We pay up to</p>
+      {/* The two sums continue directly from the package description, keeping the
+        card compact while making the covered subjects explicit. */}
+      <div className="mx-[16px] mt-[14px]">
         {building ? (
-          <div className="flex items-baseline justify-between gap-[10px] pt-[6px]">
+          <div className="flex items-baseline justify-between gap-[10px]">
             <p className="uc-type-p2 text-[var(--uc-text-muted)]">{RS.riskInfo.headlineLabels.building}</p>
             <p className="uc-type-n5-strong text-[var(--uc-text)]">
               {roundSum(building.sums[pkg.id as PackageId])}{" "}
-              <span className="uc-type-p2 text-[var(--uc-text-muted)]">{RS.selection.currency}</span>
+              <span className="uc-type-n5-strong text-[var(--uc-text)]">{RS.selection.currency}</span>
             </p>
           </div>
         ) : null}
@@ -897,13 +1052,13 @@ function PackageCard({
             <p className="uc-type-p2 text-[var(--uc-text-muted)]">{RS.riskInfo.headlineLabels.contents}</p>
             <p className="uc-type-n5-strong text-[var(--uc-text)]">
               {roundSum(contents.sums[pkg.id as PackageId])}{" "}
-              <span className="uc-type-p2 text-[var(--uc-text-muted)]">{RS.selection.currency}</span>
+              <span className="uc-type-n5-strong text-[var(--uc-text)]">{RS.selection.currency}</span>
             </p>
           </div>
         ) : null}
       </div>
 
-      <p className="px-[16px] pt-[10px] uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">
+      <p className="px-[16px] pt-[10px] uc-type-p2 leading-[20px] text-[var(--uc-text-muted)]">
         {RS.riskInfo.cardSummary}
       </p>
 
@@ -980,7 +1135,10 @@ function PackageCarousel({
   /** Choosing a card also brings it fully into view. */
   const selectAndReveal = (id: PackageId, index: number) => {
     onSelect?.(id);
-    carouselRef.current?.scrollTo({ left: index * PACKAGE_CARD_STEP, behavior: "smooth" });
+    const carousel = carouselRef.current;
+    if (carousel && typeof carousel.scrollTo === "function") {
+      carousel.scrollTo({ left: index * PACKAGE_CARD_STEP, behavior: "smooth" });
+    }
   };
 
   return (
@@ -1043,8 +1201,11 @@ function PackageSelectPreview({ state = "default" }: { state?: "default" | "bloc
 
   return (
     <Screen>
-      <Body closable title={RS.productNameEn}>
-        <p className="pt-[8px] uc-type-n5 leading-[19px] text-[var(--uc-text-muted)]">{RS.cover.packagesIntro}</p>
+      {/* The purchase runs on the insurer's platform from here, behind a front end
+          identical to the app's. There is no screen behind this one to go back to,
+          so the header carries the exit and nothing else. */}
+      <Body closable backable={false} title={RS.productNameEn}>
+        <p className="pt-[8px] uc-type-n4 leading-[24px] text-[var(--uc-text-muted)]">{RS.cover.packagesIntro}</p>
 
         <div className="pt-[16px]">
           <p className="uc-type-n4-strong text-[var(--uc-text)]">Choose your insurance period</p>
@@ -1071,15 +1232,15 @@ function PackageSelectPreview({ state = "default" }: { state?: "default" | "bloc
             helperText={`Cover period ${config.duration.period}`}
           />
         </Field>
-      </Body>
-      <BottomCta>
         <MandatoryRead
           title={RS.mustRead.acknowledgement}
           satisfied={config.mustReadSeen}
           onOpen={config.openMustRead}
         />
+      </Body>
+      <BottomCta>
         {canContinue ? null : (
-          <p className="pb-[10px] text-center uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">
+          <p className="pb-[10px] text-center uc-type-p2 leading-[20px] text-[var(--uc-text-muted)]">
             {!config.packageId
               ? "Choose a package and read the exclusions to continue."
               : showBlocked
@@ -1088,7 +1249,7 @@ function PackageSelectPreview({ state = "default" }: { state?: "default" | "bloc
           </p>
         )}
         <PrimaryButton className="!w-full" disabled={!canContinue} onClick={nav.primary}>
-          {config.packageId ? `Continue with ${config.pkg.name}` : "Continue"}
+          {config.packageId ? `Select ${config.pkg.name}` : "Select package"}
         </PrimaryButton>
       </BottomCta>
       {config.mustReadOpen ? <MustReadSheet onClose={() => config.setMustReadOpen(false)} /> : null}
@@ -1125,55 +1286,84 @@ function RiskInfoPreview() {
   );
 }
 
+/** The collapsed header sits over the top of the scroller, so scrolling has to stop short of it. */
+const COLLAPSED_HEADER_ALLOWANCE = 72;
+
 /** Step 1b — configure the chosen package: term, start date, optional add-on, price. */
 function DurationPremiumPreview({ overlay, addOnOpen = false }: { overlay?: "important-info"; addOnOpen?: boolean }) {
   const nav = useFlowNav();
   const config = useStep1Config({ addOn: addOnOpen });
   const addOn = RS.emergencyAddOn;
   const infoOpen = config.infoOpen || overlay === "important-info";
-  const addOnDetailsRef = useRef<HTMLDivElement | null>(null);
+  const addOnCardRef = useRef<HTMLDivElement | null>(null);
 
+  /**
+  /**
+   * Ticking the add-on grows the card by four blocks below the fold, so the screen
+   * scrolls to reveal them. It scrolls to the card, not to the block that appeared
+   * inside it, and it stops short by the height of the collapsed header: with
+   * scrollIntoView the card's top lands underneath that header, which is what made
+   * the movement read as overshooting. The row the customer just pressed has to
+   * stay on screen — that is the whole point of the movement.
+   */
   useEffect(() => {
     if (!config.addOn) return;
     const frame = window.requestAnimationFrame(() => {
-      addOnDetailsRef.current?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+      const card = addOnCardRef.current;
+      const scroller = card?.closest<HTMLElement>("[data-rs-flow-scroller]");
+      if (!card || !scroller) return;
+      const offset = card.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+      scroller.scrollTo({ top: scroller.scrollTop + offset - COLLAPSED_HEADER_ALLOWANCE, behavior: "smooth" });
     });
     return () => window.cancelAnimationFrame(frame);
   }, [config.addOn]);
 
   return (
     <Screen>
-      <Body closable title="Set up your policy">
+      <Body closable title={RS.screenCopy.configure.title}>
+        <p className="pt-[4px] uc-type-n4 leading-[24px] text-[var(--uc-text-muted)]">
+          {RS.screenCopy.configure.subtitle}
+        </p>
+
         {/* The package carries over from the carousel; changing it goes back there. */}
-        <div className="mt-[8px] flex items-center gap-[12px] rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[12px]">
-          <AppIcon name="shield-check" size={22} color="var(--uc-action)" />
+        <div
+          data-rs-duration-package-summary
+          className="mt-[16px] rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[12px]"
+        >
           <div className="min-w-0 flex-1">
-            <p className="uc-type-n4-strong text-[var(--uc-text)]">{config.pkg.name}</p>
-            <p className="uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">{config.pkg.headline}</p>
+            <p className="uc-type-h2 leading-[26px] text-[var(--uc-text)]">{config.pkg.name}</p>
+            <p className="pt-[2px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">{config.pkg.headline}</p>
+            <div className="mt-[10px]">
+              <SummaryRow label="Insurance duration" value={config.duration.label} strong />
+              <SummaryRow label="Cover period" value={config.duration.period} strong borderless />
+            </div>
+            <MandatoryRead
+              title={RS.importantInfo.acknowledgement}
+              satisfied={config.infoSeen}
+              onOpen={config.openInfo}
+              inCard
+            />
           </div>
         </div>
 
-        <MandatoryRead
-          title={RS.importantInfo.acknowledgement}
-          satisfied={config.infoSeen}
-          onOpen={config.openInfo}
-        />
-
-        <div className="-mx-[24px] mt-[16px]">
-          <NavigationRow
-            title={addOn.title}
-            description={addOn.optIn}
-            trailingAccessory="toggle"
-            toggleChecked={config.addOn}
-            onToggle={config.setAddOn}
-            rowHeight={80}
-            className="!pr-[24px]"
+        <div
+          ref={addOnCardRef}
+          data-testid="emergency-assistance-opt-in"
+          className="mt-[16px] rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[12px]"
+        >
+          <ConsentRow
+            text={addOn.title}
+            secondaryText={addOn.optIn}
+            checked={config.addOn}
+            strong
+            flushTop
+            onToggle={() => config.setAddOn(!config.addOn)}
           />
-        </div>
 
-        {config.addOn ? (
-          <div ref={addOnDetailsRef} className="pt-[10px]">
-            <p className="uc-type-n5 leading-[19px] text-[var(--uc-text-muted)]">{addOn.intro}</p>
+          <p className="pt-[6px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">{addOn.intro}</p>
+
+          {config.addOn ? (
+          <div className="pt-[12px]">
             <div className="flex flex-col gap-[8px] pt-[12px]">
               {addOn.packages.map((pkg) => (
                 <ChoiceCard
@@ -1192,27 +1382,23 @@ function DurationPremiumPreview({ overlay, addOnOpen = false }: { overlay?: "imp
               ))}
             </div>
             <div className="mt-[12px] flex items-start gap-[8px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[12px]">
-              <AppIcon name="info-circle" size={18} color="var(--uc-action)" />
-              <p className="flex-1 uc-type-n5 leading-[18px] text-[var(--uc-text)]">{addOn.claimLimit}</p>
+              <p className="uc-type-n5 leading-[20px] text-[var(--uc-text)]">{addOn.claimLimit}</p>
             </div>
-            <p className="pt-[10px] uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">
+            <p className="pt-[10px] uc-type-p2 leading-[20px] text-[var(--uc-text-muted)]">
               Add-on cover runs {config.duration.addOnPeriod}, from the quotation date.
             </p>
-            <p className="pt-[8px] uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">{addOn.feeNote}</p>
+            <p className="pt-[8px] uc-type-p2 leading-[20px] text-[var(--uc-text-muted)]">{addOn.feeNote}</p>
             {/* The add-on is a second product, so it carries a second read. */}
             <MandatoryRead
               title={addOn.acknowledgement}
               satisfied={config.addOnReadSeen}
               onOpen={config.openAddOnRead}
+              inCard
             />
           </div>
-        ) : null}
-
-        <div className="pt-[16px]">
-          <SummaryRow label="Selected package" value={config.pkg.name} />
-          <SummaryRow label="Insurance duration" value={config.duration.label} />
-          <SummaryRow label="Cover period" value={config.duration.period} />
+          ) : null}
         </div>
+
       </Body>
       <BottomCta>
         <PremiumSummary
@@ -1228,7 +1414,7 @@ function DurationPremiumPreview({ overlay, addOnOpen = false }: { overlay?: "imp
           totalLabel={addOn.totalLabel}
         />
         {config.configComplete ? null : (
-          <p className="pt-[10px] text-center uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">
+          <p className="pt-[10px] text-center uc-type-p2 leading-[20px] text-[var(--uc-text-muted)]">
             {config.infoSeen
               ? "Turn on the emergency assistance acknowledgement to continue."
               : "Turn on the acknowledgement above to continue."}
@@ -1244,7 +1430,7 @@ function DurationPremiumPreview({ overlay, addOnOpen = false }: { overlay?: "imp
         <BottomSheet
           fillHeight
           footer={
-            <div className="border-t border-[var(--uc-border)] pt-[12px]">
+            <div className="pt-[12px]">
               <PrimaryButton className="!w-full" onClick={() => config.setInfoOpen(false)}>Got it</PrimaryButton>
             </div>
           }
@@ -1253,14 +1439,32 @@ function DurationPremiumPreview({ overlay, addOnOpen = false }: { overlay?: "imp
           className="px-[24px] pb-[24px] pt-[20px]"
           onClose={() => config.setInfoOpen(false)}
         >
-          <div className="w-full">
-            <p className="uc-type-n5 leading-[20px] text-[var(--uc-text)]">{RS.importantInfo.body}</p>
-            <p className="mt-[14px] uc-type-n5-strong text-[var(--uc-text)]">For example</p>
-            <ul className="mt-[6px] flex flex-col gap-[8px]">
-              {RS.importantInfo.examples.map((example) => (
-                <li key={example} className="uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">• {example}</li>
+          <div className="w-full pb-[16px]">
+            {/* One rule per row: the partner's single paragraph held three of them. */}
+            <div className="pt-[4px]">
+              {RS.importantInfo.rules.map((rule) => (
+                <div key={rule.title} className="border-b border-[var(--uc-border)] py-[14px]">
+                  <p className="uc-type-n4-strong leading-[24px] text-[var(--uc-text)]">{rule.title}</p>
+                  <p className="pt-[4px] uc-type-n4 leading-[24px] text-[var(--uc-text-muted)]">{rule.body}</p>
+                </div>
               ))}
-            </ul>
+            </div>
+
+            <SectionHeadingDivider title={RS.importantInfo.examplesTitle} className="mt-[24px]" />
+            <div className="flex flex-col gap-[10px] pt-[14px]">
+              {RS.importantInfo.examples.map((example) => (
+                <div
+                  key={example.label}
+                  className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[14px]"
+                >
+                  <p className="uc-type-n4-strong leading-[24px] text-[var(--uc-text)]">{example.label}</p>
+                  <p className="pt-[4px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">{example.setup}</p>
+                  {/* The outcome is the only line that answers the question, so it carries the
+                      weight. Not the action colour: nothing here is tappable. */}
+                  <p className="pt-[8px] uc-type-n4-strong leading-[24px] text-[var(--uc-text)]">{example.result}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </BottomSheet>
       ) : null}
@@ -1278,30 +1482,64 @@ function EmergencyAddOnPreview() {
 function InsuredObjectPreview() {
   const nav = useFlowNav();
   const object = RS.insuredObject;
+  const [useHomeAddress, setUseHomeAddress] = useState(false);
+  const [address, setAddress] = useState({ street: "", houseNumber: "", apartmentNumber: "", city: "", municipality: "" });
+
+  const updateAddress = (key: keyof typeof address) => (value: string) =>
+    setAddress((current) => ({ ...current, [key]: value }));
+
+  const toggleHomeAddress = (next: boolean) => {
+    setUseHomeAddress(next);
+    setAddress(
+      next
+        ? {
+            street: object.street,
+            houseNumber: object.houseNumber,
+            apartmentNumber: object.apartmentNumber,
+            city: object.city,
+            municipality: object.municipality,
+          }
+        : { street: "", houseNumber: "", apartmentNumber: "", city: "", municipality: "" },
+    );
+  };
+
+  const addressComplete = Boolean(address.street && address.houseNumber && address.city && address.municipality);
+
   return (
     <Screen>
       <Body closable title="Insured property">
-        <p className="pt-[4px] uc-type-n5 leading-[19px] text-[var(--uc-text-muted)]">
-          Tell us where the property you want to insure is. This is the only block we cannot fill in for you — the
+        <p className="pt-[4px] uc-type-n4 leading-[24px] text-[var(--uc-text-muted)]">
+          Tell us where the property you want to insure is. This is the only block we cannot fill in for you. The
           insured home is not always your registered address.
         </p>
-        <Field><TextField label="Street" value={object.street} onChange={noop} visualState="filled" /></Field>
-        <Field><TextField label="House number" value={object.houseNumber} onChange={noop} visualState="filled" /></Field>
-        <Field><TextField label="Apartment number (optional)" value={object.apartmentNumber} onChange={noop} visualState="filled" /></Field>
-        <Field><TextField label="City" value={object.city} onChange={noop} visualState="filled" /></Field>
+        <div className="-mx-[24px] pt-[2px]">
+          <NavigationRow
+            title="I want to insure my home address"
+            description={`${object.street} ${object.houseNumber}/${object.apartmentNumber}, ${object.city}`}
+            trailingAccessory="toggle"
+            toggleChecked={useHomeAddress}
+            onToggle={toggleHomeAddress}
+            rowHeight={80}
+          />
+        </div>
+        <SectionHeadingDivider title="Address" className="mt-[16px]" />
+        <Field><TextField label="Street" value={address.street} onChange={updateAddress("street")} /></Field>
+        <Field><TextField label="House number" value={address.houseNumber} onChange={updateAddress("houseNumber")} /></Field>
+        <Field><TextField label="Apartment number (optional)" value={address.apartmentNumber} onChange={updateAddress("apartmentNumber")} /></Field>
+        <Field><TextField label="City" value={address.city} onChange={updateAddress("city")} /></Field>
         <Field>
           <TextField
             label="Municipality"
-            value={object.municipality}
-            onChange={noop}
+            value={address.municipality}
+            onChange={updateAddress("municipality")}
             readOnly
-            visualState="filled"
             trailingIconName="chevron-down"
+            onActivate={() => updateAddress("municipality")(object.municipality)}
           />
         </Field>
       </Body>
       <BottomCta>
-        <PrimaryButton className="!w-full" onClick={nav.primary}>Continue</PrimaryButton>
+        <PrimaryButton className="!w-full" disabled={!addressComplete} onClick={nav.primary}>Continue</PrimaryButton>
       </BottomCta>
     </Screen>
   );
@@ -1310,41 +1548,16 @@ function InsuredObjectPreview() {
 function PolicyholderPreview({ state = "default" }: { state?: "default" | "errors" }) {
   const nav = useFlowNav();
   const holder = RS.policyholder;
-  const object = RS.insuredObject;
   const errors = state === "errors";
-  /**
-   * Off by default only in the error state, where the customer has gone and
-   * entered a separate address; otherwise the insured property is the answer.
-   */
-  const [sameAddress, setSameAddress] = useState(!errors);
-  const [address, setAddress] = useState({ street: "", number: "", apartment: "", city: "", municipality: "" });
-  const addressBlockRef = useRef<HTMLDivElement>(null);
-
-  const updateAddress = (key: keyof typeof address) => (value: string) =>
-    setAddress((current) => ({ ...current, [key]: value }));
-
-  /** Everything the insurer needs about a separate address; apartment is optional. */
-  const addressComplete = Boolean(address.street && address.number && address.city && address.municipality);
-  const canContinue = !errors && (sameAddress || addressComplete);
-
-  const toggleSameAddress = (next: boolean) => {
-    setSameAddress(next);
-    // Opening the block reveals five new fields below the fold, so bring them into
-    // view rather than leaving the customer looking at an unchanged screen.
-    if (!next) {
-      window.requestAnimationFrame(() => {
-        addressBlockRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      });
-    }
-  };
+  const canContinue = !errors;
 
   return (
     <Screen>
-      <Body closable title="Policyholder">
-        <SectionHeadingDivider title="Personal data" className="mt-[8px]" />
-        <p className="pt-[6px] uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">
-          Taken from your verified profile. To change it, update your profile details.
+      <Body closable title={RS.screenCopy.policyholder.title}>
+        <p className="pt-[4px] uc-type-n4 leading-[24px] text-[var(--uc-text-muted)]">
+          {RS.screenCopy.policyholder.subtitle}
         </p>
+        <SectionHeadingDivider title="Personal data" className="mt-[20px]" />
         {/*
           Read-only facts, not fields. A disabled input still reads as something the
           customer could type into; these use the same presentation as the data
@@ -1352,10 +1565,10 @@ function PolicyholderPreview({ state = "default" }: { state?: "default" | "error
         */}
         <ReviewRow label="First name" value={holder.firstName} />
         <ReviewRow label="Last name" value={holder.lastName} />
-        <ReviewRow label="JMBG" value={holder.jmbgMasked} />
+        <ReviewRow label="JMBG" value={holder.jmbg} nowrap />
 
-        {/* Contact comes before address, so the address toggle — and the block it
-            opens — sit at the end where a growing section belongs. */}
+        {/* Contact is the final policyholder block; the insured address is collected
+            on the previous screen so the same-address choice happens at the source. */}
         <SectionHeadingDivider title="Contact" className="mt-[16px]" />
         <Field>
           <TextField
@@ -1379,57 +1592,16 @@ function PolicyholderPreview({ state = "default" }: { state?: "default" | "error
             />
           </Field>
         ) : (
-          <p className="pt-[12px] uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">
+          <p className="pt-[12px] uc-type-p2 leading-[20px] text-[var(--uc-text-muted)]">
             We only ask you to confirm the e-mail address if you change the one we already have.
           </p>
         )}
 
-        <SectionHeadingDivider title="Address" className="mt-[16px]" />
-        <div className="-mx-[24px] pt-[2px]">
-          <NavigationRow
-            title="Same as the insured property"
-            description={
-              sameAddress
-                ? `${object.street} ${object.houseNumber}/${object.apartmentNumber}, ${object.city}`
-                : "Turn on to reuse the insured property address"
-            }
-            trailingAccessory="toggle"
-            toggleChecked={sameAddress}
-            onToggle={toggleSameAddress}
-            rowHeight={80}
-          />
-        </div>
-
-        {sameAddress ? null : (
-          // The same five fields the insured property asks for, because it is the
-          // same kind of answer — only about a different building.
-          <div ref={addressBlockRef}>
-            <Field><TextField label="Street" value={address.street} onChange={updateAddress("street")} /></Field>
-            <Field><TextField label="Number" value={address.number} onChange={updateAddress("number")} /></Field>
-            <Field>
-              <TextField label="Apartment number (optional)" value={address.apartment} onChange={updateAddress("apartment")} />
-            </Field>
-            <Field><TextField label="City" value={address.city} onChange={updateAddress("city")} /></Field>
-            <Field>
-              <TextField
-                label="Municipality"
-                value={address.municipality}
-                onChange={updateAddress("municipality")}
-                readOnly
-                visualState={errors ? "error-empty" : undefined}
-                trailingIconName="chevron-down"
-                errorText={errors ? RS.validation.municipality : undefined}
-                onActivate={() => updateAddress("municipality")(RS.insuredObject.municipality)}
-              />
-            </Field>
-          </div>
-        )}
       </Body>
       <BottomCta>
-        {errors ? <InlineError>Check the highlighted fields before continuing.</InlineError> : null}
         {/* Nothing to continue to until the address the insurer needs is actually there. */}
         <PrimaryButton className="!w-full" disabled={!canContinue} onClick={nav.primary}>
-          Continue with purchase
+          Continue
         </PrimaryButton>
       </BottomCta>
     </Screen>
@@ -1440,31 +1612,39 @@ function PolicyholderPreview({ state = "default" }: { state?: "default" | "error
 
 function ReviewPreview({ addOn = false }: { addOn?: boolean }) {
   const nav = useFlowNav();
-  const { selection, insuredObject: object, policyholder: holder } = RS;
+  const { insuredObject: object, policyholder: holder } = RS;
+  const { currency, calculationDate, addOnPeriod } = RS.selection;
+  // The documented review-with-add-on state forces the add-on on; otherwise this
+  // is whatever the customer configured two screens ago.
+  const chosen = useRsSelection(addOn ? { addOn: true } : undefined);
+  const total = chosen.addOn ? rsdSum(chosen.premium, chosen.addOnPremium) : chosen.premium;
   return (
     <Screen>
       {/* The partner's five blocks, in the partner's order. */}
-      <Body closable title="Check your data">
-        <GroupHeader title={RS.productNameEn} editAt="rs-pi-duration-premium" />
-        <ReviewRow label="Selected package" value={selection.packageName} />
-        <ReviewRow label="Insurance duration" value={selection.duration} />
-        <ReviewRow label="Cover period" value={selection.period} />
-        <ReviewRow label="Premium, tax included" value={`${selection.premium} ${selection.currency}`} />
+      <Body closable title={RS.screenCopy.review.title}>
+        <p className="pt-[4px] uc-type-n4 leading-[24px] text-[var(--uc-text-muted)]">
+          {RS.screenCopy.review.subtitle}
+        </p>
+        <GroupHeader title={RS.productNameEn} editAt="rs-pi-package-select" />
+        <ReviewRow label="Selected package" value={chosen.pkg.name} />
+        <ReviewRow label="Insurance duration" value={chosen.duration.label} />
+        <ReviewRow label="Cover period" value={chosen.duration.period} />
+        <ReviewRow label="Premium, tax included" value={`${chosen.premium} ${currency}`} />
 
-        {addOn ? (
+        {chosen.addOn ? (
           <>
             <GroupHeader title={RS.emergencyAddOn.title} editAt="rs-pi-emergency-addon" />
-            <ReviewRow label="Selected package" value={ADD_ON_PACKAGE.name} />
-            <ReviewRow label="Insurance duration" value={selection.duration} />
+            <ReviewRow label="Selected package" value={chosen.addOnPackage.name} />
+            <ReviewRow label="Insurance duration" value={chosen.duration.label} />
             {/* Runs from the quotation date, so it differs from the household period. */}
-            <ReviewRow label="Cover period" value={selection.addOnPeriod} />
-            <ReviewRow label="Premium, tax included" value={`${ADD_ON_PREMIUM} ${selection.currency}`} />
+            <ReviewRow label="Cover period" value={chosen.duration.addOnPeriod ?? addOnPeriod} />
+            <ReviewRow label="Premium, tax included" value={`${chosen.addOnPremium} ${currency}`} />
           </>
         ) : null}
 
         <GroupHeader title="Total" />
-        <ReviewRow label="Quotation date" value={selection.calculationDate} />
-        <ReviewRow label="Total to pay, tax included" value={`${addOn ? ADD_ON_TOTAL : selection.premium} ${selection.currency}`} />
+        <ReviewRow label="Quotation date" value={calculationDate} />
+        <ReviewRow label="Total to pay, tax included" value={`${total} ${currency}`} />
 
         <GroupHeader title="Property" editAt="rs-pi-insured-object" />
         <ReviewRow label="Street" value={object.street} />
@@ -1474,7 +1654,7 @@ function ReviewPreview({ addOn = false }: { addOn?: boolean }) {
 
         <GroupHeader title="Policyholder" editAt="rs-pi-policyholder" />
         <ReviewRow label="Name and surname" value={`${holder.firstName} ${holder.lastName}`} />
-        <ReviewRow label="JMBG" value={holder.jmbgMasked} />
+        <ReviewRow label="JMBG" value={holder.jmbg} nowrap />
         <ReviewRow label="Mobile number" value={holder.mobile} />
         <ReviewRow label="E-mail" value={holder.email} />
         <ReviewRow label="Street" value={object.street} />
@@ -1483,7 +1663,7 @@ function ReviewPreview({ addOn = false }: { addOn?: boolean }) {
         <ReviewRow label="Municipality" value={object.municipality} />
       </Body>
       <BottomCta>
-        <PrimaryButton className="!w-full" onClick={nav.primary}>Continue with purchase</PrimaryButton>
+        <PrimaryButton className="!w-full" onClick={nav.primary}>Continue</PrimaryButton>
       </BottomCta>
     </Screen>
   );
@@ -1518,52 +1698,47 @@ function TermsConsentPreview() {
   const nav = useFlowNav();
   const [accepted, setAccepted] = useState<Record<string, boolean>>({});
   const required = RS.order.consents.filter((consent) => consent.required);
-  const allOn = RS.order.consents.every((consent) => accepted[consent.id]);
   const canConfirm = required.every((consent) => accepted[consent.id]);
 
   const toggle = (id: string) => setAccepted((current) => ({ ...current, [id]: !current[id] }));
-  const toggleAll = () =>
-    setAccepted(Object.fromEntries(RS.order.consents.map((consent) => [consent.id, !allOn])));
+  const [openDocument, setOpenDocument] = useState<(typeof RS.order.documents)[number] | null>(null);
 
   return (
     <Screen>
       <Body closable title="Terms and consents">
-        <p className="pt-[4px] uc-type-n4-strong leading-[22px] text-[var(--uc-text)]">{RS.order.heading}</p>
+        <p className="pt-[4px] uc-type-n4 leading-[24px] text-[var(--uc-text)]">{RS.order.heading}</p>
 
         <div className="pt-[12px]">
-          {RS.order.documents.map((document) => (
-            <div key={document.title} className="flex items-center gap-[10px] border-b border-[var(--uc-border)] py-[11px]">
-              <AppIcon name="file-pdf" size={20} color="var(--uc-action)" />
-              <p className="flex-1 uc-type-n5-strong leading-[18px] text-[var(--uc-action)]">{document.title}</p>
-              <AppIcon name="download" size={18} color="var(--uc-text)" />
-            </div>
-          ))}
+          <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[12px]">
+            {RS.order.documents.map((document) => (
+              <div key={document.title} className="flex items-start gap-[10px] py-[10px]">
+                <PdfDocumentIcon />
+                <div className="min-w-0 flex-1">
+                  <p className="uc-type-n4-strong leading-[24px] text-[var(--uc-text)]">{document.title}</p>
+                  <OpenDocumentButton title={document.title} onOpen={() => setOpenDocument(document)} />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* The partner does offer a select-all, so it is kept rather than removed. */}
-        <div className="pt-[6px]">
-          <ConsentRow text={RS.order.selectAll} checked={allOn} strong onToggle={toggleAll} />
-        </div>
-        <div>
+        <div className="mt-[12px] space-y-[4px]">
           {RS.order.consents.map((consent) => (
             <ConsentRow
               key={consent.id}
               text={consent.text}
               checked={Boolean(accepted[consent.id])}
-              optionalLabel={consent.required ? undefined : "Optional"}
               onToggle={() => toggle(consent.id)}
             />
           ))}
         </div>
 
-        <div className="mt-[14px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[12px]">
-          <p className="uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">{RS.order.privacyNote}</p>
-        </div>
       </Body>
       <BottomCta>
         {/* Enabled on the required consent alone; marketing stays genuinely optional. */}
         <PrimaryButton className="!w-full" disabled={!canConfirm} onClick={nav.primary}>{RS.order.confirmLabel}</PrimaryButton>
       </BottomCta>
+      {openDocument ? <DocumentSheet document={openDocument} onClose={() => setOpenDocument(null)} /> : null}
     </Screen>
   );
 }
@@ -1579,7 +1754,10 @@ function TermsConsentPreview() {
  */
 function PaymentCreatePreview({ state = "default" }: { state?: "default" | "insufficient" }) {
   const nav = useFlowNav();
-  const { payment, policy, selection, paymentScreens: ui } = RS;
+  const { payment, policy, paymentScreens: ui } = RS;
+  const chosen = useRsSelection();
+  const amount = chosen.addOn ? rsdSum(chosen.premium, chosen.addOnPremium) : chosen.premium;
+  const { currency } = RS.selection;
   /**
    * The account is chosen here, on the payment screen that already owns that
    * control — there is no separate payment-method step. Picking the low-balance
@@ -1623,7 +1801,6 @@ function PaymentCreatePreview({ state = "default" }: { state?: "default" | "insu
             onChange={noop}
             disabled
             visualState="disabled-filled"
-            trailingIconName="camera"
           />
         </Field>
         <Field>
@@ -1633,7 +1810,6 @@ function PaymentCreatePreview({ state = "default" }: { state?: "default" | "insu
             onChange={noop}
             disabled
             visualState="disabled-filled"
-            trailingIconName="camera"
           />
         </Field>
         <Field>
@@ -1644,7 +1820,6 @@ function PaymentCreatePreview({ state = "default" }: { state?: "default" | "insu
             onChange={noop}
             disabled
             visualState="disabled-filled"
-            trailingIconName="camera"
           />
         </Field>
 
@@ -1652,11 +1827,11 @@ function PaymentCreatePreview({ state = "default" }: { state?: "default" | "insu
         <Field>
           <TextField
             label={ui.amountLabel}
-            value={selection.premium}
+            value={amount}
             onChange={noop}
             disabled
             visualState="disabled-filled"
-            suffix={selection.currency}
+            suffix={currency}
           />
         </Field>
         <Field>
@@ -1688,10 +1863,7 @@ function PaymentCreatePreview({ state = "default" }: { state?: "default" | "insu
           <AppIcon name="chevron-down" color="var(--uc-text)" />
         </div>
 
-        <p className="pt-[10px] uc-type-p2 leading-[16px] text-[var(--uc-text-muted)]">
-          Beneficiary, amount, module, reference and purpose are fixed by the insurance request and cannot be changed here.
-        </p>
-        <p className="pt-[18px] text-center uc-type-n5 leading-[18px] text-[var(--uc-text)]">{ui.createHint}</p>
+        <p className="pt-[18px] text-center uc-type-n5 leading-[20px] text-[var(--uc-text)]">{ui.createHint}</p>
       </Body>
       <BottomCta>
         <PrimaryButton className="!w-full" disabled={short} onClick={nav.primary}>{ui.createCta}</PrimaryButton>
@@ -1703,7 +1875,10 @@ function PaymentCreatePreview({ state = "default" }: { state?: "default" | "insu
 /** The Serbian review screen, with the same rows and the same PAY wording. */
 function PaymentReviewPreview() {
   const nav = useFlowNav();
-  const { payerAccount: account, payment, policy, selection, paymentScreens: ui } = RS;
+  const { payerAccount: account, payment, policy, paymentScreens: ui } = RS;
+  const chosen = useRsSelection();
+  const amount = chosen.addOn ? rsdSum(chosen.premium, chosen.addOnPremium) : chosen.premium;
+  const { currency } = RS.selection;
   return (
     <Screen>
       <Body title={ui.reviewTitle}>
@@ -1713,13 +1888,13 @@ function PaymentReviewPreview() {
         <ReviewRow label={ui.beneficiaryNameLabel} value={payment.beneficiaryName} />
         <ReviewRow label={ui.beneficiaryAccountLabel} value={payment.beneficiaryAccount} />
         <ReviewRow label={ui.moduleReferenceLabel} value={`${payment.module} ${policy.number}`} />
-        <ReviewRow label={ui.amountReviewLabel} value={`${selection.premium} ${selection.currency}`} />
+        <ReviewRow label={ui.amountReviewLabel} value={`${amount} ${currency}`} />
         <ReviewRow label={ui.paymentCodeLabel} value={payment.paymentCode} />
         <ReviewRow label={ui.purposeLabel} value={payment.purposeEn} />
         <ReviewRow label={ui.processingDateLabel} value={payment.processingDate} />
         <ReviewRow label={ui.processingMethodLabel} value={payment.processing} />
 
-        <p className="pt-[22px] text-center uc-type-n5 leading-[19px] text-[var(--uc-text)]">{ui.payNote}</p>
+        <p className="pt-[22px] text-center uc-type-n5 leading-[20px] text-[var(--uc-text)]">{ui.payNote}</p>
       </Body>
       <BottomCta>
         <PrimaryButton className="!w-full" onClick={nav.primary}>{ui.payCta}</PrimaryButton>
@@ -1733,23 +1908,34 @@ function AbandonConfirmPreview() {
   const nav = useFlowNav();
   return (
     <Screen>
-      <Body title="Policyholder">
-        <ReviewRow label="First name" value={RS.policyholder.firstName} />
-        <ReviewRow label="Last name" value={RS.policyholder.lastName} />
-        <ReviewRow label="JMBG" value={RS.policyholder.jmbgMasked} />
-      </Body>
-      <Overlay align="center">
-        <div className="w-full rounded-[12px] bg-[var(--uc-surface)] p-[20px] shadow-[0_16px_32px_rgb(var(--uc-shadow-rgb)_/_0.18)]">
-          <p className="uc-type-h2 text-[var(--uc-text)]">Leave the purchase?</p>
-          <p className="mt-[10px] uc-type-n5 leading-[19px] text-[var(--uc-text-muted)]">{RS.errors.abandon}</p>
-          <div className="mt-[20px] flex flex-col gap-[10px]">
-            <PrimaryButton className="!w-full" onClick={nav.primary}>Continue purchase</PrimaryButton>
-            <button type="button" onClick={nav.secondary} className="w-full text-center uc-type-n5-strong text-[var(--uc-red-main)]">
-              Leave purchase
-            </button>
-          </div>
+      <PreviewSafeTop />
+      <div className="flex min-h-0 flex-1 flex-col px-[24px]">
+        <div className="flex flex-col items-center pt-[88px]">
+          <svg
+            aria-hidden="true"
+            width="100"
+            height="100"
+            viewBox="0 0 100 100"
+            fill="none"
+            className="shrink-0"
+          >
+            <path
+              d="M50 0C77.6156 0 100 22.3844 100 50C100 77.6125 77.6156 100 50 100C22.3844 100 0 77.6125 0 50C0 22.3844 22.3844 0 50 0ZM50 6.25C25.8375 6.25 6.25 25.8375 6.25 50C6.25 74.1594 25.8375 93.75 50 93.75C74.1656 93.75 93.75 74.1594 93.75 50C93.75 25.8375 74.1656 6.25 50 6.25ZM55.1504 62.9756C55.1504 68.1847 53.4468 72.9102 44.9209 72.9102V45.1719H55.1504V62.9756ZM50 25C53.4523 25 56.25 27.8002 56.25 31.25C56.25 34.7023 53.4523 37.5 50 37.5C46.5477 37.5 43.75 34.7023 43.75 31.25C43.75 27.8002 46.5477 25 50 25Z"
+              fill="var(--uc-text)"
+            />
+          </svg>
+          <h1 className="mt-[24px] text-center uc-type-h1 leading-[34px] tracking-[0.3px] text-[var(--uc-text)]">
+            Leave the purchase?
+          </h1>
+          <p className="mt-[24px] w-full text-center uc-type-p1 leading-[24px] tracking-[0.3px] text-[var(--uc-text)]">
+            {RS.errors.abandon}
+          </p>
         </div>
-      </Overlay>
+      </div>
+      <BottomCta>
+        <PrimaryButton className="!w-full" onClick={nav.primary}>Continue purchase</PrimaryButton>
+        <SecondaryAction onClick={nav.secondary}>Leave purchase</SecondaryAction>
+      </BottomCta>
     </Screen>
   );
 }
@@ -1769,27 +1955,30 @@ function PaymentSignPreview() {
   );
 }
 
-/**
- * The Serbian payment confirmation, plus the one line this flow adds: which policy
- * the order activates and where its documents are going.
- */
+/** The Serbian payment confirmation screen, using only the standard success copy. */
 function PaymentSuccessPreview() {
   const nav = useFlowNav();
+  const ui = RS.paymentScreens;
+  const chosen = useRsSelection();
+  const paid = chosen.addOn ? rsdSum(chosen.premium, chosen.addOnPremium) : chosen.premium;
   return (
     <StandardSuccessScreen
-      title={RS.paymentScreens.successTitle}
+      title={ui.successTitle}
       body={
-        <div className="space-y-[16px]">
-          <p>{RS.paymentScreens.successBody}</p>
-          <p>
-            <strong>Policy {RS.policy.number} is active</strong> for {RS.selection.period}.
-          </p>
-          <p>
-            {RS.partner} will send the policy and payment confirmation to <strong>{RS.policyholder.email}</strong>.
-          </p>
+        <div>
+          <p>{ui.successBody}</p>
+          {/* The policy exists nowhere else in the app, so this screen is the only
+              place its number, its premium and its cover period are ever shown. */}
+          <div className="pt-[18px]">
+            <SummaryRow label={ui.successPolicyLabel} value={RS.policy.number} strong />
+            <SummaryRow label={ui.successPremiumLabel} value={`${paid} ${RS.selection.currency}`} strong />
+            <SummaryRow label={ui.successPeriodLabel} value={chosen.duration.period} strong />
+            <SummaryRow label={ui.successStatusLabel} value={RS.policy.activatedStatus} strong borderless />
+          </div>
+          <p className="pt-[18px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">{ui.successDelivery}</p>
         </div>
       }
-      actionLabel={RS.paymentScreens.successCta}
+      actionLabel={ui.successCta}
       onDone={nav.primary}
     />
   );
@@ -1845,8 +2034,7 @@ export function renderRsPropertyInsurancePreview(kind: RsPropertyInsuranceScreen
       return (
         <OutcomeScreen
           title="We could not register your request"
-          icon="alert-triangle"
-          iconColor="var(--uc-red-main)"
+          tone="alert"
           body={RS.errors.submitFailed}
           primaryLabel="Try again"
           secondaryLabel="Back to products"
@@ -1856,8 +2044,7 @@ export function renderRsPropertyInsurancePreview(kind: RsPropertyInsuranceScreen
       return (
         <OutcomeScreen
           title="The premium was not paid"
-          icon="alert-triangle"
-          iconColor="var(--uc-red-main)"
+          tone="alert"
           body={RS.errors.paymentFailed}
           rows={[
             { label: "Policy number", value: RS.policy.number },
@@ -1872,8 +2059,7 @@ export function renderRsPropertyInsurancePreview(kind: RsPropertyInsuranceScreen
       return (
         <OutcomeScreen
           title="Your policy is waiting for payment"
-          icon="info-circle"
-          iconColor="var(--uc-action)"
+          tone="waiting"
           body={RS.errors.paymentCancelled}
           rows={[
             { label: "Policy number", value: RS.policy.number },

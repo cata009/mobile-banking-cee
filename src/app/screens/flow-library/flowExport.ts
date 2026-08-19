@@ -152,7 +152,7 @@ function fieldsTable(fields: readonly ExportFieldSpec[]): string {
       (field) =>
         `<tr><td>${escapeHtml(field.name)}</td><td>${escapeHtml(field.type)}</td><td>${
           field.required ? "Yes" : "No"
-        }</td><td>${escapeHtml([field.validation, field.notes].filter(Boolean).join(" — ") || "—")}</td></tr>`,
+        }</td><td>${escapeHtml([field.validation, field.notes].filter(Boolean).join(" · ") || "Not specified")}</td></tr>`,
     )
     .join("");
   return `<table class="spec-table"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
@@ -183,8 +183,6 @@ function stepSpecHtml(spec: ExportStepSpec | undefined): string {
 function businessAnalysisHtml(analysis: FlowBusinessAnalysisSpec): string {
   const sections = [
     `<h3>General information</h3>${keyValueTable(analysis.generalInformation)}`,
-    `<h3>Version history</h3>${keyValueTable(analysis.versionHistory.map((entry) => ({ label: `${entry.version} · ${entry.date}`, value: entry.detail })) )}`,
-    `<h3>Version &amp; change context</h3><p>${escapeHtml(analysis.versionContext)}</p>`,
     `<h3>Open issues</h3>${bulletList(analysis.openIssues.map((issue) => `${issue.reference} [${issue.status}] ${issue.title}. ${issue.detail}`))}`,
     analysisSectionsHtml("Requirement", analysis.requirements),
     analysisSectionsHtml("Current status", analysis.currentStatus),
@@ -282,7 +280,7 @@ export function buildFlowDocumentHtml(
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>${escapeHtml(meta.flowTitle)} — ${escapeHtml(meta.scenarioLabel)}</title>
+<title>${escapeHtml(meta.flowTitle)} | ${escapeHtml(meta.scenarioLabel)}</title>
 <style>
   @page { size: A4; margin: 16mm; }
   body { font-family: "Segoe UI", Arial, sans-serif; color: #262626; margin: 24px; }
@@ -312,7 +310,7 @@ ${autoPrintScript}
 </head>
 <body>
   <section class="cover">
-    <p class="kicker">UniCredit Mobile Banking CEE — Flow export</p>
+    <p class="kicker">UniCredit Mobile Banking CEE | Flow export</p>
     <h1>${escapeHtml(meta.flowTitle)}</h1>
     <p class="description">${escapeHtml(meta.scenarioDescription)}</p>
     <table class="meta-table">
