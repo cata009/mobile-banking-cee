@@ -121,7 +121,7 @@ export const FLOW_DEMO = {
     productNameEn: "Household insurance",
     taxNote: "5% insurance tax included",
     instalmentNote:
-      "Generali also offers interest-free instalments with partner credit cards on its web shop. In Mobile PI the premium is settled as a single domestic payment from a UniCredit account.",
+      "Generali also offers interest-free instalments with partner credit cards on its web shop. In mBanking the premium is settled as a single domestic payment from a UniCredit account.",
     /**
      * Commercial copy for the cover page — the only screen in the journey whose
      * job is to sell rather than to collect. It leads with the risk the customer
@@ -135,7 +135,7 @@ export const FLOW_DEMO = {
       benefitsTitle: "What you are covered for",
       /** Short on purpose: the acknowledgement below the carousel has to stay on screen. */
       packagesIntro:
-        "All three cover the same risks. What changes is how much we pay you. You choose your period in the next step.",
+        "All three cover the same risks. What changes is how much we pay you. Pick your period first: the prices below follow it.",
       benefits: [
         "Fire, storm, lightning and explosion",
         "Water damage, broken windows and built-in equipment",
@@ -151,7 +151,7 @@ export const FLOW_DEMO = {
       pricePeriod: "for 6 months",
       exclusionsNote:
         "Some homes cannot be covered, including unoccupied houses and flats, and buildings mostly made of timber. We will show you the full list before you buy.",
-      cta: "Get covered",
+      cta: "I am interested",
     },
 
     /** Generali's own four-step wizard, mirrored 1:1 by the in-app journey. */
@@ -247,17 +247,18 @@ export const FLOW_DEMO = {
 
     /**
      * Every risk row on the partner table carries its own info control. The
-     * explanation behind it is the insurer's legal text, so this demo models the
-     * affordance and the sheet structure rather than inventing the wording.
+     * explanation behind it is the insurer's legal text: the screen models the
+     * affordance and the sheet structure, and points at the terms that carry the
+     * wording rather than paraphrasing it.
      */
     riskInfo: {
-      title: "What this package covers",
+      title: "What it covers",
       /** The two sums that actually separate the packages, highlighted on the card. */
       headlineLabels: { building: "Your home", contents: "Your things" },
       cardSummary: "Water damage, glass, burglary and liability are included too.",
       moreDetails: "More details",
-      placeholder:
-        "The insurer's explanation of each risk — what it covers and how a claim is settled — is shown here. The wording is supplied by Generali and is not reproduced in this demo.",
+      note:
+        "What each risk covers, what it excludes and how a claim is settled is set out in the Generali insurance terms and conditions, which you receive together with your policy.",
     },
 
     /**
@@ -314,11 +315,34 @@ export const FLOW_DEMO = {
       title: "Important information",
       titleRs: "Važne informacije",
       acknowledgement: "I have read when the cover actually starts.",
-      body:
-        "Cover starts at midnight of the day marked as the start date, provided the premium has been recorded on the insurer's account by then. Otherwise the contract starts at midnight of the day the premium payment is recorded. Cover runs until midnight of the day shown on the confirmation as the end date.",
+      /** One sentence per rule: the wall of text was the reason nobody read it. */
+      rules: [
+        {
+          title: "If the premium arrives in time",
+          body: "Cover starts at midnight of the start date you chose.",
+        },
+        {
+          title: "If the premium arrives later",
+          body: "Cover starts at midnight of the day the payment is recorded on the insurer's account, not the day you chose.",
+        },
+        {
+          title: "When it ends",
+          body: "Cover runs until midnight of the end date printed on your confirmation.",
+        },
+      ],
+      examplesTitle: "Two examples",
+      /** The same two partner examples, split so the outcome can be read on its own. */
       examples: [
-        "You choose 6 months starting 15 July and the payment is recorded on 17 July. Cover starts at midnight on 17 July and ends at midnight on 17 January of the following year.",
-        "You choose 12 months starting 15 July and the payment is recorded on 12 July. Cover starts at midnight on 15 July and ends at midnight on 15 July of the following year.",
+        {
+          label: "Payment arrives two days late",
+          setup: "6 months from 15 July · recorded 17 July",
+          result: "Covered 17 July → 17 January",
+        },
+        {
+          label: "Payment arrives three days early",
+          setup: "12 months from 15 July · recorded 12 July",
+          result: "Covered 15 July → 15 July next year",
+        },
       ],
     },
 
@@ -331,7 +355,7 @@ export const FLOW_DEMO = {
       /** What the customer confirms before the add-on can be carried forward. */
       acknowledgement: "I have read what emergency assistance covers.",
       intro:
-        "A breakdown in your house or flat cannot be predicted, but you can secure the help of a reliable technician at any moment. The service covers the technician's call-out and work, and temporary accommodation for household members when staying in the home is not possible.",
+        "Things break at the worst possible hour. This sends a technician to your door, pays for the call-out and the work, and puts your household up somewhere else if the home cannot be lived in.",
       /** Paket A is the one preselected when the customer opts in. */
       defaultPackageId: "A",
       packages: [
@@ -360,18 +384,53 @@ export const FLOW_DEMO = {
       ],
       mustReadIntro:
         "Emergency home assistance covers advice, information, instructions and technician help when you need:",
+      mustReadWorksTitle: "The trades it sends",
+      /**
+       * The partner's list is seven sentences of legal prose. Same content, one
+       * trade per row: the customer can find their own emergency in two seconds
+       * and the exceptions stay attached to the trade they belong to.
+       */
       mustReadWorks: [
-        "plumbing work to urgently repair a breakdown or blockage that caused water to escape from the installations;",
-        "carpentry work to urgently repair damage or destruction to external doors and windows;",
-        "glazing work to urgently repair damaged or destroyed glass in external doors and windows after glass breakage;",
-        "electrical work to urgently repair a fault in the built-in electrical installations and equipment in your household, except where the cause is overloading or failure of fuses and other protective built-in devices, or an interruption of the electricity supply by the provider;",
-        "locksmith work in case of loss or theft of keys, keys locked inside the house or flat, a key broken or jammed in the lock or a lock failure, including damage or destruction to the door caused by the locksmith work;",
-        "work to urgently repair a fault in central or storey heating installations that caused water or steam to leak;",
-        "removing water and cleaning the house or flat after water escaping from installations, flooding, ingress of rain water, waste water and sewage into your household, except water entering through open external doors and windows.",
+        {
+          trade: "Plumbing",
+          detail: "Urgent repair of a breakdown or blockage that made water escape from the installations.",
+        },
+        {
+          trade: "Carpentry",
+          detail: "Urgent repair of damaged or destroyed external doors and windows.",
+        },
+        {
+          trade: "Glazing",
+          detail: "Urgent repair of broken glass in external doors and windows.",
+        },
+        {
+          trade: "Electrical",
+          detail: "Urgent repair of a fault in your built-in electrical installations and equipment.",
+          exception: "Not overloading, blown fuses or other protective devices, or a supply cut by the provider.",
+        },
+        {
+          trade: "Locksmith",
+          detail: "Lost or stolen keys, keys locked inside, a key broken or jammed in the lock, or a lock that has failed. Damage to the door caused by the work is covered too.",
+        },
+        {
+          trade: "Heating",
+          detail: "Urgent repair of a fault in central or storey heating that made water or steam leak.",
+        },
+        {
+          trade: "Water removal and cleaning",
+          detail: "After water escapes from the installations, or after flooding, rain water, waste water or sewage gets into the home.",
+          exception: "Not water coming in through open external doors and windows.",
+        },
       ],
       mustReadAlsoIncludes: [
-        "the small and consumable material needed to carry out the emergency intervention;",
-        "organising and reimbursing the cost of temporary accommodation when a fire or explosion has caused damage or destruction of such a nature that living in the household is no longer possible. Persons with registered residence in your household are entitled to temporary accommodation.",
+        {
+          trade: "Materials",
+          detail: "The small and consumable material needed to carry out the intervention.",
+        },
+        {
+          trade: "Temporary accommodation",
+          detail: "Organised and reimbursed when a fire or explosion leaves the home unfit to live in. Everyone with registered residence in your household is entitled to it.",
+        },
       ],
       /** The limit that decides how the add-on is worth having, so it is never buried. */
       claimLimit: "Over one year of insurance you are entitled to three insured events.",
@@ -379,9 +438,9 @@ export const FLOW_DEMO = {
       feeNote:
         "Beyond the stated amount you have no obligation to pay other fees or costs. If the value of the service provided is higher than the amount covered by the insurance, you pay the difference directly to the service provider.",
       /** Wording of the combined line the partner shows when the add-on is on. */
-      totalLabel: "Total to pay — household insurance and emergency assistance",
+      totalLabel: "Total to pay: household insurance and emergency assistance",
       totalLabelRs:
-        "Ukupno za plaćanje — osiguranje domaćinstva i hitnih intervencija (sa uračunatim porezom od 5%)",
+        "Ukupno za plaćanje: osiguranje domaćinstva i hitnih intervencija (sa uračunatim porezom od 5%)",
     },
 
     /** The configuration the previews carry from step 1 through to the payment. */
@@ -403,11 +462,31 @@ export const FLOW_DEMO = {
       addOnPeriod: "18.08.2026 - 18.02.2027",
     },
 
+    /**
+     * Titles and standfirsts for the screens the bank owns rather than the partner.
+     * Each standfirst answers the one question the screen raises: why am I being
+     * shown this, and what is expected of me here.
+     */
+    screenCopy: {
+      configure: {
+        title: "Your cover details",
+        subtitle: "Set when the cover starts, decide on emergency assistance, and see what you pay before you commit to anything.",
+      },
+      policyholder: {
+        title: "Policyholder",
+        subtitle: "The policy is issued in this name. Your identity comes from your verified profile and cannot be edited here; the contact details are yours to change.",
+      },
+      review: {
+        title: "Check your data",
+        subtitle: "This is exactly what goes to Generali. Read it once, and use Edit on any block that needs fixing.",
+      },
+    },
+
     /** Generali step 2, first block: the insured property. */
     insuredObject: {
-      street: "Bulevar Mihajla Pupina",
-      houseNumber: "165",
-      apartmentNumber: "24",
+      street: "Bulevar Arsenija Čarnojevića",
+      houseNumber: "137",
+      apartmentNumber: "42",
       city: "Beograd",
       municipality: "Beograd-Novi Beograd",
     },
@@ -417,7 +496,6 @@ export const FLOW_DEMO = {
       firstName: "Milan",
       lastName: "Petrović",
       jmbg: "0101990710015",
-      jmbgMasked: "0101990••••••",
       sameAddressAsObject: true,
       mobile: "+381641234567",
       mobileHint: "Format +3816xxxxxxx",
@@ -442,6 +520,17 @@ export const FLOW_DEMO = {
         { title: "Terms for insuring emergency interventions in the property", titleRs: "Uslovi za osiguranje hitnih intervencija u objektu" },
         { title: "General terms of use", titleRs: "Opšti uslovi korišćenja" },
       ],
+      /**
+       * Opening a notice shows the insurer's PDF inside the app rather than handing
+       * it to a browser. The document itself is a Generali file, so the viewer is
+       * specified — the page area, the save action and the acknowledgement — and
+       * the pages render from the file at build time.
+       */
+      documentViewer: {
+        downloadLabel: "Download PDF",
+        readLabel: "I have read this",
+        surfaceLabel: "PDF document",
+      },
       selectAll: "Select all options",
       selectAllRs: "Označi sve opcije",
       consents: [
@@ -468,7 +557,7 @@ export const FLOW_DEMO = {
 
     /**
      * Generali step 4, second half: who pays, and how. On the web shop this block
-     * is typed again and offers a card or a payment slip; in Mobile PI it is the
+     * is typed again and offers a card or a payment slip; in mBanking it is the
      * authenticated customer and the only method is their own account.
      */
     payer: {
@@ -481,7 +570,7 @@ export const FLOW_DEMO = {
       ],
       bankMethod: "From my UniCredit account",
       captchaNote:
-        "The web shop closes this step with a reCAPTCHA check. It is not needed in Mobile PI, because the customer is already authenticated in the banking session.",
+        "The web shop closes this step with a reCAPTCHA check. It is not needed in mBanking, because the customer is already authenticated in the banking session.",
       finishLabel: "Finish purchase",
       finishLabelRs: "Završi sa kupovinom",
     },
@@ -489,7 +578,7 @@ export const FLOW_DEMO = {
     /**
      * How the partner journey ends today, kept for comparison: the request is
      * registered, payment instructions are e-mailed, and the customer still has to
-     * pay somewhere else. This is exactly the step Mobile PI removes.
+     * pay somewhere else. This is exactly the step mBanking removes.
      */
     partnerEnding: {
       confirmation: "You have successfully sent the request to arrange household insurance and emergency home assistance.",
@@ -565,7 +654,7 @@ export const FLOW_DEMO = {
       processingDateLabel: "PAYMENT PROCESSING DATE",
       showMore: "SHOW MORE DETAILS",
       createHint: "You can review and sign your payment in the next step",
-      createCta: "NEXT",
+      createCta: "Continue",
 
       reviewTitle: "Review data",
       reviewSection: "CHECK YOUR DATA AND CONFIRM YOUR PAYMENT",
@@ -577,8 +666,8 @@ export const FLOW_DEMO = {
       amountReviewLabel: "AMOUNT",
       processingMethodLabel: "PROCESSING METHOD",
       saveAsTemplate: "SAVE AS TEMPLATE",
-      payNote: "After clicking on PAY the payment process will be started and the amount will be deducted from your account",
-      payCta: "PAY",
+      payNote: "After clicking on Pay the payment process will be started and the amount will be deducted from your account",
+      payCta: "Pay",
 
       successTitle: "Payment order is successfully sent",
       successBody:
@@ -586,6 +675,12 @@ export const FLOW_DEMO = {
       successBody2:
         "Be on top of your finances! Track your spending per category to have full overview of your financial habits.",
       successCta: "Ok, I got it",
+      successPolicyLabel: "Policy number",
+      successPremiumLabel: "Premium paid",
+      successPeriodLabel: "Cover period",
+      successStatusLabel: "Policy status",
+      successDelivery:
+        "Generali sends the policy and the payment confirmation to your e-mail address. The policy is not stored in the app.",
     },
 
     /** Returned by the insurer once the request is registered, before payment. */

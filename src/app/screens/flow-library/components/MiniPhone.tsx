@@ -1,4 +1,4 @@
-import { forwardRef, type CSSProperties, type ReactNode } from "react";
+import { forwardRef, useCallback, useRef, type CSSProperties, type ReactNode } from "react";
 import DynamicIsland from "@/app/components/DynamicIsland";
 import StatusBar from "@/app/components/StatusBar";
 
@@ -36,11 +36,23 @@ export interface MiniPhoneProps {
 
 /** Bezel thickness, matching the Demo frame's `p-3`. */
 const BEZEL = 12;
+/** Outer corner of the device shell, before scaling. */
+const BEZEL_RADIUS = 48;
 
 const MiniPhone = forwardRef<HTMLDivElement, MiniPhoneProps>(function MiniPhone(
   { children, scale = 0.62, statusBarVariant = "light", topReserve = 44, scrollable = false, device = false, className },
   ref,
 ) {
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const setFrame = useCallback(
+    (node: HTMLDivElement | null) => {
+      frameRef.current = node;
+      if (typeof ref === "function") ref(node);
+      else if (ref) (ref as { current: HTMLDivElement | null }).current = node;
+    },
+    [ref],
+  );
+
   const frameStyle = {
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
@@ -51,7 +63,7 @@ const MiniPhone = forwardRef<HTMLDivElement, MiniPhoneProps>(function MiniPhone(
 
   const screen = (
     <div
-      ref={ref}
+      ref={setFrame}
       data-flow-screen-capture="true"
       className={
         device
@@ -85,12 +97,22 @@ const MiniPhone = forwardRef<HTMLDivElement, MiniPhoneProps>(function MiniPhone(
       // A device frame never scrolls as a whole — the screen inside it does, the
       // way a real phone behaves. Only the plain preview surface scrolls, because
       // there the frame is scaled down and the content can outgrow it.
-      className={`relative shrink-0 ${device ? "overflow-hidden rounded-[48px]" : scrollable ? "overflow-x-hidden overflow-y-auto overscroll-contain scrollbar-hide" : "overflow-hidden"} ${className ?? ""}`}
-      style={{ width: outerWidth, height: outerHeight, touchAction: scrollable ? "pan-y" : undefined }}
+      className={`relative shrink-0 ${device ? "overflow-hidden" : scrollable ? "overflow-x-hidden overflow-y-auto overscroll-contain scrollbar-hide" : "overflow-hidden"} ${className ?? ""}`}
+      style={{
+        width: outerWidth,
+        height: outerHeight,
+        borderRadius: device ? BEZEL_RADIUS * scale : undefined,
+        touchAction: scrollable ? "pan-y" : undefined,
+      }}
     >
       {device ? (
+        // Absolute, not in flow: a transform does not shrink the layout box, so an
+        // in-flow child reports its full unscaled height to the wrapper. That left
+        // the wrapper with ~120px of scrollable overflow it was never meant to have,
+        // and anything that scrolled it slid the phone around inside its own clip.
+        // Out of flow, the wrapper measures exactly the frame it shows.
         <div
-          className="relative"
+          className="absolute left-0 top-0"
           style={{
             width: SCREEN_WIDTH + BEZEL * 2,
             height: SCREEN_HEIGHT + BEZEL * 2,
@@ -98,12 +120,10 @@ const MiniPhone = forwardRef<HTMLDivElement, MiniPhoneProps>(function MiniPhone(
             transformOrigin: "top left",
           }}
         >
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 translate-y-8 bg-[rgb(var(--uc-static-black-rgb)_/_0.2)] blur-3xl"
-            data-flow-device-shadow="true"
-          />
-          <div className="relative rounded-[48px] bg-[var(--uc-static-black)] p-3 shadow-2xl">{screen}</div>
+          {/* The frame carries its own elevation. The blurred overlay that used to
+              sit behind it could only paint a hard-edged smear against the wrapper
+              clip rather than a shadow. */}
+          <div className="relative h-full rounded-[48px] bg-[var(--uc-static-black)] p-3 shadow-2xl">{screen}</div>
         </div>
       ) : (
         screen

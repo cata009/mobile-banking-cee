@@ -24,13 +24,12 @@ import {
   type FlowExportStep,
 } from "../flowExport";
 
-type DetailTab = "overview" | "journey" | "spec" | "prototype";
+type DetailTab = "journey" | "spec" | "prototype";
 type JourneyView = "focused" | "filmstrip";
 
 const TABS: Array<{ id: DetailTab; label: string }> = [
-  { id: "overview", label: "Overview" },
   { id: "journey", label: "Journey" },
-  { id: "spec", label: "Spec" },
+  { id: "spec", label: "Specification" },
   { id: "prototype", label: "Prototype" },
 ];
 
@@ -67,7 +66,8 @@ export default function FlowDetail({
   flow: FlowDefinition;
   onBackToIndex: () => void;
 }) {
-  const [activeTab, setActiveTab] = useState<DetailTab>("overview");
+  const [activeTab, setActiveTab] = useState<DetailTab>("journey");
+  const tabsRef = useRef<HTMLDivElement>(null);
   const [requestedScenarioId, setRequestedScenarioId] = useState(flow.defaultScenarioId);
   const [stepIndex, setStepIndex] = useState(0);
   const [journeyView, setJourneyView] = useState<JourneyView>("focused");
@@ -159,9 +159,26 @@ export default function FlowDetail({
         onExport={handleExport}
       />
 
-      <DetailTabs activeTab={activeTab} onTabChange={setActiveTab} hasPrototype={Boolean(flow.prototype)} />
-
-      {activeTab === "overview" ? <OverviewPanel flow={flow} /> : null}
+      {/*
+        Switching tabs keeps the tab strip where it already is. Without this the
+        browser holds the old scroll offset against a panel of a different height,
+        so the reader lands somewhere arbitrary in the new tab and has to hunt
+        back up to the tabs to move again.
+      */}
+      <div ref={tabsRef} className="scroll-mt-[16px]">
+        <DetailTabs
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            setActiveTab(tab);
+            requestAnimationFrame(() => {
+              const strip = tabsRef.current;
+              if (!strip) return;
+              if (strip.getBoundingClientRect().top < 0) strip.scrollIntoView({ block: "start" });
+            });
+          }}
+          hasPrototype={Boolean(flow.prototype)}
+        />
+      </div>
 
       {activeTab === "journey" ? (
         <JourneyPanel
@@ -173,6 +190,11 @@ export default function FlowDetail({
           onScenarioSelect={selectScenario}
           onStepSelect={setStepIndex}
           onJourneyViewChange={setJourneyView}
+          onOpenSpec={(index) => {
+            setStepIndex(index);
+            setActiveTab("spec");
+            requestAnimationFrame(() => tabsRef.current?.scrollIntoView({ block: "start" }));
+          }}
         />
       ) : null}
 
@@ -182,6 +204,7 @@ export default function FlowDetail({
           scenario={scenario}
           activeStep={activeStep}
           activeStepIndex={safeStepIndex}
+          countryName={countryName}
           onScenarioSelect={selectScenario}
           onStepSelect={setStepIndex}
         />
@@ -215,11 +238,10 @@ function FlowHeader({
   onExport: (kind: "pdf" | "word") => void;
 }) {
   return (
-    <header className="rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[24px] shadow-sm">
+    <header data-testid="flow-detail-header" className="rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[24px] shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-[20px] sm:flex-nowrap">
         <div className="min-w-0 flex-1">
-          <p className="uc-type-n5-strong uppercase tracking-[0.04em] text-[var(--uc-action)]">{flow.domain}</p>
-          <h1 className="mt-[6px] text-[32px] font-bold leading-[38px] text-[var(--uc-text)]">{flow.title}</h1>
+            <h1 className="text-[32px] font-bold leading-[38px] text-[var(--uc-text)]">{flow.title}</h1>
           <p className="mt-[10px] uc-type-n4 text-[var(--uc-text-muted)]">{flow.summary}</p>
         </div>
 
@@ -371,7 +393,8 @@ function ScenarioChips({
   onSelect: (scenarioId: string) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-[8px]">
+    <div className="flex flex-wrap items-center gap-[8px]">
+      <span className="uc-type-n6-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">Path</span>
       {scenarios.map((scenario) => (
         <SelectionChip
           key={scenario.id}
@@ -386,75 +409,6 @@ function ScenarioChips({
   );
 }
 
-function OverviewPanel({ flow }: { flow: FlowDefinition }) {
-  const { overview } = flow;
-  const marketCount = flow.countryScope.length;
-  return (
-    <div className="grid gap-[24px]">
-      <Panel title="At a glance" compact>
-        <div data-testid="flow-overview-meta" className="grid grid-cols-2 gap-px overflow-hidden rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-border)] sm:grid-cols-3">
-          <MetaCell label="Domain" value={flow.domain} />
-          <MetaCell
-            label="Markets"
-            value={`${marketCount} market${marketCount === 1 ? "" : "s"}`}
-            detail={flow.countryScope.join(" · ")}
-            testId="flow-overview-country-summary"
-          />
-          <MetaCell label="Journey paths" value={`${flow.scenarios.length} path${flow.scenarios.length === 1 ? "" : "s"}`} />
-        </div>
-
-        <div className="mt-[12px] grid gap-[10px]">
-          <OverviewNarrative title="Purpose" className="border-[var(--uc-border)] bg-[var(--uc-surface-muted)] text-[var(--uc-text)]">
-            {overview.purpose}
-          </OverviewNarrative>
-          <OverviewNarrative title="Scope and demo note" className="border-[var(--uc-border)] bg-[var(--uc-surface-muted)] text-[var(--uc-text-muted)]">
-            {overview.scopeNote}
-          </OverviewNarrative>
-        </div>
-      </Panel>
-
-      <Panel title="Entry points">
-        <div className="grid gap-[12px] sm:grid-cols-3">
-          {overview.entryPoints.map((entry) => (
-            <div key={entry.label} className="rounded-[8px] bg-[var(--uc-surface-muted)] p-[14px]">
-              <p className="uc-type-n5-strong text-[var(--uc-text)]">{entry.label}</p>
-              <p className="mt-[4px] uc-type-n5 text-[var(--uc-text-muted)]">{entry.intent}</p>
-            </div>
-          ))}
-        </div>
-      </Panel>
-
-    </div>
-  );
-}
-
-function MetaCell({ label, value, detail, testId }: { label: string; value: string; detail?: string; testId?: string }) {
-  return (
-    <div data-testid={testId} className="bg-[var(--uc-surface)] p-[10px]">
-      <p className="uc-type-n5-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">{label}</p>
-      <p className="mt-[2px] uc-type-n5-strong text-[var(--uc-text)]">{value}</p>
-      {detail ? <p className="mt-[2px] uc-type-n6 text-[var(--uc-text-muted)]">{detail}</p> : null}
-    </div>
-  );
-}
-
-function OverviewNarrative({
-  title,
-  className,
-  children,
-}: {
-  title: string;
-  className: string;
-  children: ReactNode;
-}) {
-  return (
-    <section className={`rounded-[8px] border-l-[3px] px-[12px] py-[10px] ${className}`}>
-      <p className="uc-type-n5-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">{title}</p>
-      <p className="mt-[3px] max-w-[980px] uc-type-n5">{children}</p>
-    </section>
-  );
-}
-
 function JourneyPanel({
   flow,
   scenario,
@@ -464,6 +418,7 @@ function JourneyPanel({
   onScenarioSelect,
   onStepSelect,
   onJourneyViewChange,
+  onOpenSpec,
 }: {
   flow: FlowDefinition;
   scenario: FlowScenario;
@@ -473,6 +428,8 @@ function JourneyPanel({
   onScenarioSelect: (scenarioId: string) => void;
   onStepSelect: (index: number) => void;
   onJourneyViewChange: (view: JourneyView) => void;
+  /** Opens the Spec tab already on this step's screen. */
+  onOpenSpec: (index: number) => void;
 }) {
   const activeStep = scenario.steps[activeStepIndex] ?? scenario.steps[0];
   const focusedScreenRef = useRef<HTMLDivElement>(null);
@@ -512,39 +469,60 @@ function JourneyPanel({
       {scenario.steps.length === 0 ? (
         <EmptyState message="No steps are configured for this scenario yet." />
       ) : journeyView === "focused" ? (
-        <div className="mt-[20px] grid gap-[24px] xl:grid-cols-[380px_1fr]">
-          <div className="grid gap-[8px]">
-            {scenario.steps.map((step, index) => {
-              const active = index === activeStepIndex;
-              return (
-                <button
-                  key={step.id}
-                  type="button"
-                  onClick={() => onStepSelect(index)}
-                  aria-current={active}
-                  className={`flex min-h-[58px] items-center gap-[12px] rounded-[8px] border px-[12px] text-left transition-colors ${
-                    active
-                      ? "border-[var(--uc-action)] bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))]"
-                      : "border-[var(--uc-border)] bg-[var(--uc-surface)] hover:border-[var(--uc-action)]"
-                  }`}
-                >
-                  <span
-                    className={`grid size-[26px] shrink-0 place-items-center rounded-full uc-type-n5-strong ${
-                      active ? "bg-[var(--uc-action)] text-[var(--uc-text-inverse)]" : "bg-[var(--uc-surface-muted)] text-[var(--uc-text-muted)]"
+        <div className="mt-[20px] grid items-start gap-[24px] xl:grid-cols-[380px_1fr]">
+          {/*
+            The list scrolls inside its own box rather than stretching the row, so
+            the screen beside it keeps one height whatever the scenario's length.
+            The fade at the bottom is the affordance: a list cut off by a hard edge
+            reads as the end of the list.
+          */}
+          <div className="relative">
+            <div
+              data-testid="journey-step-list"
+              className="grid max-h-[664px] gap-[8px] overflow-y-auto overscroll-contain pr-[6px] scrollbar-hide"
+            >
+              {scenario.steps.map((step, index) => {
+                const active = index === activeStepIndex;
+                return (
+                  <div
+                    key={step.id}
+                    className={`group/step relative rounded-[8px] border transition-colors ${
+                      active
+                        ? "border-[var(--uc-action)] bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))]"
+                        : "border-[var(--uc-border)] bg-[var(--uc-surface)] hover:border-[var(--uc-action)]"
                     }`}
                   >
-                    {index + 1}
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block uc-type-n5-strong text-[var(--uc-text)]">{step.title}</span>
-                    <span className="mt-[2px] block uc-type-n5 text-[var(--uc-text-muted)]">{step.description}</span>
-                  </span>
-                </button>
-              );
-            })}
+                    <button
+                      type="button"
+                      onClick={() => onStepSelect(index)}
+                      aria-current={active}
+                      aria-label={step.title}
+                      className="flex min-h-[58px] w-full items-center gap-[12px] px-[12px] py-[10px] pr-[40px] text-left"
+                    >
+                      <span
+                        className={`grid size-[26px] shrink-0 place-items-center rounded-full uc-type-n5-strong ${
+                          active ? "bg-[var(--uc-action)] text-[var(--uc-text-inverse)]" : "bg-[var(--uc-surface-muted)] text-[var(--uc-text-muted)]"
+                        }`}
+                      >
+                        {index + 1}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block uc-type-n5-strong text-[var(--uc-text)]">{step.title}</span>
+                        <span className="mt-[2px] block uc-type-n5 text-[var(--uc-text-muted)]">{step.description}</span>
+                      </span>
+                    </button>
+                    <ScreenSpecLink onClick={() => onOpenSpec(index)} title={step.title} />
+                  </div>
+                );
+              })}
+            </div>
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-[36px] rounded-b-[8px] bg-gradient-to-t from-[var(--uc-surface)] to-transparent"
+            />
           </div>
           <div
-            className="relative flex min-h-[540px] items-center justify-center rounded-[8px] border border-[var(--uc-border-muted)] bg-[var(--uc-neutral-200)] p-[24px]"
+            className="relative flex h-[664px] items-center justify-center rounded-[8px] border border-[var(--uc-border-muted)] bg-[var(--uc-neutral-200)] p-[24px]"
             data-testid="journey-current-screen-container"
           >
             {activeStep ? (
@@ -563,7 +541,7 @@ function JourneyPanel({
             <div className="flex min-w-max items-start gap-[12px]">
               {scenario.steps.map((step, index) => (
                 <div key={step.id} className="flex items-start gap-[12px]">
-                  <FilmstripCard step={step} index={index} countryName={countryName} />
+                  <FilmstripCard step={step} index={index} countryName={countryName} onOpenSpec={() => onOpenSpec(index)} />
                   {index < scenario.steps.length - 1 ? <JourneyArrow /> : null}
                 </div>
               ))}
@@ -662,12 +640,14 @@ function FilmstripCard({
   countryName,
   contextLabel,
   testId,
+  onOpenSpec,
 }: {
   step: FlowStep;
   index: number;
   countryName: string;
   contextLabel?: string;
   testId?: string;
+  onOpenSpec?: () => void;
 }) {
   const screenRef = useRef<HTMLDivElement>(null);
 
@@ -684,6 +664,7 @@ function FilmstripCard({
         {index + 1}. {step.title}
       </h3>
       <p className="mt-[4px] uc-type-n5 text-[var(--uc-text-muted)]">{step.description}</p>
+      {onOpenSpec ? <ScreenSpecLink onClick={onOpenSpec} title={step.title} variant="block" /> : null}
     </article>
   );
 }
@@ -740,6 +721,89 @@ function FlowScreenDownloadButton({
       title={`Download complete ${step.title} screen`}
     >
       <AppIcon name="download" size={16} color="currentColor" />
+    </button>
+  );
+}
+
+/**
+ * The route from a screen to the words about it. A BA looking at a journey card
+ * should not have to change tab, find the scenario again and count chips to reach
+ * the spec for the screen already in front of them.
+ */
+function ScreenSpecLink({ onClick, title, variant = "corner" }: { onClick: () => void; title: string; variant?: "corner" | "block" }) {
+  if (variant === "block") {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="mt-[10px] flex w-full items-center justify-center gap-[6px] rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[10px] py-[7px] uc-type-n5-strong text-[var(--uc-action)] transition-colors hover:border-[var(--uc-action)]"
+        aria-label={`Open the screen spec for ${title}`}
+      >
+        <AppIcon name="clipboard-check" size={14} color="currentColor" />
+        Screen spec
+      </button>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="absolute right-[8px] top-1/2 grid size-[28px] -translate-y-1/2 place-items-center rounded-full border border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text-muted)] transition-colors hover:border-[var(--uc-action)] hover:text-[var(--uc-action)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+      aria-label={`Open the screen spec for ${title}`}
+      title={`Screen spec: ${title}`}
+    >
+      <AppIcon name="clipboard-check" size={14} color="currentColor" />
+    </button>
+  );
+}
+
+/**
+ * The spec's own download: a labelled control under the picture rather than a
+ * glyph floating over it. It captures the whole screen, not the part that happens
+ * to be scrolled into view, which is the only version worth putting in a document.
+ */
+function FlowScreenDownloadLink({
+  screenRef,
+  step,
+  index,
+}: {
+  screenRef: { current: HTMLDivElement | null };
+  step: FlowStep;
+  index: number;
+}) {
+  const [busy, setBusy] = useState(false);
+
+  const handleDownload = async () => {
+    const element = screenRef.current;
+    if (!element || busy) return;
+    setBusy(true);
+    try {
+      const { blob } = await createPhoneScreenshotBlob({ screenElement: element, mode: "full" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `flow-step-${index + 1}-${step.id}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      // Non-fatal: the preview stays usable.
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleDownload}
+      disabled={busy}
+      data-flow-download-mode="full"
+      className="mt-[10px] flex w-full items-center justify-center gap-[6px] rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[12px] py-[8px] uc-type-n5-strong text-[var(--uc-action)] transition-colors hover:border-[var(--uc-action)] disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      <AppIcon name="download" size={16} color="currentColor" />
+      {busy ? "Preparing PNG…" : "Download entire screen (PNG)"}
     </button>
   );
 }
@@ -909,18 +973,27 @@ function PrototypePanel({
               onClick={nav.primary}
             />
 
-            {screen !== prototype.start ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setHistory([]);
-                  setScreen(prototype.start);
-                }}
-                className="shrink-0 rounded-[8px] border border-[var(--uc-border)] px-[12px] py-[9px] uc-type-n5-strong text-[var(--uc-text)] transition-colors hover:border-[var(--uc-action)]"
-              >
-                Restart
-              </button>
-            ) : null}
+            {/*
+              Rendered on every screen and merely hidden on the first one. A
+              control that appears mid-row pushes its neighbours sideways, so the
+              forward arrow would land in a different place depending on how far
+              through the flow you are — and that arrow is the one thing a reviewer
+              clicks repeatedly.
+            */}
+            <button
+              type="button"
+              onClick={() => {
+                setHistory([]);
+                setScreen(prototype.start);
+              }}
+              aria-hidden={screen === prototype.start}
+              tabIndex={screen === prototype.start ? -1 : 0}
+              className={`shrink-0 rounded-[8px] border border-[var(--uc-border)] px-[12px] py-[9px] uc-type-n5-strong text-[var(--uc-text)] transition-colors hover:border-[var(--uc-action)] ${
+                screen === prototype.start ? "pointer-events-none invisible" : ""
+              }`}
+            >
+              Restart
+            </button>
           </div>
 
           {/* Where you are, and the branches leaving it — one line each. */}
@@ -1018,6 +1091,7 @@ function SpecPanel({
   scenario,
   activeStep,
   activeStepIndex,
+  countryName,
   onScenarioSelect,
   onStepSelect,
 }: {
@@ -1025,6 +1099,7 @@ function SpecPanel({
   scenario: FlowScenario;
   activeStep: FlowStep | undefined;
   activeStepIndex: number;
+  countryName: string;
   onScenarioSelect: (scenarioId: string) => void;
   onStepSelect: (index: number) => void;
 }) {
@@ -1054,17 +1129,31 @@ function SpecPanel({
       <Panel title="Screen spec">
         <ScenarioChips scenarios={flow.scenarios} selectedScenarioId={scenario.id} onSelect={onScenarioSelect} />
         {scenario.steps.length > 0 ? (
-          <div className="mt-[12px] flex flex-wrap gap-[8px]">
-            {scenario.steps.map((step, index) => (
-              <SelectionChip key={step.id} active={index === activeStepIndex} onClick={() => onStepSelect(index)}>
-                {index + 1}. {step.title}
-              </SelectionChip>
-            ))}
+          <div className="mt-[12px] flex flex-wrap items-center gap-[6px] border-t border-[var(--uc-border)] pt-[12px]">
+            <span className="uc-type-n6-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">Screen</span>
+            {scenario.steps.map((step, index) => {
+              const active = index === activeStepIndex;
+              return (
+                <button
+                  key={step.id}
+                  type="button"
+                  onClick={() => onStepSelect(index)}
+                  aria-current={active ? "true" : undefined}
+                  className={`rounded-[6px] border px-[10px] py-[6px] uc-type-n5-strong transition-colors ${
+                    active
+                      ? "border-[var(--uc-action)] bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] text-[var(--uc-action)]"
+                      : "border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text-muted)] hover:border-[var(--uc-action)] hover:text-[var(--uc-text)]"
+                  }`}
+                >
+                  {index + 1}. {step.title}
+                </button>
+              );
+            })}
           </div>
         ) : null}
 
         {activeStep && spec ? (
-          <ScreenSpecView step={activeStep} spec={spec} />
+          <ScreenSpecView step={activeStep} spec={spec} stepIndex={activeStepIndex} countryName={countryName} />
         ) : (
           <EmptyState message="No structured spec is attached to this screen yet." />
         )}
@@ -1075,84 +1164,142 @@ function SpecPanel({
   );
 }
 
-function ScreenSpecView({ step, spec }: { step: FlowStep; spec: FlowScreenSpec }) {
+/**
+ * One screen and everything specified about it, side by side: the screen on the
+ * left at full content height, the specification on the right as one continuous
+ * read.
+ *
+ * No accordions here. A screen spec is short enough to take in at once, and
+ * folding six headings over it made a reviewer click five times to see what they
+ * came for. The folding belongs to the long documents around it, not to this.
+ */
+function ScreenSpecView({
+  step,
+  spec,
+  stepIndex,
+  countryName,
+}: {
+  step: FlowStep;
+  spec: FlowScreenSpec;
+  stepIndex: number;
+  countryName: string;
+}) {
+  const screenRef = useRef<HTMLDivElement>(null);
   return (
-    <div className="mt-[18px] grid gap-[18px]">
-      <div>
-        <p className="uc-type-n5-strong uppercase tracking-[0.04em] text-[var(--uc-action)]">{step.title}</p>
-        <p className="mt-[4px] uc-type-n4 text-[var(--uc-text)]">{spec.purpose}</p>
+    <div className="mt-[18px] flex flex-col gap-[24px] xl:flex-row xl:items-start">
+      <div className="shrink-0">
+        <MiniPhone ref={screenRef} scale={0.62} scrollable device>
+          {renderFlowPreview(step.screen, { countryName })}
+        </MiniPhone>
+        <FlowScreenDownloadLink screenRef={screenRef} step={step} index={stepIndex} />
       </div>
 
-      {spec.states?.length ? (
-        <SpecBlock title="UI states">
-          <BulletList items={spec.states} />
-        </SpecBlock>
-      ) : null}
+      <div className="grid min-w-0 flex-1 gap-[20px]">
+        <div>
+          <p className="uc-type-n5-strong uppercase tracking-[0.04em] text-[var(--uc-action)]">{step.title}</p>
+          <p className="mt-[6px] uc-type-n4 text-[var(--uc-text)]">{spec.purpose}</p>
+          {step.description ? (
+            <p className="mt-[10px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">{step.description}</p>
+          ) : null}
+        </div>
 
-      {spec.fields?.length ? (
-        <SpecBlock title="Fields">
-          <table className="w-full border-collapse overflow-hidden rounded-[8px] text-left">
-            <thead>
-              <tr className="bg-[var(--uc-surface-muted)]">
-                {["Field", "Type", "Required", "Validation"].map((heading) => (
-                  <th key={heading} className="border border-[var(--uc-border)] px-[10px] py-[7px] uc-type-n5-strong uppercase tracking-[0.03em] text-[var(--uc-text-muted)]">
-                    {heading}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {spec.fields.map((field) => (
-                <tr key={field.name}>
-                  <td className="border border-[var(--uc-border)] px-[10px] py-[7px] uc-type-n5-strong text-[var(--uc-text)]">{field.name}</td>
-                  <td className="border border-[var(--uc-border)] px-[10px] py-[7px] uc-type-n5 text-[var(--uc-text)]">{field.type}</td>
-                  <td className="border border-[var(--uc-border)] px-[10px] py-[7px] uc-type-n5 text-[var(--uc-text-muted)]">{field.required ? "Yes" : "No"}</td>
-                  <td className="border border-[var(--uc-border)] px-[10px] py-[7px] uc-type-n5 text-[var(--uc-text-muted)]">
-                    {[field.validation, field.notes].filter(Boolean).join(" — ") || "—"}
-                  </td>
-                </tr>
+        {spec.states?.length ? (
+          <SpecSection title="UI states">
+            <BulletList items={spec.states} />
+          </SpecSection>
+        ) : null}
+
+        {spec.fields?.length ? (
+          <SpecSection title="Fields">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[520px] border-collapse text-left">
+                <thead>
+                  <tr className="bg-[var(--uc-surface-muted)]">
+                    {["Field", "Type", "Required", "Validation"].map((heading) => (
+                      <th key={heading} className="border border-[var(--uc-border)] px-[10px] py-[7px] uc-type-n6-strong uppercase tracking-[0.03em] text-[var(--uc-text-muted)]">
+                        {heading}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {spec.fields.map((field) => (
+                    <tr key={field.name}>
+                      <td className="border border-[var(--uc-border)] px-[10px] py-[7px] uc-type-n5-strong text-[var(--uc-text)]">{field.name}</td>
+                      <td className="border border-[var(--uc-border)] px-[10px] py-[7px] uc-type-n5 text-[var(--uc-text)]">{field.type}</td>
+                      <td className="border border-[var(--uc-border)] px-[10px] py-[7px] uc-type-n5 text-[var(--uc-text-muted)]">{field.required ? "Yes" : "No"}</td>
+                      <td className="border border-[var(--uc-border)] px-[10px] py-[7px] uc-type-n5 text-[var(--uc-text-muted)]">
+                        {[field.validation, field.notes].filter(Boolean).join(" · ") || "Not specified"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </SpecSection>
+        ) : null}
+
+        {spec.actions?.length ? (
+          <SpecSection title="Actions">
+            <div className="grid gap-[6px]">
+              {spec.actions.map((action) => (
+                <div key={action.label} className="flex flex-wrap gap-[8px] rounded-[8px] bg-[var(--uc-surface-muted)] px-[12px] py-[9px]">
+                  <span className="uc-type-n5-strong text-[var(--uc-text)]">{action.label}</span>
+                  <span className="uc-type-n5 text-[var(--uc-text-muted)]">→ {action.result}</span>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </SpecBlock>
-      ) : null}
+            </div>
+          </SpecSection>
+        ) : null}
 
-      {spec.actions?.length ? (
-        <SpecBlock title="Actions">
-          <div className="grid gap-[8px]">
-            {spec.actions.map((action) => (
-              <div key={action.label} className="flex flex-wrap gap-[8px] rounded-[8px] bg-[var(--uc-surface-muted)] px-[12px] py-[9px]">
-                <span className="uc-type-n5-strong text-[var(--uc-text)]">{action.label}</span>
-                <span className="uc-type-n5 text-[var(--uc-text-muted)]">→ {action.result}</span>
-              </div>
-            ))}
-          </div>
-        </SpecBlock>
-      ) : null}
+        {spec.back ? (
+          <SpecSection title="Back behavior">
+            <p className="uc-type-n5 leading-[20px] text-[var(--uc-text)]">{spec.back}</p>
+          </SpecSection>
+        ) : null}
 
-      {spec.back ? (
-        <SpecBlock title="Back behavior">
-          <p className="uc-type-n5 text-[var(--uc-text)]">{spec.back}</p>
-        </SpecBlock>
-      ) : null}
+        {spec.edgeCases?.length ? (
+          <SpecSection title="Edge cases">
+            <BulletList items={spec.edgeCases} />
+          </SpecSection>
+        ) : null}
 
-      {spec.edgeCases?.length ? (
-        <SpecBlock title="Edge cases">
-          <BulletList items={spec.edgeCases} />
-        </SpecBlock>
-      ) : null}
-
-      {spec.acceptance?.length ? (
-        <SpecBlock title="Acceptance criteria">
-          <BulletList items={spec.acceptance} />
-        </SpecBlock>
-      ) : null}
+        {spec.acceptance?.length ? (
+          <SpecSection title="Acceptance criteria">
+            <BulletList items={spec.acceptance} />
+          </SpecSection>
+        ) : null}
+      </div>
     </div>
+  );
+}
+
+/** A labelled run of spec copy. A heading and its content, nothing to open. */
+function SpecSection({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section>
+      <h3 className="uc-type-n6-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">{title}</h3>
+      <div className="mt-[8px]">{children}</div>
+    </section>
   );
 }
 
 function FlowLevelSpec({ flow }: { flow: FlowDefinition }) {
   const { overview } = flow;
+  const fixedBlocks = [
+    "Key decision rules",
+    "Preconditions",
+    "Expected result",
+    "Analytics events",
+    "Questions to close",
+  ];
+  const blockTitles = [...fixedBlocks, ...overview.notes.map((note) => note.title)];
+  const badgeFor = (title: string) => String(blockTitles.indexOf(title) + 1).padStart(2, "0");
+  const jumpItems = blockTitles.map((title) => ({
+    id: `spec-block-${slugify(title)}`,
+    label: title,
+  }));
+  const disclosure = useSectionDisclosure(jumpItems.map((item) => item.id));
 
   return (
     <Panel title="Flow specification">
@@ -1160,17 +1307,23 @@ function FlowLevelSpec({ flow }: { flow: FlowDefinition }) {
         A practical reference for review and implementation. Each rule describes the expected customer-facing outcome and
         the data that must stay unchanged.
       </p>
+      <SectionJump
+        items={jumpItems}
+        onJump={disclosure.jump}
+        allOpen={disclosure.allOpen}
+        onToggleAll={disclosure.toggleAll}
+      />
       <div className="mt-[14px] grid gap-[12px]">
-        <SpecBlock title="Key decision rules" description="What must happen consistently across the supported Mobile PI markets.">
+        <SpecBlock badge={badgeFor("Key decision rules")} disclosure={disclosure} title="Key decision rules" description="What must happen consistently across the supported markets.">
           <BusinessRuleList items={overview.businessRules} />
         </SpecBlock>
-        <SpecBlock title="Preconditions" description="Data and ledger conditions that must be true before enrichment is shown.">
+        <SpecBlock badge={badgeFor("Preconditions")} disclosure={disclosure} title="Preconditions" description="Data and ledger conditions that must be true before enrichment is shown.">
           <BulletList items={overview.preconditions} />
         </SpecBlock>
-        <SpecBlock title="Expected result" description="Where customers see the completed experience.">
+        <SpecBlock badge={badgeFor("Expected result")} disclosure={disclosure} title="Expected result" description="Where customers see the completed experience.">
           <BulletList items={overview.successDestinations} />
         </SpecBlock>
-        <SpecBlock title="Analytics events" description="Events available for delivery and adoption monitoring.">
+        <SpecBlock badge={badgeFor("Analytics events")} disclosure={disclosure} title="Analytics events" description="Events available for delivery and adoption monitoring.">
           <div className="flex flex-wrap gap-[8px]">
             {overview.analyticsEvents.map((event) => (
               <code key={event} className="rounded-[6px] bg-[var(--uc-surface-muted)] px-[8px] py-[4px] font-mono text-[12px] text-[var(--uc-text)]">
@@ -1179,11 +1332,11 @@ function FlowLevelSpec({ flow }: { flow: FlowDefinition }) {
             ))}
           </div>
         </SpecBlock>
-        <SpecBlock title="Questions to close" description="Items that require a product or delivery decision before release.">
+        <SpecBlock badge={badgeFor("Questions to close")} disclosure={disclosure} title="Questions to close" description="Items that require a product or delivery decision before release.">
           <BulletList items={overview.openQuestions} />
         </SpecBlock>
         {overview.notes.map((note) => (
-          <SpecBlock key={note.title} title={note.title} description="Additional implementation context.">
+          <SpecBlock key={note.title} badge={badgeFor(note.title)} disclosure={disclosure} title={note.title} description="Additional implementation context.">
             <p className="whitespace-pre-line uc-type-n5 text-[var(--uc-text-muted)]">{note.body}</p>
           </SpecBlock>
         ))}
@@ -1192,18 +1345,29 @@ function FlowLevelSpec({ flow }: { flow: FlowDefinition }) {
   );
 }
 
+const BA_SECTION_TITLES: Array<{ number: string; title: string }> = [
+  { number: "01", title: "General information" },
+  { number: "02", title: "Open issues" },
+  { number: "03", title: "Requirement" },
+  { number: "04", title: "Current status" },
+  { number: "05", title: "Proposed solution" },
+  { number: "06", title: "Non-functional requirements" },
+];
+
 function BusinessAnalysisContent({ analysis }: { analysis: FlowBusinessAnalysisSpec }) {
+  const disclosure = useSectionDisclosure(BA_SECTION_TITLES.map((entry) => `ba-section-${entry.number}`));
   return (
     <div data-testid="business-analysis-document" className="max-w-[1120px]">
-      <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] px-[14px] py-[12px]">
-        <p className="uc-type-n5-strong text-[var(--uc-text)]">Reading guide</p>
-        <p className="mt-[3px] uc-type-n5 text-[var(--uc-text-muted)]">
-          One review document for product, design and delivery. Shared rules appear once; booked, pending, account,
-          detail and fallback specifics sit in their relevant section. Credentials, service topology and live operational data are excluded.
-        </p>
-      </div>
+      {/* Eight sections is a document, not a page: it needs a way in other than
+          scrolling from the top every time. */}
+      <SectionJump
+        items={BA_SECTION_TITLES.map((entry) => ({ id: `ba-section-${entry.number}`, label: entry.title, badge: entry.number }))}
+        onJump={disclosure.jump}
+        allOpen={disclosure.allOpen}
+        onToggleAll={disclosure.toggleAll}
+      />
       <div className="mt-[14px] grid gap-[12px]">
-        <BusinessAnalysisSection number="01" title="General information" description="The shared business context for product, design and delivery review.">
+        <BusinessAnalysisSection number="01" title="General information" description="The shared business context for product, design and delivery review." disclosure={disclosure}>
           <div className="grid overflow-hidden rounded-[8px] border border-[var(--uc-border)] sm:grid-cols-2">
             {analysis.generalInformation.map((fact) => (
               <div key={fact.label} className="border-b border-[var(--uc-border)] bg-[var(--uc-surface)] p-[12px] last:border-b-0 sm:[&:nth-last-child(-n+2)]:border-b-0 sm:[&:nth-odd]:border-r">
@@ -1213,63 +1377,44 @@ function BusinessAnalysisContent({ analysis }: { analysis: FlowBusinessAnalysisS
             ))}
           </div>
         </BusinessAnalysisSection>
-        <BusinessAnalysisSection number="02" title="Version history" description="A compact document history aligned to the BA structure.">
-          <div className="overflow-x-auto rounded-[8px] border border-[var(--uc-border)]">
-          <table className="w-full min-w-[520px] border-collapse text-left">
-            <thead>
-              <tr className="bg-[var(--uc-surface-muted)]">
-                {['Version', 'Date', 'Detail'].map((heading) => (
-                  <th key={heading} className="border-b border-r border-[var(--uc-border)] px-[12px] py-[8px] text-left uc-type-n6-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)] last:border-r-0">{heading}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {analysis.versionHistory.map((entry) => (
-                <tr key={`${entry.version}-${entry.date}`}>
-                  <td className="border-b border-r border-[var(--uc-border)] px-[12px] py-[9px] uc-type-n5-strong text-[var(--uc-text)]">{entry.version}</td>
-                  <td className="border-b border-r border-[var(--uc-border)] px-[12px] py-[9px] uc-type-n5 text-[var(--uc-text)]">{entry.date}</td>
-                  <td className="border-b border-[var(--uc-border)] px-[12px] py-[9px] uc-type-n5 text-[var(--uc-text)]">{entry.detail}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
-        </BusinessAnalysisSection>
-        <BusinessAnalysisSection number="03" title="Version & change context" description="How this review artifact relates to the existing BA outline.">
-          <p className="uc-type-n5 text-[var(--uc-text)]">{analysis.versionContext}</p>
-        </BusinessAnalysisSection>
-        <BusinessAnalysisSection number="04" title="Open issues" description="Scope boundaries and decisions to close before a production release.">
-          <div className="grid gap-[8px]">
-            {analysis.openIssues.map((issue) => (
-              <article key={issue.reference} className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[12px]">
+        <BusinessAnalysisSection number="02" title="Open issues" description="Scope boundaries and decisions to close before a production release." disclosure={disclosure}>
+          <div className="grid">
+            {analysis.openIssues.map((issue, index) => (
+              <article
+                key={issue.reference}
+                className={index > 0 ? "border-t border-[var(--uc-border)] pt-[14px] mt-[14px]" : ""}
+              >
                 <div className="flex flex-wrap items-center gap-[8px]">
-                  <span className="rounded-[4px] bg-[var(--uc-surface-muted)] px-[7px] py-[3px] font-mono text-[11px] font-bold text-[var(--uc-text-muted)]">{issue.reference}</span>
-                  <span className="rounded-[4px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] px-[7px] py-[3px] uc-type-n6-strong text-[var(--uc-text-muted)]">{issue.status}</span>
+                  <span className="font-mono text-[11px] font-bold text-[var(--uc-text-muted)]">{issue.reference}</span>
+                  <span className="rounded-[4px] border border-[var(--uc-border)] px-[7px] py-[2px] uc-type-n6-strong text-[var(--uc-text-muted)]">{issue.status}</span>
                   <h4 className="uc-type-n5-strong text-[var(--uc-text)]">{issue.title}</h4>
                 </div>
-                <p className="mt-[6px] uc-type-n5 text-[var(--uc-text)]">{issue.detail}</p>
+                <p className="mt-[6px] uc-type-n5 leading-[20px] text-[var(--uc-text)]">{issue.detail}</p>
               </article>
             ))}
           </div>
         </BusinessAnalysisSection>
-        <AnalysisSectionList number="05" title="Requirement" description="The customer and ledger outcomes that the flow must preserve." sections={analysis.requirements} />
-        <AnalysisSectionList number="06" title="Current status" description="What the existing Mobile PI experience already provides and what stays unchanged." sections={analysis.currentStatus} />
-        <AnalysisSectionList number="07" title="Proposed solution" description="One decision system, with the specific customer states grouped where a BA expects to find them." sections={analysis.proposedSolution} />
-        <AnalysisSectionList number="08" title="Non-functional requirements" description="Delivery guardrails that make the experience reliable, inclusive and safe to evolve." sections={analysis.nonFunctionalRequirements} />
+        <AnalysisSectionList disclosure={disclosure} number="03" title="Requirement" description="The customer and ledger outcomes that the flow must preserve." sections={analysis.requirements} />
+        <AnalysisSectionList disclosure={disclosure} number="04" title="Current status" description="What the app already provides today and what stays unchanged." sections={analysis.currentStatus} />
+        <AnalysisSectionList disclosure={disclosure} number="05" title="Proposed solution" description="One decision system, with the specific customer states grouped where a BA expects to find them." sections={analysis.proposedSolution} />
+        <AnalysisSectionList disclosure={disclosure} number="06" title="Non-functional requirements" description="Delivery guardrails that make the experience reliable, inclusive and safe to evolve." sections={analysis.nonFunctionalRequirements} />
       </div>
     </div>
   );
 }
 
-function AnalysisSectionList({ number, title, description, sections }: { number: string; title: string; description: string; sections: FlowBusinessAnalysisSpec['requirements'] }) {
+function AnalysisSectionList({ number, title, description, sections, disclosure }: { number: string; title: string; description: string; sections: FlowBusinessAnalysisSpec['requirements']; disclosure: SectionDisclosure }) {
   return (
-    <BusinessAnalysisSection number={number} title={title} description={description}>
-      <div className="grid gap-[10px]">
-        {sections.map((section) => (
-          <section key={section.title} className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[12px]">
+    <BusinessAnalysisSection number={number} title={title} description={description} disclosure={disclosure}>
+      <div className="grid">
+        {sections.map((section, index) => (
+          <section
+            key={section.title}
+            className={index > 0 ? "border-t border-[var(--uc-border)] pt-[16px] mt-[16px]" : ""}
+          >
             <h4 className="uc-type-n5-strong text-[var(--uc-text)]">{section.title}</h4>
             {section.description ? <p className="mt-[3px] uc-type-n5 text-[var(--uc-text-muted)]">{section.description}</p> : null}
-            <div className="mt-[8px]"><BulletList items={section.items} /></div>
+            <div className="mt-[10px]"><BulletList items={section.items} /></div>
           </section>
         ))}
       </div>
@@ -1282,33 +1427,211 @@ function BusinessAnalysisSection({
   title,
   description,
   children,
+  disclosure,
 }: {
   number: string;
   title: string;
   description: string;
   children: ReactNode;
+  disclosure: SectionDisclosure;
 }) {
   return (
-    <section data-ba-section={number} className="overflow-hidden rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface)]">
-      <header className="flex flex-wrap items-start gap-[10px] border-b border-[var(--uc-border)] bg-[var(--uc-surface-muted)] px-[14px] py-[12px]">
-        <span className="mt-[1px] rounded-[4px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[6px] py-[2px] font-mono text-[11px] font-bold text-[var(--uc-text-muted)]">{number}</span>
-        <div className="min-w-0 flex-1">
-          <h3 className="uc-type-n5-strong text-[var(--uc-text)]">{title}</h3>
-          <p className="mt-[2px] uc-type-n5 text-[var(--uc-text-muted)]">{description}</p>
-        </div>
-      </header>
-      <div className="p-[14px]">{children}</div>
+    <DisclosureSection
+      id={`ba-section-${number}`}
+      sectionProps={{ "data-ba-section": number }}
+      badge={number}
+      title={title}
+      titleTone="heading"
+      description={description}
+      disclosure={disclosure}
+    >
+      {children}
+    </DisclosureSection>
+  );
+}
+
+/**
+ * A jump strip for a long document. Scrolling is deliberate rather than instant:
+ * a section that appears without any movement leaves the reader unsure whether
+ * the page went anywhere, and an anchor jump that lands under a sticky header is
+ * worse than no jump at all, so each target carries its own scroll margin.
+ */
+/**
+ * A contents list, not a row of filters. Stacked and link-styled on purpose: a
+ * strip of pills reads as a set of options to choose between, and these are not
+ * options — they are the document's own headings, and every one of them is
+ * somewhere you can go.
+ */
+function SectionJump({
+  items,
+  onJump,
+  allOpen,
+  onToggleAll,
+}: {
+  items: Array<{ id: string; label: string; badge?: string }>;
+  onJump: (id: string) => void;
+  allOpen: boolean;
+  onToggleAll: () => void;
+}) {
+  return (
+    <div className="mt-[4px] rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[14px]">
+      <div className="flex flex-wrap items-baseline justify-between gap-[10px]">
+        <p className="uc-type-n6-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">Contents</p>
+        <button
+          type="button"
+          onClick={onToggleAll}
+          className="uc-type-n5-strong text-[var(--uc-action)] underline-offset-[3px] hover:underline"
+        >
+          {allOpen ? "Collapse all" : "Expand all"}
+        </button>
+      </div>
+      <nav aria-label="Jump to a section" className="mt-[10px] grid gap-[6px]">
+        {items.map((item, index) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => onJump(item.id)}
+            className="flex w-fit items-baseline gap-[10px] text-left uc-type-n4-strong text-[var(--uc-action)] underline-offset-[3px] hover:underline"
+          >
+            <span className="shrink-0 font-mono text-[12px] text-[var(--uc-text-muted)]">
+              {item.badge ?? String(index + 1).padStart(2, "0")}
+            </span>
+            {item.label}
+          </button>
+        ))}
+      </nav>
+    </div>
+  );
+}
+
+interface SectionDisclosure {
+  isOpen: (id: string) => boolean;
+  toggle: (id: string) => void;
+  toggleAll: () => void;
+  allOpen: boolean;
+  jump: (id: string) => void;
+}
+
+/**
+ * Open/closed state for a document of collapsible sections, plus the jump that
+ * opens a section before scrolling to it. Landing on a collapsed heading is not
+ * arriving anywhere.
+ *
+ * Everything starts closed: a document of this length opens as its own contents
+ * page, and the reader chooses what to read rather than scrolling past it.
+ */
+function useSectionDisclosure(ids: string[]): SectionDisclosure {
+  const [open, setOpen] = useState<Set<string>>(() => new Set());
+  const allOpen = ids.length > 0 && ids.every((id) => open.has(id));
+
+  const toggle = (id: string) =>
+    setOpen((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const toggleAll = () => setOpen(allOpen ? new Set() : new Set(ids));
+
+  const jump = (id: string) => {
+    setOpen((current) => (current.has(id) ? current : new Set(current).add(id)));
+    requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
+  return { isOpen: (id: string) => open.has(id), toggle, toggleAll, allOpen, jump };
+}
+
+/**
+ * The one collapsible section in the Specification tab. Both the BA document and
+ * the flow-level blocks render through it, so a heading cannot end up with a
+ * different padding or a stray rule depending on which list it belongs to.
+ */
+function DisclosureSection({
+  id,
+  badge,
+  title,
+  titleTone = "label",
+  description,
+  children,
+  disclosure,
+  sectionProps,
+}: {
+  id: string;
+  badge?: string;
+  title: string;
+  /** "label" reads as a field heading; "heading" as a document section. */
+  titleTone?: "label" | "heading";
+  description?: string;
+  children: ReactNode;
+  disclosure: SectionDisclosure;
+  sectionProps?: Record<string, string>;
+}) {
+  const open = disclosure.isOpen(id);
+  return (
+    <section
+      id={id}
+      {...sectionProps}
+      className="scroll-mt-[16px] rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface)]"
+    >
+      <button
+        type="button"
+        onClick={() => disclosure.toggle(id)}
+        aria-expanded={open}
+        className="flex w-full items-center gap-[10px] rounded-[10px] p-[14px] text-left transition-colors hover:bg-[color-mix(in_srgb,var(--uc-action)_5%,var(--uc-surface))]"
+      >
+        {badge ? (
+          <span className="shrink-0 self-start rounded-[4px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[6px] py-[2px] font-mono text-[11px] font-bold text-[var(--uc-text-muted)]">
+            {badge}
+          </span>
+        ) : null}
+        <span className="min-w-0 flex-1">
+          <span
+            className={
+              titleTone === "heading"
+                ? "block uc-type-n5-strong text-[var(--uc-text)]"
+                : "block uc-type-n5-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]"
+            }
+          >
+            {title}
+          </span>
+          {description ? <span className="mt-[3px] block uc-type-n5 text-[var(--uc-text-muted)]">{description}</span> : null}
+        </span>
+        <span className={`grid size-[18px] shrink-0 place-items-center text-[var(--uc-text-muted)] transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true">
+          <AppIcon name="chevron-down" size={18} color="currentColor" />
+        </span>
+      </button>
+      {open ? <div className="px-[14px] pb-[14px]">{children}</div> : null}
     </section>
   );
 }
 
-function SpecBlock({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+function SpecBlock({
+  title,
+  description,
+  children,
+  disclosure,
+  badge,
+}: {
+  title: string;
+  description?: string;
+  children: ReactNode;
+  disclosure: SectionDisclosure;
+  /** The same number the contents list shows against this entry. */
+  badge?: string;
+}) {
   return (
-    <section className="rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[14px]">
-      <h3 className="uc-type-n5-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">{title}</h3>
-      {description ? <p className="mt-[3px] uc-type-n5 text-[var(--uc-text-muted)]">{description}</p> : null}
-      <div className="mt-[8px]">{children}</div>
-    </section>
+    <DisclosureSection
+      id={`spec-block-${slugify(title)}`}
+      badge={badge}
+      title={title}
+      description={description}
+      disclosure={disclosure}
+    >
+      {children}
+    </DisclosureSection>
   );
 }
 
@@ -1333,13 +1656,18 @@ function BulletList({ items }: { items: readonly string[] }) {
 
 function BusinessRuleList({ items }: { items: readonly string[] }) {
   return (
-    <ol className="grid gap-[8px]">
+    <ol className="grid gap-[14px]">
       {items.map((item, index) => {
         const { lead, detail } = splitLeadingSentence(item);
         return (
-          <li key={item} className="grid gap-[8px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[10px] sm:grid-cols-[auto_1fr]">
-            <span className="h-fit w-fit rounded-full bg-[var(--uc-action-soft)] px-[8px] py-[3px] uc-type-n6-strong text-[var(--uc-action)]">
-              Rule {index + 1}
+          <li
+            className={`grid gap-[10px] sm:grid-cols-[auto_1fr] ${
+              index > 0 ? "border-t border-[var(--uc-border)] pt-[14px]" : ""
+            }`}
+            key={item}
+          >
+            <span className="h-fit w-fit font-mono text-[11px] font-bold text-[var(--uc-text-muted)]">
+              {String(index + 1).padStart(2, "0")}
             </span>
             <p className="uc-type-n5 text-[var(--uc-text)]">
               <strong className="font-bold">{lead}</strong>

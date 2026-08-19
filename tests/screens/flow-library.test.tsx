@@ -70,6 +70,10 @@ describe('flow definitions integrity', () => {
   })
 })
 
+function expandAllSections() {
+  screen.getAllByRole('button', { name: 'Expand all' }).forEach((button) => fireEvent.click(button))
+}
+
 describe('flow-library screen', () => {
   it('opens the library index when entered from the global Flows destination', () => {
     render(
@@ -85,8 +89,9 @@ describe('flow-library screen', () => {
   it('opens on the selected flow and exposes capturable step screens', () => {
     renderFlowLibrary('ro-round-up')
 
-    // Flow detail header (the preview PageHeaders are aria-hidden, so this is unique).
-    expect(screen.getByRole('heading', { name: 'Round Up' })).toBeInTheDocument()
+    // Flow detail header. The Journey tab is the landing tab, and its previews
+    // carry headings of their own, so this looks in the header specifically.
+    expect(screen.getByTestId('flow-detail-header')).toHaveTextContent('Round Up')
 
     // The off-screen capture strip renders capturable phone screens up-front so
     // export works regardless of the active tab.
@@ -134,7 +139,7 @@ describe('flow-library screen', () => {
   it('omits Signing from the ETHOCA flow specification', () => {
     renderFlowLibrary('mobile-pi-ethoca')
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Spec' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'Specification' }))
 
     expect(screen.queryByText('Signing')).not.toBeInTheDocument()
     expect(screen.getByText('Business analysis specification')).toBeInTheDocument()
@@ -153,15 +158,13 @@ describe('flow-library screen', () => {
   it('keeps navigation outside the detail card and condenses flow metadata', () => {
     renderFlowLibrary('ro-round-up')
 
-    const detailHeader = screen.getByRole('heading', { name: 'Round Up' }).closest('header')
+    const detailHeader = screen.getByTestId('flow-detail-header')
     const libraryBack = screen.getByRole('button', { name: /flow library/i })
-    const overview = screen.getByRole('heading', { name: 'At a glance' }).closest('section')
 
     expect(detailHeader).not.toContainElement(libraryBack)
     expect(detailHeader).not.toHaveTextContent('Future Release Preview')
     expect(detailHeader).not.toHaveTextContent('RO')
-    expect(within(overview!).getByTestId('flow-overview-meta')).toHaveClass('sm:grid-cols-3')
-    expect(within(overview!).queryByText('Status')).not.toBeInTheDocument()
+    expect(within(detailHeader).queryByText('Status')).not.toBeInTheDocument()
   })
 
   it('keeps the library index focused on flow discovery rather than release statuses', () => {
@@ -177,16 +180,14 @@ describe('flow-library screen', () => {
     expect(screen.getByText(/Explore each journey visually/i)).toBeInTheDocument()
   })
 
-  it('labels overview information for business review without a duplicate scenarios section', () => {
+  it('opens a flow on its journey, with no separate overview tab to step through first', () => {
     renderFlowLibrary('mobile-pi-ethoca')
 
-    const purpose = screen.getByText('Purpose').closest('section')
-
-    expect(purpose).toHaveClass('bg-[var(--uc-surface-muted)]')
-    expect(purpose).not.toHaveClass('bg-[var(--uc-action-soft)]')
-    expect(screen.getByText('Scope and demo note')).toBeInTheDocument()
-    expect(screen.getByTestId('flow-overview-country-summary')).toHaveTextContent('8 markets')
-    expect(screen.queryByRole('heading', { name: 'Scenarios' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: 'Overview' })).not.toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Journey' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.queryByRole('heading', { name: 'At a glance' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Entry points' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Scope and demo note')).not.toBeInTheDocument()
   })
 
   it('renders header document actions as neutral icon cards', () => {
@@ -205,24 +206,26 @@ describe('flow-library screen', () => {
   it('groups the proposed solution into BA-friendly decision sections', () => {
     renderFlowLibrary('mobile-pi-ethoca')
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Spec' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'Specification' }))
+    expandAllSections()
 
-    expect(screen.getByText('Proposed solution')).toBeInTheDocument()
+    expect(screen.getAllByText('Proposed solution').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Transaction lists').length).toBeGreaterThan(0)
   })
 
   it('renders ETHOCA in a BA-aligned, demo-safe specification structure', () => {
     renderFlowLibrary('mobile-pi-ethoca')
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Spec' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'Specification' }))
+    expandAllSections()
 
     expect(screen.getByText('Business analysis specification')).toBeInTheDocument()
-    expect(screen.getByText('General information')).toBeInTheDocument()
-    expect(screen.getByText('Version & change context')).toBeInTheDocument()
-    expect(screen.getByText('Open issues')).toBeInTheDocument()
-    expect(screen.getByText('Requirement')).toBeInTheDocument()
-    expect(screen.getByText('Current status')).toBeInTheDocument()
-    expect(screen.getByText('Non-functional requirements')).toBeInTheDocument()
+    expect(screen.getAllByText('General information').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Version & change context')).not.toBeInTheDocument()
+    expect(screen.getAllByText('Open issues').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Requirement').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Current status').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Non-functional requirements').length).toBeGreaterThan(0)
     expect(screen.getByText('Digital receipts are out of scope for this demo.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /download.*txt/i })).not.toBeInTheDocument()
     expect(screen.queryByText(/Card_GetMerchantDetails/i)).not.toBeInTheDocument()
@@ -232,9 +235,10 @@ describe('flow-library screen', () => {
   it('renders ETHOCA as one BA document instead of screen-spec selectors', () => {
     renderFlowLibrary('mobile-pi-ethoca')
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Spec' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'Specification' }))
+    expandAllSections()
 
-    expect(screen.getByText('Version history')).toBeInTheDocument()
+    expect(screen.queryByText('Version history')).not.toBeInTheDocument()
     expect(screen.getByText('Transaction lists')).toBeInTheDocument()
     expect(screen.getAllByRole('heading', { name: 'Transaction details', level: 4 })).toHaveLength(1)
     expect(screen.getByText('Partial data and fallback')).toBeInTheDocument()
@@ -245,15 +249,17 @@ describe('flow-library screen', () => {
   it('renders RS property insurance as a BA document followed by its screen specs', () => {
     renderFlowLibrary('rs-property-insurance')
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Spec' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'Specification' }))
+    expandAllSections()
 
     // The document, then the screen-by-screen detail and the flow-level rules:
     // this flow specifies both, and a reviewer needs both.
     expect(screen.getByText('Business analysis specification')).toBeInTheDocument()
     expect(screen.getByText('Screen spec')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /4\. Choose a package/ })).toBeInTheDocument()
-    expect(screen.getByText('Key decision rules')).toBeInTheDocument()
-    expect(screen.getByText('Questions to close')).toBeInTheDocument()
+    // The title now appears twice: once in the jump strip, once on the block.
+    expect(screen.getAllByText('Key decision rules').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Questions to close').length).toBeGreaterThan(0)
   })
 
   it('navigates to the library index and back', () => {
@@ -326,22 +332,22 @@ describe('flow-library screen', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Journey' }))
     const focusedPreview = () => within(document.querySelector('[data-flow-preview-scrollable="true"]') as HTMLElement)
 
-    fireEvent.click(screen.getByRole('button', { name: /Enriched account list/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Enriched account list' }))
     expect(focusedPreview().getAllByText('Enel Energie').length).toBeGreaterThan(0)
     expect(focusedPreview().getByLabelText('Carrefour merchant logo')).toBeInTheDocument()
     expect(focusedPreview().getAllByLabelText('PFM category fallback').length).toBeGreaterThan(0)
 
     fireEvent.click(screen.getByRole('button', { name: 'Pending card transaction' }))
-    fireEvent.click(screen.getByRole('button', { name: /Pending account list/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Pending account list' }))
     expect(focusedPreview().getByText('Starbucks')).toBeInTheDocument()
     expect(focusedPreview().getAllByText('Pending').length).toBeGreaterThan(0)
 
-    fireEvent.click(screen.getByRole('button', { name: /Pending transaction detail/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Pending transaction detail' }))
     expect(document.querySelector('[data-flow-preview-scrollable="true"] [data-pending-status]')).toBeInTheDocument()
     expect(focusedPreview().queryByTestId('transaction-pfm-summary')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Logo unavailable fallback' }))
-    fireEvent.click(screen.getByRole('button', { name: /Partial data without logo or map/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Partial data without logo or map' }))
     expect(focusedPreview().queryByTitle('Google Maps — Merchant location')).not.toBeInTheDocument()
     expect(focusedPreview().getByText('5411 · Grocery stores, supermarkets')).toBeInTheDocument()
   })
@@ -413,7 +419,7 @@ describe('flow-library screen', () => {
     expect(focusedPreview().getByText('Carrefour')).toBeInTheDocument()
     expect(focusedPreview().getByText('YouTube Premium')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: /Enriched account list/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Enriched account list' }))
     expect(focusedPreview().getAllByText('Enel Energie').length).toBeGreaterThan(0)
     expect(focusedPreview().getByText('Carrefour')).toBeInTheDocument()
   })

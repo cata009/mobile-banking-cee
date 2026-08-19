@@ -69,8 +69,9 @@ describe("flow export document", () => {
 
     expect(html).toContain("Business analysis specification");
     expect(html).toContain("General information");
-    expect(html).toContain("Version history");
-    expect(html).toContain("Version &amp; change context");
+    // Version bookkeeping is not part of this presentation, on screen or exported.
+    expect(html).not.toContain("Version history");
+    expect(html).not.toContain("Version &amp; change context");
     expect(html).toContain("Transaction lists");
     expect(html).toContain("Open issues");
     expect(html).toContain("Non-functional requirements");
@@ -79,7 +80,7 @@ describe("flow export document", () => {
     expect(html).not.toContain("OAuth");
   });
 
-  it("uses the current BA source passed at export time instead of a stored document snapshot", () => {
+  it("exports the BA source passed at export time rather than a stored snapshot", () => {
     const html = buildFlowDocumentHtml(META, STEPS, SPEC, () => "ignored.png", { autoPrint: false }, {
       businessAnalysis: {
         generalInformation: [{ label: "Customer scope", value: "Pending debit-card purchases." }],
@@ -94,9 +95,7 @@ describe("flow export document", () => {
     });
 
     expect(html).toContain("Pending debit-card purchases.");
-    expect(html).toContain("Demo BA v1.1");
-    expect(html).toContain("Latest delivery review");
-    expect(html).not.toContain("Demo BA v1.0");
+    expect(html).toContain("Keep the latest ledger amount unchanged.");
   });
 
   it("wraps the document as Word-compatible MHTML with one image part per step", () => {
