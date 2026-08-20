@@ -37,7 +37,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
         { label: "Authorization model", value: "One final standard signature for marked orders" },
       ],
       versionContext:
-        "Bulk-approval prototype updated to match the interactive flow: Ex-Ante Costs opens on entry, ordinary rows open detail with a single-order REJECT confirmation, BULK SIGNING enters bulk mode only when at least two orders exist, and the final review uses a terms-gated Continue CTA into the read-only summary.",
+        "Bulk-approval prototype updated to match the interactive flow: Ex-Ante Costs opens on entry, ordinary rows open detail with a single-order REJECT confirmation, BULK SIGNING enters bulk mode only when at least two orders exist, same-position CANCEL abandons that local selection, and the final review uses a terms-gated Continue CTA into the read-only summary.",
       versionHistory: [
         {
           version: "0.4",
@@ -294,6 +294,8 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       states: ["Ordinary order list", "Read-only single-order detail", "Bulk selection", "One-order review queue", "Read-only summary", "Single signing step", "Honest prototype confirmation/failure"],
       acceptance: [
         "The prototype is confined to Flow Library and does not alter the runtime Orders to approve route.",
+        "The initial viewport is an ordinary list with row-level order detail, no checkboxes and no sticky signing footer; BULK SIGNING is absent when only one order remains.",
+        "BULK SIGNING and bulk-mode CANCEL share the top-right list position. CANCEL only abandons unsubmitted local selection and restores the ordinary list.",
         "Every presentation and result state is explicitly local/non-executing.",
       ],
     },
