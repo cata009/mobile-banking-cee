@@ -37,8 +37,13 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
         { label: "Authorization model", value: "One final standard signature for marked orders" },
       ],
       versionContext:
-        "Initial bulk-approval prototype updated for the supplied business requirement: Ex-Ante Costs is open on entry, navigation remains available, and the last-order terms control is the sign precondition modelled here.",
+        "Bulk-approval prototype updated to match the interactive flow: Ex-Ante Costs opens on entry, REJECT requires a singular/plural confirmation sheet before selected drafts leave the list, and the final review uses a terms-gated Continue CTA into the read-only summary.",
       versionHistory: [
+        {
+          version: "0.2",
+          date: "2026-08-20",
+          detail: "Aligned the Flow Library prototype, Journey and Specification with confirmed local rejection, removed-list behaviour, 12px sticky-row spacing, Continue CTA and header-only summary back navigation.",
+        },
         {
           version: "0.1",
           date: "2026-08-20",
@@ -73,7 +78,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
           title: "Selection and scale",
           items: [
             "The list starts with no selected drafts, supports individual and Select all checkbox controls, shows a selected count, and remains suitable for a conceptual batch size of up to 99 drafts.",
-            "When one or more drafts are selected, the Figma-style REJECT text action marks that selected set Rejected only in this local prototype; no request is sent.",
+            "When one or more drafts are selected, REJECT opens a Figma-style confirmation bottom sheet with singular/plural copy. Confirming marks that selected set Rejected only in local prototype state, removes it from the selection list and recalculates the total, Select all and selected count; no request is sent.",
           ],
         },
         {
@@ -81,7 +86,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
           items: [
             "One marked order is presented per page with a visible position such as 2 / 10, read-only product/order details, amount, ISIN, Ex-Ante Costs, Documents, Important Information and Disclaimer.",
             "Ex-Ante Costs is expanded automatically on entry. Documents, Important Information and Disclaimer begin closed and remain optional.",
-            "The header View summary action remains available at all times. A fixed bottom bar keeps Order N of total centered between circular draft Back/Forward controls; on the final draft, Forward becomes the compact primary Summary button, gated by Terms. Ex-Ante starts expanded in normal page flow and does not block navigation.",
+            "The header View summary action remains available at all times. A fixed bottom bar keeps Order N of total centered between circular draft Back/Forward controls; on the final draft, Forward becomes the compact primary Continue button, gated by Terms and opening the read-only summary. Ex-Ante starts expanded in normal page flow and does not block navigation.",
           ],
         },
         {
@@ -128,7 +133,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
         {
           title: "Read-only closing summary",
           items: [
-            "Show all pending drafts and their statuses without inline editing. The customer returns to review to change a selection.",
+            "Show all pending drafts and their statuses without inline editing. The header Back control is the only route back to review; the summary footer contains only the final signing CTA.",
             "Keep signing disabled until the prototype has presented every marked order and the last-order terms toggle is accepted; this is a UX/prototype condition, not a legal assertion.",
           ],
         },
@@ -165,10 +170,10 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       "Selection is individual and reversible. It starts empty, supports Select all, and the customer can leave drafts unselected or deselect a marked order from its review page before the final summary.",
       "The batch review is one order per page. Position, product name, amount, ISIN, order data and optional disclosure sections stay visible in a predictable structure.",
       "Ex-Ante Costs is automatically expanded whenever a selected order opens. Documents, Important Information and Disclaimer are initially closed; none of these interactions block queue navigation.",
-      "The fixed bottom area keeps the Figma navigation/progress on its first row: the first draft has no Back control, later drafts have circular Back/Forward controls, and the final draft replaces Forward with the terms-gated compact primary Summary button. The header View summary action opens the non-editable summary at any time; no control jumps or auto-focuses Ex-Ante Costs.",
-      "Every order has a compact local progress subtitle directly below Order N of total. It reads Scroll down for all the details before completion and You're all caught up with a check afterward. A sticky Terms & Conditions row appears only on the final order immediately after the selected-current-draft row and before the navigator. The progress indicator is informational and never a gate for navigation, summary, signing or backend state.",
+      "The fixed bottom area keeps the Figma navigation/progress on its first row: the first draft has no Back control, later drafts have circular Back/Forward controls, and the final draft replaces Forward with the terms-gated compact primary Continue button. The header View summary action opens the non-editable summary at any time; no control jumps or auto-focuses Ex-Ante Costs.",
+      "Every order has a compact local progress subtitle directly below Order N of total. It reads Scroll down for all the details before completion and You're all caught up with a check afterward. The selected-current-draft row and the final sticky Terms & Conditions row each use 12px vertical padding; Terms appears immediately before the navigator. The progress indicator is informational and never a gate for navigation, summary, signing or backend state.",
       "Terms & Conditions appears only on the final selected order. The prototype only enables its final batch-sign entry after every marked order has been presented and that final toggle is accepted.",
-      "The summary is read-only and covers every pending draft: marked to sign, not signed (unselected), or rejected. In this prototype REJECT marks the current selected set locally and never sends a request.",
+      "The summary is read-only and covers every pending draft: marked to sign, not signed (unselected), or rejected. In this prototype REJECT first requires the bottom-sheet confirmation, then marks the current selected set locally, removes it from selection and never sends a request.",
       "One standard signature is represented for all marked orders. Its confirmation and failure states are non-executing prototype states and must not assert an actual signature, order submission or legal completion.",
     ],
     signing:
@@ -202,7 +207,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       {
         title: "Navigation model",
         body:
-          "Each marked draft is reviewed one at a time. A fixed Figma-style bottom bar shows Order N of total between circular navigation controls, or a terminal compact Summary button; its compact reading subtitle remains visible on every order. View summary opens the non-editable summary without competing with that bar. Each order begins at the top of normal detail flow; Ex-Ante Costs is expanded but never auto-focused or jumped to.",
+          "Each marked draft is reviewed one at a time. A fixed Figma-style bottom bar shows Order N of total between circular navigation controls, or a terminal compact Continue button that opens the non-editable summary; its compact reading subtitle remains visible on every order. View summary opens the same summary without competing with that bar. Each order begins at the top of normal detail flow; Ex-Ante Costs is expanded but never auto-focused or jumped to.",
       },
       {
         title: "One final signature, honest result states",
@@ -245,17 +250,15 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
         back: "investments-bulk-selection",
       },
       "investments-bulk-review-last": {
-        primary: { label: "Summary", to: "investments-bulk-summary-ready" },
+        primary: { label: "Continue", to: "investments-bulk-summary-ready" },
         secondary: { label: "Back", to: "investments-bulk-review-first" },
         back: "investments-bulk-review-first",
       },
       "investments-bulk-summary-blocked": {
-        primary: { label: "Back to review", to: "investments-bulk-review-last" },
         back: "investments-bulk-review-first",
       },
       "investments-bulk-summary-ready": {
         primary: { label: "Confirm and sign ALL marked ORDERS", to: "investments-bulk-sign" },
-        secondary: { label: "Back to review", to: "investments-bulk-review-last" },
         back: "investments-bulk-review-last",
       },
       "investments-bulk-sign": {
@@ -294,12 +297,12 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       actions: [
         { label: "Select / deselect draft", result: "Updates only local prototype selection." },
         { label: "Select all", result: "Selects every current selectable draft, or clears the whole current selection." },
-        { label: "REJECT", result: "Marks every currently selected draft Rejected in local prototype state; never sends a request." },
+        { label: "REJECT", result: "Opens a singular/plural confirmation bottom sheet. Confirming marks every currently selected draft Rejected in local state, removes those drafts from the list and never sends a request; closing or declining keeps the selection unchanged." },
         { label: "Sign orders", result: "Opens the first selected draft; disabled with no selection." },
       ],
       edgeCases: [
         "A customer can leave any order unselected.",
-        "Rejected rows remain visible and non-selectable, and the Select all control applies only to selectable rows.",
+        "After confirmation, rejected rows leave the selection list and Select all applies only to the remaining selectable drafts; their Rejected status remains visible in the read-only summary.",
         "If the final marked order is deselected, the Sign orders CTA becomes unavailable and focus remains on the selection list.",
         "Long product names, identifiers and 10–20 order lists must not hide the checkbox label or selected count.",
       ],
@@ -342,12 +345,12 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
         { name: "Order details", type: "Read-only", required: true, notes: "Name, amount, ISIN, order data and country-aware formatting." },
         { name: "Ex-Ante Costs", type: "Expanded disclosure", required: true, notes: "Open on entry; user may collapse it without blocking navigation." },
         { name: "Documents / Important Information / Disclaimer", type: "Optional closed disclosures", required: true },
-        { name: "Progress subtitle", type: "Read-only local progress", required: true, notes: "Remains visibly below the final order's navigator and does not gate Summary." },
-        { name: "Terms & Conditions", type: "Switch", required: true, validation: "Shown only on this final selected-order page in its own separated sticky row, immediately after the selected-current-draft row and before the sticky navigator." },
+        { name: "Progress subtitle", type: "Read-only local progress", required: true, notes: "Remains visibly below the final order's navigator and does not gate Continue." },
+        { name: "Terms & Conditions", type: "Switch", required: true, validation: "Shown only on this final selected-order page in its own separated sticky row with 12px vertical padding, immediately after the selected-current-draft row and before the sticky navigator." },
       ],
       actions: [
         { label: "Circular Back", result: "Returns to the preceding selected draft." },
-        { label: "Summary", result: "Compact primary button that opens the immutable all-drafts summary after final-page Terms are accepted." },
+        { label: "Continue", result: "Compact primary button that opens the immutable all-drafts summary after final-page Terms are accepted." },
         { label: "Selected current-order checkbox", result: "Updates local selection; if another becomes final, its page becomes the only page with Terms & Conditions." },
       ],
       acceptance: [
@@ -366,7 +369,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       ],
       actions: [
         { label: "Open order detail", result: "Opens a read-only inspection page for any card and returns to the unchanged summary." },
-        { label: "Back to review", result: "Returns to the current review queue position so selection/terms can be changed." },
+        { label: "Header Back", result: "Returns to the current review queue position so selection/terms can be changed; no duplicate footer back action is shown." },
         { label: "Confirm and sign ALL marked ORDERS", result: "Visible but disabled until every marked order was presented and final-page terms are accepted." },
       ],
       edgeCases: [
@@ -390,7 +393,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       ],
       actions: [
         { label: "Open order detail", result: "Opens read-only inspection for any displayed status and returns to the unchanged summary." },
-        { label: "Back to review", result: "Returns to review; no order is changed by opening the summary." },
+        { label: "Header Back", result: "Returns to review; no order is changed by opening the summary and no duplicate footer back action is shown." },
         { label: "Confirm and sign ALL marked ORDERS", result: "Opens one standard signature step for the current marked set; prototype state only." },
       ],
       acceptance: [

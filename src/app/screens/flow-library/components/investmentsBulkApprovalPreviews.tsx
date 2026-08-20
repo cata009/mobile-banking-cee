@@ -314,7 +314,7 @@ function BulkReviewScreen({
         </div>
       </div>
       {last ? (
-        <div data-testid="bulk-review-terms-row" className="flex items-center justify-between gap-[16px] border-t border-[var(--uc-border)] px-[16px] py-[8px]">
+        <div data-testid="bulk-review-terms-row" className="flex items-center justify-between gap-[16px] border-t border-[var(--uc-border)] px-[16px] py-[12px]">
           <p className="flex-1 uc-type-n5 text-[var(--uc-text)]">I have read and accept the terms and conditions for the marked orders.</p>
           <ToggleButton ariaLabel="Accept terms and conditions" checked={termsAccepted} onToggle={onTermsToggle} />
         </div>
@@ -340,7 +340,7 @@ function BulkReviewScreen({
               disabled={!termsAccepted}
               className="!ml-auto !h-[32px] !w-auto !min-w-[80px] !gap-0 !px-[10px] !py-0"
             >
-              Summary
+              Continue
             </PrimaryButton>
           ) : (
             <button
@@ -421,10 +421,7 @@ function BulkSummaryScreen({
         {!eligible ? <p role="status" className="mt-[12px] uc-type-n5 text-[var(--uc-text-muted)]">Signing remains unavailable until every marked order has been presented and the final terms acknowledgement is set.</p> : null}
       </div>
       <div className="border-t border-[var(--uc-border)] bg-[var(--uc-surface)] px-[24px] pb-[28px] pt-[12px]">
-        <div data-testid="bulk-summary-action-group" className="flex flex-col items-center gap-[8px]">
-          <button type="button" onClick={onBack} className="h-[44px] px-[12px] text-[18px] font-bold leading-normal text-[var(--uc-action)]">Back to review</button>
-          <PrimaryButton className="!w-full" disabled={!eligible} onClick={onConfirm}>Confirm and sign ALL marked ORDERS</PrimaryButton>
-        </div>
+        <PrimaryButton className="!w-full" disabled={!eligible} onClick={onConfirm}>Confirm and sign ALL marked ORDERS</PrimaryButton>
       </div>
       {staticPreview ? <span className="sr-only">Static Flow Library summary preview</span> : null}
     </PrototypeShell>
