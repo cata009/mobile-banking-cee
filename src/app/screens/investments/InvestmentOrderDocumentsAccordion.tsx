@@ -67,7 +67,7 @@ function CostSubFeeRow({ label, amount, percentLabel, percent }: CostSubFeeRowPr
   );
 }
 
-/** Shared ON-GOING / ENTRY / TOTAL cost breakdown, reused by both the Ex-Ante and Disclaimer sections. */
+/** Shared ON-GOING / ENTRY / TOTAL cost breakdown used in the complete Ex-Ante presentation. */
 function CostBreakdownBlock({ currency, emphasize }: { currency: string; emphasize?: ScenarioEmphasis }) {
   return (
     <div className="flex flex-col">
@@ -562,34 +562,46 @@ function ScenarioPeriodChips({
   );
 }
 
-function InvestmentDisclaimerContent({ currency }: { currency: string }) {
+function ExAnteCostsContent({ currency }: { currency: string }) {
   const [scenarioView, setScenarioView] = useState<ScenarioEmphasis>("value");
   const [selectedPeriodIndex, setSelectedPeriodIndex] = useState(SCENARIO_PERIODS.length - 1);
 
   return (
     <div>
-      <div className="px-[24px]">
-        <ScenarioViewToggle value={scenarioView} onChange={setScenarioView} />
-      </div>
-      <PerformanceScenarioChart
-        view={scenarioView}
-        currency={currency}
-        periodIndex={selectedPeriodIndex}
-        onPeriodChange={setSelectedPeriodIndex}
-      />
+      <CostBreakdownBlock currency={currency} />
 
       <div className="mt-[20px]">
-        <CostBreakdownBlock currency={currency} emphasize={scenarioView} />
-      </div>
+        <div className="px-[24px]">
+          <ScenarioViewToggle value={scenarioView} onChange={setScenarioView} />
+        </div>
+        <PerformanceScenarioChart
+          view={scenarioView}
+          currency={currency}
+          periodIndex={selectedPeriodIndex}
+          onPeriodChange={setSelectedPeriodIndex}
+        />
 
-      <div className="px-[24px]">
-        <CostSummaryRow label="NET INVESTMENT AMOUNT" percent="9,30%" amount={`1 000,00 ${currency}`} emphasize={scenarioView} />
-        <CostSummaryRow label="NET RETURN" percent="9,30%" amount={`1 000,00 ${currency}`} emphasize={scenarioView} />
-      </div>
+        <div className="mt-[20px]">
+          <CostBreakdownBlock currency={currency} emphasize={scenarioView} />
+        </div>
 
-      <div className="px-[24px]">
-        <CostSummaryRow label="TOTAL" percent="9,30%" amount={`1 000,00 ${currency}`} emphasize={scenarioView} />
+        <div className="px-[24px]">
+          <CostSummaryRow label="NET INVESTMENT AMOUNT" percent="9,30%" amount={`1 000,00 ${currency}`} emphasize={scenarioView} />
+          <CostSummaryRow label="NET RETURN" percent="9,30%" amount={`1 000,00 ${currency}`} emphasize={scenarioView} />
+        </div>
+
+        <div className="px-[24px]">
+          <CostSummaryRow label="TOTAL" percent="9,30%" amount={`1 000,00 ${currency}`} emphasize={scenarioView} />
+        </div>
       </div>
+    </div>
+  );
+}
+
+function InvestmentDisclaimerContent() {
+  return (
+    <div className="px-[24px] pb-[24px] pt-[8px]">
+      <p className="uc-type-n5 text-[var(--uc-text)]">Investments can rise or fall in value. Consider the available product information and your individual circumstances before making an investment decision.</p>
     </div>
   );
 }
@@ -598,6 +610,8 @@ type DocumentsAccordionSectionId = "ex-ante" | "documents" | "important-informat
 
 export interface InvestmentOrderDocumentsAccordionProps {
   currency: string;
+  /** Lets a review surface present Ex-Ante costs immediately without changing the default closed state. */
+  initialOpenSection?: DocumentsAccordionSectionId | null;
 }
 
 /**
@@ -606,8 +620,11 @@ export interface InvestmentOrderDocumentsAccordionProps {
  * Investment disclaimer, each collapsible with its own detail content.
  * Only one section is open at a time.
  */
-export default function InvestmentOrderDocumentsAccordion({ currency }: InvestmentOrderDocumentsAccordionProps) {
-  const [openSection, setOpenSection] = useState<DocumentsAccordionSectionId | null>(null);
+export default function InvestmentOrderDocumentsAccordion({
+  currency,
+  initialOpenSection = null,
+}: InvestmentOrderDocumentsAccordionProps) {
+  const [openSection, setOpenSection] = useState<DocumentsAccordionSectionId | null>(initialOpenSection);
 
   const toggleSection = (id: DocumentsAccordionSectionId) => {
     setOpenSection((current) => (current === id ? null : id));
@@ -624,7 +641,7 @@ export default function InvestmentOrderDocumentsAccordion({ currency }: Investme
         isOpen={openSection === "ex-ante"}
         onToggle={() => toggleSection("ex-ante")}
       >
-        <CostBreakdownBlock currency={currency} />
+        <ExAnteCostsContent currency={currency} />
       </DocumentsAccordionSection>
 
       <DocumentsAccordionSection
@@ -650,11 +667,11 @@ export default function InvestmentOrderDocumentsAccordion({ currency }: Investme
       <DocumentsAccordionSection
         iconName="investment-disclaimer"
         title="Investment disclaimer"
-        subtitle="Performance scenarios and risks"
+        subtitle="General investment risk information"
         isOpen={openSection === "disclaimer"}
         onToggle={() => toggleSection("disclaimer")}
       >
-        <InvestmentDisclaimerContent currency={currency} />
+        <InvestmentDisclaimerContent />
       </DocumentsAccordionSection>
     </div>
   );

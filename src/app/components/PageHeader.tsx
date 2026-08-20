@@ -66,16 +66,17 @@ export default function PageHeader({
   const rightAction = rightActionIcon ? (
     <button
       onClick={onRightActionClick}
-      className="flex h-[40px] w-[40px] cursor-pointer items-center justify-center"
+      className="flex h-[40px] w-[40px] self-center cursor-pointer items-center justify-center"
       style={{ padding: "8px 7.998px 7.997px 7.998px" }}
       aria-label={rightActionLabel}
+      title={rightActionLabel}
     >
       {rightActionIcon}
     </button>
   ) : showHelp ? (
     <button
       onClick={onHelpClick}
-      className="flex h-[40px] w-[40px] cursor-pointer items-center justify-center"
+      className="flex h-[40px] w-[40px] self-center cursor-pointer items-center justify-center"
       style={{ padding: "8px 7.998px 7.997px 7.998px" }}
       aria-label="Help"
     >
@@ -98,7 +99,7 @@ export default function PageHeader({
           {showBack ? (
             <button
               onClick={onBack}
-              className="flex h-[40px] w-[40px] cursor-pointer items-center justify-center"
+              className="flex h-[40px] w-[40px] self-center cursor-pointer items-center justify-center"
               style={{ padding: "8px 7.998px 7.997px 7.998px" }}
               aria-label="Back"
             >

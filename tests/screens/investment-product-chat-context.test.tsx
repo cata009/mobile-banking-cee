@@ -56,6 +56,22 @@ describe("investment product chat context handoff", () => {
     expect(screen.getByRole("tab", { name: "PERFORMANCE" })).toBeInTheDocument();
   });
 
+  it("opens the orders-to-approve entry from the Investments action bar", () => {
+    const onOrdersToApproveClick = vi.fn();
+
+    render(
+      <InvestmentsPortfolioScreen
+        onBack={() => undefined}
+        onOrdersToApproveClick={onOrdersToApproveClick}
+      />,
+      { wrapper: AppProviders },
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "To approve" }));
+
+    expect(onOrdersToApproveClick).toHaveBeenCalledOnce();
+  });
+
   it("publishes the selected security and clears it when returning to the portfolio", () => {
     const onSelectedSecurityChange = vi.fn();
 

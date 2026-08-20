@@ -10,7 +10,7 @@ import type { Screen } from '@/app/contexts/NavigationContext'
 const ALL_ROUTES: Screen[] = [
   'prelogin-inactive', 'prelogin-active', 'co-apping-session', 'homepage', 'language-selector',
   'analytics', 'messages', 'payments', 'products', 'product-detail', 'investments',
-  'investments-history', 'prime', 'more', 'documents', 'settings', 'contacts', 'transactions', 'account-detail',
+  'investments-history', 'investment-orders-to-approve', 'prime', 'more', 'documents', 'settings', 'contacts', 'transactions', 'account-detail',
   'account-details-info', 'account-options', 'card-details-info', 'card-options', 'transaction-detail',
   'card-detail', 'domestic-payment', 'payment-review', 'payment-sign', 'payment-success',
   'flow-library', 'design-system', 'tools',
@@ -29,6 +29,7 @@ const BACK_FALLBACKS: Record<Screen, Screen> = {
   'product-detail': 'products',
   investments: 'homepage',
   'investments-history': 'investments',
+  'investment-orders-to-approve': 'investments',
   prime: 'homepage',
   more: 'more',
   documents: 'more',
@@ -59,7 +60,7 @@ const RESTORABLE_ROUTES: Screen[] = [
 ]
 
 describe('exhaustive route policy', () => {
-  it('owns exactly the 32 runtime routes and their existing back fallbacks', () => {
+  it('owns exactly the 33 runtime routes and their existing back fallbacks', () => {
     expect(Object.keys(ROUTE_POLICY)).toEqual(ALL_ROUTES)
     expect(Object.fromEntries(ALL_ROUTES.map((route) => [route, ROUTE_POLICY[route].backFallback]))).toEqual(
       BACK_FALLBACKS,

@@ -1,5 +1,6 @@
 import { CARD_PIN_FLOW } from "./cardPin";
 import { ETHOCA_FLOW } from "./ethoca";
+import { INVESTMENTS_BULK_APPROVAL_FLOW } from "./investmentsBulkApproval";
 import { ROUND_UP_FLOW } from "./roundUp";
 import { RS_PROPERTY_INSURANCE_FLOW } from "./rsPropertyInsurance";
 import type { FlowDefinition, FlowPreviewId, FlowScenario } from "./types";
@@ -10,10 +11,17 @@ export const FLOW_DEFINITIONS: Record<FlowPreviewId, FlowDefinition> = {
   "ro-card-pin": CARD_PIN_FLOW,
   "mobile-pi-ethoca": ETHOCA_FLOW,
   "rs-property-insurance": RS_PROPERTY_INSURANCE_FLOW,
+  "investments-bulk-approval": INVESTMENTS_BULK_APPROVAL_FLOW,
 };
 
 /** Display order. Adding a flow = add a data module + one entry here. */
-export const FLOW_ORDER: readonly FlowPreviewId[] = ["rs-property-insurance", "mobile-pi-ethoca", "ro-round-up", "ro-card-pin"];
+export const FLOW_ORDER: readonly FlowPreviewId[] = [
+  "investments-bulk-approval",
+  "rs-property-insurance",
+  "mobile-pi-ethoca",
+  "ro-round-up",
+  "ro-card-pin",
+];
 
 export function getFlowDefinition(id: FlowPreviewId): FlowDefinition {
   return FLOW_DEFINITIONS[id];

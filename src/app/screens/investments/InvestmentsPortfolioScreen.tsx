@@ -70,6 +70,7 @@ interface InvestmentsPortfolioScreenProps {
   roboAdvisorEnabled?: boolean;
   initialView?: "portfolio" | "goals";
   onHistoryClick?: (filterByTitle?: string) => void;
+  onOrdersToApproveClick?: () => void;
   onSelectedSecurityChange?: (security: InvestmentCatalogSecurity | null) => void;
   fundsWindowRequest?: InvestmentFundsRequest | null;
   buyRequest?: InvestmentBuyRequest | null;
@@ -289,6 +290,7 @@ export default function InvestmentsPortfolioScreen({
   roboAdvisorEnabled = false,
   initialView = "portfolio",
   onHistoryClick,
+  onOrdersToApproveClick,
   onSelectedSecurityChange,
   fundsWindowRequest,
   buyRequest,
@@ -611,6 +613,7 @@ export default function InvestmentsPortfolioScreen({
           iconName: "investment-to-approve",
           label: t("runtime.investments.actions.toApprove", "To approve"),
           badgeCount: 20,
+          onClick: onOrdersToApproveClick,
         },
         {
           id: "download-report",

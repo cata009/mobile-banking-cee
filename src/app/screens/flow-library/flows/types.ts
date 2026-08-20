@@ -14,7 +14,12 @@
 import type { CountryId } from "@/app/state/demoTypes";
 
 /** Stable ids for the flows shipped in the library. */
-export type FlowPreviewId = "ro-round-up" | "ro-card-pin" | "mobile-pi-ethoca" | "rs-property-insurance";
+export type FlowPreviewId =
+  | "ro-round-up"
+  | "ro-card-pin"
+  | "mobile-pi-ethoca"
+  | "rs-property-insurance"
+  | "investments-bulk-approval";
 
 /**
  * Screen kinds a preview step can render. Each maps to a DS-composed preview in
@@ -97,7 +102,28 @@ export type RsPropertyInsuranceScreenKind =
   | "rs-pi-payment-cancelled"
   | "rs-pi-abandon-confirm";
 
-export type FlowScreenKind = RoundUpScreenKind | CardPinScreenKind | EthocaScreenKind | RsPropertyInsuranceScreenKind;
+/**
+ * All-country Flow Library prototype for approving several investment drafts with
+ * one final authorization. These kinds are preview-only; they are not runtime
+ * Investments routes.
+ */
+export type InvestmentsBulkApprovalScreenKind =
+  | "investments-bulk-prototype"
+  | "investments-bulk-selection"
+  | "investments-bulk-review-first"
+  | "investments-bulk-review-last"
+  | "investments-bulk-summary-blocked"
+  | "investments-bulk-summary-ready"
+  | "investments-bulk-sign"
+  | "investments-bulk-confirmation"
+  | "investments-bulk-failure";
+
+export type FlowScreenKind =
+  | RoundUpScreenKind
+  | CardPinScreenKind
+  | EthocaScreenKind
+  | RsPropertyInsuranceScreenKind
+  | InvestmentsBulkApprovalScreenKind;
 
 /** Where a flow sits on the road to production. Drives the status chip + filtering. */
 export type FlowStatus = "future-release-preview" | "in-review" | "baseline-candidate";
