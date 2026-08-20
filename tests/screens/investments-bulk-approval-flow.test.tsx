@@ -42,7 +42,7 @@ function nextOrderFromBottom() {
 }
 
 function openSummaryFromBottom() {
-  fireEvent.click(screen.getByRole("button", { name: "Summary" }));
+  fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 }
 
 function scrollReviewContentToBottom() {
@@ -124,7 +124,7 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByTestId("bulk-summary-status-marker-draft-02")).toHaveClass("bg-[var(--uc-green-olive)]");
     expect(screen.getByTestId("bulk-summary-draft-draft-04")).toHaveTextContent("Not selected to be signed");
 
-    fireEvent.click(screen.getByRole("button", { name: "Back to review" }));
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Selected: UniCredit Balanced Income Fund. Activate to deselect." }));
     fireEvent.click(screen.getByRole("button", { name: "View summary" }));
     expect(screen.getByTestId("bulk-summary-draft-draft-01")).toHaveTextContent("Not selected to be signed");
@@ -239,7 +239,7 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 1 of 3");
     expect(screen.queryByRole("button", { name: "Previous" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Next order" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Summary" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Continue" })).not.toBeInTheDocument();
     expect(screen.queryByText(/Swipe left or right is shown as a design intent/i)).not.toBeInTheDocument();
     const currentDraftRow = screen.getByTestId("bulk-review-current-draft-row");
     expect(currentDraftRow).toHaveTextContent("UniCredit Balanced Income Fund");
@@ -259,17 +259,18 @@ describe("Investments bulk approval Flow Library prototype", () => {
     const termsRow = screen.getByTestId("bulk-review-terms-row");
     expect(termsRow).toHaveTextContent("I have read and accept the terms and conditions");
     expect(termsRow).toHaveClass("border-t");
+    expect(termsRow).toHaveClass("py-[12px]");
     expect(screen.getByTestId("bulk-review-fixed-bottom-area")).toHaveClass("shadow-[0_-2px_8px_rgba(38,38,38,0.12)]");
     expect(screen.getByTestId("bulk-review-bottom-navigation")).not.toHaveClass("border-t");
     expect(termsRow.compareDocumentPosition(screen.getByTestId("bulk-review-bottom-navigation")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.getByRole("button", { name: "Previous draft" })).toBeEnabled();
     expect(screen.queryByRole("button", { name: "Next draft" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Summary" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Summary" })).toHaveClass("bg-[var(--uc-action)]", "!h-[32px]");
-    fireEvent.click(screen.getByRole("button", { name: "Summary" }));
+    expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Continue" })).toHaveClass("bg-[var(--uc-action)]", "!h-[32px]");
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 3 of 3");
     fireEvent.click(screen.getByRole("switch", { name: /Accept terms/i }));
-    expect(screen.getByRole("button", { name: "Summary" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Continue" })).toBeEnabled();
   });
 
   it("uses the shared Investments disclosure presentation with Ex-Ante open and the other sections closed", () => {
@@ -305,8 +306,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(unselectedCard).toHaveTextContent("SELL · LU1953188835");
     expect(unselectedCard).toHaveTextContent(/3[.,]200,00 RON/);
 
-    expect(screen.getByTestId("bulk-summary-action-group")).toHaveClass("gap-[8px]");
-    expect(screen.getByRole("button", { name: "Back to review" })).toHaveClass("h-[44px]", "text-[18px]", "font-bold");
+    expect(screen.queryByRole("button", { name: "Back to review" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Confirm and sign ALL marked ORDERS" })).toHaveClass("!w-full");
   });
 
   it("opens any summary card as a read-only inspection and returns without changing its status", () => {
@@ -386,7 +387,7 @@ describe("Investments bulk approval Flow Library prototype", () => {
 
     expect(screen.getByRole("button", { name: "Confirm and sign ALL marked ORDERS" })).toBeDisabled();
 
-    fireEvent.click(screen.getByRole("button", { name: "Back to review" }));
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
     nextOrderFromBottom();
     nextOrderFromBottom();
     fireEvent.click(screen.getByRole("switch", { name: /Accept terms/i }));
