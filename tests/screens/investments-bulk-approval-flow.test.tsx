@@ -20,13 +20,21 @@ function renderBulkPrototype() {
   );
 }
 
+function enterBulkSigning() {
+  if (!screen.queryByRole("checkbox", { name: "Select all orders" })) {
+    fireEvent.click(screen.getByRole("button", { name: "BULK SIGNING" }));
+  }
+}
+
 function selectDrafts(count = 3) {
+  enterBulkSigning();
   screen.getAllByRole("checkbox").filter((checkbox) => !checkbox.hasAttribute("disabled")).slice(0, count).forEach((checkbox) => {
     fireEvent.click(checkbox);
   });
 }
 
 function selectNamedDrafts(...names: string[]) {
+  enterBulkSigning();
   names.forEach((name) => {
     fireEvent.click(screen.getByRole("checkbox", { name: `Select ${name}` }));
   });
@@ -82,32 +90,71 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByTestId("flow-prototype-steps")).toHaveClass("w-max");
   });
 
-  it("shows the Figma none-selected state with no Reject action and a disabled Sign orders CTA", () => {
+  it("starts with an ordinary order list and offers BULK SIGNING to enter bulk mode", () => {
     renderBulkPrototype();
 
     expect(screen.getAllByRole("heading", { name: "Orders to approve" })).not.toHaveLength(0);
     expect(screen.getByText("These investment order drafts were prepared by your advisor and are awaiting for your approval. Once approved, the orders will be processed.")).toBeInTheDocument();
-    expect(screen.getByTestId("bulk-selected-count")).toHaveTextContent("Selected 0");
-    expect(screen.getByRole("button", { name: "Sign orders" })).toBeDisabled();
+    const bulkSigning = screen.getByRole("button", { name: "BULK SIGNING" });
+    expect(bulkSigning).toBeInTheDocument();
+    expect(bulkSigning).toHaveClass("h-[24px]", "gap-[5px]", "text-[14px]");
+    expect(bulkSigning.querySelector("img")).toHaveAttribute("src", "/assets/investments/sign-multiple.svg");
+    expect(screen.queryByTestId("bulk-selected-count")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Sign orders" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "REJECT" })).not.toBeInTheDocument();
-    expect(screen.getAllByRole("checkbox")[0]).toHaveAttribute("data-flow-bulk-checkbox", "true");
+    expect(screen.queryByRole("checkbox", { name: "Select all orders" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Open order details for UniCredit Balanced Income Fund" })).toBeInTheDocument();
   });
 
-  it("supports one or many Figma-style selected rows with Reject and enabled Sign orders", () => {
+  it("hides BULK SIGNING when only one order remains", () => {
+    renderBulkPrototype();
+    const draftsToReject = [
+      "UniCredit Balanced Income Fund",
+      "onemarkets Climate Focus Fund",
+      "Sustainable Future Mixed Fund",
+      "Global Dividend Fund",
+      "CEE Government Bond Fund",
+      "Emerging Markets Equity Fund",
+      "Euro Short Term Bond Fund",
+      "European Small Cap Fund",
+      "Strategic Income Fund",
+    ];
+
+    draftsToReject.forEach((name) => {
+      fireEvent.click(screen.getByRole("button", { name: `Open order details for ${name}` }));
+      fireEvent.click(screen.getByRole("button", { name: "Reject" }));
+      fireEvent.click(screen.getByRole("button", { name: "Yes, reject the order" }));
+    });
+
+    expect(screen.getByText(/Total orders:/)).toHaveTextContent("Total orders: 1");
+    expect(screen.queryByRole("button", { name: "BULK SIGNING" })).not.toBeInTheDocument();
+  });
+
+  it("opens bulk mode with selectable rows and an enabled Sign orders action", () => {
     renderBulkPrototype();
 
     selectDrafts(2);
 
     expect(screen.getByTestId("bulk-selected-count")).toHaveTextContent("Selected 2");
     expect(screen.getAllByRole("checkbox", { checked: true })).toHaveLength(2);
-    expect(screen.getByRole("button", { name: "REJECT" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "REJECT" })).toHaveAttribute("data-flow-bulk-reject-action", "true");
+    expect(screen.queryByRole("button", { name: "REJECT" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Sign orders" })).toBeEnabled();
 
     fireEvent.click(screen.getByRole("button", { name: "Sign orders" }));
 
     expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 1 of");
     expect(screen.getByRole("button", { name: /Ex-Ante cost information/i })).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("exits bulk mode and clears the selection with CANCEL", () => {
+    renderBulkPrototype();
+    selectDrafts(2);
+
+    fireEvent.click(screen.getByRole("button", { name: "CANCEL" }));
+
+    expect(screen.queryByRole("checkbox", { name: "Select all orders" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Sign orders" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "BULK SIGNING" })).toBeInTheDocument();
   });
 
   it("keeps the exact named draft identities through selection, review, summary, rejection and deselection", () => {
@@ -131,17 +178,19 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByTestId("bulk-summary-draft-draft-02")).toHaveTextContent("Marked to sign");
   });
 
-  it("keeps exact rejected draft identities after batch reject", () => {
+  it("keeps an individually rejected draft in the summary after it leaves the default list", () => {
     renderBulkPrototype();
 
-    selectNamedDrafts("UniCredit Balanced Income Fund", "onemarkets Climate Focus Fund");
-    fireEvent.click(screen.getByRole("button", { name: "REJECT" }));
-    fireEvent.click(screen.getByRole("button", { name: "Yes, reject the orders" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open order details for UniCredit Balanced Income Fund" }));
+    fireEvent.click(screen.getByRole("button", { name: "Reject" }));
+    fireEvent.click(screen.getByRole("button", { name: "Yes, reject the order" }));
+    expect(screen.queryByRole("button", { name: "Open order details for UniCredit Balanced Income Fund" })).not.toBeInTheDocument();
+
     selectNamedDrafts("Sustainable Future Mixed Fund");
     fireEvent.click(screen.getByRole("button", { name: "Sign orders" }));
     fireEvent.click(screen.getByRole("button", { name: "View summary" }));
 
-    expect(screen.getByTestId("bulk-summary-draft-draft-01")).toHaveTextContent("Not selected to be signed");
+    expect(screen.getByTestId("bulk-summary-draft-draft-01")).toHaveTextContent("Rejected");
     expect(screen.getByTestId("bulk-summary-draft-draft-02")).toHaveTextContent("Not selected to be signed");
     expect(screen.getByTestId("bulk-summary-draft-draft-03")).toHaveTextContent("Marked to sign");
     expect(screen.getByTestId("bulk-summary-draft-draft-04")).toHaveTextContent("Not selected to be signed");
@@ -157,9 +206,10 @@ describe("Investments bulk approval Flow Library prototype", () => {
   it("uses the exact selection checkmark and leaves group-ending rows without a trailing divider", () => {
     renderBulkPrototype();
 
+    enterBulkSigning();
     fireEvent.click(screen.getByRole("checkbox", { name: "Select UniCredit Balanced Income Fund" }));
     expect(screen.getByTestId("flow-bulk-selection-checkmark")).toHaveAttribute("width", "14");
-    expect(screen.getByRole("button", { name: "REJECT" })).toContainElement(screen.getByTestId("flow-bulk-reject-icon"));
+    expect(screen.queryByRole("button", { name: "REJECT" })).not.toBeInTheDocument();
 
     const lastAdvisoryRow = screen.getByText("CEE Government Bond Fund").closest("div.flex");
     const lastOrderRow = screen.getByText("Balanced Allocation Fund").closest("div.flex");
@@ -170,6 +220,7 @@ describe("Investments bulk approval Flow Library prototype", () => {
   it("selects every current selectable draft from the Select all control", () => {
     renderBulkPrototype();
 
+    enterBulkSigning();
     fireEvent.click(screen.getByRole("checkbox", { name: "Select all orders" }));
 
     expect(screen.getByTestId("bulk-selected-count")).toHaveTextContent("Selected 10");
@@ -177,38 +228,35 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByRole("button", { name: "Sign orders" })).toBeEnabled();
   });
 
-  it("confirms plural rejection before removing the selected orders from the list", () => {
+  it("confirms individual rejection before removing the order from the default list", () => {
     renderBulkPrototype();
-    selectDrafts(2);
 
-    fireEvent.click(screen.getByRole("button", { name: "REJECT" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open order details for UniCredit Balanced Income Fund" }));
+    expect(screen.getByRole("button", { name: "Reject" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Reject" }));
 
-    expect(screen.getByRole("dialog")).toHaveTextContent("Are you sure you want to reject the orders?");
-    expect(screen.getByRole("dialog")).toHaveTextContent("By rejecting the orders, they will be canceled and cannot be retrieved afterwards.");
-    expect(screen.getByRole("button", { name: "Yes, reject the orders" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog")).toHaveTextContent("Are you sure you want to reject the order?");
+    expect(screen.getByRole("dialog")).toHaveTextContent("By rejecting the order, it will be canceled and cannot be retrieved afterwards.");
+    expect(screen.getByRole("button", { name: "Yes, reject the order" })).toBeInTheDocument();
     expect(screen.getByText("UniCredit Balanced Income Fund")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "No, I changed my mind" }));
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(screen.getByTestId("bulk-selected-count")).toHaveTextContent("Selected 2");
+    fireEvent.click(screen.getByRole("button", { name: "Reject" }));
+    fireEvent.click(screen.getByRole("button", { name: "Yes, reject the order" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "REJECT" }));
-    fireEvent.click(screen.getByRole("button", { name: "Yes, reject the orders" }));
-
-    expect(screen.getByTestId("bulk-selected-count")).toHaveTextContent("Selected 0");
-    expect(screen.getByText(/Total orders:/)).toHaveTextContent("Total orders: 8");
+    expect(screen.getByText(/Total orders:/)).toHaveTextContent("Total orders: 9");
     expect(screen.queryByText("UniCredit Balanced Income Fund")).not.toBeInTheDocument();
-    expect(screen.queryByText("onemarkets Climate Focus Fund")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "REJECT" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Sign orders" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Sign orders" })).not.toBeInTheDocument();
   });
 
   it("uses singular rejection copy when one order is selected", () => {
     renderBulkPrototype();
-    selectDrafts(1);
 
-    fireEvent.click(screen.getByRole("button", { name: "REJECT" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open order details for UniCredit Balanced Income Fund" }));
+    fireEvent.click(screen.getByRole("button", { name: "Reject" }));
 
     expect(screen.getByRole("dialog")).toHaveTextContent("Are you sure you want to reject the order?");
     expect(screen.getByRole("dialog")).toHaveTextContent("By rejecting the order, it will be canceled and cannot be retrieved afterwards.");
@@ -313,9 +361,10 @@ describe("Investments bulk approval Flow Library prototype", () => {
   it("opens any summary card as a read-only inspection and returns without changing its status", () => {
     renderBulkPrototype();
 
-    fireEvent.click(screen.getByRole("checkbox", { name: "Select UniCredit Balanced Income Fund" }));
-    fireEvent.click(screen.getByRole("button", { name: "REJECT" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open order details for UniCredit Balanced Income Fund" }));
+    fireEvent.click(screen.getByRole("button", { name: "Reject" }));
     fireEvent.click(screen.getByRole("button", { name: "Yes, reject the order" }));
+    enterBulkSigning();
     fireEvent.click(screen.getByRole("checkbox", { name: "Select onemarkets Climate Focus Fund" }));
     fireEvent.click(screen.getByRole("button", { name: "Sign orders" }));
     fireEvent.click(screen.getByRole("button", { name: "View summary" }));
@@ -333,7 +382,7 @@ describe("Investments bulk approval Flow Library prototype", () => {
     fireEvent.click(screen.getByRole("button", { name: "View UniCredit Balanced Income Fund order details" }));
     expect(screen.getByText("Rejected")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
-    expect(screen.getByTestId("bulk-summary-draft-draft-01")).toHaveTextContent("Not selected to be signed");
+    expect(screen.getByTestId("bulk-summary-draft-draft-01")).toHaveTextContent("Rejected");
   });
 
   it("uses a clean generic success tile with one return action and no failure shortcut", () => {

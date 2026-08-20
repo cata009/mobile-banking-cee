@@ -37,8 +37,18 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
         { label: "Authorization model", value: "One final standard signature for marked orders" },
       ],
       versionContext:
-        "Bulk-approval prototype updated to match the interactive flow: Ex-Ante Costs opens on entry, REJECT requires a singular/plural confirmation sheet before selected drafts leave the list, and the final review uses a terms-gated Continue CTA into the read-only summary.",
+        "Bulk-approval prototype updated to match the interactive flow: Ex-Ante Costs opens on entry, ordinary rows open detail with a single-order REJECT confirmation, BULK SIGNING enters bulk mode only when at least two orders exist, and the final review uses a terms-gated Continue CTA into the read-only summary.",
       versionHistory: [
+        {
+          version: "0.4",
+          date: "2026-08-20",
+          detail: "Added the top-right CANCEL action in bulk mode; it occupies the same position as BULK SIGNING and clears unsubmitted local selection before returning to the ordinary list.",
+        },
+        {
+          version: "0.3",
+          date: "2026-08-20",
+          detail: "Introduced the ordinary order-list default with row-level order detail and Reject, and made BULK SIGNING the explicit entry into the existing checkbox-based bulk-sign mode when at least two orders remain.",
+        },
         {
           version: "0.2",
           date: "2026-08-20",
@@ -77,8 +87,9 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
         {
           title: "Selection and scale",
           items: [
-            "The list starts with no selected drafts, supports individual and Select all checkbox controls, shows a selected count, and remains suitable for a conceptual batch size of up to 99 drafts.",
-            "When one or more drafts are selected, REJECT opens a Figma-style confirmation bottom sheet with singular/plural copy. Confirming marks that selected set Rejected only in local prototype state, removes it from the selection list and recalculates the total, Select all and selected count; no request is sent.",
+            "The list starts as an ordinary order list: it has no checkboxes, selected counter or sticky Sign orders footer, and every row opens its existing-style read-only order detail.",
+            "BULK SIGNING is the explicit entry into bulk-sign mode and appears only when at least two orders remain. In bulk mode, top-right CANCEL occupies that same position and returns to the ordinary list after clearing unsubmitted local selection. Only in bulk mode are individual and Select all checkboxes, a selected count and the sticky Sign orders CTA shown; the prototype remains suitable for a conceptual batch size of up to 99 drafts.",
+            "REJECT is not a list or bulk-mode action. The read-only detail has the single-order Reject action, which opens the Figma-style confirmation bottom sheet; confirming removes that draft from the list and records a local Rejected summary status without sending a request.",
           ],
         },
         {
@@ -118,8 +129,8 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
         {
           title: "Selection list",
           items: [
-            "Expose semantic checkboxes beside compact pending-order rows, never by nesting controls in a row button.",
-            "Use the Figma 24px outlined checkbox treatment in rows and Select all, with a disabled Sign orders CTA at zero selection and a selected count beside it otherwise.",
+            "Start with compact, selectable-as-a-row pending orders and a BULK SIGNING text action with its dedicated 16px icon beside the total; this ordinary list has neither checkboxes nor a sticky bulk footer.",
+            "BULK SIGNING changes the same list into bulk-sign mode only when at least two orders remain; it is replaced in the same top-right position by CANCEL. CANCEL abandons the unsubmitted selection and returns to the ordinary list. With one order, the customer uses the row-level detail flow instead. Use the Figma 24px outlined checkbox treatment in bulk rows and Select all, with a disabled Sign orders CTA at zero selection and a selected count beside it otherwise.",
           ],
         },
         {
@@ -167,13 +178,13 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       "A production implementation needs confirmed draft eligibility, document versions, signing authority and fresh order data before an authorization can be offered.",
     ],
     businessRules: [
-      "Selection is individual and reversible. It starts empty, supports Select all, and the customer can leave drafts unselected or deselect a marked order from its review page before the final summary.",
+      "The default list is an individual-detail experience: rows open read-only order detail and contain no selection affordance or sticky footer. BULK SIGNING, shown only when at least two orders remain, explicitly enables the reversible bulk selection mode; its same-position top-right CANCEL clears unsubmitted selection and restores the default list. Bulk mode supports Select all and deselection from review before the final summary.",
       "The batch review is one order per page. Position, product name, amount, ISIN, order data and optional disclosure sections stay visible in a predictable structure.",
       "Ex-Ante Costs is automatically expanded whenever a selected order opens. Documents, Important Information and Disclaimer are initially closed; none of these interactions block queue navigation.",
       "The fixed bottom area keeps the Figma navigation/progress on its first row: the first draft has no Back control, later drafts have circular Back/Forward controls, and the final draft replaces Forward with the terms-gated compact primary Continue button. The header View summary action opens the non-editable summary at any time; no control jumps or auto-focuses Ex-Ante Costs.",
       "Every order has a compact local progress subtitle directly below Order N of total. It reads Scroll down for all the details before completion and You're all caught up with a check afterward. The selected-current-draft row and the final sticky Terms & Conditions row each use 12px vertical padding; Terms appears immediately before the navigator. The progress indicator is informational and never a gate for navigation, summary, signing or backend state.",
       "Terms & Conditions appears only on the final selected order. The prototype only enables its final batch-sign entry after every marked order has been presented and that final toggle is accepted.",
-      "The summary is read-only and covers every pending draft: marked to sign, not signed (unselected), or rejected. In this prototype REJECT first requires the bottom-sheet confirmation, then marks the current selected set locally, removes it from selection and never sends a request.",
+      "The summary is read-only and covers every pending draft: marked to sign, not signed (unselected), or rejected. In this prototype the detail-screen Reject action first requires the bottom-sheet confirmation, then marks that one draft locally, removes it from the default list and never sends a request.",
       "One standard signature is represented for all marked orders. Its confirmation and failure states are non-executing prototype states and must not assert an actual signature, order submission or legal completion.",
     ],
     signing:
@@ -237,7 +248,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
     ],
     nodes: {
       "investments-bulk-prototype": {
-        primary: { label: "Explore bulk approval", to: "investments-bulk-selection" },
+        primary: { label: "BULK SIGNING", to: "investments-bulk-selection" },
       },
       "investments-bulk-selection": {
         primary: { label: "Sign orders", to: "investments-bulk-review-first" },
@@ -279,8 +290,8 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
   screenSpecs: {
     "investments-bulk-prototype": {
       purpose:
-        "Clickable local-state prototype of the complete bulk-approval experience, starting from selection and preserving the same accessible controls used by its reference states.",
-      states: ["Selection", "One-order review queue", "Read-only summary", "Single signing step", "Honest prototype confirmation/failure"],
+        "Clickable local-state prototype of the complete bulk-approval experience, starting with an ordinary order list and exposing checkbox bulk signing only after the BULK SIGNING action when at least two orders remain.",
+      states: ["Ordinary order list", "Read-only single-order detail", "Bulk selection", "One-order review queue", "Read-only summary", "Single signing step", "Honest prototype confirmation/failure"],
       acceptance: [
         "The prototype is confined to Flow Library and does not alter the runtime Orders to approve route.",
         "Every presentation and result state is explicitly local/non-executing.",
@@ -288,8 +299,8 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
     },
     "investments-bulk-selection": {
       purpose:
-        "Select a compact set of pending drafts before entering an efficient one-order-at-a-time review queue.",
-      states: ["None selected / Sign orders disabled", "One or more selected / REJECT + Sign orders enabled", "All selectable orders selected", "Conceptual batch size up to 99"],
+        "Select a compact set of pending drafts only after the customer has intentionally chosen BULK SIGNING from the ordinary list; this entry is absent when one order remains.",
+      states: ["Bulk mode entered / none selected / Sign orders disabled", "One or more selected / Sign orders enabled", "All selectable orders selected", "Conceptual batch size up to 99"],
       fields: [
         { name: "Pending draft", type: "Read-only compact row + Figma-style labelled checkbox", required: true, notes: "Product, order type, identifier and country-formatted amount." },
         { name: "Selected count / Select all", type: "Footer checkbox + live status", required: true, notes: "Updates after every checkbox change." },
@@ -297,12 +308,13 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       actions: [
         { label: "Select / deselect draft", result: "Updates only local prototype selection." },
         { label: "Select all", result: "Selects every current selectable draft, or clears the whole current selection." },
-        { label: "REJECT", result: "Opens a singular/plural confirmation bottom sheet. Confirming marks every currently selected draft Rejected in local state, removes those drafts from the list and never sends a request; closing or declining keeps the selection unchanged." },
+        { label: "CANCEL", result: "Appears in the top-right position occupied by BULK SIGNING on the ordinary list. Clears unsubmitted local selection and returns to the ordinary list." },
         { label: "Sign orders", result: "Opens the first selected draft; disabled with no selection." },
       ],
       edgeCases: [
         "A customer can leave any order unselected.",
-        "After confirmation, rejected rows leave the selection list and Select all applies only to the remaining selectable drafts; their Rejected status remains visible in the read-only summary.",
+        "The bulk list does not expose REJECT. Rejection is available only from an ordinary-list order detail; once confirmed, that draft leaves both the ordinary and bulk lists while its Rejected status remains visible in the read-only summary.",
+        "CANCEL never rejects or signs an order; it only abandons the current local bulk selection and restores the ordinary list.",
         "If the final marked order is deselected, the Sign orders CTA becomes unavailable and focus remains on the selection list.",
         "Long product names, identifiers and 10–20 order lists must not hide the checkbox label or selected count.",
       ],
@@ -457,7 +469,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       description:
         "The main prototype journey: select drafts, review marked orders sequentially, accept Terms & Conditions only on the last order, inspect the immutable summary, then enter one standard signature step.",
       steps: [
-        { id: "selection", title: "Select orders", description: "Compact individual selection with selected count and review CTA.", screen: "investments-bulk-selection" },
+        { id: "selection", title: "BULK SIGNING", description: "The ordinary list opens order detail; BULK SIGNING reveals compact selection, selected count and review CTA when at least two orders remain.", screen: "investments-bulk-selection" },
         { id: "first-review", title: "Review an order", description: "One marked order at a time; Ex-Ante Costs starts open and navigation is always available.", screen: "investments-bulk-review-first" },
         { id: "last-review", title: "Review final order", description: "The last marked order is the only page with the Terms & Conditions toggle.", screen: "investments-bulk-review-last" },
         { id: "summary", title: "All-drafts summary", description: "Read-only multi-line marked, unselected and rejected draft cards with the enabled final sign entry.", screen: "investments-bulk-summary-ready" },
@@ -472,7 +484,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       description:
         "The customer can open summary before finishing the queue. It remains read-only and its final sign action is disabled until each marked order was presented and final-page terms are accepted.",
       steps: [
-        { id: "selection", title: "Select orders", description: "Choose a subset of pending drafts.", screen: "investments-bulk-selection" },
+        { id: "selection", title: "BULK SIGNING", description: "When at least two orders remain, enter bulk mode from the ordinary list, then choose a subset of pending drafts.", screen: "investments-bulk-selection" },
         { id: "review", title: "Review in progress", description: "Navigation remains open; no disclosure scroll or open action is required.", screen: "investments-bulk-review-first" },
         { id: "blocked-summary", title: "Summary locked", description: "The sign action is visible but disabled while local review/terms conditions remain unmet.", screen: "investments-bulk-summary-blocked" },
       ],

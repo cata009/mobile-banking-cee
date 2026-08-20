@@ -52,7 +52,7 @@ function getSummaryOrderStatus(draft: BulkDraft, selectedIds: readonly string[],
 }
 
 function getSummaryStatusLabel(status: SummaryOrderStatus) {
-  return status === "Marked to sign" ? status : "Not selected to be signed";
+  return status === "Not signed" ? "Not selected to be signed" : status;
 }
 
 function PrototypeShell({ children }: { children: ReactNode }) {
@@ -63,14 +63,6 @@ function FlowBulkSelectionCheckmark() {
   return (
     <svg data-testid="flow-bulk-selection-checkmark" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
       <path fillRule="evenodd" clipRule="evenodd" d="M10.3181 3.76108C11.2141 2.82964 12.6664 2.82964 13.5625 3.76108L6.22952 11.375L0.875 5.81907C1.77066 4.88804 3.22338 4.88804 4.11943 5.81907L6.22952 8.00209L10.3181 3.76108Z" fill="var(--uc-action)" />
-    </svg>
-  );
-}
-
-function FlowBulkRejectIcon() {
-  return (
-    <svg data-testid="flow-bulk-reject-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path fillRule="evenodd" clipRule="evenodd" d="M9.5 1H12.523C13.508 1 14 2 14 2.5V3H2V2.5C2 2 2.492 1 3.477 1H6.5L7 0H9L9.5 1ZM4.84017 16C4.32017 16 3.88667 15.6015 3.84367 15.083L2.92017 4H12.9202L11.9962 15.083C11.9532 15.6015 11.5202 16 11.0002 16H4.84017Z" fill="var(--uc-action)" />
     </svg>
   );
 }
@@ -113,20 +105,26 @@ function FlowBulkSelectionCheckbox({
 }
 
 function BulkSelectionScreen({
+  bulkMode,
   selectedIds,
   rejectedIds,
   onToggle,
   onToggleAll,
   onSignOrders,
-  onRejectSelected,
+  onEnterBulk,
+  onCancelBulk,
+  onOpenOrder,
   staticPreview = false,
 }: {
+  bulkMode: boolean;
   selectedIds: readonly string[];
   rejectedIds: readonly string[];
   onToggle: (id: string) => void;
   onToggleAll: () => void;
   onSignOrders: () => void;
-  onRejectSelected: () => void;
+  onEnterBulk: () => void;
+  onCancelBulk: () => void;
+  onOpenOrder: (draft: BulkDraft) => void;
   staticPreview?: boolean;
 }) {
   const { country } = useDemo();
@@ -145,25 +143,16 @@ function BulkSelectionScreen({
         <p className="pt-[10px] uc-type-n4 text-[var(--uc-text)]">These investment order drafts were prepared by your advisor and are awaiting for your approval. Once approved, the orders will be processed.</p>
         <div className="mt-[18px] flex min-h-[24px] items-center justify-between">
           <p className="uc-type-n4 text-[var(--uc-text)]">Total orders: <span className="font-bold">{selectableDrafts.length}</span></p>
-          {selectedCount > 0 ? (
-            <button type="button" onClick={onRejectSelected} data-flow-bulk-reject-action="true" className="inline-flex h-[24px] items-center gap-[5px] whitespace-nowrap text-[14px] font-bold leading-[normal] text-[var(--uc-action)]" aria-label="REJECT">
-              <FlowBulkRejectIcon />
-              REJECT
-            </button>
-          ) : null}
+          {bulkMode ? <button type="button" onClick={onCancelBulk} className="inline-flex h-[24px] items-center whitespace-nowrap text-[14px] font-bold leading-[normal] text-[var(--uc-action)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]" aria-label="CANCEL">CANCEL</button> : null}
+          {!bulkMode && selectableDrafts.length > 1 ? <button type="button" onClick={onEnterBulk} className="inline-flex h-[24px] items-center gap-[5px] whitespace-nowrap text-[14px] font-bold leading-[normal] text-[var(--uc-action)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]" aria-label="BULK SIGNING"><img src="/assets/investments/sign-multiple.svg" width="16" height="16" alt="" aria-hidden="true" />BULK SIGNING</button> : null}
         </div>
         {groups.map((group) => (
           <section key={group.title} className="pt-[16px]">
             <SectionHeadingDivider title={group.title} className="px-[8px]" />
             {group.drafts.map((draft, index) => {
               const selected = selectedIds.includes(draft.id);
-              return (
-                <div key={draft.id} className={`flex min-h-[96px] items-center gap-[10px] py-[12px] ${index < group.drafts.length - 1 ? "border-b border-[var(--uc-border)]" : ""}`}>
-                  <FlowBulkSelectionCheckbox
-                    checked={selected}
-                    onToggle={() => onToggle(draft.id)}
-                    label={`Select ${draft.name}`}
-                  />
+              const rowClassName = `flex min-h-[96px] w-full items-center gap-[10px] py-[12px] ${index < group.drafts.length - 1 ? "border-b border-[var(--uc-border)]" : ""}`;
+              const details = <>
                   <BrandLogo logoId="unicredit" size={32} label={`${draft.name} product`} />
                   <span className="min-w-0 flex-1 text-right">
                     <span className="block text-[14px] font-bold leading-[18px] text-[var(--uc-text)]">{draft.orderType}</span>
@@ -173,13 +162,23 @@ function BulkSelectionScreen({
                       {formatMoney(draft.amount, country)}
                     </span>
                   </span>
+                </>;
+
+              return bulkMode ? (
+                <div key={draft.id} className={rowClassName}>
+                  <FlowBulkSelectionCheckbox checked={selected} onToggle={() => onToggle(draft.id)} label={`Select ${draft.name}`} />
+                  {details}
                 </div>
+              ) : (
+                <button key={draft.id} type="button" onClick={() => onOpenOrder(draft)} aria-label={`Open order details for ${draft.name}`} className={`${rowClassName} text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-focus-ring)]`}>
+                  {details}
+                </button>
               );
             })}
           </section>
         ))}
       </div>
-      <div className="border-t border-[var(--uc-border)] bg-[var(--uc-surface)] px-[16px] pb-[28px] pt-[16px]">
+      {bulkMode ? <div className="border-t border-[var(--uc-border)] bg-[var(--uc-surface)] px-[16px] pb-[28px] pt-[16px]">
         <div className="flex items-center gap-[10px]">
           <FlowBulkSelectionCheckbox checked={allSelected} onToggle={onToggleAll} label="Select all orders" />
           <p className="w-[112px] shrink-0 text-[18px] leading-[24px] text-[var(--uc-text)]" data-testid="bulk-selected-count" aria-live="polite">Selected <span className="font-bold">{selectedCount}</span></p>
@@ -187,7 +186,7 @@ function BulkSelectionScreen({
             Sign orders
         </PrimaryButton>
         </div>
-      </div>
+      </div> : null}
       {staticPreview ? <span className="sr-only">Static Flow Library selection preview</span> : null}
     </PrototypeShell>
   );
@@ -222,6 +221,34 @@ function BulkRejectConfirmationSheet({ selectedCount, onClose, onConfirm }: { se
         <p className="text-[18px] leading-[24px] text-[var(--uc-text)]">By rejecting the {noun}, {subject} will be canceled and cannot be retrieved afterwards.</p>
       </div>
     </BottomSheet>
+  );
+}
+
+function DefaultOrderDetailScreen({ draft, onBack, onReject }: { draft: BulkDraft; onBack: () => void; onReject: () => void }) {
+  const { country } = useDemo();
+
+  return (
+    <PrototypeShell>
+      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide">
+        <PageHeader title="Review Data" onBack={onBack} includeSafeArea showHelp={false} />
+        <section className="pt-[16px]">
+          <SectionHeadingDivider title="ORDER SUMMARY" className="px-[24px]" />
+          <InvestmentDetailField label="Product" value={draft.name} />
+          <InvestmentDetailField label="Product ID" value={draft.isin} />
+          <InvestmentDetailField label="Order type" value={draft.orderType === "REGULAR INVESTMENT" ? "Regular investment" : `One off ${draft.orderType}`} />
+          <InvestmentDetailField label="Estimated amount" value={formatMoney(draft.amount, country)} />
+        </section>
+        <section className="pt-[24px]">
+          <SectionHeadingDivider title="DOCUMENTS AND TERMS" className="px-[24px]" />
+          <InvestmentOrderDocumentsAccordion currency={getCountryCurrency(country)} />
+        </section>
+        <div className="h-[24px]" aria-hidden="true" />
+      </div>
+      <div className="flex flex-col gap-[12px] bg-[var(--uc-surface)] px-[24px] pb-[34px] pt-[12px]">
+        <button type="button" className="h-[40px] self-center px-[16px] uc-type-n4-strong text-[var(--uc-action)]" onClick={onReject}>Reject</button>
+        <PrimaryButton className="w-full" onClick={() => undefined}>Sign order</PrimaryButton>
+      </div>
+    </PrototypeShell>
   );
 }
 
@@ -504,7 +531,8 @@ function BulkFailureScreen({ onBack }: { onBack: () => void }) {
  * mount and reset when the prototype is reopened.
  */
 function BulkApprovalPrototype() {
-  const [view, setView] = useState<"selection" | "review" | "summary" | "summary-detail" | "sign" | "confirmation" | "failure">("selection");
+  const [view, setView] = useState<"list" | "detail" | "review" | "summary" | "summary-detail" | "sign" | "confirmation" | "failure">("list");
+  const [bulkMode, setBulkMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([...DEFAULT_SELECTED_IDS]);
   const [rejectedIds, setRejectedIds] = useState<string[]>([]);
   const [reviewedIds, setReviewedIds] = useState<string[]>([]);
@@ -512,6 +540,8 @@ function BulkApprovalPrototype() {
   const [reviewIndex, setReviewIndex] = useState(0);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [summaryInspectionId, setSummaryInspectionId] = useState<string | null>(null);
+  const [detailDraftId, setDetailDraftId] = useState<string | null>(null);
+  const [pendingRejectionIds, setPendingRejectionIds] = useState<string[]>([]);
   const [rejectSheetOpen, setRejectSheetOpen] = useState(false);
   const selectedDrafts = useMemo(
     () => BULK_DRAFTS.filter((draft) => selectedIds.includes(draft.id) && !rejectedIds.includes(draft.id)),
@@ -535,14 +565,18 @@ function BulkApprovalPrototype() {
     setTermsAccepted(false);
   };
 
-  const rejectSelected = () => {
-    if (selectedIds.length === 0) return;
-    setRejectedIds((current) => [...new Set([...current, ...selectedIds])]);
-    setSelectedIds([]);
+  const confirmRejection = () => {
+    if (pendingRejectionIds.length === 0) return;
+    setRejectedIds((current) => [...new Set([...current, ...pendingRejectionIds])]);
+    setSelectedIds((current) => current.filter((id) => !pendingRejectionIds.includes(id)));
     setReviewedIds([]);
     setReadDraftIds([]);
     setTermsAccepted(false);
+    setPendingRejectionIds([]);
     setRejectSheetOpen(false);
+    setDetailDraftId(null);
+    setBulkMode(false);
+    setView("list");
   };
 
   const startReview = () => {
@@ -577,21 +611,25 @@ function BulkApprovalPrototype() {
     setReadDraftIds((ids) => ids.filter((id) => id !== current.id));
     setTermsAccepted(false);
     if (nextIds.length === 0) {
-      setView("selection");
+      setView("list");
       return;
     }
     setReviewIndex((currentIndex) => Math.min(currentIndex, nextIds.length - 1));
   };
 
-  if (view === "selection") return <><BulkSelectionScreen selectedIds={selectedIds} rejectedIds={rejectedIds} onToggle={toggleSelection} onToggleAll={toggleAll} onSignOrders={startReview} onRejectSelected={() => setRejectSheetOpen(true)} />{rejectSheetOpen ? <BulkRejectConfirmationSheet selectedCount={selectedIds.length} onClose={() => setRejectSheetOpen(false)} onConfirm={rejectSelected} /> : null}</>;
-  if (view === "review") return <BulkReviewScreen drafts={selectedDrafts} index={reviewIndex} readDraftIds={readDraftIds} termsAccepted={termsAccepted} onPrevious={() => moveTo(reviewIndex - 1)} onNext={() => moveTo(reviewIndex + 1)} onSummary={() => setView("summary")} onBackToSelection={() => setView("selection")} onDeselect={deselectCurrent} onReadCurrent={() => setReadDraftIds((current) => current.includes(selectedDrafts[reviewIndex]!.id) ? current : [...current, selectedDrafts[reviewIndex]!.id])} onTermsToggle={() => setTermsAccepted((current) => !current)} />;
+  if (view === "list") return <><BulkSelectionScreen bulkMode={bulkMode} selectedIds={selectedIds} rejectedIds={rejectedIds} onToggle={toggleSelection} onToggleAll={toggleAll} onSignOrders={startReview} onEnterBulk={() => setBulkMode(true)} onCancelBulk={() => { setSelectedIds([]); setReviewedIds([]); setReadDraftIds([]); setTermsAccepted(false); setBulkMode(false); }} onOpenOrder={(draft) => { setDetailDraftId(draft.id); setView("detail"); }} />{rejectSheetOpen ? <BulkRejectConfirmationSheet selectedCount={pendingRejectionIds.length} onClose={() => { setPendingRejectionIds([]); setRejectSheetOpen(false); }} onConfirm={confirmRejection} /> : null}</>;
+  if (view === "detail") {
+    const draft = BULK_DRAFTS.find((candidate) => candidate.id === detailDraftId) ?? BULK_DRAFTS[0]!;
+    return <><DefaultOrderDetailScreen draft={draft} onBack={() => { setDetailDraftId(null); setView("list"); }} onReject={() => { setPendingRejectionIds([draft.id]); setRejectSheetOpen(true); }} />{rejectSheetOpen ? <BulkRejectConfirmationSheet selectedCount={pendingRejectionIds.length} onClose={() => { setPendingRejectionIds([]); setRejectSheetOpen(false); }} onConfirm={confirmRejection} /> : null}</>;
+  }
+  if (view === "review") return <BulkReviewScreen drafts={selectedDrafts} index={reviewIndex} readDraftIds={readDraftIds} termsAccepted={termsAccepted} onPrevious={() => moveTo(reviewIndex - 1)} onNext={() => moveTo(reviewIndex + 1)} onSummary={() => setView("summary")} onBackToSelection={() => setView("list")} onDeselect={deselectCurrent} onReadCurrent={() => setReadDraftIds((current) => current.includes(selectedDrafts[reviewIndex]!.id) ? current : [...current, selectedDrafts[reviewIndex]!.id])} onTermsToggle={() => setTermsAccepted((current) => !current)} />;
   if (view === "summary") return <BulkSummaryScreen selectedIds={selectedIds} rejectedIds={rejectedIds} reviewedIds={reviewedIds} termsAccepted={termsAccepted} onBack={() => setView("review")} onConfirm={() => setView("sign")} onViewDraft={(draft) => { setSummaryInspectionId(draft.id); setView("summary-detail"); }} />;
   if (view === "summary-detail") {
     const draft = BULK_DRAFTS.find((candidate) => candidate.id === summaryInspectionId) ?? BULK_DRAFTS[0]!;
     return <BulkSummaryOrderDetailScreen draft={draft} status={getSummaryOrderStatus(draft, selectedIds, rejectedIds)} onBack={() => setView("summary")} />;
   }
   if (view === "sign") return <BulkSignScreen onBack={() => setView("summary")} onSigned={() => setView("confirmation")} />;
-  if (view === "confirmation") return <BulkConfirmationScreen onOrdersToApprove={() => setView("selection")} />;
+  if (view === "confirmation") return <BulkConfirmationScreen onOrdersToApprove={() => { setBulkMode(false); setView("list"); }} />;
   return <BulkFailureScreen onBack={() => setView("summary")} />;
 }
 
@@ -606,7 +644,7 @@ export function renderInvestmentsBulkApprovalPreview(kind: string) {
     case "investments-bulk-prototype":
       return <BulkApprovalPrototype />;
     case "investments-bulk-selection":
-      return <BulkSelectionScreen selectedIds={staticSelected} rejectedIds={[]} onToggle={noop} onToggleAll={noop} onSignOrders={noop} onRejectSelected={noop} staticPreview />;
+      return <BulkSelectionScreen bulkMode selectedIds={staticSelected} rejectedIds={[]} onToggle={noop} onToggleAll={noop} onSignOrders={noop} onEnterBulk={noop} onCancelBulk={noop} onOpenOrder={noop} staticPreview />;
     case "investments-bulk-review-first":
       return <BulkReviewScreen drafts={staticReviewDrafts} index={0} readDraftIds={[]} termsAccepted={false} onPrevious={noop} onNext={noop} onSummary={noop} onBackToSelection={noop} onDeselect={noop} onReadCurrent={noop} onTermsToggle={noop} staticPreview />;
     case "investments-bulk-review-last":
