@@ -16,7 +16,7 @@ export function getUnavailableProductRouteFallback(
   availableProductIds: ReadonlySet<string>,
   hasInvestments: boolean,
 ): Screen | null {
-  if ((route.screen === "investments" || route.screen === "investments-history") && !hasInvestments) {
+  if ((route.screen === "investments" || route.screen === "investments-history" || route.screen === "investment-orders-to-approve") && !hasInvestments) {
     return "homepage";
   }
   if (ACCOUNT_PRODUCT_SCREENS.has(route.screen) && "accountId" in route && route.accountId) {

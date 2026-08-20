@@ -42,6 +42,11 @@ describe('flow-library scenario resolution', () => {
 })
 
 describe('flow definitions integrity', () => {
+  it('registers the all-country Investments bulk approval prototype', () => {
+    expect(FLOW_ORDER).toContain('investments-bulk-approval')
+    expect(FLOW_DEFINITIONS).toHaveProperty('investments-bulk-approval')
+  })
+
   it('covers every registered flow id with a valid default scenario', () => {
     for (const id of FLOW_ORDER) {
       const flow = FLOW_DEFINITIONS[id]

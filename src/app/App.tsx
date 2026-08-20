@@ -43,6 +43,7 @@ const ProductsScreen = lazy(() => import("@/app/screens/products/ProductsScreen"
 const ProductDetailScreen = lazy(() => import("@/app/screens/products/ProductDetailScreen"));
 const InvestmentsPortfolioScreen = lazy(() => import("@/app/screens/investments/InvestmentsPortfolioScreen"));
 const InvestmentsHistoryScreen = lazy(() => import("@/app/screens/investments/InvestmentsHistoryScreen"));
+const OrdersToApproveScreen = lazy(() => import("@/app/screens/investments/OrdersToApproveScreen"));
 const SettingsScreen = lazy(() => import("@/app/screens/settings/SettingsScreen"));
 const KidsMarketHomeApp = lazy(() => import("@/app/screens/kids/KidsMarketHomeApp"));
 
@@ -571,6 +572,11 @@ function AppContent({
 
     setHistoryFilterByTitle(filterByTitle ?? null);
     navigateTo("investments-history");
+  };
+
+  const handleOrdersToApproveClick = () => {
+    if (!investmentsPortfolioAvailable) return;
+    navigateTo("investment-orders-to-approve");
   };
 
   const handleAccountClick = (product: Product) => {
@@ -1116,6 +1122,7 @@ function AppContent({
             roboAdvisorEnabled={isCzRoboAdvisorPreviewActive}
             initialView={investmentsInitialView}
             onHistoryClick={handleInvestmentsHistoryClick}
+            onOrdersToApproveClick={handleOrdersToApproveClick}
             onSelectedSecurityChange={handleSelectedInvestmentSecurityChange}
             fundsWindowRequest={investmentFundsRequest}
             buyRequest={investmentBuyRequest}
@@ -1125,6 +1132,10 @@ function AppContent({
 
         {currentScreen === "investments-history" && investmentsPortfolioAvailable && (
           <InvestmentsHistoryScreen onBack={goBack} historyFilterByTitle={historyFilterByTitle} />
+        )}
+
+        {currentScreen === "investment-orders-to-approve" && investmentsPortfolioAvailable && (
+          <OrdersToApproveScreen onBack={goBack} />
         )}
 
         {/* Contacts Screen - EXACT ca Language Selector (NO animation) */}

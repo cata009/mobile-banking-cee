@@ -16,6 +16,7 @@ import TextField from "@/app/components/TextField";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import { PreviewSafeTop } from "./MiniPhone";
 import { renderRsPropertyInsurancePreview } from "./rsPropertyInsurancePreviews";
+import { renderInvestmentsBulkApprovalPreview } from "./investmentsBulkApprovalPreviews";
 import { DemoProvider } from "@/app/state/demoStore";
 import { FLOW_DEMO } from "../flows/demoData";
 import type { FlowScreenKind, RsPropertyInsuranceScreenKind } from "../flows/types";
@@ -926,6 +927,9 @@ export function renderFlowPreview(kind: FlowScreenKind, _context: PreviewContext
   // kinds carries the same prefix, so the dispatcher stays one line per flow.
   if (kind.startsWith("rs-pi-")) {
     return renderRsPropertyInsurancePreview(kind as RsPropertyInsuranceScreenKind);
+  }
+  if (kind.startsWith("investments-bulk-")) {
+    return renderInvestmentsBulkApprovalPreview(kind);
   }
 
   switch (kind) {

@@ -921,17 +921,18 @@ function PrototypePanel({
         </FlowNavProvider>
 
         <div className="w-full max-w-[900px]">
-          {/* Prev / timeline / next — the whole control in one line. */}
-          <div className="flex items-center gap-[10px]">
-            <TimelineArrow
-              direction="back"
-              label={history.length ? "Go back" : "Nothing to go back to"}
-              disabled={history.length === 0 && !node?.back}
-              onClick={stepBack}
-            />
+          {/* Arrows belong to the content-sized step group, so they stay next to its first/last stop instead of being pinned to the rail corners. */}
+          <div data-testid="flow-prototype-step-rail" className="flex min-h-[40px] w-full items-center justify-center">
+            <div data-testid="flow-prototype-step-control-group" className="flex w-fit max-w-[70vw] items-center gap-[10px]">
+              <TimelineArrow
+                direction="back"
+                label={history.length ? "Go back" : "Nothing to go back to"}
+                disabled={history.length === 0 && !node?.back}
+                onClick={stepBack}
+              />
 
-            <div ref={timelineRef} className="min-w-0 flex-1 overflow-x-auto scrollbar-hide">
-              <div className="flex items-center">
+            <div ref={timelineRef} className="w-fit max-w-full overflow-x-auto scrollbar-hide">
+              <div data-testid="flow-prototype-steps" className="flex w-max items-center px-[2px]">
                 {spine.map((stop, index) => {
                   const active = stop === screen;
                   const passed = spineIndex >= 0 && index < spineIndex;
@@ -972,29 +973,22 @@ function PrototypePanel({
               disabled={!node?.primary}
               onClick={nav.primary}
             />
-
-            {/*
-              Rendered on every screen and merely hidden on the first one. A
-              control that appears mid-row pushes its neighbours sideways, so the
-              forward arrow would land in a different place depending on how far
-              through the flow you are — and that arrow is the one thing a reviewer
-              clicks repeatedly.
-            */}
-            <button
-              type="button"
-              onClick={() => {
-                setHistory([]);
-                setScreen(prototype.start);
-              }}
-              aria-hidden={screen === prototype.start}
-              tabIndex={screen === prototype.start ? -1 : 0}
-              className={`shrink-0 rounded-[8px] border border-[var(--uc-border)] px-[12px] py-[9px] uc-type-n5-strong text-[var(--uc-text)] transition-colors hover:border-[var(--uc-action)] ${
-                screen === prototype.start ? "pointer-events-none invisible" : ""
-              }`}
-            >
-              Restart
-            </button>
           </div>
+          </div>
+          {screen !== prototype.start ? (
+            <div className="mt-[10px] flex justify-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setHistory([]);
+                  setScreen(prototype.start);
+                }}
+                className="rounded-[8px] border border-[var(--uc-border)] px-[12px] py-[9px] uc-type-n5-strong text-[var(--uc-text)] transition-colors hover:border-[var(--uc-action)]"
+              >
+                Restart
+              </button>
+            </div>
+          ) : null}
 
           {/* Where you are, and the branches leaving it — one line each. */}
           <div className="mt-[14px] flex flex-wrap items-baseline gap-x-[10px] gap-y-[6px]">

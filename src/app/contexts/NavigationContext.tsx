@@ -20,6 +20,7 @@ export type Screen =
   | "product-detail" // Product detail opened from Products bottom sheet
   | "investments" // Investments portfolio
   | "investments-history" // Investments history transactions/orders flow
+  | "investment-orders-to-approve" // Pending investments awaiting approval
   | "prime" // Prime screen
   | "more" // More screen
   | "documents" // Documents screen
