@@ -474,7 +474,7 @@ export const FLOW_DEMO = {
       },
       policyholder: {
         title: "Policyholder",
-        subtitle: "The policy is issued in this name. Your identity comes from your verified profile and cannot be edited here; the contact details are yours to change.",
+        subtitle: "The policy is issued in this name. Your identity comes from your verified profile; check your contact details and choose the account that will pay the premium.",
       },
       review: {
         title: "Check your data",
@@ -498,14 +498,14 @@ export const FLOW_DEMO = {
       jmbg: "0101990710015",
       sameAddressAsObject: true,
       mobile: "+381641234567",
-      mobileHint: "Format +3816xxxxxxx",
+      mobileHint: "Use format +381 64 123 4567",
       email: "milan.petrovic@example.rs",
     },
 
     /** Errors shown when the customer edits the prefilled contact block. */
     validation: {
       jmbg: "JMBG must have 13 digits and match the date of birth.",
-      mobile: "Enter the mobile number in the format +3816xxxxxxx.",
+      mobile: "Enter the mobile number in the format +381 64 123 4567.",
       emailConfirm: "The two e-mail addresses do not match.",
       municipality: "Select a municipality.",
     },
@@ -609,19 +609,19 @@ export const FLOW_DEMO = {
     /**
      * Mapped onto the fields the Serbian domestic payment screen already has —
      * From account, Name, Account number, Module, Reference number, Amount,
-     * Currency, Payment code, Purpose, Urgent/instant processing and Payment
+     * Currency, Purpose code, Purpose, Urgent/instant processing and Payment
      * processing date. No field is invented for this flow.
-     * Demo placeholders: the collection account and the payment code are TBD.
+     * Demo values mirror the approved Serbian payment mapping.
      */
     payment: {
       beneficiaryName: "Generali Osiguranje Srbija a.d.o.",
-      beneficiaryAccount: "205-0000012345678-90",
+      beneficiaryAccount: "160-468202-30",
       /** Poziv na broj is a model plus a reference; the screen has both fields. */
       module: "97",
       purpose: "Uplata osiguranja domaćinstva",
       purposeEn: "Household insurance premium",
-      /** The value the RS payment screen prefills; the insurance code is TBD. */
-      paymentCode: "289",
+      /** The approved Serbian purpose code for this insurance payment. */
+      paymentCode: "260",
       processing: "Urgent",
       type: "Domestic",
       dueDate: "18.08.2026",
@@ -647,7 +647,7 @@ export const FLOW_DEMO = {
       detailsSection: "PAYMENT DETAILS",
       amountLabel: "Amount",
       currencyLabel: "CURRENCY",
-      paymentCodeLabel: "PAYMENT CODE",
+      paymentCodeLabel: "Purpose code",
       purposeLabel: "PURPOSE",
       urgentLabel: "URGENT/INSTANT PROCESSING",
       instantLink: "Click to find out more about instant payment",
@@ -670,10 +670,7 @@ export const FLOW_DEMO = {
       payCta: "Pay",
 
       successTitle: "Payment order is successfully sent",
-      successBody:
-        "Your payment order has been sent to the bank. When the payment is complete, we will send a push notification if notifications are enabled on your device.",
-      successBody2:
-        "Be on top of your finances! Track your spending per category to have full overview of your financial habits.",
+      successBody: "Your payment order has been sent to the bank.",
       successCta: "Ok, I got it",
       successPolicyLabel: "Policy number",
       successPremiumLabel: "Premium paid",

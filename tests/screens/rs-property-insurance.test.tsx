@@ -94,14 +94,13 @@ describe('RS property insurance prototype', () => {
     expect(screen.getByRole('button', { name: 'Restart' })).toBeInTheDocument()
   })
 
-  it('puts the tax-inclusive starting price before the cover details', () => {
+  it('removes the standalone starting-price block from the cover page', () => {
     const preview = renderPrototype()
 
     fireEvent.click(screen.getByTitle('Product cover'))
-    const priceCard = preview.getByText('From').parentElement
-    const benefitsHeading = preview.getByText('What you are covered for')
 
-    expect(priceCard?.compareDocumentPosition(benefitsHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+    expect(preview.queryByText('From', { exact: true })).not.toBeInTheDocument()
+    expect(preview.getByText('What you are covered for')).toBeInTheDocument()
   })
 
   it('keeps package content in normal scroll while the selection CTA remains sticky', () => {
@@ -309,7 +308,7 @@ describe('RS property insurance prototype', () => {
     expect(preview.queryByText('Taken from your verified profile. To change it, update your profile details.')).not.toBeInTheDocument()
   })
 
-  it('shows only travel and property insurance in a closable insurance sheet', () => {
+  it('shows travel, property and life insurance in a closable insurance sheet', () => {
     const preview = renderPrototype()
 
     fireEvent.click(screen.getByTitle('Insurance sheet'))
@@ -317,9 +316,147 @@ describe('RS property insurance prototype', () => {
     expect(preview.getByLabelText('Close sheet')).toBeInTheDocument()
     expect(preview.getByText('Travel insurance')).toBeInTheDocument()
     expect(preview.getByText('Property insurance')).toBeInTheDocument()
+    expect(preview.getByText('Life insurance')).toBeInTheDocument()
     expect(preview.queryByText('Home insurance')).not.toBeInTheDocument()
     expect(preview.queryByText('Car Insurance (My Car)')).not.toBeInTheDocument()
-    expect(preview.queryByText('Life insurance')).not.toBeInTheDocument()
+  })
+
+  it('opens the product-cover step when Property insurance is selected', () => {
+    const preview = renderPrototype()
+
+    fireEvent.click(screen.getByTitle('Insurance sheet'))
+    fireEvent.click(preview.getByRole('button', { name: 'Property insurance' }))
+
+    expect(preview.getAllByRole('heading', { name: 'Property insurance' }).length).toBeGreaterThan(0)
+  })
+
+  it('starts the package carousel centered on the middle package', () => {
+    const preview = renderPrototype()
+
+    fireEvent.click(screen.getByTitle('Package select'))
+
+    const carousel = preview.getByTestId('rs-package-carousel')
+    expect(carousel).toHaveAttribute('data-default-centered-index', '1')
+    expect(carousel).toHaveAttribute('data-rs-card-width', '303')
+    expect(carousel.querySelector('[data-rs-package-card="B"]')).toBeInTheDocument()
+  })
+
+  it('orders Policyholder before Insured property in the primary journey', () => {
+    const steps = RS_PROPERTY_INSURANCE_FLOW.scenarios[0]!.steps
+    const titles = steps.map((step) => step.title)
+
+    expect(titles.indexOf('Policyholder')).toBeLessThan(titles.indexOf('Insured property'))
+    const nodes = RS_PROPERTY_INSURANCE_FLOW.prototype?.nodes ?? {}
+    expect(nodes['rs-pi-duration-premium']?.primary?.to).toBe('rs-pi-policyholder')
+    expect(nodes['rs-pi-policyholder']?.primary?.to).toBe('rs-pi-insured-object')
+    expect(nodes['rs-pi-insured-object']?.primary?.to).toBe('rs-pi-review')
+  })
+
+  it('shows the payer account selector and a readable international phone format on Policyholder', () => {
+    const preview = renderPrototype()
+
+    fireEvent.click(screen.getByTitle('Policyholder'))
+
+    expect(preview.getByLabelText('Payer account')).toHaveValue('170-0030012345678-20')
+    expect(preview.getByText('Current account')).toBeInTheDocument()
+    expect(preview.getByLabelText('Mobile number')).toHaveValue('+381641234567')
+    expect(preview.getByText('Use format +381 64 123 4567')).toBeInTheDocument()
+  })
+
+  it('uses the Generali account and Purpose code in payment create and review', () => {
+    const preview = renderPrototype()
+
+    fireEvent.click(screen.getByTitle('Payment create'))
+    expect(preview.getByLabelText('Account number')).toHaveValue('160-468202-30')
+    expect(preview.getByLabelText('Purpose code')).toHaveValue('260')
+
+    fireEvent.click(screen.getByTitle('Payment review'))
+    expect(preview.getByText('160-468202-30')).toBeInTheDocument()
+    expect(preview.getByText('260')).toBeInTheDocument()
+  })
+
+  it('locks urgent processing on the property-insurance payment form', () => {
+    const preview = renderPrototype()
+
+    fireEvent.click(screen.getByTitle('Payment create'))
+
+    expect(preview.getByRole('switch', { name: 'URGENT/INSTANT PROCESSING' })).toBeDisabled()
+  })
+
+  it('centres the carousel with equal side gutters and scrolls to consent after package selection', () => {
+    const preview = renderPrototype()
+
+    fireEvent.click(screen.getByTitle('Package select'))
+
+    const carousel = preview.getByTestId('rs-package-carousel')
+    expect(carousel).toHaveStyle({
+      scrollPaddingInline: 'calc((100% - 303px) / 2)',
+    })
+    expect(carousel.firstElementChild).toHaveStyle({
+      paddingLeft: 'calc((100% - 303px) / 2)',
+      paddingRight: 'calc((100% - 303px) / 2)',
+    })
+
+    const consent = preview.getByTestId('rs-package-consent')
+    expect(consent).toBeInTheDocument()
+    fireEvent.click(preview.getByRole('radio', { name: 'Choose Package A' }))
+    expect(consent).toBeInTheDocument()
+  })
+
+  it('stretches every package card to the tallest card height', () => {
+    const preview = renderPrototype()
+
+    fireEvent.click(screen.getByTitle('Package select'))
+
+    const cards = Array.from(preview.getByTestId('rs-package-carousel').querySelectorAll('[data-rs-package-card]'))
+    expect(cards).toHaveLength(3)
+    expect(cards.every((card) => card.classList.contains('h-full'))).toBe(true)
+  })
+
+  it('opens a Life insurance cover page without adding it to the documented flow', () => {
+    const preview = renderPrototype()
+
+    fireEvent.click(screen.getByTitle('Insurance sheet'))
+    fireEvent.click(preview.getByRole('button', { name: 'Life insurance' }))
+
+    expect(preview.getAllByRole('heading', { name: 'Life insurance' }).length).toBeGreaterThan(0)
+    expect(preview.getByText('Protect the people who count on you')).toBeInTheDocument()
+    expect(RS_PROPERTY_INSURANCE_FLOW.scenarios[0]!.steps.some((step) => step.title === 'Life insurance')).toBe(false)
+    expect(RS_PROPERTY_INSURANCE_FLOW.prototype?.nodes['rs-pi-life-insurance']).toBeUndefined()
+    expect(RS_PROPERTY_INSURANCE_FLOW.screenSpecs['rs-pi-life-insurance' as keyof typeof RS_PROPERTY_INSURANCE_FLOW.screenSpecs]).toBeUndefined()
+  })
+
+  it('treats insufficient balance as a separate pre-package case', () => {
+    const preview = renderPrototype()
+
+    fireEvent.click(screen.getByTitle('Product cover'))
+    fireEvent.click(screen.getByRole('button', { name: 'Balance check' }))
+
+    expect(preview.getByRole('heading', { name: 'Your accounts need a little more balance' })).toBeInTheDocument()
+    expect(preview.getByText(/We checked your eligible accounts/)).toBeInTheDocument()
+    expect(preview.queryByText('The premium was not paid')).not.toBeInTheDocument()
+    expect(RS_PROPERTY_INSURANCE_FLOW.prototype?.nodes['rs-pi-payment-failed' as never]).toBeUndefined()
+  })
+
+  it('shows a friendly retry-later state when Generali is unavailable', () => {
+    const preview = renderPrototype()
+
+    fireEvent.click(screen.getByTitle('Product cover'))
+    fireEvent.click(screen.getByRole('button', { name: 'Insurance service unavailable' }))
+
+    expect(preview.getByRole('heading', { name: 'We are preparing your insurance' })).toBeInTheDocument()
+    expect(preview.getByText(/Please come back a little later/)).toBeInTheDocument()
+    expect(preview.queryByText(/API|failed|down/i)).not.toBeInTheDocument()
+  })
+
+  it('keeps primary bottom CTAs constrained to the same full content width', () => {
+    const preview = renderPrototype()
+
+    fireEvent.click(screen.getByTitle('Payment create'))
+
+    const cta = preview.getByRole('button', { name: 'Continue' })
+    expect(cta).toHaveClass('!w-full')
+    expect(cta.parentElement).toHaveClass('px-[24px]')
   })
 
   it('keeps the Flow Library scroll position when the prototype timeline changes', () => {
@@ -442,6 +579,17 @@ describe('RS property insurance prototype', () => {
     expect(preview.getByRole('button', { name: 'Leave purchase' })).toBeInTheDocument()
   })
 
+  it('confirms leaving from the duration step and returns to that step when continuing', () => {
+    const preview = renderPrototype()
+
+    fireEvent.click(screen.getByTitle('Duration premium'))
+    fireEvent.click(preview.getByLabelText('Close purchase'))
+
+    expect(preview.getByText('Leave the purchase?')).toBeInTheDocument()
+    fireEvent.click(preview.getByRole('button', { name: 'Continue purchase' }))
+    expect(preview.getAllByRole('heading', { name: 'Your cover details' }).length).toBeGreaterThan(0)
+  })
+
   it('names the order action after the payment it opens', () => {
     const preview = renderPrototype()
 
@@ -458,14 +606,19 @@ describe('RS property insurance prototype', () => {
     expect(preview.queryByText(/Beneficiary, amount, module, reference and purpose are fixed/)).not.toBeInTheDocument()
   })
 
-  it('keeps only the standard confirmation copy on payment success', () => {
+  it('keeps only the delivery copy on payment success', () => {
     const preview = renderPrototype()
 
     fireEvent.click(screen.getByTitle('Payment success'))
 
     expect(preview.getByText(FLOW_DEMO.rsPropertyInsurance.paymentScreens.successBody)).toBeInTheDocument()
-    expect(preview.queryByText(/Policy 8100026084517 is active/)).not.toBeInTheDocument()
-    expect(preview.queryByText(/will send the policy and payment confirmation/)).not.toBeInTheDocument()
+    expect(preview.queryByText(/push notification/)).not.toBeInTheDocument()
+    expect(preview.getByText(FLOW_DEMO.rsPropertyInsurance.paymentScreens.successDelivery)).toBeInTheDocument()
+    expect(preview.getByText(FLOW_DEMO.rsPropertyInsurance.paymentScreens.successDelivery)).toHaveClass('uc-type-n4')
+    expect(preview.queryByText('Policy number')).not.toBeInTheDocument()
+    expect(preview.queryByText('Premium paid')).not.toBeInTheDocument()
+    expect(preview.queryByText('Cover period')).not.toBeInTheDocument()
+    expect(preview.queryByText('Policy status')).not.toBeInTheDocument()
   })
 
   it('uses human sentence copy and sentence-case acknowledgement labels', () => {
@@ -476,5 +629,10 @@ describe('RS property insurance prototype', () => {
     expect(cover.whyHere.join(' ')).not.toContain('—')
     expect(cover.exclusionsNote).not.toContain('—')
     expect(paymentScreens.successCta).toBe('Ok, I got it')
+  })
+
+  it('keeps the property-insurance specification complete without unresolved questions', () => {
+    expect(RS_PROPERTY_INSURANCE_FLOW.overview.openQuestions).toEqual([])
+    expect(RS_PROPERTY_INSURANCE_FLOW.overview.businessAnalysis?.openIssues).toEqual([])
   })
 })
