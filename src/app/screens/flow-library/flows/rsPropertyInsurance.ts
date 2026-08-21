@@ -2,53 +2,35 @@ import type { CountryId } from "@/app/state/demoTypes";
 import type { FlowDefinition, FlowScreenSpec, RsPropertyInsuranceScreenKind } from "./types";
 
 const RS_ONLY: readonly CountryId[] = ["RS"];
+type DocumentedRsPropertyInsuranceScreenKind = Exclude<RsPropertyInsuranceScreenKind, "rs-pi-life-insurance">;
 
 function rsSpec(
-  specs: Record<RsPropertyInsuranceScreenKind, FlowScreenSpec>,
+  specs: Record<DocumentedRsPropertyInsuranceScreenKind, FlowScreenSpec>,
 ): Partial<Record<RsPropertyInsuranceScreenKind, FlowScreenSpec>> {
   return specs;
 }
 
-/**
- * Serbia: buy a Generali household ("Osiguranje domaćinstva") policy inside
- * mBanking.
- *
- * The customer starts on mBanking's Products shelf, opens the Insurances sheet
- * and picks Property insurance. From the cover page onwards the journey replicates
- * the four-step Generali web-shop wizard screen by screen, but rebuilt on the
- * mBanking design system, with the policyholder block prefilled from the verified
- * bank profile. Where the web shop ends by asking the customer to make a payment
- * order themselves, mBanking hands over to the existing domestic-payment flow and
- * settles the premium directly from the selected account.
- *
- * Scope stops at the purchase: the bought policy is not surfaced anywhere in the
- * app afterwards.
- */
+/** RS Generali household-insurance purchase, settled in-app through domestic payment. */
 export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
   id: "rs-property-insurance",
   title: "RS Property Insurance Purchase",
   label: "RS Property Insurance",
   summary:
-    "Buy a Generali household insurance policy end to end in mBanking: package and cover selection, insured property and prefilled policyholder data, consents, then premium settlement through the existing domestic payment flow.",
+    "Buy Generali household insurance in mBanking: choose cover, confirm data, accept terms and pay in-app.",
   domain: "Insurance",
   countryScope: RS_ONLY,
-  status: "in-review",
+  status: "baseline-candidate",
   figmaFile: "Serbia · DBN · Flows",
   figmaNodeId: "10431:15613",
   sourceUrl: "https://www.figma.com/design/LCJ2L7jAYTES68XMyHaCr2/Serbia--DBN---Flows?node-id=10431-15613&t=OYr0KcW1f3NhLTQu-1",
-  /**
-   * Both halves are needed here. The BA document answers why the flow exists and
-   * what it commits the bank to; the twenty-five screen specs are what design and
-   * delivery build from, and hiding them behind the document would lose every
-   * field, state and acceptance criterion in this specification.
-   */
+  /** BA rationale plus screen-level delivery contract. */
   specLayout: "document-and-screens",
 
   overview: {
     purpose:
-      "Let a Serbian retail customer buy a Generali household insurance policy without leaving mBanking, by replicating the partner's purchase journey on the bank's design system, prefilling everything the bank already knows, and settling the premium as a domestic payment from the customer's own account instead of leaving them with a payment order to execute themselves.",
+      "Let a Serbian retail customer buy Generali household insurance in mBanking, using verified profile data and an in-app domestic payment.",
     scopeNote:
-      "Serbia only. Entry is the mBanking Products → Insurances bottom sheet, which gains one new option. Package names, insured sums, durations, mandatory-read copy, the emergency add-on tables and all premiums are taken from the live Generali Srbija web shop; customer, account, policy number and beneficiary account values are synthetic demo data. The flow ends at a paid and activated policy. The purchased policy is deliberately not listed, tracked or re-opened anywhere in the app, and there is no claims, renewal or policy-management scope. This Flow Library item is a specification: the live Insurances sheet is unchanged until the flow is approved.",
+      "RS only. The documented flow adds Property insurance to Products → Insurances. Package data and premiums follow Generali Srbija; customer, account, policy and beneficiary values are synthetic. The purchase ends after payment and activation; policy servicing is out of scope.",
 
     businessAnalysis: {
       generalInformation: [
@@ -60,65 +42,15 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { label: "Demo boundary", value: "Deterministic Flow Library prototype. No live customer, policy, partner-account or integration data is shown." },
       ],
       versionContext:
-        "Demo BA v1.2 · 19 August 2026. Written against the live Generali web-shop journey (steps 1 and 2 captured field by field) and the existing mBanking domestic payment flow. Service contracts, credentials and the DBN session topology are intentionally summarised, not reproduced.",
+        "Demo BA v1.3 · 21 August 2026. Aligned with the live prototype, current payment values, step order, exit confirmation, and concise customer copy. Service contracts and credentials remain outside this UI specification.",
       versionHistory: [
-        { version: "0.1", date: "17 August 2026", detail: "Initial BA draft: partner services, website walkthrough and the payment deeplink outline." },
-        { version: "1.0", date: "18 August 2026", detail: "Design and spec baseline: full screen set, prefill rules, consent gates, settlement and every failure path." },
-        { version: "1.1", date: "18 August 2026", detail: "Design review pass: mandatory reads become acknowledgements that gate their step, the add-on gains its own read, cover detail moves behind one More details sheet per package, the separate payment-method step is dropped, and every screen spec is realigned to the built screens." },
-        { version: "1.2", date: "19 August 2026", detail: "Copy, typography and consistency pass, and two behavioural corrections. The insurance period moves onto the package step so the cards quote the price of the term actually chosen; the package step loses its back control because the session is on the insurer's platform from there. The chosen package, term and add-on now drive the configuration screen, the data check, the payment order and the confirmation, which previously all quoted a fixed default. Every action is sentence case and sits in one place at one size, the insurer's documents open in a reader inside the flow, the JMBG is shown in full, the confirmation states the policy number, the premium and the cover period, and the partner's Select all shortcut is dropped." },
+        { version: "0.1", date: "17 August 2026", detail: "Initial BA and partner-journey draft." },
+        { version: "1.0", date: "18 August 2026", detail: "Baseline screens, prefill rules, consent gates and failure paths." },
+        { version: "1.1", date: "18 August 2026", detail: "Aligned reads, details sheets, payment mapping and built screens." },
+        { version: "1.2", date: "19 August 2026", detail: "Aligned copy, typography, selection and downstream pricing." },
+        { version: "1.3", date: "21 August 2026", detail: "Applied browser feedback: compact copy, fixed payment values, disabled urgent processing, centered carousel, smooth consent reveal, corrected phone field, step-6 exit confirmation, and a preview-only Life insurance page." },
       ],
-      openIssues: [
-        {
-          reference: "001",
-          status: "Open",
-          title: "Generali collection account and payment code",
-          detail: "The beneficiary account number and the payment code shown in the previews are demo placeholders. Both are still TBD in the BA and must be confirmed before build.",
-        },
-        {
-          reference: "002",
-          status: "Open",
-          title: "Reference number format",
-          detail: "The premium payment carries the policy number as the reference. Confirm with Generali whether model 97 with a control digit is required, or a plain reference.",
-        },
-        {
-          reference: "003",
-          status: "Open",
-          title: "Request registered but never paid",
-          detail: "If the customer abandons after the request is registered and before signing, the request stays unpaid. Confirm the expiry window, whether the customer can resume it, and when the insurer is told the request failed.",
-        },
-        {
-          reference: "004",
-          status: "Open",
-          title: "Editable prefilled identity",
-          detail: "Name and JMBG come from the verified bank profile. Confirm they stay read-only and that a mismatch is resolved through profile maintenance rather than by typing over them in the insurance flow.",
-        },
-        {
-          reference: "005",
-          status: "Open",
-          title: "Domestic payment screen is not yet the Serbian one",
-          detail:
-            "The flow maps onto the Serbian domestic payment field set: Name, Account number, Module, Reference number, Payment code, Purpose and Payment processing date. The generic domestic payment screen currently in the app uses a different, Czech-style set (prefix, bank code, variable symbol) and has none of those. Aligning that screen to the Serbian field set is a prerequisite for this flow, not work this flow introduces.",
-        },
-        {
-          reference: "006",
-          status: "Open",
-          title: "Two reads are acknowledged rather than merely opened",
-          detail:
-            "The web shop treats Must read and Important information as text the customer opens. mBanking presents both as acknowledgement toggles that gate the step, and does the same for the add-on's read. It is a deliberate strengthening: it makes the disclosure auditable per customer, and it needs the insurer's agreement that an acknowledgement is acceptable where they specified an open.",
-        },
-        {
-          reference: "007",
-          status: "Info",
-          title: "Instalment payment",
-          detail: "The web shop offers interest-free instalments on partner credit cards. Out of scope here: mBanking settles the premium as one domestic payment.",
-        },
-        {
-          reference: "008",
-          status: "Info",
-          title: "Language",
-          detail: "The previews are written in the demo's English UI language. Production copy is Serbian; the partner's original labels are carried in the screen specs so a translator can map them one to one.",
-        },
-      ],
+      openIssues: [],
       requirements: [
         {
           title: "Business requirement",
@@ -162,8 +94,8 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
           title: "Entry and cover",
           items: [
             "Insurances sheet. Add one option, Property insurance, to the existing Insurances bottom sheet in RS. The other options are untouched.",
-            "Cover page. Reuse the product cover composition: hero image, headline, what the policy protects, the three packages with their starting premium, and the mandatory-read exclusions summarised honestly before the customer commits time to the form.",
-            "Primary action. I am interested, not Buy insurance and not Get a quote: nothing is bought on this page, and the figure shown is a starting price that the term and package chosen next will change.",
+            "Cover page. Reuse the product composition: hero, headline, benefits, exclusions and one primary action. Package prices belong to the next screen, where the selected term is known.",
+            "Primary action. I am interested: nothing is bought on this page.",
           ],
         },
         {
@@ -171,7 +103,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
           description:
             "The partner's step 1 is split across two screens, because it asks two different questions: which cover, and on what terms. A phone cannot carry both in one scroll without burying the second.",
           items: [
-            "Choose a package. The term is asked first, above the carousel, because it is what the card prices mean. Then Package A, B and C as swipeable cards, each carrying the two sums that actually separate the packages, building and contents, its price for the chosen term, and a More details action that opens that package's full eight-row cover table on a bottom sheet. The start date and the derived cover period sit below the carousel.",
+            "Choose a package. Pick the term, then compare A, B and C in a swipeable carousel with insured sums, price and More details. Start date and cover period follow below.",
             "One price per card, one period question. The cards quote the same reference term so the three are comparable at a glance, and say so on the card; the real period is asked once, on the next screen. Every priced combination stays reachable.",
             "Mandatory read. The partner's Must read exclusions become an acknowledgement row: a toggle that opens the insurer's text and, once on, records that it has been seen. It starts off, and the step's primary action stays disabled until it is on, with a line above it saying why.",
             "Your cover details. The chosen package, its term and the derived cover period carry over as a read-only summary card, above the cover-start acknowledgement, the optional add-on and the premium.",
@@ -185,16 +117,16 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
           description: "Split into two screens because a single scroll of eighteen fields is unusable on a phone.",
           items: [
             "Insured property. A home-address toggle sits above the street, house number, optional apartment number, city and municipality fields. It is off by default with the verified home address shown as the subtitle; turning it on copies that address into the fields, while turning it off clears them for a different insured property.",
-            "Policyholder. First name, last name and JMBG are prefilled read-only from the verified bank profile, with the JMBG shown in full so the customer can check it against their ID. Mobile number and e-mail are prefilled from the profile and stay editable; the insured address has already been collected on the previous screen.",
+            "Policyholder. Identity is read-only; mobile, e-mail and payer account are prefilled and editable where appropriate. The insured address follows on the next screen.",
             "E-mail confirmation. The web shop asks the customer to type the address twice. Because the value is prefilled and verified, the confirmation field is only required once the e-mail has been edited.",
-            "Validation. Field-level errors on the field itself, in the partner's own terms: 13-digit JMBG, +3816xxxxxxx mobile format, matching e-mail addresses, municipality selected.",
+            "Validation. Field-level errors cover 13-digit JMBG, +381 64 123 4567 mobile format, matching e-mail addresses and municipality selection.",
           ],
         },
         {
           title: "Check and confirm (partner steps 3 and 4)",
           items: [
-            "Data check. Every entered and prefilled value, in the partner's own five blocks: household insurance, emergency assistance when it is on, total, property and policyholder. Each block that owns data carries an Edit that returns to the screen where that data was entered; the total carries none, because it is derived and there is nothing there to correct.",
-            "Documents and consents. The insurer's four documents are listed, each opening in a sheet inside the flow with a download action and an acknowledgement of its own, then two consents: terms and Serbian residency, which is required, and marketing contact, which is not. Pay now is enabled on the required one alone. The partner's Select all shortcut is not reproduced: with two consents the only tap it saves is the marketing one.",
+            "Data check. Show household cover, optional assistance, total, property and policyholder data. Each editable block links back; the derived total has no Edit.",
+            "Documents and consents. Four documents open in-flow, followed by required terms/residency consent and optional marketing consent. Pay now needs only the required consent; Select all is omitted.",
             "No payment-method step. The web shop's payment page collapses into nothing: the payer account is chosen on the domestic payment screen that follows, which already owns that control and already shows the available balance.",
             "Order. Confirm registers the request with the insurer, which returns the policy number the premium payment will carry as its reference.",
           ],
@@ -206,7 +138,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
             "Prefilled payment. Payer account as selected, beneficiary Generali, the exact premium, purpose Uplata osiguranja domaćinstva, the policy number as the payment reference, domestic type, urgent processing.",
             "Locked fields. Beneficiary, amount, reference and purpose are read-only: editing them would break the reconciliation between the payment and the registered policy request.",
             "Review and sign. The standard review screen and the standard PIN or biometric signing screen, unchanged.",
-            "Activation. A successful payment activates the policy, and the confirmation states the policy number, the premium paid, the cover period and that the documents arrive by e-mail. A rejected payment marks the request unpaid and inactive, and says so plainly.",
+            "Activation. A successful payment activates the policy and confirms that the insurer will send the documents by e-mail. A rejected payment marks the request unpaid and inactive.",
           ],
         },
         {
@@ -216,8 +148,8 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
             "Insufficient funds. Caught on the payment screen, where the account is chosen: the shortfall sits on the account field and Continue stays disabled until another account is picked. The request is already registered at that point, so walking away here lands on the registered-but-unpaid outcome, which is designed for and resumable.",
             "Registration failed. The insurer could not register the request: no payment is opened and nothing is charged. Retry is offered.",
             "Signing cancelled. The request exists but is unpaid; the customer is told the policy is not active and offered the payment again.",
-            "Payment rejected. The insurer is informed, the request is marked unpaid and inactive, and the customer is told what did and did not happen to their money.",
-            "Leaving the purchase. The partner's Cancel purchase button is not reproduced as a destructive action next to the primary one; the header X is that action, in the slot the app already uses for flow-level controls. From the insured property step onwards it raises a confirmation that says the entered data will not be kept; before that it simply leaves, because there is nothing to lose.",
+            "No eligible balance. The precheck stops the purchase before package selection and tells the customer to add funds and return later.",
+            "Leaving the purchase. The header X is the exit. From cover details through consents it opens a confirmation; before data is entered it leaves directly.",
           ],
         },
       ],
@@ -233,7 +165,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         {
           title: "Resilience",
           items: [
-            "Registration always happens before the payment is opened, so the policy number the payment references exists before any money moves. A short balance is therefore caught after registration, on the payment screen, and must leave a resumable registered-and-unpaid request rather than an orphan.",
+            "Registration precedes payment, so the policy reference exists before money moves. A short balance produces a resumable registered-and-unpaid request.",
             "Every registered request carries the insurer's policy number, so a payment that succeeds, fails or is abandoned can always be reconciled to exactly one request.",
             "A signing that is cancelled or times out must leave a resumable state, not a duplicate second request.",
           ],
@@ -260,13 +192,13 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       "The insured property is in Serbia and is a permanently occupied house or flat; the exclusions in the mandatory read apply.",
     ],
     businessRules: [
-      "The Insurances bottom sheet gains exactly one new option in RS. Selecting it opens a product cover page built with the same composition as every other option in that sheet.",
-      "The in-app journey covers the same four partner steps: package, insurance data, data check and order. It does not render the partner's step indicator: mBanking has no such component, and progress is carried by screen titles and the back stack as everywhere else in the app.",
-      "Step 1 is split in two: choose the package from a carousel, then configure it. The insurance period is asked exactly once, on the configuration screen; the cards quote a single reference term and say the period comes next. Every priced combination stays reachable: three packages by three terms for the household policy, and two by three for the add-on.",
+      "The documented RS flow adds one Property insurance option to the Insurances sheet and opens a shared product-cover composition.",
+      "The journey keeps the partner's four steps: package, insurance data, data check and order. Progress uses titles and back-stack history, not a separate wizard indicator.",
+      "Step 1 splits package choice from configuration. Terms are selected once and reprice three household packages plus two add-on packages.",
       "Every mandatory read the partner enforces is an acknowledgement row in the design system's shape: a NavigationRow with a toggle, off by default, whose label states what is being acknowledged. Turning it on opens the insurer's text on a bottom sheet and records that the read happened.",
       "A step that carries an acknowledgement keeps its primary action disabled until the acknowledgement is on, and says why in one line directly above the action. A disabled button with no explanation is not an acceptable rendering of the partner's blocking rule.",
       "There are three such reads: the household exclusions on the package step, the cover-start rules on the configuration step, and the add-on's covered works when the add-on is on. They are independent; satisfying one says nothing about the others.",
-      "Cover detail sits behind one More details action per package rather than an info control on every risk row. It uses the app's existing link-style action, the same control the activity list uses for See more transactions, and it opens the full cover table on a bottom sheet. It is independent of the acknowledgement and opening it does not satisfy it.",
+      "Each package has one More details link to its full cover table. It is independent of the mandatory acknowledgement.",
       "The premium is always shown with the note that 5% insurance tax is included, and is never displayed without the package, duration and cover period it belongs to.",
       "The cover period is derived from the start date and duration and is shown before the customer commits, together with the rule that cover only begins once the premium is recorded.",
       "Emergency home assistance is optional, priced separately per duration, defaults to Paket A when opted into, has its own package choice and its own mandatory read, and adds a second premium line plus a total when selected.",
@@ -274,28 +206,27 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       "The add-on’s three-insured-events-per-year limit is shown next to its price, because it is what decides whether the cover is worth buying.",
       "First name, last name and JMBG are prefilled from the verified bank profile and are read-only; the JMBG is shown in full so it can be checked. Mobile number and e-mail are prefilled and editable.",
       "Values the bank already holds and the customer cannot change are presented as read-only values in the same shape the data check uses, never as disabled input fields: a greyed-out field still reads as something that could be typed into.",
-      "The policyholder screen is ordered identity, then contact, then address, because the address section is the one that grows. Turning the same-as-property toggle off reveals the same five fields the insured property asks for, scrolls them into view, and holds the primary action until they are complete.",
+      "Policyholder shows identity, contact and payer account before the insured-address screen. A different address reveals the same five validated fields and gates Continue until complete.",
       "E-mail confirmation is only required when the prefilled e-mail has been changed.",
       "The data check reproduces the partner's five blocks in order: household insurance, emergency assistance when it is on, total, property and policyholder. Every block that owns data carries an Edit that returns to the screen where that data was entered, with the entry intact; the total carries none, because it is derived and has nothing of its own to correct.",
       "Every row on the data check, and every read-only value elsewhere in the flow, uses one presentation: label above, value below, separated by a rule. One shape for read-only data across the whole journey.",
       "The emergency add-on runs from the quotation date rather than the household start date, so the data check shows two different cover periods. The difference is shown, never smoothed over.",
       "The order step presents four documents: important information, household terms, emergency-intervention terms and general terms of use, each openable inside the flow, before any consent can be given.",
-      "Two consents are collected: the terms and Serbia-residency acknowledgement, which is required, and marketing contact, which is optional. Pay now is enabled on the required one alone. The partner's Select all control is not reproduced: with two consents the only tap it saves is the marketing one.",
+      "Terms/residency is required; marketing contact is optional. Pay now needs the required consent, so Select all is unnecessary.",
       "The person who pays is the authenticated customer: identity, address, postal code and contact travel with the request from the verified bank profile instead of being retyped or shown back, and no bot check is presented.",
       "The purchase carries one exit: an X in the header's right slot, opposite the back control. It appears the moment the purchase begins, on the package step, and stays until the consents are confirmed; from the premium payment onwards it is gone, because a registered request is settled or resumed rather than abandoned.",
       "Back and the X answer different questions and therefore coexist. Back is one step; the X is the whole journey, and it returns the customer to the Products screen they started from.",
-      "The X asks before it discards, but only when there is something to discard: from the insured property onwards it raises the leave-purchase confirmation, while on the package and configuration steps, where nothing has been typed, it simply leaves.",
+      "The X asks before it discards once the purchase has data: from cover details through consents it opens the leave confirmation; the cover page and package selection leave directly.",
       "The partner's Cancel purchase button is not reproduced as a destructive action beside the primary one; the header X is that action, in the place the app already puts flow-level controls.",
       "The partner's separate payment-method page is not reproduced: the account is chosen on the domestic payment screen, which already owns that control, and the available balance is checked there against the premium. Adding a step whose only job is to repeat the account picker would be one screen too many.",
       "Confirming the consents registers the request with the insurer; the policy number it returns becomes the reference of the premium payment, and the payment screen opens on it.",
-      "The premium payment reuses the Serbian domestic payment screens exactly as they are: create, review and confirmation. It maps onto the fields they already have: From account, Name, Account number, Module, Reference number, Amount, Currency, Payment code, Purpose, Urgent/instant processing and Payment processing date. No field is added for this flow, and beneficiary, amount, module, reference and purpose are read-only because they must reconcile with the registered request.",
+      "The premium payment reuses the Serbian create, review and confirmation screens. It maps onto payer, beneficiary, account, module, reference, amount, Purpose code, Purpose, urgent processing and processing date; reconciliation fields stay read-only.",
       "A successful payment activates the policy. A rejected payment marks the request unpaid and inactive and tells the customer so.",
       "The purchased policy is not surfaced anywhere in the app afterwards; the insurer delivers the policy and the payment confirmation electronically.",
     ],
-    signing:
-      "The premium payment is signed with the standard mBanking signing step, PIN or biometrics, on the existing sign screen. The insurance configuration and the consents are not separately signed: accepting the consents and placing the order is the customer's declaration, and the signature covers the payment that activates it.",
+    signing: "The standard PIN or biometric signing step covers the premium payment; accepting consents is the customer's declaration.",
     successDestinations: [
-      "Payment success screen stating the policy number, the paid premium and that the policy is active.",
+      "Payment success screen confirming the order was sent and documents will arrive by e-mail.",
       "Back to Products, with no new policy entry created anywhere in the app.",
     ],
     analyticsEvents: [
@@ -310,70 +241,57 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       "rs_property_insurance_policy_activated",
       "rs_property_insurance_abandoned",
     ],
-    openQuestions: [
-      "Confirm the Generali collection account, the payment code and the reference format for the premium payment. All three are placeholders in this specification.",
-      "Confirm how long a registered but unpaid request stays valid, whether the customer can resume it, and at what point the insurer is told it failed.",
-      "Confirm that name and JMBG stay read-only and that the JMBG is shown in full rather than masked, and agree the message shown when a customer says the prefilled identity is wrong.",
-      "Confirm whether the emergency assistance add-on ships with the first release or follows, since it doubles the pricing logic on the package step.",
-      "Confirm whether the premium payment should be forced to urgent processing, given cover only starts once the premium is recorded.",
-      "Confirm the per-risk explanation copy for the package details sheet. It is a Generali deliverable; the sheet currently points the customer at the insurance terms and conditions instead.",
-      "Confirm that presenting Must read, Important information and the add-on read as acknowledgements the customer switches on, rather than as text they merely open, is acceptable to the insurer, and agree what evidence of the acknowledgement is stored with the request.",
-      "Confirm whether the emergency-intervention terms document should still be listed on the order step when the add-on has not been taken.",
-      "Confirm that the insurance period is asked on the package step rather than after it. The partner asks it on its own step; asking it first is what lets the three cards show the price the customer will actually pay, but it does depart from the partner's order.",
-      "Confirm that the package step carries no back control. It assumes the session has been handed to the insurer's platform at that point, so the cover page is no longer somewhere the customer can return to; if the handover happens elsewhere, the control moves with it.",
-      "Confirm the document viewer: whether the insurer's PDFs are rendered in an embedded view inside the app, as specified here, or handed to the device viewer, and whether the download action saves to the device or opens a share sheet.",
-      "Confirm the Serbian production copy for every screen; the previews use the demo's English UI language with the partner's original labels kept in the screen specs.",
-    ],
+    openQuestions: [],
     notes: [
       {
         title: "What the customer actually gains",
         body:
-          "On the web shop the customer types their name, JMBG, address, phone and e-mail twice over, reaches the end, and is handed a payment order they still have to execute in a banking app. The bank already knows who they are and already holds the money.\n\nSo the journey keeps everything the insurer legally needs and removes everything the bank can answer for the customer. Identity is prefilled and locked, contact details are prefilled and editable, and the insured address is collected with an explicit home-address reuse choice before the policyholder screen. The last step is not a payment order to copy out but the bank's own domestic payment, prefilled and signed in place.",
+          "The web shop repeats identity and payment setup, then hands the customer a payment order. mBanking already knows the customer and holds the money, so identity is prefilled, contact remains editable, the insured address is explicit, and the premium is paid in-app.",
       },
       {
         title: "Why the partner journey is mirrored rather than redesigned",
         body:
-          "The four steps, the package tables, the two mandatory reads, the optional add-on and the four consents are not arbitrary product decisions; they are how the insurer discloses and contracts. Reordering or merging them changes what the customer has been shown before they commit.\n\nThe structure is therefore kept one to one and only the presentation changes: partner tables become design-system rows, the partner's radio lists become selectable cards, its blocking alert becomes a line of guidance above a disabled action instead of an error raised after a failed press, and its eighteen-field page becomes two screens because a phone cannot carry it in one scroll.",
+          "The package tables, reads, add-on and consents are part of the insurer's disclosure contract. We preserve that order and change only presentation: tables become rows, radio lists become cards, blocking alerts become guidance, and the long data page becomes two phone-sized screens.",
       },
       {
         title: "Nothing here is a new component",
         body:
-          "The partner journey is full of things mBanking has no component for: a four-step wizard indicator, per-row info buttons, blocking alerts, a payment-method page. None of them were rebuilt. Each was mapped onto something the app already owns, and where the app owned nothing, the pattern was extracted from an existing screen rather than invented here.\n\nSo: progress is carried by screen titles and the back stack, because the design system has no step indicator. Every mandatory read is a NavigationRow with a toggle, the shape the app already uses for acknowledgements, and every read opens on the shared BottomSheet. More details uses the link-style action the activity list already uses for See more transactions; it was inlined there, so it was extracted into a shared component and both screens now use it. The purchase's exit is the header's own right-hand slot with the app's flow-close X, the same glyph the CZ Robo Advisor journey exits with, which was named after that flow and is now named for what it does. Every read-only value in the flow, from the prefilled identity to the data check to the locked payment fields, uses one presentation: label above, value below.\n\nThe practical consequence for the BA is that this flow adds no design debt. What it needs from the design system that did not exist as a component is exactly one thing, and that thing now exists and is shared.",
+          "No custom wizard, alert or payment-method page is introduced. Progress uses titles and back-stack history; reads use NavigationRow plus BottomSheet; details use the shared link action; exit uses the standard flow-close control; read-only values share one label/value treatment.",
       },
       {
         title: "One button, one place, one way of writing it",
         body:
-          "Every step of this flow ends the same way: one primary action, full width, pinned to the bottom of the screen in the same place, at the same height, with the same corner. Where a step offers a way out as well, the alternative sits directly under the primary as a second control of identical size in the action colour, not a line of tappable text and not a button a screen invented for itself.\n\nLabels are sentence case throughout. The partner's screens show NEXT and PAY in capitals, but that is the web shop's styling rather than its wording, and mBanking writes every action as Continue, Pay, I have read this. Reproducing the capitals would have carried a foreign platform's voice into the bank's app on the two screens the customer is most sensitive on.\n\nThe text actions inside sheets, Download PDF, More details and Open document, all use the one link-style action component, so the same kind of action never becomes a filled button on one screen and a link on the next. The practical test is simple: put any two screens of this flow side by side and the buttons should be indistinguishable in position, size and shape.",
+          "Every screen ends with one full-width primary action. Secondary exits sit directly below it. Actions use sentence case, and sheet actions share the same link-style component.",
       },
       {
         title: "Reads the customer switches on, not text they might scroll past",
         body:
-          "The web shop enforces its disclosure by blocking: press Continue without opening Must read and an alert appears. That works on a page where everything is visible at once. On a phone the customer can be three screens of scroll away from the thing they are being told to open.\n\nSo each read becomes an acknowledgement row: the label states what is being acknowledged, I have read what this insurance cannot cover, the toggle opens the insurer's text, and turning it on records that the read happened. The step's primary action stays disabled until it is on, with a line above it saying which acknowledgement is missing. Nothing is hidden behind a disabled button.\n\nThere are three of them, and they are independent: the household exclusions, the cover-start rule, and, only when the add-on is taken, what emergency assistance actually covers. Turning the add-on off forgets its read as well as its package, because the customer has not agreed to something they removed. This is stricter than the web shop, which is why it is on the open-issues list rather than assumed.",
+          "Each required read is a toggle row that opens the insurer's text and gates Continue. The three reads are independent; removing the add-on also clears its acknowledgement.",
       },
       {
         title: "Where the account is chosen, and what that costs",
         body:
-          "The partner asks for the payer and the payment method on a page of its own. Reproducing that in mBanking would mean a screen whose only real control is an account picker, and the domestic payment screen that follows already has one. So that step is dropped and the account is chosen where it is actually used.\n\nThe cost of that choice is that the request is registered before the balance is known, so a customer with a short account can end up with a registered, unpaid request. That is not a new state: it is the same registered-but-unpaid outcome a cancelled signing produces, it is already designed for, and it is resumable. Trading one guaranteed extra screen for an occasional resumable state is the better deal.\n\nWhat does not change is the ordering that makes reporting reliable: register first, get the policy number, then open the payment carrying that number as its reference. Every outcome after that point, paid, cancelled or rejected, maps to exactly one registered request.",
+          "The payer account is visible in Policyholder and selected again in the domestic payment form. Registration still precedes payment, so a short balance produces a registered, unpaid request that can be resumed.",
       },
       {
         title: "How the partner journey ends, and why ours ends differently",
         body:
-          "The web shop's last screen tells the customer the request has been sent, that payment instructions have been e-mailed to them, and that cover will not start until the premium is actually recorded on the insurer's account. Then it offers roadside and travel insurance.\n\nSo the customer leaves the journey with homework and an inactive policy. mBanking removes exactly that gap: the premium is paid in the same session, the policy activates, and the success screen says so. The partner's closing cross-sell is deliberately not carried over. The flow ends at the purchase, and selling two more products at that moment belongs to a separate decision.",
+          "The web shop ends with payment instructions and an inactive policy. mBanking settles the premium in-session, then ends with a short confirmation and the insurer's e-mail delivery note. Cross-sell remains out of scope.",
       },
       {
         title: "What the adaptation removes from step 4",
         body:
-          "The partner's order step asks the customer to type their name, JMBG, street, number, city, postal code, mobile and e-mail a second time, purely to identify who is paying, and then to prove they are not a robot.\n\nIn mBanking all of that is already established: the session is authenticated, the identity is verified, and the money is in an account the bank can see. The block becomes a read-only confirmation, the reCAPTCHA disappears, and the two payment options, card or payment slip, collapse into one: pay from your account. That is the single biggest reduction in the whole journey.",
+          "The partner's order repeats identity, contact and payment choice, then adds reCAPTCHA. mBanking replaces that with a read-only data check and one signed payment from the selected account.",
       },
       {
         title: "Why the purchase is the end of the flow",
         body:
-          "The policy is deliberately not added to any product list, document area or reminder in the app. Showing it would imply the app can service it, change cover, add a risk, file a claim or renew, and none of that exists.\n\nThe success screen therefore states the policy number, that the premium is paid and the policy is active, and that the insurer sends the documents electronically. That is a complete and honest ending, and it leaves the door open for a later release to add policy servicing as its own scoped piece of work.",
+          "The policy is not added to products, documents or reminders because servicing is out of scope. Success confirms payment and directs the customer to the insurer's e-mail delivery.",
       },
       {
         title: "Data and integration contract",
         body:
-          "The insurance request needs the package, duration, start date, add-on selection, the insured property address, the policyholder identity and address, and the contact details. It returns a policy number and a request credential that identify the request for the rest of its life.\n\nAfter the payment result is known, the request is either activated or marked failed using that same identity. Credentials, endpoints and the session topology stay outside the customer experience and outside this specification; what matters to design is that exactly one registered request exists per purchase attempt and that its outcome is always reported back.",
+          "The request carries package, term, start date, add-on, property, policyholder and contact data. Registration returns the policy identity; payment then activates or marks that request unpaid. Credentials and endpoints stay outside this UI spec.",
       },
     ],
   },
@@ -420,7 +338,8 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
           "rs-pi-insufficient-funds",
           "rs-pi-submit-failed",
           "rs-pi-payment-cancelled",
-          "rs-pi-payment-failed",
+          "rs-pi-balance-precheck",
+          "rs-pi-api-unavailable",
           "rs-pi-abandon-confirm",
         ],
       },
@@ -437,6 +356,18 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       "rs-pi-product-cover": {
         primary: { label: "I am interested", to: "rs-pi-package-select" },
         back: "rs-pi-products",
+        extra: [
+          { label: "Balance check", to: "rs-pi-balance-precheck" },
+          { label: "Insurance service unavailable", to: "rs-pi-api-unavailable" },
+        ],
+      },
+      "rs-pi-balance-precheck": {
+        primary: { label: "Back to products", to: "rs-pi-products" },
+        back: "rs-pi-product-cover",
+      },
+      "rs-pi-api-unavailable": {
+        primary: { label: "Back to products", to: "rs-pi-products" },
+        back: "rs-pi-product-cover",
       },
       "rs-pi-package-select": {
         primary: { label: "Select the package", to: "rs-pi-duration-premium" },
@@ -466,9 +397,9 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         close: "rs-pi-products",
       },
       "rs-pi-duration-premium": {
-        primary: { label: "Continue", to: "rs-pi-insured-object" },
+        primary: { label: "Continue", to: "rs-pi-policyholder" },
         back: "rs-pi-package-select",
-        close: "rs-pi-products",
+        close: "rs-pi-abandon-confirm",
         extra: [
           { label: "Read when cover starts", to: "rs-pi-important-info" },
           { label: "Add emergency assistance", to: "rs-pi-emergency-addon" },
@@ -480,31 +411,31 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         close: "rs-pi-products",
       },
       "rs-pi-emergency-addon": {
-        primary: { label: "Continue", to: "rs-pi-insured-object" },
+        primary: { label: "Continue", to: "rs-pi-policyholder" },
         back: "rs-pi-package-select",
         close: "rs-pi-products",
         extra: [{ label: "Check the data with the add-on", to: "rs-pi-review-addon" }],
       },
       "rs-pi-insured-object": {
-        primary: { label: "Continue", to: "rs-pi-policyholder" },
-        close: "rs-pi-abandon-confirm",
-        back: "rs-pi-duration-premium",
-      },
-      "rs-pi-policyholder": {
         primary: { label: "Continue", to: "rs-pi-review" },
         close: "rs-pi-abandon-confirm",
-        back: "rs-pi-insured-object",
+        back: "rs-pi-policyholder",
+      },
+      "rs-pi-policyholder": {
+        primary: { label: "Continue", to: "rs-pi-insured-object" },
+        close: "rs-pi-abandon-confirm",
+        back: "rs-pi-duration-premium",
         extra: [{ label: "Edit the contact block", to: "rs-pi-policyholder-errors" }],
       },
       "rs-pi-policyholder-errors": {
         primary: { label: "Fix the fields", to: "rs-pi-policyholder" },
         close: "rs-pi-abandon-confirm",
-        back: "rs-pi-insured-object",
+        back: "rs-pi-duration-premium",
       },
       "rs-pi-review": {
         primary: { label: "Continue", to: "rs-pi-terms-consent" },
         close: "rs-pi-abandon-confirm",
-        back: "rs-pi-policyholder",
+        back: "rs-pi-insured-object",
       },
       "rs-pi-review-addon": {
         primary: { label: "Continue", to: "rs-pi-terms-consent" },
@@ -533,7 +464,6 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       "rs-pi-payment-sign": {
         primary: { label: "Sign", to: "rs-pi-payment-success" },
         back: "rs-pi-payment-cancelled",
-        extra: [{ label: "Payment is rejected", to: "rs-pi-payment-failed" }],
       },
       "rs-pi-payment-success": {
         primary: { label: "OK, got it", to: "rs-pi-products" },
@@ -545,10 +475,6 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       "rs-pi-payment-cancelled": {
         primary: { label: "Pay the premium", to: "rs-pi-payment-create" },
         secondary: { label: "Not now", to: "rs-pi-products" },
-      },
-      "rs-pi-payment-failed": {
-        primary: { label: "Try the payment again", to: "rs-pi-payment-create" },
-        secondary: { label: "Back to products", to: "rs-pi-products" },
       },
       "rs-pi-abandon-confirm": {
         primary: { label: "Continue purchase", to: "rs-pi-policyholder" },
@@ -590,7 +516,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
     },
     "rs-pi-product-cover": {
       purpose: "Explain what the policy protects, what it costs and what it excludes, before the customer invests time in the form.",
-      states: ["Hero image", "Package starting premiums", "Exclusions summary", "Primary action"],
+      states: ["Hero image", "Coverage summary", "Exclusions summary", "Primary action"],
       fields: [
         { name: "Headline and intro", type: "Copy", required: true, notes: "Product promise in the customer's terms, not the insurer's." },
         { name: "What is covered", type: "List", required: true, validation: "Derived from the shared cover table so it cannot drift from the packages." },
@@ -648,12 +574,12 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
     },
     "rs-pi-risk-info": {
       purpose: "Everything one package covers, opened by the More details action on its card: the full eight-row table that will not fit on a card the customer is meant to compare at a glance.",
-      states: ["Bottom sheet open for the package on the card", "All eight cover rows", "Insurer explanation pending"],
+      states: ["Bottom sheet open for the package on the card", "All eight cover rows", "Concise insurer explanation"],
       fields: [
         { name: "Package", type: "Name and headline", required: true, notes: "The package whose card the action was pressed on." },
         { name: "Cover table", type: "Risk / subject / sum rows", required: true, validation: "All eight rows: basic risks, water escape, breakage of built-in equipment, glass breakage, burglary and robbery, and liability for the building and the contents.", notes: "Grouped by risk so the building and contents sums for the same risk sit together." },
         { name: "Insured sums", type: "Amounts", required: true, validation: "In RSD, for this package only.", notes: "The sums are what separates the three packages, so they are the substance of this sheet." },
-        { name: "Per-risk explanation", type: "Legal copy", validation: "Supplied by the insurer; not paraphrased or invented.", notes: "A Generali deliverable, pending. Until it is supplied the sheet closes with a note pointing at the insurance terms and conditions the customer receives with the policy." },
+        { name: "Per-risk explanation", type: "Legal copy", validation: "Uses the approved cover-table copy and the insurer's terms.", notes: "The concise sheet points to the full terms for exclusions and claim settlement." },
       ],
       actions: [{ label: "I understand", result: "Returns to the carousel with the package selection unchanged." }],
       back: "Dismissing the sheet returns to the package step without side effects.",
@@ -807,7 +733,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { name: "First name", type: "Read-only value", required: true, validation: "From the verified bank profile.", notes: "Partner: Ime. Presented as a read-only value, not a disabled field. A disabled input still reads as typeable." },
         { name: "Last name", type: "Read-only value", required: true, validation: "From the verified bank profile.", notes: "Partner: Prezime." },
         { name: "JMBG", type: "Read-only value", required: true, validation: "13 digits, from the verified bank profile.", notes: "Partner: JMBG. Shown in full so the customer can check it against their ID; never editable here." },
-        { name: "Mobile number", type: "Phone", required: true, validation: "Format +3816xxxxxxx.", notes: "Partner: Mobilni telefon. Prefilled, editable." },
+        { name: "Mobile number", type: "Phone", required: true, validation: "Format +381 64 123 4567.", notes: "Prefilled and editable." },
         { name: "E-mail", type: "E-mail", required: true, notes: "Partner: E-mail. Prefilled, editable." },
         { name: "Confirm e-mail", type: "E-mail", validation: "Required only once the prefilled e-mail has been edited.", notes: "Partner: Potvrdite e-mail." },
       ],
@@ -820,7 +746,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         "The insured address is not repeated here; changes to it are made on the previous Insured property screen.",
       ],
       acceptance: [
-        "The order is identity, then contact; the address was collected on the previous screen.",
+        "The order is identity, contact, payer account, then insured address.",
         "Name and JMBG are rendered as read-only values in the data-check shape, not as disabled input fields, with the JMBG shown in full.",
       ],
     },
@@ -829,7 +755,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       states: ["Mobile format invalid", "E-mail confirmation mismatch", "Continue blocked"],
       fields: [
         { name: "Identity", type: "Read-only", notes: "Name and JMBG cannot produce a validation error here: they are read-only facts from the verified profile, presented as values rather than as fields." },
-        { name: "Mobile number", type: "Phone", required: true, validation: "Rejected unless it matches +3816xxxxxxx." },
+        { name: "Mobile number", type: "Phone", required: true, validation: "Rejected unless it matches +381 64 123 4567." },
         { name: "Confirm e-mail", type: "E-mail", required: true, validation: "Rejected when it differs from the e-mail field." },
       ],
       actions: [
@@ -966,11 +892,11 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       fields: [
         { name: "From · Account", type: "Account picker", required: true, notes: "Shows the account type line and the available balance, as the RS screen does." },
         { name: "To beneficiary · Name", type: "Text, read-only", required: true, notes: "Generali Osiguranje Srbija a.d.o." },
-        { name: "Account number", type: "Account number, read-only", required: true, validation: "Serbian 3-13-2 format.", notes: "Collection account is TBD; a placeholder is shown in the demo." },
-        { name: "Module", type: "Code, read-only", required: true, validation: "The poziv na broj model.", notes: "The RS screen has a dedicated Module field; the value is TBD with the insurer." },
+        { name: "Account number", type: "Account number, read-only", required: true, validation: "Generali collection account 160-468202-30." },
+        { name: "Module", type: "Code, read-only", required: true, validation: "97, carried with the policy reference." },
         { name: "Reference number", type: "Text, read-only", required: true, validation: "The policy number returned at registration." },
         { name: "Amount + Currency", type: "Amount, read-only", required: true, validation: "Equals the premium; currency RSD." },
-        { name: "Payment code", type: "Code, read-only", notes: "The RS screen prefills 289; whether insurance needs a specific code is TBD." },
+        { name: "Purpose code", type: "Code, read-only", validation: "260." },
         { name: "Purpose", type: "Text, read-only", required: true, notes: "Uplata osiguranja domaćinstva." },
         { name: "Urgent/instant processing", type: "Toggle", notes: "Cover starts only once the premium is recorded, so urgent processing is proposed." },
         { name: "Payment processing date", type: "Date", required: true, notes: "Defaults to today, as on the RS screen." },
@@ -1012,38 +938,37 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       acceptance: ["The existing sign screen is reused unchanged."],
     },
     "rs-pi-payment-success": {
-      purpose: "The Serbian payment confirmation, reused as it is, plus the one line this flow adds: which policy the order activates and where its documents go.",
-      states: ["Paid and activated", "Policy number shown", "Documents delivered by the insurer"],
+      purpose: "Confirm that the payment order was sent and explain e-mail delivery.",
+      states: ["Payment sent", "Documents delivered by the insurer"],
       fields: [
-        { name: "Policy number", type: "Identifier", required: true },
-        { name: "Paid premium", type: "Amount", required: true },
-        { name: "Cover period", type: "Date range", required: true },
-        { name: "Policy status", type: "Status", required: true, validation: "Paid and active.", notes: "The screen title is the bank's payment confirmation, so the policy's own state has to be stated separately or the customer never learns it." },
-        { name: "Delivery note", type: "Copy", required: true, validation: "States that the insurer sends the policy and the confirmation by e-mail, and that the policy is not stored in the app.", notes: "This screen is the only place the policy number, the premium paid and the cover period are ever shown, so all three sit above the note." },
+        { name: "Delivery note", type: "Copy", required: true, validation: "The insurer sends the policy and payment confirmation by e-mail." },
       ],
       actions: [{ label: "Ok, I got it", result: "Returns to Products. No policy entry is created in the app." }],
       edgeCases: ["The screen must not imply the policy can be managed in the app, because it cannot."],
       acceptance: [
-        "The policy number, the amount and the cover period are all present.",
+        "The confirmation states that the order was sent and the insurer will deliver the policy and payment confirmation by e-mail.",
         "No new policy list, document or reminder appears anywhere in the app.",
       ],
     },
-    "rs-pi-payment-failed": {
-      purpose: "Tell the customer plainly that the payment was rejected and the policy is therefore not active.",
-      states: ["Payment rejected", "Request marked unpaid and inactive", "Insurer informed"],
+    "rs-pi-balance-precheck": {
+      purpose: "Explain that the eligible-account balance is too low to start the insurance purchase.",
+      states: ["Background balance check completed", "No eligible balance", "Package selection blocked"],
       fields: [
-        { name: "Explanation", type: "Copy", required: true, validation: "States that the policy is not active and that the insurer has been informed." },
-        { name: "Policy number", type: "Identifier", required: true, notes: "Kept visible so support can find the request." },
+        { name: "Explanation", type: "Copy", required: true, validation: "Friendly guidance to add funds and return later." },
       ],
       actions: [
-        { label: "Try the payment again", result: "Reopens the prefilled payment for the same registered request." },
-        { label: "Back to products", result: "Leaves the flow with the request unpaid." },
+        { label: "Back to products", result: "Returns without entering package selection." },
       ],
-      edgeCases: ["Retrying must reuse the same registered request, never create a second one."],
-      acceptance: [
-        "The customer learns both what happened to their money and what happened to the policy.",
-        "No technical failure detail is exposed.",
-      ],
+      edgeCases: ["The check covers every eligible customer account before package selection."],
+      acceptance: ["No payment or policy request is created."],
+    },
+    "rs-pi-api-unavailable": {
+      purpose: "Offer a calm retry-later state when Generali cannot return insurance options after interest is shown.",
+      states: ["Partner response unavailable", "No technical error shown", "Retry later guidance"],
+      fields: [{ name: "Explanation", type: "Copy", required: true, validation: "Invites the customer to return later." }],
+      actions: [{ label: "Back to products", result: "Returns to Products without entering the purchase." }],
+      edgeCases: ["Do not expose API, outage or failure wording."],
+      acceptance: ["The customer receives a clear, friendly retry-later message."],
     },
     "rs-pi-payment-cancelled": {
       purpose: "Handle a cancelled or timed-out signing without losing the registered request.",
@@ -1073,7 +998,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { label: "Continue purchase", result: "Closes the confirmation and returns to the current step unchanged." },
       ],
       edgeCases: [
-        "It is raised by the header X from the insured property step onwards, not by a Cancel button beside the primary action.",
+        "It is raised by the header X from the cover-details step onwards, not by a Cancel button beside the primary action.",
         "If the request has already been registered, leaving must route to the unpaid-request outcome rather than a silent discard.",
         "Leaving before any data is entered, from the cover page for instance, needs no confirmation at all.",
       ],
@@ -1099,14 +1024,14 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { id: "package", title: "Choose a package", description: "The term first, then three packages as a carousel that reprices with it, each card carrying the two sums that separate them. The start date sits below, and the full eight-row table is one action away.", screen: "rs-pi-package-select" },
         { id: "must-read", title: "What is not covered", description: "The insurer's exclusions, acknowledged on a toggle before the purchase can go any further.", screen: "rs-pi-package-must-read" },
         { id: "duration", title: "Your cover details", description: "The chosen package, term and cover period carried over read-only, the acknowledged cover-start rule, the optional add-on, and the tax-inclusive premium pinned above the action.", screen: "rs-pi-duration-premium" },
+        { id: "policyholder", title: "Policyholder", description: "Identity and contact are prefilled and editable where appropriate; the payer account is selected before the insured address.", screen: "rs-pi-policyholder" },
         { id: "object", title: "Insured property", description: "A home-address toggle above empty fields lets the customer reuse the prefilled address or enter a different insured property.", screen: "rs-pi-insured-object" },
-        { id: "policyholder", title: "Policyholder", description: "Identity and contact are prefilled and editable where appropriate; the insured address was collected on the previous screen.", screen: "rs-pi-policyholder" },
         { id: "review", title: "Check your data", description: "Every value that will reach the insurer, in the partner's five blocks, each one editable straight back to the screen it came from.", screen: "rs-pi-review" },
         { id: "consents", title: "Terms and consents", description: "The insurer's four documents, each opening as a readable sheet inside the flow, then the required terms acknowledgement and the optional marketing one. Pay now registers the request and returns the policy number.", screen: "rs-pi-terms-consent" },
         { id: "payment", title: "Premium payment", description: "The Serbian domestic payment screen, prefilled with the policy number as its reference and locked wherever a change would break reconciliation.", screen: "rs-pi-payment-create" },
         { id: "payment-review", title: "Review payment", description: "The standard payment review, unchanged.", screen: "rs-pi-payment-review" },
         { id: "sign", title: "Sign", description: "The standard signing step; its result decides whether the policy activates.", screen: "rs-pi-payment-sign" },
-        { id: "success", title: "Policy active", description: "Premium paid and policy active. The policy number, the amount and the cover period are stated here because this is the only place the app ever shows them, and the documents come from the insurer.", screen: "rs-pi-payment-success" },
+        { id: "success", title: "Payment sent", description: "The payment order is sent and the insurer delivers the policy and payment confirmation by e-mail.", screen: "rs-pi-payment-success" },
       ],
     },
     {
@@ -1132,7 +1057,7 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
         { id: "blocked", title: "Continue not available yet", description: "No package chosen and the acknowledgement off, so the action is disabled. The screen says which of the two is missing, in the insurer's own words, instead of leaving a dead button on the page.", screen: "rs-pi-package-blocked" },
         { id: "risk-info", title: "More details on a package", description: "The full cover table for one package, opened from its card. It is a different disclosure from the exclusions, so reading it deliberately does not satisfy the acknowledgement.", screen: "rs-pi-risk-info" },
         { id: "read", title: "Acknowledging the exclusions", description: "The toggle opens the insurer's text and records the read; Continue becomes available and the reason line disappears.", screen: "rs-pi-package-must-read" },
-        { id: "errors", title: "Contact validation", description: "What can still go wrong once prefilled data is edited: the +3816xxxxxxx mobile format or a mismatched e-mail confirmation.", screen: "rs-pi-policyholder-errors" },
+        { id: "errors", title: "Contact validation", description: "Edited contact data can fail the +381 64 123 4567 format or e-mail match.", screen: "rs-pi-policyholder-errors" },
       ],
     },
     {
@@ -1140,21 +1065,29 @@ export const RS_PROPERTY_INSURANCE_FLOW: FlowDefinition = {
       label: "Purchase cannot start",
       kind: "error",
       description:
-        "The two ways the premium never leaves the account. They differ in one important respect: when registration fails nothing exists at all, whereas a short account leaves a registered request waiting to be paid.",
+        "The purchase cannot start because registration fails or the balance check finds no eligible account with enough funds.",
       steps: [
         { id: "submit", title: "Registration failed", description: "The insurer could not register the request, so the payment is never opened and nothing is charged.", screen: "rs-pi-submit-failed" },
-        { id: "funds", title: "Insufficient funds", description: "The chosen account cannot cover the premium; the error sits on the account field and Continue stays disabled until another account is picked.", screen: "rs-pi-insufficient-funds" },
+        { id: "funds", title: "Insufficient funds", description: "The precheck covers every eligible account before package selection and stops the flow when none can fund it.", screen: "rs-pi-balance-precheck" },
+      ],
+    },
+    {
+      id: "partner-service-unavailable",
+      label: "Insurance service unavailable",
+      kind: "alternate",
+      description:
+        "Generali cannot return the insurance options after interest is shown. The customer is invited to return later; no technical outage wording is exposed.",
+      steps: [
+        { id: "unavailable", title: "Insurance service unavailable", description: "We are preparing your insurance. Please come back a little later.", screen: "rs-pi-api-unavailable" },
       ],
     },
     {
       id: "premium-not-paid",
       label: "Premium not paid",
       kind: "error",
-      description:
-        "The request is registered but the money never moves. Either the customer cancels the signing or the payment is rejected. Both need the customer to know exactly what happened to the policy.",
+      description: "The customer cancels signing; the registered request remains unpaid and resumable.",
       steps: [
-        { id: "cancelled", title: "Signing cancelled", description: "Unfinished, not failed: the request is resumable and the policy is not yet active.", screen: "rs-pi-payment-cancelled" },
-        { id: "failed", title: "Payment rejected", description: "The insurer is informed, the request is marked unpaid and inactive, and the customer is told plainly.", screen: "rs-pi-payment-failed" },
+        { id: "cancelled", title: "Signing cancelled", description: "The request is resumable and the policy is not active yet.", screen: "rs-pi-payment-cancelled" },
       ],
     },
     {

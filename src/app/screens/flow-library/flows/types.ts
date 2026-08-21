@@ -78,6 +78,9 @@ export type EthocaScreenKind =
 export type RsPropertyInsuranceScreenKind =
   | "rs-pi-products"
   | "rs-pi-insurance-sheet"
+  | "rs-pi-life-insurance"
+  | "rs-pi-balance-precheck"
+  | "rs-pi-api-unavailable"
   | "rs-pi-product-cover"
   | "rs-pi-package-select"
   | "rs-pi-package-must-read"
@@ -98,7 +101,6 @@ export type RsPropertyInsuranceScreenKind =
   | "rs-pi-payment-review"
   | "rs-pi-payment-sign"
   | "rs-pi-payment-success"
-  | "rs-pi-payment-failed"
   | "rs-pi-payment-cancelled"
   | "rs-pi-abandon-confirm";
 

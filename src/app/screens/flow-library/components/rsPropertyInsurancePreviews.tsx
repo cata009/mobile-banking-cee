@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import { useDragCarousel } from "@/hooks/useDragCarousel";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import NavigationRow from "@/app/components/NavigationRow";
@@ -13,12 +13,13 @@ import ToggleButton from "@/app/components/ToggleButton";
 import { AppIcon } from "@/app/components/icons";
 import { PreviewSafeTop } from "./MiniPhone";
 import { useFlowNav } from "./prototypeNav";
-import { resetRsPurchase, setRsPurchase, useRsSelection } from "./rsPurchaseStore";
+import { resetRsPurchase, setRsPurchase, useRsSelection, type RsPayerAccountId } from "./rsPurchaseStore";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import ProductsScreen from "@/app/screens/products/ProductsScreen";
 import { getProductCardSheetConfig } from "@/app/config/productsMenuConfig";
 import { DemoProvider } from "@/app/state/demoStore";
 import heroHouseAtDusk from "@/assets/products/shelf/hero-house-dusk.png";
+import lifeInsuranceUmbrella from "@/assets/app2027/home-summary-insurance-umbrella.png";
 import { FLOW_DEMO } from "../flows/demoData";
 import type { RsPropertyInsuranceScreenKind } from "../flows/types";
 
@@ -365,6 +366,35 @@ function Field({ children }: { children: ReactNode }) {
   return <div className="pt-[14px]">{children}</div>;
 }
 
+function PayerAccountField({
+  accountId,
+  label,
+  onActivate,
+  error,
+}: {
+  accountId: RsPayerAccountId;
+  label: string;
+  onActivate: () => void;
+  error?: string;
+}) {
+  const account = accountId === "low" ? RS.lowBalanceAccount : RS.payerAccount;
+  return (
+    <TextField
+      label={label}
+      ariaLabel={label}
+      value={account.number}
+      onChange={noop}
+      readOnly
+      visualState={error ? "error-filled" : "filled"}
+      trailingIconName="chevron-down"
+      helperText={account.nameEn}
+      helperText2={`${account.typeLabel} · ${account.available} ${account.currency}`}
+      errorText={error}
+      onActivate={onActivate}
+    />
+  );
+}
+
 /** Consent row with an explicit acknowledgement control. */
 function ConsentRow({
   text,
@@ -600,6 +630,7 @@ function InsuranceSheetOverlay() {
   const options = [
     ...sheet.options.filter((option) => option.id === "travel-insurance"),
     { id: "property-insurance", title: "Property insurance" },
+    { id: "life-insurance", title: "Life insurance" },
   ];
 
   return (
@@ -612,8 +643,8 @@ function InsuranceSheetOverlay() {
     >
       <div className="flex w-full flex-col">
         {options.map((option) => {
-          // Only the row this flow adds leads anywhere; the four existing options
-          // belong to journeys that are not specified here, so they stay inert.
+          // Property enters the documented purchase flow; Life opens a preview-only
+          // cover page, while the remaining sheet options stay inert here.
           const opensThisFlow = option.id === "property-insurance";
           return (
             <NavigationRow
@@ -622,7 +653,7 @@ function InsuranceSheetOverlay() {
               trailingAccessory="chevron"
               className="pr-[16px]"
               titleStyle={{ fontSize: "18px", lineHeight: "normal", letterSpacing: "0.3px" }}
-              onClick={opensThisFlow ? nav.primary : undefined}
+              onClick={opensThisFlow ? nav.primary : option.id === "life-insurance" ? () => nav.go("rs-pi-life-insurance") : undefined}
             />
           );
         })}
@@ -668,7 +699,6 @@ function ProductsPreview({ sheet = false }: { sheet?: boolean }) {
 function ProductCoverPreview() {
   const nav = useFlowNav();
   const cover = RS.cover;
-  const cheapest = RS.packages[0];
   return (
     <Screen>
       <Body title={cover.title}>
@@ -689,17 +719,6 @@ function ProductCoverPreview() {
           {cover.headline}
         </h2>
         <p className="mt-[12px] uc-type-n4 leading-[24px] text-[var(--uc-text-muted)]">{cover.intro}</p>
-
-        <div className="mt-[18px] rounded-[10px] bg-[var(--uc-surface-muted)] px-[16px] py-[14px]">
-          <p className="uc-type-n4 text-[var(--uc-text-muted)]">{cover.priceLabel}</p>
-          <p className="pt-[2px]">
-            <span className="uc-type-h1 text-[var(--uc-text)]">{cheapest.premiums["6m"]}</span>{" "}
-            <span className="uc-type-n4-strong text-[var(--uc-text)]">{RS.selection.currency}</span>
-          </p>
-          <p className="pt-[4px] uc-type-n5 text-[var(--uc-text-muted)]">
-            {cover.pricePeriod} · {RS.taxNote}
-          </p>
-        </div>
 
         <SectionHeadingDivider title={cover.benefitsTitle} className="mt-[18px]" />
         <ul className="mt-[10px] flex flex-col gap-[12px]">
@@ -723,6 +742,63 @@ function ProductCoverPreview() {
       </Body>
       <BottomCta>
         <PrimaryButton className="!w-full" onClick={nav.primary}>{cover.cta}</PrimaryButton>
+      </BottomCta>
+    </Screen>
+  );
+}
+
+function LifeInsurancePreview() {
+  const nav = useFlowNav();
+  const benefits = [
+    "Financial support for the people who depend on you",
+    "A lump sum for serious illness or permanent disability",
+    "Flexible cover for the plans you want to protect",
+  ];
+  const reasons = [
+    "Simple setup with your verified bank profile",
+    "Clear cover and premium details before you decide",
+    "Support when your family needs it most",
+  ];
+
+  return (
+    <Screen>
+      <Body title="Life insurance">
+        <div className="aspect-[12/5] w-full overflow-hidden rounded-[8px] bg-[var(--uc-surface-muted)]">
+          <img
+            alt=""
+            aria-hidden="true"
+            className="h-full w-full object-cover"
+            draggable={false}
+            src={lifeInsuranceUmbrella}
+            style={{ objectPosition: "center 45%" }}
+          />
+        </div>
+        <h2 className="mt-[20px] uc-type-n2-strong leading-[28px] tracking-[-0.01em] text-[var(--uc-text)]">
+          Protect the people who count on you
+        </h2>
+        <p className="mt-[12px] uc-type-n4 leading-[24px] text-[var(--uc-text-muted)]">
+          Life insurance helps your family stay on track if life takes an unexpected turn. Choose cover that fits the future you are building together.
+        </p>
+
+        <SectionHeadingDivider title="What you are covered for" className="mt-[18px]" />
+        <ul className="mt-[10px] flex flex-col gap-[12px]">
+          {benefits.map((benefit) => <BenefitRow key={benefit} text={benefit} />)}
+        </ul>
+
+        <SectionHeadingDivider title="Why arrange it here" className="mt-[18px]" />
+        <ul className="mt-[10px] flex flex-col gap-[12px]">
+          {reasons.map((reason) => <BenefitRow key={reason} text={reason} />)}
+        </ul>
+
+        <p className="mt-[20px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">
+          Cover, exclusions and eligibility depend on the selected policy. We will show the full terms before you commit.
+        </p>
+        <p className="pt-[10px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">
+          Provided by UniCredit insurance partners.
+        </p>
+      </Body>
+      <BottomCta>
+        <PrimaryButton className="!w-full" onClick={nav.back}>Back to insurances</PrimaryButton>
       </BottomCta>
     </Screen>
   );
@@ -957,14 +1033,17 @@ function PackageDetailsSheet({ packageId, onClose }: { packageId: PackageId; onC
  * 24px gutter + card + 12px gap leaves ~63px of the next card showing on a 375px
  * frame, which is what makes the carousel legible as a carousel.
  */
-const PACKAGE_CARD_WIDTH = 276;
+const PACKAGE_CARD_MIN_WIDTH = 276;
+const PACKAGE_CARD_MAX_WIDTH = 320;
 /**
  * Cards quote one reference term so the three are comparable at a glance. The real
  * period is chosen once, on the configuration screen — asking twice was confusing.
  */
 const REFERENCE_DURATION: DurationId = "6m";
 const PACKAGE_CARD_GAP = 12;
-const PACKAGE_CARD_STEP = PACKAGE_CARD_WIDTH + PACKAGE_CARD_GAP;
+function calculatePackageCardWidth(viewportWidth: number) {
+  return Math.min(PACKAGE_CARD_MAX_WIDTH, Math.max(PACKAGE_CARD_MIN_WIDTH, viewportWidth - 72));
+}
 
 /**
  * One carousel card per package: what it covers, every insured sum, and its price
@@ -974,12 +1053,14 @@ const PACKAGE_CARD_STEP = PACKAGE_CARD_WIDTH + PACKAGE_CARD_GAP;
 function PackageCard({
   pkg,
   durationId,
+  cardWidth,
   selected,
   onSelect,
   onDetails,
 }: {
   pkg: (typeof RS.packages)[number];
   durationId: DurationId;
+  cardWidth: number;
   selected: boolean;
   onSelect?: () => void;
   onDetails?: (packageId: PackageId) => void;
@@ -989,13 +1070,14 @@ function PackageCard({
 
   return (
     <div
+      data-rs-package-card={pkg.id}
       // The whole card selects, so there is no small target to hunt for. Width is
       // an inline style, not a Tailwind class: an interpolated `w-[${n}px]` is
       // never seen by the JIT, so the card would size to its content and burst out
       // of the 375px frame.
       onClick={onSelect}
-      style={{ width: PACKAGE_CARD_WIDTH }}
-      className={`flex shrink-0 flex-col rounded-[14px] border-2 bg-[var(--uc-surface)] transition-colors ${
+      style={{ width: cardWidth }}
+      className={`flex h-full shrink-0 flex-col rounded-[14px] border-2 bg-[var(--uc-surface)] transition-colors ${
         selected ? "border-[var(--uc-action)]" : "border-[var(--uc-border)]"
       } ${onSelect ? "cursor-pointer" : ""}`}
     >
@@ -1097,13 +1179,37 @@ function PackageCarousel({
   onVisibleIndexChange?: (index: number) => void;
 }) {
   const carouselRef = useRef<HTMLDivElement | null>(null);
+  const [viewportWidth, setViewportWidth] = useState(375);
+  const cardWidth = calculatePackageCardWidth(viewportWidth);
+  const cardStep = cardWidth + PACKAGE_CARD_GAP;
+  const carouselGutter = `calc((100% - ${cardWidth}px) / 2)`;
+
+  useLayoutEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+    const updateWidth = () => {
+      if (carousel.clientWidth > 0) setViewportWidth(carousel.clientWidth);
+    };
+    updateWidth();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(carousel);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (carousel && typeof carousel.scrollTo === "function") {
+      carousel.scrollTo({ left: cardStep, behavior: "auto" });
+    }
+  }, [cardStep]);
 
   /** Settles the strip on whichever card is nearest, the way the app's other carousels do. */
   const snapToNearest = () => {
     const carousel = carouselRef.current;
     if (!carousel) return;
-    const index = Math.round(carousel.scrollLeft / PACKAGE_CARD_STEP);
-    carousel.scrollTo({ left: index * PACKAGE_CARD_STEP, behavior: "smooth" });
+    const index = Math.round(carousel.scrollLeft / cardStep);
+    carousel.scrollTo({ left: index * cardStep, behavior: "smooth" });
   };
 
   const { isDragging, isPressActiveRef, dragHandlers } = useDragCarousel({
@@ -1123,7 +1229,7 @@ function PackageCarousel({
   const handleScroll = () => {
     const carousel = carouselRef.current;
     if (!carousel) return;
-    const index = Math.round(carousel.scrollLeft / PACKAGE_CARD_STEP);
+    const index = Math.round(carousel.scrollLeft / cardStep);
     onVisibleIndexChange?.(Math.max(0, Math.min(RS.packages.length - 1, index)));
 
     // A free scroll (wheel, trackpad) settles too, but only once it goes quiet.
@@ -1137,13 +1243,16 @@ function PackageCarousel({
     onSelect?.(id);
     const carousel = carouselRef.current;
     if (carousel && typeof carousel.scrollTo === "function") {
-      carousel.scrollTo({ left: index * PACKAGE_CARD_STEP, behavior: "smooth" });
+      carousel.scrollTo({ left: index * cardStep, behavior: "smooth" });
     }
   };
 
   return (
     <div
       ref={carouselRef}
+      data-testid="rs-package-carousel"
+      data-default-centered-index="1"
+      data-rs-card-width={cardWidth}
       {...dragHandlers}
       onScroll={handleScroll}
       className={`-mx-[24px] overflow-x-auto scrollbar-hide select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
@@ -1151,17 +1260,19 @@ function PackageCarousel({
         WebkitOverflowScrolling: "touch",
         touchAction: "pan-y",
         scrollSnapType: "x mandatory",
-        // Without this every snapped card lands flush against the left edge,
-        // losing the 24px page gutter the rest of the screen keeps.
-        scrollPaddingLeft: 24,
+        scrollPaddingInline: carouselGutter,
       }}
     >
-      <div className="flex w-max gap-[12px] pl-[24px] pt-[12px]">
+      <div
+        className="flex w-max items-stretch gap-[12px] pt-[12px]"
+        style={{ paddingLeft: carouselGutter, paddingRight: carouselGutter }}
+      >
         {RS.packages.map((pkg, index) => (
-          <div key={pkg.id} style={{ scrollSnapAlign: "start" }}>
+          <div key={pkg.id} className="flex h-full" style={{ scrollSnapAlign: "start" }}>
             <PackageCard
               pkg={pkg}
               durationId={durationId}
+              cardWidth={cardWidth}
               selected={pkg.id === selectedId}
               onSelect={onSelect ? () => selectAndReveal(pkg.id as PackageId, index) : undefined}
               onDetails={onDetails}
@@ -1195,9 +1306,22 @@ function PackageSelectPreview({ state = "default" }: { state?: "default" | "bloc
   const nav = useFlowNav();
   const config = useStep1Config({ emptyPackageSelection: true });
   const [detailsPackageId, setDetailsPackageId] = useState<PackageId | null>(null);
-  const [visibleIndex, setVisibleIndex] = useState(0);
+  const [visibleIndex, setVisibleIndex] = useState(1);
+  const consentRef = useRef<HTMLDivElement | null>(null);
   const showBlocked = state === "blocked" && !config.mustReadSeen;
   const canContinue = Boolean(config.packageId && config.mustReadSeen);
+
+  useEffect(() => {
+    if (!config.packageId) return;
+    const frame = window.requestAnimationFrame(() => {
+      const consent = consentRef.current;
+      const scroller = consent?.closest<HTMLElement>("[data-rs-flow-scroller]");
+      if (!consent || !scroller || typeof scroller.scrollTo !== "function") return;
+      const offset = consent.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+      scroller.scrollTo({ top: scroller.scrollTop + offset - COLLAPSED_HEADER_ALLOWANCE, behavior: "smooth" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [config.packageId]);
 
   return (
     <Screen>
@@ -1232,11 +1356,13 @@ function PackageSelectPreview({ state = "default" }: { state?: "default" | "bloc
             helperText={`Cover period ${config.duration.period}`}
           />
         </Field>
-        <MandatoryRead
-          title={RS.mustRead.acknowledgement}
-          satisfied={config.mustReadSeen}
-          onOpen={config.openMustRead}
-        />
+        <div ref={consentRef} data-testid="rs-package-consent">
+          <MandatoryRead
+            title={RS.mustRead.acknowledgement}
+            satisfied={config.mustReadSeen}
+            onOpen={config.openMustRead}
+          />
+        </div>
       </Body>
       <BottomCta>
         {canContinue ? null : (
@@ -1548,8 +1674,11 @@ function InsuredObjectPreview() {
 function PolicyholderPreview({ state = "default" }: { state?: "default" | "errors" }) {
   const nav = useFlowNav();
   const holder = RS.policyholder;
+  const selection = useRsSelection();
   const errors = state === "errors";
   const canContinue = !errors;
+  const togglePayerAccount = () =>
+    setRsPurchase({ payerAccountId: selection.payerAccountId === "main" ? "low" : "main" });
 
   return (
     <Screen>
@@ -1573,11 +1702,13 @@ function PolicyholderPreview({ state = "default" }: { state?: "default" | "error
         <Field>
           <TextField
             label="Mobile number"
+            ariaLabel="Mobile number"
             value={errors ? "0641234567" : holder.mobile}
             onChange={noop}
             visualState={errors ? "error-filled" : "filled"}
             helperText={errors ? undefined : holder.mobileHint}
             errorText={errors ? RS.validation.mobile : undefined}
+            inputMode="tel"
           />
         </Field>
         <Field><TextField label="E-mail" value={holder.email} onChange={noop} visualState="filled" /></Field>
@@ -1596,6 +1727,11 @@ function PolicyholderPreview({ state = "default" }: { state?: "default" | "error
             We only ask you to confirm the e-mail address if you change the one we already have.
           </p>
         )}
+
+        <SectionHeadingDivider title="Payment account" className="mt-[16px]" />
+        <Field>
+          <PayerAccountField accountId={selection.payerAccountId} label="Payer account" onActivate={togglePayerAccount} />
+        </Field>
 
       </Body>
       <BottomCta>
@@ -1617,6 +1753,7 @@ function ReviewPreview({ addOn = false }: { addOn?: boolean }) {
   // The documented review-with-add-on state forces the add-on on; otherwise this
   // is whatever the customer configured two screens ago.
   const chosen = useRsSelection(addOn ? { addOn: true } : undefined);
+  const payerAccount = chosen.payerAccountId === "low" ? RS.lowBalanceAccount : RS.payerAccount;
   const total = chosen.addOn ? rsdSum(chosen.premium, chosen.addOnPremium) : chosen.premium;
   return (
     <Screen>
@@ -1657,6 +1794,7 @@ function ReviewPreview({ addOn = false }: { addOn?: boolean }) {
         <ReviewRow label="JMBG" value={holder.jmbg} nowrap />
         <ReviewRow label="Mobile number" value={holder.mobile} />
         <ReviewRow label="E-mail" value={holder.email} />
+        <ReviewRow label="Payer account" value={payerAccount.number} />
         <ReviewRow label="Street" value={object.street} />
         <ReviewRow label="House / apartment number" value={`${object.houseNumber}/${object.apartmentNumber}`} />
         <ReviewRow label="City" value={object.city} />
@@ -1763,9 +1901,13 @@ function PaymentCreatePreview({ state = "default" }: { state?: "default" | "insu
    * control — there is no separate payment-method step. Picking the low-balance
    * account is what surfaces the insufficient-funds state.
    */
-  const [accountId, setAccountId] = useState(state === "insufficient" ? "low" : "main");
-  const account = accountId === "low" ? RS.lowBalanceAccount : RS.payerAccount;
+  const [accountId, setAccountId] = useState<RsPayerAccountId>(state === "insufficient" ? "low" : chosen.payerAccountId);
   const short = accountId === "low";
+  const toggleAccount = () => {
+    const next: RsPayerAccountId = short ? "main" : "low";
+    setAccountId(next);
+    setRsPurchase({ payerAccountId: next });
+  };
   return (
     <Screen>
       <Body title={ui.createTitle}>
@@ -1776,17 +1918,11 @@ function PaymentCreatePreview({ state = "default" }: { state?: "default" | "insu
 
         <SectionHeadingDivider title={ui.fromSection} className="mt-[18px]" />
         <Field>
-          <TextField
+          <PayerAccountField
+            accountId={accountId}
             label={ui.accountLabel}
-            value={account.number}
-            onChange={noop}
-            readOnly
-            visualState={short ? "error-filled" : "filled"}
-            trailingIconName="chevron-down"
-            helperText={account.typeLabel}
-            helperText2={`${account.available} ${account.currency}`}
-            errorText={short ? RS.errors.insufficientFunds : undefined}
-            onActivate={() => setAccountId(short ? "main" : "low")}
+            error={short ? RS.errors.insufficientFunds : undefined}
+            onActivate={toggleAccount}
           />
         </Field>
 
@@ -1843,7 +1979,7 @@ function PaymentCreatePreview({ state = "default" }: { state?: "default" | "insu
 
         <div className="flex items-center justify-between gap-[12px] pt-[22px]">
           <p className="uc-type-n5-strong text-[var(--uc-text)]">{ui.urgentLabel}</p>
-          <ToggleButton checked onToggle={noop} ariaLabel={ui.urgentLabel} />
+          <ToggleButton checked disabled onToggle={noop} ariaLabel={ui.urgentLabel} />
         </div>
         <p className="pt-[6px] uc-type-n5-strong text-[var(--uc-action)]">{ui.instantLink}</p>
 
@@ -1875,8 +2011,9 @@ function PaymentCreatePreview({ state = "default" }: { state?: "default" | "insu
 /** The Serbian review screen, with the same rows and the same PAY wording. */
 function PaymentReviewPreview() {
   const nav = useFlowNav();
-  const { payerAccount: account, payment, policy, paymentScreens: ui } = RS;
+  const { payment, policy, paymentScreens: ui } = RS;
   const chosen = useRsSelection();
+  const account = chosen.payerAccountId === "low" ? RS.lowBalanceAccount : RS.payerAccount;
   const amount = chosen.addOn ? rsdSum(chosen.premium, chosen.addOnPremium) : chosen.premium;
   const { currency } = RS.selection;
   return (
@@ -1933,7 +2070,7 @@ function AbandonConfirmPreview() {
         </div>
       </div>
       <BottomCta>
-        <PrimaryButton className="!w-full" onClick={nav.primary}>Continue purchase</PrimaryButton>
+        <PrimaryButton className="!w-full" onClick={nav.back}>Continue purchase</PrimaryButton>
         <SecondaryAction onClick={nav.secondary}>Leave purchase</SecondaryAction>
       </BottomCta>
     </Screen>
@@ -1959,23 +2096,13 @@ function PaymentSignPreview() {
 function PaymentSuccessPreview() {
   const nav = useFlowNav();
   const ui = RS.paymentScreens;
-  const chosen = useRsSelection();
-  const paid = chosen.addOn ? rsdSum(chosen.premium, chosen.addOnPremium) : chosen.premium;
   return (
     <StandardSuccessScreen
       title={ui.successTitle}
       body={
         <div>
           <p>{ui.successBody}</p>
-          {/* The policy exists nowhere else in the app, so this screen is the only
-              place its number, its premium and its cover period are ever shown. */}
-          <div className="pt-[18px]">
-            <SummaryRow label={ui.successPolicyLabel} value={RS.policy.number} strong />
-            <SummaryRow label={ui.successPremiumLabel} value={`${paid} ${RS.selection.currency}`} strong />
-            <SummaryRow label={ui.successPeriodLabel} value={chosen.duration.period} strong />
-            <SummaryRow label={ui.successStatusLabel} value={RS.policy.activatedStatus} strong borderless />
-          </div>
-          <p className="pt-[18px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">{ui.successDelivery}</p>
+          <p className="pt-[18px] uc-type-n4 leading-[22px] text-[var(--uc-text-muted)]">{ui.successDelivery}</p>
         </div>
       }
       actionLabel={ui.successCta}
@@ -1992,8 +2119,28 @@ export function renderRsPropertyInsurancePreview(kind: RsPropertyInsuranceScreen
       return <ProductsPreview />;
     case "rs-pi-insurance-sheet":
       return <ProductsPreview sheet />;
+    case "rs-pi-life-insurance":
+      return <LifeInsurancePreview />;
     case "rs-pi-product-cover":
       return <ProductCoverPreview />;
+    case "rs-pi-balance-precheck":
+      return (
+        <OutcomeScreen
+          title="Your accounts need a little more balance"
+          tone="waiting"
+          body="We checked your eligible accounts, but none has enough available balance to start this insurance purchase. Add funds and come back when you are ready."
+          primaryLabel="Back to products"
+        />
+      );
+    case "rs-pi-api-unavailable":
+      return (
+        <OutcomeScreen
+          title="We are preparing your insurance"
+          tone="waiting"
+          body="We are getting your insurance options ready. Please come back a little later to continue."
+          primaryLabel="Back to products"
+        />
+      );
     case "rs-pi-package-select":
       return <PackageSelectPreview />;
     case "rs-pi-package-blocked":
@@ -2037,21 +2184,6 @@ export function renderRsPropertyInsurancePreview(kind: RsPropertyInsuranceScreen
           tone="alert"
           body={RS.errors.submitFailed}
           primaryLabel="Try again"
-          secondaryLabel="Back to products"
-        />
-      );
-    case "rs-pi-payment-failed":
-      return (
-        <OutcomeScreen
-          title="The premium was not paid"
-          tone="alert"
-          body={RS.errors.paymentFailed}
-          rows={[
-            { label: "Policy number", value: RS.policy.number },
-            { label: "Premium", value: `${RS.selection.premium} ${RS.selection.currency}` },
-            { label: "Status", value: "Unpaid and inactive" },
-          ]}
-          primaryLabel="Try the payment again"
           secondaryLabel="Back to products"
         />
       );

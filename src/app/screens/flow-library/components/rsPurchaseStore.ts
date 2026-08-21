@@ -6,12 +6,14 @@ const RS = FLOW_DEMO.rsPropertyInsurance;
 export type RsPackageId = "A" | "B" | "C";
 export type RsDurationId = "3m" | "6m" | "12m";
 export type RsAddOnPackageId = "A" | "B";
+export type RsPayerAccountId = "main" | "low";
 
 export interface RsPurchaseState {
   packageId: RsPackageId;
   durationId: RsDurationId;
   addOn: boolean;
   addOnPackageId: RsAddOnPackageId;
+  payerAccountId: RsPayerAccountId;
 }
 
 /**
@@ -33,6 +35,7 @@ const DEFAULT_STATE: RsPurchaseState = {
   durationId: "6m",
   addOn: false,
   addOnPackageId: RS.emergencyAddOn.defaultPackageId as RsAddOnPackageId,
+  payerAccountId: "main",
 };
 
 let state: RsPurchaseState = { ...DEFAULT_STATE };
@@ -59,7 +62,8 @@ export function setRsPurchase(patch: Partial<RsPurchaseState>) {
     next.packageId === state.packageId &&
     next.durationId === state.durationId &&
     next.addOn === state.addOn &&
-    next.addOnPackageId === state.addOnPackageId
+    next.addOnPackageId === state.addOnPackageId &&
+    next.payerAccountId === state.payerAccountId
   ) {
     return;
   }
