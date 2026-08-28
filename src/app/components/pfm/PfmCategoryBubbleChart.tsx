@@ -13,7 +13,19 @@ interface PfmCategoryBubbleChartProps {
   inactiveSubcategories?: ReadonlySet<string>;
   onExclude?: (subcategoryLabel: string) => void;
   onToggle?: (subcategoryLabel: string) => void;
+  /** Prints each subcategory total inside its bubble, where the bubble is big enough to hold it. */
+  showTotals?: boolean;
+  /** Fixed plot height, or "auto" to let the rows of bubbles size the block themselves. */
+  height?: number | "auto";
+  /**
+   * Smallest number of bubbles that must stay active. The legacy screen keeps one so the chart
+   * never empties; a list that can show everything again allows zero.
+   */
+  minActive?: number;
 }
+
+/** Below this the label alone already fills the bubble, so an amount would only crowd it. */
+const TOTAL_LABEL_MIN_DIAMETER = 84;
 
 function getBubbleDiameter(total: number, maxTotal: number, count: number) {
   if (count === 1) return 150;
@@ -35,6 +47,9 @@ export default function PfmCategoryBubbleChart({
   inactiveSubcategories = new Set(),
   onExclude,
   onToggle,
+  showTotals = false,
+  minActive = 1,
+  height = 250,
 }: PfmCategoryBubbleChartProps) {
   const maxTotal = Math.max(...subcategories.map((subcategory) => subcategory.total), 1);
   const activeCount = subcategories.filter(
@@ -44,7 +59,8 @@ export default function PfmCategoryBubbleChart({
 
   return (
     <div
-      className="mx-auto flex h-[250px] w-[327px] flex-wrap content-center items-center justify-center gap-[8px] overflow-hidden p-[8px]"
+      className="mx-auto flex w-[327px] flex-wrap content-center items-center justify-center gap-[8px] overflow-hidden p-[8px]"
+      style={{ height: height === "auto" ? undefined : height }}
       role="group"
       aria-label={ariaLabel}
       data-pfm-bubble-count={subcategories.length}
@@ -72,11 +88,18 @@ export default function PfmCategoryBubbleChart({
             data-pfm-subcategory-bubble={subcategory.label}
             data-pfm-subcategory-total={subcategory.total}
             data-pfm-subcategory-active={isInactive ? "false" : "true"}
-            disabled={!handleToggle || (!isInactive && activeCount <= 1)}
+            disabled={!handleToggle || (!isInactive && activeCount <= minActive)}
             onClick={() => handleToggle?.(subcategory.label)}
           >
-            <span className="uc-type-n5-strong max-w-full uppercase leading-[16px]">
-              {visibleLabel}
+            <span className="grid max-w-full gap-[2px]">
+              <span className="uc-type-n5-strong max-w-full uppercase leading-[16px]">
+                {visibleLabel}
+              </span>
+              {showTotals && diameter >= TOTAL_LABEL_MIN_DIAMETER ? (
+                <span className="uc-type-n5 max-w-full leading-[16px] opacity-80">
+                  {formatMoneyNumber(subcategory.total, country)}
+                </span>
+              ) : null}
             </span>
           </button>
         );

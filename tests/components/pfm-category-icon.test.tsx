@@ -14,8 +14,15 @@ describe('PfmCategoryIcon category circle variant', () => {
     const icon = screen.getByLabelText('Wallet PFM category')
     expect(icon).toHaveAttribute('data-pfm-icon-variant', 'category-circle')
     expect(icon).toHaveStyle({ width: '32px', height: '32px', backgroundColor: 'var(--uc-pfm-wallet)' })
-    expect(icon.querySelector('svg')).toHaveAttribute('width', '20')
     expect(icon.querySelector('path')).toHaveAttribute('fill', 'var(--uc-static-white)')
+  })
+
+  it('draws the edge-to-edge glyphs smaller so every circle reads the same weight', () => {
+    render(<PfmCategoryIcon category="Home" variant="category-circle" />)
+    render(<PfmCategoryIcon category="Wallet" variant="category-circle" />)
+
+    expect(screen.getByLabelText('Home PFM category').querySelector('svg')).toHaveAttribute('width', '20')
+    expect(screen.getByLabelText('Wallet PFM category').querySelector('svg')).toHaveAttribute('width', '17')
   })
 
   it('keeps the existing glyph-only rendering as the default option', () => {
