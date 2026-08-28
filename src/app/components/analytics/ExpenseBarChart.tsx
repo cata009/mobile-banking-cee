@@ -25,7 +25,8 @@ const TICK_COUNT = 5;
 const INHIBITED_COLOR = "var(--uc-neutral-300)";
 // The topmost axis tick is pulled half a line above the plot, so the panel owes it that much extra top padding.
 const TICK_LABEL_OVERHANG = 7;
-const PANEL_PADDING = 16;
+// Dotted hairlines have to survive sitting straight on the page, where there is no white card behind them.
+const GRIDLINE_COLOR = "color-mix(in srgb, var(--uc-text) 18%, transparent)";
 
 function formatAxisTick(value: number) {
   if (value === 0) return '0';
@@ -64,9 +65,8 @@ export default function ExpenseBarChart({
 
   return (
     <section
+      // The donut it shares a slot with has no card either: the page is the surface for both.
       aria-label="Expense bar chart"
-      className="rounded-[8px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)]"
-      style={{ padding: `${PANEL_PADDING}px` }}
       data-evo-expense-bar-chart
     >
       {header}
@@ -93,8 +93,8 @@ export default function ExpenseBarChart({
             {ticks.map((tick, index) => (
               <div
                 key={tick}
-                className="absolute inset-x-0 border-t border-dotted border-[var(--uc-border)]"
-                style={{ bottom: `${(index / (TICK_COUNT - 1)) * 100}%` }}
+                className="absolute inset-x-0 border-t border-dotted"
+                style={{ bottom: `${(index / (TICK_COUNT - 1)) * 100}%`, borderTopColor: GRIDLINE_COLOR }}
               />
             ))}
           </div>

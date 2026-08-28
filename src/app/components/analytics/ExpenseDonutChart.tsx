@@ -4,7 +4,11 @@ import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
 import type { PfmCategoryName } from "@/data/pfmCategories";
 
 export const EXPENSE_OTHER_CATEGORY = "Other" as const;
-export type ExpenseDonutCategory = PfmCategoryName | typeof EXPENSE_OTHER_CATEGORY;
+/**
+ * Whatever the ring is split by — a PFM category, a merchant name, a currency code, or the
+ * aggregate Other slice. The screen decides; an arc only needs a stable key.
+ */
+export type ExpenseDonutCategory = string;
 
 export interface ExpenseDonutSegment {
   category: ExpenseDonutCategory;
@@ -12,6 +16,8 @@ export interface ExpenseDonutSegment {
   total: number;
   colorVar: string;
   iconCategory?: PfmCategoryName;
+  /** Overrides the arc's marker where the split has its own mark, e.g. a currency roundel. */
+  icon?: ReactNode;
 }
 
 export interface ExpenseDonutChartProps {
@@ -126,22 +132,22 @@ export default function ExpenseDonutChart({
             aria-pressed={arc.isSelected}
             data-evo-expense-category={arc.category}
             className={`grid place-items-center rounded-full shadow-[0_0_0_3px_var(--uc-app-bg),0_1px_3px_rgb(var(--uc-shadow-rgb)/0.18)] transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)] focus-visible:ring-offset-2 ${
-              arc.iconCategory ? "" : "size-[32px] text-[var(--uc-static-white)]"
+              arc.iconCategory || arc.icon ? "" : "size-[32px] text-[var(--uc-static-white)]"
             } ${
               arc.isSelected ? "scale-110" : "hover:scale-105"
             }`}
-            style={arc.iconCategory ? undefined : { backgroundColor: `var(${arc.colorVar})` }}
+            style={arc.iconCategory || arc.icon ? undefined : { backgroundColor: `var(${arc.colorVar})` }}
             onClick={() => onToggle(arc.category)}
           >
             <span
               className="grid place-items-center transition-[filter] duration-200"
               style={{ filter: arc.isActive ? undefined : INHIBITED_ICON_FILTER }}
             >
-              {arc.iconCategory ? (
+              {arc.icon ?? (arc.iconCategory ? (
                 <PfmCategoryIcon category={arc.iconCategory} size={ICON_SIZE} variant="category-circle" />
               ) : (
                 <AppIcon name="more-horizontal" size={16} color="currentColor" aria-hidden="true" />
-              )}
+              ))}
             </span>
           </button>
         </div>
