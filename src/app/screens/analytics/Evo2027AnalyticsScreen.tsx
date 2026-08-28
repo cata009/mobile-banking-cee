@@ -3,6 +3,7 @@ import ExpenseBarChart, { type ExpenseBar } from '@/app/components/analytics/Exp
 import ExpenseDonutChart, {
   EXPENSE_OTHER_CATEGORY,
   type ExpenseDonutCategory,
+  type ExpenseDonutSegment,
 } from '@/app/components/analytics/ExpenseDonutChart';
 import AccountCarouselIndicator from '@/app/components/accounts/AccountCarouselIndicator';
 import AccountTransactionMonthDivider from '@/app/components/accounts/AccountTransactionMonthDivider';
@@ -20,7 +21,7 @@ import TransactionAvatar from '@/app/components/transactions/TransactionAvatar';
 import PfmCategoryBubbleChart from '@/app/components/pfm/PfmCategoryBubbleChart';
 import PfmCategoryIcon from '@/app/components/pfm/PfmCategoryIcon';
 import { useLanguage } from '@/app/contexts/LanguageContext';
-import { formatMoneyNumber, getCountryConfig } from '@/app/registry/countryConfig';
+import { formatMoneyNumber } from '@/app/registry/countryConfig';
 import { useCountry, useDemo } from '@/app/state/demoStore';
 import type { CountryId } from '@/app/state/demoTypes';
 import {
@@ -28,7 +29,6 @@ import {
   createSpendingAnalyticsTimeline,
   createSpendingCategoryDetail,
   getAnalyticsSubcategoryLabel,
-  type SpendingCategorySummary,
   type SpendingSubcategorySummary,
   type SpendingAnalyticsPeriod,
   type SpendingAnalyticsSummary,
@@ -90,6 +90,18 @@ interface ExpenseBreakdownRow {
 
 function capitalise(value: string, locale: string) {
   return `${value.slice(0, 1).toLocaleUpperCase(locale)}${value.slice(1)}`;
+}
+
+/** What a transaction is grouped under for the active split — the one rule all three views share. */
+function getExpenseSplitKey(
+  transaction: SpendingAnalyticsTransaction,
+  mode: ExpenseSplitMode,
+  currencyByProductId: ReadonlyMap<string, string>,
+  reportingCurrency: string,
+) {
+  if (mode === 'categories') return transaction.pfmCategory as string;
+  if (mode === 'merchants') return transaction.label;
+  return currencyByProductId.get(transaction.sourceProductId) ?? reportingCurrency;
 }
 
 function buildExpenseBreakdown(
@@ -227,6 +239,104 @@ function splitAmount(value: string) {
     separator: match[2],
     decimals: match[3],
   };
+}
+
+/** The analytics copy is English throughout, so its month and currency names are formatted that way. */
+const ANALYTICS_LOCALE = 'en-US';
+
+/**
+ * Merchants and currencies have no palette of their own, and borrowing the PFM one turns the ring
+ * into a colour lottery — two merchants in the same category come out identical, and the colours
+ * claim a meaning they do not have. They get a stepped brand ramp instead: neutral, and every step
+ * clears 3:1 against the page.
+ */
+const DONUT_NEUTRAL_COLOR_VARS = ['--uc-teal-900', '--uc-teal-bright', '--uc-text', '--uc-neutral-600'];
+
+const SPLIT_MODE_NOUNS: Record<ExpenseSplitMode, string> = {
+  categories: 'categories',
+  merchants: 'merchants',
+  currencies: 'currencies',
+};
+
+/**
+ * The ring shows whatever the list is split by: the three biggest rows plus an Other slice.
+ * A merchant borrows the colour and icon of the category it spends into; a currency has no
+ * category at all, so it takes a colour from the neutral rotation.
+ */
+function buildDonutSegments(rows: readonly ExpenseBreakdownRow[]): ExpenseDonutSegment[] {
+  const otherTotal = rows.slice(DONUT_CATEGORY_LIMIT).reduce((total, row) => total + row.total, 0);
+  const segments = rows.slice(0, DONUT_CATEGORY_LIMIT).map((row, index) => {
+    // Only a split by category wears the PFM palette and its icons. A merchant or a currency arc
+    // carries the same mark its row does — the brand roundel, the flag — so the ring reads as the
+    // list it sits above rather than as a set of categories.
+    const isCategoryRow = Boolean(row.category);
+
+    return {
+      category: row.key,
+      label: row.label,
+      total: row.total,
+      colorVar: row.category
+        ? getPfmCategory(row.category).colorVar
+        : DONUT_NEUTRAL_COLOR_VARS[index % DONUT_NEUTRAL_COLOR_VARS.length]!,
+      iconCategory: isCategoryRow ? row.category : undefined,
+      icon: isCategoryRow ? undefined : <ExpenseBreakdownRowIcon row={row} />,
+    };
+  });
+
+  return otherTotal > 0
+    ? [...segments, {
+      category: EXPENSE_OTHER_CATEGORY,
+      label: EXPENSE_OTHER_CATEGORY,
+      total: otherTotal,
+      colorVar: '--uc-pfm-finance',
+    }]
+    : segments;
+}
+
+/** Travel before a press on a chart counts as a period swipe rather than a tap on a bar or an arc. */
+const PERIOD_SWIPE_THRESHOLD = 40;
+
+/**
+ * Swiping a chart steps periods exactly as the arrows do. The charts are made of buttons, so the
+ * gesture also has to swallow the click it ends on — otherwise a swipe off a bar isolates it too.
+ */
+function usePeriodSwipe(
+  periods: readonly SpendingAnalyticsPeriod[],
+  selectedPeriodKey: string,
+  onPeriodChange: (periodKey: string) => void,
+) {
+  const startXRef = useRef<number | null>(null);
+  const swipedRef = useRef(false);
+  const activeIndex = Math.max(periods.findIndex((period) => period.key === selectedPeriodKey), 0);
+
+  const swipeHandlers = {
+    onPointerDown: (event: React.PointerEvent<HTMLElement>) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      startXRef.current = event.clientX;
+      swipedRef.current = false;
+    },
+    onPointerUp: (event: React.PointerEvent<HTMLElement>) => {
+      const startX = startXRef.current;
+      startXRef.current = null;
+      if (startX === null) return;
+
+      const deltaX = event.clientX - startX;
+      if (Math.abs(deltaX) < PERIOD_SWIPE_THRESHOLD) return;
+
+      swipedRef.current = true;
+      const nextPeriod = periods[activeIndex + (deltaX < 0 ? 1 : -1)];
+      if (nextPeriod) onPeriodChange(nextPeriod.key);
+    },
+    onPointerCancel: () => { startXRef.current = null; },
+    onClickCapture: (event: React.MouseEvent<HTMLElement>) => {
+      if (!swipedRef.current) return;
+      swipedRef.current = false;
+      event.preventDefault();
+      event.stopPropagation();
+    },
+  };
+
+  return { activeIndex, swipeHandlers };
 }
 
 /** Scroll it takes for the large title to hand over to the small one in the sticky header. */
@@ -410,9 +520,9 @@ function ExpensePeriodNavigator({
 
 function ExpenseChartPanel({
   direction,
-  categories,
-  selectedCategories,
-  onToggleCategory,
+  segments,
+  selectedKeys,
+  onToggleSegment,
   bars,
   selectedBucketKey,
   onToggleBucket,
@@ -426,9 +536,9 @@ function ExpenseChartPanel({
   onPeriodChange,
 }: {
   direction: AnalyticsDirection;
-  categories: readonly SpendingCategorySummary[];
-  selectedCategories: ReadonlySet<ExpenseDonutCategory>;
-  onToggleCategory: (category: ExpenseDonutCategory) => void;
+  segments: readonly ExpenseDonutSegment[];
+  selectedKeys: ReadonlySet<ExpenseDonutCategory>;
+  onToggleSegment: (key: ExpenseDonutCategory) => void;
   bars: readonly ExpenseBar[];
   selectedBucketKey: string | null;
   onToggleBucket: (key: string) => void;
@@ -441,42 +551,7 @@ function ExpenseChartPanel({
   selectedPeriodKey: string;
   onPeriodChange: (periodKey: string) => void;
 }) {
-  const swipeStartX = useRef<number | null>(null);
-  const primaryCategories = categories.slice(0, DONUT_CATEGORY_LIMIT);
-  const otherCategories = categories.slice(DONUT_CATEGORY_LIMIT);
-  const otherTotal = otherCategories.reduce((total, category) => total + category.total, 0);
-  const segments = [
-    ...primaryCategories.map((category) => ({
-      category: category.category,
-      label: getEvoAnalyticsCategoryDisplayLabel(category.category),
-      total: category.total,
-      colorVar: category.colorVar,
-      iconCategory: category.category,
-    })),
-    ...(otherTotal > 0 ? [{
-      category: EXPENSE_OTHER_CATEGORY,
-      label: EXPENSE_OTHER_CATEGORY,
-      total: otherTotal,
-      colorVar: '--uc-pfm-finance',
-    }] : []),
-  ];
-
-  const handleSwipeStart = (event: React.PointerEvent<HTMLElement>) => {
-    if (event.pointerType === 'mouse' && event.button !== 0) return;
-    swipeStartX.current = event.clientX;
-  };
-  const handleSwipeEnd = (event: React.PointerEvent<HTMLElement>) => {
-    const startX = swipeStartX.current;
-    swipeStartX.current = null;
-    if (startX === null) return;
-
-    const deltaX = event.clientX - startX;
-    if (Math.abs(deltaX) < 40) return;
-    const activeIndex = periods.findIndex((period) => period.key === selectedPeriodKey);
-    const nextIndex = activeIndex + (deltaX < 0 ? 1 : -1);
-    const nextPeriod = periods[nextIndex];
-    if (nextPeriod) onPeriodChange(nextPeriod.key);
-  };
+  const { activeIndex, swipeHandlers } = usePeriodSwipe(periods, selectedPeriodKey, onPeriodChange);
 
   if (segments.length === 0) {
     return (
@@ -485,9 +560,7 @@ function ExpenseChartPanel({
         className="mt-[24px] touch-pan-y select-none"
         data-evo-expense-chart
         data-evo-expense-chart-surface
-        onPointerDown={handleSwipeStart}
-        onPointerUp={handleSwipeEnd}
-        onPointerCancel={() => { swipeStartX.current = null; }}
+        {...swipeHandlers}
       >
         <p className="py-[28px] text-[16px] leading-[22px] text-[var(--uc-text-muted)]">
           No {direction === 'income' ? 'income' : 'expense'} data for this period.
@@ -502,15 +575,13 @@ function ExpenseChartPanel({
       className="mt-[16px] touch-pan-y select-none"
       data-evo-expense-chart
       data-evo-expense-chart-surface
-      onPointerDown={handleSwipeStart}
-      onPointerUp={handleSwipeEnd}
-      onPointerCancel={() => { swipeStartX.current = null; }}
+      {...swipeHandlers}
     >
       {mode === 'donut' ? (
         <ExpenseDonutChart
           segments={segments}
-          selected={selectedCategories}
-          onToggle={onToggleCategory}
+          selected={selectedKeys}
+          onToggle={onToggleSegment}
           centerLabel={headerLabel}
           centerValue={<FormattedAmount amount={headerAmount} country={country} currency={currency} />}
         />
@@ -527,6 +598,18 @@ function ExpenseChartPanel({
           )}
         />
       )}
+
+      {/* The dots say the chart is a rail of periods, and give the swipe a target to aim at. */}
+      <AccountCarouselIndicator
+        count={periods.length}
+        activeIndex={activeIndex}
+        itemLabel="period"
+        withBackdropBlur={false}
+        onSelect={(index) => {
+          const period = periods[index];
+          if (period) onPeriodChange(period.key);
+        }}
+      />
     </section>
   );
 }
@@ -641,7 +724,7 @@ function ExpenseTransactionList({
           ))}
         </div>
       ) : (
-        <div className="mt-[12px] overflow-hidden rounded-[8px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)]">
+        <div className="mt-[12px] overflow-hidden rounded-[22px] bg-[var(--uc-surface)]">
           <p className="px-[16px] py-[24px] text-[16px] leading-[22px] text-[var(--uc-text-muted)]">No transactions match this category.</p>
         </div>
       )}
@@ -790,8 +873,8 @@ function ExpenseBreakdownList({
     <section aria-label="Expense breakdown" className="mt-[28px] pb-[20px]">
       <ExpenseSplitSelector mode={mode} availableModes={availableModes} onModeChange={onModeChange} onAddTransaction={onAddTransaction} />
 
-      <div className="mt-[12px] overflow-hidden rounded-[8px] bg-[var(--uc-surface)] shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)]">
-        <div className="divide-y divide-[var(--uc-border-muted)] border-t border-[var(--uc-border-muted)]">
+      <div className="mt-[12px] overflow-hidden rounded-[22px] bg-[var(--uc-surface)] shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)]">
+        <div className="divide-y divide-[var(--uc-border-muted)]">
           {rows.length > 0 ? rows.map((row) => {
             const percentage = total > 0 ? Math.round((row.total / total) * 100) : 0;
 
@@ -857,6 +940,7 @@ function ExpenseBreakdownDetail({
   onToggleSubcategory: (subcategoryLabel: string) => void;
   onTransactionClick?: (transaction: SpendingAnalyticsTransaction) => void;
 }) {
+  const { activeIndex, swipeHandlers } = usePeriodSwipe(periods, selectedPeriodKey, onPeriodChange);
   const total = transactions.reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0);
   const flowWord = direction === 'income' ? 'income' : 'expenses';
   const activeSubcategories = subcategories.filter((subcategory) => !excludedSubcategories.has(subcategory.label));
@@ -879,7 +963,8 @@ function ExpenseBreakdownDetail({
       />
 
       {subcategories.length > 0 ? (
-        <section aria-label="Subcategories" className="mt-[8px] py-[8px]">
+        // Swiping the bubbles walks periods, exactly as swiping the chart does one page up.
+        <section aria-label="Subcategories" className="mt-[8px] touch-pan-y select-none pt-[8px]" {...swipeHandlers}>
           {/* The bubbles the PFM category screen uses — sized by share, tap one to drop it from the list. */}
           <PfmCategoryBubbleChart
             subcategories={subcategories}
@@ -896,6 +981,17 @@ function ExpenseBreakdownDetail({
             minActive={0}
             // No carousel panel to fill, so the rows of bubbles set the height themselves.
             height="auto"
+          />
+
+          <AccountCarouselIndicator
+            count={periods.length}
+            activeIndex={activeIndex}
+            itemLabel="period"
+            withBackdropBlur={false}
+            onSelect={(index) => {
+              const period = periods[index];
+              if (period) onPeriodChange(period.key);
+            }}
           />
         </section>
       ) : null}
@@ -950,7 +1046,7 @@ function SpendingMonthCard({
       data-evo-analytics-period-card={summary.periodKey}
       // Narrower than the rail so the neighbouring months peek in at both edges — that peek is
       // the swipe affordance. Plain surface: colour belongs to the data, not the chrome.
-      className="flex w-[calc(100%-44px)] shrink-0 flex-col gap-[18px] overflow-hidden rounded-[8px] bg-[var(--uc-surface)] p-[20px] text-[var(--uc-text)] shadow-[0_4px_16px_rgb(var(--uc-shadow-rgb)/0.07)]"
+      className="flex w-[calc(100%-44px)] shrink-0 flex-col gap-[18px] overflow-hidden rounded-[22px] bg-[var(--uc-surface)] p-[20px] text-[var(--uc-text)] shadow-[0_4px_16px_rgb(var(--uc-shadow-rgb)/0.07)]"
     >
       <div>
         <p className="text-[12px] font-bold uppercase leading-[16px] tracking-[0.1em] text-[color-mix(in_srgb,var(--uc-text)_62%,transparent)]">
@@ -1260,7 +1356,7 @@ function SpendingTopCategories({
         <h2 className="text-[22px] font-bold leading-[28px] tracking-[-0.02em] text-[var(--uc-text)]">{title}</h2>
       </div>
 
-      <div className="mt-[12px] overflow-hidden rounded-[8px] bg-[var(--uc-surface)] pb-[8px] shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)]">
+      <div className="mt-[12px] overflow-hidden rounded-[22px] bg-[var(--uc-surface)] pb-[8px] shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)]">
         {rows.map((row, index) => {
           const share = total > 0 ? Math.round((row.total / total) * 100) : 0;
           const amount = splitAmount(maskFormattedAmount(formatMoneyNumber(row.total, country), amountsHidden));
@@ -1329,7 +1425,7 @@ function SpendingTopCategories({
 
 function ExpensesDetail({
   direction,
-  categories,
+  segments,
   scopeLabel,
   onOpenScope,
   periods,
@@ -1337,8 +1433,8 @@ function ExpensesDetail({
   onPeriodChange,
   summary,
   country,
-  selectedCategories,
-  onToggleCategory,
+  selectedKeys,
+  onToggleSegment,
   onClearSelection,
   chartMode,
   onChartModeChange,
@@ -1357,7 +1453,7 @@ function ExpensesDetail({
   onAddTransaction,
 }: {
   direction: AnalyticsDirection;
-  categories: readonly SpendingCategorySummary[];
+  segments: readonly ExpenseDonutSegment[];
   scopeLabel: string;
   onOpenScope: () => void;
   periods: readonly SpendingAnalyticsPeriod[];
@@ -1365,8 +1461,8 @@ function ExpensesDetail({
   onPeriodChange: (periodKey: string) => void;
   summary: SpendingAnalyticsSummary;
   country: CountryId;
-  selectedCategories: ReadonlySet<ExpenseDonutCategory>;
-  onToggleCategory: (category: ExpenseDonutCategory) => void;
+  selectedKeys: ReadonlySet<ExpenseDonutCategory>;
+  onToggleSegment: (key: ExpenseDonutCategory) => void;
   onClearSelection: () => void;
   chartMode: ExpenseChartMode;
   onChartModeChange: (mode: ExpenseChartMode) => void;
@@ -1397,9 +1493,9 @@ function ExpensesDetail({
 
       <ExpenseChartPanel
         direction={direction}
-        categories={categories}
-        selectedCategories={selectedCategories}
-        onToggleCategory={onToggleCategory}
+        segments={segments}
+        selectedKeys={selectedKeys}
+        onToggleSegment={onToggleSegment}
         bars={bars}
         selectedBucketKey={selectedBucketKey}
         onToggleBucket={onToggleBucket}
@@ -1482,7 +1578,7 @@ export default function Evo2027AnalyticsScreen({
   const [openBreakdownRow, setOpenBreakdownRow] = useState<ExpenseBreakdownRow | null>(null);
   const [excludedSubcategories, setExcludedSubcategories] = useState<ReadonlySet<string>>(() => new Set());
   /** Empty means "all categories". Order is irrelevant — it is used as a set. */
-  const [selectedExpenseCategories, setSelectedExpenseCategories] = useState<ExpenseDonutCategory[]>([]);
+  const [selectedSplitKeys, setSelectedSplitKeys] = useState<ExpenseDonutCategory[]>([]);
   const [expenseChartMode, setExpenseChartMode] = useState<ExpenseChartMode>('donut');
   const [selectedBucketKey, setSelectedBucketKey] = useState<string | null>(null);
   const activeScope = scopes.find((scope) => scope.id === selectedScopeId) ?? scopes[0];
@@ -1512,70 +1608,6 @@ export default function Evo2027AnalyticsScreen({
     timeline.summariesByPeriodKey[timeline.activePeriodKey] ??
     (firstPeriod ? timeline.summariesByPeriodKey[firstPeriod.key] : undefined) ??
     createSpendingAnalytics(country, activeScope?.products ?? [], undefined, transactionCategoryOverrides);
-  const analysisCategories = analysisDirection === 'income' ? summary.moneyInCategories : summary.moneyOutCategories;
-  const primaryExpenseCategoryKeys = useMemo(
-    () => new Set(analysisCategories.slice(0, DONUT_CATEGORY_LIMIT).map((category) => category.category)),
-    [analysisCategories],
-  );
-  const activeExpenseCategories = useMemo(() => {
-    const available = new Set(analysisCategories.map((category) => category.category));
-    const hasOther = analysisCategories.length > DONUT_CATEGORY_LIMIT;
-    return new Set(selectedExpenseCategories.filter((category) => (
-      category === EXPENSE_OTHER_CATEGORY ? hasOther : available.has(category)
-    )));
-  }, [analysisCategories, selectedExpenseCategories]);
-  const categoryFilteredExpenses = useMemo(
-    () => summary.sourceTransactions.filter((transaction) => (
-      (analysisDirection === 'income' ? transaction.amount > 0 : transaction.amount < 0)
-      && (
-        activeExpenseCategories.size === 0
-        || activeExpenseCategories.has(transaction.pfmCategory)
-        || (activeExpenseCategories.has(EXPENSE_OTHER_CATEGORY) && !primaryExpenseCategoryKeys.has(transaction.pfmCategory))
-      )
-    )),
-    [activeExpenseCategories, analysisDirection, primaryExpenseCategoryKeys, summary.sourceTransactions],
-  );
-  const expenseBars = useMemo(
-    () => buildExpenseBars(summary, categoryFilteredExpenses),
-    [categoryFilteredExpenses, summary],
-  );
-  const activeBucketKey = selectedBucketKey && expenseBars.some((bar) => bar.key === selectedBucketKey)
-    ? selectedBucketKey
-    : null;
-  const visibleExpenses = useMemo(
-    () => categoryFilteredExpenses.filter((transaction) => (
-      !activeBucketKey || getExpenseBucketKey(transaction, summary.periodKind) === activeBucketKey
-    )),
-    [activeBucketKey, categoryFilteredExpenses, summary.periodKind],
-  );
-  const expenseSelectionLabels = Array.from(activeExpenseCategories)
-    .map((category) => category === EXPENSE_OTHER_CATEGORY
-      ? EXPENSE_OTHER_CATEGORY
-      : getEvoAnalyticsCategoryDisplayLabel(category));
-  const activeBucketLabel = activeBucketKey
-    ? (() => {
-      const bar = expenseBars.find((entry) => entry.key === activeBucketKey);
-      return bar ? bar.filterLabel ?? [bar.caption, bar.label].filter(Boolean).join(' ') : null;
-    })()
-    : null;
-  const expenseFilterLabel = [
-    expenseSelectionLabels.length === 1
-      ? expenseSelectionLabels[0]
-      : expenseSelectionLabels.length > 1 ? `${expenseSelectionLabels.length} categories` : null,
-    activeBucketLabel,
-  ].filter(Boolean).join(' · ') || null;
-  const visibleExpensesTotal = visibleExpenses.reduce((total, transaction) => total + Math.abs(transaction.amount), 0);
-  const expenseHeaderAmount = activeExpenseCategories.size === 0 && !activeBucketKey
-    ? analysisDirection === 'income' ? summary.incomeTotal : summary.spendingTotal
-    : visibleExpensesTotal;
-  // The chart headline names whatever the user has narrowed to, falling back to the period total.
-  const expenseSelectionLabel = expenseSelectionLabels.length > 1
-    ? `${expenseSelectionLabels.length} categories`
-    : expenseSelectionLabels[0] ?? (analysisDirection === 'income' ? 'Total income' : 'Total spent');
-  const expenseHeaderLabel = activeBucketLabel
-    ? `${expenseSelectionLabel} · ${activeBucketLabel}`
-    : expenseSelectionLabel;
-
   const currencyByProductId = useMemo(
     () => new Map(products.map((product) => [product.id, product.currency])),
     [products],
@@ -1593,9 +1625,82 @@ export default function Evo2027AnalyticsScreen({
     [scopeCurrencies.size, selectedScopeId],
   );
   const activeSplitMode = availableSplitModes.includes(expenseSplitMode) ? expenseSplitMode : 'categories';
+  const directionTransactions = useMemo(
+    () => summary.sourceTransactions.filter((transaction) => (
+      analysisDirection === 'income' ? transaction.amount > 0 : transaction.amount < 0
+    )),
+    [analysisDirection, summary.sourceTransactions],
+  );
+  // The ring is built on the whole period, so isolating one slice never makes the others vanish.
+  const donutRows = useMemo(
+    () => buildExpenseBreakdown(activeSplitMode, directionTransactions, currencyByProductId, summary.currency, ANALYTICS_LOCALE),
+    [activeSplitMode, currencyByProductId, directionTransactions, summary.currency],
+  );
+  const donutSegments = useMemo(() => buildDonutSegments(donutRows), [donutRows]);
+  const primarySplitKeys = useMemo(
+    () => new Set(donutRows.slice(0, DONUT_CATEGORY_LIMIT).map((row) => row.key)),
+    [donutRows],
+  );
+  const activeSplitSelection = useMemo(() => {
+    const available = new Set(donutRows.map((row) => row.key));
+    const hasOther = donutRows.length > DONUT_CATEGORY_LIMIT;
+    return new Set(selectedSplitKeys.filter((key) => (
+      key === EXPENSE_OTHER_CATEGORY ? hasOther : available.has(key)
+    )));
+  }, [donutRows, selectedSplitKeys]);
+  const categoryFilteredExpenses = useMemo(
+    () => directionTransactions.filter((transaction) => {
+      if (activeSplitSelection.size === 0) return true;
+
+      const key = getExpenseSplitKey(transaction, activeSplitMode, currencyByProductId, summary.currency);
+      return activeSplitSelection.has(key)
+        || (activeSplitSelection.has(EXPENSE_OTHER_CATEGORY) && !primarySplitKeys.has(key));
+    }),
+    [activeSplitMode, activeSplitSelection, currencyByProductId, directionTransactions, primarySplitKeys, summary.currency],
+  );
+  const expenseBars = useMemo(
+    () => buildExpenseBars(summary, categoryFilteredExpenses),
+    [categoryFilteredExpenses, summary],
+  );
+  const activeBucketKey = selectedBucketKey && expenseBars.some((bar) => bar.key === selectedBucketKey)
+    ? selectedBucketKey
+    : null;
+  const visibleExpenses = useMemo(
+    () => categoryFilteredExpenses.filter((transaction) => (
+      !activeBucketKey || getExpenseBucketKey(transaction, summary.periodKind) === activeBucketKey
+    )),
+    [activeBucketKey, categoryFilteredExpenses, summary.periodKind],
+  );
+  const expenseSelectionLabels = Array.from(activeSplitSelection).map((key) => (
+    key === EXPENSE_OTHER_CATEGORY ? EXPENSE_OTHER_CATEGORY : donutRows.find((row) => row.key === key)?.label ?? key
+  ));
+  const activeBucketLabel = activeBucketKey
+    ? (() => {
+      const bar = expenseBars.find((entry) => entry.key === activeBucketKey);
+      return bar ? bar.filterLabel ?? [bar.caption, bar.label].filter(Boolean).join(' ') : null;
+    })()
+    : null;
+  const expenseFilterLabel = [
+    expenseSelectionLabels.length === 1
+      ? expenseSelectionLabels[0]
+      : expenseSelectionLabels.length > 1 ? `${expenseSelectionLabels.length} ${SPLIT_MODE_NOUNS[activeSplitMode]}` : null,
+    activeBucketLabel,
+  ].filter(Boolean).join(' · ') || null;
+  const visibleExpensesTotal = visibleExpenses.reduce((total, transaction) => total + Math.abs(transaction.amount), 0);
+  const expenseHeaderAmount = activeSplitSelection.size === 0 && !activeBucketKey
+    ? analysisDirection === 'income' ? summary.incomeTotal : summary.spendingTotal
+    : visibleExpensesTotal;
+  // The chart headline names whatever the user has narrowed to, falling back to the period total.
+  const expenseSelectionLabel = expenseSelectionLabels.length > 1
+    ? `${expenseSelectionLabels.length} ${SPLIT_MODE_NOUNS[activeSplitMode]}`
+    : expenseSelectionLabels[0] ?? (analysisDirection === 'income' ? 'Total income' : 'Total spent');
+  const expenseHeaderLabel = activeBucketLabel
+    ? `${expenseSelectionLabel} · ${activeBucketLabel}`
+    : expenseSelectionLabel;
+
   const breakdownRows = useMemo(
-    () => buildExpenseBreakdown(activeSplitMode, visibleExpenses, currencyByProductId, summary.currency, getCountryConfig(country).locale),
-    [activeSplitMode, country, currencyByProductId, summary.currency, visibleExpenses],
+    () => buildExpenseBreakdown(activeSplitMode, visibleExpenses, currencyByProductId, summary.currency, ANALYTICS_LOCALE),
+    [activeSplitMode, currencyByProductId, summary.currency, visibleExpenses],
   );
   const breakdownTotal = breakdownRows.reduce((total, row) => total + row.total, 0);
   const breakdownDetail = useMemo(() => {
@@ -1720,7 +1825,7 @@ export default function Evo2027AnalyticsScreen({
   const openAnalysis = (direction: AnalyticsDirection) => {
     setContentScrollTop(0);
     setAnalysisDirection(direction);
-    setSelectedExpenseCategories([]);
+    setSelectedSplitKeys([]);
     setSelectedBucketKey(null);
     setExpenseSplitMode('categories');
     setExpenseChartMode('donut');
@@ -1728,16 +1833,21 @@ export default function Evo2027AnalyticsScreen({
     setView('analysis');
   };
 
-  const toggleExpenseCategory = (category: ExpenseDonutCategory) => {
-    setSelectedExpenseCategories((current) => (
-      current.includes(category)
-        ? current.filter((entry) => entry !== category)
-        : [...current, category]
+  const toggleExpenseSegment = (key: ExpenseDonutCategory) => {
+    setSelectedSplitKeys((current) => (
+      current.includes(key)
+        ? current.filter((entry) => entry !== key)
+        : [...current, key]
     ));
   };
   const clearExpenseSelection = () => {
-    setSelectedExpenseCategories([]);
+    setSelectedSplitKeys([]);
     setSelectedBucketKey(null);
+  };
+  // Slices selected under one split mean nothing under the next, so switching modes starts clean.
+  const changeSplitMode = (mode: ExpenseSplitMode) => {
+    setExpenseSplitMode(mode);
+    setSelectedSplitKeys([]);
   };
   const toggleExpenseBucket = (key: string) => {
     setSelectedBucketKey((current) => (current === key ? null : key));
@@ -1816,7 +1926,7 @@ export default function Evo2027AnalyticsScreen({
         ) : view === 'analysis' ? (
           <ExpensesDetail
             direction={analysisDirection}
-            categories={analysisCategories}
+            segments={donutSegments}
             scopeLabel={activeScope?.label ?? 'All accounts'}
             onOpenScope={() => setScopeSheetOpen(true)}
             periods={overviewCarouselPeriods}
@@ -1827,8 +1937,8 @@ export default function Evo2027AnalyticsScreen({
             }}
             summary={summary}
             country={country}
-            selectedCategories={activeExpenseCategories}
-            onToggleCategory={toggleExpenseCategory}
+            selectedKeys={activeSplitSelection}
+            onToggleSegment={toggleExpenseSegment}
             onClearSelection={clearExpenseSelection}
             chartMode={expenseChartMode}
             onChartModeChange={setExpenseChartMode}
@@ -1840,7 +1950,7 @@ export default function Evo2027AnalyticsScreen({
             headerAmount={expenseHeaderAmount}
             splitMode={activeSplitMode}
             availableSplitModes={availableSplitModes}
-            onSplitModeChange={setExpenseSplitMode}
+            onSplitModeChange={changeSplitMode}
             breakdownRows={breakdownRows}
             breakdownTotal={breakdownTotal}
             onOpenBreakdownRow={handleOpenBreakdownRow}
