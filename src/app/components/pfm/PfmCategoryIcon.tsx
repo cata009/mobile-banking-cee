@@ -21,6 +21,19 @@ interface PfmCategoryIconProps {
 const ICON_GLYPH_SIZE = 20;
 const DEFAULT_ICON_VIEW_BOX = "0 0 20 20";
 
+/**
+ * Most glyphs keep a ~0.8 margin inside their 20px box. These either fill it edge to edge or
+ * read as one solid mass, so at the shared size they loom over the rest of the set; drawing them
+ * a little smaller is what makes the icons look equal, which is all the eye is judging.
+ */
+const PFM_ICON_OPTICAL_SIZES: Partial<Record<PfmCategoryName, number>> = {
+  Income: 17,
+  Wallet: 17,
+  Lifestyle: 18,
+  Uncategorized: 18,
+  "Exclude from budget": 18,
+};
+
 const PFM_ICON_VIEW_BOXES: Partial<Record<PfmCategoryName, string>> = {
   "Exclude from budget": "0 0 21 20",
 };
@@ -200,6 +213,7 @@ export default function PfmCategoryIcon({
   const definition = getPfmCategory(category);
   const paths = PFM_CATEGORY_ICONS[definition.name];
   const viewBox = PFM_ICON_VIEW_BOXES[definition.name] ?? DEFAULT_ICON_VIEW_BOX;
+  const glyphSize = PFM_ICON_OPTICAL_SIZES[definition.name] ?? ICON_GLYPH_SIZE;
   const isCategoryCircle = variant === "category-circle";
   const glyphColor = isCategoryCircle ? "var(--uc-static-white)" : (color ?? `var(${definition.colorVar})`);
 
@@ -223,13 +237,13 @@ export default function PfmCategoryIcon({
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width={ICON_GLYPH_SIZE}
-          height={ICON_GLYPH_SIZE}
+          width={glyphSize}
+          height={glyphSize}
           viewBox={viewBox}
           fill="none"
           style={{
-            width: `${ICON_GLYPH_SIZE}px`,
-            height: `${ICON_GLYPH_SIZE}px`,
+            width: `${glyphSize}px`,
+            height: `${glyphSize}px`,
             aspectRatio: "1 / 1",
           }}
           aria-hidden="true"

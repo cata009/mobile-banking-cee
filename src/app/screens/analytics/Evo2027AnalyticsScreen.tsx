@@ -1,10 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type UIEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type UIEvent } from 'react';
 import ExpenseBarChart, { type ExpenseBar } from '@/app/components/analytics/ExpenseBarChart';
 import ExpenseDonutChart, {
   EXPENSE_OTHER_CATEGORY,
   type ExpenseDonutCategory,
 } from '@/app/components/analytics/ExpenseDonutChart';
 import AccountCarouselIndicator from '@/app/components/accounts/AccountCarouselIndicator';
+import AccountTransactionMonthDivider from '@/app/components/accounts/AccountTransactionMonthDivider';
+import AccountTransactionRow from '@/app/components/accounts/AccountTransactionRow';
+import { transactionGroupCardClassName } from '@/app/components/accounts/transactionGroupCard';
 import AmountVisibilityButton from '@/app/components/AmountVisibilityButton';
 import { BottomSheet } from '@/app/components/BottomSheet';
 import PageHeader from '@/app/components/PageHeader';
@@ -14,6 +17,7 @@ import App2027PrimaryNavigation, {
   type App2027PrimaryNavigationItem,
 } from '@/app/components/navigation/App2027PrimaryNavigation';
 import TransactionAvatar from '@/app/components/transactions/TransactionAvatar';
+import PfmCategoryBubbleChart from '@/app/components/pfm/PfmCategoryBubbleChart';
 import PfmCategoryIcon from '@/app/components/pfm/PfmCategoryIcon';
 import { useLanguage } from '@/app/contexts/LanguageContext';
 import { formatMoneyNumber, getCountryConfig } from '@/app/registry/countryConfig';
@@ -23,13 +27,15 @@ import {
   createSpendingAnalytics,
   createSpendingAnalyticsTimeline,
   createSpendingCategoryDetail,
+  getAnalyticsSubcategoryLabel,
   type SpendingCategorySummary,
   type SpendingSubcategorySummary,
   type SpendingAnalyticsPeriod,
   type SpendingAnalyticsSummary,
   type SpendingAnalyticsTransaction,
 } from '@/data/spendingAnalytics';
-import { type PfmCategoryName, type PfmCategorySelection } from '@/data/pfmCategories';
+import { groupAccountTransactionsByDate } from '@/data/accountDetails';
+import { getPfmCategory, type PfmCategoryName, type PfmCategorySelection } from '@/data/pfmCategories';
 import { type Product } from '@/data/products';
 import { maskFormattedAmount } from '@/app/utils/amountPrivacy';
 import { useDragCarousel } from '@/hooks/useDragCarousel';
@@ -128,9 +134,18 @@ function buildExpenseBreakdown(
   return Array.from(groups.values()).sort((a, b) => b.total - a.total || a.label.localeCompare(b.label));
 }
 
-/** Bucket a transaction lands in on the bar chart: one bar per day in a month, per month in a year. */
+const EXPENSE_WEEK_LENGTH = 7;
+
+/** Fixed 7-day slices counted from the 1st, so every month lands on 4 or 5 week buckets. */
+function getExpenseWeekIndex(day: number) {
+  return Math.floor((day - 1) / EXPENSE_WEEK_LENGTH);
+}
+
+/** Bucket a transaction lands in on the bar chart: one bar per week in a month, per month in a year. */
 function getExpenseBucketKey(transaction: SpendingAnalyticsTransaction, periodKind: 'month' | 'year') {
-  return periodKind === 'year' ? transaction.monthKey : transaction.day.padStart(2, '0');
+  return periodKind === 'year'
+    ? transaction.monthKey
+    : `w${getExpenseWeekIndex(Number(transaction.day)) + 1}`;
 }
 
 function buildExpenseBars(
@@ -150,10 +165,13 @@ function buildExpenseBars(
 
     return Array.from({ length: 12 }, (_, index) => {
       const key = `${summary.yearLabel}-${String(index + 1).padStart(2, '0')}`;
+      const month = new Date(year, index, 1);
 
       return {
         key,
-        label: new Date(year, index, 1).toLocaleDateString(locale, { month: 'short' }),
+        // A single initial keeps all twelve months on the axis; abbreviations would have to be thinned out.
+        label: month.toLocaleDateString(locale, { month: 'narrow' }),
+        filterLabel: `${month.toLocaleDateString(locale, { month: 'long' })} ${summary.yearLabel}`,
         total: totals.get(key) ?? 0,
       };
     });
@@ -164,17 +182,21 @@ function buildExpenseBars(
   const monthIndex = Number(monthPart) - 1;
   // Day 0 of the next month is the last day of this one.
   const dayCount = new Date(year, monthIndex + 1, 0).getDate();
+  // The trailing week is short whenever the month does not divide by seven (29-31, or 22-28 in February).
+  const weekCount = Math.ceil(dayCount / EXPENSE_WEEK_LENGTH);
 
-  return Array.from({ length: dayCount }, (_, index) => {
-    const key = String(index + 1).padStart(2, '0');
-
-    // Some locales return lowercase weekday abbreviations (cs: "po"); the axis reads better capitalised.
-    const weekday = new Date(year, monthIndex, index + 1).toLocaleDateString(locale, { weekday: 'short' });
+  return Array.from({ length: weekCount }, (_, index) => {
+    const key = `w${index + 1}`;
+    const firstDay = index * EXPENSE_WEEK_LENGTH + 1;
+    const lastDay = Math.min(dayCount, firstDay + EXPENSE_WEEK_LENGTH - 1);
+    const weekLabel = `Week ${index + 1}`;
 
     return {
       key,
-      label: key,
-      caption: `${weekday.slice(0, 1).toLocaleUpperCase(locale)}${weekday.slice(1)}`,
+      label: `${firstDay}–${lastDay}`,
+      caption: weekLabel,
+      // Outside the axis the ordinal alone is meaningless, so name the actual dates: "22-28 April 2026".
+      filterLabel: `${firstDay}–${lastDay} ${formatPeriodLabel(summary.periodLabel)} ${summary.yearLabel}`,
       total: totals.get(key) ?? 0,
     };
   });
@@ -207,8 +229,22 @@ function splitAmount(value: string) {
   };
 }
 
+/** Scroll it takes for the large title to hand over to the small one in the sticky header. */
+const HEADER_COLLAPSE_DISTANCE = 56;
+
+/**
+ * Slack kept past the handover point. Landing exactly on it is a knife edge: the collapse removes
+ * the large title, and any pixel the browser then gives back re-expands it, which is the flicker.
+ */
+const HEADER_COLLAPSE_MARGIN = 24;
+
+/** "APRIL" → "April", "RENT" → "Rent": ledger labels arrive shouty and read badly in a sentence. */
+function toSentenceCase(value: string) {
+  return `${value.slice(0, 1)}${value.slice(1).toLocaleLowerCase()}`;
+}
+
 function formatPeriodLabel(label: string) {
-  return `${label.slice(0, 1)}${label.slice(1).toLocaleLowerCase()}`;
+  return toSentenceCase(label);
 }
 
 function FormattedAmount({
@@ -218,6 +254,7 @@ function FormattedAmount({
   className = '',
   amountsHidden = false,
   compact = false,
+  prefix = '',
 }: {
   amount: number;
   country: CountryId;
@@ -225,6 +262,8 @@ function FormattedAmount({
   className?: string;
   amountsHidden?: boolean;
   compact?: boolean;
+  /** Sign printed with the integer part, e.g. the minus on a statement row. */
+  prefix?: string;
 }) {
   // Mask the formatted string, then split it — `splitAmount` and `maskAmountParts` have
   // incompatible shapes, and combining them the other way prints "**** , ,**".
@@ -232,7 +271,7 @@ function FormattedAmount({
 
   return (
     <p className={`inline-flex items-baseline whitespace-nowrap text-[var(--uc-text)] ${className}`.trim()}>
-      <span className={compact ? 'text-[18px] font-bold leading-[22px] tracking-[-0.02em]' : 'text-[24px] font-bold leading-[26px] tracking-[-0.025em]'}>{value.integer}</span>
+      <span className={compact ? 'text-[18px] font-bold leading-[22px] tracking-[-0.02em]' : 'text-[24px] font-bold leading-[26px] tracking-[-0.025em]'}>{prefix}{value.integer}</span>
       {value.decimals ? (
         <span className={compact ? 'text-[14px] font-normal leading-[18px]' : 'text-[16px] font-normal leading-[20px]'}>{value.separator}{value.decimals} {currency}</span>
       ) : null}
@@ -264,18 +303,17 @@ function AnalyticsHeader({ onMessagesClick }: { onMessagesClick?: () => void }) 
   );
 }
 
-function ExpensePeriodNavigator({
-  scopeLabel,
-  onOpenScope,
+/** The month/year stepper on its own, so every analytics page changes period the same way. */
+function ExpensePeriodStepper({
   periods,
   selectedPeriodKey,
   onPeriodChange,
+  className = '',
 }: {
-  scopeLabel: string;
-  onOpenScope: () => void;
   periods: readonly SpendingAnalyticsPeriod[];
   selectedPeriodKey: string;
   onPeriodChange: (periodKey: string) => void;
+  className?: string;
 }) {
   const activeIndex = Math.max(periods.findIndex((period) => period.key === selectedPeriodKey), 0);
   const activePeriod = periods[activeIndex] ?? periods[0];
@@ -285,51 +323,87 @@ function ExpensePeriodNavigator({
   if (!activePeriod) return null;
 
   return (
-    <section aria-label="Analytics period" className="mt-[4px]" data-evo-expense-interval={activePeriod.kind} data-evo-analytics-period-key={activePeriod.key}>
+    <div
+      className={`flex items-center gap-[8px] ${className}`.trim()}
+      data-evo-expense-interval={activePeriod.kind}
+      data-evo-analytics-period-key={activePeriod.key}
+    >
       <button
         type="button"
-        data-evo-analytics-scope-trigger
-        aria-haspopup="dialog"
-        onClick={onOpenScope}
-        className="-ml-[4px] inline-flex min-h-[32px] max-w-full items-center gap-[6px] rounded-[4px] px-[4px] text-left text-[16px] font-bold leading-[20px] text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+        aria-label="Show previous analytics period"
+        disabled={!previousPeriod}
+        onClick={() => previousPeriod && onPeriodChange(previousPeriod.key)}
+        className="grid size-[32px] shrink-0 place-items-center rounded-full text-[var(--uc-text)] transition-opacity disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
       >
-        <span className="truncate">{scopeLabel}</span>
-        <AppIcon name="chevron-down-wide" size={18} color="currentColor" aria-hidden="true" />
+        <AppIcon name="chevron-left" size={18} aria-hidden="true" />
       </button>
 
-      <div className="mt-[8px] flex items-center gap-[8px]">
+      <div className="min-w-0 flex-1 text-center">
+        <h2 className="truncate text-[24px] font-bold leading-[28px] tracking-[-0.02em] text-[var(--uc-text)]">
+          {activePeriod.kind === 'year' ? activePeriod.label : formatPeriodLabel(activePeriod.label)}
+        </h2>
+        {/* Both kinds carry a subtitle, so stepping from a month to a year never changes the header height. */}
+        <p className="text-[16px] font-bold leading-[20px] text-[var(--uc-text-muted)]">
+          {activePeriod.kind === 'month' ? activePeriod.year : 'Full year'}
+        </p>
+      </div>
+
+      {nextPeriod ? (
         <button
           type="button"
-          aria-label="Show previous analytics period"
-          disabled={!previousPeriod}
-          onClick={() => previousPeriod && onPeriodChange(previousPeriod.key)}
-          className="grid size-[32px] shrink-0 place-items-center rounded-full border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] text-[var(--uc-text)] transition-opacity disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
+          aria-label="Show next analytics period"
+          onClick={() => onPeriodChange(nextPeriod.key)}
+          className="grid size-[32px] shrink-0 place-items-center rounded-full text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
         >
-          <AppIcon name="chevron-left" size={18} aria-hidden="true" />
+          <AppIcon name="chevron-left" size={18} className="rotate-180" aria-hidden="true" />
+        </button>
+      ) : (
+        <span aria-hidden="true" className="size-[32px] shrink-0" />
+      )}
+    </div>
+  );
+}
+
+function ExpensePeriodNavigator({
+  scopeLabel,
+  onOpenScope,
+  periods,
+  selectedPeriodKey,
+  onPeriodChange,
+  trailing,
+}: {
+  scopeLabel: string;
+  onOpenScope: () => void;
+  periods: readonly SpendingAnalyticsPeriod[];
+  selectedPeriodKey: string;
+  onPeriodChange: (periodKey: string) => void;
+  /** Optional control parked on the scope row, e.g. the chart-mode toggle. */
+  trailing?: ReactNode;
+}) {
+  return (
+    <section aria-label="Analytics period" className="mt-[4px]">
+      <div className="flex items-center justify-between gap-[12px]">
+        <button
+          type="button"
+          data-evo-analytics-scope-trigger
+          aria-haspopup="dialog"
+          onClick={onOpenScope}
+          className="-ml-[4px] inline-flex min-h-[32px] min-w-0 max-w-full items-center gap-[6px] rounded-[4px] px-[4px] text-left text-[16px] font-bold leading-[20px] text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+        >
+          <span className="truncate">{scopeLabel}</span>
+          <AppIcon name="chevron-down-wide" size={18} color="currentColor" aria-hidden="true" />
         </button>
 
-        <div className="min-w-0 flex-1 text-center">
-          <h2 className="truncate text-[24px] font-bold leading-[28px] tracking-[-0.02em] text-[var(--uc-text)]">
-            {activePeriod.kind === 'year' ? activePeriod.label : formatPeriodLabel(activePeriod.label)}
-          </h2>
-          {activePeriod.kind === 'month' ? (
-            <p className="text-[16px] font-bold leading-[20px] text-[var(--uc-text-muted)]">{activePeriod.year}</p>
-          ) : null}
-        </div>
-
-        {nextPeriod ? (
-          <button
-            type="button"
-            aria-label="Show next analytics period"
-            onClick={() => onPeriodChange(nextPeriod.key)}
-            className="grid size-[32px] shrink-0 place-items-center rounded-full border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
-          >
-            <AppIcon name="chevron-left" size={18} className="rotate-180" aria-hidden="true" />
-          </button>
-        ) : (
-          <span aria-hidden="true" className="size-[32px] shrink-0" />
-        )}
+        {trailing}
       </div>
+
+      {/* Matches the breathing room between the page title and the scope row above. */}
+      <ExpensePeriodStepper
+        className="mt-[12px]"
+        periods={periods}
+        selectedPeriodKey={selectedPeriodKey}
+        onPeriodChange={onPeriodChange}
+      />
     </section>
   );
 }
@@ -343,7 +417,6 @@ function ExpenseChartPanel({
   selectedBucketKey,
   onToggleBucket,
   mode,
-  onModeChange,
   headerLabel,
   headerAmount,
   country,
@@ -360,7 +433,6 @@ function ExpenseChartPanel({
   selectedBucketKey: string | null;
   onToggleBucket: (key: string) => void;
   mode: ExpenseChartMode;
-  onModeChange: (mode: ExpenseChartMode) => void;
   headerLabel: string;
   headerAmount: number;
   country: CountryId;
@@ -434,35 +506,27 @@ function ExpenseChartPanel({
       onPointerUp={handleSwipeEnd}
       onPointerCancel={() => { swipeStartX.current = null; }}
     >
-      <div className="flex items-start justify-between gap-[12px]">
-        {mode === 'bars' ? (
-          <div className="min-w-0">
-            <p className="truncate text-[16px] leading-[20px] text-[var(--uc-text-muted)]">{headerLabel}</p>
-            <FormattedAmount amount={headerAmount} country={country} currency={currency} className="mt-[2px]" />
-          </div>
-        ) : (
-          <span />
-        )}
-        <ExpenseChartModeToggle mode={mode} onModeChange={onModeChange} />
-      </div>
-
-      <div className="mt-[8px]">
-        {mode === 'donut' ? (
-          <ExpenseDonutChart
-            segments={segments}
-            selected={selectedCategories}
-            onToggle={onToggleCategory}
-            centerLabel={headerLabel}
-            centerValue={<FormattedAmount amount={headerAmount} country={country} currency={currency} />}
-          />
-        ) : (
-          <ExpenseBarChart
-            bars={bars}
-            selectedKey={selectedBucketKey}
-            onToggle={onToggleBucket}
-          />
-        )}
-      </div>
+      {mode === 'donut' ? (
+        <ExpenseDonutChart
+          segments={segments}
+          selected={selectedCategories}
+          onToggle={onToggleCategory}
+          centerLabel={headerLabel}
+          centerValue={<FormattedAmount amount={headerAmount} country={country} currency={currency} />}
+        />
+      ) : (
+        <ExpenseBarChart
+          bars={bars}
+          selectedKey={selectedBucketKey}
+          onToggle={onToggleBucket}
+          header={(
+            <div className="min-w-0">
+              <p className="truncate text-[16px] leading-[20px] text-[var(--uc-text-muted)]">{headerLabel}</p>
+              <FormattedAmount amount={headerAmount} country={country} currency={currency} className="mt-[2px]" />
+            </div>
+          )}
+        />
+      )}
     </section>
   );
 }
@@ -506,54 +570,81 @@ function ExpenseTransactionList({
   summary,
   country,
   scopeLabel,
+  total,
   onTransactionClick,
 }: {
   transactions: readonly SpendingAnalyticsTransaction[];
   summary: SpendingAnalyticsSummary;
   country: CountryId;
   scopeLabel: string;
+  /** Sum of what is listed below — set where the list is a filtered slice worth totalling. */
+  total?: number;
   onTransactionClick?: (transaction: SpendingAnalyticsTransaction) => void;
 }) {
   const visibleTransactions = transactions;
+  // Statements group by day, so an analytics drill-in has to as well — same divider, same card.
+  const dateGroups = groupAccountTransactionsByDate([...visibleTransactions]);
 
   return (
     <section aria-label="Expense transactions" className="mt-[32px] pb-[20px]">
       <div className="flex items-end justify-between gap-[16px]">
-        <div>
+        <div className="min-w-0">
           <h3 className="text-[24px] font-bold leading-[26px] tracking-[-0.02em] text-[var(--uc-text)]">Transactions</h3>
           <p className="mt-[4px] text-[16px] leading-[20px] text-[var(--uc-text-muted)]">{scopeLabel}</p>
         </div>
-        <span className="text-[14px] leading-[18px] text-[var(--uc-text-muted)]">{visibleTransactions.length} shown</span>
+        {/* The figures belong beside what they add up: this list, under this filter. */}
+        <div className="shrink-0 text-right">
+          {total !== undefined ? (
+            <FormattedAmount amount={total} country={country} currency={summary.currency} compact className="justify-end" />
+          ) : null}
+          <span className="mt-[2px] block text-[14px] leading-[18px] text-[var(--uc-text-muted)]">
+            {visibleTransactions.length} shown
+          </span>
+        </div>
       </div>
 
-      <div className="mt-[12px] overflow-hidden rounded-[8px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)]">
-        {visibleTransactions.length > 0 ? visibleTransactions.map((transaction, index) => (
-          <button
-            key={transaction.id}
-            type="button"
-            data-testid="evo-expense-transaction"
-            data-evo-expense-transaction-category={transaction.pfmCategory}
-            className={`flex min-h-[72px] w-full items-center gap-[12px] px-[16px] py-[12px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-focus-ring)] ${
-              index > 0 ? 'border-t border-[var(--uc-border-muted)]' : ''
-            }`}
-            onClick={() => onTransactionClick?.(transaction)}
-          >
-            <PfmCategoryIcon category={transaction.pfmCategory} size={32} variant="category-circle" />
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-[16px] font-medium leading-[20px] text-[var(--uc-text)]">{transaction.label}</span>
-              <span className="mt-[2px] block text-[14px] leading-[18px] text-[var(--uc-text-muted)]">
-                {transaction.day} {transaction.month} · {transaction.sourceProductName}
-              </span>
-            </span>
-            <span className="shrink-0 text-right">
-              <span className="block text-[18px] font-bold leading-[20px] text-[var(--uc-text)]">- {formatMoneyNumber(Math.abs(transaction.amount), country)}</span>
-              <span className="mt-[2px] block text-[14px] leading-[18px] text-[var(--uc-text-muted)]">{summary.currency}</span>
-            </span>
-          </button>
-        )) : (
+      {visibleTransactions.length > 0 ? (
+        // The group cards carry the screen gutter themselves, so this cancels the page padding.
+        <div className="-mx-[16px] mt-[8px]">
+          {dateGroups.map((dateGroup) => (
+            <div key={dateGroup.dateKey} data-transaction-date-group={dateGroup.dateKey}>
+              <AccountTransactionMonthDivider
+                title={dateGroup.dateTitle}
+                total={dateGroup.transactions.length > 1 ? formatMoneyNumber(dateGroup.dailyTotal, country) : undefined}
+                currency={summary.currency}
+                dateSeparator
+              />
+              <div className={transactionGroupCardClassName(true)}>
+                {(dateGroup.transactions as SpendingAnalyticsTransaction[]).map((transaction) => (
+                  <div
+                    key={transaction.id}
+                    data-testid="evo-expense-transaction"
+                    data-evo-expense-transaction-category={transaction.pfmCategory}
+                  >
+                    <AccountTransactionRow
+                      transaction={transaction}
+                      formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
+                      currency={summary.currency}
+                      // Across a multi-account scope the source account is what tells two identical rows apart.
+                      detailsLabel={transaction.sourceProductName}
+                      categoryIconVariant="category-circle"
+                      positiveAmountClassName="text-[#3D7D43]"
+                      evo2027
+                      showDate={false}
+                      compact={dateGroup.transactions.length === 1}
+                      onClick={() => onTransactionClick?.(transaction)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-[12px] overflow-hidden rounded-[8px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)]">
           <p className="px-[16px] py-[24px] text-[16px] leading-[22px] text-[var(--uc-text-muted)]">No transactions match this category.</p>
-        )}
-      </div>
+        </div>
+      )}
     </section>
   );
 }
@@ -573,9 +664,16 @@ function ExpenseSplitSelector({
   const activeLabel = EXPENSE_SPLIT_MODES.find((entry) => entry.mode === mode)?.label ?? '';
 
   return (
-    <div className="relative z-10" data-evo-expense-split={mode}>
+    <div
+      className="relative z-10"
+      data-evo-expense-split={mode}
+      onKeyDown={(event) => { if (event.key === 'Escape') setIsOpen(false); }}
+    >
+      {/* Tapping anywhere else dismisses the menu, the way the sheets in this app do. */}
+      {isOpen ? <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} /> : null}
+
       <div className="flex items-center justify-between gap-[12px]">
-        <div>
+        <div className="relative">
           <p className="text-[16px] leading-[20px] text-[var(--uc-text-muted)]">Transactions split by</p>
           <button
             type="button"
@@ -586,8 +684,51 @@ function ExpenseSplitSelector({
             onClick={() => setIsOpen((open) => !open)}
           >
             {activeLabel}
-            <AppIcon name="chevron-down-wide" size={18} color="currentColor" aria-hidden="true" />
+            <AppIcon
+              name="chevron-down-wide"
+              size={18}
+              color="currentColor"
+              className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+              aria-hidden="true"
+            />
           </button>
+
+          {isOpen ? (
+            <div
+              role="listbox"
+              aria-label="Transaction split"
+              className="absolute left-0 top-[calc(100%+6px)] z-20 w-[220px] max-w-[calc(100vw-32px)] overflow-hidden rounded-[8px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] shadow-[0_8px_20px_rgb(var(--uc-shadow-rgb)/0.16)]"
+            >
+              {EXPENSE_SPLIT_MODES.filter((entry) => availableModes.includes(entry.mode)).map((entry, index) => {
+                const selected = entry.mode === mode;
+
+                return (
+                  <button
+                    key={entry.mode}
+                    type="button"
+                    role="option"
+                    aria-selected={selected}
+                    className={`flex min-h-[48px] w-full items-center gap-[12px] px-[12px] text-left text-[16px] leading-[20px] text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-focus-ring)] ${
+                      index > 0 ? 'border-t-[0.5px] border-[var(--uc-border-muted)]' : ''
+                    } ${selected ? 'font-bold' : ''}`}
+                    onClick={() => {
+                      onModeChange(entry.mode);
+                      setIsOpen(false);
+                    }}
+                  >
+                    <span className="min-w-0 flex-1 truncate">{entry.label}</span>
+                    {/* Same radio affordance the scope sheet uses, so selection reads the same everywhere. */}
+                    <AppIcon
+                      name={selected ? 'radio-selected' : 'radio-unselected'}
+                      size={20}
+                      color={selected ? 'var(--uc-action)' : 'var(--uc-icon-muted)'}
+                      aria-hidden="true"
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
         </div>
 
         <button
@@ -601,34 +742,6 @@ function ExpenseSplitSelector({
           <span>Add transaction</span>
         </button>
       </div>
-
-      {isOpen ? (
-        <div
-          role="listbox"
-          aria-label="Transaction split"
-          className="absolute left-0 top-[70px] w-[min(100%,240px)] overflow-hidden rounded-[8px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-[4px] shadow-[0_10px_24px_rgb(var(--uc-shadow-rgb)/0.18)]"
-        >
-          {EXPENSE_SPLIT_MODES.filter((entry) => availableModes.includes(entry.mode)).map((entry) => (
-            <button
-              key={entry.mode}
-              type="button"
-              role="option"
-              aria-selected={entry.mode === mode}
-              className={`flex min-h-[44px] w-full items-center rounded-[8px] px-[12px] text-left text-[16px] leading-[20px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)] ${
-                entry.mode === mode
-                  ? 'bg-[var(--uc-action-soft)] font-bold text-[var(--uc-text)]'
-                  : 'text-[var(--uc-text)] hover:bg-[var(--uc-surface-subtle)]'
-              }`}
-              onClick={() => {
-                onModeChange(entry.mode);
-                setIsOpen(false);
-              }}
-            >
-              {entry.label}
-            </button>
-          ))}
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -720,7 +833,13 @@ function ExpenseBreakdownDetail({
   transactions,
   summary,
   country,
-  periodLabel,
+  scopeLabel,
+  onOpenScope,
+  periods,
+  selectedPeriodKey,
+  onPeriodChange,
+  excludedSubcategories,
+  onToggleSubcategory,
   onTransactionClick,
 }: {
   direction: AnalyticsDirection;
@@ -729,45 +848,55 @@ function ExpenseBreakdownDetail({
   transactions: readonly SpendingAnalyticsTransaction[];
   summary: SpendingAnalyticsSummary;
   country: CountryId;
-  periodLabel: string;
+  scopeLabel: string;
+  onOpenScope: () => void;
+  periods: readonly SpendingAnalyticsPeriod[];
+  selectedPeriodKey: string;
+  onPeriodChange: (periodKey: string) => void;
+  excludedSubcategories: ReadonlySet<string>;
+  onToggleSubcategory: (subcategoryLabel: string) => void;
   onTransactionClick?: (transaction: SpendingAnalyticsTransaction) => void;
 }) {
   const total = transactions.reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0);
+  const flowWord = direction === 'income' ? 'income' : 'expenses';
+  const activeSubcategories = subcategories.filter((subcategory) => !excludedSubcategories.has(subcategory.label));
+  // The list caption names exactly what the bubbles left switched on.
+  const listLabel = activeSubcategories.length === subcategories.length
+    ? `All ${row.label} ${flowWord}`
+    : activeSubcategories.length === 1
+      ? `${toSentenceCase(activeSubcategories[0]!.label)} ${flowWord}`
+      : `${activeSubcategories.length} of ${subcategories.length} subcategories`;
 
   return (
     <div data-evo-analytics-breakdown={row.key}>
-      <div className="mt-[4px] flex items-center gap-[12px]">
-        <ExpenseBreakdownRowIcon row={row} />
-        <div className="min-w-0">
-          <FormattedAmount amount={total} country={country} currency={summary.currency} />
-          <p className="mt-[2px] text-[16px] leading-[20px] text-[var(--uc-text-muted)]">
-            {transactions.length} {transactions.length === 1 ? 'transaction' : 'transactions'} · {periodLabel}
-          </p>
-        </div>
-      </div>
+      {/* The same scope and period controls the analysis page carries, minus the chart toggle. */}
+      <ExpensePeriodNavigator
+        scopeLabel={scopeLabel}
+        onOpenScope={onOpenScope}
+        periods={periods}
+        selectedPeriodKey={selectedPeriodKey}
+        onPeriodChange={onPeriodChange}
+      />
 
       {subcategories.length > 0 ? (
-        <section aria-label="Subcategories" className="mt-[28px]">
-          <h3 className="text-[18px] font-bold leading-[24px] text-[var(--uc-text)]">Subcategories</h3>
-          <div className="mt-[8px] divide-y divide-[var(--uc-border-muted)] border-t border-[var(--uc-border-muted)]">
-            {subcategories.map((subcategory) => (
-              <div
-                key={subcategory.label}
-                data-evo-expense-subcategory={subcategory.label}
-                className="flex min-h-[64px] items-center gap-[12px] py-[12px]"
-              >
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[16px] font-medium leading-[20px] text-[var(--uc-text)]">
-                    {subcategory.label}
-                  </span>
-                  <span className="mt-[2px] block text-[14px] leading-[18px] text-[var(--uc-text-muted)]">
-                    {subcategory.transactionCount} {subcategory.transactionCount === 1 ? 'transaction' : 'transactions'}
-                  </span>
-                </span>
-                <FormattedAmount amount={subcategory.total} country={country} currency={summary.currency} className="shrink-0" />
-              </div>
-            ))}
-          </div>
+        <section aria-label="Subcategories" className="mt-[8px] py-[8px]">
+          {/* The bubbles the PFM category screen uses — sized by share, tap one to drop it from the list. */}
+          <PfmCategoryBubbleChart
+            subcategories={subcategories}
+            colorVar={getPfmCategory(row.category).colorVar}
+            country={country}
+            currency={summary.currency}
+            ariaLabel="Subcategory breakdown"
+            excludeAriaLabel="Filter out subcategory"
+            includeAriaLabel="Include subcategory"
+            inactiveSubcategories={excludedSubcategories}
+            onToggle={onToggleSubcategory}
+            showTotals
+            // Every bubble may be switched off here: the list simply comes back empty.
+            minActive={0}
+            // No carousel panel to fill, so the rows of bubbles set the height themselves.
+            height="auto"
+          />
         </section>
       ) : null}
 
@@ -775,35 +904,13 @@ function ExpenseBreakdownDetail({
         transactions={transactions}
         summary={summary}
         country={country}
-        scopeLabel={`${row.label} ${direction === 'income' ? 'income' : 'expenses'}`}
+        scopeLabel={listLabel}
+        total={total}
         onTransactionClick={onTransactionClick}
       />
     </div>
   );
 }
-/**
- * Tinted roundel in the PFM-icon idiom, so the three money figures carry a little colour and
- * the card reads at a glance: out, in, and what is left.
- */
-function MoneyFlowIcon({
-  icon,
-  colorVar,
-}: {
-  icon: 'trade-sell' | 'trade-buy' | 'accounts-coins';
-  colorVar: string;
-}) {
-  return (
-    <span
-      aria-hidden="true"
-      data-evo-analytics-flow-icon
-      className="grid size-[24px] shrink-0 place-items-center rounded-full"
-      style={{ backgroundColor: `var(${colorVar})` }}
-    >
-      <AppIcon name={icon} size={16} color="var(--uc-static-white)" aria-hidden="true" />
-    </span>
-  );
-}
-
 /** One statement card per period. Swiping the rail *is* how the user changes month. */
 function SpendingMonthCard({
   summary,
@@ -811,6 +918,7 @@ function SpendingMonthCard({
   amountsHidden,
   periodLabel,
   onOpenIncome,
+  onOpenExpenses,
   dragHandlers,
 }: {
   summary: SpendingAnalyticsSummary;
@@ -818,14 +926,22 @@ function SpendingMonthCard({
   amountsHidden: boolean;
   periodLabel: string;
   onOpenIncome: () => void;
+  onOpenExpenses: () => void;
   dragHandlers?: ReturnType<typeof useDragCarousel>['dragHandlers'];
 }) {
   const format = (value: number) => maskFormattedAmount(formatMoneyNumber(Math.abs(value), country), amountsHidden);
   const spent = splitAmount(format(summary.spendingTotal));
+  const earned = splitAmount(format(summary.incomeTotal));
   const keptShare = summary.incomeTotal > 0 && summary.netTotal > 0
     ? Math.round((summary.netTotal / summary.incomeTotal) * 100)
     : null;
   const overspent = summary.incomeTotal > 0 && summary.netTotal < 0;
+  // Both bars are measured against the bigger flow, so the longer bar is always the bigger number.
+  const flowScale = Math.max(summary.incomeTotal, summary.spendingTotal, 1);
+  const flows = [
+    { key: 'in', label: 'In', total: summary.incomeTotal, color: 'var(--uc-action)' },
+    { key: 'out', label: 'Out', total: summary.spendingTotal, color: 'var(--uc-text)' },
+  ];
 
   return (
     <section
@@ -840,13 +956,48 @@ function SpendingMonthCard({
         <p className="text-[12px] font-bold uppercase leading-[16px] tracking-[0.1em] text-[color-mix(in_srgb,var(--uc-text)_62%,transparent)]">
           {periodLabel}
         </p>
-        <p className="mt-[12px] flex items-center gap-[8px] text-[14px] leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
-          <MoneyFlowIcon icon="trade-sell" colorVar="--uc-pfm-exclude-budget" />
-          Money out
+        {/* Both flows sit above the rule: the pair is the story, neither figure tells it alone. */}
+        <div className="mt-[12px] grid grid-cols-2 gap-[12px]">
+          <button
+            type="button"
+            data-evo-analytics-open-expenses
+            onClick={onOpenExpenses}
+            className="min-w-0 rounded-[4px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-surface)]"
+          >
+            <span className="flex items-center gap-[4px] text-[14px] font-bold leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
+              Money out
+              <AppIcon name="chevron-link" size={18} color="currentColor" aria-hidden="true" />
+            </span>
+            <span className="mt-[2px] flex items-baseline gap-[2px] whitespace-nowrap">
+              <span className="text-[20px] font-bold leading-[24px] tracking-[-0.02em]">{spent.integer}</span>
+              <span className="text-[14px] font-bold leading-[18px]">{spent.separator}{spent.decimals} {summary.currency}</span>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            data-evo-analytics-open-income
+            onClick={onOpenIncome}
+            className="min-w-0 rounded-[4px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-surface)]"
+          >
+            <span className="flex items-center gap-[4px] text-[14px] font-bold leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
+              Money in
+              <AppIcon name="chevron-link" size={18} color="currentColor" aria-hidden="true" />
+            </span>
+            <span className="mt-[2px] flex items-baseline gap-[2px] whitespace-nowrap">
+              <span className="text-[20px] font-bold leading-[24px] tracking-[-0.02em]">{earned.integer}</span>
+              <span className="text-[14px] font-bold leading-[18px]">{earned.separator}{earned.decimals} {summary.currency}</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div className="border-t border-[color-mix(in_srgb,var(--uc-text)_16%,transparent)] pt-[16px]">
+        <p className="text-[14px] font-bold leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
+          Net cashflow
         </p>
-        <p className="mt-[2px] flex items-baseline gap-[2px] whitespace-nowrap">
-          <span className="text-[28px] font-bold leading-[30px] tracking-[-0.025em]">{spent.integer}</span>
-          <span className="text-[18px] font-bold leading-[22px]">{spent.separator}{spent.decimals} {summary.currency}</span>
+        <p className="mt-[2px] truncate text-[20px] font-bold leading-[24px]">
+          {summary.netTotal >= 0 ? '+' : '−'}{format(summary.netTotal)} {summary.currency}
         </p>
         <p className="mt-[4px] text-[14px] leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
           {keptShare !== null
@@ -855,33 +1006,28 @@ function SpendingMonthCard({
               ? 'More went out than came in'
               : 'No income recorded in this period'}
         </p>
-      </div>
 
-      <div className="grid grid-cols-2 gap-[12px] border-t border-[color-mix(in_srgb,var(--uc-text)_16%,transparent)] pt-[16px]">
-        <button
-          type="button"
-          data-evo-analytics-open-income
-          onClick={onOpenIncome}
-          className="min-w-0 rounded-[4px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-surface)]"
-        >
-          <span className="flex items-center gap-[6px] text-[14px] leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
-            <MoneyFlowIcon icon="trade-buy" colorVar="--uc-pfm-transfers" />
-            Money in
-            <AppIcon name="chevron-link" size={18} color="currentColor" aria-hidden="true" />
-          </span>
-          <span className="mt-[1px] block truncate text-[18px] font-bold leading-[22px]">
-            {format(summary.incomeTotal)} {summary.currency}
-          </span>
-        </button>
-
-        <div className="min-w-0">
-          <p className="flex items-center gap-[6px] text-[14px] leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
-            <MoneyFlowIcon icon="accounts-coins" colorVar="--uc-pfm-utilities" />
-            Net cashflow
-          </p>
-          <p className="mt-[1px] truncate text-[18px] font-bold leading-[22px]">
-            {summary.netTotal >= 0 ? '+' : '−'}{format(summary.netTotal)} {summary.currency}
-          </p>
+        {/* One scale for both bars, so which flow is bigger — and by how much — reads without the figures. */}
+        <div className="mt-[16px] flex flex-col gap-[8px]" data-evo-analytics-flow-bars>
+          {flows.map((flow) => (
+            <div key={flow.key} className="flex items-center gap-[10px]">
+              <span className="w-[26px] shrink-0 text-[11px] font-bold uppercase leading-[14px] tracking-[0.06em] text-[color-mix(in_srgb,var(--uc-text)_62%,transparent)]">
+                {flow.label}
+              </span>
+              <span
+                className="h-[8px] min-w-0 flex-1 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--uc-text)_10%,transparent)]"
+                data-evo-analytics-flow-bar={flow.key}
+              >
+                <span
+                  className="block h-full rounded-full transition-[width] duration-300"
+                  style={{
+                    width: `${Math.max((flow.total / flowScale) * 100, flow.total > 0 ? 2 : 0)}%`,
+                    backgroundColor: flow.color,
+                  }}
+                />
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -901,6 +1047,7 @@ function SpendingMonthCarousel({
   country,
   amountsHidden,
   onOpenIncome,
+  onOpenExpenses,
 }: {
   periods: readonly SpendingAnalyticsPeriod[];
   summariesByPeriodKey: Record<string, SpendingAnalyticsSummary>;
@@ -909,6 +1056,7 @@ function SpendingMonthCarousel({
   country: CountryId;
   amountsHidden: boolean;
   onOpenIncome: () => void;
+  onOpenExpenses: () => void;
 }) {
   const railRef = useRef<HTMLDivElement>(null);
   const snapTimeoutRef = useRef<number | null>(null);
@@ -1008,6 +1156,7 @@ function SpendingMonthCarousel({
                 ? `Total ${period.label}`
                 : `${formatPeriodLabel(period.label)} ${period.year}`}
               onOpenIncome={onOpenIncome}
+              onOpenExpenses={onOpenExpenses}
               dragHandlers={dragHandlers}
             />
           );
@@ -1243,6 +1392,7 @@ function ExpensesDetail({
         periods={periods}
         selectedPeriodKey={selectedPeriodKey}
         onPeriodChange={onPeriodChange}
+        trailing={<ExpenseChartModeToggle mode={chartMode} onModeChange={onChartModeChange} />}
       />
 
       <ExpenseChartPanel
@@ -1254,7 +1404,6 @@ function ExpensesDetail({
         selectedBucketKey={selectedBucketKey}
         onToggleBucket={onToggleBucket}
         mode={chartMode}
-        onModeChange={onChartModeChange}
         headerLabel={headerLabel}
         headerAmount={headerAmount}
         country={country}
@@ -1265,7 +1414,7 @@ function ExpensesDetail({
       />
 
       {filterLabel ? (
-        <div className="mt-[16px] flex items-center justify-between gap-[8px] rounded-[8px] bg-[var(--uc-action-soft)] px-[12px] py-[10px]">
+        <div className="mt-[16px] flex items-center justify-between gap-[8px] rounded-[8px] bg-[var(--uc-neutral-200)] px-[12px] py-[10px]">
           <p className="min-w-0 truncate text-[16px] leading-[20px] text-[var(--uc-text)]">Filtered by <strong className="font-bold">{filterLabel}</strong></p>
           <button
             type="button"
@@ -1326,8 +1475,12 @@ export default function Evo2027AnalyticsScreen({
   const [breakdownOrigin, setBreakdownOrigin] = useState<'overview' | 'analysis'>('analysis');
   const [scopeSheetOpen, setScopeSheetOpen] = useState(false);
   const [contentScrollTop, setContentScrollTop] = useState(0);
+  const contentRef = useRef<HTMLElement>(null);
+  const [scrollSlack, setScrollSlack] = useState(0);
+  const headerReleaseRef = useRef(0);
   const [expenseSplitMode, setExpenseSplitMode] = useState<ExpenseSplitMode>('categories');
   const [openBreakdownRow, setOpenBreakdownRow] = useState<ExpenseBreakdownRow | null>(null);
+  const [excludedSubcategories, setExcludedSubcategories] = useState<ReadonlySet<string>>(() => new Set());
   /** Empty means "all categories". Order is irrelevant — it is used as a set. */
   const [selectedExpenseCategories, setSelectedExpenseCategories] = useState<ExpenseDonutCategory[]>([]);
   const [expenseChartMode, setExpenseChartMode] = useState<ExpenseChartMode>('donut');
@@ -1402,7 +1555,7 @@ export default function Evo2027AnalyticsScreen({
   const activeBucketLabel = activeBucketKey
     ? (() => {
       const bar = expenseBars.find((entry) => entry.key === activeBucketKey);
-      return bar ? [bar.caption, bar.label].filter(Boolean).join(' ') : null;
+      return bar ? bar.filterLabel ?? [bar.caption, bar.label].filter(Boolean).join(' ') : null;
     })()
     : null;
   const expenseFilterLabel = [
@@ -1461,8 +1614,14 @@ export default function Evo2027AnalyticsScreen({
       ? createSpendingCategoryDetail(summary, openBreakdownRow.category, analysisDirection === 'income' ? 'in' : 'out').subcategories
       : [];
 
-    return { transactions, subcategories };
-  }, [activeBucketKey, activeSplitMode, analysisDirection, currencyByProductId, openBreakdownRow, summary]);
+    return {
+      // The bubbles always show every subcategory; switching one off only takes it out of the list.
+      transactions: transactions.filter((transaction) => (
+        !excludedSubcategories.has(getAnalyticsSubcategoryLabel(transaction))
+      )),
+      subcategories,
+    };
+  }, [activeBucketKey, activeSplitMode, analysisDirection, currencyByProductId, excludedSubcategories, openBreakdownRow, summary]);
 
   // Months oldest-to-newest, then the two year totals. The carousel rests on the most recent
   // month: swiping back walks earlier months, swiping forward reaches this year then last year.
@@ -1494,6 +1653,52 @@ export default function Evo2027AnalyticsScreen({
     })),
     [summary.moneyInCategories],
   );
+  // A page with less scroll than the collapse distance strands the title half-faded, which reads as
+  // flicker. Pad the bottom until the title can always finish its trip into the header.
+  useEffect(() => {
+    const element = contentRef.current;
+    const content = element?.firstElementChild;
+    if (!element || !content) return;
+
+    // Collapsing unmounts the large title, which takes its height out of the scroll. Without room
+    // for both, the collapse undoes the very scroll that triggered it and the title flickers — so
+    // the reservation is kept once measured, including while the title is away.
+    headerReleaseRef.current = 0;
+
+    const measure = () => {
+      const largeTitle = view === 'overview' ? null : element.previousElementSibling;
+      if (largeTitle?.querySelector('h1.uc-type-h1')) {
+        headerReleaseRef.current = (largeTitle as HTMLElement).offsetHeight;
+      }
+
+      setScrollSlack((current) => {
+        const naturalOverflow = element.scrollHeight - element.clientHeight - current;
+        // A page that does not scroll at all keeps its large title and never flickers; only the
+        // pages caught between the two states need the extra room.
+        const target = HEADER_COLLAPSE_DISTANCE + HEADER_COLLAPSE_MARGIN + headerReleaseRef.current;
+        const needed = naturalOverflow > 0 ? Math.max(0, target - naturalOverflow) : 0;
+        return Math.abs(needed - current) < 1 ? current : needed;
+      });
+    };
+
+    measure();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(content);
+    return () => observer.disconnect();
+  }, [view, openBreakdownRow?.key]);
+  // A subcategory filter only makes sense for the category it was picked in.
+  useEffect(() => {
+    setExcludedSubcategories(new Set());
+  }, [analysisDirection, openBreakdownRow?.key, selectedPeriodKey]);
+  const handleToggleSubcategory = (subcategoryLabel: string) => {
+    setExcludedSubcategories((current) => {
+      const next = new Set(current);
+      if (next.has(subcategoryLabel)) next.delete(subcategoryLabel);
+      else next.add(subcategoryLabel);
+      return next;
+    });
+  };
   const handleOpenBreakdownRow = (row: ExpenseBreakdownRow, direction: AnalyticsDirection = 'expense') => {
     setContentScrollTop(0);
     // Remember where the drill-in started, or Back would land the user on an analysis
@@ -1553,7 +1758,7 @@ export default function Evo2027AnalyticsScreen({
     if (tab === 'products') onProductsClick?.();
     if (tab === 'more') onMoreClick?.();
   };
-  const headerCollapseProgress = Math.min(1, contentScrollTop / 56);
+  const headerCollapseProgress = Math.min(1, contentScrollTop / HEADER_COLLAPSE_DISTANCE);
 
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden bg-[var(--uc-app-bg)] text-[var(--uc-text)]" data-evo-2027-analytics>
@@ -1567,6 +1772,7 @@ export default function Evo2027AnalyticsScreen({
           compact
           collapsedTitleProgress={headerCollapseProgress}
           hideCollapsedTitleWhenHidden
+          leadingVisual={<ExpenseBreakdownRowIcon row={openBreakdownRow} />}
         />
       ) : view === 'analysis' ? (
         <PageHeader
@@ -1583,6 +1789,7 @@ export default function Evo2027AnalyticsScreen({
       )}
 
       <main
+        ref={contentRef}
         className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-[16px] pb-[96px] scrollbar-hide"
         onScroll={(event) => setContentScrollTop(event.currentTarget.scrollTop)}
       >
@@ -1594,7 +1801,16 @@ export default function Evo2027AnalyticsScreen({
             transactions={breakdownDetail.transactions}
             summary={summary}
             country={country}
-            periodLabel={activeBucketLabel ?? summary.periodLabel}
+            scopeLabel={activeScope?.label ?? 'All accounts'}
+            onOpenScope={() => setScopeSheetOpen(true)}
+            periods={overviewCarouselPeriods}
+            selectedPeriodKey={selectedPeriodKey}
+            onPeriodChange={(periodKey) => {
+              setSelectedPeriodKey(periodKey);
+              setSelectedBucketKey(null);
+            }}
+            excludedSubcategories={excludedSubcategories}
+            onToggleSubcategory={handleToggleSubcategory}
             onTransactionClick={onTransactionClick}
           />
         ) : view === 'analysis' ? (
@@ -1658,6 +1874,7 @@ export default function Evo2027AnalyticsScreen({
                 country={country}
                 amountsHidden={amountsHidden}
                 onOpenIncome={() => openAnalysis('income')}
+                onOpenExpenses={() => openAnalysis('expense')}
               />
             </div>
 
@@ -1691,6 +1908,8 @@ export default function Evo2027AnalyticsScreen({
 
           </div>
         )}
+
+        <div aria-hidden="true" style={{ height: `${scrollSlack}px` }} data-evo-analytics-scroll-slack />
       </main>
 
       <div

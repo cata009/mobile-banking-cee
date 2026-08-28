@@ -19,6 +19,10 @@ interface PageHeaderProps {
   largeTitleAlign?: "left" | "center";
   largeTitleColor?: string;
   hideCollapsedTitleWhenHidden?: boolean;
+  /** Sits before the large title, e.g. the category icon of the page being read. */
+  leadingVisual?: ReactNode;
+  /** Rendered under the large title — a total, a count, whatever names the page's figures. */
+  subtitle?: ReactNode;
 }
 
 export default function PageHeader({
@@ -38,6 +42,8 @@ export default function PageHeader({
   largeTitleAlign = "left",
   largeTitleColor,
   hideCollapsedTitleWhenHidden = false,
+  leadingVisual,
+  subtitle,
 }: PageHeaderProps) {
   const iconColor = variant === "dark" ? "white" : "var(--uc-text)";
   const textColor = variant === "dark" ? "text-[var(--uc-static-white)]" : "text-[var(--uc-text)]";
@@ -62,6 +68,22 @@ export default function PageHeader({
         backgroundColor: "var(--uc-app-bg)",
       }
     : undefined;
+
+  const largeTitle = (
+    <h1
+      className={cn("uc-type-h1", textColor)}
+      style={{
+        display: "-webkit-box",
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: "vertical",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        color: largeTitleColor,
+      }}
+    >
+      {title}
+    </h1>
+  );
 
   const rightAction = rightActionIcon ? (
     <button
@@ -127,7 +149,7 @@ export default function PageHeader({
       {shouldRenderLargeTitle ? (
         <div
           className={cn(
-            "flex items-center",
+            "flex items-center gap-[12px]",
             largeTitleAlign === "center" ? "justify-center text-center" : "",
             bgColor
           )}
@@ -137,19 +159,14 @@ export default function PageHeader({
             opacity: largeTitleOpacity,
           }}
         >
-          <h1
-            className={cn("uc-type-h1", textColor)}
-            style={{
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              color: largeTitleColor,
-            }}
-          >
-            {title}
-          </h1>
+          {leadingVisual}
+          {/* Only pages that pass a visual or a subtitle get the extra wrapper; the rest keep the bare title. */}
+          {leadingVisual || subtitle ? (
+            <div className="min-w-0 flex-1">
+              {largeTitle}
+              {subtitle}
+            </div>
+          ) : largeTitle}
         </div>
       ) : null}
     </>

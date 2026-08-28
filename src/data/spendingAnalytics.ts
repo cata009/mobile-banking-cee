@@ -302,7 +302,7 @@ export function createSpendingAnalytics(
   return summary;
 }
 
-function getAnalyticsSubcategoryLabel(transaction: SpendingAnalyticsTransaction) {
+export function getAnalyticsSubcategoryLabel(transaction: SpendingAnalyticsTransaction) {
   const rawLabel = transaction.pfmSubcategory?.trim();
 
   if (transaction.pfmCategory === "Income") {

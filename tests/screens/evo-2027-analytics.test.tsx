@@ -342,7 +342,7 @@ describe('Evo 2027 expense chart and split-by breakdown', () => {
 
     expect(screen.getByRole('button', { name: 'Back' })).toBeInTheDocument()
     expect(document.querySelector('[data-evo-analytics-breakdown="' + category + '"]')).toBeInTheDocument()
-    expect(document.querySelectorAll('[data-evo-expense-subcategory]').length).toBeGreaterThan(0)
+    expect(document.querySelectorAll('[data-pfm-subcategory-bubble]').length).toBeGreaterThan(0)
     const transactions = screen.getAllByTestId('evo-expense-transaction')
     expect(transactions).not.toHaveLength(0)
     expect(transactions.every(
@@ -428,10 +428,13 @@ describe('Evo 2027 expense chart and split-by breakdown', () => {
     expect(screen.queryByTestId('evo-expense-donut-chart')).not.toBeInTheDocument()
     const chart = screen.getByLabelText('Expense bar chart')
     expect(chart).toHaveTextContent(/\d+(?:\.\d+)?K/)
-    expect(chart).not.toHaveTextContent('CZK')
-    expect(chart).toHaveTextContent(/Mon|Tue|Wed|Thu|Fri|Sat|Sun/)
-    const chartLayout = chart.firstElementChild
+    // The headline moved inside the card, so the currency now belongs there and never on the axis.
+    expect(chart).toHaveTextContent('Total spent')
+    expect(chart).toHaveTextContent('Week 1')
+    expect(chart).toHaveTextContent('1–7')
+    const chartLayout = chart.querySelector('[data-evo-expense-plot]')
     const yAxis = chartLayout?.firstElementChild
+    expect(chartLayout).not.toHaveTextContent('CZK')
     expect(chartLayout).toHaveClass('gap-[6px]')
     expect(yAxis).toHaveClass('w-[32px]')
     const bars = Array.from(chart.querySelectorAll<HTMLElement>('button[data-evo-expense-bar]'))
@@ -440,19 +443,25 @@ describe('Evo 2027 expense chart and split-by breakdown', () => {
       return fill ? Number.parseFloat(fill.style.height) > 0 : false
     })
     if (!spentBar) throw new Error('Expected at least one bar with spending')
-    const bucket = spentBar.getAttribute('data-evo-expense-bar')
+    // A month is split into fixed 7-day slices, so the bucket key is the week ordinal.
+    expect(bars.length).toBeGreaterThanOrEqual(4)
+    expect(bars.length).toBeLessThanOrEqual(5)
+    const weekIndex = Number(spentBar.getAttribute('data-evo-expense-bar')?.replace('w', '')) - 1
 
     fireEvent.click(spentBar)
 
     expect(spentBar).toHaveAttribute('aria-pressed', 'true')
 
     const [row] = breakdownRows()
-    if (!row) throw new Error('Expected a breakdown row for the selected day')
+    if (!row) throw new Error('Expected a breakdown row for the selected week')
     fireEvent.click(row)
 
-    expect(screen.getAllByTestId('evo-expense-transaction').every(
-      (transaction) => transaction.textContent?.includes(bucket + ' '),
-    )).toBe(true)
+    // The day now lives on the group divider, so every visible row sits under a date in that week.
+    expect(screen.getAllByTestId('evo-expense-transaction').every((transaction) => {
+      const dateKey = transaction.closest('[data-transaction-date-group]')?.getAttribute('data-transaction-date-group')
+      const day = Number(dateKey?.slice(-2))
+      return Number.isFinite(day) && Math.floor((day - 1) / 7) === weekIndex
+    })).toBe(true)
   })
 
   it('uses the overview amount scale in the full expense breakdown', () => {

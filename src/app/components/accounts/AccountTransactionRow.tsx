@@ -16,6 +16,11 @@ interface AccountTransactionRowProps {
   leadingVisual?: ReactNode;
   /** Optional clean merchant name; the ledger label remains untouched in the data source. */
   displayLabel?: string;
+  /**
+   * Replaces the transaction's own detail line. Cross-account lists use it to name the
+   * source account, which is what tells two otherwise identical rows apart.
+   */
+  detailsLabel?: string;
   onClick?: (transaction: AccountTransaction) => void;
   onCategoryClick?: (transaction: AccountTransaction) => void;
   categoryIconVariant?: PfmCategoryIconVariant;
@@ -51,6 +56,7 @@ export default function AccountTransactionRow({
   showDate = true,
   leadingVisual,
   displayLabel,
+  detailsLabel,
   onClick,
   onCategoryClick,
   categoryIconVariant = "glyph",
@@ -65,6 +71,7 @@ export default function AccountTransactionRow({
     ? "text-[var(--uc-text-muted)]"
     : transaction.type === "credit" ? positiveAmountClassName : "text-[var(--uc-text)]";
   const sign = transaction.amount < 0 ? "- " : "+ ";
+  const detailsLine = detailsLabel ?? transaction.details;
   const amountParts = splitAmount(formattedAmount);
 
   const date = showDate ? (
@@ -109,9 +116,9 @@ export default function AccountTransactionRow({
       <p className={`uc-type-n4-strong w-full truncate leading-[20px] ${isPending ? "text-[var(--uc-text-muted)]" : "text-[var(--uc-text)]"}`}>
         {displayLabel ?? transaction.label}
       </p>
-      {transaction.details ? (
+      {detailsLine ? (
         <p className="uc-type-n5 w-full truncate leading-[18px] text-[var(--uc-text-muted)]">
-          {transaction.details}
+          {detailsLine}
         </p>
       ) : null}
       {evoDate}
