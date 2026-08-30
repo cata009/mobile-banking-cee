@@ -458,7 +458,7 @@ export function MessagesOutboxTemplate({ interactive }: { interactive: boolean }
 export function PrimeBenefitItem({ title, description }: { title: string; description: string }) {
   return (
     <div className="grid grid-cols-[32px_1fr] gap-[12px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[16px] font-['UniCredit',sans-serif]">
-      <span className="grid size-[32px] place-items-center rounded-full bg-[var(--uc-action)] text-[var(--uc-static-white)]">
+      <span className="grid size-[32px] place-items-center rounded-full bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]">
         <AppIcon name="prime-check" color="currentColor" />
       </span>
       <span className="min-w-0">
@@ -572,7 +572,7 @@ export function PreloginInactiveTemplate({ interactive }: { interactive: boolean
             {interactive ? (
               <PrimaryButton className="w-full">Activate application</PrimaryButton>
             ) : (
-              <div className="flex h-[48px] w-full items-center justify-center rounded bg-[var(--uc-action)] font-['UniCredit',sans-serif] text-base font-bold text-[var(--uc-static-white)]">
+              <div className="flex h-[48px] w-full items-center justify-center rounded bg-[var(--uc-action-strong)] font-['UniCredit',sans-serif] text-base font-bold text-[var(--uc-static-white)]">
                 Activate application
               </div>
             )}
@@ -615,7 +615,7 @@ export function PreloginActiveTemplate({ interactive }: { interactive: boolean }
           {interactive ? (
             <PrimaryButton className="w-full">Log in</PrimaryButton>
           ) : (
-            <div className="flex h-[48px] w-full items-center justify-center rounded bg-[var(--uc-action)] font-['UniCredit',sans-serif] text-base font-bold text-[var(--uc-static-white)]">
+            <div className="flex h-[48px] w-full items-center justify-center rounded bg-[var(--uc-action-strong)] font-['UniCredit',sans-serif] text-base font-bold text-[var(--uc-static-white)]">
               Log in
             </div>
           )}
@@ -653,7 +653,7 @@ export function LanguageSelectorSheetTemplate({ interactive }: { interactive: bo
           {interactive ? (
             <PrimaryButton className="w-full">Confirm</PrimaryButton>
           ) : (
-            <div className="flex h-[48px] w-full items-center justify-center rounded bg-[var(--uc-action)] font-['UniCredit',sans-serif] text-base font-bold text-[var(--uc-static-white)]">
+            <div className="flex h-[48px] w-full items-center justify-center rounded bg-[var(--uc-action-strong)] font-['UniCredit',sans-serif] text-base font-bold text-[var(--uc-static-white)]">
               Confirm
             </div>
           )}

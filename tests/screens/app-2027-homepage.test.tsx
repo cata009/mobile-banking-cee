@@ -73,7 +73,8 @@ describe('2027 Home Transformation', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Credits' }))
     expect(container.querySelector('[data-home-transformation-summary="credits"]')).toHaveTextContent('Due this month')
     expect(container.querySelector('[data-home-summary-art="credits"]')).toBeInTheDocument()
-    expect(screen.getByText('Loans & Mortgages')).toBeInTheDocument()
+    expect(screen.getByText('Loans')).toBeInTheDocument()
+    expect(screen.getByText('Mortgages')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Block card' })).not.toBeInTheDocument()
     expect(container.querySelector('[data-home-credit-limit-progress]')).toBeInTheDocument()
 
@@ -159,7 +160,7 @@ describe('2027 Home Transformation', () => {
     expect(within(comparison).getAllByRole('button', { name: /Go to account/ })).toHaveLength(2)
     const ghostBanner = comparison.querySelector('[data-evo-card-ghost-banner] [data-component="GhostBanner"]') as HTMLElement
     expect(ghostBanner).toBeInTheDocument()
-    expect(ghostBanner).toHaveClass('h-[120px]', 'w-[136px]', '!p-[4px]')
+    expect(ghostBanner).toHaveClass('h-full', 'w-[136px]', '!p-[4px]')
     expect(ghostBanner).toHaveTextContent('Add a debit card')
     expect(ghostBanner).toHaveTextContent('Explore options')
     expect(ghostBanner).not.toHaveTextContent('Explore more cards')
@@ -209,8 +210,12 @@ describe('2027 Home Transformation', () => {
     expect(within(cardsGroup).queryByRole('button', { name: /^Cards$/ })).not.toBeInTheDocument()
     expect(cardsGroup.querySelector('[data-evo-card-comparison]')).toBeInTheDocument()
 
+    // Collapsed, the tail stays mounted inside closed grid rows so the open/close can animate;
+    // only the front card is laid out.
     const accountCards = accountsGroup.querySelectorAll('[data-product-card-evolution]')
-    expect(accountCards).toHaveLength(1)
+    expect(accountCards.length).toBeGreaterThan(1)
+    const closedTail = accountsGroup.querySelectorAll('[class*="grid-rows-[0fr]"]')
+    expect(closedTail).toHaveLength(accountCards.length - 1)
     const accountStackPreview = accountsGroup.querySelector('[data-home-product-stack-preview]') as HTMLElement
     expect(accountStackPreview).toBeInTheDocument()
     expect(accountStackPreview).toHaveAttribute('aria-hidden', 'true')
@@ -226,6 +231,7 @@ describe('2027 Home Transformation', () => {
     fireEvent.click(within(accountsGroup).getByRole('button', { name: /^Accounts$/ }))
     const expandedAccountCards = accountsGroup.querySelectorAll('[data-product-card-evolution]')
     expect(expandedAccountCards.length).toBeGreaterThan(1)
+    expect(accountsGroup.querySelectorAll('[class*="grid-rows-[0fr]"]')).toHaveLength(0)
     expect(expandedAccountCards[1]).toHaveAttribute('data-product-card-separator', 'true')
 
     const interestRail = container.querySelector('[data-home-interest-carousel] [data-home-carousel-rail]') as HTMLElement
@@ -253,24 +259,20 @@ describe('2027 Home Transformation', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Credits' }))
     const creditCardsGroup = container.querySelector('[data-home-product-group="cards"]') as HTMLElement
-    const loansGroup = container.querySelector('[data-home-transformation-group="transformation-group-loans-mortgages"]') as HTMLElement
-    const loanList = loansGroup.querySelector('[data-home-loan-list]') as HTMLElement
-    const loanCards = loanList.querySelectorAll('[data-home-loan-card]')
     expect(creditCardsGroup.querySelector('[data-home-product-group-header="static"]')).toHaveTextContent('Credit Cards')
-    const loansHeader = screen.getByRole('button', { name: /^Loans & Mortgages$/ })
-    expect(loansHeader).toHaveAttribute('data-home-product-group-header', 'compact')
-    expect(loansHeader).toHaveAttribute('aria-expanded', 'false')
-    expect(loanList).toHaveClass('overflow-hidden', 'rounded-[8px]')
-    expect(loanList).toHaveClass('relative', 'z-10')
-    expect(loanCards).toHaveLength(1)
-    expect(loanCards[0]).not.toHaveClass('rounded-[8px]')
-    expect(loansGroup.querySelector('[data-home-product-stack-preview]')).toBeInTheDocument()
 
-    fireEvent.click(loansHeader)
-    expect(loansHeader).toHaveAttribute('aria-expanded', 'true')
-    expect(loansGroup.querySelectorAll('[data-home-loan-card]')).toHaveLength(2)
-    expect(loansGroup.querySelectorAll('[data-home-loan-card]')[1]).toHaveClass('border-t-[0.5px]', 'border-[var(--uc-border-muted)]')
-    expect(loansGroup.querySelector('[data-home-product-stack-preview]')).not.toBeInTheDocument()
+    // A consumer loan and a mortgage answer different questions, so each gets its own group:
+    // one card apiece, headed statically, with no collapsed stack to peek out from under.
+    for (const [id, cardName] of [['loans', 'Personal Loan'], ['mortgages', 'Mortgage Loan']] as const) {
+      const group = container.querySelector(`[data-home-transformation-group="transformation-group-${id}"]`) as HTMLElement
+      const list = group.querySelector('[data-home-loan-list]') as HTMLElement
+      expect(group.querySelector('[data-home-product-group-header="static"]')).toBeInTheDocument()
+      expect(list).toHaveClass('overflow-hidden', 'rounded-[8px]')
+      expect(list).not.toHaveClass('relative', 'z-10')
+      expect(list.querySelectorAll('[data-home-loan-card]')).toHaveLength(1)
+      expect(list).toHaveTextContent(cardName)
+      expect(group.querySelector('[data-home-product-stack-preview]')).not.toBeInTheDocument()
+    }
 
     fireEvent.click(screen.getByRole('tab', { name: 'Insurances' }))
     const insuranceHeader = screen.getByRole('button', { name: /^Insurance$/ })
@@ -294,7 +296,7 @@ describe('2027 Home Transformation', () => {
     const stackPreview = accountsGroup.querySelector('[data-home-product-stack-preview]') as HTMLElement
 
     expect(summary).toHaveAttribute('data-home-summary-variant', 'baseline')
-    expect(summary).toHaveClass('w-full', 'h-[145.25px]', 'min-h-[145.25px]', 'rounded-[8px]', 'overflow-hidden', 'flex', 'relative', 'bg-[#94B1BA]', 'px-[24px]', 'py-[15px]')
+    expect(summary).toHaveClass('w-full', 'h-[145.25px]', 'min-h-[145.25px]', 'rounded-[8px]', 'overflow-hidden', 'flex', 'relative', 'bg-[var(--uc-summary-accounts)]', 'px-[24px]', 'py-[15px]')
     expect(summary.querySelector('[data-home-summary-content]')).toHaveClass('relative', 'z-10', 'flex-1', 'flex', 'flex-col')
     expect(summary.querySelector('[data-home-summary-primary-amount]')).toHaveClass('text-[28px]', 'font-bold')
     expect(summary.querySelector('[data-home-summary-art-container]')).toHaveClass('absolute', 'top-[24px]', 'right-0', 'w-[96px]')
@@ -359,21 +361,23 @@ describe('2027 Home Transformation', () => {
     expect(maturityAmount).toHaveClass('inline-flex', 'items-baseline', 'whitespace-nowrap', 'text-[14px]', 'font-normal')
   })
 
+  // The approved pastels now live behind per-tab tokens so each panel also has a dark
+  // expression; pinning the hex here would forbid the dark one.
   it('uses the approved color palette for every Evo summary banner', () => {
     const { container } = renderHome('CZ', 'release-future-evo-2027')
     const summary = (tab: 'accounts' | 'savings' | 'credits' | 'insurance') =>
       container.querySelector(`[data-home-transformation-summary="${tab}"]`)
 
-    expect(summary('accounts')).toHaveClass('bg-[#94B1BA]')
+    expect(summary('accounts')).toHaveClass('bg-[var(--uc-summary-accounts)]')
 
     fireEvent.click(screen.getByRole('tab', { name: 'Savings' }))
-    expect(summary('savings')).toHaveClass('bg-[#DBE0D1]')
+    expect(summary('savings')).toHaveClass('bg-[var(--uc-summary-savings)]')
 
     fireEvent.click(screen.getByRole('tab', { name: 'Credits' }))
-    expect(summary('credits')).toHaveClass('bg-[#D9B4AE]')
+    expect(summary('credits')).toHaveClass('bg-[var(--uc-summary-credits)]')
 
     fireEvent.click(screen.getByRole('tab', { name: 'Insurances' }))
-    expect(summary('insurance')).toHaveClass('bg-[#DED7EA]')
+    expect(summary('insurance')).toHaveClass('bg-[var(--uc-summary-insurance)]')
   })
 
   it('keeps loan and insurance campaigns distinct in both copy and imagery', () => {

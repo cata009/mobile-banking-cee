@@ -226,7 +226,7 @@ export default function PfmCategoryDetailScreen({
                     transaction={transaction}
                     formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
                     currency={activeSummary.currency}
-                    positiveAmountClassName={release === "release-future-evo-2027" ? "text-[#3D7D43]" : undefined}
+                    positiveAmountClassName={release === "release-future-evo-2027" ? "text-[var(--uc-green-olive)]" : undefined}
                     avatarPresentation="category"
                     onClick={(selectedTransaction) => onTransactionClick?.(
                       selectedTransaction as SpendingAnalyticsTransaction,

@@ -474,10 +474,10 @@ function CalendarRangePanel({
             row: "mt-[2px] grid w-full grid-cols-7",
             cell: "relative grid h-[44px] min-w-0 place-items-center p-0 text-center",
             day: "grid h-[40px] w-full min-w-0 place-items-center rounded-none border-0 bg-transparent p-0 text-[14px] font-bold text-[var(--uc-text)]",
-            day_range_start: "day-range-start rounded-l-full bg-[var(--uc-action)] text-[var(--uc-static-white)]",
-            day_range_end: "day-range-end rounded-r-full bg-[var(--uc-action)] text-[var(--uc-static-white)]",
-            day_selected: "bg-[var(--uc-action)] text-[var(--uc-static-white)]",
-            day_range_middle: "rounded-none bg-[var(--uc-action)] text-[var(--uc-static-white)]",
+            day_range_start: "day-range-start rounded-l-full bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]",
+            day_range_end: "day-range-end rounded-r-full bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]",
+            day_selected: "bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]",
+            day_range_middle: "rounded-none bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]",
             day_today: "border border-[var(--uc-text)]",
             day_outside: "text-[var(--uc-text-muted)] opacity-40",
             day_disabled: "text-[var(--uc-text-muted)] opacity-30",
@@ -486,7 +486,7 @@ function CalendarRangePanel({
         <div className="mt-auto flex items-center gap-[24px] pb-[15px]">
           <button type="button" onClick={selectToday} className="h-[48px] text-[12px] font-bold text-[var(--uc-action)]">TODAY</button>
           <button type="button" onClick={() => setRange(undefined)} className="h-[48px] text-[12px] font-bold text-[var(--uc-action)]">RESET</button>
-          <button type="button" disabled={!range?.from || !range.to} onClick={confirmRange} className="ml-auto h-[48px] w-[172px] rounded-[4px] bg-[var(--uc-action)] text-[18px] font-bold text-[var(--uc-static-white)] disabled:opacity-40">Confirm</button>
+          <button type="button" disabled={!range?.from || !range.to} onClick={confirmRange} className="ml-auto h-[48px] w-[172px] rounded-[4px] bg-[var(--uc-action-strong)] text-[18px] font-bold text-[var(--uc-static-white)] disabled:opacity-40">Confirm</button>
         </div>
       </div>
     </div>
@@ -680,7 +680,7 @@ function FilterScaffold({
           <button
             type="button"
             onClick={onApply}
-            className="h-[48px] w-full rounded-[4px] bg-[var(--uc-action)] text-[18px] font-bold text-[var(--uc-static-white)]"
+            className="h-[48px] w-full rounded-[4px] bg-[var(--uc-action-strong)] text-[18px] font-bold text-[var(--uc-static-white)]"
           >
             Apply
           </button>
@@ -717,7 +717,7 @@ function InfoScreen({
         <button
           type="button"
           onClick={onBack}
-          className="h-[48px] w-full rounded-[4px] bg-[var(--uc-action)] text-[18px] font-bold text-[var(--uc-static-white)]"
+          className="h-[48px] w-full rounded-[4px] bg-[var(--uc-action-strong)] text-[18px] font-bold text-[var(--uc-static-white)]"
         >
           Ok, got it
         </button>

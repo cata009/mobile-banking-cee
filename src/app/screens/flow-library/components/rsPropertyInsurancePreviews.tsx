@@ -896,7 +896,7 @@ function DurationPicker({ value, onChange }: { value: DurationId; onChange: (id:
             onClick={() => onChange(duration.id as DurationId)}
             className={`flex-1 rounded-[8px] border py-[10px] text-center uc-type-n5-strong transition-colors ${
               selected
-                ? "border-[var(--uc-action)] bg-[var(--uc-action)] text-[var(--uc-text-inverse)]"
+                ? "border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
                 : "border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)]"
             }`}
           >

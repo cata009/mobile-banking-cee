@@ -1,6 +1,30 @@
 import { useEffect, useRef, useState } from 'react';
-import { AppIcon, type IconName } from '@/app/components/icons';
+import { AppIcon, ICON_REGISTRY, type IconName } from '@/app/components/icons';
 import { useLanguage } from '@/app/contexts/LanguageContext';
+
+/**
+ * Every nav glyph is drawn at this many pixels per viewBox unit.
+ *
+ * Sizing by a shared 22px box instead would shrink any glyph that is wider than it is tall:
+ * `nav-payments` spans 24 units across and would land at 22×15 next to square marks drawn
+ * at 22×22, reading as a smaller, thinner icon. Scaling by unit keeps the stroke weight
+ * identical whatever the mark's aspect.
+ */
+const NAV_GLYPH_SCALE = 22 / 20;
+
+function navGlyphSize(name: IconName) {
+  const definition = ICON_REGISTRY[name];
+  const [, , viewBoxWidth, viewBoxHeight] = definition.source === 'custom'
+    ? definition.viewBox.split(/s+/).map(Number)
+    : [0, 0, 20, 20];
+
+  if (!viewBoxWidth || !viewBoxHeight) return { width: 22, height: 22 };
+
+  return {
+    width: Math.round(viewBoxWidth * NAV_GLYPH_SCALE * 10) / 10,
+    height: Math.round(viewBoxHeight * NAV_GLYPH_SCALE * 10) / 10,
+  };
+}
 
 export type App2027PrimaryNavigationItem =
   | 'home'
@@ -74,7 +98,7 @@ export default function App2027PrimaryNavigation({
   return (
     <nav
       aria-label={ariaLabel}
-      className={`mx-auto flex h-[68px] w-[calc(100%-12px)] max-w-[540px] items-stretch rounded-[26px] border border-[color-mix(in_srgb,var(--uc-static-white)_55%,var(--uc-border-muted))] bg-[color-mix(in_srgb,var(--uc-bottom-bar-bg)_78%,transparent)] px-[4px] pb-[5px] pt-[4px] shadow-[0_14px_40px_rgb(var(--uc-shadow-rgb)/0.18),0_2px_6px_rgb(var(--uc-shadow-rgb)/0.06),inset_0_1px_0_rgb(var(--uc-static-white-rgb)/0.45),inset_0_-1px_0_rgb(var(--uc-shadow-rgb)/0.04)] backdrop-blur-[32px] backdrop-saturate-[1.8] ${className}`.trim()}
+      className={`mx-auto flex h-[68px] w-[calc(100%-12px)] max-w-[540px] items-stretch rounded-[26px] border border-[var(--uc-glass-hairline)] bg-[color-mix(in_srgb,var(--uc-bottom-bar-bg)_78%,transparent)] px-[4px] pb-[5px] pt-[4px] shadow-[0_14px_40px_rgb(var(--uc-shadow-rgb)/0.18),0_2px_6px_rgb(var(--uc-shadow-rgb)/0.06),inset_0_1px_0_var(--uc-glass-highlight),inset_0_-1px_0_rgb(var(--uc-shadow-rgb)/0.04)] backdrop-blur-[32px] backdrop-saturate-[1.8] ${className}`.trim()}
       data-app-2027-bottom-navigation
       data-phone-bottom-navigation="true"
       data-nav-selection-motion={selectionMotion ? 'enabled' : undefined}
@@ -99,7 +123,7 @@ export default function App2027PrimaryNavigation({
             type="button"
           >
             <span data-nav-icon className="relative grid size-[24px] shrink-0 place-items-center" aria-hidden="true">
-              <AppIcon name={iconOverrides?.[id] ?? icon} size={22} />
+              <AppIcon name={iconOverrides?.[id] ?? icon} {...navGlyphSize(iconOverrides?.[id] ?? icon)} />
             </span>
             <span className="w-full whitespace-nowrap text-center text-[14px] font-medium leading-[18px] tracking-[-0.012em]">
               {label}

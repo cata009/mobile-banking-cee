@@ -1,10 +1,12 @@
 import type { CSSProperties } from "react";
+import ActionIconBubble from "@/app/components/ActionIconBubble";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 
 interface AccountActionBarProps {
   items?: readonly AccountActionBarItem[];
   align?: AccountActionBarAlignment;
+  iconTreatment?: AccountActionIconTreatment;
   className?: string;
   style?: CSSProperties;
   onDetailsClick?: () => void;
@@ -12,6 +14,13 @@ interface AccountActionBarProps {
 }
 
 export type AccountActionBarAlignment = "start" | "center" | "end" | "between";
+
+/**
+ * "bare" is the original naked glyph, kept for the bars that sit on a white card where a
+ * white roundel would vanish. "bubble" is the Payments OTHER shortcut mark — a 48px neutral
+ * roundel — for the bars that sit on the app background.
+ */
+export type AccountActionIconTreatment = "bare" | "bubble";
 
 export interface AccountActionBarItem {
   id: string;
@@ -28,9 +37,10 @@ function AccountActionItem({
   label,
   onClick,
   ariaLabel,
-  iconColor = "var(--uc-text)",
+  iconColor,
   stretch,
   hidden = false,
+  iconTreatment,
 }: {
   iconName: IconName;
   label: string;
@@ -39,6 +49,7 @@ function AccountActionItem({
   iconColor?: string;
   stretch: boolean;
   hidden?: boolean;
+  iconTreatment: AccountActionIconTreatment;
 }) {
   const normalizedLabel = label.replace(/\s+/g, " ").trim();
 
@@ -49,14 +60,24 @@ function AccountActionItem({
       disabled={hidden}
       tabIndex={hidden ? -1 : undefined}
       aria-hidden={hidden ? "true" : undefined}
-      className={`flex flex-col items-center gap-[4px] ${stretch ? "min-w-0 flex-1" : "w-[82px] shrink-0"} ${hidden ? "pointer-events-none invisible" : ""}`}
+      className={`flex flex-col items-center ${iconTreatment === "bubble" ? "gap-[6px]" : "gap-[4px]"} ${stretch ? "min-w-0 flex-1" : "w-[82px] shrink-0"} ${hidden ? "pointer-events-none invisible" : ""}`}
       aria-label={ariaLabel ?? normalizedLabel}
       data-ds-label={`Account action ${normalizedLabel}`}
     >
-      <span className="flex h-[32px] w-[32px] items-center justify-center" data-ds-label="Account action icon 32x32">
-        <AppIcon name={iconName} color={iconColor} />
-      </span>
-      <span className="uc-type-p2 whitespace-pre-line text-center leading-[15px] text-[var(--uc-text)]">
+      {iconTreatment === "bubble" ? (
+        <ActionIconBubble iconName={iconName} iconColor={iconColor} dataDsLabel="Account action icon 48x48" />
+      ) : (
+        <span className="flex h-[32px] w-[32px] items-center justify-center" data-ds-label="Account action icon 32x32">
+          <AppIcon name={iconName} color={iconColor ?? "var(--uc-text)"} />
+        </span>
+      )}
+      <span
+        className={
+          iconTreatment === "bubble"
+            ? "block w-full overflow-hidden whitespace-pre-line text-center text-[14px] font-normal leading-[16px] text-[var(--uc-text)]"
+            : "uc-type-p2 whitespace-pre-line text-center leading-[15px] text-[var(--uc-text)]"
+        }
+      >
         {label}
       </span>
     </button>
@@ -73,6 +94,7 @@ const ALIGNMENT_CLASS: Record<AccountActionBarAlignment, string> = {
 export default function AccountActionBar({
   items,
   align = "between",
+  iconTreatment = "bare",
   className = "",
   style,
   onDetailsClick,
@@ -105,6 +127,7 @@ export default function AccountActionBar({
           iconColor={item.iconColor}
           hidden={item.hidden}
           stretch={stretchItems}
+          iconTreatment={iconTreatment}
         />
       ))}
     </div>

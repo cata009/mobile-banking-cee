@@ -126,7 +126,7 @@ export default function SavingAccountAddMoneyFlow({
         <div className="flex-1" />
         {schedule ? <p className="mb-[12px] text-center text-[13px] leading-[16px] text-[var(--uc-text-muted)]">Standing order: <b className="text-[var(--uc-text)]">{repeatLabel(schedule.repeat)}, from {formatDate(schedule.startDate)}{schedule.endsOn === "date" && schedule.endDate ? ` until ${formatDate(schedule.endDate)}` : ""}</b></p> : null}
         <div className="flex items-center gap-[8px]">
-          <button type="button" aria-label="Schedule recurring transfer" onClick={() => setScheduleSheetOpen(true)} className={`grid size-[48px] shrink-0 place-items-center rounded-[12px] border ${schedule ? "border-transparent bg-[var(--uc-action)] text-[var(--uc-text-inverse)]" : "border-[var(--uc-border-muted)] bg-[var(--uc-surface)] text-[var(--uc-text)]"}`}><AppIcon name="calendar-days" size={22} color="currentColor" /></button>
+          <button type="button" aria-label="Schedule recurring transfer" onClick={() => setScheduleSheetOpen(true)} className={`grid size-[48px] shrink-0 place-items-center rounded-[12px] border ${schedule ? "border-transparent bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]" : "border-[var(--uc-border-muted)] bg-[var(--uc-surface)] text-[var(--uc-text)]"}`}><AppIcon name="calendar-days" size={22} color="currentColor" /></button>
           <PrimaryButton className="!h-[48px] !flex-1" disabled={!canSubmit} onClick={finish}>{schedule ? "Create standing order" : "Add money"}</PrimaryButton>
         </div>
         <div className="mt-[12px] grid grid-cols-3 gap-[12px]">

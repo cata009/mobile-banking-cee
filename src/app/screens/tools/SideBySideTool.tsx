@@ -118,7 +118,7 @@ export function SideBySideTool() {
               disabled={orderedSelection.length !== 2}
               title="Open the two selected countries in focus mode"
               aria-label="Open focused comparison"
-              className="grid size-[36px] shrink-0 place-items-center rounded-full bg-[var(--uc-action)] text-[var(--uc-static-white)] shadow-sm transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-40"
+              className="grid size-[36px] shrink-0 place-items-center rounded-full bg-[var(--uc-action-strong)] text-[var(--uc-static-white)] shadow-sm transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <AppIcon name="play" size={16} color="currentColor" />
             </button>

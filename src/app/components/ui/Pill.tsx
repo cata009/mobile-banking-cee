@@ -58,7 +58,7 @@ export default function Pill({
         "uc-type-n5-strong flex h-[36px] w-[120px] items-center justify-center rounded-[18px] px-[8px] py-[10px] text-center leading-none tracking-[0]",
         "shadow-[0_2px_2px_rgba(0,0,0,0.2)] transition-[background-color,color,opacity] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]",
         "disabled:pointer-events-none disabled:opacity-50",
-        isPrimary ? "bg-[var(--uc-action)] text-[var(--uc-static-white)]" : "bg-[var(--uc-surface)] text-[var(--uc-text)]",
+        isPrimary ? "bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]" : "bg-[var(--uc-surface)] text-[var(--uc-text)]",
         variant === "secondary" ? "text-[var(--uc-action)]" : null,
         className,
       )}

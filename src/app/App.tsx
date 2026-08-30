@@ -1,8 +1,9 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigationContext, NavigationProvider, type NavigationRoute } from "@/app/contexts/NavigationContext";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useNavigationContext, NavigationProvider } from "@/app/contexts/NavigationContext";
 import { LanguageProvider, useLanguage } from "@/app/contexts/LanguageContext";
 import { DemoProvider, useDemo } from "@/app/state/demoStore";
 import { isFeatureActive } from "@/app/state/featureResolver";
+import { appShellReducer, createAppShellState } from "@/app/state/appShellState";
 import { DemoShell } from "@/app/components/demo/DemoShell";
 import { DemoNavigationSync } from "@/app/components/demo/DemoNavigationSync";
 import LanguageSelector from "@/app/components/LanguageSelector";
@@ -19,6 +20,7 @@ import {
   resolveRouteStatusBarVariant,
 } from "@/app/navigation/routePolicy";
 import { getUnavailableProductRouteFallback } from "@/app/navigation/productRouteAvailability";
+import { isDesignSystemHash, resolveInitialNavigation } from "@/app/navigation/initialNavigation";
 
 // --- Screens (lazy-loaded for code-splitting) ---
 const PreLoginScreen = lazy(() => import("@/app/components/PreLoginScreen"));
@@ -119,25 +121,6 @@ import type { ProductDetailSelection } from "@/app/components/products/ProductCa
 // Panel components
 import PanelOverlay from "@/app/components/PanelOverlay";
 
-const DESIGN_SYSTEM_HASHES = new Set([
-  "overview",
-  "countries",
-  "headers",
-  "navigation",
-  "buttons",
-  "forms",
-  "cards",
-  "products",
-  "overlays",
-  "registry",
-  "templates",
-  "icons",
-  "icon-audit",
-  "typography",
-  "colors",
-  "color-audit",
-]);
-
 export default function App() {
   // Parse the shared deep link once, so the whole provider tree boots into the
   // shared state (product/country/scenario/release/theme/... — see deepLink.ts).
@@ -166,24 +149,11 @@ function AppWithNavigation({
   const { scenario, themeMode } = useDemo();
   const app2027Theme = useApp2027Theme();
   const hashSection = typeof window === "undefined" ? "" : window.location.hash.replace(/^#/, "");
-  const shouldOpenDesignSystem = DESIGN_SYSTEM_HASHES.has(hashSection) || hashSection.startsWith("component/");
-
-  // Determine initial screen: a shared deep link wins, else fall back to the
-  // existing hash/scenario-driven default.
-  const initialScreen = parsedDeepLink?.screen
-    ? parsedDeepLink.screen
-    : shouldOpenDesignSystem
-      ? "design-system"
-      : scenario === "active"
-        ? "homepage"
-        : "prelogin-inactive";
-  const initialCoAppingActive = !shouldOpenDesignSystem && scenario === "active";
-  const initialRoute: NavigationRoute =
-    initialScreen === "card-detail" || initialScreen === "card-details-info" || initialScreen === "card-options"
-      ? { screen: initialScreen, cardId: parsedDeepLink?.cardId }
-      : initialScreen === "account-detail" || initialScreen === "account-details-info" || initialScreen === "account-options"
-        ? { screen: initialScreen, accountId: parsedDeepLink?.accountId }
-        : { screen: initialScreen };
+  const { initialScreen, initialRoute, initialCoAppingActive } = resolveInitialNavigation({
+    parsedDeepLink,
+    scenario,
+    hashSection,
+  });
 
   // Frameless "real device" mode (opened from the Share QR): render the app
   // fullscreen without the desktop demo shell / phone bezel.
@@ -258,14 +228,14 @@ function AppContent({
   });
   const investmentsPortfolioAvailable = isInvestmentsPortfolioAvailable(product, country);
   
-  const [showTerminatePopup, setShowTerminatePopup] = useState(false);
-  const [showPanel, setShowPanel] = useState(false);
-  // Track de unde am pornit co-apping session (pentru a ne întoarce corect)
-  const [coAppingOriginScreen, setCoAppingOriginScreen] = useState<'prelogin-inactive' | 'prelogin-active'>('prelogin-inactive');
-  // Track edge loading animation state
-  const [showEdgeAnimation, setShowEdgeAnimation] = useState(false);
-  // Track if FAB should slide in
-  const [showFABSlideIn, setShowFABSlideIn] = useState(false);
+  const [shellState, dispatchShell] = useReducer(appShellReducer, undefined, createAppShellState);
+  const {
+    showTerminatePopup,
+    showPanel,
+    coAppingOriginScreen,
+    showEdgeAnimation,
+    showFABSlideIn,
+  } = shellState;
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(parsedDeepLink?.accountId ?? null);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(parsedDeepLink?.cardId ?? null);
   const [selectedFlowPreviewId, setSelectedFlowPreviewId] = useState<FlowPreviewId>(parsedDeepLink?.flowId ?? "ro-round-up");
@@ -369,7 +339,7 @@ function AppContent({
   useEffect(() => {
     const syncDesignSystemHash = () => {
       const hashSection = window.location.hash.replace(/^#/, "");
-      if ((DESIGN_SYSTEM_HASHES.has(hashSection) || hashSection.startsWith("component/")) && currentScreen !== "design-system") {
+      if (isDesignSystemHash(hashSection) && currentScreen !== "design-system") {
         navigateTo("design-system");
       }
     };
@@ -438,12 +408,12 @@ function AppContent({
 
   // Handler pentru click pe butonul OTHER - deschide panel-ul
   const handleOtherClick = () => {
-    setShowPanel(true);
+    dispatchShell({ type: "open-panel" });
   };
 
   // Handler pentru închidere panel
   const handleClosePanel = () => {
-    setShowPanel(false);
+    dispatchShell({ type: "close-panel" });
   };
 
   // Handler pentru click pe language selector
@@ -460,42 +430,36 @@ function AppContent({
   const handleStartCoApping = () => {
     // Salvează de unde am pornit (inactive sau active)
     const originScreen = currentScreen === 'prelogin-inactive' ? 'prelogin-inactive' : 'prelogin-active';
-    setCoAppingOriginScreen(originScreen);
-    
-    setShowPanel(false); // Close panel first
+    dispatchShell({ type: "start-coapping", origin: originScreen });
     navigateTo("co-apping-session");
   };
 
   // Handler pentru continuare din co-apping session
   const handleContinueCoApping = () => {
     setCoAppingActive(true);
-    // Start edge loading animation
-    setShowEdgeAnimation(true);
-    // Enable FAB slide in
-    setShowFABSlideIn(true);
+    dispatchShell({ type: "continue-coapping" });
     // Înapoi la ecranul de unde am venit (nu homepage!)
     navigateTo(coAppingOriginScreen);
   };
 
   // Handler when animation completes
   const handleAnimationComplete = () => {
-    setShowEdgeAnimation(false);
-    setShowFABSlideIn(false);
+    dispatchShell({ type: "animation-complete" });
   };
   
   // Handler pentru click pe butonul floating verde
   const handleFloatingButtonClick = () => {
-    setShowTerminatePopup(true);
+    dispatchShell({ type: "open-termination" });
   };
 
   // Handler pentru anulare terminare sesiune
   const handleCancelTermination = () => {
-    setShowTerminatePopup(false);
+    dispatchShell({ type: "close-termination" });
   };
 
   // Handler pentru confirmare terminare sesiune
   const handleConfirmTermination = () => {
-    setShowTerminatePopup(false);
+    dispatchShell({ type: "close-termination" });
     setCoAppingActive(false);
   };
 

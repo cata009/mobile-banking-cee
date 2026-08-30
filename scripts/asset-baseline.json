@@ -1,6 +1,6 @@
 {
-  "baselineCommit": "f95b6af",
-  "baselineNote": "Re-locked on 2026-08-18 to reconcile the complete tracked asset inventory already present on main. This release does not add, delete, replace, or optimize any image file.",
-  "assetCount": 230,
-  "pathBlobSha256Aggregate": "3c4bcc2a0afe73869b11889233a15957262ef36180d15e74213a1110ce2883b7"
+  "baselineCommit": "bc496cb",
+  "baselineNote": "Re-locked after the approved investments bulk-signing flow added the referenced reject-warning.svg and sign-multiple.svg assets. No existing image file was deleted, replaced, or optimized.",
+  "assetCount": 232,
+  "pathBlobSha256Aggregate": "926a18643179648c22387d2adf2783fd41edeae249ddc57f8ca93bfcd9c80bc7"
 }

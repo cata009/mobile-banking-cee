@@ -130,7 +130,7 @@ export function AnalyticsOverviewTemplate() {
             <span className="uc-type-n2 leading-[22px] text-[var(--uc-text)]">Card<br />Transaction</span>
           </div>
         </section>
-        <section className="mx-[33px] mt-[26px] rounded-[6px] bg-[var(--uc-action)] p-[22px] font-['UniCredit',sans-serif] text-[var(--uc-static-white)]">
+        <section className="mx-[33px] mt-[26px] rounded-[6px] bg-[var(--uc-action-strong)] p-[22px] font-['UniCredit',sans-serif] text-[var(--uc-static-white)]">
           <div className="grid grid-cols-[52px_1fr_24px] gap-[12px]">
             <span className="grid size-[42px] place-items-center rounded-full bg-[var(--uc-static-white)] text-[var(--uc-action)]">
               <AppIcon name="info-circle" color="currentColor" />
@@ -200,7 +200,7 @@ export function TemplateShortcut({
       interactive={interactive}
       className="flex w-[72px] flex-col items-center gap-[8px] text-center font-['UniCredit',sans-serif]"
     >
-      <span className="grid size-[46px] place-items-center rounded-full bg-[var(--uc-action)] text-[var(--uc-static-white)]">
+      <span className="grid size-[46px] place-items-center rounded-full bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]">
         <span className="grid size-[32px] place-items-center">
           <AppIcon name={icon} strokeWidth={2.8} color="currentColor" />
         </span>
@@ -708,7 +708,7 @@ export function AccountSelectionPanelTemplate({ interactive }: { interactive: bo
           {interactive ? (
             <PrimaryButton className="w-full">Select</PrimaryButton>
           ) : (
-            <div className="flex h-[48px] w-full items-center justify-center rounded bg-[var(--uc-action)] font-['UniCredit',sans-serif] text-base font-bold text-[var(--uc-static-white)]">
+            <div className="flex h-[48px] w-full items-center justify-center rounded bg-[var(--uc-action-strong)] font-['UniCredit',sans-serif] text-base font-bold text-[var(--uc-static-white)]">
               Select
             </div>
           )}
@@ -883,7 +883,7 @@ export function ProductSelectionTemplate({ interactive }: { interactive: boolean
           {interactive ? (
             <PrimaryButton className="w-full">Access</PrimaryButton>
           ) : (
-            <div className="flex h-[48px] w-full items-center justify-center rounded bg-[var(--uc-action)] font-['UniCredit',sans-serif] text-base font-bold text-[var(--uc-static-white)]">
+            <div className="flex h-[48px] w-full items-center justify-center rounded bg-[var(--uc-action-strong)] font-['UniCredit',sans-serif] text-base font-bold text-[var(--uc-static-white)]">
               Access
             </div>
           )}
@@ -1056,7 +1056,7 @@ export function FeedbackStatusTemplate({
         {interactive ? (
           <PrimaryButton className="w-full">{config.buttonLabel}</PrimaryButton>
         ) : (
-          <div className="flex h-[48px] w-full items-center justify-center rounded bg-[var(--uc-action)] font-['UniCredit',sans-serif] text-base font-bold text-[var(--uc-static-white)]">
+          <div className="flex h-[48px] w-full items-center justify-center rounded bg-[var(--uc-action-strong)] font-['UniCredit',sans-serif] text-base font-bold text-[var(--uc-static-white)]">
             {config.buttonLabel}
           </div>
         )}

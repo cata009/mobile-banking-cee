@@ -6,7 +6,6 @@ import NewPaymentActionListItem from "@/app/components/payments/NewPaymentAction
 import NewPaymentDiscoverBanner from "@/app/components/payments/NewPaymentDiscoverBanner";
 import PaymentHeroCard from "@/app/components/payments/PaymentHeroCard";
 import PaymentOtherShortcut from "@/app/components/payments/PaymentOtherShortcut";
-import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import ExchangeRatesScreen from "@/app/screens/payments/ExchangeRatesScreen";
 import PaymentTemplatesScreen from "@/app/screens/payments/PaymentTemplatesScreen";
 import { useLanguage } from "@/app/contexts/LanguageContext";
@@ -52,7 +51,8 @@ function PaymentsHeader({
 
   return (
     <div className="w-full bg-[var(--uc-app-bg)]">
-      <div className="px-[24px] pb-[20px]">
+      {/* Matches the 20px gutter the payment cards below use. */}
+      <div className="px-[20px] pb-[20px]">
         <div className="flex min-h-[32px] items-start gap-[8px]">
           <h1 className="uc-type-h1 flex-1 min-w-0 text-[var(--uc-text)]">
             {title}
@@ -261,8 +261,9 @@ export default function PaymentsScreen({
         </div>
 
         <section className="px-[20px] pt-[16px]">
-          <SectionHeadingDivider title={otherTitle} />
-          <div className="overflow-x-auto overflow-y-hidden scrollbar-hide pt-[8px]">
+          {/* Same group heading as the home product sections — a 24px title, no rule. */}
+          <h2 className="uc-type-l1 mb-[12px] text-[var(--uc-text)]">{otherTitle}</h2>
+          <div className="overflow-x-auto overflow-y-hidden scrollbar-hide">
             <div className="flex w-max gap-[18px] pr-[20px]">
               {localizedOtherItems.map((item) => (
                 <PaymentOtherShortcut key={item.id} item={item} onClick={handleOtherPaymentActionClick} />

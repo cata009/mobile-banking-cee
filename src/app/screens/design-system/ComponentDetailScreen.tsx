@@ -139,7 +139,7 @@ export default function ComponentDetailScreen({
           data-inspector-ui="true"
           className={`rounded-[6px] px-3 py-2 font-['UniCredit:Bold',sans-serif] text-[14px] transition-colors ${
             inspectMode
-              ? "bg-[var(--uc-action)] text-[var(--uc-static-white)]"
+              ? "bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
               : "border border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)]"
           }`}
         >

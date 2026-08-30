@@ -211,7 +211,7 @@ describe('transactions screen', () => {
     renderScreen()
 
     const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-transactions-month-section] > div'))
-      .filter((element) => element.className.includes('rounded-[22px]'))
+      .filter((element) => element.className.includes('rounded-[8px]'))
 
     expect(cards).toHaveLength(monthSections().length)
     cards.forEach((card) => {
@@ -252,6 +252,7 @@ describe('transactions screen', () => {
     const positiveAmount = document.querySelector<HTMLElement>('[data-transaction-amount="positive"]')
     if (!positiveAmount) throw new Error('Expected a positive transaction amount')
 
-    expect(positiveAmount).toHaveClass('text-[var(--uc-green-success)]')
+    // The same token the home activity list and the statement rows use.
+    expect(positiveAmount).toHaveClass('text-[var(--uc-green-olive)]')
   })
 })

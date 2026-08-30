@@ -355,7 +355,7 @@ function BulkReviewScreen({
               type="button"
               onClick={onPrevious}
               aria-label="Previous draft"
-              className="grid size-[32px] place-items-center rounded-full bg-[var(--uc-action)] pr-[2px] text-[var(--uc-text-inverse)] transition-colors hover:bg-[var(--uc-action-hover)]"
+              className="grid size-[32px] place-items-center rounded-full bg-[var(--uc-action-strong)] pr-[2px] text-[var(--uc-static-white)] transition-colors hover:bg-[var(--uc-action-hover)]"
             >
               <AppIcon name="back-heavy" size={16} color="currentColor" />
             </button>
@@ -374,7 +374,7 @@ function BulkReviewScreen({
               type="button"
               onClick={onNext}
               aria-label="Next draft"
-              className="grid size-[32px] place-items-center rounded-full bg-[var(--uc-action)] pl-[2px] text-[var(--uc-text-inverse)] transition-colors hover:bg-[var(--uc-action-hover)]"
+              className="grid size-[32px] place-items-center rounded-full bg-[var(--uc-action-strong)] pl-[2px] text-[var(--uc-static-white)] transition-colors hover:bg-[var(--uc-action-hover)]"
             >
               <span className="rotate-180"><AppIcon name="back-heavy" size={16} color="currentColor" /></span>
             </button>

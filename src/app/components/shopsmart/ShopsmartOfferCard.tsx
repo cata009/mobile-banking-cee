@@ -64,7 +64,7 @@ export default function ShopsmartOfferCard({
   const pillClass =
     pillTone === "white"
       ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-[0_0_4px_rgba(0,0,0,0.25)]"
-      : "bg-[var(--uc-action)] text-[var(--uc-static-white)] shadow-[0_0_4px_rgba(0,0,0,0.25)]";
+      : "bg-[var(--uc-action-strong)] text-[var(--uc-static-white)] shadow-[0_0_4px_rgba(0,0,0,0.25)]";
 
   return (
     <Root

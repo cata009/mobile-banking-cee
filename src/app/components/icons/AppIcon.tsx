@@ -27,6 +27,9 @@ const NON_STANDARD_ICON_NAMES = new Set([
   "robo-goal-settings",
   // Non-square glyph — forcing it into the 20×20 standard box would letterbox it
   "redo-payment",
+  "exchange-rates",
+  "investment-trend-up",
+  "investment-trend-down",
   "request-chargeback",
   "investment-ex-ante",
   "trade-buy",

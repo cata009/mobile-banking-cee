@@ -3,6 +3,13 @@ import type { AccountIdentity } from "@/data/accountDetails";
 import type { ProductType } from "@/data/products";
 import { AppIcon } from "@/app/components/icons";
 
+/**
+ * The lift on a swipeable carousel card. Exported because the Evo spending statement card
+ * rides the same rail pattern and has to read as the same object.
+ */
+export const CAROUSEL_CARD_SHADOW =
+  "0 16px 32px rgb(var(--uc-shadow-rgb) / 0.08), 0 3px 10px rgb(var(--uc-shadow-rgb) / 0.05)";
+
 export interface AccountBalanceCardProps {
   account: AccountIdentity;
   availableInteger: string;
@@ -68,7 +75,7 @@ export default function AccountBalanceCard({
         onClick ? "cursor-pointer" : ""
       } ${active ? "" : "opacity-95"}`}
       draggable={false}
-      style={{ boxShadow: "0 16px 32px rgb(var(--uc-shadow-rgb) / 0.08), 0 3px 10px rgb(var(--uc-shadow-rgb) / 0.05)" }}
+      style={{ boxShadow: CAROUSEL_CARD_SHADOW }}
       data-ds-label="AccountBalanceCard 311x197"
     >
       <div className="flex w-full flex-col">

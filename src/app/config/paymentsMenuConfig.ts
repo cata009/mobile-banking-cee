@@ -229,11 +229,12 @@ const BA_BL_PRIMARY_ITEMS: readonly PaymentHeroItem[] = [
   },
 ];
 
+// Sentence case, like the account actions these shortcuts now share their mark with.
 const DEFAULT_OTHER_ITEMS: readonly PaymentOtherItem[] = [
-  { id: "create-qr-code", label: "CREATE QR\nCODE", icon: "qr" },
-  { id: "templates", label: "TEMPLATES", icon: "templates" },
-  { id: "card-repayment", label: "CARD\nREPAYMENT", icon: "card" },
-  { id: "exchange-rates", label: "EXCHANGE\nRATES", icon: "exchange" },
+  { id: "create-qr-code", label: "Create QR\ncode", icon: "qr" },
+  { id: "templates", label: "Templates", icon: "templates" },
+  { id: "card-repayment", label: "Card\nrepayment", icon: "card" },
+  { id: "exchange-rates", label: "Exchange\nrates", icon: "exchange" },
 ];
 
 const RO_OTHER_ITEMS: readonly PaymentOtherItem[] = [
@@ -337,7 +338,7 @@ function createPaymentsMenuConfig(
   return {
     title: "Payments",
     primaryItems,
-    otherTitle: options.otherTitle ?? "OTHER",
+    otherTitle: options.otherTitle ?? "Other",
     otherTitleTranslationKey: options.otherTitleTranslationKey,
     otherItems,
     heroSheets: createHeroSheets(country, primaryItems),
@@ -347,7 +348,7 @@ function createPaymentsMenuConfig(
 export const PAYMENTS_MENU_CONFIG: Record<CountryId, PaymentsMenuConfig> = {
   RO: createPaymentsMenuConfig("RO", {
     primaryItems: RO_PRIMARY_ITEMS,
-    otherTitle: "SHORTCUTS",
+    otherTitle: "Shortcuts",
     otherTitleTranslationKey: null,
     otherItems: RO_OTHER_ITEMS,
   }),

@@ -12,7 +12,7 @@ import TransactionMonthRail, {
 import { AppIcon } from "@/app/components/icons";
 import { getCardMerchantEnrichment } from "@/app/components/merchants/merchantEnrichment";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
-import { formatMoneyNumber, getCountryConfig } from "@/app/registry/countryConfig";
+import { formatMoneyNumber, formatSignedMoneyNumber, getCountryConfig } from "@/app/registry/countryConfig";
 import { useDemo } from "@/app/state/demoStore";
 import type { CardTransactionMerchantEnrichment } from "@/app/screens/payments/DomesticPaymentFlowScreens";
 import {
@@ -341,7 +341,7 @@ export default function TransactionsScreen({
             >
               <AccountTransactionMonthDivider
                 title={section.monthTitle}
-                total={section.transactions.length > 1 ? formatMoneyNumber(section.total, country) : undefined}
+                total={section.transactions.length > 1 ? formatSignedMoneyNumber(section.total, country) : undefined}
                 currency={config.currency}
                 dateSeparator
               />
@@ -352,7 +352,9 @@ export default function TransactionsScreen({
                   transaction={transaction}
                   formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
                   currency={config.currency}
+                  accountLabel={selectedScopeId === ALL_ACCOUNTS_SCOPE ? productByTransactionId.get(transaction.id)?.name : undefined}
                   evo2027={release === "release-future-evo-2027"}
+                  positiveAmountClassName={release === "release-future-evo-2027" ? "text-[var(--uc-green-olive)]" : undefined}
                   showDate={release !== "release-future-evo-2027"}
                   onClick={openTransaction}
                 />

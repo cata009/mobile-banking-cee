@@ -275,7 +275,7 @@ export function InvestmentSecurityListScreen({
             </label>
           ))}
           <button type="button" onClick={() => { clearFilters(); setFiltersOpen(false); }} className="mt-[16px] h-[48px] w-full rounded-[4px] border border-[var(--uc-action)] text-[16px] font-bold text-[var(--uc-action)]">Remove filters</button>
-          <button type="button" onClick={() => setFiltersOpen(false)} className="mt-[8px] h-[48px] w-full rounded-[4px] bg-[var(--uc-action)] text-[18px] font-bold text-[var(--uc-static-white)]">Show products</button>
+          <button type="button" onClick={() => setFiltersOpen(false)} className="mt-[8px] h-[48px] w-full rounded-[4px] bg-[var(--uc-action-strong)] text-[18px] font-bold text-[var(--uc-static-white)]">Show products</button>
         </BottomSheet>
       ) : null}
     </div>

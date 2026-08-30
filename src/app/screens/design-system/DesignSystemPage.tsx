@@ -236,7 +236,7 @@ export default function DesignSystemPage() {
                     href={`#${id}`}
                     className={`rounded-full border px-4 py-2 text-left text-[13px] transition-colors ${
                       isActive
-                        ? "border-[var(--uc-action)] bg-[var(--uc-action)] text-[var(--uc-static-white)]"
+                        ? "border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
                         : "border-[var(--uc-border)] bg-[var(--uc-app-bg)] text-[var(--uc-text-muted)] hover:border-[var(--uc-action)]"
                     }`}
                   >

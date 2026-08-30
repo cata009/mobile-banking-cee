@@ -69,7 +69,7 @@ export default function TransactionMonthRail({
             onClick={() => onMonthSelect(month.key)}
             className={`flex h-[38px] shrink-0 items-center justify-center rounded-full px-[14px] text-[16px] leading-[20px] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${
               active
-                ? "bg-[var(--uc-action)] font-medium text-[var(--uc-static-white)]"
+                ? "bg-[var(--uc-action-strong)] font-medium text-[var(--uc-static-white)]"
                 : "bg-[var(--uc-surface-subtle)] font-normal text-[var(--uc-text-muted)]"
             }`}
           >

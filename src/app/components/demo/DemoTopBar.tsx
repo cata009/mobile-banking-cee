@@ -611,7 +611,7 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
                       onClick={handleCopyShareLink}
                       className={`mt-3 flex h-[36px] w-full items-center justify-center gap-2 rounded-lg text-[13px] font-['UniCredit:Bold',sans-serif] transition-colors ${
                         shareCopied
-                          ? "bg-[var(--uc-action)] text-[var(--uc-static-white)]"
+                          ? "bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
                           : "bg-[var(--uc-surface-muted)] text-[var(--uc-text)] hover:bg-[color-mix(in_srgb,var(--uc-action)_12%,var(--uc-surface-muted))] hover:text-[var(--uc-action)]"
                       }`}
                     >

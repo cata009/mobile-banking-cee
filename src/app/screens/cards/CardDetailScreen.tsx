@@ -11,7 +11,7 @@ import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import { AppIcon } from "@/app/components/icons";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
-import { getCountryConfig, formatMoneyNumber } from "@/app/registry/countryConfig";
+import { getCountryConfig, formatMoneyNumber, formatSignedMoneyNumber } from "@/app/registry/countryConfig";
 import { maskFormattedAmount } from "@/app/utils/amountPrivacy";
 import { formatMaskedCardNumber } from "@/app/utils/cardNumber";
 import { useProducts } from "@/hooks/useProducts";
@@ -500,7 +500,7 @@ export default function CardDetailScreen({
         </div>
 
         {/* Quick actions */}
-        <AccountActionBar items={cardQuickActions} align="between" />
+        <AccountActionBar items={cardQuickActions} align="between" iconTreatment="bubble" />
       </div>
 
       {/* ── Transactions section ─────────────────────────────────── */}
@@ -556,7 +556,7 @@ export default function CardDetailScreen({
                         displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
                         leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
                         categoryIconVariant={categoryIconVariant}
-                        positiveAmountClassName={release === "release-future-evo-2027" ? "text-[#3D7D43]" : undefined}
+                        positiveAmountClassName={release === "release-future-evo-2027" ? "text-[var(--uc-green-olive)]" : undefined}
                         evo2027={usesEvoGroupCards}
                         showDate={!usesEvoGroupCards}
                         onClick={(selectedTransaction) => onTransactionClick?.(selectedTransaction, activeCard, getCardMerchantEnrichment(selectedTransaction, country))}
@@ -568,15 +568,17 @@ export default function CardDetailScreen({
           {transactionGroups.length > 0 ? (
             transactionGroups.map((group, index) => (
               <div key={group.monthTitle} className={index > 0 && !usesEvoGroupCards ? "pt-[16px]" : undefined}>
-                <AccountTransactionMonthDivider
-                  title={group.monthTitle}
-                  currency={config.currency}
-                />
+                {usesEvoGroupCards ? null : (
+                  <AccountTransactionMonthDivider
+                    title={group.monthTitle}
+                    currency={config.currency}
+                  />
+                )}
                 {usesEvoGroupCards ? groupAccountTransactionsByDate(group.transactions).map((dateGroup) => (
                   <div key={dateGroup.dateKey} data-transaction-date-group={dateGroup.dateKey}>
                     <AccountTransactionMonthDivider
                       title={dateGroup.dateTitle}
-                      total={dateGroup.transactions.length > 1 ? formatMoneyNumber(dateGroup.dailyTotal, country) : undefined}
+                      total={dateGroup.transactions.length > 1 ? formatSignedMoneyNumber(dateGroup.dailyTotal, country) : undefined}
                       currency={config.currency}
                       dateSeparator
                     />
@@ -590,7 +592,7 @@ export default function CardDetailScreen({
                           displayLabel={transactionRowPresentation?.displayLabel?.(tx)}
                           leadingVisual={transactionRowPresentation?.leadingVisual?.(tx)}
                           categoryIconVariant={categoryIconVariant}
-                          positiveAmountClassName="text-[#3D7D43]"
+                          positiveAmountClassName="text-[var(--uc-green-olive)]"
                           evo2027
                           showDate={false}
                           compact={dateGroup.transactions.length === 1}

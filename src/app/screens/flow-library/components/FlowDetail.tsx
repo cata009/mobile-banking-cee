@@ -501,7 +501,7 @@ function JourneyPanel({
                     >
                       <span
                         className={`grid size-[26px] shrink-0 place-items-center rounded-full uc-type-n5-strong ${
-                          active ? "bg-[var(--uc-action)] text-[var(--uc-text-inverse)]" : "bg-[var(--uc-surface-muted)] text-[var(--uc-text-muted)]"
+                          active ? "bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]" : "bg-[var(--uc-surface-muted)] text-[var(--uc-text-muted)]"
                         }`}
                       >
                         {index + 1}
@@ -952,7 +952,7 @@ function PrototypePanel({
                         title={screenLabel(stop)}
                         className={`flex shrink-0 items-center gap-[6px] rounded-full border px-[10px] py-[6px] transition-colors ${
                           active
-                            ? "border-[var(--uc-action)] bg-[var(--uc-action)] text-[var(--uc-text-inverse)]"
+                            ? "border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
                             : passed
                               ? "border-[var(--uc-action)] bg-[var(--uc-surface)] text-[var(--uc-action)]"
                               : "border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text-muted)] hover:border-[var(--uc-action)]"

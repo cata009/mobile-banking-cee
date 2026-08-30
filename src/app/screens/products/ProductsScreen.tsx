@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { RefObject, UIEvent } from "react";
 import { useDragCarousel } from "@/hooks/useDragCarousel";
 import BottomNavigation from "@/app/components/BottomNavigation";
-import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
 import { AppIcon } from "@/app/components/icons";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
@@ -13,6 +12,7 @@ import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
 import ShopsmartOfferCard from "@/app/components/shopsmart/ShopsmartOfferCard";
 import App2027ProductsShelf from "@/app/screens/products/App2027ProductsShelf";
+import { ProductsHeader } from "@/app/screens/products/ProductsHeader";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useCountry, useDemo } from "@/app/state/demoStore";
 import {
@@ -24,6 +24,8 @@ import {
   type ShopSmartOfferCard,
   type ShopSmartSummary,
 } from "@/app/config/productsMenuConfig";
+
+export { ProductsHeader };
 
 type NavItem = "home" | "analytics" | "payments" | "products" | "more";
 
@@ -53,48 +55,6 @@ export type { ProductDetailSelection };
 export interface ProductsShelfFocusRequest {
   requestId: number;
   cardId?: ProductsCardId | null;
-}
-
-export function ProductsHeader({
-  title,
-  onContactsClick,
-  onMessagesClick,
-}: {
-  title: string;
-  onContactsClick?: () => void;
-  onMessagesClick?: () => void;
-}) {
-  const country = useCountry();
-  const { t } = useLanguage();
-  const usesBosniaHeaderActions = country === "BA" || country === "BA_BL";
-  const handleAction = (_action: string) => {
-  };
-
-  return (
-    <div className="w-full bg-[var(--uc-app-bg)]">
-      <div className="px-[24px] pb-[22px]">
-        <div className="flex min-h-[32px] items-start gap-[8px]">
-          <h1
-            className="uc-type-n1 flex-1 min-w-0 text-[var(--uc-text)]"
-            style={{ fontSize: "28px", lineHeight: "36px" }}
-          >
-            {title}
-          </h1>
-          <HeaderActionRail>
-            {usesBosniaHeaderActions ? (
-              <HeaderActionButton icon="contact-phone" label="Contact phone" onClick={onContactsClick} />
-            ) : (
-              <HeaderActionButton icon="profile" label={t("runtime.actions.profile", "Profile")} onClick={() => handleAction("profile")} />
-            )}
-            <HeaderActionButton icon="messages" label={t("runtime.actions.messages", "Messages")} onClick={onMessagesClick} />
-            {usesBosniaHeaderActions ? null : (
-              <HeaderActionButton icon="help" label={t("runtime.actions.help", "Help")} onClick={() => handleAction("help")} />
-            )}
-          </HeaderActionRail>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export function ProductsTabs({
@@ -524,6 +484,7 @@ export default function ProductsScreen({
     <div className="relative flex h-full w-full flex-col bg-[var(--uc-app-bg)] text-[var(--uc-text)]">
       {showProductsShelf ? (
         <App2027ProductsShelf
+          title={t("runtime.productsMenu.title", config.title)}
           onProductDetailOpen={onProductDetailOpen}
           onHeroCollapsedChange={onShelfHeroCollapsedChange}
           renderOffers={() => (

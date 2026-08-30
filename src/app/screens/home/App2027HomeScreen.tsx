@@ -133,7 +133,7 @@ function ProductCategoryTabs({ categories }: { categories: ProductCategory[] }) 
               aria-selected={isActive}
               data-home-product-category-tab={tab.key}
               className={`flex h-[46px] shrink-0 items-center justify-center rounded-full border px-[12px] text-center text-[18px] leading-[20px] whitespace-nowrap ${isActive
-                ? 'flex-col gap-[2px] border-transparent bg-[var(--uc-action)] py-[8px] font-medium text-[var(--uc-static-white)]'
+                ? 'flex-col gap-[2px] border-transparent bg-[var(--uc-action-strong)] py-[8px] font-medium text-[var(--uc-static-white)]'
                 : 'border-transparent bg-[var(--uc-surface)] font-normal text-[var(--uc-text-muted)]'}`}
             >
               <span>{tab.label}</span>
@@ -188,7 +188,7 @@ function StorySignal({ story }: { story: HomeStory }) {
 
 function StoryCard({ story, onDismiss }: { story: HomeStory; onDismiss: () => void }) {
   return (
-    <article key={story.id} data-home-story={story.id} data-story-tone={story.tone} data-story-direct-action="true" className="relative flex min-h-[104px] w-full shrink-0 snap-start snap-always flex-col overflow-hidden rounded-[16px] p-[12px]" style={{ borderRadius: 16 }}>
+    <article key={story.id} data-home-story={story.id} data-story-tone={story.tone} data-story-direct-action="true" className="relative flex min-h-[104px] w-full shrink-0 snap-start snap-always flex-col overflow-hidden rounded-[8px] p-[12px]" style={{ borderRadius: 8 }}>
       <div aria-hidden="true" data-story-orbit />
       <button type="button" data-home-story-action aria-label={`${story.eyebrow}: ${story.title}`} onClick={story.onClick} className="absolute inset-0 z-0 rounded-[inherit] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-action)]" />
       <div className="relative z-10 flex items-start justify-between gap-[12px]">
@@ -569,7 +569,7 @@ export default function App2027HomeScreen({
                 ) : null}
               </>
             ) : (
-              <div className="flex min-h-[112px] items-center gap-[14px] rounded-[22px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[18px] py-[16px]" aria-live="polite">
+              <div className="flex min-h-[112px] items-center gap-[14px] rounded-[8px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[18px] py-[16px]" aria-live="polite">
                 <span className="grid size-[44px] shrink-0 place-items-center rounded-full bg-[var(--uc-action-soft)] text-[var(--uc-action)]"><AppIcon name="check" size={20} aria-hidden="true" /></span>
                 <div>
                   <h3 className="text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">You are all caught up</h3>
@@ -616,7 +616,7 @@ export default function App2027HomeScreen({
             <button
               type="button"
               onClick={() => setActiveSheet('personalise')}
-              className="group flex min-h-[68px] w-full items-center gap-[14px] rounded-[22px] border border-[var(--uc-border-muted)] bg-[color-mix(in_srgb,var(--uc-surface-raised)_84%,transparent)] px-[16px] py-[10px] text-left shadow-[inset_0_1px_0_rgb(255_255_255_/_0.28),0_10px_28px_rgb(0_0_0_/_0.09)] backdrop-blur-[14px] transition-all active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)] motion-reduce:transform-none"
+              className="group flex min-h-[68px] w-full items-center gap-[14px] rounded-[8px] border border-[var(--uc-border-muted)] bg-[color-mix(in_srgb,var(--uc-surface-raised)_84%,transparent)] px-[16px] py-[10px] text-left shadow-[inset_0_1px_0_rgb(255_255_255_/_0.28),0_10px_28px_rgb(0_0_0_/_0.09)] backdrop-blur-[14px] transition-all active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)] motion-reduce:transform-none"
             >
               <span className="grid size-[48px] shrink-0 place-items-center rounded-full bg-[var(--uc-action-soft)] text-[var(--uc-action)]">
                 <AppIcon name="account-options" size={22} aria-hidden="true" />

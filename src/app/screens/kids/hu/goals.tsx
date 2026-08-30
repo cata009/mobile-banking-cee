@@ -4,7 +4,7 @@
  *
  * Extracted verbatim from KidsMarketHomeApp.tsx (kids-split Phase 3).
  */
-import { useState } from "react";
+import { useReducer, useState } from "react";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
@@ -20,6 +20,7 @@ import {
 } from "./money";
 import type { HuThemePreset } from "./theme";
 import type { HuGoalContribution, ScheduleConfig, ScheduleEnd, ScheduleRepeat } from "./types";
+import { createHuScheduleState, huScheduleReducer } from "./huScheduleState";
 
 export function HuKidsGoalsSection({
   goals,
@@ -681,12 +682,16 @@ function ScheduleSheet({
   onReset?: () => void;
 }) {
   const todayIso = toIsoDateOnly(new Date());
-  const [startDate, setStartDate] = useState<string>(initialSchedule?.startDate ?? todayIso);
-  const [repeat, setRepeat] = useState<ScheduleRepeat>(initialSchedule?.repeat ?? "never");
-  const [endsOn, setEndsOn] = useState<ScheduleEnd>(initialSchedule?.endsOn ?? { type: "never" });
-  const [datePickerTarget, setDatePickerTarget] = useState<null | "start" | "end">(null);
-  const [repeatPickerOpen, setRepeatPickerOpen] = useState(false);
-  const [endsPickerOpen, setEndsPickerOpen] = useState(false);
+  const [scheduleState, dispatchSchedule] = useReducer(
+    huScheduleReducer,
+    createHuScheduleState(todayIso, initialSchedule),
+  );
+  const { startDate, repeat, endsOn, datePickerTarget, repeatPickerOpen, endsPickerOpen } = scheduleState;
+  const setRepeat = (value: ScheduleRepeat) => dispatchSchedule({ type: "set-field", field: "repeat", value });
+  const setEndsOn = (value: ScheduleEnd) => dispatchSchedule({ type: "set-field", field: "endsOn", value });
+  const setDatePickerTarget = (value: null | "start" | "end") => dispatchSchedule({ type: "set-field", field: "datePickerTarget", value });
+  const setRepeatPickerOpen = (value: boolean) => dispatchSchedule({ type: "set-field", field: "repeatPickerOpen", value });
+  const setEndsPickerOpen = (value: boolean) => dispatchSchedule({ type: "set-field", field: "endsPickerOpen", value });
 
   const handleConfirm = () => {
     onConfirm({ startDate, repeat, endsOn });
@@ -792,9 +797,7 @@ function ScheduleSheet({
               onSelect={(date) => {
                 if (!date) return;
                 const iso = toIsoDateOnly(date);
-                if (datePickerTarget === "start") setStartDate(iso);
-                else setEndsOn({ type: "on-date", date: iso });
-                setDatePickerTarget(null);
+                dispatchSchedule({ type: "select-date", date: iso });
               }}
             />
           </div>
@@ -847,9 +850,7 @@ function ScheduleSheet({
             <button
               type="button"
               onClick={() => {
-                if (endsOn.type !== "on-date") setEndsOn({ type: "on-date", date: todayIso });
-                setEndsPickerOpen(false);
-                setDatePickerTarget("end");
+                dispatchSchedule({ type: "open-end-date", fallbackDate: todayIso });
               }}
               className="flex w-full items-center justify-between py-[14px] text-left"
             >
@@ -1021,7 +1022,7 @@ export function HuKidsAddMoneyPage({
             onClick={() => setIsScheduleSheetOpen(true)}
             className={
               schedule
-                ? "grid size-[48px] shrink-0 place-items-center rounded-[12px] border border-transparent bg-[var(--uc-action)] text-[var(--uc-text-inverse)]"
+                ? "grid size-[48px] shrink-0 place-items-center rounded-[12px] border border-transparent bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
                 : "grid size-[48px] shrink-0 place-items-center rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] text-[var(--uc-text)]"
             }
           >

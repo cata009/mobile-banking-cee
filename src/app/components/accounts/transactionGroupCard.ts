@@ -13,6 +13,6 @@ export function transactionGroupCardClassName(enabled: boolean) {
   return enabled
     // divide-y draws the hairline between rows only, never above the first or
     // below the last, which is what the home activity card does.
-    ? "mx-[16px] mb-[12px] mt-[12px] divide-y divide-[var(--uc-border-muted)] overflow-hidden rounded-[22px] bg-[var(--uc-surface)] px-[8px] py-[4px]"
+    ? "mx-[16px] mb-[12px] mt-[12px] divide-y divide-[var(--uc-border-muted)] overflow-hidden rounded-[8px] bg-[var(--uc-surface)]"
     : "pt-[16px]";
 }

@@ -5,6 +5,8 @@ import GhostBanner from '@/app/components/cards/GhostBanner';
 import ShopsmartOfferCard from '@/app/components/shopsmart/ShopsmartOfferCard';
 import { maskAmountParts } from '@/app/utils/amountPrivacy';
 import { formatAmount, type Product, type ProductCategory } from '@/data/products';
+import { buildInvestmentSecurities, calculateInvestmentPortfolioPerformance } from '@/app/config/investmentsPortfolioConfig';
+import { calculateLatestWeekSpending, createSpendingAnalyticsTimeline } from '@/data/spendingAnalytics';
 import type { CountryId } from '@/app/state/demoTypes';
 import { getProductsMenuForCountry, type ShopSmartOfferCategory } from '@/app/config/productsMenuConfig';
 import { useDragCarousel } from '@/hooks/useDragCarousel';
@@ -20,10 +22,11 @@ import travelInsuranceCampaign from '@/assets/products/detail/img_illustration_t
 import shopSmartValentino from '@/assets/shopsmart/shopsmart-valentino.png';
 import shopSmartEnglishHome from '@/assets/shopsmart/shopsmart-english-home.png';
 import App2027Activity from './App2027Activity';
-import App2027ProductAccordions, { CurrencyBadge } from './App2027ProductAccordions';
+import App2027ProductAccordions, { CurrencyBadge, TrendBadge } from './App2027ProductAccordions';
 
 type TransformationTab = 'accounts' | 'savings' | 'credits' | 'insurance';
 type FormattedAmount = { integer: string; decimals: string; currency: string };
+type ProductPerformance = { label: string; color: string; direction: 'up' | 'down' };
 
 export interface App2027TransformationHomeProps {
   categories: ProductCategory[];
@@ -110,6 +113,34 @@ function formatMaturityMoney(amount: FormattedAmount, hidden: boolean) {
   return <span data-home-deposit-maturity-value className="inline-flex items-baseline whitespace-nowrap text-[14px] font-normal leading-[18px]"><span>{display.integer}</span><span>{display.decimals} {display.currency}</span></span>;
 }
 
+/**
+ * The portfolio's gain rendered the way the portfolio screen renders it: signed amount, signed
+ * percent, green when up and red when down. Returns undefined when there is nothing invested —
+ * a flat card is better than a 0,00 that looks like a loss.
+ */
+function buildPortfolioPerformance(investments: Product[], country: CountryId, amountsHidden: boolean): ProductPerformance | undefined {
+  const first = investments[0];
+  if (!first) return undefined;
+
+  const { performanceAmount, performancePercent } = calculateInvestmentPortfolioPerformance(
+    buildInvestmentSecurities(investments, country),
+  );
+  if (performanceAmount === 0) return undefined;
+
+  const up = performanceAmount > 0;
+  const sign = up ? '+' : '-';
+  const amount = formatAmount(performanceAmount, first.currency);
+  // The percent borrows the amount's decimal mark so the two halves of the line agree, whatever
+  // separator formatAmount hands back.
+  const separator = amount.decimals.charAt(0) || '.';
+  const percent = `${Math.abs(performancePercent).toFixed(2).replace('.', separator)}%`;
+  const label = amountsHidden
+    ? `${sign}**,** ${amount.currency} (${sign}**,**%)`
+    : `${sign}${amount.integer}${amount.decimals} ${amount.currency} (${sign}${percent})`;
+
+  return { label, color: up ? 'var(--uc-green-olive)' : 'var(--uc-status-red)', direction: up ? 'up' : 'down' };
+}
+
 function categoryProducts(categories: ProductCategory[], key: ProductCategory['key']) {
   return categories.find((category) => category.key === key)?.products ?? [];
 }
@@ -121,16 +152,17 @@ const SUMMARY_ART: Partial<Record<TransformationTab, { src: string; className: s
   insurance: { src: insuranceUmbrella, className: 'bottom-[-24px] right-[-38px] h-[186px] w-[210px]' },
 };
 
-function SummaryBanner({ tab, amount, amountsHidden, secondaryLabel, secondaryValue, policyCount = 2 }: { tab: TransformationTab; amount?: FormattedAmount; amountsHidden: boolean; secondaryLabel: string; secondaryValue: FormattedAmount | string; policyCount?: number }) {
+function SummaryBanner({ tab, amount, amountsHidden, secondaryLabel, secondaryValue, policyCount = 2 }: { tab: TransformationTab; amount?: FormattedAmount; amountsHidden: boolean; secondaryLabel?: string; secondaryValue?: FormattedAmount | string; policyCount?: number }) {
   if (tab === 'accounts' && amount && typeof secondaryValue !== 'string') {
     const displayedTotal = maskAmountParts(amount, amountsHidden);
-    const displayedSpent = maskAmountParts(secondaryValue, amountsHidden);
+    // A month whose last week has no spending yet leaves the row out entirely.
+    const displayedSpent = secondaryValue && secondaryLabel ? maskAmountParts(secondaryValue, amountsHidden) : null;
 
     return (
       <section
         data-home-transformation-summary={tab}
         data-home-summary-variant="baseline"
-        className="relative flex h-[145.25px] min-h-[145.25px] w-full overflow-hidden rounded-[8px] bg-[#94B1BA] px-[24px] py-[15px]"
+        className="relative flex h-[145.25px] min-h-[145.25px] w-full overflow-hidden rounded-[8px] bg-[var(--uc-summary-accounts)] px-[24px] py-[15px]"
       >
         <div data-home-summary-content className="relative z-10 flex flex-1 flex-col">
             <div className="flex flex-col gap-[4px]">
@@ -141,15 +173,17 @@ function SummaryBanner({ tab, amount, amountsHidden, secondaryLabel, secondaryVa
               </div>
             </div>
 
-            <div data-home-summary-divider className="my-[9px] h-px w-full bg-[color-mix(in_srgb,var(--uc-text)_35%,transparent)]" />
+            {displayedSpent ? <>
+              <div data-home-summary-divider className="my-[9px] h-px w-full bg-[color-mix(in_srgb,var(--uc-text)_35%,transparent)]" />
 
-            <div className="flex flex-col gap-[4px]">
-              <p className="uc-type-n5-strong text-[var(--uc-text)]">{secondaryLabel}</p>
-              <div className="flex items-baseline">
-                <span data-home-summary-secondary-amount className="uc-type-n2-strong leading-[1] text-[var(--uc-text)]">{displayedSpent.integer}</span>
-                <span className="uc-type-n5-strong leading-[1] text-[var(--uc-text)]">{displayedSpent.decimals} {displayedSpent.currency}</span>
+              <div className="flex flex-col gap-[4px]">
+                <p className="uc-type-n5-strong text-[var(--uc-text)]">{secondaryLabel}</p>
+                <div className="flex items-baseline">
+                  <span data-home-summary-secondary-amount className="uc-type-n2-strong leading-[1] text-[var(--uc-text)]">{displayedSpent.integer}</span>
+                  <span className="uc-type-n5-strong leading-[1] text-[var(--uc-text)]">{displayedSpent.decimals} {displayedSpent.currency}</span>
+                </div>
               </div>
-            </div>
+            </> : null}
         </div>
 
         <div data-home-summary-art-container className="absolute right-0 top-[24px] z-0 w-[96px]">
@@ -164,12 +198,12 @@ function SummaryBanner({ tab, amount, amountsHidden, secondaryLabel, secondaryVa
     ? <span data-home-insurance-policy-count className="text-[28px] font-bold leading-[32px] tracking-[-0.025em]">{policyCount} active {policyCount === 1 ? 'policy' : 'policies'}</span>
     : amount ? formatSummaryMoney(amount, amountsHidden) : null;
   const tone = tab === 'accounts'
-    ? 'bg-[#94B1BA]'
+    ? 'bg-[var(--uc-summary-accounts)]'
     : tab === 'savings'
-      ? 'bg-[#DBE0D1]'
+      ? 'bg-[var(--uc-summary-savings)]'
       : tab === 'credits'
-        ? 'bg-[#D9B4AE]'
-        : 'bg-[#DED7EA]';
+        ? 'bg-[var(--uc-summary-credits)]'
+        : 'bg-[var(--uc-summary-insurance)]';
   const art = SUMMARY_ART[tab];
 
   return (
@@ -180,12 +214,14 @@ function SummaryBanner({ tab, amount, amountsHidden, secondaryLabel, secondaryVa
       <div className="relative z-10 max-w-[calc(100%-112px)] sm:max-w-[66%]">
         <p className="text-[14px] font-bold leading-[18px]">{headline}</p>
         <div className="mt-[2px] flex items-baseline whitespace-nowrap">{featured}</div>
-        <div
-          data-home-summary-divider
-          className="my-[9px] h-px w-full bg-[color-mix(in_srgb,var(--uc-text)_35%,transparent)]"
-        />
-        <p className="text-[14px] font-bold leading-[18px]">{secondaryLabel}</p>
-        <p data-home-summary-secondary-amount className="mt-[1px] text-[18px] font-bold leading-[22px]">{typeof secondaryValue === 'string' ? secondaryValue : formatMoney(secondaryValue, amountsHidden)}</p>
+        {secondaryValue !== undefined ? <>
+          <div
+            data-home-summary-divider
+            className="my-[9px] h-px w-full bg-[color-mix(in_srgb,var(--uc-text)_35%,transparent)]"
+          />
+          <p className="text-[14px] font-bold leading-[18px]">{secondaryLabel}</p>
+          <p data-home-summary-secondary-amount className="mt-[1px] text-[18px] font-bold leading-[22px]">{typeof secondaryValue === 'string' ? secondaryValue : formatMoney(secondaryValue, amountsHidden)}</p>
+        </> : null}
       </div>
       {art ? <img src={art.src} alt="" aria-hidden="true" data-home-summary-art={tab} className={`pointer-events-none absolute z-0 object-contain object-right-bottom drop-shadow-[0_8px_10px_rgb(var(--uc-shadow-rgb)/0.14)] ${art.className}`} /> : null}
     </section>
@@ -266,7 +302,7 @@ function DepositList({ deposits, amountsHidden, formatProductAmount, onProductCl
   const displayedDeposits = collapsed ? deposits.slice(0, 1) : deposits;
 
   return <>
-    <div data-home-deposit-list className={['overflow-hidden rounded-[8px] bg-[var(--uc-surface)]', collapsed ? 'relative z-10 shadow-[0_6px_12px_rgb(var(--uc-shadow-rgb)/0.08)]' : 'shadow-[0_10px_24px_rgb(var(--uc-shadow-rgb)/0.05)]'].join(' ')}>
+    <div data-home-deposit-list className={['overflow-hidden rounded-[8px] bg-[var(--uc-surface)]', collapsed ? 'relative z-10 shadow-[0_6px_12px_rgb(var(--uc-shadow-rgb)/0.08)]' : ''].join(' ')}>
       {displayedDeposits.map((product, index) => {
         const current = formatProductAmount(product);
         const presentation = depositPresentation(product);
@@ -294,7 +330,7 @@ function InsurancePolicyList({ onClick, collapsed = false }: { onClick?: () => v
   const policies = collapsed ? INSURANCE_POLICIES.slice(0, 1) : INSURANCE_POLICIES;
 
   return <>
-    <div data-home-insurance-policy-list className={['overflow-hidden rounded-[8px] bg-[var(--uc-surface)]', collapsed ? 'relative z-10 shadow-[0_6px_12px_rgb(var(--uc-shadow-rgb)/0.08)]' : 'shadow-[0_10px_24px_rgb(var(--uc-shadow-rgb)/0.05)]'].join(' ')}>
+    <div data-home-insurance-policy-list className={['overflow-hidden rounded-[8px] bg-[var(--uc-surface)]', collapsed ? 'relative z-10 shadow-[0_6px_12px_rgb(var(--uc-shadow-rgb)/0.08)]' : ''].join(' ')}>
       {policies.map((policy, index) => (
         <button key={policy.title} data-home-insurance-policy-card type="button" onClick={onClick} className={`w-full p-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${index > 0 ? 'border-t-[0.5px] border-[var(--uc-border-muted)]' : ''}`}>
           <div className="flex items-start justify-between gap-[12px]"><span><span className="block text-[16px] font-bold">{policy.title}</span><span className="mt-[4px] block text-[14px] text-[var(--uc-text-muted)]">{policy.subtitle}</span></span><span data-home-insurance-logo className="grid h-[40px] w-[72px] shrink-0 place-items-center overflow-hidden rounded-[4px] bg-[#00549f] text-[14px] font-bold text-white">Allianz</span></div>
@@ -311,7 +347,7 @@ function LoanList({ loans, amountsHidden, onProductClick, collapsed = false }: {
   const displayedLoans = collapsed ? loans.slice(0, 1) : loans;
 
   return <>
-    <div data-home-loan-list className={['overflow-hidden rounded-[8px] bg-[var(--uc-surface)]', collapsed ? 'relative z-10 shadow-[0_6px_12px_rgb(var(--uc-shadow-rgb)/0.08)]' : 'shadow-[0_10px_24px_rgb(var(--uc-shadow-rgb)/0.05)]'].join(' ')}>
+    <div data-home-loan-list className={['overflow-hidden rounded-[8px] bg-[var(--uc-surface)]', collapsed ? 'relative z-10 shadow-[0_6px_12px_rgb(var(--uc-shadow-rgb)/0.08)]' : ''].join(' ')}>
       {displayedLoans.map((product, index) => {
         const total = Math.abs(product.balance) * 1.45;
         const repaid = total - Math.abs(product.balance);
@@ -336,7 +372,12 @@ function LoanList({ loans, amountsHidden, onProductClick, collapsed = false }: {
   </>;
 }
 
-function CompactProductCard({ product, amount, amountsHidden, subtitle, onClick, stackRole = 'single' }: { product: Product; amount: FormattedAmount; amountsHidden: boolean; subtitle?: string; onClick?: () => void; stackRole?: 'single' | 'first' | 'middle' | 'last' }) {
+/**
+ * A product's value in one line, plus — where the product has one — what that value did.
+ * `performance` swaps the currency flag for a trend arrow and adds the gain line under the
+ * amount: on a portfolio the direction is the headline, not the currency.
+ */
+function CompactProductCard({ product, amount, amountsHidden, subtitle, performance, onClick, stackRole = 'single' }: { product: Product; amount: FormattedAmount; amountsHidden: boolean; subtitle?: string; performance?: ProductPerformance; onClick?: () => void; stackRole?: 'single' | 'first' | 'middle' | 'last' }) {
   const display = maskAmountParts(amount, amountsHidden);
   const radiusClass = stackRole === 'first' ? 'rounded-t-[8px]' : stackRole === 'last' ? 'rounded-b-[8px]' : stackRole === 'middle' ? 'rounded-none' : 'rounded-[8px]';
   const hasSeparator = stackRole === 'middle' || stackRole === 'last';
@@ -347,8 +388,9 @@ function CompactProductCard({ product, amount, amountsHidden, subtitle, onClick,
         <span className="block truncate text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{product.name}{subtitle ? <><span aria-hidden="true"> · </span>{subtitle}</> : null}</span>
         <span className="mt-[3px] block truncate text-[14px] leading-[18px] text-[var(--uc-text-muted)]">{product.accountNumber}</span>
         <span className="mt-[13px] block text-[var(--uc-text)]"><span className="text-[24px] font-bold leading-[26px]">{display.integer}</span><span className="text-[14px]">{display.decimals} {display.currency}</span></span>
+        {performance ? <span data-home-compact-product-performance className="mt-[6px] block text-[16px] font-bold leading-[20px]" style={{ color: performance.color }}>{performance.label}</span> : null}
       </span>
-      <span className="absolute right-[16px] top-[16px]"><CurrencyBadge currency={product.currency} /></span>
+      <span className="absolute right-[16px] top-[16px]">{performance ? <TrendBadge direction={performance.direction} /> : <CurrencyBadge currency={product.currency} />}</span>
     </button>
   );
 }
@@ -425,7 +467,7 @@ function InterestCarousel({ tab, onProductsClick }: { tab: TransformationTab; on
   const cards = INTEREST_CAMPAIGNS[tab];
   return (
     <section data-home-interest-carousel aria-labelledby="interest-heading">
-      <h2 id="interest-heading" className="text-[22px] font-bold leading-[28px] tracking-[-0.02em]">For your interest</h2>
+      <h2 id="interest-heading" className="uc-type-l1 text-[var(--uc-text)]">For your interest</h2>
       <HorizontalCarousel ariaLabel="For your interest" count={cards.length}>
         {cards.map((card, index) => (
           <button key={index} type="button" onClick={onProductsClick} className="w-[calc(100%-48px)] shrink-0 snap-start overflow-hidden rounded-[8px] bg-[var(--uc-surface)] text-left shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]">
@@ -447,7 +489,6 @@ function InterestCarousel({ tab, onProductsClick }: { tab: TransformationTab; on
 function ShopSmart({ country, onProductsClick }: { country: CountryId; onProductsClick?: () => void }) {
   const [activeFilter, setActiveFilter] = useState<ShopSmartCategory>('popular');
   const offers = getProductsMenuForCountry(country).shopSmartOfferCards;
-  if (!offers.length) return null;
   const visibleOffers = activeFilter === 'popular'
     ? offers
     : offers.filter((offer) => offer.categories.includes(activeFilter));
@@ -461,12 +502,14 @@ function ShopSmart({ country, onProductsClick }: { country: CountryId; onProduct
   const categoriesRef = useRef<HTMLDivElement>(null);
   const { dragHandlers: categoryDragHandlers, isDragging: isCategoryDragging } = useDragCarousel({
     carouselRef: categoriesRef,
-    enabled: filters.length > 1,
+    enabled: offers.length > 0 && filters.length > 1,
   });
+
+  if (!offers.length) return null;
 
   return (
     <section data-home-shopsmart data-home-shopsmart-filter={activeFilter}>
-      <h2 className="text-[22px] font-bold leading-[28px] tracking-[-0.02em]">Shopsmart</h2>
+      <h2 className="uc-type-l1 text-[var(--uc-text)]">Shopsmart</h2>
       <div
         ref={categoriesRef}
         {...categoryDragHandlers}
@@ -476,7 +519,7 @@ function ShopSmart({ country, onProductsClick }: { country: CountryId; onProduct
       >
         {filters.map((filter) => {
           const active = filter.id === activeFilter;
-          return <button key={filter.id} type="button" aria-pressed={active} onPointerDown={(event) => event.stopPropagation()} onClick={() => setActiveFilter(filter.id)} className={`flex h-[46px] shrink-0 items-center justify-center rounded-full border px-[12px] text-[18px] leading-[20px] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${active ? 'flex-col gap-[2px] border-transparent bg-[var(--uc-action)] py-[8px] font-medium text-[var(--uc-static-white)]' : 'border-transparent bg-[var(--uc-surface)] font-normal text-[var(--uc-text-muted)]'}`}>
+          return <button key={filter.id} type="button" aria-pressed={active} onPointerDown={(event) => event.stopPropagation()} onClick={() => setActiveFilter(filter.id)} className={`flex h-[46px] shrink-0 items-center justify-center rounded-full border px-[12px] text-[18px] leading-[20px] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${active ? 'flex-col gap-[2px] border-transparent bg-[var(--uc-action-strong)] py-[8px] font-medium text-[var(--uc-static-white)]' : 'border-transparent bg-[var(--uc-surface)] font-normal text-[var(--uc-text-muted)]'}`}>
             <span>{filter.label}</span>
             {active ? <span aria-hidden="true" data-home-shopsmart-filter-dot className="size-[4px] rounded-full bg-[var(--uc-static-white)]" /> : null}
           </button>;
@@ -512,8 +555,35 @@ export default function App2027TransformationHome({ categories, country, amounts
   const debitCards = cards.filter((product) => product.type === 'debit_card');
   const savings = categoryProducts(categories, 'savings_deposits').filter((product) => product.type === 'saving_account');
   const deposits = categoryProducts(categories, 'savings_deposits').filter((product) => product.type === 'term_deposit');
+  // The banner quotes the last bar of the Expenses chart, not an estimate: same timeline, same
+  // week slices. When that week has no spending the row drops rather than printing a 0,00 that
+  // reads like a data error.
+  const weekSpending = useMemo(() => {
+    const products = categories.flatMap((category) => category.products);
+    if (!products.length) return null;
+
+    const timeline = createSpendingAnalyticsTimeline(country, products);
+    const summary = timeline.summariesByPeriodKey[timeline.activePeriodKey];
+    if (!summary) return null;
+
+    const total = calculateLatestWeekSpending(summary);
+    if (total === null || total <= 0) return null;
+
+    return { total, currency: summary.currency };
+  }, [categories, country]);
+
   const investments = categoryProducts(categories, 'investments');
-  const loans = categoryProducts(categories, 'mortgages_loans');
+  // Same figures the portfolio screen prints under its chart, so opening the card confirms
+  // what the card already said.
+  const portfolioPerformance = useMemo(
+    () => buildPortfolioPerformance(investments, country, amountsHidden),
+    [amountsHidden, country, investments],
+  );
+  // One shelf category, two products the customer thinks of separately: a consumer loan and a
+  // mortgage answer different questions, and every other group here is a single product type.
+  const creditProducts = categoryProducts(categories, 'mortgages_loans');
+  const loans = creditProducts.filter((product) => product.type !== 'mortgage');
+  const mortgages = creditProducts.filter((product) => product.type === 'mortgage');
   const creditCategories = categories.map((category) => category.key === 'cards'
     ? { ...category, products: category.products.filter((product) => product.type === 'credit_card') }
     : category,
@@ -533,13 +603,13 @@ export default function App2027TransformationHome({ categories, country, amounts
         <div role="tablist" aria-label="Product categories" className="flex gap-[5px] overflow-x-auto overscroll-x-contain scrollbar-hide">
           {(Object.keys(TAB_LABELS) as TransformationTab[]).map((tab) => {
             const active = activeTab === tab;
-            return <button key={tab} type="button" role="tab" aria-selected={active} onClick={() => setActiveTab(tab)} className={`flex h-[46px] shrink-0 items-center justify-center rounded-full border px-[12px] text-[18px] leading-[20px] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${active ? 'flex-col gap-[2px] border-transparent bg-[var(--uc-action)] py-[8px] font-medium text-[var(--uc-static-white)]' : 'border-transparent bg-[var(--uc-surface)] font-normal text-[var(--uc-text-muted)]'}`}><span>{TAB_LABELS[tab]}</span>{active ? <span aria-hidden="true" className="size-[4px] rounded-full bg-[var(--uc-static-white)]" /> : null}</button>;
+            return <button key={tab} type="button" role="tab" aria-selected={active} onClick={() => setActiveTab(tab)} className={`flex h-[46px] shrink-0 items-center justify-center rounded-full border px-[12px] text-[18px] leading-[20px] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${active ? 'flex-col gap-[2px] border-transparent bg-[var(--uc-action-strong)] py-[8px] font-medium text-[var(--uc-static-white)]' : 'border-transparent bg-[var(--uc-surface)] font-normal text-[var(--uc-text-muted)]'}`}><span>{TAB_LABELS[tab]}</span>{active ? <span aria-hidden="true" className="size-[4px] rounded-full bg-[var(--uc-static-white)]" /> : null}</button>;
           })}
         </div>
       </section>
 
       {activeTab === 'accounts' ? <>
-        <SummaryBanner tab="accounts" amount={calculateTotalAvailable()} amountsHidden={amountsHidden} secondaryLabel="Spent this week" secondaryValue={{ ...calculateTotalAvailable(), integer: String(Math.max(0, Math.round(Number(calculateTotalAvailable().integer.replace(/\s/g, '')) * 0.005)).toLocaleString('cs-CZ')), decimals: '.00' }} />
+        <SummaryBanner tab="accounts" amount={calculateTotalAvailable()} amountsHidden={amountsHidden} secondaryLabel={weekSpending ? "Spent this week" : undefined} secondaryValue={weekSpending ? formatAmount(weekSpending.total, weekSpending.currency as Product['currency']) : undefined} />
         {!accounts.length ? <Group title="Accounts"><EmptyProducts title="Open your everyday account" description="Choose an account for payments, salary and everyday banking." onClick={onProductsClick} /></Group> : null}
         {!debitCards.length ? <Group title="Cards"><EmptyProducts title="Choose a card for everyday use" description="Explore cards with benefits that fit your spending." onClick={onProductsClick} /></Group> : null}
         <App2027ProductAccordions categories={debitCardCategories} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} calculateGroupTotal={calculateTotal} getProductDisplayNumber={getProductDisplayNumber} onProductClick={onProductClick} useCzRoboAccountCards onDomesticPaymentClick={onDomesticPaymentClick} onPaymentsClick={onPaymentsClick} onAccountInfoClick={onAccountInfoClick} onCardDetailsClick={onCardDetailsClick} onCardOptionsClick={onCardOptionsClick} visibleKeys={['accounts', 'cards']} initialOpenKeys={{ accounts: true, cards: true }} />
@@ -550,7 +620,7 @@ export default function App2027TransformationHome({ categories, country, amounts
 
       {activeTab === 'savings' ? <>
         <SummaryBanner tab="savings" amount={totalSavings} amountsHidden={amountsHidden} secondaryLabel="Growth this year" secondaryValue={savingsGrowth} />
-        <Group title="Investment portfolios" expandable={investments.length > 1}>{investments.length ? investments.map((product) => <CompactProductCard key={product.id} product={product} amount={formatProductAmount(product)} amountsHidden={amountsHidden} onClick={() => onProductClick(product)} />) : <EmptyProducts title="Start investing" description="Explore portfolios built around your goals." onClick={onProductsClick} />}</Group>
+        <Group title="Investment portfolios" expandable={investments.length > 1}>{investments.length ? investments.map((product) => <CompactProductCard key={product.id} product={product} amount={formatProductAmount(product)} amountsHidden={amountsHidden} performance={portfolioPerformance} onClick={() => onProductClick(product)} />) : <EmptyProducts title="Start investing" description="Explore portfolios built around your goals." onClick={onProductsClick} />}</Group>
         <Group title="Saving Accounts" expandable={savings.length > 1}>{savings.length ? <div data-home-compact-product-list="saving_account" className="overflow-hidden rounded-[8px] shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)]">{savings.map((product, index) => <CompactProductCard key={product.id} product={product} amount={formatProductAmount(product)} amountsHidden={amountsHidden} subtitle="2.5% p.a." onClick={() => onProductClick(product)} stackRole={savings.length === 1 ? 'single' : index === 0 ? 'first' : index === savings.length - 1 ? 'last' : 'middle'} />)}</div> : <EmptyProducts title="Start saving for what matters" description="Open a saving account and set money aside automatically." onClick={onProductsClick} />}</Group>
         <Group title="Deposits" defaultOpen={deposits.length <= 1} expandable={deposits.length > 1} preview={deposits.length > 1 ? <DepositList deposits={deposits} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} onProductClick={onProductClick} collapsed /> : undefined}>
           {deposits.length ? <DepositList deposits={deposits} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} onProductClick={onProductClick} /> : <EmptyProducts title="Explore term deposits" description="Put your money to work with a fixed return." onClick={onProductsClick} />}
@@ -561,8 +631,11 @@ export default function App2027TransformationHome({ categories, country, amounts
       {activeTab === 'credits' ? <>
         <SummaryBanner tab="credits" amount={debt} amountsHidden={amountsHidden} secondaryLabel="Due this month" secondaryValue={dueThisMonth} />
         {cards.filter((product) => product.type === 'credit_card').length ? <App2027ProductAccordions categories={creditCategories} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} calculateGroupTotal={calculateTotal} getProductDisplayNumber={getProductDisplayNumber} onProductClick={onProductClick} onCardDetailsClick={onCardDetailsClick} onCardOptionsClick={onCardOptionsClick} useCzRoboAccountCards visibleKeys={['cards']} initialOpenKeys={{ cards: true }} titleOverrides={{ cards: 'Credit Cards' }} /> : <Group title="Credit Cards"><EmptyProducts title="Discover a credit card" description="Choose benefits that match your everyday spending." onClick={onProductsClick} /></Group>}
-        <Group title="Loans & Mortgages" defaultOpen={loans.length <= 1} expandable={loans.length > 1} preview={loans.length > 1 ? <LoanList loans={loans} amountsHidden={amountsHidden} onProductClick={onProductClick} collapsed /> : undefined}>
-          {loans.length ? <LoanList loans={loans} amountsHidden={amountsHidden} onProductClick={onProductClick} /> : <EmptyProducts title="Find financing that fits" description="Explore loans and mortgages for your next plan." onClick={onProductsClick} />}
+        <Group title="Loans" defaultOpen={loans.length <= 1} expandable={loans.length > 1} preview={loans.length > 1 ? <LoanList loans={loans} amountsHidden={amountsHidden} onProductClick={onProductClick} collapsed /> : undefined}>
+          {loans.length ? <LoanList loans={loans} amountsHidden={amountsHidden} onProductClick={onProductClick} /> : <EmptyProducts title="Find financing that fits" description="Explore a loan for your next plan." onClick={onProductsClick} />}
+        </Group>
+        <Group title="Mortgages" defaultOpen={mortgages.length <= 1} expandable={mortgages.length > 1} preview={mortgages.length > 1 ? <LoanList loans={mortgages} amountsHidden={amountsHidden} onProductClick={onProductClick} collapsed /> : undefined}>
+          {mortgages.length ? <LoanList loans={mortgages} amountsHidden={amountsHidden} onProductClick={onProductClick} /> : <EmptyProducts title="Plan your home" description="See what a mortgage with us would look like." onClick={onProductsClick} />}
         </Group>
         <InterestCarousel tab="credits" onProductsClick={onProductsClick} />
       </> : null}

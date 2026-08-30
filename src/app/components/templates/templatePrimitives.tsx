@@ -128,7 +128,7 @@ export function TemplateBottomButton({
           className={`flex h-[48px] w-full items-center justify-center rounded font-['UniCredit',sans-serif] text-base font-bold ${
             disabled
               ? "bg-[var(--uc-action-soft-strong)] text-[var(--uc-static-white)]"
-              : "bg-[var(--uc-action)] text-[var(--uc-static-white)]"
+              : "bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
           }`}
           aria-disabled={disabled}
         >

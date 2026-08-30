@@ -869,6 +869,32 @@ export function buildInvestmentChartPoints(
   });
 }
 
+export interface InvestmentPortfolioPerformance {
+  totalValue: number;
+  performanceAmount: number;
+  performancePercent: number;
+}
+
+/**
+ * The portfolio's headline figures, from the securities that actually hold value.
+ *
+ * Both the portfolio screen and the home product card read them from here, so the card can
+ * never quote a performance the screen behind it disagrees with.
+ */
+export function calculateInvestmentPortfolioPerformance(
+  securities: readonly InvestmentSecurity[],
+): InvestmentPortfolioPerformance {
+  const funded = securities.filter((security) => security.status === "active" && security.localValue > 0);
+  const totalValue = funded.reduce((sum, security) => sum + security.localValue, 0);
+  const performanceAmount = funded.reduce((sum, security) => sum + security.performanceAmount, 0);
+
+  return {
+    totalValue,
+    performanceAmount,
+    performancePercent: totalValue > 0 ? (performanceAmount / totalValue) * 100 : 0,
+  };
+}
+
 export function sortInvestmentSecurities(
   securities: readonly InvestmentSecurity[],
   sortId: InvestmentSortId,

@@ -122,7 +122,7 @@ function SellModeButton({ selected, children, onClick }: { selected: boolean; ch
       onClick={onClick}
       className={`inline-flex h-[24px] min-w-[68px] items-center justify-center rounded-[4px] px-[10px] text-[14px] font-bold uppercase leading-[16px] ${
         selected
-          ? "border border-[var(--uc-action)] bg-[var(--uc-action)] text-[var(--uc-static-white)]"
+          ? "border border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
           : "border border-[var(--uc-text)] bg-[var(--uc-surface)] text-[var(--uc-text)]"
       }`}
     >

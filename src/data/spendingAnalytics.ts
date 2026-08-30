@@ -208,6 +208,40 @@ function summarizeTransactions(
   };
 }
 
+/** Fixed 7-day slices counted from the 1st, so every month lands on 4 or 5 week buckets. */
+export const SPENDING_WEEK_LENGTH = 7;
+
+export function getSpendingWeekIndex(day: number) {
+  return Math.floor((day - 1) / SPENDING_WEEK_LENGTH);
+}
+
+/**
+ * What the latest week of a month cost, on the same slices the Expenses bar chart buckets by.
+ *
+ * The home banner's "Spent this week" and the last bar of that chart are the same number by
+ * construction — a banner that invents its own figure is worse than no banner.
+ * Returns null for a year summary, which has no weeks.
+ */
+export function calculateLatestWeekSpending(summary: SpendingAnalyticsSummary): number | null {
+  if (summary.periodKind !== "month") return null;
+
+  const [yearPart, monthPart] = summary.monthKey.split("-");
+  const year = Number(yearPart);
+  const monthIndex = Number(monthPart) - 1;
+  if (!Number.isFinite(year) || !Number.isFinite(monthIndex)) return null;
+
+  // Day 0 of the next month is the last day of this one.
+  const dayCount = new Date(year, monthIndex + 1, 0).getDate();
+  const lastWeekIndex = Math.ceil(dayCount / SPENDING_WEEK_LENGTH) - 1;
+
+  return summary.sourceTransactions.reduce((sum, transaction) => {
+    const amount = roundMoney(transaction.amount);
+    if (amount >= 0) return sum;
+    if (getSpendingWeekIndex(Number(transaction.day)) !== lastWeekIndex) return sum;
+    return roundMoney(sum + Math.abs(amount));
+  }, 0);
+}
+
 export function createSpendingAnalyticsTimeline(
   country: CountryId,
   products: Product[],

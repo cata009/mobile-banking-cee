@@ -55,6 +55,8 @@ import {
   buildInvestmentPortfolioFollowUp,
   buildInvestmentRiskFollowUp,
 } from "./cz/investmentFollowUps";
+import { resolveCzSupportReply } from "./cz/handlers/support";
+import { resolveCzCardReply } from "./cz/handlers/cards";
 
 export {
   CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX,
@@ -956,59 +958,13 @@ export function buildCzChatSmartReplyResolver({
       };
     }
 
-    const creditLimitReviewFollowUp = buildCzNavigateFollowUp(
-      "cz-limit-review",
-      "Review offer",
-      "credit-limit-review",
-    );
-    const creditLimitNotNowFollowUp = buildCzChatFollowUp(
-      "cz-limit-not-now",
-      "Not now",
-      "Finish this credit limit conversation without changing anything.",
-    );
-
-    if (hasAny(normalized, ["finish this credit limit conversation without changing anything", "leave this credit limit offer unchanged"])) {
-      return {
-        text:
-          `### Offer left unchanged\n` +
-          `Nothing changed on your card. You can review a future eligible offer from the card page.`,
-      };
-    }
-
-    if (hasAny(normalized, ["check repayment impact for this credit limit offer", "repayment impact for this credit limit offer", "repayment impact", "impact if i accept"])) {
-      return {
-        text:
-          `### Repayment impact\n` +
-          `A higher limit does not create a charge by itself. It only adds spending room, so keep any extra use within an amount you can comfortably repay.\n` +
-          `${primaryCard ? `This offer moves **${primaryCard.name}** from **${creditLimit}** to **${proposedCreditLimit}**.` : "The exact amounts are confirmed in the secure card flow."}\n` +
-          `Review the final terms before signing; nothing changes from this conversation.`,
-        followUps: [creditLimitReviewFollowUp, creditLimitNotNowFollowUp],
-      };
-    }
-
-    if (
-      hasAny(normalized, [
-        "i'm interested in this credit limit offer",
-        "interested in this credit limit offer",
-        "interested in this offer",
-        "credit limit offer",
-        "credit card limit upgrade options",
-        "limit upgrade options",
-      ])
-    ) {
-      return {
-        text:
-          `### Your limit offer\n` +
-          `${primaryCard ? `Increase **${primaryCard.name}** from **${creditLimit}** to **${proposedCreditLimit}** for extra flexibility when you need it.` : "Review the eligible limit prepared for your card."}\n` +
-          `You can check the repayment impact here or open the secure review. Nothing changes until you accept the terms and sign.`,
-        richBlocks: [creditLimitOfferBlock],
-        followUps: [
-          buildCzChatFollowUp("cz-limit-impact", "Check repayment impact", "Check repayment impact for this credit limit offer."),
-          creditLimitReviewFollowUp,
-          creditLimitNotNowFollowUp,
-        ],
-      };
-    }
+    const cardReply = resolveCzCardReply(normalized, {
+      primaryCardName: primaryCard?.name ?? null,
+      creditLimit,
+      proposedCreditLimit,
+      creditLimitOfferBlock,
+    });
+    if (cardReply) return cardReply;
 
     if (hasAny(normalized, ["main things i should notice", "financial overview", "homepage overview"])) {
       return {
@@ -1851,68 +1807,8 @@ export function buildCzChatSmartReplyResolver({
       };
     }
 
-    if (hasAny(normalized, ["specific inbox", "outbox message", "message types", "bank notifications"])) {
-      return {
-        text:
-          `### Messages help\n` +
-          `Use Messages for bank communication, not transaction proof.\n` +
-          `Inbox is for received notices, Outbox is for requests or messages sent from the app, and Documents is where durable statements or confirmations should live.\n` +
-          `If the user needs evidence for a payment, route to Documents or the transaction detail instead of only searching messages.`,
-        richBlocks: [documentBlock],
-        followUps: [
-          buildCzNavigateFollowUp("cz-open-messages", "Open Messages", "messages"),
-          buildCzNavigateFollowUp("cz-open-documents", "Open Documents", "documents"),
-          buildCzChatFollowUp("cz-find-confirmation", "Find payment proof", "Help me find or understand a payment confirmation."),
-        ],
-      };
-    }
-
-    if (hasAny(normalized, ["prime can help", "contact or prepare questions for my advisor", "advisor questions"])) {
-      return {
-        text:
-          `### Prime preparation\n` +
-          `A good Prime answer should help the customer prepare before contacting the advisor.\n` +
-          `Summarize the goal, the amount involved, urgency, risk or borrowing questions, and any documents the advisor should review.\n` +
-          `Then route to Prime or Contacts rather than pretending the chat itself is the advisor.`,
-        followUps: [
-          buildCzNavigateFollowUp("cz-open-prime", "Open Prime", "prime"),
-          buildCzNavigateFollowUp("cz-open-contacts", "Open Contacts", "contacts"),
-          buildCzChatFollowUp("cz-prepare-advisor", "Prepare questions", "Help me prepare questions before contacting the bank."),
-        ],
-      };
-    }
-
-    if (hasAny(normalized, ["right support", "support or branch contact", "prepare questions before contacting"])) {
-      return {
-        text:
-          `### Contact route\n` +
-          `First decide whether this is servicing, advice, or urgent security.\n` +
-          `- Security issue: card block/support first.\n` +
-          `- Product advice: prepare context and use advisor/Prime where available.\n` +
-          `- Branch/contact search: open Contacts and choose the channel there.\n` +
-          `The assistant should prepare the question, not replace the official contact route.`,
-        followUps: [
-          buildCzNavigateFollowUp("cz-open-contacts", "Open Contacts", "contacts"),
-          buildCzChatFollowUp("cz-card-security", "Card security", "Help me review this card's security settings and recent activity."),
-          buildCzChatFollowUp("cz-documents", "Find documents", "Help me find statements, contracts, confirmations, or legal notices."),
-        ],
-      };
-    }
-
-    if (hasAny(normalized, ["why should i review the card before documents", "why this order"])) {
-      return {
-        text:
-          `### Why that order\n` +
-          `The card check is action-oriented: it can explain free-to-spend, recent reservations, and the limit-review opportunity.\n` +
-          `Documents are evidence-oriented: useful when the customer needs a statement, receipt, contract, or legal notice.\n` +
-          `So I would start with Card if the question is "what should I do next?", and Documents if the question is "where is the proof?"`,
-        richBlocks: [productsBlock],
-        followUps: [
-          buildCzNavigateFollowUp("cz-open-card", "Open Card", "card-detail"),
-          buildCzNavigateFollowUp("cz-open-documents", "Open Documents", "documents"),
-        ],
-      };
-    }
+    const supportReply = resolveCzSupportReply(normalized, { documentBlock, productsBlock });
+    if (supportReply) return supportReply;
 
     return defaultReplyResolver(input);
   };

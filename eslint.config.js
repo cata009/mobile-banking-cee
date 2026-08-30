@@ -1,25 +1,38 @@
 import js from '@eslint/js'
+import jsxA11y from 'eslint-plugin-jsx-a11y'
+import reactHooks from 'eslint-plugin-react-hooks'
 import tseslint from 'typescript-eslint'
+
+const jsxA11yWarnings = Object.fromEntries(
+  Object.keys(jsxA11y.flatConfigs.recommended.rules).map((ruleName) => [ruleName, 'warn']),
+)
 
 export default tseslint.config(
   {
-    ignores: [
-      'dist/**',
-      'node_modules/**',
-      'package/**',
-      'screenshots/**',
-      'src/imports/**',
-    ],
+    ignores: ['dist/**', 'node_modules/**', 'package/**', 'screenshots/**', 'src/imports/**'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: [
-      'api/**/*.js',
-      'scripts/**/*.{js,mjs,cjs}',
-      'tests/**/*.{js,mjs,cjs}',
-      '*.config.js',
-    ],
+    files: ['src/**/*.{ts,tsx}'],
+    plugins: {
+      'react-hooks': reactHooks,
+    },
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+    },
+  },
+  {
+    files: ['src/**/*.tsx'],
+    languageOptions: jsxA11y.flatConfigs.recommended.languageOptions,
+    plugins: jsxA11y.flatConfigs.recommended.plugins,
+    // Existing prototypes have accessibility debt. Surface it now without
+    // blocking unrelated work; touched components can ratchet warnings down.
+    rules: jsxA11yWarnings,
+  },
+  {
+    files: ['api/**/*.js', 'scripts/**/*.{js,mjs,cjs}', 'tests/**/*.{js,mjs,cjs}', '*.config.js'],
     languageOptions: {
       globals: {
         Buffer: 'readonly',
@@ -47,10 +60,7 @@ export default tseslint.config(
   },
   {
     // Node-side dev scripts and API handlers legitimately log progress/results.
-    files: [
-      'api/**/*.js',
-      'scripts/**/*.{js,mjs,cjs}',
-    ],
+    files: ['api/**/*.js', 'scripts/**/*.{js,mjs,cjs}'],
     rules: {
       'no-console': 'off',
     },
