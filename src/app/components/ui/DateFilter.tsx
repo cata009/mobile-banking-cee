@@ -34,7 +34,7 @@ function DateFilterChip({
       className={cn(
         "inline-flex h-[24px] min-w-[42px] shrink-0 items-center justify-center rounded-[4px] px-[8px] text-center text-[14px] font-bold leading-[16px] whitespace-nowrap",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]",
-        selected ? "border border-[var(--uc-action)] bg-[var(--uc-action)] text-[var(--uc-static-white)]" : "border border-[var(--uc-text)] bg-transparent text-[var(--uc-text)]",
+        selected ? "border border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]" : "border border-[var(--uc-text)] bg-transparent text-[var(--uc-text)]",
       )}
       aria-pressed={selected}
       onClick={onClick}

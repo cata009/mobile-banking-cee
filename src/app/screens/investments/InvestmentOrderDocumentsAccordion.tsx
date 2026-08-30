@@ -550,7 +550,7 @@ function ScenarioPeriodChips({
             className={cn(
               "inline-flex h-[21px] min-w-[35px] items-center justify-center whitespace-nowrap rounded-[3.5px] px-[8px] text-center text-[14px] font-bold leading-[15px]",
               selected
-                ? "border border-transparent bg-[var(--uc-action)] text-[var(--uc-text-inverse)]"
+                ? "border border-transparent bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
                 : "border border-[var(--uc-text)] bg-transparent text-[var(--uc-text)]",
             )}
           >

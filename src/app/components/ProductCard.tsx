@@ -63,17 +63,17 @@ export default function ProductCard({
     const visibleActions = actions?.slice(0, 4) ?? [];
     const radiusClass =
       stackRole === 'first'
-        ? 'rounded-t-[4px]'
+        ? 'rounded-t-[8px]'
         : stackRole === 'last'
-          ? 'rounded-b-[4px]'
+          ? 'rounded-b-[8px]'
           : stackRole === 'middle'
             ? 'rounded-none'
-          : 'rounded-[4px]';
+          : 'rounded-[8px]';
     const hasSeparator = stackRole === 'middle' || stackRole === 'last';
 
     return (
       <div
-        className={`flex w-full max-w-full min-w-0 flex-col items-end bg-[var(--uc-surface-raised)] p-[16px] text-[var(--uc-text)] transition-opacity ${visibleActions.length > 0 ? "gap-[32px]" : footer ? "gap-[16px]" : "gap-[8px]"} ${hasSeparator ? 'border-t-[0.5px] border-[var(--uc-border-muted)]' : ''} ${stackRole === 'single' ? 'relative z-10 shadow-[0_6px_12px_rgb(var(--uc-shadow-rgb)/0.08)]' : ''} ${radiusClass} ${onClick ? "cursor-pointer hover:opacity-90" : ""}`}
+        className={`flex w-full max-w-full min-w-0 flex-col items-end bg-[var(--uc-surface-raised)] p-[16px] text-[var(--uc-text)] transition-opacity ${visibleActions.length > 0 ? "gap-[32px]" : footer ? "gap-[16px]" : "gap-[8px]"} ${hasSeparator ? 'border-t-[0.5px] border-[var(--uc-border-muted)]' : ''} ${stackRole === 'single' ? 'relative z-10' : ''} ${radiusClass} ${onClick ? "cursor-pointer hover:opacity-90" : ""}`}
         data-product-card-evolution
         data-product-card-separator={hasSeparator ? 'true' : undefined}
         data-product-style={productStyle}
@@ -154,7 +154,7 @@ export default function ProductCard({
 
   return (
     <div 
-      className={`flex flex-col items-start gap-[4px] self-stretch rounded-[4px] bg-[var(--uc-surface-raised)] transition-opacity ${onClick ? "cursor-pointer hover:opacity-90" : ""}`}
+      className={`flex flex-col items-start gap-[4px] self-stretch rounded-[8px] bg-[var(--uc-surface-raised)] transition-opacity ${onClick ? "cursor-pointer hover:opacity-90" : ""}`}
       style={{
         padding: '16px'
       }}

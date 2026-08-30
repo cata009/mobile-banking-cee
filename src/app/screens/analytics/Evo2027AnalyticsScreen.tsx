@@ -1,11 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type UIEvent } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type ReactNode, type UIEvent } from 'react';
 import ExpenseBarChart, { type ExpenseBar } from '@/app/components/analytics/ExpenseBarChart';
 import ExpenseDonutChart, {
   EXPENSE_OTHER_CATEGORY,
   type ExpenseDonutCategory,
   type ExpenseDonutSegment,
 } from '@/app/components/analytics/ExpenseDonutChart';
+import CashFlowBars, { CashFlowDot } from '@/app/components/analytics/CashFlowBars';
 import AccountCarouselIndicator from '@/app/components/accounts/AccountCarouselIndicator';
+import { CAROUSEL_CARD_SHADOW } from '@/app/components/accounts/AccountBalanceCard';
 import AccountTransactionMonthDivider from '@/app/components/accounts/AccountTransactionMonthDivider';
 import AccountTransactionRow from '@/app/components/accounts/AccountTransactionRow';
 import { transactionGroupCardClassName } from '@/app/components/accounts/transactionGroupCard';
@@ -21,7 +23,7 @@ import TransactionAvatar from '@/app/components/transactions/TransactionAvatar';
 import PfmCategoryBubbleChart from '@/app/components/pfm/PfmCategoryBubbleChart';
 import PfmCategoryIcon from '@/app/components/pfm/PfmCategoryIcon';
 import { useLanguage } from '@/app/contexts/LanguageContext';
-import { formatMoneyNumber } from '@/app/registry/countryConfig';
+import { formatMoneyNumber, formatSignedMoneyNumber } from '@/app/registry/countryConfig';
 import { useCountry, useDemo } from '@/app/state/demoStore';
 import type { CountryId } from '@/app/state/demoTypes';
 import {
@@ -29,6 +31,8 @@ import {
   createSpendingAnalyticsTimeline,
   createSpendingCategoryDetail,
   getAnalyticsSubcategoryLabel,
+  getSpendingWeekIndex,
+  SPENDING_WEEK_LENGTH,
   type SpendingSubcategorySummary,
   type SpendingAnalyticsPeriod,
   type SpendingAnalyticsSummary,
@@ -42,6 +46,13 @@ import { useDragCarousel } from '@/hooks/useDragCarousel';
 import { useProducts } from '@/hooks/useProducts';
 import { CurrencyBadge } from '../home/App2027ProductAccordions';
 import { getEvoAnalyticsCategoryDisplayLabel } from './analyticsCategoryLabels';
+import {
+  createEvoAnalyticsState,
+  evoAnalyticsReducer,
+  type AnalyticsDirection,
+  type ExpenseChartMode,
+  type ExpenseSplitMode,
+} from './evoAnalyticsState';
 
 type AnalyticsScope = {
   id: string;
@@ -55,15 +66,10 @@ const OVERVIEW_CATEGORY_LIMIT = 3;
 /** Categories drawn as individual arcs; all remaining categories share the Other arc. */
 const DONUT_CATEGORY_LIMIT = 3;
 
-type ExpenseChartMode = 'donut' | 'bars';
-type AnalyticsDirection = 'expense' | 'income';
-
 const EXPENSE_CHART_MODES: ReadonlyArray<{ mode: ExpenseChartMode; icon: 'analytics-donut-toggle' | 'analytics-bars-toggle'; label: string }> = [
   { mode: 'donut', icon: 'analytics-donut-toggle', label: 'Show categories as a donut' },
   { mode: 'bars', icon: 'analytics-bars-toggle', label: 'Show spending over time' },
 ];
-
-type ExpenseSplitMode = 'categories' | 'merchants' | 'currencies';
 
 const EXPENSE_SPLIT_MODES: ReadonlyArray<{ mode: ExpenseSplitMode; label: string }> = [
   { mode: 'categories', label: 'Categories' },
@@ -146,18 +152,11 @@ function buildExpenseBreakdown(
   return Array.from(groups.values()).sort((a, b) => b.total - a.total || a.label.localeCompare(b.label));
 }
 
-const EXPENSE_WEEK_LENGTH = 7;
-
-/** Fixed 7-day slices counted from the 1st, so every month lands on 4 or 5 week buckets. */
-function getExpenseWeekIndex(day: number) {
-  return Math.floor((day - 1) / EXPENSE_WEEK_LENGTH);
-}
-
 /** Bucket a transaction lands in on the bar chart: one bar per week in a month, per month in a year. */
 function getExpenseBucketKey(transaction: SpendingAnalyticsTransaction, periodKind: 'month' | 'year') {
   return periodKind === 'year'
     ? transaction.monthKey
-    : `w${getExpenseWeekIndex(Number(transaction.day)) + 1}`;
+    : `w${getSpendingWeekIndex(Number(transaction.day)) + 1}`;
 }
 
 function buildExpenseBars(
@@ -183,6 +182,7 @@ function buildExpenseBars(
         key,
         // A single initial keeps all twelve months on the axis; abbreviations would have to be thinned out.
         label: month.toLocaleDateString(locale, { month: 'narrow' }),
+        filterTitle: month.toLocaleDateString(locale, { month: 'long' }),
         filterLabel: `${month.toLocaleDateString(locale, { month: 'long' })} ${summary.yearLabel}`,
         total: totals.get(key) ?? 0,
       };
@@ -195,12 +195,12 @@ function buildExpenseBars(
   // Day 0 of the next month is the last day of this one.
   const dayCount = new Date(year, monthIndex + 1, 0).getDate();
   // The trailing week is short whenever the month does not divide by seven (29-31, or 22-28 in February).
-  const weekCount = Math.ceil(dayCount / EXPENSE_WEEK_LENGTH);
+  const weekCount = Math.ceil(dayCount / SPENDING_WEEK_LENGTH);
 
   return Array.from({ length: weekCount }, (_, index) => {
     const key = `w${index + 1}`;
-    const firstDay = index * EXPENSE_WEEK_LENGTH + 1;
-    const lastDay = Math.min(dayCount, firstDay + EXPENSE_WEEK_LENGTH - 1);
+    const firstDay = index * SPENDING_WEEK_LENGTH + 1;
+    const lastDay = Math.min(dayCount, firstDay + SPENDING_WEEK_LENGTH - 1);
     const weekLabel = `Week ${index + 1}`;
 
     return {
@@ -208,6 +208,7 @@ function buildExpenseBars(
       label: `${firstDay}–${lastDay}`,
       caption: weekLabel,
       // Outside the axis the ordinal alone is meaningless, so name the actual dates: "22-28 April 2026".
+      filterTitle: `${firstDay}–${lastDay} ${formatPeriodLabel(summary.periodLabel)}`,
       filterLabel: `${firstDay}–${lastDay} ${formatPeriodLabel(summary.periodLabel)} ${summary.yearLabel}`,
       total: totals.get(key) ?? 0,
     };
@@ -397,7 +398,8 @@ function AnalyticsHeader({ onMessagesClick }: { onMessagesClick?: () => void }) 
   // sibling destination keeps — see HomeHeader.tsx:33, PaymentsScreen.tsx:55, MoreHeader.tsx:34.
   return (
     <header className="w-full bg-[var(--uc-app-bg)]">
-      <div className="px-[24px] pb-[20px]">
+      {/* Same gutter as the page body below, so the title lines up with the cards. */}
+      <div className="px-[16px] pb-[20px]">
         <div className="flex min-h-[32px] items-start gap-[8px]">
           <h1 className="uc-type-h1 min-w-0 flex-1 text-[var(--uc-text)]">
             {t('runtime.analytics.title', 'My Spendings')}
@@ -418,11 +420,14 @@ function ExpensePeriodStepper({
   periods,
   selectedPeriodKey,
   onPeriodChange,
+  titleOverride,
   className = '',
 }: {
   periods: readonly SpendingAnalyticsPeriod[];
   selectedPeriodKey: string;
   onPeriodChange: (periodKey: string) => void;
+  /** Names the slice the user isolated on the chart; the year keeps its place underneath. */
+  titleOverride?: string | null;
   className?: string;
 }) {
   const activeIndex = Math.max(periods.findIndex((period) => period.key === selectedPeriodKey), 0);
@@ -450,11 +455,11 @@ function ExpensePeriodStepper({
 
       <div className="min-w-0 flex-1 text-center">
         <h2 className="truncate text-[24px] font-bold leading-[28px] tracking-[-0.02em] text-[var(--uc-text)]">
-          {activePeriod.kind === 'year' ? activePeriod.label : formatPeriodLabel(activePeriod.label)}
+          {titleOverride ?? (activePeriod.kind === 'year' ? activePeriod.label : formatPeriodLabel(activePeriod.label))}
         </h2>
         {/* Both kinds carry a subtitle, so stepping from a month to a year never changes the header height. */}
         <p className="text-[16px] font-bold leading-[20px] text-[var(--uc-text-muted)]">
-          {activePeriod.kind === 'month' ? activePeriod.year : 'Full year'}
+          {titleOverride || activePeriod.kind === 'month' ? activePeriod.year : 'Full year'}
         </p>
       </div>
 
@@ -480,6 +485,7 @@ function ExpensePeriodNavigator({
   periods,
   selectedPeriodKey,
   onPeriodChange,
+  titleOverride,
   trailing,
 }: {
   scopeLabel: string;
@@ -487,6 +493,7 @@ function ExpensePeriodNavigator({
   periods: readonly SpendingAnalyticsPeriod[];
   selectedPeriodKey: string;
   onPeriodChange: (periodKey: string) => void;
+  titleOverride?: string | null;
   /** Optional control parked on the scope row, e.g. the chart-mode toggle. */
   trailing?: ReactNode;
 }) {
@@ -498,7 +505,7 @@ function ExpensePeriodNavigator({
           data-evo-analytics-scope-trigger
           aria-haspopup="dialog"
           onClick={onOpenScope}
-          className="-ml-[4px] inline-flex min-h-[32px] min-w-0 max-w-full items-center gap-[6px] rounded-[4px] px-[4px] text-left text-[16px] font-bold leading-[20px] text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+          className="-ml-[4px] inline-flex min-h-[32px] min-w-0 max-w-full items-center gap-[6px] rounded-[8px] px-[4px] text-left text-[16px] font-bold leading-[20px] text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
         >
           <span className="truncate">{scopeLabel}</span>
           <AppIcon name="chevron-down-wide" size={18} color="currentColor" aria-hidden="true" />
@@ -513,6 +520,7 @@ function ExpensePeriodNavigator({
         periods={periods}
         selectedPeriodKey={selectedPeriodKey}
         onPeriodChange={onPeriodChange}
+        titleOverride={titleOverride}
       />
     </section>
   );
@@ -636,7 +644,7 @@ function ExpenseChartModeToggle({
           aria-pressed={entry.mode === mode}
           className={`grid h-[24px] w-[40px] place-items-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)] ${
             entry.mode === mode
-              ? 'bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-[0_1px_2px_rgb(var(--uc-shadow-rgb)/0.16)]'
+              ? 'bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]'
               : 'text-[var(--uc-text-subtle)]'
           }`}
           onClick={() => onModeChange(entry.mode)}
@@ -672,7 +680,7 @@ function ExpenseTransactionList({
     <section aria-label="Expense transactions" className="mt-[32px] pb-[20px]">
       <div className="flex items-end justify-between gap-[16px]">
         <div className="min-w-0">
-          <h3 className="text-[24px] font-bold leading-[26px] tracking-[-0.02em] text-[var(--uc-text)]">Transactions</h3>
+          <h3 className="uc-type-l1 text-[var(--uc-text)]">Transactions</h3>
           <p className="mt-[4px] text-[16px] leading-[20px] text-[var(--uc-text-muted)]">{scopeLabel}</p>
         </div>
         {/* The figures belong beside what they add up: this list, under this filter. */}
@@ -693,7 +701,7 @@ function ExpenseTransactionList({
             <div key={dateGroup.dateKey} data-transaction-date-group={dateGroup.dateKey}>
               <AccountTransactionMonthDivider
                 title={dateGroup.dateTitle}
-                total={dateGroup.transactions.length > 1 ? formatMoneyNumber(dateGroup.dailyTotal, country) : undefined}
+                total={dateGroup.transactions.length > 1 ? formatSignedMoneyNumber(dateGroup.dailyTotal, country) : undefined}
                 currency={summary.currency}
                 dateSeparator
               />
@@ -711,7 +719,7 @@ function ExpenseTransactionList({
                       // Across a multi-account scope the source account is what tells two identical rows apart.
                       detailsLabel={transaction.sourceProductName}
                       categoryIconVariant="category-circle"
-                      positiveAmountClassName="text-[#3D7D43]"
+                      positiveAmountClassName="text-[var(--uc-green-olive)]"
                       evo2027
                       showDate={false}
                       compact={dateGroup.transactions.length === 1}
@@ -724,7 +732,7 @@ function ExpenseTransactionList({
           ))}
         </div>
       ) : (
-        <div className="mt-[12px] overflow-hidden rounded-[22px] bg-[var(--uc-surface)]">
+        <div className="mt-[12px] overflow-hidden rounded-[8px] bg-[var(--uc-surface)]">
           <p className="px-[16px] py-[24px] text-[16px] leading-[22px] text-[var(--uc-text-muted)]">No transactions match this category.</p>
         </div>
       )}
@@ -873,7 +881,7 @@ function ExpenseBreakdownList({
     <section aria-label="Expense breakdown" className="mt-[28px] pb-[20px]">
       <ExpenseSplitSelector mode={mode} availableModes={availableModes} onModeChange={onModeChange} onAddTransaction={onAddTransaction} />
 
-      <div className="mt-[12px] overflow-hidden rounded-[22px] bg-[var(--uc-surface)] shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)]">
+      <div className="mt-[12px] overflow-hidden rounded-[8px] bg-[var(--uc-surface)] shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)]">
         <div className="divide-y divide-[var(--uc-border-muted)]">
           {rows.length > 0 ? rows.map((row) => {
             const percentage = total > 0 ? Math.round((row.total / total) * 100) : 0;
@@ -921,6 +929,7 @@ function ExpenseBreakdownDetail({
   periods,
   selectedPeriodKey,
   onPeriodChange,
+  periodTitleOverride,
   excludedSubcategories,
   onToggleSubcategory,
   onTransactionClick,
@@ -936,6 +945,7 @@ function ExpenseBreakdownDetail({
   periods: readonly SpendingAnalyticsPeriod[];
   selectedPeriodKey: string;
   onPeriodChange: (periodKey: string) => void;
+  periodTitleOverride?: string | null;
   excludedSubcategories: ReadonlySet<string>;
   onToggleSubcategory: (subcategoryLabel: string) => void;
   onTransactionClick?: (transaction: SpendingAnalyticsTransaction) => void;
@@ -960,6 +970,7 @@ function ExpenseBreakdownDetail({
         periods={periods}
         selectedPeriodKey={selectedPeriodKey}
         onPeriodChange={onPeriodChange}
+        titleOverride={periodTitleOverride}
       />
 
       {subcategories.length > 0 ? (
@@ -1032,12 +1043,6 @@ function SpendingMonthCard({
     ? Math.round((summary.netTotal / summary.incomeTotal) * 100)
     : null;
   const overspent = summary.incomeTotal > 0 && summary.netTotal < 0;
-  // Both bars are measured against the bigger flow, so the longer bar is always the bigger number.
-  const flowScale = Math.max(summary.incomeTotal, summary.spendingTotal, 1);
-  const flows = [
-    { key: 'in', label: 'In', total: summary.incomeTotal, color: 'var(--uc-action)' },
-    { key: 'out', label: 'Out', total: summary.spendingTotal, color: 'var(--uc-text)' },
-  ];
 
   return (
     <section
@@ -1046,10 +1051,11 @@ function SpendingMonthCard({
       data-evo-analytics-period-card={summary.periodKey}
       // Narrower than the rail so the neighbouring months peek in at both edges — that peek is
       // the swipe affordance. Plain surface: colour belongs to the data, not the chrome.
-      className="flex w-[calc(100%-44px)] shrink-0 flex-col gap-[18px] overflow-hidden rounded-[22px] bg-[var(--uc-surface)] p-[20px] text-[var(--uc-text)] shadow-[0_4px_16px_rgb(var(--uc-shadow-rgb)/0.07)]"
+      className="flex w-[calc(100%-44px)] shrink-0 flex-col gap-[18px] overflow-hidden rounded-[8px] bg-[var(--uc-surface)] p-[20px] text-[var(--uc-text)]"
+      style={{ boxShadow: CAROUSEL_CARD_SHADOW }}
     >
       <div>
-        <p className="text-[12px] font-bold uppercase leading-[16px] tracking-[0.1em] text-[color-mix(in_srgb,var(--uc-text)_62%,transparent)]">
+        <p className="text-[18px] font-bold uppercase leading-[22px] tracking-[0.05em] text-[var(--uc-action)]">
           {periodLabel}
         </p>
         {/* Both flows sit above the rule: the pair is the story, neither figure tells it alone. */}
@@ -1058,11 +1064,11 @@ function SpendingMonthCard({
             type="button"
             data-evo-analytics-open-expenses
             onClick={onOpenExpenses}
-            className="min-w-0 rounded-[4px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-surface)]"
+            className="min-w-0 rounded-[8px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-surface)]"
           >
-            <span className="flex items-center gap-[4px] text-[14px] font-bold leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
+            <span className="flex items-center gap-[6px] text-[14px] font-bold leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
+              <CashFlowDot flow="out" />
               Money out
-              <AppIcon name="chevron-link" size={18} color="currentColor" aria-hidden="true" />
             </span>
             <span className="mt-[2px] flex items-baseline gap-[2px] whitespace-nowrap">
               <span className="text-[20px] font-bold leading-[24px] tracking-[-0.02em]">{spent.integer}</span>
@@ -1074,11 +1080,11 @@ function SpendingMonthCard({
             type="button"
             data-evo-analytics-open-income
             onClick={onOpenIncome}
-            className="min-w-0 rounded-[4px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-surface)]"
+            className="min-w-0 rounded-[8px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-surface)]"
           >
-            <span className="flex items-center gap-[4px] text-[14px] font-bold leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
+            <span className="flex items-center gap-[6px] text-[14px] font-bold leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
+              <CashFlowDot flow="in" />
               Money in
-              <AppIcon name="chevron-link" size={18} color="currentColor" aria-hidden="true" />
             </span>
             <span className="mt-[2px] flex items-baseline gap-[2px] whitespace-nowrap">
               <span className="text-[20px] font-bold leading-[24px] tracking-[-0.02em]">{earned.integer}</span>
@@ -1103,28 +1109,13 @@ function SpendingMonthCard({
               : 'No income recorded in this period'}
         </p>
 
-        {/* One scale for both bars, so which flow is bigger — and by how much — reads without the figures. */}
-        <div className="mt-[16px] flex flex-col gap-[8px]" data-evo-analytics-flow-bars>
-          {flows.map((flow) => (
-            <div key={flow.key} className="flex items-center gap-[10px]">
-              <span className="w-[26px] shrink-0 text-[11px] font-bold uppercase leading-[14px] tracking-[0.06em] text-[color-mix(in_srgb,var(--uc-text)_62%,transparent)]">
-                {flow.label}
-              </span>
-              <span
-                className="h-[8px] min-w-0 flex-1 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--uc-text)_10%,transparent)]"
-                data-evo-analytics-flow-bar={flow.key}
-              >
-                <span
-                  className="block h-full rounded-full transition-[width] duration-300"
-                  style={{
-                    width: `${Math.max((flow.total / flowScale) * 100, flow.total > 0 ? 2 : 0)}%`,
-                    backgroundColor: flow.color,
-                  }}
-                />
-              </span>
-            </div>
-          ))}
-        </div>
+        <CashFlowBars
+          className="mt-[16px]"
+          incomeTotal={summary.incomeTotal}
+          spendingTotal={summary.spendingTotal}
+          barDataAttribute="data-evo-analytics-flow-bar"
+          barsDataAttribute="data-evo-analytics-flow-bars"
+        />
       </div>
     </section>
   );
@@ -1235,7 +1226,7 @@ function SpendingMonthCarousel({
         }}
         // Bleeds to the device edges so the peeking neighbours are visible, while the first card
         // still starts on the page's 16px inset.
-        className={`-mx-[16px] flex gap-[12px] overflow-x-auto overscroll-x-contain px-[16px] py-[4px] scrollbar-hide select-none touch-pan-y focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        className={`-mx-[16px] flex gap-[12px] overflow-x-auto overflow-y-visible overscroll-x-contain px-[16px] pt-[16px] pb-[34px] scrollbar-hide select-none touch-pan-y focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
         style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
       >
         {periods.map((period) => {
@@ -1260,7 +1251,7 @@ function SpendingMonthCarousel({
       </div>
 
       {periods.length > 1 ? (
-        <div className="mt-[8px] flex justify-center" aria-label="Monthly interval pages">
+        <div className="-mt-[16px] flex justify-center" aria-label="Monthly interval pages">
           <AccountCarouselIndicator count={periods.length} activeIndex={activeIndex} onSelect={scrollToIndex} itemLabel="month" />
         </div>
       ) : null}
@@ -1353,10 +1344,10 @@ function SpendingTopCategories({
   return (
     <section aria-label={ariaLabel} {...{ [sectionDataAttribute]: true }}>
       <div>
-        <h2 className="text-[22px] font-bold leading-[28px] tracking-[-0.02em] text-[var(--uc-text)]">{title}</h2>
+        <h2 className="uc-type-l1 text-[var(--uc-text)]">{title}</h2>
       </div>
 
-      <div className="mt-[12px] overflow-hidden rounded-[22px] bg-[var(--uc-surface)] pb-[8px] shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)]">
+      <div className="mt-[12px] overflow-hidden rounded-[8px] bg-[var(--uc-surface)] pb-[8px] shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)]">
         {rows.map((row, index) => {
           const share = total > 0 ? Math.round((row.total / total) * 100) : 0;
           const amount = splitAmount(maskFormattedAmount(formatMoneyNumber(row.total, country), amountsHidden));
@@ -1431,6 +1422,7 @@ function ExpensesDetail({
   periods,
   selectedPeriodKey,
   onPeriodChange,
+  periodTitleOverride,
   summary,
   country,
   selectedKeys,
@@ -1459,6 +1451,7 @@ function ExpensesDetail({
   periods: readonly SpendingAnalyticsPeriod[];
   selectedPeriodKey: string;
   onPeriodChange: (periodKey: string) => void;
+  periodTitleOverride?: string | null;
   summary: SpendingAnalyticsSummary;
   country: CountryId;
   selectedKeys: ReadonlySet<ExpenseDonutCategory>;
@@ -1488,6 +1481,7 @@ function ExpensesDetail({
         periods={periods}
         selectedPeriodKey={selectedPeriodKey}
         onPeriodChange={onPeriodChange}
+        titleOverride={periodTitleOverride}
         trailing={<ExpenseChartModeToggle mode={chartMode} onModeChange={onChartModeChange} />}
       />
 
@@ -1565,22 +1559,36 @@ export default function Evo2027AnalyticsScreen({
       ...currentAccounts.map((account) => ({ id: account.id, label: account.name, products: [account] })),
     ];
   }, [currentAccounts, products]);
-  const [selectedScopeId, setSelectedScopeId] = useState(initialScopeId ?? 'all-accounts');
-  const [view, setView] = useState<'overview' | 'analysis' | 'breakdown'>(initialDirection ? 'analysis' : 'overview');
-  const [analysisDirection, setAnalysisDirection] = useState<AnalyticsDirection>(initialDirection ?? 'expense');
-  const [breakdownOrigin, setBreakdownOrigin] = useState<'overview' | 'analysis'>('analysis');
-  const [scopeSheetOpen, setScopeSheetOpen] = useState(false);
+  const initialScope = scopes.find((scope) => scope.id === (initialScopeId ?? 'all-accounts')) ?? scopes[0];
+  const initialPeriodKey = useMemo(
+    () => createSpendingAnalyticsTimeline(
+      country,
+      initialScope?.products ?? [],
+      transactionCategoryOverrides,
+    ).activePeriodKey,
+    [country, initialScope?.products, transactionCategoryOverrides],
+  );
+  const [analyticsState, dispatchAnalytics] = useReducer(
+    evoAnalyticsReducer,
+    createEvoAnalyticsState(initialScopeId, initialDirection, initialPeriodKey),
+  );
+  const {
+    selectedScopeId,
+    view,
+    analysisDirection,
+    scopeSheetOpen,
+    expenseSplitMode,
+    selectedSplitKeys,
+    expenseChartMode,
+    selectedBucketKey,
+    selectedPeriodKey,
+  } = analyticsState;
   const [contentScrollTop, setContentScrollTop] = useState(0);
   const contentRef = useRef<HTMLElement>(null);
   const [scrollSlack, setScrollSlack] = useState(0);
   const headerReleaseRef = useRef(0);
-  const [expenseSplitMode, setExpenseSplitMode] = useState<ExpenseSplitMode>('categories');
   const [openBreakdownRow, setOpenBreakdownRow] = useState<ExpenseBreakdownRow | null>(null);
   const [excludedSubcategories, setExcludedSubcategories] = useState<ReadonlySet<string>>(() => new Set());
-  /** Empty means "all categories". Order is irrelevant — it is used as a set. */
-  const [selectedSplitKeys, setSelectedSplitKeys] = useState<ExpenseDonutCategory[]>([]);
-  const [expenseChartMode, setExpenseChartMode] = useState<ExpenseChartMode>('donut');
-  const [selectedBucketKey, setSelectedBucketKey] = useState<string | null>(null);
   const activeScope = scopes.find((scope) => scope.id === selectedScopeId) ?? scopes[0];
   const timeline = useMemo(
     () => createSpendingAnalyticsTimeline(country, activeScope?.products ?? [], transactionCategoryOverrides),
@@ -1590,16 +1598,14 @@ export default function Evo2027AnalyticsScreen({
     () => timeline.periods.filter((period) => period.kind === 'month'),
     [timeline.periods],
   );
-  const [selectedPeriodKey, setSelectedPeriodKey] = useState(timeline.activePeriodKey);
-
   useEffect(() => {
     if (!scopes.some((scope) => scope.id === selectedScopeId)) {
-      setSelectedScopeId('all-accounts');
+      dispatchAnalytics({ type: 'set-field', field: 'selectedScopeId', value: 'all-accounts' });
     }
   }, [scopes, selectedScopeId]);
 
   useEffect(() => {
-    setSelectedPeriodKey(timeline.activePeriodKey);
+    dispatchAnalytics({ type: 'set-field', field: 'selectedPeriodKey', value: timeline.activePeriodKey });
   }, [timeline.activePeriodKey]);
 
   const firstPeriod = monthlyPeriods[0];
@@ -1674,12 +1680,14 @@ export default function Evo2027AnalyticsScreen({
   const expenseSelectionLabels = Array.from(activeSplitSelection).map((key) => (
     key === EXPENSE_OTHER_CATEGORY ? EXPENSE_OTHER_CATEGORY : donutRows.find((row) => row.key === key)?.label ?? key
   ));
-  const activeBucketLabel = activeBucketKey
-    ? (() => {
-      const bar = expenseBars.find((entry) => entry.key === activeBucketKey);
-      return bar ? bar.filterLabel ?? [bar.caption, bar.label].filter(Boolean).join(' ') : null;
-    })()
+  const activeBucket = activeBucketKey
+    ? expenseBars.find((entry) => entry.key === activeBucketKey) ?? null
     : null;
+  const activeBucketLabel = activeBucket
+    ? activeBucket.filterLabel ?? [activeBucket.caption, activeBucket.label].filter(Boolean).join(' ')
+    : null;
+  // The stepper is where the period is named, so an isolated slice renames it there.
+  const activeBucketTitle = activeBucket?.filterTitle ?? activeBucketLabel;
   const expenseFilterLabel = [
     expenseSelectionLabels.length === 1
       ? expenseSelectionLabels[0]
@@ -1694,9 +1702,7 @@ export default function Evo2027AnalyticsScreen({
   const expenseSelectionLabel = expenseSelectionLabels.length > 1
     ? `${expenseSelectionLabels.length} ${SPLIT_MODE_NOUNS[activeSplitMode]}`
     : expenseSelectionLabels[0] ?? (analysisDirection === 'income' ? 'Total income' : 'Total spent');
-  const expenseHeaderLabel = activeBucketLabel
-    ? `${expenseSelectionLabel} · ${activeBucketLabel}`
-    : expenseSelectionLabel;
+  const expenseHeaderLabel = expenseSelectionLabel;
 
   const breakdownRows = useMemo(
     () => buildExpenseBreakdown(activeSplitMode, visibleExpenses, currencyByProductId, summary.currency, ANALYTICS_LOCALE),
@@ -1806,56 +1812,41 @@ export default function Evo2027AnalyticsScreen({
   };
   const handleOpenBreakdownRow = (row: ExpenseBreakdownRow, direction: AnalyticsDirection = 'expense') => {
     setContentScrollTop(0);
-    // Remember where the drill-in started, or Back would land the user on an analysis
-    // page they never opened when they came straight from an overview category row.
-    setBreakdownOrigin(view === 'overview' ? 'overview' : 'analysis');
-    if (view === 'overview') {
-      setAnalysisDirection(direction);
-      setSelectedBucketKey(null);
-    }
     setOpenBreakdownRow(row);
-    setView('breakdown');
+    dispatchAnalytics({
+      type: 'open-breakdown',
+      from: view === 'overview' ? 'overview' : 'analysis',
+      direction,
+    });
   };
   const handleBackFromBreakdown = () => {
     setContentScrollTop(0);
     setOpenBreakdownRow(null);
-    setView(breakdownOrigin);
+    dispatchAnalytics({ type: 'close-breakdown' });
   };
 
   const openAnalysis = (direction: AnalyticsDirection) => {
     setContentScrollTop(0);
-    setAnalysisDirection(direction);
-    setSelectedSplitKeys([]);
-    setSelectedBucketKey(null);
-    setExpenseSplitMode('categories');
-    setExpenseChartMode('donut');
     setOpenBreakdownRow(null);
-    setView('analysis');
+    dispatchAnalytics({ type: 'open-analysis', direction });
   };
 
   const toggleExpenseSegment = (key: ExpenseDonutCategory) => {
-    setSelectedSplitKeys((current) => (
-      current.includes(key)
-        ? current.filter((entry) => entry !== key)
-        : [...current, key]
-    ));
+    dispatchAnalytics({ type: 'toggle-segment', key });
   };
   const clearExpenseSelection = () => {
-    setSelectedSplitKeys([]);
-    setSelectedBucketKey(null);
+    dispatchAnalytics({ type: 'clear-selection' });
   };
   // Slices selected under one split mean nothing under the next, so switching modes starts clean.
   const changeSplitMode = (mode: ExpenseSplitMode) => {
-    setExpenseSplitMode(mode);
-    setSelectedSplitKeys([]);
+    dispatchAnalytics({ type: 'change-split-mode', mode });
   };
   const toggleExpenseBucket = (key: string) => {
-    setSelectedBucketKey((current) => (current === key ? null : key));
+    dispatchAnalytics({ type: 'toggle-bucket', key });
   };
   const handleBackToOverview = () => {
     setContentScrollTop(0);
-    setView('overview');
-    setSelectedBucketKey(null);
+    dispatchAnalytics({ type: 'back-overview' });
     setOpenBreakdownRow(null);
 
     // The overview and detail use the same period rail, so the current selection remains intact.
@@ -1912,13 +1903,13 @@ export default function Evo2027AnalyticsScreen({
             summary={summary}
             country={country}
             scopeLabel={activeScope?.label ?? 'All accounts'}
-            onOpenScope={() => setScopeSheetOpen(true)}
+            onOpenScope={() => dispatchAnalytics({ type: 'set-field', field: 'scopeSheetOpen', value: true })}
             periods={overviewCarouselPeriods}
             selectedPeriodKey={selectedPeriodKey}
             onPeriodChange={(periodKey) => {
-              setSelectedPeriodKey(periodKey);
-              setSelectedBucketKey(null);
+              dispatchAnalytics({ type: 'select-period', periodKey });
             }}
+            periodTitleOverride={activeBucketTitle}
             excludedSubcategories={excludedSubcategories}
             onToggleSubcategory={handleToggleSubcategory}
             onTransactionClick={onTransactionClick}
@@ -1928,20 +1919,20 @@ export default function Evo2027AnalyticsScreen({
             direction={analysisDirection}
             segments={donutSegments}
             scopeLabel={activeScope?.label ?? 'All accounts'}
-            onOpenScope={() => setScopeSheetOpen(true)}
+            onOpenScope={() => dispatchAnalytics({ type: 'set-field', field: 'scopeSheetOpen', value: true })}
             periods={overviewCarouselPeriods}
             selectedPeriodKey={selectedPeriodKey}
             onPeriodChange={(periodKey) => {
-              setSelectedPeriodKey(periodKey);
-              setSelectedBucketKey(null);
+              dispatchAnalytics({ type: 'select-period', periodKey });
             }}
+            periodTitleOverride={activeBucketTitle}
             summary={summary}
             country={country}
             selectedKeys={activeSplitSelection}
             onToggleSegment={toggleExpenseSegment}
             onClearSelection={clearExpenseSelection}
             chartMode={expenseChartMode}
-            onChartModeChange={setExpenseChartMode}
+            onChartModeChange={(value) => dispatchAnalytics({ type: 'set-field', field: 'expenseChartMode', value })}
             bars={expenseBars}
             selectedBucketKey={activeBucketKey}
             onToggleBucket={toggleExpenseBucket}
@@ -1967,8 +1958,8 @@ export default function Evo2027AnalyticsScreen({
                 type="button"
                 data-evo-analytics-scope-trigger
                 aria-haspopup="dialog"
-                onClick={() => setScopeSheetOpen(true)}
-                className="-ml-[4px] inline-flex min-h-[32px] max-w-full items-center gap-[6px] self-start rounded-[4px] px-[4px] text-left text-[16px] font-bold leading-[20px] text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+                onClick={() => dispatchAnalytics({ type: 'set-field', field: 'scopeSheetOpen', value: true })}
+                className="-ml-[4px] inline-flex min-h-[32px] max-w-full items-center gap-[6px] self-start rounded-[8px] px-[4px] text-left text-[16px] font-bold leading-[20px] text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
               >
                 <span className="truncate">{activeScope?.label ?? 'All accounts'}</span>
                 <AppIcon name="chevron-down-wide" size={18} color="currentColor" aria-hidden="true" />
@@ -1979,7 +1970,7 @@ export default function Evo2027AnalyticsScreen({
                 summariesByPeriodKey={timeline.summariesByPeriodKey}
                 selectedPeriodKey={selectedPeriodKey}
                 onPeriodChange={(periodKey) => {
-                  setSelectedPeriodKey(periodKey);
+                  dispatchAnalytics({ type: 'select-period', periodKey });
                 }}
                 country={country}
                 amountsHidden={amountsHidden}
@@ -2022,21 +2013,25 @@ export default function Evo2027AnalyticsScreen({
         <div aria-hidden="true" style={{ height: `${scrollSlack}px` }} data-evo-analytics-scroll-slack />
       </main>
 
+      {/*
+        Same dock as home, attribute included: the shared stylesheet adds 8px of padding to any
+        wrapper holding the nav that is not marked as the dock, which parked this bar 8px higher
+        than every other tab and made it jump on the way in.
+      */}
       <div
         data-evo-analytics-primary-navigation
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex h-[76px] items-end justify-center bg-transparent pb-[8px]"
+        data-app-2027-navigation-dock
+        className="absolute inset-x-0 bottom-[8px] z-30 flex justify-center bg-transparent"
       >
-        <div className="pointer-events-auto w-full">
-          <App2027PrimaryNavigation activeTab="analytics" onTabChange={handleTabChange} selectionMotion />
-        </div>
+        <App2027PrimaryNavigation activeTab="analytics" onTabChange={handleTabChange} selectionMotion />
       </div>
 
       {scopeSheetOpen ? (
         <SpendingScopeSheet
           scopes={scopes}
           selectedScopeId={activeScope?.id ?? 'all-accounts'}
-          onScopeChange={setSelectedScopeId}
-          onClose={() => setScopeSheetOpen(false)}
+          onScopeChange={(value) => dispatchAnalytics({ type: 'set-field', field: 'selectedScopeId', value })}
+          onClose={() => dispatchAnalytics({ type: 'set-field', field: 'scopeSheetOpen', value: false })}
         />
       ) : null}
     </div>

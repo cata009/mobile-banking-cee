@@ -403,7 +403,7 @@ export function MeasurementSurface({ children }: { children: React.ReactNode }) 
                 style={{ left: item.x, top: item.y, width: item.width, height: item.height }}
               >
                 {showLabel && (
-                  <div className={`absolute left-0 top-0 -translate-y-full whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] text-[var(--uc-static-white)] ${isActive ? "bg-[var(--uc-action)]" : "bg-[var(--uc-text)]"}`}>
+                  <div className={`absolute left-0 top-0 -translate-y-full whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] text-[var(--uc-static-white)] ${isActive ? "bg-[var(--uc-action-strong)]" : "bg-[var(--uc-text)]"}`}>
                     {item.label} · {item.width}x{item.height}
                   </div>
                 )}

@@ -163,6 +163,17 @@ export function formatMoneyNumber(
 }
 
 /**
+ * Same as `formatMoneyNumber`, but a positive total keeps its plus.
+ *
+ * Statement subtotals sit next to signed transaction amounts; an unsigned one reads as though the
+ * day had no direction at all.
+ */
+export function formatSignedMoneyNumber(amount: number, country: CountryId): string {
+  const formatted = formatMoneyNumber(amount, country);
+  return amount > 0 ? `+${formatted}` : formatted;
+}
+
+/**
  * Split formatted amount into integer and decimal parts
  * Useful for custom rendering with different styles
  * 

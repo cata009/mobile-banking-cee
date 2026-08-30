@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type UIEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode, type UIEvent } from 'react';
 import type { Product, ProductCategory } from '@/data/products';
 import { AppIcon } from '@/app/components/icons';
 import ProductCard, { type ProductCardAction } from '@/app/components/ProductCard';
@@ -9,8 +9,6 @@ import AccountCarouselIndicator from '@/app/components/accounts/AccountCarouselI
 import { buildFutureCzAccountCardActions } from '@/app/components/productCardFixtures';
 import { maskAmountParts } from '@/app/utils/amountPrivacy';
 import { useDragCarousel } from '@/hooks/useDragCarousel';
-import currencyExchangeIcon from '@/assets/icons/currency-exchange.svg';
-import exchangeRatesIcon from '@/assets/icons/exchange-rates.svg';
 
 type FormattedAmount = {
   integer: string;
@@ -51,8 +49,8 @@ function buildCzEvoAccountCardActions({
 
   return [
     { id: 'new-payment', label: 'New\npayment', ariaLabel: 'New payment', icon: <AppIcon name="payment-new" size={24} className="text-[var(--uc-text)]" />, onClick: onNewPayment },
-    { id: 'currency-exchange', label: 'Currency\nExchange', ariaLabel: 'Currency Exchange', icon: <img src={currencyExchangeIcon} alt="" aria-hidden="true" className="size-[24px]" />, onClick: onPaymentsClick },
-    { id: 'exchange-rates', label: 'Exchange\nrates', ariaLabel: 'Exchange rates', icon: <img src={exchangeRatesIcon} alt="" aria-hidden="true" className="h-[20px] w-[19px]" />, onClick: onPaymentsClick },
+    { id: 'currency-exchange', label: 'Currency\nExchange', ariaLabel: 'Currency Exchange', icon: <AppIcon name="currency-exchange" size={24} className="text-[var(--uc-text)]" />, onClick: onPaymentsClick },
+    { id: 'exchange-rates', label: 'Exchange\nrates', ariaLabel: 'Exchange rates', icon: <AppIcon name="exchange-rates" className="text-[var(--uc-text)]" />, onClick: onPaymentsClick },
     { id: 'account-info', label: 'Account\ninfo', ariaLabel: 'Account info', icon: <AppIcon name="account-info" size={24} className="text-[var(--uc-text)]" />, onClick: onAccountInfo },
   ];
 }
@@ -139,6 +137,29 @@ function Amount({ amount, hidden, size = 'row' }: { amount: FormattedAmount; hid
       <span className={`${size === 'row' ? 'text-[16px] leading-[18px]' : 'text-[14px] leading-[18px]'} ml-[1px] font-medium`}>
         {displayAmount.decimals} {displayAmount.currency}
       </span>
+    </span>
+  );
+}
+
+/**
+ * The currency roundel's sibling for a securities portfolio: the same white disc in the same
+ * corner, carrying the trend arrow instead of a flag. A portfolio's country says nothing the
+ * reader wants at a glance; whether it is up or down does.
+ */
+export function TrendBadge({ direction, size = 40 }: { direction: 'up' | 'down'; size?: 32 | 40 }) {
+  const up = direction === 'up';
+  return (
+    <span
+      aria-label={up ? 'Portfolio up' : 'Portfolio down'}
+      role="img"
+      className="relative grid shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--uc-surface-raised)] shadow-[0_3px_9px_rgb(0_0_0/0.12)]"
+      style={{ width: size, height: size }}
+    >
+      <AppIcon
+        name={up ? 'investment-trend-up' : 'investment-trend-down'}
+        color={up ? 'var(--uc-green-olive)' : 'var(--uc-status-red)'}
+        aria-hidden="true"
+      />
     </span>
   );
 }
@@ -332,7 +353,7 @@ function EvoCardComparisonTile({
       aria-label={`Open ${item.title} card details`}
       onClick={onClick}
       {...dragHandlers}
-      className="flex min-h-[120px] w-full flex-col items-center justify-center gap-[8px] rounded-[8px] bg-[var(--uc-surface-raised)] px-[8px] py-[12px] text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+      className="flex min-h-[120px] w-full flex-col items-center justify-center gap-[8px] rounded-[8px] px-[8px] py-[12px] text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
     >
       <Card
         variant={item.variant}
@@ -440,9 +461,9 @@ function EvoCardsComparison({
 
   return (
     <section data-evo-card-comparison aria-label="Debit Cards" className="mt-[12px]">
-      <h2 className="uc-type-l1 mb-[8px] text-[var(--uc-text)]">Debit Cards</h2>
+      <h2 className="uc-type-l1 mb-[12px] text-[var(--uc-text)]">Debit Cards</h2>
       {/* No bottom padding: the 32px carousel indicator below the rail already carries its own 13px of air. */}
-      <div data-evo-card-carousel-container className="rounded-[8px] bg-[var(--uc-surface)] p-[8px] pb-0 shadow-[0_3px_9px_rgb(var(--uc-shadow-rgb)/0.10)]">
+      <div data-evo-card-carousel-container className="rounded-[8px] bg-[var(--uc-surface)] p-[8px] pb-0">
         <div
           ref={carouselRef}
           data-evo-card-carousel
@@ -468,11 +489,13 @@ function EvoCardsComparison({
                   dragHandlers={dragHandlers}
                 />
               ))}
-              {/* A compact, card-height CTA keeps the secondary action visually subordinate to the debit card. */}
+              {/* A narrower CTA keeps the secondary action subordinate to the debit card. The cell
+                  carries the tile's own py-[12px], so `h-full` lands the dashed box on the tile's
+                  content box rather than its outer edge — no second height to keep in sync. */}
               {page.includesGhostBanner ? (
-                <div data-evo-card-ghost-banner className="flex min-h-[120px] items-center justify-center">
+                <div data-evo-card-ghost-banner className="flex min-h-[120px] items-stretch justify-center py-[12px]">
                   <GhostBanner
-                    className="h-[120px] w-[136px] !max-w-[136px] !p-[4px]"
+                    className="h-full w-[136px] !max-w-[136px] !p-[4px]"
                     layout="stacked"
                     title="Add a debit card"
                     description="Explore options"
@@ -485,7 +508,7 @@ function EvoCardsComparison({
           ))}
         </div>
         <div className="flex justify-center" aria-label="Debit Cards pages">
-          <AccountCarouselIndicator count={pages.length} activeIndex={activeIndex} onSelect={scrollToIndex} />
+          <AccountCarouselIndicator count={pages.length} activeIndex={activeIndex} onSelect={scrollToIndex} withBackdropBlur={false} />
         </div>
       </div>
     </section>
@@ -602,9 +625,11 @@ export default function App2027ProductAccordions({
         const displayTitle = titleOverrides?.[key] ?? title;
         const hasCollapsedProductStack = useBaselineHeader && category.products.length > 1;
         const isExpandable = !useBaselineHeader || category.products.length > 1;
-        const displayedProducts = hasCollapsedProductStack && !isOpen
-          ? category.products.slice(0, 1)
-          : category.products;
+        // Everything renders; the collapsed state hides the tail behind a closed grid row rather
+        // than unmounting it, so the transition has something to animate.
+        const displayedProducts = category.products;
+        const collapsedTail = hasCollapsedProductStack && !isOpen;
+        const showStackPreview = hasCollapsedProductStack && !isOpen && Boolean(category.products[1]);
         const shouldRenderPanel = isOpen || (useBaselineHeader && category.products.length > 0);
 
         return (
@@ -613,7 +638,7 @@ export default function App2027ProductAccordions({
             data-home-product-group={key}
             className={useBaselineHeader
               ? 'flex flex-col'
-              : 'overflow-hidden rounded-[16px] border border-transparent bg-[var(--uc-surface)] shadow-none dark:border-[var(--uc-border-muted)]'}
+              : 'overflow-hidden rounded-[8px] border border-transparent bg-[var(--uc-surface)] shadow-none dark:border-[var(--uc-border-muted)]'}
           >
             {isExpandable ? <button
               type="button"
@@ -670,17 +695,31 @@ export default function App2027ProductAccordions({
 
             {shouldRenderPanel ? (
               <div id={panelId} className={useBaselineHeader ? 'pt-[8px]' : 'divide-y divide-[var(--uc-border-muted)] border-t border-[var(--uc-border-muted)]'}>
+                {/* The peek below only reads as a stack if the card in front casts onto it —
+                    the same lift DepositList and LoanList give their collapsed stacks. */}
+                <div className={showStackPreview ? 'relative z-10 rounded-[8px] shadow-[0_6px_12px_rgb(var(--uc-shadow-rgb)/0.08)]' : 'contents'}>
                 {displayedProducts.map((product, productIndex) => {
-                  const stackRole = displayedProducts.length === 1
+                  // While the tail is closed the front card is the whole list, so it takes the
+                  // single-card corners; opening hands it back the top of a stack.
+                  const visibleCount = collapsedTail ? 1 : displayedProducts.length;
+                  const stackRole = visibleCount === 1
                     ? 'single'
                     : productIndex === 0
                       ? 'first'
                       : productIndex === displayedProducts.length - 1
                         ? 'last'
                         : 'middle';
+                  const tailWrapper = (node: ReactNode) => productIndex === 0 ? node : (
+                    <div
+                      key={product.id}
+                      className={`grid transition-[grid-template-rows,opacity] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${collapsedTail ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'}`}
+                    >
+                      <div className="min-h-0 overflow-hidden">{node}</div>
+                    </div>
+                  );
 
                   if (key === 'accounts' && useCzRoboAccountCards) {
-                    return (
+                    return tailWrapper(
                       <CzRoboAccountCard
                         key={product.id}
                         product={product}
@@ -697,7 +736,7 @@ export default function App2027ProductAccordions({
                   }
 
                   if (key === 'cards' && useCzRoboAccountCards) {
-                    return (
+                    return tailWrapper(
                       <CzRoboCard
                         key={product.id}
                         product={product}
@@ -712,7 +751,7 @@ export default function App2027ProductAccordions({
                     );
                   }
 
-                  return (
+                  return tailWrapper(
                     <ProductRow
                       key={product.id}
                       product={product}
@@ -723,9 +762,8 @@ export default function App2027ProductAccordions({
                     />
                   );
                 })}
-                {hasCollapsedProductStack && !isOpen && category.products[1] ? (
-                  <ProductStackPreview />
-                ) : null}
+                </div>
+                {showStackPreview ? <ProductStackPreview /> : null}
               </div>
             ) : null}
           </div>

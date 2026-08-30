@@ -26,7 +26,7 @@ function InvestmentActionButton({ action }: { action: InvestmentAction }) {
       <span className="relative grid size-[32px] place-items-center">
         <AppIcon name={action.iconName} color="var(--uc-icon)" />
         {action.badgeCount ? (
-          <span className="uc-type-n5-strong absolute right-[-6px] top-[-5px] grid size-[20px] place-items-center rounded-full bg-[var(--uc-brand)] leading-none text-[var(--uc-text-inverse)]">
+          <span className="uc-type-n5-strong absolute right-[-6px] top-[-5px] grid size-[20px] place-items-center rounded-full bg-[var(--uc-brand)] leading-none text-[var(--uc-static-white)]">
             {action.badgeCount > 99 ? "99+" : action.badgeCount}
           </span>
         ) : null}
@@ -54,7 +54,7 @@ export default function InvestmentActionBar({
       <button
         type="button"
         onClick={onInvestClick}
-        className="flex h-[56px] w-[56px] flex-col items-center justify-center gap-0 rounded-full bg-[var(--uc-action)] px-[12px] py-[4px] text-[var(--uc-static-white)] shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
+        className="flex h-[56px] w-[56px] flex-col items-center justify-center gap-0 rounded-full bg-[var(--uc-action-strong)] px-[12px] py-[4px] text-[var(--uc-static-white)] shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
         aria-label={investLabel}
         data-ds-label="Investments invest action"
       >

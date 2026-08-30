@@ -41,7 +41,7 @@ export default function AccountMonthlyReport({
     <section
       aria-label={`${reportTitle} for ${group.monthTitle}`}
       data-monthly-account-report={group.monthKey}
-      className="mx-[16px] mb-[12px] mt-[12px] overflow-hidden rounded-[22px] bg-[var(--uc-surface)] px-[8px] py-[8px]"
+      className="mx-[16px] mb-[12px] mt-[12px] overflow-hidden rounded-[8px] bg-[var(--uc-surface)] px-[8px] py-[8px]"
     >
       {onOpenSpending ? (
         <button

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from "react";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import TextField from "@/app/components/TextField";
@@ -31,7 +31,6 @@ import { useDragCarousel, type DragCarouselHandlers } from "@/hooks/useDragCarou
 import {
   ROBO_DOCUMENTS,
   ROBO_GOAL_TYPES,
-  ROBO_PORTFOLIOS,
   ROBO_PORTFOLIO_PRESENTATIONS,
   ROBO_STRATEGIES,
   buildRoboReviewRows,
@@ -46,39 +45,14 @@ import {
   type RoboPortfolioProduct,
   type RoboStrategy,
 } from "./czFutureRoboAdvisorModel";
-
-type CreationStep =
-  | "intro"
-  | "contact"
-  | "profile"
-  | "goal-type"
-  | "goal-name"
-  | "target"
-  | "horizon"
-  | "funding-method"
-  | "funding-setup"
-  | "strategy"
-  | "projection"
-  | "portfolio"
-  | "review"
-  | "sign"
-  | "processing"
-  | "success"
-  | "goal-detail";
-
-type ManagementMode =
-  | "menu"
-  | "add-money"
-  | "monthly"
-  | "withdraw"
-  | "partial-withdrawal"
-  | "full-withdrawal"
-  | "history"
-  | "settings"
-  | "rename"
-  | "target"
-  | "horizon"
-  | "close";
+import {
+  createRoboAdvisorFlowState,
+  getPreviousManagementMode,
+  getRoboAdvisorBackStep,
+  roboAdvisorFlowReducer,
+  type RoboAdvisorCreationStep as CreationStep,
+  type RoboAdvisorManagementMode as ManagementMode,
+} from "./roboAdvisorFlowState";
 
 interface CzFutureRoboAdvisorFlowProps {
   onBack: () => void;
@@ -1214,29 +1188,39 @@ export default function CzFutureRoboAdvisorFlow({
   requiresContactValidation = false,
   availableStrategyCount = 3,
 }: CzFutureRoboAdvisorFlowProps) {
-  const initialPortfolio = initialGoal
-    ? ROBO_PORTFOLIOS.find((portfolio) => portfolio.id === initialGoal.portfolioId) ?? ROBO_PORTFOLIOS[0]!
-    : null;
-  const [step, setStep] = useState<CreationStep>(initialGoal ? "goal-detail" : "intro");
-  const [previousStep, setPreviousStep] = useState<CreationStep>("strategy");
-  const [previousPortfolioStep, setPreviousPortfolioStep] = useState<CreationStep>("strategy");
-  const [goalType, setGoalType] = useState("");
-  const [goalName, setGoalName] = useState(initialGoal?.name ?? "");
-  const [targetAmount, setTargetAmount] = useState(
-    initialGoal?.targetInteger.replace(/\s/g, "") ?? "",
+  const [flowState, dispatchFlow] = useReducer(
+    roboAdvisorFlowReducer,
+    initialGoal,
+    createRoboAdvisorFlowState,
   );
-  const [horizonYears, setHorizonYears] = useState(0);
-  const [manualHorizon, setManualHorizon] = useState("");
-  const [fundingMethod, setFundingMethod] = useState<RoboFundingMethod | null>(null);
-  const [initialAmount, setInitialAmount] = useState("");
-  const [monthlyContribution, setMonthlyContribution] = useState("");
-  const [startDate, setStartDate] = useState("1 March 2026");
-  const [selectedStrategyId, setSelectedStrategyId] = useState<RoboStrategy["id"]>(
-    initialPortfolio?.strategyId ?? "sustainable-balanced",
-  );
-  const [selectedPortfolio, setSelectedPortfolio] = useState<RoboPortfolio | null>(initialPortfolio);
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [managementMode, setManagementMode] = useState<ManagementMode>("menu");
+  const {
+    step,
+    goalType,
+    goalName,
+    targetAmount,
+    horizonYears,
+    manualHorizon,
+    fundingMethod,
+    initialAmount,
+    monthlyContribution,
+    startDate,
+    selectedStrategyId,
+    selectedPortfolio,
+    termsAccepted,
+    managementMode,
+  } = flowState;
+  const setStep = (value: CreationStep) => dispatchFlow({ type: "set-field", field: "step", value });
+  const setGoalType = (value: string) => dispatchFlow({ type: "set-field", field: "goalType", value });
+  const setGoalName = (value: string) => dispatchFlow({ type: "set-field", field: "goalName", value });
+  const setTargetAmount = (value: string) => dispatchFlow({ type: "set-field", field: "targetAmount", value });
+  const setFundingMethod = (value: RoboFundingMethod | null) => dispatchFlow({ type: "set-field", field: "fundingMethod", value });
+  const setInitialAmount = (value: string) => dispatchFlow({ type: "set-field", field: "initialAmount", value });
+  const setMonthlyContribution = (value: string) => dispatchFlow({ type: "set-field", field: "monthlyContribution", value });
+  const setStartDate = (value: string) => dispatchFlow({ type: "set-field", field: "startDate", value });
+  const setSelectedStrategyId = (value: RoboStrategy["id"]) => dispatchFlow({ type: "set-field", field: "selectedStrategyId", value });
+  const setSelectedPortfolio = (value: RoboPortfolio | null) => dispatchFlow({ type: "set-field", field: "selectedPortfolio", value });
+  const setTermsAccepted = (value: boolean) => dispatchFlow({ type: "set-field", field: "termsAccepted", value });
+  const setManagementMode = (value: ManagementMode) => dispatchFlow({ type: "set-field", field: "managementMode", value });
   const strategyCarouselRef = useRef<HTMLDivElement>(null);
 
   const strategies = useMemo(() => ROBO_STRATEGIES.slice(0, availableStrategyCount), [availableStrategyCount]);
@@ -1271,24 +1255,7 @@ export default function CzFutureRoboAdvisorFlow({
   }, [step]);
 
   const goBackByStep = () => {
-    const backMap: Partial<Record<CreationStep, CreationStep>> = {
-      contact: "intro",
-      profile: requiresContactValidation ? "contact" : "intro",
-      "goal-type": "profile",
-      "goal-name": "goal-type",
-      target: "goal-name",
-      horizon: "target",
-      "funding-method": "horizon",
-      "funding-setup": "funding-method",
-      strategy: "funding-setup",
-      projection: previousStep,
-      portfolio: previousPortfolioStep,
-      review: "portfolio",
-      sign: "review",
-      processing: "sign",
-      "goal-detail": "success",
-    };
-    const destination = backMap[step];
+    const destination = getRoboAdvisorBackStep(flowState, requiresContactValidation);
     if (destination) setStep(destination);
     else onBack();
   };
@@ -1378,7 +1345,7 @@ export default function CzFutureRoboAdvisorFlow({
               className={cn(
                 "h-[34px] rounded-[4px] border uc-type-n5-strong transition-colors",
                 targetAmount === amount
-                  ? "border-[var(--uc-action)] bg-[var(--uc-action)] text-[var(--uc-text-inverse)]"
+                  ? "border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
                   : "border-[var(--uc-text)] bg-[var(--uc-surface)] text-[var(--uc-text)]",
               )}
             >
@@ -1409,8 +1376,7 @@ export default function CzFutureRoboAdvisorFlow({
               aria-checked={horizonYears === years && !manualHorizon}
               aria-label={`${years} years`}
               onClick={() => {
-                setHorizonYears(years);
-                setManualHorizon("");
+                dispatchFlow({ type: "select-horizon", years });
               }}
               className="flex h-[56px] w-full items-center gap-[16px] text-left"
             >
@@ -1424,8 +1390,7 @@ export default function CzFutureRoboAdvisorFlow({
             aria-checked={manualHorizon.length > 0}
             aria-label="Other time horizon"
             onClick={() => {
-              setHorizonYears(0);
-              if (!manualHorizon) setManualHorizon("1");
+              dispatchFlow({ type: "set-manual-horizon", value: manualHorizon || "1" });
             }}
             className="flex h-[56px] w-full items-center gap-[16px] text-left"
           >
@@ -1438,8 +1403,7 @@ export default function CzFutureRoboAdvisorFlow({
             label="Other horizon"
             value={manualHorizon}
             onChange={(value) => {
-              setManualHorizon(value);
-              setHorizonYears(0);
+              dispatchFlow({ type: "set-manual-horizon", value });
             }}
             inputMode="numeric"
             suffix="years"
@@ -1521,7 +1485,7 @@ export default function CzFutureRoboAdvisorFlow({
                     className={cn(
                       "h-[34px] rounded-[4px] border uc-type-n5-strong",
                       initialAmount === amount
-                        ? "border-[var(--uc-action)] bg-[var(--uc-action)] text-[var(--uc-text-inverse)]"
+                        ? "border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
                         : "border-[var(--uc-text)] text-[var(--uc-text)]",
                     )}
                   >
@@ -1544,7 +1508,7 @@ export default function CzFutureRoboAdvisorFlow({
                     className={cn(
                       "h-[34px] rounded-[4px] border text-[14px] font-bold",
                       monthlyContribution === amount
-                        ? "border-[var(--uc-action)] bg-[var(--uc-action)] text-[var(--uc-text-inverse)]"
+                        ? "border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
                         : "border-[var(--uc-text)] bg-[var(--uc-surface)] text-[var(--uc-text)]",
                     )}
                   >
@@ -1589,8 +1553,7 @@ export default function CzFutureRoboAdvisorFlow({
           <PrimaryButton
             labelSize="18"
             onClick={() => {
-              setPreviousPortfolioStep("strategy");
-              setStep("portfolio");
+              dispatchFlow({ type: "open-portfolio", from: "strategy" });
             }}
           >
             Continue with {selectedStrategy.name}
@@ -1617,9 +1580,7 @@ export default function CzFutureRoboAdvisorFlow({
               selected={selectedStrategy.id === strategy.id}
               onSelect={() => setSelectedStrategyId(strategy.id)}
               onProjection={() => {
-                setSelectedStrategyId(strategy.id);
-                setPreviousStep("strategy");
-                setStep("projection");
+                dispatchFlow({ type: "open-projection", strategyId: strategy.id });
               }}
               dragHandlers={strategyDragHandlers}
             />
@@ -1679,8 +1640,7 @@ export default function CzFutureRoboAdvisorFlow({
           <PrimaryButton
             labelSize="18"
             onClick={() => {
-              setPreviousPortfolioStep("projection");
-              setStep("portfolio");
+              dispatchFlow({ type: "open-portfolio", from: "projection" });
             }}
           >
             See suitable portfolios
@@ -1713,7 +1673,7 @@ export default function CzFutureRoboAdvisorFlow({
                 className={cn(
                   "h-[36px] shrink-0 rounded-[4px] border-2 px-[18px] text-[14px] font-bold uppercase",
                   selected
-                    ? "border-[var(--uc-action)] bg-[var(--uc-action)] text-[var(--uc-text-inverse)]"
+                    ? "border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
                     : "border-[var(--uc-text)] bg-[var(--uc-surface)] text-[var(--uc-text)]",
                 )}
               >
@@ -1843,13 +1803,7 @@ export default function CzFutureRoboAdvisorFlow({
           mode={managementMode}
           goalName={goalName}
           onBack={() => {
-            if (["partial-withdrawal", "full-withdrawal"].includes(managementMode)) {
-              setManagementMode("withdraw");
-            } else if (["rename", "target", "horizon", "monthly", "close"].includes(managementMode)) {
-              setManagementMode("settings");
-            } else {
-              setManagementMode("menu");
-            }
+            setManagementMode(getPreviousManagementMode(managementMode));
           }}
           onClose={onExit}
           onMode={setManagementMode}

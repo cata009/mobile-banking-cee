@@ -855,6 +855,11 @@ function getCreditCardTransactions(
   ];
 }
 
+/** Who pays this country's salary. The home activity card names the employer, as the statement does. */
+export function getSalaryPayer(country: Country): string {
+  return COUNTRY_TRANSACTION_PROFILES[country].salaryPayer;
+}
+
 export function getAccountTransactionProfileIndex(product: Product, productIndex: number) {
   if (product.type === "current_account") {
     return productIndex;

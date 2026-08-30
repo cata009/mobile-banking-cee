@@ -47,7 +47,7 @@ export function SelectionChip({
       title={title}
       className={`rounded-[20px] px-[14px] py-[8px] text-[13px] font-bold leading-[16px] transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
         active
-          ? "bg-[var(--uc-action)] text-[var(--uc-static-white)]"
+          ? "bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
           : "bg-[var(--uc-surface-muted)] text-[var(--uc-text)] hover:bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface-muted))]"
       }`}
     >

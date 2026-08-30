@@ -21,7 +21,7 @@ import { AppIcon } from "@/app/components/icons";
 import PfmCategoryChangeSheet from "@/app/components/pfm/PfmCategoryChangeSheet";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
-import { getCountryConfig, formatMoneyNumber } from "@/app/registry/countryConfig";
+import { getCountryConfig, formatMoneyNumber, formatSignedMoneyNumber } from "@/app/registry/countryConfig";
 import { maskAmountParts, maskFormattedAmount } from "@/app/utils/amountPrivacy";
 import { useCopyToClipboard } from "@/app/utils/useCopyToClipboard";
 import { useProducts } from "@/hooks/useProducts";
@@ -227,7 +227,7 @@ export default function AccountDetailScreen({
     );
 
     if (usesApp2027CzLedger) {
-      const activityTransactions = getApp2027ActivityTransactions();
+      const activityTransactions = getApp2027ActivityTransactions(country);
       const activityLabels = new Set(activityTransactions.map((transaction) => transaction.label));
       baseTransactions = [
         ...activityTransactions,
@@ -586,7 +586,7 @@ export default function AccountDetailScreen({
           />
         </div>
 
-        <AccountActionBar items={accountActionItems} />
+        <AccountActionBar items={accountActionItems} iconTreatment="bubble" />
       </div>
 
         {activeProduct?.type !== "term_deposit" ? (
@@ -623,7 +623,7 @@ export default function AccountDetailScreen({
                         displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
                         leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
                         categoryIconVariant={release === "release-future-evo-2027" ? "category-circle" : "glyph"}
-                        positiveAmountClassName={release === "release-future-evo-2027" ? "text-[#3D7D43]" : undefined}
+                        positiveAmountClassName={release === "release-future-evo-2027" ? "text-[var(--uc-green-olive)]" : undefined}
                         evo2027={usesEvoGroupCards}
                         showDate={!usesEvoGroupCards}
                         onClick={openTransaction}
@@ -655,7 +655,7 @@ export default function AccountDetailScreen({
                       <div key={dateGroup.dateKey} data-transaction-date-group={dateGroup.dateKey}>
                         <AccountTransactionMonthDivider
                           title={dateGroup.dateTitle}
-                          total={dateGroup.transactions.length > 1 ? formatMoneyNumber(dateGroup.dailyTotal, country) : undefined}
+                          total={dateGroup.transactions.length > 1 ? formatSignedMoneyNumber(dateGroup.dailyTotal, country) : undefined}
                           currency={activeCurrency}
                           dateSeparator
                         />
@@ -669,7 +669,7 @@ export default function AccountDetailScreen({
                               displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
                               leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
                               categoryIconVariant="category-circle"
-                              positiveAmountClassName="text-[#3D7D43]"
+                              positiveAmountClassName="text-[var(--uc-green-olive)]"
                               evo2027
                               showDate={false}
                               compact={dateGroup.transactions.length === 1}

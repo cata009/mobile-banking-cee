@@ -229,7 +229,7 @@ function ThemePreview({ appearance, theme }: { appearance: ThemeMode; theme: App
 
               <section className="mt-[18px]">
                 <div className="flex items-center justify-between"><h2 className="text-[19px] font-bold leading-[24px]">Your recent transactions</h2><span className={`text-[14px] font-bold ${muted}`}>See all ›</span></div>
-                <div className={`mt-[9px] overflow-hidden rounded-[22px] border backdrop-blur-[22px] ${glass}`}>
+                <div className={`mt-[9px] overflow-hidden rounded-[8px] border backdrop-blur-[22px] ${glass}`}>
                   {[
                     ['+', 'Salary', 'UniCredit payroll · Today, 08:05', '+62 500 CZK'],
                     ['M', "McDonald’s", 'Lunch · Today, 12:31', '−248.90 CZK'],

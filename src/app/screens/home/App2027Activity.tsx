@@ -2,7 +2,7 @@ import LinkActionButton from '@/app/components/LinkActionButton';
 import TransactionAvatar from '@/app/components/transactions/TransactionAvatar';
 import { getCardMerchantEnrichment } from '@/app/components/merchants/merchantEnrichment';
 import type { CountryId } from '@/app/state/demoTypes';
-import type { AccountTransaction } from '@/data/accountDetails';
+import { getSalaryPayer, type AccountTransaction } from '@/data/accountDetails';
 import type { MerchantId } from '@/data/merchantDirectory';
 import type { CardTransactionMerchantEnrichment } from '@/app/screens/payments/DomesticPaymentFlowScreens';
 
@@ -25,6 +25,8 @@ interface ActivityItem {
   id: App2027ActivityKind;
   name: string;
   detail: string;
+  /** The product the money moved through - the third line, under what the payment was. */
+  account: string;
   time: string;
   amount: string;
   amountValue: number;
@@ -40,8 +42,10 @@ interface ActivityItem {
 const ACTIVITY: readonly ActivityItem[] = [
   {
     id: 'salary',
-    name: 'Salary',
-    detail: 'UniCredit payroll',
+    // The employer's name is filled in per country from the statement's own salary payer.
+    name: '',
+    detail: 'Salary April',
+    account: 'Everyday account',
     time: 'Today, 08:05',
     amount: '+62\u00a0500.00',
     amountValue: 62500,
@@ -54,7 +58,8 @@ const ACTIVITY: readonly ActivityItem[] = [
   {
     id: 'mcdonalds',
     name: "McDonald's",
-    detail: 'Debit card \u2022\u20226829',
+    detail: 'Card payment',
+    account: 'Debit card \u2022\u20226829',
     time: 'Today, 12:31',
     amount: '\u2212248.90',
     amountValue: -248.9,
@@ -69,6 +74,7 @@ const ACTIVITY: readonly ActivityItem[] = [
     id: 'spotify',
     name: 'Spotify',
     detail: 'Monthly subscription',
+    account: 'Debit card \u2022\u20226829',
     time: 'Yesterday, 18:07',
     amount: '\u2212169.00',
     amountValue: -169,
@@ -81,14 +87,18 @@ const ACTIVITY: readonly ActivityItem[] = [
   },
 ] as const;
 
-function activityTransaction(item: ActivityItem): AccountTransaction {
+function activityName(item: ActivityItem, country: CountryId) {
+  return item.id === 'salary' ? getSalaryPayer(country) : item.name;
+}
+
+function activityTransaction(item: ActivityItem, country: CountryId): AccountTransaction {
   return {
     id: `app-2027-${item.id}`,
     day: item.id === 'spotify' ? '11' : '12',
     month: 'AUG',
     monthKey: '2026-08',
     monthTitle: 'August 2026',
-    label: item.name,
+    label: activityName(item, country),
     details: item.detail,
     amount: item.amountValue,
     type: item.tone,
@@ -101,12 +111,12 @@ function activityTransaction(item: ActivityItem): AccountTransaction {
   };
 }
 
-export function getApp2027ActivityTransactions(): AccountTransaction[] {
-  return ACTIVITY.map(activityTransaction);
+export function getApp2027ActivityTransactions(country: CountryId): AccountTransaction[] {
+  return ACTIVITY.map((item) => activityTransaction(item, country));
 }
 
 export function getApp2027ActivityKind(transaction: AccountTransaction): App2027ActivityKind | undefined {
-  if (transaction.label === 'Salary') return 'salary';
+  if (transaction.pfmSubcategory === 'Salary') return 'salary';
   if (transaction.label === "McDonald's") return 'mcdonalds';
   if (transaction.label === 'Spotify') return 'spotify';
   return undefined;
@@ -128,7 +138,7 @@ function ActivityAmount({ item, currency, hidden }: { item: ActivityItem; curren
   return (
     <span
       data-home-activity-amount={isIncoming ? 'positive' : 'negative'}
-      className={`min-w-[112px] shrink-0 whitespace-nowrap text-right tabular-nums ${isIncoming ? 'text-[#3D7D43]' : 'text-[var(--uc-text)]'}`}
+      className={`min-w-[112px] shrink-0 whitespace-nowrap text-right tabular-nums ${isIncoming ? 'text-[var(--uc-green-olive)]' : 'text-[var(--uc-text)]'}`}
     >
       <span className="text-[18px] font-bold leading-[22px] tracking-[-0.018em]">
         {displayAmount}
@@ -150,14 +160,14 @@ export default function App2027Activity({ country, currency, amountsHidden, onTr
     >
       <h2
         id="app-2027-activity-heading"
-        className="text-[22px] font-bold leading-[28px] tracking-[-0.02em] text-[var(--uc-text)]"
+        className="uc-type-l1 text-[var(--uc-text)]"
       >
         Your recent transactions
       </h2>
 
       <div
         data-home-activity-card
-        className="relative isolate mt-[12px] overflow-hidden rounded-[22px] border border-transparent bg-[var(--uc-surface)] px-[16px] pb-[12px] pt-[4px] shadow-none"
+        className="relative isolate mt-[12px] overflow-hidden rounded-[8px] border border-transparent bg-[var(--uc-surface)] pb-[12px] pt-[4px] shadow-none"
       >
       <ul className="relative z-10">
         {ACTIVITY.map((item, index) => (
@@ -165,21 +175,24 @@ export default function App2027Activity({ country, currency, amountsHidden, onTr
             <button
               type="button"
               onClick={() => {
-                const transaction = activityTransaction(item);
+                const transaction = activityTransaction(item, country);
                 onTransactionOpen?.(transaction, getApp2027MerchantEnrichment(transaction, country));
               }}
-              aria-label={`Open ${item.name} transaction, ${amountsHidden ? 'amount hidden' : `${item.amount} ${currency}`}`}
-              className="group flex min-h-[82px] w-full items-start gap-[12px] rounded-[12px] py-[12px] text-left transition-[background-color,transform] duration-200 active:scale-[0.99] active:bg-[var(--uc-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-action)] motion-reduce:transition-none"
+              aria-label={`Open ${activityName(item, country)} transaction, ${amountsHidden ? 'amount hidden' : `${item.amount} ${currency}`}`}
+              className="group flex min-h-[82px] w-full items-start gap-[12px] rounded-[8px] px-[16px] py-[12px] text-left transition-[background-color,transform] duration-200 active:scale-[0.99] active:bg-[var(--uc-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-action)] motion-reduce:transition-none"
             >
-              <TransactionAvatar transaction={activityTransaction(item)} size={42} elevated />
+              <TransactionAvatar transaction={activityTransaction(item, country)} size={42} />
 
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[16px] font-bold leading-[20px] tracking-[-0.01em] text-[var(--uc-text)]">
-                  {item.name}
+                  {activityName(item, country)}
                 </span>
                 {item.detail ? <span className="mt-[4px] block truncate text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
                   {item.detail}
                 </span> : null}
+                <span data-home-activity-account className="mt-[3px] block truncate text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
+                  {item.account}
+                </span>
                 <span className="mt-[3px] block text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
                   {compact ? (item.id === 'spotify' ? 'Yesterday' : 'Today') : item.time}
                 </span>

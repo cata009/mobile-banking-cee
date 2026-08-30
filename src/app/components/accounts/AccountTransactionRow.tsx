@@ -21,6 +21,13 @@ interface AccountTransactionRowProps {
    * source account, which is what tells two otherwise identical rows apart.
    */
   detailsLabel?: string;
+  /**
+   * Names the product the transaction belongs to, on its own line under the details.
+   *
+   * Only pooled lists pass it: once the reader has filtered to one account, repeating that
+   * account's name on every row says nothing they did not just choose.
+   */
+  accountLabel?: string;
   onClick?: (transaction: AccountTransaction) => void;
   onCategoryClick?: (transaction: AccountTransaction) => void;
   categoryIconVariant?: PfmCategoryIconVariant;
@@ -57,6 +64,7 @@ export default function AccountTransactionRow({
   leadingVisual,
   displayLabel,
   detailsLabel,
+  accountLabel,
   onClick,
   onCategoryClick,
   categoryIconVariant = "glyph",
@@ -70,7 +78,7 @@ export default function AccountTransactionRow({
   const amountClassName = isPending
     ? "text-[var(--uc-text-muted)]"
     : transaction.type === "credit" ? positiveAmountClassName : "text-[var(--uc-text)]";
-  const sign = transaction.amount < 0 ? "- " : "+ ";
+  const sign = transaction.amount < 0 ? "-" : "+";
   const detailsLine = detailsLabel ?? transaction.details;
   const amountParts = splitAmount(formattedAmount);
 
@@ -121,6 +129,11 @@ export default function AccountTransactionRow({
           {detailsLine}
         </p>
       ) : null}
+      {accountLabel ? (
+        <p className="uc-type-n5 w-full truncate leading-[18px] text-[var(--uc-text-muted)]" data-transaction-account>
+          {accountLabel}
+        </p>
+      ) : null}
       {evoDate}
     </div>
   );
@@ -138,7 +151,7 @@ export default function AccountTransactionRow({
 
   if (evo2027) {
     const leading = !isPending || leadingVisual || avatarPresentation === "identity" ? (
-      leadingVisual ?? <TransactionAvatar transaction={transaction} pfmVariant={categoryIconVariant} presentation={avatarPresentation} />
+      leadingVisual ?? <TransactionAvatar transaction={transaction} pfmVariant={categoryIconVariant} presentation={avatarPresentation} size={42} />
     ) : null;
 
     if (onCategoryClick) {
@@ -151,7 +164,7 @@ export default function AccountTransactionRow({
           <button
             type="button"
             aria-label={`Change category for ${transaction.label}`}
-            className="grid size-[32px] shrink-0 place-items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
+            className="grid size-[42px] shrink-0 place-items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
             onClick={() => onCategoryClick(transaction)}
           >
             {leading}

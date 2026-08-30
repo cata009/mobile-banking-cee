@@ -73,7 +73,7 @@ describe('static template previews', () => {
   it.each([
     ['products-menu', 18, '94bcc6cf9c856849395fa935d13af4fdec52da19ea0aae3f111d2806c47757b5'],
     ['products-shopsmart', 15, 'd599d178e4549596bfaa7131c729de7a201095cc58a3f1ca2b6af0b66abdf8c2'],
-    ['analytics-overview', 0, '41a8ecdf1df04f9f8d0c2723ed45ec295f35798695d36a014dc3ce006e23ec4b'],
+    ['analytics-overview', 0, '974342acb4197789bc4572f938cf9865dcae3309190cb3dc1885a2450f612f60'],
   ] as const)('preserves %s markup in normal and presentation-only modes', (previewId, buttonCount, expectedHash) => {
     const normal = renderPreview(previewId, false)
     const normalMarkup = normal.container.innerHTML

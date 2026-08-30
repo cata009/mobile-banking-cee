@@ -32,6 +32,7 @@ import {
   buildInvestmentChartPoints,
   buildInvestmentSecurities,
   buildInvestmentSecurityCatalog,
+  calculateInvestmentPortfolioPerformance,
   getInvestmentDistributionGroupKey,
   getInvestmentDistributionTitle,
   getInvestmentProducts,
@@ -360,9 +361,11 @@ export default function InvestmentsPortfolioScreen({
   const activeSecurities = sortedSecurities.filter((security) => security.status === "active");
   const inactiveSecurities = sortedSecurities.filter((security) => security.status === "inactive");
   const portfolioCurrency = getCountryConfig(country).currency;
-  const totalValue = financialSecurities.reduce((sum, security) => sum + security.localValue, 0);
-  const totalPerformanceAmount = financialSecurities.reduce((sum, security) => sum + security.performanceAmount, 0);
-  const totalPerformancePercent = totalValue > 0 ? (totalPerformanceAmount / totalValue) * 100 : 0;
+  const {
+    totalValue,
+    performanceAmount: totalPerformanceAmount,
+    performancePercent: totalPerformancePercent,
+  } = calculateInvestmentPortfolioPerformance(securities);
   const chartPoints = useMemo(() => buildInvestmentChartPoints(totalValue, selectedPeriodId), [selectedPeriodId, totalValue]);
   const distributionItems = useMemo(
     () => buildInvestmentDistributionItems(financialSecurities, selectedTabId),

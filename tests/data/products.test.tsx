@@ -8,7 +8,7 @@ import { DEFAULT_PRODUCT_COUNTS, DemoProvider, useDemo } from '@/app/state/demoS
 import type { ProductCountKey, ProductCounts } from '@/app/state/demoTypes'
 import { getCountryCurrency } from '@/data/exchangeRates'
 import { mockProducts, type ProductType } from '@/data/products'
-import { useProducts } from '@/hooks/useProducts'
+import { deriveProductCategories, useProducts } from '@/hooks/useProducts'
 
 const PRODUCT_COUNT_KEYS = Object.keys(DEFAULT_PRODUCT_COUNTS) as ProductCountKey[]
 
@@ -29,6 +29,23 @@ function wrapper({ children }: PropsWithChildren) {
 }
 
 describe('product data', () => {
+  it('derives the Evo 2027 Czech product model without a React provider', () => {
+    const categories = deriveProductCategories({
+      country: 'CZ',
+      release: 'release-future-evo-2027',
+      resolvedProductCounts: DEFAULT_PRODUCT_COUNTS,
+    })
+    const accounts = categories
+      .flatMap((category) => category.products)
+      .filter((product) => product.type === 'current_account')
+
+    expect(accounts.map(({ id, currency }) => [id, currency])).toEqual([
+      ['acc-1', 'CZK'],
+      ['acc-2', 'EUR'],
+      ['acc-3', 'USD'],
+    ])
+  })
+
   it('locks the existing seed projection and card/investment-specific fields', () => {
     const projection = mockProducts.map((product) => ({
       id: product.id,

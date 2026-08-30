@@ -8,6 +8,8 @@ export interface ExpenseBar {
   caption?: string;
   /** Names the bucket outside the chart (header, filter chip) when the axis pair reads too long there. */
   filterLabel?: string;
+  /** The same name without its year, for the period stepper that already prints the year below. */
+  filterTitle?: string;
   total: number;
 }
 

@@ -140,7 +140,7 @@ describe('card-detail action boundaries', () => {
     mockedProductState.categories = [{ key: 'cards', title: 'Cards', products: mockProducts }]
 
     const groupCards = (container: HTMLElement) => Array.from(container.querySelectorAll<HTMLElement>('div'))
-      .filter((element) => element.className.includes('rounded-[22px]') && element.className.includes('mx-[16px]'))
+      .filter((element) => element.className.includes('rounded-[8px]') && element.className.includes('mx-[16px]'))
 
     const evo = render(
       <CardDetailScreen selectedCardId={firstDebitCard.id} onBack={() => undefined} />,
@@ -175,7 +175,7 @@ describe('card-detail action boundaries', () => {
     expect(Array.from(dateSeparators).some((separator) => /CZK/.test(separator.textContent ?? ''))).toBe(true)
     expect(Array.from(dateSeparators).some((separator) => !/CZK/.test(separator.textContent ?? ''))).toBe(true)
     expect(Array.from(dateSeparators).every((separator) => !separator.querySelector('.h-px'))).toBe(true)
-    expect(dateSeparators[0]?.parentElement).not.toHaveClass('rounded-[22px]')
+    expect(dateSeparators[0]?.parentElement).not.toHaveClass('rounded-[8px]')
   })
 
   it('uses the homepage success green for positive transaction rows in Evo 2027 only', () => {
@@ -191,7 +191,7 @@ describe('card-detail action boundaries', () => {
       { wrapper: ({ children }) => <AppProviders release="release-future-evo-2027">{children}</AppProviders> },
     )
 
-    expect(evo.container.querySelector('[data-transaction-amount="positive"]')).toHaveClass('text-[#3D7D43]')
+    expect(evo.container.querySelector('[data-transaction-amount="positive"]')).toHaveClass('text-[var(--uc-green-olive)]')
     evo.unmount()
 
     const current = render(
@@ -204,7 +204,7 @@ describe('card-detail action boundaries', () => {
       { wrapper: AppProviders },
     )
 
-    expect(current.container.querySelector('[data-transaction-amount="positive"]')).not.toHaveClass('text-[#3D7D43]')
+    expect(current.container.querySelector('[data-transaction-amount="positive"]')).not.toHaveClass('text-[var(--uc-green-olive)]')
   })
 
   it('omits the month divider for the current account month in Evo 2027', () => {

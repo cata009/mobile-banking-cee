@@ -31,10 +31,10 @@
    recognisable portfolio rail. Width changes composition; height changes
    density. Type and touch targets remain stable. */
 [data-app-2027-home] {
-  --uc-app-bg: #090b0d;
-  --uc-surface: rgb(27 30 31 / 0.76);
+  --uc-app-bg: #12171a;
+  --uc-surface: rgb(30 37 41 / 0.82);
   --uc-surface-muted: rgb(255 255 255 / 0.09);
-  --uc-surface-raised: rgb(35 38 39 / 0.88);
+  --uc-surface-raised: rgb(39 47 52 / 0.9);
   --uc-text: #f7f7f4;
   --uc-text-muted: #bec2c2;
   --uc-text-subtle: #9ca1a1;
@@ -44,7 +44,8 @@
   --uc-action-hover: #8cebe5;
   --uc-action-soft: rgb(101 217 210 / 0.15);
   --uc-action-soft-strong: rgb(101 217 210 / 0.22);
-  --uc-bottom-bar-bg: rgb(30 32 32 / 0.74);
+  --uc-action-strong: #0F6E7C;
+  --uc-bottom-bar-bg: rgb(34 41 45 / 0.74);
   isolation: isolate;
 }
 
@@ -67,15 +68,16 @@
   --uc-action-hover: var(--uc-teal-900);
   --uc-action-soft: var(--uc-teal-pale);
   --uc-action-soft-strong: var(--uc-teal-soft);
+  --uc-action-strong: var(--uc-teal-main);
   --uc-bottom-bar-bg: var(--uc-neutral-white);
 }
 
 [data-uc-theme="dark"] [data-app-2027-home] {
   --app2027-logo-color: #f7f7f4;
-  --uc-app-bg: #090b0d;
-  --uc-surface: rgb(27 30 31 / 0.76);
+  --uc-app-bg: #12171a;
+  --uc-surface: rgb(30 37 41 / 0.82);
   --uc-surface-muted: rgb(255 255 255 / 0.09);
-  --uc-surface-raised: rgb(35 38 39 / 0.88);
+  --uc-surface-raised: rgb(39 47 52 / 0.9);
   --uc-text: #f7f7f4;
   --uc-text-muted: #bec2c2;
   --uc-text-subtle: #aeb3b3;
@@ -85,7 +87,8 @@
   --uc-action-hover: #8cebe5;
   --uc-action-soft: rgb(101 217 210 / 0.15);
   --uc-action-soft-strong: rgb(101 217 210 / 0.22);
-  --uc-bottom-bar-bg: rgb(30 32 32 / 0.74);
+  --uc-action-strong: #0F6E7C;
+  --uc-bottom-bar-bg: rgb(34 41 45 / 0.74);
 }
 
 [data-app-2027-home]::before,

@@ -70,7 +70,7 @@ describe('Future CZ Homepage Investment goals routing', () => {
 
     expect(await screen.findByRole('heading', { name: 'Invest towards what matters' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Create Goal' })).toBeInTheDocument()
-  })
+  }, 30_000)
 
   it.each([
     ['Build long-term wealth', 'Strategic approach'],

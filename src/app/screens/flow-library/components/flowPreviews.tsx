@@ -59,7 +59,7 @@ function Pills({ options, active }: { options: readonly string[]; active: string
             key={option}
             className={`rounded-full px-[16px] py-[8px] uc-type-n5-strong ${
               selected
-                ? "bg-[var(--uc-action)] text-[var(--uc-text-inverse)]"
+                ? "bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
                 : "border border-[var(--uc-action)] bg-[var(--uc-surface)] text-[var(--uc-action)]"
             }`}
           >

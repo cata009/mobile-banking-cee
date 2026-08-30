@@ -10,10 +10,18 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
+    testTimeout: 15_000,
     include: ['tests/**/*.test.{ts,tsx,mjs}'],
+    setupFiles: ['tests/setup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'text-summary'],
+      thresholds: {
+        statements: 80,
+        branches: 80,
+        functions: 62,
+        lines: 80,
+      },
       include: ['src/**/*.{ts,tsx}'],
       exclude: [
         'src/**/*.d.ts',

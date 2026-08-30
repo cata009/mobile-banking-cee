@@ -10,7 +10,7 @@ import svgPaths from '@/imports/svg-wan58807zo';
 import { useProductData } from '@/app/state/demoStore';
 import { convertCurrency, getCountryCurrency, roundMoney } from '@/data/exchangeRates';
 import { formatMaskedCardNumber } from '@/app/utils/cardNumber';
-import type { ProductCountKey, ProductCounts } from '@/app/state/demoTypes';
+import type { CountryId, ProductCountKey, ProductCounts, ReleaseId } from '@/app/state/demoTypes';
 
 function formatProductIban(country: string, productId: string, baseNumber: string): string {
   const prefix = country === 'BA_BL' ? 'BA' : country;
@@ -434,8 +434,17 @@ function applyCzApp2027DebitCards(categories: ProductCategory[]): ProductCategor
   });
 }
 
-export function useProducts() {
-  const { country, release, resolvedProductCounts } = useProductData();
+type DeriveProductCategoriesInput = {
+  country: CountryId;
+  release: ReleaseId;
+  resolvedProductCounts: ProductCounts;
+};
+
+export function deriveProductCategories({
+  country,
+  release,
+  resolvedProductCounts,
+}: DeriveProductCategoriesInput): ProductCategory[] {
   const localCurrency = getCountryCurrency(country);
   const baseCountedCategories = applyProductCounts(getProductsByCategory(), resolvedProductCounts);
   const isCzApp2027 =
@@ -451,7 +460,7 @@ export function useProducts() {
   const countedProducts = countedCategories.flatMap(category => category.products);
   
   // Get base categories and convert all products to local currency
-  const categories = countedCategories.map(category => ({
+  return countedCategories.map(category => ({
     ...category,
     products: category.products.map(product => {
       const isCard = product.type === 'debit_card' || product.type === 'credit_card' || product.type === 'meal_card';
@@ -513,6 +522,12 @@ export function useProducts() {
       };
     })
   }));
+}
+
+export function useProducts() {
+  const { country, release, resolvedProductCounts } = useProductData();
+  const localCurrency = getCountryCurrency(country);
+  const categories = deriveProductCategories({ country, release, resolvedProductCounts });
 
   const getProductIcon = (product: Product): ReactNode => {
     switch (product.type) {
