@@ -59,6 +59,8 @@ export interface ShopSmartOfferCard {
   pillLabel?: string;
   pillTone?: "teal" | "white";
   tagLabel?: string;
+  /** Promotional image badge used on the dedicated Partner offers page. */
+  partnerTagLabel?: string;
   distance?: string;
   trailingIcon?: "website" | "partners";
 }
@@ -272,6 +274,7 @@ export const DEFAULT_SHOPSMART_OFFER_CARDS: readonly ShopSmartOfferCard[] = [
     imageSrc: shopsmartValentinoImage,
     pillLabel: "Active",
     pillTone: "white",
+    partnerTagLabel: "10% OFF",
     trailingIcon: "website",
   },
   {
@@ -283,6 +286,7 @@ export const DEFAULT_SHOPSMART_OFFER_CARDS: readonly ShopSmartOfferCard[] = [
     imageSrc: shopsmartLentiamoImage,
     pillLabel: "Active",
     pillTone: "white",
+    partnerTagLabel: "50 RON",
     trailingIcon: "website",
   },
   {
@@ -294,6 +298,7 @@ export const DEFAULT_SHOPSMART_OFFER_CARDS: readonly ShopSmartOfferCard[] = [
     imageSrc: shopsmartEnglishHomeImage,
     pillLabel: "Activate",
     pillTone: "teal",
+    partnerTagLabel: "10% OFF",
     distance: "2,69 km",
     trailingIcon: "partners",
   },
@@ -306,6 +311,7 @@ export const DEFAULT_SHOPSMART_OFFER_CARDS: readonly ShopSmartOfferCard[] = [
     imageSrc: shopsmartOnlineCardImage,
     pillLabel: "Activate",
     pillTone: "teal",
+    partnerTagLabel: "15% OFF",
     trailingIcon: "website",
   },
   {
@@ -317,6 +323,7 @@ export const DEFAULT_SHOPSMART_OFFER_CARDS: readonly ShopSmartOfferCard[] = [
     imageSrc: shopsmartTravelKitImage,
     pillLabel: "Activate",
     pillTone: "teal",
+    partnerTagLabel: "8% OFF",
     trailingIcon: "website",
   },
   {
@@ -328,6 +335,7 @@ export const DEFAULT_SHOPSMART_OFFER_CARDS: readonly ShopSmartOfferCard[] = [
     imageSrc: shopsmartLivingRoomImage,
     pillLabel: "Activate",
     pillTone: "teal",
+    partnerTagLabel: "10% OFF",
     distance: "4,2 km",
     trailingIcon: "partners",
   },

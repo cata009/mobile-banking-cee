@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import CashFlowBars, { CashFlowDot } from "@/app/components/analytics/CashFlowBars";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { formatMoneyNumber } from "@/app/registry/countryConfig";
@@ -11,6 +13,8 @@ interface CashFlowSummaryBarsProps {
   onIncomeClick?: () => void;
   onSpendingClick?: () => void;
   compact?: boolean;
+  /** Rendered between the two figures and the bars, as on the Spending card. */
+  net?: ReactNode;
 }
 
 /**
@@ -28,6 +32,7 @@ export default function CashFlowSummaryBars({
   onIncomeClick,
   onSpendingClick,
   compact = false,
+  net,
 }: CashFlowSummaryBarsProps) {
   const { t } = useLanguage();
 
@@ -90,6 +95,8 @@ export default function CashFlowSummaryBars({
           );
         })}
       </div>
+
+      {net ? <div className="mt-[12px]">{net}</div> : null}
 
       <CashFlowBars className="mt-[16px]" incomeTotal={incomeTotal} spendingTotal={spendingTotal} />
     </section>

@@ -21,7 +21,10 @@ import { AppIcon } from "@/app/components/icons";
 import PfmCategoryChangeSheet from "@/app/components/pfm/PfmCategoryChangeSheet";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
-import { getCountryConfig, formatMoneyNumber, formatSignedMoneyNumber } from "@/app/registry/countryConfig";
+import { getCountryConfig } from "@/app/registry/countryConfig";
+import { formatEvo2027Number, formatEvo2027SignedNumber } from "@/app/utils/evo2027Formatting";
+import { EVO_SAVING_ACCOUNT_ANNUAL_RATE } from "@/app/config/evoCreditTerms";
+import { depositPresentation } from "@/app/screens/home/App2027TransformationHome";
 import { maskAmountParts, maskFormattedAmount } from "@/app/utils/amountPrivacy";
 import { useCopyToClipboard } from "@/app/utils/useCopyToClipboard";
 import { useProducts } from "@/hooks/useProducts";
@@ -78,9 +81,25 @@ function splitFormattedNumber(value: string) {
   };
 }
 
-function getProductAccountIdentity(product: Product) {
+/**
+ * What a product earns, said the way Home says it: "Savings Account · 2.5% p.a.".
+ *
+ * The rate is the reason the product exists, and Home puts it in the title. The
+ * detail screen — the place you go to read about that very product — left it out.
+ */
+function productRateSuffix(product: Product, perAnnum: string): string {
+  if (product.type === "saving_account") {
+    return ` · ${(EVO_SAVING_ACCOUNT_ANNUAL_RATE * 100).toFixed(1)}% ${perAnnum}`;
+  }
+  if (product.type === "term_deposit") {
+    return ` · ${(depositPresentation(product).annualRate * 100).toFixed(1)}% ${perAnnum}`;
+  }
+  return "";
+}
+
+function getProductAccountIdentity(product: Product, rateSuffix = "") {
   return {
-    accountName: product.name,
+    accountName: `${product.name}${rateSuffix}`,
     accountNumber: product.accountNumber,
     subAccount: "",
   };
@@ -267,10 +286,7 @@ export default function AccountDetailScreen({
   );
   const filteredTransactions = useMemo(() => {
     return scopedTransactions.filter((transaction) => {
-      const formattedAmount = `${transaction.amount < 0 ? "-" : "+"} ${formatMoneyNumber(
-        Math.abs(transaction.amount),
-        country,
-      )} ${config.currency}`;
+      const formattedAmount = `${transaction.amount < 0 ? "-" : "+"} ${formatEvo2027Number(Math.abs(transaction.amount))} ${config.currency}`;
       const searchableText = [
         transaction.label,
         transaction.details,
@@ -500,6 +516,10 @@ export default function AccountDetailScreen({
             }}
           >
             {accountProducts.map((product, index) => {
+              // Evo names the rate in the product title; other releases do not.
+              const rateSuffix = usesEvoGroupCards
+                ? productRateSuffix(product, t('runtime.evo.labels.interestRate', 'p.a.'))
+                : "";
               const termDepositDetails = product.type === "term_deposit"
                 ? getTermDepositDetails(product, currentAccountNumber)
                 : null;
@@ -507,7 +527,7 @@ export default function AccountDetailScreen({
                 ? getLoanDetails(product)
                 : null;
               const primaryBalance = loanDetails?.ownedAmount ?? product.balance;
-              const availableParts = splitFormattedNumber(formatMoneyNumber(primaryBalance, country));
+              const availableParts = splitFormattedNumber(formatEvo2027Number(primaryBalance));
               const secondaryBalance = termDepositDetails?.maturityAmount
                 ?? loanDetails?.nextInstallment
                 ?? product.balance * 0.92;
@@ -547,13 +567,13 @@ export default function AccountDetailScreen({
                   >
                     <AccountBalanceCard
                       account={termDepositDetails ? {
-                        ...getProductAccountIdentity(product),
+                        ...getProductAccountIdentity(product, rateSuffix),
                         accountNumber: `Maturity date ${termDepositDetails.maturityDate}`,
-                      } : getProductAccountIdentity(product)}
+                      } : getProductAccountIdentity(product, rateSuffix)}
                       availableInteger={displayedAvailable.integer}
                       availableDecimals={displayedAvailable.decimals}
                       currency={displayedAvailable.currency}
-                      currentBalance={maskFormattedAmount(formatMoneyNumber(secondaryBalance, country), amountsHidden)}
+                      currentBalance={maskFormattedAmount(formatEvo2027Number(secondaryBalance), amountsHidden)}
                       active={isActiveCard}
                       showSubAccount={false}
                       productType={product.type}
@@ -618,7 +638,7 @@ export default function AccountDetailScreen({
                       <AccountTransactionRow
                         key={transaction.id}
                         transaction={transaction}
-                        formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
+                        formattedAmount={formatEvo2027Number(Math.abs(transaction.amount))}
                         currency={activeCurrency}
                         displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
                         leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
@@ -655,7 +675,7 @@ export default function AccountDetailScreen({
                       <div key={dateGroup.dateKey} data-transaction-date-group={dateGroup.dateKey}>
                         <AccountTransactionMonthDivider
                           title={dateGroup.dateTitle}
-                          total={dateGroup.transactions.length > 1 ? formatSignedMoneyNumber(dateGroup.dailyTotal, country) : undefined}
+                          total={dateGroup.transactions.length > 1 ? formatEvo2027SignedNumber(dateGroup.dailyTotal) : undefined}
                           currency={activeCurrency}
                           dateSeparator
                         />
@@ -664,7 +684,7 @@ export default function AccountDetailScreen({
                             <AccountTransactionRow
                               key={transaction.id}
                               transaction={transaction}
-                              formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
+                              formattedAmount={formatEvo2027Number(Math.abs(transaction.amount))}
                               currency={activeCurrency}
                               displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
                               leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
@@ -685,7 +705,7 @@ export default function AccountDetailScreen({
                         <AccountTransactionRow
                           key={transaction.id}
                           transaction={transaction}
-                          formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
+                          formattedAmount={formatEvo2027Number(Math.abs(transaction.amount))}
                           currency={activeCurrency}
                           displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
                           leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}

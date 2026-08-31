@@ -315,7 +315,11 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.queryByRole("button", { name: "Next draft" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
     // Disabled drops the action fill entirely rather than fading it to a muddy block.
-    expect(screen.getByRole("button", { name: "Continue" })).toHaveClass("bg-[var(--uc-surface-muted)]", "!h-[32px]");
+    expect(screen.getByRole("button", { name: "Continue" })).toHaveClass(
+      "bg-[var(--uc-action-strong)]",
+      "opacity-30",
+      "!h-[32px]",
+    );
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 3 of 3");
     fireEvent.click(screen.getByRole("switch", { name: /Accept terms/i }));

@@ -80,11 +80,17 @@ export default function TransactionPairAvatar({
       role="img"
       style={{ width: size, height: size }}
     >
-      <span className="absolute left-0 top-0">
+      <span className="absolute inline-flex leading-none left-0 top-0">
         <EndpointRoundel endpoint={pair.from} size={discSize} currency={currency} />
       </span>
+      {/*
+        inline-flex and leading-none, not a bare span: an inline child inside a
+        block wrapper builds a line box with half-leading above and below it, so
+        the ring was drawn around a taller rectangle than the disc and showed as
+        a stroke that did not follow the circle.
+      */}
       <span
-        className="absolute rounded-full shadow-[0_0_0_2px_var(--uc-surface)]"
+        className="absolute inline-flex rounded-full leading-none shadow-[0_0_0_2px_var(--uc-surface)]"
         style={{ left: offset, top: offset }}
       >
         <EndpointRoundel endpoint={pair.to} size={discSize} currency={currency} />

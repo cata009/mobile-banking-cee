@@ -11,6 +11,14 @@ export interface ExpenseBar {
   /** The same name without its year, for the period stepper that already prints the year below. */
   filterTitle?: string;
   total: number;
+  /**
+   * How much of a full bucket this bar covers, 0–1. Defaults to a whole one.
+   *
+   * A month's last "week" is two or three days, and drawn at full width beside
+   * four seven-day bars it read as a collapse in spending rather than a shorter
+   * period. The height still carries the amount — the width now carries the span.
+   */
+  weight?: number;
 }
 
 export interface ExpenseBarChartProps {
@@ -20,6 +28,11 @@ export interface ExpenseBarChartProps {
   onToggle: (key: string) => void;
   /** Rendered inside the panel, above the plot — the period headline and its total. */
   header?: ReactNode;
+  /**
+   * Currency code printed once, on the top tick. The scale is money and said so
+   * nowhere, while every other figure in the app carries its currency.
+   */
+  axisCurrency?: string;
 }
 
 const PLOT_HEIGHT = 168;
@@ -52,14 +65,36 @@ function niceCeil(value: number) {
   return step * magnitude;
 }
 
+/**
+ * The gap between ticks, chosen before the ceiling rather than after it.
+ *
+ * Rounding the maximum and then dividing it by four produced axes like
+ * "0 / 6.3K / 12.5K / 18.8K / 25K": the top of the scale was round but every
+ * label below it was not. Rounding the *step* instead makes every label round,
+ * and the ceiling falls out of it.
+ */
+function niceStep(dataMax: number) {
+  if (dataMax <= 0) return 1;
+
+  const rough = dataMax / (TICK_COUNT - 1);
+  const magnitude = 10 ** Math.floor(Math.log10(rough));
+  const normalized = rough / magnitude;
+  const step = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+
+  return step * magnitude;
+}
+
 export default function ExpenseBarChart({
   bars,
   selectedKey,
   onToggle,
   header,
+  axisCurrency,
 }: ExpenseBarChartProps) {
-  const axisMax = niceCeil(Math.max(...bars.map((bar) => bar.total), 0));
-  const ticks = Array.from({ length: TICK_COUNT }, (_, index) => (axisMax / (TICK_COUNT - 1)) * index);
+  const dataMax = Math.max(...bars.map((bar) => bar.total), 0);
+  const step = niceStep(dataMax);
+  const axisMax = dataMax > 0 ? step * (TICK_COUNT - 1) : niceCeil(dataMax);
+  const ticks = Array.from({ length: TICK_COUNT }, (_, index) => step * index);
   // Twelve one-letter months still fit; anything denser has to thin its labels out to avoid collisions.
   const labelEvery = Math.max(1, Math.ceil(bars.length / 12));
   // A handful of weekly bars would read as hairlines at the width a month of daily bars needs.
@@ -86,6 +121,7 @@ export default function ExpenseBarChart({
           {ticks.map((tick) => (
             <span key={tick} className="whitespace-nowrap" style={{ transform: `translateY(-${TICK_LABEL_OVERHANG}px)` }}>
               {formatAxisTick(tick)}
+              {axisCurrency && tick === ticks[ticks.length - 1] ? ` ${axisCurrency}` : ''}
             </span>
           ))}
         </div>
@@ -121,7 +157,7 @@ export default function ExpenseBarChart({
                     <span
                       className="w-full rounded-t-[4px] transition-[height,background-color] duration-200"
                       style={{
-                        maxWidth: `${barWidth}px`,
+                        maxWidth: `${barWidth * (bar.weight ?? 1)}px`,
                         height: `${Math.max(height, bar.total > 0 ? 2 : 0)}%`,
                         backgroundColor: isActive ? "var(--uc-action)" : INHIBITED_COLOR,
                       }}

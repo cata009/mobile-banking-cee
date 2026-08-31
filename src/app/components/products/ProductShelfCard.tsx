@@ -21,11 +21,14 @@ const IMAGE_HEIGHT = { carousel: "h-[100px]", list: "h-[140px]" } as const;
 const CARD_WIDTH = { carousel: "w-[240px] shrink-0", list: "w-full" } as const;
 
 /**
- * Product card for the Evo 2027 Products shelf (Figma node 24042:11585).
- * Photo + product-name tag + benefit headline + one supporting line.
+ * Product card for the Evo 2027 Offers shelf (Figma node 24042:11585).
+ * Photo + product name + benefit line.
  *
- * The tag carries the product name so the benefit copy stays identifiable —
- * the Figma Tag slot exists on the image but ships hidden.
+ * The name used to be a small uppercase tag laid over the photograph while the
+ * marketing headline took the bold slot underneath, so scanning the shelf you
+ * read four slogans before you read four product names. Choosing a product is a
+ * lookup far more often than a discovery, so the two have swapped: the name is
+ * the headline, the benefit is the line under it, and the photo carries no text.
  */
 export default function ProductShelfCard({
   item,
@@ -66,17 +69,14 @@ export default function ProductShelfCard({
           className="size-full object-cover"
           style={{ objectPosition: item.imagePosition }}
         />
-        <span
-          data-product-shelf-tag
-          className="absolute left-0 top-[12px] rounded-r-[8px] px-[12px] py-[4px] text-[12px] font-bold uppercase leading-[16px] text-[var(--uc-static-white)]"
-          style={{ backgroundColor: "rgb(var(--uc-static-black-rgb) / 0.72)" }}
-        >
-          {item.productName}
-        </span>
       </span>
       <span className="flex min-h-[66px] flex-1 flex-col gap-[4px] p-[12px]">
-        <span className="text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{item.title}</span>
-        <span className="line-clamp-2 text-[14px] leading-[18px] text-[var(--uc-text)]">{item.body}</span>
+        <span data-product-shelf-name className="text-[17px] font-bold leading-[21px] text-[var(--uc-text)]">
+          {item.productName}
+        </span>
+        <span data-product-shelf-benefit className="line-clamp-2 text-[14px] leading-[18px] text-[var(--uc-text-muted)]">
+          {item.title}
+        </span>
       </span>
     </button>
   );

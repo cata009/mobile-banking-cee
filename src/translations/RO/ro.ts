@@ -72,11 +72,11 @@ const ro: TranslationKeys = {
   // HOMEPAGE - BOTTOM NAVIGATION
   // ==========================================
   navigation: {
-    home: 'Home',
-    analytics: 'Analytics',
-    payments: 'Payments',
-    products: 'Products',
-    more: 'More',
+    home: 'Acasă',
+    analytics: 'Cheltuieli',
+    payments: 'Plăți',
+    products: 'Oferte',
+    more: 'Mai mult',
   },
 
   // ==========================================

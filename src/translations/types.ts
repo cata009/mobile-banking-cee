@@ -1,3 +1,5 @@
+import type { EvoTranslations } from "./evo";
+
 /**
  * Type-safe Translation Keys Interface
  * Defines the structure for all translations across the application
@@ -238,6 +240,8 @@ export interface TranslationKeys {
       };
       cards: Record<string, string>;
     };
+    /** Evo 2027 surfaces: Home, Spending and Offers. */
+    evo: EvoTranslations;
     dialogs: {
       logoutTitle: string;
       logoutMessage: string;

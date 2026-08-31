@@ -1,4 +1,5 @@
-import { formatMoneyNumber, getCountryConfig } from "@/app/registry/countryConfig";
+import { getCountryConfig } from "@/app/registry/countryConfig";
+import { formatEvo2027Number } from "@/app/utils/evo2027Formatting";
 import type { CountryId } from "@/app/state/demoTypes";
 import type { AccountTransaction } from "@/data/accountDetails";
 import { getPfmCategory, normalizePfmCategory } from "@/data/pfmCategories";
@@ -165,7 +166,7 @@ export function createTransactionDetailData(
   product?: Product | null,
 ): TransactionDetailData {
   const config = getCountryConfig(country);
-  const amount = `${transaction.amount < 0 ? "-" : ""}${formatMoneyNumber(Math.abs(transaction.amount), country)} ${config.currency}`;
+  const amount = `${transaction.amount < 0 ? "-" : ""}${formatEvo2027Number(Math.abs(transaction.amount))} ${config.currency}`;
   const pfmCategory = normalizePfmCategory(transaction.pfmCategory || transaction.category);
   const pfmCategoryDefinition = getPfmCategory(pfmCategory);
   const categoryTag =

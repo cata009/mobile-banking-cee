@@ -11,7 +11,8 @@ import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import { AppIcon } from "@/app/components/icons";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
-import { getCountryConfig, formatMoneyNumber, formatSignedMoneyNumber } from "@/app/registry/countryConfig";
+import { getCountryConfig } from "@/app/registry/countryConfig";
+import { formatEvo2027Number, formatEvo2027SignedNumber } from "@/app/utils/evo2027Formatting";
 import { maskFormattedAmount } from "@/app/utils/amountPrivacy";
 import { formatMaskedCardNumber } from "@/app/utils/cardNumber";
 import { useProducts } from "@/hooks/useProducts";
@@ -218,7 +219,7 @@ export default function CardDetailScreen({
   const filteredTransactions = useMemo(() => {
     if (!normalizedSearch) return scopedTransactions;
     return scopedTransactions.filter((tx) => {
-      const formattedAmount = `${tx.amount < 0 ? "-" : "+"} ${formatMoneyNumber(Math.abs(tx.amount), country)} ${config.currency}`;
+      const formattedAmount = `${tx.amount < 0 ? "-" : "+"} ${formatEvo2027Number(Math.abs(tx.amount))} ${config.currency}`;
       return [tx.label, tx.details, tx.category, tx.status, tx.day, tx.month, tx.monthTitle, formattedAmount]
         .filter(Boolean)
         .join(" ")
@@ -246,9 +247,9 @@ export default function CardDetailScreen({
   const freeToSpendAmount = useMemo(() => {
     if (!activeCard) return "0";
     if (activeCard.type === "credit_card" && "availableCredit" in activeCard) {
-      return formatMoneyNumber((activeCard as import("@/data/products").CreditCard).availableCredit, country);
+      return formatEvo2027Number((activeCard as import("@/data/products").CreditCard).availableCredit);
     }
-    return formatMoneyNumber(Math.abs(activeCard.balance), country);
+    return formatEvo2027Number(Math.abs(activeCard.balance));
   }, [activeCard, country]);
 
   const maskedFreeToSpend = maskFormattedAmount(freeToSpendAmount, amountsHidden);
@@ -551,7 +552,7 @@ export default function CardDetailScreen({
                       <AccountTransactionRow
                         key={transaction.id}
                         transaction={transaction}
-                        formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
+                        formattedAmount={formatEvo2027Number(Math.abs(transaction.amount))}
                         currency={config.currency}
                         displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
                         leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
@@ -578,7 +579,7 @@ export default function CardDetailScreen({
                   <div key={dateGroup.dateKey} data-transaction-date-group={dateGroup.dateKey}>
                     <AccountTransactionMonthDivider
                       title={dateGroup.dateTitle}
-                      total={dateGroup.transactions.length > 1 ? formatSignedMoneyNumber(dateGroup.dailyTotal, country) : undefined}
+                      total={dateGroup.transactions.length > 1 ? formatEvo2027SignedNumber(dateGroup.dailyTotal) : undefined}
                       currency={config.currency}
                       dateSeparator
                     />
@@ -587,7 +588,7 @@ export default function CardDetailScreen({
                         <AccountTransactionRow
                           key={tx.id}
                           transaction={tx}
-                          formattedAmount={formatMoneyNumber(Math.abs(tx.amount), country)}
+                          formattedAmount={formatEvo2027Number(Math.abs(tx.amount))}
                           currency={config.currency}
                           displayLabel={transactionRowPresentation?.displayLabel?.(tx)}
                           leadingVisual={transactionRowPresentation?.leadingVisual?.(tx)}
@@ -607,7 +608,7 @@ export default function CardDetailScreen({
                     <AccountTransactionRow
                       key={tx.id}
                       transaction={tx}
-                      formattedAmount={formatMoneyNumber(Math.abs(tx.amount), country)}
+                      formattedAmount={formatEvo2027Number(Math.abs(tx.amount))}
                       currency={config.currency}
                       displayLabel={transactionRowPresentation?.displayLabel?.(tx)}
                       leadingVisual={transactionRowPresentation?.leadingVisual?.(tx)}

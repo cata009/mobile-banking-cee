@@ -33,6 +33,7 @@ export interface ShopsmartOfferCardProps {
   tagLabel?: string;
   distance?: string;
   trailingIcon?: ShopsmartOfferTrailingIcon;
+  variant?: "default" | "partner";
   onClick?: () => void;
 }
 
@@ -57,6 +58,7 @@ export default function ShopsmartOfferCard({
   tagLabel,
   distance,
   trailingIcon = "website",
+  variant = "default",
   onClick,
 }: ShopsmartOfferCardProps) {
   const Root = onClick ? "button" : "article";
@@ -70,23 +72,21 @@ export default function ShopsmartOfferCard({
     <Root
       type={onClick ? "button" : undefined}
       onClick={onClick}
-      className="relative flex h-full w-full max-w-none flex-col overflow-hidden rounded-[8px] bg-[var(--uc-surface)] text-left text-[var(--uc-text)]"
+      className={`relative flex h-full w-full max-w-none flex-col overflow-hidden rounded-[8px] bg-[var(--uc-surface)] text-left text-[var(--uc-text)] ${variant === "partner" ? "border border-[var(--uc-border-strong)]" : ""}`}
       data-component="ShopsmartOfferCard"
       data-figma-schema={SHOPSMART_OFFER_CARD_SOURCE.schema}
       data-source-node={`${SHOPSMART_OFFER_CARD_SOURCE.sourceNodeIds.offers1} ${SHOPSMART_OFFER_CARD_SOURCE.sourceNodeIds.offers2}`}
     >
       <div className="relative w-full overflow-hidden" style={{ height: imageHeight }}>
-        <img
-          src={imageSrc}
-          alt={imageAlt ?? merchant}
-          className="h-full w-full object-cover"
-          draggable={false}
-        />
+        <img src={imageSrc} alt={imageAlt ?? merchant} className="h-full w-full object-cover" draggable={false} />
         {imageOverlay ? <span aria-hidden="true" className="absolute inset-0 bg-black/20" /> : null}
       </div>
 
       {tagLabel ? (
-        <span className="absolute left-0 top-[16px] inline-flex h-[24px] items-center gap-[4px] rounded-r-[4px] bg-[#F0871D] px-[12px] py-[4px] text-[12px] font-bold uppercase leading-[16px] tracking-[1px] text-[var(--uc-static-white)]">
+        <span
+          data-partner-offer-badge={variant === "partner" ? "true" : undefined}
+          className={`absolute left-0 top-[16px] inline-flex h-[24px] items-center gap-[4px] rounded-r-[4px] px-[12px] py-[4px] text-[12px] font-bold uppercase leading-[16px] tracking-[1px] text-[var(--uc-static-white)] ${variant === "partner" ? "bg-[#DD1860]" : "bg-[#F0871D]"}`}
+        >
           <GiftIcon />
           {tagLabel}
         </span>
@@ -100,17 +100,23 @@ export default function ShopsmartOfferCard({
         </span>
       ) : null}
 
-      <div className="flex min-h-[121px] flex-1 flex-col gap-[16px] px-[16px] pb-[13px] pt-[9px]">
+      <div className="flex flex-1 flex-col gap-[16px] px-[16px] pb-[13px] pt-[9px]">
         <div className="flex flex-col">
           <span className="text-[14px] font-bold leading-[20px] tracking-[0.3px] text-[var(--uc-action)]">
             {merchant}
           </span>
-          <span className="mt-[1px] block min-h-[46px] whitespace-pre-line text-[18px] font-bold leading-[23px] tracking-[0.42px] text-[var(--uc-text)]">
+          <span
+            data-equalize="shopsmart-title"
+            className={`mt-[1px] block whitespace-pre-line font-bold tracking-[0.42px] text-[var(--uc-text)] ${variant === "partner" ? "text-[20px] leading-[24px]" : "text-[18px] leading-[23px]"}`}
+          >
             {title}
           </span>
         </div>
 
-        <div className="flex min-h-[32px] items-center justify-between gap-[8px]">
+        <div
+          data-equalize="shopsmart-status"
+          className="mt-auto flex min-h-[32px] items-center justify-between gap-[8px]"
+        >
           <span className="min-w-0 text-[14px] font-normal leading-[16px] tracking-[1px] text-[var(--uc-text)]">
             {statusText}
           </span>

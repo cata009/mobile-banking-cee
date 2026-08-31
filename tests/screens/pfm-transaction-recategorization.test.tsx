@@ -68,9 +68,12 @@ describe('PFM transaction recategorization entry points', () => {
     const decemberReport = current.container.querySelector<HTMLElement>('[data-monthly-account-report="2025-12"]')
     expect(decemberReport).toHaveTextContent(/Total December 2025/i)
     expect(decemberReport).toHaveTextContent(/4\.399,84\s*CZK/)
-    expect(decemberReport?.querySelector('h3')).toHaveClass('uc-type-h2')
+    // The Spending card's own treatment, at account level: the month named in the
+    // brand colour and uppercase, and the signed total moved under the two flows
+    // as a Net cashflow block rather than floating under the title.
+    expect(decemberReport?.querySelector('h3')).toHaveClass('uppercase', 'text-[var(--uc-action)]')
     expect(decemberReport).toHaveClass('rounded-[8px]', 'bg-[var(--uc-surface)]')
-    expect(decemberReport?.querySelector('[data-monthly-report-total]')).toHaveClass('uc-type-n2-strong', 'text-[var(--uc-text-muted)]')
+    expect(decemberReport?.querySelector('[data-monthly-report-total]')).toHaveTextContent(/Net cashflow/i)
     expect(decemberReport?.querySelector('[data-monthly-report-total]')).toHaveTextContent(/[-+]\s*.*CZK/)
     expect(decemberReport?.querySelector('[data-ds-label="AccountTransactionMonthDivider"]')).not.toBeInTheDocument()
     expect(decemberReport?.previousElementSibling).toBeNull()

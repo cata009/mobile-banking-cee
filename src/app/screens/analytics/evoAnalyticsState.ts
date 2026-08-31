@@ -1,4 +1,5 @@
 import type { ExpenseDonutCategory } from '@/app/components/analytics/ExpenseDonutChart'
+import type { SpendingPeriodSelection } from './evoSpendingPeriods'
 
 export type ExpenseChartMode = 'donut' | 'bars'
 export type AnalyticsDirection = 'expense' | 'income'
@@ -15,7 +16,14 @@ export type EvoAnalyticsState = {
   selectedSplitKeys: ExpenseDonutCategory[]
   expenseChartMode: ExpenseChartMode
   selectedBucketKey: string | null
-  selectedPeriodKey: string
+  /** What the screen is showing: which months, at which granularity. */
+  period: SpendingPeriodSelection
+  periodSheetOpen: boolean
+  /**
+   * Movements between the customer's own accounts. Off by default — counted,
+   * they inflate both Money in and Money out and dilute every percentage.
+   */
+  includeOwnTransfers: boolean
 }
 
 type SetFieldAction = {
@@ -40,12 +48,13 @@ export type EvoAnalyticsAction =
   | { type: 'clear-selection' }
   | { type: 'change-split-mode'; mode: ExpenseSplitMode }
   | { type: 'toggle-bucket'; key: string }
-  | { type: 'select-period'; periodKey: string }
+  | { type: 'select-period'; period: SpendingPeriodSelection }
+  | { type: 'toggle-own-transfers' }
 
 export function createEvoAnalyticsState(
   initialScopeId: string | null | undefined,
   initialDirection: AnalyticsDirection | null | undefined,
-  initialPeriodKey: string,
+  initialPeriod: SpendingPeriodSelection,
 ): EvoAnalyticsState {
   return {
     selectedScopeId: initialScopeId ?? 'all-accounts',
@@ -57,7 +66,9 @@ export function createEvoAnalyticsState(
     selectedSplitKeys: [],
     expenseChartMode: 'donut',
     selectedBucketKey: null,
-    selectedPeriodKey: initialPeriodKey,
+    period: initialPeriod,
+    periodSheetOpen: false,
+    includeOwnTransfers: false,
   }
 }
 
@@ -104,6 +115,9 @@ export function evoAnalyticsReducer(state: EvoAnalyticsState, action: EvoAnalyti
         selectedBucketKey: state.selectedBucketKey === action.key ? null : action.key,
       }
     case 'select-period':
-      return { ...state, selectedPeriodKey: action.periodKey, selectedBucketKey: null }
+      // A bucket selected under one period means nothing under the next.
+      return { ...state, period: action.period, selectedBucketKey: null, periodSheetOpen: false }
+    case 'toggle-own-transfers':
+      return { ...state, includeOwnTransfers: !state.includeOwnTransfers }
   }
 }

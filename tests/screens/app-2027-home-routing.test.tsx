@@ -39,7 +39,7 @@ describe('Evo 2027 Homepage routing', () => {
   it('boots Evo 2027 from a shared deep link', async () => {
     render(<App />)
 
-    expect(await screen.findByText('Total Available')).toBeInTheDocument()
+    expect(await screen.findByText('Total available')).toBeInTheDocument()
     expect(screen.getByText('Evo 2027')).toBeInTheDocument()
     expect(document.querySelector('[data-app-2027-home]')).toBeInTheDocument()
     expect(document.querySelector('[data-home-transformation]')).toBeInTheDocument()
@@ -48,7 +48,7 @@ describe('Evo 2027 Homepage routing', () => {
   it('retains the current Czech Evo 2027 homepage composition', async () => {
     render(<App />)
 
-    await screen.findByText('Total Available')
+    await screen.findByText('Total available')
     expect(screen.getByRole('tablist', { name: 'Product categories' })).toBeInTheDocument()
     expect(document.querySelector('[data-app-2027-home]')).toBeInTheDocument()
   })
@@ -56,7 +56,7 @@ describe('Evo 2027 Homepage routing', () => {
   it('propagates an applied Evo visual theme across the app surface', async () => {
     render(<App />)
 
-    await screen.findByText('Total Available')
+    await screen.findByText('Total available')
     const appSurface = document.querySelector('[data-app-2027-theme-scope]') as HTMLElement
     expect(appSurface).toHaveAttribute('data-home-theme', 'standard')
 

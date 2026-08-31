@@ -5,12 +5,11 @@ import BottomNavigation from "@/app/components/BottomNavigation";
 import { AppIcon } from "@/app/components/icons";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
-import ProductCardBottomSheet, {
-  type ProductDetailSelection,
-} from "@/app/components/products/ProductCardBottomSheet";
+import ProductCardBottomSheet, { type ProductDetailSelection } from "@/app/components/products/ProductCardBottomSheet";
 import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
 import ShopsmartOfferCard from "@/app/components/shopsmart/ShopsmartOfferCard";
+import ShopsmartCategoryChips from "@/app/components/shopsmart/ShopsmartCategoryChips";
 import App2027ProductsShelf from "@/app/screens/products/App2027ProductsShelf";
 import { ProductsHeader } from "@/app/screens/products/ProductsHeader";
 import { useLanguage } from "@/app/contexts/LanguageContext";
@@ -21,6 +20,7 @@ import {
   type ProductsCardId,
   type ProductsMenuTab,
   type ProductsOffer,
+  type ShopSmartOfferCategory,
   type ShopSmartOfferCard,
   type ShopSmartSummary,
 } from "@/app/config/productsMenuConfig";
@@ -99,8 +99,7 @@ export function SectionHeading({ children }: { children: string }) {
   return <SectionHeadingDivider title={children} className="px-[24px]" />;
 }
 
-function handleOfferClick(_offer: ProductsOffer) {
-}
+function handleOfferClick(_offer: ProductsOffer) {}
 
 export function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -131,9 +130,7 @@ export function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
       );
     }
 
-    return clampCarouselScrollLeft(
-      cardOffsetLeft - (carousel.clientWidth - OFFER_CARD_WIDTH) / 2,
-    );
+    return clampCarouselScrollLeft(cardOffsetLeft - (carousel.clientWidth - OFFER_CARD_WIDTH) / 2);
   };
 
   const getNearestOfferIndex = (scrollLeft: number) => {
@@ -186,9 +183,12 @@ export function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
     else carousel.scrollLeft = 0;
   }, [offers]);
 
-  useEffect(() => () => {
-    clearScrollSnapTimeout();
-  }, []);
+  useEffect(
+    () => () => {
+      clearScrollSnapTimeout();
+    },
+    [],
+  );
 
   return (
     <div
@@ -203,10 +203,7 @@ export function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
     >
       <div className="flex gap-[12px] px-[24px] pt-[16px]">
         {offers.map((offer, index) => (
-          <div
-            key={offer.id}
-            {...dragHandlers}
-          >
+          <div key={offer.id} {...dragHandlers}>
             <ProductOfferCard
               offer={offer}
               colorFamily={offer.colorFamily}
@@ -304,18 +301,22 @@ export function ShopSmartContent({
   showSummary?: boolean;
 }) {
   const { t } = useLanguage();
+  const partnerOffersMode = !showSummary;
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState<"popular" | ShopSmartOfferCategory>("popular");
+
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
   const visibleOfferCards = useMemo(() => {
-    if (!normalizedSearchQuery) return offerCards;
-
     return offerCards.filter((offer) => {
+      if (activeCategory !== "popular" && !offer.categories.includes(activeCategory)) return false;
+      if (!normalizedSearchQuery) return true;
       const searchableText = [
         offer.merchant,
         offer.title,
         offer.statusText,
         offer.pillLabel,
         offer.tagLabel,
+        offer.partnerTagLabel,
         offer.distance,
       ]
         .filter(Boolean)
@@ -324,35 +325,67 @@ export function ShopSmartContent({
 
       return searchableText.includes(normalizedSearchQuery);
     });
-  }, [normalizedSearchQuery, offerCards]);
+  }, [activeCategory, normalizedSearchQuery, offerCards]);
+  const partnerCategories: ReadonlyArray<{
+    id: "popular" | ShopSmartOfferCategory;
+    label: string;
+  }> = [
+    { id: "popular", label: t("runtime.evo.shopsmart.filters.popular", "MOST POPULAR") },
+    { id: "eshops", label: t("runtime.evo.shopsmart.filters.eshops", "E-SHOPS") },
+    { id: "electronics", label: t("runtime.evo.shopsmart.filters.electronics", "ELECTRONICS") },
+    { id: "travel", label: t("runtime.evo.shopsmart.filters.travel", "TRAVEL") },
+    { id: "home", label: t("runtime.evo.shopsmart.filters.home", "HOME & LIVING") },
+  ];
 
   return (
     <section className="flex flex-col gap-[16px] pt-[16px]" data-products-shopsmart-content="true">
       {showSummary ? <ShopSmartSummaryBlock summary={summary} /> : null}
       <div className="flex flex-col gap-[16px]">
-        <SectionHeading>{t("runtime.productsMenu.allOffers", "ALL OFFERS")}</SectionHeading>
+        {!partnerOffersMode ? (
+          <SectionHeading>{t("runtime.productsMenu.allOffers", "ALL OFFERS")}</SectionHeading>
+        ) : null}
         {/* On the Evo shelf this body sits on the app background, where the
             search bar's own app-bg fill is invisible; `searchSurface` rebinds the
             variable so the field reads as a raised white row, and `stickySearchTop`
             keeps it reachable while the offers scroll, as Account details does. */}
         <div
           data-products-shopsmart-search
-          className={stickySearchTop ? "sticky z-[9] bg-[var(--uc-app-bg)] px-[16px] pb-[10px] pt-[2px]" : "px-[16px] py-[2px]"}
+          className={
+            stickySearchTop ? "sticky z-[9] bg-[var(--uc-app-bg)] px-[16px] pb-[10px] pt-[2px]" : "px-[16px] py-[2px]"
+          }
           style={stickySearchTop ? { top: stickySearchTop } : undefined}
         >
           <div
-            className={searchSurface ? "rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[8px]" : undefined}
+            className={
+              searchSurface
+                ? "rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[8px]"
+                : undefined
+            }
             style={searchSurface ? { ["--uc-app-bg" as string]: "var(--uc-surface)" } : undefined}
           >
             <AccountSearchBar
               value={searchQuery}
               onValueChange={setSearchQuery}
               onFilterClick={() => {}}
+              showTrailingAction={!partnerOffersMode}
               placeholder={t("runtime.actions.search", "Search")}
             />
           </div>
         </div>
-        <div data-products-shopsmart-offers className="flex w-full min-w-0 flex-col items-stretch gap-[16px] px-[24px]">
+        {partnerOffersMode ? (
+          <ShopsmartCategoryChips
+            categories={partnerCategories}
+            activeId={activeCategory}
+            onSelect={(id) => setActiveCategory(id as typeof activeCategory)}
+            ariaLabel={t("runtime.evo.shopsmart.categoriesLabel", "Shopsmart categories")}
+            className="px-[16px]"
+            railDataAttribute="data-partner-offers-categories"
+          />
+        ) : null}
+        <div
+          data-products-shopsmart-offers
+          className={`flex w-full min-w-0 flex-col items-stretch gap-[16px] ${partnerOffersMode ? "px-[16px]" : "px-[24px]"}`}
+        >
           {visibleOfferCards.map((offer) => (
             <ShopsmartOfferCard
               key={offer.id}
@@ -360,11 +393,13 @@ export function ShopSmartContent({
               title={offer.title}
               statusText={offer.statusText}
               imageSrc={offer.imageSrc}
-              pillLabel={offer.pillLabel}
+              imageHeight={partnerOffersMode ? 143 : 130}
+              pillLabel={partnerOffersMode ? undefined : offer.pillLabel}
               pillTone={offer.pillTone}
-              tagLabel={offer.tagLabel}
+              tagLabel={partnerOffersMode ? offer.partnerTagLabel : offer.tagLabel}
               distance={offer.distance}
               trailingIcon={offer.trailingIcon}
+              variant={partnerOffersMode ? "partner" : "default"}
               onClick={() => handleShopSmartOfferClick(offer)}
             />
           ))}
@@ -379,8 +414,7 @@ export function ShopSmartContent({
   );
 }
 
-function handleShopSmartOfferClick(_offer: ShopSmartOfferCard) {
-}
+function handleShopSmartOfferClick(_offer: ShopSmartOfferCard) {}
 
 function ShopSmartSummaryBlock({ summary }: { summary: ShopSmartSummary }) {
   return (
@@ -488,6 +522,10 @@ export default function ProductsScreen({
       {showProductsShelf ? (
         <App2027ProductsShelf
           title={t("runtime.productsMenu.title", config.title)}
+          offerCounts={{
+            shopsmart: config.shopSmartOfferCards.length,
+            "partner-offers": config.shopSmartOfferCards.length,
+          }}
           onProductDetailOpen={onProductDetailOpen}
           onHeroCollapsedChange={onShelfHeroCollapsedChange}
           renderOffers={({ showSummary = true } = {}) => (
@@ -531,10 +569,7 @@ export default function ProductsScreen({
                 productsSectionRef={productsSectionRef}
               />
             ) : (
-              <ShopSmartContent
-                summary={config.shopSmartSummary}
-                offerCards={config.shopSmartOfferCards}
-              />
+              <ShopSmartContent summary={config.shopSmartSummary} offerCards={config.shopSmartOfferCards} />
             )}
           </div>
         </>

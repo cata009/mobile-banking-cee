@@ -72,11 +72,11 @@ const sl: TranslationKeys = {
   // HOMEPAGE - BOTTOM NAVIGATION
   // ==========================================
   navigation: {
-    home: 'Home',
-    analytics: 'Analytics',
-    payments: 'Payments',
-    products: 'Products',
-    more: 'More',
+    home: 'Domov',
+    analytics: 'Poraba',
+    payments: 'Plačila',
+    products: 'Ponudbe',
+    more: 'Več',
   },
 
   // ==========================================

@@ -30,6 +30,6 @@ describe('Settings appearance', () => {
     expect(screen.getByRole('button', { name: 'light' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'dark' })).toBeInTheDocument()
     expect(screen.getByTestId('app-2027-phone-theme-preview')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Apply current theme' })).toHaveClass('w-[327px]', 'rounded')
+    expect(screen.getByRole('button', { name: 'Apply current theme' })).toHaveClass('w-full', 'rounded')
   })
 })
