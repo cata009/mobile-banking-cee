@@ -10,6 +10,7 @@ import svgPaths from '@/imports/svg-wan58807zo';
 import { useProductData } from '@/app/state/demoStore';
 import { convertCurrency, getCountryCurrency, roundMoney } from '@/data/exchangeRates';
 import { formatMaskedCardNumber } from '@/app/utils/cardNumber';
+import { formatEvo2027Amount } from '@/app/utils/evo2027Formatting';
 import type { CountryId, ProductCountKey, ProductCounts, ReleaseId } from '@/app/state/demoTypes';
 
 function formatProductIban(country: string, productId: string, baseNumber: string): string {
@@ -527,6 +528,8 @@ export function deriveProductCategories({
 export function useProducts() {
   const { country, release, resolvedProductCounts } = useProductData();
   const localCurrency = getCountryCurrency(country);
+  const formatAmountForRelease = (amount: number, currency: Product['currency']) =>
+    release === "release-future-evo-2027" ? formatEvo2027Amount(amount, currency) : formatAmount(amount, currency);
   const categories = deriveProductCategories({ country, release, resolvedProductCounts });
 
   const getProductIcon = (product: Product): ReactNode => {
@@ -588,7 +591,7 @@ export function useProducts() {
   };
 
   const formatProductAmount = (product: Product) => {
-    return formatAmount(getDisplayBalance(product), product.currency);
+    return formatAmountForRelease(getDisplayBalance(product), product.currency);
   };
 
   const getProductDisplayNumber = (product: Product): string => {
@@ -609,7 +612,7 @@ export function useProducts() {
       return sum + convertCurrency(getDisplayBalance(product), product.currency, localCurrency);
     }, 0);
 
-    return formatAmount(total, localCurrency);
+    return formatAmountForRelease(total, localCurrency);
   };
 
   // Calculate Total Available: Accounts + Savings (excluding term deposits)
@@ -628,7 +631,7 @@ export function useProducts() {
       return sum;
     }, 0);
 
-    return formatAmount(total, localCurrency);
+    return formatAmountForRelease(total, localCurrency);
   };
 
   // Calculate Total Owed: Mortgages + Loans (absolute value)
@@ -647,7 +650,7 @@ export function useProducts() {
       return sum;
     }, 0);
 
-    return formatAmount(total, localCurrency);
+    return formatAmountForRelease(total, localCurrency);
   };
 
   return {

@@ -8,6 +8,9 @@ import productCardMortgagesImage from "../../../screenshots/mortgages.png";
 import shopsmartEnglishHomeImage from "@/assets/shopsmart/shopsmart-english-home.png";
 import shopsmartLentiamoImage from "@/assets/shopsmart/shopsmart-lentiamo.png";
 import shopsmartValentinoImage from "@/assets/shopsmart/shopsmart-valentino.png";
+import shopsmartOnlineCardImage from "@/assets/products/shelf/shelf-online-card.png";
+import shopsmartTravelKitImage from "@/assets/products/shelf/shelf-travel-kit.png";
+import shopsmartLivingRoomImage from "@/assets/products/shelf/hero-living-room.png";
 
 export type ProductsMenuTab = "banking" | "shopsmart";
 export type ShopSmartOfferCategory = "eshops" | "electronics" | "travel" | "home";
@@ -292,6 +295,40 @@ export const DEFAULT_SHOPSMART_OFFER_CARDS: readonly ShopSmartOfferCard[] = [
     pillLabel: "Activate",
     pillTone: "teal",
     distance: "2,69 km",
+    trailingIcon: "partners",
+  },
+  {
+    id: "shopsmart-datart",
+    categories: ["eshops", "electronics"],
+    merchant: "DATART",
+    title: "15% cashback on tech\nabove 2,000 CZK",
+    statusText: "Until 31-December-2025",
+    imageSrc: shopsmartOnlineCardImage,
+    pillLabel: "Activate",
+    pillTone: "teal",
+    trailingIcon: "website",
+  },
+  {
+    id: "shopsmart-booking",
+    categories: ["eshops", "travel"],
+    merchant: "Booking.com",
+    title: "8% cashback on\nselected stays",
+    statusText: "Until 31-December-2025",
+    imageSrc: shopsmartTravelKitImage,
+    pillLabel: "Activate",
+    pillTone: "teal",
+    trailingIcon: "website",
+  },
+  {
+    id: "shopsmart-ikea",
+    categories: ["eshops", "home"],
+    merchant: "IKEA",
+    title: "10% cashback on\nhome essentials",
+    statusText: "Until 31-December-2025",
+    imageSrc: shopsmartLivingRoomImage,
+    pillLabel: "Activate",
+    pillTone: "teal",
+    distance: "4,2 km",
     trailingIcon: "partners",
   },
 ];

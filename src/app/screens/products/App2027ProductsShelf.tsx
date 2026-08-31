@@ -32,11 +32,11 @@ const SHELF_SECTION_TITLE = 'text-[24px] font-bold leading-[28px] tracking-[-0.0
 const SHELF_SECTION_GAP = 'pt-[28px]'
 const SHELF_FIRST_SECTION_GAP = 'pt-[6px]'
 /**
- * Height of the sticky `PageHeader` block: the safe-area reserve plus its 48px
- * row and 8px of top padding. Anything that has to stick *below* the header —
+ * Height of the sticky `PageHeader` block: the safe-area reserve plus its
+ * border-box 48px compact row. Anything that has to stick *below* the header —
  * the search field — offsets by this.
  */
-const SHELF_STICKY_HEADER_HEIGHT = 'calc(var(--uc-phone-top-reserve, 54px) + 56px)'
+const SHELF_STICKY_HEADER_HEIGHT = 'calc(var(--uc-phone-top-reserve, 54px) + 48px)'
 /**
  * `AccountSearchBar` paints itself with `--uc-app-bg`, which is invisible on a
  * page that already uses that background. Rebinding the variable to the raised
@@ -60,7 +60,7 @@ type ShelfView =
   | { kind: 'shelf' }
   | { kind: 'category'; categoryId: ProductShelfCategoryId }
   | { kind: 'search' }
-  | { kind: 'offers'; title: string }
+  | { kind: 'offers'; title: string; showSummary: boolean }
 
 /** Every product on the shelf, flattened once for search. */
 const SEARCHABLE_ITEMS: ReadonlyArray<{ item: ProductShelfItem; category: ProductShelfCategory; haystack: string }> =
@@ -77,7 +77,7 @@ export interface App2027ProductsShelfProps {
   title: string
   onProductDetailOpen?: (selection: ProductDetailSelection) => void
   /** Existing ShopSmart tab body, rendered inside the offers sub-page. */
-  renderOffers?: () => ReactNode
+  renderOffers?: (options?: { showSummary?: boolean }) => ReactNode
   /**
    * Kept for the app's status-bar switch. The shelf is a light page at every
    * scroll position now, so it reports collapsed from the start.
@@ -159,7 +159,7 @@ export default function App2027ProductsShelf({
   if (view.kind === 'offers') {
     return (
       <ProductShelfSubPage title={view.title} onBack={() => setView({ kind: 'shelf' })}>
-        <div data-products-shelf-offers="true">{renderOffers?.()}</div>
+        <div data-products-shelf-offers="true">{renderOffers?.({ showSummary: view.showSummary })}</div>
       </ProductShelfSubPage>
     )
   }
@@ -197,14 +197,18 @@ export default function App2027ProductsShelf({
               <ShelfPartnerTile
                 key={entry.id}
                 entry={entry}
-                onClick={() => setView({ kind: 'offers', title: entry.title.replace(/\n/g, ' ') })}
+                onClick={() => setView({
+                  kind: 'offers',
+                  title: entry.title.replace(/\n/g, ' '),
+                  showSummary: entry.id !== 'partner-offers',
+                })}
               />
             ))}
           </div>
         </section>
 
         <section
-          className={`flex flex-col gap-[28px] px-[16px] ${SHELF_SECTION_GAP}`}
+          className={`flex flex-col gap-[16px] px-[16px] ${SHELF_SECTION_GAP}`}
           data-products-shelf-catalog="true"
         >
           {PRODUCT_SHELF_CATEGORIES.map((category, categoryIndex) => (
@@ -289,7 +293,7 @@ function ShelfPartnerTile({ entry, onClick }: { entry: ProductShelfEntryCard; on
         loading="lazy"
         draggable={false}
         data-products-shelf-entry-media
-        className="absolute inset-0 size-full object-cover"
+        className="absolute inset-0 size-full origin-bottom-right scale-[1.28] object-cover"
         style={{ objectPosition: entry.imagePosition }}
       />
       {/* Two layers: a light overall knock-down so busy photography stops
@@ -298,14 +302,16 @@ function ShelfPartnerTile({ entry, onClick }: { entry: ProductShelfEntryCard; on
       <span
         aria-hidden="true"
         className="absolute inset-0"
-        style={{ backgroundColor: 'rgb(var(--uc-static-black-rgb) / 0.18)' }}
+        data-products-shelf-entry-scrim
+        style={{ backgroundColor: 'rgb(var(--uc-static-black-rgb) / 0.08)' }}
       />
       <span
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-[112px]"
+        data-products-shelf-entry-gradient
+        className="absolute inset-x-0 top-0 h-[96px]"
         style={{
           background:
-            'linear-gradient(to bottom, rgb(var(--uc-static-black-rgb) / 0.97) 0%, rgb(var(--uc-static-black-rgb) / 0.88) 40%, rgb(var(--uc-static-black-rgb) / 0.55) 72%, transparent 100%)',
+            'linear-gradient(to bottom, rgb(var(--uc-static-black-rgb) / 0.78) 0%, rgb(var(--uc-static-black-rgb) / 0.58) 30%, rgb(var(--uc-static-black-rgb) / 0.24) 64%, transparent 100%)',
         }}
       />
       {/* The More menu's corner badge: a filled quarter-disc in the top-right, not a
@@ -431,7 +437,7 @@ function ProductShelfSubPage({ title, onBack, children }: { title: string; onBac
         collapsedTitleProgress={progress}
         includeSafeArea
       />
-      <div className={`pt-[8px] ${SHELF_CONTENT_WIDTH}`}>{children}</div>
+      <div className={`relative z-0 pt-[8px] ${SHELF_CONTENT_WIDTH}`}>{children}</div>
     </div>
   )
 }

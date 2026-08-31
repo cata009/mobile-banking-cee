@@ -19,6 +19,24 @@ export const CARD_SOURCE = {
   cornerRadius: 4,
 } as const;
 
+const CARD_ARROW_PATH = "M10.3 0 31.4 20 10.3 40c-2.4-2.7-3-6.2-1.6-9.7.45-1.1 1.2-2.05 2.05-2.9L18.6 20l-7.85-7.4C9.9 11.8 9.15 10.8 8.7 9.7 7.3 6.2 7.9 2.7 10.3 0Z";
+
+/** Reusable UniCredit double-arrow mark for campaign photography overlays. */
+export function CardArrowMark({ color = "var(--uc-brand)", className }: { color?: string; className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={cn("block h-full w-full", className)}
+      preserveAspectRatio="none"
+      viewBox="0 0 64 40"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d={CARD_ARROW_PATH} fill={color} />
+      <path d={CARD_ARROW_PATH} fill={color} transform="translate(24 0) scale(.95)" />
+    </svg>
+  );
+}
+
 export type CardVariant =
   | "mc-debit-gold"
   | "mc-credit-premium-gold"

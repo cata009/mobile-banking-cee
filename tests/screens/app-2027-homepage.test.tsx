@@ -92,6 +92,8 @@ describe('2027 Home Transformation', () => {
 
     expect(accountsGroup).toBeInTheDocument()
     expect(within(accountsGroup as HTMLElement).getByRole('img', { name: 'CZK currency' })).toBeInTheDocument()
+    expect(accountsGroup).toHaveTextContent('22.850,50 CZK')
+    expect(accountsGroup).not.toHaveTextContent('22 850.50 CZK')
 
     fireEvent.click(within(accountsGroup as HTMLElement).getByRole('button', { name: /^Accounts$/ }))
     expect(within(accountsGroup as HTMLElement).getByRole('img', { name: 'EUR currency' })).toBeInTheDocument()
@@ -236,14 +238,25 @@ describe('2027 Home Transformation', () => {
 
     const interestRail = container.querySelector('[data-home-interest-carousel] [data-home-carousel-rail]') as HTMLElement
     expect(container.querySelectorAll('[data-home-interest-media]')).toHaveLength(3)
-    expect(container.querySelector('[data-home-interest-media]')).toHaveClass('size-full', 'object-cover')
+    expect(container.querySelector('[data-home-interest-media]')).toHaveClass('block', 'size-full', 'scale-[1.12]', 'object-cover')
     expect(container.querySelector('[data-home-interest-media]')?.parentElement).toHaveClass('h-[100px]', 'overflow-hidden')
     expect(interestRail).not.toHaveAttribute('data-home-carousel-auto-advance')
     expect(interestRail).toHaveClass('select-none', 'touch-pan-y', 'cursor-grab')
     expect(interestRail).not.toHaveClass('snap-x', 'snap-mandatory')
     expect(interestRail.firstElementChild).toHaveClass('w-[calc(100%-48px)]')
+    expect(container.querySelector('[data-home-interest-carousel] h3')).toHaveClass('min-h-[46px]')
+    expect(container.querySelector('[data-home-interest-carousel] h3')?.nextElementSibling).not.toHaveClass('min-h-[36px]')
+    expect(container.querySelector('[data-home-interest-carousel] h3')?.nextElementSibling?.nextElementSibling).not.toHaveClass('min-h-[34px]')
+    expect(container.querySelector('[data-home-interest-media]')?.parentElement).toHaveClass('relative')
+    expect(container.querySelector('[data-home-interest-arrow-back]')).toBeInTheDocument()
+    expect(container.querySelector('[data-home-interest-arrow-front]')).toBeInTheDocument()
+    expect(container.querySelector('[data-home-interest-arrow-back]')).toHaveStyle({ left: '8%', top: '8%', width: '32%', height: '52%' })
+    const arrowPaths = container.querySelectorAll('[data-home-interest-arrow-back] path')
+    expect(arrowPaths).toHaveLength(2)
+    expect(arrowPaths[1]).toHaveAttribute('transform', 'translate(24 0) scale(.95)')
+    expect(container.querySelector('[data-home-interest-arrow-front]')).toHaveAttribute('style', expect.stringContaining('polygon(0 100%'))
     const shopSmartMedia = container.querySelectorAll('[data-home-shopsmart] [data-component="ShopsmartOfferCard"] img')
-    expect(shopSmartMedia).toHaveLength(3)
+    expect(shopSmartMedia).toHaveLength(6)
     expect(shopSmartMedia[0]).toHaveClass('h-full', 'w-full', 'object-cover')
     expect(shopSmartMedia[0]?.parentElement).toHaveClass('relative', 'w-full', 'overflow-hidden')
     expect(shopSmartMedia[0]?.parentElement).toHaveStyle({ height: '130px' })
@@ -387,22 +400,59 @@ describe('2027 Home Transformation', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Credits' }))
     expect(Array.from(carousel().querySelectorAll('h3')).map((heading) => heading.textContent)).toEqual([
-      'Plan your next move with confidence',
-      'A mortgage shaped around you',
-      'Make room for what matters now',
+      'Plan a loan that fits your life',
+      'Find a home loan for your next step',
+      'Finance the things that matter',
     ])
     const loanImageSources = imageSources()
     expect(new Set(loanImageSources).size).toBe(3)
 
     fireEvent.click(screen.getByRole('tab', { name: 'Insurances' }))
     expect(Array.from(carousel().querySelectorAll('h3')).map((heading) => heading.textContent)).toEqual([
-      'Protect the place you call home',
-      'Travel with confidence',
-      'Cover for life’s unexpected turns',
+      'Protect your home with confidence',
+      'Travel covered from start to finish',
+      'Prepare for life’s unexpected moments',
     ])
     const insuranceImageSources = imageSources()
     expect(new Set(insuranceImageSources).size).toBe(3)
     expect(new Set([...loanImageSources, ...insuranceImageSources]).size).toBe(6)
+  })
+
+  it('uses section-specific interest titles across Accounts, Savings, Credits and Insurances', () => {
+    const { container } = renderHome('CZ', 'release-future-evo-2027')
+    const titles = () => Array.from(container.querySelectorAll('[data-home-interest-carousel] h3')).map((heading) => heading.textContent)
+    const sectionTitle = () => container.querySelector('[data-home-interest-carousel] > h2')?.textContent
+
+    expect(sectionTitle()).toBe('Smart ideas for everyday money')
+    expect(titles()).toEqual([
+      'Save a little every day',
+      'Stay on top of your everyday money',
+      'Find your next smart move',
+    ])
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Savings' }))
+    expect(sectionTitle()).toBe('Ideas to grow your savings')
+    expect(titles()).toEqual([
+      'Build a reserve for what matters',
+      'Make your savings work harder',
+      'Set a goal and watch it grow',
+    ])
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Credits' }))
+    expect(sectionTitle()).toBe('Ideas for your next step')
+    expect(titles()).toEqual([
+      'Plan a loan that fits your life',
+      'Find a home loan for your next step',
+      'Finance the things that matter',
+    ])
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Insurances' }))
+    expect(sectionTitle()).toBe('Protection for what matters')
+    expect(titles()).toEqual([
+      'Protect your home with confidence',
+      'Travel covered from start to finish',
+      'Prepare for life’s unexpected moments',
+    ])
   })
 
   it('keeps single-product savings groups static and presents Evo term deposits as a stacked accordion', () => {
@@ -522,7 +572,7 @@ describe('2027 Home Transformation', () => {
     const { container, onProductsClick } = renderHome('CZ', 'release-future-evo-2027')
     const shopSmart = container.querySelector('[data-home-shopsmart]') as HTMLElement
 
-    expect(shopSmart.querySelectorAll('[data-component="ShopsmartOfferCard"]')).toHaveLength(3)
+    expect(shopSmart.querySelectorAll('[data-component="ShopsmartOfferCard"]')).toHaveLength(6)
     expect(shopSmart).toHaveTextContent('Valentino.ro')
     expect(shopSmart).toHaveTextContent('Lentiamo.ro')
 
@@ -540,8 +590,20 @@ describe('2027 Home Transformation', () => {
     expect(shopSmart).not.toHaveTextContent('Valentino.ro')
 
     const offerCard = shopSmart.querySelector('[data-component="ShopsmartOfferCard"]') as HTMLElement
+    expect(offerCard.querySelector('span.whitespace-pre-line')).toHaveClass('min-h-[46px]')
     fireEvent.click(offerCard)
     expect(onProductsClick).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps at least two ShopSmart offers available in every category filter', () => {
+    const { container } = renderHome('CZ', 'release-future-evo-2027')
+    const shopSmart = container.querySelector('[data-home-shopsmart]') as HTMLElement
+
+    for (const [label, id] of [['E-shops', 'eshops'], ['Electronics', 'electronics'], ['Travel', 'travel'], ['Home & living', 'home']] as const) {
+      fireEvent.click(within(shopSmart).getByRole('button', { name: label }))
+      expect(shopSmart).toHaveAttribute('data-home-shopsmart-filter', id)
+      expect(shopSmart.querySelectorAll('[data-component="ShopsmartOfferCard"]').length).toBeGreaterThanOrEqual(2)
+    }
   })
 
   it('keeps Insurance policies in the same compact stacked treatment as account products', () => {

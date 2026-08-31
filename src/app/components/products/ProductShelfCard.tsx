@@ -74,7 +74,7 @@ export default function ProductShelfCard({
           {item.productName}
         </span>
       </span>
-      <span className="flex min-h-[76px] flex-1 flex-col gap-[4px] p-[12px]">
+      <span className="flex min-h-[66px] flex-1 flex-col gap-[4px] p-[12px]">
         <span className="text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{item.title}</span>
         <span className="line-clamp-2 text-[14px] leading-[18px] text-[var(--uc-text)]">{item.body}</span>
       </span>

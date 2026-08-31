@@ -118,6 +118,46 @@ describe('Evo 2027 analytics overview', () => {
     expect(rail?.children).toHaveLength(cards.length)
   })
 
+  it('uses 16px flow labels and keeps the scope selector 16px from the period carousel', () => {
+    const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
+    const hero = container.querySelector<HTMLElement>('[data-evo-analytics-summary-hero]')
+    const controls = container.querySelector<HTMLElement>('[data-evo-analytics-overview-controls]')
+
+    expect(controls).toBeInTheDocument()
+    expect(controls).toHaveClass('gap-[0px]')
+    expect(hero?.querySelector('[data-evo-analytics-open-expenses] > span:first-child')).toHaveClass('text-[16px]')
+    expect(hero?.querySelector('[data-evo-analytics-open-income] > span:first-child')).toHaveClass('text-[16px]')
+    expect(hero?.querySelector('[data-evo-analytics-summary-net-label]')).toHaveClass('text-[16px]')
+    expect(hero?.textContent).toMatch(/\d{1,3}\.\d{3},\d{2} CZK/)
+    expect(hero?.textContent).not.toMatch(/\d{1,3} \d{3},\d{2} CZK/)
+  })
+
+  it('uses the portfolio trend badge for positive and negative net cashflow', () => {
+    const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
+    const nets = container.querySelectorAll('[data-evo-analytics-summary-net]')
+
+    expect(nets.length).toBeGreaterThan(1)
+    expect(nets[0]).toHaveClass('flex', 'items-start')
+    const upBadge = container.querySelector('[data-evo-analytics-summary-net] [role="img"][aria-label="Portfolio up"]')
+    expect(upBadge).toBeInTheDocument()
+    expect(upBadge).toHaveStyle({ width: '16px', height: '16px' })
+    expect(upBadge).not.toHaveClass('rounded-full', 'bg-[var(--uc-surface-raised)]', 'shadow-[0_3px_9px_rgb(0_0_0/0.12)]')
+    expect(container.querySelector('[data-evo-analytics-summary-net] [role="img"][aria-label="Portfolio down"]')).toBeInTheDocument()
+  })
+
+  it('compacts the monthly summary card around its flow separator', () => {
+    const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
+    const hero = container.querySelector<HTMLElement>('[data-evo-analytics-summary-hero]')
+    const flowGrid = hero?.querySelector('[data-evo-analytics-open-expenses]')?.parentElement
+    const netSection = hero?.querySelector('[data-evo-analytics-summary-net]')?.parentElement
+    const bars = hero?.querySelector('[data-evo-analytics-flow-bars]')
+
+    expect(hero).toHaveClass('gap-[12px]', 'p-[16px]')
+    expect(flowGrid).toHaveClass('mt-[8px]')
+    expect(netSection).toHaveClass('pt-[10px]')
+    expect(bars).toHaveClass('mt-[12px]')
+  })
+
   it('shows matching top money-out and money-in sections on the overview', () => {
     const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
 

@@ -146,17 +146,18 @@ function Amount({ amount, hidden, size = 'row' }: { amount: FormattedAmount; hid
  * corner, carrying the trend arrow instead of a flag. A portfolio's country says nothing the
  * reader wants at a glance; whether it is up or down does.
  */
-export function TrendBadge({ direction, size = 40 }: { direction: 'up' | 'down'; size?: 32 | 40 }) {
+export function TrendBadge({ direction, size = 40, compact = false }: { direction: 'up' | 'down'; size?: 16 | 32 | 40; compact?: boolean }) {
   const up = direction === 'up';
   return (
     <span
       aria-label={up ? 'Portfolio up' : 'Portfolio down'}
       role="img"
-      className="relative grid shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--uc-surface-raised)] shadow-[0_3px_9px_rgb(0_0_0/0.12)]"
+      className={compact ? 'inline-flex shrink-0 items-center justify-center' : 'relative grid shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--uc-surface-raised)] shadow-[0_3px_9px_rgb(0_0_0/0.12)]'}
       style={{ width: size, height: size }}
     >
       <AppIcon
         name={up ? 'investment-trend-up' : 'investment-trend-down'}
+        size={compact ? size : undefined}
         color={up ? 'var(--uc-green-olive)' : 'var(--uc-status-red)'}
         aria-hidden="true"
       />
