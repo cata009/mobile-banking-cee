@@ -121,7 +121,7 @@ export function createMarketEnglishTranslations({
       home: 'Home',
       analytics: 'Spending',
       payments: 'Payments',
-      products: 'Products',
+      products: 'Offers',
       more: 'More',
     },
     home: {

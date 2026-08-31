@@ -1,4 +1,5 @@
 import type { AppLanguage } from "@/app/registry/languageByCountry";
+import { createEvoTranslations, EVO_ENGLISH } from "./evo";
 import type { TranslationKeys } from "./types";
 
 type RuntimeTranslations = TranslationKeys["runtime"];
@@ -91,7 +92,7 @@ const EN_RUNTIME: RuntimeTranslations = {
     },
   },
   analytics: {
-    title: "My Spendings",
+    title: "Spending",
     dataFor: "Data For",
     yearTotal: "Year total",
     inflow: "Inflow",
@@ -225,7 +226,9 @@ const EN_RUNTIME: RuntimeTranslations = {
     },
   },
   productsMenu: {
-    title: "Products",
+    // The L1 tab and the page it opens carry the same word; "Products" clashed
+    // with the customer's own products on Home, so both are "Offers".
+    title: "Offers",
     banking: "Banking",
     shopSmart: "ShopSmart",
     offersForYou: "OFFERS FOR YOU",
@@ -366,6 +369,7 @@ const EN_RUNTIME: RuntimeTranslations = {
       youtube: "YouTube",
     },
   },
+  evo: EVO_ENGLISH,
   dialogs: {
     logoutTitle: "Log out",
     logoutMessage: "Are you sure you want to log out?",
@@ -398,14 +402,14 @@ const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslatio
     accounts: { ...EN_RUNTIME.accounts, title: "Conturi" },
     analytics: {
       ...EN_RUNTIME.analytics,
-      title: "Cheltuielile mele",
+      title: "Cheltuieli",
       dataFor: "Date pentru",
       moneyOut: "Bani ieșiți",
       moneyIn: "Bani intrați",
       noTransactionsForPeriod: "Nu există tranzacții pentru această perioadă",
     },
     payments: { ...EN_RUNTIME.payments, title: "Plăți", other: "Altele" },
-    productsMenu: { ...EN_RUNTIME.productsMenu, title: "Produse" },
+    productsMenu: { ...EN_RUNTIME.productsMenu, title: "Oferte" },
     messages: { ...EN_RUNTIME.messages, title: "Mesaje", inbox: "Primite", outbox: "Trimise" },
     documents: { ...EN_RUNTIME.documents, title: "Documente" },
     settings: { ...EN_RUNTIME.settings, title: "Setări" },
@@ -415,9 +419,9 @@ const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslatio
   cs: {
     actions: { ...EN_RUNTIME.actions, back: "Zpět", messages: "Zprávy", help: "Nápověda", search: "Hledat", filters: "Filtry", next: "Další", sign: "Podepsat", okGotIt: "Rozumím" },
     accounts: { ...EN_RUNTIME.accounts, title: "Účty" },
-    analytics: { ...EN_RUNTIME.analytics, title: "Moje výdaje", dataFor: "Data pro", moneyOut: "Výdaje", moneyIn: "Příjmy", noTransactionsForPeriod: "Žádné transakce pro toto období" },
+    analytics: { ...EN_RUNTIME.analytics, title: "Výdaje", dataFor: "Data pro", moneyOut: "Výdaje", moneyIn: "Příjmy", noTransactionsForPeriod: "Žádné transakce pro toto období" },
     payments: { ...EN_RUNTIME.payments, title: "Platby", other: "Ostatní" },
-    productsMenu: { ...EN_RUNTIME.productsMenu, title: "Produkty" },
+    productsMenu: { ...EN_RUNTIME.productsMenu, title: "Nabídky" },
     messages: { ...EN_RUNTIME.messages, title: "Zprávy", inbox: "Doručené", outbox: "Odeslané", newBadge: "NOVÉ" },
     documents: { ...EN_RUNTIME.documents, title: "Dokumenty", newBadge: "NOVÉ" },
     settings: { ...EN_RUNTIME.settings, title: "Nastavení" },
@@ -427,9 +431,9 @@ const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslatio
   sk: {
     actions: { ...EN_RUNTIME.actions, back: "Späť", messages: "Správy", help: "Pomoc", search: "Hľadať", filters: "Filtre", next: "Ďalej", sign: "Podpísať", okGotIt: "Rozumiem" },
     accounts: { ...EN_RUNTIME.accounts, title: "Účty" },
-    analytics: { ...EN_RUNTIME.analytics, title: "Moje výdavky", dataFor: "Dáta pre", moneyOut: "Výdavky", moneyIn: "Príjmy", noTransactionsForPeriod: "Žiadne transakcie za toto obdobie" },
+    analytics: { ...EN_RUNTIME.analytics, title: "Výdavky", dataFor: "Dáta pre", moneyOut: "Výdavky", moneyIn: "Príjmy", noTransactionsForPeriod: "Žiadne transakcie za toto obdobie" },
     payments: { ...EN_RUNTIME.payments, title: "Platby", other: "Ostatné" },
-    productsMenu: { ...EN_RUNTIME.productsMenu, title: "Produkty" },
+    productsMenu: { ...EN_RUNTIME.productsMenu, title: "Ponuky" },
     messages: { ...EN_RUNTIME.messages, title: "Správy", inbox: "Doručené", outbox: "Odoslané", newBadge: "NOVÉ" },
     documents: { ...EN_RUNTIME.documents, title: "Dokumenty", newBadge: "NOVÉ" },
     settings: { ...EN_RUNTIME.settings, title: "Nastavenia" },
@@ -439,9 +443,9 @@ const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslatio
   hu: {
     actions: { ...EN_RUNTIME.actions, back: "Vissza", messages: "Üzenetek", help: "Súgó", search: "Keresés", filters: "Szűrők", next: "Tovább", sign: "Aláírás", okGotIt: "Rendben" },
     accounts: { ...EN_RUNTIME.accounts, title: "Számlák" },
-    analytics: { ...EN_RUNTIME.analytics, title: "Költéseim", dataFor: "Adatok", moneyOut: "Kiadások", moneyIn: "Bevételek", noTransactionsForPeriod: "Nincs tranzakció ebben az időszakban" },
+    analytics: { ...EN_RUNTIME.analytics, title: "Költések", dataFor: "Adatok", moneyOut: "Kiadások", moneyIn: "Bevételek", noTransactionsForPeriod: "Nincs tranzakció ebben az időszakban" },
     payments: { ...EN_RUNTIME.payments, title: "Fizetések", other: "Egyéb" },
-    productsMenu: { ...EN_RUNTIME.productsMenu, title: "Termékek" },
+    productsMenu: { ...EN_RUNTIME.productsMenu, title: "Ajánlatok" },
     messages: { ...EN_RUNTIME.messages, title: "Üzenetek", inbox: "Bejövő", outbox: "Kimenő", newBadge: "ÚJ" },
     documents: { ...EN_RUNTIME.documents, title: "Dokumentumok", newBadge: "ÚJ" },
     settings: { ...EN_RUNTIME.settings, title: "Beállítások" },
@@ -451,9 +455,9 @@ const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslatio
   sr: {
     actions: { ...EN_RUNTIME.actions, back: "Nazad", messages: "Poruke", help: "Pomoć", search: "Pretraga", filters: "Filteri", next: "Dalje", sign: "Potpiši", okGotIt: "Razumem" },
     accounts: { ...EN_RUNTIME.accounts, title: "Računi" },
-    analytics: { ...EN_RUNTIME.analytics, title: "Moja potrošnja", dataFor: "Podaci za", moneyOut: "Odliv", moneyIn: "Priliv", noTransactionsForPeriod: "Nema transakcija za ovaj period" },
+    analytics: { ...EN_RUNTIME.analytics, title: "Potrošnja", dataFor: "Podaci za", moneyOut: "Odliv", moneyIn: "Priliv", noTransactionsForPeriod: "Nema transakcija za ovaj period" },
     payments: { ...EN_RUNTIME.payments, title: "Plaćanja", other: "Ostalo" },
-    productsMenu: { ...EN_RUNTIME.productsMenu, title: "Proizvodi" },
+    productsMenu: { ...EN_RUNTIME.productsMenu, title: "Ponude" },
     messages: { ...EN_RUNTIME.messages, title: "Poruke", inbox: "Primljeno", outbox: "Poslato", newBadge: "NOVO" },
     documents: { ...EN_RUNTIME.documents, title: "Dokumenti", newBadge: "NOVO" },
     settings: { ...EN_RUNTIME.settings, title: "Podešavanja" },
@@ -463,9 +467,9 @@ const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslatio
   bs: {
     actions: { ...EN_RUNTIME.actions, back: "Nazad", messages: "Poruke", help: "Pomoć", search: "Pretraga", filters: "Filteri", next: "Dalje", sign: "Potpiši", okGotIt: "Razumijem" },
     accounts: { ...EN_RUNTIME.accounts, title: "Računi" },
-    analytics: { ...EN_RUNTIME.analytics, title: "Moja potrošnja", dataFor: "Podaci za", moneyOut: "Odliv", moneyIn: "Priliv", noTransactionsForPeriod: "Nema transakcija za ovaj period" },
+    analytics: { ...EN_RUNTIME.analytics, title: "Potrošnja", dataFor: "Podaci za", moneyOut: "Odliv", moneyIn: "Priliv", noTransactionsForPeriod: "Nema transakcija za ovaj period" },
     payments: { ...EN_RUNTIME.payments, title: "Plaćanja", other: "Ostalo" },
-    productsMenu: { ...EN_RUNTIME.productsMenu, title: "Proizvodi" },
+    productsMenu: { ...EN_RUNTIME.productsMenu, title: "Ponude" },
     messages: { ...EN_RUNTIME.messages, title: "Poruke", inbox: "Primljeno", outbox: "Poslano", newBadge: "NOVO" },
     documents: { ...EN_RUNTIME.documents, title: "Dokumenti", newBadge: "NOVO" },
     settings: { ...EN_RUNTIME.settings, title: "Postavke" },
@@ -475,9 +479,9 @@ const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslatio
   sl: {
     actions: { ...EN_RUNTIME.actions, back: "Nazaj", messages: "Sporočila", help: "Pomoč", search: "Iskanje", filters: "Filtri", next: "Naprej", sign: "Podpiši", okGotIt: "Razumem" },
     accounts: { ...EN_RUNTIME.accounts, title: "Računi" },
-    analytics: { ...EN_RUNTIME.analytics, title: "Moja poraba", dataFor: "Podatki za", moneyOut: "Odlivi", moneyIn: "Prilivi", noTransactionsForPeriod: "Ni transakcij za to obdobje" },
+    analytics: { ...EN_RUNTIME.analytics, title: "Poraba", dataFor: "Podatki za", moneyOut: "Odlivi", moneyIn: "Prilivi", noTransactionsForPeriod: "Ni transakcij za to obdobje" },
     payments: { ...EN_RUNTIME.payments, title: "Plačila", other: "Ostalo" },
-    productsMenu: { ...EN_RUNTIME.productsMenu, title: "Produkti" },
+    productsMenu: { ...EN_RUNTIME.productsMenu, title: "Ponudbe" },
     messages: { ...EN_RUNTIME.messages, title: "Sporočila", inbox: "Prejeto", outbox: "Poslano", newBadge: "NOVO" },
     documents: { ...EN_RUNTIME.documents, title: "Dokumenti", newBadge: "NOVO" },
     settings: { ...EN_RUNTIME.settings, title: "Nastavitve" },
@@ -514,6 +518,11 @@ export function mergeRuntimeTranslations(
 
 export function createSharedTranslations(language: AppLanguage): Pick<TranslationKeys, "runtime"> {
   return {
-    runtime: mergeRuntimeTranslations(EN_RUNTIME, LOCAL_OVERRIDES[language]),
+    runtime: {
+      ...mergeRuntimeTranslations(EN_RUNTIME, LOCAL_OVERRIDES[language]),
+      // The Evo set carries its own per-language fallback, so it is built rather
+      // than merged: every key resolves to the market language or to English.
+      evo: createEvoTranslations(language),
+    },
   };
 }

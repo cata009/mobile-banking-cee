@@ -22,6 +22,7 @@ export interface HomeScreenProps {
   onPaymentsClick?: () => void;
   onDomesticPaymentClick?: () => void;
   onProductsClick?: () => void;
+  onOfferOpen?: (shelfItemId: string) => void;
   onMoreClick?: () => void;
   onAccountClick?: (product: Product) => void;
   onAccountInfoClick?: (product: Product) => void;
@@ -44,6 +45,7 @@ export default function HomeScreen({
   onPaymentsClick,
   onDomesticPaymentClick,
   onProductsClick,
+  onOfferOpen,
   onMoreClick,
   onAccountClick,
   onAccountInfoClick,
@@ -91,6 +93,7 @@ export default function HomeScreen({
         onPaymentsClick={onPaymentsClick}
         onDomesticPaymentClick={onDomesticPaymentClick}
         onProductsClick={onProductsClick}
+        onOfferOpen={onOfferOpen}
         onMoreClick={onMoreClick}
         onAccountClick={onAccountClick}
         onAccountInfoClick={onAccountInfoClick}

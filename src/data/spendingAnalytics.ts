@@ -144,15 +144,34 @@ function collectAnalyticsTransactions(
   };
 }
 
+/**
+ * Options that change what a summary counts, rather than which period it covers.
+ */
+export interface SpendingSummaryOptions {
+  /**
+   * Movements where both ends belong to the customer — a transfer to their own
+   * savings account, a currency exchange between their own accounts.
+   *
+   * Counted, these appear as Money out on one account and Money in on the other,
+   * so the customer looks like they spend and earn more than they do and every
+   * category percentage is diluted. Excluded by default; the Spending screen
+   * offers a visible toggle.
+   */
+  includeOwnTransfers?: boolean;
+}
+
 function summarizeTransactions(
   period: SpendingAnalyticsPeriod,
   reportingCurrency: string,
   transactions: SpendingAnalyticsTransaction[],
+  options: SpendingSummaryOptions = {},
 ): SpendingAnalyticsSummary {
   const outCategoryTotals = new Map<PfmCategoryName, { total: number; transactionCount: number }>();
   const inCategoryTotals = new Map<PfmCategoryName, { total: number; transactionCount: number }>();
   const includedTransactions = transactions.filter((transaction) => {
     const category = normalizePfmCategory(transaction.pfmCategory || transaction.category);
+
+    if (!options.includeOwnTransfers && transaction.transferPair) return false;
 
     return !isInternalTransferCategory(transaction.category)
       && category !== "Investments"
@@ -246,6 +265,7 @@ export function createSpendingAnalyticsTimeline(
   country: CountryId,
   products: Product[],
   categoryOverrides: SpendingCategoryOverrides = {},
+  options: SpendingSummaryOptions = {},
 ): SpendingAnalyticsTimeline {
   const { reportingCurrency, allTransactions } = collectAnalyticsTransactions(country, products, categoryOverrides);
 
@@ -288,7 +308,7 @@ export function createSpendingAnalyticsTimeline(
         ? allTransactions.filter((transaction) => transaction.monthKey === period.key)
         : allTransactions.filter((transaction) => getYearFromMonthKey(transaction.monthKey) === period.year);
 
-    accumulator[period.key] = summarizeTransactions(period, reportingCurrency, periodTransactions);
+    accumulator[period.key] = summarizeTransactions(period, reportingCurrency, periodTransactions, options);
     return accumulator;
   }, {});
 
@@ -304,7 +324,7 @@ export function createSpendingAnalyticsTimeline(
       periods: [fallbackPeriod],
       activePeriodKey: fallbackPeriod.key,
       summariesByPeriodKey: {
-        [fallbackPeriod.key]: summarizeTransactions(fallbackPeriod, reportingCurrency, []),
+        [fallbackPeriod.key]: summarizeTransactions(fallbackPeriod, reportingCurrency, [], options),
       },
     };
   }
@@ -314,6 +334,46 @@ export function createSpendingAnalyticsTimeline(
     activePeriodKey,
     summariesByPeriodKey,
   };
+}
+
+/**
+ * A summary over an arbitrary run of months.
+ *
+ * The timeline only ever produced one summary per calendar month plus one per
+ * calendar year, which is why the screen could not answer "the last three
+ * months" or "between March and July". Any contiguous or non-contiguous set of
+ * month keys can be summarised here, on exactly the same rules.
+ */
+export function createSpendingRangeSummary(
+  country: CountryId,
+  products: Product[],
+  monthKeys: readonly string[],
+  presentation: { key: string; label: string; year: string; kind?: "month" | "year" },
+  categoryOverrides: SpendingCategoryOverrides = {},
+  options: SpendingSummaryOptions = {},
+): SpendingAnalyticsSummary {
+  const { reportingCurrency, allTransactions } = collectAnalyticsTransactions(country, products, categoryOverrides);
+  const wanted = new Set(monthKeys);
+  const transactions = allTransactions.filter((transaction) => wanted.has(transaction.monthKey));
+
+  const period: SpendingAnalyticsPeriod = {
+    key: presentation.key,
+    kind: presentation.kind ?? "year",
+    label: presentation.label,
+    year: presentation.year,
+  };
+
+  return summarizeTransactions(period, reportingCurrency, transactions, options);
+}
+
+/** Every month the customer has activity in, oldest first. */
+export function listSpendingMonthKeys(
+  country: CountryId,
+  products: Product[],
+  categoryOverrides: SpendingCategoryOverrides = {},
+): string[] {
+  const { allTransactions } = collectAnalyticsTransactions(country, products, categoryOverrides);
+  return Array.from(new Set(allTransactions.map((transaction) => transaction.monthKey))).sort();
 }
 
 export function createSpendingAnalytics(

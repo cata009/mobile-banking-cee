@@ -96,11 +96,11 @@ const sk: TranslationKeys = {
   // HOMEPAGE - BOTTOM NAVIGATION
   // ==========================================
   navigation: {
-    home: 'Home',
-    analytics: 'Analytics',
-    payments: 'Payments',
-    products: 'Products',
-    more: 'More',
+    home: 'Domov',
+    analytics: 'Výdavky',
+    payments: 'Platby',
+    products: 'Ponuky',
+    more: 'Viac',
   },
 
   // ==========================================

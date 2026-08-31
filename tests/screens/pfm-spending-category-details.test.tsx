@@ -168,10 +168,10 @@ describe('PFM Spending category details', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Open category details: SHOPPING' }))
     expect(screen.getAllByRole('heading', { name: 'SHOPPING' })).toHaveLength(2)
-    expect(screen.queryByRole('heading', { name: 'My Spendings' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Spending' })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
-    expect(screen.getByRole('heading', { name: 'My Spendings' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Spending' })).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Open category details: INCOME' }))
     expect(screen.getAllByRole('heading', { name: 'INCOME' })).toHaveLength(2)

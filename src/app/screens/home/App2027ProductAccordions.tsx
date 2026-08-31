@@ -8,6 +8,8 @@ import GhostBanner from '@/app/components/cards/GhostBanner';
 import AccountCarouselIndicator from '@/app/components/accounts/AccountCarouselIndicator';
 import { buildFutureCzAccountCardActions } from '@/app/components/productCardFixtures';
 import { maskAmountParts } from '@/app/utils/amountPrivacy';
+import { useLanguage } from '@/app/contexts/LanguageContext';
+import { formatGroupCount } from './App2027TransformationHome';
 import { useDragCarousel } from '@/hooks/useDragCarousel';
 
 type FormattedAmount = {
@@ -269,17 +271,25 @@ function CzRoboCard({
   onCardOptionsClick?: (product: Product) => void;
   stackRole: 'single' | 'first' | 'middle' | 'last';
 }) {
-  const amount = maskAmountParts(formatProductAmount(product), amountsHidden);
+  const { t } = useLanguage();
   const cardVariant = getEvoCardVariant(product);
   const isCreditCard = product.type === 'credit_card';
   const creditUsed = isCreditCard ? Math.max(0, product.creditLimit - product.availableCredit) : 0;
   const creditUtilisation = isCreditCard && product.creditLimit > 0 ? (creditUsed / product.creditLimit) * 100 : 0;
+  /*
+   * The hero is what the customer can still spend — the question a card answers
+   * when they are standing at a till. What they have drawn from the limit is the
+   * supporting fact, and it now reads as one sentence under the bar rather than
+   * a caption, a bar and a two-column table saying the same thing three ways.
+   */
   const usedAmount = isCreditCard
     ? maskAmountParts(formatProductAmount({ ...product, balance: creditUsed, availableCredit: creditUsed }), amountsHidden)
     : null;
   const limitAmount = isCreditCard
     ? maskAmountParts(formatProductAmount({ ...product, balance: product.creditLimit, availableCredit: product.creditLimit }), amountsHidden)
     : null;
+  const amount = maskAmountParts(formatProductAmount(product), amountsHidden);
+  const title = product.name;
   const openCardJourney = () => onProductClick(product);
   const openCardDetails = () => (onCardDetailsClick ?? onProductClick)(product);
   const openCardOptions = () => (onCardOptionsClick ?? onProductClick)(product);
@@ -287,7 +297,7 @@ function CzRoboCard({
   return (
     <ProductCard
       icon={<NavigationCardArt variant={cardVariant} />}
-      title={product.name}
+      title={title}
       accountNumber={getProductDisplayNumber(product)}
       amount={amount.integer}
       decimals={amount.decimals}
@@ -307,7 +317,7 @@ function CzRoboCard({
           <div
             data-home-credit-limit-progress
             role="progressbar"
-            aria-label="Credit used from limit"
+            aria-label={t('runtime.evo.labels.usedCredit')}
             aria-valuemin={0}
             aria-valuemax={product.creditLimit}
             aria-valuenow={creditUsed}
@@ -315,10 +325,13 @@ function CzRoboCard({
           >
             <div className="h-full rounded-full bg-[var(--uc-action)]" style={{ width: `${creditUtilisation}%` }} />
           </div>
-          <div className="mt-[10px] flex items-start justify-between gap-[12px] text-[14px] leading-[18px]">
-            <span className="text-[var(--uc-text-muted)]">Used credit<br /><b className="flex items-baseline text-[var(--uc-text)]"><span className="text-[16px] leading-[20px]">{usedAmount.integer}</span><span>{usedAmount.decimals} {usedAmount.currency}</span></b></span>
-            <span className="text-right text-[var(--uc-text-muted)]">Credit limit<br /><b className="flex items-baseline justify-end text-[var(--uc-text)]"><span className="text-[16px] leading-[20px]">{limitAmount.integer}</span><span>{limitAmount.decimals} {limitAmount.currency}</span></b></span>
-          </div>
+          {/* One line: drawn, out of the limit. The percentage is the bar itself. */}
+          <p data-home-credit-used className="mt-[10px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">
+            {t('runtime.evo.labels.usedCredit')}{' '}
+            <b className="font-bold text-[var(--uc-text)]">{usedAmount.integer}{usedAmount.decimals}</b>
+            {' '}{t('runtime.evo.labels.ofLimit')}{' '}
+            <b className="font-bold text-[var(--uc-text)]">{limitAmount.integer}{limitAmount.decimals} {limitAmount.currency}</b>
+          </p>
         </div>
       ) : undefined}
       onClick={openCardJourney}
@@ -380,6 +393,8 @@ function EvoCardsComparison({
   getProductDisplayNumber: (product: Product) => string;
   onProductClick: (product: Product) => void;
 }) {
+  const { t } = useLanguage();
+  const title = t('runtime.evo.groups.debitCards');
   const debitCards = products.filter((product) => product.type === 'debit_card').slice(0, 2);
   const carouselRef = useRef<HTMLDivElement>(null);
   const scrollSnapTimeoutRef = useRef<number | null>(null);
@@ -461,8 +476,8 @@ function EvoCardsComparison({
   if (comparisonCards.length < 2) return null;
 
   return (
-    <section data-evo-card-comparison aria-label="Debit Cards" className="mt-[12px]">
-      <h2 className="uc-type-l1 mb-[12px] text-[var(--uc-text)]">Debit Cards</h2>
+    <section data-evo-card-comparison aria-label={title} className="mt-[12px]">
+      <h2 className="uc-type-l1 mb-[12px] text-[var(--uc-text)]">{title}</h2>
       {/* No bottom padding: the 32px carousel indicator below the rail already carries its own 13px of air. */}
       <div data-evo-card-carousel-container className="rounded-[8px] bg-[var(--uc-surface)] p-[8px] pb-0">
         <div
@@ -470,7 +485,7 @@ function EvoCardsComparison({
           data-evo-card-carousel
           data-evo-card-page-count={pages.length}
           role="region"
-          aria-label="Debit Cards carousel"
+          aria-label={title}
           onScroll={handleCarouselScroll}
           {...dragHandlers}
           className={`flex gap-[8px] overflow-x-auto overscroll-x-contain pb-[2px] scrollbar-hide select-none touch-pan-y focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
@@ -508,7 +523,7 @@ function EvoCardsComparison({
             </div>
           ))}
         </div>
-        <div className="flex justify-center" aria-label="Debit Cards pages">
+        <div className="flex justify-center">
           <AccountCarouselIndicator count={pages.length} activeIndex={activeIndex} onSelect={scrollToIndex} withBackdropBlur={false} />
         </div>
       </div>
@@ -583,6 +598,7 @@ export default function App2027ProductAccordions({
   titleOverrides,
   className,
 }: App2027ProductAccordionsProps) {
+  const { t } = useLanguage();
   const [openGroups, setOpenGroups] = useState<Record<SupportedCategoryKey, boolean>>({
     accounts: true,
     cards: false,
@@ -620,6 +636,7 @@ export default function App2027ProductAccordions({
         }
 
         const isOpen = openGroups[key];
+        const countLabel = formatGroupCount(category.products.length, t);
         const total = category.products.length ? calculateGroupTotal(category.products) : null;
         const panelId = `app-2027-products-${key}`;
         const useBaselineHeader = useCzRoboAccountCards;
@@ -648,13 +665,18 @@ export default function App2027ProductAccordions({
               aria-controls={panelId}
               onClick={() => setOpenGroups((current) => ({ ...current, [key]: !current[key] }))}
               className={useBaselineHeader
-                ? 'flex h-[48px] w-full items-center justify-between px-0 text-left transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]'
+                ? 'flex min-h-[48px] w-full items-center justify-between gap-[12px] px-0 py-[4px] text-left transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]'
                 : 'flex min-h-[74px] w-full items-center gap-[10px] px-[14px] py-[12px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-action)]'}
             >
               {useBaselineHeader ? (
                 <>
-                  <h2 className="uc-type-l1 text-[var(--uc-text)]">{displayTitle}</h2>
-                  <span className={`grid size-[32px] place-items-center transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                  <h2 className="uc-type-l1 min-w-0 flex-1 text-[var(--uc-text)]">{displayTitle}</h2>
+                  {!isOpen && countLabel ? (
+                    <span data-home-group-count className="shrink-0 text-[13px] leading-[16px] text-[var(--uc-text-muted)]">
+                      {countLabel}
+                    </span>
+                  ) : null}
+                  <span className={`grid size-[32px] shrink-0 place-items-center transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
                     <AppIcon name="chevron-down-wide" color="var(--uc-icon)" aria-hidden="true" />
                   </span>
                 </>

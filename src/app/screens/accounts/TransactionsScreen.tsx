@@ -12,7 +12,8 @@ import TransactionMonthRail, {
 import { AppIcon } from "@/app/components/icons";
 import { getCardMerchantEnrichment } from "@/app/components/merchants/merchantEnrichment";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
-import { formatMoneyNumber, formatSignedMoneyNumber, getCountryConfig } from "@/app/registry/countryConfig";
+import { getCountryConfig } from "@/app/registry/countryConfig";
+import { formatEvo2027Number, formatEvo2027SignedNumber } from "@/app/utils/evo2027Formatting";
 import { useDemo } from "@/app/state/demoStore";
 import type { CardTransactionMerchantEnrichment } from "@/app/screens/payments/DomesticPaymentFlowScreens";
 import {
@@ -168,7 +169,7 @@ export default function TransactionsScreen({
             transaction.day,
             transaction.month,
             transaction.monthTitle,
-            formatMoneyNumber(Math.abs(transaction.amount), country),
+            formatEvo2027Number(Math.abs(transaction.amount)),
           ]
             .filter(Boolean)
             .join(" ")
@@ -341,7 +342,7 @@ export default function TransactionsScreen({
             >
               <AccountTransactionMonthDivider
                 title={section.monthTitle}
-                total={section.transactions.length > 1 ? formatSignedMoneyNumber(section.total, country) : undefined}
+                total={section.transactions.length > 1 ? formatEvo2027SignedNumber(section.total) : undefined}
                 currency={config.currency}
                 dateSeparator
               />
@@ -350,7 +351,7 @@ export default function TransactionsScreen({
                 <AccountTransactionRow
                   key={transaction.id}
                   transaction={transaction}
-                  formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
+                  formattedAmount={formatEvo2027Number(Math.abs(transaction.amount))}
                   currency={config.currency}
                   accountLabel={selectedScopeId === ALL_ACCOUNTS_SCOPE ? productByTransactionId.get(transaction.id)?.name : undefined}
                   evo2027={release === "release-future-evo-2027"}

@@ -23,6 +23,18 @@ function formatProductIban(country: string, productId: string, baseNumber: strin
   return `${prefix}${checkDigits}BACX${baseNumber}`;
 }
 
+/**
+ * The Czech local account number: nine digits, then the bank code.
+ *
+ * CZ Evo 2027 prints current accounts this way, but savings, deposits and
+ * portfolios fell through to the IBAN builder — so the same customer saw
+ * 123456789/2700 on one tab and CZ78BACX5678901234567801 on the next.
+ */
+function formatCzLocalAccountNumber(baseNumber: string): string {
+  const digits = baseNumber.replace(/D/g, '');
+  return `${digits.slice(-9).padStart(9, '0')}/2700`;
+}
+
 type ProductCountDefinition = {
   key: ProductCountKey;
   categoryKey: ProductCategory["key"];
@@ -474,6 +486,8 @@ export function deriveProductCategories({
         ? product.accountNumber
         : isCard
         ? product.accountNumber
+        : isCzApp2027
+        ? formatCzLocalAccountNumber(product.accountNumber)
         : formatProductIban(country, product.id, product.accountNumber);
 
       if (preserveCzApp2027Account) {
@@ -634,18 +648,28 @@ export function useProducts() {
     return formatAmountForRelease(total, localCurrency);
   };
 
-  // Calculate Total Owed: Mortgages + Loans (absolute value)
+  /**
+   * Total Owed: loans + mortgages + drawn credit-card balances.
+   *
+   * Cards used to be left out, so the headline debt figure silently excluded the
+   * most expensive borrowing a retail customer holds — and could not be
+   * reconciled against the credit card sitting on the same screen. A card's
+   * drawn balance is its limit less what is still available.
+   */
   const calculateTotalOwed = (): {
     integer: string;
     decimals: string;
     currency: string;
   } => {
     const allProducts = categories.flatMap(cat => cat.products);
-    
-    // Sum: loans + mortgages (take absolute value since they're negative)
+
     const total = allProducts.reduce((sum, product) => {
       if (product.type === 'loan' || product.type === 'mortgage') {
         return sum + Math.abs(convertCurrency(product.balance, product.currency, localCurrency));
+      }
+      if (product.type === 'credit_card') {
+        const drawn = Math.max(0, product.creditLimit - product.availableCredit);
+        return sum + convertCurrency(drawn, product.currency, localCurrency);
       }
       return sum;
     }, 0);

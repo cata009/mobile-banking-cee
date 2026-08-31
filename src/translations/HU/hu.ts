@@ -72,11 +72,11 @@ const hu: TranslationKeys = {
   // HOMEPAGE - BOTTOM NAVIGATION
   // ==========================================
   navigation: {
-    home: 'Home',
-    analytics: 'Analytics',
-    payments: 'Payments',
-    products: 'Products',
-    more: 'More',
+    home: 'Kezdőlap',
+    analytics: 'Költések',
+    payments: 'Fizetések',
+    products: 'Ajánlatok',
+    more: 'Több',
   },
 
   // ==========================================

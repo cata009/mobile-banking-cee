@@ -208,16 +208,26 @@ export function TransactionDetailScreen({
           collapsedTitleProgress={headerProgress}
           includeSafeArea
           showHelp={false}
+          /* The name is not the first thing here any more — the mark is, and the
+             name sits under it. The bar still takes the name over on scroll. */
+          renderLargeTitle={false}
         />
 
         <div className="bg-[var(--uc-app-bg)] pb-[8px]">
           <section className="px-[24px] pt-[8px] text-center" style={{ opacity: 1 - headerProgress }}>
-            {/* The header leads with who the transaction was with: the merchant
+            {/* The block leads with who the transaction was with — the merchant
                 mark when there is one, otherwise the account pair or the
-                counterparty resolved from the row itself. */}
-            <div className="mx-auto mb-[10px] flex w-fit items-center justify-center">
+                counterparty resolved from the row itself — and names them
+                underneath it. */}
+            <div className="mx-auto flex w-fit items-center justify-center">
               {merchantEnrichment?.merchantLogo ?? <TransactionAvatar transaction={transaction} size={64} />}
             </div>
+            <h1
+              data-transaction-detail-title
+              className="mt-[12px] font-['UniCredit',sans-serif] text-[28px] font-bold leading-[32px] tracking-[-0.02em] text-[var(--uc-text)]"
+            >
+              {merchantEnrichment?.cleanMerchantName ?? detail.title}
+            </h1>
             <p className="uc-type-n5-strong mt-[8px] text-[var(--uc-text-muted)]">
               {detail.bookingDate}
             </p>

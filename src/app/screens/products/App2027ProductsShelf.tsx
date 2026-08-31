@@ -78,6 +78,8 @@ export interface App2027ProductsShelfProps {
   onProductDetailOpen?: (selection: ProductDetailSelection) => void
   /** Existing ShopSmart tab body, rendered inside the offers sub-page. */
   renderOffers?: (options?: { showSummary?: boolean }) => ReactNode
+  /** Live counts from the offer collection rendered by each commerce entry. */
+  offerCounts?: Partial<Record<ProductShelfEntryCard['id'], number>>
   /**
    * Kept for the app's status-bar switch. The shelf is a light page at every
    * scroll position now, so it reports collapsed from the start.
@@ -96,6 +98,7 @@ export default function App2027ProductsShelf({
   title,
   onProductDetailOpen,
   renderOffers,
+  offerCounts,
   onHeroCollapsedChange,
 }: App2027ProductsShelfProps) {
   const { t } = useLanguage()
@@ -196,12 +199,14 @@ export default function App2027ProductsShelf({
             {PRODUCT_SHELF_ENTRY_CARDS.map((entry) => (
               <ShelfPartnerTile
                 key={entry.id}
-                entry={entry}
-                onClick={() => setView({
-                  kind: 'offers',
-                  title: entry.title.replace(/\n/g, ' '),
-                  showSummary: entry.id !== 'partner-offers',
-                })}
+                entry={{ ...entry, count: offerCounts?.[entry.id] ?? entry.count }}
+                onClick={() =>
+                  setView({
+                    kind: 'offers',
+                    title: entry.title.replace(/\n/g, ' '),
+                    showSummary: entry.id !== 'partner-offers',
+                  })
+                }
               />
             ))}
           </div>

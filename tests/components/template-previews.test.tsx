@@ -70,9 +70,11 @@ afterEach(() => {
 })
 
 describe('static template previews', () => {
+  // The L1 tab and the page it opens are both "Offers" now, so the static
+  // previews that mirror them re-hash.
   it.each([
-    ['products-menu', 18, '94bcc6cf9c856849395fa935d13af4fdec52da19ea0aae3f111d2806c47757b5'],
-    ['products-shopsmart', 18, '953b72271370bfff012241620281d3015331ebcc7b2b001faf3b9d2c0c2069e7'],
+    ['products-menu', 18, 'ac490a12a87a9e19ed2bc6259b555b25ebf5eedd96ea0fc3689623c50156b3a8'],
+    ['products-shopsmart', 18, 'e60022857b5d5a598ee266e147ed424e168c0461804e3148228dc5a3c02308d3'],
     ['analytics-overview', 0, '974342acb4197789bc4572f938cf9865dcae3309190cb3dc1885a2450f612f60'],
   ] as const)('preserves %s markup in normal and presentation-only modes', (previewId, buttonCount, expectedHash) => {
     const normal = renderPreview(previewId, false)

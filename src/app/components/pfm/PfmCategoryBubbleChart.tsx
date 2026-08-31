@@ -1,4 +1,4 @@
-import { formatMoneyNumber } from "@/app/registry/countryConfig";
+import { formatEvo2027Number } from "@/app/utils/evo2027Formatting";
 import type { CountryId } from "@/app/state/demoTypes";
 import type { SpendingSubcategorySummary } from "@/data/spendingAnalytics";
 
@@ -51,6 +51,10 @@ export default function PfmCategoryBubbleChart({
   minActive = 1,
   height = 250,
 }: PfmCategoryBubbleChartProps) {
+  // Amounts follow the app-wide Evo number contract now — the bubbles printed
+  // "12 627,64" while the transaction row for the same movement, directly below,
+  // printed "12.627,64 CZK". The prop stays for the component's existing callers.
+  void country;
   const maxTotal = Math.max(...subcategories.map((subcategory) => subcategory.total), 1);
   const activeCount = subcategories.filter(
     (subcategory) => !inactiveSubcategories.has(subcategory.label),
@@ -84,7 +88,7 @@ export default function PfmCategoryBubbleChart({
             }}
             aria-label={`${isInactive && includeAriaLabel ? includeAriaLabel : excludeAriaLabel}: ${subcategory.label}`}
             aria-pressed={isInactive}
-            title={`${subcategory.label}: ${formatMoneyNumber(subcategory.total, country)} ${currency}`}
+            title={`${subcategory.label}: ${formatEvo2027Number(subcategory.total)} ${currency}`}
             data-pfm-subcategory-bubble={subcategory.label}
             data-pfm-subcategory-total={subcategory.total}
             data-pfm-subcategory-active={isInactive ? "false" : "true"}
@@ -97,7 +101,9 @@ export default function PfmCategoryBubbleChart({
               </span>
               {showTotals && diameter >= TOTAL_LABEL_MIN_DIAMETER ? (
                 <span className="uc-type-n5 max-w-full leading-[16px] opacity-80">
-                  {formatMoneyNumber(subcategory.total, country)}
+                  {/* A bare number in a coloured disc could be anything —
+                      a count, a percentage. The currency says it is money. */}
+                  {formatEvo2027Number(subcategory.total)} {currency}
                 </span>
               ) : null}
             </span>

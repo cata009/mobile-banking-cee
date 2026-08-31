@@ -9,7 +9,7 @@ import { useDragCarousel } from '@/hooks/useDragCarousel';
 import App2027Activity from './App2027Activity';
 import App2027Portfolio from './App2027Portfolio';
 import App2027ProductAccordions from './App2027ProductAccordions';
-import App2027TransformationHome from './App2027TransformationHome';
+import App2027TransformationHome, { type TransformationTab } from './App2027TransformationHome';
 import { getStoredApp2027Theme, type HomeTheme } from './App2027ThemePicker';
 import HomeHeader from './HomeHeader';
 import App2027PrimaryNavigation, { type App2027PrimaryNavigationItem } from '@/app/components/navigation/App2027PrimaryNavigation';
@@ -24,6 +24,8 @@ interface App2027HomeScreenProps {
   onPaymentsClick?: () => void;
   onDomesticPaymentClick?: () => void;
   onProductsClick?: () => void;
+  /** Opens one catalogue product, so a Home campaign lands on what it advertised. */
+  onOfferOpen?: (shelfItemId: string) => void;
   onMoreClick?: () => void;
   onAccountClick?: (product: Product) => void;
   onAccountInfoClick?: (product: Product) => void;
@@ -40,6 +42,21 @@ interface App2027HomeScreenProps {
 }
 
 type NavItem = App2027PrimaryNavigationItem;
+
+const TRANSFORMATION_TAB_STORAGE_KEY = 'app2027-transformation-tab';
+const TRANSFORMATION_TABS: readonly TransformationTab[] = ['accounts', 'savings', 'credits', 'insurance'];
+
+function readStoredTransformationTab(): TransformationTab {
+  try {
+    const stored = window.sessionStorage.getItem(TRANSFORMATION_TAB_STORAGE_KEY);
+    if (stored && (TRANSFORMATION_TABS as readonly string[]).includes(stored)) {
+      return stored as TransformationTab;
+    }
+  } catch {
+    // Fall through to the default.
+  }
+  return 'accounts';
+}
 type HomeSheetId = 'personalise' | 'products';
 type FavouriteId = 'new-payment' | 'scan-pay' | 'transfer' | 'save';
 type StoryId = 'payment-due' | 'recommendation' | 'spending' | 'savings-goal';
@@ -266,6 +283,7 @@ export default function App2027HomeScreen({
   onPaymentsClick,
   onDomesticPaymentClick,
   onProductsClick,
+  onOfferOpen,
   onMoreClick,
   onAccountClick,
   onAccountInfoClick,
@@ -293,7 +311,35 @@ export default function App2027HomeScreen({
       return [];
     }
   });
+  const scrollRef = useRef<HTMLElement>(null);
   const [homeTheme] = useState<HomeTheme>(getStoredApp2027Theme);
+  /*
+   * The selected product tab lives above the scroller, and in session storage.
+   * It used to reset to Accounts on every return to Home, so a mortgage or card
+   * customer re-selected their tab on every single visit.
+   */
+  const [transformationTab, setTransformationTab] = useState<TransformationTab>(readStoredTransformationTab);
+
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(TRANSFORMATION_TAB_STORAGE_KEY, transformationTab);
+    } catch {
+      // Private mode: the tab still works, it just does not survive a reload.
+    }
+  }, [transformationTab]);
+
+  /*
+   * Switching tab shows different content, so the scroller goes back to the top.
+   * Without this a switch from a long tab to a short one landed mid-page, past
+   * the summary banner, with no sign that anything had changed.
+   */
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    // jsdom has no scrollTo; the assignment is the fallback everywhere in this app.
+    if (typeof scroller.scrollTo === 'function') scroller.scrollTo({ top: 0, behavior: 'auto' });
+    else scroller.scrollTop = 0;
+  }, [transformationTab]);
 
   const currency = getCountryCurrency(demo.country);
   const products = useMemo(() => categories.flatMap((category) => category.products), [categories]);
@@ -476,7 +522,7 @@ export default function App2027HomeScreen({
         <HomeHeader onPrimeClick={onPrimeClick} onMessagesClick={onMessagesClick} showTitle={false} />
       </header>
 
-      <main data-app-2027-scroll className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-[clamp(16px,4vw,24px)] pb-[16px] pt-[18px] scrollbar-hide">
+      <main ref={scrollRef} data-app-2027-scroll className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-[clamp(16px,4vw,24px)] pb-[16px] pt-[18px] scrollbar-hide">
         <div data-app-2027-layout className="mx-auto grid w-full max-w-[1080px] grid-cols-1 items-start gap-[28px]">
           {showHomeTransformation ? (
             <App2027TransformationHome
@@ -499,6 +545,10 @@ export default function App2027HomeScreen({
               onCardDetailsClick={onCardDetailsClick}
               onCardOptionsClick={onCardOptionsClick}
               onProductsClick={onProductsClick}
+              onOfferOpen={onOfferOpen}
+              onSpendingClick={onAnalyticsClick}
+              activeTab={transformationTab}
+              onActiveTabChange={setTransformationTab}
               onTransactionOpen={openActivityTransaction}
             />
           ) : (

@@ -310,3 +310,40 @@ export const PRODUCT_SHELF_CATEGORIES: readonly [ProductShelfCategory, ...Produc
 export function getProductShelfCategory(id: ProductShelfCategoryId): ProductShelfCategory {
   return PRODUCT_SHELF_CATEGORIES.find((category) => category.id === id) ?? PRODUCT_SHELF_CATEGORIES[0];
 }
+
+/** The shelf entry behind an item id, with the category it belongs to. */
+export function getProductShelfEntry(
+  itemId: string,
+): { item: ProductShelfItem; category: ProductShelfCategory } | null {
+  for (const category of PRODUCT_SHELF_CATEGORIES) {
+    const item = category.items.find((entry) => entry.id === itemId);
+    if (item) return { item, category };
+  }
+  return null;
+}
+
+/**
+ * A campaign's destination, as the product detail page expects it.
+ *
+ * Home's campaign cards used to hand the customer to the top of the Offers
+ * shelf and leave them to re-find the product they had just tapped. They now
+ * carry the shelf item they are advertising, and this turns that id into the
+ * same selection a tap on the shelf card would have produced — same photo,
+ * same headline, same detail page.
+ */
+export function buildShelfProductSelection(itemId: string) {
+  const entry = getProductShelfEntry(itemId);
+  if (!entry) return null;
+
+  const { item, category } = entry;
+  return {
+    cardId: item.cardId,
+    categoryTitle: category.title,
+    optionId: item.id,
+    title: item.productName,
+    heroImage: item.image,
+    heroImagePosition: item.imagePosition,
+    headline: item.title,
+    intro: item.body,
+  };
+}

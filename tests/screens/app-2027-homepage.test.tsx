@@ -2,7 +2,7 @@
 
 import '@testing-library/jest-dom/vitest'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { LanguageProvider } from '@/app/contexts/LanguageContext'
 import BottomNavigation from '@/app/components/BottomNavigation'
 import App2027HomeScreen from '@/app/screens/home/App2027HomeScreen'
@@ -25,17 +25,24 @@ function renderHome(country: CountryId = 'CZ', release: DemoState['release'] = '
   const onDomesticPaymentClick = vi.fn()
   const onProductsClick = vi.fn()
   const onAccountClick = vi.fn()
+  const onAnalyticsClick = vi.fn()
   const result = render(
     <DemoProvider initialState={{ product: 'PI', country, scenario: 'active', release, bankingScenario: 'retail-multi-account-card', productCounts: PRODUCT_COUNTS }}>
       <LanguageProvider initialLanguage="en">
-        <App2027HomeScreen onDomesticPaymentClick={onDomesticPaymentClick} onProductsClick={onProductsClick} onAccountClick={onAccountClick} useCzRoboAccountCards={release === 'release-future-evo-2027'} />
+        <App2027HomeScreen onDomesticPaymentClick={onDomesticPaymentClick} onProductsClick={onProductsClick} onAccountClick={onAccountClick} onAnalyticsClick={onAnalyticsClick} useCzRoboAccountCards={release === 'release-future-evo-2027'} />
       </LanguageProvider>
     </DemoProvider>,
   )
-  return { ...result, onDomesticPaymentClick, onProductsClick, onAccountClick }
+  return { ...result, onDomesticPaymentClick, onProductsClick, onAccountClick, onAnalyticsClick }
 }
 
 afterEach(cleanup)
+
+// Home remembers the selected product tab for the session, so each test has to
+// start from a known one rather than inheriting the previous test's choice.
+beforeEach(() => {
+  window.sessionStorage.clear()
+})
 
 describe('2027 Home Transformation', () => {
   it('reuses the Baseline header and bottom navigation while transforming content below the tabs', () => {
@@ -64,10 +71,10 @@ describe('2027 Home Transformation', () => {
     const { container } = renderHome('CZ', 'release-future-evo-2027')
     const tabs = within(screen.getByRole('tablist', { name: 'Product categories' })).getAllByRole('tab')
 
-    expect(tabs.map((tab) => tab.textContent)).toEqual(['Accounts', 'Savings', 'Credits', 'Insurances'])
+    expect(tabs.map((tab) => tab.textContent)).toEqual(['Accounts', 'Savings', 'Credits', 'Insurance'])
     fireEvent.click(screen.getByRole('tab', { name: 'Savings' }))
-    expect(container.querySelector('[data-home-transformation-summary="savings"]')).toHaveTextContent('Growth this year')
-    expect(screen.getByText('Saving Accounts')).toBeInTheDocument()
+    expect(container.querySelector('[data-home-transformation-summary="savings"]')).toHaveTextContent('Interest earned')
+    expect(screen.getByText('Saving accounts')).toBeInTheDocument()
     expect(screen.getByText(/6.5% p.a./)).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('tab', { name: 'Credits' }))
@@ -78,11 +85,14 @@ describe('2027 Home Transformation', () => {
     expect(screen.queryByRole('button', { name: 'Block card' })).not.toBeInTheDocument()
     expect(container.querySelector('[data-home-credit-limit-progress]')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Insurances' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'Insurance' }))
     expect(container.querySelector('[data-home-transformation-summary="insurance"]')).toHaveTextContent('2 active policies')
     expect(container.querySelector('[data-home-summary-art="insurance"]')).toBeInTheDocument()
+    // The stacked model: the first policy on top, the count in the header, and
+    // the rest a tap away — the same shape the accounts and deposits groups use.
     expect(screen.getByText('Genius Protect')).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: /^Insurance$/ }))
+    expect(screen.queryByText('Home Protect')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /^Insurance/ }))
     expect(screen.getByText('Home Protect')).toBeInTheDocument()
   })
 
@@ -95,7 +105,7 @@ describe('2027 Home Transformation', () => {
     expect(accountsGroup).toHaveTextContent('22.850,50 CZK')
     expect(accountsGroup).not.toHaveTextContent('22 850.50 CZK')
 
-    fireEvent.click(within(accountsGroup as HTMLElement).getByRole('button', { name: /^Accounts$/ }))
+    fireEvent.click(within(accountsGroup as HTMLElement).getByRole('button', { name: /^Accounts/ }))
     expect(within(accountsGroup as HTMLElement).getByRole('img', { name: 'EUR currency' })).toBeInTheDocument()
     expect(within(accountsGroup as HTMLElement).getByRole('img', { name: 'USD currency' })).toBeInTheDocument()
     const newPayment = within(accountsGroup as HTMLElement).getAllByRole('button', { name: 'New payment' })[0]
@@ -110,13 +120,13 @@ describe('2027 Home Transformation', () => {
     const accountsGroup = container.querySelector('[data-home-product-group="accounts"]') as HTMLElement
     const cardsGroup = container.querySelector('[data-home-product-group="cards"]') as HTMLElement
 
-    fireEvent.click(within(accountsGroup).getByRole('button', { name: /^Accounts$/ }))
+    fireEvent.click(within(accountsGroup).getByRole('button', { name: /^Accounts/ }))
     expect(within(accountsGroup).getAllByRole('button', { name: 'Currency Exchange' })).toHaveLength(2)
     expect(within(accountsGroup).getAllByRole('button', { name: 'Exchange rates' })).toHaveLength(2)
     expect(within(accountsGroup).getAllByRole('button', { name: 'Scan QR code' })).toHaveLength(1)
     expect(within(accountsGroup).getAllByRole('button', { name: 'Create QR code' })).toHaveLength(1)
 
-    expect(within(cardsGroup).queryByRole('button', { name: /^Cards$/ })).not.toBeInTheDocument()
+    expect(within(cardsGroup).queryByRole('button', { name: /^Cards/ })).not.toBeInTheDocument()
     const debitCards = cardsGroup.querySelectorAll('[data-evo-card-comparison-tile]')
     expect(debitCards).toHaveLength(3)
     expect(debitCards[0]!).toHaveTextContent('Debit Standard')
@@ -134,8 +144,8 @@ describe('2027 Home Transformation', () => {
 
     const comparison = container.querySelector('[data-evo-card-comparison]') as HTMLElement
     expect(comparison).toBeInTheDocument()
-    expect(comparison).toHaveTextContent('Debit Cards')
-    expect(within(cardsGroup).queryByRole('button', { name: /^Cards$/ })).not.toBeInTheDocument()
+    expect(comparison).toHaveTextContent('Debit cards')
+    expect(within(cardsGroup).queryByRole('button', { name: /^Cards/ })).not.toBeInTheDocument()
 
     const tiles = comparison.querySelectorAll('[data-evo-card-comparison-tile]')
     const pages = comparison.querySelectorAll('[data-evo-card-carousel-page]')
@@ -194,7 +204,7 @@ describe('2027 Home Transformation', () => {
     const { container } = renderHome('CZ', 'release-future-evo-2027')
     const accountsGroup = container.querySelector('[data-home-product-group="accounts"]') as HTMLElement
 
-    const accountsHeader = within(accountsGroup).getByRole('button', { name: /^Accounts$/ })
+    const accountsHeader = within(accountsGroup).getByRole('button', { name: /^Accounts/ })
     expect(accountsHeader).toHaveAttribute('aria-expanded', 'false')
     expect(within(accountsGroup).queryByText('Total available balance')).not.toBeInTheDocument()
     expect(accountsGroup.querySelector('[data-home-product-group-icon="accounts"]')).not.toBeInTheDocument()
@@ -208,8 +218,8 @@ describe('2027 Home Transformation', () => {
     const accountsGroup = container.querySelector('[data-home-product-group="accounts"]') as HTMLElement
     const cardsGroup = container.querySelector('[data-home-product-group="cards"]') as HTMLElement
 
-    expect(within(accountsGroup).getByRole('button', { name: /^Accounts$/ })).toHaveAttribute('data-home-product-group-header', 'compact')
-    expect(within(cardsGroup).queryByRole('button', { name: /^Cards$/ })).not.toBeInTheDocument()
+    expect(within(accountsGroup).getByRole('button', { name: /^Accounts/ })).toHaveAttribute('data-home-product-group-header', 'compact')
+    expect(within(cardsGroup).queryByRole('button', { name: /^Cards/ })).not.toBeInTheDocument()
     expect(cardsGroup.querySelector('[data-evo-card-comparison]')).toBeInTheDocument()
 
     // Collapsed, the tail stays mounted inside closed grid rows so the open/close can animate;
@@ -230,7 +240,7 @@ describe('2027 Home Transformation', () => {
     expect(cardsGroup.querySelectorAll('[data-product-card-evolution]')).toHaveLength(0)
     expect(cardsGroup.querySelector('[data-evo-card-comparison-tile] [data-component="Card"]')).toHaveClass('shadow-[0_3px_6px_rgb(var(--uc-shadow-rgb)/0.22)]')
 
-    fireEvent.click(within(accountsGroup).getByRole('button', { name: /^Accounts$/ }))
+    fireEvent.click(within(accountsGroup).getByRole('button', { name: /^Accounts/ }))
     const expandedAccountCards = accountsGroup.querySelectorAll('[data-product-card-evolution]')
     expect(expandedAccountCards.length).toBeGreaterThan(1)
     expect(accountsGroup.querySelectorAll('[class*="grid-rows-[0fr]"]')).toHaveLength(0)
@@ -238,44 +248,51 @@ describe('2027 Home Transformation', () => {
 
     const interestRail = container.querySelector('[data-home-interest-carousel] [data-home-carousel-rail]') as HTMLElement
     expect(container.querySelectorAll('[data-home-interest-media]')).toHaveLength(3)
-    expect(container.querySelector('[data-home-interest-media]')).toHaveClass('block', 'size-full', 'scale-[1.12]', 'object-cover')
-    expect(container.querySelector('[data-home-interest-media]')?.parentElement).toHaveClass('h-[100px]', 'overflow-hidden')
+    // No zoom: the campaign frames are UniCredit's own, and the chevron is
+    // composited into each one — cropping further pushes it out of the band.
+    expect(container.querySelector('[data-home-interest-media]')).toHaveClass('block', 'size-full', 'object-cover')
+    expect(container.querySelector('[data-home-interest-media]')).not.toHaveClass('scale-[1.12]')
+    expect(container.querySelector('[data-home-interest-media]')?.parentElement).toHaveClass('h-[130px]', 'overflow-hidden')
     expect(interestRail).not.toHaveAttribute('data-home-carousel-auto-advance')
     expect(interestRail).toHaveClass('select-none', 'touch-pan-y', 'cursor-grab')
     expect(interestRail).not.toHaveClass('snap-x', 'snap-mandatory')
     expect(interestRail.firstElementChild).toHaveClass('w-[calc(100%-48px)]')
-    expect(container.querySelector('[data-home-interest-carousel] h3')).toHaveClass('min-h-[46px]')
+    // No reserved line: each row takes the height of the tallest across the rail,
+    // so a two-line title lifts its neighbours instead of every card paying for it.
+    expect(container.querySelector('[data-home-interest-carousel] h3')).toHaveAttribute('data-equalize', 'interest-title')
     expect(container.querySelector('[data-home-interest-carousel] h3')?.nextElementSibling).not.toHaveClass('min-h-[36px]')
     expect(container.querySelector('[data-home-interest-carousel] h3')?.nextElementSibling?.nextElementSibling).not.toHaveClass('min-h-[34px]')
     expect(container.querySelector('[data-home-interest-media]')?.parentElement).toHaveClass('relative')
-    expect(container.querySelector('[data-home-interest-arrow-back]')).toBeInTheDocument()
-    expect(container.querySelector('[data-home-interest-arrow-front]')).toBeInTheDocument()
-    expect(container.querySelector('[data-home-interest-arrow-back]')).toHaveStyle({ left: '8%', top: '8%', width: '32%', height: '52%' })
-    const arrowPaths = container.querySelectorAll('[data-home-interest-arrow-back] path')
-    expect(arrowPaths).toHaveLength(2)
-    expect(arrowPaths[1]).toHaveAttribute('transform', 'translate(24 0) scale(.95)')
-    expect(container.querySelector('[data-home-interest-arrow-front]')).toHaveAttribute('style', expect.stringContaining('polygon(0 100%'))
+    // The chevron is part of the photograph now, art-directed to pass behind the
+    // subject. The overlay that faked that with a hand-drawn clip path is gone.
+    expect(container.querySelector('[data-home-interest-arrow-back]')).not.toBeInTheDocument()
+    expect(container.querySelector('[data-home-interest-arrow-front]')).not.toBeInTheDocument()
     const shopSmartMedia = container.querySelectorAll('[data-home-shopsmart] [data-component="ShopsmartOfferCard"] img')
     expect(shopSmartMedia).toHaveLength(6)
+    const shopSmartRail = container.querySelector('[data-home-shopsmart] [data-home-carousel-rail]')
+    expect(shopSmartRail?.firstElementChild).toHaveClass('w-[calc(100%-48px)]')
     expect(shopSmartMedia[0]).toHaveClass('h-full', 'w-full', 'object-cover')
     expect(shopSmartMedia[0]?.parentElement).toHaveClass('relative', 'w-full', 'overflow-hidden')
     expect(shopSmartMedia[0]?.parentElement).toHaveStyle({ height: '130px' })
+    // The campaign photography is outpainted to the card's panoramic ratio, so
+    // every tab can use the neutral centre without cutting people or chevrons.
     expect(Array.from(container.querySelectorAll('[data-home-interest-media]')).map((image) => (image as HTMLImageElement).style.objectPosition)).toEqual([
-      'center 38%',
-      'center 23%',
-      'center 38%',
+      'center center',
+      'center center',
+      'center center',
     ])
 
     fireEvent.click(screen.getByRole('tab', { name: 'Savings' }))
-    expect(container.querySelector('[data-home-transformation-group="transformation-group-saving-accounts"] [data-home-product-group-header="static"]')).toHaveTextContent('Saving Accounts')
-    expect(screen.getByRole('button', { name: /^Deposits$/ })).toHaveAttribute('aria-expanded', 'false')
+    expect(container.querySelector('[data-home-transformation-group="transformation-group-saving-accounts"] [data-home-product-group-header="static"]')).toHaveTextContent('Saving accounts')
+    expect(screen.getByRole('button', { name: /^Deposits/ })).toHaveAttribute('aria-expanded', 'false')
 
     fireEvent.click(screen.getByRole('tab', { name: 'Credits' }))
     const creditCardsGroup = container.querySelector('[data-home-product-group="cards"]') as HTMLElement
-    expect(creditCardsGroup.querySelector('[data-home-product-group-header="static"]')).toHaveTextContent('Credit Cards')
+    expect(creditCardsGroup.querySelector('[data-home-product-group-header="static"]')).toHaveTextContent('Credit cards')
 
     // A consumer loan and a mortgage answer different questions, so each gets its own group:
-    // one card apiece, headed statically, with no collapsed stack to peek out from under.
+    // one card apiece, headed by a plain heading rather than a toggle, with no
+    // collapsed stack to peek out from under.
     for (const [id, cardName] of [['loans', 'Personal Loan'], ['mortgages', 'Mortgage Loan']] as const) {
       const group = container.querySelector(`[data-home-transformation-group="transformation-group-${id}"]`) as HTMLElement
       const list = group.querySelector('[data-home-loan-list]') as HTMLElement
@@ -287,19 +304,18 @@ describe('2027 Home Transformation', () => {
       expect(group.querySelector('[data-home-product-stack-preview]')).not.toBeInTheDocument()
     }
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Insurances' }))
-    const insuranceHeader = screen.getByRole('button', { name: /^Insurance$/ })
+    fireEvent.click(screen.getByRole('tab', { name: 'Insurance' }))
+    const insuranceHeader = screen.getByRole('button', { name: /^Insurance/ })
     const insuranceGroup = container.querySelector('[data-home-transformation-group="transformation-group-insurance"]') as HTMLElement
     expect(insuranceHeader).toHaveAttribute('data-home-product-group-header', 'compact')
+    // One policy on the stack, with the header carrying the count of what is under it.
     expect(insuranceHeader).toHaveAttribute('aria-expanded', 'false')
     expect(insuranceGroup.querySelectorAll('[data-home-insurance-policy-card]')).toHaveLength(1)
-    expect(insuranceGroup.querySelector('[data-home-insurance-policy-list]')).toHaveClass('relative', 'z-10')
-    expect(insuranceGroup.querySelector('[data-home-product-stack-preview]')).toBeInTheDocument()
+    expect(insuranceGroup.querySelector('[data-home-group-count]')).toHaveTextContent('2')
 
     fireEvent.click(insuranceHeader)
     expect(insuranceHeader).toHaveAttribute('aria-expanded', 'true')
     expect(insuranceGroup.querySelectorAll('[data-home-insurance-policy-card]')).toHaveLength(2)
-    expect(insuranceGroup.querySelector('[data-home-product-stack-preview]')).not.toBeInTheDocument()
   })
 
   it('uses the Baseline balance-card composition for the Evo account totals while retaining spent-this-week logic', () => {
@@ -308,36 +324,38 @@ describe('2027 Home Transformation', () => {
     const accountsGroup = container.querySelector('[data-home-product-group="accounts"]') as HTMLElement
     const stackPreview = accountsGroup.querySelector('[data-home-product-stack-preview]') as HTMLElement
 
-    expect(summary).toHaveAttribute('data-home-summary-variant', 'baseline')
-    expect(summary).toHaveClass('w-full', 'h-[145.25px]', 'min-h-[145.25px]', 'rounded-[8px]', 'overflow-hidden', 'flex', 'relative', 'bg-[var(--uc-summary-accounts)]', 'px-[24px]', 'py-[15px]')
-    expect(summary.querySelector('[data-home-summary-content]')).toHaveClass('relative', 'z-10', 'flex-1', 'flex', 'flex-col')
-    expect(summary.querySelector('[data-home-summary-primary-amount]')).toHaveClass('text-[28px]', 'font-bold')
-    expect(summary.querySelector('[data-home-summary-art-container]')).toHaveClass('absolute', 'top-[24px]', 'right-0', 'w-[96px]')
+    // min-h, not a fixed height: a longer translation grows the banner instead of clipping.
+    expect(summary).toHaveClass('min-h-[145.25px]', 'rounded-[8px]', 'overflow-hidden', 'relative', 'bg-[var(--uc-summary-accounts)]', 'px-[24px]', 'py-[15px]')
+    expect(summary.querySelector('[data-home-summary-primary-amount] span')).toHaveClass('text-[28px]', 'font-bold')
+    expect(summary.querySelector('[data-home-summary-art="accounts"]')).toBeInTheDocument()
     expect(summary.querySelector('[data-home-summary-divider]')).toHaveClass('my-[9px]', 'h-px', 'w-full')
-    expect(summary.querySelector('[data-home-summary-secondary-amount]')).toHaveClass('uc-type-n2-strong')
+    expect(summary.querySelector('[data-home-summary-secondary-amount]')).toBeInTheDocument()
     expect(summary).toHaveTextContent('Spent this week')
+    // "Spent this week" is the one banner figure whose detail lives elsewhere, so
+    // the banner is the door into Spending rather than an inert block of colour.
+    expect(summary.tagName).toBe('BUTTON')
     expect(stackPreview).not.toHaveTextContent('620')
   })
 
   it('uses 28px bold typography for every Evo summary primary value', () => {
     const { container } = renderHome('CZ', 'release-future-evo-2027')
     const primaryAmount = (tab: 'accounts' | 'savings' | 'credits') =>
-      container.querySelector(`[data-home-transformation-summary="${tab}"] [data-home-summary-primary-amount]`)
+      container.querySelector(`[data-home-transformation-summary="${tab}"] [data-home-summary-primary-amount] span`)
 
     expect(primaryAmount('accounts')).toHaveClass('text-[28px]', 'font-bold')
-    expect(container.querySelector('[data-home-transformation-summary="accounts"]')).toHaveClass('h-[145.25px]')
+    expect(container.querySelector('[data-home-transformation-summary="accounts"]')).toHaveClass('min-h-[145.25px]')
 
     fireEvent.click(screen.getByRole('tab', { name: 'Savings' }))
     expect(primaryAmount('savings')).toHaveClass('text-[28px]', 'font-bold')
-    expect(container.querySelector('[data-home-transformation-summary="savings"]')).toHaveClass('h-[145.25px]', 'min-h-[145.25px]', 'py-[15px]')
+    expect(container.querySelector('[data-home-transformation-summary="savings"]')).toHaveClass('min-h-[145.25px]', 'py-[15px]')
 
     fireEvent.click(screen.getByRole('tab', { name: 'Credits' }))
     expect(primaryAmount('credits')).toHaveClass('text-[28px]', 'font-bold')
-    expect(container.querySelector('[data-home-transformation-summary="credits"]')).toHaveClass('h-[145.25px]', 'min-h-[145.25px]', 'py-[15px]')
+    expect(container.querySelector('[data-home-transformation-summary="credits"]')).toHaveClass('min-h-[145.25px]', 'py-[15px]')
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Insurances' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'Insurance' }))
     expect(container.querySelector('[data-home-insurance-policy-count]')).toHaveClass('text-[28px]', 'font-bold')
-    expect(container.querySelector('[data-home-transformation-summary="insurance"]')).toHaveClass('h-[145.25px]', 'min-h-[145.25px]', 'py-[15px]')
+    expect(container.querySelector('[data-home-transformation-summary="insurance"]')).toHaveClass('min-h-[145.25px]', 'py-[15px]')
   })
 
   it('uses amount-progress cards for Evo credit and lending products', () => {
@@ -355,8 +373,9 @@ describe('2027 Home Transformation', () => {
     expect(creditProgress).toHaveAttribute('aria-valuemax', '10000')
     expect(creditProgress).toHaveAttribute('aria-valuenow', '6800')
     expect(creditProgress).toHaveTextContent('')
-    expect(container.querySelector('[data-home-credit-limit-details]')).toHaveTextContent('Used credit')
-    expect(container.querySelector('[data-home-credit-limit-details]')).toHaveTextContent('Credit limit')
+    // Drawn and limit read as one sentence under the bar; the percentage is the bar.
+    expect(container.querySelector('[data-home-credit-used]')).toHaveTextContent('6.800,00')
+    expect(container.querySelector('[data-home-credit-used]')).toHaveTextContent('10.000,00 CZK')
     expect(screen.queryByRole('button', { name: 'Card details' })).not.toBeInTheDocument()
 
     expect(loanProgress).toHaveAttribute('aria-valuenow', '31')
@@ -364,14 +383,14 @@ describe('2027 Home Transformation', () => {
     expect(loanCard).toHaveTextContent('Total repaid')
     expect(loanCard).toHaveTextContent('Total loan')
     expect(repaidAmount).toHaveClass('inline-flex', 'items-baseline', 'whitespace-nowrap')
-    expect(repaidAmount.firstElementChild?.firstElementChild).toHaveClass('text-[16px]', 'font-bold')
-    expect(repaidAmount.firstElementChild?.lastElementChild).toHaveClass('text-[14px]', 'font-bold')
-    expect(totalAmount.firstElementChild?.firstElementChild).toHaveClass('text-[16px]', 'font-bold')
-    expect(totalAmount.firstElementChild?.lastElementChild).toHaveClass('text-[14px]', 'font-bold')
+    expect(repaidAmount.firstElementChild).toHaveClass('text-[16px]', 'font-bold')
+    expect(repaidAmount.lastElementChild).toHaveClass('text-[12px]', 'font-medium')
+    expect(totalAmount.firstElementChild).toHaveClass('text-[16px]', 'font-bold')
+    expect(totalAmount.lastElementChild).toHaveClass('text-[12px]', 'font-medium')
 
     fireEvent.click(screen.getByRole('tab', { name: 'Savings' }))
     const maturityAmount = container.querySelector('[data-home-deposit-maturity-value]') as HTMLElement
-    expect(maturityAmount).toHaveClass('inline-flex', 'items-baseline', 'whitespace-nowrap', 'text-[14px]', 'font-normal')
+    expect(maturityAmount).toHaveClass('inline-flex', 'items-baseline', 'whitespace-nowrap')
   })
 
   // The approved pastels now live behind per-tab tokens so each panel also has a dark
@@ -389,7 +408,7 @@ describe('2027 Home Transformation', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Credits' }))
     expect(summary('credits')).toHaveClass('bg-[var(--uc-summary-credits)]')
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Insurances' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'Insurance' }))
     expect(summary('insurance')).toHaveClass('bg-[var(--uc-summary-insurance)]')
   })
 
@@ -407,7 +426,7 @@ describe('2027 Home Transformation', () => {
     const loanImageSources = imageSources()
     expect(new Set(loanImageSources).size).toBe(3)
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Insurances' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'Insurance' }))
     expect(Array.from(carousel().querySelectorAll('h3')).map((heading) => heading.textContent)).toEqual([
       'Protect your home with confidence',
       'Travel covered from start to finish',
@@ -416,6 +435,24 @@ describe('2027 Home Transformation', () => {
     const insuranceImageSources = imageSources()
     expect(new Set(insuranceImageSources).size).toBe(3)
     expect(new Set([...loanImageSources, ...insuranceImageSources]).size).toBe(6)
+  })
+
+  it('uses panoramic outpainted campaign photography across every Home tab', () => {
+    const { container } = renderHome('CZ', 'release-future-evo-2027')
+    const assertPanoramicImages = () => {
+      const images = Array.from(container.querySelectorAll('[data-home-interest-media]')) as HTMLImageElement[]
+      expect(images).toHaveLength(3)
+      expect(images.every((image) => image.src.includes('-wide-v2.png'))).toBe(true)
+      expect(images.every((image) => image.style.objectPosition === 'center center')).toBe(true)
+    }
+
+    assertPanoramicImages()
+    fireEvent.click(screen.getByRole('tab', { name: 'Savings' }))
+    assertPanoramicImages()
+    fireEvent.click(screen.getByRole('tab', { name: 'Credits' }))
+    assertPanoramicImages()
+    fireEvent.click(screen.getByRole('tab', { name: 'Insurance' }))
+    assertPanoramicImages()
   })
 
   it('uses section-specific interest titles across Accounts, Savings, Credits and Insurances', () => {
@@ -446,7 +483,7 @@ describe('2027 Home Transformation', () => {
       'Finance the things that matter',
     ])
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Insurances' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'Insurance' }))
     expect(sectionTitle()).toBe('Protection for what matters')
     expect(titles()).toEqual([
       'Protect your home with confidence',
@@ -464,14 +501,14 @@ describe('2027 Home Transformation', () => {
     const savingsGroup = container.querySelector('[data-home-transformation-group="transformation-group-saving-accounts"]') as HTMLElement
     const depositGroup = container.querySelector('[data-home-transformation-group="transformation-group-deposits"]') as HTMLElement
     const savingsSummary = container.querySelector('[data-home-transformation-summary="savings"]') as HTMLElement
-    const depositsHeader = screen.getByRole('button', { name: /^Deposits$/ })
+    const depositsHeader = screen.getByRole('button', { name: /^Deposits/ })
     const depositList = depositGroup.querySelector('[data-home-deposit-list]') as HTMLElement
     const maturityAmount = container.querySelector('[data-home-deposit-maturity]') as HTMLElement
     const maturityProgress = container.querySelector('[data-home-deposit-maturity-progress]') as HTMLElement
 
-    expect(screen.queryByRole('button', { name: /^Saving Accounts$/ })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /^Investment portfolios$/ })).not.toBeInTheDocument()
-    expect(savingsGroup.querySelector('[data-home-product-group-header="static"]')).toHaveTextContent('Saving Accounts')
+    // A group holding one product has nothing to fold away, so its title stays a
+    // heading: no chevron, and no state in which the only product is hidden.
+    expect(savingsGroup.querySelector('[data-home-product-group-header="static"]')).toHaveTextContent('Saving accounts')
     expect(investmentGroup.querySelector('[data-home-product-group-header="static"]')).toHaveTextContent('Investment portfolios')
     expect(savingsSummary).toHaveTextContent('768')
     expect(savingsSummary).toHaveTextContent('914')
@@ -483,7 +520,7 @@ describe('2027 Home Transformation', () => {
     expect(depositList.querySelectorAll('[data-home-deposit-card]')).toHaveLength(1)
     expect(depositGroup.querySelector('[data-home-product-stack-preview]')).toBeInTheDocument()
     expect(maturityAmount).toHaveClass('text-[14px]')
-    expect(maturityAmount.querySelector('[data-home-deposit-maturity-value]')).toHaveClass('text-[14px]', 'font-normal')
+    expect(maturityAmount.querySelector('[data-home-deposit-maturity-value]')).toBeInTheDocument()
     expect(maturityProgress).toHaveAttribute('aria-valuenow', '75')
     expect(maturityProgress).toHaveAttribute('aria-valuemax', '365')
     expect(maturityProgress.firstElementChild).toHaveStyle({ width: '20.54794520547945%' })
@@ -505,7 +542,7 @@ describe('2027 Home Transformation', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Credits' }))
     const creditCardsGroup = container.querySelector('[data-home-product-group="cards"]') as HTMLElement
-    expect(creditCardsGroup.querySelector('[data-home-product-group-header="static"]')).toHaveTextContent('Credit Cards')
+    expect(creditCardsGroup.querySelector('[data-home-product-group-header="static"]')).toHaveTextContent('Credit cards')
     expect(creditCardsGroup.querySelector('[data-home-product-group-header="static"] > svg')).not.toBeInTheDocument()
   })
 
@@ -527,17 +564,21 @@ describe('2027 Home Transformation', () => {
     const activity = container.querySelector('[data-home-transformation-activity="true"]') as HTMLElement
     const activityCard = activity.querySelector('[data-home-activity-card]') as HTMLElement
     const scrollSurface = container.querySelector('[data-app-2027-scroll]') as HTMLElement
-    const shopSmartCategories = screen.getByLabelText('ShopSmart categories')
+    const shopSmartCategories = screen.getByLabelText('Shopsmart categories')
 
     expect(activity).toContainElement(screen.getByRole('heading', { name: 'Your recent transactions' }))
     expect(activityCard).not.toContainElement(screen.getByRole('heading', { name: 'Your recent transactions' }))
     expect(container.querySelector('[data-home-summary-art="accounts"]')).toBeInTheDocument()
     expect(scrollSurface).toHaveClass('pb-[16px]')
     expect(shopSmartCategories).toHaveClass('flex-nowrap', 'overflow-x-auto', 'select-none', 'touch-pan-y', 'cursor-grab')
+    // The Offers page's own partner-category chip, shared: same corners, same
+    // type, same brand blue when selected. Two rails were filtering the same
+    // catalogue with controls that had drifted apart.
     const mostPopularFilter = screen.getByRole('button', { name: 'Most popular' })
-    expect(mostPopularFilter).toHaveClass('flex', 'h-[46px]', 'shrink-0', 'rounded-full', 'border', 'px-[12px]', 'text-[18px]')
-    expect(mostPopularFilter.querySelector('[data-home-shopsmart-filter-dot]')).toHaveClass('size-[4px]', 'rounded-full')
-    expect(screen.getByRole('button', { name: 'Home & living' })).toHaveClass('flex', 'h-[46px]', 'shrink-0', 'whitespace-nowrap', 'rounded-full', 'border', 'px-[12px]', 'text-[18px]')
+    expect(mostPopularFilter).toHaveClass('flex', 'h-[36px]', 'shrink-0', 'rounded-[4px]', 'border', 'px-[16px]', 'text-[14px]', 'uppercase')
+    expect(mostPopularFilter).toHaveClass('bg-[var(--uc-action-strong)]', 'text-[var(--uc-static-white)]')
+    expect(mostPopularFilter).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: 'Home & living' })).toHaveClass('flex', 'h-[36px]', 'shrink-0', 'whitespace-nowrap', 'rounded-[4px]', 'border', 'px-[16px]', 'text-[14px]', 'uppercase')
 
     const eShopsFilter = screen.getByRole('button', { name: 'E-shops' })
     fireEvent.click(eShopsFilter)
@@ -562,10 +603,10 @@ describe('2027 Home Transformation', () => {
     const savingAccount = container.querySelector('[data-home-compact-product-card="saving_account"]') as HTMLElement
     expect(savingAccount).toBeInTheDocument()
     expect(within(savingAccount).queryByRole('button', { name: 'New payment' })).not.toBeInTheDocument()
-    expect(container.querySelector('[data-home-deposit-maturity] [data-home-deposit-maturity-value]')).toHaveClass('text-[14px]', 'font-normal')
+    expect(container.querySelector('[data-home-deposit-maturity] [data-home-deposit-maturity-value]')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('tab', { name: 'Credits' }))
-    expect(container.querySelector('[data-home-loan-installment] [data-home-supporting-amount]')).toHaveClass('text-[16px]')
+    expect(container.querySelector('[data-home-loan-installment] [data-home-supporting-amount] span')).toHaveClass('text-[16px]')
   })
 
   it('reuses the Products ShopSmart offer cards in the homepage carousel and keeps category taps actionable', () => {
@@ -590,7 +631,8 @@ describe('2027 Home Transformation', () => {
     expect(shopSmart).not.toHaveTextContent('Valentino.ro')
 
     const offerCard = shopSmart.querySelector('[data-component="ShopsmartOfferCard"]') as HTMLElement
-    expect(offerCard.querySelector('span.whitespace-pre-line')).toHaveClass('min-h-[46px]')
+    // Equalised across the rail rather than reserving two lines on every card.
+    expect(offerCard.querySelector('span.whitespace-pre-line')).toHaveAttribute('data-equalize', 'shopsmart-title')
     fireEvent.click(offerCard)
     expect(onProductsClick).toHaveBeenCalledTimes(1)
   })
@@ -609,8 +651,8 @@ describe('2027 Home Transformation', () => {
   it('keeps Insurance policies in the same compact stacked treatment as account products', () => {
     const { container } = renderHome('CZ', 'release-future-evo-2027')
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Insurances' }))
-    fireEvent.click(screen.getByRole('button', { name: /^Insurance$/ }))
+    fireEvent.click(screen.getByRole('tab', { name: 'Insurance' }))
+    fireEvent.click(screen.getByRole('button', { name: /^Insurance/ }))
 
     const policyList = container.querySelector('[data-home-insurance-policy-list]') as HTMLElement
     const policyCards = policyList.querySelectorAll('[data-home-insurance-policy-card]')

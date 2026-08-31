@@ -73,6 +73,21 @@ describe('Products responsive shelves', () => {
     expect(catalog).toHaveClass('gap-[16px]')
   })
 
+  it('derives both commerce counters from the number of offers inside', () => {
+    const { container } = render(
+      <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027' }}>
+        <LanguageProvider initialLanguage="en">
+          <App2027ProductsShelf title="Products" offerCounts={{ shopsmart: 6, 'partner-offers': 6 }} />
+        </LanguageProvider>
+      </DemoProvider>,
+    )
+
+    const counters = container.querySelectorAll('[data-products-shelf-entry-count]')
+    expect(counters).toHaveLength(2)
+    expect(counters[0]).toHaveTextContent('6')
+    expect(counters[1]).toHaveTextContent('6')
+  })
+
   it('hides the activated-offers summary only on the Partner offers view', () => {
     const config = getProductsMenuForCountry('CZ')
     const { container } = render(
@@ -101,6 +116,70 @@ describe('Products responsive shelves', () => {
     fireEvent.click(container.querySelector('[data-products-shelf-entry="shopsmart"]') as HTMLElement)
 
     expect(container).toHaveTextContent('ACTIVATED OFFERS:')
+  })
+
+  it('renders Partner offers with category chips, offer badges, and no legacy status or Filters action', () => {
+    const config = getProductsMenuForCountry('CZ')
+    const { container, queryByRole } = render(
+      <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027' }}>
+        <LanguageProvider initialLanguage="en">
+          <ShopSmartContent
+            summary={config.shopSmartSummary}
+            offerCards={config.shopSmartOfferCards}
+            showSummary={false}
+          />
+        </LanguageProvider>
+      </DemoProvider>,
+    )
+
+    expect(container.querySelector('[data-partner-offers-categories]')).toBeInTheDocument()
+    expect(container.querySelector('[data-partner-offer-badge]')).toHaveTextContent('10% OFF')
+    expect(container).not.toHaveTextContent('Active')
+    expect(queryByRole('button', { name: 'Filters' })).not.toBeInTheDocument()
+  })
+
+  it('filters Partner offers from the category chips below Search', () => {
+    const config = getProductsMenuForCountry('CZ')
+    const { container, getByRole } = render(
+      <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027' }}>
+        <LanguageProvider initialLanguage="en">
+          <ShopSmartContent
+            summary={config.shopSmartSummary}
+            offerCards={config.shopSmartOfferCards}
+            showSummary={false}
+          />
+        </LanguageProvider>
+      </DemoProvider>,
+    )
+
+    fireEvent.click(getByRole('button', { name: /travel/i }))
+
+    const offers = container.querySelector('[data-products-shopsmart-offers]')
+    expect(offers).toHaveTextContent('Valentino.ro')
+    expect(offers).toHaveTextContent('Booking.com')
+    expect(offers).not.toHaveTextContent('Lentiamo.ro')
+  })
+
+  it('lets the Partner offers category rail be dragged horizontally like Home', () => {
+    const config = getProductsMenuForCountry('CZ')
+    const { container } = render(
+      <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027' }}>
+        <LanguageProvider initialLanguage="en">
+          <ShopSmartContent
+            summary={config.shopSmartSummary}
+            offerCards={config.shopSmartOfferCards}
+            showSummary={false}
+          />
+        </LanguageProvider>
+      </DemoProvider>,
+    )
+    const categories = container.querySelector('[data-partner-offers-categories]') as HTMLElement
+
+    fireEvent.mouseDown(categories, { button: 0, clientX: 180 })
+    fireEvent.mouseMove(document, { buttons: 1, clientX: 100 })
+    fireEvent.mouseUp(document)
+
+    expect(categories.scrollLeft).toBe(80)
   })
 
   it('aligns the Search sticky row to the actual compact header height', () => {

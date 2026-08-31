@@ -101,9 +101,11 @@ export default function AccountTransactionRow({
           className={`uc-type-n2-strong text-right leading-[22px] ${amountClassName}`}
           data-transaction-amount={transaction.type === "credit" && !isPending ? "positive" : undefined}
         >
+          {/* The comma belongs to the decimals, not to the integer: at the
+              integer size it read as a full stop dropped into the middle of
+              the amount. */}
           <span>{sign}{amountParts.integer}</span>
-          <span className="tracking-[0.3px]">{amountParts.separator}</span>
-          <span className="uc-type-n5 uppercase">{amountParts.decimals} {currency}</span>
+          <span className="uc-type-n5 uppercase tracking-[0.3px]">{amountParts.separator}{amountParts.decimals} {currency}</span>
         </p>
         {isPending ? (
           <span className="flex items-center gap-[7px] uc-type-n5-strong uppercase text-[var(--uc-text-muted)]" data-pending-status>
@@ -143,8 +145,7 @@ export default function AccountTransactionRow({
       data-transaction-amount={transaction.type === "credit" && !isPending ? "positive" : undefined}
     >
       <span>{sign}{amountParts.integer}</span>
-      <span className="tracking-[0.3px]">{amountParts.separator}</span>
-      <span className="uc-type-n5 uppercase">{amountParts.decimals} {currency}</span>
+      <span className="uc-type-n5 uppercase tracking-[0.3px]">{amountParts.separator}{amountParts.decimals} {currency}</span>
     </p>
   );
   const evoRowSizing = compact ? "min-h-[64px] py-[8px]" : isPending ? "min-h-[92px] py-[16px]" : "min-h-[80px] py-[16px]";

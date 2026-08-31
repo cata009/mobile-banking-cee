@@ -18,6 +18,12 @@ export interface ExpenseDonutSegment {
   iconCategory?: PfmCategoryName;
   /** Overrides the arc's marker where the split has its own mark, e.g. a currency roundel. */
   icon?: ReactNode;
+  /**
+   * Text drawn in the marker instead of an icon — used by the Other arc, whose
+   * three-dot glyph read as "more options" everywhere else in the app rather
+   * than "the categories not drawn here".
+   */
+  markerLabel?: string;
 }
 
 export interface ExpenseDonutChartProps {
@@ -145,6 +151,8 @@ export default function ExpenseDonutChart({
             >
               {arc.icon ?? (arc.iconCategory ? (
                 <PfmCategoryIcon category={arc.iconCategory} size={ICON_SIZE} variant="category-circle" />
+              ) : arc.markerLabel ? (
+                <span className="text-[13px] font-bold leading-none text-[var(--uc-static-white)]">{arc.markerLabel}</span>
               ) : (
                 <AppIcon name="more-horizontal" size={16} color="currentColor" aria-hidden="true" />
               ))}

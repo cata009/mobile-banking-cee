@@ -117,6 +117,7 @@ import type {
 } from "@/app/screens/investments/InvestmentsPortfolioScreen";
 import InvestmentChatChart from "@/app/components/investments/InvestmentChatChart";
 import type { ProductDetailSelection } from "@/app/components/products/ProductCardBottomSheet";
+import { buildShelfProductSelection } from "@/app/config/productsShelfConfig";
 
 // Panel components
 import PanelOverlay from "@/app/components/PanelOverlay";
@@ -517,6 +518,23 @@ function AppContent({
     navigateTo("product-detail");
   };
 
+  /**
+   * A Home campaign opening the product it advertises.
+   *
+   * Every campaign card and every ShopSmart offer used to call
+   * `handleProductsClick` and drop the customer at the top of the Offers shelf,
+   * where they had to re-find what they had just tapped. Falls back to the shelf
+   * only when the id does not resolve.
+   */
+  const handleOfferOpen = (shelfItemId: string) => {
+    const selection = buildShelfProductSelection(shelfItemId);
+    if (!selection) {
+      handleProductsClick();
+      return;
+    }
+    handleProductDetailOpen(selection);
+  };
+
   const handleInvestmentsClick = () => {
     if (!investmentsPortfolioAvailable) return;
 
@@ -857,6 +875,7 @@ function AppContent({
             onPaymentsClick={handlePaymentsClick}
             onDomesticPaymentClick={handleDomesticPaymentClick}
             onProductsClick={handleProductsClick}
+            onOfferOpen={handleOfferOpen}
             onMoreClick={handleMoreClick}
             onAccountClick={handleAccountClick}
             onAccountInfoClick={handleAccountDetailsClick}
