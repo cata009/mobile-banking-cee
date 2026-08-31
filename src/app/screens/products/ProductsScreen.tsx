@@ -34,7 +34,7 @@ const OFFER_CARD_GAP = 12;
 const OFFER_CARD_STEP = OFFER_CARD_WIDTH + OFFER_CARD_GAP;
 const OFFER_CAROUSEL_EDGE_GUTTER = 24;
 /** Matches the Evo shelf sub-page header height, so a sticky row lands under it. */
-const SHELF_STICKY_HEADER_TOP = "calc(var(--uc-phone-top-reserve, 54px) + 56px)";
+const SHELF_STICKY_HEADER_TOP = "calc(var(--uc-phone-top-reserve, 54px) + 48px)";
 
 interface ProductsScreenProps {
   onHomeClick?: () => void;
@@ -292,6 +292,7 @@ export function ShopSmartContent({
   offerCards,
   stickySearchTop,
   searchSurface = false,
+  showSummary = true,
 }: {
   summary: ShopSmartSummary;
   offerCards: readonly ShopSmartOfferCard[];
@@ -299,6 +300,8 @@ export function ShopSmartContent({
   stickySearchTop?: string;
   /** Paint the search field as a raised surface, for pages on the app background. */
   searchSurface?: boolean;
+  /** Partner offers has no activated-offers summary; ShopSmart keeps it. */
+  showSummary?: boolean;
 }) {
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
@@ -325,7 +328,7 @@ export function ShopSmartContent({
 
   return (
     <section className="flex flex-col gap-[16px] pt-[16px]" data-products-shopsmart-content="true">
-      <ShopSmartSummaryBlock summary={summary} />
+      {showSummary ? <ShopSmartSummaryBlock summary={summary} /> : null}
       <div className="flex flex-col gap-[16px]">
         <SectionHeading>{t("runtime.productsMenu.allOffers", "ALL OFFERS")}</SectionHeading>
         {/* On the Evo shelf this body sits on the app background, where the
@@ -487,12 +490,13 @@ export default function ProductsScreen({
           title={t("runtime.productsMenu.title", config.title)}
           onProductDetailOpen={onProductDetailOpen}
           onHeroCollapsedChange={onShelfHeroCollapsedChange}
-          renderOffers={() => (
+          renderOffers={({ showSummary = true } = {}) => (
             <ShopSmartContent
               summary={config.shopSmartSummary}
               offerCards={config.shopSmartOfferCards}
               stickySearchTop={SHELF_STICKY_HEADER_TOP}
               searchSurface
+              showSummary={showSummary}
             />
           )}
         />

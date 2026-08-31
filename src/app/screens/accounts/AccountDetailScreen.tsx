@@ -537,7 +537,7 @@ export default function AccountDetailScreen({
                   style={{ height: ACCOUNT_CARD_HEIGHT }}
                 >
                   <div
-                    className="pointer-events-none w-[311px] transition-[transform,opacity,filter] duration-300 ease-out will-change-transform"
+                    className="w-[311px] transition-[transform,opacity,filter] duration-300 ease-out will-change-transform"
                     style={{
                       filter: isActiveCard ? "none" : "saturate(0.96) brightness(0.99)",
                       opacity: isActiveCard ? 1 : 0.86,

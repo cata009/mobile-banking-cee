@@ -208,4 +208,26 @@ describe("AccountDetailsInfoScreen", () => {
     expect(await screen.findByRole("status")).toHaveTextContent("Account number successfully copied");
     expect(container.querySelector("[data-copy-toast]")).toBeInTheDocument();
   });
+
+  it("keeps the copy action clickable on an inactive account card", async () => {
+    const { container } = render(
+      <AccountDetailScreen
+        selectedProductId="acc-1"
+        onBack={() => undefined}
+        onDetailsClick={() => undefined}
+        onOptionsClick={() => undefined}
+      />,
+      { wrapper: AppProviders },
+    );
+
+    const inactiveCopy = container.querySelector(
+      '[data-account-carousel-card-state="inactive"] [aria-label="Copy account number"]',
+    );
+
+    expect(inactiveCopy).toBeInTheDocument();
+    expect(inactiveCopy?.closest(".pointer-events-none")).not.toBeInTheDocument();
+    fireEvent.click(inactiveCopy as HTMLElement);
+
+    expect(await screen.findByRole("status")).toHaveTextContent("Account number successfully copied");
+  });
 });

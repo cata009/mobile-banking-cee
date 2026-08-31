@@ -39,8 +39,8 @@ import marketProduce from "@/assets/products/shelf/shelf-market-produce.png";
 import cardsShopper from "@/assets/products/shelf/cards-shopper.png";
 import onlineCard from "@/assets/products/shelf/shelf-online-card.png";
 // Partner-programme tiles.
-import partnerShopsmart from "@/assets/products/shelf/partner-shopsmart.png";
-import partnerOffersStreet from "@/assets/products/shelf/partner-offers-street.png";
+import partnerShopsmartV2 from "@/assets/products/shelf/partner-shopsmart-v2.png";
+import partnerOffersV2 from "@/assets/products/shelf/partner-offers-v2.png";
 
 export type ProductShelfCategoryId =
   | "savings-investments"
@@ -139,16 +139,16 @@ export const PRODUCT_SHELF_ENTRY_CARDS: readonly ProductShelfEntryCard[] = [
     title: "Shopsmart",
     subtitle: "Cashback where you already shop",
     count: 32,
-    image: partnerShopsmart,
-    imagePosition: "center 45%",
+    image: partnerShopsmartV2,
+    imagePosition: "100% 100%",
   },
   {
     id: "partner-offers",
     title: "Partner offers",
     subtitle: "Seasonal deals from partner brands",
     count: 13,
-    image: partnerOffersStreet,
-    imagePosition: "center 55%",
+    image: partnerOffersV2,
+    imagePosition: "100% 100%",
   },
 ];
 

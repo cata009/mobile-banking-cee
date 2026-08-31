@@ -23,7 +23,7 @@ import TransactionAvatar from '@/app/components/transactions/TransactionAvatar';
 import PfmCategoryBubbleChart from '@/app/components/pfm/PfmCategoryBubbleChart';
 import PfmCategoryIcon from '@/app/components/pfm/PfmCategoryIcon';
 import { useLanguage } from '@/app/contexts/LanguageContext';
-import { formatMoneyNumber, formatSignedMoneyNumber } from '@/app/registry/countryConfig';
+import { formatEvo2027Number, formatEvo2027SignedNumber } from '@/app/utils/evo2027Formatting';
 import { useCountry, useDemo } from '@/app/state/demoStore';
 import type { CountryId } from '@/app/state/demoTypes';
 import {
@@ -44,7 +44,7 @@ import { type Product } from '@/data/products';
 import { maskFormattedAmount } from '@/app/utils/amountPrivacy';
 import { useDragCarousel } from '@/hooks/useDragCarousel';
 import { useProducts } from '@/hooks/useProducts';
-import { CurrencyBadge } from '../home/App2027ProductAccordions';
+import { CurrencyBadge, TrendBadge } from '../home/App2027ProductAccordions';
 import { getEvoAnalyticsCategoryDisplayLabel } from './analyticsCategoryLabels';
 import {
   createEvoAnalyticsState,
@@ -376,9 +376,10 @@ function FormattedAmount({
   /** Sign printed with the integer part, e.g. the minus on a statement row. */
   prefix?: string;
 }) {
+  void country;
   // Mask the formatted string, then split it — `splitAmount` and `maskAmountParts` have
   // incompatible shapes, and combining them the other way prints "**** , ,**".
-  const value = splitAmount(maskFormattedAmount(formatMoneyNumber(Math.abs(amount), country), amountsHidden));
+  const value = splitAmount(maskFormattedAmount(formatEvo2027Number(Math.abs(amount)), amountsHidden));
 
   return (
     <p className={`inline-flex items-baseline whitespace-nowrap text-[var(--uc-text)] ${className}`.trim()}>
@@ -701,7 +702,7 @@ function ExpenseTransactionList({
             <div key={dateGroup.dateKey} data-transaction-date-group={dateGroup.dateKey}>
               <AccountTransactionMonthDivider
                 title={dateGroup.dateTitle}
-                total={dateGroup.transactions.length > 1 ? formatSignedMoneyNumber(dateGroup.dailyTotal, country) : undefined}
+                total={dateGroup.transactions.length > 1 ? formatEvo2027SignedNumber(dateGroup.dailyTotal) : undefined}
                 currency={summary.currency}
                 dateSeparator
               />
@@ -714,7 +715,7 @@ function ExpenseTransactionList({
                   >
                     <AccountTransactionRow
                       transaction={transaction}
-                      formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
+                      formattedAmount={formatEvo2027Number(Math.abs(transaction.amount))}
                       currency={summary.currency}
                       // Across a multi-account scope the source account is what tells two identical rows apart.
                       detailsLabel={transaction.sourceProductName}
@@ -1036,7 +1037,8 @@ function SpendingMonthCard({
   onOpenExpenses: () => void;
   dragHandlers?: ReturnType<typeof useDragCarousel>['dragHandlers'];
 }) {
-  const format = (value: number) => maskFormattedAmount(formatMoneyNumber(Math.abs(value), country), amountsHidden);
+  void country;
+  const format = (value: number) => maskFormattedAmount(formatEvo2027Number(Math.abs(value)), amountsHidden);
   const spent = splitAmount(format(summary.spendingTotal));
   const earned = splitAmount(format(summary.incomeTotal));
   const keptShare = summary.incomeTotal > 0 && summary.netTotal > 0
@@ -1051,7 +1053,7 @@ function SpendingMonthCard({
       data-evo-analytics-period-card={summary.periodKey}
       // Narrower than the rail so the neighbouring months peek in at both edges — that peek is
       // the swipe affordance. Plain surface: colour belongs to the data, not the chrome.
-      className="flex w-[calc(100%-44px)] shrink-0 flex-col gap-[18px] overflow-hidden rounded-[8px] bg-[var(--uc-surface)] p-[20px] text-[var(--uc-text)]"
+      className="flex w-[calc(100%-44px)] shrink-0 flex-col gap-[12px] overflow-hidden rounded-[8px] bg-[var(--uc-surface)] p-[16px] text-[var(--uc-text)]"
       style={{ boxShadow: CAROUSEL_CARD_SHADOW }}
     >
       <div>
@@ -1059,14 +1061,14 @@ function SpendingMonthCard({
           {periodLabel}
         </p>
         {/* Both flows sit above the rule: the pair is the story, neither figure tells it alone. */}
-        <div className="mt-[12px] grid grid-cols-2 gap-[12px]">
+        <div className="mt-[8px] grid grid-cols-2 gap-[12px]">
           <button
             type="button"
             data-evo-analytics-open-expenses
             onClick={onOpenExpenses}
             className="min-w-0 rounded-[8px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-surface)]"
           >
-            <span className="flex items-center gap-[6px] text-[14px] font-bold leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
+            <span className="flex items-center gap-[6px] text-[16px] font-bold leading-[20px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
               <CashFlowDot flow="out" />
               Money out
             </span>
@@ -1082,7 +1084,7 @@ function SpendingMonthCard({
             onClick={onOpenIncome}
             className="min-w-0 rounded-[8px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-surface)]"
           >
-            <span className="flex items-center gap-[6px] text-[14px] font-bold leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
+            <span className="flex items-center gap-[6px] text-[16px] font-bold leading-[20px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
               <CashFlowDot flow="in" />
               Money in
             </span>
@@ -1094,23 +1096,31 @@ function SpendingMonthCard({
         </div>
       </div>
 
-      <div className="border-t border-[color-mix(in_srgb,var(--uc-text)_16%,transparent)] pt-[16px]">
-        <p className="text-[14px] font-bold leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
-          Net cashflow
-        </p>
-        <p className="mt-[2px] truncate text-[20px] font-bold leading-[24px]">
-          {summary.netTotal >= 0 ? '+' : '−'}{format(summary.netTotal)} {summary.currency}
-        </p>
-        <p className="mt-[4px] text-[14px] leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
-          {keptShare !== null
-            ? `You kept ${keptShare}% of what came in`
-            : overspent
-              ? 'More went out than came in'
-              : 'No income recorded in this period'}
-        </p>
+      <div className="border-t border-[color-mix(in_srgb,var(--uc-text)_16%,transparent)] pt-[10px]">
+        <div
+          data-evo-analytics-summary-net
+          className="flex items-start gap-[8px]"
+        >
+          <TrendBadge direction={summary.netTotal >= 0 ? 'up' : 'down'} size={16} compact />
+          <div className="min-w-0 flex-1">
+            <p data-evo-analytics-summary-net-label className="text-[16px] font-bold leading-[20px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
+              Net cashflow
+            </p>
+            <p className="mt-[2px] truncate text-[20px] font-bold leading-[24px]">
+              {summary.netTotal >= 0 ? '+' : '−'}{format(summary.netTotal)} {summary.currency}
+            </p>
+            <p className="mt-[4px] text-[14px] leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
+              {keptShare !== null
+                ? `You kept ${keptShare}% of what came in`
+                : overspent
+                  ? 'More went out than came in'
+                  : 'No income recorded in this period'}
+            </p>
+          </div>
+        </div>
 
         <CashFlowBars
-          className="mt-[16px]"
+          className="mt-[12px]"
           incomeTotal={summary.incomeTotal}
           spendingTotal={summary.spendingTotal}
           barDataAttribute="data-evo-analytics-flow-bar"
@@ -1339,6 +1349,7 @@ function SpendingTopCategories({
   onOpenRow: (row: ExpenseBreakdownRow) => void;
   onSeeAll: () => void;
 }) {
+  void country;
   if (rows.length === 0) return null;
 
   return (
@@ -1350,7 +1361,7 @@ function SpendingTopCategories({
       <div className="mt-[12px] overflow-hidden rounded-[8px] bg-[var(--uc-surface)] pb-[8px] shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)]">
         {rows.map((row, index) => {
           const share = total > 0 ? Math.round((row.total / total) * 100) : 0;
-          const amount = splitAmount(maskFormattedAmount(formatMoneyNumber(row.total, country), amountsHidden));
+          const amount = splitAmount(maskFormattedAmount(formatEvo2027Number(row.total), amountsHidden));
 
           return (
             <button
@@ -1953,7 +1964,7 @@ export default function Evo2027AnalyticsScreen({
             data-evo-analytics-scope={activeScope?.id ?? 'all-accounts'}
             className="flex min-w-0 flex-col gap-[28px]"
           >
-            <div className="flex min-w-0 flex-col gap-[10px]">
+            <div data-evo-analytics-overview-controls className="flex min-w-0 flex-col gap-[0px]">
               <button
                 type="button"
                 data-evo-analytics-scope-trigger

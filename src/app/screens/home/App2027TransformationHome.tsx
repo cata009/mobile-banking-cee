@@ -4,7 +4,8 @@ import AccountCarouselIndicator from '@/app/components/accounts/AccountCarouselI
 import GhostBanner from '@/app/components/cards/GhostBanner';
 import ShopsmartOfferCard from '@/app/components/shopsmart/ShopsmartOfferCard';
 import { maskAmountParts } from '@/app/utils/amountPrivacy';
-import { formatAmount, type Product, type ProductCategory } from '@/data/products';
+import type { Product, ProductCategory } from '@/data/products';
+import { formatEvo2027Amount } from '@/app/utils/evo2027Formatting';
 import { buildInvestmentSecurities, calculateInvestmentPortfolioPerformance } from '@/app/config/investmentsPortfolioConfig';
 import { calculateLatestWeekSpending, createSpendingAnalyticsTimeline } from '@/data/spendingAnalytics';
 import type { CountryId } from '@/app/state/demoTypes';
@@ -23,6 +24,7 @@ import shopSmartValentino from '@/assets/shopsmart/shopsmart-valentino.png';
 import shopSmartEnglishHome from '@/assets/shopsmart/shopsmart-english-home.png';
 import App2027Activity from './App2027Activity';
 import App2027ProductAccordions, { CurrencyBadge, TrendBadge } from './App2027ProductAccordions';
+import { CardArrowMark } from '@/app/components/cards/Card';
 
 type TransformationTab = 'accounts' | 'savings' | 'credits' | 'insurance';
 type FormattedAmount = { integer: string; decimals: string; currency: string };
@@ -55,34 +57,49 @@ const TAB_LABELS: Record<TransformationTab, string> = {
   insurance: 'Insurances',
 };
 
+const INTEREST_SECTION_TITLES: Record<TransformationTab, string> = {
+  accounts: 'Smart ideas for everyday money',
+  savings: 'Ideas to grow your savings',
+  credits: 'Ideas for your next step',
+  insurance: 'Protection for what matters',
+};
+
 type InterestCampaign = {
   title: string;
   body: string;
   caption: string;
   image: string;
   imagePosition: string;
+  arrowTreatment?: {
+    left: string;
+    top: string;
+    width: string;
+    height: string;
+    rotate: string;
+    foregroundClipPath: string;
+  };
 };
 
 const INTEREST_CAMPAIGNS: Record<TransformationTab, readonly InterestCampaign[]> = {
   accounts: [
-    { title: 'Build your savings without thinking about it', body: 'Round up everyday payments and save the difference.', caption: 'Set your rule and adjust it at any time.', image: interestRoundups, imagePosition: 'center 38%' },
-    { title: 'Discover what is next for you', body: 'Useful ideas that keep everyday banking moving.', caption: 'Choose what works for you.', image: interestNextStep, imagePosition: 'center 23%' },
-    { title: 'A little extra peace of mind', body: 'Build a safety net for the moments that matter.', caption: 'Review your options whenever you need.', image: interestSafetyNet, imagePosition: 'center 38%' },
+    { title: 'Save a little every day', body: 'Round up everyday payments and save the difference.', caption: 'Set your rule and adjust it at any time.', image: interestRoundups, imagePosition: 'center 38%', arrowTreatment: { left: '8%', top: '8%', width: '32%', height: '52%', rotate: '-3deg', foregroundClipPath: 'polygon(0 100%, 0 72%, 35% 72%, 44% 60%, 52% 48%, 59% 34%, 100% 34%, 100% 100%)' } },
+    { title: 'Stay on top of your everyday money', body: 'Useful ideas that keep everyday banking moving.', caption: 'Choose what works for you.', image: interestNextStep, imagePosition: 'center 23%' },
+    { title: 'Find your next smart move', body: 'Build a safety net for the moments that matter.', caption: 'Review your options whenever you need.', image: interestSafetyNet, imagePosition: 'center 38%' },
   ],
   savings: [
-    { title: 'Build your safety net', body: 'Set money aside automatically, at your own pace.', caption: 'Start with an amount that feels right.', image: interestSafetyNet, imagePosition: 'center 38%' },
-    { title: 'Put every crown to work', body: 'Make small changes that help your savings grow.', caption: 'Choose a savings goal that suits you.', image: interestRoundups, imagePosition: 'center 38%' },
-    { title: 'Make room for your next plan', body: 'Set money aside for the things you are looking forward to.', caption: 'Adjust your plan whenever life changes.', image: interestNextStep, imagePosition: 'center 23%' },
+    { title: 'Build a reserve for what matters', body: 'Set money aside automatically, at your own pace.', caption: 'Start with an amount that feels right.', image: interestSafetyNet, imagePosition: 'center 38%', arrowTreatment: { left: '4%', top: '10%', width: '30%', height: '50%', rotate: '-3deg', foregroundClipPath: 'polygon(0 60%, 100% 55%, 100% 100%, 0 100%)' } },
+    { title: 'Make your savings work harder', body: 'Make small changes that help your savings grow.', caption: 'Choose a savings goal that suits you.', image: interestRoundups, imagePosition: 'center 38%' },
+    { title: 'Set a goal and watch it grow', body: 'Set money aside for the things you are looking forward to.', caption: 'Adjust your plan whenever life changes.', image: interestNextStep, imagePosition: 'center 23%' },
   ],
   credits: [
-    { title: 'Plan your next move with confidence', body: 'Explore financing options for the things that matter.', caption: 'Find a loan that fits your plans.', image: interestNextStep, imagePosition: 'center 23%' },
-    { title: 'A mortgage shaped around you', body: 'Compare options for a home that works for your next chapter.', caption: 'See what a realistic monthly payment could look like.', image: shopSmartEnglishHome, imagePosition: 'center 45%' },
-    { title: 'Make room for what matters now', body: 'Finance your next priority with repayments you can plan for.', caption: 'Subject to credit approval.', image: shopSmartValentino, imagePosition: 'center 35%' },
+    { title: 'Plan a loan that fits your life', body: 'Explore financing options for the things that matter.', caption: 'Find a loan that fits your plans.', image: interestNextStep, imagePosition: 'center 23%', arrowTreatment: { left: '68%', top: '8%', width: '27%', height: '48%', rotate: '4deg', foregroundClipPath: 'polygon(0 60%, 100% 56%, 100% 100%, 0 100%)' } },
+    { title: 'Find a home loan for your next step', body: 'Compare options for a home that works for your next chapter.', caption: 'See what a realistic monthly payment could look like.', image: shopSmartEnglishHome, imagePosition: 'center 45%' },
+    { title: 'Finance the things that matter', body: 'Finance your next priority with repayments you can plan for.', caption: 'Subject to credit approval.', image: shopSmartValentino, imagePosition: 'center 35%' },
   ],
   insurance: [
-    { title: 'Protect the place you call home', body: 'Explore cover for your home and belongings.', caption: 'Find protection that fits your needs.', image: homeInsuranceCampaign, imagePosition: '68% center' },
-    { title: 'Travel with confidence', body: 'Arrange travel cover before your next trip.', caption: 'Keep your plans protected from departure to return.', image: travelInsuranceCampaign, imagePosition: '58% 42%' },
-    { title: 'Cover for life’s unexpected turns', body: 'Choose protection that supports the people who matter most.', caption: 'Review your cover whenever life changes.', image: interestSafetyNet, imagePosition: 'center 38%' },
+    { title: 'Protect your home with confidence', body: 'Explore cover for your home and belongings.', caption: 'Find protection that fits your needs.', image: homeInsuranceCampaign, imagePosition: '68% center', arrowTreatment: { left: '4%', top: '10%', width: '30%', height: '50%', rotate: '2deg', foregroundClipPath: 'polygon(0 60%, 100% 56%, 100% 100%, 0 100%)' } },
+    { title: 'Travel covered from start to finish', body: 'Arrange travel cover before your next trip.', caption: 'Keep your plans protected from departure to return.', image: travelInsuranceCampaign, imagePosition: '58% 42%' },
+    { title: 'Prepare for life’s unexpected moments', body: 'Choose protection that supports the people who matter most.', caption: 'Review your cover whenever life changes.', image: interestSafetyNet, imagePosition: 'center 38%' },
   ],
 };
 
@@ -129,9 +146,9 @@ function buildPortfolioPerformance(investments: Product[], country: CountryId, a
 
   const up = performanceAmount > 0;
   const sign = up ? '+' : '-';
-  const amount = formatAmount(performanceAmount, first.currency);
-  // The percent borrows the amount's decimal mark so the two halves of the line agree, whatever
-  // separator formatAmount hands back.
+  const amount = formatEvo2027Amount(performanceAmount, first.currency);
+  // The percent borrows the amount's decimal mark so both halves follow the Evo 2027 number
+  // contract.
   const separator = amount.decimals.charAt(0) || '.';
   const percent = `${Math.abs(performancePercent).toFixed(2).replace('.', separator)}%`;
   const label = amountsHidden
@@ -306,7 +323,7 @@ function DepositList({ deposits, amountsHidden, formatProductAmount, onProductCl
       {displayedDeposits.map((product, index) => {
         const current = formatProductAmount(product);
         const presentation = depositPresentation(product);
-        const maturity = formatAmount(product.balance * (1 + presentation.annualRate * presentation.termDays / 365), product.currency);
+        const maturity = formatEvo2027Amount(product.balance * (1 + presentation.annualRate * presentation.termDays / 365), product.currency);
         const elapsedDays = presentation.termDays - presentation.daysToMaturity;
         const maturityProgress = presentation.termDays > 0 ? (elapsedDays / presentation.termDays) * 100 : 0;
 
@@ -351,10 +368,10 @@ function LoanList({ loans, amountsHidden, onProductClick, collapsed = false }: {
       {displayedLoans.map((product, index) => {
         const total = Math.abs(product.balance) * 1.45;
         const repaid = total - Math.abs(product.balance);
-        const remaining = formatAmount(Math.abs(product.balance), product.currency);
-        const installment = formatAmount(Math.round(Math.abs(product.balance) * 0.009), product.currency);
-        const totalAmount = formatAmount(total, product.currency);
-        const repaidAmount = formatAmount(repaid, product.currency);
+  const remaining = formatEvo2027Amount(Math.abs(product.balance), product.currency);
+  const installment = formatEvo2027Amount(Math.round(Math.abs(product.balance) * 0.009), product.currency);
+  const totalAmount = formatEvo2027Amount(total, product.currency);
+  const repaidAmount = formatEvo2027Amount(repaid, product.currency);
         const repaidPercentage = total > 0 ? (repaid / total) * 100 : 0;
 
         return <div key={product.id} data-home-loan-card className={['bg-[var(--uc-surface)] p-[16px]', index > 0 ? 'border-t-[0.5px] border-[var(--uc-border-muted)]' : ''].filter(Boolean).join(' ')}>
@@ -465,17 +482,42 @@ function HorizontalCarousel({ ariaLabel, count, children }: { ariaLabel: string;
 
 function InterestCarousel({ tab, onProductsClick }: { tab: TransformationTab; onProductsClick?: () => void }) {
   const cards = INTEREST_CAMPAIGNS[tab];
+  const sectionTitle = INTEREST_SECTION_TITLES[tab];
   return (
     <section data-home-interest-carousel aria-labelledby="interest-heading">
-      <h2 id="interest-heading" className="uc-type-l1 text-[var(--uc-text)]">For your interest</h2>
-      <HorizontalCarousel ariaLabel="For your interest" count={cards.length}>
+      <h2 id="interest-heading" className="uc-type-l1 text-[var(--uc-text)]">{sectionTitle}</h2>
+      <HorizontalCarousel ariaLabel={sectionTitle} count={cards.length}>
         {cards.map((card, index) => (
-          <button key={index} type="button" onClick={onProductsClick} className="w-[calc(100%-48px)] shrink-0 snap-start overflow-hidden rounded-[8px] bg-[var(--uc-surface)] text-left shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]">
-            <div className="h-[100px] overflow-hidden bg-[var(--uc-surface-muted)]">
-              <img src={card.image} alt="" aria-hidden="true" data-home-interest-media className="size-full object-cover" style={{ objectPosition: card.imagePosition }} />
+          <button key={index} type="button" onClick={onProductsClick} className="flex h-full w-[calc(100%-48px)] shrink-0 snap-start flex-col overflow-hidden rounded-[8px] bg-[var(--uc-surface)] text-left shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]">
+            <div className="relative h-[100px] overflow-hidden bg-[var(--uc-surface-muted)] leading-none">
+              <img src={card.image} alt="" aria-hidden="true" data-home-interest-media className="block size-full scale-[1.12] object-cover" style={{ objectPosition: card.imagePosition }} />
+              {card.arrowTreatment ? <>
+                <span
+                  data-home-interest-arrow-back
+                  aria-hidden="true"
+                  className="pointer-events-none absolute z-10 drop-shadow-[0_2px_2px_rgb(0_0_0_/_0.24)]"
+                  style={{
+                    left: card.arrowTreatment.left,
+                    top: card.arrowTreatment.top,
+                    width: card.arrowTreatment.width,
+                    height: card.arrowTreatment.height,
+                    transform: `rotate(${card.arrowTreatment.rotate})`,
+                  }}
+                >
+                  <CardArrowMark />
+                </span>
+                <span
+                  data-home-interest-arrow-front
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 z-20 overflow-hidden"
+                  style={{ clipPath: card.arrowTreatment.foregroundClipPath }}
+                >
+                  <img src={card.image} alt="" className="block size-full scale-[1.12] object-cover" style={{ objectPosition: card.imagePosition }} />
+                </span>
+              </> : null}
             </div>
-            <div className="px-[16px] py-[12px]">
-              <h3 className="text-[18px] font-bold leading-[23px]">{card.title}</h3>
+            <div className="flex flex-1 flex-col px-[16px] py-[12px]">
+              <h3 className="min-h-[46px] text-[18px] font-bold leading-[23px]">{card.title}</h3>
               <p className="mt-[7px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">{card.body}</p>
               <p className="mt-[8px] text-[13px] leading-[17px] text-[var(--uc-text-muted)]">{card.caption}</p>
             </div>
@@ -593,9 +635,15 @@ export default function App2027TransformationHome({ categories, country, amounts
     : category,
   ).filter((category) => category.key !== 'cards' || category.products.length > 0);
   const totalSavings = useMemo(() => calculateTotal([...savings, ...deposits, ...investments]), [calculateTotal, deposits, investments, savings]);
-  const savingsGrowth = useMemo(() => ({ ...totalSavings, integer: String(Math.max(0, Math.round(Number(totalSavings.integer.replace(/\s/g, '')) * 0.032)).toLocaleString('cs-CZ')), decimals: '.00' }), [totalSavings]);
+  const savingsGrowth = useMemo(() => formatEvo2027Amount(
+    Math.max(0, Math.round(Number(totalSavings.integer.replace(/\D/g, '')) * 0.032)),
+    totalSavings.currency,
+  ), [totalSavings]);
   const debt = calculateTotalOwed();
-  const dueThisMonth = useMemo(() => ({ ...debt, integer: String(Math.max(0, Math.round(Number(debt.integer.replace(/\s/g, '')) * 0.009)).toLocaleString('cs-CZ')), decimals: '.00' }), [debt]);
+  const dueThisMonth = useMemo(() => formatEvo2027Amount(
+    Math.max(0, Math.round(Number(debt.integer.replace(/\D/g, '')) * 0.009)),
+    debt.currency,
+  ), [debt]);
 
   return (
     <div data-home-transformation data-home-area="transformation" className="flex min-w-0 flex-col gap-[28px]">
@@ -609,7 +657,7 @@ export default function App2027TransformationHome({ categories, country, amounts
       </section>
 
       {activeTab === 'accounts' ? <>
-        <SummaryBanner tab="accounts" amount={calculateTotalAvailable()} amountsHidden={amountsHidden} secondaryLabel={weekSpending ? "Spent this week" : undefined} secondaryValue={weekSpending ? formatAmount(weekSpending.total, weekSpending.currency as Product['currency']) : undefined} />
+        <SummaryBanner tab="accounts" amount={calculateTotalAvailable()} amountsHidden={amountsHidden} secondaryLabel={weekSpending ? "Spent this week" : undefined} secondaryValue={weekSpending ? formatEvo2027Amount(weekSpending.total, weekSpending.currency as Product['currency']) : undefined} />
         {!accounts.length ? <Group title="Accounts"><EmptyProducts title="Open your everyday account" description="Choose an account for payments, salary and everyday banking." onClick={onProductsClick} /></Group> : null}
         {!debitCards.length ? <Group title="Cards"><EmptyProducts title="Choose a card for everyday use" description="Explore cards with benefits that fit your spending." onClick={onProductsClick} /></Group> : null}
         <App2027ProductAccordions categories={debitCardCategories} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} calculateGroupTotal={calculateTotal} getProductDisplayNumber={getProductDisplayNumber} onProductClick={onProductClick} useCzRoboAccountCards onDomesticPaymentClick={onDomesticPaymentClick} onPaymentsClick={onPaymentsClick} onAccountInfoClick={onAccountInfoClick} onCardDetailsClick={onCardDetailsClick} onCardOptionsClick={onCardOptionsClick} visibleKeys={['accounts', 'cards']} initialOpenKeys={{ accounts: true, cards: true }} />

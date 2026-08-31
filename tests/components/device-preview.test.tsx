@@ -26,6 +26,14 @@ function selectDevice(label: string) {
 }
 
 describe('adaptive device preview', () => {
+  it('uses the same flat chrome as neighboring demo actions', () => {
+    const { container } = renderPreview()
+    const controls = container.querySelector('[data-device-preview-controls]')
+
+    expect(controls).toHaveClass('flex', 'items-center', 'gap-[4px]')
+    expect(controls).not.toHaveClass('border', 'bg-[var(--uc-surface)]', 'p-[4px]', 'shadow-sm')
+  })
+
   it('changes the actual logical viewport for regular, Galaxy Fold8 and Apple passport profiles', () => {
     renderPreview()
     const screenSurface = screen.getByTestId('device-preview-screen')

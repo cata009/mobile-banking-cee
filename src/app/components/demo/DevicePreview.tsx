@@ -153,7 +153,7 @@ export function DevicePreviewSelector() {
 
   return (
     <div
-      className="flex items-center gap-[4px] rounded-[10px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-[4px] shadow-sm"
+      className="flex items-center gap-[4px]"
       data-device-preview-controls
     >
       <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
