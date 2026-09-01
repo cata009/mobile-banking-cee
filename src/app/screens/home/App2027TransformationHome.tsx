@@ -1100,12 +1100,11 @@ export default function App2027TransformationHome({
                 tabIndex={active ? 0 : -1}
                 onKeyDown={onTabKeyDown}
                 onClick={() => selectTab(tab)}
-                /* Unselected takes the same outline the category chips wear: a
-                   black stroke and black text. A borderless muted pill and an
-                   outlined chip were two answers to "not selected". */
+                /* Selected is the only state that carries weight, here and on the
+                   chips below: a filled pill against plain muted labels. */
                 className={`flex min-h-[44px] shrink-0 items-center justify-center rounded-full border px-[13px] py-[7px] text-[16px] leading-[19px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${active
                   ? 'flex-col gap-[2px] border-transparent bg-[var(--uc-action-strong)] font-medium text-[var(--uc-static-white)]'
-                  : 'border-[var(--uc-text)] bg-[var(--uc-surface)] font-normal text-[var(--uc-text)]'}`}
+                  : 'border-transparent bg-[var(--uc-surface)] font-normal text-[var(--uc-text-muted)]'}`}
               >
                 <span>{t(`runtime.evo.tabs.${tab === 'insurance' ? 'insurances' : tab}`)}</span>
                 {active ? <span aria-hidden="true" className="size-[4px] rounded-full bg-[var(--uc-static-white)]" /> : null}

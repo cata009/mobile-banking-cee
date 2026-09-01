@@ -26,8 +26,11 @@ export interface ShopsmartCategoryChipsProps {
  *
  * Home and the Offers page were filtering the same catalogue with two chips that
  * had drifted apart — 8px versus 4px corners, 13px versus 14px type, a muted
- * grey outline versus a black one. Same job, same control: this is the Offers
- * page's chip, which is the one the brand's own partner page uses.
+ * grey outline versus a black one. Same job, same control.
+ *
+ * Only the selected chip carries weight: a white pill on the page ground says
+ * "not selected" on its own, and an outline around every one of them turned a
+ * filter row into a row of buttons competing with the content under it.
  */
 export default function ShopsmartCategoryChips({
   categories,
@@ -66,7 +69,7 @@ export default function ShopsmartCategoryChips({
             className={`flex h-[36px] shrink-0 items-center justify-center rounded-[4px] border px-[16px] text-[14px] font-bold uppercase leading-[18px] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${
               active
                 ? "border-[var(--uc-action-strong)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
-                : "border-[var(--uc-text)] bg-[var(--uc-surface)] text-[var(--uc-text)]"
+                : "border-transparent bg-[var(--uc-surface)] text-[var(--uc-text-muted)]"
             }`}
           >
             {category.label}
