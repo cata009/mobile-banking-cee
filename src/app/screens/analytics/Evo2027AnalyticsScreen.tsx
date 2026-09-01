@@ -1415,24 +1415,30 @@ function SpendingMonthCard({
         <p className="text-[18px] font-bold uppercase leading-[22px] tracking-[0.05em] text-[var(--uc-action)]">
           {periodLabel}
         </p>
-        {/* Both flows sit above the rule: the pair is the story, neither figure tells it alone. */}
-        <div className="mt-[8px] grid grid-cols-2 gap-[12px]">
-          <button
-            type="button"
-            data-evo-analytics-open-expenses
-            onClick={onOpenExpenses}
-            className="min-w-0 rounded-[8px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-surface)]"
-          >
-            <span className="flex items-center gap-[6px] text-[16px] font-bold leading-[20px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
-              <CashFlowDot flow="out" />
-              Money out
-            </span>
-            <span className="mt-[2px] flex items-baseline gap-[2px] whitespace-nowrap">
-              <span className="text-[20px] font-bold leading-[24px] tracking-[-0.02em]">{spent.integer}</span>
-              <span className="text-[14px] font-bold leading-[18px]">{spent.separator}{spent.decimals} {summary.currency}</span>
-            </span>
-          </button>
+        {/* The answer first: what the period left behind. The two bars take the
+            rule's place under it, and the figures that produced them sit beneath
+            the bar each one fills — money in under the green, money out under the
+            black. */}
+        <NetCashflowBlock
+          className="mt-[8px]"
+          netTotal={summary.netTotal}
+          incomeTotal={summary.incomeTotal}
+          formattedAbsoluteNet={netWord}
+          formattedSignedNet={`${summary.netTotal >= 0 ? '+' : '−'}${format(summary.netTotal)} ${summary.currency}`}
+          dataAttribute="data-evo-analytics-summary-net"
+          labelDataAttribute="data-evo-analytics-summary-net-label"
+        />
+      </div>
 
+      <div>
+        <CashFlowBars
+          incomeTotal={summary.incomeTotal}
+          spendingTotal={summary.spendingTotal}
+          barDataAttribute="data-evo-analytics-flow-bar"
+          barsDataAttribute="data-evo-analytics-flow-bars"
+        />
+
+        <div className="mt-[12px] flex items-start justify-between gap-[12px]">
           <button
             type="button"
             data-evo-analytics-open-income
@@ -1448,25 +1454,24 @@ function SpendingMonthCard({
               <span className="text-[14px] font-bold leading-[18px]">{earned.separator}{earned.decimals} {summary.currency}</span>
             </span>
           </button>
+
+          <button
+            type="button"
+            data-evo-analytics-open-expenses
+            onClick={onOpenExpenses}
+            className="min-w-0 rounded-[8px] text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-surface)]"
+          >
+            <span className="flex items-center justify-end gap-[6px] text-[16px] font-bold leading-[20px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
+              <CashFlowDot flow="out" />
+              Money out
+            </span>
+            <span className="mt-[2px] flex items-baseline justify-end gap-[2px] whitespace-nowrap">
+              <span className="text-[20px] font-bold leading-[24px] tracking-[-0.02em]">{spent.integer}</span>
+              <span className="text-[14px] font-bold leading-[18px]">{spent.separator}{spent.decimals} {summary.currency}</span>
+            </span>
+          </button>
         </div>
       </div>
-
-      <NetCashflowBlock
-        netTotal={summary.netTotal}
-        incomeTotal={summary.incomeTotal}
-        formattedAbsoluteNet={netWord}
-        formattedSignedNet={`${summary.netTotal >= 0 ? '+' : '−'}${format(summary.netTotal)} ${summary.currency}`}
-        dataAttribute="data-evo-analytics-summary-net"
-        labelDataAttribute="data-evo-analytics-summary-net-label"
-      />
-
-      <CashFlowBars
-        className="mt-[12px]"
-        incomeTotal={summary.incomeTotal}
-        spendingTotal={summary.spendingTotal}
-        barDataAttribute="data-evo-analytics-flow-bar"
-        barsDataAttribute="data-evo-analytics-flow-bars"
-      />
     </section>
   );
 }

@@ -111,7 +111,6 @@ function MonthSelector({
 function AnalyticsHeroPanel({
   activePeriodKey,
   summary,
-  country,
 }: {
   activePeriodKey: string;
   summary: SpendingAnalyticsSummary;
@@ -121,7 +120,6 @@ function AnalyticsHeroPanel({
     <>
       <MonthSelector activePeriodKey={activePeriodKey} summary={summary} />
       <CashFlowSummaryBars
-        country={country}
         currency={summary.currency}
         incomeTotal={summary.incomeTotal}
         spendingTotal={summary.spendingTotal}
