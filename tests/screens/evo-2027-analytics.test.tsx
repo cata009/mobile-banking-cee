@@ -204,17 +204,24 @@ describe('Evo 2027 analytics overview', () => {
     expect(down()).toBeInTheDocument()
   })
 
-  it('compacts the monthly summary card around its flow separator', () => {
+  it('leads the summary card with the net figure and puts each flow under its own bar', () => {
     const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
     const hero = container.querySelector<HTMLElement>('[data-evo-analytics-summary-hero]')
-    const flowGrid = hero?.querySelector('[data-evo-analytics-open-expenses]')?.parentElement
-    const netSection = hero?.querySelector('[data-evo-analytics-summary-net]')?.parentElement
-    const bars = hero?.querySelector('[data-evo-analytics-flow-bars]')
+    const net = hero?.querySelector('[data-evo-analytics-summary-net]') as HTMLElement
+    const bars = hero?.querySelector('[data-evo-analytics-flow-bars]') as HTMLElement
+    const income = hero?.querySelector('[data-evo-analytics-open-income]') as HTMLElement
+    const expenses = hero?.querySelector('[data-evo-analytics-open-expenses]') as HTMLElement
 
     expect(hero).toHaveClass('gap-[12px]', 'p-[16px]')
-    expect(flowGrid).toHaveClass('mt-[8px]')
-    expect(netSection).toHaveClass('pt-[10px]')
-    expect(bars).toHaveClass('mt-[12px]')
+    // The answer, then the bars in the rule's place, then the two figures.
+    const order = (a: HTMLElement, b: HTMLElement) =>
+      Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)
+    expect(order(net, bars)).toBe(true)
+    expect(order(bars, income)).toBe(true)
+    // Money in reads left, money out right, each under the bar it fills.
+    expect(order(income, expenses)).toBe(true)
+    expect(expenses).toHaveClass('text-right')
+    expect(income).toHaveClass('text-left')
   })
 
   it('shows matching top money-out and money-in sections on the overview', () => {

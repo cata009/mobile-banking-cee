@@ -2,11 +2,9 @@ import type { ReactNode } from "react";
 
 import CashFlowBars, { CashFlowDot } from "@/app/components/analytics/CashFlowBars";
 import { useLanguage } from "@/app/contexts/LanguageContext";
-import { formatMoneyNumber } from "@/app/registry/countryConfig";
-import type { CountryId } from "@/app/state/demoTypes";
+import { formatEvo2027Number } from "@/app/utils/evo2027Formatting";
 
 interface CashFlowSummaryBarsProps {
-  country: CountryId;
   currency: string;
   incomeTotal: number;
   spendingTotal: number;
@@ -25,7 +23,6 @@ interface CashFlowSummaryBarsProps {
  * It replaced a 160px two-column bar chart that spent most of its height on air.
  */
 export default function CashFlowSummaryBars({
-  country,
   currency,
   incomeTotal,
   spendingTotal,
@@ -36,15 +33,8 @@ export default function CashFlowSummaryBars({
 }: CashFlowSummaryBarsProps) {
   const { t } = useLanguage();
 
+  // Money in first, money out second: each figure sits under the bar it fills.
   const flows = [
-    {
-      key: "expense",
-      label: t("runtime.analytics.moneyOut", "Money out"),
-      dot: "out",
-      total: spendingTotal,
-      totalAttribute: "outflow",
-      onClick: onSpendingClick,
-    },
     {
       key: "income",
       label: t("runtime.analytics.moneyIn", "Money in"),
@@ -53,6 +43,14 @@ export default function CashFlowSummaryBars({
       totalAttribute: "inflow",
       onClick: onIncomeClick,
     },
+    {
+      key: "expense",
+      label: t("runtime.analytics.moneyOut", "Money out"),
+      dot: "out",
+      total: spendingTotal,
+      totalAttribute: "outflow",
+      onClick: onSpendingClick,
+    },
   ] as const;
 
   return (
@@ -60,11 +58,19 @@ export default function CashFlowSummaryBars({
       data-monthly-cash-flow-chart
       className={`px-[8px] ${compact ? "pb-[8px] pt-[16px]" : "pb-[12px] pt-[16px]"}`}
     >
-      <div className="grid grid-cols-2 gap-[12px]">
-        {flows.map((flow) => {
+      {/* The same order the Spending card uses: what the month left behind, then
+          the two bars in the rule's place, then the figures under the bar each
+          one fills. */}
+      {net}
+
+      <CashFlowBars className={net ? "mt-[16px]" : undefined} incomeTotal={incomeTotal} spendingTotal={spendingTotal} />
+
+      <div className="mt-[12px] flex items-start justify-between gap-[12px]">
+        {flows.map((flow, index) => {
+          const alignEnd = index === flows.length - 1;
           const amount = (
             <>
-              <span className="flex items-center gap-[6px] text-[14px] font-bold leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)]">
+              <span className={`flex items-center gap-[6px] text-[14px] font-bold leading-[18px] text-[color-mix(in_srgb,var(--uc-text)_72%,transparent)] ${alignEnd ? "justify-end" : ""}`}>
                 <CashFlowDot flow={flow.dot} />
                 {flow.label}
               </span>
@@ -72,7 +78,7 @@ export default function CashFlowSummaryBars({
                 data-cash-flow-total={flow.totalAttribute}
                 className="mt-[2px] block truncate text-[20px] font-bold leading-[24px] tracking-[-0.02em] text-[var(--uc-text)]"
               >
-                {formatMoneyNumber(flow.total, country)} {currency}
+                {formatEvo2027Number(flow.total)} {currency}
               </span>
             </>
           );
@@ -84,21 +90,17 @@ export default function CashFlowSummaryBars({
               aria-label={flow.key === "income" ? "Open income analytics" : "Open expenses analytics"}
               data-cash-flow-direction={flow.key}
               onClick={flow.onClick}
-              className="min-w-0 rounded-[8px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-surface)]"
+              className={`min-w-0 rounded-[8px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-surface)] ${alignEnd ? "text-right" : "text-left"}`}
             >
               {amount}
             </button>
           ) : (
-            <div key={flow.key} className="min-w-0" data-cash-flow-direction={flow.key}>
+            <div key={flow.key} className={`min-w-0 ${alignEnd ? "text-right" : "text-left"}`} data-cash-flow-direction={flow.key}>
               {amount}
             </div>
           );
         })}
       </div>
-
-      {net ? <div className="mt-[12px]">{net}</div> : null}
-
-      <CashFlowBars className="mt-[16px]" incomeTotal={incomeTotal} spendingTotal={spendingTotal} />
     </section>
   );
 }

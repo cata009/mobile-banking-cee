@@ -1,6 +1,6 @@
 import CashFlowSummaryBars from "@/app/components/analytics/CashFlowSummaryBars";
 import NetCashflowBlock from "@/app/components/analytics/NetCashflowBlock";
-import { formatMoneyNumber } from "@/app/registry/countryConfig";
+import { formatEvo2027Number } from "@/app/utils/evo2027Formatting";
 import type { CountryId } from "@/app/state/demoTypes";
 import type { AccountTransactionMonthGroup } from "@/data/accountDetails";
 
@@ -14,7 +14,6 @@ interface AccountMonthlyReportProps {
 }
 
 export default function AccountMonthlyReport({
-  country,
   currency,
   group,
   onOpenSpending,
@@ -25,7 +24,7 @@ export default function AccountMonthlyReport({
   const year = group.monthTitle.split(" ")[1] ?? "";
   const displayMonthTitle = `${monthName.charAt(0)}${monthName.slice(1).toLowerCase()} ${year}`.trim();
   const reportTitle = `Total ${displayMonthTitle}`;
-  const absoluteMonthlyTotal = `${formatMoneyNumber(Math.abs(group.monthlyTotal), country)} ${currency}`;
+  const absoluteMonthlyTotal = `${formatEvo2027Number(Math.abs(group.monthlyTotal))} ${currency}`;
   const formattedMonthlyTotal = `${group.monthlyTotal >= 0 ? "+" : "−"}${absoluteMonthlyTotal}`;
   const { incomeTotal, spendingTotal } = group.transactions.reduce(
     (totals, transaction) => {
@@ -69,7 +68,6 @@ export default function AccountMonthlyReport({
         </div>
       )}
       <CashFlowSummaryBars
-        country={country}
         currency={currency}
         incomeTotal={incomeTotal}
         spendingTotal={spendingTotal}

@@ -26,6 +26,9 @@ export interface NetCashflowBlockProps {
  * The trend mark belongs to the label, so it sits on the label's centre line; the
  * amount and the sentence under it start at the same left edge as the mark rather
  * than indenting past it. One column, one edge.
+ *
+ * It leads the card now, so it draws no rule of its own: the two flow bars
+ * underneath separate it from the figures they belong to.
  */
 export default function NetCashflowBlock({
   netTotal,
@@ -47,7 +50,7 @@ export default function NetCashflowBlock({
       : t("runtime.evo.spending.noIncome");
 
   return (
-    <div className={`border-t border-[color-mix(in_srgb,var(--uc-text)_16%,transparent)] pt-[10px] ${className}`.trim()}>
+    <div className={className || undefined}>
       <div className="min-w-0" {...(dataAttribute ? { [dataAttribute]: true } : {})}>
         <div className="flex items-center gap-[8px]">
           <TrendBadge direction={netTotal >= 0 ? "up" : "down"} size={16} compact />
