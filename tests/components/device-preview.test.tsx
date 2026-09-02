@@ -38,7 +38,7 @@ describe('adaptive device preview', () => {
     renderPreview()
     const screenSurface = screen.getByTestId('device-preview-screen')
 
-    expect(screenSurface).toHaveStyle({ width: '430px', height: '932px' })
+    expect(screenSurface).toHaveStyle({ width: '393px', height: '852px' })
 
     expect(screen.queryByRole('combobox', { name: 'Preview device' })).not.toBeInTheDocument()
 

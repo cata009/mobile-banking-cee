@@ -21,7 +21,7 @@ import { AppIcon } from "@/app/components/icons";
 import PfmCategoryChangeSheet from "@/app/components/pfm/PfmCategoryChangeSheet";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useDemo } from "@/app/state/demoStore";
-import { getCountryConfig } from "@/app/registry/countryConfig";
+import { formatMoneyNumber, getCountryConfig } from "@/app/registry/countryConfig";
 import { formatEvo2027Number, formatEvo2027SignedNumber } from "@/app/utils/evo2027Formatting";
 import { EVO_SAVING_ACCOUNT_ANNUAL_RATE } from "@/app/config/evoCreditTerms";
 import { depositPresentation } from "@/app/screens/home/App2027TransformationHome";
@@ -606,7 +606,7 @@ export default function AccountDetailScreen({
           />
         </div>
 
-        <AccountActionBar items={accountActionItems} iconTreatment="bubble" />
+        <AccountActionBar items={accountActionItems} iconTreatment={usesEvoGroupCards ? "bubble" : "bare"} />
       </div>
 
         {activeProduct?.type !== "term_deposit" ? (
@@ -642,8 +642,9 @@ export default function AccountDetailScreen({
                         currency={activeCurrency}
                         displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
                         leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
-                        categoryIconVariant={release === "release-future-evo-2027" ? "category-circle" : "glyph"}
-                        positiveAmountClassName={release === "release-future-evo-2027" ? "text-[var(--uc-green-olive)]" : undefined}
+                        categoryIconVariant={usesEvoGroupCards ? "category-circle" : "glyph"}
+                        avatarPresentation={usesEvoGroupCards ? "identity" : "category"}
+                        positiveAmountClassName={usesEvoGroupCards ? "text-[var(--uc-green-olive)]" : undefined}
                         evo2027={usesEvoGroupCards}
                         showDate={!usesEvoGroupCards}
                         onClick={openTransaction}
@@ -655,19 +656,27 @@ export default function AccountDetailScreen({
               {transactionGroups.length > 0 ? (
                 transactionGroups.map((group, index) => (
                   <div key={group.monthTitle} className={index > 0 && !usesEvoGroupCards ? "pt-[16px]" : undefined}>
+                    {/* The baseline heads every month with its own divider and
+                        running total, and a completed month adds the report
+                        underneath it. Evo 2027 replaces the divider with the
+                        report card, and heads its days instead of its months. */}
+                    {!usesEvoGroupCards ? (
+                      <AccountTransactionMonthDivider
+                        title={group.monthTitle}
+                        total={formatMoneyNumber(group.monthlyTotal, country)}
+                        currency={activeCurrency}
+                      />
+                    ) : null}
+
                     {showCompletedMonthReports && group.monthKey !== currentMonthKey && group.transactions.every((transaction) => transaction.status === "Booked") ? (
                       <AccountMonthlyReport
+                        variant={usesEvoGroupCards ? "evo-2027" : "baseline"}
                         country={country}
                         currency={activeCurrency}
                         group={group}
                         onOpenSpending={onOpenSpending}
                         onOpenIncome={onOpenIncome}
                         onOpenExpenses={onOpenExpenses}
-                      />
-                    ) : group.monthKey !== currentMonthKey ? (
-                      <AccountTransactionMonthDivider
-                        title={group.monthTitle}
-                        currency={activeCurrency}
                       />
                     ) : null}
 
@@ -710,6 +719,7 @@ export default function AccountDetailScreen({
                           displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
                           leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
                           categoryIconVariant="glyph"
+                          avatarPresentation="category"
                           onClick={openTransaction}
                           onCategoryClick={onTransactionCategoryChange ? setCategorySheetTransaction : undefined}
                         />

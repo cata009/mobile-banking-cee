@@ -14,7 +14,7 @@ import {
 } from '@/app/components/ui/dropdown-menu';
 
 export type DevicePreviewProfileId =
-  | 'iphone-17-pro-max'
+  | 'iphone-16'
   | 'galaxy-fold8-closed'
   | 'galaxy-fold8-open'
   | 'apple-foldable-closed'
@@ -35,11 +35,11 @@ export interface DevicePreviewProfile {
 
 export const DEVICE_PREVIEW_PROFILES: readonly DevicePreviewProfile[] = [
   {
-    id: 'iphone-17-pro-max',
-    label: 'iPhone 17 Pro Max',
+    id: 'iphone-16',
+    label: 'iPhone 16',
     shortLabel: 'Phone',
-    width: 430,
-    height: 932,
+    width: 393,
+    height: 852,
     kind: 'phone',
     screenChrome: 'dynamic-island',
     supportsRotation: false,
@@ -106,7 +106,7 @@ interface DevicePreviewContextValue {
 const DevicePreviewContext = createContext<DevicePreviewContextValue | null>(null);
 
 export function DevicePreviewProvider({ children }: { children: ReactNode }) {
-  const [profileId, setProfileIdState] = useState<DevicePreviewProfileId>('iphone-17-pro-max');
+  const [profileId, setProfileIdState] = useState<DevicePreviewProfileId>('iphone-16');
   const [orientation, setOrientation] = useState<DevicePreviewOrientation>('portrait');
   const profile = DEVICE_PREVIEW_PROFILES.find((item) => item.id === profileId) ?? DEFAULT_DEVICE_PREVIEW_PROFILE;
 
@@ -136,10 +136,10 @@ export function useDevicePreview() {
   if (!value) {
     return {
       profile: DEFAULT_DEVICE_PREVIEW_PROFILE,
-      profileId: 'iphone-17-pro-max' as const,
+      profileId: 'iphone-16' as const,
       orientation: 'portrait' as const,
       canRotate: false,
-      viewport: { width: 430, height: 932 },
+      viewport: { width: 393, height: 852 },
       setProfileId: () => undefined,
       rotate: () => undefined,
     };

@@ -1,10 +1,26 @@
 /* App 2027 adaptive composition.
    Width assigns the two financial columns; height only tightens spatial rhythm.
-   Typography and interactive target sizes remain owned by the components. */
+   Typography and interactive target sizes remain owned by the components.
 
-@container home (min-width: 680px) {
-  /* Transformation is a self-contained tablet composition. It must span the
-     legacy Home grid before forming its own two-column reading rhythm. */
+   The width tiers are the Material 3 window size classes — compact (<600),
+   medium (600–839), expanded (>=840) — because that is where the foldables in
+   the device picker actually land: closed covers are compact, a rotated open
+   fold is medium, an open fold is expanded. Three behaviours, not a continuum. */
+
+/* ── Panes ────────────────────────────────────────────────────────────────
+   A tab panel declares which of its sections are the subject (the customer's
+   products) and which support them (activity, campaigns, offers). Below the
+   expanded class the panes are `display: contents`, so the sections stack in
+   document order exactly as they do on a phone and the wrappers cost nothing. */
+[data-home-pane] {
+  display: contents;
+}
+
+
+/* ── Medium (600–839): one column, held at a comfortable measure ───────────
+   A rotated open fold is tall but only ~630 wide: split it and you get two
+   columns too narrow for any of these cards. Cap the measure and centre it. */
+@container home (min-width: 600px) and (max-width: 839px) {
   [data-app-2027-layout] > [data-home-area="transformation"] {
     grid-area: auto;
     grid-column: 1 / -1;
@@ -12,41 +28,55 @@
   }
 
   [data-home-transformation] {
+    width: 100%;
+    max-width: 560px;
+    margin-inline: auto;
+  }
+}
+
+/* ── Expanded (>=840): a primary pane at the phone's measure, beside a
+      supporting pane ─────────────────────────────────────────────────────
+   Deliberately not two equal columns. Stretching a product card to half of
+   840px is what made this read as a blown-up phone screen; the products keep
+   the measure they were drawn at, and what supports them fills the rest. Two
+   real panes rather than one grid, so a tall accordion on the left never drags
+   the card beside it down a row. */
+@container home (min-width: 840px) {
+  [data-app-2027-layout] > [data-home-area="transformation"] {
+    grid-area: auto;
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  [data-home-transformation] > [role="tabpanel"] {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(300px, 372px) minmax(0, 1fr);
     align-items: start;
-    column-gap: 24px;
+    column-gap: 20px;
     row-gap: 24px;
   }
 
-  [data-home-transformation] > [data-home-area="product-categories"],
-  [data-home-transformation] > [data-home-transformation-summary] {
+  [data-home-transformation] > [role="tabpanel"] > [data-home-transformation-summary] {
     grid-column: 1 / -1;
   }
 
-  [data-home-transformation] > * {
+  [data-home-pane] {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
     min-width: 0;
-    margin: 0;
+  }
+
+  [data-home-pane="primary"] {
+    grid-column: 1;
+  }
+
+  [data-home-pane="supporting"] {
+    grid-column: 2;
   }
 
   [data-home-transformation-summary] {
     min-height: 176px;
-  }
-}
-
-/* A rotated open foldable has tablet height but phone-like reading width.
-   Keep its content vertical and fully scrollable rather than squeezing cards
-   into artificial columns. */
-@container home (min-width: 600px) and (max-width: 679px) {
-  [data-app-2027-layout] > [data-home-area="transformation"] {
-    grid-column: 1 / -1;
-    min-width: 0;
-  }
-
-  [data-home-transformation] {
-    width: 100%;
-    max-width: 580px;
-    margin-inline: auto;
   }
 }
 

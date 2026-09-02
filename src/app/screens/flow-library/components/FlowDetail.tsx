@@ -19,12 +19,14 @@ import type {
 import {
   captureFlowStepImages,
   exportFlowAsPdf,
-  exportFlowAsWord,
   type ExportOverview,
   type FlowExportStep,
 } from "../flowExport";
+import { buildFlowDocument, copyConfluenceDocument, downloadFlowDocx } from "../handoff";
 
 type DetailTab = "journey" | "spec" | "prototype";
+/** How a reviewer takes the flow away: print, Confluence paste, or Word/import. */
+type ExportKind = "pdf" | "confluence" | "word";
 type JourneyView = "focused" | "filmstrip";
 
 const TABS: Array<{ id: DetailTab; label: string }> = [
@@ -71,8 +73,9 @@ export default function FlowDetail({
   const [requestedScenarioId, setRequestedScenarioId] = useState(flow.defaultScenarioId);
   const [stepIndex, setStepIndex] = useState(0);
   const [journeyView, setJourneyView] = useState<JourneyView>("focused");
-  const [exportKind, setExportKind] = useState<"pdf" | "word" | null>(null);
+  const [exportKind, setExportKind] = useState<ExportKind | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const captureRef = useRef<HTMLDivElement>(null);
 
   const { scenario } = resolveScenario(flow, requestedScenarioId);
@@ -87,17 +90,44 @@ export default function FlowDetail({
     setStepIndex(0);
   };
 
-  const handleExport = async (kind: "pdf" | "word") => {
+  const exportMeta = () => ({
+    flowTitle: flow.title,
+    flowLabel: flow.label,
+    scenarioLabel: scenario.label,
+    scenarioDescription: scenario.description,
+    countryScope: flow.countryScope.join(", "),
+    status: flow.status.replace(/-/g, " "),
+    domain: flow.domain,
+    figmaFile: flow.figmaFile,
+    sourceUrl: flow.sourceUrl,
+  });
+
+  const handleExport = async (kind: ExportKind) => {
+    if (exportKind) return;
     const container = captureRef.current;
-    if (!container || exportKind) return;
-    if (steps.length === 0) {
-      setExportError("This scenario has no steps to export yet.");
-      return;
-    }
 
     setExportKind(kind);
     setExportError(null);
+    setCopied(false);
     try {
+      const overview = toExportOverview(flow);
+
+      // The clipboard route is text and tables only, so it skips the screen
+      // capture entirely — the paste lands in Confluence in well under a second.
+      if (kind === "confluence") {
+        const document = buildFlowDocument(exportMeta(), [], flow.overview.notes, overview, {
+          includeScreens: false,
+        });
+        await copyConfluenceDocument(document);
+        setCopied(true);
+        return;
+      }
+
+      if (!container) return;
+      if (steps.length === 0) {
+        setExportError("This scenario has no steps to export yet.");
+        return;
+      }
       const stepElements = Array.from(container.querySelectorAll<HTMLElement>("[data-flow-screen-capture]"));
       const exportSteps: FlowExportStep[] = steps.map((step) => ({
         title: step.title,
@@ -110,29 +140,14 @@ export default function FlowDetail({
         return;
       }
 
-      const meta = {
-        flowTitle: flow.title,
-        flowLabel: flow.label,
-        scenarioLabel: scenario.label,
-        scenarioDescription: scenario.description,
-        countryScope: flow.countryScope.join(", "),
-        status: flow.status.replace(/-/g, " "),
-        domain: flow.domain,
-        figmaFile: flow.figmaFile,
-        sourceUrl: flow.sourceUrl,
-      };
-      const overview = toExportOverview(flow);
-
+      const meta = exportMeta();
       if (kind === "pdf") {
         exportFlowAsPdf(meta, captured, flow.overview.notes, overview);
       } else {
-        exportFlowAsWord(
-          meta,
-          captured,
-          flow.overview.notes,
-          `flow-${slugify(flow.title)}-${slugify(scenario.label)}.doc`,
-          overview,
-        );
+        const document = buildFlowDocument(meta, captured, flow.overview.notes, overview, {
+          includeScreens: true,
+        });
+        downloadFlowDocx(document, `flow-${slugify(flow.title)}-${slugify(scenario.label)}.docx`);
       }
     } catch (error) {
       setExportError(error instanceof Error ? error.message : "Export failed. Try again.");
@@ -140,6 +155,13 @@ export default function FlowDetail({
       setExportKind(null);
     }
   };
+
+  // Let the "Copied" confirmation fade on its own; a stuck badge reads as state.
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 6000);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
 
   return (
     <div className="flex flex-col gap-[24px]">
@@ -156,6 +178,7 @@ export default function FlowDetail({
         flow={flow}
         exportKind={exportKind}
         exportError={exportError}
+        copied={copied}
         onExport={handleExport}
       />
 
@@ -230,12 +253,14 @@ function FlowHeader({
   flow,
   exportKind,
   exportError,
+  copied,
   onExport,
 }: {
   flow: FlowDefinition;
-  exportKind: "pdf" | "word" | null;
+  exportKind: ExportKind | null;
   exportError: string | null;
-  onExport: (kind: "pdf" | "word") => void;
+  copied: boolean;
+  onExport: (kind: ExportKind) => void;
 }) {
   return (
     <header data-testid="flow-detail-header" className="rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[24px] shadow-sm">
@@ -260,7 +285,18 @@ function FlowHeader({
             </a>
             <ExportButton kind="pdf" busy={exportKind === "pdf"} disabled={exportKind !== null} onClick={() => onExport("pdf")} testId="flow-export-pdf" />
             <ExportButton kind="word" busy={exportKind === "word"} disabled={exportKind !== null} onClick={() => onExport("word")} testId="flow-export-word" />
+            <ConfluenceCopyButton
+              busy={exportKind === "confluence"}
+              disabled={exportKind !== null}
+              copied={copied}
+              onClick={() => onExport("confluence")}
+            />
           </div>
+          {copied ? (
+            <p role="status" className="max-w-[300px] text-right uc-type-n5 text-[var(--uc-green-status)]">
+              Specification copied. Paste into a Confluence page with Ctrl+V.
+            </p>
+          ) : null}
           {exportError ? (
             <p role="alert" className="max-w-[280px] text-right uc-type-n5 text-[var(--uc-red-main)]">
               {exportError}
@@ -285,7 +321,10 @@ function ExportButton({
   onClick: () => void;
   testId: string;
 }) {
-  const label = kind === "pdf" ? "Export flow as PDF" : "Export flow as Word";
+  const label =
+    kind === "pdf"
+      ? "Export flow as PDF"
+      : "Download .docx (screens included) — Confluence: Tools > Import Word Document";
   return (
     <button
       type="button"
@@ -303,6 +342,67 @@ function ExportButton({
     >
       <DesktopDocumentIcon kind={kind} />
     </button>
+  );
+}
+
+/**
+ * The fast path out of the library: the specification as rich HTML on the
+ * clipboard, which Confluence turns into native headings and tables on paste.
+ * Labelled rather than iconified because it is the one a reviewer reaches for.
+ */
+function ConfluenceCopyButton({
+  busy,
+  disabled,
+  copied,
+  onClick,
+}: {
+  busy: boolean;
+  disabled: boolean;
+  copied: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      data-testid="flow-export-confluence"
+      aria-busy={busy || undefined}
+      title="Copy the specification for Confluence — paste it into a page with Ctrl+V"
+      data-flow-document-action="confluence"
+      className={`inline-flex h-[40px] items-center gap-[8px] rounded-[10px] border px-[14px] uc-type-n5-strong shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+        copied
+          ? "border-[var(--uc-green-status)] bg-[var(--uc-surface)] text-[var(--uc-green-status)]"
+          : "border-[var(--uc-border)] bg-[var(--uc-surface-muted)] text-[var(--uc-text)] hover:border-[#1868DB] hover:bg-[var(--uc-surface)]"
+      }`}
+    >
+      <ConfluenceIcon copied={copied} />
+      {copied ? "Copied" : busy ? "Copying…" : "Copy for Confluence"}
+    </button>
+  );
+}
+
+function ConfluenceIcon({ copied }: { copied: boolean }) {
+  if (copied) {
+    return (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+        <path d="M3.5 9.5 7 13l7.5-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  return (
+    <svg data-testid="flow-document-icon-confluence" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M2.3 17.1c-.3.5-.1 1.1.4 1.4l4.6 2.8c.5.3 1.2.1 1.5-.4.9-1.5 1.6-2.3 3-2.3 1 0 2 .3 3.9 1.2l4.5 2.1c.5.2 1.1 0 1.4-.5l2.2-5c.2-.5 0-1.1-.5-1.3-1-.5-2.9-1.4-4.6-2.2-2.5-1.2-4.6-1.8-6.5-1.8-3.3 0-6.1 1.6-7.9 4.6l-2 3.4Z"
+        fill="#2681FF"
+        transform="translate(-1 -1)"
+      />
+      <path
+        d="M21.7 6.9c.3-.5.1-1.1-.4-1.4L16.7 2.7c-.5-.3-1.2-.1-1.5.4-.9 1.5-1.6 2.3-3 2.3-1 0-2-.3-3.9-1.2L3.8 2.1c-.5-.2-1.1 0-1.4.5L.2 7.6c-.2.5 0 1.1.5 1.3 1 .5 2.9 1.4 4.6 2.2 2.5 1.2 4.6 1.8 6.5 1.8 3.3 0 6.1-1.6 7.9-4.6l2-1.4Z"
+        fill="#0052CC"
+        transform="translate(1 3)"
+      />
+    </svg>
   );
 }
 

@@ -66,7 +66,8 @@ export default function ShopsmartCategoryChips({
             {...(chipDataAttribute ? { [chipDataAttribute]: category.id } : {})}
             aria-pressed={active}
             onClick={() => onSelect(category.id)}
-            className={`flex h-[36px] shrink-0 items-center justify-center rounded-[4px] border px-[16px] text-[14px] font-bold uppercase leading-[18px] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${
+            /* Figma box: 12px on the sides, 8px above and below the 18px line. */
+            className={`flex shrink-0 items-center justify-center rounded-[4px] border px-[12px] py-[8px] text-[14px] font-bold uppercase leading-[18px] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${
               active
                 ? "border-[var(--uc-action-strong)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
                 : "border-transparent bg-[var(--uc-surface)] text-[var(--uc-text-muted)]"

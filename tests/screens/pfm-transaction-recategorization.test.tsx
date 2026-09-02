@@ -66,23 +66,13 @@ describe('PFM transaction recategorization entry points', () => {
 
     expect(current.container.querySelectorAll('[data-monthly-account-report]')).not.toHaveLength(0)
     const decemberReport = current.container.querySelector<HTMLElement>('[data-monthly-account-report="2025-12"]')
-    expect(decemberReport).toHaveTextContent(/Total December 2025/i)
-    expect(decemberReport).toHaveTextContent(/4\.399,84\s*CZK/)
-    // The Spending card's own treatment, at account level: the month named in the
-    // brand colour and uppercase, and the signed total moved under the two flows
-    // as a Net cashflow block rather than floating under the title.
-    expect(decemberReport?.querySelector('h3')).toHaveClass('uppercase', 'text-[var(--uc-action)]')
-    expect(decemberReport).toHaveClass('rounded-[8px]', 'bg-[var(--uc-surface)]')
-    expect(decemberReport?.querySelector('[data-monthly-report-total]')).toHaveTextContent(/Net cashflow/i)
-    expect(decemberReport?.querySelector('[data-monthly-report-total]')).toHaveTextContent(/[-+]\s*.*CZK/)
-    expect(decemberReport?.querySelector('[data-ds-label="AccountTransactionMonthDivider"]')).not.toBeInTheDocument()
-    expect(decemberReport?.previousElementSibling).toBeNull()
-    expect(decemberReport).not.toHaveClass('border-b')
-    // The report draws the same in/out bar pair the Evo spending card uses, not the old 160px column chart.
-    const cashFlow = decemberReport?.querySelector('[data-monthly-cash-flow-chart]')
-    expect(cashFlow).not.toHaveClass('h-[160px]')
-    expect(cashFlow?.querySelector('[data-cash-flow-bars]')).toBeInTheDocument()
-    expect(cashFlow?.querySelector('[data-cash-flow-bar="in"] > span')).toHaveStyle({ backgroundColor: 'var(--uc-green-success)' })
+    // The baseline keeps its original report — a plain heading over the two-bar
+    // chart. The Spending-card treatment below belongs to Evo 2027 alone.
+    expect(decemberReport).toHaveTextContent(/Monthly report/i)
+    expect(decemberReport).not.toHaveTextContent(/Net cashflow/i)
+    expect(decemberReport).not.toHaveClass('rounded-[8px]', 'bg-[var(--uc-surface)]')
+    expect(decemberReport?.querySelector('[data-cash-flow-bars]')).not.toBeInTheDocument()
+    expect(decemberReport?.querySelector('[data-monthly-cash-flow-chart]')).toHaveClass('h-[172px]')
     expect(decemberReport?.querySelector('[data-cash-flow-total="inflow"]')).toHaveTextContent('4.399,84 CZK')
     fireEvent.click(decemberReport?.querySelector('[data-monthly-report-open]') as HTMLElement)
     fireEvent.click(decemberReport?.querySelector('[data-cash-flow-direction="income"]') as HTMLElement)
@@ -103,6 +93,32 @@ describe('PFM transaction recategorization entry points', () => {
     )
 
     expect(saving.container.querySelectorAll('[data-monthly-account-report]')).toHaveLength(0)
+    saving.unmount()
+
+    // Evo 2027 keeps the Spending-card treatment: the month named in the brand
+    // colour and uppercase, with the signed total under the two flows.
+    const evo = render(
+      <AccountDetailScreen
+        selectedProductId="acc-1"
+        onBack={() => undefined}
+        onDetailsClick={() => undefined}
+        onOptionsClick={() => undefined}
+        onOpenSpending={() => undefined}
+      />,
+      {
+        wrapper: ({ children }) => (
+          <DemoProvider initialState={{ country: 'RO', release: 'release-future-evo-2027' }}>
+            <LanguageProvider initialLanguage="en">{children}</LanguageProvider>
+          </DemoProvider>
+        ),
+      },
+    )
+    const evoReport = evo.container.querySelector<HTMLElement>('[data-monthly-account-report="2025-12"]')
+    expect(evoReport).toHaveTextContent(/Total December 2025/i)
+    expect(evoReport?.querySelector('h3')).toHaveClass('uppercase', 'text-[var(--uc-action)]')
+    expect(evoReport).toHaveClass('rounded-[8px]', 'bg-[var(--uc-surface)]')
+    expect(evoReport?.querySelector('[data-monthly-report-total]')).toHaveTextContent(/Net cashflow/i)
+    expect(evoReport?.querySelector('[data-cash-flow-bars]')).toBeInTheDocument()
   })
 
   it('opens the category sheet from a list icon without invoking transaction navigation', () => {

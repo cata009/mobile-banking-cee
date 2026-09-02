@@ -19,6 +19,8 @@ interface PfmCategoryIconProps {
 }
 
 const ICON_GLYPH_SIZE = 20;
+/** How much of its box a bare glyph occupies: 24px inside the 32px list mark. */
+const BARE_GLYPH_BOX_RATIO = 0.75;
 const DEFAULT_ICON_VIEW_BOX = "0 0 20 20";
 
 /**
@@ -203,6 +205,22 @@ const PFM_CATEGORY_ICONS: Partial<Record<PfmCategoryName, PfmIconPath[]>> = {
   ],
 };
 
+/**
+ * A few marks are drawn in Figma as a filled disc with the glyph knocked out of
+ * it rather than as a bare shape. That artwork is only correct for the bare
+ * `glyph` variant — `category-circle` draws its own roundel behind a white
+ * glyph, and a disc there would fill the roundel solid.
+ */
+const PFM_ICON_GLYPH_PATHS: Partial<Record<PfmCategoryName, PfmIconPath[]>> = {
+  Transfers: [
+    {
+      fillRule: "evenodd",
+      clipRule: "evenodd",
+      d: "M16.4844 13.75H10.1137L11.2562 14.8925C11.7444 15.3806 11.7444 16.1719 11.2562 16.66L7.72125 13.125L11.2562 9.58938C11.7444 10.0781 11.7444 10.8694 11.2562 11.3575L10.1137 12.5H16.4844V13.75ZM7.27187 10.41L3.73688 6.875L7.27187 3.33938C7.76 3.82812 7.76 4.61938 7.27187 5.1075L6.12937 6.25H12.5V7.5H6.12937L7.27187 8.6425C7.76 9.13062 7.76 9.92188 7.27187 10.41ZM10 0C4.4775 0 0 4.4775 0 10C0 15.5231 4.4775 20 10 20C15.5231 20 20 15.5231 20 10C20 4.4775 15.5231 0 10 0Z",
+    },
+  ],
+};
+
 export default function PfmCategoryIcon({
   category,
   size = 32,
@@ -211,10 +229,20 @@ export default function PfmCategoryIcon({
   variant = "glyph",
 }: PfmCategoryIconProps) {
   const definition = getPfmCategory(category);
-  const paths = PFM_CATEGORY_ICONS[definition.name];
-  const viewBox = PFM_ICON_VIEW_BOXES[definition.name] ?? DEFAULT_ICON_VIEW_BOX;
-  const glyphSize = PFM_ICON_OPTICAL_SIZES[definition.name] ?? ICON_GLYPH_SIZE;
   const isCategoryCircle = variant === "category-circle";
+  const paths =
+    (isCategoryCircle ? undefined : PFM_ICON_GLYPH_PATHS[definition.name]) ??
+    PFM_CATEGORY_ICONS[definition.name];
+  const viewBox = PFM_ICON_VIEW_BOXES[definition.name] ?? DEFAULT_ICON_VIEW_BOX;
+  const opticalSize = PFM_ICON_OPTICAL_SIZES[definition.name] ?? ICON_GLYPH_SIZE;
+  // A circled icon needs the roundel's padding, so its glyph stays at the drawn
+  // 20px. A bare glyph has no roundel to sit inside, so it takes three quarters
+  // of its box — the 20-in-32 it used to draw read as a speck, and filling the
+  // box edge to edge made it loom over the row. The optical corrections keep
+  // their ratio to the box either way.
+  const glyphSize = isCategoryCircle
+    ? opticalSize
+    : Math.round((opticalSize / ICON_GLYPH_SIZE) * size * BARE_GLYPH_BOX_RATIO);
   const glyphColor = isCategoryCircle ? "var(--uc-static-white)" : (color ?? `var(${definition.colorVar})`);
 
   if (paths) {

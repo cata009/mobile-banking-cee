@@ -942,6 +942,27 @@ export default function App2027TransformationHome({
   const [uncontrolledTab, setUncontrolledTab] = useState<TransformationTab>('accounts');
   const activeTab = controlledTab ?? uncontrolledTab;
   const tabRefs = useRef<Partial<Record<TransformationTab, HTMLButtonElement | null>>>({});
+  const tabRailRef = useRef<HTMLDivElement>(null);
+  const { dragHandlers: tabDragHandlers, isDragging: isTabRailDragging } = useDragCarousel({
+    carouselRef: tabRailRef,
+  });
+
+  // Selecting a tab off-screen — by keyboard, or from a deep link — has to bring
+  // it into the rail, or the row would sit on a selection nobody can see.
+  useEffect(() => {
+    const rail = tabRailRef.current;
+    const tab = tabRefs.current[activeTab];
+    if (!rail || !tab) return;
+
+    const overflowLeft = tab.offsetLeft - rail.scrollLeft;
+    const overflowRight = tab.offsetLeft + tab.offsetWidth - (rail.scrollLeft + rail.clientWidth);
+    if (overflowLeft >= 0 && overflowRight <= 0) return;
+
+    rail.scrollTo({
+      left: overflowLeft < 0 ? tab.offsetLeft : tab.offsetLeft + tab.offsetWidth - rail.clientWidth,
+      behavior: 'smooth',
+    });
+  }, [activeTab]);
 
   const selectTab = useCallback((tab: TransformationTab) => {
     setUncontrolledTab(tab);
@@ -1076,15 +1097,19 @@ export default function App2027TransformationHome({
     <div data-home-transformation data-home-area="transformation" className="flex min-w-0 flex-col gap-[28px]">
       <section data-home-area="product-categories" className="relative min-w-0">
         {/*
-          The row overflowed its container at 375px even in English, with
-          `scrollbar-hide` and no fade — so the fourth tab was cut off and nothing
-          said it existed. It wraps now, which is also what a 40%-longer
-          translation needs.
+          One line that scrolls, never a second row: the categories are a rail you
+          push through, so the row keeps a fixed height whatever the translation
+          costs. The fade on the trailing edge is what says there is more — the
+          reason this wrapped before was a cut-off fourth tab with nothing to
+          announce it.
         */}
         <div
+          ref={tabRailRef}
           role="tablist"
           aria-label={t('runtime.evo.tabs.ariaLabel')}
-          className="flex flex-wrap gap-[5px]"
+          {...tabDragHandlers}
+          className={`flex gap-[5px] overflow-x-auto overscroll-x-contain scrollbar-hide select-none pr-[24px] ${isTabRailDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+          style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
         >
           {TAB_ORDER.map((tab) => {
             const active = activeTab === tab;
@@ -1099,6 +1124,10 @@ export default function App2027TransformationHome({
                 aria-controls={panelId}
                 tabIndex={active ? 0 : -1}
                 onKeyDown={onTabKeyDown}
+                /* The drag starts from the pill as well as the rail: the pills
+                   leave almost no bare rail to grab, and capturing on the pill
+                   is what keeps a tap on it a tap rather than a swallowed click. */
+                {...tabDragHandlers}
                 onClick={() => selectTab(tab)}
                 /* Selected is the only state that carries weight, here and on the
                    chips below: a filled pill against plain muted labels. */
@@ -1112,6 +1141,10 @@ export default function App2027TransformationHome({
             );
           })}
         </div>
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 right-0 w-[32px] bg-gradient-to-l from-[var(--uc-app-bg)] to-transparent"
+        />
       </section>
 
       <div
@@ -1131,12 +1164,16 @@ export default function App2027TransformationHome({
           onOpen={weekSpending && onSpendingClick ? () => onSpendingClick() : undefined}
           openLabel={t('runtime.evo.summary.openSpending')}
         />
-        {!accounts.length ? <Group title={t('runtime.evo.groups.accounts')} expandable={false}><EmptyProducts title={t('runtime.evo.empty.accountTitle')} description={t('runtime.evo.empty.accountBody')} onClick={onProductsClick} /></Group> : null}
-        {!debitCards.length ? <Group title={t('runtime.evo.groups.cards')} expandable={false}><EmptyProducts title={t('runtime.evo.empty.cardsTitle')} description={t('runtime.evo.empty.cardsBody')} onClick={onProductsClick} /></Group> : null}
-        <App2027ProductAccordions categories={debitCardCategories} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} calculateGroupTotal={calculateTotal} getProductDisplayNumber={getProductDisplayNumber} onProductClick={onProductClick} useCzRoboAccountCards onDomesticPaymentClick={onDomesticPaymentClick} onPaymentsClick={onPaymentsClick} onAccountInfoClick={onAccountInfoClick} onCardDetailsClick={onCardDetailsClick} onCardOptionsClick={onCardOptionsClick} visibleKeys={['accounts', 'cards']} initialOpenKeys={{ accounts: true, cards: true }} />
-        {accounts.length ? <App2027Activity country={country} currency={calculateTotal(accounts).currency} amountsHidden={amountsHidden} compact homeArea={false} onTransactionOpen={onTransactionOpen} onSeeMore={onSeeAllTransactions ?? (() => { const firstAccount = accounts[0]; if (firstAccount) onProductClick(firstAccount); })} /> : null}
-        <InterestCarousel tab="accounts" onOfferOpen={onOfferOpen} />
-        <ShopSmart country={country} onProductsClick={onProductsClick} />
+        <div data-home-pane="primary">
+          {!accounts.length ? <Group title={t('runtime.evo.groups.accounts')} expandable={false}><EmptyProducts title={t('runtime.evo.empty.accountTitle')} description={t('runtime.evo.empty.accountBody')} onClick={onProductsClick} /></Group> : null}
+          {!debitCards.length ? <Group title={t('runtime.evo.groups.cards')} expandable={false}><EmptyProducts title={t('runtime.evo.empty.cardsTitle')} description={t('runtime.evo.empty.cardsBody')} onClick={onProductsClick} /></Group> : null}
+          <App2027ProductAccordions categories={debitCardCategories} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} calculateGroupTotal={calculateTotal} getProductDisplayNumber={getProductDisplayNumber} onProductClick={onProductClick} useCzRoboAccountCards onDomesticPaymentClick={onDomesticPaymentClick} onPaymentsClick={onPaymentsClick} onAccountInfoClick={onAccountInfoClick} onCardDetailsClick={onCardDetailsClick} onCardOptionsClick={onCardOptionsClick} visibleKeys={['accounts', 'cards']} initialOpenKeys={{ accounts: true, cards: true }} />
+        </div>
+        <div data-home-pane="supporting">
+          {accounts.length ? <App2027Activity country={country} currency={calculateTotal(accounts).currency} amountsHidden={amountsHidden} compact homeArea={false} onTransactionOpen={onTransactionOpen} onSeeMore={onSeeAllTransactions ?? (() => { const firstAccount = accounts[0]; if (firstAccount) onProductClick(firstAccount); })} /> : null}
+          <InterestCarousel tab="accounts" onOfferOpen={onOfferOpen} />
+          <ShopSmart country={country} onProductsClick={onProductsClick} />
+        </div>
       </> : null}
 
       {activeTab === 'savings' ? <>
@@ -1149,12 +1186,16 @@ export default function App2027TransformationHome({
           secondaryLabel={t('runtime.evo.summary.interestEarned')}
           secondaryValue={interestEarned}
         />
+        <div data-home-pane="primary">
         <Group title={t('runtime.evo.groups.investmentPortfolios')} expandable={investments.length > 1} itemCount={investments.length}>{investments.length ? investments.map((product) => <CompactProductCard key={product.id} product={product} amount={formatProductAmount(product)} amountsHidden={amountsHidden} performance={portfolioPerformance} onClick={() => onProductClick(product)} />) : <EmptyProducts title={t('runtime.evo.empty.investTitle')} description={t('runtime.evo.empty.investBody')} onClick={onProductsClick} />}</Group>
         <Group title={t('runtime.evo.groups.savingAccounts')} expandable={savings.length > 1} itemCount={savings.length}>{savings.length ? <div data-home-compact-product-list="saving_account" className="overflow-hidden rounded-[8px] shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)]">{savings.map((product, index) => <CompactProductCard key={product.id} product={product} amount={formatProductAmount(product)} amountsHidden={amountsHidden} subtitle={`${(EVO_SAVING_ACCOUNT_ANNUAL_RATE * 100).toFixed(1)}% ${t('runtime.evo.labels.interestRate')}`} onClick={() => onProductClick(product)} stackRole={savings.length === 1 ? 'single' : index === 0 ? 'first' : index === savings.length - 1 ? 'last' : 'middle'} />)}</div> : <EmptyProducts title={t('runtime.evo.empty.savingsTitle')} description={t('runtime.evo.empty.savingsBody')} onClick={onProductsClick} />}</Group>
         <Group title={t('runtime.evo.groups.deposits')} defaultOpen={deposits.length <= 1} expandable={deposits.length > 1} itemCount={deposits.length} preview={deposits.length > 1 ? <DepositList deposits={deposits} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} onProductClick={onProductClick} collapsed /> : undefined}>
           {deposits.length ? <DepositList deposits={deposits} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} onProductClick={onProductClick} total={deposits.length > 1 ? depositsSubtotal : undefined} /> : <EmptyProducts title={t('runtime.evo.empty.depositsTitle')} description={t('runtime.evo.empty.depositsBody')} onClick={onProductsClick} />}
         </Group>
-        <InterestCarousel tab="savings" onOfferOpen={onOfferOpen} />
+        </div>
+        <div data-home-pane="supporting">
+          <InterestCarousel tab="savings" onOfferOpen={onOfferOpen} />
+        </div>
       </> : null}
 
       {activeTab === 'credits' ? <>
@@ -1165,6 +1206,7 @@ export default function App2027TransformationHome({
           secondaryLabel={t('runtime.evo.summary.dueThisMonth')}
           secondaryValue={dueThisMonth}
         />
+        <div data-home-pane="primary">
         {creditCards.length ? <App2027ProductAccordions categories={creditCategories} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} calculateGroupTotal={calculateTotal} getProductDisplayNumber={getProductDisplayNumber} onProductClick={onProductClick} onCardDetailsClick={onCardDetailsClick} onCardOptionsClick={onCardOptionsClick} useCzRoboAccountCards visibleKeys={['cards']} initialOpenKeys={{ cards: true }} titleOverrides={{ cards: t('runtime.evo.groups.creditCards') }} /> : <Group title={t('runtime.evo.groups.creditCards')} expandable={false}><EmptyProducts title={t('runtime.evo.empty.creditCardTitle')} description={t('runtime.evo.empty.creditCardBody')} onClick={onProductsClick} /></Group>}
         <Group title={t('runtime.evo.groups.loans')} defaultOpen={loans.length <= 1} expandable={loans.length > 1} itemCount={loans.length} preview={loans.length > 1 ? <LoanList loans={loans} amountsHidden={amountsHidden} onProductClick={onProductClick} collapsed /> : undefined}>
           {loans.length ? <LoanList loans={loans} amountsHidden={amountsHidden} onProductClick={onProductClick} /> : <EmptyProducts title={t('runtime.evo.empty.loanTitle')} description={t('runtime.evo.empty.loanBody')} onClick={onProductsClick} />}
@@ -1172,7 +1214,10 @@ export default function App2027TransformationHome({
         <Group title={t('runtime.evo.groups.mortgages')} defaultOpen={mortgages.length <= 1} expandable={mortgages.length > 1} itemCount={mortgages.length} preview={mortgages.length > 1 ? <LoanList loans={mortgages} amountsHidden={amountsHidden} onProductClick={onProductClick} collapsed /> : undefined}>
           {mortgages.length ? <LoanList loans={mortgages} amountsHidden={amountsHidden} onProductClick={onProductClick} /> : <EmptyProducts title={t('runtime.evo.empty.mortgageTitle')} description={t('runtime.evo.empty.mortgageBody')} onClick={onProductsClick} />}
         </Group>
-        <InterestCarousel tab="credits" onOfferOpen={onOfferOpen} />
+        </div>
+        <div data-home-pane="supporting">
+          <InterestCarousel tab="credits" onOfferOpen={onOfferOpen} />
+        </div>
       </> : null}
 
       {activeTab === 'insurance' ? <>
@@ -1185,6 +1230,7 @@ export default function App2027TransformationHome({
         />
         {/* The stacked model the accounts, deposits and loans groups use: one
             policy on top of the rest, and the header says how many are under it. */}
+        <div data-home-pane="primary">
         <Group
           title={t('runtime.evo.groups.insurance')}
           defaultOpen={activePolicyCount <= 1}
@@ -1196,7 +1242,10 @@ export default function App2027TransformationHome({
         >
           <InsurancePolicyList onClick={onOfferOpen} amountsHidden={amountsHidden} />
         </Group>
-        <InterestCarousel tab="insurance" onOfferOpen={onOfferOpen} />
+        </div>
+        <div data-home-pane="supporting">
+          <InterestCarousel tab="insurance" onOfferOpen={onOfferOpen} />
+        </div>
       </> : null}
       </div>
     </div>
