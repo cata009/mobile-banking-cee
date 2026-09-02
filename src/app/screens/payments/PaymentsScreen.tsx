@@ -6,6 +6,7 @@ import NewPaymentActionListItem from '@/app/components/payments/NewPaymentAction
 import NewPaymentDiscoverBanner from '@/app/components/payments/NewPaymentDiscoverBanner'
 import PaymentHeroCard from '@/app/components/payments/PaymentHeroCard'
 import PaymentOtherShortcut from '@/app/components/payments/PaymentOtherShortcut'
+import SectionHeadingDivider from '@/app/components/SectionHeadingDivider'
 import ExchangeRatesScreen from '@/app/screens/payments/ExchangeRatesScreen'
 import InternalTransferScreen from '@/app/screens/payments/InternalTransferScreen'
 import PaymentTemplatesScreen from '@/app/screens/payments/PaymentTemplatesScreen'
@@ -175,6 +176,7 @@ export default function PaymentsScreen({
   const disabledActionReasons = new Map(
     effectiveContext.disabledActions.map((disabledAction) => [disabledAction.action, disabledAction.reason]),
   )
+  const isEvo2027 = demoState.release === 'release-future-evo-2027'
   const menu = getPaymentsMenuForCountry(country)
   const localizedPrimaryItems = menu.primaryItems.map((item) => {
     const translationKey = item.translationKey === undefined ? item.id : item.translationKey
@@ -285,12 +287,22 @@ export default function PaymentsScreen({
         </div>
 
         <section className="px-[20px] pt-[16px]">
-          {/* Same group heading as the home product sections — a 24px title, no rule. */}
-          <h2 className="uc-type-l1 mb-[12px] text-[var(--uc-text)]">{otherTitle}</h2>
-          <div className="overflow-x-auto overflow-y-hidden scrollbar-hide">
+          {/* Evo 2027 gave this the home sections' 24px title; the baseline app
+              keeps the rule-and-caption divider it always had. */}
+          {isEvo2027 ? (
+            <h2 className="uc-type-l1 mb-[12px] text-[var(--uc-text)]">{otherTitle}</h2>
+          ) : (
+            <SectionHeadingDivider title={otherTitle} />
+          )}
+          <div className={`overflow-x-auto overflow-y-hidden scrollbar-hide ${isEvo2027 ? '' : 'pt-[8px]'}`}>
             <div className="flex w-max gap-[18px] pr-[20px]">
               {localizedOtherItems.map((item) => (
-                <PaymentOtherShortcut key={item.id} item={item} onClick={handleOtherPaymentActionClick} />
+                <PaymentOtherShortcut
+                  key={item.id}
+                  item={item}
+                  treatment={isEvo2027 ? 'evo-2027' : 'baseline'}
+                  onClick={handleOtherPaymentActionClick}
+                />
               ))}
             </div>
           </div>

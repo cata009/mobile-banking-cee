@@ -22,6 +22,141 @@ export const ROUND_UP_FLOW: FlowDefinition = {
       "Make saving invisible and repeatable: every qualifying card payment can trigger a small automatic transfer equal to the rounding difference, so the customer saves without manually moving money. The purchase itself is never changed — only an additional saving transfer is created.",
     scopeNote:
       "Scoped to Romania (PI). This is a Flow Library preview, not baseline: backend integration is mocked and the flow is not yet promoted into the live demo or baseline ledger.",
+    businessAnalysis: {
+      generalInformation: [
+        { label: "Business outcome", value: "Turn eligible card payments into a repeatable savings habit without changing the purchase itself." },
+        { label: "Customer scope", value: "Romanian retail customers with an eligible current account and an eligible savings destination, or a need to open one." },
+        { label: "Markets", value: "RO only. The currency, account eligibility and customer copy are Romania-specific in this preview." },
+        { label: "Boundary", value: "Create, manage and deactivate the Round Up configuration; transfer execution and operational recovery remain outside this demo." },
+        { label: "Demo boundary", value: "Deterministic Flow Library prototype. No live balances, card transactions, transfer execution or production eligibility service is used." },
+      ],
+      versionContext:
+        "Demo BA v1.0 · 1 September 2026. Aligned with the existing Round Up journey, account-opening branch, standard signing pattern and management states. Service contracts, credentials and live ledger data remain outside this UI specification.",
+      versionHistory: [
+        { version: "1.0", date: "1 September 2026", detail: "Added the complete BA document for Round Up across discovery, setup, management and deactivation." },
+      ],
+      openIssues: [
+        {
+          reference: "BA-01",
+          status: "Open",
+          title: "Eligibility and account matrix",
+          detail: "Confirm which source account types, destination savings products and card transaction types qualify in production, including joint and blocked accounts.",
+        },
+        {
+          reference: "BA-02",
+          status: "Open",
+          title: "Rounding and currency rules",
+          detail: "Confirm multi-currency behaviour and whether the optional boost is applied before or after the rounding threshold for boundary amounts.",
+        },
+        {
+          reference: "BA-03",
+          status: "Open",
+          title: "Transfer failure and recovery",
+          detail: "Define what the customer sees when a qualifying payment cannot create its saving transfer, and whether retries, limits or a temporary pause are needed.",
+        },
+      ],
+      requirements: [
+        {
+          title: "Automatic saving",
+          description: "Make the saving mechanism understandable while keeping the original card purchase unchanged.",
+          items: [
+            "For each qualifying card payment, calculate and present the difference to the configured next 5 RON or next 10 RON threshold, plus any configured boost.",
+            "Create the additional saving transfer only for eligible card transactions; never alter the purchase amount, merchant data or available balance semantics of the original payment.",
+            "Explain where the difference is taken from, where it is saved and when the customer should expect to see it.",
+          ],
+        },
+        {
+          title: "Configuration and consent",
+          description: "Collect the accounts, saving option and acknowledgement needed to activate the feature.",
+          items: [
+            "Require a usable current account, a destination savings account and a selected rounding threshold before activation.",
+            "If no eligible savings account exists, guide the customer through the account-opening branch and continue into Round Up only after the account step succeeds.",
+            "Keep the terms acknowledgement explicit and make preselected account values clearly changeable when more than one option exists.",
+          ],
+        },
+        {
+          title: "Control and transparency",
+          description: "The customer must be able to understand, change or stop the feature without losing account context.",
+          items: [
+            "Show the active source account, savings account, threshold and boost in Manage Round Up, with Save Changes enabled only after a real change.",
+            "Keep deactivation separate from editing and ask for confirmation before automatic saving stops.",
+            "Use the standard review and signing pattern for create, update and deactivate actions because each changes a financial configuration.",
+          ],
+        },
+      ],
+      currentStatus: [
+        {
+          title: "Existing Mobile Banking surfaces",
+          items: [
+            "The current product and account compositions already provide the likely discovery surfaces: Home, Saving and investing products, and account actions.",
+            "The standard signing pattern and account lists are reused; this flow does not introduce a separate authorization or account-detail model.",
+          ],
+        },
+        {
+          title: "Prototype boundary",
+          items: [
+            "The Flow Library models account selection, terms, setup, signing, success and deactivation locally so stakeholders can review the complete journey.",
+            "No live transfer, eligibility decision, balance reservation, failure retry or persistent Round Up configuration is executed by this preview.",
+          ],
+        },
+      ],
+      proposedSolution: [
+        {
+          title: "Discover and explain",
+          items: [
+            "Expose Round Up from Home, Saving and investing products, and relevant account actions with entry copy that matches the customer's intent.",
+            "Use the info page to explain next-5/next-10 rounding, optional boost and the fact that the original purchase remains unchanged before asking the customer to set up.",
+          ],
+        },
+        {
+          title: "Choose the saving route",
+          items: [
+            "With an eligible savings account, open the setup form with source and destination choices available.",
+            "Without one, open the savings-account step first, require a fundable support account and both mandatory conditions, then continue after standard signing.",
+            "Do not silently choose an account when the customer has no eligible destination; explain why the branch is required.",
+          ],
+        },
+        {
+          title: "Review, sign and confirm",
+          items: [
+            "Summarise source account, destination account, rounding threshold, boost and the customer-facing transfer effect before signing.",
+            "On success, state clearly whether Round Up was activated, updated or deactivated and return to the relevant account or management context.",
+            "Make the destination account the proof point by showing Round Up transfers as labelled account activity once the feature is active.",
+          ],
+        },
+        {
+          title: "Manage and stop",
+          items: [
+            "Prefill the active configuration, preserve the customer's current settings and enable Save Changes only when the configuration differs.",
+            "Keep deactivation visually secondary but easy to find, with a confirmation explaining that future qualifying payments will no longer create saving transfers.",
+          ],
+        },
+      ],
+      nonFunctionalRequirements: [
+        {
+          title: "Financial correctness and resilience",
+          items: [
+            "The calculated saving amount, transfer amount and displayed summary must use the same rounding rule and currency precision; the purchase amount remains unchanged.",
+            "A delayed, rejected or unavailable transfer must not leave a misleading success state or duplicate the saving action; the recovery behaviour must be defined before production.",
+            "Activation, update and deactivation must be safe to retry without silently creating duplicate configurations.",
+          ],
+        },
+        {
+          title: "Accessibility and localisation",
+          items: [
+            "Account pickers, segmented options, terms toggles and the deactivation confirmation need accessible names, clear selected states and keyboard-equivalent interaction.",
+            "Amounts, dates, currencies and saving copy follow Romanian conventions; the mechanism remains understandable at larger text sizes.",
+          ],
+        },
+        {
+          title: "Measurement and privacy",
+          items: [
+            "Measure discovery, setup completion, account-opening branch usage, activation, configuration changes, deactivation and transfer outcomes at aggregate product level.",
+            "Keep personal account details, balances and transaction payloads out of the BA surface and demo fixtures unless they are required to explain the customer-facing state.",
+          ],
+        },
+      ],
+    },
     entryPoints: [
       { label: "Home promotional card", intent: "Educational / acquisition — introduce Round Up to eligible-but-inactive customers." },
       { label: "Products › Saving and investing", intent: "Catalogue discovery — listed beside Term deposit, Saving account, Mutual funds." },

@@ -35,6 +35,134 @@ export const CARD_PIN_FLOW: FlowDefinition = {
       "Cover two related card needs — viewing an existing PIN and setting/changing a PIN — from the Card options context, keeping PIN disclosure protected even inside an authenticated session.",
     scopeNote:
       "Scoped to Romania (PI). Flow Library preview: card-processor outcomes are mocked; a production flow needs real status, retry handling and audit events.",
+    businessAnalysis: {
+      generalInformation: [
+        { label: "Business outcome", value: "Give eligible cardholders a secure self-service route to view, set or change a card PIN." },
+        { label: "Customer scope", value: "Romanian retail customers with an eligible delivered and activated debit or credit card." },
+        { label: "Markets", value: "RO only. Card eligibility, biometric copy and authorization policy are country-specific in this preview." },
+        { label: "Boundary", value: "View an existing PIN and set or change a PIN from Card options; card delivery, activation and processor servicing are outside this flow." },
+        { label: "Demo boundary", value: "Deterministic Flow Library prototype. No real PIN, card-processor response or sensitive customer credential is used." },
+      ],
+      versionContext:
+        "Demo BA v1.0 · 1 September 2026. Aligned with the existing Card options, Face ID, Set PIN, Sign, success and not-eligible preview states. Processor contracts, credentials and real PIN values are intentionally excluded.",
+      versionHistory: [
+        { version: "1.0", date: "1 September 2026", detail: "Added the complete BA document for PIN view, PIN change and eligibility fallback." },
+      ],
+      openIssues: [
+        {
+          reference: "BA-01",
+          status: "Open",
+          title: "Eligibility reasons and retry policy",
+          detail: "Define the exact product and processor conditions behind the not-eligible state and whether each reason offers retry, activation guidance or support contact.",
+        },
+        {
+          reference: "BA-02",
+          status: "Open",
+          title: "PIN disclosure controls",
+          detail: "Confirm biometric fallback, automatic close timing, re-authentication requirements and the policy for screenshots, screen recording and navigation history.",
+        },
+        {
+          reference: "BA-03",
+          status: "Open",
+          title: "Debit and credit differences",
+          detail: "Confirm whether card type changes PIN length, allowed changes, cooldowns, eligibility or only the copy and artwork shown in the shared journey.",
+        },
+      ],
+      requirements: [
+        {
+          title: "Protected PIN view",
+          description: "PIN disclosure must be intentional, temporary and protected even after the customer has authenticated in the app.",
+          items: [
+            "Start the view path from the selected card context and require the configured biometric verification before the PIN surface opens.",
+            "Keep the PIN masked by default; reveal digits only after a deliberate Show PIN action and make the privacy warning visible at the point of disclosure.",
+            "Close the revealed state after the agreed timeout or explicit dismissal and return to Card options without retaining sensitive digits in navigation history.",
+          ],
+        },
+        {
+          title: "Set and change PIN",
+          description: "The customer needs a clear, validated route to replace or set a PIN on an eligible card.",
+          items: [
+            "Capture two matching four-digit values, show validation for incomplete or mismatched input and reject weak patterns where policy requires.",
+            "Preserve the selected debit or credit card context through Set your PIN, review and standard signing.",
+            "Do not apply a new PIN until the standard authorization step succeeds; cancellation returns without changing the existing PIN.",
+          ],
+        },
+        {
+          title: "Eligibility and customer feedback",
+          description: "Unsupported or unavailable operations are designed product states, not technical errors.",
+          items: [
+            "Detect ineligible cards before exposing a misleading PIN setup or reveal action and explain the next useful step in plain language.",
+            "Keep view and change outcomes distinct: view returns without a persistent change, while change confirms that the new PIN applies to future transactions.",
+            "Record product-level outcomes for start, biometric result, reveal, change, cancellation and ineligibility without exposing the PIN itself.",
+          ],
+        },
+      ],
+      currentStatus: [
+        {
+          title: "Existing Mobile Banking surfaces",
+          items: [
+            "Cards and Card options already provide the selected card context and the General settings area where View PIN belongs.",
+            "The standard app signing pattern is reused for changing a PIN; biometric verification is reserved for the sensitive view path.",
+          ],
+        },
+        {
+          title: "Prototype boundary",
+          items: [
+            "The Flow Library models credit and debit variants, hidden and visible PIN states, Set PIN validation, signing, success and not-eligible feedback locally.",
+            "No real PIN retrieval, card update, processor timeout, cooldown, fraud control or audit record is executed by this preview.",
+          ],
+        },
+      ],
+      proposedSolution: [
+        {
+          title: "Enter from the selected card",
+          items: [
+            "Keep the selected card visible from Cards through Card options and into every PIN state so the customer can verify which card is being managed.",
+            "Expose View PIN under General settings and keep the change route available from the appropriate card-options action.",
+          ],
+        },
+        {
+          title: "View PIN securely",
+          items: [
+            "Open the Face ID verification state before disclosure and keep the underlying card context clear without showing sensitive data behind the modal.",
+            "After verification, show a masked PIN surface with a deliberate reveal action, privacy copy and an explicit close path.",
+            "Return to Card options after close or timeout with no visible PIN remaining.",
+          ],
+        },
+        {
+          title: "Set or change PIN",
+          items: [
+            "Open Set your PIN with empty fields and a disabled Continue action; enable it only when both values satisfy the agreed four-digit rules.",
+            "Send valid input through the standard Sign screen, then confirm the update with a concise success state and return to Card options.",
+            "If the card is not eligible, use the not-eligible popup instead of opening a form that cannot complete.",
+          ],
+        },
+      ],
+      nonFunctionalRequirements: [
+        {
+          title: "Security and privacy",
+          items: [
+            "Never place a real PIN in URLs, analytics events, logs, exported documents, screenshots or persistent client state.",
+            "Use the approved biometric and signing controls, automatic close behaviour and re-entry policy for the sensitive view and change paths.",
+            "A failed, cancelled or timed-out operation must leave the existing PIN unchanged and must not reveal processor or credential details to the customer.",
+          ],
+        },
+        {
+          title: "Accessibility and localisation",
+          items: [
+            "PIN inputs, reveal controls, biometric status, privacy copy and fallback actions need accessible names, visible focus and non-colour status cues.",
+            "Credit/debit labels and customer-facing guidance follow Romanian conventions while preserving the shared layout and interaction model.",
+          ],
+        },
+        {
+          title: "Measurement and resilience",
+          items: [
+            "Measure entry, biometric success, reveal completion, PIN change completion, cancellation and ineligibility at aggregate product level; never measure the PIN value.",
+            "Processor delays, repeated attempts and temporary unavailability must resolve to a safe retry or support state without duplicate PIN changes.",
+          ],
+        },
+      ],
+    },
     entryPoints: [
       { label: "Cards › Options › General settings › View PIN", intent: "Primary path for both credit and debit cards, preserving card context." },
       { label: "Card activation / delivery deep link", intent: "Possible secondary entry — not assumed until a product decision exists." },

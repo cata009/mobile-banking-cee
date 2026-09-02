@@ -62,7 +62,7 @@ export default function ShopsmartOfferCard({
   onClick,
 }: ShopsmartOfferCardProps) {
   const Root = onClick ? "button" : "article";
-  const iconName = trailingIcon === "website" ? "contact-website" : "shopping-bag";
+  const iconName = trailingIcon === "website" ? "contact-website" : "shopsmart-store";
   const pillClass =
     pillTone === "white"
       ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-[0_0_4px_rgba(0,0,0,0.25)]"

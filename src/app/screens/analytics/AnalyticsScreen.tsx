@@ -3,7 +3,7 @@ import type { UIEvent } from "react";
 import { useDragCarousel } from "@/hooks/useDragCarousel";
 import BottomNavigation from "@/app/components/BottomNavigation";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
-import CashFlowSummaryBars from "@/app/components/analytics/CashFlowSummaryBars";
+import MonthlyCashFlowChart from "@/app/components/analytics/MonthlyCashFlowChart";
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
 import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
 import { useLanguage } from "@/app/contexts/LanguageContext";
@@ -111,6 +111,7 @@ function MonthSelector({
 function AnalyticsHeroPanel({
   activePeriodKey,
   summary,
+  country,
 }: {
   activePeriodKey: string;
   summary: SpendingAnalyticsSummary;
@@ -119,7 +120,10 @@ function AnalyticsHeroPanel({
   return (
     <>
       <MonthSelector activePeriodKey={activePeriodKey} summary={summary} />
-      <CashFlowSummaryBars
+      {/* This screen is the baseline Spending surface — Evo 2027 renders
+          Evo2027AnalyticsScreen instead — so it keeps the original chart. */}
+      <MonthlyCashFlowChart
+        country={country}
         currency={summary.currency}
         incomeTotal={summary.incomeTotal}
         spendingTotal={summary.spendingTotal}

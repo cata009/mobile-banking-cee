@@ -15,6 +15,16 @@ export const SAFE_AREA_TOP = 70;
 export const SAFE_AREA_BOTTOM = 34;
 
 const PHONE_BEZEL = 12;
+/**
+ * The app is authored at a logical 375px width — the Figma canvas (375x812).
+ * A phone profile is a *bigger pane of glass*, not a wider canvas, so its screen
+ * scales that canvas up instead of reflowing it: a 375px-wide component in Figma
+ * lands on the phone at the proportion it was drawn at.
+ *
+ * Foldables are the exception — their whole point is the wider adaptive layout,
+ * so they keep rendering fluid at their own logical width.
+ */
+const AUTHORING_WIDTH = 375;
 const PREVIEW_HORIZONTAL_PADDING = 96;
 const PREVIEW_VERTICAL_PADDING = 32;
 const MIN_PREVIEW_SCALE = 0.5;
@@ -44,6 +54,10 @@ export default function MobileFrame({
   const { profile, orientation, viewport } = useDevicePreview();
   const phoneFrameWidth = viewport.width + PHONE_BEZEL * 2;
   const phoneFrameHeight = viewport.height + PHONE_BEZEL * 2;
+  const usesAuthoringCanvas = profile.kind === 'phone';
+  const contentScale = usesAuthoringCanvas ? viewport.width / AUTHORING_WIDTH : 1;
+  const contentWidth = usesAuthoringCanvas ? AUTHORING_WIDTH : viewport.width;
+  const contentHeight = viewport.height / contentScale;
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const screenSurfaceRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -112,10 +126,19 @@ export default function MobileFrame({
                 width: viewport.width,
                 height: viewport.height,
                 borderRadius: profile.kind === 'foldable-main' ? 24 : 36,
+              }}
+            >
+            <div
+              className="absolute left-0 top-0 origin-top-left"
+              data-phone-canvas="true"
+              style={{
+                width: contentWidth,
+                height: contentHeight,
+                transform: contentScale === 1 ? undefined : `scale(${contentScale})`,
                 containerType: 'size',
                 ...({
-                  '--uc-preview-width': `${viewport.width}px`,
-                  '--uc-preview-height': `${viewport.height}px`,
+                  '--uc-preview-width': `${contentWidth}px`,
+                  '--uc-preview-height': `${contentHeight}px`,
                 } as CSSProperties),
               }}
             >
@@ -151,6 +174,7 @@ export default function MobileFrame({
               {isCoAppingActive && (
                 <ShareScreenGlow />
               )}
+            </div>
             </div>
 
             <div className="absolute left-[-3px] top-[80px] w-[3px] h-[28px] bg-[rgb(var(--uc-static-black-rgb)_/_0.4)] rounded-r-sm" />

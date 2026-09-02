@@ -575,10 +575,10 @@ describe('2027 Home Transformation', () => {
     // type, same brand blue when selected. Two rails were filtering the same
     // catalogue with controls that had drifted apart.
     const mostPopularFilter = screen.getByRole('button', { name: 'Most popular' })
-    expect(mostPopularFilter).toHaveClass('flex', 'h-[36px]', 'shrink-0', 'rounded-[4px]', 'border', 'px-[16px]', 'text-[14px]', 'uppercase')
+    expect(mostPopularFilter).toHaveClass('flex', 'shrink-0', 'rounded-[4px]', 'border', 'px-[12px]', 'py-[8px]', 'text-[14px]', 'uppercase')
     expect(mostPopularFilter).toHaveClass('bg-[var(--uc-action-strong)]', 'text-[var(--uc-static-white)]')
     expect(mostPopularFilter).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByRole('button', { name: 'Home & living' })).toHaveClass('flex', 'h-[36px]', 'shrink-0', 'whitespace-nowrap', 'rounded-[4px]', 'border', 'px-[16px]', 'text-[14px]', 'uppercase')
+    expect(screen.getByRole('button', { name: 'Home & living' })).toHaveClass('flex', 'shrink-0', 'whitespace-nowrap', 'rounded-[4px]', 'border', 'px-[12px]', 'py-[8px]', 'text-[14px]', 'uppercase')
 
     const eShopsFilter = screen.getByRole('button', { name: 'E-shops' })
     fireEvent.click(eShopsFilter)

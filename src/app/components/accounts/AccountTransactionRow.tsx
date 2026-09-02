@@ -69,7 +69,9 @@ export default function AccountTransactionRow({
   onCategoryClick,
   categoryIconVariant = "glyph",
   avatarPresentation = "identity",
-  positiveAmountClassName = "text-[var(--uc-green-success)]",
+  // Money in reads in the brand accent, as the baseline app has always drawn it.
+  // Evo 2027 moved to its own success green and each Evo surface passes it.
+  positiveAmountClassName = "text-[var(--uc-action)]",
   evo2027 = false,
   showTransactionDate = false,
   compact = false,

@@ -56,6 +56,23 @@ describe('flow definitions integrity', () => {
     }
   })
 
+  it('provides the complete business analysis document for every registered flow', () => {
+    for (const id of FLOW_ORDER) {
+      const analysis = FLOW_DEFINITIONS[id].overview.businessAnalysis
+      expect(analysis, `${id} is missing its business analysis document`).toBeDefined()
+
+      if (!analysis) continue
+
+      expect(analysis.generalInformation.length, `${id}: general information`).toBeGreaterThan(0)
+      expect(analysis.versionContext, `${id}: version context`).toBeTruthy()
+      expect(analysis.versionHistory.length, `${id}: version history`).toBeGreaterThan(0)
+      expect(analysis.requirements.length, `${id}: requirements`).toBeGreaterThan(0)
+      expect(analysis.currentStatus.length, `${id}: current status`).toBeGreaterThan(0)
+      expect(analysis.proposedSolution.length, `${id}: proposed solution`).toBeGreaterThan(0)
+      expect(analysis.nonFunctionalRequirements.length, `${id}: non-functional requirements`).toBeGreaterThan(0)
+    }
+  })
+
   it('derives the preview meta registry from the definitions', () => {
     expect(FLOW_PREVIEW_ORDER).toEqual(FLOW_ORDER)
     for (const id of FLOW_ORDER) {
@@ -151,12 +168,16 @@ describe('flow-library screen', () => {
     expect(screen.queryByText(/map deep-link/i)).not.toBeInTheDocument()
   })
 
-  it('shows the Figma, PDF, and Word header actions without handoff copy', () => {
+  it('shows the Figma, PDF, Word and Confluence header actions without handoff copy', () => {
     renderFlowLibrary('ro-round-up')
 
     expect(screen.getByRole('link', { name: 'Open Figma source' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Export flow as PDF' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Export flow as Word' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', {
+        name: 'Download .docx (screens included) — Confluence: Tools > Import Word Document',
+      }),
+    ).toBeInTheDocument()
     expect(screen.queryByText('Screens + full spec, ready for handoff.')).not.toBeInTheDocument()
   })
 
@@ -200,12 +221,23 @@ describe('flow-library screen', () => {
 
     expect(screen.getByRole('link', { name: 'Open Figma source' })).toHaveClass('bg-[var(--uc-surface-muted)]')
     expect(screen.getByRole('button', { name: 'Export flow as PDF' })).toHaveClass('bg-[var(--uc-surface-muted)]')
-    expect(screen.getByRole('button', { name: 'Export flow as Word' })).toHaveClass('bg-[var(--uc-surface-muted)]')
+    expect(
+      screen.getByRole('button', {
+        name: 'Download .docx (screens included) — Confluence: Tools > Import Word Document',
+      }),
+    ).toHaveClass('bg-[var(--uc-surface-muted)]')
     expect(screen.getByTestId('flow-document-icon-figma')).toBeInTheDocument()
     expect(screen.getByTestId('flow-document-icon-pdf')).toBeInTheDocument()
     expect(screen.getByTestId('flow-document-icon-word')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Export flow as PDF' })).toHaveAttribute('data-export-document', 'current-flow')
-    expect(screen.getByRole('button', { name: 'Export flow as Word' })).toHaveAttribute('data-export-document', 'current-flow')
+    expect(screen.getByRole('button', { name: 'Export flow as PDF' })).toHaveAttribute(
+      'data-export-document',
+      'current-flow',
+    )
+    expect(
+      screen.getByRole('button', {
+        name: 'Download .docx (screens included) — Confluence: Tools > Import Word Document',
+      }),
+    ).toHaveAttribute('data-export-document', 'current-flow')
   })
 
   it('groups the proposed solution into BA-friendly decision sections', () => {
@@ -410,7 +442,9 @@ describe('flow-library screen', () => {
     expect(within(gallery).getByText('Independent transaction-list entry points')).toBeInTheDocument()
     expect(within(gallery).getByText(/alternative entry points, not a navigation sequence/i)).toBeInTheDocument()
     expect(within(gallery).getByTestId('ethoca-entry-card-list')).toHaveTextContent('Card Detail transaction list')
-    expect(within(gallery).getByTestId('ethoca-entry-account-list')).toHaveTextContent('Current Account card-transaction list')
+    expect(within(gallery).getByTestId('ethoca-entry-account-list')).toHaveTextContent(
+      'Current Account card-transaction list',
+    )
     expect(within(gallery).getByTestId('ethoca-detail-examples')).toHaveTextContent('Transaction detail examples')
     expect(within(gallery).queryByTestId('journey-arrow')).not.toBeInTheDocument()
   })
@@ -434,9 +468,9 @@ describe('flow-library screen', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Journey' }))
     const focusedPreview = document.querySelector('[data-flow-preview-scrollable="true"]') as HTMLElement
-    const logo = within(focusedPreview).getAllByTestId('merchant-logo-carrefour').find(
-      (candidate) => candidate.getAttribute('style')?.includes('width: 32px'),
-    )
+    const logo = within(focusedPreview)
+      .getAllByTestId('merchant-logo-carrefour')
+      .find((candidate) => candidate.getAttribute('style')?.includes('width: 32px'))
 
     expect(logo).toHaveClass('relative')
   })

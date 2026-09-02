@@ -265,9 +265,8 @@ export interface FlowAnalysisSection {
 }
 
 /**
- * A business-analysis companion structure for flows that need to mirror the
- * established BA document shape without exposing implementation credentials,
- * service names, or live production data.
+ * The business-analysis document mirrors the established BA shape without
+ * exposing implementation credentials, service names, or live production data.
  */
 export interface FlowBusinessAnalysisSpec {
   generalInformation: readonly FlowAnalysisFact[];
@@ -287,8 +286,8 @@ export interface FlowBusinessAnalysisSpec {
 export interface FlowOverviewSpec {
   purpose: string;
   scopeNote: string;
-  /** Optional BA-aligned presentation for complex cross-functional flows. */
-  businessAnalysis?: FlowBusinessAnalysisSpec;
+  /** BA-aligned handoff document shared by the screen and export presentations. */
+  businessAnalysis: FlowBusinessAnalysisSpec;
   entryPoints: FlowEntryPoint[];
   preconditions: string[];
   businessRules: string[];
@@ -322,7 +321,8 @@ export interface FlowDefinition {
    * "document-and-screens" adds the per-screen specs and the flow-level rules
    * underneath it, for a flow whose screens are specified in their own right and
    * whose reviewer needs both the business case and the screen-by-screen detail.
-   * Without a BA document both layouts are identical.
+   * Every registered flow carries a BA document; the layout only controls whether
+   * screen-level specs are shown below that document.
    */
   specLayout?: "document-only" | "document-and-screens";
   /** Optional clickable map; when present the detail view gains a Prototype tab. */

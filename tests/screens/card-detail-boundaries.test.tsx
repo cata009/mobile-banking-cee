@@ -111,29 +111,28 @@ describe('card-detail action boundaries', () => {
     expect(container.querySelector('[data-card-variant="mc-virtual-standard-violet"]')).toBeInTheDocument()
   })
 
-  it('circles the category fallback in every release, so it matches the merchant marks beside it', () => {
+  it('leads with merchant marks in Evo 2027 only, so the baseline keeps its bare category glyphs', () => {
     mockedProductState.categories = [{ key: 'cards', title: 'Cards', products: mockProducts }]
 
-    // A card list now leads with merchant marks, which are filled roundels. A
-    // bare category glyph next to them reads as a second icon language, so the
-    // circled variant is the rule on statement surfaces rather than an Evo one.
-    for (const release of ['release-future-evo-2027', undefined] as const) {
-      const rendered = render(
-        <CardDetailScreen selectedCardId={firstDebitCard.id} onBack={() => undefined} />,
-        {
-          wrapper: ({ children }) => release
-            ? <AppProviders release={release}>{children}</AppProviders>
-            : <AppProviders>{children}</AppProviders>,
-        },
-      )
+    // Identity marks — merchant logos, party initials, circled category roundels —
+    // are an Evo 2027 decision. The baseline statement stays on the flat PFM glyph
+    // it always used, so an Evo choice does not leak into the released app.
+    const evo = render(
+      <CardDetailScreen selectedCardId={firstDebitCard.id} onBack={() => undefined} />,
+      { wrapper: ({ children }) => <AppProviders release="release-future-evo-2027">{children}</AppProviders> },
+    )
+    expect(evo.container.querySelector('[data-merchant-logo]')).toBeInTheDocument()
+    expect(evo.container.querySelector('[data-pfm-icon-variant="category-circle"]')).toBeInTheDocument()
+    evo.unmount()
 
-      expect(rendered.container.querySelector('[data-merchant-logo]'), release ?? 'baseline').toBeInTheDocument()
-      expect(
-        rendered.container.querySelector('[data-pfm-icon-variant="category-circle"]'),
-        release ?? 'baseline',
-      ).toBeInTheDocument()
-      rendered.unmount()
-    }
+    const baseline = render(
+      <CardDetailScreen selectedCardId={firstDebitCard.id} onBack={() => undefined} />,
+      { wrapper: ({ children }) => <AppProviders>{children}</AppProviders> },
+    )
+    expect(baseline.container.querySelector('[data-merchant-logo]')).not.toBeInTheDocument()
+    expect(baseline.container.querySelector('[data-pfm-icon-variant="category-circle"]')).not.toBeInTheDocument()
+    expect(baseline.container.querySelector('[data-transaction-avatar="pfm-category"]')).toBeInTheDocument()
+    baseline.unmount()
   })
 
   it('groups a card month into the shared transaction card in Evo 2027 only', () => {

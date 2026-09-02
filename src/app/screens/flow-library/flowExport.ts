@@ -1,14 +1,13 @@
 /**
- * Flow export helpers — PDF and Word, dependency-free by design (adding
- * packages requires separate approval in this repo).
+ * Flow export helpers — PDF, plus the screen capture every export shares.
+ * Dependency-free by design (adding packages requires separate approval here).
  *
  * PDF: a print-formatted HTML document (cover, per-step screen + spec tables, and
  * a flow-spec appendix) opens in a new tab and triggers the browser print dialog,
  * where stakeholders pick "Save as PDF".
  *
- * Word: the same document is wrapped in the MHTML container format that Microsoft
- * Word opens natively (`.doc`), with every captured step screen embedded as a
- * base64 image part.
+ * The Word and Confluence handoffs live in `./handoff`, which renders the same
+ * content as a real `.docx` and as clipboard HTML.
  *
  * The structured `spec`/`overview` inputs are optional and additive: when omitted,
  * the document renders exactly as before (screens + prose appendix).
@@ -333,33 +332,6 @@ ${specHtml}
 </html>`;
 }
 
-function utf8ToBase64(value: string): string {
-  const bytes = new TextEncoder().encode(value);
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary);
-}
-
-function chunkBase64(base64: string): string {
-  return base64.replace(/(.{76})/g, "$1\r\n");
-}
-
-/** Word-compatible MHTML container with the HTML part and one PNG part per step. */
-export function buildFlowWordFile(html: string, steps: readonly CapturedFlowStep[]): string {
-  const boundary = "----=_NextPart_MOBILE_CEE_FLOW";
-  const parts: string[] = [
-    `MIME-Version: 1.0\r\nContent-Type: multipart/related; boundary="${boundary}"; type="text/html"\r\n\r\n`,
-    `--${boundary}\r\nContent-Type: text/html; charset="utf-8"\r\nContent-Transfer-Encoding: base64\r\nContent-Location: flow.html\r\n\r\n${chunkBase64(utf8ToBase64(html))}\r\n\r\n`,
-  ];
-  steps.forEach((step, index) => {
-    parts.push(
-      `--${boundary}\r\nContent-Type: image/png\r\nContent-Transfer-Encoding: base64\r\nContent-Location: step-${index + 1}.png\r\n\r\n${chunkBase64(step.pngBase64)}\r\n\r\n`,
-    );
-  });
-  parts.push(`--${boundary}--\r\n`);
-  return parts.join("");
-}
-
 /** Open the print-ready document in a new tab; the user saves it as PDF. */
 export function exportFlowAsPdf(
   meta: FlowExportMeta,
@@ -382,31 +354,4 @@ export function exportFlowAsPdf(
     throw new Error("The browser blocked the export tab. Allow pop-ups for this site and retry.");
   }
   window.setTimeout(() => URL.revokeObjectURL(url), 120_000);
-}
-
-/** Download the flow as a Word-compatible `.doc` file. */
-export function exportFlowAsWord(
-  meta: FlowExportMeta,
-  steps: readonly CapturedFlowStep[],
-  spec: readonly FlowExportSpecItem[],
-  filename: string,
-  overview?: ExportOverview,
-): void {
-  const html = buildFlowDocumentHtml(
-    meta,
-    steps,
-    spec,
-    (index) => `step-${index + 1}.png`,
-    { autoPrint: false },
-    overview,
-  );
-  const blob = new Blob([buildFlowWordFile(html, steps)], { type: "application/msword" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
 }

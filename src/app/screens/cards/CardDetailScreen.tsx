@@ -194,6 +194,8 @@ export default function CardDetailScreen({
   /** Evo 2027 groups each month into the same card the home activity list uses. */
   const usesEvoGroupCards = release === "release-future-evo-2027";
   const categoryIconVariant = release === "release-future-evo-2027" ? "category-circle" : "glyph";
+  /** The baseline statement keeps the bare PFM glyph; identity marks are an Evo 2027 decision. */
+  const avatarPresentation = usesEvoGroupCards ? "identity" : "category";
   const currentAccounts = useMemo(
     () => categories.flatMap((category) => category.products).filter((product) => product.type === "current_account"),
     [categories],
@@ -501,7 +503,7 @@ export default function CardDetailScreen({
         </div>
 
         {/* Quick actions */}
-        <AccountActionBar items={cardQuickActions} align="between" iconTreatment="bubble" />
+        <AccountActionBar items={cardQuickActions} align="between" iconTreatment={usesEvoGroupCards ? "bubble" : "bare"} />
       </div>
 
       {/* ── Transactions section ─────────────────────────────────── */}
@@ -557,6 +559,7 @@ export default function CardDetailScreen({
                         displayLabel={transactionRowPresentation?.displayLabel?.(transaction)}
                         leadingVisual={transactionRowPresentation?.leadingVisual?.(transaction)}
                         categoryIconVariant={categoryIconVariant}
+                        avatarPresentation={avatarPresentation}
                         positiveAmountClassName={release === "release-future-evo-2027" ? "text-[var(--uc-green-olive)]" : undefined}
                         evo2027={usesEvoGroupCards}
                         showDate={!usesEvoGroupCards}
@@ -593,6 +596,7 @@ export default function CardDetailScreen({
                           displayLabel={transactionRowPresentation?.displayLabel?.(tx)}
                           leadingVisual={transactionRowPresentation?.leadingVisual?.(tx)}
                           categoryIconVariant={categoryIconVariant}
+                          avatarPresentation={avatarPresentation}
                           positiveAmountClassName="text-[var(--uc-green-olive)]"
                           evo2027
                           showDate={false}
@@ -613,6 +617,7 @@ export default function CardDetailScreen({
                       displayLabel={transactionRowPresentation?.displayLabel?.(tx)}
                       leadingVisual={transactionRowPresentation?.leadingVisual?.(tx)}
                       categoryIconVariant={categoryIconVariant}
+                      avatarPresentation={avatarPresentation}
                       onClick={(selectedTx) => onTransactionClick?.(selectedTx, activeCard, getCardMerchantEnrichment(selectedTx, country))}
                     />
                     ))}
