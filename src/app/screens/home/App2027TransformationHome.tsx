@@ -268,7 +268,9 @@ function SummaryBanner({
       ? [{
         label: secondaryLabel,
         value: typeof secondaryValue === 'string'
-          ? <span className="text-[18px] font-bold leading-[22px]">{secondaryValue}</span>
+          // Same weight and size the money slots use on the other tabs — a date
+          // is another supporting figure, not a bigger one.
+          ? <span className="text-[16px] font-bold leading-[20px] tracking-[-0.018em]">{secondaryValue}</span>
           : <Money data-home-summary-secondary-amount amount={secondaryValue} hidden={amountsHidden} role="support" />,
       }]
       : []);

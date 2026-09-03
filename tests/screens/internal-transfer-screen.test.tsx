@@ -177,7 +177,8 @@ describe('Evo 2027 internal transfer', () => {
   it('opens from the Evo payments hero and returns to Payments', () => {
     render(<PaymentsScreen />, { wrapper: Providers })
 
-    fireEvent.click(screen.getByRole('button', { name: /Between my accounts/i }))
+    // The Evo hub replaced the hero cards with one grid; this is its tile.
+    fireEvent.click(screen.getByRole('button', { name: 'Move money' }))
     expect(screen.getAllByRole('heading', { name: 'Move between accounts' }).length).toBeGreaterThan(0)
     expect(screen.queryByRole('dialog', { name: 'Between my accounts' })).not.toBeInTheDocument()
 

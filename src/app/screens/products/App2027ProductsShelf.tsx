@@ -85,6 +85,12 @@ export interface App2027ProductsShelfProps {
    * scroll position now, so it reports collapsed from the start.
    */
   onHeroCollapsedChange?: (collapsed: boolean) => void
+  /**
+   * True while a level-2 sub-page (a category, the search, an offers list) is
+   * open, so the shell can drop the primary navigation the way every other
+   * second-level page in the app does.
+   */
+  onSubPageChange?: (open: boolean) => void
 }
 /**
  * Evo 2027 Products shelf — Figma "2027 - transformation 11" (node 24042:10990).
@@ -100,6 +106,7 @@ export default function App2027ProductsShelf({
   renderOffers,
   offerCounts,
   onHeroCollapsedChange,
+  onSubPageChange,
 }: App2027ProductsShelfProps) {
   const { t } = useLanguage()
   const [view, setView] = useState<ShelfView>({ kind: 'shelf' })
@@ -110,6 +117,12 @@ export default function App2027ProductsShelf({
   }, [onHeroCollapsedChange])
 
   useEffect(() => () => onHeroCollapsedChange?.(false), [onHeroCollapsedChange])
+
+  useEffect(() => {
+    onSubPageChange?.(view.kind !== 'shelf')
+  }, [onSubPageChange, view.kind])
+
+  useEffect(() => () => onSubPageChange?.(false), [onSubPageChange])
 
   const openProduct = (item: ProductShelfItem, category: ProductShelfCategory) => {
     onProductDetailOpen?.({

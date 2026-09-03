@@ -1576,9 +1576,11 @@ export const CUSTOM_ICONS = {
     source: "custom",
     label: "Shopsmart store",
     category: "Contacts",
-    width: 32,
-    height: 32,
-    viewBox: "0 0 32 32",
+    width: 20,
+    height: 20,
+    // Cropped to the glyph the way the sibling contact icons are: at 32x32 the
+    // artwork only filled the middle 20px and read a size smaller beside them.
+    viewBox: "6 7 20 18",
     usage: ["ShopsmartOfferCard"],
     render: () => (
       <path

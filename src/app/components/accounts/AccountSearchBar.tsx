@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { ChangeEvent, FocusEvent } from "react";
-import { AppIcon } from "@/app/components/icons";
+import { AppIcon, type IconName } from "@/app/components/icons";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 
 export const ACCOUNT_SEARCH_BAR_SOURCE = {
@@ -37,6 +37,13 @@ interface AccountSearchBarProps {
   fieldSize?: "compact" | "comfortable";
   /** Adds breathing room around the 32px icon slots on Evo 2027 list surfaces. */
   fieldPadding?: "none" | "8";
+  /**
+   * Replaces the filter glyph in the trailing slot — the Payments hub puts a QR
+   * scanner there, where a list would put filters. Clearing a typed query still
+   * takes the slot over, as it does everywhere else.
+   */
+  trailingIcon?: IconName;
+  trailingLabel?: string;
 }
 
 export default function AccountSearchBar({
@@ -55,6 +62,8 @@ export default function AccountSearchBar({
   fieldSurface = "muted",
   fieldSize = "compact",
   fieldPadding = "none",
+  trailingIcon,
+  trailingLabel,
 }: AccountSearchBarProps) {
   const { t } = useLanguage();
   const resolvedPlaceholder = placeholder ?? t("runtime.actions.search", "Search");
@@ -128,12 +137,18 @@ export default function AccountSearchBar({
             type="button"
             onClick={hasSearchValue ? handleClearClick : onFilterClick}
             className={`grid ${showRemoveFilters ? "h-[32px] w-[32px]" : `${fieldHeight} ${comfortableField ? "w-[40px]" : "w-[32px]"}`} shrink-0 place-items-center`}
-            aria-label={hasSearchValue ? "Clear search results" : t("runtime.actions.filters", "Filters")}
-            aria-pressed={!hasSearchValue && filtersActive ? true : undefined}
+            aria-label={
+              hasSearchValue
+                ? "Clear search results"
+                : trailingLabel ?? t("runtime.actions.filters", "Filters")
+            }
+            aria-pressed={!hasSearchValue && !trailingIcon && filtersActive ? true : undefined}
             data-ds-label={hasSearchValue ? "Clear results icon 32x32" : "Filter icon 32x32"}
           >
             {hasSearchValue ? (
               <AppIcon name="clear-results" color="var(--uc-text)" />
+            ) : trailingIcon ? (
+              <AppIcon name={trailingIcon} color="var(--uc-text)" />
             ) : (
               <AppIcon name="filters" color={filtersActive ? "var(--uc-action)" : "var(--uc-text)"} />
             )}

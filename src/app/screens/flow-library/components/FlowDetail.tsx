@@ -471,9 +471,9 @@ function DetailTabs({
   );
 }
 
-function Panel({ title, action, children, compact = false }: { title: string; action?: ReactNode; children: ReactNode; compact?: boolean }) {
+function Panel({ id, title, action, children, compact = false }: { id?: string; title: string; action?: ReactNode; children: ReactNode; compact?: boolean }) {
   return (
-    <section role="tabpanel" className={`rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] shadow-sm ${compact ? "p-[16px]" : "p-[20px]"}`}>
+    <section id={id} role="tabpanel" className={`scroll-mt-[72px] rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] shadow-sm ${compact ? "p-[16px]" : "p-[20px]"}`}>
       <div className="flex flex-wrap items-center justify-between gap-[12px]">
         <h2 className="uc-type-h2 text-[var(--uc-text)]">{title}</h2>
         {action ?? null}
@@ -1206,21 +1206,29 @@ function SpecPanel({
 
   if (analysis && !showScreenSpecs) {
     return (
-      <Panel title="Business analysis specification">
+      <Panel id={SPEC_SECTION_IDS.businessAnalysis} title="Business analysis specification">
         <BusinessAnalysisContent analysis={analysis} />
       </Panel>
     );
   }
 
+  const navSections = [
+    ...(analysis ? [{ id: SPEC_SECTION_IDS.businessAnalysis, label: "Business analysis" }] : []),
+    { id: SPEC_SECTION_IDS.screenSpec, label: "Screen spec" },
+    { id: SPEC_SECTION_IDS.flowSpec, label: "Flow specification" },
+  ];
+
   return (
     <div className="grid gap-[24px]">
+      <SpecSectionNav sections={navSections} />
+
       {analysis ? (
-        <Panel title="Business analysis specification">
+        <Panel id={SPEC_SECTION_IDS.businessAnalysis} title="Business analysis specification">
           <BusinessAnalysisContent analysis={analysis} />
         </Panel>
       ) : null}
 
-      <Panel title="Screen spec">
+      <Panel id={SPEC_SECTION_IDS.screenSpec} title="Screen spec">
         <ScenarioChips scenarios={flow.scenarios} selectedScenarioId={scenario.id} onSelect={onScenarioSelect} />
         {scenario.steps.length > 0 ? (
           <div className="mt-[12px] flex flex-wrap items-center gap-[6px] border-t border-[var(--uc-border)] pt-[12px]">
@@ -1378,6 +1386,91 @@ function SpecSection({ title, children }: { title: string; children: ReactNode }
   );
 }
 
+/** Anchors the Specification tab's sticky nav scrolls between. */
+const SPEC_SECTION_IDS = {
+  businessAnalysis: "spec-section-business-analysis",
+  screenSpec: "spec-section-screen-spec",
+  flowSpec: "spec-section-flow-spec",
+} as const;
+
+/**
+ * Sticky section switcher for the Specification tab.
+ *
+ * The tab is three long documents stacked on one page; without this the only way
+ * between them is scrolling, and readers stop looking past the first one. It
+ * sticks to the top of the library's own scroller and highlights the section
+ * currently under the reader.
+ */
+function SpecSectionNav({ sections }: { sections: Array<{ id: string; label: string }> }) {
+  const [activeId, setActiveId] = useState(sections[0]?.id ?? "");
+  const navRef = useRef<HTMLElement | null>(null);
+  // The caller rebuilds the list every render; the spy only needs to resubscribe
+  // when the set of anchors actually changes.
+  const sectionKey = sections.map((section) => section.id).join("|");
+  const sectionsRef = useRef(sections);
+  sectionsRef.current = sections;
+
+  useEffect(() => {
+    const sections = sectionsRef.current;
+    const scroller = navRef.current?.closest("[data-flow-library-screen]");
+    if (!scroller) return;
+
+    let frame = 0;
+    const sync = () => {
+      frame = 0;
+      const anchorTop = scroller.getBoundingClientRect().top + 96;
+      let current = sections[0]?.id ?? "";
+      for (const section of sections) {
+        const element = document.getElementById(section.id);
+        if (element && element.getBoundingClientRect().top <= anchorTop) current = section.id;
+      }
+      setActiveId(current);
+    };
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(sync);
+    };
+
+    sync();
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      scroller.removeEventListener("scroll", onScroll);
+    };
+  }, [sectionKey]);
+
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  return (
+    <nav
+      ref={navRef}
+      aria-label="Specification sections"
+      className="sticky top-[6px] z-30 flex w-fit max-w-full flex-wrap items-center gap-[2px] rounded-full border border-[color-mix(in_srgb,var(--uc-border)_70%,transparent)] bg-[color-mix(in_srgb,var(--uc-surface)_80%,transparent)] p-[4px] shadow-[0_6px_20px_-8px_rgba(0,0,0,0.28)] backdrop-blur-md"
+    >
+      {sections.map((section) => {
+        const active = section.id === activeId;
+        return (
+          <button
+            key={section.id}
+            type="button"
+            onClick={() => scrollTo(section.id)}
+            aria-current={active ? "true" : undefined}
+            className={`rounded-full px-[16px] py-[7px] uc-type-n5-strong transition-all duration-200 ${
+              active
+                ? "bg-[var(--uc-action-strong)] text-[var(--uc-static-white)] shadow-[0_2px_8px_-2px_color-mix(in_srgb,var(--uc-action-strong)_60%,transparent)]"
+                : "text-[var(--uc-text-muted)] hover:bg-[color-mix(in_srgb,var(--uc-action)_8%,transparent)] hover:text-[var(--uc-text)]"
+            }`}
+          >
+            {section.label}
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
 function FlowLevelSpec({ flow }: { flow: FlowDefinition }) {
   const { overview } = flow;
   const fixedBlocks = [
@@ -1396,7 +1489,7 @@ function FlowLevelSpec({ flow }: { flow: FlowDefinition }) {
   const disclosure = useSectionDisclosure(jumpItems.map((item) => item.id));
 
   return (
-    <Panel title="Flow specification">
+    <Panel id={SPEC_SECTION_IDS.flowSpec} title="Flow specification">
       <p className="max-w-[860px] uc-type-n5 text-[var(--uc-text-muted)]">
         A practical reference for review and implementation. Each rule describes the expected customer-facing outcome and
         the data that must stay unchanged.
@@ -1668,7 +1761,7 @@ function DisclosureSection({
     <section
       id={id}
       {...sectionProps}
-      className="scroll-mt-[16px] rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface)]"
+      className="scroll-mt-[76px] rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface)]"
     >
       <button
         type="button"

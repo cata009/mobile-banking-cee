@@ -292,7 +292,9 @@ describe('flow-library screen', () => {
     // The document, then the screen-by-screen detail and the flow-level rules:
     // this flow specifies both, and a reviewer needs both.
     expect(screen.getByText('Business analysis specification')).toBeInTheDocument()
-    expect(screen.getByText('Screen spec')).toBeInTheDocument()
+    // 'Screen spec' is both a panel heading and an entry in the sticky section nav.
+    expect(screen.getByRole('heading', { name: 'Screen spec' })).toBeInTheDocument()
+    expect(screen.getByRole('navigation', { name: 'Specification sections' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /4\. Choose a package/ })).toBeInTheDocument()
     // The title now appears twice: once in the jump strip, once on the block.
     expect(screen.getAllByText('Key decision rules').length).toBeGreaterThan(0)

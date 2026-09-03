@@ -318,12 +318,46 @@ describe('CZ Future Robo Advisor flow', () => {
       releasePointerCapture: vi.fn(),
     })
 
+    // A tap must not capture the pointer: while an element holds the capture the
+    // browser fires the click at *it* rather than at what was pressed, which is
+    // what used to swallow taps on controls inside a carousel.
+    // A tap must not capture the pointer: while an element holds the capture the
+    // browser fires the click at *it* rather than at what was pressed, which is
+    // what used to swallow taps on controls inside a carousel.
     fireEvent.pointerDown(projectionButton, { pointerId: 7, pointerType: 'touch', clientX: 160 })
-    expect(captureOnButton).toHaveBeenCalledTimes(1)
     fireEvent.pointerUp(projectionButton, { pointerId: 7, pointerType: 'touch', clientX: 160 })
     fireEvent.click(projectionButton)
 
+    expect(captureOnButton).not.toHaveBeenCalled()
     expect(screen.getByRole('heading', { name: 'Projection for Sustainable Balanced' })).toBeInTheDocument()
+  })
+
+  it('claims the pointer once a press on a card becomes a drag', () => {
+    startFlow()
+    reachFundingMethod()
+    fireEvent.click(screen.getByRole('radio', { name: /One-off investment/i }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('button', { name: /^10\D000 CZK$/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+
+    const carousel = screen.getByTestId('robo-strategy-carousel')
+    const projectionButton = screen.getByRole('button', { name: 'See projection for Sustainable Balanced' })
+    const captureOnButton = vi.fn()
+    Object.assign(carousel, { setPointerCapture: vi.fn(), hasPointerCapture: () => false })
+    Object.assign(projectionButton, {
+      setPointerCapture: captureOnButton,
+      hasPointerCapture: () => true,
+      releasePointerCapture: vi.fn(),
+    })
+
+    // Movement past the drag threshold is what claims the pointer, so a drag
+    // started on a card keeps scrolling the rail once the finger leaves it.
+    fireEvent.pointerDown(projectionButton, { pointerId: 8, pointerType: 'touch', clientX: 160 })
+    fireEvent.pointerMove(projectionButton, { pointerId: 8, pointerType: 'touch', clientX: 120 })
+    fireEvent.pointerUp(projectionButton, { pointerId: 8, pointerType: 'touch', clientX: 120 })
+
+    expect(captureOnButton).toHaveBeenCalledTimes(1)
+    expect(screen.queryByRole('heading', { name: 'Projection for Sustainable Balanced' })).not.toBeInTheDocument()
   })
 
   it('keeps both investment controls available and connected to the projection chart', () => {
