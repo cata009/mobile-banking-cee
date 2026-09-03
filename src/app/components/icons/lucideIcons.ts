@@ -32,6 +32,7 @@ import {
   ShieldCheck,
   ShoppingBag,
   SlidersHorizontal,
+  SquarePen,
   Trophy,
   UserRound,
   Users,
@@ -48,6 +49,15 @@ export const LUCIDE_ICONS = {
     height: 24,
     component: PieChart,
     usage: ["Evo2027AnalyticsScreen expense chart mode toggle"],
+  },
+  "edit-pencil": {
+    source: "lucide",
+    label: "Edit",
+    category: "External Lucide",
+    width: 24,
+    height: 24,
+    component: SquarePen,
+    usage: ["Evo 2027 Payments header — customise the action grid"],
   },
   "chart-bars": {
     source: "lucide",

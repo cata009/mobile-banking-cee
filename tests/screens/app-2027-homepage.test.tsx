@@ -462,7 +462,7 @@ describe('2027 Home Transformation', () => {
 
     expect(sectionTitle()).toBe('Smart ideas for everyday money')
     expect(titles()).toEqual([
-      'Save a little every day',
+      'Save a little every time you spend',
       'Stay on top of your everyday money',
       'Find your next smart move',
     ])

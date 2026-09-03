@@ -11,6 +11,7 @@ import { CAROUSEL_CARD_SHADOW } from '@/app/components/accounts/AccountBalanceCa
 import AccountTransactionMonthDivider from '@/app/components/accounts/AccountTransactionMonthDivider';
 import AccountTransactionRow from '@/app/components/accounts/AccountTransactionRow';
 import { transactionGroupCardClassName } from '@/app/components/accounts/transactionGroupCard';
+import ActionIconBubble from '@/app/components/ActionIconBubble';
 import AmountVisibilityButton from '@/app/components/AmountVisibilityButton';
 import { BottomSheet } from '@/app/components/BottomSheet';
 import PageHeader from '@/app/components/PageHeader';
@@ -350,6 +351,9 @@ function buildDonutSegments(rows: readonly ExpenseBreakdownRow[]): ExpenseDonutS
 /** Travel before a press on a chart counts as a period swipe rather than a tap on a bar or an arc. */
 const PERIOD_SWIPE_THRESHOLD = 40;
 
+/** Travel before the swipe takes pointer capture, so a plain tap never does. */
+const PERIOD_SWIPE_CAPTURE_PX = 4;
+
 /** How far the incoming period starts off-centre when a swipe commits. */
 const PERIOD_SWIPE_SETTLE_PX = 72;
 
@@ -374,6 +378,7 @@ function usePeriodSwipe(
 ) {
   const startXRef = useRef<number | null>(null);
   const pointerIdRef = useRef<number | undefined>(undefined);
+  const captureTargetRef = useRef<HTMLElement | null>(null);
   const swipedRef = useRef(false);
   const guardTimeoutRef = useRef<number | null>(null);
   const settleTimeoutRef = useRef<number | null>(null);
@@ -386,6 +391,12 @@ function usePeriodSwipe(
     ((deltaX < 0 && !canNext) || (deltaX > 0 && !canPrev) ? 0.25 : 1) * deltaX;
 
   const release = () => {
+    const target = captureTargetRef.current;
+    const pointerId = pointerIdRef.current;
+    if (target && pointerId !== undefined && target.hasPointerCapture?.(pointerId)) {
+      target.releasePointerCapture(pointerId);
+    }
+    captureTargetRef.current = null;
     startXRef.current = null;
     pointerIdRef.current = undefined;
   };
@@ -397,19 +408,31 @@ function usePeriodSwipe(
       pointerIdRef.current = event.pointerId;
       swipedRef.current = false;
       setDragging(true);
-      // Capture keeps the gesture alive if the finger leaves the chart. It is a
-      // nicety, and it throws for a pointer the browser no longer considers
-      // active — which would take the whole screen down with it.
-      try {
-        event.currentTarget.setPointerCapture?.(event.pointerId);
-      } catch {
-        /* the gesture still works without capture */
-      }
+      /*
+       * No setPointerCapture here. While an element holds the capture the browser
+       * fires the following `click` at *that* element, so every tap on an arc, a
+       * bar or a dot inside the chart was delivered to the chart surface instead
+       * and did nothing. Capture is taken in onPointerMove, once the press has
+       * proven itself a swipe.
+       */
     },
     onPointerMove: (event: React.PointerEvent<HTMLElement>) => {
       const startX = startXRef.current;
       if (startX === null || pointerIdRef.current !== event.pointerId) return;
-      setOffset(resistance(event.clientX - startX));
+
+      const deltaX = event.clientX - startX;
+      // Capture keeps the gesture alive if the finger leaves the chart. It throws
+      // for a pointer the browser no longer considers active, which would take the
+      // whole screen down with it.
+      if (!captureTargetRef.current && Math.abs(deltaX) >= PERIOD_SWIPE_CAPTURE_PX) {
+        try {
+          event.currentTarget.setPointerCapture?.(event.pointerId);
+          captureTargetRef.current = event.currentTarget;
+        } catch {
+          /* the gesture still works without capture */
+        }
+      }
+      setOffset(resistance(deltaX));
     },
     onPointerUp: (event: React.PointerEvent<HTMLElement>) => {
       const startX = startXRef.current;
@@ -468,6 +491,26 @@ function usePeriodSwipe(
   useEffect(() => () => {
     if (guardTimeoutRef.current !== null) window.clearTimeout(guardTimeoutRef.current);
     if (settleTimeoutRef.current !== null) window.clearTimeout(settleTimeoutRef.current);
+  }, []);
+
+  // A press that never became a swipe holds no capture, so releasing it outside
+  // the chart never reaches the element's own handler. Without this the chart
+  // would stay parked wherever the finger left it.
+  useEffect(() => {
+    const endStrayPress = (event: globalThis.PointerEvent) => {
+      if (startXRef.current === null || pointerIdRef.current !== event.pointerId) return;
+      if (captureTargetRef.current) return;
+      startXRef.current = null;
+      pointerIdRef.current = undefined;
+      setDragging(false);
+      setOffset(0);
+    };
+    window.addEventListener('pointerup', endStrayPress);
+    window.addEventListener('pointercancel', endStrayPress);
+    return () => {
+      window.removeEventListener('pointerup', endStrayPress);
+      window.removeEventListener('pointercancel', endStrayPress);
+    };
   }, []);
 
   /** Spread on the element that should move; the handlers go on the surface. */
@@ -1177,15 +1220,19 @@ function ExpenseSplitSelector({
           ) : null}
         </div>
 
+        {/* Same shape as the Payments OTHER shortcuts: the 48px roundel above,
+            the label under it. A shortcut looks the same wherever it appears. */}
         <button
           type="button"
           aria-label="Add transaction"
           data-evo-add-transaction
           onClick={onAddTransaction}
-          className="inline-flex min-h-[32px] shrink-0 items-center gap-[6px] rounded-full px-[8px] text-[14px] font-bold leading-[18px] text-[var(--uc-action)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
+          className="flex w-[74px] shrink-0 cursor-pointer flex-col items-center gap-[6px] rounded-[8px] text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
         >
-          <AppIcon name="add-money" size={18} color="currentColor" aria-hidden="true" />
-          <span>Add transaction</span>
+          <ActionIconBubble iconName="add-money" />
+          <span className="block w-full overflow-hidden text-center text-[14px] font-normal leading-[16px]">
+            Add transaction
+          </span>
         </button>
       </div>
     </div>
@@ -1430,7 +1477,9 @@ function SpendingMonthCard({
         />
       </div>
 
-      <div>
+      {/* The bars are a separate reading from the sentence above them; at the
+          card's own 12px rhythm they read as one crowded block. */}
+      <div className="mt-[8px]">
         <CashFlowBars
           incomeTotal={summary.incomeTotal}
           spendingTotal={summary.spendingTotal}
@@ -2176,9 +2225,18 @@ export default function Evo2027AnalyticsScreen({
     [activeSplitMode, currencyByProductId, directionTransactions, summary.currency],
   );
   const donutSegments = useMemo(() => buildDonutSegments(donutRows), [donutRows]);
+  /*
+   * The arcs actually drawn, not the first N rows: the ring stops early when a
+   * row is too small to carry a marker, and taking the limit instead left rows
+   * that Other visibly folds in outside the filter it applied.
+   */
   const primarySplitKeys = useMemo(
-    () => new Set(donutRows.slice(0, DONUT_CATEGORY_LIMIT).map((row) => row.key)),
-    [donutRows],
+    () => new Set(
+      donutSegments
+        .filter((segment) => segment.category !== EXPENSE_OTHER_CATEGORY)
+        .map((segment) => segment.category),
+    ),
+    [donutSegments],
   );
   const activeSplitSelection = useMemo(() => {
     const available = new Set(donutRows.map((row) => row.key));
@@ -2222,10 +2280,25 @@ export default function Evo2027AnalyticsScreen({
     : null;
   // The stepper is where the period is named, so an isolated slice renames it there.
   const activeBucketTitle = activeBucket?.filterTitle ?? activeBucketLabel;
+  /*
+   * "Other" is one arc but many categories, and counting it as one made a
+   * selection of the +11 arc plus two more read as "3 categories" while the
+   * figure under it covered thirteen.
+   */
+  const foldedOtherCount = Math.max(0, donutRows.length - primarySplitKeys.size);
+  const expenseSelectionCount = Array.from(activeSplitSelection).reduce(
+    (total, key) => total + (key === EXPENSE_OTHER_CATEGORY ? foldedOtherCount : 1),
+    0,
+  );
+  // One named row keeps its own name; anything wider is counted.
+  const singleSelectionLabel = expenseSelectionLabels.length === 1 && expenseSelectionCount === 1
+    ? expenseSelectionLabels[0]
+    : null;
+  const countedSelectionLabel = expenseSelectionCount > 0
+    ? `${expenseSelectionCount} ${SPLIT_MODE_NOUNS[activeSplitMode]}`
+    : null;
   const expenseFilterLabel = [
-    expenseSelectionLabels.length === 1
-      ? expenseSelectionLabels[0]
-      : expenseSelectionLabels.length > 1 ? `${expenseSelectionLabels.length} ${SPLIT_MODE_NOUNS[activeSplitMode]}` : null,
+    singleSelectionLabel ?? countedSelectionLabel,
     activeBucketLabel,
   ].filter(Boolean).join(' · ') || null;
   const visibleExpensesTotal = visibleExpenses.reduce((total, transaction) => total + Math.abs(transaction.amount), 0);
@@ -2233,9 +2306,9 @@ export default function Evo2027AnalyticsScreen({
     ? analysisDirection === 'income' ? summary.incomeTotal : summary.spendingTotal
     : visibleExpensesTotal;
   // The chart headline names whatever the user has narrowed to, falling back to the period total.
-  const expenseSelectionLabel = expenseSelectionLabels.length > 1
-    ? `${expenseSelectionLabels.length} ${SPLIT_MODE_NOUNS[activeSplitMode]}`
-    : expenseSelectionLabels[0] ?? (analysisDirection === 'income' ? 'Total income' : 'Total spent');
+  const expenseSelectionLabel = singleSelectionLabel
+    ?? countedSelectionLabel
+    ?? (analysisDirection === 'income' ? 'Total income' : 'Total spent');
   const expenseHeaderLabel = expenseSelectionLabel;
 
   const breakdownRows = useMemo(
@@ -2322,6 +2395,17 @@ export default function Evo2027AnalyticsScreen({
     observer.observe(content);
     return () => observer.disconnect();
   }, [view, openBreakdownRow?.key]);
+  /*
+   * Every view here shares one scroller, so opening a category from halfway down
+   * the list used to land the new page already scrolled — its chart cut off and
+   * its header collapsed. Each level starts at its own top.
+   */
+  useEffect(() => {
+    const element = contentRef.current;
+    if (!element) return;
+    element.scrollTop = 0;
+    setContentScrollTop(0);
+  }, [view, openBreakdownRow?.key, analysisDirection]);
   // A subcategory filter only makes sense for the category it was picked in.
   useEffect(() => {
     setExcludedSubcategories(new Set());

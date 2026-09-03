@@ -16,7 +16,8 @@ const PARTY_TINTS = [
   "#6E8A63",
 ] as const;
 
-function partyTint(name: string) {
+/** Exported so other identity roundels (payment beneficiaries) tint the same way. */
+export function partyTint(name: string) {
   let hash = 0;
   for (let index = 0; index < name.length; index += 1) {
     hash = (hash * 31 + name.charCodeAt(index)) % 100_000;

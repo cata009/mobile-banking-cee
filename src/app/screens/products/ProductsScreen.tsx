@@ -474,6 +474,7 @@ export default function ProductsScreen({
   };
   const [activeTab, setActiveTab] = useState<ProductsMenuTab>("banking");
   const [selectedProductCard, setSelectedProductCard] = useState<ProductsCard | null>(null);
+  const [shelfSubPageOpen, setShelfSubPageOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const productsSectionRef = useRef<HTMLElement>(null);
   const visibleTab = config.hasShopSmartTab ? activeTab : "banking";
@@ -528,6 +529,7 @@ export default function ProductsScreen({
           }}
           onProductDetailOpen={onProductDetailOpen}
           onHeroCollapsedChange={onShelfHeroCollapsedChange}
+          onSubPageChange={setShelfSubPageOpen}
           renderOffers={({ showSummary = true } = {}) => (
             <ShopSmartContent
               summary={config.shopSmartSummary}
@@ -575,9 +577,13 @@ export default function ProductsScreen({
         </>
       )}
 
-      <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center border-t border-[var(--uc-border-muted)] bg-[var(--uc-bottom-bar-bg)]">
-        <BottomNavigation activeTab="products" onTabChange={handleTabChange} />
-      </div>
+      {/* Level 2 is a page you came into from a tab, not a tab of its own: it
+          leaves the primary navigation behind and is left through Back. */}
+      {shelfSubPageOpen ? null : (
+        <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center border-t border-[var(--uc-border-muted)] bg-[var(--uc-bottom-bar-bg)]">
+          <BottomNavigation activeTab="products" onTabChange={handleTabChange} />
+        </div>
+      )}
 
       {selectedProductCard ? (
         <ProductCardBottomSheet

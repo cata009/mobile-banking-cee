@@ -5,6 +5,9 @@ const actionIconName: Record<NewPaymentActionIcon, IconName> = {
   domestic: "new-payment-domestic",
   foreign: "new-payment-foreign",
   templates: "payment-templates",
+  qr: "payment-scan-qr",
+  slip: "payment-create-qr",
+  exchange: "payment-exchange-rates",
 };
 
 function NewPaymentActionIconView({ icon }: { icon: NewPaymentActionIcon }) {

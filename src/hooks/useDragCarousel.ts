@@ -40,10 +40,12 @@ interface DragState {
   pointerId: number | null;
   startScrollLeft: number;
   startX: number;
+  /** The element holding pointer capture, once a drag has actually started. */
+  captureTarget: HTMLElement | null;
 }
 
 function createIdleDragState(): DragState {
-  return { didMove: false, input: null, pointerId: null, startScrollLeft: 0, startX: 0 };
+  return { didMove: false, input: null, pointerId: null, startScrollLeft: 0, startX: 0, captureTarget: null };
 }
 
 export interface UseDragCarouselOptions {
@@ -107,6 +109,7 @@ export function useDragCarousel({
 
   const dragStateRef = useRef<DragState>(createIdleDragState());
   const mouseDragCleanupRef = useRef<(() => void) | null>(null);
+  const pointerDragCleanupRef = useRef<(() => void) | null>(null);
   const suppressClickRef = useRef(false);
   // Mirrors `dragStateRef.current.input !== null`: true from press to release,
   // exposed so scroll handlers can gate their idle snap-timer on live state.
@@ -127,6 +130,8 @@ export function useDragCarousel({
   const removeMouseDragListeners = useCallback(() => {
     mouseDragCleanupRef.current?.();
     mouseDragCleanupRef.current = null;
+    pointerDragCleanupRef.current?.();
+    pointerDragCleanupRef.current = null;
   }, []);
 
   const resetDrag = useCallback(() => {
@@ -147,6 +152,7 @@ export function useDragCarousel({
         pointerId,
         startScrollLeft: carousel.scrollLeft,
         startX: clientX,
+        captureTarget: null,
       };
       isPressActiveRef.current = true;
       return true;
@@ -185,42 +191,80 @@ export function useDragCarousel({
   const onPointerDown = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
       if (event.pointerType === "mouse" && (!enableMouseDragRef.current || event.button !== 0)) return;
-      if (beginDrag(event.clientX, "pointer", event.pointerId)) {
-        event.currentTarget.setPointerCapture(event.pointerId);
-      }
+      /*
+       * Deliberately no setPointerCapture here. While an element holds the
+       * capture, the browser fires the resulting `click` at that element instead
+       * of the one actually under the pointer — which silently swallowed every
+       * tap on a button inside a carousel (chart segments, category chips,
+       * period cards). Capture is taken in `onPointerMove`, once the press has
+       * proven itself a drag, so a plain tap never captures at all.
+       */
+      if (!beginDrag(event.clientX, "pointer", event.pointerId)) return;
+
+      /*
+       * Until the drag captures the pointer, a release outside the rail never
+       * reaches `onPointerUp` — without this the press would stay "active" and
+       * block the next one.
+       */
+      const endPress = (pointerEvent: globalThis.PointerEvent) => {
+        const dragState = dragStateRef.current;
+        if (dragState.input !== "pointer" || dragState.pointerId !== pointerEvent.pointerId) return;
+        if (dragState.captureTarget) return;
+        finishDrag();
+      };
+      document.addEventListener("pointerup", endPress);
+      document.addEventListener("pointercancel", endPress);
+      pointerDragCleanupRef.current = () => {
+        document.removeEventListener("pointerup", endPress);
+        document.removeEventListener("pointercancel", endPress);
+      };
     },
-    [beginDrag],
+    [beginDrag, finishDrag],
   );
 
   const onPointerMove = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
       const dragState = dragStateRef.current;
       if (dragState.input !== "pointer" || dragState.pointerId !== event.pointerId) return;
-      if (moveDrag(event.clientX)) event.preventDefault();
+      if (!moveDrag(event.clientX)) return;
+
+      event.preventDefault();
+      // Now that this is a drag, keep the gesture even if the pointer leaves the rail.
+      if (!dragState.captureTarget) {
+        const target = event.currentTarget;
+        target.setPointerCapture(event.pointerId);
+        dragState.captureTarget = target;
+      }
     },
     [moveDrag],
   );
+
+  const releasePointerCapture = useCallback((dragState: DragState) => {
+    const target = dragState.captureTarget;
+    if (!target || dragState.pointerId === null) return;
+    if (target.hasPointerCapture(dragState.pointerId)) target.releasePointerCapture(dragState.pointerId);
+    dragState.captureTarget = null;
+  }, []);
 
   const onPointerUp = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
       const dragState = dragStateRef.current;
       if (dragState.input !== "pointer" || dragState.pointerId !== event.pointerId) return;
-      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-        event.currentTarget.releasePointerCapture(event.pointerId);
-      }
+      releasePointerCapture(dragState);
       finishDrag();
     },
-    [finishDrag],
+    [finishDrag, releasePointerCapture],
   );
 
   const onPointerCancel = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
       const dragState = dragStateRef.current;
       if (dragState.input !== "pointer" || dragState.pointerId !== event.pointerId) return;
+      releasePointerCapture(dragState);
       resetDrag();
       suppressClickRef.current = false;
     },
-    [resetDrag],
+    [releasePointerCapture, resetDrag],
   );
 
   const onMouseDown = useCallback(

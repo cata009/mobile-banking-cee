@@ -30,8 +30,12 @@ export type PaymentOtherIcon = "qr" | "templates" | "card" | "standing" | "forei
 export type NewPaymentActionId =
   | "domestic-payment"
   | "foreign-payment"
-  | "templates-beneficiaries";
-export type NewPaymentActionIcon = "domestic" | "foreign" | "templates";
+  | "templates-beneficiaries"
+  | "scan-qr-code"
+  | "payment-slip"
+  | "standard-transfer"
+  | "currency-conversion";
+export type NewPaymentActionIcon = "domestic" | "foreign" | "templates" | "qr" | "slip" | "exchange";
 
 export interface PaymentHeroItem {
   id: PaymentHeroId;
@@ -60,6 +64,12 @@ export interface NewPaymentAction {
 export interface NewPaymentInfoBanner {
   title: string;
   description: string;
+  /**
+   * `null` keeps this copy as written instead of falling back to the shared
+   * "New payment" banner translation — a sheet that carries its own message
+   * would otherwise be overwritten by the generic one.
+   */
+  translationKey?: string | null;
 }
 
 export interface NewPaymentSheetConfig {
@@ -263,10 +273,66 @@ const DOMESTIC_PAYMENT_DESCRIPTION: Record<CountryId, string> = {
   SI: "Send payment in EUR in SI",
 };
 
+/**
+ * Czech Republic ships its own copy for two of the hero sheets: Scan & pay opens
+ * on the two things there are to scan, and Between my accounts on the two kinds
+ * of internal transfer. Everything else keeps the shared three-action sheet.
+ */
+const CZ_HERO_SHEET_OVERRIDES: Partial<Record<PaymentHeroId, Omit<NewPaymentSheetConfig, "title">>> = {
+  "scan-pay": {
+    actions: [
+      {
+        id: "scan-qr-code",
+        title: "SCAN A QR CODE",
+        description: "Make a payment by scanning a QR code",
+        icon: "qr",
+      },
+      {
+        id: "payment-slip",
+        title: "PAYMENT SLIP",
+        description: "Make a payment by scanning a payment slip",
+        icon: "slip",
+      },
+    ],
+    infoBanner: {
+      title: "Scan & pay",
+      description: "No more filling up payment forms, pay quickly and simply!",
+      translationKey: null,
+    },
+  },
+  "between-accounts": {
+    actions: [
+      {
+        id: "standard-transfer",
+        title: "STANDARD TRANSFER",
+        description: "Send CZK between your accounts",
+        icon: "domestic",
+      },
+      {
+        id: "currency-conversion",
+        title: "CURRENCY CONVERSIONS",
+        description: "Send foreign currency between your accounts",
+        icon: "exchange",
+      },
+    ],
+    infoBanner: {
+      title: "Currency conversions",
+      description: "Easy money transfers between your accounts in foreign currencies",
+      translationKey: null,
+    },
+  },
+};
+
 function createHeroSheetConfig(
   title: string,
   country: CountryId,
+  heroId: PaymentHeroId,
+  options: { allowCountryOverrides?: boolean } = {},
 ): NewPaymentSheetConfig {
+  const { allowCountryOverrides = true } = options;
+  const override = allowCountryOverrides && country === "CZ" ? CZ_HERO_SHEET_OVERRIDES[heroId] : undefined;
+  if (override) return { title, ...override };
+
   return {
     title,
     actions: [
@@ -318,7 +384,7 @@ function createHeroSheets(
 ): Record<PaymentHeroId, NewPaymentSheetConfig> {
   return PAYMENT_HERO_IDS.reduce((sheets, heroId) => {
     const itemTitle = primaryItems.find((item) => item.id === heroId)?.title.replace(/\n/g, " ");
-    sheets[heroId] = createHeroSheetConfig(itemTitle ?? DEFAULT_HERO_SHEET_TITLES[heroId], country);
+    sheets[heroId] = createHeroSheetConfig(itemTitle ?? DEFAULT_HERO_SHEET_TITLES[heroId], country, heroId);
     return sheets;
   }, {} as Record<PaymentHeroId, NewPaymentSheetConfig>);
 }
@@ -363,4 +429,20 @@ export const PAYMENTS_MENU_CONFIG: Record<CountryId, PaymentsMenuConfig> = {
 
 export function getPaymentsMenuForCountry(country: CountryId): PaymentsMenuConfig {
   return PAYMENTS_MENU_CONFIG[country];
+}
+
+/**
+ * The CZ hero-sheet copy is a baseline-only detail: the future releases redesign
+ * these journeys, so they keep the shared sheet.
+ */
+export function getHeroSheetForRelease(
+  menu: PaymentsMenuConfig,
+  country: CountryId,
+  heroId: PaymentHeroId,
+  options: { baseline: boolean },
+): NewPaymentSheetConfig {
+  if (options.baseline) return menu.heroSheets[heroId];
+
+  const title = menu.heroSheets[heroId].title;
+  return createHeroSheetConfig(title, country, heroId, { allowCountryOverrides: false });
 }

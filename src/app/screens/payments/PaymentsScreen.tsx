@@ -7,14 +7,17 @@ import NewPaymentDiscoverBanner from '@/app/components/payments/NewPaymentDiscov
 import PaymentHeroCard from '@/app/components/payments/PaymentHeroCard'
 import PaymentOtherShortcut from '@/app/components/payments/PaymentOtherShortcut'
 import SectionHeadingDivider from '@/app/components/SectionHeadingDivider'
+import Evo2027PaymentsHub, { type PaymentsHubActionId } from '@/app/screens/payments/Evo2027PaymentsHub'
 import ExchangeRatesScreen from '@/app/screens/payments/ExchangeRatesScreen'
 import InternalTransferScreen from '@/app/screens/payments/InternalTransferScreen'
 import PaymentTemplatesScreen from '@/app/screens/payments/PaymentTemplatesScreen'
+import RecurrentPaymentsScreen from '@/app/screens/payments/RecurrentPaymentsScreen'
 import { useLanguage } from '@/app/contexts/LanguageContext'
 import { resolveEffectiveAppContext } from '@/app/platform/effectiveAppContext'
 import { useDemo, useCountry } from '@/app/state/demoStore'
 import type { BankingActionId } from '@/app/state/demoTypes'
 import {
+  getHeroSheetForRelease,
   getPaymentsMenuForCountry,
   type NewPaymentAction,
   type NewPaymentSheetConfig,
@@ -40,10 +43,13 @@ function PaymentsHeader({
   title,
   onContactsClick,
   onMessagesClick,
+  onCustomiseClick,
 }: {
   title: string
   onContactsClick?: () => void
   onMessagesClick?: () => void
+  /** Evo 2027 only: opens the editor for the payments grid. */
+  onCustomiseClick?: () => void
 }) {
   const country = useCountry()
   const { t } = useLanguage()
@@ -72,7 +78,15 @@ function PaymentsHeader({
               label={t('runtime.actions.messages', 'Messages')}
               onClick={onMessagesClick}
             />
-            {usesBosniaHeaderActions ? null : (
+            {/* Evo trades Help for the pencil: this page is the one the customer
+                arranges, so the action that shapes it belongs in its header. */}
+            {onCustomiseClick ? (
+              <HeaderActionButton
+                icon="edit"
+                label={t('runtime.payments.hub.customise', 'Customise payments')}
+                onClick={onCustomiseClick}
+              />
+            ) : usesBosniaHeaderActions ? null : (
               <HeaderActionButton
                 icon="help"
                 label={t('runtime.actions.help', 'Help')}
@@ -128,11 +142,15 @@ function PaymentHeroSheet({
     infoBanner: {
       title: t(
         `runtime.payments.heroSheets.${heroId}.infoBanner.title`,
-        t('runtime.payments.newPayment.infoBanner.title', config.infoBanner.title),
+        config.infoBanner.translationKey === null
+          ? config.infoBanner.title
+          : t('runtime.payments.newPayment.infoBanner.title', config.infoBanner.title),
       ),
       description: t(
         `runtime.payments.heroSheets.${heroId}.infoBanner.description`,
-        t('runtime.payments.newPayment.infoBanner.description', config.infoBanner.description),
+        config.infoBanner.translationKey === null
+          ? config.infoBanner.description
+          : t('runtime.payments.newPayment.infoBanner.description', config.infoBanner.description),
       ),
     },
   }
@@ -201,10 +219,13 @@ export default function PaymentsScreen({
       ? menu.otherTitle
       : t(menu.otherTitleTranslationKey ?? 'runtime.payments.other', menu.otherTitle)
   const [selectedPrimaryItemId, setSelectedPrimaryItemId] = useState<PaymentHeroItem['id'] | null>(null)
+  const [hubEditOpen, setHubEditOpen] = useState(false)
   const [activeChildView, setActiveChildView] = useState<
-    'overview' | 'templates' | 'exchange-rates' | 'internal-transfer'
+    'overview' | 'templates' | 'exchange-rates' | 'internal-transfer' | 'recurrent-payments'
   >('overview')
-  const selectedHeroSheet = selectedPrimaryItemId ? menu.heroSheets[selectedPrimaryItemId] : null
+  const selectedHeroSheet = selectedPrimaryItemId
+    ? getHeroSheetForRelease(menu, country, selectedPrimaryItemId, { baseline: !isEvo2027 })
+    : null
 
   const handleOtherPaymentActionClick = (item: PaymentOtherItem) => {
     if (item.id === 'templates') {
@@ -217,6 +238,49 @@ export default function PaymentsScreen({
       return
     }
   }
+
+  /**
+   * The Evo hub is one grid over the journeys that used to be split between hero
+   * cards and the OTHER rail, so it routes to both: the screens the app already
+   * has, and the hero sheets for the ones that still start with a choice.
+   */
+  const handleHubAction = (id: PaymentsHubActionId) => {
+    switch (id) {
+      case 'new-payment':
+        onDomesticPaymentClick?.()
+        return
+      case 'between-accounts':
+        setActiveChildView('internal-transfer')
+        return
+      case 'recurrent-payments':
+        setActiveChildView('recurrent-payments')
+        return
+      case 'templates':
+        setActiveChildView('templates')
+        return
+      case 'exchange-rates':
+        setActiveChildView('exchange-rates')
+        return
+      case 'scan-pay':
+        setSelectedPrimaryItemId('scan-pay')
+        return
+      case 'manage-ebills':
+        setSelectedPrimaryItemId('manage-ebills')
+        return
+      default:
+        // Card repayment, Create QR and Foreign payment have no destination in
+        // the prototype yet; the New payment sheet is where they all begin.
+        setSelectedPrimaryItemId('new-payment')
+    }
+  }
+
+  const hubDisabledReasons = new Map<PaymentsHubActionId, string>()
+  const betweenAccountsReason = disabledActionReasons.get('payments.exchange.create')
+  if (betweenAccountsReason) hubDisabledReasons.set('between-accounts', betweenAccountsReason)
+  const domesticReason = disabledActionReasons.get('payments.domestic.create')
+  if (domesticReason) hubDisabledReasons.set('new-payment', domesticReason)
+  const recurrentReason = disabledActionReasons.get('payments.templates.manage')
+  if (recurrentReason) hubDisabledReasons.set('recurrent-payments', recurrentReason)
 
   const handlePrimaryItemSelect = (item: PaymentHeroItem) => {
     if (item.id === 'between-accounts' && demoState.release === 'release-future-evo-2027') {
@@ -259,6 +323,10 @@ export default function PaymentsScreen({
     return <InternalTransferScreen onBack={() => setActiveChildView('overview')} />
   }
 
+  if (activeChildView === 'recurrent-payments') {
+    return <RecurrentPaymentsScreen onBack={() => setActiveChildView('overview')} />
+  }
+
   return (
     <div className="relative flex h-full w-full flex-col bg-[var(--uc-app-bg)] text-[var(--uc-text)]">
       <div className="h-[54px] flex-shrink-0 bg-[var(--uc-app-bg)]" />
@@ -266,9 +334,20 @@ export default function PaymentsScreen({
         title={t('runtime.payments.title', menu.title)}
         onContactsClick={onContactsClick}
         onMessagesClick={onMessagesClick}
+        onCustomiseClick={isEvo2027 ? () => setHubEditOpen(true) : undefined}
       />
 
-      <div className="flex-1 overflow-y-auto scrollbar-hide pb-[76px]">
+      <div className="flex-1 overflow-y-auto scrollbar-hide pb-[96px]">
+        {isEvo2027 ? (
+          <Evo2027PaymentsHub
+            disabledReasons={hubDisabledReasons}
+            onAction={handleHubAction}
+            onBeneficiarySelect={() => onDomesticPaymentClick?.()}
+            editOpen={hubEditOpen}
+            onEditClose={() => setHubEditOpen(false)}
+          />
+        ) : (
+        <>
         <div className="flex flex-col gap-[13px] px-[20px] pt-[8px]">
           {localizedPrimaryItems.map((item) => {
             const actionId = getActionForHeroItem(item)
@@ -287,26 +366,22 @@ export default function PaymentsScreen({
         </div>
 
         <section className="px-[20px] pt-[16px]">
-          {/* Evo 2027 gave this the home sections' 24px title; the baseline app
-              keeps the rule-and-caption divider it always had. */}
-          {isEvo2027 ? (
-            <h2 className="uc-type-l1 mb-[12px] text-[var(--uc-text)]">{otherTitle}</h2>
-          ) : (
-            <SectionHeadingDivider title={otherTitle} />
-          )}
-          <div className={`overflow-x-auto overflow-y-hidden scrollbar-hide ${isEvo2027 ? '' : 'pt-[8px]'}`}>
-            <div className="flex w-max gap-[18px] pr-[20px]">
+          <SectionHeadingDivider title={otherTitle} />
+          <div className="overflow-x-auto overflow-y-hidden scrollbar-hide pt-[8px]">
+            <div className="flex w-max gap-[12px] pr-[20px]">
               {localizedOtherItems.map((item) => (
                 <PaymentOtherShortcut
                   key={item.id}
                   item={item}
-                  treatment={isEvo2027 ? 'evo-2027' : 'baseline'}
+                  treatment="baseline"
                   onClick={handleOtherPaymentActionClick}
                 />
               ))}
             </div>
           </div>
         </section>
+        </>
+        )}
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center border-t border-[var(--uc-border-muted)] bg-[var(--uc-bottom-bar-bg)]">

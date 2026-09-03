@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
+import LanguageSelector from "@/app/components/LanguageSelector";
 import NavigationRow from "@/app/components/NavigationRow";
 import PageHeader from "@/app/components/PageHeader";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
@@ -20,8 +21,15 @@ export default function SettingsScreen({ onBack }: SettingsScreenProps) {
   const { t } = useLanguage();
   const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(64);
   const [appearanceOpen, setAppearanceOpen] = useState(false);
+  const [languageOpen, setLanguageOpen] = useState(false);
   const [appliedHomeTheme, setAppliedHomeTheme] = useState<HomeTheme>(getStoredApp2027Theme);
   const [draftHomeTheme, setDraftHomeTheme] = useState<HomeTheme>(getStoredApp2027Theme);
+
+  // The language screen is the one the pre-login flow already uses, so the choice
+  // and its country-aware options stay the same wherever it is reached from.
+  if (languageOpen) {
+    return <LanguageSelector onBack={() => setLanguageOpen(false)} />;
+  }
 
   if (appearanceOpen) {
     return (
@@ -75,7 +83,9 @@ export default function SettingsScreen({ onBack }: SettingsScreenProps) {
                         setDraftHomeTheme(appliedHomeTheme);
                         setAppearanceOpen(true);
                       }
-                      : undefined}
+                      : item.id === "language"
+                        ? () => setLanguageOpen(true)
+                        : undefined}
                   />
                 ))}
               </div>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 85.9 98.9" xml:space="preserve">
+ <linearGradient id="monetaGradient" gradientUnits="userSpaceOnUse" x1="-22.9107" y1="79.1742" x2="75.7627" y2="164.9027" gradientTransform="matrix(0.9323 0 0 -1.0726 18.6663 180.1696)">
+  <stop offset="0.25" style="stop-color:#140757"/>
+  <stop offset="0.2861" style="stop-color:#270953"/>
+  <stop offset="0.4266" style="stop-color:#6D1042"/>
+  <stop offset="0.5533" style="stop-color:#A41535"/>
+  <stop offset="0.6616" style="stop-color:#CC192C"/>
+  <stop offset="0.7474" style="stop-color:#E41B26"/>
+  <stop offset="0.8" style="stop-color:#ED1C24"/>
+ </linearGradient>
+ <path fill="url(#monetaGradient)" d="M10.3,25.7l24.4,23.5L10.3,72.7L10.3,25.7L10.3,25.7z M85.6,0l-43,41.5L0,0.4V98l42.3-41l8.2-7.8l24.4-23.5v47   L58.5,56.9l-8,7.7l35.4,34.3V0H85.6z"/>
+</svg>

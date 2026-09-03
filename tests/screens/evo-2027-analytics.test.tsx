@@ -453,7 +453,10 @@ describe('Evo 2027 expense chart and split-by breakdown', () => {
     fireEvent.click(otherButton)
 
     expect(otherButton).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getAllByText('Other', { exact: true }).length).toBeGreaterThan(0)
+    // Other is one arc but many categories, so the headline counts what it folds
+    // in rather than naming the arc.
+    const foldedCount = Number(otherButton.textContent?.trim().replace('+', ''))
+    expect(screen.getAllByText(`${foldedCount} categories`).length).toBeGreaterThan(0)
     // Picking Other narrows the list to what the ring folded away: fewer rows
     // than the full breakdown, and not one of them is a named arc.
     const remaining = breakdownRows().map((row) => row.getAttribute('data-evo-expense-breakdown-row'))

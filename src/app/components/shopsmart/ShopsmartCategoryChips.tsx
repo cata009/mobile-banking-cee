@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import { useDragCarousel } from "@/hooks/useDragCarousel";
 
@@ -42,7 +42,40 @@ export default function ShopsmartCategoryChips({
   railDataAttribute,
 }: ShopsmartCategoryChipsProps) {
   const railRef = useRef<HTMLDivElement>(null);
+  const chipRefs = useRef(new Map<string, HTMLButtonElement>());
+  const hasSettledRef = useRef(false);
   const { dragHandlers, isDragging } = useDragCarousel({ carouselRef: railRef });
+
+  /*
+   * Selecting a chip further along the rail used to leave it wherever it
+   * happened to sit — often half cut off at the edge, with no sign of what comes
+   * next. The rail now brings the selection to the middle and stops there, so
+   * moving forward and back through the categories reads as one continuous
+   * strip. The ends are the exception: a first or last chip stays put rather
+   * than dragging empty space into view.
+   */
+  useEffect(() => {
+    const rail = railRef.current;
+    const chip = chipRefs.current.get(activeId);
+    if (!rail || !chip) return;
+
+    const maxScroll = Math.max(0, rail.scrollWidth - rail.clientWidth);
+    const centred = chip.offsetLeft - (rail.clientWidth - chip.offsetWidth) / 2;
+    const left = Math.min(Math.max(centred, 0), maxScroll);
+    if (Math.abs(left - rail.scrollLeft) < 1) {
+      hasSettledRef.current = true;
+      return;
+    }
+
+    // The first placement is where the rail already was; only a change animates.
+    const behavior: ScrollBehavior = hasSettledRef.current
+      && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      ? 'smooth'
+      : 'auto';
+    hasSettledRef.current = true;
+    if (typeof rail.scrollTo === 'function') rail.scrollTo({ left, behavior });
+    else rail.scrollLeft = left;
+  }, [activeId, categories]);
 
   return (
     <div
@@ -63,6 +96,10 @@ export default function ShopsmartCategoryChips({
           <button
             key={category.id}
             type="button"
+            ref={(node) => {
+              if (node) chipRefs.current.set(category.id, node);
+              else chipRefs.current.delete(category.id);
+            }}
             {...(chipDataAttribute ? { [chipDataAttribute]: category.id } : {})}
             aria-pressed={active}
             onClick={() => onSelect(category.id)}

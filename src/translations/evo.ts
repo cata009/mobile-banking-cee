@@ -235,7 +235,7 @@ const EN: EvoTranslations = {
     sectionTitles: { accounts: "Smart ideas for everyday money", savings: "Ideas to grow your savings", credits: "Ideas for your next step", insurance: "Protection for what matters" },
     cards: {
       roundups: {
-        title: "Save a little every day",
+        title: "Save a little every time you spend",
         body: "Round up everyday payments and save the difference.",
         caption: "Set your rule and adjust it at any time.",
       },
