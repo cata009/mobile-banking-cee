@@ -13,6 +13,8 @@ import { useDemo } from "@/app/state/demoStore";
 interface HomeHeaderProps {
   onPrimeClick?: () => void;
   onMessagesClick?: () => void;
+  /** Adds a Spending shortcut at the head of the rail. Omit and the rail is unchanged. */
+  onSpendingClick?: () => void;
   showActions?: boolean;
   showTitle?: boolean;
   title?: string;
@@ -21,6 +23,7 @@ interface HomeHeaderProps {
 export default function HomeHeader({
   onPrimeClick,
   onMessagesClick,
+  onSpendingClick,
   showActions = true,
   showTitle = true,
   title = "Your Homepage",
@@ -54,6 +57,9 @@ export default function HomeHeader({
           </button>
 
           <HeaderActionRail>
+            {onSpendingClick ? (
+              <HeaderActionButton icon="spending" label="Spending" onClick={onSpendingClick} />
+            ) : null}
             <AmountVisibilityButton hidden={amountsHidden} onToggle={toggleAmountsHidden} />
             <HeaderActionButton icon="profile" label="Profile" />
             <HeaderActionButton icon="messages" label="Messages" onClick={onMessagesClick} />

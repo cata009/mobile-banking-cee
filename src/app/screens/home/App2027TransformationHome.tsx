@@ -2,13 +2,12 @@ import { Children, cloneElement, isValidElement, useCallback, useEffect, useLayo
 import { AppIcon } from '@/app/components/icons';
 import AccountCarouselIndicator from '@/app/components/accounts/AccountCarouselIndicator';
 import GhostBanner from '@/app/components/cards/GhostBanner';
-import TotalRow from '@/app/components/TotalRow';
 import ShopsmartOfferCard from '@/app/components/shopsmart/ShopsmartOfferCard';
 import { maskAmountParts } from '@/app/utils/amountPrivacy';
 import type { Product, ProductCategory } from '@/data/products';
 import { formatEvo2027Amount } from '@/app/utils/evo2027Formatting';
 import { buildInvestmentSecurities, calculateInvestmentPortfolioPerformance } from '@/app/config/investmentsPortfolioConfig';
-import { calculateLatestWeekSpending, createSpendingAnalyticsTimeline } from '@/data/spendingAnalytics';
+import { createSpendingAnalyticsTimeline } from '@/data/spendingAnalytics';
 import type { CountryId } from '@/app/state/demoTypes';
 import { getProductsMenuForCountry, type ShopSmartOfferCategory } from '@/app/config/productsMenuConfig';
 import {
@@ -35,8 +34,9 @@ import ucArrowSailing from '@/assets/app2027/uc-prime/Prime-Sailing-banner-wide-
 import ucArrowJet from '@/assets/app2027/uc-prime/exkluzivni-vyhody-prime-wide-v2.png';
 import ucArrowOffice from '@/assets/app2027/uc-prime/Prime-Office-banner-wide-v2.png';
 import ShopsmartCategoryChips from '@/app/components/shopsmart/ShopsmartCategoryChips';
-import App2027Activity from './App2027Activity';
+import type { App2027TransactionOpenHandler } from './App2027Activity';
 import App2027ProductAccordions, { CurrencyBadge, TrendBadge } from './App2027ProductAccordions';
+import App2027ProductRail from './App2027ProductRail';
 
 export type TransformationTab = 'accounts' | 'savings' | 'credits' | 'insurance';
 type FormattedAmount = { integer: string; decimals: string; currency: string };
@@ -52,7 +52,6 @@ export interface App2027TransformationHomeProps {
   formatProductAmount: (product: Product) => FormattedAmount;
   getProductDisplayNumber: (product: Product) => string;
   onProductClick: (product: Product) => void;
-  onSeeAllTransactions?: () => void;
   onAccountInfoClick?: (product: Product) => void;
   onDomesticPaymentClick?: () => void;
   onPaymentsClick?: () => void;
@@ -63,7 +62,8 @@ export interface App2027TransformationHomeProps {
   onOfferOpen?: (shelfItemId: string) => void;
   /** Opens Spending, optionally on a named period. */
   onSpendingClick?: (periodPresetId?: string) => void;
-  onTransactionOpen?: Parameters<typeof App2027Activity>[0]['onTransactionOpen'];
+  /** Opens a transaction from an account sheet, on the account whose ledger it came from. */
+  onTransactionOpen?: App2027TransactionOpenHandler;
 }
 
 const TAB_ORDER: readonly TransformationTab[] = ['accounts', 'savings', 'credits', 'insurance'];
@@ -414,6 +414,53 @@ function Group({
   );
 }
 
+/**
+ * A product group on Home, as the rail Accounts already used.
+ *
+ * Every group answers to the same swipe now, so reaching the second deposit or
+ * the second policy costs what reaching the second account costs. A group the
+ * customer has nothing in keeps the old header-plus-banner shape: there is no
+ * rail to swipe through and a lone empty state does not want dots under it.
+ */
+function ProductRailGroup({
+  title,
+  products,
+  empty,
+  renderCard,
+  sheetDataAttribute,
+  railDataAttribute,
+  addShelfItemId,
+  onOfferOpen,
+}: {
+  title: string;
+  products: Product[];
+  empty: ReactNode;
+  renderCard: (product: Product) => ReactNode;
+  sheetDataAttribute?: string;
+  railDataAttribute?: string;
+  /** Shelf page the header's + opens — where the customer gets another of these. */
+  addShelfItemId?: string;
+  onOfferOpen?: (shelfItemId: string) => void;
+}) {
+  const { t } = useLanguage();
+  const onAdd = addShelfItemId && onOfferOpen ? () => onOfferOpen(addShelfItemId) : undefined;
+  const addLabel = `${t('runtime.evo.groups.addProduct')} ${title}`;
+
+  if (!products.length) return <Group title={title} expandable={false}>{empty}</Group>;
+
+  return (
+    <App2027ProductRail
+      title={title}
+      countLabel={formatGroupCount(products.length, t) ?? undefined}
+      sheetDataAttribute={sheetDataAttribute}
+      railDataAttribute={railDataAttribute}
+      onAdd={onAdd}
+      addLabel={addLabel}
+      items={products.map((product) => ({ id: product.id, label: product.name, content: renderCard(product) }))}
+    />
+  );
+}
+
 const INSURANCE_POLICIES = [
   {
     title: 'Genius Protect',
@@ -442,10 +489,6 @@ const INSURANCE_POLICIES = [
     target: 'home-insurance',
   },
 ] as const;
-
-function ProductStackPreview() {
-  return <span aria-hidden="true" data-home-product-stack-preview className="relative z-0 -mt-[6px] block h-[16px] w-full rounded-b-[8px] border-x border-b border-[color-mix(in_srgb,var(--uc-border-muted)_72%,transparent)] bg-[var(--uc-surface-raised)]" />;
-}
 
 /**
  * A progress bar that names what it measures — to assistive tech, not on screen.
@@ -531,149 +574,123 @@ export function depositPresentation(product: Product): DepositPresentation {
   return EVO_2027_DEPOSIT_PRESENTATIONS[product.id] ?? DEFAULT_DEPOSIT_PRESENTATION;
 }
 
-function DepositList({ deposits, amountsHidden, formatProductAmount, onProductClick, collapsed = false, total }: { deposits: Product[]; amountsHidden: boolean; formatProductAmount: (product: Product) => FormattedAmount; onProductClick: (product: Product) => void; collapsed?: boolean; total?: FormattedAmount }) {
+function DepositCard({ product, amountsHidden, formatProductAmount, onProductClick }: { product: Product; amountsHidden: boolean; formatProductAmount: (product: Product) => FormattedAmount; onProductClick: (product: Product) => void }) {
   const { t } = useLanguage();
-  const displayedDeposits = collapsed ? deposits.slice(0, 1) : deposits;
-  const displayedTotal = total ? maskAmountParts(total, amountsHidden) : null;
+  const current = formatProductAmount(product);
+  const presentation = depositPresentation(product);
+  const maturity = formatEvo2027Amount(product.balance * (1 + presentation.annualRate * presentation.termDays / 365), product.currency);
+  const elapsedDays = presentation.termDays - presentation.daysToMaturity;
 
-  return <>
-    <div data-home-deposit-list className={['overflow-hidden rounded-[8px] bg-[var(--uc-surface)]', collapsed ? 'relative z-10 shadow-[0_6px_12px_rgb(var(--uc-shadow-rgb)/0.08)]' : ''].join(' ')}>
-      {displayedDeposits.map((product, index) => {
-        const current = formatProductAmount(product);
-        const presentation = depositPresentation(product);
-        const maturity = formatEvo2027Amount(product.balance * (1 + presentation.annualRate * presentation.termDays / 365), product.currency);
-        const elapsedDays = presentation.termDays - presentation.daysToMaturity;
+  return <div data-home-deposit-card className="flex h-full flex-col bg-[var(--uc-surface)] p-[16px]">
+    <button type="button" onClick={() => onProductClick(product)} className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]">
+      <p className="text-[16px] font-bold">{product.name} · {(presentation.annualRate * 100).toFixed(1)}% {t('runtime.evo.labels.interestRate')}</p>
+      <p data-home-deposit-maturity className="mt-[3px] flex flex-wrap items-baseline gap-[3px] text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
+        {t('runtime.evo.labels.maturityAmount')}: <Money data-home-deposit-maturity-value amount={maturity} hidden={amountsHidden} role="support" />
+      </p>
+      <p className="mt-[12px] text-[var(--uc-text)]"><Money amount={current} hidden={amountsHidden} role="product" /></p>
+    </button>
+    {/* Pushed to the foot of the card so every deposit on the rail carries its
+        bar and dates on the same line, whatever its name costs above. */}
+    <div className="mt-auto">
+      <div className="mt-[20px] flex flex-wrap justify-between gap-x-[12px] gap-y-[4px] text-[14px]">
+        <span>{t('runtime.evo.labels.period')}: <b>{presentation.periodLabel}</b></span>
+        <span>{t('runtime.evo.labels.daysToMaturity')}: <b>{presentation.daysToMaturity}</b></span>
+      </div>
+      <LabelledProgress
+        dataAttribute="data-home-deposit-maturity-progress"
+        label={t('runtime.evo.labels.maturityProgress')}
+        valueNow={elapsedDays}
+        valueMax={presentation.termDays}
+        valueText={`${elapsedDays}/${presentation.termDays}`}
+      />
+      <div className="mt-[10px] flex flex-wrap justify-between gap-x-[12px] gap-y-[4px] text-[13px] text-[var(--uc-text-muted)]">
+        <span>{t('runtime.evo.labels.startDate')}: {presentation.startDate}</span>
+        <span>{t('runtime.evo.labels.maturityDate')}: {presentation.maturityDate}</span>
+      </div>
+    </div>
+  </div>;
+}
 
-        return <div key={product.id} data-home-deposit-card className={['bg-[var(--uc-surface)] p-[16px]', index > 0 ? 'border-t-[0.5px] border-[var(--uc-border-muted)]' : ''].filter(Boolean).join(' ')}>
-          <button type="button" onClick={() => onProductClick(product)} className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]">
-            <p className="text-[16px] font-bold">{product.name} · {(presentation.annualRate * 100).toFixed(1)}% {t('runtime.evo.labels.interestRate')}</p>
-            <p data-home-deposit-maturity className="mt-[3px] flex flex-wrap items-baseline gap-[3px] text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
-              {t('runtime.evo.labels.maturityAmount')}: <Money data-home-deposit-maturity-value amount={maturity} hidden={amountsHidden} role="support" />
-            </p>
-            <p className="mt-[12px] text-[var(--uc-text)]"><Money amount={current} hidden={amountsHidden} role="product" /></p>
-          </button>
-          <div className="mt-[20px] flex flex-wrap justify-between gap-x-[12px] gap-y-[4px] text-[14px]">
-            <span>{t('runtime.evo.labels.period')}: <b>{presentation.periodLabel}</b></span>
-            <span>{t('runtime.evo.labels.daysToMaturity')}: <b>{presentation.daysToMaturity}</b></span>
-          </div>
-          <LabelledProgress
-            dataAttribute="data-home-deposit-maturity-progress"
-            label={t('runtime.evo.labels.maturityProgress')}
-            valueNow={elapsedDays}
-            valueMax={presentation.termDays}
-            valueText={`${elapsedDays}/${presentation.termDays}`}
-          />
-          <div className="mt-[10px] flex flex-wrap justify-between gap-x-[12px] gap-y-[4px] text-[13px] text-[var(--uc-text-muted)]">
-            <span>{t('runtime.evo.labels.startDate')}: {presentation.startDate}</span>
-            <span>{t('runtime.evo.labels.maturityDate')}: {presentation.maturityDate}</span>
-          </div>
-        </div>;
-      })}
-      {displayedTotal ? (
-        <TotalRow
-          className="w-full border-t border-[var(--uc-border-muted)]"
-          variant="evolution"
-          productStyle="pi"
-          integer={displayedTotal.integer}
-          decimals={displayedTotal.decimals}
-          currency={displayedTotal.currency}
+function InsurancePolicyCard({ policy, onClick, amountsHidden }: { policy: (typeof INSURANCE_POLICIES)[number]; onClick?: (shelfItemId: string) => void; amountsHidden: boolean }) {
+  const { t } = useLanguage();
+
+  return (
+    <button
+      data-home-insurance-policy-card
+      type="button"
+      onClick={() => onClick?.(policy.target)}
+      className="flex h-full w-full flex-col p-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+    >
+      <div className="flex items-start justify-between gap-[12px]">
+        <span className="min-w-0">
+          <span className="block text-[16px] font-bold">{policy.title}</span>
+          <span className="mt-[4px] block text-[14px] text-[var(--uc-text-muted)]">{policy.subtitle}</span>
+        </span>
+        <span data-home-insurance-logo className="grid h-[40px] w-[72px] shrink-0 place-items-center overflow-hidden rounded-[4px] bg-[#00549f] text-[14px] font-bold text-white">Allianz</span>
+      </div>
+      {/* The figure is what the customer pays next, captioned underneath —
+          the shape a loan card uses. The sum insured belongs in the policy
+          detail: it is the one number nobody acts on from Home. */}
+      <p className="mt-[10px] text-[var(--uc-text)]">
+        <Money data-home-insurance-premium amount={formatEvo2027Amount(policy.premium, 'CZK')} hidden={amountsHidden} role="product" />
+      </p>
+      <p className="mt-[2px] text-[13px] leading-[16px] text-[var(--uc-text-muted)]">{t('runtime.evo.labels.nextPremium')}</p>
+      {/* At the foot of the card, so the bar and its dates line up across the rail. */}
+      <div className="mt-auto w-full">
+        <LabelledProgress
+          dataAttribute="data-home-insurance-progress"
+          label={t('runtime.evo.labels.policyProgress')}
+          valueNow={policy.progress}
         />
-      ) : null}
-    </div>
-    {collapsed && deposits.length > 1 ? <ProductStackPreview /> : null}
-  </>;
+        {/* Two dates around the bar, exactly as a deposit carries start and
+            maturity: without them the percentage had nothing to be read from. */}
+        <div className="mt-[10px] flex flex-wrap justify-between gap-x-[12px] gap-y-[4px] text-[13px] text-[var(--uc-text-muted)]">
+          <span>{t('runtime.evo.labels.coverStarted')}: {policy.startDate}</span>
+          <span>{t('runtime.evo.labels.renewal')}: {policy.renewalDate}</span>
+        </div>
+      </div>
+    </button>
+  );
 }
 
-function InsurancePolicyList({ onClick, amountsHidden, collapsed = false }: { onClick?: (shelfItemId: string) => void; amountsHidden: boolean; collapsed?: boolean }) {
+function LoanCard({ product, amountsHidden, onProductClick }: { product: Product; amountsHidden: boolean; onProductClick: (product: Product) => void }) {
   const { t } = useLanguage();
-  const policies = collapsed ? INSURANCE_POLICIES.slice(0, 1) : INSURANCE_POLICIES;
+  const terms = getEvoCreditTerms(product);
+  const total = Math.abs(product.balance) * 1.45;
+  const repaid = total - Math.abs(product.balance);
+  const remaining = formatEvo2027Amount(Math.abs(product.balance), product.currency);
+  const installment = formatEvo2027Amount(Math.round(Math.abs(product.balance) * terms.installmentRate), product.currency);
+  const totalAmount = formatEvo2027Amount(total, product.currency);
+  const repaidAmount = formatEvo2027Amount(repaid, product.currency);
+  const repaidPercentage = total > 0 ? (repaid / total) * 100 : 0;
 
-  return <>
-    <div data-home-insurance-policy-list className={['overflow-hidden rounded-[8px] bg-[var(--uc-surface)]', collapsed ? 'relative z-10 shadow-[0_6px_12px_rgb(var(--uc-shadow-rgb)/0.08)]' : ''].join(' ')}>
-      {policies.map((policy, index) => (
-        <button
-          key={policy.title}
-          data-home-insurance-policy-card
-          type="button"
-          onClick={() => onClick?.(policy.target)}
-          className={`w-full p-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${index > 0 ? 'border-t-[0.5px] border-[var(--uc-border-muted)]' : ''}`}
-        >
-          <div className="flex items-start justify-between gap-[12px]">
-            <span className="min-w-0">
-              <span className="block text-[16px] font-bold">{policy.title}</span>
-              <span className="mt-[4px] block text-[14px] text-[var(--uc-text-muted)]">{policy.subtitle}</span>
-            </span>
-            <span data-home-insurance-logo className="grid h-[40px] w-[72px] shrink-0 place-items-center overflow-hidden rounded-[4px] bg-[#00549f] text-[14px] font-bold text-white">Allianz</span>
-          </div>
-          {/* The figure is what the customer pays next, captioned underneath —
-              the shape a loan card uses. The sum insured belongs in the policy
-              detail: it is the one number nobody acts on from Home. */}
-          <p className="mt-[10px] text-[var(--uc-text)]">
-            <Money data-home-insurance-premium amount={formatEvo2027Amount(policy.premium, 'CZK')} hidden={amountsHidden} role="product" />
-          </p>
-          <p className="mt-[2px] text-[13px] leading-[16px] text-[var(--uc-text-muted)]">{t('runtime.evo.labels.nextPremium')}</p>
-          <LabelledProgress
-            dataAttribute="data-home-insurance-progress"
-            label={t('runtime.evo.labels.policyProgress')}
-            valueNow={policy.progress}
-          />
-          {/* Two dates around the bar, exactly as a deposit carries start and
-              maturity: without them the percentage had nothing to be read from. */}
-          <div className="mt-[10px] flex flex-wrap justify-between gap-x-[12px] gap-y-[4px] text-[13px] text-[var(--uc-text-muted)]">
-            <span>{t('runtime.evo.labels.coverStarted')}: {policy.startDate}</span>
-            <span>{t('runtime.evo.labels.renewal')}: {policy.renewalDate}</span>
-          </div>
-        </button>
-      ))}
+  return <div data-home-loan-card className="flex h-full flex-col bg-[var(--uc-surface)] p-[16px]">
+    <button type="button" onClick={() => onProductClick(product)} className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]">
+      <p className="text-[16px] font-bold">{product.name}</p>
+      <p data-home-loan-installment className="mt-[4px] flex flex-wrap items-baseline gap-[3px] text-[14px] text-[var(--uc-text-muted)]">
+        {t('runtime.evo.labels.nextInstallment')}: <Money data-home-supporting-amount amount={installment} hidden={amountsHidden} role="support" />
+      </p>
+      <p className="mt-[10px] text-[var(--uc-text)]"><Money amount={remaining} hidden={amountsHidden} role="product" /></p>
+    </button>
+    {/* At the foot of the card, so the bar and the two totals line up across the rail. */}
+    <div className="mt-auto">
+      <LabelledProgress
+        dataAttribute="data-home-loan-progress"
+        label={t('runtime.evo.labels.repaidProgress')}
+        valueNow={repaidPercentage}
+      />
+      <div className="mt-[10px] flex justify-between gap-[12px] text-[14px]">
+        <span className="text-[var(--uc-text-muted)]">
+          {t('runtime.evo.labels.totalRepaid')}<br />
+          <Money data-home-loan-repaid-amount amount={repaidAmount} hidden={amountsHidden} role="support" className="text-[var(--uc-text)]" />
+        </span>
+        <span className="text-right text-[var(--uc-text-muted)]">
+          {t('runtime.evo.labels.totalLoan')}<br />
+          <Money data-home-loan-total-amount amount={totalAmount} hidden={amountsHidden} role="support" className="text-[var(--uc-text)]" />
+        </span>
+      </div>
     </div>
-    {collapsed ? <ProductStackPreview /> : null}
-  </>;
-}
-
-function LoanList({ loans, amountsHidden, onProductClick, collapsed = false }: { loans: Product[]; amountsHidden: boolean; onProductClick: (product: Product) => void; collapsed?: boolean }) {
-  const { t } = useLanguage();
-  const displayedLoans = collapsed ? loans.slice(0, 1) : loans;
-
-  return <>
-    <div data-home-loan-list className={['overflow-hidden rounded-[8px] bg-[var(--uc-surface)]', collapsed ? 'relative z-10 shadow-[0_6px_12px_rgb(var(--uc-shadow-rgb)/0.08)]' : ''].join(' ')}>
-      {displayedLoans.map((product, index) => {
-        const terms = getEvoCreditTerms(product);
-        const total = Math.abs(product.balance) * 1.45;
-        const repaid = total - Math.abs(product.balance);
-        const remaining = formatEvo2027Amount(Math.abs(product.balance), product.currency);
-        const installment = formatEvo2027Amount(Math.round(Math.abs(product.balance) * terms.installmentRate), product.currency);
-        const totalAmount = formatEvo2027Amount(total, product.currency);
-        const repaidAmount = formatEvo2027Amount(repaid, product.currency);
-        const repaidPercentage = total > 0 ? (repaid / total) * 100 : 0;
-
-        return <div key={product.id} data-home-loan-card className={['bg-[var(--uc-surface)] p-[16px]', index > 0 ? 'border-t-[0.5px] border-[var(--uc-border-muted)]' : ''].filter(Boolean).join(' ')}>
-          <button type="button" onClick={() => onProductClick(product)} className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]">
-            <p className="text-[16px] font-bold">{product.name}</p>
-            <p data-home-loan-installment className="mt-[4px] flex flex-wrap items-baseline gap-[3px] text-[14px] text-[var(--uc-text-muted)]">
-              {t('runtime.evo.labels.nextInstallment')}: <Money data-home-supporting-amount amount={installment} hidden={amountsHidden} role="support" />
-            </p>
-            <p className="mt-[10px] text-[var(--uc-text)]"><Money amount={remaining} hidden={amountsHidden} role="product" /></p>
-          </button>
-          <LabelledProgress
-            dataAttribute="data-home-loan-progress"
-            label={t('runtime.evo.labels.repaidProgress')}
-            valueNow={repaidPercentage}
-          />
-          <div className="mt-[10px] flex justify-between gap-[12px] text-[14px]">
-            <span className="text-[var(--uc-text-muted)]">
-              {t('runtime.evo.labels.totalRepaid')}<br />
-              <Money data-home-loan-repaid-amount amount={repaidAmount} hidden={amountsHidden} role="support" className="text-[var(--uc-text)]" />
-            </span>
-            <span className="text-right text-[var(--uc-text-muted)]">
-              {t('runtime.evo.labels.totalLoan')}<br />
-              <Money data-home-loan-total-amount amount={totalAmount} hidden={amountsHidden} role="support" className="text-[var(--uc-text)]" />
-            </span>
-          </div>
-        </div>;
-      })}
-    </div>
-    {collapsed && loans.length > 1 ? <ProductStackPreview /> : null}
-  </>;
+  </div>;
 }
 
 /**
@@ -835,7 +852,10 @@ function InterestCarousel({ tab, onOfferOpen }: { tab: TransformationTab; onOffe
               data-home-interest-card={card.copyKey}
               data-home-interest-target={card.target}
               onClick={() => onOfferOpen?.(card.target)}
-              className="flex h-full w-[calc(100%-48px)] shrink-0 snap-start flex-col overflow-hidden rounded-[8px] bg-[var(--uc-surface)] text-left shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+              /* Same 24px peek as the account sheets above: every rail on this
+                 page has to start and end on one vertical line, or the page
+                 reads as three different column widths stacked. */
+              className="flex h-full w-[calc(100%-24px)] shrink-0 snap-start flex-col overflow-hidden rounded-[8px] bg-[var(--uc-surface)] text-left shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
             >
               {/* Taller than the 100px band it replaces: the chevron is a third of
                   the source frame, and a shallower crop left no room around it. */}
@@ -893,7 +913,7 @@ function ShopSmart({ country, onProductsClick }: { country: CountryId; onProduct
       />
       <HorizontalCarousel key={activeFilter} ariaLabel={t('runtime.evo.shopsmart.offersLabel')} count={visibleOffers.length}>
         {visibleOffers.map((offer) => (
-          <div key={offer.id} className="w-[calc(100%-48px)] shrink-0 snap-start">
+          <div key={offer.id} className="w-[calc(100%-24px)] shrink-0 snap-start">
             <ShopsmartOfferCard
               merchant={offer.merchant}
               title={offer.title}
@@ -923,7 +943,6 @@ export default function App2027TransformationHome({
   formatProductAmount,
   getProductDisplayNumber,
   onProductClick,
-  onSeeAllTransactions,
   onAccountInfoClick,
   onDomesticPaymentClick,
   onPaymentsClick,
@@ -993,21 +1012,22 @@ export default function App2027TransformationHome({
   const savings = categoryProducts(categories, 'savings_deposits').filter((product) => product.type === 'saving_account');
   const deposits = categoryProducts(categories, 'savings_deposits').filter((product) => product.type === 'term_deposit');
 
-  // The banner quotes the last bar of the Expenses chart, not an estimate: same timeline, same
-  // week slices. When that week has no spending the row drops rather than printing a 0,00 that
-  // reads like a data error.
-  const weekSpending = useMemo(() => {
+  // Money out for the active month, on the same timeline the Spending screen builds its
+  // cash-flow card from. The figure is wider than that card's, because this counts every
+  // product the customer holds while the Spending screen scopes to the account picked in its
+  // own selector. When the month has no spending the row drops rather than printing a 0,00
+  // that reads like a data error.
+  const monthSpending = useMemo(() => {
     const products = categories.flatMap((category) => category.products);
     if (!products.length) return null;
 
     const timeline = createSpendingAnalyticsTimeline(country, products);
     const summary = timeline.summariesByPeriodKey[timeline.activePeriodKey];
-    if (!summary) return null;
+    if (!summary || summary.periodKind !== 'month') return null;
 
-    const total = calculateLatestWeekSpending(summary);
-    if (total === null || total <= 0) return null;
+    if (summary.spendingTotal <= 0) return null;
 
-    return { total, currency: summary.currency };
+    return { total: summary.spendingTotal, currency: summary.currency };
   }, [categories, country]);
 
   const investments = categoryProducts(categories, 'investments');
@@ -1040,7 +1060,6 @@ export default function App2027TransformationHome({
   const availableTotal = useMemo(() => calculateTotal(accounts), [accounts, calculateTotal]);
   const savingsProducts = useMemo(() => [...savings, ...deposits, ...investments], [deposits, investments, savings]);
   const totalSavings = useMemo(() => calculateTotal(savingsProducts), [calculateTotal, savingsProducts]);
-  const depositsSubtotal = useMemo(() => calculateTotal(deposits), [calculateTotal, deposits]);
 
   /*
    * "Growth this year" was a flat 3.2% of a pool that mixes guaranteed products
@@ -1161,18 +1180,19 @@ export default function App2027TransformationHome({
           tab="accounts"
           amount={availableTotal}
           amountsHidden={amountsHidden}
-          secondaryLabel={weekSpending ? t('runtime.evo.summary.spentThisWeek') : undefined}
-          secondaryValue={weekSpending ? formatEvo2027Amount(weekSpending.total, weekSpending.currency as Product['currency']) : undefined}
-          onOpen={weekSpending && onSpendingClick ? () => onSpendingClick() : undefined}
+          secondaryLabel={monthSpending ? t('runtime.evo.summary.spentThisMonth') : undefined}
+          secondaryValue={monthSpending ? formatEvo2027Amount(monthSpending.total, monthSpending.currency as Product['currency']) : undefined}
+          onOpen={monthSpending && onSpendingClick ? () => onSpendingClick() : undefined}
           openLabel={t('runtime.evo.summary.openSpending')}
         />
         <div data-home-pane="primary">
           {!accounts.length ? <Group title={t('runtime.evo.groups.accounts')} expandable={false}><EmptyProducts title={t('runtime.evo.empty.accountTitle')} description={t('runtime.evo.empty.accountBody')} onClick={onProductsClick} /></Group> : null}
           {!debitCards.length ? <Group title={t('runtime.evo.groups.cards')} expandable={false}><EmptyProducts title={t('runtime.evo.empty.cardsTitle')} description={t('runtime.evo.empty.cardsBody')} onClick={onProductsClick} /></Group> : null}
-          <App2027ProductAccordions categories={debitCardCategories} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} calculateGroupTotal={calculateTotal} getProductDisplayNumber={getProductDisplayNumber} onProductClick={onProductClick} useCzRoboAccountCards onDomesticPaymentClick={onDomesticPaymentClick} onPaymentsClick={onPaymentsClick} onAccountInfoClick={onAccountInfoClick} onCardDetailsClick={onCardDetailsClick} onCardOptionsClick={onCardOptionsClick} visibleKeys={['accounts', 'cards']} initialOpenKeys={{ accounts: true, cards: true }} />
+          {/* Recent transactions ride with each account: transactions only exist per
+              ledger, so each sheet shows its own head and "See more" opens that account. */}
+          <App2027ProductAccordions categories={debitCardCategories} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} calculateGroupTotal={calculateTotal} getProductDisplayNumber={getProductDisplayNumber} onProductClick={onProductClick} useCzRoboAccountCards accountActivity={{ country, onTransactionOpen }} onDomesticPaymentClick={onDomesticPaymentClick} onPaymentsClick={onPaymentsClick} onAccountInfoClick={onAccountInfoClick} onCardDetailsClick={onCardDetailsClick} onCardOptionsClick={onCardOptionsClick} addShelfItemIds={{ accounts: 'current-account', cards: 'debit-card' }} onOfferOpen={onOfferOpen} visibleKeys={['accounts', 'cards']} initialOpenKeys={{ accounts: true, cards: true }} />
         </div>
         <div data-home-pane="supporting">
-          {accounts.length ? <App2027Activity country={country} currency={calculateTotal(accounts).currency} amountsHidden={amountsHidden} compact homeArea={false} onTransactionOpen={onTransactionOpen} onSeeMore={onSeeAllTransactions ?? (() => { const firstAccount = accounts[0]; if (firstAccount) onProductClick(firstAccount); })} /> : null}
           <InterestCarousel tab="accounts" onOfferOpen={onOfferOpen} />
           <ShopSmart country={country} onProductsClick={onProductsClick} />
         </div>
@@ -1189,11 +1209,36 @@ export default function App2027TransformationHome({
           secondaryValue={interestEarned}
         />
         <div data-home-pane="primary">
-        <Group title={t('runtime.evo.groups.investmentPortfolios')} expandable={investments.length > 1} itemCount={investments.length}>{investments.length ? investments.map((product) => <CompactProductCard key={product.id} product={product} amount={formatProductAmount(product)} amountsHidden={amountsHidden} performance={portfolioPerformance} onClick={() => onProductClick(product)} />) : <EmptyProducts title={t('runtime.evo.empty.investTitle')} description={t('runtime.evo.empty.investBody')} onClick={onProductsClick} />}</Group>
-        <Group title={t('runtime.evo.groups.savingAccounts')} expandable={savings.length > 1} itemCount={savings.length}>{savings.length ? <div data-home-compact-product-list="saving_account" className="overflow-hidden rounded-[8px] shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)]">{savings.map((product, index) => <CompactProductCard key={product.id} product={product} amount={formatProductAmount(product)} amountsHidden={amountsHidden} subtitle={`${(EVO_SAVING_ACCOUNT_ANNUAL_RATE * 100).toFixed(1)}% ${t('runtime.evo.labels.interestRate')}`} onClick={() => onProductClick(product)} stackRole={savings.length === 1 ? 'single' : index === 0 ? 'first' : index === savings.length - 1 ? 'last' : 'middle'} />)}</div> : <EmptyProducts title={t('runtime.evo.empty.savingsTitle')} description={t('runtime.evo.empty.savingsBody')} onClick={onProductsClick} />}</Group>
-        <Group title={t('runtime.evo.groups.deposits')} defaultOpen={deposits.length <= 1} expandable={deposits.length > 1} itemCount={deposits.length} preview={deposits.length > 1 ? <DepositList deposits={deposits} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} onProductClick={onProductClick} collapsed /> : undefined}>
-          {deposits.length ? <DepositList deposits={deposits} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} onProductClick={onProductClick} total={deposits.length > 1 ? depositsSubtotal : undefined} /> : <EmptyProducts title={t('runtime.evo.empty.depositsTitle')} description={t('runtime.evo.empty.depositsBody')} onClick={onProductsClick} />}
-        </Group>
+        <ProductRailGroup
+          title={t('runtime.evo.groups.investmentPortfolios')}
+          products={investments}
+          railDataAttribute="data-home-investment-rail"
+          addShelfItemId="mutual-funds"
+          onOfferOpen={onOfferOpen}
+          sheetDataAttribute="data-home-investment-sheet"
+          empty={<EmptyProducts title={t('runtime.evo.empty.investTitle')} description={t('runtime.evo.empty.investBody')} onClick={onProductsClick} />}
+          renderCard={(product) => <CompactProductCard product={product} amount={formatProductAmount(product)} amountsHidden={amountsHidden} performance={portfolioPerformance} onClick={() => onProductClick(product)} />}
+        />
+        <ProductRailGroup
+          title={t('runtime.evo.groups.savingAccounts')}
+          products={savings}
+          railDataAttribute="data-home-saving-account-rail"
+          addShelfItemId="saving-account"
+          onOfferOpen={onOfferOpen}
+          sheetDataAttribute="data-home-saving-account-sheet"
+          empty={<EmptyProducts title={t('runtime.evo.empty.savingsTitle')} description={t('runtime.evo.empty.savingsBody')} onClick={onProductsClick} />}
+          renderCard={(product) => <CompactProductCard product={product} amount={formatProductAmount(product)} amountsHidden={amountsHidden} subtitle={`${(EVO_SAVING_ACCOUNT_ANNUAL_RATE * 100).toFixed(1)}% ${t('runtime.evo.labels.interestRate')}`} onClick={() => onProductClick(product)} />}
+        />
+        <ProductRailGroup
+          title={t('runtime.evo.groups.deposits')}
+          products={deposits}
+          railDataAttribute="data-home-deposit-rail"
+          addShelfItemId="term-deposit"
+          onOfferOpen={onOfferOpen}
+          sheetDataAttribute="data-home-deposit-sheet"
+          empty={<EmptyProducts title={t('runtime.evo.empty.depositsTitle')} description={t('runtime.evo.empty.depositsBody')} onClick={onProductsClick} />}
+          renderCard={(product) => <DepositCard product={product} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} onProductClick={onProductClick} />}
+        />
         </div>
         <div data-home-pane="supporting">
           <InterestCarousel tab="savings" onOfferOpen={onOfferOpen} />
@@ -1209,13 +1254,27 @@ export default function App2027TransformationHome({
           secondaryValue={dueThisMonth}
         />
         <div data-home-pane="primary">
-        {creditCards.length ? <App2027ProductAccordions categories={creditCategories} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} calculateGroupTotal={calculateTotal} getProductDisplayNumber={getProductDisplayNumber} onProductClick={onProductClick} onCardDetailsClick={onCardDetailsClick} onCardOptionsClick={onCardOptionsClick} useCzRoboAccountCards visibleKeys={['cards']} initialOpenKeys={{ cards: true }} titleOverrides={{ cards: t('runtime.evo.groups.creditCards') }} /> : <Group title={t('runtime.evo.groups.creditCards')} expandable={false}><EmptyProducts title={t('runtime.evo.empty.creditCardTitle')} description={t('runtime.evo.empty.creditCardBody')} onClick={onProductsClick} /></Group>}
-        <Group title={t('runtime.evo.groups.loans')} defaultOpen={loans.length <= 1} expandable={loans.length > 1} itemCount={loans.length} preview={loans.length > 1 ? <LoanList loans={loans} amountsHidden={amountsHidden} onProductClick={onProductClick} collapsed /> : undefined}>
-          {loans.length ? <LoanList loans={loans} amountsHidden={amountsHidden} onProductClick={onProductClick} /> : <EmptyProducts title={t('runtime.evo.empty.loanTitle')} description={t('runtime.evo.empty.loanBody')} onClick={onProductsClick} />}
-        </Group>
-        <Group title={t('runtime.evo.groups.mortgages')} defaultOpen={mortgages.length <= 1} expandable={mortgages.length > 1} itemCount={mortgages.length} preview={mortgages.length > 1 ? <LoanList loans={mortgages} amountsHidden={amountsHidden} onProductClick={onProductClick} collapsed /> : undefined}>
-          {mortgages.length ? <LoanList loans={mortgages} amountsHidden={amountsHidden} onProductClick={onProductClick} /> : <EmptyProducts title={t('runtime.evo.empty.mortgageTitle')} description={t('runtime.evo.empty.mortgageBody')} onClick={onProductsClick} />}
-        </Group>
+        {creditCards.length ? <App2027ProductAccordions categories={creditCategories} amountsHidden={amountsHidden} formatProductAmount={formatProductAmount} calculateGroupTotal={calculateTotal} getProductDisplayNumber={getProductDisplayNumber} onProductClick={onProductClick} onCardDetailsClick={onCardDetailsClick} onCardOptionsClick={onCardOptionsClick} useCzRoboAccountCards addShelfItemIds={{ cards: 'credit-card' }} onOfferOpen={onOfferOpen} visibleKeys={['cards']} initialOpenKeys={{ cards: true }} titleOverrides={{ cards: t('runtime.evo.groups.creditCards') }} /> : <Group title={t('runtime.evo.groups.creditCards')} expandable={false}><EmptyProducts title={t('runtime.evo.empty.creditCardTitle')} description={t('runtime.evo.empty.creditCardBody')} onClick={onProductsClick} /></Group>}
+        <ProductRailGroup
+          title={t('runtime.evo.groups.loans')}
+          products={loans}
+          railDataAttribute="data-home-loan-rail"
+          addShelfItemId="personal-loan"
+          onOfferOpen={onOfferOpen}
+          sheetDataAttribute="data-home-loan-sheet"
+          empty={<EmptyProducts title={t('runtime.evo.empty.loanTitle')} description={t('runtime.evo.empty.loanBody')} onClick={onProductsClick} />}
+          renderCard={(product) => <LoanCard product={product} amountsHidden={amountsHidden} onProductClick={onProductClick} />}
+        />
+        <ProductRailGroup
+          title={t('runtime.evo.groups.mortgages')}
+          products={mortgages}
+          railDataAttribute="data-home-mortgage-rail"
+          addShelfItemId="mortgage-loan"
+          onOfferOpen={onOfferOpen}
+          sheetDataAttribute="data-home-mortgage-sheet"
+          empty={<EmptyProducts title={t('runtime.evo.empty.mortgageTitle')} description={t('runtime.evo.empty.mortgageBody')} onClick={onProductsClick} />}
+          renderCard={(product) => <LoanCard product={product} amountsHidden={amountsHidden} onProductClick={onProductClick} />}
+        />
         </div>
         <div data-home-pane="supporting">
           <InterestCarousel tab="credits" onOfferOpen={onOfferOpen} />
@@ -1230,20 +1289,23 @@ export default function App2027TransformationHome({
           secondaryLabel={t('runtime.evo.summary.nextRenewal')}
           secondaryValue={nextRenewal}
         />
-        {/* The stacked model the accounts, deposits and loans groups use: one
-            policy on top of the rest, and the header says how many are under it. */}
+        {/* The rail every other group on Home uses: one policy per page, the
+            header says how many there are, and the second one is a swipe away
+            rather than behind a chevron. */}
         <div data-home-pane="primary">
-        <Group
+        <App2027ProductRail
           title={t('runtime.evo.groups.insurance')}
-          defaultOpen={activePolicyCount <= 1}
-          expandable={activePolicyCount > 1}
-          itemCount={activePolicyCount}
-          preview={activePolicyCount > 1
-            ? <InsurancePolicyList onClick={onOfferOpen} amountsHidden={amountsHidden} collapsed />
-            : undefined}
-        >
-          <InsurancePolicyList onClick={onOfferOpen} amountsHidden={amountsHidden} />
-        </Group>
+          countLabel={formatGroupCount(activePolicyCount, t) ?? undefined}
+          railDataAttribute="data-home-insurance-rail"
+          sheetDataAttribute="data-home-insurance-sheet"
+          {...(onOfferOpen ? { onAdd: () => onOfferOpen('life-insurance') } : {})}
+          addLabel={`${t('runtime.evo.groups.addProduct')} ${t('runtime.evo.groups.insurance')}`}
+          items={INSURANCE_POLICIES.map((policy) => ({
+            id: policy.target,
+            label: policy.title,
+            content: <InsurancePolicyCard policy={policy} onClick={onOfferOpen} amountsHidden={amountsHidden} />,
+          }))}
+        />
         </div>
         <div data-home-pane="supporting">
           <InterestCarousel tab="insurance" onOfferOpen={onOfferOpen} />

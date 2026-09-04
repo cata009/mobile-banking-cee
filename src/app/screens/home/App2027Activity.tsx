@@ -2,24 +2,51 @@ import LinkActionButton from '@/app/components/LinkActionButton';
 import TransactionAvatar from '@/app/components/transactions/TransactionAvatar';
 import { getCardMerchantEnrichment } from '@/app/components/merchants/merchantEnrichment';
 import type { CountryId } from '@/app/state/demoTypes';
-import { getSalaryPayer, type AccountTransaction } from '@/data/accountDetails';
+import { formatEvo2027Number } from '@/app/utils/evo2027Formatting';
+import {
+  getAccountTransactionProfileIndex,
+  getAccountTransactions,
+  getSalaryPayer,
+  type AccountTransaction,
+} from '@/data/accountDetails';
 import type { MerchantId } from '@/data/merchantDirectory';
+import type { Product } from '@/data/products';
 import type { CardTransactionMerchantEnrichment } from '@/app/screens/payments/DomesticPaymentFlowScreens';
+
+/**
+ * Opens a transaction's detail. `account` is the product whose ledger the row came
+ * from, so a row under the Euro account opens on the Euro account rather than on
+ * whichever current account happens to come first.
+ */
+export type App2027TransactionOpenHandler = (
+  transaction: AccountTransaction,
+  merchantEnrichment?: CardTransactionMerchantEnrichment,
+  account?: Product,
+) => void;
 
 export interface App2027ActivityProps {
   country: CountryId;
   currency: string;
   amountsHidden: boolean;
-  onTransactionOpen?: (
-    transaction: AccountTransaction,
-    merchantEnrichment?: CardTransactionMerchantEnrichment,
-  ) => void;
+  onTransactionOpen?: App2027TransactionOpenHandler;
   onSeeMore?: () => void;
   compact?: boolean;
   homeArea?: boolean;
 }
 
 export type App2027ActivityKind = 'salary' | 'mcdonalds' | 'spotify';
+
+/** One recent-transactions row, already worded for display. */
+export interface App2027ActivityRow {
+  transaction: AccountTransaction;
+  name: string;
+  detail?: string;
+  /** The product the money moved through. Left out when the list already belongs to it. */
+  accountLine?: string;
+  timeLabel: string;
+  /** Signed and formatted, without the currency. */
+  amountLabel: string;
+}
 
 interface ActivityItem {
   id: App2027ActivityKind;
@@ -47,7 +74,7 @@ const ACTIVITY: readonly ActivityItem[] = [
     detail: 'Salary April',
     account: 'Everyday account',
     time: 'Today, 08:05',
-    amount: '+62\u00a0500.00',
+    amount: '+62 500.00',
     amountValue: 62500,
     tone: 'credit',
     category: 'Income',
@@ -59,9 +86,9 @@ const ACTIVITY: readonly ActivityItem[] = [
     id: 'mcdonalds',
     name: "McDonald's",
     detail: 'Card payment',
-    account: 'Debit card \u2022\u20226829',
+    account: 'Debit card ••6829',
     time: 'Today, 12:31',
-    amount: '\u2212248.90',
+    amount: '−248.90',
     amountValue: -248.9,
     tone: 'debit',
     category: 'Lifestyle',
@@ -74,9 +101,9 @@ const ACTIVITY: readonly ActivityItem[] = [
     id: 'spotify',
     name: 'Spotify',
     detail: 'Monthly subscription',
-    account: 'Debit card \u2022\u20226829',
+    account: 'Debit card ••6829',
     time: 'Yesterday, 18:07',
-    amount: '\u2212169.00',
+    amount: '−169.00',
     amountValue: -169,
     tone: 'debit',
     category: 'Leisure time',
@@ -129,11 +156,70 @@ export function getApp2027MerchantEnrichment(
   return getCardMerchantEnrichment(transaction, country);
 }
 
-function ActivityAmount({ item, currency, hidden }: { item: ActivityItem; currency: string; hidden: boolean }) {
-  const isIncoming = item.amount.startsWith('+');
+/** A curated Evo row as the legacy home lists it: every line, the row's own amount string. */
+function curatedRow(item: ActivityItem, country: CountryId, compact: boolean): App2027ActivityRow {
+  return {
+    transaction: activityTransaction(item, country),
+    name: activityName(item, country),
+    detail: item.detail,
+    accountLine: item.account,
+    timeLabel: compact ? (item.id === 'spotify' ? 'Yesterday' : 'Today') : item.time,
+    amountLabel: item.amount,
+  };
+}
+
+/** Two lines under the card: enough to show the account is alive, short enough to stay a card. */
+const ACCOUNT_ACTIVITY_ROW_LIMIT = 2;
+
+/** The Evo 2027 amount contract with an explicit sign: "+62.500,00", "−248,90". */
+function formatSignedEvoAmount(amount: number): string {
+  return `${amount < 0 ? '−' : '+'}${formatEvo2027Number(amount)}`;
+}
+
+/** "28 Apr" from the ledger's zero-padded day and upper-case month. */
+function formatLedgerDay(transaction: AccountTransaction): string {
+  const month = `${transaction.month.charAt(0)}${transaction.month.slice(1).toLowerCase()}`;
+  return `${Number.parseInt(transaction.day, 10)} ${month}`;
+}
+
+/**
+ * The head of one account's own ledger, for the leaf tucked under its card on the Evo
+ * home. It is the same ledger the account page opens on, so "See more" continues this
+ * list rather than starting another one. The primary account keeps the curated Evo
+ * rows the account page also leads with; every other account shows its latest booked
+ * rows. No account line: the sheet already names the account.
+ */
+export function getApp2027AccountActivityRows(
+  country: CountryId,
+  account: Product,
+  accountIndex: number,
+): App2027ActivityRow[] {
+  const profileIndex = getAccountTransactionProfileIndex(account, accountIndex);
+
+  if (profileIndex === 0) {
+    return ACTIVITY.slice(0, ACCOUNT_ACTIVITY_ROW_LIMIT).map((item) => {
+      const { accountLine: _ownAccount, ...row } = curatedRow(item, country, true);
+      return { ...row, amountLabel: formatSignedEvoAmount(item.amountValue) };
+    });
+  }
+
+  return getAccountTransactions(country, profileIndex, account.currency)
+    .filter((transaction) => transaction.status === 'Booked')
+    .slice(0, ACCOUNT_ACTIVITY_ROW_LIMIT)
+    .map((transaction) => ({
+      transaction,
+      name: transaction.label,
+      ...(transaction.details ? { detail: transaction.details } : {}),
+      timeLabel: formatLedgerDay(transaction),
+      amountLabel: formatSignedEvoAmount(transaction.amount),
+    }));
+}
+
+function ActivityAmount({ amountLabel, currency, hidden }: { amountLabel: string; currency: string; hidden: boolean }) {
+  const isIncoming = amountLabel.startsWith('+');
   const displayAmount = hidden
-    ? `****${item.amount.includes(',') ? ',' : '.'}**`
-    : item.amount;
+    ? `****${amountLabel.includes(',') ? ',' : '.'}**`
+    : amountLabel;
 
   return (
     <span
@@ -150,7 +236,56 @@ function ActivityAmount({ item, currency, hidden }: { item: ActivityItem; curren
   );
 }
 
+/**
+ * One tappable recent-transaction row of the home activity list: avatar, who, what,
+ * where it came from, when, and the amount.
+ */
+export function App2027ActivityRowButton({
+  row,
+  currency,
+  amountsHidden,
+  onOpen,
+}: {
+  row: App2027ActivityRow;
+  currency: string;
+  amountsHidden: boolean;
+  onOpen?: (transaction: AccountTransaction) => void;
+}) {
+  return (
+    <button
+      type="button"
+      data-home-activity-row
+      onClick={() => onOpen?.(row.transaction)}
+      aria-label={`Open ${row.name} transaction, ${amountsHidden ? 'amount hidden' : `${row.amountLabel} ${currency}`}`}
+      className="group flex min-h-[82px] w-full items-start gap-[12px] rounded-[8px] px-[16px] py-[12px] text-left transition-[background-color,transform] duration-200 active:scale-[0.99] active:bg-[var(--uc-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-action)] motion-reduce:transition-none"
+    >
+      <TransactionAvatar transaction={row.transaction} size={42} />
+
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[16px] font-bold leading-[20px] tracking-[-0.01em] text-[var(--uc-text)]">
+          {row.name}
+        </span>
+        {row.detail ? <span className="mt-[4px] block truncate text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
+          {row.detail}
+        </span> : null}
+        {row.accountLine ? <span data-home-activity-account className="mt-[3px] block truncate text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
+          {row.accountLine}
+        </span> : null}
+        <span data-home-activity-time className="mt-[3px] block text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
+          {row.timeLabel}
+        </span>
+      </span>
+
+      <ActivityAmount amountLabel={row.amountLabel} currency={currency} hidden={amountsHidden} />
+    </button>
+  );
+}
+
 export default function App2027Activity({ country, currency, amountsHidden, onTransactionOpen, onSeeMore, compact = false, homeArea = true }: App2027ActivityProps) {
+  const openTransaction = (transaction: AccountTransaction) => {
+    onTransactionOpen?.(transaction, getApp2027MerchantEnrichment(transaction, country));
+  };
+
   return (
     <section
       data-home-area={homeArea ? 'activity' : undefined}
@@ -172,34 +307,12 @@ export default function App2027Activity({ country, currency, amountsHidden, onTr
       <ul className="relative z-10">
         {ACTIVITY.map((item, index) => (
           <li key={item.id} className={index > 0 ? 'border-t border-[var(--uc-border-muted)]' : undefined}>
-            <button
-              type="button"
-              onClick={() => {
-                const transaction = activityTransaction(item, country);
-                onTransactionOpen?.(transaction, getApp2027MerchantEnrichment(transaction, country));
-              }}
-              aria-label={`Open ${activityName(item, country)} transaction, ${amountsHidden ? 'amount hidden' : `${item.amount} ${currency}`}`}
-              className="group flex min-h-[82px] w-full items-start gap-[12px] rounded-[8px] px-[16px] py-[12px] text-left transition-[background-color,transform] duration-200 active:scale-[0.99] active:bg-[var(--uc-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-action)] motion-reduce:transition-none"
-            >
-              <TransactionAvatar transaction={activityTransaction(item, country)} size={42} />
-
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-[16px] font-bold leading-[20px] tracking-[-0.01em] text-[var(--uc-text)]">
-                  {activityName(item, country)}
-                </span>
-                {item.detail ? <span className="mt-[4px] block truncate text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
-                  {item.detail}
-                </span> : null}
-                <span data-home-activity-account className="mt-[3px] block truncate text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
-                  {item.account}
-                </span>
-                <span className="mt-[3px] block text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
-                  {compact ? (item.id === 'spotify' ? 'Yesterday' : 'Today') : item.time}
-                </span>
-              </span>
-
-              <ActivityAmount item={item} currency={currency} hidden={amountsHidden} />
-            </button>
+            <App2027ActivityRowButton
+              row={curatedRow(item, country, compact)}
+              currency={currency}
+              amountsHidden={amountsHidden}
+              onOpen={openTransaction}
+            />
           </li>
         ))}
       </ul>

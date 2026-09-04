@@ -17,6 +17,8 @@ export interface HorizontalCarouselProps {
   count: number;
   /** What each dot navigates to, used in the dot labels. */
   itemLabel?: string;
+  /** A name per dot, used instead of the ordinal — "Euro account" rather than "account 2". */
+  itemLabels?: readonly string[];
   children: ReactNode;
 }
 
@@ -27,7 +29,7 @@ export interface HorizontalCarouselProps {
  * The 2027 home screen keeps its own private copy of this rail on purpose —
  * home is out of scope for the Products work and was left untouched.
  */
-export default function HorizontalCarousel({ ariaLabel, count, itemLabel, children }: HorizontalCarouselProps) {
+export default function HorizontalCarousel({ ariaLabel, count, itemLabel, itemLabels, children }: HorizontalCarouselProps) {
   const railRef = useRef<HTMLDivElement>(null);
   const scrollSnapTimeoutRef = useRef<number | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -126,7 +128,7 @@ export default function HorizontalCarousel({ ariaLabel, count, itemLabel, childr
       {draggableChildren}
     </div>
     {count > 1 && overflows ? <div className="mt-[4px] flex justify-center" aria-label={`${ariaLabel} pages`}>
-      <AccountCarouselIndicator count={count} activeIndex={activeIndex} itemLabel={itemLabel} onSelect={scrollToIndex} />
+      <AccountCarouselIndicator count={count} activeIndex={activeIndex} itemLabel={itemLabel} itemLabels={itemLabels} onSelect={scrollToIndex} />
     </div> : null}
   </>;
 }

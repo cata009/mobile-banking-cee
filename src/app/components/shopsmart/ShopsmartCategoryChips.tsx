@@ -28,6 +28,11 @@ export interface ShopsmartCategoryChipsProps {
  * had drifted apart — 8px versus 4px corners, 13px versus 14px type, a muted
  * grey outline versus a black one. Same job, same control.
  *
+ * The control itself is the product-category tab from the top of Home: the same
+ * rounded pill, the same 16px label, the same dot under the selected one. A
+ * screen that filters with square uppercase chips at the bottom and rounded
+ * sentence-case pills at the top reads as two apps.
+ *
  * Only the selected chip carries weight: a white pill on the page ground says
  * "not selected" on its own, and an outline around every one of them turned a
  * filter row into a row of buttons competing with the content under it.
@@ -84,7 +89,7 @@ export default function ShopsmartCategoryChips({
       {...(railDataAttribute ? { [railDataAttribute]: true } : {})}
       role="group"
       aria-label={ariaLabel}
-      className={`flex flex-nowrap items-center gap-[8px] overflow-x-auto overscroll-x-contain scrollbar-hide select-none touch-pan-y ${
+      className={`flex flex-nowrap items-center gap-[5px] overflow-x-auto overscroll-x-contain scrollbar-hide select-none touch-pan-y ${
         isDragging ? "cursor-grabbing" : "cursor-grab"
       } ${className}`.trim()}
       style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
@@ -103,14 +108,16 @@ export default function ShopsmartCategoryChips({
             {...(chipDataAttribute ? { [chipDataAttribute]: category.id } : {})}
             aria-pressed={active}
             onClick={() => onSelect(category.id)}
-            /* Figma box: 12px on the sides, 8px above and below the 18px line. */
-            className={`flex shrink-0 items-center justify-center rounded-[4px] border px-[12px] py-[8px] text-[14px] font-bold uppercase leading-[18px] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${
+            /* Geometry copied from the product-category tabs on Home so the two
+               rails are the same control, dot and all. */
+            className={`flex min-h-[44px] shrink-0 items-center justify-center rounded-full border px-[13px] py-[7px] text-[16px] leading-[19px] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${
               active
-                ? "border-[var(--uc-action-strong)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
-                : "border-transparent bg-[var(--uc-surface)] text-[var(--uc-text-muted)]"
+                ? "flex-col gap-[2px] border-transparent bg-[var(--uc-action-strong)] font-medium text-[var(--uc-static-white)]"
+                : "border-transparent bg-[var(--uc-surface)] font-normal text-[var(--uc-text-muted)]"
             }`}
           >
-            {category.label}
+            <span>{category.label}</span>
+            {active ? <span aria-hidden="true" className="size-[4px] rounded-full bg-[var(--uc-static-white)]" /> : null}
           </button>
         );
       })}

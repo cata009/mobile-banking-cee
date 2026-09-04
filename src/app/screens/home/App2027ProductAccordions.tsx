@@ -4,12 +4,15 @@ import { AppIcon } from '@/app/components/icons';
 import ProductCard, { type ProductCardAction } from '@/app/components/ProductCard';
 import NavigationCardArt from '@/app/components/cards/NavigationCardArt';
 import Card, { type CardVariant } from '@/app/components/cards/Card';
-import GhostBanner from '@/app/components/cards/GhostBanner';
 import AccountCarouselIndicator from '@/app/components/accounts/AccountCarouselIndicator';
 import { buildFutureCzAccountCardActions } from '@/app/components/productCardFixtures';
 import { maskAmountParts } from '@/app/utils/amountPrivacy';
 import { useLanguage } from '@/app/contexts/LanguageContext';
+import type { CountryId } from '@/app/state/demoTypes';
 import { formatGroupCount } from './App2027TransformationHome';
+import App2027AccountSheets from './App2027AccountSheets';
+import { App2027GroupAddButton } from './App2027ProductRail';
+import type { App2027TransactionOpenHandler } from './App2027Activity';
 import { useDragCarousel } from '@/hooks/useDragCarousel';
 
 type FormattedAmount = {
@@ -57,6 +60,15 @@ function buildCzEvoAccountCardActions({
   ];
 }
 
+/**
+ * Turns the Evo Accounts group into a rail of account sheets, each account card
+ * carrying its own recent transactions. Needs the country to read each ledger.
+ */
+export interface App2027AccountActivityOptions {
+  country: CountryId;
+  onTransactionOpen?: App2027TransactionOpenHandler;
+}
+
 export interface App2027ProductAccordionsProps {
   categories: ProductCategory[];
   amountsHidden: boolean;
@@ -65,6 +77,7 @@ export interface App2027ProductAccordionsProps {
   getProductDisplayNumber: (product: Product) => string;
   onProductClick: (product: Product) => void;
   useCzRoboAccountCards?: boolean;
+  accountActivity?: App2027AccountActivityOptions;
   onDomesticPaymentClick?: () => void;
   onPaymentsClick?: () => void;
   onAccountInfoClick?: (product: Product) => void;
@@ -73,6 +86,9 @@ export interface App2027ProductAccordionsProps {
   visibleKeys?: SupportedCategoryKey[];
   initialOpenKeys?: Partial<Record<SupportedCategoryKey, boolean>>;
   titleOverrides?: Partial<Record<SupportedCategoryKey, string>>;
+  /** Shelf page each group header's + opens, keyed by group. */
+  addShelfItemIds?: Partial<Record<SupportedCategoryKey, string>>;
+  onOfferOpen?: (shelfItemId: string) => void;
   className?: string;
 }
 
@@ -388,10 +404,13 @@ function EvoCardsComparison({
   products,
   getProductDisplayNumber,
   onProductClick,
+  onAdd,
 }: {
   products: Product[];
   getProductDisplayNumber: (product: Product) => string;
   onProductClick: (product: Product) => void;
+  /** Opens the shelf page where the customer orders another debit card. */
+  onAdd?: () => void;
 }) {
   const { t } = useLanguage();
   const title = t('runtime.evo.groups.debitCards');
@@ -424,8 +443,8 @@ function EvoCardsComparison({
     },
   ] : [];
   const pages = [
-    { id: 'standard-and-premium', cards: comparisonCards.slice(0, 2), includesGhostBanner: false },
-    { id: 'eur-and-ghost-banner', cards: comparisonCards.slice(2), includesGhostBanner: true },
+    { id: 'standard-and-premium', cards: comparisonCards.slice(0, 2) },
+    { id: 'eur', cards: comparisonCards.slice(2) },
   ].filter((page) => page.cards.length > 0);
 
   const scrollToIndex = useCallback((index: number) => {
@@ -477,7 +496,10 @@ function EvoCardsComparison({
 
   return (
     <section data-evo-card-comparison aria-label={title} className="mt-[12px]">
-      <h2 className="uc-type-l1 mb-[12px] text-[var(--uc-text)]">{title}</h2>
+      <div className="mb-[12px] flex w-full items-center gap-[12px]">
+        <h2 className="uc-type-l1 min-w-0 flex-1 truncate text-[var(--uc-text)]">{title}</h2>
+        {onAdd ? <App2027GroupAddButton label={`${t('runtime.evo.groups.addProduct')} ${title}`} onClick={onAdd} /> : null}
+      </div>
       {/* No bottom padding: the 32px carousel indicator below the rail already carries its own 13px of air. */}
       <div data-evo-card-carousel-container className="rounded-[8px] bg-[var(--uc-surface)] p-[8px] pb-0">
         <div
@@ -505,21 +527,9 @@ function EvoCardsComparison({
                   dragHandlers={dragHandlers}
                 />
               ))}
-              {/* A narrower CTA keeps the secondary action subordinate to the debit card. The cell
-                  carries the tile's own py-[12px], so `h-full` lands the dashed box on the tile's
-                  content box rather than its outer edge — no second height to keep in sync. */}
-              {page.includesGhostBanner ? (
-                <div data-evo-card-ghost-banner className="flex min-h-[120px] items-stretch justify-center py-[12px]">
-                  <GhostBanner
-                    className="h-full w-[136px] !max-w-[136px] !p-[4px]"
-                    layout="stacked"
-                    title="Add a debit card"
-                    description="Explore options"
-                    titleClassName="text-[14px] font-bold leading-[18px] text-[var(--uc-text)]"
-                    descriptionClassName="text-[14px] leading-[18px] text-[var(--uc-text-muted)]"
-                  />
-                </div>
-              ) : null}
+              {/* No "Add a debit card" tile at the end of the rail: the group header
+                  now carries that action for every group on the page, and a dashed
+                  box repeating it a swipe away was the same offer made twice. */}
             </div>
           ))}
         </div>
@@ -588,6 +598,7 @@ export default function App2027ProductAccordions({
   getProductDisplayNumber,
   onProductClick,
   useCzRoboAccountCards = false,
+  accountActivity,
   onDomesticPaymentClick,
   onPaymentsClick,
   onAccountInfoClick,
@@ -596,6 +607,8 @@ export default function App2027ProductAccordions({
   visibleKeys,
   initialOpenKeys,
   titleOverrides,
+  addShelfItemIds,
+  onOfferOpen,
   className,
 }: App2027ProductAccordionsProps) {
   const { t } = useLanguage();
@@ -619,6 +632,40 @@ export default function App2027ProductAccordions({
       className={['space-y-[12px]', className].filter(Boolean).join(' ')}
     >
       {visibleGroups.map(({ key, title, icon, category }) => {
+        // Evo Accounts: no stack to open and close — every account is a sheet on a rail,
+        // its recent transactions glued under the card, the next account peeking in.
+        if (key === 'accounts' && useCzRoboAccountCards && accountActivity && category.products.length > 0) {
+          return (
+            <div key={key} data-home-product-group={key} className="flex flex-col">
+              <App2027AccountSheets
+                accounts={category.products}
+                country={accountActivity.country}
+                amountsHidden={amountsHidden}
+                title={titleOverrides?.[key] ?? t('runtime.evo.groups.accounts', title)}
+                countLabel={formatGroupCount(category.products.length, t) ?? undefined}
+                {...(addShelfItemIds?.[key] && onOfferOpen
+                  ? { onAdd: () => onOfferOpen(addShelfItemIds[key] as string) }
+                  : {})}
+                addLabel={`${t('runtime.evo.groups.addProduct')} ${titleOverrides?.[key] ?? t('runtime.evo.groups.accounts', title)}`}
+                renderAccountCard={(account) => (
+                  <CzRoboAccountCard
+                    product={account}
+                    amountsHidden={amountsHidden}
+                    formatProductAmount={formatProductAmount}
+                    getProductDisplayNumber={getProductDisplayNumber}
+                    onProductClick={onProductClick}
+                    onDomesticPaymentClick={onDomesticPaymentClick}
+                    onPaymentsClick={onPaymentsClick}
+                    onAccountInfoClick={onAccountInfoClick}
+                    stackRole="single"
+                  />
+                )}
+                onTransactionOpen={accountActivity.onTransactionOpen}
+              />
+            </div>
+          );
+        }
+
         const isEvoDebitCardsGroup = key === 'cards'
           && useCzRoboAccountCards
           && category.products.some((product) => product.type === 'debit_card');
@@ -630,6 +677,9 @@ export default function App2027ProductAccordions({
                 products={category.products}
                 getProductDisplayNumber={getProductDisplayNumber}
                 onProductClick={onProductClick}
+                {...(addShelfItemIds?.[key] && onOfferOpen
+                  ? { onAdd: () => onOfferOpen(addShelfItemIds[key] as string) }
+                  : {})}
               />
             </div>
           );
@@ -658,6 +708,16 @@ export default function App2027ProductAccordions({
               ? 'flex flex-col'
               : 'overflow-hidden rounded-[8px] border border-transparent bg-[var(--uc-surface)] shadow-none dark:border-[var(--uc-border-muted)]'}
           >
+            {/* The + belongs to the group, not to the toggle, so it sits beside the
+                header rather than inside it — a button inside a button is not markup. */}
+            <HeaderRow
+              add={useBaselineHeader && addShelfItemIds?.[key] && onOfferOpen ? (
+                <App2027GroupAddButton
+                  label={`${t('runtime.evo.groups.addProduct')} ${displayTitle}`}
+                  onClick={() => onOfferOpen(addShelfItemIds[key] as string)}
+                />
+              ) : null}
+            >
             {isExpandable ? <button
               type="button"
               data-home-product-group-header={useBaselineHeader ? 'compact' : undefined}
@@ -715,6 +775,7 @@ export default function App2027ProductAccordions({
             </button> : useBaselineHeader ? <div data-home-product-group-header="static" className="flex h-[48px] w-full items-center px-0">
               <h2 className="uc-type-l1 text-[var(--uc-text)]">{displayTitle}</h2>
             </div> : null}
+            </HeaderRow>
 
             {shouldRenderPanel ? (
               <div id={panelId} className={useBaselineHeader ? 'pt-[8px]' : 'divide-y divide-[var(--uc-border-muted)] border-t border-[var(--uc-border-muted)]'}>
@@ -795,3 +856,14 @@ export default function App2027ProductAccordions({
     </section>
   );
 }
+
+/**
+ * Keeps the group's add button beside its header without nesting it inside the
+ * collapse toggle. With no button to place, it stays out of the tree entirely so
+ * the legacy card-style header keeps the layout it has.
+ */
+function HeaderRow({ add, children }: { add: ReactNode; children: ReactNode }) {
+  if (!add) return <>{children}</>;
+  return <div className="flex w-full items-center gap-[12px]">{children}{add}</div>;
+}
+
