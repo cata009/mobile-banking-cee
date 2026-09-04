@@ -535,16 +535,47 @@ export const CUSTOM_ICONS = {
     source: "custom",
     label: "Templates",
     category: "Payments",
+    width: 22,
+    height: 22,
+    /* Cropped to the artwork so the glyph carries the same weight as the other
+       payment marks instead of sitting inside its own margin. */
+    viewBox: "1 1 22 22",
+    usage: ["PaymentOtherShortcut", "NewPaymentActionListItem", "Evo2027PaymentsHub"],
+    notes: "Single canonical template icon shared by Payments OTHER and New payment sheet.",
+    render: () => (
+      <>
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M2.99658 3.2C2.99658 1.98487 4.00383 1 5.24658 1H20.9966V11.2667H2.99658V3.2ZM16.4966 9.06667H7.49658V7.6H16.4966V9.06667ZM14.9966 6.13333H8.99658V3.2H14.9966V6.13333Z"
+          fill="currentColor"
+        />
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M2.99658 23V12.7333H20.9966V20.8C20.9966 22.0151 19.9893 23 18.7466 23H2.99658ZM16.4966 20.8H7.49658V19.3333H16.4966V20.8ZM14.9966 17.8667H8.99658V14.9333H14.9966V17.8667Z"
+          fill="currentColor"
+        />
+      </>
+    ),
+  },
+  "payment-recurrent": {
+    source: "custom",
+    label: "Recurrent payments",
+    category: "Payments",
     width: 20,
     height: 20,
-    viewBox: "7 6 18 20",
-    usage: ["PaymentOtherShortcut", "NewPaymentActionListItem"],
-    notes: "Single canonical template icon shared by Payments OTHER and New payment sheet.",
+    /* Artwork is drawn on a 32 grid but only occupies 6→26; cropping to that box
+       is what makes it read at the same size as its neighbours on the hub grid. */
+    viewBox: "6 6 20 20",
+    usage: ["Evo2027PaymentsHub"],
+    notes:
+      "Recurrent payments had been borrowing the Templates glyph, so two different journeys sat on the hub grid under the same mark.",
     render: () => (
       <path
         fillRule="evenodd"
         clipRule="evenodd"
-        d="M20 8.5V9.125H12.5H11.25V10.375V21.625H10C8.61937 21.625 7.5 20.5056 7.5 19.125V6H17.5C18.8806 6 20 7.11937 20 8.5ZM12.5 23.5V10.375H22.5C23.8806 10.375 25 11.4944 25 12.875V26H15C13.6194 26 12.5 24.8806 12.5 23.5Z"
+        d="M12.4555 13.6987L8.61138 16.3399L8.13203 16.6686H6V9.88865V7.66667C6 6.746 6.74668 6 7.66669 6H11.5554H16.0001V11.2633L13.3908 13.056V10.868C13.3908 10.766 13.3668 10.696 13.3195 10.654C13.2735 10.6147 13.2015 10.596 13.0935 10.596H12.7775C12.6435 10.596 12.5281 10.6227 12.4348 10.674L11.5534 11.1433C11.4928 11.176 11.4541 11.2206 11.4394 11.2746C11.4234 11.332 11.4361 11.396 11.4754 11.4633L11.6294 11.752C11.6961 11.86 11.8054 11.8826 11.9281 11.8153L12.4555 11.5433V13.6987ZM7.9467 7.11133C7.56269 7.11133 7.25202 7.42199 7.25202 7.80533C7.25202 8.18866 7.56269 8.49999 7.9467 8.49999C8.33071 8.49999 8.64071 8.18866 8.64071 7.80533C8.64071 7.42199 8.33071 7.11133 7.9467 7.11133ZM7.9607 14.4093H7.96003C7.9167 14.568 7.98003 14.684 8.1327 14.7267C8.47537 14.834 8.83671 14.8887 9.20472 14.8887C9.76006 14.8887 10.1741 14.77 10.4354 14.5347C10.6774 14.3113 10.7994 14.004 10.7994 13.6233V13.522C10.7994 13.0447 10.6121 12.724 10.2414 12.5653C10.5407 12.4067 10.6914 12.1073 10.6914 11.6726V11.602C10.6914 11.23 10.5601 10.9493 10.3014 10.7673C10.0787 10.616 9.76539 10.5393 9.36939 10.5393C8.98605 10.5393 8.60405 10.618 8.23337 10.7733C8.1147 10.8233 8.06537 10.9267 8.10003 11.0566L8.18203 11.362C8.20337 11.4306 8.23804 11.476 8.28737 11.498C8.33737 11.52 8.39537 11.5166 8.45937 11.488C8.75271 11.3613 9.02339 11.298 9.26139 11.298C9.42939 11.298 9.55406 11.322 9.63006 11.368C9.71539 11.4233 9.75673 11.5166 9.75673 11.6533V11.698C9.75673 11.8946 9.70206 12.0273 9.59073 12.1027C9.45473 12.192 9.26539 12.2373 9.02739 12.2373H8.86871C8.78471 12.2373 8.72605 12.2567 8.69138 12.2947C8.65805 12.3307 8.64205 12.3867 8.64205 12.464V12.7867C8.64205 12.8673 8.65738 12.92 8.69071 12.952C8.72405 12.986 8.77871 13.0013 8.86271 13.0013H9.11539C9.40272 13.0013 9.60206 13.0427 9.70806 13.126C9.8114 13.2053 9.86407 13.342 9.86407 13.5347V13.5847C9.86407 13.7707 9.8194 13.9047 9.72873 13.984C9.62006 14.082 9.42673 14.1313 9.15405 14.1313C8.87938 14.1313 8.60405 14.0813 8.33271 13.9827C8.24737 13.9547 8.18203 13.956 8.13537 13.9867C8.09003 14.016 8.05737 14.0713 8.03003 14.162L7.9607 14.4093ZM14.1941 7.11133C14.5781 7.11133 14.8888 7.42199 14.8888 7.80533C14.8888 8.18866 14.5781 8.49999 14.1941 8.49999C13.8101 8.49999 13.5001 8.18866 13.5001 7.80533C13.5001 7.42199 13.8101 7.11133 14.1941 7.11133ZM17.2819 24.5033L8.66638 18.58V26H23.3079C24.9233 26 26 24.9233 26 23.3073V18.58L17.2819 24.5033ZM17.2821 12.0001L9.36659 17.4381L17.2821 22.8767L25.1975 17.4381L17.2821 12.0001Z"
         fill="currentColor"
       />
     ),
@@ -1292,6 +1323,25 @@ export const CUSTOM_ICONS = {
     notes: "System add glyph (plus inside a circle). Figma source ic_system_add_active.",
     render: () => (
       <path d="M10 0C15.5225 0 20 4.4775 20 10C20 15.5225 15.5225 20 10 20C4.47688 20 0 15.5225 0 10C0 4.4775 4.47688 0 10 0ZM9.0625 4.375V9.0625H4.375V10.9375H9.0625V15.625H10.9375V10.9375H15.625V9.0625H10.9375V4.375H9.0625Z" fill="currentColor" />
+    ),
+  },
+  plus: {
+    source: "custom",
+    label: "Add",
+    category: "System",
+    width: 20,
+    height: 20,
+    viewBox: "0 0 20 20",
+    usage: ["App2027GroupAddButton"],
+    notes:
+      "Bare plus, no disc. The filled add-circle glyph inside a roundel reads as two stacked circles; a group header wants the lighter mark.",
+    render: () => (
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M9 3H11V9H17V11H11V17H9V11H3V9H9V3Z"
+        fill="currentColor"
+      />
     ),
   },
   "more-horizontal": {

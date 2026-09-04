@@ -1,6 +1,5 @@
 import { useState } from "react";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
-import ActionIconBubble from "@/app/components/ActionIconBubble";
 import BankBadge from "@/app/components/payments/BankBadge";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import PrimaryButton from "@/app/components/PrimaryButton";
@@ -47,7 +46,7 @@ const HUB_ACTIONS: readonly HubAction[] = [
   { id: "new-payment", label: "Domestic\npayment", icon: "new-payment-domestic" },
   { id: "between-accounts", label: "Move\nmoney", icon: "transaction-transfer" },
   { id: "scan-pay", label: "Scan &\npay", icon: "payment-scan-qr" },
-  { id: "recurrent-payments", label: "Recurrent\npayments", icon: "payment-templates" },
+  { id: "recurrent-payments", label: "Recurrent\npayments", icon: "payment-recurrent" },
   { id: "templates", label: "Templates", icon: "payment-templates" },
   { id: "card-repayment", label: "Card\nrepayment", icon: "payment-card-repayment" },
   { id: "exchange-rates", label: "Exchange\nrates", icon: "payment-exchange-rates" },
@@ -176,7 +175,7 @@ export default function Evo2027PaymentsHub({
       </div>
 
       <section aria-label={t("runtime.payments.hub.actionsLabel", "Payment actions")} className="px-[20px]">
-        <div className="grid grid-cols-4 gap-x-[8px] gap-y-[20px]">
+        <div className="grid grid-cols-4 gap-[8px]">
           {gridActions.map((action) => (
             <HubTile
               key={action.id}
@@ -433,12 +432,19 @@ function HubTile({
       disabled={disabled}
       title={disabledReason}
       aria-label={label.replace(/\n/g, " ")}
-      className={`flex cursor-pointer flex-col items-center gap-[6px] rounded-[8px] text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)] ${
-        disabled ? "cursor-not-allowed opacity-40" : ""
+      className={`flex min-h-[124px] flex-col items-center justify-center gap-[16px] rounded-[16px] bg-[var(--uc-surface)] px-[4px] py-[24px] text-[var(--uc-text)] shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)] transition-[transform,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)] ${
+        disabled ? "cursor-not-allowed opacity-40" : "cursor-pointer active:scale-[0.97] active:shadow-none"
       }`}
     >
-      <ActionIconBubble iconName={icon} />
-      <span className="block w-full whitespace-pre-line text-center text-[14px] font-normal leading-[16px] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] [display:-webkit-box]">
+      {/* The card is already the white surface, so the roundel behind the glyph
+          would only draw white on white — the icon carries itself here. */}
+      <span className="grid size-[24px] shrink-0 place-items-center">
+        <AppIcon name={icon} size={24} color="var(--pi-shortcut-icon-fg, var(--uc-text))" />
+      </span>
+      {/* Two lines' worth of box whether the label needs one or two, so every
+          glyph in the row sits on the same line rather than half of them
+          dropping 8px because their label is short. */}
+      <span className="block h-[32px] w-full whitespace-pre-line text-center text-[14px] font-normal leading-[16px] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] [display:-webkit-box]">
         {label}
       </span>
     </button>

@@ -22,7 +22,7 @@ export interface EvoTranslations {
   };
   summary: {
     totalAvailable: string;
-    spentThisWeek: string;
+    spentThisMonth: string;
     totalSavings: string;
     interestEarned: string;
     marketPerformance: string;
@@ -50,6 +50,8 @@ export interface EvoTranslations {
     investmentPortfolios: string;
     insurance: string;
     oneProduct: string;
+    /** Aria-label prefix on the group header's add button, e.g. "Add Deposits". */
+    addProduct: string;
     manyProducts: string;
   };
   labels: {
@@ -113,6 +115,9 @@ export interface EvoTranslations {
   activity: {
     heading: string;
     seeMore: string;
+    /** Eyebrow of the per-account list glued under each account card. */
+    recent: string;
+    empty: string;
   };
   spending: {
     changePeriod: string;
@@ -159,7 +164,7 @@ const EN: EvoTranslations = {
   },
   summary: {
     totalAvailable: "Total available",
-    spentThisWeek: "Spent this week",
+    spentThisMonth: "Spent this month",
     totalSavings: "Total savings",
     interestEarned: "Interest earned",
     marketPerformance: "Market performance",
@@ -184,9 +189,10 @@ const EN: EvoTranslations = {
     mortgages: "Mortgages",
     deposits: "Deposits",
     savingAccounts: "Saving accounts",
-    investmentPortfolios: "Investment portfolios",
+    investmentPortfolios: "Investment",
     insurance: "Insurance",
     oneProduct: "1 product",
+    addProduct: "Add",
     manyProducts: "products",
   },
   labels: {
@@ -311,6 +317,8 @@ const EN: EvoTranslations = {
   activity: {
     heading: "Your recent transactions",
     seeMore: "See more",
+    recent: "Recent transactions",
+    empty: "No transactions yet",
   },
   spending: {
     changePeriod: "Change period",
@@ -354,7 +362,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
     tabs: { accounts: "Conturi", savings: "Economii", credits: "Credite", insurances: "AsigurÄri", ariaLabel: "Categorii de produse" },
     summary: {
       totalAvailable: "Total disponibil",
-      spentThisWeek: "Cheltuit sÄptÄmÃ¢na aceasta",
+      spentThisMonth: "Cheltuit luna aceasta",
       totalSavings: "Total economii",
       interestEarned: "DobÃ¢ndÄ cÃ¢ÈtigatÄ",
       marketPerformance: "PerformanÈÄ de piaÈÄ",
@@ -373,8 +381,8 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
     groups: {
       accounts: "Conturi", cards: "Carduri", debitCards: "Carduri de debit", creditCards: "Carduri de credit",
       loans: "Credite", mortgages: "Credite ipotecare", deposits: "Depozite", savingAccounts: "Conturi de economii",
-      investmentPortfolios: "Portofolii de investiÈii", insurance: "AsigurÄri",
-      oneProduct: "1 produs", manyProducts: "produse",
+      investmentPortfolios: "Investiții", insurance: "AsigurÄri",
+      oneProduct: "1 produs", addProduct: "Adaugă", manyProducts: "produse",
     },
     labels: {
       maturityAmount: "SumÄ la scadenÈÄ", period: "PerioadÄ", daysToMaturity: "Zile pÃ¢nÄ la scadenÈÄ",
@@ -426,7 +434,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
       filters: { popular: "Cele mai populare", eshops: "Magazine online", electronics: "Electronice", travel: "CÄlÄtorii", home: "CasÄ Èi decor" },
       categoriesLabel: "Categorii Shopsmart", offersLabel: "Oferte Shopsmart",
     },
-    activity: { heading: "TranzacÈiile tale recente", seeMore: "Vezi mai multe" },
+    activity: { heading: "TranzacÈiile tale recente", seeMore: "Vezi mai multe", recent: "Tranzacții recente", empty: "Nicio tranzacție încă" },
     spending: {
       changePeriod: "SchimbÄ perioada", periodSheetTitle: "Alege o perioadÄ",
       presetThisMonth: "Luna aceasta", presetLastMonth: "Luna trecutÄ",
@@ -450,7 +458,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
   cs: {
     tabs: { accounts: "ÃÄty", savings: "SpoÅenÃ­", credits: "ÃvÄry", insurances: "PojiÅ¡tÄnÃ­", ariaLabel: "Kategorie produktÅ¯" },
     summary: {
-      totalAvailable: "Celkem k dispozici", spentThisWeek: "Utraceno tento tÃ½den", totalSavings: "Celkem spoÅenÃ­",
+      totalAvailable: "Celkem k dispozici", spentThisMonth: "Utraceno tento měsíc", totalSavings: "Celkem spoÅenÃ­",
       interestEarned: "PÅipsanÃ© Ãºroky", marketPerformance: "VÃ½konnost na trhu", totalOwed: "Celkem dluÅ¾Ã­te",
       dueThisMonth: "SplatnÃ© tento mÄsÃ­c", covered: "Jste krytÃ­", nextRenewal: "DalÅ¡Ã­ obnovenÃ­",
       activePolicy: "aktivnÃ­ smlouva", activePolicies: "aktivnÃ­ smlouvy",
@@ -460,7 +468,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
     groups: {
       accounts: "ÃÄty", cards: "Karty", debitCards: "DebetnÃ­ karty", creditCards: "KreditnÃ­ karty",
       loans: "PÅ¯jÄky", mortgages: "HypotÃ©ky", deposits: "TermÃ­novanÃ© vklady", savingAccounts: "SpoÅicÃ­ ÃºÄty",
-      investmentPortfolios: "InvestiÄnÃ­ portfolia", insurance: "PojiÅ¡tÄnÃ­", oneProduct: "1 produkt", manyProducts: "produktÅ¯",
+      investmentPortfolios: "Investice", insurance: "PojiÅ¡tÄnÃ­", oneProduct: "1 produkt", addProduct: "Přidat", manyProducts: "produktÅ¯",
     },
     labels: {
       maturityAmount: "ÄÃ¡stka pÅi splatnosti", period: "ObdobÃ­", daysToMaturity: "DnÃ­ do splatnosti",
@@ -504,7 +512,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
       filters: { popular: "NejoblÃ­benÄjÅ¡Ã­", eshops: "E-shopy", electronics: "Elektronika", travel: "CestovÃ¡nÃ­", home: "BydlenÃ­" },
       categoriesLabel: "Kategorie Shopsmart", offersLabel: "NabÃ­dky Shopsmart",
     },
-    activity: { heading: "VaÅ¡e nedÃ¡vnÃ© transakce", seeMore: "Zobrazit vÃ­ce" },
+    activity: { heading: "VaÅ¡e nedÃ¡vnÃ© transakce", seeMore: "Zobrazit vÃ­ce", recent: "Nedávné transakce", empty: "Zatím žádné transakce" },
     spending: {
       changePeriod: "ZmÄnit obdobÃ­", periodSheetTitle: "Vyberte obdobÃ­",
       presetThisMonth: "Tento mÄsÃ­c", presetLastMonth: "MinulÃ½ mÄsÃ­c",
@@ -528,7 +536,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
   sk: {
     tabs: { accounts: "ÃÄty", savings: "Sporenie", credits: "Ãvery", insurances: "Poistenie", ariaLabel: "KategÃ³rie produktov" },
     summary: {
-      totalAvailable: "Celkom k dispozÃ­cii", spentThisWeek: "MinutÃ© tento tÃ½Å¾deÅ", totalSavings: "Celkom sporenie",
+      totalAvailable: "Celkom k dispozÃ­cii", spentThisMonth: "Minuté tento mesiac", totalSavings: "Celkom sporenie",
       interestEarned: "PripÃ­sanÃ© Ãºroky", marketPerformance: "VÃ½konnosÅ¥ na trhu", totalOwed: "Celkom dlÅ¾Ã­te",
       dueThisMonth: "SplatnÃ© tento mesiac", covered: "Ste krytÃ­", nextRenewal: "ÄalÅ¡ie obnovenie",
       activePolicy: "aktÃ­vna zmluva", activePolicies: "aktÃ­vne zmluvy",
@@ -538,7 +546,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
     groups: {
       accounts: "ÃÄty", cards: "Karty", debitCards: "DebetnÃ© karty", creditCards: "KreditnÃ© karty",
       loans: "PÃ´Å¾iÄky", mortgages: "HypotÃ©ky", deposits: "TermÃ­novanÃ© vklady", savingAccounts: "Sporiace ÃºÄty",
-      investmentPortfolios: "InvestiÄnÃ© portfÃ³liÃ¡", insurance: "Poistenie", oneProduct: "1 produkt", manyProducts: "produktov",
+      investmentPortfolios: "Investície", insurance: "Poistenie", oneProduct: "1 produkt", addProduct: "Pridať", manyProducts: "produktov",
     },
     labels: {
       maturityAmount: "Suma pri splatnosti", period: "Obdobie", daysToMaturity: "DnÃ­ do splatnosti",
@@ -582,7 +590,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
       filters: { popular: "NajobÄ¾ÃºbenejÅ¡ie", eshops: "E-shopy", electronics: "Elektronika", travel: "Cestovanie", home: "BÃ½vanie" },
       categoriesLabel: "KategÃ³rie Shopsmart", offersLabel: "Ponuky Shopsmart",
     },
-    activity: { heading: "VaÅ¡e nedÃ¡vne transakcie", seeMore: "ZobraziÅ¥ viac" },
+    activity: { heading: "VaÅ¡e nedÃ¡vne transakcie", seeMore: "ZobraziÅ¥ viac", recent: "Nedávne transakcie", empty: "Zatiaľ žiadne transakcie" },
     spending: {
       changePeriod: "ZmeniÅ¥ obdobie", periodSheetTitle: "Vyberte obdobie",
       presetThisMonth: "Tento mesiac", presetLastMonth: "MinulÃ½ mesiac",
@@ -606,7 +614,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
   hu: {
     tabs: { accounts: "SzÃ¡mlÃ¡k", savings: "MegtakarÃ­tÃ¡s", credits: "Hitelek", insurances: "BiztosÃ­tÃ¡s", ariaLabel: "TermÃ©kkategÃ³riÃ¡k" },
     summary: {
-      totalAvailable: "Ãsszes elÃ©rhetÅ", spentThisWeek: "Ezen a hÃ©ten kÃ¶ltve", totalSavings: "Ãsszes megtakarÃ­tÃ¡s",
+      totalAvailable: "Ãsszes elÃ©rhetÅ", spentThisMonth: "Ebben a hónapban költve", totalSavings: "Ãsszes megtakarÃ­tÃ¡s",
       interestEarned: "JÃ³vÃ¡Ã­rt kamat", marketPerformance: "Piaci teljesÃ­tmÃ©ny", totalOwed: "Ãsszes tartozÃ¡s",
       dueThisMonth: "Ebben a hÃ³napban esedÃ©kes", covered: "BiztosÃ­tva vagy", nextRenewal: "KÃ¶vetkezÅ megÃºjÃ­tÃ¡s",
       activePolicy: "aktÃ­v kÃ¶tvÃ©ny", activePolicies: "aktÃ­v kÃ¶tvÃ©ny",
@@ -616,7 +624,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
     groups: {
       accounts: "SzÃ¡mlÃ¡k", cards: "KÃ¡rtyÃ¡k", debitCards: "BetÃ©ti kÃ¡rtyÃ¡k", creditCards: "HitelkÃ¡rtyÃ¡k",
       loans: "KÃ¶lcsÃ¶nÃ¶k", mortgages: "JelzÃ¡loghitelek", deposits: "LekÃ¶tÃ¶tt betÃ©tek", savingAccounts: "MegtakarÃ­tÃ¡si szÃ¡mlÃ¡k",
-      investmentPortfolios: "BefektetÃ©si portfÃ³liÃ³k", insurance: "BiztosÃ­tÃ¡s", oneProduct: "1 termÃ©k", manyProducts: "termÃ©k",
+      investmentPortfolios: "Befektetések", insurance: "BiztosÃ­tÃ¡s", oneProduct: "1 termÃ©k", addProduct: "Hozzáadás", manyProducts: "termÃ©k",
     },
     labels: {
       maturityAmount: "LejÃ¡ratkori Ã¶sszeg", period: "IdÅszak", daysToMaturity: "Nap a lejÃ¡ratig",
@@ -660,7 +668,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
       filters: { popular: "LegnÃ©pszerÅ±bb", eshops: "WebÃ¡ruhÃ¡zak", electronics: "Elektronika", travel: "UtazÃ¡s", home: "Otthon" },
       categoriesLabel: "Shopsmart kategÃ³riÃ¡k", offersLabel: "Shopsmart ajÃ¡nlatok",
     },
-    activity: { heading: "LegutÃ³bbi tranzakciÃ³id", seeMore: "TÃ¶bb megjelenÃ­tÃ©se" },
+    activity: { heading: "LegutÃ³bbi tranzakciÃ³id", seeMore: "TÃ¶bb megjelenÃ­tÃ©se", recent: "Legutóbbi tranzakciók", empty: "Még nincs tranzakció" },
     spending: {
       changePeriod: "IdÅszak mÃ³dosÃ­tÃ¡sa", periodSheetTitle: "VÃ¡lassz idÅszakot",
       presetThisMonth: "Ez a hÃ³nap", presetLastMonth: "ElÅzÅ hÃ³nap",
@@ -684,7 +692,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
   sr: {
     tabs: { accounts: "RaÄuni", savings: "Å tednja", credits: "Krediti", insurances: "Osiguranje", ariaLabel: "Kategorije proizvoda" },
     summary: {
-      totalAvailable: "Ukupno dostupno", spentThisWeek: "PotroÅ¡eno ove nedelje", totalSavings: "Ukupna Å¡tednja",
+      totalAvailable: "Ukupno dostupno", spentThisMonth: "Potrošeno ovog meseca", totalSavings: "Ukupna Å¡tednja",
       interestEarned: "Pripisana kamata", marketPerformance: "TrÅ¾iÅ¡ni prinos", totalOwed: "Ukupan dug",
       dueThisMonth: "Dospeva ovog meseca", covered: "Osigurani ste", nextRenewal: "SledeÄa obnova",
       activePolicy: "aktivna polisa", activePolicies: "aktivne polise",
@@ -694,7 +702,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
     groups: {
       accounts: "RaÄuni", cards: "Kartice", debitCards: "Debitne kartice", creditCards: "Kreditne kartice",
       loans: "Krediti", mortgages: "Stambeni krediti", deposits: "OroÄeni depoziti", savingAccounts: "Å tedni raÄuni",
-      investmentPortfolios: "Investicioni portfoliji", insurance: "Osiguranje", oneProduct: "1 proizvod", manyProducts: "proizvoda",
+      investmentPortfolios: "Investicije", insurance: "Osiguranje", oneProduct: "1 proizvod", addProduct: "Dodaj", manyProducts: "proizvoda",
     },
     labels: {
       maturityAmount: "Iznos o dospeÄu", period: "Period", daysToMaturity: "Dana do dospeÄa",
@@ -738,7 +746,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
       filters: { popular: "Najpopularnije", eshops: "Online prodavnice", electronics: "Elektronika", travel: "Putovanja", home: "Dom i ureÄenje" },
       categoriesLabel: "Shopsmart kategorije", offersLabel: "Shopsmart ponude",
     },
-    activity: { heading: "VaÅ¡e nedavne transakcije", seeMore: "PrikaÅ¾i viÅ¡e" },
+    activity: { heading: "VaÅ¡e nedavne transakcije", seeMore: "PrikaÅ¾i viÅ¡e", recent: "Nedavne transakcije", empty: "Još nema transakcija" },
     spending: {
       changePeriod: "Promeni period", periodSheetTitle: "Izaberite period",
       presetThisMonth: "Ovaj mesec", presetLastMonth: "ProÅ¡li mesec",
@@ -762,7 +770,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
   bs: {
     tabs: { accounts: "RaÄuni", savings: "Å tednja", credits: "Krediti", insurances: "Osiguranje", ariaLabel: "Kategorije proizvoda" },
     summary: {
-      totalAvailable: "Ukupno dostupno", spentThisWeek: "PotroÅ¡eno ove sedmice", totalSavings: "Ukupna Å¡tednja",
+      totalAvailable: "Ukupno dostupno", spentThisMonth: "Potrošeno ovog mjeseca", totalSavings: "Ukupna Å¡tednja",
       interestEarned: "Pripisana kamata", marketPerformance: "TrÅ¾iÅ¡ni prinos", totalOwed: "Ukupan dug",
       dueThisMonth: "Dospijeva ovog mjeseca", covered: "Osigurani ste", nextRenewal: "SljedeÄa obnova",
       activePolicy: "aktivna polisa", activePolicies: "aktivne polise",
@@ -772,7 +780,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
     groups: {
       accounts: "RaÄuni", cards: "Kartice", debitCards: "Debitne kartice", creditCards: "Kreditne kartice",
       loans: "Krediti", mortgages: "Stambeni krediti", deposits: "OroÄeni depoziti", savingAccounts: "Å tedni raÄuni",
-      investmentPortfolios: "Investicijski portfoliji", insurance: "Osiguranje", oneProduct: "1 proizvod", manyProducts: "proizvoda",
+      investmentPortfolios: "Investicije", insurance: "Osiguranje", oneProduct: "1 proizvod", addProduct: "Dodaj", manyProducts: "proizvoda",
     },
     labels: {
       maturityAmount: "Iznos o dospijeÄu", period: "Period", daysToMaturity: "Dana do dospijeÄa",
@@ -816,7 +824,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
       filters: { popular: "Najpopularnije", eshops: "Online trgovine", electronics: "Elektronika", travel: "Putovanja", home: "Dom i ureÄenje" },
       categoriesLabel: "Shopsmart kategorije", offersLabel: "Shopsmart ponude",
     },
-    activity: { heading: "VaÅ¡e nedavne transakcije", seeMore: "PrikaÅ¾i viÅ¡e" },
+    activity: { heading: "VaÅ¡e nedavne transakcije", seeMore: "PrikaÅ¾i viÅ¡e", recent: "Nedavne transakcije", empty: "Još nema transakcija" },
     spending: {
       changePeriod: "Promijeni period", periodSheetTitle: "Odaberite period",
       presetThisMonth: "Ovaj mjesec", presetLastMonth: "ProÅ¡li mjesec",
@@ -840,7 +848,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
   sl: {
     tabs: { accounts: "RaÄuni", savings: "VarÄevanje", credits: "Krediti", insurances: "Zavarovanje", ariaLabel: "Kategorije produktov" },
     summary: {
-      totalAvailable: "Skupaj na voljo", spentThisWeek: "Porabljeno ta teden", totalSavings: "Skupaj varÄevanje",
+      totalAvailable: "Skupaj na voljo", spentThisMonth: "Porabljeno ta mesec", totalSavings: "Skupaj varÄevanje",
       interestEarned: "Pripisane obresti", marketPerformance: "TrÅ¾ni donos", totalOwed: "Skupaj dolgujete",
       dueThisMonth: "Zapade ta mesec", covered: "Ste zavarovani", nextRenewal: "Naslednja obnova",
       activePolicy: "aktivna polica", activePolicies: "aktivne police",
@@ -850,7 +858,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
     groups: {
       accounts: "RaÄuni", cards: "Kartice", debitCards: "Debetne kartice", creditCards: "Kreditne kartice",
       loans: "Posojila", mortgages: "Stanovanjski krediti", deposits: "Vezane vloge", savingAccounts: "VarÄevalni raÄuni",
-      investmentPortfolios: "NaloÅ¾beni portfelji", insurance: "Zavarovanje", oneProduct: "1 produkt", manyProducts: "produktov",
+      investmentPortfolios: "Naložbe", insurance: "Zavarovanje", oneProduct: "1 produkt", addProduct: "Dodaj", manyProducts: "produktov",
     },
     labels: {
       maturityAmount: "Znesek ob zapadlosti", period: "Obdobje", daysToMaturity: "Dni do zapadlosti",
@@ -894,7 +902,7 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
       filters: { popular: "Najbolj priljubljeno", eshops: "Spletne trgovine", electronics: "Elektronika", travel: "Potovanja", home: "Dom in bivanje" },
       categoriesLabel: "Kategorije Shopsmart", offersLabel: "Ponudbe Shopsmart",
     },
-    activity: { heading: "VaÅ¡e nedavne transakcije", seeMore: "PrikaÅ¾i veÄ" },
+    activity: { heading: "VaÅ¡e nedavne transakcije", seeMore: "PrikaÅ¾i veÄ", recent: "Nedavne transakcije", empty: "Še ni transakcij" },
     spending: {
       changePeriod: "Spremeni obdobje", periodSheetTitle: "Izberite obdobje",
       presetThisMonth: "Ta mesec", presetLastMonth: "PrejÅ¡nji mesec",

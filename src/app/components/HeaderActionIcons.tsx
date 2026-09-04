@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { AppIcon } from "@/app/components/icons";
 
-type HeaderActionIconName = "profile" | "messages" | "help" | "search" | "logout" | "contact-phone" | "edit";
+type HeaderActionIconName = "profile" | "messages" | "help" | "search" | "logout" | "contact-phone" | "edit" | "spending";
 
 interface HeaderActionButtonProps {
   icon: HeaderActionIconName;
@@ -18,6 +18,9 @@ export function HeaderActionIcon({ icon }: { icon: HeaderActionIconName }) {
   if (icon === "contact-phone") return <AppIcon name="contact-phone" color="var(--uc-icon)" />;
   if (icon === "search") return <AppIcon name="search" color="var(--uc-icon)" />;
   if (icon === "edit") return <AppIcon name="edit-pencil" color="var(--uc-icon)" />;
+  // The same mark the bottom bar uses for Spending, so the shortcut and the
+  // destination it opens carry one glyph.
+  if (icon === "spending") return <AppIcon name="nav-analytics" color="var(--uc-icon)" />;
   return <AppIcon name="help-circle" color="var(--uc-icon)" />;
 }
 

@@ -6,7 +6,7 @@ import { useDemo } from '@/app/state/demoStore';
 import { maskAmountParts } from '@/app/utils/amountPrivacy';
 import { useProducts } from '@/hooks/useProducts';
 import { useDragCarousel } from '@/hooks/useDragCarousel';
-import App2027Activity from './App2027Activity';
+import App2027Activity, { type App2027TransactionOpenHandler } from './App2027Activity';
 import App2027Portfolio from './App2027Portfolio';
 import App2027ProductAccordions from './App2027ProductAccordions';
 import App2027TransformationHome, { type TransformationTab } from './App2027TransformationHome';
@@ -352,13 +352,13 @@ export default function App2027HomeScreen({
   const savingsProduct = products.find((product) => product.type === 'saving_account' || product.type === 'term_deposit');
   const showHomeTransformation = demo.release === 'release-future-evo-2027';
 
-  const openActivityTransaction = (
-    transaction: AccountTransaction,
-    merchantEnrichment?: CardTransactionMerchantEnrichment,
-  ) => {
-    const sourceProduct = transaction.source === 'card'
-      ? activityDebitCard ?? activityAccount
-      : activityAccount;
+  const openActivityTransaction: App2027TransactionOpenHandler = (transaction, merchantEnrichment, account) => {
+    const owner = account ?? activityAccount;
+    // Card rows of the primary account open on the card, as the activity list always
+    // did; any other account's rows open on that account, whose ledger they came from.
+    const sourceProduct = transaction.source === 'card' && (!account || account.id === activityAccount?.id)
+      ? activityDebitCard ?? owner
+      : owner;
     if (sourceProduct) onTransactionClick?.(transaction, sourceProduct, merchantEnrichment);
   };
 
@@ -519,14 +519,13 @@ export default function App2027HomeScreen({
       <div className="h-[var(--uc-phone-top-reserve,54px)] shrink-0" />
 
       <header data-app-2027-header className="z-20 shrink-0 bg-[var(--uc-app-bg)]">
-        <HomeHeader onPrimeClick={onPrimeClick} onMessagesClick={onMessagesClick} showTitle={false} />
+        <HomeHeader onPrimeClick={onPrimeClick} onMessagesClick={onMessagesClick} onSpendingClick={onAnalyticsClick} showTitle={false} />
       </header>
 
       <main ref={scrollRef} data-app-2027-scroll className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-[clamp(16px,4vw,24px)] pb-[16px] pt-[18px] scrollbar-hide">
         <div data-app-2027-layout className="mx-auto grid w-full max-w-[1080px] grid-cols-1 items-start gap-[28px]">
           {showHomeTransformation ? (
             <App2027TransformationHome
-              onSeeAllTransactions={onSeeAllTransactionsClick}
               categories={categories}
               country={demo.country}
               amountsHidden={demo.amountsHidden}
