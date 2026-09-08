@@ -2,10 +2,21 @@
  * Flow Library — typed model.
  *
  * A "flow definition" is the single source of truth for one future/not-yet-baseline
- * journey. It drives three things at once:
+ * journey. It drives four things at once:
  *   1. the interactive journey preview (which DS-composed screen renders per step),
- *   2. the on-screen, spec-grade documentation a business analyst reads, and
- *   3. the exported PDF/Word handoff.
+ *   2. the on-screen, spec-grade documentation a business analyst reads,
+ *   3. the developer build surface (screens as built, guards, state machine), and
+ *   4. the exported PDF/Word/Confluence handoff.
+ *
+ * Tab ownership — what each Flow Library tab owns, and therefore what must not be
+ * copied into another tab. A tab may cite another tab's content by rule id or
+ * screen title; it never repeats it:
+ *   Journey         the linear story: scenario, steps, why.
+ *   Specification   the ONLY home of flow rules (`overview.rules`) and screen
+ *                   contracts (`screenSpecs`).
+ *   Prototype       navigation only: the clickable map and its transitions.
+ *   Implementation  the cross-screen technical layer no single screen owns:
+ *                   session model, guards, operations, the screens as built.
  *
  * Keep this file free of React/DOM imports so it can be imported by data modules,
  * the export layer, and tests without pulling in the preview components.
@@ -145,6 +156,8 @@ export interface FlowFieldSpec {
 export interface FlowActionSpec {
   label: string;
   result: string;
+  /** Id of the rule (`overview.rules`) that governs this control, when one does. */
+  rule?: string;
 }
 
 /**
@@ -152,7 +165,13 @@ export interface FlowActionSpec {
  * so a screen shared across scenarios is documented once.
  */
 export interface FlowScreenSpec {
+  /** Canonical screen name, the same on every tab and in every export. */
+  title?: string;
+  /** Ids of the rules (`overview.rules`) that govern this screen. Cited, never restated. */
+  rules?: readonly string[];
   purpose: string;
+  /** Explicit first-render contract: visible data, default values and CTA availability. */
+  defaultState?: string;
   /** UI states / variants the screen can show. */
   states?: string[];
   /** Fields / data points rendered or captured. */
@@ -280,6 +299,71 @@ export interface FlowBusinessAnalysisSpec {
 }
 
 /**
+ * One atomic, referenceable rule. Authored once under a group heading; every
+ * other surface cites the id (see `flows/rules.ts`).
+ */
+export interface FlowRule {
+  id: string;
+  group: string;
+  statement: string;
+}
+
+/** The state the flow carries between screens — owned by no single screen. */
+export interface FlowSessionModel {
+  name: string;
+  /** A TypeScript type literal, shown verbatim and shipped in the reference package. */
+  shape: string;
+  description: string;
+}
+
+/** The executable form of one or more rules, and the test that proves it. */
+export interface FlowGuardSpec {
+  name: string;
+  signature: string;
+  rules: readonly string[];
+  enforcedOn: readonly FlowScreenKind[];
+  test: string;
+}
+
+/** One call across the integration boundary, and what is still undecided about it. */
+export interface FlowOperationSpec {
+  name: string;
+  signature: string;
+  calledFrom: FlowScreenKind;
+  purpose: string;
+  unresolved?: string;
+}
+
+export interface FlowAnalyticsMapping {
+  event: string;
+  trigger: string;
+  screen?: FlowScreenKind;
+}
+
+/**
+ * The developer build surface. Everything a screen contract cannot own because
+ * it spans screens. Transitions, data fields and acceptance criteria are NOT
+ * repeated here — the Implementation tab derives them from `prototype` and
+ * `screenSpecs`, so they cannot drift.
+ */
+export interface FlowImplementationSpec {
+  sessionModel: FlowSessionModel;
+  guards: readonly FlowGuardSpec[];
+  operations: readonly FlowOperationSpec[];
+  analytics?: readonly FlowAnalyticsMapping[];
+  openTechnicalQuestions: readonly string[];
+  /**
+   * Which component function in the flow's preview module renders each screen,
+   * plus the stateful shell that wires them. Names only: the code itself is read
+   * from the module source (`components/screenSources.ts`).
+   */
+  screenSource?: {
+    screens: Partial<Record<FlowScreenKind, string>>;
+    shell?: string;
+  };
+}
+
+/**
  * Flow-level structured specification — the handoff a BA lifts to write the spec.
  * Concise structured fields up top; rich narrative preserved in `notes`.
  */
@@ -290,6 +374,9 @@ export interface FlowOverviewSpec {
   businessAnalysis: FlowBusinessAnalysisSpec;
   entryPoints: FlowEntryPoint[];
   preconditions: string[];
+  /** The canonical, id-carrying rule set. When present, `businessRules` is derived from it. */
+  rules?: readonly FlowRule[];
+  /** One paragraph per rule group. Authored directly only by flows without `rules`. */
   businessRules: string[];
   /** Present only for flows that require an explicit signing step. */
   signing?: string;
@@ -327,6 +414,8 @@ export interface FlowDefinition {
   specLayout?: "document-only" | "document-and-screens";
   /** Optional clickable map; when present the detail view gains a Prototype tab. */
   prototype?: FlowPrototypeSpec;
+  /** Optional build surface; when present the detail view gains an Implementation tab. */
+  implementation?: FlowImplementationSpec;
   /** Per-screen specs, keyed by screen kind (documented once, reused across scenarios). */
   screenSpecs: Partial<Record<FlowScreenKind, FlowScreenSpec>>;
   defaultScenarioId: string;

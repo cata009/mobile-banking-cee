@@ -12,6 +12,7 @@
  */
 
 import type {
+  ExportImplementation,
   ExportOverview,
   CapturedFlowStep,
   FlowExportMeta,
@@ -97,6 +98,10 @@ function businessAnalysisBlocks(blocks: DocBlock[], analysis: FlowBusinessAnalys
 function stepSpecBlocks(blocks: DocBlock[], spec: ExportStepSpec | undefined): void {
   if (!spec) return;
   if (spec.purpose) blocks.push({ kind: "paragraph", text: spec.purpose });
+  if (spec.defaultState) {
+    blocks.push({ kind: "heading", level: 4, text: "Default state on entry" });
+    blocks.push({ kind: "paragraph", text: spec.defaultState });
+  }
   if (spec.states?.length) {
     blocks.push({ kind: "heading", level: 4, text: "UI states" });
     push(blocks, bullets(spec.states));
@@ -150,9 +155,22 @@ function flowSpecBlocks(blocks: DocBlock[], overview: ExportOverview): void {
       rows: overview.entryPoints.map((entry) => [entry.label, entry.intent]),
     });
   }
+  if (overview.preconditions?.length) {
+    blocks.push({ kind: "heading", level: 3, text: "Preconditions" });
+    push(blocks, bullets(overview.preconditions));
+  }
+  if (overview.rules?.length) {
+    blocks.push({ kind: "heading", level: 3, text: "Rules" });
+    blocks.push({
+      kind: "table",
+      head: ["Id", "Group", "Rule"],
+      rows: overview.rules.map((rule) => [rule.id, rule.group, rule.statement]),
+    });
+  } else if (overview.businessRules?.length) {
+    blocks.push({ kind: "heading", level: 3, text: "Business rules" });
+    push(blocks, bullets(overview.businessRules));
+  }
   const simple: [string, readonly string[] | undefined][] = [
-    ["Preconditions", overview.preconditions],
-    ["Business rules", overview.businessRules],
     ["Success destinations", overview.successDestinations],
     ["Analytics events", overview.analyticsEvents],
     ["Open questions", overview.openQuestions],
@@ -226,5 +244,54 @@ export function buildFlowDocument(
     });
   }
 
+  if (overview?.implementation) implementationBlocks(blocks, overview.implementation);
+
   return { title: meta.flowTitle, subtitle: meta.scenarioDescription, blocks };
+}
+
+/** The build surface as an appendix — every table already carries screen titles, not kinds. */
+function implementationBlocks(blocks: DocBlock[], implementation: ExportImplementation): void {
+  blocks.push({ kind: "heading", level: 1, text: "Implementation" });
+  blocks.push({ kind: "heading", level: 2, text: `Session model — ${implementation.sessionModel.name}` });
+  blocks.push({ kind: "paragraph", text: implementation.sessionModel.description });
+  blocks.push({ kind: "paragraph", text: implementation.sessionModel.shape });
+  if (implementation.guards.length) {
+    blocks.push({ kind: "heading", level: 2, text: "Guards" });
+    blocks.push({
+      kind: "table",
+      head: ["Guard", "Signature", "Rules", "Enforced on", "Proven by"],
+      rows: implementation.guards.map((guard) => [guard.name, guard.signature, guard.rules, guard.enforcedOn, guard.test]),
+    });
+  }
+  if (implementation.transitions.length) {
+    blocks.push({ kind: "heading", level: 2, text: "State machine" });
+    blocks.push({
+      kind: "table",
+      head: ["From", "Control", "To", "Kind"],
+      rows: implementation.transitions.map((transition) => [
+        transition.from,
+        transition.control,
+        transition.to,
+        transition.kind,
+      ]),
+    });
+  }
+  if (implementation.operations.length) {
+    blocks.push({ kind: "heading", level: 2, text: "Integration boundary" });
+    blocks.push({
+      kind: "table",
+      head: ["Operation", "Signature", "Called from", "Purpose", "Not decided yet"],
+      rows: implementation.operations.map((operation) => [
+        operation.name,
+        operation.signature,
+        operation.calledFrom,
+        operation.purpose,
+        operation.unresolved,
+      ]),
+    });
+  }
+  if (implementation.openTechnicalQuestions.length) {
+    blocks.push({ kind: "heading", level: 2, text: "Implementation caveats" });
+    push(blocks, bullets(implementation.openTechnicalQuestions));
+  }
 }

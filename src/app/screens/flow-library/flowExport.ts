@@ -32,6 +32,7 @@ export interface ExportActionSpec {
 /** Per-step specification rendered as tables under each screen. */
 export interface ExportStepSpec {
   purpose?: string;
+  defaultState?: string;
   states?: readonly string[];
   fields?: readonly ExportFieldSpec[];
   actions?: readonly ExportActionSpec[];
@@ -58,11 +59,30 @@ export interface ExportOverview {
   specLayout?: "document-only" | "document-and-screens";
   entryPoints?: readonly { label: string; intent: string }[];
   preconditions?: readonly string[];
+  /** Id-carrying rules; rendered as a table instead of `businessRules` when present. */
+  rules?: readonly { id: string; group: string; statement: string }[];
   businessRules?: readonly string[];
   signing?: string;
   successDestinations?: readonly string[];
   analyticsEvents?: readonly string[];
   openQuestions?: readonly string[];
+  /** The build surface, appended as its own section when the flow declares one. */
+  implementation?: ExportImplementation;
+}
+
+/** Implementation tables with every screen kind already resolved to its title. */
+export interface ExportImplementation {
+  sessionModel: { name: string; shape: string; description: string };
+  guards: readonly { name: string; signature: string; rules: string; enforcedOn: string; test: string }[];
+  operations: readonly {
+    name: string;
+    signature: string;
+    calledFrom: string;
+    purpose: string;
+    unresolved: string;
+  }[];
+  transitions: readonly { from: string; control: string; to: string; kind: string }[];
+  openTechnicalQuestions: readonly string[];
 }
 
 export interface FlowExportMeta {
@@ -170,6 +190,8 @@ function stepSpecHtml(spec: ExportStepSpec | undefined): string {
   if (!spec) return "";
   const parts: string[] = [];
   if (spec.purpose) parts.push(`<p class="spec-purpose">${escapeHtml(spec.purpose)}</p>`);
+  if (spec.defaultState)
+    parts.push(`<h4>Default state on entry</h4><p>${escapeHtml(spec.defaultState)}</p>`);
   if (spec.states?.length) parts.push(`<h4>UI states</h4>${bulletList(spec.states)}`);
   if (spec.fields?.length) parts.push(`<h4>Fields</h4>${fieldsTable(spec.fields)}`);
   if (spec.actions?.length) parts.push(`<h4>Actions</h4>${actionsTable(spec.actions)}`);
@@ -206,7 +228,7 @@ function overviewHtml(overview: ExportOverview | undefined): string {
   // document carries the business case, and the rules, signing, analytics and
   // open questions that follow it are what delivery works from.
   if (overview.businessAnalysis && overview.specLayout !== "document-and-screens") {
-    return businessAnalysisHtml(overview.businessAnalysis);
+    return `${businessAnalysisHtml(overview.businessAnalysis)}${implementationHtml(overview.implementation)}`;
   }
   const analysis = overview.businessAnalysis ? businessAnalysisHtml(overview.businessAnalysis) : "";
   const sections: string[] = [];
@@ -219,7 +241,16 @@ function overviewHtml(overview: ExportOverview | undefined): string {
     );
   }
   if (overview.preconditions?.length) sections.push(`<h3>Preconditions</h3>${bulletList(overview.preconditions)}`);
-  if (overview.businessRules?.length) sections.push(`<h3>Business rules</h3>${bulletList(overview.businessRules)}`);
+  if (overview.rules?.length) {
+    sections.push(
+      `<h3>Rules</h3>${htmlTable(
+        ["Id", "Group", "Rule"],
+        overview.rules.map((rule) => [rule.id, rule.group, rule.statement]),
+      )}`,
+    );
+  } else if (overview.businessRules?.length) {
+    sections.push(`<h3>Business rules</h3>${bulletList(overview.businessRules)}`);
+  }
   if (overview.signing) sections.push(`<h3>Signing</h3><p>${escapeHtml(overview.signing)}</p>`);
   if (overview.successDestinations?.length)
     sections.push(`<h3>Success destinations</h3>${bulletList(overview.successDestinations)}`);
@@ -228,7 +259,59 @@ function overviewHtml(overview: ExportOverview | undefined): string {
   const flowSpec = sections.length
     ? `<section class="step"><h2>Flow specification</h2>${sections.join("")}</section>`
     : "";
-  return `${analysis}${flowSpec}`;
+  return `${analysis}${flowSpec}${implementationHtml(overview.implementation)}`;
+}
+
+function htmlTable(head: readonly string[], rows: readonly (readonly string[])[]): string {
+  const headHtml = head.map((cell) => `<th>${escapeHtml(cell)}</th>`).join("");
+  const bodyHtml = rows
+    .map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`)
+    .join("");
+  return `<table><thead><tr>${headHtml}</tr></thead><tbody>${bodyHtml}</tbody></table>`;
+}
+
+/** The build surface as an appendix: session model, guards, transitions, boundary, caveats. */
+function implementationHtml(implementation: ExportImplementation | undefined): string {
+  if (!implementation) return "";
+  const parts: string[] = [
+    `<h3>Session model — ${escapeHtml(implementation.sessionModel.name)}</h3><p>${escapeHtml(
+      implementation.sessionModel.description,
+    )}</p><pre>${escapeHtml(implementation.sessionModel.shape)}</pre>`,
+  ];
+  if (implementation.guards.length) {
+    parts.push(
+      `<h3>Guards</h3>${htmlTable(
+        ["Guard", "Signature", "Rules", "Enforced on", "Proven by"],
+        implementation.guards.map((guard) => [guard.name, guard.signature, guard.rules, guard.enforcedOn, guard.test]),
+      )}`,
+    );
+  }
+  if (implementation.transitions.length) {
+    parts.push(
+      `<h3>State machine</h3>${htmlTable(
+        ["From", "Control", "To", "Kind"],
+        implementation.transitions.map((transition) => [transition.from, transition.control, transition.to, transition.kind]),
+      )}`,
+    );
+  }
+  if (implementation.operations.length) {
+    parts.push(
+      `<h3>Integration boundary</h3>${htmlTable(
+        ["Operation", "Signature", "Called from", "Purpose", "Not decided yet"],
+        implementation.operations.map((operation) => [
+          operation.name,
+          operation.signature,
+          operation.calledFrom,
+          operation.purpose,
+          operation.unresolved,
+        ]),
+      )}`,
+    );
+  }
+  if (implementation.openTechnicalQuestions.length) {
+    parts.push(`<h3>Implementation caveats</h3>${bulletList(implementation.openTechnicalQuestions)}`);
+  }
+  return `<section class="step"><h2>Implementation</h2>${parts.join("")}</section>`;
 }
 
 /**
