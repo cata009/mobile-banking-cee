@@ -47,6 +47,7 @@ const STEPS: CapturedFlowStep[] = [
       "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
     spec: {
       purpose: "Mark what to approve.",
+      defaultState: "No draft is selected; Continue is disabled.",
       fields: [{ name: "Order", type: "checkbox", required: true }],
       actions: [{ label: "Continue", result: "Opens the first order" }],
       edgeCases: ["No drafts available"],
@@ -81,6 +82,8 @@ describe("flow handoff — document model", () => {
       document.blocks.some((block) => block.kind === "heading" && block.text === "1. Selection"),
     ).toBe(true);
     expect(document.blocks.some((block) => block.kind === "table" && block.head?.[0] === "Field")).toBe(true);
+    expect(document.blocks.some((block) => block.kind === "heading" && block.text === "Default state on entry")).toBe(true);
+    expect(document.blocks.some((block) => block.kind === "paragraph" && block.text.includes("No draft is selected"))).toBe(true);
   });
 
   it("treats a BA document as the whole spec unless the flow asks for both", () => {
@@ -172,5 +175,60 @@ describe("flow handoff — docx", () => {
 
     expect(text).toContain('r:embed="rIdImg1"');
     expect(text).toContain('Target="media/screen-1.png"');
+  });
+});
+
+describe("flow handoff — rules and implementation appendix", () => {
+  const overview: ExportOverview = {
+    ...OVERVIEW,
+    specLayout: "document-and-screens",
+    rules: [{ id: "R1", group: "Selection", statement: "Only pending drafts can be marked." }],
+    implementation: {
+      sessionModel: {
+        name: "ReviewSession",
+        shape: "type ReviewSession = { selectedIds: string[] }",
+        description: "Carried between screens.",
+      },
+      guards: [
+        { name: "canSign", signature: "(session) => boolean", rules: "R1", enforcedOn: "Summary", test: "guards.test.ts › canSign" },
+      ],
+      operations: [
+        {
+          name: "requestAuthorization",
+          signature: "() => Promise<void>",
+          calledFrom: "Summary",
+          purpose: "Opens signing.",
+          unresolved: "Orchestration.",
+        },
+      ],
+      transitions: [{ from: "Selection", control: "Continue", to: "Summary", kind: "primary" }],
+      openTechnicalQuestions: ["Idempotency on retry."],
+    },
+  };
+
+  it("renders id-carrying rules as a table and appends the implementation appendix", () => {
+    const document = buildFlowDocument(META, [], [], overview, { includeScreens: false });
+    const headings = document.blocks.flatMap((block) => (block.kind === "heading" ? [block.text] : []));
+
+    expect(headings).toContain("Rules");
+    expect(headings).not.toContain("Business rules");
+    expect(
+      document.blocks.some((block) => block.kind === "table" && block.head?.[0] === "Id" && block.rows[0]?.[0] === "R1"),
+    ).toBe(true);
+    expect(headings).toContain("Implementation");
+    expect(headings).toContain("State machine");
+    expect(
+      document.blocks.some(
+        (block) => block.kind === "table" && block.rows.some((row) => row.includes("requestAuthorization")),
+      ),
+    ).toBe(true);
+  });
+
+  it("carries the rule ids and the appendix into the Confluence paste", () => {
+    const html = buildConfluenceHtml(buildFlowDocument(META, [], [], overview, { includeScreens: false }));
+
+    expect(html).toContain("<td>R1</td>");
+    expect(html).toContain("<h1>Implementation</h1>");
+    expect(html).toContain("<h2>Integration boundary</h2>");
   });
 });
