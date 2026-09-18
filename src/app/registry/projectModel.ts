@@ -156,6 +156,12 @@ export const RELEASES: Record<ReleaseId, ReleaseMeta> = {
     description: "Czech-only Evo 2027 preview based on the current Mobile PI baseline.",
     status: "active",
   },
+  "release-future-rs-my-banker": {
+    id: "release-future-rs-my-banker",
+    label: "My Banker",
+    description: "Serbia-only My Banker preview based on the current RS Mobile PI baseline.",
+    status: "active",
+  },
   "release-v1": {
     id: "release-v1",
     label: "Release R1",

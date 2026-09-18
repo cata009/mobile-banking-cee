@@ -138,6 +138,23 @@ export const FEATURE_META: Record<FeatureId, FeatureMeta> = {
     affectedScreens: ["pi.home.overview"],
   },
 
+  fx_rsMyBanker: {
+    id: "fx_rsMyBanker",
+    label: "RS - My Banker",
+    description: "Serbia-only My Banker future preview, seeded from the current RS Mobile PI baseline.",
+    kind: "release",
+    scope: "countries",
+    countries: ["RS"],
+    releases: ["release-future-rs-my-banker"],
+    products: ["PI"],
+    designSystems: ["current"],
+    lifecycleStatus: "implemented",
+    coverageStatus: "mock-driven",
+    introducedIn: "release-future-rs-my-banker",
+    baselineFrom: null,
+    affectedScreens: ["pi.home.overview", "pi.my-banker.recommendations"],
+  },
+
   fx_quickActionsRedesign: {
     id: "fx_quickActionsRedesign",
     label: "Quick Actions Redesign",

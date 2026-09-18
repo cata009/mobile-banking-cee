@@ -27,7 +27,7 @@ import {
 
 export { ProductsHeader };
 
-type NavItem = "home" | "analytics" | "payments" | "products" | "more";
+import type { NavItem } from "@/app/components/BottomNavigation";
 
 const OFFER_CARD_WIDTH = 327;
 const OFFER_CARD_GAP = 12;
@@ -42,6 +42,7 @@ interface ProductsScreenProps {
   onContactsClick?: () => void;
   onMessagesClick?: () => void;
   onPaymentsClick?: () => void;
+  onInvestmentsClick?: () => void;
   onMoreClick?: () => void;
   onProductDetailOpen?: (selection: ProductDetailSelection) => void;
   productsShelfFocusRequest?: ProductsShelfFocusRequest | null;
@@ -447,6 +448,7 @@ export default function ProductsScreen({
   onContactsClick,
   onMessagesClick,
   onPaymentsClick,
+  onInvestmentsClick,
   onMoreClick,
   onProductDetailOpen,
   productsShelfFocusRequest,
@@ -514,6 +516,7 @@ export default function ProductsScreen({
   const handleTabChange = (tab: NavItem) => {
     if (tab === "home") onHomeClick?.();
     if (tab === "analytics") onAnalyticsClick?.();
+    if (tab === "investments") onInvestmentsClick?.();
     if (tab === "payments") onPaymentsClick?.();
     if (tab === "more") onMoreClick?.();
   };

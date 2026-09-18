@@ -157,26 +157,28 @@ const sk: TranslationKeys = {
       address: 'Želetavská 1525/1, 140 92, Bratislava 4',
       callNow: 'Zavolať teraz',
       sendEmail: 'Poslať email',
+      bookAppointment: 'Rezervovať stretnutie',
+      requestCall: 'Požiadať o zavolanie',
       availability: 'K dispozícii v intervale 08-18, od pondelka do piatku',
     },
     
     benefits: {
       pageTitle: 'Prime výhody',
-      introText: 'Užite si naše Prime by UniCredit Bank a získajte špecializovaného osobného poradcu, ktorý poskytuje ponuky šité na mieru a podporu, vďaka ktorej je vaše bankové skúsenosti skutočne personalizované.',
-      
-      benefit1Title: 'OSOBNÝ PORADCA',
-      benefit1Description: 'Majte špecializovaného poradcu k dispozícii pre všetky vaše bankové požiadavky',
-      
-      benefit2Title: 'ZÍSKAJTE PONUKY NA MIERU',
-      benefit2Description: 'Stretnite sa osobne s vaším poradcom a prezrite si nové produkty pre vás',
-      
-      benefit3Title: 'VÝHODA Č. 3',
-      benefit3Description: 'Stretnite sa osobne s vaším poradcom a prezrite si nové produkty pre vás',
-      
-      benefit4Title: 'VÝHODA Č. 4',
-      benefit4Description: 'Stretnite sa osobne s vaším poradcom a prezrite si nové produkty pre vás',
-      
-      termsConditions: 'Zmluvné podmienky programu PRIME',
+      introText: 'Prime by UniCredit Bank vám prináša osobného poradcu na mieru, ponuky šité priamo pre vás a exkluzívne výhody — bankovníctvo postavené okolo vás.',
+
+      benefit1Title: 'VÁŠ OSOBNÝ PORADCA',
+      benefit1Description: 'Jeden poradca, ktorý vás pozná a je vždy pripravený pomôcť s akoukoľvek bankovou požiadavkou.',
+
+      benefit2Title: 'PONUKY NA MIERU',
+      benefit2Description: 'Stretnite sa osobne so svojím poradcom a objavte produkty a ponuky vybrané práve pre vás.',
+
+      benefit3Title: 'PRIORITNÝ SERVIS',
+      benefit3Description: 'Preskočte rad vďaka prioritnej podpore, kedykoľvek ju potrebujete – na pobočke aj telefonicky.',
+
+      benefit4Title: 'EXKLUZÍVNE VÝHODY',
+      benefit4Description: 'Užívajte si zvýhodnené sadzby, špeciálne akcie a výhody vyhradené členom Prime.',
+
+      termsConditions: 'Zmluvné podmienky programu Prime',
     },
   },
 };

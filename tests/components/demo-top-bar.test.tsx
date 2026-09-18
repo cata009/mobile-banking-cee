@@ -74,7 +74,17 @@ describe('DemoTopBar app and country selector', () => {
     expect(screen.queryByRole('button', { name: 'App 2027' })).not.toBeInTheDocument()
   })
 
-  it('does not enable Future App outside Czech Republic', () => {
+  it('offers the Serbian My Banker preview as the RS Future App', () => {
+    renderTopBar('RS')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Baseline App' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Future App' }))
+
+    expect(screen.getByRole('button', { name: 'My Banker' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Evo 2027' })).not.toBeInTheDocument()
+  })
+
+  it('does not enable Future App outside the markets with a preview', () => {
     renderTopBar('RO')
 
     fireEvent.click(screen.getByRole('button', { name: 'Baseline App' }))
@@ -86,6 +96,12 @@ describe('DemoTopBar app and country selector', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Baseline App' }))
     const futureApp = screen.getByRole('button', { name: 'Future App' })
+
+    if (country === 'RS') {
+      fireEvent.click(futureApp)
+      expect(screen.getByRole('button', { name: 'My Banker' })).toBeInTheDocument()
+      return
+    }
 
     if (country !== 'CZ') {
       expect(futureApp).toBeDisabled()

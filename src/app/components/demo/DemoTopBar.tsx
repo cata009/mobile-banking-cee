@@ -51,6 +51,7 @@ const FUTURE_RELEASE_ORDER: readonly ReleaseId[] = [
   "release-future-cz-coapping",
   "release-future-cz-robo",
   "release-future-evo-2027",
+  "release-future-rs-my-banker",
 ] as const;
 
 function getScenarioEntryScreen(scenario: Scenario) {

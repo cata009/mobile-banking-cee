@@ -1,4 +1,5 @@
 import type { EvoTranslations } from "./evo";
+import type { MyBankerTranslations } from "./myBanker";
 
 /**
  * Type-safe Translation Keys Interface
@@ -184,6 +185,13 @@ export interface TranslationKeys {
     };
     investments: {
       title: string;
+      destination: {
+        currentPortfolio: string;
+        options: string;
+        termDeposit: string;
+        investmentFunds: string;
+        stocks: string;
+      };
       totalValue: string;
       performance: string;
       value: string;
@@ -242,6 +250,8 @@ export interface TranslationKeys {
     };
     /** Evo 2027 surfaces: Home, Spending and Offers. */
     evo: EvoTranslations;
+    /** My Banker: the RS peer-based product recommendation screen. */
+    myBanker: MyBankerTranslations;
     dialogs: {
       logoutTitle: string;
       logoutMessage: string;
@@ -413,6 +423,8 @@ export interface TranslationKeys {
       address: string; // "Želetavská 1525/1, 140 92, Praha 4" (placeholder)
       callNow: string; // "Call now"
       sendEmail: string; // "Send an email"
+      bookAppointment: string; // "Book an appointment"
+      requestCall: string; // "Request a call"
       availability: string; // "Available during interval 08-18, from Monday to Friday"
     };
     

@@ -157,26 +157,28 @@ const cs: TranslationKeys = {
       address: 'Želetavská 1525/1, 140 92, Praha 4',
       callNow: 'Zavolat nyní',
       sendEmail: 'Poslat email',
+      bookAppointment: 'Rezervovat schůzku',
+      requestCall: 'Požádat o zavolání',
       availability: 'K dispozici v intervalu 08-18, od pondělí do pátku',
     },
     
     benefits: {
       pageTitle: 'Prime výhody',
-      introText: 'Užijte si naše Prime by UniCredit Bank a získejte specializovaného osobního poradce, který poskytuje nabídky šité na míru a podporu, díky níž je vaše bankovní zkušenost skutečně personalizovaná.',
-      
-      benefit1Title: 'OSOBNÍ PORADCE',
-      benefit1Description: 'Mějte specializovaného poradce k dispozici pro všechny vaše bankovní požadavky',
-      
-      benefit2Title: 'ZÍSKEJTE NABÍDKY NA MÍRU',
-      benefit2Description: 'Setkejte se osobně s vaším poradcem a prohlédněte si nové produkty pro vás',
-      
-      benefit3Title: 'VÝHODA Č. 3',
-      benefit3Description: 'Setkejte se osobně s vaším poradcem a prohlédněte si nové produkty pro vás',
-      
-      benefit4Title: 'VÝHODA Č. 4',
-      benefit4Description: 'Setkejte se osobně s vaším poradcem a prohlédněte si nové produkty pro vás',
-      
-      termsConditions: 'Smluvní podmínky programu PRIME',
+      introText: 'Prime by UniCredit Bank vám přináší osobního poradce na míru, nabídky šité přímo pro vás a exkluzivní výhody — bankovnictví postavené kolem vás.',
+
+      benefit1Title: 'VÁŠ OSOBNÍ PORADCE',
+      benefit1Description: 'Jeden poradce, který vás zná a je vždy připraven pomoct s jakýmkoli bankovním požadavkem.',
+
+      benefit2Title: 'NABÍDKY NA MÍRU',
+      benefit2Description: 'Setkejte se osobně se svým poradcem a objevte produkty a nabídky vybrané právě pro vás.',
+
+      benefit3Title: 'PRIORITNÍ SERVIS',
+      benefit3Description: 'Přeskočte frontu díky prioritní podpoře, kdykoli ji potřebujete – na pobočce i po telefonu.',
+
+      benefit4Title: 'EXKLUZIVNÍ VÝHODY',
+      benefit4Description: 'Užívejte si zvýhodněné sazby, speciální akce a výhody vyhrazené členům Prime.',
+
+      termsConditions: 'Smluvní podmínky programu Prime',
     },
   },
 };

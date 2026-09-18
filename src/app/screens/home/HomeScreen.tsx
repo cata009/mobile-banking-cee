@@ -7,7 +7,7 @@ import App2027HomeScreen from "./App2027HomeScreen";
 import HomeHeader from "./HomeHeader";
 import InactiveState from "./InactiveState";
 import UnplannedBanner from "./UnplannedBanner";
-import BottomNavigation from "@/app/components/BottomNavigation";
+import BottomNavigation, { type NavItem } from "@/app/components/BottomNavigation";
 import { useDemo } from "@/app/state/demoStore";
 import { getFeatureFlags } from "@/app/state/featureHelpers";
 import type { Product } from "@/data/products";
@@ -62,12 +62,15 @@ export default function HomeScreen({
   const features = getFeatureFlags(demoState);
 
   // Handler for bottom navigation tab changes
-  const handleTabChange = (tab: 'home' | 'analytics' | 'payments' | 'products' | 'more') => {
+  const handleTabChange = (tab: NavItem) => {
     if (tab === 'more' && onMoreClick) {
       onMoreClick();
     }
     if (tab === 'analytics' && onAnalyticsClick) {
       onAnalyticsClick();
+    }
+    if (tab === 'investments' && onInvestmentsClick) {
+      onInvestmentsClick();
     }
     if (tab === 'payments' && onPaymentsClick) {
       onPaymentsClick();
@@ -115,7 +118,12 @@ export default function HomeScreen({
 
       {/* STICKY Top Bar - Prime Badge + Icons - FIXED */}
       <div className="sticky top-0 z-10 bg-[var(--uc-app-bg)] flex-shrink-0">
-        <HomeHeader onPrimeClick={onPrimeClick} onMessagesClick={onMessagesClick} showTitle={false} />
+        <HomeHeader
+          onPrimeClick={onPrimeClick}
+          onMessagesClick={onMessagesClick}
+          onSpendingClick={features.myBanker ? onAnalyticsClick : undefined}
+          showTitle={false}
+        />
       </div>
 
       {/* Scrollable Content */}
@@ -131,6 +139,7 @@ export default function HomeScreen({
           onInvestmentGoalsClick={onInvestmentGoalsClick}
           onDomesticPaymentClick={onDomesticPaymentClick}
           onAccountInfoClick={onAccountInfoClick}
+          excludeCategoryKeys={features.myBanker ? ['investments'] : undefined}
         />
 
         {/* Unplanned Banner (conditional) */}

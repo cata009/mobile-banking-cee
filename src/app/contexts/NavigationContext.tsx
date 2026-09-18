@@ -17,6 +17,7 @@ export type Screen =
   | "messages" // Messages inbox/outbox
   | "payments" // Payments menu
   | "products" // Products menu
+  | "my-banker" // My Banker peer-based product recommendations (RS future)
   | "product-detail" // Product detail opened from Products bottom sheet
   | "investments" // Investments portfolio
   | "investments-history" // Investments history transactions/orders flow

@@ -272,7 +272,7 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "teal-300",
     name: "Teal Soft",
     paletteId: "action-teal",
-    lightHex: "#99D9D5",
+    lightHex: "#94B1BA",
     darkHex: "#2E7C88",
     sourceTokens: ["Primary / 900 3"],
     usage: "Soft active surface and light selected background.",

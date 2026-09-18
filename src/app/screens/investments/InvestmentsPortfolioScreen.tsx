@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import InvestmentDistributionChart from "@/app/components/investments/InvestmentDistributionChart";
 import InvestmentActionBar from "@/app/components/investments/InvestmentActionBar";
@@ -23,6 +23,7 @@ import {
 import { InvestmentSecurityDetailScreen, InvestmentSecurityListScreen } from "@/app/screens/investments/InvestmentSecurityScreens";
 import { AppIcon } from "@/app/components/icons";
 import PageHeader from "@/app/components/PageHeader";
+import ProductCard from "@/app/components/ProductCard";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import {
   INVESTMENT_PERIODS,
@@ -68,6 +69,14 @@ export interface InvestmentFundsRequest {
 
 interface InvestmentsPortfolioScreenProps {
   onBack: () => void;
+  /** Rendered between the header and the portfolio tabs, e.g. the My Banker module. */
+  headerSlot?: ReactNode;
+  /** RS Future / My Banker replaces the portfolio landing page with its investment destination. */
+  myBankerDestination?: boolean;
+  /** Opens the existing product-detail journey for a term deposit. */
+  onTermDepositClick?: () => void;
+  /** Space to leave under the content when the screen sits above a tab bar. */
+  bottomInset?: number;
   roboAdvisorEnabled?: boolean;
   initialView?: "portfolio" | "goals";
   onHistoryClick?: (filterByTitle?: string) => void;
@@ -288,6 +297,10 @@ function DistributionCategoryDetailScreen({
 
 export default function InvestmentsPortfolioScreen({
   onBack,
+  headerSlot,
+  myBankerDestination = false,
+  onTermDepositClick,
+  bottomInset = 0,
   roboAdvisorEnabled = false,
   initialView = "portfolio",
   onHistoryClick,
@@ -298,7 +311,7 @@ export default function InvestmentsPortfolioScreen({
   onBuyRequestConsumed,
 }: InvestmentsPortfolioScreenProps) {
   const { country, amountsHidden } = useDemo();
-  const { categories } = useProducts();
+  const { categories, formatProductAmount, getProductDisplayNumber, getProductIcon } = useProducts();
   const { t } = useLanguage();
   const { progress: headerProgress, onScroll: handlePageScroll, setProgress: setHeaderProgress } = useCollapsingHeader(64);
   const [selectedTabId, setSelectedTabId] = useState<InvestmentPortfolioTabId>("performance");
@@ -317,6 +330,7 @@ export default function InvestmentsPortfolioScreen({
   const [selectedRoboGoal, setSelectedRoboGoal] = useState<RoboExistingGoal | null>(null);
   const [roboGoals, setRoboGoals] = useState<readonly RoboExistingGoal[]>(INITIAL_CZ_ROBO_GOALS);
   const [buyOrderDraft, setBuyOrderDraft] = useState<CoAppingInvestmentBuyDraft | null>(null);
+  const [portfolioJourneyOpen, setPortfolioJourneyOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const consumedFundsRequestIdRef = useRef<number | null>(null);
   const consumedBuyRequestIdRef = useRef<number | null>(null);
@@ -341,6 +355,10 @@ export default function InvestmentsPortfolioScreen({
   }, [isOnPortfolioHome]);
 
   const allProducts = useMemo(() => categories.flatMap((category) => category.products), [categories]);
+  const portfolioEntryProduct = useMemo(
+    () => allProducts.find((product) => product.type === "investment_account") ?? null,
+    [allProducts],
+  );
   const currentAccounts = useMemo(
     () => allProducts.filter((product): product is CurrentAccount => product.type === "current_account"),
     [allProducts],
@@ -602,6 +620,88 @@ export default function InvestmentsPortfolioScreen({
     );
   }
 
+  if (myBankerDestination && !portfolioJourneyOpen) {
+    const portfolioAmount = portfolioEntryProduct
+      ? maskAmountParts(formatProductAmount(portfolioEntryProduct), amountsHidden)
+      : null;
+    const investmentOptions = [
+      {
+        id: "term-deposit",
+        label: t("runtime.investments.destination.termDeposit", "Term deposit"),
+        onClick: onTermDepositClick,
+      },
+      {
+        id: "investment-funds",
+        label: t("runtime.investments.destination.investmentFunds", "Investment funds"),
+        onClick: () => setFundsWindowOpen(true),
+      },
+      {
+        id: "stocks",
+        label: t("runtime.investments.destination.stocks", "Stocks"),
+        onClick: () => setSecurityListOpen(true),
+      },
+    ];
+
+    return (
+      <div
+        className="h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide"
+        style={bottomInset > 0 ? { paddingBottom: bottomInset } : undefined}
+        data-my-banker-investments-destination="true"
+      >
+        <PageHeader
+          title={t("runtime.investments.title", "Investment")}
+          onBack={onBack}
+          includeSafeArea
+          showHelp
+          onHelpClick={() => undefined}
+        />
+        {headerSlot ? <div className="px-[16px] pb-[8px]">{headerSlot}</div> : null}
+
+        <section className="px-[16px] pt-[16px]" aria-labelledby="current-investment-portfolio">
+          <h2 id="current-investment-portfolio" className="uc-type-n4-strong mb-[12px] text-[var(--uc-text)]">
+            {t("runtime.investments.destination.currentPortfolio", "Your investment portfolio")}
+          </h2>
+          {portfolioEntryProduct && portfolioAmount ? (
+            <div data-investment-portfolio-entry="true">
+              <ProductCard
+                icon={getProductIcon(portfolioEntryProduct)}
+                title={portfolioEntryProduct.name}
+                accountNumber={getProductDisplayNumber(portfolioEntryProduct)}
+                amount={portfolioAmount.integer}
+                decimals={portfolioAmount.decimals}
+                currency={portfolioAmount.currency}
+                onClick={() => setPortfolioJourneyOpen(true)}
+              />
+            </div>
+          ) : (
+            <EmptyInvestmentsState />
+          )}
+        </section>
+
+        <section className="px-[16px] pt-[28px]" aria-labelledby="investment-options">
+          <h2 id="investment-options" className="uc-type-n4-strong mb-[12px] text-[var(--uc-text)]">
+            {t("runtime.investments.destination.options", "Investment Options")}
+          </h2>
+          <div className="overflow-hidden rounded-[8px] border border-[var(--uc-border-muted)]">
+            {investmentOptions.map((option, index) => (
+              <button
+                key={option.id}
+                type="button"
+                aria-label={option.label}
+                className={`flex min-h-[64px] w-full items-center justify-between bg-[var(--uc-surface)] px-[16px] text-left ${index > 0 ? "border-t border-[var(--uc-border-muted)]" : ""}`}
+                data-investment-option={option.id}
+                onClick={option.onClick}
+              >
+                <span className="uc-type-n4-strong text-[var(--uc-text)]">{option.label}</span>
+                <AppIcon name="chevron-link" color="var(--uc-text)" />
+              </button>
+            ))}
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   const investmentActionBar = (
     <InvestmentActionBar
       actions={[
@@ -634,15 +734,23 @@ export default function InvestmentsPortfolioScreen({
       ref={scrollContainerRef}
       className="h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide"
       onScroll={handlePageScroll}
+      style={bottomInset > 0 ? { paddingBottom: bottomInset } : undefined}
     >
       <PageHeader
         title={t("runtime.investments.title", "Investment")}
-        onBack={onBack}
+        onBack={() => {
+          if (myBankerDestination && portfolioJourneyOpen) {
+            setPortfolioJourneyOpen(false);
+            return;
+          }
+          onBack();
+        }}
         collapsedTitleProgress={headerProgress}
         includeSafeArea
         showHelp
         onHelpClick={() => undefined}
       />
+      {headerSlot ? <div className="px-[16px] pb-[8px]">{headerSlot}</div> : null}
       <InvestmentPortfolioTabs
         tabs={INVESTMENT_PORTFOLIO_TABS.map((tab) => ({
           ...tab,

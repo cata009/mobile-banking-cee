@@ -133,26 +133,28 @@ const hu: TranslationKeys = {
       address: 'Želetavská 1525/1, 140 92, Budapest 4',
       callNow: 'Hívás most',
       sendEmail: 'E-mail küldése',
+      bookAppointment: 'Időpontfoglalás',
+      requestCall: 'Visszahívás kérése',
       availability: 'Elérhető 08-18 között, hétfőtől péntekig',
     },
     
     benefits: {
       pageTitle: 'Prime előnyök',
-      introText: 'Élvezze Prime by UniCredit Bank szolgáltatásunkat és kapjon dedikált személyes tanácsadót, aki testreszabott ajánlatokat és támogatást nyújt, így banki élménye valóban személyre szabott.',
-      
-      benefit1Title: 'SZEMÉLYES TANÁCSADÓ',
-      benefit1Description: 'Legyen dedikált tanácsadója elérhető minden banki kéréséhez',
-      
-      benefit2Title: 'KAPJON TESTRESZABOTT AJÁNLATOKAT',
-      benefit2Description: 'Találkozzon személyesen tanácsadójával és nézze meg az új termékeket',
-      
-      benefit3Title: '3. ELŐNY',
-      benefit3Description: 'Találkozzon személyesen tanácsadójával és nézze meg az új termékeket',
-      
-      benefit4Title: '4. ELŐNY',
-      benefit4Description: 'Találkozzon személyesen tanácsadójával és nézze meg az új termékeket',
-      
-      termsConditions: 'PRIME PROGRAM feltételei',
+      introText: 'A Prime by UniCredit Bank dedikált személyes tanácsadót, személyre szabott ajánlatokat és exkluzív előnyöket kínál Önnek — banki élmény, amely teljesen Ön köré épül.',
+
+      benefit1Title: 'AZ ÖN SZEMÉLYES TANÁCSADÓJA',
+      benefit1Description: 'Egyetlen tanácsadó, aki ismeri Önt, és mindig készen áll segíteni bármilyen banki ügyben.',
+
+      benefit2Title: 'SZEMÉLYRE SZABOTT AJÁNLATOK',
+      benefit2Description: 'Találkozzon személyesen tanácsadójával, és fedezze fel az Önnek válogatott termékeket és ajánlatokat.',
+
+      benefit3Title: 'ELSŐBBSÉGI KISZOLGÁLÁS',
+      benefit3Description: 'Kerülje el a sorban állást elsőbbségi ügyintézéssel, bármikor van rá szüksége — fiókban vagy telefonon.',
+
+      benefit4Title: 'KIZÁRÓLAGOS ELŐNYÖK',
+      benefit4Description: 'Élvezze a kedvezményes kamatokat, különleges eseményeket és a Prime tagoknak fenntartott előnyöket.',
+
+      termsConditions: 'A Prime program általános szerződési feltételei',
     },
   },
 };
