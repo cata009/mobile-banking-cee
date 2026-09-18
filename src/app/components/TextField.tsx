@@ -31,6 +31,8 @@ interface TextFieldProps {
   readOnly?: boolean;
   suffix?: string;
   onActivate?: () => void;
+  /** Called when the input loses focus, e.g. to commit a clamped numeric draft. */
+  onBlur?: () => void;
 }
 
 const DISABLED_COLOR = "var(--uc-neutral-650)";
@@ -55,6 +57,7 @@ export default function TextField({
   readOnly = false,
   suffix,
   onActivate,
+  onBlur,
 }: TextFieldProps) {
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -165,7 +168,10 @@ export default function TextField({
                 value={hasValue ? value : ""}
                 onChange={(event) => onChange(event.target.value)}
                 onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
+                onBlur={() => {
+                  setIsFocused(false);
+                  onBlur?.();
+                }}
                 onKeyDown={(event) => {
                   if (onActivate && (event.key === "Enter" || event.key === " ")) {
                     event.preventDefault();

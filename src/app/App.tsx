@@ -8,6 +8,7 @@ import { DemoShell } from "@/app/components/demo/DemoShell";
 import { DemoNavigationSync } from "@/app/components/demo/DemoNavigationSync";
 import LanguageSelector from "@/app/components/LanguageSelector";
 import MobileFrame from "@/app/components/MobileFrame";
+import TabbedScreen from "@/app/components/TabbedScreen";
 import FramelessDeviceFrame from "@/app/components/FramelessDeviceFrame";
 import { useApp2027Theme, type HomeTheme } from "@/app/screens/home/App2027ThemePicker";
 import { isCoAppingAvailable } from "@/app/utils/coAppingAvailability";
@@ -43,6 +44,8 @@ const DocumentsScreen = lazy(() => import("@/app/screens/documents/DocumentsScre
 const PaymentsScreen = lazy(() => import("@/app/screens/payments/PaymentsScreen"));
 const ProductsScreen = lazy(() => import("@/app/screens/products/ProductsScreen"));
 const ProductDetailScreen = lazy(() => import("@/app/screens/products/ProductDetailScreen"));
+const MyBankerScreen = lazy(() => import("@/app/screens/my-banker/MyBankerScreen"));
+const MyBankerEntryCard = lazy(() => import("@/app/screens/my-banker/MyBankerEntryCard"));
 const InvestmentsPortfolioScreen = lazy(() => import("@/app/screens/investments/InvestmentsPortfolioScreen"));
 const InvestmentsHistoryScreen = lazy(() => import("@/app/screens/investments/InvestmentsHistoryScreen"));
 const OrdersToApproveScreen = lazy(() => import("@/app/screens/investments/OrdersToApproveScreen"));
@@ -216,6 +219,7 @@ function AppContent({
   const coAppingAvailable = isCoAppingAvailable(country);
   const isCzCoAppingChatbotPreviewActive = isFeatureActive(demoState, "fx_czCoAppingSmartAssistant");
   const isCzRoboAdvisorPreviewActive = isFeatureActive(demoState, "fx_czRoboAdvisor");
+  const myBankerAvailable = isFeatureActive(demoState, "fx_rsMyBanker");
   const currentRoutePolicy = ROUTE_POLICY[currentScreen];
   const isInAppScreen = currentRoutePolicy.surface === "app";
   const czChatLauncherVariant: CzChatLauncherVariant = "edge-tab";
@@ -511,6 +515,10 @@ function AppContent({
 
   const handleProductsClick = () => {
     navigateTo("products");
+  };
+
+  const handleMyBankerClick = () => {
+    navigateTo("my-banker");
   };
 
   const handleProductDetailOpen = (selection: ProductDetailSelection) => {
@@ -890,6 +898,7 @@ function AppContent({
         {currentScreen === "analytics" && (
           <AnalyticsScreen
             onHomeClick={() => navigateTo("homepage")}
+            onInvestmentsClick={handleInvestmentsClick}
             onMessagesClick={handleMessagesClick}
             onPaymentsClick={handlePaymentsClick}
             onProductsClick={handleProductsClick}
@@ -1010,6 +1019,7 @@ function AppContent({
           <MoreScreen 
             onHomeClick={() => navigateTo('homepage')}
             onAnalyticsClick={handleAnalyticsClick}
+            onInvestmentsClick={handleInvestmentsClick}
             onMessagesClick={handleMessagesClick}
             onPaymentsClick={handlePaymentsClick}
             onProductsClick={handleProductsClick}
@@ -1035,6 +1045,7 @@ function AppContent({
           <PaymentsScreen
             onHomeClick={() => navigateTo("homepage")}
             onAnalyticsClick={handleAnalyticsClick}
+            onInvestmentsClick={handleInvestmentsClick}
             onContactsClick={() => navigateTo('contacts')}
             onMessagesClick={handleMessagesClick}
             onProductsClick={handleProductsClick}
@@ -1075,6 +1086,7 @@ function AppContent({
           <ProductsScreen
             onHomeClick={() => navigateTo("homepage")}
             onAnalyticsClick={handleAnalyticsClick}
+            onInvestmentsClick={handleInvestmentsClick}
             onContactsClick={() => navigateTo('contacts')}
             onMessagesClick={handleMessagesClick}
             onPaymentsClick={handlePaymentsClick}
@@ -1084,6 +1096,10 @@ function AppContent({
             onProductsShelfFocusHandled={() => setProductsShelfFocusRequest(null)}
             onShelfHeroCollapsedChange={setProductsShelfHeroCollapsed}
           />
+        )}
+
+        {currentScreen === "my-banker" && myBankerAvailable && (
+          <MyBankerScreen onBack={goBack} />
         )}
 
         {currentScreen === "product-detail" && (
@@ -1100,8 +1116,21 @@ function AppContent({
         )}
 
         {currentScreen === "investments" && investmentsPortfolioAvailable && (
+          <TabbedScreen
+            active={myBankerAvailable}
+            onTabChange={(tab) => {
+              if (tab === "home") navigateTo("homepage");
+              if (tab === "payments") handlePaymentsClick();
+              if (tab === "products") handleProductsClick();
+              if (tab === "more") handleMoreClick();
+            }}
+          >
           <InvestmentsPortfolioScreen
             onBack={goBack}
+            headerSlot={myBankerAvailable ? <MyBankerEntryCard onClick={handleMyBankerClick} /> : undefined}
+            myBankerDestination={myBankerAvailable}
+            onTermDepositClick={() => handleOfferOpen("term-deposit")}
+            bottomInset={myBankerAvailable ? 24 : 0}
             roboAdvisorEnabled={isCzRoboAdvisorPreviewActive}
             initialView={investmentsInitialView}
             onHistoryClick={handleInvestmentsHistoryClick}
@@ -1111,6 +1140,7 @@ function AppContent({
             buyRequest={investmentBuyRequest}
             onBuyRequestConsumed={handleInvestmentBuyRequestConsumed}
           />
+          </TabbedScreen>
         )}
 
         {currentScreen === "investments-history" && investmentsPortfolioAvailable && (

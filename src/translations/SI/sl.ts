@@ -133,26 +133,28 @@ const sl: TranslationKeys = {
       address: 'Želetavská 1525/1, 140 92, Ljubljana 4',
       callNow: 'Pokliči zdaj',
       sendEmail: 'Pošlji e-pošto',
+      bookAppointment: 'Rezerviraj sestanek',
+      requestCall: 'Zahtevaj klic',
       availability: 'Na voljo v intervalu 08-18, od ponedeljka do petka',
     },
     
     benefits: {
       pageTitle: 'Prime ugodnosti',
-      introText: 'Uživajte v našem Prime by UniCredit Bank in pridobite namenskega osebnega svetovalca, ki zagotavlja prilagojene ponudbe in podporo, zaradi česar je vaša bančna izkušnja resnično prilagojena.',
-      
-      benefit1Title: 'OSEBNI SVETOVALEC',
-      benefit1Description: 'Imejte namenskega svetovalca na voljo za vse vaše bančne zahteve',
-      
-      benefit2Title: 'PRIDOBITE PRILAGOJENE PONUDBE',
-      benefit2Description: 'Srečajte se osebno s svetovalcem in preverite nove izdelke za vas',
-      
-      benefit3Title: 'UGODNOST ŠT. 3',
-      benefit3Description: 'Srečajte se osebno s svetovalcem in preverite nove izdelke za vas',
-      
-      benefit4Title: 'UGODNOST ŠT. 4',
-      benefit4Description: 'Srečajte se osebno s svetovalcem in preverite nove izdelke za vas',
-      
-      termsConditions: 'Pogoji programa PRIME',
+      introText: 'Prime by UniCredit Bank vam prinaša namenskega osebnega svetovalca, ponudbe po meri in ekskluzivne ugodnosti — bančništvo, zasnovano povsem okoli vas.',
+
+      benefit1Title: 'VAŠ OSEBNI SVETOVALEC',
+      benefit1Description: 'En svetovalec, ki vas pozna in je vedno pripravljen pomagati pri vsaki bančni zadevi.',
+
+      benefit2Title: 'PONUDBE PO MERI',
+      benefit2Description: 'Srečajte se osebno s svetovalcem in odkrijte izdelke ter ponudbe, izbrane posebej za vas.',
+
+      benefit3Title: 'PREDNOSTNA OBRAVNAVA',
+      benefit3Description: 'Preskočite čakalno vrsto s prednostno podporo, kadar koli jo potrebujete — v poslovalnici ali po telefonu.',
+
+      benefit4Title: 'EKSKLUZIVNE UGODNOSTI',
+      benefit4Description: 'Uživajte v ugodnejših obrestnih merah, posebnih dogodkih in ugodnostih, rezerviranih za člane Prime.',
+
+      termsConditions: 'Pogoji in določila programa Prime',
     },
   },
 };

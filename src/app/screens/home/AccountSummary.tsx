@@ -27,6 +27,8 @@ interface AccountSummaryProps {
   onInvestmentGoalsClick?: () => void;
   onDomesticPaymentClick?: () => void;
   onAccountInfoClick?: (product: Product) => void;
+  /** Categories that live on their own tab in this release, e.g. investments. */
+  excludeCategoryKeys?: readonly string[];
 }
 
 export default function AccountSummary({
@@ -36,6 +38,7 @@ export default function AccountSummary({
   onInvestmentGoalsClick,
   onDomesticPaymentClick,
   onAccountInfoClick,
+  excludeCategoryKeys,
 }: AccountSummaryProps) {
   const { 
     categories, 
@@ -126,7 +129,9 @@ export default function AccountSummary({
       </div>
 
       {/* Dynamic Product Categories */}
-      {categories.map((category) => {
+      {categories
+        .filter((category) => !excludeCategoryKeys?.includes(category.key))
+        .map((category) => {
         const shouldShowTotal = category.key !== 'cards';
         const isFutureInvestmentCategory =
           useFutureProductCards &&

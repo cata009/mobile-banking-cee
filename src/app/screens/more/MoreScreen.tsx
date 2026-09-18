@@ -4,6 +4,7 @@
  * Individual cards can be enabled/disabled per country
  */
 
+import type { NavItem } from "@/app/components/BottomNavigation";
 import { useEffect, useState } from 'react';
 import { MoreHeader } from './MoreHeader';
 import { ContactsCard } from './cards/ContactsCard';
@@ -29,6 +30,7 @@ interface MoreScreenProps {
   onMessagesClick?: () => void;
   onPaymentsClick?: () => void;
   onProductsClick?: () => void;
+  onInvestmentsClick?: () => void;
   onContactsClick?: () => void;
   onDocumentsClick?: () => void;
   onSettingsClick?: () => void;
@@ -41,6 +43,7 @@ export default function MoreScreen({
   onMessagesClick,
   onPaymentsClick,
   onProductsClick,
+  onInvestmentsClick,
   onContactsClick,
   onDocumentsClick,
   onSettingsClick,
@@ -94,9 +97,12 @@ export default function MoreScreen({
   };
 
   // Handler for bottom navigation
-  const handleTabChange = (tab: 'home' | 'analytics' | 'payments' | 'products' | 'more') => {
+  const handleTabChange = (tab: NavItem) => {
     if (tab === 'home' && onHomeClick) {
       onHomeClick();
+    }
+    if (tab === 'investments' && onInvestmentsClick) {
+      onInvestmentsClick();
     }
     if (tab === 'analytics' && onAnalyticsClick) {
       onAnalyticsClick();

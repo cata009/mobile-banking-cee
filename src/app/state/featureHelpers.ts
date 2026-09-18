@@ -13,6 +13,7 @@ export interface FeatureFlags {
   newPaymentsHub: boolean;
   cardsRedesign: boolean;
   evo2027Homepage: boolean;
+  myBanker: boolean;
   unplannedBanner: boolean;
   transactionsFilters: boolean;
   quickActionsRedesign: boolean;
@@ -48,6 +49,7 @@ export function getFeatureFlags(demoState: DemoState): FeatureFlags {
     newPaymentsHub: isFeatureActive(demoState, "fx_newPaymentsHub"),
     cardsRedesign: isFeatureActive(demoState, "fx_cardsRedesign"),
     evo2027Homepage: isFeatureActive(demoState, "fx_evo2027Homepage"),
+    myBanker: isFeatureActive(demoState, "fx_rsMyBanker"),
     unplannedBanner: isFeatureActive(demoState, "fx_unplannedBanner"),
     transactionsFilters: isFeatureActive(demoState, "fx_transactionsFilters"),
     quickActionsRedesign: isFeatureActive(demoState, "fx_quickActionsRedesign"),

@@ -26,7 +26,7 @@ import {
 } from '@/app/config/paymentsMenuConfig'
 import type { PaymentTemplateSelection } from '@/data/paymentTemplates'
 
-type NavItem = 'home' | 'analytics' | 'payments' | 'products' | 'more'
+import type { NavItem } from '@/app/components/BottomNavigation'
 
 interface PaymentsScreenProps {
   onHomeClick?: () => void
@@ -34,6 +34,7 @@ interface PaymentsScreenProps {
   onContactsClick?: () => void
   onMessagesClick?: () => void
   onProductsClick?: () => void
+  onInvestmentsClick?: () => void
   onMoreClick?: () => void
   onDomesticPaymentClick?: () => void
   onTemplateSelect?: (selection: PaymentTemplateSelection) => void
@@ -183,6 +184,7 @@ export default function PaymentsScreen({
   onContactsClick,
   onMessagesClick,
   onProductsClick,
+  onInvestmentsClick,
   onMoreClick,
   onDomesticPaymentClick,
   onTemplateSelect,
@@ -297,6 +299,9 @@ export default function PaymentsScreen({
     }
     if (tab === 'analytics') {
       onAnalyticsClick?.()
+    }
+    if (tab === 'investments') {
+      onInvestmentsClick?.()
     }
     if (tab === 'more') {
       onMoreClick?.()

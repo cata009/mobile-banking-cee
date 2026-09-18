@@ -74,7 +74,7 @@ describe('static template previews', () => {
   // previews that mirror them re-hash.
   it.each([
     ['products-menu', 18, 'ac490a12a87a9e19ed2bc6259b555b25ebf5eedd96ea0fc3689623c50156b3a8'],
-    ['products-shopsmart', 18, 'e60022857b5d5a598ee266e147ed424e168c0461804e3148228dc5a3c02308d3'],
+    ['products-shopsmart', 18, 'c40fd120f365dda995669e86ebfc1934b9f37c4371afb42ff2c63ba137802072'],
     ['analytics-overview', 0, '974342acb4197789bc4572f938cf9865dcae3309190cb3dc1885a2450f612f60'],
   ] as const)('preserves %s markup in normal and presentation-only modes', (previewId, buttonCount, expectedHash) => {
     const normal = renderPreview(previewId, false)

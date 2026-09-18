@@ -20,6 +20,14 @@ export function YourAdvisorTab() {
     // Future: window.location.href = `mailto:${t('prime.advisor.emailAddress')}`;
   };
 
+  const handleBookAppointment = () => {
+    // Future: open appointment booking flow
+  };
+
+  const handleRequestCall = () => {
+    // Future: open request-a-call flow
+  };
+
   return (
     <div className="flex flex-col gap-[24px] w-full">
       {/* Intro Text */}
@@ -125,6 +133,49 @@ export function YourAdvisorTab() {
                 {/* Button Text */}
                 <p className="uc-type-n5-strong flex-[1_0_0] leading-[16px] min-h-px min-w-px relative text-center text-[var(--uc-static-white)] whitespace-pre-wrap max-w-[79px]">
                   {t('prime.advisor.sendEmail')}
+                </p>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        {/* Secondary Contact Buttons */}
+        <div className="content-stretch flex gap-[16px] items-start relative shrink-0 w-full">
+          {/* Book an Appointment Button */}
+          <button
+            onClick={handleBookAppointment}
+            className="bg-[color-mix(in_srgb,var(--uc-static-white)_10%,transparent)] flex-[1_0_0] min-h-[124px] min-w-px relative rounded-[16px] cursor-pointer hover:bg-[color-mix(in_srgb,var(--uc-static-white)_15%,transparent)] transition-colors"
+          >
+            <div className="flex flex-col items-center justify-center min-h-[inherit] size-full">
+              <div className="content-stretch flex flex-col gap-[16px] items-center justify-center min-h-[inherit] px-[4px] py-[24px] relative w-full">
+                {/* Calendar Icon - Native SVG from Figma */}
+                <div className="grid h-[32px] w-[32px] shrink-0 place-items-center">
+                  <AppIcon name="prime-book-appointment" color="var(--uc-static-white)" />
+                </div>
+
+                {/* Button Text */}
+                <p className="uc-type-n5-strong flex-[1_0_0] leading-[16px] min-h-px min-w-px relative text-center text-[var(--uc-static-white)] whitespace-pre-wrap max-w-[79px]">
+                  {t('prime.advisor.bookAppointment')}
+                </p>
+              </div>
+            </div>
+          </button>
+
+          {/* Request a Call Button */}
+          <button
+            onClick={handleRequestCall}
+            className="bg-[color-mix(in_srgb,var(--uc-static-white)_10%,transparent)] flex-[1_0_0] min-h-[124px] min-w-px relative rounded-[16px] cursor-pointer hover:bg-[color-mix(in_srgb,var(--uc-static-white)_15%,transparent)] transition-colors"
+          >
+            <div className="flex flex-col items-center justify-center min-h-[inherit] size-full">
+              <div className="content-stretch flex flex-col gap-[16px] items-center justify-center min-h-[inherit] px-[4px] py-[24px] relative w-full">
+                {/* Phone Icon - Native SVG from Figma */}
+                <div className="grid h-[32px] w-[32px] shrink-0 place-items-center">
+                  <AppIcon name="prime-request-call" color="var(--uc-static-white)" />
+                </div>
+
+                {/* Button Text */}
+                <p className="uc-type-n5-strong flex-[1_0_0] leading-[16px] min-h-px min-w-px relative text-center text-[var(--uc-static-white)] whitespace-pre-wrap max-w-[79px]">
+                  {t('prime.advisor.requestCall')}
                 </p>
               </div>
             </div>

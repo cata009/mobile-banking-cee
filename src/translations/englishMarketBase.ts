@@ -87,16 +87,16 @@ export const STANDARD_ENGLISH_PANEL: TranslationKeys['panel'] = {
 const PRIME_BENEFITS: TranslationKeys['prime']['benefits'] = {
   pageTitle: 'Prime benefits',
   introText:
-    'Enjoy our Prime by UniCredit Bank and get a dedicated personal advisor who provides tailored offers and support making your banking experience truly personalized.',
-  benefit1Title: 'PERSONAL ADVISOR',
-  benefit1Description: 'Have a dedicated avisor available for all your banking requests',
-  benefit2Title: 'GET TAYLOR MADE OFFERS',
-  benefit2Description: 'Meet your advisor in person and check new products for you',
-  benefit3Title: 'BENEFIT NR 3',
-  benefit3Description: 'Meet your advisor in person and check new products for you',
-  benefit4Title: 'BENEFIT NR 4',
-  benefit4Description: 'Meet your advisor in person and check new products for you',
-  termsConditions: 'Term conditions of PRIME PROGRAM',
+    'Prime by UniCredit Bank brings you a dedicated personal advisor, tailor-made offers and exclusive privileges — banking designed entirely around you.',
+  benefit1Title: 'YOUR PERSONAL ADVISOR',
+  benefit1Description: 'One advisor who knows you, ready to help with every banking request — anytime.',
+  benefit2Title: 'TAILOR-MADE OFFERS',
+  benefit2Description: 'Meet your advisor in person and discover products and offers picked just for you.',
+  benefit3Title: 'PRIORITY SERVICE',
+  benefit3Description: 'Skip the queue with priority support whenever you need us, in branch or by phone.',
+  benefit4Title: 'EXCLUSIVE PRIVILEGES',
+  benefit4Description: 'Enjoy preferential rates, special events and privileges reserved for Prime members.',
+  termsConditions: 'Prime program terms and conditions',
 }
 
 export function createMarketEnglishTranslations({
@@ -153,6 +153,8 @@ export function createMarketEnglishTranslations({
         branchAddress: 'BRANCH ADDRESS',
         callNow: 'Call now',
         sendEmail: 'Send an email',
+        bookAppointment: 'Book an appointment',
+        requestCall: 'Request a call',
         availability: 'Available during interval 08-18, from Monday to Friday',
         ...advisor,
       },

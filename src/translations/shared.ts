@@ -1,5 +1,6 @@
 import type { AppLanguage } from "@/app/registry/languageByCountry";
 import { createEvoTranslations, EVO_ENGLISH } from "./evo";
+import { createMyBankerTranslations, MY_BANKER_ENGLISH } from "./myBanker";
 import type { TranslationKeys } from "./types";
 
 type RuntimeTranslations = TranslationKeys["runtime"];
@@ -262,6 +263,13 @@ const EN_RUNTIME: RuntimeTranslations = {
   },
   investments: {
     title: "Investment",
+    destination: {
+      currentPortfolio: "Your investment portfolio",
+      options: "Investment Options",
+      termDeposit: "Term deposit",
+      investmentFunds: "Investment funds",
+      stocks: "Stocks",
+    },
     totalValue: "Total value",
     performance: "Performance",
     value: "Value",
@@ -370,6 +378,7 @@ const EN_RUNTIME: RuntimeTranslations = {
     },
   },
   evo: EVO_ENGLISH,
+  myBanker: MY_BANKER_ENGLISH,
   dialogs: {
     logoutTitle: "Log out",
     logoutMessage: "Are you sure you want to log out?",
@@ -457,6 +466,30 @@ const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslatio
     accounts: { ...EN_RUNTIME.accounts, title: "Računi" },
     analytics: { ...EN_RUNTIME.analytics, title: "Potrošnja", dataFor: "Podaci za", moneyOut: "Odliv", moneyIn: "Priliv", noTransactionsForPeriod: "Nema transakcija za ovaj period" },
     payments: { ...EN_RUNTIME.payments, title: "Plaćanja", other: "Ostalo" },
+    investments: {
+      ...EN_RUNTIME.investments,
+      title: "Investicije",
+      destination: {
+        currentPortfolio: "Vaš investicioni portfolio",
+        options: "Mogućnosti ulaganja",
+        termDeposit: "Oročeni depozit",
+        investmentFunds: "Investicioni fondovi",
+        stocks: "Akcije",
+      },
+      totalValue: "Ukupna vrednost",
+      performance: "Prinos",
+      value: "Vrednost",
+      total: "Ukupno",
+      allProducts: "SVI PROIZVODI",
+      activeSecurities: "AKTIVNE HARTIJE",
+      inactiveSecurities: "NEAKTIVNE HARTIJE",
+      emptyTitle: "Još nemate investicione proizvode",
+      emptyDescription: "Vrednost portfolija pojaviće se ovde kada investicioni proizvodi budu dostupni.",
+      tabs: { performance: "PRINOS", productType: "TIP PROIZVODA", currency: "VALUTA", assetClass: "KLASA IMOVINE", accountList: "LISTA RAČUNA" },
+      distributionTitles: { productType: "RASPODELA PO TIPU PROIZVODA", currency: "RASPODELA PO VALUTI", assetClass: "RASPODELA PO KLASI IMOVINE", accountList: "RASPODELA PO RAČUNIMA" },
+      actions: { history: "Istorija", toApprove: "Za odobrenje", downloadReport: "Zbirni\nizveštaj", invest: "Investirajte" },
+      fundBanner: { title: "Pronađite najbolji fond za vas", description: "Otkrijte naše predloge", action: "IDITE NA FONDOVE" },
+    },
     productsMenu: { ...EN_RUNTIME.productsMenu, title: "Ponude" },
     messages: { ...EN_RUNTIME.messages, title: "Poruke", inbox: "Primljeno", outbox: "Poslato", newBadge: "NOVO" },
     documents: { ...EN_RUNTIME.documents, title: "Dokumenti", newBadge: "NOVO" },
@@ -523,6 +556,8 @@ export function createSharedTranslations(language: AppLanguage): Pick<Translatio
       // The Evo set carries its own per-language fallback, so it is built rather
       // than merged: every key resolves to the market language or to English.
       evo: createEvoTranslations(language),
+      // Same contract as the Evo set: built per language, English key fallback.
+      myBanker: createMyBankerTranslations(language),
     },
   };
 }

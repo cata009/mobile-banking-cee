@@ -24,7 +24,7 @@ import PfmCategoryDetailScreen from "./PfmCategoryDetailScreen";
 import { getAnalyticsCategoryDisplayLabel } from "./analyticsCategoryLabels";
 import Evo2027AnalyticsScreen from "./Evo2027AnalyticsScreen";
 
-type NavItem = "home" | "analytics" | "payments" | "products" | "more";
+import type { NavItem } from "@/app/components/BottomNavigation";
 const HERO_PANEL_WIDTH = 375;
 
 interface AnalyticsScreenProps {
@@ -32,6 +32,7 @@ interface AnalyticsScreenProps {
   onMessagesClick?: () => void;
   onPaymentsClick?: () => void;
   onProductsClick?: () => void;
+  onInvestmentsClick?: () => void;
   onMoreClick?: () => void;
   transactionCategoryOverrides?: Readonly<Record<string, PfmCategorySelection>>;
   onTransactionClick?: (transaction: SpendingAnalyticsTransaction) => void;
@@ -373,6 +374,7 @@ function LegacyAnalyticsScreen({
   onMessagesClick,
   onPaymentsClick,
   onProductsClick,
+  onInvestmentsClick,
   onMoreClick,
   transactionCategoryOverrides = {},
   onTransactionClick,
@@ -409,6 +411,7 @@ function LegacyAnalyticsScreen({
 
   const handleTabChange = (tab: NavItem) => {
     if (tab === "home") onHomeClick?.();
+    if (tab === "investments") onInvestmentsClick?.();
     if (tab === "payments") onPaymentsClick?.();
     if (tab === "products") onProductsClick?.();
     if (tab === "more") onMoreClick?.();

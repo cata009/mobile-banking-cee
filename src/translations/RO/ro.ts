@@ -133,26 +133,28 @@ const ro: TranslationKeys = {
       address: 'Str. Exemplu 1525/1, 140 92, București 4',
       callNow: 'Sună acum',
       sendEmail: 'Trimite un email',
+      bookAppointment: 'Programează o întâlnire',
+      requestCall: 'Solicită un apel',
       availability: 'Disponibil în intervalul 08-18, de luni până vineri',
     },
     
     benefits: {
       pageTitle: 'Beneficii Prime',
-      introText: 'Bucură-te de Prime by UniCredit Bank și obține un consultant personal dedicat care îți oferă oferte personalizate și suport, făcând experiența ta bancară cu adevărat personalizată.',
-      
-      benefit1Title: 'CONSULTANT PERSONAL',
-      benefit1Description: 'Ai un consultant dedicat disponibil pentru toate solicitările tale bancare',
-      
-      benefit2Title: 'OBȚINE OFERTE PERSONALIZATE',
-      benefit2Description: 'Întâlnește-ți consultantul personal și verifică produsele noi pentru tine',
-      
-      benefit3Title: 'BENEFICIU NR 3',
-      benefit3Description: 'Întâlnește-ți consultantul personal și verifică produsele noi pentru tine',
-      
-      benefit4Title: 'BENEFICIU NR 4',
-      benefit4Description: 'Întâlnește-ți consultantul personal și verifică produsele noi pentru tine',
-      
-      termsConditions: 'Termeni și condiții program PRIME',
+      introText: 'Prime by UniCredit Bank îți oferă un consultant personal dedicat, oferte croite special pentru tine și privilegii exclusive — banking gândit în întregime pentru tine.',
+
+      benefit1Title: 'CONSULTANTUL TĂU PERSONAL',
+      benefit1Description: 'Un singur consultant care te cunoaște, mereu pregătit să te ajute cu orice solicitare bancară.',
+
+      benefit2Title: 'OFERTE PERSONALIZATE',
+      benefit2Description: 'Întâlnește-ți consultantul personal și descoperă produse și oferte alese special pentru tine.',
+
+      benefit3Title: 'SERVICII PRIORITARE',
+      benefit3Description: 'Sari peste rând cu asistență prioritară ori de câte ori ai nevoie, la sucursală sau telefonic.',
+
+      benefit4Title: 'PRIVILEGII EXCLUSIVE',
+      benefit4Description: 'Bucură-te de dobânzi preferențiale, evenimente speciale și privilegii rezervate membrilor Prime.',
+
+      termsConditions: 'Termeni și condiții program Prime',
     },
   },
 };

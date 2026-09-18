@@ -57,6 +57,12 @@ export const FEATURE_UI_MAP: Record<FeatureId, FeatureUIConfig> = {
     description: "Applies the CZ-only Evo 2027 Homepage presentation through the shared 2027 home components",
   },
 
+  fx_rsMyBanker: {
+    id: "fx_rsMyBanker",
+    locations: ["home.app2027"],
+    description: "Marks the Serbia-only My Banker future preview surface, seeded from the current RS baseline",
+  },
+
   // ─── RELEASE FEATURES ────────────────────────────────────────
   fx_newPaymentsHub: {
     id: "fx_newPaymentsHub",
