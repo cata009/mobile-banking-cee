@@ -1,3 +1,5 @@
+import { formatInvestmentMoney } from "@/app/utils/investmentAmountFormatting";
+
 export type RoboInvestorProfileStatus = "valid" | "expired" | "missing";
 export type RoboFundingMethod = "one-off" | "regular" | "combined";
 
@@ -348,7 +350,7 @@ export function getFundingFieldVisibility(method: RoboFundingMethod): RoboFundin
 export function formatCzkInput(value: string): string {
   const numberValue = Number(value.replace(/[^\d]/g, ""));
   if (!Number.isFinite(numberValue) || numberValue <= 0) return "0 CZK";
-  return `${new Intl.NumberFormat("cs-CZ", { maximumFractionDigits: 0 }).format(numberValue)} CZK`;
+  return formatInvestmentMoney(numberValue, "CZ", "CZK", false, 0, 0);
 }
 
 export function buildRoboReviewRows(draft: RoboDraft): RoboReviewRow[] {

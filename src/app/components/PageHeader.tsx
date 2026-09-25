@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { AppIcon } from "@/app/components/icons";
+import { AppIcon, type IconName } from "@/app/components/icons";
 import { cn } from "@/app/components/ui/utils";
 
 interface PageHeaderProps {
@@ -16,6 +16,8 @@ interface PageHeaderProps {
   includeSafeArea?: boolean;
   rightActionIcon?: ReactNode;
   rightActionLabel?: string;
+  backIconName?: IconName;
+  backLabel?: string;
   largeTitleAlign?: "left" | "center";
   largeTitleColor?: string;
   hideCollapsedTitleWhenHidden?: boolean;
@@ -39,6 +41,8 @@ export default function PageHeader({
   includeSafeArea = false,
   rightActionIcon,
   rightActionLabel = "Action",
+  backIconName = "back-heavy",
+  backLabel = "Back",
   largeTitleAlign = "left",
   largeTitleColor,
   hideCollapsedTitleWhenHidden = false,
@@ -123,9 +127,10 @@ export default function PageHeader({
               onClick={onBack}
               className="flex h-[40px] w-[40px] self-center cursor-pointer items-center justify-center"
               style={{ padding: "8px 7.998px 7.997px 7.998px" }}
-              aria-label="Back"
+              aria-label={backLabel}
+              title={backLabel}
             >
-              <AppIcon name="back-heavy" color={iconColor} />
+              <AppIcon name={backIconName} color={iconColor} />
             </button>
           ) : (
             <div className="h-[40px] w-[40px]" />

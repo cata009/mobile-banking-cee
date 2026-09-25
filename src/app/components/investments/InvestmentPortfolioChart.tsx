@@ -9,8 +9,8 @@ import {
   YAxis,
 } from "recharts";
 import type { InvestmentChartPoint } from "@/app/config/investmentsPortfolioConfig";
-import { getCountryConfig } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
+import { formatInvestmentMoney } from "@/app/utils/investmentAmountFormatting";
 
 const INVESTMENT_POSITIVE_COLOR = "var(--uc-green-olive)";
 
@@ -20,6 +20,9 @@ interface InvestmentPortfolioChartProps {
   currency: string;
   amountsHidden: boolean;
   compact?: boolean;
+  showVerticalGridLines?: boolean;
+  edgeToEdge?: boolean;
+  tightBottomPadding?: boolean;
 }
 
 interface ActivePointState {
@@ -77,14 +80,7 @@ function formatAxisValue(value: number, valueRange: number): string {
 }
 
 function formatTooltipValue(value: number, country: CountryId, currency: string, amountsHidden: boolean): string {
-  if (amountsHidden) return `**,** ${currency}`;
-
-  const config = getCountryConfig(country);
-
-  return `${new Intl.NumberFormat(config.locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value)} ${currency}`;
+  return formatInvestmentMoney(value, country, currency, amountsHidden);
 }
 
 function formatTooltipPercent(value: number, amountsHidden: boolean): string {
@@ -231,6 +227,9 @@ export default function InvestmentPortfolioChart({
   currency,
   amountsHidden,
   compact = false,
+  showVerticalGridLines = true,
+  edgeToEdge = false,
+  tightBottomPadding = false,
 }: InvestmentPortfolioChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);
   const [activePoint, setActivePoint] = useState<ActivePointState | null>(null);
@@ -241,8 +240,10 @@ export default function InvestmentPortfolioChart({
   const valueRange = maxValue - minValue || 1;
   const chartData = useMemo(() => buildChartData(points), [points]);
   const verticalGridLines = useMemo(
-    () => chartData.filter((point) => point.showDot !== false && point.dateLabel).map((point) => point.label),
-    [chartData],
+    () => showVerticalGridLines
+      ? chartData.filter((point) => point.showDot !== false && point.dateLabel).map((point) => point.label)
+      : [],
+    [chartData, showVerticalGridLines],
   );
   const domainPadding = valueRange * 0.08;
   const yDomain: [number, number] = [minValue - domainPadding, maxValue + domainPadding];
@@ -288,7 +289,7 @@ export default function InvestmentPortfolioChart({
     <div
       ref={chartRef}
       className={`relative w-full touch-none select-none [&_.recharts-surface]:outline-none [&_.recharts-tooltip-wrapper]:!transition-none [&_.recharts-wrapper]:outline-none ${
-        compact ? "mt-[8px] h-[190px]" : "mt-[18px] h-[210px]"
+        compact ? "mt-[8px] h-[190px]" : tightBottomPadding ? "mt-[18px] h-[190px]" : "mt-[18px] h-[210px]"
       }`}
       data-ds-label="Investments portfolio chart"
       onTouchCancel={clearActivePoint}
@@ -305,8 +306,8 @@ export default function InvestmentPortfolioChart({
         <AreaChart
           data={chartData}
           margin={compact
-            ? { top: 8, right: 4, bottom: 34, left: -6 }
-            : { top: 8, right: 10, bottom: 36, left: 0 }}
+            ? { top: 8, right: 4, bottom: 34, left: 0 }
+            : { top: 8, right: edgeToEdge ? 4 : 10, bottom: tightBottomPadding ? 0 : 36, left: 0 }}
           onMouseDown={(event) => {
             setIsPointerActive(true);
             selectActivePoint(getActivePointFromChartEvent(event));
@@ -330,7 +331,9 @@ export default function InvestmentPortfolioChart({
             axisLine={false}
             tickLine={false}
             height={compact ? 38 : 42}
-            padding={compact ? { left: 18, right: 18 } : { left: 24, right: 24 }}
+            padding={compact
+              ? { left: 18, right: edgeToEdge ? 0 : 18 }
+              : { left: 24, right: edgeToEdge ? 0 : 24 }}
             tick={(tickProps: RuntimeAxisTickAdapter) => {
               const { x, y, payload } = tickProps;
               const index = typeof payload?.index === "number" ? payload.index : -1;
@@ -338,10 +341,11 @@ export default function InvestmentPortfolioChart({
               if (!point) return <g aria-hidden="true" />;
               const tickX = typeof x === "number" ? x : 0;
               const tickY = typeof y === "number" ? y : 0;
+              const textAnchor = edgeToEdge && index === chartData.length - 1 ? "end" : "middle";
 
               return (
                 <g transform={`translate(${tickX},${tickY + 10})`}>
-                  <text textAnchor="middle" fill="var(--uc-text-muted)" fontSize={compact ? 10 : 12} fontWeight={700}>
+                  <text textAnchor={textAnchor} fill="var(--uc-text-muted)" fontSize={compact ? 10 : 12} fontWeight={700}>
                     <tspan x={0} dy={0}>{point.dateLabel}</tspan>
                     <tspan x={0} dy={compact ? 12 : 14}>{point.yearLabel}</tspan>
                   </text>

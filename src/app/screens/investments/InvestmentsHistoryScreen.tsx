@@ -16,7 +16,6 @@ import {
   buildInvestmentHistoryOrders,
   buildInvestmentHistoryTransactions,
   buildInvestmentSecurities,
-  calculateInvestmentProductsTotalValue,
   getInvestmentProducts,
   type InvestmentHistoryDatePreset,
   type InvestmentHistoryFilterState,
@@ -31,6 +30,7 @@ import type { CountryId } from "@/app/state/demoTypes";
 import { useDemo } from "@/app/state/demoStore";
 import { maskAmountParts } from "@/app/utils/amountPrivacy";
 import { parseIsoDateOnly } from "@/app/utils/dateOnly";
+import { formatInvestmentAmountParts } from "@/app/utils/investmentAmountFormatting";
 import type { Currency } from "@/data/products";
 import { useProducts } from "@/hooks/useProducts";
 
@@ -43,6 +43,12 @@ type InfoMode = "transactions" | "orders" | null;
 
 interface InvestmentsHistoryScreenProps {
   onBack: () => void;
+  closeModuleButton?: boolean;
+  titleOverride?: string;
+  initialTab?: InvestmentHistoryTabId;
+  approvalCount?: number;
+  onToApproveClick?: () => void;
+  includeCzRoboHistoricalTransactions?: boolean;
   /**
    * Optional security title used to pre-filter history when arriving from
    * a security-detail screen. Consumed once on mount; cleared on country change
@@ -50,6 +56,7 @@ interface InvestmentsHistoryScreenProps {
    * Transactions/Orders tab switches by default.
    */
   historyFilterByTitle?: string | null;
+  historyFilterBySecurityId?: string | null;
 }
 
 const HISTORY_TABS = [
@@ -72,26 +79,7 @@ function formatFilterDate(value: string, country: CountryId) {
 }
 
 function formatAmountParts(amount: number, country: CountryId, currency: string, signed = true) {
-  const config = getCountryConfig(country);
-  const absoluteAmount = Math.abs(amount);
-  const formatter = new Intl.NumberFormat(config.locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-  const parts = formatter.formatToParts(absoluteAmount);
-  const integer = parts
-    .filter((part) => part.type === "integer" || part.type === "group")
-    .map((part) => part.value)
-    .join("");
-  const decimalSeparator = parts.find((part) => part.type === "decimal")?.value ?? ",";
-  const fraction = parts.find((part) => part.type === "fraction")?.value ?? "00";
-  const sign = signed ? (amount > 0 ? "+" : amount < 0 ? "-" : "") : "";
-
-  return {
-    integer: `${sign}${integer || "0"}`,
-    decimal: `${decimalSeparator}${fraction}`,
-    currency,
-  };
+  return formatInvestmentAmountParts(amount, country, currency, false, signed);
 }
 
 function formatAmountLabel(amount: number, country: CountryId, currency: string, hidden: boolean, signed = true) {
@@ -849,12 +837,23 @@ function InvestmentHistoryDetailScreen({
   );
 }
 
-export default function InvestmentsHistoryScreen({ onBack, historyFilterByTitle }: InvestmentsHistoryScreenProps) {
+export default function InvestmentsHistoryScreen({
+  onBack,
+  historyFilterByTitle,
+  historyFilterBySecurityId,
+  closeModuleButton = false,
+  titleOverride = "History",
+  initialTab = "transactions",
+  approvalCount = 0,
+  onToApproveClick,
+  includeCzRoboHistoricalTransactions = false,
+}: InvestmentsHistoryScreenProps) {
   const { country, amountsHidden } = useDemo();
   const { categories } = useProducts();
   const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(64);
-  const [activeTab, setActiveTab] = useState<InvestmentHistoryTabId>("transactions");
+  const [activeTab, setActiveTab] = useState<InvestmentHistoryTabId>(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
+  const [historySecurityIdFilter, setHistorySecurityIdFilter] = useState<string | null>(null);
   const [filterMode, setFilterMode] = useState<FilterMode>(null);
 
   // Pre-filter by the originating security's title (arrival from security detail).
@@ -865,6 +864,13 @@ export default function InvestmentsHistoryScreen({ onBack, historyFilterByTitle 
       setSearchQuery(historyFilterByTitle);
     }
   }, [historyFilterByTitle]);
+  useEffect(() => {
+    setHistorySecurityIdFilter(
+      typeof historyFilterBySecurityId === "string" && historyFilterBySecurityId.trim()
+        ? historyFilterBySecurityId
+        : null,
+    );
+  }, [historyFilterBySecurityId]);
   const [infoMode, setInfoMode] = useState<InfoMode>(null);
   const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
   const previousCountryRef = useRef(country);
@@ -872,7 +878,6 @@ export default function InvestmentsHistoryScreen({ onBack, historyFilterByTitle 
   const allProducts = useMemo(() => categories.flatMap((category) => category.products), [categories]);
   const investmentProducts = useMemo(() => getInvestmentProducts(allProducts), [allProducts]);
   const securities = useMemo(() => buildInvestmentSecurities(investmentProducts, country), [country, investmentProducts]);
-  const totalValue = useMemo(() => calculateInvestmentProductsTotalValue(investmentProducts), [investmentProducts]);
   const countryCurrency = getCountryConfig(country).currency as Currency;
   const allCurrenciesKey = [countryCurrency, ...securities.map((security) => security.instrumentCurrency)].join("|");
   const allCurrencies = useMemo(() => {
@@ -904,7 +909,10 @@ export default function InvestmentsHistoryScreen({ onBack, historyFilterByTitle 
   const [appliedFilters, setAppliedFilters] = useState<InvestmentHistoryFilterState | null>(null);
   const [draftFilters, setDraftFilters] = useState<InvestmentHistoryFilterState>(defaultFilters);
 
-  const transactions = useMemo(() => buildInvestmentHistoryTransactions(securities, country), [country, securities]);
+  const transactions = useMemo(
+    () => buildInvestmentHistoryTransactions(securities, country, { includeCzRoboHistoricalTransactions }),
+    [country, includeCzRoboHistoricalTransactions, securities],
+  );
   const orders = useMemo(() => buildInvestmentHistoryOrders(securities, country), [country, securities]);
   const latestTransactionDate = useMemo(() => new Date(Math.max(...transactions.map((item) => new Date(item.date).getTime()))), [transactions]);
   const latestOrderDate = useMemo(() => new Date(Math.max(...orders.map((item) => new Date(item.date).getTime()))), [orders]);
@@ -912,6 +920,7 @@ export default function InvestmentsHistoryScreen({ onBack, historyFilterByTitle 
   const effectiveFilters = appliedFilters ?? tabDefaults;
 
   const filteredTransactions = transactions.filter((item) =>
+    (!historySecurityIdFilter || item.securityId === historySecurityIdFilter) &&
     historyRowMatchesSearch(item, searchQuery) &&
     historyRowMatchesDate(item.date, effectiveFilters, latestTransactionDate) &&
     effectiveFilters.selectedTypes.includes(item.type) &&
@@ -945,6 +954,7 @@ export default function InvestmentsHistoryScreen({ onBack, historyFilterByTitle 
     setAppliedFilters(null);
     setDraftFilters(tabDefaults);
     setSearchQuery("");
+    setHistorySecurityIdFilter(null);
     setFilterMode(null);
     setInfoMode(null);
     setSelectedItem(null);
@@ -1047,8 +1057,10 @@ export default function InvestmentsHistoryScreen({ onBack, historyFilterByTitle 
   return (
     <div className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide" onScroll={handleScroll} data-investment-history-screen="true">
       <PageHeader
-        title="History"
+        title={titleOverride}
         onBack={onBack}
+        backIconName={closeModuleButton ? "close-flow" : undefined}
+        backLabel={closeModuleButton ? "Close Investments" : undefined}
         onHelpClick={() => setInfoMode(activeTab)}
         collapsedTitleProgress={headerProgress}
         includeSafeArea
@@ -1062,10 +1074,31 @@ export default function InvestmentsHistoryScreen({ onBack, historyFilterByTitle 
         ariaLabel="Investment history tabs"
         withTopMargin={false}
       />
+      {activeTab === "orders" && onToApproveClick ? (
+        <button
+          type="button"
+          onClick={onToApproveClick}
+          className="mx-[16px] mt-[16px] flex w-[calc(100%-32px)] items-center gap-[12px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[14px] text-left"
+          aria-label={`${approvalCount} orders need your approval`}
+        >
+          <AppIcon name="investment-to-approve" color="var(--uc-action)" />
+          <span className="min-w-0 flex-1">
+            <span className="block uc-type-n4-strong text-[var(--uc-text)]">Needs your approval</span>
+            <span className="mt-[3px] block uc-type-n5 text-[var(--uc-text-muted)]">Review pending investment orders.</span>
+          </span>
+          <span className="grid size-[24px] shrink-0 place-items-center rounded-full bg-[var(--uc-brand)] text-[12px] font-bold text-[var(--uc-static-white)]">
+            {approvalCount}
+          </span>
+          <AppIcon name="chevron-link" color="var(--uc-text-muted)" size={18} />
+        </button>
+      ) : null}
       <div className="px-[16px] pt-[24px]">
         <AccountSearchBar
           value={searchQuery}
-          onValueChange={setSearchQuery}
+          onValueChange={(value) => {
+            setSearchQuery(value);
+            setHistorySecurityIdFilter(null);
+          }}
           onFilterClick={openFilters}
           filtersActive={filterActive}
           showRemoveFiltersAction={false}
@@ -1073,7 +1106,7 @@ export default function InvestmentsHistoryScreen({ onBack, historyFilterByTitle 
         />
       </div>
       {filterActive ? <ActiveFilterRail chips={activeFilterChips} onRemoveAll={() => setAppliedFilters(null)} /> : null}
-      {totalValue <= 0 || activeRows.length === 0 ? (
+      {activeRows.length === 0 ? (
         <div className="px-[24px] pt-[26px]">
           <p className="text-[18px] font-bold leading-[24px] text-[var(--uc-text)]">
             {activeTab === "transactions" ? "You don't have any transactions" : "You don't have any orders"}

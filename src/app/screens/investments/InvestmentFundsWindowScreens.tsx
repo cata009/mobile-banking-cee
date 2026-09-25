@@ -11,9 +11,8 @@ import {
   type InvestmentFundCollectionId,
 } from "@/app/config/investmentFundCollections";
 import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
-import { getCountryConfig } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
-import { maskFormattedAmount } from "@/app/utils/amountPrivacy";
+import { formatInvestmentMoney } from "@/app/utils/investmentAmountFormatting";
 import amundiLogo from "@/assets/investments/funds/fund-amundi-logo.png";
 
 interface InvestmentFundsSelectionScreenProps {
@@ -32,11 +31,7 @@ interface InvestmentFundCollectionScreenProps {
 }
 
 function formatFundMoney(value: number, country: CountryId, hidden: boolean) {
-  const formatted = new Intl.NumberFormat(getCountryConfig(country).locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(Math.abs(value));
-  return hidden ? maskFormattedAmount(formatted, true) : formatted;
+  return formatInvestmentMoney(value, country, "", hidden);
 }
 
 function formatFundPercent(value: number) {

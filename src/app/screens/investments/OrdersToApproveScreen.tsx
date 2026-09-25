@@ -10,12 +10,11 @@ import {
   getInvestmentProducts,
   type InvestmentCatalogSecurity,
 } from "@/app/config/investmentsPortfolioConfig";
-import { getCountryConfig } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import { useDemo } from "@/app/state/demoStore";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useProducts } from "@/hooks/useProducts";
-import { maskFormattedAmount } from "@/app/utils/amountPrivacy";
+import { formatInvestmentAmountParts, formatInvestmentMoney } from "@/app/utils/investmentAmountFormatting";
 import InvestmentOrderDocumentsAccordion from "./InvestmentOrderDocumentsAccordion";
 import type { CurrentAccount } from "@/data/products";
 
@@ -32,25 +31,16 @@ type PendingOrder = {
 };
 
 function formatAmount(amount: number, country: CountryId, currency: string) {
-  const { locale } = getCountryConfig(country);
-  const absolute = Math.abs(amount);
-  const parts = new Intl.NumberFormat(locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).formatToParts(absolute);
-  const integer = parts.filter((part) => part.type === "integer" || part.type === "group").map((part) => part.value).join("");
-  const decimal = parts.find((part) => part.type === "decimal")?.value ?? ".";
-  const fraction = parts.find((part) => part.type === "fraction")?.value ?? "00";
+  const parts = formatInvestmentAmountParts(amount, country, currency, false, true);
+  const integer = parts.integer.startsWith("+") ? parts.integer.slice(1) : parts.integer;
+  const decimal = parts.decimal.slice(0, 1) || ",";
+  const fraction = parts.decimal.slice(1) || "00";
 
-  return { integer: `${amount < 0 ? "-" : ""}${integer}`, decimal, fraction, currency };
+  return { integer, decimal, fraction, currency };
 }
 
 function formatMoney(amount: number, country: CountryId, currency: string, hidden: boolean) {
-  const formatted = new Intl.NumberFormat(getCountryConfig(country).locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(Math.abs(amount));
-  return `${amount < 0 ? "-" : ""}${hidden ? maskFormattedAmount(formatted, true) : formatted} ${currency}`;
+  return formatInvestmentMoney(amount, country, currency, hidden);
 }
 
 function compactAccountNumber(value: string) {
