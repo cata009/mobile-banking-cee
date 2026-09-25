@@ -10,7 +10,7 @@ import InvestmentPortfolioTabs from "@/app/components/investments/InvestmentPort
 import InvestmentProductCard from "@/app/components/investments/InvestmentProductCard";
 import InvestmentAmountDisplay, { formatInvestmentAmountParts, type InvestmentAmountParts } from "@/app/components/investments/InvestmentAmountDisplay";
 import InvestmentProductsAccordion from "@/app/components/investments/InvestmentProductsAccordion";
-import InvestmentsFundBanner from "@/app/components/investments/InvestmentsFundBanner";
+import InvestmentFundCarousel from "@/app/components/investments/InvestmentFundCarousel";
 import InvestmentsHistoryScreen from "@/app/screens/investments/InvestmentsHistoryScreen";
 import OrdersToApproveScreen from "@/app/screens/investments/OrdersToApproveScreen";
 import TabbedScreen from "@/app/components/TabbedScreen";
@@ -879,12 +879,7 @@ export default function InvestmentsPortfolioScreen({
           </p>
           <SectionHeadingDivider title="A good place to start" className="mt-[24px]" />
         </div>
-        <InvestmentsFundBanner
-          title={t("runtime.investments.fundBanner.title", "Find out the best fund for you")}
-          description={t("runtime.investments.fundBanner.description", "Discover our suggestions")}
-          actionLabel={t("runtime.investments.fundBanner.action", "GO TO FUNDS WINDOW")}
-          onClick={() => setFundsWindowOpen(true)}
-        />
+        <InvestmentFundCarousel onSelectCollection={setSelectedFundCollectionId} />
       </div>
     ));
   }
