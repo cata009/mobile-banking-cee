@@ -15,6 +15,7 @@ import InvestmentPeriodChips from "@/app/components/investments/InvestmentPeriod
 import InvestmentPortfolioChart from "@/app/components/investments/InvestmentPortfolioChart";
 import InvestmentPortfolioTabs from "@/app/components/investments/InvestmentPortfolioTabs";
 import { cn } from "@/app/components/ui/utils";
+import { formatInvestmentNumber } from "@/app/utils/investmentAmountFormatting";
 import {
   INVESTMENT_PERIODS,
   INVESTMENT_SORT_OPTIONS,
@@ -216,57 +217,59 @@ function GoalSelectionCard({
 
 function IntroScreen({ onCreate, onExit }: { onCreate: () => void; onExit: () => void }) {
   return (
-    <div className="flex h-full w-full flex-col overflow-y-auto bg-[var(--uc-surface)] scrollbar-hide" data-robo-screen="intro">
-      <div className="relative h-[400px] shrink-0 overflow-hidden bg-[var(--uc-app-bg)]">
-        <img src={introImage} alt="" className="h-full w-full object-cover" />
-        <button
-          type="button"
-          aria-label="Close"
-          onClick={onExit}
-          className="absolute right-[8px] top-[calc(var(--uc-phone-top-reserve,54px)+4px)] grid size-[40px] place-items-center"
-        >
-          <AppIcon name="close-flow" color="var(--uc-text)" size={20} />
-        </button>
-      </div>
-      <div className="flex flex-1 flex-col px-[24px] pb-[34px] pt-[20px]">
-        <h1 className="uc-type-h1 text-[var(--uc-text)]">Invest towards what matters</h1>
-        <p className="mt-[16px] text-[16px] leading-[21px] text-[var(--uc-text)]">
-          Create a goal and invest with a portfolio selected for your needs.
-        </p>
-        <div className="mt-[22px] rounded-[8px] bg-[var(--uc-surface-muted)]">
-          {[
-            ["A recommendation built around you", "We use your goal, time horizon and investor profile to check suitable portfolios."],
-            ["A clear plan you can track", "Explore possible outcomes, compare portfolios and follow your goal over time."],
-            ["You decide before anything is invested", "Review the recommendation, risks and documents before you sign."],
-          ].map(([title, body], index) => (
-            <div
-              key={title}
-              className={cn("flex gap-[12px] px-[16px] py-[14px]", index > 0 ? "border-t border-[var(--uc-border)]" : null)}
-            >
-              <span className="mt-[2px] grid size-[24px] shrink-0 place-items-center text-[var(--uc-text)]">
-                <AppIcon name={index === 2 ? "investment-important-info" : "invest-action"} size={22} />
-              </span>
-              <div>
-                <p className="uc-type-n5-strong uppercase text-[var(--uc-text)]">{title}</p>
-                <p className="uc-type-n5 mt-[3px] leading-[16px] text-[var(--uc-text)]">{body}</p>
-              </div>
-            </div>
-          ))}
+    <div className="flex h-full w-full flex-col overflow-hidden bg-[var(--uc-surface)]" data-robo-screen="intro">
+      <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
+        <div className="relative h-[400px] shrink-0 overflow-hidden bg-[var(--uc-app-bg)]">
+          <img src={introImage} alt="" className="h-full w-full object-cover" />
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onExit}
+            className="absolute right-[8px] top-[calc(var(--uc-phone-top-reserve,54px)+4px)] grid size-[40px] place-items-center"
+          >
+            <AppIcon name="close-flow" color="var(--uc-text)" size={20} />
+          </button>
         </div>
-        <div className="mt-[22px]">
-          <p className="uc-type-n4-strong text-[var(--uc-text)]">Your capital is at risk. Returns are not guaranteed.</p>
-          <p className="uc-type-n4 mt-[8px] leading-[21px] text-[var(--uc-text)]">
-            Investments may rise or fall in value, and you could get back less than you invest. We only show a
-            portfolio after checking what is suitable for you.
+        <div className="px-[24px] pb-[24px] pt-[20px]">
+          <h1 className="uc-type-h1 text-[var(--uc-text)]">Invest towards what matters</h1>
+          <p className="mt-[16px] text-[16px] leading-[21px] text-[var(--uc-text)]">
+            Create a goal and invest with a portfolio selected for your needs.
+          </p>
+          <div className="mt-[22px] rounded-[8px] bg-[var(--uc-surface-muted)]">
+            {[
+              ["A recommendation built around you", "We use your goal, time horizon and investor profile to check suitable portfolios."],
+              ["A clear plan you can track", "Explore possible outcomes, compare portfolios and follow your goal over time."],
+              ["You decide before anything is invested", "Review the recommendation, risks and documents before you sign."],
+            ].map(([title, body], index) => (
+              <div
+                key={title}
+                className={cn("flex gap-[12px] px-[16px] py-[14px]", index > 0 ? "border-t border-[var(--uc-border)]" : null)}
+              >
+                <span className="mt-[2px] grid size-[24px] shrink-0 place-items-center text-[var(--uc-text)]">
+                  <AppIcon name={index === 2 ? "investment-important-info" : "invest-action"} size={22} />
+                </span>
+                <div>
+                  <p className="uc-type-n5-strong uppercase text-[var(--uc-text)]">{title}</p>
+                  <p className="uc-type-n5 mt-[3px] leading-[16px] text-[var(--uc-text)]">{body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-[22px]">
+            <p className="uc-type-n4-strong text-[var(--uc-text)]">Your capital is at risk. Returns are not guaranteed.</p>
+            <p className="uc-type-n4 mt-[8px] leading-[21px] text-[var(--uc-text)]">
+              Investments may rise or fall in value, and you could get back less than you invest. We only show a
+              portfolio after checking what is suitable for you.
+            </p>
+          </div>
+          <p className="uc-type-n5 mt-[18px] border-t border-[var(--uc-border)] pt-[10px] text-[var(--uc-text-muted)]">
+            An investment account is required. Account terms and required documents are shown before signing.
           </p>
         </div>
-        <p className="uc-type-n5 mt-[18px] border-t border-[var(--uc-border)] pt-[10px] text-[var(--uc-text-muted)]">
-          An investment account is required. Account terms and required documents are shown before signing.
-        </p>
-        <div className="mt-auto pt-[22px]">
-          <PrimaryButton labelSize="18" onClick={onCreate}>Create Goal</PrimaryButton>
-        </div>
-      </div>
+      </main>
+      <footer className="shrink-0 px-[24px] pb-[34px] pt-[12px]">
+        <PrimaryButton labelSize="18" onClick={onCreate}>Create Goal</PrimaryButton>
+      </footer>
     </div>
   );
 }
@@ -616,12 +619,10 @@ function PortfolioDetails({
   portfolio,
   strategy,
   horizonYears,
-  onSelect,
 }: {
   portfolio: RoboPortfolio;
   strategy: RoboStrategy;
   horizonYears: number;
-  onSelect: () => void;
 }) {
   const presentation = ROBO_PORTFOLIO_PRESENTATIONS[strategy.id];
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
@@ -680,9 +681,6 @@ function PortfolioDetails({
             </section>
           );
         })}
-      </div>
-      <div className="mt-[30px]">
-        <PrimaryButton labelSize="18" className="!w-full" onClick={onSelect}>Choose {presentation.shortName}</PrimaryButton>
       </div>
     </article>
   );
@@ -941,13 +939,13 @@ function GoalDetail({
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="whitespace-nowrap text-[20px] font-bold leading-[22px] text-[var(--uc-text)]">
-                    {value.toLocaleString("cs-CZ")}<span className="text-[14px] font-normal">,00 CZK</span>
+                    {formatInvestmentNumber(value, "CZ", 0, 0)}<span className="text-[14px] font-normal">,00 CZK</span>
                   </p>
                   <p className={cn(
                     "mt-[3px] text-[14px] font-bold leading-[17px]",
                     performance < 0 ? "text-[var(--uc-status-red)]" : "text-[var(--uc-green-olive)]",
                   )}>
-                    {performance > 0 ? "+" : ""}{performance.toLocaleString("cs-CZ")}%
+                    {performance > 0 ? "+" : ""}{formatInvestmentNumber(performance, "CZ", 0, 3)}%
                   </p>
                 </div>
               </button>
@@ -962,7 +960,7 @@ function GoalDetail({
                   <p className="mt-[3px] text-[14px] text-[var(--uc-text-muted)]">{group.percent}% of portfolio</p>
                 </div>
                 <p className="text-[20px] font-bold text-[var(--uc-text)]">
-                  {Math.round((currentValue * group.percent) / 100).toLocaleString("cs-CZ")}
+                  {formatInvestmentNumber(Math.round((currentValue * group.percent) / 100), "CZ", 0, 0)}
                   <span className="text-[14px] font-normal">,00 CZK</span>
                 </p>
               </div>
@@ -977,7 +975,7 @@ function GoalDetail({
                   <p className="mt-[3px] text-[14px] text-[var(--uc-text-muted)]">{percent}% of portfolio</p>
                 </div>
                 <p className="text-[20px] font-bold text-[var(--uc-text)]">
-                  {Math.round((currentValue * percent) / 100).toLocaleString("cs-CZ")}
+                  {formatInvestmentNumber(Math.round((currentValue * percent) / 100), "CZ", 0, 0)}
                   <span className="text-[14px] font-normal">,00 CZK</span>
                 </p>
               </div>
@@ -1334,7 +1332,14 @@ export default function CzFutureRoboAdvisorFlow({
         dataScreen="target"
         footer={<PrimaryButton labelSize="18" disabled={!Number(targetAmount)} onClick={() => setStep("horizon")}>Continue</PrimaryButton>}
       >
-        <TextField label="Target amount" value={targetAmount} onChange={setTargetAmount} inputMode="numeric" suffix="CZK" />
+        <TextField
+          label="Target amount"
+          value={targetAmount}
+          onChange={setTargetAmount}
+          inputMode="numeric"
+          suffix="CZK"
+          suffixOutsideDivider
+        />
         <div className="mt-[20px] grid grid-cols-3 gap-[8px]">
           {["100000", "250000", "500000"].map((amount) => (
             <button
@@ -1343,10 +1348,10 @@ export default function CzFutureRoboAdvisorFlow({
               aria-pressed={targetAmount === amount}
               onClick={() => setTargetAmount(amount)}
               className={cn(
-                "h-[34px] rounded-[4px] border uc-type-n5-strong transition-colors",
+                "h-[34px] rounded-[4px] uc-type-n5-strong transition-colors",
                 targetAmount === amount
-                  ? "border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
-                  : "border-[var(--uc-text)] bg-[var(--uc-surface)] text-[var(--uc-text)]",
+                  ? "border border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
+                  : "bg-[var(--uc-neutral-100)] text-[var(--uc-text)]",
               )}
             >
               {formatCzkInput(amount)}
@@ -1483,10 +1488,10 @@ export default function CzFutureRoboAdvisorFlow({
                     type="button"
                     onClick={() => setInitialAmount(amount)}
                     className={cn(
-                      "h-[34px] rounded-[4px] border uc-type-n5-strong",
+                      "h-[34px] rounded-[4px] uc-type-n5-strong transition-colors",
                       initialAmount === amount
-                        ? "border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
-                        : "border-[var(--uc-text)] text-[var(--uc-text)]",
+                        ? "border border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
+                        : "bg-[var(--uc-neutral-100)] text-[var(--uc-text)]",
                     )}
                   >
                     {formatCzkInput(amount)}
@@ -1659,6 +1664,17 @@ export default function CzFutureRoboAdvisorFlow({
         onBack={goBackByStep}
         onClose={onExit}
         dataScreen="portfolio"
+        footer={portfolio ? (
+          <PrimaryButton
+            labelSize="18"
+            onClick={() => {
+              setSelectedPortfolio(portfolio);
+              setStep("review");
+            }}
+          >
+            Choose {ROBO_PORTFOLIO_PRESENTATIONS[selectedStrategy.id].shortName}
+          </PrimaryButton>
+        ) : undefined}
       >
         <div className="-mx-[24px] flex gap-[8px] overflow-x-auto px-[24px] pb-[4px] scrollbar-hide" aria-label="Portfolio variants">
           {strategies.map((strategy) => {
@@ -1671,10 +1687,10 @@ export default function CzFutureRoboAdvisorFlow({
                 aria-pressed={selected}
                 onClick={() => setSelectedStrategyId(strategy.id)}
                 className={cn(
-                  "h-[36px] shrink-0 rounded-[4px] border-2 px-[18px] text-[14px] font-bold uppercase",
+                  "h-[36px] shrink-0 rounded-[4px] px-[18px] text-[14px] font-bold uppercase transition-colors",
                   selected
-                    ? "border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
-                    : "border-[var(--uc-text)] bg-[var(--uc-surface)] text-[var(--uc-text)]",
+                    ? "border border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
+                    : "bg-[var(--uc-neutral-100)] text-[var(--uc-text)]",
                 )}
               >
                 {label}
@@ -1689,10 +1705,6 @@ export default function CzFutureRoboAdvisorFlow({
               portfolio={portfolio}
               strategy={selectedStrategy}
               horizonYears={resolvedHorizon}
-              onSelect={() => {
-                setSelectedPortfolio(portfolio);
-                setStep("review");
-              }}
             />
           </div>
         ) : null}

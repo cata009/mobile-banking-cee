@@ -1,12 +1,14 @@
 import type { ReactNode } from "react";
 import type { InvestmentDistributionItem } from "@/app/config/investmentsPortfolioConfig";
-import type { InvestmentAmountParts } from "@/app/components/investments/InvestmentProductCard";
+import InvestmentAmountDisplay, { type InvestmentAmountParts } from "@/app/components/investments/InvestmentAmountDisplay";
 
 interface InvestmentDistributionChartProps {
   title: string;
   items: readonly InvestmentDistributionItem[];
   formatAmount: (value: number, currency: string) => InvestmentAmountParts;
   totalLabel: string;
+  czRoboAmountStyle?: boolean;
+  hideDonut?: boolean;
   onItemClick?: (item: InvestmentDistributionItem) => void;
   /** Extra content rendered between the donut chart and the section title. */
   headerExtra?: ReactNode;
@@ -156,16 +158,20 @@ export default function InvestmentDistributionChart({
   items,
   formatAmount,
   totalLabel,
+  czRoboAmountStyle = false,
+  hideDonut = false,
   onItemClick,
   headerExtra,
 }: InvestmentDistributionChartProps) {
   const visibleItems = items.slice(0, MAX_VISIBLE_SLICES);
   const sliceGeometry = buildSliceGeometry(visibleItems);
   const leaders = buildSliceLeaders(sliceGeometry);
+  const contentPaddingClass = czRoboAmountStyle ? "px-[16px]" : "px-[23px]";
 
   return (
-    <section className="pt-[18px] text-[var(--uc-text)]" data-ds-label="Investments distribution chart">
-      <div className="relative h-[179px] w-full overflow-hidden" aria-label={`100% ${totalLabel}`}>
+    <section className={`text-[var(--uc-text)] ${hideDonut ? "pt-[8px]" : "pt-[18px]"}`} data-ds-label="Investments distribution chart">
+      {!hideDonut ? (
+        <div className="relative h-[179px] w-full overflow-hidden" aria-label={`100% ${totalLabel}`}>
         <svg
           className="pointer-events-none absolute inset-0 h-[179px] w-full"
           viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
@@ -236,11 +242,12 @@ export default function InvestmentDistributionChart({
             </div>
           );
         })}
-      </div>
+        </div>
+      ) : null}
 
       {headerExtra ? <div className="mt-[8px]">{headerExtra}</div> : null}
 
-      <div className="mt-[24px] px-[23px]">
+      <div className={`${hideDonut ? "mt-[8px]" : "mt-[24px]"} ${contentPaddingClass}`}>
         <h2 className="uc-type-n4-strong text-[var(--uc-text)]">{title}</h2>
       </div>
       <div className="mt-[18px]">
@@ -252,7 +259,7 @@ export default function InvestmentDistributionChart({
               key={item.id}
               type="button"
               onClick={() => onItemClick?.(item)}
-              className="flex min-h-[80px] w-full items-start justify-between gap-[14px] px-[23px] py-[13px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
+              className={`flex min-h-[80px] w-full items-start justify-between gap-[14px] ${contentPaddingClass} py-[13px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]`}
             >
               <div className="flex min-w-0 gap-[10px]">
                 <span
@@ -262,8 +269,9 @@ export default function InvestmentDistributionChart({
                 <div className="min-w-0">
                   <h3 className="uc-type-n4-strong truncate text-[var(--uc-text)]">{item.label}</h3>
                   <p className="uc-type-n4 mt-[3px] text-[var(--uc-text)]">
-                    <span>{amount.integer}</span>
-                    <span>{amount.decimal} {amount.currency}</span>
+                    {czRoboAmountStyle
+                      ? <InvestmentAmountDisplay parts={amount} scale="card" />
+                      : <><span>{amount.integer}</span><span>{amount.decimal} {amount.currency}</span></>}
                   </p>
                   {item.secondaryLabel && (
                     <p className="uc-type-n5 mt-[2px] truncate text-[var(--uc-text-muted)]">{item.secondaryLabel}</p>

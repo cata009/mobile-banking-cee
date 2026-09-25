@@ -10,9 +10,8 @@ import StandardSignScreen from "@/app/components/flow/StandardSignScreen";
 import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
 import InvestmentDetailField from "@/app/components/investments/InvestmentDetailField";
 import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
-import { getCountryConfig } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
-import { maskFormattedAmount } from "@/app/utils/amountPrivacy";
+import { formatInvestmentMoney, formatInvestmentNumber } from "@/app/utils/investmentAmountFormatting";
 import { convertCurrency, roundMoney } from "@/data/exchangeRates";
 import type { CurrentAccount } from "@/data/products";
 import InvestmentOrderDocumentsAccordion from "./InvestmentOrderDocumentsAccordion";
@@ -51,19 +50,12 @@ function trimNumber(value: number, maximumFractionDigits = 6) {
 }
 
 function formatMoney(value: number, currency: string, country: CountryId, hidden: boolean) {
-  const formatted = new Intl.NumberFormat(getCountryConfig(country).locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
-  return `${hidden ? maskFormattedAmount(formatted, true) : formatted} ${currency}`;
+  return formatInvestmentMoney(value, country, currency, hidden);
 }
 
 function formatQuantity(value: number, country: CountryId, hidden = false) {
   if (hidden) return "*,***";
-  return new Intl.NumberFormat(getCountryConfig(country).locale, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 6,
-  }).format(value);
+  return formatInvestmentNumber(value, country, 0, 6);
 }
 
 function compactAccountNumber(value: string) {

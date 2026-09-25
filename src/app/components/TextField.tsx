@@ -30,6 +30,7 @@ interface TextFieldProps {
   inputMode?: HTMLAttributes<HTMLInputElement>["inputMode"];
   readOnly?: boolean;
   suffix?: string;
+  suffixOutsideDivider?: boolean;
   onActivate?: () => void;
   /** Called when the input loses focus, e.g. to commit a clamped numeric draft. */
   onBlur?: () => void;
@@ -56,6 +57,7 @@ export default function TextField({
   inputMode,
   readOnly = false,
   suffix,
+  suffixOutsideDivider = false,
   onActivate,
   onBlur,
 }: TextFieldProps) {
@@ -184,21 +186,29 @@ export default function TextField({
                 style={{ color: valueColor }}
               />
             )}
-            {suffix ? (
+            {suffix && !suffixOutsideDivider ? (
               <span className="uc-type-p1 ml-[8px] shrink-0" style={{ color: valueColor }}>
                 {suffix}
               </span>
             ) : null}
           </div>
 
-          <span className="ml-[12px] grid h-[32px] w-[32px] shrink-0 place-items-center" aria-hidden={!trailingIconName}>
-            {trailingIconName ? (
-              <AppIcon
-                name={trailingIconName}
-                color={trailingIconColor ?? (isDisabled ? DISABLED_COLOR : "var(--uc-text)")}
-              />
-            ) : null}
-          </span>
+          {suffix && suffixOutsideDivider ? (
+            <span className="uc-type-p1 ml-[12px] shrink-0" style={{ color: valueColor }}>
+              {suffix}
+            </span>
+          ) : null}
+
+          {trailingIconName || !suffixOutsideDivider ? (
+            <span className="ml-[12px] grid h-[32px] w-[32px] shrink-0 place-items-center" aria-hidden={!trailingIconName}>
+              {trailingIconName ? (
+                <AppIcon
+                  name={trailingIconName}
+                  color={trailingIconColor ?? (isDisabled ? DISABLED_COLOR : "var(--uc-text)")}
+                />
+              ) : null}
+            </span>
+          ) : null}
         </div>
 
         {descriptionText1 || descriptionText2 ? (

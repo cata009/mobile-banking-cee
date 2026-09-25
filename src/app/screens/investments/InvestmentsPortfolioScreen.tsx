@@ -1,14 +1,20 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
+import { BottomSheet } from "@/app/components/BottomSheet";
 import InvestmentDistributionChart from "@/app/components/investments/InvestmentDistributionChart";
 import InvestmentActionBar from "@/app/components/investments/InvestmentActionBar";
 import InvestmentFilterChips from "@/app/components/investments/InvestmentFilterChips";
 import InvestmentPeriodChips from "@/app/components/investments/InvestmentPeriodChips";
 import InvestmentPortfolioChart from "@/app/components/investments/InvestmentPortfolioChart";
 import InvestmentPortfolioTabs from "@/app/components/investments/InvestmentPortfolioTabs";
-import InvestmentProductCard, { type InvestmentAmountParts } from "@/app/components/investments/InvestmentProductCard";
+import InvestmentProductCard from "@/app/components/investments/InvestmentProductCard";
+import InvestmentAmountDisplay, { formatInvestmentAmountParts, type InvestmentAmountParts } from "@/app/components/investments/InvestmentAmountDisplay";
 import InvestmentProductsAccordion from "@/app/components/investments/InvestmentProductsAccordion";
 import InvestmentsFundBanner from "@/app/components/investments/InvestmentsFundBanner";
+import InvestmentsHistoryScreen from "@/app/screens/investments/InvestmentsHistoryScreen";
+import OrdersToApproveScreen from "@/app/screens/investments/OrdersToApproveScreen";
+import TabbedScreen from "@/app/components/TabbedScreen";
+import { MY_BANKER_NAV_ITEMS, type NavItem } from "@/app/components/BottomNavigation";
 import InvestmentBuyOrderFlow from "@/app/screens/investments/InvestmentBuyOrderFlow";
 import InvestmentSellOrderFlow from "@/app/screens/investments/InvestmentSellOrderFlow";
 import CzFutureRoboAdvisorFlow from "@/app/screens/investments/CzFutureRoboAdvisorFlow";
@@ -21,7 +27,7 @@ import {
   InvestmentFundsSelectionScreen,
 } from "@/app/screens/investments/InvestmentFundsWindowScreens";
 import { InvestmentSecurityDetailScreen, InvestmentSecurityListScreen } from "@/app/screens/investments/InvestmentSecurityScreens";
-import { AppIcon } from "@/app/components/icons";
+import { AppIcon, type IconName } from "@/app/components/icons";
 import PageHeader from "@/app/components/PageHeader";
 import ProductCard from "@/app/components/ProductCard";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
@@ -31,6 +37,7 @@ import {
   INVESTMENT_SORT_OPTIONS,
   buildInvestmentDistributionItems,
   buildInvestmentChartPoints,
+  buildInvestmentHistoryTransactions,
   buildInvestmentSecurities,
   buildInvestmentSecurityCatalog,
   calculateInvestmentPortfolioPerformance,
@@ -48,7 +55,6 @@ import {
 import type { InvestmentFundCollectionId } from "@/app/config/investmentFundCollections";
 import { getCountryConfig } from "@/app/registry/countryConfig";
 import { useLanguage } from "@/app/contexts/LanguageContext";
-import type { CountryId } from "@/app/state/demoTypes";
 import { useDemo } from "@/app/state/demoStore";
 import { maskAmountParts } from "@/app/utils/amountPrivacy";
 import { useProducts } from "@/hooks/useProducts";
@@ -77,6 +83,8 @@ interface InvestmentsPortfolioScreenProps {
   onTermDepositClick?: () => void;
   /** Space to leave under the content when the screen sits above a tab bar. */
   bottomInset?: number;
+  showBottomNavigation?: boolean;
+  onBottomNavigationChange?: (tab: NavItem) => void;
   roboAdvisorEnabled?: boolean;
   initialView?: "portfolio" | "goals";
   onHistoryClick?: (filterByTitle?: string) => void;
@@ -102,43 +110,47 @@ const DISTRIBUTION_TITLE_TRANSLATION_KEYS: Record<Exclude<InvestmentPortfolioTab
   "account-list": "accountList",
 };
 
-function formatAmountParts(amount: number, country: CountryId, currency: string): InvestmentAmountParts {
-  const config = getCountryConfig(country);
-  const absoluteAmount = Math.abs(amount);
-  const formatter = new Intl.NumberFormat(config.locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-  const parts = formatter.formatToParts(absoluteAmount);
-  const integer = parts
-    .filter((part) => part.type === "integer" || part.type === "group")
-    .map((part) => part.value)
-    .join("");
-  const decimalSeparator = parts.find((part) => part.type === "decimal")?.value ?? ",";
-  const fraction = parts.find((part) => part.type === "fraction")?.value ?? "00";
+const CZ_ROBO_NAV_LABEL_OVERRIDES: Partial<Record<NavItem, string>> = {
+  home: "Portfolio",
+  investments: "Explore",
+  payments: "Invest",
+  products: "Activity",
+  more: "More",
+};
 
-  return {
-    integer: `${integer || "0"}`,
-    decimal: `${decimalSeparator}${fraction}`,
-    currency,
-  };
-}
+const CZ_ROBO_NAV_ICON_OVERRIDES: Partial<Record<NavItem, IconName>> = {
+  home: "chart-donut",
+  payments: "invest-action",
+  products: "investment-history",
+};
 
-function maskInvestmentAmount(parts: InvestmentAmountParts, hidden: boolean): InvestmentAmountParts {
-  const masked = maskAmountParts(
-    {
-      integer: parts.integer,
-      decimals: parts.decimal,
-      currency: parts.currency,
-    },
-    hidden,
-  );
+function PortfolioPerformanceTrendIcon({ direction }: { direction: "up" | "down" | null }) {
+  if (direction === "up") {
+    return (
+      <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="13" height="10" viewBox="0 0 13 10" fill="none">
+        <g clipPath="url(#portfolio-performance-up-clip)">
+          <path d="M7.13534 0C7.26313 1.00262 7.83168 1.5437 8.75884 1.57239C9.28176 1.58803 9.80467 1.57499 10.3276 1.57499C10.3458 1.6441 10.3654 1.71189 10.3837 1.78099C9.40825 2.78101 8.43153 3.77972 7.45352 4.78104C7.82386 5.19305 8.15117 5.55681 8.5189 5.9649C9.57777 4.91012 10.574 3.91923 11.6903 2.80839C11.835 4.26865 11.3252 5.85929 13.3177 6.28303V0H7.13403H7.13534Z" fill="#3D7D43" />
+          <path d="M0.586201 6.67738C-0.0618973 7.31102 -0.00582445 8.00725 0.594025 8.75303C1.71679 7.76475 2.84737 6.7882 3.95188 5.78166C4.2844 5.47788 4.49174 5.47527 4.79558 5.81947C5.38108 6.4818 6.01093 7.10502 6.65902 7.78039C7.09848 7.34883 7.44926 7.00463 7.77657 6.68259C6.62121 5.52481 5.51149 4.41267 4.3496 3.24707C3.11209 4.36704 1.80937 5.48179 0.586201 6.67607V6.67738Z" fill="#3D7D43" />
+        </g>
+        <defs>
+          <clipPath id="portfolio-performance-up-clip">
+            <rect width="13" height="9.53333" fill="white" />
+          </clipPath>
+        </defs>
+      </svg>
+    );
+  }
 
-  return {
-    integer: masked.integer,
-    decimal: masked.decimals,
-    currency: masked.currency,
-  };
+  if (direction === "down") {
+    return (
+      <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="17" height="23" viewBox="0 0 17 23" fill="none">
+        <path d="M3.69405 2.94426C2.33845 2.1411 1.19458 2.54851 0.212192 3.89131C2.37686 5.33196 4.52534 6.79102 6.71243 8.1928C7.37216 8.61449 7.46982 8.96147 7.02855 9.62653C6.17982 10.9077 5.41672 12.2457 4.57426 13.6379C5.49664 14.1816 6.23245 14.6158 6.92048 15.0205C8.34475 12.5595 9.71293 10.1957 11.1474 7.72026C8.70998 6.14617 6.25199 4.46025 3.69624 2.94368L3.69405 2.94426Z" fill="#E30000" />
+        <path d="M13.957 8.93774C12.3309 9.60344 11.6781 10.8016 12.0471 12.3713C12.2561 13.2564 12.5133 14.1286 12.7486 15.0067C12.6407 15.0684 12.5357 15.1318 12.4279 15.1935C10.3098 14.0056 8.19335 12.8149 6.07192 11.6232C5.54673 12.4304 5.08318 13.1437 4.56338 13.9448C6.81095 15.2482 8.92308 16.4753 11.2906 17.8499C8.9037 18.7499 6.00334 18.6094 6.18832 22.1459L16.7386 19.319L13.9564 8.93555L13.957 8.93774Z" fill="#E30000" />
+      </svg>
+    );
+  }
+
+  return null;
 }
 
 function PortfolioSummary({
@@ -149,6 +161,7 @@ function PortfolioSummary({
   performancePercentValue,
   amountsHidden,
   currency,
+  czRoboAmountStyle,
 }: {
   totalValue: InvestmentAmountParts;
   performanceAmount: InvestmentAmountParts;
@@ -157,6 +170,7 @@ function PortfolioSummary({
   performancePercentValue: number;
   amountsHidden: boolean;
   currency: string;
+  czRoboAmountStyle: boolean;
 }) {
   const { t } = useLanguage();
   const performanceColor = (() => {
@@ -168,6 +182,37 @@ function PortfolioSummary({
   const signedPercentLabel = amountsHidden || performancePercentValue === 0
     ? performancePercentLabel
     : `${performancePercentValue > 0 ? "+" : "-"}${performancePercentLabel}`;
+  const performanceDirection = performanceAmountValue > 0 || performancePercentValue > 0
+    ? "up"
+    : performanceAmountValue < 0 || performancePercentValue < 0
+      ? "down"
+      : null;
+
+  if (czRoboAmountStyle) {
+    return (
+      <div className="px-[16px] pt-[16px]">
+        <div className="flex flex-col gap-0">
+          <div className="flex flex-col gap-[2px]">
+            <span className="text-[14px] font-bold leading-normal text-[var(--uc-text)]">
+              {t("runtime.investments.totalValue", "Total value")}:
+            </span>
+            <InvestmentAmountDisplay parts={totalValue} scale="portfolio" />
+          </div>
+          <div className="flex items-center gap-[4px] whitespace-nowrap">
+            <InvestmentAmountDisplay
+              parts={performanceAmount}
+              scale="transaction"
+              className="text-[var(--uc-text)]"
+            />
+            <PortfolioPerformanceTrendIcon direction={performanceDirection} />
+            <span className="text-[14px] font-bold leading-normal" style={{ color: performanceColor }}>
+              {signedPercentLabel}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-[16px] pt-[16px]">
@@ -301,6 +346,8 @@ export default function InvestmentsPortfolioScreen({
   myBankerDestination = false,
   onTermDepositClick,
   bottomInset = 0,
+  showBottomNavigation = false,
+  onBottomNavigationChange = () => undefined,
   roboAdvisorEnabled = false,
   initialView = "portfolio",
   onHistoryClick,
@@ -315,6 +362,12 @@ export default function InvestmentsPortfolioScreen({
   const { t } = useLanguage();
   const { progress: headerProgress, onScroll: handlePageScroll, setProgress: setHeaderProgress } = useCollapsingHeader(64);
   const [selectedTabId, setSelectedTabId] = useState<InvestmentPortfolioTabId>("performance");
+  const [czRoboSection, setCzRoboSection] = useState<"portfolio" | "explore" | "invest" | "activity" | "more">("portfolio");
+  const [czRoboApprovalQueueOpen, setCzRoboApprovalQueueOpen] = useState(false);
+  const [czRoboSortSheetOpen, setCzRoboSortSheetOpen] = useState(false);
+  const [czRoboReturnToOrders, setCzRoboReturnToOrders] = useState(false);
+  const [czRoboHistoryFilterByTitle, setCzRoboHistoryFilterByTitle] = useState<string | null>(null);
+  const [czRoboHistoryFilterBySecurityId, setCzRoboHistoryFilterBySecurityId] = useState<string | null>(null);
   const [selectedPeriodId, setSelectedPeriodId] = useState<InvestmentPeriodId>("max");
   const [selectedSortId, setSelectedSortId] = useState<InvestmentSortId>("max-value");
   const [selectedDistributionItem, setSelectedDistributionItem] = useState<InvestmentDistributionItem | null>(null);
@@ -371,6 +424,12 @@ export default function InvestmentsPortfolioScreen({
     }),
     [country, roboAdvisorEnabled, securities],
   );
+  const investmentHistoryTransactions = useMemo(
+    () => buildInvestmentHistoryTransactions(securities, country, {
+      includeCzRoboHistoricalTransactions: showBottomNavigation,
+    }),
+    [country, securities, showBottomNavigation],
+  );
   const financialSecurities = useMemo(
     () => securities.filter((security) => security.status === "active" && security.localValue > 0),
     [securities],
@@ -378,6 +437,8 @@ export default function InvestmentsPortfolioScreen({
   const sortedSecurities = useMemo(() => sortInvestmentSecurities(securities, selectedSortId), [securities, selectedSortId]);
   const activeSecurities = sortedSecurities.filter((security) => security.status === "active");
   const inactiveSecurities = sortedSecurities.filter((security) => security.status === "inactive");
+  const activeSortOptionLabel = INVESTMENT_SORT_OPTIONS.find((option) => option.id === selectedSortId)?.label ?? "MAX VALUE";
+  const activeSortDescending = selectedSortId === "max-value" || selectedSortId === "max-percent";
   const portfolioCurrency = getCountryConfig(country).currency;
   const {
     totalValue,
@@ -390,8 +451,14 @@ export default function InvestmentsPortfolioScreen({
     [financialSecurities, selectedTabId],
   );
 
-  const totalValueParts = maskInvestmentAmount(formatAmountParts(totalValue, country, portfolioCurrency), amountsHidden);
-  const performanceParts = maskInvestmentAmount(formatAmountParts(totalPerformanceAmount, country, portfolioCurrency), amountsHidden);
+  const totalValueParts = formatInvestmentAmountParts(totalValue, country, portfolioCurrency, amountsHidden);
+  const performanceParts = formatInvestmentAmountParts(
+    totalPerformanceAmount,
+    country,
+    portfolioCurrency,
+    amountsHidden,
+    showBottomNavigation,
+  );
   const totalPerformancePercentLabel = amountsHidden
     ? "**,**%"
     : `${Math.abs(totalPerformancePercent).toFixed(2).replace(".", ",")}%`;
@@ -446,16 +513,140 @@ export default function InvestmentsPortfolioScreen({
     <InvestmentProductCard
       key={security.id}
       security={security}
-      valueParts={maskInvestmentAmount(formatAmountParts(security.value, country, security.currency), amountsHidden)}
-      performanceParts={maskInvestmentAmount(formatAmountParts(security.performanceAmount, country, security.localCurrency), amountsHidden)}
+      valueParts={formatInvestmentAmountParts(security.value, country, security.currency, amountsHidden)}
+      performanceParts={formatInvestmentAmountParts(
+        security.performanceAmount,
+        country,
+        security.localCurrency,
+        amountsHidden,
+        showBottomNavigation,
+      )}
       valueLabel={t("runtime.investments.value", "Value")}
       performanceLabel={t("runtime.investments.performance", "Performance")}
+      czRoboAmountStyle={showBottomNavigation}
+      amountsHidden={amountsHidden}
+      currentPriceParts={showBottomNavigation
+        ? formatInvestmentAmountParts(security.marketPrice, country, security.instrumentCurrency, amountsHidden)
+        : undefined}
+      portfolioValueParts={showBottomNavigation
+        ? formatInvestmentAmountParts(security.localValue, country, security.localCurrency, amountsHidden)
+        : undefined}
       onClick={() => selectSecurity(securityCatalog.find((item) => item.id === security.id) ?? null)}
     />
   );
 
   const formatDistributionAmount = (value: number, itemCurrency: string) =>
-    maskInvestmentAmount(formatAmountParts(value, country, itemCurrency), amountsHidden);
+    formatInvestmentAmountParts(value, country, itemCurrency, amountsHidden);
+
+  const downloadConsolidatedReport = () => {
+    const rows = [
+      ["Product", "Product ID", "Product type", "Asset class", "Quantity", "Market value", "Currency", "Local value", "Local currency", "Performance amount", "Performance percent"],
+      ...securityCatalog.filter((security) => security.owned).map((security) => [
+        security.title,
+        security.productId,
+        security.productType,
+        security.assetClass,
+        security.quantity,
+        security.value,
+        security.instrumentCurrency,
+        security.localValue,
+        security.localCurrency,
+        security.performanceAmount,
+        security.performancePercent,
+      ]),
+    ];
+    const csv = `\uFEFF${rows
+      .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(","))
+      .join("\r\n")}`;
+    const file = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const downloadUrl = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = `investment-consolidated-report-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 0);
+  };
+
+  const handleBottomNavigationChange = (tab: NavItem) => {
+    if (showBottomNavigation && (tab !== "products" || czRoboSection !== "activity")) {
+      setCzRoboHistoryFilterByTitle(null);
+      setCzRoboHistoryFilterBySecurityId(null);
+    }
+    if (showBottomNavigation && tab === "home") {
+      setCzRoboSection("portfolio");
+      setCzRoboApprovalQueueOpen(false);
+      setSecurityListOpen(false);
+      setFundsWindowOpen(false);
+      return;
+    }
+    if (showBottomNavigation && tab === "payments") {
+      setCzRoboSection("invest");
+      setCzRoboApprovalQueueOpen(false);
+      setSelectedSecurity(null);
+      setSecurityListOpen(true);
+      return;
+    }
+    if (showBottomNavigation && tab === "investments") {
+      setCzRoboSection("explore");
+      setCzRoboApprovalQueueOpen(false);
+      setSecurityListOpen(false);
+      return;
+    }
+    if (showBottomNavigation && tab === "products") {
+      setCzRoboSection("activity");
+      setCzRoboApprovalQueueOpen(false);
+      setCzRoboReturnToOrders(false);
+      setSecurityListOpen(false);
+      return;
+    }
+    if (showBottomNavigation && tab === "more") {
+      setCzRoboSection("more");
+      setCzRoboApprovalQueueOpen(false);
+      setSecurityListOpen(false);
+      return;
+    }
+    onBottomNavigationChange(tab);
+  };
+
+  const wrapWithBottomNavigation = (activeTab: NavItem, children: ReactNode) => showBottomNavigation
+    ? (
+      <TabbedScreen
+        active
+        activeTab={activeTab}
+        items={MY_BANKER_NAV_ITEMS}
+        iconOverrides={CZ_ROBO_NAV_ICON_OVERRIDES}
+        labelOverrides={CZ_ROBO_NAV_LABEL_OVERRIDES}
+        onTabChange={handleBottomNavigationChange}
+      >
+        {children}
+      </TabbedScreen>
+    )
+    : children;
+
+  if (showBottomNavigation && czRoboSection === "activity") {
+    if (czRoboApprovalQueueOpen) {
+      return <OrdersToApproveScreen onBack={() => setCzRoboApprovalQueueOpen(false)} />;
+    }
+    return wrapWithBottomNavigation(
+      "products",
+      <InvestmentsHistoryScreen
+        onBack={onBack}
+        closeModuleButton={showBottomNavigation}
+        titleOverride="Activity"
+        initialTab={czRoboReturnToOrders ? "orders" : "transactions"}
+        historyFilterByTitle={czRoboHistoryFilterByTitle}
+        historyFilterBySecurityId={czRoboHistoryFilterBySecurityId}
+        includeCzRoboHistoricalTransactions={showBottomNavigation}
+        approvalCount={20}
+        onToApproveClick={() => {
+          setCzRoboReturnToOrders(true);
+          setCzRoboApprovalQueueOpen(true);
+        }}
+      />,
+    );
+  }
 
   if (selectedSecurity && buyOrderOpen) {
     return (
@@ -500,10 +691,26 @@ export default function InvestmentsPortfolioScreen({
     return (
       <InvestmentSecurityDetailScreen
         security={selectedSecurity}
+        transactions={investmentHistoryTransactions}
         country={country}
         amountsHidden={amountsHidden}
+        czRoboProductDetail={showBottomNavigation}
         onBack={() => selectSecurity(null)}
         onHistoryClick={() => onHistoryClick?.(selectedSecurity.title)}
+        onSeeMoreTransactions={() => {
+          setCzRoboHistoryFilterByTitle(selectedSecurity.title);
+          setCzRoboHistoryFilterBySecurityId(selectedSecurity.id);
+          setCzRoboSection("activity");
+          setCzRoboApprovalQueueOpen(false);
+          setCzRoboReturnToOrders(false);
+          setSecurityListOpen(false);
+          setFundsWindowOpen(false);
+          setSelectedDistributionItem(null);
+          setSelectedFundCollectionId(null);
+          setRoboAdvisorView("closed");
+          setSelectedRoboGoal(null);
+          selectSecurity(null);
+        }}
         onSellClick={() => setSellOrderOpen(true)}
         onBuyClick={() => {
           setBuyOrderDraft(null);
@@ -548,6 +755,7 @@ export default function InvestmentsPortfolioScreen({
           ));
           selectSecurity({
             ...security,
+            owned: true,
             value,
             localValue,
             performancePercent,
@@ -574,15 +782,26 @@ export default function InvestmentsPortfolioScreen({
   }
 
   if (securityListOpen) {
-    return (
+    const securityListScreen = (
       <InvestmentSecurityListScreen
         securities={securityCatalog}
         country={country}
         amountsHidden={amountsHidden}
-        onBack={() => setSecurityListOpen(false)}
+        closeModuleButton={showBottomNavigation && czRoboSection === "invest"}
+        czRoboAmountStyle={showBottomNavigation}
+        onBack={() => {
+          if (showBottomNavigation && czRoboSection === "invest") {
+            onBack();
+            return;
+          }
+          setSecurityListOpen(false);
+        }}
         onSelect={selectSecurity}
       />
     );
+    return czRoboSection === "invest"
+      ? wrapWithBottomNavigation("payments", securityListScreen)
+      : securityListScreen;
   }
 
   if (selectedFundCollectionId) {
@@ -606,6 +825,68 @@ export default function InvestmentsPortfolioScreen({
         onSelectCollection={setSelectedFundCollectionId}
       />
     );
+  }
+
+  if (showBottomNavigation && czRoboSection === "more") {
+    return wrapWithBottomNavigation("more", (
+      <div className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide">
+        <PageHeader
+          title="More"
+          onBack={onBack}
+          backIconName="close-flow"
+          backLabel="Close Investments"
+          includeSafeArea
+          showHelp
+          onHelpClick={() => undefined}
+        />
+        <section className="px-[24px] pt-[24px]" aria-labelledby="cz-robo-reports">
+          <SectionHeadingDivider title="REPORTS" />
+          <button
+            type="button"
+            onClick={downloadConsolidatedReport}
+            className="mt-[12px] flex w-full items-center gap-[12px] rounded-[8px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-[16px] text-left"
+            aria-label="Download consolidated investment report as CSV"
+          >
+            <span className="grid size-[40px] shrink-0 place-items-center rounded-full bg-[var(--uc-surface-muted)]">
+              <AppIcon name="investment-download-report" color="var(--uc-action)" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span id="cz-robo-reports" className="block uc-type-n4-strong text-[var(--uc-text)]">Consolidated report</span>
+              <span className="mt-[4px] block uc-type-n5 text-[var(--uc-text-muted)]">Download your current holdings and performance.</span>
+            </span>
+            <span className="shrink-0 text-[13px] font-bold uppercase text-[var(--uc-action)]">CSV</span>
+          </button>
+        </section>
+      </div>
+    ));
+  }
+
+  if (showBottomNavigation && czRoboSection === "explore") {
+    return wrapWithBottomNavigation("investments", (
+      <div className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide">
+        <PageHeader
+          title="Explore"
+          onBack={onBack}
+          backIconName="close-flow"
+          backLabel="Close Investments"
+          includeSafeArea
+          showHelp
+          onHelpClick={() => undefined}
+        />
+        <div className="px-[24px] pt-[18px]">
+          <p className="text-[16px] leading-[21px] text-[var(--uc-text)]">
+            Discover investment ideas, browse funds and learn how they work.
+          </p>
+          <SectionHeadingDivider title="A good place to start" className="mt-[24px]" />
+        </div>
+        <InvestmentsFundBanner
+          title={t("runtime.investments.fundBanner.title", "Find out the best fund for you")}
+          description={t("runtime.investments.fundBanner.description", "Discover our suggestions")}
+          actionLabel={t("runtime.investments.fundBanner.action", "GO TO FUNDS WINDOW")}
+          onClick={() => setFundsWindowOpen(true)}
+        />
+      </div>
+    ));
   }
 
   if (selectedDistributionItem && selectedTabId !== "performance") {
@@ -729,15 +1010,15 @@ export default function InvestmentsPortfolioScreen({
     />
   );
 
-  return (
-    <div
-      ref={scrollContainerRef}
-      className="h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide"
-      onScroll={handlePageScroll}
-      style={bottomInset > 0 ? { paddingBottom: bottomInset } : undefined}
-    >
+  return wrapWithBottomNavigation("home", (
+      <div
+        ref={scrollContainerRef}
+        className="h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide"
+        onScroll={handlePageScroll}
+        style={bottomInset > 0 ? { paddingBottom: bottomInset } : undefined}
+      >
       <PageHeader
-        title={t("runtime.investments.title", "Investment")}
+        title={showBottomNavigation ? "Portfolio details" : t("runtime.investments.title", "Investment")}
         onBack={() => {
           if (myBankerDestination && portfolioJourneyOpen) {
             setPortfolioJourneyOpen(false);
@@ -745,20 +1026,24 @@ export default function InvestmentsPortfolioScreen({
           }
           onBack();
         }}
+        backIconName={showBottomNavigation ? "close-flow" : undefined}
+        backLabel={showBottomNavigation ? "Close Investments" : undefined}
         collapsedTitleProgress={headerProgress}
         includeSafeArea
         showHelp
         onHelpClick={() => undefined}
       />
       {headerSlot ? <div className="px-[16px] pb-[8px]">{headerSlot}</div> : null}
-      <InvestmentPortfolioTabs
-        tabs={INVESTMENT_PORTFOLIO_TABS.map((tab) => ({
-          ...tab,
-          label: t(`runtime.investments.tabs.${TAB_TRANSLATION_KEYS[tab.id]}`, tab.label),
-        }))}
-        selectedTabId={selectedTabId}
-        onChange={setSelectedTabId}
-      />
+      {!showBottomNavigation ? (
+        <InvestmentPortfolioTabs
+          tabs={INVESTMENT_PORTFOLIO_TABS.map((tab) => ({
+            ...tab,
+            label: t(`runtime.investments.tabs.${TAB_TRANSLATION_KEYS[tab.id]}`, tab.label),
+          }))}
+          selectedTabId={selectedTabId}
+          onChange={setSelectedTabId}
+        />
+      ) : null}
 
       {securities.length > 0 ? (
         <>
@@ -770,22 +1055,45 @@ export default function InvestmentsPortfolioScreen({
             performancePercentValue={totalPerformancePercent}
             amountsHidden={amountsHidden}
             currency={portfolioCurrency}
+            czRoboAmountStyle={showBottomNavigation}
           />
-          {selectedTabId === "performance" ? (
-            <div className="px-[8px]">
+          {showBottomNavigation || selectedTabId === "performance" ? (
+              <div className={showBottomNavigation ? "px-[16px]" : "px-[8px]"}>
               <InvestmentPortfolioChart
                 points={chartPoints}
                 country={country}
                 currency={portfolioCurrency}
                 amountsHidden={amountsHidden}
+                showVerticalGridLines={!showBottomNavigation}
+                edgeToEdge={showBottomNavigation}
+                tightBottomPadding={showBottomNavigation}
               />
               <InvestmentPeriodChips
                 periods={INVESTMENT_PERIODS}
                 selectedPeriodId={selectedPeriodId}
                 onChange={setSelectedPeriodId}
+                softUnselected={showBottomNavigation}
+                className={showBottomNavigation ? "py-[8px]" : ""}
               />
             </div>
-          ) : (
+          ) : null}
+          {showBottomNavigation ? (
+            <>
+              <h2 className="px-[16px] pb-[8px] pt-[32px] text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">
+                Investments allocation by
+              </h2>
+              <InvestmentPortfolioTabs
+                tabs={INVESTMENT_PORTFOLIO_TABS.map((tab) => ({
+                  ...tab,
+                  label: t(`runtime.investments.tabs.${TAB_TRANSLATION_KEYS[tab.id]}`, tab.label),
+                }))}
+                selectedTabId={selectedTabId}
+                onChange={setSelectedTabId}
+                variant="chips"
+              />
+            </>
+          ) : null}
+          {selectedTabId !== "performance" ? (
             <InvestmentDistributionChart
               title={t(
                 `runtime.investments.distributionTitles.${DISTRIBUTION_TITLE_TRANSLATION_KEYS[selectedTabId]}`,
@@ -793,45 +1101,80 @@ export default function InvestmentsPortfolioScreen({
               )}
               items={distributionItems}
               formatAmount={formatDistributionAmount}
+              czRoboAmountStyle={showBottomNavigation}
+              hideDonut={showBottomNavigation}
               totalLabel={t("runtime.investments.total", "Total")}
               onItemClick={setSelectedDistributionItem}
-              headerExtra={investmentActionBar}
+              headerExtra={showBottomNavigation ? undefined : investmentActionBar}
             />
-          )}
+          ) : null}
           {selectedTabId === "performance" ? (
             <>
-              {investmentActionBar}
-              <SectionHeadingDivider
-                title={t("runtime.investments.allProducts", "ALL PRODUCTS")}
-                count={securities.length}
-                countAlign="end"
-                className="px-[24px] pt-[8px]"
-              />
-              <InvestmentFilterChips
-                options={INVESTMENT_SORT_OPTIONS}
-                selectedOptionId={selectedSortId}
-                onChange={setSelectedSortId}
-              />
-              <InvestmentProductsAccordion
-                title={t("runtime.investments.activeSecurities", "ACTIVE SECURITIES")}
-                count={activeSecurities.length}
-                defaultOpen
-              >
-                <div>{activeSecurities.map(renderSecurity)}</div>
-              </InvestmentProductsAccordion>
-              <InvestmentProductsAccordion
-                title={t("runtime.investments.inactiveSecurities", "INACTIVE SECURITIES")}
-                count={inactiveSecurities.length}
-                defaultOpen={false}
-              >
-                <div>{inactiveSecurities.map(renderSecurity)}</div>
-              </InvestmentProductsAccordion>
-              <InvestmentsFundBanner
-                title={t("runtime.investments.fundBanner.title", "Find out the best fund for you")}
-                description={t("runtime.investments.fundBanner.description", "Discover our suggestions")}
-                actionLabel={t("runtime.investments.fundBanner.action", "GO TO FUNDS WINDOW")}
-                onClick={() => setFundsWindowOpen(true)}
-              />
+              {showBottomNavigation ? null : investmentActionBar}
+              {!showBottomNavigation ? (
+                <SectionHeadingDivider
+                  title={t("runtime.investments.allProducts", "ALL PRODUCTS")}
+                  count={securities.length}
+                  countAlign="end"
+                  className="px-[24px] pt-[8px]"
+                />
+              ) : null}
+              {!showBottomNavigation ? (
+                <InvestmentFilterChips
+                  options={INVESTMENT_SORT_OPTIONS}
+                  selectedOptionId={selectedSortId}
+                  onChange={setSelectedSortId}
+                />
+              ) : null}
+              {showBottomNavigation ? (
+                <section className="flex flex-col" data-cz-robo-active-securities="true">
+                  <div className="flex min-h-[56px] items-center justify-between gap-[8px] px-[16px]">
+                    <h2 className="uc-type-n4-strong text-[var(--uc-text)]">
+                      {t("runtime.investments.activeSecurities", "ACTIVE SECURITIES")} ({activeSecurities.length})
+                    </h2>
+                    <button
+                      type="button"
+                      aria-label={`Sort securities. Current sort: ${activeSortOptionLabel}`}
+                      aria-haspopup="dialog"
+                      aria-expanded={czRoboSortSheetOpen}
+                      onClick={() => setCzRoboSortSheetOpen(true)}
+                      className="inline-flex h-[34px] shrink-0 items-center gap-[6px] text-[14px] font-bold uppercase leading-[16px] text-[#007A91] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
+                      data-cz-robo-security-sort-trigger="true"
+                    >
+                      <span>{activeSortOptionLabel}</span>
+                      <svg
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        style={{ transform: activeSortDescending ? "rotate(180deg)" : undefined }}
+                      >
+                        <path fillRule="evenodd" clipRule="evenodd" d="M8.00016 0.666992L14.6668 6.64145C13.7451 7.46519 12.2535 7.46519 11.3335 6.64145L9.17794 4.71057V15.3337L6.8215 15.3328V4.71057L4.66683 6.64145C3.74683 7.46519 2.2535 7.46519 1.3335 6.64145L8.00016 0.666992Z" fill="#007A91" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div>{activeSecurities.map(renderSecurity)}</div>
+                </section>
+              ) : (
+                <InvestmentProductsAccordion
+                  title={t("runtime.investments.activeSecurities", "ACTIVE SECURITIES")}
+                  count={activeSecurities.length}
+                  defaultOpen
+                >
+                  <div>{activeSecurities.map(renderSecurity)}</div>
+                </InvestmentProductsAccordion>
+              )}
+              {!showBottomNavigation ? (
+                <InvestmentProductsAccordion
+                  title={t("runtime.investments.inactiveSecurities", "INACTIVE SECURITIES")}
+                  count={inactiveSecurities.length}
+                  defaultOpen={false}
+                >
+                  <div>{inactiveSecurities.map(renderSecurity)}</div>
+                </InvestmentProductsAccordion>
+              ) : null}
             </>
           ) : null}
           <div className="h-[28px]" />
@@ -839,6 +1182,35 @@ export default function InvestmentsPortfolioScreen({
       ) : (
         <EmptyInvestmentsState />
       )}
-    </div>
-  );
+      {showBottomNavigation && czRoboSortSheetOpen ? (
+        <BottomSheet title="Sort securities" onClose={() => setCzRoboSortSheetOpen(false)}>
+          <div role="radiogroup" aria-label="Sort securities">
+            {INVESTMENT_SORT_OPTIONS.map((option) => {
+              const selected = option.id === selectedSortId;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => {
+                    setSelectedSortId(option.id);
+                    setCzRoboSortSheetOpen(false);
+                  }}
+                  className="flex min-h-[56px] w-full items-center justify-between border-b border-[var(--uc-border-muted)] px-[8px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
+                >
+                  <span className="text-[16px] font-bold text-[var(--uc-text)]">{option.label}</span>
+                  <AppIcon
+                    name={selected ? "radio-selected" : "radio-unselected"}
+                    color={selected ? "var(--uc-action)" : "var(--uc-text-muted)"}
+                    size={24}
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </BottomSheet>
+      ) : null}
+      </div>
+    ));
 }

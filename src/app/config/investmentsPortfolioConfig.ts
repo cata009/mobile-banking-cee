@@ -110,6 +110,8 @@ export interface InvestmentHistoryDateOption {
 
 export interface InvestmentHistoryTransaction {
   id: string;
+  /** Stable investment security ID used to keep product history exact when names repeat. */
+  securityId?: string;
   date: string;
   title: string;
   amount: number;
@@ -792,6 +794,8 @@ export function buildInvestmentSecurityCatalog(
   // Legacy/inactive holdings (weight 0) are historical positions and must not
   // appear as purchasable products with a 0,00 price.
   const ownedCatalog = financialOwnedSecurities.map((security, index) => enrichCatalogSecurity(security, country, true, index));
+  // Goal seed rows are catalog data, not proof of an account position. A
+  // concrete goal holding is marked owned when it is opened from that goal.
   const roboGoalCatalog = (options.includeRoboGoals ? ROBO_GOAL_SECURITY_SEEDS : []).map((seed, index) => {
     const localValue = roundMoney(referenceLocalValue * (0.7 + index * 0.11));
     const value = roundMoney(convertCurrency(localValue, localCurrency, seed.instrumentCurrency));
@@ -810,7 +814,7 @@ export function buildInvestmentSecurityCatalog(
       riskLevel: seed.riskLevel ?? deriveRiskLevel(seed),
       liquidity: seed.liquidity ?? deriveLiquidity(seed),
     };
-    return enrichCatalogSecurity(security, country, true, ownedCatalog.length + index);
+    return enrichCatalogSecurity(security, country, false, ownedCatalog.length + index);
   });
   const availableCatalog = CATALOG_ONLY_SEEDS.map((seed, index) => {
     const localValue = roundMoney(referenceLocalValue * (0.72 + index * 0.18));
@@ -1001,10 +1005,53 @@ function buildIsoDate(year: number, monthIndex: number, day: number): string {
 export function buildInvestmentHistoryTransactions(
   securities: readonly InvestmentSecurity[],
   country: CountryId,
+  options: { includeCzRoboHistoricalTransactions?: boolean } = {},
 ): InvestmentHistoryTransaction[] {
   const financialSecurities = securities.filter((security) => security.status === "active" && security.localValue > 0);
-  if (!isNonEmpty(financialSecurities)) return [];
   const countryCurrency = getCountryCurrency(country) as Currency;
+  const climateFocusFormerHolding = options.includeCzRoboHistoricalTransactions
+    ? CATALOG_ONLY_SEEDS.find((seed) => seed.id === "climate-focus")
+    : undefined;
+  // Keep a former Climate Focus position in the CZ Robo demo history so a
+  // product can show trades after the customer has sold the full position.
+  const formerHoldingTransactions: InvestmentHistoryTransaction[] = climateFocusFormerHolding
+    ? [
+        {
+          id: "trx-catalog-climate-focus-2026-05-12",
+          securityId: `catalog-${climateFocusFormerHolding.id}`,
+          date: buildIsoDate(2026, 4, 12),
+          title: climateFocusFormerHolding.title,
+          amount: 5_240,
+          currency: countryCurrency,
+          type: "SELL",
+          tone: "positive",
+          logoId: climateFocusFormerHolding.logoId,
+        },
+        {
+          id: "trx-catalog-climate-focus-2025-11-03",
+          securityId: `catalog-${climateFocusFormerHolding.id}`,
+          date: buildIsoDate(2025, 10, 3),
+          title: climateFocusFormerHolding.title,
+          amount: -4_900,
+          currency: countryCurrency,
+          type: "BUY",
+          tone: "negative",
+          logoId: climateFocusFormerHolding.logoId,
+        },
+        {
+          id: "trx-catalog-climate-focus-2025-10-14",
+          securityId: `catalog-${climateFocusFormerHolding.id}`,
+          date: buildIsoDate(2025, 9, 14),
+          title: climateFocusFormerHolding.title,
+          amount: -2_100,
+          currency: countryCurrency,
+          type: "BUY",
+          tone: "negative",
+          logoId: climateFocusFormerHolding.logoId,
+        },
+      ]
+    : [];
+  if (!isNonEmpty(financialSecurities)) return formerHoldingTransactions;
   const transactionTypes: NonEmptyReadonlyArray<InvestmentHistoryTransactionType> = [
     "COUPON",
     "BUY",
@@ -1043,7 +1090,7 @@ export function buildInvestmentHistoryTransactions(
   ];
   const total = dates.length;
 
-  return dates.map((date, index) => {
+  const transactions: InvestmentHistoryTransaction[] = dates.map((date, index) => {
     const security = getCyclicItem(financialSecurities, index);
     const type = getCyclicItem(transactionTypes, index);
     const currency = index % 2 === 0 ? countryCurrency : security.instrumentCurrency;
@@ -1055,6 +1102,7 @@ export function buildInvestmentHistoryTransactions(
 
     return {
       id: `trx-${security.id}-${index}`,
+      securityId: security.id,
       date,
       title: security.title,
       amount: isPositive ? amount : -amount,
@@ -1064,6 +1112,9 @@ export function buildInvestmentHistoryTransactions(
       logoId: security.logoId,
     };
   });
+
+  return [...transactions, ...formerHoldingTransactions]
+    .sort((first, second) => new Date(second.date).getTime() - new Date(first.date).getTime());
 }
 
 export function buildInvestmentHistoryOrders(

@@ -10,9 +10,8 @@ import StandardSignScreen from "@/app/components/flow/StandardSignScreen";
 import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
 import InvestmentDetailField from "@/app/components/investments/InvestmentDetailField";
 import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
-import { getCountryConfig } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
-import { maskFormattedAmount } from "@/app/utils/amountPrivacy";
+import { formatInvestmentMoney } from "@/app/utils/investmentAmountFormatting";
 import type { CurrentAccount } from "@/data/products";
 import type { CoAppingInvestmentBuyDraft } from "../../../../package/mobile-pi-coapping-chat-package/src";
 import InvestmentOrderDocumentsAccordion from "./InvestmentOrderDocumentsAccordion";
@@ -35,11 +34,7 @@ interface InvestmentBuyOrderFlowProps {
 }
 
 function formatMoney(value: number, currency: string, country: CountryId, hidden: boolean) {
-  const formatted = new Intl.NumberFormat(getCountryConfig(country).locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
-  return `${hidden ? maskFormattedAmount(formatted, true) : formatted} ${currency}`;
+  return formatInvestmentMoney(value, country, currency, hidden);
 }
 
 function compactAccountNumber(value: string) {

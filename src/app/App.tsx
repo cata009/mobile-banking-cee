@@ -1131,6 +1131,13 @@ function AppContent({
             myBankerDestination={myBankerAvailable}
             onTermDepositClick={() => handleOfferOpen("term-deposit")}
             bottomInset={myBankerAvailable ? 24 : 0}
+            showBottomNavigation={isCzRoboAdvisorPreviewActive}
+            onBottomNavigationChange={(tab) => {
+              if (tab === "home") navigateTo("homepage");
+              if (tab === "payments") handlePaymentsClick();
+              if (tab === "products") handleProductsClick();
+              if (tab === "more") handleMoreClick();
+            }}
             roboAdvisorEnabled={isCzRoboAdvisorPreviewActive}
             initialView={investmentsInitialView}
             onHistoryClick={handleInvestmentsHistoryClick}
@@ -1144,7 +1151,11 @@ function AppContent({
         )}
 
         {currentScreen === "investments-history" && investmentsPortfolioAvailable && (
-          <InvestmentsHistoryScreen onBack={goBack} historyFilterByTitle={historyFilterByTitle} />
+          <InvestmentsHistoryScreen
+            onBack={goBack}
+            historyFilterByTitle={historyFilterByTitle}
+            includeCzRoboHistoricalTransactions={isCzRoboAdvisorPreviewActive}
+          />
         )}
 
         {currentScreen === "investment-orders-to-approve" && investmentsPortfolioAvailable && (
