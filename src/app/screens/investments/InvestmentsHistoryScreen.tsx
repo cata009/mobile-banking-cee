@@ -6,6 +6,7 @@ import BrandLogo from "@/app/components/brand-logo/BrandLogo";
 import { AppIcon } from "@/app/components/icons";
 import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
 import PageHeader from "@/app/components/PageHeader";
+import CzRoboLevelOneShell from "@/app/screens/investments/CzRoboLevelOneShell";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import { Calendar } from "@/app/components/ui/calendar";
 import { cn } from "@/app/components/ui/utils";
@@ -1054,17 +1055,8 @@ export default function InvestmentsHistoryScreen({
     );
   }
 
-  return (
-    <div className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide" onScroll={handleScroll} data-investment-history-screen="true">
-      <PageHeader
-        title={titleOverride}
-        onBack={onBack}
-        backIconName={closeModuleButton ? "close-flow" : undefined}
-        backLabel={closeModuleButton ? "Close Investments" : undefined}
-        onHelpClick={() => setInfoMode(activeTab)}
-        collapsedTitleProgress={headerProgress}
-        includeSafeArea
-      />
+  const historyListContent = (
+    <>
       <MessagesMailboxTabs
         tabs={HISTORY_TABS}
         activeTabId={activeTab}
@@ -1150,6 +1142,32 @@ export default function InvestmentsHistoryScreen({
         </div>
       )}
       <div className="h-[34px]" />
+    </>
+  );
+
+  if (closeModuleButton) {
+    return (
+      <CzRoboLevelOneShell
+        title={titleOverride}
+        onBack={onBack}
+        onHelpClick={() => setInfoMode(activeTab)}
+        onScroll={handleScroll}
+      >
+        <div data-investment-history-screen="true">{historyListContent}</div>
+      </CzRoboLevelOneShell>
+    );
+  }
+
+  return (
+    <div className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide" onScroll={handleScroll} data-investment-history-screen="true">
+      <PageHeader
+        title={titleOverride}
+        onBack={onBack}
+        onHelpClick={() => setInfoMode(activeTab)}
+        collapsedTitleProgress={headerProgress}
+        includeSafeArea
+      />
+      {historyListContent}
     </div>
   );
 }

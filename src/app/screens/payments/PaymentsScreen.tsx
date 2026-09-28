@@ -402,7 +402,7 @@ export default function PaymentsScreen({
   }
 
   if (activeChildView === 'recurrent-payments') {
-    return <RecurrentPaymentsScreen onBack={() => setActiveChildView('overview')} />
+    return <RecurrentPaymentsScreen onBack={() => setActiveChildView('overview')} isEvo2027={isEvo2027} />
   }
 
   if (isEvo2027 && selectedBeneficiary && isEditingBeneficiary) {

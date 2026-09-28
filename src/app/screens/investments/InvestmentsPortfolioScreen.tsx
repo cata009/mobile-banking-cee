@@ -14,6 +14,7 @@ import InvestmentFundCarousel from "@/app/components/investments/InvestmentFundC
 import InvestmentsHistoryScreen from "@/app/screens/investments/InvestmentsHistoryScreen";
 import OrdersToApproveScreen from "@/app/screens/investments/OrdersToApproveScreen";
 import TabbedScreen from "@/app/components/TabbedScreen";
+import CzRoboLevelOneShell from "@/app/screens/investments/CzRoboLevelOneShell";
 import { MY_BANKER_NAV_ITEMS, type NavItem } from "@/app/components/BottomNavigation";
 import InvestmentBuyOrderFlow from "@/app/screens/investments/InvestmentBuyOrderFlow";
 import InvestmentSellOrderFlow from "@/app/screens/investments/InvestmentSellOrderFlow";
@@ -574,40 +575,48 @@ export default function InvestmentsPortfolioScreen({
       setCzRoboHistoryFilterByTitle(null);
       setCzRoboHistoryFilterBySecurityId(null);
     }
-    if (showBottomNavigation && tab === "home") {
-      setCzRoboSection("portfolio");
+    if (showBottomNavigation) {
       setCzRoboApprovalQueueOpen(false);
+      setCzRoboReturnToOrders(false);
+      selectSecurity(null);
+      setBuyOrderOpen(false);
+      setSellOrderOpen(false);
+      setBuyOrderDraft(null);
       setSecurityListOpen(false);
       setFundsWindowOpen(false);
-      return;
-    }
-    if (showBottomNavigation && tab === "payments") {
-      setCzRoboSection("invest");
-      setCzRoboApprovalQueueOpen(false);
-      setSelectedSecurity(null);
-      setSecurityListOpen(true);
-      return;
+      setSelectedFundCollectionId(null);
+      setSelectedDistributionItem(null);
+      setRoboAdvisorView("closed");
+      setSelectedRoboGoal(null);
+
+      if (tab === "home") {
+        setCzRoboSection("portfolio");
+        return;
+      }
+      if (tab === "payments") {
+        setCzRoboSection("invest");
+        setSecurityListOpen(true);
+        return;
+      }
+      if (tab === "analytics") {
+        setCzRoboSection("explore");
+        onBottomNavigationChange?.(tab);
+        return;
+      }
+      if (tab === "products") {
+        setCzRoboSection("activity");
+        return;
+      }
+      if (tab === "more") {
+        setCzRoboSection("more");
+        return;
+      }
     }
     if (showBottomNavigation && tab === "investments") {
       setCzRoboSection("explore");
-      setCzRoboApprovalQueueOpen(false);
-      setSecurityListOpen(false);
       return;
     }
-    if (showBottomNavigation && tab === "products") {
-      setCzRoboSection("activity");
-      setCzRoboApprovalQueueOpen(false);
-      setCzRoboReturnToOrders(false);
-      setSecurityListOpen(false);
-      return;
-    }
-    if (showBottomNavigation && tab === "more") {
-      setCzRoboSection("more");
-      setCzRoboApprovalQueueOpen(false);
-      setSecurityListOpen(false);
-      return;
-    }
-    onBottomNavigationChange(tab);
+    onBottomNavigationChange?.(tab);
   };
 
   const wrapWithBottomNavigation = (activeTab: NavItem, children: ReactNode) => showBottomNavigation
@@ -618,6 +627,7 @@ export default function InvestmentsPortfolioScreen({
         items={MY_BANKER_NAV_ITEMS}
         iconOverrides={CZ_ROBO_NAV_ICON_OVERRIDES}
         labelOverrides={CZ_ROBO_NAV_LABEL_OVERRIDES}
+        className="bg-[var(--uc-surface)]"
         onTabChange={handleBottomNavigationChange}
       >
         {children}
@@ -829,16 +839,7 @@ export default function InvestmentsPortfolioScreen({
 
   if (showBottomNavigation && czRoboSection === "more") {
     return wrapWithBottomNavigation("more", (
-      <div className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide">
-        <PageHeader
-          title="More"
-          onBack={onBack}
-          backIconName="close-flow"
-          backLabel="Close Investments"
-          includeSafeArea
-          showHelp
-          onHelpClick={() => undefined}
-        />
+      <CzRoboLevelOneShell title="More" onBack={onBack}>
         <section className="px-[24px] pt-[24px]" aria-labelledby="cz-robo-reports">
           <SectionHeadingDivider title="REPORTS" />
           <button
@@ -857,22 +858,13 @@ export default function InvestmentsPortfolioScreen({
             <span className="shrink-0 text-[13px] font-bold uppercase text-[var(--uc-action)]">CSV</span>
           </button>
         </section>
-      </div>
+      </CzRoboLevelOneShell>
     ));
   }
 
   if (showBottomNavigation && czRoboSection === "explore") {
     return wrapWithBottomNavigation("investments", (
-      <div className="h-full w-full overflow-y-auto bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide">
-        <PageHeader
-          title="Explore"
-          onBack={onBack}
-          backIconName="close-flow"
-          backLabel="Close Investments"
-          includeSafeArea
-          showHelp
-          onHelpClick={() => undefined}
-        />
+      <CzRoboLevelOneShell title="Explore" onBack={onBack}>
         <div className="px-[24px] pt-[18px]">
           <p className="text-[16px] leading-[21px] text-[var(--uc-text)]">
             Discover investment ideas, browse funds and learn how they work.
@@ -880,7 +872,7 @@ export default function InvestmentsPortfolioScreen({
           <SectionHeadingDivider title="A good place to start" className="mt-[24px]" />
         </div>
         <InvestmentFundCarousel onSelectCollection={setSelectedFundCollectionId} />
-      </div>
+      </CzRoboLevelOneShell>
     ));
   }
 
@@ -1007,27 +999,46 @@ export default function InvestmentsPortfolioScreen({
 
   return wrapWithBottomNavigation("home", (
       <div
-        ref={scrollContainerRef}
-        className="h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide"
-        onScroll={handlePageScroll}
-        style={bottomInset > 0 ? { paddingBottom: bottomInset } : undefined}
+        ref={showBottomNavigation ? undefined : scrollContainerRef}
+        className={showBottomNavigation
+          ? "flex h-full min-h-0 w-full flex-col overflow-hidden bg-[var(--uc-app-bg)] text-[var(--uc-text)]"
+          : "h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide"}
+        onScroll={showBottomNavigation ? undefined : handlePageScroll}
+        style={!showBottomNavigation && bottomInset > 0 ? { paddingBottom: bottomInset } : undefined}
       >
       <PageHeader
-        title={showBottomNavigation ? "Portfolio details" : t("runtime.investments.title", "Investment")}
+        title={showBottomNavigation ? "" : t("runtime.investments.title", "Investment")}
         onBack={() => {
-          if (myBankerDestination && portfolioJourneyOpen) {
+          if (!showBottomNavigation && myBankerDestination && portfolioJourneyOpen) {
             setPortfolioJourneyOpen(false);
             return;
           }
           onBack();
         }}
+        variant={showBottomNavigation ? "gray" : "light"}
         backIconName={showBottomNavigation ? "close-flow" : undefined}
-        backLabel={showBottomNavigation ? "Close Investments" : undefined}
+        backLabel={showBottomNavigation ? "Back to mobile banking" : undefined}
         collapsedTitleProgress={headerProgress}
         includeSafeArea
+        renderLargeTitle={!showBottomNavigation}
+        hideCollapsedTitleWhenHidden={showBottomNavigation}
         showHelp
         onHelpClick={() => undefined}
       />
+      <div
+        className={showBottomNavigation
+          ? "mt-[16px] min-h-0 flex-1 overflow-hidden rounded-t-[24px] bg-[var(--uc-surface)] shadow-[0_-8px_20px_rgba(0,0,0,0.045)]"
+          : ""}
+      >
+      <div
+        ref={showBottomNavigation ? scrollContainerRef : undefined}
+        className={showBottomNavigation ? "h-full min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide" : ""}
+        onScroll={showBottomNavigation ? handlePageScroll : undefined}
+        style={showBottomNavigation && bottomInset > 0 ? { paddingBottom: bottomInset } : undefined}
+      >
+      {showBottomNavigation ? (
+        <h1 className="uc-type-h1 px-[16px] pb-[8px] pt-[24px] text-[var(--uc-text)]">Portfolio details</h1>
+      ) : null}
       {headerSlot ? <div className="px-[16px] pb-[8px]">{headerSlot}</div> : null}
       {!showBottomNavigation ? (
         <InvestmentPortfolioTabs
@@ -1178,6 +1189,8 @@ export default function InvestmentsPortfolioScreen({
       ) : (
         <EmptyInvestmentsState />
       )}
+      </div>
+      </div>
       {showBottomNavigation && czRoboSortSheetOpen ? (
         <BottomSheet title="Sort securities" onClose={() => setCzRoboSortSheetOpen(false)}>
           <div role="radiogroup" aria-label="Sort securities">
