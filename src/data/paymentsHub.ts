@@ -22,6 +22,7 @@ export interface FrequentBeneficiary {
   /** Masked account, shown under the name the way a Revolt-style list shows a handle. */
   accountNumber: string
   /** Unmasked demo account details used when starting a new payment. */
+  paymentAccountPrefix?: string
   paymentAccountNumber: string
   paymentBankCode: string
   recipientKind: 'individual' | 'business'
@@ -233,6 +234,49 @@ const FREQUENT_BENEFICIARY_SEEDS: readonly FrequentBeneficiarySeed[] = [
 ]
 const SNAPSHOT_DATE = new Date('2026-09-26T12:00:00')
 const FAVORITE_BENEFICIARY_IDS_STORAGE_KEY = 'uc.evo2027.payments.favoriteBeneficiaryIds'
+const BENEFICIARY_DETAILS_STORAGE_KEY = 'uc.evo2027.payments.beneficiaryDetails'
+
+type EditableBeneficiaryDetails = Pick<
+  FrequentBeneficiary,
+  'name' | 'paymentAccountPrefix' | 'paymentAccountNumber' | 'paymentBankCode' | 'recipientKind' | 'bank'
+>
+
+type StoredBeneficiaryDetails = Record<string, Partial<EditableBeneficiaryDetails>>
+
+function getStoredBeneficiaryDetails(): StoredBeneficiaryDetails {
+  if (typeof window === 'undefined') return {}
+
+  try {
+    const stored: unknown = JSON.parse(window.localStorage.getItem(BENEFICIARY_DETAILS_STORAGE_KEY) ?? '{}')
+    return stored && typeof stored === 'object' && !Array.isArray(stored) ? stored as StoredBeneficiaryDetails : {}
+  } catch {
+    return {}
+  }
+}
+
+export function saveFrequentBeneficiaryDetails(person: FrequentBeneficiary) {
+  if (typeof window === 'undefined') return
+
+  const stored = getStoredBeneficiaryDetails()
+  stored[person.id] = {
+    name: person.name,
+    paymentAccountPrefix: person.paymentAccountPrefix ?? '',
+    paymentAccountNumber: person.paymentAccountNumber,
+    paymentBankCode: person.paymentBankCode,
+    recipientKind: person.recipientKind,
+    bank: person.bank,
+  }
+
+  try {
+    window.localStorage.setItem(BENEFICIARY_DETAILS_STORAGE_KEY, JSON.stringify(stored))
+  } catch {
+    /* The edit still applies to the current screen when storage is unavailable. */
+  }
+}
+
+export function getBeneficiaryBankIdForCode(bankCode: string, fallback: BankId): BankId {
+  return (Object.entries(DEMO_BANK_CODES).find(([, code]) => code === bankCode)?.[0] as BankId | undefined) ?? fallback
+}
 
 export function getStoredFavoriteBeneficiaryIds(): string[] {
   if (typeof window === 'undefined') return []
@@ -305,15 +349,14 @@ export function getBeneficiaryPaymentHistory(person: FrequentBeneficiary, countr
 
 export function getFrequentBeneficiaries(country: CountryId): FrequentBeneficiary[] {
   const currency = getCountryConfig(country).currency
-
+  const storedDetails = getStoredBeneficiaryDetails()
   const transactions = getRecentPaymentTransactions(country, currency)
   return FREQUENT_BENEFICIARY_SEEDS.flatMap((seed) => {
     const latest = transactions.find((transaction) => transaction.beneficiaryId === seed.id)
     if (!latest) return []
     const paymentAccountNumber = `200014${seed.suffix}`
     const paymentBankCode = DEMO_BANK_CODES[seed.bank]
-    return [
-      {
+    const baseBeneficiary: FrequentBeneficiary = {
         id: seed.id,
         name: seed.name,
         bank: seed.bank,
@@ -328,8 +371,16 @@ export function getFrequentBeneficiaries(country: CountryId): FrequentBeneficiar
         lastPaidLabel: recentPaymentLabel(`${latest.monthKey}-${latest.day}`),
         lastPaidAt: `${latest.monthKey}-${latest.day}`,
         currency,
-      },
-    ]
+      }
+    const beneficiary = { ...baseBeneficiary, ...storedDetails[seed.id] }
+    const accountPrefix = beneficiary.paymentAccountPrefix ? `${beneficiary.paymentAccountPrefix}-` : ''
+    return [{
+      ...beneficiary,
+      accountNumber:
+        country === 'CZ'
+          ? `${accountPrefix}${beneficiary.paymentAccountNumber.slice(0, 6)}****/${beneficiary.paymentBankCode}`
+          : accountFor(country, seed.suffix),
+    }]
   })
 }
 

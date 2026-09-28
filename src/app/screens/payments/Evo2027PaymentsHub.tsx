@@ -342,7 +342,31 @@ function HubLayoutEditor({
   };
 
   return (
-    <BottomSheet title={t("runtime.payments.hub.customise", "Customise payments")} onClose={onClose}>
+    <BottomSheet
+      title={t("runtime.payments.hub.customise", "Customise payments")}
+      onClose={onClose}
+      fillHeight
+      footer={(
+        <div className="flex flex-col gap-[8px] border-t border-[var(--uc-border-muted)] bg-[var(--uc-sheet-bg)] pt-[12px]">
+          <PrimaryButton
+            onClick={() => {
+              onApply(draft);
+              onClose();
+            }}
+            disabled={draft.length === 0}
+          >
+            {t("runtime.actions.save", "Save")}
+          </PrimaryButton>
+          <button
+            type="button"
+            onClick={() => setDraft([...DEFAULT_HUB_LAYOUT])}
+            className="uc-type-n5-strong min-h-[40px] text-[var(--uc-action)] underline-offset-[3px] hover:underline"
+          >
+            {t("runtime.payments.hub.reset", "Reset to default")}
+          </button>
+        </div>
+      )}
+    >
       <p className="uc-type-n5 text-[var(--uc-text-muted)]">
         {t(
           "runtime.payments.hub.customiseHint",
@@ -394,24 +418,6 @@ function HubLayoutEditor({
         })}
       </div>
 
-      <div className="mt-[20px] flex flex-col gap-[8px]">
-        <PrimaryButton
-          onClick={() => {
-            onApply(draft);
-            onClose();
-          }}
-          disabled={draft.length === 0}
-        >
-          {t("runtime.actions.save", "Save")}
-        </PrimaryButton>
-        <button
-          type="button"
-          onClick={() => setDraft([...DEFAULT_HUB_LAYOUT])}
-          className="uc-type-n5-strong min-h-[40px] text-[var(--uc-action)] underline-offset-[3px] hover:underline"
-        >
-          {t("runtime.payments.hub.reset", "Reset to default")}
-        </button>
-      </div>
     </BottomSheet>
   );
 }

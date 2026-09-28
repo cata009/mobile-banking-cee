@@ -76,6 +76,7 @@ export function usePaymentFlow({
       recipientAccountMode: "local",
       recipientKind: person.recipientKind,
       beneficiaryName: person.name,
+      prefix: person.paymentAccountPrefix ?? '',
       accountNumber: person.paymentAccountNumber,
       bankCode: person.paymentBankCode,
       bankName: BANK_BADGES[person.bank].name,

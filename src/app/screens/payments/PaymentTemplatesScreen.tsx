@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { AppIcon } from "@/app/components/icons";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import BeneficiaryAvatar from "@/app/components/payments/BeneficiaryAvatar";
 import PageHeader from "@/app/components/PageHeader";
@@ -79,14 +78,11 @@ function Evo2027TemplateRow({
           {item.accountNumber}
         </span>
       </span>
-      <span className="flex shrink-0 items-center gap-[8px]">
-        {item.kind === "template" ? (
-          <span className="whitespace-nowrap text-[12px] font-semibold tabular-nums text-[var(--uc-text)]">
-            {item.amount} {item.currency}
-          </span>
-        ) : null}
-        <AppIcon name="chevron-link" size={18} color="var(--uc-icon)" />
-      </span>
+      {item.kind === "template" ? (
+        <span className="shrink-0 whitespace-nowrap text-[14px] font-semibold tabular-nums text-[var(--uc-text)]">
+          {item.amount} {item.currency}
+        </span>
+      ) : null}
     </button>
   );
 }
@@ -115,12 +111,17 @@ export default function PaymentTemplatesScreen({ onBack, onSelect, isEvo2027 = f
             variant="gray"
           />
           <div className="px-[20px] pb-[24px] pt-[12px]">
-            <AccountSearchBar
-              value={searchValue}
-              onValueChange={setSearchValue}
-              placeholder={t("runtime.payments.templates.search", "Search templates or recipients")}
-              showTrailingAction={false}
-            />
+            <div
+              className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[8px]"
+              style={{ ['--uc-app-bg' as string]: 'var(--uc-surface)' }}
+            >
+              <AccountSearchBar
+                value={searchValue}
+                onValueChange={setSearchValue}
+                placeholder={t("runtime.payments.templates.search", "Search templates or recipients")}
+                showTrailingAction={false}
+              />
+            </div>
 
             {noResults ? (
               <p className="uc-type-n4 py-[40px] text-center text-[var(--uc-text-muted)]">

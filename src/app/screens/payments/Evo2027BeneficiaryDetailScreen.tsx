@@ -8,6 +8,7 @@ import { formatEvo2027Number } from '@/app/utils/evo2027Formatting'
 import { getRecipientCountry } from '@/data/paymentRecipientRules'
 import { getBeneficiaryPaymentHistory, type FrequentBeneficiary } from '@/data/paymentsHub'
 import type { AccountTransaction } from '@/data/accountDetails'
+import { useCollapsingHeader } from '@/hooks/useCollapsingHeader'
 
 function formatPaymentDate(payment: AccountTransaction) {
   return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(
@@ -15,7 +16,28 @@ function formatPaymentDate(payment: AccountTransaction) {
   )
 }
 
-function FactRow({ label, value }: { label: string; value: string }) {
+function FactRow({ label, value, onClick }: { label: string; value: string; onClick?: () => void }) {
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={`Edit beneficiary account: ${value}`}
+        className="flex w-full items-start justify-between gap-[14px] py-[13px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-action)]"
+      >
+        <span className="shrink-0 text-[13px] text-[var(--uc-text-muted)]">{label}</span>
+        <span className="flex min-w-0 items-center justify-end gap-[5px] break-all text-right text-[13px] font-bold text-[var(--uc-action)]">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3.05834 1.8829C3.82246 1.14807 5.05736 1.15043 5.81854 1.88764L6.3348 2.38683L2.56457 6.01086L0.666748 4.1811L3.05834 1.8829Z" fill="currentColor" />
+            <path d="M15.3334 14.6666L10.6172 13.76L14.3899 10.1336L15.3334 14.6666Z" fill="currentColor" />
+            <path d="M9.64856 12.834L13.4017 9.2265L7.30488 3.31705L3.54443 6.92073L9.64856 12.834Z" fill="currentColor" />
+          </svg>
+          <span>{value}</span>
+        </span>
+      </button>
+    )
+  }
+
   return (
     <div className="flex items-start justify-between gap-[14px] py-[13px]">
       <span className="shrink-0 text-[13px] text-[var(--uc-text-muted)]">{label}</span>
@@ -29,6 +51,7 @@ export default function Evo2027BeneficiaryDetailScreen({
   onBack,
   onSendMoney,
   onTransactionClick,
+  onEditBeneficiary,
   isFavorite,
   onFavoriteToggle,
   sendMoneyDisabled = false,
@@ -37,11 +60,13 @@ export default function Evo2027BeneficiaryDetailScreen({
   onBack: () => void
   onSendMoney: () => void
   onTransactionClick: (payment: AccountTransaction) => void
+  onEditBeneficiary: () => void
   isFavorite: boolean
   onFavoriteToggle: () => void
   sendMoneyDisabled?: boolean
 }) {
   const country = useCountry()
+  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(48)
   const payments = getBeneficiaryPaymentHistory(person, country)
   const totalSent = payments.reduce((total, payment) => total + Math.abs(payment.amount), 0)
   const countryName = getRecipientCountry(country === 'BA_BL' ? 'BA' : country)?.name ?? country
@@ -51,7 +76,7 @@ export default function Evo2027BeneficiaryDetailScreen({
       className="flex h-full min-h-0 w-full flex-col bg-[var(--uc-app-bg)] text-[var(--uc-text)]"
       data-evo-beneficiary-detail
     >
-      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide">
+      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide" onScroll={handlePageScroll}>
         <PageHeader
           title={person.name}
           onBack={onBack}
@@ -59,6 +84,7 @@ export default function Evo2027BeneficiaryDetailScreen({
           showHelp={false}
           variant="gray"
           renderLargeTitle={false}
+          collapsedTitleProgress={headerProgress}
           rightActionIcon={<FavoriteStarIcon filled={isFavorite} />}
           rightActionLabel={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
           rightActionPressed={isFavorite}
@@ -79,7 +105,10 @@ export default function Evo2027BeneficiaryDetailScreen({
           >
             <FactRow
               label="Account"
-              value={country === 'CZ' ? `${person.paymentAccountNumber}/${person.paymentBankCode}` : person.accountNumber}
+              value={country === 'CZ'
+                ? `${person.paymentAccountPrefix ? `${person.paymentAccountPrefix}-` : ''}${person.paymentAccountNumber}/${person.paymentBankCode}`
+                : person.accountNumber}
+              onClick={onEditBeneficiary}
             />
             <div className="border-t border-[var(--uc-border-muted)]">
               <FactRow label="Bank" value={BANK_BADGES[person.bank].name} />

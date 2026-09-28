@@ -1059,6 +1059,9 @@ function ExpenseTransactionList({
   summary,
   country,
   scopeLabel,
+  accountScopeLabel,
+  onOpenScope,
+  showAccountScope,
   total,
   onTransactionClick,
 }: {
@@ -1066,6 +1069,9 @@ function ExpenseTransactionList({
   summary: SpendingAnalyticsSummary;
   country: CountryId;
   scopeLabel: string;
+  accountScopeLabel: string;
+  onOpenScope: () => void;
+  showAccountScope: boolean;
   /** Sum of what is listed below — set where the list is a filtered slice worth totalling. */
   total?: number;
   onTransactionClick?: (transaction: SpendingAnalyticsTransaction) => void;
@@ -1079,7 +1085,20 @@ function ExpenseTransactionList({
       <div className="flex items-end justify-between gap-[16px]">
         <div className="min-w-0">
           <h3 className="uc-type-l1 text-[var(--uc-text)]">Transactions</h3>
-          <p className="mt-[4px] text-[16px] leading-[20px] text-[var(--uc-text-muted)]">{scopeLabel}</p>
+          {showAccountScope ? (
+            <button
+              type="button"
+              data-evo-analytics-scope-trigger
+              aria-haspopup="dialog"
+              onClick={onOpenScope}
+              className="mt-[4px] inline-flex min-h-[32px] items-center gap-[4px] rounded-[8px] px-[4px] text-[16px] font-bold leading-[20px] text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+            >
+              <span>{accountScopeLabel}</span>
+              <AppIcon name="chevron-down-wide" size={18} color="currentColor" aria-hidden="true" />
+            </button>
+          ) : (
+            <p className="mt-[4px] text-[16px] leading-[20px] text-[var(--uc-text-muted)]">{scopeLabel}</p>
+          )}
         </div>
         {/* The figures belong beside what they add up: this list, under this filter. */}
         <div className="shrink-0 text-right">
@@ -1239,23 +1258,23 @@ function ExpenseSplitSelector({
   );
 }
 
-function ExpenseBreakdownRowIcon({ row }: { row: ExpenseBreakdownRow }) {
+function ExpenseBreakdownRowIcon({ row, size = 32 }: { row: ExpenseBreakdownRow; size?: number }) {
   if (row.category) {
-    return <PfmCategoryIcon category={row.category} size={32} variant="category-circle" />;
+    return <PfmCategoryIcon category={row.category} size={size} variant="category-circle" />;
   }
 
   if (row.currency) {
-    return <CurrencyBadge currency={row.currency} size={32} />;
+    return <CurrencyBadge currency={row.currency} size={size} />;
   }
 
   // A merchant row leads exactly as the statement does: the brand mark for a
   // card purchase, the counterparty initials for a payment, the account pair
   // for an own transfer, and the category icon only when there is no party.
   if (row.sample) {
-    return <TransactionAvatar transaction={row.sample} size={32} />;
+    return <TransactionAvatar transaction={row.sample} size={size} />;
   }
 
-  return <PfmCategoryIcon category="Uncategorized" size={32} variant="category-circle" />;
+  return <PfmCategoryIcon category="Uncategorized" size={size} variant="category-circle" />;
 }
 
 function ExpenseBreakdownList({
@@ -1369,11 +1388,22 @@ function ExpenseBreakdownDetail({
     : activeSubcategories.length === 1
       ? `${toSentenceCase(activeSubcategories[0]!.label)} ${flowWord}`
       : `${activeSubcategories.length} of ${subcategories.length} subcategories`;
+  const showAccountScopeWithTransactions = Boolean(row.sample);
 
   return (
     <div data-evo-analytics-breakdown={row.key}>
+      {row.sample?.merchantId ? (
+        <header className="flex flex-col items-center pt-[18px] text-center" data-evo-merchant-breakdown-header>
+          <ExpenseBreakdownRowIcon row={row} size={76} />
+          <h1 className="mt-[18px] font-['UniCredit',sans-serif] text-[29px] font-bold leading-[34px]">
+            {row.label}
+          </h1>
+        </header>
+      ) : null}
       {/* The same two rows the analysis page carries, minus the chart toggle. */}
-      <SpendingScopeRow className="mt-[4px]" scopeLabel={scopeLabel} onOpenScope={onOpenScope} />
+      {!showAccountScopeWithTransactions ? (
+        <SpendingScopeRow className="mt-[4px]" scopeLabel={scopeLabel} onOpenScope={onOpenScope} />
+      ) : null}
       <SpendingPeriodHeader
         className="mt-[8px]"
         period={period}
@@ -1413,6 +1443,9 @@ function ExpenseBreakdownDetail({
         summary={summary}
         country={country}
         scopeLabel={listLabel}
+        accountScopeLabel={scopeLabel}
+        onOpenScope={onOpenScope}
+        showAccountScope={showAccountScopeWithTransactions}
         total={total}
         onTransactionClick={onTransactionClick}
       />
@@ -2490,7 +2523,8 @@ export default function Evo2027AnalyticsScreen({
           compact
           collapsedTitleProgress={headerCollapseProgress}
           hideCollapsedTitleWhenHidden
-          leadingVisual={<ExpenseBreakdownRowIcon row={openBreakdownRow} />}
+          renderLargeTitle={!openBreakdownRow.sample?.merchantId}
+          leadingVisual={openBreakdownRow.sample?.merchantId ? undefined : <ExpenseBreakdownRowIcon row={openBreakdownRow} />}
         />
       ) : view === 'analysis' ? (
         <PageHeader
