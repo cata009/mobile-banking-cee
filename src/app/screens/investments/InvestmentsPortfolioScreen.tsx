@@ -113,6 +113,7 @@ const DISTRIBUTION_TITLE_TRANSLATION_KEYS: Record<Exclude<InvestmentPortfolioTab
 
 const CZ_ROBO_NAV_LABEL_OVERRIDES: Partial<Record<NavItem, string>> = {
   home: "Portfolio",
+  analytics: "Explore",
   investments: "Explore",
   payments: "Invest",
   products: "Activity",
@@ -121,6 +122,7 @@ const CZ_ROBO_NAV_LABEL_OVERRIDES: Partial<Record<NavItem, string>> = {
 
 const CZ_ROBO_NAV_ICON_OVERRIDES: Partial<Record<NavItem, IconName>> = {
   home: "chart-donut",
+  analytics: "investment-trend-up",
   payments: "invest-action",
   products: "investment-history",
 };
@@ -358,7 +360,8 @@ export default function InvestmentsPortfolioScreen({
   buyRequest,
   onBuyRequestConsumed,
 }: InvestmentsPortfolioScreenProps) {
-  const { country, amountsHidden } = useDemo();
+  const { country, amountsHidden, release } = useDemo();
+  const isEvo2027Release = release === "release-future-evo-2027";
   const { categories, formatProductAmount, getProductDisplayNumber, getProductIcon } = useProducts();
   const { t } = useLanguage();
   const { progress: headerProgress, onScroll: handlePageScroll, setProgress: setHeaderProgress } = useCollapsingHeader(64);
@@ -600,7 +603,7 @@ export default function InvestmentsPortfolioScreen({
       }
       if (tab === "analytics") {
         setCzRoboSection("explore");
-        onBottomNavigationChange?.(tab);
+        if (!isEvo2027Release) onBottomNavigationChange?.(tab);
         return;
       }
       if (tab === "products") {
@@ -863,7 +866,7 @@ export default function InvestmentsPortfolioScreen({
   }
 
   if (showBottomNavigation && czRoboSection === "explore") {
-    return wrapWithBottomNavigation("investments", (
+    return wrapWithBottomNavigation(isEvo2027Release ? "analytics" : "investments", (
       <CzRoboLevelOneShell title="Explore" onBack={onBack}>
         <div className="px-[24px] pt-[18px]">
           <p className="text-[16px] leading-[21px] text-[var(--uc-text)]">
