@@ -101,7 +101,7 @@ function PaymentsHeader({
                     onClick={onCustomiseClick}
                     className="flex size-[32px] items-center justify-center text-[var(--uc-icon)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
                   >
-                    <BeneficiaryEditIcon size={22} />
+                    <BeneficiaryEditIcon size={26} />
                   </button>
                 ) : null}
               </>

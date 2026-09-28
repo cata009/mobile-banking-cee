@@ -162,10 +162,10 @@ export default function Evo2027PaymentsHub({
   const labelFor = (action: HubAction) => t(`runtime.payments.hub.actions.${action.id}`, action.label);
 
   return (
-    <div className="flex flex-col gap-[24px] pt-[4px]">
+    <div className="flex flex-col pt-[4px]">
       {/* Search stays reachable while the beneficiaries scroll, the way Account
           details keeps its own field pinned. */}
-      <div className="sticky top-0 z-[9] shrink-0 bg-[var(--uc-app-bg)] px-[20px]">
+      <div className="sticky top-[4px] z-[9] shrink-0 bg-[var(--uc-app-bg)] px-[20px] pb-[24px]">
         <AccountSearchBar
           value={searchValue}
           onValueChange={setSearchValue}
@@ -197,7 +197,7 @@ export default function Evo2027PaymentsHub({
         </div>
       </section>
 
-      <section aria-label={t("runtime.payments.hub.recent", "Recent payments")} className="px-[20px]">
+      <section aria-label={t("runtime.payments.hub.recent", "Recent payments")} className="mt-[24px] px-[20px]">
         <h2 className="uc-type-l1 text-[var(--uc-text)]">
           {t("runtime.payments.hub.recipients", "Recipients")}
         </h2>
