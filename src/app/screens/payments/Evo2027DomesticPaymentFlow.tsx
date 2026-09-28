@@ -14,6 +14,7 @@ import { getPartyInitials, partyTint } from '@/app/components/transactions/Trans
 import type { BankId } from '@/app/config/bankLogos'
 import PageHeader from '@/app/components/PageHeader'
 import PrimaryButton from '@/app/components/PrimaryButton'
+import ToggleButton from '@/app/components/ToggleButton'
 import { useLanguage } from '@/app/contexts/LanguageContext'
 import { useCountry } from '@/app/state/demoStore'
 import { useProducts } from '@/hooks/useProducts'
@@ -90,6 +91,38 @@ function formatRecipientAccount(draft: DomesticPaymentDraft, homeCountry: Countr
       .join('')
   }
   return draft.accountNumber
+}
+
+function isSavedPaymentRecipient(draft: DomesticPaymentDraft, homeCountry: CountryId) {
+  const normalizedCountry = homeCountry === 'BA_BL' ? 'BA' : homeCountry
+  const recipientCountry = draft.recipientCountry ?? normalizedCountry
+  const recipientKind = draft.recipientKind ?? 'individual'
+  if (recipientCountry !== normalizedCountry || (draft.recipientAccountMode ?? 'local') !== 'local') return false
+
+  const savedBeneficiary = getFrequentBeneficiaries(homeCountry).some((person) =>
+    draft.beneficiaryName === person.name &&
+    recipientKind === person.recipientKind &&
+    draft.prefix === (person.paymentAccountPrefix ?? '') &&
+    draft.accountNumber === person.paymentAccountNumber &&
+    draft.bankCode === person.paymentBankCode &&
+    draft.currency === person.currency,
+  )
+  if (savedBeneficiary) return true
+
+  return getPaymentTemplates(homeCountry).some((template) => {
+    const beneficiaryName = template.id === 'family-savings' && homeCountry === 'CZ'
+      ? 'Marie Novotná'
+      : template.beneficiaryName
+    const templateRecipientKind = template.id === 'family-savings' ? 'individual' : 'business'
+    const accountNumber = template.accountNumber.replace(/\D/g, '').slice(-6)
+
+    return draft.beneficiaryName === beneficiaryName &&
+      recipientKind === templateRecipientKind &&
+      draft.prefix === '' &&
+      draft.accountNumber === accountNumber &&
+      draft.bankCode === template.bankCode &&
+      draft.currency === template.currency
+  })
 }
 
 function beneficiaryBankId(draft: DomesticPaymentDraft, homeCountry: CountryId): BankId | null {
@@ -242,7 +275,7 @@ function PaymentFxBreakdownContent({ quote }: { quote: PaymentFxQuote }) {
   const amount = (value: number, currency: string) => `${formatEvo2027Number(value)} ${currency}`
   return (
     <div className="pb-[12px]">
-      <div className="space-y-[20px] rounded-[18px] bg-[var(--uc-surface)] px-[16px] py-[20px] text-[14px]">
+      <div className="space-y-[20px] rounded-[20px] bg-[color-mix(in_srgb,var(--uc-text)_4%,var(--uc-surface))] px-[18px] py-[17px] text-[14px]">
         <div className="flex items-start justify-between gap-[12px]">
           <span className="text-[var(--uc-text-muted)]">Recipient gets</span>
           <span className="font-medium">{amount(quote.recipientAmount, quote.recipientCurrency)}</span>
@@ -304,7 +337,7 @@ export function Evo2027DomesticPaymentCreateScreen({
           payerBalance: `${formatEvo2027Number(initialPayer.balance)} ${initialPayer.currency}`,
         }
       : {}),
-    dueDate: draft.amount ? draft.dueDate : todayIso(),
+    dueDate: draft.instantPayment || !draft.amount ? todayIso() : draft.dueDate,
   })
   const [amountExpression, setAmountExpression] = useState(draft.amount.replace('.', ','))
   const [step, setStep] = useState<'recipient' | 'amount'>(
@@ -537,6 +570,7 @@ export function Evo2027DomesticPaymentCreateScreen({
   const hasOperator = /[+\-*/]/.test(amountExpression)
   const expressionComplete = Number.isFinite(evaluatedAmount)
   const fxRequired = Boolean(selectedPayerAccount && !sourceCurrencyMatchesPayment)
+  const canUseInstantPayment = !fxRequired && (recipientRoute === 'cz-domestic' || recipientRoute === 'ro-domestic')
   const fxQuote = fxRequired && expressionComplete && evaluatedAmount > 0 && selectedPayerAccount
     ? getPaymentFxQuote({
         recipientAmount: evaluatedAmount,
@@ -1042,7 +1076,7 @@ export function Evo2027DomesticPaymentCreateScreen({
             </div>
           </div>
           <div className="shrink-0 bg-[var(--uc-surface)] px-[24px] pb-[20px] pt-[8px]">
-            {form.dueDate !== todayIso() ? (
+            {!form.instantPayment && form.dueDate !== todayIso() ? (
               <p className="mb-[9px] text-center text-[12px] text-[var(--uc-text-muted)]">
                 Scheduled: <strong className="text-[var(--uc-text)]">{dueDateDisplay(form.dueDate)}</strong>
               </p>
@@ -1051,9 +1085,9 @@ export function Evo2027DomesticPaymentCreateScreen({
               <button
                 type="button"
                 onClick={() => setScheduleOpen(true)}
-                aria-label={`Payment date: ${dueDateDisplay(form.dueDate)}`}
-                title={`Payment date: ${dueDateDisplay(form.dueDate)}`}
-                className={`grid size-[48px] shrink-0 place-items-center rounded-[12px] border ${form.dueDate !== todayIso() ? 'border-transparent bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]' : 'border-[var(--uc-border-muted)] bg-[var(--uc-surface)] text-[var(--uc-text)]'}`}
+                aria-label={`Payment date: ${canUseInstantPayment && form.instantPayment ? 'Instant payment' : dueDateDisplay(form.dueDate)}`}
+                title={`Payment date: ${canUseInstantPayment && form.instantPayment ? 'Instant payment' : dueDateDisplay(form.dueDate)}`}
+                className={`grid size-[48px] shrink-0 place-items-center rounded-[12px] border ${!form.instantPayment && form.dueDate !== todayIso() ? 'border-transparent bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]' : 'border-[var(--uc-border-muted)] bg-[var(--uc-surface)] text-[var(--uc-text)]'}`}
               >
                 <CalendarDays size={22} />
               </button>
@@ -1494,18 +1528,47 @@ export function Evo2027DomesticPaymentCreateScreen({
       {scheduleOpen ? (
         <BottomSheet title="Payment date" onClose={() => setScheduleOpen(false)}>
           <div className="space-y-[16px] pb-[20px]">
-            <label htmlFor="evo-payment-date" className="block text-[13px] text-[var(--uc-text-muted)]">
-              Choose when to submit this payment.
-              <input
-                id="evo-payment-date"
-                aria-label="Payment date"
-                type="date"
-                min={todayIso()}
-                value={/^\d{4}-\d{2}-\d{2}$/.test(form.dueDate) ? form.dueDate : todayIso()}
-                onChange={(event) => update('dueDate', event.target.value)}
-                className={`${fieldClass} mt-[9px] block`}
-              />
-            </label>
+            {canUseInstantPayment ? (
+              <div className="flex items-center justify-between gap-[16px] rounded-[12px] bg-[color-mix(in_srgb,var(--uc-text)_4%,var(--uc-surface))] px-[16px] py-[14px]">
+                <div>
+                  <p className="text-[14px] font-semibold text-[var(--uc-text)]">Instant payment</p>
+                  <p className="mt-[3px] text-[12px] leading-[17px] text-[var(--uc-text-muted)]">
+                    Send as soon as the payment is confirmed.
+                  </p>
+                </div>
+                <ToggleButton
+                  ariaLabel="Instant payment"
+                  checked={form.instantPayment}
+                  onToggle={(instantPayment) => setForm((current) => ({
+                    ...current,
+                    instantPayment,
+                    dueDate: instantPayment ? todayIso() : current.dueDate,
+                  }))}
+                />
+              </div>
+            ) : null}
+            {canUseInstantPayment && form.instantPayment ? (
+              <p className="text-[13px] leading-[19px] text-[var(--uc-text-muted)]">
+                This payment will be sent immediately.
+              </p>
+            ) : (
+              <label htmlFor="evo-payment-date" className="block text-[13px] text-[var(--uc-text-muted)]">
+                Choose when to submit this payment.
+                <input
+                  id="evo-payment-date"
+                  aria-label="Payment date"
+                  type="date"
+                  min={todayIso()}
+                  value={/^\d{4}-\d{2}-\d{2}$/.test(form.dueDate) ? form.dueDate : todayIso()}
+                  onChange={(event) => setForm((current) => ({
+                    ...current,
+                    dueDate: event.target.value,
+                    instantPayment: false,
+                  }))}
+                  className={`${fieldClass} mt-[9px] block`}
+                />
+              </label>
+            )}
             <FlowButton onClick={() => setScheduleOpen(false)}>Done</FlowButton>
           </div>
         </BottomSheet>
@@ -1553,7 +1616,6 @@ export function Evo2027PaymentReviewScreen({
   const { t } = useLanguage()
   const country = useCountry()
   const { categories } = useProducts()
-  const [trusted, setTrusted] = useState(false)
   const [infoOpen, setInfoOpen] = useState(false)
   const [fxBreakdownOpen, setFxBreakdownOpen] = useState(false)
   const [editField, setEditField] = useState<'reference' | 'note' | null>(null)
@@ -1583,6 +1645,11 @@ export function Evo2027PaymentReviewScreen({
     : null
   const recipientRoute = resolveRecipientRoute(country, draft.recipientCountry ?? country, draft.currency)
   const isForeignRoute = recipientRoute === 'foreign-us' || recipientRoute === 'foreign-cn'
+  const canContinueToSign =
+    (recipientRoute === 'cz-domestic' || recipientRoute === 'ro-domestic') && (!fxRequired || Boolean(fxQuote))
+  const requiresBankQuote = isForeignRoute || (fxRequired && !fxQuote)
+  const canUseInstantPayment = !fxRequired && (recipientRoute === 'cz-domestic' || recipientRoute === 'ro-domestic')
+  const savedRecipient = isSavedPaymentRecipient(draft, country)
   const bankName =
     draft.bankName ||
     (recipientRoute === 'cz-domestic'
@@ -1598,37 +1665,21 @@ export function Evo2027PaymentReviewScreen({
       <FlowTop
         title={t('runtime.payments.evo.reviewTitle', 'Review transfer')}
         onBack={onBack}
-        rightAction={<BeneficiaryAvatar draft={draft} homeCountry={country} />}
-        onRightActionClick={() => setInfoOpen(true)}
       />
-      <div className="min-h-0 flex-1 overflow-y-auto px-[20px] pb-[15px] pt-[54px] scrollbar-hide">
-        <div className="mb-[23px] mt-[17px] text-center">
-          <h1 className="font-['UniCredit',sans-serif] text-[43px] font-bold leading-[50px]">
-            {formattedAmount}
-          </h1>
-          {fxQuote ? (
-            <button
-              type="button"
-              onClick={() => setFxBreakdownOpen(true)}
-              aria-label="View payment breakdown"
-              className="mx-auto mt-[5px] flex items-center gap-[6px] text-[14px] text-[var(--uc-text-muted)]"
-            >
-              <Info size={16} />
-              ≈ {formatEvo2027Number(fxQuote.totalSourceAmount)} {fxQuote.sourceCurrency}
-            </button>
-          ) : null}
-        </div>
+      <div className="min-h-0 flex-1 overflow-y-auto px-[20px] pb-[15px] pt-[24px] scrollbar-hide">
         <div className="space-y-[12px]">
-          <section className={cardClass}>
-            <div className="flex items-start gap-[12px]">
-              <span className="flex-1 text-[15px] font-semibold leading-[20px]">Do you know and trust the payee?</span>
-              <AlertTriangle size={21} className="shrink-0 text-[var(--uc-orange-main)]" />
-            </div>
-            <p className="mt-[8px] text-[13px] leading-[19px] text-[var(--uc-text-muted)]">
-              If you are unsure, check the recipient’s details before sending. Fraudsters can impersonate people and
-              businesses.
-            </p>
-          </section>
+          {!savedRecipient ? (
+            <section className={cardClass}>
+              <div className="flex items-start gap-[12px]">
+                <span className="flex-1 text-[15px] font-semibold leading-[20px]">Do you know and trust the payee?</span>
+                <AlertTriangle size={21} className="shrink-0 text-[var(--uc-orange-main)]" />
+              </div>
+              <p className="mt-[8px] text-[13px] leading-[19px] text-[var(--uc-text-muted)]">
+                If you are unsure, check the recipient’s details before sending. Fraudsters can impersonate people and
+                businesses.
+              </p>
+            </section>
+          ) : null}
           {recipientRoute === 'sepa-eur' ? (
             <section className={cardClass}>
               <p className="text-[13px] font-semibold">Recipient verification required</p>
@@ -1690,7 +1741,9 @@ export function Evo2027PaymentReviewScreen({
           </section>
           <section className={`${cardClass} flex items-center justify-between gap-[10px]`}>
             <span className="text-[13px] text-[var(--uc-text-muted)]">Payment date</span>
-            <span className="text-right text-[13px] font-medium">{dueDateDisplay(draft.dueDate)}</span>
+            <span className="text-right text-[13px] font-medium">
+              {canUseInstantPayment && draft.instantPayment ? 'Instant' : dueDateDisplay(draft.dueDate)}
+            </span>
           </section>
           <section className="overflow-hidden rounded-[20px] bg-[color-mix(in_srgb,var(--uc-text)_4%,var(--uc-surface))] px-[18px]">
             <button
@@ -1774,41 +1827,15 @@ export function Evo2027PaymentReviewScreen({
               </>
             )}
           </section>
-          {!fxRequired && (recipientRoute === 'cz-domestic' || recipientRoute === 'ro-domestic') ? (
-            <section className="rounded-[20px] bg-[color-mix(in_srgb,var(--uc-text)_4%,var(--uc-surface))] px-[18px]">
-              <label htmlFor="evo-review-instant-payment" className="flex cursor-pointer items-center justify-between gap-[10px] py-[17px]">
-                <span className="text-[13px]">Instant payment</span>
-                <input
-                  id="evo-review-instant-payment"
-                  aria-label="Instant payment"
-                  type="checkbox"
-                  checked={draft.instantPayment}
-                  onChange={(event) => onDraftChange({ ...draft, instantPayment: event.target.checked })}
-                  className="size-[20px] accent-[var(--uc-action-strong)]"
-                />
-              </label>
-              <label htmlFor="evo-trusted-recipient" className="flex cursor-pointer items-center justify-between gap-[10px] border-t border-[var(--uc-border-muted)] py-[17px]">
-                <span className="text-[13px]">Add to trusted recipients</span>
-                <input
-                  id="evo-trusted-recipient"
-                  aria-label="Add to trusted recipients"
-                  type="checkbox"
-                  checked={trusted}
-                  onChange={(event) => setTrusted(event.target.checked)}
-                  className="size-[20px] accent-[var(--uc-action-strong)]"
-                />
-              </label>
-            </section>
-          ) : null}
         </div>
       </div>
       <div className="shrink-0 bg-[var(--uc-surface)] px-[24px] pb-[42px] pt-[10px]">
-        {fxRequired || isForeignRoute ? (
+        {requiresBankQuote ? (
           <p className="mb-[9px] text-center text-[12px] text-[var(--uc-text-muted)]">
             A current bank quote is required before signing.
           </p>
         ) : null}
-        <FlowButton disabled={fxRequired || (recipientRoute !== 'cz-domestic' && recipientRoute !== 'ro-domestic')} onClick={onSign}>
+        <FlowButton disabled={!canContinueToSign} onClick={onSign}>
           Continue to sign
         </FlowButton>
       </div>
