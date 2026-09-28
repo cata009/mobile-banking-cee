@@ -854,6 +854,8 @@ function GoalDetail({
           currency="CZK"
           amountsHidden={false}
           compact
+          czRoboPresentation
+          showVerticalGridLines={false}
         />
         <InvestmentPeriodChips
           periods={GOAL_DETAIL_PERIODS}

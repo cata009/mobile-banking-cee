@@ -16,6 +16,7 @@ interface PageHeaderProps {
   includeSafeArea?: boolean;
   rightActionIcon?: ReactNode;
   rightActionLabel?: string;
+  rightActionPressed?: boolean;
   backIconName?: IconName;
   backLabel?: string;
   largeTitleAlign?: "left" | "center";
@@ -25,6 +26,7 @@ interface PageHeaderProps {
   leadingVisual?: ReactNode;
   /** Rendered under the large title — a total, a count, whatever names the page's figures. */
   subtitle?: ReactNode;
+  headerSubtitle?: ReactNode;
 }
 
 export default function PageHeader({
@@ -41,6 +43,7 @@ export default function PageHeader({
   includeSafeArea = false,
   rightActionIcon,
   rightActionLabel = "Action",
+  rightActionPressed,
   backIconName = "back-heavy",
   backLabel = "Back",
   largeTitleAlign = "left",
@@ -48,6 +51,7 @@ export default function PageHeader({
   hideCollapsedTitleWhenHidden = false,
   leadingVisual,
   subtitle,
+  headerSubtitle,
 }: PageHeaderProps) {
   const iconColor = variant === "dark" ? "white" : "var(--uc-text)";
   const textColor = variant === "dark" ? "text-[var(--uc-static-white)]" : "text-[var(--uc-text)]";
@@ -95,6 +99,7 @@ export default function PageHeader({
       className="flex h-[40px] w-[40px] self-center cursor-pointer items-center justify-center"
       style={{ padding: "8px 7.998px 7.997px 7.998px" }}
       aria-label={rightActionLabel}
+      aria-pressed={rightActionPressed}
       title={rightActionLabel}
     >
       {rightActionIcon}
@@ -136,16 +141,21 @@ export default function PageHeader({
             <div className="h-[40px] w-[40px]" />
           )}
 
-          <h1
-            className={cn("uc-type-n4-strong pointer-events-none truncate text-center", textColor)}
+          <div
+            className="pointer-events-none min-w-0 text-center"
             aria-hidden={hideCollapsedTitleWhenHidden && titleProgress === 0}
             style={{
               opacity: titleProgress,
               transform: `translateY(${(1 - titleProgress) * 6}px)`,
             }}
           >
-            {title}
-          </h1>
+            <h1 className={cn("uc-type-n4-strong truncate", textColor)}>{title}</h1>
+            {headerSubtitle ? (
+              <p className="mt-[2px] truncate text-[12px] leading-[16px] text-[var(--uc-text-muted)]">
+                {headerSubtitle}
+              </p>
+            ) : null}
+          </div>
 
           {rightAction}
         </div>

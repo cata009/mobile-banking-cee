@@ -11,6 +11,7 @@ import {
 import type { InvestmentChartPoint } from "@/app/config/investmentsPortfolioConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import { formatInvestmentMoney } from "@/app/utils/investmentAmountFormatting";
+import { buildInvestmentTimeline, formatInvestmentTimelineTick } from "./investmentChartTimeline";
 
 const INVESTMENT_POSITIVE_COLOR = "var(--uc-green-olive)";
 
@@ -23,6 +24,7 @@ interface InvestmentPortfolioChartProps {
   showVerticalGridLines?: boolean;
   edgeToEdge?: boolean;
   tightBottomPadding?: boolean;
+  czRoboPresentation?: boolean;
 }
 
 interface ActivePointState {
@@ -35,6 +37,7 @@ interface ActivePointState {
 }
 
 interface ChartDatum extends InvestmentChartPoint {
+  timestamp?: number;
   index: number;
   performanceAmount: number;
   performancePercent: number;
@@ -61,6 +64,7 @@ interface RuntimeAxisTickAdapter {
   y?: unknown;
   payload?: {
     index?: unknown;
+    value?: unknown;
   };
 }
 
@@ -128,6 +132,7 @@ function getActivePointFromChartEvent(event: unknown): ActivePointState | null {
 function getNearestPointFromTouch(
   event: TouchEvent<HTMLDivElement>,
   chartData: readonly ChartDatum[],
+  temporal = false,
 ): ActivePointState | null {
   const touch = event.touches[0];
   const surface = event.currentTarget.querySelector(".recharts-surface");
@@ -135,13 +140,24 @@ function getNearestPointFromTouch(
   if (!touch || !surface || chartData.length === 0) return null;
 
   const rect = surface.getBoundingClientRect();
-  const plotLeft = 44;
-  const plotRight = rect.width - 10;
+  const surfaceWidth = Number(surface.getAttribute("width")) || rect.width;
+  const xAxis = surface.querySelector(".recharts-xAxis .recharts-cartesian-axis-ticks");
+  const tickGroups = xAxis?.querySelectorAll(".recharts-cartesian-axis-tick");
+  const firstTick = tickGroups?.[0]?.querySelector("g")?.getAttribute("transform");
+  const lastTick = tickGroups?.[tickGroups.length - 1]?.querySelector("g")?.getAttribute("transform");
+  const plotLeft = temporal ? Number(firstTick?.match(/translate\(([^,]+)/)?.[1] ?? 66) : 44;
+  const plotRight = temporal ? Number(lastTick?.match(/translate\(([^,]+)/)?.[1] ?? surfaceWidth - 26) : rect.width - 10;
   const plotTop = 8;
   const plotBottom = rect.height - 36;
-  const relativeX = Math.min(plotRight, Math.max(plotLeft, touch.clientX - rect.left));
+  const touchX = (touch.clientX - rect.left) * (temporal && rect.width ? surfaceWidth / rect.width : 1);
+  const relativeX = Math.min(plotRight, Math.max(plotLeft, touchX));
   const step = (plotRight - plotLeft) / Math.max(1, chartData.length - 1);
-  const index = Math.min(chartData.length - 1, Math.max(0, Math.round((relativeX - plotLeft) / step)));
+  const start = chartData[0]?.timestamp ?? 0;
+  const span = (chartData.at(-1)?.timestamp ?? 1) - start || 1;
+  const targetTime = start + ((relativeX - plotLeft) / (plotRight - plotLeft)) * span;
+  const index = temporal
+    ? chartData.reduce((nearest, point, i) => Math.abs((point.timestamp ?? 0) - targetTime) < Math.abs((chartData[nearest]?.timestamp ?? 0) - targetTime) ? i : nearest, 0)
+    : Math.min(chartData.length - 1, Math.max(0, Math.round((relativeX - plotLeft) / step)));
   const point = chartData[index];
 
   if (!point) return null;
@@ -150,7 +166,7 @@ function getNearestPointFromTouch(
     point,
     index,
     coordinate: {
-      x: plotLeft + step * index,
+      x: temporal ? plotLeft + (((point.timestamp ?? 0) - start) / span) * (plotRight - plotLeft) : plotLeft + step * index,
       y: Math.min(plotBottom, Math.max(plotTop, touch.clientY - rect.top)),
     },
   };
@@ -230,6 +246,7 @@ export default function InvestmentPortfolioChart({
   showVerticalGridLines = true,
   edgeToEdge = false,
   tightBottomPadding = false,
+  czRoboPresentation = false,
 }: InvestmentPortfolioChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);
   const [activePoint, setActivePoint] = useState<ActivePointState | null>(null);
@@ -238,7 +255,19 @@ export default function InvestmentPortfolioChart({
   const minValue = Math.min(...values);
   const maxValue = Math.max(...values);
   const valueRange = maxValue - minValue || 1;
-  const chartData = useMemo(() => buildChartData(points), [points]);
+  const chartData = useMemo(() => {
+    const data = buildChartData(points);
+    if (!czRoboPresentation) return data;
+    const timeline = buildInvestmentTimeline(points);
+    return data.map((point, index) => {
+      const timestamp = timeline[index] ?? 0;
+      const date = formatInvestmentTimelineTick(timestamp);
+      return { ...point, timestamp, label: `${date.dateLabel} ${date.yearLabel}` };
+    });
+  }, [points, czRoboPresentation]);
+  const timeStart = chartData[0]?.timestamp ?? 0;
+  const timeEnd = chartData.at(-1)?.timestamp ?? 1;
+  const timeTicks = [0, 1, 2, 3].map((step) => timeStart + (timeEnd - timeStart) * step / 3);
   const verticalGridLines = useMemo(
     () => showVerticalGridLines
       ? chartData.filter((point) => point.showDot !== false && point.dateLabel).map((point) => point.label)
@@ -272,7 +301,13 @@ export default function InvestmentPortfolioChart({
   useEffect(() => {
     setActivePoint(null);
     setIsPointerActive(false);
-  }, [points]);
+    if (!czRoboPresentation || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const animation = chartRef.current?.animate?.([{ opacity: 0.45 }, { opacity: 1 }], {
+      duration: 220,
+      easing: "cubic-bezier(0.2, 0, 0, 1)",
+    });
+    return () => animation?.cancel();
+  }, [points, czRoboPresentation]);
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
@@ -295,11 +330,11 @@ export default function InvestmentPortfolioChart({
       onTouchCancel={clearActivePoint}
       onTouchEnd={clearActivePoint}
       onTouchMove={(event) => {
-        selectActivePoint(getNearestPointFromTouch(event, chartData));
+        selectActivePoint(getNearestPointFromTouch(event, chartData, czRoboPresentation));
       }}
       onTouchStart={(event) => {
         setIsPointerActive(true);
-        selectActivePoint(getNearestPointFromTouch(event, chartData));
+        selectActivePoint(getNearestPointFromTouch(event, chartData, czRoboPresentation));
       }}
     >
       <ResponsiveContainer width="100%" height="100%">
@@ -326,26 +361,31 @@ export default function InvestmentPortfolioChart({
             </linearGradient>
           </defs>
           <XAxis
-            dataKey="label"
+            dataKey={czRoboPresentation ? "timestamp" : "label"}
+            type={czRoboPresentation ? "number" : "category"}
+            domain={czRoboPresentation ? [timeStart, timeEnd] : undefined}
+            ticks={czRoboPresentation ? timeTicks : undefined}
             interval={0}
             axisLine={false}
             tickLine={false}
             height={compact ? 38 : 42}
-            padding={compact
+            padding={czRoboPresentation ? { left: 22, right: 22 } : compact
               ? { left: 18, right: edgeToEdge ? 0 : 18 }
               : { left: 24, right: edgeToEdge ? 0 : 24 }}
             tick={(tickProps: RuntimeAxisTickAdapter) => {
               const { x, y, payload } = tickProps;
               const index = typeof payload?.index === "number" ? payload.index : -1;
-              const point = chartData[index] ?? chartData[0];
+              const point = czRoboPresentation && typeof payload?.value === "number"
+                ? formatInvestmentTimelineTick(payload.value)
+                : chartData[index] ?? chartData[0];
               if (!point) return <g aria-hidden="true" />;
               const tickX = typeof x === "number" ? x : 0;
               const tickY = typeof y === "number" ? y : 0;
-              const textAnchor = edgeToEdge && index === chartData.length - 1 ? "end" : "middle";
+              const textAnchor = !czRoboPresentation && edgeToEdge && index === chartData.length - 1 ? "end" : "middle";
 
               return (
                 <g transform={`translate(${tickX},${tickY + 10})`}>
-                  <text textAnchor={textAnchor} fill="var(--uc-text-muted)" fontSize={compact ? 10 : 12} fontWeight={700}>
+                  <text textAnchor={textAnchor} fill="var(--uc-text-muted)" fontSize={czRoboPresentation ? 11 : compact ? 10 : 12} fontWeight={700}>
                     <tspan x={0} dy={0}>{point.dateLabel}</tspan>
                     <tspan x={0} dy={compact ? 12 : 14}>{point.yearLabel}</tspan>
                   </text>
@@ -380,6 +420,7 @@ export default function InvestmentPortfolioChart({
             />
           ))}
           <Area
+            isAnimationActive={czRoboPresentation ? false : undefined}
             type="monotone"
             dataKey="value"
             fill="url(#investmentChartFill)"

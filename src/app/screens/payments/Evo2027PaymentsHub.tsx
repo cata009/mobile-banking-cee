@@ -1,13 +1,13 @@
 import { useState } from "react";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
-import BankBadge from "@/app/components/payments/BankBadge";
+import BeneficiaryAvatar from "@/app/components/payments/BeneficiaryAvatar";
+import FavoriteStarIcon from "@/app/components/payments/FavoriteStarIcon";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import ToggleButton from "@/app/components/ToggleButton";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useCountry } from "@/app/state/demoStore";
 import { formatEvo2027Amount } from "@/app/utils/evo2027Formatting";
-import { getPartyInitials, partyTint } from "@/app/components/transactions/TransactionPartyAvatar";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import { getFrequentBeneficiaries, type FrequentBeneficiary } from "@/data/paymentsHub";
 
@@ -43,7 +43,7 @@ const GRID_LIMIT = 8;
  * higher than their neighbours.
  */
 const HUB_ACTIONS: readonly HubAction[] = [
-  { id: "new-payment", label: "Domestic\npayment", icon: "new-payment-domestic" },
+  { id: "new-payment", label: "New\nPayment", icon: "new-payment-domestic" },
   { id: "between-accounts", label: "Move\nmoney", icon: "transaction-transfer" },
   { id: "scan-pay", label: "Scan &\npay", icon: "payment-scan-qr" },
   { id: "recurrent-payments", label: "Recurrent\npayments", icon: "payment-recurrent" },
@@ -108,6 +108,7 @@ export interface Evo2027PaymentsHubProps {
   onBeneficiarySelect: (beneficiary: FrequentBeneficiary) => void;
   /** Actions the current banking scenario cannot start, with the reason to show. */
   disabledReasons?: Map<PaymentsHubActionId, string>;
+  favoriteBeneficiaryIds?: readonly string[];
   /** The header pencil owns the editor; the hub owns what it edits. */
   editOpen?: boolean;
   onEditClose?: () => void;
@@ -126,6 +127,7 @@ export default function Evo2027PaymentsHub({
   onAction,
   onBeneficiarySelect,
   disabledReasons,
+  favoriteBeneficiaryIds = [],
   editOpen = false,
   onEditClose,
 }: Evo2027PaymentsHubProps) {
@@ -148,11 +150,16 @@ export default function Evo2027PaymentsHub({
   };
 
   const normalizedSearch = searchValue.trim().toLocaleLowerCase();
-  const beneficiaries = getFrequentBeneficiaries(country).filter((person) => (
-    !normalizedSearch
-    || person.name.toLocaleLowerCase().includes(normalizedSearch)
-    || person.accountNumber.toLocaleLowerCase().includes(normalizedSearch)
-  ));
+  const beneficiaries = getFrequentBeneficiaries(country)
+    .filter((person) => (
+      !normalizedSearch
+      || person.name.toLocaleLowerCase().includes(normalizedSearch)
+      || person.accountNumber.toLocaleLowerCase().includes(normalizedSearch)
+    ))
+    .sort((left, right) => (right.lastPaidAt ?? '').localeCompare(left.lastPaidAt ?? ''));
+  const favoriteIds = new Set(favoriteBeneficiaryIds);
+  const favoriteBeneficiaries = beneficiaries.filter((person) => favoriteIds.has(person.id));
+  const recentBeneficiaries = beneficiaries.filter((person) => !favoriteIds.has(person.id));
 
   const labelFor = (action: HubAction) => t(`runtime.payments.hub.actions.${action.id}`, action.label);
 
@@ -195,7 +202,7 @@ export default function Evo2027PaymentsHub({
 
       <section aria-label={t("runtime.payments.hub.recent", "Recent payments")} className="px-[20px]">
         <h2 className="uc-type-l1 text-[var(--uc-text)]">
-          {t("runtime.payments.hub.recent", "Recent payments")}
+          {t("runtime.payments.hub.recipients", "Recipients")}
         </h2>
 
         {beneficiaries.length === 0 ? (
@@ -203,15 +210,36 @@ export default function Evo2027PaymentsHub({
             {t("runtime.payments.hub.noBeneficiaries", "Nobody matches this search")}
           </p>
         ) : (
-          <div className="mt-[12px] overflow-hidden rounded-[8px] bg-[var(--uc-surface)] shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)]">
-            {beneficiaries.map((person, index) => (
-              <BeneficiaryRow
-                key={person.id}
-                person={person}
-                withDivider={index > 0}
-                onSelect={() => onBeneficiarySelect(person)}
-              />
-            ))}
+          <div className="mt-[12px] flex flex-col gap-[16px]">
+            {favoriteBeneficiaries.length > 0 ? (
+              <section aria-label={t("runtime.payments.hub.favoriteBeneficiaries", "Favorite beneficiaries")} data-favorite-beneficiaries>
+                <div className="overflow-hidden rounded-[8px] bg-[var(--uc-surface)] shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)]">
+                  {favoriteBeneficiaries.map((person, index) => (
+                    <BeneficiaryRow
+                      key={person.id}
+                      person={person}
+                      isFavorite
+                      withDivider={index > 0}
+                      onSelect={() => onBeneficiarySelect(person)}
+                    />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {recentBeneficiaries.length > 0 ? (
+              <div className="overflow-hidden rounded-[8px] bg-[var(--uc-surface)] shadow-[0_1px_1px_rgb(var(--uc-shadow-rgb)/0.04)]">
+                {recentBeneficiaries.map((person, index) => (
+                  <BeneficiaryRow
+                    key={person.id}
+                    person={person}
+                    isFavorite={false}
+                    withDivider={index > 0}
+                    onSelect={() => onBeneficiarySelect(person)}
+                  />
+                ))}
+              </div>
+            ) : null}
           </div>
         )}
       </section>
@@ -453,16 +481,17 @@ function HubTile({
 
 function BeneficiaryRow({
   person,
+  isFavorite,
   withDivider,
   onSelect,
 }: {
   person: FrequentBeneficiary;
+  isFavorite: boolean;
   withDivider: boolean;
   onSelect: () => void;
 }) {
   const { t } = useLanguage();
   const amount = formatEvo2027Amount(person.lastAmount, person.currency);
-  const initials = getPartyInitials(person.name);
 
   return (
     <button
@@ -474,18 +503,7 @@ function BeneficiaryRow({
     >
       {/* Same anatomy as a transaction avatar: the roundel identifies the party,
           the badge on its corner says where the money lands. */}
-      <span aria-hidden="true" className="relative inline-flex size-[40px] shrink-0 items-center justify-center">
-        <span
-          aria-hidden="true"
-          className="grid size-full place-items-center rounded-full text-[14px] font-bold leading-none tracking-[0.01em] text-[var(--uc-static-white)]"
-          style={{ backgroundColor: partyTint(person.name) }}
-        >
-          {initials}
-        </span>
-        <span className="absolute" style={{ right: -1, bottom: -1 }}>
-          <BankBadge bank={person.bank} />
-        </span>
-      </span>
+      <BeneficiaryAvatar name={person.name} bank={person.bank} />
 
       {/* What was paid belongs under the name, the way a chat thread reads; the
           account number is detail for the payment screen, not for this list. */}
@@ -497,8 +515,13 @@ function BeneficiaryRow({
         </span>
       </span>
 
-      <span className="shrink-0 whitespace-nowrap text-[14px] leading-[18px] text-[var(--uc-text-muted)]">
-        {person.lastPaidLabel}
+      <span className="flex shrink-0 flex-col items-end gap-[3px] whitespace-nowrap text-[14px] leading-[18px] text-[var(--uc-text-muted)]">
+        <span>{person.lastPaidLabel}</span>
+        {isFavorite ? (
+          <span data-favorite-beneficiary-indicator className="leading-none text-[var(--uc-text)]">
+            <FavoriteStarIcon filled size={14} />
+          </span>
+        ) : null}
       </span>
     </button>
   );

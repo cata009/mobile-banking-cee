@@ -5,6 +5,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import InvestmentDistributionChart from '@/app/components/investments/InvestmentDistributionChart'
 import InvestmentPortfolioChart from '@/app/components/investments/InvestmentPortfolioChart'
+import { buildInvestmentChartPoints, INVESTMENT_PERIODS } from '@/app/config/investmentsPortfolioConfig'
 import type {
   InvestmentChartPoint,
   InvestmentDistributionItem,
@@ -101,6 +102,31 @@ beforeAll(() => {
 afterEach(cleanup)
 
 describe('InvestmentPortfolioChart', () => {
+  it('keeps CZ Robo ticks evenly spaced and points available through every period change', async () => {
+    vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: true })))
+    const view = (period: (typeof INVESTMENT_PERIODS)[number]['id']) => (
+      <InvestmentPortfolioChart points={buildInvestmentChartPoints(42500, period)} country="CZ" currency="CZK" amountsHidden={false} czRoboPresentation showVerticalGridLines={false} />
+    )
+    const { container, rerender } = render(view('max'))
+    for (const period of INVESTMENT_PERIODS) {
+      rerender(view(period.id))
+      const dots = await getPortfolioDots(container)
+      expect(dots).toHaveLength(6)
+      const ticks = Array.from(container.querySelectorAll('.recharts-xAxis .recharts-cartesian-axis-tick > g'))
+      expect(ticks).toHaveLength(4)
+      const xs = ticks.map(tick => Number(tick.getAttribute('transform')?.match(/translate\(([^,]+)/)?.[1]))
+      const step = xs[1]! - xs[0]!
+      expect(xs[2]! - xs[1]!).toBeCloseTo(step)
+      expect(xs[3]! - xs[2]!).toBeCloseTo(step)
+      fireEvent.pointerDown(dots[5]!)
+      expectTooltip('04 Jun 2026')
+      fireEvent.pointerUp(dots[5]!)
+      expect(container.innerHTML).not.toMatch(/NaN|Infinity/)
+    }
+    vi.unstubAllGlobals()
+    vi.stubGlobal('ResizeObserver', TestResizeObserver)
+  })
+
   it('shows the pressed point until pointer release and clears it on an outside press', async () => {
     const { container } = renderPortfolio()
     const dots = await getPortfolioDots(container)

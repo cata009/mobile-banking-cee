@@ -1,4 +1,5 @@
 import { FormEvent, ReactNode, CSSProperties, useEffect, useState } from "react";
+import { shouldUseLocalAccess } from "./accessGatePolicy";
 
 type AccessGateProps = {
   children: ReactNode;
@@ -8,8 +9,12 @@ type AccessStatus = "checking" | "locked" | "unlocked";
 
 const LOCAL_ACCESS_KEY = "mb-local-access";
 const SHARE_ACCESS_PARAM = "access_token";
-const LOCAL_DEV_PASSWORD = import.meta.env.DEV ? import.meta.env.VITE_LOCAL_ACCESS_PASSWORD || "" : "";
-const LOCAL_SHARE_ACCESS_TOKEN = import.meta.env.DEV
+const USE_LOCAL_ACCESS = shouldUseLocalAccess({
+  isDev: import.meta.env.DEV,
+  hostname: window.location.hostname,
+});
+const LOCAL_DEV_PASSWORD = USE_LOCAL_ACCESS ? import.meta.env.VITE_LOCAL_ACCESS_PASSWORD || "" : "";
+const LOCAL_SHARE_ACCESS_TOKEN = USE_LOCAL_ACCESS
   ? import.meta.env.VITE_LOCAL_SHARE_ACCESS_TOKEN || ""
   : "";
 const ONE_MONTH_MS = 31 * 24 * 60 * 60 * 1000;
@@ -139,7 +144,7 @@ export default function AccessGate({ children }: AccessGateProps) {
     const checkAccess = async () => {
       const shareToken = readShareAccessToken();
 
-      if (import.meta.env.DEV) {
+      if (USE_LOCAL_ACCESS) {
         setUsesLocalFallback(true);
 
         if (shareToken) {

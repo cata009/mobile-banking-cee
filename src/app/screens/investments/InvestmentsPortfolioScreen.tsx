@@ -1062,6 +1062,7 @@ export default function InvestmentsPortfolioScreen({
                 showVerticalGridLines={!showBottomNavigation}
                 edgeToEdge={showBottomNavigation}
                 tightBottomPadding={showBottomNavigation}
+                czRoboPresentation={showBottomNavigation && country === "CZ"}
               />
               <InvestmentPeriodChips
                 periods={INVESTMENT_PERIODS}

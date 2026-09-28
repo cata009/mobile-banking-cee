@@ -6,11 +6,25 @@ import { getPfmCategory, normalizePfmCategory } from "@/data/pfmCategories";
 import type { PfmCategoryName } from "@/data/pfmCategories";
 import type { Product } from "@/data/products";
 import type { PaymentTemplateSelection } from "@/data/paymentTemplates";
+import type { UsBankDetailsMode } from "@/data/paymentRecipientRules";
 
 export type DomesticPaymentEntry = "new" | "redo";
 
 export interface DomesticPaymentDraft {
   entry: DomesticPaymentEntry;
+  recipientCountry?: string;
+  recipientAccountMode?: "local" | "iban";
+  recipientKind?: "individual" | "business";
+  recipientEmail?: string;
+  bankSwift?: string;
+  usBankDetailsMode?: UsBankDetailsMode;
+  routingNumber?: string;
+  cnapsCode?: string;
+  recipientStreet?: string;
+  recipientCity?: string;
+  recipientRegion?: string;
+  recipientPostalCode?: string;
+  paymentPurpose?: string;
   payerAccountName: string;
   payerAccountNumber: string;
   payerBalance: string;
@@ -186,10 +200,10 @@ export function createTransactionDetailData(
     accountTitle: product?.name || "Primary Account",
     accountOwner: "John Snow",
     beneficiaryName: transaction.label,
-    beneficiaryBankName: COUNTRY_BANK_NAMES[country],
-    beneficiaryAccountNumber: beneficiaryAccount(country),
+    beneficiaryBankName: transaction.beneficiaryBankName ?? COUNTRY_BANK_NAMES[country],
+    beneficiaryAccountNumber: transaction.beneficiaryAccountNumber ?? beneficiaryAccount(country),
     paymentDetails: transaction.details || `Payment ${transaction.month.toLowerCase()} - ${transaction.label}`,
-    referenceNumber: "6041300502",
+    referenceNumber: transaction.referenceNumber ?? "6041300502",
   };
 }
 
@@ -201,6 +215,9 @@ export function createRedoDomesticPaymentDraft(
   const config = getCountryConfig(country);
   const payer = defaultPayerAccount(country, product);
   const amount = Math.abs(transaction.amount);
+  const localRecipientAccount = country === "CZ"
+    ? transaction.beneficiaryAccountNumber?.match(/^(\d{2,10})\/(\d{4})$/)
+    : null;
 
   return {
     entry: "redo",
@@ -208,10 +225,10 @@ export function createRedoDomesticPaymentDraft(
     payerAccountNumber: payer.number,
     payerBalance: payer.balance,
     beneficiaryName: transaction.label,
-    prefix: country === "CZ" ? "19" : "",
-    accountNumber: "2000145399",
-    bankCode: COUNTRY_BANK_CODES[country],
-    bankName: COUNTRY_BANK_NAMES[country],
+    prefix: localRecipientAccount ? "" : country === "CZ" ? "19" : "",
+    accountNumber: localRecipientAccount?.[1] ?? "2000145399",
+    bankCode: localRecipientAccount?.[2] ?? COUNTRY_BANK_CODES[country],
+    bankName: transaction.beneficiaryBankName ?? COUNTRY_BANK_NAMES[country],
     amount: amount % 1 === 0 ? String(amount) : amount.toFixed(2).replace(".", ","),
     currency: config.currency,
     instantPayment: true,

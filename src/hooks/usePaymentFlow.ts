@@ -21,6 +21,8 @@ import type { AccountTransaction } from "@/data/accountDetails";
 import type { PaymentTemplateSelection } from "@/data/paymentTemplates";
 import type { Product } from "@/data/products";
 import type { CountryId } from "@/app/state/demoTypes";
+import { BANK_BADGES } from "@/app/config/bankLogos";
+import type { FrequentBeneficiary } from "@/data/paymentsHub";
 
 interface UsePaymentFlowOptions {
   country: CountryId;
@@ -40,20 +42,45 @@ export function usePaymentFlow({
 }: UsePaymentFlowOptions) {
   const { navigateTo } = useNavigationContext();
   const [paymentDraft, setPaymentDraft] = useState<DomesticPaymentDraft | null>(null);
+  const [paymentEntryId, setPaymentEntryId] = useState(0);
+  const [paymentInitialStep, setPaymentInitialStep] = useState<"recipient" | "amount">("recipient");
 
   const handleRedoPaymentClick = useCallback(() => {
     if (!selectedTransaction) return;
+    setPaymentEntryId((current) => current + 1);
+    setPaymentInitialStep("recipient");
     setPaymentDraft(createRedoDomesticPaymentDraft(selectedTransaction, country, selectedAccountProduct));
     navigateTo("domestic-payment");
   }, [country, navigateTo, selectedAccountProduct, selectedTransaction]);
 
   const handleDomesticPaymentClick = useCallback(() => {
+    setPaymentEntryId((current) => current + 1);
+    setPaymentInitialStep("recipient");
     setPaymentDraft(createEmptyDomesticPaymentDraft(country, selectedAccountProduct));
     navigateTo("domestic-payment");
   }, [country, navigateTo, selectedAccountProduct]);
 
   const handlePaymentTemplateSelect = useCallback((selection: PaymentTemplateSelection) => {
+    setPaymentEntryId((current) => current + 1);
+    setPaymentInitialStep("recipient");
     setPaymentDraft(createTemplateDomesticPaymentDraft(selection, country, selectedAccountProduct));
+    navigateTo("domestic-payment");
+  }, [country, navigateTo, selectedAccountProduct]);
+
+  const handleBeneficiaryPaymentClick = useCallback((person: FrequentBeneficiary) => {
+    setPaymentEntryId((current) => current + 1);
+    setPaymentInitialStep("amount");
+    setPaymentDraft({
+      ...createEmptyDomesticPaymentDraft(country, selectedAccountProduct),
+      recipientCountry: country === "BA_BL" ? "BA" : country,
+      recipientAccountMode: "local",
+      recipientKind: person.recipientKind,
+      beneficiaryName: person.name,
+      accountNumber: person.paymentAccountNumber,
+      bankCode: person.paymentBankCode,
+      bankName: BANK_BADGES[person.bank].name,
+      currency: person.currency,
+    });
     navigateTo("domestic-payment");
   }, [country, navigateTo, selectedAccountProduct]);
 
@@ -61,6 +88,10 @@ export function usePaymentFlow({
     setPaymentDraft(nextDraft);
     navigateTo("payment-review");
   }, [navigateTo]);
+
+  const handlePaymentDraftChange = useCallback((nextDraft: DomesticPaymentDraft) => {
+    setPaymentDraft(nextDraft);
+  }, []);
 
   const handlePaymentDone = useCallback(() => {
     setPaymentDraft(null);
@@ -70,10 +101,14 @@ export function usePaymentFlow({
 
   return {
     paymentDraft,
+    paymentEntryId,
+    paymentInitialStep,
     handleRedoPaymentClick,
     handleDomesticPaymentClick,
     handlePaymentTemplateSelect,
+    handleBeneficiaryPaymentClick,
     handleDomesticPaymentNext,
+    handlePaymentDraftChange,
     handlePaymentDone,
   };
 }

@@ -39,15 +39,15 @@ export const DEFAULT_BANK_LOGO_INSET = 0.14;
 
 export const BANK_BADGES: Record<BankId, BankBadge> = {
   unicredit: { id: "unicredit", name: "UniCredit Bank", short: "UC", color: "#E2001A", textColor: "#FFFFFF", brandLogoId: "unicredit" },
-  revolut: { id: "revolut", name: "Revolut", short: "R", color: "#0A0A0A", textColor: "#FFFFFF", logoInset: 0.06 },
+  revolut: { id: "revolut", name: "Revolut", short: "R", color: "#0A0A0A", textColor: "#FFFFFF", logoInset: 0.2 },
   // The KB mark is a square block: it reads as an app icon filling the badge,
   // so it keeps no inset and lets the circle crop its corners.
   kb: { id: "kb", name: "Komerční banka", short: "KB", color: "#8C1D40", textColor: "#FFFFFF", logoInset: 0 },
   cs: { id: "cs", name: "Česká spořitelna", short: "ČS", color: "#2870ED", textColor: "#FFFFFF" },
   // Square yellow block, like KB: it fills the badge rather than floating in it.
-  raiffeisen: { id: "raiffeisen", name: "Raiffeisenbank", short: "RB", color: "#FFD500", textColor: "#000000", logoInset: 0 },
+  raiffeisen: { id: "raiffeisen", name: "Raiffeisenbank", short: "RB", color: "#FFD500", textColor: "#000000", logoInset: 0.2 },
   // Tall, narrow glyph like Revolut's: no corners to clip, so it runs closer to the edge.
-  moneta: { id: "moneta", name: "MONETA Money Bank", short: "M", color: "#6E2585", textColor: "#FFFFFF", logoInset: 0.06 },
+  moneta: { id: "moneta", name: "MONETA Money Bank", short: "M", color: "#6E2585", textColor: "#FFFFFF", logoInset: 0.2 },
 };
 
 /**

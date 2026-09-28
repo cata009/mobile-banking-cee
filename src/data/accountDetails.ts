@@ -4,6 +4,7 @@ import { normalizePfmCategory } from "@/data/pfmCategories";
 import type { PfmCategoryName } from "@/data/pfmCategories";
 import type { Currency } from "@/data/products";
 import type { CreditCard, DebitCard, Product } from "@/data/products";
+import { getRecentPaymentTransactions } from "@/data/paymentsHub";
 
 export interface AccountIdentity {
   accountName: string;
@@ -26,12 +27,16 @@ export interface TransactionTransferPair {
 
 export interface AccountTransaction {
   id: string;
+  beneficiaryId?: string;
   day: string;
   month: string;
   monthKey: string;
   monthTitle: string;
   label: string;
   details?: string;
+  beneficiaryBankName?: string;
+  beneficiaryAccountNumber?: string;
+  referenceNumber?: string;
   /** Currency carried by the account ledger, used when an own-account transfer shows its payer. */
   currency?: Currency;
   amount: number;
@@ -905,7 +910,10 @@ export function getAccountTransactions(
     return getSecondaryCurrentAccountTransactions(country, currency, accountIndex, profile);
   }
 
-  return getPrimaryCurrentAccountTransactions(country, currency, accountIndex, profile);
+  const primaryTransactions = getPrimaryCurrentAccountTransactions(country, currency, accountIndex, profile);
+  return accountIndex === 0
+    ? [...getRecentPaymentTransactions(country, currency), ...primaryTransactions]
+    : primaryTransactions;
 }
 
 export function getCardTransactions(

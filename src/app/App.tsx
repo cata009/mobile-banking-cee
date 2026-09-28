@@ -78,6 +78,10 @@ import {
   PaymentSuccessScreen,
   TransactionDetailScreen,
 } from "@/app/screens/payments/DomesticPaymentFlowScreens";
+import {
+  Evo2027DomesticPaymentCreateScreen,
+  Evo2027PaymentReviewScreen,
+} from "@/app/screens/payments/Evo2027DomesticPaymentFlow";
 import { useProducts } from "@/hooks/useProducts";
 import {
   deepLinkToDemoInitialState,
@@ -108,6 +112,7 @@ import {
 } from "../../package/mobile-pi-coapping-chat-package/src";
 import "../../package/mobile-pi-coapping-chat-package/src/coapping.css";
 import type { AccountTransaction } from "@/data/accountDetails";
+import type { FrequentBeneficiary } from "@/data/paymentsHub";
 import type { SpendingAnalyticsTransaction } from "@/data/spendingAnalytics";
 import { useDeepLinkUrlSync } from "@/hooks/useDeepLinkUrlSync";
 import { usePaymentFlow } from "@/hooks/usePaymentFlow";
@@ -248,6 +253,7 @@ function AppContent({
     parsedDeepLink?.flowId ? "detail" : "index",
   );
   const [selectedTransaction, setSelectedTransaction] = useState<AccountTransaction | null>(null);
+  const [selectedPaymentBeneficiary, setSelectedPaymentBeneficiary] = useState<FrequentBeneficiary | null>(null);
   const [selectedMerchantEnrichment, setSelectedMerchantEnrichment] = useState<CardTransactionMerchantEnrichment | undefined>();
   const { transactionCategoryOverrides, handleTransactionCategoryChange } =
     useTransactionCategoryOverrides({ setSelectedTransaction });
@@ -292,10 +298,14 @@ function AppContent({
   const selectedAccountProduct = accountProducts.find((accountProduct) => accountProduct.id === selectedAccountId) ?? accountProducts[0] ?? null;
   const {
     paymentDraft,
+    paymentEntryId,
+    paymentInitialStep,
     handleRedoPaymentClick,
     handleDomesticPaymentClick,
+    handleBeneficiaryPaymentClick,
     handlePaymentTemplateSelect,
     handleDomesticPaymentNext,
+    handlePaymentDraftChange,
     handlePaymentDone,
   } = usePaymentFlow({
     country,
@@ -609,6 +619,13 @@ function AppContent({
     setSelectedTransaction(transaction);
     setSelectedMerchantEnrichment(merchantEnrichment);
     navigateTo("transaction-detail");
+  };
+
+  const handleBeneficiaryTransactionClick = (transaction: AccountTransaction) => {
+    const payerAccount = accountProducts.find(
+      (productItem) => productItem.type === "current_account" && productItem.currency === transaction.currency,
+    );
+    if (payerAccount) handleTransactionClick(transaction, payerAccount);
   };
 
   const handleApp2027TransactionClick = (
@@ -1051,24 +1068,47 @@ function AppContent({
             onProductsClick={handleProductsClick}
             onMoreClick={handleMoreClick}
             onDomesticPaymentClick={handleDomesticPaymentClick}
+            onBeneficiarySendMoney={handleBeneficiaryPaymentClick}
+            selectedBeneficiary={selectedPaymentBeneficiary}
+            onBeneficiarySelect={setSelectedPaymentBeneficiary}
+            onBeneficiaryTransactionClick={handleBeneficiaryTransactionClick}
             onTemplateSelect={handlePaymentTemplateSelect}
           />
         )}
 
         {currentScreen === "domestic-payment" && paymentDraft && (
-          <DomesticPaymentCreateScreen
-            draft={paymentDraft}
-            onBack={goBack}
-            onNext={handleDomesticPaymentNext}
-          />
+          release === "release-future-evo-2027" ? (
+            <Evo2027DomesticPaymentCreateScreen
+              key={paymentEntryId}
+              draft={paymentDraft}
+              initialStep={paymentInitialStep}
+              onBack={goBack}
+              onNext={handleDomesticPaymentNext}
+            />
+          ) : (
+            <DomesticPaymentCreateScreen
+              draft={paymentDraft}
+              onBack={goBack}
+              onNext={handleDomesticPaymentNext}
+            />
+          )
         )}
 
         {currentScreen === "payment-review" && paymentDraft && (
-          <PaymentReviewScreen
-            draft={paymentDraft}
-            onBack={goBack}
-            onSign={() => navigateTo("payment-sign")}
-          />
+          release === "release-future-evo-2027" ? (
+            <Evo2027PaymentReviewScreen
+              draft={paymentDraft}
+              onDraftChange={handlePaymentDraftChange}
+              onBack={goBack}
+              onSign={() => navigateTo("payment-sign")}
+            />
+          ) : (
+            <PaymentReviewScreen
+              draft={paymentDraft}
+              onBack={goBack}
+              onSign={() => navigateTo("payment-sign")}
+            />
+          )
         )}
 
         {currentScreen === "payment-sign" && (
@@ -1079,7 +1119,10 @@ function AppContent({
         )}
 
         {currentScreen === "payment-success" && (
-          <PaymentSuccessScreen onDone={handlePaymentDone} />
+          <PaymentSuccessScreen onDone={() => {
+            setSelectedPaymentBeneficiary(null);
+            handlePaymentDone();
+          }} />
         )}
 
         {currentScreen === "products" && (

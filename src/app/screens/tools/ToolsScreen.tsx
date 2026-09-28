@@ -35,7 +35,7 @@ interface ToolMeta {
 const TOOLS: readonly ToolMeta[] = [
   {
     id: "side-by-side",
-    label: "Side-by-side countries",
+    label: "Country comparison",
     icon: "grid-2x2",
     description:
       "Render the same screen for 2–3 countries as live app frames in parallel and compare the CEE differences directly.",
@@ -59,7 +59,7 @@ const TOOLS: readonly ToolMeta[] = [
   },
   {
     id: "translation-review",
-    label: "Translation review table",
+    label: "Translation review",
     icon: "book-open",
     description:
       "Every string of a translation namespace across all languages, with overflow-risk highlighting and CSV export.",
@@ -74,11 +74,11 @@ const TOOLS: readonly ToolMeta[] = [
     audience: "BA · Local market teams · PM",
   },
   {
-    id: "localization-signoff",
-    label: "Localization sign-off",
+    id: "localization",
+    label: "Localization",
     icon: "shield-check",
     description:
-      "Approve or flag each local translation with a note, tracked per language and persisted across reloads, exportable as a release sign-off report.",
+      "Approve or flag each local translation with a note, tracked per language and persisted across reloads, exportable as a release report.",
     audience: "Local market teams · BA",
   },
 ];
