@@ -68,6 +68,7 @@ type FrequentBeneficiarySeed = Omit<
   category: PfmCategoryName
   subcategory: string
   payments: readonly { date: string; amount: number; details: string }[]
+  receivedPayments?: readonly { date: string; amount: number; details: string }[]
 }
 
 const DEMO_BANK_CODES: Record<BankId, string> = {
@@ -102,6 +103,7 @@ const FREQUENT_BENEFICIARY_SEEDS: readonly FrequentBeneficiarySeed[] = [
       { date: '2026-07-24', amount: 460, details: 'Holiday cottage deposit' },
       { date: '2026-06-24', amount: 275, details: 'June household bills' },
     ],
+    receivedPayments: [{ date: '2026-08-12', amount: 120, details: 'Cinema tickets reimbursement' }],
   },
   {
     id: 'victor-ionescu',
@@ -114,6 +116,7 @@ const FREQUENT_BENEFICIARY_SEEDS: readonly FrequentBeneficiarySeed[] = [
       { date: '2026-09-23', amount: 150, details: 'Dinner and cinema tickets' },
       { date: '2026-07-18', amount: 95, details: 'Train tickets to Brno' },
     ],
+    receivedPayments: [{ date: '2026-08-25', amount: 50, details: 'Dinner bill split' }],
   },
   {
     id: 'homeowners-association',
@@ -127,6 +130,7 @@ const FREQUENT_BENEFICIARY_SEEDS: readonly FrequentBeneficiarySeed[] = [
       { date: '2026-07-11', amount: 599.24, details: 'July building charges' },
       { date: '2026-06-11', amount: 610, details: 'Lift maintenance contribution' },
     ],
+    receivedPayments: [{ date: '2026-08-20', amount: 48.5, details: 'Water overpayment refund' }],
   },
   {
     id: 'bright-future-foundation',
@@ -150,6 +154,7 @@ const FREQUENT_BENEFICIARY_SEEDS: readonly FrequentBeneficiarySeed[] = [
       { date: '2026-04-15', amount: 800, details: 'New furniture contribution' },
       { date: '2026-03-12', amount: 1100, details: 'Spring break accommodation' },
     ],
+    receivedPayments: [{ date: '2026-06-21', amount: 650, details: 'Shared holiday costs' }],
   },
   {
     id: 'city-utilities',
@@ -163,6 +168,7 @@ const FREQUENT_BENEFICIARY_SEEDS: readonly FrequentBeneficiarySeed[] = [
       { date: '2026-05-16', amount: 208.4, details: 'May water bill adjustment' },
       { date: '2026-04-15', amount: 221, details: 'April heating advance' },
     ],
+    receivedPayments: [{ date: '2026-06-28', amount: 23.5, details: 'Final meter reading refund' }],
   },
   {
     id: 'petr-havelka',
@@ -175,6 +181,7 @@ const FREQUENT_BENEFICIARY_SEEDS: readonly FrequentBeneficiarySeed[] = [
       { date: '2026-06-12', amount: 7500, details: 'Car repair reimbursement' },
       { date: '2026-04-12', amount: 4200, details: 'Mountain trip accommodation' },
     ],
+    receivedPayments: [{ date: '2026-06-18', amount: 1200, details: 'Workshop parts reimbursement' }],
   },
   {
     id: 'school-fees',
@@ -197,6 +204,7 @@ const FREQUENT_BENEFICIARY_SEEDS: readonly FrequentBeneficiarySeed[] = [
     category: 'Transfers',
     subcategory: 'Bank transfer',
     payments: [{ date: '2026-05-28', amount: 80, details: 'Concert tickets' }],
+    receivedPayments: [{ date: '2026-06-01', amount: 40, details: 'Concert ticket share' }],
   },
   {
     id: 'internet-provider',
@@ -209,6 +217,7 @@ const FREQUENT_BENEFICIARY_SEEDS: readonly FrequentBeneficiarySeed[] = [
       { date: '2026-05-21', amount: 1277, details: 'Home internet and TV - May' },
       { date: '2026-04-21', amount: 1200, details: 'Broadband plan renewal' },
     ],
+    receivedPayments: [{ date: '2026-05-27', amount: 127.7, details: 'Router deposit refund' }],
   },
   {
     id: 'daniel-lataretu',
@@ -218,6 +227,7 @@ const FREQUENT_BENEFICIARY_SEEDS: readonly FrequentBeneficiarySeed[] = [
     category: 'Transfers',
     subcategory: 'Bank transfer',
     payments: [{ date: '2026-05-14', amount: 250, details: 'Dinner shared on 12 May' }],
+    receivedPayments: [{ date: '2026-05-18', amount: 80, details: 'Taxi fare split' }],
   },
   {
     id: 'insurance-generali',
@@ -230,6 +240,7 @@ const FREQUENT_BENEFICIARY_SEEDS: readonly FrequentBeneficiarySeed[] = [
       { date: '2026-05-06', amount: 1150, details: 'Home insurance renewal' },
       { date: '2026-02-06', amount: 1100, details: 'Contents cover - February' },
     ],
+    receivedPayments: [{ date: '2026-05-13', amount: 210, details: 'Insurance premium adjustment' }],
   },
 ]
 const SNAPSHOT_DATE = new Date('2026-09-26T12:00:00')
@@ -315,11 +326,15 @@ export function getRecentPaymentTransactions(country: CountryId, currency: Curre
   return FREQUENT_BENEFICIARY_SEEDS.flatMap((person) => {
     const accountNumber = `200014${person.suffix}`
     const bankCode = DEMO_BANK_CODES[person.bank]
-    return person.payments.map(({ date, amount, details }, index) => {
+    const createTransaction = (
+      { date, amount, details }: { date: string; amount: number; details: string },
+      id: string,
+      type: AccountTransaction['type'],
+    ): AccountTransaction => {
       const [year = '2026', month = '01', day = '01'] = date.split('-')
       const parsedDate = new Date(`${date}T12:00:00`)
       return {
-        id: `recent-payment-${person.id}-${index}`,
+        id,
         beneficiaryId: person.id,
         day,
         month: new Intl.DateTimeFormat('en', { month: 'short' }).format(parsedDate).toUpperCase(),
@@ -328,8 +343,8 @@ export function getRecentPaymentTransactions(country: CountryId, currency: Curre
         label: person.name,
         details,
         currency,
-        amount: -amount,
-        type: 'debit' as const,
+        amount: type === 'debit' ? -amount : amount,
+        type,
         category: person.category,
         pfmCategory: person.category,
         pfmSubcategory: person.subcategory,
@@ -339,7 +354,16 @@ export function getRecentPaymentTransactions(country: CountryId, currency: Curre
         beneficiaryAccountNumber: `${accountNumber}/${bankCode}`,
         referenceNumber: `${year}${month}${day}${person.suffix}`,
       }
-    })
+    }
+
+    return [
+      ...person.payments.map((payment, index) =>
+        createTransaction(payment, `recent-payment-${person.id}-${index}`, 'debit'),
+      ),
+      ...(person.receivedPayments ?? []).map((payment, index) =>
+        createTransaction(payment, `recent-receipt-${person.id}-${index}`, 'credit'),
+      ),
+    ]
   }).sort((left, right) => `${right.monthKey}-${right.day}`.localeCompare(`${left.monthKey}-${left.day}`))
 }
 
@@ -352,7 +376,7 @@ export function getFrequentBeneficiaries(country: CountryId): FrequentBeneficiar
   const storedDetails = getStoredBeneficiaryDetails()
   const transactions = getRecentPaymentTransactions(country, currency)
   return FREQUENT_BENEFICIARY_SEEDS.flatMap((seed) => {
-    const latest = transactions.find((transaction) => transaction.beneficiaryId === seed.id)
+    const latest = transactions.find((transaction) => transaction.beneficiaryId === seed.id && transaction.type === 'debit')
     if (!latest) return []
     const paymentAccountNumber = `200014${seed.suffix}`
     const paymentBankCode = DEMO_BANK_CODES[seed.bank]
