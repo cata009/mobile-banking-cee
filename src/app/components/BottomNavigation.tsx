@@ -65,6 +65,7 @@ export default function BottomNavigation({
       <App2027PrimaryNavigation
         activeTab={activeTab === "investments" ? "home" : activeTab}
         labels={labelOverrides}
+        iconOverrides={iconOverrides}
         onTabChange={handleTabClick}
         selectionMotion
       />
