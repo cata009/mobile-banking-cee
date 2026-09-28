@@ -62,16 +62,18 @@ export default function PaymentTemplatesScreen({ onBack, onSelect, isEvo2027 = f
             variant="gray"
           />
           <div className="px-[20px] pb-[24px] pt-[12px]">
-            <div
-              className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[8px]"
-              style={{ ['--uc-app-bg' as string]: 'var(--uc-surface)' }}
-            >
-              <AccountSearchBar
-                value={searchValue}
-                onValueChange={setSearchValue}
-                placeholder={t("runtime.payments.templates.search", "Search templates or recipients")}
-                showTrailingAction={false}
-              />
+            <div className="sticky top-[calc(var(--uc-phone-top-reserve,54px)_+_48px)] z-[9] -mx-[20px] bg-[var(--uc-app-bg)] px-[20px] pb-[24px]">
+              <div
+                className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[8px]"
+                style={{ ['--uc-app-bg' as string]: 'var(--uc-surface)' }}
+              >
+                <AccountSearchBar
+                  value={searchValue}
+                  onValueChange={setSearchValue}
+                  placeholder={t("runtime.payments.templates.search", "Search templates or recipients")}
+                  showTrailingAction={false}
+                />
+              </div>
             </div>
 
             {noResults ? (
@@ -79,7 +81,7 @@ export default function PaymentTemplatesScreen({ onBack, onSelect, isEvo2027 = f
                 {t("runtime.payments.templates.noResults", "No templates or beneficiaries found")}
               </p>
             ) : (
-              <div className="mt-[24px] flex flex-col gap-[24px]">
+              <div className="flex flex-col gap-[24px]">
                 {templates.length > 0 ? (
                   <section aria-label={t("runtime.payments.templates.paymentTemplates", "Payment templates")}>
                     <h2 className="mb-[10px] text-[16px] font-semibold leading-[22px] text-[var(--uc-text)]">
@@ -92,6 +94,7 @@ export default function PaymentTemplatesScreen({ onBack, onSelect, isEvo2027 = f
                           item={item}
                           onSelect={() => onSelect(item)}
                           selectLabel={t("runtime.payments.templates.useTemplate", "Use template")}
+                          withLeadingInset
                         />
                       ))}
                     </div>
@@ -110,6 +113,7 @@ export default function PaymentTemplatesScreen({ onBack, onSelect, isEvo2027 = f
                           item={item}
                           onSelect={() => onSelect(item)}
                           selectLabel={t("runtime.payments.templates.useBeneficiary", "Use beneficiary")}
+                          withLeadingInset
                         />
                       ))}
                     </div>

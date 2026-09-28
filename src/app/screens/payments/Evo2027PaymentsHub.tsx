@@ -46,7 +46,7 @@ const HUB_ACTIONS: readonly HubAction[] = [
   { id: "between-accounts", label: "Move\nmoney", icon: "transaction-transfer" },
   { id: "scan-pay", label: "Scan &\npay", icon: "payment-scan-qr" },
   { id: "recurrent-payments", label: "Recurrent\npayments", icon: "payment-recurrent" },
-  { id: "templates", label: "Templates", icon: "payment-templates" },
+  { id: "templates", label: "My\nTemplates", icon: "payment-templates" },
   { id: "card-repayment", label: "Card\nrepayment", icon: "payment-card-repayment" },
   { id: "create-qr-code", label: "Create QR\ncode", icon: "payment-create-qr" },
   { id: "foreign-payment", label: "Foreign\npayment", icon: "new-payment-foreign" },
@@ -159,13 +159,17 @@ export default function Evo2027PaymentsHub({
   const favoriteBeneficiaries = beneficiaries.filter((person) => favoriteIds.has(person.id));
   const recentBeneficiaries = beneficiaries.filter((person) => !favoriteIds.has(person.id));
 
-  const labelFor = (action: HubAction) => t(`runtime.payments.hub.actions.${action.id}`, action.label);
+  const labelFor = (action: HubAction) => action.id === "recurrent-payments"
+    ? t("runtime.payments.hub.actions.scheduled", "Scheduled\npayments")
+    : action.id === "templates"
+      ? t("runtime.payments.hub.actions.myTemplates", "My\nTemplates")
+      : t(`runtime.payments.hub.actions.${action.id}`, action.label);
 
   return (
-    <div className="flex flex-col pt-[4px]">
+    <div className="flex flex-col">
       {/* Search stays reachable while the beneficiaries scroll, the way Account
           details keeps its own field pinned. */}
-      <div className="sticky top-[4px] z-[9] shrink-0 bg-[var(--uc-app-bg)] px-[20px] pb-[24px]">
+      <div className="sticky top-0 z-[9] shrink-0 bg-[var(--uc-app-bg)] px-[20px] pb-[24px] pt-[4px]">
         <AccountSearchBar
           value={searchValue}
           onValueChange={setSearchValue}

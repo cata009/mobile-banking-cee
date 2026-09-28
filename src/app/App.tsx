@@ -1163,6 +1163,7 @@ function AppContent({
             active={myBankerAvailable}
             onTabChange={(tab) => {
               if (tab === "home") navigateTo("homepage");
+              if (tab === "analytics") handleAnalyticsClick();
               if (tab === "payments") handlePaymentsClick();
               if (tab === "products") handleProductsClick();
               if (tab === "more") handleMoreClick();
@@ -1177,6 +1178,7 @@ function AppContent({
             showBottomNavigation={isCzRoboAdvisorPreviewActive}
             onBottomNavigationChange={(tab) => {
               if (tab === "home") navigateTo("homepage");
+              if (tab === "analytics") handleAnalyticsClick();
               if (tab === "payments") handlePaymentsClick();
               if (tab === "products") handleProductsClick();
               if (tab === "more") handleMoreClick();

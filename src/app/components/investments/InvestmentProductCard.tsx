@@ -125,7 +125,7 @@ export default function InvestmentProductCard({
     <button
       type="button"
       onClick={onClick}
-      className={`flex min-h-[95px] w-full flex-col gap-[4px] bg-[var(--uc-surface)] py-[16px] pl-[16px] ${czRoboAmountStyle ? "pr-[16px]" : "pr-[24px]"} text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-focus-ring)]`}
+      className={`flex min-h-[95px] w-full flex-col gap-[4px] ${czRoboAmountStyle ? "bg-transparent" : "bg-[var(--uc-surface)]"} py-[16px] pl-[16px] ${czRoboAmountStyle ? "pr-[16px]" : "pr-[24px]"} text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-focus-ring)]`}
       data-ds-label="Investment product card"
     >
       {czRoboAmountStyle ? (

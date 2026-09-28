@@ -28,6 +28,7 @@ import { getCountryConfig } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import { formatInvestmentMoney } from "@/app/utils/investmentAmountFormatting";
 import InvestmentBasketFundsScreen from "@/app/screens/investments/InvestmentBasketFundsScreen";
+import CzRoboLevelOneShell from "@/app/screens/investments/CzRoboLevelOneShell";
 
 interface SharedProps {
   country: CountryId;
@@ -226,17 +227,8 @@ export function InvestmentSecurityListScreen({
     );
   }
 
-  return (
-    <div className="relative h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide" onScroll={handleScroll} data-investment-security-list="true">
-      <PageHeader
-        title={basketFundsAvailable ? "Buy securities" : "List of securities"}
-        onBack={onBack}
-        backIconName={closeModuleButton ? "close-flow" : undefined}
-        backLabel={closeModuleButton ? "Close Investments" : undefined}
-        includeSafeArea
-        compact
-        collapsedTitleProgress={headerProgress}
-      />
+  const securityListContent = (
+    <>
       {basketFundsAvailable ? (
         <MessagesMailboxTabs
           tabs={[
@@ -360,6 +352,31 @@ export function InvestmentSecurityListScreen({
           <button type="button" onClick={() => setFiltersOpen(false)} className="mt-[8px] h-[48px] w-full rounded-[4px] bg-[var(--uc-action-strong)] text-[18px] font-bold text-[var(--uc-static-white)]">Show products</button>
         </BottomSheet>
       ) : null}
+    </>
+  );
+
+  if (closeModuleButton) {
+    return (
+      <CzRoboLevelOneShell
+        title={basketFundsAvailable ? "Buy securities" : "List of securities"}
+        onBack={onBack}
+        onScroll={handleScroll}
+      >
+        <div data-investment-security-list="true">{securityListContent}</div>
+      </CzRoboLevelOneShell>
+    );
+  }
+
+  return (
+    <div className="relative h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide" onScroll={handleScroll} data-investment-security-list="true">
+      <PageHeader
+        title={basketFundsAvailable ? "Buy securities" : "List of securities"}
+        onBack={onBack}
+        includeSafeArea
+        compact
+        collapsedTitleProgress={headerProgress}
+      />
+      {securityListContent}
     </div>
   );
 }
