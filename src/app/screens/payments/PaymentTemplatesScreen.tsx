@@ -1,6 +1,6 @@
 import { useState } from "react";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
-import BeneficiaryAvatar from "@/app/components/payments/BeneficiaryAvatar";
+import Evo2027PaymentSelectionRow from "@/app/components/payments/Evo2027PaymentSelectionRow";
 import PageHeader from "@/app/components/PageHeader";
 import PaymentTemplateListItem from "@/app/components/payments/PaymentTemplateListItem";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
@@ -36,55 +36,6 @@ function forEvo2027(item: PaymentTemplateSelection, country: CountryId) {
   };
   const beneficiaryName = beneficiaryNameById[item.id];
   return beneficiaryName ? { ...item, beneficiaryName } : item;
-}
-
-function sentenceCase(value: string) {
-  const lower = value.toLocaleLowerCase();
-  return `${lower.slice(0, 1).toLocaleUpperCase()}${lower.slice(1)}`;
-}
-
-function Evo2027TemplateRow({
-  item,
-  onSelect,
-  selectLabel,
-  forLabel,
-}: {
-  item: PaymentTemplateSelection;
-  onSelect: (item: PaymentTemplateSelection) => void;
-  selectLabel: string;
-  forLabel: string;
-}) {
-  const templateTitle = sentenceCase(item.title);
-  const accessibleTitle = item.kind === "template" ? templateTitle : item.beneficiaryName;
-
-  return (
-    <button
-      type="button"
-      onClick={() => onSelect(item)}
-      aria-label={`${selectLabel} ${accessibleTitle} ${forLabel} ${item.beneficiaryName}`}
-      className="grid min-h-[82px] w-full grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-[12px] px-[14px] py-[12px] text-left transition-colors active:bg-[var(--uc-app-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-action)]"
-    >
-      <BeneficiaryAvatar name={item.beneficiaryName} bank="unicredit" size={40} />
-      <span className="min-w-0">
-        <span className="block truncate text-[14px] font-semibold leading-[18px] text-[var(--uc-text)]">
-          {item.beneficiaryName}
-        </span>
-        {item.kind === "template" ? (
-          <span className="mt-[2px] block truncate text-[12px] leading-[16px] text-[var(--uc-text-muted)]">
-            {templateTitle}
-          </span>
-        ) : null}
-        <span className="mt-[2px] block truncate text-[12px] leading-[16px] text-[var(--uc-text-muted)]">
-          {item.accountNumber}
-        </span>
-      </span>
-      {item.kind === "template" ? (
-        <span className="shrink-0 whitespace-nowrap text-[14px] font-semibold tabular-nums text-[var(--uc-text)]">
-          {item.amount} {item.currency}
-        </span>
-      ) : null}
-    </button>
-  );
 }
 
 export default function PaymentTemplatesScreen({ onBack, onSelect, isEvo2027 = false }: PaymentTemplatesScreenProps) {
@@ -136,12 +87,11 @@ export default function PaymentTemplatesScreen({ onBack, onSelect, isEvo2027 = f
                     </h2>
                     <div className="overflow-hidden rounded-[16px] bg-[var(--uc-surface)] divide-y divide-[var(--uc-border-muted)]">
                       {templates.map((item) => (
-                        <Evo2027TemplateRow
+                        <Evo2027PaymentSelectionRow
                           key={item.id}
                           item={item}
-                          onSelect={onSelect}
+                          onSelect={() => onSelect(item)}
                           selectLabel={t("runtime.payments.templates.useTemplate", "Use template")}
-                          forLabel={t("runtime.payments.templates.forBeneficiary", "for")}
                         />
                       ))}
                     </div>
@@ -155,12 +105,11 @@ export default function PaymentTemplatesScreen({ onBack, onSelect, isEvo2027 = f
                     </h2>
                     <div className="overflow-hidden rounded-[16px] bg-[var(--uc-surface)] divide-y divide-[var(--uc-border-muted)]">
                       {beneficiaries.map((item) => (
-                        <Evo2027TemplateRow
+                        <Evo2027PaymentSelectionRow
                           key={item.id}
                           item={item}
-                          onSelect={onSelect}
+                          onSelect={() => onSelect(item)}
                           selectLabel={t("runtime.payments.templates.useBeneficiary", "Use beneficiary")}
-                          forLabel={t("runtime.payments.templates.forBeneficiary", "for")}
                         />
                       ))}
                     </div>

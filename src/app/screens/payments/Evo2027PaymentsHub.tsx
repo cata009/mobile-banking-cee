@@ -19,7 +19,6 @@ export type PaymentsHubActionId =
   | "recurrent-payments"
   | "templates"
   | "card-repayment"
-  | "exchange-rates"
   | "create-qr-code"
   | "foreign-payment"
   | "manage-ebills";
@@ -49,7 +48,6 @@ const HUB_ACTIONS: readonly HubAction[] = [
   { id: "recurrent-payments", label: "Recurrent\npayments", icon: "payment-recurrent" },
   { id: "templates", label: "Templates", icon: "payment-templates" },
   { id: "card-repayment", label: "Card\nrepayment", icon: "payment-card-repayment" },
-  { id: "exchange-rates", label: "Exchange\nrates", icon: "payment-exchange-rates" },
   { id: "create-qr-code", label: "Create QR\ncode", icon: "payment-create-qr" },
   { id: "foreign-payment", label: "Foreign\npayment", icon: "new-payment-foreign" },
   { id: "manage-ebills", label: "Manage\ne-bills", icon: "payment-new" },
@@ -66,7 +64,7 @@ const CUSTOMISABLE_SLOTS = GRID_LIMIT - 1;
 
 const HUB_LAYOUT_STORAGE_KEY = "uc.evo2027.payments.hubLayout";
 
-const DEFAULT_HUB_LAYOUT: readonly PaymentsHubActionId[] = HUB_ACTIONS.slice(0, CUSTOMISABLE_SLOTS).map(
+const DEFAULT_HUB_LAYOUT: readonly PaymentsHubActionId[] = HUB_ACTIONS.slice(0, CUSTOMISABLE_SLOTS - 1).map(
   (action) => action.id,
 );
 
@@ -167,14 +165,13 @@ export default function Evo2027PaymentsHub({
     <div className="flex flex-col gap-[24px] pt-[4px]">
       {/* Search stays reachable while the beneficiaries scroll, the way Account
           details keeps its own field pinned. */}
-      <div className="sticky top-0 z-[9] bg-[var(--uc-app-bg)] px-[20px] pb-[10px] pt-[2px]">
+      <div className="sticky top-0 z-[9] shrink-0 bg-[var(--uc-app-bg)] px-[20px]">
         <AccountSearchBar
           value={searchValue}
           onValueChange={setSearchValue}
           placeholder={t("runtime.payments.hub.searchPlaceholder", "Name, account, IBAN")}
           fieldSurface="raised"
           fieldSize="comfortable"
-          fieldPadding="8"
           trailingIcon="payment-scan-qr"
           trailingLabel={t("runtime.payments.hub.scanQr", "Scan a QR code")}
           onFilterClick={() => onAction("scan-pay")}

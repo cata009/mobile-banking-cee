@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import CopyToast, { type CopyToastState } from '@/app/components/accounts/CopyToast'
+import { AppIcon } from '@/app/components/icons'
 import { BottomSheet } from '@/app/components/BottomSheet'
 import BottomNavigation from '@/app/components/BottomNavigation'
 import { HeaderActionButton, HeaderActionRail } from '@/app/components/HeaderActionIcons'
+import BeneficiaryEditIcon from '@/app/components/payments/BeneficiaryEditIcon'
 import NewPaymentActionListItem from '@/app/components/payments/NewPaymentActionListItem'
 import NewPaymentDiscoverBanner from '@/app/components/payments/NewPaymentDiscoverBanner'
 import PaymentHeroCard from '@/app/components/payments/PaymentHeroCard'
@@ -59,12 +61,15 @@ function PaymentsHeader({
   onContactsClick,
   onMessagesClick,
   onCustomiseClick,
+  onExchangeRatesClick,
 }: {
   title: string
   onContactsClick?: () => void
   onMessagesClick?: () => void
   /** Evo 2027 only: opens the editor for the payments grid. */
   onCustomiseClick?: () => void
+  /** Evo 2027 moves exchange rates from the action grid into this header. */
+  onExchangeRatesClick?: () => void
 }) {
   const country = useCountry()
   const { t } = useLanguage()
@@ -79,34 +84,57 @@ function PaymentsHeader({
           <h1 className="uc-type-h1 flex-1 min-w-0 text-[var(--uc-text)]">{title}</h1>
 
           <HeaderActionRail>
-            {usesBosniaHeaderActions ? (
-              <HeaderActionButton icon="contact-phone" label="Contact phone" onClick={onContactsClick} />
+            {onExchangeRatesClick ? (
+              <>
+                <button
+                  type="button"
+                  aria-label={t('runtime.payments.hub.actions.exchange-rates', 'Exchange rates')}
+                  onClick={onExchangeRatesClick}
+                  className="flex size-[32px] items-center justify-center text-[var(--uc-icon)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+                >
+                  <AppIcon name="payment-exchange-rates" size={22} color="currentColor" />
+                </button>
+                {onCustomiseClick ? (
+                  <button
+                    type="button"
+                    aria-label={t('runtime.payments.hub.customise', 'Customise payments')}
+                    onClick={onCustomiseClick}
+                    className="flex size-[32px] items-center justify-center text-[var(--uc-icon)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+                  >
+                    <BeneficiaryEditIcon size={22} />
+                  </button>
+                ) : null}
+              </>
             ) : (
-              <HeaderActionButton
-                icon="profile"
-                label={t('runtime.actions.profile', 'Profile')}
-                onClick={() => handleAction('profile')}
-              />
-            )}
-            <HeaderActionButton
-              icon="messages"
-              label={t('runtime.actions.messages', 'Messages')}
-              onClick={onMessagesClick}
-            />
-            {/* Evo trades Help for the pencil: this page is the one the customer
-                arranges, so the action that shapes it belongs in its header. */}
-            {onCustomiseClick ? (
-              <HeaderActionButton
-                icon="edit"
-                label={t('runtime.payments.hub.customise', 'Customise payments')}
-                onClick={onCustomiseClick}
-              />
-            ) : usesBosniaHeaderActions ? null : (
-              <HeaderActionButton
-                icon="help"
-                label={t('runtime.actions.help', 'Help')}
-                onClick={() => handleAction('help')}
-              />
+              <>
+                {usesBosniaHeaderActions ? (
+                  <HeaderActionButton icon="contact-phone" label="Contact phone" onClick={onContactsClick} />
+                ) : (
+                  <HeaderActionButton
+                    icon="profile"
+                    label={t('runtime.actions.profile', 'Profile')}
+                    onClick={() => handleAction('profile')}
+                  />
+                )}
+                <HeaderActionButton
+                  icon="messages"
+                  label={t('runtime.actions.messages', 'Messages')}
+                  onClick={onMessagesClick}
+                />
+                {onCustomiseClick ? (
+                  <HeaderActionButton
+                    icon="edit"
+                    label={t('runtime.payments.hub.customise', 'Customise payments')}
+                    onClick={onCustomiseClick}
+                  />
+                ) : usesBosniaHeaderActions ? null : (
+                  <HeaderActionButton
+                    icon="help"
+                    label={t('runtime.actions.help', 'Help')}
+                    onClick={() => handleAction('help')}
+                  />
+                )}
+              </>
             )}
           </HeaderActionRail>
         </div>
@@ -307,9 +335,6 @@ export default function PaymentsScreen({
       case 'templates':
         setActiveChildView('templates')
         return
-      case 'exchange-rates':
-        setActiveChildView('exchange-rates')
-        return
       case 'scan-pay':
         setSelectedPrimaryItemId('scan-pay')
         return
@@ -419,9 +444,10 @@ export default function PaymentsScreen({
         onContactsClick={onContactsClick}
         onMessagesClick={onMessagesClick}
         onCustomiseClick={isEvo2027 ? () => setHubEditOpen(true) : undefined}
+        onExchangeRatesClick={isEvo2027 ? () => setActiveChildView('exchange-rates') : undefined}
       />
 
-      <div className="flex-1 overflow-y-auto scrollbar-hide pb-[96px]">
+      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide pb-[96px]">
         {isEvo2027 ? (
           <Evo2027PaymentsHub
             disabledReasons={hubDisabledReasons}
