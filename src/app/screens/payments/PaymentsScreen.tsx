@@ -10,6 +10,7 @@ import PaymentOtherShortcut from '@/app/components/payments/PaymentOtherShortcut
 import SectionHeadingDivider from '@/app/components/SectionHeadingDivider'
 import Evo2027PaymentsHub, { type PaymentsHubActionId } from '@/app/screens/payments/Evo2027PaymentsHub'
 import Evo2027BeneficiaryDetailScreen from '@/app/screens/payments/Evo2027BeneficiaryDetailScreen'
+import Evo2027BeneficiaryEditScreen from '@/app/screens/payments/Evo2027BeneficiaryEditScreen'
 import ExchangeRatesScreen from '@/app/screens/payments/ExchangeRatesScreen'
 import InternalTransferScreen from '@/app/screens/payments/InternalTransferScreen'
 import PaymentTemplatesScreen from '@/app/screens/payments/PaymentTemplatesScreen'
@@ -29,7 +30,11 @@ import {
 import type { PaymentTemplateSelection } from '@/data/paymentTemplates'
 import type { FrequentBeneficiary } from '@/data/paymentsHub'
 import type { AccountTransaction } from '@/data/accountDetails'
-import { getStoredFavoriteBeneficiaryIds, storeFavoriteBeneficiaryIds } from '@/data/paymentsHub'
+import {
+  getStoredFavoriteBeneficiaryIds,
+  saveFrequentBeneficiaryDetails,
+  storeFavoriteBeneficiaryIds,
+} from '@/data/paymentsHub'
 
 import type { NavItem } from '@/app/components/BottomNavigation'
 
@@ -236,6 +241,7 @@ export default function PaymentsScreen({
   const [selectedPrimaryItemId, setSelectedPrimaryItemId] = useState<PaymentHeroItem['id'] | null>(null)
   const [hubEditOpen, setHubEditOpen] = useState(false)
   const [localSelectedBeneficiary, setLocalSelectedBeneficiary] = useState<FrequentBeneficiary | null>(null)
+  const [isEditingBeneficiary, setIsEditingBeneficiary] = useState(false)
   const [favoriteBeneficiaryIds, setFavoriteBeneficiaryIds] = useState<string[]>(getStoredFavoriteBeneficiaryIds)
   const [favoriteToast, setFavoriteToast] = useState<CopyToastState | null>(null)
   useEffect(() => {
@@ -247,6 +253,7 @@ export default function PaymentsScreen({
   }, [favoriteToast])
   const selectedBeneficiary = controlledBeneficiary === undefined ? localSelectedBeneficiary : controlledBeneficiary
   const setSelectedBeneficiary = (person: FrequentBeneficiary | null) => {
+    setIsEditingBeneficiary(false)
     if (onBeneficiarySelect) onBeneficiarySelect(person)
     else setLocalSelectedBeneficiary(person)
   }
@@ -373,6 +380,19 @@ export default function PaymentsScreen({
     return <RecurrentPaymentsScreen onBack={() => setActiveChildView('overview')} />
   }
 
+  if (isEvo2027 && selectedBeneficiary && isEditingBeneficiary) {
+    return (
+      <Evo2027BeneficiaryEditScreen
+        person={selectedBeneficiary}
+        onBack={() => setIsEditingBeneficiary(false)}
+        onSave={(updatedBeneficiary) => {
+          saveFrequentBeneficiaryDetails(updatedBeneficiary)
+          setSelectedBeneficiary(updatedBeneficiary)
+        }}
+      />
+    )
+  }
+
   if (isEvo2027 && selectedBeneficiary) {
     return (
       <div className="relative h-full w-full">
@@ -380,6 +400,7 @@ export default function PaymentsScreen({
           person={selectedBeneficiary}
           isFavorite={favoriteBeneficiaryIds.includes(selectedBeneficiary.id)}
           onFavoriteToggle={() => toggleFavoriteBeneficiary(selectedBeneficiary.id)}
+          onEditBeneficiary={() => setIsEditingBeneficiary(true)}
           onBack={() => setSelectedBeneficiary(null)}
           onSendMoney={() => onBeneficiarySendMoney?.(selectedBeneficiary)}
           onTransactionClick={(payment) => onBeneficiaryTransactionClick?.(payment)}
