@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import CopyToast, { type CopyToastState } from '@/app/components/accounts/CopyToast'
 import { BottomSheet } from '@/app/components/BottomSheet'
 import BottomNavigation from '@/app/components/BottomNavigation'
 import { HeaderActionButton, HeaderActionRail } from '@/app/components/HeaderActionIcons'
@@ -8,6 +9,7 @@ import PaymentHeroCard from '@/app/components/payments/PaymentHeroCard'
 import PaymentOtherShortcut from '@/app/components/payments/PaymentOtherShortcut'
 import SectionHeadingDivider from '@/app/components/SectionHeadingDivider'
 import Evo2027PaymentsHub, { type PaymentsHubActionId } from '@/app/screens/payments/Evo2027PaymentsHub'
+import Evo2027BeneficiaryDetailScreen from '@/app/screens/payments/Evo2027BeneficiaryDetailScreen'
 import ExchangeRatesScreen from '@/app/screens/payments/ExchangeRatesScreen'
 import InternalTransferScreen from '@/app/screens/payments/InternalTransferScreen'
 import PaymentTemplatesScreen from '@/app/screens/payments/PaymentTemplatesScreen'
@@ -25,6 +27,9 @@ import {
   type PaymentOtherItem,
 } from '@/app/config/paymentsMenuConfig'
 import type { PaymentTemplateSelection } from '@/data/paymentTemplates'
+import type { FrequentBeneficiary } from '@/data/paymentsHub'
+import type { AccountTransaction } from '@/data/accountDetails'
+import { getStoredFavoriteBeneficiaryIds, storeFavoriteBeneficiaryIds } from '@/data/paymentsHub'
 
 import type { NavItem } from '@/app/components/BottomNavigation'
 
@@ -37,6 +42,10 @@ interface PaymentsScreenProps {
   onInvestmentsClick?: () => void
   onMoreClick?: () => void
   onDomesticPaymentClick?: () => void
+  onBeneficiarySendMoney?: (person: FrequentBeneficiary) => void
+  selectedBeneficiary?: FrequentBeneficiary | null
+  onBeneficiarySelect?: (person: FrequentBeneficiary | null) => void
+  onBeneficiaryTransactionClick?: (transaction: AccountTransaction) => void
   onTemplateSelect?: (selection: PaymentTemplateSelection) => void
 }
 
@@ -187,6 +196,10 @@ export default function PaymentsScreen({
   onInvestmentsClick,
   onMoreClick,
   onDomesticPaymentClick,
+  onBeneficiarySendMoney,
+  selectedBeneficiary: controlledBeneficiary,
+  onBeneficiarySelect,
+  onBeneficiaryTransactionClick,
   onTemplateSelect,
 }: PaymentsScreenProps) {
   const demoState = useDemo()
@@ -222,6 +235,33 @@ export default function PaymentsScreen({
       : t(menu.otherTitleTranslationKey ?? 'runtime.payments.other', menu.otherTitle)
   const [selectedPrimaryItemId, setSelectedPrimaryItemId] = useState<PaymentHeroItem['id'] | null>(null)
   const [hubEditOpen, setHubEditOpen] = useState(false)
+  const [localSelectedBeneficiary, setLocalSelectedBeneficiary] = useState<FrequentBeneficiary | null>(null)
+  const [favoriteBeneficiaryIds, setFavoriteBeneficiaryIds] = useState<string[]>(getStoredFavoriteBeneficiaryIds)
+  const [favoriteToast, setFavoriteToast] = useState<CopyToastState | null>(null)
+  useEffect(() => {
+    if (!favoriteToast?.visible) return
+    const timeoutId = window.setTimeout(() => {
+      setFavoriteToast((current) => (current ? { ...current, visible: false } : null))
+    }, 1400)
+    return () => window.clearTimeout(timeoutId)
+  }, [favoriteToast])
+  const selectedBeneficiary = controlledBeneficiary === undefined ? localSelectedBeneficiary : controlledBeneficiary
+  const setSelectedBeneficiary = (person: FrequentBeneficiary | null) => {
+    if (onBeneficiarySelect) onBeneficiarySelect(person)
+    else setLocalSelectedBeneficiary(person)
+  }
+  const toggleFavoriteBeneficiary = (personId: string) => {
+    const wasFavorite = favoriteBeneficiaryIds.includes(personId)
+    setFavoriteBeneficiaryIds((current) => {
+      const next = current.includes(personId) ? current.filter((id) => id !== personId) : [...current, personId]
+      storeFavoriteBeneficiaryIds(next)
+      return next
+    })
+    setFavoriteToast({
+      message: wasFavorite ? 'Removed from favorites' : 'Added to favorites',
+      visible: true,
+    })
+  }
   const [activeChildView, setActiveChildView] = useState<
     'overview' | 'templates' | 'exchange-rates' | 'internal-transfer' | 'recurrent-payments'
   >('overview')
@@ -316,6 +356,7 @@ export default function PaymentsScreen({
       <PaymentTemplatesScreen
         onBack={() => setActiveChildView('overview')}
         onSelect={(selection) => onTemplateSelect?.(selection)}
+        isEvo2027={isEvo2027}
       />
     )
   }
@@ -332,6 +373,23 @@ export default function PaymentsScreen({
     return <RecurrentPaymentsScreen onBack={() => setActiveChildView('overview')} />
   }
 
+  if (isEvo2027 && selectedBeneficiary) {
+    return (
+      <div className="relative h-full w-full">
+        <Evo2027BeneficiaryDetailScreen
+          person={selectedBeneficiary}
+          isFavorite={favoriteBeneficiaryIds.includes(selectedBeneficiary.id)}
+          onFavoriteToggle={() => toggleFavoriteBeneficiary(selectedBeneficiary.id)}
+          onBack={() => setSelectedBeneficiary(null)}
+          onSendMoney={() => onBeneficiarySendMoney?.(selectedBeneficiary)}
+          onTransactionClick={(payment) => onBeneficiaryTransactionClick?.(payment)}
+          sendMoneyDisabled={Boolean(domesticReason) || !onBeneficiarySendMoney}
+        />
+        <CopyToast toast={favoriteToast} bottomOffset={106} />
+      </div>
+    )
+  }
+
   return (
     <div className="relative flex h-full w-full flex-col bg-[var(--uc-app-bg)] text-[var(--uc-text)]">
       <div className="h-[54px] flex-shrink-0 bg-[var(--uc-app-bg)]" />
@@ -346,8 +404,9 @@ export default function PaymentsScreen({
         {isEvo2027 ? (
           <Evo2027PaymentsHub
             disabledReasons={hubDisabledReasons}
+            favoriteBeneficiaryIds={favoriteBeneficiaryIds}
             onAction={handleHubAction}
-            onBeneficiarySelect={() => onDomesticPaymentClick?.()}
+            onBeneficiarySelect={setSelectedBeneficiary}
             editOpen={hubEditOpen}
             onEditClose={() => setHubEditOpen(false)}
           />
@@ -392,6 +451,8 @@ export default function PaymentsScreen({
       <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center border-t border-[var(--uc-border-muted)] bg-[var(--uc-bottom-bar-bg)]">
         <BottomNavigation activeTab="payments" onTabChange={handleTabChange} />
       </div>
+
+      <CopyToast toast={favoriteToast} />
 
       {selectedPrimaryItemId && selectedHeroSheet && (
         <PaymentHeroSheet

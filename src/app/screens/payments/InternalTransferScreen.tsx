@@ -5,6 +5,7 @@ import { AppIcon } from '@/app/components/icons'
 import PageHeader from '@/app/components/PageHeader'
 import PrimaryButton from '@/app/components/PrimaryButton'
 import { CurrencyFlagRoundel } from '@/app/components/payments/CurrencyFlag'
+import SelectedMark from '@/app/components/payments/SelectedMark'
 import { useCountry } from '@/app/state/demoStore'
 import type { CountryId } from '@/app/state/demoTypes'
 import { formatMoneyNumber } from '@/app/registry/countryConfig'
@@ -211,8 +212,8 @@ function AccountPicker({
   const title = pickerRole === 'source' ? 'Choose source account' : 'Choose destination account'
 
   return (
-    <BottomSheet title={title} onClose={onClose} closeLabel="Close account picker" showDragHandle className="pb-[24px]">
-      <div className="flex flex-col gap-[8px]">
+    <BottomSheet title={title} onClose={onClose} closeLabel="Close account picker" maxHeightOffsetPx={70}>
+      <div className="overflow-hidden rounded-[14px] bg-[var(--uc-surface)]">
         {accounts
           .filter((account) => account.id !== blockedAccountId)
           .map((account) => {
@@ -222,24 +223,21 @@ function AccountPicker({
                 key={account.id}
                 type="button"
                 aria-label={`${account.name}, ${formatBalance(account, country)}`}
+                aria-pressed={selected}
                 onClick={() => onSelect(account)}
-                className={`grid min-h-[76px] w-full grid-cols-[40px_minmax(0,1fr)_24px] items-center gap-[12px] rounded-[12px] px-[12px] py-[10px] text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${
-                  selected
-                    ? 'bg-[var(--uc-action-soft)]'
-                    : 'bg-[var(--uc-surface-muted)] hover:bg-[color-mix(in_srgb,var(--uc-action)_8%,var(--uc-surface-muted))]'
-                }`}
+                className={`grid min-h-[76px] w-full grid-cols-[36px_minmax(0,1fr)_16px] items-center gap-[12px] border-b border-[var(--uc-border-muted)] pl-0 pr-[14px] text-left last:border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-action)] ${selected ? 'text-[var(--uc-action-strong)]' : ''}`}
               >
-                <CurrencyFlagRoundel currency={account.currency} size={40} />
+                <CurrencyFlagRoundel currency={account.currency} size={36} />
                 <span className="min-w-0">
-                  <span className="uc-type-h2 block truncate text-[var(--uc-text)]">{account.name}</span>
-                  <span className="uc-type-n5 mt-[3px] block truncate text-[var(--uc-text-muted)]">
+                  <span className="block truncate text-[16px] font-semibold leading-[20px]">{account.name}</span>
+                  <span className="block truncate text-[12px] text-[var(--uc-text-muted)]">
                     {account.accountNumber}
                   </span>
-                  <span className="uc-type-n5 mt-[2px] block truncate text-[var(--uc-text-muted)]">
+                  <span className="block truncate text-[12px] text-[var(--uc-text-muted)]">
                     Available {formatBalance(account, country)}
                   </span>
                 </span>
-                {selected ? <AppIcon name="check" color="var(--uc-action)" /> : null}
+                {selected ? <SelectedMark /> : <span aria-hidden="true" />}
               </button>
             )
           })}

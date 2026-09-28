@@ -438,6 +438,7 @@ export function InvestmentSecurityDetailScreen({
               amountsHidden={amountsHidden}
               compact
               showVerticalGridLines={false}
+              czRoboPresentation={country === "CZ"}
             />
             <InvestmentPeriodChips
               periods={INVESTMENT_PERIODS.filter((item) => item.id !== "6m")}

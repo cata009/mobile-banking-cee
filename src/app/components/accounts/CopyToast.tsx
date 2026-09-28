@@ -9,7 +9,7 @@ export interface CopyToastState {
  * Centered pill toast shown at the bottom of the viewport after a copy action.
  * Mirrors the HU kids copy toast so the experience is consistent across PI.
  */
-export default function CopyToast({ toast }: { toast: CopyToastState | null }) {
+export default function CopyToast({ toast, bottomOffset = 18 }: { toast: CopyToastState | null; bottomOffset?: number }) {
   if (!toast) {
     return null;
   }
@@ -20,6 +20,7 @@ export default function CopyToast({ toast }: { toast: CopyToastState | null }) {
       className="pointer-events-none absolute inset-x-0 bottom-[18px] z-[60] flex justify-center px-[16px]"
       data-copy-toast
       role="status"
+      style={{ bottom: bottomOffset }}
     >
       <div
         className={cn(

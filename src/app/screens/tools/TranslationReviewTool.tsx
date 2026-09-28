@@ -1,5 +1,5 @@
 /**
- * Translation review table.
+ * Translation review.
  *
  * One translation namespace at a time, every key across all 14 language
  * columns. Localized strings that are much longer than the same country's
