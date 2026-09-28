@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { AlertTriangle, CalendarDays, ChevronRight, Delete, Info, Landmark } from 'lucide-react'
 import { BottomSheet } from '@/app/components/BottomSheet'
 import AccountSearchBar from '@/app/components/accounts/AccountSearchBar'
+import Evo2027PaymentSelectionRow from '@/app/components/payments/Evo2027PaymentSelectionRow'
 import BankBadge from '@/app/components/payments/BankBadge'
 import CountryFlagRoundel from '@/app/components/payments/CountryFlagRoundel'
 import IbanMaskedField from '@/app/components/payments/IbanMaskedField'
@@ -17,6 +18,7 @@ import { useLanguage } from '@/app/contexts/LanguageContext'
 import { useCountry } from '@/app/state/demoStore'
 import { useProducts } from '@/hooks/useProducts'
 import { formatEvo2027Number } from '@/app/utils/evo2027Formatting'
+import { getPaymentTemplates } from '@/data/paymentTemplates'
 import {
   appendPaymentToken,
   evaluatePaymentExpression,
@@ -24,6 +26,7 @@ import {
 } from '@/app/utils/paymentAmountCalculator'
 import type { DomesticPaymentDraft } from '@/data/paymentFlow'
 import { getPaymentFxQuote, type PaymentFxQuote } from '@/data/paymentFxQuote'
+import { getFrequentBeneficiaries, type FrequentBeneficiary } from '@/data/paymentsHub'
 import {
   CHINA_PAYMENT_PURPOSES,
   getRecipientCountry,
@@ -48,6 +51,7 @@ const BANK_NAMES: Record<string, string> = {
   '0300': 'ČSOB',
   '0600': 'MONETA Money Bank',
   '0800': 'Česká spořitelna',
+  '8250': 'Revolut',
   '2010': 'Fio banka',
   '2700': 'UniCredit Bank',
   '5500': 'Raiffeisenbank',
@@ -93,7 +97,7 @@ function beneficiaryBankId(draft: DomesticPaymentDraft, homeCountry: CountryId):
   const code = (draft.recipientAccountMode ?? 'local') === 'iban' ? draft.accountNumber.slice(4, 8) : draft.bankCode
   return (
     (
-      { '2700': 'unicredit', '0100': 'kb', '0800': 'cs', '5500': 'raiffeisen', '0600': 'moneta' } as Partial<
+      { '2700': 'unicredit', '0100': 'kb', '0800': 'cs', '5500': 'raiffeisen', '0600': 'moneta', '8250': 'revolut' } as Partial<
         Record<string, BankId>
       >
     )[code] ?? null
@@ -135,31 +139,41 @@ function BeneficiaryAvatar({
   )
 }
 
+function ExistingBeneficiaryIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path fillRule="evenodd" clipRule="evenodd" d="M4.13944 1H19.8537C21.5894 1 22.9966 2.40721 22.9966 4.14286V19.8571C22.9966 21.5928 21.5894 23 19.8537 23H4.13944V1ZM8.06801 17.5H19.068V12.7857H12.8687C10.2523 12.7896 8.11908 14.8844 8.06801 17.5ZM15.9252 8.46429C15.9252 6.9455 14.694 5.71429 13.1752 5.71429C11.6564 5.71429 10.4252 6.9455 10.4252 8.46429C10.4252 9.98307 11.6564 11.2143 13.1752 11.2143C14.694 11.2143 15.9252 9.98307 15.9252 8.46429Z" fill="currentColor" />
+      <path d="M0.996582 18.2857C0.996582 16.9838 2.0518 15.9286 3.35372 15.9286V20.6429C2.0518 20.6429 0.996582 19.5876 0.996582 18.2857Z" fill="currentColor" />
+      <path d="M3.35372 9.64286C2.0518 9.64286 0.996582 10.6981 0.996582 12C0.996582 13.3019 2.0518 14.3571 3.35372 14.3571V9.64286Z" fill="currentColor" />
+      <path d="M0.996582 5.71429C0.996582 4.41236 2.0518 3.35714 3.35372 3.35714V8.07143C2.0518 8.07143 0.996582 7.01621 0.996582 5.71429Z" fill="currentColor" />
+    </svg>
+  )
+}
+
 function FlowTop({
   title,
   headerSubtitle,
   onBack,
-  onHelp,
   rightAction,
   onRightActionClick,
+  rightActionLabel,
 }: {
   title: string
   headerSubtitle?: string
   onBack: () => void
-  onHelp?: () => void
   rightAction?: ReactNode
   onRightActionClick?: () => void
+  rightActionLabel?: string
 }) {
   return (
     <PageHeader
       title={title}
       headerSubtitle={headerSubtitle}
       onBack={onBack}
-      onHelpClick={onHelp}
-      showHelp={Boolean(onHelp)}
+      showHelp={false}
       rightActionIcon={rightAction}
       onRightActionClick={onRightActionClick}
-      rightActionLabel="Recipient details"
+      rightActionLabel={rightActionLabel ?? "Recipient details"}
       variant="light"
       includeSafeArea
       renderLargeTitle={false}
@@ -183,6 +197,7 @@ function FormField({
   placeholder,
   inputMode,
   type = 'text',
+  headerAccessory,
 }: {
   label: string
   value: string
@@ -190,11 +205,15 @@ function FormField({
   placeholder?: string
   inputMode?: 'numeric' | 'email'
   type?: string
+  headerAccessory?: ReactNode
 }) {
   const id = useId()
   return (
     <label htmlFor={id} className="block w-full">
-      <span className="uc-type-n4 block text-[var(--uc-text)]">{label}</span>
+      <div className="flex items-center justify-between gap-[8px]">
+        <span className="uc-type-n4 block text-[var(--uc-text)]">{label}</span>
+        {headerAccessory}
+      </div>
       <input
         id={id}
         aria-label={label}
@@ -293,8 +312,9 @@ export function Evo2027DomesticPaymentCreateScreen({
   )
   const [accountPickerOpen, setAccountPickerOpen] = useState(false)
   const [fxBreakdownOpen, setFxBreakdownOpen] = useState(false)
-  const [helpOpen, setHelpOpen] = useState(false)
   const [beneficiaryInfoOpen, setBeneficiaryInfoOpen] = useState(false)
+  const [existingBeneficiaryPickerOpen, setExistingBeneficiaryPickerOpen] = useState(false)
+  const [existingBeneficiarySearch, setExistingBeneficiarySearch] = useState('')
   const [scheduleOpen, setScheduleOpen] = useState(false)
   const [countryPickerOpen, setCountryPickerOpen] = useState(false)
   const [currencyPickerOpen, setCurrencyPickerOpen] = useState(false)
@@ -316,6 +336,48 @@ export function Evo2027DomesticPaymentCreateScreen({
   const [lastName, setLastName] = useState(initialNameParts.length > 1 ? (initialNameParts.at(-1) ?? '') : '')
   const recipientCountry = form.recipientCountry ?? country
   const recipientRoute = resolveRecipientRoute(country, recipientCountry, form.currency)
+  const existingBeneficiaries = getFrequentBeneficiaries(country)
+  const existingTemplates = getPaymentTemplates(country).map((template) =>
+    template.id === 'family-savings' && country === 'CZ'
+      ? { ...template, beneficiaryName: 'Marie Novotná' }
+      : template,
+  )
+  const normalizedBeneficiarySearch = existingBeneficiarySearch.trim().toLocaleLowerCase()
+  const filteredExistingBeneficiaries = existingBeneficiaries.filter((person) => {
+    if (!normalizedBeneficiarySearch) return true
+    return [person.name, person.accountNumber, person.paymentAccountNumber, person.paymentBankCode]
+      .some((value) => value.toLocaleLowerCase().includes(normalizedBeneficiarySearch))
+  })
+  const filteredExistingTemplates = existingTemplates.filter((template) => {
+    if (!normalizedBeneficiarySearch) return true
+    return [template.title, template.beneficiaryName, template.accountNumber]
+      .some((value) => value.toLocaleLowerCase().includes(normalizedBeneficiarySearch))
+  })
+  const templateAccountNumber = (template: (typeof existingTemplates)[number]) =>
+    template.accountNumber.replace(/\D/g, '').slice(-6)
+  const templateRecipientKind = (template: (typeof existingTemplates)[number]) =>
+    template.id === 'family-savings' ? 'individual' : 'business'
+  const selectedExistingBeneficiaryId = existingBeneficiaries.find((person) =>
+    form.beneficiaryName === person.name &&
+    form.recipientKind === person.recipientKind &&
+    (form.recipientCountry ?? (country === 'BA_BL' ? 'BA' : country)) === (country === 'BA_BL' ? 'BA' : country) &&
+    (form.recipientAccountMode ?? 'local') === 'local' &&
+    form.prefix === (person.paymentAccountPrefix ?? '') &&
+    form.accountNumber === person.paymentAccountNumber &&
+    form.bankCode === person.paymentBankCode &&
+    form.currency === person.currency,
+  )?.id
+  const selectedExistingTemplateId = existingTemplates.find((template) =>
+    form.beneficiaryName === template.beneficiaryName &&
+    form.recipientKind === templateRecipientKind(template) &&
+    (form.recipientAccountMode ?? 'local') === 'local' &&
+    form.prefix === '' &&
+    form.accountNumber === templateAccountNumber(template) &&
+    form.bankCode === template.bankCode &&
+    form.currency === template.currency &&
+    form.amount === template.amount.replace(/\./g, '') &&
+    form.informationForBeneficiary === template.paymentNote,
+  )?.id
   const isCzLocal = recipientRoute === 'cz-domestic' && (form.recipientAccountMode ?? 'local') === 'local'
   const isForeignUs = recipientRoute === 'foreign-us'
   const isForeignCn = recipientRoute === 'foreign-cn'
@@ -325,6 +387,28 @@ export function Evo2027DomesticPaymentCreateScreen({
     recipientRoute === 'cz-domestic'
       ? (isCzLocal ? BANK_NAMES[form.bankCode] : BANK_NAMES[form.accountNumber.slice(4, 8)]) || form.bankName
       : form.bankName
+  const czAccountModeSelector = recipientRoute === 'cz-domestic' ? (
+    <button
+      type="button"
+      onClick={() => setBankDetailsPickerOpen(true)}
+      aria-label={`Change account details type, currently ${isCzLocal ? 'Account number' : 'IBAN'}`}
+      className="inline-flex shrink-0 items-center gap-[4px] rounded-full border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[8px] py-[3px] text-[12px] font-semibold text-[var(--uc-action)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+    >
+      {isCzLocal ? 'Account number' : 'IBAN'}
+      <SelectChevron filled size={14} />
+    </button>
+  ) : null
+  const usBankDetailsModeSelector = isForeignUs ? (
+    <button
+      type="button"
+      onClick={() => setUsBankDetailsPickerOpen(true)}
+      aria-label="Choose US bank details"
+      className="inline-flex shrink-0 items-center gap-[4px] rounded-full border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[8px] py-[3px] text-[12px] font-semibold text-[var(--uc-action)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+    >
+      {US_BANK_DETAILS_OPTIONS.find((option) => option.value === usBankDetailsMode)?.label}
+      <SelectChevron filled size={14} />
+    </button>
+  ) : null
   const selectedPayerAccount =
     accounts.find((account) => account.accountNumber === form.payerAccountNumber) ??
     accounts.find((account) => account.name === form.payerAccountName)
@@ -347,6 +431,75 @@ export function Evo2027DomesticPaymentCreateScreen({
     `${option.code} ${option.name}`.toLowerCase().includes(currencySearch.trim().toLowerCase())
   const update = (key: keyof DomesticPaymentDraft, value: string | boolean) =>
     setForm((current) => ({ ...current, [key]: value }))
+  const selectExistingBeneficiary = (person: FrequentBeneficiary) => {
+    const parts = person.name.trim().split(/\s+/).filter(Boolean)
+    setFirstNames(parts.length > 1 ? parts.slice(0, -1).join(' ') : (parts[0] ?? ''))
+    setLastName(parts.length > 1 ? (parts.at(-1) ?? '') : '')
+    setForm((current) => ({
+      ...current,
+      recipientCountry: country === 'BA_BL' ? 'BA' : country,
+      recipientAccountMode: 'local',
+      recipientKind: person.recipientKind,
+      recipientEmail: '',
+      beneficiaryName: person.name,
+      prefix: person.paymentAccountPrefix ?? '',
+      accountNumber: person.paymentAccountNumber,
+      bankCode: person.paymentBankCode,
+      bankName: BANK_NAMES[person.paymentBankCode] ?? '',
+      bankSwift: '',
+      routingNumber: '',
+      cnapsCode: '',
+      recipientStreet: '',
+      recipientCity: '',
+      recipientRegion: '',
+      recipientPostalCode: '',
+      paymentPurpose: '',
+      currency: person.currency,
+      amount: '',
+      informationForBeneficiary: '',
+    }))
+    setAmountExpression('')
+    setCountryChosen(true)
+    setCurrencyChosen(true)
+    setExistingBeneficiarySearch('')
+    setExistingBeneficiaryPickerOpen(false)
+  }
+  const selectExistingTemplate = (template: (typeof existingTemplates)[number]) => {
+    const beneficiaryName = template.beneficiaryName
+    const recipientKind = templateRecipientKind(template)
+    const nameParts = beneficiaryName.trim().split(/\s+/).filter(Boolean)
+    const nextAmountExpression = template.amount.replace(/\./g, '')
+    setFirstNames(nameParts.length > 1 ? nameParts.slice(0, -1).join(' ') : (nameParts[0] ?? ''))
+    setLastName(nameParts.length > 1 ? (nameParts.at(-1) ?? '') : '')
+    setAmountExpression(nextAmountExpression)
+    setForm((current) => ({
+      ...current,
+      recipientCountry: country === 'BA_BL' ? 'BA' : country,
+      recipientAccountMode: 'local',
+      recipientKind,
+      recipientEmail: '',
+      beneficiaryName,
+      prefix: '',
+      accountNumber: templateAccountNumber(template),
+      bankCode: template.bankCode,
+      bankName: template.bankName,
+      bankSwift: '',
+      routingNumber: '',
+      cnapsCode: '',
+      recipientStreet: '',
+      recipientCity: '',
+      recipientRegion: '',
+      recipientPostalCode: '',
+      paymentPurpose: '',
+      currency: template.currency,
+      amount: nextAmountExpression,
+      informationForBeneficiary: template.paymentNote,
+    }))
+    setCountryChosen(true)
+    setCurrencyChosen(true)
+    setExistingBeneficiarySearch('')
+    setExistingBeneficiaryPickerOpen(false)
+  }
   const nameValid =
     (form.recipientKind ?? 'individual') === 'business'
       ? form.beneficiaryName.trim().length >= 2
@@ -498,8 +651,8 @@ export function Evo2027DomesticPaymentCreateScreen({
         }
         headerSubtitle={step === 'amount' ? formatRecipientAccount(form, country) : undefined}
         onBack={step === 'amount' ? () => setStep('recipient') : onBack}
-        onHelp={step === 'recipient' ? () => setHelpOpen(true) : undefined}
         rightAction={step === 'amount' ? <BeneficiaryAvatar draft={form} homeCountry={country} /> : undefined}
+        rightActionLabel="Recipient details"
         onRightActionClick={step === 'amount' ? () => setBeneficiaryInfoOpen(true) : undefined}
       />
       {step === 'recipient' ? (
@@ -512,7 +665,7 @@ export function Evo2027DomesticPaymentCreateScreen({
               {t('runtime.payments.evo.recipientTitle', 'Add beneficiary')}
             </h1>
             <div
-              className="mb-[18px] grid grid-cols-2 rounded-full bg-[var(--uc-surface-muted)] p-[3px]"
+              className="mb-[16px] grid grid-cols-2 rounded-full bg-[var(--uc-surface-muted)] p-[2px]"
               aria-label="Recipient type"
             >
               {(['individual', 'business'] as const).map((kind) => (
@@ -528,7 +681,7 @@ export function Evo2027DomesticPaymentCreateScreen({
                         kind === 'individual' ? `${firstNames} ${lastName}`.trim() : current.beneficiaryName,
                     }))
                   }
-                  className={`h-[39px] rounded-full text-[14px] font-semibold ${(form.recipientKind || 'individual') === kind ? 'bg-[var(--uc-surface)] shadow-sm' : 'text-[var(--uc-text-muted)]'}`}
+                  className={`h-[32px] rounded-full text-[14px] font-semibold ${(form.recipientKind || 'individual') === kind ? 'bg-[var(--uc-surface)] shadow-sm' : 'text-[var(--uc-text-muted)]'}`}
                 >
                   {kind === 'individual' ? 'Individual' : 'Business'}
                 </button>
@@ -574,27 +727,20 @@ export function Evo2027DomesticPaymentCreateScreen({
               {countryChosen && currencyChosen ? (
                 <>
                   <div className="flex items-center justify-between gap-[8px] px-[2px] pt-[13px]">
-                    <h2 className="text-[17px] font-semibold">Recipient details</h2>
-                    {recipientRoute === 'cz-domestic' ? (
-                      <button
-                        type="button"
-                        onClick={() => setBankDetailsPickerOpen(true)}
-                        className="flex items-center gap-[5px] text-[13px] font-semibold text-[var(--uc-action)]"
-                      >
-                        {isCzLocal ? 'Account number' : 'IBAN'}
-                        <SelectChevron filled size={16} />
-                      </button>
-                    ) : isForeignUs ? (
-                      <button
-                        type="button"
-                        onClick={() => setUsBankDetailsPickerOpen(true)}
-                        aria-label="Choose US bank details"
-                        className="flex items-center gap-[5px] text-[13px] font-semibold text-[var(--uc-action)]"
-                      >
-                        {US_BANK_DETAILS_OPTIONS.find((option) => option.value === usBankDetailsMode)?.label}
-                        <SelectChevron filled size={16} />
-                      </button>
-                    ) : null}
+                    <div className="flex min-w-0 flex-col items-start">
+                      <h2 className="text-[17px] font-semibold">Recipient details</h2>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setExistingBeneficiarySearch('')
+                        setExistingBeneficiaryPickerOpen(true)
+                      }}
+                      aria-label="Select an existing beneficiary"
+                      className="grid size-[32px] shrink-0 place-items-center rounded-[8px] text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+                    >
+                      <ExistingBeneficiaryIcon />
+                    </button>
                   </div>
                   {isCzLocal ? (
                     <FormField
@@ -610,6 +756,7 @@ export function Evo2027DomesticPaymentCreateScreen({
                       <FormField
                         label="Account number"
                         value={form.accountNumber}
+                        headerAccessory={usBankDetailsModeSelector}
                         onChange={(value) => update('accountNumber', value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 34))}
                         inputMode={isForeignUs ? 'numeric' : undefined}
                         placeholder={isForeignUs ? 'e.g. 1234567890' : 'Account number supplied by recipient'}
@@ -666,6 +813,7 @@ export function Evo2027DomesticPaymentCreateScreen({
                     <FormField
                       label="Account number"
                       value={form.accountNumber}
+                      headerAccessory={czAccountModeSelector}
                       onChange={(value) => update('accountNumber', value.replace(/\D/g, '').slice(0, 10))}
                       inputMode="numeric"
                       placeholder="e.g. 2000145399"
@@ -675,6 +823,7 @@ export function Evo2027DomesticPaymentCreateScreen({
                       value={form.accountNumber}
                       countryCode={recipientCountry}
                       length={getRecipientCountry(recipientCountry)?.ibanLength ?? 34}
+                      headerAccessory={czAccountModeSelector}
                       onChange={(value) => update('accountNumber', value)}
                       onScan={() => setIbanScanOpen(true)}
                     />
@@ -698,22 +847,10 @@ export function Evo2027DomesticPaymentCreateScreen({
                       placeholder="e.g. 0800"
                     />
                   ) : null}
-                  {isCzLocal && (form.accountNumber || form.bankCode) ? (
-                    <div className="flex items-center justify-between gap-[10px] px-[8px] text-[12px] text-[var(--uc-text-muted)]">
-                      <span className="min-w-0 truncate" title={`Czech format: ${formatRecipientAccount(form, country)}`}>
-                        Czech format: {formatRecipientAccount(form, country)}
-                      </span>
-                      {bankName ? (
-                        <span className="flex max-w-[42%] shrink-0 items-center gap-[5px] text-[var(--uc-action-strong)]">
-                          <Landmark size={14} className="shrink-0" />
-                          <span className="truncate" title={bankName}>{bankName}</span>
-                        </span>
-                      ) : null}
-                    </div>
-                  ) : bankName ? (
-                    <p className="flex items-center gap-[7px] px-[8px] text-[12px] text-[var(--uc-text-muted)]">
-                      <Landmark size={15} className="text-[var(--uc-action)]" />
-                      {bankName}
+                  {bankName ? (
+                    <p className="flex items-center gap-[7px] px-[8px] text-[12px] text-[var(--uc-text)]">
+                      <Landmark size={15} className="shrink-0 text-[var(--uc-text)]" />
+                      <span className="truncate" title={bankName}>{bankName}</span>
                     </p>
                   ) : null}
                   {(form.recipientKind ?? 'individual') === 'business' ? (
@@ -1043,19 +1180,15 @@ export function Evo2027DomesticPaymentCreateScreen({
       ) : null}
       {usBankDetailsPickerOpen ? (
         <BottomSheet
-          title="Choose which bank details to use"
+          title="Choose bank details"
           onClose={() => setUsBankDetailsPickerOpen(false)}
-          showDragHandle
-          showCloseButton={false}
-          maxHeightOffsetPx={70}
         >
-          <div role="radiogroup" aria-label="US bank details" className="overflow-hidden rounded-[18px] bg-[var(--uc-surface)]">
+          <div className="overflow-hidden rounded-[14px] bg-[var(--uc-surface)]">
             {US_BANK_DETAILS_OPTIONS.map((option) => (
               <button
                 key={option.value}
                 type="button"
-                role="radio"
-                aria-checked={usBankDetailsMode === option.value}
+                aria-pressed={usBankDetailsMode === option.value}
                 onClick={() => {
                   setForm((current) => ({
                     ...current,
@@ -1065,18 +1198,94 @@ export function Evo2027DomesticPaymentCreateScreen({
                   }))
                   setUsBankDetailsPickerOpen(false)
                 }}
-                className="flex min-h-[68px] w-full items-center gap-[15px] border-b border-[var(--uc-border-muted)] px-[16px] text-left last:border-0"
+                className={`flex min-h-[62px] w-full items-center justify-between gap-[12px] border-b border-[var(--uc-border-muted)] px-[14px] text-left last:border-0 ${usBankDetailsMode === option.value ? 'text-[var(--uc-action-strong)]' : 'text-[var(--uc-text)]'}`}
               >
-                <span aria-hidden="true" className={`grid size-[22px] shrink-0 place-items-center rounded-full border-2 ${usBankDetailsMode === option.value ? 'border-[var(--uc-action-strong)]' : 'border-[var(--uc-text-muted)]'}`}>
-                  {usBankDetailsMode === option.value ? <span className="size-[11px] rounded-full bg-[var(--uc-action-strong)]" /> : null}
-                </span>
                 <span className="min-w-0">
-                  <span className="block text-[16px] font-medium">{option.label}</span>
+                  <span className="block text-[16px] font-semibold">{option.label}</span>
                   {option.description ? <span className="block text-[12px] text-[var(--uc-text-muted)]">{option.description}</span> : null}
                 </span>
+                {usBankDetailsMode === option.value ? <SelectedMark /> : null}
               </button>
             ))}
           </div>
+        </BottomSheet>
+      ) : null}
+      {existingBeneficiaryPickerOpen ? (
+        <BottomSheet
+          title="Choose a beneficiary or template"
+          onClose={() => {
+            setExistingBeneficiaryPickerOpen(false)
+            setExistingBeneficiarySearch('')
+          }}
+          fillHeight
+          maxHeightOffsetPx={70}
+        >
+          <div className="sticky top-0 z-10 mb-[8px] bg-[var(--uc-sheet-bg)] pb-[12px]">
+            <div
+              className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[8px]"
+              style={{ ['--uc-app-bg' as string]: 'var(--uc-surface)' }}
+            >
+              <AccountSearchBar
+                value={existingBeneficiarySearch}
+                onValueChange={setExistingBeneficiarySearch}
+                placeholder="Search beneficiaries and templates"
+                showTrailingAction={false}
+              />
+            </div>
+          </div>
+          <div className="space-y-[18px]">
+            {filteredExistingBeneficiaries.length > 0 ? (
+              <section aria-label="Beneficiaries">
+                <h2 className="mb-[8px] text-[15px] font-semibold text-[var(--uc-text)]">Beneficiaries</h2>
+                <div className="overflow-hidden rounded-[14px] bg-[var(--uc-surface)] divide-y divide-[var(--uc-border-muted)]">
+                  {filteredExistingBeneficiaries.map((person) => (
+                    <Evo2027PaymentSelectionRow
+                      key={person.id}
+                      item={{
+                        id: person.id,
+                        kind: 'beneficiary',
+                        title: person.name,
+                        beneficiaryName: person.name,
+                        accountNumber: `${person.paymentAccountPrefix ? `${person.paymentAccountPrefix}-` : ''}${person.paymentAccountNumber}/${person.paymentBankCode}`,
+                        amount: '',
+                        currency: person.currency,
+                        bank: person.bank,
+                      }}
+                      onSelect={() => selectExistingBeneficiary(person)}
+                      selectLabel="Select beneficiary"
+                      selected={selectedExistingBeneficiaryId === person.id}
+                    />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {filteredExistingTemplates.length > 0 ? (
+              <section aria-label="Templates">
+                <h2 className="mb-[8px] text-[15px] font-semibold text-[var(--uc-text)]">Templates</h2>
+                <div className="overflow-hidden rounded-[14px] bg-[var(--uc-surface)] divide-y divide-[var(--uc-border-muted)]">
+                  {filteredExistingTemplates.map((template) => {
+                    return (
+                      <Evo2027PaymentSelectionRow
+                        key={template.id}
+                        item={template}
+                        onSelect={() => selectExistingTemplate(template)}
+                        selectLabel="Select template"
+                        selected={selectedExistingTemplateId === template.id}
+                      />
+                    )
+                  })}
+                </div>
+              </section>
+            ) : null}
+          </div>
+          {filteredExistingBeneficiaries.length === 0 && filteredExistingTemplates.length === 0 ? (
+            <p className="px-[12px] py-[24px] text-center text-[14px] text-[var(--uc-text-muted)]">
+              {existingBeneficiaries.length === 0 && existingTemplates.length === 0
+                ? 'No existing beneficiaries or templates are available yet.'
+                : 'No beneficiaries or templates match this search.'}
+            </p>
+          ) : null}
         </BottomSheet>
       ) : null}
       {countryPickerOpen ? (
@@ -1309,14 +1518,6 @@ export function Evo2027DomesticPaymentCreateScreen({
             </p>
             <PrimaryButton onClick={() => setIbanScanOpen(false)}>Enter IBAN manually</PrimaryButton>
           </div>
-        </BottomSheet>
-      ) : null}
-      {helpOpen ? (
-        <BottomSheet title="Domestic payment" onClose={() => setHelpOpen(false)}>
-          <p className="pb-[22px] text-[14px] leading-[21px] text-[var(--uc-text-muted)]">
-            Enter the recipient’s local account details, then choose an amount and payment date. You can review
-            everything before signing.
-          </p>
         </BottomSheet>
       ) : null}
       {beneficiaryInfoOpen ? (

@@ -1,4 +1,4 @@
-import { useId, useRef, type ChangeEvent, type KeyboardEvent } from 'react'
+import { useId, useRef, type ChangeEvent, type KeyboardEvent, type ReactNode } from 'react'
 import { AppIcon } from '@/app/components/icons'
 import { formatIbanInput, getIbanGhostSuffix, normalizeIbanInput } from '@/app/utils/ibanInputMask'
 
@@ -8,12 +8,14 @@ export default function IbanMaskedField({
   length,
   onChange,
   onScan,
+  headerAccessory,
 }: {
   value: string
   countryCode: string
   length: number
   onChange: (value: string) => void
   onScan: () => void
+  headerAccessory?: ReactNode
 }) {
   const id = useId()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -59,9 +61,12 @@ export default function IbanMaskedField({
 
   return (
     <div className="w-full">
-      <span id={`${id}-label`} className="uc-type-n4 block text-[var(--uc-text)]">
-        IBAN
-      </span>
+      <div className="flex items-center justify-between gap-[8px]">
+        <span id={`${id}-label`} className="uc-type-n4 block text-[var(--uc-text)]">
+          IBAN
+        </span>
+        {headerAccessory}
+      </div>
       <span id={`${id}-hint`} className="sr-only">
         IBAN must contain {length} characters.
       </span>
