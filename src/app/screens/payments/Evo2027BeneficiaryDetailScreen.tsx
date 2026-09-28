@@ -67,8 +67,13 @@ export default function Evo2027BeneficiaryDetailScreen({
 }) {
   const country = useCountry()
   const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(48)
-  const payments = getBeneficiaryPaymentHistory(person, country)
-  const totalSent = payments.reduce((total, payment) => total + Math.abs(payment.amount), 0)
+  const transactions = getBeneficiaryPaymentHistory(person, country)
+  const totalSent = transactions
+    .filter((transaction) => transaction.type === 'debit')
+    .reduce((total, transaction) => total + Math.abs(transaction.amount), 0)
+  const totalReceived = transactions
+    .filter((transaction) => transaction.type === 'credit')
+    .reduce((total, transaction) => total + transaction.amount, 0)
   const countryName = getRecipientCountry(country === 'BA_BL' ? 'BA' : country)?.name ?? country
 
   return (
@@ -126,18 +131,24 @@ export default function Evo2027BeneficiaryDetailScreen({
               <h2 className="font-['UniCredit',sans-serif] text-[22px] font-bold">Transactions</h2>
             </div>
             <div className="divide-y divide-[var(--uc-border-muted)] overflow-hidden rounded-[16px] bg-[var(--uc-surface)]">
-              <div className="flex items-center justify-between gap-[10px] border-b border-[var(--uc-border-muted)] px-[14px] py-[15px]">
+              <div className="flex items-center justify-between gap-[10px] px-[14px] py-[15px]">
                 <span className="text-[14px] text-[var(--uc-text-muted)]">Total sent</span>
                 <span className="text-[14px] font-semibold">
                   {formatEvo2027Number(totalSent)} {person.currency}
                 </span>
               </div>
-              {payments.map((payment) => (
+              <div className="flex items-center justify-between gap-[10px] px-[14px] py-[15px]">
+                <span className="text-[14px] text-[var(--uc-text-muted)]">Total received</span>
+                <span className="text-[14px] font-semibold text-[var(--uc-green-olive)]">
+                  {formatEvo2027Number(totalReceived)} {person.currency}
+                </span>
+              </div>
+              {transactions.map((payment) => (
                 <button
                   key={payment.id}
                   type="button"
                   onClick={() => onTransactionClick(payment)}
-                  aria-label={`View transaction with ${person.name} on ${formatPaymentDate(payment)}`}
+                  aria-label={`${payment.type === 'credit' ? 'View receipt from' : 'View payment to'} ${person.name} on ${formatPaymentDate(payment)}`}
                   className="flex min-h-[84px] w-full items-center gap-[12px] px-[14px] py-[12px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-action)]"
                 >
                   <BeneficiaryAvatar name={person.name} bank={person.bank} size={40} />
@@ -150,8 +161,8 @@ export default function Evo2027BeneficiaryDetailScreen({
                       {formatPaymentDate(payment)}
                     </p>
                   </div>
-                  <span className="shrink-0 text-[14px] font-semibold">
-                    −{formatEvo2027Number(Math.abs(payment.amount))} {person.currency}
+                  <span className={`shrink-0 text-[14px] font-semibold ${payment.type === 'credit' ? 'text-[var(--uc-green-olive)]' : ''}`}>
+                    {payment.type === 'credit' ? '+' : '−'}{formatEvo2027Number(Math.abs(payment.amount))} {person.currency}
                   </span>
                 </button>
               ))}
