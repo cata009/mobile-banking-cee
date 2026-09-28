@@ -40,7 +40,7 @@ export default function Evo2027PaymentSelectionRow({
       onClick={onSelect}
       aria-label={accessibleLabel}
       aria-pressed={selected}
-      className="grid min-h-[82px] w-full grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-[12px] px-[14px] py-[12px] text-left transition-colors active:bg-[var(--uc-app-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-action)]"
+      className="grid min-h-[82px] w-full grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-[12px] py-[12px] pl-0 pr-[14px] text-left transition-colors active:bg-[var(--uc-app-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-action)]"
     >
       <BeneficiaryAvatar name={item.beneficiaryName} bank={item.bank ?? 'unicredit'} size={40} />
       <span className="min-w-0">
