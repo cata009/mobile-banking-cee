@@ -2,6 +2,9 @@ import { useState } from "react";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import Evo2027PaymentSelectionRow from "@/app/components/payments/Evo2027PaymentSelectionRow";
 import PageHeader from "@/app/components/PageHeader";
+import PaymentSelectionDetailScreen from "@/app/screens/payments/PaymentSelectionDetailScreen";
+import PaymentTemplateEditScreen from "@/app/screens/payments/PaymentTemplateEditScreen";
+import Evo2027BeneficiaryEditScreen from "@/app/screens/payments/Evo2027BeneficiaryEditScreen";
 import PaymentTemplateListItem from "@/app/components/payments/PaymentTemplateListItem";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import { useLanguage } from "@/app/contexts/LanguageContext";
@@ -9,9 +12,14 @@ import { useCountry } from "@/app/state/demoStore";
 import type { CountryId } from "@/app/state/demoTypes";
 import {
   getPaymentTemplates,
+  getEvo2027TemplateBeneficiaryName,
   getSavedBeneficiaries,
+  deletePaymentTemplateSelection,
+  mapFrequentBeneficiaryToSelection,
+  savePaymentTemplateSelection,
   type PaymentTemplateSelection,
 } from "@/data/paymentTemplates";
+import { getFrequentBeneficiaries, saveFrequentBeneficiaryDetails } from "@/data/paymentsHub";
 
 interface PaymentTemplatesScreenProps {
   onBack: () => void;
@@ -27,29 +35,73 @@ function matchesSearch(item: PaymentTemplateSelection, normalizedSearch: string)
 }
 
 function forEvo2027(item: PaymentTemplateSelection, country: CountryId) {
-  if (country !== "CZ") return item;
-
-  const beneficiaryNameById: Record<string, string> = {
-    "family-savings": "Marie Novotná",
-    "maria-popescu": "Marie Novotná",
-    "victor-ionescu": "Viktor Dvořák",
-  };
-  const beneficiaryName = beneficiaryNameById[item.id];
-  return beneficiaryName ? { ...item, beneficiaryName } : item;
+  if (country !== "CZ" || item.kind !== "template") return item;
+  return { ...item, beneficiaryName: getEvo2027TemplateBeneficiaryName(item, country) };
 }
 
 export default function PaymentTemplatesScreen({ onBack, onSelect, isEvo2027 = false }: PaymentTemplatesScreenProps) {
   const country = useCountry();
   const { t } = useLanguage();
   const [searchValue, setSearchValue] = useState("");
+  const [selectedDetail, setSelectedDetail] = useState<PaymentTemplateSelection | null>(null);
+  const [isEditingSelection, setIsEditingSelection] = useState(false);
   const normalizedSearch = searchValue.trim().toLocaleLowerCase();
   const templates = getPaymentTemplates(country)
     .map((item) => (isEvo2027 ? forEvo2027(item, country) : item))
     .filter((item) => matchesSearch(item, normalizedSearch));
-  const beneficiaries = getSavedBeneficiaries(country)
+  const beneficiaries = getSavedBeneficiaries(country, isEvo2027)
     .map((item) => (isEvo2027 ? forEvo2027(item, country) : item))
     .filter((item) => matchesSearch(item, normalizedSearch));
   const noResults = templates.length === 0 && beneficiaries.length === 0;
+
+  if (isEvo2027 && selectedDetail) {
+    if (isEditingSelection && selectedDetail.kind === "template") {
+      return (
+        <PaymentTemplateEditScreen
+          selection={selectedDetail}
+          onBack={() => setIsEditingSelection(false)}
+          onSave={(updatedSelection) => {
+            savePaymentTemplateSelection(country, updatedSelection);
+            setSelectedDetail(updatedSelection);
+            setIsEditingSelection(false);
+          }}
+        />
+      );
+    }
+
+    if (isEditingSelection && selectedDetail.kind === "beneficiary") {
+      const beneficiary = getFrequentBeneficiaries(country).find((person) => person.id === selectedDetail.id);
+      if (beneficiary) {
+        return (
+          <Evo2027BeneficiaryEditScreen
+            person={beneficiary}
+            onBack={() => setIsEditingSelection(false)}
+            onSave={(updatedBeneficiary) => {
+              saveFrequentBeneficiaryDetails(updatedBeneficiary);
+              setSelectedDetail(mapFrequentBeneficiaryToSelection(updatedBeneficiary));
+              setIsEditingSelection(false);
+            }}
+          />
+        );
+      }
+    }
+
+    return (
+      <PaymentSelectionDetailScreen
+        selection={selectedDetail}
+        onBack={() => setSelectedDetail(null)}
+        onUse={() => onSelect(selectedDetail)}
+        onEdit={() => setIsEditingSelection(true)}
+        onDelete={() => {
+          deletePaymentTemplateSelection(country, selectedDetail.id);
+          setSelectedDetail(null);
+        }}
+        useLabel={selectedDetail.kind === "template"
+          ? t("runtime.payments.templates.useTemplate", "Use template")
+          : t("runtime.payments.templates.useBeneficiary", "Use beneficiary")}
+      />
+    );
+  }
 
   if (isEvo2027) {
     return (
@@ -92,8 +144,8 @@ export default function PaymentTemplatesScreen({ onBack, onSelect, isEvo2027 = f
                         <Evo2027PaymentSelectionRow
                           key={item.id}
                           item={item}
-                          onSelect={() => onSelect(item)}
-                          selectLabel={t("runtime.payments.templates.useTemplate", "Use template")}
+                          onSelect={() => setSelectedDetail(item)}
+                          selectLabel={t("runtime.payments.templates.viewDetails", "View details")}
                           withLeadingInset
                         />
                       ))}
@@ -111,8 +163,8 @@ export default function PaymentTemplatesScreen({ onBack, onSelect, isEvo2027 = f
                         <Evo2027PaymentSelectionRow
                           key={item.id}
                           item={item}
-                          onSelect={() => onSelect(item)}
-                          selectLabel={t("runtime.payments.templates.useBeneficiary", "Use beneficiary")}
+                          onSelect={() => setSelectedDetail(item)}
+                          selectLabel={t("runtime.payments.templates.viewDetails", "View details")}
                           withLeadingInset
                         />
                       ))}

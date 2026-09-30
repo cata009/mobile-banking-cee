@@ -11,6 +11,12 @@ import PrimaryButton from "@/app/components/PrimaryButton";
 import { AppIcon } from "@/app/components/icons";
 import { Calendar } from "@/app/components/ui/calendar";
 import LinkButton from "@/app/components/ui/LinkButton";
+import {
+  formatScheduleDate,
+  formatScheduleSummary,
+  SCHEDULE_REPEAT_OPTIONS,
+  toIsoDateOnly,
+} from "@/app/utils/scheduleFormatting";
 import { HU_KIDS_ACCOUNTS, type HuKidsAccount, goalProgress, type SavingGoal } from "@/data/huKidsBanking";
 import {
   HU_MASKED_INTEGER,
@@ -407,7 +413,7 @@ export function HuKidsGoalDetailPage({
                 <div className="flex items-center justify-between">
                   <dt className="text-[14px] text-[var(--uc-text-muted)]">Repeat</dt>
                   <dd className="uc-type-n5-strong text-[var(--uc-text)]">
-                    {REPEAT_OPTIONS.find((opt) => opt.id === detailContribution.schedule?.repeat)?.label}
+                    {SCHEDULE_REPEAT_OPTIONS.find((opt) => opt.id === detailContribution.schedule?.repeat)?.label}
                   </dd>
                 </div>
                 <div className="flex items-center justify-between">
@@ -633,38 +639,6 @@ const OPERATOR_RE = /[+\-*/]/;
 const TRAILING_OPERATOR_RE = /[+\-*/]$/;
 const DIGIT_RE = /^\d$/;
 
-/** Format a Date to an ISO date-only string (YYYY-MM-DD). */
-function toIsoDateOnly(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
-/** Format an ISO date string to a readable label (e.g. "Today", "24.07.2026"). */
-function formatScheduleDate(isoDate: string): string {
-  const today = toIsoDateOnly(new Date());
-  if (isoDate === today) return "today";
-  const date = new Date(`${isoDate}T00:00:00`);
-  return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
-}
-
-const REPEAT_OPTIONS: ReadonlyArray<{ id: ScheduleRepeat; label: string }> = [
-  { id: "never", label: "Never" },
-  { id: "daily", label: "Daily" },
-  { id: "weekly", label: "Weekly" },
-  { id: "biweekly", label: "Every 2 weeks" },
-  { id: "monthly", label: "Monthly" },
-  { id: "yearly", label: "Yearly" },
-];
-
-/** Human-readable summary of a schedule's selection (without the "Scheduled:" prefix). */
-export function formatScheduleSummary(schedule: ScheduleConfig): string {
-  const repeatLabel = REPEAT_OPTIONS.find((opt) => opt.id === schedule.repeat)?.label ?? schedule.repeat;
-  let summary = `${repeatLabel}, starting ${formatScheduleDate(schedule.startDate)}`;
-  if (schedule.endsOn.type === "on-date") {
-    summary += `, until ${formatScheduleDate(schedule.endsOn.date)}`;
-  }
-  return summary;
-}
-
 /**
  * Bottom sheet for configuring a recurring schedule: start date, repeat
  * cadence, and optional end condition. Date pickers use the shared Calendar
@@ -698,7 +672,7 @@ function ScheduleSheet({
     onClose();
   };
 
-  const repeatLabel = REPEAT_OPTIONS.find((opt) => opt.id === repeat)?.label ?? "Never";
+  const repeatLabel = SCHEDULE_REPEAT_OPTIONS.find((opt) => opt.id === repeat)?.label ?? "Never";
 
   return (
     <>
@@ -808,7 +782,7 @@ function ScheduleSheet({
       {repeatPickerOpen ? (
         <BottomSheet title="Repeat" onClose={() => setRepeatPickerOpen(false)} closeLabel="Close repeat picker">
           <div className="flex flex-col">
-            {REPEAT_OPTIONS.map((opt) => (
+            {SCHEDULE_REPEAT_OPTIONS.map((opt) => (
               <button
                 key={opt.id}
                 type="button"

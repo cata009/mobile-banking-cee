@@ -169,7 +169,7 @@ export default function Evo2027PaymentsHub({
     <div className="flex flex-col">
       {/* Search stays reachable while the beneficiaries scroll, the way Account
           details keeps its own field pinned. */}
-      <div className="sticky top-0 z-[9] shrink-0 bg-[var(--uc-app-bg)] px-[20px] pb-[24px] pt-[4px]">
+      <div className="sticky top-[-2px] z-[9] shrink-0 bg-[var(--uc-app-bg)] px-[20px] pb-[24px] pt-[4px]">
         <AccountSearchBar
           value={searchValue}
           onValueChange={setSearchValue}

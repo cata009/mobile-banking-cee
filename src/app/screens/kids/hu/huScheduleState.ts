@@ -1,4 +1,4 @@
-import type { ScheduleConfig, ScheduleEnd, ScheduleRepeat } from './types'
+import type { ScheduleConfig, ScheduleEnd, ScheduleRepeat } from '@/data/schedule'
 
 export type HuScheduleState = {
   startDate: string
