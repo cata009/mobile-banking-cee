@@ -96,9 +96,7 @@ export default function PaymentTemplatesScreen({ onBack, onSelect, isEvo2027 = f
           deletePaymentTemplateSelection(country, selectedDetail.id);
           setSelectedDetail(null);
         }}
-        useLabel={selectedDetail.kind === "template"
-          ? t("runtime.payments.templates.useTemplate", "Use template")
-          : t("runtime.payments.templates.useBeneficiary", "Use beneficiary")}
+        useLabel={t("runtime.payments.templates.sendMoney", "Send money")}
       />
     );
   }
