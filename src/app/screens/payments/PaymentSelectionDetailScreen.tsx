@@ -3,6 +3,7 @@ import AccountActionBar, { type AccountActionBarItem } from "@/app/components/ac
 import { BottomSheet } from "@/app/components/BottomSheet";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
+import FavoriteStarIcon from "@/app/components/payments/FavoriteStarIcon";
 import type { PaymentTemplateSelection } from "@/data/paymentTemplates";
 import { useState } from "react";
 
@@ -26,6 +27,8 @@ export default function PaymentSelectionDetailScreen({
   onUse,
   onEdit,
   onDelete,
+  isFavorite = false,
+  onFavoriteToggle,
   useLabel,
 }: {
   selection: PaymentTemplateSelection;
@@ -33,6 +36,8 @@ export default function PaymentSelectionDetailScreen({
   onUse: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  isFavorite?: boolean;
+  onFavoriteToggle?: () => void;
   useLabel: string;
 }) {
   const isTemplate = selection.kind === "template";
@@ -57,6 +62,10 @@ export default function PaymentSelectionDetailScreen({
           showHelp={false}
           variant="gray"
           renderLargeTitle={false}
+          rightActionIcon={!isTemplate ? <FavoriteStarIcon filled={isFavorite} /> : undefined}
+          rightActionLabel={isFavorite ? "Remove from favorites" : "Add to favorites"}
+          rightActionPressed={!isTemplate ? isFavorite : undefined}
+          onRightActionClick={!isTemplate ? onFavoriteToggle : undefined}
         />
 
         <main className="px-[20px] pb-[24px]">
