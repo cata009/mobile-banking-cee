@@ -389,6 +389,8 @@ export default function PaymentsScreen({
         onBack={() => setActiveChildView('overview')}
         onSelect={(selection) => onTemplateSelect?.(selection)}
         isEvo2027={isEvo2027}
+        favoriteBeneficiaryIds={favoriteBeneficiaryIds}
+        onFavoriteToggle={toggleFavoriteBeneficiary}
       />
     )
   }

@@ -25,6 +25,8 @@ interface PaymentTemplatesScreenProps {
   onBack: () => void;
   onSelect: (selection: PaymentTemplateSelection) => void;
   isEvo2027?: boolean;
+  favoriteBeneficiaryIds?: readonly string[];
+  onFavoriteToggle?: (beneficiaryId: string) => void;
 }
 
 function matchesSearch(item: PaymentTemplateSelection, normalizedSearch: string) {
@@ -39,7 +41,13 @@ function forEvo2027(item: PaymentTemplateSelection, country: CountryId) {
   return { ...item, beneficiaryName: getEvo2027TemplateBeneficiaryName(item, country) };
 }
 
-export default function PaymentTemplatesScreen({ onBack, onSelect, isEvo2027 = false }: PaymentTemplatesScreenProps) {
+export default function PaymentTemplatesScreen({
+  onBack,
+  onSelect,
+  isEvo2027 = false,
+  favoriteBeneficiaryIds = [],
+  onFavoriteToggle,
+}: PaymentTemplatesScreenProps) {
   const country = useCountry();
   const { t } = useLanguage();
   const [searchValue, setSearchValue] = useState("");
@@ -92,6 +100,8 @@ export default function PaymentTemplatesScreen({ onBack, onSelect, isEvo2027 = f
         onBack={() => setSelectedDetail(null)}
         onUse={() => onSelect(selectedDetail)}
         onEdit={() => setIsEditingSelection(true)}
+        isFavorite={favoriteBeneficiaryIds.includes(selectedDetail.id)}
+        onFavoriteToggle={() => onFavoriteToggle?.(selectedDetail.id)}
         onDelete={() => {
           deletePaymentTemplateSelection(country, selectedDetail.id);
           setSelectedDetail(null);
