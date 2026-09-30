@@ -1,6 +1,13 @@
 import { getCountryConfig } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
+import { BANK_BADGES } from "@/app/config/bankLogos";
 import type { Currency } from "@/data/products";
+import {
+  deleteFrequentBeneficiary,
+  getFrequentBeneficiaries,
+  saveFrequentBeneficiaryDetails,
+  type FrequentBeneficiary,
+} from "@/data/paymentsHub";
 
 export type PaymentTemplateSelectionKind = "template" | "beneficiary";
 
@@ -15,6 +22,112 @@ export interface PaymentTemplateSelection {
   amount: string;
   currency: Currency;
   paymentNote: string;
+  bank?: FrequentBeneficiary["bank"];
+  recipientKind?: FrequentBeneficiary["recipientKind"];
+  paymentAccountPrefix?: string;
+  paymentAccountNumber?: string;
+}
+
+interface StoredPaymentSelectionChanges {
+  updated: Record<string, Partial<PaymentTemplateSelection>>;
+  deletedIds: string[];
+}
+
+const PAYMENT_SELECTIONS_STORAGE_KEY = "uc.evo2027.payments.templateChanges";
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isPaymentTemplateSelection(value: unknown): value is PaymentTemplateSelection {
+  if (!isRecord(value)) return false;
+  return typeof value.id === "string"
+    && (value.kind === "template" || value.kind === "beneficiary")
+    && typeof value.title === "string"
+    && typeof value.beneficiaryName === "string"
+    && typeof value.accountNumber === "string"
+    && typeof value.bankCode === "string"
+    && typeof value.bankName === "string"
+    && typeof value.amount === "string"
+    && typeof value.currency === "string"
+    && typeof value.paymentNote === "string";
+}
+
+function getStoredPaymentSelectionChanges(country: CountryId): StoredPaymentSelectionChanges {
+  const empty: StoredPaymentSelectionChanges = { updated: {}, deletedIds: [] };
+  if (typeof window === "undefined") return empty;
+
+  try {
+    const stored: unknown = JSON.parse(
+      window.localStorage.getItem(`${PAYMENT_SELECTIONS_STORAGE_KEY}.${country}`) ?? "{}",
+    );
+    if (!isRecord(stored)) return empty;
+    const updated = isRecord(stored.updated) ? stored.updated : {};
+    return {
+      updated: Object.fromEntries(Object.entries(updated).filter(([, value]) => isRecord(value))) as Record<
+        string,
+        Partial<PaymentTemplateSelection>
+      >,
+      deletedIds: Array.isArray(stored.deletedIds)
+        ? stored.deletedIds.filter((id): id is string => typeof id === "string")
+        : [],
+    };
+  } catch {
+    return empty;
+  }
+}
+
+function storePaymentSelectionChanges(country: CountryId, changes: StoredPaymentSelectionChanges) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(`${PAYMENT_SELECTIONS_STORAGE_KEY}.${country}`, JSON.stringify(changes));
+  } catch {
+    /* Changes still update the current details page if storage is unavailable. */
+  }
+}
+
+function applyPaymentSelectionChanges(country: CountryId, items: PaymentTemplateSelection[]) {
+  const changes = getStoredPaymentSelectionChanges(country);
+  const deletedIds = new Set(changes.deletedIds);
+  return items
+    .filter((item) => !deletedIds.has(item.id))
+    .map((item) => ({ ...item, ...changes.updated[item.id] }))
+    .filter(isPaymentTemplateSelection);
+}
+
+export function savePaymentTemplateSelection(country: CountryId, selection: PaymentTemplateSelection) {
+  if (selection.kind === "beneficiary") {
+    const existing = getFrequentBeneficiaries(country).find((person) => person.id === selection.id);
+    if (existing) {
+      saveFrequentBeneficiaryDetails({
+        ...existing,
+        name: selection.beneficiaryName,
+        paymentAccountPrefix: selection.paymentAccountPrefix ?? existing.paymentAccountPrefix,
+        paymentAccountNumber: selection.paymentAccountNumber ?? existing.paymentAccountNumber,
+        paymentBankCode: selection.bankCode,
+        bank: selection.bank ?? existing.bank,
+        recipientKind: selection.recipientKind ?? existing.recipientKind,
+      });
+    }
+    return;
+  }
+
+  const changes = getStoredPaymentSelectionChanges(country);
+  changes.updated[selection.id] = selection;
+  changes.deletedIds = changes.deletedIds.filter((id) => id !== selection.id);
+  storePaymentSelectionChanges(country, changes);
+}
+
+export function deletePaymentTemplateSelection(country: CountryId, selectionId: string) {
+  if (getFrequentBeneficiaries(country).some((person) => person.id === selectionId)) {
+    deleteFrequentBeneficiary(country, selectionId);
+    return;
+  }
+
+  const changes = getStoredPaymentSelectionChanges(country);
+  delete changes.updated[selectionId];
+  if (!changes.deletedIds.includes(selectionId)) changes.deletedIds.push(selectionId);
+  storePaymentSelectionChanges(country, changes);
 }
 
 function getCountryPrefix(country: CountryId) {
@@ -48,7 +161,7 @@ function createSelection(
 }
 
 export function getPaymentTemplates(country: CountryId): PaymentTemplateSelection[] {
-  return [
+  return applyPaymentSelectionChanges(country, [
     createSelection(country, {
       id: "green-energy",
       kind: "template",
@@ -94,11 +207,28 @@ export function getPaymentTemplates(country: CountryId): PaymentTemplateSelectio
       amount: "195,00",
       paymentNote: "Monthly membership",
     }),
-  ];
+  ]);
 }
 
-export function getSavedBeneficiaries(country: CountryId): PaymentTemplateSelection[] {
-  return [
+export function getEvo2027TemplateBeneficiaryName(
+  template: PaymentTemplateSelection,
+  country: CountryId,
+): string {
+  if (country === "CZ" && template.id === "family-savings" && template.beneficiaryName === "Maria Popescu") {
+    return "Marie Novotná";
+  }
+  return template.beneficiaryName;
+}
+
+export function getSavedBeneficiaries(
+  country: CountryId,
+  synchronizeWithPaymentsHome = true,
+): PaymentTemplateSelection[] {
+  if (synchronizeWithPaymentsHome) {
+    return getFrequentBeneficiaries(country).map(mapFrequentBeneficiaryToSelection);
+  }
+
+  return applyPaymentSelectionChanges(country, [
     createSelection(country, {
       id: "maria-popescu",
       kind: "beneficiary",
@@ -126,5 +256,24 @@ export function getSavedBeneficiaries(country: CountryId): PaymentTemplateSelect
       amount: "",
       paymentNote: "",
     }),
-  ];
+  ]);
+}
+
+export function mapFrequentBeneficiaryToSelection(person: FrequentBeneficiary): PaymentTemplateSelection {
+  return {
+    id: person.id,
+    kind: "beneficiary",
+    title: person.name.toLocaleUpperCase(),
+    beneficiaryName: person.name,
+    accountNumber: person.accountNumber,
+    bankCode: person.paymentBankCode,
+    bankName: BANK_BADGES[person.bank].name,
+    amount: "",
+    currency: person.currency,
+    paymentNote: "",
+    bank: person.bank,
+    recipientKind: person.recipientKind,
+    paymentAccountPrefix: person.paymentAccountPrefix ?? "",
+    paymentAccountNumber: person.paymentAccountNumber,
+  };
 }

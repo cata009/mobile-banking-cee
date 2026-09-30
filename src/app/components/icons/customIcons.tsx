@@ -7,6 +7,39 @@
 import type { CustomIconDefinition } from "./iconTypes";
 
 export const CUSTOM_ICONS = {
+  "edit-pencil": {
+    source: "custom",
+    label: "Edit",
+    category: "Actions",
+    width: 24,
+    height: 24,
+    viewBox: "0 0 24 24",
+    usage: ["Scheduled payment detail actions", "HeaderActionIcons"],
+    notes: "DS edit glyph supplied for scheduled payment actions.",
+    render: () => (
+      <>
+        <path d="M4.58739 2.82448C5.73356 1.72222 7.58592 1.72577 8.72769 2.83158L9.50208 3.58037L3.84674 9.01641L1 6.27178L4.58739 2.82448Z" fill="currentColor" />
+        <path d="M23 22L15.9257 20.6401L21.5847 15.2005L23 22Z" fill="currentColor" />
+        <path d="M14.4727 19.2511L20.1024 13.8399L10.9572 4.9757L5.31652 10.3812L14.4727 19.2511Z" fill="currentColor" />
+      </>
+    ),
+  },
+  "trash-2": {
+    source: "custom",
+    label: "Delete",
+    category: "Actions",
+    width: 24,
+    height: 24,
+    viewBox: "0 0 24 24",
+    usage: ["Scheduled payment detail actions"],
+    notes: "DS delete glyph supplied for scheduled payment actions.",
+    render: () => (
+      <>
+        <path d="M10 3.25H5.96933C4.656 3.25 4 4.5 4 5.125V5.75H20V5.125C20 4.5 19.344 3.25 18.0307 3.25H14L13.3333 2H10.6667L10 3.25Z" fill="currentColor" />
+        <path d="M16.2132 22C16.9065 22 17.4845 21.5019 17.5418 20.8538L18.7732 7.00001H5.43984L6.67184 20.8538C6.72917 21.5019 7.30651 22 7.99984 22H16.2132Z" fill="currentColor" />
+      </>
+    ),
+  },
   "analytics-donut-toggle": {
     source: "custom",
     label: "Analytics donut toggle",

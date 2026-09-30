@@ -6,10 +6,13 @@ import PageHeader from '@/app/components/PageHeader'
 import PrimaryButton from '@/app/components/PrimaryButton'
 import { CurrencyFlagRoundel } from '@/app/components/payments/CurrencyFlag'
 import SelectedMark from '@/app/components/payments/SelectedMark'
+import ScheduledTransferSetupPage from '@/app/screens/payments/ScheduledTransferSetupPage'
 import { useCountry } from '@/app/state/demoStore'
 import type { CountryId } from '@/app/state/demoTypes'
 import { formatMoneyNumber } from '@/app/registry/countryConfig'
 import { useProducts } from '@/hooks/useProducts'
+import { formatScheduleSummary } from '@/app/utils/scheduleFormatting'
+import type { ScheduleConfig } from '@/data/schedule'
 import {
   createInternalTransferDraft,
   getEligibleTransferAccounts,
@@ -19,7 +22,24 @@ import {
 } from '@/app/screens/payments/internalTransferState'
 
 interface InternalTransferScreenProps {
-  onBack: () => void
+  onBack: (draft?: InternalTransferDraft) => void
+  onDone?: () => void
+  initialSchedule?: ScheduleConfig | null
+  initialDraft?: InternalTransferDraft
+  requireSchedule?: boolean
+  isEditing?: boolean
+  submitLabel?: string
+  onEditSchedule?: (draft: InternalTransferDraft) => void
+  onComplete?: (transfer: {
+    sourceAccountId: string
+    destinationAccountId: string
+    sourceAccountName: string
+    destinationAccountName: string
+    amount: number
+    currency: InternalTransferAccount['currency']
+    note: string
+    schedule: ScheduleConfig | null
+  }) => void
 }
 
 type PickerPosition = 'top' | 'bottom'
@@ -251,11 +271,15 @@ function TransferSuccess({
   sourceAccount,
   destinationAccount,
   onDone,
+  scheduleConfig,
+  successTitle,
 }: {
   draft: InternalTransferDraft
   sourceAccount: InternalTransferAccount
   destinationAccount: InternalTransferAccount
   onDone: () => void
+  scheduleConfig?: ScheduleConfig | null
+  successTitle?: string
 }) {
   const reduceMotion = useReducedMotion()
   const quote = getInternalTransferQuote({
@@ -263,6 +287,7 @@ function TransferSuccess({
     sourceAccount,
     destinationAccount,
   })
+  const scheduleSummary = scheduleConfig ? formatScheduleSummary(scheduleConfig) : null
 
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-app-bg)] px-[24px] pb-[24px] pt-[54px] text-[var(--uc-text)]">
@@ -276,13 +301,18 @@ function TransferSuccess({
         >
           <AppIcon name="check" size={36} color="var(--uc-static-white)" strokeWidth={2.4} />
         </motion.div>
-        <h1 className="uc-type-h1 mt-[28px] text-[var(--uc-text)]">Money moved</h1>
+        <h1 className="uc-type-h1 mt-[28px] text-[var(--uc-text)]">
+          {successTitle ?? (scheduleSummary ? 'Transfer scheduled' : 'Money moved')}
+        </h1>
         <p className="mt-[12px] text-[36px] font-bold leading-[40px] text-[var(--uc-text)]">
           {quote.sourceAmount.toFixed(2)} {sourceAccount.currency}
         </p>
         <p className="uc-type-n4 mt-[12px] max-w-[280px] text-[var(--uc-text-muted)]">
           From {sourceAccount.name} to {destinationAccount.name}
         </p>
+        {scheduleSummary ? (
+          <p className="uc-type-n5 mt-[8px] max-w-[300px] text-[var(--uc-text-muted)]">{scheduleSummary}</p>
+        ) : null}
         {quote.isFx ? (
           <p className="uc-type-n4 mt-[8px] text-[var(--uc-action)]">
             {formatSignedAmount(quote.destinationAmount, destinationAccount.currency, '+')} received
@@ -293,33 +323,6 @@ function TransferSuccess({
         Done
       </PrimaryButton>
     </div>
-  )
-}
-
-function TransferScheduleSheet({ onClose, onConfirm }: { onClose: () => void; onConfirm: (date: string) => void }) {
-  const today = new Date().toISOString().slice(0, 10)
-  const [date, setDate] = useState(today)
-
-  return (
-    <BottomSheet title="Schedule transfer" onClose={onClose} closeLabel="Close schedule">
-      <div className="flex flex-col gap-[18px] pb-[8px]">
-        <label htmlFor="internal-transfer-date" className="uc-type-n4 text-[var(--uc-text)]">
-          Transfer date
-          <input
-            aria-label="Transfer date"
-            id="internal-transfer-date"
-            type="date"
-            min={today}
-            value={date}
-            onChange={(event) => setDate(event.target.value)}
-            className="uc-type-n4 mt-[8px] h-[52px] w-full rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[14px] text-[var(--uc-text)]"
-          />
-        </label>
-        <PrimaryButton className="w-full" onClick={() => onConfirm(date)}>
-          Confirm date
-        </PrimaryButton>
-      </div>
-    </BottomSheet>
   )
 }
 
@@ -422,21 +425,36 @@ function AmountKeypad({
   )
 }
 
-export default function InternalTransferScreen({ onBack }: InternalTransferScreenProps) {
+export default function InternalTransferScreen({
+  onBack,
+  onDone,
+  initialSchedule,
+  initialDraft,
+  requireSchedule = false,
+  isEditing = false,
+  submitLabel,
+  onEditSchedule,
+  onComplete,
+}: InternalTransferScreenProps) {
   const country = useCountry()
   const reduceMotion = useReducedMotion()
   const { categories } = useProducts()
   const accounts = getEligibleTransferAccounts(categories.flatMap((category) => category.products))
-  const [draft, setDraft] = useState<InternalTransferDraft>(() => createInternalTransferDraft(accounts))
-  const [topAccountId, setTopAccountId] = useState(accounts[0]?.id ?? '')
-  const [bottomAccountId, setBottomAccountId] = useState(accounts[1]?.id ?? '')
+  const [draft, setDraft] = useState<InternalTransferDraft>(() => ({
+    ...createInternalTransferDraft(accounts),
+    ...initialDraft,
+  }))
+  const [topAccountId, setTopAccountId] = useState(initialDraft?.sourceAccountId ?? accounts[0]?.id ?? '')
+  const [bottomAccountId, setBottomAccountId] = useState(initialDraft?.destinationAccountId ?? accounts[1]?.id ?? '')
   const [pickerPosition, setPickerPosition] = useState<PickerPosition | null>(null)
   const [keypadOpen, setKeypadOpen] = useState(false)
   const [activeAmountPosition, setActiveAmountPosition] = useState<PickerPosition>('top')
-  const [amountExpression, setAmountExpression] = useState('')
-  const [scheduleSheetOpen, setScheduleSheetOpen] = useState(false)
-  const [scheduledDate, setScheduledDate] = useState<string | null>(null)
+  const [amountExpression, setAmountExpression] = useState(initialDraft?.amountText ?? '')
+  const [scheduleConfig, setScheduleConfig] = useState<ScheduleConfig | null>(initialSchedule ?? null)
+  const [scheduleSetupOpen, setScheduleSetupOpen] = useState(false)
+  const [completeAfterSchedule, setCompleteAfterSchedule] = useState(false)
   const [completed, setCompleted] = useState(false)
+  const handleBack = () => onBack(draft)
   const sourceAccount = accounts.find((account) => account.id === draft.sourceAccountId)
   const destinationAccount = accounts.find((account) => account.id === draft.destinationAccountId)
   const topAccount = accounts.find((account) => account.id === topAccountId)
@@ -453,7 +471,7 @@ export default function InternalTransferScreen({ onBack }: InternalTransferScree
   ) {
     return (
       <div className="flex h-full w-full flex-col bg-[var(--uc-app-bg)] text-[var(--uc-text)]">
-        <PageHeader title="Move between accounts" onBack={onBack} includeSafeArea showHelp={false} />
+        <PageHeader title="Move between accounts" onBack={handleBack} includeSafeArea showHelp={false} />
         <div className="flex flex-1 flex-col items-center justify-center px-[32px] text-center">
           <div className="grid size-[64px] place-items-center rounded-full bg-[var(--uc-surface-muted)]">
             <AppIcon name="currency-exchange" size={28} color="var(--uc-icon)" />
@@ -473,7 +491,9 @@ export default function InternalTransferScreen({ onBack }: InternalTransferScree
         draft={draft}
         sourceAccount={sourceAccount}
         destinationAccount={destinationAccount}
-        onDone={onBack}
+        onDone={onDone ?? handleBack}
+        scheduleConfig={scheduleConfig}
+        successTitle={isEditing ? 'Transfer updated' : undefined}
       />
     )
   }
@@ -503,6 +523,40 @@ export default function InternalTransferScreen({ onBack }: InternalTransferScree
   const rateText = quote.isFx
     ? `1 ${sourceAccount.currency} = ${quote.rate.toFixed(4)} ${destinationAccount.currency}`
     : null
+
+  const completeTransfer = (nextSchedule: ScheduleConfig | null) => {
+    onComplete?.({
+      sourceAccountId: sourceAccount.id,
+      destinationAccountId: destinationAccount.id,
+      sourceAccountName: sourceAccount.name,
+      destinationAccountName: destinationAccount.name,
+      amount: quote.sourceAmount,
+      currency: sourceAccount.currency,
+      note: draft.note,
+      schedule: nextSchedule,
+    })
+    setCompleted(true)
+  }
+
+  if (scheduleSetupOpen) {
+    return (
+      <ScheduledTransferSetupPage
+        initialSchedule={scheduleConfig}
+        onBack={() => {
+          setScheduleSetupOpen(false)
+          setCompleteAfterSchedule(false)
+        }}
+        onConfirm={(nextSchedule) => {
+          setScheduleConfig(nextSchedule)
+          setScheduleSetupOpen(false)
+          if (completeAfterSchedule) {
+            setCompleteAfterSchedule(false)
+            completeTransfer(nextSchedule)
+          }
+        }}
+      />
+    )
+  }
 
   const selectAccount = (account: InternalTransferAccount) => {
     const selectingSource = pickerPosition === 'top' ? topIsSource : !topIsSource
@@ -593,13 +647,13 @@ export default function InternalTransferScreen({ onBack }: InternalTransferScree
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden bg-[var(--uc-surface)] text-[var(--uc-text)]">
       <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide">
-        <PageHeader title="Move between accounts" onBack={onBack} includeSafeArea showHelp={false} />
+        <PageHeader title="Move between accounts" onBack={handleBack} includeSafeArea showHelp={false} />
 
         <main
           onPointerDown={handleMainPointerDown}
           className={`bg-[var(--uc-surface)] px-[16px] pt-[8px] ${keypadOpen ? 'pb-[360px]' : 'pb-[160px]'}`}
         >
-          <div className="overflow-hidden rounded-[16px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface-muted)] shadow-[0_8px_24px_rgb(var(--uc-shadow-rgb)/0.06)]">
+          <div className="overflow-hidden rounded-[16px] border border-[var(--uc-border)] bg-[var(--uc-surface)]">
             <section className="px-[12px] pb-[8px] pt-[8px]">
               <AccountChooser
                 account={topAccount}
@@ -673,7 +727,7 @@ export default function InternalTransferScreen({ onBack }: InternalTransferScree
           </div>
 
           {quote.isFx && rateText ? (
-            <div className="mt-[16px] flex items-center justify-between gap-[12px] rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface-muted)] px-[14px] py-[12px]">
+            <div className="mt-[16px] flex items-center justify-between gap-[12px] rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[14px] py-[12px]">
               <span className="uc-type-n5 text-[var(--uc-text-muted)]">Exchange rate</span>
               <span className="uc-type-n5-strong text-right text-[var(--uc-text)]">{rateText}</span>
             </div>
@@ -699,9 +753,9 @@ export default function InternalTransferScreen({ onBack }: InternalTransferScree
               className="uc-type-p1 mt-[8px] h-[52px] w-full rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[14px] text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-subtle)] focus:border-[var(--uc-action)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--uc-action)_18%,transparent)]"
             />
           </label>
-          {scheduledDate ? (
+          {scheduleConfig ? (
             <p className="uc-type-n5 mt-[10px] text-[var(--uc-text-muted)]">
-              Scheduled for {new Intl.DateTimeFormat('en-GB').format(new Date(`${scheduledDate}T00:00:00`))}
+              Scheduled: {formatScheduleSummary(scheduleConfig)}
             </p>
           ) : null}
         </main>
@@ -715,13 +769,18 @@ export default function InternalTransferScreen({ onBack }: InternalTransferScree
         <div className="flex items-center gap-[8px]">
           <button
             type="button"
-            aria-label="Schedule recurring transfer"
+            aria-label={initialSchedule ? 'Edit transfer schedule' : 'Schedule transfer'}
             onClick={() => {
               setKeypadOpen(false)
-              setScheduleSheetOpen(true)
+              if (initialSchedule && onEditSchedule) {
+                onEditSchedule(draft)
+                return
+              }
+              setCompleteAfterSchedule(false)
+              setScheduleSetupOpen(true)
             }}
             className={`grid size-[48px] shrink-0 place-items-center rounded-[12px] border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${
-              scheduledDate
+              scheduleConfig
                 ? 'border-transparent bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]'
                 : 'border-[var(--uc-border-muted)] bg-[var(--uc-surface)] text-[var(--uc-text)]'
             }`}
@@ -729,12 +788,20 @@ export default function InternalTransferScreen({ onBack }: InternalTransferScree
             <AppIcon name="calendar-days" size={22} color="currentColor" />
           </button>
           <PrimaryButton
-            onClick={() => setCompleted(true)}
+            onClick={() => {
+              finishAmountEditing()
+              if (requireSchedule && !scheduleConfig) {
+                setCompleteAfterSchedule(true)
+                setScheduleSetupOpen(true)
+                return
+              }
+              completeTransfer(scheduleConfig)
+            }}
             disabled={!isSubmittable}
             className="!h-[48px] !w-auto !min-w-0 !flex-1"
             labelSize="16"
           >
-            Move money
+            {submitLabel ?? 'Move money'}
           </PrimaryButton>
         </div>
         {keypadOpen ? (
@@ -760,15 +827,6 @@ export default function InternalTransferScreen({ onBack }: InternalTransferScree
           selectedAccountId={pickerPosition === 'top' ? topAccount.id : bottomAccount.id}
           onSelect={selectAccount}
           onClose={() => setPickerPosition(null)}
-        />
-      ) : null}
-      {scheduleSheetOpen ? (
-        <TransferScheduleSheet
-          onClose={() => setScheduleSheetOpen(false)}
-          onConfirm={(date) => {
-            setScheduledDate(date)
-            setScheduleSheetOpen(false)
-          }}
         />
       ) : null}
     </div>

@@ -19,7 +19,7 @@ import { useLanguage } from '@/app/contexts/LanguageContext'
 import { useCountry } from '@/app/state/demoStore'
 import { useProducts } from '@/hooks/useProducts'
 import { formatEvo2027Number } from '@/app/utils/evo2027Formatting'
-import { getPaymentTemplates } from '@/data/paymentTemplates'
+import { getEvo2027TemplateBeneficiaryName, getPaymentTemplates } from '@/data/paymentTemplates'
 import {
   appendPaymentToken,
   evaluatePaymentExpression,
@@ -110,9 +110,7 @@ function isSavedPaymentRecipient(draft: DomesticPaymentDraft, homeCountry: Count
   if (savedBeneficiary) return true
 
   return getPaymentTemplates(homeCountry).some((template) => {
-    const beneficiaryName = template.id === 'family-savings' && homeCountry === 'CZ'
-      ? 'Marie Novotná'
-      : template.beneficiaryName
+    const beneficiaryName = getEvo2027TemplateBeneficiaryName(template, homeCountry)
     const templateRecipientKind = template.id === 'family-savings' ? 'individual' : 'business'
     const accountNumber = template.accountNumber.replace(/\D/g, '').slice(-6)
 
@@ -371,9 +369,7 @@ export function Evo2027DomesticPaymentCreateScreen({
   const recipientRoute = resolveRecipientRoute(country, recipientCountry, form.currency)
   const existingBeneficiaries = getFrequentBeneficiaries(country)
   const existingTemplates = getPaymentTemplates(country).map((template) =>
-    template.id === 'family-savings' && country === 'CZ'
-      ? { ...template, beneficiaryName: 'Marie Novotná' }
-      : template,
+    ({ ...template, beneficiaryName: getEvo2027TemplateBeneficiaryName(template, country) }),
   )
   const normalizedBeneficiarySearch = existingBeneficiarySearch.trim().toLocaleLowerCase()
   const filteredExistingBeneficiaries = existingBeneficiaries.filter((person) => {
@@ -499,7 +495,7 @@ export function Evo2027DomesticPaymentCreateScreen({
   }
   const selectExistingTemplate = (template: (typeof existingTemplates)[number]) => {
     const beneficiaryName = template.beneficiaryName
-    const recipientKind = templateRecipientKind(template)
+    const recipientKind = template.recipientKind ?? templateRecipientKind(template)
     const nameParts = beneficiaryName.trim().split(/\s+/).filter(Boolean)
     const nextAmountExpression = template.amount.replace(/\./g, '')
     setFirstNames(nameParts.length > 1 ? nameParts.slice(0, -1).join(' ') : (nameParts[0] ?? ''))
@@ -512,8 +508,8 @@ export function Evo2027DomesticPaymentCreateScreen({
       recipientKind,
       recipientEmail: '',
       beneficiaryName,
-      prefix: '',
-      accountNumber: templateAccountNumber(template),
+      prefix: template.paymentAccountPrefix ?? '',
+      accountNumber: template.paymentAccountNumber ?? templateAccountNumber(template),
       bankCode: template.bankCode,
       bankName: template.bankName,
       bankSwift: '',

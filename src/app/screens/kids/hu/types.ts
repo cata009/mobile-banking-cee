@@ -9,6 +9,9 @@ import type { IconName } from "@/app/components/icons";
 import type { CountryId } from "@/app/state/demoTypes";
 import type { AccountTransaction } from "@/data/accountDetails";
 import type { LearnModule } from "@/data/huKidsBanking";
+import type { ScheduleConfig } from "@/data/schedule";
+
+export type { ScheduleConfig, ScheduleEnd, ScheduleRepeat } from "@/data/schedule";
 
 export type HuLightNavId = "home" | "analytics" | "payments" | "products" | "more";
 
@@ -81,18 +84,6 @@ export type HuKidsTask = {
   status: HuTaskStatus;
   parentNote?: string;
 };
-
-export type ScheduleRepeat = "never" | "daily" | "weekly" | "biweekly" | "monthly" | "yearly";
-
-export type ScheduleEnd =
-  | { type: "never" }
-  | { type: "on-date"; date: string };
-
-export interface ScheduleConfig {
-  startDate: string;
-  repeat: ScheduleRepeat;
-  endsOn: ScheduleEnd;
-}
 
 export type HuGoalContribution = {
   id: string;

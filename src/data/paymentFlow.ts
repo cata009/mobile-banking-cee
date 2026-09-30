@@ -162,12 +162,15 @@ export function createTemplateDomesticPaymentDraft(
   country: CountryId,
   product?: Product | null,
 ): DomesticPaymentDraft {
+  const isSavedBeneficiary = selection.kind === "beneficiary";
   return {
     ...createEmptyDomesticPaymentDraft(country, product),
     beneficiaryName: selection.beneficiaryName,
-    accountNumber: selection.accountNumber,
+    prefix: isSavedBeneficiary ? selection.paymentAccountPrefix ?? "" : "",
+    accountNumber: isSavedBeneficiary ? selection.paymentAccountNumber ?? selection.accountNumber : selection.accountNumber,
     bankCode: selection.bankCode,
     bankName: selection.bankName,
+    recipientKind: selection.recipientKind,
     amount: selection.kind === "template" ? selection.amount : "",
     currency: selection.currency,
     informationForBeneficiary: selection.kind === "template" ? selection.paymentNote : "",

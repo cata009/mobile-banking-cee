@@ -19,6 +19,8 @@ const NON_STANDARD_ICON_NAMES = new Set([
   // 32×32 container icons — rendered at native size, not the 20×20 standard glyph override
   "close-x",
   "insurance-calendar",
+  "edit-pencil",
+  "trash-2",
   "chevron-link",
   "investment-documents",
   "investment-important-info",

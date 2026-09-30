@@ -15,6 +15,7 @@ import type { BankId } from '@/app/config/bankLogos'
 import { BANK_BADGES } from '@/app/config/bankLogos'
 import type { AccountTransaction } from '@/data/accountDetails'
 import type { PfmCategoryName } from '@/data/pfmCategories'
+import type { ScheduleConfig } from '@/data/schedule'
 
 export interface FrequentBeneficiary {
   id: string
@@ -35,7 +36,7 @@ export interface FrequentBeneficiary {
   bank: BankId
 }
 
-export type RecurrentPaymentKind = 'standing-order' | 'direct-debit'
+export type RecurrentPaymentKind = 'internal-transfer' | 'standing-order' | 'direct-debit'
 
 export interface RecurrentPayment {
   id: string
@@ -45,9 +46,26 @@ export interface RecurrentPayment {
   nextDate: string
   amount: number
   currency: Currency
+  /** Optional schedule configuration for locally created or edited demo flows. */
+  schedule?: ScheduleConfig
+  /** Optional transfer details for an internal account-to-account flow. */
+  details?: string
+  sourceAccountId?: string
+  destinationAccountId?: string
+  sourceAccountName?: string
+  destinationAccountName?: string
+  note?: string
   /** Direct debits carry a ceiling rather than a fixed amount. */
   isLimit?: boolean
 }
+
+interface StoredRecurrentPaymentChanges {
+  created: RecurrentPayment[]
+  updated: Record<string, Partial<RecurrentPayment>>
+  deletedIds: string[]
+}
+
+const RECURRENT_PAYMENTS_STORAGE_KEY = 'uc.evo2027.payments.recurrentPaymentChanges'
 
 function accountFor(country: CountryId, suffix: string) {
   const prefix = country === 'BA_BL' ? 'BA' : country
@@ -246,6 +264,7 @@ const FREQUENT_BENEFICIARY_SEEDS: readonly FrequentBeneficiarySeed[] = [
 const SNAPSHOT_DATE = new Date('2026-09-26T12:00:00')
 const FAVORITE_BENEFICIARY_IDS_STORAGE_KEY = 'uc.evo2027.payments.favoriteBeneficiaryIds'
 const BENEFICIARY_DETAILS_STORAGE_KEY = 'uc.evo2027.payments.beneficiaryDetails'
+const DELETED_BENEFICIARY_IDS_STORAGE_KEY = 'uc.evo2027.payments.deletedBeneficiaryIds'
 
 type EditableBeneficiaryDetails = Pick<
   FrequentBeneficiary,
@@ -253,6 +272,7 @@ type EditableBeneficiaryDetails = Pick<
 >
 
 type StoredBeneficiaryDetails = Record<string, Partial<EditableBeneficiaryDetails>>
+type StoredDeletedBeneficiaryIds = Record<string, string[]>
 
 function getStoredBeneficiaryDetails(): StoredBeneficiaryDetails {
   if (typeof window === 'undefined') return {}
@@ -262,6 +282,37 @@ function getStoredBeneficiaryDetails(): StoredBeneficiaryDetails {
     return stored && typeof stored === 'object' && !Array.isArray(stored) ? stored as StoredBeneficiaryDetails : {}
   } catch {
     return {}
+  }
+}
+
+function getDeletedBeneficiaryIds(country: CountryId): string[] {
+  if (typeof window === 'undefined') return []
+
+  try {
+    const stored: unknown = JSON.parse(window.localStorage.getItem(DELETED_BENEFICIARY_IDS_STORAGE_KEY) ?? '{}')
+    if (!stored || typeof stored !== 'object' || Array.isArray(stored)) return []
+    const ids = (stored as StoredDeletedBeneficiaryIds)[country]
+    return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : []
+  } catch {
+    return []
+  }
+}
+
+export function deleteFrequentBeneficiary(country: CountryId, beneficiaryId: string) {
+  if (typeof window === 'undefined') return
+
+  try {
+    const storedValue: unknown = JSON.parse(window.localStorage.getItem(DELETED_BENEFICIARY_IDS_STORAGE_KEY) ?? '{}')
+    const stored = storedValue && typeof storedValue === 'object' && !Array.isArray(storedValue)
+      ? storedValue as StoredDeletedBeneficiaryIds
+      : {}
+    const deletedIds = new Set(getDeletedBeneficiaryIds(country))
+    deletedIds.add(beneficiaryId)
+    stored[country] = [...deletedIds]
+    window.localStorage.setItem(DELETED_BENEFICIARY_IDS_STORAGE_KEY, JSON.stringify(stored))
+    storeFavoriteBeneficiaryIds(getStoredFavoriteBeneficiaryIds().filter((id) => id !== beneficiaryId))
+  } catch {
+    /* The current screen can still return to its refreshed list if storage is unavailable. */
   }
 }
 
@@ -374,8 +425,10 @@ export function getBeneficiaryPaymentHistory(person: FrequentBeneficiary, countr
 export function getFrequentBeneficiaries(country: CountryId): FrequentBeneficiary[] {
   const currency = getCountryConfig(country).currency
   const storedDetails = getStoredBeneficiaryDetails()
+  const deletedIds = new Set(getDeletedBeneficiaryIds(country))
   const transactions = getRecentPaymentTransactions(country, currency)
   return FREQUENT_BENEFICIARY_SEEDS.flatMap((seed) => {
+    if (deletedIds.has(seed.id)) return []
     const latest = transactions.find((transaction) => transaction.beneficiaryId === seed.id && transaction.type === 'debit')
     if (!latest) return []
     const paymentAccountNumber = `200014${seed.suffix}`
@@ -424,9 +477,177 @@ const DIRECT_DEBIT_SEEDS: ReadonlyArray<Omit<RecurrentPayment, 'currency' | 'kin
   { id: 'dd-insurance', name: 'Household insurance', nextDate: '18-September-2026', amount: 1150, isLimit: true },
 ]
 
+const INTERNAL_TRANSFER_SEEDS: ReadonlyArray<Omit<RecurrentPayment, 'currency' | 'kind'>> = [
+  {
+    id: 'mtb-demo-savings',
+    name: 'To Savings account',
+    nextDate: '30-September-2026',
+    amount: 5000,
+    schedule: { startDate: '2026-09-30', repeat: 'monthly', endsOn: { type: 'never' } },
+    details: 'Everyday account → Savings account',
+    sourceAccountId: 'acc-1',
+    destinationAccountId: 'sav-1',
+    sourceAccountName: 'Everyday account',
+    destinationAccountName: 'Savings account',
+    note: 'Monthly savings',
+  },
+  {
+    id: 'mtb-demo-everyday',
+    name: 'To Everyday account',
+    nextDate: '15-October-2026',
+    amount: 2500,
+    schedule: { startDate: '2026-10-15', repeat: 'biweekly', endsOn: { type: 'never' } },
+    details: 'Savings account → Everyday account',
+    sourceAccountId: 'sav-1',
+    destinationAccountId: 'acc-1',
+    sourceAccountName: 'Savings account',
+    destinationAccountName: 'Everyday account',
+    note: 'Regular spending budget',
+  },
+]
+
+function monthlyScheduleFromDateLabel(label: string): ScheduleConfig {
+  const [dayText, monthName, yearText] = label.split('-')
+  const month = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ].indexOf(monthName ?? '')
+  const day = Number(dayText)
+  const year = Number(yearText)
+  const validDate = month >= 0 && Number.isInteger(day) && day >= 1 && day <= 31 && Number.isInteger(year)
+
+  return {
+    startDate: validDate
+      ? `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+      : new Date().toISOString().slice(0, 10),
+    repeat: 'monthly',
+    endsOn: { type: 'never' },
+  }
+}
+
 export function getRecurrentPayments(country: CountryId, kind: RecurrentPaymentKind): RecurrentPayment[] {
   const currency = getCountryConfig(country).currency
-  const seeds = kind === 'standing-order' ? STANDING_ORDER_SEEDS : DIRECT_DEBIT_SEEDS
+  const seeds = kind === 'internal-transfer'
+    ? INTERNAL_TRANSFER_SEEDS
+    : kind === 'standing-order'
+      ? STANDING_ORDER_SEEDS
+      : DIRECT_DEBIT_SEEDS
 
-  return seeds.map((seed) => ({ ...seed, kind, currency }))
+  return seeds.map((seed) => ({
+    ...seed,
+    kind,
+    currency,
+    schedule: monthlyScheduleFromDateLabel(seed.nextDate),
+  }))
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function isScheduleConfig(value: unknown): value is ScheduleConfig {
+  if (!isRecord(value) || typeof value.startDate !== 'string') return false
+  if (!['never', 'daily', 'weekly', 'biweekly', 'monthly', 'yearly'].includes(String(value.repeat))) return false
+  return isRecord(value.endsOn)
+    && (value.endsOn.type === 'never'
+      || (value.endsOn.type === 'on-date' && typeof value.endsOn.date === 'string'))
+}
+
+function isRecurrentPayment(value: unknown): value is RecurrentPayment {
+  if (!isRecord(value)) return false
+  return typeof value.id === 'string'
+    && (value.kind === 'internal-transfer' || value.kind === 'standing-order' || value.kind === 'direct-debit')
+    && typeof value.name === 'string'
+    && typeof value.nextDate === 'string'
+    && typeof value.amount === 'number'
+    && typeof value.currency === 'string'
+    && (value.schedule === undefined || isScheduleConfig(value.schedule))
+    && (value.details === undefined || typeof value.details === 'string')
+    && (value.sourceAccountId === undefined || typeof value.sourceAccountId === 'string')
+    && (value.destinationAccountId === undefined || typeof value.destinationAccountId === 'string')
+    && (value.sourceAccountName === undefined || typeof value.sourceAccountName === 'string')
+    && (value.destinationAccountName === undefined || typeof value.destinationAccountName === 'string')
+    && (value.note === undefined || typeof value.note === 'string')
+    && (value.isLimit === undefined || typeof value.isLimit === 'boolean')
+}
+
+function getStoredRecurrentPaymentChanges(country: CountryId): StoredRecurrentPaymentChanges {
+  const empty: StoredRecurrentPaymentChanges = { created: [], updated: {}, deletedIds: [] }
+  if (typeof window === 'undefined') return empty
+
+  try {
+    const stored: unknown = JSON.parse(
+      window.localStorage.getItem(`${RECURRENT_PAYMENTS_STORAGE_KEY}.${country}`) ?? '{}',
+    )
+    if (!isRecord(stored)) return empty
+
+    const updates = isRecord(stored.updated) ? stored.updated : {}
+    return {
+      created: Array.isArray(stored.created) ? stored.created.filter(isRecurrentPayment) : [],
+      updated: Object.fromEntries(
+        Object.entries(updates).filter(([, value]) => isRecord(value)),
+      ) as Record<string, Partial<RecurrentPayment>>,
+      deletedIds: Array.isArray(stored.deletedIds)
+        ? stored.deletedIds.filter((id): id is string => typeof id === 'string')
+        : [],
+    }
+  } catch {
+    return empty
+  }
+}
+
+function storeRecurrentPaymentChanges(country: CountryId, changes: StoredRecurrentPaymentChanges) {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(`${RECURRENT_PAYMENTS_STORAGE_KEY}.${country}`, JSON.stringify(changes))
+  } catch {
+    /* Keep the current screen usable if local storage is unavailable. */
+  }
+}
+
+export function getAllRecurrentPayments(country: CountryId): RecurrentPayment[] {
+  const changes = getStoredRecurrentPaymentChanges(country)
+  const deletedIds = new Set(changes.deletedIds)
+  const base = [
+    ...getRecurrentPayments(country, 'internal-transfer'),
+    ...getRecurrentPayments(country, 'standing-order'),
+    ...getRecurrentPayments(country, 'direct-debit'),
+  ]
+
+  return [
+    ...base
+      .filter((payment) => !deletedIds.has(payment.id))
+      .map((payment) => ({ ...payment, ...changes.updated[payment.id] })),
+    ...changes.created.filter((payment) => !deletedIds.has(payment.id)),
+  ]
+}
+
+export function createRecurrentPayment(country: CountryId, payment: RecurrentPayment) {
+  const changes = getStoredRecurrentPaymentChanges(country)
+  changes.created = [...changes.created.filter((item) => item.id !== payment.id), payment]
+  storeRecurrentPaymentChanges(country, changes)
+}
+
+export function updateRecurrentPayment(
+  country: CountryId,
+  paymentId: string,
+  updates: Partial<RecurrentPayment>,
+) {
+  const changes = getStoredRecurrentPaymentChanges(country)
+  const createdIndex = changes.created.findIndex((payment) => payment.id === paymentId)
+  if (createdIndex >= 0) {
+    const created = changes.created[createdIndex]
+    if (created) changes.created[createdIndex] = { ...created, ...updates }
+  } else {
+    changes.updated[paymentId] = { ...changes.updated[paymentId], ...updates }
+  }
+  storeRecurrentPaymentChanges(country, changes)
+}
+
+export function deleteRecurrentPayment(country: CountryId, paymentId: string) {
+  const changes = getStoredRecurrentPaymentChanges(country)
+  changes.created = changes.created.filter((payment) => payment.id !== paymentId)
+  delete changes.updated[paymentId]
+  if (!changes.deletedIds.includes(paymentId)) changes.deletedIds.push(paymentId)
+  storeRecurrentPaymentChanges(country, changes)
 }
