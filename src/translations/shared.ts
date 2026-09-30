@@ -209,6 +209,7 @@ const EN_RUNTIME: RuntimeTranslations = {
       noResults: "No templates or beneficiaries found",
       useTemplate: "Use template",
       useBeneficiary: "Use beneficiary",
+      sendMoney: "Send money",
       forBeneficiary: "for",
     },
     exchangeRates: {

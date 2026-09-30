@@ -149,6 +149,7 @@ export interface TranslationKeys {
         noResults: string;
         useTemplate: string;
         useBeneficiary: string;
+        sendMoney: string;
         forBeneficiary: string;
       };
       exchangeRates: {
