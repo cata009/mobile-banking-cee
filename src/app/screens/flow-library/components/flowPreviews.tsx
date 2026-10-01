@@ -16,10 +16,11 @@ import TextField from "@/app/components/TextField";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import { PreviewSafeTop } from "./MiniPhone";
 import { renderRsPropertyInsurancePreview } from "./rsPropertyInsurancePreviews";
+import { renderGeniusMyCarPreview } from "./geniusMyCarPreviews";
 import { renderInvestmentsBulkApprovalPreview } from "./investmentsBulkApprovalPreviews";
 import { DemoProvider } from "@/app/state/demoStore";
 import { FLOW_DEMO } from "../flows/demoData";
-import type { FlowScreenKind, RsPropertyInsuranceScreenKind } from "../flows/types";
+import type { FlowScreenKind, GeniusMyCarScreenKind, RsPropertyInsuranceScreenKind } from "../flows/types";
 import { getAccountTransactions, type AccountTransaction } from "@/data/accountDetails";
 import { mockProducts, type CurrentAccount, type DebitCard } from "@/data/products";
 import carrefourOfficialLogo from "@/assets/ethoca/carrefour-official.svg";
@@ -923,6 +924,9 @@ export interface PreviewContext {
 }
 
 export function renderFlowPreview(kind: FlowScreenKind, _context: PreviewContext = {}): ReactNode {
+  if (kind.startsWith("genius-my-car-")) {
+    return renderGeniusMyCarPreview(kind as GeniusMyCarScreenKind);
+  }
   // RS Property Insurance keeps its screens in their own module; every one of its
   // kinds carries the same prefix, so the dispatcher stays one line per flow.
   if (kind.startsWith("rs-pi-")) {

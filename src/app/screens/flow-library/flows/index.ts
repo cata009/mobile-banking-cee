@@ -1,5 +1,6 @@
 import { CARD_PIN_FLOW } from "./cardPin";
 import { ETHOCA_FLOW } from "./ethoca";
+import { GENIUS_MY_CAR_FLOW } from "./geniusMyCar";
 import { INVESTMENTS_BULK_APPROVAL_FLOW } from "./investmentsBulkApproval";
 import { ROUND_UP_FLOW } from "./roundUp";
 import { RS_PROPERTY_INSURANCE_FLOW } from "./rsPropertyInsurance";
@@ -9,6 +10,7 @@ import type { FlowDefinition, FlowPreviewId, FlowScenario } from "./types";
 export const FLOW_DEFINITIONS: Record<FlowPreviewId, FlowDefinition> = {
   "ro-round-up": ROUND_UP_FLOW,
   "ro-card-pin": CARD_PIN_FLOW,
+  "ro-genius-my-car": GENIUS_MY_CAR_FLOW,
   "mobile-pi-ethoca": ETHOCA_FLOW,
   "rs-property-insurance": RS_PROPERTY_INSURANCE_FLOW,
   "investments-bulk-approval": INVESTMENTS_BULK_APPROVAL_FLOW,
@@ -18,6 +20,7 @@ export const FLOW_DEFINITIONS: Record<FlowPreviewId, FlowDefinition> = {
 export const FLOW_ORDER: readonly FlowPreviewId[] = [
   "investments-bulk-approval",
   "rs-property-insurance",
+  "ro-genius-my-car",
   "mobile-pi-ethoca",
   "ro-round-up",
   "ro-card-pin",

@@ -28,6 +28,7 @@ import type { CountryId } from "@/app/state/demoTypes";
 export type FlowPreviewId =
   | "ro-round-up"
   | "ro-card-pin"
+  | "ro-genius-my-car"
   | "mobile-pi-ethoca"
   | "rs-property-insurance"
   | "investments-bulk-approval";
@@ -115,6 +116,31 @@ export type RsPropertyInsuranceScreenKind =
   | "rs-pi-payment-cancelled"
   | "rs-pi-abandon-confirm";
 
+/** Romania-only Genius My Car entry, vehicle registration and RCA/CASCO purchase previews. */
+export type GeniusMyCarScreenKind =
+  | "genius-my-car-products"
+  | "genius-my-car-insurance-sheet"
+  | "genius-my-car-car-cover"
+  | "genius-my-car-vehicles"
+  | "genius-my-car-vehicles-attention"
+  | "genius-my-car-vehicles-uninsured"
+  | "genius-my-car-owner"
+  | "genius-my-car-vehicle-details"
+  | "genius-my-car-period"
+  | "genius-my-car-offer"
+  | "genius-my-car-terms"
+  | "genius-my-car-payment"
+  | "genius-my-car-success"
+  | "genius-my-car-add-owner"
+  | "genius-my-car-add-vehicle-details"
+  | "genius-my-car-casco-owner"
+  | "genius-my-car-casco-vehicle-details"
+  | "genius-my-car-casco-period"
+  | "genius-my-car-casco-offer"
+  | "genius-my-car-casco-terms"
+  | "genius-my-car-casco-payment"
+  | "genius-my-car-casco-success";
+
 /**
  * All-country Flow Library prototype for approving several investment drafts with
  * one final authorization. These kinds are preview-only; they are not runtime
@@ -136,6 +162,7 @@ export type FlowScreenKind =
   | CardPinScreenKind
   | EthocaScreenKind
   | RsPropertyInsuranceScreenKind
+  | GeniusMyCarScreenKind
   | InvestmentsBulkApprovalScreenKind;
 
 /** Where a flow sits on the road to production. Drives the status chip + filtering. */
