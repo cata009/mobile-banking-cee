@@ -72,7 +72,7 @@ export type RoboAdvisorFlowAction =
   | { type: 'select-horizon'; years: number }
   | { type: 'set-manual-horizon'; value: string }
   | { type: 'open-projection'; strategyId: RoboStrategy['id'] }
-  | { type: 'open-portfolio'; from: 'strategy' | 'projection' }
+  | { type: 'open-portfolio'; from: 'funding-setup' | 'strategy' | 'projection' }
 
 export function createRoboAdvisorFlowState(initialGoal?: RoboExistingGoal): RoboAdvisorFlowState {
   const initialPortfolio = initialGoal

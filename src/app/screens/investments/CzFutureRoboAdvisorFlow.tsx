@@ -1578,7 +1578,15 @@ export default function CzFutureRoboAdvisorFlow({
         onClose={onExit}
         dataScreen={`funding-setup${fundingMethod ? `-${fundingMethod}` : ""}`}
         contentTopClassName="pt-[16px]"
-        footer={<PrimaryButton labelSize="18" disabled={!canContinue} onClick={() => setStep("strategy")}>Choose a strategy</PrimaryButton>}
+        footer={(
+          <PrimaryButton
+            labelSize="18"
+            disabled={!canContinue}
+            onClick={() => dispatchFlow({ type: "open-portfolio", from: "funding-setup" })}
+          >
+            Continue
+          </PrimaryButton>
+        )}
       >
         <div
           role="radiogroup"

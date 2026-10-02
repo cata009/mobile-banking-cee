@@ -61,23 +61,14 @@ function reachGoalDetail() {
   reachFundingMethod()
   fireEvent.click(screen.getByRole('radio', { name: /Invest once/i }))
   fireEvent.click(screen.getByRole('button', { name: /^10\D000 CZK$/ }))
-  fireEvent.click(screen.getByRole('button', { name: 'Choose a strategy' }))
-  fireEvent.click(screen.getByRole('button', { name: 'Continue with Sustainable Balanced' }))
-  fireEvent.click(screen.getByRole('button', { name: 'Choose Sustainable' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
   fireEvent.click(screen.getByRole('switch', { name: 'Accept terms and conditions' }))
   fireEvent.click(screen.getByRole('button', { name: 'Continue to sign' }))
   fireEvent.click(screen.getByRole('button', { name: 'Sign goal' }))
   act(() => vi.advanceTimersByTime(840))
   act(() => vi.advanceTimersByTime(900))
   fireEvent.click(screen.getByRole('button', { name: 'Open goal' }))
-}
-
-function reachProjection() {
-  reachFundingMethod()
-  fireEvent.click(screen.getByRole('radio', { name: /Invest once/i }))
-  fireEvent.click(screen.getByRole('button', { name: /^10\D000 CZK$/ }))
-  fireEvent.click(screen.getByRole('button', { name: 'Choose a strategy' }))
-  fireEvent.click(screen.getByRole('button', { name: 'See projection for Sustainable Balanced' }))
 }
 
 describe('CZ Future Robo Advisor flow', () => {
@@ -176,7 +167,7 @@ describe('CZ Future Robo Advisor flow', () => {
     expect(quickAmount).toHaveAttribute('aria-pressed', 'false')
   })
 
-  it('uses one funding screen for the combined branch and reaches strategy projection', () => {
+  it('uses one funding screen and continues directly to suitable basket funds', () => {
     startFlow()
 
     reachFundingMethod()
@@ -190,27 +181,10 @@ describe('CZ Future Robo Advisor flow', () => {
 
     fireEvent.change(screen.getByRole('textbox', { name: 'Amount to invest now' }), { target: { value: '50000' } })
     fireEvent.change(screen.getByRole('textbox', { name: 'Monthly contribution' }), { target: { value: '2000' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Choose a strategy' }))
-
-    expect(screen.getByRole('heading', { name: 'Choose a strategy' })).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'See projection for Sustainable Balanced' }))
-    expect(screen.getByRole('heading', { name: 'Projection for Sustainable Balanced' })).toBeInTheDocument()
-    expect(screen.getByText(/projections are estimates/i)).toBeInTheDocument()
-    const investNowSlider = screen.getByRole('slider', { name: 'Invest now' })
-    const chart = screen.getByRole('img', { name: /Projected values after/ })
-    const initialProjection = chart.getAttribute('aria-label')
-    expect(investNowSlider).toHaveValue('50000')
-    expect(screen.getByRole('slider', { name: 'Invest monthly' })).toHaveValue('2000')
-    expect(screen.getByRole('button', { name: 'See suitable portfolios' })).toBeInTheDocument()
-
-    fireEvent.change(investNowSlider, { target: { value: '100000' } })
-    expect(screen.getByText(/100.*000 CZK/)).toBeInTheDocument()
-    expect(chart.getAttribute('aria-label')).not.toBe(initialProjection)
-
-    fireEvent.click(screen.getByRole('button', { name: 'See suitable portfolios' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
     expect(screen.getByRole('heading', { name: 'Available portfolios' })).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
-    expect(screen.getByRole('heading', { name: 'Projection for Sustainable Balanced' })).toBeInTheDocument()
+    expect(screen.getByTestId('robo-basket-portfolio-carousel').querySelectorAll('[role="radio"]')).toHaveLength(5)
+    expect(screen.getByText(/3 one-off and 2 regular/i)).toBeInTheDocument()
   })
 
   it('reviews client-facing documents and sends the goal to secure signing', () => {
@@ -220,9 +194,8 @@ describe('CZ Future Robo Advisor flow', () => {
     reachFundingMethod()
     fireEvent.click(screen.getByRole('radio', { name: /Invest once/i }))
     fireEvent.change(screen.getByRole('textbox', { name: 'Amount to invest now' }), { target: { value: '50000' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Choose a strategy' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Continue with Sustainable Balanced' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Choose Sustainable' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
 
     expect(screen.getByRole('heading', { name: 'Review Data' })).toBeInTheDocument()
     expect(screen.getByText('Documents and account terms')).toBeInTheDocument()
@@ -248,12 +221,12 @@ describe('CZ Future Robo Advisor flow', () => {
     expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled()
   })
 
-  it('shows relevant contribution fields inline and validates before choosing a strategy', () => {
+  it('shows relevant contribution fields inline and validates before basket recommendations', () => {
     startFlow()
     reachFundingMethod()
 
     expect(screen.getAllByRole('radio')).toHaveLength(3)
-    const continueButton = screen.getByRole('button', { name: 'Choose a strategy' })
+    const continueButton = screen.getByRole('button', { name: 'Continue' })
     expect(continueButton).toBeDisabled()
 
     fireEvent.click(screen.getByRole('radio', { name: /Invest monthly/i }))
@@ -266,7 +239,7 @@ describe('CZ Future Robo Advisor flow', () => {
     fireEvent.change(screen.getByRole('textbox', { name: 'Monthly contribution' }), { target: { value: '1000' } })
     expect(continueButton).toBeEnabled()
     fireEvent.click(continueButton)
-    expect(screen.getByRole('heading', { name: 'Choose a strategy' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Available portfolios' })).toBeInTheDocument()
   })
 
   it('offers quick monthly contribution suggestions with a visible selected state', () => {
@@ -281,123 +254,12 @@ describe('CZ Future Robo Advisor flow', () => {
     expect(suggestion).toHaveAttribute('aria-pressed', 'true')
   })
 
-  it('supports drag interaction on the strategy carousel', () => {
-    startFlow()
-    reachFundingMethod()
-    fireEvent.click(screen.getByRole('radio', { name: /Invest once/i }))
-    fireEvent.click(screen.getByRole('button', { name: /^10\D000 CZK$/ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Choose a strategy' }))
-
-    const carousel = screen.getByTestId('robo-strategy-carousel')
-    expect(carousel).not.toHaveClass('-mx-[24px]')
-    expect(carousel).toHaveClass('-mr-[24px]', 'pr-[24px]')
-    Object.defineProperty(carousel, 'scrollLeft', { value: 0, writable: true })
-    fireEvent.mouseDown(carousel, { button: 0, clientX: 280 })
-    fireEvent.mouseMove(document, { buttons: 1, clientX: 80 })
-    fireEvent.mouseUp(document)
-
-    expect(carousel.scrollLeft).toBeGreaterThan(0)
-  })
-
-  it('keeps the projection action clickable while the card participates in drag gestures', () => {
-    startFlow()
-    reachFundingMethod()
-    fireEvent.click(screen.getByRole('radio', { name: /Invest once/i }))
-    fireEvent.click(screen.getByRole('button', { name: /^10\D000 CZK$/ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Choose a strategy' }))
-
-    const carousel = screen.getByTestId('robo-strategy-carousel')
-    const projectionButton = screen.getByRole('button', { name: 'See projection for Sustainable Balanced' })
-    const captureOnButton = vi.fn()
-    Object.assign(carousel, { setPointerCapture: vi.fn(), hasPointerCapture: () => false })
-    Object.assign(projectionButton, {
-      setPointerCapture: captureOnButton,
-      hasPointerCapture: () => true,
-      releasePointerCapture: vi.fn(),
-    })
-
-    // A tap must not capture the pointer: while an element holds the capture the
-    // browser fires the click at *it* rather than at what was pressed, which is
-    // what used to swallow taps on controls inside a carousel.
-    // A tap must not capture the pointer: while an element holds the capture the
-    // browser fires the click at *it* rather than at what was pressed, which is
-    // what used to swallow taps on controls inside a carousel.
-    fireEvent.pointerDown(projectionButton, { pointerId: 7, pointerType: 'touch', clientX: 160 })
-    fireEvent.pointerUp(projectionButton, { pointerId: 7, pointerType: 'touch', clientX: 160 })
-    fireEvent.click(projectionButton)
-
-    expect(captureOnButton).not.toHaveBeenCalled()
-    expect(screen.getByRole('heading', { name: 'Projection for Sustainable Balanced' })).toBeInTheDocument()
-  })
-
-  it('claims the pointer once a press on a card becomes a drag', () => {
-    startFlow()
-    reachFundingMethod()
-    fireEvent.click(screen.getByRole('radio', { name: /Invest once/i }))
-    fireEvent.click(screen.getByRole('button', { name: /^10\D000 CZK$/ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Choose a strategy' }))
-
-    const carousel = screen.getByTestId('robo-strategy-carousel')
-    const projectionButton = screen.getByRole('button', { name: 'See projection for Sustainable Balanced' })
-    const captureOnButton = vi.fn()
-    Object.assign(carousel, { setPointerCapture: vi.fn(), hasPointerCapture: () => false })
-    Object.assign(projectionButton, {
-      setPointerCapture: captureOnButton,
-      hasPointerCapture: () => true,
-      releasePointerCapture: vi.fn(),
-    })
-
-    // Movement past the drag threshold is what claims the pointer, so a drag
-    // started on a card keeps scrolling the rail once the finger leaves it.
-    fireEvent.pointerDown(projectionButton, { pointerId: 8, pointerType: 'touch', clientX: 160 })
-    fireEvent.pointerMove(projectionButton, { pointerId: 8, pointerType: 'touch', clientX: 120 })
-    fireEvent.pointerUp(projectionButton, { pointerId: 8, pointerType: 'touch', clientX: 120 })
-
-    expect(captureOnButton).toHaveBeenCalledTimes(1)
-    expect(screen.queryByRole('heading', { name: 'Projection for Sustainable Balanced' })).not.toBeInTheDocument()
-  })
-
-  it('keeps both investment controls available and connected to the projection chart', () => {
-    startFlow()
-    reachProjection()
-
-    const chart = screen.getByRole('img', { name: /Projected values after/ })
-    const initialProjection = chart.getAttribute('aria-label')
-    const monthlySlider = screen.getByRole('slider', { name: 'Invest monthly' })
-    expect(screen.getByRole('slider', { name: 'Invest now' })).toBeInTheDocument()
-
-    fireEvent.change(monthlySlider, { target: { value: '3000' } })
-    expect(chart.getAttribute('aria-label')).not.toBe(initialProjection)
-  })
-
-  it('shows annual returns before the projection and uses 8px amount radii', () => {
-    startFlow()
-    reachProjection()
-
-    const annualReturnHeading = screen.getByText('Estimated annual return')
-    const projectionHeading = screen.getByText('Projection summary')
-    expect(
-      annualReturnHeading.compareDocumentPosition(projectionHeading)
-      & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy()
-
-    document.querySelectorAll('output').forEach((output) => {
-      expect(output).toHaveClass('rounded-[8px]')
-    })
-
-    const projectionChart = screen.getByRole('img', { name: /Projected values after/ })
-    projectionChart.querySelectorAll('rect').forEach((valueLabel) => {
-      expect(valueLabel).toHaveAttribute('rx', '8')
-    })
-  })
-
   it('shows five basket recommendations in a carousel and updates the selected basket contents', () => {
     startFlow()
     reachFundingMethod()
     fireEvent.click(screen.getByRole('radio', { name: /Invest once/i }))
     fireEvent.click(screen.getByRole('button', { name: /^10\D000 CZK$/ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Choose a strategy' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Continue with Sustainable Balanced' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
 
     const carousel = screen.getByTestId('robo-basket-portfolio-carousel')
     expect(carousel.querySelectorAll('[role="radio"]')).toHaveLength(5)
