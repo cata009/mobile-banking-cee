@@ -151,7 +151,7 @@ describe("CZ Basket Funds catalogue", () => {
     expect(within(carousel).queryByRole("button", { name: /Global growth Basket/i })).not.toBeInTheDocument();
   });
 
-  it("opens the grouped Basket Funds page and expands each group independently", () => {
+  it("shows five recommended basket funds split 3 one-off and 2 regular", () => {
     renderCatalogue();
 
     fireEvent.click(screen.getByRole("button", { name: "See all basket funds" }));
@@ -160,15 +160,21 @@ describe("CZ Basket Funds catalogue", () => {
     expect(screen.getByText(/diversified portfolios that combine multiple investment funds/i)).toBeInTheDocument();
     const oneOff = screen.getByRole("region", { name: /one off investment baskets/i });
     const regular = screen.getByRole("region", { name: /regular investment baskets/i });
-    expect(within(oneOff).getByText("6")).toBeInTheDocument();
-    expect(within(regular).getByText("14")).toBeInTheDocument();
-    expect(oneOff.querySelectorAll("[data-basket-fund-row]")).toHaveLength(4);
-    expect(regular.querySelectorAll("[data-basket-fund-row]")).toHaveLength(4);
+    expect(within(oneOff).getByText("3")).toBeInTheDocument();
+    expect(within(regular).getByText("2")).toBeInTheDocument();
+    expect(oneOff.querySelectorAll("[data-basket-fund-row]")).toHaveLength(3);
+    expect(regular.querySelectorAll("[data-basket-fund-row]")).toHaveLength(2);
 
-    fireEvent.click(within(oneOff).getByRole("button", { name: "See more one off investment baskets" }));
-    expect(oneOff.querySelectorAll("[data-basket-fund-row]")).toHaveLength(6);
-    expect(regular.querySelectorAll("[data-basket-fund-row]")).toHaveLength(4);
-    expect(within(oneOff).getByRole("button", { name: "See less one off investment baskets" })).toBeInTheDocument();
+    fireEvent.click(within(oneOff).getByRole("button", { name: /Open basket fund onemarkets J\.P\. Morgan Global growth Basket/i }));
+    expect(screen.getByText("Basket fund description")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Funds distribution" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+
+    const restoredOneOff = screen.getByRole("region", { name: /one off investment baskets/i });
+    const restoredRegular = screen.getByRole("region", { name: /regular investment baskets/i });
+    expect(restoredOneOff.querySelectorAll("[data-basket-fund-row]")).toHaveLength(3);
+    expect(restoredRegular.querySelectorAll("[data-basket-fund-row]")).toHaveLength(2);
+    expect(screen.queryByRole("button", { name: /See more .* investment baskets/i })).not.toBeInTheDocument();
   });
 
   it("preserves the selected catalogue tab after returning from Basket Funds", () => {
@@ -176,7 +182,7 @@ describe("CZ Basket Funds catalogue", () => {
     fireEvent.click(screen.getByRole("tab", { name: "Regular Plan" }));
     fireEvent.click(screen.getByRole("button", { name: /onemarkets Chase Regular EUR/i }));
 
-    expect(screen.getAllByText("Basket Funds")).not.toHaveLength(0);
+    expect(screen.getByText("Basket fund description")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
 
     expect(screen.getByRole("tab", { name: "Regular Plan" })).toHaveAttribute("aria-selected", "true");
@@ -205,7 +211,7 @@ describe("CZ Basket Funds catalogue", () => {
     expect(HTMLElement.prototype.releasePointerCapture).toHaveBeenCalledWith(7);
   });
 
-  it("opens the basket funds page on a stationary card click but not after a drag", () => {
+  it("opens basket details on a stationary card click but not after a drag", () => {
     renderCatalogue();
     const carousel = screen.getByRole("region", { name: "Basket funds carousel" });
     Object.defineProperty(carousel, "scrollWidth", { configurable: true, value: 2000 });
@@ -214,7 +220,7 @@ describe("CZ Basket Funds catalogue", () => {
 
     // Stationary click (no drag) opens the basket funds page.
     fireEvent.click(firstCard);
-    expect(screen.getAllByText("Basket Funds")).not.toHaveLength(0);
+    expect(screen.getByText("Basket fund description")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
 
     // A drag followed by a pointer-up-leaving suppress-click must NOT open it.
@@ -223,6 +229,6 @@ describe("CZ Basket Funds catalogue", () => {
     fireEvent.pointerUp(firstCard, { pointerId: 3 });
     fireEvent.click(firstCard);
 
-    expect(screen.queryByText("Basket Funds")).not.toBeInTheDocument();
+    expect(screen.queryByText("Basket fund description")).not.toBeInTheDocument();
   });
 });

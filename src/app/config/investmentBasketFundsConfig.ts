@@ -1,4 +1,12 @@
 export type InvestmentBasketContributionType = "ONE OFF" | "RECURRENT";
+export type InvestmentBasketInvestorProfile = "conservative-v1" | "moderate-v2" | "aggressive-v3";
+
+export interface InvestmentBasketFundHolding {
+  title: string;
+  productId?: string;
+  percent?: number;
+  currency?: string;
+}
 
 export interface InvestmentBasketFund {
   id: string;
@@ -6,15 +14,32 @@ export interface InvestmentBasketFund {
   description: string;
   contributionType: InvestmentBasketContributionType;
   logoId: string;
+  recommendedFor?: readonly InvestmentBasketInvestorProfile[];
+  detailDescription?: string;
+  contentsSummary?: string;
+  holdings?: readonly InvestmentBasketFundHolding[];
 }
 
-export const CZ_INVESTMENT_BASKETS = [
+const FIGMA_GLOBAL_GROWTH_DESCRIPTION =
+  "Unlock expert diversification with one click. The Global Growth Basket combines a selection of premium funds, managed by top-tier professionals. This strategy is built for investors seeking a balanced approach to international markets, ensuring your capital is spread across various fund management styles and geographic areas for optimized stability and performance.";
+
+export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
   {
     id: "jp-morgan-global-growth",
     title: "onemarkets J.P. Morgan Global growth Basket",
     description: "A mix of 5 high-yield equity funds.",
     contributionType: "ONE OFF",
     logoId: "unicredit",
+    recommendedFor: ["moderate-v2"],
+    detailDescription: FIGMA_GLOBAL_GROWTH_DESCRIPTION,
+    contentsSummary: "A mix of 5 high-yield equity funds.",
+    holdings: [
+      { title: "Nano-Chip Equity Fund", productId: "XY987654321", percent: 35 },
+      { title: "Quantum Computing Alpha", productId: "XY987654322", percent: 15 },
+      { title: "AI Ethical Solutions", productId: "XY987654323", percent: 20 },
+      { title: "Diszruptìv Vegyes Alap 2004/F", productId: "XY987654324", percent: 15 },
+      { title: "Diszruptìv Vegyes Alap 2004/F", productId: "XY987654325", percent: 5 },
+    ],
   },
   {
     id: "blackrock-credit-opportunities",
@@ -22,6 +47,9 @@ export const CZ_INVESTMENT_BASKETS = [
     description: "4 equity ESG funds.",
     contributionType: "ONE OFF",
     logoId: "unicredit",
+    recommendedFor: ["moderate-v2"],
+    contentsSummary: "4 equity ESG funds.",
+    holdings: [],
   },
   {
     id: "onemarkets-eur-collection",
@@ -29,6 +57,9 @@ export const CZ_INVESTMENT_BASKETS = [
     description: "Pictet Thematic Intelligence Fund",
     contributionType: "ONE OFF",
     logoId: "unicredit",
+    recommendedFor: ["moderate-v2"],
+    contentsSummary: "Pictet Thematic Intelligence Fund",
+    holdings: [{ title: "Pictet Thematic Intelligence Fund" }],
   },
   {
     id: "jp-morgan-credit-opportunities",
@@ -54,9 +85,18 @@ export const CZ_INVESTMENT_BASKETS = [
   {
     id: "chase-regular-eur",
     title: "onemarkets Chase Regular EUR",
-    description: "A mix of 5 high-yield equity funds this is a secondary line of description",
     contributionType: "RECURRENT",
     logoId: "unicredit",
+    recommendedFor: ["moderate-v2"],
+    description: "A regular investment basket with a mix of 5 high-yield equity funds.",
+    contentsSummary: "A mix of 5 high-yield equity funds.",
+    holdings: [
+      { title: "Amundi Funds Global Opportunity", productId: "CZROBOAMUND14" },
+      { title: "onemarkets Climate Focus Fund", productId: "CZCLIMATEFO2" },
+      { title: "Global Dividend Fund", productId: "CZGLOBALDIV4" },
+      { title: "Global Tech Leaders", productId: "CZGLOBALTEC8" },
+      { title: "Europe Equity Opportunities", productId: "CZEUROPEEQU7" },
+    ],
   },
   {
     id: "jp-morgan-credit-regular",
@@ -64,6 +104,9 @@ export const CZ_INVESTMENT_BASKETS = [
     description: "A mix of 8 high-yield equity funds.",
     contributionType: "RECURRENT",
     logoId: "unicredit",
+    recommendedFor: ["moderate-v2"],
+    contentsSummary: "A mix of 8 high-yield equity funds.",
+    holdings: [],
   },
   {
     id: "amundi-eur-collection-regular",
@@ -155,4 +198,11 @@ export function getInvestmentBaskets(contributionType?: InvestmentBasketContribu
   return contributionType
     ? CZ_INVESTMENT_BASKETS.filter((basket) => basket.contributionType === contributionType)
     : [...CZ_INVESTMENT_BASKETS];
+}
+
+export function getRecommendedInvestmentBaskets(profile: InvestmentBasketInvestorProfile = "moderate-v2") {
+  const eligible = CZ_INVESTMENT_BASKETS.filter((basket) => basket.recommendedFor?.includes(profile));
+  const oneOff = eligible.filter((basket) => basket.contributionType === "ONE OFF").slice(0, 3);
+  const regular = eligible.filter((basket) => basket.contributionType === "RECURRENT").slice(0, 2);
+  return [...oneOff, ...regular];
 }

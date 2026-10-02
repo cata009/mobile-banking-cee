@@ -31,6 +31,7 @@ interface TextFieldProps {
   readOnly?: boolean;
   suffix?: string;
   suffixOutsideDivider?: boolean;
+  suffixClassName?: string;
   onActivate?: () => void;
   /** Called when the input loses focus, e.g. to commit a clamped numeric draft. */
   onBlur?: () => void;
@@ -58,6 +59,7 @@ export default function TextField({
   readOnly = false,
   suffix,
   suffixOutsideDivider = false,
+  suffixClassName = "",
   onActivate,
   onBlur,
 }: TextFieldProps) {
@@ -187,14 +189,14 @@ export default function TextField({
               />
             )}
             {suffix && !suffixOutsideDivider ? (
-              <span className="uc-type-p1 ml-[8px] shrink-0" style={{ color: valueColor }}>
+              <span className={`uc-type-p1 ml-[8px] shrink-0 ${suffixClassName}`} style={{ color: valueColor }}>
                 {suffix}
               </span>
             ) : null}
           </div>
 
           {suffix && suffixOutsideDivider ? (
-            <span className="uc-type-p1 ml-[12px] shrink-0" style={{ color: valueColor }}>
+            <span className={`uc-type-p1 ml-[12px] shrink-0 ${suffixClassName}`} style={{ color: valueColor }}>
               {suffix}
             </span>
           ) : null}

@@ -1,4 +1,9 @@
 import { formatInvestmentMoney } from "@/app/utils/investmentAmountFormatting";
+import {
+  getRecommendedInvestmentBaskets,
+  type InvestmentBasketFund,
+  type InvestmentBasketInvestorProfile,
+} from "@/app/config/investmentBasketFundsConfig";
 
 export type RoboInvestorProfileStatus = "valid" | "expired" | "missing";
 export type RoboFundingMethod = "one-off" | "regular" | "combined";
@@ -58,9 +63,10 @@ export interface RoboPortfolio {
   strategyId: RoboStrategy["id"];
   name: string;
   description: string;
-  minimumLabel: string;
+  minimumLabel?: string;
   suitabilitySummary: string;
   holdings: readonly RoboHolding[];
+  basketFund?: InvestmentBasketFund;
 }
 
 export type RoboGoalStatus = "ACTIVE" | "INACTIVE";
@@ -113,24 +119,41 @@ export const ROBO_GOAL_TYPES = [
   {
     id: "build-wealth",
     title: "General build-up wealth",
+    description: "Grow your wealth to support long-term goals.",
   },
   {
     id: "protect-from-inflation",
     title: "Protection for inflation",
+    description: "Help preserve purchasing power as prices rise.",
   },
   {
     id: "unforeseen-circumstances",
     title: "Saving for unforeseen circumstances",
+    description: "Build a reserve for unexpected expenses.",
   },
   {
     id: "major-purchase",
     title: "Saving for a major purchase",
+    description: "Save for a future purchase, like a home or car.",
   },
   {
     id: "retirement",
     title: "Retirement",
+    description: "Build long-term savings for retirement.",
   },
 ] as const;
+
+const ROBO_GOAL_NAME_SUGGESTIONS: Readonly<Record<string, readonly string[]>> = {
+  "General build-up wealth": ["Build a brighter future", "Make my money work", "My next big opportunity"],
+  "Protection for inflation": ["Keep my savings strong", "Protect my purchasing power", "Future-proof my savings"],
+  "Saving for unforeseen circumstances": ["Peace of mind", "My safety net", "Ready for the unexpected"],
+  "Saving for a major purchase": ["My dream home", "My next car", "My next big purchase"],
+  Retirement: ["Retire on my terms", "A brighter retirement", "My future freedom"],
+};
+
+export function getRoboGoalNameSuggestions(goalType: string): readonly string[] {
+  return ROBO_GOAL_NAME_SUGGESTIONS[goalType] ?? ["A brighter future", "Make my money work", "My next big opportunity"];
+}
 
 export const ROBO_STRATEGIES: readonly RoboStrategy[] = [
   {
@@ -214,6 +237,15 @@ export const ROBO_PORTFOLIOS: readonly RoboPortfolio[] = [
       { name: "Cash reserve", type: "Cash", percent: 15, currency: "CZK" },
     ],
   },
+  ...ROBO_STRATEGIES.flatMap((strategy) => getRecommendedInvestmentBaskets("moderate-v2").map((basket) => ({
+    id: `basket-${strategy.id}-${basket.id}`,
+    strategyId: strategy.id,
+    name: basket.title,
+    description: basket.description,
+    suitabilitySummary: `Recommended for the Moderate - V2 profile and this goal’s ${basket.contributionType === "ONE OFF" ? "one-off" : "regular investment"} plan.`,
+    holdings: [],
+    basketFund: basket,
+  }))),
 ] as const;
 
 export const ROBO_PORTFOLIO_PRESENTATIONS: Record<RoboStrategy["id"], RoboPortfolioPresentation> = {
@@ -378,6 +410,14 @@ export function buildRoboReviewRows(draft: RoboDraft): RoboReviewRow[] {
   return rows;
 }
 
-export function getPortfoliosForStrategy(strategyId: RoboStrategy["id"]): readonly RoboPortfolio[] {
-  return ROBO_PORTFOLIOS.filter((portfolio) => portfolio.strategyId === strategyId);
+export function getPortfoliosForStrategy(
+  strategyId: RoboStrategy["id"],
+  investorProfile: InvestmentBasketInvestorProfile = "moderate-v2",
+): readonly RoboPortfolio[] {
+  const eligibleIds = new Set<string>(getRecommendedInvestmentBaskets(investorProfile).map((basket) => basket.id));
+  return ROBO_PORTFOLIOS.filter((portfolio) => (
+    portfolio.strategyId === strategyId
+    && portfolio.basketFund
+    && eligibleIds.has(portfolio.basketFund.id)
+  ));
 }

@@ -6,6 +6,7 @@ import ToggleButton from "@/app/components/ToggleButton";
 import NavigationRow from "@/app/components/NavigationRow";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
+import InfoBanner from "@/app/components/cards/InfoBanner";
 import BrandLogo from "@/app/components/brand-logo/BrandLogo";
 import StandardSignScreen from "@/app/components/flow/StandardSignScreen";
 import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
@@ -25,6 +26,7 @@ import {
   type InvestmentPortfolioTabOption,
   type InvestmentSortId,
 } from "@/app/config/investmentsPortfolioConfig";
+import type { InvestmentBasketFund } from "@/app/config/investmentBasketFundsConfig";
 import introImage from "@/assets/investments/robo-advisor-intro.png";
 import amundiLogo from "@/assets/investments/funds/fund-amundi-logo.png";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
@@ -36,6 +38,7 @@ import {
   ROBO_STRATEGIES,
   buildRoboReviewRows,
   formatCzkInput,
+  getRoboGoalNameSuggestions,
   getFundingFieldVisibility,
   getPortfoliosForStrategy,
   isInvestorProfileBlocking,
@@ -82,10 +85,21 @@ interface RoboScreenProps {
   titleClassName?: string;
   descriptionTrailing?: ReactNode;
   descriptionTopClassName?: string;
+  contentTopClassName?: string;
 }
 
 const cashAccountLabel = "Current ··· 4821";
 const DEFAULT_ROBO_STRATEGY = ROBO_STRATEGIES[0]!;
+const ROBO_INVESTOR_PROFILE_LABELS = {
+  conservative: "Conservative - V1",
+  moderate: "Moderate - V2",
+  aggressive: "Aggressive - V3",
+} as const;
+const ROBO_FUNDING_OPTIONS: readonly { id: RoboFundingMethod; title: string; description: string }[] = [
+  { id: "one-off", title: "Invest once", description: "Make a single investment now." },
+  { id: "regular", title: "Invest monthly", description: "Choose an amount to contribute each month." },
+  { id: "combined", title: "Invest now and monthly", description: "Make an initial investment, then continue with monthly contributions." },
+];
 
 function RoboScreen({
   title,
@@ -99,6 +113,7 @@ function RoboScreen({
   titleClassName,
   descriptionTrailing,
   descriptionTopClassName = "mt-[16px]",
+  contentTopClassName = "pt-[32px]",
 }: RoboScreenProps) {
   const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(64);
 
@@ -138,7 +153,7 @@ function RoboScreen({
             {descriptionTrailing}
           </div>
         ) : null}
-        <div className="pt-[32px]">{children}</div>
+        <div className={contentTopClassName}>{children}</div>
       </main>
       {footer ? <footer className="shrink-0 px-[24px] pb-[34px] pt-[12px]">{footer}</footer> : null}
     </div>
@@ -187,11 +202,13 @@ const GOAL_ICONS: Record<(typeof ROBO_GOAL_TYPES)[number]["id"], IconName> = {
 function GoalSelectionCard({
   id,
   title,
+  description,
   selected,
   onSelect,
 }: {
   id: (typeof ROBO_GOAL_TYPES)[number]["id"];
   title: string;
+  description: string;
   selected: boolean;
   onSelect: () => void;
 }) {
@@ -200,14 +217,17 @@ function GoalSelectionCard({
       type="button"
       role="radio"
       aria-checked={selected}
-      aria-label={title}
+      aria-label={`${title}. ${description}`}
       onClick={onSelect}
-      className="flex min-h-[64px] w-full items-center gap-[16px] rounded-[5px] border border-[var(--uc-text)] px-[20px] py-[15px] text-left"
+      className="flex w-full items-center gap-[12px] rounded-[5px] border border-[var(--uc-text)] px-[16px] py-[12px] text-left"
     >
       <span className="grid size-[24px] shrink-0 place-items-center text-[var(--uc-text)]">
         <AppIcon name={GOAL_ICONS[id]} size={24} />
       </span>
-      <span className="flex-1 text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{title}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{title}</span>
+        <span className="mt-[4px] block text-[14px] leading-[18px] text-[var(--uc-text)]">{description}</span>
+      </span>
       <span className="grid size-[24px] shrink-0 place-items-center">
         <AppIcon name={selected ? "radio-selected" : "radio-unselected"} size={24} color="var(--uc-text)" />
       </span>
@@ -316,7 +336,7 @@ function InvestorProfileScreen({
       description={
         blocking
           ? "Your investor profile needs an update before we can check which portfolios are suitable for you."
-          : "Your answers indicate a Moderate investor profile. We’ll use it together with your goal and time horizon when checking suitable portfolios."
+          : `Your answers indicate a ${ROBO_INVESTOR_PROFILE_LABELS.moderate} investor profile. We’ll use it together with your goal and time horizon when checking suitable portfolios.`
       }
       onBack={onBack}
       onClose={onExit}
@@ -324,24 +344,13 @@ function InvestorProfileScreen({
       footer={!blocking ? <PrimaryButton labelSize="18" onClick={onContinue}>Continue</PrimaryButton> : undefined}
     >
       <div className="rounded-[4px] bg-[var(--uc-surface-muted)] py-[16px] pl-[24px] pr-[12px]">
-        <div className="flex gap-[5px]" aria-label="Moderate risk: level 3 of 5">
-          {[0, 1, 2, 3, 4].map((level) => (
-            <span
-              key={level}
-              className={cn(
-                "h-[6px] w-[30px] rounded-full",
-                level < 3 ? "bg-[var(--uc-text)]" : "bg-[var(--uc-border)]",
-              )}
-            />
-          ))}
-        </div>
-        <p className="mt-[16px] text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">
-          {blocking ? "Profile update needed" : "Moderate"}
+        <p className="text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">
+          {blocking ? "Profile update needed" : ROBO_INVESTOR_PROFILE_LABELS.moderate}
         </p>
         <p className="mt-[12px] text-[16px] leading-[21px] text-[var(--uc-text)]">
           {blocking
             ? "Please review your MiFID answers so we can check which portfolios remain suitable for you."
-            : "As a moderate risk investor, you are willing to accept periods of market volatility in exchange for the possibility of returns that can outpace inflation over the long term."}
+            : "As a moderate risk investor you are willing to accept periods of market volatility in exchange for the possibility of receiving returns that will outpace inflation by a significant margin in the long run."}
         </p>
       </div>
       {blocking ? (
@@ -350,7 +359,14 @@ function InvestorProfileScreen({
             Update investor profile
           </button>
         </div>
-      ) : null}
+      ) : (
+        <InfoBanner
+          title="Update your investor profile"
+          description="Review the MiFID questions so your recommendation reflects your current situation."
+          actionLabel="UPDATE NOW  ›"
+          className="mt-[24px] w-full rounded-[4px]"
+        />
+      )}
     </RoboScreen>
   );
 }
@@ -409,6 +425,53 @@ function StrategyCard({
         className="mt-[22px] w-full py-[8px] text-center uc-type-n4-strong uppercase text-[var(--uc-action)]"
       >
         See projection
+      </button>
+    </article>
+  );
+}
+
+function BasketPortfolioCard({
+  portfolio,
+  selected,
+  onSelect,
+  dragHandlers,
+}: {
+  portfolio: RoboPortfolio;
+  selected: boolean;
+  onSelect: () => void;
+  dragHandlers: DragCarouselHandlers;
+}) {
+  const basket = portfolio.basketFund!;
+  const contentsSummary = basket.contentsSummary ?? basket.description;
+
+  return (
+    <article
+      {...dragHandlers}
+      className={cn(
+        "w-[299px] shrink-0 snap-start rounded-[8px] border bg-[var(--uc-surface)] p-[15px]",
+        selected ? "border-[2px] border-[var(--uc-action)]" : "border-[var(--uc-text)]",
+      )}
+    >
+      <button
+        {...dragHandlers}
+        type="button"
+        role="radio"
+        aria-checked={selected}
+        aria-label={`Choose ${basket.title}`}
+        onClick={onSelect}
+        className="w-full text-left"
+      >
+        <div className="flex items-center gap-[10px]">
+          <BrandLogo logoId={basket.logoId} size={32} />
+          <span className="uc-type-n6-strong rounded-[4px] bg-[var(--uc-neutral-100)] px-[7px] py-[4px] text-[var(--uc-text)]">
+            {basket.contributionType === "ONE OFF" ? "ONE-OFF" : "REGULAR"}
+          </span>
+        </div>
+        <h2 className={cn("uc-type-h2 mt-[12px] line-clamp-2 min-h-[48px]", selected ? "text-[var(--uc-action)]" : "text-[var(--uc-text)]")}>
+          {basket.title}
+        </h2>
+        <p className="uc-type-n5 mt-[7px] min-h-[51px] leading-[17px] text-[var(--uc-text)]">{basket.description}</p>
+        <p className="uc-type-n6 mt-[12px] text-[var(--uc-text-muted)]">{contentsSummary}</p>
       </button>
     </article>
   );
@@ -617,72 +680,66 @@ function PortfolioProductLogo({ product }: { product: RoboPortfolioProduct }) {
 
 function PortfolioDetails({
   portfolio,
-  strategy,
-  horizonYears,
 }: {
   portfolio: RoboPortfolio;
-  strategy: RoboStrategy;
-  horizonYears: number;
 }) {
-  const presentation = ROBO_PORTFOLIO_PRESENTATIONS[strategy.id];
-  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
+  const basket = portfolio.basketFund;
+  if (!basket) return null;
+  const hasDistribution = basket.holdings?.some((holding) => holding.percent !== undefined) ?? false;
 
   return (
-    <article className="pb-[8px]">
-      <h2 className="text-[22px] font-bold leading-[28px] text-[var(--uc-text)]">{presentation.shortName}</h2>
-      <p className="mt-[8px] text-[16px] leading-[21px] text-[var(--uc-text)]">
-        Matches your Moderate profile · {horizonYears}+ year horizon · Illustrative return: {strategy.illustrativeReturn}
-      </p>
-      <span className="mt-[12px] inline-flex rounded-full bg-[var(--uc-green-olive)] px-[12px] py-[5px] text-[14px] font-bold leading-[18px] text-[var(--uc-text-inverse)]">
-        {portfolio.minimumLabel}
-      </span>
-      <p className="mt-[28px] text-[16px] font-bold uppercase leading-[20px] text-[var(--uc-text)]">Portfolio holdings</p>
+    <section className="pb-[8px]" aria-label="Basket contents" data-robo-basket-details={basket.id}>
+      <SectionHeadingDivider
+        title={hasDistribution ? "FUNDS DISTRIBUTION" : "BASKET CONTENTS"}
+        variant="medium-title"
+      />
+      {basket.holdings?.length ? (
+        <div className="mt-[6px]">
+          {basket.holdings.map((holding, index) => (
+            <div key={holding.productId ?? `${basket.id}-${index}`} className="flex min-h-[58px] items-center gap-[10px] py-[8px]">
+              <BrandLogo logoId={basket.logoId} size={32} />
+              <div className="min-w-0 flex-1">
+                <p className="text-[14px] font-bold leading-[18px] text-[var(--uc-text)]">{holding.title}</p>
+                {holding.productId ? <p className="mt-[2px] text-[13px] leading-[16px] text-[var(--uc-text-muted)]">{holding.productId}</p> : null}
+              </div>
+              {holding.percent !== undefined ? <span className="text-[15px] font-bold text-[var(--uc-text)]">{holding.percent}%</span> : null}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-[10px] text-[16px] leading-[21px] text-[var(--uc-text)]">
+          {basket.contentsSummary ?? basket.description}
+        </p>
+      )}
+    </section>
+  );
+}
 
-      <div className="mt-[18px] space-y-[26px]">
-        {presentation.assetGroups.map((group) => {
-          const isExpanded = expandedGroup === group.label;
-          const visibleProducts = isExpanded ? group.products : group.products.slice(0, group.initiallyVisible);
-          const canExpand = group.products.length > group.initiallyVisible;
-          return (
-            <section key={group.label} aria-label={`${group.label} ${group.percent}%`}>
-              <div className="flex items-center justify-between text-[16px] leading-[20px]">
-                <h3 className="font-bold text-[var(--uc-text)]">{group.label}</h3>
-                <span className="text-[var(--uc-text)]">{group.percent}%</span>
+function BasketAllocation({ basket }: { basket: InvestmentBasketFund }) {
+  return (
+    <section className="mt-[18px]" aria-label="Basket contents">
+      <SectionHeadingDivider
+        title={basket.holdings?.some((holding) => holding.percent !== undefined) ? "FUNDS DISTRIBUTION" : "BASKET CONTENTS"}
+      />
+      {basket.holdings?.length ? (
+        <div>
+          {basket.holdings.map((holding, index) => (
+            <div key={holding.productId ?? `${basket.id}-${index}`} className="flex min-h-[64px] items-center gap-[12px] py-[9px]">
+              <BrandLogo logoId={basket.logoId} size={32} />
+              <div className="min-w-0 flex-1">
+                <p className="text-[14px] font-bold leading-[18px] text-[var(--uc-text)]">{holding.title}</p>
+                {holding.productId ? <p className="mt-[2px] text-[13px] leading-[16px] text-[var(--uc-text-muted)]">{holding.productId}</p> : null}
               </div>
-              <div className="mt-[8px] h-[9px] overflow-hidden rounded-full border border-[var(--uc-text-subtle)] bg-[var(--uc-surface-muted)]">
-                <div className="h-full rounded-full bg-[var(--uc-action)]" style={{ width: `${group.percent}%` }} />
-              </div>
-              <div className="mt-[10px]">
-                {visibleProducts.map((product) => (
-                  <div key={product.name} className="flex min-h-[54px] items-center gap-[12px] py-[7px]">
-                    <PortfolioProductLogo product={product} />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[14px] font-bold leading-[18px] text-[var(--uc-text)]">{product.name}</p>
-                      <p className="mt-[2px] text-[13px] leading-[16px] text-[var(--uc-text-muted)]">{product.currency}</p>
-                    </div>
-                    <span className="shrink-0 text-[14px] leading-[18px] text-[var(--uc-text)]">{product.percent}%</span>
-                  </div>
-                ))}
-              </div>
-              {canExpand ? (
-                <button
-                  type="button"
-                  aria-label={`${isExpanded ? "See less" : "See more"} ${group.label.toLowerCase()} products`}
-                  aria-expanded={isExpanded}
-                  onClick={() => setExpandedGroup(isExpanded ? null : group.label)}
-                  className="mx-auto mt-[5px] flex items-center gap-[4px] py-[7px] text-[14px] font-bold uppercase leading-[18px] text-[var(--uc-action)]"
-                >
-                  {isExpanded ? "See less" : "See more"}
-                  <span className={cn("transition-transform", isExpanded ? "rotate-180" : null)}>
-                    <AppIcon name="chevron-down" size={15} color="var(--uc-action)" />
-                  </span>
-                </button>
-              ) : null}
-            </section>
-          );
-        })}
-      </div>
-    </article>
+              {holding.percent !== undefined ? <span className="text-[14px] font-bold text-[var(--uc-text)]">{holding.percent}%</span> : null}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-[8px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">
+          {basket.contentsSummary ?? basket.description}
+        </p>
+      )}
+    </section>
   );
 }
 
@@ -783,14 +840,15 @@ function GoalDetail({
     () => buildInvestmentChartPoints(currentValue, selectedPeriodId),
     [selectedPeriodId],
   );
-  const presentation = ROBO_PORTFOLIO_PRESENTATIONS[portfolio.strategyId];
+  const basket = portfolio.basketFund;
+  const presentation = basket ? null : ROBO_PORTFOLIO_PRESENTATIONS[portfolio.strategyId];
   const productRows = useMemo(() => {
-    const rows = presentation.assetGroups.flatMap((group) =>
+    const rows = (presentation?.assetGroups ?? []).flatMap((group) =>
       group.products.map((product, index) => ({
         product,
         productType: getGoalProductType(group.label),
         value: Math.round((currentValue * product.percent) / 100),
-        performance: index === 0 && group === presentation.assetGroups[0] ? -1.8 : 1.8,
+        performance: index === 0 && group === presentation?.assetGroups[0] ? -1.8 : 1.8,
       })),
     );
     return [...rows].sort((left, right) => {
@@ -918,7 +976,9 @@ function GoalDetail({
           onChange={setSelectedSortId}
         />
 
-        {selectedAllocationTab === "product-type" ? (
+        {basket ? (
+          <BasketAllocation basket={basket} />
+        ) : selectedAllocationTab === "product-type" ? (
           <div>
             {productRows.map(({ product, productType, value, performance }) => (
               <button
@@ -955,7 +1015,7 @@ function GoalDetail({
           </div>
         ) : selectedAllocationTab === "asset-class" ? (
           <div>
-            {presentation.assetGroups.map((group) => (
+            {presentation?.assetGroups.map((group) => (
               <div key={group.label} className="flex min-h-[72px] items-center justify-between px-[24px] py-[14px]">
                 <div>
                   <p className="text-[14px] font-bold text-[var(--uc-text)]">{group.label}</p>
@@ -1222,13 +1282,18 @@ export default function CzFutureRoboAdvisorFlow({
   const setTermsAccepted = (value: boolean) => dispatchFlow({ type: "set-field", field: "termsAccepted", value });
   const setManagementMode = (value: ManagementMode) => dispatchFlow({ type: "set-field", field: "managementMode", value });
   const strategyCarouselRef = useRef<HTMLDivElement>(null);
+  const portfolioCarouselRef = useRef<HTMLDivElement>(null);
 
   const strategies = useMemo(() => ROBO_STRATEGIES.slice(0, availableStrategyCount), [availableStrategyCount]);
   const selectedStrategy: RoboStrategy =
     strategies.find((strategy) => strategy.id === selectedStrategyId)
     ?? strategies[0]
     ?? DEFAULT_ROBO_STRATEGY;
-  const portfolios = getPortfoliosForStrategy(selectedStrategy.id);
+  const portfolios = getPortfoliosForStrategy(selectedStrategy.id, "moderate-v2");
+  const basketPortfolios = portfolios.filter((candidate) => candidate.basketFund);
+  const selectedBasketPortfolio = basketPortfolios.find((candidate) => candidate.id === selectedPortfolio?.id)
+    ?? basketPortfolios[0]
+    ?? null;
   const fundingFields = fundingMethod ? getFundingFieldVisibility(fundingMethod) : null;
   const resolvedHorizon = horizonYears || Number(manualHorizon) || 10;
   const hasHorizonSelection = horizonYears > 0 || Number(manualHorizon) > 0;
@@ -1247,6 +1312,28 @@ export default function CzFutureRoboAdvisorFlow({
     enabled: strategies.length > 1,
     onSettle: snapStrategyCarousel,
   });
+  const snapPortfolioCarousel = () => {
+    const carousel = portfolioCarouselRef.current;
+    if (!carousel || basketPortfolios.length <= 1) return;
+    const index = Math.max(0, Math.min(basketPortfolios.length - 1, Math.round(carousel.scrollLeft / 315)));
+    const left = index * 315;
+    if (typeof carousel.scrollTo === "function") carousel.scrollTo({ left, behavior: "smooth" });
+    else carousel.scrollLeft = left;
+    setSelectedPortfolio(basketPortfolios[index]!);
+  };
+  const { isDragging: isPortfolioDragging, dragHandlers: portfolioDragHandlers } = useDragCarousel({
+    carouselRef: portfolioCarouselRef,
+    enabled: basketPortfolios.length > 1,
+    onSettle: snapPortfolioCarousel,
+  });
+
+  useEffect(() => {
+    if (step !== "portfolio") return;
+    const carousel = portfolioCarouselRef.current;
+    if (!carousel) return;
+    const selectedIndex = basketPortfolios.findIndex((candidate) => candidate.id === selectedBasketPortfolio?.id);
+    carousel.scrollLeft = Math.max(0, selectedIndex) * 315;
+  }, [step, selectedStrategy.id]);
 
   useEffect(() => {
     if (step !== "processing") return;
@@ -1300,6 +1387,7 @@ export default function CzFutureRoboAdvisorFlow({
               key={type.id}
               id={type.id}
               title={type.title}
+              description={type.description}
               selected={goalType === type.title}
               onSelect={() => setGoalType(type.title)}
             />
@@ -1320,6 +1408,24 @@ export default function CzFutureRoboAdvisorFlow({
         footer={<PrimaryButton labelSize="18" disabled={!goalName.trim()} onClick={() => setStep("target")}>Continue</PrimaryButton>}
       >
         <TextField label="Enter your goal name" value={goalName} onChange={setGoalName} helperText="You can change this name later" />
+        <div className="mt-[22px] flex flex-wrap gap-[8px]" role="group" aria-label="Suggested goal names">
+          {getRoboGoalNameSuggestions(goalType).map((suggestion) => (
+            <button
+              key={suggestion}
+              type="button"
+              aria-pressed={goalName === suggestion}
+              onClick={() => setGoalName(suggestion)}
+              className={cn(
+                "min-h-[36px] rounded-[4px] px-[12px] py-[8px] text-[13px] font-bold leading-[17px] transition-colors",
+                goalName === suggestion
+                  ? "border border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
+                  : "bg-[var(--uc-neutral-100)] text-[var(--uc-text)]",
+              )}
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
       </RoboScreen>
     );
   }
@@ -1328,7 +1434,7 @@ export default function CzFutureRoboAdvisorFlow({
     return (
       <RoboScreen
         title="Set your target amount"
-        description="Choose the amount you want this goal to reach. Progress can go above 100%, and the target is not a guaranteed outcome."
+        description="Choose the most realistic amount you want this goal to reach. We’ll use it alongside your time horizon and investor profile to frame your investment plan. Progress may exceed 100%, but this target is not guaranteed. Investment values can rise or fall, and you could get back less than you invest."
         onBack={goBackByStep}
         onClose={onExit}
         dataScreen="target"
@@ -1372,7 +1478,7 @@ export default function CzFutureRoboAdvisorFlow({
         onBack={goBackByStep}
         onClose={onExit}
         dataScreen="horizon"
-        footer={<PrimaryButton labelSize="18" disabled={!hasHorizonSelection} onClick={() => setStep("funding-method")}>Continue</PrimaryButton>}
+        footer={<PrimaryButton labelSize="18" disabled={!hasHorizonSelection} onClick={() => setStep("funding-setup")}>Continue</PrimaryButton>}
       >
         <div role="radiogroup" aria-label="Time horizon" className="space-y-[4px]">
           {[3, 5, 7, 10].map((years) => (
@@ -1420,55 +1526,26 @@ export default function CzFutureRoboAdvisorFlow({
     );
   }
 
-  if (step === "funding-method") {
-    const options: Array<{ id: RoboFundingMethod; title: string; description: string }> = [
-      { id: "one-off", title: "One-off investment", description: "Invest a single amount now." },
-      { id: "regular", title: "Regular investment", description: "Build your goal with a monthly amount." },
-      { id: "combined", title: "One-off and regular", description: "Start now and continue each month." },
-    ];
-    return (
-      <RoboScreen
-        title="Choose how to invest"
-        description="Choose one option. You can invest once, monthly, or combine both."
-        onBack={goBackByStep}
-        onClose={onExit}
-        dataScreen="funding-method"
-        footer={<PrimaryButton labelSize="18" disabled={!fundingMethod} onClick={() => setStep("funding-setup")}>Continue</PrimaryButton>}
-      >
-        <div role="radiogroup" aria-label="Investment frequency" className="space-y-[16px]">
-          {options.map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              role="radio"
-              aria-checked={fundingMethod === option.id}
-              onClick={() => setFundingMethod(option.id)}
-              className="flex min-h-[56px] w-full items-center gap-[16px] py-[8px] text-left"
-            >
-              <span className="grid size-[32px] shrink-0 place-items-center">
-                <AppIcon name={fundingMethod === option.id ? "radio-selected" : "radio-unselected"} size={24} color="var(--uc-text)" />
-              </span>
-              <span className="min-w-0 flex-1 text-[16px] font-bold uppercase leading-[20px] text-[var(--uc-text)]">
-                <span>{option.title}</span>
-                <span className="block">{option.description}</span>
-              </span>
-            </button>
-          ))}
-        </div>
-      </RoboScreen>
-    );
-  }
-
-  if (step === "funding-setup" && fundingMethod && fundingFields) {
-    const canContinue =
-      (!fundingFields.initialAmount || Number(initialAmount) > 0)
+  if (step === "funding-setup") {
+    const canContinue = Boolean(
+      fundingMethod
+      && fundingFields
+      && (!fundingFields.initialAmount || Number(initialAmount) > 0)
       && (!fundingFields.monthlyContribution || Number(monthlyContribution) > 0)
-      && (!fundingFields.startDate || startDate.trim().length > 0);
-    const description = fundingMethod === "one-off"
-      ? "Choose how much to invest now and the cash account to use."
+      && (!fundingFields.startDate || startDate.trim().length > 0),
+    );
+    const description = !fundingMethod
+      ? "Choose a contribution plan. The matching details will appear below."
+      : fundingMethod === "one-off"
+        ? "Choose how much to invest now and which cash account to use."
+        : fundingMethod === "regular"
+          ? "Set your monthly contribution, start date and cash account."
+          : "Set an initial investment and monthly contributions from one cash account.";
+    const cashAccountDescription = fundingMethod === "one-off"
+      ? "We’ll use this account for your one-time investment."
       : fundingMethod === "regular"
-        ? "Set up your monthly contribution and choose the cash account to use."
-        : "Set up an initial investment and a monthly contribution from one cash account.";
+        ? "We’ll use this account for your monthly contributions."
+        : "We’ll use this account for your initial and monthly contributions.";
 
     return (
       <RoboScreen
@@ -1476,74 +1553,113 @@ export default function CzFutureRoboAdvisorFlow({
         description={description}
         onBack={goBackByStep}
         onClose={onExit}
-        dataScreen={`funding-${fundingMethod}`}
-        footer={<PrimaryButton labelSize="18" disabled={!canContinue} onClick={() => setStep("strategy")}>Continue</PrimaryButton>}
+        dataScreen={`funding-setup${fundingMethod ? `-${fundingMethod}` : ""}`}
+        contentTopClassName="pt-[16px]"
+        footer={<PrimaryButton labelSize="18" disabled={!canContinue} onClick={() => setStep("strategy")}>Choose a strategy</PrimaryButton>}
       >
-        <div className="space-y-[28px]">
-          {fundingFields.initialAmount ? (
-            <div>
-              <TextField label="Amount to invest now" value={initialAmount} onChange={setInitialAmount} inputMode="numeric" suffix="CZK" />
-              <div className="mt-[16px] grid grid-cols-3 gap-[8px]">
-                {["5000", "10000", "100000"].map((amount) => (
-                  <button
-                    key={amount}
-                    type="button"
-                    onClick={() => setInitialAmount(amount)}
-                    className={cn(
-                      "h-[34px] rounded-[4px] uc-type-n5-strong transition-colors",
-                      initialAmount === amount
-                        ? "border border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
-                        : "bg-[var(--uc-neutral-100)] text-[var(--uc-text)]",
-                    )}
-                  >
-                    {formatCzkInput(amount)}
-                  </button>
-                ))}
+        <div
+          role="radiogroup"
+          aria-label="Contribution plan"
+          className="space-y-[8px]"
+        >
+          {ROBO_FUNDING_OPTIONS.map((option) => {
+            const selected = fundingMethod === option.id;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                aria-label={`${option.title}. ${option.description}`}
+                onClick={() => setFundingMethod(option.id)}
+                className={cn(
+                  "flex min-h-[48px] w-full items-center gap-[10px] py-[6px] text-left transition-colors",
+                )}
+              >
+                <span className="grid size-[24px] shrink-0 place-items-center">
+                  <AppIcon name={selected ? "radio-selected" : "radio-unselected"} size={24} color={selected ? "var(--uc-action)" : "var(--uc-text)"} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className={cn("block text-[15px] font-bold leading-[18px]", selected ? "text-[var(--uc-action)]" : "text-[var(--uc-text)]")}>{option.title}</span>
+                  <span className="mt-[2px] block text-[13px] leading-[16px] text-[var(--uc-text-muted)]">{option.description}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {fundingFields ? (
+          <>
+            <div className="mt-[24px] space-y-[24px]">
+              {fundingFields.initialAmount ? (
+                <div>
+                  <TextField label="Amount to invest now" value={initialAmount} onChange={setInitialAmount} inputMode="numeric" suffix="CZK" suffixOutsideDivider suffixClassName="font-bold" />
+                  <div className="mt-[16px] grid grid-cols-3 gap-[8px]">
+                    {["5000", "10000", "100000"].map((amount) => (
+                      <button
+                        key={amount}
+                        type="button"
+                        aria-pressed={initialAmount === amount}
+                        onClick={() => setInitialAmount(amount)}
+                        className={cn(
+                          "h-[34px] rounded-[4px] uc-type-n5-strong transition-colors",
+                          initialAmount === amount
+                            ? "border border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
+                            : "bg-[var(--uc-neutral-100)] text-[var(--uc-text)]",
+                        )}
+                      >
+                        {formatCzkInput(amount)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {fundingFields.monthlyContribution ? (
+                <div>
+                  <TextField label="Monthly contribution" value={monthlyContribution} onChange={setMonthlyContribution} inputMode="numeric" suffix="CZK" suffixOutsideDivider suffixClassName="font-bold" />
+                  <div className="mt-[16px] grid grid-cols-3 gap-[8px]">
+                    {["500", "1000", "2000"].map((amount) => (
+                      <button
+                        key={amount}
+                        type="button"
+                        aria-pressed={monthlyContribution === amount}
+                        onClick={() => setMonthlyContribution(amount)}
+                        className={cn(
+                          "h-[34px] rounded-[4px] border text-[14px] font-bold",
+                          monthlyContribution === amount
+                            ? "border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
+                            : "border-[var(--uc-text)] bg-[var(--uc-surface)] text-[var(--uc-text)]",
+                        )}
+                      >
+                        {formatCzkInput(amount)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {fundingFields.startDate ? (
+                <TextField label="Start date" value={startDate} onChange={setStartDate} trailingIconName="calendar-days" />
+              ) : null}
+            </div>
+
+            <div className="mt-[28px]">
+              <h2 className="text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">Choose the account to use</h2>
+              <p className="mt-[10px] text-[16px] leading-[21px] text-[var(--uc-text)]">{cashAccountDescription}</p>
+              <div className="mt-[18px]">
+                <TextField
+                  label="Cash account"
+                  value="CZ12345678901234"
+                  onChange={() => undefined}
+                  readOnly
+                  trailingIconName="chevron-down"
+                  helperText="My account name"
+                  helperText2="Available balance 50 000,00 CZK"
+                />
               </div>
             </div>
-          ) : null}
-          {fundingFields.monthlyContribution ? (
-            <div>
-              <TextField label="Monthly contribution" value={monthlyContribution} onChange={setMonthlyContribution} inputMode="numeric" suffix="CZK" />
-              <div className="mt-[16px] grid grid-cols-3 gap-[8px]">
-                {["500", "1000", "2000"].map((amount) => (
-                  <button
-                    key={amount}
-                    type="button"
-                    aria-pressed={monthlyContribution === amount}
-                    onClick={() => setMonthlyContribution(amount)}
-                    className={cn(
-                      "h-[34px] rounded-[4px] border text-[14px] font-bold",
-                      monthlyContribution === amount
-                        ? "border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
-                        : "border-[var(--uc-text)] bg-[var(--uc-surface)] text-[var(--uc-text)]",
-                    )}
-                  >
-                    {formatCzkInput(amount)}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : null}
-          {fundingFields.startDate ? (
-            <TextField label="Start date" value={startDate} onChange={setStartDate} trailingIconName="calendar-days" />
-          ) : null}
-        </div>
-        <h2 className="mt-[34px] text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">Choose the account to use</h2>
-        <p className="mt-[14px] text-[16px] leading-[21px] text-[var(--uc-text)]">
-          We’ll use this account for your first and future investments.
-        </p>
-        <div className="mt-[18px]">
-          <TextField
-            label="Cash account"
-            value="CZ12345678901234"
-            onChange={() => undefined}
-            readOnly
-            trailingIconName="chevron-down"
-            helperText="My account name"
-            helperText2="Available balance 50 000,00 CZK"
-          />
-        </div>
+
+          </>
+        ) : null}
       </RoboScreen>
     );
   }
@@ -1658,56 +1774,70 @@ export default function CzFutureRoboAdvisorFlow({
   }
 
   if (step === "portfolio") {
-    const portfolio = portfolios[0];
+    const oneOffCount = basketPortfolios.filter((candidate) => candidate.basketFund?.contributionType === "ONE OFF").length;
+    const regularCount = basketPortfolios.filter((candidate) => candidate.basketFund?.contributionType === "RECURRENT").length;
     return (
       <RoboScreen
         title="Available portfolios"
-        description={`Based on your Moderate investor profile and selected ${resolvedHorizon}-year horizon, these portfolios are suitable for your goal.`}
+        description={`Based on your ${ROBO_INVESTOR_PROFILE_LABELS.moderate} investor profile and selected ${resolvedHorizon}-year horizon, ${basketPortfolios.length} basket funds are available: ${oneOffCount} one-off and ${regularCount} regular. Choose one to review its contents.`}
         onBack={goBackByStep}
         onClose={onExit}
         dataScreen="portfolio"
-        footer={portfolio ? (
+        footer={(
           <PrimaryButton
             labelSize="18"
             onClick={() => {
-              setSelectedPortfolio(portfolio);
+              if (!selectedBasketPortfolio) return;
+              setSelectedPortfolio(selectedBasketPortfolio);
               setStep("review");
             }}
           >
-            Choose {ROBO_PORTFOLIO_PRESENTATIONS[selectedStrategy.id].shortName}
+            {selectedBasketPortfolio ? `Choose ${selectedBasketPortfolio.name}` : "Choose a basket fund"}
           </PrimaryButton>
-        ) : undefined}
+        )}
       >
-        <div className="-mx-[24px] flex gap-[8px] overflow-x-auto px-[24px] pb-[4px] scrollbar-hide" aria-label="Portfolio variants">
-          {strategies.map((strategy) => {
-            const label = ROBO_PORTFOLIO_PRESENTATIONS[strategy.id].shortName;
-            const selected = strategy.id === selectedStrategy.id;
-            return (
-              <button
-                key={strategy.id}
-                type="button"
-                aria-pressed={selected}
-                onClick={() => setSelectedStrategyId(strategy.id)}
-                className={cn(
-                  "h-[36px] shrink-0 rounded-[4px] px-[18px] text-[14px] font-bold uppercase transition-colors",
-                  selected
-                    ? "border border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
-                    : "bg-[var(--uc-neutral-100)] text-[var(--uc-text)]",
-                )}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
-        {portfolio ? (
-          <div className="mt-[28px]">
-            <PortfolioDetails
-              key={portfolio.id}
-              portfolio={portfolio}
-              strategy={selectedStrategy}
-              horizonYears={resolvedHorizon}
+        <div
+          ref={portfolioCarouselRef}
+          role="radiogroup"
+          aria-label="Recommended basket funds"
+          data-testid="robo-basket-portfolio-carousel"
+          {...portfolioDragHandlers}
+          onScroll={(event) => {
+            const index = Math.max(0, Math.min(basketPortfolios.length - 1, Math.round(event.currentTarget.scrollLeft / 315)));
+            const nearest = basketPortfolios[index];
+            if (nearest && nearest.id !== selectedBasketPortfolio?.id) setSelectedPortfolio(nearest);
+          }}
+          className={cn(
+            "-mr-[24px] flex touch-pan-y snap-x snap-mandatory gap-[16px] overflow-x-auto pb-[8px] pr-[24px] scrollbar-hide",
+            isPortfolioDragging ? "cursor-grabbing select-none snap-none" : "cursor-grab",
+          )}
+        >
+          {basketPortfolios.map((candidate) => (
+            <BasketPortfolioCard
+              key={candidate.id}
+              portfolio={candidate}
+              selected={candidate.id === selectedBasketPortfolio?.id}
+              onSelect={() => setSelectedPortfolio(candidate)}
+              dragHandlers={portfolioDragHandlers}
             />
+          ))}
+        </div>
+        {basketPortfolios.length > 1 ? (
+          <div className="mt-[14px] flex justify-center gap-[6px]" aria-label="Basket fund selection position">
+            {basketPortfolios.map((candidate) => (
+              <span
+                key={candidate.id}
+                className={cn(
+                  "h-[6px] rounded-full transition-all",
+                  candidate.id === selectedBasketPortfolio?.id ? "w-[30px] bg-[var(--uc-action)]" : "w-[6px] bg-[var(--uc-text-subtle)]",
+                )}
+              />
+            ))}
+          </div>
+        ) : null}
+        {selectedBasketPortfolio ? (
+          <div className="mt-[24px]">
+            <PortfolioDetails key={selectedBasketPortfolio.id} portfolio={selectedBasketPortfolio} />
           </div>
         ) : null}
       </RoboScreen>
@@ -1725,7 +1855,7 @@ export default function CzFutureRoboAdvisorFlow({
       monthlyContribution,
       startDate,
       cashAccountLabel,
-      investorProfileLabel: "Moderate",
+      investorProfileLabel: ROBO_INVESTOR_PROFILE_LABELS.moderate,
       portfolioName: selectedPortfolio.name,
     });
     const goalRows = reviewRows.filter((row) => row.section === "goal");

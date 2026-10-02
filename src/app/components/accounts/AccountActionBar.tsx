@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import ActionIconBubble from "@/app/components/ActionIconBubble";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import { useLanguage } from "@/app/contexts/LanguageContext";
@@ -24,28 +24,34 @@ export type AccountActionIconTreatment = "bare" | "bubble";
 
 export interface AccountActionBarItem {
   id: string;
-  iconName: IconName;
+  iconName?: IconName;
+  icon?: ReactNode;
   label: string;
   onClick?: () => void;
   ariaLabel?: string;
+  pressed?: boolean;
   iconColor?: string;
   hidden?: boolean;
 }
 
 function AccountActionItem({
   iconName,
+  icon,
   label,
   onClick,
   ariaLabel,
+  pressed,
   iconColor,
   stretch,
   hidden = false,
   iconTreatment,
 }: {
-  iconName: IconName;
+  iconName?: IconName;
+  icon?: ReactNode;
   label: string;
   onClick?: () => void;
   ariaLabel?: string;
+  pressed?: boolean;
   iconColor?: string;
   stretch: boolean;
   hidden?: boolean;
@@ -62,13 +68,28 @@ function AccountActionItem({
       aria-hidden={hidden ? "true" : undefined}
       className={`flex flex-col items-center ${iconTreatment === "bubble" ? "gap-[6px]" : "gap-[4px]"} ${stretch ? "min-w-0 flex-1" : "w-[82px] shrink-0"} ${hidden ? "pointer-events-none invisible" : ""}`}
       aria-label={ariaLabel ?? normalizedLabel}
+      aria-pressed={pressed}
       data-ds-label={`Account action ${normalizedLabel}`}
     >
-      {iconTreatment === "bubble" ? (
+      {iconTreatment === "bubble" && iconName ? (
         <ActionIconBubble iconName={iconName} iconColor={iconColor} dataDsLabel="Account action icon 48x48" />
+      ) : iconTreatment === "bubble" ? (
+        <span
+          className="grid size-[48px] shrink-0 place-items-center rounded-full"
+          data-ds-label="Account action icon 48x48"
+          style={{ background: "var(--pi-shortcut-icon-bg, var(--uc-surface))" }}
+        >
+          <span className="grid size-[24px] place-items-center" style={{ color: iconColor ?? "var(--uc-text)" }}>
+            {icon}
+          </span>
+        </span>
       ) : (
-        <span className="flex h-[32px] w-[32px] items-center justify-center" data-ds-label="Account action icon 32x32">
-          <AppIcon name={iconName} color={iconColor ?? "var(--uc-text)"} />
+        <span
+          className="flex h-[32px] w-[32px] items-center justify-center"
+          data-ds-label="Account action icon 32x32"
+          style={{ color: iconColor ?? "var(--uc-text)" }}
+        >
+          {icon ?? (iconName ? <AppIcon name={iconName} color={iconColor ?? "var(--uc-text)"} /> : null)}
         </span>
       )}
       <span
@@ -121,9 +142,11 @@ export default function AccountActionBar({
         <AccountActionItem
           key={item.id}
           iconName={item.iconName}
+          icon={item.icon}
           label={item.label}
           onClick={item.onClick}
           ariaLabel={item.ariaLabel}
+          pressed={item.pressed}
           iconColor={item.iconColor}
           hidden={item.hidden}
           stretch={stretchItems}
