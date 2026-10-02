@@ -33,7 +33,7 @@ function FundDistributionRow({
   return (
     <div className="flex w-full items-center gap-[8px] px-[16px] py-[24px]" data-basket-fund-holding={productId}>
       <BrandLogo logoId="unicredit" size={32} />
-      <div className="min-w-0 flex-1 text-right">
+      <div className="min-w-0 flex-1 text-left">
         <p className="truncate text-[14px] font-bold leading-[17px] text-[var(--uc-text)]">{title}</p>
         {productId ? <p className="text-[14px] leading-[17px] text-[var(--uc-text-muted)]">{productId}</p> : null}
       </div>
