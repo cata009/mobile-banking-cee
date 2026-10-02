@@ -15,6 +15,7 @@ export interface InvestmentBasketFund {
   contributionType: InvestmentBasketContributionType;
   logoId: string;
   recommendedFor?: readonly InvestmentBasketInvestorProfile[];
+  roboCarouselTitle?: string;
   detailDescription?: string;
   contentsSummary?: string;
   holdings?: readonly InvestmentBasketFundHolding[];
@@ -31,6 +32,7 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
     contributionType: "ONE OFF",
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
+    roboCarouselTitle: "onemarkets J.P. Morgan\nGlobal growth Basket",
     detailDescription: FIGMA_GLOBAL_GROWTH_DESCRIPTION,
     contentsSummary: "A mix of 5 high-yield equity funds.",
     holdings: [
@@ -48,6 +50,7 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
     contributionType: "ONE OFF",
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
+    roboCarouselTitle: "BlackRock Credit\nOpportunities",
     contentsSummary: "4 equity ESG funds.",
     holdings: [
       { title: "Sustainable Future Mixed Fund", productId: "CZSUSTAINAB3" },
@@ -63,6 +66,7 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
     contributionType: "ONE OFF",
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
+    roboCarouselTitle: "onemarkets EUR\ncollection",
     contentsSummary: "Pictet Thematic Intelligence Fund",
     holdings: [{ title: "Pictet Thematic Intelligence Fund" }],
   },
@@ -93,6 +97,7 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
     contributionType: "RECURRENT",
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
+    roboCarouselTitle: "onemarkets Chase\nRegular EUR",
     description: "Build your investment steadily with monthly contributions to five curated equity funds.",
     contentsSummary: "A mix of 5 high-yield equity funds.",
     holdings: [
@@ -110,6 +115,7 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
     contributionType: "RECURRENT",
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
+    roboCarouselTitle: "onemarkets J.P. Morgan\nCredit Opportunities",
     contentsSummary: "A mix of 8 high-yield equity funds.",
     holdings: [
       { title: "Amundi Funds Global Opportunity", productId: "CZROBOAMUND14" },
