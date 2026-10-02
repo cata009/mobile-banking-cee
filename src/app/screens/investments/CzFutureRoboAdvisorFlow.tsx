@@ -471,10 +471,10 @@ function BasketPortfolioCard({
             </span>
           ) : null}
         </div>
-        <h2 className={cn("uc-type-h2 mt-[12px] line-clamp-2 min-h-[48px]", selected ? "text-[var(--uc-action)]" : "text-[var(--uc-text)]")}>
-          {basket.title}
+        <h2 className={cn("uc-type-h2 mt-[12px] line-clamp-2 min-h-[48px] whitespace-pre-line", selected ? "text-[var(--uc-action)]" : "text-[var(--uc-text)]")}>
+          {basket.roboCarouselTitle ?? basket.title}
         </h2>
-        <p className="uc-type-n5 mt-[7px] min-h-[51px] leading-[17px] text-[var(--uc-text)]">{basket.description}</p>
+        <p className="uc-type-n5 mt-[7px] line-clamp-3 min-h-[51px] leading-[17px] text-[var(--uc-text)]">{basket.description}</p>
       </button>
       <button
         {...dragHandlers}
