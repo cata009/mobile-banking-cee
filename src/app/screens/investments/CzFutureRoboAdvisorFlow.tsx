@@ -102,6 +102,33 @@ const ROBO_FUNDING_OPTIONS: readonly { id: RoboFundingMethod; title: string; des
   { id: "combined", title: "Invest now and monthly", description: "Make an initial investment, then continue with monthly contributions." },
 ];
 
+function FundingAmountSuggestion({
+  amount,
+  value,
+  onSelect,
+}: {
+  amount: string;
+  value: string;
+  onSelect: (amount: string) => void;
+}) {
+  const selected = value === amount;
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      onClick={() => onSelect(amount)}
+      className={cn(
+        "h-[34px] rounded-[4px] uc-type-n5-strong transition-colors",
+        selected
+          ? "border border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
+          : "bg-[var(--uc-neutral-100)] text-[var(--uc-text)]",
+      )}
+    >
+      {formatCzkInput(amount)}
+    </button>
+  );
+}
+
 function RoboScreen({
   title,
   description,
@@ -1631,20 +1658,12 @@ export default function CzFutureRoboAdvisorFlow({
                   <TextField label="Amount to invest now" value={initialAmount} onChange={setInitialAmount} inputMode="numeric" suffix="CZK" suffixOutsideDivider suffixClassName="font-bold" />
                   <div className="mt-[16px] grid grid-cols-3 gap-[8px]">
                     {["5000", "10000", "100000"].map((amount) => (
-                      <button
+                      <FundingAmountSuggestion
                         key={amount}
-                        type="button"
-                        aria-pressed={initialAmount === amount}
-                        onClick={() => setInitialAmount(amount)}
-                        className={cn(
-                          "h-[34px] rounded-[4px] uc-type-n5-strong transition-colors",
-                          initialAmount === amount
-                            ? "border border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
-                            : "bg-[var(--uc-neutral-100)] text-[var(--uc-text)]",
-                        )}
-                      >
-                        {formatCzkInput(amount)}
-                      </button>
+                        amount={amount}
+                        value={initialAmount}
+                        onSelect={setInitialAmount}
+                      />
                     ))}
                   </div>
                 </div>
@@ -1654,20 +1673,12 @@ export default function CzFutureRoboAdvisorFlow({
                   <TextField label="Monthly contribution" value={monthlyContribution} onChange={setMonthlyContribution} inputMode="numeric" suffix="CZK" suffixOutsideDivider suffixClassName="font-bold" />
                   <div className="mt-[16px] grid grid-cols-3 gap-[8px]">
                     {["500", "1000", "2000"].map((amount) => (
-                      <button
+                      <FundingAmountSuggestion
                         key={amount}
-                        type="button"
-                        aria-pressed={monthlyContribution === amount}
-                        onClick={() => setMonthlyContribution(amount)}
-                        className={cn(
-                          "h-[34px] rounded-[4px] border text-[14px] font-bold",
-                          monthlyContribution === amount
-                            ? "border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
-                            : "border-[var(--uc-text)] bg-[var(--uc-surface)] text-[var(--uc-text)]",
-                        )}
-                      >
-                        {formatCzkInput(amount)}
-                      </button>
+                        amount={amount}
+                        value={monthlyContribution}
+                        onSelect={setMonthlyContribution}
+                      />
                     ))}
                   </div>
                 </div>
