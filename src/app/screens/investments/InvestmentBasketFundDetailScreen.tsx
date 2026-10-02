@@ -57,11 +57,8 @@ export default function InvestmentBasketFundDetailScreen({
   const marketPriceParts = formatInvestmentAmountParts(535.44, country, "EUR", amountsHidden);
   const description = basket.detailDescription ?? basket.description;
   const hasDistributionPercentages = basket.holdings?.some((holding) => holding.percent !== undefined) ?? false;
-  const performanceColor = (basket.performancePercent ?? 0) > 0
-    ? "var(--uc-green-olive)"
-    : (basket.performancePercent ?? 0) < 0
-      ? "var(--uc-status-red)"
-      : "var(--uc-text)";
+  const performancePercent = basket.performancePercent ?? 0;
+  const performanceColor = performancePercent < 0 ? "var(--uc-status-red)" : "var(--uc-green-olive)";
   const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(96);
 
   return (
@@ -96,7 +93,7 @@ export default function InvestmentBasketFundDetailScreen({
                     </p>
                     <p className="mt-[4px] flex flex-wrap items-baseline gap-x-[4px] text-[14px] leading-[18px]">
                       <span>Performance:</span>
-                      <span className="font-bold text-[var(--uc-green-olive)]">{formatPerformance(0)}</span>
+                      <span className="font-bold" style={{ color: performanceColor }}>{formatPerformance(performancePercent)}</span>
                       <span className="text-[var(--uc-text-muted)]">· from 19.07.2022</span>
                     </p>
                   </div>
