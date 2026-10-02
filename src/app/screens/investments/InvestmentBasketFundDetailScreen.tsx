@@ -111,7 +111,6 @@ export default function InvestmentBasketFundDetailScreen({
             <SectionHeadingDivider
               title={hasDistributionPercentages ? "FUNDS DISTRIBUTION" : "BASKET CONTENTS"}
               variant="medium-title"
-              className="px-[24px]"
             />
             <div className="pt-[8px]">
               {basket.holdings?.length ? basket.holdings.map((holding, index) => (
@@ -126,7 +125,7 @@ export default function InvestmentBasketFundDetailScreen({
 
           {hasFigmaSampleDetails ? (
             <section className="mt-[24px]" aria-label="Market info">
-              <SectionHeadingDivider title="MARKET INFO" variant="medium-title" className="px-[24px]" />
+              <SectionHeadingDivider title="MARKET INFO" variant="medium-title" />
               <InvestmentDetailField
                 label="Actual market price"
                 value={<InvestmentAmountDisplay parts={marketPriceParts} scale="field" />}
