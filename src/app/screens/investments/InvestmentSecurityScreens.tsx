@@ -16,7 +16,7 @@ import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import LinkButton from "@/app/components/ui/LinkButton";
-import { CZ_INVESTMENT_BASKETS } from "@/app/config/investmentBasketFundsConfig";
+import { getRecommendedInvestmentBaskets } from "@/app/config/investmentBasketFundsConfig";
 import {
   INVESTMENT_PERIODS,
   buildInvestmentChartPoints,
@@ -28,7 +28,9 @@ import { getCountryConfig } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import { formatInvestmentMoney } from "@/app/utils/investmentAmountFormatting";
 import InvestmentBasketFundsScreen from "@/app/screens/investments/InvestmentBasketFundsScreen";
+import InvestmentBasketFundDetailScreen from "@/app/screens/investments/InvestmentBasketFundDetailScreen";
 import CzRoboLevelOneShell from "@/app/screens/investments/CzRoboLevelOneShell";
+import type { InvestmentBasketFund } from "@/app/config/investmentBasketFundsConfig";
 
 interface SharedProps {
   country: CountryId;
@@ -38,6 +40,7 @@ interface SharedProps {
 interface InvestmentSecurityListScreenProps extends SharedProps {
   securities: readonly InvestmentCatalogSecurity[];
   onBack: () => void;
+  onSelectBasketFund?: (basket: InvestmentBasketFund) => void;
   closeModuleButton?: boolean;
   czRoboAmountStyle?: boolean;
   onSelect: (security: InvestmentCatalogSecurity) => void;
@@ -64,6 +67,7 @@ const BASKET_CARD_WIDTH = 260;
 const BASKET_CARD_GAP = 16;
 const BASKET_CARD_STEP = BASKET_CARD_WIDTH + BASKET_CARD_GAP;
 const BASKET_CAROUSEL_EDGE_GUTTER = 16;
+const ROBO_RECOMMENDED_BASKETS = getRecommendedInvestmentBaskets("moderate-v2");
 
 function formatMoney(value: number, country: CountryId, currency: string, hidden: boolean, digits = 2) {
   return formatInvestmentMoney(value, country, currency, hidden, digits, digits);
@@ -136,6 +140,7 @@ export function InvestmentSecurityListScreen({
   country,
   amountsHidden,
   onBack,
+  onSelectBasketFund,
   closeModuleButton = false,
   czRoboAmountStyle = false,
   onSelect,
@@ -148,6 +153,7 @@ export function InvestmentSecurityListScreen({
   const [currency, setCurrency] = useState<string | null>(null);
   const [catalogueTab, setCatalogueTab] = useState<"all" | "regular">("all");
   const [basketFundsOpen, setBasketFundsOpen] = useState(false);
+  const [standaloneBasketFund, setStandaloneBasketFund] = useState<InvestmentBasketFund | null>(null);
   const currencies = useMemo(() => [...new Set(securities.map((item) => item.instrumentCurrency))], [securities]);
   const filtersActive = ownedOnly || currency !== null;
   const visibleSecurities = useMemo(() => {
@@ -162,11 +168,12 @@ export function InvestmentSecurityListScreen({
   const visibleBaskets = useMemo(() => {
     if (!basketFundsAvailable) return [];
     const normalizedQuery = query.trim().toLowerCase();
-    return CZ_INVESTMENT_BASKETS.filter((basket) => {
+    return ROBO_RECOMMENDED_BASKETS.filter((basket) => {
       if (catalogueTab === "regular" && basket.contributionType !== "RECURRENT") return false;
       return !normalizedQuery || `${basket.title} ${basket.description}`.toLowerCase().includes(normalizedQuery);
     });
   }, [basketFundsAvailable, catalogueTab, query]);
+  const carouselBaskets = visibleBaskets.slice(0, 5);
 
   const clearFilters = () => {
     setOwnedOnly(false);
@@ -192,7 +199,7 @@ export function InvestmentSecurityListScreen({
   };
 
   const getNearestBasketIndex = (scrollLeft: number) => {
-    const count = visibleBaskets.length;
+    const count = carouselBaskets.length;
     if (count <= 1) return 0;
     let nearestIndex = 0;
     let nearestDistance = Math.abs(scrollLeft - getBasketScrollLeft(0));
@@ -208,7 +215,7 @@ export function InvestmentSecurityListScreen({
 
   const snapBasketToNearest = () => {
     const carousel = basketCarouselRef.current;
-    if (!carousel || visibleBaskets.length <= 1) return;
+    if (!carousel || carouselBaskets.length <= 1) return;
     const nearestIndex = getNearestBasketIndex(carousel.scrollLeft);
     carousel.scrollTo({ left: getBasketScrollLeft(nearestIndex), behavior: "smooth" });
   };
@@ -218,11 +225,23 @@ export function InvestmentSecurityListScreen({
     onSettle: snapBasketToNearest,
   });
 
+  if (standaloneBasketFund && !onSelectBasketFund) {
+    return (
+      <InvestmentBasketFundDetailScreen
+        basket={standaloneBasketFund}
+        country={country}
+        amountsHidden={amountsHidden}
+        onBack={() => setStandaloneBasketFund(null)}
+      />
+    );
+  }
+
   if (basketFundsAvailable && basketFundsOpen) {
     return (
       <InvestmentBasketFundsScreen
-        baskets={CZ_INVESTMENT_BASKETS}
+        baskets={ROBO_RECOMMENDED_BASKETS}
         onBack={() => setBasketFundsOpen(false)}
+        onSelectBasket={onSelectBasketFund ?? setStandaloneBasketFund}
       />
     );
   }
@@ -256,11 +275,11 @@ export function InvestmentSecurityListScreen({
         <section className="pt-[16px]" aria-label="Basket funds">
           <SectionHeadingDivider
             title="BASKET FUNDS"
-            count={CZ_INVESTMENT_BASKETS.length}
+            count={carouselBaskets.length}
             countAlign="end"
             className="px-[24px] pt-[8px]"
           />
-          {visibleBaskets.length > 0 ? (
+          {carouselBaskets.length > 0 ? (
             <div
               ref={basketCarouselRef}
               {...basketDragHandlers}
@@ -273,11 +292,11 @@ export function InvestmentSecurityListScreen({
               style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
             >
               <div className="flex gap-[16px]" style={{ paddingLeft: BASKET_CAROUSEL_EDGE_GUTTER, paddingRight: BASKET_CAROUSEL_EDGE_GUTTER }}>
-                {visibleBaskets.map((basket) => (
+                {carouselBaskets.map((basket) => (
                   <InvestmentBasketFundCard
                     key={basket.id}
                     basket={basket}
-                    onSelect={() => setBasketFundsOpen(true)}
+                    onSelect={() => (onSelectBasketFund ?? setStandaloneBasketFund)(basket)}
                     {...basketDragHandlers}
                   />
                 ))}

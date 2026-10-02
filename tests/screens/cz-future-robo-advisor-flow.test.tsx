@@ -43,7 +43,7 @@ function startFlow(
 function reachHorizon() {
   fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
   fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
-  fireEvent.click(screen.getByRole('radio', { name: 'General build-up wealth' }))
+  fireEvent.click(screen.getByRole('radio', { name: /General build-up wealth/ }))
   fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
   fireEvent.change(screen.getByRole('textbox', { name: 'Enter your goal name' }), { target: { value: 'New car' } })
   fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
@@ -59,10 +59,9 @@ function reachFundingMethod() {
 
 function reachGoalDetail() {
   reachFundingMethod()
-  fireEvent.click(screen.getByRole('radio', { name: /One-off investment/i }))
-  fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+  fireEvent.click(screen.getByRole('radio', { name: /Invest once/i }))
   fireEvent.click(screen.getByRole('button', { name: /^10\D000 CZK$/ }))
-  fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Choose a strategy' }))
   fireEvent.click(screen.getByRole('button', { name: 'Continue with Sustainable Balanced' }))
   fireEvent.click(screen.getByRole('button', { name: 'Choose Sustainable' }))
   fireEvent.click(screen.getByRole('switch', { name: 'Accept terms and conditions' }))
@@ -75,10 +74,9 @@ function reachGoalDetail() {
 
 function reachProjection() {
   reachFundingMethod()
-  fireEvent.click(screen.getByRole('radio', { name: /One-off investment/i }))
-  fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+  fireEvent.click(screen.getByRole('radio', { name: /Invest once/i }))
   fireEvent.click(screen.getByRole('button', { name: /^10\D000 CZK$/ }))
-  fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Choose a strategy' }))
   fireEvent.click(screen.getByRole('button', { name: 'See projection for Sustainable Balanced' }))
 }
 
@@ -89,7 +87,7 @@ describe('CZ Future Robo Advisor flow', () => {
     expect(screen.getByText('Create a goal and invest with a portfolio selected for your needs.')).toHaveClass('text-[16px]')
     fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
 
-    expect(screen.getByText(/Your answers indicate a Moderate investor profile/)).toHaveClass('text-[16px]')
+    expect(screen.getByText(/Your answers indicate a Moderate - V2 investor profile/)).toHaveClass('text-[16px]')
     expect(screen.getByText(/As a moderate risk investor/)).toHaveClass('text-[16px]')
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
 
@@ -127,7 +125,7 @@ describe('CZ Future Robo Advisor flow', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
 
     expect(screen.getAllByRole('radio')).toHaveLength(5)
-    expect(screen.getByRole('radio', { name: 'General build-up wealth' })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /General build-up wealth/ })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: 'Protection for inflation' })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: 'Saving for unforeseen circumstances' })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: 'Saving for a major purchase' })).toBeInTheDocument()
@@ -163,7 +161,7 @@ describe('CZ Future Robo Advisor flow', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
-    fireEvent.click(screen.getByRole('radio', { name: 'General build-up wealth' }))
+    fireEvent.click(screen.getByRole('radio', { name: /General build-up wealth/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
     fireEvent.change(screen.getByRole('textbox', { name: 'Enter your goal name' }), { target: { value: 'New car' } })
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
@@ -182,8 +180,7 @@ describe('CZ Future Robo Advisor flow', () => {
     startFlow()
 
     reachFundingMethod()
-    fireEvent.click(screen.getByRole('radio', { name: /One-off and regular/i }))
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('radio', { name: /Invest now and monthly/i }))
 
     expect(screen.getByRole('heading', { name: 'Set up your investment' })).toBeInTheDocument()
     expect(screen.getByRole('textbox', { name: 'Amount to invest now' })).toBeInTheDocument()
@@ -193,7 +190,7 @@ describe('CZ Future Robo Advisor flow', () => {
 
     fireEvent.change(screen.getByRole('textbox', { name: 'Amount to invest now' }), { target: { value: '50000' } })
     fireEvent.change(screen.getByRole('textbox', { name: 'Monthly contribution' }), { target: { value: '2000' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Choose a strategy' }))
 
     expect(screen.getByRole('heading', { name: 'Choose a strategy' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'See projection for Sustainable Balanced' }))
@@ -221,10 +218,9 @@ describe('CZ Future Robo Advisor flow', () => {
     startFlow()
 
     reachFundingMethod()
-    fireEvent.click(screen.getByRole('radio', { name: /One-off investment/i }))
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('radio', { name: /Invest once/i }))
     fireEvent.change(screen.getByRole('textbox', { name: 'Amount to invest now' }), { target: { value: '50000' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Choose a strategy' }))
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Sustainable Balanced' }))
     fireEvent.click(screen.getByRole('button', { name: 'Choose Sustainable' }))
 
@@ -252,27 +248,31 @@ describe('CZ Future Robo Advisor flow', () => {
     expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled()
   })
 
-  it('uses explicit radio selection before continuing from the funding method screen', () => {
+  it('shows relevant contribution fields inline and validates before choosing a strategy', () => {
     startFlow()
     reachFundingMethod()
 
     expect(screen.getAllByRole('radio')).toHaveLength(3)
-    const continueButton = screen.getByRole('button', { name: 'Continue' })
+    const continueButton = screen.getByRole('button', { name: 'Choose a strategy' })
     expect(continueButton).toBeDisabled()
 
-    fireEvent.click(screen.getByRole('radio', { name: /Regular investment/i }))
-    expect(screen.getByRole('heading', { name: 'Choose how to invest' })).toBeInTheDocument()
-    expect(continueButton).toBeEnabled()
-
-    fireEvent.click(continueButton)
+    fireEvent.click(screen.getByRole('radio', { name: /Invest monthly/i }))
     expect(screen.getByRole('heading', { name: 'Set up your investment' })).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: 'Monthly contribution' })).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: 'Start date' })).toBeInTheDocument()
+    expect(screen.queryByRole('textbox', { name: 'Amount to invest now' })).not.toBeInTheDocument()
+    expect(continueButton).toBeDisabled()
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'Monthly contribution' }), { target: { value: '1000' } })
+    expect(continueButton).toBeEnabled()
+    fireEvent.click(continueButton)
+    expect(screen.getByRole('heading', { name: 'Choose a strategy' })).toBeInTheDocument()
   })
 
   it('offers quick monthly contribution suggestions with a visible selected state', () => {
     startFlow()
     reachFundingMethod()
-    fireEvent.click(screen.getByRole('radio', { name: /Regular investment/i }))
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('radio', { name: /Invest monthly/i }))
 
     const suggestion = screen.getByRole('button', { name: /1.*000 CZK/ })
     fireEvent.click(suggestion)
@@ -284,10 +284,9 @@ describe('CZ Future Robo Advisor flow', () => {
   it('supports drag interaction on the strategy carousel', () => {
     startFlow()
     reachFundingMethod()
-    fireEvent.click(screen.getByRole('radio', { name: /One-off investment/i }))
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('radio', { name: /Invest once/i }))
     fireEvent.click(screen.getByRole('button', { name: /^10\D000 CZK$/ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Choose a strategy' }))
 
     const carousel = screen.getByTestId('robo-strategy-carousel')
     expect(carousel).not.toHaveClass('-mx-[24px]')
@@ -303,10 +302,9 @@ describe('CZ Future Robo Advisor flow', () => {
   it('keeps the projection action clickable while the card participates in drag gestures', () => {
     startFlow()
     reachFundingMethod()
-    fireEvent.click(screen.getByRole('radio', { name: /One-off investment/i }))
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('radio', { name: /Invest once/i }))
     fireEvent.click(screen.getByRole('button', { name: /^10\D000 CZK$/ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Choose a strategy' }))
 
     const carousel = screen.getByTestId('robo-strategy-carousel')
     const projectionButton = screen.getByRole('button', { name: 'See projection for Sustainable Balanced' })
@@ -335,10 +333,9 @@ describe('CZ Future Robo Advisor flow', () => {
   it('claims the pointer once a press on a card becomes a drag', () => {
     startFlow()
     reachFundingMethod()
-    fireEvent.click(screen.getByRole('radio', { name: /One-off investment/i }))
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('radio', { name: /Invest once/i }))
     fireEvent.click(screen.getByRole('button', { name: /^10\D000 CZK$/ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Choose a strategy' }))
 
     const carousel = screen.getByTestId('robo-strategy-carousel')
     const projectionButton = screen.getByRole('button', { name: 'See projection for Sustainable Balanced' })
@@ -394,31 +391,30 @@ describe('CZ Future Robo Advisor flow', () => {
     })
   })
 
-  it('shows selectable portfolio variants, allocation groups, logos and expandable products', () => {
+  it('shows five basket recommendations in a carousel and updates the selected basket contents', () => {
     startFlow()
     reachFundingMethod()
-    fireEvent.click(screen.getByRole('radio', { name: /One-off investment/i }))
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('radio', { name: /Invest once/i }))
     fireEvent.click(screen.getByRole('button', { name: /^10\D000 CZK$/ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Choose a strategy' }))
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Sustainable Balanced' }))
 
-    expect(screen.getByRole('button', { name: 'Sustainable' })).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByRole('button', { name: 'Core' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Income' })).toBeInTheDocument()
-    expect(screen.getByText('Stocks')).toBeInTheDocument()
-    expect(screen.getByText('70%')).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: 'Apple' })).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: 'Tesla' })).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: 'Amundi Asset Management' })).toBeInTheDocument()
+    const carousel = screen.getByTestId('robo-basket-portfolio-carousel')
+    expect(carousel.querySelectorAll('[role="radio"]')).toHaveLength(5)
+    expect(screen.getByRole('radio', { name: 'Choose onemarkets J.P. Morgan Global growth Basket' })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('heading', { name: 'FUNDS DISTRIBUTION' })).toBeInTheDocument()
+    expect(screen.getByText('Nano-Chip Equity Fund')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'See more stocks products' }))
-    expect(screen.getByRole('button', { name: 'See less stocks products' })).toBeInTheDocument()
-    expect(screen.getByText('Microsoft')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('radio', { name: 'Choose BlackRock Credit Opportunities' }))
+    expect(screen.getByRole('radio', { name: 'Choose BlackRock Credit Opportunities' })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('heading', { name: 'BASKET CONTENTS' })).toBeInTheDocument()
+    expect(screen.getAllByText('4 equity ESG funds.')).toHaveLength(2)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Core' }))
-    expect(screen.getByRole('button', { name: 'Core' })).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByRole('button', { name: 'Choose Core' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('radio', { name: 'Choose onemarkets Chase Regular EUR' }))
+    expect(screen.getByText('Amundi Funds Global Opportunity')).toBeInTheDocument()
+    expect(screen.getByText('CZROBOAMUND14')).toBeInTheDocument()
+    expect(screen.getByText('Europe Equity Opportunities')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Choose onemarkets Chase Regular EUR' })).toBeInTheDocument()
   })
 
   it('reuses the Investments performance surface and Figma allocation pattern on goal detail', () => {

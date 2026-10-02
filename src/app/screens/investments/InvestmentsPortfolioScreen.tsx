@@ -28,6 +28,8 @@ import {
   InvestmentFundsSelectionScreen,
 } from "@/app/screens/investments/InvestmentFundsWindowScreens";
 import { InvestmentSecurityDetailScreen, InvestmentSecurityListScreen } from "@/app/screens/investments/InvestmentSecurityScreens";
+import InvestmentBasketFundDetailScreen from "@/app/screens/investments/InvestmentBasketFundDetailScreen";
+import type { InvestmentBasketFund } from "@/app/config/investmentBasketFundsConfig";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import PageHeader from "@/app/components/PageHeader";
 import ProductCard from "@/app/components/ProductCard";
@@ -379,6 +381,7 @@ export default function InvestmentsPortfolioScreen({
   const [fundsWindowOpen, setFundsWindowOpen] = useState(false);
   const [selectedFundCollectionId, setSelectedFundCollectionId] = useState<InvestmentFundCollectionId | null>(null);
   const [selectedSecurity, setSelectedSecurity] = useState<InvestmentCatalogSecurity | null>(null);
+  const [selectedBasketFund, setSelectedBasketFund] = useState<InvestmentBasketFund | null>(null);
   const [buyOrderOpen, setBuyOrderOpen] = useState(false);
   const [sellOrderOpen, setSellOrderOpen] = useState(false);
   const [roboAdvisorView, setRoboAdvisorView] = useState<"closed" | "goals" | "create" | "detail">(
@@ -794,6 +797,18 @@ export default function InvestmentsPortfolioScreen({
     );
   }
 
+  if (selectedBasketFund) {
+    return (
+      <InvestmentBasketFundDetailScreen
+        basket={selectedBasketFund}
+        country={country}
+        amountsHidden={amountsHidden}
+        onBack={() => setSelectedBasketFund(null)}
+        onHistoryClick={onHistoryClick}
+      />
+    );
+  }
+
   if (securityListOpen) {
     const securityListScreen = (
       <InvestmentSecurityListScreen
@@ -809,6 +824,7 @@ export default function InvestmentsPortfolioScreen({
           }
           setSecurityListOpen(false);
         }}
+        onSelectBasketFund={setSelectedBasketFund}
         onSelect={selectSecurity}
       />
     );
