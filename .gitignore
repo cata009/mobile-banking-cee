@@ -3,6 +3,7 @@ dist/
 test-results/
 .codex-temp/
 .worktrees/
+.creator-worktrees/
 .claude/
 .superpowers/
 mini/

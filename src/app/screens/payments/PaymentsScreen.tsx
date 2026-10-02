@@ -33,6 +33,7 @@ import type { PaymentTemplateSelection } from '@/data/paymentTemplates'
 import type { FrequentBeneficiary } from '@/data/paymentsHub'
 import type { AccountTransaction } from '@/data/accountDetails'
 import {
+  deleteFrequentBeneficiary,
   getStoredFavoriteBeneficiaryIds,
   saveFrequentBeneficiaryDetails,
   storeFavoriteBeneficiaryIds,
@@ -391,6 +392,7 @@ export default function PaymentsScreen({
         isEvo2027={isEvo2027}
         favoriteBeneficiaryIds={favoriteBeneficiaryIds}
         onFavoriteToggle={toggleFavoriteBeneficiary}
+        onTransactionClick={(payment) => onBeneficiaryTransactionClick?.(payment)}
       />
     )
   }
@@ -428,6 +430,10 @@ export default function PaymentsScreen({
           isFavorite={favoriteBeneficiaryIds.includes(selectedBeneficiary.id)}
           onFavoriteToggle={() => toggleFavoriteBeneficiary(selectedBeneficiary.id)}
           onEditBeneficiary={() => setIsEditingBeneficiary(true)}
+          onDeleteBeneficiary={() => {
+            deleteFrequentBeneficiary(country, selectedBeneficiary.id);
+            setSelectedBeneficiary(null);
+          }}
           onBack={() => setSelectedBeneficiary(null)}
           onSendMoney={() => onBeneficiarySendMoney?.(selectedBeneficiary)}
           onTransactionClick={(payment) => onBeneficiaryTransactionClick?.(payment)}

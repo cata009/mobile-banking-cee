@@ -12,11 +12,17 @@ import ProductAccordionAnimated from "@/app/components/ProductAccordionAnimated"
 interface PreLoginScreenProps {
   onOtherClick: () => void;
   onLanguageClick: () => void;
+  backgroundImageUrl?: string;
+  backgroundPosition?: string;
+  backgroundZoom?: number;
 }
 
 export default function PreLoginScreen({
   onOtherClick,
   onLanguageClick,
+  backgroundImageUrl,
+  backgroundPosition,
+  backgroundZoom = 1,
 }: PreLoginScreenProps) {
   const { t, language, translations } = useLanguage();
   const country = useCountry();
@@ -44,11 +50,12 @@ export default function PreLoginScreen({
   return (
     <div className="w-full h-full relative bg-[var(--uc-static-black)]">
       {/* Background Image */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <img 
-          src={backgroundImage} 
+          src={backgroundImageUrl ?? backgroundImage}
           alt="Background" 
           className="w-full h-full object-cover"
+          style={{ objectPosition: backgroundPosition, transform: backgroundZoom === 1 ? undefined : `scale(${backgroundZoom})`, transformOrigin: backgroundPosition }}
         />
       </div>
       

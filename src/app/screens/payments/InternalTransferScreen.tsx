@@ -1,5 +1,5 @@
-import { useState, type PointerEvent } from 'react'
-import { motion, useReducedMotion } from 'motion/react'
+import { useEffect, useRef, useState, type PointerEvent, type Ref } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { BottomSheet } from '@/app/components/BottomSheet'
 import { AppIcon } from '@/app/components/icons'
 import PageHeader from '@/app/components/PageHeader'
@@ -9,7 +9,7 @@ import SelectedMark from '@/app/components/payments/SelectedMark'
 import ScheduledTransferSetupPage from '@/app/screens/payments/ScheduledTransferSetupPage'
 import { useCountry } from '@/app/state/demoStore'
 import type { CountryId } from '@/app/state/demoTypes'
-import { formatMoneyNumber } from '@/app/registry/countryConfig'
+import { formatMoneyNumber, getCountryConfig } from '@/app/registry/countryConfig'
 import { useProducts } from '@/hooks/useProducts'
 import { formatScheduleSummary } from '@/app/utils/scheduleFormatting'
 import type { ScheduleConfig } from '@/data/schedule'
@@ -110,17 +110,20 @@ function AccountChooser({
   account,
   role,
   balance,
+  balanceError = false,
   onClick,
 }: {
   account: InternalTransferAccount
   role: 'From' | 'To'
   balance: string
+  balanceError?: boolean
   onClick: () => void
 }) {
   return (
     <button
       type="button"
-      aria-label={`${role} account ${account.name}, balance ${balance}`}
+      data-account-chooser
+      aria-label={`${role} account ${account.name}, balance ${balance}${balanceError ? ', insufficient balance' : ''}`}
       onClick={onClick}
       className="grid min-h-[64px] w-full grid-cols-[36px_minmax(0,1fr)] items-center gap-[12px] rounded-[12px] px-[4px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
     >
@@ -133,7 +136,18 @@ function AccountChooser({
             <AppIcon name="chevron-down-wide" size={16} color="var(--uc-icon)" />
           </span>
         </span>
-        <span className="uc-type-n5 mt-[2px] block truncate text-[var(--uc-text-muted)]">{balance}</span>
+        <span
+          className={`uc-type-n5 mt-[2px] flex min-w-0 items-center gap-[6px] ${
+            balanceError ? 'text-[var(--uc-status-red)]' : 'text-[var(--uc-text-muted)]'
+          }`}
+        >
+          <span className="truncate">{balance}</span>
+          {balanceError ? (
+            <span className="shrink-0 font-semibold text-[var(--uc-status-red)]" role="alert">
+              Insufficient balance
+            </span>
+          ) : null}
+        </span>
       </span>
     </button>
   )
@@ -142,19 +156,22 @@ function AccountChooser({
 function EditableAmount({
   value,
   currency,
+  inputRef,
   onChange,
   onFocus,
 }: {
   value: string
   currency: string
+  inputRef?: Ref<HTMLInputElement>
   onChange: (value: string) => void
   onFocus: () => void
 }) {
   const visibleCharacterCount = Math.max(1, Math.min(value.length || 1, 11))
 
   return (
-    <div data-amount-editor className="mt-[8px] flex items-baseline gap-[6px] px-[4px]">
+    <div data-amount-editor className="mt-[6px] flex items-baseline gap-[6px] px-[4px]">
       <input
+        ref={inputRef}
         type="text"
         inputMode="none"
         autoComplete="off"
@@ -447,13 +464,17 @@ export default function InternalTransferScreen({
   const [topAccountId, setTopAccountId] = useState(initialDraft?.sourceAccountId ?? accounts[0]?.id ?? '')
   const [bottomAccountId, setBottomAccountId] = useState(initialDraft?.destinationAccountId ?? accounts[1]?.id ?? '')
   const [pickerPosition, setPickerPosition] = useState<PickerPosition | null>(null)
-  const [keypadOpen, setKeypadOpen] = useState(false)
+  const [keypadOpen, setKeypadOpen] = useState(true)
   const [activeAmountPosition, setActiveAmountPosition] = useState<PickerPosition>('top')
   const [amountExpression, setAmountExpression] = useState(initialDraft?.amountText ?? '')
   const [scheduleConfig, setScheduleConfig] = useState<ScheduleConfig | null>(initialSchedule ?? null)
   const [scheduleSetupOpen, setScheduleSetupOpen] = useState(false)
   const [completeAfterSchedule, setCompleteAfterSchedule] = useState(false)
   const [completed, setCompleted] = useState(false)
+  const amountInputRef = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    if (keypadOpen && pickerPosition === null) amountInputRef.current?.focus({ preventScroll: true })
+  }, [activeAmountPosition, keypadOpen, pickerPosition])
   const handleBack = () => onBack(draft)
   const sourceAccount = accounts.find((account) => account.id === draft.sourceAccountId)
   const destinationAccount = accounts.find((account) => account.id === draft.destinationAccountId)
@@ -471,7 +492,14 @@ export default function InternalTransferScreen({
   ) {
     return (
       <div className="flex h-full w-full flex-col bg-[var(--uc-app-bg)] text-[var(--uc-text)]">
-        <PageHeader title="Move between accounts" onBack={handleBack} includeSafeArea showHelp={false} />
+        <PageHeader
+          title="Move between accounts"
+          onBack={handleBack}
+          includeSafeArea
+          showHelp={false}
+          renderLargeTitle={false}
+          collapsedTitleProgress={1}
+        />
         <div className="flex flex-1 flex-col items-center justify-center px-[32px] text-center">
           <div className="grid size-[64px] place-items-center rounded-full bg-[var(--uc-surface-muted)]">
             <AppIcon name="currency-exchange" size={28} color="var(--uc-icon)" />
@@ -499,9 +527,12 @@ export default function InternalTransferScreen({
   }
 
   const activeAccount = activeAmountPosition === 'top' ? topAccount : bottomAccount
+  const wholeNumberFormatter = new Intl.NumberFormat(getCountryConfig(country).locale, {
+    maximumFractionDigits: 0,
+  })
   const keypadSuggestions = INTERNAL_TRANSFER_PRESETS.map((value) => ({
     value,
-    label: `${formatMoneyNumber(value, country)} ${activeAccount.currency}`,
+    label: `${wholeNumberFormatter.format(value)} ${activeAccount.currency}`,
   }))
   const inputSide = activeAccount.id === sourceAccount.id ? 'source' : 'destination'
   const hasOperator = OPERATOR_RE.test(amountExpression)
@@ -570,6 +601,7 @@ export default function InternalTransferScreen({
       setBottomAccountId(account.id)
     }
     setPickerPosition(null)
+    setKeypadOpen(true)
   }
 
   const swapAccounts = () => {
@@ -635,7 +667,7 @@ export default function InternalTransferScreen({
 
   const handleMainPointerDown = (event: PointerEvent<HTMLElement>) => {
     const target = event.target instanceof Element ? event.target : null
-    if (target?.closest('[data-amount-editor]')) return
+    if (target?.closest('[data-amount-editor], [data-account-chooser]')) return
     finishAmountEditing()
   }
 
@@ -647,20 +679,28 @@ export default function InternalTransferScreen({
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden bg-[var(--uc-surface)] text-[var(--uc-text)]">
       <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide">
-        <PageHeader title="Move between accounts" onBack={handleBack} includeSafeArea showHelp={false} />
+        <PageHeader
+          title="Move between accounts"
+          onBack={handleBack}
+          includeSafeArea
+          showHelp={false}
+          renderLargeTitle={false}
+          collapsedTitleProgress={1}
+          headerSubtitle={rateText}
+        />
 
         <main
           onPointerDown={handleMainPointerDown}
-          className={`bg-[var(--uc-surface)] px-[16px] pt-[8px] ${keypadOpen ? 'pb-[360px]' : 'pb-[160px]'}`}
+          className={`bg-[var(--uc-surface)] px-[16px] pt-[4px] ${keypadOpen ? 'pb-[360px]' : 'pb-[160px]'}`}
         >
           <div className="overflow-hidden rounded-[16px] border border-[var(--uc-border)] bg-[var(--uc-surface)]">
-            <section className="px-[12px] pb-[8px] pt-[8px]">
+            <section className="px-[12px] pb-[4px] pt-[4px]">
               <AccountChooser
                 account={topAccount}
                 role={topIsSource ? 'From' : 'To'}
                 balance={formatBalance(topAccount, country)}
+                balanceError={quote.error === 'insufficient-balance' && topIsSource}
                 onClick={() => {
-                  setKeypadOpen(false)
                   setPickerPosition('top')
                 }}
               />
@@ -668,6 +708,7 @@ export default function InternalTransferScreen({
                 <EditableAmount
                   value={amountDisplayText}
                   currency={topAccount.currency}
+                  inputRef={amountInputRef}
                   onChange={updateAmount}
                   onFocus={() => activateAmountPosition('top')}
                 />
@@ -697,13 +738,13 @@ export default function InternalTransferScreen({
               </motion.button>
             </div>
 
-            <section className="px-[12px] pb-[10px] pt-0">
+            <section className="px-[12px] pb-[6px] pt-0">
               <AccountChooser
                 account={bottomAccount}
                 role={topIsSource ? 'To' : 'From'}
                 balance={formatBalance(bottomAccount, country)}
+                balanceError={quote.error === 'insufficient-balance' && !topIsSource}
                 onClick={() => {
-                  setKeypadOpen(false)
                   setPickerPosition('bottom')
                 }}
               />
@@ -711,6 +752,7 @@ export default function InternalTransferScreen({
                 <EditableAmount
                   value={amountDisplayText}
                   currency={bottomAccount.currency}
+                  inputRef={amountInputRef}
                   onChange={updateAmount}
                   onFocus={() => activateAmountPosition('bottom')}
                 />
@@ -726,20 +768,7 @@ export default function InternalTransferScreen({
             </section>
           </div>
 
-          {quote.isFx && rateText ? (
-            <div className="mt-[16px] flex items-center justify-between gap-[12px] rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[14px] py-[12px]">
-              <span className="uc-type-n5 text-[var(--uc-text-muted)]">Exchange rate</span>
-              <span className="uc-type-n5-strong text-right text-[var(--uc-text)]">{rateText}</span>
-            </div>
-          ) : null}
-
-          {quote.error === 'insufficient-balance' ? (
-            <p className="uc-type-n4 mt-[12px] text-[var(--uc-status-red)]" role="alert">
-              Amount exceeds your available balance.
-            </p>
-          ) : null}
-
-          <label htmlFor="internal-transfer-note" className="mt-[28px] block">
+          <label htmlFor="internal-transfer-note" className="mt-[20px] block">
             <span className="uc-type-n4 block text-[var(--uc-text)]">Note (optional)</span>
             <input
               type="text"
@@ -761,9 +790,20 @@ export default function InternalTransferScreen({
         </main>
       </div>
 
-      <div
-        className={`absolute inset-x-0 bottom-0 bg-[var(--uc-surface)] px-[24px] pt-[16px] ${
-          keypadOpen ? 'pb-[16px]' : 'pb-[42px]'
+      <motion.div
+        layout="position"
+        transition={{
+          layout: {
+            duration: reduceMotion ? 0 : 0.24,
+            ease: [0.22, 1, 0.36, 1],
+          },
+        }}
+        className={`absolute inset-x-0 bottom-0 z-10 bg-[var(--uc-surface)] px-[24px] pt-[16px] ${
+          reduceMotion ? '' : 'transition-[box-shadow] duration-300 ease-out'
+        } ${
+          keypadOpen
+            ? 'pb-[16px] shadow-[0_-12px_28px_rgb(var(--uc-shadow-rgb)_/_0.10),0_-2px_6px_rgb(var(--uc-shadow-rgb)_/_0.04)]'
+            : 'pb-[42px] shadow-[0_0_0_rgb(var(--uc-shadow-rgb)_/_0)]'
         }`}
       >
         <div className="flex items-center gap-[8px]">
@@ -804,20 +844,33 @@ export default function InternalTransferScreen({
             {submitLabel ?? 'Move money'}
           </PrimaryButton>
         </div>
-        {keypadOpen ? (
-          <AmountKeypad
-            hasValue={amountExpression.length > 0}
-            showOperators={amountExpression.length > 0}
-            canEvaluate={hasOperator}
-            suggestions={keypadSuggestions}
-            onDigit={appendDigit}
-            onDelete={deleteDigit}
-            onOperator={selectCalculatorOperator}
-            onEquals={calculateResult}
-            onSuggestion={(value) => commitExpression(String(value))}
-          />
-        ) : null}
-      </div>
+        <AnimatePresence initial={false}>
+          {keypadOpen ? (
+            <motion.div
+              key="amount-keypad"
+              initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
+              transition={{
+                duration: reduceMotion ? 0 : 0.24,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+            >
+              <AmountKeypad
+                hasValue={amountExpression.length > 0}
+                showOperators={amountExpression.length > 0}
+                canEvaluate={hasOperator}
+                suggestions={keypadSuggestions}
+                onDigit={appendDigit}
+                onDelete={deleteDigit}
+                onOperator={selectCalculatorOperator}
+                onEquals={calculateResult}
+                onSuggestion={(value) => commitExpression(String(value))}
+              />
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </motion.div>
 
       {pickerPosition ? (
         <AccountPicker
@@ -826,7 +879,10 @@ export default function InternalTransferScreen({
           blockedAccountId={pickerPosition === 'top' ? bottomAccount.id : topAccount.id}
           selectedAccountId={pickerPosition === 'top' ? topAccount.id : bottomAccount.id}
           onSelect={selectAccount}
-          onClose={() => setPickerPosition(null)}
+          onClose={() => {
+            setPickerPosition(null)
+            setKeypadOpen(true)
+          }}
         />
       ) : null}
     </div>
