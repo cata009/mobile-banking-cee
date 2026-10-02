@@ -474,11 +474,9 @@ function BasketPortfolioCard({
 }) {
   const basket = portfolio.basketFund!;
   const performancePercent = basket.performancePercent;
-  const performanceColor = performancePercent === undefined || performancePercent === 0
+  const performanceColor = performancePercent === undefined
     ? "var(--uc-text)"
-    : performancePercent > 0
-      ? "var(--uc-green-olive)"
-      : "var(--uc-status-red)";
+    : performancePercent < 0 ? "var(--uc-status-red)" : "var(--uc-green-olive)";
 
   return (
     <article
@@ -500,9 +498,9 @@ function BasketPortfolioCard({
         <div className="flex min-h-[36px] items-center justify-between gap-[8px]">
           <BrandLogo logoId={basket.logoId} size={32} />
           {performancePercent !== undefined ? (
-            <div className="flex flex-col items-end justify-center rounded-[4px] bg-[var(--uc-surface-muted)] px-[8px] py-[3px]">
-              <span className="text-[10px] font-bold uppercase leading-[11px] tracking-[0.25px] text-[var(--uc-text-muted)]">1Y performance</span>
-              <span className="text-[16px] font-bold leading-[18px] tabular-nums" style={{ color: performanceColor }}>
+            <div className="flex min-w-[110px] flex-col items-end justify-center rounded-[4px] bg-[var(--uc-surface-muted)] px-[10px] py-[6px]">
+              <span className="text-[10px] font-bold uppercase leading-[12px] tracking-[0.3px] text-[var(--uc-text-muted)]">Performance</span>
+              <span className="text-[20px] font-bold leading-[23px] tabular-nums" style={{ color: performanceColor }}>
                 {formatInvestmentBasketPerformance(performancePercent)}
               </span>
             </div>
