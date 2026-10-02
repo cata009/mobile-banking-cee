@@ -125,14 +125,16 @@ export default function InvestmentBasketFundDetailScreen({
           )}
         </div>
 
-        <AccountActionBar
-          items={[
-            { id: "history", iconName: "investment-history", label: "History", onClick: () => onHistoryClick?.(basket.title) },
-            { id: "documents", iconName: "account-option-statement", label: "Documents" },
-            { id: "sell", iconName: "trade-sell", label: "Sell", hidden: true },
-            { id: "buy", iconName: "trade-buy", label: "Buy", iconColor: "var(--uc-action)" },
-          ]}
-        />
+        {!czRoboProductDetail ? (
+          <AccountActionBar
+            items={[
+              { id: "history", iconName: "investment-history", label: "History", onClick: () => onHistoryClick?.(basket.title) },
+              { id: "documents", iconName: "account-option-statement", label: "Documents" },
+              { id: "sell", iconName: "trade-sell", label: "Sell", hidden: true },
+              { id: "buy", iconName: "trade-buy", label: "Buy", iconColor: "var(--uc-action)" },
+            ]}
+          />
+        ) : null}
 
         <div className="pt-[18px]">
           <InvestmentDetailField

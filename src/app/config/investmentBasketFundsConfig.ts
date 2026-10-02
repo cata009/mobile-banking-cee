@@ -39,7 +39,7 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
     contributionType: "ONE OFF",
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
-    performancePercent: 0,
+    performancePercent: 2.27,
     roboCarouselTitle: "onemarkets J.P. Morgan\nGlobal growth Basket",
     detailDescription: FIGMA_GLOBAL_GROWTH_DESCRIPTION,
     contentsSummary: "A mix of 5 high-yield equity funds.",
