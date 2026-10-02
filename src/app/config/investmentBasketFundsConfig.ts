@@ -27,7 +27,7 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
   {
     id: "jp-morgan-global-growth",
     title: "onemarkets J.P. Morgan Global growth Basket",
-    description: "A mix of 5 high-yield equity funds.",
+    description: "Explore global opportunities with five curated equity funds in one basket.",
     contributionType: "ONE OFF",
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
@@ -44,7 +44,7 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
   {
     id: "blackrock-credit-opportunities",
     title: "BlackRock Credit Opportunities",
-    description: "4 equity ESG funds.",
+    description: "Discover four ESG-focused equity funds selected for a more conscious portfolio.",
     contributionType: "ONE OFF",
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
@@ -54,7 +54,7 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
   {
     id: "onemarkets-eur-collection",
     title: "onemarkets EUR collection",
-    description: "Pictet Thematic Intelligence Fund",
+    description: "Explore emerging themes through the Pictet Thematic Intelligence Fund.",
     contributionType: "ONE OFF",
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
@@ -88,7 +88,7 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
     contributionType: "RECURRENT",
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
-    description: "A regular investment basket with a mix of 5 high-yield equity funds.",
+    description: "Build your investment steadily with monthly contributions to five curated equity funds.",
     contentsSummary: "A mix of 5 high-yield equity funds.",
     holdings: [
       { title: "Amundi Funds Global Opportunity", productId: "CZROBOAMUND14" },
@@ -101,7 +101,7 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
   {
     id: "jp-morgan-credit-regular",
     title: "onemarkets J.P. Morgan Credit Opportunities",
-    description: "A mix of 8 high-yield equity funds.",
+    description: "Invest monthly across eight high-yield equity funds in one convenient basket.",
     contributionType: "RECURRENT",
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],

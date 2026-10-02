@@ -10,6 +10,7 @@ import InfoBanner from "@/app/components/cards/InfoBanner";
 import BrandLogo from "@/app/components/brand-logo/BrandLogo";
 import StandardSignScreen from "@/app/components/flow/StandardSignScreen";
 import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
+import InvestmentBasketFundDetailScreen from "@/app/screens/investments/InvestmentBasketFundDetailScreen";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import InvestmentFilterChips from "@/app/components/investments/InvestmentFilterChips";
 import InvestmentPeriodChips from "@/app/components/investments/InvestmentPeriodChips";
@@ -434,15 +435,16 @@ function BasketPortfolioCard({
   portfolio,
   selected,
   onSelect,
+  onDetails,
   dragHandlers,
 }: {
   portfolio: RoboPortfolio;
   selected: boolean;
   onSelect: () => void;
+  onDetails: () => void;
   dragHandlers: DragCarouselHandlers;
 }) {
   const basket = portfolio.basketFund!;
-  const contentsSummary = basket.contentsSummary ?? basket.description;
 
   return (
     <article
@@ -471,7 +473,16 @@ function BasketPortfolioCard({
           {basket.title}
         </h2>
         <p className="uc-type-n5 mt-[7px] min-h-[51px] leading-[17px] text-[var(--uc-text)]">{basket.description}</p>
-        <p className="uc-type-n6 mt-[12px] text-[var(--uc-text-muted)]">{contentsSummary}</p>
+      </button>
+      <button
+        {...dragHandlers}
+        type="button"
+        aria-label={`Details for ${basket.title}`}
+        onClick={onDetails}
+        className="mt-[8px] flex w-full items-center justify-center gap-[4px] py-[8px] text-[14px] font-bold text-[var(--uc-action)]"
+      >
+        Details
+        <AppIcon name="chevron-link" size={20} color="var(--uc-action)" />
       </button>
     </article>
   );
@@ -1253,6 +1264,7 @@ export default function CzFutureRoboAdvisorFlow({
     initialGoal,
     createRoboAdvisorFlowState,
   );
+  const [basketDetailsToOpen, setBasketDetailsToOpen] = useState<InvestmentBasketFund | null>(null);
   const {
     step,
     goalType,
@@ -1346,6 +1358,17 @@ export default function CzFutureRoboAdvisorFlow({
     if (destination) setStep(destination);
     else onBack();
   };
+
+  if (basketDetailsToOpen) {
+    return (
+      <InvestmentBasketFundDetailScreen
+        basket={basketDetailsToOpen}
+        country="CZ"
+        amountsHidden={false}
+        onBack={() => setBasketDetailsToOpen(null)}
+      />
+    );
+  }
 
   if (step === "intro") {
     return (
@@ -1792,7 +1815,7 @@ export default function CzFutureRoboAdvisorFlow({
               setStep("review");
             }}
           >
-            {selectedBasketPortfolio ? `Choose ${selectedBasketPortfolio.name}` : "Choose a basket fund"}
+            Continue
           </PrimaryButton>
         )}
       >
@@ -1818,6 +1841,9 @@ export default function CzFutureRoboAdvisorFlow({
               portfolio={candidate}
               selected={candidate.id === selectedBasketPortfolio?.id}
               onSelect={() => setSelectedPortfolio(candidate)}
+              onDetails={() => {
+                if (candidate.basketFund) setBasketDetailsToOpen(candidate.basketFund);
+              }}
               dragHandlers={portfolioDragHandlers}
             />
           ))}

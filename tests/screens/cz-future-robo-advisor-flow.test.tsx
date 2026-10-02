@@ -414,7 +414,8 @@ describe('CZ Future Robo Advisor flow', () => {
     expect(screen.getByText('Amundi Funds Global Opportunity')).toBeInTheDocument()
     expect(screen.getByText('CZROBOAMUND14')).toBeInTheDocument()
     expect(screen.getByText('Europe Equity Opportunities')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Choose onemarkets Chase Regular EUR' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Details for onemarkets Chase Regular EUR' })).toBeInTheDocument()
   })
 
   it('reuses the Investments performance surface and Figma allocation pattern on goal detail', () => {
