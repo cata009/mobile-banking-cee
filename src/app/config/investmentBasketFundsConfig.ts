@@ -62,13 +62,19 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
   {
     id: "onemarkets-eur-collection",
     title: "onemarkets EUR collection",
-    description: "Explore emerging themes through the Pictet Thematic Intelligence Fund.",
+    description: "Discover global themes through a curated mix of five investment funds.",
     contributionType: "ONE OFF",
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
     roboCarouselTitle: "onemarkets EUR\ncollection",
-    contentsSummary: "Pictet Thematic Intelligence Fund",
-    holdings: [{ title: "Pictet Thematic Intelligence Fund", percent: 100 }],
+    contentsSummary: "Five thematic funds selected for a diversified portfolio.",
+    holdings: [
+      { title: "Pictet Thematic Intelligence Fund", percent: 20 },
+      { title: "onemarkets Climate Focus Fund", productId: "CZCLIMATEFO2", percent: 20 },
+      { title: "Global Dividend Fund", productId: "CZGLOBALDIV4", percent: 20 },
+      { title: "Global Tech Leaders", productId: "CZGLOBALTEC8", percent: 20 },
+      { title: "Europe Equity Opportunities", productId: "CZEUROPEEQU7", percent: 20 },
+    ],
   },
   {
     id: "jp-morgan-credit-opportunities",
