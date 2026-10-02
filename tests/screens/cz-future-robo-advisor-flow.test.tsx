@@ -270,7 +270,9 @@ describe('CZ Future Robo Advisor flow', () => {
     fireEvent.click(screen.getByRole('radio', { name: 'Choose BlackRock Credit Opportunities' }))
     expect(screen.getByRole('radio', { name: 'Choose BlackRock Credit Opportunities' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('heading', { name: 'BASKET CONTENTS' })).toBeInTheDocument()
-    expect(screen.getAllByText('4 equity ESG funds.')).toHaveLength(2)
+    expect(screen.getByText('Sustainable Future Mixed Fund')).toBeInTheDocument()
+    expect(screen.getByText('Europe Equity Opportunities')).toBeInTheDocument()
+    expect(screen.queryByText('4 equity ESG funds.')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('radio', { name: 'Choose onemarkets Chase Regular EUR' }))
     expect(screen.getByText('Amundi Funds Global Opportunity')).toBeInTheDocument()
@@ -278,6 +280,10 @@ describe('CZ Future Robo Advisor flow', () => {
     expect(screen.getByText('Europe Equity Opportunities')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Continue' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Details for onemarkets Chase Regular EUR' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Choose onemarkets J.P. Morgan Credit Opportunities' }))
+    expect(screen.getByText('Nano-Chip Equity Fund')).toBeInTheDocument()
+    expect(screen.getByText('CZGLOBALGRO9')).toBeInTheDocument()
   })
 
   it('reuses the Investments performance surface and Figma allocation pattern on goal detail', () => {
