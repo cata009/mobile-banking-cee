@@ -2,6 +2,7 @@ import { useState } from "react";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import Evo2027PaymentSelectionRow from "@/app/components/payments/Evo2027PaymentSelectionRow";
 import PageHeader from "@/app/components/PageHeader";
+import Evo2027BeneficiaryDetailScreen from "@/app/screens/payments/Evo2027BeneficiaryDetailScreen";
 import PaymentSelectionDetailScreen from "@/app/screens/payments/PaymentSelectionDetailScreen";
 import PaymentTemplateEditScreen from "@/app/screens/payments/PaymentTemplateEditScreen";
 import Evo2027BeneficiaryEditScreen from "@/app/screens/payments/Evo2027BeneficiaryEditScreen";
@@ -10,6 +11,7 @@ import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { useCountry } from "@/app/state/demoStore";
 import type { CountryId } from "@/app/state/demoTypes";
+import type { AccountTransaction } from "@/data/accountDetails";
 import {
   getPaymentTemplates,
   getEvo2027TemplateBeneficiaryName,
@@ -27,6 +29,7 @@ interface PaymentTemplatesScreenProps {
   isEvo2027?: boolean;
   favoriteBeneficiaryIds?: readonly string[];
   onFavoriteToggle?: (beneficiaryId: string) => void;
+  onTransactionClick?: (transaction: AccountTransaction) => void;
 }
 
 function matchesSearch(item: PaymentTemplateSelection, normalizedSearch: string) {
@@ -47,6 +50,7 @@ export default function PaymentTemplatesScreen({
   isEvo2027 = false,
   favoriteBeneficiaryIds = [],
   onFavoriteToggle,
+  onTransactionClick,
 }: PaymentTemplatesScreenProps) {
   const country = useCountry();
   const { t } = useLanguage();
@@ -89,6 +93,27 @@ export default function PaymentTemplatesScreen({
               setSelectedDetail(mapFrequentBeneficiaryToSelection(updatedBeneficiary));
               setIsEditingSelection(false);
             }}
+          />
+        );
+      }
+    }
+
+    if (selectedDetail.kind === "beneficiary") {
+      const beneficiary = getFrequentBeneficiaries(country).find((person) => person.id === selectedDetail.id);
+      if (beneficiary) {
+        return (
+          <Evo2027BeneficiaryDetailScreen
+            person={beneficiary}
+            onBack={() => setSelectedDetail(null)}
+            onSendMoney={() => onSelect(selectedDetail)}
+            onTransactionClick={(transaction) => onTransactionClick?.(transaction)}
+            onEditBeneficiary={() => setIsEditingSelection(true)}
+            onDeleteBeneficiary={() => {
+              deletePaymentTemplateSelection(country, selectedDetail.id);
+              setSelectedDetail(null);
+            }}
+            isFavorite={favoriteBeneficiaryIds.includes(selectedDetail.id)}
+            onFavoriteToggle={() => onFavoriteToggle?.(selectedDetail.id)}
           />
         );
       }

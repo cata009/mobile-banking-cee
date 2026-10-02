@@ -10,18 +10,22 @@ export function ToolPanel({
   title,
   action,
   children,
+  className = "",
+  bodyClassName = "",
 }: {
   title: string;
   action?: ReactNode;
   children: ReactNode;
+  className?: string;
+  bodyClassName?: string;
 }) {
   return (
-    <section className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[20px] shadow-sm">
+    <section className={`rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[20px] shadow-sm ${className}`}>
       <div className="flex flex-wrap items-center justify-between gap-[12px]">
         <h2 className="text-[18px] font-bold leading-[22px] tracking-[0] text-[var(--uc-text)]">{title}</h2>
         {action ?? null}
       </div>
-      <div className="mt-[16px]">{children}</div>
+      <div className={`mt-[16px] ${bodyClassName}`}>{children}</div>
     </section>
   );
 }

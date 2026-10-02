@@ -12,6 +12,9 @@ interface PreLoginActiveScreenProps {
   onOtherClick: () => void;
   onLanguageClick: () => void;
   onLoginClick?: () => void;
+  backgroundImageUrl?: string;
+  backgroundPosition?: string;
+  backgroundZoom?: number;
 }
 
 /**
@@ -32,6 +35,9 @@ export default function PreLoginActiveScreen({
   onOtherClick,
   onLanguageClick,
   onLoginClick,
+  backgroundImageUrl,
+  backgroundPosition,
+  backgroundZoom = 1,
 }: PreLoginActiveScreenProps) {
   const { t, language } = useLanguage();
   const [showFaceId, setShowFaceId] = useState(false);
@@ -54,11 +60,12 @@ export default function PreLoginActiveScreen({
   return (
     <div className="w-full h-full relative bg-[var(--uc-static-black)]">
       {/* Background Image */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <img 
-          src={backgroundImage} 
+          src={backgroundImageUrl ?? backgroundImage}
           alt="Background" 
           className="w-full h-full object-cover"
+          style={{ objectPosition: backgroundPosition, transform: backgroundZoom === 1 ? undefined : `scale(${backgroundZoom})`, transformOrigin: backgroundPosition }}
         />
       </div>
       

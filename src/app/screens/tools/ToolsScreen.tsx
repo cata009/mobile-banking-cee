@@ -15,8 +15,10 @@ import { TranslationReviewTool } from "./TranslationReviewTool";
 import { CountryDivergenceTool } from "./CountryDivergenceTool";
 import { LocalizationSignoffTool } from "./LocalizationSignoffTool";
 import { LocalizationCoverageTool } from "./LocalizationCoverageTool";
+import { PreloginPictureTesterTool } from "./PreloginPictureTesterTool";
 
 type ToolId =
+  | "prelogin-picture"
   | "side-by-side"
   | "country-divergence"
   | "translation-tester"
@@ -33,6 +35,14 @@ interface ToolMeta {
 }
 
 const TOOLS: readonly ToolMeta[] = [
+  {
+    id: "prelogin-picture",
+    label: "Prelogin picture tester",
+    icon: "camera",
+    description:
+      "Position and crop your image in the active and inactive prelogin screens, then download a PNG ready for the final app.",
+    audience: "Design · Local market teams · QA",
+  },
   {
     id: "side-by-side",
     label: "Country comparison",
@@ -74,7 +84,7 @@ const TOOLS: readonly ToolMeta[] = [
     audience: "BA · Local market teams · PM",
   },
   {
-    id: "localization",
+    id: "localization-signoff",
     label: "Localization",
     icon: "shield-check",
     description:
@@ -147,7 +157,9 @@ export default function ToolsScreen() {
         ) : (
           <div className="mt-[20px]">
             <ToolErrorBoundary key={activeToolId} toolLabel={activeTool?.label ?? "Tool"}>
-              {activeToolId === "side-by-side" ? (
+              {activeToolId === "prelogin-picture" ? (
+                <PreloginPictureTesterTool />
+              ) : activeToolId === "side-by-side" ? (
                 <SideBySideTool />
               ) : activeToolId === "country-divergence" ? (
                 <CountryDivergenceTool />
