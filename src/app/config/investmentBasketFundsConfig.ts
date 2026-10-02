@@ -19,6 +19,13 @@ export interface InvestmentBasketFund {
   detailDescription?: string;
   contentsSummary?: string;
   holdings?: readonly InvestmentBasketFundHolding[];
+  /** Illustrative one-year basket return shown in the CZ Robo demo. */
+  performancePercent?: number;
+}
+
+export function formatInvestmentBasketPerformance(value: number) {
+  const amount = Number(Math.abs(value).toFixed(2)).toString().replace(".", ",");
+  return `${value < 0 ? "−" : "+"}${amount}%`;
 }
 
 const FIGMA_GLOBAL_GROWTH_DESCRIPTION =
@@ -32,6 +39,7 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
     contributionType: "ONE OFF",
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
+    performancePercent: 0,
     roboCarouselTitle: "onemarkets J.P. Morgan\nGlobal growth Basket",
     detailDescription: FIGMA_GLOBAL_GROWTH_DESCRIPTION,
     contentsSummary: "A mix of 5 high-yield equity funds.",
@@ -50,6 +58,7 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
     contributionType: "ONE OFF",
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
+    performancePercent: 2.43,
     roboCarouselTitle: "BlackRock Credit\nOpportunities",
     contentsSummary: "4 equity ESG funds.",
     holdings: [
@@ -66,6 +75,7 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
     contributionType: "ONE OFF",
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
+    performancePercent: 1.81,
     roboCarouselTitle: "onemarkets EUR\ncollection",
     contentsSummary: "Five thematic funds selected for a diversified portfolio.",
     holdings: [
@@ -103,6 +113,7 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
     contributionType: "RECURRENT",
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
+    performancePercent: 1.42,
     roboCarouselTitle: "onemarkets Chase\nRegular EUR",
     description: "Build your investment steadily with monthly contributions to five curated equity funds.",
     contentsSummary: "A mix of 5 high-yield equity funds.",
@@ -121,6 +132,7 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
     contributionType: "RECURRENT",
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
+    performancePercent: 1.65,
     roboCarouselTitle: "onemarkets J.P. Morgan\nCredit Opportunities",
     contentsSummary: "A mix of 8 high-yield equity funds.",
     holdings: [
