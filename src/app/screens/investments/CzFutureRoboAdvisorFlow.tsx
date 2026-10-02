@@ -1655,7 +1655,7 @@ export default function CzFutureRoboAdvisorFlow({
             <div className="mt-[24px] space-y-[24px]">
               {fundingFields.initialAmount ? (
                 <div>
-                  <TextField label="Amount to invest now" value={initialAmount} onChange={setInitialAmount} inputMode="numeric" suffix="CZK" suffixOutsideDivider suffixClassName="font-bold" />
+                  <TextField label="Amount to invest now" value={initialAmount} onChange={setInitialAmount} inputMode="numeric" suffix="CZK" suffixOutsideDivider suffixClassName="!font-bold" />
                   <div className="mt-[16px] grid grid-cols-3 gap-[8px]">
                     {["5000", "10000", "100000"].map((amount) => (
                       <FundingAmountSuggestion
@@ -1670,7 +1670,7 @@ export default function CzFutureRoboAdvisorFlow({
               ) : null}
               {fundingFields.monthlyContribution ? (
                 <div>
-                  <TextField label="Monthly contribution" value={monthlyContribution} onChange={setMonthlyContribution} inputMode="numeric" suffix="CZK" suffixOutsideDivider suffixClassName="font-bold" />
+                  <TextField label="Monthly contribution" value={monthlyContribution} onChange={setMonthlyContribution} inputMode="numeric" suffix="CZK" suffixOutsideDivider suffixClassName="!font-bold" />
                   <div className="mt-[16px] grid grid-cols-3 gap-[8px]">
                     {["500", "1000", "2000"].map((amount) => (
                       <FundingAmountSuggestion
