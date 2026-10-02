@@ -1368,6 +1368,7 @@ export default function CzFutureRoboAdvisorFlow({
         basket={basketDetailsToOpen}
         country="CZ"
         amountsHidden={false}
+        czRoboProductDetail
         onBack={() => setBasketDetailsToOpen(null)}
       />
     );
