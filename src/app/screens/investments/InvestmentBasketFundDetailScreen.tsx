@@ -6,6 +6,7 @@ import PageHeader from "@/app/components/PageHeader";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import type { InvestmentBasketFund } from "@/app/config/investmentBasketFundsConfig";
 import type { CountryId } from "@/app/state/demoTypes";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 
 interface InvestmentBasketFundDetailScreenProps {
   basket: InvestmentBasketFund;
@@ -13,6 +14,7 @@ interface InvestmentBasketFundDetailScreenProps {
   amountsHidden: boolean;
   onBack: () => void;
   onHistoryClick?: (filterByTitle?: string) => void;
+  czRoboProductDetail?: boolean;
 }
 
 function formatPerformance(value: number) {
@@ -48,43 +50,71 @@ export default function InvestmentBasketFundDetailScreen({
   amountsHidden,
   onBack,
   onHistoryClick,
+  czRoboProductDetail = false,
 }: InvestmentBasketFundDetailScreenProps) {
   const hasFigmaSampleDetails = basket.id === "jp-morgan-global-growth";
   const heroParts = formatInvestmentAmountParts(1500, country, "EUR", amountsHidden);
   const marketPriceParts = formatInvestmentAmountParts(535.44, country, "EUR", amountsHidden);
   const description = basket.detailDescription ?? basket.description;
   const hasDistributionPercentages = basket.holdings?.some((holding) => holding.percent !== undefined) ?? false;
+  const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(96);
 
   return (
     <div
       className="flex h-full w-full flex-col overflow-hidden bg-[var(--uc-surface)] text-[var(--uc-text)]"
       data-investment-basket-detail={basket.id}
     >
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
+      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide" onScroll={czRoboProductDetail ? handleScroll : undefined}>
         <div className="bg-[var(--uc-app-bg)]">
           <PageHeader
-            title=""
+            title={czRoboProductDetail ? basket.title : ""}
             onBack={onBack}
-            variant="gray"
+            variant={czRoboProductDetail ? "light" : "gray"}
             includeSafeArea
             showHelp={false}
+            compact={!czRoboProductDetail}
             renderLargeTitle={false}
+            collapsedTitleProgress={czRoboProductDetail ? headerProgress : undefined}
           />
-          <section className="flex flex-col items-center px-[24px] pb-[24px] text-center">
-            <BrandLogo logoId={basket.logoId} size={40} label={`${basket.title} product`} />
-            <h1 className="mt-[8px] text-[28px] font-bold leading-[31px] text-[var(--uc-text)]">{basket.title}</h1>
-            {hasFigmaSampleDetails ? (
-              <>
-                <p className="mt-[16px] flex items-baseline justify-center leading-none tracking-[0.2px]">
-                  <InvestmentAmountDisplay parts={heroParts} scale="hero" />
-                </p>
-                <p className="mt-[8px] text-[14px] font-bold leading-[17px] text-[var(--uc-text)]">
-                  PERFORMANCE {formatPerformance(0)}
-                </p>
-                <p className="mt-[8px] text-[14px] leading-[17px] text-[var(--uc-text)]">(from 19.07.2022)</p>
-              </>
-            ) : null}
-          </section>
+          {czRoboProductDetail ? (
+            <section className="bg-[var(--uc-surface)] pb-[28px]">
+              <div className="px-[24px] pt-[8px]">
+                <div className="flex items-start gap-[10px]">
+                  <h1 className="min-w-0 flex-1 text-[28px] font-bold leading-[31px] text-[var(--uc-text)]">{basket.title}</h1>
+                  <BrandLogo logoId={basket.logoId} size={32} label={`${basket.title} product`} />
+                </div>
+                {hasFigmaSampleDetails ? (
+                  <div className="mt-[8px]">
+                    <p className="text-[14px] leading-[16px] text-[var(--uc-text)]">Actual market price</p>
+                    <p className="mt-[2px] leading-none">
+                      <InvestmentAmountDisplay parts={heroParts} scale="hero" />
+                    </p>
+                    <p className="mt-[4px] flex flex-wrap items-baseline gap-x-[4px] text-[14px] leading-[18px]">
+                      <span>Performance:</span>
+                      <span className="font-bold text-[var(--uc-green-olive)]">{formatPerformance(0)}</span>
+                      <span className="text-[var(--uc-text-muted)]">· from 19.07.2022</span>
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            </section>
+          ) : (
+            <section className="flex flex-col items-center px-[24px] pb-[24px] text-center">
+              <BrandLogo logoId={basket.logoId} size={40} label={`${basket.title} product`} />
+              <h1 className="mt-[8px] text-[28px] font-bold leading-[31px] text-[var(--uc-text)]">{basket.title}</h1>
+              {hasFigmaSampleDetails ? (
+                <>
+                  <p className="mt-[16px] flex items-baseline justify-center leading-none tracking-[0.2px]">
+                    <InvestmentAmountDisplay parts={heroParts} scale="hero" />
+                  </p>
+                  <p className="mt-[8px] text-[14px] font-bold leading-[17px] text-[var(--uc-text)]">
+                    PERFORMANCE {formatPerformance(0)}
+                  </p>
+                  <p className="mt-[8px] text-[14px] leading-[17px] text-[var(--uc-text)]">(from 19.07.2022)</p>
+                </>
+              ) : null}
+            </section>
+          )}
         </div>
 
         <AccountActionBar

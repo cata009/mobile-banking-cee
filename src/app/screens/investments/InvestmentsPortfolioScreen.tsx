@@ -803,6 +803,7 @@ export default function InvestmentsPortfolioScreen({
         basket={selectedBasketFund}
         country={country}
         amountsHidden={amountsHidden}
+        czRoboProductDetail={showBottomNavigation}
         onBack={() => setSelectedBasketFund(null)}
         onHistoryClick={onHistoryClick}
       />
