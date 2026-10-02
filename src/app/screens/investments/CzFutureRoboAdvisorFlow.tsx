@@ -459,6 +459,29 @@ function StrategyCard({
   );
 }
 
+function getCarouselGeometry(carousel: HTMLElement) {
+  const firstCard = carousel.firstElementChild as HTMLElement | null;
+  const secondCard = firstCard?.nextElementSibling as HTMLElement | null;
+  const cardWidth = firstCard?.offsetWidth || 299;
+  const measuredStep = firstCard && secondCard ? secondCard.offsetLeft - firstCard.offsetLeft : 0;
+  const step = measuredStep > 0 ? measuredStep : cardWidth + 16;
+  const centerInset = Math.max(0, (carousel.clientWidth - cardWidth) / 2);
+  return { step, centerInset };
+}
+
+function getCarouselSelectedIndex(carousel: HTMLElement, itemCount: number) {
+  if (itemCount <= 1) return 0;
+  const { step, centerInset } = getCarouselGeometry(carousel);
+  return Math.max(0, Math.min(itemCount - 1, Math.round((carousel.scrollLeft + centerInset) / step)));
+}
+
+function getCarouselScrollLeft(carousel: HTMLElement, index: number, itemCount: number) {
+  const { step, centerInset } = getCarouselGeometry(carousel);
+  const safeIndex = Math.max(0, Math.min(Math.max(0, itemCount - 1), index));
+  const maxScrollLeft = Math.max(0, carousel.scrollWidth - carousel.clientWidth);
+  return Math.max(0, Math.min(maxScrollLeft, safeIndex * step - centerInset));
+}
+
 function BasketPortfolioCard({
   portfolio,
   selected,
@@ -482,7 +505,7 @@ function BasketPortfolioCard({
     <article
       {...dragHandlers}
       className={cn(
-        "w-[299px] shrink-0 snap-start rounded-[8px] border bg-[var(--uc-surface)] p-[15px]",
+        "w-[299px] shrink-0 snap-center rounded-[8px] border bg-[var(--uc-surface)] p-[15px]",
         selected ? "border-[2px] border-[var(--uc-action)]" : "border-[var(--uc-border-muted)]",
       )}
     >
@@ -495,21 +518,21 @@ function BasketPortfolioCard({
         onClick={onSelect}
         className="w-full text-left"
       >
-        <div className="flex min-h-[36px] items-center justify-between gap-[8px]">
+        <div className="flex items-start gap-[10px]">
           <BrandLogo logoId={basket.logoId} size={32} />
-          {performancePercent !== undefined ? (
-            <div className="flex flex-col items-end justify-center">
-              <span className="text-[10px] font-bold uppercase leading-[12px] tracking-[0.3px] text-[var(--uc-text-muted)]">Performance</span>
-              <span className="text-[20px] font-bold leading-[23px] tabular-nums" style={{ color: performanceColor }}>
-                {formatInvestmentBasketPerformance(performancePercent)}
-              </span>
-            </div>
-          ) : null}
+          <h2 className={cn("min-w-0 flex-1 uc-type-h2 line-clamp-2 min-h-[48px] whitespace-pre-line", selected ? "text-[var(--uc-action)]" : "text-[var(--uc-text)]")}>
+            {basket.roboCarouselTitle ?? basket.title}
+          </h2>
         </div>
-        <h2 className={cn("uc-type-h2 mt-[8px] line-clamp-2 min-h-[48px] whitespace-pre-line", selected ? "text-[var(--uc-action)]" : "text-[var(--uc-text)]")}>
-          {basket.roboCarouselTitle ?? basket.title}
-        </h2>
-        <p className="uc-type-n5 mt-[5px] line-clamp-3 min-h-[51px] leading-[17px] text-[var(--uc-text)]">{basket.description}</p>
+        {performancePercent !== undefined ? (
+          <div className="mt-[6px] flex items-baseline gap-[7px]">
+            <span className="text-[10px] font-bold uppercase leading-[12px] tracking-[0.3px] text-[var(--uc-text-muted)]">Performance</span>
+            <span className="text-[18px] font-bold leading-[22px] tabular-nums" style={{ color: performanceColor }}>
+              {formatInvestmentBasketPerformance(performancePercent)}
+            </span>
+          </div>
+        ) : null}
+        <p className="uc-type-n5 mt-[6px] line-clamp-3 min-h-[51px] leading-[17px] text-[var(--uc-text)]">{basket.description}</p>
       </button>
       <button
         {...dragHandlers}
@@ -1365,8 +1388,8 @@ export default function CzFutureRoboAdvisorFlow({
   const snapPortfolioCarousel = () => {
     const carousel = portfolioCarouselRef.current;
     if (!carousel || basketPortfolios.length <= 1) return;
-    const index = Math.max(0, Math.min(basketPortfolios.length - 1, Math.round(carousel.scrollLeft / 315)));
-    const left = index * 315;
+    const index = getCarouselSelectedIndex(carousel, basketPortfolios.length);
+    const left = getCarouselScrollLeft(carousel, index, basketPortfolios.length);
     if (typeof carousel.scrollTo === "function") carousel.scrollTo({ left, behavior: "smooth" });
     else carousel.scrollLeft = left;
     setSelectedPortfolio(basketPortfolios[index]!);
@@ -1382,7 +1405,7 @@ export default function CzFutureRoboAdvisorFlow({
     const carousel = portfolioCarouselRef.current;
     if (!carousel) return;
     const selectedIndex = basketPortfolios.findIndex((candidate) => candidate.id === selectedBasketPortfolio?.id);
-    carousel.scrollLeft = Math.max(0, selectedIndex) * 315;
+    carousel.scrollLeft = getCarouselScrollLeft(carousel, Math.max(0, selectedIndex), basketPortfolios.length);
   }, [step, selectedStrategy.id]);
 
   useEffect(() => {
@@ -1855,7 +1878,7 @@ export default function CzFutureRoboAdvisorFlow({
           data-testid="robo-basket-portfolio-carousel"
           {...portfolioDragHandlers}
           onScroll={(event) => {
-            const index = Math.max(0, Math.min(basketPortfolios.length - 1, Math.round(event.currentTarget.scrollLeft / 315)));
+            const index = getCarouselSelectedIndex(event.currentTarget, basketPortfolios.length);
             const nearest = basketPortfolios[index];
             if (nearest && nearest.id !== selectedBasketPortfolio?.id) setSelectedPortfolio(nearest);
           }}
@@ -1869,7 +1892,15 @@ export default function CzFutureRoboAdvisorFlow({
               key={candidate.id}
               portfolio={candidate}
               selected={candidate.id === selectedBasketPortfolio?.id}
-              onSelect={() => setSelectedPortfolio(candidate)}
+              onSelect={() => {
+                setSelectedPortfolio(candidate);
+                const carousel = portfolioCarouselRef.current;
+                if (!carousel) return;
+                const index = basketPortfolios.findIndex((basket) => basket.id === candidate.id);
+                const left = getCarouselScrollLeft(carousel, index, basketPortfolios.length);
+                if (typeof carousel.scrollTo === "function") carousel.scrollTo({ left, behavior: "smooth" });
+                else carousel.scrollLeft = left;
+              }}
               onDetails={() => {
                 if (candidate.basketFund) setBasketDetailsToOpen(candidate.basketFund);
               }}
