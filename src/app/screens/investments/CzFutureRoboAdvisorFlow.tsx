@@ -465,9 +465,11 @@ function BasketPortfolioCard({
       >
         <div className="flex items-center gap-[10px]">
           <BrandLogo logoId={basket.logoId} size={32} />
-          <span className="uc-type-n6-strong rounded-[4px] bg-[var(--uc-neutral-100)] px-[7px] py-[4px] text-[var(--uc-text)]">
-            {basket.contributionType === "ONE OFF" ? "ONE-OFF" : "REGULAR"}
-          </span>
+          {basket.contributionType === "RECURRENT" ? (
+            <span className="uc-type-n6-strong rounded-[4px] bg-[var(--uc-neutral-100)] px-[7px] py-[4px] text-[var(--uc-text)]">
+              REGULAR
+            </span>
+          ) : null}
         </div>
         <h2 className={cn("uc-type-h2 mt-[12px] line-clamp-2 min-h-[48px]", selected ? "text-[var(--uc-action)]" : "text-[var(--uc-text)]")}>
           {basket.title}
@@ -703,6 +705,7 @@ function PortfolioDetails({
       <SectionHeadingDivider
         title={hasDistribution ? "FUNDS DISTRIBUTION" : "BASKET CONTENTS"}
         variant="medium-title"
+        className="-mx-[24px]"
       />
       {basket.holdings?.length ? (
         <div className="mt-[6px]">

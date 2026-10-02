@@ -49,7 +49,12 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
     contentsSummary: "4 equity ESG funds.",
-    holdings: [],
+    holdings: [
+      { title: "Sustainable Future Mixed Fund", productId: "CZSUSTAINAB3" },
+      { title: "onemarkets Climate Focus Fund", productId: "CZCLIMATEFO2" },
+      { title: "Global Dividend Fund", productId: "CZGLOBALDIV4" },
+      { title: "Europe Equity Opportunities", productId: "CZEUROPEEQU7" },
+    ],
   },
   {
     id: "onemarkets-eur-collection",
@@ -106,7 +111,16 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
     logoId: "unicredit",
     recommendedFor: ["moderate-v2"],
     contentsSummary: "A mix of 8 high-yield equity funds.",
-    holdings: [],
+    holdings: [
+      { title: "Amundi Funds Global Opportunity", productId: "CZROBOAMUND14" },
+      { title: "onemarkets Climate Focus Fund", productId: "CZCLIMATEFO2" },
+      { title: "Global Dividend Fund", productId: "CZGLOBALDIV4" },
+      { title: "Global Tech Leaders", productId: "CZGLOBALTEC8" },
+      { title: "Europe Equity Opportunities", productId: "CZEUROPEEQU7" },
+      { title: "Sustainable Future Mixed Fund", productId: "CZSUSTAINAB3" },
+      { title: "Global Growth Portfolio", productId: "CZGLOBALGRO9" },
+      { title: "Nano-Chip Equity Fund", productId: "XY987654321" },
+    ],
   },
   {
     id: "amundi-eur-collection-regular",
