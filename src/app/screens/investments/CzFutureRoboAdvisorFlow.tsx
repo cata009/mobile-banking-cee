@@ -391,7 +391,8 @@ function InvestorProfileScreen({
         <InfoBanner
           title="Update your investor profile"
           description="Review the MiFID questions so your recommendation reflects your current situation."
-          actionLabel="UPDATE NOW  ›"
+          actionLabel="UPDATE NOW"
+          actionIconName="chevron-link"
           className="mt-[24px] w-full rounded-[4px]"
         />
       )}
