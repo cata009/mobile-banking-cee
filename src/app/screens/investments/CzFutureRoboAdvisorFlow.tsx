@@ -501,14 +501,14 @@ function BasketPortfolioCard({
         <h2 className={cn("uc-type-h2 mt-[12px] line-clamp-2 min-h-[48px] whitespace-pre-line", selected ? "text-[var(--uc-action)]" : "text-[var(--uc-text)]")}>
           {basket.roboCarouselTitle ?? basket.title}
         </h2>
-        <p className="uc-type-n5 mt-[7px] line-clamp-3 min-h-[51px] leading-[17px] text-[var(--uc-text)]">{basket.description}</p>
+        <p className="uc-type-n5 mt-[7px] line-clamp-3 min-h-[34px] leading-[17px] text-[var(--uc-text)]">{basket.description}</p>
       </button>
       <button
         {...dragHandlers}
         type="button"
         aria-label={`Details for ${basket.title}`}
         onClick={onDetails}
-        className="mt-[8px] flex w-full items-center justify-center gap-[4px] py-[8px] text-[14px] font-bold text-[var(--uc-action)]"
+        className="mt-[4px] flex w-full items-center justify-center gap-[4px] py-[8px] text-[14px] font-bold text-[var(--uc-action)]"
       >
         Details
         <AppIcon name="chevron-link" size={20} color="var(--uc-action)" />
