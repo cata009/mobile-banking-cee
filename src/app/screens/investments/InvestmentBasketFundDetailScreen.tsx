@@ -4,7 +4,7 @@ import InvestmentAmountDisplay, { formatInvestmentAmountParts } from "@/app/comp
 import InvestmentDetailField from "@/app/components/investments/InvestmentDetailField";
 import PageHeader from "@/app/components/PageHeader";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
-import type { InvestmentBasketFund } from "@/app/config/investmentBasketFundsConfig";
+import { formatInvestmentBasketPerformance, type InvestmentBasketFund } from "@/app/config/investmentBasketFundsConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 
@@ -18,7 +18,7 @@ interface InvestmentBasketFundDetailScreenProps {
 }
 
 function formatPerformance(value: number) {
-  return `${value > 0 ? "+" : value < 0 ? "−" : "+"}${Math.abs(value).toFixed(0)}%`;
+  return formatInvestmentBasketPerformance(value);
 }
 
 function FundDistributionRow({
@@ -57,6 +57,11 @@ export default function InvestmentBasketFundDetailScreen({
   const marketPriceParts = formatInvestmentAmountParts(535.44, country, "EUR", amountsHidden);
   const description = basket.detailDescription ?? basket.description;
   const hasDistributionPercentages = basket.holdings?.some((holding) => holding.percent !== undefined) ?? false;
+  const performanceColor = (basket.performancePercent ?? 0) > 0
+    ? "var(--uc-green-olive)"
+    : (basket.performancePercent ?? 0) < 0
+      ? "var(--uc-status-red)"
+      : "var(--uc-text)";
   const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(96);
 
   return (
@@ -95,6 +100,12 @@ export default function InvestmentBasketFundDetailScreen({
                       <span className="text-[var(--uc-text-muted)]">· from 19.07.2022</span>
                     </p>
                   </div>
+                ) : basket.performancePercent !== undefined ? (
+                  <p className="mt-[8px] flex flex-wrap items-baseline gap-x-[4px] text-[14px] leading-[18px]">
+                    <span>Performance:</span>
+                    <span className="font-bold" style={{ color: performanceColor }}>{formatPerformance(basket.performancePercent)}</span>
+                    <span className="text-[var(--uc-text-muted)]">· 1Y</span>
+                  </p>
                 ) : null}
               </div>
             </section>

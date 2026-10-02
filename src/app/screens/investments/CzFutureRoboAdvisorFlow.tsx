@@ -27,7 +27,7 @@ import {
   type InvestmentPortfolioTabOption,
   type InvestmentSortId,
 } from "@/app/config/investmentsPortfolioConfig";
-import type { InvestmentBasketFund } from "@/app/config/investmentBasketFundsConfig";
+import { formatInvestmentBasketPerformance, type InvestmentBasketFund } from "@/app/config/investmentBasketFundsConfig";
 import introImage from "@/assets/investments/robo-advisor-intro.png";
 import amundiLogo from "@/assets/investments/funds/fund-amundi-logo.png";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
@@ -473,13 +473,19 @@ function BasketPortfolioCard({
   dragHandlers: DragCarouselHandlers;
 }) {
   const basket = portfolio.basketFund!;
+  const performancePercent = basket.performancePercent;
+  const performanceColor = performancePercent === undefined || performancePercent === 0
+    ? "var(--uc-text)"
+    : performancePercent > 0
+      ? "var(--uc-green-olive)"
+      : "var(--uc-status-red)";
 
   return (
     <article
       {...dragHandlers}
       className={cn(
         "w-[299px] shrink-0 snap-start rounded-[8px] border bg-[var(--uc-surface)] p-[15px]",
-        selected ? "border-[2px] border-[var(--uc-action)]" : "border-[var(--uc-text)]",
+        selected ? "border-[2px] border-[var(--uc-action)]" : "border-[var(--uc-border-muted)]",
       )}
     >
       <button
@@ -487,29 +493,32 @@ function BasketPortfolioCard({
         type="button"
         role="radio"
         aria-checked={selected}
-        aria-label={`Choose ${basket.title}`}
+        aria-label={`Choose ${basket.title}${performancePercent !== undefined ? `, 1-year performance ${formatInvestmentBasketPerformance(performancePercent)}` : ""}`}
         onClick={onSelect}
         className="w-full text-left"
       >
-        <div className="flex items-center gap-[10px]">
+        <div className="flex min-h-[36px] items-center justify-between gap-[8px]">
           <BrandLogo logoId={basket.logoId} size={32} />
-          {basket.contributionType === "RECURRENT" ? (
-            <span className="uc-type-n6-strong rounded-[4px] bg-[var(--uc-neutral-100)] px-[7px] py-[4px] text-[var(--uc-text)]">
-              REGULAR
-            </span>
+          {performancePercent !== undefined ? (
+            <div className="flex flex-col items-end justify-center rounded-[4px] bg-[var(--uc-surface-muted)] px-[8px] py-[3px]">
+              <span className="text-[10px] font-bold uppercase leading-[11px] tracking-[0.25px] text-[var(--uc-text-muted)]">1Y performance</span>
+              <span className="text-[16px] font-bold leading-[18px] tabular-nums" style={{ color: performanceColor }}>
+                {formatInvestmentBasketPerformance(performancePercent)}
+              </span>
+            </div>
           ) : null}
         </div>
-        <h2 className={cn("uc-type-h2 mt-[12px] line-clamp-2 min-h-[48px] whitespace-pre-line", selected ? "text-[var(--uc-action)]" : "text-[var(--uc-text)]")}>
+        <h2 className={cn("uc-type-h2 mt-[8px] line-clamp-2 min-h-[48px] whitespace-pre-line", selected ? "text-[var(--uc-action)]" : "text-[var(--uc-text)]")}>
           {basket.roboCarouselTitle ?? basket.title}
         </h2>
-        <p className="uc-type-n5 mt-[7px] line-clamp-3 min-h-[34px] leading-[17px] text-[var(--uc-text)]">{basket.description}</p>
+        <p className="uc-type-n5 mt-[5px] line-clamp-3 min-h-[51px] leading-[17px] text-[var(--uc-text)]">{basket.description}</p>
       </button>
       <button
         {...dragHandlers}
         type="button"
         aria-label={`Details for ${basket.title}`}
         onClick={onDetails}
-        className="mt-[4px] flex w-full items-center justify-center gap-[4px] py-[8px] text-[14px] font-bold text-[var(--uc-action)]"
+        className="mt-[2px] flex w-full items-center justify-center gap-[4px] py-[6px] text-[14px] font-bold text-[var(--uc-action)]"
       >
         Details
         <AppIcon name="chevron-link" size={20} color="var(--uc-action)" />
@@ -1821,12 +1830,10 @@ export default function CzFutureRoboAdvisorFlow({
   }
 
   if (step === "portfolio") {
-    const oneOffCount = basketPortfolios.filter((candidate) => candidate.basketFund?.contributionType === "ONE OFF").length;
-    const regularCount = basketPortfolios.filter((candidate) => candidate.basketFund?.contributionType === "RECURRENT").length;
     return (
       <RoboScreen
         title="Available portfolios"
-        description={`Based on your ${ROBO_INVESTOR_PROFILE_LABELS.moderate} investor profile and selected ${resolvedHorizon}-year horizon, ${basketPortfolios.length} basket funds are available: ${oneOffCount} one-off and ${regularCount} regular. Choose one to review its contents.`}
+        description={`Based on your ${ROBO_INVESTOR_PROFILE_LABELS.moderate} investor profile and selected ${resolvedHorizon}-year horizon, these baskets are a suitable match. Choose one to review its contents.`}
         onBack={goBackByStep}
         onClose={onExit}
         dataScreen="portfolio"
