@@ -5,6 +5,25 @@ export interface CoverCrop {
   sh: number
 }
 
+/** Simulates centered cover fit of the finished crop on another screen. */
+export function getDevicePreviewCrop(reference: CoverCrop, width: number, height: number): CoverCrop {
+  const inner = getCoverCrop(reference.sw, reference.sh, width, height, 50, 50, 1)
+  return { ...inner, sx: reference.sx + inner.sx, sy: reference.sy + inner.sy }
+}
+
+export function cropToImageStyle(
+  imageWidth: number,
+  imageHeight: number,
+  width: number,
+  height: number,
+  crop: CoverCrop,
+) {
+  const base = getCoverCrop(imageWidth, imageHeight, width, height, 50, 50, 1)
+  const horizontal = imageWidth - crop.sw > 0.001 ? (crop.sx / (imageWidth - crop.sw)) * 100 : 50
+  const vertical = imageHeight - crop.sh > 0.001 ? (crop.sy / (imageHeight - crop.sh)) * 100 : 50
+  return { position: `${Number(horizontal.toFixed(6))}% ${Number(vertical.toFixed(6))}%`, zoom: base.sw / crop.sw }
+}
+
 /** Matches object-cover + object-position, then scale around that position. */
 export function getCoverCrop(
   imageWidth: number,
