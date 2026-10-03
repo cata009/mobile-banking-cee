@@ -105,8 +105,8 @@ interface DevicePreviewContextValue {
 
 const DevicePreviewContext = createContext<DevicePreviewContextValue | null>(null);
 
-export function DevicePreviewProvider({ children }: { children: ReactNode }) {
-  const [profileId, setProfileIdState] = useState<DevicePreviewProfileId>('iphone-16');
+export function DevicePreviewProvider({ children, initialProfileId = 'iphone-16' }: { children: ReactNode; initialProfileId?: DevicePreviewProfileId }) {
+  const [profileId, setProfileIdState] = useState<DevicePreviewProfileId>(initialProfileId);
   const [orientation, setOrientation] = useState<DevicePreviewOrientation>('portrait');
   const profile = DEVICE_PREVIEW_PROFILES.find((item) => item.id === profileId) ?? DEFAULT_DEVICE_PREVIEW_PROFILE;
 

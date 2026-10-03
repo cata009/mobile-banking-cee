@@ -40,7 +40,7 @@ const TOOLS: readonly ToolMeta[] = [
     label: "Prelogin picture tester",
     icon: "camera",
     description:
-      "Position and crop your image in the active and inactive prelogin screens, then download a PNG ready for the final app.",
+      "Simulate prelogin images and text, check readability across phone sizes, and download the finished crop with an implementation package.",
     audience: "Design · Local market teams · QA",
   },
   {

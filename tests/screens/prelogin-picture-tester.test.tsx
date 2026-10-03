@@ -64,6 +64,19 @@ function upload(name = 'portrait.jpg', type = 'image/jpeg') {
 }
 
 describe('prelogin picture tester', () => {
+  it('edits real screen copy and keeps each language draft separate', () => {
+    openTester()
+    fireEvent.click(screen.getByRole('button', { name: 'Text' }))
+    fireEvent.change(screen.getByLabelText('Active title'), { target: { value: 'My custom welcome' } })
+    expect(within(screen.getByLabelText('Active app preview')).getByText('My custom welcome')).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Preview language'), { target: { value: 'local' } })
+    expect(screen.getByLabelText('Active title')).not.toHaveValue('My custom welcome')
+    fireEvent.change(screen.getByLabelText('Preview language'), { target: { value: 'en' } })
+    expect(screen.getByLabelText('Active title')).toHaveValue('My custom welcome')
+    fireEvent.click(screen.getByRole('button', { name: 'Reset texts' }))
+    expect(within(screen.getByLabelText('Active app preview')).queryByText('My custom welcome')).not.toBeInTheDocument()
+  })
+
   it('enables crop download only after an image finishes decoding', () => {
     openTester()
     expect(screen.getByRole('button', { name: 'Download cropped image' })).toBeDisabled()

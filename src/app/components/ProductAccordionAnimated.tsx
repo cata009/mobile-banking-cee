@@ -74,18 +74,24 @@ interface ProductAccordionAnimatedProps {
   welcomeText: string;
   products: Product[];
   findOutMoreText: string;
+  expandedProductId?: string;
 }
 
-export default function ProductAccordionAnimated({ welcomeText, products, findOutMoreText }: ProductAccordionAnimatedProps) {
+export default function ProductAccordionAnimated({ welcomeText, products, findOutMoreText, expandedProductId }: ProductAccordionAnimatedProps) {
   // Generate initial order based on number of products
   const initialOrder = Array.from({ length: products.length }, (_, i) => i);
   const [productOrder, setProductOrder] = useState(initialOrder);
+  const expandedIndex = products.findIndex((product) => product.id === expandedProductId);
 
   // Reset product order when products change (e.g., country switch)
   useEffect(() => {
     const newOrder = Array.from({ length: products.length }, (_, i) => i);
+    if (expandedIndex > 0) {
+      newOrder.splice(expandedIndex, 1);
+      newOrder.unshift(expandedIndex);
+    }
     setProductOrder(newOrder);
-  }, [products.length]);
+  }, [products.length, expandedIndex]);
 
   const handleProductClick = (clickedIndex: number) => {
     const positionInOrder = productOrder.indexOf(clickedIndex);

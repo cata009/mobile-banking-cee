@@ -15,6 +15,7 @@ interface PreLoginActiveScreenProps {
   backgroundImageUrl?: string;
   backgroundPosition?: string;
   backgroundZoom?: number;
+  textOverrides?: Readonly<Record<string, string>>;
 }
 
 /**
@@ -38,8 +39,10 @@ export default function PreLoginActiveScreen({
   backgroundImageUrl,
   backgroundPosition,
   backgroundZoom = 1,
+  textOverrides,
 }: PreLoginActiveScreenProps) {
-  const { t, language } = useLanguage();
+  const { t: translate, language } = useLanguage();
+  const t = (key: string) => textOverrides?.[key] ?? translate(key);
   const [showFaceId, setShowFaceId] = useState(false);
 
 
@@ -58,7 +61,7 @@ export default function PreLoginActiveScreen({
   };
 
   return (
-    <div className="w-full h-full relative bg-[var(--uc-static-black)]">
+    <div className="w-full h-full relative bg-[var(--uc-static-black)]" data-prelogin-screen="active">
       {/* Background Image */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <img 
@@ -71,6 +74,7 @@ export default function PreLoginActiveScreen({
       
       {/* Contrast Gradient Overlay - for text visibility */}
       <div 
+        data-prelogin-overlay="top"
         className="absolute top-0 left-0 w-full z-10"
         style={{
           height: '75vh', // Adaptive height that reaches bottom section
@@ -82,7 +86,7 @@ export default function PreLoginActiveScreen({
       <div className="absolute inset-0 z-20 flex flex-col">
         {/* Header - Logo + Language Selector */}
         <div className="pt-[70px] px-[24px] pb-[10px] flex items-center justify-between">
-          <UniCreditLogo className="h-[24px] w-auto" />
+          <div data-prelogin-brand="true"><UniCreditLogo className="h-[24px] w-auto" /></div>
           <LanguageSelectorButton onClick={onLanguageClick} language={language} />
         </div>
         
@@ -104,6 +108,7 @@ export default function PreLoginActiveScreen({
         
         {/* Bottom Section - Login Button + Navigation with gradient background */}
         <div 
+          data-prelogin-overlay="bottom"
           className="mt-auto w-full flex flex-col items-start px-[24px] py-[32px] gap-[24px]"
           style={{
             background: 'linear-gradient(180deg, color-mix(in srgb, var(--uc-static-black) 0%, transparent) 0%, var(--uc-static-black) 5.95%)'

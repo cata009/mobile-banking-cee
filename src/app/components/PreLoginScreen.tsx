@@ -15,6 +15,8 @@ interface PreLoginScreenProps {
   backgroundImageUrl?: string;
   backgroundPosition?: string;
   backgroundZoom?: number;
+  textOverrides?: Readonly<Record<string, string>>;
+  previewExpandedProductId?: string;
 }
 
 export default function PreLoginScreen({
@@ -23,8 +25,11 @@ export default function PreLoginScreen({
   backgroundImageUrl,
   backgroundPosition,
   backgroundZoom = 1,
+  textOverrides,
+  previewExpandedProductId,
 }: PreLoginScreenProps) {
-  const { t, language, translations } = useLanguage();
+  const { t: translate, language, translations } = useLanguage();
+  const t = (key: string) => textOverrides?.[key] ?? translate(key);
   const country = useCountry();
   
   // Check if current country has product accordion
@@ -38,17 +43,17 @@ export default function PreLoginScreen({
     if (productTranslation && typeof productTranslation === 'object' && 'title' in productTranslation) {
       return {
         ...product,
-        title: productTranslation.title,
-        description: productTranslation.description,
+        title: textOverrides?.[`products.${product.id}.title`] ?? productTranslation.title,
+        description: textOverrides?.[`products.${product.id}.description`] ?? productTranslation.description,
       };
     }
     
-    return product;
+    return { ...product, title: textOverrides?.[`products.${product.id}.title`] ?? product.title, description: textOverrides?.[`products.${product.id}.description`] ?? product.description };
   });
 
 
   return (
-    <div className="w-full h-full relative bg-[var(--uc-static-black)]">
+    <div className="w-full h-full relative bg-[var(--uc-static-black)]" data-prelogin-screen="inactive">
       {/* Background Image */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <img 
@@ -63,12 +68,13 @@ export default function PreLoginScreen({
       <div className="absolute inset-0 z-20 flex flex-col">
         {/* Header - Logo + Language Selector */}
         <div className="pt-[70px] px-[24px] pb-[10px] flex items-center justify-between">
-          <UniCreditLogo className="h-[24px] w-auto" />
+          <div data-prelogin-brand="true"><UniCreditLogo className="h-[24px] w-auto" /></div>
           <LanguageSelectorButton onClick={onLanguageClick} language={language} />
         </div>
         
         {/* Main Content - Bottom section with gradient background */}
         <div 
+          data-prelogin-overlay="bottom"
           className={`mt-auto w-full flex flex-col items-start px-[24px] py-[32px] ${showProductAccordion ? 'gap-[24px]' : 'gap-[32px]'}`}
           style={{
             background: 'linear-gradient(180deg, color-mix(in srgb, var(--uc-static-black) 0%, transparent) 0%, var(--uc-static-black) 5.95%)'
@@ -77,6 +83,7 @@ export default function PreLoginScreen({
           {/* ======== COUNTRIES WITH PRODUCT ACCORDION ======== */}
           {showProductAccordion ? (
             <ProductAccordionAnimated 
+              expandedProductId={previewExpandedProductId}
               welcomeText={t('preLogin.welcome')} 
               products={translatedProducts}
               findOutMoreText={t('products.findOutMore')}
