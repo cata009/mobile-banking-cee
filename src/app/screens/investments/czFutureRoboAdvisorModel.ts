@@ -144,15 +144,15 @@ export const ROBO_GOAL_TYPES = [
 ] as const;
 
 const ROBO_GOAL_NAME_SUGGESTIONS: Readonly<Record<string, readonly string[]>> = {
-  "General build-up wealth": ["Build a brighter future", "Make my money work", "My next big opportunity"],
-  "Protection for inflation": ["Keep my savings strong", "Protect my purchasing power", "Future-proof my savings"],
-  "Saving for unforeseen circumstances": ["Peace of mind", "My safety net", "Ready for the unexpected"],
-  "Saving for a major purchase": ["My dream home", "My next car", "My next big purchase"],
-  Retirement: ["Retire on my terms", "A brighter retirement", "My future freedom"],
+  "General build-up wealth": ["Bright future", "Make money work", "My next opportunity"],
+  "Protection for inflation": ["Keep savings strong", "Protect my savings", "Future-proof savings"],
+  "Saving for unforeseen circumstances": ["Peace of mind", "My safety net", "Ready for surprises"],
+  "Saving for a major purchase": ["My dream home", "My next car", "Big purchase"],
+  Retirement: ["Retire on my terms", "Brighter retirement", "Future freedom"],
 };
 
 export function getRoboGoalNameSuggestions(goalType: string): readonly string[] {
-  return ROBO_GOAL_NAME_SUGGESTIONS[goalType] ?? ["A brighter future", "Make my money work", "My next big opportunity"];
+  return ROBO_GOAL_NAME_SUGGESTIONS[goalType] ?? ["Bright future", "Make money work", "My next opportunity"];
 }
 
 export const ROBO_STRATEGIES: readonly RoboStrategy[] = [

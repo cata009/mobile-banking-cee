@@ -75,22 +75,6 @@ export const INITIAL_CZ_ROBO_GOALS: readonly RoboExistingGoal[] = [
     endDate: "15 Feb 2027",
     portfolioId: "balanced-core-portfolio",
   },
-  {
-    id: "goal-5-inflation",
-    name: "Keep pace with inflation",
-    purpose: "Protection for inflation",
-    status: "ACTIVE",
-    currentInteger: "88 900",
-    currentDecimals: ",00 CZK",
-    returnLabel: "-11 100,00 CZK (-1,36%)",
-    returnTone: "negative",
-    targetInteger: "100 000",
-    targetDecimals: ",00 CZK",
-    progress: 89,
-    startDate: "15 Feb 2025",
-    endDate: "15 Feb 2027",
-    portfolioId: "sustainable-balanced-portfolio",
-  },
 ] as const;
 
 function GoalStatus({ status }: { status: RoboGoalStatus }) {

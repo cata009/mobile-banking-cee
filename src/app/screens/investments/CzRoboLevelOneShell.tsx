@@ -37,14 +37,14 @@ export default function CzRoboLevelOneShell({
         showHelp
         onHelpClick={onHelpClick}
       />
-      <div className="mt-[16px] min-h-0 flex-1 overflow-hidden rounded-t-[24px] bg-[var(--uc-surface)] shadow-[0_-8px_20px_rgba(0,0,0,0.045)]">
+      <div className="mt-[8px] min-h-0 flex-1 overflow-hidden rounded-t-[24px] bg-[var(--uc-surface)] shadow-[0_-8px_20px_rgba(0,0,0,0.045)]">
         <div
           ref={scrollRef}
           className="h-full min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide"
           onScroll={onScroll}
           style={bottomInset > 0 ? { paddingBottom: bottomInset } : undefined}
         >
-          <h1 className="uc-type-h1 px-[16px] pb-[8px] pt-[24px] text-[var(--uc-text)]">{title}</h1>
+          <h1 className="uc-type-h1 px-[16px] pb-[8px] pt-[16px] text-[var(--uc-text)]">{title}</h1>
           {children}
         </div>
       </div>

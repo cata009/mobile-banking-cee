@@ -21,8 +21,10 @@ import {
   INVESTMENT_PERIODS,
   buildInvestmentChartPoints,
   type InvestmentCatalogSecurity,
+  type InvestmentContributionType,
   type InvestmentHistoryTransaction,
   type InvestmentPeriodId,
+  type InvestmentProductType,
 } from "@/app/config/investmentsPortfolioConfig";
 import { getCountryConfig } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
@@ -43,6 +45,7 @@ interface InvestmentSecurityListScreenProps extends SharedProps {
   onSelectBasketFund?: (basket: InvestmentBasketFund) => void;
   closeModuleButton?: boolean;
   czRoboAmountStyle?: boolean;
+  enableQuickFilters?: boolean;
   onSelect: (security: InvestmentCatalogSecurity) => void;
 }
 
@@ -51,6 +54,7 @@ interface InvestmentSecurityDetailScreenProps extends SharedProps {
   transactions?: readonly InvestmentHistoryTransaction[];
   onBack: () => void;
   czRoboProductDetail?: boolean;
+  comfortablePeriodTargets?: boolean;
   onHistoryClick?: (filterByTitle?: string) => void;
   onSeeMoreTransactions?: () => void;
   onSellClick?: () => void;
@@ -68,6 +72,12 @@ const BASKET_CARD_GAP = 16;
 const BASKET_CARD_STEP = BASKET_CARD_WIDTH + BASKET_CARD_GAP;
 const BASKET_CAROUSEL_EDGE_GUTTER = 16;
 const ROBO_RECOMMENDED_BASKETS = getRecommendedInvestmentBaskets("moderate-v2");
+const QUICK_FILTER_PRODUCT_TYPES: readonly InvestmentProductType[] = ["Fund", "Stock", "Bond"];
+const QUICK_FILTER_PRODUCT_LABELS: Record<InvestmentProductType, string> = {
+  Fund: "Funds",
+  Stock: "Stocks",
+  Bond: "Bonds",
+};
 
 function formatMoney(value: number, country: CountryId, currency: string, hidden: boolean, digits = 2) {
   return formatInvestmentMoney(value, country, currency, hidden, digits, digits);
@@ -75,6 +85,14 @@ function formatMoney(value: number, country: CountryId, currency: string, hidden
 
 function formatPercent(value: number) {
   return `${value > 0 ? "+" : value < 0 ? "-" : ""}${Math.abs(value).toFixed(2).replace(".", ",")}%`;
+}
+
+function quickFilterChipClass(selected: boolean) {
+  return `min-h-[36px] rounded-[4px] px-[12px] py-[8px] text-[13px] font-bold leading-[17px] transition-colors ${
+    selected
+      ? "border border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
+      : "bg-[var(--uc-neutral-100)] text-[var(--uc-text)]"
+  }`;
 }
 
 function formatTransactionDate(value: string, country: CountryId) {
@@ -143,43 +161,59 @@ export function InvestmentSecurityListScreen({
   onSelectBasketFund,
   closeModuleButton = false,
   czRoboAmountStyle = false,
+  enableQuickFilters = false,
   onSelect,
 }: InvestmentSecurityListScreenProps) {
   const basketFundsAvailable = country === "CZ";
+  const quickFiltersEnabled = enableQuickFilters && basketFundsAvailable;
   const [query, setQuery] = useState("");
   const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(64);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [ownedOnly, setOwnedOnly] = useState(false);
   const [currency, setCurrency] = useState<string | null>(null);
   const [catalogueTab, setCatalogueTab] = useState<"all" | "regular">("all");
+  const [productTypeFilter, setProductTypeFilter] = useState<InvestmentProductType | null>(null);
+  const [contributionTypeFilter, setContributionTypeFilter] = useState<InvestmentContributionType | null>(null);
   const [basketFundsOpen, setBasketFundsOpen] = useState(false);
   const [standaloneBasketFund, setStandaloneBasketFund] = useState<InvestmentBasketFund | null>(null);
   const currencies = useMemo(() => [...new Set(securities.map((item) => item.instrumentCurrency))], [securities]);
-  const filtersActive = ownedOnly || currency !== null;
+  const availableProductTypes = useMemo(() => {
+    const presentTypes = new Set(securities.map((item) => item.productType));
+    return QUICK_FILTER_PRODUCT_TYPES.filter((productType) => presentTypes.has(productType));
+  }, [securities]);
+  const filtersActive = ownedOnly || currency !== null || (quickFiltersEnabled && (productTypeFilter !== null || contributionTypeFilter !== null));
+  const effectiveContributionType = quickFiltersEnabled
+    ? contributionTypeFilter
+    : catalogueTab === "regular"
+      ? "RECURRENT"
+      : null;
   const visibleSecurities = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return securities.filter((security) => {
-      if (basketFundsAvailable && catalogueTab === "regular" && security.contributionType !== "RECURRENT") return false;
+      if (effectiveContributionType && security.contributionType !== effectiveContributionType) return false;
+      if (quickFiltersEnabled && productTypeFilter && security.productType !== productTypeFilter) return false;
       if (ownedOnly && !security.owned) return false;
       if (currency && security.instrumentCurrency !== currency) return false;
       return !normalizedQuery || `${security.title} ${security.productId}`.toLowerCase().includes(normalizedQuery);
     });
-  }, [basketFundsAvailable, catalogueTab, currency, ownedOnly, query, securities]);
+  }, [currency, effectiveContributionType, ownedOnly, productTypeFilter, query, quickFiltersEnabled, securities]);
   const visibleBaskets = useMemo(() => {
     if (!basketFundsAvailable) return [];
+    if (quickFiltersEnabled && productTypeFilter && productTypeFilter !== "Fund") return [];
     const normalizedQuery = query.trim().toLowerCase();
     return ROBO_RECOMMENDED_BASKETS.filter((basket) => {
-      if (catalogueTab === "regular" && basket.contributionType !== "RECURRENT") return false;
+      if (effectiveContributionType && basket.contributionType !== effectiveContributionType) return false;
       return !normalizedQuery || `${basket.title} ${basket.description}`.toLowerCase().includes(normalizedQuery);
     });
-  }, [basketFundsAvailable, catalogueTab, query]);
+  }, [basketFundsAvailable, effectiveContributionType, productTypeFilter, query, quickFiltersEnabled]);
   const carouselBaskets = visibleBaskets.slice(0, 5);
 
   const clearFilters = () => {
     setOwnedOnly(false);
     setCurrency(null);
+    setProductTypeFilter(null);
+    setContributionTypeFilter(null);
   };
-
 
   const basketCarouselRef = useRef<HTMLDivElement>(null);
 
@@ -225,6 +259,10 @@ export function InvestmentSecurityListScreen({
     onSettle: snapBasketToNearest,
   });
 
+  const showBasketFundsSection = basketFundsAvailable && (
+    !quickFiltersEnabled || productTypeFilter === null || productTypeFilter === "Fund"
+  );
+
   if (standaloneBasketFund && !onSelectBasketFund) {
     return (
       <InvestmentBasketFundDetailScreen
@@ -248,7 +286,7 @@ export function InvestmentSecurityListScreen({
 
   const securityListContent = (
     <>
-      {basketFundsAvailable ? (
+      {basketFundsAvailable && !quickFiltersEnabled ? (
         <MessagesMailboxTabs
           tabs={[
             { id: "all", label: "All products" },
@@ -267,11 +305,33 @@ export function InvestmentSecurityListScreen({
           onFilterClick={() => setFiltersOpen(true)}
           onRemoveFilters={clearFilters}
           filtersActive={filtersActive}
+          showRemoveFiltersAction={!quickFiltersEnabled}
           placeholder="Search"
         />
       </div>
 
-      {basketFundsAvailable ? (
+      {quickFiltersEnabled ? (
+        <div className="px-[16px] pb-[12px]" data-investment-quick-filters="true">
+          <div className="flex flex-wrap gap-[8px]" role="group" aria-label="Filter by product type">
+            {availableProductTypes.map((productType) => {
+              const selected = productTypeFilter === productType;
+              return (
+                <button
+                  key={productType}
+                  type="button"
+                  className={quickFilterChipClass(selected)}
+                  aria-pressed={selected}
+                  onClick={() => setProductTypeFilter(selected ? null : productType)}
+                >
+                  {QUICK_FILTER_PRODUCT_LABELS[productType]}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+
+      {showBasketFundsSection ? (
         <section className="pt-[16px]" aria-label="Basket funds">
           <SectionHeadingDivider
             title="BASKET FUNDS"
@@ -310,11 +370,19 @@ export function InvestmentSecurityListScreen({
               See all basket funds
             </LinkButton>
           </div>
-          <SectionHeadingDivider
-            title="ALL SECURITIES"
-            className="px-[24px] pt-[8px]"
-          />
+          {!quickFiltersEnabled ? (
+            <SectionHeadingDivider
+              title="ALL SECURITIES"
+              className="px-[24px] pt-[8px]"
+            />
+          ) : null}
         </section>
+      ) : null}
+      {quickFiltersEnabled ? (
+        <SectionHeadingDivider
+          title="ALL SECURITIES"
+          className="px-[24px] pt-[8px]"
+        />
       ) : null}
       <div>
         {visibleSecurities.map((security) => (
@@ -323,6 +391,7 @@ export function InvestmentSecurityListScreen({
             type="button"
             onClick={() => onSelect(security)}
             className="flex min-h-[105px] w-full items-center gap-[8px] bg-[var(--uc-surface)] p-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-focus-ring)]"
+            aria-label={quickFiltersEnabled ? `Open ${security.title}` : undefined}
             data-investment-security-row={security.id}
           >
             <BrandLogo logoId={security.logoId ?? "unicredit"} size={32} />
@@ -356,6 +425,26 @@ export function InvestmentSecurityListScreen({
 
       {filtersOpen ? (
         <BottomSheet title="Filters" onClose={() => setFiltersOpen(false)}>
+          {quickFiltersEnabled ? (
+            <>
+              <p className="pb-[8px] pt-[4px] text-[14px] font-bold text-[var(--uc-text-muted)]">INVESTMENT PLAN</p>
+              {([
+                { id: "ONE OFF", label: "One-off investments" },
+                { id: "RECURRENT", label: "Regular investments" },
+              ] as const).map((option) => (
+                <label key={option.id} className="flex min-h-[48px] items-center gap-[12px] py-[8px] text-[16px]">
+                  <input
+                    type="radio"
+                    name="investment-plan"
+                    checked={contributionTypeFilter === option.id}
+                    onChange={() => setContributionTypeFilter(option.id)}
+                    className="size-[20px] accent-[var(--uc-action)]"
+                  />
+                  {option.label}
+                </label>
+              ))}
+            </>
+          ) : null}
           <label className="flex min-h-[56px] items-center gap-[12px] border-b border-[var(--uc-border)] py-[12px] text-[16px] font-bold">
             <input type="checkbox" checked={ownedOnly} onChange={(event) => setOwnedOnly(event.target.checked)} className="size-[20px] accent-[var(--uc-action)]" />
             Products I own
@@ -407,6 +496,7 @@ export function InvestmentSecurityDetailScreen({
   amountsHidden,
   onBack,
   czRoboProductDetail = false,
+  comfortablePeriodTargets = false,
   onHistoryClick,
   onSeeMoreTransactions,
   onSellClick,
@@ -481,6 +571,7 @@ export function InvestmentSecurityDetailScreen({
               selectedPeriodId={period}
               onChange={setPeriod}
               softUnselected={czRoboProductDetail}
+              comfortableTouchTargets={comfortablePeriodTargets}
             />
           </div>
         </section>
@@ -621,7 +712,7 @@ export function InvestmentSecurityDetailScreen({
         <InvestmentDetailField label="Actual market price" value={formatMoney(marketPrice, country, security.currency, amountsHidden)} />
         <div className="px-[8px]">
           <InvestmentPortfolioChart points={chartPoints} country={country} currency={security.currency} amountsHidden={amountsHidden} />
-          <InvestmentPeriodChips periods={INVESTMENT_PERIODS.filter((item) => item.id !== "6m")} selectedPeriodId={period} onChange={setPeriod} />
+          <InvestmentPeriodChips periods={INVESTMENT_PERIODS.filter((item) => item.id !== "6m")} selectedPeriodId={period} onChange={setPeriod} comfortableTouchTargets={comfortablePeriodTargets} />
         </div>
         <InvestmentDetailField label="Product ID" value={security.productId} />
         <InvestmentDetailField label="Fund type" value={security.productType === "Fund" ? "Funds" : security.productType} />

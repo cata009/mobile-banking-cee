@@ -27,8 +27,8 @@ const DONUT_OUTER_RADIUS = DONUT_RADIUS + DONUT_STROKE_WIDTH / 2;
 /**
  * The donut visually shows at most this many slices. Any further distribution
  * rows remain in the list below but are not drawn on the donut, so a 5-row
- * distribution (e.g. Fund/Bond/Stock/ETF/Money market) renders 4 slices and a
- * grey remainder instead of cramming five thin labels around the chart.
+ * distribution (e.g. Funds/Bonds/Stocks) renders clear slices without
+ * cramming narrow labels around the chart.
  */
 const MAX_VISIBLE_SLICES = 4;
 

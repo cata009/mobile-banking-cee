@@ -17,6 +17,7 @@ export interface InfoBannerProps {
   description?: string;
   actionLabel?: string;
   actionIconName?: IconName;
+  actionIconSize?: number;
   onActionClick?: () => void;
   iconName?: IconName;
   iconColor?: string;
@@ -36,6 +37,7 @@ export default function InfoBanner({
   description,
   actionLabel,
   actionIconName,
+  actionIconSize = 16,
   onActionClick,
   iconName = "info-circle",
   iconColor = "var(--uc-text)",
@@ -76,7 +78,7 @@ export default function InfoBanner({
             className="uc-type-n5-strong inline-flex items-center gap-[4px] self-start leading-[15px] text-[var(--uc-action)]"
           >
             {actionLabel}
-            {actionIconName ? <AppIcon name={actionIconName} size={16} color="var(--uc-action)" aria-hidden="true" /> : null}
+            {actionIconName ? <AppIcon name={actionIconName} size={actionIconSize} color="var(--uc-action)" aria-hidden="true" /> : null}
           </button>
         )}
       </div>

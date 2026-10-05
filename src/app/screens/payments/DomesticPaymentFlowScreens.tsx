@@ -89,6 +89,17 @@ function DetailRow({
   );
 }
 
+function getMccDisplayName(value?: string) {
+  const mcc = value?.trim();
+  if (!mcc) return undefined;
+
+  const localizedName = mcc.match(/^\d{4}\s*[·•–—-]\s*(.+)$/)?.[1]?.trim();
+  if (localizedName) return localizedName;
+
+  // A numeric MCC without a description is not customer-facing display text.
+  return /^\d{4}$/.test(mcc) ? undefined : mcc;
+}
+
 function FlowField({
   children,
   minHeight,
@@ -221,6 +232,7 @@ export function TransactionDetailScreen({
     () => createTransactionDetailData(transaction, country, product),
     [country, product, transaction],
   );
+  const merchantCategoryName = getMccDisplayName(merchantEnrichment?.mcc);
   const currencyLabel = detail.amount.split(" ").slice(-1)[0];
   const isPending = transaction.status === "Pending";
   const cardUsed = isPhysicalCard(product)
@@ -391,7 +403,7 @@ export function TransactionDetailScreen({
                     </motion.div>
                   ) : null}
                 </AnimatePresence>
-                {merchantEnrichment?.mcc ? <DetailRow label="Merchant Category Code (MCC)" value={merchantEnrichment.mcc} /> : null}
+                {merchantCategoryName ? <DetailRow label="Merchant Category Code (MCC)" value={merchantCategoryName} /> : null}
               </>
             ) : (
               <>

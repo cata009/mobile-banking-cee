@@ -11,6 +11,7 @@ import { useProductData } from '@/app/state/demoStore';
 import { convertCurrency, getCountryCurrency, roundMoney } from '@/data/exchangeRates';
 import { formatMaskedCardNumber } from '@/app/utils/cardNumber';
 import { formatEvo2027Amount } from '@/app/utils/evo2027Formatting';
+import { formatCzLocalAccountNumber } from '@/data/czechDomesticAccount';
 import type { CountryId, ProductCountKey, ProductCounts, ReleaseId } from '@/app/state/demoTypes';
 
 function formatProductIban(country: string, productId: string, baseNumber: string): string {
@@ -21,18 +22,6 @@ function formatProductIban(country: string, productId: string, baseNumber: strin
   }
   const checkDigits = String((hash % 89) + 10);
   return `${prefix}${checkDigits}BACX${baseNumber}`;
-}
-
-/**
- * The Czech local account number: nine digits, then the bank code.
- *
- * CZ Evo 2027 prints current accounts this way, but savings, deposits and
- * portfolios fell through to the IBAN builder — so the same customer saw
- * 123456789/2700 on one tab and CZ78BACX5678901234567801 on the next.
- */
-function formatCzLocalAccountNumber(baseNumber: string): string {
-  const digits = baseNumber.replace(/D/g, '');
-  return `${digits.slice(-9).padStart(9, '0')}/2700`;
 }
 
 type ProductCountDefinition = {

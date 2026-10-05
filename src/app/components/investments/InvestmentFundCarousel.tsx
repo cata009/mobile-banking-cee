@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
 
+import AccountCarouselIndicator from "@/app/components/accounts/AccountCarouselIndicator";
 import InvestmentsFundBanner from "@/app/components/investments/InvestmentsFundBanner";
+import { useDragCarousel } from "@/hooks/useDragCarousel";
 import {
   INVESTMENT_FUND_COLLECTIONS,
   type InvestmentFundCollectionId,
@@ -14,6 +16,7 @@ export default function InvestmentFundCarousel({ onSelectCollection }: Investmen
   const carouselRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<Array<HTMLDivElement | null>>([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const { dragHandlers, isDragging } = useDragCarousel({ carouselRef });
 
   const updateActiveSlide = () => {
     const carousel = carouselRef.current;
@@ -37,64 +40,67 @@ export default function InvestmentFundCarousel({ onSelectCollection }: Investmen
   };
 
   const goToSlide = (index: number) => {
-    slideRefs.current[index]?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    const carousel = carouselRef.current;
+    const slide = slideRefs.current[index];
+    if (!carousel || !slide) return;
+
+    const carouselRect = carousel.getBoundingClientRect();
+    const slideRect = slide.getBoundingClientRect();
+    const maxScrollLeft = Math.max(0, carousel.scrollWidth - carousel.clientWidth);
+    const nextScrollLeft = Math.min(
+      maxScrollLeft,
+      Math.max(0, carousel.scrollLeft + slideRect.left - carouselRect.left),
+    );
+    carousel.scrollTo({ left: nextScrollLeft, behavior: "smooth" });
   };
 
   return (
     <div className="mt-[16px]">
-      <div
-        ref={carouselRef}
-        onScroll={updateActiveSlide}
-        className="relative flex snap-x snap-mandatory gap-[12px] overflow-x-auto overscroll-x-contain px-[24px] pb-[4px] scrollbar-hide"
-        role="region"
-        aria-label="Investment fund collections"
-        aria-roledescription="carousel"
-        data-investment-fund-carousel="true"
-      >
-        {INVESTMENT_FUND_COLLECTIONS.map((collection, index) => (
-          <div
-            key={collection.id}
-            ref={(element) => {
-              slideRefs.current[index] = element;
-            }}
-            className="w-[calc(100%_-_52px)] shrink-0 snap-start"
-            role="group"
-            aria-roledescription="slide"
-            aria-label={`${collection.title}, ${index + 1} of ${INVESTMENT_FUND_COLLECTIONS.length}`}
-          >
-            <InvestmentsFundBanner
-              title={collection.title}
-              description={collection.subtitle}
-              actionLabel="FIND OUT MORE"
-              variant={collection.bannerVariant}
-              onClick={() => onSelectCollection(collection.id)}
-            />
-          </div>
-        ))}
+      <div className="pl-[24px]">
+        <div
+          ref={carouselRef}
+          {...dragHandlers}
+          onScroll={updateActiveSlide}
+          className={`relative flex snap-x snap-mandatory gap-[12px] overflow-x-auto overscroll-x-contain pr-[24px] pb-[4px] scrollbar-hide select-none touch-pan-y ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+          style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+          role="region"
+          aria-label="Investment fund collections"
+          aria-roledescription="carousel"
+          data-investment-fund-carousel="true"
+        >
+          {INVESTMENT_FUND_COLLECTIONS.map((collection, index) => (
+            <div
+              key={collection.id}
+              ref={(element) => {
+                slideRefs.current[index] = element;
+              }}
+              className="w-[calc(100%_-_52px)] shrink-0 snap-start"
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${collection.title}, ${index + 1} of ${INVESTMENT_FUND_COLLECTIONS.length}`}
+            >
+              <InvestmentsFundBanner
+                title={collection.title}
+                description={collection.subtitle}
+                actionLabel="FIND OUT MORE"
+                dragHandlers={dragHandlers}
+                variant={collection.bannerVariant}
+                onClick={() => onSelectCollection(collection.id)}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div
-        className="mt-[12px] flex items-center justify-center gap-[8px]"
-        role="group"
-        aria-label="Choose a fund collection"
-      >
-        {INVESTMENT_FUND_COLLECTIONS.map((collection, index) => (
-          <button
-            key={collection.id}
-            type="button"
-            onClick={() => goToSlide(index)}
-            className="grid min-h-[24px] min-w-[24px] place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
-            aria-label={`Show ${collection.title}`}
-            aria-current={activeIndex === index ? "true" : undefined}
-          >
-            <span
-              className={`block h-[8px] rounded-full transition-[width,background-color] duration-200 ${
-                activeIndex === index ? "w-[24px] bg-[var(--uc-action)]" : "w-[8px] bg-[var(--uc-border-muted)]"
-              }`}
-              aria-hidden="true"
-            />
-          </button>
-        ))}
+      <div className="mt-[4px]" role="group" aria-label="Choose a fund collection">
+        <AccountCarouselIndicator
+          count={INVESTMENT_FUND_COLLECTIONS.length}
+          activeIndex={activeIndex}
+          itemLabel="fund collection"
+          itemLabels={INVESTMENT_FUND_COLLECTIONS.map((collection) => collection.title)}
+          withBackdropBlur={false}
+          onSelect={goToSlide}
+        />
       </div>
 
       <span className="sr-only" aria-live="polite">

@@ -123,9 +123,10 @@ const CZ_ROBO_NAV_LABEL_OVERRIDES: Partial<Record<NavItem, string>> = {
 };
 
 const CZ_ROBO_NAV_ICON_OVERRIDES: Partial<Record<NavItem, IconName>> = {
-  home: "chart-donut",
-  analytics: "investment-trend-up",
-  payments: "invest-action",
+  home: "robo-nav-portfolio",
+  analytics: "robo-nav-explore",
+  investments: "robo-nav-explore",
+  payments: "robo-nav-invest",
   products: "investment-history",
 };
 
@@ -425,6 +426,17 @@ export default function InvestmentsPortfolioScreen({
   );
   const investmentProducts = useMemo(() => getInvestmentProducts(allProducts), [allProducts]);
   const securities = useMemo(() => buildInvestmentSecurities(investmentProducts, country), [country, investmentProducts]);
+  const securityAccountOptions = useMemo(() => {
+    const options = new Map<string, { id: string; name: string; currency: string }>();
+    securities.filter((security) => security.status === "active").forEach((security) => {
+      options.set(security.securityAccountId, {
+        id: security.securityAccountId,
+        name: security.securityAccountName,
+        currency: security.securityAccountCurrency,
+      });
+    });
+    return [...options.values()];
+  }, [securities]);
   const securityCatalog = useMemo(
     () => buildInvestmentSecurityCatalog(securities, country, {
       includeRoboGoals: roboAdvisorEnabled,
@@ -669,6 +681,7 @@ export default function InvestmentsPortfolioScreen({
       <InvestmentBuyOrderFlow
         security={selectedSecurity}
         accounts={currentAccounts}
+        securityAccounts={securityAccountOptions}
         country={country}
         amountsHidden={amountsHidden}
         initialDraft={buyOrderDraft}
@@ -711,6 +724,7 @@ export default function InvestmentsPortfolioScreen({
         country={country}
         amountsHidden={amountsHidden}
         czRoboProductDetail={showBottomNavigation}
+        comfortablePeriodTargets={showBottomNavigation || isEvo2027Release}
         onBack={() => selectSecurity(null)}
         onHistoryClick={() => onHistoryClick?.(selectedSecurity.title)}
         onSeeMoreTransactions={() => {
@@ -757,6 +771,9 @@ export default function InvestmentsPortfolioScreen({
     return (
       <CzFutureRoboAdvisorFlow
         initialGoal={roboAdvisorView === "detail" ? selectedRoboGoal ?? undefined : undefined}
+        currentAccounts={currentAccounts}
+        country={country}
+        amountsHidden={amountsHidden}
         onOpenSecurity={({ securityId, localValue, performancePercent }) => {
           const security = securityCatalog.find((item) => item.id === securityId);
           if (!security) {
@@ -818,6 +835,7 @@ export default function InvestmentsPortfolioScreen({
         amountsHidden={amountsHidden}
         closeModuleButton={showBottomNavigation && czRoboSection === "invest"}
         czRoboAmountStyle={showBottomNavigation}
+        enableQuickFilters={country === "CZ" && (showBottomNavigation || isEvo2027Release)}
         onBack={() => {
           if (showBottomNavigation && czRoboSection === "invest") {
             onBack();
@@ -1047,7 +1065,7 @@ export default function InvestmentsPortfolioScreen({
       />
       <div
         className={showBottomNavigation
-          ? "mt-[16px] min-h-0 flex-1 overflow-hidden rounded-t-[24px] bg-[var(--uc-surface)] shadow-[0_-8px_20px_rgba(0,0,0,0.045)]"
+          ? "mt-[8px] min-h-0 flex-1 overflow-hidden rounded-t-[24px] bg-[var(--uc-surface)] shadow-[0_-8px_20px_rgba(0,0,0,0.045)]"
           : ""}
       >
       <div
@@ -1057,7 +1075,7 @@ export default function InvestmentsPortfolioScreen({
         style={showBottomNavigation && bottomInset > 0 ? { paddingBottom: bottomInset } : undefined}
       >
       {showBottomNavigation ? (
-        <h1 className="uc-type-h1 px-[16px] pb-[8px] pt-[24px] text-[var(--uc-text)]">Portfolio details</h1>
+        <h1 className="uc-type-h1 px-[16px] pb-[8px] pt-[16px] text-[var(--uc-text)]">Portfolio details</h1>
       ) : null}
       {headerSlot ? <div className="px-[16px] pb-[8px]">{headerSlot}</div> : null}
       {!showBottomNavigation ? (
@@ -1100,13 +1118,14 @@ export default function InvestmentsPortfolioScreen({
                 selectedPeriodId={selectedPeriodId}
                 onChange={setSelectedPeriodId}
                 softUnselected={showBottomNavigation}
-                className={showBottomNavigation ? "py-[8px]" : ""}
+                comfortableTouchTargets={showBottomNavigation || isEvo2027Release}
+                className={showBottomNavigation ? "py-[2px]" : ""}
               />
             </div>
           ) : null}
           {showBottomNavigation ? (
             <>
-              <h2 className="px-[16px] pb-[8px] pt-[32px] text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">
+              <h2 className="px-[16px] pb-[8px] pt-[24px] text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">
                 Investments allocation by
               </h2>
               <InvestmentPortfolioTabs

@@ -13,7 +13,6 @@ export type RoboAdvisorCreationStep =
   | 'goal-type'
   | 'goal-name'
   | 'target'
-  | 'horizon'
   | 'funding-setup'
   | 'strategy'
   | 'projection'
@@ -132,8 +131,7 @@ export function getRoboAdvisorBackStep(
     'goal-type': 'profile',
     'goal-name': 'goal-type',
     target: 'goal-name',
-    horizon: 'target',
-    'funding-setup': 'horizon',
+    'funding-setup': 'target',
     strategy: 'funding-setup',
     projection: state.previousStep,
     portfolio: state.previousPortfolioStep,

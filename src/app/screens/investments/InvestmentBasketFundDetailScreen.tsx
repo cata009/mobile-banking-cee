@@ -79,7 +79,7 @@ export default function InvestmentBasketFundDetailScreen({
             collapsedTitleProgress={czRoboProductDetail ? headerProgress : undefined}
           />
           {czRoboProductDetail ? (
-            <section className="bg-[var(--uc-surface)] pb-[28px]">
+            <section className="bg-[var(--uc-surface)] pb-[12px]">
               <div className="px-[24px] pt-[8px]">
                 <div className="flex items-start gap-[10px]">
                   <h1 className="min-w-0 flex-1 text-[28px] font-bold leading-[31px] text-[var(--uc-text)]">{basket.title}</h1>
@@ -136,7 +136,7 @@ export default function InvestmentBasketFundDetailScreen({
           />
         ) : null}
 
-        <div className="pt-[18px]">
+        <div className={czRoboProductDetail ? "pt-[8px]" : "pt-[18px]"}>
           <InvestmentDetailField
             label="Basket fund description"
             value={description}
@@ -147,9 +147,9 @@ export default function InvestmentBasketFundDetailScreen({
             <InvestmentDetailField label="Basket ID" value="3333343141" variant="product-detail" />
           ) : null}
 
-          <section aria-label={hasDistributionPercentages ? "Funds distribution" : "Basket contents"} data-basket-fund-distribution>
+          <section aria-label={hasDistributionPercentages ? (czRoboProductDetail ? "Products distribution" : "Funds distribution") : "Basket contents"} data-basket-fund-distribution>
             <SectionHeadingDivider
-              title={hasDistributionPercentages ? "FUNDS DISTRIBUTION" : "BASKET CONTENTS"}
+              title={hasDistributionPercentages ? (czRoboProductDetail ? "PRODUCTS DISTRIBUTION" : "FUNDS DISTRIBUTION") : "BASKET CONTENTS"}
               variant="medium-title"
             />
             <div className="pt-[8px]">

@@ -45,6 +45,9 @@ const NON_STANDARD_ICON_NAMES = new Set([
   "card-options-reissue",
   "payment-photo-camera",
   "payment-use-account",
+  "robo-nav-portfolio",
+  "robo-nav-invest",
+  "robo-nav-explore",
 ]);
 const ICON_INVENTORY_EXCLUDED_NAMES = new Set(["radio-unselected", "radio-selected"]);
 

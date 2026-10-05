@@ -70,6 +70,14 @@ export function getCzechPaymentBankName(bankCode: string) {
   return /^\d{4}$/.test(bankCode) ? CZECH_PAYMENT_BANKS[bankCode] : undefined;
 }
 
+/** Formats a CZ account as the local account number plus UniCredit bank code. */
+export function formatCzLocalAccountNumber(value: string): string {
+  const normalized = value.trim();
+  if (/^(?:(?:\d{1,6}-)?\d{2,10})\/\d{4}$/.test(normalized)) return normalized;
+  const digits = normalized.replace(/\D/g, "");
+  return `${digits.slice(-9).padStart(9, "0")}/2700`;
+}
+
 export function isValidCzechPrefix(prefix: string) {
   return prefix === "" || (/^\d{1,6}$/.test(prefix) && hasCzechModulo11Checksum(prefix));
 }
