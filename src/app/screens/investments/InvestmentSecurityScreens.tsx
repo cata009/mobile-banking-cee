@@ -541,8 +541,7 @@ function BasketHoldingSecurityDetailScreen({
           ) : null}
         </div>
       </section>
-      <section className="mt-[8px] px-[16px]" aria-label="Performance trend">
-        <p className="px-[8px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">Illustrative trend · index 100</p>
+      <section className="mt-[8px] px-[16px]" aria-label="Performance chart">
         <InvestmentPortfolioChart
           points={chartPoints}
           country={country}
@@ -665,7 +664,7 @@ function CatalogInvestmentSecurityDetailScreen({
         <div className="bg-[var(--uc-surface)]">
           {hasPortfolioPosition ? (
             <section>
-              <SectionHeadingDivider title="MY SECURITY" className="px-[24px]" />
+              <h2 className="uc-type-n5-strong px-[24px] uppercase text-[var(--uc-text-muted)]">MY SECURITY</h2>
               <InvestmentDetailField
                 label="Total value in portfolio / client currency"
                 value={<InvestmentAmountDisplay parts={portfolioValueParts} scale="field" />}

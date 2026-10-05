@@ -270,7 +270,6 @@ function OptionCard({
 
 const GOAL_ICONS: Record<(typeof ROBO_GOAL_TYPES)[number]["id"], IconName> = {
   "build-wealth": "robo-goal-wealth",
-  "protect-from-inflation": "robo-goal-inflation",
   "unforeseen-circumstances": "robo-goal-unforeseen",
   "major-purchase": "robo-goal-purchase",
   retirement: "robo-goal-retirement",
@@ -1444,7 +1443,9 @@ export default function CzFutureRoboAdvisorFlow({
     ?? null;
   const fundingFields = fundingMethod ? getFundingFieldVisibility(fundingMethod) : null;
   const resolvedHorizon = horizonYears || Number(manualHorizon) || 10;
-  const hasHorizonSelection = horizonYears > 0 || Number(manualHorizon) > 0;
+  const manualHorizonValue = Number(manualHorizon);
+  const hasValidManualHorizon = Number.isInteger(manualHorizonValue) && manualHorizonValue >= 3 && manualHorizonValue <= 15;
+  const hasHorizonSelection = horizonYears > 0 || hasValidManualHorizon;
 
   const snapStrategyCarousel = () => {
     const carousel = strategyCarouselRef.current;
@@ -1688,7 +1689,7 @@ export default function CzFutureRoboAdvisorFlow({
               aria-checked={manualHorizon.length > 0}
               aria-label="Other time horizon"
               onClick={() => {
-                dispatchFlow({ type: "set-manual-horizon", value: manualHorizon || "1" });
+                dispatchFlow({ type: "set-manual-horizon", value: manualHorizon || "3" });
               }}
               className="col-span-2 flex min-h-[48px] w-full items-center gap-[12px] text-left"
             >
@@ -1701,8 +1702,10 @@ export default function CzFutureRoboAdvisorFlow({
               <TextField
                 label="Other time horizon (years)"
                 value={manualHorizon}
-                onChange={(value) => dispatchFlow({ type: "set-manual-horizon", value })}
+                onChange={(value) => dispatchFlow({ type: "set-manual-horizon", value: value.replace(/\D/g, "").slice(0, 2) })}
                 inputMode="numeric"
+                helperText="Select between 3 and 15 years"
+                errorText={manualHorizon.length > 0 && !hasValidManualHorizon ? "Enter a whole number from 3 to 15 years." : undefined}
               />
             </div>
           ) : null}
