@@ -8,7 +8,7 @@ export type InvestmentPeriodId = "1m" | "3m" | "6m" | "1y" | "3y" | "max";
 export type InvestmentSortId = "max-value" | "min-value" | "max-percent" | "min-percent";
 export type InvestmentSecurityStatus = "active" | "inactive";
 export type InvestmentContributionType = "ONE OFF" | "RECURRENT";
-export type InvestmentProductType = "Fund" | "Stock" | "Bond" | "ETF" | "Money market";
+export type InvestmentProductType = "Fund" | "Stock" | "Bond";
 export type InvestmentAssetClass = "Balanced" | "Equity" | "Fixed income" | "Liquidity";
 export type InvestmentRiskLevel = "Low" | "Medium" | "High";
 export type InvestmentLiquidity = "Daily" | "Weekly" | "Monthly";
@@ -354,7 +354,7 @@ const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
     securityAccountId: "sec-eur",
     securityAccountName: "EUR Securities Account",
     securityAccountCurrency: "EUR",
-    productType: "ETF",
+    productType: "Fund",
     assetClass: "Equity",
   },
   {
@@ -370,7 +370,7 @@ const SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
     securityAccountId: "sec-gbp",
     securityAccountName: "GBP Securities Account",
     securityAccountCurrency: "GBP",
-    productType: "Money market",
+    productType: "Fund",
     assetClass: "Liquidity",
   },
   {
@@ -600,7 +600,7 @@ const ROBO_GOAL_SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
     securityAccountId: "robo-sec-local",
     securityAccountName: "Investment goals cash reserve",
     securityAccountCurrency: "CZK",
-    productType: "Money market",
+    productType: "Fund",
     assetClass: "Liquidity",
   },
   {
@@ -698,7 +698,7 @@ export function calculateInvestmentProductsTotalValue(products: readonly Product
  */
 function deriveRiskLevel(seed: InvestmentSecuritySeed): InvestmentRiskLevel {
   if (seed.riskLevel) return seed.riskLevel;
-  if (seed.assetClass === "Liquidity" || seed.productType === "Money market") return "Low";
+  if (seed.assetClass === "Liquidity") return "Low";
   if (seed.assetClass === "Fixed income" || seed.productType === "Bond") return "Low";
   if (seed.assetClass === "Balanced") return "Medium";
   return "High";
@@ -706,7 +706,7 @@ function deriveRiskLevel(seed: InvestmentSecuritySeed): InvestmentRiskLevel {
 
 function deriveLiquidity(seed: InvestmentSecuritySeed): InvestmentLiquidity {
   if (seed.liquidity) return seed.liquidity;
-  if (seed.assetClass === "Liquidity" || seed.productType === "Money market") return "Daily";
+  if (seed.assetClass === "Liquidity") return "Daily";
   if (seed.assetClass === "Fixed income" || seed.productType === "Bond") return "Weekly";
   return "Monthly";
 }

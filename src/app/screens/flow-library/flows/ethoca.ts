@@ -140,7 +140,7 @@ export const ETHOCA_FLOW: FlowDefinition = {
             "Merchant header. Show the clean merchant name and a circular 64x64 merchant visual when a usable logo is available; pending details retain their existing PFM-free treatment.",
             "In-store purchase. Show the static location and address card first under Transaction details only when verified location data is available; never show an empty placeholder.",
             "Online purchase. Do not render a map or guessed address for online, remote or addressless transactions.",
-            "Field availability. Show Merchant Category Code after Posting date only when a code or description is supplied; omit unavailable fields rather than guessing or inventing values.",
+            "Field availability. Show the localized Merchant Category Code description after Posting date only when available; omit numeric-only or unavailable MCC values rather than displaying a code or inventing a label.",
             "Card linkage. Keep Card used visible for card-originated transactions and resolve it to the exact debit or credit card that produced the transaction.",
           ],
         },
@@ -149,7 +149,7 @@ export const ETHOCA_FLOW: FlowDefinition = {
           description: "The fallback is part of the expected customer experience, not an error state.",
           items: [
             "List fallback. When no safe logo is available, retain the existing PFM category glyph inside the 32x32 K7 / #F5F5F5 circle so every row keeps a stable visual footprint.",
-            "Partial enrichment. A safe clean name and MCC may still be shown when logo or verified location data is absent; omit only the unavailable visual or map block.",
+            "Partial enrichment. A safe clean name and localized MCC description may still be shown when logo or verified location data is absent; omit only the unavailable visual or map block.",
             "No usable enrichment. Keep the existing PFM information and standard transaction data without broken images, empty icon slots or invented values.",
           ],
         },
@@ -205,7 +205,7 @@ export const ETHOCA_FLOW: FlowDefinition = {
       "Pending card transactions use the identical merchant-logo/fallback selection. The existing orange dot and `Pending` label remain directly below the amount and are not replaced by enrichment status.",
       "PFM category remains an independent classification. ETHOCA does not overwrite the category, spending insight, recategorisation controls or category pill; it changes merchant presentation only.",
       "For an in-store transaction with a verified address/coordinates, show a static map/address card as the first item under Transaction details. Online, remote and addressless transactions do not render an empty map placeholder.",
-      "Show `Merchant Category Code (MCC)` as the final Transaction details row immediately after Posting date when supplied. If the service has no MCC, omit the row rather than inventing a code.",
+      "Show `Merchant Category Code (MCC)` as the final Transaction details row immediately after Posting date when a localized MCC description is supplied. Display the description only; retain the numeric code in enrichment data for mapping, but never show it to the customer. If no description is available, omit the row.",
       "Card-used navigation stays visible for a card transaction and resolves to the exact debit or credit card that produced it. The account view must not duplicate or transform the transaction into an account payment.",
       "All labels, date formats, currency formatting and accessibility text are localized by the active Mobile PI country/language. ETHOCA eligibility is never inferred from country; country scope is global.",
     ],
@@ -225,7 +225,6 @@ export const ETHOCA_FLOW: FlowDefinition = {
       "Confirm the production ETHOCA payload contract, cache/expiry policy, image hosting allowlist, image dimensions and invalid-image retry behaviour.",
       "Confirm country-by-country availability, consent/legal copy and production validation/retention for merchant location data. The approved Flow preview uses a static, non-interactive map card.",
       "Confirm whether an enriched clean name without a logo should be released together with the PFM-in-K7 list fallback (specified here) or held until logo delivery is complete.",
-      "Confirm MCC localization: whether to show the numeric code only, a localized label only, or both as in this preview fixture.",
     ],
     notes: [
       {
@@ -241,12 +240,12 @@ export const ETHOCA_FLOW: FlowDefinition = {
       {
         title: "Transaction detail decision system",
         body:
-          "The enriched card detail uses a 64x64 circular merchant mark in the header and the clean merchant name as the transaction title. PFM information remains on completed card details because categorisation continues to power Spending Insight and customer recategorisation; pending details stay PFM-free.\n\nFor a verified in-store purchase, the first Transaction details item is a static map/address card. It is omitted for online purchases or missing/unsafe location data and does not open an external map. Standard transaction fields follow, with Merchant Category Code as the final row directly after Posting date when received. Card used remains visible below the detail rows.",
+          "The enriched card detail uses a 64x64 circular merchant mark in the header and the clean merchant name as the transaction title. PFM information remains on completed card details because categorisation continues to power Spending Insight and customer recategorisation; pending details stay PFM-free.\n\nFor a verified in-store purchase, the first Transaction details item is a static map/address card. It is omitted for online purchases or missing/unsafe location data and does not open an external map. Standard transaction fields follow, with the localized MCC description as the final row directly after Posting date when available; the numeric code is not displayed. Card used remains visible below the detail rows.",
       },
       {
         title: "Data and resilience contract",
         body:
-          "The integration needs a transaction-id keyed enrichment object: clean display name, logo URL/alt text, channel, verified address and/or coordinates, MCC code and label, and an availability state. Do not rewrite the raw ledger descriptor; retain it for traceability and support.\n\nIf enrichment is late, absent, malformed, inaccessible or its logo cannot be rendered, the UI must degrade without layout shift to the existing PFM identity in the K7 circle. Partial data can still safely show a clean name and MCC while omitting both logo and location. Do not show an empty image frame, a broken image icon, invented address, guessed MCC or a technical service error to the customer.",
+          "The integration needs a transaction-id keyed enrichment object: clean display name, logo URL/alt text, channel, verified address and/or coordinates, numeric MCC code, localized MCC description and an availability state. Retain the numeric code for mapping/audit logic, but display only the localized description to customers. Do not rewrite the raw ledger descriptor; retain it for traceability and support.\n\nIf enrichment is late, absent, malformed, inaccessible or its logo cannot be rendered, the UI must degrade without layout shift to the existing PFM identity in the K7 circle. Partial data can still safely show a clean name and MCC description while omitting both logo and location. Do not show an empty image frame, a broken image icon, invented address, guessed MCC description or a technical service error to the customer.",
       },
     ],
   },
@@ -322,9 +321,9 @@ export const ETHOCA_FLOW: FlowDefinition = {
         { name: "Merchant display name", type: "String", required: true, validation: "Clean service-supplied name is used as the transaction title." },
         { name: "Merchant logo", type: "Unavailable", required: true, validation: "No broken logo or empty 64x64 placeholder is rendered." },
         { name: "Location", type: "Unavailable", required: true, validation: "No map/address card is rendered." },
-        { name: "Merchant Category Code (MCC)", type: "Code + localized label", required: true, validation: "Final detail row immediately after Posting date." },
+        { name: "Merchant Category Code (MCC)", type: "Localized category name", required: true, validation: "Final detail row immediately after Posting date; never display the numeric code." },
       ],
-      acceptance: ["Piata Obor shows a clean name and MCC without logo or map.", "The existing PFM information remains available because categorization is independent."],
+      acceptance: ["Piata Obor shows the MCC category name without its numeric code, logo or map.", "The existing PFM information remains available because categorization is independent."],
     },
     "ethoca-detail-in-store": {
       purpose: "Show an enriched in-store card transaction with merchant header, verified static map/address first, standard transaction data, MCC last and the card used.",
@@ -333,19 +332,19 @@ export const ETHOCA_FLOW: FlowDefinition = {
         { name: "Merchant logo", type: "Image URL", required: true, validation: "Rendered in a circular 64x64 header mark." },
         { name: "Location", type: "Address + coordinates", required: true, validation: "Verified in-store data only; first static item under Transaction details." },
         { name: "Posting date", type: "Ledger date", required: true },
-        { name: "Merchant Category Code (MCC)", type: "Code + localized label", required: true, validation: "Final detail row immediately after Posting date." },
+        { name: "Merchant Category Code (MCC)", type: "Localized category name", required: true, validation: "Final detail row immediately after Posting date; never display the numeric code." },
         { name: "Card used", type: "Card reference", required: true, notes: "Routes to the exact originating card." },
       ],
       actions: [{ label: "Card used", result: "Opens the originating card." }],
-      edgeCases: ["Address/coordinates absent or unverified → omit the whole map card.", "MCC absent → omit MCC row."],
-      acceptance: ["The static map/address card is the first detail item.", "MCC is the final detail item after Posting date.", "PFM category remains present independently."],
+      edgeCases: ["Address/coordinates absent or unverified → omit the whole map card.", "MCC description absent or only numeric code supplied → omit MCC row."],
+      acceptance: ["The static map/address card is the first detail item.", "The localized MCC name is the final detail item after Posting date, without its numeric code.", "PFM category remains present independently."],
     },
     "ethoca-detail-online": {
       purpose: "Show an enriched online card transaction without inventing a physical location.",
       states: ["Merchant logo/name available", "Online channel", "MCC available"],
       fields: [
         { name: "Merchant logo", type: "Image URL", required: true, validation: "Rendered in a circular 64x64 header mark." },
-        { name: "Merchant Category Code (MCC)", type: "Code + localized label", required: true, validation: "Final detail row immediately after Posting date." },
+        { name: "Merchant Category Code (MCC)", type: "Localized category name", required: true, validation: "Final detail row immediately after Posting date; never display the numeric code." },
       ],
       acceptance: ["No empty map card or guessed store address appears for online purchases.", "MCC placement matches in-store detail."],
     },

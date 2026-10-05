@@ -1,6 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
-import { BottomSheet } from "@/app/components/BottomSheet";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
@@ -9,10 +8,12 @@ import ToggleButton from "@/app/components/ToggleButton";
 import StandardSignScreen from "@/app/components/flow/StandardSignScreen";
 import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
 import InvestmentDetailField from "@/app/components/investments/InvestmentDetailField";
+import InvestmentAccountSelectionSheet from "@/app/components/investments/InvestmentAccountSelectionSheet";
 import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import { formatInvestmentMoney } from "@/app/utils/investmentAmountFormatting";
 import type { CurrentAccount } from "@/data/products";
+import { formatCzLocalAccountNumber } from "@/data/czechDomesticAccount";
 import type { CoAppingInvestmentBuyDraft } from "../../../../package/mobile-pi-coapping-chat-package/src";
 import InvestmentOrderDocumentsAccordion from "./InvestmentOrderDocumentsAccordion";
 import {
@@ -23,9 +24,16 @@ import {
 
 type InvestmentBuyOrderStep = "order-data" | "review" | "sign" | "success";
 
+interface SecurityAccountOption {
+  id: string;
+  name: string;
+  currency: string;
+}
+
 interface InvestmentBuyOrderFlowProps {
   security: InvestmentCatalogSecurity;
   accounts: readonly CurrentAccount[];
+  securityAccounts?: readonly SecurityAccountOption[];
   country: CountryId;
   amountsHidden: boolean;
   initialDraft?: CoAppingInvestmentBuyDraft | null;
@@ -136,6 +144,7 @@ function FlowFrame({
 export default function InvestmentBuyOrderFlow({
   security,
   accounts,
+  securityAccounts = [],
   country,
   amountsHidden,
   initialDraft,
@@ -146,13 +155,29 @@ export default function InvestmentBuyOrderFlow({
   const [step, setStep] = useState<InvestmentBuyOrderStep>(validatedInitialDraft ? "review" : "order-data");
   const [quantityValue, setQuantityValue] = useState(String(validatedInitialDraft?.quantity ?? 1));
   const [selectedAccountId, setSelectedAccountId] = useState(validatedInitialDraft?.accountId ?? accounts[0]?.id ?? "");
+  const [selectedSecurityAccountId, setSelectedSecurityAccountId] = useState(security.securityAccountId);
   const [executionTiming] = useState<CoAppingInvestmentBuyDraft["executionTiming"]>(
     validatedInitialDraft?.executionTiming ?? "today",
   );
   const [accountSheetOpen, setAccountSheetOpen] = useState(false);
+  const [securityAccountSheetOpen, setSecurityAccountSheetOpen] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   const selectedAccount = accounts.find((account) => account.id === selectedAccountId) ?? accounts[0] ?? null;
+  const availableSecurityAccounts = useMemo(() => {
+    const options = [...securityAccounts];
+    if (!options.some((option) => option.id === security.securityAccountId)) {
+      options.unshift({
+        id: security.securityAccountId,
+        name: security.securityAccountName,
+        currency: security.securityAccountCurrency,
+      });
+    }
+    return options;
+  }, [security, securityAccounts]);
+  const selectedSecurityAccount = availableSecurityAccounts.find((account) => account.id === selectedSecurityAccountId)
+    ?? availableSecurityAccounts[0]
+    ?? { id: security.securityAccountId, name: security.securityAccountName, currency: security.securityAccountCurrency };
   const quantity = parseInvestmentOrderQuantity(quantityValue);
   // The displayed buy-order price is always "yesterday's" price snapshot,
   // formatted consistently as DD.MM.YYYY across all countries.
@@ -221,8 +246,11 @@ export default function InvestmentBuyOrderFlow({
 
         <section className="pt-[24px]">
           <SectionHeadingDivider title="ACCOUNTS" className="px-[24px]" />
-          <InvestmentDetailField label="Security account" value={security.securityAccountName} />
-          <InvestmentDetailField label="Cash account" value={`${selectedAccount.name} · ${compactAccountNumber(selectedAccount.accountNumber)}`} />
+          <InvestmentDetailField label="Security account" value={selectedSecurityAccount.name} />
+          <InvestmentDetailField
+            label="Cash account"
+            value={`${selectedAccount.name} · ${country === "CZ" ? formatCzLocalAccountNumber(selectedAccount.accountNumber) : compactAccountNumber(selectedAccount.accountNumber)}`}
+          />
           {quote.accountCurrency !== quote.productCurrency ? (
             <InvestmentDetailField label="Estimated debit" value={formatMoney(quote.debitAmount, quote.accountCurrency, country, amountsHidden)} />
           ) : null}
@@ -288,11 +316,12 @@ export default function InvestmentBuyOrderFlow({
           <TextField
             label="Security account"
             ariaLabel="Security account"
-            value={security.securityAccountName}
+            value={selectedSecurityAccount.name}
             onChange={() => undefined}
             helperText={`${security.quantity.toFixed(0)} PCS`}
             readOnly
             trailingIconName="chevron-down-wide"
+            onActivate={() => setSecurityAccountSheetOpen(true)}
           />
         </div>
         {selectedAccount ? (
@@ -300,7 +329,7 @@ export default function InvestmentBuyOrderFlow({
             <TextField
               label="Cash account"
               ariaLabel={`Cash account, ${selectedAccount.name}`}
-              value={selectedAccount.accountNumber}
+              value={country === "CZ" ? formatCzLocalAccountNumber(selectedAccount.accountNumber) : selectedAccount.accountNumber}
               onChange={() => undefined}
               helperText={selectedAccount.name}
               helperText2={`Available balance ${formatMoney(selectedAccount.balance, selectedAccount.currency, country, amountsHidden)}`}
@@ -330,27 +359,37 @@ export default function InvestmentBuyOrderFlow({
       </section>
 
       {accountSheetOpen ? (
-        <BottomSheet title="Select cash account" onClose={() => setAccountSheetOpen(false)}>
-          <div className="space-y-[1px] bg-[var(--uc-border)]">
-            {accounts.map((account) => (
-              <button
-                key={account.id}
-                type="button"
-                className="flex min-h-[72px] w-full items-center justify-between gap-[16px] bg-[var(--uc-sheet-bg)] px-[8px] py-[12px] text-left"
-                onClick={() => {
-                  setSelectedAccountId(account.id);
-                  setAccountSheetOpen(false);
-                }}
-              >
-                <span>
-                  <span className="block uc-type-n4-strong">{account.name}</span>
-                  <span className="block uc-type-n5 text-[var(--uc-text-muted)]">{compactAccountNumber(account.accountNumber)}</span>
-                </span>
-                <span className="shrink-0 uc-type-n4-strong">{formatMoney(account.balance, account.currency, country, amountsHidden)}</span>
-              </button>
-            ))}
-          </div>
-        </BottomSheet>
+        <InvestmentAccountSelectionSheet
+          title="Select cash account"
+          options={accounts.map((account) => ({
+            id: account.id,
+            name: account.name,
+            detail: country === "CZ" ? formatCzLocalAccountNumber(account.accountNumber) : compactAccountNumber(account.accountNumber),
+            balance: formatMoney(account.balance, account.currency, country, amountsHidden),
+          }))}
+          selectedId={selectedAccountId}
+          onClose={() => setAccountSheetOpen(false)}
+          onConfirm={(id) => {
+            setSelectedAccountId(id);
+            setAccountSheetOpen(false);
+          }}
+        />
+      ) : null}
+      {securityAccountSheetOpen ? (
+        <InvestmentAccountSelectionSheet
+          title="Select security account"
+          options={availableSecurityAccounts.map((account) => ({
+            id: account.id,
+            name: account.name,
+            detail: account.currency,
+          }))}
+          selectedId={selectedSecurityAccountId}
+          onClose={() => setSecurityAccountSheetOpen(false)}
+          onConfirm={(id) => {
+            setSelectedSecurityAccountId(id);
+            setSecurityAccountSheetOpen(false);
+          }}
+        />
       ) : null}
     </FlowFrame>
   );

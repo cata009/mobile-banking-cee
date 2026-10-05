@@ -1,5 +1,6 @@
 import { AppIcon } from "@/app/components/icons";
 import { cn } from "@/app/components/ui/utils";
+import type { DragCarouselHandlers } from "@/hooks/useDragCarousel";
 import fundBannerPlant from "@/assets/investments/fund-banner-plant-unsplash.jpg";
 import fundOnemarket from "@/assets/investments/funds/fund-onemarket.png";
 import fundSelectionPlus from "@/assets/investments/funds/fund-selection-plus.png";
@@ -42,6 +43,7 @@ interface InvestmentsFundBannerProps {
   onClick?: () => void;
   variant?: InvestmentsFundBannerVariantId;
   className?: string;
+  dragHandlers?: DragCarouselHandlers;
 }
 
 function FundBannerIllustration({ variant }: { variant: InvestmentsFundBannerVariantId }) {
@@ -80,11 +82,13 @@ export default function InvestmentsFundBanner({
   onClick,
   variant = "discovery",
   className,
+  dragHandlers,
 }: InvestmentsFundBannerProps) {
   const isCollectionVariant = INVESTMENTS_FUND_BANNER_VARIANTS[variant].collection;
 
   return (
     <button
+      {...dragHandlers}
       type="button"
       onClick={onClick}
       className={cn(

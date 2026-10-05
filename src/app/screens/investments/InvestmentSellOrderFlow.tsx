@@ -1,6 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
-import { BottomSheet } from "@/app/components/BottomSheet";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
@@ -9,11 +8,13 @@ import ToggleButton from "@/app/components/ToggleButton";
 import StandardSignScreen from "@/app/components/flow/StandardSignScreen";
 import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
 import InvestmentDetailField from "@/app/components/investments/InvestmentDetailField";
+import InvestmentAccountSelectionSheet from "@/app/components/investments/InvestmentAccountSelectionSheet";
 import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import { formatInvestmentMoney, formatInvestmentNumber } from "@/app/utils/investmentAmountFormatting";
 import { convertCurrency, roundMoney } from "@/data/exchangeRates";
 import type { CurrentAccount } from "@/data/products";
+import { formatCzLocalAccountNumber } from "@/data/czechDomesticAccount";
 import InvestmentOrderDocumentsAccordion from "./InvestmentOrderDocumentsAccordion";
 import { ProductEvaluationBullet } from "./InvestmentBuyOrderFlow";
 
@@ -245,7 +246,7 @@ export default function InvestmentSellOrderFlow({
           <InvestmentDetailField label="Portfolio account" value={security.securityAccountName} />
           <InvestmentDetailField
             label="Cash account"
-            value={`${selectedAccount.name} · ${compactAccountNumber(selectedAccount.accountNumber)}`}
+          value={`${selectedAccount.name} · ${country === "CZ" ? formatCzLocalAccountNumber(selectedAccount.accountNumber) : compactAccountNumber(selectedAccount.accountNumber)}`}
           />
           {selectedAccount.currency !== security.instrumentCurrency ? (
             <InvestmentDetailField
@@ -395,7 +396,7 @@ export default function InvestmentSellOrderFlow({
             <TextField
               label="Cash account"
               ariaLabel={`Cash account, ${selectedAccount.name}`}
-              value={selectedAccount.accountNumber}
+              value={country === "CZ" ? formatCzLocalAccountNumber(selectedAccount.accountNumber) : selectedAccount.accountNumber}
               onChange={() => undefined}
               helperText={selectedAccount.name}
               helperText2={`Available balance ${formatMoney(selectedAccount.balance, selectedAccount.currency, country, amountsHidden)}`}
@@ -410,29 +411,21 @@ export default function InvestmentSellOrderFlow({
       </section>
 
       {accountSheetOpen ? (
-        <BottomSheet title="Select cash account" onClose={() => setAccountSheetOpen(false)}>
-          <div className="space-y-[1px] bg-[var(--uc-border)]">
-            {accounts.map((account) => (
-              <button
-                key={account.id}
-                type="button"
-                className="flex min-h-[72px] w-full items-center justify-between gap-[16px] bg-[var(--uc-sheet-bg)] px-[8px] py-[12px] text-left"
-                onClick={() => {
-                  setSelectedAccountId(account.id);
-                  setAccountSheetOpen(false);
-                }}
-              >
-                <span>
-                  <span className="block uc-type-n4-strong">{account.name}</span>
-                  <span className="block uc-type-n5 text-[var(--uc-text-muted)]">{compactAccountNumber(account.accountNumber)}</span>
-                </span>
-                <span className="shrink-0 uc-type-n4-strong">
-                  {formatMoney(account.balance, account.currency, country, amountsHidden)}
-                </span>
-              </button>
-            ))}
-          </div>
-        </BottomSheet>
+        <InvestmentAccountSelectionSheet
+          title="Select cash account"
+          options={accounts.map((account) => ({
+            id: account.id,
+            name: account.name,
+            detail: country === "CZ" ? formatCzLocalAccountNumber(account.accountNumber) : compactAccountNumber(account.accountNumber),
+            balance: formatMoney(account.balance, account.currency, country, amountsHidden),
+          }))}
+          selectedId={selectedAccountId}
+          onClose={() => setAccountSheetOpen(false)}
+          onConfirm={(id) => {
+            setSelectedAccountId(id);
+            setAccountSheetOpen(false);
+          }}
+        />
       ) : null}
     </FlowFrame>
   );

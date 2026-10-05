@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from "react";
+import { BottomSheet } from "@/app/components/BottomSheet";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import TextField from "@/app/components/TextField";
@@ -7,6 +8,7 @@ import NavigationRow from "@/app/components/NavigationRow";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
 import InfoBanner from "@/app/components/cards/InfoBanner";
+import InvestmentAccountSelectionSheet from "@/app/components/investments/InvestmentAccountSelectionSheet";
 import BrandLogo from "@/app/components/brand-logo/BrandLogo";
 import StandardSignScreen from "@/app/components/flow/StandardSignScreen";
 import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
@@ -16,8 +18,13 @@ import InvestmentFilterChips from "@/app/components/investments/InvestmentFilter
 import InvestmentPeriodChips from "@/app/components/investments/InvestmentPeriodChips";
 import InvestmentPortfolioChart from "@/app/components/investments/InvestmentPortfolioChart";
 import InvestmentPortfolioTabs from "@/app/components/investments/InvestmentPortfolioTabs";
+import { Calendar } from "@/app/components/ui/calendar";
+import LinkButton from "@/app/components/ui/LinkButton";
 import { cn } from "@/app/components/ui/utils";
-import { formatInvestmentNumber } from "@/app/utils/investmentAmountFormatting";
+import { formatInvestmentMoney, formatInvestmentNumber } from "@/app/utils/investmentAmountFormatting";
+import type { CountryId } from "@/app/state/demoTypes";
+import type { CurrentAccount } from "@/data/products";
+import { formatCzLocalAccountNumber } from "@/data/czechDomesticAccount";
 import {
   INVESTMENT_PERIODS,
   INVESTMENT_SORT_OPTIONS,
@@ -60,6 +67,9 @@ import {
 } from "./roboAdvisorFlowState";
 
 interface CzFutureRoboAdvisorFlowProps {
+  currentAccounts?: readonly CurrentAccount[];
+  country?: CountryId;
+  amountsHidden?: boolean;
   onBack: () => void;
   onExit: () => void;
   onOpenSecurity?: (selection: {
@@ -82,6 +92,7 @@ interface RoboScreenProps {
   headerAction?: "close" | "help";
   children: ReactNode;
   footer?: ReactNode;
+  overlay?: ReactNode;
   dataScreen: string;
   titleClassName?: string;
   descriptionTrailing?: ReactNode;
@@ -89,7 +100,15 @@ interface RoboScreenProps {
   contentTopClassName?: string;
 }
 
-const cashAccountLabel = "Current ··· 4821";
+const defaultCashAccountLabel = "Current ··· 4821";
+const DEFAULT_ROBO_CASH_ACCOUNT: CurrentAccount = {
+  id: "robo-default-cash",
+  type: "current_account",
+  name: "My account name",
+  accountNumber: "CZ12345678901234",
+  balance: 50_000,
+  currency: "CZK",
+};
 const DEFAULT_ROBO_STRATEGY = ROBO_STRATEGIES[0]!;
 const ROBO_INVESTOR_PROFILE_LABELS = {
   conservative: "Conservative - V1",
@@ -101,6 +120,15 @@ const ROBO_FUNDING_OPTIONS: readonly { id: RoboFundingMethod; title: string; des
   { id: "regular", title: "Invest monthly", description: "Choose an amount to contribute each month." },
   { id: "combined", title: "Invest now and monthly", description: "Make an initial investment, then continue with monthly contributions." },
 ];
+
+function compactRoboAccountNumber(value: string) {
+  if (value.length <= 8) return value;
+  return `${value.slice(0, 4)} •••• ${value.slice(-4)}`;
+}
+
+function displayRoboAccountNumber(value: string, country: CountryId) {
+  return country === "CZ" ? formatCzLocalAccountNumber(value) : compactRoboAccountNumber(value);
+}
 
 function FundingAmountSuggestion({
   amount,
@@ -137,6 +165,7 @@ function RoboScreen({
   headerAction = "close",
   children,
   footer,
+  overlay,
   dataScreen,
   titleClassName,
   descriptionTrailing,
@@ -147,7 +176,7 @@ function RoboScreen({
 
   return (
     <div
-      className="flex h-full w-full flex-col overflow-hidden bg-[var(--uc-surface)] text-[var(--uc-text)]"
+      className="relative flex h-full w-full flex-col overflow-hidden bg-[var(--uc-surface)] text-[var(--uc-text)]"
       data-robo-screen={dataScreen}
     >
       <PageHeader
@@ -184,8 +213,19 @@ function RoboScreen({
         <div className={contentTopClassName}>{children}</div>
       </main>
       {footer ? <footer className="shrink-0 px-[24px] pb-[34px] pt-[12px]">{footer}</footer> : null}
+      {overlay}
     </div>
   );
+}
+
+function formatRoboCalendarDate(date: Date): string {
+  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" }).format(date);
+}
+
+function parseRoboCalendarDate(value: string): Date {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return new Date();
+  return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
 }
 
 function OptionCard({
@@ -267,16 +307,18 @@ function IntroScreen({ onCreate, onExit }: { onCreate: () => void; onExit: () =>
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-[var(--uc-surface)]" data-robo-screen="intro">
       <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
-        <div className="relative h-[400px] shrink-0 overflow-hidden bg-[var(--uc-app-bg)]">
-          <img src={introImage} alt="" className="h-full w-full object-cover" />
+        <div className="pointer-events-none sticky top-[calc(var(--uc-phone-top-reserve,54px)+4px)] z-20 -mb-[40px] flex h-[40px] justify-end px-[8px]">
           <button
             type="button"
             aria-label="Close"
             onClick={onExit}
-            className="absolute right-[8px] top-[calc(var(--uc-phone-top-reserve,54px)+4px)] grid size-[40px] place-items-center"
+            className="pointer-events-auto grid size-[40px] place-items-center"
           >
             <AppIcon name="close-flow" color="var(--uc-text)" size={20} />
           </button>
+        </div>
+        <div className="relative h-[400px] shrink-0 overflow-hidden bg-[var(--uc-app-bg)]">
+          <img src={introImage} alt="" className="h-full w-full object-cover" />
         </div>
         <div className="px-[24px] pb-[24px] pt-[20px]">
           <h1 className="uc-type-h1 text-[var(--uc-text)]">Invest towards what matters</h1>
@@ -393,6 +435,7 @@ function InvestorProfileScreen({
           description="Review the MiFID questions so your recommendation reflects your current situation."
           actionLabel="UPDATE NOW"
           actionIconName="chevron-link"
+          actionIconSize={24}
           className="mt-[24px] w-full rounded-[4px]"
         />
       )}
@@ -497,9 +540,6 @@ function BasketPortfolioCard({
 }) {
   const basket = portfolio.basketFund!;
   const performancePercent = basket.performancePercent;
-  const performanceColor = performancePercent === undefined
-    ? "var(--uc-text)"
-    : performancePercent < 0 ? "var(--uc-status-red)" : "var(--uc-green-olive)";
 
   return (
     <article
@@ -518,32 +558,31 @@ function BasketPortfolioCard({
         onClick={onSelect}
         className="w-full text-left"
       >
-        <div className="flex items-start gap-[10px]">
+        <div className="flex items-center gap-[10px]">
           <BrandLogo logoId={basket.logoId} size={32} />
           <h2 className={cn("min-w-0 flex-1 uc-type-h2 line-clamp-2 min-h-[48px] whitespace-pre-line", selected ? "text-[var(--uc-action)]" : "text-[var(--uc-text)]")}>
             {basket.roboCarouselTitle ?? basket.title}
           </h2>
         </div>
         {performancePercent !== undefined ? (
-          <div className="mt-[6px] flex items-baseline gap-[7px]">
-            <span className="text-[10px] font-bold uppercase leading-[12px] tracking-[0.3px] text-[var(--uc-text-muted)]">Performance</span>
-            <span className="text-[18px] font-bold leading-[22px] tabular-nums" style={{ color: performanceColor }}>
+          <div className="mt-[8px]">
+            <span className="block text-[26px] font-bold leading-[30px] tabular-nums text-[var(--uc-text)]">
               {formatInvestmentBasketPerformance(performancePercent)}
+            </span>
+            <span className="mt-[2px] block text-[12px] leading-[16px] text-[var(--uc-text-muted)]">
+              Performance · 1 year
             </span>
           </div>
         ) : null}
-        <p className="uc-type-n5 mt-[6px] line-clamp-3 min-h-[51px] leading-[17px] text-[var(--uc-text)]">{basket.description}</p>
+        <p className="uc-type-n5 mt-[8px] line-clamp-3 min-h-[51px] leading-[17px] text-[var(--uc-text)]">{basket.description}</p>
       </button>
-      <button
-        {...dragHandlers}
-        type="button"
+      <LinkButton
         aria-label={`Details for ${basket.title}`}
         onClick={onDetails}
-        className="mt-[2px] flex w-full items-center justify-center gap-[4px] py-[6px] text-[14px] font-bold text-[var(--uc-action)]"
+        className="mx-auto mt-[2px] py-[6px]"
       >
         Details
-        <AppIcon name="chevron-link" size={20} color="var(--uc-action)" />
-      </button>
+      </LinkButton>
     </article>
   );
 }
@@ -761,7 +800,7 @@ function PortfolioDetails({
   return (
     <section className="pb-[8px]" aria-label="Basket contents" data-robo-basket-details={basket.id}>
       <SectionHeadingDivider
-        title={hasDistribution ? "FUNDS DISTRIBUTION" : "BASKET CONTENTS"}
+        title={hasDistribution ? "PRODUCTS DISTRIBUTION" : "BASKET CONTENTS"}
         variant="medium-title"
         className="-mx-[24px]"
       />
@@ -791,12 +830,12 @@ function BasketAllocation({ basket }: { basket: InvestmentBasketFund }) {
   return (
     <section className="mt-[18px]" aria-label="Basket contents">
       <SectionHeadingDivider
-        title={basket.holdings?.some((holding) => holding.percent !== undefined) ? "FUNDS DISTRIBUTION" : "BASKET CONTENTS"}
+        title={basket.holdings?.some((holding) => holding.percent !== undefined) ? "PRODUCTS DISTRIBUTION" : "BASKET CONTENTS"}
       />
       {basket.holdings?.length ? (
         <div>
           {basket.holdings.map((holding, index) => (
-            <div key={holding.productId ?? `${basket.id}-${index}`} className="flex min-h-[64px] items-center gap-[12px] py-[9px]">
+            <div key={holding.productId ?? `${basket.id}-${index}`} className="flex min-h-[64px] items-center gap-[12px] px-[24px] py-[9px]">
               <BrandLogo logoId={basket.logoId} size={32} />
               <div className="min-w-0 flex-1">
                 <p className="text-[14px] font-bold leading-[18px] text-[var(--uc-text)]">{holding.title}</p>
@@ -989,6 +1028,7 @@ function GoalDetail({
         />
         <InvestmentPeriodChips
           periods={GOAL_DETAIL_PERIODS}
+          comfortableTouchTargets
           selectedPeriodId={selectedPeriodId}
           onChange={setSelectedPeriodId}
         />
@@ -1303,7 +1343,7 @@ function ManagementScreen({
       {mode === "add-money" || mode === "partial-withdrawal" ? (
         <div className="mt-[28px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[14px]">
           <p className="uc-type-n5 text-[var(--uc-text-muted)]">Cash account</p>
-          <p className="uc-type-n4-strong mt-[4px] text-[var(--uc-text)]">{cashAccountLabel}</p>
+          <p className="uc-type-n4-strong mt-[4px] text-[var(--uc-text)]">{defaultCashAccountLabel}</p>
         </div>
       ) : null}
     </RoboScreen>
@@ -1311,6 +1351,9 @@ function ManagementScreen({
 }
 
 export default function CzFutureRoboAdvisorFlow({
+  currentAccounts = [DEFAULT_ROBO_CASH_ACCOUNT],
+  country = "CZ",
+  amountsHidden = false,
   onBack,
   onExit,
   onOpenSecurity,
@@ -1326,6 +1369,9 @@ export default function CzFutureRoboAdvisorFlow({
     createRoboAdvisorFlowState,
   );
   const [basketDetailsToOpen, setBasketDetailsToOpen] = useState<InvestmentBasketFund | null>(null);
+  const [startDatePickerOpen, setStartDatePickerOpen] = useState(false);
+  const [cashAccountSheetOpen, setCashAccountSheetOpen] = useState(false);
+  const [selectedCashAccountId, setSelectedCashAccountId] = useState(currentAccounts[0]?.id ?? "");
   const {
     step,
     goalType,
@@ -1354,6 +1400,7 @@ export default function CzFutureRoboAdvisorFlow({
   const setSelectedPortfolio = (value: RoboPortfolio | null) => dispatchFlow({ type: "set-field", field: "selectedPortfolio", value });
   const setTermsAccepted = (value: boolean) => dispatchFlow({ type: "set-field", field: "termsAccepted", value });
   const setManagementMode = (value: ManagementMode) => dispatchFlow({ type: "set-field", field: "managementMode", value });
+  const selectedCashAccount = currentAccounts.find((account) => account.id === selectedCashAccountId) ?? null;
   const strategyCarouselRef = useRef<HTMLDivElement>(null);
   const portfolioCarouselRef = useRef<HTMLDivElement>(null);
 
@@ -1464,6 +1511,7 @@ export default function CzFutureRoboAdvisorFlow({
         onBack={goBackByStep}
         onClose={onExit}
         dataScreen="goal-type"
+        contentTopClassName="pt-[16px]"
         footer={<PrimaryButton labelSize="18" disabled={!goalType} onClick={() => setStep("goal-name")}>Continue</PrimaryButton>}
       >
         <div className="space-y-[12px]">
@@ -1501,7 +1549,7 @@ export default function CzFutureRoboAdvisorFlow({
               aria-pressed={goalName === suggestion}
               onClick={() => setGoalName(suggestion)}
               className={cn(
-                "min-h-[36px] rounded-[4px] px-[12px] py-[8px] text-[13px] font-bold leading-[17px] transition-colors",
+                "min-h-[36px] w-fit whitespace-nowrap rounded-[4px] px-[12px] py-[8px] text-left text-[13px] font-bold leading-[17px] transition-colors",
                 goalName === suggestion
                   ? "border border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
                   : "bg-[var(--uc-neutral-100)] text-[var(--uc-text)]",
@@ -1518,12 +1566,13 @@ export default function CzFutureRoboAdvisorFlow({
   if (step === "target") {
     return (
       <RoboScreen
-        title="Set your target amount"
-        description="Choose the most realistic amount you want this goal to reach. We’ll use it alongside your time horizon and investor profile to frame your investment plan. Progress may exceed 100%, but this target is not guaranteed. Investment values can rise or fall, and you could get back less than you invest."
+        title="Set your goal plan"
+        description="Choose a target amount and time horizon to shape your investment recommendation."
         onBack={goBackByStep}
         onClose={onExit}
-        dataScreen="target"
-        footer={<PrimaryButton labelSize="18" disabled={!Number(targetAmount)} onClick={() => setStep("horizon")}>Continue</PrimaryButton>}
+        dataScreen="target-and-horizon"
+        contentTopClassName="pt-[20px]"
+        footer={<PrimaryButton labelSize="18" disabled={!Number(targetAmount) || !hasHorizonSelection} onClick={() => setStep("funding-setup")}>Continue</PrimaryButton>}
       >
         <TextField
           label="Target amount"
@@ -1532,8 +1581,9 @@ export default function CzFutureRoboAdvisorFlow({
           inputMode="numeric"
           suffix="CZK"
           suffixOutsideDivider
+          suffixClassName="!font-bold"
         />
-        <div className="mt-[20px] grid grid-cols-3 gap-[8px]">
+        <div className="mt-[12px] grid grid-cols-3 gap-[8px]" role="group" aria-label="Suggested target amounts">
           {["100000", "250000", "500000"].map((amount) => (
             <button
               key={amount}
@@ -1551,62 +1601,54 @@ export default function CzFutureRoboAdvisorFlow({
             </button>
           ))}
         </div>
-      </RoboScreen>
-    );
-  }
-
-  if (step === "horizon") {
-    return (
-      <RoboScreen
-        title="Choose your time horizon"
-        description="Choose a period that fits your goal. It guides the recommendation, but your goal will not close automatically."
-        onBack={goBackByStep}
-        onClose={onExit}
-        dataScreen="horizon"
-        footer={<PrimaryButton labelSize="18" disabled={!hasHorizonSelection} onClick={() => setStep("funding-setup")}>Continue</PrimaryButton>}
-      >
-        <div role="radiogroup" aria-label="Time horizon" className="space-y-[4px]">
-          {[3, 5, 7, 10].map((years) => (
+        <section className="mt-[20px]" aria-label="Time horizon">
+          <h2 className="text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">Choose your time horizon</h2>
+          <p className="mt-[10px] text-[16px] leading-[21px] text-[var(--uc-text)]">
+            Choose a period that fits your goal. It guides the recommendation, but your goal will not close automatically.
+          </p>
+          <div role="radiogroup" aria-label="Time horizon" className="mt-[10px] grid grid-cols-2 gap-x-[12px] gap-y-[4px]">
+            {[3, 5, 7, 10].map((years) => {
+              const selected = horizonYears === years && !manualHorizon;
+              return (
+                <button
+                  key={years}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  aria-label={`${years} years`}
+                  onClick={() => dispatchFlow({ type: "select-horizon", years })}
+                  className="flex min-h-[48px] w-full items-center gap-[12px] text-left"
+                >
+                  <AppIcon name={selected ? "radio-selected" : "radio-unselected"} size={24} />
+                  <span className="text-[14px] font-bold leading-[18px]">{years} YEARS</span>
+                </button>
+              );
+            })}
             <button
-              key={years}
               type="button"
               role="radio"
-              aria-checked={horizonYears === years && !manualHorizon}
-              aria-label={`${years} years`}
+              aria-checked={manualHorizon.length > 0}
+              aria-label="Other time horizon"
               onClick={() => {
-                dispatchFlow({ type: "select-horizon", years });
+                dispatchFlow({ type: "set-manual-horizon", value: manualHorizon || "1" });
               }}
-              className="flex h-[56px] w-full items-center gap-[16px] text-left"
+              className="col-span-2 flex min-h-[48px] w-full items-center gap-[12px] text-left"
             >
-              <AppIcon name={horizonYears === years && !manualHorizon ? "radio-selected" : "radio-unselected"} size={24} />
-              <span className="text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{years} YEARS</span>
+              <AppIcon name={manualHorizon.length > 0 ? "radio-selected" : "radio-unselected"} size={24} />
+              <span className="text-[14px] font-bold leading-[18px]">OTHER TIME HORIZON</span>
             </button>
-          ))}
-          <button
-            type="button"
-            role="radio"
-            aria-checked={manualHorizon.length > 0}
-            aria-label="Other time horizon"
-            onClick={() => {
-              dispatchFlow({ type: "set-manual-horizon", value: manualHorizon || "1" });
-            }}
-            className="flex h-[56px] w-full items-center gap-[16px] text-left"
-          >
-            <AppIcon name={manualHorizon.length > 0 ? "radio-selected" : "radio-unselected"} size={24} />
-            <span className="text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">OTHER TIME HORIZON</span>
-          </button>
-        </div>
-        {manualHorizon.length > 0 ? <div className="mt-[28px]">
-          <TextField
-            label="Other horizon"
-            value={manualHorizon}
-            onChange={(value) => {
-              dispatchFlow({ type: "set-manual-horizon", value });
-            }}
-            inputMode="numeric"
-            suffix="years"
-          />
-        </div> : null}
+          </div>
+          {manualHorizon.length > 0 ? (
+            <div className="mt-[12px]">
+              <TextField
+                label="Other time horizon (years)"
+                value={manualHorizon}
+                onChange={(value) => dispatchFlow({ type: "set-manual-horizon", value })}
+                inputMode="numeric"
+              />
+            </div>
+          ) : null}
+        </section>
       </RoboScreen>
     );
   }
@@ -1615,6 +1657,7 @@ export default function CzFutureRoboAdvisorFlow({
     const canContinue = Boolean(
       fundingMethod
       && fundingFields
+      && selectedCashAccount
       && (!fundingFields.initialAmount || Number(initialAmount) > 0)
       && (!fundingFields.monthlyContribution || Number(monthlyContribution) > 0)
       && (!fundingFields.startDate || startDate.trim().length > 0),
@@ -1640,6 +1683,48 @@ export default function CzFutureRoboAdvisorFlow({
         onClose={onExit}
         dataScreen={`funding-setup${fundingMethod ? `-${fundingMethod}` : ""}`}
         contentTopClassName="pt-[16px]"
+        overlay={(
+          <>
+            {startDatePickerOpen ? (
+              <BottomSheet
+                title="Select start date"
+                onClose={() => setStartDatePickerOpen(false)}
+                closeLabel="Close calendar"
+              >
+                <div className="w-full pb-[8px]">
+                  <Calendar
+                    className="w-full"
+                    mode="single"
+                    disabled={{ before: new Date() }}
+                    selected={parseRoboCalendarDate(startDate)}
+                    onSelect={(date) => {
+                      if (!date) return;
+                      setStartDate(formatRoboCalendarDate(date));
+                      setStartDatePickerOpen(false);
+                    }}
+                  />
+                </div>
+              </BottomSheet>
+            ) : null}
+            {cashAccountSheetOpen ? (
+              <InvestmentAccountSelectionSheet
+                title="Select cash account"
+                options={currentAccounts.map((account) => ({
+                  id: account.id,
+                  name: account.name,
+                  detail: displayRoboAccountNumber(account.accountNumber, country),
+                  balance: formatInvestmentMoney(account.balance, country, account.currency, amountsHidden),
+                }))}
+                selectedId={selectedCashAccountId}
+                onClose={() => setCashAccountSheetOpen(false)}
+                onConfirm={(id) => {
+                  setSelectedCashAccountId(id);
+                  setCashAccountSheetOpen(false);
+                }}
+              />
+            ) : null}
+          </>
+        )}
         footer={(
           <PrimaryButton
             labelSize="18"
@@ -1700,7 +1785,7 @@ export default function CzFutureRoboAdvisorFlow({
                 </div>
               ) : null}
               {fundingFields.monthlyContribution ? (
-                <div>
+                <div className={fundingFields.initialAmount ? "pt-[8px]" : undefined}>
                   <TextField label="Monthly contribution" value={monthlyContribution} onChange={setMonthlyContribution} inputMode="numeric" suffix="CZK" suffixOutsideDivider suffixClassName="!font-bold" />
                   <div className="mt-[16px] grid grid-cols-3 gap-[8px]">
                     {["500", "1000", "2000"].map((amount) => (
@@ -1715,7 +1800,18 @@ export default function CzFutureRoboAdvisorFlow({
                 </div>
               ) : null}
               {fundingFields.startDate ? (
-                <TextField label="Start date" value={startDate} onChange={setStartDate} trailingIconName="calendar-days" />
+                <TextField
+                  label="Start date"
+                  value={startDate}
+                  onChange={setStartDate}
+                  readOnly
+                  onActivate={() => setStartDatePickerOpen(true)}
+                  trailingIconName="calendar-days"
+                  trailingIconAction={{
+                    ariaLabel: "Select start date",
+                    onClick: () => setStartDatePickerOpen(true),
+                  }}
+                />
               ) : null}
             </div>
 
@@ -1723,15 +1819,21 @@ export default function CzFutureRoboAdvisorFlow({
               <h2 className="text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">Choose the account to use</h2>
               <p className="mt-[10px] text-[16px] leading-[21px] text-[var(--uc-text)]">{cashAccountDescription}</p>
               <div className="mt-[18px]">
-                <TextField
-                  label="Cash account"
-                  value="CZ12345678901234"
-                  onChange={() => undefined}
-                  readOnly
-                  trailingIconName="chevron-down"
-                  helperText="My account name"
-                  helperText2="Available balance 50 000,00 CZK"
-                />
+                {selectedCashAccount ? (
+                  <TextField
+                    label="Cash account"
+                    ariaLabel={`Cash account, ${selectedCashAccount.name}`}
+                    value={displayRoboAccountNumber(selectedCashAccount.accountNumber, country)}
+                    onChange={() => undefined}
+                    readOnly
+                    trailingIconName="chevron-down"
+                    helperText={selectedCashAccount.name}
+                    helperText2={`Available balance ${formatInvestmentMoney(selectedCashAccount.balance, country, selectedCashAccount.currency, amountsHidden)}`}
+                    onActivate={() => setCashAccountSheetOpen(true)}
+                  />
+                ) : (
+                  <p className="text-[14px] leading-[18px] text-[var(--uc-status-red)]">No current account is available.</p>
+                )}
               </div>
             </div>
 
@@ -1854,7 +1956,7 @@ export default function CzFutureRoboAdvisorFlow({
     return (
       <RoboScreen
         title="Available portfolios"
-        description={`Based on your ${ROBO_INVESTOR_PROFILE_LABELS.moderate} investor profile and selected ${resolvedHorizon}-year horizon, these baskets are a suitable match. Choose one to review its contents.`}
+        description={`Based on your ${ROBO_INVESTOR_PROFILE_LABELS.moderate} investor profile, these baskets are a suitable match. Choose one to review their contents.`}
         onBack={goBackByStep}
         onClose={onExit}
         dataScreen="portfolio"
@@ -1940,7 +2042,9 @@ export default function CzFutureRoboAdvisorFlow({
       initialAmount,
       monthlyContribution,
       startDate,
-      cashAccountLabel,
+      cashAccountLabel: selectedCashAccount
+        ? `${selectedCashAccount.name} · ${displayRoboAccountNumber(selectedCashAccount.accountNumber, country)}`
+        : defaultCashAccountLabel,
       investorProfileLabel: ROBO_INVESTOR_PROFILE_LABELS.moderate,
       portfolioName: selectedPortfolio.name,
     });
