@@ -50,15 +50,27 @@ interface InvestmentSecurityListScreenProps extends SharedProps {
 }
 
 interface InvestmentSecurityDetailScreenProps extends SharedProps {
-  security: InvestmentCatalogSecurity;
+  security?: InvestmentCatalogSecurity;
+  basketHoldingDetail?: {
+    title: string;
+    productId?: string;
+    basketTitle: string;
+    allocationPercent?: number;
+  };
   transactions?: readonly InvestmentHistoryTransaction[];
   onBack: () => void;
   czRoboProductDetail?: boolean;
+  inBottomSheet?: boolean;
+  hideOrderActions?: boolean;
   comfortablePeriodTargets?: boolean;
   onHistoryClick?: (filterByTitle?: string) => void;
   onSeeMoreTransactions?: () => void;
   onSellClick?: () => void;
   onBuyClick?: () => void;
+}
+
+interface CatalogInvestmentSecurityDetailScreenProps extends Omit<InvestmentSecurityDetailScreenProps, "security" | "basketHoldingDetail"> {
+  security: InvestmentCatalogSecurity;
 }
 
 const INVESTMENT_POSITIVE_COLOR = "var(--uc-green-olive)";
@@ -489,19 +501,59 @@ export function InvestmentSecurityListScreen({
   );
 }
 
-export function InvestmentSecurityDetailScreen({
+export function InvestmentSecurityDetailScreen(props: InvestmentSecurityDetailScreenProps) {
+  if (!props.security && props.basketHoldingDetail) {
+    return <BasketHoldingSecurityDetailScreen holding={props.basketHoldingDetail} />;
+  }
+  if (!props.security) return null;
+  const { basketHoldingDetail: _basketHoldingDetail, ...catalogProps } = props;
+  return <CatalogInvestmentSecurityDetailScreen {...catalogProps} security={props.security} />;
+}
+
+function BasketHoldingSecurityDetailScreen({
+  holding,
+}: {
+  holding: NonNullable<InvestmentSecurityDetailScreenProps["basketHoldingDetail"]>;
+}) {
+  return (
+    <div className="h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide" data-cz-robo-basket-holding-detail>
+      <section className="bg-[var(--uc-surface)] pb-[16px]">
+        <div className="px-[24px] pt-[8px]">
+          <div className="flex items-start gap-[10px]">
+            <h1 className="min-w-0 flex-1 text-[28px] font-bold leading-[31px] text-[var(--uc-text)]">{holding.title}</h1>
+            <BrandLogo logoId="unicredit" size={32} label={`${holding.title} product`} />
+          </div>
+          {holding.allocationPercent !== undefined ? (
+            <p className="mt-[8px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">{holding.allocationPercent}% of this basket</p>
+          ) : null}
+        </div>
+      </section>
+      <section className="pt-[8px]">
+        <SectionHeadingDivider title="PRODUCT INFO" className="px-[24px]" />
+        {holding.productId ? <InvestmentDetailField label="Product ID" value={holding.productId} variant="product-detail" /> : null}
+        <InvestmentDetailField label="Basket" value={holding.basketTitle} variant="product-detail" />
+        {holding.allocationPercent !== undefined ? <InvestmentDetailField label="Basket allocation" value={`${holding.allocationPercent}%`} variant="product-detail" /> : null}
+      </section>
+      <div className="h-[34px]" aria-hidden="true" />
+    </div>
+  );
+}
+
+function CatalogInvestmentSecurityDetailScreen({
   security,
   transactions = [],
   country,
   amountsHidden,
   onBack,
   czRoboProductDetail = false,
+  inBottomSheet = false,
+  hideOrderActions = false,
   comfortablePeriodTargets = false,
   onHistoryClick,
   onSeeMoreTransactions,
   onSellClick,
   onBuyClick,
-}: InvestmentSecurityDetailScreenProps) {
+}: CatalogInvestmentSecurityDetailScreenProps) {
   const [period, setPeriod] = useState<InvestmentPeriodId>("3y");
   const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(96);
   const marketPrice = security.marketPrice;
@@ -529,15 +581,17 @@ export function InvestmentSecurityDetailScreen({
         data-cz-robo-product-detail="true"
       >
         <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide" onScroll={handleScroll}>
-        <PageHeader
-          title={security.title}
-          onBack={onBack}
-          includeSafeArea
-          showHelp={false}
-          compact
-          renderLargeTitle={false}
-          collapsedTitleProgress={headerProgress}
-        />
+        {!inBottomSheet ? (
+          <PageHeader
+            title={security.title}
+            onBack={onBack}
+            includeSafeArea
+            showHelp={false}
+            compact
+            renderLargeTitle={false}
+            collapsedTitleProgress={headerProgress}
+          />
+        ) : null}
         <section className="bg-[var(--uc-surface)] pb-[28px]">
           <div className="px-[24px] pt-[8px]">
             <div className="flex items-start gap-[10px]">
@@ -632,7 +686,7 @@ export function InvestmentSecurityDetailScreen({
           <div className="h-[34px]" />
         </div>
         </div>
-        {canSell || canBuy ? (
+        {!hideOrderActions && (canSell || canBuy) ? (
           <div className="flex shrink-0 items-center gap-[12px] border-t border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[24px] pb-[34px] pt-[12px]" data-cz-robo-product-detail-actions="true">
             {canSell ? (
               <PrimaryButton

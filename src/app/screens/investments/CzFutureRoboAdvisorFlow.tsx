@@ -13,6 +13,7 @@ import BrandLogo from "@/app/components/brand-logo/BrandLogo";
 import StandardSignScreen from "@/app/components/flow/StandardSignScreen";
 import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
 import InvestmentBasketFundDetailScreen from "@/app/screens/investments/InvestmentBasketFundDetailScreen";
+import { InvestmentSecurityDetailScreen } from "@/app/screens/investments/InvestmentSecurityScreens";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import InvestmentFilterChips from "@/app/components/investments/InvestmentFilterChips";
 import InvestmentPeriodChips from "@/app/components/investments/InvestmentPeriodChips";
@@ -33,8 +34,9 @@ import {
   type InvestmentPortfolioTabId,
   type InvestmentPortfolioTabOption,
   type InvestmentSortId,
+  type InvestmentCatalogSecurity,
 } from "@/app/config/investmentsPortfolioConfig";
-import { formatInvestmentBasketPerformance, type InvestmentBasketFund } from "@/app/config/investmentBasketFundsConfig";
+import { formatInvestmentBasketPerformance, type InvestmentBasketFund, type InvestmentBasketFundHolding } from "@/app/config/investmentBasketFundsConfig";
 import introImage from "@/assets/investments/robo-advisor-intro.png";
 import amundiLogo from "@/assets/investments/funds/fund-amundi-logo.png";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
@@ -68,6 +70,7 @@ import {
 
 interface CzFutureRoboAdvisorFlowProps {
   currentAccounts?: readonly CurrentAccount[];
+  securityCatalog?: readonly InvestmentCatalogSecurity[];
   country?: CountryId;
   amountsHidden?: boolean;
   onBack: () => void;
@@ -82,6 +85,12 @@ interface CzFutureRoboAdvisorFlowProps {
   profileStatus?: RoboInvestorProfileStatus;
   requiresContactValidation?: boolean;
   availableStrategyCount?: 1 | 2 | 3;
+}
+
+interface SelectedBasketHolding {
+  basketTitle: string;
+  holding: InvestmentBasketFundHolding;
+  security: InvestmentCatalogSecurity | null;
 }
 
 interface RoboScreenProps {
@@ -574,12 +583,12 @@ function BasketPortfolioCard({
             </span>
           </div>
         ) : null}
-        <p className="uc-type-n5 mt-[8px] line-clamp-3 min-h-[51px] leading-[17px] text-[var(--uc-text)]">{basket.description}</p>
+        <p className="uc-type-n5 mt-[6px] line-clamp-2 min-h-[34px] leading-[17px] text-[var(--uc-text)]">{basket.description}</p>
       </button>
       <LinkButton
         aria-label={`Details for ${basket.title}`}
         onClick={onDetails}
-        className="mx-auto mt-[2px] py-[6px]"
+        className="mx-auto mt-0 min-h-[32px]"
       >
         Details
       </LinkButton>
@@ -790,8 +799,10 @@ function PortfolioProductLogo({ product }: { product: RoboPortfolioProduct }) {
 
 function PortfolioDetails({
   portfolio,
+  onHoldingClick,
 }: {
   portfolio: RoboPortfolio;
+  onHoldingClick: (holding: InvestmentBasketFundHolding) => void;
 }) {
   const basket = portfolio.basketFund;
   if (!basket) return null;
@@ -807,14 +818,21 @@ function PortfolioDetails({
       {basket.holdings?.length ? (
         <div className="mt-[6px]">
           {basket.holdings.map((holding, index) => (
-            <div key={holding.productId ?? `${basket.id}-${index}`} className="flex min-h-[58px] items-center gap-[10px] py-[8px]">
+            <button
+              key={holding.productId ?? `${basket.id}-${index}`}
+              type="button"
+              aria-label={`Open product details for ${holding.title}`}
+              data-basket-holding={holding.productId ?? holding.title}
+              onClick={() => onHoldingClick(holding)}
+              className="flex min-h-[58px] w-full items-center gap-[10px] py-[8px] text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--uc-action)]"
+            >
               <BrandLogo logoId={basket.logoId} size={32} />
               <div className="min-w-0 flex-1">
                 <p className="text-[14px] font-bold leading-[18px] text-[var(--uc-text)]">{holding.title}</p>
                 {holding.productId ? <p className="mt-[2px] text-[13px] leading-[16px] text-[var(--uc-text-muted)]">{holding.productId}</p> : null}
               </div>
               {holding.percent !== undefined ? <span className="text-[15px] font-bold text-[var(--uc-text)]">{holding.percent}%</span> : null}
-            </div>
+            </button>
           ))}
         </div>
       ) : (
@@ -1352,6 +1370,7 @@ function ManagementScreen({
 
 export default function CzFutureRoboAdvisorFlow({
   currentAccounts = [DEFAULT_ROBO_CASH_ACCOUNT],
+  securityCatalog = [],
   country = "CZ",
   amountsHidden = false,
   onBack,
@@ -1369,6 +1388,7 @@ export default function CzFutureRoboAdvisorFlow({
     createRoboAdvisorFlowState,
   );
   const [basketDetailsToOpen, setBasketDetailsToOpen] = useState<InvestmentBasketFund | null>(null);
+  const [selectedBasketHolding, setSelectedBasketHolding] = useState<SelectedBasketHolding | null>(null);
   const [startDatePickerOpen, setStartDatePickerOpen] = useState(false);
   const [cashAccountSheetOpen, setCashAccountSheetOpen] = useState(false);
   const [selectedCashAccountId, setSelectedCashAccountId] = useState(currentAccounts[0]?.id ?? "");
@@ -1401,6 +1421,14 @@ export default function CzFutureRoboAdvisorFlow({
   const setTermsAccepted = (value: boolean) => dispatchFlow({ type: "set-field", field: "termsAccepted", value });
   const setManagementMode = (value: ManagementMode) => dispatchFlow({ type: "set-field", field: "managementMode", value });
   const selectedCashAccount = currentAccounts.find((account) => account.id === selectedCashAccountId) ?? null;
+  const openBasketHolding = (basket: InvestmentBasketFund, holding: InvestmentBasketFundHolding) => {
+    const normalizedTitle = holding.title.trim().toLowerCase();
+    const security = securityCatalog.find((candidate) => (
+      (holding.productId && (candidate.productId === holding.productId || candidate.id === holding.productId))
+      || candidate.title.trim().toLowerCase() === normalizedTitle
+    )) ?? null;
+    setSelectedBasketHolding({ basketTitle: basket.title, holding, security });
+  };
   const strategyCarouselRef = useRef<HTMLDivElement>(null);
   const portfolioCarouselRef = useRef<HTMLDivElement>(null);
 
@@ -1467,6 +1495,34 @@ export default function CzFutureRoboAdvisorFlow({
     else onBack();
   };
 
+  const selectedBasketHoldingOverlay = selectedBasketHolding ? (
+    <BottomSheet
+      title="Product details"
+      onClose={() => setSelectedBasketHolding(null)}
+      closeLabel="Close product details"
+      fillHeight
+      className="!p-0"
+      headerClassName="mx-[16px] mt-[16px]"
+      bodyClassName="min-h-0 flex-1"
+    >
+      <InvestmentSecurityDetailScreen
+        security={selectedBasketHolding.security ?? undefined}
+        basketHoldingDetail={selectedBasketHolding.security ? undefined : {
+          title: selectedBasketHolding.holding.title,
+          productId: selectedBasketHolding.holding.productId,
+          basketTitle: selectedBasketHolding.basketTitle,
+          allocationPercent: selectedBasketHolding.holding.percent,
+        }}
+        country={country}
+        amountsHidden={amountsHidden}
+        onBack={() => setSelectedBasketHolding(null)}
+        czRoboProductDetail
+        inBottomSheet
+        hideOrderActions
+      />
+    </BottomSheet>
+  ) : undefined;
+
   if (basketDetailsToOpen) {
     return (
       <InvestmentBasketFundDetailScreen
@@ -1474,6 +1530,8 @@ export default function CzFutureRoboAdvisorFlow({
         country="CZ"
         amountsHidden={false}
         czRoboProductDetail
+        onOpenHolding={(holding) => openBasketHolding(basketDetailsToOpen, holding)}
+        overlay={selectedBasketHoldingOverlay}
         onBack={() => setBasketDetailsToOpen(null)}
       />
     );
@@ -1960,6 +2018,7 @@ export default function CzFutureRoboAdvisorFlow({
         onBack={goBackByStep}
         onClose={onExit}
         dataScreen="portfolio"
+        overlay={selectedBasketHoldingOverlay}
         footer={(
           <PrimaryButton
             labelSize="18"
@@ -2025,7 +2084,11 @@ export default function CzFutureRoboAdvisorFlow({
         ) : null}
         {selectedBasketPortfolio ? (
           <div className="mt-[24px]">
-            <PortfolioDetails key={selectedBasketPortfolio.id} portfolio={selectedBasketPortfolio} />
+            <PortfolioDetails
+              key={selectedBasketPortfolio.id}
+              portfolio={selectedBasketPortfolio}
+              onHoldingClick={(holding) => openBasketHolding(selectedBasketPortfolio.basketFund!, holding)}
+            />
           </div>
         ) : null}
       </RoboScreen>
