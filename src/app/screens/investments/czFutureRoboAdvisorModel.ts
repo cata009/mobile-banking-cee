@@ -122,11 +122,6 @@ export const ROBO_GOAL_TYPES = [
     description: "Grow your wealth to support long-term goals.",
   },
   {
-    id: "protect-from-inflation",
-    title: "Protection for inflation",
-    description: "Help preserve purchasing power as prices rise.",
-  },
-  {
     id: "unforeseen-circumstances",
     title: "Saving for unforeseen circumstances",
     description: "Build a reserve for unexpected expenses.",
@@ -145,7 +140,6 @@ export const ROBO_GOAL_TYPES = [
 
 const ROBO_GOAL_NAME_SUGGESTIONS: Readonly<Record<string, readonly string[]>> = {
   "General build-up wealth": ["Bright future", "Make money work", "My next opportunity"],
-  "Protection for inflation": ["Keep savings strong", "Protect my savings", "Future-proof savings"],
   "Saving for unforeseen circumstances": ["Peace of mind", "My safety net", "Ready for surprises"],
   "Saving for a major purchase": ["My dream home", "My next car", "Big purchase"],
   Retirement: ["Retire on my terms", "Brighter retirement", "Future freedom"],
