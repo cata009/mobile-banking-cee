@@ -957,8 +957,8 @@ function GoalDetail({
     ? `${existingGoal.targetInteger}${existingGoal.targetDecimals}`
     : formatCzkInput(targetAmount);
   const resolvedProgress = existingGoal?.progress ?? 80;
-  const resolvedStartDate = existingGoal?.startDate ?? existingGoal?.endDate ?? "15 Feb 2025";
-  const resolvedEndDate = existingGoal?.timeLeft ?? existingGoal?.endDate ?? "15 Feb 2035";
+  const resolvedStartDate = existingGoal ? existingGoal.startDate : "15 Feb 2025";
+  const resolvedEndDate = existingGoal?.endDate ?? "15 Feb 2035";
   const resolvedReturnTone = existingGoal?.returnTone ?? "negative";
   const resolvedReturnLabel = existingGoal?.returnLabel ?? "-1 100,00 CZK (-1,36%)";
   const [selectedPeriodId, setSelectedPeriodId] = useState<InvestmentPeriodId>("3y");
@@ -1046,6 +1046,7 @@ function GoalDetail({
         <InvestmentPeriodChips
           periods={GOAL_DETAIL_PERIODS}
           comfortableTouchTargets
+          className="-mt-[8px]"
           selectedPeriodId={selectedPeriodId}
           onChange={setSelectedPeriodId}
         />
@@ -1086,7 +1087,14 @@ function GoalDetail({
           </span>
         </div>
         <div className="mt-[8px] flex justify-between uc-type-n5 text-[var(--uc-text-muted)]">
-          <span>{resolvedStartDate}</span><span>{resolvedEndDate}</span>
+          {resolvedStartDate ? (
+            <>
+              <span>{resolvedStartDate}</span>
+              <span>{resolvedEndDate}</span>
+            </>
+          ) : (
+            <span>{resolvedEndDate}</span>
+          )}
         </div>
       </div>
 
