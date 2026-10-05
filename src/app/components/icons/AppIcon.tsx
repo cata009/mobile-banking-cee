@@ -43,6 +43,8 @@ const NON_STANDARD_ICON_NAMES = new Set([
   "card-options-change-name",
   "card-options-delivery-address",
   "card-options-reissue",
+  "payment-photo-camera",
+  "payment-use-account",
 ]);
 const ICON_INVENTORY_EXCLUDED_NAMES = new Set(["radio-unselected", "radio-selected"]);
 
