@@ -341,7 +341,7 @@ export default function InvestmentPortfolioChart({
         <AreaChart
           data={chartData}
           margin={compact
-            ? { top: 8, right: 4, bottom: 34, left: 0 }
+            ? { top: 8, right: 4, bottom: 0, left: 0 }
             : { top: 8, right: edgeToEdge ? 4 : 10, bottom: tightBottomPadding ? 0 : 36, left: 0 }}
           onMouseDown={(event) => {
             setIsPointerActive(true);

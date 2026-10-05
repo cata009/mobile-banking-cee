@@ -363,6 +363,7 @@ function GoalPlanScreen({
       description="Choose a target amount and time horizon to shape your investment recommendation."
       onBack={onBack}
       onClose={onClose}
+      headerAction="none"
       dataScreen={dataScreen}
       contentTopClassName="pt-[20px]"
       footer={(
