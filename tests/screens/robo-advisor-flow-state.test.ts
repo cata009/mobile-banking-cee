@@ -21,14 +21,13 @@ describe('Robo Advisor flow state', () => {
       id: 'goal-1',
       name: 'My home',
       purpose: 'Saving for a major purchase',
-      status: 'ACTIVE' as const,
       currentInteger: '10 000',
       currentDecimals: '00',
       returnLabel: '+1.00%',
       returnTone: 'positive' as const,
       targetInteger: '250 000',
       targetDecimals: '00',
-      progress: 4,
+      horizonYears: 10,
       endDate: '2032',
       portfolioId: ROBO_PORTFOLIOS[0]!.id,
     }
@@ -37,6 +36,7 @@ describe('Robo Advisor flow state', () => {
       step: 'goal-detail',
       goalName: 'My home',
       targetAmount: '250000',
+      horizonYears: 10,
       selectedPortfolio: ROBO_PORTFOLIOS[0],
     })
   })

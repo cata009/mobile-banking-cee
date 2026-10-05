@@ -26,6 +26,7 @@ export type RoboAdvisorCreationStep =
 export type RoboAdvisorManagementMode =
   | 'menu'
   | 'add-money'
+  | 'add-money-basket'
   | 'monthly'
   | 'withdraw'
   | 'partial-withdrawal'
@@ -33,8 +34,7 @@ export type RoboAdvisorManagementMode =
   | 'history'
   | 'settings'
   | 'rename'
-  | 'target'
-  | 'horizon'
+  | 'goal-plan'
   | 'close'
 
 export type RoboAdvisorFlowState = {
@@ -77,6 +77,7 @@ export function createRoboAdvisorFlowState(initialGoal?: RoboExistingGoal): Robo
   const initialPortfolio = initialGoal
     ? (ROBO_PORTFOLIOS.find((portfolio) => portfolio.id === initialGoal.portfolioId) ?? ROBO_PORTFOLIOS[0]!)
     : null
+  const hasPresetHorizon = [3, 5, 7, 10].includes(initialGoal?.horizonYears ?? 0)
 
   return {
     step: initialGoal ? 'goal-detail' : 'intro',
@@ -84,9 +85,9 @@ export function createRoboAdvisorFlowState(initialGoal?: RoboExistingGoal): Robo
     previousPortfolioStep: 'strategy',
     goalType: '',
     goalName: initialGoal?.name ?? '',
-    targetAmount: initialGoal?.targetInteger.replace(/\s/g, '') ?? '',
-    horizonYears: 0,
-    manualHorizon: '',
+    targetAmount: initialGoal?.targetInteger.replace(/\D/g, '') ?? '',
+    horizonYears: hasPresetHorizon ? initialGoal?.horizonYears ?? 0 : 0,
+    manualHorizon: initialGoal && !hasPresetHorizon ? String(initialGoal.horizonYears) : '',
     fundingMethod: null,
     initialAmount: '',
     monthlyContribution: '',
@@ -146,7 +147,8 @@ export function getRoboAdvisorBackStep(
 
 export function getPreviousManagementMode(mode: RoboAdvisorManagementMode): RoboAdvisorManagementMode {
   if (mode === 'partial-withdrawal' || mode === 'full-withdrawal') return 'withdraw'
-  if (mode === 'rename' || mode === 'target' || mode === 'horizon' || mode === 'monthly' || mode === 'close') {
+  if (mode === 'add-money-basket') return 'menu'
+  if (mode === 'rename' || mode === 'goal-plan' || mode === 'monthly' || mode === 'close') {
     return 'settings'
   }
   return 'menu'

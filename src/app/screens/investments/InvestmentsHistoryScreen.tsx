@@ -4,12 +4,9 @@ import AccountActionBar from "@/app/components/accounts/AccountActionBar";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import BrandLogo from "@/app/components/brand-logo/BrandLogo";
 import { AppIcon } from "@/app/components/icons";
-import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
 import PageHeader from "@/app/components/PageHeader";
 import CzRoboLevelOneShell from "@/app/screens/investments/CzRoboLevelOneShell";
-import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import { Calendar } from "@/app/components/ui/calendar";
-import { cn } from "@/app/components/ui/utils";
 import type { DateRange } from "react-day-picker";
 import {
   INVESTMENT_HISTORY_DATE_OPTIONS,
@@ -34,6 +31,7 @@ import { parseIsoDateOnly } from "@/app/utils/dateOnly";
 import { formatInvestmentAmountParts } from "@/app/utils/investmentAmountFormatting";
 import type { Currency } from "@/data/products";
 import { useProducts } from "@/hooks/useProducts";
+import InvestmentHistoryRows, { InvestmentHistoryTabs } from "@/app/screens/investments/InvestmentHistoryRows";
 
 type HistoryItem =
   | { kind: "transaction"; item: InvestmentHistoryTransaction }
@@ -60,11 +58,6 @@ interface InvestmentsHistoryScreenProps {
   historyFilterBySecurityId?: string | null;
 }
 
-const HISTORY_TABS = [
-  { id: "transactions", label: "TRANSACTIONS" },
-  { id: "orders", label: "ORDERS" },
-] as const;
-
 const INVESTMENT_HISTORY_ORDER_STATUSES: readonly InvestmentHistoryOrderStatus[] = ["EXECUTED", "PENDING", "REJECTED"];
 
 function toIsoDateOnly(date: Date) {
@@ -88,30 +81,6 @@ function formatAmountLabel(amount: number, country: CountryId, currency: string,
   const masked = maskAmountParts({ integer: amountParts.integer, decimals: amountParts.decimal, currency }, hidden);
 
   return `${masked.integer}${masked.decimals} ${masked.currency}`;
-}
-
-function InvestmentAmountLabel({
-  amount,
-  country,
-  currency,
-  hidden,
-  className,
-}: {
-  amount: number;
-  country: CountryId;
-  currency: string;
-  hidden: boolean;
-  className?: string;
-}) {
-  const amountParts = formatAmountParts(amount, country, currency);
-  const masked = maskAmountParts({ integer: amountParts.integer, decimals: amountParts.decimal, currency }, hidden);
-
-  return (
-    <p className={cn("text-right leading-[22px]", className)}>
-      <span className="text-[20px] font-bold">{masked.integer}</span>
-      <span className="text-[14px] font-normal">{masked.decimals} {masked.currency}</span>
-    </p>
-  );
 }
 
 function AmountHero({
@@ -145,16 +114,6 @@ function formatDateParts(date: string, country: CountryId) {
     year: new Intl.DateTimeFormat(config.locale, { year: "numeric", timeZone: "UTC" }).format(parsed),
     long: new Intl.DateTimeFormat(config.locale, { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(parsed),
   };
-}
-
-function groupByYear<T extends { date: string }>(items: readonly T[], country: CountryId) {
-  const groups = new Map<string, T[]>();
-  items.forEach((item) => {
-    const year = formatDateParts(item.date, country).year;
-    groups.set(year, [...(groups.get(year) ?? []), item]);
-  });
-
-  return [...groups.entries()].map(([year, rows]) => ({ year, rows }));
 }
 
 function historyRowMatchesSearch(item: InvestmentHistoryTransaction | InvestmentHistoryOrder, searchQuery: string) {
@@ -213,97 +172,6 @@ function filtersMatchDefaults(filters: InvestmentHistoryFilterState, defaults: I
     && sameSelection(filters.selectedTypes, defaults.selectedTypes)
     && sameSelection(filters.selectedCurrencies, defaults.selectedCurrencies)
     && (tab !== "orders" || sameSelection(filters.selectedStatuses, defaults.selectedStatuses));
-}
-
-function DateBlock({ date, country }: { date: string; country: CountryId }) {
-  const parts = formatDateParts(date, country);
-  return (
-    <div className="flex w-[48px] shrink-0 items-center">
-      <div className="w-[28px] text-left">
-        <p className="text-[18px] font-bold leading-[20px] text-[var(--uc-text)]">{parts.day}</p>
-        <p className="text-[14px] font-bold leading-[15px] text-[var(--uc-text-muted)]">{parts.month}</p>
-      </div>
-    </div>
-  );
-}
-
-function TradeIcon({ type }: { type: "BUY" | "SELL" | InvestmentHistoryTransactionType }) {
-  const isBuy = type === "BUY" || type === "COUPON";
-  const color = isBuy ? "var(--uc-green-olive)" : "var(--uc-status-red)";
-  return (
-    <span className="grid size-[32px] shrink-0 place-items-center" aria-hidden="true">
-      <AppIcon name={isBuy ? "trade-buy" : "trade-sell"} color={color} size={28} />
-    </span>
-  );
-}
-
-function InvestmentHistoryTransactionRow({
-  item,
-  country,
-  amountsHidden,
-  onClick,
-}: {
-  item: InvestmentHistoryTransaction;
-  country: CountryId;
-  amountsHidden: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex h-[80px] w-full items-center bg-[var(--uc-surface)] px-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
-      data-investment-history-row="transaction"
-    >
-      <DateBlock date={item.date} country={country} />
-      <TradeIcon type={item.type} />
-      <div className="ml-[16px] flex min-w-0 flex-1 flex-col items-end py-[10px] text-right">
-        <p className="w-full truncate text-right text-[14px] font-normal leading-[17px] text-[var(--uc-text)]">{item.title}</p>
-        <InvestmentAmountLabel
-          amount={item.amount}
-          country={country}
-          currency={item.currency}
-          hidden={amountsHidden}
-          className={item.tone === "positive" ? "text-[var(--uc-green-olive)]" : "text-[var(--uc-status-red)]"}
-        />
-        <p className="w-full truncate text-right text-[14px] font-normal leading-[17px] text-[var(--uc-text-muted)]">{item.type}</p>
-      </div>
-    </button>
-  );
-}
-
-function InvestmentHistoryOrderRow({
-  item,
-  country,
-  amountsHidden,
-  onClick,
-}: {
-  item: InvestmentHistoryOrder;
-  country: CountryId;
-  amountsHidden: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex h-[80px] w-full items-center bg-[var(--uc-surface)] px-[16px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
-      data-investment-history-row="order"
-    >
-      <TradeIcon type={item.orderType} />
-      <div className="ml-[16px] flex min-w-0 flex-1 flex-col items-end py-[10px] text-right">
-        <p className="w-full truncate text-right text-[14px] font-normal leading-[17px] text-[var(--uc-text)]">{item.title}</p>
-        <InvestmentAmountLabel
-          amount={item.orderType === "SELL" ? -item.amount : item.amount}
-          country={country}
-          currency={item.currency}
-          hidden={amountsHidden}
-          className={item.orderType === "SELL" ? "text-[var(--uc-status-red)]" : "text-[var(--uc-text)]"}
-        />
-        <p className="w-full truncate text-right text-[14px] font-normal uppercase leading-[17px] text-[var(--uc-text-muted)]">{item.status}</p>
-      </div>
-    </button>
-  );
 }
 
 function ActiveFilterRail({ chips, onRemoveAll }: { chips: readonly { id: string; label: string; onRemove: () => void }[]; onRemoveAll: () => void }) {
@@ -928,13 +796,13 @@ export default function InvestmentsHistoryScreen({
     effectiveFilters.selectedCurrencies.includes(item.currency)
   );
   const filteredOrders = orders.filter((item) =>
+    (!historySecurityIdFilter || item.securityId === historySecurityIdFilter) &&
     historyRowMatchesSearch(item, searchQuery) &&
     historyRowMatchesDate(item.date, effectiveFilters, latestOrderDate) &&
     effectiveFilters.selectedTypes.includes(item.orderType) &&
     effectiveFilters.selectedCurrencies.includes(item.currency) &&
     effectiveFilters.selectedStatuses.includes(item.status)
   );
-  const activeRows = activeTab === "transactions" ? filteredTransactions : filteredOrders;
   const filterActive = appliedFilters !== null;
 
 
@@ -1057,15 +925,7 @@ export default function InvestmentsHistoryScreen({
 
   const historyListContent = (
     <>
-      <MessagesMailboxTabs
-        tabs={HISTORY_TABS}
-        activeTabId={activeTab}
-        onChange={(tabId) => setActiveTab(tabId as InvestmentHistoryTabId)}
-        minTabWidth={188}
-        layout="equal"
-        ariaLabel="Investment history tabs"
-        withTopMargin={false}
-      />
+      <InvestmentHistoryTabs activeTab={activeTab} onChange={setActiveTab} />
       {activeTab === "orders" && onToApproveClick ? (
         <button
           type="button"
@@ -1098,49 +958,15 @@ export default function InvestmentsHistoryScreen({
         />
       </div>
       {filterActive ? <ActiveFilterRail chips={activeFilterChips} onRemoveAll={() => setAppliedFilters(null)} /> : null}
-      {activeRows.length === 0 ? (
-        <div className="px-[24px] pt-[26px]">
-          <p className="text-[18px] font-bold leading-[24px] text-[var(--uc-text)]">
-            {activeTab === "transactions" ? "You don't have any transactions" : "You don't have any orders"}
-          </p>
-        </div>
-      ) : (
-        <div className="pt-[24px]">
-          {activeTab === "transactions"
-            ? groupByYear(filteredTransactions, country).map((group) => (
-                <section key={group.year}>
-                  <SectionHeadingDivider title={group.year} variant="light-date" className="px-[16px]" />
-                  <div className="pt-[16px]">
-                    {group.rows.map((item) => (
-                      <InvestmentHistoryTransactionRow
-                        key={item.id}
-                        item={item}
-                        country={country}
-                        amountsHidden={amountsHidden}
-                        onClick={() => setSelectedItem({ kind: "transaction", item })}
-                      />
-                    ))}
-                  </div>
-                </section>
-              ))
-            : groupByYear(filteredOrders, country).map((group) => (
-                <section key={group.year}>
-                  <SectionHeadingDivider title={group.year} variant="light-date" className="px-[16px]" />
-                  <div className="pt-[16px]">
-                    {group.rows.map((item) => (
-                      <InvestmentHistoryOrderRow
-                        key={item.id}
-                        item={item}
-                        country={country}
-                        amountsHidden={amountsHidden}
-                        onClick={() => setSelectedItem({ kind: "order", item })}
-                      />
-                    ))}
-                  </div>
-                </section>
-              ))}
-        </div>
-      )}
+      <InvestmentHistoryRows
+        tab={activeTab}
+        transactions={filteredTransactions}
+        orders={filteredOrders}
+        country={country}
+        amountsHidden={amountsHidden}
+        onTransactionClick={(item) => setSelectedItem({ kind: "transaction", item })}
+        onOrderClick={(item) => setSelectedItem({ kind: "order", item })}
+      />
       <div className="h-[34px]" />
     </>
   );

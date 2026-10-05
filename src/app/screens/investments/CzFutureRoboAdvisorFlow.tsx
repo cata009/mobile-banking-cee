@@ -12,27 +12,29 @@ import InvestmentAccountSelectionSheet from "@/app/components/investments/Invest
 import BrandLogo from "@/app/components/brand-logo/BrandLogo";
 import StandardSignScreen from "@/app/components/flow/StandardSignScreen";
 import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
+import InvestmentProductCard from "@/app/components/investments/InvestmentProductCard";
 import InvestmentBasketFundDetailScreen from "@/app/screens/investments/InvestmentBasketFundDetailScreen";
+import InvestmentHistoryRows, { InvestmentHistoryTabs } from "@/app/screens/investments/InvestmentHistoryRows";
 import { InvestmentSecurityDetailScreen } from "@/app/screens/investments/InvestmentSecurityScreens";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import InvestmentFilterChips from "@/app/components/investments/InvestmentFilterChips";
 import InvestmentPeriodChips from "@/app/components/investments/InvestmentPeriodChips";
 import InvestmentPortfolioChart from "@/app/components/investments/InvestmentPortfolioChart";
-import InvestmentPortfolioTabs from "@/app/components/investments/InvestmentPortfolioTabs";
 import { Calendar } from "@/app/components/ui/calendar";
 import LinkButton from "@/app/components/ui/LinkButton";
 import { cn } from "@/app/components/ui/utils";
-import { formatInvestmentMoney, formatInvestmentNumber } from "@/app/utils/investmentAmountFormatting";
+import { formatInvestmentAmountParts, formatInvestmentMoney, formatInvestmentNumber } from "@/app/utils/investmentAmountFormatting";
 import type { CountryId } from "@/app/state/demoTypes";
 import type { CurrentAccount } from "@/data/products";
 import { formatCzLocalAccountNumber } from "@/data/czechDomesticAccount";
+import { convertCurrency, getCountryCurrency, roundMoney } from "@/data/exchangeRates";
 import {
   INVESTMENT_PERIODS,
   INVESTMENT_SORT_OPTIONS,
+  buildInvestmentHistoryOrders,
+  buildInvestmentHistoryTransactions,
   buildInvestmentChartPoints,
   type InvestmentPeriodId,
-  type InvestmentPortfolioTabId,
-  type InvestmentPortfolioTabOption,
   type InvestmentSortId,
   type InvestmentCatalogSecurity,
 } from "@/app/config/investmentsPortfolioConfig";
@@ -46,9 +48,11 @@ import {
   ROBO_GOAL_TYPES,
   ROBO_PORTFOLIO_PRESENTATIONS,
   ROBO_STRATEGIES,
+  calculateRoboGoalProgress,
   buildRoboReviewRows,
   formatCzkInput,
   getRoboGoalNameSuggestions,
+  getRoboGoalProgress,
   getFundingFieldVisibility,
   getPortfoliosForStrategy,
   isInvestorProfileBlocking,
@@ -77,8 +81,10 @@ interface CzFutureRoboAdvisorFlowProps {
   onExit: () => void;
   onOpenSecurity?: (selection: {
     securityId: string;
+    productId?: string;
     localValue: number;
     performancePercent: number;
+    hideBuyAction?: boolean;
   }) => void;
   initialGoal?: RoboExistingGoal;
   onGoalUpdated?: (goal: RoboExistingGoal) => void;
@@ -98,13 +104,12 @@ interface RoboScreenProps {
   description?: string;
   onBack: () => void;
   onClose: () => void;
-  headerAction?: "close" | "help";
+  headerAction?: "close" | "help" | "none";
   children: ReactNode;
   footer?: ReactNode;
   overlay?: ReactNode;
   dataScreen: string;
   titleClassName?: string;
-  descriptionTrailing?: ReactNode;
   descriptionTopClassName?: string;
   contentTopClassName?: string;
 }
@@ -177,7 +182,6 @@ function RoboScreen({
   overlay,
   dataScreen,
   titleClassName,
-  descriptionTrailing,
   descriptionTopClassName = "mt-[16px]",
   contentTopClassName = "pt-[32px]",
 }: RoboScreenProps) {
@@ -212,11 +216,10 @@ function RoboScreen({
         <h1 className={cn("uc-type-h1 pt-[8px] text-[var(--uc-text)]", titleClassName)}>{title}</h1>
         {description ? (
           <div
-            className={cn(descriptionTopClassName, "flex items-center justify-between gap-[16px]")}
+            className={descriptionTopClassName}
             data-testid={dataScreen === "goal-detail" ? "robo-goal-detail-meta" : undefined}
           >
             <p className="text-[16px] leading-[21px] text-[var(--uc-text)]">{description}</p>
-            {descriptionTrailing}
           </div>
         ) : null}
         <div className={contentTopClassName}>{children}</div>
@@ -224,6 +227,163 @@ function RoboScreen({
       {footer ? <footer className="shrink-0 px-[24px] pb-[34px] pt-[12px]">{footer}</footer> : null}
       {overlay}
     </div>
+  );
+}
+
+interface GoalPlanFieldsProps {
+  targetAmount: string;
+  onTargetAmountChange: (value: string) => void;
+  horizonYears: number;
+  manualHorizon: string;
+  onSelectHorizon: (years: number) => void;
+  onManualHorizonChange: (value: string) => void;
+}
+
+function isValidRoboHorizon(value: string): boolean {
+  const years = Number(value);
+  return Number.isInteger(years) && years >= 3 && years <= 15;
+}
+
+function GoalPlanFields({
+  targetAmount,
+  onTargetAmountChange,
+  horizonYears,
+  manualHorizon,
+  onSelectHorizon,
+  onManualHorizonChange,
+}: GoalPlanFieldsProps) {
+  return (
+    <>
+      <TextField
+        label="Target amount"
+        value={targetAmount}
+        onChange={onTargetAmountChange}
+        inputMode="numeric"
+        suffix="CZK"
+        suffixOutsideDivider
+        suffixClassName="!font-bold"
+      />
+      <div className="mt-[12px] grid grid-cols-3 gap-[8px]" role="group" aria-label="Suggested target amounts">
+        {["100000", "250000", "500000"].map((amount) => (
+          <button
+            key={amount}
+            type="button"
+            aria-pressed={targetAmount === amount}
+            onClick={() => onTargetAmountChange(amount)}
+            className={cn(
+              "h-[34px] rounded-[4px] uc-type-n5-strong transition-colors",
+              targetAmount === amount
+                ? "border border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
+                : "bg-[var(--uc-neutral-100)] text-[var(--uc-text)]",
+            )}
+          >
+            {formatCzkInput(amount)}
+          </button>
+        ))}
+      </div>
+      <section className="mt-[20px]" aria-label="Time horizon">
+        <h2 className="text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">Choose your time horizon</h2>
+        <p className="mt-[10px] text-[16px] leading-[21px] text-[var(--uc-text)]">
+          Choose a period that fits your goal. It guides the recommendation, but your goal will not close automatically.
+        </p>
+        <div role="radiogroup" aria-label="Time horizon" className="mt-[10px] grid grid-cols-2 gap-x-[12px] gap-y-[4px]">
+          {[3, 5, 7, 10].map((years) => {
+            const selected = horizonYears === years && !manualHorizon;
+            return (
+              <button
+                key={years}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                aria-label={`${years} years`}
+                onClick={() => onSelectHorizon(years)}
+                className="flex min-h-[48px] w-full items-center gap-[12px] text-left"
+              >
+                <AppIcon name={selected ? "radio-selected" : "radio-unselected"} size={24} />
+                <span className="text-[14px] font-bold leading-[18px]">{years} YEARS</span>
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            role="radio"
+            aria-checked={manualHorizon.length > 0}
+            aria-label="Other time horizon"
+            onClick={() => onManualHorizonChange(manualHorizon || "3")}
+            className="col-span-2 flex min-h-[48px] w-full items-center gap-[12px] text-left"
+          >
+            <AppIcon name={manualHorizon.length > 0 ? "radio-selected" : "radio-unselected"} size={24} />
+            <span className="text-[14px] font-bold leading-[18px]">OTHER TIME HORIZON</span>
+          </button>
+        </div>
+        {manualHorizon.length > 0 ? (
+          <div className="mt-[12px]">
+            <TextField
+              label="Other time horizon (years)"
+              value={manualHorizon}
+              onChange={(value) => onManualHorizonChange(value.replace(/\D/g, "").slice(0, 2))}
+              inputMode="numeric"
+              helperText="Select between 3 and 15 years"
+              errorText={manualHorizon.length > 0 && !isValidRoboHorizon(manualHorizon)
+                ? "Enter a whole number from 3 to 15 years."
+                : undefined}
+            />
+          </div>
+        ) : null}
+      </section>
+    </>
+  );
+}
+
+function GoalPlanScreen({
+  dataScreen,
+  targetAmount,
+  onTargetAmountChange,
+  horizonYears,
+  manualHorizon,
+  onSelectHorizon,
+  onManualHorizonChange,
+  onBack,
+  onClose,
+  onContinue,
+  continueLabel = "Continue",
+}: GoalPlanFieldsProps & {
+  dataScreen: string;
+  onBack: () => void;
+  onClose: () => void;
+  onContinue: (years: number) => void;
+  continueLabel?: string;
+}) {
+  const hasHorizonSelection = horizonYears > 0 || isValidRoboHorizon(manualHorizon);
+  const selectedHorizon = horizonYears || Number(manualHorizon) || 10;
+
+  return (
+    <RoboScreen
+      title="Set your goal plan"
+      description="Choose a target amount and time horizon to shape your investment recommendation."
+      onBack={onBack}
+      onClose={onClose}
+      dataScreen={dataScreen}
+      contentTopClassName="pt-[20px]"
+      footer={(
+        <PrimaryButton
+          labelSize="18"
+          disabled={!Number(targetAmount) || !hasHorizonSelection}
+          onClick={() => onContinue(selectedHorizon)}
+        >
+          {continueLabel}
+        </PrimaryButton>
+      )}
+    >
+      <GoalPlanFields
+        targetAmount={targetAmount}
+        onTargetAmountChange={onTargetAmountChange}
+        horizonYears={horizonYears}
+        manualHorizon={manualHorizon}
+        onSelectHorizon={onSelectHorizon}
+        onManualHorizonChange={onManualHorizonChange}
+      />
+    </RoboScreen>
   );
 }
 
@@ -237,35 +397,89 @@ function parseRoboCalendarDate(value: string): Date {
   return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
 }
 
-function OptionCard({
-  title,
-  description,
-  selected,
-  onClick,
-}: {
-  title: string;
-  description: string;
-  selected: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={selected}
-      className={cn(
-        "w-full rounded-[8px] border px-[16px] py-[15px] text-left transition-colors",
-        selected
-          ? "border-[2px] border-[var(--uc-action)] bg-[color-mix(in_srgb,var(--uc-action)_5%,var(--uc-surface))]"
-          : "border-[var(--uc-border)] bg-[var(--uc-surface)]",
-      )}
-    >
-      <span className={cn("uc-type-n4-strong block", selected ? "text-[var(--uc-action)]" : "text-[var(--uc-text)]")}>
-        {title}
-      </span>
-      <span className="uc-type-n5 mt-[5px] block leading-[17px] text-[var(--uc-text-muted)]">{description}</span>
-    </button>
+function formatRoboGoalDate(date: Date): string {
+  return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(date);
+}
+
+function getRoboGoalEndDate(goal: RoboExistingGoal, horizonYears: number): string {
+  const date = parseRoboCalendarDate(goal.startDate ?? goal.endDate);
+  date.setFullYear(date.getFullYear() + (goal.startDate ? horizonYears : horizonYears - goal.horizonYears));
+  return formatRoboGoalDate(date);
+}
+
+function getRoboGoalEndDateFromStart(startDate: string, horizonYears: number): string {
+  const date = parseRoboCalendarDate(startDate);
+  date.setFullYear(date.getFullYear() + horizonYears);
+  return formatRoboGoalDate(date);
+}
+
+interface RoboWithdrawalProduct {
+  id: string;
+  name: string;
+  percent: number;
+  localValue: number;
+  security: InvestmentCatalogSecurity | null;
+}
+
+function getRoboWithdrawalProducts(
+  portfolio: RoboPortfolio,
+  currentValue: number,
+  country: CountryId,
+  securityCatalog: readonly InvestmentCatalogSecurity[],
+): RoboWithdrawalProduct[] {
+  const basketHoldings = portfolio.basketFund?.holdings ?? [];
+  const basketProducts = basketHoldings.map((holding, index) => ({
+      id: holding.productId ?? `${portfolio.id}-holding-${index}`,
+      name: holding.title,
+      percent: holding.percent ?? 100 / basketHoldings.length,
+  }));
+
+  const presentationProducts = ROBO_PORTFOLIO_PRESENTATIONS[portfolio.strategyId].assetGroups.flatMap((group) =>
+    group.products.map((product) => ({
+      id: product.securityId,
+      name: product.name,
+      percent: product.percent,
+    })),
   );
+  const products = basketProducts.length > 0 ? basketProducts : presentationProducts.length > 0
+    ? presentationProducts
+    : portfolio.holdings.map((holding, index) => ({
+    id: `${portfolio.id}-holding-${index}`,
+    name: holding.name,
+    percent: holding.percent,
+  }));
+  const localCurrency = getCountryCurrency(country) as InvestmentCatalogSecurity["localCurrency"];
+
+  return products.map((product) => {
+    const sourceSecurity = securityCatalog.find((security) => (
+      security.id === product.id
+      || security.productId === product.id
+      || security.title.trim().toLocaleLowerCase() === product.name.trim().toLocaleLowerCase()
+    )) ?? null;
+    const localValue = roundMoney((currentValue * product.percent) / 100);
+    const value = sourceSecurity
+      ? roundMoney(convertCurrency(localValue, localCurrency, sourceSecurity.instrumentCurrency))
+      : localValue;
+    const security: InvestmentCatalogSecurity | null = sourceSecurity ? {
+      ...sourceSecurity,
+      title: product.name,
+      value,
+      currency: sourceSecurity.instrumentCurrency,
+      localValue,
+      localCurrency,
+      quantity: Number((value / sourceSecurity.marketPrice).toFixed(6)),
+      performanceAmount: roundMoney((localValue * sourceSecurity.performancePercent) / 100),
+    } : null;
+
+    return { ...product, localValue, security };
+  });
+}
+
+function getRoboGoalCurrentValue(goal?: RoboExistingGoal): number {
+  return goal
+    ? Number(goal.currentInteger.replace(/\s/g, ""))
+      + Number(goal.currentDecimals.replace(/[^\d]/g, "")) / 100
+    : 79800;
 }
 
 const GOAL_ICONS: Record<(typeof ROBO_GOAL_TYPES)[number]["id"], IconName> = {
@@ -843,27 +1057,107 @@ function PortfolioDetails({
   );
 }
 
-function BasketAllocation({ basket }: { basket: InvestmentBasketFund }) {
+function BasketAllocation({
+  basket,
+  currentValue,
+  country,
+  amountsHidden,
+  securityCatalog,
+  onOpenSecurity,
+}: {
+  basket: InvestmentBasketFund;
+  currentValue: number;
+  country: CountryId;
+  amountsHidden: boolean;
+  securityCatalog: readonly InvestmentCatalogSecurity[];
+  onOpenSecurity?: (selection: {
+    securityId: string;
+    productId?: string;
+    localValue: number;
+    performancePercent: number;
+    hideBuyAction?: boolean;
+  }) => void;
+}) {
+  const localCurrency = getCountryCurrency(country) as InvestmentCatalogSecurity["localCurrency"];
+  const holdings = basket.holdings ?? [];
+
   return (
-    <section className="mt-[18px]" aria-label="Basket contents">
-      <SectionHeadingDivider
-        title={basket.holdings?.some((holding) => holding.percent !== undefined) ? "PRODUCTS DISTRIBUTION" : "BASKET CONTENTS"}
-      />
-      {basket.holdings?.length ? (
+    <section aria-label="Basket positions">
+      {holdings.length ? (
         <div>
-          {basket.holdings.map((holding, index) => (
-            <div key={holding.productId ?? `${basket.id}-${index}`} className="flex min-h-[64px] items-center gap-[12px] px-[24px] py-[9px]">
-              <BrandLogo logoId={basket.logoId} size={32} />
-              <div className="min-w-0 flex-1">
-                <p className="text-[14px] font-bold leading-[18px] text-[var(--uc-text)]">{holding.title}</p>
-                {holding.productId ? <p className="mt-[2px] text-[13px] leading-[16px] text-[var(--uc-text-muted)]">{holding.productId}</p> : null}
-              </div>
-              {holding.percent !== undefined ? <span className="text-[14px] font-bold text-[var(--uc-text)]">{holding.percent}%</span> : null}
-            </div>
-          ))}
+          {holdings.map((holding, index) => {
+            const security = securityCatalog.find((candidate) => (
+              (holding.productId && (candidate.id === holding.productId || candidate.productId === holding.productId))
+              || candidate.title.trim().toLocaleLowerCase() === holding.title.trim().toLocaleLowerCase()
+            ));
+            if (!security) {
+              return (
+                <div key={holding.productId ?? `${basket.id}-${index}`} className="flex min-h-[80px] items-center gap-[12px] px-[16px] py-[16px]">
+                  <BrandLogo logoId={basket.logoId} size={32} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[14px] font-bold leading-[18px] text-[var(--uc-text)]">{holding.title}</p>
+                    <p className="mt-[4px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">Position data unavailable</p>
+                  </div>
+                </div>
+              );
+            }
+
+            const percent = holding.percent ?? 100 / Math.max(holdings.length, 1);
+            const localValue = roundMoney((currentValue * percent) / 100);
+            const value = roundMoney(convertCurrency(localValue, localCurrency, security.instrumentCurrency));
+            const position: InvestmentCatalogSecurity = {
+              ...security,
+              title: holding.title,
+              productId: holding.productId ?? security.productId,
+              value,
+              currency: security.instrumentCurrency,
+              localValue,
+              localCurrency,
+              quantity: Number((value / security.marketPrice).toFixed(6)),
+              performanceAmount: roundMoney((localValue * security.performancePercent) / 100),
+            };
+
+            return (
+              <InvestmentProductCard
+                key={holding.productId ?? `${basket.id}-${security.id}-${index}`}
+                security={position}
+                valueParts={formatInvestmentAmountParts(value, country, position.currency, amountsHidden)}
+                performanceParts={formatInvestmentAmountParts(
+                  position.performanceAmount,
+                  country,
+                  localCurrency,
+                  amountsHidden,
+                  true,
+                )}
+                valueLabel="Value"
+                performanceLabel="Performance"
+                czRoboAmountStyle
+                amountsHidden={amountsHidden}
+                currentPriceParts={formatInvestmentAmountParts(
+                  position.marketPrice,
+                  country,
+                  position.instrumentCurrency,
+                  amountsHidden,
+                )}
+                portfolioValueParts={formatInvestmentAmountParts(
+                  localValue,
+                  country,
+                  localCurrency,
+                  amountsHidden,
+                )}
+                onClick={() => onOpenSecurity?.({
+                  securityId: security.id,
+                  productId: holding.productId,
+                  localValue,
+                  performancePercent: position.performancePercent,
+                  hideBuyAction: true,
+                })}
+              />
+            );
+          })}
         </div>
       ) : (
-        <p className="mt-[8px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">
+        <p className="px-[16px] py-[16px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">
           {basket.contentsSummary ?? basket.description}
         </p>
       )}
@@ -910,12 +1204,6 @@ const GOAL_DETAIL_PERIODS = INVESTMENT_PERIODS
   .filter((period) => period.id !== "6m")
   .map((period) => period.id === "max" ? { ...period, label: "MAX" } : period);
 
-const GOAL_ALLOCATION_TABS: readonly InvestmentPortfolioTabOption[] = [
-  { id: "product-type", label: "PRODUCTS" },
-  { id: "asset-class", label: "ASSET CLASS" },
-  { id: "currency", label: "CURRENCY" },
-];
-
 function getGoalProductType(groupLabel: string): string {
   if (groupLabel === "Stocks") return "Stock";
   if (groupLabel === "Funds") return "Fund";
@@ -927,6 +1215,10 @@ function GoalDetail({
   goalName,
   targetAmount,
   portfolio,
+  country,
+  amountsHidden,
+  securityCatalog,
+  horizonYears,
   existingGoal,
   onBack,
   onClose,
@@ -936,33 +1228,38 @@ function GoalDetail({
   goalName: string;
   targetAmount: string;
   portfolio: RoboPortfolio;
+  country: CountryId;
+  amountsHidden: boolean;
+  securityCatalog: readonly InvestmentCatalogSecurity[];
+  horizonYears: number;
   existingGoal?: RoboExistingGoal;
   onBack: () => void;
   onClose: () => void;
   onAction: (mode: ManagementMode) => void;
   onOpenSecurity?: (selection: {
     securityId: string;
+    productId?: string;
     localValue: number;
     performancePercent: number;
+    hideBuyAction?: boolean;
   }) => void;
 }) {
-  const currentValue = existingGoal
-    ? Number(existingGoal.currentInteger.replace(/\s/g, ""))
-      + Number(existingGoal.currentDecimals.replace(/[^\d]/g, "")) / 100
-    : 79800;
+  const currentValue = getRoboGoalCurrentValue(existingGoal);
   const resolvedGoalName = existingGoal?.name ?? (goalName || "My investment goal");
   const resolvedPurpose = existingGoal?.purpose ?? "General build-up wealth";
-  const resolvedStatus = existingGoal ? existingGoal.status : "ACTIVE";
   const resolvedTarget = existingGoal
     ? `${existingGoal.targetInteger}${existingGoal.targetDecimals}`
     : formatCzkInput(targetAmount);
-  const resolvedProgress = existingGoal?.progress ?? 80;
+  const draftTarget = Number(targetAmount);
+  const resolvedProgress = existingGoal
+    ? getRoboGoalProgress(existingGoal)
+    : draftTarget > 0 ? calculateRoboGoalProgress(currentValue, draftTarget) : 80;
   const resolvedStartDate = existingGoal ? existingGoal.startDate : "15 Feb 2025";
-  const resolvedEndDate = existingGoal?.endDate ?? "15 Feb 2035";
+  const resolvedEndDate = existingGoal?.endDate
+    ?? getRoboGoalEndDateFromStart(resolvedStartDate ?? "15 Feb 2025", horizonYears);
   const resolvedReturnTone = existingGoal?.returnTone ?? "negative";
   const resolvedReturnLabel = existingGoal?.returnLabel ?? "-1 100,00 CZK (-1,36%)";
   const [selectedPeriodId, setSelectedPeriodId] = useState<InvestmentPeriodId>("3y");
-  const [selectedAllocationTab, setSelectedAllocationTab] = useState<InvestmentPortfolioTabId>("product-type");
   const [selectedSortId, setSelectedSortId] = useState<InvestmentSortId>("max-value");
   const chartPoints = useMemo(
     () => buildInvestmentChartPoints(currentValue, selectedPeriodId),
@@ -972,12 +1269,34 @@ function GoalDetail({
   const presentation = basket ? null : ROBO_PORTFOLIO_PRESENTATIONS[portfolio.strategyId];
   const productRows = useMemo(() => {
     const rows = (presentation?.assetGroups ?? []).flatMap((group) =>
-      group.products.map((product, index) => ({
-        product,
-        productType: getGoalProductType(group.label),
-        value: Math.round((currentValue * product.percent) / 100),
-        performance: index === 0 && group === presentation?.assetGroups[0] ? -1.8 : 1.8,
-      })),
+      group.products.map((product, index) => {
+        const value = Math.round((currentValue * product.percent) / 100);
+        const sourceSecurity = securityCatalog.find((security) => (
+          security.id === product.securityId || security.productId === product.securityId
+        ));
+        const performance = sourceSecurity?.performancePercent
+          ?? (index === 0 && group === presentation?.assetGroups[0] ? -1.8 : 1.8);
+        const scale = sourceSecurity && sourceSecurity.localValue > 0
+          ? value / sourceSecurity.localValue
+          : 0;
+        const security = sourceSecurity && scale > 0 ? {
+          ...sourceSecurity,
+          title: product.name,
+          value: Math.round(sourceSecurity.value * scale * 100) / 100,
+          localValue: value,
+          quantity: Number(((sourceSecurity.value * scale) / sourceSecurity.marketPrice).toFixed(6)),
+          performancePercent: performance,
+          performanceAmount: Math.round((value * performance) / 100 * 100) / 100,
+        } : undefined;
+
+        return {
+          product,
+          productType: getGoalProductType(group.label),
+          value,
+          performance,
+          security,
+        };
+      }),
     );
     return [...rows].sort((left, right) => {
       if (selectedSortId === "min-value") return left.value - right.value;
@@ -985,32 +1304,17 @@ function GoalDetail({
       if (selectedSortId === "min-percent") return left.product.percent - right.product.percent;
       return right.value - left.value;
     });
-  }, [presentation, selectedSortId]);
-  const currencyRows = useMemo(() => {
-    const totals = new Map<string, number>();
-    productRows.forEach(({ product }) => totals.set(product.currency, (totals.get(product.currency) ?? 0) + product.percent));
-    return [...totals.entries()].sort((left, right) => right[1] - left[1]);
-  }, [productRows]);
-
+  }, [currentValue, presentation, securityCatalog, selectedSortId]);
   return (
     <RoboScreen
       title={resolvedGoalName}
       description={resolvedPurpose}
-      descriptionTrailing={resolvedStatus ? (
-        <span className={cn(
-          "shrink-0 rounded-[8px] px-[8px] py-[4px] text-[12px] font-bold leading-[15px] text-[var(--uc-static-white)]",
-          resolvedStatus === "ACTIVE"
-            ? "bg-[var(--uc-green-olive)]"
-            : "bg-[var(--uc-neutral-700)]",
-        )}>
-          {resolvedStatus}
-        </span>
-      ) : undefined}
       onBack={onBack}
       onClose={onClose}
       headerAction="help"
       dataScreen="goal-detail"
       descriptionTopClassName="mt-[8px]"
+      contentTopClassName="pt-[16px]"
     >
       <div data-testid="robo-goal-detail">
         <p className="uc-type-n5 text-[var(--uc-text-muted)]">Current value</p>
@@ -1055,14 +1359,16 @@ function GoalDetail({
       <AccountActionBar
         className="-mx-[8px] mt-[18px] !px-0 !py-[8px]"
         items={[
-          { id: "add-money", iconName: "add-money", label: "Add\nmoney", ariaLabel: "Add money", onClick: () => onAction("add-money") },
+          { id: "add-money", iconName: "add-money", label: "Add\nmoney", ariaLabel: "Add money", onClick: () => onAction("add-money-basket") },
           { id: "withdraw", iconName: "robo-withdraw", label: "Withdraw\nMoney", ariaLabel: "Withdraw", onClick: () => onAction("withdraw") },
           { id: "history", iconName: "investment-history", label: "History", onClick: () => onAction("history") },
           { id: "settings", iconName: "robo-goal-settings", label: "Goal\nSettings", ariaLabel: "Goal settings", onClick: () => onAction("settings") },
         ]}
       />
 
-      <SectionHeadingDivider title="Goal progress" className="mt-[26px]" />
+      <h2 className="mt-[30px] text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">
+        Goal progress
+      </h2>
       <div className="mt-[14px]">
         <div>
           <p className="uc-type-n5 text-[var(--uc-text-muted)]">Target amount</p>
@@ -1075,13 +1381,13 @@ function GoalDetail({
           <div className="h-[10px] overflow-hidden rounded-full border border-[var(--uc-border)] bg-[var(--uc-neutral-200)]">
             <div
               className="h-full rounded-full bg-[var(--uc-action)]"
-              style={{ width: `${Math.max(2, resolvedProgress)}%` }}
+              style={{ width: `${Math.min(100, Math.max(2, resolvedProgress))}%` }}
             />
           </div>
           <span
             className="absolute top-0 -translate-x-full rounded-full bg-[var(--uc-action)] px-[5px] py-[3px] text-[12px] font-bold leading-[14px] text-white"
             data-testid="goal-detail-progress-badge"
-            style={{ left: `${Math.max(12, resolvedProgress)}%` }}
+            style={{ left: `${Math.min(100, Math.max(12, resolvedProgress))}%` }}
           >
             {resolvedProgress}%
           </span>
@@ -1101,31 +1407,70 @@ function GoalDetail({
       <h2 className="mt-[30px] text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">
         Portfolio allocation
       </h2>
-      <div className="-mx-[24px] mt-[18px]">
-        <InvestmentPortfolioTabs
-          tabs={GOAL_ALLOCATION_TABS}
-          selectedTabId={selectedAllocationTab}
-          onChange={setSelectedAllocationTab}
-        />
+      <div className="-mx-[24px] mt-[16px]">
         <InvestmentFilterChips
           options={INVESTMENT_SORT_OPTIONS}
           selectedOptionId={selectedSortId}
           onChange={setSelectedSortId}
+          className="py-[16px]"
         />
 
         {basket ? (
-          <BasketAllocation basket={basket} />
-        ) : selectedAllocationTab === "product-type" ? (
+          <BasketAllocation
+            basket={basket}
+            currentValue={currentValue}
+            country={country}
+            amountsHidden={amountsHidden}
+            securityCatalog={securityCatalog}
+            onOpenSecurity={onOpenSecurity}
+          />
+        ) : (
           <div>
-            {productRows.map(({ product, productType, value, performance }) => (
+            {productRows.map(({ product, productType, value, performance, security }) => security ? (
+              <InvestmentProductCard
+                key={product.securityId}
+                security={security}
+                valueParts={formatInvestmentAmountParts(security.value, country, security.currency, amountsHidden)}
+                performanceParts={formatInvestmentAmountParts(
+                  security.performanceAmount,
+                  country,
+                  security.localCurrency,
+                  amountsHidden,
+                  true,
+                )}
+                valueLabel="Value"
+                performanceLabel="Performance"
+                czRoboAmountStyle
+                amountsHidden={amountsHidden}
+                currentPriceParts={formatInvestmentAmountParts(
+                  security.marketPrice,
+                  country,
+                  security.instrumentCurrency,
+                  amountsHidden,
+                )}
+                portfolioValueParts={formatInvestmentAmountParts(
+                  security.localValue,
+                  country,
+                  security.localCurrency,
+                  amountsHidden,
+                )}
+                onClick={() => onOpenSecurity?.({
+                  securityId: product.securityId,
+                  localValue: security.localValue,
+                  performancePercent: security.performancePercent,
+                  hideBuyAction: true,
+                })}
+              />
+            ) : (
               <button
-                key={product.name}
+                key={product.securityId}
                 type="button"
                 aria-label={`Open ${product.name} product details`}
                 onClick={() => onOpenSecurity?.({
                   securityId: product.securityId,
                   localValue: value,
                   performancePercent: performance,
+                  hideBuyAction: true,
                 })}
                 className="flex min-h-[80px] w-full items-start gap-[8px] px-[24px] py-[14px] text-left"
               >
@@ -1138,46 +1483,16 @@ function GoalDetail({
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="whitespace-nowrap text-[20px] font-bold leading-[22px] text-[var(--uc-text)]">
-                    {formatInvestmentNumber(value, "CZ", 0, 0)}<span className="text-[14px] font-normal">,00 CZK</span>
+                    {formatInvestmentNumber(value, country, 0, 0)}<span className="text-[14px] font-normal">,00 CZK</span>
                   </p>
                   <p className={cn(
                     "mt-[3px] text-[14px] font-bold leading-[17px]",
                     performance < 0 ? "text-[var(--uc-status-red)]" : "text-[var(--uc-green-olive)]",
                   )}>
-                    {performance > 0 ? "+" : ""}{formatInvestmentNumber(performance, "CZ", 0, 3)}%
+                    {performance > 0 ? "+" : ""}{formatInvestmentNumber(performance, country, 0, 3)}%
                   </p>
                 </div>
               </button>
-            ))}
-          </div>
-        ) : selectedAllocationTab === "asset-class" ? (
-          <div>
-            {presentation?.assetGroups.map((group) => (
-              <div key={group.label} className="flex min-h-[72px] items-center justify-between px-[24px] py-[14px]">
-                <div>
-                  <p className="text-[14px] font-bold text-[var(--uc-text)]">{group.label}</p>
-                  <p className="mt-[3px] text-[14px] text-[var(--uc-text-muted)]">{group.percent}% of portfolio</p>
-                </div>
-                <p className="text-[20px] font-bold text-[var(--uc-text)]">
-                  {formatInvestmentNumber(Math.round((currentValue * group.percent) / 100), "CZ", 0, 0)}
-                  <span className="text-[14px] font-normal">,00 CZK</span>
-                </p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div>
-            {currencyRows.map(([currency, percent]) => (
-              <div key={currency} className="flex min-h-[72px] items-center justify-between px-[24px] py-[14px]">
-                <div>
-                  <p className="text-[14px] font-bold text-[var(--uc-text)]">{currency}</p>
-                  <p className="mt-[3px] text-[14px] text-[var(--uc-text-muted)]">{percent}% of portfolio</p>
-                </div>
-                <p className="text-[20px] font-bold text-[var(--uc-text)]">
-                  {formatInvestmentNumber(Math.round((currentValue * percent) / 100), "CZ", 0, 0)}
-                  <span className="text-[14px] font-normal">,00 CZK</span>
-                </p>
-              </div>
             ))}
           </div>
         )}
@@ -1189,33 +1504,187 @@ function GoalDetail({
 function ManagementScreen({
   mode,
   goalName,
+  portfolio,
+  currentValue,
+  country,
+  amountsHidden,
+  securityCatalog,
+  basketDetailsOverlay,
+  onOpenBasketHolding,
+  targetAmount,
+  onTargetAmountChange,
+  horizonYears,
+  manualHorizon,
+  onSelectHorizon,
+  onManualHorizonChange,
   onBack,
   onClose,
   onMode,
   onRename,
+  onSaveGoalPlan,
 }: {
   mode: ManagementMode;
   goalName: string;
+  portfolio: RoboPortfolio;
+  currentValue: number;
+  country: CountryId;
+  amountsHidden: boolean;
+  securityCatalog: readonly InvestmentCatalogSecurity[];
+  basketDetailsOverlay?: ReactNode;
+  onOpenBasketHolding?: (holding: InvestmentBasketFundHolding) => void;
+  targetAmount: string;
+  onTargetAmountChange: (value: string) => void;
+  horizonYears: number;
+  manualHorizon: string;
+  onSelectHorizon: (years: number) => void;
+  onManualHorizonChange: (value: string) => void;
   onBack: () => void;
   onClose: () => void;
   onMode: (mode: ManagementMode) => void;
   onRename: (name: string) => void;
+  onSaveGoalPlan: (targetAmount: string, horizonYears: number) => void;
 }) {
   const [amount, setAmount] = useState(mode === "monthly" ? "2000" : "10000");
   const [date, setDate] = useState("1 March 2026");
   const [renameName, setRenameName] = useState(goalName);
+  const [selectedWithdrawalProductId, setSelectedWithdrawalProductId] = useState<string | null>(null);
+  const [historyTab, setHistoryTab] = useState<"transactions" | "orders">("transactions");
+  const withdrawalProducts = useMemo(
+    () => getRoboWithdrawalProducts(portfolio, currentValue, country, securityCatalog),
+    [country, currentValue, portfolio, securityCatalog],
+  );
+  const goalHistorySecurities = useMemo(
+    () => withdrawalProducts.flatMap((product) => {
+      if (!product.security || product.localValue <= 0) return [];
+      return [{
+        ...product.security,
+        id: `goal-${product.id}-${product.security.id}`,
+        productId: product.id,
+        status: "active" as const,
+        localValue: product.localValue,
+      }];
+    }),
+    [withdrawalProducts],
+  );
+  const goalTransactions = useMemo(
+    () => buildInvestmentHistoryTransactions(goalHistorySecurities, country, { minimumRecordsPerSecurity: 2 }),
+    [country, goalHistorySecurities],
+  );
+  const goalOrders = useMemo(
+    () => buildInvestmentHistoryOrders(goalHistorySecurities, country, { minimumRecordsPerSecurity: 2 }),
+    [country, goalHistorySecurities],
+  );
+  const selectedWithdrawalProducts = withdrawalProducts.filter((product) => product.id === selectedWithdrawalProductId);
+  const selectedWithdrawalValue = selectedWithdrawalProducts.reduce(
+    (total, product) => total + product.localValue,
+    0,
+  );
+  const selectWithdrawalProduct = (productId: string) => setSelectedWithdrawalProductId(productId);
+
+  const openWithdrawalReview = () => {
+    if (selectedWithdrawalProducts.length === 0) return;
+    setAmount(String(Math.round(selectedWithdrawalValue)));
+    onMode("partial-withdrawal");
+  };
+
+  const renderSelectedWithdrawalProducts = () => (
+    <div className="mt-[20px]">
+      {selectedWithdrawalProducts.map((product) => {
+        if (!product.security) return null;
+        const security = product.security;
+        return <InvestmentProductCard
+          key={product.id}
+          security={security}
+          valueParts={formatInvestmentAmountParts(security.value, country, security.currency, amountsHidden)}
+          performanceParts={formatInvestmentAmountParts(
+            security.performanceAmount,
+            country,
+            security.localCurrency,
+            amountsHidden,
+            true,
+          )}
+          valueLabel="Value"
+          performanceLabel="Performance"
+          czRoboAmountStyle
+          amountsHidden={amountsHidden}
+          currentPriceParts={formatInvestmentAmountParts(security.marketPrice, country, security.instrumentCurrency, amountsHidden)}
+          portfolioValueParts={formatInvestmentAmountParts(security.localValue, country, security.localCurrency, amountsHidden)}
+        />;
+      })}
+    </div>
+  );
+
+  if (mode === "add-money-basket") {
+    const basket = portfolio.basketFund;
+    if (!basket) {
+      return (
+        <RoboScreen
+          title="Add money"
+          description="Add a one-off investment to this goal."
+          onBack={onBack}
+          onClose={onClose}
+          headerAction="none"
+          dataScreen="add-money-basket-unavailable"
+          footer={<PrimaryButton labelSize="18" onClick={() => onMode("add-money")}>Buy</PrimaryButton>}
+        >
+          <p className="uc-type-n5 text-[var(--uc-text-muted)]">Basket details are unavailable for this goal.</p>
+        </RoboScreen>
+      );
+    }
+
+    return (
+      <InvestmentBasketFundDetailScreen
+        basket={basket}
+        country={country}
+        amountsHidden={amountsHidden}
+        onBack={onBack}
+        czRoboProductDetail
+        onOpenHolding={onOpenBasketHolding}
+        overlay={basketDetailsOverlay}
+        footerActionLabel="Buy"
+        onFooterAction={() => onMode("add-money")}
+      />
+    );
+  }
+
+  if (mode === "goal-plan") {
+    return (
+      <GoalPlanScreen
+        dataScreen="manage-goal-plan"
+        targetAmount={targetAmount}
+        onTargetAmountChange={onTargetAmountChange}
+        horizonYears={horizonYears}
+        manualHorizon={manualHorizon}
+        onSelectHorizon={onSelectHorizon}
+        onManualHorizonChange={onManualHorizonChange}
+        onBack={onBack}
+        onClose={onClose}
+        onContinue={(years) => onSaveGoalPlan(targetAmount, years)}
+        continueLabel="Save changes"
+      />
+    );
+  }
 
   if (mode === "history") {
     return (
-      <RoboScreen title="Goal history" description="Transactions and portfolio orders for this goal." onBack={onBack} onClose={onClose} dataScreen="history">
-        <div className="grid grid-cols-2 border-b border-[var(--uc-border)]">
-          <button className="border-b-[2px] border-[var(--uc-action)] py-[11px] uc-type-n4-strong text-[var(--uc-action)]">Transactions</button>
-          <button className="py-[11px] uc-type-n4-strong text-[var(--uc-text-muted)]">Orders</button>
-        </div>
-        <div className="mt-[10px]">
-          <NavigationRow title="Initial investment" description="Completed · 50 000 CZK · 15 Feb 2025" trailingAccessory="chevron" className="!px-0" />
-          <NavigationRow title="Monthly investment" description="Completed · 2 000 CZK · 1 Mar 2026" trailingAccessory="chevron" className="!px-0" />
-          <NavigationRow title="Portfolio rebalancing" description="Completed · 4 orders · 12 Apr 2026" trailingAccessory="chevron" className="!px-0" />
+      <RoboScreen
+        title="History"
+        onBack={onBack}
+        onClose={onClose}
+        headerAction="none"
+        dataScreen="history"
+        contentTopClassName="pt-[8px]"
+      >
+        <div className="-mx-[24px]" data-investment-history-screen="goal">
+          <InvestmentHistoryTabs activeTab={historyTab} onChange={setHistoryTab} />
+          <InvestmentHistoryRows
+            tab={historyTab}
+            transactions={goalTransactions}
+            orders={goalOrders}
+            country={country}
+            amountsHidden={amountsHidden}
+          />
+          <div className="h-[34px]" />
         </div>
       </RoboScreen>
     );
@@ -1228,27 +1697,88 @@ function ManagementScreen({
         description="Update how the goal is displayed and tracked. A material change may require a new suitability check."
         onBack={onBack}
         onClose={onClose}
+        headerAction="none"
         dataScreen="settings"
       >
         <NavigationRow title="Rename goal" description="Change the name shown in Investments." trailingAccessory="chevron" onClick={() => onMode("rename")} className="!px-0" />
-        <NavigationRow title="Change target" description="Update the amount you want to reach." trailingAccessory="chevron" onClick={() => onMode("target")} className="!px-0" />
-        <NavigationRow title="Change time horizon" description="Update how long you plan to invest." trailingAccessory="chevron" onClick={() => onMode("horizon")} className="!px-0" />
-        <NavigationRow title="Manage monthly investment" description="Change or stop your monthly contribution." trailingAccessory="chevron" onClick={() => onMode("monthly")} className="!px-0" />
-        <NavigationRow title="Close goal" description="Available after all holdings are withdrawn." trailingAccessory="chevron" onClick={() => onMode("close")} className="!px-0" />
+        <NavigationRow title="Change goal plan" description="Update your target amount and time horizon." trailingAccessory="chevron" onClick={() => onMode("goal-plan")} className="!px-0" />
       </RoboScreen>
     );
   }
 
   if (mode === "withdraw") {
     return (
-      <RoboScreen title="Withdraw money" description="You can withdraw part or all of the goal. The goal remains available until you choose to close it." onBack={onBack} onClose={onClose} dataScreen="withdraw">
-        <div className="space-y-[12px]">
-          <OptionCard title="Withdraw part" description="Choose an amount of holdings to sell." selected={false} onClick={() => onMode("partial-withdrawal")} />
-          <OptionCard title="Withdraw all" description="Sell all holdings in this goal." selected={false} onClick={() => onMode("full-withdrawal")} />
+      <RoboScreen
+        title="Withdraw money"
+        description="Choose one product to sell."
+        onBack={onBack}
+        onClose={onClose}
+        headerAction="none"
+        dataScreen="withdraw"
+        footer={(
+          <PrimaryButton labelSize="18" disabled={selectedWithdrawalProducts.length === 0} onClick={openWithdrawalReview}>
+            Continue
+          </PrimaryButton>
+        )}
+      >
+        <div
+          className="mt-[8px]"
+          role="radiogroup"
+          aria-label="Choose a product to sell"
+        >
+          {withdrawalProducts.map((product) => {
+            const selected = selectedWithdrawalProductId === product.id;
+            const security = product.security;
+            if (!security) {
+              return (
+                <button
+                  key={product.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  aria-label={`Choose ${product.name} to sell`}
+                  onClick={() => selectWithdrawalProduct(product.id)}
+                  className={cn(
+                    "flex min-h-[72px] w-full items-center gap-[12px] px-[16px] py-[12px] text-left",
+                    selected ? "bg-[color-mix(in_srgb,var(--uc-action)_5%,var(--uc-surface))]" : "",
+                  )}
+                >
+                  <AppIcon name={selected ? "radio-selected" : "radio-unselected"} size={24} color="var(--uc-action)" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate uc-type-n5-strong text-[var(--uc-text)]">{product.name}</span>
+                    <span className="mt-[3px] block uc-type-n6 text-[var(--uc-text-muted)]">Current quote unavailable</span>
+                  </span>
+                </button>
+              );
+            }
+
+            return (
+              <InvestmentProductCard
+                key={product.id}
+                security={security}
+                valueParts={formatInvestmentAmountParts(security.value, country, security.currency, amountsHidden)}
+                performanceParts={formatInvestmentAmountParts(
+                  security.performanceAmount,
+                  country,
+                  security.localCurrency,
+                  amountsHidden,
+                  true,
+                )}
+                valueLabel="Value"
+                performanceLabel="Performance"
+                czRoboAmountStyle
+                amountsHidden={amountsHidden}
+                currentPriceParts={formatInvestmentAmountParts(security.marketPrice, country, security.instrumentCurrency, amountsHidden)}
+                portfolioValueParts={formatInvestmentAmountParts(security.localValue, country, security.localCurrency, amountsHidden)}
+                selection={{
+                  selected,
+                  ariaLabel: `Choose ${product.name} to sell`,
+                  onSelect: () => selectWithdrawalProduct(product.id),
+                }}
+              />
+            );
+          })}
         </div>
-        <p className="uc-type-n5 mt-[24px] leading-[17px] text-[var(--uc-text-muted)]">
-          Final proceeds depend on execution prices. The value can be lower than the amount shown today.
-        </p>
       </RoboScreen>
     );
   }
@@ -1256,18 +1786,19 @@ function ManagementScreen({
   if (mode === "full-withdrawal") {
     return (
       <RoboScreen
-        title="Withdraw all investments?"
-        description="All holdings in this goal will be sold. The final amount may be lower than today’s value."
+        title="Review sale orders"
+        description="The selected products will be sold. The final amount may be lower than today’s value."
         onBack={onBack}
         onClose={onClose}
         dataScreen="full-withdrawal"
         footer={<PrimaryButton labelSize="18" onClick={onBack}>Review sale orders</PrimaryButton>}
       >
         <div className="rounded-[8px] bg-[var(--uc-surface-muted)] p-[16px]">
-          <p className="uc-type-n5 text-[var(--uc-text-muted)]">Estimated current value</p>
-          <p className="uc-type-h2 mt-[5px] text-[var(--uc-text)]">79 800,00 CZK</p>
+          <p className="uc-type-n5 text-[var(--uc-text-muted)]">Estimated selected value</p>
+          <p className="uc-type-h2 mt-[5px] text-[var(--uc-text)]">{formatInvestmentMoney(selectedWithdrawalValue, "CZ", "CZK")}</p>
           <p className="uc-type-n5 mt-[8px] leading-[17px] text-[var(--uc-text-muted)]">This is not a guaranteed withdrawal amount.</p>
         </div>
+        {renderSelectedWithdrawalProducts()}
       </RoboScreen>
     );
   }
@@ -1314,26 +1845,17 @@ function ManagementScreen({
       label: "Goal name",
       action: "Save name",
     },
-    target: {
-      title: "Change target amount",
-      description: "Update the amount you want this goal to reach.",
-      label: "Target amount",
-      action: "Review change",
-    },
-    horizon: {
-      title: "Change time horizon",
-      description: "A material change may require a new suitability check.",
-      label: "Time horizon",
-      action: "Review change",
-    },
-  }[mode as Exclude<ManagementMode, "menu" | "withdraw" | "full-withdrawal" | "history" | "settings" | "close">];
+  }[mode as Exclude<ManagementMode, "menu" | "withdraw" | "full-withdrawal" | "history" | "settings" | "close" | "goal-plan" | "add-money-basket">];
 
   return (
     <RoboScreen
       title={config.title}
-      description={config.description}
+      description={mode === "partial-withdrawal"
+        ? "Review the products you selected and choose how much to withdraw."
+        : config.description}
       onBack={onBack}
       onClose={onClose}
+      headerAction={mode === "rename" || mode === "add-money" ? "none" : "close"}
       dataScreen={mode}
       footer={(
         <PrimaryButton
@@ -1352,12 +1874,13 @@ function ManagementScreen({
         </PrimaryButton>
       )}
     >
+      {mode === "partial-withdrawal" ? renderSelectedWithdrawalProducts() : null}
       <TextField
         label={config.label}
-        value={mode === "rename" ? renameName : mode === "horizon" ? "10 years" : amount}
-        onChange={mode === "rename" ? setRenameName : mode === "horizon" ? () => undefined : setAmount}
-        inputMode={mode === "rename" || mode === "horizon" ? "text" : "numeric"}
-        suffix={mode === "rename" || mode === "horizon" ? undefined : "CZK"}
+        value={mode === "rename" ? renameName : amount}
+        onChange={mode === "rename" ? setRenameName : setAmount}
+        inputMode={mode === "rename" ? "text" : "numeric"}
+        suffix={mode === "rename" ? undefined : "CZK"}
       />
       {mode === "monthly" ? (
         <div className="mt-[28px]">
@@ -1419,6 +1942,8 @@ export default function CzFutureRoboAdvisorFlow({
   const setGoalType = (value: string) => dispatchFlow({ type: "set-field", field: "goalType", value });
   const setGoalName = (value: string) => dispatchFlow({ type: "set-field", field: "goalName", value });
   const setTargetAmount = (value: string) => dispatchFlow({ type: "set-field", field: "targetAmount", value });
+  const selectHorizon = (years: number) => dispatchFlow({ type: "select-horizon", years });
+  const setManualHorizonValue = (value: string) => dispatchFlow({ type: "set-manual-horizon", value });
   const setFundingMethod = (value: RoboFundingMethod | null) => dispatchFlow({ type: "set-field", field: "fundingMethod", value });
   const setInitialAmount = (value: string) => dispatchFlow({ type: "set-field", field: "initialAmount", value });
   const setMonthlyContribution = (value: string) => dispatchFlow({ type: "set-field", field: "monthlyContribution", value });
@@ -1427,6 +1952,26 @@ export default function CzFutureRoboAdvisorFlow({
   const setSelectedPortfolio = (value: RoboPortfolio | null) => dispatchFlow({ type: "set-field", field: "selectedPortfolio", value });
   const setTermsAccepted = (value: boolean) => dispatchFlow({ type: "set-field", field: "termsAccepted", value });
   const setManagementMode = (value: ManagementMode) => dispatchFlow({ type: "set-field", field: "managementMode", value });
+  const saveGoalPlan = (nextTargetAmount: string, nextHorizonYears: number) => {
+    const targetDigits = nextTargetAmount.replace(/\D/g, "");
+    if (!targetDigits || !isValidRoboHorizon(String(nextHorizonYears))) return;
+
+    setTargetAmount(targetDigits);
+    if ([3, 5, 7, 10].includes(nextHorizonYears)) selectHorizon(nextHorizonYears);
+    else setManualHorizonValue(String(nextHorizonYears));
+
+    if (initialGoal) {
+      const targetInteger = formatCzkInput(targetDigits).replace(/\s*CZK$/, "");
+      onGoalUpdated?.({
+        ...initialGoal,
+        targetInteger,
+        targetDecimals: ",00 CZK",
+        horizonYears: nextHorizonYears,
+        endDate: getRoboGoalEndDate(initialGoal, nextHorizonYears),
+      });
+    }
+    setManagementMode("menu");
+  };
   const selectedCashAccount = currentAccounts.find((account) => account.id === selectedCashAccountId) ?? null;
   const openBasketHolding = (basket: InvestmentBasketFund, holding: InvestmentBasketFundHolding) => {
     const normalizedTitle = holding.title.trim().toLowerCase();
@@ -1451,9 +1996,6 @@ export default function CzFutureRoboAdvisorFlow({
     ?? null;
   const fundingFields = fundingMethod ? getFundingFieldVisibility(fundingMethod) : null;
   const resolvedHorizon = horizonYears || Number(manualHorizon) || 10;
-  const manualHorizonValue = Number(manualHorizon);
-  const hasValidManualHorizon = Number.isInteger(manualHorizonValue) && manualHorizonValue >= 3 && manualHorizonValue <= 15;
-  const hasHorizonSelection = horizonYears > 0 || hasValidManualHorizon;
 
   const snapStrategyCarousel = () => {
     const carousel = strategyCarouselRef.current;
@@ -1632,93 +2174,18 @@ export default function CzFutureRoboAdvisorFlow({
 
   if (step === "target") {
     return (
-      <RoboScreen
-        title="Set your goal plan"
-        description="Choose a target amount and time horizon to shape your investment recommendation."
+      <GoalPlanScreen
+        dataScreen="target-and-horizon"
+        targetAmount={targetAmount}
+        onTargetAmountChange={setTargetAmount}
+        horizonYears={horizonYears}
+        manualHorizon={manualHorizon}
+        onSelectHorizon={selectHorizon}
+        onManualHorizonChange={setManualHorizonValue}
         onBack={goBackByStep}
         onClose={onExit}
-        dataScreen="target-and-horizon"
-        contentTopClassName="pt-[20px]"
-        footer={<PrimaryButton labelSize="18" disabled={!Number(targetAmount) || !hasHorizonSelection} onClick={() => setStep("funding-setup")}>Continue</PrimaryButton>}
-      >
-        <TextField
-          label="Target amount"
-          value={targetAmount}
-          onChange={setTargetAmount}
-          inputMode="numeric"
-          suffix="CZK"
-          suffixOutsideDivider
-          suffixClassName="!font-bold"
-        />
-        <div className="mt-[12px] grid grid-cols-3 gap-[8px]" role="group" aria-label="Suggested target amounts">
-          {["100000", "250000", "500000"].map((amount) => (
-            <button
-              key={amount}
-              type="button"
-              aria-pressed={targetAmount === amount}
-              onClick={() => setTargetAmount(amount)}
-              className={cn(
-                "h-[34px] rounded-[4px] uc-type-n5-strong transition-colors",
-                targetAmount === amount
-                  ? "border border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
-                  : "bg-[var(--uc-neutral-100)] text-[var(--uc-text)]",
-              )}
-            >
-              {formatCzkInput(amount)}
-            </button>
-          ))}
-        </div>
-        <section className="mt-[20px]" aria-label="Time horizon">
-          <h2 className="text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">Choose your time horizon</h2>
-          <p className="mt-[10px] text-[16px] leading-[21px] text-[var(--uc-text)]">
-            Choose a period that fits your goal. It guides the recommendation, but your goal will not close automatically.
-          </p>
-          <div role="radiogroup" aria-label="Time horizon" className="mt-[10px] grid grid-cols-2 gap-x-[12px] gap-y-[4px]">
-            {[3, 5, 7, 10].map((years) => {
-              const selected = horizonYears === years && !manualHorizon;
-              return (
-                <button
-                  key={years}
-                  type="button"
-                  role="radio"
-                  aria-checked={selected}
-                  aria-label={`${years} years`}
-                  onClick={() => dispatchFlow({ type: "select-horizon", years })}
-                  className="flex min-h-[48px] w-full items-center gap-[12px] text-left"
-                >
-                  <AppIcon name={selected ? "radio-selected" : "radio-unselected"} size={24} />
-                  <span className="text-[14px] font-bold leading-[18px]">{years} YEARS</span>
-                </button>
-              );
-            })}
-            <button
-              type="button"
-              role="radio"
-              aria-checked={manualHorizon.length > 0}
-              aria-label="Other time horizon"
-              onClick={() => {
-                dispatchFlow({ type: "set-manual-horizon", value: manualHorizon || "3" });
-              }}
-              className="col-span-2 flex min-h-[48px] w-full items-center gap-[12px] text-left"
-            >
-              <AppIcon name={manualHorizon.length > 0 ? "radio-selected" : "radio-unselected"} size={24} />
-              <span className="text-[14px] font-bold leading-[18px]">OTHER TIME HORIZON</span>
-            </button>
-          </div>
-          {manualHorizon.length > 0 ? (
-            <div className="mt-[12px]">
-              <TextField
-                label="Other time horizon (years)"
-                value={manualHorizon}
-                onChange={(value) => dispatchFlow({ type: "set-manual-horizon", value: value.replace(/\D/g, "").slice(0, 2) })}
-                inputMode="numeric"
-                helperText="Select between 3 and 15 years"
-                errorText={manualHorizon.length > 0 && !hasValidManualHorizon ? "Enter a whole number from 3 to 15 years." : undefined}
-              />
-            </div>
-          ) : null}
-        </section>
-      </RoboScreen>
+        onContinue={() => setStep("funding-setup")}
+      />
     );
   }
 
@@ -2210,6 +2677,22 @@ export default function CzFutureRoboAdvisorFlow({
         <ManagementScreen
           mode={managementMode}
           goalName={goalName}
+          portfolio={selectedPortfolio}
+          currentValue={getRoboGoalCurrentValue(initialGoal)}
+          country={country}
+          amountsHidden={amountsHidden}
+          securityCatalog={securityCatalog}
+          basketDetailsOverlay={selectedBasketHoldingOverlay}
+          onOpenBasketHolding={(holding) => {
+            const basket = selectedPortfolio.basketFund;
+            if (basket) openBasketHolding(basket, holding);
+          }}
+          targetAmount={targetAmount}
+          onTargetAmountChange={setTargetAmount}
+          horizonYears={horizonYears}
+          manualHorizon={manualHorizon}
+          onSelectHorizon={selectHorizon}
+          onManualHorizonChange={setManualHorizonValue}
           onBack={() => {
             setManagementMode(getPreviousManagementMode(managementMode));
           }}
@@ -2219,6 +2702,7 @@ export default function CzFutureRoboAdvisorFlow({
             setGoalName(name);
             if (initialGoal) onGoalUpdated?.({ ...initialGoal, name });
           }}
+          onSaveGoalPlan={saveGoalPlan}
         />
       );
     }
@@ -2227,6 +2711,10 @@ export default function CzFutureRoboAdvisorFlow({
         goalName={goalName}
         targetAmount={targetAmount}
         portfolio={selectedPortfolio}
+        country={country}
+        amountsHidden={amountsHidden}
+        securityCatalog={securityCatalog}
+        horizonYears={resolvedHorizon}
         existingGoal={initialGoal}
         onBack={onExit}
         onClose={onExit}

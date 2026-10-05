@@ -62,6 +62,7 @@ interface InvestmentSecurityDetailScreenProps extends SharedProps {
   czRoboProductDetail?: boolean;
   inBottomSheet?: boolean;
   hideOrderActions?: boolean;
+  hideBuyAction?: boolean;
   comfortablePeriodTargets?: boolean;
   onHistoryClick?: (filterByTitle?: string) => void;
   onSeeMoreTransactions?: () => void;
@@ -579,6 +580,7 @@ function CatalogInvestmentSecurityDetailScreen({
   czRoboProductDetail = false,
   inBottomSheet = false,
   hideOrderActions = false,
+  hideBuyAction = false,
   comfortablePeriodTargets = false,
   onHistoryClick,
   onSeeMoreTransactions,
@@ -604,7 +606,7 @@ function CatalogInvestmentSecurityDetailScreen({
   const canSell = hasPortfolioPosition && security.status === "active";
 
   if (czRoboProductDetail) {
-    const canBuy = security.status === "active";
+    const canBuy = security.status === "active" && !hideBuyAction;
     return (
       <div
         className="flex h-full w-full flex-col bg-[var(--uc-surface)] text-[var(--uc-text)]"
@@ -779,7 +781,7 @@ function CatalogInvestmentSecurityDetailScreen({
           { id: "history", iconName: "investment-history", label: "History", onClick: () => onHistoryClick?.(security.title) },
           { id: "documents", iconName: "account-option-statement", label: "Documents" },
           { id: "sell", iconName: "trade-sell", label: "Sell", hidden: !canSell, iconColor: "var(--uc-text)", onClick: onSellClick },
-          { id: "buy", iconName: "trade-buy", label: "Buy", hidden: security.status !== "active", iconColor: "var(--uc-action)", onClick: onBuyClick },
+          { id: "buy", iconName: "trade-buy", label: "Buy", hidden: hideBuyAction || security.status !== "active", iconColor: "var(--uc-action)", onClick: onBuyClick },
         ]}
       />
       <div className="h-[24px]" aria-hidden="true" />

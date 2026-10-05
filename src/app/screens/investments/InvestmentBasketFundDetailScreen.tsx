@@ -4,6 +4,7 @@ import BrandLogo from "@/app/components/brand-logo/BrandLogo";
 import InvestmentAmountDisplay, { formatInvestmentAmountParts } from "@/app/components/investments/InvestmentAmountDisplay";
 import InvestmentDetailField from "@/app/components/investments/InvestmentDetailField";
 import PageHeader from "@/app/components/PageHeader";
+import PrimaryButton from "@/app/components/PrimaryButton";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import { formatInvestmentBasketPerformance, type InvestmentBasketFund, type InvestmentBasketFundHolding } from "@/app/config/investmentBasketFundsConfig";
 import type { CountryId } from "@/app/state/demoTypes";
@@ -17,6 +18,8 @@ interface InvestmentBasketFundDetailScreenProps {
   onHistoryClick?: (filterByTitle?: string) => void;
   czRoboProductDetail?: boolean;
   onOpenHolding?: (holding: InvestmentBasketFundHolding) => void;
+  footerActionLabel?: string;
+  onFooterAction?: () => void;
   overlay?: ReactNode;
 }
 
@@ -72,6 +75,8 @@ export default function InvestmentBasketFundDetailScreen({
   onHistoryClick,
   czRoboProductDetail = false,
   onOpenHolding,
+  footerActionLabel = "Buy",
+  onFooterAction,
   overlay,
 }: InvestmentBasketFundDetailScreenProps) {
   const hasFigmaSampleDetails = basket.id === "jp-morgan-global-growth";
@@ -211,6 +216,13 @@ export default function InvestmentBasketFundDetailScreen({
         </div>
         <div className="h-[34px]" aria-hidden="true" />
       </div>
+      {onFooterAction ? (
+        <footer className="shrink-0 bg-[var(--uc-surface)] px-[24px] pb-[34px] pt-[12px]" data-testid="basket-fund-footer-action">
+          <PrimaryButton labelSize="18" onClick={onFooterAction}>
+            {footerActionLabel}
+          </PrimaryButton>
+        </footer>
+      ) : null}
       {overlay}
     </div>
   );
