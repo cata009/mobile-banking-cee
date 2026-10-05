@@ -85,7 +85,6 @@ export interface RoboExistingGoal {
   progress: number;
   startDate?: string;
   endDate: string;
-  timeLeft?: string;
   portfolioId: RoboPortfolio["id"];
 }
 

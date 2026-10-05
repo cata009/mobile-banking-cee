@@ -14,7 +14,7 @@ export const INITIAL_CZ_ROBO_GOALS: readonly RoboExistingGoal[] = [
   {
     id: "goal-4-strategic",
     name: "Build long-term wealth",
-    purpose: "Strategic approach",
+    purpose: "General build-up wealth",
     status: "ACTIVE",
     currentInteger: "100 000",
     currentDecimals: ",00 CZK",
@@ -46,7 +46,7 @@ export const INITIAL_CZ_ROBO_GOALS: readonly RoboExistingGoal[] = [
   {
     id: "goal-3-strategic",
     name: "Financial freedom",
-    purpose: "Strategic approach",
+    purpose: "Retirement",
     status: "INACTIVE",
     currentInteger: "5 000",
     currentDecimals: ",00 CZK",
@@ -56,13 +56,12 @@ export const INITIAL_CZ_ROBO_GOALS: readonly RoboExistingGoal[] = [
     targetDecimals: ",00 CZK",
     progress: 1,
     endDate: "31 Dec 2027",
-    timeLeft: "1Y 5M 23D left",
     portfolioId: "steady-income-portfolio",
   },
   {
     id: "goal-4-inflation",
     name: "Protect my savings",
-    purpose: "Protection for inflation",
+    purpose: "Saving for unforeseen circumstances",
     status: "ACTIVE",
     currentInteger: "100 000",
     currentDecimals: ",00 CZK",
@@ -159,14 +158,17 @@ function GoalCard({
             </span>
           </div>
           <div className="mt-[8px] flex items-center justify-between text-[14px] leading-[17px]">
-            <span className="flex items-center gap-[4px]">
-              {goal.startDate ? null : <AppIcon name="calendar-days" size={16} />}
-              {goal.startDate ?? goal.endDate}
-            </span>
-            <span className="flex items-center gap-[4px]">
-              {goal.timeLeft ? <AppIcon name="contact-time" size={16} /> : null}
-              {goal.timeLeft ?? goal.endDate}
-            </span>
+            {goal.startDate ? (
+              <>
+                <span>{goal.startDate}</span>
+                <span>{goal.endDate}</span>
+              </>
+            ) : (
+              <span className="flex items-center gap-[4px]">
+                <AppIcon name="calendar-days" size={16} />
+                {goal.endDate}
+              </span>
+            )}
           </div>
         </div>
       </button>
