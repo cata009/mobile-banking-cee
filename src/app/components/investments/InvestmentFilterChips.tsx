@@ -1,18 +1,21 @@
 import type { InvestmentSortId, InvestmentSortOption } from "@/app/config/investmentsPortfolioConfig";
+import { cn } from "@/app/components/ui/utils";
 
 interface InvestmentFilterChipsProps {
   options: readonly InvestmentSortOption[];
   selectedOptionId: InvestmentSortId;
   onChange: (optionId: InvestmentSortId) => void;
+  className?: string;
 }
 
 export default function InvestmentFilterChips({
   options,
   selectedOptionId,
   onChange,
+  className,
 }: InvestmentFilterChipsProps) {
   return (
-    <div className="flex w-full justify-center gap-[8px] overflow-x-auto px-[24px] py-[18px] scrollbar-hide" data-ds-label="Investments sorting chips">
+    <div className={cn("flex w-full justify-center gap-[8px] overflow-x-auto px-[24px] py-[18px] scrollbar-hide", className)} data-ds-label="Investments sorting chips">
       {options.map((option) => {
         const selected = option.id === selectedOptionId;
 

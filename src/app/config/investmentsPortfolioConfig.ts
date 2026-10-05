@@ -124,6 +124,8 @@ export interface InvestmentHistoryTransaction {
 
 export interface InvestmentHistoryOrder {
   id: string;
+  /** Stable investment security ID used to keep product orders exact when names repeat. */
+  securityId?: string;
   date: string;
   title: string;
   amount: number;
@@ -635,6 +637,86 @@ const ROBO_GOAL_SECURITY_SEEDS: readonly InvestmentSecuritySeed[] = [
     productType: "Bond",
     assetClass: "Fixed income",
   },
+  {
+    id: "robo-nano-chip-equity",
+    title: "Nano-Chip Equity Fund",
+    status: "active",
+    contributionType: "ONE OFF",
+    weight: 5,
+    marketPrice: 127.45,
+    performancePercent: 2.27,
+    instrumentCurrency: "USD",
+    logoId: "unicredit",
+    securityAccountId: "robo-sec-usd",
+    securityAccountName: "Investment goals USD portfolio",
+    securityAccountCurrency: "USD",
+    productType: "Fund",
+    assetClass: "Equity",
+  },
+  {
+    id: "robo-quantum-computing-alpha",
+    title: "Quantum Computing Alpha",
+    status: "active",
+    contributionType: "ONE OFF",
+    weight: 5,
+    marketPrice: 88.6,
+    performancePercent: 1.75,
+    instrumentCurrency: "USD",
+    logoId: "unicredit",
+    securityAccountId: "robo-sec-usd",
+    securityAccountName: "Investment goals USD portfolio",
+    securityAccountCurrency: "USD",
+    productType: "Fund",
+    assetClass: "Equity",
+  },
+  {
+    id: "robo-ai-ethical-solutions",
+    title: "AI Ethical Solutions",
+    status: "active",
+    contributionType: "ONE OFF",
+    weight: 5,
+    marketPrice: 97.32,
+    performancePercent: 0.92,
+    instrumentCurrency: "EUR",
+    logoId: "unicredit",
+    securityAccountId: "robo-sec-eur",
+    securityAccountName: "Investment goals EUR portfolio",
+    securityAccountCurrency: "EUR",
+    productType: "Fund",
+    assetClass: "Equity",
+  },
+  {
+    id: "robo-diszruptiv-vegyes-alap",
+    title: "Diszruptìv Vegyes Alap 2004/F",
+    status: "active",
+    contributionType: "ONE OFF",
+    weight: 5,
+    marketPrice: 102.17,
+    performancePercent: 1.36,
+    instrumentCurrency: "EUR",
+    logoId: "unicredit",
+    securityAccountId: "robo-sec-eur",
+    securityAccountName: "Investment goals EUR portfolio",
+    securityAccountCurrency: "EUR",
+    productType: "Fund",
+    assetClass: "Balanced",
+  },
+  {
+    id: "robo-pictet-thematic-intelligence",
+    title: "Pictet Thematic Intelligence Fund",
+    status: "active",
+    contributionType: "ONE OFF",
+    weight: 5,
+    marketPrice: 146.32,
+    performancePercent: -0.32,
+    instrumentCurrency: "EUR",
+    logoId: "unicredit",
+    securityAccountId: "robo-sec-eur",
+    securityAccountName: "Investment goals EUR portfolio",
+    securityAccountCurrency: "EUR",
+    productType: "Fund",
+    assetClass: "Equity",
+  },
 ];
 
 const DISTRIBUTION_COLORS: NonEmptyReadonlyArray<string> = [
@@ -1005,7 +1087,7 @@ function buildIsoDate(year: number, monthIndex: number, day: number): string {
 export function buildInvestmentHistoryTransactions(
   securities: readonly InvestmentSecurity[],
   country: CountryId,
-  options: { includeCzRoboHistoricalTransactions?: boolean } = {},
+  options: { includeCzRoboHistoricalTransactions?: boolean; minimumRecordsPerSecurity?: number } = {},
 ): InvestmentHistoryTransaction[] {
   const financialSecurities = securities.filter((security) => security.status === "active" && security.localValue > 0);
   const countryCurrency = getCountryCurrency(country) as Currency;
@@ -1088,11 +1170,15 @@ export function buildInvestmentHistoryTransactions(
     buildIsoDate(2024, 11, 5),
     buildIsoDate(2024, 8, 20),
   ];
-  const total = dates.length;
+  const total = Math.max(
+    dates.length,
+    financialSecurities.length * Math.max(0, Math.floor(options.minimumRecordsPerSecurity ?? 0)),
+  );
 
-  const transactions: InvestmentHistoryTransaction[] = dates.map((date, index) => {
+  const transactions: InvestmentHistoryTransaction[] = Array.from({ length: total }, (_, index) => {
+    const date = dates[index % dates.length]!;
     const security = getCyclicItem(financialSecurities, index);
-    const type = getCyclicItem(transactionTypes, index);
+    const type = transactionTypes[index % transactionTypes.length]!;
     const currency = index % 2 === 0 ? countryCurrency : security.instrumentCurrency;
     const sourceAmount = type === "COUPON"
       ? Math.max(12, Math.abs(security.performanceAmount || security.localValue * 0.008))
@@ -1120,6 +1206,7 @@ export function buildInvestmentHistoryTransactions(
 export function buildInvestmentHistoryOrders(
   securities: readonly InvestmentSecurity[],
   country: CountryId,
+  options: { minimumRecordsPerSecurity?: number } = {},
 ): InvestmentHistoryOrder[] {
   const financialSecurities = securities.filter((security) => security.status === "active" && security.localValue > 0);
   if (!isNonEmpty(financialSecurities)) return [];
@@ -1173,15 +1260,22 @@ export function buildInvestmentHistoryOrders(
     buildIsoDate(2024, 8, 19),
   ];
 
-  return dates.map((date, index) => {
+  const total = Math.max(
+    dates.length,
+    financialSecurities.length * Math.max(0, Math.floor(options.minimumRecordsPerSecurity ?? 0)),
+  );
+
+  return Array.from({ length: total }, (_, index) => {
+    const date = dates[index % dates.length]!;
     const security = getCyclicItem(financialSecurities, index);
-    const orderType = getCyclicItem(orderTypes, index);
-    const status = getCyclicItem(statuses, index);
+    const orderType = orderTypes[index % orderTypes.length]!;
+    const status = statuses[index % statuses.length]!;
     const currency = index % 2 === 0 ? countryCurrency : security.instrumentCurrency;
     const amount = roundMoney(convertCurrency(security.localValue * (0.08 + (index % 4) * 0.02), security.localCurrency, currency));
 
     return {
       id: `ord-${security.id}-${index}`,
+      securityId: security.id,
       date,
       title: security.title,
       amount,

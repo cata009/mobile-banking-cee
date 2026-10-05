@@ -1,7 +1,7 @@
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import { AppIcon } from "@/app/components/icons";
-import type { RoboExistingGoal, RoboGoalStatus } from "./czFutureRoboAdvisorModel";
+import { getRoboGoalProgress, type RoboExistingGoal } from "./czFutureRoboAdvisorModel";
 
 interface CzInvestmentGoalsScreenProps {
   goals: readonly RoboExistingGoal[];
@@ -15,79 +15,62 @@ export const INITIAL_CZ_ROBO_GOALS: readonly RoboExistingGoal[] = [
     id: "goal-4-strategic",
     name: "Build long-term wealth",
     purpose: "General build-up wealth",
-    status: "ACTIVE",
     currentInteger: "100 000",
     currentDecimals: ",00 CZK",
     returnLabel: "+1 100,00 CZK (+1,36%)",
     returnTone: "positive",
     targetInteger: "100 000",
     targetDecimals: ",00 CZK",
-    progress: 100,
+    horizonYears: 3,
     startDate: "15 Feb 2025",
-    endDate: "15 Feb 2027",
-    portfolioId: "sustainable-balanced-portfolio",
+    endDate: "15 Feb 2028",
+    portfolioId: "basket-sustainable-balanced-jp-morgan-global-growth",
   },
   {
     id: "goal-2-purchase",
     name: "My future home",
     purpose: "Saving for a major purchase",
-    status: "ACTIVE",
     currentInteger: "51 241",
     currentDecimals: ",33 CZK",
     returnLabel: "+241,33 CZK (+0,47%)",
     returnTone: "positive",
     targetInteger: "250 000",
     targetDecimals: ",00 CZK",
-    progress: 20,
+    horizonYears: 10,
     startDate: "15 Feb 2025",
     endDate: "15 Feb 2035",
-    portfolioId: "balanced-core-portfolio",
+    portfolioId: "basket-balanced-core-blackrock-credit-opportunities",
   },
   {
     id: "goal-3-strategic",
     name: "Financial freedom",
     purpose: "Retirement",
-    status: "INACTIVE",
     currentInteger: "5 000",
     currentDecimals: ",00 CZK",
     returnLabel: "0 total return",
     returnTone: "neutral",
     targetInteger: "100 000",
     targetDecimals: ",00 CZK",
-    progress: 1,
+    horizonYears: 3,
     endDate: "31 Dec 2027",
-    portfolioId: "steady-income-portfolio",
+    portfolioId: "basket-steady-income-chase-regular-eur",
   },
   {
     id: "goal-4-inflation",
     name: "Protect my savings",
     purpose: "Saving for unforeseen circumstances",
-    status: "ACTIVE",
     currentInteger: "100 000",
     currentDecimals: ",00 CZK",
     returnLabel: "-1 100,00 CZK (-1,36%)",
     returnTone: "negative",
     targetInteger: "100 000",
     targetDecimals: ",00 CZK",
-    progress: 100,
+    horizonYears: 3,
     startDate: "15 Feb 2025",
-    endDate: "15 Feb 2027",
-    portfolioId: "balanced-core-portfolio",
+    endDate: "15 Feb 2028",
+    portfolioId: "basket-balanced-core-onemarkets-eur-collection",
   },
 ] as const;
-
-function GoalStatus({ status }: { status: RoboGoalStatus }) {
-  return (
-    <span
-      className={`shrink-0 rounded-[4px] px-[8px] py-[4px] text-[12px] font-bold leading-[14px] text-white ${
-        status === "ACTIVE" ? "bg-[var(--uc-green-olive)]" : "bg-[var(--uc-neutral-700)]"
-      }`}
-      data-testid="investment-goal-status"
-    >
-      {status}
-    </span>
-  );
-}
 
 function GoalCard({
   goal,
@@ -102,6 +85,7 @@ function GoalCard({
       : goal.returnTone === "negative"
         ? "text-[var(--uc-status-red)]"
         : "text-[var(--uc-text)]";
+  const progress = getRoboGoalProgress(goal);
 
   return (
     <article
@@ -115,12 +99,11 @@ function GoalCard({
         aria-label={`Open ${goal.name}: ${goal.purpose}`}
         onClick={() => onOpen(goal)}
       >
-        <div className="flex w-full items-start justify-between gap-[12px]">
+        <div className="flex w-full items-start">
           <div className="min-w-0">
             <h3 className="text-[18px] font-bold leading-[24px]">{goal.name}</h3>
             <p className="text-[14px] leading-[17px]">{goal.purpose}</p>
           </div>
-          <GoalStatus status={goal.status} />
         </div>
 
         <div className="w-full">
@@ -147,14 +130,14 @@ function GoalCard({
             <div className="h-[10px] overflow-hidden rounded-full border border-[var(--uc-border)] bg-[var(--uc-neutral-200)]">
               <div
                 className="h-full rounded-full bg-[var(--uc-action)]"
-                style={{ width: `${Math.max(2, goal.progress)}%` }}
+                style={{ width: `${Math.min(100, Math.max(2, progress))}%` }}
               />
             </div>
             <span
               className="absolute top-0 -translate-x-full rounded-full bg-[var(--uc-action)] px-[5px] py-[3px] text-[12px] font-bold leading-[14px] text-white"
-              style={{ left: `${Math.max(12, goal.progress)}%` }}
+              style={{ left: `${Math.min(100, Math.max(12, progress))}%` }}
             >
-              {goal.progress}%
+              {progress}%
             </span>
           </div>
           <div className="mt-[8px] flex items-center justify-between text-[14px] leading-[17px]">

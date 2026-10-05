@@ -382,6 +382,7 @@ export default function InvestmentsPortfolioScreen({
   const [fundsWindowOpen, setFundsWindowOpen] = useState(false);
   const [selectedFundCollectionId, setSelectedFundCollectionId] = useState<InvestmentFundCollectionId | null>(null);
   const [selectedSecurity, setSelectedSecurity] = useState<InvestmentCatalogSecurity | null>(null);
+  const [hideSelectedSecurityBuy, setHideSelectedSecurityBuy] = useState(false);
   const [selectedBasketFund, setSelectedBasketFund] = useState<InvestmentBasketFund | null>(null);
   const [buyOrderOpen, setBuyOrderOpen] = useState(false);
   const [sellOrderOpen, setSellOrderOpen] = useState(false);
@@ -489,8 +490,9 @@ export default function InvestmentsPortfolioScreen({
     [onSelectedSecurityChange],
   );
 
-  const selectSecurity = (security: InvestmentCatalogSecurity | null) => {
+  const selectSecurity = (security: InvestmentCatalogSecurity | null, options: { hideBuyAction?: boolean } = {}) => {
     setSelectedSecurity(security);
+    setHideSelectedSecurityBuy(Boolean(security && options.hideBuyAction));
     onSelectedSecurityChange?.(security);
   };
 
@@ -519,6 +521,7 @@ export default function InvestmentsPortfolioScreen({
     const requestedSecurity = securityCatalog.find((security) => security.id === buyRequest.securityId) ?? null;
     if (requestedSecurity) {
       setSelectedSecurity(requestedSecurity);
+      setHideSelectedSecurityBuy(false);
       onSelectedSecurityChange?.(requestedSecurity);
       setBuyOrderDraft(buyRequest.draft ?? null);
       setSellOrderOpen(false);
@@ -724,6 +727,7 @@ export default function InvestmentsPortfolioScreen({
         country={country}
         amountsHidden={amountsHidden}
         czRoboProductDetail={showBottomNavigation}
+        hideBuyAction={hideSelectedSecurityBuy}
         comfortablePeriodTargets={showBottomNavigation || isEvo2027Release}
         onBack={() => selectSecurity(null)}
         onHistoryClick={() => onHistoryClick?.(selectedSecurity.title)}
@@ -775,7 +779,7 @@ export default function InvestmentsPortfolioScreen({
         securityCatalog={securityCatalog}
         country={country}
         amountsHidden={amountsHidden}
-        onOpenSecurity={({ securityId, localValue, performancePercent }) => {
+        onOpenSecurity={({ securityId, productId, localValue, performancePercent, hideBuyAction }) => {
           const security = securityCatalog.find((item) => item.id === securityId);
           if (!security) {
             selectSecurity(null);
@@ -790,12 +794,13 @@ export default function InvestmentsPortfolioScreen({
           selectSecurity({
             ...security,
             owned: true,
+            productId: productId ?? security.productId,
             value,
             localValue,
             performancePercent,
             performanceAmount: roundMoney((localValue * performancePercent) / 100),
             quantity: Number((value / security.marketPrice).toFixed(6)),
-          });
+          }, { hideBuyAction });
         }}
         onGoalUpdated={(updatedGoal) => {
           setRoboGoals((goals) => goals.map((goal) => (

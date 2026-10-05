@@ -69,23 +69,39 @@ export interface RoboPortfolio {
   basketFund?: InvestmentBasketFund;
 }
 
-export type RoboGoalStatus = "ACTIVE" | "INACTIVE";
-
 export interface RoboExistingGoal {
   id: string;
   name: string;
   purpose: string;
-  status: RoboGoalStatus;
   currentInteger: string;
   currentDecimals: string;
   returnLabel: string;
   returnTone: "positive" | "negative" | "neutral";
   targetInteger: string;
   targetDecimals: string;
-  progress: number;
+  horizonYears: number;
   startDate?: string;
   endDate: string;
   portfolioId: RoboPortfolio["id"];
+}
+
+function parseRoboGoalAmount(integer: string, decimals: string): number {
+  const wholeAmount = Number(integer.replace(/\D/g, ""));
+  const decimalDigits = decimals.match(/\d+/)?.[0] ?? "0";
+  return wholeAmount + Number(decimalDigits) / 100;
+}
+
+export function getRoboGoalProgress(goal: Pick<
+  RoboExistingGoal,
+  "currentInteger" | "currentDecimals" | "targetInteger" | "targetDecimals"
+>): number {
+  const currentValue = parseRoboGoalAmount(goal.currentInteger, goal.currentDecimals);
+  const targetValue = parseRoboGoalAmount(goal.targetInteger, goal.targetDecimals);
+  return targetValue > 0 ? Math.round((currentValue / targetValue) * 100) : 0;
+}
+
+export function calculateRoboGoalProgress(currentValue: number, targetValue: number): number {
+  return targetValue > 0 ? Math.round((currentValue / targetValue) * 100) : 0;
 }
 
 export interface RoboDraft {

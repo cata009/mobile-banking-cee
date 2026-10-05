@@ -5,6 +5,12 @@ import InvestmentAmountDisplay, { type InvestmentAmountParts } from "@/app/compo
 
 export type { InvestmentAmountParts } from "@/app/components/investments/InvestmentAmountDisplay";
 
+interface InvestmentProductSelectionProps {
+  selected: boolean;
+  ariaLabel: string;
+  onSelect: () => void;
+}
+
 interface InvestmentProductCardProps {
   security: InvestmentSecurity;
   valueParts: InvestmentAmountParts;
@@ -15,6 +21,7 @@ interface InvestmentProductCardProps {
   amountsHidden?: boolean;
   currentPriceParts?: InvestmentAmountParts;
   portfolioValueParts?: InvestmentAmountParts;
+  selection?: InvestmentProductSelectionProps;
   onClick?: () => void;
 }
 
@@ -44,6 +51,7 @@ export default function InvestmentProductCard({
   amountsHidden = false,
   currentPriceParts,
   portfolioValueParts,
+  selection,
   onClick,
 }: InvestmentProductCardProps) {
   const valueText = `${valueParts.integer}${valueParts.decimal} ${valueParts.currency}`;
@@ -124,12 +132,28 @@ export default function InvestmentProductCard({
   return (
     <button
       type="button"
-      onClick={onClick}
-      className={`flex min-h-[95px] w-full flex-col gap-[4px] ${czRoboAmountStyle ? "bg-transparent" : "bg-[var(--uc-surface)]"} py-[16px] pl-[16px] ${czRoboAmountStyle ? "pr-[16px]" : "pr-[24px]"} text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-focus-ring)]`}
+      onClick={selection?.onSelect ?? onClick}
+      role={selection ? "radio" : undefined}
+      aria-checked={selection?.selected}
+      aria-label={selection?.ariaLabel}
+      className={`flex min-h-[95px] w-full flex-col gap-[4px] ${
+        selection?.selected
+          ? "bg-[color-mix(in_srgb,var(--uc-action)_5%,var(--uc-surface))]"
+          : czRoboAmountStyle ? "bg-transparent" : "bg-[var(--uc-surface)]"
+      } py-[16px] pl-[16px] ${czRoboAmountStyle ? "pr-[16px]" : "pr-[24px]"} text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--uc-focus-ring)]`}
       data-ds-label="Investment product card"
     >
       {czRoboAmountStyle ? (
         <div className="flex w-full min-w-0 items-start gap-[12px]">
+          {selection ? (
+            <span className="grid size-[24px] shrink-0 place-items-center" aria-hidden="true">
+              <AppIcon
+                name={selection.selected ? "radio-selected" : "radio-unselected"}
+                size={24}
+                color={selection.selected ? "var(--uc-action)" : "var(--uc-text)"}
+              />
+            </span>
+          ) : null}
           <BrandLogo logoId={security.logoId ?? "unicredit"} size={32} label={`${security.title} product`} />
           {czRoboProductDetails}
         </div>
