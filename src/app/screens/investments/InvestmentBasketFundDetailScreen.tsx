@@ -1,10 +1,11 @@
+import type { ReactNode } from "react";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
 import BrandLogo from "@/app/components/brand-logo/BrandLogo";
 import InvestmentAmountDisplay, { formatInvestmentAmountParts } from "@/app/components/investments/InvestmentAmountDisplay";
 import InvestmentDetailField from "@/app/components/investments/InvestmentDetailField";
 import PageHeader from "@/app/components/PageHeader";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
-import { formatInvestmentBasketPerformance, type InvestmentBasketFund } from "@/app/config/investmentBasketFundsConfig";
+import { formatInvestmentBasketPerformance, type InvestmentBasketFund, type InvestmentBasketFundHolding } from "@/app/config/investmentBasketFundsConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 
@@ -15,6 +16,8 @@ interface InvestmentBasketFundDetailScreenProps {
   onBack: () => void;
   onHistoryClick?: (filterByTitle?: string) => void;
   czRoboProductDetail?: boolean;
+  onOpenHolding?: (holding: InvestmentBasketFundHolding) => void;
+  overlay?: ReactNode;
 }
 
 function formatPerformance(value: number) {
@@ -25,13 +28,15 @@ function FundDistributionRow({
   title,
   productId,
   percent,
+  onClick,
 }: {
   title: string;
   productId?: string;
   percent?: number;
+  onClick?: () => void;
 }) {
-  return (
-    <div className="flex w-full items-center gap-[8px] px-[16px] py-[24px]" data-basket-fund-holding={productId}>
+  const content = (
+    <>
       <BrandLogo logoId="unicredit" size={32} />
       <div className="min-w-0 flex-1 text-left">
         <p className="truncate text-[14px] font-bold leading-[17px] text-[var(--uc-text)]">{title}</p>
@@ -40,7 +45,22 @@ function FundDistributionRow({
       {percent !== undefined ? (
         <p className="shrink-0 text-[20px] font-bold leading-[24px] tracking-[0.2px] text-[var(--uc-text)]">{percent}%</p>
       ) : null}
-    </div>
+    </>
+  );
+
+  const className = "flex w-full items-center gap-[8px] px-[16px] py-[24px] text-left";
+  return onClick ? (
+    <button
+      type="button"
+      className={className}
+      data-basket-fund-holding={productId}
+      aria-label={`Open product details for ${title}`}
+      onClick={onClick}
+    >
+      {content}
+    </button>
+  ) : (
+    <div className={className} data-basket-fund-holding={productId}>{content}</div>
   );
 }
 
@@ -51,8 +71,11 @@ export default function InvestmentBasketFundDetailScreen({
   onBack,
   onHistoryClick,
   czRoboProductDetail = false,
+  onOpenHolding,
+  overlay,
 }: InvestmentBasketFundDetailScreenProps) {
   const hasFigmaSampleDetails = basket.id === "jp-morgan-global-growth";
+  const showFigmaMarketInfo = hasFigmaSampleDetails && !czRoboProductDetail;
   const heroParts = formatInvestmentAmountParts(1500, country, "EUR", amountsHidden);
   const marketPriceParts = formatInvestmentAmountParts(535.44, country, "EUR", amountsHidden);
   const description = basket.detailDescription ?? basket.description;
@@ -63,7 +86,7 @@ export default function InvestmentBasketFundDetailScreen({
 
   return (
     <div
-      className="flex h-full w-full flex-col overflow-hidden bg-[var(--uc-surface)] text-[var(--uc-text)]"
+      className="relative flex h-full w-full flex-col overflow-hidden bg-[var(--uc-surface)] text-[var(--uc-text)]"
       data-investment-basket-detail={basket.id}
     >
       <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide" onScroll={czRoboProductDetail ? handleScroll : undefined}>
@@ -85,7 +108,13 @@ export default function InvestmentBasketFundDetailScreen({
                   <h1 className="min-w-0 flex-1 text-[28px] font-bold leading-[31px] text-[var(--uc-text)]">{basket.title}</h1>
                   <BrandLogo logoId={basket.logoId} size={32} label={`${basket.title} product`} />
                 </div>
-                {hasFigmaSampleDetails ? (
+                {czRoboProductDetail && basket.performancePercent !== undefined ? (
+                  <p className="mt-[8px] flex flex-wrap items-baseline gap-x-[4px] text-[14px] leading-[18px]">
+                    <span>Performance:</span>
+                    <span className="font-bold" style={{ color: performanceColor }}>{formatPerformance(basket.performancePercent)}</span>
+                    <span className="text-[var(--uc-text-muted)]">· 1Y</span>
+                  </p>
+                ) : hasFigmaSampleDetails ? (
                   <div className="mt-[8px]">
                     <p className="text-[14px] leading-[16px] text-[var(--uc-text)]">Actual market price</p>
                     <p className="mt-[2px] leading-none">
@@ -143,7 +172,7 @@ export default function InvestmentBasketFundDetailScreen({
             multiline
             variant="product-detail"
           />
-          {hasFigmaSampleDetails ? (
+          {showFigmaMarketInfo ? (
             <InvestmentDetailField label="Basket ID" value="3333343141" variant="product-detail" />
           ) : null}
 
@@ -154,7 +183,11 @@ export default function InvestmentBasketFundDetailScreen({
             />
             <div className="pt-[8px]">
               {basket.holdings?.length ? basket.holdings.map((holding, index) => (
-                  <FundDistributionRow key={holding.productId ?? `${basket.id}-${index}`} {...holding} />
+                  <FundDistributionRow
+                    key={holding.productId ?? `${basket.id}-${index}`}
+                    {...holding}
+                    onClick={czRoboProductDetail && onOpenHolding ? () => onOpenHolding(holding) : undefined}
+                  />
               )) : (
                 <p className="px-[24px] py-[16px] text-[16px] leading-[21px] text-[var(--uc-text)]">
                   {basket.contentsSummary ?? basket.description}
@@ -163,7 +196,7 @@ export default function InvestmentBasketFundDetailScreen({
             </div>
           </section>
 
-          {hasFigmaSampleDetails ? (
+          {showFigmaMarketInfo ? (
             <section className="mt-[24px]" aria-label="Market info">
               <SectionHeadingDivider title="MARKET INFO" variant="medium-title" />
               <InvestmentDetailField
@@ -178,6 +211,7 @@ export default function InvestmentBasketFundDetailScreen({
         </div>
         <div className="h-[34px]" aria-hidden="true" />
       </div>
+      {overlay}
     </div>
   );
 }

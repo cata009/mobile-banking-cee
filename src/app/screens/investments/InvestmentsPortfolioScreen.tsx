@@ -772,6 +772,7 @@ export default function InvestmentsPortfolioScreen({
       <CzFutureRoboAdvisorFlow
         initialGoal={roboAdvisorView === "detail" ? selectedRoboGoal ?? undefined : undefined}
         currentAccounts={currentAccounts}
+        securityCatalog={securityCatalog}
         country={country}
         amountsHidden={amountsHidden}
         onOpenSecurity={({ securityId, localValue, performancePercent }) => {
