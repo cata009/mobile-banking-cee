@@ -503,7 +503,13 @@ export function InvestmentSecurityListScreen({
 
 export function InvestmentSecurityDetailScreen(props: InvestmentSecurityDetailScreenProps) {
   if (!props.security && props.basketHoldingDetail) {
-    return <BasketHoldingSecurityDetailScreen holding={props.basketHoldingDetail} />;
+    return (
+      <BasketHoldingSecurityDetailScreen
+        holding={props.basketHoldingDetail}
+        country={props.country}
+        amountsHidden={props.amountsHidden}
+      />
+    );
   }
   if (!props.security) return null;
   const { basketHoldingDetail: _basketHoldingDetail, ...catalogProps } = props;
@@ -512,9 +518,16 @@ export function InvestmentSecurityDetailScreen(props: InvestmentSecurityDetailSc
 
 function BasketHoldingSecurityDetailScreen({
   holding,
+  country,
+  amountsHidden,
 }: {
   holding: NonNullable<InvestmentSecurityDetailScreenProps["basketHoldingDetail"]>;
+  country: CountryId;
+  amountsHidden: boolean;
 }) {
+  const [period, setPeriod] = useState<InvestmentPeriodId>("3y");
+  const chartPoints = useMemo(() => buildInvestmentChartPoints(100, period), [period]);
+
   return (
     <div className="h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide" data-cz-robo-basket-holding-detail>
       <section className="bg-[var(--uc-surface)] pb-[16px]">
@@ -527,6 +540,25 @@ function BasketHoldingSecurityDetailScreen({
             <p className="mt-[8px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">{holding.allocationPercent}% of this basket</p>
           ) : null}
         </div>
+      </section>
+      <section className="mt-[8px] px-[16px]" aria-label="Performance trend">
+        <p className="px-[8px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">Illustrative trend · index 100</p>
+        <InvestmentPortfolioChart
+          points={chartPoints}
+          country={country}
+          currency=""
+          amountsHidden={amountsHidden}
+          compact
+          showVerticalGridLines={false}
+          czRoboPresentation={country === "CZ"}
+        />
+        <InvestmentPeriodChips
+          periods={INVESTMENT_PERIODS.filter((item) => item.id !== "6m")}
+          selectedPeriodId={period}
+          onChange={setPeriod}
+          softUnselected
+          comfortableTouchTargets
+        />
       </section>
       <section className="pt-[8px]">
         <SectionHeadingDivider title="PRODUCT INFO" className="px-[24px]" />
