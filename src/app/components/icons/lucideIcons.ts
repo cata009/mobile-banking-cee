@@ -92,7 +92,7 @@ export const LUCIDE_ICONS = {
     width: 24,
     height: 24,
     component: Camera,
-    usage: ["DomesticPaymentFlowScreens"],
+    usage: ["DomesticPaymentFlowScreens", "DemoTopBar", "ToolsScreen", "PreloginPictureTesterTool"],
   },
   landmark: {
     source: "lucide",

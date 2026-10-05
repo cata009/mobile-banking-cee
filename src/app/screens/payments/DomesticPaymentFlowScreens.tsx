@@ -15,21 +15,50 @@ import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
 import TransactionAvatar from "@/app/components/transactions/TransactionAvatar";
 import PfmCategoryChangeSheet from "@/app/components/pfm/PfmCategoryChangeSheet";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
+import PaymentTemplatesScreen from "@/app/screens/payments/PaymentTemplatesScreen";
 import TextField from "@/app/components/TextField";
 import StandardSignScreen from "@/app/components/flow/StandardSignScreen";
 import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
 import type { AccountTransaction } from "@/data/accountDetails";
+import { useDemo } from "@/app/state/demoStore";
 import { getPfmCategorySelection, type PfmCategorySelection } from "@/data/pfmCategories";
 import type { CreditCard, DebitCard, Product } from "@/data/products";
 import {
   createTransactionDetailData,
+  createTemplateDomesticPaymentDraft,
   formatDraftAmount,
   type DomesticPaymentDraft,
 } from "@/data/paymentFlow";
+import type { PaymentTemplateSelection } from "@/data/paymentTemplates";
 import type { CountryId } from "@/app/state/demoTypes";
+import {
+  getCzechPaymentBankName,
+  isValidCzechBankCode,
+  isValidCzechMainAccountNumber,
+  isValidCzechPrefix,
+  parseCzechDomesticAccountClipboard,
+} from "@/data/czechDomesticAccount";
 
-function SectionTitle({ children }: { children: string }) {
-  return <SectionHeadingDivider title={children} className="pt-[30px]" />;
+function SectionTitle({
+  children,
+  darkNoDivider = false,
+  className = "",
+}: {
+  children: string;
+  darkNoDivider?: boolean;
+  className?: string;
+}) {
+  const wrapperClassName = `pt-[30px] ${className}`;
+
+  if (darkNoDivider) {
+    return (
+      <div className={wrapperClassName} data-ds-label="SectionHeadingDivider">
+        <h2 className="uc-type-n5-strong line-clamp-2 uppercase text-[#262626]">{children}</h2>
+      </div>
+    );
+  }
+
+  return <SectionHeadingDivider title={children} className={wrapperClassName} />;
 }
 
 function DetailRow({
@@ -62,11 +91,16 @@ function DetailRow({
 
 function FlowField({
   children,
+  minHeight,
 }: {
   children: ReactNode;
+  minHeight?: number;
 }) {
   return (
-    <div className="flex min-h-[80px] flex-col justify-center">
+    <div
+      className="flex min-h-[80px] flex-col justify-center"
+      style={minHeight ? { minHeight } : undefined}
+    >
       {children}
     </div>
   );
@@ -74,6 +108,22 @@ function FlowField({
 
 function formatAmountInput(value: string) {
   return value.replace(/\s/g, "");
+}
+
+const CZ_DOMESTIC_PAYMENT_FIELD_LIMITS = {
+  prefix: 6,
+  accountNumber: 10,
+  bankCode: 4,
+} as const;
+
+function sanitizeCzAccountPart(value: string, maxLength: number) {
+  return value.replace(/\D/g, "").slice(0, maxLength);
+}
+
+function getCzSelectionAccountParts(selection: PaymentTemplateSelection) {
+  // Synthetic CZ template and saved-beneficiary identifiers encode local account parts.
+  const match = selection.accountNumber.match(/^CZ\d{2}BACX(\d{6})(\d{6})$/);
+  return match ? { prefix: match[1], accountNumber: match[2] } : null;
 }
 
 export interface CardTransactionMerchantEnrichment {
@@ -413,17 +463,117 @@ export function DomesticPaymentCreateScreen({
   onNext: (draft: DomesticPaymentDraft) => void;
 }) {
   const { t } = useLanguage();
+  const { product, country, release } = useDemo();
   const [form, setForm] = useState(draft);
+  const [isRecipientPickerOpen, setIsRecipientPickerOpen] = useState(false);
+  const [czTouched, setCzTouched] = useState({ prefix: false, accountNumber: false, bankCode: false });
+  const [czClipboardAccount, setCzClipboardAccount] = useState<ReturnType<typeof parseCzechDomesticAccountClipboard>>(null);
   const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(48);
+  const usesCzBaselineDomesticPaymentLayout =
+    product === "PI" && country === "CZ" && release === "release-current";
+  const czAccountValidity = {
+    prefix: isValidCzechPrefix(form.prefix.trim()),
+    accountNumber: isValidCzechMainAccountNumber(form.accountNumber.trim()),
+    bankCode: isValidCzechBankCode(form.bankCode.trim()),
+  };
+  const czTouchedErrors = [
+    czTouched.prefix && !czAccountValidity.prefix
+      ? t("runtime.payments.domesticFlow.prefix", "Prefix")
+      : "",
+    czTouched.accountNumber && !czAccountValidity.accountNumber
+      ? t("runtime.accounts.detailsInfo.accountNumber", "Account number")
+      : "",
+    czTouched.bankCode && !czAccountValidity.bankCode
+      ? t("runtime.payments.domesticFlow.bankCode", "Bank code")
+      : "",
+  ].filter(Boolean);
+  const updateCzAccountPart = (
+    key: "prefix" | "accountNumber" | "bankCode",
+    rawValue: string,
+  ) => {
+    const maxLength = CZ_DOMESTIC_PAYMENT_FIELD_LIMITS[key];
+    const value = sanitizeCzAccountPart(rawValue, maxLength);
+    setForm((current) => ({
+      ...current,
+      [key]: value,
+      ...(key === "bankCode" ? { bankName: getCzechPaymentBankName(value) ?? "" } : {}),
+    }));
+  };
+  const checkCzClipboard = async () => {
+    if (!navigator.clipboard?.readText) {
+      setCzClipboardAccount(null);
+      return;
+    }
+    try {
+      const clipboardText = await navigator.clipboard.readText();
+      setCzClipboardAccount(parseCzechDomesticAccountClipboard(clipboardText));
+    } catch {
+      // Clipboard access is optional; denied permission or unsupported browsers show no suggestion.
+      setCzClipboardAccount(null);
+    }
+  };
+  const applyCzClipboardAccount = () => {
+    if (!czClipboardAccount) return;
+    setForm((current) => ({
+      ...current,
+      ...czClipboardAccount,
+      bankName: getCzechPaymentBankName(czClipboardAccount.bankCode) ?? "",
+    }));
+    setCzTouched({ prefix: true, accountNumber: true, bankCode: true });
+    setCzClipboardAccount(null);
+  };
   const update = (key: keyof DomesticPaymentDraft, value: string | boolean) => {
     setForm((current) => ({ ...current, [key]: value }));
   };
+  const handleRecipientSelection = (selection: PaymentTemplateSelection) => {
+    const selectedDraft = createTemplateDomesticPaymentDraft(selection, country);
+    const czLocalAccountParts = usesCzBaselineDomesticPaymentLayout
+      ? getCzSelectionAccountParts(selection)
+      : null;
+
+    setForm((current) => {
+      const next = {
+        ...current,
+        beneficiaryName: selectedDraft.beneficiaryName,
+        prefix: czLocalAccountParts?.prefix ?? selectedDraft.prefix,
+        accountNumber: czLocalAccountParts?.accountNumber ?? selectedDraft.accountNumber,
+        bankCode: selectedDraft.bankCode,
+        bankName: usesCzBaselineDomesticPaymentLayout
+          ? getCzechPaymentBankName(selectedDraft.bankCode) ?? ""
+          : selectedDraft.bankName,
+        recipientKind: selectedDraft.recipientKind,
+        currency: selectedDraft.currency,
+      };
+
+      return selection.kind === "template"
+        ? {
+            ...next,
+            amount: selectedDraft.amount,
+            informationForBeneficiary: selectedDraft.informationForBeneficiary,
+          }
+        : next;
+    });
+    setIsRecipientPickerOpen(false);
+  };
+
+  if (usesCzBaselineDomesticPaymentLayout && isRecipientPickerOpen) {
+    return (
+      <PaymentTemplatesScreen
+        onBack={() => setIsRecipientPickerOpen(false)}
+        onSelect={handleRecipientSelection}
+        isEvo2027={false}
+      />
+    );
+  }
 
   const isFormValid =
     form.beneficiaryName.trim().length > 0 &&
-    form.prefix.trim().length > 0 &&
+    (usesCzBaselineDomesticPaymentLayout || form.prefix.trim().length > 0) &&
     form.accountNumber.trim().length > 0 &&
     form.bankCode.trim().length > 0 &&
+    (!usesCzBaselineDomesticPaymentLayout || (
+      czAccountValidity.prefix && czAccountValidity.accountNumber && czAccountValidity.bankCode
+    )) &&
     form.amount.trim().length > 0;
 
 
@@ -433,13 +583,31 @@ export function DomesticPaymentCreateScreen({
         <PageHeader
           title={t("runtime.payments.domesticFlow.domesticPaymentTitle", "Domestic payment")}
           onBack={onBack}
+          onHelpClick={() => undefined}
           collapsedTitleProgress={headerProgress}
           includeSafeArea
-          showHelp={false}
+          showHelp={usesCzBaselineDomesticPaymentLayout}
+          subtitle={
+            usesCzBaselineDomesticPaymentLayout ? (
+              <div className="mt-[8px]">
+                <p className="uc-type-n4 text-[var(--uc-text-muted)]">
+                  {t("runtime.payments.domesticFlow.to", "To")}
+                </p>
+                <h2 className="uc-type-h1 mt-[8px] text-[var(--uc-text)]">
+                  {t("runtime.payments.domesticFlow.newBeneficiary", "New beneficiary")}
+                </h2>
+              </div>
+            ) : undefined
+          }
         />
         <div className="px-[24px] pb-[18px]">
-        <SectionTitle>{t("runtime.payments.domesticFlow.fromAccount", "FROM ACCOUNT")}</SectionTitle>
-        <FlowField>
+        <SectionTitle
+          darkNoDivider={usesCzBaselineDomesticPaymentLayout}
+          className={usesCzBaselineDomesticPaymentLayout ? "pb-[12px]" : undefined}
+        >
+          {t("runtime.payments.domesticFlow.fromAccount", "FROM ACCOUNT")}
+        </SectionTitle>
+        <FlowField minHeight={usesCzBaselineDomesticPaymentLayout ? 96 : undefined}>
           <TextField
             label={t("runtime.accounts.detailsInfo.accountNumber", "Account number")}
             value={form.payerAccountNumber}
@@ -447,35 +615,151 @@ export function DomesticPaymentCreateScreen({
             helperText={form.payerAccountName}
             helperText2={form.payerBalance}
             trailingIconName="chevron-down-wide"
+            trailingIconPlacement={usesCzBaselineDomesticPaymentLayout ? "floating" : "inline"}
           />
         </FlowField>
 
-        <SectionTitle>{t("runtime.payments.domesticFlow.beneficiary", "BENEFICIARY")}</SectionTitle>
+        <SectionTitle darkNoDivider={usesCzBaselineDomesticPaymentLayout}>
+          {usesCzBaselineDomesticPaymentLayout
+            ? t("runtime.payments.domesticFlow.toBeneficiary", "TO BENEFICIARY")
+            : t("runtime.payments.domesticFlow.beneficiary", "BENEFICIARY")}
+        </SectionTitle>
         <FlowField>
-          <TextField label={t("runtime.transactionDetail.beneficiaryName", "Beneficiary")} value={form.beneficiaryName} onChange={(value) => update("beneficiaryName", value)} />
+          {usesCzBaselineDomesticPaymentLayout ? (
+            <TextField
+              label={t("runtime.transactionDetail.beneficiaryName", "Beneficiary")}
+              value={form.beneficiaryName}
+              onChange={(value) => update("beneficiaryName", value)}
+              trailingIconName="chevron-down-wide"
+              trailingIconPlacement="floating"
+              trailingIconAction={{
+                ariaLabel: t("runtime.payments.templates.open", "Choose beneficiary or template"),
+                onClick: () => setIsRecipientPickerOpen(true),
+              }}
+            />
+          ) : (
+            <TextField
+              label={t("runtime.transactionDetail.beneficiaryName", "Beneficiary")}
+              value={form.beneficiaryName}
+              onChange={(value) => update("beneficiaryName", value)}
+            />
+          )}
         </FlowField>
-        <FlowField>
-          <TextField label={t("runtime.payments.domesticFlow.prefix", "Prefix")} value={form.prefix} onChange={(value) => update("prefix", value)} />
-        </FlowField>
-        <FlowField>
-          <TextField
-            label={t("runtime.payments.domesticFlow.accountNumberMandatory", "Account number (mandatory)")}
-            value={form.accountNumber}
-            onChange={(value) => update("accountNumber", value)}
-            trailingIconName="camera"
-          />
-        </FlowField>
-        <FlowField>
-          <TextField
-            label={t("runtime.payments.domesticFlow.bankCodeMandatory", "Bank code (mandatory)")}
-            value={form.bankCode}
-            onChange={(value) => update("bankCode", value)}
-            helperText={form.bankName}
-            trailingIconName="camera"
-          />
-        </FlowField>
+        {usesCzBaselineDomesticPaymentLayout ? (
+          <FlowField>
+            <div
+              className="grid min-w-0 items-end gap-x-[8px] gap-y-[6px]"
+              style={{
+                gridTemplateColumns: `minmax(56px, ${CZ_DOMESTIC_PAYMENT_FIELD_LIMITS.prefix}fr) minmax(100px, ${CZ_DOMESTIC_PAYMENT_FIELD_LIMITS.accountNumber}fr) minmax(66px, ${CZ_DOMESTIC_PAYMENT_FIELD_LIMITS.bankCode}fr) 32px`,
+              }}
+            >
+              <TextField
+                label={t("runtime.payments.domesticFlow.prefix", "Prefix")}
+                value={form.prefix}
+                onChange={(value) => updateCzAccountPart("prefix", value)}
+                inputMode="numeric"
+                maxLength={CZ_DOMESTIC_PAYMENT_FIELD_LIMITS.prefix}
+                suffixOutsideDivider
+                forceFloatLabel
+                ariaInvalid={czTouched.prefix && !czAccountValidity.prefix}
+                ariaDescribedBy={czTouchedErrors.length ? "cz-account-validation" : undefined}
+                visualState={czTouched.prefix && !czAccountValidity.prefix ? "error-filled" : undefined}
+                onFocus={() => void checkCzClipboard()}
+                onBlur={() => setCzTouched((current) => ({ ...current, prefix: true }))}
+              />
+              <TextField
+                label={t("runtime.accounts.detailsInfo.accountNumber", "Account number")}
+                value={form.accountNumber}
+                onChange={(value) => updateCzAccountPart("accountNumber", value)}
+                inputMode="numeric"
+                maxLength={CZ_DOMESTIC_PAYMENT_FIELD_LIMITS.accountNumber}
+                suffixOutsideDivider
+                forceFloatLabel
+                ariaInvalid={czTouched.accountNumber && !czAccountValidity.accountNumber}
+                ariaDescribedBy={czTouchedErrors.length ? "cz-account-validation" : undefined}
+                visualState={czTouched.accountNumber && !czAccountValidity.accountNumber
+                  ? (form.accountNumber.trim() ? "error-filled" : "error-empty")
+                  : undefined}
+                onFocus={() => void checkCzClipboard()}
+                onBlur={() => setCzTouched((current) => ({ ...current, accountNumber: true }))}
+              />
+              <TextField
+                label={t("runtime.payments.domesticFlow.bankCode", "Bank code")}
+                value={form.bankCode}
+                onChange={(value) => updateCzAccountPart("bankCode", value)}
+                inputMode="numeric"
+                maxLength={CZ_DOMESTIC_PAYMENT_FIELD_LIMITS.bankCode}
+                suffixOutsideDivider
+                forceFloatLabel
+                ariaInvalid={czTouched.bankCode && !czAccountValidity.bankCode}
+                ariaDescribedBy={czTouchedErrors.length ? "cz-account-validation" : undefined}
+                visualState={czTouched.bankCode && !czAccountValidity.bankCode
+                  ? (form.bankCode.trim() ? "error-filled" : "error-empty")
+                  : undefined}
+                onFocus={() => void checkCzClipboard()}
+                onBlur={() => setCzTouched((current) => ({ ...current, bankCode: true }))}
+              />
+              <span className="grid h-[32px] w-[32px] shrink-0 place-items-center" aria-hidden="true">
+                <AppIcon name="payment-photo-camera" color="var(--uc-text)" />
+              </span>
+              {getCzechPaymentBankName(form.bankCode.trim()) ? (
+                <p className="col-start-1 col-span-4 row-start-2 mt-[6px] uc-type-n5 text-[var(--uc-text-muted)]">
+                  {getCzechPaymentBankName(form.bankCode.trim())}
+                </p>
+              ) : null}
+              {czTouchedErrors.length ? (
+                <p id="cz-account-validation" className="col-span-4 row-start-3 mt-[4px] uc-type-n5 text-[var(--uc-status-red)]" role="alert">
+                  {t("runtime.payments.domesticFlow.czechAccountValidation", "Check the highlighted account details")}: {czTouchedErrors.join(", ")}.
+                </p>
+              ) : null}
+              {czClipboardAccount ? (
+                <button
+                  type="button"
+                  onClick={applyCzClipboardAccount}
+                  className="col-span-4 row-start-4 mt-[2px] flex h-[32px] items-center justify-center rounded-[16px] bg-[rgba(38,38,38,0.06)] px-0 text-left text-[#000] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+                  aria-label={`Use account from clipboard: ${czClipboardAccount.prefix ? `${czClipboardAccount.prefix}-` : ""}${czClipboardAccount.accountNumber} / ${czClipboardAccount.bankCode}`}
+                >
+                  <span className="flex min-w-0 items-center gap-[4px]">
+                    <span className="grid size-[32px] shrink-0 place-items-center">
+                      <AppIcon name="payment-use-account" size={16} color="#262626" />
+                    </span>
+                    <span className="uc-type-n5 truncate text-[#000]">
+                      <span className="font-normal">Use account: </span>
+                      <span className="uc-type-n5-strong font-bold">{czClipboardAccount.prefix ? `${czClipboardAccount.prefix}-` : ""}{czClipboardAccount.accountNumber} / {czClipboardAccount.bankCode}</span>
+                    </span>
+                  </span>
+                </button>
+              ) : null}
+            </div>
+          </FlowField>
+        ) : (
+          <>
+            <FlowField>
+              <TextField label={t("runtime.payments.domesticFlow.prefix", "Prefix")} value={form.prefix} onChange={(value) => update("prefix", value)} />
+            </FlowField>
+            <FlowField>
+              <TextField
+                label={t("runtime.payments.domesticFlow.accountNumberMandatory", "Account number (mandatory)")}
+                value={form.accountNumber}
+                onChange={(value) => update("accountNumber", value)}
+                trailingIconName="camera"
+              />
+            </FlowField>
+            <FlowField>
+              <TextField
+                label={t("runtime.payments.domesticFlow.bankCodeMandatory", "Bank code (mandatory)")}
+                value={form.bankCode}
+                onChange={(value) => update("bankCode", value)}
+                helperText={form.bankName}
+                trailingIconName="camera"
+              />
+            </FlowField>
+          </>
+        )}
 
-        <SectionTitle>{t("runtime.payments.domesticFlow.paymentDetails", "PAYMENT DETAILS")}</SectionTitle>
+        <SectionTitle darkNoDivider={usesCzBaselineDomesticPaymentLayout}>
+          {t("runtime.payments.domesticFlow.paymentDetails", "PAYMENT DETAILS")}
+        </SectionTitle>
         <FlowField>
           <AmountField
             label={t("runtime.payments.domesticFlow.amountLimit", "Amount limit")}

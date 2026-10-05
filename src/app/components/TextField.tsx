@@ -24,15 +24,25 @@ interface TextFieldProps {
   visualState?: TextFieldVisualState;
   trailingIconName?: IconName;
   trailingIconColor?: string;
+  trailingIconAction?: {
+    ariaLabel: string;
+    onClick: () => void;
+  };
+  trailingIconPlacement?: "inline" | "floating";
   multipleValues?: string[];
   multipleCount?: number;
   ariaLabel?: string;
+  ariaInvalid?: boolean;
+  ariaDescribedBy?: string;
   inputMode?: HTMLAttributes<HTMLInputElement>["inputMode"];
+  maxLength?: number;
+  forceFloatLabel?: boolean;
   readOnly?: boolean;
   suffix?: string;
   suffixOutsideDivider?: boolean;
   suffixClassName?: string;
   onActivate?: () => void;
+  onFocus?: () => void;
   /** Called when the input loses focus, e.g. to commit a clamped numeric draft. */
   onBlur?: () => void;
 }
@@ -52,15 +62,22 @@ export default function TextField({
   visualState,
   trailingIconName,
   trailingIconColor,
+  trailingIconAction,
+  trailingIconPlacement = "inline",
   multipleValues,
   multipleCount,
   ariaLabel,
+  ariaInvalid = false,
+  ariaDescribedBy,
   inputMode,
+  maxLength,
+  forceFloatLabel = false,
   readOnly = false,
   suffix,
   suffixOutsideDivider = false,
   suffixClassName = "",
   onActivate,
+  onFocus,
   onBlur,
 }: TextFieldProps) {
   const [isFocused, setIsFocused] = useState(false);
@@ -80,7 +97,7 @@ export default function TextField({
   const isActive = derivedState === "on-focus";
   const isMultiple = derivedState === "multiple-filled";
   const hasValue = derivedState === "filled" || derivedState === "error-filled" || derivedState === "disabled-filled" || isMultiple || value.trim().length > 0;
-  const shouldFloatLabel = isActive || hasValue;
+  const shouldFloatLabel = forceFloatLabel || isActive || hasValue;
 
   const labelColor = isDisabled
     ? DISABLED_COLOR
@@ -104,6 +121,7 @@ export default function TextField({
 
   const descriptionText1 = isError ? errorText : helperText;
   const descriptionText2 = isError ? errorText2 : helperText2;
+  const hasFloatingTrailingIcon = trailingIconPlacement === "floating" && Boolean(trailingIconName);
   const displayedMultipleValues = multipleValues?.join("; ") ?? value;
   const effectiveMultipleCount = multipleCount ?? multipleValues?.length ?? 0;
   const inputPlaceholder = shouldFloatLabel ? placeholder : label;
@@ -130,7 +148,7 @@ export default function TextField({
           </label>
         ) : null}
 
-        <div className={`${shouldFloatLabel ? "mt-[4px]" : ""} flex items-end`}>
+        <div className={`${shouldFloatLabel ? "mt-[4px]" : ""} flex items-end ${hasFloatingTrailingIcon ? "pr-[44px]" : ""}`}>
           <div
             className={`flex min-w-0 flex-1 items-end border-b pb-[3px] ${isDisabled ? "cursor-default" : "cursor-text"}`}
             style={{
@@ -167,11 +185,17 @@ export default function TextField({
                 id={inputId}
                 type="text"
                 aria-label={ariaLabel ?? label}
+                aria-invalid={ariaInvalid || undefined}
+                aria-describedby={ariaDescribedBy}
                 inputMode={inputMode}
+                maxLength={maxLength}
                 readOnly={readOnly}
                 value={hasValue ? value : ""}
                 onChange={(event) => onChange(event.target.value)}
-                onFocus={() => setIsFocused(true)}
+                onFocus={() => {
+                  setIsFocused(true);
+                  onFocus?.();
+                }}
                 onBlur={() => {
                   setIsFocused(false);
                   onBlur?.();
@@ -201,17 +225,63 @@ export default function TextField({
             </span>
           ) : null}
 
-          {trailingIconName || !suffixOutsideDivider ? (
-            <span className="ml-[12px] grid h-[32px] w-[32px] shrink-0 place-items-center" aria-hidden={!trailingIconName}>
-              {trailingIconName ? (
+          {!hasFloatingTrailingIcon && (trailingIconName || !suffixOutsideDivider) ? (
+            trailingIconAction && trailingIconName ? (
+              <button
+                type="button"
+                aria-label={trailingIconAction.ariaLabel}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  trailingIconAction.onClick();
+                }}
+                className="ml-[12px] grid h-[32px] w-[32px] shrink-0 place-items-center rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+              >
                 <AppIcon
                   name={trailingIconName}
                   color={trailingIconColor ?? (isDisabled ? DISABLED_COLOR : "var(--uc-text)")}
                 />
-              ) : null}
-            </span>
+              </button>
+            ) : (
+              <span className="ml-[12px] grid h-[32px] w-[32px] shrink-0 place-items-center" aria-hidden={!trailingIconName}>
+                {trailingIconName ? (
+                  <AppIcon
+                    name={trailingIconName}
+                    color={trailingIconColor ?? (isDisabled ? DISABLED_COLOR : "var(--uc-text)")}
+                  />
+                ) : null}
+              </span>
+            )
           ) : null}
         </div>
+
+        {hasFloatingTrailingIcon && trailingIconName ? (
+          trailingIconAction ? (
+            <button
+              type="button"
+              aria-label={trailingIconAction.ariaLabel}
+              onClick={(event) => {
+                event.stopPropagation();
+                trailingIconAction.onClick();
+              }}
+              className={`absolute right-0 grid h-[32px] w-[32px] place-items-center rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${shouldFloatLabel ? "top-[12px]" : "top-0"}`}
+            >
+              <AppIcon
+                name={trailingIconName}
+                color={trailingIconColor ?? (isDisabled ? DISABLED_COLOR : "var(--uc-text)")}
+              />
+            </button>
+          ) : (
+            <span
+              className={`absolute right-0 grid h-[32px] w-[32px] place-items-center ${shouldFloatLabel ? "top-[12px]" : "top-0"}`}
+              aria-hidden="true"
+            >
+              <AppIcon
+                name={trailingIconName}
+                color={trailingIconColor ?? (isDisabled ? DISABLED_COLOR : "var(--uc-text)")}
+              />
+            </span>
+          )
+        ) : null}
 
         {descriptionText1 || descriptionText2 ? (
           <div className="mt-[6px] flex flex-col">
