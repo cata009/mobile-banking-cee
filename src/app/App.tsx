@@ -271,7 +271,7 @@ function AppContent({
   const [productsShelfFocusRequest, setProductsShelfFocusRequest] = useState<ProductsShelfFocusRequest | null>(null);
   const [productsShelfHeroCollapsed, setProductsShelfHeroCollapsed] = useState(false);
   const [selectedProductDetail, setSelectedProductDetail] = useState<ProductDetailSelection | null>(null);
-  const [investmentsInitialView, setInvestmentsInitialView] = useState<"portfolio" | "goals">("portfolio");
+  const [investmentsInitialView, setInvestmentsInitialView] = useState<"portfolio" | "goals" | undefined>();
   const [analyticsInitialScopeId, setAnalyticsInitialScopeId] = useState<string | null>(null);
   const [analyticsInitialDirection, setAnalyticsInitialDirection] = useState<"expense" | "income" | null>(null);
 

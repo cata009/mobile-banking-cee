@@ -267,6 +267,21 @@ export function buildDeepLinkUrl(state: DeepLinkState): string {
     params.set(PARAM.cardId, state.cardId);
   }
 
+  // CZ Robo goal details live inside the Investments screen rather than in
+  // the top-level route, so preserve their refresh-resume context while the
+  // global deep-link synchronizer rebuilds the rest of the URL.
+  if (normalizedScreen === "investments") {
+    const currentParams = new URLSearchParams(window.location.search);
+    const roboView = currentParams.get("robo_view");
+    const roboGoalId = currentParams.get("robo_goal");
+    if (roboView === "goals") {
+      params.set("robo_view", roboView);
+    } else if (roboView === "detail" && roboGoalId) {
+      params.set("robo_view", roboView);
+      params.set("robo_goal", roboGoalId);
+    }
+  }
+
   if (state.deviceMode) params.set(PARAM.frame, "0");
 
   const { origin, pathname } = window.location;

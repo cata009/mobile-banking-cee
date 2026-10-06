@@ -128,7 +128,6 @@ export default function InvestmentProductCard({
       </div>
     </div>
   );
-
   return (
     <button
       type="button"

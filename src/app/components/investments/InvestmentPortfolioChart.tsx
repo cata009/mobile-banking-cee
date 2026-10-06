@@ -369,7 +369,7 @@ export default function InvestmentPortfolioChart({
             axisLine={false}
             tickLine={false}
             height={compact ? 38 : 42}
-            padding={czRoboPresentation ? { left: 22, right: 22 } : compact
+            padding={czRoboPresentation ? { left: 0, right: 0 } : compact
               ? { left: 18, right: edgeToEdge ? 0 : 18 }
               : { left: 24, right: edgeToEdge ? 0 : 24 }}
             tick={(tickProps: RuntimeAxisTickAdapter) => {
@@ -382,10 +382,14 @@ export default function InvestmentPortfolioChart({
               const tickX = typeof x === "number" ? x : 0;
               const tickY = typeof y === "number" ? y : 0;
               const textAnchor = !czRoboPresentation && edgeToEdge && index === chartData.length - 1 ? "end" : "middle";
+              const isLastRoboTick = czRoboPresentation
+                && typeof payload?.value === "number"
+                && Math.abs(payload.value - timeEnd) < 1;
+              const alignedTextAnchor = isLastRoboTick || textAnchor === "end" ? "end" : textAnchor;
 
               return (
                 <g transform={`translate(${tickX},${tickY + 10})`}>
-                  <text textAnchor={textAnchor} fill="var(--uc-text-muted)" fontSize={czRoboPresentation ? 11 : compact ? 10 : 12} fontWeight={700}>
+                  <text textAnchor={alignedTextAnchor} fill="var(--uc-text-muted)" fontSize={czRoboPresentation ? 11 : compact ? 10 : 12} fontWeight={700}>
                     <tspan x={0} dy={0}>{point.dateLabel}</tspan>
                     <tspan x={0} dy={compact ? 12 : 14}>{point.yearLabel}</tspan>
                   </text>
@@ -400,6 +404,7 @@ export default function InvestmentPortfolioChart({
             tickLine={false}
             ticks={yTicks}
             tickFormatter={(value) => formatAxisValue(Number(value), valueRange)}
+            tickMargin={czRoboPresentation ? 11 : undefined}
             tick={{ fill: "var(--uc-text-muted)", fontSize: compact ? 11 : 12, fontWeight: 700 }}
           />
           <CartesianGrid

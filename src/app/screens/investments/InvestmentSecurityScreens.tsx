@@ -725,7 +725,7 @@ function CatalogInvestmentSecurityDetailScreen({
               <PrimaryButton
                 labelSize="18"
                 variant="surface"
-                className="!w-0 !flex-1 !border !border-[var(--uc-border)]"
+                className="!w-0 !flex-1 !border !border-[var(--uc-text)]"
                 onClick={onSellClick}
               >
                 Sell

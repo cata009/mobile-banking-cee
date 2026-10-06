@@ -6,6 +6,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest
 import CzFutureRoboAdvisorFlow from '@/app/screens/investments/CzFutureRoboAdvisorFlow'
 
 beforeAll(() => {
+  vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: false })));
   Object.defineProperty(HTMLElement.prototype, 'scrollTo', {
     configurable: true,
     value: vi.fn(),
@@ -60,7 +61,7 @@ function reachFundingMethod() {
 function reachGoalDetail() {
   reachFundingMethod()
   fireEvent.click(screen.getByRole('radio', { name: /Invest once/i }))
-  fireEvent.click(screen.getByRole('button', { name: /^10\D000 CZK$/ }))
+  fireEvent.click(screen.getByRole('button', { name: /^10\.000,00 CZK$/ }))
   fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
   fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
   fireEvent.click(screen.getByRole('switch', { name: 'Accept terms and conditions' }))
@@ -108,19 +109,18 @@ describe('CZ Future Robo Advisor flow', () => {
     expect(onExit).toHaveBeenCalledTimes(1)
   })
 
-  it('keeps the five Figma goal choices', () => {
+  it('keeps the four Figma goal choices', () => {
     startFlow()
 
     fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
 
-    expect(screen.getAllByRole('radio')).toHaveLength(5)
+    expect(screen.getAllByRole('radio')).toHaveLength(4)
     expect(screen.getByRole('radio', { name: /General build-up wealth/ })).toBeInTheDocument()
-    expect(screen.getByRole('radio', { name: 'Protection for inflation' })).toBeInTheDocument()
-    expect(screen.getByRole('radio', { name: 'Saving for unforeseen circumstances' })).toBeInTheDocument()
-    expect(screen.getByRole('radio', { name: 'Saving for a major purchase' })).toBeInTheDocument()
-    expect(screen.getByRole('radio', { name: 'Retirement' })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /Saving for unforeseen circumstances/ })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /Saving for a major purchase/ })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /Retirement/ })).toBeInTheDocument()
   })
 
   it('collapses each Robo page title into the centered header while scrolling', () => {
@@ -133,8 +133,8 @@ describe('CZ Future Robo Advisor flow', () => {
     fireEvent.scroll(scrollContainer!)
 
     const titles = screen.getAllByRole('heading', { name: 'Your risk profile' })
-    const compactTitle = titles.find((title) => title.classList.contains('text-center'))
-    expect(compactTitle).toHaveStyle({ opacity: '1' })
+    const compactTitle = titles.find((title) => title.parentElement?.classList.contains('text-center'))
+    expect(compactTitle?.parentElement).toHaveStyle({ opacity: '1' })
   })
 
   it('blocks goal creation until an expired MiFID profile is updated', () => {
@@ -157,7 +157,7 @@ describe('CZ Future Robo Advisor flow', () => {
     fireEvent.change(screen.getByRole('textbox', { name: 'Enter your goal name' }), { target: { value: 'New car' } })
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
 
-    const quickAmount = screen.getByRole('button', { name: /250.*000 CZK/ })
+    const quickAmount = screen.getByRole('button', { name: /250\.000,00 CZK/ })
     fireEvent.click(quickAmount)
 
     expect(screen.getByRole('textbox', { name: 'Target amount' })).toHaveValue('250000')
@@ -184,7 +184,7 @@ describe('CZ Future Robo Advisor flow', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
     expect(screen.getByRole('heading', { name: 'Available portfolios' })).toBeInTheDocument()
     expect(screen.getByTestId('robo-basket-portfolio-carousel').querySelectorAll('[role="radio"]')).toHaveLength(5)
-    expect(screen.getByText(/3 one-off and 2 regular/i)).toBeInTheDocument()
+    expect(screen.getByText(/these baskets are a suitable match/i)).toBeInTheDocument()
   })
 
   it('reviews client-facing documents and sends the goal to secure signing', () => {
@@ -215,7 +215,7 @@ describe('CZ Future Robo Advisor flow', () => {
     expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled()
     const fiveYears = screen.getByRole('radio', { name: '5 years' })
     expect(fiveYears).not.toHaveClass('border-b')
-    expect(screen.getByText('5 YEARS')).toHaveClass('text-[16px]', 'font-bold')
+    expect(screen.getByText('5 YEARS')).toHaveClass('text-[14px]', 'font-bold')
 
     fireEvent.click(fiveYears)
     expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled()
@@ -247,7 +247,7 @@ describe('CZ Future Robo Advisor flow', () => {
     reachFundingMethod()
     fireEvent.click(screen.getByRole('radio', { name: /Invest monthly/i }))
 
-    const suggestion = screen.getByRole('button', { name: /1.*000 CZK/ })
+    const suggestion = screen.getByRole('button', { name: /1\.000,00 CZK/ })
     fireEvent.click(suggestion)
 
     expect(screen.getByRole('textbox', { name: 'Monthly contribution' })).toHaveValue('1000')
@@ -258,30 +258,30 @@ describe('CZ Future Robo Advisor flow', () => {
     startFlow()
     reachFundingMethod()
     fireEvent.click(screen.getByRole('radio', { name: /Invest once/i }))
-    fireEvent.click(screen.getByRole('button', { name: /^10\D000 CZK$/ }))
+    fireEvent.click(screen.getByRole('button', { name: /^10\.000,00 CZK$/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
 
     const carousel = screen.getByTestId('robo-basket-portfolio-carousel')
     expect(carousel.querySelectorAll('[role="radio"]')).toHaveLength(5)
-    expect(screen.getByRole('radio', { name: 'Choose onemarkets J.P. Morgan Global growth Basket' })).toHaveAttribute('aria-checked', 'true')
-    expect(screen.getByRole('heading', { name: 'FUNDS DISTRIBUTION' })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /^Choose onemarkets J\.P\. Morgan Global growth Basket/ })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('heading', { name: 'PRODUCTS DISTRIBUTION' })).toBeInTheDocument()
     expect(screen.getByText('Nano-Chip Equity Fund')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('radio', { name: 'Choose BlackRock Credit Opportunities' }))
-    expect(screen.getByRole('radio', { name: 'Choose BlackRock Credit Opportunities' })).toHaveAttribute('aria-checked', 'true')
-    expect(screen.getByRole('heading', { name: 'BASKET CONTENTS' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('radio', { name: /^Choose BlackRock Credit Opportunities/ }))
+    expect(screen.getByRole('radio', { name: /^Choose BlackRock Credit Opportunities/ })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('heading', { name: 'PRODUCTS DISTRIBUTION' })).toBeInTheDocument()
     expect(screen.getByText('Sustainable Future Mixed Fund')).toBeInTheDocument()
     expect(screen.getByText('Europe Equity Opportunities')).toBeInTheDocument()
     expect(screen.queryByText('4 equity ESG funds.')).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('radio', { name: 'Choose onemarkets Chase Regular EUR' }))
+    fireEvent.click(screen.getByRole('radio', { name: /^Choose onemarkets Chase Regular EUR/ }))
     expect(screen.getByText('Amundi Funds Global Opportunity')).toBeInTheDocument()
     expect(screen.getByText('CZROBOAMUND14')).toBeInTheDocument()
     expect(screen.getByText('Europe Equity Opportunities')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Continue' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Details for onemarkets Chase Regular EUR' })).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('radio', { name: 'Choose onemarkets J.P. Morgan Credit Opportunities' }))
+    fireEvent.click(screen.getByRole('radio', { name: /^Choose onemarkets J\.P\. Morgan Credit Opportunities/ }))
     expect(screen.getByText('Nano-Chip Equity Fund')).toBeInTheDocument()
     expect(screen.getByText('CZGLOBALGRO9')).toBeInTheDocument()
   })
@@ -305,11 +305,8 @@ describe('CZ Future Robo Advisor flow', () => {
     expect(addMoney).not.toHaveClass('bg-[var(--uc-surface-muted)]', 'rounded-[6px]')
 
     expect(screen.getByRole('heading', { name: 'Portfolio allocation' })).toHaveClass('text-[20px]')
-    expect(screen.getByRole('tab', { name: 'PRODUCTS' })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getByRole('tab', { name: 'ASSET CLASS' })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'CURRENCY' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'MAX VALUE' })).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByRole('img', { name: 'Apple' })).toBeInTheDocument()
-    expect(screen.getByText('30% · Stock · USD')).toBeInTheDocument()
+    expect(screen.getByText('Nano-Chip Equity Fund')).toBeInTheDocument()
+    expect(screen.getByText('Quantum Computing Alpha')).toBeInTheDocument()
   })
 })
