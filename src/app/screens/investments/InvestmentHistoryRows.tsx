@@ -72,7 +72,7 @@ function HistoryDateBlock({ date, country }: { date: string; country: CountryId 
   const parts = formatHistoryDateParts(date, country);
   return (
     <div className="flex w-[48px] shrink-0 items-center">
-      <div className="w-[28px] text-left">
+      <div className="w-[28px] text-center">
         <p className="text-[18px] font-bold leading-[20px] text-[var(--uc-text)]">{parts.day}</p>
         <p className="text-[14px] font-bold leading-[15px] text-[var(--uc-text-muted)]">{parts.month}</p>
       </div>

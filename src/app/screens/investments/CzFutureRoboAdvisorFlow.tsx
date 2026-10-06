@@ -14,8 +14,9 @@ import StandardSignScreen from "@/app/components/flow/StandardSignScreen";
 import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
 import InvestmentProductCard from "@/app/components/investments/InvestmentProductCard";
 import InvestmentBasketFundDetailScreen from "@/app/screens/investments/InvestmentBasketFundDetailScreen";
-import InvestmentHistoryRows, { InvestmentHistoryTabs } from "@/app/screens/investments/InvestmentHistoryRows";
+import InvestmentsHistoryScreen from "@/app/screens/investments/InvestmentsHistoryScreen";
 import { InvestmentSecurityDetailScreen } from "@/app/screens/investments/InvestmentSecurityScreens";
+import InvestmentSellOrderFlow from "@/app/screens/investments/InvestmentSellOrderFlow";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import InvestmentFilterChips from "@/app/components/investments/InvestmentFilterChips";
 import InvestmentPeriodChips from "@/app/components/investments/InvestmentPeriodChips";
@@ -51,6 +52,9 @@ import {
   calculateRoboGoalProgress,
   buildRoboReviewRows,
   formatCzkInput,
+  formatCzkGoalAmount,
+  formatCzkInteger,
+  formatCzkReturnLabel,
   getRoboGoalNameSuggestions,
   getRoboGoalProgress,
   getFundingFieldVisibility,
@@ -85,6 +89,7 @@ interface CzFutureRoboAdvisorFlowProps {
     localValue: number;
     performancePercent: number;
     hideBuyAction?: boolean;
+    securityOverride?: InvestmentCatalogSecurity;
   }) => void;
   initialGoal?: RoboExistingGoal;
   onGoalUpdated?: (goal: RoboExistingGoal) => void;
@@ -414,6 +419,62 @@ function getRoboGoalEndDateFromStart(startDate: string, horizonYears: number): s
   return formatRoboGoalDate(date);
 }
 
+function localizeRoboBasketInstrument(
+  sourceSecurity: InvestmentCatalogSecurity,
+  country: CountryId,
+  overrides: { title?: string; productId?: string } = {},
+): InvestmentCatalogSecurity {
+  const localCurrency = getCountryCurrency(country) as InvestmentCatalogSecurity["localCurrency"];
+  const title = overrides.title ?? sourceSecurity.title;
+  const marketPrice = roundMoney(convertCurrency(
+    sourceSecurity.marketPrice,
+    sourceSecurity.instrumentCurrency,
+    localCurrency,
+  ));
+  const localValue = roundMoney(convertCurrency(sourceSecurity.localValue, sourceSecurity.localCurrency, localCurrency));
+  const value = roundMoney(convertCurrency(sourceSecurity.value, sourceSecurity.instrumentCurrency, localCurrency));
+
+  return {
+    ...sourceSecurity,
+    title,
+    productId: overrides.productId ?? sourceSecurity.productId,
+    value,
+    currency: localCurrency,
+    instrumentCurrency: localCurrency,
+    localValue,
+    localCurrency,
+    securityAccountId: country === "CZ" ? "robo-sec-local" : sourceSecurity.securityAccountId,
+    securityAccountName: `Investment goals ${localCurrency} portfolio`,
+    securityAccountCurrency: localCurrency,
+    marketPrice,
+    quantity: marketPrice > 0 ? Number((value / marketPrice).toFixed(6)) : 0,
+    description: `${title} is a ${sourceSecurity.assetClass.toLowerCase()} ${sourceSecurity.productType.toLowerCase()} denominated in ${localCurrency}. Review its objectives, risk profile, fees and official product documents before placing an order.`,
+  };
+}
+
+function buildRoboBasketPosition(
+  sourceSecurity: InvestmentCatalogSecurity,
+  localValue: number,
+  country: CountryId,
+  overrides: { title?: string; productId?: string; performancePercent?: number } = {},
+): InvestmentCatalogSecurity {
+  const security = localizeRoboBasketInstrument(sourceSecurity, country, overrides);
+  const value = roundMoney(localValue);
+  const performancePercent = overrides.performancePercent ?? sourceSecurity.performancePercent;
+
+  return {
+    ...security,
+    owned: true,
+    status: "active",
+    value,
+    localValue,
+    localCurrency: security.instrumentCurrency,
+    quantity: security.marketPrice > 0 ? Number((value / security.marketPrice).toFixed(6)) : 0,
+    performancePercent,
+    performanceAmount: roundMoney((localValue * performancePercent) / 100),
+  };
+}
+
 interface RoboWithdrawalProduct {
   id: string;
   name: string;
@@ -461,16 +522,22 @@ function getRoboWithdrawalProducts(
     const value = sourceSecurity
       ? roundMoney(convertCurrency(localValue, localCurrency, sourceSecurity.instrumentCurrency))
       : localValue;
-    const security: InvestmentCatalogSecurity | null = sourceSecurity ? {
-      ...sourceSecurity,
-      title: product.name,
-      value,
-      currency: sourceSecurity.instrumentCurrency,
-      localValue,
-      localCurrency,
-      quantity: Number((value / sourceSecurity.marketPrice).toFixed(6)),
-      performanceAmount: roundMoney((localValue * sourceSecurity.performancePercent) / 100),
-    } : null;
+    const security: InvestmentCatalogSecurity | null = sourceSecurity
+      ? basketProducts.length > 0
+        ? buildRoboBasketPosition(sourceSecurity, localValue, country, { title: product.name, productId: product.id })
+        : {
+          ...sourceSecurity,
+          title: product.name,
+          owned: true,
+          status: "active",
+          value,
+          currency: sourceSecurity.instrumentCurrency,
+          localValue,
+          localCurrency,
+          quantity: Number((value / sourceSecurity.marketPrice).toFixed(6)),
+          performanceAmount: roundMoney((localValue * sourceSecurity.performancePercent) / 100),
+        }
+      : null;
 
     return { ...product, localValue, security };
   });
@@ -478,7 +545,7 @@ function getRoboWithdrawalProducts(
 
 function getRoboGoalCurrentValue(goal?: RoboExistingGoal): number {
   return goal
-    ? Number(goal.currentInteger.replace(/\s/g, ""))
+    ? Number(goal.currentInteger.replace(/\D/g, ""))
       + Number(goal.currentDecimals.replace(/[^\d]/g, "")) / 100
     : 79800;
 }
@@ -1077,9 +1144,9 @@ function BasketAllocation({
     localValue: number;
     performancePercent: number;
     hideBuyAction?: boolean;
+    securityOverride?: InvestmentCatalogSecurity;
   }) => void;
 }) {
-  const localCurrency = getCountryCurrency(country) as InvestmentCatalogSecurity["localCurrency"];
   const holdings = basket.holdings ?? [];
 
   return (
@@ -1105,28 +1172,20 @@ function BasketAllocation({
 
             const percent = holding.percent ?? 100 / Math.max(holdings.length, 1);
             const localValue = roundMoney((currentValue * percent) / 100);
-            const value = roundMoney(convertCurrency(localValue, localCurrency, security.instrumentCurrency));
-            const position: InvestmentCatalogSecurity = {
-              ...security,
+            const position = buildRoboBasketPosition(security, localValue, country, {
               title: holding.title,
-              productId: holding.productId ?? security.productId,
-              value,
-              currency: security.instrumentCurrency,
-              localValue,
-              localCurrency,
-              quantity: Number((value / security.marketPrice).toFixed(6)),
-              performanceAmount: roundMoney((localValue * security.performancePercent) / 100),
-            };
+              productId: holding.productId,
+            });
 
             return (
               <InvestmentProductCard
                 key={holding.productId ?? `${basket.id}-${security.id}-${index}`}
                 security={position}
-                valueParts={formatInvestmentAmountParts(value, country, position.currency, amountsHidden)}
+                valueParts={formatInvestmentAmountParts(position.value, country, position.currency, amountsHidden)}
                 performanceParts={formatInvestmentAmountParts(
                   position.performanceAmount,
                   country,
-                  localCurrency,
+                  position.localCurrency,
                   amountsHidden,
                   true,
                 )}
@@ -1143,7 +1202,7 @@ function BasketAllocation({
                 portfolioValueParts={formatInvestmentAmountParts(
                   localValue,
                   country,
-                  localCurrency,
+                  position.localCurrency,
                   amountsHidden,
                 )}
                 onClick={() => onOpenSecurity?.({
@@ -1152,6 +1211,7 @@ function BasketAllocation({
                   localValue,
                   performancePercent: position.performancePercent,
                   hideBuyAction: true,
+                  securityOverride: position,
                 })}
               />
             );
@@ -1243,13 +1303,14 @@ function GoalDetail({
     localValue: number;
     performancePercent: number;
     hideBuyAction?: boolean;
+    securityOverride?: InvestmentCatalogSecurity;
   }) => void;
 }) {
   const currentValue = getRoboGoalCurrentValue(existingGoal);
   const resolvedGoalName = existingGoal?.name ?? (goalName || "My investment goal");
   const resolvedPurpose = existingGoal?.purpose ?? "General build-up wealth";
   const resolvedTarget = existingGoal
-    ? `${existingGoal.targetInteger}${existingGoal.targetDecimals}`
+    ? formatCzkGoalAmount(existingGoal.targetInteger, existingGoal.targetDecimals)
     : formatCzkInput(targetAmount);
   const draftTarget = Number(targetAmount);
   const resolvedProgress = existingGoal
@@ -1259,7 +1320,7 @@ function GoalDetail({
   const resolvedEndDate = existingGoal?.endDate
     ?? getRoboGoalEndDateFromStart(resolvedStartDate ?? "15 Feb 2025", horizonYears);
   const resolvedReturnTone = existingGoal?.returnTone ?? "negative";
-  const resolvedReturnLabel = existingGoal?.returnLabel ?? "-1 100,00 CZK (-1,36%)";
+  const resolvedReturnLabel = formatCzkReturnLabel(existingGoal?.returnLabel ?? "-1 100,00 CZK (-1,36%)");
   const [selectedPeriodId, setSelectedPeriodId] = useState<InvestmentPeriodId>("3y");
   const [selectedSortId, setSelectedSortId] = useState<InvestmentSortId>("max-value");
   const chartPoints = useMemo(
@@ -1320,7 +1381,7 @@ function GoalDetail({
       <div data-testid="robo-goal-detail">
         <p className="uc-type-n5 text-[var(--uc-text-muted)]">Current value</p>
         <p className="mt-[4px] text-[24px] font-bold leading-[26px] text-[var(--uc-text)]">
-          {existingGoal?.currentInteger ?? "79 800"}
+          {formatCzkInteger(existingGoal?.currentInteger ?? "79 800")}
           <span className="text-[16px] font-normal">{existingGoal?.currentDecimals ?? ",00 CZK"}</span>
         </p>
         <p className={cn(
@@ -1351,7 +1412,7 @@ function GoalDetail({
         <InvestmentPeriodChips
           periods={GOAL_DETAIL_PERIODS}
           comfortableTouchTargets
-          className="-mt-[8px]"
+          className="mt-[12px]"
           selectedPeriodId={selectedPeriodId}
           onChange={setSelectedPeriodId}
         />
@@ -1408,95 +1469,97 @@ function GoalDetail({
       <h2 className="mt-[30px] text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">
         Portfolio allocation
       </h2>
-      <div className="-mx-[24px] mt-[16px]">
+      <div className="-mx-[24px] mt-[8px]">
         <InvestmentFilterChips
           options={INVESTMENT_SORT_OPTIONS}
           selectedOptionId={selectedSortId}
           onChange={setSelectedSortId}
-          className="py-[16px]"
+          className="pt-[8px] pb-[16px]"
         />
 
-        {basket ? (
-          <BasketAllocation
-            basket={basket}
-            currentValue={currentValue}
-            country={country}
-            amountsHidden={amountsHidden}
-            securityCatalog={securityCatalog}
-            onOpenSecurity={onOpenSecurity}
-          />
-        ) : (
-          <div>
-            {productRows.map(({ product, productType, value, performance, security }) => security ? (
-              <InvestmentProductCard
-                key={product.securityId}
-                security={security}
-                valueParts={formatInvestmentAmountParts(security.value, country, security.currency, amountsHidden)}
-                performanceParts={formatInvestmentAmountParts(
-                  security.performanceAmount,
-                  country,
-                  security.localCurrency,
-                  amountsHidden,
-                  true,
-                )}
-                valueLabel="Value"
-                performanceLabel="Performance"
-                czRoboAmountStyle
-                amountsHidden={amountsHidden}
-                currentPriceParts={formatInvestmentAmountParts(
-                  security.marketPrice,
-                  country,
-                  security.instrumentCurrency,
-                  amountsHidden,
-                )}
-                portfolioValueParts={formatInvestmentAmountParts(
-                  security.localValue,
-                  country,
-                  security.localCurrency,
-                  amountsHidden,
-                )}
-                onClick={() => onOpenSecurity?.({
-                  securityId: product.securityId,
-                  localValue: security.localValue,
-                  performancePercent: security.performancePercent,
-                  hideBuyAction: true,
-                })}
-              />
-            ) : (
-              <button
-                key={product.securityId}
-                type="button"
-                aria-label={`Open ${product.name} product details`}
-                onClick={() => onOpenSecurity?.({
-                  securityId: product.securityId,
-                  localValue: value,
-                  performancePercent: performance,
-                  hideBuyAction: true,
-                })}
-                className="flex min-h-[80px] w-full items-start gap-[8px] px-[24px] py-[14px] text-left"
-              >
-                <PortfolioProductLogo product={product} />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[14px] font-bold leading-[18px] text-[var(--uc-text)]">{product.name}</p>
-                  <p className="mt-[3px] text-[14px] leading-[18px] text-[var(--uc-text)]">
-                    {product.percent}% · {productType} · {product.currency}
-                  </p>
-                </div>
-                <div className="shrink-0 text-right">
-                  <p className="whitespace-nowrap text-[20px] font-bold leading-[22px] text-[var(--uc-text)]">
-                    {formatInvestmentNumber(value, country, 0, 0)}<span className="text-[14px] font-normal">,00 CZK</span>
-                  </p>
-                  <p className={cn(
-                    "mt-[3px] text-[14px] font-bold leading-[17px]",
-                    performance < 0 ? "text-[var(--uc-status-red)]" : "text-[var(--uc-green-olive)]",
-                  )}>
-                    {performance > 0 ? "+" : ""}{formatInvestmentNumber(performance, country, 0, 3)}%
-                  </p>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
+        <div className="px-[8px]">
+          {basket ? (
+            <BasketAllocation
+              basket={basket}
+              currentValue={currentValue}
+              country={country}
+              amountsHidden={amountsHidden}
+              securityCatalog={securityCatalog}
+              onOpenSecurity={onOpenSecurity}
+            />
+          ) : (
+            <div>
+              {productRows.map(({ product, productType, value, performance, security }) => security ? (
+                <InvestmentProductCard
+                  key={product.securityId}
+                  security={security}
+                  valueParts={formatInvestmentAmountParts(security.value, country, security.currency, amountsHidden)}
+                  performanceParts={formatInvestmentAmountParts(
+                    security.performanceAmount,
+                    country,
+                    security.localCurrency,
+                    amountsHidden,
+                    true,
+                  )}
+                  valueLabel="Value"
+                  performanceLabel="Performance"
+                  czRoboAmountStyle
+                  amountsHidden={amountsHidden}
+                  currentPriceParts={formatInvestmentAmountParts(
+                    security.marketPrice,
+                    country,
+                    security.instrumentCurrency,
+                    amountsHidden,
+                  )}
+                  portfolioValueParts={formatInvestmentAmountParts(
+                    security.localValue,
+                    country,
+                    security.localCurrency,
+                    amountsHidden,
+                  )}
+                  onClick={() => onOpenSecurity?.({
+                    securityId: product.securityId,
+                    localValue: security.localValue,
+                    performancePercent: security.performancePercent,
+                    hideBuyAction: true,
+                  })}
+                />
+              ) : (
+                <button
+                  key={product.securityId}
+                  type="button"
+                  aria-label={`Open ${product.name} product details`}
+                  onClick={() => onOpenSecurity?.({
+                    securityId: product.securityId,
+                    localValue: value,
+                    performancePercent: performance,
+                    hideBuyAction: true,
+                  })}
+                  className="flex min-h-[80px] w-full items-start gap-[8px] px-[16px] py-[14px] text-left"
+                >
+                  <PortfolioProductLogo product={product} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[14px] font-bold leading-[18px] text-[var(--uc-text)]">{product.name}</p>
+                    <p className="mt-[3px] text-[14px] leading-[18px] text-[var(--uc-text)]">
+                      {product.percent}% · {productType} · {product.currency}
+                    </p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="whitespace-nowrap text-[20px] font-bold leading-[22px] text-[var(--uc-text)]">
+                      {formatInvestmentNumber(value, country, 0, 0)}<span className="text-[14px] font-normal">,00 CZK</span>
+                    </p>
+                    <p className={cn(
+                      "mt-[3px] text-[14px] font-bold leading-[17px]",
+                      performance < 0 ? "text-[var(--uc-status-red)]" : "text-[var(--uc-green-olive)]",
+                    )}>
+                      {performance > 0 ? "+" : ""}{formatInvestmentNumber(performance, country, 0, 3)}%
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </RoboScreen>
   );
@@ -1521,6 +1584,7 @@ function ManagementScreen({
   onBack,
   onClose,
   onMode,
+  currentAccounts,
   onRename,
   onSaveGoalPlan,
 }: {
@@ -1542,6 +1606,7 @@ function ManagementScreen({
   onBack: () => void;
   onClose: () => void;
   onMode: (mode: ManagementMode) => void;
+  currentAccounts: readonly CurrentAccount[];
   onRename: (name: string) => void;
   onSaveGoalPlan: (targetAmount: string, horizonYears: number) => void;
 }) {
@@ -1549,6 +1614,7 @@ function ManagementScreen({
   const [date, setDate] = useState("1 March 2026");
   const [renameName, setRenameName] = useState(goalName);
   const [selectedWithdrawalProductId, setSelectedWithdrawalProductId] = useState<string | null>(null);
+  const [selectedWithdrawalOrderSecurity, setSelectedWithdrawalOrderSecurity] = useState<InvestmentCatalogSecurity | null>(null);
   const [historyTab, setHistoryTab] = useState<"transactions" | "orders">("transactions");
   const withdrawalProducts = useMemo(
     () => getRoboWithdrawalProducts(portfolio, currentValue, country, securityCatalog),
@@ -1568,11 +1634,13 @@ function ManagementScreen({
     [withdrawalProducts],
   );
   const goalTransactions = useMemo(
-    () => buildInvestmentHistoryTransactions(goalHistorySecurities, country, { minimumRecordsPerSecurity: 2 }),
+    () => buildInvestmentHistoryTransactions(goalHistorySecurities, country, { minimumRecordsPerSecurity: 2 })
+      .filter((item) => item.date.startsWith("2025-") || item.date.startsWith("2026-")),
     [country, goalHistorySecurities],
   );
   const goalOrders = useMemo(
-    () => buildInvestmentHistoryOrders(goalHistorySecurities, country, { minimumRecordsPerSecurity: 2 }),
+    () => buildInvestmentHistoryOrders(goalHistorySecurities, country, { minimumRecordsPerSecurity: 2 })
+      .filter((item) => item.date.startsWith("2025-") || item.date.startsWith("2026-")),
     [country, goalHistorySecurities],
   );
   const selectedWithdrawalProducts = withdrawalProducts.filter((product) => product.id === selectedWithdrawalProductId);
@@ -1580,12 +1648,10 @@ function ManagementScreen({
     (total, product) => total + product.localValue,
     0,
   );
-  const selectWithdrawalProduct = (productId: string) => setSelectedWithdrawalProductId(productId);
-
-  const openWithdrawalReview = () => {
-    if (selectedWithdrawalProducts.length === 0) return;
-    setAmount(String(Math.round(selectedWithdrawalValue)));
-    onMode("partial-withdrawal");
+  const openWithdrawalProduct = (product: RoboWithdrawalProduct) => {
+    if (!product.security) return;
+    setSelectedWithdrawalProductId(product.id);
+    setSelectedWithdrawalOrderSecurity(product.security);
   };
 
   const renderSelectedWithdrawalProducts = () => (
@@ -1614,6 +1680,22 @@ function ManagementScreen({
       })}
     </div>
   );
+
+  if (selectedWithdrawalOrderSecurity) {
+    return (
+      <InvestmentSellOrderFlow
+        security={selectedWithdrawalOrderSecurity}
+        accounts={currentAccounts}
+        country={country}
+        amountsHidden={amountsHidden}
+        onBack={() => setSelectedWithdrawalOrderSecurity(null)}
+        onComplete={() => {
+          setSelectedWithdrawalOrderSecurity(null);
+          onMode("menu");
+        }}
+      />
+    );
+  }
 
   if (mode === "add-money-basket") {
     const basket = portfolio.basketFund;
@@ -1668,26 +1750,13 @@ function ManagementScreen({
 
   if (mode === "history") {
     return (
-      <RoboScreen
-        title="History"
+      <InvestmentsHistoryScreen
         onBack={onBack}
-        onClose={onClose}
-        headerAction="none"
-        dataScreen="history"
-        contentTopClassName="pt-[8px]"
-      >
-        <div className="-mx-[24px]" data-investment-history-screen="goal">
-          <InvestmentHistoryTabs activeTab={historyTab} onChange={setHistoryTab} />
-          <InvestmentHistoryRows
-            tab={historyTab}
-            transactions={goalTransactions}
-            orders={goalOrders}
-            country={country}
-            amountsHidden={amountsHidden}
-          />
-          <div className="h-[34px]" />
-        </div>
-      </RoboScreen>
+        initialTab={historyTab}
+        transactionsOverride={goalTransactions}
+        ordersOverride={goalOrders}
+        onTabChange={setHistoryTab}
+      />
     );
   }
 
@@ -1711,45 +1780,27 @@ function ManagementScreen({
     return (
       <RoboScreen
         title="Withdraw money"
-        description="Choose one product to sell."
+        description="Select an investment to start your sale. Review the quantity, estimated proceeds and order details before signing."
+        contentTopClassName="pt-[4px]"
         onBack={onBack}
         onClose={onClose}
         headerAction="none"
         dataScreen="withdraw"
-        footer={(
-          <PrimaryButton labelSize="18" disabled={selectedWithdrawalProducts.length === 0} onClick={openWithdrawalReview}>
-            Continue
-          </PrimaryButton>
-        )}
       >
-        <div
-          className="mt-[8px]"
-          role="radiogroup"
-          aria-label="Choose a product to sell"
-        >
+        <div className="-mx-[24px]">
           {withdrawalProducts.map((product) => {
-            const selected = selectedWithdrawalProductId === product.id;
             const security = product.security;
             if (!security) {
               return (
-                <button
+                <div
                   key={product.id}
-                  type="button"
-                  role="radio"
-                  aria-checked={selected}
-                  aria-label={`Choose ${product.name} to sell`}
-                  onClick={() => selectWithdrawalProduct(product.id)}
-                  className={cn(
-                    "flex min-h-[72px] w-full items-center gap-[12px] px-[16px] py-[12px] text-left",
-                    selected ? "bg-[color-mix(in_srgb,var(--uc-action)_5%,var(--uc-surface))]" : "",
-                  )}
+                  className="flex min-h-[72px] w-full items-center px-[16px] py-[12px] text-left"
                 >
-                  <AppIcon name={selected ? "radio-selected" : "radio-unselected"} size={24} color="var(--uc-action)" />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate uc-type-n5-strong text-[var(--uc-text)]">{product.name}</span>
+                    <span className="block uc-type-n5-strong text-[var(--uc-text)]">{product.name}</span>
                     <span className="mt-[3px] block uc-type-n6 text-[var(--uc-text-muted)]">Current quote unavailable</span>
                   </span>
-                </button>
+                </div>
               );
             }
 
@@ -1771,11 +1822,7 @@ function ManagementScreen({
                 amountsHidden={amountsHidden}
                 currentPriceParts={formatInvestmentAmountParts(security.marketPrice, country, security.instrumentCurrency, amountsHidden)}
                 portfolioValueParts={formatInvestmentAmountParts(security.localValue, country, security.localCurrency, amountsHidden)}
-                selection={{
-                  selected,
-                  ariaLabel: `Choose ${product.name} to sell`,
-                  onSelect: () => selectWithdrawalProduct(product.id),
-                }}
+                onClick={() => openWithdrawalProduct(product)}
               />
             );
           })}
@@ -1962,7 +2009,7 @@ export default function CzFutureRoboAdvisorFlow({
     else setManualHorizonValue(String(nextHorizonYears));
 
     if (initialGoal) {
-      const targetInteger = formatCzkInput(targetDigits).replace(/\s*CZK$/, "");
+      const targetInteger = formatCzkInteger(targetDigits);
       onGoalUpdated?.({
         ...initialGoal,
         targetInteger,
@@ -1980,7 +2027,10 @@ export default function CzFutureRoboAdvisorFlow({
       (holding.productId && (candidate.productId === holding.productId || candidate.id === holding.productId))
       || candidate.title.trim().toLowerCase() === normalizedTitle
     )) ?? null;
-    setSelectedBasketHolding({ basketTitle: basket.title, holding, security });
+    const localizedSecurity = security
+      ? localizeRoboBasketInstrument(security, country, { title: holding.title, productId: holding.productId })
+      : null;
+    setSelectedBasketHolding({ basketTitle: basket.title, holding, security: localizedSecurity });
   };
   const strategyCarouselRef = useRef<HTMLDivElement>(null);
   const portfolioCarouselRef = useRef<HTMLDivElement>(null);
@@ -2699,6 +2749,7 @@ export default function CzFutureRoboAdvisorFlow({
           }}
           onClose={onExit}
           onMode={setManagementMode}
+          currentAccounts={currentAccounts}
           onRename={(name) => {
             setGoalName(name);
             if (initialGoal) onGoalUpdated?.({ ...initialGoal, name });

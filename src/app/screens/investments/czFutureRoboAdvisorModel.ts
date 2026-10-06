@@ -1,4 +1,3 @@
-import { formatInvestmentMoney } from "@/app/utils/investmentAmountFormatting";
 import {
   getRecommendedInvestmentBaskets,
   type InvestmentBasketFund,
@@ -209,7 +208,7 @@ export const ROBO_PORTFOLIOS: readonly RoboPortfolio[] = [
     strategyId: "sustainable-balanced",
     name: "Sustainable Balanced",
     description: "A diversified portfolio aligned with the selected sustainable strategy.",
-    minimumLabel: "From 25 000 CZK",
+    minimumLabel: "From 25.000,00 CZK",
     suitabilitySummary: "Matches the Moderate profile and selected 10-year horizon.",
     holdings: [
       { name: "Amundi Responsible Global Equity", type: "Equity fund", percent: 42, currency: "CZK" },
@@ -223,7 +222,7 @@ export const ROBO_PORTFOLIOS: readonly RoboPortfolio[] = [
     strategyId: "balanced-core",
     name: "Core",
     description: "A broad multi-asset portfolio focused on diversification and long-term balance.",
-    minimumLabel: "From 35 000 CZK",
+    minimumLabel: "From 35.000,00 CZK",
     suitabilitySummary: "Matches the Moderate profile and selected 10-year horizon.",
     holdings: [
       { name: "Amundi Global Equity", type: "Equity fund", percent: 40, currency: "USD" },
@@ -237,7 +236,7 @@ export const ROBO_PORTFOLIOS: readonly RoboPortfolio[] = [
     strategyId: "steady-income",
     name: "Steady Income",
     description: "A defensive portfolio with a larger bond allocation and smaller expected fluctuations.",
-    minimumLabel: "From 20 000 CZK",
+    minimumLabel: "From 20.000,00 CZK",
     suitabilitySummary: "Matches the Moderate profile and selected 10-year horizon.",
     holdings: [
       { name: "Czech Short Duration Bond", type: "Bond fund", percent: 35, currency: "CZK" },
@@ -388,10 +387,24 @@ export function getFundingFieldVisibility(method: RoboFundingMethod): RoboFundin
   };
 }
 
+export function formatCzkInteger(value: string | number): string {
+  const digits = String(value).replace(/\D/g, "") || "0";
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+export function formatCzkGoalAmount(integer: string, decimals: string): string {
+  const decimalDigits = decimals.replace(/\D/g, "").padEnd(2, "0").slice(0, 2);
+  return `${formatCzkInteger(integer)},${decimalDigits} CZK`;
+}
+
+export function formatCzkReturnLabel(value: string): string {
+  return value.replace(/(\d)[\s\u00a0\u202f]+(?=\d{3}(?:[,.]|$))/g, "$1.");
+}
+
 export function formatCzkInput(value: string): string {
   const numberValue = Number(value.replace(/[^\d]/g, ""));
-  if (!Number.isFinite(numberValue) || numberValue <= 0) return "0 CZK";
-  return formatInvestmentMoney(numberValue, "CZ", "CZK", false, 0, 0);
+  if (!Number.isFinite(numberValue) || numberValue <= 0) return "0,00 CZK";
+  return formatCzkGoalAmount(String(numberValue), ",00");
 }
 
 export function buildRoboReviewRows(draft: RoboDraft): RoboReviewRow[] {

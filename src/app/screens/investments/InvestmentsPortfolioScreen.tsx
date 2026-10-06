@@ -130,6 +130,51 @@ const CZ_ROBO_NAV_ICON_OVERRIDES: Partial<Record<NavItem, IconName>> = {
   products: "investment-history",
 };
 
+type CzRoboResumeState = { view: "goals" } | { view: "detail"; goalId: string };
+
+function parseCzRoboResumeState(value: unknown): CzRoboResumeState | null {
+  if (!value || typeof value !== "object") return null;
+  const saved = value as { view?: unknown; goalId?: unknown };
+  if (saved.view === "goals") return { view: "goals" };
+  if (saved.view === "detail" && typeof saved.goalId === "string") {
+    return INITIAL_CZ_ROBO_GOALS.some((goal) => goal.id === saved.goalId)
+      ? { view: "detail", goalId: saved.goalId }
+      : null;
+  }
+  return null;
+}
+
+function readCzRoboResumeState(): CzRoboResumeState | null {
+  if (typeof window === "undefined") return null;
+
+  const historyState = window.history.state as { czRoboResume?: unknown } | null;
+  const stateResume = parseCzRoboResumeState(historyState?.czRoboResume);
+  if (stateResume) return stateResume;
+
+  const params = new URLSearchParams(window.location.search);
+  const view = params.get("robo_view");
+  return parseCzRoboResumeState({ view, goalId: params.get("robo_goal") });
+}
+
+function writeCzRoboResumeState(state: CzRoboResumeState | null) {
+  if (typeof window === "undefined") return;
+  const existingHistoryState = window.history.state && typeof window.history.state === "object" && !Array.isArray(window.history.state)
+    ? { ...window.history.state as Record<string, unknown> }
+    : {};
+  if (state) existingHistoryState.czRoboResume = state;
+  else delete existingHistoryState.czRoboResume;
+
+  const url = new URL(window.location.href);
+  url.searchParams.delete("robo_view");
+  url.searchParams.delete("robo_goal");
+  if (state) {
+    url.searchParams.set("robo_view", state.view);
+    if (state.view === "detail") url.searchParams.set("robo_goal", state.goalId);
+  }
+  const nextUrl = `${url.pathname}${url.search}${url.hash}`;
+  window.history.replaceState(existingHistoryState, "", nextUrl);
+}
+
 function PortfolioPerformanceTrendIcon({ direction }: { direction: "up" | "down" | null }) {
   if (direction === "up") {
     return (
@@ -355,7 +400,7 @@ export default function InvestmentsPortfolioScreen({
   showBottomNavigation = false,
   onBottomNavigationChange = () => undefined,
   roboAdvisorEnabled = false,
-  initialView = "portfolio",
+  initialView,
   onHistoryClick,
   onOrdersToApproveClick,
   onSelectedSecurityChange,
@@ -386,10 +431,20 @@ export default function InvestmentsPortfolioScreen({
   const [selectedBasketFund, setSelectedBasketFund] = useState<InvestmentBasketFund | null>(null);
   const [buyOrderOpen, setBuyOrderOpen] = useState(false);
   const [sellOrderOpen, setSellOrderOpen] = useState(false);
-  const [roboAdvisorView, setRoboAdvisorView] = useState<"closed" | "goals" | "create" | "detail">(
-    roboAdvisorEnabled && initialView === "goals" ? "goals" : "closed",
-  );
-  const [selectedRoboGoal, setSelectedRoboGoal] = useState<RoboExistingGoal | null>(null);
+  const [restoredRoboResumeState] = useState(() => {
+    return roboAdvisorEnabled && initialView === undefined ? readCzRoboResumeState() : null;
+  });
+  const restoredRoboGoal = restoredRoboResumeState?.view === "detail"
+    ? INITIAL_CZ_ROBO_GOALS.find((goal) => goal.id === restoredRoboResumeState.goalId) ?? null
+    : null;
+  const [roboAdvisorView, setRoboAdvisorView] = useState<"closed" | "goals" | "create" | "detail">(() => {
+    if (!roboAdvisorEnabled) return "closed";
+    if (initialView === "goals") return "goals";
+    if (initialView === "portfolio") return "closed";
+    if (restoredRoboGoal) return "detail";
+    return restoredRoboResumeState?.view === "goals" ? "goals" : "closed";
+  });
+  const [selectedRoboGoal, setSelectedRoboGoal] = useState<RoboExistingGoal | null>(restoredRoboGoal);
   const [roboGoals, setRoboGoals] = useState<readonly RoboExistingGoal[]>(INITIAL_CZ_ROBO_GOALS);
   const [buyOrderDraft, setBuyOrderDraft] = useState<CoAppingInvestmentBuyDraft | null>(null);
   const [portfolioJourneyOpen, setPortfolioJourneyOpen] = useState(false);
@@ -415,6 +470,17 @@ export default function InvestmentsPortfolioScreen({
     }
     setHeaderProgress(0);
   }, [isOnPortfolioHome]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!roboAdvisorEnabled || roboAdvisorView === "closed") {
+      writeCzRoboResumeState(null);
+    } else if (roboAdvisorView === "detail" && selectedRoboGoal) {
+      writeCzRoboResumeState({ view: "detail", goalId: selectedRoboGoal.id });
+    } else if (roboAdvisorView === "goals" || roboAdvisorView === "create") {
+      writeCzRoboResumeState({ view: "goals" });
+    }
+  }, [roboAdvisorEnabled, roboAdvisorView, selectedRoboGoal]);
 
   const allProducts = useMemo(() => categories.flatMap((category) => category.products), [categories]);
   const portfolioEntryProduct = useMemo(
@@ -779,8 +845,8 @@ export default function InvestmentsPortfolioScreen({
         securityCatalog={securityCatalog}
         country={country}
         amountsHidden={amountsHidden}
-        onOpenSecurity={({ securityId, productId, localValue, performancePercent, hideBuyAction }) => {
-          const security = securityCatalog.find((item) => item.id === securityId);
+        onOpenSecurity={({ securityId, productId, localValue, performancePercent, hideBuyAction, securityOverride }) => {
+          const security = securityOverride ?? securityCatalog.find((item) => item.id === securityId);
           if (!security) {
             selectSecurity(null);
             return;

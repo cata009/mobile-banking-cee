@@ -3,12 +3,24 @@ import {
   ROBO_PORTFOLIO_PRESENTATIONS,
   ROBO_STRATEGIES,
   buildRoboReviewRows,
+  formatCzkGoalAmount,
+  formatCzkInteger,
+  formatCzkInput,
+  formatCzkReturnLabel,
   getFundingFieldVisibility,
   isInvestorProfileBlocking,
 } from '@/app/screens/investments/czFutureRoboAdvisorModel'
 import { buildInvestmentSecurityCatalog } from '@/app/config/investmentsPortfolioConfig'
 
 describe('CZ Future Robo Advisor model', () => {
+  it('formats goal currency amounts with dot grouping and two decimals', () => {
+    expect(formatCzkInput('100000')).toBe('100.000,00 CZK')
+    expect(formatCzkInput('1234567')).toBe('1.234.567,00 CZK')
+    expect(formatCzkGoalAmount('51 241', ',33 CZK')).toBe('51.241,33 CZK')
+    expect(formatCzkInteger('100 000')).toBe('100.000')
+    expect(formatCzkReturnLabel('+1 100,00 CZK (+1,36%)')).toBe('+1.100,00 CZK (+1,36%)')
+  })
+
   it('blocks only missing or expired investor profiles', () => {
     expect(isInvestorProfileBlocking('valid')).toBe(false)
     expect(isInvestorProfileBlocking('expired')).toBe(true)
@@ -52,7 +64,7 @@ describe('CZ Future Robo Advisor model', () => {
         expect.objectContaining({
           id: product.securityId,
           title: product.name,
-          owned: true,
+          owned: false,
         }),
       )
     }

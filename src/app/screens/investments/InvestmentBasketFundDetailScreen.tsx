@@ -80,7 +80,7 @@ export default function InvestmentBasketFundDetailScreen({
   overlay,
 }: InvestmentBasketFundDetailScreenProps) {
   const hasFigmaSampleDetails = basket.id === "jp-morgan-global-growth";
-  const showFigmaMarketInfo = hasFigmaSampleDetails && !czRoboProductDetail;
+  const showFigmaMarketInfo = hasFigmaSampleDetails;
   const heroParts = formatInvestmentAmountParts(1500, country, "EUR", amountsHidden);
   const marketPriceParts = formatInvestmentAmountParts(535.44, country, "EUR", amountsHidden);
   const description = basket.detailDescription ?? basket.description;
@@ -95,19 +95,19 @@ export default function InvestmentBasketFundDetailScreen({
       data-investment-basket-detail={basket.id}
     >
       <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide" onScroll={czRoboProductDetail ? handleScroll : undefined}>
+        <PageHeader
+          title={czRoboProductDetail ? basket.title : ""}
+          onBack={onBack}
+          variant={czRoboProductDetail ? "light" : "gray"}
+          includeSafeArea
+          showHelp={false}
+          compact={!czRoboProductDetail}
+          renderLargeTitle={false}
+          collapsedTitleProgress={czRoboProductDetail ? headerProgress : undefined}
+        />
         <div className="bg-[var(--uc-app-bg)]">
-          <PageHeader
-            title={czRoboProductDetail ? basket.title : ""}
-            onBack={onBack}
-            variant={czRoboProductDetail ? "light" : "gray"}
-            includeSafeArea
-            showHelp={false}
-            compact={!czRoboProductDetail}
-            renderLargeTitle={false}
-            collapsedTitleProgress={czRoboProductDetail ? headerProgress : undefined}
-          />
           {czRoboProductDetail ? (
-            <section className="bg-[var(--uc-surface)] pb-[12px]">
+            <section className="bg-[var(--uc-surface)] pb-[4px]">
               <div className="px-[24px] pt-[8px]">
                 <div className="flex items-start gap-[10px]">
                   <h1 className="min-w-0 flex-1 text-[28px] font-bold leading-[31px] text-[var(--uc-text)]">{basket.title}</h1>
@@ -170,14 +170,14 @@ export default function InvestmentBasketFundDetailScreen({
           />
         ) : null}
 
-        <div className={czRoboProductDetail ? "pt-[8px]" : "pt-[18px]"}>
+        <div className={czRoboProductDetail ? "pt-0" : "pt-[18px]"}>
           <InvestmentDetailField
             label="Basket fund description"
             value={description}
             multiline
             variant="product-detail"
           />
-          {showFigmaMarketInfo ? (
+          {showFigmaMarketInfo && !czRoboProductDetail ? (
             <InvestmentDetailField label="Basket ID" value="3333343141" variant="product-detail" />
           ) : null}
 
@@ -201,8 +201,17 @@ export default function InvestmentBasketFundDetailScreen({
             </div>
           </section>
 
-          {showFigmaMarketInfo ? (
-            <section className="mt-[24px]" aria-label="Market info">
+          {showFigmaMarketInfo && czRoboProductDetail ? (
+            <section className="mt-[24px]" aria-label="Market info" data-basket-fund-market-info>
+              <SectionHeadingDivider title="MARKET INFO" variant="medium-title" />
+              <InvestmentDetailField label="Basket ID" value="3333343141" variant="product-detail" />
+              <InvestmentDetailField label="Product ID" value="RS34343143143" variant="product-detail" />
+              <InvestmentDetailField label="Last update" value="03.01.2026" variant="product-detail" />
+            </section>
+          ) : null}
+
+          {showFigmaMarketInfo && !czRoboProductDetail ? (
+            <section className="mt-[24px]" aria-label="Market info" data-basket-fund-market-info>
               <SectionHeadingDivider title="MARKET INFO" variant="medium-title" />
               <InvestmentDetailField
                 label="Actual market price"

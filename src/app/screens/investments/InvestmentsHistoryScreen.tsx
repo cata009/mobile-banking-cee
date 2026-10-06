@@ -48,6 +48,9 @@ interface InvestmentsHistoryScreenProps {
   approvalCount?: number;
   onToApproveClick?: () => void;
   includeCzRoboHistoricalTransactions?: boolean;
+  transactionsOverride?: readonly InvestmentHistoryTransaction[];
+  ordersOverride?: readonly InvestmentHistoryOrder[];
+  onTabChange?: (tab: InvestmentHistoryTabId) => void;
   /**
    * Optional security title used to pre-filter history when arriving from
    * a security-detail screen. Consumed once on mount; cleared on country change
@@ -710,6 +713,9 @@ export default function InvestmentsHistoryScreen({
   onBack,
   historyFilterByTitle,
   historyFilterBySecurityId,
+  transactionsOverride,
+  ordersOverride,
+  onTabChange,
   closeModuleButton = false,
   titleOverride = "History",
   initialTab = "transactions",
@@ -778,11 +784,13 @@ export default function InvestmentsHistoryScreen({
   const [appliedFilters, setAppliedFilters] = useState<InvestmentHistoryFilterState | null>(null);
   const [draftFilters, setDraftFilters] = useState<InvestmentHistoryFilterState>(defaultFilters);
 
-  const transactions = useMemo(
+  const generatedTransactions = useMemo(
     () => buildInvestmentHistoryTransactions(securities, country, { includeCzRoboHistoricalTransactions }),
     [country, includeCzRoboHistoricalTransactions, securities],
   );
-  const orders = useMemo(() => buildInvestmentHistoryOrders(securities, country), [country, securities]);
+  const transactions = transactionsOverride ?? generatedTransactions;
+  const generatedOrders = useMemo(() => buildInvestmentHistoryOrders(securities, country), [country, securities]);
+  const orders = ordersOverride ?? generatedOrders;
   const latestTransactionDate = useMemo(() => new Date(Math.max(...transactions.map((item) => new Date(item.date).getTime()))), [transactions]);
   const latestOrderDate = useMemo(() => new Date(Math.max(...orders.map((item) => new Date(item.date).getTime()))), [orders]);
   const tabDefaults = useMemo(() => resetFilterTypesForTab(defaultFilters, activeTab), [activeTab, defaultFilters]);
@@ -925,7 +933,13 @@ export default function InvestmentsHistoryScreen({
 
   const historyListContent = (
     <>
-      <InvestmentHistoryTabs activeTab={activeTab} onChange={setActiveTab} />
+      <InvestmentHistoryTabs
+        activeTab={activeTab}
+        onChange={(tab) => {
+          setActiveTab(tab);
+          onTabChange?.(tab);
+        }}
+      />
       {activeTab === "orders" && onToApproveClick ? (
         <button
           type="button"

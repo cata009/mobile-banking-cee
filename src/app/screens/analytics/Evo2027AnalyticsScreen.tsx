@@ -1264,7 +1264,7 @@ function ExpenseBreakdownRowIcon({ row, size = 32 }: { row: ExpenseBreakdownRow;
   }
 
   if (row.currency) {
-    return <CurrencyBadge currency={row.currency} size={size} />;
+    return <CurrencyBadge currency={row.currency} size={size === 32 ? 32 : 40} />;
   }
 
   // A merchant row leads exactly as the statement does: the brand mark for a

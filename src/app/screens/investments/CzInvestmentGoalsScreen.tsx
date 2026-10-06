@@ -1,7 +1,12 @@
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import { AppIcon } from "@/app/components/icons";
-import { getRoboGoalProgress, type RoboExistingGoal } from "./czFutureRoboAdvisorModel";
+import {
+  formatCzkInteger,
+  formatCzkReturnLabel,
+  getRoboGoalProgress,
+  type RoboExistingGoal,
+} from "./czFutureRoboAdvisorModel";
 
 interface CzInvestmentGoalsScreenProps {
   goals: readonly RoboExistingGoal[];
@@ -52,7 +57,8 @@ export const INITIAL_CZ_ROBO_GOALS: readonly RoboExistingGoal[] = [
     targetInteger: "100 000",
     targetDecimals: ",00 CZK",
     horizonYears: 3,
-    endDate: "31 Dec 2027",
+    startDate: "15 Feb 2025",
+    endDate: "15 Feb 2028",
     portfolioId: "basket-steady-income-chase-regular-eur",
   },
   {
@@ -109,11 +115,11 @@ function GoalCard({
         <div className="w-full">
           <p className="text-[14px] leading-[17px] text-[var(--uc-text-muted)]">Current value</p>
           <div className="flex items-baseline">
-            <span className="text-[24px] font-bold leading-[26px]">{goal.currentInteger}</span>
+            <span className="text-[24px] font-bold leading-[26px]">{formatCzkInteger(goal.currentInteger)}</span>
             <span className="text-[16px] leading-[18px]">{goal.currentDecimals}</span>
           </div>
           <p className={`mt-[2px] text-[14px] leading-[18px] ${returnClass}`}>
-            <span className={goal.returnTone === "neutral" ? "" : "font-bold"}>{goal.returnLabel}</span>
+            <span className={goal.returnTone === "neutral" ? "" : "font-bold"}>{formatCzkReturnLabel(goal.returnLabel)}</span>
             {goal.returnTone === "neutral" ? null : (
               <span className="font-normal text-[var(--uc-text-muted)]"> total return</span>
             )}
@@ -123,7 +129,7 @@ function GoalCard({
         <div className="w-full border-t border-[var(--uc-border-muted)] pt-[16px]">
           <p className="text-[14px] leading-[17px] text-[var(--uc-text-muted)]">Target</p>
           <div className="flex items-baseline">
-            <span className="text-[16px] font-bold leading-[18px]">{goal.targetInteger}</span>
+            <span className="text-[16px] font-bold leading-[18px]">{formatCzkInteger(goal.targetInteger)}</span>
             <span className="text-[14px] leading-[17px]">{goal.targetDecimals}</span>
           </div>
           <div className="relative mt-[10px] pt-[6px]">
@@ -165,6 +171,16 @@ export default function CzInvestmentGoalsScreen({
   onCreateGoal,
   onOpenGoal,
 }: CzInvestmentGoalsScreenProps) {
+  const totalGoalsValue = goals.reduce((total, goal) => {
+    const integer = goal.currentInteger.replace(/\D/g, "");
+    const decimals = goal.currentDecimals.replace(/[^\d,.-]/g, "").replace(",", ".");
+    return total + Number(`${integer}${decimals}`);
+  }, 0);
+  const [totalInteger, totalDecimals = "00"] = new Intl.NumberFormat("cs-CZ", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(totalGoalsValue).split(",");
+
   return (
     <div
       className="flex h-full w-full flex-col overflow-hidden bg-[var(--uc-app-bg)] text-[var(--uc-text)]"
@@ -183,8 +199,8 @@ export default function CzInvestmentGoalsScreen({
         <section className="flex flex-col items-center pb-[64px] pt-[26px] text-center">
           <p className="text-[18px] leading-[20px]">Total goals value</p>
           <div className="mt-[4px] flex items-baseline justify-center">
-            <span className="text-[48px] font-bold leading-[52px]">151.241</span>
-            <span className="text-[32px] leading-[34px]">,33 CZK</span>
+            <span className="text-[48px] font-bold leading-[52px]">{formatCzkInteger(totalInteger ?? "0")}</span>
+            <span className="text-[32px] leading-[34px]">,{totalDecimals} CZK</span>
           </div>
         </section>
 
