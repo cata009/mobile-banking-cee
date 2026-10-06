@@ -116,6 +116,8 @@ function demoEntries(product: ProductId, country: CountryId): readonly ScreenId[
     "pi.products.overview",
     "pi.products.detail",
     "pi.more.overview",
+    "pi.prime.appointments",
+    "pi.prime.call-request",
   ];
 
   piEntries.push("pi.investments.portfolio");

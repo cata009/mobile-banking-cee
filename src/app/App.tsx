@@ -37,6 +37,8 @@ const TerminateSessionPopup = lazy(() => import("@/app/components/TerminateSessi
 
 // Prime component - available for all countries
 const PrimeScreen = lazy(() => import("@/app/screens/prime/PrimeScreen"));
+const AppointmentScreen = lazy(() => import("@/app/screens/appointments/AppointmentScreen"));
+const RequestCallScreen = lazy(() => import("@/app/screens/appointments/RequestCallScreen"));
 
 // More component - available for all countries
 const MoreScreen = lazy(() => import("@/app/screens/more/MoreScreen"));
@@ -1028,7 +1030,19 @@ function AppContent({
 
         {/* Prime Screen - EXACT ca Language Selector (NO animation) */}
         {currentScreen === "prime" && (
-          <PrimeScreen onBack={handlePrimeBack} />
+          <PrimeScreen
+            onBack={handlePrimeBack}
+            onBookAppointment={() => navigateTo("appointments")}
+            onRequestCall={() => navigateTo("request-call")}
+          />
+        )}
+
+        {currentScreen === "appointments" && (
+          <AppointmentScreen country={country} onBack={goBack} />
+        )}
+
+        {currentScreen === "request-call" && (
+          <RequestCallScreen country={country} onBack={goBack} />
         )}
 
         {/* More Screen - EXACT ca Language Selector (NO animation) */}

@@ -10,7 +10,7 @@ import type { Screen } from '@/app/contexts/NavigationContext'
 const ALL_ROUTES: Screen[] = [
   'prelogin-inactive', 'prelogin-active', 'co-apping-session', 'homepage', 'language-selector',
   'analytics', 'messages', 'payments', 'products', 'my-banker', 'product-detail', 'investments',
-  'investments-history', 'investment-orders-to-approve', 'prime', 'more', 'documents', 'settings', 'contacts', 'transactions', 'account-detail',
+  'investments-history', 'investment-orders-to-approve', 'prime', 'appointments', 'request-call', 'more', 'documents', 'settings', 'contacts', 'transactions', 'account-detail',
   'account-details-info', 'account-options', 'card-details-info', 'card-options', 'transaction-detail',
   'card-detail', 'domestic-payment', 'payment-review', 'payment-sign', 'payment-success',
   'flow-library', 'design-system', 'tools',
@@ -32,6 +32,8 @@ const BACK_FALLBACKS: Record<Screen, Screen> = {
   'investments-history': 'investments',
   'investment-orders-to-approve': 'investments',
   prime: 'homepage',
+  appointments: 'prime',
+  'request-call': 'prime',
   more: 'more',
   documents: 'more',
   settings: 'more',
@@ -55,13 +57,13 @@ const BACK_FALLBACKS: Record<Screen, Screen> = {
 
 const RESTORABLE_ROUTES: Screen[] = [
   'prelogin-inactive', 'prelogin-active', 'homepage', 'analytics', 'messages', 'payments', 'products', 'my-banker',
-  'investments', 'investments-history', 'prime', 'more', 'documents', 'settings', 'contacts', 'transactions', 'account-detail',
+  'investments', 'investments-history', 'prime', 'appointments', 'request-call', 'more', 'documents', 'settings', 'contacts', 'transactions', 'account-detail',
   'account-details-info', 'account-options', 'card-details-info', 'card-options', 'card-detail', 'flow-library', 'design-system',
   'tools',
 ]
 
 describe('exhaustive route policy', () => {
-  it('owns exactly the 34 runtime routes and their existing back fallbacks', () => {
+  it('owns exactly the 36 runtime routes and their existing back fallbacks', () => {
     expect(Object.keys(ROUTE_POLICY)).toEqual(ALL_ROUTES)
     expect(Object.fromEntries(ALL_ROUTES.map((route) => [route, ROUTE_POLICY[route].backFallback]))).toEqual(
       BACK_FALLBACKS,
