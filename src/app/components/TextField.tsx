@@ -122,6 +122,9 @@ export default function TextField({
   const descriptionText1 = isError ? errorText : helperText;
   const descriptionText2 = isError ? errorText2 : helperText2;
   const hasFloatingTrailingIcon = trailingIconPlacement === "floating" && Boolean(trailingIconName);
+  const helperTextWidth = trailingIconName && trailingIconPlacement === "inline"
+    ? "calc(100% - 44px)"
+    : "100%";
   const displayedMultipleValues = multipleValues?.join("; ") ?? value;
   const effectiveMultipleCount = multipleCount ?? multipleValues?.length ?? 0;
   const inputPlaceholder = shouldFloatLabel ? placeholder : label;
@@ -284,10 +287,10 @@ export default function TextField({
         ) : null}
 
         {descriptionText1 || descriptionText2 ? (
-          <div className="mt-[6px] flex flex-col">
+          <div className="mt-[6px] flex flex-col" style={{ width: helperTextWidth }}>
             {descriptionText1 ? (
               <p
-                className="uc-type-n5"
+                className="uc-type-n5 max-w-full break-words"
                 style={{ color: helperColor }}
               >
                 {descriptionText1}
@@ -295,7 +298,7 @@ export default function TextField({
             ) : null}
             {descriptionText2 ? (
               <p
-                className="uc-type-n5"
+                className="uc-type-n5 max-w-full break-words"
                 style={{ color: helperColor }}
               >
                 {descriptionText2}

@@ -151,6 +151,8 @@ export type ScreenId =
   | "pi.my-banker.recommendations"
   | "pi.products.detail"
   | "pi.prime.overview"
+  | "pi.prime.appointments"
+  | "pi.prime.call-request"
   | "pi.more.overview"
   | "pi.documents.overview"
   | "pi.settings.overview"

@@ -9,17 +9,50 @@ import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import { useLanguage } from '@/app/contexts/LanguageContext';
 import { YourAdvisorTab } from './YourAdvisorTab';
 import { YourBenefitsTab } from './YourBenefitsTab';
+import { PrimeContactActionFlow, type PrimeMailPreferences } from './PrimeContactActionFlow';
 import PageHeader from '@/app/components/PageHeader';
 import imgPrimeHome from "figma:asset/6f8736f05a24b87b9ef5508cfd9021e9a466bf48.png";
 
 interface PrimeScreenProps {
   onBack: () => void;
+  onBookAppointment: () => void;
+  onRequestCall: () => void;
 }
 
-export default function PrimeScreen({ onBack }: PrimeScreenProps) {
+const PRIME_MAIL_PREFERENCES_KEY = "uc-prime-mail-preferences-v1";
+
+function loadPrimeMailPreferences(): PrimeMailPreferences {
+  if (typeof window === "undefined") return { askEveryTime: true, preferredApp: null };
+  try {
+    const value: unknown = JSON.parse(window.localStorage.getItem(PRIME_MAIL_PREFERENCES_KEY) ?? "null");
+    if (typeof value !== "object" || value === null) return { askEveryTime: true, preferredApp: null };
+    const preferences = value as Partial<PrimeMailPreferences>;
+    return {
+      askEveryTime: typeof preferences.askEveryTime === "boolean" ? preferences.askEveryTime : true,
+      preferredApp: preferences.preferredApp === "gmail" || preferences.preferredApp === "mail" ? preferences.preferredApp : null,
+    };
+  } catch {
+    return { askEveryTime: true, preferredApp: null };
+  }
+}
+
+export default function PrimeScreen({ onBack, onBookAppointment, onRequestCall }: PrimeScreenProps) {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<'advisor' | 'benefits'>('advisor');
+  const [contactAction, setContactAction] = useState<"call" | "email" | null>(null);
+  const [mailPreferences, setMailPreferences] = useState<PrimeMailPreferences>(loadPrimeMailPreferences);
   const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(48);
+  const advisorName = t('prime.advisor.name', 'David Novak');
+  const advisorPhone = t('prime.advisor.phone', '+420 602 123 456');
+  const advisorEmail = t('prime.advisor.emailAddress', 'david.novak@unicredit.cz');
+  const updateMailPreferences = (preferences: PrimeMailPreferences) => {
+    setMailPreferences(preferences);
+    try {
+      window.localStorage.setItem(PRIME_MAIL_PREFERENCES_KEY, JSON.stringify(preferences));
+    } catch {
+      // Keep the current setting for this app session if storage is unavailable.
+    }
+  };
 
   return (
     <div className="w-full h-full relative flex flex-col">
@@ -91,12 +124,30 @@ export default function PrimeScreen({ onBack }: PrimeScreenProps) {
           {/* Tab Content */}
           <div className="px-[24px]">
             {activeTab === 'advisor' ? (
-              <YourAdvisorTab />
+              <YourAdvisorTab
+                onBookAppointment={onBookAppointment}
+                onRequestCall={onRequestCall}
+                onCallNow={() => setContactAction("call")}
+                onSendEmail={() => setContactAction("email")}
+              />
             ) : (
               <YourBenefitsTab />
             )}
           </div>
         </div>
+        {contactAction ? (
+          <PrimeContactActionFlow
+            key={contactAction}
+            initialAction={contactAction}
+            advisorName={advisorName}
+            phoneNumber={advisorPhone}
+            emailAddress={advisorEmail}
+            mailPreferences={mailPreferences}
+            onMailPreferencesChange={updateMailPreferences}
+            onClose={() => setContactAction(null)}
+            text={t}
+          />
+        ) : null}
       </div>
     </div>
   );

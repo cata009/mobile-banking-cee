@@ -23,6 +23,8 @@ export type Screen =
   | "investments-history" // Investments history transactions/orders flow
   | "investment-orders-to-approve" // Pending investments awaiting approval
   | "prime" // Prime screen
+  | "appointments" // Prime appointment booking and meeting management
+  | "request-call" // Prime callback request flow
   | "more" // More screen
   | "documents" // Documents screen
   | "settings" // Settings screen

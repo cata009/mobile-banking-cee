@@ -9,23 +9,30 @@ import { AppIcon } from "@/app/components/icons";
 import { PrimeDiamondMark } from "@/app/components/prime/PrimeDiamondMark";
 import imgAdvisorImage from "figma:asset/e693dd6eed452da6c4cda0e69dbdd3f45039c9f2.png";
 
-export function YourAdvisorTab() {
+interface YourAdvisorTabProps {
+  onBookAppointment?: () => void;
+  onRequestCall?: () => void;
+  onCallNow?: () => void;
+  onSendEmail?: () => void;
+}
+
+export function YourAdvisorTab({ onBookAppointment, onRequestCall, onCallNow, onSendEmail }: YourAdvisorTabProps) {
   const { t } = useLanguage();
 
   const handleCallNow = () => {
-    // Future: window.location.href = `tel:${t('prime.advisor.phone')}`;
+    onCallNow?.();
   };
 
   const handleSendEmail = () => {
-    // Future: window.location.href = `mailto:${t('prime.advisor.emailAddress')}`;
+    onSendEmail?.();
   };
 
   const handleBookAppointment = () => {
-    // Future: open appointment booking flow
+    onBookAppointment?.();
   };
 
   const handleRequestCall = () => {
-    // Future: open request-a-call flow
+    onRequestCall?.();
   };
 
   return (
