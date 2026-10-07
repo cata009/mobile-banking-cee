@@ -6,7 +6,7 @@
 import { forwardRef, useEffect, useRef, useState, type ComponentPropsWithoutRef } from "react";
 import { useNavigationContext } from "@/app/contexts/NavigationContext";
 import { COUNTRIES, COUNTRY_META, FEATURE_META } from "@/app/registry/demoConfig";
-import { PRODUCT_ORDER } from "@/app/registry/projectModel";
+import { PRODUCT_ORDER, RELEASES } from "@/app/registry/projectModel";
 import { getReleaseBundle } from "@/app/registry/releaseRegistry";
 import { useDemo } from "@/app/state/demoStore";
 import type { CountryId, DesignSystemId, ProductId, ReleaseId, Scenario } from "@/app/state/demoTypes";
@@ -51,7 +51,7 @@ const FUTURE_RELEASE_ORDER: readonly ReleaseId[] = [
   "release-future-cz-coapping",
   "release-future-cz-robo",
   "release-future-evo-2027",
-  "release-future-rs-my-banker",
+  "release-future-rs-future-gain",
 ] as const;
 
 function getScenarioEntryScreen(scenario: Scenario) {
@@ -65,6 +65,14 @@ function getFutureReleaseOptions(
 ): ReleaseId[] {
   return FUTURE_RELEASE_ORDER.filter((releaseId) => {
     const bundle = getReleaseBundle(releaseId);
+    const release = RELEASES[releaseId];
+
+    if (release.products && !release.products.includes(product)) return false;
+    if (release.countries && !release.countries.includes(country)) return false;
+
+    if (bundle.features.length === 0) {
+      return Boolean(release.products?.length && release.countries?.length);
+    }
 
     return bundle.features.some((featureId) => {
       const feature = FEATURE_META[featureId];

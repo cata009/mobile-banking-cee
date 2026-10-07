@@ -1,3 +1,4 @@
+import type { InputHTMLAttributes } from "react";
 import TextField, { type TextFieldVisualState } from "@/app/components/TextField";
 import { AppIcon, type IconName } from "@/app/components/icons";
 
@@ -12,11 +13,17 @@ interface AmountFieldProps {
   errorText?: string;
   errorText2?: string;
   placeholder?: string;
+  ariaLabel?: string;
+  inputMode?: InputHTMLAttributes<HTMLInputElement>["inputMode"];
+  ariaInvalid?: boolean;
+  onBlur?: () => void;
   disabled?: boolean;
   visualState?: TextFieldVisualState;
   multipleValues?: string[];
   multipleCount?: number;
   currencyIconName?: IconName;
+  currencyAriaLabel?: string;
+  onCurrencyClick?: () => void;
   /** Hide the currency selector chevron (for domestic payments where currency is fixed). */
   hideCurrencySelector?: boolean;
 }
@@ -34,11 +41,17 @@ export default function AmountField({
   errorText,
   errorText2,
   placeholder,
+  ariaLabel,
+  inputMode,
+  ariaInvalid,
+  onBlur,
   disabled = false,
   visualState,
   multipleValues,
   multipleCount,
   currencyIconName = "chevron-down-wide",
+  currencyAriaLabel,
+  onCurrencyClick,
   hideCurrencySelector = false,
 }: AmountFieldProps) {
   const isDisabled = disabled || visualState === "disabled-empty" || visualState === "disabled-filled";
@@ -57,6 +70,10 @@ export default function AmountField({
           errorText={errorText}
           errorText2={errorText2}
           placeholder={placeholder}
+          ariaLabel={ariaLabel}
+          inputMode={inputMode}
+          ariaInvalid={ariaInvalid}
+          onBlur={onBlur}
           disabled={disabled}
           visualState={visualState}
           multipleValues={multipleValues}
@@ -67,6 +84,9 @@ export default function AmountField({
       <button
         type="button"
         disabled={isDisabled}
+        aria-label={currencyAriaLabel ?? `${currencyLabel}: ${currency}`}
+        aria-haspopup={onCurrencyClick ? "dialog" : undefined}
+        onClick={onCurrencyClick}
         className="flex shrink-0 items-start gap-0 text-left disabled:cursor-default"
       >
         <span className="flex min-w-[64px] flex-col">

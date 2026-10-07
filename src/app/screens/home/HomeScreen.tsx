@@ -4,6 +4,7 @@
 
 import AccountSummary from "./AccountSummary";
 import App2027HomeScreen from "./App2027HomeScreen";
+import FutureGainSmartInvestmentBanner from "@/app/components/investments/FutureGainSmartInvestmentBanner";
 import HomeHeader from "./HomeHeader";
 import InactiveState from "./InactiveState";
 import UnplannedBanner from "./UnplannedBanner";
@@ -30,6 +31,7 @@ export interface HomeScreenProps {
   onCardOptionsClick?: (product: Product) => void;
   onInvestmentsClick?: () => void;
   onInvestmentGoalsClick?: () => void;
+  onSmartInvestmentOpen?: () => void;
   onTransactionClick?: (
     transaction: AccountTransaction,
     product: Product,
@@ -53,13 +55,16 @@ export default function HomeScreen({
   onCardOptionsClick,
   onInvestmentsClick,
   onInvestmentGoalsClick,
+  onSmartInvestmentOpen,
   onTransactionClick,
 }: HomeScreenProps) {
   const demoState = useDemo();
-  const { scenario } = demoState;
+  const { scenario, product, country, release } = demoState;
 
   // Get all feature flags from centralized helper
   const features = getFeatureFlags(demoState);
+  const isFutureGainSmartInvestment =
+    product === "PI" && country === "RS" && release === "release-future-rs-future-gain";
 
   // Handler for bottom navigation tab changes
   const handleTabChange = (tab: NavItem) => {
@@ -134,6 +139,11 @@ export default function HomeScreen({
         {/* Account Summary */}
         <AccountSummary
           showRedesign={features.cardsRedesign}
+          investmentBanner={
+            isFutureGainSmartInvestment && onSmartInvestmentOpen ? (
+              <FutureGainSmartInvestmentBanner onClick={onSmartInvestmentOpen} />
+            ) : undefined
+          }
           onAccountClick={onAccountClick}
           onInvestmentsClick={onInvestmentsClick}
           onInvestmentGoalsClick={onInvestmentGoalsClick}

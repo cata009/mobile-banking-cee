@@ -218,7 +218,7 @@ function buildProjectPack(product: ProductId, country: CountryId): ProjectPack {
         ? ["release-future-evo-2027"] as const
         : []),
       ...(product === "PI" && country === "RS"
-        ? ["release-future-rs-my-banker"] as const
+        ? ["release-future-rs-future-gain"] as const
         : []),
       "release-v1",
       "release-v2",

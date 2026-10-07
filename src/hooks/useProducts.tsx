@@ -619,13 +619,9 @@ export function useProducts() {
   };
 
   // Calculate Total Available: Accounts + Savings (excluding term deposits)
-  const calculateTotalAvailable = (): {
-    integer: string;
-    decimals: string;
-    currency: string;
-  } => {
+  const calculateTotalAvailableAmount = (): number => {
     const allProducts = categories.flatMap(cat => cat.products);
-    
+
     // Sum: current_accounts + saving_accounts (NO term_deposit)
     const total = allProducts.reduce((sum, product) => {
       if (product.type === 'current_account' || product.type === 'saving_account') {
@@ -634,7 +630,15 @@ export function useProducts() {
       return sum;
     }, 0);
 
-    return formatAmountForRelease(total, localCurrency);
+    return total;
+  };
+
+  const calculateTotalAvailable = (): {
+    integer: string;
+    decimals: string;
+    currency: string;
+  } => {
+    return formatAmountForRelease(calculateTotalAvailableAmount(), localCurrency);
   };
 
   /**
@@ -673,6 +677,7 @@ export function useProducts() {
     getProductDisplayNumber,
     calculateTotal,
     calculateTotalAvailable,
+    calculateTotalAvailableAmount,
     calculateTotalOwed
   };
 }

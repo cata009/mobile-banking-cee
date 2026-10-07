@@ -61,6 +61,7 @@ function resolveVisibleScreens(state: DemoState): readonly ScreenId[] {
       screen.products.includes(state.product) &&
       screen.countries.includes(state.country) &&
       screen.designSystems.includes(state.designSystem) &&
+      (!screen.releases || screen.releases.includes(state.release)) &&
       !["missing", "blocked", "legacy"].includes(screen.status)
     );
   });

@@ -50,6 +50,7 @@ const MyBankerScreen = lazy(() => import("@/app/screens/my-banker/MyBankerScreen
 const MyBankerEntryCard = lazy(() => import("@/app/screens/my-banker/MyBankerEntryCard"));
 const InvestmentsPortfolioScreen = lazy(() => import("@/app/screens/investments/InvestmentsPortfolioScreen"));
 const InvestmentsHistoryScreen = lazy(() => import("@/app/screens/investments/InvestmentsHistoryScreen"));
+const SmartInvestmentScreen = lazy(() => import("@/app/screens/investments/SmartInvestmentScreen"));
 const OrdersToApproveScreen = lazy(() => import("@/app/screens/investments/OrdersToApproveScreen"));
 const SettingsScreen = lazy(() => import("@/app/screens/settings/SettingsScreen"));
 const KidsMarketHomeApp = lazy(() => import("@/app/screens/kids/KidsMarketHomeApp"));
@@ -124,7 +125,9 @@ import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfoli
 import type {
   InvestmentBuyRequest,
   InvestmentFundsRequest,
+  InvestmentSecurityDetailRequest,
 } from "@/app/screens/investments/InvestmentsPortfolioScreen";
+import type { FutureGainFundSimulatorState } from "@/app/screens/investments/FutureGainInvestmentSimulatorScreen";
 import InvestmentChatChart from "@/app/components/investments/InvestmentChatChart";
 import type { ProductDetailSelection } from "@/app/components/products/ProductCardBottomSheet";
 import { buildShelfProductSelection } from "@/app/config/productsShelfConfig";
@@ -227,17 +230,20 @@ function AppContent({
   const isCzCoAppingChatbotPreviewActive = isFeatureActive(demoState, "fx_czCoAppingSmartAssistant");
   const isCzRoboAdvisorPreviewActive = isFeatureActive(demoState, "fx_czRoboAdvisor");
   const myBankerAvailable = isFeatureActive(demoState, "fx_rsMyBanker");
+  const futureGainSmartInvestmentAvailable =
+    product === "PI" && country === "RS" && release === "release-future-rs-future-gain";
   const currentRoutePolicy = ROUTE_POLICY[currentScreen];
   const isInAppScreen = currentRoutePolicy.surface === "app";
   const czChatLauncherVariant: CzChatLauncherVariant = "edge-tab";
   const isMarketKidsRuntimeContext =
     product === "KIDS_PI" && designSystem === "current" && isKidsHomeCountry(country);
   const isKidsRuntimeContext = isMarketKidsRuntimeContext;
-  const isSupportedRuntimeContext = isRouteEligibleForProductContext(currentScreen, {
-    product,
-    country,
-    designSystem,
-  });
+  const isSupportedRuntimeContext =
+    isRouteEligibleForProductContext(currentScreen, {
+      product,
+      country,
+      designSystem,
+    }) && (currentScreen !== "smart-investment" || futureGainSmartInvestmentAvailable);
   const investmentsPortfolioAvailable = isInvestmentsPortfolioAvailable(product, country);
   
   const [shellState, dispatchShell] = useReducer(appShellReducer, undefined, createAppShellState);
@@ -267,6 +273,9 @@ function AppContent({
   const investmentBuyRequestSequenceRef = useRef(0);
   const [investmentFundsRequest, setInvestmentFundsRequest] = useState<InvestmentFundsRequest | null>(null);
   const investmentFundsRequestSequenceRef = useRef(0);
+  const [investmentSecurityDetailRequest, setInvestmentSecurityDetailRequest] = useState<InvestmentSecurityDetailRequest | null>(null);
+  const investmentSecurityDetailRequestSequenceRef = useRef(0);
+  const [futureGainFundSimulatorResumeState, setFutureGainFundSimulatorResumeState] = useState<FutureGainFundSimulatorState | null>(null);
   const [creditLimitOverrides, setCreditLimitOverrides] = useState<Record<string, number>>({});
   const [creditLimitOfferFlowCardId, setCreditLimitOfferFlowCardId] = useState<string | null>(null);
   const [historyFilterByTitle, setHistoryFilterByTitle] = useState<string | null>(null);
@@ -560,6 +569,24 @@ function AppContent({
 
     setInvestmentsInitialView("portfolio");
     navigateTo("investments");
+  };
+
+  const handleFutureGainInvestmentFundsClick = (simulatorState: FutureGainFundSimulatorState) => {
+    if (!investmentsPortfolioAvailable) return;
+
+    investmentSecurityDetailRequestSequenceRef.current += 1;
+    setInvestmentSecurityDetailRequest({
+      requestId: investmentSecurityDetailRequestSequenceRef.current,
+      securityId: simulatorState.securityId,
+      futureGainSimulatorState: simulatorState,
+    });
+    setInvestmentsInitialView("portfolio");
+    navigateTo("investments");
+  };
+
+  const handleReturnToFutureGainSimulator = (simulatorState: FutureGainFundSimulatorState) => {
+    setFutureGainFundSimulatorResumeState(simulatorState);
+    navigateTo("smart-investment");
   };
 
   const handleInvestmentGoalsClick = () => {
@@ -910,6 +937,7 @@ function AppContent({
             onCardOptionsClick={handleCardOptionsClick}
             onInvestmentsClick={handleInvestmentsClick}
             onInvestmentGoalsClick={handleInvestmentGoalsClick}
+            onSmartInvestmentOpen={() => navigateTo("smart-investment")}
             onTransactionClick={handleApp2027TransactionClick}
           />
         )}
@@ -1202,11 +1230,22 @@ function AppContent({
             onHistoryClick={handleInvestmentsHistoryClick}
             onOrdersToApproveClick={handleOrdersToApproveClick}
             onSelectedSecurityChange={handleSelectedInvestmentSecurityChange}
+            onReturnToFutureGainSimulator={handleReturnToFutureGainSimulator}
             fundsWindowRequest={investmentFundsRequest}
+            securityDetailRequest={investmentSecurityDetailRequest}
             buyRequest={investmentBuyRequest}
             onBuyRequestConsumed={handleInvestmentBuyRequestConsumed}
           />
           </TabbedScreen>
+        )}
+
+        {currentScreen === "smart-investment" && futureGainSmartInvestmentAvailable && (
+          <SmartInvestmentScreen
+            onBack={goBack}
+            onExploreInvestmentFunds={handleFutureGainInvestmentFundsClick}
+            initialFundSimulatorState={futureGainFundSimulatorResumeState}
+            onClearFundSimulatorState={() => setFutureGainFundSimulatorResumeState(null)}
+          />
         )}
 
         {currentScreen === "investments-history" && investmentsPortfolioAvailable && (
