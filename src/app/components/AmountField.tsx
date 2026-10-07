@@ -87,7 +87,7 @@ export default function AmountField({
         aria-label={currencyAriaLabel ?? `${currencyLabel}: ${currency}`}
         aria-haspopup={onCurrencyClick ? "dialog" : undefined}
         onClick={onCurrencyClick}
-        className="flex shrink-0 items-start gap-0 text-left disabled:cursor-default"
+        className="flex shrink-0 items-center gap-0 text-left disabled:cursor-default"
       >
         <span className="flex min-w-[64px] flex-col">
           <span
@@ -104,7 +104,7 @@ export default function AmountField({
           </span>
         </span>
         {!hideCurrencySelector && (
-          <span className="mt-[21px] grid h-[32px] w-[32px] shrink-0 place-items-center">
+          <span className="grid h-[32px] w-[32px] shrink-0 place-items-center">
             <AppIcon name={currencyIconName} color={currencyColor} />
           </span>
         )}

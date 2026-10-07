@@ -722,7 +722,7 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
               helperText={!amountError
                 ? fundingSource === "current"
                   ? "Available balance"
-                  : "Enter the amount you would like to request."
+                  : "Enter the amount you want to simulate."
                 : undefined}
               helperText2={!amountError && fundingSource === "current"
                 ? formatDepositAmount(availableBalance, currency, country)
