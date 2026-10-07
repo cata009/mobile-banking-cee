@@ -589,6 +589,16 @@ function AppContent({
     navigateTo("smart-investment");
   };
 
+  const handleSmartInvestmentBack = () => {
+    if (futureGainFundSimulatorResumeState) {
+      setFutureGainFundSimulatorResumeState(null);
+      navigateToAndReset("homepage");
+      return;
+    }
+
+    goBack();
+  };
+
   const handleInvestmentGoalsClick = () => {
     if (!investmentsPortfolioAvailable || !isCzRoboAdvisorPreviewActive) return;
 
@@ -1176,6 +1186,7 @@ function AppContent({
             onMessagesClick={handleMessagesClick}
             onPaymentsClick={handlePaymentsClick}
             onMoreClick={handleMoreClick}
+            onSmartInvestmentOpen={() => navigateTo("smart-investment")}
             onProductDetailOpen={handleProductDetailOpen}
             productsShelfFocusRequest={productsShelfFocusRequest}
             onProductsShelfFocusHandled={() => setProductsShelfFocusRequest(null)}
@@ -1241,10 +1252,9 @@ function AppContent({
 
         {currentScreen === "smart-investment" && futureGainSmartInvestmentAvailable && (
           <SmartInvestmentScreen
-            onBack={goBack}
+            onBack={handleSmartInvestmentBack}
             onExploreInvestmentFunds={handleFutureGainInvestmentFundsClick}
             initialFundSimulatorState={futureGainFundSimulatorResumeState}
-            onClearFundSimulatorState={() => setFutureGainFundSimulatorResumeState(null)}
           />
         )}
 

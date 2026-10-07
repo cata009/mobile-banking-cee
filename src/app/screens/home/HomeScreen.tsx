@@ -135,7 +135,7 @@ export default function HomeScreen({
       <div
         className={`flex-1 overflow-y-auto scrollbar-hide ${isFutureGainSmartInvestment ? "" : "pb-[80px]"}`}
         style={isFutureGainSmartInvestment
-          ? { paddingBottom: "calc(80px + var(--uc-phone-bottom-reserve, 34px))" }
+          ? { paddingBottom: "calc(40px + var(--uc-phone-bottom-reserve, 34px))" }
           : undefined}
       >
         {/* Title - SCROLLABLE */}

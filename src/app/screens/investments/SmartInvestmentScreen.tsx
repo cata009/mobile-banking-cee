@@ -28,7 +28,6 @@ interface SmartInvestmentScreenProps {
   onBack: () => void;
   onExploreInvestmentFunds: (state: FutureGainFundSimulatorState) => void;
   initialFundSimulatorState?: FutureGainFundSimulatorState | null;
-  onClearFundSimulatorState?: () => void;
 }
 
 interface SmartInvestmentOptionProps {
@@ -248,7 +247,6 @@ export default function SmartInvestmentScreen({
   onBack,
   onExploreInvestmentFunds,
   initialFundSimulatorState,
-  onClearFundSimulatorState,
 }: SmartInvestmentScreenProps) {
   const { amountsHidden, country } = useDemo();
   const { calculateTotalAvailableAmount } = useProducts();
@@ -302,7 +300,6 @@ export default function SmartInvestmentScreen({
         onBack={() => {
           setInvestmentTypeOpen(null);
           setFundSimulatorInitialState(null);
-          onClearFundSimulatorState?.();
           setHeaderProgress(0);
         }}
         onExploreFunds={onExploreInvestmentFunds}
