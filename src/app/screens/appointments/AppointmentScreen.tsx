@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import TextField from "@/app/components/TextField";
@@ -502,13 +502,18 @@ export default function AppointmentScreen({ country, onBack }: AppointmentScreen
   const [mapReturnView, setMapReturnView] = useState<"booking" | "detail" | "review">("booking");
   const [mapReadonly, setMapReadonly] = useState(false);
   const selectedAppointment = appointments.find(({ id }) => id === selectedAppointmentId) ?? null;
+  const initializedCountryRef = useRef<CountryId | null>(null);
 
   useEffect(() => {
-    if (recordState.country !== country) setRecordState({ country, appointments: loadAppointments(country) });
+    if (initializedCountryRef.current === country) return;
+    initializedCountryRef.current = country;
+    setRecordState((current) => current.country === country
+      ? current
+      : { country, appointments: loadAppointments(country) });
     setDraft(createDraft(branchName, branchAddress));
     setView(loadAppointments(country).length > 0 ? "list" : "booking");
     setActiveTab("active");
-  }, [country]);
+  }, [country, branchName, branchAddress]);
 
   const updateAppointments = (nextAppointments: AppointmentRecord[]) => {
     saveAppointments(country, nextAppointments);

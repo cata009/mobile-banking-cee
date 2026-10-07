@@ -48,6 +48,8 @@ interface InvestmentsHistoryScreenProps {
   approvalCount?: number;
   onToApproveClick?: () => void;
   includeCzRoboHistoricalTransactions?: boolean;
+  allDatesByDefault?: boolean;
+  hideCurrencyFilter?: boolean;
   transactionsOverride?: readonly InvestmentHistoryTransaction[];
   ordersOverride?: readonly InvestmentHistoryOrder[];
   onTabChange?: (tab: InvestmentHistoryTabId) => void;
@@ -130,6 +132,8 @@ function historyRowMatchesSearch(item: InvestmentHistoryTransaction | Investment
 }
 
 function historyRowMatchesDate(itemDate: string, filters: InvestmentHistoryFilterState, latestDate: Date) {
+  if (filters.datePreset === "all-time") return true;
+
   if (filters.datePreset === "define") {
     const start = parseIsoDateOnly(filters.customStartDate).getTime();
     const endDate = parseIsoDateOnly(filters.customEndDate);
@@ -261,7 +265,13 @@ function FilterTextFieldRow({
         <div className="h-px w-[295px] bg-[var(--uc-border)]" />
       </div>
       <span className="absolute left-[331px] top-[20px] grid size-[32px] place-items-center" aria-hidden="true">
-        <AppIcon name={icon} color="var(--uc-text)" size={icon === "calendar-days" ? 22 : 32} />
+        {icon === "calendar-days" ? (
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <path d="M25.125 14.125V23.5C25.125 24.8805 23.9659 25.9998 22.5361 26H7V14.125H25.125ZM9.5 23.708H12.625V20.583H9.5V23.708ZM14.5 23.708H17.625V20.583H14.5V23.708ZM9.5 19.333H12.625V16.208H9.5V19.333ZM14.5 19.333H17.625V16.208H14.5V19.333ZM19.5 19.333H22.625V16.208H19.5V19.333ZM25.125 12.25H7V8.5C7 7.11951 8.15913 6.00022 9.58887 6H25.125V12.25ZM10.2363 7.875C9.52117 7.87515 8.94238 8.43447 8.94238 9.125C8.94238 9.81491 9.52117 10.3748 10.2363 10.375C10.9516 10.375 11.5312 9.815 11.5312 9.125C11.5312 8.43438 10.9516 7.875 10.2363 7.875ZM21.8887 7.875C21.1734 7.875 20.5938 8.43438 20.5938 9.125C20.5938 9.815 21.1734 10.375 21.8887 10.375C22.6038 10.3749 23.1826 9.81491 23.1826 9.125C23.1826 8.43446 22.6038 7.87515 21.8887 7.875Z" fill="var(--uc-investment-reference-icon)" />
+          </svg>
+        ) : (
+          <AppIcon name={icon} color="var(--uc-text)" size={32} />
+        )}
       </span>
     </button>
   );
@@ -366,6 +376,7 @@ function FilterPanel({
   mode,
   draftFilters,
   currencies,
+  hideCurrencyFilter = false,
   historyTab,
   country,
   onBack,
@@ -376,6 +387,7 @@ function FilterPanel({
   mode: Exclude<FilterMode, null>;
   draftFilters: InvestmentHistoryFilterState;
   currencies: readonly Currency[];
+  hideCurrencyFilter?: boolean;
   historyTab: InvestmentHistoryTabId;
   country: CountryId;
   onBack: () => void;
@@ -435,6 +447,20 @@ function FilterPanel({
     );
   }
 
+  if (mode === "status") {
+    return (
+      <FilterScaffold title="Select order status" onBack={() => onModeChange("main")} onApply={onApply}>
+        <div className="flex items-center justify-between border-b border-[var(--uc-border)] px-[24px] py-[12px]">
+          <button type="button" className="text-[14px] font-bold text-[var(--uc-action)]" onClick={() => onDraftChange({ ...draftFilters, selectedStatuses: [...INVESTMENT_HISTORY_ORDER_STATUSES] })}>SELECT ALL</button>
+          <button type="button" className="text-[14px] font-bold text-[var(--uc-action)]" onClick={() => onDraftChange({ ...draftFilters, selectedStatuses: [] })}>CLEAR</button>
+        </div>
+        {INVESTMENT_HISTORY_ORDER_STATUSES.map((status) => (
+          <CheckRow key={status} label={status} selected={draftFilters.selectedStatuses.includes(status)} onClick={() => toggleStatus(status)} />
+        ))}
+      </FilterScaffold>
+    );
+  }
+
   if (mode === "currency") {
     return (
       <FilterScaffold title="Select transaction currency" onBack={() => onModeChange("main")} onApply={onApply}>
@@ -452,20 +478,6 @@ function FilterPanel({
         {otherCurrencies.length > 0 ? (
           <CheckRow label="Other currencies" selected={otherCurrencies.every((currency) => draftFilters.selectedCurrencies.includes(currency))} onClick={toggleOtherCurrencies} />
         ) : null}
-      </FilterScaffold>
-    );
-  }
-
-  if (mode === "status") {
-    return (
-      <FilterScaffold title="Select order status" onBack={() => onModeChange("main")} onApply={onApply}>
-        <div className="flex items-center justify-between border-b border-[var(--uc-border)] px-[24px] py-[12px]">
-          <button type="button" className="text-[14px] font-bold text-[var(--uc-action)]" onClick={() => onDraftChange({ ...draftFilters, selectedStatuses: [...INVESTMENT_HISTORY_ORDER_STATUSES] })}>SELECT ALL</button>
-          <button type="button" className="text-[14px] font-bold text-[var(--uc-action)]" onClick={() => onDraftChange({ ...draftFilters, selectedStatuses: [] })}>CLEAR</button>
-        </div>
-        {INVESTMENT_HISTORY_ORDER_STATUSES.map((status) => (
-          <CheckRow key={status} label={status} selected={draftFilters.selectedStatuses.includes(status)} onClick={() => toggleStatus(status)} />
-        ))}
       </FilterScaffold>
     );
   }
@@ -503,7 +515,7 @@ function FilterPanel({
           <div>
             <FilterTextFieldRow title="By type" value={draftFilters.selectedTypes.length === availableTypes.length ? "All" : draftFilters.selectedTypes.join(", ") || "None"} onClick={() => onModeChange("type")} />
             {historyTab === "orders" ? <FilterTextFieldRow title="By status" value={draftFilters.selectedStatuses.length === INVESTMENT_HISTORY_ORDER_STATUSES.length ? "All" : draftFilters.selectedStatuses.join(", ") || "None"} onClick={() => onModeChange("status")} /> : null}
-            <FilterTextFieldRow title="By currency" value={draftFilters.selectedCurrencies.length === currencies.length ? "All" : draftFilters.selectedCurrencies.join(", ") || "None"} onClick={() => onModeChange("currency")} />
+            {!hideCurrencyFilter ? <FilterTextFieldRow title="By currency" value={draftFilters.selectedCurrencies.length === currencies.length ? "All" : draftFilters.selectedCurrencies.join(", ") || "None"} onClick={() => onModeChange("currency")} /> : null}
           </div>
         </div>
       </div>
@@ -532,7 +544,9 @@ function FilterScaffold({
         <div className="flex shrink-0 items-start justify-between px-[24px]">
           <h1 className="w-[287px] text-[28px] font-bold leading-[32px] tracking-[0.3px] text-[var(--uc-text)]">{title}</h1>
           <button type="button" onClick={onBack} className="grid size-[32px] place-items-center" aria-label="Close filters">
-            <AppIcon name="close-x" color="var(--uc-text)" size={24} />
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <path d="M22.3002 9.70973C21.9102 9.31973 21.2802 9.31973 20.8902 9.70973L16.0002 14.5897L11.1102 9.69973C10.7202 9.30973 10.0902 9.30973 9.70021 9.69973C9.31021 10.0897 9.31021 10.7197 9.70021 11.1097L14.5902 15.9997L9.70021 20.8897C9.31021 21.2797 9.31021 21.9097 9.70021 22.2997C10.0902 22.6897 10.7202 22.6897 11.1102 22.2997L16.0002 17.4097L20.8902 22.2997C21.2802 22.6897 21.9102 22.6897 22.3002 22.2997C22.6902 21.9097 22.6902 21.2797 22.3002 20.8897L17.4102 15.9997L22.3002 11.1097C22.6802 10.7297 22.6802 10.0897 22.3002 9.70973Z" fill="var(--uc-investment-reference-icon)" />
+            </svg>
           </button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto pt-[24px] scrollbar-hide">{children}</div>
@@ -722,6 +736,8 @@ export default function InvestmentsHistoryScreen({
   approvalCount = 0,
   onToApproveClick,
   includeCzRoboHistoricalTransactions = false,
+  allDatesByDefault = false,
+  hideCurrencyFilter = false,
 }: InvestmentsHistoryScreenProps) {
   const { country, amountsHidden } = useDemo();
   const { categories } = useProducts();
@@ -774,13 +790,13 @@ export default function InvestmentsHistoryScreen({
     return [...currencies];
   }, [allCurrenciesKey]);
   const defaultFilters = useMemo<InvestmentHistoryFilterState>(() => ({
-    datePreset: "last-year",
+    datePreset: allDatesByDefault ? "all-time" : "last-year",
     customStartDate: "2025-09-01",
     customEndDate: "2026-06-30",
     selectedTypes: [...INVESTMENT_HISTORY_TRANSACTION_TYPES],
     selectedCurrencies: allCurrencies,
     selectedStatuses: [...INVESTMENT_HISTORY_ORDER_STATUSES],
-  }), [allCurrencies]);
+  }), [allCurrencies, allDatesByDefault]);
   const [appliedFilters, setAppliedFilters] = useState<InvestmentHistoryFilterState | null>(null);
   const [draftFilters, setDraftFilters] = useState<InvestmentHistoryFilterState>(defaultFilters);
 
@@ -791,8 +807,18 @@ export default function InvestmentsHistoryScreen({
   const transactions = transactionsOverride ?? generatedTransactions;
   const generatedOrders = useMemo(() => buildInvestmentHistoryOrders(securities, country), [country, securities]);
   const orders = ordersOverride ?? generatedOrders;
-  const latestTransactionDate = useMemo(() => new Date(Math.max(...transactions.map((item) => new Date(item.date).getTime()))), [transactions]);
-  const latestOrderDate = useMemo(() => new Date(Math.max(...orders.map((item) => new Date(item.date).getTime()))), [orders]);
+  const latestTransactionDate = useMemo(
+    () => transactions.length
+      ? new Date(Math.max(...transactions.map((item) => new Date(item.date).getTime())))
+      : new Date(),
+    [transactions],
+  );
+  const latestOrderDate = useMemo(
+    () => orders.length
+      ? new Date(Math.max(...orders.map((item) => new Date(item.date).getTime())))
+      : new Date(),
+    [orders],
+  );
   const tabDefaults = useMemo(() => resetFilterTypesForTab(defaultFilters, activeTab), [activeTab, defaultFilters]);
   const effectiveFilters = appliedFilters ?? tabDefaults;
 
@@ -854,11 +880,11 @@ export default function InvestmentsHistoryScreen({
     const chips: { id: string; label: string; onRemove: () => void }[] = [];
     const availableTypes = getHistoryTypesForTab(activeTab);
 
-    if (appliedFilters.datePreset !== "last-year") {
+    if (appliedFilters.datePreset !== defaultFilters.datePreset) {
       const dateLabel = appliedFilters.datePreset === "define"
         ? `${formatFilterDate(appliedFilters.customStartDate, country)} - ${formatFilterDate(appliedFilters.customEndDate, country)}`
         : INVESTMENT_HISTORY_DATE_OPTIONS.find((option) => option.id === appliedFilters.datePreset)?.label ?? "Date";
-      chips.push({ id: "date", label: dateLabel, onRemove: () => updateAppliedFilters({ ...appliedFilters, datePreset: "last-year" }) });
+      chips.push({ id: "date", label: dateLabel, onRemove: () => updateAppliedFilters({ ...appliedFilters, datePreset: defaultFilters.datePreset }) });
     }
 
     if (!sameSelection(appliedFilters.selectedTypes, availableTypes)) {
@@ -921,6 +947,7 @@ export default function InvestmentsHistoryScreen({
         mode={filterMode}
         draftFilters={draftFilters}
         currencies={allCurrencies}
+        hideCurrencyFilter={hideCurrencyFilter}
         historyTab={activeTab}
         country={country}
         onBack={() => setFilterMode(null)}

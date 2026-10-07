@@ -5,7 +5,7 @@
  *   pick payee → enter amount (live decision) → instant / pending result.
  * There is no free IBAN entry: teens only ever pay someone already on the list.
  */
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import { AppIcon } from "@/app/components/icons";
@@ -186,6 +186,7 @@ function AmountStep({
   onConfirm: () => void;
 }) {
   const hasAmount = Number(amount || 0) > 0;
+  const noteId = useId();
 
   return (
     <div className="space-y-[16px]">
@@ -202,10 +203,11 @@ function AmountStep({
       <RoCard className="space-y-[16px]">
         <RoAmountField value={amount} onChange={onAmount} chips={[10, 20, 50]} />
         <div>
-          <label className="mb-[8px] block text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
+          <label htmlFor={noteId} className="mb-[8px] block text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
             Mențiune
           </label>
           <input
+            id={noteId}
             className="h-[46px] w-full rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] text-[15px] text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)] focus:ring-2 focus:ring-[var(--hu-theme-accent-strong)]"
             placeholder="Ex: partea la pizza"
             value={note}

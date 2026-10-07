@@ -5,7 +5,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import AnalyticsScreen from '@/app/screens/analytics/AnalyticsScreen'
 import { LanguageProvider } from '@/app/contexts/LanguageContext'
-import { DemoProvider } from '@/app/state/demoStore'
+import { DemoProvider, useDemo } from '@/app/state/demoStore'
 import { mockProducts, type Product } from '@/data/products'
 
 const mockedProductState = vi.hoisted(() => ({
@@ -22,6 +22,17 @@ function Providers({ children }: { children: React.ReactNode }) {
       <LanguageProvider initialLanguage="en">{children}</LanguageProvider>
     </DemoProvider>
   )
+}
+
+function HiddenProviders({ children }: { children: React.ReactNode }) {
+  return <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027', amountsHidden: true }}>
+    <LanguageProvider initialLanguage="en">{children}</LanguageProvider>
+  </DemoProvider>
+}
+
+function PrivacyControl() {
+  const { toggleAmountsHidden } = useDemo()
+  return <button onClick={toggleAmountsHidden}>Toggle amounts for test</button>
 }
 
 beforeAll(() => {
@@ -45,7 +56,51 @@ function periodDots() {
   return Array.from(document.querySelectorAll<HTMLElement>('[data-evo-analytics-period-dots] button'))
 }
 
+/** Choose the rich ledger month explicitly rather than relying on latest-month fixtures. */
+function selectMonth(label: string) {
+  // The indicator only renders a moving window of six periods.
+  for (let step = 0; step < 24; step += 1) {
+    const dots = periodDots()
+    const dot = dots.find((candidate) => candidate.getAttribute('aria-label') === label)
+    if (dot) {
+      fireEvent.click(dot)
+      return
+    }
+    const oldestVisible = dots[0]
+    if (!oldestVisible || oldestVisible.getAttribute('aria-current') === 'true') break
+    fireEvent.click(oldestVisible)
+  }
+  throw new Error('Expected period ' + label)
+}
+
 describe('Evo 2027 analytics overview', () => {
+  it('masks the monetary bar-chart axis and restores its scale when amounts become visible', () => {
+    render(<><PrivacyControl /><AnalyticsScreen initialScopeId="acc-1" initialDirection="expense" /></>, { wrapper: HiddenProviders })
+    fireEvent.click(screen.getByRole('button', { name: 'Show spending over time' }))
+    const chart = screen.getByLabelText('Expense bar chart')
+    const axis = chart.querySelector('[data-evo-expense-plot]')?.firstElementChild
+    expect(axis).toHaveTextContent('****')
+    expect(axis?.textContent).not.toMatch(/\d/)
+    expect(axis).toHaveTextContent('CZK')
+    expect(chart).not.toHaveTextContent('470,00')
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle amounts for test' }))
+    expect(axis?.textContent).toMatch(/\d/)
+    expect(axis).not.toHaveTextContent('****')
+    expect(chart).toHaveTextContent('470,00')
+  })
+
+  it('keeps the latest-period monetary total masked in the account expense detail', async () => {
+    const { container } = render(<AnalyticsScreen initialScopeId="acc-1" initialDirection="expense" />, { wrapper: HiddenProviders })
+    expect(container).not.toHaveTextContent('470,00')
+    expect(container).not.toHaveTextContent('250,00')
+    expect(container).not.toHaveTextContent('220,00')
+    fireEvent.click(screen.getByRole('button', { name: 'Open Transfers transactions' }))
+    expect(await screen.findAllByTestId('evo-expense-transaction')).toHaveLength(2)
+    expect(container).not.toHaveTextContent('470,00')
+    expect(container).not.toHaveTextContent('250,00')
+    expect(container).not.toHaveTextContent('220,00')
+    expect(container.textContent).not.toMatch(/\d[,.]\d{2}\s*CZK/)
+  })
   it('can open directly on one account and the requested money direction', () => {
     const { container } = render(
       <AnalyticsScreen initialScopeId="acc-1" initialDirection="income" />,
@@ -81,6 +136,7 @@ describe('Evo 2027 analytics overview', () => {
 
   it('opens with the family L1 composition: swipeable month cards and a category section', () => {
     const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
+    selectMonth('April 2026')
 
     expect(container.querySelector('[data-evo-analytics-period-carousel]')).toBeInTheDocument()
     expect(container.querySelector('[data-evo-analytics-summary-hero]')).toBeInTheDocument()
@@ -123,16 +179,23 @@ describe('Evo 2027 analytics overview', () => {
   it('offers presets and a custom range, and closes the axis with the year totals', () => {
     const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
 
+    // September contains exactly the two new outgoing transfers: 320 + 150 CZK.
+    const hero = Array.from(container.querySelectorAll('[data-evo-analytics-summary-hero]'))
+      .find((card) => !card.closest('[aria-hidden="true"]'))
+    expect(hero?.querySelector('[data-evo-analytics-open-expenses]')).toHaveTextContent('470,00 CZK')
+    expect(hero?.querySelector('[data-evo-analytics-open-income]')).toHaveTextContent('0,00 CZK')
+    expect(hero?.querySelector('[data-evo-analytics-summary-net]')).toHaveTextContent('−470,00 CZK')
+
     // The rail opens on the newest month, and the year totals sit after it.
     const dots = periodDots()
     expect(dots.length).toBeGreaterThan(1)
     expect(dots.find((dot) => dot.getAttribute('aria-current') === 'true'))
-      .toHaveAttribute('aria-label', 'April 2026')
+      .toHaveAttribute('aria-label', 'September 2026')
     expect(dots[dots.length - 1]).toHaveAttribute('aria-label', 'Total 2025')
 
-    fireEvent.click(dots.find((dot) => dot.getAttribute('aria-label') === 'March 2026') as HTMLElement)
+    selectMonth('April 2026')
     expect(container.querySelector('[data-evo-analytics-period-carousel]'))
-      .toHaveAttribute('data-evo-analytics-period-key', 'month:2026-03')
+      .toHaveAttribute('data-evo-analytics-period-key', 'month:2026-04')
 
     // Presets and the custom range are reached from the analysis screen, where
     // the period is the page's heading rather than one filter among several.
@@ -226,6 +289,7 @@ describe('Evo 2027 analytics overview', () => {
 
   it('shows matching top money-out and money-in sections on the overview', () => {
     const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
+    selectMonth('April 2026')
 
     const moneyOut = container.querySelector<HTMLElement>('[data-evo-analytics-top-categories]')
     const moneyIn = container.querySelector<HTMLElement>('[data-evo-analytics-money-in-categories]')
@@ -251,6 +315,7 @@ describe('Evo 2027 analytics overview', () => {
 
   it('opens the money-in category detail with the income direction', () => {
     const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
+    selectMonth('April 2026')
     const incomeRow = container.querySelector<HTMLElement>('[data-evo-analytics-money-in-category]')
 
     expect(incomeRow).toBeInTheDocument()
@@ -264,8 +329,9 @@ describe('Evo 2027 analytics overview', () => {
 })
 
 describe('Evo 2027 expense chart and split-by breakdown', () => {
-  function openExpenses() {
+  function openExpenses(month = 'April 2026') {
     const rendered = render(<AnalyticsScreen />, { wrapper: Providers })
+    selectMonth(month)
     fireEvent.click(screen.getByRole('button', { name: 'All spending categories' }))
     return rendered
   }
@@ -343,7 +409,7 @@ describe('Evo 2027 expense chart and split-by breakdown', () => {
   })
 
   it('moves to adjacent periods when the chart itself is swiped', () => {
-    openExpenses()
+    openExpenses('September 2026')
 
     const period = document.querySelector<HTMLElement>('[data-evo-analytics-period-key]')
     const chart = screen.getByLabelText('Expense chart')
@@ -354,7 +420,8 @@ describe('Evo 2027 expense chart and split-by breakdown', () => {
     fireEvent.pointerMove(chart, { pointerType: 'touch', pointerId: 1, clientX: 200 })
     fireEvent.pointerUp(chart, { pointerType: 'touch', pointerId: 1, clientX: 220 })
 
-    expect(period).not.toHaveAttribute('data-evo-analytics-period-key', initialKey ?? '')
+    expect(initialKey).toBe('month:2026-09')
+    expect(period).toHaveAttribute('data-evo-analytics-period-key', 'month:2026-08')
 
     // Dragging left walks forward again, back to where it started.
     fireEvent.pointerDown(chart, { pointerType: 'touch', pointerId: 2, clientX: 220 })
@@ -388,19 +455,20 @@ describe('Evo 2027 expense chart and split-by breakdown', () => {
 
   it('keeps Income on the same period control, with the year totals closing the axis', () => {
     render(<AnalyticsScreen />, { wrapper: Providers })
+    selectMonth('April 2026')
     fireEvent.click(screen.getByRole('button', { name: 'All income categories' }))
 
     expect(document.querySelector('[data-evo-analytics-direction="income"]')).toBeInTheDocument()
-    // The newest month is where the rail opens; the year totals sit past it.
+    // Income retains the selected rich month; the year totals close the rail.
     const dots = periodDots()
     expect(dots.find((dot) => dot.getAttribute('aria-current') === 'true'))
       .toHaveAttribute('aria-label', 'April 2026')
-    expect(dots[dots.length - 1]).toHaveAttribute('aria-label', 'Total 2025')
     expect(document.querySelector('[data-evo-expense-interval]')).toHaveAttribute('data-evo-expense-interval', 'month')
 
     fireEvent.click(document.querySelector('[data-evo-analytics-period-trigger]') as HTMLElement)
     fireEvent.click(document.querySelector('[data-evo-analytics-period-option="last-year"]') as HTMLElement)
     expect(document.querySelector('[data-evo-expense-interval="year"]')).toBeInTheDocument()
+    expect(periodDots().at(-1)).toHaveAttribute('aria-label', 'Total 2025')
     expect(screen.queryByText('Monthly interval')).not.toBeInTheDocument()
   })
 

@@ -1,6 +1,6 @@
 {
-  "baselineCommit": "bc496cb",
-  "baselineNote": "Re-locked after the approved investments bulk-signing flow added the referenced reject-warning.svg and sign-multiple.svg assets. No existing image file was deleted, replaced, or optimized.",
-  "assetCount": 232,
-  "pathBlobSha256Aggregate": "926a18643179648c22387d2adf2783fd41edeae249ddc57f8ca93bfcd9c80bc7"
+  "baselineCommit": "efe26b6 + protected operator input 2026-10-07",
+  "baselineNote": "Preserves all 260 previously approved asset blobs and the operator's referenced Robo quit SVG. Repository inventory includes pending application assets/references; unrelated designer files remain outside that inventory. No existing asset bytes changed.",
+  "assetCount": 261,
+  "pathBlobSha256Aggregate": "53032f7ec9e97620b9b83bd5e7d7b6cc4daa69dd5e7eb49e3d6814346e8f9c2d"
 }

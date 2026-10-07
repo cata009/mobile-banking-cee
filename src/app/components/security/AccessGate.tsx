@@ -22,26 +22,35 @@ const SIX_MONTHS_MS = 183 * 24 * 60 * 60 * 1000;
 const LOCAL_CONFIGURATION_MESSAGE =
   "Local access is not configured. Add VITE_LOCAL_ACCESS_PASSWORD to .env.local and restart Vite.";
 
-function readLocalJson<T>(key: string, fallback: T): T {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function readLocalJson(key: string): unknown {
   try {
     const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
+    return raw ? JSON.parse(raw) : null;
   } catch {
-    return fallback;
+    return null;
   }
 }
 
 function isLocalAccessValid() {
-  const access = readLocalJson<{ expiresAt?: number }>(LOCAL_ACCESS_KEY, {});
-  return Boolean(access.expiresAt && access.expiresAt > Date.now());
+  const access = readLocalJson(LOCAL_ACCESS_KEY);
+  return isRecord(access) && typeof access.expiresAt === "number" &&
+    Number.isFinite(access.expiresAt) && access.expiresAt > Date.now();
 }
 
 function setLocalAccess(remember: boolean) {
   const now = Date.now();
-  localStorage.setItem(
-    LOCAL_ACCESS_KEY,
-    JSON.stringify({ expiresAt: now + (remember ? SIX_MONTHS_MS : ONE_MONTH_MS) })
-  );
+  try {
+    localStorage.setItem(
+      LOCAL_ACCESS_KEY,
+      JSON.stringify({ expiresAt: now + (remember ? SIX_MONTHS_MS : ONE_MONTH_MS) })
+    );
+  } catch {
+    // Persistence is optional; valid local authentication still unlocks this session.
+  }
 }
 
 async function checkServerAccess() {
@@ -53,8 +62,8 @@ async function checkServerAccess() {
 
   if (!response.ok) return false;
 
-  const data = (await response.json()) as { authenticated?: boolean };
-  return Boolean(data.authenticated);
+  const data: unknown = await response.json();
+  return isRecord(data) && data.authenticated === true;
 }
 
 async function submitServerAccess(password: string, remember: boolean) {
@@ -67,11 +76,11 @@ async function submitServerAccess(password: string, remember: boolean) {
     body: JSON.stringify({ password, remember }),
     credentials: "same-origin",
   });
-  const data = (await response.json().catch(() => ({}))) as { ok?: boolean; message?: string };
+  const data: unknown = await response.json().catch(() => null);
 
   return {
-    ok: response.ok && Boolean(data.ok),
-    message: data.message,
+    ok: response.ok && isRecord(data) && data.ok === true,
+    message: isRecord(data) && typeof data.message === "string" ? data.message : undefined,
   };
 }
 
@@ -85,11 +94,11 @@ async function submitServerShareAccess(shareToken: string) {
     body: JSON.stringify({ shareToken }),
     credentials: "same-origin",
   });
-  const data = (await response.json().catch(() => ({}))) as { ok?: boolean; message?: string };
+  const data: unknown = await response.json().catch(() => null);
 
   return {
-    ok: response.ok && Boolean(data.ok),
-    message: data.message,
+    ok: response.ok && isRecord(data) && data.ok === true,
+    message: isRecord(data) && typeof data.message === "string" ? data.message : undefined,
   };
 }
 

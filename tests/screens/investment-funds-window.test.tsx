@@ -113,7 +113,10 @@ describe("Investments funds window", () => {
       .find((heading) => heading.classList.contains("uc-type-n4-strong"));
     expect(compactTitle).toBeDefined();
     fireEvent.scroll(page, { target: { scrollTop: 96 } });
-    expect(compactTitle?.style.opacity).toBe("1");
+    expect(compactTitle?.parentElement?.style.opacity).toBe("1");
+    const largeTitle = screen.getAllByRole("heading", { name: "Our funds selection" })
+      .find((heading) => heading.classList.contains("uc-type-h1"));
+    expect(largeTitle?.parentElement?.style.opacity).toBe("0");
     expect(screen.getByRole("button", { name: /Selection\+ portfolios/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Featured this month/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Equity funds/i })).toBeTruthy();

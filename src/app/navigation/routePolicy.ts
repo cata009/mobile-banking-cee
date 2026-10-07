@@ -1,5 +1,6 @@
 import type { Screen } from "@/app/contexts/NavigationContext";
 import type { CountryId, DesignSystemId, ProductId, ReleaseId, ScreenId, ThemeMode } from "@/app/state/demoTypes";
+import { isReleaseFeatureActive } from '@/app/state/featureResolver';
 
 export type RouteSurface = "prelogin" | "app" | "platform";
 export type RouteStatusBarVariant = "light" | "dark" | "theme";
@@ -27,7 +28,7 @@ export const ROUTE_POLICY = {
   "prelogin-inactive": route({ surface: "prelogin", registryIds: ["pi.prelogin.inactive"], productEligibility: "mobile-runtime", statusBar: "dark", backFallback: "prelogin-inactive", payload: "none", deepLink: { restorable: true, fallback: "prelogin-inactive", payload: "none" } }),
   "prelogin-active": route({ surface: "prelogin", registryIds: ["pi.prelogin.active"], productEligibility: "mobile-runtime", statusBar: "dark", backFallback: "prelogin-active", payload: "none", deepLink: { restorable: true, fallback: "prelogin-active", payload: "none" } }),
   "co-apping-session": route({ surface: "app", registryIds: ["pi.co-apping.session"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "prelogin-active", payload: "none", deepLink: { restorable: false, fallback: "homepage", payload: "none" } }),
-  homepage: route({ surface: "app", registryIds: ["pi.home.overview", "kids.sk.home-concept", "kids.hu.home-concept"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "homepage", payload: "none" } }),
+  homepage: route({ surface: "app", registryIds: ["pi.home.overview", "kids.sk.home-concept", "kids.hu.home-concept", "kids.ro.home-concept"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "homepage", payload: "none" } }),
   "language-selector": route({ surface: "app", registryIds: ["pi.language.selector"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "prelogin-active", payload: "none", deepLink: { restorable: false, fallback: "homepage", payload: "none" } }),
   analytics: route({ surface: "app", registryIds: ["pi.analytics.overview"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "analytics", payload: "none" } }),
   messages: route({ surface: "app", registryIds: ["pi.messages.overview"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "messages", payload: "none" } }),
@@ -68,11 +69,19 @@ export interface ProductRouteContext {
   country: CountryId;
   designSystem: DesignSystemId;
   release?: ReleaseId;
+  scenario?: 'active' | 'inactive';
 }
 
 export function isRouteEligibleForProductContext(screen: Screen, context: ProductRouteContext): boolean {
   if (ROUTE_POLICY[screen].productEligibility === "unrestricted") return true;
   if (context.designSystem !== "current") return false;
+  if (screen === 'my-banker') {
+    return isReleaseFeatureActive({
+      ...context,
+      release: context.release ?? 'release-current',
+      scenario: context.scenario ?? 'active',
+    }, 'fx_rsMyBanker');
+  }
   if (context.product === "PI") return true;
   return (
     context.product === "KIDS_PI" &&

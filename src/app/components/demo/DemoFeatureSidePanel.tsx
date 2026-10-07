@@ -108,6 +108,7 @@ export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelPr
         <div
           className="fixed inset-0 bg-[rgb(var(--uc-static-black-rgb)_/_0.3)] z-[9998] transition-opacity"
           onClick={onClose}
+          aria-hidden="true"
         />
       )}
 

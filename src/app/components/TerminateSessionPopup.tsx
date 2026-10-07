@@ -17,6 +17,7 @@ export default function TerminateSessionPopup({
       <div
         className="absolute inset-0 bg-[rgb(var(--uc-static-black-rgb)_/_0.5)] backdrop-blur-sm"
         onClick={onCancel}
+        aria-hidden="true"
       />
 
       {/* Popup */}

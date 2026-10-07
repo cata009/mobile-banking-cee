@@ -50,6 +50,7 @@ export interface DeepLinkState {
   flowId?: FlowPreviewId | null;
   accountId?: string | null;
   cardId?: string | null;
+  transactionSource?: 'account' | 'card';
   productCounts?: ProductCounts;
   /** Frameless "real device" mode — render the app fullscreen, no phone bezel. */
   deviceMode?: boolean;
@@ -234,7 +235,9 @@ export function deepLinkToDemoInitialState(parsed: ParsedDeepLink | null): Parti
  * preserved only for the Design System (which uses it for section navigation).
  */
 export function buildDeepLinkUrl(state: DeepLinkState): string {
-  const normalizedScreen = normalizeScreen(state.screen, Boolean(state.cardId));
+  const hasCardParent = state.screen === 'transaction-detail' && state.transactionSource === 'account'
+    ? false : Boolean(state.cardId);
+  const normalizedScreen = normalizeScreen(state.screen, hasCardParent);
   const payloadPolicy = ROUTE_POLICY[normalizedScreen].deepLink.payload;
   const params = new URLSearchParams();
 

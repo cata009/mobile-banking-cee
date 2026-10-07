@@ -4,7 +4,10 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import tseslint from 'typescript-eslint'
 
 const jsxA11yWarnings = Object.fromEntries(
-  Object.keys(jsxA11y.flatConfigs.recommended.rules).map((ruleName) => [ruleName, 'warn']),
+  Object.entries(jsxA11y.flatConfigs.recommended.rules).map(([ruleName, setting]) => {
+    const [severity, ...options] = Array.isArray(setting) ? setting : [setting]
+    return [ruleName, severity === 'off' || severity === 0 ? setting : ['warn', ...options]]
+  }),
 )
 
 export default tseslint.config(

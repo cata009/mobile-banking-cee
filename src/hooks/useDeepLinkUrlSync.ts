@@ -25,6 +25,7 @@ export function useDeepLinkUrlSync({
   flowId,
   accountId,
   cardId,
+  transactionSource,
   deviceMode,
 }: DeepLinkState) {
   useEffect(() => {
@@ -43,6 +44,7 @@ export function useDeepLinkUrlSync({
       flowId,
       accountId,
       cardId,
+      transactionSource,
       deviceMode,
     });
     window.history.replaceState(window.history.state, "", url);
@@ -61,6 +63,7 @@ export function useDeepLinkUrlSync({
     flowId,
     accountId,
     cardId,
+    transactionSource,
     deviceMode,
   ]);
 }

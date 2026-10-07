@@ -1,0 +1,24 @@
+{
+  "owner": "pi.cz.robo",
+  "worktreeRoot": "C:/Users/mihai/Desktop/Mobile Banking - CEE",
+  "ownedPaths": [
+    "src/app/screens/investments/CzFutureRoboAdvisorFlow.tsx",
+    "src/app/screens/investments/CzInvestmentGoalsScreen.tsx",
+    "src/app/screens/investments/czFutureRoboAdvisorModel.ts",
+    "src/app/screens/investments/roboAdvisorFlowState.ts",
+    "src/app/screens/investments/robo/**",
+    "src/experiences/pi/cz/robo/**",
+    "src/features/investments/robo/**",
+    "tests/screens/cz-future-robo-advisor-model.test.ts",
+    "tests/screens/cz-future-robo-advisor-flow.test.tsx",
+    "tests/screens/robo-advisor-flow-state.test.ts",
+    "tests/screens/robo-demo-clock.test.ts",
+    "tests/screens/robo-funding-clock.test.tsx",
+    "tests/screens/robo-incoming-goal.test.tsx",
+    "tests/features/robo-goal-domain.test.ts",
+    "tests/features/robo-management-state.test.ts",
+    "tests/features/robo-state-contract.test.ts",
+    "tests/screens/cz-robo/**",
+    "src/assets/cz-robo/**"
+  ]
+}

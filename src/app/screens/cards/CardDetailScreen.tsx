@@ -228,7 +228,7 @@ export default function CardDetailScreen({
         .toLowerCase()
         .includes(normalizedSearch);
     });
-  }, [config.currency, country, normalizedSearch, scopedTransactions]);
+  }, [config.currency, normalizedSearch, scopedTransactions]);
 
   const transactionGroups = useMemo(
     () => groupAccountTransactionsByMonth(filteredTransactions.filter((transaction) => transaction.status === "Booked")),
@@ -252,7 +252,7 @@ export default function CardDetailScreen({
       return formatEvo2027Number((activeCard as import("@/data/products").CreditCard).availableCredit);
     }
     return formatEvo2027Number(Math.abs(activeCard.balance));
-  }, [activeCard, country]);
+  }, [activeCard]);
 
   const maskedFreeToSpend = maskFormattedAmount(freeToSpendAmount, amountsHidden);
 
@@ -342,10 +342,11 @@ export default function CardDetailScreen({
     scrollToCard(index);
   };
 
+  const initialCardScroll = useRef(() => getCardScrollLeft(activeIndex));
   useEffect(() => {
     const carousel = carouselRef.current;
     if (!carousel || typeof carousel.scrollTo !== "function") return;
-    carousel.scrollTo({ left: getCardScrollLeft(activeIndex) });
+    carousel.scrollTo({ left: initialCardScroll.current() });
   }, []);
 
   useEffect(() => {

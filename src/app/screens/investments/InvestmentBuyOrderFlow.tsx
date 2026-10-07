@@ -1,3 +1,4 @@
+import { ProductEvaluationBullet } from '@/app/components/investments/ProductEvaluationBullet';
 import { useMemo, useState, type ReactNode } from "react";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import PageHeader from "@/app/components/PageHeader";
@@ -41,6 +42,21 @@ interface InvestmentBuyOrderFlowProps {
   onComplete: () => void;
 }
 
+export interface InvestmentBuyOrderReviewRow {
+  label: string;
+  value: string;
+}
+
+export interface InvestmentBuyOrderReviewDataProps {
+  orderSummary: readonly InvestmentBuyOrderReviewRow[];
+  accounts?: readonly InvestmentBuyOrderReviewRow[];
+  currency: string;
+  onBack: () => void;
+  actionLabel: string;
+  actionDisabled?: boolean;
+  onAction: () => void;
+}
+
 function formatMoney(value: number, currency: string, country: CountryId, hidden: boolean) {
   return formatInvestmentMoney(value, country, currency, hidden);
 }
@@ -76,30 +92,8 @@ function getValidatedInitialDraft(
 function formatExecutionTiming(value: CoAppingInvestmentBuyDraft["executionTiming"]) {
   return value === "next-business-day" ? "Next business day" : "Today";
 }
+export { ProductEvaluationBullet } from '@/app/components/investments/ProductEvaluationBullet';
 
-/**
- * Small green dot bullet used in PRODUCT EVALUATION attributes.
- * Spec: 32×32 SVG viewBox, solid filled circle in --uc-green-olive.
- */
-export function ProductEvaluationBullet() {
-  return (
-    <svg
-      width="32"
-      height="32"
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M20 16C20 18.2088 18.2084 20 16 20C13.7908 20 12 18.2088 12 16C12 13.7912 13.7908 12 16 12C18.2084 12 20 13.7912 20 16Z"
-        fill="var(--uc-green-olive)"
-      />
-    </svg>
-  );
-}
 
 function FlowFrame({
   title,
@@ -141,6 +135,57 @@ function FlowFrame({
   );
 }
 
+export function InvestmentBuyOrderReviewData({
+  orderSummary,
+  accounts = [],
+  currency,
+  onBack,
+  actionLabel,
+  actionDisabled = false,
+  onAction,
+}: InvestmentBuyOrderReviewDataProps) {
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
+  return (
+    <FlowFrame
+      title="Review Data"
+      onBack={onBack}
+      actionLabel={actionLabel}
+      actionDisabled={actionDisabled || !termsAccepted}
+      onAction={onAction}
+    >
+      <section className="pt-[16px]">
+        <SectionHeadingDivider title="ORDER SUMMARY" className="px-[24px]" />
+        {orderSummary.map((row, index) => (
+          <InvestmentDetailField key={`${row.label}-${index}`} label={row.label} value={row.value} />
+        ))}
+      </section>
+
+      {accounts.length > 0 ? (
+        <section className="pt-[24px]">
+          <SectionHeadingDivider title="ACCOUNTS" className="px-[24px]" />
+          {accounts.map((row, index) => (
+            <InvestmentDetailField key={`${row.label}-${index}`} label={row.label} value={row.value} />
+          ))}
+        </section>
+      ) : null}
+
+      <section className="pt-[24px]">
+        <SectionHeadingDivider title="DOCUMENTS AND TERMS" className="px-[24px]" />
+        <InvestmentOrderDocumentsAccordion currency={currency} />
+        <div className="flex items-center justify-between gap-[20px] px-[24px] py-[20px]">
+          <p className="uc-type-n4 flex-1">I have read and accept the terms and conditions.</p>
+          <ToggleButton
+            ariaLabel="Accept terms and conditions"
+            checked={termsAccepted}
+            onToggle={setTermsAccepted}
+          />
+        </div>
+      </section>
+    </FlowFrame>
+  );
+}
+
 export default function InvestmentBuyOrderFlow({
   security,
   accounts,
@@ -161,7 +206,6 @@ export default function InvestmentBuyOrderFlow({
   );
   const [accountSheetOpen, setAccountSheetOpen] = useState(false);
   const [securityAccountSheetOpen, setSecurityAccountSheetOpen] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const selectedAccount = accounts.find((account) => account.id === selectedAccountId) ?? accounts[0] ?? null;
   const availableSecurityAccounts = useMemo(() => {
@@ -226,49 +270,31 @@ export default function InvestmentBuyOrderFlow({
 
   if (step === "review" && selectedAccount && quote) {
     return (
-      <FlowFrame
-        title="Review Data"
+      <InvestmentBuyOrderReviewData
+        orderSummary={[
+          { label: "Product", value: security.title },
+          { label: "Product ID", value: security.productId },
+          { label: "Order type", value: "One off BUY" },
+          { label: "Quantity", value: `${quote.quantity} PCS` },
+          { label: "Execution", value: formatExecutionTiming(executionTiming) },
+          { label: "Market price", value: formatMoney(quote.marketPrice, quote.productCurrency, country, amountsHidden) },
+          { label: "Estimated amount", value: formatMoney(quote.productAmount, quote.productCurrency, country, amountsHidden) },
+        ]}
+        accounts={[
+          { label: "Security account", value: selectedSecurityAccount.name },
+          {
+            label: "Cash account",
+            value: `${selectedAccount.name} · ${country === "CZ" ? formatCzLocalAccountNumber(selectedAccount.accountNumber) : compactAccountNumber(selectedAccount.accountNumber)}`,
+          },
+          ...(quote.accountCurrency !== quote.productCurrency
+            ? [{ label: "Estimated debit", value: formatMoney(quote.debitAmount, quote.accountCurrency, country, amountsHidden) }]
+            : []),
+        ]}
+        currency={quote.productCurrency}
         onBack={() => setStep("order-data")}
         actionLabel="Buy"
-        actionDisabled={!termsAccepted}
         onAction={() => setStep("sign")}
-      >
-        <section className="pt-[16px]">
-          <SectionHeadingDivider title="ORDER SUMMARY" className="px-[24px]" />
-          <InvestmentDetailField label="Product" value={security.title} />
-          <InvestmentDetailField label="Product ID" value={security.productId} />
-          <InvestmentDetailField label="Order type" value="One off BUY" />
-          <InvestmentDetailField label="Quantity" value={`${quote.quantity} PCS`} />
-          <InvestmentDetailField label="Execution" value={formatExecutionTiming(executionTiming)} />
-          <InvestmentDetailField label="Market price" value={formatMoney(quote.marketPrice, quote.productCurrency, country, amountsHidden)} />
-          <InvestmentDetailField label="Estimated amount" value={formatMoney(quote.productAmount, quote.productCurrency, country, amountsHidden)} />
-        </section>
-
-        <section className="pt-[24px]">
-          <SectionHeadingDivider title="ACCOUNTS" className="px-[24px]" />
-          <InvestmentDetailField label="Security account" value={selectedSecurityAccount.name} />
-          <InvestmentDetailField
-            label="Cash account"
-            value={`${selectedAccount.name} · ${country === "CZ" ? formatCzLocalAccountNumber(selectedAccount.accountNumber) : compactAccountNumber(selectedAccount.accountNumber)}`}
-          />
-          {quote.accountCurrency !== quote.productCurrency ? (
-            <InvestmentDetailField label="Estimated debit" value={formatMoney(quote.debitAmount, quote.accountCurrency, country, amountsHidden)} />
-          ) : null}
-        </section>
-
-        <section className="pt-[24px]">
-          <SectionHeadingDivider title="DOCUMENTS AND TERMS" className="px-[24px]" />
-          <InvestmentOrderDocumentsAccordion currency={quote.productCurrency} />
-          <div className="flex items-center justify-between gap-[20px] px-[24px] py-[20px]">
-            <p className="uc-type-n4 flex-1">I have read and accept the terms and conditions.</p>
-            <ToggleButton
-              ariaLabel="Accept terms and conditions"
-              checked={termsAccepted}
-              onToggle={setTermsAccepted}
-            />
-          </div>
-        </section>
-      </FlowFrame>
+      />
     );
   }
 

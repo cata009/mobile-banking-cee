@@ -337,7 +337,7 @@ export default function AccountDetailScreen({
         categoryMatches
       );
     });
-  }, [activeProduct?.accountNumber, appliedFilters, config.currency, country, normalizedTransactionSearch, scopedTransactions]);
+  }, [activeProduct?.accountNumber, appliedFilters, config.currency, normalizedTransactionSearch, scopedTransactions]);
   const transactionGroups = useMemo(
     () => groupAccountTransactionsByMonth(filteredTransactions.filter((transaction) => transaction.status === "Booked")),
     [filteredTransactions],
@@ -452,10 +452,11 @@ export default function AccountDetailScreen({
     scrollToAccount(index);
   };
 
+  const initialAccountScroll = useRef(() => getAccountScrollLeft(activeIndex));
   useEffect(() => {
     if (!carouselRef.current) return;
     if (typeof carouselRef.current.scrollTo !== "function") return;
-    carouselRef.current.scrollTo({ left: getAccountScrollLeft(activeIndex) });
+    carouselRef.current.scrollTo({ left: initialAccountScroll.current() });
   }, []);
 
   if (!activeProduct) {

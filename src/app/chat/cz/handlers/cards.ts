@@ -15,7 +15,7 @@ function hasAny(normalized: string, terms: readonly string[]): boolean {
 export function resolveCzCardReply(
   normalized: string,
   { primaryCardName, creditLimit, proposedCreditLimit, creditLimitOfferBlock }: CzCardHandlerContext,
-): CoAppingReplyResult | null {
+): Exclude<CoAppingReplyResult, string> | null {
   const review = buildCzNavigateFollowUp('cz-limit-review', 'Review offer', 'credit-limit-review')
   const notNow = buildCzChatFollowUp(
     'cz-limit-not-now',

@@ -6,6 +6,7 @@ import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import BrandLogo from "@/app/components/brand-logo/BrandLogo";
 import { AppIcon } from "@/app/components/icons";
 import { BottomSheet } from "@/app/components/BottomSheet";
+import NavigationRow from "@/app/components/NavigationRow";
 import InvestmentBasketFundCard from "@/app/components/investments/InvestmentBasketFundCard";
 import InvestmentPeriodChips from "@/app/components/investments/InvestmentPeriodChips";
 import InvestmentPortfolioChart from "@/app/components/investments/InvestmentPortfolioChart";
@@ -16,6 +17,7 @@ import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import LinkButton from "@/app/components/ui/LinkButton";
+import { cn } from "@/app/components/ui/utils";
 import { getRecommendedInvestmentBaskets } from "@/app/config/investmentBasketFundsConfig";
 import {
   INVESTMENT_PERIODS,
@@ -152,16 +154,16 @@ function ProductTransactionRow({
 
 function ProductKidDocumentRow({ security }: { security: InvestmentCatalogSecurity }) {
   return (
-    <div className="px-[24px] py-[12px]" data-investment-kid-document={security.productId}>
-      <div className="flex min-h-[68px] items-center gap-[12px] rounded-[4px] border border-[var(--uc-border-muted)] px-[12px] py-[10px]">
-        <span className="grid size-[36px] shrink-0 place-items-center rounded-full bg-[var(--uc-surface-muted)]">
-          <AppIcon name="account-option-statement" color="var(--uc-action)" size={22} />
-        </span>
-        <div className="min-w-0">
-          <p className="text-[14px] font-bold leading-[18px] text-[var(--uc-text)]">Key Information Document (KID)</p>
-          <p className="mt-[2px] truncate text-[13px] leading-[17px] text-[var(--uc-text-muted)]">{security.title}</p>
-        </div>
-      </div>
+    <div data-investment-kid-document={security.productId}>
+      <NavigationRow
+        title="Key Information Document (KID)"
+        description={security.title}
+        leadingIconName="investment-documents"
+        trailingAccessory="chevron"
+        rowHeight={80}
+        className="!px-[24px]"
+        descriptionClassName="!text-[var(--uc-text-muted)]"
+      />
     </div>
   );
 }
@@ -280,6 +282,7 @@ export function InvestmentSecurityListScreen({
     return (
       <InvestmentBasketFundDetailScreen
         basket={standaloneBasketFund}
+        securityCatalog={securities}
         country={country}
         amountsHidden={amountsHidden}
         onBack={() => setStandaloneBasketFund(null)}
@@ -509,6 +512,7 @@ export function InvestmentSecurityDetailScreen(props: InvestmentSecurityDetailSc
         holding={props.basketHoldingDetail}
         country={props.country}
         amountsHidden={props.amountsHidden}
+        inBottomSheet={props.inBottomSheet}
       />
     );
   }
@@ -521,10 +525,12 @@ function BasketHoldingSecurityDetailScreen({
   holding,
   country,
   amountsHidden,
+  inBottomSheet = false,
 }: {
   holding: NonNullable<InvestmentSecurityDetailScreenProps["basketHoldingDetail"]>;
   country: CountryId;
   amountsHidden: boolean;
+  inBottomSheet?: boolean;
 }) {
   const [period, setPeriod] = useState<InvestmentPeriodId>("3y");
   const chartPoints = useMemo(() => buildInvestmentChartPoints(100, period), [period]);
@@ -532,11 +538,13 @@ function BasketHoldingSecurityDetailScreen({
   return (
     <div className="h-full w-full overflow-y-auto overflow-x-hidden bg-[var(--uc-surface)] text-[var(--uc-text)] scrollbar-hide" data-cz-robo-basket-holding-detail>
       <section className="bg-[var(--uc-surface)] pb-[16px]">
-        <div className="px-[24px] pt-[8px]">
-          <div className="flex items-start gap-[10px]">
-            <h1 className="min-w-0 flex-1 text-[28px] font-bold leading-[31px] text-[var(--uc-text)]">{holding.title}</h1>
-            <BrandLogo logoId="unicredit" size={32} label={`${holding.title} product`} />
-          </div>
+        <div className={cn("px-[24px]", inBottomSheet ? "pt-0" : "pt-[8px]")}>
+          {!inBottomSheet ? (
+            <div className="flex items-start gap-[10px]">
+              <h1 className="min-w-0 flex-1 text-[28px] font-bold leading-[31px] text-[var(--uc-text)]">{holding.title}</h1>
+              <BrandLogo logoId="unicredit" size={32} label={`${holding.title} product`} />
+            </div>
+          ) : null}
           {holding.allocationPercent !== undefined ? (
             <p className="mt-[8px] text-[14px] leading-[18px] text-[var(--uc-text-muted)]">{holding.allocationPercent}% of this basket</p>
           ) : null}
@@ -626,17 +634,19 @@ function CatalogInvestmentSecurityDetailScreen({
           />
         ) : null}
         <section className="bg-[var(--uc-surface)] pb-[28px]">
-          <div className="px-[24px] pt-[8px]">
-            <div className="flex items-start gap-[10px]">
-              <h1 className="min-w-0 flex-1 text-[28px] font-bold leading-[31px] text-[var(--uc-text)]">{security.title}</h1>
-              <BrandLogo logoId={security.logoId ?? "unicredit"} size={32} label={`${security.title} product`} />
-            </div>
-            <div className="mt-[8px]">
+          <div className={cn("px-[24px]", inBottomSheet ? "pt-0" : "pt-[8px]")}>
+            {!inBottomSheet ? (
+              <div className="flex items-start gap-[10px]">
+                <h1 className="min-w-0 flex-1 text-[28px] font-bold leading-[31px] text-[var(--uc-text)]">{security.title}</h1>
+                <BrandLogo logoId={security.logoId ?? "unicredit"} size={32} label={`${security.title} product`} />
+              </div>
+            ) : null}
+            <div className="mt-[16px]">
               <p className="text-[14px] leading-[16px] text-[var(--uc-text)]">Actual market price</p>
-              <p className="mt-[2px] leading-none">
+              <p className="mt-[4px] leading-none">
                 <InvestmentAmountDisplay parts={marketPriceParts} scale="hero" />
               </p>
-              <p className="mt-[4px] flex flex-wrap items-baseline gap-x-[4px] text-[14px] leading-[18px]">
+              <p className="mt-[8px] flex flex-wrap items-baseline gap-x-[4px] text-[14px] leading-[18px]">
                 <span>Performance:</span>
                 <span className="font-bold" style={{ color: performanceColor }}>{formatPercent(security.performancePercent)}</span>
                 <span className="text-[var(--uc-text-muted)]">· from {security.lastUpdate}</span>
@@ -657,16 +667,18 @@ function CatalogInvestmentSecurityDetailScreen({
               periods={INVESTMENT_PERIODS.filter((item) => item.id !== "6m")}
               selectedPeriodId={period}
               onChange={setPeriod}
+              className="mt-[12px]"
               softUnselected={czRoboProductDetail}
               comfortableTouchTargets={comfortablePeriodTargets}
             />
           </div>
         </section>
 
-        <div className="bg-[var(--uc-surface)]">
+        {/* Carry the detail surface over the chart's trailing padding to hide its stray divider without changing spacing. */}
+        <div className="-mt-[28px] bg-[var(--uc-surface)] pt-[28px]">
           {hasPortfolioPosition ? (
             <section>
-              <h2 className="uc-type-n5-strong px-[24px] uppercase text-[var(--uc-text-muted)]">MY SECURITY</h2>
+              <h2 className="px-[24px] text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">My security</h2>
               <InvestmentDetailField
                 label="Total value in portfolio / client currency"
                 value={<InvestmentAmountDisplay parts={portfolioValueParts} scale="field" />}
@@ -681,7 +693,7 @@ function CatalogInvestmentSecurityDetailScreen({
           ) : null}
 
           <section>
-            <SectionHeadingDivider title="MARKET INFO" className="px-[24px]" />
+            <h2 className={`px-[24px] text-[20px] font-bold leading-[24px] text-[var(--uc-text)] ${hasPortfolioPosition ? "mt-[16px]" : ""}`}>Market info</h2>
             <InvestmentDetailField label="Product ID" value={security.productId} variant="product-detail" />
             <InvestmentDetailField label="Fund type" value={security.productType === "Fund" ? "Funds" : security.productType} variant="product-detail" />
             <InvestmentDetailField label="Security description" value={security.description} multiline variant="product-detail" />
@@ -693,7 +705,7 @@ function CatalogInvestmentSecurityDetailScreen({
               variant="product-detail"
             />
           </section>
-          {productTransactions.length > 0 ? (
+          {!czRoboProductDetail && productTransactions.length > 0 ? (
             <section data-investment-product-transactions={security.id}>
               <SectionHeadingDivider title="TRANSACTIONS" className="px-[24px]" />
               {productTransactions.slice(0, 2).map((transaction) => (
@@ -719,8 +731,8 @@ function CatalogInvestmentSecurityDetailScreen({
           <div className="h-[34px]" />
         </div>
         </div>
-        {!hideOrderActions && (canSell || canBuy) ? (
-          <div className="flex shrink-0 items-center gap-[12px] border-t border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[24px] pb-[34px] pt-[12px]" data-cz-robo-product-detail-actions="true">
+        {!inBottomSheet && !hideOrderActions && (canSell || canBuy) ? (
+          <div className="flex shrink-0 items-center gap-[12px] bg-[var(--uc-surface)] px-[24px] pb-[34px] pt-[12px]" data-cz-robo-product-detail-actions="true">
             {canSell ? (
               <PrimaryButton
                 labelSize="18"
@@ -788,7 +800,7 @@ function CatalogInvestmentSecurityDetailScreen({
 
       {security.owned ? (
         <section>
-          <SectionHeadingDivider title="MY SECURITY" className="px-[24px]" />
+          <h2 className="px-[24px] text-[20px] font-bold leading-[24px] text-[var(--uc-text)]">My security</h2>
           <InvestmentDetailField label="Total value in portfolio / client currency" value={formatMoney(security.localValue, country, security.localCurrency, amountsHidden)} />
           <InvestmentDetailField label="Quantity" value={`${amountsHidden ? "*,***" : security.quantity.toFixed(3).replace(".", ",")} PCS`} />
         </section>
@@ -799,7 +811,7 @@ function CatalogInvestmentSecurityDetailScreen({
         <InvestmentDetailField label="Actual market price" value={formatMoney(marketPrice, country, security.currency, amountsHidden)} />
         <div className="px-[8px]">
           <InvestmentPortfolioChart points={chartPoints} country={country} currency={security.currency} amountsHidden={amountsHidden} />
-          <InvestmentPeriodChips periods={INVESTMENT_PERIODS.filter((item) => item.id !== "6m")} selectedPeriodId={period} onChange={setPeriod} comfortableTouchTargets={comfortablePeriodTargets} />
+          <InvestmentPeriodChips periods={INVESTMENT_PERIODS.filter((item) => item.id !== "6m")} selectedPeriodId={period} onChange={setPeriod} comfortableTouchTargets={comfortablePeriodTargets} className="mt-[12px]" />
         </div>
         <InvestmentDetailField label="Product ID" value={security.productId} />
         <InvestmentDetailField label="Fund type" value={security.productType === "Fund" ? "Funds" : security.productType} />

@@ -8,20 +8,35 @@ export interface InvestmentBasketFundHolding {
   currency?: string;
 }
 
+export interface InvestmentBasketMarketInfo {
+  /** Source Basket ID, or the stable config key when no source ID was supplied. */
+  basketId: string;
+  /** One basket-level ISIN; local demo values are generated when source data is missing. */
+  basketIsin: string;
+  /** Null when the source catalog has not provided an update date. */
+  lastUpdate: string | null;
+}
+
 export interface InvestmentBasketFund {
   id: string;
   title: string;
   description: string;
   contributionType: InvestmentBasketContributionType;
   logoId: string;
+  marketInfo: InvestmentBasketMarketInfo;
   recommendedFor?: readonly InvestmentBasketInvestorProfile[];
   roboCarouselTitle?: string;
   detailDescription?: string;
   contentsSummary?: string;
-  holdings?: readonly InvestmentBasketFundHolding[];
+  holdings: readonly InvestmentBasketFundHolding[];
   /** Illustrative one-year basket return shown in the CZ Robo demo. */
   performancePercent?: number;
 }
+
+type InvestmentBasketDefinition = Omit<InvestmentBasketFund, "marketInfo" | "holdings"> & {
+  marketInfo?: Partial<InvestmentBasketMarketInfo>;
+  holdings?: readonly InvestmentBasketFundHolding[];
+};
 
 export function formatInvestmentBasketPerformance(value: number) {
   const amount = Number(Math.abs(value).toFixed(2)).toString().replace(".", ",");
@@ -31,13 +46,18 @@ export function formatInvestmentBasketPerformance(value: number) {
 const FIGMA_GLOBAL_GROWTH_DESCRIPTION =
   "Unlock expert diversification with one click. The Global Growth Basket combines a selection of premium funds, managed by top-tier professionals. This strategy is built for investors seeking a balanced approach to international markets, ensuring your capital is spread across various fund management styles and geographic areas for optimized stability and performance.";
 
-export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
+const BASKET_DEFINITIONS: readonly InvestmentBasketDefinition[] = [
   {
     id: "jp-morgan-global-growth",
     title: "onemarkets J.P. Morgan Global growth Basket",
     description: "Explore global opportunities with five curated equity funds in one basket.",
     contributionType: "ONE OFF",
     logoId: "unicredit",
+    marketInfo: {
+      basketId: "3333343141",
+      basketIsin: "RS34343143143",
+      lastUpdate: "03.01.2026",
+    },
     recommendedFor: ["moderate-v2"],
     performancePercent: 3.27,
     roboCarouselTitle: "onemarkets J.P. Morgan\nGlobal growth Basket",
@@ -230,7 +250,18 @@ export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = [
     contributionType: "RECURRENT",
     logoId: "unicredit",
   },
-] as const satisfies readonly InvestmentBasketFund[];
+];
+
+/** Normalize market fields for every basket; never substitute a constituent ISIN for a basket ISIN. */
+export const CZ_INVESTMENT_BASKETS: readonly InvestmentBasketFund[] = BASKET_DEFINITIONS.map((basket, index) => ({
+  ...basket,
+  marketInfo: {
+    basketId: basket.marketInfo?.basketId ?? basket.id,
+    basketIsin: basket.marketInfo?.basketIsin ?? `CZROBO${String(index + 1).padStart(6, "0")}`,
+    lastUpdate: basket.marketInfo?.lastUpdate ?? null,
+  },
+  holdings: basket.holdings ?? [],
+}));
 
 export function getInvestmentBaskets(contributionType?: InvestmentBasketContributionType) {
   return contributionType

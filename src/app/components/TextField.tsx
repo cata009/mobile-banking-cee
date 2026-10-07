@@ -138,6 +138,7 @@ export default function TextField({
     <div
       className="w-full"
       data-component="TextField"
+      role="presentation"
       onClick={onActivate}
     >
       <div className="relative">
@@ -158,6 +159,7 @@ export default function TextField({
               borderBottomColor: dividerColor,
               borderBottomWidth: "0.5px",
             }}
+            role="presentation"
             onClick={() => {
               if (!isDisabled && !isMultiple) {
                 inputRef.current?.focus();

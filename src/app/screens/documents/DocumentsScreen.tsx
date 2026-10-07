@@ -1,4 +1,4 @@
-import { useMemo, useState, type PointerEvent } from "react";
+import { useCallback, useMemo, useState, type PointerEvent } from "react";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import { AppIcon } from "@/app/components/icons";
@@ -39,7 +39,7 @@ function DocumentsAlertDialog({
 }) {
   return (
     <>
-      <div className="absolute inset-0 z-[90] bg-[rgb(var(--uc-static-black-rgb)_/_0.5)] backdrop-blur-[5.9px]" onClick={onCancel ?? onConfirm} />
+      <div aria-hidden="true" role="presentation" className="absolute inset-0 z-[90] bg-[rgb(var(--uc-static-black-rgb)_/_0.5)] backdrop-blur-[5.9px]" onClick={onCancel ?? onConfirm} />
       <div className="absolute inset-0 z-[91] flex items-center justify-center px-[16px]">
         <div className="w-[270px] overflow-hidden rounded-[14px] bg-[var(--uc-surface-muted)] shadow-[0_2px_6px_rgb(var(--uc-shadow-rgb)_/_0.06),0_16px_24px_rgb(var(--uc-shadow-rgb)_/_0.08)]">
           <div className="px-[16px] pb-[18px] pt-[19px] text-center">
@@ -133,7 +133,8 @@ function DocumentListRow({
         onClick={onRequestDelete}
         className={`absolute inset-y-0 right-0 flex w-[80px] flex-col items-center justify-center bg-[var(--uc-status-red)] text-[var(--uc-static-white)] ${isActionsOpen ? "visible" : "invisible pointer-events-none"}`}
       >
-        <span className="uc-type-n5-strong mt-[40px] leading-[15px]">
+        <AppIcon name="trash-2" size={24} color="currentColor" />
+        <span className="uc-type-n5-strong mt-[8px] leading-[15px]">
           DELETE
         </span>
       </button>
@@ -187,7 +188,7 @@ export default function DocumentsScreen({ onBack, onHelpClick }: DocumentsScreen
   const [pendingDeleteItem, setPendingDeleteItem] = useState<DocumentListItem | null>(null);
   const [isLegalInfoOpen, setIsLegalInfoOpen] = useState(false);
 
-  const getDocumentStateKey = (item: DocumentListItem) => `${country}:${item.id}`;
+  const getDocumentStateKey = useCallback((item: DocumentListItem) => `${country}:${item.id}`, [country]);
 
   const handleCancelDelete = () => {
     setPendingDeleteItem(null);
@@ -248,7 +249,7 @@ export default function DocumentsScreen({ onBack, onHelpClick }: DocumentsScreen
         ),
       }))
       .filter((group) => group.items.length > 0);
-  }, [config.groups, deletedDocumentIds, searchQuery, t]);
+  }, [config.groups, deletedDocumentIds, searchQuery, t, getDocumentStateKey]);
 
   return (
     <div
