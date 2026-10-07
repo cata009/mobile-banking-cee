@@ -1,31 +1,9 @@
 import { configure } from '@testing-library/dom'
+import { installDeterministicBrowserGeometry } from './helpers/browserGeometry'
 
 configure({ asyncUtilTimeout: 10_000 })
 
-function installDeterministicElementGeometry() {
-  if (typeof Element === 'undefined') return
-
-  const nativeGetBoundingClientRect = Element.prototype.getBoundingClientRect
-  Element.prototype.getBoundingClientRect = function getBoundingClientRect() {
-    if (this.classList.contains('recharts-responsive-container')) {
-      return {
-        x: 0,
-        y: 0,
-        top: 0,
-        right: -1,
-        bottom: -1,
-        left: 0,
-        width: -1,
-        height: -1,
-        toJSON: () => ({ x: 0, y: 0, width: -1, height: -1 }),
-      }
-    }
-
-    return nativeGetBoundingClientRect.call(this)
-  }
-}
-
-installDeterministicElementGeometry()
+installDeterministicBrowserGeometry()
 
 /**
  * jsdom ships no PointerEvent, so `fireEvent.pointerDown(el, { clientX })` used
@@ -75,3 +53,34 @@ function installPointerEvents() {
 }
 
 installPointerEvents()
+
+/** Shared sheets query reduced motion; jsdom does not implement media queries. */
+function installMediaQueries() {
+  if (typeof window === 'undefined' || typeof window.matchMedia === 'function') return
+
+  window.matchMedia = (media: string): MediaQueryList => {
+    const query = new EventTarget() as MediaQueryList
+    Object.defineProperties(query, {
+      media: { value: media, enumerable: true },
+      matches: { value: false, configurable: true, enumerable: true },
+      onchange: { value: null, writable: true },
+    })
+    query.addListener = (listener) => {
+      if (listener) query.addEventListener('change', listener as EventListener)
+    }
+    query.removeListener = (listener) => {
+      if (listener) query.removeEventListener('change', listener as EventListener)
+    }
+    return query
+  }
+}
+
+installMediaQueries()
+
+if (typeof Element !== 'undefined' && typeof Element.prototype.scrollTo !== 'function') {
+  Element.prototype.scrollTo = function (optionsOrX?: ScrollToOptions | number, y?: number) {
+    const options = typeof optionsOrX === 'number' ? { left: optionsOrX, top: y } : optionsOrX
+    if (options?.left !== undefined) this.scrollLeft = options.left
+    if (options?.top !== undefined) this.scrollTop = options.top
+  }
+}

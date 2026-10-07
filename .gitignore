@@ -1,6 +1,7 @@
 node_modules/
 dist/
 test-results/
+coverage/
 .codex-temp/
 .worktrees/
 .creator-worktrees/

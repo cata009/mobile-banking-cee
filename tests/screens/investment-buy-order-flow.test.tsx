@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import "@testing-library/jest-dom/vitest";
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import InvestmentBuyOrderFlow from "@/app/screens/investments/InvestmentBuyOrderFlow";
 import { InvestmentSecurityDetailScreen } from "@/app/screens/investments/InvestmentSecurityScreens";
@@ -166,8 +166,17 @@ describe("InvestmentBuyOrderFlow", () => {
     );
 
     fireEvent.click(screen.getByRole("textbox", { name: /Cash account, Main account/ }));
-    expect(screen.getByRole("dialog", { name: "Select cash account" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /Daily account/ }));
+    const sheet = screen.getByRole("dialog", { name: "Select cash account" });
+    const confirm = within(sheet).getByRole("button", { name: "Select" });
+    expect(confirm).toBeEnabled();
+    expect(within(sheet).getByRole("radio", { name: /Main account/ })).toBeChecked();
+    const daily = within(sheet).getByRole("radio", { name: /Daily account/ });
+    fireEvent.click(daily);
+    expect(daily).toBeChecked();
+    // Picking a radio drafts the choice; only confirmation changes the order.
+    expect(screen.getByRole("textbox", { name: /Cash account, Main account/ })).toBeInTheDocument();
+    expect(confirm).toBeEnabled();
+    fireEvent.click(confirm);
     expect(screen.getByRole("textbox", { name: /Cash account, Daily account/ })).toBeInTheDocument();
   });
 

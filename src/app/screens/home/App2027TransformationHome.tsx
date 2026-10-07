@@ -1,5 +1,7 @@
+import { formatGroupCount } from '@/features/products/groupCount';
 import { Children, cloneElement, isValidElement, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type UIEvent } from 'react';
 import { AppIcon } from '@/app/components/icons';
+import { ScrollableRegion } from '@/app/components/ui/ScrollableRegion';
 import AccountCarouselIndicator from '@/app/components/accounts/AccountCarouselIndicator';
 import GhostBanner from '@/app/components/cards/GhostBanner';
 import ShopsmartOfferCard from '@/app/components/shopsmart/ShopsmartOfferCard';
@@ -141,17 +143,17 @@ const MONEY_ROLE_CLASSES: Record<MoneyRole, { integer: string; decimals: string 
 function Money({
   amount,
   hidden,
-  role = 'product',
+  scale = 'product',
   className = '',
   ...rest
-}: { amount: FormattedAmount; hidden: boolean; role?: MoneyRole; className?: string } & Record<string, unknown>) {
+}: { amount: FormattedAmount; hidden: boolean; scale?: MoneyRole; className?: string } & Record<string, unknown>) {
   const display = maskAmountParts(amount, hidden);
-  const classes = MONEY_ROLE_CLASSES[role];
+  const classes = MONEY_ROLE_CLASSES[scale];
 
   return (
     <span
       {...rest}
-      data-home-money={role}
+      data-home-money={scale}
       className={`inline-flex items-baseline whitespace-nowrap ${className}`.trim()}
     >
       <span className={classes.integer}>{display.integer}</span>
@@ -249,7 +251,7 @@ function SummaryBanner({
       </span>
     )
     : amount
-      ? <Money data-home-summary-primary-amount amount={amount} hidden={amountsHidden} role="hero" />
+      ? <Money data-home-summary-primary-amount amount={amount} hidden={amountsHidden} scale="hero" />
       : null;
 
   const tone = tab === 'accounts'
@@ -271,7 +273,7 @@ function SummaryBanner({
           // Same weight and size the money slots use on the other tabs — a date
           // is another supporting figure, not a bigger one.
           ? <span className="text-[16px] font-bold leading-[20px] tracking-[-0.018em]">{secondaryValue}</span>
-          : <Money data-home-summary-secondary-amount amount={secondaryValue} hidden={amountsHidden} role="support" />,
+          : <Money data-home-summary-secondary-amount amount={secondaryValue} hidden={amountsHidden} scale="support" />,
       }]
       : []);
 
@@ -337,20 +339,8 @@ function SummaryBanner({
     </button>
   );
 }
+export { formatGroupCount } from '@/features/products/groupCount';
 
-/**
- * How many products a closed group is holding back.
- *
- * Shared rather than re-assembled per screen: the Evo groups and the account
- * accordions both hide products behind a chevron, and a count that reads one way
- * on one and another way on the next is exactly the drift this pass exists to stop.
- */
-export function formatGroupCount(count: number | undefined, t: (key: string, fallback?: string) => string) {
-  if (count === undefined || count <= 0) return null;
-  return count === 1
-    ? t('runtime.evo.groups.oneProduct')
-    : `${count} ${t('runtime.evo.groups.manyProducts')}`;
-}
 
 /**
  * A collapsible product group.
@@ -585,9 +575,9 @@ function DepositCard({ product, amountsHidden, formatProductAmount, onProductCli
     <button type="button" onClick={() => onProductClick(product)} className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]">
       <p className="text-[16px] font-bold">{product.name} · {(presentation.annualRate * 100).toFixed(1)}% {t('runtime.evo.labels.interestRate')}</p>
       <p data-home-deposit-maturity className="mt-[3px] flex flex-wrap items-baseline gap-[3px] text-[14px] font-normal leading-[18px] text-[var(--uc-text-muted)]">
-        {t('runtime.evo.labels.maturityAmount')}: <Money data-home-deposit-maturity-value amount={maturity} hidden={amountsHidden} role="support" />
+        {t('runtime.evo.labels.maturityAmount')}: <Money data-home-deposit-maturity-value amount={maturity} hidden={amountsHidden} scale="support" />
       </p>
-      <p className="mt-[12px] text-[var(--uc-text)]"><Money amount={current} hidden={amountsHidden} role="product" /></p>
+      <p className="mt-[12px] text-[var(--uc-text)]"><Money amount={current} hidden={amountsHidden} scale="product" /></p>
     </button>
     {/* Pushed to the foot of the card so every deposit on the rail carries its
         bar and dates on the same line, whatever its name costs above. */}
@@ -632,7 +622,7 @@ function InsurancePolicyCard({ policy, onClick, amountsHidden }: { policy: (type
           the shape a loan card uses. The sum insured belongs in the policy
           detail: it is the one number nobody acts on from Home. */}
       <p className="mt-[10px] text-[var(--uc-text)]">
-        <Money data-home-insurance-premium amount={formatEvo2027Amount(policy.premium, 'CZK')} hidden={amountsHidden} role="product" />
+        <Money data-home-insurance-premium amount={formatEvo2027Amount(policy.premium, 'CZK')} hidden={amountsHidden} scale="product" />
       </p>
       <p className="mt-[2px] text-[13px] leading-[16px] text-[var(--uc-text-muted)]">{t('runtime.evo.labels.nextPremium')}</p>
       {/* At the foot of the card, so the bar and its dates line up across the rail. */}
@@ -668,9 +658,9 @@ function LoanCard({ product, amountsHidden, onProductClick }: { product: Product
     <button type="button" onClick={() => onProductClick(product)} className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]">
       <p className="text-[16px] font-bold">{product.name}</p>
       <p data-home-loan-installment className="mt-[4px] flex flex-wrap items-baseline gap-[3px] text-[14px] text-[var(--uc-text-muted)]">
-        {t('runtime.evo.labels.nextInstallment')}: <Money data-home-supporting-amount amount={installment} hidden={amountsHidden} role="support" />
+        {t('runtime.evo.labels.nextInstallment')}: <Money data-home-supporting-amount amount={installment} hidden={amountsHidden} scale="support" />
       </p>
-      <p className="mt-[10px] text-[var(--uc-text)]"><Money amount={remaining} hidden={amountsHidden} role="product" /></p>
+      <p className="mt-[10px] text-[var(--uc-text)]"><Money amount={remaining} hidden={amountsHidden} scale="product" /></p>
     </button>
     {/* At the foot of the card, so the bar and the two totals line up across the rail. */}
     <div className="mt-auto">
@@ -682,11 +672,11 @@ function LoanCard({ product, amountsHidden, onProductClick }: { product: Product
       <div className="mt-[10px] flex justify-between gap-[12px] text-[14px]">
         <span className="text-[var(--uc-text-muted)]">
           {t('runtime.evo.labels.totalRepaid')}<br />
-          <Money data-home-loan-repaid-amount amount={repaidAmount} hidden={amountsHidden} role="support" className="text-[var(--uc-text)]" />
+          <Money data-home-loan-repaid-amount amount={repaidAmount} hidden={amountsHidden} scale="support" className="text-[var(--uc-text)]" />
         </span>
         <span className="text-right text-[var(--uc-text-muted)]">
           {t('runtime.evo.labels.totalLoan')}<br />
-          <Money data-home-loan-total-amount amount={totalAmount} hidden={amountsHidden} role="support" className="text-[var(--uc-text)]" />
+          <Money data-home-loan-total-amount amount={totalAmount} hidden={amountsHidden} scale="support" className="text-[var(--uc-text)]" />
         </span>
       </div>
     </div>
@@ -818,12 +808,12 @@ function HorizontalCarousel({ ariaLabel, count, children }: { ariaLabel: string;
   });
 
   return <>
-    <div ref={railRef} data-home-carousel-rail role="region" aria-label={ariaLabel} tabIndex={0} onScroll={onScroll} onKeyDown={(event) => {
+    <ScrollableRegion ref={railRef} data-home-carousel-rail aria-label={ariaLabel} onScroll={onScroll} onKeyDown={(event) => {
       if (event.key === 'ArrowRight') { event.preventDefault(); scrollToIndex(activeIndex + 1); }
       if (event.key === 'ArrowLeft') { event.preventDefault(); scrollToIndex(activeIndex - 1); }
     }} {...dragHandlers} className={`mt-[12px] flex items-stretch gap-[12px] overflow-x-auto overscroll-x-contain pb-[4px] scrollbar-hide select-none touch-pan-y focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`} style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
       {draggableChildren}
-    </div>
+    </ScrollableRegion>
     {count > 1 ? <div className="mt-[4px] flex justify-center" aria-label={`${ariaLabel} pages`}>
       <AccountCarouselIndicator count={count} activeIndex={activeIndex} onSelect={scrollToIndex} />
     </div> : null}

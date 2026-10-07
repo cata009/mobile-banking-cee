@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { Product } from "@/app/config/productConfig";
 import { AppIcon } from "@/app/components/icons";
+import { activateOnKeyboard } from '@/app/components/ui/keyboardActivation';
 
 /**
  * Separator Line
@@ -53,6 +54,9 @@ function CollapsedProduct({ product, onClick }: { product: Product; onClick: () 
       <div 
         className="flex items-center gap-[16px] w-full pt-[24px] pb-[24px] cursor-pointer hover:opacity-80 transition-opacity relative"
         onClick={onClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={activateOnKeyboard}
       >
         <div className="absolute top-0 left-1/2 -translate-x-1/2">
           <SeparatorLine />

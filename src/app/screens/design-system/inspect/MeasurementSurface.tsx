@@ -7,6 +7,7 @@
 import {
   Fragment,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useLayoutEffect,
@@ -272,7 +273,7 @@ export function MeasurementSurface({ children }: { children: React.ReactNode }) 
   const [active, setActive] = useState<MeasuredElement | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  const measure = () => {
+  const measure = useCallback(() => {
     const root = rootRef.current;
     if (!root || !inspectMode) {
       setMeasurements([]);
@@ -303,11 +304,11 @@ export function MeasurementSurface({ children }: { children: React.ReactNode }) 
         .map((element, index) => readElementMeasurement(element, root, index))
         .filter((item): item is MeasuredElement => Boolean(item))
     );
-  };
+  }, [inspectMode]);
 
   useLayoutEffect(() => {
     measure();
-  }, [inspectMode, children]);
+  }, [measure, children]);
 
   useEffect(() => {
     if (!inspectMode || !rootRef.current) return;
@@ -322,7 +323,7 @@ export function MeasurementSurface({ children }: { children: React.ReactNode }) 
       window.removeEventListener("resize", measure);
       window.clearTimeout(timeout);
     };
-  }, [inspectMode]);
+  }, [inspectMode, measure]);
 
   const findMeasurementFromEvent = (target: EventTarget | null) => {
     const root = rootRef.current;

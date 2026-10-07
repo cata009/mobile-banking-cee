@@ -13,7 +13,7 @@ function hasAny(normalized: string, terms: readonly string[]): boolean {
 export function resolveCzSupportReply(
   normalized: string,
   { documentBlock, productsBlock }: CzSupportHandlerContext,
-): CoAppingReplyResult | null {
+): Exclude<CoAppingReplyResult, string> | null {
   if (hasAny(normalized, ['specific inbox', 'outbox message', 'message types', 'bank notifications'])) {
     return {
       text:

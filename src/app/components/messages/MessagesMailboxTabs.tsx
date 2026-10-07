@@ -143,7 +143,6 @@ export default function MessagesMailboxTabs({
               }
               onChange(tab.id);
             }}
-            aria-pressed={isActive}
             role="tab"
             aria-selected={isActive}
             className="uc-type-n4-strong relative flex h-full shrink-0 items-center justify-center px-[16px] text-[var(--uc-text)]"

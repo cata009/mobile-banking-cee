@@ -4,6 +4,7 @@
  */
 
 import { getBaselineLedgerEntry } from "@/app/registry/baselineRegistry";
+import { resolveExperienceManifest } from '@/experiences/registry';
 import { getProjectPack } from "@/app/registry/projectPackRegistry";
 import { getReleaseBundle, getReleaseDiff, getReleasePromotionReadiness } from "@/app/registry/releaseRegistry";
 import { SCREEN_REGISTRY } from "@/app/registry/screenRegistry";
@@ -30,6 +31,7 @@ export interface EffectiveDataSnapshot {
 }
 
 export interface EffectiveAppContext {
+  experience: ReturnType<typeof resolveExperienceManifest>;
   baseline: ReturnType<typeof getBaselineLedgerEntry>;
   releasePreview: ReturnType<typeof getReleaseBundle>;
   releaseDiff: ReturnType<typeof getReleaseDiff>;
@@ -85,6 +87,7 @@ export function resolveEffectiveAppContext(state: DemoState): EffectiveAppContex
   const holdings = bankingScenario.holdings;
 
   return {
+    experience: resolveExperienceManifest(state),
     baseline: getBaselineLedgerEntry(state.baseline),
     releasePreview: getReleaseBundle(state.release),
     releaseDiff: getReleaseDiff(state.release),

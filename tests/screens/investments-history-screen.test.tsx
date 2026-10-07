@@ -121,7 +121,7 @@ describe('InvestmentsHistoryScreen details', () => {
     if (!sellDetail) throw new Error('SELL order detail did not open')
     expect(sellDetail).toHaveTextContent('SELL')
     expect(sellDetail).toHaveTextContent('EXECUTED')
-    expect(sellDetail.textContent).toMatch(/-\d/)
+    expect(sellDetail.textContent).toMatch(/\u2212\d/)
     expect(within(sellDetail).getByText(/More\s+details/)).toBeInTheDocument()
   })
 })

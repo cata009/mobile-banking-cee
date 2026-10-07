@@ -22,6 +22,6 @@ export function maskAmountParts<T extends AmountParts>(amount: T, hidden: boolea
 export function maskFormattedAmount(value: string, hidden: boolean): string {
   if (!hidden) return value;
 
-  const separator = value.match(/[,.]\d{2}/)?.[0].charAt(0) ?? ",";
+  const separator = value.match(/[,.]\d{2}(?=\D*$)/)?.[0].charAt(0) ?? ",";
   return `****${separator}**`;
 }

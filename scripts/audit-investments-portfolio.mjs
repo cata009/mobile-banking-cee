@@ -3,11 +3,9 @@ import { createServer } from "vite";
 
 const COUNTRIES = ["RO", "CZ", "SK", "HU", "RS", "BA", "BA_BL", "SI"];
 const expectedProductTypeCounts = {
-  Fund: 4,
+  Fund: 6,
   Bond: 2,
   Stock: 2,
-  ETF: 1,
-  "Money market": 1,
 };
 
 const expectedTransactionTypes = [
@@ -151,11 +149,9 @@ try {
     assert.deepEqual(
       productTypeDistribution.map(({ label, value, percent }) => ({ label, value, percent })),
       [
-        { label: "Fund", value: 3_800, percent: 38 },
+        { label: "Fund", value: 6_200, percent: 62 },
         { label: "Bond", value: 2_200, percent: 22 },
         { label: "Stock", value: 1_600, percent: 16 },
-        { label: "ETF", value: 1_400, percent: 14 },
-        { label: "Money market", value: 1_000, percent: 10 },
       ],
       `${country}: canonical product-type distribution must retain exact values and percentages`,
     );

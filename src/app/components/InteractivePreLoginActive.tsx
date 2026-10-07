@@ -96,13 +96,15 @@ export default function InteractivePreLoginActive({
 
   return (
     <div 
-      onClick={handleBackdropClick} 
+      onClick={handleBackdropClick}
+      role="presentation"
       className="absolute inset-0 w-full h-full"
       style={{ pointerEvents: 'auto' }}
     >
       {/* Panel Component - rendered based on Co-Apping availability */}
       <div 
         onClick={handlePanelAreaClick}
+        role="presentation"
         className="absolute inset-0 w-full h-full"
       >
         {coAppingAvailable ? (

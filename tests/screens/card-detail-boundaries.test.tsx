@@ -239,8 +239,21 @@ describe('card-detail action boundaries', () => {
       { wrapper: ({ children }) => <AppProviders release="release-future-evo-2027">{children}</AppProviders> },
     )
 
-    const singleTransactionRow = container.querySelector<HTMLElement>('[data-transaction-date-group="2026-08-11"] [data-evo2027-transaction-row]')
-    expect(singleTransactionRow).toHaveClass('min-h-[64px]', 'py-[8px]')
+    const ledgerDateCounts = new Map<string, number>()
+    for (const transaction of getAccountTransactions('CZ', 0, 'CZK')) {
+      const date = transaction.monthKey + '-' + transaction.day
+      ledgerDateCounts.set(date, (ledgerDateCounts.get(date) ?? 0) + 1)
+    }
+    const singleDate = [...ledgerDateCounts].find(([, count]) => count === 1)?.[0]
+    expect(singleDate).toBeDefined()
+    const singleGroup = container.querySelector('[data-transaction-date-group="' + singleDate + '"]')
+    expect(singleGroup?.querySelectorAll('[data-evo2027-transaction-row]')).toHaveLength(1)
+    expect(singleGroup?.querySelector('[data-evo2027-transaction-row]')).toHaveClass('min-h-[64px]', 'py-[8px]')
+
+    // The added payment ledger makes August 11 a multi-transaction day.
+    const expandedGroup = container.querySelector('[data-transaction-date-group="2026-08-11"]')
+    expect(expandedGroup?.querySelectorAll('[data-evo2027-transaction-row]').length).toBeGreaterThan(1)
+    expect(expandedGroup?.querySelector('[data-evo2027-transaction-row]')).toHaveClass('min-h-[80px]', 'py-[16px]')
   })
 
   it('adds 8px search breathing room only to Evo 2027 account lists', () => {

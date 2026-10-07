@@ -183,11 +183,15 @@ describe("investment product chat context handoff", () => {
     expect(screen.getByText("onemarkets Climate Focus Fund")).toBeInTheDocument();
   });
 
-  it("navigates from the portfolio banner through a fund collection to the existing fund detail", () => {
-    render(<InvestmentsPortfolioScreen onBack={() => undefined} />, { wrapper: AppProviders });
+  it("navigates from a chat funds-window handoff through a collection to the existing detail", async () => {
+    const { rerender } = render(
+      <InvestmentsPortfolioScreen onBack={() => undefined} />,
+      { wrapper: AppProviders },
+    );
+    expect(screen.queryByRole("button", { name: /Find out the best fund for you/i })).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Find out the best fund for you/i }));
-    expect(screen.getByTestId("investment-funds-selection")).toBeInTheDocument();
+    rerender(<InvestmentsPortfolioScreen onBack={() => undefined} fundsWindowRequest={{ requestId: 8 }} />);
+    expect(await screen.findByTestId("investment-funds-selection")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Our Onemarket funds/i }));
     expect(screen.getByTestId("investment-fund-collection-onemarket")).toBeInTheDocument();

@@ -511,19 +511,25 @@ export default function ProductsScreen({
     title: t(`runtime.productsMenu.offers.${offer.id}.title`, offer.title),
     description: t(`runtime.productsMenu.offers.${offer.id}.description`, offer.description),
   }), [t]);
-  const localizeCard = (card: ProductsCard): ProductsCard => {
+  const localizeCard = useCallback((card: ProductsCard): ProductsCard => {
     const translationId = getProductsCardTranslationId(card);
 
     return {
       ...card,
       title: translationId ? t(`runtime.productsMenu.cards.${translationId}`, card.title) : card.title,
     };
-  };
+  }, [t]);
   const [activeTab, setActiveTab] = useState<ProductsMenuTab>("banking");
   const [selectedProductCard, setSelectedProductCard] = useState<ProductsCard | null>(null);
   const [shelfSubPageOpen, setShelfSubPageOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const productsSectionRef = useRef<HTMLElement>(null);
+  const focusRequestSnapshotRef = useRef({
+    request: productsShelfFocusRequest,
+    products: config.products,
+    localizeCard,
+    onHandled: onProductsShelfFocusHandled,
+  });
   const visibleTab = config.hasShopSmartTab ? activeTab : "banking";
   const offers = useMemo(() => {
     if (!isFutureGainSmartInvestment) return config.offers.map(localizeOffer);
@@ -558,7 +564,18 @@ export default function ProductsScreen({
   };
 
   useEffect(() => {
-    if (!productsShelfFocusRequest) return;
+    focusRequestSnapshotRef.current = {
+      request: productsShelfFocusRequest,
+      products: config.products,
+      localizeCard,
+      onHandled: onProductsShelfFocusHandled,
+    };
+  }, [productsShelfFocusRequest, config.products, localizeCard, onProductsShelfFocusHandled]);
+
+  useEffect(() => {
+    // A request owns its original card, translations and callback for the whole timer.
+    const { request, products, localizeCard: localizeRequestedCard, onHandled } = focusRequestSnapshotRef.current;
+    if (!request) return;
 
     setActiveTab("banking");
     setSelectedProductCard(null);
@@ -574,12 +591,12 @@ export default function ProductsScreen({
         });
       }
 
-      if (productsShelfFocusRequest.cardId) {
-        const targetCard = config.products.find((card) => card.id === productsShelfFocusRequest.cardId);
-        if (targetCard) setSelectedProductCard(localizeCard(targetCard));
+      if (request.cardId) {
+        const targetCard = products.find((card) => card.id === request.cardId);
+        if (targetCard) setSelectedProductCard(localizeRequestedCard(targetCard));
       }
 
-      onProductsShelfFocusHandled?.();
+      onHandled?.();
     }, 100);
 
     return () => window.clearTimeout(focusTimeout);

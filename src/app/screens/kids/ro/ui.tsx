@@ -175,11 +175,13 @@ export function RoDecisionBanner({ decision }: { decision: PaymentDecision }) {
 
 /** Large amount entry with RON suffix and quick-amount chips. */
 export function RoAmountField({
+  id,
   value,
   onChange,
   chips = [10, 20, 50],
   autoFocusHint,
 }: {
+  id?: string;
   value: string;
   onChange: (next: string) => void;
   chips?: number[];
@@ -189,6 +191,7 @@ export function RoAmountField({
     <div>
       <div className="flex h-[64px] items-center rounded-[14px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[16px] focus-within:ring-2 focus-within:ring-[var(--hu-theme-accent-strong)]">
         <input
+          id={id}
           aria-label="Sumă"
           className="min-w-0 flex-1 bg-transparent text-[32px] font-bold leading-[36px] text-[var(--uc-text)] outline-none"
           inputMode="numeric"

@@ -2,7 +2,7 @@
  * RO Teens savings goals: the list surface, a goal detail with add-money +
  * ask-parent, and the create-goal form.
  */
-import { useState } from "react";
+import { useId, useState } from "react";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import { AppIcon } from "@/app/components/icons";
@@ -252,6 +252,8 @@ export function RoCreateGoalScreen({
   const [title, setTitle] = useState("");
   const [target, setTarget] = useState("300");
   const [emoji, setEmoji] = useState(EMOJI_CHOICES[0]);
+  const titleId = useId();
+  const targetId = useId();
   const parsedTarget = Number(target || 0);
   const canCreate = title.trim().length > 0 && parsedTarget > 0;
 
@@ -269,10 +271,11 @@ export function RoCreateGoalScreen({
       <main className="scrollbar-hide min-h-0 flex-1 overflow-y-auto px-[20px] pb-[36px] pt-[10px]">
         <RoCard className="space-y-[18px]">
           <div>
-            <label className="mb-[8px] block text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
+            <label htmlFor={titleId} className="mb-[8px] block text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
               Pentru ce economisești?
             </label>
             <input
+              id={titleId}
               className="h-[52px] w-full rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] text-[17px] font-bold text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)] focus:ring-2 focus:ring-[var(--hu-theme-accent-strong)]"
               placeholder="Ex: Căști noi"
               value={title}
@@ -306,10 +309,10 @@ export function RoCreateGoalScreen({
           </div>
 
           <div>
-            <label className="mb-[8px] block text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
+            <label htmlFor={targetId} className="mb-[8px] block text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
               Țintă
             </label>
-            <RoAmountField value={target} onChange={setTarget} chips={[100, 300, 500]} />
+            <RoAmountField id={targetId} value={target} onChange={setTarget} chips={[100, 300, 500]} />
           </div>
 
           <PrimaryButton

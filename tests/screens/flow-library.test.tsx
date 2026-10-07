@@ -596,7 +596,7 @@ describe('flow-library screen', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Logo unavailable fallback' }))
     fireEvent.click(screen.getByRole('button', { name: 'Partial data without logo or map' }))
     expect(focusedPreview().queryByTitle('Google Maps — Merchant location')).not.toBeInTheDocument()
-    expect(focusedPreview().getByText('5411 · Grocery stores, supermarkets')).toBeInTheDocument()
+    expect(focusedPreview().getByText('Grocery stores, supermarkets')).toBeInTheDocument()
   })
 
   it('keeps the focused ETHOCA screen preview scrollable', () => {

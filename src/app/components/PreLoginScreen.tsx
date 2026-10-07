@@ -111,7 +111,6 @@ export default function PreLoginScreen({
           {/* Bottom Navigation - 3 links */}
           <div 
             className="flex items-center justify-between w-full"
-            onClick={() => {}}
           >
             <NavigationLink text={t('preLogin.contacts')} onClick={() => {}} />
             <NavigationLink text={t('preLogin.mtoken')} onClick={() => {}} />
