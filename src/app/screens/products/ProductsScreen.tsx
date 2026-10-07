@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RefObject, UIEvent } from "react";
 import { useDragCarousel } from "@/hooks/useDragCarousel";
 import BottomNavigation from "@/app/components/BottomNavigation";
@@ -8,6 +8,8 @@ import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import ProductCardBottomSheet, { type ProductDetailSelection } from "@/app/components/products/ProductCardBottomSheet";
 import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
+import AccountCarouselIndicator from "@/app/components/accounts/AccountCarouselIndicator";
+import { FUTURE_GAIN_SMART_INVESTMENT_OFFER } from "@/app/components/investments/FutureGainSmartInvestmentBanner";
 import ShopsmartOfferCard from "@/app/components/shopsmart/ShopsmartOfferCard";
 import ShopsmartCategoryChips from "@/app/components/shopsmart/ShopsmartCategoryChips";
 import App2027ProductsShelf from "@/app/screens/products/App2027ProductsShelf";
@@ -43,6 +45,7 @@ interface ProductsScreenProps {
   onMessagesClick?: () => void;
   onPaymentsClick?: () => void;
   onInvestmentsClick?: () => void;
+  onSmartInvestmentOpen?: () => void;
   onMoreClick?: () => void;
   onProductDetailOpen?: (selection: ProductDetailSelection) => void;
   productsShelfFocusRequest?: ProductsShelfFocusRequest | null;
@@ -102,9 +105,20 @@ export function SectionHeading({ children }: { children: string }) {
 
 function handleOfferClick(_offer: ProductsOffer) {}
 
-export function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
+export function OffersRail({
+  offers,
+  showDots = false,
+  onOfferClick,
+  compactTopSpacing = false,
+}: {
+  offers: readonly ProductsOffer[];
+  showDots?: boolean;
+  onOfferClick?: (offer: ProductsOffer) => void;
+  compactTopSpacing?: boolean;
+}) {
   const carouselRef = useRef<HTMLDivElement>(null);
   const scrollSnapTimeoutRef = useRef<number | null>(null);
+  const [activeOfferIndex, setActiveOfferIndex] = useState(0);
 
   const clampOfferIndex = (index: number) => Math.max(0, Math.min(offers.length - 1, index));
 
@@ -145,8 +159,10 @@ export function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
   };
 
   const scrollToOffer = (index: number, behavior: ScrollBehavior = "smooth") => {
+    const nextIndex = clampOfferIndex(index);
+    setActiveOfferIndex(nextIndex);
     carouselRef.current?.scrollTo({
-      left: getOfferScrollLeft(index),
+      left: getOfferScrollLeft(nextIndex),
       behavior,
     });
   };
@@ -179,6 +195,7 @@ export function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
 
   useEffect(() => {
     const carousel = carouselRef.current;
+    setActiveOfferIndex(0);
     if (!carousel) return;
     if (typeof carousel.scrollTo === "function") carousel.scrollTo({ left: 0 });
     else carousel.scrollLeft = 0;
@@ -192,33 +209,47 @@ export function OffersRail({ offers }: { offers: readonly ProductsOffer[] }) {
   );
 
   return (
-    <div
-      ref={carouselRef}
-      onScroll={handleCarouselScroll}
-      {...dragHandlers}
-      className={`overflow-x-auto scrollbar-hide select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
-      style={{
-        WebkitOverflowScrolling: "touch",
-        touchAction: "pan-y",
-      }}
-    >
-      <div className="flex gap-[12px] px-[24px] pt-[16px]">
-        {offers.map((offer, index) => (
-          <div key={offer.id} {...dragHandlers}>
-            <ProductOfferCard
-              offer={offer}
-              colorFamily={offer.colorFamily}
-              lightVersion={offer.lightVersion}
-              onClick={(selectedOffer) => {
-                scrollToOffer(index);
-                handleOfferClick(selectedOffer);
-              }}
-            />
-          </div>
-        ))}
-        <div aria-hidden="true" className="w-[12px] shrink-0" />
+    <>
+      <div
+        ref={carouselRef}
+        onScroll={handleCarouselScroll}
+        {...dragHandlers}
+        className={`overflow-x-auto scrollbar-hide select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+        style={{
+          WebkitOverflowScrolling: "touch",
+          touchAction: "pan-y",
+        }}
+      >
+        <div className={`flex gap-[12px] px-[24px] ${compactTopSpacing ? "pt-[4px]" : "pt-[16px]"}`}>
+          {offers.map((offer, index) => (
+            <div key={offer.id} {...dragHandlers}>
+              <ProductOfferCard
+                offer={offer}
+                colorFamily={offer.colorFamily}
+                lightVersion={offer.lightVersion}
+                onClick={(selectedOffer) => {
+                  scrollToOffer(index);
+                  if (onOfferClick) onOfferClick(selectedOffer);
+                  else handleOfferClick(selectedOffer);
+                }}
+              />
+            </div>
+          ))}
+          <div aria-hidden="true" className="w-[12px] shrink-0" />
+        </div>
       </div>
-    </div>
+      {showDots && offers.length > 1 ? (
+        <div className="px-[24px] pt-[8px]">
+          <AccountCarouselIndicator
+            count={offers.length}
+            activeIndex={activeOfferIndex}
+            itemLabel="offer"
+            withBackdropBlur={false}
+            onSelect={(index) => scrollToOffer(index)}
+          />
+        </div>
+      ) : null}
+    </>
   );
 }
 
@@ -237,8 +268,11 @@ export function getProductsCardTranslationId(card: ProductsCard) {
 export function BankingContent({
   offersTitle,
   offers,
+  showOffersDots = false,
+  onOfferClick,
   productsTitle,
   products,
+  offersHeadingVariant = "section",
   otherSolutionsTitle,
   otherSolutions,
   onProductCardClick,
@@ -246,8 +280,11 @@ export function BankingContent({
 }: {
   offersTitle: string;
   offers: readonly ProductsOffer[];
+  showOffersDots?: boolean;
+  onOfferClick?: (offer: ProductsOffer) => void;
   productsTitle: string;
   products: readonly ProductsCard[];
+  offersHeadingVariant?: "section" | "none";
   otherSolutionsTitle: string;
   otherSolutions: readonly ProductsCard[];
   onProductCardClick: (card: ProductsCard) => void;
@@ -256,9 +293,14 @@ export function BankingContent({
   return (
     <>
       {offers.length > 0 && (
-        <section className="pt-[16px]">
-          <SectionHeading>{offersTitle}</SectionHeading>
-          <OffersRail offers={offers} />
+        <section className={offersHeadingVariant === "none" ? "pt-0" : "pt-[16px]"}>
+          {offersHeadingVariant === "none" ? null : <SectionHeading>{offersTitle}</SectionHeading>}
+          <OffersRail
+            offers={offers}
+            showDots={showOffersDots}
+            onOfferClick={onOfferClick}
+            compactTopSpacing={offersHeadingVariant === "none"}
+          />
         </section>
       )}
 
@@ -449,6 +491,7 @@ export default function ProductsScreen({
   onMessagesClick,
   onPaymentsClick,
   onInvestmentsClick,
+  onSmartInvestmentOpen,
   onMoreClick,
   onProductDetailOpen,
   productsShelfFocusRequest,
@@ -461,11 +504,13 @@ export default function ProductsScreen({
   const config = getProductsMenuForCountry(country);
   /** Evo 2027 replaces the products menu with the shelf; every other release keeps the baseline. */
   const showProductsShelf = demo.release === "release-future-evo-2027";
-  const localizeOffer = (offer: ProductsOffer): ProductsOffer => ({
+  const isFutureGainSmartInvestment =
+    demo.product === "PI" && country === "RS" && demo.release === "release-future-rs-future-gain";
+  const localizeOffer = useCallback((offer: ProductsOffer): ProductsOffer => ({
     ...offer,
     title: t(`runtime.productsMenu.offers.${offer.id}.title`, offer.title),
     description: t(`runtime.productsMenu.offers.${offer.id}.description`, offer.description),
-  });
+  }), [t]);
   const localizeCard = (card: ProductsCard): ProductsCard => {
     const translationId = getProductsCardTranslationId(card);
 
@@ -480,6 +525,33 @@ export default function ProductsScreen({
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const productsSectionRef = useRef<HTMLElement>(null);
   const visibleTab = config.hasShopSmartTab ? activeTab : "banking";
+  const offers = useMemo(() => {
+    if (!isFutureGainSmartInvestment) return config.offers.map(localizeOffer);
+
+    const firstSerbianOffer = config.offers[0];
+    return [
+      ...(firstSerbianOffer
+        ? [{
+          ...localizeOffer(firstSerbianOffer),
+          title: "Products for you!",
+          description: "Portfolio insights from clients with similar ages and monthly income.",
+          colorFamily: "green" as const,
+          lightVersion: false,
+        }]
+        : [{
+          id: "future-gain-products-for-you",
+          title: "Products for you!",
+          description: "Portfolio insights from clients with similar ages and monthly income.",
+          colorFamily: "green" as const,
+          lightVersion: false,
+        }]),
+      FUTURE_GAIN_SMART_INVESTMENT_OFFER,
+    ];
+  }, [config.offers, isFutureGainSmartInvestment, localizeOffer]);
+
+  const handleFutureGainOfferClick = (offer: ProductsOffer) => {
+    if (offer.id === FUTURE_GAIN_SMART_INVESTMENT_OFFER.id) onSmartInvestmentOpen?.();
+  };
 
   const handleProductCardClick = (card: ProductsCard) => {
     setSelectedProductCard(card);
@@ -564,9 +636,14 @@ export default function ProductsScreen({
           <div ref={scrollContainerRef} className="relative z-0 flex-1 overflow-y-auto scrollbar-hide pb-[92px]">
             {visibleTab === "banking" ? (
               <BankingContent
-                offersTitle={t("runtime.productsMenu.offersForYou", config.offersTitle)}
-                offers={config.offers.map(localizeOffer)}
-                productsTitle={config.productsTitle ? t("runtime.productsMenu.ourProducts", config.productsTitle) : ""}
+                offersTitle={isFutureGainSmartInvestment ? "" : t("runtime.productsMenu.offersForYou", config.offersTitle)}
+                offersHeadingVariant={isFutureGainSmartInvestment ? "none" : "section"}
+                offers={offers}
+                showOffersDots={isFutureGainSmartInvestment}
+                onOfferClick={isFutureGainSmartInvestment ? handleFutureGainOfferClick : undefined}
+                productsTitle={isFutureGainSmartInvestment
+                  ? ""
+                  : config.productsTitle ? t("runtime.productsMenu.ourProducts", config.productsTitle) : ""}
                 products={config.products.map(localizeCard)}
                 otherSolutionsTitle={t("runtime.productsMenu.otherSolutionsForYou", config.otherSolutionsTitle)}
                 otherSolutions={config.otherSolutions.map(localizeCard)}

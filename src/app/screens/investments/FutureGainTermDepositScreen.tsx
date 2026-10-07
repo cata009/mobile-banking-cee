@@ -639,21 +639,21 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
           hideCollapsedTitleWhenHidden
         />
       </div>
-      <main className="min-h-0 flex-1 overflow-y-auto pb-[24px] scrollbar-hide" onScroll={handleScroll}>
+      <main className="min-h-0 flex-1 overflow-y-auto flex flex-col pb-[24px] scrollbar-hide" onScroll={handleScroll}>
         <h1 className="uc-type-h1 px-[24px] pt-[8px] text-[var(--uc-text)]">Term deposit</h1>
         <div className="px-[24px] pt-[16px]">
           <section className="rounded-[8px] bg-[#f5f5f5] p-[16px]" aria-labelledby="missed-opportunity-title">
             <div className="flex items-center gap-[4px]">
-              <h2 id="missed-opportunity-title" className="uc-type-h2 flex-1 text-[var(--uc-text)]">
+              <h2 id="missed-opportunity-title" className="uc-type-h2 text-[var(--uc-text)]">
                 Missed investment opportunity
               </h2>
               <button
                 type="button"
                 onClick={() => setInfoType("opportunity")}
                 aria-label="About the missed investment opportunity estimate"
-                className="grid size-[28px] shrink-0 place-items-center"
+                className="grid size-[24px] shrink-0 place-items-center"
               >
-                <AppIcon name="help-circle" size={20} color="var(--uc-text)" />
+                <AppIcon name="info-circle" size={20} color="var(--uc-text)" />
               </button>
             </div>
             <div className="mt-[8px] grid grid-cols-[1fr_1px_1fr] items-start gap-[12px]">
@@ -807,12 +807,11 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
           </dl>
         </section>
 
-        <p className="uc-type-n5 mt-[16px] px-[24px] pb-[24px] text-center text-[var(--uc-text-muted)]">
+        <p className="uc-type-n5 mt-auto px-[24px] pt-[16px] pb-[8px] text-center text-[var(--uc-text-muted)]">
           {TERM_DEPOSIT_DISCLAIMER}
         </p>
       </main>
-
-      <footer className="shrink-0 bg-[var(--uc-surface)] px-[24px] pb-[var(--uc-phone-bottom-reserve,34px)] pt-[8px]">
+      <footer className="shrink-0 bg-[var(--uc-surface)] px-[24px] pb-[var(--uc-phone-bottom-reserve,34px)] pt-[4px]">
         <button
           type="button"
           disabled={!isAmountValid}

@@ -640,7 +640,7 @@ export default function FutureGainInvestmentSimulatorScreen({
           hideCollapsedTitleWhenHidden
         />
       </div>
-      <main className="min-h-0 flex-1 overflow-y-auto pb-[24px] scrollbar-hide" onScroll={handleScroll}>
+      <main className="min-h-0 flex-1 overflow-y-auto flex flex-col pb-[24px] scrollbar-hide" onScroll={handleScroll}>
         <h1 className="uc-type-h1 px-[24px] pt-[8px] text-[var(--uc-text)]">{title}</h1>
         <section className="px-[24px] pt-[16px]" aria-label={calculationLabel}>
           <SectionHeadingDivider title={calculationLabel} />
@@ -707,11 +707,11 @@ export default function FutureGainInvestmentSimulatorScreen({
             <InvestmentSimulatorRow label="Price updated at" value="03.01.2026" />
           </dl>
         </section>
-        <p className="uc-type-n5 mt-[16px] px-[24px] pb-[24px] text-center text-[var(--uc-text-muted)]">
+        <p className="uc-type-n5 mt-auto px-[24px] pt-[16px] pb-[8px] text-center text-[var(--uc-text-muted)]">
           {INVESTMENT_DISCLAIMERS[kind]}
         </p>
       </main>
-      <footer className="shrink-0 bg-[var(--uc-surface)] px-[24px] pb-[var(--uc-phone-bottom-reserve,34px)] pt-[8px]">
+      <footer className="shrink-0 bg-[var(--uc-surface)] px-[24px] pb-[var(--uc-phone-bottom-reserve,34px)] pt-[4px]">
         <button
           type="button"
           disabled={!isAmountValid}
