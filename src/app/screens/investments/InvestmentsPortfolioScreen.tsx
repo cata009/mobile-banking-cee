@@ -18,6 +18,7 @@ import CzRoboLevelOneShell from "@/app/screens/investments/CzRoboLevelOneShell";
 import { MY_BANKER_NAV_ITEMS, type NavItem } from "@/app/components/BottomNavigation";
 import InvestmentBuyOrderFlow from "@/app/screens/investments/InvestmentBuyOrderFlow";
 import InvestmentSellOrderFlow from "@/app/screens/investments/InvestmentSellOrderFlow";
+import type { FutureGainFundSimulatorState } from "@/app/screens/investments/FutureGainInvestmentSimulatorScreen";
 import CzFutureRoboAdvisorFlow from "@/app/screens/investments/CzFutureRoboAdvisorFlow";
 import CzInvestmentGoalsScreen, {
   INITIAL_CZ_ROBO_GOALS,
@@ -76,6 +77,12 @@ export interface InvestmentFundsRequest {
   collectionId?: InvestmentFundCollectionId;
 }
 
+export interface InvestmentSecurityDetailRequest {
+  requestId: number;
+  securityId: string;
+  futureGainSimulatorState: FutureGainFundSimulatorState;
+}
+
 interface InvestmentsPortfolioScreenProps {
   onBack: () => void;
   /** Rendered between the header and the portfolio tabs, e.g. the My Banker module. */
@@ -93,7 +100,9 @@ interface InvestmentsPortfolioScreenProps {
   onHistoryClick?: (filterByTitle?: string) => void;
   onOrdersToApproveClick?: () => void;
   onSelectedSecurityChange?: (security: InvestmentCatalogSecurity | null) => void;
+  onReturnToFutureGainSimulator?: (state: FutureGainFundSimulatorState) => void;
   fundsWindowRequest?: InvestmentFundsRequest | null;
+  securityDetailRequest?: InvestmentSecurityDetailRequest | null;
   buyRequest?: InvestmentBuyRequest | null;
   onBuyRequestConsumed?: (requestId: number) => void;
 }
@@ -404,7 +413,9 @@ export default function InvestmentsPortfolioScreen({
   onHistoryClick,
   onOrdersToApproveClick,
   onSelectedSecurityChange,
+  onReturnToFutureGainSimulator,
   fundsWindowRequest,
+  securityDetailRequest,
   buyRequest,
   onBuyRequestConsumed,
 }: InvestmentsPortfolioScreenProps) {
@@ -427,6 +438,7 @@ export default function InvestmentsPortfolioScreen({
   const [fundsWindowOpen, setFundsWindowOpen] = useState(false);
   const [selectedFundCollectionId, setSelectedFundCollectionId] = useState<InvestmentFundCollectionId | null>(null);
   const [selectedSecurity, setSelectedSecurity] = useState<InvestmentCatalogSecurity | null>(null);
+  const [futureGainSimulatorReturnState, setFutureGainSimulatorReturnState] = useState<FutureGainFundSimulatorState | null>(null);
   const [hideSelectedSecurityBuy, setHideSelectedSecurityBuy] = useState(false);
   const [selectedBasketFund, setSelectedBasketFund] = useState<InvestmentBasketFund | null>(null);
   const [buyOrderOpen, setBuyOrderOpen] = useState(false);
@@ -450,6 +462,7 @@ export default function InvestmentsPortfolioScreen({
   const [portfolioJourneyOpen, setPortfolioJourneyOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const consumedFundsRequestIdRef = useRef<number | null>(null);
+  const consumedSecurityDetailRequestIdRef = useRef<number | null>(null);
   const consumedBuyRequestIdRef = useRef<number | null>(null);
 
   // Returning to portfolio home (all sub-screens closed) should always show
@@ -558,6 +571,7 @@ export default function InvestmentsPortfolioScreen({
 
   const selectSecurity = (security: InvestmentCatalogSecurity | null, options: { hideBuyAction?: boolean } = {}) => {
     setSelectedSecurity(security);
+    setFutureGainSimulatorReturnState(null);
     setHideSelectedSecurityBuy(Boolean(security && options.hideBuyAction));
     onSelectedSecurityChange?.(security);
   };
@@ -579,6 +593,29 @@ export default function InvestmentsPortfolioScreen({
     onSelectedSecurityChange?.(null);
     setFundsWindowOpen(!fundsWindowRequest.collectionId);
   }, [fundsWindowRequest, onSelectedSecurityChange]);
+
+  useEffect(() => {
+    if (
+      !securityDetailRequest
+      || consumedSecurityDetailRequestIdRef.current === securityDetailRequest.requestId
+    ) return;
+
+    consumedSecurityDetailRequestIdRef.current = securityDetailRequest.requestId;
+    const requestedSecurity = securityCatalog.find((security) => security.id === securityDetailRequest.securityId);
+    if (!requestedSecurity) return;
+
+    setSelectedDistributionItem(null);
+    setFundsWindowOpen(false);
+    setSelectedFundCollectionId(null);
+    setSelectedSecurity(requestedSecurity);
+    setFutureGainSimulatorReturnState(securityDetailRequest.futureGainSimulatorState);
+    setHideSelectedSecurityBuy(false);
+    setSecurityListOpen(false);
+    setBuyOrderOpen(false);
+    setSellOrderOpen(false);
+    setBuyOrderDraft(null);
+    onSelectedSecurityChange?.(requestedSecurity);
+  }, [onSelectedSecurityChange, securityCatalog, securityDetailRequest]);
 
   useEffect(() => {
     if (!buyRequest || consumedBuyRequestIdRef.current === buyRequest.requestId) return;
@@ -795,7 +832,12 @@ export default function InvestmentsPortfolioScreen({
         czRoboProductDetail={showBottomNavigation}
         hideBuyAction={hideSelectedSecurityBuy}
         comfortablePeriodTargets={showBottomNavigation || isEvo2027Release}
-        onBack={() => selectSecurity(null)}
+        onBack={() => {
+          selectSecurity(null);
+          if (futureGainSimulatorReturnState) {
+            onReturnToFutureGainSimulator?.(futureGainSimulatorReturnState);
+          }
+        }}
         onHistoryClick={() => onHistoryClick?.(selectedSecurity.title)}
         onSeeMoreTransactions={() => {
           setCzRoboHistoryFilterByTitle(selectedSecurity.title);

@@ -1,6 +1,8 @@
-import { ReactNode, useEffect, useId, useRef } from "react";
+import { ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
 import { AppIcon } from "@/app/components/icons";
 import { cn } from "@/app/components/ui/utils";
+
+const ANIMATED_BOTTOM_SHEET_DURATION_MS = 360;
 
 interface BottomSheetProps {
   title?: string;
@@ -8,14 +10,16 @@ interface BottomSheetProps {
   subtitle?: ReactNode;
   meta?: ReactNode;
   children: ReactNode;
-  footer?: ReactNode;
+  footer?: ReactNode | ((requestClose: () => void) => ReactNode);
   maxHeightOffsetPx?: number;
   fillHeight?: boolean;
   className?: string;
   headerClassName?: string;
   bodyClassName?: string;
   showCloseButton?: boolean;
+  closeButtonPosition?: "left" | "right";
   showDragHandle?: boolean;
+  animated?: boolean;
   closeLabel?: string;
   onClose: () => void;
 }
@@ -33,12 +37,49 @@ export function BottomSheet({
   headerClassName,
   bodyClassName,
   showCloseButton = true,
+  closeButtonPosition = "right",
   showDragHandle = false,
+  animated = false,
   closeLabel = "Close",
   onClose,
 }: BottomSheetProps) {
   const titleId = useId();
   const dialogRef = useRef<HTMLElement | null>(null);
+  const closeTimerRef = useRef<number | null>(null);
+  const [isVisible, setIsVisible] = useState(
+    () => !animated || (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches),
+  );
+
+  const requestClose = useCallback(() => {
+    const reduceMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!animated || reduceMotion) {
+      onClose();
+      return;
+    }
+    if (closeTimerRef.current !== null) return;
+
+    setIsVisible(false);
+    closeTimerRef.current = window.setTimeout(() => {
+      closeTimerRef.current = null;
+      onClose();
+    }, ANIMATED_BOTTOM_SHEET_DURATION_MS);
+  }, [animated, onClose]);
+
+  useEffect(() => {
+    if (!animated || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let secondFrame: number | null = null;
+    const firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => setIsVisible(true));
+    });
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      if (secondFrame !== null) window.cancelAnimationFrame(secondFrame);
+    };
+  }, [animated]);
+
+  useEffect(() => () => {
+    if (closeTimerRef.current !== null) window.clearTimeout(closeTimerRef.current);
+  }, []);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -56,7 +97,7 @@ export function BottomSheet({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onClose();
+        requestClose();
         return;
       }
 
@@ -95,14 +136,20 @@ export function BottomSheet({
       window.removeEventListener("keydown", handleKeyDown);
       previouslyFocusedElement?.focus();
     };
-  }, [onClose]);
+  }, [requestClose]);
 
   return (
-    <div className="absolute inset-0 z-50 flex items-end bg-[var(--uc-overlay)]">
+    <div
+      className={cn(
+        "absolute inset-0 z-50 flex items-end bg-[var(--uc-overlay)]",
+        animated && "transition-opacity duration-[260ms] ease-out motion-reduce:transition-none",
+        animated && !isVisible ? "opacity-0 motion-reduce:opacity-100" : "opacity-100",
+      )}
+    >
       <button
         aria-label="Close sheet"
         className="absolute inset-0 cursor-default"
-        onClick={onClose}
+        onClick={requestClose}
         type="button"
       />
       <section
@@ -111,6 +158,10 @@ export function BottomSheet({
         className={cn(
           "relative w-full overflow-y-auto rounded-t-[12px] bg-[var(--uc-sheet-bg)] p-[16px] shadow-[0_-8px_24px_rgb(var(--uc-shadow-rgb)_/_0.18)] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
           fillHeight && "flex flex-col overflow-hidden",
+          animated && "transition-[translate,opacity] duration-[360ms] ease-[cubic-bezier(0,0,0.2,1)] motion-reduce:transition-none",
+          animated && !isVisible
+            ? "translate-y-[12px] opacity-0 motion-reduce:translate-y-0 motion-reduce:opacity-100"
+            : "translate-y-0 opacity-100",
           className,
         )}
         ref={dialogRef}
@@ -122,14 +173,24 @@ export function BottomSheet({
           <button
             aria-label={closeLabel}
             className="mx-auto mb-[24px] flex h-[16px] w-[64px] items-center justify-center"
-            onClick={onClose}
+            onClick={requestClose}
             type="button"
           >
             <span className="h-[4px] w-[32px] rounded-full bg-[var(--uc-border)]" />
           </button>
         ) : null}
-        <div className={cn("mb-[24px] flex shrink-0 items-start justify-between gap-[16px]", headerClassName)}>
-          <div className="min-w-0">
+        <div className={cn("mb-[24px] flex shrink-0 items-start justify-between gap-[16px]", closeButtonPosition === "left" && "justify-start", headerClassName)}>
+          {showCloseButton && closeButtonPosition === "left" ? (
+            <button
+              aria-label={closeLabel}
+              className="grid size-[32px] shrink-0 place-items-center bg-transparent text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-sheet-bg)]"
+              onClick={requestClose}
+              type="button"
+            >
+              <AppIcon name="close-x" color="var(--uc-icon)" />
+            </button>
+          ) : null}
+          <div className={cn("min-w-0", showCloseButton && closeButtonPosition === "left" && "flex-1")}>
             {title ? (
               <h1
                 id={titleId}
@@ -145,11 +206,11 @@ export function BottomSheet({
             ) : null}
             {meta ? <div className="mt-[4px]">{meta}</div> : null}
           </div>
-          {showCloseButton ? (
+          {showCloseButton && closeButtonPosition === "right" ? (
             <button
               aria-label={closeLabel}
               className="grid size-[32px] shrink-0 place-items-center bg-transparent text-[var(--uc-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-sheet-bg)]"
-              onClick={onClose}
+              onClick={requestClose}
               type="button"
             >
               <AppIcon name="close-x" color="var(--uc-icon)" />
@@ -159,7 +220,7 @@ export function BottomSheet({
         <div className={cn(fillHeight && "min-h-0 flex-1 overflow-y-auto scrollbar-hide", bodyClassName)}>{children}</div>
         {footer ? (
           <div className="shrink-0" data-bottom-sheet-footer="true">
-            {footer}
+            {typeof footer === "function" ? footer(requestClose) : footer}
           </div>
         ) : null}
       </section>

@@ -40,6 +40,8 @@ export interface ReleaseMeta {
   label: string;
   description: string;
   status: "active" | "planned" | "legacy-mapped";
+  products?: readonly ProductId[];
+  countries?: readonly CountryId[];
 }
 
 export const PRODUCTS: Record<ProductId, ProductMeta> = {
@@ -158,9 +160,17 @@ export const RELEASES: Record<ReleaseId, ReleaseMeta> = {
   },
   "release-future-rs-my-banker": {
     id: "release-future-rs-my-banker",
-    label: "My Banker",
-    description: "Serbia-only My Banker preview based on the current RS Mobile PI baseline.",
+    label: "Retired My Banker",
+    description: "Retired from the PI Serbia Future App tree.",
+    status: "legacy-mapped",
+  },
+  "release-future-rs-future-gain": {
+    id: "release-future-rs-future-gain",
+    label: "Future Gain",
+    description: "PI Serbia Future App copy of the current Baseline.",
     status: "active",
+    products: ["PI"],
+    countries: ["RS"],
   },
   "release-v1": {
     id: "release-v1",

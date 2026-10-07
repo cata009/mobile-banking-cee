@@ -10,6 +10,7 @@ import type {
   DesignSystemId,
   FeatureId,
   ProductId,
+  ReleaseId,
   ScreenId,
 } from "@/app/state/demoTypes";
 
@@ -40,6 +41,7 @@ export interface ScreenMeta {
   products: readonly ProductId[];
   countries: readonly CountryId[];
   designSystems: readonly DesignSystemId[];
+  releases?: readonly ReleaseId[];
   status: CapabilityStatus;
   layoutFamily: LayoutFamily;
   componentPath: string;
@@ -349,6 +351,21 @@ export const SCREEN_REGISTRY: Record<ScreenId, ScreenMeta> = {
     features: [],
     screenshots: [],
     similarTo: ["pi.account.detail", "pi.products.overview"],
+  },
+  "pi.investments.smart-investment": {
+    id: "pi.investments.smart-investment",
+    label: "PI Smart investment",
+    runtimeScreen: "smart-investment",
+    products: ["PI"],
+    countries: ["RS"],
+    designSystems: ["current"],
+    releases: ["release-future-rs-future-gain"],
+    status: "mock-driven",
+    layoutFamily: "investments",
+    componentPath: "src/app/screens/investments/SmartInvestmentScreen.tsx",
+    features: [],
+    screenshots: [],
+    similarTo: ["pi.investments.portfolio", "pi.products.detail"],
   },
   "pi.investments.history": {
     id: "pi.investments.history", label: "PI Investments history", runtimeScreen: "investments-history",

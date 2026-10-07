@@ -16,6 +16,7 @@ interface PrimeContactActionFlowProps {
   initialAction: InitialAction;
   advisorName: string;
   phoneNumber: string;
+  callIdentity?: "advisor" | "support";
   emailAddress: string;
   mailPreferences: PrimeMailPreferences;
   onMailPreferencesChange: (preferences: PrimeMailPreferences) => void;
@@ -27,6 +28,7 @@ export function PrimeContactActionFlow({
   initialAction,
   advisorName,
   phoneNumber,
+  callIdentity = "advisor",
   emailAddress,
   mailPreferences,
   onMailPreferencesChange,
@@ -114,7 +116,13 @@ export function PrimeContactActionFlow({
       <div role="dialog" aria-modal="true" aria-labelledby="call-screen-title" className="absolute inset-0 z-50 flex flex-col bg-[#151518] px-[28px] text-white" data-contact-action-simulation="call-active" style={{ paddingTop: "calc(var(--uc-phone-top-reserve, 54px) + 24px)", paddingBottom: "calc(var(--uc-phone-bottom-reserve, 34px) + 20px)" }}>
         <div className="flex-1">
           <div className="flex flex-col items-center pt-[36px] text-center">
-            <img src={advisorImage} alt={advisorName} className="size-[104px] rounded-full border border-white/20 object-cover" />
+            {callIdentity === "advisor" ? (
+              <img src={advisorImage} alt={advisorName} className="size-[104px] rounded-full border border-white/20 object-cover" />
+            ) : (
+              <span className="grid size-[104px] place-items-center rounded-full border border-white/20 bg-[#3b3b40]">
+                <AppIcon name="contact-phone" size={40} color="white" />
+              </span>
+            )}
             <h1 id="call-screen-title" className="mt-[22px] uc-type-h1 text-white">{advisorName}</h1>
             <p className="mt-[8px] uc-type-n4 text-white/70">{phoneNumber}</p>
             <p className="mt-[14px] h-[22px] uc-type-n5 text-white/70">{callConnected ? formatCallTime(callSeconds) : text("prime.advisor.calling", "Calling…")}</p>

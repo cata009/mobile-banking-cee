@@ -17,11 +17,13 @@ import { isInvestmentsPortfolioAvailable } from "@/app/utils/investmentsAvailabi
 import { isAccountDetailProduct } from "@/data/products";
 import { formatAmount } from "@/data/products";
 import type { Product } from "@/data/products";
+import type { ReactNode } from "react";
 
 const FUTURE_CZ_INVESTMENT_GOALS_VALUE = 151_241.33;
 
 interface AccountSummaryProps {
   showRedesign?: boolean;
+  investmentBanner?: ReactNode;
   onAccountClick?: (product: Product) => void;
   onInvestmentsClick?: () => void;
   onInvestmentGoalsClick?: () => void;
@@ -33,6 +35,7 @@ interface AccountSummaryProps {
 
 export default function AccountSummary({
   showRedesign = false,
+  investmentBanner,
   onAccountClick,
   onInvestmentsClick,
   onInvestmentGoalsClick,
@@ -223,6 +226,9 @@ export default function AccountSummary({
                   />
                 ) : null}
               </ProductsList>
+              {category.key === "investments" && category.products.length > 0 && investmentBanner ? (
+                <div className="pt-[16px]">{investmentBanner}</div>
+              ) : null}
             </AccordionSection>
           </div>
         );
