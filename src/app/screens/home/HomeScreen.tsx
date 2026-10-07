@@ -132,7 +132,12 @@ export default function HomeScreen({
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto pb-[80px] scrollbar-hide">
+      <div
+        className={`flex-1 overflow-y-auto scrollbar-hide ${isFutureGainSmartInvestment ? "" : "pb-[80px]"}`}
+        style={isFutureGainSmartInvestment
+          ? { paddingBottom: "calc(80px + var(--uc-phone-bottom-reserve, 34px))" }
+          : undefined}
+      >
         {/* Title - SCROLLABLE */}
         <HomeHeader showActions={false} />
 
@@ -157,7 +162,7 @@ export default function HomeScreen({
       </div>
 
       {/* Bottom Navigation */}
-      <div className="absolute bottom-0 left-0 right-0 bg-[var(--uc-bottom-bar-bg)] border-t border-[var(--uc-border-muted)] flex items-center justify-center">
+      <div className="absolute bottom-0 left-0 right-0 z-20 border-t border-[var(--uc-border-muted)] bg-[var(--uc-bottom-bar-bg)] flex items-center justify-center">
         <BottomNavigation onTabChange={handleTabChange} />
       </div>
     </div>

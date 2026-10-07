@@ -11,7 +11,7 @@ import { AppIcon } from "@/app/components/icons";
 import { PrimeContactActionFlow } from "@/app/screens/prime/PrimeContactActionFlow";
 import { AppointmentPage } from "@/app/screens/appointments/AppointmentScreen";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
-import { formatMoneyNumber } from "@/app/registry/countryConfig";
+import { formatMoneyNumber, splitMoneyAmount } from "@/app/registry/countryConfig";
 import { useDemo } from "@/app/state/demoStore";
 import { convertCurrency, getCountryCurrency, roundMoney } from "@/data/exchangeRates";
 import { useProducts } from "@/hooks/useProducts";
@@ -92,6 +92,48 @@ function formatDepositAmount(
   country: ReturnType<typeof useDemo>["country"],
 ): string {
   return `${formatMoneyNumber(roundMoney(amount), country)} ${currency}`;
+}
+
+function getOpportunityAmountFontSize(amounts: readonly number[], country: ReturnType<typeof useDemo>["country"]): number {
+  const longestInteger = Math.max(...amounts.map((amount) => splitMoneyAmount(amount, country).integer.length));
+  return Math.max(16, 24 - Math.max(0, longestInteger - 8) * 1.5);
+}
+
+function OpportunityAmount({
+  amount,
+  currency,
+  country,
+  color,
+  hidden,
+  fontSize,
+  prefix = "",
+  align = "left",
+}: {
+  amount: number;
+  currency: DepositCurrency;
+  country: ReturnType<typeof useDemo>["country"];
+  color: string;
+  hidden: boolean;
+  fontSize: number;
+  prefix?: string;
+  align?: "left" | "right";
+}) {
+  const formatted = formatMoneyNumber(amount, country);
+  const { integer, decimal } = splitMoneyAmount(amount, country);
+  const decimalSeparator = formatted.slice(integer.length, integer.length + 1);
+
+  return (
+    <p
+      className={`mt-[2px] flex min-w-0 items-baseline whitespace-nowrap font-bold ${align === "right" ? "justify-end" : "justify-start"}`}
+      style={{ color, fontSize }}
+    >
+      <span>{hidden ? "••••••" : `${prefix}${integer}`}</span>
+      <span className="uc-type-n5 ml-[2px] shrink-0">
+        {hidden ? null : `${decimalSeparator}${decimal}`}
+        <span className="ml-[2px]">{currency}</span>
+      </span>
+    </p>
+  );
 }
 
 function formatSuggestionAmount(amount: number, country: ReturnType<typeof useDemo>["country"]): string {
@@ -517,6 +559,7 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
   const suggestionBaseAmount = fundingSource === "current" ? availableBalance : externalMaximum;
   const amount = parseAmount(amountInput);
   const rates = RATES[fundingSource][currency];
+  const opportunityRates = RATES.current[currency];
   const isAmountValid = amount > 0;
   const amountError = amount <= 0 ? "Enter an amount to continue." : "";
   const quickAmounts = getQuickAmounts(suggestionBaseAmount, currency, fundingSource);
@@ -527,7 +570,8 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
   const grossMaturity = roundMoney(amount + grossInterest);
   const tax = roundMoney(grossInterest * (rates.tax / 100));
   const netMaturity = roundMoney(grossMaturity - tax);
-  const potentialYield = roundMoney(averageUninvestedFunds * (rates.nominal / 100) * annualizedDayFactor);
+  const potentialYield = roundMoney(averageUninvestedFunds * (opportunityRates.nominal / 100) * (365 / 360));
+  const opportunityAmountFontSize = getOpportunityAmountFontSize([averageUninvestedFunds, potentialYield], country);
 
   const handleCurrencyConfirm = () => {
     const enteredAmount = parseAmount(amountInput);
@@ -612,22 +656,32 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
                 <AppIcon name="help-circle" size={20} color="var(--uc-text)" />
               </button>
             </div>
-            <div className="mt-[8px] grid grid-cols-[1fr_1px_1fr] items-center gap-[12px]">
+            <div className="mt-[8px] grid grid-cols-[1fr_1px_1fr] items-start gap-[12px]">
               <div className="min-w-0">
                 <p className="uc-type-n5 text-[var(--uc-text)]">Average funds</p>
-                <p className="uc-type-n3 mt-[2px] whitespace-nowrap text-[var(--uc-text)]">
-                  {amountsHidden ? "••••••" : formatMoneyNumber(averageUninvestedFunds, country)}
-                  <span className="uc-type-n5 ml-[2px]">{currency}</span>
-                </p>
+                <OpportunityAmount
+                  amount={averageUninvestedFunds}
+                  currency={currency}
+                  country={country}
+                  color="var(--uc-text)"
+                  hidden={amountsHidden}
+                  fontSize={opportunityAmountFontSize}
+                />
                 <p className="uc-type-n5 text-[var(--uc-text-muted)]">left uninvested after monthly expenses</p>
               </div>
-              <span className="h-[48px] bg-[var(--uc-border-muted)]" />
+              <span className="h-[48px] self-center bg-[var(--uc-border-muted)]" />
               <div className="min-w-0 text-right">
                 <p className="uc-type-n5 text-[var(--uc-text)]">Potential yield</p>
-                <p className="uc-type-n3 mt-[2px] whitespace-nowrap text-[#3d7d43]">
-                  {amountsHidden ? "••••••" : `+${formatMoneyNumber(potentialYield, country)}`}
-                  <span className="uc-type-n5 ml-[2px]">{currency}</span>
-                </p>
+                <OpportunityAmount
+                  amount={potentialYield}
+                  currency={currency}
+                  country={country}
+                  color="#3d7d43"
+                  hidden={amountsHidden}
+                  fontSize={opportunityAmountFontSize}
+                  prefix="+"
+                  align="right"
+                />
                 <p className="uc-type-n5 text-[var(--uc-text-muted)]">for a 12M deposit</p>
               </div>
             </div>
