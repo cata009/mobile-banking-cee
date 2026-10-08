@@ -567,9 +567,9 @@ export function SignPinTemplate({ interactive }: { interactive: boolean }) {
     <TemplatePhoneSurface>
       <TemplateTopChrome title="Sign" showHelp={false} interactive={interactive} />
       <section className="px-[24px] pt-[145px] font-['UniCredit',sans-serif]">
-        <label className="block text-[12px] font-bold uppercase leading-[15px] tracking-[0.08em] text-[var(--uc-text-muted)]">
+        <p className="block text-[12px] font-bold uppercase leading-[15px] tracking-[0.08em] text-[var(--uc-text-muted)]">
           Enter pin code
-        </label>
+        </p>
         <div className="mt-[13px] flex h-[32px] items-center border-b-[2px] border-[var(--uc-action)] uc-type-h1 leading-none tracking-[8px] text-[var(--uc-text)]">
           <span aria-hidden="true">******</span>
         </div>

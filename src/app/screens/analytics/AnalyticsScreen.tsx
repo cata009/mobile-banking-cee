@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { UIEvent } from "react";
 import { useDragCarousel } from "@/hooks/useDragCarousel";
 import BottomNavigation from "@/app/components/BottomNavigation";
@@ -149,26 +149,26 @@ function AnalyticsHeroCarousel({
   const carouselRef = useRef<HTMLDivElement>(null);
   const scrollSnapTimeoutRef = useRef<number | null>(null);
 
-  const clampPeriodIndex = (index: number) => Math.max(0, Math.min(periods.length - 1, index));
+  const clampPeriodIndex = useCallback((index: number) => Math.max(0, Math.min(periods.length - 1, index)), [periods.length]);
 
-  const getPeriodScrollLeft = (index: number) => {
+  const getPeriodScrollLeft = useCallback((index: number) => {
     const nextIndex = clampPeriodIndex(index);
     return nextIndex * HERO_PANEL_WIDTH;
-  };
+  }, [clampPeriodIndex]);
 
   const getNearestPeriodIndex = (scrollLeft: number) => {
     if (periods.length <= 1) return 0;
     return clampPeriodIndex(Math.round(scrollLeft / HERO_PANEL_WIDTH));
   };
 
-  const scrollToPeriod = (index: number, behavior: ScrollBehavior = "smooth") => {
+  const scrollToPeriod = useCallback((index: number, behavior: ScrollBehavior = "smooth") => {
     const carousel = carouselRef.current;
     if (!carousel) return;
     carousel.scrollTo({
       left: getPeriodScrollLeft(index),
       behavior,
     });
-  };
+  }, [getPeriodScrollLeft]);
 
   const snapCarouselToNearestPeriod = () => {
     const carousel = carouselRef.current;
@@ -202,7 +202,7 @@ function AnalyticsHeroCarousel({
     const activeIndex = periods.findIndex((period) => period.key === activePeriodKey);
     if (activeIndex < 0) return;
     scrollToPeriod(activeIndex, "auto");
-  }, [activePeriodKey, periods]);
+  }, [activePeriodKey, periods, scrollToPeriod]);
 
   useEffect(() => () => {
     clearScrollSnapTimeout();

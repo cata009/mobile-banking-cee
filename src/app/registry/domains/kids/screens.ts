@@ -1,0 +1,47 @@
+import type { ScreenId } from '@/app/state/demoTypes'
+import type { ScreenMeta } from '../contracts'
+
+export const KIDS_SCREENS = {
+  'kids.sk.home-concept': {
+    id: 'kids.sk.home-concept',
+    label: 'SK Kids Bulbank document-inspired concept',
+    runtimeScreen: 'homepage',
+    products: ['KIDS_PI'],
+    countries: ['SK'],
+    designSystems: ['current'],
+    status: 'mock-driven',
+    layoutFamily: 'kids',
+    componentPath: 'src/app/screens/kids/KidsMarketHomeApp.tsx',
+    features: [],
+    screenshots: [],
+    similarTo: ['pi.products.overview'],
+  },
+  'kids.hu.home-concept': {
+    id: 'kids.hu.home-concept',
+    label: 'HU Kids smart homepage concept',
+    runtimeScreen: 'homepage',
+    products: ['KIDS_PI'],
+    countries: ['HU'],
+    designSystems: ['current'],
+    status: 'mock-driven',
+    layoutFamily: 'kids',
+    componentPath: 'src/app/screens/kids/KidsMarketHomeApp.tsx',
+    features: [],
+    screenshots: [],
+    similarTo: ['kids.sk.home-concept'],
+  },
+  'kids.ro.home-concept': {
+    id: 'kids.ro.home-concept',
+    label: 'RO Kids teens homepage concept',
+    runtimeScreen: 'homepage',
+    products: ['KIDS_PI'],
+    countries: ['RO'],
+    designSystems: ['current'],
+    status: 'mock-driven',
+    layoutFamily: 'kids',
+    componentPath: 'src/experiences/kids-pi/ro/baseline/composition.tsx',
+    features: [],
+    screenshots: [],
+    similarTo: ['kids.hu.home-concept'],
+  },
+} satisfies Partial<Record<ScreenId, ScreenMeta>>

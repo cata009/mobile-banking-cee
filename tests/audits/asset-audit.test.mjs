@@ -4,9 +4,18 @@ import {
   buildAssetAudit,
   assertAssetBaseline,
   isTrackedAssetPath,
+  collectAuditedRepositoryFiles,
 } from "../../scripts/audit-assets.mjs";
 
 describe("tracked asset audit", () => {
+  it('includes pending application assets and their source references without adopting unrelated designer files', () => {
+    const paths = collectAuditedRepositoryFiles(['src/app/App.tsx','src/assets/logo.svg'], ['src/assets/investments/quit.svg','src/features/robo/View.tsx','liveness-final.png','.env'])
+    expect(paths).toEqual(['src/app/App.tsx','src/assets/investments/quit.svg','src/assets/logo.svg','src/features/robo/View.tsx'])
+    const files = new Map([['src/app/App.tsx',Buffer.from('')],['src/assets/logo.svg',Buffer.from('<svg/>')],['src/features/robo/View.tsx',Buffer.from('import quit from "@/assets/investments/quit.svg"')],['src/assets/investments/quit.svg',Buffer.from('<svg><path/></svg>')]])
+    const report = buildAssetAudit({trackedFiles:paths,readFile:path=>files.get(path)})
+    expect(report.assetCount).toBe(2)
+    expect(report.referencedAssets).toContainEqual({path:'src/assets/investments/quit.svg',referencedBy:['src/features/robo/View.tsx']})
+  })
   it("fails closed when a tracked asset path or blob changes from the approved baseline", () => {
     const report = { assetCount: 2, pathBlobSha256Aggregate: "approved" };
     expect(() => assertAssetBaseline(report, { assetCount: 2, pathBlobSha256Aggregate: "approved" }))

@@ -1,0 +1,11 @@
+/* Static investment reference colors preserve the currently approved authored
+   snapshots in BOTH light and dark themes. These are not adaptive semantic roles.
+   A future theme/palette migration requires a separate reviewed design change. */
+:root,
+[data-uc-theme="light"],
+[data-uc-theme="dark"] {
+  --uc-investment-reference-panel: #F5F5F5;
+  --uc-investment-reference-positive: #3D7D43;
+  --uc-investment-reference-action: #007A91;
+  --uc-investment-reference-icon: #262626;
+}

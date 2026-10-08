@@ -19,6 +19,7 @@ import {
 } from "@/data/spendingAnalytics";
 import AnalyticsPeriodIndicator, { buildCenteredPeriodIndicator } from "./AnalyticsPeriodIndicator";
 import { getAnalyticsCategoryDisplayLabel } from "./analyticsCategoryLabels";
+import { maskFormattedAmount } from '@/app/utils/amountPrivacy';
 
 interface PfmCategoryDetailScreenProps {
   category: PfmCategoryName;
@@ -47,7 +48,7 @@ export default function PfmCategoryDetailScreen({
   onBack,
   onTransactionClick,
 }: PfmCategoryDetailScreenProps) {
-  const { country, release } = useDemo();
+  const { country, release, amountsHidden } = useDemo();
   const { t } = useLanguage();
   const carouselRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<number | null>(null);
@@ -168,11 +169,12 @@ export default function PfmCategoryDetailScreen({
                   </p>
                   <h2 className="uc-type-h1 mt-[2px] text-[var(--uc-text)]">{formatPeriodTitle(period)}</h2>
                   <p className="uc-type-h2 mt-[2px] text-[var(--uc-text)]" aria-live="polite">
-                    {formatMoneyNumber(detail.total, country)} {summary.currency}
+                    {maskFormattedAmount(formatMoneyNumber(detail.total, country), amountsHidden)} {summary.currency}
                   </p>
                 </div>
 
                 <PfmCategoryBubbleChart
+                  amountsHidden={amountsHidden}
                   subcategories={completeDetail.subcategories}
                   colorVar={categoryDefinition.colorVar}
                   country={country}
@@ -216,7 +218,7 @@ export default function PfmCategoryDetailScreen({
             <div className="bg-[var(--uc-surface)] pb-[24px]">
               <AccountTransactionMonthDivider
                 title={activePeriod?.kind === "year" ? activePeriod.year : (activePeriod?.label ?? activeSummary.periodLabel)}
-                total={formatMoneyNumber(signedTotal, country)}
+                total={maskFormattedAmount(formatMoneyNumber(signedTotal, country), amountsHidden)}
                 currency={activeSummary.currency}
               />
 
@@ -224,7 +226,7 @@ export default function PfmCategoryDetailScreen({
                 <div key={transaction.id}>
                   <AccountTransactionRow
                     transaction={transaction}
-                    formattedAmount={formatMoneyNumber(Math.abs(transaction.amount), country)}
+                    formattedAmount={maskFormattedAmount(formatMoneyNumber(Math.abs(transaction.amount), country), amountsHidden)}
                     currency={activeSummary.currency}
                     positiveAmountClassName={release === "release-future-evo-2027" ? "text-[var(--uc-green-olive)]" : undefined}
                     avatarPresentation="category"

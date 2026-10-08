@@ -1,9 +1,12 @@
 // @vitest-environment jsdom
 
 import '@testing-library/jest-dom/vitest'
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/app/App'
+import MyBankerScreen from '@/app/screens/my-banker/MyBankerScreen'
+import { DemoProvider } from '@/app/state/demoStore'
+import { LanguageProvider } from '@/app/contexts/LanguageContext'
 
 /** RS My Banker with a portfolio holding a credit card and nothing else. */
 const MY_BANKER_URL =
@@ -12,8 +15,20 @@ const MY_BANKER_URL =
   '&count_accounts=1&count_debit_cards=0&count_credit_cards=1&count_meal_cards=0' +
   '&count_deposits=0&count_savings=0&count_loans=0&count_mortgages=0&count_investments=0'
 
-/** The prospect persona falls in a band with fewer peers than the minimum. */
-const SPARSE_PEERS_URL = MY_BANKER_URL.replace('bank=retail-multi-account-card', 'bank=retail-prospect')
+/** Retained reference renderer: the old persona does not enable a runtime release. */
+function renderLegacyReference(bankingScenario: 'retail-multi-account-card' | 'retail-prospect' = 'retail-multi-account-card') {
+  return render(
+    <DemoProvider initialState={{
+      product: 'PI', country: 'RS', scenario: 'active', designSystem: 'current',
+      release: 'release-current', bankingScenario,
+      productCounts: { accounts: 1, debitCards: 0, creditCards: 1, mealCards: 0, deposits: 0, savingsAccounts: 0, loans: 0, mortgages: 0, investments: 0 },
+    }}>
+      <LanguageProvider initialLanguage="en">
+        <MyBankerScreen onBack={() => undefined} />
+      </LanguageProvider>
+    </DemoProvider>,
+  )
+}
 
 const READY_TIMEOUT = { timeout: 4000 }
 
@@ -62,9 +77,9 @@ async function waitForAnalysis() {
   return screen.findByText(/You have \d of 6 products people like you use/, {}, READY_TIMEOUT)
 }
 
-describe('My Banker screen', () => {
+describe('Retained My Banker reference component', () => {
   it('narrates the peer analysis on entry, then opens on where the client stands', async () => {
-    renderAt(MY_BANKER_URL)
+    renderLegacyReference()
 
     expect(await screen.findByText('Comparing you with similar clients')).toBeInTheDocument()
     expect(screen.getByText('Reading your profile')).toBeInTheDocument()
@@ -76,7 +91,7 @@ describe('My Banker screen', () => {
   })
 
   it('argues for the one product most peers have and the client does not', async () => {
-    renderAt(MY_BANKER_URL)
+    renderLegacyReference()
     await waitForAnalysis()
 
     const lead = await findCard('overdraft')
@@ -94,7 +109,7 @@ describe('My Banker screen', () => {
   })
 
   it('opens the simulation on the group figure and keeps that reference visible', async () => {
-    renderAt(MY_BANKER_URL)
+    renderLegacyReference()
     await waitForAnalysis()
 
     const lead = await findCard('overdraft')
@@ -105,7 +120,7 @@ describe('My Banker screen', () => {
   })
 
   it('keeps the other products one tap away, in peer-adoption order', async () => {
-    renderAt(MY_BANKER_URL)
+    renderLegacyReference()
     await waitForAnalysis()
 
     expect(screen.getByText('More for people like you')).toBeInTheDocument()
@@ -130,7 +145,7 @@ describe('My Banker screen', () => {
   })
 
   it('sends a request to the relationship manager and leaves the confirmation on the card', async () => {
-    renderAt(MY_BANKER_URL)
+    renderLegacyReference()
     await waitForAnalysis()
 
     const lead = await findCard('overdraft')
@@ -153,7 +168,7 @@ describe('My Banker screen', () => {
   })
 
   it('keeps the simulation untouched when the request is cancelled', async () => {
-    renderAt(MY_BANKER_URL)
+    renderLegacyReference()
     await waitForAnalysis()
 
     const lead = await findCard('overdraft')
@@ -167,7 +182,7 @@ describe('My Banker screen', () => {
   })
 
   it('drops the argument and the percentages when the peer group is too small', async () => {
-    renderAt(SPARSE_PEERS_URL)
+    renderLegacyReference('retail-prospect')
 
     expect(
       await screen.findByText(/There are not enough clients like you to compare with yet/, {}, READY_TIMEOUT),
@@ -186,4 +201,20 @@ describe('My Banker screen', () => {
       'credit-card',
     ])
   })
+})
+
+
+describe('My Banker runtime retirement', () => {
+  it.each(['release-future-rs-my-banker', 'release-future-rs-future-gain'])(
+    'falls back from a My Banker deep link in %s without activating the reference renderer',
+    async (release) => {
+      renderAt(MY_BANKER_URL.replace('release-future-rs-my-banker', release))
+      await waitFor(() => expect(new URLSearchParams(window.location.search).get('screen')).toBe('homepage'))
+      expect(screen.getByRole('button', { name: 'PI - Serbia' })).toBeInTheDocument()
+      expect(screen.queryByText('Comparing you with similar clients')).not.toBeInTheDocument()
+      expect(screen.queryByText(/You have \d of 6 products people like you use/)).not.toBeInTheDocument()
+      expect(screen.queryByRole('heading', { name: 'My Banker' })).not.toBeInTheDocument()
+      expect(document.querySelector('[data-my-banker-lead]')).not.toBeInTheDocument()
+    },
+  )
 })

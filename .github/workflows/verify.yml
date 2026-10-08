@@ -21,6 +21,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -34,3 +36,12 @@ jobs:
       # needs a real working tree - which the checkout above already provides.
       - name: Run the full gate
         run: npm run verify
+
+      - name: Validate declared agent ownership
+        if: github.event_name == 'pull_request' && hashFiles('.agent-task.json') != ''
+        env:
+          TASK_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          TASK_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git fetch --no-tags origin "$TASK_BASE_SHA" "$TASK_HEAD_SHA"
+          npm run agent:scope -- --task .agent-task.json --base "$TASK_BASE_SHA" --head "$TASK_HEAD_SHA"

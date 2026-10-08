@@ -1,5 +1,6 @@
 import { AppIcon } from "@/app/components/icons";
 import type { IconName } from "@/app/components/icons";
+import { activateOnKeyboard } from '@/app/components/ui/keyboardActivation';
 
 export interface PanelMenuSheetProps {
   aboutSmartBanking: string;
@@ -53,6 +54,10 @@ function CloseHandle({
       <div
         className={`content-stretch flex items-start p-[10px] relative size-full${closeHandleCursor ? " cursor-pointer" : ""}`}
         onClick={onClose}
+        role={onClose ? 'button' : undefined}
+        aria-label={onClose ? 'Close panel' : undefined}
+        tabIndex={onClose ? 0 : undefined}
+        onKeyDown={onClose ? activateOnKeyboard : undefined}
       >
         <DragHandle />
       </div>
@@ -70,6 +75,9 @@ function PanelMenuRow({ icon, iconDataName, label, onClick, interactive = false 
       className={`content-stretch flex gap-[8px] h-[80px] items-center px-[16px] py-[24px] relative shrink-0 w-[375px]${interactionClasses}`}
       data-name="Light Restyle/Navigation"
       onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? activateOnKeyboard : undefined}
     >
       <div className="content-stretch flex flex-[1_0_0] gap-[16px] items-center min-h-px min-w-px relative">
         <div className="relative shrink-0 size-[32px]" data-name={iconDataName}>
@@ -99,6 +107,7 @@ export default function PanelMenuSheet({
       <div
         className="absolute backdrop-blur-[5.939px] bg-[var(--uc-static-black)] inset-0 opacity-51"
         data-name="Screen Dimming"
+        aria-hidden="true"
         onClick={onClose}
       />
       <div className="-translate-x-1/2 absolute bg-[var(--uc-text)] bottom-0 content-stretch flex flex-col gap-[8px] items-start left-1/2 py-[24px] rounded-tl-[12px] rounded-tr-[12px]">

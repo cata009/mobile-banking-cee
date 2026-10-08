@@ -3,7 +3,7 @@ import { COMPONENT_REGISTRY } from '@/app/registry/componentRegistry'
 import MiniPhone from './MiniPhone'
 import ScreenInspector from './ScreenInspector'
 import { renderFlowPreview } from './flowPreviews'
-import { FLOW_SCREEN_SOURCES } from './screenSources'
+import { FLOW_SCREEN_SOURCES, type FlowScreenSource } from './screenSources'
 import { groupRules, rulesForScreen, screenTitle, screensForRule } from '../flows/rules'
 import type { FlowDefinition, FlowRule, FlowScreenKind } from '../flows/types'
 import {
@@ -15,7 +15,13 @@ import {
   sessionSource,
   stateTransitions,
 } from '../handoff/referencePackage'
-import { composedComponents, moduleToRepoPath, parseImports, sliceFunction, tokensUsed } from '../handoff/sourceSlices'
+import {
+  composedComponents,
+  moduleToRepoPath,
+  parseImports,
+  findFunctionSource,
+  tokensUsed,
+} from '../handoff/sourceSlices'
 
 /**
  * The developer build surface.
@@ -44,9 +50,7 @@ const SECTIONS = [
 
 const INSPECT_SCALE = 0.56
 
-const REGISTRY_BY_PATH = new Map(
-  Object.values(COMPONENT_REGISTRY).map((meta) => [meta.componentPath, meta] as const),
-)
+const REGISTRY_BY_PATH = new Map(Object.values(COMPONENT_REGISTRY).map((meta) => [meta.componentPath, meta] as const))
 
 export default function FlowImplementationPanel({
   flow,
@@ -73,10 +77,13 @@ export default function FlowImplementationPanel({
         <p className="uc-type-n6-strong text-[var(--uc-action)]">Build surface</p>
         <h2 className="mt-[5px] uc-type-h2 text-[var(--uc-text)]">Build it as it is built here</h2>
         <p className="mt-[8px] max-w-[880px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">
-          <strong className="text-[var(--uc-text)]">Specification says what; this tab says how, from the same definition.</strong>{' '}
-          The screens below are the real components that rendered the prototype, with the design-system parts they compose and
-          an inspector over the real layout. The state machine, data contract and test names are derived from the prototype map
-          and the screen contracts — nothing here is written twice. Rules are cited by id (R1…); the text lives in Specification.
+          <strong className="text-[var(--uc-text)]">
+            Specification says what; this tab says how, from the same definition.
+          </strong>{' '}
+          The screens below are the real components that rendered the prototype, with the design-system parts they
+          compose and an inspector over the real layout. The state machine, data contract and test names are derived
+          from the prototype map and the screen contracts — nothing here is written twice. Rules are cited by id (R1…);
+          the text lives in Specification.
         </p>
         <nav aria-label="Implementation sections" className="mt-[14px] flex flex-wrap gap-[6px]">
           {SECTIONS.map((section) => (
@@ -106,7 +113,10 @@ export default function FlowImplementationPanel({
           {implementation.sessionModel.description}
         </p>
         <div className="mt-[14px] grid gap-[16px] xl:grid-cols-[minmax(0,420px)_1fr]">
-          <CodeBlock title={`${implementation.sessionModel.name} — lives across screens`} code={implementation.sessionModel.shape} />
+          <CodeBlock
+            title={`${implementation.sessionModel.name} — lives across screens`}
+            code={implementation.sessionModel.shape}
+          />
           <div className="overflow-x-auto">
             <table className="w-full min-w-[560px] border-collapse text-left">
               <thead>
@@ -126,7 +136,11 @@ export default function FlowImplementationPanel({
                     <Td>
                       <span className="flex flex-wrap gap-[4px]">
                         {guard.rules.map((id) => (
-                          <RuleChip key={id} rule={rules.find((rule) => rule.id === id) ?? { id, group: '', statement: '' }} onOpen={onOpenRule} />
+                          <RuleChip
+                            key={id}
+                            rule={rules.find((rule) => rule.id === id) ?? { id, group: '', statement: '' }}
+                            onOpen={onOpenRule}
+                          />
                         ))}
                       </span>
                     </Td>
@@ -148,8 +162,8 @@ export default function FlowImplementationPanel({
 
       <Panel id="impl-rules" title="Rule → guard → test">
         <p className="max-w-[820px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">
-          One row per rule: where it applies, the guard that enforces it and the test that proves it. A rule with no guard is a
-          contract on the screen itself — see its screen contract.
+          One row per rule: where it applies, the guard that enforces it and the test that proves it. A rule with no
+          guard is a contract on the screen itself — see its screen contract.
         </p>
         <div className="mt-[14px] overflow-x-auto">
           <table className="w-full min-w-[720px] border-collapse text-left">
@@ -188,7 +202,10 @@ export default function FlowImplementationPanel({
                       <Td muted>
                         {guards.length ? (
                           guards.map((guard) => (
-                            <code key={guard.name} className="block font-mono text-[12px] font-bold text-[var(--uc-text)]">
+                            <code
+                              key={guard.name}
+                              className="block font-mono text-[12px] font-bold text-[var(--uc-text)]"
+                            >
                               {guard.name}
                             </code>
                           ))
@@ -218,8 +235,9 @@ export default function FlowImplementationPanel({
 
       <Panel id="impl-boundary" title="Technical integration boundary">
         <p className="max-w-[820px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">
-          Every call the flow makes across the boundary, the screen that makes it, and what is still undecided. Replace the
-          reference adapter with the approved data client; enter signing orchestration only after the summary guard passes.
+          Every call the flow makes across the boundary, the screen that makes it, and what is still undecided. Replace
+          the reference adapter with the approved data client; enter signing orchestration only after the summary guard
+          passes.
         </p>
         <div className="mt-[14px] overflow-x-auto">
           <table className="w-full min-w-[720px] border-collapse text-left">
@@ -265,8 +283,8 @@ export default function FlowImplementationPanel({
 
       <Panel id="impl-tests" title="Acceptance criteria as tests">
         <p className="max-w-[820px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">
-          Every acceptance criterion in the screen contracts, as a test name. Generated from Specification; ships in the package
-          as <code className="font-mono text-[12px]">tests/acceptance.skeleton.test.ts</code>.
+          Every acceptance criterion in the screen contracts, as a test name. Generated from Specification; ships in the
+          package as <code className="font-mono text-[12px]">tests/acceptance.skeleton.test.ts</code>.
         </p>
         <div className="mt-[14px]">
           <CodeBlock title="acceptance.skeleton.test.ts" code={acceptanceTestsSource(flow)} collapsedHeight={280} />
@@ -304,7 +322,10 @@ export default function FlowImplementationPanel({
         <ul className="grid gap-[8px]">
           {implementation.openTechnicalQuestions.map((question) => (
             <li key={question} className="flex gap-[8px] uc-type-n5 text-[var(--uc-text)]">
-              <span aria-hidden="true" className="mt-[8px] size-[5px] shrink-0 rounded-full bg-[var(--uc-text-muted)]" />
+              <span
+                aria-hidden="true"
+                className="mt-[8px] size-[5px] shrink-0 rounded-full bg-[var(--uc-text-muted)]"
+              />
               <span>{question}</span>
             </li>
           ))}
@@ -329,13 +350,12 @@ function ScreensAsBuilt({
   flow: FlowDefinition
   screens: readonly FlowScreenKind[]
   countryName: string
-  screenSource: { file: string; source: string } | undefined
+  screenSource: FlowScreenSource | undefined
   onOpenRule: (ruleId: string) => void
   onOpenScreenContract: (screen: FlowScreenKind) => void
 }) {
   const [inspecting, setInspecting] = useState(false)
   const mapping = flow.implementation?.screenSource
-  const imports = useMemo(() => (screenSource ? parseImports(screenSource.source) : []), [screenSource])
   const shownComponents = new Set<string>()
 
   return (
@@ -353,7 +373,10 @@ function ScreensAsBuilt({
               : 'border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)] hover:border-[#7B61FF]'
           }`}
         >
-          <span aria-hidden="true" className="grid size-[14px] place-items-center rounded-[3px] border-2 border-current" />
+          <span
+            aria-hidden="true"
+            className="grid size-[14px] place-items-center rounded-[3px] border-2 border-current"
+          />
           {inspecting ? 'Inspecting — hover a screen' : 'Inspect spacing & tokens'}
         </button>
       }
@@ -367,18 +390,22 @@ function ScreensAsBuilt({
           </>
         ) : null}{' '}
         Turn on the inspector to read sizes, padding, gaps, typography and colour tokens off the real layout — in the
-        phone's own 375-wide pixels, the way you would read them in Figma, except these are the numbers the build produced.
+        phone's own 375-wide pixels, the way you would read them in Figma, except these are the numbers the build
+        produced.
       </p>
       {mapping?.shell ? (
         <p className="mt-[6px] uc-type-n6 text-[var(--uc-text-muted)]">
-          Flow shell: <code className="font-mono text-[12px] text-[var(--uc-text)]">{mapping.shell}</code> wires these screens with local state.
+          Flow shell: <code className="font-mono text-[12px] text-[var(--uc-text)]">{mapping.shell}</code> wires these
+          screens with local state.
         </p>
       ) : null}
 
       <div className="mt-[18px] grid gap-[18px]">
         {screens.map((screen) => {
           const component = mapping?.screens[screen]
-          const slice = screenSource && component ? sliceFunction(screenSource.source, component) : undefined
+          const located = screenSource && component ? findFunctionSource(screenSource, component) : undefined
+          const slice = located?.slice
+          const imports = located ? parseImports(located.source) : []
           const firstShowing = Boolean(component) && !shownComponents.has(component!)
           if (component) shownComponents.add(component)
           const composed = slice ? composedComponents(slice.code, imports) : []
@@ -415,7 +442,9 @@ function ScreensAsBuilt({
                 {component ? (
                   <dl className="mt-[12px] grid gap-[8px] uc-type-n5">
                     <div className="grid gap-[2px] sm:grid-cols-[132px_minmax(0,1fr)]">
-                      <dt className="uc-type-n6-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">Component</dt>
+                      <dt className="uc-type-n6-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
+                        Component
+                      </dt>
                       <dd className="min-w-0">
                         <code className="font-mono text-[12px] font-bold text-[var(--uc-text)]">{component}</code>
                         {slice ? (
@@ -427,15 +456,21 @@ function ScreensAsBuilt({
                     </div>
                     {usage ? (
                       <div className="grid gap-[2px] sm:grid-cols-[132px_minmax(0,1fr)]">
-                        <dt className="uc-type-n6-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">This state</dt>
+                        <dt className="uc-type-n6-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
+                          This state
+                        </dt>
                         <dd className="min-w-0">
-                          <code className="block overflow-x-auto whitespace-pre font-mono text-[11px] leading-[16px] text-[var(--uc-text)]">{usage}</code>
+                          <code className="block overflow-x-auto whitespace-pre font-mono text-[11px] leading-[16px] text-[var(--uc-text)]">
+                            {usage}
+                          </code>
                         </dd>
                       </div>
                     ) : null}
                     {composed.length ? (
                       <div className="grid gap-[2px] sm:grid-cols-[132px_minmax(0,1fr)]">
-                        <dt className="uc-type-n6-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">Composes</dt>
+                        <dt className="uc-type-n6-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
+                          Composes
+                        </dt>
                         <dd className="flex min-w-0 flex-wrap gap-[6px]">
                           {composed.map((entry) => (
                             <ComposedChip key={entry.name} name={entry.name} module={entry.module} />
@@ -445,10 +480,15 @@ function ScreensAsBuilt({
                     ) : null}
                     {tokens.length ? (
                       <div className="grid gap-[2px] sm:grid-cols-[132px_minmax(0,1fr)]">
-                        <dt className="uc-type-n6-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">Tokens</dt>
+                        <dt className="uc-type-n6-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
+                          Tokens
+                        </dt>
                         <dd className="flex min-w-0 flex-wrap gap-[4px]">
                           {tokens.map((token) => (
-                            <code key={token} className="rounded-[4px] bg-[var(--uc-surface-muted)] px-[5px] py-[1px] font-mono text-[11px] text-[var(--uc-text)]">
+                            <code
+                              key={token}
+                              className="rounded-[4px] bg-[var(--uc-surface-muted)] px-[5px] py-[1px] font-mono text-[11px] text-[var(--uc-text)]"
+                            >
                               {token}
                             </code>
                           ))}
@@ -457,14 +497,16 @@ function ScreensAsBuilt({
                     ) : null}
                   </dl>
                 ) : (
-                  <p className="mt-[12px] uc-type-n5 text-[var(--uc-text-muted)]">No component is mapped to this screen yet.</p>
+                  <p className="mt-[12px] uc-type-n5 text-[var(--uc-text-muted)]">
+                    No component is mapped to this screen yet.
+                  </p>
                 )}
 
                 {slice ? (
                   firstShowing ? (
                     <div className="mt-[12px]">
                       <CodeBlock
-                        title={`${component}.tsx — ${screenSource?.file.split('/').pop()} · lines ${slice.startLine}–${slice.endLine}`}
+                        title={`${component}.tsx — ${located?.file.split('/').pop()} · lines ${slice.startLine}–${slice.endLine}`}
                         code={slice.code}
                         collapsedHeight={220}
                       />
@@ -533,8 +575,9 @@ function StateMachine({
   return (
     <Panel id="impl-states" title="State machine">
       <p className="max-w-[820px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">
-        Every transition, derived from the prototype map — the same map business clicked through, so it cannot drift from
-        what was reviewed. Start: <strong className="text-[var(--uc-text)]">{screenTitle(flow, flow.prototype.start)}</strong>.{' '}
+        Every transition, derived from the prototype map — the same map business clicked through, so it cannot drift
+        from what was reviewed. Start:{' '}
+        <strong className="text-[var(--uc-text)]">{screenTitle(flow, flow.prototype.start)}</strong>.{' '}
         {transitions.length} transitions across {orderedScreens(flow).length} screens.
       </p>
       <div className="mt-[14px] overflow-x-auto">
@@ -638,7 +681,8 @@ function DeliveryPackage({ flow, screenSourceFile }: { flow: FlowDefinition; scr
         <div className="max-w-[720px]">
           <p className="uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">
             Everything on this tab, as files — generated from the flow definition at the moment you download it, so the
-            package cannot lag behind Specification. Scaffolding to adapt, not production code or an approved integration.
+            package cannot lag behind Specification. Scaffolding to adapt, not production code or an approved
+            integration.
           </p>
           <ul className="mt-[10px] grid gap-[4px]">
             {contents.map((line) => (
@@ -666,7 +710,17 @@ function DeliveryPackage({ flow, screenSourceFile }: { flow: FlowDefinition; scr
 
 /* ------------------------------------------------------------------------ */
 
-function Panel({ id, title, action, children }: { id?: string; title?: string; action?: ReactNode; children: ReactNode }) {
+function Panel({
+  id,
+  title,
+  action,
+  children,
+}: {
+  id?: string
+  title?: string
+  action?: ReactNode
+  children: ReactNode
+}) {
   return (
     <section
       id={id}
@@ -693,21 +747,43 @@ function Th({ children }: { children: ReactNode }) {
 
 function Td({ children, muted = false }: { children: ReactNode; muted?: boolean }) {
   return (
-    <td className={`border border-[var(--uc-border)] px-[10px] py-[7px] align-top uc-type-n5 ${muted ? 'text-[var(--uc-text-muted)]' : 'text-[var(--uc-text)]'}`}>
+    <td
+      className={`border border-[var(--uc-border)] px-[10px] py-[7px] align-top uc-type-n5 ${muted ? 'text-[var(--uc-text-muted)]' : 'text-[var(--uc-text)]'}`}
+    >
       {children}
     </td>
   )
 }
 
-function ScreenLink({ flow, screen, onOpen }: { flow: FlowDefinition; screen: FlowScreenKind; onOpen: (screen: FlowScreenKind) => void }) {
+function ScreenLink({
+  flow,
+  screen,
+  onOpen,
+}: {
+  flow: FlowDefinition
+  screen: FlowScreenKind
+  onOpen: (screen: FlowScreenKind) => void
+}) {
   return (
-    <button type="button" onClick={() => onOpen(screen)} className="text-left uc-type-n5-strong text-[var(--uc-text)] hover:text-[var(--uc-action)]">
+    <button
+      type="button"
+      onClick={() => onOpen(screen)}
+      className="text-left uc-type-n5-strong text-[var(--uc-text)] hover:text-[var(--uc-action)]"
+    >
       {screenTitle(flow, screen)}
     </button>
   )
 }
 
-function RuleChips({ flow, screen, onOpenRule }: { flow: FlowDefinition; screen: FlowScreenKind; onOpenRule: (ruleId: string) => void }) {
+function RuleChips({
+  flow,
+  screen,
+  onOpenRule,
+}: {
+  flow: FlowDefinition
+  screen: FlowScreenKind
+  onOpenRule: (ruleId: string) => void
+}) {
   const rules = rulesForScreen(flow, screen)
   if (rules.length === 0) return null
   return (

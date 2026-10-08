@@ -151,11 +151,15 @@ function InvestmentHistoryTransactionRow({
       <div className="ml-[16px] flex min-w-0 flex-1 flex-col items-end py-[10px] text-right">
         <p className="w-full truncate text-right text-[14px] font-normal leading-[17px] text-[var(--uc-text)]">{item.title}</p>
         <InvestmentAmountLabel
-          amount={item.amount}
+          amount={item.type === "SELL" ? -Math.abs(item.amount) : item.amount}
           country={country}
           currency={item.currency}
           hidden={amountsHidden}
-          className={item.tone === "positive" ? "text-[var(--uc-green-olive)]" : "text-[var(--uc-status-red)]"}
+          className={item.type === "SELL"
+            ? "text-[var(--uc-text)]"
+            : item.tone === "positive"
+              ? "text-[var(--uc-green-olive)]"
+              : "text-[var(--uc-status-red)]"}
         />
         <p className="w-full truncate text-right text-[14px] font-normal leading-[17px] text-[var(--uc-text-muted)]">{item.type}</p>
       </div>
@@ -180,11 +184,11 @@ function InvestmentHistoryOrderRow({
       <div className="ml-[16px] flex min-w-0 flex-1 flex-col items-end py-[10px] text-right">
         <p className="w-full truncate text-right text-[14px] font-normal leading-[17px] text-[var(--uc-text)]">{item.title}</p>
         <InvestmentAmountLabel
-          amount={item.orderType === "SELL" ? -item.amount : item.amount}
+          amount={item.orderType === "SELL" ? -Math.abs(item.amount) : item.amount}
           country={country}
           currency={item.currency}
           hidden={amountsHidden}
-          className={item.orderType === "SELL" ? "text-[var(--uc-status-red)]" : "text-[var(--uc-text)]"}
+          className="text-[var(--uc-text)]"
         />
         <p className="w-full truncate text-right text-[14px] font-normal uppercase leading-[17px] text-[var(--uc-text-muted)]">{item.status}</p>
       </div>
@@ -205,7 +209,7 @@ export default function InvestmentHistoryRows({
   if (items.length === 0) {
     return (
       <div className="px-[24px] pt-[26px]">
-        <p className="text-[18px] font-bold leading-[24px] text-[var(--uc-text)]">
+        <p className="text-[18px] font-normal leading-[24px] text-[var(--uc-text)]">
           {tab === "transactions" ? "You don't have any transactions" : "You don't have any orders"}
         </p>
       </div>

@@ -33,6 +33,7 @@ export interface ExpenseBarChartProps {
    * nowhere, while every other figure in the app carries its currency.
    */
   axisCurrency?: string;
+  amountsHidden?: boolean;
 }
 
 const PLOT_HEIGHT = 168;
@@ -90,6 +91,7 @@ export default function ExpenseBarChart({
   onToggle,
   header,
   axisCurrency,
+  amountsHidden = false,
 }: ExpenseBarChartProps) {
   const dataMax = Math.max(...bars.map((bar) => bar.total), 0);
   const step = niceStep(dataMax);
@@ -120,7 +122,7 @@ export default function ExpenseBarChart({
         >
           {ticks.map((tick) => (
             <span key={tick} className="whitespace-nowrap" style={{ transform: `translateY(-${TICK_LABEL_OVERHANG}px)` }}>
-              {formatAxisTick(tick)}
+              {amountsHidden ? '****' : formatAxisTick(tick)}
               {axisCurrency && tick === ticks[ticks.length - 1] ? ` ${axisCurrency}` : ''}
             </span>
           ))}

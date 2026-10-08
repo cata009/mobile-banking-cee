@@ -126,19 +126,25 @@ export function buildAssetAudit({ trackedFiles, readFile, readAssetFile = readFi
   };
 }
 
-export function auditTrackedAssets(root = process.cwd()) {
+export function collectAuditedRepositoryFiles(trackedFiles, pendingFiles) {
+  const applicationFiles = pendingFiles.filter((path) => /^(?:src|public|package|api)\//.test(normalizePath(path)) && (isTrackedAssetPath(path) || isCodeReferencePath(path)));
+  return [...new Set([...trackedFiles, ...applicationFiles].map(normalizePath))].sort();
+}
+
+export function auditTrackedAssets(root = process.cwd(), includePendingApplicationFiles = false) {
   const trackedFiles = execFileSync("git", ["ls-files", "-z"], {
     cwd: root,
     encoding: "utf8",
   }).split("\0").filter(Boolean);
 
+  const pendingFiles = includePendingApplicationFiles ? execFileSync('git', ['ls-files', '--others', '--exclude-standard', '-z'], {cwd:root,encoding:'utf8'}).split('\0').filter(Boolean) : [];
   return buildAssetAudit({
-    trackedFiles,
+    trackedFiles: collectAuditedRepositoryFiles(trackedFiles, pendingFiles),
     readFile: (path) => readFileSync(resolve(root, path)),
     readAssetFile: (path) => {
       const objectId = execFileSync(
         "git",
-        ["hash-object", `--path=${path}`, "--", path],
+        ["hash-object", "-w", `--path=${path}`, "--", path],
         { cwd: root, encoding: "utf8" },
       ).trim();
       return execFileSync("git", ["cat-file", "blob", objectId], {
@@ -176,7 +182,7 @@ export function assertAssetBaseline(report, baseline) {
 
 const invokedPath = process.argv[1] ? resolve(process.argv[1]) : null;
 if (invokedPath === fileURLToPath(import.meta.url)) {
-  const report = auditTrackedAssets();
+  const report = auditTrackedAssets(process.cwd(), true);
   const baselinePath = resolve(dirname(fileURLToPath(import.meta.url)), "asset-baseline.json");
   const baseline = JSON.parse(readFileSync(baselinePath, "utf8"));
   assertAssetBaseline(report, baseline);

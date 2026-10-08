@@ -27,7 +27,13 @@ interface InvestmentSellOrderFlowProps {
   country: CountryId;
   amountsHidden: boolean;
   onBack: () => void;
-  onComplete: () => void;
+  onComplete: (execution: InvestmentSellExecution) => void;
+}
+
+export interface InvestmentSellExecution {
+  quantity: number;
+  amount: number;
+  currency: InvestmentCatalogSecurity["instrumentCurrency"];
 }
 
 interface SellQuote {
@@ -214,7 +220,11 @@ export default function InvestmentSellOrderFlow({
         title="Order accepted"
         body={`Your order to sell ${security.title} has been accepted. You can follow its status in Investments History.`}
         actionLabel="Back to investments"
-        onDone={onComplete}
+        onDone={() => onComplete({
+          quantity: quote?.quantity ?? 0,
+          amount: quote?.productAmount ?? 0,
+          currency: security.instrumentCurrency,
+        })}
       />
     );
   }

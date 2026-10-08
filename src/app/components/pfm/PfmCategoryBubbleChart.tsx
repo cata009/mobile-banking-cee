@@ -1,4 +1,5 @@
 import { formatEvo2027Number } from "@/app/utils/evo2027Formatting";
+import { maskFormattedAmount } from '@/app/utils/amountPrivacy';
 import type { CountryId } from "@/app/state/demoTypes";
 import type { SpendingSubcategorySummary } from "@/data/spendingAnalytics";
 
@@ -15,6 +16,7 @@ interface PfmCategoryBubbleChartProps {
   onToggle?: (subcategoryLabel: string) => void;
   /** Prints each subcategory total inside its bubble, where the bubble is big enough to hold it. */
   showTotals?: boolean;
+  amountsHidden?: boolean;
   /** Fixed plot height, or "auto" to let the rows of bubbles size the block themselves. */
   height?: number | "auto";
   /**
@@ -48,6 +50,7 @@ export default function PfmCategoryBubbleChart({
   onExclude,
   onToggle,
   showTotals = false,
+  amountsHidden = false,
   minActive = 1,
   height = 250,
 }: PfmCategoryBubbleChartProps) {
@@ -72,6 +75,7 @@ export default function PfmCategoryBubbleChart({
       {subcategories.map((subcategory) => {
         const diameter = getBubbleDiameter(subcategory.total, maxTotal, subcategories.length);
         const isInactive = inactiveSubcategories.has(subcategory.label);
+        const displayedTotal = maskFormattedAmount(formatEvo2027Number(subcategory.total), amountsHidden);
         const visibleLabel = subcategory.label.length > 24
           ? `${subcategory.label.slice(0, 21).trim()}…`
           : subcategory.label;
@@ -88,9 +92,9 @@ export default function PfmCategoryBubbleChart({
             }}
             aria-label={`${isInactive && includeAriaLabel ? includeAriaLabel : excludeAriaLabel}: ${subcategory.label}`}
             aria-pressed={isInactive}
-            title={`${subcategory.label}: ${formatEvo2027Number(subcategory.total)} ${currency}`}
+            title={`${subcategory.label}: ${displayedTotal} ${currency}`}
             data-pfm-subcategory-bubble={subcategory.label}
-            data-pfm-subcategory-total={subcategory.total}
+            data-pfm-subcategory-total={amountsHidden ? undefined : subcategory.total}
             data-pfm-subcategory-active={isInactive ? "false" : "true"}
             disabled={!handleToggle || (!isInactive && activeCount <= minActive)}
             onClick={() => handleToggle?.(subcategory.label)}
@@ -103,7 +107,7 @@ export default function PfmCategoryBubbleChart({
                 <span className="uc-type-n5 max-w-full leading-[16px] opacity-80">
                   {/* A bare number in a coloured disc could be anything —
                       a count, a percentage. The currency says it is money. */}
-                  {formatEvo2027Number(subcategory.total)} {currency}
+                  {displayedTotal} {currency}
                 </span>
               ) : null}
             </span>

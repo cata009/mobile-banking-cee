@@ -38,6 +38,7 @@ export default function PanelOverlay({ onClose, onStartCoApping }: PanelOverlayP
     <div 
       className="absolute inset-0 z-50" 
       onClick={handleBackdropClick}
+      role="presentation"
     >
       {coAppingAvailable ? (
         <PanelWithTranslations

@@ -25,12 +25,16 @@ let highlighterPromise: Promise<Highlighter> | null = null;
 
 function getHighlighter(): Promise<Highlighter> {
   if (!highlighterPromise) {
-    highlighterPromise = import("shiki").then(({ createHighlighter }) =>
+    const pending = import("shiki").then(({ createHighlighter }) =>
       createHighlighter({
         themes: [SHIKI_THEME],
         langs: ["tsx", "swift", "kotlin"],
       }),
     );
+    highlighterPromise = pending;
+    void pending.catch(() => {
+      if (highlighterPromise === pending) highlighterPromise = null;
+    });
   }
   return highlighterPromise;
 }
@@ -48,6 +52,8 @@ export default function CodeBlock({ code, language, fileName }: CodeBlockProps) 
         theme: SHIKI_THEME,
       });
       setHtml(out);
+    }).catch(() => {
+      if (!cancelled) setHtml(null);
     });
     return () => {
       cancelled = true;

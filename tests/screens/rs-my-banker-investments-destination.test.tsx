@@ -6,8 +6,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import App from "@/app/App";
 
-const MY_BANKER_INVESTMENTS_URL =
-  "/?product=PI&country=RS&scenario=active&ds=current&release=release-future-rs-my-banker" +
+const FUTURE_GAIN_INVESTMENTS_URL =
+  "/?product=PI&country=RS&scenario=active&ds=current&release=release-future-rs-future-gain" +
   "&bank=retail-multi-account-card&theme=light&lang=en&screen=investments" +
   "&count_accounts=1&count_debit_cards=0&count_credit_cards=1&count_meal_cards=0" +
   "&count_deposits=0&count_savings=0&count_loans=0&count_mortgages=0&count_investments=1";
@@ -38,20 +38,20 @@ afterEach(() => {
   window.history.replaceState({}, "", "/");
 });
 
-describe("RS My Banker investment destination", () => {
-  it("keeps My Banker above the current portfolio and investment options", async () => {
-    renderAt(MY_BANKER_INVESTMENTS_URL);
+describe("RS Future Gain investment destination", () => {
+  it("opens the current portfolio and investment options without the retired peer card", async () => {
+    renderAt(FUTURE_GAIN_INVESTMENTS_URL);
 
-    expect(await screen.findByText("15 of 24 clients like you use Overdraft")).toBeInTheDocument();
-    expect(screen.getByText("See all recommendations")).toBeInTheDocument();
-    expect(screen.getByText("Investment Options")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Term deposit" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Investment funds" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Stocks" })).toBeInTheDocument();
-    expect(screen.queryByText("PERFORMANCE")).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Stocks" }));
+    expect(await screen.findByText("Total value:")).toBeInTheDocument();
+    expect(screen.queryByText("15 of 24 clients like you use Overdraft")).not.toBeInTheDocument();
+    expect(screen.queryByText("See all recommendations")).not.toBeInTheDocument();
+    expect(document.querySelector('[data-ds-label="My Banker entry card"]')).not.toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "PERFORMANCE" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "PRODUCT TYPE" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Invest" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Invest" }));
 
     expect(document.querySelector('[data-investment-security-list="true"]')).toBeInTheDocument();
+    expect(document.querySelectorAll("[data-investment-security-row]").length).toBeGreaterThan(0);
   });
 });

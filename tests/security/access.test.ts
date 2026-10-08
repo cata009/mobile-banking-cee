@@ -1,4 +1,6 @@
 import crypto from "node:crypto";
+import { once } from "node:events";
+import { Readable } from "node:stream";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 type RequestHarness = {
@@ -322,3 +324,100 @@ describe("stakeholder access gate security contract", () => {
     expect(cookiePair(response, "mb_access")).toBeUndefined();
   });
 });
+
+// These cases catch field reads on null and acceptance of non-object request bodies.
+describe('access request payload boundaries', () => {
+  test.each([null, 17, true, false, 0, ""])(
+    'finishes rejecting an explicitly parsed malformed body %j after stream consumption',
+    async (body) => {
+      configureAccess();
+      const handler = await loadHandler();
+      const stream = Readable.from([]);
+      stream.resume();
+      await once(stream, "end");
+      const request = Object.assign(stream, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body,
+      });
+      const response = createResponse();
+      let timeout: ReturnType<typeof setTimeout> | undefined;
+      try {
+        const result = await Promise.race([
+          handler(request, response).then(() => "completed"),
+          new Promise<string>((resolve) => {
+            timeout = setTimeout(() => resolve("pending"), 100);
+          }),
+        ]);
+        expect(result).toBe("completed");
+        expect(response.ended).toBe(true);
+        expect(response.statusCode).toBe(401);
+        expect(response.body).toMatchObject({ ok: false });
+        expect(cookieValues(response)).toEqual([]);
+      } finally {
+        clearTimeout(timeout);
+      }
+    },
+  );
+  test.each([
+    ["parsed object", { password: "test-password" }],
+    ["raw JSON", '{"password":"test-password"}'],
+  ])('authenticates a consumed request carrying %s', async (_label, body) => {
+    configureAccess();
+    const stream = Readable.from([]);
+    stream.resume();
+    await once(stream, "end");
+    const response = createResponse();
+    await (await loadHandler())(Object.assign(stream, {
+      method: "POST", headers: { "content-type": "application/json" }, body,
+    }), response);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toMatchObject({ ok: true });
+    expect(cookiePair(response, "mb_access")).toBeDefined();
+  });
+  test('authenticates streamed JSON when the parsed body is absent', async () => {
+    configureAccess();
+    const response = createResponse();
+    const request = Object.assign(Readable.from(['{"password":"test-password"}']), {
+      method: "POST", headers: { "content-type": "application/json" },
+    });
+    await (await loadHandler())(request, response);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toMatchObject({ ok: true });
+    expect(cookiePair(response, "mb_access")).toBeDefined();
+  });
+  test('keeps a pre-parsed buffer rejected without waiting on a consumed stream', async () => {
+    configureAccess();
+    const stream = Readable.from([]);
+    stream.resume();
+    await once(stream, "end");
+    const response = createResponse();
+    await (await loadHandler())(Object.assign(stream, {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: Buffer.from('{"password":"test-password"}'),
+    }), response);
+    expect(response.statusCode).toBe(401);
+    expect(cookieValues(response)).toEqual([]);
+  });
+  test.each(['null', '[]', '[{}]', '"test-password"', '17', 'true', '{broken', [], null])(
+    'rejects invalid JSON payload %j without issuing access',
+    async (body) => {
+      configureAccess()
+      const response = await invoke(await loadHandler(), {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body,
+      })
+      expect(response.statusCode).toBe(401)
+      expect(response.body).toMatchObject({ ok: false })
+      expect(cookieValues(response)).toEqual([])
+    },
+  )
+  test('does not authenticate an array with a password property', async () => {
+    configureAccess()
+    const body = Object.assign([], { password: 'test-password' })
+    const response = await invoke(await loadHandler(), { method: 'POST', body })
+    expect(response.statusCode).toBe(401)
+    expect(cookieValues(response)).toEqual([])
+  })
+})

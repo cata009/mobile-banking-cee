@@ -328,7 +328,7 @@ export default function SmartInvestmentScreen({
           <p className="uc-type-n5 text-[var(--uc-text)]">
             Explore investment opportunities and make informed decisions
           </p>
-          <div className="flex min-h-[105px] w-full flex-col gap-[8px] rounded-[8px] bg-[#f5f5f5] p-[16px]">
+          <div className="flex min-h-[105px] w-full flex-col gap-[8px] rounded-[8px] bg-[var(--uc-investment-reference-panel)] p-[16px]">
             <div className="flex items-start gap-[4px]">
               <p className="uc-type-n4-strong min-w-0 flex-1 leading-[18px] text-[var(--uc-text)]">
                 Available balance in {currency} from your current accounts and AVISTA savings

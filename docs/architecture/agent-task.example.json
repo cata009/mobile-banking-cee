@@ -1,0 +1,11 @@
+{
+  "owner": "flows",
+  "worktreeRoot": "<absolute assigned worktree path>",
+  "ownedPaths": [
+    "src/flows/shared/investments-bulk-approval/**",
+    "src/features/investments/bulk-approval/**",
+    "tests/features/bulk-approval-model.test.ts",
+    "tests/screens/investments-bulk-approval-flow.test.tsx"
+  ],
+  "sharedRequests": ["Coordinate generic handoff or registry changes with core integration."]
+}

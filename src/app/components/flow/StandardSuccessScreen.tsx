@@ -7,6 +7,8 @@ interface StandardSuccessScreenProps {
   body: ReactNode;
   actionLabel: string;
   onDone: () => void;
+  secondaryActionLabel?: string;
+  onSecondaryAction?: () => void;
 }
 
 export default function StandardSuccessScreen({
@@ -14,6 +16,8 @@ export default function StandardSuccessScreen({
   body,
   actionLabel,
   onDone,
+  secondaryActionLabel,
+  onSecondaryAction,
 }: StandardSuccessScreenProps) {
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]" data-standard-success-screen="true">
@@ -30,6 +34,15 @@ export default function StandardSuccessScreen({
       </div>
       <div className="px-[24px] pb-[42px]">
         <PrimaryButton onClick={onDone}>{actionLabel}</PrimaryButton>
+        {secondaryActionLabel && onSecondaryAction ? (
+          <button
+            type="button"
+            onClick={onSecondaryAction}
+            className="uc-type-n5-strong mt-[8px] min-h-[44px] w-full rounded text-center text-[var(--uc-action)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-surface)]"
+          >
+            {secondaryActionLabel}
+          </button>
+        ) : null}
       </div>
     </div>
   );

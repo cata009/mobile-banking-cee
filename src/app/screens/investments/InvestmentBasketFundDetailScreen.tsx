@@ -7,11 +7,13 @@ import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import { formatInvestmentBasketPerformance, type InvestmentBasketFund, type InvestmentBasketFundHolding } from "@/app/config/investmentBasketFundsConfig";
+import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 
 interface InvestmentBasketFundDetailScreenProps {
   basket: InvestmentBasketFund;
+  securityCatalog?: readonly InvestmentCatalogSecurity[];
   country: CountryId;
   amountsHidden: boolean;
   onBack: () => void;
@@ -69,6 +71,7 @@ function FundDistributionRow({
 
 export default function InvestmentBasketFundDetailScreen({
   basket,
+  securityCatalog = [],
   country,
   amountsHidden,
   onBack,
@@ -80,13 +83,20 @@ export default function InvestmentBasketFundDetailScreen({
   overlay,
 }: InvestmentBasketFundDetailScreenProps) {
   const hasFigmaSampleDetails = basket.id === "jp-morgan-global-growth";
-  const showFigmaMarketInfo = hasFigmaSampleDetails;
   const heroParts = formatInvestmentAmountParts(1500, country, "EUR", amountsHidden);
   const marketPriceParts = formatInvestmentAmountParts(535.44, country, "EUR", amountsHidden);
   const description = basket.detailDescription ?? basket.description;
   const hasDistributionPercentages = basket.holdings?.some((holding) => holding.percent !== undefined) ?? false;
   const performancePercent = basket.performancePercent ?? 0;
   const performanceColor = performancePercent < 0 ? "var(--uc-status-red)" : "var(--uc-green-olive)";
+  const basketId = basket.marketInfo?.basketId ?? basket.id;
+  const basketIsin = basket.marketInfo?.basketIsin ?? null;
+  const basketLastUpdate = basket.marketInfo?.lastUpdate ?? (basket.holdings ?? [])
+    .map((holding) => securityCatalog.find((security) => (
+      (holding.productId && (security.productId === holding.productId || security.id === holding.productId))
+      || security.title.trim().toLocaleLowerCase() === holding.title.trim().toLocaleLowerCase()
+    ))?.lastUpdate)
+    .find((lastUpdate): lastUpdate is string => Boolean(lastUpdate));
   const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(96);
 
   return (
@@ -177,10 +187,6 @@ export default function InvestmentBasketFundDetailScreen({
             multiline
             variant="product-detail"
           />
-          {showFigmaMarketInfo && !czRoboProductDetail ? (
-            <InvestmentDetailField label="Basket ID" value="3333343141" variant="product-detail" />
-          ) : null}
-
           <section aria-label={hasDistributionPercentages ? (czRoboProductDetail ? "Products distribution" : "Funds distribution") : "Basket contents"} data-basket-fund-distribution>
             <SectionHeadingDivider
               title={hasDistributionPercentages ? (czRoboProductDetail ? "PRODUCTS DISTRIBUTION" : "FUNDS DISTRIBUTION") : "BASKET CONTENTS"}
@@ -201,25 +207,32 @@ export default function InvestmentBasketFundDetailScreen({
             </div>
           </section>
 
-          {showFigmaMarketInfo && czRoboProductDetail ? (
-            <section className="mt-[24px]" aria-label="Market info" data-basket-fund-market-info>
-              <SectionHeadingDivider title="MARKET INFO" variant="medium-title" />
-              <InvestmentDetailField label="Basket ID" value="3333343141" variant="product-detail" />
-              <InvestmentDetailField label="Product ID" value="RS34343143143" variant="product-detail" />
-              <InvestmentDetailField label="Last update" value="03.01.2026" variant="product-detail" />
-            </section>
-          ) : null}
-
-          {showFigmaMarketInfo && !czRoboProductDetail ? (
+          {czRoboProductDetail ? (
             <section className="mt-[24px]" aria-label="Market info" data-basket-fund-market-info>
               <SectionHeadingDivider title="MARKET INFO" variant="medium-title" />
               <InvestmentDetailField
-                label="Actual market price"
-                value={<InvestmentAmountDisplay parts={marketPriceParts} scale="field" />}
+                label="Basket ID"
+                value={basketId}
                 variant="product-detail"
               />
-              <InvestmentDetailField label="Product ID" value="RS34343143143" variant="product-detail" />
-              <InvestmentDetailField label="Last update" value="03.01.2026" variant="product-detail" />
+              <InvestmentDetailField label="Basket ISIN" value={basketIsin ?? "Not available"} variant="product-detail" />
+              <InvestmentDetailField label="Last update" value={basketLastUpdate ?? "Not available"} variant="product-detail" />
+            </section>
+          ) : null}
+
+          {!czRoboProductDetail ? (
+            <section className="mt-[24px]" aria-label="Market info" data-basket-fund-market-info>
+              <SectionHeadingDivider title="MARKET INFO" variant="medium-title" />
+              {hasFigmaSampleDetails ? (
+                <InvestmentDetailField
+                  label="Actual market price"
+                  value={<InvestmentAmountDisplay parts={marketPriceParts} scale="field" />}
+                  variant="product-detail"
+                />
+              ) : null}
+              <InvestmentDetailField label="Basket ID" value={basketId} variant="product-detail" />
+              <InvestmentDetailField label="Basket ISIN" value={basketIsin ?? "Not available"} variant="product-detail" />
+              <InvestmentDetailField label="Last update" value={basketLastUpdate ?? "Not available"} variant="product-detail" />
             </section>
           ) : null}
         </div>

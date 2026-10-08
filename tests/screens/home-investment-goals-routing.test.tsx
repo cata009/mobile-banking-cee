@@ -13,7 +13,10 @@ const FUTURE_CZ_HOME_WITH_INVESTMENTS_URL =
 
 beforeEach(() => {
   window.history.replaceState({}, '', FUTURE_CZ_HOME_WITH_INVESTMENTS_URL)
-  vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: false })))
+  vi.stubGlobal(
+    'matchMedia',
+    vi.fn(() => ({ matches: false })),
+  )
   vi.stubGlobal(
     'ResizeObserver',
     class ResizeObserver {
@@ -42,9 +45,7 @@ describe('Future CZ Homepage Investment goals routing', () => {
 
   async function openExistingGoal() {
     await openGoalsOverview()
-    fireEvent.click(
-      await screen.findByRole('button', { name: 'Open Build long-term wealth: General build-up wealth' }),
-    )
+    fireEvent.click(await screen.findByRole('button', { name: 'Open Build long-term wealth: General build-up wealth' }))
   }
 
   it('opens the complete goals container and starts the existing creation flow from its CTA', async () => {
@@ -56,18 +57,29 @@ describe('Future CZ Homepage Investment goals routing', () => {
     expect(screen.getByText('256.241')).toBeInTheDocument()
     expect(screen.getAllByText(',33 CZK')).not.toHaveLength(0)
     expect(screen.getByText('YOUR GOAL LIST')).toBeInTheDocument()
-    expect(screen.getByText('4', { selector: '[data-goal-count]' })).toBeInTheDocument()
-    expect(screen.getAllByTestId('investment-goal-card')).toHaveLength(4)
+    expect(screen.getByText('5', { selector: '[data-goal-count]' })).toBeInTheDocument()
+    expect(screen.getAllByTestId('investment-goal-card')).toHaveLength(5)
     expect(screen.queryByText(/My Robo Goal name/i)).not.toBeInTheDocument()
     expect(screen.getByText('Build long-term wealth')).toBeInTheDocument()
     expect(screen.getByText('My future home')).toBeInTheDocument()
     expect(screen.getByText('Financial freedom')).toBeInTheDocument()
     expect(screen.getByText('Protect my savings')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Open Build long-term wealth: General build-up wealth' })).toHaveTextContent('100.000,00 CZK')
+    expect(
+      screen.getByRole('button', { name: 'Open Build long-term wealth: General build-up wealth' }),
+    ).toHaveTextContent('100.000,00 CZK')
 
     fireEvent.click(screen.getByRole('button', { name: 'Create New Goal' }))
 
     expect(await screen.findByRole('heading', { name: 'Invest towards what matters' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
+    expect(await screen.findByRole('heading', { name: /First of all/ })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Edit data' }))
+    expect(screen.getByRole('heading', { name: /First of all/ })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'I confirm these data' }))
+    expect(await screen.findByRole('heading', { name: 'Your risk profile' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    expect(screen.getByRole('button', { name: 'I confirm these data' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
     expect(screen.getByRole('button', { name: 'Create Goal' })).toBeInTheDocument()
   }, 30_000)
 
@@ -81,21 +93,19 @@ describe('Future CZ Homepage Investment goals routing', () => {
 
     await openGoalsOverview()
 
-    fireEvent.click(
-      await screen.findByRole('button', { name: `Open ${goalName}: ${purpose}` }),
-    )
+    fireEvent.click(await screen.findByRole('button', { name: `Open ${goalName}: ${purpose}` }))
 
     expect(await screen.findByTestId('robo-goal-detail')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: goalName })).toBeInTheDocument()
     expect(screen.getByText(purpose)).toBeInTheDocument()
     if (goalName === 'Build long-term wealth') {
-      expect(screen.getByTestId('robo-goal-detail')).toHaveTextContent('100.000,00 CZK')
+      expect(screen.getByTestId('robo-goal-detail')).toHaveTextContent('92.312,77 CZK')
     }
 
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
 
     expect(await screen.findByText('Total goals value')).toBeInTheDocument()
-    expect(screen.getAllByTestId('investment-goal-card')).toHaveLength(4)
+    expect(screen.getAllByTestId('investment-goal-card')).toHaveLength(5)
   })
 
   it('keeps goal-card surfaces visually static on pointer hover', async () => {
@@ -115,10 +125,10 @@ describe('Future CZ Homepage Investment goals routing', () => {
 
     await openGoalsOverview()
 
-    expect(await screen.findAllByTestId('investment-goal-card')).toHaveLength(4)
+    expect(await screen.findAllByTestId('investment-goal-card')).toHaveLength(5)
   })
 
-  it('places the goal progress percentage on the detail progress bar', async () => {
+  it('shows the goal progress percentage separately from the detail progress bar', async () => {
     render(<App />)
 
     await openExistingGoal()
@@ -126,8 +136,8 @@ describe('Future CZ Homepage Investment goals routing', () => {
     const progressBar = await screen.findByTestId('goal-detail-progress-bar')
     const progressBadge = screen.getByTestId('goal-detail-progress-badge')
 
-    expect(progressBar).toContainElement(progressBadge)
-    expect(progressBadge).toHaveTextContent('100%')
+    expect(progressBar).not.toContainElement(progressBadge)
+    expect(progressBadge).toHaveTextContent('92%')
   })
 
   it('uses Help instead of the creation Close action on an existing goal detail', async () => {
@@ -166,17 +176,17 @@ describe('Future CZ Homepage Investment goals routing', () => {
 
     await openExistingGoal()
     const nanoChipHolding = await screen.findByRole('button', { name: /Nano-Chip Equity Fund product/ })
-    expect(nanoChipHolding).toHaveTextContent('13,160 PCS')
-    expect(nanoChipHolding).toHaveTextContent('35.000,00')
+    expect(nanoChipHolding).toHaveTextContent('11,660 PCS')
+    expect(nanoChipHolding).toHaveTextContent('31.010,57')
     expect(nanoChipHolding).toHaveTextContent('CZK')
 
     fireEvent.click(nanoChipHolding)
 
-    expect(await screen.findByText('MY SECURITY')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'My security' })).toBeInTheDocument()
     expect(screen.getAllByRole('heading', { name: 'Nano-Chip Equity Fund' })).not.toHaveLength(0)
     const productDetail = document.querySelector('[data-investment-product-detail]')
     expect(productDetail).toHaveAttribute('data-investment-product-detail', 'owned')
-    expect(productDetail).toHaveTextContent('35.000,00')
+    expect(productDetail).toHaveTextContent('31.010,57')
     expect(productDetail).toHaveTextContent('2.659,62')
     expect(productDetail).toHaveTextContent('CZK')
     expect(screen.queryByRole('button', { name: 'Buy' })).not.toBeInTheDocument()

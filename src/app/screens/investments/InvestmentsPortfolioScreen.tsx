@@ -34,6 +34,7 @@ import type { InvestmentBasketFund } from "@/app/config/investmentBasketFundsCon
 import { AppIcon, type IconName } from "@/app/components/icons";
 import PageHeader from "@/app/components/PageHeader";
 import ProductCard from "@/app/components/ProductCard";
+import PrimaryButton from "@/app/components/PrimaryButton";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import {
   INVESTMENT_PERIODS,
@@ -189,8 +190,8 @@ function PortfolioPerformanceTrendIcon({ direction }: { direction: "up" | "down"
     return (
       <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="13" height="10" viewBox="0 0 13 10" fill="none">
         <g clipPath="url(#portfolio-performance-up-clip)">
-          <path d="M7.13534 0C7.26313 1.00262 7.83168 1.5437 8.75884 1.57239C9.28176 1.58803 9.80467 1.57499 10.3276 1.57499C10.3458 1.6441 10.3654 1.71189 10.3837 1.78099C9.40825 2.78101 8.43153 3.77972 7.45352 4.78104C7.82386 5.19305 8.15117 5.55681 8.5189 5.9649C9.57777 4.91012 10.574 3.91923 11.6903 2.80839C11.835 4.26865 11.3252 5.85929 13.3177 6.28303V0H7.13403H7.13534Z" fill="#3D7D43" />
-          <path d="M0.586201 6.67738C-0.0618973 7.31102 -0.00582445 8.00725 0.594025 8.75303C1.71679 7.76475 2.84737 6.7882 3.95188 5.78166C4.2844 5.47788 4.49174 5.47527 4.79558 5.81947C5.38108 6.4818 6.01093 7.10502 6.65902 7.78039C7.09848 7.34883 7.44926 7.00463 7.77657 6.68259C6.62121 5.52481 5.51149 4.41267 4.3496 3.24707C3.11209 4.36704 1.80937 5.48179 0.586201 6.67607V6.67738Z" fill="#3D7D43" />
+          <path d="M7.13534 0C7.26313 1.00262 7.83168 1.5437 8.75884 1.57239C9.28176 1.58803 9.80467 1.57499 10.3276 1.57499C10.3458 1.6441 10.3654 1.71189 10.3837 1.78099C9.40825 2.78101 8.43153 3.77972 7.45352 4.78104C7.82386 5.19305 8.15117 5.55681 8.5189 5.9649C9.57777 4.91012 10.574 3.91923 11.6903 2.80839C11.835 4.26865 11.3252 5.85929 13.3177 6.28303V0H7.13403H7.13534Z" fill="var(--uc-investment-reference-positive)" />
+          <path d="M0.586201 6.67738C-0.0618973 7.31102 -0.00582445 8.00725 0.594025 8.75303C1.71679 7.76475 2.84737 6.7882 3.95188 5.78166C4.2844 5.47788 4.49174 5.47527 4.79558 5.81947C5.38108 6.4818 6.01093 7.10502 6.65902 7.78039C7.09848 7.34883 7.44926 7.00463 7.77657 6.68259C6.62121 5.52481 5.51149 4.41267 4.3496 3.24707C3.11209 4.36704 1.80937 5.48179 0.586201 6.67607V6.67738Z" fill="var(--uc-investment-reference-positive)" />
         </g>
         <defs>
           <clipPath id="portfolio-performance-up-clip">
@@ -301,8 +302,31 @@ function PortfolioSummary({
   );
 }
 
-function EmptyInvestmentsState() {
+function EmptyInvestmentsState({ onInvest }: { onInvest?: () => void }) {
   const { t } = useLanguage();
+
+  if (onInvest) {
+    return (
+      <section className="mx-[16px] mt-[24px] pb-[24px]" aria-labelledby="empty-investment-portfolio-title">
+        <div className="flex items-start gap-[12px] rounded-[8px] border border-[var(--uc-border)] p-[16px]">
+          <span className="mt-[2px] shrink-0" aria-hidden="true">
+            <AppIcon name="info-circle" size={24} color="var(--uc-text-muted)" />
+          </span>
+          <div className="min-w-0">
+            <h2 id="empty-investment-portfolio-title" className="uc-type-n4-strong text-[var(--uc-text)]">
+              {t("runtime.investments.emptyPortfolioTitle", "Your portfolio is still empty")}
+            </h2>
+            <p className="uc-type-n4 mt-[8px] text-[var(--uc-text-muted)]">
+              {t("runtime.investments.emptyPortfolioNextStep", "Select Invest to explore available investment products.")}
+            </p>
+          </div>
+        </div>
+        <PrimaryButton className="mt-[24px]" onClick={onInvest}>
+          {t("runtime.investments.actions.invest", "Invest")}
+        </PrimaryButton>
+      </section>
+    );
+  }
 
   return (
     <div className="mx-[24px] mt-[24px] rounded-[8px] border border-[var(--uc-border)] p-[18px]">
@@ -482,7 +506,7 @@ export default function InvestmentsPortfolioScreen({
       scrollContainerRef.current.scrollTo({ top: 0 });
     }
     setHeaderProgress(0);
-  }, [isOnPortfolioHome]);
+  }, [isOnPortfolioHome, setHeaderProgress]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -885,6 +909,7 @@ export default function InvestmentsPortfolioScreen({
         initialGoal={roboAdvisorView === "detail" ? selectedRoboGoal ?? undefined : undefined}
         currentAccounts={currentAccounts}
         securityCatalog={securityCatalog}
+        transactions={investmentHistoryTransactions}
         country={country}
         amountsHidden={amountsHidden}
         onOpenSecurity={({ securityId, productId, localValue, performancePercent, hideBuyAction, securityOverride }) => {
@@ -911,9 +936,12 @@ export default function InvestmentsPortfolioScreen({
           }, { hideBuyAction });
         }}
         onGoalUpdated={(updatedGoal) => {
-          setRoboGoals((goals) => goals.map((goal) => (
-            goal.id === updatedGoal.id ? updatedGoal : goal
-          )));
+          setRoboGoals((goals) => {
+            const exists = goals.some((goal) => goal.id === updatedGoal.id);
+            return exists
+              ? goals.map((goal) => goal.id === updatedGoal.id ? updatedGoal : goal)
+              : [updatedGoal, ...goals];
+          });
           setSelectedRoboGoal(updatedGoal);
         }}
         onBack={() => {
@@ -932,6 +960,7 @@ export default function InvestmentsPortfolioScreen({
     return (
       <InvestmentBasketFundDetailScreen
         basket={selectedBasketFund}
+        securityCatalog={securityCatalog}
         country={country}
         amountsHidden={amountsHidden}
         czRoboProductDetail={showBottomNavigation}
@@ -1298,7 +1327,7 @@ export default function InvestmentsPortfolioScreen({
                       aria-haspopup="dialog"
                       aria-expanded={czRoboSortSheetOpen}
                       onClick={() => setCzRoboSortSheetOpen(true)}
-                      className="inline-flex h-[34px] shrink-0 items-center gap-[6px] text-[14px] font-bold uppercase leading-[16px] text-[#007A91] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
+                      className="inline-flex h-[34px] shrink-0 items-center gap-[6px] text-[14px] font-bold uppercase leading-[16px] text-[var(--uc-investment-reference-action)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
                       data-cz-robo-security-sort-trigger="true"
                     >
                       <span>{activeSortOptionLabel}</span>
@@ -1311,7 +1340,7 @@ export default function InvestmentsPortfolioScreen({
                         fill="none"
                         style={{ transform: activeSortDescending ? "rotate(180deg)" : undefined }}
                       >
-                        <path fillRule="evenodd" clipRule="evenodd" d="M8.00016 0.666992L14.6668 6.64145C13.7451 7.46519 12.2535 7.46519 11.3335 6.64145L9.17794 4.71057V15.3337L6.8215 15.3328V4.71057L4.66683 6.64145C3.74683 7.46519 2.2535 7.46519 1.3335 6.64145L8.00016 0.666992Z" fill="#007A91" />
+                        <path fillRule="evenodd" clipRule="evenodd" d="M8.00016 0.666992L14.6668 6.64145C13.7451 7.46519 12.2535 7.46519 11.3335 6.64145L9.17794 4.71057V15.3337L6.8215 15.3328V4.71057L4.66683 6.64145C3.74683 7.46519 2.2535 7.46519 1.3335 6.64145L8.00016 0.666992Z" fill="var(--uc-investment-reference-action)" />
                       </svg>
                     </button>
                   </div>
@@ -1340,7 +1369,21 @@ export default function InvestmentsPortfolioScreen({
           <div className="h-[28px]" />
         </>
       ) : (
-        <EmptyInvestmentsState />
+        showBottomNavigation ? <EmptyInvestmentsState /> : (
+          <>
+            <PortfolioSummary
+              totalValue={totalValueParts}
+              performanceAmount={performanceParts}
+              performancePercentLabel={totalPerformancePercentLabel}
+              performanceAmountValue={totalPerformanceAmount}
+              performancePercentValue={totalPerformancePercent}
+              amountsHidden={amountsHidden}
+              currency={portfolioCurrency}
+              czRoboAmountStyle={false}
+            />
+            <EmptyInvestmentsState onInvest={() => setSecurityListOpen(true)} />
+          </>
+        )
       )}
       </div>
       </div>

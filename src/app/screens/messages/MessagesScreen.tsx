@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
@@ -83,7 +83,7 @@ export default function MessagesScreen({ onBack }: MessagesScreenProps) {
       { id: "inbox" as MessageMailbox, label: t("runtime.messages.inbox", config.tabs.inbox), hasNewItems: true },
       { id: "outbox" as MessageMailbox, label: t("runtime.messages.outbox", config.tabs.outbox) },
     ] as const;
-  const localizeMessage = (message: MessageListItem): MessageListItem => {
+  const localizeMessage = useCallback((message: MessageListItem): MessageListItem => {
     const keyBase = `runtime.messages.rows.${message.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
     return {
       ...message,
@@ -91,7 +91,7 @@ export default function MessagesScreen({ onBack }: MessagesScreenProps) {
       description: t(`${keyBase}.description`, message.description),
       badge: message.badge ? t("runtime.messages.newBadge", message.badge) : message.badge,
     };
-  };
+  }, [t]);
 
 
   const filteredMessages = useMemo(() => {
@@ -112,7 +112,7 @@ export default function MessagesScreen({ onBack }: MessagesScreenProps) {
         .toLowerCase()
         .includes(normalizedQuery),
     );
-  }, [config.sectionTitle, messages, searchQuery, t]);
+  }, [config.sectionTitle, messages, searchQuery, localizeMessage]);
 
   return (
     <div

@@ -1,6 +1,8 @@
+import { useState } from "react";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import { AppIcon } from "@/app/components/icons";
+import { InvestmentGoalsHelpScreen } from "./robo/InvestmentGoalsHelpScreen";
 import {
   formatCzkInteger,
   formatCzkReturnLabel,
@@ -15,68 +17,7 @@ interface CzInvestmentGoalsScreenProps {
   onOpenGoal: (goal: RoboExistingGoal) => void;
 }
 
-export const INITIAL_CZ_ROBO_GOALS: readonly RoboExistingGoal[] = [
-  {
-    id: "goal-4-strategic",
-    name: "Build long-term wealth",
-    purpose: "General build-up wealth",
-    currentInteger: "100 000",
-    currentDecimals: ",00 CZK",
-    returnLabel: "+1 100,00 CZK (+1,36%)",
-    returnTone: "positive",
-    targetInteger: "100 000",
-    targetDecimals: ",00 CZK",
-    horizonYears: 3,
-    startDate: "15 Feb 2025",
-    endDate: "15 Feb 2028",
-    portfolioId: "basket-sustainable-balanced-jp-morgan-global-growth",
-  },
-  {
-    id: "goal-2-purchase",
-    name: "My future home",
-    purpose: "Saving for a major purchase",
-    currentInteger: "51 241",
-    currentDecimals: ",33 CZK",
-    returnLabel: "+241,33 CZK (+0,47%)",
-    returnTone: "positive",
-    targetInteger: "250 000",
-    targetDecimals: ",00 CZK",
-    horizonYears: 10,
-    startDate: "15 Feb 2025",
-    endDate: "15 Feb 2035",
-    portfolioId: "basket-balanced-core-blackrock-credit-opportunities",
-  },
-  {
-    id: "goal-3-strategic",
-    name: "Financial freedom",
-    purpose: "Retirement",
-    currentInteger: "5 000",
-    currentDecimals: ",00 CZK",
-    returnLabel: "0 total return",
-    returnTone: "neutral",
-    targetInteger: "100 000",
-    targetDecimals: ",00 CZK",
-    horizonYears: 3,
-    startDate: "15 Feb 2025",
-    endDate: "15 Feb 2028",
-    portfolioId: "basket-steady-income-chase-regular-eur",
-  },
-  {
-    id: "goal-4-inflation",
-    name: "Protect my savings",
-    purpose: "Saving for unforeseen circumstances",
-    currentInteger: "100 000",
-    currentDecimals: ",00 CZK",
-    returnLabel: "-1 100,00 CZK (-1,36%)",
-    returnTone: "negative",
-    targetInteger: "100 000",
-    targetDecimals: ",00 CZK",
-    horizonYears: 3,
-    startDate: "15 Feb 2025",
-    endDate: "15 Feb 2028",
-    portfolioId: "basket-balanced-core-onemarkets-eur-collection",
-  },
-] as const;
+export { INITIAL_CZ_ROBO_GOALS } from "@/features/investments/robo/goalFixtures";
 
 function GoalCard({
   goal,
@@ -127,26 +68,28 @@ function GoalCard({
         </div>
 
         <div className="w-full border-t border-[var(--uc-border-muted)] pt-[16px]">
-          <p className="text-[14px] leading-[17px] text-[var(--uc-text-muted)]">Target</p>
-          <div className="flex items-baseline">
-            <span className="text-[16px] font-bold leading-[18px]">{formatCzkInteger(goal.targetInteger)}</span>
-            <span className="text-[14px] leading-[17px]">{goal.targetDecimals}</span>
+          <div className="flex items-end justify-between gap-[16px]">
+            <div>
+              <p className="text-[14px] leading-[17px] text-[var(--uc-text-muted)]">Target</p>
+              <div className="flex items-baseline">
+                <span className="text-[16px] font-bold leading-[18px]">{formatCzkInteger(goal.targetInteger)}</span>
+                <span className="text-[14px] leading-[17px]">{goal.targetDecimals}</span>
+              </div>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className="text-[14px] leading-[17px] text-[var(--uc-text-muted)]">Progress</p>
+              <p className="text-[16px] font-bold leading-[18px]">{progress}%</p>
+            </div>
           </div>
-          <div className="relative mt-[10px] pt-[6px]">
+          <div className="mt-[12px]">
             <div className="h-[10px] overflow-hidden rounded-full border border-[var(--uc-border)] bg-[var(--uc-neutral-200)]">
               <div
                 className="h-full rounded-full bg-[var(--uc-action)]"
                 style={{ width: `${Math.min(100, Math.max(2, progress))}%` }}
               />
             </div>
-            <span
-              className="absolute top-0 -translate-x-full rounded-full bg-[var(--uc-action)] px-[5px] py-[3px] text-[12px] font-bold leading-[14px] text-white"
-              style={{ left: `${Math.min(100, Math.max(12, progress))}%` }}
-            >
-              {progress}%
-            </span>
           </div>
-          <div className="mt-[8px] flex items-center justify-between text-[14px] leading-[17px]">
+          <div className="mt-[12px] flex items-center justify-between text-[14px] leading-[17px]">
             {goal.startDate ? (
               <>
                 <span>{goal.startDate}</span>
@@ -171,6 +114,7 @@ export default function CzInvestmentGoalsScreen({
   onCreateGoal,
   onOpenGoal,
 }: CzInvestmentGoalsScreenProps) {
+  const [page, setPage] = useState<"list" | "help">("list");
   const totalGoalsValue = goals.reduce((total, goal) => {
     const integer = goal.currentInteger.replace(/\D/g, "");
     const decimals = goal.currentDecimals.replace(/[^\d,.-]/g, "").replace(",", ".");
@@ -181,6 +125,10 @@ export default function CzInvestmentGoalsScreen({
     maximumFractionDigits: 2,
   }).format(totalGoalsValue).split(",");
 
+  if (page === "help") {
+    return <InvestmentGoalsHelpScreen onBack={() => setPage("list")} />;
+  }
+
   return (
     <div
       className="flex h-full w-full flex-col overflow-hidden bg-[var(--uc-app-bg)] text-[var(--uc-text)]"
@@ -189,7 +137,7 @@ export default function CzInvestmentGoalsScreen({
       <PageHeader
         title=""
         onBack={onBack}
-        onHelpClick={() => undefined}
+        onHelpClick={() => setPage("help")}
         variant="gray"
         includeSafeArea
         renderLargeTitle={false}

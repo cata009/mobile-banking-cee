@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { AppIcon } from "@/app/components/icons";
 import NavigationRow from "@/app/components/NavigationRow";
 import { cn } from "@/app/components/ui/utils";
-import { ProductEvaluationBullet } from "./InvestmentBuyOrderFlow";
+import { ProductEvaluationBullet } from "@/app/components/investments/ProductEvaluationBullet";
 
 /** Shared 5-tone palette, reused from the portfolio distribution donut for visual consistency. */
 const CHART_COLORS = ["#00A3E0", "#5BC199", "#074861", "#885BC1", "#535453"] as const;
