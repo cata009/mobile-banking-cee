@@ -74,21 +74,22 @@ export function IntroScreen({ onCreate, onExit }: { onCreate: () => void; onExit
         <div className="px-[24px] pb-[24px] pt-[20px]">
           <h1 className="uc-type-h1 text-[var(--uc-text)]">Invest towards what matters</h1>
           <p className="mt-[16px] text-[16px] leading-[21px] text-[var(--uc-text)]">
-            Create a goal and invest with a portfolio selected for your needs.
+            Turn your plans into an investment goal. Choose a suitable portfolio, then decide when and how much to
+            invest.
           </p>
           <div className="mt-[22px] rounded-[8px] bg-[var(--uc-surface-muted)]">
             {[
               [
-                'A recommendation built around you',
-                'We use your goal, time horizon and investor profile to check suitable portfolios.',
+                'A plan built around you',
+                'Confirm your contact details and review your investor profile. Set a goal, target amount and time horizon.',
               ],
               [
-                'A clear plan you can track',
-                'Explore possible outcomes, compare portfolios and follow your goal over time.',
+                'Explore your investment options',
+                'Compare suitable portfolios and explore potential outcomes before choosing one for your goal.',
               ],
               [
-                'You decide before anything is invested',
-                'Review the recommendation, risks and documents before you sign.',
+                'Start when you’re ready',
+                'Review and sign to create your goal. Then add money once or set up monthly contributions.',
               ],
             ].map(([title, body], index) => (
               <div
@@ -99,7 +100,7 @@ export function IntroScreen({ onCreate, onExit }: { onCreate: () => void; onExit
                 )}
               >
                 <span className="mt-[2px] grid size-[24px] shrink-0 place-items-center text-[var(--uc-text)]">
-                  <AppIcon name={index === 2 ? 'investment-important-info' : 'invest-action'} size={22} />
+                  <AppIcon name={index === 0 ? 'user-round' : index === 1 ? 'chart-bars' : 'shield-check'} size={22} />
                 </span>
                 <div>
                   <p className="uc-type-n5-strong uppercase text-[var(--uc-text)]">{title}</p>
@@ -118,7 +119,8 @@ export function IntroScreen({ onCreate, onExit }: { onCreate: () => void; onExit
             </p>
           </div>
           <p className="uc-type-n5 mt-[18px] border-t border-[var(--uc-border)] pt-[10px] text-[var(--uc-text-muted)]">
-            An investment account is required. Account terms and required documents are shown before signing.
+            Creating your goal does not invest money. You’ll review your contribution and order details before
+            confirming.
           </p>
         </div>
       </main>

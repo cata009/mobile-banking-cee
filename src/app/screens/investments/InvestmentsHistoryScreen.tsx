@@ -50,6 +50,7 @@ interface InvestmentsHistoryScreenProps {
   includeCzRoboHistoricalTransactions?: boolean;
   allDatesByDefault?: boolean;
   hideCurrencyFilter?: boolean;
+  hideAllTimeDateOption?: boolean;
   transactionsOverride?: readonly InvestmentHistoryTransaction[];
   ordersOverride?: readonly InvestmentHistoryOrder[];
   onTabChange?: (tab: InvestmentHistoryTabId) => void;
@@ -377,6 +378,7 @@ function FilterPanel({
   draftFilters,
   currencies,
   hideCurrencyFilter = false,
+  hideAllTimeDateOption = false,
   historyTab,
   country,
   onBack,
@@ -388,6 +390,7 @@ function FilterPanel({
   draftFilters: InvestmentHistoryFilterState;
   currencies: readonly Currency[];
   hideCurrencyFilter?: boolean;
+  hideAllTimeDateOption?: boolean;
   historyTab: InvestmentHistoryTabId;
   country: CountryId;
   onBack: () => void;
@@ -489,7 +492,7 @@ function FilterPanel({
         <div>
           <FilterDivider title="BY DATE" />
           <div className="flex flex-col">
-            {INVESTMENT_HISTORY_DATE_OPTIONS.map((option) => (
+            {INVESTMENT_HISTORY_DATE_OPTIONS.filter((option) => !hideAllTimeDateOption || option.id !== "all-time").map((option) => (
               <RadioRow
                 key={option.id}
                 label={option.label}
@@ -738,6 +741,7 @@ export default function InvestmentsHistoryScreen({
   includeCzRoboHistoricalTransactions = false,
   allDatesByDefault = false,
   hideCurrencyFilter = false,
+  hideAllTimeDateOption = false,
 }: InvestmentsHistoryScreenProps) {
   const { country, amountsHidden } = useDemo();
   const { categories } = useProducts();
@@ -790,13 +794,13 @@ export default function InvestmentsHistoryScreen({
     return [...currencies];
   }, [allCurrenciesKey]);
   const defaultFilters = useMemo<InvestmentHistoryFilterState>(() => ({
-    datePreset: allDatesByDefault ? "all-time" : "last-year",
+    datePreset: allDatesByDefault && !hideAllTimeDateOption ? "all-time" : "last-year",
     customStartDate: "2025-09-01",
     customEndDate: "2026-06-30",
     selectedTypes: [...INVESTMENT_HISTORY_TRANSACTION_TYPES],
     selectedCurrencies: allCurrencies,
     selectedStatuses: [...INVESTMENT_HISTORY_ORDER_STATUSES],
-  }), [allCurrencies, allDatesByDefault]);
+  }), [allCurrencies, allDatesByDefault, hideAllTimeDateOption]);
   const [appliedFilters, setAppliedFilters] = useState<InvestmentHistoryFilterState | null>(null);
   const [draftFilters, setDraftFilters] = useState<InvestmentHistoryFilterState>(defaultFilters);
 
@@ -948,6 +952,7 @@ export default function InvestmentsHistoryScreen({
         draftFilters={draftFilters}
         currencies={allCurrencies}
         hideCurrencyFilter={hideCurrencyFilter}
+        hideAllTimeDateOption={hideAllTimeDateOption}
         historyTab={activeTab}
         country={country}
         onBack={() => setFilterMode(null)}

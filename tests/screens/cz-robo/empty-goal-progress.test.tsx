@@ -62,7 +62,7 @@ describe('Empty Robo goal progress', () => {
         ...emptyGoal,
         orders: [{ ...sourceGoal.orders![0]!, orderType: 'BUY', status: 'PENDING' }],
       },
-      'Your top-up orders are pending',
+      'Your investment is being processed',
     ],
     [
       'scheduled',

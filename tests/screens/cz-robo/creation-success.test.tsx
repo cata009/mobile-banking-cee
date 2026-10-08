@@ -7,7 +7,7 @@ import { CreationSuccessScreen } from '@/app/screens/investments/robo/CreationSu
 afterEach(cleanup)
 
 describe('Robo goal creation success', () => {
-  it('confirms the selected goal and explains that its first contribution is still needed', () => {
+  it('invites the first investment towards the selected goal with flexible contribution options', () => {
     render(
       <CreationSuccessScreen
         goalName="A home of my own"
@@ -19,9 +19,9 @@ describe('Robo goal creation success', () => {
     )
 
     expect(screen.getByRole('heading', { level: 1, name: 'Your goal is ready' })).toBeVisible()
-    expect(screen.getByRole('heading', { name: 'Start with your first contribution' })).toBeVisible()
+    expect(screen.getByRole('heading', { name: 'Give your goal a head start' })).toBeVisible()
     expect(screen.getByText('A home of my own')).toBeVisible()
-    expect(screen.getByText(/add money to start investing/i)).toBeVisible()
+    expect(screen.getByText(/one-off contribution or a monthly plan/i)).toBeVisible()
     expect(screen.getByText(/review.*before confirming/i)).toBeVisible()
   })
 

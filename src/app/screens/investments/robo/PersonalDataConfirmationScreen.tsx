@@ -2,7 +2,14 @@ import PrimaryButton from '@/app/components/PrimaryButton'
 import { AppIcon } from '@/app/components/icons'
 import { RoboScreen } from '@/app/screens/investments/robo/RoboScreen'
 
-export function PersonalDataConfirmationScreen({ onBack, onConfirm }: { onBack: () => void; onConfirm: () => void }) {
+export function PersonalDataConfirmationScreen({
+  onBack,
+  onConfirm,
+}: {
+  onBack: () => void
+  onConfirm: () => void
+  onClose?: () => void
+}) {
   return (
     <RoboScreen
       title={"First of all,\nlet's check your data"}
@@ -14,15 +21,15 @@ export function PersonalDataConfirmationScreen({ onBack, onConfirm }: { onBack: 
       dataScreen="personal-data-confirmation"
       footer={
         <div className="space-y-[12px]">
-          <button
-            type="button"
-            className="min-h-[44px] w-full rounded-[4px] text-[16px] font-bold uppercase leading-[22px] text-[var(--uc-action)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uc-action)]"
-          >
-            Edit data
-          </button>
           <PrimaryButton labelSize="18" onClick={onConfirm}>
             I confirm these data
           </PrimaryButton>
+          <button
+            type="button"
+            className="min-h-[44px] w-full rounded-[4px] text-[16px] font-bold leading-[22px] text-[var(--uc-action)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uc-action)]"
+          >
+            Edit data
+          </button>
         </div>
       }
     >

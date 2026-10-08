@@ -104,7 +104,7 @@ export function ManageHistoryScreen({
     <InvestmentsHistoryScreen
       onBack={onBack}
       initialTab={historyTab}
-      allDatesByDefault
+      hideAllTimeDateOption
       hideCurrencyFilter
       transactionsOverride={goalTransactions}
       ordersOverride={goalOrders}

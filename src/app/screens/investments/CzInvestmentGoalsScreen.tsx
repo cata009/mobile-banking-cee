@@ -2,7 +2,9 @@ import { useState } from "react";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import { AppIcon } from "@/app/components/icons";
+import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import { InvestmentGoalsHelpScreen } from "./robo/InvestmentGoalsHelpScreen";
+import goalsSummaryIllustration from "@/assets/investments/goals-summary-illustration.png";
 import {
   formatCzkInteger,
   formatCzkReturnLabel,
@@ -115,6 +117,7 @@ export default function CzInvestmentGoalsScreen({
   onOpenGoal,
 }: CzInvestmentGoalsScreenProps) {
   const [page, setPage] = useState<"list" | "help">("list");
+  const { progress: headerProgress, onScroll: handleScroll, setProgress: setHeaderProgress } = useCollapsingHeader(64);
   const totalGoalsValue = goals.reduce((total, goal) => {
     const integer = goal.currentInteger.replace(/\D/g, "");
     const decimals = goal.currentDecimals.replace(/[^\d,.-]/g, "").replace(",", ".");
@@ -126,7 +129,14 @@ export default function CzInvestmentGoalsScreen({
   }).format(totalGoalsValue).split(",");
 
   if (page === "help") {
-    return <InvestmentGoalsHelpScreen onBack={() => setPage("list")} />;
+    return (
+      <InvestmentGoalsHelpScreen
+        onBack={() => {
+          setHeaderProgress(0);
+          setPage("list");
+        }}
+      />
+    );
   }
 
   return (
@@ -135,28 +145,55 @@ export default function CzInvestmentGoalsScreen({
       data-investment-goals-screen
     >
       <PageHeader
-        title=""
+        title="Your goals list"
         onBack={onBack}
         onHelpClick={() => setPage("help")}
         variant="gray"
         includeSafeArea
         renderLargeTitle={false}
+        collapsedTitleProgress={headerProgress}
+        hideCollapsedTitleWhenHidden
       />
 
-      <main className="min-h-0 flex-1 overflow-y-auto px-[16px] pb-[24px] scrollbar-hide">
-        <section className="flex flex-col items-center pb-[64px] pt-[26px] text-center">
-          <p className="text-[18px] leading-[20px]">Total goals value</p>
-          <div className="mt-[4px] flex items-baseline justify-center">
-            <span className="text-[48px] font-bold leading-[52px]">{formatCzkInteger(totalInteger ?? "0")}</span>
-            <span className="text-[32px] leading-[34px]">,{totalDecimals} CZK</span>
+      <main
+        className="min-h-0 flex-1 overflow-y-auto px-[16px] pb-[24px] scrollbar-hide"
+        onScroll={handleScroll}
+      >
+        <h1 className="uc-type-h1 pt-[8px]">Your goals list</h1>
+        <p className="mb-[24px] mt-[6px] text-[16px] leading-[21px] text-[var(--uc-text-muted)]">
+          Track your plans, one step at a time
+        </p>
+
+        <section
+          aria-label="Total goals value"
+          className="relative isolate mb-[24px] flex min-h-[110px] items-center overflow-hidden rounded-[8px] px-[20px] py-[16px] text-left [container-type:inline-size]"
+          style={{
+            backgroundColor: "color-mix(in srgb, var(--uc-text) 7%, var(--uc-surface-raised))",
+            backgroundImage: "linear-gradient(110deg, transparent 35%, color-mix(in srgb, var(--uc-action) 12%, transparent) 100%)",
+          }}
+        >
+          <div className="relative z-10 min-w-0 pr-[76px]">
+            <p className="text-[16px] font-bold leading-[21px]">Total goals value</p>
+            <div className="mt-[2px] flex flex-wrap items-baseline gap-y-[2px]">
+              <span className="min-w-0 max-w-full break-words text-[clamp(30px,11cqw,36px)] font-bold leading-[1.1] [overflow-wrap:anywhere]">
+                {formatCzkInteger(totalInteger ?? "0")}
+              </span>
+              <span className="shrink-0 whitespace-nowrap text-[18px] leading-[22px]">,{totalDecimals} CZK</span>
+            </div>
           </div>
+          <img
+            src={goalsSummaryIllustration}
+            alt=""
+            aria-hidden="true"
+            width={144}
+            height={172}
+            className="pointer-events-none absolute right-[-18px] top-[6px] h-[172px] w-[144px] rotate-[12deg] object-contain"
+          />
         </section>
 
         <div className="mb-[16px] flex items-center justify-between border-b border-[var(--uc-border-muted)] pb-[8px]">
-          <h2 className="text-[18px] font-bold leading-[22px]">YOUR GOAL LIST</h2>
-          <span className="text-[18px] font-bold leading-[22px]" data-goal-count>
-            {goals.length}
-          </span>
+          <h2 className="text-[18px] font-bold leading-[22px]">Your goals</h2>
+          <span className="text-[18px] font-bold leading-[22px]" data-goal-count>{goals.length}</span>
         </div>
 
         <div className="flex flex-col gap-[16px]">

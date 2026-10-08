@@ -3,7 +3,7 @@ import { buildInvestmentSecurityCatalog } from '@/app/config/investmentsPortfoli
 import { INITIAL_CZ_ROBO_GOALS } from '@/features/investments/robo/goalFixtures'
 import { buildInitialRoboGoal, getRoboGoalCurrentValue } from '@/features/investments/robo/goalModel'
 import { hydrateRoboGoal } from '@/features/investments/robo/goalHydration'
-import { applyRoboTopUp, applyRoboSale } from '@/features/investments/robo/goalActions'
+import { applyRoboTopUp, applyRoboSale, executeRoboBuyOrder } from '@/features/investments/robo/goalActions'
 import { getRoboPortfolioForGoal, ROBO_STRATEGIES } from '@/features/investments/robo/model'
 import {
   buildRoboProjection,
@@ -38,9 +38,7 @@ describe('Robo goal policies and extraction fixtures', () => {
     expect(goal.positions!.find((position) => position.title === 'Nano-Chip Equity Fund')!.quantity).toBe(11.659775)
     expect(getRoboGoalCurrentValue(goal)).toBe(92312.77)
     expect(goal.orders!.filter((order) => order.orderType === 'SELL')).toHaveLength(2)
-    expect(goal.orders!.filter((order) => order.orderType === 'BUY' && order.status === 'EXECUTED')).toHaveLength(
-      goal.positions!.length,
-    )
+    expect(goal.orders!.filter((order) => order.orderType === 'BUY' && order.status === 'EXECUTED')).toHaveLength(1)
     expect(hydrateRoboGoal(goal, basket, 'CZ', catalog)).toBe(goal)
   })
 
@@ -65,6 +63,8 @@ describe('Robo goal policies and extraction fixtures', () => {
     expect(next.currentDecimals).toBe(goal.currentDecimals)
     expect(next.transactions).toEqual(goal.transactions)
     const pending = next.orders!.filter((order) => order.status === 'PENDING')
+    expect(pending).toHaveLength(1)
+    expect(pending[0]!.title).toBe(basket.title)
     expect(pending.reduce((total, order) => total + order.amount, 0)).toBe(10000)
     expect(
       pending.every(
@@ -81,6 +81,35 @@ describe('Robo goal policies and extraction fixtures', () => {
       { ...operation, id: 'once' },
     )
     expect(once.recurringContribution).toBe(next.recurringContribution)
+  })
+
+  it('executes one basket order into five BUY transactions and holdings exactly once', () => {
+    const empty = buildInitialRoboGoal(portfolio, seed, 0, 'CZ', catalog, { date: operation.date })
+    const pending = applyRoboTopUp(
+      empty,
+      portfolio,
+      {
+        method: 'one-off',
+        initialAmount: 10000,
+        monthlyAmount: 0,
+        startDate: '',
+        cashAccountId: 'cash-cz',
+      },
+      'CZ',
+      catalog,
+      operation,
+    )
+    const orderId = pending.orders![0]!.id
+    const executed = executeRoboBuyOrder(pending, portfolio, orderId, 'CZ', catalog)
+    expect(executed.orders).toHaveLength(1)
+    expect(executed.orders![0]).toMatchObject({ id: orderId, amount: 10000, status: 'EXECUTED', title: basket.title })
+    expect(executed.transactions).toHaveLength(5)
+    expect(executed.transactions!.every((transaction) => transaction.type === 'BUY')).toBe(true)
+    expect(executed.transactions!.reduce((total, transaction) => total + transaction.amount, 0)).toBe(10000)
+    expect(executed.positions!.filter((position) => position.quantity > 0)).toHaveLength(5)
+    expect(getRoboGoalCurrentValue(executed)).toBe(10000)
+    expect(executeRoboBuyOrder(executed, portfolio, orderId, 'CZ', catalog)).toBe(executed)
+    expect(hydrateRoboGoal(executed, basket, 'CZ', catalog)).toBe(executed)
   })
 
   it('caps executed sales to held units and records both transaction and executed order', () => {

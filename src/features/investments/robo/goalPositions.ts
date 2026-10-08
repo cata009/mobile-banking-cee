@@ -206,23 +206,39 @@ export function buildRoboBasketTradeHistory(
       date,
       title: allocation.holding.title,
       amount: allocation.amount,
+      quantity: allocation.quantity,
       currency,
       type: orderType,
       tone,
       logoId: allocation.security?.logoId,
     })),
-    orders: allocations.map((allocation) => ({
-      id: `${eventId}-order-${allocation.holdingIndex}`,
-      securityId: allocation.security?.id ?? allocation.holding.productId,
-      date,
-      title: allocation.holding.title,
-      amount: allocation.amount,
-      currency,
-      orderType,
-      status: 'EXECUTED',
-      tone,
-      logoId: allocation.security?.logoId,
-    })),
+    orders:
+      isBuy && allocations.length > 0
+        ? [
+            {
+              id: `${eventId}-order`,
+              securityId: basket.id,
+              date,
+              title: basket.title,
+              amount: roundMoney(amount),
+              currency,
+              orderType: 'BUY',
+              status: 'EXECUTED',
+              tone: 'positive',
+            },
+          ]
+        : allocations.map((allocation) => ({
+            id: `${eventId}-order-${allocation.holdingIndex}`,
+            securityId: allocation.security?.id ?? allocation.holding.productId,
+            date,
+            title: allocation.holding.title,
+            amount: allocation.amount,
+            currency,
+            orderType,
+            status: 'EXECUTED',
+            tone,
+            logoId: allocation.security?.logoId,
+          })),
   }
 }
 
@@ -231,6 +247,7 @@ export function buildRoboPositionOpeningHistory(
   startDate: string | undefined,
   positions: readonly RoboGoalPosition[],
   securityCatalog: readonly InvestmentCatalogSecurity[],
+  basket?: InvestmentBasketFund,
 ): { transactions: InvestmentHistoryTransaction[]; orders: InvestmentHistoryOrder[] } {
   const historyDate = startDate ? parseRoboCalendarDate(startDate) : new Date()
   historyDate.setHours(12, 0, 0, 0)
@@ -262,19 +279,34 @@ export function buildRoboPositionOpeningHistory(
 
   return {
     transactions: transactionRows,
-    orders: transactionRows.map((transaction) => ({
-      id: `${goalId}-opening-buy-order-${transaction.id.split('-').at(-1)}`,
-      securityId: transaction.securityId,
-      date: transaction.date,
-      title: transaction.title,
-      amount: transaction.amount,
-      quantity: transaction.quantity,
-      currency: transaction.currency,
-      orderType: 'BUY' as const,
-      status: 'EXECUTED' as const,
-      tone: 'positive' as const,
-      logoId: transaction.logoId,
-    })),
+    orders:
+      basket && transactionRows.length > 0
+        ? [
+            {
+              id: `${goalId}-opening-buy-order`,
+              securityId: basket.id,
+              date,
+              title: basket.title,
+              amount: roundMoney(transactionRows.reduce((total, transaction) => total + transaction.amount, 0)),
+              currency: transactionRows[0]!.currency,
+              orderType: 'BUY',
+              status: 'EXECUTED',
+              tone: 'positive',
+            },
+          ]
+        : transactionRows.map((transaction) => ({
+            id: `${goalId}-opening-buy-order-${transaction.id.split('-').at(-1)}`,
+            securityId: transaction.securityId,
+            date: transaction.date,
+            title: transaction.title,
+            amount: transaction.amount,
+            quantity: transaction.quantity,
+            currency: transaction.currency,
+            orderType: 'BUY' as const,
+            status: 'EXECUTED' as const,
+            tone: 'positive' as const,
+            logoId: transaction.logoId,
+          })),
   }
 }
 
@@ -353,19 +385,24 @@ export function buildRoboBasketPendingOrders(
   date = new Date().toISOString(),
 ): InvestmentHistoryOrder[] {
   const currency = getCountryCurrency(country) as InvestmentCatalogSecurity['localCurrency']
-  return getRoboBasketPurchaseAllocations(basket, amount, country, securityCatalog)
-    .filter((allocation) => allocation.amount > 0)
-    .map((allocation) => ({
-      id: `${eventId}-order-${allocation.holdingIndex}`,
-      securityId: allocation.security?.id ?? allocation.holding.productId,
+  if (
+    !getRoboBasketPurchaseAllocations(basket, amount, country, securityCatalog).some(
+      (allocation) => allocation.amount > 0,
+    )
+  )
+    return []
+  return [
+    {
+      id: `${eventId}-order`,
+      securityId: basket.id,
       cashAccountId,
       date,
-      title: allocation.holding.title,
-      amount: allocation.amount,
+      title: basket.title,
+      amount: roundMoney(amount),
       currency,
       orderType: 'BUY',
       status: 'PENDING',
       tone: 'neutral',
-      logoId: allocation.security?.logoId,
-    }))
+    },
+  ]
 }

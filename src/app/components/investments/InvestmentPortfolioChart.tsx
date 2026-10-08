@@ -75,17 +75,18 @@ interface RuntimeAxisTickAdapter {
 
 function formatAxisValue(value: number, valueRange: number): string {
   const absolute = Math.abs(value);
+  let label: string;
 
   if (absolute >= 1_000_000) {
-    return `${Math.round(absolute / 1_000_000)}m`;
-  }
-
-  if (absolute >= 1_000) {
+    label = `${Math.round(absolute / 1_000_000)}m`;
+  } else if (absolute >= 1_000) {
     const decimals = valueRange < 1_000 ? 2 : valueRange < 10_000 ? 1 : 0;
-    return `${(absolute / 1_000).toFixed(decimals).replace(".", ",")}k`;
+    label = `${(absolute / 1_000).toFixed(decimals).replace(".", ",")}k`;
+  } else {
+    label = `${Math.round(absolute)}`;
   }
 
-  return `${Math.round(absolute)}`;
+  return value < 0 && label !== "0" ? `-${label}` : label;
 }
 
 function formatTooltipValue(value: number, country: CountryId, currency: string, amountsHidden: boolean): string {
@@ -295,6 +296,12 @@ export default function InvestmentPortfolioChart({
     : [minValue - domainPadding, maxValue + domainPadding];
   const [domainMin, domainMax] = yDomain;
   const yTicks = [0, 1, 2, 3].map((step) => domainMin + ((domainMax - domainMin) * step) / 3);
+  const displayedYTicks = isZeroBaselineChart ? [0] : yTicks;
+  const amountFontSize = compact ? 11 : 12;
+  const roboAxisGutter = Math.ceil(Math.max(
+    isZeroBaselineChart ? 20 : 36,
+    ...displayedYTicks.map((value) => formatAxisValue(value, valueRange).length * amountFontSize * 0.7 + 8),
+  ));
   const activeDatum = activePoint ? chartData[activePoint.index] : undefined;
   const tooltipX = activePoint ? Math.min(236, Math.max(6, activePoint.coordinate.x - 45)) : 0;
   const tooltipY = activePoint
@@ -403,7 +410,7 @@ export default function InvestmentPortfolioChart({
               const isFirstRoboTick = czRoboPresentation
                 && typeof payload?.value === "number"
                 && Math.abs(payload.value - timeStart) < 1;
-              const alignedTextAnchor = isZeroBaselineChart
+              const alignedTextAnchor = czRoboPresentation || isZeroBaselineChart
                 ? isLastRoboTick ? "end" : isFirstRoboTick ? "start" : "middle"
                 : isLastRoboTick || textAnchor === "end" ? "end" : textAnchor;
 
@@ -418,14 +425,26 @@ export default function InvestmentPortfolioChart({
             }}
           />
           <YAxis
-            width={isZeroBaselineChart ? 28 : czRoboPresentation ? 52 : compact ? 38 : 44}
+            width={czRoboPresentation ? roboAxisGutter : isZeroBaselineChart ? 28 : compact ? 38 : 44}
             domain={yDomain}
             axisLine={false}
             tickLine={false}
-            ticks={isZeroBaselineChart ? [0] : yTicks}
+            ticks={displayedYTicks}
             tickFormatter={(value) => formatAxisValue(Number(value), valueRange)}
             tickMargin={isZeroBaselineChart ? 4 : czRoboPresentation ? 11 : undefined}
-            tick={{ fill: "var(--uc-text-muted)", fontSize: compact ? 11 : 12, fontWeight: 700 }}
+            tick={czRoboPresentation ? ({ y, payload }: RuntimeAxisTickAdapter) => (
+              <text
+                x={0}
+                y={typeof y === "number" && Number.isFinite(y) ? y : 0}
+                dy="0.355em"
+                textAnchor="start"
+                fill="var(--uc-text-muted)"
+                fontSize={amountFontSize}
+                fontWeight={700}
+              >
+                {formatAxisValue(Number(payload?.value), valueRange)}
+              </text>
+            ) : { fill: "var(--uc-text-muted)", fontSize: amountFontSize, fontWeight: 700 }}
           />
           {isZeroBaselineChart ? null : (
             <CartesianGrid

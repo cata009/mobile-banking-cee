@@ -7,7 +7,11 @@ import type {
 } from '@/app/config/investmentsPortfolioConfig'
 import { roundMoney } from '@/data/exchangeRates'
 import { updateRoboGoalPositionValue, getRoboWithdrawalProducts } from './goalModel'
-import { addRoboBasketPurchaseToPositions, buildRoboBasketPendingOrders } from './goalPositions'
+import {
+  addRoboBasketPurchaseToPositions,
+  buildRoboBasketPendingOrders,
+  buildRoboBasketTradeHistory,
+} from './goalPositions'
 export type RoboOperation = { id: string; date: string }
 export type RoboContribution = {
   method: RoboFundingMethod
@@ -51,6 +55,35 @@ export function applyRoboTopUp(
     orders: [...(goal.orders ?? []), ...pendingOrders],
   })
   return { ...nextGoal, recurringContribution }
+}
+
+/** Apply a completed basket BUY once; submission itself keeps the goal unfunded. */
+export function executeRoboBuyOrder(
+  goal: RoboExistingGoal,
+  portfolio: RoboPortfolio,
+  orderId: string,
+  country: CountryId,
+  securityCatalog: readonly InvestmentCatalogSecurity[],
+): RoboExistingGoal {
+  const basket = portfolio.basketFund
+  const order = goal.orders?.find((candidate) => candidate.id === orderId)
+  if (
+    !basket ||
+    !order ||
+    order.orderType !== 'BUY' ||
+    order.status !== 'PENDING' ||
+    order.securityId !== basket.id ||
+    order.amount <= 0
+  )
+    return goal
+  const trade = buildRoboBasketTradeHistory(basket, order.amount, country, securityCatalog, 'BUY', order.id, order.date)
+  const positions = addRoboBasketPurchaseToPositions(basket, order.amount, country, securityCatalog, goal.positions)
+  return updateRoboGoalPositionValue(goal, positions, {
+    transactions: [...(goal.transactions ?? []), ...trade.transactions],
+    orders: goal.orders!.map((candidate) =>
+      candidate.id === orderId ? { ...candidate, status: 'EXECUTED', tone: 'positive' } : candidate,
+    ),
+  })
 }
 
 export function applyRoboSale(

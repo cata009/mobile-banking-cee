@@ -9,6 +9,7 @@ export interface RoboScreenProps {
   description?: string
   onBack: () => void
   onClose: () => void
+  onHelp?: () => void
   headerAction?: 'close' | 'help' | 'none'
   children: ReactNode
   footer?: ReactNode
@@ -24,6 +25,7 @@ export function RoboScreen({
   description,
   onBack,
   onClose,
+  onHelp,
   headerAction = 'close',
   children,
   footer,
@@ -48,7 +50,7 @@ export function RoboScreen({
         renderLargeTitle={false}
         collapsedTitleProgress={headerProgress}
         showHelp={headerAction === 'help'}
-        onHelpClick={() => undefined}
+        onHelpClick={onHelp ?? (() => undefined)}
         rightActionIcon={
           headerAction === 'close' ? <AppIcon name="close-flow" color="var(--uc-text)" size={20} /> : undefined
         }

@@ -32,7 +32,7 @@ export function hydrateRoboGoal(
 
   const existingTransactions = goal.transactions ?? []
   const existingOrders = goal.orders ?? []
-  const openingHistory = buildRoboPositionOpeningHistory(goal.id, goal.startDate, positions, securityCatalog)
+  const openingHistory = buildRoboPositionOpeningHistory(goal.id, goal.startDate, positions, securityCatalog, basket)
   const missingBuyTransactions = openingHistory.transactions.filter(
     (transaction) =>
       !existingTransactions.some((existing) => existing.type === 'BUY' && roboHistoryRowsMatch(existing, transaction)),
@@ -41,7 +41,12 @@ export function hydrateRoboGoal(
     (order) =>
       !existingOrders.some(
         (existing) =>
-          existing.orderType === 'BUY' && existing.status === 'EXECUTED' && roboHistoryRowsMatch(existing, order),
+          existing.orderType === 'BUY' &&
+          existing.status === 'EXECUTED' &&
+          (roboHistoryRowsMatch(existing, order) ||
+            existingTransactions.some(
+              (transaction) => transaction.type === 'BUY' && roboHistoryRowsMatch(existing, transaction),
+            )),
       ),
   )
   const hydratedTransactions = [...existingTransactions, ...missingBuyTransactions]
