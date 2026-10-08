@@ -24,6 +24,32 @@ async function confirmPicker(action: RegExp, option: string) {
 }
 
 describe('Retained Future Gain term deposit simulator', () => {
+  it('clears the current-account amount for external funding and offers a fixed fourth preset', () => {
+    renderBankingScreen(<FutureGainTermDepositScreen onBack={vi.fn()} />, { country: 'RS' })
+    const amount = screen.getByRole('textbox', { name: 'Amount to deposit in EUR' })
+    expect(screen.getByRole('button', { name: 'ALL AVAILABLE' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('radio', { name: /External bank account/ }))
+
+    expect(amount).toHaveValue('')
+    expect(screen.queryByRole('button', { name: 'ALL AVAILABLE' })).not.toBeInTheDocument()
+    const fourthPreset = screen.getByRole('button', { name: '100.000' })
+    fireEvent.click(fourthPreset)
+    expect(amount).toHaveValue('100.000,00')
+  })
+
+  it('keeps an external amount empty when the currency changes and offers the currency-specific fixed maximum', async () => {
+    renderBankingScreen(<FutureGainTermDepositScreen onBack={vi.fn()} />, { country: 'RS' })
+    fireEvent.click(screen.getByRole('radio', { name: /External bank account/ }))
+    await confirmPicker(/Change currency, currently EUR/, 'RSD')
+
+    const amount = screen.getByRole('textbox', { name: 'Amount to deposit in RSD' })
+    expect(amount).toHaveValue('')
+    expect(screen.queryByRole('button', { name: 'ALL AVAILABLE' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '1.000.000' }))
+    expect(amount).toHaveValue('1.000.000,00')
+  })
+
   it('updates the representative estimate for entered money, funding, currency and tenor', async () => {
     renderBankingScreen(<FutureGainTermDepositScreen onBack={vi.fn()} />, { country: 'RS' })
     fireEvent.change(screen.getByRole('textbox', { name: 'Amount to deposit in EUR' }), {
@@ -44,7 +70,7 @@ describe('Retained Future Gain term deposit simulator', () => {
     expect(exampleValue('Total deposit amount and gross interest at maturity')).toHaveTextContent('1.011,25 RSD')
     expect(exampleValue('Tax')).toHaveTextContent('0 RSD')
     expect(exampleValue('Net deposit amount and interest at maturity')).toHaveTextContent('1.011,25 RSD')
-    fireEvent.click(screen.getByRole('button', { name: 'ALL AVAILABLE' }))
+    fireEvent.click(screen.getByRole('button', { name: '1.000.000' }))
     expect(screen.getByRole('textbox', { name: 'Amount to deposit in RSD' })).toHaveValue('1.000.000,00')
     await confirmPicker(/Change currency, currently RSD/, 'USD')
     await confirmPicker(/Change tenor, currently 3 months/, '6 months')
