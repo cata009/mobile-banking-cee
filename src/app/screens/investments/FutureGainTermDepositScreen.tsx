@@ -580,7 +580,12 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
     const newSuggestionBase = fundingSource === "current" ? newAvailable : EXTERNAL_LIMITS[pendingCurrency];
     setCurrency(pendingCurrency);
     const fallbackAmount = Math.min(5_000, newSuggestionBase);
-    setAmountInput(formatInputAmount(convertedAmount > 0 ? convertedAmount : fallbackAmount, country));
+    const nextAmount = convertedAmount > 0
+      ? convertedAmount
+      : fundingSource === "current"
+        ? fallbackAmount
+        : 0;
+    setAmountInput(nextAmount > 0 ? formatInputAmount(nextAmount, country) : "");
   };
 
   const handleSelectionConfirm = () => {
@@ -589,6 +594,11 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
   };
 
   const showSimulatorInfo = () => setInfoType("simulator");
+  const handleFundingSourceSelect = (source: FundingSource) => {
+    if (source === fundingSource) return;
+    setFundingSource(source);
+    if (source === "external") setAmountInput("");
+  };
 
   if (requestStep === "contact") {
     return (
@@ -694,8 +704,8 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
             Choose your deposit type, currency, amount, and term to see the expected interest and return.
           </p>
           <div className="mt-[16px] grid grid-cols-2 gap-[8px] px-[24px]" role="radiogroup" aria-label="Choose your deposit type">
-            <DepositSourceCard source="current" selected={fundingSource === "current"} onSelect={() => setFundingSource("current")} />
-            <DepositSourceCard source="external" selected={fundingSource === "external"} onSelect={() => setFundingSource("external")} />
+            <DepositSourceCard source="current" selected={fundingSource === "current"} onSelect={() => handleFundingSourceSelect("current")} />
+            <DepositSourceCard source="external" selected={fundingSource === "external"} onSelect={() => handleFundingSourceSelect("external")} />
           </div>
         </section>
 
@@ -732,7 +742,7 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
           </div>
           <div className="mt-[12px] flex flex-nowrap gap-[8px] overflow-x-auto px-[24px] scrollbar-hide">
             {quickAmounts.map((quickAmount, index) => {
-              const isAllAvailable = index === quickAmounts.length - 1;
+              const isAllAvailable = fundingSource === "current" && index === quickAmounts.length - 1;
               return (
                 <AmountSuggestionChip
                   key={`${quickAmount}-${index}`}
