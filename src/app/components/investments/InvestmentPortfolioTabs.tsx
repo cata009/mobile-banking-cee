@@ -66,7 +66,6 @@ export default function InvestmentPortfolioTabs({
               }}
               role="tab"
               aria-selected={selected}
-              aria-pressed={selected}
               onClick={() => onChange(tab.id)}
               className={`h-[34px] shrink-0 whitespace-nowrap rounded-[4px] border px-[12px] text-[14px] font-bold leading-[18px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)] ${
                 selected

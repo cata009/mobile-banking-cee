@@ -2,7 +2,7 @@
  * RO Teens "ask a parent" flows: request money and request a top-up.
  * Both always create a pending approval addressed to a parent.
  */
-import { useState } from "react";
+import { useId, useState } from "react";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import { cn } from "@/app/components/ui/utils";
@@ -25,6 +25,7 @@ export function RoRequestScreen({
   const [amount, setAmount] = useState(mode === "topup" ? "50" : "30");
   const [reason, setReason] = useState<RoRequestReason>(mode === "topup" ? "Altele" : "Mâncare");
   const [note, setNote] = useState("");
+  const noteId = useId();
   const parsed = Number(amount || 0);
   const canSubmit = parsed > 0;
 
@@ -83,10 +84,11 @@ export function RoRequestScreen({
           </div>
 
           <div>
-            <label className="mb-[8px] block text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
+            <label htmlFor={noteId} className="mb-[8px] block text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
               Mesaj pentru Mama
             </label>
             <textarea
+              id={noteId}
               className="h-[88px] w-full resize-none rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] py-[12px] text-[15px] text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)] focus:ring-2 focus:ring-[var(--hu-theme-accent-strong)]"
               placeholder="Ex: pentru excursia de vineri"
               value={note}

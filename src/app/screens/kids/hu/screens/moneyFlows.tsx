@@ -3,7 +3,7 @@
  *
  * Extracted verbatim from KidsMarketHomeApp.tsx.
  */
-import { useState } from "react";
+import { useId, useState } from "react";
 import { AppIcon } from "@/app/components/icons";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
@@ -23,6 +23,8 @@ export function HuRequestMoneyScreen({
   theme: HuThemePreset;
 }) {
   const [amount, setAmount] = useState("3000");
+  const amountId = useId();
+  const noteId = useId();
   const [reason, setReason] = useState<HuMoneyReason>("Food");
   const [note, setNote] = useState("");
   const parsedAmount = Number(amount.replace(/[^\d]/g, ""));
@@ -59,11 +61,12 @@ export function HuRequestMoneyScreen({
               Your request will show as a pending action until it is approved.
             </p>
 
-            <label className="mt-[18px] block text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
+            <label htmlFor={amountId} className="mt-[18px] block text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
               Amount
             </label>
             <div className="mt-[8px] flex h-[58px] items-center rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] focus-within:ring-2 focus-within:ring-[var(--uc-action)] focus-within:ring-offset-2 focus-within:ring-offset-[var(--uc-app-bg)]">
               <input
+                id={amountId}
                 className="min-w-0 flex-1 bg-transparent text-[28px] font-bold leading-[32px] tracking-[0] text-[var(--uc-text)] outline-none"
                 inputMode="numeric"
                 onChange={(event) => setAmount(event.target.value.replace(/[^\d]/g, ""))}
@@ -99,10 +102,11 @@ export function HuRequestMoneyScreen({
               </div>
             </div>
 
-            <label className="mt-[18px] block text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
+            <label htmlFor={noteId} className="mt-[18px] block text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
               Note
             </label>
             <textarea
+              id={noteId}
               className="mt-[8px] h-[92px] w-full resize-none rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] py-[12px] text-[15px] font-normal leading-[19px] tracking-[0] text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)] focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
               onChange={(event) => setNote(event.target.value)}
               placeholder="Example: lunch after school"
@@ -128,6 +132,8 @@ export function HuSendMoneyScreen({
   theme: HuThemePreset;
 }) {
   const [contactName, setContactName] = useState<HuSendContact>("Anna");
+  const amountId = useId();
+  const noteId = useId();
   const [amount, setAmount] = useState("1200");
   const [note, setNote] = useState("Class project tickets");
   const parsedAmount = Number(amount.replace(/[^\d]/g, ""));
@@ -208,11 +214,12 @@ export function HuSendMoneyScreen({
               </div>
             </div>
 
-            <label className="mt-[18px] block text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
+            <label htmlFor={amountId} className="mt-[18px] block text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
               Amount
             </label>
             <div className="mt-[8px] flex h-[58px] items-center rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] focus-within:ring-2 focus-within:ring-[var(--uc-action)] focus-within:ring-offset-2 focus-within:ring-offset-[var(--uc-app-bg)]">
               <input
+                id={amountId}
                 className="min-w-0 flex-1 bg-transparent text-[28px] font-bold leading-[32px] tracking-[0] text-[var(--uc-text)] outline-none"
                 inputMode="numeric"
                 onChange={(event) => setAmount(event.target.value.replace(/[^\d]/g, ""))}
@@ -221,10 +228,11 @@ export function HuSendMoneyScreen({
               <span className="text-[16px] font-bold leading-[20px] tracking-[0] text-[var(--uc-text-muted)]">HUF</span>
             </div>
 
-            <label className="mt-[18px] block text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
+            <label htmlFor={noteId} className="mt-[18px] block text-[12px] font-bold uppercase leading-[14px] tracking-[0] text-[var(--uc-text-muted)]">
               Note
             </label>
             <textarea
+              id={noteId}
               className="mt-[8px] h-[92px] w-full resize-none rounded-[12px] border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] px-[14px] py-[12px] text-[15px] font-normal leading-[19px] tracking-[0] text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)] focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)]"
               onChange={(event) => setNote(event.target.value)}
               placeholder="Optional"

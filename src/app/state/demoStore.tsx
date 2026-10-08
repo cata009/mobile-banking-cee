@@ -5,6 +5,8 @@
 
 import { createContext, useCallback, useContext, useMemo, useState, ReactNode } from "react";
 import { getReleaseBundle } from "@/app/registry/releaseRegistry";
+import { getContextKey, getCurrentFlags } from './flagContext';
+export { getContextKey, getCurrentFlags } from './flagContext';
 import {
   DEFAULT_VISIBLE_PRODUCT_OVERRIDES,
   isPIProductScenarioId,
@@ -15,7 +17,6 @@ import type {
   BankingScenarioId,
   CountryId,
   DesignSystemId,
-  FeatureFlagOverrides,
   FeatureId,
   ProductCountKey,
   ProductCounts,
@@ -43,11 +44,6 @@ export const DEFAULT_PRODUCT_COUNTS: ProductCounts = {
  * // "PI:RO:current:baseline-current:release-current:retail-single-account"
  * ```
  */
-export function getContextKey(
-  state: Pick<DemoState, "product" | "country" | "designSystem" | "baseline" | "release" | "bankingScenario">
-): string {
-  return `${state.product}:${state.country}:${state.designSystem}:${state.baseline}:${state.release}:${state.bankingScenario}`;
-}
 
 /**
  * Get current flags for active context
@@ -62,10 +58,6 @@ export function getContextKey(
  * // { fx_transactionsFilters: true }
  * ```
  */
-export function getCurrentFlags(state: DemoState): FeatureFlagOverrides {
-  const contextKey = getContextKey(state);
-  return state.flagsByContext[contextKey] || {};
-}
 
 /**
  * Default demo state with empty flags by context

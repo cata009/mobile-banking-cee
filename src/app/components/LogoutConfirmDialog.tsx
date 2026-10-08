@@ -26,6 +26,7 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm }: LogoutConfir
       <div 
         className="absolute inset-0 bg-[rgb(var(--uc-static-black-rgb)_/_0.4)] z-[9998]"
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* Dialog Container - centered - ABSOLUTE to stay within MobileFrame */}

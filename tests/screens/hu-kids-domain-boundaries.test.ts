@@ -55,8 +55,8 @@ describe("HU Kids domain module boundaries", () => {
     expect(compatibility.HU_KIDS_CARDS).toBe(HU_KIDS_CARDS);
     expect(compatibility.HU_DEFAULT_KIDS_CARD).toBe(HU_DEFAULT_KIDS_CARD);
 
-    expect(kidsAppSource).toContain('from "./hu/theme"');
-    expect(kidsAppSource).toContain('from "./hu/cards"');
+    expect(kidsAppSource).toMatch(/from ["']\.\/hu\/theme["']/);
+    expect(kidsAppSource).toMatch(/from ["']\.\/hu\/cards["']/);
     expect(kidsAppSource).not.toMatch(/export type HuThemeId\s*=/);
     expect(kidsAppSource).not.toMatch(/export type HuThemePreset\s*=/);
     expect(kidsAppSource).not.toMatch(/export const HU_THEME_PRESETS\s*:/);

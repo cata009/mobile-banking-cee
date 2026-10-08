@@ -25,6 +25,11 @@ interface InvestmentPortfolioChartProps {
   edgeToEdge?: boolean;
   tightBottomPadding?: boolean;
   czRoboPresentation?: boolean;
+  zeroBaselineOnly?: boolean;
+  /** Hide adjacent-point returns for ledger series without historical valuations. */
+  showTooltipPerformance?: boolean;
+  /** Ledger balances change at execution dates rather than between them. */
+  curveType?: "monotone" | "stepAfter";
 }
 
 interface ActivePointState {
@@ -177,11 +182,13 @@ function InvestmentChartTooltip({
   country,
   currency,
   amountsHidden,
+  showPerformance,
 }: {
   point: ChartDatum | undefined;
   country: CountryId;
   currency: string;
   amountsHidden: boolean;
+  showPerformance: boolean;
 }) {
   if (!point) return null;
   const performanceColor = point.performanceAmount < 0 ? "var(--uc-danger)" : INVESTMENT_POSITIVE_COLOR;
@@ -195,9 +202,11 @@ function InvestmentChartTooltip({
       <p className="mt-[6px] text-[13px] font-bold leading-[15px] text-[var(--uc-text)]">
         {formatTooltipValue(point.value, country, currency, amountsHidden)}
       </p>
-      <p className="mt-[6px] text-[13px] font-bold leading-[15px]" style={{ color: performanceColor }}>
-        {formatTooltipPercent(point.performancePercent, amountsHidden)}
-      </p>
+      {showPerformance ? (
+        <p className="mt-[6px] text-[13px] font-bold leading-[15px]" style={{ color: performanceColor }}>
+          {formatTooltipPercent(point.performancePercent, amountsHidden)}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -247,6 +256,9 @@ export default function InvestmentPortfolioChart({
   edgeToEdge = false,
   tightBottomPadding = false,
   czRoboPresentation = false,
+  zeroBaselineOnly = false,
+  showTooltipPerformance = true,
+  curveType = "monotone",
 }: InvestmentPortfolioChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);
   const [activePoint, setActivePoint] = useState<ActivePointState | null>(null);
@@ -255,6 +267,7 @@ export default function InvestmentPortfolioChart({
   const minValue = Math.min(...values);
   const maxValue = Math.max(...values);
   const valueRange = maxValue - minValue || 1;
+  const isZeroBaselineChart = zeroBaselineOnly && values.length > 0 && values.every((value) => value === 0);
   const chartData = useMemo(() => {
     const data = buildChartData(points);
     if (!czRoboPresentation) return data;
@@ -269,17 +282,19 @@ export default function InvestmentPortfolioChart({
   const timeEnd = chartData.at(-1)?.timestamp ?? 1;
   const timeTicks = [0, 1, 2, 3].map((step) => timeStart + (timeEnd - timeStart) * step / 3);
   const verticalGridLines = useMemo(
-    () => showVerticalGridLines
-      ? chartData.filter((point) => point.showDot !== false && point.dateLabel).map((point) => point.label)
-      : [],
-    [chartData, showVerticalGridLines],
+    () => {
+      if (!showVerticalGridLines) return [];
+      const duplicatedCategories = !czRoboPresentation && new Set(chartData.map((point) => point.label)).size < chartData.length;
+      return chartData.filter((point) => point.showDot !== false && point.dateLabel).map((point) => czRoboPresentation ? point.timestamp ?? 0 : duplicatedCategories ? point.index : point.label);
+    },
+    [chartData, showVerticalGridLines, czRoboPresentation],
   );
   const domainPadding = valueRange * 0.08;
-  const yDomain: [number, number] = [minValue - domainPadding, maxValue + domainPadding];
-  const yTicks = useMemo(() => {
-    const [domainMin, domainMax] = yDomain;
-    return [0, 1, 2, 3].map((step) => domainMin + ((domainMax - domainMin) * step) / 3);
-  }, [yDomain]);
+  const yDomain: [number, number] = isZeroBaselineChart
+    ? [-1, 1]
+    : [minValue - domainPadding, maxValue + domainPadding];
+  const [domainMin, domainMax] = yDomain;
+  const yTicks = [0, 1, 2, 3].map((step) => domainMin + ((domainMax - domainMin) * step) / 3);
   const activeDatum = activePoint ? chartData[activePoint.index] : undefined;
   const tooltipX = activePoint ? Math.min(236, Math.max(6, activePoint.coordinate.x - 45)) : 0;
   const tooltipY = activePoint
@@ -385,7 +400,12 @@ export default function InvestmentPortfolioChart({
               const isLastRoboTick = czRoboPresentation
                 && typeof payload?.value === "number"
                 && Math.abs(payload.value - timeEnd) < 1;
-              const alignedTextAnchor = isLastRoboTick || textAnchor === "end" ? "end" : textAnchor;
+              const isFirstRoboTick = czRoboPresentation
+                && typeof payload?.value === "number"
+                && Math.abs(payload.value - timeStart) < 1;
+              const alignedTextAnchor = isZeroBaselineChart
+                ? isLastRoboTick ? "end" : isFirstRoboTick ? "start" : "middle"
+                : isLastRoboTick || textAnchor === "end" ? "end" : textAnchor;
 
               return (
                 <g transform={`translate(${tickX},${tickY + 10})`}>
@@ -398,22 +418,24 @@ export default function InvestmentPortfolioChart({
             }}
           />
           <YAxis
-            width={compact ? 38 : 44}
+            width={isZeroBaselineChart ? 28 : czRoboPresentation ? 52 : compact ? 38 : 44}
             domain={yDomain}
             axisLine={false}
             tickLine={false}
-            ticks={yTicks}
+            ticks={isZeroBaselineChart ? [0] : yTicks}
             tickFormatter={(value) => formatAxisValue(Number(value), valueRange)}
-            tickMargin={czRoboPresentation ? 11 : undefined}
+            tickMargin={isZeroBaselineChart ? 4 : czRoboPresentation ? 11 : undefined}
             tick={{ fill: "var(--uc-text-muted)", fontSize: compact ? 11 : 12, fontWeight: 700 }}
           />
-          <CartesianGrid
-            horizontal
-            vertical={false}
-            stroke="var(--uc-border-muted)"
-            strokeDasharray="2 4"
-            strokeLinecap="round"
-          />
+          {isZeroBaselineChart ? null : (
+            <CartesianGrid
+              horizontal
+              vertical={false}
+              stroke="var(--uc-border-muted)"
+              strokeDasharray="2 4"
+              strokeLinecap="round"
+            />
+          )}
           {verticalGridLines.map((label) => (
             <ReferenceLine
               key={label}
@@ -426,13 +448,13 @@ export default function InvestmentPortfolioChart({
           ))}
           <Area
             isAnimationActive={czRoboPresentation ? false : undefined}
-            type="monotone"
+            type={curveType}
             dataKey="value"
-            fill="url(#investmentChartFill)"
+            fill={isZeroBaselineChart ? "none" : "url(#investmentChartFill)"}
             stroke="var(--uc-action)"
             strokeWidth={3}
             activeDot={false}
-            dot={(props: RuntimeDotAdapter) => {
+            dot={isZeroBaselineChart ? false : (props: RuntimeDotAdapter) => {
               const { cx, cy, index, payload } = props;
               const showDot = !(
                 typeof payload === "object"
@@ -477,6 +499,7 @@ export default function InvestmentPortfolioChart({
             country={country}
             currency={currency}
             amountsHidden={amountsHidden}
+            showPerformance={showTooltipPerformance}
           />
         </div>
       ) : null}

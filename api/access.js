@@ -144,16 +144,25 @@ function safeReturnTo(value) {
 }
 
 async function readRequestBody(req) {
-  if (req.body && typeof req.body === "object") return req.body;
+  if (
+    req.body !== undefined &&
+    (req.body === null || (typeof req.body !== "object" && typeof req.body !== "string"))
+  ) {
+    return {};
+  }
+  if (req.body !== null && typeof req.body === "object") {
+    return Array.isArray(req.body) ? {} : req.body;
+  }
 
-  const rawBody = req.body && typeof req.body === "string" ? req.body : await readStream(req);
+  const rawBody = typeof req.body === "string" ? req.body : await readStream(req);
   const contentType = req.headers["content-type"] || "";
 
   if (!rawBody) return {};
 
   if (contentType.includes("application/json")) {
     try {
-      return JSON.parse(rawBody);
+      const body = JSON.parse(rawBody);
+      return body !== null && typeof body === "object" && !Array.isArray(body) ? body : {};
     } catch {
       return {};
     }

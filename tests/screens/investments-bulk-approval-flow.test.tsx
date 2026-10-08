@@ -479,6 +479,20 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByText("UniCredit Balanced Income Fund").parentElement).toHaveTextContent("Not selected to be signed");
   });
 
+  it("resets accepted terms when deselection changes the reviewed batch", () => {
+    renderBulkPrototype();
+    startReviewWithSelectedDrafts();
+    nextOrderFromBottom();
+    nextOrderFromBottom();
+    fireEvent.click(screen.getByRole("switch", { name: /Accept terms/i }));
+    expect(screen.getByRole("switch", { name: /Accept terms/i })).toHaveAttribute("aria-checked", "true");
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "Selected: Sustainable Future Mixed Fund. Activate to deselect." }));
+
+    expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 2 of 2");
+    expect(screen.getByRole("switch", { name: /Accept terms/i })).toHaveAttribute("aria-checked", "false");
+  });
+
   it.each(COUNTRIES)("renders selectable, country-formatted drafts for %s", (country) => {
     render(
       <DemoProvider initialState={{ country, product: "PI" }}>

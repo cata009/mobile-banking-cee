@@ -26,7 +26,6 @@ export default function InvestmentAccountSelectionSheet({
   onConfirm,
 }: InvestmentAccountSelectionSheetProps) {
   const [draftId, setDraftId] = useState(selectedId);
-  const [selectionMade, setSelectionMade] = useState(false);
 
   return (
     <BottomSheet
@@ -36,9 +35,9 @@ export default function InvestmentAccountSelectionSheet({
         <div className="pt-[8px]">
           <PrimaryButton
             className="w-full"
-            disabled={!selectionMade || !options.some((option) => option.id === draftId)}
+            disabled={!options.some((option) => option.id === draftId)}
             onClick={() => {
-              if (selectionMade && options.some((option) => option.id === draftId)) onConfirm(draftId);
+              if (options.some((option) => option.id === draftId)) onConfirm(draftId);
             }}
           >
             Select
@@ -58,7 +57,6 @@ export default function InvestmentAccountSelectionSheet({
               aria-label={[option.name, option.detail, option.balance].filter(Boolean).join(", ")}
               onClick={() => {
                 setDraftId(option.id);
-                setSelectionMade(true);
               }}
               className="flex min-h-[80px] w-full items-center gap-[12px] bg-[var(--uc-sheet-bg)] px-[8px] py-[12px] text-left"
             >

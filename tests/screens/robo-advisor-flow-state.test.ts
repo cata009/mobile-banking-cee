@@ -37,7 +37,11 @@ describe('Robo Advisor flow state', () => {
       goalName: 'My home',
       targetAmount: '250000',
       horizonYears: 10,
-      selectedPortfolio: ROBO_PORTFOLIOS[0],
+      selectedStrategyId: 'sustainable-balanced',
+      selectedPortfolio: {
+        id: 'basket-sustainable-balanced-jp-morgan-global-growth',
+        strategyId: 'sustainable-balanced',
+      },
     })
   })
 

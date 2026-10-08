@@ -250,8 +250,14 @@ export function SideBySideTool() {
 
     {isFocusModeOpen && orderedSelection.length === 2 ? (
       <div
+        role="presentation"
         className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/70 p-[16px] backdrop-blur-sm"
-        onClick={() => setIsFocusModeOpen(false)}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) setIsFocusModeOpen(false);
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") setIsFocusModeOpen(false);
+        }}
       >
         <section
           role="dialog"
@@ -259,7 +265,6 @@ export function SideBySideTool() {
           aria-label="Focused country comparison"
           data-focused-side-by-side="true"
           className="max-h-[calc(100vh-32px)] max-w-full overflow-auto rounded-[20px] bg-[var(--uc-surface)] p-[16px] shadow-2xl"
-          onClick={(event) => event.stopPropagation()}
         >
           <div className="sticky top-0 z-10 mb-[12px] flex items-center justify-between gap-[16px] rounded-[12px] bg-[var(--uc-surface)] px-[4px] py-[4px]">
             <div>

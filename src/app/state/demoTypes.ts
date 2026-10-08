@@ -161,6 +161,7 @@ export type ScreenId =
   | "pi.contacts.overview"
   | "kids.sk.home-concept"
   | "kids.hu.home-concept"
+  | "kids.ro.home-concept"
   | "platform.design-system"
   | "platform.flow-library"
   | "platform.tools";

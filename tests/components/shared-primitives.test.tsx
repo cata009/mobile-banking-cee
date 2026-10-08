@@ -62,6 +62,23 @@ describe('AccountActionBar', () => {
 })
 
 describe('BottomSheet', () => {
+  it.each([false, true])('closes an animated sheet with reduced motion %s', (reducedMotion) => {
+    vi.useFakeTimers()
+    const originalMatchMedia = window.matchMedia
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) => {
+      const result = originalMatchMedia(query)
+      Object.defineProperty(result, 'matches', { value: reducedMotion })
+      return result
+    })
+    const onClose = vi.fn()
+    render(<BottomSheet animated onClose={onClose}><span>Animated content</span></BottomSheet>)
+    act(() => vi.advanceTimersByTime(50))
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    expect(onClose).toHaveBeenCalledTimes(reducedMotion ? 1 : 0)
+    act(() => vi.advanceTimersByTime(400))
+    expect(onClose).toHaveBeenCalledOnce()
+  })
+
   it('enters focus, wraps Tab in both directions, closes on Escape, and restores focus', () => {
     vi.useFakeTimers()
     const onClose = vi.fn()

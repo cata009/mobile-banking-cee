@@ -10,6 +10,7 @@ import {
   type UIEvent,
 } from 'react';
 import AccountCarouselIndicator from '@/app/components/accounts/AccountCarouselIndicator';
+import { ScrollableRegion } from './ScrollableRegion';
 import { useDragCarousel } from '@/hooks/useDragCarousel';
 
 export interface HorizontalCarouselProps {
@@ -121,12 +122,12 @@ export default function HorizontalCarousel({ ariaLabel, count, itemLabel, itemLa
   });
 
   return <>
-    <div ref={railRef} data-carousel-rail role="region" aria-label={ariaLabel} tabIndex={0} onScroll={onScroll} onKeyDown={(event) => {
+    <ScrollableRegion ref={railRef} data-carousel-rail aria-label={ariaLabel} onScroll={onScroll} onKeyDown={(event) => {
       if (event.key === 'ArrowRight') { event.preventDefault(); scrollToIndex(activeIndex + 1); }
       if (event.key === 'ArrowLeft') { event.preventDefault(); scrollToIndex(activeIndex - 1); }
     }} {...dragHandlers} className={`mt-[12px] flex gap-[12px] overflow-x-auto overscroll-x-contain pb-[4px] scrollbar-hide select-none touch-pan-y focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${!overflows ? '' : isDragging ? 'cursor-grabbing' : 'cursor-grab'}`} style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
       {draggableChildren}
-    </div>
+    </ScrollableRegion>
     {count > 1 && overflows ? <div className="mt-[4px] flex justify-center" aria-label={`${ariaLabel} pages`}>
       <AccountCarouselIndicator count={count} activeIndex={activeIndex} itemLabel={itemLabel} itemLabels={itemLabels} onSelect={scrollToIndex} />
     </div> : null}

@@ -15,7 +15,7 @@ export type InvestmentLiquidity = "Daily" | "Weekly" | "Monthly";
 export type InvestmentHistoryTabId = "transactions" | "orders";
 export type InvestmentHistoryTransactionType = "COUPON" | "BUY" | "SELL" | "OTHER WITHDRAWAL";
 export type InvestmentHistoryOrderStatus = "EXECUTED" | "PENDING" | "REJECTED";
-export type InvestmentHistoryDatePreset = "last-month" | "last-6-months" | "last-year" | "define";
+export type InvestmentHistoryDatePreset = "last-month" | "last-6-months" | "last-year" | "all-time" | "define";
 
 /**
  * "Yesterday's" date as DD.MM.YYYY, computed once at module load.
@@ -115,6 +115,8 @@ export interface InvestmentHistoryTransaction {
   date: string;
   title: string;
   amount: number;
+  /** Executed security units, when the source event is unit-based. */
+  quantity?: number;
   currency: Currency;
   type: InvestmentHistoryTransactionType;
   tone: "positive" | "negative" | "neutral";
@@ -126,9 +128,13 @@ export interface InvestmentHistoryOrder {
   id: string;
   /** Stable investment security ID used to keep product orders exact when names repeat. */
   securityId?: string;
+  /** Cash account selected to fund this investment order, when applicable. */
+  cashAccountId?: string;
   date: string;
   title: string;
   amount: number;
+  /** Ordered or sold security units, when the source event is unit-based. */
+  quantity?: number;
   currency: Currency;
   orderType: "BUY" | "SELL";
   status: InvestmentHistoryOrderStatus;
@@ -204,6 +210,7 @@ export const INVESTMENT_HISTORY_DATE_OPTIONS: readonly InvestmentHistoryDateOpti
   { id: "last-month", label: "Last Month" },
   { id: "last-6-months", label: "Last 6 Months" },
   { id: "last-year", label: "Last year" },
+  { id: "all-time", label: "All time" },
   { id: "define", label: "Define" },
 ];
 

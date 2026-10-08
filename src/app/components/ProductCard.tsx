@@ -1,4 +1,5 @@
 import { ReactNode, type MouseEvent } from 'react';
+import { activateOnKeyboard } from '@/app/components/ui/keyboardActivation';
 
 export const PRODUCT_CARD_EVOLUTION_SOURCE = {
   schema: "codex-figma-component-spec/v1",
@@ -77,6 +78,9 @@ export default function ProductCard({
         data-product-card-evolution
         data-product-card-separator={hasSeparator ? 'true' : undefined}
         data-product-style={productStyle}
+        role={onClick ? 'button' : undefined}
+        tabIndex={onClick ? 0 : undefined}
+        onKeyDown={onClick ? activateOnKeyboard : undefined}
         onClick={onClick}
         style={{
           background: isSme ? "var(--uc-neutral-200)" : "var(--uc-surface-raised)",
@@ -159,6 +163,9 @@ export default function ProductCard({
         padding: '16px'
       }}
       onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? activateOnKeyboard : undefined}
     >
       {/* Top Container: Icon + Title & Account Number */}
       <div className="flex items-start gap-[16px] self-stretch">

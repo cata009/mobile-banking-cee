@@ -8,17 +8,22 @@
  */
 
 import type { FlowPreviewId } from "../flows/types";
-import investmentsBulkApprovalSource from "./investmentsBulkApprovalPreviews.tsx?raw";
+import investmentsBulkApprovalSource from "@/flows/shared/investments-bulk-approval/investmentsBulkApprovalPreviews.tsx?raw";
+
+import bulkApprovalModelSource from "@/features/investments/bulk-approval/model.ts?raw";
 
 export interface FlowScreenSource {
   /** Repo-relative path, for the package README and the copy header. */
   file: string;
   source: string;
+  /** Extracted runtime sources, preserved at their repository paths in the ZIP. */
+  dependencies?: readonly { file: string; source: string }[];
 }
 
 export const FLOW_SCREEN_SOURCES: Partial<Record<FlowPreviewId, FlowScreenSource>> = {
   "investments-bulk-approval": {
-    file: "src/app/screens/flow-library/components/investmentsBulkApprovalPreviews.tsx",
+    file: "src/flows/shared/investments-bulk-approval/investmentsBulkApprovalPreviews.tsx",
     source: investmentsBulkApprovalSource,
+    dependencies: [{ file: "src/features/investments/bulk-approval/model.ts", source: bulkApprovalModelSource }],
   },
 };

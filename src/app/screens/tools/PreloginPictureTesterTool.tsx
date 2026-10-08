@@ -304,7 +304,6 @@ export function PreloginPictureTesterTool() {
             </div>
             <div hidden={editorTab !== 'image'} className="mt-[14px]">
               {/* Drag/drop supplements the accessible native file chooser. */}
-              {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
               <div
                 role="group"
                 aria-label="Image drop zone"

@@ -1,15 +1,19 @@
 // @vitest-environment jsdom
 
 import '@testing-library/jest-dom/vitest'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
+import App from '@/app/App'
 import { DemoTopBar } from '@/app/components/demo/DemoTopBar'
 import { NavigationProvider } from '@/app/contexts/NavigationContext'
 import { COUNTRIES } from '@/app/registry/demoConfig'
 import { DemoProvider } from '@/app/state/demoStore'
 import type { CountryId } from '@/app/state/demoTypes'
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  window.history.replaceState({}, '', '/')
+})
 
 function renderTopBar(country: CountryId = 'CZ') {
   return render(
@@ -74,14 +78,35 @@ describe('DemoTopBar app and country selector', () => {
     expect(screen.queryByRole('button', { name: 'App 2027' })).not.toBeInTheDocument()
   })
 
-  it('offers the Serbian My Banker preview as the RS Future App', () => {
+  it('offers the supported Serbian Future Gain preview', () => {
     renderTopBar('RS')
 
     fireEvent.click(screen.getByRole('button', { name: 'Baseline App' }))
     fireEvent.click(screen.getByRole('button', { name: 'Future App' }))
 
-    expect(screen.getByRole('button', { name: 'My Banker' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Future Gain' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /My Banker/ })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Evo 2027' })).not.toBeInTheDocument()
+  })
+
+  it('opens the current RS Offers destination after selecting Future Gain', async () => {
+    window.history.replaceState({}, '', '/?product=PI&country=RS&scenario=active&ds=current&release=release-current&bank=retail-multi-account-card&lang=en&screen=homepage')
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'Baseline App' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Future App' }))
+    expect(await screen.findByRole('button', { name: 'Future Gain' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /My Banker/ })).not.toBeInTheDocument()
+    // Changing the preview returns to its login entry before customer navigation.
+    fireEvent.click(await screen.findByRole('button', { name: 'Log in' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Offers' }))
+    await waitFor(() => expect(new URLSearchParams(window.location.search).get('screen')).toBe('products'))
+    expect(new URLSearchParams(window.location.search).get('release')).toBe('release-future-rs-future-gain')
+    fireEvent.click(await screen.findByRole('button', { name: /Check smart/ }))
+    expect((await screen.findAllByRole('heading', { name: 'Smart investment' })).length).toBeGreaterThan(0)
+    expect(document.querySelector('[data-smart-investment-screen="true"]')).toBeInTheDocument()
+    // The simulator is transient; shared links retain its stable homepage parent.
+    await waitFor(() => expect(new URLSearchParams(window.location.search).get('screen')).toBe('homepage'))
+    expect(screen.queryByRole('heading', { name: 'My Banker' })).not.toBeInTheDocument()
   })
 
   it('does not enable Future App outside the markets with a preview', () => {
@@ -99,7 +124,8 @@ describe('DemoTopBar app and country selector', () => {
 
     if (country === 'RS') {
       fireEvent.click(futureApp)
-      expect(screen.getByRole('button', { name: 'My Banker' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Future Gain' })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /My Banker/ })).not.toBeInTheDocument()
       return
     }
 

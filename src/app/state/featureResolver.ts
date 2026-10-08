@@ -6,9 +6,11 @@
 import type { DemoState, FeatureId } from "./demoTypes";
 import { FEATURE_META } from "@/app/registry/demoConfig";
 import { getReleaseBundle } from "@/app/registry/releaseRegistry";
-import { getCurrentFlags } from "./demoStore";
+import { getCurrentFlags } from "./flagContext";
 
-export function isFeatureActive(state: DemoState, featureId: FeatureId): boolean {
+export type ReleaseFeatureContext = Pick<DemoState, 'product' | 'country' | 'designSystem' | 'scenario' | 'release'>;
+
+function isFeatureInScope(state: ReleaseFeatureContext, featureId: FeatureId): boolean {
   if (state.scenario === "inactive") {
     return false;
   }
@@ -47,9 +49,20 @@ export function isFeatureActive(state: DemoState, featureId: FeatureId): boolean
     }
   }
 
-  if (featureMeta.kind === "release") {
-    return getReleaseBundle(state.release).features.includes(featureId);
-  }
+  return true;
+}
+
+export function isReleaseFeatureActive(state: ReleaseFeatureContext, featureId: FeatureId): boolean {
+  return isFeatureInScope(state, featureId)
+    && FEATURE_META[featureId]?.kind === 'release'
+    && getReleaseBundle(state.release).features.includes(featureId);
+}
+
+export function isFeatureActive(state: DemoState, featureId: FeatureId): boolean {
+  if (!isFeatureInScope(state, featureId)) return false;
+  const featureMeta = FEATURE_META[featureId];
+
+  if (featureMeta.kind === "release") return getReleaseBundle(state.release).features.includes(featureId);
 
   if (featureMeta.kind === "unplanned") {
     const currentFlags = getCurrentFlags(state);

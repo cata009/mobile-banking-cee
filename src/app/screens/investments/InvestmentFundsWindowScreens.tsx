@@ -104,7 +104,7 @@ function FundCollectionGroup({
   onSelectSecurity: (security: InvestmentCatalogSecurity) => void;
 }) {
   return (
-    <section role="region" aria-label={title} className="mt-[18px]">
+    <section aria-label={title} className="mt-[18px]">
       <div className="mx-[16px] flex h-[32px] items-center justify-between border-b border-[var(--uc-border)] px-[4px]">
         <h2 className="text-[16px] font-bold leading-[20px] text-[var(--uc-text)]">{title}</h2>
         <span className="text-[14px] font-bold leading-[18px] text-[var(--uc-text)]">{securities.length}</span>

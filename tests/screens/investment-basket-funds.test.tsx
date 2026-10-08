@@ -121,7 +121,8 @@ describe("CZ Basket Funds catalogue", () => {
     expect(screen.getByRole("tab", { name: "Regular Plan" })).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Basket funds carousel" })).toBeInTheDocument();
     expect(screen.getByText("BASKET FUNDS")).toBeInTheDocument();
-    expect(screen.getByText("20")).toBeInTheDocument();
+    expect(within(screen.getByText("BASKET FUNDS").closest("section")!).getByText("5")).toBeInTheDocument();
+    expect(within(screen.getByRole("region", { name: "Basket funds carousel" })).getAllByRole("button")).toHaveLength(5);
     expect(screen.getByRole("button", { name: "See all basket funds" })).toBeInTheDocument();
 
     rerender(

@@ -256,9 +256,10 @@ function ProductRow({ product, icon, amount, displayNumber, onClick }: { product
 }
 
 function HomeSheet({ title, subtitle, onClose, children }: { title: string; subtitle?: string; onClose: () => void; children: ReactNode }) {
+  const dialogEvents = { onClick: (event: React.MouseEvent<HTMLElement>) => event.stopPropagation() };
   return (
-    <div className="absolute inset-0 z-50 flex items-end justify-center bg-[rgb(var(--uc-static-black-rgb)/0.34)] px-[8px] pt-[72px]" data-home-sheet onClick={onClose}>
-      <section role="dialog" aria-modal="true" aria-label={title} className="max-h-full w-full max-w-[560px] overflow-y-auto rounded-t-[28px] bg-[var(--uc-surface)] px-[20px] pb-[24px] shadow-[0_-18px_52px_rgb(var(--uc-shadow-rgb)/0.18)]" onClick={(event) => event.stopPropagation()}>
+    <div className="absolute inset-0 z-50 flex items-end justify-center bg-[rgb(var(--uc-static-black-rgb)/0.34)] px-[8px] pt-[72px]" data-home-sheet role="presentation" onClick={onClose}>
+      <section {...dialogEvents} role="dialog" aria-modal="true" aria-label={title} className="max-h-full w-full max-w-[560px] overflow-y-auto rounded-t-[28px] bg-[var(--uc-surface)] px-[20px] pb-[24px] shadow-[0_-18px_52px_rgb(var(--uc-shadow-rgb)/0.18)]">
         <div className="mx-auto mb-[8px] mt-[8px] h-[4px] w-[40px] rounded-full bg-[var(--uc-border)]" />
         <div className="flex min-h-[64px] items-center justify-between gap-[16px]">
           <div className="min-w-0">

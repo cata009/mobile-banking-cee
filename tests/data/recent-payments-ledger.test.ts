@@ -22,14 +22,19 @@ describe('recent payments ledger', () => {
       const history = getBeneficiaryPaymentHistory(beneficiary, 'CZ')
       historyCounts.add(history.length)
       expect(history.length).toBeGreaterThan(0)
-      expect(beneficiary.lastAmount).toBe(Math.abs(history[0]!.amount))
-      const redo = createRedoDomesticPaymentDraft(history[0]!, 'CZ')
+      const dates = history.map((row) => row.monthKey + '-' + row.day)
+      expect(dates).toEqual([...dates].sort().reverse())
+      const latestDebit = history.find((row) => row.type === 'debit')
+      expect(latestDebit).toBeDefined()
+      expect(beneficiary.lastAmount).toBe(Math.abs(latestDebit!.amount))
+      const redo = createRedoDomesticPaymentDraft(latestDebit!, 'CZ')
       expect(redo.beneficiaryName).toBe(beneficiary.name)
       expect(redo.accountNumber).toBe(beneficiary.paymentAccountNumber)
       expect(redo.bankCode).toBe(beneficiary.paymentBankCode)
 
       for (const transaction of history) {
         expect(ledgerIds.has(transaction.id)).toBe(true)
+        expect(transaction.type === 'debit' ? transaction.amount < 0 : transaction.amount > 0).toBe(true)
         expect(transaction.beneficiaryId).toBe(beneficiary.id)
         const detail = createTransactionDetailData(transaction, 'CZ')
         expect(detail.beneficiaryName).toBe(beneficiary.name)
@@ -39,6 +44,12 @@ describe('recent payments ledger', () => {
         )
       }
     }
+
+    const association = beneficiaries.find((person) => person.id === 'homeowners-association')!
+    const associationHistory = getBeneficiaryPaymentHistory(association, 'CZ')
+    expect(associationHistory[0]).toMatchObject({ type: 'credit', amount: 48.5, monthKey: '2026-08', day: '20' })
+    expect(association.lastAmount).toBe(599.24)
+    expect(association.lastPaidAt).toBe('2026-08-11')
 
     expect(historyCounts.size).toBeGreaterThan(2)
   })

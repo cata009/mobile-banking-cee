@@ -178,7 +178,7 @@ function InvestmentPickerSheet({
             </label>
           ))
           : options.map((option) => (
-            <label key={option.id} className="flex min-h-[80px] cursor-pointer items-center gap-[12px] px-[4px] py-[12px] text-[var(--uc-text)]">
+            <label key={option.id} aria-label={option.name} className="flex min-h-[80px] cursor-pointer items-center gap-[12px] px-[4px] py-[12px] text-[var(--uc-text)]">
               <input
                 type="radio"
                 name={`${kind}-investment-option`}
@@ -270,13 +270,13 @@ function InvestmentFundDetailScreen({ onBack, onBuy, onHistory }: { onBack: () =
     <div className="relative flex h-full w-full flex-col overflow-hidden bg-[var(--uc-surface)] text-[var(--uc-text)]" data-future-gain-fund-detail="true">
       <PageHeader title="onemarkets Climate Focus Fund" onBack={onBack} includeSafeArea showHelp={false} compact renderLargeTitle={false} collapsedTitleProgress={headerProgress} hideCollapsedTitleWhenHidden />
       <main className="min-h-0 flex-1 overflow-y-auto scrollbar-hide" onScroll={handleScroll}>
-        <div className="flex flex-col items-center bg-[#f5f5f5] px-[24px] pb-[20px] pt-[12px] text-center">
+        <div className="flex flex-col items-center bg-[var(--uc-investment-reference-panel)] px-[24px] pb-[20px] pt-[12px] text-center">
           <img src={currentBankIcon} alt="" width={24} height={24} className="block" draggable={false} />
           <h1 className="uc-type-h2 mt-[8px] max-w-[300px] text-[var(--uc-text)]">onemarkets Climate Focus Fund</h1>
           <p className="uc-type-n3 mt-[8px] text-[var(--uc-text)]">1 500,00 RSD</p>
-          <p className="uc-type-n5-strong mt-[2px] text-[var(--uc-text)]">PERFORMANCE <span className="text-[#3d7d43]">+2.21%</span></p>
+          <p className="uc-type-n5-strong mt-[2px] text-[var(--uc-text)]">PERFORMANCE <span className="text-[var(--uc-investment-reference-positive)]">+2.21%</span></p>
           <p className="uc-type-n5 text-[var(--uc-text-muted)]">(from 19.07.2022)</p>
-          <span className="mt-[12px] rounded-[14px] bg-[var(--uc-neutral-100)] px-[12px] py-[6px] uc-type-n5-strong text-[#3d7d43]">● &nbsp;Positive Target Market</span>
+          <span className="mt-[12px] rounded-[14px] bg-[var(--uc-neutral-100)] px-[12px] py-[6px] uc-type-n5-strong text-[var(--uc-investment-reference-positive)]">● &nbsp;Positive Target Market</span>
         </div>
         <div className="grid grid-cols-2 border-b border-[var(--uc-border-muted)]">
           <button type="button" onClick={onHistory} className="flex h-[64px] items-center justify-center gap-[8px] uc-type-n5 text-[var(--uc-text)]">
@@ -391,7 +391,7 @@ function FundBuyOrderScreen({ onBack, onNext }: { onBack: () => void; onNext: (q
         <section className="mt-[16px]">
           <h2 className="uc-type-n5-strong border-b border-[var(--uc-border-muted)] pb-[8px] text-[var(--uc-text)]">PRODUCT EVALUATION</h2>
           <InvestmentSimulatorRow label="Name" value="onemarkets Climate Focus Fund" />
-          <p className="uc-type-n5 mt-[8px] text-[var(--uc-text)]"><span className="text-[#3d7d43]">●</span> &nbsp;Product is in client’s target market</p>
+          <p className="uc-type-n5 mt-[8px] text-[var(--uc-text)]"><span className="text-[var(--uc-investment-reference-positive)]">●</span> &nbsp;Product is in client’s target market</p>
         </section>
         <section className="mt-[20px]">
           <h2 className="uc-type-n5-strong border-b border-[var(--uc-border-muted)] pb-[8px] text-[var(--uc-text)]">PRODUCT DETAIL</h2>

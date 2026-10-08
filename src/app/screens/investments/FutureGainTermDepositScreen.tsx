@@ -324,7 +324,7 @@ function RepresentativeExampleRow({
   onInfoClick?: () => void;
 }) {
   return (
-    <div className={`flex h-[80px] flex-col justify-center gap-[4px] px-[24px] py-[16px] ${highlighted ? "bg-[#f5f5f5]" : "bg-white"}`}>
+    <div className={`flex h-[80px] flex-col justify-center gap-[4px] px-[24px] py-[16px] ${highlighted ? "bg-[var(--uc-investment-reference-panel)]" : "bg-white"}`}>
       <dt className={`flex items-center gap-[4px] ${highlighted ? "uc-type-n4-strong" : "uc-type-n4"} text-[var(--uc-text)]`}>
         {label}
         {infoLabel && onInfoClick ? (
@@ -514,8 +514,8 @@ export function RequestSuccessScreen({ onDone }: { onDone: () => void }) {
         <h1 className="uc-type-h1 px-[16px] pt-[8px] text-[var(--uc-text)]">Request received</h1>
       </div>
       <main className="flex min-h-0 flex-1 flex-col px-[24px] pt-[56px]">
-        <div className="mx-auto grid size-[96px] place-items-center rounded-full border-[6px] border-[#3d7d43] text-[#3d7d43]">
-          <AppIcon name="check" size={64} color="#3d7d43" />
+        <div className="mx-auto grid size-[96px] place-items-center rounded-full border-[6px] border-[var(--uc-investment-reference-positive)] text-[var(--uc-investment-reference-positive)]">
+          <AppIcon name="check" size={64} color="var(--uc-investment-reference-positive)" />
         </div>
         <h2 className="uc-type-n4-strong mt-[48px] text-[var(--uc-text)]">Thank you!</h2>
         <p className="uc-type-p1 mt-[16px] text-[var(--uc-text)]">
@@ -642,7 +642,7 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
       <main className="min-h-0 flex-1 overflow-y-auto flex flex-col pb-[24px] scrollbar-hide" onScroll={handleScroll}>
         <h1 className="uc-type-h1 px-[24px] pt-[8px] text-[var(--uc-text)]">Term deposit</h1>
         <div className="px-[24px] pt-[16px]">
-          <section className="rounded-[8px] bg-[#f5f5f5] p-[16px]" aria-labelledby="missed-opportunity-title">
+          <section className="rounded-[8px] bg-[var(--uc-investment-reference-panel)] p-[16px]" aria-labelledby="missed-opportunity-title">
             <div className="flex items-center gap-[4px]">
               <h2 id="missed-opportunity-title" className="uc-type-h2 text-[var(--uc-text)]">
                 Missed investment opportunity
@@ -676,7 +676,7 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
                   amount={potentialYield}
                   currency={currency}
                   country={country}
-                  color="#3d7d43"
+                  color="var(--uc-investment-reference-positive)"
                   hidden={amountsHidden}
                   fontSize={opportunityAmountFontSize}
                   prefix="+"

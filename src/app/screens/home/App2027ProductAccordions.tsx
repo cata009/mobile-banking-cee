@@ -9,7 +9,7 @@ import { buildFutureCzAccountCardActions } from '@/app/components/productCardFix
 import { maskAmountParts } from '@/app/utils/amountPrivacy';
 import { useLanguage } from '@/app/contexts/LanguageContext';
 import type { CountryId } from '@/app/state/demoTypes';
-import { formatGroupCount } from './App2027TransformationHome';
+import { formatGroupCount } from '@/features/products/groupCount';
 import App2027AccountSheets from './App2027AccountSheets';
 import { App2027GroupAddButton } from './App2027ProductRail';
 import type { App2027TransactionOpenHandler } from './App2027Activity';

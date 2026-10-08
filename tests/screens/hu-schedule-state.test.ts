@@ -2,6 +2,27 @@ import { describe, expect, it } from 'vitest'
 import { createHuScheduleState, huScheduleReducer } from '@/app/screens/kids/hu/huScheduleState'
 
 describe('HU goal schedule state', () => {
+  it('ignores a stale date selection after the calendar has closed', () => {
+    const state = createHuScheduleState('2026-10-07')
+    expect(huScheduleReducer(state, { type: 'select-date', date: '2026-12-01' })).toBe(state)
+  })
+
+  it('updates an existing end date and keeps its repeat cadence', () => {
+    const state = huScheduleReducer(
+      createHuScheduleState('2026-10-07', {
+        startDate: '2026-10-08',
+        repeat: 'monthly',
+        endsOn: { type: 'on-date', date: '2026-12-01' },
+      }),
+      { type: 'open-end-date', fallbackDate: '2026-10-07' },
+    )
+    expect(state.endsOn).toEqual({ type: 'on-date', date: '2026-12-01' })
+    expect(huScheduleReducer(state, { type: 'select-date', date: '2027-01-01' })).toMatchObject({
+      repeat: 'monthly',
+      endsOn: { type: 'on-date', date: '2027-01-01' },
+      datePickerTarget: null,
+    })
+  })
   it('restores an existing schedule and keeps pickers closed', () => {
     expect(
       createHuScheduleState('2026-08-30', {

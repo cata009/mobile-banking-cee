@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import '@testing-library/jest-dom/vitest'
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { LanguageProvider } from '@/app/contexts/LanguageContext'
 import { DemoProvider } from '@/app/state/demoStore'
@@ -54,9 +54,9 @@ describe('Evo 2027 internal transfer', () => {
     const defaultDestinationAmount = screen.getByRole('button', { name: 'Enter amount in EUR' })
     expect(defaultDestinationAmount).not.toHaveTextContent('+0.00')
     expect(defaultDestinationAmount).toHaveTextContent('0EUR')
-    const exchangeRateLabel = screen.getByText('Exchange rate')
-    expect(exchangeRateLabel).toBeInTheDocument()
-    expect(exchangeRateLabel.parentElement).toHaveClass('border', 'border-[var(--uc-border-muted)]')
+    const rateSubtitle = screen.getByText('1 CZK = 0.0412 EUR')
+    expect(rateSubtitle.tagName).toBe('P')
+    expect(within(rateSubtitle.parentElement!).getByRole('heading', { name: 'Move between accounts' })).toBeInTheDocument()
     expect(screen.queryByText('Live exchange rate')).not.toBeInTheDocument()
 
     fireEvent.change(screen.getByRole('textbox', { name: 'Amount in CZK' }), {
@@ -93,7 +93,7 @@ describe('Evo 2027 internal transfer', () => {
     fireEvent.change(screen.getByRole('textbox', { name: 'Amount in CZK' }), {
       target: { value: '30000' },
     })
-    expect(screen.getByText('Amount exceeds your available balance.')).toBeInTheDocument()
+    expect(within(screen.getByRole('button', { name: /From account Everyday account/i })).getByRole('alert')).toHaveTextContent('Insufficient balance')
     expect(screen.getByRole('button', { name: 'Move money' })).toBeDisabled()
 
     fireEvent.change(screen.getByRole('textbox', { name: 'Amount in CZK' }), {
@@ -105,7 +105,7 @@ describe('Evo 2027 internal transfer', () => {
     expect(screen.getByText('250.00 CZK')).toBeInTheDocument()
   })
 
-  it('opens the in-app amount keypad on focus without suggested amount chips', () => {
+  it('shows presets before amount entry and calculator operations after entry', () => {
     render(<InternalTransferScreen onBack={() => undefined} />, { wrapper: Providers })
 
     const amountInput = screen.getByRole('textbox', { name: 'Amount in CZK' })
@@ -113,14 +113,14 @@ describe('Evo 2027 internal transfer', () => {
 
     const keypad = screen.getByRole('group', { name: 'Amount keypad' })
     const digits = within(keypad).getByRole('group', { name: 'Amount digits' })
-    expect(within(keypad).getByRole('button', { name: '1\u00a0000,00 CZK' })).toBeInTheDocument()
+    expect(within(keypad).getByRole('button', { name: '1\u00a0000 CZK' })).toBeInTheDocument()
     fireEvent.click(within(digits).getByRole('button', { name: '1' }))
     fireEvent.click(within(digits).getByRole('button', { name: '2' }))
     fireEvent.click(within(digits).getByRole('button', { name: '5' }))
 
     expect(amountInput).toHaveValue('125')
     const operations = within(keypad).getByRole('group', { name: 'Calculator operations' })
-    expect(within(keypad).queryByRole('button', { name: '1\u00a0000,00 CZK' })).not.toBeInTheDocument()
+    expect(within(keypad).queryByRole('button', { name: '1\u00a0000 CZK' })).not.toBeInTheDocument()
     expect(
       within(operations)
         .getAllByRole('button')
@@ -133,8 +133,14 @@ describe('Evo 2027 internal transfer', () => {
     fireEvent.click(within(operations).getByRole('button', { name: 'Equals' }))
     expect(amountInput).toHaveValue('150')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Schedule recurring transfer' }))
-    expect(screen.getByRole('dialog', { name: 'Schedule transfer' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Schedule transfer' }))
+    expect(screen.getAllByRole('heading', { name: 'Schedule' }).length).toBeGreaterThan(0)
+    expect(screen.getByText('Start date')).toBeInTheDocument()
+    expect(screen.getByText('Repeat', { exact: true })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Never' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
+    expect(screen.getAllByRole('heading', { name: 'Move between accounts' }).length).toBeGreaterThan(0)
+    expect(screen.getByRole('textbox', { name: 'Amount in CZK' })).toHaveValue('150')
   })
 
   it('lets either account amount activate the same neutral keypad experience', () => {
@@ -155,7 +161,7 @@ describe('Evo 2027 internal transfer', () => {
     expect(orderedAccountButtons[1]).toHaveAccessibleName(/To account Euro account/i)
   })
 
-  it('collapses a complete calculator expression when the user clicks away', () => {
+  it('collapses a complete calculator expression when the user clicks away', async () => {
     render(<InternalTransferScreen onBack={() => undefined} />, { wrapper: Providers })
 
     const amountInput = screen.getByRole('textbox', { name: 'Amount in CZK' })
@@ -171,7 +177,7 @@ describe('Evo 2027 internal transfer', () => {
     fireEvent.pointerDown(screen.getByRole('main'))
 
     expect(amountInput).toHaveValue('25')
-    expect(screen.queryByRole('group', { name: 'Amount keypad' })).not.toBeInTheDocument()
+    await waitFor(() => expect(screen.queryByRole('group', { name: 'Amount keypad' })).not.toBeInTheDocument())
   })
 
   it('opens from the Evo payments hero and returns to Payments', () => {
