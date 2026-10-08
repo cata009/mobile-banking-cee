@@ -18,9 +18,10 @@ export function CreationSuccessScreen({ goalName, onAddMoney, onOpenGoal }: Crea
       onSecondaryAction={onOpenGoal}
       body={
         <>
-          <h2 className="uc-type-h2 leading-[23px]">Start with your first contribution</h2>
+          <h2 className="uc-type-h2 leading-[23px]">Give your goal a head start</h2>
           <p className="mt-[12px] leading-[22px]">
-            Add money to start investing towards <strong className="uc-type-n4-strong">{goalName}</strong>.
+            Start investing towards <strong className="uc-type-n4-strong">{goalName}</strong> with a one-off
+            contribution or a monthly plan that fits your life.
           </p>
           <p className="uc-type-n5 mt-[12px] leading-[19px] text-[var(--uc-text-muted)]">
             You’ll review the amount before confirming.

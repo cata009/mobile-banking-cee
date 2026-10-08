@@ -40,10 +40,14 @@ export function TopUpSignScreen({
 }) {
   return (
     <StandardSignScreen
-      title="Sign investment orders"
+      title="Confirm investment"
       pinLabel="Security code"
       actionLabel="Confirm investment"
-      pinHelper="Confirm this investment from the selected cash account. Initial basket orders will be submitted for execution."
+      pinHelper={
+        topUpMethod === 'regular'
+          ? 'Confirm the monthly investment plan from your selected cash account.'
+          : 'Confirm this investment from your selected cash account. One basket order will be submitted for execution.'
+      }
       onBack={() => dispatchManagement({ type: 'top-up-back', to: 'review' })}
       onSign={() => {
         onAddMoney({
@@ -71,10 +75,10 @@ export function TopUpSuccessScreen({
       title={topUpMethod === 'regular' ? 'Monthly investment scheduled' : 'Add money request submitted'}
       body={
         topUpMethod === 'regular'
-          ? 'Your monthly investment is scheduled. The goal value will change after the first basket orders execute.'
+          ? 'Your monthly investment is scheduled. The goal value will change after the first basket order is executed.'
           : topUpMethod === 'combined'
-            ? 'Your initial basket orders are pending and your monthly investment is scheduled. The goal value will update after the orders execute.'
-            : 'Your basket orders are pending. The goal value and positions will update after they execute. You can follow their status in History.'
+            ? 'Your basket order is pending and your monthly investment is scheduled. The goal value will update after the order is executed.'
+            : 'Your basket order is pending. The goal value and positions will update after it is executed. You can follow its status in History.'
       }
       actionLabel="Back to goal"
       onDone={() => onMode('menu')}

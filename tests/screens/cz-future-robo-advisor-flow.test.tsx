@@ -165,7 +165,7 @@ describe('CZ Future Robo Advisor flow', () => {
   it('uses 16px subtitles and goal option titles throughout goal creation', () => {
     startFlow()
 
-    expect(screen.getByText('Create a goal and invest with a portfolio selected for your needs.')).toHaveClass(
+    expect(screen.getByText('Turn your plans into an investment goal. Choose a suitable portfolio, then decide when and how much to invest.')).toHaveClass(
       'text-[16px]',
     )
     fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
@@ -179,7 +179,7 @@ describe('CZ Future Robo Advisor flow', () => {
     expect(screen.getByText('General build-up wealth')).toHaveClass('text-[16px]')
   })
 
-  it('uses the supplied close action throughout the Robo flow and exits from it', () => {
+  it('keeps personal data back-only and uses the supplied close action on other Robo steps', () => {
     const onExit = vi.fn()
     startFlow('valid', onExit)
 
@@ -190,6 +190,8 @@ describe('CZ Future Robo Advisor flow', () => {
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
+    expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Edit data' })).not.toHaveClass('uppercase')
     fireEvent.click(screen.getByRole('button', { name: 'I confirm these data' }))
 
     const flowClose = screen.getByRole('button', { name: 'Close' })

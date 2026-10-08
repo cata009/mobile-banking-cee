@@ -92,7 +92,7 @@ describe('Robo incoming versus working goal ownership', () => {
         },
       ],
     })
-    expect(screen.getByText('Your top-up orders are pending')).toBeInTheDocument()
+    expect(screen.getByText('Your investment is being processed')).toBeInTheDocument()
     view.update(readyGoal('Executed goal', 10000))
     expect(screen.getByRole('heading', { name: 'Executed goal' })).toBeInTheDocument()
     expect(screen.getByTestId('robo-goal-detail')).toHaveTextContent('10.000,00 CZK')

@@ -8,6 +8,23 @@ import CzInvestmentGoalsScreen, { INITIAL_CZ_ROBO_GOALS } from '@/app/screens/in
 afterEach(cleanup)
 
 describe('CZ investment goals help', () => {
+  it('names the list and presents the live total alongside the goal cards', () => {
+    const goals = [
+      { ...INITIAL_CZ_ROBO_GOALS[0]!, currentInteger: '1 200', currentDecimals: ',25 CZK' },
+      { ...INITIAL_CZ_ROBO_GOALS[1]!, currentInteger: '300', currentDecimals: ',75 CZK' },
+    ]
+    const props = { onBack: () => undefined, onCreateGoal: () => undefined, onOpenGoal: () => undefined }
+    const { rerender } = render(<CzInvestmentGoalsScreen goals={goals} {...props} />)
+    expect(screen.getByRole('heading', { level: 1, name: 'Your goals list' })).toBeInTheDocument()
+    expect(screen.getByText('Track your plans, one step at a time')).toBeInTheDocument()
+    const summary = screen.getByRole('region', { name: 'Total goals value' })
+    expect(summary).toHaveTextContent('1.501,00 CZK')
+    expect(screen.getAllByTestId('investment-goal-card')).toHaveLength(2)
+    rerender(<CzInvestmentGoalsScreen goals={[]} {...props} />)
+    expect(screen.getByRole('region', { name: 'Total goals value' })).toHaveTextContent('0,00 CZK')
+    expect(screen.queryAllByTestId('investment-goal-card')).toHaveLength(0)
+  })
+
   it('opens useful help and returns to unchanged goal cards without leaving the list', () => {
     const onBack = vi.fn()
     const onCreateGoal = vi.fn()
@@ -21,12 +38,14 @@ describe('CZ investment goals help', () => {
       />,
     )
     const originalCards = screen.getAllByTestId('investment-goal-card').map((card) => card.outerHTML)
-    const originalTotal = screen.getByText('Total goals value').parentElement?.textContent
+    const originalTotal = screen.getByRole('region', { name: 'Total goals value' }).textContent
+
+    fireEvent.scroll(screen.getByRole('main'), { target: { scrollTop: 100 } })
 
     fireEvent.click(screen.getByRole('button', { name: 'Help' }))
 
     expect(screen.getByRole('heading', { name: 'Investment goals', level: 1 })).toBeInTheDocument()
-    expect(screen.queryByText('YOUR GOAL LIST')).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Your goals' })).not.toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Set your goal' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Your model portfolio' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Make your first investment' })).toBeInTheDocument()
@@ -39,9 +58,10 @@ describe('CZ investment goals help', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
 
-    expect(screen.getByText('YOUR GOAL LIST')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Your goals' })).toBeInTheDocument()
     expect(screen.getAllByTestId('investment-goal-card').map((card) => card.outerHTML)).toEqual(originalCards)
-    expect(screen.getByText('Total goals value').parentElement?.textContent).toBe(originalTotal)
+    expect(screen.getByRole('region', { name: 'Total goals value' }).textContent).toBe(originalTotal)
+    expect(screen.getByRole('heading', { level: 1, name: 'Your goals list' })).toBeInTheDocument()
     expect(onBack).not.toHaveBeenCalled()
     expect(onCreateGoal).not.toHaveBeenCalled()
     expect(onOpenGoal).not.toHaveBeenCalled()
@@ -73,7 +93,7 @@ describe('CZ investment goals help', () => {
     expect(screen.getAllByTestId('investment-goal-card').map((card) => card.outerHTML)).toEqual(originalCards)
     expect(onBack).not.toHaveBeenCalled()
     expect(onCreateGoal).toHaveBeenCalledTimes(1)
-    expect(screen.getByText('YOUR GOAL LIST')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Your goals' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'I confirm these data' })).not.toBeInTheDocument()
   })
 

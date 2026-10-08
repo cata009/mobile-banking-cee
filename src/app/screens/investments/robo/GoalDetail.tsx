@@ -37,6 +37,7 @@ import {
   PortfolioProductLogo,
 } from '@/app/screens/investments/robo/PortfolioScreens'
 import { RoboScreen } from '@/app/screens/investments/robo/RoboScreen'
+import { GoalDetailHelpScreen } from '@/app/screens/investments/robo/GoalDetailHelpScreen'
 
 export function GoalDetail({
   goalName,
@@ -96,6 +97,7 @@ export function GoalDetail({
   const resolvedReturnTone = existingGoal?.returnTone ?? 'negative'
   const resolvedReturnLabel = formatCzkReturnLabel(existingGoal?.returnLabel ?? '-1 100,00 CZK (-1,36%)')
   const [selectedPeriodId, setSelectedPeriodId] = useState<InvestmentPeriodId>('3y')
+  const [helpOpen, setHelpOpen] = useState(false)
   const [selectedSortId, setSelectedSortId] = useState<InvestmentSortId>('max-value')
   const [capturedChartReferenceDate] = useState(() => new Date())
   const resolvedChartReferenceDate = chartReferenceDate ?? capturedChartReferenceDate
@@ -148,6 +150,9 @@ export function GoalDetail({
       return right.value - left.value
     })
   }, [currentValue, presentation, securityCatalog, selectedSortId])
+  if (helpOpen) {
+    return <GoalDetailHelpScreen onBack={() => setHelpOpen(false)} />
+  }
   return (
     <RoboScreen
       title={resolvedGoalName}
@@ -155,6 +160,7 @@ export function GoalDetail({
       onBack={onBack}
       onClose={onClose}
       headerAction="help"
+      onHelp={() => setHelpOpen(true)}
       dataScreen="goal-detail"
       descriptionTopClassName="mt-[8px]"
       contentTopClassName="pt-[16px]"
@@ -238,7 +244,7 @@ export function GoalDetail({
             className="!w-full [&_.line-clamp-2]:line-clamp-none [&_.line-clamp-4]:line-clamp-none [&_.uc-type-n4]:leading-[22px]"
             title={
               hasPendingBuyOrders
-                ? 'Your top-up orders are pending'
+                ? 'Your investment is being processed'
                 : hasRecurringPlan
                   ? 'Your recurring top-up is scheduled'
                   : hasSellHistory
@@ -247,9 +253,9 @@ export function GoalDetail({
             }
             description={
               hasPendingBuyOrders
-                ? 'Your goal will show positions and value after the basket orders are executed.'
+                ? 'Your goal will show positions and value after your investment is executed. Follow its status in History.'
                 : hasRecurringPlan
-                  ? `Your monthly contribution is set to start on ${existingGoal?.recurringContribution?.startDate}. Positions appear after the first orders are executed.`
+                  ? `Your monthly contribution is set to start on ${existingGoal?.recurringContribution?.startDate}. Positions appear after the first basket order is executed.`
                   : hasSellHistory
                     ? 'Your previous sales remain in History. Add money whenever you’re ready to invest again.'
                     : 'Your model portfolio is ready. Select Add money to make your first investment towards this goal.'

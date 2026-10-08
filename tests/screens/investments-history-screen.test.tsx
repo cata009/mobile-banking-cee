@@ -55,6 +55,14 @@ beforeAll(() => {
 afterEach(cleanup)
 
 describe('InvestmentsHistoryScreen details', () => {
+  it('omits All time for goal history and starts with an available date preset', () => {
+    render(<InvestmentsHistoryScreen onBack={() => undefined} hideAllTimeDateOption allDatesByDefault />, { wrapper: AppProviders })
+    fireEvent.click(screen.getByRole('button', { name: 'Filters' }))
+    expect(screen.queryByRole('button', { name: 'All time' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Last year' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: 'Define' })).toBeInTheDocument()
+  })
+
   it('ignores an invalid incoming title filter instead of crashing the history list', () => {
     const invalidClickPayload = { type: 'click' }
 

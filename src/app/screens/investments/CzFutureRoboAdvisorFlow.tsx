@@ -20,6 +20,7 @@ import { type InvestmentBasketFund, type InvestmentBasketFundHolding } from '@/a
 import type { InvestmentHistoryTransaction } from '@/app/config/investmentsPortfolioConfig'
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { BottomSheet } from '@/app/components/BottomSheet'
+import { AppIcon } from '@/app/components/icons'
 import StandardSignScreen from '@/app/components/flow/StandardSignScreen'
 import { CreationSuccessScreen } from '@/app/screens/investments/robo/CreationSuccessScreen'
 import InvestmentBasketFundDetailScreen from '@/app/screens/investments/InvestmentBasketFundDetailScreen'
@@ -377,7 +378,13 @@ export default function CzFutureRoboAdvisorFlow({
   }
 
   if (step === 'contact') {
-    return <PersonalDataConfirmationScreen onBack={goBackByStep} onConfirm={() => setStep('profile')} />
+    return (
+      <PersonalDataConfirmationScreen
+        onBack={goBackByStep}
+        onConfirm={() => setStep('profile')}
+        onClose={requestExit}
+      />
+    )
   }
 
   if (step === 'profile') {
@@ -552,9 +559,17 @@ export default function CzFutureRoboAdvisorFlow({
   if (step === 'processing') {
     return (
       <div
-        className="flex h-full w-full flex-col items-center justify-center bg-[var(--uc-surface)] px-[34px] text-center"
+        className="relative flex h-full w-full flex-col items-center justify-center bg-[var(--uc-surface)] px-[34px] text-center"
         data-robo-screen="processing"
       >
+        <button
+          type="button"
+          aria-label="Close"
+          onClick={requestExit}
+          className="absolute right-[8px] top-[calc(var(--uc-phone-top-reserve,54px)+8px)] grid size-[40px] place-items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uc-action)]"
+        >
+          <AppIcon name="close-flow" color="var(--uc-text)" size={20} />
+        </button>
         <div className="size-[72px] animate-spin rounded-full border-[5px] border-[var(--uc-border)] border-t-[var(--uc-action)]" />
         <h1 className="uc-type-h1 mt-[34px] text-[var(--uc-text)]">We’re setting up your goal</h1>
         <p className="uc-type-n4 mt-[14px] leading-[21px] text-[var(--uc-text)]">
