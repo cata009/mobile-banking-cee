@@ -5,7 +5,6 @@ import { AmountSuggestionChip } from "@/app/components/AmountSuggestionChip";
 import AmountField from "@/app/components/AmountField";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import PageHeader from "@/app/components/PageHeader";
-import TextField from "@/app/components/TextField";
 import UniCreditLogo from "@/app/components/UniCreditLogo";
 import { AppIcon } from "@/app/components/icons";
 import { PrimeContactActionFlow } from "@/app/screens/prime/PrimeContactActionFlow";
@@ -23,7 +22,7 @@ import requestContactIcon from "@/assets/investments/term-deposit/request-contac
 type DepositCurrency = "EUR" | "RSD" | "USD";
 type FundingSource = "current" | "external";
 type TenorMonths = 3 | 6 | 12;
-type SelectionType = "currency" | "tenor" | null;
+type SelectionType = "currency" | null;
 type InfoType = "simulator" | "opportunity" | "nks" | "eks" | null;
 type RequestStep = "calculator" | "contact" | "callback" | "success";
 
@@ -193,22 +192,18 @@ function DepositSourceCard({
 }
 
 function DepositSelectionSheet({
-  type,
   selected,
   onSelect,
   onConfirm,
   onClose,
 }: {
-  type: Exclude<SelectionType, null>;
-  selected: DepositCurrency | TenorMonths;
-  onSelect: (value: DepositCurrency | TenorMonths) => void;
+  selected: DepositCurrency;
+  onSelect: (value: DepositCurrency) => void;
   onConfirm: () => void;
   onClose: () => void;
 }) {
-  const isCurrency = type === "currency";
-  const options: readonly (DepositCurrency | TenorMonths)[] = isCurrency ? DEPOSIT_CURRENCIES : TENOR_OPTIONS;
-  const title = isCurrency ? "Select currency" : "Select tenor";
-  const headingId = isCurrency ? "term-deposit-currency-options" : "term-deposit-tenor-options";
+  const title = "Select currency";
+  const headingId = "term-deposit-currency-options";
 
   return (
     <BottomSheet
@@ -241,20 +236,18 @@ function DepositSelectionSheet({
         </h2>
       </div>
       <div role="radiogroup" aria-labelledby={headingId} className="pt-[8px]">
-        {options.map((option) => {
-          const value = isCurrency ? (option as DepositCurrency) : (option as TenorMonths);
-          const label = isCurrency ? String(value) : `${value} months`;
+        {DEPOSIT_CURRENCIES.map((value) => {
           return (
-            <label key={String(option)} className="flex h-[80px] cursor-pointer items-center gap-[12px] px-[4px] text-[var(--uc-text)]">
+            <label key={value} className="flex h-[80px] cursor-pointer items-center gap-[12px] px-[4px] text-[var(--uc-text)]">
               <input
                 type="radio"
-                name={isCurrency ? "term-deposit-currency" : "term-deposit-tenor"}
-                value={String(value)}
+                name="term-deposit-currency"
+                value={value}
                 checked={selected === value}
                 onChange={() => onSelect(value)}
                 className="size-[22px] accent-[var(--uc-action)]"
               />
-              <span className="uc-type-n4-strong">{label}</span>
+              <span className="uc-type-n4-strong">{value}</span>
             </label>
           );
         })}
@@ -550,7 +543,6 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
   const [tenor, setTenor] = useState<TenorMonths>(12);
   const [selectionType, setSelectionType] = useState<SelectionType>(null);
   const [pendingCurrency, setPendingCurrency] = useState<DepositCurrency>("EUR");
-  const [pendingTenor, setPendingTenor] = useState<TenorMonths>(12);
   const [infoType, setInfoType] = useState<InfoType>(null);
   const [requestStep, setRequestStep] = useState<RequestStep>("calculator");
   const [callbackNote, setCallbackNote] = useState("");
@@ -586,11 +578,6 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
         ? fallbackAmount
         : 0;
     setAmountInput(nextAmount > 0 ? formatInputAmount(nextAmount, country) : "");
-  };
-
-  const handleSelectionConfirm = () => {
-    if (selectionType === "currency") handleCurrencyConfirm();
-    if (selectionType === "tenor") setTenor(pendingTenor);
   };
 
   const showSimulatorInfo = () => setInfoType("simulator");
@@ -759,26 +746,29 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
         </section>
 
         <section className="mt-[20px] px-[24px]" aria-label="Deposit term">
-          <TextField
-            label="Tenor"
-            value={`${tenor} months`}
-            onChange={() => undefined}
-            readOnly
-            ariaLabel={`Tenor, ${tenor} months`}
-            trailingIconName="chevron-down-wide"
-            trailingIconAction={{
-              ariaLabel: `Change tenor, currently ${tenor} months`,
-              onClick: () => {
-                setPendingTenor(tenor);
-                setSelectionType("tenor");
-              },
-            }}
-            onActivate={() => {
-              setPendingTenor(tenor);
-              setSelectionType("tenor");
-            }}
-            helperText="Select one of offered options"
-          />
+          <p id="term-deposit-tenor-label" className="uc-type-n5 text-[var(--uc-text-muted)]">Select the preferred tenor</p>
+          <div role="radiogroup" aria-labelledby="term-deposit-tenor-label" className="mt-[8px] flex flex-col">
+            {TENOR_OPTIONS.map((months) => (
+              <label key={months} className="flex h-[48px] cursor-pointer items-center gap-[12px] px-[4px] text-[var(--uc-text)]">
+                <input
+                  type="radio"
+                  name="term-deposit-tenor"
+                  value={String(months)}
+                  checked={tenor === months}
+                  onChange={() => setTenor(months)}
+                  className="peer sr-only"
+                />
+                <span className="grid size-[24px] shrink-0 place-items-center rounded-full peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--uc-focus-ring)]" aria-hidden="true">
+                  <AppIcon
+                    name={tenor === months ? "radio-selected" : "radio-unselected"}
+                    size={24}
+                    color="var(--uc-text)"
+                  />
+                </span>
+                <span className="uc-type-n4">{months} months</span>
+              </label>
+            ))}
+          </div>
         </section>
 
         <section className="mt-[24px]" aria-label="Representative example">
@@ -832,15 +822,11 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
         </button>
       </footer>
 
-      {selectionType ? (
+      {selectionType === "currency" ? (
         <DepositSelectionSheet
-          type={selectionType}
-          selected={selectionType === "currency" ? pendingCurrency : pendingTenor}
-          onSelect={(value) => {
-            if (selectionType === "currency") setPendingCurrency(value as DepositCurrency);
-            else setPendingTenor(value as TenorMonths);
-          }}
-          onConfirm={handleSelectionConfirm}
+          selected={pendingCurrency}
+          onSelect={setPendingCurrency}
+          onConfirm={handleCurrencyConfirm}
           onClose={() => setSelectionType(null)}
         />
       ) : null}
