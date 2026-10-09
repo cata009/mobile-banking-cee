@@ -50,6 +50,13 @@ describe('Retained Future Gain term deposit simulator', () => {
     expect(amount).toHaveValue('1.000.000,00')
   })
 
+  it('keeps the decimal separator attached to the whole opportunity amount', () => {
+    renderBankingScreen(<FutureGainTermDepositScreen onBack={vi.fn()} />, { country: 'RS' })
+    const decimalAndCurrency = screen.getByText('Average funds').parentElement?.querySelector('p > span:nth-child(2)')
+
+    expect(decimalAndCurrency).not.toHaveClass('ml-[2px]')
+  })
+
   it('updates the representative estimate for entered money, funding, currency and tenor', async () => {
     renderBankingScreen(<FutureGainTermDepositScreen onBack={vi.fn()} />, { country: 'RS' })
     fireEvent.change(screen.getByRole('textbox', { name: 'Amount to deposit in EUR' }), {
@@ -66,7 +73,12 @@ describe('Retained Future Gain term deposit simulator', () => {
     await confirmPicker(/Change currency, currently EUR/, 'RSD')
     expect(screen.getByText('Select the preferred tenor')).toBeInTheDocument()
     const tenorOptions = screen.getByRole('radiogroup', { name: 'Select the preferred tenor' })
-    expect(within(tenorOptions).getAllByRole('radio').map((radio) => radio.getAttribute('value'))).toEqual(['12', '6', '3'])
+    const tenorRadios = within(tenorOptions).getAllByRole('radio')
+    expect(tenorRadios.map((radio) => radio.getAttribute('value'))).toEqual(['12', '6', '3'])
+    for (const radio of tenorRadios) {
+      expect(radio).toHaveClass('absolute', 'opacity-0', 'size-[24px]')
+      expect(radio).not.toHaveClass('sr-only')
+    }
     expect(within(tenorOptions).getByRole('radio', { name: '12 months' })).toBeChecked()
     expect(screen.queryByRole('button', { name: /Change tenor/ })).not.toBeInTheDocument()
     fireEvent.click(within(tenorOptions).getByRole('radio', { name: '3 months' }))
