@@ -127,7 +127,7 @@ function OpportunityAmount({
       style={{ color, fontSize }}
     >
       <span>{hidden ? "••••••" : `${prefix}${integer}`}</span>
-      <span className="uc-type-n5 ml-[2px] shrink-0">
+      <span className="uc-type-n5 shrink-0">
         {hidden ? null : `${decimalSeparator}${decimal}`}
         <span className="ml-[2px]">{currency}</span>
       </span>
@@ -749,16 +749,16 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
           <p id="term-deposit-tenor-label" className="uc-type-n5 text-[var(--uc-text-muted)]">Select the preferred tenor</p>
           <div role="radiogroup" aria-labelledby="term-deposit-tenor-label" className="mt-[8px] flex flex-col">
             {TENOR_OPTIONS.map((months) => (
-              <label key={months} className="flex h-[48px] cursor-pointer items-center gap-[12px] px-[4px] text-[var(--uc-text)]">
+              <label key={months} className="relative flex h-[48px] cursor-pointer items-center gap-[12px] px-[4px] text-[var(--uc-text)]">
                 <input
                   type="radio"
                   name="term-deposit-tenor"
                   value={String(months)}
                   checked={tenor === months}
                   onChange={() => setTenor(months)}
-                  className="peer sr-only"
+                  className="peer absolute left-[4px] top-1/2 z-10 size-[24px] -translate-y-1/2 cursor-pointer opacity-0"
                 />
-                <span className="grid size-[24px] shrink-0 place-items-center rounded-full peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--uc-focus-ring)]" aria-hidden="true">
+                <span className="pointer-events-none grid size-[24px] shrink-0 place-items-center rounded-full peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--uc-focus-ring)]" aria-hidden="true">
                   <AppIcon
                     name={tenor === months ? "radio-selected" : "radio-unselected"}
                     size={24}
