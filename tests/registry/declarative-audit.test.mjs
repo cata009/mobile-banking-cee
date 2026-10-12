@@ -15,7 +15,7 @@ describe('composed template audit', () => {
       templates: 47,
       codePreviews: 47,
       components: 100,
-      screens: 39,
+      screens: 40,
       flows: 14,
     })
   })

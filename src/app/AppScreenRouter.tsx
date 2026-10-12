@@ -45,6 +45,7 @@ const MyBankerEntryCard = lazy(() => import('@/app/screens/my-banker/MyBankerEnt
 const InvestmentsPortfolioScreen = lazy(() => import('@/app/screens/investments/InvestmentsPortfolioScreen'))
 const InvestmentsHistoryScreen = lazy(() => import('@/app/screens/investments/InvestmentsHistoryScreen'))
 const SmartInvestmentScreen = lazy(() => import('@/app/screens/investments/SmartInvestmentScreen'))
+const FutureGainPeerInsightsScreen = lazy(() => import('@/app/screens/investments/FutureGainPeerInsightsScreen'))
 const OrdersToApproveScreen = lazy(() => import('@/app/screens/investments/OrdersToApproveScreen'))
 const SettingsScreen = lazy(() => import('@/app/screens/settings/SettingsScreen'))
 const KidsMarketHomeApp = lazy(() => import('@/app/screens/kids/KidsMarketHomeApp'))
@@ -406,6 +407,7 @@ export function AppScreenRouter({ coordinators, shell }: { coordinators: AppCoor
           onPaymentsClick={handlePaymentsClick}
           onMoreClick={handleMoreClick}
           onSmartInvestmentOpen={() => navigateTo('smart-investment')}
+          onFutureGainPeerInsightsOpen={() => navigateTo('future-gain-peer-insights')}
           onProductDetailOpen={handleProductDetailOpen}
           productsShelfFocusRequest={productsShelfFocusRequest}
           onProductsShelfFocusHandled={focusHandled}
@@ -469,6 +471,9 @@ export function AppScreenRouter({ coordinators, shell }: { coordinators: AppCoor
           onExploreInvestmentFunds={handleFutureGainInvestmentFundsClick}
           initialFundSimulatorState={futureGainFundSimulatorResumeState}
         />
+      )}
+      {currentScreen === 'future-gain-peer-insights' && futureGainSmartInvestmentAvailable && (
+        <FutureGainPeerInsightsScreen onBack={goBack} />
       )}
       {currentScreen === 'investments-history' && investmentsPortfolioAvailable && (
         <InvestmentsHistoryScreen

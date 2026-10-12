@@ -51,6 +51,7 @@ const SCREENS_ORDER = [
   'pi.products.detail',
   'pi.investments.portfolio',
   'pi.investments.smart-investment',
+  'pi.investments.future-gain-peer-insights',
   'pi.investments.history',
   'pi.card.detail',
   'pi.card.details-info',

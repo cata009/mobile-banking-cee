@@ -14,5 +14,6 @@ export const PI_RS_FUTURE_GAIN = {
     'src/experiences/pi/rs/future-gain/composition.ts',
     'src/app/screens/investments/FutureGainTermDepositScreen.tsx',
     'src/app/screens/investments/FutureGainInvestmentSimulatorScreen.tsx',
+    'src/app/screens/investments/FutureGainPeerInsightsScreen.tsx',
   ],
 } as const satisfies ExperienceManifest
