@@ -22,6 +22,7 @@ export type Screen =
   | 'my-banker' // My Banker peer-based product recommendations (RS future)
   | 'product-detail' // Product detail opened from Products bottom sheet
   | 'smart-investment' // Future Gain smart investment information and currency preview
+  | 'future-gain-peer-insights' // Future Gain GDPR consent and peer goal carousel
   | 'investments' // Investments portfolio
   | 'investments-history' // Investments history transactions/orders flow
   | 'investment-orders-to-approve' // Pending investments awaiting approval

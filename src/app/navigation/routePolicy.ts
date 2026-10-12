@@ -1,6 +1,7 @@
 import type { Screen } from "@/app/contexts/NavigationContext";
 import type { CountryId, DesignSystemId, ProductId, ReleaseId, ScreenId, ThemeMode } from "@/app/state/demoTypes";
 import { isReleaseFeatureActive } from '@/app/state/featureResolver';
+import { isFutureGainAvailable } from '@/features/investments/future-gain/model';
 
 export type RouteSurface = "prelogin" | "app" | "platform";
 export type RouteStatusBarVariant = "light" | "dark" | "theme";
@@ -38,6 +39,7 @@ export const ROUTE_POLICY = {
   "product-detail": route({ surface: "app", registryIds: ["pi.products.detail"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "products", payload: "product-detail", deepLink: { restorable: false, fallback: "products", payload: "none" } }),
   investments: route({ surface: "app", registryIds: ["pi.investments.portfolio"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "investments", payload: "none" } }),
   "smart-investment": route({ surface: "app", registryIds: ["pi.investments.smart-investment"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: false, fallback: "homepage", payload: "none" } }),
+  "future-gain-peer-insights": route({ surface: "app", registryIds: ["pi.investments.future-gain-peer-insights"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "products", payload: "none", deepLink: { restorable: false, fallback: "products", payload: "none" } }),
   "investments-history": route({ surface: "app", registryIds: ["pi.investments.history"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "investments", payload: "none", deepLink: { restorable: true, fallback: "investments-history", payload: "none" } }),
   "investment-orders-to-approve": route({ surface: "app", registryIds: [], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "investments", payload: "none", deepLink: { restorable: false, fallback: "investments", payload: "none" } }),
   prime: route({ surface: "app", registryIds: ["pi.prime.overview"], productEligibility: "mobile-runtime", statusBar: "dark", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "prime", payload: "none" } }),
@@ -75,6 +77,13 @@ export interface ProductRouteContext {
 export function isRouteEligibleForProductContext(screen: Screen, context: ProductRouteContext): boolean {
   if (ROUTE_POLICY[screen].productEligibility === "unrestricted") return true;
   if (context.designSystem !== "current") return false;
+  if (screen === 'future-gain-peer-insights') {
+    return isFutureGainAvailable({
+      product: context.product,
+      country: context.country,
+      release: context.release ?? 'release-current',
+    });
+  }
   if (screen === 'my-banker') {
     return isReleaseFeatureActive({
       ...context,

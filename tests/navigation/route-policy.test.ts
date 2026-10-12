@@ -10,7 +10,7 @@ import type { Screen } from '@/app/contexts/NavigationContext'
 const ALL_ROUTES: Screen[] = [
   'prelogin-inactive', 'prelogin-active', 'co-apping-session', 'homepage', 'language-selector',
   'analytics', 'messages', 'payments', 'products', 'my-banker', 'product-detail', 'investments',
-  'smart-investment', 'investments-history', 'investment-orders-to-approve', 'prime', 'appointments', 'request-call', 'more', 'documents', 'settings', 'contacts', 'transactions', 'account-detail',
+  'smart-investment', 'future-gain-peer-insights', 'investments-history', 'investment-orders-to-approve', 'prime', 'appointments', 'request-call', 'more', 'documents', 'settings', 'contacts', 'transactions', 'account-detail',
   'account-details-info', 'account-options', 'card-details-info', 'card-options', 'transaction-detail',
   'card-detail', 'domestic-payment', 'payment-review', 'payment-sign', 'payment-success',
   'flow-library', 'design-system', 'tools',
@@ -30,6 +30,7 @@ const BACK_FALLBACKS: Record<Screen, Screen> = {
   'my-banker': 'homepage',
   investments: 'homepage',
   'smart-investment': 'homepage',
+  'future-gain-peer-insights': 'products',
   'investments-history': 'investments',
   'investment-orders-to-approve': 'investments',
   prime: 'homepage',
@@ -64,7 +65,7 @@ const RESTORABLE_ROUTES: Screen[] = [
 ]
 
 describe('exhaustive route policy', () => {
-  it('owns exactly the 37 runtime routes and their existing back fallbacks', () => {
+  it('owns exactly the 38 runtime routes and their back fallbacks', () => {
     expect(Object.keys(ROUTE_POLICY)).toEqual(ALL_ROUTES)
     expect(Object.fromEntries(ALL_ROUTES.map((route) => [route, ROUTE_POLICY[route].backFallback]))).toEqual(
       BACK_FALLBACKS,
@@ -101,6 +102,22 @@ describe('exhaustive route policy', () => {
     expect(isRouteEligibleForProductContext('payments', { product: 'KIDS_PI', country: 'RO', designSystem: 'current' })).toBe(true)
     expect(isRouteEligibleForProductContext('payments', { product: 'SME', country: 'CZ', designSystem: 'current' })).toBe(false)
     expect(isRouteEligibleForProductContext('payments', { product: 'PI', country: 'CZ', designSystem: 'next' })).toBe(false)
+    expect(
+      isRouteEligibleForProductContext('future-gain-peer-insights', {
+        product: 'PI',
+        country: 'RS',
+        designSystem: 'current',
+        release: 'release-future-rs-future-gain',
+      }),
+    ).toBe(true)
+    expect(
+      isRouteEligibleForProductContext('future-gain-peer-insights', {
+        product: 'PI',
+        country: 'RS',
+        designSystem: 'current',
+        release: 'release-current',
+      }),
+    ).toBe(false)
     expect(isRouteEligibleForProductContext('design-system', { product: 'SME', country: 'CZ', designSystem: 'next' })).toBe(true)
   })
 })

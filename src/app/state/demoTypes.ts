@@ -146,6 +146,7 @@ export type ScreenId =
   | "pi.investments.portfolio"
   | "pi.investments.history"
   | "pi.investments.smart-investment"
+  | "pi.investments.future-gain-peer-insights"
   | "pi.card.detail"
   | "pi.card.details-info"
   | "pi.card.options"

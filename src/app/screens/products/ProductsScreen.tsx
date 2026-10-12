@@ -46,6 +46,7 @@ interface ProductsScreenProps {
   onPaymentsClick?: () => void;
   onInvestmentsClick?: () => void;
   onSmartInvestmentOpen?: () => void;
+  onFutureGainPeerInsightsOpen?: () => void;
   onMoreClick?: () => void;
   onProductDetailOpen?: (selection: ProductDetailSelection) => void;
   productsShelfFocusRequest?: ProductsShelfFocusRequest | null;
@@ -492,6 +493,7 @@ export default function ProductsScreen({
   onPaymentsClick,
   onInvestmentsClick,
   onSmartInvestmentOpen,
+  onFutureGainPeerInsightsOpen,
   onMoreClick,
   onProductDetailOpen,
   productsShelfFocusRequest,
@@ -539,6 +541,7 @@ export default function ProductsScreen({
       ...(firstSerbianOffer
         ? [{
           ...localizeOffer(firstSerbianOffer),
+          id: "future-gain-products-for-you",
           title: "Products for you!",
           description: "Portfolio insights from clients with similar ages and monthly income.",
           colorFamily: "green" as const,
@@ -556,6 +559,7 @@ export default function ProductsScreen({
   }, [config.offers, isFutureGainSmartInvestment, localizeOffer]);
 
   const handleFutureGainOfferClick = (offer: ProductsOffer) => {
+    if (offer.id === "future-gain-products-for-you") onFutureGainPeerInsightsOpen?.();
     if (offer.id === FUTURE_GAIN_SMART_INVESTMENT_OFFER.id) onSmartInvestmentOpen?.();
   };
 
