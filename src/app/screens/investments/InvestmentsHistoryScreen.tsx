@@ -1,3 +1,4 @@
+import { getHistoryTypesForTab, normalizeFiltersForTab, resetFilterTypesForTab, selectInvestmentHistoryRows } from '@/features/investments/history/model';
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import AccountActionBar from "@/app/components/accounts/AccountActionBar";
@@ -119,55 +120,6 @@ function formatDateParts(date: string, country: CountryId) {
     month: new Intl.DateTimeFormat("en-US", { month: "short", timeZone: "UTC" }).format(parsed).toUpperCase(),
     year: new Intl.DateTimeFormat(config.locale, { year: "numeric", timeZone: "UTC" }).format(parsed),
     long: new Intl.DateTimeFormat(config.locale, { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(parsed),
-  };
-}
-
-function historyRowMatchesSearch(item: InvestmentHistoryTransaction | InvestmentHistoryOrder, searchQuery: string) {
-  const normalized = searchQuery.trim().toLowerCase();
-  if (!normalized) return true;
-
-  const fields = "type" in item
-    ? [item.title, item.type, item.currency]
-    : [item.title, item.orderType, item.status, item.currency];
-  return fields.some((field) => String(field).toLowerCase().includes(normalized));
-}
-
-function historyRowMatchesDate(itemDate: string, filters: InvestmentHistoryFilterState, latestDate: Date) {
-  if (filters.datePreset === "all-time") return true;
-
-  if (filters.datePreset === "define") {
-    const start = parseIsoDateOnly(filters.customStartDate).getTime();
-    const endDate = parseIsoDateOnly(filters.customEndDate);
-    endDate.setHours(23, 59, 59, 999);
-    const end = endDate.getTime();
-    const current = new Date(itemDate).getTime();
-    return current >= start && current <= end;
-  }
-
-  const days = filters.datePreset === "last-month" ? 31 : filters.datePreset === "last-6-months" ? 183 : 366;
-  const cutoff = new Date(latestDate);
-  cutoff.setUTCDate(cutoff.getUTCDate() - days);
-  return new Date(itemDate).getTime() >= cutoff.getTime();
-}
-
-function getHistoryTypesForTab(tab: InvestmentHistoryTabId) {
-  return tab === "orders" ? (["BUY", "SELL"] as const) : INVESTMENT_HISTORY_TRANSACTION_TYPES;
-}
-
-function normalizeFiltersForTab(filters: InvestmentHistoryFilterState, tab: InvestmentHistoryTabId): InvestmentHistoryFilterState {
-  const availableTypes = getHistoryTypesForTab(tab);
-  const selectedTypes = filters.selectedTypes.filter((type) => availableTypes.includes(type));
-
-  return {
-    ...filters,
-    selectedTypes,
-  };
-}
-
-function resetFilterTypesForTab(filters: InvestmentHistoryFilterState, tab: InvestmentHistoryTabId): InvestmentHistoryFilterState {
-  return {
-    ...filters,
-    selectedTypes: [...getHistoryTypesForTab(tab)],
   };
 }
 
@@ -811,36 +763,10 @@ export default function InvestmentsHistoryScreen({
   const transactions = transactionsOverride ?? generatedTransactions;
   const generatedOrders = useMemo(() => buildInvestmentHistoryOrders(securities, country), [country, securities]);
   const orders = ordersOverride ?? generatedOrders;
-  const latestTransactionDate = useMemo(
-    () => transactions.length
-      ? new Date(Math.max(...transactions.map((item) => new Date(item.date).getTime())))
-      : new Date(),
-    [transactions],
-  );
-  const latestOrderDate = useMemo(
-    () => orders.length
-      ? new Date(Math.max(...orders.map((item) => new Date(item.date).getTime())))
-      : new Date(),
-    [orders],
-  );
   const tabDefaults = useMemo(() => resetFilterTypesForTab(defaultFilters, activeTab), [activeTab, defaultFilters]);
   const effectiveFilters = appliedFilters ?? tabDefaults;
 
-  const filteredTransactions = transactions.filter((item) =>
-    (!historySecurityIdFilter || item.securityId === historySecurityIdFilter) &&
-    historyRowMatchesSearch(item, searchQuery) &&
-    historyRowMatchesDate(item.date, effectiveFilters, latestTransactionDate) &&
-    effectiveFilters.selectedTypes.includes(item.type) &&
-    effectiveFilters.selectedCurrencies.includes(item.currency)
-  );
-  const filteredOrders = orders.filter((item) =>
-    (!historySecurityIdFilter || item.securityId === historySecurityIdFilter) &&
-    historyRowMatchesSearch(item, searchQuery) &&
-    historyRowMatchesDate(item.date, effectiveFilters, latestOrderDate) &&
-    effectiveFilters.selectedTypes.includes(item.orderType) &&
-    effectiveFilters.selectedCurrencies.includes(item.currency) &&
-    effectiveFilters.selectedStatuses.includes(item.status)
-  );
+  const {transactions: filteredTransactions, orders: filteredOrders} = selectInvestmentHistoryRows({transactions, orders, filters:effectiveFilters, searchQuery, securityId:historySecurityIdFilter});
   const filterActive = appliedFilters !== null;
 
 

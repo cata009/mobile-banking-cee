@@ -1,0 +1,1579 @@
+
+ RUN  v3.2.7 C:/Users/mihai/Desktop/Mobile Banking - CEE
+
+···········xxxxxxxxxxxx···x·····
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 13 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/features/mobile-first-profile-services.test.ts > Mobile First profile service policies > clamps one calendar month to the destination month end
+AssertionError: expected '' to contain '1 mese'
+
+- Expected
++ Received
+
+- 1 mese
+
+ ❯ tests/features/mobile-first-profile-services.test.ts:47:113
+     45|   it('clamps one calendar month to the destination month end', () => {
+     46|     expect(documentFilterError({ category: 'Investimenti e trading', s…
+     47|     expect(documentFilterError({ category: 'Investimenti e trading', s…
+       |                                                                                                                 ^
+     48|     expect(documentFilterError({ category: 'Consulenze', start: '2024-…
+     49|     expect(documentFilterError({ category: 'Consulenze', start: '2024-…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/13]⎯
+
+ FAIL  tests/screens/mobile-first-profile-services.test.tsx > Mobile First profile services > validates inherited Investimenti e trading filter constraints when the draft category is blank
+TestingLibraryElementError: Unable to find an accessible element with the role "alert"
+
+Here are the accessible roles:
+
+  main:
+
+  Name "Risultati di ricerca":
+  <main
+    aria-label="Risultati di ricerca"
+    class="mf-home mf-profile-page mf-services mf-services-documents"
+    lang="it"
+  />
+
+  --------------------------------------------------
+  banner:
+
+  Name "":
+  <header
+    class="mf-profile-page-header"
+  />
+
+  --------------------------------------------------
+  button:
+
+  Name "Indietro":
+  <button
+    aria-label="Indietro"
+    type="button"
+  />
+
+  Name "Chiudi":
+  <button
+    aria-label="Chiudi"
+    type="button"
+  />
+
+  Name "Impostazioni documenti":
+  <button
+    aria-label="Impostazioni documenti"
+    type="button"
+  />
+
+  Name "Filtri documenti":
+  <button
+    aria-label="Filtri documenti"
+    type="button"
+  />
+
+  Name "Attestazione ISEE RICHIEDI ›":
+  <button
+    type="button"
+  />
+
+  Name "Titolarità conto RICHIEDI ›":
+  <button
+    type="button"
+  />
+
+  Name "Rimuovi filtri":
+  <button
+    class="mf-services-text-action"
+    type="button"
+  />
+
+  Name "Segna tutto come letto":
+  <button
+    class="mf-services-text-action"
+    type="button"
+  />
+
+  Name "Condividi":
+  <button
+    class="mf-services-text-action"
+    type="button"
+  />
+
+  Name "18 GEN 25 Investimenti e trading Informativa ex ante su costi ed oneri altre operazioni Riferimento: 00000103167429":
+  <button
+    class="mf-services-card"
+    type="button"
+  />
+
+  Name "Archivio":
+  <button
+    class="mf-services-text-action"
+    type="button"
+  />
+
+  --------------------------------------------------
+  presentation:
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40.0034'%20height='40.0034'%20viewBox='0%200%2040.0034%2040.0034'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Back'%3e%3cg%20id='Navigation%20and%20action/Back_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M24.8452%209.01362C26.3901%2010.4828%2026.3901%2012.8671%2024.8452%2014.3376L19.2511%2020.0136L24.8452%2025.6896C26.3901%2027.1602%2026.3901%2029.5431%2024.8452%2031.0136L14.0039%2020.0136L24.8452%209.01362Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40'%20height='40'%20viewBox='0%200%2040%2040'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Close'%3e%3cg%20id='Navigation%20and%20action/Close_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M11.0426%209L20%2017.9574L28.9581%209L31%2011.0426L22.0426%2020L31%2028.9574L28.9581%2031L20%2022.0426L11.0426%2031L9%2028.9574L17.9574%2020L9%2011.0426L11.0426%209Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Settings_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M8.88564%2012.2892C10.2939%2012.8581%2011.895%2012.179%2012.4654%2010.7706C13.0343%209.36226%2012.3536%207.7594%2010.9454%207.19054C9.5371%206.62168%207.93599%207.30237%207.36718%208.71074C6.79836%2010.1191%207.479%2011.7204%208.88564%2012.2892ZM1.76142%2014.7248L0.851011%2012.5488L2.92373%2010.7381V9.31493L0.833333%207.5146L1.72901%205.33269L4.48527%205.51832L5.48112%204.52092L5.27635%201.76002L7.45219%200.851012L9.27153%202.93421H10.6769L12.4859%200.833333L14.6677%201.72908L14.4821%204.48409L15.4779%205.48149L18.2401%205.27523L19.1505%207.45125L17.0763%209.26189V10.6865L19.1667%2012.4854L18.271%2014.6688L15.5368%2014.4832L14.5204%2015.4997L14.7251%2018.24L12.5478%2019.1505L10.7491%2017.0879H9.30541L7.51406%2019.1667L5.3338%2018.2724L5.51795%2015.5365L4.50147%2014.5215L1.76142%2014.7248Z'%20fill='%23262626'/%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Filter_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M4.013%201.66727C4.897%201.67235%205.70251%202.19258%206.09429%203.01146H18.3218V5.16215H6.1099C5.73196%205.94924%204.97155%206.46348%204.12227%206.50634H4.013C2.71986%206.50634%201.67156%205.42308%201.67156%204.08681C1.67156%202.75054%202.71986%201.66727%204.013%201.66727ZM15.9804%207.58174C17.1373%207.57348%2018.1266%208.4396%2018.3088%209.6202C18.491%2010.8008%2017.8114%2011.9419%2016.7094%2012.3059C15.6074%2012.6699%2014.4133%2012.1476%2013.8991%2011.0766H1.67155V8.92592H13.8835C14.2778%208.10185%2015.0908%207.5807%2015.9804%207.58174ZM10.7772%2014.8403C10.3854%2014.0214%209.57988%2013.5012%208.69589%2013.4961H8.58662C7.73699%2013.5378%206.97608%2014.0524%206.599%2014.8403H1.67155V16.991H6.599C6.99456%2017.8137%207.80688%2018.3339%208.69589%2018.3339C9.5849%2018.3339%2010.3972%2017.8137%2010.7928%2016.991H18.3218V14.8403H10.7772Z'%20fill='%23262626'/%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Double%20tick_T2'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M12.8257%205.77227L9.66873%208.81122L9.14226%208.30593L7.89231%209.51719L9.66873%2011.2283L15.3311%205.77227C14.6392%205.105%2013.5176%205.105%2012.8257%205.77227ZM7.96019%205.77226C8.65206%205.10499%209.77372%205.10499%2010.4656%205.77226L4.80323%2011.2283L0.668945%207.24719C1.36082%206.57947%202.48202%206.57947%203.17389%207.24719L4.80323%208.81121L7.96019%205.77226Z'%20fill='%23007A91'/%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Share_T2'%3e%3cpath%20id='Path'%20d='M6.41992%207.83887H4.0498C3.94084%207.83887%203.85178%207.92644%203.85156%208.03418V13.9658C3.85178%2014.0736%203.94084%2014.1611%204.0498%2014.1611H11.9502C12.0592%2014.1611%2012.1482%2014.0736%2012.1484%2013.9658V8.03418C12.1482%207.92644%2012.0592%207.83887%2011.9502%207.83887H9.58008V6.66699H11.9502C12.7137%206.66699%2013.3328%207.27889%2013.333%208.03418V13.9658C13.3328%2014.7211%2012.7137%2015.333%2011.9502%2015.333H4.0498C3.28628%2015.333%202.66721%2014.7211%202.66699%2013.9658V8.03418C2.66721%207.27889%203.28628%206.66699%204.0498%206.66699H6.41992V7.83887ZM11.3643%203.79199C10.9022%204.22278%2010.1516%204.22265%209.68945%203.79199L8.60742%202.78125V10.3096L7.42383%2010.3105V2.78125L6.34082%203.79199C5.87883%204.22244%205.12992%204.22238%204.66699%203.79199L8.01562%200.666992L11.3643%203.79199Z'%20fill='%23007A91'/%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  --------------------------------------------------
+  region:
+
+  Name "Risultati di ricerca":
+  <div
+    aria-label="Risultati di ricerca"
+    class="mf-profile-page-scroll scrollbar-hide"
+    role="region"
+    tabindex="0"
+  />
+
+  --------------------------------------------------
+  heading:
+
+  Name "Risultati di ricerca":
+  <h1
+    tabindex="-1"
+  />
+
+  Name "Investimenti e trading":
+  <h2 />
+
+  --------------------------------------------------
+  strong:
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  --------------------------------------------------
+  tablist:
+
+  Name "Categorie documenti":
+  <div
+    aria-label="Categorie documenti"
+    class="mf-profile-tabs scrollbar-hide"
+    role="tablist"
+  />
+
+  --------------------------------------------------
+  tab:
+
+  Name "In primo piano":
+  <button
+    aria-selected="false"
+    role="tab"
+    tabindex="-1"
+    type="button"
+  />
+
+  Name "Recenti":
+  <button
+    aria-selected="false"
+    role="tab"
+    tabindex="-1"
+    type="button"
+  />
+
+  Name "Conti":
+  <button
+    aria-selected="false"
+    role="tab"
+    tabindex="-1"
+    type="button"
+  />
+
+  Name "Carte":
+  <button
+    aria-selected="false"
+    role="tab"
+    tabindex="-1"
+    type="button"
+  />
+
+  Name "Altro":
+  <button
+    aria-selected="true"
+    role="tab"
+    tabindex="0"
+    type="button"
+  />
+
+  --------------------------------------------------
+  textbox:
+
+  Name "Cerca documenti":
+  <input
+    id=":r13:"
+    placeholder="Cerca per parola chiave..."
+    value=""
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <main
+      aria-label="Risultati di ricerca"
+      class="mf-home mf-profile-page mf-services mf-services-documents"
+      lang="it"
+    >
+      <header
+        class="mf-profile-page-header"
+      >
+        <button
+          aria-label="Indietro"
+          type="button"
+        >
+          <img
+            alt=""
+            src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40.0034'%20height='40.0034'%20viewBox='0%200%2040.0034%2040.0034'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Back'%3e%3cg%20id='Navigation%20and%20action/Back_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M24.8452%209.01362C26.3901%2010.4828%2026.3901%2012.8671%2024.8452%2014.3376L19.2511%2020.0136L24.8452%2025.6896C26.3901%2027.1602%2026.3901%2029.5431%2024.8452%2031.0136L14.0039%2020.0136L24.8452%209.01362Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+          />
+        </button>
+        <div>
+          <button
+            aria-label="Chiudi"
+            type="button"
+          >
+            <img
+              alt=""
+              src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40'%20height='40'%20viewBox='0%200%2040%2040'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Close'%3e%3cg%20id='Navigation%20and%20action/Close_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M11.0426%209L20%2017.9574L28.9581%209L31%2011.0426L22.0426%2020L31%2028.9574L28.9581%2031L20%2022.0426L11.0426%2031L9%2028.9574L17.9574%2020L9%2011.0426L11.0426%209Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+            />
+          </button>
+        </div>
+      </header>
+      <div
+        aria-label="Risultati di ricerca"
+        class="mf-profile-page-scroll scrollbar-hide"
+        role="region"
+        tabindex="0"
+      >
+        <h1
+          tabindex="-1"
+        >
+          Risultati di ricerca
+        </h1>
+        <div
+          class="mf-services-toolbar"
+        >
+          <button
+            aria-label="Impostazioni documenti"
+            type="button"
+          >
+            <img
+              alt=""
+              src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Settings_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M8.88564%2012.2892C10.2939%2012.8581%2011.895%2012.179%2012.4654%2010.7706C13.0343%209.36226%2012.3536%207.7594%2010.9454%207.19054C9.5371%206.62168%207.93599%207.30237%207.36718%208.71074C6.79836%2010.1191%207.479%2011.7204%208.88564%2012.2892ZM1.76142%2014.7248L0.851011%2012.5488L2.92373%2010.7381V9.31493L0.833333%207.5146L1.72901%205.33269L4.48527%205.51832L5.48112%204.52092L5.27635%201.76002L7.45219%200.851012L9.27153%202.93421H10.6769L12.4859%200.833333L14.6677%201.72908L14.4821%204.48409L15.4779%205.48149L18.2401%205.27523L19.1505%207.45125L17.0763%209.26189V10.6865L19.1667%2012.4854L18.271%2014.6688L15.5368%2014.4832L14.5204%2015.4997L14.7251%2018.24L12.5478%2019.1505L10.7491%2017.0879H9.30541L7.51406%2019.1667L5.3338%2018.2724L5.51795%2015.5365L4.50147%2014.5215L1.76142%2014.7248Z'%20fill='%23262626'/%3e%3c/g%3e%3c/svg%3e"
+            />
+          </button>
+          <button
+            aria-label="Filtri documenti"
+            type="button"
+          >
+            <img
+              alt=""
+              src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Filter_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M4.013%201.66727C4.897%201.67235%205.70251%202.19258%206.09429%203.01146H18.3218V5.16215H6.1099C5.73196%205.94924%204.97155%206.46348%204.12227%206.50634H4.013C2.71986%206.50634%201.67156%205.42308%201.67156%204.08681C1.67156%202.75054%202.71986%201.66727%204.013%201.66727ZM15.9804%207.58174C17.1373%207.57348%2018.1266%208.4396%2018.3088%209.6202C18.491%2010.8008%2017.8114%2011.9419%2016.7094%2012.3059C15.6074%2012.6699%2014.4133%2012.1476%2013.8991%2011.0766H1.67155V8.92592H13.8835C14.2778%208.10185%2015.0908%207.5807%2015.9804%207.58174ZM10.7772%2014.8403C10.3854%2014.0214%209.57988%2013.5012%208.69589%2013.4961H8.58662C7.73699%2013.5378%206.97608%2014.0524%206.599%2014.8403H1.67155V16.991H6.599C6.99456%2017.8137%207.80688%2018.3339%208.69589%2018.3339C9.5849%2018.3339%2010.3972%2017.8137%2010.7928%2016.991H18.3218V14.8403H10.7772Z'%20fill='%23262626'/%3e%3c/g%3e%3c/svg%3e"
+            />
+          </button>
+        </div>
+        <div
+          class="mf-services-certificates"
+        >
+          <button
+            type="button"
+          >
+            <strong>
+              Attestazione ISEE
+            </strong>
+            <span>
+              RICHIEDI ›
+            </span>
+          </button>
+          <button
+            type="button"
+          >
+            <strong>
+              Titolarità conto
+            </strong>
+            <span>
+              RICHIEDI ›
+            </span>
+          </button>
+        </div>
+        <div
+          aria-label="Categorie documenti"
+          class="mf-profile-tabs scrollbar-hide"
+          role="tablist"
+        >
+          <button
+            aria-selected="false"
+            role="tab"
+            tabindex="-1"
+            type[39...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/screens/mobile-first-profile-services.test.tsx:192:19
+    190|     fireEvent.change(screen.getByLabelText('Data di fine'), { target: …
+    191|     fireEvent.click(screen.getByRole('button', { name: 'Applica' }))
+    192|     expect(screen.getByRole('alert')).toHaveTextContent(message)
+       |                   ^
+    193|   })
+    194|   it.each([[1, 'message-btp', 'messages'], [2, 'mifid', 'practices']] …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/13]⎯
+
+ FAIL  tests/screens/mobile-first-profile-services.test.tsx > Mobile First profile services > validates inherited Consulenze filter constraints when the draft category is blank
+TestingLibraryElementError: Unable to find an accessible element with the role "alert"
+
+Here are the accessible roles:
+
+  main:
+
+  Name "Risultati di ricerca":
+  <main
+    aria-label="Risultati di ricerca"
+    class="mf-home mf-profile-page mf-services mf-services-documents"
+    lang="it"
+  />
+
+  --------------------------------------------------
+  banner:
+
+  Name "":
+  <header
+    class="mf-profile-page-header"
+  />
+
+  --------------------------------------------------
+  button:
+
+  Name "Indietro":
+  <button
+    aria-label="Indietro"
+    type="button"
+  />
+
+  Name "Chiudi":
+  <button
+    aria-label="Chiudi"
+    type="button"
+  />
+
+  Name "Impostazioni documenti":
+  <button
+    aria-label="Impostazioni documenti"
+    type="button"
+  />
+
+  Name "Filtri documenti":
+  <button
+    aria-label="Filtri documenti"
+    type="button"
+  />
+
+  Name "Attestazione ISEE RICHIEDI ›":
+  <button
+    type="button"
+  />
+
+  Name "Titolarità conto RICHIEDI ›":
+  <button
+    type="button"
+  />
+
+  Name "Rimuovi filtri":
+  <button
+    class="mf-services-text-action"
+    type="button"
+  />
+
+  Name "Segna tutto come letto":
+  <button
+    class="mf-services-text-action"
+    type="button"
+  />
+
+  Name "Condividi":
+  <button
+    class="mf-services-text-action"
+    type="button"
+  />
+
+  Name "12 GEN 25 Consulenze Informativa su costi ed oneri - Advice Riferimento: 2501564915901":
+  <button
+    class="mf-services-card"
+    type="button"
+  />
+
+  Name "Archivio":
+  <button
+    class="mf-services-text-action"
+    type="button"
+  />
+
+  --------------------------------------------------
+  presentation:
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40.0034'%20height='40.0034'%20viewBox='0%200%2040.0034%2040.0034'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Back'%3e%3cg%20id='Navigation%20and%20action/Back_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M24.8452%209.01362C26.3901%2010.4828%2026.3901%2012.8671%2024.8452%2014.3376L19.2511%2020.0136L24.8452%2025.6896C26.3901%2027.1602%2026.3901%2029.5431%2024.8452%2031.0136L14.0039%2020.0136L24.8452%209.01362Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40'%20height='40'%20viewBox='0%200%2040%2040'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Close'%3e%3cg%20id='Navigation%20and%20action/Close_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M11.0426%209L20%2017.9574L28.9581%209L31%2011.0426L22.0426%2020L31%2028.9574L28.9581%2031L20%2022.0426L11.0426%2031L9%2028.9574L17.9574%2020L9%2011.0426L11.0426%209Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Settings_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M8.88564%2012.2892C10.2939%2012.8581%2011.895%2012.179%2012.4654%2010.7706C13.0343%209.36226%2012.3536%207.7594%2010.9454%207.19054C9.5371%206.62168%207.93599%207.30237%207.36718%208.71074C6.79836%2010.1191%207.479%2011.7204%208.88564%2012.2892ZM1.76142%2014.7248L0.851011%2012.5488L2.92373%2010.7381V9.31493L0.833333%207.5146L1.72901%205.33269L4.48527%205.51832L5.48112%204.52092L5.27635%201.76002L7.45219%200.851012L9.27153%202.93421H10.6769L12.4859%200.833333L14.6677%201.72908L14.4821%204.48409L15.4779%205.48149L18.2401%205.27523L19.1505%207.45125L17.0763%209.26189V10.6865L19.1667%2012.4854L18.271%2014.6688L15.5368%2014.4832L14.5204%2015.4997L14.7251%2018.24L12.5478%2019.1505L10.7491%2017.0879H9.30541L7.51406%2019.1667L5.3338%2018.2724L5.51795%2015.5365L4.50147%2014.5215L1.76142%2014.7248Z'%20fill='%23262626'/%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Filter_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M4.013%201.66727C4.897%201.67235%205.70251%202.19258%206.09429%203.01146H18.3218V5.16215H6.1099C5.73196%205.94924%204.97155%206.46348%204.12227%206.50634H4.013C2.71986%206.50634%201.67156%205.42308%201.67156%204.08681C1.67156%202.75054%202.71986%201.66727%204.013%201.66727ZM15.9804%207.58174C17.1373%207.57348%2018.1266%208.4396%2018.3088%209.6202C18.491%2010.8008%2017.8114%2011.9419%2016.7094%2012.3059C15.6074%2012.6699%2014.4133%2012.1476%2013.8991%2011.0766H1.67155V8.92592H13.8835C14.2778%208.10185%2015.0908%207.5807%2015.9804%207.58174ZM10.7772%2014.8403C10.3854%2014.0214%209.57988%2013.5012%208.69589%2013.4961H8.58662C7.73699%2013.5378%206.97608%2014.0524%206.599%2014.8403H1.67155V16.991H6.599C6.99456%2017.8137%207.80688%2018.3339%208.69589%2018.3339C9.5849%2018.3339%2010.3972%2017.8137%2010.7928%2016.991H18.3218V14.8403H10.7772Z'%20fill='%23262626'/%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Double%20tick_T2'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M12.8257%205.77227L9.66873%208.81122L9.14226%208.30593L7.89231%209.51719L9.66873%2011.2283L15.3311%205.77227C14.6392%205.105%2013.5176%205.105%2012.8257%205.77227ZM7.96019%205.77226C8.65206%205.10499%209.77372%205.10499%2010.4656%205.77226L4.80323%2011.2283L0.668945%207.24719C1.36082%206.57947%202.48202%206.57947%203.17389%207.24719L4.80323%208.81121L7.96019%205.77226Z'%20fill='%23007A91'/%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Share_T2'%3e%3cpath%20id='Path'%20d='M6.41992%207.83887H4.0498C3.94084%207.83887%203.85178%207.92644%203.85156%208.03418V13.9658C3.85178%2014.0736%203.94084%2014.1611%204.0498%2014.1611H11.9502C12.0592%2014.1611%2012.1482%2014.0736%2012.1484%2013.9658V8.03418C12.1482%207.92644%2012.0592%207.83887%2011.9502%207.83887H9.58008V6.66699H11.9502C12.7137%206.66699%2013.3328%207.27889%2013.333%208.03418V13.9658C13.3328%2014.7211%2012.7137%2015.333%2011.9502%2015.333H4.0498C3.28628%2015.333%202.66721%2014.7211%202.66699%2013.9658V8.03418C2.66721%207.27889%203.28628%206.66699%204.0498%206.66699H6.41992V7.83887ZM11.3643%203.79199C10.9022%204.22278%2010.1516%204.22265%209.68945%203.79199L8.60742%202.78125V10.3096L7.42383%2010.3105V2.78125L6.34082%203.79199C5.87883%204.22244%205.12992%204.22238%204.66699%203.79199L8.01562%200.666992L11.3643%203.79199Z'%20fill='%23007A91'/%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  --------------------------------------------------
+  region:
+
+  Name "Risultati di ricerca":
+  <div
+    aria-label="Risultati di ricerca"
+    class="mf-profile-page-scroll scrollbar-hide"
+    role="region"
+    tabindex="0"
+  />
+
+  --------------------------------------------------
+  heading:
+
+  Name "Risultati di ricerca":
+  <h1
+    tabindex="-1"
+  />
+
+  Name "Consulenze":
+  <h2 />
+
+  --------------------------------------------------
+  strong:
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  --------------------------------------------------
+  tablist:
+
+  Name "Categorie documenti":
+  <div
+    aria-label="Categorie documenti"
+    class="mf-profile-tabs scrollbar-hide"
+    role="tablist"
+  />
+
+  --------------------------------------------------
+  tab:
+
+  Name "In primo piano":
+  <button
+    aria-selected="false"
+    role="tab"
+    tabindex="-1"
+    type="button"
+  />
+
+  Name "Recenti":
+  <button
+    aria-selected="false"
+    role="tab"
+    tabindex="-1"
+    type="button"
+  />
+
+  Name "Conti":
+  <button
+    aria-selected="false"
+    role="tab"
+    tabindex="-1"
+    type="button"
+  />
+
+  Name "Carte":
+  <button
+    aria-selected="false"
+    role="tab"
+    tabindex="-1"
+    type="button"
+  />
+
+  Name "Altro":
+  <button
+    aria-selected="true"
+    role="tab"
+    tabindex="0"
+    type="button"
+  />
+
+  --------------------------------------------------
+  textbox:
+
+  Name "Cerca documenti":
+  <input
+    id=":r19:"
+    placeholder="Cerca per parola chiave..."
+    value=""
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <main
+      aria-label="Risultati di ricerca"
+      class="mf-home mf-profile-page mf-services mf-services-documents"
+      lang="it"
+    >
+      <header
+        class="mf-profile-page-header"
+      >
+        <button
+          aria-label="Indietro"
+          type="button"
+        >
+          <img
+            alt=""
+            src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40.0034'%20height='40.0034'%20viewBox='0%200%2040.0034%2040.0034'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Back'%3e%3cg%20id='Navigation%20and%20action/Back_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M24.8452%209.01362C26.3901%2010.4828%2026.3901%2012.8671%2024.8452%2014.3376L19.2511%2020.0136L24.8452%2025.6896C26.3901%2027.1602%2026.3901%2029.5431%2024.8452%2031.0136L14.0039%2020.0136L24.8452%209.01362Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+          />
+        </button>
+        <div>
+          <button
+            aria-label="Chiudi"
+            type="button"
+          >
+            <img
+              alt=""
+              src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40'%20height='40'%20viewBox='0%200%2040%2040'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Close'%3e%3cg%20id='Navigation%20and%20action/Close_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M11.0426%209L20%2017.9574L28.9581%209L31%2011.0426L22.0426%2020L31%2028.9574L28.9581%2031L20%2022.0426L11.0426%2031L9%2028.9574L17.9574%2020L9%2011.0426L11.0426%209Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+            />
+          </button>
+        </div>
+      </header>
+      <div
+        aria-label="Risultati di ricerca"
+        class="mf-profile-page-scroll scrollbar-hide"
+        role="region"
+        tabindex="0"
+      >
+        <h1
+          tabindex="-1"
+        >
+          Risultati di ricerca
+        </h1>
+        <div
+          class="mf-services-toolbar"
+        >
+          <button
+            aria-label="Impostazioni documenti"
+            type="button"
+          >
+            <img
+              alt=""
+              src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Settings_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M8.88564%2012.2892C10.2939%2012.8581%2011.895%2012.179%2012.4654%2010.7706C13.0343%209.36226%2012.3536%207.7594%2010.9454%207.19054C9.5371%206.62168%207.93599%207.30237%207.36718%208.71074C6.79836%2010.1191%207.479%2011.7204%208.88564%2012.2892ZM1.76142%2014.7248L0.851011%2012.5488L2.92373%2010.7381V9.31493L0.833333%207.5146L1.72901%205.33269L4.48527%205.51832L5.48112%204.52092L5.27635%201.76002L7.45219%200.851012L9.27153%202.93421H10.6769L12.4859%200.833333L14.6677%201.72908L14.4821%204.48409L15.4779%205.48149L18.2401%205.27523L19.1505%207.45125L17.0763%209.26189V10.6865L19.1667%2012.4854L18.271%2014.6688L15.5368%2014.4832L14.5204%2015.4997L14.7251%2018.24L12.5478%2019.1505L10.7491%2017.0879H9.30541L7.51406%2019.1667L5.3338%2018.2724L5.51795%2015.5365L4.50147%2014.5215L1.76142%2014.7248Z'%20fill='%23262626'/%3e%3c/g%3e%3c/svg%3e"
+            />
+          </button>
+          <button
+            aria-label="Filtri documenti"
+            type="button"
+          >
+            <img
+              alt=""
+              src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Filter_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M4.013%201.66727C4.897%201.67235%205.70251%202.19258%206.09429%203.01146H18.3218V5.16215H6.1099C5.73196%205.94924%204.97155%206.46348%204.12227%206.50634H4.013C2.71986%206.50634%201.67156%205.42308%201.67156%204.08681C1.67156%202.75054%202.71986%201.66727%204.013%201.66727ZM15.9804%207.58174C17.1373%207.57348%2018.1266%208.4396%2018.3088%209.6202C18.491%2010.8008%2017.8114%2011.9419%2016.7094%2012.3059C15.6074%2012.6699%2014.4133%2012.1476%2013.8991%2011.0766H1.67155V8.92592H13.8835C14.2778%208.10185%2015.0908%207.5807%2015.9804%207.58174ZM10.7772%2014.8403C10.3854%2014.0214%209.57988%2013.5012%208.69589%2013.4961H8.58662C7.73699%2013.5378%206.97608%2014.0524%206.599%2014.8403H1.67155V16.991H6.599C6.99456%2017.8137%207.80688%2018.3339%208.69589%2018.3339C9.5849%2018.3339%2010.3972%2017.8137%2010.7928%2016.991H18.3218V14.8403H10.7772Z'%20fill='%23262626'/%3e%3c/g%3e%3c/svg%3e"
+            />
+          </button>
+        </div>
+        <div
+          class="mf-services-certificates"
+        >
+          <button
+            type="button"
+          >
+            <strong>
+              Attestazione ISEE
+            </strong>
+            <span>
+              RICHIEDI ›
+            </span>
+          </button>
+          <button
+            type="button"
+          >
+            <strong>
+              Titolarità conto
+            </strong>
+            <span>
+              RICHIEDI ›
+            </span>
+          </button>
+        </div>
+        <div
+          aria-label="Categorie documenti"
+          class="mf-profile-tabs scrollbar-hide"
+          role="tablist"
+        >
+          <button
+            aria-selected="false"
+            role="tab"
+            tabindex="-1"
+            type[39...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/screens/mobile-first-profile-services.test.tsx:192:19
+    190|     fireEvent.change(screen.getByLabelText('Data di fine'), { target: …
+    191|     fireEvent.click(screen.getByRole('button', { name: 'Applica' }))
+    192|     expect(screen.getByRole('alert')).toHaveTextContent(message)
+       |                   ^
+    193|   })
+    194|   it.each([[1, 'message-btp', 'messages'], [2, 'mifid', 'practices']] …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/13]⎯
+
+ FAIL  tests/screens/mobile-first-profile-services.test.tsx > Mobile First profile services > validates inherited In primo piano filter constraints when the draft category is blank
+TestingLibraryElementError: Unable to find an accessible element with the role "alert"
+
+Here are the accessible roles:
+
+  main:
+
+  Name "Risultati di ricerca":
+  <main
+    aria-label="Risultati di ricerca"
+    class="mf-home mf-profile-page mf-services mf-services-documents"
+    lang="it"
+  />
+
+  --------------------------------------------------
+  banner:
+
+  Name "":
+  <header
+    class="mf-profile-page-header"
+  />
+
+  --------------------------------------------------
+  button:
+
+  Name "Indietro":
+  <button
+    aria-label="Indietro"
+    type="button"
+  />
+
+  Name "Chiudi":
+  <button
+    aria-label="Chiudi"
+    type="button"
+  />
+
+  Name "Impostazioni documenti":
+  <button
+    aria-label="Impostazioni documenti"
+    type="button"
+  />
+
+  Name "Filtri documenti":
+  <button
+    aria-label="Filtri documenti"
+    type="button"
+  />
+
+  Name "Attestazione ISEE RICHIEDI ›":
+  <button
+    type="button"
+  />
+
+  Name "Titolarità conto RICHIEDI ›":
+  <button
+    type="button"
+  />
+
+  Name "Rimuovi filtri":
+  <button
+    class="mf-services-text-action"
+    type="button"
+  />
+
+  Name "Segna tutto come letto":
+  <button
+    class="mf-services-text-action"
+    type="button"
+  />
+
+  Name "Condividi":
+  <button
+    class="mf-services-text-action"
+    type="button"
+  />
+
+  Name "13 GEN 25 Conti correnti Estratto conto Riferimento: 00000103167429":
+  <button
+    class="mf-services-card is-unread"
+    type="button"
+  />
+
+  Name "22 GEN 25 Altri documenti e report Modulo Unico Amundi Riferimento: 8464":
+  <button
+    class="mf-services-card is-unread"
+    type="button"
+  />
+
+  Name "01 GEN 25 Altri documenti e report Modulo di raccomandazione Riferimento: 9258":
+  <button
+    class="mf-services-card"
+    type="button"
+  />
+
+  Name "06 GEN 25 Altri documenti e report Modulo di gestione Riferimento: 45678":
+  <button
+    class="mf-services-card"
+    type="button"
+  />
+
+  Name "17 GEN 25 Pagamenti e operazioni Modulo di pagamento F24 Riferimento: 123456789":
+  <button
+    class="mf-services-card is-unread"
+    type="button"
+  />
+
+  Name "12 GEN 25 Questionari Questionario di profilazione e adeguata verifica Riferimento: 81263748596":
+  <button
+    class="mf-services-card"
+    type="button"
+  />
+
+  Name "Archivio":
+  <button
+    class="mf-services-text-action"
+    type="button"
+  />
+
+  --------------------------------------------------
+  presentation:
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40.0034'%20height='40.0034'%20viewBox='0%200%2040.0034%2040.0034'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Back'%3e%3cg%20id='Navigation%20and%20action/Back_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M24.8452%209.01362C26.3901%2010.4828%2026.3901%2012.8671%2024.8452%2014.3376L19.2511%2020.0136L24.8452%2025.6896C26.3901%2027.1602%2026.3901%2029.5431%2024.8452%2031.0136L14.0039%2020.0136L24.8452%209.01362Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40'%20height='40'%20viewBox='0%200%2040%2040'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Close'%3e%3cg%20id='Navigation%20and%20action/Close_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M11.0426%209L20%2017.9574L28.9581%209L31%2011.0426L22.0426%2020L31%2028.9574L28.9581%2031L20%2022.0426L11.0426%2031L9%2028.9574L17.9574%2020L9%2011.0426L11.0426%209Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Settings_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M8.88564%2012.2892C10.2939%2012.8581%2011.895%2012.179%2012.4654%2010.7706C13.0343%209.36226%2012.3536%207.7594%2010.9454%207.19054C9.5371%206.62168%207.93599%207.30237%207.36718%208.71074C6.79836%2010.1191%207.479%2011.7204%208.88564%2012.2892ZM1.76142%2014.7248L0.851011%2012.5488L2.92373%2010.7381V9.31493L0.833333%207.5146L1.72901%205.33269L4.48527%205.51832L5.48112%204.52092L5.27635%201.76002L7.45219%200.851012L9.27153%202.93421H10.6769L12.4859%200.833333L14.6677%201.72908L14.4821%204.48409L15.4779%205.48149L18.2401%205.27523L19.1505%207.45125L17.0763%209.26189V10.6865L19.1667%2012.4854L18.271%2014.6688L15.5368%2014.4832L14.5204%2015.4997L14.7251%2018.24L12.5478%2019.1505L10.7491%2017.0879H9.30541L7.51406%2019.1667L5.3338%2018.2724L5.51795%2015.5365L4.50147%2014.5215L1.76142%2014.7248Z'%20fill='%23262626'/%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Filter_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M4.013%201.66727C4.897%201.67235%205.70251%202.19258%206.09429%203.01146H18.3218V5.16215H6.1099C5.73196%205.94924%204.97155%206.46348%204.12227%206.50634H4.013C2.71986%206.50634%201.67156%205.42308%201.67156%204.08681C1.67156%202.75054%202.71986%201.66727%204.013%201.66727ZM15.9804%207.58174C17.1373%207.57348%2018.1266%208.4396%2018.3088%209.6202C18.491%2010.8008%2017.8114%2011.9419%2016.7094%2012.3059C15.6074%2012.6699%2014.4133%2012.1476%2013.8991%2011.0766H1.67155V8.92592H13.8835C14.2778%208.10185%2015.0908%207.5807%2015.9804%207.58174ZM10.7772%2014.8403C10.3854%2014.0214%209.57988%2013.5012%208.69589%2013.4961H8.58662C7.73699%2013.5378%206.97608%2014.0524%206.599%2014.8403H1.67155V16.991H6.599C6.99456%2017.8137%207.80688%2018.3339%208.69589%2018.3339C9.5849%2018.3339%2010.3972%2017.8137%2010.7928%2016.991H18.3218V14.8403H10.7772Z'%20fill='%23262626'/%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Double%20tick_T2'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M12.8257%205.77227L9.66873%208.81122L9.14226%208.30593L7.89231%209.51719L9.66873%2011.2283L15.3311%205.77227C14.6392%205.105%2013.5176%205.105%2012.8257%205.77227ZM7.96019%205.77226C8.65206%205.10499%209.77372%205.10499%2010.4656%205.77226L4.80323%2011.2283L0.668945%207.24719C1.36082%206.57947%202.48202%206.57947%203.17389%207.24719L4.80323%208.81121L7.96019%205.77226Z'%20fill='%23007A91'/%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Share_T2'%3e%3cpath%20id='Path'%20d='M6.41992%207.83887H4.0498C3.94084%207.83887%203.85178%207.92644%203.85156%208.03418V13.9658C3.85178%2014.0736%203.94084%2014.1611%204.0498%2014.1611H11.9502C12.0592%2014.1611%2012.1482%2014.0736%2012.1484%2013.9658V8.03418C12.1482%207.92644%2012.0592%207.83887%2011.9502%207.83887H9.58008V6.66699H11.9502C12.7137%206.66699%2013.3328%207.27889%2013.333%208.03418V13.9658C13.3328%2014.7211%2012.7137%2015.333%2011.9502%2015.333H4.0498C3.28628%2015.333%202.66721%2014.7211%202.66699%2013.9658V8.03418C2.66721%207.27889%203.28628%206.66699%204.0498%206.66699H6.41992V7.83887ZM11.3643%203.79199C10.9022%204.22278%2010.1516%204.22265%209.68945%203.79199L8.60742%202.78125V10.3096L7.42383%2010.3105V2.78125L6.34082%203.79199C5.87883%204.22244%205.12992%204.22238%204.66699%203.79199L8.01562%200.666992L11.3643%203.79199Z'%20fill='%23007A91'/%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  --------------------------------------------------
+  region:
+
+  Name "Risultati di ricerca":
+  <div
+    aria-label="Risultati di ricerca"
+    class="mf-profile-page-scroll scrollbar-hide"
+    role="region"
+    tabindex="0"
+  />
+
+  --------------------------------------------------
+  heading:
+
+  Name "Risultati di ricerca":
+  <h1
+    tabindex="-1"
+  />
+
+  --------------------------------------------------
+  strong:
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  Name "":
+  <strong />
+
+  --------------------------------------------------
+  tablist:
+
+  Name "Categorie documenti":
+  <div
+    aria-label="Categorie documenti"
+    class="mf-profile-tabs scrollbar-hide"
+    role="tablist"
+  />
+
+  --------------------------------------------------
+  tab:
+
+  Name "In primo piano":
+  <button
+    aria-selected="true"
+    role="tab"
+    tabindex="0"
+    type="button"
+  />
+
+  Name "Recenti":
+  <button
+    aria-selected="false"
+    role="tab"
+    tabindex="-1"
+    type="button"
+  />
+
+  Name "Conti":
+  <button
+    aria-selected="false"
+    role="tab"
+    tabindex="-1"
+    type="button"
+  />
+
+  Name "Carte":
+  <button
+    aria-selected="false"
+    role="tab"
+    tabindex="-1"
+    type="button"
+  />
+
+  Name "Altro":
+  <button
+    aria-selected="false"
+    role="tab"
+    tabindex="-1"
+    type="button"
+  />
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  <p />
+
+  --------------------------------------------------
+  textbox:
+
+  Name "Cerca documenti":
+  <input
+    id=":r1e:"
+    placeholder="Cerca per parola chiave..."
+    value=""
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <main
+      aria-label="Risultati di ricerca"
+      class="mf-home mf-profile-page mf-services mf-services-documents"
+      lang="it"
+    >
+      <header
+        class="mf-profile-page-header"
+      >
+        <button
+          aria-label="Indietro"
+          type="button"
+        >
+          <img
+            alt=""
+            src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40.0034'%20height='40.0034'%20viewBox='0%200%2040.0034%2040.0034'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Back'%3e%3cg%20id='Navigation%20and%20action/Back_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M24.8452%209.01362C26.3901%2010.4828%2026.3901%2012.8671%2024.8452%2014.3376L19.2511%2020.0136L24.8452%2025.6896C26.3901%2027.1602%2026.3901%2029.5431%2024.8452%2031.0136L14.0039%2020.0136L24.8452%209.01362Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+          />
+        </button>
+        <div>
+          <button
+            aria-label="Chiudi"
+            type="button"
+          >
+            <img
+              alt=""
+              src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40'%20height='40'%20viewBox='0%200%2040%2040'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Close'%3e%3cg%20id='Navigation%20and%20action/Close_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M11.0426%209L20%2017.9574L28.9581%209L31%2011.0426L22.0426%2020L31%2028.9574L28.9581%2031L20%2022.0426L11.0426%2031L9%2028.9574L17.9574%2020L9%2011.0426L11.0426%209Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+            />
+          </button>
+        </div>
+      </header>
+      <div
+        aria-label="Risultati di ricerca"
+        class="mf-profile-page-scroll scrollbar-hide"
+        role="region"
+        tabindex="0"
+      >
+        <h1
+          tabindex="-1"
+        >
+          Risultati di ricerca
+        </h1>
+        <div
+          class="mf-services-toolbar"
+        >
+          <button
+            aria-label="Impostazioni documenti"
+            type="button"
+          >
+            <img
+              alt=""
+              src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Settings_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M8.88564%2012.2892C10.2939%2012.8581%2011.895%2012.179%2012.4654%2010.7706C13.0343%209.36226%2012.3536%207.7594%2010.9454%207.19054C9.5371%206.62168%207.93599%207.30237%207.36718%208.71074C6.79836%2010.1191%207.479%2011.7204%208.88564%2012.2892ZM1.76142%2014.7248L0.851011%2012.5488L2.92373%2010.7381V9.31493L0.833333%207.5146L1.72901%205.33269L4.48527%205.51832L5.48112%204.52092L5.27635%201.76002L7.45219%200.851012L9.27153%202.93421H10.6769L12.4859%200.833333L14.6677%201.72908L14.4821%204.48409L15.4779%205.48149L18.2401%205.27523L19.1505%207.45125L17.0763%209.26189V10.6865L19.1667%2012.4854L18.271%2014.6688L15.5368%2014.4832L14.5204%2015.4997L14.7251%2018.24L12.5478%2019.1505L10.7491%2017.0879H9.30541L7.51406%2019.1667L5.3338%2018.2724L5.51795%2015.5365L4.50147%2014.5215L1.76142%2014.7248Z'%20fill='%23262626'/%3e%3c/g%3e%3c/svg%3e"
+            />
+          </button>
+          <button
+            aria-label="Filtri documenti"
+            type="button"
+          >
+            <img
+              alt=""
+              src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Filter_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M4.013%201.66727C4.897%201.67235%205.70251%202.19258%206.09429%203.01146H18.3218V5.16215H6.1099C5.73196%205.94924%204.97155%206.46348%204.12227%206.50634H4.013C2.71986%206.50634%201.67156%205.42308%201.67156%204.08681C1.67156%202.75054%202.71986%201.66727%204.013%201.66727ZM15.9804%207.58174C17.1373%207.57348%2018.1266%208.4396%2018.3088%209.6202C18.491%2010.8008%2017.8114%2011.9419%2016.7094%2012.3059C15.6074%2012.6699%2014.4133%2012.1476%2013.8991%2011.0766H1.67155V8.92592H13.8835C14.2778%208.10185%2015.0908%207.5807%2015.9804%207.58174ZM10.7772%2014.8403C10.3854%2014.0214%209.57988%2013.5012%208.69589%2013.4961H8.58662C7.73699%2013.5378%206.97608%2014.0524%206.599%2014.8403H1.67155V16.991H6.599C6.99456%2017.8137%207.80688%2018.3339%208.69589%2018.3339C9.5849%2018.3339%2010.3972%2017.8137%2010.7928%2016.991H18.3218V14.8403H10.7772Z'%20fill='%23262626'/%3e%3c/g%3e%3c/svg%3e"
+            />
+          </button>
+        </div>
+        <div
+          class="mf-services-certificates"
+        >
+          <button
+            type="button"
+          >
+            <strong>
+              Attestazione ISEE
+            </strong>
+            <span>
+              RICHIEDI ›
+            </span>
+          </button>
+          <button
+            type="button"
+          >
+            <strong>
+              Titolarità conto
+            </strong>
+            <span>
+              RICHIEDI ›
+            </span>
+          </button>
+        </div>
+        <div
+          aria-label="Categorie documenti"
+          class="mf-profile-tabs scrollbar-hide"
+          role="tablist"
+        >
+          <button
+            aria-selected="true"
+            role="tab"
+            tabindex="0"
+            type=...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/screens/mobile-first-profile-services.test.tsx:192:19
+    190|     fireEvent.change(screen.getByLabelText('Data di fine'), { target: …
+    191|     fireEvent.click(screen.getByRole('button', { name: 'Applica' }))
+    192|     expect(screen.getByRole('alert')).toHaveTextContent(message)
+       |                   ^
+    193|   })
+    194|   it.each([[1, 'message-btp', 'messages'], [2, 'mifid', 'practices']] …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/13]⎯
+
+ FAIL  tests/screens/mobile-first-profile-services.test.tsx > Mobile First profile services > marks initial detail 1/message-btp read without repeated snapshot mutations
+ FAIL  tests/screens/mobile-first-profile-services.test.tsx > Mobile First profile services > marks initial detail 2/mifid read without repeated snapshot mutations
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/screens/mobile-first-profile-services.test.tsx:197:95
+    195|     const props = { entry: 'communications' as const, communicationTab…
+    196|     const { rerender } = render(<MobileFirstProfileServices {...props}…
+    197|     expect(profileServicesStore.getSnapshot()[collection].find(item =>…
+       |                                                                                               ^
+    198|     const readSnapshot = profileServicesStore.getSnapshot()
+    199|     rerender(<MobileFirstProfileServices {...props} />)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/13]⎯
+
+ FAIL  tests/screens/mobile-first-profile-services.test.tsx > Mobile First profile services > keeps cards context after searching across support categories
+Error: expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <p>
+  Con l’app Mobile Banking puoi gestire il tuo conto in completa autonomia, senza dover andare in filiale. Puoi visualizzare il saldo aggiornato, controllare i movimenti in tempo reale e accedere a tutte le funzionalità legate a BANCOMAT Pay®.
+</p> instead
+ ❯ tests/screens/mobile-first-profile-services.test.tsx:209:281
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/13]⎯
+
+ FAIL  tests/screens/mobile-first-profile-services.test.tsx > Mobile First profile services > keeps the Mobile Code lock after returning to document delivery settings
+TestingLibraryElementError: Unable to find an accessible element with the role "alert"
+
+Here are the accessible roles:
+
+  main:
+
+  Name "Profilo":
+  <main
+    aria-label="Profilo"
+    class="mf-home mf-profile-page mf-services-success"
+    lang="it"
+  />
+
+  --------------------------------------------------
+  banner:
+
+  Name "":
+  <header
+    class="mf-profile-page-header"
+  />
+
+  --------------------------------------------------
+  button:
+
+  Name "Indietro":
+  <button
+    aria-label="Indietro"
+    type="button"
+  />
+
+  Name "Chiudi":
+  <button
+    aria-label="Chiudi"
+    type="button"
+  />
+
+  Name "Chiudi":
+  <button
+    class="mf-profile-button is-secondary "
+    type="button"
+  />
+
+  --------------------------------------------------
+  presentation:
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40.0034'%20height='40.0034'%20viewBox='0%200%2040.0034%2040.0034'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Back'%3e%3cg%20id='Navigation%20and%20action/Back_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M24.8452%209.01362C26.3901%2010.4828%2026.3901%2012.8671%2024.8452%2014.3376L19.2511%2020.0136L24.8452%2025.6896C26.3901%2027.1602%2026.3901%2029.5431%2024.8452%2031.0136L14.0039%2020.0136L24.8452%209.01362Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40'%20height='40'%20viewBox='0%200%2040%2040'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Close'%3e%3cg%20id='Navigation%20and%20action/Close_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M11.0426%209L20%2017.9574L28.9581%209L31%2011.0426L22.0426%2020L31%2028.9574L28.9581%2031L20%2022.0426L11.0426%2031L9%2028.9574L17.9574%2020L9%2011.0426L11.0426%209Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40'%20height='40'%20viewBox='0%200%2040%2040'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Success_large_TKY%20PAGE'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M26.4545%2015.2747C27.794%2013.9364%2029.9642%2013.9364%2031.3014%2015.2747L18.5746%2028.0209L9.6875%2019.135C11.0258%2017.7967%2013.196%2017.7967%2014.5344%2019.135L18.5746%2023.1741L26.4545%2015.2747ZM20%2036.0416C11.1404%2036.0416%203.95833%2028.8583%203.95833%2019.9999C3.95833%2011.1403%2011.1404%203.95823%2020%203.95823C28.8607%203.95823%2036.0417%2011.1403%2036.0417%2019.9999C36.0417%2028.8583%2028.8607%2036.0416%2020%2036.0416V36.0416ZM20%201.66667C9.87427%201.66667%201.66667%209.87427%201.66667%2020C1.66667%2030.1246%209.87427%2038.3333%2020%2038.3333C30.1257%2038.3333%2038.3333%2030.1246%2038.3333%2020C38.3333%209.87427%2030.1257%201.66667%2020%201.66667V1.66667Z'%20fill='white'/%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  --------------------------------------------------
+  region:
+
+  Name "Profilo":
+  <div
+    aria-label="Profilo"
+    class="mf-profile-page-scroll scrollbar-hide has-footer"
+    role="region"
+    tabindex="0"
+  />
+
+  --------------------------------------------------
+  heading:
+
+  Name "Scelta effettuata correttamente":
+  <h1
+    tabindex="-1"
+  />
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  <p
+    class="mf-profile-description"
+  />
+
+  --------------------------------------------------
+  contentinfo:
+
+  Name "":
+  <footer
+    class="mf-profile-page-footer"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <main
+      aria-label="Profilo"
+      class="mf-home mf-profile-page mf-services-success"
+      lang="it"
+    >
+      <header
+        class="mf-profile-page-header"
+      >
+        <button
+          aria-label="Indietro"
+          type="button"
+        >
+          <img
+            alt=""
+            src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40.0034'%20height='40.0034'%20viewBox='0%200%2040.0034%2040.0034'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Back'%3e%3cg%20id='Navigation%20and%20action/Back_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M24.8452%209.01362C26.3901%2010.4828%2026.3901%2012.8671%2024.8452%2014.3376L19.2511%2020.0136L24.8452%2025.6896C26.3901%2027.1602%2026.3901%2029.5431%2024.8452%2031.0136L14.0039%2020.0136L24.8452%209.01362Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+          />
+        </button>
+        <div>
+          <button
+            aria-label="Chiudi"
+            type="button"
+          >
+            <img
+              alt=""
+              src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40'%20height='40'%20viewBox='0%200%2040%2040'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Close'%3e%3cg%20id='Navigation%20and%20action/Close_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M11.0426%209L20%2017.9574L28.9581%209L31%2011.0426L22.0426%2020L31%2028.9574L28.9581%2031L20%2022.0426L11.0426%2031L9%2028.9574L17.9574%2020L9%2011.0426L11.0426%209Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+            />
+          </button>
+        </div>
+      </header>
+      <div
+        aria-label="Profilo"
+        class="mf-profile-page-scroll scrollbar-hide has-footer"
+        role="region"
+        tabindex="0"
+      >
+        <h1
+          tabindex="-1"
+        >
+          <img
+            alt=""
+            src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40'%20height='40'%20viewBox='0%200%2040%2040'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Success_large_TKY%20PAGE'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M26.4545%2015.2747C27.794%2013.9364%2029.9642%2013.9364%2031.3014%2015.2747L18.5746%2028.0209L9.6875%2019.135C11.0258%2017.7967%2013.196%2017.7967%2014.5344%2019.135L18.5746%2023.1741L26.4545%2015.2747ZM20%2036.0416C11.1404%2036.0416%203.95833%2028.8583%203.95833%2019.9999C3.95833%2011.1403%2011.1404%203.95823%2020%203.95823C28.8607%203.95823%2036.0417%2011.1403%2036.0417%2019.9999C36.0417%2028.8583%2028.8607%2036.0416%2020%2036.0416V36.0416ZM20%201.66667C9.87427%201.66667%201.66667%209.87427%201.66667%2020C1.66667%2030.1246%209.87427%2038.3333%2020%2038.3333C30.1257%2038.3333%2038.3333%2030.1246%2038.3333%2020C38.3333%209.87427%2030.1257%201.66667%2020%201.66667V1.66667Z'%20fill='white'/%3e%3c/g%3e%3c/svg%3e"
+          />
+          <span>
+            Scelta effettuata correttamente
+          </span>
+        </h1>
+        <p
+          class="mf-profile-description"
+        >
+          La modalità di ricezione è stata modificata.
+        </p>
+      </div>
+      <footer
+        class="mf-profile-page-footer"
+      >
+        <button
+          class="mf-profile-button is-secondary "
+          type="button"
+        >
+          Chiudi
+        </button>
+      </footer>
+    </main>
+  </div>
+</body>
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/screens/mobile-first-profile-services.test.tsx:223:19
+    221|     fireEvent.change(screen.getByLabelText('Mobile Code'), { target: {…
+    222|     fireEvent.click(screen.getByRole('button', { name: 'Conferma' }))
+    223|     expect(screen.getByRole('alert')).toHaveTextContent('bloccata')
+       |                   ^
+    224|     expect(profileServicesStore.getSnapshot().delivery).toBeUndefined()
+    225|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/13]⎯
+
+ FAIL  tests/screens/mobile-first-profile-services.test.tsx > Mobile First profile services > keeps the Mobile Code lock after returning to the MIFID interview
+TestingLibraryElementError: Unable to find an accessible element with the role "alert"
+
+Here are the accessible roles:
+
+  main:
+
+  Name "Profilo":
+  <main
+    aria-label="Profilo"
+    class="mf-home mf-profile-page mf-services-success"
+    lang="it"
+  />
+
+  --------------------------------------------------
+  banner:
+
+  Name "":
+  <header
+    class="mf-profile-page-header"
+  />
+
+  --------------------------------------------------
+  button:
+
+  Name "Indietro":
+  <button
+    aria-label="Indietro"
+    type="button"
+  />
+
+  Name "Chiudi":
+  <button
+    aria-label="Chiudi"
+    type="button"
+  />
+
+  Name "Vedi pratiche chiuse":
+  <button
+    class="mf-profile-button is-secondary "
+    type="button"
+  />
+
+  Name "Chiudi":
+  <button
+    class="mf-profile-button is-secondary "
+    type="button"
+  />
+
+  --------------------------------------------------
+  presentation:
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40.0034'%20height='40.0034'%20viewBox='0%200%2040.0034%2040.0034'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Back'%3e%3cg%20id='Navigation%20and%20action/Back_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M24.8452%209.01362C26.3901%2010.4828%2026.3901%2012.8671%2024.8452%2014.3376L19.2511%2020.0136L24.8452%2025.6896C26.3901%2027.1602%2026.3901%2029.5431%2024.8452%2031.0136L14.0039%2020.0136L24.8452%209.01362Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40'%20height='40'%20viewBox='0%200%2040%2040'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Close'%3e%3cg%20id='Navigation%20and%20action/Close_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M11.0426%209L20%2017.9574L28.9581%209L31%2011.0426L22.0426%2020L31%2028.9574L28.9581%2031L20%2022.0426L11.0426%2031L9%2028.9574L17.9574%2020L9%2011.0426L11.0426%209Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  Name "":
+  <img
+    alt=""
+    src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40'%20height='40'%20viewBox='0%200%2040%2040'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Success_large_TKY%20PAGE'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M26.4545%2015.2747C27.794%2013.9364%2029.9642%2013.9364%2031.3014%2015.2747L18.5746%2028.0209L9.6875%2019.135C11.0258%2017.7967%2013.196%2017.7967%2014.5344%2019.135L18.5746%2023.1741L26.4545%2015.2747ZM20%2036.0416C11.1404%2036.0416%203.95833%2028.8583%203.95833%2019.9999C3.95833%2011.1403%2011.1404%203.95823%2020%203.95823C28.8607%203.95823%2036.0417%2011.1403%2036.0417%2019.9999C36.0417%2028.8583%2028.8607%2036.0416%2020%2036.0416V36.0416ZM20%201.66667C9.87427%201.66667%201.66667%209.87427%201.66667%2020C1.66667%2030.1246%209.87427%2038.3333%2020%2038.3333C30.1257%2038.3333%2038.3333%2030.1246%2038.3333%2020C38.3333%209.87427%2030.1257%201.66667%2020%201.66667V1.66667Z'%20fill='white'/%3e%3c/g%3e%3c/svg%3e"
+  />
+
+  --------------------------------------------------
+  region:
+
+  Name "Profilo":
+  <div
+    aria-label="Profilo"
+    class="mf-profile-page-scroll scrollbar-hide has-footer"
+    role="region"
+    tabindex="0"
+  />
+
+  --------------------------------------------------
+  heading:
+
+  Name "Aggiornamento intervista completato":
+  <h1
+    tabindex="-1"
+  />
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  <p
+    class="mf-profile-description"
+  />
+
+  --------------------------------------------------
+  contentinfo:
+
+  Name "":
+  <footer
+    class="mf-profile-page-footer"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <main
+      aria-label="Profilo"
+      class="mf-home mf-profile-page mf-services-success"
+      lang="it"
+    >
+      <header
+        class="mf-profile-page-header"
+      >
+        <button
+          aria-label="Indietro"
+          type="button"
+        >
+          <img
+            alt=""
+            src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40.0034'%20height='40.0034'%20viewBox='0%200%2040.0034%2040.0034'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Back'%3e%3cg%20id='Navigation%20and%20action/Back_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M24.8452%209.01362C26.3901%2010.4828%2026.3901%2012.8671%2024.8452%2014.3376L19.2511%2020.0136L24.8452%2025.6896C26.3901%2027.1602%2026.3901%2029.5431%2024.8452%2031.0136L14.0039%2020.0136L24.8452%209.01362Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+          />
+        </button>
+        <div>
+          <button
+            aria-label="Chiudi"
+            type="button"
+          >
+            <img
+              alt=""
+              src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40'%20height='40'%20viewBox='0%200%2040%2040'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Close'%3e%3cg%20id='Navigation%20and%20action/Close_K10'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M11.0426%209L20%2017.9574L28.9581%209L31%2011.0426L22.0426%2020L31%2028.9574L28.9581%2031L20%2022.0426L11.0426%2031L9%2028.9574L17.9574%2020L9%2011.0426L11.0426%209Z'%20fill='%23262626'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e"
+            />
+          </button>
+        </div>
+      </header>
+      <div
+        aria-label="Profilo"
+        class="mf-profile-page-scroll scrollbar-hide has-footer"
+        role="region"
+        tabindex="0"
+      >
+        <h1
+          tabindex="-1"
+        >
+          <img
+            alt=""
+            src="data:image/svg+xml,%3csvg%20preserveAspectRatio='none'%20overflow='visible'%20style='display:%20block;'%20width='40'%20height='40'%20viewBox='0%200%2040%2040'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20id='Navigation%20and%20action/Success_large_TKY%20PAGE'%3e%3cpath%20id='Path'%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M26.4545%2015.2747C27.794%2013.9364%2029.9642%2013.9364%2031.3014%2015.2747L18.5746%2028.0209L9.6875%2019.135C11.0258%2017.7967%2013.196%2017.7967%2014.5344%2019.135L18.5746%2023.1741L26.4545%2015.2747ZM20%2036.0416C11.1404%2036.0416%203.95833%2028.8583%203.95833%2019.9999C3.95833%2011.1403%2011.1404%203.95823%2020%203.95823C28.8607%203.95823%2036.0417%2011.1403%2036.0417%2019.9999C36.0417%2028.8583%2028.8607%2036.0416%2020%2036.0416V36.0416ZM20%201.66667C9.87427%201.66667%201.66667%209.87427%201.66667%2020C1.66667%2030.1246%209.87427%2038.3333%2020%2038.3333C30.1257%2038.3333%2038.3333%2030.1246%2038.3333%2020C38.3333%209.87427%2030.1257%201.66667%2020%201.66667V1.66667Z'%20fill='white'/%3e%3c/g%3e%3c/svg%3e"
+          />
+          <span>
+            Aggiornamento intervista completato
+          </span>
+        </h1>
+        <p
+          class="mf-profile-description"
+        >
+          L’intervista rilasciata è stata salvata nella sezione Documenti/Questionari nel tuo profilo personale. Ti ricordiamo che potrai aggiornare la tua posizione contattando la tua filiale.
+        </p>
+      </div>
+      <footer
+        class="mf-profile-page-footer"
+      >
+        <button
+          class="mf-profile-button is-secondary "
+          type="button"
+        >
+          Vedi pratiche chiuse
+        </button>
+        <button
+          class="mf-profile-button is-secondary "
+          type="button"
+        >
+          Chiudi
+        </button>
+      </footer>
+    </main>
+  </div>
+</body>
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/screens/mobile-first-profile-services.test.tsx:237:19
+    235|     fireEvent.change(screen.getByLabelText('Mobile Code'), { target: {…
+    236|     fireEvent.click(screen.getByRole('button', { name: 'Conferma' }))
+    237|     expect(screen.getByRole('alert')).toHaveTextContent('bloccata')
+       |                   ^
+    238|     expect(profileServicesStore.getSnapshot().practices.find(item => i…
+    239|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/13]⎯
+
+ FAIL  tests/screens/mobile-first-profile-services.test.tsx > Mobile First profile services > blocks MIFID signing with a Sospesa certificate and offers certificate management
+ FAIL  tests/screens/mobile-first-profile-services.test.tsx > Mobile First profile services > blocks MIFID signing with a Revocata certificate and offers certificate management
+ FAIL  tests/screens/mobile-first-profile-services.test.tsx > Mobile First profile services > blocks MIFID signing with a Non attiva certificate and offers certificate management
+Error: expect(element).toBeDisabled()
+
+Received element is not disabled:
+  <button
+  class="mf-profile-button "
+  type="button"
+/>
+ ❯ tests/screens/mobile-first-profile-services.test.tsx:246:73
+    244|     fireEvent.click(screen.getByRole('button', { name: /Intervista di …
+    245|     fireEvent.click(screen.getByRole('button', { name: 'Continua' }))
+    246|     expect(screen.getByRole('button', { name: 'Prosegui alla firma' })…
+       |                                                                         ^
+    247|     fireEvent.click(screen.getByRole('button', { name: 'Gestisci firma…
+    248|     expect(onNavigate).toHaveBeenCalledWith('settings', 'digital-signa…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/13]⎯
+
+ FAIL  tests/screens/mobile-first-profile-services.test.tsx > Mobile First profile services > rechecks certificate state while the MIFID authorization screen is open
+Error: expect(element).toBeDisabled()
+
+Received element is not disabled:
+  <button
+  class="mf-profile-button "
+  type="button"
+/>
+ ❯ tests/screens/mobile-first-profile-services.test.tsx:258:62
+    256|     fireEvent.change(screen.getByLabelText('Mobile Code'), { target: {…
+    257|     act(() => profileSettingsStore.update({ signature: 'Revocata' }))
+    258|     expect(screen.getByRole('button', { name: 'Conferma' })).toBeDisab…
+       |                                                              ^
+    259|     expect(profileServicesStore.getSnapshot().practices.find(item => i…
+    260|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/13]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  13 failed | 19 passed (32)
+   Start at  19:52:16
+   Duration  2.05s (transform 274ms, setup 142ms, collect 614ms, tests 735ms, environment 271ms, prepare 92ms)
+

@@ -1,3 +1,4 @@
+import { filterEvoTransactions } from '@/features/accounts-payments/evoTransactionFilters';
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent, ReactNode } from "react";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
@@ -285,58 +286,7 @@ export default function AccountDetailScreen({
     [transactionRowPresentation, transactions],
   );
   const filteredTransactions = useMemo(() => {
-    return scopedTransactions.filter((transaction) => {
-      const formattedAmount = `${transaction.amount < 0 ? "-" : "+"} ${formatEvo2027Number(Math.abs(transaction.amount))} ${config.currency}`;
-      const searchableText = [
-        transaction.label,
-        transaction.details,
-        transaction.category,
-        transaction.status,
-        transaction.day,
-        transaction.month,
-        transaction.monthTitle,
-        formattedAmount,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-      const searchMatches = normalizedTransactionSearch ? searchableText.includes(normalizedTransactionSearch) : true;
-      const keywordMatches = appliedFilters.keyword.trim()
-        ? searchableText.includes(appliedFilters.keyword.trim().toLowerCase())
-        : true;
-      const accountMatches = appliedFilters.accountNumber.trim()
-        ? activeProduct?.accountNumber.toLowerCase().includes(appliedFilters.accountNumber.trim().toLowerCase())
-        : true;
-      const variableMatches = appliedFilters.variableCode.trim()
-        ? transaction.id.toLowerCase().includes(appliedFilters.variableCode.trim().toLowerCase())
-        : true;
-      const amountFrom = Number.parseFloat(appliedFilters.amountFrom.replace(",", "."));
-      const amountTo = Number.parseFloat(appliedFilters.amountTo.replace(",", "."));
-      const absoluteAmount = Math.abs(transaction.amount);
-      const amountFromMatches = Number.isFinite(amountFrom) ? absoluteAmount >= amountFrom : true;
-      const amountToMatches = Number.isFinite(amountTo) ? absoluteAmount <= amountTo : true;
-      const statusMatches = appliedFilters.status === "All transactions" ? true : transaction.status === appliedFilters.status;
-      const typeMatches =
-        appliedFilters.transactionType === "All transactions"
-          ? true
-          : appliedFilters.transactionType === "Incoming"
-            ? transaction.type === "credit"
-            : transaction.type === "debit";
-      const categoryMatches = appliedFilters.category === "All categories" ? true : transaction.category === appliedFilters.category;
-
-      return (
-        searchMatches &&
-        keywordMatches &&
-        accountMatches &&
-        variableMatches &&
-        amountFromMatches &&
-        amountToMatches &&
-        statusMatches &&
-        typeMatches &&
-        categoryMatches
-      );
-    });
+    return filterEvoTransactions({ transactions: scopedTransactions, search: normalizedTransactionSearch, filters: appliedFilters, accountNumber: activeProduct?.accountNumber, currency: config.currency });
   }, [activeProduct?.accountNumber, appliedFilters, config.currency, normalizedTransactionSearch, scopedTransactions]);
   const transactionGroups = useMemo(
     () => groupAccountTransactionsByMonth(filteredTransactions.filter((transaction) => transaction.status === "Booked")),

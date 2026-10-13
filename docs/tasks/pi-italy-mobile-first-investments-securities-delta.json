@@ -1,0 +1,217 @@
+[
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\experiences\\pi\\it\\mobile-first\\MobileFirstInvestmentSecurities.tsx",
+    "bytes": 38800
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\experiences\\pi\\it\\mobile-first\\MobileFirstInvestmentSecuritiesDetail.tsx",
+    "bytes": 7891
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\experiences\\pi\\it\\mobile-first\\MobileFirstInvestmentSecuritiesElements.tsx",
+    "bytes": 5981
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\experiences\\pi\\it\\mobile-first\\MobileFirstInvestmentSecuritiesLists.tsx",
+    "bytes": 15910
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\experiences\\pi\\it\\mobile-first\\MobileFirstInvestmentSecuritiesOperations.tsx",
+    "bytes": 16133
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\experiences\\pi\\it\\mobile-first\\MobileFirstInvestmentSecuritiesSearch.tsx",
+    "bytes": 13489
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\experiences\\pi\\it\\mobile-first\\MobileFirstInvestmentSecuritiesTransaction.tsx",
+    "bytes": 25787
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\experiences\\pi\\it\\mobile-first\\investmentsSecuritiesContent.ts",
+    "bytes": 3786
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\experiences\\pi\\it\\mobile-first\\mobile-first-investments-securities.css",
+    "bytes": 15476
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\features\\investments\\mobileFirstSecurities.ts",
+    "bytes": 19440
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\auctionPath.svg",
+    "bytes": 793
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\imgBrandApple.png",
+    "bytes": 26135
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\imgDeviceAndTechnologyScreenRotationK10.svg",
+    "bytes": 1947
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\imgGraphLine.svg",
+    "bytes": 989
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\imgIconsInvestimentiGraficoPortafoglio.svg",
+    "bytes": 1187
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\imgInvestmentsBuyK10.svg",
+    "bytes": 1881
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\imgInvestmentsIndexK10.svg",
+    "bytes": 794
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\imgInvestmentsOrdersAndTransactionsK10.svg",
+    "bytes": 901
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\imgMiscellaneousNewsK10.svg",
+    "bytes": 822
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\imgNavigationAndActionAdd.svg",
+    "bytes": 382
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\imgNavigationAndActionAddK10.svg",
+    "bytes": 568
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\imgNavigationAndActionBest1.svg",
+    "bytes": 2015
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\imgNavigationAndActionBookmarkK10.svg",
+    "bytes": 355
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\imgNavigationAndActionDownK10.svg",
+    "bytes": 469
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\imgNavigationAndActionInfoSmall.svg",
+    "bytes": 712
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\imgNavigationAndActionSearchK10.svg",
+    "bytes": 1083
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\imgNavigationAndActionUpT2.svg",
+    "bytes": 470
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\imgVector130.svg",
+    "bytes": 229
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\marketComposition.svg",
+    "bytes": 1643
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\marketGraph.svg",
+    "bytes": 417
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\registered-security-block.svg",
+    "bytes": 1066
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\valuationArrow.svg",
+    "bytes": 280
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\valuationDotted.svg",
+    "bytes": 252
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\valuationGraph.svg",
+    "bytes": 450
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\src\\assets\\mobile-first\\it\\investments\\securities\\valuationTarget.svg",
+    "bytes": 345
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\tests\\screens\\mobile-first-investments-securities.test.tsx",
+    "bytes": 16520
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\docs\\tasks\\pi-italy-mobile-first-investments-securities-asset-verification.json",
+    "bytes": 11416
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\docs\\tasks\\pi-italy-mobile-first-investments-securities-assets.json",
+    "bytes": 6222
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\docs\\tasks\\pi-italy-mobile-first-investments-securities-coverage.md",
+    "bytes": 8023
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\docs\\tasks\\pi-italy-mobile-first-investments-securities-delta.json",
+    "bytes": 8392
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\docs\\tasks\\pi-italy-mobile-first-investments-securities-ownership.json",
+    "bytes": 6398
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\docs\\tasks\\pi-italy-mobile-first-investments-securities-test-results.json",
+    "bytes": 6761
+  },
+  {
+    "change": "A",
+    "path": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE\\docs\\tasks\\pi-italy-mobile-first-investments-securities-tsconfig.json",
+    "bytes": 358
+  }
+]

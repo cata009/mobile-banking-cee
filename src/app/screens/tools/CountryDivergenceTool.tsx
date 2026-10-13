@@ -9,7 +9,8 @@
 
 import { Fragment, useMemo, useState } from "react";
 import { AppIcon } from "@/app/components/icons";
-import { COUNTRIES, COUNTRY_META } from "@/app/registry/demoConfig";
+import { COUNTRY_META } from "@/app/registry/demoConfig";
+import { ALL_COUNTRIES as COUNTRIES } from "@/app/registry/domains/countries";
 import type { CountryId } from "@/app/state/demoTypes";
 import { FieldLabel, SelectionChip, StatusBadge, ToolPanel, downloadTextFile } from "./toolsUi";
 import {

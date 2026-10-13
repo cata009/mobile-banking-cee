@@ -14,6 +14,7 @@ export const COUNTRIES = [
   "BA",
   "BA_BL",
   "SI",
+  "IT",
 ] as const satisfies readonly [CountryId, ...CountryId[]];
 
 export const COUNTRY_META: Record<CountryId, { name: string; nameEN: string; flag: string; currency: string }> = {
@@ -25,6 +26,7 @@ export const COUNTRY_META: Record<CountryId, { name: string; nameEN: string; fla
   SK: { name: "Slovakia", nameEN: "Slovakia", flag: "SK", currency: "EUR" },
   SI: { name: "Slovenia", nameEN: "Slovenia", flag: "SI", currency: "EUR" },
   CZ: { name: "Czech Republic", nameEN: "Czech Republic", flag: "CZ", currency: "CZK" },
+  IT: { name: "Italia", nameEN: "Italy", flag: "IT", currency: "EUR" },
 };
 
 export const SCENARIOS: readonly { id: Scenario; label: string; description?: string }[] = [

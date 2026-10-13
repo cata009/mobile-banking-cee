@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-12",
+  "owner": "codex-pi-italy-mobile-first-investments",
+  "source": "Figma d2TyUaQNN6YsgznQaWymIR 24262:641750",
+  "affectedTests": {
+    "result": "passed",
+    "tests": 78,
+    "files": 8,
+    "command": "npx vitest run tests/screens/mobile-first-investments tests/screens/italy-mobile-first-investments.test.tsx --maxWorkers=1",
+    "time": "20:12 Europe/Bucharest"
+  },
+  "review": {
+    "browserScreenshots": [
+      "advisory",
+      "funds",
+      "securities",
+      "deposit"
+    ],
+    "targetedReReview": "passed",
+    "reportedImportantFindings": "resolved",
+    "actualSourceFamilyAdded": "selected-deposit eligibility blocking",
+    "parentIntegrationReReview": "passed: 3 files,18 tests; no residual important issue"
+  },
+  "measuredGeometry": {
+    "mobilePrimaryHeight": 56,
+    "securities": {
+      "width": 361,
+      "height": 357
+    },
+    "funds": {
+      "width": 358,
+      "height": 310
+    },
+    "primaryFont": {
+      "weight": 700,
+      "size": 18
+    }
+  },
+  "assets": {
+    "originalOverviewAssetsPreserved": 51,
+    "newParentFiles": 50,
+    "nonEmpty": 50
+  },
+  "sharedGate": {
+    "reason": "Integration scope extended with global Search and coherent demo figures across PI Italy; final gate follows all relevant editors closing",
+    "status": "pending integration owner final combined state",
+    "command": "npm run verify",
+    "ownerThread": "01a1305d-f58e-7720-987c-0981657b9795"
+  },
+  "scopeManifest": {
+    "owner": "integration owner",
+    "status": "awaiting combined validation"
+  },
+  "noDeployment": true,
+  "noGitIndexMutation": true
+}

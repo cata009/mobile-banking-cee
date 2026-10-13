@@ -9,6 +9,7 @@ import { PI_RS_BASELINE_ADAPTER } from './pi/rs/baseline/composition'
 import { PI_BA_BASELINE_ADAPTER } from './pi/ba/baseline/composition'
 import { PI_BA_BL_BASELINE_ADAPTER } from './pi/ba-bl/baseline/composition'
 import { PI_SI_BASELINE_ADAPTER } from './pi/si/baseline/composition'
+import { PI_IT_MOBILE_FIRST_ADAPTER } from './pi/it/mobile-first/composition'
 import { PI_CZ_COAPPING_ADAPTER } from './pi/cz/coapping/composition'
 import { PI_CZ_ROBO_ADAPTER } from './pi/cz/robo/composition'
 import { PI_CZ_EVO_ADAPTER } from './pi/cz/evo-2027/composition'
@@ -26,6 +27,7 @@ export const EXPERIENCE_COMPOSITION_ADAPTERS: readonly ExperienceCompositionAdap
   PI_BA_BASELINE_ADAPTER,
   PI_BA_BL_BASELINE_ADAPTER,
   PI_SI_BASELINE_ADAPTER,
+  PI_IT_MOBILE_FIRST_ADAPTER,
   PI_CZ_COAPPING_ADAPTER,
   PI_CZ_ROBO_ADAPTER,
   PI_CZ_EVO_ADAPTER,

@@ -1,0 +1,2 @@
+/* Fixed logical authoring viewport for paired Source/RNWeb checks. */
+#root { width: var(--native-preview-width, 393px); height: var(--native-preview-height, 852px); max-width: none; max-height: none; overflow: hidden; }

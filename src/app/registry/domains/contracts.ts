@@ -1,4 +1,4 @@
-import type { Screen } from '@/app/contexts/NavigationContext'
+import type { Screen } from '@/app/navigation/screenTypes'
 import type {
   CapabilityStatus,
   ComponentId,

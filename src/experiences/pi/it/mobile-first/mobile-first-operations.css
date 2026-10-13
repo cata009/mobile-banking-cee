@@ -1,0 +1,147 @@
+.mf-operations-host {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: transparent;
+}
+
+.mf-operations-sheet {
+  padding: 56px 0 0;
+  border-radius: 4px 4px 0 0;
+  background: #fff;
+  color: var(--mf-text);
+  box-shadow: none;
+}
+
+.mf-operations-sheet > button {
+  position: absolute;
+  inset: 20px auto auto 50%;
+  width: 64px;
+  height: 16px;
+  margin: 0;
+  transform: translateX(-50%);
+}
+
+.mf-operations-sheet > button > span {
+  background: #333;
+  opacity: 0.8;
+}
+
+.mf-operations-sheet .mf-operations-heading {
+  margin: 0 0 40px;
+  padding: 0 16px;
+}
+
+.mf-operations-heading > div > div {
+  margin-top: 0;
+}
+
+.mf-operations-sheet .mf-operations-title {
+  margin: 0;
+  font-size: calc(32px * var(--mf-text-scale, 1));
+  font-weight: 700;
+  line-height: calc(36px * var(--mf-text-scale, 1));
+}
+
+.mf-operations-sheet .mf-operations-help {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.mf-operations-body {
+  padding: 0 16px 40px;
+  overscroll-behavior: contain;
+}
+
+.mf-operations-quick-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  height: 106px;
+  margin-bottom: 40px;
+}
+
+.mf-operations-sheet .mf-operations-quick-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.mf-operations-quick-icon {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border-radius: 98px;
+  background: var(--mf-surface);
+}
+
+.mf-operations-quick-label {
+  display: flex;
+  flex-direction: column;
+  color: var(--mf-muted);
+  font-size: calc(14px * var(--mf-text-scale, 1));
+  font-weight: 500;
+  line-height: calc(16px * var(--mf-text-scale, 1));
+  text-align: center;
+}
+
+.mf-operations-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.mf-operations-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mf-operations-group-title {
+  margin: 0;
+  font-size: calc(28px * var(--mf-text-scale, 1));
+  font-weight: 700;
+  line-height: calc(32px * var(--mf-text-scale, 1));
+}
+
+.mf-operations-group-title-small {
+  font-size: calc(24px * var(--mf-text-scale, 1));
+  line-height: calc(26px * var(--mf-text-scale, 1));
+}
+
+.mf-operations-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mf-operations-sheet .mf-operations-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--mf-text);
+  font-size: calc(18px * var(--mf-text-scale, 1));
+  font-weight: 400;
+  line-height: calc(24px * var(--mf-text-scale, 1));
+  text-align: left;
+}
+
+.mf-operations-row > img {
+  flex-shrink: 0;
+}

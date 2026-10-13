@@ -89,6 +89,30 @@ function DetailRow({
   );
 }
 
+function EvoTransactionFactRow({
+  label,
+  value,
+  copy,
+}: {
+  label: string;
+  value: string;
+  copy?: boolean;
+}) {
+  return (
+    <div data-transaction-detail-fact-row className="flex items-start justify-between gap-[14px] py-[13px]">
+      <span className="min-w-0 flex-1 text-[13px] text-[var(--uc-text-muted)]">{label}</span>
+      <span className="flex min-w-0 flex-1 items-start justify-end gap-[8px]">
+        <span className="min-w-0 break-words text-right text-[13px] font-medium text-[var(--uc-text)]">{value}</span>
+        {copy ? (
+          <button type="button" className="grid size-[32px] shrink-0 place-items-center" aria-label={`Copy ${label}`}>
+            <AppIcon name="copy-documents" color="var(--uc-text)" />
+          </button>
+        ) : null}
+      </span>
+    </div>
+  );
+}
+
 function getMccDisplayName(value?: string) {
   const mcc = value?.trim();
   if (!mcc) return undefined;
@@ -222,7 +246,9 @@ export function TransactionDetailScreen({
   cardUsedContent?: ReactNode;
 }) {
   const { t } = useLanguage();
+  const { release } = useDemo();
   const { categories } = useProducts();
+  const isEvo2027 = release === "release-future-evo-2027";
   const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(48);
   const [areDetailsExpanded, setAreDetailsExpanded] = useState(false);
   const [categorySheetOpen, setCategorySheetOpen] = useState(false);
@@ -243,6 +269,10 @@ export function TransactionDetailScreen({
           .find((candidate): candidate is DebitCard => candidate.type === "debit_card" && candidate.linkedAccountId === product.id) ?? null
       : null;
   const isCardTransaction = cardUsed !== null;
+  const renderDetailRow = (label: string, value: string, copy = false) =>
+    isEvo2027
+      ? <EvoTransactionFactRow label={label} value={value} copy={copy} />
+      : <DetailRow label={label} value={value} copy={copy} />;
   const transactionActionItems: AccountActionBarItem[] = isPending ? [] : [
     {
       id: "change-category",
@@ -377,60 +407,74 @@ export function TransactionDetailScreen({
             {isCardTransaction ? (
               <>
                 {merchantEnrichment?.location ? <MerchantLocationDetail location={merchantEnrichment.location} /> : null}
-                <DetailRow
-                  label={t("runtime.cardTransactionDetail.description", "Transaction description")}
-                  value={merchantEnrichment?.cleanMerchantName ?? transaction.label}
-                />
-                <DetailRow label={t("runtime.transactionDetail.amount", "Amount")} value={detail.amount} />
-                <DetailRow
-                  label={t("runtime.cardTransactionDetail.postingDate", "Posting date")}
-                  value={detail.bookingDate}
-                />
-                <AnimatePresence initial={false}>
-                  {areDetailsExpanded ? (
-                    <motion.div
-                      key="card-transaction-date"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                      style={{ overflow: "hidden" }}
-                    >
-                      <DetailRow
-                        label={t("runtime.cardTransactionDetail.transactionDate", "Transaction date")}
-                        value={detail.bookingDate}
-                      />
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
-                {merchantCategoryName ? <DetailRow label="Merchant Category Code (MCC)" value={merchantCategoryName} /> : null}
+                <div
+                  data-evo2027-transaction-details={isEvo2027 ? "true" : undefined}
+                  className={isEvo2027 ? "rounded-[18px] bg-[var(--uc-surface)] px-[16px]" : undefined}
+                >
+                  <div className={isEvo2027 ? "divide-y divide-[var(--uc-border-muted)]" : undefined}>
+                    {renderDetailRow(
+                      t("runtime.cardTransactionDetail.description", "Transaction description"),
+                      merchantEnrichment?.cleanMerchantName ?? transaction.label,
+                    )}
+                    {renderDetailRow(t("runtime.transactionDetail.amount", "Amount"), detail.amount)}
+                    {renderDetailRow(
+                      t("runtime.cardTransactionDetail.postingDate", "Posting date"),
+                      detail.bookingDate,
+                    )}
+                    <AnimatePresence initial={false}>
+                      {areDetailsExpanded ? (
+                        <motion.div
+                          key="card-transaction-date"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                          style={{ overflow: "hidden" }}
+                        >
+                          {renderDetailRow(
+                            t("runtime.cardTransactionDetail.transactionDate", "Transaction date"),
+                            detail.bookingDate,
+                          )}
+                        </motion.div>
+                      ) : null}
+                    </AnimatePresence>
+                    {merchantCategoryName
+                      ? renderDetailRow("Merchant Category Code (MCC)", merchantCategoryName)
+                      : null}
+                  </div>
+                </div>
               </>
             ) : (
-              <>
-                <DetailRow label={t("runtime.accounts.detailsInfo.accountNumber", "Account number")} value={detail.accountNumber} copy />
-                <DetailRow label={t("runtime.accounts.detailsInfo.accountTitle", "Account title")} value={detail.accountTitle} />
-                <DetailRow label={t("runtime.transactionDetail.accountOwner", "Account owner")} value={detail.accountOwner} />
-                <AnimatePresence initial={false}>
-                  {areDetailsExpanded ? (
-                    <motion.div
-                      key="extra-transaction-details"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                      style={{ overflow: "hidden" }}
-                    >
-                      <DetailRow label={t("runtime.transactionDetail.bookingDate", "Booking date")} value={detail.bookingDate} />
-                      <DetailRow label={t("runtime.transactionDetail.beneficiaryName", "Beneficiary Name")} value={detail.beneficiaryName} />
-                      <DetailRow label={t("runtime.transactionDetail.beneficiaryBankName", "Beneficiary Bank Name")} value={detail.beneficiaryBankName} />
-                      <DetailRow label={t("runtime.transactionDetail.beneficiaryAccountNumber", "Beneficiary account number")} value={detail.beneficiaryAccountNumber} copy />
-                      <DetailRow label={t("runtime.transactionDetail.amount", "Amount")} value={detail.amount} />
-                      <DetailRow label={t("runtime.payments.domesticFlow.paymentDetails", "Payment details")} value={detail.paymentDetails} />
-                      <DetailRow label={t("runtime.transactionDetail.referenceNumber", "Reference number")} value={detail.referenceNumber} />
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
-              </>
+              <div
+                data-evo2027-transaction-details={isEvo2027 ? "true" : undefined}
+                className={isEvo2027 ? "rounded-[18px] bg-[var(--uc-surface)] px-[16px]" : undefined}
+              >
+                <div className={isEvo2027 ? "divide-y divide-[var(--uc-border-muted)]" : undefined}>
+                  {renderDetailRow(t("runtime.accounts.detailsInfo.accountNumber", "Account number"), detail.accountNumber, true)}
+                  {renderDetailRow(t("runtime.accounts.detailsInfo.accountTitle", "Account title"), detail.accountTitle)}
+                  {renderDetailRow(t("runtime.transactionDetail.accountOwner", "Account owner"), detail.accountOwner)}
+                  <AnimatePresence initial={false}>
+                    {areDetailsExpanded ? (
+                      <motion.div
+                        key="extra-transaction-details"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                        style={{ overflow: "hidden" }}
+                      >
+                        {renderDetailRow(t("runtime.transactionDetail.bookingDate", "Booking date"), detail.bookingDate)}
+                        {renderDetailRow(t("runtime.transactionDetail.beneficiaryName", "Beneficiary Name"), detail.beneficiaryName)}
+                        {renderDetailRow(t("runtime.transactionDetail.beneficiaryBankName", "Beneficiary Bank Name"), detail.beneficiaryBankName)}
+                        {renderDetailRow(t("runtime.transactionDetail.beneficiaryAccountNumber", "Beneficiary account number"), detail.beneficiaryAccountNumber, true)}
+                        {renderDetailRow(t("runtime.transactionDetail.amount", "Amount"), detail.amount)}
+                        {renderDetailRow(t("runtime.payments.domesticFlow.paymentDetails", "Payment details"), detail.paymentDetails)}
+                        {renderDetailRow(t("runtime.transactionDetail.referenceNumber", "Reference number"), detail.referenceNumber)}
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
+                </div>
+              </div>
             )}
           </div>
           <button

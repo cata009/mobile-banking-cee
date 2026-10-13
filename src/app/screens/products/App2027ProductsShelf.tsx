@@ -314,9 +314,7 @@ function ShelfPartnerTile({ entry, onClick }: { entry: ProductShelfEntryCard; on
         className="absolute inset-0 size-full origin-bottom-right scale-[1.28] object-cover"
         style={{ objectPosition: entry.imagePosition }}
       />
-      {/* Two layers: a light overall knock-down so busy photography stops
-          competing, then a hard top scrim, since the copy now reads from the top
-          edge down the way the More menu cards do. */}
+      {/* A light full-image knock-down plus a dark, left-to-right copy scrim. */}
       <span
         aria-hidden="true"
         className="absolute inset-0"
@@ -326,10 +324,10 @@ function ShelfPartnerTile({ entry, onClick }: { entry: ProductShelfEntryCard; on
       <span
         aria-hidden="true"
         data-products-shelf-entry-gradient
-        className="absolute inset-x-0 top-0 h-[96px]"
+        className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(to bottom, rgb(var(--uc-static-black-rgb) / 0.78) 0%, rgb(var(--uc-static-black-rgb) / 0.58) 30%, rgb(var(--uc-static-black-rgb) / 0.24) 64%, transparent 100%)',
+            'linear-gradient(90deg, rgb(0 40 46 / 0.96) 0%, rgb(0 40 46 / 0.95) 58%, rgb(0 40 46 / 0.90) 88%, rgb(0 40 46 / 0.16) 100%)',
         }}
       />
       {/* The More menu's corner badge: a filled quarter-disc in the top-right, not a

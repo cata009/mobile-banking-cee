@@ -1,0 +1,832 @@
+[
+  {
+    "name": "24268-254540-imgBack.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 488
+  },
+  {
+    "name": "24268-254540-imgBankTouchpointAndCustomerCarePhoneSupportWhite.svg",
+    "width": "24",
+    "height": "24",
+    "bytes": 1428
+  },
+  {
+    "name": "24268-254540-imgClose.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 454
+  },
+  {
+    "name": "24268-254540-imgFrame1.svg",
+    "width": "67",
+    "height": "24",
+    "bytes": 2855
+  },
+  {
+    "name": "24268-254540-imgHeroBanner.png",
+    "bytes": 315401
+  },
+  {
+    "name": "24268-254540-imgNavigationAndActionChatWhite.svg",
+    "width": "24",
+    "height": "24",
+    "bytes": 1117
+  },
+  {
+    "name": "24268-254540-imgNavigationAndActionForthT2.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 475
+  },
+  {
+    "name": "24268-256435-imgBack.svg",
+    "width": "40",
+    "height": "40.0034",
+    "bytes": 202
+  },
+  {
+    "name": "24268-256435-imgClose.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 456
+  },
+  {
+    "name": "24268-256435-imgFrame1.svg",
+    "width": "67",
+    "height": "24",
+    "bytes": 2865
+  },
+  {
+    "name": "24268-256435-imgHelp.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 192
+  },
+  {
+    "name": "24268-256435-imgNavigationAndActionDownK10.svg",
+    "width": "20",
+    "height": "20",
+    "bytes": 469
+  },
+  {
+    "name": "24268-256435-imgNavigationAndActionDownT2.svg",
+    "width": "24.0034",
+    "height": "24.0034",
+    "bytes": 488
+  },
+  {
+    "name": "24268-256435-imgNavigationAndActionDownT3.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 453
+  },
+  {
+    "name": "24268-256435-imgNavigationAndActionEditT2.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 594
+  },
+  {
+    "name": "24268-256435-imgNavigationAndActionLocator.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 649
+  },
+  {
+    "name": "24268-256435-imgNavigationAndActionProblemK1.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 811
+  },
+  {
+    "name": "24268-256501-imgClose.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 454
+  },
+  {
+    "name": "24268-256501-imgFrame1.svg",
+    "width": "67",
+    "height": "24",
+    "bytes": 2855
+  },
+  {
+    "name": "24268-256501-imgNavigationAndActionSuccessLargeTkyPage.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 874
+  },
+  {
+    "name": "24268-257075-imgBankProductAndServiceAccountsV2K10.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 3585
+  },
+  {
+    "name": "24268-257075-imgBorder.svg",
+    "width": "22",
+    "height": "22",
+    "bytes": 265
+  },
+  {
+    "name": "24268-257075-imgBorder1.svg",
+    "width": "22",
+    "height": "22",
+    "bytes": 250
+  },
+  {
+    "name": "24268-257075-imgClose.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 456
+  },
+  {
+    "name": "24268-257075-imgDot.svg",
+    "width": "10",
+    "height": "10",
+    "bytes": 227
+  },
+  {
+    "name": "24268-257075-imgFrame1.svg",
+    "width": "67",
+    "height": "24",
+    "bytes": 2865
+  },
+  {
+    "name": "24268-257096-imgBankProductAndServiceAccountsV2K10.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 3585
+  },
+  {
+    "name": "24268-257096-imgClose.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 456
+  },
+  {
+    "name": "24268-257096-imgFrame1.svg",
+    "width": "67",
+    "height": "24",
+    "bytes": 2865
+  },
+  {
+    "name": "24268-257096-imgNavigationAndActionSingleTickT2.svg",
+    "width": "14",
+    "height": "14",
+    "bytes": 475
+  },
+  {
+    "name": "24268-257570-imgClose.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 456
+  },
+  {
+    "name": "24268-257570-imgFrame1.svg",
+    "width": "67",
+    "height": "24",
+    "bytes": 2865
+  },
+  {
+    "name": "24268-257570-imgNavigationAndActionDeleteT2.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 632
+  },
+  {
+    "name": "24268-257570-imgNavigationAndActionShareT2.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 955
+  },
+  {
+    "name": "24268-257570-imgNavigationAndActionXlsT2.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 3382
+  },
+  {
+    "name": "24268-257570-imgTypologyFilterStatusDefaultOnWhiteYesNotificationYes.svg",
+    "width": "48",
+    "height": "48",
+    "bytes": 1280
+  },
+  {
+    "name": "24268-257747-imgClose.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 456
+  },
+  {
+    "name": "24268-257747-imgFrame1.svg",
+    "width": "67",
+    "height": "24",
+    "bytes": 2865
+  },
+  {
+    "name": "24268-257747-imgNavigationAndActionCalendarHolidayK10.svg",
+    "width": "24",
+    "height": "24",
+    "bytes": 2578
+  },
+  {
+    "name": "24268-257747-imgNavigationAndActionDownK10.svg",
+    "width": "24.0034",
+    "height": "24.0034",
+    "bytes": 493
+  },
+  {
+    "name": "24268-257747-imgNavigationAndActionDownT2.svg",
+    "width": "24.0034",
+    "height": "24.0034",
+    "bytes": 488
+  },
+  {
+    "name": "24268-257747-imgNavigationAndActionSingleTickT2.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 479
+  },
+  {
+    "name": "24268-258938-imgBorder.svg",
+    "width": "22",
+    "height": "22",
+    "bytes": 250
+  },
+  {
+    "name": "24268-258938-imgBorder1.svg",
+    "width": "22",
+    "height": "22",
+    "bytes": 265
+  },
+  {
+    "name": "24268-258938-imgClose.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 456
+  },
+  {
+    "name": "24268-258938-imgDot.svg",
+    "width": "10",
+    "height": "10",
+    "bytes": 227
+  },
+  {
+    "name": "24268-258938-imgFrame1.svg",
+    "width": "67",
+    "height": "24",
+    "bytes": 2865
+  },
+  {
+    "name": "24268-258938-imgLineTop.svg",
+    "width": "361",
+    "height": "1",
+    "bytes": 227
+  },
+  {
+    "name": "24268-258938-imgNavigationAndActionDownK10.svg",
+    "width": "24.0034",
+    "height": "24.0034",
+    "bytes": 493
+  },
+  {
+    "name": "24268-258938-imgNavigationAndActionEditT2.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 594
+  },
+  {
+    "name": "24268-258938-imgNavigationAndActionHideK10.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 1337
+  },
+  {
+    "name": "24268-258938-imgNavigationAndActionInfoSmall.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 712
+  },
+  {
+    "name": "24268-261733-imgBack.svg",
+    "width": "40",
+    "height": "40.0034",
+    "bytes": 502
+  },
+  {
+    "name": "24268-261733-imgClose.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 456
+  },
+  {
+    "name": "24268-261733-imgFrame1.svg",
+    "width": "67",
+    "height": "24",
+    "bytes": 2865
+  },
+  {
+    "name": "24268-261733-imgHelp.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 1424
+  },
+  {
+    "name": "24268-261733-imgLineBottom.svg",
+    "width": "361",
+    "height": "1",
+    "bytes": 230
+  },
+  {
+    "name": "24268-261733-imgLineTop.svg",
+    "width": "361",
+    "height": "1",
+    "bytes": 227
+  },
+  {
+    "name": "24268-261733-imgLogosMoneyfarmHorizontal.svg",
+    "width": "130",
+    "height": "20",
+    "bytes": 16291
+  },
+  {
+    "name": "24268-261733-imgNavigationAndActionDocumentK10.svg",
+    "width": "20",
+    "height": "20",
+    "bytes": 2276
+  },
+  {
+    "name": "24268-261733-imgNavigationAndActionForthT2.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 475
+  },
+  {
+    "name": "24268-261751-imgAvatarCard.png",
+    "bytes": 12729
+  },
+  {
+    "name": "24268-261751-imgBack.svg",
+    "width": "40",
+    "height": "40.0034",
+    "bytes": 202
+  },
+  {
+    "name": "24268-261751-imgClose.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 456
+  },
+  {
+    "name": "24268-261751-imgExclude.svg",
+    "width": "20",
+    "height": "20",
+    "bytes": 2276
+  },
+  {
+    "name": "24268-261751-imgFrame1.svg",
+    "width": "67",
+    "height": "24",
+    "bytes": 2865
+  },
+  {
+    "name": "24268-261751-imgHelp.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 192
+  },
+  {
+    "name": "24268-261751-imgLineBottom.svg",
+    "width": "361",
+    "height": "1",
+    "bytes": 230
+  },
+  {
+    "name": "24268-261751-imgLineTop.svg",
+    "width": "361",
+    "height": "1",
+    "bytes": 227
+  },
+  {
+    "name": "24268-261751-imgNavigationAndActionCopyK10.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 663
+  },
+  {
+    "name": "24268-261751-imgNavigationAndActionCopyK11.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 663
+  },
+  {
+    "name": "24268-261751-imgNavigationAndActionDocumentK10.svg",
+    "width": "20",
+    "height": "20",
+    "bytes": 2276
+  },
+  {
+    "name": "24268-261751-imgNavigationAndActionForthT2.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 475
+  },
+  {
+    "name": "24268-261751-imgNavigationAndActionForthT3.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 475
+  },
+  {
+    "name": "24268-261751-imgNavigationAndActionInfoSmallK10.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 805
+  },
+  {
+    "name": "context0-imgBack.svg",
+    "width": "40",
+    "height": "40.0034",
+    "bytes": 202
+  },
+  {
+    "name": "context0-imgBankProductAndServiceInsurancesWhite.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 806
+  },
+  {
+    "name": "context0-imgBankProductAndServiceMortgagesWhite.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 1165
+  },
+  {
+    "name": "context0-imgBankProductAndServicePfmWhite.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 648
+  },
+  {
+    "name": "context0-imgBankTouchpointAndCustomerCarePhoneSupportWhite.svg",
+    "width": "24",
+    "height": "24",
+    "bytes": 1428
+  },
+  {
+    "name": "context0-imgBankTouchpointAndCustomerCareUnicreditTowersK10.svg",
+    "width": "24",
+    "height": "24",
+    "bytes": 840
+  },
+  {
+    "name": "context0-imgBuildingsHomeWhite.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 559
+  },
+  {
+    "name": "context0-imgClose.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 456
+  },
+  {
+    "name": "context0-imgEllipse28.svg",
+    "width": "4",
+    "height": "4",
+    "bytes": 228
+  },
+  {
+    "name": "context0-imgEllipse3.svg",
+    "width": "132",
+    "height": "132",
+    "bytes": 259
+  },
+  {
+    "name": "context0-imgFrame1.svg",
+    "width": "67",
+    "height": "24",
+    "bytes": 2865
+  },
+  {
+    "name": "context0-imgHelp.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 192
+  },
+  {
+    "name": "context0-imgHomeBankingAndPaymentsCashWhite.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 2230
+  },
+  {
+    "name": "context0-imgHomeBankingAndPaymentsFastPaymentsWhite.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 2454
+  },
+  {
+    "name": "context0-imgHomeBankingAndPaymentsRechargePrepaidCardWhite.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 2482
+  },
+  {
+    "name": "context0-imgInvestmentsIndexWhite.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 812
+  },
+  {
+    "name": "context0-imgNavigationAndActionBackK10.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 471
+  },
+  {
+    "name": "context0-imgNavigationAndActionBlockWhite.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 999
+  },
+  {
+    "name": "context0-imgNavigationAndActionCalendarDailyT2.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 1265
+  },
+  {
+    "name": "context0-imgNavigationAndActionChatWhite.svg",
+    "width": "24",
+    "height": "24",
+    "bytes": 1117
+  },
+  {
+    "name": "context0-imgNavigationAndActionDocumentK10.svg",
+    "width": "24",
+    "height": "24",
+    "bytes": 562
+  },
+  {
+    "name": "context0-imgNavigationAndActionForthK10.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 471
+  },
+  {
+    "name": "context0-imgNavigationAndActionForthT2.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 475
+  },
+  {
+    "name": "context0-imgNavigationAndActionForthT3.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 475
+  },
+  {
+    "name": "context0-imgNavigationAndActionPreferredWhite.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 749
+  },
+  {
+    "name": "context0-imgNavigationAndActionProblem.svg",
+    "width": "24",
+    "height": "24",
+    "bytes": 771
+  },
+  {
+    "name": "context0-imgNavigationAndActionProfileWhite.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 792
+  },
+  {
+    "name": "context0-imgValidationPinK10.svg",
+    "width": "24",
+    "height": "24",
+    "bytes": 1580
+  },
+  {
+    "name": "context1-imgBack.svg",
+    "width": "40",
+    "height": "40.0034",
+    "bytes": 202
+  },
+  {
+    "name": "context1-imgClose.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 456
+  },
+  {
+    "name": "context1-imgFrame1.svg",
+    "width": "67",
+    "height": "24",
+    "bytes": 2865
+  },
+  {
+    "name": "context1-imgHelp.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 192
+  },
+  {
+    "name": "context1-imgNavigationAndActionDownK10.svg",
+    "width": "24.0034",
+    "height": "24.0034",
+    "bytes": 493
+  },
+  {
+    "name": "context2-imgBankTouchpointAndCustomerCareAgency2K10.svg",
+    "width": "24",
+    "height": "24",
+    "bytes": 956
+  },
+  {
+    "name": "context2-imgBankTouchpointAndCustomerCarePhoneSupportK10.svg",
+    "width": "24",
+    "height": "24",
+    "bytes": 1434
+  },
+  {
+    "name": "context2-imgClose.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 456
+  },
+  {
+    "name": "context2-imgFrame1.svg",
+    "width": "67",
+    "height": "24",
+    "bytes": 2865
+  },
+  {
+    "name": "context2-imgNavigationAndActionDownK10.svg",
+    "width": "24.0034",
+    "height": "24.0034",
+    "bytes": 493
+  },
+  {
+    "name": "context2-imgNavigationAndActionEmailK10.svg",
+    "width": "24",
+    "height": "24",
+    "bytes": 2453
+  },
+  {
+    "name": "context2-imgNavigationAndActionForthT2.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 475
+  },
+  {
+    "name": "context3-imgBack.svg",
+    "width": "40",
+    "height": "40.0034",
+    "bytes": 202
+  },
+  {
+    "name": "context3-imgClose.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 456
+  },
+  {
+    "name": "context3-imgEllipse28.svg",
+    "width": "4",
+    "height": "4",
+    "bytes": 228
+  },
+  {
+    "name": "context3-imgFrame1.svg",
+    "width": "67",
+    "height": "24",
+    "bytes": 2865
+  },
+  {
+    "name": "context3-imgHelp.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 192
+  },
+  {
+    "name": "context3-imgNavigationAndActionDoubleTickT2.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 621
+  },
+  {
+    "name": "context3-imgNavigationAndActionFilterK10.svg",
+    "width": "20",
+    "height": "20",
+    "bytes": 1017
+  },
+  {
+    "name": "context3-imgNavigationAndActionForthK1.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 475
+  },
+  {
+    "name": "context3-imgNavigationAndActionForthT2.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 475
+  },
+  {
+    "name": "context3-imgNavigationAndActionSettingsK10.svg",
+    "width": "20",
+    "height": "20",
+    "bytes": 999
+  },
+  {
+    "name": "context3-imgNavigationAndActionShareT2.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 955
+  },
+  {
+    "name": "context4-imgBack.svg",
+    "width": "40",
+    "height": "40.0034",
+    "bytes": 202
+  },
+  {
+    "name": "context4-imgClose.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 456
+  },
+  {
+    "name": "context4-imgFrame1.svg",
+    "width": "67",
+    "height": "24",
+    "bytes": 2865
+  },
+  {
+    "name": "context4-imgHelp.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 192
+  },
+  {
+    "name": "context4-imgNavigationAndActionDoubleTickT2.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 621
+  },
+  {
+    "name": "context4-imgNavigationAndActionFilterK10.svg",
+    "width": "20",
+    "height": "20",
+    "bytes": 1017
+  },
+  {
+    "name": "context4-imgNavigationAndActionForthT2.svg",
+    "width": "16",
+    "height": "16",
+    "bytes": 475
+  },
+  {
+    "name": "context5-imgBack.svg",
+    "width": "40",
+    "height": "40.0034",
+    "bytes": 202
+  },
+  {
+    "name": "context5-imgClose.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 456
+  },
+  {
+    "name": "context5-imgEllipse28.svg",
+    "width": "4",
+    "height": "4",
+    "bytes": 228
+  },
+  {
+    "name": "context5-imgFrame1.svg",
+    "width": "67",
+    "height": "24",
+    "bytes": 2865
+  },
+  {
+    "name": "context5-imgHelp.svg",
+    "width": "40",
+    "height": "40",
+    "bytes": 192
+  },
+  {
+    "name": "context5-imgLineBottom.svg",
+    "width": "361",
+    "height": "1",
+    "bytes": 230
+  }
+]

@@ -1,0 +1,1613 @@
+{
+  "fileKey": "d2TyUaQNN6YsgznQaWymIR",
+  "pageId": "24268:238892",
+  "coverageNotes": [
+    "Repeated frames with filled/empty/error/keyboard/selector/authorization/confirmation variants consume the same state family.",
+    "Native date fields stand in for operating-system calendar entry; source selector bottom sheets are implemented by DataSelect.",
+    "Camera, local gallery, NFC, OTP, identity renewal, and appointment actions are local simulations; no external actions.",
+    "Source NFC illustration is a checkerboard PNG. The exact Figma asset is preserved.",
+    "COMMHUB_00083 frame 24268:249723 contains contact-detail content in the source despite its profile-photo frame name; photo flow uses camera/crop/source-image confirmation."
+  ],
+  "frames": [
+    {
+      "frameId": "24268:247769",
+      "name": "COMMHUB_00061_U_M_CommHub_ProfiloUtente_I tuoi dati",
+      "scope": "personal",
+      "family": "overview",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:247778",
+      "name": "COMMHUB_00068_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica nucleo familiare_Step7",
+      "scope": "personal",
+      "family": "family",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:247787",
+      "name": "COMMHUB_00069_U_M_CommHub_ProfiloUtente_I tuoi dati",
+      "scope": "personal",
+      "family": "overview",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:247796",
+      "name": "COMMHUB_00074_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica Targa_Step3",
+      "scope": "personal",
+      "family": "plates",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:247805",
+      "name": "COMMHUB_00075_U_M_CommHub_ProfiloUtente_I tuoi dati",
+      "scope": "personal",
+      "family": "overview",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:247814",
+      "name": "COMMHUB_00538_U_M_CommHub_ProfiloUtente_I tuoi dati_CancellaFoto_Step1",
+      "scope": "personal",
+      "family": "photo",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:247823",
+      "name": "COMMHUB_00536_U_W_CommHub_ProfiloUtente_I tuoi dati",
+      "scope": "personal",
+      "family": "overview",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:247832",
+      "name": "COMMHUB_00540_U_M_CommHub_ProfiloUtente_I tuoi dati_CancellaFoto_Step4",
+      "scope": "personal",
+      "family": "photo",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:247841",
+      "name": "COMMHUB_00079_U_M_CommHub_ProfiloUtente_Modifica immagine_Step1",
+      "scope": "personal",
+      "family": "photo",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:247849",
+      "name": "COMMHUB_00537_U_W_CommHub_ProfiloUtente_Modifica immagine_Step1_Nofoto",
+      "scope": "personal",
+      "family": "photo",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:247856",
+      "name": "COMMHUB_00086_U_M_CommHub_ProfiloUtente_Eliminazione immagine_Step1",
+      "scope": "personal",
+      "family": "photo",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:247864",
+      "name": "COMMHUB_00021_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica titolo di studio_Step1",
+      "scope": "personal",
+      "family": "education",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:247878",
+      "name": "COMMHUB_00064_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica nucleo familiare_Step3",
+      "scope": "personal",
+      "family": "family",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:247903",
+      "name": "COMMHUB_00066_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica nucleo familiare_Step5",
+      "scope": "personal",
+      "family": "family",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:247928",
+      "name": "COMMHUB_00063_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica nucleo familiare_Step2",
+      "scope": "personal",
+      "family": "family",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:247949",
+      "name": "COMMHUB_00070_U_M_CommHub_ProfiloUtente_I tuoi dati_Aggiungi Targa_Step1",
+      "scope": "personal",
+      "family": "plates",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:247967",
+      "name": "COMMHUB_00072_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica Targa_Step1",
+      "scope": "personal",
+      "family": "plates",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:247984",
+      "name": "COMMHUB_00071_U_M_CommHub_ProfiloUtente_I tuoi dati_Aggiungi Targa_Step2",
+      "scope": "personal",
+      "family": "plates",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:248002",
+      "name": "COMMHUB_00076_U_M_CommHub_ProfiloUtente_I tuoi dati_Portabilità dati_Step1",
+      "scope": "personal",
+      "family": "portability",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:248017",
+      "name": "COMMHUB_00077_U_M_CommHub_ProfiloUtente_I tuoi dati_Portabilità dati_Step2",
+      "scope": "personal",
+      "family": "portability",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:248033",
+      "name": "COMMHUB_00073_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica Targa_Step2",
+      "scope": "personal",
+      "family": "plates",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:248050",
+      "name": "COMMHUB_00065_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica nucleo familiare_Step4",
+      "scope": "personal",
+      "family": "family",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:248174",
+      "name": "COMMHUB_00022_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica titolo di studio_Step2",
+      "scope": "personal",
+      "family": "education",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:248176",
+      "name": "COMMHUB_00067_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica nucleo familiare_Step6",
+      "scope": "personal",
+      "family": "family",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:248179",
+      "name": "COMMHUB_00023_U_M_CommHub_ProfiloUtente_I tuoi dati",
+      "scope": "personal",
+      "family": "overview",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:248188",
+      "name": "COMMHUB_00605_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Carta d'identità Errore",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:248199",
+      "name": "COMMHUB_00586_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Step2",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:248326",
+      "name": "COMMHUB_00597_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Politicamente Esposto_Step2",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:248453",
+      "name": "COMMHUB_00587_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Step3",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:248655",
+      "name": "COMMHUB_00598_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Politicamente Esposto_Step3",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:248857",
+      "name": "COMMHUB_00591_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Step7",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:248982",
+      "name": "COMMHUB_00062_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica nucleo familiare_Step1",
+      "scope": "personal",
+      "family": "family",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249001",
+      "name": "COMMHUB_00477_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Step1",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249023",
+      "name": "COMMHUB_00596_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Politicamente Esposto_Step1",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249045",
+      "name": "COMMHUB_00588_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Step4",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249067",
+      "name": "COMMHUB_00599_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Politicamente Esposto_Step4",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249104",
+      "name": "COMMHUB_00053_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica cellulare_Step7",
+      "scope": "personal",
+      "family": "phone",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249106",
+      "name": "COMMHUB_00045_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica email_Step4",
+      "scope": "personal",
+      "family": "email",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249108",
+      "name": "COMMHUB_00045_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica email_Step4",
+      "scope": "personal",
+      "family": "email",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249110",
+      "name": "COMMHUB_00045_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica email_Step4",
+      "scope": "personal",
+      "family": "email",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249112",
+      "name": "COMMHUB_00045_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica email_Step4",
+      "scope": "personal",
+      "family": "email",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249118",
+      "name": "COMMHUB_00589_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Step5",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249133",
+      "name": "COMMHUB_00589_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Step5",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249156",
+      "name": "COMMHUB_00589_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Step5",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249178",
+      "name": "COMMHUB_00600_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Politicamente Esposto_Step5",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249193",
+      "name": "COMMHUB_00046_U_M_CommHub_ProfiloUtente_I tuoi dati",
+      "scope": "personal",
+      "family": "overview",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249202",
+      "name": "COMMHUB_00046_U_M_CommHub_ProfiloUtente_I tuoi dati",
+      "scope": "personal",
+      "family": "overview",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249211",
+      "name": "COMMHUB_00046_U_M_CommHub_ProfiloUtente_I tuoi dati",
+      "scope": "personal",
+      "family": "overview",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249220",
+      "name": "COMMHUB_00046_U_M_CommHub_ProfiloUtente_I tuoi dati",
+      "scope": "personal",
+      "family": "overview",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249229",
+      "name": "COMMHUB_00046_U_M_CommHub_ProfiloUtente_I tuoi dati",
+      "scope": "personal",
+      "family": "overview",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249238",
+      "name": "COMMHUB_00041_U_M_CommHub_ProfiloUtente_I tuoi dati",
+      "scope": "personal",
+      "family": "overview",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249247",
+      "name": "COMMHUB_00041_U_M_CommHub_ProfiloUtente_I tuoi dati",
+      "scope": "personal",
+      "family": "overview",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249256",
+      "name": "COMMHUB_00041_U_M_CommHub_ProfiloUtente_I tuoi dati",
+      "scope": "personal",
+      "family": "overview",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249265",
+      "name": "COMMHUB_00041_U_M_CommHub_ProfiloUtente_I tuoi dati",
+      "scope": "personal",
+      "family": "overview",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249277",
+      "name": "COMMHUB_00046_U_M_CommHub_ProfiloUtente_I tuoi dati",
+      "scope": "personal",
+      "family": "overview",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249286",
+      "name": "COMMHUB_00047_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica cellulare_Step1",
+      "scope": "personal",
+      "family": "phone",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249301",
+      "name": "COMMHUB_00042_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica email_Step1",
+      "scope": "personal",
+      "family": "email",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249312",
+      "name": "COMMHUB_00042_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica email_Step1",
+      "scope": "personal",
+      "family": "email",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249324",
+      "name": "COMMHUB_00042_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica email_Step1",
+      "scope": "personal",
+      "family": "email",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249336",
+      "name": "COMMHUB_00042_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica email_Step1",
+      "scope": "personal",
+      "family": "email",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249348",
+      "name": "COMMHUB_00043_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica email_Step2",
+      "scope": "personal",
+      "family": "email",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249359",
+      "name": "COMMHUB_00043_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica email_Step2",
+      "scope": "personal",
+      "family": "email",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249371",
+      "name": "COMMHUB_00043_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica email_Step2",
+      "scope": "personal",
+      "family": "email",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249383",
+      "name": "COMMHUB_00043_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica email_Step2",
+      "scope": "personal",
+      "family": "email",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249397",
+      "name": "COMMHUB_00051_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica cellulare_Step5",
+      "scope": "personal",
+      "family": "phone",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249410",
+      "name": "COMMHUB_00563_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica cellulare_Step5.b",
+      "scope": "personal",
+      "family": "phone",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249424",
+      "name": "COMMHUB_00052_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica cellulare_Step6",
+      "scope": "personal",
+      "family": "phone",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249437",
+      "name": "COMMHUB_00048_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica cellulare_Step2",
+      "scope": "personal",
+      "family": "phone",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249452",
+      "name": "COMMHUB_00050_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica cellulare_Step4",
+      "scope": "personal",
+      "family": "phone",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249467",
+      "name": "COMMHUB_00049_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica cellulare_Step3",
+      "scope": "personal",
+      "family": "phone",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249531",
+      "name": "COMMHUB_00054_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica residenza_Step1",
+      "scope": "personal",
+      "family": "residence",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249548",
+      "name": "COMMHUB_00058_U_M_CommHub_ProfiloUtente_I tuoi dati_Indirizzo multiplo_Modifica_Step3",
+      "scope": "personal",
+      "family": "correspondence",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249566",
+      "name": "COMMHUB_00629_U_M_CommHub_ProfiloUtente_I tuoi dati_Indirizzo singolo_Modifica_Step2",
+      "scope": "personal",
+      "family": "correspondence",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249584",
+      "name": "COMMHUB_00046_U_M_CommHub_ProfiloUtente_I tuoi dati_Indirizzo multiplo_Modifica_Step2",
+      "scope": "personal",
+      "family": "correspondence",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249603",
+      "name": "COMMHUB_00057_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica residenza_Step3",
+      "scope": "personal",
+      "family": "residence",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249605",
+      "name": "COMMHUB_00060_U_M_CommHub_ProfiloUtente_I tuoi dati_Indirizzo multiplo_Modifica_Step6",
+      "scope": "personal",
+      "family": "correspondence",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249607",
+      "name": "COMMHUB_00632_U_M_CommHub_ProfiloUtente_I tuoi dati_Indirizzo singolo_Modifica_Step5",
+      "scope": "personal",
+      "family": "correspondence",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249609",
+      "name": "COMMHUB_00055_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica residenza_Step2",
+      "scope": "personal",
+      "family": "residence",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249626",
+      "name": "COMMHUB_00059_U_M_CommHub_ProfiloUtente_I tuoi dati_Indirizzo multiplo_Modifica_Step4",
+      "scope": "personal",
+      "family": "correspondence",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249645",
+      "name": "COMMHUB_00630_U_M_CommHub_ProfiloUtente_I tuoi dati_Indirizzo singolo_Modifica_Step3",
+      "scope": "personal",
+      "family": "correspondence",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249664",
+      "name": "COMMHUB_00078_U_M_CommHub_ProfiloUtente_I tuoi dati_Portabilità dati_Step4",
+      "scope": "personal",
+      "family": "portability",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249666",
+      "name": "COMMHUB_00080_U_M_CommHub_ProfiloUtente_Modifica immagine_Step2",
+      "scope": "personal",
+      "family": "photo",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249682",
+      "name": "COMMHUB_00084_U_M_CommHub_ProfiloUtente_Modifica immagine_Step6",
+      "scope": "personal",
+      "family": "photo",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249697",
+      "name": "COMMHUB_00081_U_M_CommHub_ProfiloUtente_Modifica immagine_Step3",
+      "scope": "personal",
+      "family": "photo",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249714",
+      "name": "COMMHUB_00085_U_M_CommHub_ProfiloUtente_Modifica immagine_Step7",
+      "scope": "personal",
+      "family": "photo",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249723",
+      "name": "COMMHUB_00083_U_M_CommHub_ProfiloUtente_Modifica immagine_Step5",
+      "scope": "personal",
+      "family": "photo",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249768",
+      "name": "COMMHUB_00087_U_M_CommHub_ProfiloUtente_Eliminazione immagine_Step2",
+      "scope": "personal",
+      "family": "photo",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249782",
+      "name": "COMMHUB_00082_U_M_CommHub_ProfiloUtente_Modifica immagine_Step4",
+      "scope": "personal",
+      "family": "photo",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249784",
+      "name": "COMMHUB_00463_U_M_CommHub_ProfiloUtente_I tuoi dati_Indirizzo multiplo_Modifica_Step5",
+      "scope": "personal",
+      "family": "correspondence",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249786",
+      "name": "COMMHUB_00631_U_M_CommHub_ProfiloUtente_I tuoi dati_Indirizzo singolo_Modifica_Step4",
+      "scope": "personal",
+      "family": "correspondence",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249788",
+      "name": "COMMHUB_00463_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica nucleo familiare_Step3",
+      "scope": "personal",
+      "family": "family",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249790",
+      "name": "COMMHUB_00590_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Step6",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249836",
+      "name": "COMMHUB_00592_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Step8",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249882",
+      "name": "COMMHUB_00601_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Politicamente Esposto_Step6",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249934",
+      "name": "COMMHUB_00594_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Step10",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249936",
+      "name": "COMMHUB_00603_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Politicamente Esposto_Step8",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249938",
+      "name": "COMMHUB_00595_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Step11",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249940",
+      "name": "COMMHUB_00604_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Politicamente Esposto_Step9",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249950",
+      "name": "COMMHUB_00041_U_M_CommHub_ProfiloUtente_I tuoi dati",
+      "scope": "personal",
+      "family": "overview",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249959",
+      "name": "COMMHUB_00041_U_M_CommHub_ProfiloUtente_I tuoi dati",
+      "scope": "personal",
+      "family": "overview",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249968",
+      "name": "COMMHUB_00593_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Step9",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249981",
+      "name": "COMMHUB_00602_U_M_CommHub_ProfiloUtente_I tuoi dati_Questionario di adeguata verifica_Politicamente Esposto_Step7",
+      "scope": "personal",
+      "family": "questionnaire",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249994",
+      "name": "COMMHUB_00056_U_M_CommHub_ProfiloUtente_I tuoi dati_Modifica residenza_Step2",
+      "scope": "personal",
+      "family": "residence",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:249997",
+      "name": "COMMHUB_00070_U_M_CommHub_ProfiloUtente_I tuoi dati_Aggiungi Targa_Step1",
+      "scope": "personal",
+      "family": "plates",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:250015",
+      "name": "COMMHUB_00070_U_M_CommHub_ProfiloUtente_I tuoi dati_Aggiungi Targa_Step1",
+      "scope": "personal",
+      "family": "plates",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:250041",
+      "name": "COMMHUB_00548_U_M_CommHub_ProfiloUtente_I tuoi dati_Portabilità dati_Step3",
+      "scope": "personal",
+      "family": "portability",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:250053",
+      "name": "COMMHUB_00627_U_M_CommHub_ProfiloUtente_I tuoi dati_Indirizzo multiplo_Modifica_Step1",
+      "scope": "personal",
+      "family": "correspondence",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:250062",
+      "name": "COMMHUB_00628_U_M_CommHub_ProfiloUtente_I tuoi dati_Indirizzo singolo_Modifica_Step1",
+      "scope": "personal",
+      "family": "correspondence",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260198",
+      "name": "COMMHUB_00334_U_M_CommHub_ProfiloUtente_Rubrica",
+      "scope": "contacts",
+      "family": "list",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260233",
+      "name": "COMMHUB_00382_U_M_CommHub_ProfiloUtente_Rubrica_Operazioni veloci_Attivazione_Step5",
+      "scope": "contacts",
+      "family": "quick",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260274",
+      "name": "COMMHUB_00387_U_M_CommHub_ProfiloUtente_Rubrica_Operazioni veloci_Disattivazione_Step5",
+      "scope": "contacts",
+      "family": "quick",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260313",
+      "name": "COMMHUB_00335_U_M_CommHub_ProfiloUtente_Rubrica_Ricerca ghost_Step1",
+      "scope": "contacts",
+      "family": "search",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260352",
+      "name": "COMMHUB_00337_U_M_CommHub_ProfiloUtente_Rubrica_Ricerca_Step1",
+      "scope": "contacts",
+      "family": "search",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260390",
+      "name": "COMMHUB_00336_U_M_CommHub_ProfiloUtente_Rubrica_Ricerca ghost_Step2",
+      "scope": "contacts",
+      "family": "search",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260405",
+      "name": "COMMHUB_00338_U_M_CommHub_ProfiloUtente_Rubrica_Ricerca_Step2",
+      "scope": "contacts",
+      "family": "search",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260420",
+      "name": "COMMHUB_00366_U_M_CommHub_ProfiloUtente_Rubrica_Modifica contatto_Step1",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260455",
+      "name": "COMMHUB_00353_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto_Step14",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260494",
+      "name": "COMMHUB_00371_U_M_CommHub_ProfiloUtente_Rubrica_Unisci contatti_Step1",
+      "scope": "contacts",
+      "family": "merge",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260533",
+      "name": "COMMHUB_00340_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto_Step1",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260553",
+      "name": "COMMHUB_00368_U_M_CommHub_ProfiloUtente_Rubrica_Modifica contatto_Step3",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260588",
+      "name": "COMMHUB_00368_U_M_CommHub_ProfiloUtente_Rubrica_Modifica contatto_Step5",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260623",
+      "name": "COMMHUB_00342_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto_Step3",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260646",
+      "name": "COMMHUB_00344_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto_Step5",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260670",
+      "name": "COMMHUB_00346_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto_Step7",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260695",
+      "name": "COMMHUB_00348_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto_Step9",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260725",
+      "name": "COMMHUB_00350_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto_Step11",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260756",
+      "name": "COMMHUB_00339_U_M_CommHub_ProfiloUtente_Rubrica_Contatto",
+      "scope": "contacts",
+      "family": "contact-detail",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260774",
+      "name": "COMMHUB_00341_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto_Step2",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260806",
+      "name": "COMMHUB_00343_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto_Step4",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260840",
+      "name": "COMMHUB_00347_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto_Step8",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260875",
+      "name": "COMMHUB_00349_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto_Step10",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260939",
+      "name": "COMMHUB_00345_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto_Step6",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260975",
+      "name": "COMMHUB_00367_U_M_CommHub_ProfiloUtente_Rubrica_Modifica contatto_Step2",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261016",
+      "name": "COMMHUB_00367_U_M_CommHub_ProfiloUtente_Rubrica_Modifica contatto_Step4",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261078",
+      "name": "COMMHUB_00372_U_M_CommHub_ProfiloUtente_Rubrica_Unisci contatti_Step2",
+      "scope": "contacts",
+      "family": "merge",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261113",
+      "name": "COMMHUB_00649_U_M_CommHub_ProfiloUtente_Rubrica_Unisci contatti_Step2",
+      "scope": "contacts",
+      "family": "merge",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261149",
+      "name": "COMMHUB_00373_U_M_CommHub_ProfiloUtente_Rubrica_Unisci contatti_Step3",
+      "scope": "contacts",
+      "family": "merge",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261163",
+      "name": "COMMHUB_00375_U_M_CommHub_ProfiloUtente_Rubrica_Unisci contatti_Step5",
+      "scope": "contacts",
+      "family": "merge",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261185",
+      "name": "COMMHUB_00374_U_M_CommHub_ProfiloUtente_Rubrica_Unisci contatti_Step4",
+      "scope": "contacts",
+      "family": "merge",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261236",
+      "name": "COMMHUB_00376_U_M_CommHub_ProfiloUtente_Rubrica_Unisci contatti_Step6",
+      "scope": "contacts",
+      "family": "merge",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261238",
+      "name": "COMMHUB_00380_U_M_CommHub_ProfiloUtente_Rubrica_Operazioni veloci_Attivazione_Step3",
+      "scope": "contacts",
+      "family": "quick",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261240",
+      "name": "COMMHUB_00385_U_M_CommHub_ProfiloUtente_Rubrica_Operazioni veloci_Disattivazione_Step3",
+      "scope": "contacts",
+      "family": "quick",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261254",
+      "name": "COMMHUB_00377_U_M_CommHub_ProfiloUtente_Rubrica_Unisci contatti_Step7",
+      "scope": "contacts",
+      "family": "merge",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261256",
+      "name": "COMMHUB_00381_U_M_CommHub_ProfiloUtente_Rubrica_Operazioni veloci_Attivazione_Step4",
+      "scope": "contacts",
+      "family": "quick",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261258",
+      "name": "COMMHUB_00390_U_M_CommHub_ProfiloUtente_Rubrica_Elimazione contatto_Step3",
+      "scope": "contacts",
+      "family": "delete",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261260",
+      "name": "COMMHUB_00386_U_M_CommHub_ProfiloUtente_Rubrica_Operazioni veloci_Disattivazione_Step4",
+      "scope": "contacts",
+      "family": "quick",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261262",
+      "name": "COMMHUB_00378_U_M_CommHub_ProfiloUtente_Rubrica_Operazioni veloci_Attivazione_Step1",
+      "scope": "contacts",
+      "family": "quick",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261280",
+      "name": "COMMHUB_00383_U_M_CommHub_ProfiloUtente_Rubrica_Operazioni veloci_Disattivazione_Step1",
+      "scope": "contacts",
+      "family": "quick",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261298",
+      "name": "COMMHUB_00379_U_M_CommHub_ProfiloUtente_Rubrica_Operazioni veloci_Attivazione_Step2",
+      "scope": "contacts",
+      "family": "quick",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261319",
+      "name": "COMMHUB_00384_U_M_CommHub_ProfiloUtente_Rubrica_Operazioni veloci_Disattivazione_Step2",
+      "scope": "contacts",
+      "family": "quick",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261340",
+      "name": "COMMHUB_00351_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto_Step12",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261342",
+      "name": "COMMHUB_00357_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto Estero_Step5",
+      "scope": "contacts",
+      "family": "foreign-contact",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261344",
+      "name": "COMMHUB_00364_U_M_CommHub_ProfiloUtente_Rubrica_Modifica contatto Estero_Step4",
+      "scope": "contacts",
+      "family": "foreign-contact",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261346",
+      "name": "COMMHUB_00352_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto_Step13",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261348",
+      "name": "COMMHUB_00359_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto Estero_Step7",
+      "scope": "contacts",
+      "family": "foreign-contact",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261350",
+      "name": "COMMHUB_00365_U_M_CommHub_ProfiloUtente_Rubrica_Modifica contatto Estero_Step5",
+      "scope": "contacts",
+      "family": "foreign-contact",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261352",
+      "name": "COMMHUB_00369_U_M_CommHub_ProfiloUtente_Rubrica_Modifica contatto_Step6",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261354",
+      "name": "COMMHUB_00370_U_M_CommHub_ProfiloUtente_Rubrica_Modifica contatto_Step7",
+      "scope": "contacts",
+      "family": "contact-editor",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261356",
+      "name": "COMMHUB_00388_U_M_CommHub_ProfiloUtente_Rubrica_Elimazione contatto_Step1",
+      "scope": "contacts",
+      "family": "delete",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261375",
+      "name": "COMMHUB_00389_U_M_CommHub_ProfiloUtente_Rubrica_Elimazione contatto_Step2",
+      "scope": "contacts",
+      "family": "delete",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261395",
+      "name": "COMMHUB_00354_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto Estero_Step1",
+      "scope": "contacts",
+      "family": "foreign-contact",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261415",
+      "name": "COMMHUB_00355_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto Estero_Step2",
+      "scope": "contacts",
+      "family": "foreign-contact",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261448",
+      "name": "COMMHUB_00355_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto Estero_Step3",
+      "scope": "contacts",
+      "family": "foreign-contact",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261516",
+      "name": "COMMHUB_00356_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto Estero_Step4",
+      "scope": "contacts",
+      "family": "foreign-contact",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261539",
+      "name": "COMMHUB_00362_U_M_CommHub_ProfiloUtente_Rubrica_Modifica contatto Estero_Step2",
+      "scope": "contacts",
+      "family": "foreign-contact",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261560",
+      "name": "COMMHUB_00363_U_M_CommHub_ProfiloUtente_Rubrica_Modifica contatto Estero_Step3",
+      "scope": "contacts",
+      "family": "foreign-contact",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261593",
+      "name": "COMMHUB_00358_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto Estero_Step6",
+      "scope": "contacts",
+      "family": "foreign-contact",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261618",
+      "name": "COMMHUB_00360_U_M_CommHub_ProfiloUtente_Rubrica_Nuovo contatto Estero_Step8",
+      "scope": "contacts",
+      "family": "foreign-contact",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:261637",
+      "name": "COMMHUB_00361_U_M_CommHub_ProfiloUtente_Rubrica_Modifica contatto Estero_Step1",
+      "scope": "contacts",
+      "family": "foreign-contact",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259631",
+      "name": "COMMHUB_00308_U_M_CommHub_ProfiloUtente_Documenti",
+      "scope": "identity",
+      "family": "document-list",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259639",
+      "name": "COMMHUB_00308_U_M_CommHub_ProfiloUtente_Documenti",
+      "scope": "identity",
+      "family": "document-list",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259651",
+      "name": "COMMHUB_00308_U_M_CommHub_ProfiloUtente_Documenti",
+      "scope": "identity",
+      "family": "document-list",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259669",
+      "name": "COMMHUB_00331_U_M_CommHub_ProfiloUtente_Documenti",
+      "scope": "identity",
+      "family": "document-list",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259682",
+      "name": "COMMHUB_00332_U_M_CommHub_ProfiloUtente_Documenti_Dettaglio",
+      "scope": "identity",
+      "family": "document-detail",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259701",
+      "name": "COMMHUB_00333_U_M_CommHub_ProfiloUtente_Documenti_Dettaglio",
+      "scope": "identity",
+      "family": "document-detail",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259720",
+      "name": "COMMHUB_00316_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step8",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259738",
+      "name": "COMMHUB_00316_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step8",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259752",
+      "name": "COMMHUB_00316_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step8",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259767",
+      "name": "COMMHUB_00318_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step10",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259786",
+      "name": "COMMHUB_00319_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step11",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259797",
+      "name": "COMMHUB_00320_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step12",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259809",
+      "name": "COMMHUB_00322_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step14",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259831",
+      "name": "COMMHUB_00321_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step13",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259852",
+      "name": "COMMHUB_00327_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step18",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259880",
+      "name": "COMMHUB_00317_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step9",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259918",
+      "name": "COMMHUB_00329_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step20",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259920",
+      "name": "COMMHUB_00309_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step1",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:259999",
+      "name": "COMMHUB_00309_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step1",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260087",
+      "name": "COMMHUB_00323_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step15",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260089",
+      "name": "COMMHUB_00310_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step2",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260100",
+      "name": "COMMHUB_00310_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step2",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260111",
+      "name": "COMMHUB_00311_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step3",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260131",
+      "name": "COMMHUB_00313_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step5",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260144",
+      "name": "COMMHUB_00315_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step7",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260154",
+      "name": "COMMHUB_00328_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step19",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260156",
+      "name": "COMMHUB_00324_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step16",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260158",
+      "name": "COMMHUB_00325_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step17",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260160",
+      "name": "COMMHUB_00312_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step4",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260162",
+      "name": "COMMHUB_00314_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step6",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    },
+    {
+      "frameId": "24268:260164",
+      "name": "COMMHUB_00311_U_M_CommHub_ProfiloUtente_Documenti_Aggiornamento_Step3",
+      "scope": "identity",
+      "family": "renewal",
+      "coverage": "shared native form/state family",
+      "visualVerification": "representatives only"
+    }
+  ]
+}

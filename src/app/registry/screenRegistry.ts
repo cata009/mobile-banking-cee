@@ -1,5 +1,5 @@
 import type { ScreenId } from '@/app/state/demoTypes'
-import type { Screen } from '@/app/contexts/NavigationContext'
+import type { Screen } from '@/app/navigation/screenTypes'
 import type { ScreenMeta } from './domains/contracts'
 import { composeRegistry } from './domains/composeRegistry'
 import { IDENTITY_SCREENS } from './domains/identity/screens'

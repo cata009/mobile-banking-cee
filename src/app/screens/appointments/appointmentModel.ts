@@ -92,6 +92,7 @@ export function getInitialAppointmentDate(now = new Date()): string {
 
 export function getAppointmentDateLocale(country: CountryId, language: string): string {
   const countryLocale: Record<CountryId, string> = {
+    IT: "IT",
     CZ: "CZ",
     SK: "SK",
     RO: "RO",

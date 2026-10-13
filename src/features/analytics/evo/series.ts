@@ -1,4 +1,4 @@
-import type { ExpenseBar } from '@/app/components/analytics/ExpenseBarChart'
+import type { ExpenseBar } from '@/features/analytics/chartTypes'
 import {
   getSpendingWeekIndex,
   SPENDING_WEEK_LENGTH,

@@ -1,0 +1,224 @@
+{
+  "sharedChanges": "Home/CategoryPanel integration belongs to codex-pi-italy-mobile-first-integration",
+  "baseCommit": "538360ead4a6da9ae889f142f8d00e333f99412b",
+  "checkout": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE",
+  "files": [
+    {
+      "bytes": 6023,
+      "change": "A",
+      "path": "docs/tasks/pi-italy-mobile-first-loans-assets.json"
+    },
+    {
+      "bytes": 5904,
+      "change": "A",
+      "path": "docs/tasks/pi-italy-mobile-first-loans-ownership.json"
+    },
+    {
+      "bytes": 54562,
+      "change": "A",
+      "path": "docs/tasks/pi-italy-mobile-first-loans-preview.png"
+    },
+    {
+      "bytes": 2813,
+      "change": "A",
+      "path": "docs/tasks/pi-italy-mobile-first-loans-qa.html"
+    },
+    {
+      "bytes": 6514,
+      "change": "A",
+      "path": "docs/tasks/pi-italy-mobile-first-loans.md"
+    },
+    {
+      "bytes": 413,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/img170.svg"
+    },
+    {
+      "bytes": 833,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgBankTouchpointAndCustomerCareAgency.svg"
+    },
+    {
+      "bytes": 511,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgBuildingsHome.svg"
+    },
+    {
+      "bytes": 456,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgClose.svg"
+    },
+    {
+      "bytes": 570,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgCommonDesign.svg"
+    },
+    {
+      "bytes": 230,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgEllipse28.svg"
+    },
+    {
+      "bytes": 2002,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgGroup.svg"
+    },
+    {
+      "bytes": 1369,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgHelp.svg"
+    },
+    {
+      "bytes": 96151,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgHeroBannerMobile.png"
+    },
+    {
+      "bytes": 1866,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgHomeBankingAndPaymentsCash.svg"
+    },
+    {
+      "bytes": 2666,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgHomeBankingAndPaymentsInstalmentPlansK10.svg"
+    },
+    {
+      "bytes": 769,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgIconButtonFavourite.svg"
+    },
+    {
+      "bytes": 769,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgIconButtonFavourite1.svg"
+    },
+    {
+      "bytes": 438,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgNavigationAndActionArrowBack.svg"
+    },
+    {
+      "bytes": 441,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgNavigationAndActionArrowForth.svg"
+    },
+    {
+      "bytes": 805,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgNavigationAndActionChat.svg"
+    },
+    {
+      "bytes": 562,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgNavigationAndActionDocumentK10.svg"
+    },
+    {
+      "bytes": 493,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgNavigationAndActionDownK10.svg"
+    },
+    {
+      "bytes": 468,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgNavigationAndActionDownK11.svg"
+    },
+    {
+      "bytes": 595,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgNavigationAndActionEditK10.svg"
+    },
+    {
+      "bytes": 594,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgNavigationAndActionEditT2.svg"
+    },
+    {
+      "bytes": 785,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgNavigationAndActionExport.svg"
+    },
+    {
+      "bytes": 1067,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgNavigationAndActionFailLargeK10.svg"
+    },
+    {
+      "bytes": 476,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgNavigationAndActionForthK10.svg"
+    },
+    {
+      "bytes": 807,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgNavigationAndActionInfoSmallK10.svg"
+    },
+    {
+      "bytes": 871,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgNavigationAndActionSuccessLargeK10.svg"
+    },
+    {
+      "bytes": 491,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgNavigationAndActionUpK10.svg"
+    },
+    {
+      "bytes": 491,
+      "change": "A",
+      "path": "src/assets/mobile-first/it/loans/imgNavigationAndActionUpK11.svg"
+    },
+    {
+      "bytes": 3672,
+      "change": "A",
+      "path": "src/experiences/pi/it/mobile-first/loansAssets.ts"
+    },
+    {
+      "bytes": 2908,
+      "change": "A",
+      "path": "src/experiences/pi/it/mobile-first/loansContent.ts"
+    },
+    {
+      "bytes": 18415,
+      "change": "A",
+      "path": "src/experiences/pi/it/mobile-first/mobile-first-loans.css"
+    },
+    {
+      "bytes": 42750,
+      "change": "A",
+      "path": "src/experiences/pi/it/mobile-first/MobileFirstLoans.tsx"
+    },
+    {
+      "bytes": 3715,
+      "change": "A",
+      "path": "src/experiences/pi/it/mobile-first/MobileFirstLoansPrimitives.tsx"
+    },
+    {
+      "bytes": 23746,
+      "change": "A",
+      "path": "src/experiences/pi/it/mobile-first/MobileFirstLoansSimulation.tsx"
+    },
+    {
+      "bytes": 8960,
+      "change": "A",
+      "path": "src/features/credit/mobileFirstLoans.ts"
+    },
+    {
+      "bytes": 3551,
+      "change": "A",
+      "path": "tests/features/mobile-first-loans.test.ts"
+    },
+    {
+      "bytes": 10148,
+      "change": "A",
+      "path": "tests/screens/italy-mobile-first-loans.test.tsx"
+    },
+    {
+      "change": "A",
+      "path": "docs/tasks/pi-italy-mobile-first-loans-delta.json",
+      "bytes": null
+    }
+  ],
+  "owner": "codex-pi-it-mutui-prestiti",
+  "testsPassed": 17
+}

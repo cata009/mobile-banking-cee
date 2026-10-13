@@ -1,30 +1,14 @@
 import type { ReactNode } from "react";
 import { AppIcon } from "@/app/components/icons";
 import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
-import type { PfmCategoryName } from "@/data/pfmCategories";
 
 export const EXPENSE_OTHER_CATEGORY = "Other" as const;
 /**
  * Whatever the ring is split by — a PFM category, a merchant name, a currency code, or the
  * aggregate Other slice. The screen decides; an arc only needs a stable key.
  */
-export type ExpenseDonutCategory = string;
-
-export interface ExpenseDonutSegment {
-  category: ExpenseDonutCategory;
-  label: string;
-  total: number;
-  colorVar: string;
-  iconCategory?: PfmCategoryName;
-  /** Overrides the arc's marker where the split has its own mark, e.g. a currency roundel. */
-  icon?: ReactNode;
-  /**
-   * Text drawn in the marker instead of an icon — used by the Other arc, whose
-   * three-dot glyph read as "more options" everywhere else in the app rather
-   * than "the categories not drawn here".
-   */
-  markerLabel?: string;
-}
+import type { ExpenseDonutCategory, ExpenseDonutSegment } from '@/features/analytics/chartTypes';
+export type { ExpenseDonutCategory, ExpenseDonutSegment } from '@/features/analytics/chartTypes';
 
 export interface ExpenseDonutChartProps {
   segments: readonly ExpenseDonutSegment[];

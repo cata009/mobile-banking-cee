@@ -1,25 +1,7 @@
 import type { ReactNode } from 'react';
 
-export interface ExpenseBar {
-  key: string;
-  /** Primary axis label, e.g. the day number or the month short name. */
-  label: string;
-  /** Optional secondary line above the label, e.g. the week ordinal. */
-  caption?: string;
-  /** Names the bucket outside the chart (header, filter chip) when the axis pair reads too long there. */
-  filterLabel?: string;
-  /** The same name without its year, for the period stepper that already prints the year below. */
-  filterTitle?: string;
-  total: number;
-  /**
-   * How much of a full bucket this bar covers, 0–1. Defaults to a whole one.
-   *
-   * A month's last "week" is two or three days, and drawn at full width beside
-   * four seven-day bars it read as a collapse in spending rather than a shorter
-   * period. The height still carries the amount — the width now carries the span.
-   */
-  weight?: number;
-}
+import type { ExpenseBar } from '@/features/analytics/chartTypes';
+export type { ExpenseBar } from '@/features/analytics/chartTypes';
 
 export interface ExpenseBarChartProps {
   bars: readonly ExpenseBar[];

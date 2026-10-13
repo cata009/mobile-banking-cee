@@ -20,7 +20,7 @@ export interface ExperienceComposition {
   manifest: ExperienceManifest
   product: 'PI' | 'KIDS_PI'
   country: CountryId
-  home: 'pi-baseline' | 'pi-evo-2027' | 'kids-sk' | 'kids-hu' | 'kids-ro'
+  home: 'pi-baseline' | 'pi-evo-2027' | 'pi-mobile-first' | 'kids-sk' | 'kids-hu' | 'kids-ro'
   payments: 'baseline' | 'evo-2027'
   products: 'baseline' | 'evo-2027'
   roboAdvisor: boolean

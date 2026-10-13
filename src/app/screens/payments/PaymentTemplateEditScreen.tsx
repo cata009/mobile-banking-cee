@@ -1,3 +1,4 @@
+import { isValidEvoPaymentTemplate } from '@/features/accounts-payments/evoPaymentPolicy';
 import { useState } from "react";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
@@ -52,11 +53,7 @@ export default function PaymentTemplateEditScreen({
   const [bankName, setBankName] = useState(selection.bankName);
   const [amount, setAmount] = useState(selection.amount);
   const [paymentNote, setPaymentNote] = useState(selection.paymentNote);
-  const isValid = title.trim().length > 1
-    && beneficiaryName.trim().length > 1
-    && accountNumber.trim().length > 5
-    && bankCode.trim().length > 0
-    && amount.trim().length > 0;
+  const isValid = isValidEvoPaymentTemplate({title, beneficiaryName, accountNumber, bankCode, amount});
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-[var(--uc-app-bg)] text-[var(--uc-text)]">

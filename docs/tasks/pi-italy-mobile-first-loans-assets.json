@@ -1,0 +1,170 @@
+[
+  {
+    "name": "imgNavigationAndActionArrowBack",
+    "url": "https://www.figma.com/api/mcp/asset/df99d221-48d1-4ce1-9295-2849e9c49a7a.svg",
+    "file": "imgNavigationAndActionArrowBack.svg",
+    "nodeId": "24262:583346"
+  },
+  {
+    "name": "imgNavigationAndActionArrowForth",
+    "url": "https://www.figma.com/api/mcp/asset/341ffde9-a33a-4b52-ab0b-e39640a84180.svg",
+    "file": "imgNavigationAndActionArrowForth.svg",
+    "nodeId": "24262:583346"
+  },
+  {
+    "name": "imgEllipse28",
+    "url": "https://www.figma.com/api/mcp/asset/0f8f05c9-17ab-45fe-b5af-4e4a6d827210.svg",
+    "file": "imgEllipse28.svg",
+    "nodeId": "24262:583346"
+  },
+  {
+    "name": "imgNavigationAndActionForthK10",
+    "url": "https://www.figma.com/api/mcp/asset/27c97366-e5bf-4779-a20f-d3828f872fa2.svg",
+    "file": "imgNavigationAndActionForthK10.svg",
+    "nodeId": "24262:583346"
+  },
+  {
+    "name": "imgNavigationAndActionInfoSmallK10",
+    "url": "https://www.figma.com/api/mcp/asset/5d197bbc-e1a5-4777-b20b-e83f107783b1.svg",
+    "file": "imgNavigationAndActionInfoSmallK10.svg",
+    "nodeId": "24262:583346"
+  },
+  {
+    "name": "imgNavigationAndActionDocumentK10",
+    "url": "https://www.figma.com/api/mcp/asset/063bb248-f81d-42f9-914e-5826e71a691e.svg",
+    "file": "imgNavigationAndActionDocumentK10.svg",
+    "nodeId": "24262:583346"
+  },
+  {
+    "name": "imgHelp",
+    "url": "https://www.figma.com/api/mcp/asset/b1fa3bbb-6cf9-475e-bf83-65fad6870483.svg",
+    "file": "imgHelp.svg",
+    "nodeId": "24262:584088"
+  },
+  {
+    "name": "imgClose",
+    "url": "https://www.figma.com/api/mcp/asset/91c3fdc8-0978-4cfd-a912-113acad49b1e.svg",
+    "file": "imgClose.svg",
+    "nodeId": "24262:584088"
+  },
+  {
+    "name": "imgNavigationAndActionEditT2",
+    "url": "https://www.figma.com/api/mcp/asset/35a5fd75-ec63-4e33-9c68-3c7c4e3a35c1.svg",
+    "file": "imgNavigationAndActionEditT2.svg",
+    "nodeId": "24262:584088"
+  },
+  {
+    "name": "imgNavigationAndActionEditK10",
+    "url": "https://www.figma.com/api/mcp/asset/b6968373-e873-4159-9e51-e22b87ad16b3.svg",
+    "file": "imgNavigationAndActionEditK10.svg",
+    "nodeId": "24262:583598"
+  },
+  {
+    "name": "imgIconButtonFavourite",
+    "url": "https://www.figma.com/api/mcp/asset/450ac9d7-fa16-4809-bfa1-64924730a68b.svg",
+    "file": "imgIconButtonFavourite.svg",
+    "nodeId": "24262:583598"
+  },
+  {
+    "name": "imgNavigationAndActionUpK10",
+    "url": "https://www.figma.com/api/mcp/asset/376b93c4-8842-47ac-8a5f-97bc64a758b0.svg",
+    "file": "imgNavigationAndActionUpK10.svg",
+    "nodeId": "24262:583598"
+  },
+  {
+    "name": "imgNavigationAndActionDownK10",
+    "url": "https://www.figma.com/api/mcp/asset/3ddd4115-c43b-413d-afb8-0a432f918a8a.svg",
+    "file": "imgNavigationAndActionDownK10.svg",
+    "nodeId": "24262:583598"
+  },
+  {
+    "name": "imgNavigationAndActionUpK11",
+    "url": "https://www.figma.com/api/mcp/asset/e68ec59b-3ec4-4190-a549-424d77a204f4.svg",
+    "file": "imgNavigationAndActionUpK11.svg",
+    "nodeId": "24262:583598"
+  },
+  {
+    "name": "imgNavigationAndActionDownK11",
+    "url": "https://www.figma.com/api/mcp/asset/8517fedf-6e13-49a3-864d-19488e1cce0f.svg",
+    "file": "imgNavigationAndActionDownK11.svg",
+    "nodeId": "24262:583598"
+  },
+  {
+    "name": "imgIconButtonFavourite1",
+    "url": "https://www.figma.com/api/mcp/asset/8a6687c2-6f63-4612-937e-ee5f37903ae2.svg",
+    "file": "imgIconButtonFavourite1.svg",
+    "nodeId": "24262:583598"
+  },
+  {
+    "name": "imgHomeBankingAndPaymentsInstalmentPlansK10",
+    "url": "https://www.figma.com/api/mcp/asset/45427b33-02a6-4495-9c77-25a8be7d8143.svg",
+    "file": "imgHomeBankingAndPaymentsInstalmentPlansK10.svg",
+    "nodeId": "24262:583598"
+  },
+  {
+    "name": "imgGroup",
+    "url": "https://www.figma.com/api/mcp/asset/5eca3fb6-9e0d-44b8-9dcf-4a9745786bb8.svg",
+    "file": "imgGroup.svg",
+    "nodeId": "24262:584592"
+  },
+  {
+    "name": "imgBuildingsHome",
+    "url": "https://www.figma.com/api/mcp/asset/94d79e9d-c966-4e11-b8c8-5684ed06f76e.svg",
+    "file": "imgBuildingsHome.svg",
+    "nodeId": "24262:584592"
+  },
+  {
+    "name": "imgCommonDesign",
+    "url": "https://www.figma.com/api/mcp/asset/8f4a8924-dc7f-4c94-b578-f168a5744b68.svg",
+    "file": "imgCommonDesign.svg",
+    "nodeId": "24262:584592"
+  },
+  {
+    "name": "imgHomeBankingAndPaymentsCash",
+    "url": "https://www.figma.com/api/mcp/asset/cd9d52c8-7df5-42fd-8355-bfdacd72590f.svg",
+    "file": "imgHomeBankingAndPaymentsCash.svg",
+    "nodeId": "24262:584592"
+  },
+  {
+    "name": "imgNavigationAndActionExport",
+    "url": "https://www.figma.com/api/mcp/asset/067089fc-91d7-4f88-b9c9-2684f678074a.svg",
+    "file": "imgNavigationAndActionExport.svg",
+    "nodeId": "24262:584592"
+  },
+  {
+    "name": "imgHeroBannerMobile",
+    "url": "https://www.figma.com/api/mcp/asset/882c373f-5d81-42fa-9ebc-f51e6f598b95.png",
+    "file": "imgHeroBannerMobile.png",
+    "nodeId": "24262:584584"
+  },
+  {
+    "name": "imgNavigationAndActionSuccessLargeK10",
+    "url": "https://www.figma.com/api/mcp/asset/1fc13510-54c6-4786-8fbb-d1c3ffb1a35a.svg",
+    "file": "imgNavigationAndActionSuccessLargeK10.svg",
+    "nodeId": "24262:585367"
+  },
+  {
+    "name": "imgNavigationAndActionFailLargeK10",
+    "url": "https://www.figma.com/api/mcp/asset/b7a19f59-b2b5-450a-aca5-4bb6ee9c825f.svg",
+    "file": "imgNavigationAndActionFailLargeK10.svg",
+    "nodeId": "24262:585377"
+  },
+  {
+    "name": "imgNavigationAndActionChat",
+    "url": "https://www.figma.com/api/mcp/asset/a524ce9f-c3c4-469a-a6aa-a513495b9180.svg",
+    "file": "imgNavigationAndActionChat.svg",
+    "nodeId": "24262:585774"
+  },
+  {
+    "name": "imgBankTouchpointAndCustomerCareAgency",
+    "url": "https://www.figma.com/api/mcp/asset/bf756276-0db7-41b2-9fd6-cfb5501c7493.svg",
+    "file": "imgBankTouchpointAndCustomerCareAgency.svg",
+    "nodeId": "24262:585774"
+  },
+  {
+    "name": "img170",
+    "url": "https://www.figma.com/api/mcp/asset/9a1448d9-14e7-4d2b-a37c-adbed905b9a8.svg",
+    "file": "img170.svg",
+    "nodeId": "24262:584943"
+  }
+]

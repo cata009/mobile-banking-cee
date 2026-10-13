@@ -1,0 +1,836 @@
+[
+  {
+    "key": "context0",
+    "name": "imgNavigationAndActionBackK10",
+    "url": "https://www.figma.com/api/mcp/asset/997cf9a3-490f-45c0-b1f8-cd146a969161.svg",
+    "file": "context0-imgNavigationAndActionBackK10.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgNavigationAndActionForthK10",
+    "url": "https://www.figma.com/api/mcp/asset/b415d284-5976-4ada-8ef7-e2a008267f93.svg",
+    "file": "context0-imgNavigationAndActionForthK10.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgFrame1",
+    "url": "https://www.figma.com/api/mcp/asset/d0a1e7ec-c5eb-472c-a19b-2704af32b78d.svg",
+    "file": "context0-imgFrame1.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgBack",
+    "url": "https://www.figma.com/api/mcp/asset/a59857f8-2f56-4d50-b1c4-0fcaa4c654dd.svg",
+    "file": "context0-imgBack.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgHelp",
+    "url": "https://www.figma.com/api/mcp/asset/f917eb88-728e-4e42-86c5-b67c0bc072aa.svg",
+    "file": "context0-imgHelp.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgClose",
+    "url": "https://www.figma.com/api/mcp/asset/82073ff2-b5dd-4991-9221-7017ebce156b.svg",
+    "file": "context0-imgClose.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgNavigationAndActionProblem",
+    "url": "https://www.figma.com/api/mcp/asset/e10bf0e7-339c-4c2b-93c0-e95720243557.svg",
+    "file": "context0-imgNavigationAndActionProblem.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgValidationPinK10",
+    "url": "https://www.figma.com/api/mcp/asset/6a003a7a-6819-490e-b484-b74597a34229.svg",
+    "file": "context0-imgValidationPinK10.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgNavigationAndActionDocumentK10",
+    "url": "https://www.figma.com/api/mcp/asset/484b3582-4374-4330-87eb-aa7aff2e58b2.svg",
+    "file": "context0-imgNavigationAndActionDocumentK10.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgBankTouchpointAndCustomerCareUnicreditTowersK10",
+    "url": "https://www.figma.com/api/mcp/asset/50cbd920-efa1-4740-89d8-c7af54fe2ec7.svg",
+    "file": "context0-imgBankTouchpointAndCustomerCareUnicreditTowersK10.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgNavigationAndActionCalendarDailyT2",
+    "url": "https://www.figma.com/api/mcp/asset/deca5832-e5cf-4079-be80-609beda4a5bb.svg",
+    "file": "context0-imgNavigationAndActionCalendarDailyT2.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgEllipse28",
+    "url": "https://www.figma.com/api/mcp/asset/ac016610-64a8-4f10-b618-9cb4c0a78fbb.svg",
+    "file": "context0-imgEllipse28.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgNavigationAndActionForthT2",
+    "url": "https://www.figma.com/api/mcp/asset/a72af462-99a9-4118-94da-7b72e85df09e.svg",
+    "file": "context0-imgNavigationAndActionForthT2.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgNavigationAndActionForthT3",
+    "url": "https://www.figma.com/api/mcp/asset/fb5dace6-50e9-48d3-9caa-a9dddede0799.svg",
+    "file": "context0-imgNavigationAndActionForthT3.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgNavigationAndActionPreferredWhite",
+    "url": "https://www.figma.com/api/mcp/asset/2264b98d-5c00-4aab-a0eb-2b71bac0c2f2.svg",
+    "file": "context0-imgNavigationAndActionPreferredWhite.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgEllipse3",
+    "url": "https://www.figma.com/api/mcp/asset/b48e6c34-f361-4af2-b98d-7f072548d527.svg",
+    "file": "context0-imgEllipse3.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgBuildingsHomeWhite",
+    "url": "https://www.figma.com/api/mcp/asset/7c0f4393-4b7c-4a2b-a92b-65515eeffb89.svg",
+    "file": "context0-imgBuildingsHomeWhite.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgInvestmentsIndexWhite",
+    "url": "https://www.figma.com/api/mcp/asset/6d3a18a5-77fd-4aff-8b5e-112a78cdf638.svg",
+    "file": "context0-imgInvestmentsIndexWhite.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgHomeBankingAndPaymentsCashWhite",
+    "url": "https://www.figma.com/api/mcp/asset/23264ebe-d4e6-4174-8709-2627a52b362a.svg",
+    "file": "context0-imgHomeBankingAndPaymentsCashWhite.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgHomeBankingAndPaymentsRechargePrepaidCardWhite",
+    "url": "https://www.figma.com/api/mcp/asset/e80b2f01-788f-4c50-a24d-4fed23b11f7d.svg",
+    "file": "context0-imgHomeBankingAndPaymentsRechargePrepaidCardWhite.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgNavigationAndActionProfileWhite",
+    "url": "https://www.figma.com/api/mcp/asset/826a080c-9191-4c5d-b531-2d2ac7906a91.svg",
+    "file": "context0-imgNavigationAndActionProfileWhite.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgBankProductAndServicePfmWhite",
+    "url": "https://www.figma.com/api/mcp/asset/8428de57-abc4-45f3-997f-ba8cc8f4542b.svg",
+    "file": "context0-imgBankProductAndServicePfmWhite.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgHomeBankingAndPaymentsFastPaymentsWhite",
+    "url": "https://www.figma.com/api/mcp/asset/5295ce5d-0c08-4838-85fc-62626c116076.svg",
+    "file": "context0-imgHomeBankingAndPaymentsFastPaymentsWhite.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgNavigationAndActionBlockWhite",
+    "url": "https://www.figma.com/api/mcp/asset/3eaa065e-d3b6-455a-a9d4-303b70c0107e.svg",
+    "file": "context0-imgNavigationAndActionBlockWhite.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgBankProductAndServiceMortgagesWhite",
+    "url": "https://www.figma.com/api/mcp/asset/9f822927-f195-4ae7-98cd-5a7441657316.svg",
+    "file": "context0-imgBankProductAndServiceMortgagesWhite.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgBankProductAndServiceInsurancesWhite",
+    "url": "https://www.figma.com/api/mcp/asset/ae5563be-b20c-4e5d-b1e1-3625e07bd87d.svg",
+    "file": "context0-imgBankProductAndServiceInsurancesWhite.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgNavigationAndActionChatWhite",
+    "url": "https://www.figma.com/api/mcp/asset/ca61a945-832c-4f37-8096-5611756e7a4f.svg",
+    "file": "context0-imgNavigationAndActionChatWhite.svg"
+  },
+  {
+    "key": "context0",
+    "name": "imgBankTouchpointAndCustomerCarePhoneSupportWhite",
+    "url": "https://www.figma.com/api/mcp/asset/820d9899-4996-4f68-b82a-cf8177127a7a.svg",
+    "file": "context0-imgBankTouchpointAndCustomerCarePhoneSupportWhite.svg"
+  },
+  {
+    "key": "context1",
+    "name": "imgFrame1",
+    "url": "https://www.figma.com/api/mcp/asset/e8339ebc-3b70-44ce-be8b-2c1c10ff7210.svg",
+    "file": "context1-imgFrame1.svg"
+  },
+  {
+    "key": "context1",
+    "name": "imgBack",
+    "url": "https://www.figma.com/api/mcp/asset/237b2a8a-201f-40c8-a132-7a784ceb5de9.svg",
+    "file": "context1-imgBack.svg"
+  },
+  {
+    "key": "context1",
+    "name": "imgHelp",
+    "url": "https://www.figma.com/api/mcp/asset/ac607da2-4d4e-4138-beae-7cb6ac119296.svg",
+    "file": "context1-imgHelp.svg"
+  },
+  {
+    "key": "context1",
+    "name": "imgClose",
+    "url": "https://www.figma.com/api/mcp/asset/40ffc009-2640-44dc-b57a-c8c71e0a88f1.svg",
+    "file": "context1-imgClose.svg"
+  },
+  {
+    "key": "context1",
+    "name": "imgNavigationAndActionDownK10",
+    "url": "https://www.figma.com/api/mcp/asset/3334a77c-29d6-45d8-8472-cad0a4bef429.svg",
+    "file": "context1-imgNavigationAndActionDownK10.svg"
+  },
+  {
+    "key": "context2",
+    "name": "imgNavigationAndActionDownK10",
+    "url": "https://www.figma.com/api/mcp/asset/e39fa027-d75a-4aa5-8a98-3df7638e8d48.svg",
+    "file": "context2-imgNavigationAndActionDownK10.svg"
+  },
+  {
+    "key": "context2",
+    "name": "imgNavigationAndActionForthT2",
+    "url": "https://www.figma.com/api/mcp/asset/1a4d6c09-e83c-47f0-999a-16b000ef49a8.svg",
+    "file": "context2-imgNavigationAndActionForthT2.svg"
+  },
+  {
+    "key": "context2",
+    "name": "imgFrame1",
+    "url": "https://www.figma.com/api/mcp/asset/affc1e08-17aa-4fdd-aae5-bc263fb9ff85.svg",
+    "file": "context2-imgFrame1.svg"
+  },
+  {
+    "key": "context2",
+    "name": "imgClose",
+    "url": "https://www.figma.com/api/mcp/asset/fd930373-a139-44de-af6a-3016efa31032.svg",
+    "file": "context2-imgClose.svg"
+  },
+  {
+    "key": "context2",
+    "name": "imgBankTouchpointAndCustomerCareAgency2K10",
+    "url": "https://www.figma.com/api/mcp/asset/ad743a0b-cff7-4906-b132-3909cd503ce6.svg",
+    "file": "context2-imgBankTouchpointAndCustomerCareAgency2K10.svg"
+  },
+  {
+    "key": "context2",
+    "name": "imgBankTouchpointAndCustomerCarePhoneSupportK10",
+    "url": "https://www.figma.com/api/mcp/asset/e309bbbe-d997-4574-b77f-6570514dee73.svg",
+    "file": "context2-imgBankTouchpointAndCustomerCarePhoneSupportK10.svg"
+  },
+  {
+    "key": "context2",
+    "name": "imgNavigationAndActionEmailK10",
+    "url": "https://www.figma.com/api/mcp/asset/ba4194a0-5ff1-4817-bd21-e17812e0c13a.svg",
+    "file": "context2-imgNavigationAndActionEmailK10.svg"
+  },
+  {
+    "key": "context3",
+    "name": "imgNavigationAndActionForthT2",
+    "url": "https://www.figma.com/api/mcp/asset/e1d2b4cc-06be-4286-9cb4-ea08b8af9052.svg",
+    "file": "context3-imgNavigationAndActionForthT2.svg"
+  },
+  {
+    "key": "context3",
+    "name": "imgFrame1",
+    "url": "https://www.figma.com/api/mcp/asset/72ba04e0-dbeb-4da9-a44e-d7db21843a8b.svg",
+    "file": "context3-imgFrame1.svg"
+  },
+  {
+    "key": "context3",
+    "name": "imgBack",
+    "url": "https://www.figma.com/api/mcp/asset/0823fd7a-39f8-4d16-8707-78bf007a7efd.svg",
+    "file": "context3-imgBack.svg"
+  },
+  {
+    "key": "context3",
+    "name": "imgHelp",
+    "url": "https://www.figma.com/api/mcp/asset/0cacbc58-c29a-4e73-929a-4b1c0a780a97.svg",
+    "file": "context3-imgHelp.svg"
+  },
+  {
+    "key": "context3",
+    "name": "imgClose",
+    "url": "https://www.figma.com/api/mcp/asset/a4e51ec8-25de-4b84-b66d-c499fdf4e487.svg",
+    "file": "context3-imgClose.svg"
+  },
+  {
+    "key": "context3",
+    "name": "imgNavigationAndActionSettingsK10",
+    "url": "https://www.figma.com/api/mcp/asset/e2d15ac2-ff23-4052-8445-1495f305a49f.svg",
+    "file": "context3-imgNavigationAndActionSettingsK10.svg"
+  },
+  {
+    "key": "context3",
+    "name": "imgNavigationAndActionFilterK10",
+    "url": "https://www.figma.com/api/mcp/asset/4f6fb558-e66e-49b5-9c61-fd36b906d29b.svg",
+    "file": "context3-imgNavigationAndActionFilterK10.svg"
+  },
+  {
+    "key": "context3",
+    "name": "imgNavigationAndActionForthK1",
+    "url": "https://www.figma.com/api/mcp/asset/dc2ffcd0-6a0a-4328-a89c-977dede70785.svg",
+    "file": "context3-imgNavigationAndActionForthK1.svg"
+  },
+  {
+    "key": "context3",
+    "name": "imgEllipse28",
+    "url": "https://www.figma.com/api/mcp/asset/1c7fa196-e09d-42ec-b6bc-6a638996539f.svg",
+    "file": "context3-imgEllipse28.svg"
+  },
+  {
+    "key": "context3",
+    "name": "imgNavigationAndActionDoubleTickT2",
+    "url": "https://www.figma.com/api/mcp/asset/abd9befb-df2b-4a62-a38b-d57c28efdb6f.svg",
+    "file": "context3-imgNavigationAndActionDoubleTickT2.svg"
+  },
+  {
+    "key": "context3",
+    "name": "imgNavigationAndActionShareT2",
+    "url": "https://www.figma.com/api/mcp/asset/cf294e10-f632-4439-ac43-64144e610c10.svg",
+    "file": "context3-imgNavigationAndActionShareT2.svg"
+  },
+  {
+    "key": "context4",
+    "name": "imgNavigationAndActionFilterK10",
+    "url": "https://www.figma.com/api/mcp/asset/d2785f72-c521-44dc-a3a7-5cbbb8d0ccc0.svg",
+    "file": "context4-imgNavigationAndActionFilterK10.svg"
+  },
+  {
+    "key": "context4",
+    "name": "imgFrame1",
+    "url": "https://www.figma.com/api/mcp/asset/e854b0bf-0575-4361-aa24-db6ace1ef0f0.svg",
+    "file": "context4-imgFrame1.svg"
+  },
+  {
+    "key": "context4",
+    "name": "imgBack",
+    "url": "https://www.figma.com/api/mcp/asset/9ca630ef-ec45-41ed-b602-d28ad94b9d62.svg",
+    "file": "context4-imgBack.svg"
+  },
+  {
+    "key": "context4",
+    "name": "imgHelp",
+    "url": "https://www.figma.com/api/mcp/asset/974d084c-9110-4ac0-8fa5-f1aa88598b2b.svg",
+    "file": "context4-imgHelp.svg"
+  },
+  {
+    "key": "context4",
+    "name": "imgClose",
+    "url": "https://www.figma.com/api/mcp/asset/85eca33e-6608-49f5-98b6-d2b885da479c.svg",
+    "file": "context4-imgClose.svg"
+  },
+  {
+    "key": "context4",
+    "name": "imgNavigationAndActionDoubleTickT2",
+    "url": "https://www.figma.com/api/mcp/asset/2da2cffe-69fb-4a45-b3b4-fc29c3b5d70e.svg",
+    "file": "context4-imgNavigationAndActionDoubleTickT2.svg"
+  },
+  {
+    "key": "context4",
+    "name": "imgNavigationAndActionForthT2",
+    "url": "https://www.figma.com/api/mcp/asset/ddd5865e-b116-47ac-a526-54b4b259c80d.svg",
+    "file": "context4-imgNavigationAndActionForthT2.svg"
+  },
+  {
+    "key": "context5",
+    "name": "imgFrame1",
+    "url": "https://www.figma.com/api/mcp/asset/ef1ae489-3222-456b-89ae-6cad3fc206ff.svg",
+    "file": "context5-imgFrame1.svg"
+  },
+  {
+    "key": "context5",
+    "name": "imgBack",
+    "url": "https://www.figma.com/api/mcp/asset/f711ffb3-70d1-4f19-947b-96f808786440.svg",
+    "file": "context5-imgBack.svg"
+  },
+  {
+    "key": "context5",
+    "name": "imgHelp",
+    "url": "https://www.figma.com/api/mcp/asset/776183ed-078f-4939-9108-0813ada39db8.svg",
+    "file": "context5-imgHelp.svg"
+  },
+  {
+    "key": "context5",
+    "name": "imgClose",
+    "url": "https://www.figma.com/api/mcp/asset/a37290ab-e447-4324-9d72-25e84cd0de3c.svg",
+    "file": "context5-imgClose.svg"
+  },
+  {
+    "key": "context5",
+    "name": "imgEllipse28",
+    "url": "https://www.figma.com/api/mcp/asset/6a95c3ab-8fd8-4081-ac91-a79dcd73091d.svg",
+    "file": "context5-imgEllipse28.svg"
+  },
+  {
+    "key": "context5",
+    "name": "imgLineBottom",
+    "url": "https://www.figma.com/api/mcp/asset/533739d3-3002-4f74-8d04-d5ee7733ba28.svg",
+    "file": "context5-imgLineBottom.svg"
+  },
+  {
+    "key": "24268:256435",
+    "name": "imgFrame1",
+    "url": "https://www.figma.com/api/mcp/asset/782255da-570c-46e7-915a-513c40adbcbb.svg",
+    "file": "24268-256435-imgFrame1.svg"
+  },
+  {
+    "key": "24268:256435",
+    "name": "imgBack",
+    "url": "https://www.figma.com/api/mcp/asset/c832bf46-dfa4-47b6-b29e-89ad3ba7dba1.svg",
+    "file": "24268-256435-imgBack.svg"
+  },
+  {
+    "key": "24268:256435",
+    "name": "imgHelp",
+    "url": "https://www.figma.com/api/mcp/asset/0fb80785-4eed-455b-8da3-c9a6d8ce3d27.svg",
+    "file": "24268-256435-imgHelp.svg"
+  },
+  {
+    "key": "24268:256435",
+    "name": "imgClose",
+    "url": "https://www.figma.com/api/mcp/asset/c0cc3da3-e048-4a9b-ad67-25c8ed8ac0a2.svg",
+    "file": "24268-256435-imgClose.svg"
+  },
+  {
+    "key": "24268:256435",
+    "name": "imgNavigationAndActionDownT2",
+    "url": "https://www.figma.com/api/mcp/asset/57854884-824d-4fcc-9892-ab1d9f7e06fa.svg",
+    "file": "24268-256435-imgNavigationAndActionDownT2.svg"
+  },
+  {
+    "key": "24268:256435",
+    "name": "imgNavigationAndActionLocator",
+    "url": "https://www.figma.com/api/mcp/asset/8e7a1d59-7ab9-4e72-8401-5778cc20b6ac.svg",
+    "file": "24268-256435-imgNavigationAndActionLocator.svg"
+  },
+  {
+    "key": "24268:256435",
+    "name": "imgNavigationAndActionDownK10",
+    "url": "https://www.figma.com/api/mcp/asset/2513ce70-4ba1-48cb-8133-51e6021ea524.svg",
+    "file": "24268-256435-imgNavigationAndActionDownK10.svg"
+  },
+  {
+    "key": "24268:256435",
+    "name": "imgNavigationAndActionDownT3",
+    "url": "https://www.figma.com/api/mcp/asset/3ffafd81-b57b-4b53-bc7c-5035933c5ba8.svg",
+    "file": "24268-256435-imgNavigationAndActionDownT3.svg"
+  },
+  {
+    "key": "24268:256435",
+    "name": "imgNavigationAndActionEditT2",
+    "url": "https://www.figma.com/api/mcp/asset/87e459c8-783d-40d3-a51a-9b8e94f56e50.svg",
+    "file": "24268-256435-imgNavigationAndActionEditT2.svg"
+  },
+  {
+    "key": "24268:256435",
+    "name": "imgNavigationAndActionProblemK1",
+    "url": "https://www.figma.com/api/mcp/asset/53fcb5de-ac9d-4dc1-8a93-e08cba02f6e4.svg",
+    "file": "24268-256435-imgNavigationAndActionProblemK1.svg"
+  },
+  {
+    "key": "24268:256501",
+    "name": "imgFrame1",
+    "url": "https://www.figma.com/api/mcp/asset/09ac80cb-ab8b-408a-ae56-5dad113d41bf.svg",
+    "file": "24268-256501-imgFrame1.svg"
+  },
+  {
+    "key": "24268:256501",
+    "name": "imgClose",
+    "url": "https://www.figma.com/api/mcp/asset/761bb1a8-1122-4226-8e23-c7220a3dd2e2.svg",
+    "file": "24268-256501-imgClose.svg"
+  },
+  {
+    "key": "24268:256501",
+    "name": "imgNavigationAndActionSuccessLargeTkyPage",
+    "url": "https://www.figma.com/api/mcp/asset/9cb294ba-926e-4d88-81ca-ea1c8ac54fd1.svg",
+    "file": "24268-256501-imgNavigationAndActionSuccessLargeTkyPage.svg"
+  },
+  {
+    "key": "24268:257747",
+    "name": "imgFrame1",
+    "url": "https://www.figma.com/api/mcp/asset/26ff53e7-5236-4014-b9d1-576917a18882.svg",
+    "file": "24268-257747-imgFrame1.svg"
+  },
+  {
+    "key": "24268:257747",
+    "name": "imgClose",
+    "url": "https://www.figma.com/api/mcp/asset/baa11f1a-eef1-497b-a928-25ebc81b64a3.svg",
+    "file": "24268-257747-imgClose.svg"
+  },
+  {
+    "key": "24268:257747",
+    "name": "imgNavigationAndActionSingleTickT2",
+    "url": "https://www.figma.com/api/mcp/asset/bce3faa1-0159-48ab-86f0-96e4ce001550.svg",
+    "file": "24268-257747-imgNavigationAndActionSingleTickT2.svg"
+  },
+  {
+    "key": "24268:257747",
+    "name": "imgNavigationAndActionCalendarHolidayK10",
+    "url": "https://www.figma.com/api/mcp/asset/6a76b3b9-1568-426e-980b-e556d7012ca9.svg",
+    "file": "24268-257747-imgNavigationAndActionCalendarHolidayK10.svg"
+  },
+  {
+    "key": "24268:257747",
+    "name": "imgNavigationAndActionDownT2",
+    "url": "https://www.figma.com/api/mcp/asset/d6a91a40-aaca-4fe2-855f-864ff1d5c84e.svg",
+    "file": "24268-257747-imgNavigationAndActionDownT2.svg"
+  },
+  {
+    "key": "24268:257747",
+    "name": "imgNavigationAndActionDownK10",
+    "url": "https://www.figma.com/api/mcp/asset/93550dbd-b571-4b85-a5de-dbeb8ab6e45c.svg",
+    "file": "24268-257747-imgNavigationAndActionDownK10.svg"
+  },
+  {
+    "key": "24268:257570",
+    "name": "imgTypologyFilterStatusDefaultOnWhiteYesNotificationYes",
+    "url": "https://www.figma.com/api/mcp/asset/06f38a46-03fe-4800-946d-d264ede87f60.svg",
+    "file": "24268-257570-imgTypologyFilterStatusDefaultOnWhiteYesNotificationYes.svg"
+  },
+  {
+    "key": "24268:257570",
+    "name": "imgFrame1",
+    "url": "https://www.figma.com/api/mcp/asset/a8d39e44-f1d2-4df5-b92c-f5c17c356127.svg",
+    "file": "24268-257570-imgFrame1.svg"
+  },
+  {
+    "key": "24268:257570",
+    "name": "imgClose",
+    "url": "https://www.figma.com/api/mcp/asset/b1b3d6e3-79d1-4068-a7b6-72145a22156e.svg",
+    "file": "24268-257570-imgClose.svg"
+  },
+  {
+    "key": "24268:257570",
+    "name": "imgNavigationAndActionShareT2",
+    "url": "https://www.figma.com/api/mcp/asset/e7f4c23c-941a-49de-a147-fd865a4f6601.svg",
+    "file": "24268-257570-imgNavigationAndActionShareT2.svg"
+  },
+  {
+    "key": "24268:257570",
+    "name": "imgNavigationAndActionDeleteT2",
+    "url": "https://www.figma.com/api/mcp/asset/4f049b96-0aa6-475f-ae11-a3750124aef6.svg",
+    "file": "24268-257570-imgNavigationAndActionDeleteT2.svg"
+  },
+  {
+    "key": "24268:257570",
+    "name": "imgNavigationAndActionXlsT2",
+    "url": "https://www.figma.com/api/mcp/asset/20a08bbe-9c49-48e1-a30d-293aebcf65d0.svg",
+    "file": "24268-257570-imgNavigationAndActionXlsT2.svg"
+  },
+  {
+    "key": "24268:258938",
+    "name": "imgBorder",
+    "url": "https://www.figma.com/api/mcp/asset/047319f5-a8a5-4d5d-8ff3-5a2c39dea353.svg",
+    "file": "24268-258938-imgBorder.svg"
+  },
+  {
+    "key": "24268:258938",
+    "name": "imgBorder1",
+    "url": "https://www.figma.com/api/mcp/asset/eb25dc92-b3b2-4004-adc3-4cc5c953c20b.svg",
+    "file": "24268-258938-imgBorder1.svg"
+  },
+  {
+    "key": "24268:258938",
+    "name": "imgDot",
+    "url": "https://www.figma.com/api/mcp/asset/c1297e8e-0581-4a01-88af-e0e02005cbe3.svg",
+    "file": "24268-258938-imgDot.svg"
+  },
+  {
+    "key": "24268:258938",
+    "name": "imgFrame1",
+    "url": "https://www.figma.com/api/mcp/asset/e8c4aee9-4a8b-4bf9-b34d-9dd3b8f2f900.svg",
+    "file": "24268-258938-imgFrame1.svg"
+  },
+  {
+    "key": "24268:258938",
+    "name": "imgClose",
+    "url": "https://www.figma.com/api/mcp/asset/b060f9e2-e889-4407-b4cd-b280e85d367b.svg",
+    "file": "24268-258938-imgClose.svg"
+  },
+  {
+    "key": "24268:258938",
+    "name": "imgLineTop",
+    "url": "https://www.figma.com/api/mcp/asset/586159f4-71ce-4780-af58-b5479cc2b9a4.svg",
+    "file": "24268-258938-imgLineTop.svg"
+  },
+  {
+    "key": "24268:258938",
+    "name": "imgNavigationAndActionHideK10",
+    "url": "https://www.figma.com/api/mcp/asset/a0f26e52-8232-4dc3-a992-5586918e13a1.svg",
+    "file": "24268-258938-imgNavigationAndActionHideK10.svg"
+  },
+  {
+    "key": "24268:258938",
+    "name": "imgNavigationAndActionEditT2",
+    "url": "https://www.figma.com/api/mcp/asset/470f4bbe-0886-49bf-9a8a-c9652dc3a47b.svg",
+    "file": "24268-258938-imgNavigationAndActionEditT2.svg"
+  },
+  {
+    "key": "24268:258938",
+    "name": "imgNavigationAndActionInfoSmall",
+    "url": "https://www.figma.com/api/mcp/asset/5e175275-5e16-4536-9d05-e64ae5c72807.svg",
+    "file": "24268-258938-imgNavigationAndActionInfoSmall.svg"
+  },
+  {
+    "key": "24268:258938",
+    "name": "imgNavigationAndActionDownK10",
+    "url": "https://www.figma.com/api/mcp/asset/c2dcf26d-aa84-4ee7-87b9-81309544d480.svg",
+    "file": "24268-258938-imgNavigationAndActionDownK10.svg"
+  },
+  {
+    "key": "24268:257075",
+    "name": "imgFrame1",
+    "url": "https://www.figma.com/api/mcp/asset/59200f27-494e-4bff-92fd-e5f1351fd254.svg",
+    "file": "24268-257075-imgFrame1.svg"
+  },
+  {
+    "key": "24268:257075",
+    "name": "imgClose",
+    "url": "https://www.figma.com/api/mcp/asset/05ad2d4a-8ab1-4ce1-9eb3-56a7a3da4dbb.svg",
+    "file": "24268-257075-imgClose.svg"
+  },
+  {
+    "key": "24268:257075",
+    "name": "imgBankProductAndServiceAccountsV2K10",
+    "url": "https://www.figma.com/api/mcp/asset/03417d58-0567-456a-99b0-7dcd53d7a311.svg",
+    "file": "24268-257075-imgBankProductAndServiceAccountsV2K10.svg"
+  },
+  {
+    "key": "24268:257075",
+    "name": "imgBorder",
+    "url": "https://www.figma.com/api/mcp/asset/ca59875e-5808-4645-bcf4-7b1347e7a94c.svg",
+    "file": "24268-257075-imgBorder.svg"
+  },
+  {
+    "key": "24268:257075",
+    "name": "imgDot",
+    "url": "https://www.figma.com/api/mcp/asset/417fac85-32f3-4eb5-8162-3801e18a9716.svg",
+    "file": "24268-257075-imgDot.svg"
+  },
+  {
+    "key": "24268:257075",
+    "name": "imgBorder1",
+    "url": "https://www.figma.com/api/mcp/asset/1900e836-dcb9-4c36-86cc-f9e9df969ef2.svg",
+    "file": "24268-257075-imgBorder1.svg"
+  },
+  {
+    "key": "24268:257096",
+    "name": "imgFrame1",
+    "url": "https://www.figma.com/api/mcp/asset/817d8411-5528-4ed1-a071-e86b524fb8c8.svg",
+    "file": "24268-257096-imgFrame1.svg"
+  },
+  {
+    "key": "24268:257096",
+    "name": "imgClose",
+    "url": "https://www.figma.com/api/mcp/asset/6479b226-3ca5-4281-9a23-4f22ea33c1cd.svg",
+    "file": "24268-257096-imgClose.svg"
+  },
+  {
+    "key": "24268:257096",
+    "name": "imgBankProductAndServiceAccountsV2K10",
+    "url": "https://www.figma.com/api/mcp/asset/47990111-e4bf-494b-a2fb-f9ab0f8704d9.svg",
+    "file": "24268-257096-imgBankProductAndServiceAccountsV2K10.svg"
+  },
+  {
+    "key": "24268:257096",
+    "name": "imgNavigationAndActionSingleTickT2",
+    "url": "https://www.figma.com/api/mcp/asset/84e464ad-1996-42a2-9115-def94023e3e2.svg",
+    "file": "24268-257096-imgNavigationAndActionSingleTickT2.svg"
+  },
+  {
+    "key": "24268:261751",
+    "name": "imgNavigationAndActionForthT2",
+    "url": "https://www.figma.com/api/mcp/asset/ffdfa1a5-8b70-4717-b15e-1ea784ba17e6.svg",
+    "file": "24268-261751-imgNavigationAndActionForthT2.svg"
+  },
+  {
+    "key": "24268:261751",
+    "name": "imgAvatarCard",
+    "url": "https://www.figma.com/api/mcp/asset/fd1d76db-224b-4a2d-be07-b64ea80bb78e.png",
+    "file": "24268-261751-imgAvatarCard.png"
+  },
+  {
+    "key": "24268:261751",
+    "name": "imgLineTop",
+    "url": "https://www.figma.com/api/mcp/asset/b39eabdf-454f-43fe-a351-ba606e7e6509.svg",
+    "file": "24268-261751-imgLineTop.svg"
+  },
+  {
+    "key": "24268:261751",
+    "name": "imgExclude",
+    "url": "https://www.figma.com/api/mcp/asset/925072ef-5359-42c2-ad41-eba1341911e8.svg",
+    "file": "24268-261751-imgExclude.svg"
+  },
+  {
+    "key": "24268:261751",
+    "name": "imgNavigationAndActionInfoSmallK10",
+    "url": "https://www.figma.com/api/mcp/asset/7ae5b017-2cb7-4664-9d94-93cec197b227.svg",
+    "file": "24268-261751-imgNavigationAndActionInfoSmallK10.svg"
+  },
+  {
+    "key": "24268:261751",
+    "name": "imgNavigationAndActionCopyK10",
+    "url": "https://www.figma.com/api/mcp/asset/35f77786-ef49-4e19-bbc5-e581472b516a.svg",
+    "file": "24268-261751-imgNavigationAndActionCopyK10.svg"
+  },
+  {
+    "key": "24268:261751",
+    "name": "imgLineBottom",
+    "url": "https://www.figma.com/api/mcp/asset/f802ad8f-5893-4ff6-9d17-65910c89c168.svg",
+    "file": "24268-261751-imgLineBottom.svg"
+  },
+  {
+    "key": "24268:261751",
+    "name": "imgFrame1",
+    "url": "https://www.figma.com/api/mcp/asset/d773bba7-25de-4bd9-a224-8f8e66f5f44b.svg",
+    "file": "24268-261751-imgFrame1.svg"
+  },
+  {
+    "key": "24268:261751",
+    "name": "imgBack",
+    "url": "https://www.figma.com/api/mcp/asset/94d95311-736d-4e27-bd24-b8c956b5de68.svg",
+    "file": "24268-261751-imgBack.svg"
+  },
+  {
+    "key": "24268:261751",
+    "name": "imgHelp",
+    "url": "https://www.figma.com/api/mcp/asset/d1439ac2-2757-414f-8a46-451b871092ef.svg",
+    "file": "24268-261751-imgHelp.svg"
+  },
+  {
+    "key": "24268:261751",
+    "name": "imgClose",
+    "url": "https://www.figma.com/api/mcp/asset/23631e65-4f52-44a0-9101-27822853ef4e.svg",
+    "file": "24268-261751-imgClose.svg"
+  },
+  {
+    "key": "24268:261751",
+    "name": "imgNavigationAndActionCopyK11",
+    "url": "https://www.figma.com/api/mcp/asset/ccc5d2b2-2116-4e81-8b27-0465de51d9e0.svg",
+    "file": "24268-261751-imgNavigationAndActionCopyK11.svg"
+  },
+  {
+    "key": "24268:261751",
+    "name": "imgNavigationAndActionDocumentK10",
+    "url": "https://www.figma.com/api/mcp/asset/2fe01930-af26-4383-84f4-d3bb3a460076.svg",
+    "file": "24268-261751-imgNavigationAndActionDocumentK10.svg"
+  },
+  {
+    "key": "24268:261751",
+    "name": "imgNavigationAndActionForthT3",
+    "url": "https://www.figma.com/api/mcp/asset/4a6361d8-d8a8-4a04-89fd-6964945f4d88.svg",
+    "file": "24268-261751-imgNavigationAndActionForthT3.svg"
+  },
+  {
+    "key": "24268:261733",
+    "name": "imgFrame1",
+    "url": "https://www.figma.com/api/mcp/asset/a904ad41-aeb7-499b-9507-0a1494f6f99c.svg",
+    "file": "24268-261733-imgFrame1.svg"
+  },
+  {
+    "key": "24268:261733",
+    "name": "imgBack",
+    "url": "https://www.figma.com/api/mcp/asset/478b10c8-8d05-4c2b-94d1-bc8bf62e14c1.svg",
+    "file": "24268-261733-imgBack.svg"
+  },
+  {
+    "key": "24268:261733",
+    "name": "imgHelp",
+    "url": "https://www.figma.com/api/mcp/asset/0a2020d4-d234-495f-a5a9-8432c92a572c.svg",
+    "file": "24268-261733-imgHelp.svg"
+  },
+  {
+    "key": "24268:261733",
+    "name": "imgClose",
+    "url": "https://www.figma.com/api/mcp/asset/c3b54376-de64-4adb-b720-8a32744d7c68.svg",
+    "file": "24268-261733-imgClose.svg"
+  },
+  {
+    "key": "24268:261733",
+    "name": "imgLogosMoneyfarmHorizontal",
+    "url": "https://www.figma.com/api/mcp/asset/f95228c5-b2bd-4aac-b26f-76887d7ae418.svg",
+    "file": "24268-261733-imgLogosMoneyfarmHorizontal.svg"
+  },
+  {
+    "key": "24268:261733",
+    "name": "imgNavigationAndActionDocumentK10",
+    "url": "https://www.figma.com/api/mcp/asset/af3ce76b-0503-40c7-b5aa-3a616cdba6af.svg",
+    "file": "24268-261733-imgNavigationAndActionDocumentK10.svg"
+  },
+  {
+    "key": "24268:261733",
+    "name": "imgNavigationAndActionForthT2",
+    "url": "https://www.figma.com/api/mcp/asset/b3d34a97-c8a6-49e4-8891-8ceb137c0f81.svg",
+    "file": "24268-261733-imgNavigationAndActionForthT2.svg"
+  },
+  {
+    "key": "24268:261733",
+    "name": "imgLineBottom",
+    "url": "https://www.figma.com/api/mcp/asset/d2491597-e072-4f1e-bfe5-2477f8d542bd.svg",
+    "file": "24268-261733-imgLineBottom.svg"
+  },
+  {
+    "key": "24268:261733",
+    "name": "imgLineTop",
+    "url": "https://www.figma.com/api/mcp/asset/ce0f2d23-a530-4e1d-bfad-453fcc581ab4.svg",
+    "file": "24268-261733-imgLineTop.svg"
+  },
+  {
+    "key": "24268:254540",
+    "name": "imgFrame1",
+    "url": "https://www.figma.com/api/mcp/asset/f6760070-ff42-4824-bba5-1da88a275e6b.svg",
+    "file": "24268-254540-imgFrame1.svg"
+  },
+  {
+    "key": "24268:254540",
+    "name": "imgHeroBanner",
+    "url": "https://www.figma.com/api/mcp/asset/784fd311-cb15-4f2c-af11-1b33558188fd.png",
+    "file": "24268-254540-imgHeroBanner.png"
+  },
+  {
+    "key": "24268:254540",
+    "name": "imgBack",
+    "url": "https://www.figma.com/api/mcp/asset/e53f061c-3a48-43f4-8905-1e0a6c28116e.svg",
+    "file": "24268-254540-imgBack.svg"
+  },
+  {
+    "key": "24268:254540",
+    "name": "imgClose",
+    "url": "https://www.figma.com/api/mcp/asset/8e72e75a-5677-420b-bb5f-9296ec710fe1.svg",
+    "file": "24268-254540-imgClose.svg"
+  },
+  {
+    "key": "24268:254540",
+    "name": "imgNavigationAndActionForthT2",
+    "url": "https://www.figma.com/api/mcp/asset/9bc868cd-67b2-40de-9a91-475c65f0f6b4.svg",
+    "file": "24268-254540-imgNavigationAndActionForthT2.svg"
+  },
+  {
+    "key": "24268:254540",
+    "name": "imgNavigationAndActionChatWhite",
+    "url": "https://www.figma.com/api/mcp/asset/608ed8c6-ee66-4709-bb75-ef0e7f9b16c0.svg",
+    "file": "24268-254540-imgNavigationAndActionChatWhite.svg"
+  },
+  {
+    "key": "24268:254540",
+    "name": "imgBankTouchpointAndCustomerCarePhoneSupportWhite",
+    "url": "https://www.figma.com/api/mcp/asset/f63a6db6-8bb4-4933-8ee5-160381ecd96a.svg",
+    "file": "24268-254540-imgBankTouchpointAndCustomerCarePhoneSupportWhite.svg"
+  }
+]

@@ -4,10 +4,7 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import MobileFrame from '@/app/components/MobileFrame'
-import {
-  DevicePreviewProvider,
-  DevicePreviewSelector,
-} from '@/app/components/demo/DevicePreview'
+import { DevicePreviewProvider, DevicePreviewSelector } from '@/app/components/demo/DevicePreview'
 
 afterEach(cleanup)
 
@@ -15,7 +12,9 @@ function renderPreview() {
   return render(
     <DevicePreviewProvider>
       <DevicePreviewSelector />
-      <MobileFrame><div>Homepage</div></MobileFrame>
+      <MobileFrame>
+        <div>Homepage</div>
+      </MobileFrame>
     </DevicePreviewProvider>,
   )
 }
@@ -26,6 +25,26 @@ function selectDevice(label: string) {
 }
 
 describe('adaptive device preview', () => {
+  it('renders Mobile First at its Figma width while keeping the baseline canvas at 375px', () => {
+    const { container, rerender } = render(
+      <DevicePreviewProvider>
+        <MobileFrame authoringWidth={393}>
+          <div>Italia</div>
+        </MobileFrame>
+      </DevicePreviewProvider>,
+    )
+    const canvas = container.querySelector('[data-phone-canvas]') as HTMLElement
+    expect(canvas).toHaveStyle({ width: '393px' })
+    expect(canvas.style.transform).toBe('')
+    rerender(
+      <DevicePreviewProvider>
+        <MobileFrame>
+          <div>CEE</div>
+        </MobileFrame>
+      </DevicePreviewProvider>,
+    )
+    expect(container.querySelector('[data-phone-canvas]')).toHaveStyle({ width: '375px' })
+  })
   it('uses the same flat chrome as neighboring demo actions', () => {
     const { container } = renderPreview()
     const controls = container.querySelector('[data-device-preview-controls]')

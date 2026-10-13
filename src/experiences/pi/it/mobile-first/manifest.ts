@@ -1,0 +1,30 @@
+import type { ExperienceManifest } from '../../../contracts'
+
+export const PI_IT_MOBILE_FIRST = {
+  id: 'pi.it.mobile-first',
+  label: 'PI Italia Mobile First',
+  owner: 'pi-it-mobile-first',
+  product: 'PI',
+  country: 'IT',
+  designSystem: 'mobile-first',
+  releases: ['release-current'],
+  baseBaseline: 'baseline-current',
+  status: 'preview',
+  entryScreen: 'pi.home.overview',
+  sourceModules: [
+    'src/experiences/pi/it/mobile-first/composition.ts',
+    'src/experiences/pi/it/mobile-first/MobileFirstHome.tsx',
+    'src/experiences/pi/it/mobile-first/MobileFirstSearch.tsx',
+    'src/experiences/pi/it/mobile-first/searchContent.ts',
+    'src/experiences/pi/it/mobile-first/MobileFirstAccount.tsx',
+    'src/experiences/pi/it/mobile-first/MobileFirstCategoryPanel.tsx',
+    'src/experiences/pi/it/mobile-first/MobileFirstInvestments.tsx',
+    'src/experiences/pi/it/mobile-first/MobileFirstOperations.tsx',
+    'src/experiences/pi/it/mobile-first/MobileFirstPfm.tsx',
+    'src/experiences/pi/it/mobile-first/MobileFirstCards.tsx',
+    'src/experiences/pi/it/mobile-first/MobileFirstLoans.tsx',
+    'src/experiences/pi/it/mobile-first/MobileFirstInsurance.tsx',
+    'src/experiences/pi/it/mobile-first/MobileFirstProfile.tsx',
+    'src/experiences/pi/it/mobile-first/MobileFirstProfileLogin.tsx',
+  ],
+} as const satisfies ExperienceManifest

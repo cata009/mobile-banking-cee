@@ -3,7 +3,6 @@ import path from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
-
 function figmaAssetResolver(): Plugin {
   return {
     name: 'figma-asset-resolver',
@@ -19,7 +18,12 @@ function figmaAssetResolver(): Plugin {
 export default defineConfig({
   server: {
     port: Number(process.env.PORT) || 5173,
+    watch: {
+      ignored: ['**/.codex-temp/**', '**/android-spike/**', '**/native-spike/**', '**/public/downloads/*.apk'],
+    },
   },
+  // Restrict Source dependency discovery to its own entry; native HTML has a separate Vite pipeline.
+  optimizeDeps: { entries: ['index.html'] },
   plugins: [
     figmaAssetResolver(),
     // The React and Tailwind plugins are both required for Make, even if
@@ -42,9 +46,7 @@ export default defineConfig({
         chunkFileNames: 'assets/chunks/[name].js',
         assetFileNames(assetInfo) {
           const names = assetInfo.names ?? []
-          return names.some((name) => name.endsWith('.css'))
-            ? 'assets/app.css'
-            : 'assets/[name]-[hash][extname]'
+          return names.some((name) => name.endsWith('.css')) ? 'assets/app.css' : 'assets/[name]-[hash][extname]'
         },
         // Split the previously-monolithic ~2 MB App chunk into stable vendor
         // groups that cache independently and load in parallel. This is purely

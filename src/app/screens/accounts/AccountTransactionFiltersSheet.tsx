@@ -5,45 +5,9 @@ import { AppIcon } from "@/app/components/icons";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import TextField from "@/app/components/TextField";
 
-export type AccountTransactionDateFilter = "none" | "last-week" | "last-month" | "last-3-months" | "custom";
-
-export interface AccountTransactionFilterState {
-  keyword: string;
-  accountNumber: string;
-  variableCode: string;
-  datePreset: AccountTransactionDateFilter;
-  amountFrom: string;
-  amountTo: string;
-  status: "All transactions" | "Booked" | "Pending";
-  transactionType: "All transactions" | "Incoming" | "Outgoing";
-  category: string;
-}
-
-export const EMPTY_ACCOUNT_TRANSACTION_FILTERS: AccountTransactionFilterState = {
-  keyword: "",
-  accountNumber: "",
-  variableCode: "",
-  datePreset: "none",
-  amountFrom: "",
-  amountTo: "",
-  status: "All transactions",
-  transactionType: "All transactions",
-  category: "All categories",
-};
-
-export function hasAccountTransactionFilters(filters: AccountTransactionFilterState) {
-  return (
-    filters.keyword.trim().length > 0 ||
-    filters.accountNumber.trim().length > 0 ||
-    filters.variableCode.trim().length > 0 ||
-    filters.datePreset !== "none" ||
-    filters.amountFrom.trim().length > 0 ||
-    filters.amountTo.trim().length > 0 ||
-    filters.status !== "All transactions" ||
-    filters.transactionType !== "All transactions" ||
-    filters.category !== "All categories"
-  );
-}
+import { hasAccountTransactionFilters, type AccountTransactionDateFilter, type AccountTransactionFilterState } from '@/features/accounts-payments/evoTransactionFilters';
+export { EMPTY_ACCOUNT_TRANSACTION_FILTERS, hasAccountTransactionFilters } from '@/features/accounts-payments/evoTransactionFilters';
+export type { AccountTransactionDateFilter, AccountTransactionFilterState } from '@/features/accounts-payments/evoTransactionFilters';
 
 interface AccountTransactionFiltersSheetProps {
   currency: string;

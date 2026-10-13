@@ -632,6 +632,11 @@ const SI_PRODUCTS_MENU_DIRECT: ProductsMenuConfig = {
 };
 
 export const PRODUCTS_MENU_CONFIG: Record<CountryId, ProductsMenuConfig> = {
+  IT: {
+    ...createProductsMenuConfig(false),
+    offers: [], products: [], otherSolutions: [], shopSmartOffers: [], shopSmartProducts: [], shopSmartOfferCards: [],
+    shopSmartSummary: { activatedOffers: 0, totalSavedLabel: "", totalSavedAmount: "" },
+  },
   RO: RO_PRODUCTS_MENU,
   CZ: CZ_PRODUCTS_MENU,
   SK: SK_PRODUCTS_MENU,

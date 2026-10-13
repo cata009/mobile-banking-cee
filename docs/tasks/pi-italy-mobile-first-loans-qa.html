@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PI Italy — Mutui e Prestiti QA</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 940px;
+        background: #edf1f2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 24px;
+        box-sizing: border-box;
+      }
+      .qa-title {
+        font: 16px system-ui;
+        margin-bottom: 16px;
+        color: #262626;
+      }
+      .qa-phone {
+        position: relative;
+        width: 393px;
+        height: 852px;
+        flex: none;
+        border: 8px solid #262626;
+        border-radius: 48px;
+        overflow: hidden;
+        box-sizing: content-box;
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+      }
+      .qa-status {
+        position: absolute;
+        z-index: 80;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 48px;
+        padding: 18px 24px;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: space-between;
+        font: 600 15px system-ui;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="qa-title">PI Italy · Mutui e Prestiti · Visual QA</div>
+    <div class="qa-phone">
+      <div id="root"></div>
+      <div class="qa-status"><span>9:41</span><span>▮▮▮ ▰</span></div>
+    </div>
+    <script type="module">
+      import React from 'react'
+      import { createRoot } from 'react-dom/client'
+      import { DemoProvider, DEFAULT_PRODUCT_COUNTS } from '/src/app/state/demoStore.tsx'
+      import MobileFirstLoans from '/src/experiences/pi/it/mobile-first/MobileFirstLoans.tsx'
+      import '/src/styles/index.css'
+      const view = new URLSearchParams(location.search).get('view') || 'detail'
+      function Preview() {
+        const [open, setOpen] = React.useState(true)
+        return open
+          ? React.createElement(MobileFirstLoans, {
+              initialView: view,
+              initialLoanId: 'mortgage-milano',
+              onClose: () => setOpen(false),
+            })
+          : React.createElement(
+              'button',
+              { onClick: () => setOpen(true), style: { margin: '134px 16px' } },
+              'Riapri Mutui e Prestiti',
+            )
+      }
+      createRoot(document.getElementById('root')).render(
+        React.createElement(
+          DemoProvider,
+          {
+            initialState: {
+              product: 'PI',
+              country: 'IT',
+              designSystem: 'mobile-first',
+              productCounts: { ...DEFAULT_PRODUCT_COUNTS, mortgages: 3, loans: 4 },
+            },
+          },
+          React.createElement(Preview),
+        ),
+      )
+    </script>
+  </body>
+</html>

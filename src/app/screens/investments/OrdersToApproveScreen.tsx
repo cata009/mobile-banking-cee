@@ -1,3 +1,4 @@
+import { buildPendingInvestmentOrders, getPendingOrderQuantity, type PendingOrder } from '@/features/investments/orders/pendingOrders';
 import { useState } from "react";
 import BrandLogo from "@/app/components/brand-logo/BrandLogo";
 import PageHeader from "@/app/components/PageHeader";
@@ -8,7 +9,6 @@ import {
   buildInvestmentSecurityCatalog,
   buildInvestmentSecurities,
   getInvestmentProducts,
-  type InvestmentCatalogSecurity,
 } from "@/app/config/investmentsPortfolioConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import { useDemo } from "@/app/state/demoStore";
@@ -21,14 +21,6 @@ import type { CurrentAccount } from "@/data/products";
 interface OrdersToApproveScreenProps {
   onBack: () => void;
 }
-
-type PendingOrder = {
-  id: string;
-  type: "BUY" | "SELL" | "REGULAR INVESTMENT";
-  amount: number;
-  positive?: boolean;
-  security: InvestmentCatalogSecurity;
-};
 
 function formatAmount(amount: number, country: CountryId, currency: string) {
   const parts = formatInvestmentAmountParts(amount, country, currency, false, true);
@@ -62,7 +54,7 @@ function PendingOrderDetail({
 }) {
   const isRecurring = order.type === "REGULAR INVESTMENT";
   const isSell = order.type === "SELL";
-  const quantity = Math.max(1, Math.round(Math.abs(order.amount) / order.security.marketPrice));
+  const quantity = getPendingOrderQuantity(order);
   const estimatedLabel = isSell ? "Estimated credit" : "Estimated amount";
   const amount = formatMoney(order.amount, country, order.security.localCurrency, amountsHidden);
 
@@ -146,18 +138,7 @@ export default function OrdersToApproveScreen({ onBack }: OrdersToApproveScreenP
   const products = categories.flatMap((category) => category.products);
   const securities = buildInvestmentSecurities(getInvestmentProducts(products), country);
   const catalog = buildInvestmentSecurityCatalog(securities, country);
-  const usable = catalog.length ? catalog : [];
-
-  const pick = (index: number) => usable[index % usable.length];
-  const advisory = usable.length ? [
-    { id: "advisory-buy", type: "BUY" as const, amount: 5000, positive: true, security: pick(0)! },
-    { id: "advisory-sell", type: "SELL" as const, amount: -5000, security: pick(1)! },
-    { id: "advisory-regular", type: "REGULAR INVESTMENT" as const, amount: 5000, positive: true, security: pick(2)! },
-  ] : [];
-  const nonAdvisory = usable.length ? [
-    { id: "non-advisory-buy", type: "BUY" as const, amount: 3500, positive: true, security: pick(3)! },
-    { id: "non-advisory-sell", type: "SELL" as const, amount: -1550, security: pick(4)! },
-  ] : [];
+  const {advisory, nonAdvisory} = buildPendingInvestmentOrders(catalog);
   const [selectedOrder, setSelectedOrder] = useState<PendingOrder | null>(null);
   const cashAccount = products.find((product): product is CurrentAccount => product.type === "current_account") ?? null;
 

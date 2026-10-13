@@ -1,5 +1,5 @@
 import type { ExpenseBreakdownRow } from './types'
-import type { ExpenseDonutCategory } from '@/app/components/analytics/ExpenseDonutChart'
+import type { ExpenseDonutCategory } from '@/features/analytics/chartTypes'
 import type { SpendingPeriodSelection } from '@/app/screens/analytics/evoSpendingPeriods'
 
 export type ExpenseChartMode = 'donut' | 'bars'

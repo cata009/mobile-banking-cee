@@ -89,6 +89,7 @@ export interface AccountProductOption {
 }
 
 const ACCOUNT_IDENTITIES: Record<Country, AccountIdentity[]> = {
+  IT: [],
   RO: [
     { accountName: "Current Account", accountNumber: "RO20BACX0000000010351312", subAccount: "PRT1" },
     { accountName: "Savings Account", accountNumber: "RO49BACX000008204119876", subAccount: "PRT2" },
@@ -217,7 +218,8 @@ interface CountryMerchantSlots {
   travel: MerchantId;
 }
 
-const COUNTRY_TRANSACTION_PROFILES: Record<Country, CountryTransactionProfile> = {
+const COUNTRY_TRANSACTION_PROFILES: Record<Country, CountryTransactionProfile | null> = {
+  IT: null,
   RO: {
     salaryPayer: "Dante International",
     freelancePayer: "PFA Popescu Andreea",
@@ -862,7 +864,7 @@ function getCreditCardTransactions(
 
 /** Who pays this country's salary. The home activity card names the employer, as the statement does. */
 export function getSalaryPayer(country: Country): string {
-  return COUNTRY_TRANSACTION_PROFILES[country].salaryPayer;
+  return COUNTRY_TRANSACTION_PROFILES[country]?.salaryPayer ?? "";
 }
 
 export function getAccountTransactionProfileIndex(product: Product, productIndex: number) {
@@ -897,6 +899,7 @@ export function getAccountTransactions(
   currency: Currency,
 ): AccountTransaction[] {
   const profile = COUNTRY_TRANSACTION_PROFILES[country];
+  if (!profile) return [];
 
   if (accountIndex === SAVINGS_TRANSFER_PROFILE_INDEX) {
     return getSavingsTransferTransactions(country, currency, accountIndex);
@@ -927,7 +930,8 @@ export function getCardTransactions(
       .filter((transaction) => transaction.source === "card");
   }
 
-  return getCreditCardTransactions(country, currency, COUNTRY_TRANSACTION_PROFILES[country]);
+  const profile = COUNTRY_TRANSACTION_PROFILES[country];
+  return profile ? getCreditCardTransactions(country, currency, profile) : [];
 }
 
 export function groupAccountTransactionsByMonth(

@@ -102,6 +102,7 @@ function integrationReadiness(product: ProductId, country: CountryId): ProjectPa
 }
 
 function demoEntries(product: ProductId, country: CountryId): readonly ScreenId[] {
+  if (country === "IT") return product === "PI" ? ["pi.home.overview"] : [];
   if (product === "KIDS_PI") {
     const marketScreen = KIDS_MARKET_SCREEN_BY_COUNTRY[country];
     return marketScreen ? [marketScreen] : [];
@@ -209,9 +210,9 @@ function buildProjectPack(product: ProductId, country: CountryId): ProjectPack {
     country,
     market: country,
     label: `${productLabel(product)} ${country}`,
-    designSystems: ["current", "next"],
-    baselines: ["baseline-current", "baseline-r1", "baseline-r2", "baseline-r3", "baseline-r4", "uat-current"],
-    releases: [
+    designSystems: country === "IT" ? (product === "PI" ? ["mobile-first"] : []) : ["current", "next"],
+    baselines: country === "IT" ? ["baseline-current"] : ["baseline-current", "baseline-r1", "baseline-r2", "baseline-r3", "baseline-r4", "uat-current"],
+    releases: country === "IT" ? ["release-current"] : [
       "release-current",
       "release-future-cz-coapping",
       "release-future-cz-robo",
@@ -227,14 +228,16 @@ function buildProjectPack(product: ProductId, country: CountryId): ProjectPack {
       "release-v4",
     ],
     defaultScenario: defaultScenario(product),
-    featureSet: featureSet(product),
+    featureSet: country === "IT" ? [] : featureSet(product),
     demoEntries: demoEntries(product, country),
     templatePack: `${productSlug(product)}-${country.toLowerCase()}-reference`,
     knowledgeSources: knowledgeSources(product, country),
     runtimeCoverage: runtimeCoverage(product, country),
     integrationReadiness: integrationReadiness(product, country),
     notes:
-      product === "PI"
+      product === "PI" && country === "IT"
+        ? "Mobile First homepage prototype; other mobile screens and journeys are not implemented."
+        : product === "PI"
         ? "Runtime demo is available today; country specifics continue to mature through config and manifests."
         : product === "KIDS_PI" && hasKidsMarketConcept(country)
           ? "Runtime Kids market-home concept is available today as a mock-driven comparison variant; backend, parent/legal, and full flow depth remain out of scope."

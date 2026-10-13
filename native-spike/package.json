@@ -1,0 +1,63 @@
+{
+  "name": "com.mobilebanking.cee.demo",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "lint": "eslint .",
+    "start": "react-native start",
+    "test": "jest",
+    "web": "vite",
+    "web:build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "fidelity:check": "node ../scripts/native-spike/fidelity/check-reference.mjs",
+    "fidelity:test": "node --test ../scripts/native-spike/fidelity/reference-guard.test.mjs"
+  },
+  "dependencies": {
+    "@hot-updater/react-native": "1.0.1",
+    "@react-native-async-storage/async-storage": "^3.1.1",
+    "@react-native/new-app-screen": "0.87.1",
+    "@ungap/structured-clone": "1.4.0",
+    "fflate": "0.8.3",
+    "react": "19.2.3",
+    "react-dom": "^19.2.3",
+    "react-native": "0.87.1",
+    "react-native-safe-area-context": "^5.5.2",
+    "react-native-svg": "^15.15.5",
+    "react-native-web": "^0.21.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.3",
+    "@babel/runtime": "^7.25.0",
+    "@eslint/compat": "^2.1.1",
+    "@expo/fingerprint": "0.20.14",
+    "@hot-updater/bare": "1.0.1",
+    "@hot-updater/server": "1.0.1",
+    "@hot-updater/standalone": "1.0.1",
+    "@react-native-community/cli": "20.2.0",
+    "@react-native-community/cli-platform-android": "20.2.0",
+    "@react-native-community/cli-platform-ios": "20.2.0",
+    "@react-native/babel-preset": "0.87.1",
+    "@react-native/eslint-config": "0.87.1",
+    "@react-native/jest-preset": "0.87.1",
+    "@react-native/metro-config": "0.87.1",
+    "@react-native/typescript-config": "0.87.1",
+    "@types/jest": "^29.5.13",
+    "@types/react": "^19.2.0",
+    "@types/react-test-renderer": "^19.1.0",
+    "@types/ungap__structured-clone": "1.2.0",
+    "@vitejs/plugin-react": "^5.1.4",
+    "eslint": "^9.39.5",
+    "hot-updater": "1.0.1",
+    "jest": "^29.6.3",
+    "prettier": "2.8.8",
+    "react-test-renderer": "19.2.3",
+    "typescript": "^6.0.3",
+    "vite": "^7.3.1"
+  },
+  "engines": {
+    "node": ">= 22.11.0"
+  }
+}

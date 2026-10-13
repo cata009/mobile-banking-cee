@@ -2,6 +2,7 @@ import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import ShareScreenGlow from '@/app/components/ShareScreenGlow';
 
 interface FramelessDeviceFrameProps {
+  authoringWidth?: 375 | 393;
   children: React.ReactNode;
   statusBarVariant?: 'light' | 'dark' | 'theme';
   overlay?: React.ReactNode;
@@ -25,6 +26,7 @@ const FRAMELESS_TOP_RESERVE = 12;
  * (edge to edge, any aspect ratio).
  */
 export default function FramelessDeviceFrame({
+  authoringWidth = FRAME_WIDTH,
   children,
   overlay,
   isCoAppingActive,
@@ -41,7 +43,7 @@ export default function FramelessDeviceFrame({
       const height = container.clientHeight;
       if (width <= 0 || height <= 0) return;
 
-      const scale = width / FRAME_WIDTH;
+      const scale = width / authoringWidth;
       const logicalHeight = height / scale;
 
       setSurface((prev) =>
@@ -64,7 +66,7 @@ export default function FramelessDeviceFrame({
       window.removeEventListener('resize', applySurface);
       window.removeEventListener('orientationchange', applySurface);
     };
-  }, []);
+  }, [authoringWidth]);
 
   useEffect(() => {
     const previousOverscroll = document.documentElement.style.overscrollBehaviorY;
@@ -92,7 +94,7 @@ export default function FramelessDeviceFrame({
       <div
         className="relative overflow-hidden bg-[var(--uc-app-bg)]"
         style={{
-          width: FRAME_WIDTH,
+          width: authoringWidth,
           height: surface.logicalHeight,
           transform: `scale(${surface.scale})`,
           transformOrigin: 'top left',

@@ -13,6 +13,7 @@ import { RS_TRANSLATIONS } from './RS';
 import { HU_TRANSLATIONS } from './HU';
 import { BA_TRANSLATIONS } from './BA';
 import { SI_TRANSLATIONS } from './SI';
+import { IT_TRANSLATIONS } from './IT';
 import type { Country } from '@/app/state/demoTypes';
 import type { AppLanguage } from '@/app/registry/languageByCountry';
 
@@ -21,6 +22,7 @@ import type { AppLanguage } from '@/app/registry/languageByCountry';
  * Maps Country → Language → Translations
  */
 export const TRANSLATIONS = {
+  IT: IT_TRANSLATIONS,
   CZ: CZ_TRANSLATIONS,
   SK: SK_TRANSLATIONS,
   RO: RO_TRANSLATIONS,

@@ -134,6 +134,15 @@ export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelPr
         </div>
 
         <div className="p-6 space-y-6">
+          {demoState.designSystem === "mobile-first" && demoState.country === "IT" ? (
+            <section className="border border-[var(--uc-border-muted)] rounded-md p-4">
+              <h4 className="font-semibold text-[var(--uc-text)]">Mobile First</h4>
+              <p className="mt-2 text-sm text-[var(--uc-text-muted)]">
+                Italy Mobile First experience. Homepage and product flows follow the Figma design.
+              </p>
+            </section>
+          ) : (
+            <>
           <section className="border border-[var(--uc-border-muted)] rounded-md p-4">
             <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-3">
               Banking Scenario
@@ -196,6 +205,8 @@ export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelPr
             disabledMessage={isInactive ? "Disabled when scenario is inactive" : undefined}
             onChange={(featureId, checked) => setFlag(featureId, checked)}
           />
+            </>
+          )}
         </div>
       </div>
     </>

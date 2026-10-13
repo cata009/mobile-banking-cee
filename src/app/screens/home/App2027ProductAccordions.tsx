@@ -1,3 +1,4 @@
+import { getEvoCreditProgressAccessibility } from '@/features/products/evoHome';
 import { useCallback, useEffect, useRef, useState, type ReactNode, type UIEvent } from 'react';
 import type { Product, ProductCategory } from '@/data/products';
 import { AppIcon } from '@/app/components/icons';
@@ -291,6 +292,7 @@ function CzRoboCard({
   const cardVariant = getEvoCardVariant(product);
   const isCreditCard = product.type === 'credit_card';
   const creditUsed = isCreditCard ? Math.max(0, product.creditLimit - product.availableCredit) : 0;
+  const creditAccessibility = isCreditCard ? getEvoCreditProgressAccessibility(product, amountsHidden) : undefined;
   const creditUtilisation = isCreditCard && product.creditLimit > 0 ? (creditUsed / product.creditLimit) * 100 : 0;
   /*
    * The hero is what the customer can still spend — the question a card answers
@@ -334,9 +336,10 @@ function CzRoboCard({
             data-home-credit-limit-progress
             role="progressbar"
             aria-label={t('runtime.evo.labels.usedCredit')}
-            aria-valuemin={0}
-            aria-valuemax={product.creditLimit}
-            aria-valuenow={creditUsed}
+            aria-valuemin={creditAccessibility?.min}
+            aria-valuemax={creditAccessibility?.max}
+            aria-valuenow={creditAccessibility?.now}
+            aria-valuetext={creditAccessibility?.text}
             className="h-[12px] overflow-hidden rounded-full bg-[var(--uc-surface-muted)]"
           >
             <div className="h-full rounded-full bg-[var(--uc-action)]" style={{ width: `${creditUtilisation}%` }} />
@@ -866,4 +869,3 @@ function HeaderRow({ add, children }: { add: ReactNode; children: ReactNode }) {
   if (!add) return <>{children}</>;
   return <div className="flex w-full items-center gap-[12px]">{children}{add}</div>;
 }
-

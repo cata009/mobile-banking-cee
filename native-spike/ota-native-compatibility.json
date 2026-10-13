@@ -1,0 +1,14 @@
+{
+  "applicationId": "com.mobilebanking.cee.demo",
+  "entryComponent": "PIItalyNative",
+  "channel": "demo-preview",
+  "permissions": [
+    "INTERNET",
+    "USE_BIOMETRIC",
+    "USE_FINGERPRINT:maxSdk28"
+  ],
+  "screenPrivacy": "FLAG_SECURE-v1",
+  "fileProvider": "private-cache-share-v1",
+  "localOtaProof": "loopback-network-exception-v1",
+  "manifestSha256": "58106f9bb4346079fe4fade4e20358c35ce624be7bf9b5e0339493cac6e422fd"
+}

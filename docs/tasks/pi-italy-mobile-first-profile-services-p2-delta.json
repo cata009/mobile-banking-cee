@@ -1,0 +1,12 @@
+[
+  "src/features/profile/mobileFirstProfileServices.ts",
+  "src/experiences/pi/it/mobile-first/MobileFirstProfileServicesDocuments.tsx",
+  "src/experiences/pi/it/mobile-first/MobileFirstProfileServicesSupport.tsx",
+  "src/experiences/pi/it/mobile-first/MobileFirstProfileServicesCommunications.tsx",
+  "tests/features/mobile-first-profile-services.test.ts",
+  "tests/screens/mobile-first-profile-services.test.tsx",
+  "docs/tasks/pi-italy-mobile-first-profile-services-p2.md",
+  "docs/tasks/pi-italy-mobile-first-profile-services-p2-red.txt",
+  "docs/tasks/pi-italy-mobile-first-profile-services-p2-delta.json",
+  "docs/tasks/pi-italy-mobile-first-profile-services-delta.json"
+]

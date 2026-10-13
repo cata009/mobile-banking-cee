@@ -1,4 +1,5 @@
-import { Suspense, useReducer } from 'react'
+import { Suspense, useReducer, useState, useSyncExternalStore, type CSSProperties } from 'react'
+import { profileSettingsStore } from '@/features/profile/mobileFirstProfileSettings'
 import { useNavigationContext } from '@/app/contexts/NavigationContext'
 import { useDemo } from '@/app/state/demoStore'
 import { appShellReducer, createAppShellState } from '@/app/state/appShellState'
@@ -63,6 +64,13 @@ export function AppShell({ parsedDeepLink, deviceMode, app2027Theme }: AppShellP
     coordinators.chat.view
   const { handleCzChatLauncherOpen, handleCzChatAction, openChanged } = coordinators.chat.actions
   const [shellState, dispatchShell] = useReducer(appShellReducer, undefined, createAppShellState)
+  const [mobileFirstPhoneChrome, setMobileFirstPhoneChrome] = useState<'light' | 'dark'>('light')
+  const mobileFirstSettings = useSyncExternalStore(
+    profileSettingsStore.subscribe,
+    profileSettingsStore.getSnapshot,
+    profileSettingsStore.getSnapshot,
+  )
+  const isItalyMobileFirst = product === 'PI' && country === 'IT' && designSystem === 'mobile-first'
   const { showTerminatePopup, showPanel, coAppingOriginScreen, showEdgeAnimation, showFABSlideIn } = shellState
 
   const routeStatusBarVariant = resolveRouteStatusBarVariant(currentScreen, {
@@ -79,9 +87,11 @@ export function AppShell({ parsedDeepLink, deviceMode, app2027Theme }: AppShellP
    * disappear — so the variant follows the scroll.
    */
   const statusBarVariant =
-    productsShelfHeroCollapsed && routeStatusBarVariant === 'dark' && themeMode !== 'dark'
-      ? 'light'
-      : routeStatusBarVariant
+    product === 'PI' && country === 'IT' && designSystem === 'mobile-first'
+      ? mobileFirstPhoneChrome
+      : productsShelfHeroCollapsed && routeStatusBarVariant === 'dark' && themeMode !== 'dark'
+        ? 'light'
+        : routeStatusBarVariant
 
   // Handler pentru click pe butonul OTHER - deschide panel-ul
   const handleOtherClick = () => {
@@ -226,7 +236,13 @@ export function AppShell({ parsedDeepLink, deviceMode, app2027Theme }: AppShellP
     ) : null
   const screenRecoveryKey = getScreenRecoveryKey(demoState, currentRoute)
 
-  const content = <AppScreenRouter coordinators={coordinators} shell={shell} />
+  const content = (
+    <AppScreenRouter
+      coordinators={coordinators}
+      shell={shell}
+      onMobileFirstPhoneChromeChange={setMobileFirstPhoneChrome}
+    />
+  )
   return (
     <>
       <DemoNavigationSync />
@@ -237,11 +253,18 @@ export function AppShell({ parsedDeepLink, deviceMode, app2027Theme }: AppShellP
       )}
       {currentRoutePolicy.surface !== 'platform' && (
         <FrameComponent
+          authoringWidth={product === 'PI' && country === 'IT' && designSystem === 'mobile-first' ? 393 : 375}
           statusBarVariant={statusBarVariant}
           isCoAppingActive={isCoAppingActive && coAppingAvailable}
           overlay={czChatLayer}
         >
           <div
+            data-mf-large-text={(isItalyMobileFirst && mobileFirstSettings.textSize) || undefined}
+            style={
+              isItalyMobileFirst
+                ? ({ '--mf-text-scale': mobileFirstSettings.textSize ? '1.125' : '1' } as CSSProperties)
+                : undefined
+            }
             data-app-2027-home={release === 'release-future-evo-2027' || undefined}
             data-app-2027-theme-scope={release === 'release-future-evo-2027' || undefined}
             data-home-theme={release === 'release-future-evo-2027' ? app2027Theme : undefined}

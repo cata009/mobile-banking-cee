@@ -6,8 +6,8 @@ vi.mock('react', () => {
 })
 const entries = import.meta.glob('/src/experiences/**/index.ts', { eager: true })
 it('keeps every market metadata entry independent of the UI runtime and refers to the same manifest', () => {
-  expect(EXPERIENCE_MANIFESTS).toHaveLength(15)
-  expect(Object.keys(entries)).toHaveLength(15)
+  expect(EXPERIENCE_MANIFESTS).toHaveLength(16)
+  expect(Object.keys(entries)).toHaveLength(16)
   for (const entry of Object.values(entries)) expect(EXPERIENCE_MANIFESTS).toContain(Object.values(entry as object)[0])
 })
 it('rejects future releases in another product or market and blocks entry/source mismatches', () => {

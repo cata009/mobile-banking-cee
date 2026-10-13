@@ -1,3 +1,4 @@
+import { isValidEvoBeneficiaryEdit } from '@/features/accounts-payments/evoPaymentPolicy'
 import { useState } from 'react'
 import PageHeader from '@/app/components/PageHeader'
 import PrimaryButton from '@/app/components/PrimaryButton'
@@ -57,10 +58,7 @@ export default function Evo2027BeneficiaryEditScreen({
   const [bankCode, setBankCode] = useState(person.paymentBankCode)
 
   const beneficiaryName = recipientKind === 'business' ? businessName.trim() : `${firstNames} ${lastName}`.trim()
-  const validName = recipientKind === 'business'
-    ? businessName.trim().length >= 2
-    : firstNames.trim().length > 0 && lastName.trim().length > 0
-  const isValid = validName && /^\d{2,10}$/.test(accountNumber) && /^\d{4}$/.test(bankCode) && /^\d{0,6}$/.test(prefix)
+  const isValid = isValidEvoBeneficiaryEdit({name: beneficiaryName, recipientKind, firstNames, lastName, prefix, accountNumber, bankCode})
   const bankId = getBeneficiaryBankIdForCode(bankCode, person.bank)
   const countryName = getRecipientCountry(country === 'BA_BL' ? 'BA' : country)?.name ?? country
 

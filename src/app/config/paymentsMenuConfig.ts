@@ -263,6 +263,7 @@ const BA_OTHER_ITEMS: readonly PaymentOtherItem[] = [
 ];
 
 const DOMESTIC_PAYMENT_DESCRIPTION: Record<CountryId, string> = {
+  IT: "",
   RO: "Send payment in RON in RO",
   CZ: "Send payment in CZK in CR",
   SK: "Send payment in EUR in SK",
@@ -412,6 +413,8 @@ function createPaymentsMenuConfig(
 }
 
 export const PAYMENTS_MENU_CONFIG: Record<CountryId, PaymentsMenuConfig> = {
+  // Italy currently exposes only its Mobile First homepage.
+  IT: createPaymentsMenuConfig("IT", { primaryItems: [], otherItems: [] }),
   RO: createPaymentsMenuConfig("RO", {
     primaryItems: RO_PRIMARY_ITEMS,
     otherTitle: "Shortcuts",

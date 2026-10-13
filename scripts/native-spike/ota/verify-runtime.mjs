@@ -1,0 +1,17 @@
+import { createRequire } from 'node:module';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { checkout } from './local-storage.mjs';
+import { assertNativeRuntime } from './runtime-metadata.mjs';
+const require = createRequire(new URL('../../../native-spike/package.json', import.meta.url));
+const project = path.join(checkout, 'native-spike');
+process.chdir(project);
+const { generateFingerprint } = await import(pathToFileURL(require.resolve('hot-updater')).href);
+const current = await generateFingerprint('android');
+const saved = JSON.parse(await fs.readFile('fingerprint.json', 'utf8'));
+const manifest = await fs.readFile('android/app/src/main/AndroidManifest.xml', 'utf8');
+const marker = JSON.parse(await fs.readFile('ota-native-compatibility.json', 'utf8'));
+const publicKey = (await fs.readFile('keys/ota-public-key.pem', 'utf8')).trim();
+assertNativeRuntime({currentHash:current.hash,savedHash:saved.android?.hash,manifest,marker,publicKey});
+console.log(`Android runtime/signing metadata verified: ${current.hash}`);

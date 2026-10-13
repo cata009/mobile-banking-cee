@@ -10,7 +10,6 @@ import { PRODUCT_ORDER, RELEASES } from "@/app/registry/projectModel";
 import { getReleaseBundle } from "@/app/registry/releaseRegistry";
 import { useDemo } from "@/app/state/demoStore";
 import type { CountryId, DesignSystemId, ProductId, ReleaseId, Scenario } from "@/app/state/demoTypes";
-import { QRCodeSVG } from "qrcode.react";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import {
   DropdownMenu,
@@ -58,11 +57,7 @@ function getScenarioEntryScreen(scenario: Scenario) {
   return scenario === "active" ? "homepage" : "prelogin-inactive";
 }
 
-function getFutureReleaseOptions(
-  product: ProductId,
-  country: CountryId,
-  designSystem: DesignSystemId
-): ReleaseId[] {
+function getFutureReleaseOptions(product: ProductId, country: CountryId, designSystem: DesignSystemId): ReleaseId[] {
   return FUTURE_RELEASE_ORDER.filter((releaseId) => {
     const bundle = getReleaseBundle(releaseId);
     const release = RELEASES[releaseId];
@@ -104,19 +99,8 @@ function getLocalShareAccessToken() {
 }
 
 export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
-  const {
-    product,
-    country,
-    scenario,
-    designSystem,
-    release,
-    themeMode,
-    setProduct,
-    setCountry,
-    setScenario,
-    setRelease,
-    setThemeMode,
-  } = useDemo();
+  const { product, country, scenario, designSystem, release, themeMode, setProduct, setCountry, setScenario, setRelease, setThemeMode } =
+    useDemo();
   const { currentScreen, navigateToAndReset, setCoAppingActive } = useNavigationContext();
 
   const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
@@ -149,6 +133,7 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
   const isToolsSelected = currentScreen === "tools";
   const showContextControls = !isDesignSystemSelected && !isFlowLibrarySelected && !isToolsSelected;
   const scenarioEntryScreen = getScenarioEntryScreen(scenario);
+  const isItalyMobileFirst = product === "PI" && country === "IT" && designSystem === "mobile-first";
   const selectedScenarioLabel = scenario === "active" ? "Active app" : "Inactive app";
 
   const activePlatformTab: PlatformTabId = isFlowLibrarySelected
@@ -187,8 +172,7 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
   };
 
   const handleAppCountrySelect = (productId: ProductId, countryCode: (typeof COUNTRIES)[number]) => {
-    const shouldReturnToDemo =
-      currentScreen === "design-system" || currentScreen === "flow-library" || currentScreen === "tools";
+    const shouldReturnToDemo = currentScreen === "design-system" || currentScreen === "flow-library" || currentScreen === "tools";
     closeAllDropdowns();
     leavePlatformSurface();
     setProduct(productId);
@@ -198,7 +182,7 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
     }
     setCoAppingActive(false);
     if (shouldReturnToDemo || productId !== product || countryCode !== country) {
-      window.requestAnimationFrame(() => navigateToAndReset(scenarioEntryScreen));
+      window.requestAnimationFrame(() => navigateToAndReset(productId === "PI" && countryCode === "IT" ? "homepage" : scenarioEntryScreen));
     }
   };
 
@@ -285,17 +269,13 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
       const shareAccessToken = (await requestShareAccessToken()) ?? getLocalShareAccessToken();
       if (!shareAccessToken) return;
       setShareUrls((current) =>
-        current.framed === framed
-          ? { ...current, device: withShareAccessTokenParam(device, shareAccessToken) }
-          : current
+        current.framed === framed ? { ...current, device: withShareAccessTokenParam(device, shareAccessToken) } : current
       );
     } catch {
       const localShareAccessToken = getLocalShareAccessToken();
       if (!localShareAccessToken) return;
       setShareUrls((current) =>
-        current.framed === framed
-          ? { ...current, device: withShareAccessTokenParam(device, localShareAccessToken) }
-          : current
+        current.framed === framed ? { ...current, device: withShareAccessTokenParam(device, localShareAccessToken) } : current
       );
     }
   };
@@ -327,13 +307,14 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
     shareResetTimeoutRef.current = window.setTimeout(() => setShareCopied(false), 1800);
   };
 
-  const isLocalhostShare = /^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(window.location.host);
-
-  useEffect(() => () => {
-    if (shareResetTimeoutRef.current) {
-      window.clearTimeout(shareResetTimeoutRef.current);
-    }
-  }, []);
+  useEffect(
+    () => () => {
+      if (shareResetTimeoutRef.current) {
+        window.clearTimeout(shareResetTimeoutRef.current);
+      }
+    },
+    []
+  );
 
   return (
     <>
@@ -352,30 +333,15 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
           </div>
 
           <nav className="flex min-w-0 items-stretch justify-center gap-2" aria-label="Platform navigation">
-            <PlatformNavButton
-              active={activePlatformTab === "demo"}
-              icon="demo-app"
-              label="Demo"
-              onClick={handleDemoSelect}
-            />
-            <PlatformNavButton
-              active={activePlatformTab === "flows"}
-              icon="repeat"
-              label="Flows"
-              onClick={handleFlowLibrarySelect}
-            />
+            <PlatformNavButton active={activePlatformTab === "demo"} icon="demo-app" label="Demo" onClick={handleDemoSelect} />
+            <PlatformNavButton active={activePlatformTab === "flows"} icon="repeat" label="Flows" onClick={handleFlowLibrarySelect} />
             <PlatformNavButton
               active={activePlatformTab === "design-system"}
               icon="palette"
               label="Design system"
               onClick={handleDesignSystemSelect}
             />
-            <PlatformNavButton
-              active={activePlatformTab === "tools"}
-              icon="sliders-horizontal"
-              label="Tools"
-              onClick={handleToolsSelect}
-            />
+            <PlatformNavButton active={activePlatformTab === "tools"} icon="sliders-horizontal" label="Tools" onClick={handleToolsSelect} />
           </nav>
 
           <div className="flex min-w-0 items-center justify-end gap-2">
@@ -431,7 +397,7 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
                         <p className="px-2 pb-1 pt-1 font-['UniCredit:Bold',sans-serif] text-[11px] uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
                           Country
                         </p>
-                        {COUNTRIES.map((countryCode) => (
+                        {COUNTRIES.filter((countryCode) => countryCode !== "IT" || productId === "PI").map((countryCode) => (
                           <DropdownMenuItem
                             key={countryCode}
                             onSelect={() => handleAppCountrySelect(productId, countryCode)}
@@ -448,52 +414,62 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <div className="relative shrink-0" ref={releaseDropdownRef}>
-                <ContextDropdownButton
-                  label={isFutureReleaseSelected ? "Future App" : "Baseline App"}
-                  expanded={isReleaseDropdownOpen}
-                  onClick={() => setIsReleaseDropdownOpen(!isReleaseDropdownOpen)}
-                />
+              {isItalyMobileFirst ? (
+                <span className="flex h-[34px] shrink-0 items-center px-2 font-['UniCredit:Bold',sans-serif] text-[14px] leading-none text-[var(--uc-text)]">
+                  Baseline App
+                </span>
+              ) : (
+                <div className="relative shrink-0" ref={releaseDropdownRef}>
+                  <ContextDropdownButton
+                    label={isFutureReleaseSelected ? "Future App" : "Baseline App"}
+                    expanded={isReleaseDropdownOpen}
+                    onClick={() => setIsReleaseDropdownOpen(!isReleaseDropdownOpen)}
+                  />
 
-                {isReleaseDropdownOpen && (
-                  <div className="absolute left-0 top-full z-[10000] mt-2 min-w-[150px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-1 shadow-lg">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setRelease("release-current");
-                        setIsReleaseDropdownOpen(false);
-                      }}
-                      className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
-                        !isFutureReleaseSelected
-                          ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
-                          : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
-                      }`}
-                    >
-                      Baseline App
-                    </button>
-                    <button
-                      type="button"
-                      disabled={futureReleaseOptions.length === 0}
-                      onClick={() => {
-                        const firstFutureRelease = futureReleaseOptions[0];
-                        if (!firstFutureRelease) return;
-                        setScenario("active");
-                        setRelease(firstFutureRelease);
-                        setIsReleaseDropdownOpen(false);
-                      }}
-                      className={`w-full px-4 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:text-[var(--uc-text-muted)] disabled:opacity-50 ${
-                        isFutureReleaseSelected
-                          ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
-                          : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)] hover:bg-[var(--uc-surface-muted)]"
-                      }`}
-                    >
-                      Future App
-                    </button>
-                  </div>
-                )}
-              </div>
+                  {isReleaseDropdownOpen && (
+                    <div className="absolute left-0 top-full z-[10000] mt-2 min-w-[150px] rounded-lg border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] py-1 shadow-lg">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRelease("release-current");
+                          setIsReleaseDropdownOpen(false);
+                        }}
+                        className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[var(--uc-surface-muted)] ${
+                          !isFutureReleaseSelected
+                            ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
+                            : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)]"
+                        }`}
+                      >
+                        Baseline App
+                      </button>
+                      <button
+                        type="button"
+                        disabled={futureReleaseOptions.length === 0}
+                        onClick={() => {
+                          const firstFutureRelease = futureReleaseOptions[0];
+                          if (!firstFutureRelease) return;
+                          setScenario("active");
+                          setRelease(firstFutureRelease);
+                          setIsReleaseDropdownOpen(false);
+                        }}
+                        className={`w-full px-4 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:text-[var(--uc-text-muted)] disabled:opacity-50 ${
+                          isFutureReleaseSelected
+                            ? "bg-[color-mix(in_srgb,var(--uc-action)_10%,var(--uc-surface))] font-['UniCredit:Bold',sans-serif] text-[var(--uc-action)]"
+                            : "font-['UniCredit:Regular',sans-serif] text-[var(--uc-text)] hover:bg-[var(--uc-surface-muted)]"
+                        }`}
+                      >
+                        Future App
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
-              {!isFutureReleaseSelected && (
+              {isItalyMobileFirst ? (
+                <span className="flex h-[34px] shrink-0 items-center px-2 font-['UniCredit:Bold',sans-serif] text-[14px] leading-none text-[var(--uc-text)]">
+                  Active app
+                </span>
+              ) : !isFutureReleaseSelected && (
                 <div className="relative shrink-0" ref={scenarioDropdownRef}>
                   <ContextDropdownButton
                     label={selectedScenarioLabel}
@@ -572,49 +548,17 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
             <div className="flex min-w-0 items-center justify-end gap-2">
               <HeaderIconButton icon="demo-reset" label="Refresh" onClick={handleReset} />
 
-              {onOpenFocusMode && (
-                <HeaderIconButton icon="play" label="Open large demo" onClick={onOpenFocusMode} />
-              )}
+              {onOpenFocusMode && <HeaderIconButton icon="play" label="Open large demo" onClick={onOpenFocusMode} />}
 
               <div className="relative" ref={shareRef}>
-                <HeaderIconButton
-                  icon="share-filled"
-                  label="Share"
-                  active={isShareOpen}
-                  onClick={toggleShare}
-                  expanded={isShareOpen}
-                />
+                <HeaderIconButton icon="share-filled" label="Share" active={isShareOpen} onClick={toggleShare} expanded={isShareOpen} />
 
                 {isShareOpen && (
                   <div className="absolute right-0 top-full z-[10000] mt-2 w-[264px] rounded-xl border border-[var(--uc-border-muted)] bg-[var(--uc-surface)] p-4 shadow-xl">
-                    <p className="font-['UniCredit:Bold',sans-serif] text-[14px] leading-none text-[var(--uc-text)]">
-                      Share this state
-                    </p>
+                    <p className="font-['UniCredit:Bold',sans-serif] text-[14px] leading-none text-[var(--uc-text)]">Share this state</p>
                     <p className="mt-1.5 font-['UniCredit:Regular',sans-serif] text-[12px] leading-[16px] text-[var(--uc-text-muted)]">
                       Same product, country, screen, language and theme you see now.
                     </p>
-
-                    <div className="mt-3 flex flex-col items-center gap-2 rounded-lg bg-[var(--uc-surface-muted)] p-3">
-                      <div className="rounded-md bg-white p-2">
-                        <QRCodeSVG
-                          value={shareUrls.device || window.location.href}
-                          size={144}
-                          level="M"
-                          marginSize={2}
-                          fgColor="#111111"
-                          bgColor="#ffffff"
-                        />
-                      </div>
-                      <p className="text-center font-['UniCredit:Regular',sans-serif] text-[11px] leading-[14px] text-[var(--uc-text-muted)]">
-                        Scan to open on your phone, fullscreen, no frame
-                      </p>
-                    </div>
-
-                    {isLocalhostShare && (
-                      <p className="mt-2 font-['UniCredit:Regular',sans-serif] text-[11px] leading-[14px] text-[#B45309]">
-                        On localhost the QR only resolves on this machine. Deploy the demo or use your LAN IP for real phones.
-                      </p>
-                    )}
 
                     <button
                       onClick={handleCopyShareLink}
@@ -629,6 +573,14 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
                       </span>
                       {shareCopied ? "Link copied" : "Copy desktop link"}
                     </button>
+                    <a
+                      href={shareUrls.device || withFramelessParam(window.location.href)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 flex h-[36px] w-full items-center justify-center rounded-lg font-['UniCredit:Bold',sans-serif] text-[13px] text-[var(--uc-action)] hover:bg-[var(--uc-surface-muted)]"
+                    >
+                      Open fullscreen demo
+                    </a>
                   </div>
                 )}
               </div>
@@ -644,10 +596,7 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
         ) : null}
       </header>
 
-      <DemoFeatureSidePanel
-        isOpen={isControlPanelOpen}
-        onClose={() => setIsControlPanelOpen(false)}
-      />
+      <DemoFeatureSidePanel isOpen={isControlPanelOpen} onClose={() => setIsControlPanelOpen(false)} />
     </>
   );
 }
@@ -744,14 +693,7 @@ function UniCreditLogo() {
 
 function DemoPlatformIcon() {
   return (
-    <svg
-      aria-hidden="true"
-      className="block"
-      width="22"
-      height="22"
-      viewBox="0 0 22 22"
-      fill="none"
-    >
+    <svg aria-hidden="true" className="block" width="22" height="22" viewBox="0 0 22 22" fill="none">
       <rect x="5.25" y="2.75" width="11.5" height="16.5" rx="2.6" stroke="currentColor" strokeWidth="1.7" />
       <path d="M8.5 6.5h5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
       <path
@@ -765,14 +707,7 @@ function DemoPlatformIcon() {
 function ThemeModeIcon({ mode }: { mode: "light" | "dark" }) {
   if (mode === "light") {
     return (
-      <svg
-        aria-hidden="true"
-        className="block"
-        width="20"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-      >
+      <svg aria-hidden="true" className="block" width="20" height="20" viewBox="0 0 20 20" fill="none">
         <path
           d="M10 4.375V1.875M10 18.125V15.625M4.375 10H1.875M18.125 10H15.625M5.15625 5.15625L3.4375 3.4375M16.5625 16.5625L14.8438 14.8438M14.8438 5.15625L16.5625 3.4375M3.4375 16.5625L5.15625 14.8438"
           stroke="currentColor"
@@ -788,14 +723,7 @@ function ThemeModeIcon({ mode }: { mode: "light" | "dark" }) {
   }
 
   return (
-    <svg
-      aria-hidden="true"
-      className="block"
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-    >
+    <svg aria-hidden="true" className="block" width="20" height="20" viewBox="0 0 20 20" fill="none">
       <path
         clipRule="evenodd"
         d="M12.5485 2.25044C11.4726 3.02014 10.7708 4.27926 10.7708 5.70136C10.7708 8.04126 12.6675 9.93793 15.0074 9.93793C16.2221 9.93793 17.3167 9.42655 18.0892 8.60786C18.1152 8.83067 18.1286 9.05731 18.1286 9.28706C18.1286 12.6647 15.3907 15.4025 12.0131 15.4025C8.63546 15.4025 5.89758 12.6647 5.89758 9.28706C5.89758 6.36322 7.95028 3.91903 10.6928 3.31861C11.1895 3.20987 11.7092 3.14514 12.5485 2.25044Z"
@@ -838,16 +766,14 @@ function PlatformNavButton({
   );
 }
 
-const ContextDropdownButton = forwardRef<HTMLButtonElement, Omit<ComponentPropsWithoutRef<"button">, "children"> & {
-  label: string;
-  expanded: boolean;
-  maxWidthClassName?: string;
-}>(function ContextDropdownButton({
-  label,
-  expanded,
-  maxWidthClassName = "max-w-[220px]",
-  ...buttonProps
-}, ref) {
+const ContextDropdownButton = forwardRef<
+  HTMLButtonElement,
+  Omit<ComponentPropsWithoutRef<"button">, "children"> & {
+    label: string;
+    expanded: boolean;
+    maxWidthClassName?: string;
+  }
+>(function ContextDropdownButton({ label, expanded, maxWidthClassName = "max-w-[220px]", ...buttonProps }, ref) {
   return (
     <button
       {...buttonProps}

@@ -17,6 +17,7 @@ export type CountryProducts = {
 const LOREM_SHORT = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
 export const COUNTRY_PRODUCTS: CountryProducts = {
+  IT: [],
   // Serbia - 3 products
   RS: [
     {

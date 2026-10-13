@@ -1,0 +1,11 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="256" height="64" viewBox="0 0 256 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Field">
+<rect x="0.5" y="0.5" width="255" height="63" rx="15.5" stroke="#909090"/>
+<circle id="Ellipse 1" cx="68" cy="32" r="4" fill="white"/>
+<circle id="Ellipse 3" cx="92" cy="32" r="4" fill="white"/>
+<circle id="Ellipse 4" cx="116" cy="32" r="4" fill="white"/>
+<circle id="Ellipse 5" cx="140" cy="32" r="4" fill="white"/>
+<circle id="Ellipse 6" cx="164" cy="32" r="4" fill="white"/>
+<circle id="Ellipse 7" cx="188" cy="32" r="4" fill="white"/>
+</g>
+</svg>

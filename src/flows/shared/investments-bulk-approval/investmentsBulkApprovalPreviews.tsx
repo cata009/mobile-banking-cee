@@ -14,6 +14,7 @@ import { useDemo } from '@/app/state/demoStore'
 import { getCountryCurrency } from '@/data/exchangeRates'
 
 import {
+  canSignBulkSummary,
   BULK_DRAFTS,
   DEFAULT_SELECTED_IDS,
   STATIC_REVIEW_SELECTED_IDS,
@@ -566,7 +567,7 @@ function BulkSummaryScreen({
   staticPreview?: boolean
 }) {
   const { country } = useDemo()
-  const eligible = selectedIds.length > 0 && selectedIds.every((id) => reviewedIds.includes(id)) && termsAccepted
+  const eligible = canSignBulkSummary(selectedIds, reviewedIds, termsAccepted)
   return (
     <PrototypeShell>
       <PageHeader title="Orders summary" onBack={onBack} includeSafeArea showHelp={false} />

@@ -30,6 +30,12 @@ export interface CountryConfig {
  * Country configuration mapping
  */
 export const COUNTRY_CONFIG: Record<CountryId, CountryConfig> = {
+  IT: {
+    currency: "EUR",
+    locale: "it-IT",
+    currencySymbol: "€",
+    defaultScenario: "active",
+  },
   RO: {
     currency: "RON",
     locale: "ro-RO",

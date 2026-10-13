@@ -1,0 +1,23 @@
+{
+  "owner": "root",
+  "scope": "PI IT mobile-first",
+  "scaleVariable": "--mf-text-scale",
+  "default": 1,
+  "large": 1.125,
+  "baselineReverseCheck": "passed",
+  "changed": [
+    "src/experiences/pi/it/mobile-first/mobile-first-account.css",
+    "src/experiences/pi/it/mobile-first/mobile-first-cards.css",
+    "src/experiences/pi/it/mobile-first/mobile-first-investments-funds.css",
+    "src/experiences/pi/it/mobile-first/mobile-first-investments-securities.css",
+    "src/experiences/pi/it/mobile-first/mobile-first-investments-services.css",
+    "src/experiences/pi/it/mobile-first/mobile-first-investments.css",
+    "src/experiences/pi/it/mobile-first/mobile-first-keyboard.css",
+    "src/experiences/pi/it/mobile-first/mobile-first-loans.css",
+    "src/experiences/pi/it/mobile-first/mobile-first-operations.css",
+    "src/experiences/pi/it/mobile-first/mobile-first-pfm.css",
+    "src/experiences/pi/it/mobile-first/mobile-first-products.css",
+    "src/experiences/pi/it/mobile-first/mobile-first-search-results.css",
+    "src/experiences/pi/it/mobile-first/mobile-first.css"
+  ]
+}

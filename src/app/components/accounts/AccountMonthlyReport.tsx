@@ -1,3 +1,4 @@
+import {getEvoMonthReport} from '@/features/accounts-payments/evoAccountActions';
 import CashFlowSummaryBars from "@/app/components/analytics/CashFlowSummaryBars";
 import MonthlyCashFlowChart from "@/app/components/analytics/MonthlyCashFlowChart";
 import NetCashflowBlock from "@/app/components/analytics/NetCashflowBlock";
@@ -37,17 +38,7 @@ export default function AccountMonthlyReport({
   const reportTitle = `Total ${displayMonthTitle}`;
   const absoluteMonthlyTotal = `${formatEvo2027Number(Math.abs(group.monthlyTotal))} ${currency}`;
   const formattedMonthlyTotal = `${group.monthlyTotal >= 0 ? "+" : "−"}${absoluteMonthlyTotal}`;
-  const { incomeTotal, spendingTotal } = group.transactions.reduce(
-    (totals, transaction) => {
-      if (transaction.amount >= 0) {
-        totals.incomeTotal += transaction.amount;
-      } else {
-        totals.spendingTotal += Math.abs(transaction.amount);
-      }
-      return totals;
-    },
-    { incomeTotal: 0, spendingTotal: 0 },
-  );
+  const { incomeTotal, spendingTotal } = getEvoMonthReport(group);
 
   if (variant === "baseline") {
     // The pre-Evo report, unchanged: a plain heading over the two-bar chart, on

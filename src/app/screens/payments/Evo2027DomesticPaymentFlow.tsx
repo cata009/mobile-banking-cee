@@ -1,3 +1,4 @@
+import { getEvoPaymentReadiness, canContinueEvoPaymentToSign } from '@/features/accounts-payments/evoPaymentPolicy'
 import { useId, useState } from 'react'
 import type { ReactNode } from 'react'
 import { AlertTriangle, CalendarDays, ChevronRight, Delete, Info, Landmark } from 'lucide-react'
@@ -22,7 +23,6 @@ import { formatEvo2027Number } from '@/app/utils/evo2027Formatting'
 import { getEvo2027TemplateBeneficiaryName, getPaymentTemplates } from '@/data/paymentTemplates'
 import {
   appendPaymentToken,
-  evaluatePaymentExpression,
   paymentAmountPresets,
 } from '@/app/utils/paymentAmountCalculator'
 import type { DomesticPaymentDraft } from '@/data/paymentFlow'
@@ -34,7 +34,6 @@ import {
   isCountryCurrencySupported,
   isValidIban,
   isValidSwiftBic,
-  isValidUsBankDetails,
   isValidUsRoutingNumber,
   PAYMENT_CURRENCIES,
   RECIPIENT_COUNTRIES,
@@ -441,7 +440,6 @@ export function Evo2027DomesticPaymentCreateScreen({
   const selectedPayerAccount =
     accounts.find((account) => account.accountNumber === form.payerAccountNumber) ??
     accounts.find((account) => account.name === form.payerAccountName)
-  const sourceCurrencyMatchesPayment = selectedPayerAccount?.currency === form.currency
   const ownedCurrencyTotals = new Map<string, number>()
   for (const account of accounts)
     ownedCurrencyTotals.set(account.currency, (ownedCurrencyTotals.get(account.currency) ?? 0) + account.balance)
@@ -529,58 +527,9 @@ export function Evo2027DomesticPaymentCreateScreen({
     setExistingBeneficiarySearch('')
     setExistingBeneficiaryPickerOpen(false)
   }
-  const nameValid =
-    (form.recipientKind ?? 'individual') === 'business'
-      ? form.beneficiaryName.trim().length >= 2
-      : firstNames.trim().length > 0 && lastName.trim().length > 0
-  const foreignAddressValid =
-    (form.recipientStreet?.trim().length ?? 0) >= 3 &&
-    (form.recipientCity?.trim().length ?? 0) >= 2 &&
-    (form.recipientRegion?.trim().length ?? 0) >= 2 &&
-    (!isForeignUs || /^\d{5}(?:-?\d{4})?$/.test(form.recipientPostalCode?.trim() ?? ''))
-  const foreignBankValid =
-    (form.bankName?.trim().length ?? 0) >= 2 &&
-    (isForeignUs
-      ? isValidUsBankDetails(usBankDetailsMode, form.routingNumber ?? '', form.bankSwift ?? '')
-      : isValidSwiftBic(form.bankSwift ?? ''))
-  const foreignAccountValid = /^[A-Z0-9]{4,34}$/.test(form.accountNumber)
-  const chinaPurposeValid = CHINA_PAYMENT_PURPOSES.some(
-    (purpose) => purpose.code === form.paymentPurpose &&
-      purpose.kinds.some((kind) => kind === (form.recipientKind ?? 'individual')),
-  )
-  const recipientValid =
-    nameValid &&
-    countryChosen &&
-    currencyChosen &&
-    isCountryCurrencySupported(recipientCountry, form.currency) &&
-    Boolean(selectedPayerAccount) &&
-    (isForeignRoute
-      ? foreignAccountValid && foreignBankValid && foreignAddressValid &&
-        (!isForeignCn || (chinaPurposeValid && (form.currency !== 'CNY' || (form.cnapsCode?.trim().length ?? 0) >= 8)))
-      : isCzLocal
-        ? /^\d{2,10}$/.test(form.accountNumber) && /^\d{4}$/.test(form.bankCode)
-        : isValidIban(form.accountNumber, recipientCountry)) &&
-    (!form.recipientEmail || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.recipientEmail))
-  const evaluatedAmount = evaluatePaymentExpression(amountExpression)
+  const { recipientValid, amountValid, canUseInstantPayment, amount: evaluatedAmount, exceedsBalance, fxQuote, fxRequired, expressionComplete } = getEvoPaymentReadiness({draft: form, payer: selectedPayerAccount, homeCountry: country, firstNames, lastName, countryChosen, currencyChosen, amountExpression})
   const hasAmountExpression = amountExpression.length > 0
   const hasOperator = /[+\-*/]/.test(amountExpression)
-  const expressionComplete = Number.isFinite(evaluatedAmount)
-  const fxRequired = Boolean(selectedPayerAccount && !sourceCurrencyMatchesPayment)
-  const canUseInstantPayment = !fxRequired && (recipientRoute === 'cz-domestic' || recipientRoute === 'ro-domestic')
-  const fxQuote = fxRequired && expressionComplete && evaluatedAmount > 0 && selectedPayerAccount
-    ? getPaymentFxQuote({
-        recipientAmount: evaluatedAmount,
-        recipientCurrency: form.currency,
-        sourceCurrency: selectedPayerAccount.currency,
-      })
-    : null
-  const sourceDebitAmount = fxRequired ? fxQuote?.totalSourceAmount : evaluatedAmount
-  const exceedsBalance = Boolean(
-    selectedPayerAccount &&
-    sourceDebitAmount !== undefined &&
-    sourceDebitAmount > selectedPayerAccount.balance,
-  )
-  const amountValid = expressionComplete && evaluatedAmount > 0 && !exceedsBalance && (!fxRequired || Boolean(fxQuote))
   const expressionDisplay = amountExpression.replace(/\*/g, '×').replace(/\//g, '÷').replace(/-/g, '−')
   const displayText =
     hasOperator && expressionComplete
@@ -1641,8 +1590,7 @@ export function Evo2027PaymentReviewScreen({
     : null
   const recipientRoute = resolveRecipientRoute(country, draft.recipientCountry ?? country, draft.currency)
   const isForeignRoute = recipientRoute === 'foreign-us' || recipientRoute === 'foreign-cn'
-  const canContinueToSign =
-    (recipientRoute === 'cz-domestic' || recipientRoute === 'ro-domestic') && (!fxRequired || Boolean(fxQuote))
+  const canContinueToSign = canContinueEvoPaymentToSign(recipientRoute, fxRequired, Boolean(fxQuote))
   const requiresBankQuote = isForeignRoute || (fxRequired && !fxQuote)
   const canUseInstantPayment = !fxRequired && (recipientRoute === 'cz-domestic' || recipientRoute === 'ro-domestic')
   const savedRecipient = isSavedPaymentRecipient(draft, country)
