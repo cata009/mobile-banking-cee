@@ -70,12 +70,12 @@ export default function MobileFirstDetailHeader({
             aria-expanded={helpExpanded}
             onClick={onHelp}
           >
-            <img src={help} alt="" width={24} height={24} />
+            <img src={help} alt="" width={40} height={40} />
           </button>
         )}
         {onClose && (
           <button type="button" className="mf-detail-header-control" aria-label={closeLabel} onClick={onClose}>
-            <img src={close} alt="" width={24} height={24} />
+            <img src={close} alt="" width={40} height={40} />
           </button>
         )}
         {onProfile && (

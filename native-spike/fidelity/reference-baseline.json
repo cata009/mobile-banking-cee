@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "policy": "italy-source-ui-v1",
-  "recordedAt": "2026-10-13T02:36:59.687Z",
-  "recordedBy": "/root/review_native_profile",
-  "reason": "Initial frozen Italy UI/CSS/artwork working-tree reference capture with reviewed area routing; visual acceptance remains pending.",
-  "baseCommit": "538360ead4a6da9ae889f142f8d00e333f99412b",
+  "recordedAt": "2026-10-13T07:45:13.381Z",
+  "recordedBy": "root Italy Source annotation integration",
+  "reason": "Capture the verified Source state already published at main 770ea65 plus the five user-requested annotation corrections: canonical Home chevrons, original Help/Close canvas geometry, unclipped movement category, safe card scroll restoration and bounded fund summary with percentage below. The prior capture predates four already-integrated Home/investment files. Reviewed actual browser and regression evidence; this records Source references only, without accepting native visual parity.",
+  "baseCommit": "770ea65e4505c6befc5bc69982d8eefd8d5020c4",
   "visualAccepted": false,
   "areas": [
     "home",
@@ -7665,8 +7665,8 @@
       "kind": "css",
       "areas": ["cards"],
       "hashMode": "lf-text",
-      "sha256": "eb885e3a3c35dbe6d80acdd1ebfe87961ed176c2c9807c77a921f194352eae0e",
-      "contentBytes": 22909
+      "sha256": "b5313e58963d3b5e0ca6d7cba5ab4ad72ceefc70f76b02beee87ffc31d4c56a4",
+      "contentBytes": 23128
     },
     {
       "path": "src/experiences/pi/it/mobile-first/mobile-first-detail-header.css",
@@ -7699,8 +7699,8 @@
       "kind": "css",
       "areas": ["investments"],
       "hashMode": "lf-text",
-      "sha256": "204b2a665c6d9277c7fbaccd1832113d006175961c048efa52ca4b4773565a53",
-      "contentBytes": 13809
+      "sha256": "dc7fe54ceb2c14d72a73a3e722889dc74ba081207d938363109a8103e7e295ff",
+      "contentBytes": 14187
     },
     {
       "path": "src/experiences/pi/it/mobile-first/mobile-first-investments-securities.css",
@@ -7723,8 +7723,8 @@
       "kind": "css",
       "areas": ["investments"],
       "hashMode": "lf-text",
-      "sha256": "99443e4e4c8ded92e54f6bc8866d014d071dfdd18765114bebf2f78ddc155680",
-      "contentBytes": 15531
+      "sha256": "918cf75f6c4720c3dbaa1844b44d8c2b687925f24bf1b766ef0690aa0e5b1d6e",
+      "contentBytes": 16304
     },
     {
       "path": "src/experiences/pi/it/mobile-first/mobile-first-keyboard.css",
@@ -7773,8 +7773,8 @@
       "kind": "css",
       "areas": ["home"],
       "hashMode": "lf-text",
-      "sha256": "c4cdff9fcd30ca0f94949aa17983377b7b3bf85391522ba0635be39ff4f40f0e",
-      "contentBytes": 8832
+      "sha256": "1cb85dd6c47aabb9a87aa1f999d7f2fa02c88d0942db1f4151e777087d3d7de7",
+      "contentBytes": 8848
     },
     {
       "path": "src/experiences/pi/it/mobile-first/mobile-first-profile-data.css",
@@ -7831,8 +7831,8 @@
         "profile"
       ],
       "hashMode": "lf-text",
-      "sha256": "81daf3525c58694470048f98a02cbbd8455df0819918357f3e13f57cc4a6205b",
-      "contentBytes": 14425
+      "sha256": "f74376fa3af939e7683ca61bf0db547f73483d374e98ed6bb7fae62f83488847",
+      "contentBytes": 14634
     },
     {
       "path": "src/experiences/pi/it/mobile-first/MobileFirstAccount.tsx",
@@ -7887,8 +7887,8 @@
       "kind": "ui",
       "areas": ["cards"],
       "hashMode": "lf-text",
-      "sha256": "51784c69c4d24b9dd51633b280f3ab811023c7028e196c7cb884892b8a62b183",
-      "contentBytes": 26917
+      "sha256": "f2fc9d9af47fd7bc35b94bae0c0ebb8dc63385fb6171bc1ea8402e8b5a873ede",
+      "contentBytes": 27154
     },
     {
       "path": "src/experiences/pi/it/mobile-first/MobileFirstCardsJourney.tsx",
@@ -7903,24 +7903,24 @@
       "kind": "ui",
       "areas": ["cards"],
       "hashMode": "lf-text",
-      "sha256": "41faf7944f61c11521952572a5c35a2ed826788cc7a83d7d78f882bb699bec3b",
-      "contentBytes": 17070
+      "sha256": "5b47d1aa4ffe40c9b7dcba831563ee50bbbe5f982be296c0c70f403a98faf116",
+      "contentBytes": 17041
     },
     {
       "path": "src/experiences/pi/it/mobile-first/MobileFirstCardsPrimitives.tsx",
       "kind": "ui",
       "areas": ["cards"],
       "hashMode": "lf-text",
-      "sha256": "c9bc7948a5dd47b27edc0c11987b150e714b15355288123cfe646f71b46e3148",
-      "contentBytes": 8937
+      "sha256": "c47be703df754d07e1ab44e94abf8f9f6dbf17624c573f3705ad687e60d29117",
+      "contentBytes": 9603
     },
     {
       "path": "src/experiences/pi/it/mobile-first/MobileFirstCategoryPanel.tsx",
       "kind": "ui",
       "areas": ["home"],
       "hashMode": "lf-text",
-      "sha256": "cf9c3b8ad26ee24e7dba77d136be71187a598c5a3075b917e42180408a772167",
-      "contentBytes": 13801
+      "sha256": "d753e5096f7d4a0ed491f31966f01862d9f1cdc17fd3439f67dbca0265bc0dc0",
+      "contentBytes": 13762
     },
     {
       "path": "src/experiences/pi/it/mobile-first/MobileFirstDetailHeader.tsx",
@@ -7937,7 +7937,7 @@
         "profile"
       ],
       "hashMode": "lf-text",
-      "sha256": "1a996dde723892b004a8947b4d208565d39ecd4ffed0119a236198e9b532f67f",
+      "sha256": "ab3f0607a613d4c0108b1122c52864707227d30d76cc92f9f38189166ec951eb",
       "contentBytes": 3133
     },
     {
@@ -7945,16 +7945,16 @@
       "kind": "ui",
       "areas": ["home"],
       "hashMode": "lf-text",
-      "sha256": "422ce6a3726f4befb53d6abe6dce870efce87f42f002c871556419b45af6e6c6",
-      "contentBytes": 37482
+      "sha256": "d147d19300a282f7211de5c96fbe9d54e00c328a1d0ec44aa3679194ba5f44b3",
+      "contentBytes": 38596
     },
     {
       "path": "src/experiences/pi/it/mobile-first/MobileFirstInsurance.tsx",
       "kind": "ui",
       "areas": ["insurance"],
       "hashMode": "lf-text",
-      "sha256": "898374be0d8b1c0dd82ec7f8bd562828eecdc4f2be4c29ebe2da7370151c0ae7",
-      "contentBytes": 22004
+      "sha256": "f11092420f4af1d68c4d93fa98d936b821bea75d9a18550aeac9d9a15fc1b9d0",
+      "contentBytes": 22108
     },
     {
       "path": "src/experiences/pi/it/mobile-first/MobileFirstInsuranceDocuments.tsx",
@@ -8073,8 +8073,8 @@
       "kind": "ui",
       "areas": ["investments"],
       "hashMode": "lf-text",
-      "sha256": "568d49498db7d197eb1a5fdd72e736712afe9125ca918a7a17504d05664856fd",
-      "contentBytes": 27484
+      "sha256": "4e555e8fa83445e65a119456a2f253b61e1dd39e08d74763d8a63ba7f36094d5",
+      "contentBytes": 28104
     },
     {
       "path": "src/experiences/pi/it/mobile-first/MobileFirstInvestmentSecurities.tsx",
@@ -8203,8 +8203,8 @@
       "kind": "ui",
       "areas": ["loans"],
       "hashMode": "lf-text",
-      "sha256": "b1efd92acf0241068f102d34c35493fb5789756654b60431b9321aec182ab14e",
-      "contentBytes": 44329
+      "sha256": "acd633668f3b1096025ef58c299b9f71ed985240f9a21e537917574e5a08a23d",
+      "contentBytes": 44453
     },
     {
       "path": "src/experiences/pi/it/mobile-first/MobileFirstLoansPrimitives.tsx",

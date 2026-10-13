@@ -18,6 +18,7 @@ import {
 import { createInsuranceExport } from '@/features/insurance/mobileFirstInsuranceExports'
 import { ITALY_INSURANCE_POLICIES, INSURANCE_MANAGEMENT_ACTIONS, insuranceDocuments } from './insuranceContent'
 import { insuranceAssets as a } from './insuranceAssets'
+import { mobileFirstAssets as shared } from './assets'
 import { MOBILE_FIRST_TAB_CONTENT } from './productTabContent'
 import {
   InsuranceAmount,
@@ -86,8 +87,8 @@ export function MobileFirstInsurancePanel({
                   <b>Numero polizza {policy.number}</b>
                   <span>Attiva dal {insuranceDate(policy.start)}</span>
                 </span>
-                <span className="mf-ins-home-chevron">
-                  <img src={a.homeChevron} alt="" />
+                <span className="mf-product-chevron" aria-hidden="true">
+                  <img src={shared.accountChevron} alt="" width={12} height={22} />
                 </span>
               </span>
             </button>

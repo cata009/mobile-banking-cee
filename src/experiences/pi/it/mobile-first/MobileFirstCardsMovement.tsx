@@ -213,8 +213,7 @@ export default function MobileFirstCardsMovement({
   )
   const maximum = Math.max(100, ...trend.map((month) => month.totalCents))
   return (
-    <CardsPage title={m.name} onBack={onClose} onClose={onClose}>
-      <b className="mfc-subtitle">{m.category}</b>
+    <CardsPage title={m.name} subtitle={m.category} onBack={onClose} onClose={onClose}>
       <p className="mfc-space">Importo speso</p>
       <CardAmount value={m.amount} hidden={hidden} />
       {m.status !== 'settled' && (

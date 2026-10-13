@@ -12,7 +12,6 @@ import debitLogo from '@/assets/mobile-first/it/products/imgUniCreditLogo1.svg'
 import mastercard from '@/assets/mobile-first/it/products/imgGroup2.svg'
 import whiteEye from '@/assets/mobile-first/it/products/imgNavigationAndActionShowT2.svg'
 import blackEye from '@/assets/mobile-first/it/products/card-eye.svg'
-import chevron from '@/assets/mobile-first/it/products/product-chevron.svg'
 import { mobileFirstAssets as assets } from './assets'
 import type { ItalyCard } from './cardsContent'
 import { MOBILE_FIRST_TAB_CONTENT, type MobileFirstProductCategory } from './productTabContent'
@@ -62,7 +61,7 @@ function ProductAmount({
 function ProductChevron() {
   return (
     <span className="mf-product-chevron" aria-hidden="true">
-      <img src={chevron} alt="" />
+      <img src={assets.accountChevron} alt="" width={12} height={22} />
     </span>
   )
 }

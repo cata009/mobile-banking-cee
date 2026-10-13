@@ -44,7 +44,9 @@ describe('Italy Mobile First detail header safe area', () => {
     expect(navigation.getPropertyValue('position')).toBe('absolute')
     expect(headerTop).toBeGreaterThanOrEqual(70)
     expect(navigation.getPropertyValue('background')).toBe('#fff')
-    expect(Number.parseFloat(scroll.getPropertyValue('padding'))).toBeGreaterThanOrEqual(headerBottom)
+    const scrollInset =
+      Number.parseFloat(scroll.getPropertyValue('top') || '0') + Number.parseFloat(scroll.getPropertyValue('padding'))
+    expect(scrollInset).toBeGreaterThanOrEqual(headerBottom)
     expect(scroll.getPropertyValue('overflow') || scroll.getPropertyValue('overflow-y')).toBe('auto')
   })
 
@@ -137,7 +139,7 @@ describe('Italy Mobile First detail header safe area', () => {
 
   it.each([
     ['mobile-first-account.css', '.mf-account-overlay-title'],
-    ['mobile-first-cards.css', '.mfc-scroll > h1'],
+    ['mobile-first-cards.css', '.mfc-scroll > .mfc-page-heading'],
     ['mobile-first-loans.css', '.mf-loans-scroll > h1'],
     ['mobile-first-pfm.css', '.mf-pfm-inner-content > h1'],
     ['mobile-first-insurance.css', '.mf-ins-page-heading'],
