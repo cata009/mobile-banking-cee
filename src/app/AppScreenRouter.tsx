@@ -21,6 +21,7 @@ import type { AppShellActions } from './AppShell'
 const PreLoginScreen = lazy(() => import('@/app/components/PreLoginScreen'))
 const PreLoginActiveScreen = lazy(() => import('@/app/components/PreLoginActiveScreen'))
 const HomeScreen = lazy(() => import('@/app/screens/home/HomeScreen'))
+const MobileFirstHome = lazy(() => import('@/experiences/pi/it/mobile-first/MobileFirstHome'))
 const AnalyticsScreen = lazy(() => import('@/app/screens/analytics/AnalyticsScreen'))
 const MessagesScreen = lazy(() => import('@/app/screens/messages/MessagesScreen'))
 
@@ -64,7 +65,15 @@ const CreditLimitOfferFlow = lazy(() => import('@/app/screens/cards/CreditLimitO
 const CardDetailsInfoScreen = lazy(() => import('@/app/screens/cards/CardDetailsInfoScreen'))
 const CardOptionsScreen = lazy(() => import('@/app/screens/cards/CardOptionsScreen'))
 
-export function AppScreenRouter({ coordinators, shell }: { coordinators: AppCoordinators; shell: AppShellActions }) {
+export function AppScreenRouter({
+  coordinators,
+  shell,
+  onMobileFirstPhoneChromeChange,
+}: {
+  coordinators: AppCoordinators
+  shell: AppShellActions
+  onMobileFirstPhoneChromeChange?: (variant: 'light' | 'dark') => void
+}) {
   const {
     currentScreen,
     navigateTo,
@@ -177,6 +186,8 @@ export function AppScreenRouter({ coordinators, shell }: { coordinators: AppCoor
     )
   if (!isSupportedRuntimeContext) return <UnsupportedContextScreen product={product} designSystem={designSystem} />
   if (isKidsRuntimeContext) return isKidsHomeCountry(country) ? <KidsMarketHomeApp country={country} /> : null
+  if (product === 'PI' && country === 'IT' && designSystem === 'mobile-first' && currentScreen === 'homepage')
+    return <MobileFirstHome onPhoneChromeChange={onMobileFirstPhoneChromeChange} />
   return (
     <>
       {/* ========== PRE-LOGIN SCREENS ========== */}

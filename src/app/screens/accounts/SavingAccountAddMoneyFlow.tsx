@@ -1,3 +1,4 @@
+import { getEvoSavingAddMoneyReadiness } from '@/features/accounts-payments/evoAccountActions';
 import { useMemo, useState } from "react";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import PageHeader from "@/app/components/PageHeader";
@@ -92,8 +93,8 @@ export default function SavingAccountAddMoneyFlow({
   const [schedule, setSchedule] = useState<StandingOrderDraft | null>(null);
   const [completion, setCompletion] = useState<"money" | "schedule" | null>(null);
   const selectedSource = sourceAccounts.find((account) => account.id === sourceAccountId) ?? sourceAccounts[0];
-  const amount = Number(amountText) || 0;
-  const canSubmit = Boolean(selectedSource) && amount > 0 && amount <= (selectedSource?.balance ?? 0);
+  const { amount, canSubmit } = getEvoSavingAddMoneyReadiness({amountText, sourceAccount: selectedSource});
+
   const formattedAmount = useMemo(() => formatMoneyNumber(amount, country), [amount, country]);
 
   const appendDigit = (digit: string) => {

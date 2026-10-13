@@ -5,6 +5,7 @@ import ShareScreenGlow from '@/app/components/ShareScreenGlow';
 import { useDevicePreview } from '@/app/components/demo/DevicePreview';
 
 interface MobileFrameProps {
+  authoringWidth?: 375 | 393;
   children: React.ReactNode;
   statusBarVariant?: PhoneChromeVariant;
   overlay?: React.ReactNode;
@@ -46,6 +47,7 @@ function getBoundedPreviewScale(width: number, height: number, frameWidth: numbe
 }
 
 export default function MobileFrame({
+  authoringWidth = AUTHORING_WIDTH,
   children,
   statusBarVariant = 'dark',
   overlay,
@@ -55,8 +57,8 @@ export default function MobileFrame({
   const phoneFrameWidth = viewport.width + PHONE_BEZEL * 2;
   const phoneFrameHeight = viewport.height + PHONE_BEZEL * 2;
   const usesAuthoringCanvas = profile.kind === 'phone';
-  const contentScale = usesAuthoringCanvas ? viewport.width / AUTHORING_WIDTH : 1;
-  const contentWidth = usesAuthoringCanvas ? AUTHORING_WIDTH : viewport.width;
+  const contentScale = usesAuthoringCanvas ? viewport.width / authoringWidth : 1;
+  const contentWidth = usesAuthoringCanvas ? authoringWidth : viewport.width;
   const contentHeight = viewport.height / contentScale;
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const screenSurfaceRef = useRef<HTMLDivElement>(null);

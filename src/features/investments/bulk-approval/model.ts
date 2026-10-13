@@ -124,3 +124,12 @@ export function getSummaryOrderStatus(
 export function getSummaryStatusLabel(status: SummaryOrderStatus) {
   return status === 'Not signed' ? 'Not selected to be signed' : status
 }
+
+/** Original summary gate; selecting and reviewing drafts plus terms enables demo signing. */
+export function canSignBulkSummary(
+  selectedIds: readonly string[],
+  reviewedIds: readonly string[],
+  termsAccepted: boolean,
+): boolean {
+  return selectedIds.length > 0 && selectedIds.every((id) => reviewedIds.includes(id)) && termsAccepted
+}

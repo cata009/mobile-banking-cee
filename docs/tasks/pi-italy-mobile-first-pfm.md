@@ -1,0 +1,15 @@
+# Italy Mobile First PFM
+
+Owner: `codex-pi-it-pfm`. Base: `538360ead4a6da9ae889f142f8d00e333f99412b`.
+Checkout: `C:\Users\mihai\Desktop\Mobile Banking - CEE`.
+The initial pending changes and exact ownership are recorded in `pi-italy-mobile-first-pfm-ownership.json`.
+
+The linked Figma frame `24251:126563` is empty. The actual design is in sibling sections on page `21053:86052`: expense overview `24251:127426`, income `24251:129734`, budget `24251:128190`, report `24251:128682`, resources `24251:129304`, commitments `24251:129361`. Additional source frames cover settings, search, category details and the budget/asset forms. Assets are saved under `src/assets/mobile-first/it/pfm/`; code contains no temporary Figma URLs. The Code Connect snippet references an Angular logo component absent from this React repository and incorrectly maps Home category glyphs to it; those slots reuse the existing matching Home PFM glyph.
+
+`MobileFirstPfm({ onClose, initialTab })` is a local full-screen experience, consistent with the existing Italy account/search entry pattern. The integration owner connects Home's Bilancio icon and summary widgets. PFM has no Home floating action. Escape closes the active detail, then returns Home. The existing 70px white system-bar layer covers scrolling content.
+
+The experience includes Spese/Entrate, category movements, text/direction/amount search with an empty state, period and month selection, relationship settings, Report, budget editing and category activation, resources/commitments and adding an asset or commitment. Amount validation and movement search live in `src/features/analytics/mobileFirstPfm.ts`. Demo edits are in component state and reset when the PFM experience is closed. Figma contains independent illustrative totals and placeholder copy; initial source values are preserved rather than represented as live account totals.
+
+Own file delta: three `MobileFirstPfm*.tsx` components, `mobile-first-pfm.css`, `pfmContent.ts`, `pfmAssets.ts`, `src/features/analytics/mobileFirstPfm.ts`, `tests/screens/italy-mobile-first-pfm.test.tsx`, the task ownership/review documents, and the local PFM asset directory. No existing product files were modified by the PFM owner. Home integration is the separate integration owner's delta.
+
+Verification: 11/11 PFM interaction tests; scoped ESLint and Prettier pass; module boundary audit passes (155 files). Visual QA in a separate browser tab covers Spese, Entrate, Budget, Report, resources, commitments, relationship settings, loading/geometry of visible assets, and scrolling. All 136 downloaded assets are non-empty. Strict TypeScript passed before the parallel Cards/Conti work began; the latest combined run reports unfinished imports and test typing in `tests/features/mobile-first-cards.test.ts`, `tests/screens/italy-mobile-first-cards.test.tsx`, and `tests/screens/italy-mobile-first-account-flows.test.tsx`, with no PFM errors. Final combined `npm run verify` is coordinated with the integration owner after all relevant editors finish.

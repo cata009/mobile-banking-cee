@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "hono",
+  "buildCommand": "npm run build",
+  "functions": { "src/index.ts": { "maxDuration": 60 } }
+}

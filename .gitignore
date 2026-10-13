@@ -23,3 +23,15 @@ vite.err.log
 Thumbs.db
 
 .vercel
+
+# Local task records and Android review binaries are preserved outside Git.
+.agent-task.json
+public/downloads/
+native-spike/.bundle/
+native-spike/.hot-updater/
+native-spike/dist/
+
+# Superseded browser-wrapper experiment, retained locally for provenance.
+android-spike/
+scripts/android-spike/
+.github/workflows/android-demo.yml

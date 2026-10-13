@@ -1,0 +1,4405 @@
+{
+  "frames": [
+    [
+      "24268:250083",
+      "COMMHUB_00184_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza"
+    ],
+    [
+      "24268:250097",
+      "COMMHUB_00200_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Screenshot"
+    ],
+    [
+      "24268:250109",
+      "COMMHUB_00201_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Storico Accessi_Step1"
+    ],
+    [
+      "24268:250130",
+      "COMMHUB_00201_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Storico Accessi_Step1"
+    ],
+    [
+      "24268:250151",
+      "COMMHUB_00203_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Storico Accessi_Step3"
+    ],
+    [
+      "24268:250172",
+      "COMMHUB_00108_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche"
+    ],
+    [
+      "24268:250193",
+      "COMMHUB_00117_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_SMS Premium attivo"
+    ],
+    [
+      "24268:250215",
+      "COMMHUB_00109_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Conti correnti"
+    ],
+    [
+      "24268:250238",
+      "COMMHUB_00110_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Bilancio familiare e Budget"
+    ],
+    [
+      "24268:250262",
+      "COMMHUB_00118_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_SMS Premium attivo_Modifica"
+    ],
+    [
+      "24268:250272",
+      "COMMHUB_00111_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Bilancio familiare e Budget_Categorie_Step1"
+    ],
+    [
+      "24268:250293",
+      "COMMHUB_00111_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Bilancio familiare e Budget_Categorie_Step1"
+    ],
+    [
+      "24268:250314",
+      "COMMHUB_00111_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Bilancio familiare e Budget_Categorie_Step1"
+    ],
+    [
+      "24268:250337",
+      "COMMHUB_00111_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Bilancio familiare e Budget_Categorie_Step1"
+    ],
+    [
+      "24268:250358",
+      "COMMHUB_00111_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Bilancio familiare e Budget_Categorie_Step1"
+    ],
+    [
+      "24268:250380",
+      "COMMHUB_00112_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Bilancio familiare e Budget_Categorie_Step2"
+    ],
+    [
+      "24268:250417",
+      "COMMHUB_00113_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Bilancio familiare e Budget_Categorie_Step3"
+    ],
+    [
+      "24268:250454",
+      "COMMHUB_00120_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti"
+    ],
+    [
+      "24268:250465",
+      "COMMHUB_00128_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti"
+    ],
+    [
+      "24268:250476",
+      "COMMHUB_00609_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti"
+    ],
+    [
+      "24268:250487",
+      "COMMHUB_00121_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso1_Step1"
+    ],
+    [
+      "24268:250506",
+      "COMMHUB_00121_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso1_Step1"
+    ],
+    [
+      "24268:250534",
+      "COMMHUB_00122_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso1_Step2"
+    ],
+    [
+      "24268:250553",
+      "COMMHUB_00130_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso2_Step2"
+    ],
+    [
+      "24268:250572",
+      "COMMHUB_00611_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso3_Step2"
+    ],
+    [
+      "24268:250591",
+      "COMMHUB_00129_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso2_Step1"
+    ],
+    [
+      "24268:250610",
+      "COMMHUB_00610_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso3_Step1"
+    ],
+    [
+      "24268:250629",
+      "COMMHUB_00138_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi"
+    ],
+    [
+      "24268:250663",
+      "COMMHUB_00138_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi"
+    ],
+    [
+      "24268:250687",
+      "COMMHUB_00139_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step1"
+    ],
+    [
+      "24268:250698",
+      "COMMHUB_00144_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step6"
+    ],
+    [
+      "24268:250709",
+      "COMMHUB_00140_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step2"
+    ],
+    [
+      "24268:250719",
+      "COMMHUB_00140_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step2"
+    ],
+    [
+      "24268:250729",
+      "COMMHUB_00140_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step2"
+    ],
+    [
+      "24268:250739",
+      "COMMHUB_00140_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step2"
+    ],
+    [
+      "24268:250760",
+      "COMMHUB_00141_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step3"
+    ],
+    [
+      "24268:250770",
+      "COMMHUB_00142_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step4"
+    ],
+    [
+      "24268:250785",
+      "COMMHUB_00143_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step5"
+    ],
+    [
+      "24268:250800",
+      "COMMHUB_00152_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step4"
+    ],
+    [
+      "24268:250816",
+      "COMMHUB_00530_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Rapporto già esistente_Step4"
+    ],
+    [
+      "24268:250832",
+      "COMMHUB_00123_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso1_Step3"
+    ],
+    [
+      "24268:250851",
+      "COMMHUB_00124_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso1_Step4"
+    ],
+    [
+      "24268:250870",
+      "COMMHUB_00125_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso1_Step5"
+    ],
+    [
+      "24268:250889",
+      "COMMHUB_00131_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso2_Step3"
+    ],
+    [
+      "24268:250908",
+      "COMMHUB_00612_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso3_Step3"
+    ],
+    [
+      "24268:250927",
+      "COMMHUB_00133_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso2_Step5"
+    ],
+    [
+      "24268:250950",
+      "COMMHUB_00614_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso3_Step5"
+    ],
+    [
+      "24268:250969",
+      "COMMHUB_00132_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso2_Step4"
+    ],
+    [
+      "24268:250990",
+      "COMMHUB_00613_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso3_Step4"
+    ],
+    [
+      "24268:251011",
+      "COMMHUB_00168_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti"
+    ],
+    [
+      "24268:251038",
+      "COMMHUB_00545_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti"
+    ],
+    [
+      "24268:251065",
+      "COMMHUB_00532_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Caso Empty"
+    ],
+    [
+      "24268:251087",
+      "COMMHUB_00169_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Rinnovo consenso_Step1"
+    ],
+    [
+      "24268:251111",
+      "COMMHUB_00291_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Importa conto_Step1"
+    ],
+    [
+      "24268:251128",
+      "COMMHUB_00281_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Revoca consenso_Step1"
+    ],
+    [
+      "24268:251150",
+      "COMMHUB_00282_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Revoca consenso_Step2"
+    ],
+    [
+      "24268:251174",
+      "COMMHUB_00170_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Rinnovo consenso_Step2"
+    ],
+    [
+      "24268:251188",
+      "COMMHUB_00170_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Rinnovo consenso_Step2"
+    ],
+    [
+      "24268:251204",
+      "COMMHUB_00292_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Importa conto_Step2"
+    ],
+    [
+      "24268:251218",
+      "COMMHUB_00546_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_ContoEsportato"
+    ],
+    [
+      "24268:251241",
+      "COMMHUB_00547_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_ContoEsportato"
+    ],
+    [
+      "24268:251270",
+      "COMMHUB_00171_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Rinnovo consenso_Step3"
+    ],
+    [
+      "24268:251285",
+      "COMMHUB_00293_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Importa conto_Step3"
+    ],
+    [
+      "24268:251300",
+      "COMMHUB_00119_U_M_CommHub_ProfiloUtente_Impostazioni_Newsletter"
+    ],
+    [
+      "24268:251321",
+      "COMMHUB_00635_U_M_CommHub_ProfiloUtente_Impostazioni_Newsletter_Disattivazione_Step1"
+    ],
+    [
+      "24268:251342",
+      "COMMHUB_00638_U_M_CommHub_ProfiloUtente_Impostazioni_Newsletter_Attivazione_Step1"
+    ],
+    [
+      "24268:251363",
+      "COMMHUB_00636_U_M_CommHub_ProfiloUtente_Impostazioni_Newsletter_Disattivazione_Step2"
+    ],
+    [
+      "24268:251386",
+      "COMMHUB_00637_U_M_CommHub_ProfiloUtente_Impostazioni_Newsletter_Disattivazione_Step3"
+    ],
+    [
+      "24268:251407",
+      "COMMHUB_00639_U_M_CommHub_ProfiloUtente_Impostazioni_Newsletter_Attivazione_Step2"
+    ],
+    [
+      "24268:251430",
+      "COMMHUB_00640_U_M_CommHub_ProfiloUtente_Impostazioni_Newsletter_Attivazione_Step3"
+    ],
+    [
+      "24268:251451",
+      "COMMHUB_00089_U_M_CommHub_ProfiloUtente_Impostazioni_Generali"
+    ],
+    [
+      "24268:251465",
+      "COMMHUB_00092_U_M_CommHub_ProfiloUtente_Impostazioni_Generali_Preferenza profilo_Step1"
+    ],
+    [
+      "24268:251477",
+      "COMMHUB_00093_U_M_CommHub_ProfiloUtente_Impostazioni_Generali_Preferenza profilo_Step2"
+    ],
+    [
+      "24268:251493",
+      "COMMHUB_00090_U_M_CommHub_ProfiloUtente_Impostazioni_Generali_Cambio Lingua"
+    ],
+    [
+      "24268:251517",
+      "COMMHUB_00090_U_M_CommHub_ProfiloUtente_Impostazioni_Generali_Cambio Lingua"
+    ],
+    [
+      "24268:251538",
+      "COMMHUB_00523_U_M_CommHub_ProfiloUtente_Impostazioni_Generali_DisabilitazioneIP_Step1"
+    ],
+    [
+      "24268:251564",
+      "COMMHUB_00525_U_M_CommHub_ProfiloUtente_Impostazioni_Generali_DisabilitazioneIP_Step1"
+    ],
+    [
+      "24268:251590",
+      "COMMHUB_00524_U_M_CommHub_ProfiloUtente_Impostazioni_Generali_DisabilitazioneIP_Step2"
+    ],
+    [
+      "24268:251605",
+      "COMMHUB_00526_U_M_CommHub_ProfiloUtente_Impostazioni_Generali_DisabilitazioneIP_Step2"
+    ],
+    [
+      "24268:251620",
+      "COMMHUB_00097_U_M_CommHub_ProfiloUtente_Impostazioni_Dispositivi_Dispositivo Principale_Visualizza"
+    ],
+    [
+      "24268:251645",
+      "COMMHUB_00094_U_M_CommHub_ProfiloUtente_Impostazioni_Dispositivi"
+    ],
+    [
+      "24268:251662",
+      "COMMHUB_00094_U_M_CommHub_ProfiloUtente_Impostazioni_Dispositivi"
+    ],
+    [
+      "24268:251681",
+      "COMMHUB_00094_U_M_CommHub_ProfiloUtente_Impostazioni_Dispositivi"
+    ],
+    [
+      "24268:251702",
+      "COMMHUB_00094_U_M_CommHub_ProfiloUtente_Impostazioni_Dispositivi"
+    ],
+    [
+      "24268:251712",
+      "COMMHUB_00095_U_M_CommHub_ProfiloUtente_Impostazioni_Dispositivi_DisattivaApp_Step1"
+    ],
+    [
+      "24268:251724",
+      "COMMHUB_00096_U_M_CommHub_ProfiloUtente_Impostazioni_Dispositivi_DisattivaApp_Step2"
+    ],
+    [
+      "24268:251738",
+      "COMMHUB_00127_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso1_Step7"
+    ],
+    [
+      "24268:251740",
+      "COMMHUB_00172_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Rinnovo consenso_Step4"
+    ],
+    [
+      "24268:251742",
+      "COMMHUB_00294_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Importa conto_Step4"
+    ],
+    [
+      "24268:251744",
+      "COMMHUB_00284_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Revoca consenso_Step4"
+    ],
+    [
+      "24268:251746",
+      "COMMHUB_00137_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso2_Step6"
+    ],
+    [
+      "24268:251748",
+      "COMMHUB_00616_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso3_Step7"
+    ],
+    [
+      "24268:251750",
+      "COMMHUB_00146_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step8"
+    ],
+    [
+      "24268:251752",
+      "COMMHUB_00621_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step6"
+    ],
+    [
+      "24268:251754",
+      "COMMHUB_00579_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step4"
+    ],
+    [
+      "24268:251756",
+      "COMMHUB_00126_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso1_Step6"
+    ],
+    [
+      "24268:251758",
+      "COMMHUB_00283_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Revoca consenso_Step3"
+    ],
+    [
+      "24268:251760",
+      "COMMHUB_00136_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso2_Step5"
+    ],
+    [
+      "24268:251762",
+      "COMMHUB_00615_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso3_Step6"
+    ],
+    [
+      "24268:251764",
+      "COMMHUB_00145_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step7"
+    ],
+    [
+      "24268:251766",
+      "COMMHUB_00153_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step5"
+    ],
+    [
+      "24268:251768",
+      "COMMHUB_00578_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step3"
+    ],
+    [
+      "24268:251770",
+      "COMMHUB_00531_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Rapporto già esistente_Step5"
+    ],
+    [
+      "24268:251773",
+      "COMMHUB_00221_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy"
+    ],
+    [
+      "24268:251822",
+      "COMMHUB_00647_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Non rilasciati"
+    ],
+    [
+      "24268:251871",
+      "COMMHUB_00650_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Cliente Condiviso"
+    ],
+    [
+      "24268:251928",
+      "COMMHUB_00222_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy"
+    ],
+    [
+      "24268:251990",
+      "COMMHUB_00344_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step1"
+    ],
+    [
+      "24268:252052",
+      "COMMHUB_00503_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step1"
+    ],
+    [
+      "24268:252068",
+      "COMMHUB_00494_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step2"
+    ],
+    [
+      "24268:252084",
+      "COMMHUB_00496_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step4"
+    ],
+    [
+      "24268:252100",
+      "COMMHUB_00495_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step3"
+    ],
+    [
+      "24268:252118",
+      "COMMHUB_00506_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step4"
+    ],
+    [
+      "24268:252134",
+      "COMMHUB_00499_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step7"
+    ],
+    [
+      "24268:252150",
+      "COMMHUB_00223_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica cookies"
+    ],
+    [
+      "24268:252168",
+      "COMMHUB_00224_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e privacy_Modifica IVASS"
+    ],
+    [
+      "24268:252186",
+      "COMMHUB_00185_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaPIN_Step1"
+    ],
+    [
+      "24268:252200",
+      "COMMHUB_00186_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaPIN_Step2"
+    ],
+    [
+      "24268:252224",
+      "COMMHUB_00187_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaPIN_Step3"
+    ],
+    [
+      "24268:252248",
+      "COMMHUB_00189_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaPIN_Step5"
+    ],
+    [
+      "24268:252250",
+      "COMMHUB_00189_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaPIN_Step5"
+    ],
+    [
+      "24268:252252",
+      "COMMHUB_00509_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step7"
+    ],
+    [
+      "24268:252254",
+      "COMMHUB_00502_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step10"
+    ],
+    [
+      "24268:252256",
+      "COMMHUB_00196_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step2"
+    ],
+    [
+      "24268:252281",
+      "COMMHUB_00195_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step1"
+    ],
+    [
+      "24268:252295",
+      "COMMHUB_00197_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step3"
+    ],
+    [
+      "24268:252324",
+      "COMMHUB_00198_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step4"
+    ],
+    [
+      "24268:252351",
+      "COMMHUB_00199_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step5"
+    ],
+    [
+      "24268:252353",
+      "COMMHUB_00190_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_CreazioneMobileCode_Step1"
+    ],
+    [
+      "24268:252367",
+      "COMMHUB_00192_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_CreazioneMobileCode_Step3"
+    ],
+    [
+      "24268:252381",
+      "COMMHUB_00191_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_CreazioneMobileCode_Step2"
+    ],
+    [
+      "24268:252406",
+      "COMMHUB_00193_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_CreazioneMobileCode_Step4"
+    ],
+    [
+      "24268:252427",
+      "COMMHUB_00193_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_CreazioneMobileCode_Step5"
+    ],
+    [
+      "24268:252469",
+      "COMMHUB_00202_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Storico Accessi_Step2"
+    ],
+    [
+      "24268:252490",
+      "COMMHUB_00202_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Storico Accessi_Step2"
+    ],
+    [
+      "24268:252499",
+      "COMMHUB_00088_U_M_CommHub_ProfiloUtente_Impostazioni"
+    ],
+    [
+      "24268:252526",
+      "COMMHUB_00207_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Frima digitale_Attivazione_Step3"
+    ],
+    [
+      "24268:252529",
+      "COMMHUB_00206_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Frima digitale_Attivazione_Step2"
+    ],
+    [
+      "24268:252542",
+      "COMMHUB_00208_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Frima digitale_Attivazione_Step4"
+    ],
+    [
+      "24268:252544",
+      "COMMHUB_00205_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Frima digitale_Attivazione_Step1"
+    ],
+    [
+      "24268:252558",
+      "COMMHUB_00209_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Sospensione_Step1"
+    ],
+    [
+      "24268:252572",
+      "COMMHUB_00214_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Sospensione_Step6"
+    ],
+    [
+      "24268:252586",
+      "COMMHUB_00211_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Sospensione_Step3"
+    ],
+    [
+      "24268:252597",
+      "COMMHUB_00210_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Sospensione_Step2"
+    ],
+    [
+      "24268:252622",
+      "COMMHUB_00213_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Sospensione_Step5"
+    ],
+    [
+      "24268:252624",
+      "COMMHUB_00212_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Sospensione_Step4"
+    ],
+    [
+      "24268:252626",
+      "COMMHUB_00215_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Revoca_Step1"
+    ],
+    [
+      "24268:252640",
+      "COMMHUB_00217_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Revoca_Step3"
+    ],
+    [
+      "24268:252651",
+      "COMMHUB_00216_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Revoca_Step2"
+    ],
+    [
+      "24268:252676",
+      "COMMHUB_00219_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Revoca_Step5"
+    ],
+    [
+      "24268:252678",
+      "COMMHUB_00220_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Revoca_Step6"
+    ],
+    [
+      "24268:252692",
+      "COMMHUB_00218_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Revoca_Step4"
+    ],
+    [
+      "24268:252697",
+      "COMMHUB_00147_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Disposizioni_Modifica_Step1"
+    ],
+    [
+      "24268:252712",
+      "COMMHUB_00576_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Disposizioni_Profilo infromativo"
+    ],
+    [
+      "24268:252724",
+      "COMMHUB_00576_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Disposizioni_Modifica_Step1"
+    ],
+    [
+      "24268:252739",
+      "COMMHUB_00577_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Disposizioni_Modifica_Step2"
+    ],
+    [
+      "24268:252754",
+      "COMMHUB_00589_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step4"
+    ],
+    [
+      "24268:252756",
+      "COMMHUB_00588_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step3"
+    ],
+    [
+      "24268:252758",
+      "COMMHUB_00586_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Disposizioni_Modifica_Step1"
+    ],
+    [
+      "24268:252773",
+      "COMMHUB_00587_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Disposizioni_Modifica_Step2"
+    ],
+    [
+      "24268:252788",
+      "COMMHUB_00149_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step1"
+    ],
+    [
+      "24268:252802",
+      "COMMHUB_00527_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Rapporto già esistente_Step1"
+    ],
+    [
+      "24268:252821",
+      "COMMHUB_00528_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Rapporto già esistente_Step2"
+    ],
+    [
+      "24268:252840",
+      "COMMHUB_00149_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step1"
+    ],
+    [
+      "24268:252856",
+      "COMMHUB_00150_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step2"
+    ],
+    [
+      "24268:252870",
+      "COMMHUB_00151_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step3"
+    ],
+    [
+      "24268:252881",
+      "COMMHUB_00529_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Rapporto già esistente_Step3"
+    ],
+    [
+      "24268:252892",
+      "COMMHUB_00148_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Disposizioni_Modifica_Step2"
+    ],
+    [
+      "24268:252936",
+      "COMMHUB_00159_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step6"
+    ],
+    [
+      "24268:252955",
+      "COMMHUB_00160_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step7"
+    ],
+    [
+      "24268:252957",
+      "COMMHUB_00161_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step8"
+    ],
+    [
+      "24268:252959",
+      "COMMHUB_00154_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step1"
+    ],
+    [
+      "24268:252983",
+      "COMMHUB_00156_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step3"
+    ],
+    [
+      "24268:253000",
+      "COMMHUB_00163_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step2"
+    ],
+    [
+      "24268:253017",
+      "COMMHUB_00488_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step2"
+    ],
+    [
+      "24268:253034",
+      "COMMHUB_00157_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step4"
+    ],
+    [
+      "24268:253057",
+      "COMMHUB_00164_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step3"
+    ],
+    [
+      "24268:253079",
+      "COMMHUB_00489_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step3"
+    ],
+    [
+      "24268:253101",
+      "COMMHUB_00158_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step5"
+    ],
+    [
+      "24268:253123",
+      "COMMHUB_00155_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step2"
+    ],
+    [
+      "24268:253154",
+      "COMMHUB_00162_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step1"
+    ],
+    [
+      "24268:253165",
+      "COMMHUB_00487_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step1"
+    ],
+    [
+      "24268:253176",
+      "COMMHUB_00165_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step4"
+    ],
+    [
+      "24268:253195",
+      "COMMHUB_00491_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step4"
+    ],
+    [
+      "24268:253214",
+      "COMMHUB_00166_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step5"
+    ],
+    [
+      "24268:253216",
+      "COMMHUB_00492_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step5"
+    ],
+    [
+      "24268:253220",
+      "COMMHUB_00490_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step5"
+    ],
+    [
+      "24268:253245",
+      "COMMHUB_00167_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step6"
+    ],
+    [
+      "24268:253247",
+      "COMMHUB_00493_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step6"
+    ],
+    [
+      "24268:253250",
+      "COMMHUB_00116_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Investimenti e risparmio"
+    ],
+    [
+      "24268:253270",
+      "COMMHUB_00177_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Utilizza codice fornito dalla terza parte_Step1"
+    ],
+    [
+      "24268:253278",
+      "COMMHUB_00178_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Utilizza codice fornito dalla terza parte_Step2"
+    ],
+    [
+      "24268:253286",
+      "COMMHUB_00179_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Utilizza codice fornito dalla terza parte_Step3"
+    ],
+    [
+      "24268:253337",
+      "COMMHUB_00179_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Utilizza codice fornito dalla terza parte_Step5"
+    ],
+    [
+      "24268:253339",
+      "COMMHUB_00178_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Utilizza codice fornito dalla terza parte_Step4"
+    ],
+    [
+      "24268:253356",
+      "COMMHUB_00188_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaPIN_Step4"
+    ],
+    [
+      "24268:253382",
+      "CON_00055_U_M_Conti_Homepage_3+ conti_Tutti i conti_Importa conto_Step2"
+    ],
+    [
+      "24268:253414",
+      " Rimando a ucx"
+    ],
+    [
+      "24268:253416",
+      " Rimando a ucx"
+    ],
+    [
+      "24268:253418",
+      " Rimando a ucx"
+    ],
+    [
+      "24268:254418",
+      "COMMHUB_00504_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step2"
+    ],
+    [
+      "24268:254432",
+      "COMMHUB_00497_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step5"
+    ],
+    [
+      "24268:254446",
+      "COMMHUB_00505_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step3"
+    ],
+    [
+      "24268:254461",
+      "COMMHUB_00498_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step6"
+    ],
+    [
+      "24268:254476",
+      "COMMHUB_00507_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step5"
+    ],
+    [
+      "24268:254478",
+      "COMMHUB_00500_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step8"
+    ],
+    [
+      "24268:254480",
+      "COMMHUB_00508_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step6"
+    ],
+    [
+      "24268:254487",
+      "COMMHUB_00501_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step9"
+    ],
+    [
+      "24268:254508",
+      "COMMHUB_00194_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_CreazioneMobileCode_Step6"
+    ],
+    [
+      "24268:254513",
+      "COMMHUB_00576_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Disposizioni_Profilo infromativo"
+    ],
+    [
+      "24268:247443",
+      "COMMHUB_00014_U_M_CommHub_ProfiloUtente_Check up Sicurezza_Livello Medio/Basso_Livelli"
+    ],
+    [
+      "24268:247457",
+      "COMMHUB_00016_U_M_CommHub_ProfiloUtente_Check up Sicurezza_Livello Medio/Basso_Missioni"
+    ],
+    [
+      "24268:247472",
+      "COMMHUB_00012_U_M_CommHub_ProfiloUtente_Check up Sicurezza_Livello Alto"
+    ],
+    [
+      "24268:247495",
+      "COMMHUB_00013_U_M_CommHub_ProfiloUtente_Check up Sicurezza_Livello Medio/Basso"
+    ],
+    [
+      "24268:247521",
+      "COMMHUB_00015_U_M_CommHub_ProfiloUtente_Check up Sicurezza_Livello Medio/Basso_Livelli_Phishing"
+    ],
+    [
+      "24268:247543",
+      "COMMHUB_00041_U_M_CommHub_ProfiloUtente_I tuoi dati"
+    ],
+    [
+      "24268:247550",
+      "COMMHUB_00001_U_M_CommHub_ProfiloUtente"
+    ],
+    [
+      "24268:247585",
+      "COMMHUB_00185_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaPIN_Step1"
+    ]
+  ],
+  "texts": [
+    {
+      "id": "24268:250083",
+      "text": [
+        "Sicurezza",
+        "PIN",
+        "MODIFICA",
+        "Mobile Code",
+        "GESTISCI",
+        "Screenshot",
+        "MODIFICA",
+        "Disabilitato",
+        "Check up sicurezza",
+        "visualizza",
+        "Storico accessi",
+        "visualizza",
+        "Firma digitale",
+        "MODIFICA",
+        "Attiva"
+      ]
+    },
+    {
+      "id": "24268:250097",
+      "text": [
+        "Screenshot",
+        "Da questa pagina è possibile abilitare o disabilitare sul tuo dispositivo la possibilità di effettuare degli screenshot delle schermate della tua App Mobile Banking UniCredit.\nRicorda che nel caso in cui tu voglia effettuare screenshot, non sarà possibile oscurare i dati dell’App qualora questa non sia in primo piano (background)",
+        "Abilita screenshot",
+        "Salva le modifiche"
+      ]
+    },
+    {
+      "id": "24268:250109",
+      "text": [
+        "Storico accessi",
+        "Da questa pagina è possibile visualizzare l’elenco degli accessi al servizio di BancaMulticanale.",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Invia storico"
+      ]
+    },
+    {
+      "id": "24268:250130",
+      "text": [
+        "Storico accessi",
+        "Da questa pagina è possibile visualizzare l’elenco degli accessi al servizio di BancaMulticanale.",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Invia storico"
+      ]
+    },
+    {
+      "id": "24268:250151",
+      "text": [
+        "Risultati di ricerca",
+        "Filtri applicati:",
+        "Periodo:",
+        "02/10/2024 - 02/01/2025",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Canale",
+        "20/01/2025 - 15:05:13",
+        "Invia storico"
+      ]
+    },
+    {
+      "id": "24268:250172",
+      "text": [
+        "Notifiche",
+        "Abilita le notifiche",
+        "Sicurezza",
+        "VISUALIZZA",
+        "Conti corrente",
+        "VISUALIZZA",
+        "Carte",
+        "VISUALIZZA",
+        "Parental control",
+        "VISUALIZZA",
+        "Investimenti e risparmio",
+        "VISUALIZZA",
+        "Mutui e prestiti",
+        "VISUALIZZA",
+        "Bilancio familiare e budget",
+        "VISUALIZZA",
+        "Comunicazioni commerciali",
+        "VISUALIZZA",
+        "Altre comunicazioni",
+        "VISUALIZZA",
+        "Salva modifiche"
+      ]
+    },
+    {
+      "id": "24268:250193",
+      "text": [
+        "Notifiche",
+        "Ricevi ancora notifiche tramite SMS?",
+        "Passa a Notifiche Push: riceverai le comunicazioni relatie ai tuoi rapporti bancari gratuitamente sul tuo smartphone.",
+        "MODIFICA",
+        "Abilita tutte le notifiche",
+        "Sicurezza",
+        "VISUALIZZA",
+        "Conti corrente",
+        "VISUALIZZA",
+        "Carte",
+        "VISUALIZZA",
+        "Parental control",
+        "VISUALIZZA",
+        "Investimenti e risparmio",
+        "VISUALIZZA",
+        "Mutui e prestiti",
+        "VISUALIZZA",
+        "Bilancio familiare e budget",
+        "VISUALIZZA",
+        "Comunicazioni commerciali",
+        "VISUALIZZA",
+        "Altre comunicazioni",
+        "VISUALIZZA",
+        "Salva modifiche"
+      ]
+    },
+    {
+      "id": "24268:250215",
+      "text": [
+        "Conti correnti",
+        "Abilita le notifiche",
+        "Bonifici e ricariche",
+        "Accrediti",
+        "Solo archivio",
+        "Addebiti",
+        "Solo archivio",
+        "Avvisi",
+        "Salva modifiche"
+      ]
+    },
+    {
+      "id": "24268:250238",
+      "text": [
+        "Bilancio familiare e Budget",
+        "Bilancio familiare",
+        "Solo archivio",
+        "gestisci",
+        "Budget mensile",
+        "Solo archivio",
+        "Budget di categoria",
+        "Solo archivio",
+        "Salva modifiche"
+      ]
+    },
+    {
+      "id": "24268:250262",
+      "text": [
+        "Impostazioni notifiche",
+        "Stai modificando il metodo di ricezione delle comunicazioni: non riceverai più SMS a pagamento ma le notifiche push sul tuo smartphone.\nRicordati che passando alle notifiche push non potrai più riattivare SMS Premium.\nPer informazioni sul trattamento dei tuoi dati personali consulta l'informativa privacy. Vai alla sezione «Il mio Profilo» o su unicredit.it/it/info/privacy.html",
+        "Autorizza"
+      ]
+    },
+    {
+      "id": "24268:250272",
+      "text": [
+        "Bilancio familiare e Budget",
+        "Nuova notifica per categoria",
+        "Seleziona una categoria per cui vuoi ricevere una notifica",
+        "Categoria",
+        "Seleziona categoria",
+        "Sottocategoria",
+        "Seleziona sottocategoria",
+        "Notifiche attive",
+        "Categorie di spesa per cui le notifiche sono già attive",
+        "Trasporti - Bus e Metro",
+        "ELIMINA",
+        "Scuola e formazione - Altro scuola e formzione",
+        "ELIMINA",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:250293",
+      "text": [
+        "Bilancio familiare e Budget",
+        "Nuova notifica per categoria",
+        "Seleziona una categoria per cui vuoi ricevere una notifica",
+        "Categoria",
+        "Trasporti",
+        "Sottocategoria",
+        "Seleziona sottocategoria",
+        "Notifiche attive",
+        "Categorie di spesa per cui le notifiche sono già attive",
+        "Trasporti - Bus e Metro",
+        "ELIMINA",
+        "Scuola e formazione - Altro scuola e formzione",
+        "ELIMINA",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:250314",
+      "text": [
+        "Bilancio familiare e Budget",
+        "Nuova notifica per categoria",
+        "Seleziona una categoria per cui vuoi ricevere una notifica",
+        "Categoria",
+        "Trasporti",
+        "Sottocategoria",
+        "Seleziona sottocategoria",
+        "Notifiche attive",
+        "Categorie di spesa per cui le notifiche sono già attive",
+        "Trasporti - Bus e Metro",
+        "ELIMINA",
+        "Scuola e formazione - Altro scuola e formzione",
+        "ELIMINA",
+        "Conferma",
+        "Attenzione",
+        "Stai eliminando una notifica per le categorie di spesa che hai selezionato in precedenza.",
+        "Conferma",
+        "Annulla"
+      ]
+    },
+    {
+      "id": "24268:250337",
+      "text": [
+        "Bilancio familiare e Budget",
+        "Nuova notifica per categoria",
+        "Seleziona una categoria per cui vuoi ricevere una notifica",
+        "Categoria",
+        "Trasporti",
+        "Sottocategoria",
+        "Carburante",
+        "Notifiche attive",
+        "Categorie di spesa per cui le notifiche sono già attive",
+        "Trasporti - Bus e Metro",
+        "ELIMINA",
+        "Scuola e formazione - Altro scuola e formzione",
+        "ELIMINA",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:250358",
+      "text": [
+        "Bilancio familiare e Budget",
+        "Nuova notifica per categoria",
+        "Seleziona una categoria per cui vuoi ricevere una notifica",
+        "Categoria",
+        "Seleziona categoria",
+        "Sottocategoria",
+        "Seleziona sottocategoria",
+        "Notifiche attive",
+        "Categorie di spesa per cui le notifiche sono già attive",
+        "Trasporti - Carburante",
+        "ELIMINA",
+        "Trasporti - Bus e Metro",
+        "ELIMINA",
+        "Scuola e formazione - Altro scuola e formzione",
+        "ELIMINA",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:250380",
+      "text": [
+        "Bilancio familiare e Budget",
+        "Nuova notifica per categoria",
+        "Seleziona una categoria per cui vuoi ricevere una notifica",
+        "Categoria",
+        "Seleziona categoria",
+        "Sottocategoria",
+        "Seleziona sottocategoria",
+        "Conferma",
+        "Seleziona una categoria",
+        "Assicurazioni e finanziamenti",
+        "Tasse e sanzioni",
+        "Casa",
+        "Utenze",
+        "Trasporti",
+        "Scuola e formazione",
+        "Salute",
+        "Shopping",
+        "Cura della persona",
+        "Tempo libero e viaggi",
+        "Alimentari e spesa",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:250417",
+      "text": [
+        "Bilancio familiare e Budget",
+        "Nuova notifica per categoria",
+        "Seleziona una categoria per cui vuoi ricevere una notifica",
+        "Categoria",
+        "Seleziona categoria",
+        "Sottocategoria",
+        "Seleziona sottocategoria",
+        "Conferma",
+        "Seleziona una sottocategoria",
+        "Altro Trasporti",
+        "Carburante",
+        "Riparazioni, Tagliandi e Gomme",
+        "Accessori Auto, Moto e Barche",
+        "Parcheggi, Garage e Lavaggio",
+        "Pedaggi autostradali",
+        "Bus e Metro",
+        "Car Sharing, Noleggi, Taxi",
+        "Treni",
+        "Voli e Traghetti",
+        "Bicicletta",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:250454",
+      "text": [
+        "Limiti e operatività rapporti",
+        "Limiti",
+        "visualizza",
+        "Disposizioni",
+        "visualizza",
+        "Operatività rapporti",
+        "visualizza"
+      ]
+    },
+    {
+      "id": "24268:250465",
+      "text": [
+        "Limiti e operatività rapporti",
+        "Limiti",
+        "visualizza",
+        "Disposizioni",
+        "visualizza",
+        "Operatività rapporti",
+        "visualizza"
+      ]
+    },
+    {
+      "id": "24268:250476",
+      "text": [
+        "Limiti e operatività rapporti",
+        "Limiti",
+        "visualizza",
+        "Disposizioni",
+        "visualizza",
+        "Operatività rapporti",
+        "visualizza"
+      ]
+    },
+    {
+      "id": "24268:250487",
+      "text": [
+        "Limiti",
+        "Limiti operativi Banca Multicanale",
+        "Limiti Banca Multicanale",
+        "Codice di Adesione 123456",
+        "Limiti bonifico istantaneo",
+        "Filippo Fumagalli",
+        "Conto n. 00000000012",
+        "Andrea Rossini",
+        "Conto n. 00000000013",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250506",
+      "text": [
+        "Limiti",
+        "Limiti operativi Banca Multicanale",
+        "Limiti Banca Multicanale",
+        "Codice di Adesione 123456",
+        "Limiti bonifico istantaneo",
+        "Filippo Fumagalli",
+        "Conto n. 00000000012",
+        "Andrea Rossini",
+        "Conto n. 00000000013",
+        "Prosegui",
+        "Limiti bonifico istantaneo",
+        "I limiti di bonifico istantaneo si applicano alle sole disposizioni di bonifico effettuate con tipologia «Istantaneo». E’ possibile impostare, con effetto immediato, un limite di importo massimo, su base giornaliera o per singola operazione."
+      ]
+    },
+    {
+      "id": "24268:250534",
+      "text": [
+        "Limiti",
+        "Limiti operativi Banca Multicanale",
+        "Limiti Banca Multicanale",
+        "Codice di Adesione 123456",
+        "Limiti bonifico istantaneo",
+        "Filippo Fumagalli",
+        "Conto n. 00000000012",
+        "Andrea Rossini",
+        "Conto n. 00000000013",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250553",
+      "text": [
+        "Limiti",
+        "Limiti operativi Banca Multicanale",
+        "Limiti banca multicanale",
+        "Codice di Adesione 123456",
+        "Limiti bonifico istantaneo",
+        "Filippo Fumagalli",
+        "Conto n. 00000000012",
+        "Andrea Rossini",
+        "Conto n. 00000000013",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250572",
+      "text": [
+        "Limiti",
+        "Limiti operativi Banca Multicanale",
+        "Limiti banca multicanale",
+        "Codice di Adesione 123456",
+        "Limiti bonifico istantaneo",
+        "Filippo Fumagalli",
+        "Conto n. 00000000012",
+        "Andrea Rossini",
+        "Conto n. 00000000013",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250591",
+      "text": [
+        "Limiti",
+        "Limiti operativi Banca Multicanale",
+        "Limiti banca multicanale",
+        "Codice di Adesione 123456",
+        "Limiti bonifico istantaneo",
+        "Filippo Fumagalli",
+        "Conto n. 00000000012",
+        "Andrea Rossini",
+        "Conto n. 00000000013",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250610",
+      "text": [
+        "Limiti",
+        "Limiti operativi Banca Multicanale",
+        "Limiti banca multicanale",
+        "Codice di Adesione 123456",
+        "Limiti bonifico istantaneo",
+        "Filippo Fumagalli",
+        "Conto n. 00000000012",
+        "Andrea Rossini",
+        "Conto n. 00000000013",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250629",
+      "text": [
+        "Limiti operativi",
+        "Questi sono i limiti operativi applicati al tuo servizio di Banca Multicanale che corrispondono agli importi massimi di cui disponi giornalmente o mensilmente per effettuare le operazioni sotto indicate. Puoi modificare i tuoi limiti giornalieri del servizio premendo sul pulsante “Modifica limiti”",
+        "Limiti",
+        "Pagamento giornaliero",
+        "Utilizzati: 0€",
+        "5.000€",
+        "Pagamento mensile",
+        "Utilizzati: 689,00€",
+        "25.000€",
+        "Compravendita titoli mensile",
+        "Utilizzati: 1.287€",
+        "1.500.000€",
+        "Modifica limiti"
+      ]
+    },
+    {
+      "id": "24268:250663",
+      "text": [
+        "Limiti operativi",
+        "Questi sono i limiti operativi applicati al tuo servizio di Banca Multicanale che corrispondono agli importi massimi di cui disponi giornalmente o mensilmente per effettuare le operazioni sotto indicate. Puoi modificare i tuoi limiti giornalieri del servizio premendo sul pulsante “Modifica limiti”",
+        "Limiti",
+        "Pagamento giornaliero",
+        "Limiti operativi",
+        "Per operazioni di importo compreso tra il limite impostato minimo e massimo è richiesto inserimento di una password dispositiva. \nPer operazioni inferiori al limite minimo non è richiesta la password.\n\nPagamenti giornalieri:\n0 - 5.000 €\nPagamenti mensili:\n0 - 25.000 €\nCompravendita titoli:\n500.000 - 1.500.000 €"
+      ]
+    },
+    {
+      "id": "24268:250687",
+      "text": [
+        "Cambio limiti operativi",
+        "Da qui puoi impostare i tuoi limiti operativi giornalieri e mensili per effettuare le disposizioni di pagamento all’interno del servizio di Banca Multicanale, fino ad un massimo corrispondente al tuo limite mensile.\n\nIl cambio del limite è relativo a tutte le tipologie di pagamento, tranne Operazioni Veloci e Titoli.",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250698",
+      "text": [
+        "Conferma la modifica dei limiti operativi di Banca Multicanale",
+        "Confermo di aver preso visione dei contenuti che corrispondono a quanto da me indicato e dichiaro che, in caso di rapporti cointestati, la richiesta è stata espressa sulla base della preventiva condivisione con gli altri cointestatari.",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:250709",
+      "text": [
+        "Imposta i limiti del servizio di Banca Multicanale",
+        "Limite giornaliero",
+        "5.000",
+        ",00 €",
+        "5.000,00 €",
+        "5.000 €",
+        "25.000 €",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250719",
+      "text": [
+        "Imposta i limiti del servizio di Banca Multicanale",
+        "Limite giornaliero",
+        "999.999.999",
+        ",00 EUR",
+        "5.000,00 €",
+        "5.000 €",
+        "25.000 €",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250729",
+      "text": [
+        "Imposta i limiti del servizio di Banca Multicanale",
+        "Limite giornaliero",
+        "999.999.999",
+        ",00 EUR",
+        "5.000,00 €",
+        "5.000 €",
+        "25.000 €",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250739",
+      "text": [
+        "Imposta i limiti del servizio di Banca Multicanale",
+        "Limite giornaliero",
+        "999.999.999",
+        ",00",
+        "EUR",
+        "5.000,00 €",
+        "5.000 €",
+        "25.000 €",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250760",
+      "text": [
+        "Imposta i limiti del servizio di Banca Multicanale",
+        "Limite giornaliero",
+        "7.000",
+        ",00 €",
+        "7.000,00 €",
+        "5.000 €",
+        "25.000 €",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250770",
+      "text": [
+        "Imposta il periodo di validità della modifica del limite",
+        "1 Settimana",
+        "Fino al 01/04/2025",
+        "1 Mese",
+        "Fino al 25/04/2025",
+        "3 Mesi",
+        "Fino al 25/06/2025",
+        "6 Mesi",
+        "Fino al 25/09/2025",
+        "1 Anno",
+        "Fino al 25/03/2026",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250785",
+      "text": [
+        "Conferma la modifica dei limiti operativi di Banca Multicanale",
+        "Limite massimo giornaliero",
+        "7.000",
+        ",00 €",
+        "Periodo di validità",
+        "6 mesi",
+        "fino alle 23.59 del 25/09/2025",
+        "FACSIMILE",
+        "condividi documento pdf",
+        "VISUALIZZA IL DOCUMENTO PDF",
+        "Continua"
+      ]
+    },
+    {
+      "id": "24268:250800",
+      "text": [
+        "Conferma della modifica del collegamento da informativo a dispositivo",
+        "Andrea Rossini",
+        "IT 123456789000000012",
+        "Prima di procedere, è necessario prendere visione del documento",
+        "FACSIMILE",
+        "VISUALIZZA IL DOCUMENTO PDF",
+        "Confermo di aver preso visione",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:250816",
+      "text": [
+        "Conferma della modifica del collegamento da informativo a dispositivo",
+        "Salici",
+        "IT 123456789000000012",
+        "Ardizzon",
+        "IT 123456789000000012",
+        "Prima di procedere, è necessario prendere visione del documento",
+        "FACSIMILE",
+        "VISUALIZZA IL DOCUMENTO PDF",
+        "Confermo di aver preso visione",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:250832",
+      "text": [
+        "Imposta limiti bonifico instantaneo",
+        "Puoi impostare con effetto immediato un limite di importo massimo, su base giornaliera o per singola operazione, utilizzabile per le tue operazioni di bonifico istantaneo. Il limite inserito è valido per il rapporto selezionato ed è cumulativo per i canali da cui è possibile disporre bonifici istantanei qualora stabilito su base giornaliera.",
+        "Limite giornaliero",
+        "Inserisci importo limite",
+        "Importo limite",
+        "Limite singola operazione",
+        "Inserisci importo limite",
+        "15.000",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250851",
+      "text": [
+        "Imposta limiti bonifico instantaneo",
+        "Puoi impostare con effetto immediato un limite di importo massimo, su base giornaliera o per singola operazione, utilizzabile per le tue operazioni di bonifico istantaneo. Il limite inserito è valido per il rapporto selezionato ed è cumulativo per i canali da cui è possibile disporre bonifici istantanei qualora stabilito su base giornaliera.",
+        "Limite giornaliero",
+        "Inserisci importo limite",
+        "Importo limite",
+        "Limite singola operazione",
+        "Inserisci importo limite",
+        "15.000",
+        "Modifica il valore per poter procedere",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250870",
+      "text": [
+        "Imposta limiti bonifico instantaneo",
+        "Puoi impostare con effetto immediato un limite di importo massimo, su base giornaliera o per singola operazione, utilizzabile per le tue operazioni di bonifico istantaneo. Il limite inserito è valido per il rapporto selezionato ed è cumulativo per i canali da cui è possibile disporre bonifici istantanei qualora stabilito su base giornaliera.",
+        "Limite giornaliero",
+        "Inserisci importo limite",
+        "Importo limite",
+        "Limite singola operazione",
+        "Inserisci importo limite",
+        "20.000",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250889",
+      "text": [
+        "Imposta limiti bonifico instantaneo",
+        "Puoi impostare il tuo limite giornaliero o per singola operazione di Bonifico Istantaneo. Il cambio del limite ha valenza sul conto corrente selezionato e può essere utilizzato su qualsiasi canale e da qualsiasi soggetto titolare del rapporto stesso. Il limite è subordinato ai limiti di canale.",
+        "Limite giornaliero",
+        "Inserisci importo limite",
+        "Importo limite",
+        "Limite singola operazione",
+        "Inserisci importo limite",
+        "15.000",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250908",
+      "text": [
+        "Imposta limiti bonifico instantaneo",
+        "Puoi impostare il tuo limite giornaliero o per singola operazione di Bonifico Istantaneo. Il cambio del limite ha valenza sul conto corrente selezionato e può essere utilizzato su qualsiasi canale e da qualsiasi soggetto titolare del rapporto stesso. Il limite è subordinato ai limiti di canale.",
+        "Limite giornaliero",
+        "Inserisci importo limite",
+        "Importo limite",
+        "Limite singola operazione",
+        "Inserisci importo limite",
+        "15.000",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250927",
+      "text": [
+        "Imposta limiti bonifico instantaneo",
+        "Puoi impostare con effetto immediato un limite di importo massimo, su base giornaliera o per singola operazione, utilizzabile per le tue operazioni di bonifico istantaneo. Il limite inserito è valido per il rapporto selezionato ed è cumulativo per i canali da cui è possibile disporre bonifici istantanei qualora stabilito su base giornaliera.",
+        "Limite giornaliero",
+        "Inserisci importo limite",
+        "Importo limite",
+        "Limite singola operazione",
+        "Inserisci importo limite",
+        "15.000",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250950",
+      "text": [
+        "Imposta limiti bonifico instantaneo",
+        "Puoi impostare con effetto immediato un limite di importo massimo, su base giornaliera o per singola operazione, utilizzabile per le tue operazioni di bonifico istantaneo. Il limite inserito è valido per il rapporto selezionato ed è cumulativo per i canali da cui è possibile disporre bonifici istantanei qualora stabilito su base giornaliera.",
+        "Limite giornaliero",
+        "Inserisci importo limite",
+        "Importo limite",
+        "Limite singola operazione",
+        "Inserisci importo limite",
+        "15.000",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:250969",
+      "text": [
+        "Imposta limiti bonifico instantaneo",
+        "Puoi impostare il tuo limite giornaliero o per singola operazione di Bonifico Istantaneo. Il cambio del limite ha valenza sul conto corrente selezionato e può essere utilizzato su qualsiasi canale e da qualsiasi soggetto titolare del rapporto stesso. Il limite è subordinato ai limiti di canale.",
+        "Limite giornaliero",
+        "Inserisci importo limite",
+        "Importo limite",
+        "Limite singola operazione",
+        "Inserisci importo limite",
+        "15.000",
+        "Prosegui",
+        "Attenzione",
+        "Stai disattivando il limite operativo per singola operazione attualmente impostato. Dopo la conferma i limiti precedentemente inseriti verranno sovrascritti e non saranno più visibili (saranno consultabili in DOL nella sezione Contratti), potrai comunque rimodificarli inserendoli nuovamente dalla funzione dedicata.",
+        "Prosegui",
+        "Annulla"
+      ]
+    },
+    {
+      "id": "24268:250990",
+      "text": [
+        "Imposta limiti bonifico instantaneo",
+        "Puoi impostare il tuo limite giornaliero o per singola operazione di Bonifico Istantaneo. Il cambio del limite ha valenza sul conto corrente selezionato e può essere utilizzato su qualsiasi canale e da qualsiasi soggetto titolare del rapporto stesso. Il limite è subordinato ai limiti di canale.",
+        "Limite giornaliero",
+        "Inserisci importo limite",
+        "Importo limite",
+        "Limite singola operazione",
+        "Inserisci importo limite",
+        "15.000",
+        "Prosegui",
+        "Attenzione",
+        "Stai disattivando il limite giornaliero attualmente impostato. Dopo la conferma i limiti precedentemente inseriti verranno sovrascritti e non saranno più visibili (saranno consultabili in DOL nella sezione Contratti), potrai comunque rimodificarli inserendoli nuovamente dalla funzione dedicata.",
+        "Prosegui",
+        "Annulla"
+      ]
+    },
+    {
+      "id": "24268:251011",
+      "text": [
+        "Terze parti",
+        "Cerca conti....",
+        "utilizza codice fornito dalla terza parte",
+        "Conti importati",
+        "Intesa Sanpaolo Retail",
+        "Consenso: ab8f012e-262c-4eb9-a644-41e0d8132bd1\nValidità: dal 10/12/2024 al 09/06/2025",
+        "Attivo\nRuolo: AISP",
+        "Conti esportati",
+        "UniCredit S.p.a Test",
+        "Consenso: ab8f012e-262c-4eb9-a644-41e0d8132bd1\nValidità: dal 19/02/2025 al 19/02/2025",
+        "Rev. Utente\nRuolo: AISP",
+        "UniCredit S.p.a Test",
+        "Consenso: ab8f012e-262c-4eb9-a644-41e0d8132bd1\nValidità: dal 19/02/2025 al 19/02/2025",
+        "Rev. Utente\nRuolo: AISP",
+        "UniCredit S.p.a Test",
+        "Consenso: ab8f012e-262c-4eb9-a644-41e0d8132bd1\nValidità: dal 19/02/2025 al 19/02/2025",
+        "Scaduto\nRuolo: AISP",
+        "UniCredit S.p.a Test",
+        "Consenso: ab8f012e-262c-4eb9-a644-41e0d8132bd1\nValidità: dal 19/02/2025 al 19/02/2025",
+        "Rev. 3° Parte\nRuolo: AISP",
+        "UniCredit S.p.a Test",
+        "Consenso: ab8f012e-262c-4eb9-a644-41e0d8132bd1\nValidità: dal 19/02/2025 al 19/02/2025",
+        "Rev. Utente\nRuolo: AISP",
+        "Importa conto"
+      ]
+    },
+    {
+      "id": "24268:251038",
+      "text": [
+        "Terze parti",
+        "Cerca conti....",
+        "utilizza codice fornito dalla terza parte",
+        "Conti importati",
+        "Intesa Sanpaolo Retail",
+        "Consenso: ab8f012e-262c-4eb9-a644-41e0d8132bd1\nValidità: dal 10/12/2024 al 09/06/2025",
+        "Attivo\nRuolo: AISP",
+        "Conti esportati",
+        "Banca nazionale del lavoro S.P.A (In forma contratta BNL S.P.A)",
+        "Consenso: ab8f012e-262c-4eb9-a644-41e0d8132bd1\nValidità: dal 19/02/2025 al 19/02/2025",
+        "Rev. Utente\nRuolo: AISP",
+        "UniCredit S.p.a Test",
+        "Consenso: ab8f012e-262c-4eb9-a644-41e0d8132bd1\nValidità: dal 19/02/2025 al 19/02/2025",
+        "Rev. Utente\nRuolo: AISP",
+        "UniCredit S.p.a Test",
+        "Consenso: ab8f012e-262c-4eb9-a644-41e0d8132bd1\nValidità: dal 19/02/2025 al 19/02/2025",
+        "Scaduto\nRuolo: AISP",
+        "UniCredit S.p.a Test",
+        "Consenso: ab8f012e-262c-4eb9-a644-41e0d8132bd1\nValidità: dal 19/02/2025 al 19/02/2025",
+        "Rev. 3° Parte\nRuolo: AISP",
+        "UniCredit S.p.a Test",
+        "Consenso: ab8f012e-262c-4eb9-a644-41e0d8132bd1\nValidità: dal 19/02/2025 al 19/02/2025",
+        "Rev. Utente\nRuolo: AISP",
+        "Importa conto"
+      ]
+    },
+    {
+      "id": "24268:251065",
+      "text": [
+        "Terze parti",
+        "Cerca conti...",
+        "utilizza codice fornito dalla terza parte",
+        "Conti importati",
+        "Nessun consenso trovato",
+        "Conti esportati",
+        "Nessun consenso trovato",
+        "Importa conto"
+      ]
+    },
+    {
+      "id": "24268:251087",
+      "text": [
+        "Intesa Sanpaolo Retail",
+        "Dettaglio consenso",
+        "Consenso",
+        "12e796bc-ed51-4d48-9d77-04beb6",
+        "ID",
+        "Intesa Sanpaolo Retail",
+        "Data di scadenza",
+        "19/01/2021",
+        "Conti importati",
+        "Intestazione",
+        "Andrea Rossini",
+        "Conto",
+        "IT 123456879678770977547",
+        "Condivisione",
+        "Dettaglio, Saldo, Transazioni",
+        "Rinnova consenso",
+        "Revoca consenso"
+      ]
+    },
+    {
+      "id": "24268:251111",
+      "text": [
+        "Tutto a portata di mano",
+        "Grazie alla PSD2 potrai visualizzare, da Banca via Internet o da App Mobile Banking, il saldo e i movimenti dei tuoi conti e delle tue carte con IBAN, non solo UniCredit, ma anche di altre Banche. Potrai anche effettuare pagamenti da uno dei conti o carte con IBAN aggregati, in modo facile e veloce.",
+        "visualizza DOCUMENTO PDF ",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:251128",
+      "text": [
+        "Intesa Sanpaolo Retail",
+        "Dettaglio consenso",
+        "Consenso",
+        "12e796bc-ed51-4d48-9d77-04beb6",
+        "ID",
+        "Intesa Sanpaolo Retail",
+        "Data di scadenza",
+        "19/01/2021",
+        "Conti importati",
+        "Intestazione",
+        "Andrea Rossini",
+        "Conto",
+        "IT 123456879678770977547",
+        "Condivisione",
+        "Dettaglio, Saldo, Transazioni",
+        "Rinnova consenso",
+        "Revoca consenso"
+      ]
+    },
+    {
+      "id": "24268:251150",
+      "text": [
+        "Intesa Sanpaolo Retail",
+        "Dettaglio consenso",
+        "Consenso",
+        "12e796bc-ed51-4d48-9d77-04beb6",
+        "ID",
+        "Intesa Sanpaolo Retail",
+        "Data di scadenza",
+        "19/01/2021",
+        "Conti importati",
+        "Intestazione",
+        "Andrea Rossini",
+        "Conto",
+        "IT 123456879678770977547",
+        "Condivisione",
+        "Dettaglio, Saldo, Transazioni",
+        "Rinnova consenso",
+        "Revoca consenso",
+        "Attenzione",
+        "Confermando l’operazione revochi il consenso 12e796bc-ed51-4d48-9d77-04beb6 fornito dalla Terza Parte per accedere ai tuoi dati.",
+        "Revoca consenso",
+        "Annulla"
+      ]
+    },
+    {
+      "id": "24268:251174",
+      "text": [
+        "Da che banca vuoi importare un conto o una carta con iban?",
+        "Seleziona il Paese",
+        "Italia",
+        "Inserisci Banca",
+        "Intesa Sanpaolo Retail",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:251188",
+      "text": [
+        "Da che banca vuoi importare un conto o una carta con iban?",
+        "Seleziona il Paese",
+        "Italia",
+        "Inserisci Banca",
+        "Intesa Sanpaolo Retail",
+        "Prosegui",
+        "Attenzione",
+        "Esiste già un consenso attivo per la banca selezionata. Proseguendo annullerai il consenso esistente e lo sostituirai con il nuovo.",
+        "Prosegui",
+        "Mantieni scelta precedente"
+      ]
+    },
+    {
+      "id": "24268:251204",
+      "text": [
+        "Da che banca vuoi importare un conto o una carta con iban?",
+        "Seleziona il Paese",
+        "Italia",
+        "Inserisci Banca",
+        "Intesa Sanpaolo Retail",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:251218",
+      "text": [
+        "Intesa Sanpaolo Retail",
+        "Dettaglio consenso",
+        "Consenso",
+        "12e796bc-ed51-4d48-9d77-04beb6",
+        "ID",
+        "Intesa Sanpaolo Retail",
+        "Data di scadenza",
+        "19/01/2021",
+        "Conti importati",
+        "Intestazione",
+        "Andrea Rossini",
+        "Conto",
+        "IT 123456879678770977547",
+        "Condivisione",
+        "Dettaglio, Saldo, Transazioni",
+        "Rinnova consenso",
+        "Revoca Consenso"
+      ]
+    },
+    {
+      "id": "24268:251241",
+      "text": [
+        "UniCredit S.p.A Test",
+        "Dettaglio consenso",
+        "Consenso",
+        "12e796bc-ed51-4d48-9d77-04beb6",
+        "ID",
+        "IT-BI-1005",
+        "Tipologia",
+        "AISP",
+        "Data di scadenza",
+        "19/01/2021",
+        "Conti esportati",
+        "Intestazione",
+        "Andrea Rossini",
+        "Conto",
+        "IT 123456879678770977547",
+        "Condivisione",
+        "Dettaglio, Saldo, Transazioni",
+        "Intestazione",
+        "Andrea Rossini",
+        "Conto",
+        "IT 123456879678770977547",
+        "Condivisione",
+        "Dettaglio, Saldo, Transazioni",
+        "Revoca consenso"
+      ]
+    },
+    {
+      "id": "24268:251270",
+      "text": [
+        "Stiamo per collegarti alla tua Banca",
+        "Per completare l’operazione clicca su “Prosegui” e collegati alla Banca. Ti verrano chieste le tue credenziali d’accesso",
+        "Importante",
+        "Non chiudere questa pagina prima di aver terminato l’importazione per evitare di rincominciare il processo.",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:251285",
+      "text": [
+        "Stiamo per collegarti alla tua Banca",
+        "Per completare l’operazione clicca su “Prosegui” e collegati alla Banca. Ti verrano chieste le tue credenziali d’accesso",
+        "Importante",
+        "Non chiudere questa pagina prima di aver terminato l’importazione per evitare di rincominciare il processo.",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:251300",
+      "text": [
+        "Newsletter",
+        "Email",
+        "Email",
+        "mic****ssi@email.it",
+        "MODIFICA",
+        "Verificato",
+        "Iscrizioni",
+        "Morning Meeting",
+        "Morning Meeting fonte: UniCredit Bank AG - Succ.ale Milano",
+        "Novità di Banca Multicanale",
+        "Novità di Banca Multicanale fonte: UniCredit",
+        "Newsletter Genius",
+        "Newsletter Genius fonte: UniCredit"
+      ]
+    },
+    {
+      "id": "24268:251321",
+      "text": [
+        "Newsletter",
+        "Email",
+        "Email",
+        "mic****ssi@email.it",
+        "MODIFICA",
+        "Verificato",
+        "Iscrizioni",
+        "Morning Meeting",
+        "Morning Meeting fonte: UniCredit Bank AG - Succ.ale Milano",
+        "Novità di Banca Multicanale",
+        "Novità di Banca Multicanale fonte: UniCredit",
+        "Newsletter Genius",
+        "Newsletter Genius fonte: UniCredit"
+      ]
+    },
+    {
+      "id": "24268:251342",
+      "text": [
+        "Newsletter",
+        "Email",
+        "Email",
+        "mic****ssi@email.it",
+        "MODIFICA",
+        "Verificato",
+        "Iscrizioni",
+        "Morning Meeting",
+        "Morning Meeting fonte: UniCredit Bank AG - Succ.ale Milano",
+        "Novità di Banca Multicanale",
+        "Novità di Banca Multicanale fonte: UniCredit",
+        "Newsletter Genius",
+        "Newsletter Genius fonte: UniCredit"
+      ]
+    },
+    {
+      "id": "24268:251363",
+      "text": [
+        "Newsletter",
+        "Email",
+        "Email",
+        "mic****ssi@email.it",
+        "MODIFICA",
+        "Verificato",
+        "Iscrizioni",
+        "Morning Meeting",
+        "Morning Meeting fonte: UniCredit Bank AG - Succ.ale Milano",
+        "Novità di Banca Multicanale",
+        "Novità di Banca Multicanale fonte: UniCredit",
+        "Newsletter Genius",
+        "Newsletter Genius fonte: UniCredit",
+        "Morning Meeting",
+        "L’aggiornamento dell’iscrizione alla newsletter è avvenuto con successo.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:251386",
+      "text": [
+        "Newsletter",
+        "Email",
+        "Email",
+        "mic****ssi@email.it",
+        "MODIFICA",
+        "Verificato",
+        "Iscrizioni",
+        "Morning Meeting",
+        "Morning Meeting fonte: UniCredit Bank AG - Succ.ale Milano",
+        "Novità di Banca Multicanale",
+        "Novità di Banca Multicanale fonte: UniCredit",
+        "Newsletter Genius",
+        "Newsletter Genius fonte: UniCredit"
+      ]
+    },
+    {
+      "id": "24268:251407",
+      "text": [
+        "Newsletter",
+        "Email",
+        "Email",
+        "mic****ssi@email.it",
+        "MODIFICA",
+        "Verificato",
+        "Iscrizioni",
+        "Morning Meeting",
+        "Morning Meeting fonte: UniCredit Bank AG - Succ.ale Milano",
+        "Novità di Banca Multicanale",
+        "Novità di Banca Multicanale fonte: UniCredit",
+        "Newsletter Genius",
+        "Newsletter Genius fonte: UniCredit",
+        "Morning Meeting",
+        "L’aggiornamento dell’iscrizione alla newsletter è avvenuto con successo.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:251430",
+      "text": [
+        "Newsletter",
+        "Email",
+        "Email",
+        "mic****ssi@email.it",
+        "MODIFICA",
+        "Verificato",
+        "Iscrizioni",
+        "Morning Meeting",
+        "Morning Meeting fonte: UniCredit Bank AG - Succ.ale Milano",
+        "Novità di Banca Multicanale",
+        "Novità di Banca Multicanale fonte: UniCredit",
+        "Newsletter Genius",
+        "Newsletter Genius fonte: UniCredit"
+      ]
+    },
+    {
+      "id": "24268:251451",
+      "text": [
+        "Generali",
+        "Preferenza profilo",
+        "MODIFICA",
+        "Lingua",
+        "Italiano",
+        "MODIFICA",
+        "Geolocalizzazione",
+        "MODIFICA",
+        "Ridimensionamento testo",
+        "Salva modifiche"
+      ]
+    },
+    {
+      "id": "24268:251465",
+      "text": [
+        "Preferenza profilo",
+        "Scegli quale profilo vuoi visualizzare quando apri l'App.\nVedrai il profilo scelto come default per :\n\n﻿﻿Pagina di apertura dell'app su cui fare Login\n﻿﻿Primo profilo visualizzato in Home",
+        "Non ti preoccupare! Potrai sempre navigare tra un profilo e l'altro in totale libertà o modificare la tua scelta in seguito!",
+        "UniCredit",
+        "buddy",
+        "Salva modifiche"
+      ]
+    },
+    {
+      "id": "24268:251477",
+      "text": [
+        "Preferenza profilo",
+        "Scegli quale profilo vuoi visualizzare quando apri l'App.\nVedrai il profilo scelto come default per :\n\n﻿﻿Pagina di apertura dell'app su cui fare Login\n﻿﻿Primo profilo visualizzato in Home",
+        "Non ti preoccupare! Potrai sempre navigare tra un profilo e l'altro in totale libertà o modificare la tua scelta in seguito!",
+        "UniCredit",
+        "buddy",
+        "Modifica effettuata",
+        "Hai cambiato il tuo profilo preferito in UniCredit",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:251493",
+      "text": [
+        "Generali",
+        "Preferenza profilo",
+        "MODIFICA",
+        "Lingua",
+        "Italiano",
+        "MODIFICA",
+        "Geolocalizzazione",
+        "MODIFICA",
+        "Ridimensionamento testo",
+        "Cambio lingua",
+        "Inglese",
+        "Italiano",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:251517",
+      "text": [
+        "Generali",
+        "Preferenza profilo",
+        "MODIFICA",
+        "Lingua",
+        "Italiano",
+        "MODIFICA",
+        "Geolocalizzazione",
+        "MODIFICA",
+        "Ridimensionamento testo",
+        "Ridimensionamento testo",
+        "Con questa impostazione attiva permetterai all’app di recepire la dimensione dei testi in base a quella impostata sul tuo telefono.\r\n\nDisabilitandola invece manterrai una dimensione standard.\r"
+      ]
+    },
+    {
+      "id": "24268:251538",
+      "text": [
+        "Generali",
+        "Preferenza profilo",
+        "MODIFICA",
+        "Lingua",
+        "Italiano",
+        "MODIFICA",
+        "Geolocalizzazione",
+        "MODIFICA",
+        "Ridimensionamento testo",
+        "Servizi geolocalizzazione",
+        "Rifornimento IP",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:251564",
+      "text": [
+        "Generali",
+        "Preferenza profilo",
+        "MODIFICA",
+        "Lingua",
+        "Italiano",
+        "MODIFICA",
+        "Geolocalizzazione",
+        "MODIFICA",
+        "Ridimensionamento testo",
+        "Servizi geolocalizzazione",
+        "Rifornimento IP",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:251590",
+      "text": [
+        "Generali",
+        "Preferenza profilo",
+        "MODIFICA",
+        "Lingua",
+        "Italiano",
+        "MODIFICA",
+        "Geolocalizzazione",
+        "MODIFICA",
+        "Ridimensionamento testo",
+        "Modifiche salvate",
+        "Da questo momento il servizio di rifornimento carburante “Rifornimento IP” non sarà utilizzabile. Ti ricordiamo che potrai modificare la tua scelta dalla sezione Impostazioni > Generali.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:251605",
+      "text": [
+        "Generali",
+        "Preferenza profilo",
+        "MODIFICA",
+        "Lingua",
+        "Italiano",
+        "MODIFICA",
+        "Geolocalizzazione",
+        "MODIFICA",
+        "Ridimensionamento testo",
+        "Modifiche salvate",
+        " Ti ricordiamo che potrai modificare la tua scelta dalla sezione Impostazioni > Generali.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:251620",
+      "text": [
+        "Generali",
+        "Impostazioni homepage",
+        "MODIFICA",
+        "Lingua",
+        "MODIFICA",
+        "Italiano",
+        "Geolocalizzazione",
+        "MODIFICA",
+        "iPhone",
+        "Marca e sistema operativo",
+        "Apple - iOS",
+        "Data di registrazione",
+        "20/01/2025 - 15:05",
+        "Ultimo accesso",
+        "20/01/2025 - 15:05",
+        "Ultima autorizzazione",
+        "20/01/2025 - 15:05",
+        "Tipologia di dispositivo",
+        "Dispositivo principale"
+      ]
+    },
+    {
+      "id": "24268:251645",
+      "text": [
+        "Dispositivi",
+        "Dispositivo principale",
+        "iPhone",
+        "VISUALIZZA",
+        "Altri dispositivi attivi",
+        "Dispositivo secondario",
+        "Ufficio",
+        "VISUALIZZA",
+        "Dispositivo secondario",
+        "Tablet",
+        "VISUALIZZA",
+        "Disattiva tutti i dispositivi"
+      ]
+    },
+    {
+      "id": "24268:251662",
+      "text": [
+        "Dispositivi",
+        "Utente condiviso",
+        "Se sei un cliente buddy - UniCredit il tuo dispositivo è condiviso tra i profili.",
+        "maggiori informazioni",
+        "Dispositivo principale",
+        "iPhone",
+        "VISUALIZZA",
+        "Altri dispositivi attivi",
+        "Dispositivo secondario",
+        "Ufficio",
+        "VISUALIZZA",
+        "Dispositivo secondario",
+        "Tablet",
+        "VISUALIZZA",
+        "Disattiva tutti i dispositivi"
+      ]
+    },
+    {
+      "id": "24268:251681",
+      "text": [
+        "Disattiva tutti i dispositivi",
+        "Dispositivi",
+        "Utente condiviso",
+        "Se sei un cliente buddy - UniCredit il tuo dispositivo è condiviso tra i profili.",
+        "maggiori informazioni",
+        "Dispositivo principale",
+        "iPhone",
+        "VISUALIZZA",
+        "Altri dispositivi attivi",
+        "Dispositivo secondario",
+        "Ufficio",
+        "VISUALIZZA",
+        "Dispositivo secondario",
+        "Tablet",
+        "VISUALIZZA",
+        "Sei sicuro di voler disattivare l’app per tutti i dispositivi?",
+        "Se sei un cliente buddy - UniCredit il tuo dispositivo è condiviso tra i profili.\n\nSe disattivi i tuoi dispositivi su buddy la tua scelta sarà valida anche per il tuo profilo UniCredit.",
+        "Disattiva",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:251702",
+      "text": [
+        "Utente condiviso",
+        "Se sei un cliente buddy - UniCredit il tuo dispositivo è condiviso tra i profili.\n\nPotrai impostare un solo dispositivo principale e un solo dispositivo secondario per il tuo profilo buddy e il tuo profilo UniCredit."
+      ]
+    },
+    {
+      "id": "24268:251712",
+      "text": [
+        "Disattiva tutti i dispositivi",
+        "Per completare la disattivazione dell’app da tutti i tuoi dispositivi, inserisci il tuo codice fiscale e “Conferma”. Ricorda che, disattivando tutti i tuoi dispositivi non potrai più accedere all’app se non attraverso una nuova registrazione.",
+        "Inserisci codice fiscale",
+        "RSSMRA90R10F205I",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:251724",
+      "text": [
+        "Disattiva tutti i dispositivi",
+        "Per completare la disattivazione dell’app da tutti i tuoi dispositivi, inserisci il tuo codice fiscale e “Conferma”. Ricorda che, disattivando tutti i tuoi dispositivi non potrai più accedere all’app se non attraverso una nuova registrazione.",
+        "Inserisci codice fiscale",
+        "RSSMRA90R10F205I",
+        "Conferma",
+        "Sei sicuro di voler disattivare l’app per tutti i dispositivi?",
+        "",
+        "Disattiva",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:251738",
+      "text": [
+        "Richiesta inserita correttamente!",
+        "I nuovi limiti operativi sono già attivi",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:251740",
+      "text": [
+        "Operazione completata con successo",
+        "Il consenso è ora attivo e da oggi puoi consultare i rapporti importati nella Banca via internet e sull’APP Mobile Banking UniCredit.\nRicordarti di rinnovare il consenso alla scadenza.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:251742",
+      "text": [
+        "Operazione completata con successo",
+        "Il consenso è ora attivo e da oggi puoi consultare i rapporti importati nella Banca via internet e sull’APP Mobile Banking UniCredit.\nRicordarti di rinnovare il consenso alla scadenza.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:251744",
+      "text": [
+        "Revoca consenso effettuata!",
+        "L’account Banca 1 realtivo al contratto di consenso numero 12e796bc-ed51-4d48-9d77-04beb6 è stato revocato.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:251746",
+      "text": [
+        "Richiesta inserita correttamente!",
+        "I nuovi limiti operativi sono già attivi",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:251748",
+      "text": [
+        "Richiesta inserita correttamente!",
+        "I nuovi limiti operativi sono già attivi",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:251750",
+      "text": [
+        "Richiesta inserita correttamente!",
+        "Riceverai una email di conferma quando i nuovi limiti operativi saranno attivi. La modifica sarà valida fino al giorno 01/04/2025, dopo questa data i limiti torneranno ad essere quelli precedenti.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:251752",
+      "text": [
+        "Richiesta inserita correttamente!",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:251754",
+      "text": [
+        "Il bonifico istantaneo \nè stato attivato correttamente",
+        "Potrai disattivarlo in qualsiasi momento dalla tua area personale.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:251756",
+      "text": [
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:251758",
+      "text": [
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:251760",
+      "text": [
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:251762",
+      "text": [
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:251764",
+      "text": [
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:251766",
+      "text": [
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:251768",
+      "text": [
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:251770",
+      "text": [
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:251773",
+      "text": [
+        "Consensi e Privacy",
+        "Privacy",
+        "modifica privacy",
+        "Messaggistica",
+        "Acconsento",
+        "Email",
+        "Acconsento",
+        "Sistemi multimediali",
+        "Acconsento",
+        "Chiamate",
+        "Non acconsento",
+        "Profilazione",
+        "Acconsento",
+        "Cookies",
+        "modifica cookies",
+        "Tracciamento",
+        "Acconsento",
+        "Informative Privacy e Cookies Policy",
+        "Per consultare le informative Privacy e la Cookies Policy dell’App.",
+        "visualizza informativa",
+        "IVASS",
+        "MODIFICA CONSENSO IVASS",
+        "Consensi IVASS",
+        "Acconsento"
+      ]
+    },
+    {
+      "id": "24268:251822",
+      "text": [
+        "Consensi e Privacy",
+        "Privacy",
+        "modifica privacy",
+        "Messaggistica",
+        "Acconsento",
+        "Email",
+        "Acconsento",
+        "Sistemi multimediali",
+        "Acconsento",
+        "Chiamate",
+        "Non acconsento",
+        "Profilazione",
+        "Acconsento",
+        "Cookies",
+        "modifica cookies",
+        "Tracciamento",
+        "Acconsento",
+        "Informative Privacy e Cookies Policy",
+        "Per consultare le informative Privacy e la Cookies Policy dell’App.",
+        "visualizza informativa",
+        "IVASS",
+        "MODIFICA CONSENSO IVASS",
+        "Consensi IVASS",
+        "Non rilasciato"
+      ]
+    },
+    {
+      "id": "24268:251871",
+      "text": [
+        "Consensi e Privacy",
+        "Privacy",
+        "modifica privacy",
+        "Messaggistica",
+        "Acconsento",
+        "Email",
+        "Acconsento",
+        "Sistemi multimediali",
+        "Acconsento",
+        "Chiamate",
+        "Non acconsento",
+        "Profilazione",
+        "Acconsento",
+        "Cookies UniCredit",
+        "modifica cookies",
+        "Tracciamento",
+        "Acconsento",
+        "Cookies buddy",
+        "modifica cookies",
+        "Tracciamento",
+        "Acconsento",
+        "Informative Privacy e Cookies Policy",
+        "Per consultare le informative Privacy e la Cookies Policy dell’App.",
+        "visualizza informativa",
+        "IVASS",
+        "MODIFICA CONSENSO IVASS",
+        "Consensi IVASS",
+        "Non rilasciato"
+      ]
+    },
+    {
+      "id": "24268:251928",
+      "text": [
+        "Proteggi la tua privacy scegliendo come tratteremo i tuoi dati",
+        "Fai la tua scelta, ma prima prendi visione dell’informativa sul trattamento e la protezione dei dati personali",
+        "Messaggistica",
+        "SMS, MMS, Applicazioni",
+        "Acconsento",
+        "Non acconsento",
+        "Invio Email",
+        "Acconsento",
+        "Non acconsento",
+        "Sistemi di comunicazione multimediali, digitali e/o elettronici",
+        "Acconsento",
+        "Non acconsento",
+        "Chiamate",
+        "con e senza operatore telefonico",
+        "Acconsento",
+        "Non acconsento",
+        "Profilazione e Arrichimento",
+        "Acconsento",
+        "Non acconsento",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:251990",
+      "text": [
+        "Proteggi la tua privacy scegliendo come tratteremo i tuoi dati",
+        "Fai la tua scelta, ma prima prendi visione dell’informativa sul trattamento e la protezione dei dati personali",
+        "Messaggistica",
+        "SMS, MMS, Applicazioni",
+        "Acconsento",
+        "Non acconsento",
+        "Invio Email",
+        "Acconsento",
+        "Non acconsento",
+        "Sistemi di comunicazione multimediali, digitali e/o elettronici",
+        "Acconsento",
+        "Non acconsento",
+        "Chiamate",
+        "con e senza operatore telefonico",
+        "Acconsento",
+        "Non acconsento",
+        "Profilazione e Arrichimento",
+        "Acconsento",
+        "Non acconsento",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:252052",
+      "text": [
+        "Firma la documentazione",
+        "Ti raccomandiamo l’attenta lettura della documentazione di seguito esposta; premendo “Conferma” avvierai il processo di presa visione della stessa e, ove previsto, di successiva firma della medesima ai fini della formalizzazione della pratica.",
+        "Avanti"
+      ]
+    },
+    {
+      "id": "24268:252068",
+      "text": [
+        "Firma la documentazione",
+        "Ti raccomandiamo l’attenta lettura della documentazione di seguito esposta; premendo “Conferma” avvierai il processo di presa visione della stessa e, ove previsto, di successiva firma della medesima ai fini della formalizzazione della pratica.",
+        "Avanti"
+      ]
+    },
+    {
+      "id": "24268:252084",
+      "text": [
+        "Firma la documentazione",
+        "Ti raccomandiamo l’attenta lettura della documentazione di seguito esposta; premendo “Conferma” avvierai il processo di presa visione della stessa e, ove previsto, di successiva firma della medesima ai fini della formalizzazione della pratica.",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252100",
+      "text": [
+        "Per firmare è necessaria la firma digitale: scopri come funziona",
+        "Per sottoscrivere con la Firma Digitale i documenti informatici è necessaria\nl'emissione di un certificato di Firma Digitale, che è subito disponibile e che non comporta costi aggiuntivi. L'emissione del Certificato e la modalità di sottoscrizione sono regolate dal Manuale Operativo del certificatore accreditato In.Te.S.A. S.p.A.",
+        "Per procedere in tal senso, UniCredit deve comunicare il tuo Nome, Cognome, Codice Fiscale e data di nascita al Certificatore\nAccreditato In.Te.Sa. S.p.A., che li tratterà in qualità di titolare autonomo dei dati personali in conformità all'Informativa privacy qui resa ai sensi dell'art. 14 del Regolamento generale per la protezione dei dati personali n. 2016/679 (GDPR).",
+        "Ho preso visione del Manuale Operativo e richiedo la Firma Digitale",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:252118",
+      "text": [
+        "Completa la sottoscrizione",
+        "Premendo sul tasto “Conferma” ed inserendo poi il sistema di autenticazione richiesto, si completa la sottoscrizione elettronica in corrispondenza dei punti firma finora accettati.",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252134",
+      "text": [
+        "Completa la sottoscrizione",
+        "Premendo sul tasto “Conferma” ed inserendo poi il sistema di autenticazione richiesto, si completa la sottoscrizione elettronica in corrispondenza dei punti firma finora accettati.",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252150",
+      "text": [
+        "Le tue scelte sui Cookie",
+        "Fai la tua scelta, ma prima prendi visione della Cookie Policy",
+        "Puoi prestare o negare il consenso all’utilizzo di tutti gli strumenti con finalità di profilazione commerciale con i seguenti bottoni:",
+        "Acconsento",
+        "Non acconsento",
+        "Gli strumenti con finalità di profilazione commerciale sono correttamente abilitati",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252168",
+      "text": [
+        "Promozione contratti assicurativi a distanza",
+        "La Banca, per promuovere contratti assicurativi, per inviare materiale pubblicitario, per la vendita a distanza e per il compimento di ricerche di mercato tramite tecniche di comunicazione a distanza (SMS e push, Banca via Internet e call center) deve acquisire preventivamente dal cliente il consenso all'utilizzo di queste tecniche di comunicazione. Il consenso può essere revocato in qualunque momento e senza oneri.",
+        "Acconsento",
+        "Non acconsento",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252186",
+      "text": [
+        "Sicurezza",
+        "PIN",
+        "MODIFICA",
+        "Mobile Code",
+        "GESTISCI",
+        "Screenshot",
+        "MODIFICA",
+        "Disabilitato",
+        "Check up sicurezza",
+        "visualizza",
+        "Storico accessi",
+        "visualizza",
+        "Firma digitale",
+        "MODIFICA",
+        "Attiva"
+      ]
+    },
+    {
+      "id": "24268:252200",
+      "text": [
+        "Modifica PIN",
+        "Inserisci PIN attuale",
+        "Inserisci il tuo attuale PIN",
+        "Inserisci nuovo PIN",
+        "Inserisci il tuo nuovo PIN",
+        "Conferma il nuovo PIN",
+        "Inserisci il tuo nuovo PIN",
+        "Il tuo nuovo PIN deve:",
+        "Avere massimo 8 caratteri numerici",
+        "Essere differente dagli ultimi 5 PIN che hai utilizzato",
+        "Essere diverso dal tuo Codice Adesione",
+        "Il tuo nuovo PIN non deve:",
+        "Ripetere più di 3 volte lo stesso numero consecutivamente (es: 11111111, 11112323) ",
+        "Inserire più di 3 numeri in sequenza (es: 12345678, 12341234) ",
+        "Usare la tua data di nascita",
+        "Salva le modifiche"
+      ]
+    },
+    {
+      "id": "24268:252224",
+      "text": [
+        "Modifica PIN",
+        "Inserisci PIN attuale",
+        "*******",
+        "Inserisci nuovo PIN",
+        "*******",
+        "Conferma il nuovo PIN",
+        "*******",
+        "Il tuo nuovo PIN deve:",
+        "Avere massimo 8 caratteri numerici",
+        "Essere differente dagli ultimi 5 PIN che hai utilizzato",
+        "Essere diverso dal tuo Codice Adesione",
+        "Il tuo nuovo PIN non deve:",
+        "Ripetere più di 3 volte lo stesso numero consecutivamente (es: 11111111, 11112323) ",
+        "Inserire più di 3 numeri in sequenza (es: 12345678, 12341234) ",
+        "Usare la tua data di nascita",
+        "Salva le modifiche"
+      ]
+    },
+    {
+      "id": "24268:252248",
+      "text": [
+        "Codice PIN modificato con successo!",
+        "Il tuo codice PIN è stato modificato correttamente. Da ora potrai utilizzarlo per accedere e autorizzare le operazioni in sicurezza.\n\nSe non hai richiesto questa modifica o hai bisogno di assistenza, contatta il supporto clienti.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:252250",
+      "text": [
+        "Storico accessi inviato \ncon successo!",
+        "Lo storico accessi è stato inviato correttamente all’indirizzo email fornito.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:252252",
+      "text": [
+        "La sottoscrizione si è conclusa correttamente!",
+        "Vai a Homepage",
+        "Vai alla sezione Pratiche"
+      ]
+    },
+    {
+      "id": "24268:252254",
+      "text": [
+        "La sottoscrizione si è conclusa correttamente!",
+        "Vai a Homepage",
+        "Vai alla sezione Pratiche"
+      ]
+    },
+    {
+      "id": "24268:252256",
+      "text": [
+        "Sicurezza",
+        "PIN",
+        "MODIFICA",
+        "Mobile Code",
+        "GESTISCI",
+        "Screenshot",
+        "MODIFICA",
+        "Disabilitato",
+        "Check up sicurezza",
+        "visualizza",
+        "Storico accessi",
+        "visualizza",
+        "Firma digitale",
+        "MODIFICA",
+        "Attiva",
+        "Mobile Code",
+        "Creazione",
+        "Modifica",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252281",
+      "text": [
+        "Sicurezza",
+        "PIN",
+        "MODIFICA",
+        "Mobile Code",
+        "GESTISCI",
+        "Screenshot",
+        "MODIFICA",
+        "Disabilitato",
+        "Check up sicurezza",
+        "visualizza",
+        "Storico accessi",
+        "visualizza",
+        "Firma digitale",
+        "MODIFICA",
+        "Attiva"
+      ]
+    },
+    {
+      "id": "24268:252295",
+      "text": [
+        "Modifica il Mobile Code",
+        "Il mobile code è il codice che ti permette di generare password monouso con cui autorizzare le tua operazioni dall’App.",
+        "Inserisci attuale Mobile Code",
+        "Inserisci il tuo Mobile Code",
+        "Inserisci il nuovo Mobile Code",
+        "Inserisci il nuovo Mobile Code",
+        "Conferma il nuovo Mobile Code",
+        "Reinserisci il nuovo Mobile Code",
+        "Il tuo nuovo Mobile Code deve:",
+        "Essere un numero di lunghezza compresa tra 6 e 10 cifre",
+        "Il tuo nuovo Mobile Code non deve:",
+        "Contenere numeri consecutivi (ad es: 12345678, 87654321)",
+        "Contenere lo stesso numero in sequenza più di 3 volte (es. 11113568, 462222)",
+        "Contenere la stessa sequenza di due o tre numeri più di due volte (es. 121212, 12125612, 1231231237)",
+        "Essere uguale al tuo codice di adesione, PIN o data di nascita",
+        "Essere uguale al Mobile Code precedente",
+        "Iniziare con il numero \"zero\"",
+        "Salva le modifiche"
+      ]
+    },
+    {
+      "id": "24268:252324",
+      "text": [
+        "Modifica il Mobile Code",
+        "Il mobile code è il codice che ti permette di generare password monouso con cui autorizzare le tua operazioni dall’App.",
+        "Inserisci attuale Mobile Code",
+        "12345678",
+        "Inserisci il nuovo Mobile Code",
+        "34567812",
+        "Conferma il nuovo Mobile Code",
+        "34567812",
+        "Il tuo nuovo Mobile Code deve:",
+        "Essere un numero di lunghezza compresa tra 6 e 10 cifre",
+        "Il tuo nuovo Mobile Code non deve:",
+        "Contenere numeri consecutivi (ad es: 12345678, 87654321)",
+        "Contenere lo stesso numero in sequenza più di 3 volte (es. 11113568, 462222)",
+        "Contenere la stessa sequenza di due o tre numeri più di due volte (es. 121212, 12125612, 1231231237)",
+        "Essere uguale al tuo codice di adesione, PIN o data di nascita",
+        "Essere uguale al Mobile Code precedente",
+        "Iniziare con il numero \"zero\"",
+        "Salva le modifiche"
+      ]
+    },
+    {
+      "id": "24268:252351",
+      "text": [
+        "Mobile Code modificato con successo!",
+        "Il tuo Mobile Code è stato modificato correttamente. Da ora potrai utilizzarlo per accedere e autorizzare le operazioni in sicurezza.\n\nSe non hai richiesto questa modifica o hai bisogno di assistenza, contatta il supporto clienti.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:252353",
+      "text": [
+        "Sicurezza",
+        "PIN",
+        "MODIFICA",
+        "Mobile Code",
+        "GESTISCI",
+        "Screenshot",
+        "MODIFICA",
+        "Disabilitato",
+        "Check up sicurezza",
+        "visualizza",
+        "Storico accessi",
+        "visualizza",
+        "Firma digitale",
+        "MODIFICA",
+        "Attiva"
+      ]
+    },
+    {
+      "id": "24268:252367",
+      "text": [
+        "Creazione di un nuovo Mobile Code",
+        "1",
+        "/2",
+        "Verifica dati",
+        "Il mobile code è il codice che utilizzi per generare le password usa e getta necessario per confermare le operazioni effettuate con l’App Mobile Banking di UniCredit e tramite gli altri canali del Servizio di Banca Multicanale o negli acquisti online.\nPer ricevere il nuovo mobile code, perprima cosa verifica/conferma il tuo indirizzo email e il tuo numero di cellulare, nel caso in cui non siano già verificati.",
+        "Email",
+        "mic****ssi@email.it",
+        "MODIFICA",
+        "Verificato",
+        "Numero di cellulare",
+        "335****997",
+        "MODIFICA",
+        "Verificato",
+        "Operatore telefonico",
+        "Vodafone",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252381",
+      "text": [
+        "Sicurezza",
+        "PIN",
+        "MODIFICA",
+        "Mobile Code",
+        "GESTISCI",
+        "Screenshot",
+        "MODIFICA",
+        "Disabilitato",
+        "Check up sicurezza",
+        "visualizza",
+        "Storico accessi",
+        "visualizza",
+        "Firma digitale",
+        "MODIFICA",
+        "Attiva",
+        "Mobile Code",
+        "Creazione",
+        "Modifica",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252406",
+      "text": [
+        "Creazione di un nuovo Mobile Code",
+        "2",
+        "/2",
+        "Conferma",
+        "10.000",
+        ",00 €",
+        "Saldo disponibile",
+        "UniCredit Genius Card",
+        "Credit",
+        "Per sicurezza inserisci anche il penultimo blocco di quattro cifre della tua Carta",
+        "XXXX ",
+        "XXXX ",
+        "Es.123",
+        "XXXX",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252427",
+      "text": [
+        "Mobile Code creato con successo!",
+        "Ti abbiamo inviato al numero di cellulare che hai inserito un SMS con un nuovo codice Mobile Code che potrai modificare nella sezione Sicurezza della tua Banca Multicanale. Per rendere la modifica effettiva accedi nuovamente all’App Mobile Banking.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:252469",
+      "text": [
+        "Filtri di ricerca",
+        "Data",
+        "Seleziona periodo",
+        "3M",
+        "6M",
+        "6M",
+        "12M",
+        "Personalizza periodo",
+        "02/10/2024 - 02/01/2025",
+        "Rimuovi Filtri",
+        "Applica"
+      ]
+    },
+    {
+      "id": "24268:252490",
+      "text": [
+        "Invia storico via email",
+        "Email",
+        "andrearossini@email.it",
+        "MODIFICA",
+        "Verificato",
+        "Invia storico"
+      ]
+    },
+    {
+      "id": "24268:252499",
+      "text": [
+        "Impostazioni",
+        "Gestione e Preferenze",
+        "Generali",
+        "Dispositivi",
+        "Notifiche",
+        "Newsletter",
+        "Banca",
+        "Limiti e operatività rapporti",
+        "Diritto di recesso contratti conclusi a distanza",
+        "Operazioni veloci",
+        "Terze parti",
+        "Sicurezza",
+        "Face ID",
+        "Sicurezza",
+        "Consensi e Privacy"
+      ]
+    },
+    {
+      "id": "24268:252526",
+      "text": [
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252529",
+      "text": [
+        "Richiesta di certificato per la firma digitale",
+        "Per sottoscrivere con la Firma Digitale i documenti informatici e necessaria l'emissione di un certificato di Firma Digitale, che e subito disponibile e che non comporta costi aggiuntivi. L'emissione del Certificato e la modalità di sottoscrizione sono regolate dal Manuale \nOperativo del certificatore accreditato In.Te.S.A. S.p.A.\n\nPer procedere in tal senso, UniCredit deve comunicare il tuo Nome, Cognome, Codice Fiscale e data di nascita al Certificatore Accreditato In.Te.Sa.\nS.p.A., che li tratterà in qualità di titolare autonomo dei dati personali in conformità all'Informativa privacy qui resa ai sensi dell'art. 14 del Regolamento generale per la protezione dei dati personali n.\n2016/679 (GDPR).",
+        "Ho preso visione del Manuale Operativo e richiedo la Firma Digitale",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252542",
+      "text": [
+        "Certificato attivato correttamente!",
+        "Il tuo certificato per la firma digitale è stato attivato con successo. \n\nOra puoi utilizzarlo per firmare documenti in modo semplice e sicuro. ",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:252544",
+      "text": [
+        "Sicurezza",
+        "PIN",
+        "MODIFICA",
+        "Mobile Code",
+        "GESTISCI",
+        "Screenshot",
+        "MODIFICA",
+        "Disabilitato",
+        "Check up sicurezza",
+        "visualizza",
+        "Storico accessi",
+        "visualizza",
+        "Firma digitale",
+        "attiva",
+        "Non attiva"
+      ]
+    },
+    {
+      "id": "24268:252558",
+      "text": [
+        "Sicurezza",
+        "PIN",
+        "MODIFICA",
+        "Mobile Code",
+        "GESTISCI",
+        "Screenshot",
+        "MODIFICA",
+        "Disabilitato",
+        "Check up sicurezza",
+        "visualizza",
+        "Storico accessi",
+        "visualizza",
+        "Firma digitale",
+        "MODIFICA",
+        "Attiva"
+      ]
+    },
+    {
+      "id": "24268:252572",
+      "text": [
+        "Sicurezza",
+        "PIN",
+        "MODIFICA",
+        "Mobile Code",
+        "GESTISCI",
+        "Screenshot",
+        "MODIFICA",
+        "Disabilitato",
+        "Check up sicurezza",
+        "visualizza",
+        "Storico accessi",
+        "visualizza",
+        "Firma digitale",
+        "RIATTIVA",
+        "Sospesa"
+      ]
+    },
+    {
+      "id": "24268:252586",
+      "text": [
+        "Sei sicuro di voler sospendere il certificato di Firma digitale?",
+        "Stai effettuando la sospensione del tuo Certificato Qualificato per la Firma Digitale.  Ti ricordiamo le firme che hai già apposto con questo certificato rimarranno comunque valide e i relativi documenti saranno conservati nel server sicuro della Banca, in quello dell’ente certificatore In.Te.S.A. e nella sezione Documenti/Contratti del tuo Menu personale.   Ti ricordiamo che se sospendi il Certificato: \n\nprima di firmare nuovi documenti online dovrai riattivare il Certificato\nse non lo riattivi entro 90 giorni dalla sospensione il Certificato sarà revocato",
+        "Annulla",
+        "Sospendi"
+      ]
+    },
+    {
+      "id": "24268:252597",
+      "text": [
+        "Sicurezza",
+        "PIN",
+        "MODIFICA",
+        "Mobile Code",
+        "GESTISCI",
+        "Screenshot",
+        "MODIFICA",
+        "Disabilitato",
+        "Check up sicurezza",
+        "visualizza",
+        "Storico accessi",
+        "visualizza",
+        "Firma digitale",
+        "MODIFICA",
+        "Servizio attivo",
+        "Firma digitale",
+        "Sospendi",
+        "Revoca",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252622",
+      "text": [
+        "Certificato sospeso correttamente",
+        "Il tuo certificato per la firma digitale è stato sospeso con successo. Questa operazione è reversibile, potrai riattivarlo in qualsiasi momento dalla tua area personale.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:252624",
+      "text": [
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252626",
+      "text": [
+        "Sicurezza",
+        "PIN",
+        "MODIFICA",
+        "Mobile Code",
+        "GESTISCI",
+        "Screenshot",
+        "MODIFICA",
+        "Disabilitato",
+        "Check up sicurezza",
+        "visualizza",
+        "Storico accessi",
+        "visualizza",
+        "Firma digitale",
+        "MODIFICA",
+        "Attiva"
+      ]
+    },
+    {
+      "id": "24268:252640",
+      "text": [
+        "Sei sicuro di voler revocare il certificato di Firma digitale?",
+        "Stai effettuando la sospensione del tuo Certificato Qualificato per la Firma Digitale.  Ti ricordiamo le firme che hai già apposto con questo certificato rimarranno comunque valide e i relativi documenti saranno conservati nel server sicuro della Banca, in quello dell’ente certificatore In.Te.S.A. e nella sezione Documenti/Contratti del tuo Menu personale.   Ti ricordiamo che se sospendi il Certificato: \n\nprima di firmare nuovi documenti online dovrai riattivare il Certificato\nse non lo riattivi entro 90 giorni dalla sospensione il Certificato sarà revocato",
+        "Annulla",
+        "Revoca"
+      ]
+    },
+    {
+      "id": "24268:252651",
+      "text": [
+        "Sicurezza",
+        "PIN",
+        "MODIFICA",
+        "Mobile Code",
+        "GESTISCI",
+        "Screenshot",
+        "MODIFICA",
+        "Disabilitato",
+        "Check up sicurezza",
+        "visualizza",
+        "Storico accessi",
+        "visualizza",
+        "Firma digitale",
+        "MODIFICA",
+        "Attiva",
+        "Firma digitale",
+        "Sospendi",
+        "Revoca",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252676",
+      "text": [
+        "Certificato revocato correttamente",
+        "Il tuo certificato per la firma digitale è stato revocato con successo. Potrai richiederlo nuovamente in qualsiasi momento dalla tua area personale.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:252678",
+      "text": [
+        "Sicurezza",
+        "PIN",
+        "MODIFICA",
+        "Mobile Code",
+        "GESTISCI",
+        "Screenshot",
+        "MODIFICA",
+        "Disabilitato",
+        "Check up sicurezza",
+        "visualizza",
+        "Storico accessi",
+        "visualizza",
+        "Firma digitale",
+        "attiva",
+        "Revocata"
+      ]
+    },
+    {
+      "id": "24268:252692",
+      "text": [
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252697",
+      "text": [
+        "Disposizioni",
+        "Selezionando una singola funzionalità di pagamento sarà possibile riattivarla o sospenderla in qualsiasi momento.",
+        "Bonifico istantaneo",
+        "Bonifico Sepa",
+        "Bonifico Extra Sepa",
+        "Salva le modifiche"
+      ]
+    },
+    {
+      "id": "24268:252712",
+      "text": [
+        "Disposizioni",
+        "Bonifico istantaneo",
+        "Bonifico Sepa",
+        "Bonifico Extra Sepa"
+      ]
+    },
+    {
+      "id": "24268:252724",
+      "text": [
+        "Disposizioni",
+        "Selezionando una singola funzionalità di pagamento sarà possibile riattivarla o sospenderla in qualsiasi momento.",
+        "Bonifico istantaneo",
+        "Bonifico Sepa",
+        "Bonifico Extra Sepa",
+        "Salva le modifiche"
+      ]
+    },
+    {
+      "id": "24268:252739",
+      "text": [
+        "Disposizioni",
+        "Selezionando una singola funzionalità di pagamento sarà possibile riattivarla o sospenderla in qualsiasi momento.",
+        "Bonifico istantaneo",
+        "Bonifico Sepa",
+        "Bonifico Extra Sepa",
+        "Salva le modifiche"
+      ]
+    },
+    {
+      "id": "24268:252754",
+      "text": [
+        "Il bonifico istantaneo, il bonifico SEPA e il bonifico extra SEPA sono stati attivati correttamente",
+        "Potrai disattivarli in qualsiasi momento dalla tua area personale.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:252756",
+      "text": [
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252758",
+      "text": [
+        "Disposizioni",
+        "Selezionando una singola funzionalità di pagamento sarà possibile riattivarla o sospenderla in qualsiasi momento.",
+        "Bonifico istantaneo",
+        "Bonifico Sepa",
+        "Bonifico Extra Sepa",
+        "Salva le modifiche"
+      ]
+    },
+    {
+      "id": "24268:252773",
+      "text": [
+        "Disposizioni",
+        "Selezionando una singola funzionalità di pagamento sarà possibile riattivarla o sospenderla in qualsiasi momento.",
+        "Bonifico istantaneo",
+        "Bonifico Sepa",
+        "Bonifico Extra Sepa",
+        "Salva le modifiche"
+      ]
+    },
+    {
+      "id": "24268:252788",
+      "text": [
+        "Operatività Conti Correnti e Conto Titoli",
+        "Questa sezione ti permette di richiedere di modificare la modalità di collegamento dei tuoi\nConti Correnti e Conto Titoli al servizio di Banca Multicanale da informativa a dispositiva. La richiesta, se relativa a rapporti cointestati, deve essere previamente condivisa con gli altri cointestatari. Per tornare alla modalità informativa\nrivolgiti alla tua filiale.",
+        "Seleziona i conti che vuoi rendere dispositivi",
+        "Andrea Rossini",
+        "IT 123456789000000012",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:252802",
+      "text": [
+        "Operatività Conti Correnti e Conto Titoli",
+        "Questa sezione ti permette di richiedere di modificare la modalità di collegamento dei tuoi\nConti Correnti e Conto Titoli al servizio di Banca Multicanale da informativa a dispositiva. La richiesta, se relativa a rapporti cointestati, deve essere previamente condivisa con gli altri cointestatari. Per tornare alla modalità informativa\nrivolgiti alla tua filiale.",
+        "Conti dispositivi",
+        "Conto corrente - Ardizzon",
+        "IT 123456789000000012",
+        "Dispositivo",
+        "Seleziona i conti che vuoi rendere dispositivi",
+        "Salici",
+        "IT 123456789000000012",
+        "Ardizzon",
+        "IT 123456789000000012",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:252821",
+      "text": [
+        "Operatività Conti Correnti e Conto Titoli",
+        "Questa sezione ti permette di richiedere di modificare la modalità di collegamento dei tuoi\nConti Correnti e Conto Titoli al servizio di Banca Multicanale da informativa a dispositiva. La richiesta, se relativa a rapporti cointestati, deve essere previamente condivisa con gli altri cointestatari. Per tornare alla modalità informativa\nrivolgiti alla tua filiale.",
+        "Conti dispositivi",
+        "Conto corrente - Ardizzon",
+        "IT 123456789000000012",
+        "Dispositivo",
+        "Seleziona i conti che vuoi rendere dispositivi",
+        "Salici",
+        "IT 123456789000000012",
+        "Ardizzon",
+        "IT 123456789000000012",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:252840",
+      "text": [
+        "Operatività Conti Correnti e Conto Titoli",
+        "Questa sezione ti permette di richiedere di modificare la modalità di collegamento dei tuoi\nConti Correnti e Conto Titoli al servizio di Banca Multicanale da informativa a dispositiva. La richiesta, se relativa a rapporti cointestati, deve essere previamente condivisa con gli altri cointestatari. Per tornare alla modalità informativa\nrivolgiti alla tua filiale.",
+        "Conti dispositivi",
+        "Conti correnti",
+        "Andrea Rossini IT545T200802435000102474",
+        "Dispositivo",
+        "Conto titoli",
+        "Andrea Rossini 123456789023456",
+        "Dispositivo",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:252856",
+      "text": [
+        "Operatività Conti Correnti e Conto Titoli",
+        "Questa sezione ti permette di richiedere di modificare la modalità di collegamento dei tuoi\nConti Correnti e Conto Titoli al servizio di Banca Multicanale da informativa a dispositiva. La richiesta, se relativa a rapporti cointestati, deve essere previamente condivisa con gli altri cointestatari. Per tornare alla modalità informativa\nrivolgiti alla tua filiale.",
+        "Seleziona i conti che vuoi rendere dispositivi",
+        "Andrea Rossini",
+        "IT 123456789000000012",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:252870",
+      "text": [
+        "Conferma richiesta di modifica",
+        "Confermo di aver preso visione dei contenuti che corrispondono a quanto da me indicato e dichiaro che, in caso di rapporti cointestati, la richiesta è stata espressa sulla base della preventiva condivisione con gli altri cointestatari",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252881",
+      "text": [
+        "Conferma richiesta di modifica",
+        "Confermo di aver preso visione dei contenuti che corrispondono a quanto da me indicato e dichiaro che, in caso di rapporti cointestati, la richiesta è stata espressa sulla base della preventiva condivisione con gli altri cointestatari",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252892",
+      "text": [
+        "Disposizioni",
+        "Selezionando una singola funzionalità di pagamento sarà possibile riattivarla o sospenderla in qualsiasi momento.",
+        "Bonifico istantaneo",
+        "Bonifico Sepa",
+        "Bonifico Extra Sepa",
+        "Salva le modifiche",
+        "Disposizioni",
+        "Selezionando una singola funzionalità di pagamento sarà possibile riattivarla o sospenderla in qualsiasi momento.",
+        "Bonifico istantaneo",
+        "Bonifico Sepa",
+        "Bonifico Extra Sepa",
+        "Salva le modifiche",
+        "Sei sicuro di voler sospendere il bonifico istantaneo?",
+        "Potrai riattivarla in qualsiasi momento dalla sezione dedicata nel tuo profilo",
+        "Conferma",
+        "Annulla"
+      ]
+    },
+    {
+      "id": "24268:252936",
+      "text": [
+        "Attiva operazioni veloci",
+        "4",
+        "/4",
+        "Presa visione dei costi",
+        "Informativa sulla visione dei costi",
+        "Attivazione della funzionalità: 0 € \nCosto delle Operazioni Veloci: Il costo è lo stesso previsto per le normali operazioni effettuate tramite banca via Internet SMS di conferma, inviato in automatico dalla banca al cliente quando viene effettuata un'Operazione Veloce Il costo del singolo SMS è 26 centesimi. I prezzi si intendono in euro, IVA inclusa. Gli importi relativi agli sms saranno addebitati sul conto telefonico dei titolari dal rispettivo operatore telefonico.",
+        "Ho preso visione dei costi",
+        "Continua"
+      ]
+    },
+    {
+      "id": "24268:252955",
+      "text": [
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:252957",
+      "text": [
+        "Hai attivato il servizio con successo!",
+        "Grazie! Il servizio è stato attivato correttamente. Ora puoi iniziare a utilizzarlo per bonifici e ricariche in modo semplice e veloce. \nPuoi gestire il servizio dalle tue Impostazioni.\n\nSe hai bisogno di assistenza, il nostro team è sempre a tua disposizione.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:252959",
+      "text": [
+        "Operazioni veloci",
+        "Operazioni veloci",
+        "attiva",
+        "Non attivo",
+        "SCOPRI I COSTI DEL SERVIZIO E GLI OPERATORI",
+        "Operazioni Veloci: Attivarle è facile",
+        "Con Operazioni Veloci non dovrai più inserire le password dispositive per Bonifici in Italia, ricariche di cellulari e carte pregate verso i beneficiari da te abilitati.",
+        "Velocità in sicurezza",
+        "L'Unicredit Pass si usa solo per attivare la funzionalità\n\nPer garantire la massima sicurezza del servizio, in fase di attivazione ti sarà richiesta la password usa e getta generata dal tuo dispositivo (Mobile ToKen o UniCredit Pass). Successivamente, non avrai più bisogno di alcuna password per effettuare bonifici e ricariche a favore dei beneficiari da te abilitati.",
+        "Lista dei beneficiari",
+        "Potrai eseguire le Operazioni Veloci verso i beneficiari che hai selezionato. Per selezionarli basta accedere alla tua Rubrica e abilitare al servizio i contatti a tua scelta.\n\nPotrai eseguire i Pagamenti Veloci solo verso i beneficiari che avrai selezionato e abilitato. Per selezionare i beneficiari ti sarà sufficiente accedere alla tua Rubrica e abilitare al servizio i contatti di tuo interesse."
+      ]
+    },
+    {
+      "id": "24268:252983",
+      "text": [
+        "Attiva operazioni veloci",
+        "1",
+        "/4",
+        "Verifica dati",
+        "Email",
+        "mic****ssi@email.it",
+        "MODIFICA",
+        "Verificato",
+        "Numero di cellulare",
+        "335****997",
+        "MODIFICA",
+        "Verificato",
+        "Operatore telefonico",
+        "Vodafone",
+        "Continua"
+      ]
+    },
+    {
+      "id": "24268:253000",
+      "text": [
+        "Modifica operazioni veloci",
+        "1",
+        "/3",
+        "Verifica dati",
+        "Email",
+        "mic****ssi@email.it",
+        "MODIFICA",
+        "Verificato",
+        "Numero di cellulare",
+        "335****997",
+        "MODIFICA",
+        "Verificato",
+        "Operatore telefonico",
+        "Vodafone",
+        "Continua"
+      ]
+    },
+    {
+      "id": "24268:253017",
+      "text": [
+        "Modifica operazioni veloci",
+        "1",
+        "/4",
+        "Verifica dati",
+        "Email",
+        "mic****ssi@email.it",
+        "MODIFICA",
+        "Verificato",
+        "Numero di cellulare",
+        "335****997",
+        "MODIFICA",
+        "Verificato",
+        "Operatore telefonico",
+        "Vodafone",
+        "Continua"
+      ]
+    },
+    {
+      "id": "24268:253034",
+      "text": [
+        "Attiva operazioni veloci",
+        "2",
+        "/4",
+        "Seleziona conto o carta",
+        "Seleziona i conti correnti e/o la carta con IBAN su cui vuoi autorizzare l'addebito dei bonifici e delle ricariche telefoniche.",
+        "Conti correnti",
+        "Andrea Rossini",
+        "IT60 X123 0000005678",
+        "Giovanni Rossi",
+        "IT60 X123 0000001234",
+        "Carte con IBAN",
+        "UniCredit Genius Card",
+        "**** **** **** 1234",
+        "Continua"
+      ]
+    },
+    {
+      "id": "24268:253057",
+      "text": [
+        "Modifica operazioni veloci",
+        "2",
+        "/3",
+        "Seleziona conto o carta",
+        "Attiva e disattiva i conti correnti e/o la carta prepagata con IBAN che vuoi abilitare per i bonifici e le ricariche telefoniche.",
+        "Conti correnti",
+        "Andrea Rossini",
+        "IT60 X123 0000005678",
+        "Giovanni Rossi",
+        "IT60 X123 0000001234",
+        "Carte con IBAN",
+        "UniCredit Genius Card",
+        "**** **** **** 1234",
+        "Continua"
+      ]
+    },
+    {
+      "id": "24268:253079",
+      "text": [
+        "Modifica operazioni veloci",
+        "2",
+        "/4",
+        "Seleziona conto o carta",
+        "Attiva e disattiva i conti correnti e/o la carta prepagata con IBAN che vuoi abilitare per i bonifici e le ricariche telefoniche.",
+        "Conti correnti",
+        "Andrea Rossini",
+        "IT60 X123 0000005678",
+        "Giovanni Rossi",
+        "IT60 X123 0000001234",
+        "Carte con IBAN",
+        "UniCredit Genius Card",
+        "**** **** **** 1234",
+        "Continua"
+      ]
+    },
+    {
+      "id": "24268:253101",
+      "text": [
+        "Attiva operazioni veloci",
+        "3",
+        "/4",
+        "Seleziona conto o carta predefinito",
+        "Seleziona il conto o la carta predefinito per gli addebiti",
+        "Conti correnti",
+        "Andrea Rossini",
+        "IT60 X123 0000005678",
+        "Giovanni Rossi",
+        "IT60 X123 0000001234",
+        "Carte con IBAN",
+        "UniCredit Genius Card",
+        "**** **** **** 1234",
+        "Continua"
+      ]
+    },
+    {
+      "id": "24268:253123",
+      "text": [
+        "Pagamenti veloci",
+        "Pagamenti Veloci: bonifici e ricariche senza password",
+        "Bonifici, ricariche e pagamenti rapidi ai beneficiari selezionati tramite Internet Banking, SMS, sito mobile e App. Attivazione gratuita.",
+        "Link",
+        "SCOPRI I COSTI DEL SERVIZIO E GLI OPERATORI ABILITATI",
+        "Velocità in sicurezza",
+        "L'Unicredit Pass si usa solo per attivare la funzionalità\n\nPer garantire la massima sicurezza del servizio, in fase di attivazione ti sarà richiesta la password usa e getta generata dal tuo dispositivo (Mobile ToKen o UniCredit Pass). Successivamente, non avrai più bisogno di alcuna password per effettuare bonifici e ricariche a favore dei beneficiari da te.",
+        "Lista dei beneficiari",
+        "Pagamenti solo verso una lista definita di beneficiari.\n\nPotrai eseguire i Pagamenti Veloci solo verso i beneficiari che avrai selezionato e abilitato. Per selezionare i beneficiari ti sarà sufficiente accedere alla tua Rubrica e abilitare al servizio i contatti di tuo interesse.",
+        "Costi di attivazione e utilizzo del servizio",
+        "Attivazione del servizio: 0 EUR\n Costo delle Operazioni Veloci: Il costo è lo stesso previsto per le normali operazioni effettuate tramite Banca via Internet.\n SMS di conferma: 26 centesimi.\n L’SMS di conferma ti viene inviato in automatico dalla banca ogni volta che effettui un'Operazione Veloce. SMS da te inviati per richiedere l'effettuazione di un'Operazione Veloce: comportano gli stessi costi applicati dal tuo operatore telefonico per i normali SMS in uscita, come previsti dal tuo piano tariffario. Gli operatori telefonici abilitati al servizio sono TIM, Vodafone, WINDTRE, Poste Mobile e Coop Voce. I prezzi si intendono in euro, IVA inclusa. Gli importi degli SMS ti saranno addebitati sul conto telefonico direttamente dal tuo operatore.",
+        "Operatori telefonici abilitati",
+        "Gli operatori telefonici abilitati al servizio sono:\nTIM, Vodafone, WINDTRE, Poste Mobile e Coop Voce.\n\nI prezzi si intendono in euro, IVA inclusa. Gli importi degli SMS ti saranno addebitati sul conto telefonico direttamente dal tuo operatore."
+      ]
+    },
+    {
+      "id": "24268:253154",
+      "text": [
+        "Operazioni veloci",
+        "Operazioni veloci",
+        "MODIFICA",
+        "Attivo",
+        "SCOPRI I COSTI DEL SERVIZIO E GLI OPERATORI"
+      ]
+    },
+    {
+      "id": "24268:253165",
+      "text": [
+        "Operazioni veloci",
+        "Operazioni veloci",
+        "MODIFICA",
+        "Attivo",
+        "SCOPRI I COSTI DEL SERVIZIO E GLI OPERATORI"
+      ]
+    },
+    {
+      "id": "24268:253176",
+      "text": [
+        "Modifica operazioni veloci",
+        "3",
+        "/3",
+        "Presa visione dei costi",
+        "Informativa sulla visione dei costi",
+        "Attivazione della funzionalità: 0 € \nCosto delle Operazioni Veloci: Il costo è lo stesso previsto per le normali operazioni effettuate tramite banca via Internet SMS di conferma, inviato in automatico dalla banca al cliente quando viene effettuata un'Operazione Veloce Il costo del singolo SMS è 26 centesimi. I prezzi si intendono in euro, IVA inclusa. Gli importi relativi agli sms saranno addebitati sul conto telefonico dei titolari dal rispettivo operatore telefonico.",
+        "Ho preso visione dei costi",
+        "Continua"
+      ]
+    },
+    {
+      "id": "24268:253195",
+      "text": [
+        "Modifica operazioni veloci",
+        "4",
+        "/4",
+        "Presa visione dei costi",
+        "Informativa sulla visione dei costi",
+        "Attivazione della funzionalità: 0 € \nCosto delle Operazioni Veloci: Il costo è lo stesso previsto per le normali operazioni effettuate tramite banca via Internet SMS di conferma, inviato in automatico dalla banca al cliente quando viene effettuata un'Operazione Veloce Il costo del singolo SMS è 26 centesimi. I prezzi si intendono in euro, IVA inclusa. Gli importi relativi agli sms saranno addebitati sul conto telefonico dei titolari dal rispettivo operatore telefonico.",
+        "Ho preso visione dei costi",
+        "Continua"
+      ]
+    },
+    {
+      "id": "24268:253214",
+      "text": [
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:253216",
+      "text": [
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:253220",
+      "text": [
+        "Attiva operazioni veloci",
+        "3",
+        "/4",
+        "Seleziona conto o carta predefinito",
+        "Seleziona il conto o la carta predefinito per gli addebiti",
+        "Conti correnti",
+        "Andrea Rossini",
+        "IT60 X123 0000005678",
+        "Giovanni Rossi",
+        "IT60 X123 0000001234",
+        "Carte con IBAN",
+        "UniCredit Genius Card",
+        "**** **** **** 1234",
+        "Continua"
+      ]
+    },
+    {
+      "id": "24268:253245",
+      "text": [
+        "Hai modificato il servizio con successo!",
+        "Grazie! Il servizio è stato modificato correttamente.\n\nSe hai bisogno di assistenza, il nostro team è sempre a tua disposizione.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:253247",
+      "text": [
+        "Hai modificato il servizio con successo!",
+        "Grazie! Il servizio è stato modificato correttamente.\n\nSe hai bisogno di assistenza, il nostro team è sempre a tua disposizione.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:253250",
+      "text": [
+        "Investimenti e risparmio",
+        "Abilita tutte le notifiche",
+        "Ordini",
+        "Solo archivio",
+        "Altre comunicazioni",
+        "Solo archivio",
+        "Salva modifiche"
+      ]
+    },
+    {
+      "id": "24268:253270",
+      "text": [
+        "Utilizza il codice fornito dalla terza parte",
+        "1",
+        "/2",
+        "Inserisci il codice fornito dalla Terza Parte",
+        "Codice univoco fornito dalla terza parte",
+        "Inserisci codice univoco",
+        "Inserisci il codice univoco fornito dalle Terze Parti per verificare e confermare un consenso per aggregazione del/dei rapporto/i o un'operazione di pagamento o un annullo.",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:253278",
+      "text": [
+        "Utilizza il codice fornito dalla terza parte",
+        "1",
+        "/2",
+        "Inserisci il codice fornito dalla Terza Parte",
+        "Codice univoco fornito dalla terza parte",
+        "YADITY",
+        "Inserisci il codice univoco fornito dalle Terze Parti per verificare e confermare un consenso per aggregazione del/dei rapporto/i o un'operazione di pagamento o un annullo.",
+        "Prosegui"
+      ]
+    },
+    {
+      "id": "24268:253286",
+      "text": [
+        "Conferma consenso",
+        "2",
+        "/2",
+        "Consenso richiesto",
+        "In questa pagina trovi i consensi richiesti dalla terza parte",
+        "Consenso",
+        "93f50b10a4a2-49bf-86cc-1259f5458",
+        "Scadenza",
+        "28/04/2025",
+        "UniCredit S.p.a Test",
+        "ID",
+        "IT-BI-123456 (AISP)",
+        "Conto Ronzoni Umberto",
+        "Numero conto",
+        "000000040500523",
+        "Intestatario",
+        "Ronzoni Umberto",
+        "IBAN",
+        "IT12345678798765598787784624654",
+        "Valuta",
+        "EUR",
+        "Condividi",
+        "Saldo",
+        "Transazioni",
+        "Conto Ronzoni Umberto, Marelli Chiara",
+        "Numero conto",
+        "000000040500523",
+        "Intestatario",
+        "Ronzoni Umberto, Marelli Chiara",
+        "IBAN",
+        "IT12345678798765598787784624567",
+        "Valuta",
+        "EUR",
+        "Condividi",
+        "Saldo",
+        "Transazioni",
+        "Carta prepagata Genius Card",
+        "Numero conto",
+        "000000040500523",
+        "Intestatario",
+        "Ronzoni Umberto",
+        "IBAN",
+        "IT12345678798765598787784624567",
+        "Valuta",
+        "EUR",
+        "Condividi",
+        "Saldo",
+        "Transazioni",
+        "Cliccando su conferma approverai il consenso richiesto dalla Terza parte.",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:253337",
+      "text": [
+        "Grazie cliente, \nl’operazione è stata eseguita correttamente.",
+        "Clicca sul pulsante per tornare alla pagina della Terza Parte o attendi pochi secondi per essere reindirizzato automaticamente.",
+        "Torna su Terze Parti"
+      ]
+    },
+    {
+      "id": "24268:253339",
+      "text": [
+        "MAV, RAV, REP",
+        "4",
+        "/4",
+        "Riepilogo",
+        "Conto di addebito",
+        "Conto Principale - Andrea Rossini",
+        "modifica",
+        "Riferimento",
+        "02000123456789012",
+        "modifica",
+        "Importo",
+        "48",
+        ",00 €",
+        "modifica",
+        "Commissioni bancarie ",
+        "0",
+        ",75 €",
+        "Importo totale",
+        "48",
+        ",75 €",
+        "Data esecuzione",
+        "03/02/2025",
+        "Il pagamento è annullabile solo entro le 18:00 della giornata di inserimento",
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:253356",
+      "text": [
+        "MAV, RAV, REP",
+        "4",
+        "/4",
+        "Riepilogo",
+        "Conto di addebito",
+        "Conto Principale - Andrea Rossini",
+        "modifica",
+        "Riferimento",
+        "02000123456789012",
+        "modifica",
+        "Importo",
+        "48",
+        ",00 €",
+        "modifica",
+        "Commissioni bancarie ",
+        "0",
+        ",75 €",
+        "Importo totale",
+        "48",
+        ",75 €",
+        "Data esecuzione",
+        "03/02/2025",
+        "Il pagamento è annullabile solo entro le 18:00 della giornata di inserimento",
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Face ID",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:253382",
+      "text": [
+        "Da quale banca vuoi importare un conto o una carta IBAN?",
+        "Paese",
+        "Seleziona il Paese",
+        "Banca",
+        "Seleziona la Banca",
+        "Prosegui",
+        "Attenzione",
+        "Il codice inserito non è corretto. Si prega di riprovare.",
+        "Chiudi"
+      ]
+    },
+    {
+      "id": "24268:253414",
+      "text": [
+        " Rimando a ucx"
+      ]
+    },
+    {
+      "id": "24268:253416",
+      "text": [
+        " Rimando a ucx"
+      ]
+    },
+    {
+      "id": "24268:253418",
+      "text": [
+        " Rimando a ucx"
+      ]
+    },
+    {
+      "id": "24268:254418",
+      "text": [
+        "Documento Consensi Privacy",
+        "FACSIMILE",
+        "VISUALIZZA DOCUMENTO PDF",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:254432",
+      "text": [
+        "Documento Consensi Privacy",
+        "FACSIMILE",
+        "VISUALIZZA DOCUMENTO PDF",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:254446",
+      "text": [
+        "Documento Consensi Privacy",
+        "Dichiaro di aver preso visione dell’Informativa privacy reasmi a disposizione e di confermare la volontà da me espressa in merito ai consenso al trattamento dei dati personali",
+        "FACSIMILE",
+        "VISUALIZZA DOCUMENTO PDF",
+        "Accetta e prosegui"
+      ]
+    },
+    {
+      "id": "24268:254461",
+      "text": [
+        "Documento Consensi Privacy",
+        "Dichiaro di aver preso visione dell’Informativa privacy reasmi a disposizione e di confermare la volontà da me espressa in merito ai consenso al trattamento dei dati personali",
+        "FACSIMILE",
+        "VISUALIZZA DOCUMENTO PDF",
+        "Accetta e prosegui"
+      ]
+    },
+    {
+      "id": "24268:254476",
+      "text": [
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:254478",
+      "text": [
+        "Inserisci il tuo",
+        "Mobile Code",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "ho dimenticato il mobile code",
+        "Conferma",
+        "Conferma"
+      ]
+    },
+    {
+      "id": "24268:254480",
+      "text": [
+        "67",
+        "%",
+        "Elaborazione in corso",
+        "L’operazione è in corso potrebbe richiedere \nqualche secondo. \nNon chiudere la pagina!"
+      ]
+    },
+    {
+      "id": "24268:254487",
+      "text": [
+        "67",
+        "%",
+        "Elaborazione in corso",
+        "L’operazione è in corso potrebbe richiedere \nqualche secondo. \nNon chiudere la pagina!"
+      ]
+    },
+    {
+      "id": "24268:254508",
+      "text": [
+        "FaceTime",
+        "10",
+        "MON",
+        "Calendar",
+        "Photos",
+        "Camera",
+        "Mail",
+        "Notes",
+        "Reminders",
+        "Clock",
+        "News",
+        "TV",
+        "Podcasts",
+        "App Store",
+        "Maps",
+        "Health",
+        "Wallet",
+        "Settings",
+        "Weather",
+        "Stocks",
+        "Find My",
+        "Home",
+        "Your App",
+        "􀊫 Search",
+        "UniCredit",
+        "9:41 AM",
+        "1 messaggio"
+      ]
+    },
+    {
+      "id": "24268:254513",
+      "text": [
+        "Limiti e operatività rapporti",
+        "Limiti",
+        "visualizza",
+        "Operatività rapporti",
+        "visualizza"
+      ]
+    },
+    {
+      "id": "24268:247443",
+      "text": [
+        "Livelli",
+        "Il livello del profilo di sicurezza si basa sull'analisi di alcuni parametri e impostazioni dello smartphone in uso.\nI task proposti hanno l'obiettivo di suggerire dei comportamenti di utilizzo che possano migliorare il tuo profilo di sicurezza di base che, da solo e/o in presenza di comportamenti non corretti, possono comunque non essere sufficienti a tutelarti da tentativi di frode",
+        "Livello basso",
+        "Il tuo smartphone presenta elementi che potrebbero esporti ad un rischio.",
+        "Completato",
+        "Livello medio",
+        "Segui i task suggeriti per ridurre i rischi associati al tuo device.",
+        "Completato",
+        "Livello alto",
+        "Sei sulla buona strada, ma non abbassare mai \nla guardia.",
+        "Completato"
+      ]
+    },
+    {
+      "id": "24268:247457",
+      "text": [
+        "Missioni",
+        "Completa le missioni e passa di livello.",
+        "Ripristina il dispositivo",
+        "Riporta il device alle impostazioni di fabbrica. Tutti i dati locali verranno eliminati.",
+        "Scarica l’ultima versione dell’app",
+        "Vai allo store ufficiale per reinstallare l’app in modo semplice e sicuro.",
+        "Verifica la tua email",
+        "Accedi alla sezione profilo e verifica il recapito.",
+        "Verifica il tuo numero di telefono",
+        "Accedi alla sezione profilo e verifica il recapito.",
+        "Verifica il tuo numero di telefono",
+        "Accedi alla sezione profilo e verifica il recapito.",
+        "Consulta la pagina Sicurezza",
+        "Resta aggiornato su comunicazioni ufficiali e consigli per proteggere i tuoi dati.",
+        "SIM cambiata di recente",
+        "Per la tua sicurezza, alcune operazioni potrebbero essere temporaneamente limitate. Aspetta qualche giorno per un’operatività sicura"
+      ]
+    },
+    {
+      "id": "24268:247472",
+      "text": [
+        "Fai il Check-up della tua sicurezza",
+        "Il livello di protezione è: Alto. \nScopri come migliorarlo",
+        "Scopri i livelli",
+        "Missioni",
+        "Completa le missioni e passa di livello",
+        "Tieniti informato sulla sicurezza",
+        "Visita la pagina dedicata sul sito UniCredit per aggiornamenti e consigli utili.",
+        "Pillole di sicurezza",
+        "Segui le pillole e rendi più sicura la tua app",
+        "Impara a riconoscere il phishing",
+        "Tutelati dalle truffe al telefono",
+        "Tutelati \ndalle truffe \nall’ATM",
+        "scopri TUTTE LE PILLOLE DI SICUREZZA"
+      ]
+    },
+    {
+      "id": "24268:247495",
+      "text": [
+        "Fai il Check-up della tua sicurezza",
+        "Il livello di protezione è: Medio. \nScopri come migliorarlo",
+        "Scopri i livelli",
+        "Missioni",
+        "Completa le missioni e passa di livello",
+        "Ripristina il dispositivo",
+        "Riporta il device alle impostazioni di fabbrica. Tutti i dati locali verranno eliminati.",
+        "Scarica l’ultima versione dell’app",
+        "Vai allo store ufficiale per reinstallare l’app in modo semplice e sicuro.",
+        "scopri TUTTE le missioni",
+        "Pillole di sicurezza",
+        "Segui le pillole e rendi più sicura la tua app",
+        "Impara a riconoscere il phishing",
+        "Tutelati dalle truffe al telefono",
+        "Tutelati \ndalle truffe \nall’ATM",
+        "scopri TUTTE LE PILLOLE DI SICUREZZA"
+      ]
+    },
+    {
+      "id": "24268:247521",
+      "text": [
+        "Impara a riconoscere \nil phishing",
+        "Cos’è il phishing?",
+        "Si tratta di una truffa realizzata tramite email.\nLa vittima riceve un email, apparentemente inviata dalla propria banca o da altra nota società, in cui è presente un link attraverso il quale accedere direttamente al sito internet del mittente.\n\nIn realtà nei casi di phishing il link rimanda ad un \"sito clone\" appositamente creato riproducendo grafica e contenuti del sito ufficiale così da farlo apparire identico a quello vero.\n\nAttraverso il sito clone vengono raccolti dati personali, codici di accesso o dati delle carte al fine di utilizzarli fraudolentemente.",
+        "Attenzione!",
+        "Esistono alcuni accorgimenti per difendersi dal phishing: diffidare delle email che nell'intestazione non riportano.",
+        "Scopri di più"
+      ]
+    },
+    {
+      "id": "24268:247543",
+      "text": []
+    },
+    {
+      "id": "24268:247550",
+      "text": [
+        "Andrea Rossini",
+        "I tuoi dati",
+        "La tua banca",
+        "Supporto",
+        "Rubrica",
+        "Impostazioni",
+        "Mobile Token",
+        "Documenti",
+        "2",
+        "Comunicazioni e attività",
+        "Notifiche",
+        "3",
+        "Messaggi",
+        "Pratiche",
+        "23",
+        "GEN 25",
+        "Pagamenti",
+        "VISUALIZZA",
+        "Pagamenti con carta di debito",
+        "21",
+        "GEN 25",
+        "Sicurezza",
+        "VISUALIZZA",
+        "Accesso da Dispositivo secondario",
+        "15",
+        "GEN 25",
+        "Sicurezza",
+        "VISUALIZZA",
+        "Errore Accesso Banca Multicanale",
+        "10",
+        "GEN 25",
+        "Sicurezza",
+        "VISUALIZZA",
+        "Accesso Banca Multicanale",
+        "vedi tutte le notifiche",
+        "In evidenza",
+        "Il Mio Dono",
+        "La piattaforma UniCredit per la raccolta fondi, ideata per sostenere le Organizzazioni del Terzo Settore",
+        "Scopri tutte le offerte dei nostri partner",
+        "Scopri i numerosi servizi offerti per te dai nostri partner a prezzi dedicati.",
+        "Altro",
+        "Trova Filiali",
+        "My Apps",
+        "Iniziative e promo",
+        "Vantaggi per te",
+        "Casa",
+        "Partner",
+        "Servizi immobiliari",
+        "Scopri i numerosi servizi offerti per te dai nostri partner a prezzi dedicati.",
+        "Logout"
+      ]
+    },
+    {
+      "id": "24268:247585",
+      "text": [
+        "Sicurezza",
+        "PIN",
+        "MODIFICA",
+        "Mobile Code",
+        "GESTISCI",
+        "Screenshot",
+        "MODIFICA",
+        "Disabilitato",
+        "Check up sicurezza",
+        "visualizza",
+        "Storico accessi",
+        "visualizza",
+        "Firma digitale",
+        "MODIFICA",
+        "Attiva"
+      ]
+    }
+  ]
+}

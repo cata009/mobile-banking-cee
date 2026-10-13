@@ -4,9 +4,9 @@
  */
 
 /**
- * Supported UniCredit countries in CEE region
+ * Supported UniCredit markets, including the Italy Mobile First prototype.
  */
-export type Country = "RO" | "RS" | "HU" | "BA" | "BA_BL" | "SK" | "SI" | "CZ";
+export type Country = "RO" | "RS" | "HU" | "BA" | "BA_BL" | "SK" | "SI" | "CZ" | "IT";
 
 /**
  * Official country identifier alias used by project registries.
@@ -25,8 +25,9 @@ export type ProductId = "PI" | "SME" | "KIDS_PI";
  * Supported design systems.
  * current = current CEE light restyle.
  * next = future design-system deviation.
+ * mobile-first = PI Italy homepage design system.
  */
-export type DesignSystemId = "current" | "next";
+export type DesignSystemId = "current" | "next" | "mobile-first";
 
 /**
  * Runtime visual theme for the stakeholder demo.

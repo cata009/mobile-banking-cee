@@ -11,6 +11,19 @@ import { DemoProvider } from '@/app/state/demoStore'
 
 afterEach(cleanup)
 
+function whiteTextContrastOverTealScrim(alpha: number) {
+  const linearChannel = (value: number) => {
+    const channel = value / 255
+    return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
+  }
+  const compositeChannel = (tealChannel: number) => tealChannel * alpha + 255 * (1 - alpha)
+  const luminance =
+    0.2126 * linearChannel(compositeChannel(0)) +
+    0.7152 * linearChannel(compositeChannel(40)) +
+    0.0722 * linearChannel(compositeChannel(46))
+  return 1.05 / (luminance + 0.05)
+}
+
 describe('Products responsive shelves', () => {
   it('uses a fluid two-column product grid instead of fixed 164px columns', () => {
     const config = getProductsMenuForCountry('CZ')
@@ -45,7 +58,7 @@ describe('Products responsive shelves', () => {
     expect(offers?.querySelector('[data-component="ShopsmartOfferCard"]')).toHaveClass('w-full', 'max-w-none')
   })
 
-  it('uses lower-right commerce imagery and a tighter category rhythm on the Products shelf', () => {
+  it('keeps offer copy above AA contrast over bright commerce imagery', () => {
     const { container } = render(
       <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027' }}>
         <LanguageProvider initialLanguage="en">
@@ -68,8 +81,14 @@ describe('Products responsive shelves', () => {
     expect(scrims).toHaveLength(2)
     expect(scrims[0]).toHaveAttribute('style', expect.stringContaining('0.08'))
     expect(gradients).toHaveLength(2)
-    expect(gradients[0]).toHaveAttribute('style', expect.stringContaining('0.78'))
-    expect(gradients[0]).toHaveAttribute('style', expect.stringContaining('0.24'))
+    for (const gradient of gradients) {
+      expect(gradient).toHaveClass('inset-0')
+      const style = gradient.getAttribute('style') ?? ''
+      expect(style).toContain('linear-gradient(90deg')
+      const alpha = Number(style.match(/rgb\(0 40 46 \/ ([\d.]+)\) 88%/)?.[1])
+      expect(Number.isFinite(alpha)).toBe(true)
+      expect(whiteTextContrastOverTealScrim(alpha)).toBeGreaterThanOrEqual(4.5)
+    }
     expect(catalog).toHaveClass('gap-[16px]')
   })
 

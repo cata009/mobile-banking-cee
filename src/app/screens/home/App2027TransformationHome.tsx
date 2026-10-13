@@ -1,3 +1,5 @@
+import { EVO_HOME_INSURANCE_POLICIES as INSURANCE_POLICIES, getEvoDepositPresentation as depositPresentation, getEvoInterestEarned, getEvoDueThisMonth, getEvoLoanPresentation } from '@/features/products/evoHome';
+export { getEvoDepositPresentation as depositPresentation } from '@/features/products/evoHome';
 import { formatGroupCount } from '@/features/products/groupCount';
 import { Children, cloneElement, isValidElement, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type UIEvent } from 'react';
 import { AppIcon } from '@/app/components/icons';
@@ -13,9 +15,7 @@ import { createSpendingAnalyticsTimeline } from '@/data/spendingAnalytics';
 import type { CountryId } from '@/app/state/demoTypes';
 import { getProductsMenuForCountry, type ShopSmartOfferCategory } from '@/app/config/productsMenuConfig';
 import {
-  EVO_CREDIT_CARD_MINIMUM_RATE,
   EVO_SAVING_ACCOUNT_ANNUAL_RATE,
-  getEvoCreditTerms,
 } from '@/app/config/evoCreditTerms';
 import { useLanguage } from '@/app/contexts/LanguageContext';
 import { useDragCarousel } from '@/hooks/useDragCarousel';
@@ -451,35 +451,6 @@ function ProductRailGroup({
   );
 }
 
-const INSURANCE_POLICIES = [
-  {
-    title: 'Genius Protect',
-    subtitle: 'Life insurance policy · 3431424',
-    premium: 70,
-    /*
-     * What the policy is actually worth to the customer — the figure a loan card
-     * gives to the outstanding balance. Without it the card led with a 70 CZK
-     * premium and a progress bar nobody could source.
-     */
-     coverAmount: 500000,
-    // Was "Last payment: 30/05/2027" — a past-tense fact dated in the future.
-    startDate: '30/05/2025',
-    renewalDate: '30/05/2027',
-    progress: 30,
-    target: 'life-insurance',
-  },
-  {
-    title: 'Home Protect',
-    subtitle: 'Home insurance policy · 3431425',
-    premium: 120,
-    coverAmount: 2400000,
-    startDate: '15/11/2025',
-    renewalDate: '15/11/2026',
-    progress: 56,
-    target: 'home-insurance',
-  },
-] as const;
-
 /**
  * A progress bar that names what it measures — to assistive tech, not on screen.
  *
@@ -522,53 +493,11 @@ function LabelledProgress({
   );
 }
 
-type DepositPresentation = {
-  annualRate: number;
-  periodLabel: string;
-  termDays: number;
-  daysToMaturity: number;
-  startDate: string;
-  maturityDate: string;
-};
-
-const DEFAULT_DEPOSIT_PRESENTATION: DepositPresentation = {
-  annualRate: 0.065,
-  periodLabel: '1 Year',
-  termDays: 365,
-  daysToMaturity: 290,
-  startDate: '30/05/2026',
-  maturityDate: '30/05/2027',
-};
-
-const EVO_2027_DEPOSIT_PRESENTATIONS: Record<string, DepositPresentation> = {
-  'term-1': DEFAULT_DEPOSIT_PRESENTATION,
-  'term-2': {
-    annualRate: 0.052,
-    periodLabel: '6 Months',
-    termDays: 184,
-    daysToMaturity: 72,
-    startDate: '12/03/2026',
-    maturityDate: '12/09/2026',
-  },
-  'term-3': {
-    annualRate: 0.071,
-    periodLabel: '2 Years',
-    termDays: 730,
-    daysToMaturity: 481,
-    startDate: '09/01/2026',
-    maturityDate: '09/01/2028',
-  },
-};
-
-export function depositPresentation(product: Product): DepositPresentation {
-  return EVO_2027_DEPOSIT_PRESENTATIONS[product.id] ?? DEFAULT_DEPOSIT_PRESENTATION;
-}
-
 function DepositCard({ product, amountsHidden, formatProductAmount, onProductClick }: { product: Product; amountsHidden: boolean; formatProductAmount: (product: Product) => FormattedAmount; onProductClick: (product: Product) => void }) {
   const { t } = useLanguage();
   const current = formatProductAmount(product);
   const presentation = depositPresentation(product);
-  const maturity = formatEvo2027Amount(product.balance * (1 + presentation.annualRate * presentation.termDays / 365), product.currency);
+  const maturity = presentation.maturityAmount;
   const elapsedDays = presentation.termDays - presentation.daysToMaturity;
 
   return <div data-home-deposit-card className="flex h-full flex-col bg-[var(--uc-surface)] p-[16px]">
@@ -645,14 +574,7 @@ function InsurancePolicyCard({ policy, onClick, amountsHidden }: { policy: (type
 
 function LoanCard({ product, amountsHidden, onProductClick }: { product: Product; amountsHidden: boolean; onProductClick: (product: Product) => void }) {
   const { t } = useLanguage();
-  const terms = getEvoCreditTerms(product);
-  const total = Math.abs(product.balance) * 1.45;
-  const repaid = total - Math.abs(product.balance);
-  const remaining = formatEvo2027Amount(Math.abs(product.balance), product.currency);
-  const installment = formatEvo2027Amount(Math.round(Math.abs(product.balance) * terms.installmentRate), product.currency);
-  const totalAmount = formatEvo2027Amount(total, product.currency);
-  const repaidAmount = formatEvo2027Amount(repaid, product.currency);
-  const repaidPercentage = total > 0 ? (repaid / total) * 100 : 0;
+  const { remaining, installment, total: totalAmount, repaid: repaidAmount, repaidPercentage } = getEvoLoanPresentation(product);
 
   return <div data-home-loan-card className="flex h-full flex-col bg-[var(--uc-surface)] p-[16px]">
     <button type="button" onClick={() => onProductClick(product)} className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]">
@@ -1059,18 +981,7 @@ export default function App2027TransformationHome({
    * signed figure the portfolio row shows.
    */
   const interestEarned = useMemo(() => {
-    const currency = totalSavings.currency as Product['currency'];
-    const fromSavings = savings.reduce(
-      (sum, product) => sum + product.balance * EVO_SAVING_ACCOUNT_ANNUAL_RATE,
-      0,
-    );
-    const fromDeposits = deposits.reduce((sum, product) => {
-      const presentation = depositPresentation(product);
-      const elapsedDays = presentation.termDays - presentation.daysToMaturity;
-      return sum + product.balance * presentation.annualRate * (elapsedDays / 365);
-    }, 0);
-
-    return formatEvo2027Amount(Math.round(fromSavings + fromDeposits), currency);
+    return getEvoInterestEarned(savings, deposits, totalSavings.currency as Product['currency']);
   }, [deposits, savings, totalSavings.currency]);
 
   const debt = calculateTotalOwed();
@@ -1079,18 +990,7 @@ export default function App2027TransformationHome({
    * rather than a flat 0.9% of the balance that quietly left revolving credit out.
    */
   const dueThisMonth = useMemo(() => {
-    const fromLoans = [...loans, ...mortgages].reduce((sum, product) => {
-      const terms = getEvoCreditTerms(product);
-      return sum + Math.round(Math.abs(product.balance) * terms.installmentRate);
-    }, 0);
-    const fromCards = creditCards.reduce((sum, product) => {
-      const drawn = 'creditLimit' in product && 'availableCredit' in product
-        ? Math.max(0, (product.creditLimit as number) - (product.availableCredit as number))
-        : 0;
-      return sum + Math.round(drawn * EVO_CREDIT_CARD_MINIMUM_RATE);
-    }, 0);
-
-    return formatEvo2027Amount(fromLoans + fromCards, debt.currency as Product['currency']);
+    return getEvoDueThisMonth(loans, mortgages, creditCards, debt.currency as Product['currency']);
   }, [creditCards, debt.currency, loans, mortgages]);
 
   const activePolicyCount = INSURANCE_POLICIES.length;

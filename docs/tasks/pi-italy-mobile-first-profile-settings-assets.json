@@ -1,0 +1,165 @@
+{
+  "owner": "/root/profile_settings",
+  "sourceFile": "d2TyUaQNN6YsgznQaWymIR",
+  "checkedAt": "2026-10-12",
+  "assets": [
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/general.svg",
+      "sourceNodeId": "24268:252509",
+      "callsite": "MobileFirstProfileSettings.tsx / settings menu",
+      "geometry": "24x24 icon wrapper; SVG retains intrinsic dimensions (14–22px wide,16–22px tall)"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/devices.svg",
+      "sourceNodeId": "24268:252510",
+      "callsite": "MobileFirstProfileSettings.tsx / settings menu",
+      "geometry": "24x24 icon wrapper; SVG retains intrinsic dimensions (14–22px wide,16–22px tall)"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/notifications.svg",
+      "sourceNodeId": "24268:252511",
+      "callsite": "MobileFirstProfileSettings.tsx / settings menu",
+      "geometry": "24x24 icon wrapper; SVG retains intrinsic dimensions (14–22px wide,16–22px tall)"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/newsletter.svg",
+      "sourceNodeId": "24268:252512",
+      "callsite": "MobileFirstProfileSettings.tsx / settings menu",
+      "geometry": "24x24 icon wrapper; SVG retains intrinsic dimensions (14–22px wide,16–22px tall)"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/limits.svg",
+      "sourceNodeId": "24268:252516",
+      "callsite": "MobileFirstProfileSettings.tsx / settings menu",
+      "geometry": "24x24 icon wrapper; SVG retains intrinsic dimensions (14–22px wide,16–22px tall)"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/withdrawal.svg",
+      "sourceNodeId": "24268:252517",
+      "callsite": "MobileFirstProfileSettings.tsx / settings menu",
+      "geometry": "24x24 icon wrapper; SVG retains intrinsic dimensions (14–22px wide,16–22px tall)"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/quick.svg",
+      "sourceNodeId": "24268:252518",
+      "callsite": "MobileFirstProfileSettings.tsx / settings menu",
+      "geometry": "24x24 icon wrapper; SVG retains intrinsic dimensions (14–22px wide,16–22px tall)"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/third-party.svg",
+      "sourceNodeId": "24268:252519",
+      "callsite": "MobileFirstProfileSettings.tsx / settings menu",
+      "geometry": "24x24 icon wrapper; SVG retains intrinsic dimensions (14–22px wide,16–22px tall)"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/face-id.svg",
+      "sourceNodeId": "24268:252523",
+      "callsite": "MobileFirstProfileSettings.tsx / settings menu",
+      "geometry": "24x24 icon wrapper; SVG retains intrinsic dimensions (14–22px wide,16–22px tall)"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/security.svg",
+      "sourceNodeId": "24268:252524",
+      "callsite": "MobileFirstProfileSettings.tsx / settings menu",
+      "geometry": "24x24 icon wrapper; SVG retains intrinsic dimensions (14–22px wide,16–22px tall)"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/privacy.svg",
+      "sourceNodeId": "24268:252525",
+      "callsite": "MobileFirstProfileSettings.tsx / settings menu",
+      "geometry": "24x24 icon wrapper; SVG retains intrinsic dimensions (14–22px wide,16–22px tall)"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/phishing.png",
+      "sourceNodeId": "24268:247495",
+      "callsite": "MobileFirstProfileSettings.tsx / checkup articles",
+      "geometry": "source120x152 image slots; matching crop/ratio"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/telephone.png",
+      "sourceNodeId": "24268:247495",
+      "callsite": "MobileFirstProfileSettings.tsx / checkup articles",
+      "geometry": "source120x152 image slots; matching crop/ratio"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/atm.png",
+      "sourceNodeId": "24268:247495",
+      "callsite": "MobileFirstProfileSettings.tsx / checkup articles",
+      "geometry": "source120x152 image slots; matching crop/ratio"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/eye.svg",
+      "sourceNodeId": "10206:186337",
+      "callsite": "MobileFirstProfileSettingsShared.tsx / SettingsSecret",
+      "geometry": "24x24"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/success.svg",
+      "sourceNodeId": "24268:251738",
+      "callsite": "MobileFirstProfileSettingsShared.tsx / SettingsResult",
+      "geometry": "40x40"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/privacy-document.png",
+      "sourceNodeId": "24268:254446",
+      "callsite": "MobileFirstProfileSettingsShared.tsx / SettingsDocument privacy",
+      "geometry": "361px available source column, native aspect ratio"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/limits-document.png",
+      "sourceNodeId": "24268:250785",
+      "callsite": "MobileFirstProfileSettingsBank.tsx / daily-summary; Shared SettingsDocument limits",
+      "geometry": "full source content-column width, native aspect ratio"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/relationship-document.png",
+      "sourceNodeId": "24268:250800",
+      "callsite": "MobileFirstProfileSettingsShared.tsx / SettingsDocument relationship",
+      "geometry": "full source content-column width, native aspect ratio"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/edit.svg",
+      "sourceNodeId": "24268:250083",
+      "callsite": "MobileFirstProfileSettingsSecurity.tsx / SecurityAction",
+      "geometry": "Native Figma dimensions retained"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/forth.svg",
+      "sourceNodeId": "24268:250083",
+      "callsite": "SecurityAction and Check-up CTA",
+      "geometry": "16x16 native SVG dimensions retained"
+    },
+    {
+      "file": "src/assets/mobile-first/it/profile/settings/email-eye.svg",
+      "sourceNodeId": "24268:252490",
+      "callsite": "MobileFirstProfileSettingsSecurity.tsx / verified history email visibility control",
+      "geometry": "Native source root dimensions retained"
+    }
+  ],
+  "reused": [
+    {
+      "component": "MobileFirstProfileAuthorization.tsx",
+      "source": "Root canonical Mobile Code authorization context",
+      "slots": "Exact gray auth background, keypad, biometrics/delete/forgot assets",
+      "owner": "root"
+    },
+    {
+      "component": "MobileFirstCardsPrimitives.tsx / CardArt",
+      "source": "24268:252406 / 21055:119037",
+      "slots": "Black source card skin/pattern/arrow, UniCredit/mastercard logos, Credit/Genius caption",
+      "geometry": "212x133.307 thumbnail",
+      "reason": "Existing credit-card art uses same source assets and exact miniature composition. Name configured to UniCredit Genius Card; no replacement asset."
+    },
+    {
+      "component": "MobileFirstProfilePrimitives.tsx",
+      "slots": "Header back/help/close assets",
+      "owner": "root"
+    }
+  ],
+  "checks": {
+    "downloadedFiles": "22 non-empty files",
+    "svgDimensions": "Checked root width/height/viewBox for all13 SVGs; adjusted menu CSS to retain dimensions.",
+    "sourceScreenshots": "Canonical design screenshots inspected.",
+    "browser": "Integrated menu SVGs loaded with proportional root dimensions; check-up photos loaded in source slots. Menu/security/check-up screenshots inspected. Remaining documents/credential stages have source and screen-test proof. The carousel click/geometry regression was confirmed repaired in the integrated app."
+  }
+}

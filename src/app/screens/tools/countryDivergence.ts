@@ -8,7 +8,8 @@
  * stakeholders ask constantly: "where does country X differ from the rest?"
  */
 
-import { COUNTRIES, COUNTRY_META, FEATURE_META } from "@/app/registry/demoConfig";
+import { COUNTRY_META, FEATURE_META } from "@/app/registry/demoConfig";
+import { ALL_COUNTRIES as COUNTRIES } from "@/app/registry/domains/countries";
 import { COUNTRY_CONFIG } from "@/app/registry/countryConfig";
 import { LOCAL_LANGUAGE_BY_COUNTRY, getLanguageDisplayName } from "@/app/registry/languageByCountry";
 import { isCoAppingAvailable } from "@/app/utils/coAppingAvailability";

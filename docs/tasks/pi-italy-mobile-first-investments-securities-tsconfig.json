@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": [
+    "../../src/features/investments/mobileFirstSecurities.ts",
+    "../../src/experiences/pi/it/mobile-first/MobileFirstInvestmentSecurities*.tsx",
+    "../../src/experiences/pi/it/mobile-first/investmentsSecuritiesContent.ts",
+    "../../tests/screens/mobile-first-investments-securities.test.tsx"
+  ]
+}

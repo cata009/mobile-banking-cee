@@ -62,6 +62,7 @@ const SHARED_MESSAGES_CONFIG: MessagesConfig = {
 };
 
 export const MESSAGES_CONFIG_BY_COUNTRY: Record<CountryId, MessagesConfig> = {
+  IT: { title: "Messages", tabs: { inbox: "Inbox", outbox: "Outbox" }, sectionTitle: "", inbox: [], outbox: [] },
   RO: SHARED_MESSAGES_CONFIG,
   RS: SHARED_MESSAGES_CONFIG,
   HU: SHARED_MESSAGES_CONFIG,

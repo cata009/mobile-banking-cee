@@ -105,10 +105,10 @@ describe('Design System specimen selectors', () => {
   })
 
   it('keeps country and palette registries non-empty and in their published order', () => {
-    expectTypeOf(COUNTRIES).toEqualTypeOf<readonly ['RO', 'CZ', 'SK', 'HU', 'RS', 'BA', 'BA_BL', 'SI']>()
+    expectTypeOf(COUNTRIES).toEqualTypeOf<readonly ['RO', 'CZ', 'SK', 'HU', 'RS', 'BA', 'BA_BL', 'SI', 'IT']>()
     expectTypeOf(COLOR_PALETTES).toMatchTypeOf<readonly [DesignSystemPalette, ...DesignSystemPalette[]]>()
 
-    expect(COUNTRIES).toEqual(['RO', 'CZ', 'SK', 'HU', 'RS', 'BA', 'BA_BL', 'SI'])
+    expect(COUNTRIES).toEqual(['RO', 'CZ', 'SK', 'HU', 'RS', 'BA', 'BA_BL', 'SI', 'IT'])
     expect(COLOR_PALETTES.map(({ id }) => id)).toEqual([
       'neutral',
       'action-teal',

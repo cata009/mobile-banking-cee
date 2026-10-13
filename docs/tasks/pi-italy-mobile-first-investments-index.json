@@ -1,0 +1,3367 @@
+[
+  {
+    "id": "24262:658839",
+    "name": "INV_00152B_U_M_Vetrina fondi",
+    "section": "🟢 INV_U_M_Vetrina Fondi"
+  },
+  {
+    "id": "24262:658873",
+    "name": "INV_00042_U_M_Floating Button Investi_Apertura cassetto",
+    "section": "🟢 INV_U_M_Vetrina Fondi"
+  },
+  {
+    "id": "24262:658900",
+    "name": "INV_00204_U_M_Vetrina fondi_Dettaglio_Novità",
+    "section": "🟢 INV_U_M_Vetrina Fondi"
+  },
+  {
+    "id": "24262:658923",
+    "name": "INV_00205_U_M_Vetrina fondi_Dettaglio_In evidenza 3",
+    "section": "🟢 INV_U_M_Vetrina Fondi"
+  },
+  {
+    "id": "24262:658947",
+    "name": "INV_00206_U_M_Vetrina fondi_Dettaglio_In evidenza 4",
+    "section": "🟢 INV_U_M_Vetrina Fondi"
+  },
+  {
+    "id": "24262:658967",
+    "name": "INV_00208_U_M_Vetrina fondi_Dettaglio_Categorie in rilievo_Top ten fondi azionari",
+    "section": "🟢 INV_U_M_Vetrina Fondi"
+  },
+  {
+    "id": "24262:658979",
+    "name": "INV_00157_U_M_Vetrina fondi_Ricerca fondi avanzata_Filtri non inseriti",
+    "section": "🟢 INV_U_M_Vetrina Fondi"
+  },
+  {
+    "id": "24262:659053",
+    "name": "INV_00385_U_M_Vetrina fondi_Ricerca fondi avanzata_Filtri inseriti",
+    "section": "🟢 INV_U_M_Vetrina Fondi"
+  },
+  {
+    "id": "24262:659127",
+    "name": "INV_00158_U_M_Vetrina fondi_Ricerca fondi avanzata_Ricerca effettuata",
+    "section": "🟢 INV_U_M_Vetrina Fondi"
+  },
+  {
+    "id": "24262:659183",
+    "name": "INV_00002_U_M_Homepage_Overview_Grafico un solo asset",
+    "section": "🟢 INV_U_M_Homepage_Overview"
+  },
+  {
+    "id": "24262:659232",
+    "name": "INV_00003_U_M_Homepage_Overview_Grafico edge case 0,5%",
+    "section": "🟢 INV_U_M_Homepage_Overview"
+  },
+  {
+    "id": "24262:659288",
+    "name": "INV_00001_U_M_Homepage_Overview_Grafico full",
+    "section": "🟢 INV_U_M_Homepage_Overview"
+  },
+  {
+    "id": "24262:659346",
+    "name": "INV_00005_U_M_Homepage_Overview_Avviso MIFID",
+    "section": "🟢 INV_U_M_Homepage_Overview"
+  },
+  {
+    "id": "24262:659405",
+    "name": "INV_00006_U_M_Homepage_Overview_Avviso prenota consulenza",
+    "section": "🟢 INV_U_M_Homepage_Overview"
+  },
+  {
+    "id": "24262:659466",
+    "name": "INV_00004_U_M_Homepage_Overview_Grafico ESG",
+    "section": "🟢 INV_U_M_Homepage_Overview"
+  },
+  {
+    "id": "24262:659524",
+    "name": "INV_00042_U_M_Floating Button Investi_Apertura cassetto",
+    "section": "🟢 INV_U_M_Homepage_Overview"
+  },
+  {
+    "id": "24262:659550",
+    "name": "INV_00043_U_M_Homepage_Overview_CORNER CASE_Caricamento POG",
+    "section": "🟢 INV_U_M_Homepage_Overview"
+  },
+  {
+    "id": "24262:659595",
+    "name": "INV_00113_U_M_Homepage_Overview_Tooltip",
+    "section": "🟢 INV_U_M_Homepage_Overview"
+  },
+  {
+    "id": "24262:659667",
+    "name": "INV_00001_U_M_Homepage_Overview_Grafico full",
+    "section": "🟢 INV_U_M_Homepage_Overview_Market Focus"
+  },
+  {
+    "id": "24262:659725",
+    "name": "INV_00007_U_M_Homepage_Overview_Market focus_Giornaliero 5 elementi",
+    "section": "🟢 INV_U_M_Homepage_Overview_Market Focus"
+  },
+  {
+    "id": "24262:659786",
+    "name": "INV_00008_U_M_Homepage_Overview_Market focus_Settimanale 5 elementi",
+    "section": "🟢 INV_U_M_Homepage_Overview_Market Focus"
+  },
+  {
+    "id": "24262:659847",
+    "name": "INV_00009_U_M_Homepage_Overview_Market focus_Mensile 5 elementi",
+    "section": "🟢 INV_U_M_Homepage_Overview_Market Focus"
+  },
+  {
+    "id": "24262:659908",
+    "name": "INV_00010_U_M_Homepage_Overview_Market focus_Trimestrale 5 elementi",
+    "section": "🟢 INV_U_M_Homepage_Overview_Market Focus"
+  },
+  {
+    "id": "24262:659977",
+    "name": "INV_00001_U_M_Homepage_Overview_Grafico full",
+    "section": "🟢 INV_U_M_Homepage_Overview_Education"
+  },
+  {
+    "id": "24262:660035",
+    "name": "INV_00001_U_M_Homepage_Overview_Grafico full",
+    "section": "🟢 INV_U_M_Homepage_Overview_Education"
+  },
+  {
+    "id": "24262:660225",
+    "name": "INV_00011_U_M_Homepage_Verticale_Sezione Education",
+    "section": "🟢 INV_U_M_Homepage_Overview_Education"
+  },
+  {
+    "id": "24262:660256",
+    "name": "INV_00011_U_M_Homepage_Verticale_Sezione Education",
+    "section": "🟢 INV_U_M_Homepage_Overview_Education"
+  },
+  {
+    "id": "24262:660287",
+    "name": "INV_00011_U_M_Homepage_Verticale_Sezione Education",
+    "section": "🟢 INV_U_M_Homepage_Overview_Education"
+  },
+  {
+    "id": "24262:660422",
+    "name": "COMMHUB_00041_U_M_CommHub_ProfiloUtente_I tuoi dati",
+    "section": "🟢 INV_U_M_Homepage_Overview_Education"
+  },
+  {
+    "id": "24262:660437",
+    "name": "INV_00013_U_M_Homepage_Posizione Fiscale_Overview",
+    "section": "🟢 INV_U_M_Homepage_Posizione fiscale"
+  },
+  {
+    "id": "24262:660527",
+    "name": "INV_00014_U_M_Homepage_Posizione Fiscale_Dettaglio_Minus/Plusvalenze",
+    "section": "🟢 INV_U_M_Homepage_Posizione fiscale"
+  },
+  {
+    "id": "24262:660556",
+    "name": "INV_00015_U_M_Homepage_Posizione Fiscale_Dettaglio_Prezzi",
+    "section": "🟢 INV_U_M_Homepage_Posizione fiscale"
+  },
+  {
+    "id": "24262:660585",
+    "name": "INV_00001_U_M_Homepage_Overview_Grafico full",
+    "section": "🟢 INV_U_M_Homepage_Posizione fiscale"
+  },
+  {
+    "id": "24262:660655",
+    "name": "INV_00001_U_M_Homepage_Overview_Grafico full",
+    "section": "🟢 INV_U_M_Homepage_Posizione fiscale_Corner case no grafico"
+  },
+  {
+    "id": "24262:660714",
+    "name": "INV_00016_U_M_Homepage_Posizione Fiscale_Overview_Corner Case_No grafico",
+    "section": "🟢 INV_U_M_Homepage_Posizione fiscale_Corner case no grafico"
+  },
+  {
+    "id": "24262:660785",
+    "name": "INV_00017_U_M_Homepage_Posizione Fiscale_Dettaglio_Corner Case_Minus/Plusvalenze",
+    "section": "🟢 INV_U_M_Homepage_Posizione fiscale_Corner case no grafico"
+  },
+  {
+    "id": "24262:660814",
+    "name": "INV_00018_U_M_Homepage_Posizione Fiscale_Dettaglio_Corner Case_Minus/Plusvalenze_Comportamento mesi",
+    "section": "🟢 INV_U_M_Homepage_Posizione fiscale_Corner case no grafico"
+  },
+  {
+    "id": "24262:660839",
+    "name": "INV_00019_U_M_Homepage_Posizione Fiscale_Dettaglio_Corner Case_Prezzi",
+    "section": "🟢 INV_U_M_Homepage_Posizione fiscale_Corner case no grafico"
+  },
+  {
+    "id": "24262:660874",
+    "name": "INV_00001_U_M_Homepage_Overview_Grafico full",
+    "section": "🟢 INV_U_M_Homepage_Posizione fiscale_Corner case no posizione fiscale"
+  },
+  {
+    "id": "24262:660933",
+    "name": "INV_00048_U_M_Homepage_Posizione Fiscale_CORNER CASE_No posizione fiscale",
+    "section": "🟢 INV_U_M_Homepage_Posizione fiscale_Corner case no posizione fiscale"
+  },
+  {
+    "id": "24262:660949",
+    "name": "INV_00020_U_M_Dettaglio_Posizione Fondo PIC_La tua posizione",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Schede fondo"
+  },
+  {
+    "id": "24262:660985",
+    "name": "INV_00034_U_M_Dettaglio_Scheda fondo_Scheda",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Schede fondo"
+  },
+  {
+    "id": "24262:661044",
+    "name": "INV_00035_U_M_Dettaglio_Scheda fondo_Performance",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Schede fondo"
+  },
+  {
+    "id": "24262:661060",
+    "name": "INV_00036_U_M_Dettaglio_Scheda fondo_Composizione",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Schede fondo"
+  },
+  {
+    "id": "24262:661108",
+    "name": "INV_00037_U_M_Dettaglio_Scheda fondo_Composizione_Apertura composizione",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Schede fondo"
+  },
+  {
+    "id": "24262:661235",
+    "name": "INV_00038_U_M_Dettaglio_Scheda fondo_Commissioni",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Schede fondo"
+  },
+  {
+    "id": "24262:661255",
+    "name": "INV_00039_U_M_Dettaglio_Scheda fondo_Documenti",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Schede fondo"
+  },
+  {
+    "id": "24262:661284",
+    "name": "INV_00020_U_M_Dettaglio_Posizione Fondo PIC_La tua posizione",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (PIC)"
+  },
+  {
+    "id": "24262:661319",
+    "name": "INV_00021_U_M_Dettaglio_Posizione Fondo PIC_Dettaglio fondo",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (PIC)"
+  },
+  {
+    "id": "24262:661342",
+    "name": "INV_00022_U_M_Dettaglio_Posizione Fondo PIC_Altri dettagli",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (PIC)"
+  },
+  {
+    "id": "24262:661371",
+    "name": "INV_00023_U_M_Dettaglio_Posizione Fondo PIC_Lista ultimi ordini",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (PIC)"
+  },
+  {
+    "id": "24262:661390",
+    "name": "INV_00019_U_M_Homepage_Fondi",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (PIC)"
+  },
+  {
+    "id": "24262:661459",
+    "name": "INV_00024_U_M_Dettaglio_Posizione Fondo PAC_La tua posizione",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (PAC)"
+  },
+  {
+    "id": "24262:661496",
+    "name": "INV_00025_U_M_Dettaglio_Posizione Fondo PAC_Dettaglio fondo",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (PAC)"
+  },
+  {
+    "id": "24262:661523",
+    "name": "INV_00026_U_M_Dettaglio_Posizione Fondo PAC_Altri dettagli",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (PAC)"
+  },
+  {
+    "id": "24262:661552",
+    "name": "INV_00027_U_M_Dettaglio_Posizione Fondo PAC_Lista ultimi ordini",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (PAC)"
+  },
+  {
+    "id": "24262:661571",
+    "name": "INV_00025B_U_M_Dettaglio_Posizione Fondo PAC_Piano di accumulo",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (PAC)"
+  },
+  {
+    "id": "24262:661606",
+    "name": "INV_00019_U_M_Homepage_Fondi",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (PAC)"
+  },
+  {
+    "id": "24262:661650",
+    "name": "INV_00033_U_M_Dettaglio_Posizione Fondo PAC con rimborso programmato_Rimborso programmato",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (PAC)"
+  },
+  {
+    "id": "24262:661677",
+    "name": "INV_00028_U_M_Dettaglio_Posizione Fondo PAC con rimborso programmato_La tua posizione",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (PAC)"
+  },
+  {
+    "id": "24262:661714",
+    "name": "INV_00029_U_M_Dettaglio_Posizione Fondo PAC con rimborso programmato_Dettaglio fondo",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (PAC)"
+  },
+  {
+    "id": "24262:661741",
+    "name": "INV_00031_U_M_Dettaglio_Posizione Fondo PAC con rimborso programmato_Altri dettagli",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (PAC)"
+  },
+  {
+    "id": "24262:661770",
+    "name": "INV_00032_U_M_Dettaglio_Posizione Fondo PAC con rimborso programmato_Lista ultimi ordini",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (PAC)"
+  },
+  {
+    "id": "24262:661789",
+    "name": "INV_00030_U_M_Dettaglio_Posizione Fondo PAC con rimborso programmato_Piano di accumulo",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (PAC)"
+  },
+  {
+    "id": "24262:661848",
+    "name": "INV_00041_U_M_Titoli_Dettaglio_Posizione titolo",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titolo"
+  },
+  {
+    "id": "24262:661886",
+    "name": "INV_00040_U_M_Homepage_Titoli_Versione aperta_Vista base",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titolo"
+  },
+  {
+    "id": "24262:661957",
+    "name": "INV_00587_U_M_Homepage_Titoli_Versione aperta_Vista base_casistica PeL 0",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titolo"
+  },
+  {
+    "id": "24262:662029",
+    "name": "INV_00048B_U_M_Homepage_Titoli_Versione chiusa",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titolo"
+  },
+  {
+    "id": "24262:662061",
+    "name": "INV_00238_U_M_Homepage_Titoli_Apertura info",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titolo"
+  },
+  {
+    "id": "24262:662096",
+    "name": "INV_00050_U_M_Homepage_Titoli_Selezione deposito",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titolo"
+  },
+  {
+    "id": "24262:662142",
+    "name": "INV_00051_U_M_Homepage_Titoli_Selezione sottodeposito",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titolo"
+  },
+  {
+    "id": "24262:662180",
+    "name": "INV_00049_U_M_Homepage_Titoli_Versione aperta_Vista avanzata",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titolo"
+  },
+  {
+    "id": "24262:662250",
+    "name": "INV_00114_U_M_Homepage_Titoli_Condivisione_Step 1",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titolo"
+  },
+  {
+    "id": "24262:662286",
+    "name": "INV_00115_U_M_Homepage_Titoli_Condivisione_Step 2",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titolo"
+  },
+  {
+    "id": "24262:662531",
+    "name": "INV_00048B_U_M_Homepage_Titoli_Versione chiusa",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titolo"
+  },
+  {
+    "id": "24262:662640",
+    "name": "INV_00048B_U_M_Homepage_Titoli_Versione chiusa",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titolo"
+  },
+  {
+    "id": "24262:662752",
+    "name": "INV_00045_U_M_Fondi_Dettaglio_Plafond PIR_Variante 1_Ordinario",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (CASO PIR)"
+  },
+  {
+    "id": "24262:662800",
+    "name": "INV_00044_U_M_Homepage_Fondi_Caso PIR",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (CASO PIR)"
+  },
+  {
+    "id": "24262:662851",
+    "name": "INV_00042_U_M_Floating Button Investi_Apertura cassetto",
+    "section": "🟢 INV_U_M_Homepage_Overview_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:662875",
+    "name": "INV_00052_U_M_Floating Investi_Gestione ordini e movimenti_Titoli_Ordini",
+    "section": "🟢 INV_U_M_Homepage_Overview_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:662893",
+    "name": "INV_00053_U_M_Floating Investi_Gestione ordini e movimenti_Titoli_Movimenti",
+    "section": "🟢 INV_U_M_Homepage_Overview_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:662909",
+    "name": "INV_00054_U_M_Floating Investi_Gestione ordini e movimenti_Fondi_Ordini",
+    "section": "🟢 INV_U_M_Homepage_Overview_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:662935",
+    "name": "INV_20023_U_M_Homepage_Titoli_Gestione ordini e movimenti_Ordini_Dettaglio ordine Ineseguito",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:662983",
+    "name": "INV_00040_U_M_Homepage_Titoli_Versione aperta_Vista base",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:663052",
+    "name": "INV_00055_U_M_Homepage_Titoli_Gestione ordini e movimenti_Ordini",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:663068",
+    "name": "INV_00055_U_M_Homepage_Titoli_Gestione ordini e movimenti_Ordini",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:663085",
+    "name": "INV_00058_U_M_Homepage_Titoli_Gestione ordini e movimenti_Movimenti",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:663099",
+    "name": "INV_00059_U_M_Homepage_Titoli_Gestione ordini e movimenti_Movimenti_Dettaglio movimento ineseguito",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:663138",
+    "name": "INV_00060_U_M_Homepage_Titoli_Gestione ordini e movimenti_Movimenti_Dettaglio movimento inseguito",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:663177",
+    "name": "INV_00159_U_M_Homepage_Titoli_Gestione ordini e movimenti_Dettaglio ordine_Filtri di ricerca",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:663225",
+    "name": "INV_00160_U_M_Homepage_Titoli_Gestione ordini e movimenti_Dettaglio movimento_Filtri di ricerca",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:663270",
+    "name": "INV_00161_U_M_Homepage_Titoli_Gestione ordini e movimenti_Dettaglio movimento_Filtri di ricerca_Dettaglio causale",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:663337",
+    "name": "INV_00589_U_M_Homepage_Titoli_Gestione ordini e movimenti_Dettaglio movimento_Filtri di ricerca",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:663397",
+    "name": "INV_20024_U_M_Homepage_Titoli_Gestione ordini e movimenti_Ordini_Dettaglio ordine eseguito",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:663410",
+    "name": "INV_00056_U_M_Homepage_Titoli_Gestione ordini e movimenti_Ordini_Dettaglio ordine ineseguito_Esempio con scheda titolo",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:663463",
+    "name": "INV_00057_U_M_Homepage_Titoli_Gestione ordini e movimenti_Ordini_Dettaglio ordine eseguito",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Gestione ordini e movimenti"
+  },
+  {
+    "id": "24262:663521",
+    "name": "INV_00061_U_M_Homepage_Fondi_Gestione ordini",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Gestione ordini"
+  },
+  {
+    "id": "24262:663529",
+    "name": "INV_00019_U_M_Homepage_Fondi",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Gestione ordini"
+  },
+  {
+    "id": "24262:663573",
+    "name": "INV_00162_U_M_Homepage_Fondi_Dettaglio ordini_Dettaglio ordine caricato_Filtri di ricerca",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Gestione ordini"
+  },
+  {
+    "id": "24262:663618",
+    "name": "INV_00163_U_M_Homepage_Fondi_Dettaglio ordini_Dettaglio ordine caricato_Filtri di ricerca_Dettaglio causale",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Gestione ordini"
+  },
+  {
+    "id": "24262:663694",
+    "name": "INV_00062_U_M_Homepage_Fondi_Dettaglio ordini_annulla ordine",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Gestione ordini"
+  },
+  {
+    "id": "24262:663742",
+    "name": "INV_00062_U_M_Homepage_Fondi_Dettaglio ordini_annulla ordine_thank you page",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Gestione ordini"
+  },
+  {
+    "id": "24262:663748",
+    "name": "INV_00056_U_M_Homepage_Titoli_Gestione ordini e movimenti_Ordini_Dettaglio ordine ineseguito_Esempio con scheda titolo",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Gestione ordini"
+  },
+  {
+    "id": "24262:663803",
+    "name": "INV_00063_U_M_Homepage_Overview_CORNER CASE_Pog a zero",
+    "section": "🟢 INV_U_M_Homepage_Overview_Corner case"
+  },
+  {
+    "id": "24262:663854",
+    "name": "INV_00064_U_M_Homepage_Titoli_CORNER CASE_Pog a zero",
+    "section": "🟢 INV_U_M_Homepage_Overview_Corner case"
+  },
+  {
+    "id": "24262:663871",
+    "name": "INV_00065_U_M_Homepage_Overview_Fondi_CORNER CASE_Pog a zero",
+    "section": "🟢 INV_U_M_Homepage_Overview_Corner case"
+  },
+  {
+    "id": "24262:663891",
+    "name": "INV_00066_U_M_Homepage_Overview_CORNER CASE_No grafico ESG",
+    "section": "🟢 INV_U_M_Homepage_Overview_Corner case"
+  },
+  {
+    "id": "24262:663947",
+    "name": "INV_00067_U_M_Homepage_Overview_CORNER CASE_No deposito titoli",
+    "section": "🟢 INV_U_M_Homepage_Overview_Corner case"
+  },
+  {
+    "id": "24262:663980",
+    "name": "INV_00430_U_M_Homepage_Titoli_Gestione ordini e movimenti_Ordini_CORNER CASE No ordini",
+    "section": "🟢 INV_U_M_Homepage_Overview_Corner case"
+  },
+  {
+    "id": "24262:663990",
+    "name": "INV_00431_U_M_Homepage_Titoli_Gestione ordini e movimenti_Movimenti_CORNER CASE No movimenti",
+    "section": "🟢 INV_U_M_Homepage_Overview_Corner case"
+  },
+  {
+    "id": "24262:664001",
+    "name": "INV_00432_U_M_Homepage_Fondi_Gestione ordini_CORNER CASE No ordini",
+    "section": "🟢 INV_U_M_Homepage_Overview_Corner case"
+  },
+  {
+    "id": "24262:664281",
+    "name": "INV_00042_U_M_Floating Button Investi_Apertura cassetto",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:664307",
+    "name": "INV_00068_U_M_Floating Investi_Mercati_Homepage_Approfondimenti su materie prime",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:664389",
+    "name": "INV_00069_U_M_Floating Investi_Mercati_Homepage_Approfondimenti su tassi",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:664478",
+    "name": "INV_00070_U_M_Floating Investi_Mercati_Homepage_Approfondimenti su cambi",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:664565",
+    "name": "INV_00152_U_M_Floating Investi_Mercati_Homepage_Calendario dividendi_Versione con due mesi in pagina",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:664655",
+    "name": "INV_00073_U_M_Floating Investi_Mercati_Dettaglio_Composizione",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:664675",
+    "name": "INV_00074_U_M_Floating Investi_Mercati_Dettaglio_Scopri le news",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:664699",
+    "name": "INV_00080_U_M_Floating Investi_Mercati_Dettaglio_News_Perdita di capitale per Apple",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:664718",
+    "name": "INV_00072_U_M_Floating Investi_Mercati_Dettaglio_Tutti gli indici",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:664749",
+    "name": "INV_00075_U_M_Floating Investi_Mercati_Dettaglio_Tutti i cambi",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:664828",
+    "name": "INV_00078_U_M_Floating Investi_Mercati_Dettaglio_Calendario dividendi",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:664877",
+    "name": "INV_00071_U_M_Floating Investi_Mercati_Homepage_Watchlist vuota",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:664950",
+    "name": "INV_00079_U_M_Floating Investi_Mercati_Dettaglio_Categorie in rilievo_Rendimenti obbligazionari al 3%",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:664963",
+    "name": "INV_00506_U_M_Floating Investi_Mercati_Dettaglio_Categorie in rilievo_Cryptovalute_Accordion aperto",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:664974",
+    "name": "INV_00520_U_M_Floating Investi_Mercati_Dettaglio_Categorie in rilievo_Cryptovalute_Accordion chiuso",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:664985",
+    "name": "INV_00520_U_M_Floating Investi_Mercati_Dettaglio_Categorie in rilievo_Cryptovalute_Accordion chiuso",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:665000",
+    "name": "INV_00520_U_M_Floating Investi_Mercati_Dettaglio_Categorie in rilievo_Cryptovalute_Accordion chiuso",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:665015",
+    "name": "INV_00128_U_M_Floating Investi_Mercati_Dettaglio_Categorie in rilievo",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:665039",
+    "name": "INV_00081_U_M_Floating Investi_Mercati_Homepage_Grafico non caricato",
+    "section": "🟢 INV_U_M_Floating Button_Mercati"
+  },
+  {
+    "id": "24262:665140",
+    "name": "INV_00041_U_M_Titoli_Dettaglio_Posizione titolo",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:665178",
+    "name": "INV_00082_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Azioni_Overview",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:665274",
+    "name": "INV_00085_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Azioni_News",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:665299",
+    "name": "INV_00086_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Azioni_Book e altre borse_Versione nuovo book",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:665323",
+    "name": "INV_00089_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Azioni_Book e altro borse_Versione book non attivo",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:665349",
+    "name": "INV_00089_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Azioni_Book e altro borse_Versione book non attivo",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:665374",
+    "name": "INV_00642_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Azioni_Book e altro borse_Versione no book",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:665394",
+    "name": "INV_00090_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Azioni_Profilo societario_Versione con azionisti",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:665484",
+    "name": "INV_00091_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Azioni_Profilo societario_Versione no azionisti",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:665552",
+    "name": "INV_00083_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Azioni_Valutazioni_Grafico positivo",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:665632",
+    "name": "INV_00084_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Azioni_Valutazion_Grafico negativo",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:665714",
+    "name": "INV_00093_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Obbligazioni_Dettagli",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:665772",
+    "name": "INV_00094_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Obbligazioni_Book e altre borse",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:665795",
+    "name": "INV_00095_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Obbligazioni_Dati statistici",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:665860",
+    "name": "INV_00097_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Covered Warrant_Dettagli",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:665914",
+    "name": "INV_00098_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Covered Warrant_Book e altre borse",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:665937",
+    "name": "INV_00099_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Covered Warrant_Dati statistici",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:665988",
+    "name": "INV_00101_U_M_Homepage_Titoli_Dettaglio_Schede titoli_ETC e Certificati_Dettagli",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:666033",
+    "name": "INV_00104_U_M_Homepage_Titoli_Dettaglio_Schede titoli_ETF e Fondi Quotati_Dettagli",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:666064",
+    "name": "INV_00105_U_M_Homepage_Titoli_Dettaglio_Schede titoli_ETF e Fondi Quotati_Book e altre borse",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:666087",
+    "name": "INV_00102_U_M_Homepage_Titoli_Dettaglio_Schede titoli_ETC e Certificati_Book e altre borse",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:666110",
+    "name": "INV_00107_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Tassi di interesse_Overview",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:666161",
+    "name": "INV_00106_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Tassi di cambio_Overview",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:666215",
+    "name": "INV_00103_U_M_Homepage_Titoli_Dettaglio_Schede titoli_ETF e Fondi Quotati_Overview",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:666275",
+    "name": "INV_00100_U_M_Homepage_Titoli_Dettaglio_Schede titoli_ETC e Certificati_Overview",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:666335",
+    "name": "INV_00096_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Covered Warrant_Overview",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:666397",
+    "name": "INV_00092_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Obbligazioni_Overview",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:666457",
+    "name": "INV_00108_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Indici_Overview",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:666508",
+    "name": "INV_00109_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Indici_Migliori e peggiori",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:666542",
+    "name": "INV_00110_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Indici_Più scambiati",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:666566",
+    "name": "INV_00111_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Indici_News",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:666591",
+    "name": "INV_00634_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Indici_News assenti",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:666611",
+    "name": "INV_00112_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Materie prime_Overview",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:666662",
+    "name": "INV_00170B_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Azioni_Overview_Apertura disclaimer",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:667007",
+    "name": "Sezione",
+    "section": "🟢 INV_U_M_Titoli_Schede titoli"
+  },
+  {
+    "id": "24262:667020",
+    "name": "INV_00118_U_M_Fondi_Dettaglio_Risparmia e investi_Dettaglio fondo",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (Risparmia e investi)"
+  },
+  {
+    "id": "24262:667046",
+    "name": "INV_00120_U_M_Fondi_Dettaglio_Risparmia e investi_Altri dettagli",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (Risparmia e investi)"
+  },
+  {
+    "id": "24262:667075",
+    "name": "INV_00121_U_M_Fondi_Dettaglio_Risparmia e investi_Lista ultimi ordini",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (Risparmia e investi)"
+  },
+  {
+    "id": "24262:667094",
+    "name": "INV_00119_U_M_Fondi_Dettaglio_Risparmia e investi_Risparmia e investi",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (Risparmia e investi)"
+  },
+  {
+    "id": "24262:667126",
+    "name": "INV_00116_U_M_Homepage_Fondi_Risparmia e investi",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (Risparmia e investi)"
+  },
+  {
+    "id": "24262:667170",
+    "name": "INV_00117_U_M_Fondi_Dettaglio_Risparmia e investi_La tua posizione",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (Risparmia e investi)"
+  },
+  {
+    "id": "24262:667206",
+    "name": "INV_00544_U_M_Fondi_Dettaglio_Risparmia e investi_Drawer altri servizi",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (Risparmia e investi)"
+  },
+  {
+    "id": "24262:667261",
+    "name": "INV_00124_U_M_Fondi_Dettaglio_Conto gestito_Dettaglio fondo",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (Conto gestito)"
+  },
+  {
+    "id": "24262:667287",
+    "name": "INV_00126_U_M_Fondi_Dettaglio_Conto gestito_Altri dettagli",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (Conto gestito)"
+  },
+  {
+    "id": "24262:667316",
+    "name": "INV_00127_U_M_Fondi_Dettaglio_Conto gestito_Lista ultimi ordini",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (Conto gestito)"
+  },
+  {
+    "id": "24262:667335",
+    "name": "INV_00125_U_M_Fondi_Dettaglio_Conto gestito_Conto gestito",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (Conto gestito)"
+  },
+  {
+    "id": "24262:667365",
+    "name": "INV_00122_U_M_Homepage_Fondi_Conto gestito",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (Conto gestito)"
+  },
+  {
+    "id": "24262:667409",
+    "name": "INV_00123_U_M_Fondi_Dettaglio_Conto gestito_La tua posizione",
+    "section": "🟢 INV_U_M_Homepage_Fondi_Posizione fondo (Conto gestito)"
+  },
+  {
+    "id": "24262:667448",
+    "name": "INV_00152B_U_M_Vetrina fondi",
+    "section": "🟢 INV_U_M_Fondi_Ricerca"
+  },
+  {
+    "id": "24262:667481",
+    "name": "INV_00155_U_M_Vetrina fondi_Ricerca fondi_Ricerca effettuata",
+    "section": "🟢 INV_U_M_Fondi_Ricerca"
+  },
+  {
+    "id": "24262:667501",
+    "name": "INV_00153_U_M_Vetrina fondi_Ricerca fondi_Apertura ricerca",
+    "section": "🟢 INV_U_M_Fondi_Ricerca"
+  },
+  {
+    "id": "24262:667523",
+    "name": "INV_00516_U_M_Vetrina fondi_Ricerca fondi_Apertura ricerca_Compilazione ricerca",
+    "section": "🟢 INV_U_M_Fondi_Ricerca"
+  },
+  {
+    "id": "24262:667547",
+    "name": "INV_00517_U_M_Vetrina fondi_Ricerca fondi_Apertura ricerca_Compilazione ricerca in corso",
+    "section": "🟢 INV_U_M_Fondi_Ricerca"
+  },
+  {
+    "id": "24262:667569",
+    "name": "INV_00156_U_M_Vetrina fondi_Ricerca fondi_Dettaglio_Categorie in rilievo_Multi asset",
+    "section": "🟢 INV_U_M_Fondi_Ricerca"
+  },
+  {
+    "id": "24262:667582",
+    "name": "INV_00157_U_M_Vetrina fondi_Ricerca fondi avanzata_Filtri non inseriti",
+    "section": "🟢 INV_U_M_Fondi_Ricerca"
+  },
+  {
+    "id": "24262:667656",
+    "name": "INV_00385_U_M_Vetrina fondi_Ricerca fondi avanzata_Filtri inseriti",
+    "section": "🟢 INV_U_M_Fondi_Ricerca"
+  },
+  {
+    "id": "24262:667730",
+    "name": "INV_00386_U_M_Vetrina fondi_Ricerca fondi avanzata_Filtri inseriti_Asset manager esplosi",
+    "section": "🟢 INV_U_M_Fondi_Ricerca"
+  },
+  {
+    "id": "24262:667804",
+    "name": "INV_00154_U_M_Vetrina fondi_Ricerca fondi_Ricerca con completamento",
+    "section": "🟢 INV_U_M_Fondi_Ricerca"
+  },
+  {
+    "id": "24262:667824",
+    "name": "INV_00518_U_M_Vetrina fondi_Apertura ricerca_Ricerca inviata",
+    "section": "🟢 INV_U_M_Fondi_Ricerca"
+  },
+  {
+    "id": "24262:667846",
+    "name": "INV_00519_U_M_Vetrina fondi_Ricerca fondi_Apertura ricerca_Ricerca eliminata",
+    "section": "🟢 INV_U_M_Fondi_Ricerca"
+  },
+  {
+    "id": "24262:667861",
+    "name": "INV_00224_U_M_Mercati_Ricerca base_Apertura pagina_Dettaglio_In rilievo",
+    "section": "🟢 INV_U_M_Fondi_Ricerca"
+  },
+  {
+    "id": "24262:667917",
+    "name": "INV_00164_U_M_Homepage_Investimenti assicurativi",
+    "section": "🟢 INV_U_M_Homepage_Prodotti assicurativi"
+  },
+  {
+    "id": "24262:667950",
+    "name": "INV_00165_U_M_Homepage_Investimenti assicurativi_Dettaglio prodotto",
+    "section": "🟢 INV_U_M_Homepage_Prodotti assicurativi"
+  },
+  {
+    "id": "24262:667972",
+    "name": "INV_00001_U_M_Homepage_Overview_Grafico full",
+    "section": "🟢 INV_U_M_Homepage_Prodotti assicurativi"
+  },
+  {
+    "id": "24262:668316",
+    "name": "INV_00551_U_M_Titoli_Compravendita_Acquisto_piazzata",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:668396",
+    "name": "INV_00552_U_M_Titoli_Compravendita_Acquisto_piazzata",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:668476",
+    "name": "INV_00550_U_M_Titoli_Compravendita_Acquisto_piazzata",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669214",
+    "name": "INV_00082_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Azioni_Overview",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669320",
+    "name": "INV_00560_U_M_Titoli_Compravendita_Acquisto_piazzata_posizione",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669338",
+    "name": "INV_00579_U_M_Titoli_Compravendita_Acquisto_Best_al limite",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669415",
+    "name": "INV_00578_U_M_Titoli_Compravendita_Acquisto_Best",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669489",
+    "name": "INV_00580_U_M_Titoli_Compravendita_Acquisto_Best_monointestato",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669565",
+    "name": "INV_00581_U_M_Titoli_Compravendita_Acquisto_Best_al meglio",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669638",
+    "name": "INV_00556_U_M_Titoli_Compravendita_Acquisto_piazzata_info tooltip mercato",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669707",
+    "name": "INV_00557_U_M_Titoli_Compravendita_Acquisto_piazzata_info tooltip ordini",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669776",
+    "name": "INV_00564_U_M_Titoli_Compravendita_Acquisto_riepilogo",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669810",
+    "name": "INV_00567_U_M_Titoli_Compravendita_Acquisto_Riepilogo con dettagli operazione",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669843",
+    "name": "INV_00561_U_M_Titoli_Compravendita_Acquisto_conferma acquisto",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669869",
+    "name": "INV_00562_U_M_Titoli_Compravendita_Acquisto_conferma acquisto",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669887",
+    "name": "INV_00563_U_M_Titoli_Compravendita_Acquisto_popup uscita dal flusso",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669918",
+    "name": "INV_00566_U_M_Titoli_Compravendita_Acquisto_TUP",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669920",
+    "name": "INV_00568_U_M_Titoli_Compravendita_Acquisto_TUP warning",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669922",
+    "name": "INV_00565_U_M_Titoli_Compravendita_Acquisto_informativa",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669924",
+    "name": "INV_00558_U_M_Titoli_Compravendita_Acquisto_piazzata_selezione deposito e sottodeposito",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:669984",
+    "name": "INV_00555_U_M_Titoli_Compravendita_Acquisto_piazzata_selezione mercato",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:670032",
+    "name": "INV_00569_U_M_Titoli_Compravendita_Acquisto_popup errore",
+    "section": "🟢 INV_U_M_Compravendita"
+  },
+  {
+    "id": "24262:670532",
+    "name": "INV_00218_U_M_Mercati_Ricerca base_Apertura pagina_",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:670562",
+    "name": "INV_00042_U_M_Floating Button Investi_Apertura cassetto",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:670595",
+    "name": "INV_00219_U_M_Mercati_Ricerca base_Apertura titolo",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:670622",
+    "name": "INV_00220_U_M_Mercati_Ricerca base_Apertura titolo_Dettaglio_Cerca per",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:670659",
+    "name": "INV_00221_U_M_Mercati_Ricerca base_Apertura titolo_Dettaglio_Asset class",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:670698",
+    "name": "INV_00222_U_M_Mercati_Ricerca base_Apertura titolo_Dettaglio_Tutti gli asset class",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:670750",
+    "name": "INV_00512_U_M_Mercati_Ricerca base_Apertura pagina_Compilazione",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:670780",
+    "name": "INV_00513_U_M_Mercati_Ricerca base_Apertura pagina_Compilazione Apple",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:670810",
+    "name": "INV_00508_U_M_Mercati_Ricerca base_Apertura pagina_Casistica con Descrizione e Simbolo accorpati",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:670836",
+    "name": "INV_00509_U_M_Mercati_Ricerca base_Apertura pagina_Casistica con cerca per ISIN",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:670870",
+    "name": "INV_00223_U_M_Mercati_Ricerca base_Apertura pagina_Dettaglio_In rilievo_Sostenibilità",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:670886",
+    "name": "INV_00227_U_M_Mercati_Ricerca avanzata_Apertura pagina_Dettaglio_Tipologia strumento",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:670914",
+    "name": "INV_00226_U_M_Mercati_Ricerca avanzata_Apertura pagina_Filtri_Azioni",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:670958",
+    "name": "INV_00228_U_M_Mercati_Ricerca avanzata_Apertura pagina_Filtri_Obbligazioni",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:670991",
+    "name": "INV_00510_U_M_Mercati_Ricerca avanzata_Apertura pagina_Filtri_Obbligazioni_Apertura calendario",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:671039",
+    "name": "INV_00229_U_M_Mercati_Ricerca avanzata_Apertura pagina_Filtri_ETF e Fondi Quotati",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:671077",
+    "name": "INV_00230_U_M_Mercati_Ricerca avanzata_Apertura pagina_ETC e Certificati",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:671102",
+    "name": "INV_00231_U_M_Mercati_Ricerca avanzata_Apertura pagina_Covered Warrants",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:671148",
+    "name": "INV_00232_U_M_Mercati_Ricerca avanzata_Azioni_Vista base",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:671169",
+    "name": "INV_00233_U_M_Mercati_Ricerca avanzata_Azioni_Vista avanzata",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:671191",
+    "name": "INV_00234_U_M_Mercati_Ricerca avanzata_Obbligazione vista avanzata",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:671213",
+    "name": "INV_00235_U_M_Mercati_Ricerca avanzata_ETF e Fondi Quotati_Vista avanzata",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:671235",
+    "name": "INV_00236_U_M_Mercati_Ricerca avanzata_ETC e Certificati_Vista avanzata",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:671257",
+    "name": "INV_00237_U_M_Mercati_Ricerca avanzata_Covered Warrants_Vista avanzata",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:671279",
+    "name": "INV_00224_U_M_Mercati_Ricerca base_Apertura pagina_Dettaglio_In rilievo",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:671304",
+    "name": "INV_00514_U_M_Mercati_Ricerca base_Apertura titolo_Invio ricerca",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:671333",
+    "name": "INV_00515_U_M_Mercati_Ricerca base_Apertura titolo_Eliminazione ricerca",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:671357",
+    "name": "INV_00227_U_M_Mercati_Ricerca avanzata_Apertura pagina_Filtri_Azioni",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:671442",
+    "name": "INV_00644_U_M_Mercati_Ricerca base_Apertura pagina_Dettaglio_In rilievo_Sostenibilità_vista avanzata",
+    "section": "🟢 INV_U_M_Mercati_Ricerca"
+  },
+  {
+    "id": "24262:671469",
+    "name": "INV_00241_U_M_Dettaglio_Posizione Fondo PIC_Cassetto operazioni",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671516",
+    "name": "INV_00242_U_M_Dispositive fondi PIC_Rimborso fondo in quote_Step 1_T0",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671525",
+    "name": "INV_00242B_U_M_Dispositive fondi PIC_Rimborso fondo in quote_Step 1_Esemplificazione funzionamento componente",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671534",
+    "name": "INV_00248_U_M_Dispositive fondi PIC_Rimborso fondo in importo_Step 1",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671543",
+    "name": "INV_00243_U_M_Dispositive fondi PIC_Rimborso fondo in quote_Step 2",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671562",
+    "name": "INV_00249_U_M_Dispositive fondi PIC_Rimborso fondo in importo_Step 2",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671581",
+    "name": "INV_00244_U_M_Dispositive fondi PIC_Rimborso fondo in quote_Step 3",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671584",
+    "name": "INV_00250_U_M_Dispositive fondi PIC_Rimborso fondo in importo_Step 3",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671587",
+    "name": "INV_00252_U_M_Dispositive fondi PIC_Rimborso fondo in importo_Inserimento mobile code_Step 4",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671589",
+    "name": "INV_00251_U_M_Dispositive fondi PIC_Rimborso fondo in importo_Inserimento mobile code_Step 4",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671591",
+    "name": "INV_00253_U_M_Dispositive fondi PIC_Rimborso fondo in importo_Tha k you page",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671593",
+    "name": "INV_00020_U_M_Dettaglio_Posizione Fondo PIC_La tua posizione",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671628",
+    "name": "INV_00019_U_M_Homepage_Fondi",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671672",
+    "name": "INV_00266_U_M_Dispositive fondi PIC_Switch fondo_Step 1",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671717",
+    "name": "INV_00268_U_M_Dispositive fondi PIC_Switch fondo_Step 4",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671746",
+    "name": "INV_00267_U_M_Dispositive fondi PIC_Switch fondo_Step 3",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671775",
+    "name": "INV_00270_U_M_Dispositive fondi PIC_Switch fondo_Step 6",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671784",
+    "name": "INV_00272_U_M_Dispositive fondi PIC_Switch fondo_Inserimento mobile code_Step 3",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671786",
+    "name": "INV_00271_U_M_Dispositive fondi PIC_Switch fondo_Inserimento mobile code_Step 2",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671788",
+    "name": "INV_00269_U_M_Dispositive fondi PIC_Switch fondo_presa visione doc_Step 6",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671791",
+    "name": "INV_00254_U_M_Dispositive fondi PIC_Sottoscrizione fondo_Step 1",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671801",
+    "name": "INV_00256_U_M_Dispositive fondi PIC_Sottoscrizione fondo_Step 3",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671813",
+    "name": "INV_00475_U_M_Dispositive fondi PIC_Sottoscrizione fondo_Step 3_CASO importo superiore a 5.000€",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671826",
+    "name": "INV_00586_U_M_Dispositive fondi PIC_Sottoscrizione fondo_Step 3_CASO importo non disponibile per regolamento_popup warning",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671841",
+    "name": "INV_00476_U_M_Dispositive fondi PIC_Sottoscrizione fondo_Step 3_Apertura Tendina",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671873",
+    "name": "INV_00258_U_M_Dispositive fondi PIC_Sottoscrizione fondo_Step 5",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671895",
+    "name": "INV_00260_U_M_Dispositive fondi PIC_Sottoscrizione fondo_Step 7",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671898",
+    "name": "INV_00261_U_M_Dispositive fondi PIC_Sottoscrizione fondo_Step 8",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671907",
+    "name": "INV_00259_U_M_Dispositive fondi PIC_Sottoscrizione fondo_Step 6",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671924",
+    "name": "INV_00255_U_M_Dispositive fondi PIC_Sottoscrizione fondo_Step 2_CASO con entrambe le selezioni attive",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671933",
+    "name": "INV_00265_U_M_Dispositive fondi PIC_Sottoscrizione fondo_Step 2_CASO con una sola selection attiva",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671942",
+    "name": "INV_00264_U_M_Dispositive fondi PIC_Sottoscrizione fondo_Thank you page",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671944",
+    "name": "INV_00263_U_M_Dispositive fondi PIC_Sottoscrizione fondo_Inserimento mobile code_Step 9",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671946",
+    "name": "INV_00262_U_M_Dispositive fondi PIC_Sottoscrizione fondo_Inserimento mobile code_Step 9",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671948",
+    "name": "INV_00257_U_M_Dispositive fondi PIC_Sottoscrizione fondo_Step 4",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671957",
+    "name": "INV_00273_U_M_Dispositive fondi PIC_Switch fondo_Thank you page",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671959",
+    "name": "INV_00359_U_M_Dispositive fondi PIC_Sottoscrizione fondo_CASO POP-UP DI ALERT",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671971",
+    "name": "INV_00360_U_M_Dispositive fondi PIC_Sottoscrizione fondo_CASO PORTAFOGLIO INADEGUATO",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671984",
+    "name": "INV_00612_U_M_Dispositive fondi PIC_Rimborso fondo in quote_Step 3",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671987",
+    "name": "INV_00613_U_M_Dispositive fondi PIC_Rimborso fondo in importo_Step 3",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671993",
+    "name": "INV_00614_U_M_Dispositive fondi PIC_Sottoscrizione fondo_Step 7",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:671997",
+    "name": "INV_00621_U_M_Dispositive fondi PIC_Switch fondo_presa visione doc_firma_Step 6",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:672001",
+    "name": "INV_00246_U_M_Dispositive fondi PIC_Rimborso fondo in quote_Inserimento mobile code_Step 3",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:672003",
+    "name": "INV_00245_U_M_Dispositive fondi PIC_Rimborso fondo in quote_Inserimenti mobile code_Step 2",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:672005",
+    "name": "INV_00247_U_M_Dispositive fondi PIC_Rimborso fondo in quote_Thank you page",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:672012",
+    "name": "INV_00616_U_M_Dispositive fondi PIC_Switch fondo_Step 1",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:672058",
+    "name": "INV_00617_U_M_Dispositive fondi PIC_Switch fondo_Step 2",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:672068",
+    "name": "INV_00618_U_M_Dispositive fondi PIC_Switch fondo_Step 2",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:672079",
+    "name": "INV_00619_U_M_Dispositive fondi PIC_Switch fondo_Step 2",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:672089",
+    "name": "INV_00620_U_M_Dispositive fondi PIC_Switch fondo_Step 2_selezione valore",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:672108",
+    "name": "INV_00615_U_M_Dispositive fondi PIC_Switch fondo_Step 3_reinvesti o accredita",
+    "section": "🟢 Investimenti_U_M_Fondi_Dispositive fondi (PIC)"
+  },
+  {
+    "id": "24262:672132",
+    "name": "INV_00275_U_M_Dispositive fondi PAC_Rimborso fondo in quote_Step 2",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672141",
+    "name": "INV_00281_U_M_Dispositive fondi PAC_Rimborso fondo in importo_Step 1",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672150",
+    "name": "INV_00276_U_M_Dispositive fondi PAC_Rimborso fondo in quote_Step 3",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672169",
+    "name": "INV_00282_U_M_Dispositive fondi PAC_Rimborso fond in importo_Step 2",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672188",
+    "name": "INV_00277_U_M_Dispositive fondi PAC_Rimborso fondo in quote_Step 5",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672191",
+    "name": "INV_00294_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 3",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672194",
+    "name": "INV_00279_U_M_Dispositive fondi PAC_Rimborso fondo in quote_Inserimento mobile code_Step 3",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672196",
+    "name": "INV_00278_U_M_Dispositive fondi PAC_Rimborso fondo in quote_Inserimento mobile code_Step 2",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672198",
+    "name": "INV_00285_U_M_Dispositive fondi PAC_Rimborso fondo in importo_Inserimento mobile code_Step 2",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672200",
+    "name": "INV_00284_U_M_Dispositive fondi PAC_Rimborso fondo in importo_Inserimento mobile code_Step 1",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672203",
+    "name": "INV_00280_U_M_Dispositive fondi PAC_Rimborso fondo in quote_Thank you page",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672205",
+    "name": "INV_00286_U_M_Dispositive fondi PAC_Rimborso fondo in importo_Thank you page",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672207",
+    "name": "INV_00024_U_M_Dettaglio_Posizione Fondo PAC_La tua posizione",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672244",
+    "name": "INV_00019_U_M_Homepage_Fondi",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672288",
+    "name": "INV_00597_U_M_Dispositive fondi PAC_Switch fondo_Step 1",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672334",
+    "name": "INV_00596_U_M_Dispositive fondi PAC_Switch fondo_Step 1",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672380",
+    "name": "INV_00598_U_M_Dispositive fondi PAC_Switch fondo_Step 2",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672390",
+    "name": "INV_00300_U_M_Dispositive fondi PAC_Switch fondo_Step 18",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672400",
+    "name": "INV_00599_U_M_Dispositive fondi PAC_Switch fondo_Step 2",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672411",
+    "name": "INV_00600_U_M_Dispositive fondi PAC_Switch fondo_Step 2",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672421",
+    "name": "INV_00601_U_M_Dispositive fondi PAC_Switch fondo_Step 2_selection valore",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672440",
+    "name": "INV_00585_U_M_Dispositive fondi PAC_Switch fondo_Step 6_errore valore",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672449",
+    "name": "INV_00302_U_M_Dispositive fondi PAC_Switch fondo_Step 4",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672479",
+    "name": "INV_00301_U_M_Dispositive fondi PAC_Switch fondo_Step 3",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672500",
+    "name": "INV_00304_U_M_Dispositive fondi PAC_Switch fondo_Step 6",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672508",
+    "name": "INV_00307_U_M_Dispositive fondi PAC_Switch fondo_Thank you page",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672510",
+    "name": "INV_00306_U_M_Dispositive fondi PAC_Switch fondo_Inserimento mobile code_Step 3",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672512",
+    "name": "INV_00646_U_M_Dispositive fondi PAC_Switch fondo_Inserimento mobile code_Step 4",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672514",
+    "name": "INV_00305_U_M_Dispositive fondi PAC_Switch fondo_Inserimento mobile code_Step 2",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672517",
+    "name": "INV_00645_U_M_Dispositive fondi PAC_Switch fondo_Inserimento mobile code_Step 3",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672520",
+    "name": "INV_00303_U_M_Dispositive fondi PAC_Switch fondo_Step 6",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672523",
+    "name": "INV_00602_U_M_Dispositive fondi PAC_Switch fondo_Step 6",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672526",
+    "name": "INV_00287_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 2",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672536",
+    "name": "INV_00290_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 5",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672549",
+    "name": "INV_00477_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 5_CASO importo superiore a 5.000€",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672562",
+    "name": "INV_00478_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 4_CASO importo superiore a 5.000€_Apertura tendina",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672593",
+    "name": "INV_00292_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 7",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672614",
+    "name": "INV_00294_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 8",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672617",
+    "name": "INV_00611_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 8",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672620",
+    "name": "INV_00295_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 10",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672628",
+    "name": "INV_00293_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 8",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672648",
+    "name": "INV_00480_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 8_CASO warning assicurazione",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672671",
+    "name": "INV_00288_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 2_CASO con entrambe le selezioni attive",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672680",
+    "name": "INV_00299_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 2_CASO con una sola selezione attiva",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672689",
+    "name": "INV_00291_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 6",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672698",
+    "name": "INV_00298_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Thank you page",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672700",
+    "name": "INV_00289_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 4",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672712",
+    "name": "INV_00297_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Inserimento mobile code_Step 3",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672714",
+    "name": "INV_00296_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Inserimento mobile code_Step 2",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672717",
+    "name": "INV_00309_U_M_Dispositive fondi PAC_Anticipo rata_Step 3",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672736",
+    "name": "INV_00315_U_M_Dispositive fondi PAC_Anticipo rata_Thank you page",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672738",
+    "name": "INV_00308_U_M_Dispositive fondi PAC_Anticipo rata_Step 2",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672754",
+    "name": "INV_00310_U_M_Dispositive fondi PAC_Anticipo rata_Step 4",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672772",
+    "name": "INV_00317_U_M_Dispositive fondi PAC_Modifica rata_Step 3",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672793",
+    "name": "INV_00319_U_M_Dispositive fondi PAC_Modifica rata_Step 5",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672796",
+    "name": "INV_00606_U_M_Dispositive fondi PAC_Modifica rata_Step 7",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672799",
+    "name": "INV_00605_U_M_Dispositive fondi PAC_Modifica rata_Step 6",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672816",
+    "name": "INV_00320_U_M_Dispositive fondi PAC_Modifica rata_Step 6",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672825",
+    "name": "INV_00318_U_M_Dispositive fondi PAC_Modifica rata_Step 4",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672852",
+    "name": "INV_00323_U_M_Dispositive fondi PAC_Modifica rata_Thank you page",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672854",
+    "name": "INV_00316_U_M_Dispositive fondi PAC_Modifica rata_Step 2",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672869",
+    "name": "INV_00322_U_M_Dispositive fondi PAC_Modifica rata_Inserimento mobile code_Step 3",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672871",
+    "name": "INV_00321_U_M_Dispositive fondi PAC_Modifica rata_Inserimento mobile code_Step 2",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672874",
+    "name": "INV_00327_U_M_Dispositive fondi PAC_Sospensione PAC_Step 5",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672882",
+    "name": "INV_00330_U_M_Dispositive fondi PAC_Sospensione PAC_Thank you page",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672884",
+    "name": "INV_00324_U_M_Dispositive fondi PAC_Sospensione PAC_Step 4",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672913",
+    "name": "INV_00329_U_M_Dispositive fondi PAC_Sospensione PAC_Inserimento mobile code_Step 3",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672915",
+    "name": "INV_00328_U_M_Dispositive fondi PAC_Sospensione PAC_Inserimento mobile code_Step 2",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672917",
+    "name": "INV_00274_U_M_Dettaglio_Posizione fondo PAC_Cassetto operazioni",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672973",
+    "name": "INV_00354_U_M_Dispositive fondi PAC_Riattivazione PAC_Conferma",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:672981",
+    "name": "INV_00351_U_M_Dispositive fondi PAC_Riattivazione PAC_Step 2",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673008",
+    "name": "INV_00355_U_M_Dispositive fondi PAC_Riattivazione PAC_Inserimento mobile code_Step 2",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673011",
+    "name": "INV_00352_U_M_Dispositive fondi PAC_Riattivazione PAC_Step 3",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673026",
+    "name": "INV_00353_U_M_Dispositive fondi PAC_Riattivazione PAC_Step 4",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673029",
+    "name": "INV_00608_U_M_Dispositive fondi PAC_Riattivazione PAC_Step 5",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673032",
+    "name": "INV_00350_U_M_Dettaglio_Posizione fondo PAC_Cassetto operazioni_Caso riattivazione PAC",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673094",
+    "name": "INV_00361_U_M_Dispositive fondi PAC_Sottoscrizione fondo_CASO POP-UP DI ALERT",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673106",
+    "name": "INV_00362_U_M_Dispositive fondi PAC_Sottoscrizione fondo_CASO PORTAFOGLIO INADEGUATO",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673115",
+    "name": "INV_00479_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 5_CASO richiesta aggiunta di polizza",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673129",
+    "name": "INV_00583_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 6_errore importo",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673141",
+    "name": "INV_00584_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 7_errore importo",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673154",
+    "name": "INV_00326_U_M_Dispositive fondi PAC_Sospensione PAC_Step 4",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673157",
+    "name": "INV_00607_U_M_Dispositive fondi PAC_Sospensione PAC_Step 5",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673176",
+    "name": "INV_00610_U_M_Dispositive fondi PAC_Sottoscrizione fondo_Step 3",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673179",
+    "name": "INV_00609_U_M_Dispositive fondi PAC_Rimborso fondo in quote_Step 5",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673187",
+    "name": "INV_00257_U_M_Dispositive fondi PIC_Sottoscrizione fondo_Step 6",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673196",
+    "name": "INV_00300_U_M_Dispositive fondi PAC_Switch fondo_Step 7",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673277",
+    "name": "INV_00357_U_M_Dispositive fondi PAC_Riattivazione PAC_Thank you page",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673279",
+    "name": "INV_00356_U_M_Dispositive fondi PAC_Riattivazione PAC_Inserimento mobile code_Step 3",
+    "section": "🟢 Investimenti_Dispositive fondi (PAC)"
+  },
+  {
+    "id": "24262:673292",
+    "name": "INV_00485_U_M_Homepage_Overview_Portafoglio virtuale_Dettaglio_Lista portafoglio",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673309",
+    "name": "INV_00490_U_M_Homepage_Overview_Portafoglio virtuale_Dettaglio_Gestisci portafoglio 1",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673318",
+    "name": "INV_00493_U_M_Homepage_Overview_Portafoglio virtuale_Dettaglio_Modifica nome portafoglio 1",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673324",
+    "name": "INV_00494_U_M_Homepage_Overview_Portafoglio virtuale_Dettaglio_Modifica nome portafoglio 2",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673330",
+    "name": "INV_00491_U_M_Homepage_Overview_Portafoglio virtuale_Dettaglio_Gestisci portafoglio 2",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673339",
+    "name": "INV_00492_U_M_Homepage_Overview_Portafoglio virtuale_Pop-up salvataggio modifiche",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673352",
+    "name": "INV_00641_U_M_Homepage_Overview_Portafoglio virtuale_Pop-up modifica modifiche",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673365",
+    "name": "INV_00481_U_M_Homepage_Overview_Portafoglio virtuale_Dettaglio_Nuovo portafoglio",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673371",
+    "name": "INV_00489_U_M_Homepage_Overview_Portafoglio virtuale_Transazioni virtuali_Versione 2",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673399",
+    "name": "INV_00487_U_M_Homepage_Overview_Portafoglio virtuale_Portafoglio_Versione 2",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673447",
+    "name": "INV_00496_U_M_Homepage_Overview_Portafoglio virtuale_Ricerca virtuale con titolo",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673466",
+    "name": "INV_00497_U_M_Homepage_Overview_Portafoglio virtuale_Posizione titolo virtuale",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673499",
+    "name": "INV_00498_U_M_Homepage_Overview_Portafoglio virtuale_Acquisto virtuale_Tipologia prezzo attuale",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673520",
+    "name": "INV_00500_U_M_Homepage_Overview_Portafoglio virtuale_Acquisto virtuale_Tipologia prezzo manuale",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673544",
+    "name": "INV_00499_U_M_Homepage_Overview_Portafoglio virtuale_Acquisto virtuale_Dettaglio_Tipologia prezzo",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673602",
+    "name": "INV_00011_U_M_Homepage_Verticale_Sezione Education",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673633",
+    "name": "INV_00482_U_M_Homepage_Overview_Portafoglio virtuale_Dettaglio_Inserimento nome nuovo portafoglio 1",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673639",
+    "name": "INV_00483_U_M_Homepage_Overview_Portafoglio virtuale_Dettaglio_Inserimento nome nuovo portafoglio 2",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673645",
+    "name": "INV_00484_U_M_Homepage_Overview_Portafoglio virtuale_Dettaglio_Lista portafoglio vuota",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673659",
+    "name": "INV_00495_U_M_Homepage_Overview_Portafoglio virtuale_Ricerca virtuale",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673673",
+    "name": "INV_00501_U_M_Homepage_Overview_Portafoglio virtuale_Scheda di dettaglio_Overview",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673769",
+    "name": "INV_00503_U_M_Homepage_Overview_Portafoglio virtuale_Scheda di dettaglio_News",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673794",
+    "name": "INV_00504_U_M_Homepage_Overview_Portafoglio virtuale_Scheda di dettaglio_Book e altre borse",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673818",
+    "name": "INV_00505_U_M_Homepage_Overview_Portafoglio virtuale_Scheda di dettaglio_Profilo societario",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:673907",
+    "name": "INV_00502_U_M_Homepage_Overview_Portafoglio virtuale_Scheda di dettaglio_Valutazioni",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:674025",
+    "name": "INV_00498_U_M_Homepage_Overview_Portafoglio virtuale_Acquisto virtuale_TYP",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:674027",
+    "name": "INV_00498_U_M_Homepage_Overview_Portafoglio virtuale_Acquisto virtuale_TYP",
+    "section": "🟢 INV_U_M_Portafoglio virtuale"
+  },
+  {
+    "id": "24262:674119",
+    "name": "INV_00041_U_M_Titoli_Dettaglio_Posizione titolo",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titoli_AUCAP"
+  },
+  {
+    "id": "24262:674155",
+    "name": "INV_00528_U_M_Titoli_Posizione titolo_Processo AUCAP_Drawer operazioni",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titoli_AUCAP"
+  },
+  {
+    "id": "24262:674204",
+    "name": "INV_00040_U_M_Homepage_Titoli_Versione aperta_Vista base",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titoli_AUCAP"
+  },
+  {
+    "id": "24262:674272",
+    "name": "INV_00529_U_M_Titoli_Posizione titolo_Processo AUCAP_Autocertificazione",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titoli_AUCAP"
+  },
+  {
+    "id": "24262:674288",
+    "name": "INV_00534_U_M_Titoli_Posizione titolo_Processo AUCAP_Inserimenti dati_Dati inseriti",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titoli_AUCAP"
+  },
+  {
+    "id": "24262:674333",
+    "name": "INV_00532_U_M_Titoli_Posizione titolo_Processo AUCAP_Inserimento dati_Blank",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titoli_AUCAP"
+  },
+  {
+    "id": "24262:674378",
+    "name": "INV_00533_U_M_Titoli_Posizione titolo_Processo AUCAP_Inserimento dati_Info icon Quantità di azioni richieste",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titoli_AUCAP"
+  },
+  {
+    "id": "24262:674433",
+    "name": "INV_00535_U_M_Titoli_Posizione titolo_Processo AUCAP_Inserimento dati_Errore quantità",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titoli_AUCAP"
+  },
+  {
+    "id": "24262:674478",
+    "name": "INV_00536_U_M_Titoli_Posizione titolo_Processo AUCAP_Inserimenti dati_Errore azioni multiple di 12",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titoli_AUCAP"
+  },
+  {
+    "id": "24262:674523",
+    "name": "INV_00530_U_M_Titoli_Posizione titolo_Processo AUCAP_Controllo dati",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titoli_AUCAP"
+  },
+  {
+    "id": "24262:674564",
+    "name": "INV_00531_U_M_Titoli_Posizione titolo_Processo AUCAP_Controllo dati_Info icon valuta di regolamento/registrazione",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titoli_AUCAP"
+  },
+  {
+    "id": "24262:674615",
+    "name": "INV_00538_U_M_Titoli_Posizione titolo_Processo AUCAP_Documenti 1",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titoli_AUCAP"
+  },
+  {
+    "id": "24262:674630",
+    "name": "INV_00539_U_M_Titoli_Posizione titolo_Processo AUCAP_Documenti 2",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titoli_AUCAP"
+  },
+  {
+    "id": "24262:674645",
+    "name": "INV_00537_U_M_Titoli_Posizione titolo_Processo AUCAP_Riepilogo",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titoli_AUCAP"
+  },
+  {
+    "id": "24262:674668",
+    "name": "INV_00542_U_M_Titoli_Posizione titolo_Processo AUCAP_Thank you page",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titoli_AUCAP"
+  },
+  {
+    "id": "24262:674670",
+    "name": "INV_00541_U_M_Titoli_Posizione titolo_Processo AUCAP_Mobile code 2",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titoli_AUCAP"
+  },
+  {
+    "id": "24262:674672",
+    "name": "INV_00540_U_M_Titoli_Posizione titolo_Processo AUCAP_Mobile code 1",
+    "section": "🟢 INV_U_M_Homepage_Titoli_Posizione titoli_AUCAP"
+  },
+  {
+    "id": "24262:674686",
+    "name": "INV_00042_U_M_Floating Button Investi_Apertura cassetto",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:674710",
+    "name": "INV_00129_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Apertura liste",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:674734",
+    "name": "INV_00131_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Lista tecnologia",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:674760",
+    "name": "INV_00390_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Lista tecnologia_CORNER CASE massimo numero di strumenti raggiunto",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:674799",
+    "name": "INV_00132_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Lista tecnologia_Gestione lista",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:674821",
+    "name": "INV_00208_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Lista tecnologia_Conferma eliminazione strumento",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:674846",
+    "name": "INV_00239_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Lista tecnologia_Messaggio di attenzione",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:674871",
+    "name": "INV_00133_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Ricerca",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:674895",
+    "name": "INV_00134_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Ricerca_Selezione lista",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:674907",
+    "name": "INV_00135_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Ricerca_Pop-up conferma aggiunta strumento",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:674935",
+    "name": "INV_00136_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Ricerca_Pop-up strumento non aggiunto",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:674963",
+    "name": "INV_00204_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Gestione liste_Conferma eliminazione",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:674984",
+    "name": "INV_00240_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Gestione liste_Messaggio di attenzione",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675005",
+    "name": "INV_00130_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Gestione liste",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675023",
+    "name": "INV_00205_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Gestione liste_Lista eliminata",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675041",
+    "name": "INV_00137_U_M_Floating Investi_Mercati_Dettaglio_Nuova Watchlist_Creazione nuova watchlist",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675057",
+    "name": "INV_00140_U_M_Floating Investi_Mercati_Dettaglio_Nuova Watchlist_Lista azioni vuota",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675070",
+    "name": "INV_00141_U_M_Floating Investi_Mercati_Dettaglio_Nuova Watchlist_Ricerca",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675094",
+    "name": "INV_00143_U_M_Floating Investi_Mercati_Dettaglio_Nuova Watchlist_Pop-up conferma aggiunta strumento",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675122",
+    "name": "INV_00138_U_M_Floating Investi_Mercati_Dettaglio_Nuova Watchlist_Creazione nuova watchlist_Inserimento nome lista_Step 4",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675129",
+    "name": "INV_00139_U_M_Floating Investi_Mercati_Dettaglio_Nuova Watchlist_Creazione nuova watchlist_Inserimento nome lista_Step 5",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675136",
+    "name": "INV_00082_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Azioni_Overview",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675335",
+    "name": "INV_00144_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Aggiunta alla watchlist",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675349",
+    "name": "INV_00148_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Creazione nuova watchlist_Watchlistcreata",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675372",
+    "name": "INV_00145_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Aggiunta alla watchlist_Conferma aggiunta strumento",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675395",
+    "name": "INV_00146_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Creazione nuova watchlist_Inserimento nome lista_Step 3",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675402",
+    "name": "INV_00147_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Creazione nuova watchlist_Inserimento nome lista_Step 4",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675410",
+    "name": "INV_00149_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Ricerca",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675434",
+    "name": "INV_00150_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Ricerca_Selezione lista",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675446",
+    "name": "INV_00151_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Conferma aggiunta strumento",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675474",
+    "name": "INV_00206_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Lista tecnologia_Rinomina lista_Step 2",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675481",
+    "name": "INV_00207_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Lista tecnologia_Rinomina lista_Step 3",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675489",
+    "name": "INV_00150B_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Ricerca_Selezione lista_CORNER CASE liste piene e raggiunto il numero massimo",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675520",
+    "name": "INV_00358_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Ricerca_Selezione lista_CORNER CASE non tutte liste piene, ma raggiunto il numero massimo",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675546",
+    "name": "INV_00389_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Ricerca_Selezione lista_CORNER CASE numero massimo di strumenti raggiunto, ma nuova lista attivo",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675566",
+    "name": "INV_00387_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Apertura liste_CORNER CASE_Numero massimo di liste raggiunto",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675596",
+    "name": "INV_00388_U_M_Floating Investi_Mercati_Dettaglio_Watchlist_Apertura liste_CORNER CASE_Numero massimo di liste e di strumenti per lista raggiunto",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675626",
+    "name": "INV_00142_U_M_Floating Investi_Mercati_Dettaglio_Nuova Watchlist_Selezione lista",
+    "section": "🟢 INV_U_M_Floating Button_Mercati_Watchlist"
+  },
+  {
+    "id": "24262:675668",
+    "name": "INV_00001_U_M_Homepage_Overview_Grafico full",
+    "section": "🟢 INV_U_M_Homepage_Overview_Catalogo prodotti"
+  },
+  {
+    "id": "24262:675730",
+    "name": "CEN_00078_U_M_Commercial engagements_catalogo prodotti",
+    "section": "🟢 INV_U_M_Homepage_Overview_Catalogo prodotti"
+  },
+  {
+    "id": "24262:675745",
+    "name": "CEN_00080_U_M_Commercial engagements_Catalogo prodotti_web view",
+    "section": "🟢 INV_U_M_Homepage_Overview_Catalogo prodotti"
+  },
+  {
+    "id": "24262:675751",
+    "name": "CEN_00081_U_M_Commercial engagements_Catalogo prodotti_web view_Conto corrente_1 action",
+    "section": "🟢 INV_U_M_Homepage_Overview_Catalogo prodotti"
+  },
+  {
+    "id": "24262:675786",
+    "name": "INV_00550_U_M_Titoli_Compravendita_Acquisto_piazzata",
+    "section": "Messaggio di blocco per titolo non acquistabile per il deposito selezionato"
+  },
+  {
+    "id": "24262:675864",
+    "name": "INV_00550_U_M_Titoli_Compravendita_Acquisto_piazzata",
+    "section": "Messaggio di blocco per titolo non acquistabile per il deposito selezionato"
+  },
+  {
+    "id": "24262:675943",
+    "name": "INV_00550_U_M_Titoli_Compravendita_Acquisto_piazzata",
+    "section": "Messaggio di blocco per titolo non acquistabile per il deposito selezionato"
+  },
+  {
+    "id": "24262:676022",
+    "name": "INV_00550_U_M_Titoli_Compravendita_Acquisto_piazzata",
+    "section": "Messaggio di blocco per titolo non acquistabile per il deposito selezionato"
+  },
+  {
+    "id": "24262:676100",
+    "name": "INV_00550_U_M_Titoli_Compravendita_Acquisto_piazzata",
+    "section": "Messaggio di blocco per titolo non acquistabile per il deposito selezionato"
+  },
+  {
+    "id": "24262:676179",
+    "name": "INV_00550_U_M_Titoli_Compravendita_Acquisto_piazzata",
+    "section": "Messaggio di blocco per titolo non acquistabile per il deposito selezionato"
+  },
+  {
+    "id": "24262:776998",
+    "name": "INV_00168_U_M_Homepage_Prodotti di risparmio",
+    "section": "🟢 INV_U_M_Homepage_Prodotti di risparmio"
+  },
+  {
+    "id": "24262:777023",
+    "name": "INV_00594_U_M_Homepage_Prodotti di risparmio",
+    "section": "🟢 INV_U_M_Homepage_Prodotti di risparmio"
+  },
+  {
+    "id": "24262:777049",
+    "name": "INV_00169_U_M_Homepage_Prodotti di risparmio_Dettaglio prodotto",
+    "section": "🟢 INV_U_M_Homepage_Prodotti di risparmio"
+  },
+  {
+    "id": "24262:777074",
+    "name": "INV_00595_U_M_Homepage_Prodotti di risparmio_Dettaglio prodotto",
+    "section": "🟢 INV_U_M_Homepage_Prodotti di risparmio"
+  },
+  {
+    "id": "24262:777101",
+    "name": "INV_00001_U_M_Homepage_Overview_Grafico full",
+    "section": "🟢 INV_U_M_Homepage_Prodotti di risparmio"
+  },
+  {
+    "id": "24262:777160",
+    "name": "INV_00375_U_M_Homepage_Prodotti di risparmio_Dettaglio_Sottoscrizione prodotto_CASO più prodotti di non selezionati",
+    "section": "🟢 INV_U_M_Homepage_Prodotti di risparmio"
+  },
+  {
+    "id": "24262:777180",
+    "name": "INV_00374_U_M_Homepage_Prodotti di risparmio_Dettaglio_Sottoscrizione prodotto_CASO un solo prodotto non selezionato",
+    "section": "🟢 INV_U_M_Homepage_Prodotti di risparmio"
+  },
+  {
+    "id": "24262:777214",
+    "name": "INV_00374_U_M_Homepage_Prodotti di risparmio_Dettaglio_Sottoscrizione prodotto_CASO un solo prodotto non selezionato",
+    "section": "🟢 INV_U_M_Homepage_Prodotti di risparmio"
+  },
+  {
+    "id": "24262:777236",
+    "name": "INV_00376_U_M_Homepage_Prodotti di risparmio_Dettaglio_Sottoscrizione prodotto_CASO un solo prodotto selezionato",
+    "section": "🟢 INV_U_M_Homepage_Prodotti di risparmio"
+  },
+  {
+    "id": "24262:777270",
+    "name": "INV_00377_U_M_Homepage_Prodotti di risparmio_Dettaglio_Sottoscrizione prodotto_CASO un solo prodotto selezionato_Step 2_Selezione importo",
+    "section": "🟢 INV_U_M_Homepage_Prodotti di risparmio"
+  },
+  {
+    "id": "24262:777293",
+    "name": "INV_00379_U_M_Homepage_Prodotti di risparmio_Dettaglio_Sottoscrizione prodotto_CASO un solo prodotto_Step 3_Riepilogo",
+    "section": "🟢 INV_U_M_Homepage_Prodotti di risparmio"
+  },
+  {
+    "id": "24262:777312",
+    "name": "INV_00380_U_M_Homepage_Prodotti di risparmio_Dettaglio_Sottoscrizione prodotto_CASO un solo prodotto_Step 4_Presa visione",
+    "section": "🟢 INV_U_M_Homepage_Prodotti di risparmio"
+  },
+  {
+    "id": "24262:777324",
+    "name": "INV_00382_U_M_Homepage_Prodotti di risparmio_Dettaglio_Sottoscrizione prodotto_CASO un solo prodotto_Inserimento mobile code 2",
+    "section": "🟢 INV_U_M_Homepage_Prodotti di risparmio"
+  },
+  {
+    "id": "24262:777326",
+    "name": "INV_00381_U_M_Homepage_Prodotti di risparmio_Dettaglio_Sottoscrizione prodotto_CASO un solo prodotto_Inserimento mobile code 1",
+    "section": "🟢 INV_U_M_Homepage_Prodotti di risparmio"
+  },
+  {
+    "id": "24262:777329",
+    "name": "INV_00383_U_M_Homepage_Prodotti di risparmio_Dettaglio_Sottoscrizione prodotto_TUP",
+    "section": "🟢 INV_U_M_Homepage_Prodotti di risparmio"
+  },
+  {
+    "id": "24262:777331",
+    "name": "INV_00378_U_M_Homepage_Prodotti di risparmio_Dettaglio_Sottoscrizione prodotto_CASO un solo prodotto_Step 2_Selezione importo_CORNER CASE Importo &quot;Altro&quot;",
+    "section": "🟢 INV_U_M_Homepage_Prodotti di risparmio"
+  },
+  {
+    "id": "24262:777370",
+    "name": "INV_00001_U_M_Homepage_Overview_Grafico full",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777429",
+    "name": "INV_00170_U_M_Homepage_Profilo Investimenti",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777468",
+    "name": "INV_00592_U_M_Homepage_Profilo Investimenti_Mifid Incompleta",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777507",
+    "name": "INV_00593_U_M_Homepage_Profilo Investimenti_Mifid Completa",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777546",
+    "name": "INV_00331_U_M_Homepage_Profilo Investimenti_CASO Privati",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777584",
+    "name": "INV_00186_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Attivazione Pacchetto Trading Real Time NYSE_Step 1",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777596",
+    "name": "INV_00178_U_M_Homepage_Profilo Investimenti_Attivazione funzionalità_Pop-up di conferma conto",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777613",
+    "name": "INV_00179_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Attivazione funzionalità_Step 2",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777630",
+    "name": "INV_00180_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Attivazione funzionalità_Firma documenti_Step 2",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777645",
+    "name": "INV_00187_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Attivazione Pacchetto Trading Real Time NYSE_Step 2_Caso positivo",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777710",
+    "name": "INV_00188_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Attivazione Pacchetto Trading Real Time NYSE_Step 2_Caso negativo",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777775",
+    "name": "INV_00185_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Attivazione funzionalità_Thank You Page",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777777",
+    "name": "INV_00195_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Attivazione Pacchetto Trading Real Time NYSE_Thank You Page",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777786",
+    "name": "INV_00203_U_M_Homepage_Profilo Investimenti_Trading Alert",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777832",
+    "name": "INV_00201_U_M_Homepage_Profilo Investimenti_Personalizza deposito",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777868",
+    "name": "INV_00182_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Attivazione funzionalità_Step 4",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777877",
+    "name": "INV_00184_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Attivazione funzionalità_Inserimento Mobile Code_Step 2",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777879",
+    "name": "INV_00183_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Attivazione funzionalità_Inserimento Mobile Code_Step 1",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777881",
+    "name": "INV_00189_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Attivazione Pacchetto Trading Real Time NYSE_Step 3",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777949",
+    "name": "INV_00190_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Attivazione Pacchetto Trading Real Time NYSE_Step 4",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777965",
+    "name": "INV_00191_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Attivazione Pacchetto Trading Real Time NYSE_Firma_Step 4",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777981",
+    "name": "INV_00192_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Attivazione Pacchetto Trading Real Time NYSE_Step 5",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777990",
+    "name": "INV_00194_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Attivazione Pacchetto Trading Real Time NYSE_Inserimento Mobile Code_Step 2",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777992",
+    "name": "INV_00193_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Attivazione Pacchetto Trading Real Time NYSE_Inserimento Mobile Code_Step 1",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:777994",
+    "name": "INV_00197_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Revoca Pacchetti_Step 1",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778006",
+    "name": "INV_00200_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Revoca Pacchetti_Thank You Page",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778015",
+    "name": "INV_00199_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Revoca Pacchetti_Inserimento Mobile Code_Step 2",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778017",
+    "name": "INV_00198_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Revoca Pacchetti_Inserimento Mobile Code_Step 1",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778020",
+    "name": "INV_00196_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetti_Revoca Pacchetti_Pacchetto Money Trading",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778039",
+    "name": "INV_00336_U_M_Homepage_Profilo Investimenti_Schermata Communication Hub notifiche push per investimenti",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778071",
+    "name": "INV_00173_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetto Trading Real Time NYSE",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778089",
+    "name": "INV_00174_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetto Trading Real Time NASDAQ",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778106",
+    "name": "INV_00175_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetto Trading Real Time EURONEXT",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778118",
+    "name": "INV_00176_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetto Trading Real Time LSE",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778131",
+    "name": "INV_00177_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetto Trading Real Time XETRA",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778145",
+    "name": "INV_00171_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetto Money Trading",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778169",
+    "name": "INV_00384_U_M_Homepage_Profilo Investimenti_CASO Privati_Dettaglio Pacchetto Push Book 5 livelli",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778188",
+    "name": "INV_00172_U_M_Homepage_Profilo Investimenti_Dettaglio Pacchetto Money Trading Advanced",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778210",
+    "name": "INV_00203_U_M_Homepage_Profilo Investimenti_Trading Alert",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778332",
+    "name": "INV_00203_U_M_Homepage_Profilo Investimenti_Trading Alert",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778431",
+    "name": "INV_00203_U_M_Homepage_Profilo Investimenti_Trading Alert",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778442",
+    "name": "INV_00335_U_M_Homepage_Profilo Investimenti_Trading Alert_CASO no alert",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778470",
+    "name": "INV_20293_U_W_Homepage_Profilo investimenti_FiltriAlert ",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778532",
+    "name": "INV_00338_U_M_Homepage_Profilo Investimenti_Trading Alert_Attivazione alert da scheda titolo_CASO in cui attivo due alert_Accesi",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778550",
+    "name": "INV_00338_U_M_Homepage_Profilo Investimenti_Trading Alert_Attivazione alert da scheda titolo_CASO in cui attivo due alert_Accesi",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778571",
+    "name": "INV_00338_U_M_Homepage_Profilo Investimenti_Trading Alert_Attivazione alert da scheda titolo_CASO in cui attivo due alert_Accesi",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778592",
+    "name": "INV_00338_U_M_Homepage_Profilo Investimenti_Trading Alert_Attivazione alert da scheda titolo_CASO in cui attivo due alert_Accesi",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778613",
+    "name": "INV_00338_U_M_Homepage_Profilo Investimenti_Trading Alert_Attivazione alert da scheda titolo_CASO in cui attivo due alert_Accesi",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778634",
+    "name": "INV_00082_U_M_Homepage_Titoli_Dettaglio_Schede titoli_Azioni_Overview",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778782",
+    "name": "INV_00334_U_M_Homepage_Profilo Investimenti_Trading Alert_Pop-up di eliminazione alert",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:778894",
+    "name": "INV_00334_U_M_Homepage_Profilo Investimenti_Trading Alert_Pop-up di eliminazione alert",
+    "section": "🟢 Investimenti_Homepage_Profilo investimenti"
+  },
+  {
+    "id": "24262:779016",
+    "name": "INV_00001_U_M_Homepage_Overview_Grafico full",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779075",
+    "name": "INV_00473_U_M_Homepage_Consulenza_Dettaglio_Operazioni da firmare e inserire",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779106",
+    "name": "INV_00633_U_M_Comm Hub_Consulenza_Flusso firma_Step2",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779134",
+    "name": "INV_00348_U_M_Homepage_Consulenza_Operazioni da inserire",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779164",
+    "name": "INV_00623_U_M_Homepage_Consulenza_Flusso firma_Step1",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779177",
+    "name": "INV_00625_U_M_Homepage_Consulenza_Flusso firma_Step3",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779189",
+    "name": "INV_00624_U_M_Homepage_Consulenza_Flusso firma_Step2",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779200",
+    "name": "INV_00626_U_M_Homepage_Consulenza_Flusso firma_Step4",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779211",
+    "name": "INV_00627_U_M_Homepage_Consulenza_Flusso firma_Step5",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779222",
+    "name": "INV_00628_U_M_Homepage_Consulenza_Flusso firma_Step6",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779229",
+    "name": "INV_00622_U_M_Homepage_Consulenza_Operazioni da inserire",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779245",
+    "name": "INV_00474_U_M_Homepage_Consulenza_Nessuna consulenza",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779257",
+    "name": "INV_00342_U_M_Homepage_Consulenza_Idee di investimento",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779275",
+    "name": "INV_00343_U_M_Homepage_Consulenza_Idee di investimento_CASO no idee di investimento",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779293",
+    "name": "INV_00345_U_M_Homepage_Consulenza_Dettaglio BTP Futura_Conferma idea di approfondimento",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779318",
+    "name": "INV_00651_U_M_Homepage_Consulenza_Dettaglio BTP Futura_Conferma idea di approfondimento_box unico",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779360",
+    "name": "INV_00347_U_M_Homepage_Consulenza_Dettaglio BTP Futura_Pop-up errore",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779388",
+    "name": "INV_00346_U_M_Homepage_Consulenza_Dettaglio BTP Futura_Pop-up conferma ",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779416",
+    "name": "INV_00344_U_M_Homepage_Consulenza_Idee di investimento_Dettaglio BTP Futura",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779429",
+    "name": "INV_00630_U_M_Homepage_Consulenza_Flusso firma_Step8.a",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779431",
+    "name": "INV_00631_U_M_Homepage_Consulenza_Flusso firma_Step8.b",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779433",
+    "name": "INV_00629_U_M_Homepage_Consulenza_Flusso firma_Step7",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779436",
+    "name": "INV_00632_U_M_Comm Hub_Consulenza_Flusso firma_Step1",
+    "section": "🟢 Investimenti_Homepage_Consulenza"
+  },
+  {
+    "id": "24262:779714",
+    "name": "INV_00042_U_M_Floating Button Investi_Apertura cassetto",
+    "section": "🟢 Investimenti_Floating Button_Mercato primario"
+  },
+  {
+    "id": "24262:779740",
+    "name": "INV_00363_U_M_Floating Button_Mercato primario_Aste_CORNER CASE No titoli d&#39;asta",
+    "section": "🟢 Investimenti_Floating Button_Mercato primario"
+  },
+  {
+    "id": "24262:779767",
+    "name": "INV_00365_U_M_Floating Button_Mercato primario_Aste",
+    "section": "🟢 Investimenti_Floating Button_Mercato primario"
+  },
+  {
+    "id": "24262:779800",
+    "name": "INV_00367_U_M_Floating Button_Mercato primario_Aste_Dettaglio_Flusso di sottoscrzione_Step 1_Più depositi titoli",
+    "section": "🟢 Investimenti_Floating Button_Mercato primario"
+  },
+  {
+    "id": "24262:779825",
+    "name": "INV_00368_U_M_Floating Button_Mercato primario_Aste_Dettaglio_Flusso di sottoscrizione_Step 1_Errore inserimenti quantità",
+    "section": "🟢 Investimenti_Floating Button_Mercato primario"
+  },
+  {
+    "id": "24262:779850",
+    "name": "INV_00369_U_M_Floating Button_Mercato primario_Aste_Dettaglio_Flusso di sottoscrizione_Step 1_Inserimenti quantità corretta",
+    "section": "🟢 Investimenti_Floating Button_Mercato primario"
+  },
+  {
+    "id": "24262:779875",
+    "name": "INV_00370_U_M_Floating Button_Mercato primario_Aste_Dettaglio_Flusso di sottoscrizione_Step 2_Riepilogo",
+    "section": "🟢 Investimenti_Floating Button_Mercato primario"
+  },
+  {
+    "id": "24262:779924",
+    "name": "INV_00511_U_M_Floating Button_Mercato primario_Aste_Dettaglio_Flusso di sottoscrizione_Dettaglio operazione",
+    "section": "🟢 Investimenti_Floating Button_Mercato primario"
+  },
+  {
+    "id": "24262:779947",
+    "name": "INV_00371_U_M_Floating Button_Mercato primario_Aste_Dettaglio_Flusso di sottoscrizione_TUP",
+    "section": "🟢 Investimenti_Floating Button_Mercato primario"
+  },
+  {
+    "id": "24262:779950",
+    "name": "INV_00366_U_M_Floating Button_Mercato primario_Aste_Dettaglio_Flusso di sottoscrizione_Step 1_CORNER CASE un solo deposito titoli",
+    "section": "🟢 Investimenti_Floating Button_Mercato primario"
+  },
+  {
+    "id": "24262:779978",
+    "name": "INV_00391_U_M_Homepage_Titoli_Biglietti assembleari_Apertura pagina",
+    "section": "🟢 Investimenti_Titoli_Biglietti assembleari"
+  },
+  {
+    "id": "24262:780021",
+    "name": "INV_00040_U_M_Homepage_Titoli_Versione aperta_Vista base",
+    "section": "🟢 Investimenti_Titoli_Biglietti assembleari"
+  },
+  {
+    "id": "24262:780094",
+    "name": "INV_00392_U_M_Homepage_Titoli_Biglietti assembleari_RIchiesta biglietto_Dati non inseriti",
+    "section": "🟢 Investimenti_Titoli_Biglietti assembleari"
+  },
+  {
+    "id": "24262:780153",
+    "name": "INV_00394_U_M_Homepage_Titoli_Biglietti assembleari_Richiesta biglietto_Dati inseriti",
+    "section": "🟢 Investimenti_Titoli_Biglietti assembleari"
+  },
+  {
+    "id": "24262:780212",
+    "name": "INV_00395_U_M_Homepage_Titoli_Biglietti assembleari_Richiesta biglietto_Messaggio di avviso con conferma",
+    "section": "🟢 Investimenti_Titoli_Biglietti assembleari"
+  },
+  {
+    "id": "24262:780274",
+    "name": "INV_00393_U_M_Homepage_Titoli_Biglietti assembleari_Richiesta biglietto_CASO errore",
+    "section": "🟢 Investimenti_Titoli_Biglietti assembleari"
+  },
+  {
+    "id": "24262:780333",
+    "name": "INV_00397_U_M_Homepage_Titoli_Biglietti assembleari_Richiesta biglietto_Inserimento mobile code_Step 2",
+    "section": "🟢 Investimenti_Titoli_Biglietti assembleari"
+  },
+  {
+    "id": "24262:780335",
+    "name": "INV_00396_U_M_Homepage_Titoli_Biglietti assembleari_Richiesta biglietto_Inserimento mobile code_Step 1",
+    "section": "🟢 Investimenti_Titoli_Biglietti assembleari"
+  },
+  {
+    "id": "24262:780338",
+    "name": "INV_00398_U_M_Homepage_Titoli_Biglietti assembleari_Thank you page",
+    "section": "🟢 Investimenti_Titoli_Biglietti assembleari"
+  },
+  {
+    "id": "24262:780342",
+    "name": "INV_00399_U_M_Homepage_MIFID_Vedi altro chiuso",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780361",
+    "name": "INV_00400_U_M_Homepage_MIFID_Vedi altro aperto",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780378",
+    "name": "INV_00401_U_M_Homepage_MIFID_Sottoscrizione intervista adeguatezza",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780392",
+    "name": "INV_00426_U_M_Homepage_MIFID_Sottoscrizione intervista di adeguatezza_Documenti_Step 1",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780409",
+    "name": "INV_00427_U_M_Homepage_MIFID_Sottoscrizione intervista di adeguatezza_Documenti_Step 2",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780426",
+    "name": "INV_00428_U_M_Homepage_MIFID_Sottoscrizione intervista di adeguatezza_Completamento sottoscrizione",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780437",
+    "name": "INV_00402_U_M_Homepage_MIFID_Sottoscrizione intervista adeguatezza_Dati intestatario",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780449",
+    "name": "INV_00404_U_M_Homepage_MIFID_Sottoscrizione intervista adeguatezza_Step 2",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780467",
+    "name": "INV_00405_U_M_Homepage_MIFID_Sottoscrizione intervista adeguatezza_Step 3",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780485",
+    "name": "INV_00406_U_M_Homepage_MIFID_Sottoscrizione intervista adeguatezza_Step 4",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780504",
+    "name": "INV_00407_U_M_Homepage_MIFID_Sottoscrizione intervista adeguatezza_Step 5",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780523",
+    "name": "INV_00408_U_M_Homepage_MIFID_Sottoscrizione intervista adeguatezza_Step 6",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780542",
+    "name": "INV_00409_U_M_Homepage_MIFID_Sottoscrizione intervista adeguatezza Versione 2_Step 1",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780555",
+    "name": "INV_00411_U_M_Homepage_MIFID_Sottoscrizione intervista adeguatezza Versione 2_Step 2",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780571",
+    "name": "INV_00412_U_M_Homepage_MIFID_Sottoscrizione intervista adeguatezza Versione 2_Step 3",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780588",
+    "name": "INV_00413_U_M_Homepage_MIFID_Sottoscrizione intervista adeguatezza Versione 2_Step 4",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780608",
+    "name": "INV_00410_U_M_Homepage_MIFID_Sottoscrizione intervista adeguatezza Versione 2_Propensione al rischio",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780644",
+    "name": "INV_00403_U_M_Homepage_MIFID_Sottoscrizione intervista adeguatezza_Step 1",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780662",
+    "name": "INV_00414_U_M_Homepage_MIFID_Sottoscrizione intervista di appropriatezza_Step 1",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780679",
+    "name": "INV_00415_U_M_Homepage_MIFID_Sottoscrizione intervista di appropriatezza_Step 2",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780698",
+    "name": "INV_00416_U_M_Homepage_MIFID_Sottoscrizione intervista di appropriatezza_Step 3",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780713",
+    "name": "INV_00420_U_M_Homepage_MIFID_Sottoscrizione intervista di appropriatezza Versione 2_Step 2",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780728",
+    "name": "INV_00421_U_M_Homepage_MIFID_Sottoscrizione intervista di appropriatezza Versione 2_Step 3",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780740",
+    "name": "INV_00422_U_M_Homepage_MIFID_Sottoscrizione intervista di appropriatezza Versione 2_Step 4",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780752",
+    "name": "INV_00423_U_M_Homepage_MIFID_Sottoscrizione intervista di appropriatezza Versione 3_Step 1",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780766",
+    "name": "INV_00424_U_M_Homepage_MIFID_Sottoscrizione intervista di appropriatezza Versione 3_Step 2",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780783",
+    "name": "INV_00425_U_M_Homepage_MIFID_Sottoscrizione intervista di appropriatezza Versione 3_Step 3",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780801",
+    "name": "INV_00417_U_M_Homepage_MIFID_Sottoscrizione intervista di appropriatezza Versione 2_Step 1_Falso",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780817",
+    "name": "INV_00418_U_M_Homepage_MIFID_Sottoscrizione intervista di appropriatezza Versione 2_Step 1_Vero",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780832",
+    "name": "INV_00419_U_M_Homepage_MIFID_Sottoscrizione intervista di appropriatezza Versione 2_Step 1_Falso",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780851",
+    "name": "INV_00429_U_M_Homepage_MIFID_Thank you page",
+    "section": "🟢 Investimenti_Homepage_Overview_MIFID"
+  },
+  {
+    "id": "24262:780861",
+    "name": "INV_00019_U_M_Homepage_Fondi",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:780906",
+    "name": "INV_00433_U_M_Fondi_Dettaglio_Risparmia e Investi_Tab &quot;Da attivare&quot;",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:780924",
+    "name": "INV_00434_U_M_Fondi_Dettaglio_Risparmia e Investi_Tab &quot;Fondi idonei&quot;",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:780941",
+    "name": "INV_00435_U_M_Fondi_Dettaglio_Risparmia e Investi_Thank you page per fondi idonei al servizio risparmia e investi",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:780943",
+    "name": "INV_00436_U_M_Fondi_Dettaglio_Risparmia e Investi_Adesione_Step 1",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:780965",
+    "name": "INV_00448_U_M_Fondi_Dettaglio_Risparmia e Investi_Modifica_Step 1",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:780987",
+    "name": "INV_00457_U_M_Fondi_Dettaglio_Risparmia e Investi_Sospensione_Step 1",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781018",
+    "name": "INV_00444_U_M_Fondi_Dettaglio_Risparmia e Investi_Adesione_Conferma",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781027",
+    "name": "INV_00453_U_M_Fondi_Dettaglio_Risparmia e Investi_Modifica_Conferma",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781036",
+    "name": "INV_00460_U_M_Fondi_Dettaglio_Risparmia e Investi_Sospensione_Conferma",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781045",
+    "name": "INV_00442_U_M_Fondi_Dettaglio_Risparmia e Investi_Adesione_Firma 1",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781061",
+    "name": "INV_00443_U_M_Fondi_Dettaglio_Risparmia e Investi_Adesione_Firma 2",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781076",
+    "name": "INV_00451_U_M_Fondi_Dettaglio_Risparmia e Investi_Modifica_Firma 1",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781092",
+    "name": "INV_00452_U_M_Fondi_Dettaglio_Risparmia e Investi_Modifica_Firma 2",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781107",
+    "name": "INV_00437_U_M_Fondi_Dettaglio_Risparmia e Investi_Adesione_Step 2",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781134",
+    "name": "INV_00438_U_M_Fondi_Dettaglio_Risparmia e Investi_Adesione_Info icon giacenza media",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781164",
+    "name": "INV_00439_U_M_Fondi_Dettaglio_Risparmia e Investi_Adesione_Info icon soglia di disinvestimento",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781194",
+    "name": "INV_00440_U_M_Fondi_Dettaglio_Risparmia e Investi_Adesione_Info icon limite massimo di investimento (opzionale)",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781224",
+    "name": "INV_00449_U_M_Fondi_Dettaglio_Risparmia e Investi_Modifica_Step 2",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781244",
+    "name": "INV_00458_U_M_Fondi_Dettaglio_Risparmia e Investi_Sospesione_Firma 1",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781260",
+    "name": "INV_00459_U_M_Fondi_Dettaglio_Risparmia e Investi_Sospensione_Firma 2",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781275",
+    "name": "INV_00441_U_M_Fondi_Dettaglio_Risparmia e Investi_Adesione_Step 3",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781317",
+    "name": "INV_00450_U_M_Fondi_Dettaglio_Risparmia e Investi_Modifica_Step 3",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781357",
+    "name": "INV_00447_U_M_Fondi_Dettaglio_Risparmia e Investi_Adesione_Thank you page",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781359",
+    "name": "INV_00456_U_M_Fondi_Dettaglio_Risparmia e Investi_Modifica_Thank you page",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781361",
+    "name": "INV_00446_U_M_Fondi_Dettaglio_Risparmia e Investi_Adesione_Mobile code 2",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781363",
+    "name": "INV_00455_U_M_Fondi_Dettaglio_Risparmia e Investi_Modifica_Mobile code 2",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781365",
+    "name": "INV_00462_U_M_Fondi_Dettaglio_Risparmia e Investi_Sospensione_Mobile code 2",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781367",
+    "name": "INV_00445_U_M_Fondi_Dettaglio_Risparmia e Investi_Adesione_Mobile code 1",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781370",
+    "name": "INV_00454_U_M_Fondi_Dettaglio_Risparmia e Investi_Modifica_Mobile code 1",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781373",
+    "name": "INV_00461_U_M_Fondi_Dettaglio_Risparmia e Investi_Sospensione_Mobile code 1",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781377",
+    "name": "INV_00464_U_M_Fondi_Dettaglio_Risparmia e Investi_Riattivazione_Step 1",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781399",
+    "name": "INV_00469_U_M_Fondi_Dettaglio_Risparmia e Investi_Riattivazione_Conferma",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781408",
+    "name": "INV_00467_U_M_Fondi_Dettaglio_Risparmia e Investi_Riattivazione_Firma 1",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781424",
+    "name": "INV_00468_U_M_Fondi_Dettaglio_Risparmia e Investi_Riattivazione_Firma 2",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781439",
+    "name": "INV_00465_U_M_Fondi_Dettaglio_Risparmia e Investi_Riattivazione_Step 2",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781458",
+    "name": "INV_00466_U_M_Fondi_Dettaglio_Risparmia e Investi_Riattivazione_Step 3",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781499",
+    "name": "INV_00472_U_M_Fondi_Dettaglio_Risparmia e Investi_Riattivazione_Thank you page",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781501",
+    "name": "INV_00471_U_M_Fondi_Dettaglio_Risparmia e Investi_Riattivazione_Mobile code 2",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781503",
+    "name": "INV_00470_U_M_Fondi_Dettaglio_Risparmia e Investi_Riattivazione_Mobile code 1",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781507",
+    "name": "INV_00521_U_M_Fondi_Dettaglio_Risparmia e Investi_Revoca_Step 1",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781538",
+    "name": "INV_00524_U_M_Fondi_Dettaglio_Risparmia e Investi_Revoca_Conferma",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781547",
+    "name": "INV_00522_U_M_Fondi_Dettaglio_Risparmia e Investi_Revoca_Firma 1",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781563",
+    "name": "INV_00523_U_M_Fondi_Dettaglio_Risparmia e Investi_Revoca_Firma 2",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781578",
+    "name": "INV_00526_U_M_Fondi_Dettaglio_Risparmia e Investi_Revoca_Mobile code 2",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781580",
+    "name": "INV_00525_U_M_Fondi_Dettaglio_Risparmia e Investi_Revoca_Mobile code 1",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781583",
+    "name": "INV_00527_U_M_Fondi_Dettaglio_Risparmia e Investi_Revoca_Thank you page",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781585",
+    "name": "INV_00544_U_M_Fondi_Dettaglio_Risparmia e investi_Drawer altri servizi",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781635",
+    "name": "INV_00463_U_M_Fondi_Dettaglio_Risparmia e Investi_Sospensione_Thank you page",
+    "section": "🟢 Funzionalità Risparmia e investi"
+  },
+  {
+    "id": "24262:781639",
+    "name": "INV_00001_U_M_Homepage_Overview_Grafico full",
+    "section": "🟢 INV_U_M_Comportamento Button Investi e scroll"
+  },
+  {
+    "id": "24262:781692",
+    "name": "INV_00001_U_M_Homepage_Overview_Grafico full",
+    "section": "🟢 INV_U_M_Comportamento Button Investi e scroll"
+  },
+  {
+    "id": "24262:781773",
+    "name": "Intestazione",
+    "section": "🟢 INV_U_M_Comportamento Button Investi e scroll"
+  },
+  {
+    "id": "24262:781779",
+    "name": "Body",
+    "section": "🟢 INV_U_M_Comportamento Button Investi e scroll"
+  },
+  {
+    "id": "24262:781831",
+    "name": "Intestazione",
+    "section": "🟢 INV_U_M_Comportamento Button Investi e scroll"
+  },
+  {
+    "id": "24262:781838",
+    "name": "Frame 427321891",
+    "section": "🟢 INV_U_M_Comportamento Button Investi e scroll"
+  },
+  {
+    "id": "24262:781856",
+    "name": "Frame 427321906",
+    "section": "🟢 INV_U_M_Comportamento Button Investi e scroll"
+  }
+]

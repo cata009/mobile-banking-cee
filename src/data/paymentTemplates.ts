@@ -1,6 +1,6 @@
 import { getCountryConfig } from "@/app/registry/countryConfig";
 import type { CountryId } from "@/app/state/demoTypes";
-import { BANK_BADGES } from "@/app/config/bankLogos";
+import { BANK_BADGES } from "@/data/bankIdentity";
 import type { Currency } from "@/data/products";
 import {
   deleteFrequentBeneficiary,

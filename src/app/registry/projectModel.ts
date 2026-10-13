@@ -69,6 +69,12 @@ export const PRODUCTS: Record<ProductId, ProductMeta> = {
 };
 
 export const DESIGN_SYSTEMS: Record<DesignSystemId, DesignSystemMeta> = {
+  "mobile-first": {
+    id: "mobile-first",
+    label: "Mobile First",
+    description: "Mobile First design system for the PI Italy homepage prototype.",
+    status: "active",
+  },
   current: {
     id: "current",
     label: "Current CEE Light Restyle",
@@ -83,7 +89,7 @@ export const DESIGN_SYSTEMS: Record<DesignSystemId, DesignSystemMeta> = {
   },
 };
 
-export const DESIGN_SYSTEM_ORDER: readonly DesignSystemId[] = ["current", "next"] as const;
+export const DESIGN_SYSTEM_ORDER: readonly DesignSystemId[] = ["current", "next", "mobile-first"] as const;
 
 export const BASELINES: Record<BaselineId, BaselineMeta> = {
   "baseline-current": {
@@ -207,4 +213,5 @@ export const PROJECT_COUNTRIES: readonly CountryId[] = [
   "BA",
   "BA_BL",
   "SI",
+  "IT",
 ] as const;

@@ -1,0 +1,2008 @@
+{
+  "fileKey": "d2TyUaQNN6YsgznQaWymIR",
+  "pageId": "24268:238892",
+  "sectionIds": [
+    "24268:250074",
+    "24268:247442"
+  ],
+  "capturedFrames": 218,
+  "contract": "Family mapping records semantic runtime coverage, not screenshot certification of every source variant. Duplicate frames share interactions. Root integration owns navigation and the final combined verify.",
+  "sourceFrames": [
+    {
+      "id": "24268:250083",
+      "name": "COMMHUB_00184_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250097",
+      "name": "COMMHUB_00200_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Screenshot",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250109",
+      "name": "COMMHUB_00201_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Storico Accessi_Step1",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250130",
+      "name": "COMMHUB_00201_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Storico Accessi_Step1",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250151",
+      "name": "COMMHUB_00203_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Storico Accessi_Step3",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250172",
+      "name": "COMMHUB_00108_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche",
+      "status": "implemented-family",
+      "family": "notifications",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "notifications/sms-warning/notification-group/notification-event/categories/category-remove",
+      "variant": ""
+    },
+    {
+      "id": "24268:250193",
+      "name": "COMMHUB_00117_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_SMS Premium attivo",
+      "status": "implemented-family",
+      "family": "notifications",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "notifications/sms-warning/notification-group/notification-event/categories/category-remove",
+      "variant": "attivo"
+    },
+    {
+      "id": "24268:250215",
+      "name": "COMMHUB_00109_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Conti correnti",
+      "status": "implemented-family",
+      "family": "notifications",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "notifications/sms-warning/notification-group/notification-event/categories/category-remove",
+      "variant": ""
+    },
+    {
+      "id": "24268:250238",
+      "name": "COMMHUB_00110_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Bilancio familiare e Budget",
+      "status": "implemented-family",
+      "family": "notifications",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "notifications/sms-warning/notification-group/notification-event/categories/category-remove",
+      "variant": ""
+    },
+    {
+      "id": "24268:250262",
+      "name": "COMMHUB_00118_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_SMS Premium attivo_Modifica",
+      "status": "implemented-family",
+      "family": "notifications",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "notifications/sms-warning/notification-group/notification-event/categories/category-remove",
+      "variant": "attivo"
+    },
+    {
+      "id": "24268:250272",
+      "name": "COMMHUB_00111_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Bilancio familiare e Budget_Categorie_Step1",
+      "status": "implemented-family",
+      "family": "notifications",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "notifications/sms-warning/notification-group/notification-event/categories/category-remove",
+      "variant": ""
+    },
+    {
+      "id": "24268:250293",
+      "name": "COMMHUB_00111_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Bilancio familiare e Budget_Categorie_Step1",
+      "status": "implemented-family",
+      "family": "notifications",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "notifications/sms-warning/notification-group/notification-event/categories/category-remove",
+      "variant": ""
+    },
+    {
+      "id": "24268:250314",
+      "name": "COMMHUB_00111_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Bilancio familiare e Budget_Categorie_Step1",
+      "status": "implemented-family",
+      "family": "notifications",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "notifications/sms-warning/notification-group/notification-event/categories/category-remove",
+      "variant": ""
+    },
+    {
+      "id": "24268:250337",
+      "name": "COMMHUB_00111_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Bilancio familiare e Budget_Categorie_Step1",
+      "status": "implemented-family",
+      "family": "notifications",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "notifications/sms-warning/notification-group/notification-event/categories/category-remove",
+      "variant": ""
+    },
+    {
+      "id": "24268:250358",
+      "name": "COMMHUB_00111_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Bilancio familiare e Budget_Categorie_Step1",
+      "status": "implemented-family",
+      "family": "notifications",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "notifications/sms-warning/notification-group/notification-event/categories/category-remove",
+      "variant": ""
+    },
+    {
+      "id": "24268:250380",
+      "name": "COMMHUB_00112_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Bilancio familiare e Budget_Categorie_Step2",
+      "status": "implemented-family",
+      "family": "notifications",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "notifications/sms-warning/notification-group/notification-event/categories/category-remove",
+      "variant": ""
+    },
+    {
+      "id": "24268:250417",
+      "name": "COMMHUB_00113_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Bilancio familiare e Budget_Categorie_Step3",
+      "status": "implemented-family",
+      "family": "notifications",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "notifications/sms-warning/notification-group/notification-event/categories/category-remove",
+      "variant": ""
+    },
+    {
+      "id": "24268:250454",
+      "name": "COMMHUB_00120_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250465",
+      "name": "COMMHUB_00128_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250476",
+      "name": "COMMHUB_00609_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250487",
+      "name": "COMMHUB_00121_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso1_Step1",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250506",
+      "name": "COMMHUB_00121_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso1_Step1",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250534",
+      "name": "COMMHUB_00122_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso1_Step2",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250553",
+      "name": "COMMHUB_00130_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso2_Step2",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250572",
+      "name": "COMMHUB_00611_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso3_Step2",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250591",
+      "name": "COMMHUB_00129_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso2_Step1",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250610",
+      "name": "COMMHUB_00610_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso3_Step1",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250629",
+      "name": "COMMHUB_00138_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250663",
+      "name": "COMMHUB_00138_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250687",
+      "name": "COMMHUB_00139_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step1",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250698",
+      "name": "COMMHUB_00144_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step6",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250709",
+      "name": "COMMHUB_00140_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step2",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250719",
+      "name": "COMMHUB_00140_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step2",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250729",
+      "name": "COMMHUB_00140_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step2",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250739",
+      "name": "COMMHUB_00140_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step2",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250760",
+      "name": "COMMHUB_00141_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step3",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250770",
+      "name": "COMMHUB_00142_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step4",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250785",
+      "name": "COMMHUB_00143_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step5",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250800",
+      "name": "COMMHUB_00152_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step4",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250816",
+      "name": "COMMHUB_00530_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Rapporto già esistente_Step4",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": "Rapporto già esistente"
+    },
+    {
+      "id": "24268:250832",
+      "name": "COMMHUB_00123_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso1_Step3",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250851",
+      "name": "COMMHUB_00124_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso1_Step4",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250870",
+      "name": "COMMHUB_00125_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso1_Step5",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250889",
+      "name": "COMMHUB_00131_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso2_Step3",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250908",
+      "name": "COMMHUB_00612_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso3_Step3",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250927",
+      "name": "COMMHUB_00133_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso2_Step5",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250950",
+      "name": "COMMHUB_00614_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso3_Step5",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250969",
+      "name": "COMMHUB_00132_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso2_Step4",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:250990",
+      "name": "COMMHUB_00613_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso3_Step4",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251011",
+      "name": "COMMHUB_00168_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251038",
+      "name": "COMMHUB_00545_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251065",
+      "name": "COMMHUB_00532_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Caso Empty",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": "Empty"
+    },
+    {
+      "id": "24268:251087",
+      "name": "COMMHUB_00169_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Rinnovo consenso_Step1",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251111",
+      "name": "COMMHUB_00291_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Importa conto_Step1",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251128",
+      "name": "COMMHUB_00281_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Revoca consenso_Step1",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251150",
+      "name": "COMMHUB_00282_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Revoca consenso_Step2",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251174",
+      "name": "COMMHUB_00170_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Rinnovo consenso_Step2",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251188",
+      "name": "COMMHUB_00170_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Rinnovo consenso_Step2",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251204",
+      "name": "COMMHUB_00292_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Importa conto_Step2",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251218",
+      "name": "COMMHUB_00546_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_ContoEsportato",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251241",
+      "name": "COMMHUB_00547_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_ContoEsportato",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251270",
+      "name": "COMMHUB_00171_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Rinnovo consenso_Step3",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251285",
+      "name": "COMMHUB_00293_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Importa conto_Step3",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251300",
+      "name": "COMMHUB_00119_U_M_CommHub_ProfiloUtente_Impostazioni_Newsletter",
+      "status": "implemented-family",
+      "family": "newsletter",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "newsletter/newsletter-confirm/authorize/result/email/email-verify",
+      "variant": ""
+    },
+    {
+      "id": "24268:251321",
+      "name": "COMMHUB_00635_U_M_CommHub_ProfiloUtente_Impostazioni_Newsletter_Disattivazione_Step1",
+      "status": "implemented-family",
+      "family": "newsletter",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "newsletter/newsletter-confirm/authorize/result/email/email-verify",
+      "variant": ""
+    },
+    {
+      "id": "24268:251342",
+      "name": "COMMHUB_00638_U_M_CommHub_ProfiloUtente_Impostazioni_Newsletter_Attivazione_Step1",
+      "status": "implemented-family",
+      "family": "newsletter",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "newsletter/newsletter-confirm/authorize/result/email/email-verify",
+      "variant": ""
+    },
+    {
+      "id": "24268:251363",
+      "name": "COMMHUB_00636_U_M_CommHub_ProfiloUtente_Impostazioni_Newsletter_Disattivazione_Step2",
+      "status": "implemented-family",
+      "family": "newsletter",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "newsletter/newsletter-confirm/authorize/result/email/email-verify",
+      "variant": ""
+    },
+    {
+      "id": "24268:251386",
+      "name": "COMMHUB_00637_U_M_CommHub_ProfiloUtente_Impostazioni_Newsletter_Disattivazione_Step3",
+      "status": "implemented-family",
+      "family": "newsletter",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "newsletter/newsletter-confirm/authorize/result/email/email-verify",
+      "variant": ""
+    },
+    {
+      "id": "24268:251407",
+      "name": "COMMHUB_00639_U_M_CommHub_ProfiloUtente_Impostazioni_Newsletter_Attivazione_Step2",
+      "status": "implemented-family",
+      "family": "newsletter",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "newsletter/newsletter-confirm/authorize/result/email/email-verify",
+      "variant": ""
+    },
+    {
+      "id": "24268:251430",
+      "name": "COMMHUB_00640_U_M_CommHub_ProfiloUtente_Impostazioni_Newsletter_Attivazione_Step3",
+      "status": "implemented-family",
+      "family": "newsletter",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "newsletter/newsletter-confirm/authorize/result/email/email-verify",
+      "variant": ""
+    },
+    {
+      "id": "24268:251451",
+      "name": "COMMHUB_00089_U_M_CommHub_ProfiloUtente_Impostazioni_Generali",
+      "status": "implemented-family",
+      "family": "general",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "general/preference/language/location/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251465",
+      "name": "COMMHUB_00092_U_M_CommHub_ProfiloUtente_Impostazioni_Generali_Preferenza profilo_Step1",
+      "status": "implemented-family",
+      "family": "general",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "general/preference/language/location/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251477",
+      "name": "COMMHUB_00093_U_M_CommHub_ProfiloUtente_Impostazioni_Generali_Preferenza profilo_Step2",
+      "status": "implemented-family",
+      "family": "general",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "general/preference/language/location/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251493",
+      "name": "COMMHUB_00090_U_M_CommHub_ProfiloUtente_Impostazioni_Generali_Cambio Lingua",
+      "status": "implemented-family",
+      "family": "general",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "general/preference/language/location/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251517",
+      "name": "COMMHUB_00090_U_M_CommHub_ProfiloUtente_Impostazioni_Generali_Cambio Lingua",
+      "status": "implemented-family",
+      "family": "general",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "general/preference/language/location/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251538",
+      "name": "COMMHUB_00523_U_M_CommHub_ProfiloUtente_Impostazioni_Generali_DisabilitazioneIP_Step1",
+      "status": "implemented-family",
+      "family": "general",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "general/preference/language/location/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251564",
+      "name": "COMMHUB_00525_U_M_CommHub_ProfiloUtente_Impostazioni_Generali_DisabilitazioneIP_Step1",
+      "status": "implemented-family",
+      "family": "general",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "general/preference/language/location/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251590",
+      "name": "COMMHUB_00524_U_M_CommHub_ProfiloUtente_Impostazioni_Generali_DisabilitazioneIP_Step2",
+      "status": "implemented-family",
+      "family": "general",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "general/preference/language/location/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251605",
+      "name": "COMMHUB_00526_U_M_CommHub_ProfiloUtente_Impostazioni_Generali_DisabilitazioneIP_Step2",
+      "status": "implemented-family",
+      "family": "general",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "general/preference/language/location/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251620",
+      "name": "COMMHUB_00097_U_M_CommHub_ProfiloUtente_Impostazioni_Dispositivi_Dispositivo Principale_Visualizza",
+      "status": "implemented-family",
+      "family": "devices",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "devices/device/shared-info/deactivate/device-confirm/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251645",
+      "name": "COMMHUB_00094_U_M_CommHub_ProfiloUtente_Impostazioni_Dispositivi",
+      "status": "implemented-family",
+      "family": "devices",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "devices/device/shared-info/deactivate/device-confirm/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251662",
+      "name": "COMMHUB_00094_U_M_CommHub_ProfiloUtente_Impostazioni_Dispositivi",
+      "status": "implemented-family",
+      "family": "devices",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "devices/device/shared-info/deactivate/device-confirm/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251681",
+      "name": "COMMHUB_00094_U_M_CommHub_ProfiloUtente_Impostazioni_Dispositivi",
+      "status": "implemented-family",
+      "family": "devices",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "devices/device/shared-info/deactivate/device-confirm/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251702",
+      "name": "COMMHUB_00094_U_M_CommHub_ProfiloUtente_Impostazioni_Dispositivi",
+      "status": "implemented-family",
+      "family": "devices",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "devices/device/shared-info/deactivate/device-confirm/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251712",
+      "name": "COMMHUB_00095_U_M_CommHub_ProfiloUtente_Impostazioni_Dispositivi_DisattivaApp_Step1",
+      "status": "implemented-family",
+      "family": "devices",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "devices/device/shared-info/deactivate/device-confirm/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251724",
+      "name": "COMMHUB_00096_U_M_CommHub_ProfiloUtente_Impostazioni_Dispositivi_DisattivaApp_Step2",
+      "status": "implemented-family",
+      "family": "devices",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "devices/device/shared-info/deactivate/device-confirm/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251738",
+      "name": "COMMHUB_00127_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso1_Step7",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251740",
+      "name": "COMMHUB_00172_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Rinnovo consenso_Step4",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251742",
+      "name": "COMMHUB_00294_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Importa conto_Step4",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251744",
+      "name": "COMMHUB_00284_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Revoca consenso_Step4",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251746",
+      "name": "COMMHUB_00137_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso2_Step6",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251748",
+      "name": "COMMHUB_00616_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso3_Step7",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251750",
+      "name": "COMMHUB_00146_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step8",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251752",
+      "name": "COMMHUB_00621_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step6",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251754",
+      "name": "COMMHUB_00579_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step4",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251756",
+      "name": "COMMHUB_00126_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso1_Step6",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251758",
+      "name": "COMMHUB_00283_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Revoca consenso_Step3",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251760",
+      "name": "COMMHUB_00136_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso2_Step5",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251762",
+      "name": "COMMHUB_00615_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Modifica_Caso3_Step6",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251764",
+      "name": "COMMHUB_00145_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step7",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251766",
+      "name": "COMMHUB_00153_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step5",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251768",
+      "name": "COMMHUB_00578_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step3",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:251770",
+      "name": "COMMHUB_00531_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Rapporto già esistente_Step5",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": "Rapporto già esistente"
+    },
+    {
+      "id": "24268:251773",
+      "name": "COMMHUB_00221_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:251822",
+      "name": "COMMHUB_00647_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Non rilasciati",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": "Non rilasciati"
+    },
+    {
+      "id": "24268:251871",
+      "name": "COMMHUB_00650_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Cliente Condiviso",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": "Cliente Condiviso"
+    },
+    {
+      "id": "24268:251928",
+      "name": "COMMHUB_00222_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:251990",
+      "name": "COMMHUB_00344_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step1",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:252052",
+      "name": "COMMHUB_00503_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step1",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:252068",
+      "name": "COMMHUB_00494_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step2",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:252084",
+      "name": "COMMHUB_00496_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step4",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:252100",
+      "name": "COMMHUB_00495_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step3",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:252118",
+      "name": "COMMHUB_00506_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step4",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:252134",
+      "name": "COMMHUB_00499_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step7",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:252150",
+      "name": "COMMHUB_00223_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica cookies",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:252168",
+      "name": "COMMHUB_00224_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e privacy_Modifica IVASS",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:252186",
+      "name": "COMMHUB_00185_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaPIN_Step1",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252200",
+      "name": "COMMHUB_00186_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaPIN_Step2",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252224",
+      "name": "COMMHUB_00187_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaPIN_Step3",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252248",
+      "name": "COMMHUB_00189_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaPIN_Step5",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252250",
+      "name": "COMMHUB_00189_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaPIN_Step5",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252252",
+      "name": "COMMHUB_00509_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step7",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:252254",
+      "name": "COMMHUB_00502_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step10",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:252256",
+      "name": "COMMHUB_00196_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step2",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252281",
+      "name": "COMMHUB_00195_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step1",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252295",
+      "name": "COMMHUB_00197_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step3",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252324",
+      "name": "COMMHUB_00198_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step4",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252351",
+      "name": "COMMHUB_00199_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step5",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252353",
+      "name": "COMMHUB_00190_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_CreazioneMobileCode_Step1",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252367",
+      "name": "COMMHUB_00192_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_CreazioneMobileCode_Step3",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252381",
+      "name": "COMMHUB_00191_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_CreazioneMobileCode_Step2",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252406",
+      "name": "COMMHUB_00193_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_CreazioneMobileCode_Step4",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252427",
+      "name": "COMMHUB_00193_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_CreazioneMobileCode_Step5",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252469",
+      "name": "COMMHUB_00202_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Storico Accessi_Step2",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252490",
+      "name": "COMMHUB_00202_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Storico Accessi_Step2",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252499",
+      "name": "COMMHUB_00088_U_M_CommHub_ProfiloUtente_Impostazioni",
+      "status": "implemented",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "settings"
+    },
+    {
+      "id": "24268:252526",
+      "name": "COMMHUB_00207_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Frima digitale_Attivazione_Step3",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252529",
+      "name": "COMMHUB_00206_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Frima digitale_Attivazione_Step2",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252542",
+      "name": "COMMHUB_00208_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Frima digitale_Attivazione_Step4",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252544",
+      "name": "COMMHUB_00205_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Frima digitale_Attivazione_Step1",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252558",
+      "name": "COMMHUB_00209_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Sospensione_Step1",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252572",
+      "name": "COMMHUB_00214_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Sospensione_Step6",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252586",
+      "name": "COMMHUB_00211_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Sospensione_Step3",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252597",
+      "name": "COMMHUB_00210_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Sospensione_Step2",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252622",
+      "name": "COMMHUB_00213_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Sospensione_Step5",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252624",
+      "name": "COMMHUB_00212_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Sospensione_Step4",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252626",
+      "name": "COMMHUB_00215_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Revoca_Step1",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252640",
+      "name": "COMMHUB_00217_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Revoca_Step3",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252651",
+      "name": "COMMHUB_00216_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Revoca_Step2",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252676",
+      "name": "COMMHUB_00219_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Revoca_Step5",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252678",
+      "name": "COMMHUB_00220_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Revoca_Step6",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252692",
+      "name": "COMMHUB_00218_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_Firma digitale_Revoca_Step4",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252697",
+      "name": "COMMHUB_00147_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Disposizioni_Modifica_Step1",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252712",
+      "name": "COMMHUB_00576_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Disposizioni_Profilo infromativo",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252724",
+      "name": "COMMHUB_00576_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Disposizioni_Modifica_Step1",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252739",
+      "name": "COMMHUB_00577_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Disposizioni_Modifica_Step2",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252754",
+      "name": "COMMHUB_00589_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Limiti operativi_Cambio limit_Step4",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252756",
+      "name": "COMMHUB_00588_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step3",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252758",
+      "name": "COMMHUB_00586_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Disposizioni_Modifica_Step1",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252773",
+      "name": "COMMHUB_00587_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Disposizioni_Modifica_Step2",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252788",
+      "name": "COMMHUB_00149_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step1",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252802",
+      "name": "COMMHUB_00527_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Rapporto già esistente_Step1",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": "Rapporto già esistente"
+    },
+    {
+      "id": "24268:252821",
+      "name": "COMMHUB_00528_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Rapporto già esistente_Step2",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": "Rapporto già esistente"
+    },
+    {
+      "id": "24268:252840",
+      "name": "COMMHUB_00149_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step1",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252856",
+      "name": "COMMHUB_00150_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step2",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252870",
+      "name": "COMMHUB_00151_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Step3",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252881",
+      "name": "COMMHUB_00529_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Operatività rapporti_Rapporto già esistente_Step3",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": "Rapporto già esistente"
+    },
+    {
+      "id": "24268:252892",
+      "name": "COMMHUB_00148_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Disposizioni_Modifica_Step2",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252936",
+      "name": "COMMHUB_00159_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step6",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252955",
+      "name": "COMMHUB_00160_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step7",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252957",
+      "name": "COMMHUB_00161_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step8",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252959",
+      "name": "COMMHUB_00154_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step1",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:252983",
+      "name": "COMMHUB_00156_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step3",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253000",
+      "name": "COMMHUB_00163_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step2",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253017",
+      "name": "COMMHUB_00488_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step2",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253034",
+      "name": "COMMHUB_00157_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step4",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253057",
+      "name": "COMMHUB_00164_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step3",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253079",
+      "name": "COMMHUB_00489_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step3",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253101",
+      "name": "COMMHUB_00158_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step5",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253123",
+      "name": "COMMHUB_00155_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step2",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253154",
+      "name": "COMMHUB_00162_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step1",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253165",
+      "name": "COMMHUB_00487_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step1",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253176",
+      "name": "COMMHUB_00165_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step4",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253195",
+      "name": "COMMHUB_00491_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step4",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253214",
+      "name": "COMMHUB_00166_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step5",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253216",
+      "name": "COMMHUB_00492_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step5",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253220",
+      "name": "COMMHUB_00490_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step5",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253245",
+      "name": "COMMHUB_00167_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step6",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253247",
+      "name": "COMMHUB_00493_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Modifica_Step6",
+      "status": "implemented-family",
+      "family": "quick",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "quick/quick-intro/quick-info/quick-contacts/quick-contact-edit/quick-accounts/quick-default/quick-costs/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253250",
+      "name": "COMMHUB_00116_U_M_CommHub_ProfiloUtente_Impostazioni_Notifiche_Investimenti e risparmio",
+      "status": "implemented-family",
+      "family": "notifications",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "notifications/sms-warning/notification-group/notification-event/categories/category-remove",
+      "variant": ""
+    },
+    {
+      "id": "24268:253270",
+      "name": "COMMHUB_00177_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Utilizza codice fornito dalla terza parte_Step1",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253278",
+      "name": "COMMHUB_00178_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Utilizza codice fornito dalla terza parte_Step2",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253286",
+      "name": "COMMHUB_00179_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Utilizza codice fornito dalla terza parte_Step3",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253337",
+      "name": "COMMHUB_00179_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Utilizza codice fornito dalla terza parte_Step5",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253339",
+      "name": "COMMHUB_00178_U_M_CommHub_ProfiloUtente_Impostazioni_Terze Parti_Utilizza codice fornito dalla terza parte_Step4",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": "",
+      "note": "Source reuses a MAV payment summary around authorization. Settings consume the canonical Mobile Code authorization mechanism rather than reproducing an unrelated payment."
+    },
+    {
+      "id": "24268:253356",
+      "name": "COMMHUB_00188_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaPIN_Step4",
+      "status": "implemented-family",
+      "family": "security",
+      "component": "MobileFirstProfileSettingsSecurity.tsx",
+      "runtime": "security/mobile-menu/credential/create-contacts/create-contact/contact-code/create-card/signature-menu/signature-doc/signature-warning/screenshots/history/history-filter/history-send/authorize/result",
+      "variant": "",
+      "note": "Source reuses a MAV payment summary around authorization. Settings consume the canonical Mobile Code authorization mechanism rather than reproducing an unrelated payment."
+    },
+    {
+      "id": "24268:253382",
+      "name": "CON_00055_U_M_Conti_Homepage_3+ conti_Tutti i conti_Importa conto_Step2",
+      "status": "implemented-family",
+      "family": "third-party",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "third-party/consent-detail/consent-confirm/import-intro/import-bank/import-existing-warning/import-handoff/third-code/consent-code-summary/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:253414",
+      "name": " Rimando a ucx",
+      "status": "source-handoff",
+      "runtime": "withdrawal / source-referenced UCX handoff",
+      "note": "Source contains only Rimando a ucx and provides no destination UX."
+    },
+    {
+      "id": "24268:253416",
+      "name": " Rimando a ucx",
+      "status": "source-handoff",
+      "runtime": "withdrawal / source-referenced UCX handoff",
+      "note": "Source contains only Rimando a ucx and provides no destination UX."
+    },
+    {
+      "id": "24268:253418",
+      "name": " Rimando a ucx",
+      "status": "source-handoff",
+      "runtime": "withdrawal / source-referenced UCX handoff",
+      "note": "Source contains only Rimando a ucx and provides no destination UX."
+    },
+    {
+      "id": "24268:254418",
+      "name": "COMMHUB_00504_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step2",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:254432",
+      "name": "COMMHUB_00497_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step5",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:254446",
+      "name": "COMMHUB_00505_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step3",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:254461",
+      "name": "COMMHUB_00498_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step6",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:254476",
+      "name": "COMMHUB_00507_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step5",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:254478",
+      "name": "COMMHUB_00500_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step8",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:254480",
+      "name": "COMMHUB_00508_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step6",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:254487",
+      "name": "COMMHUB_00501_U_M_CommHub_ProfiloUtente_Impostazioni_Consensi e Privacy_Modifica privacy_Step9",
+      "status": "implemented-family",
+      "family": "privacy",
+      "component": "MobileFirstProfileSettingsCommunications.tsx",
+      "runtime": "privacy/privacy-edit/privacy-signing-intro/privacy-signature/privacy-doc/privacy-signing-complete/authorize/result/cookies/ivass",
+      "variant": ""
+    },
+    {
+      "id": "24268:254508",
+      "name": "COMMHUB_00194_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_CreazioneMobileCode_Step6",
+      "status": "source-handoff",
+      "runtime": "create-card -> Mobile Code receipt",
+      "note": "Source is an iOS home screen with an SMS. Receipt outcome is modeled; no OS or SMS APIs invoked."
+    },
+    {
+      "id": "24268:254513",
+      "name": "COMMHUB_00576_U_M_CommHub_ProfiloUtente_Impostazioni_Limiti e operatività rapporti_Disposizioni_Profilo infromativo",
+      "status": "implemented-family",
+      "family": "limits",
+      "component": "MobileFirstProfileSettingsBank.tsx",
+      "runtime": "limits-select/daily-overview/daily-intro/daily-amount/daily-period/daily-summary/instant-edit/instant-warning/instant-summary/dispositions/dispositions-confirm/relationships/document/authorize/result",
+      "variant": ""
+    },
+    {
+      "id": "24268:247443",
+      "name": "COMMHUB_00014_U_M_CommHub_ProfiloUtente_Check up Sicurezza_Livello Medio/Basso_Livelli",
+      "status": "implemented-family",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "checkup/levels/missions/mission/mission-contact/mission-contact-code/article",
+      "note": "Source protection level is driven by feature fixtures; device/store missions are informational OS handoffs."
+    },
+    {
+      "id": "24268:247457",
+      "name": "COMMHUB_00016_U_M_CommHub_ProfiloUtente_Check up Sicurezza_Livello Medio/Basso_Missioni",
+      "status": "implemented-family",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "checkup/levels/missions/mission/mission-contact/mission-contact-code/article",
+      "note": "Source protection level is driven by feature fixtures; device/store missions are informational OS handoffs."
+    },
+    {
+      "id": "24268:247472",
+      "name": "COMMHUB_00012_U_M_CommHub_ProfiloUtente_Check up Sicurezza_Livello Alto",
+      "status": "implemented-family",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "checkup/levels/missions/mission/mission-contact/mission-contact-code/article",
+      "note": "Source protection level is driven by feature fixtures; device/store missions are informational OS handoffs."
+    },
+    {
+      "id": "24268:247495",
+      "name": "COMMHUB_00013_U_M_CommHub_ProfiloUtente_Check up Sicurezza_Livello Medio/Basso",
+      "status": "implemented-family",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "checkup/levels/missions/mission/mission-contact/mission-contact-code/article",
+      "note": "Source protection level is driven by feature fixtures; device/store missions are informational OS handoffs."
+    },
+    {
+      "id": "24268:247521",
+      "name": "COMMHUB_00015_U_M_CommHub_ProfiloUtente_Check up Sicurezza_Livello Medio/Basso_Livelli_Phishing",
+      "status": "implemented-family",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "checkup/levels/missions/mission/mission-contact/mission-contact-code/article",
+      "note": "Source protection level is driven by feature fixtures; device/store missions are informational OS handoffs."
+    },
+    {
+      "id": "24268:247543",
+      "name": "COMMHUB_00041_U_M_CommHub_ProfiloUtente_I tuoi dati",
+      "status": "delegated",
+      "owner": "profile_personal",
+      "note": "Empty I tuoi dati reference; parent personal area owns this boundary."
+    },
+    {
+      "id": "24268:247550",
+      "name": "COMMHUB_00001_U_M_CommHub_ProfiloUtente",
+      "status": "delegated",
+      "owner": "root",
+      "note": "Embedded root profile hub reference."
+    },
+    {
+      "id": "24268:247585",
+      "name": "COMMHUB_00185_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaPIN_Step1",
+      "status": "implemented-family",
+      "component": "MobileFirstProfileSettings.tsx",
+      "runtime": "checkup/levels/missions/mission/mission-contact/mission-contact-code/article",
+      "note": "Embedded security menu reuses Security component."
+    }
+  ],
+  "sourceTextEvidence": "pi-italy-mobile-first-profile-settings-figma.json",
+  "canonicalDesignContexts": [
+    "24268:252499",
+    "24268:250083",
+    "24268:247495",
+    "24268:251451",
+    "24268:251645",
+    "24268:250172",
+    "24268:251773",
+    "24268:250709",
+    "24268:252200",
+    "24268:252295",
+    "24268:251011",
+    "24268:252983",
+    "24268:250832",
+    "24268:251738",
+    "24268:252248",
+    "24268:252427",
+    "24268:253245",
+    "24268:252406",
+    "24268:251300",
+    "24268:251928",
+    "24268:254446",
+    "24268:252788",
+    "24268:252586",
+    "24268:252529",
+    "24268:253034",
+    "24268:253101",
+    "24268:252936",
+    "24268:252150",
+    "24268:252168",
+    "24268:250272",
+    "24268:252252",
+    "24268:250785",
+    "24268:250800",
+    "24268:252490"
+  ],
+  "testEvidence": "37 focused tests passed (19 feature, 18 screen). Review fixes include independent group notifications, fresh email verification, cancel-safe applied history filters, canonical cross-remount credential locks, source history email receipt, and digital-signature direct entry.",
+  "limitations": [
+    "No real OS permission changes, device erasure, email/SMS send, account grants, signatures or banking contracts are invoked.",
+    "Security phone/store/reset guidance stays informational; all protection-level fixtures remain inspectable through feature state.",
+    "Source UCX placeholders and OS SMS screen are recorded as handoffs. Embedded root/personal frames are delegated, not double implemented.",
+    "Canonical contexts and integrated menu/security/check-up screenshots were inspected. Complete visual certification of all 218 frames is not claimed."
+  ],
+  "browserEvidence": "Integrated browser Home -> Profile -> Impostazioni -> Sicurezza -> Check-up verified after Home wiring. Menu/security/check-up screenshots inspected; all menu SVG natural sizes and security image load/geometry checked. Browser HMR occasionally reset the app during other-agent edits; no claim of screenshot verification for every source frame. Browser reproduced a zero-height security carousel; flex-shrink repair restored a 252px row and clickable phishing topic, with source 120x152 photos confirmed.",
+  "editorHandoffs": [
+    {
+      "path": "src/experiences/pi/it/mobile-first/mobile-first-profile-settings.css",
+      "owner": "/root",
+      "reason": "Mechanical --mf-text-scale font/line-height conversion and baseline check; worker CSS edit ownership released."
+    }
+  ]
+}

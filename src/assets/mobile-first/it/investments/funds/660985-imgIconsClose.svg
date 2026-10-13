@@ -1,0 +1,11 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Icons / Close">
+<foreignObject x="-15.8" y="-15.8" width="55.6" height="55.6"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(8.4px);clip-path:url(#bgblur_0_0_421_clip_path);height:100%;width:100%"></div></foreignObject><circle id="Background" data-figma-bg-blur-radius="16.8" cx="12" cy="12" r="11" fill="#262626" fill-opacity="0.8"/>
+<g id="Navigation and action/Close_K10">
+<path id="Path" fill-rule="evenodd" clip-rule="evenodd" d="M7.52128 6.5L12 10.9787L16.4791 6.5L17.5 7.52128L13.0213 12L17.5 16.4787L16.4791 17.5L12 13.0213L7.52128 17.5L6.5 16.4787L10.9787 12L6.5 7.52128L7.52128 6.5Z" fill="white"/>
+</g>
+</g>
+<defs>
+<clipPath id="bgblur_0_0_421_clip_path" transform="translate(15.8 15.8)"><circle cx="12" cy="12" r="11"/>
+</clipPath></defs>
+</svg>

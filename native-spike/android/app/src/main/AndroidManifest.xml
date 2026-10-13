@@ -1,0 +1,32 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" android:maxSdkVersion="28"/>
+    <application android:name=".MainApplication" android:label="@string/app_name" android:icon="@drawable/unicredit_app_icon" android:roundIcon="@drawable/unicredit_app_icon" android:allowBackup="false" android:theme="@style/AppTheme" android:usesCleartextTraffic="${usesCleartextTraffic}" android:networkSecurityConfig="@xml/native_network_security" android:supportsRtl="true">
+        <provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.demo.files" android:exported="false" android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/demo_export_paths"/>
+        </provider>
+        <activity android:name=".MainActivity" android:label="@string/app_name" android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <meta-data android:name="com.hotupdater.CHANNEL" android:value="demo-preview"/>
+        <meta-data android:name="com.hotupdater.FINGERPRINT_HASH" android:value="a61a80f451f0e1c4c5dcfc4708f3780cf3f0f2d0"/>
+        <meta-data android:name="com.hotupdater.PUBLIC_KEY" android:value="-----BEGIN PUBLIC KEY-----
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAoCOiXQv4KRJEo4x6q18d
+3VyRiNDacA4QUkQsT1yy3Prnyw0bJWJI4jEus27C0HqpYoVQMn19KO5y3FcvtPZb
+Tbuae4iReYRI3AFSKXIfAqfZfz+wLQkZ9xNPFhfiQcHtF9+htk7pXslGcG13UTrz
+eeZMdbfBrR5i33aj/YnX+eI5EwS2x5Y8ESxyofYWMJJs75niuIiRN5WPXrW2eFrv
+0uVpaHbXbCsjQehsSNOP8+0XYFtrVBwcy0fjspBDSDxI6F2O3GjjBZTe8FU1aFiP
+Z3pM59zZ9FK6802KUqHrCF0hOI7I2YoV9k+mLpr2I8qoCDDPpwQhXYvJyBMAVE/i
+gHIoZ+9FqDv+9lHXE5A040qjYYelqcvUhzKJxt5FtwKdYVJbZhTWPpq1wKjT4bQF
+iVYk91ZLoNRmbU6nXtUAMNyYJYrKTLpxa0UCvlcFM1d5I9wnTQSvuZLuzruXfQe7
+Uf77gfN/YPEK2cOXOJFGvhc8TBrslxYoGk2eKjipFVGoPlEFG5qJ/z4VfJ9bGH6Y
+c/gCKS/2NoV1FWG4Pw4WB1Z9rv+NAZRhU2YINJv/+6kyv3n4X9z5eSZMTg2m/xnl
+jvUkjM0AEwA3dEMAgk6mfh7ML/rnV9uUjDhHvCkhOohCnVteuDUqRKZrIHj88sLU
+XM37Be5IRnOfOenjQFxs32ECAwEAAQ==
+-----END PUBLIC KEY-----"/>
+    </application>
+</manifest>

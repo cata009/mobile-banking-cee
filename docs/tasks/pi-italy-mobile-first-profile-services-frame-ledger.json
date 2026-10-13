@@ -1,0 +1,1148 @@
+[
+  {
+    "id": "24268:254535",
+    "name": "Supporto",
+    "frames": [
+      {
+        "id": "24268:254540",
+        "name": "COMMHUB_00554_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Conti_Articolo",
+        "w": 393,
+        "h": 1205
+      },
+      {
+        "id": "24268:254563",
+        "name": "COMMHUB_00558_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Conti_Articolo",
+        "w": 393,
+        "h": 1061
+      },
+      {
+        "id": "24268:254586",
+        "name": "COMMHUB_00559_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Conti_Articolo",
+        "w": 393,
+        "h": 1333
+      },
+      {
+        "id": "24268:254615",
+        "name": "COMMHUB_00225_U_M_CommHub_ProfiloUtente_Supporto",
+        "w": 393,
+        "h": 1842.00341796875
+      },
+      {
+        "id": "24268:254666",
+        "name": "COMMHUB_00557_U_M_CommHub_ProfiloUtente_Supporto",
+        "w": 393,
+        "h": 1854.00341796875
+      },
+      {
+        "id": "24268:254717",
+        "name": "COMMHUB_00226_U_M_CommHub_ProfiloUtente_Supporto_Chiama_Estero_Step1",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:254893",
+        "name": "COMMHUB_00226_U_M_CommHub_ProfiloUtente_Supporto_Chiama_Estero_Step1",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:255067",
+        "name": "COMMHUB_00226_U_M_CommHub_ProfiloUtente_Supporto_Chiama_Estero_Step1",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:255265",
+        "name": "COMMHUB_00552_U_M_CommHub_ProfiloUtente_Supporto_Ambito_Conti",
+        "w": 393,
+        "h": 1774.00341796875
+      },
+      {
+        "id": "24268:255301",
+        "name": "COMMHUB_00555_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Carte",
+        "w": 393,
+        "h": 1822.00341796875
+      },
+      {
+        "id": "24268:255338",
+        "name": "COMMHUB_00556_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Carte",
+        "w": 393,
+        "h": 2154.00341796875
+      },
+      {
+        "id": "24268:255377",
+        "name": "COMMHUB_00001_U_M_CommHub_ProfiloUtente",
+        "w": 393,
+        "h": 2104
+      },
+      {
+        "id": "24268:255412",
+        "name": "HOM_00003_U_M_Homepage_Monoprodotto_Unico Conto",
+        "w": 393,
+        "h": 2190
+      },
+      {
+        "id": "24268:255441",
+        "name": "COMMHUB_00534_U_M_CommHub_ProfiloUtente_Help_Dettaglio",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:255451",
+        "name": "COMMHUB_00566_U_M_CommHub_ProfiloUtente_Help_Dettaglio",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:255462",
+        "name": "COMMHUB_00542_U_M_CommHub_ProfiloUtente_Help_DettaglioUCX",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:255518",
+        "name": "CAR_00082_U_M_Carte_Homepage_2+ carte_Dettaglio carta_Quick actions_Problemi carta_Step1",
+        "w": 393,
+        "h": 906
+      },
+      {
+        "id": "24268:255531",
+        "name": "CAR_00083_U_M_Carte_Homepage_2+ carte_Dettaglio carta_Quick actions_Problemi carta_Step2",
+        "w": 393,
+        "h": 906
+      },
+      {
+        "id": "24268:255546",
+        "name": "CAR_00005_U_M_Carte_Homepage_2+ carte_Dettaglio carta",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:255578",
+        "name": "COMMHUB_00196_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step2",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:255603",
+        "name": "COMMHUB_00195_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step1",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:255617",
+        "name": "COMMHUB_00197_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step3",
+        "w": 393,
+        "h": 1064
+      },
+      {
+        "id": "24268:255646",
+        "name": "COMMHUB_00198_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step4",
+        "w": 393,
+        "h": 1064
+      },
+      {
+        "id": "24268:255673",
+        "name": "COMMHUB_00199_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step5",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:255675",
+        "name": "COMMHUB_00553_U_M_CommHub_ProfiloUtente_Supporto_Ambito_Conti_Argomenti_Gestione conto",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:255700",
+        "name": "COMMHUB_00552_U_M_CommHub_ProfiloUtente_Supporto_Ambito_Conti_Argomenti_Gestione conto_Ricerca",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:255717",
+        "name": "COMMHUB_00564_U_M_CommHub_ProfiloUtente_Supporto_Ambito_Conti_Argomenti_Gestione conto_Ricerca",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:255735",
+        "name": "COMMHUB_00560_U_M_CommHub_ProfiloUtente_Supporto_Ambito_Conti_Argomenti_Gestione conto_Ricerca",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:255753",
+        "name": "COMMHUB_00561_U_M_CommHub_ProfiloUtente_Supporto_Ambito_Conti_Argomenti_Gestione conto_Ricerca",
+        "w": 393,
+        "h": 1092.00341796875
+      },
+      {
+        "id": "24268:255785",
+        "name": "COMMHUB_00562_U_M_CommHub_ProfiloUtente_Supporto_Ambito_Conti_Argomenti_Gestione conto_Ricerca",
+        "w": 393,
+        "h": 2044.00341796875
+      },
+      {
+        "id": "24268:255827",
+        "name": "COMMHUB_00563_U_M_CommHub_ProfiloUtente_Supporto_Ambito_Conti_Argomenti_Gestione conto_Ricerca",
+        "w": 393,
+        "h": 3012.00341796875
+      },
+      {
+        "id": "24268:255894",
+        "name": "COMMHUB_00577_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Conti_Articolo",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:255917",
+        "name": "COMMHUB_00578_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Carte_Articolo",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:255940",
+        "name": "COMMHUB_00579_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Pagamenti_Articolo",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:255963",
+        "name": "COMMHUB_00580_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Mutui e prestiti_Articolo",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:255986",
+        "name": "COMMHUB_00581_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Bilancio Familiare_Articolo",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256009",
+        "name": "COMMHUB_00582_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Profilo_Articolo",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256032",
+        "name": "COMMHUB_00583_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Sicurezza_Articolo",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256055",
+        "name": "COMMHUB_00584_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Documenti_Articolo",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256078",
+        "name": "COMMHUB_00585_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Investimentii_Articolo",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256101",
+        "name": "COMMHUB_00625_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Protezione_Articolo",
+        "w": 393,
+        "h": 852
+      }
+    ]
+  },
+  {
+    "id": "24268:256125",
+    "name": "Fissa un appuntamento",
+    "frames": [
+      {
+        "id": "24268:256128",
+        "name": "COMMHUB_00238_U_M_CommHub_ProfiloUtente_Ubook_Step6",
+        "w": 393,
+        "h": 1784.0135498046875
+      },
+      {
+        "id": "24268:256160",
+        "name": "COMMHUB_00239_U_M_CommHub_ProfiloUtente_Ubook_Step7",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256192",
+        "name": "COMMHUB_00241_U_M_CommHub_ProfiloUtente_Ubook_Step9",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256225",
+        "name": "COMMHUB_00233_U_M_CommHub_ProfiloUtente_Ubook_Step2",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256238",
+        "name": "COMMHUB_00234_U_M_CommHub_ProfiloUtente_Ubook_Step3",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256267",
+        "name": "COMMHUB_00235_U_M_CommHub_ProfiloUtente_Ubook_Step4",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256281",
+        "name": "COMMHUB_00236_U_M_CommHub_ProfiloUtente_Ubook_Step5",
+        "w": 393,
+        "h": 1302
+      },
+      {
+        "id": "24268:256335",
+        "name": "COMMHUB_00237_U_M_CommHub_ProfiloUtente_Ubook_Step6",
+        "w": 393,
+        "h": 1900.0101318359375
+      },
+      {
+        "id": "24268:256370",
+        "name": "COMMHUB_00240_U_M_CommHub_ProfiloUtente_Ubook_Step8",
+        "w": 393,
+        "h": 1684.0135498046875
+      },
+      {
+        "id": "24268:256403",
+        "name": "COMMHUB_00242_U_M_CommHub_ProfiloUtente_Ubook_Step10",
+        "w": 393,
+        "h": 1684.0135498046875
+      },
+      {
+        "id": "24268:256435",
+        "name": "COMMHUB_00243_U_M_CommHub_ProfiloUtente_Ubook_Step11",
+        "w": 393,
+        "h": 1820.0135498046875
+      },
+      {
+        "id": "24268:256468",
+        "name": "COMMHUB_00626_U_M_CommHub_ProfiloUtente_Ubook_Step14",
+        "w": 393,
+        "h": 1732.0135498046875
+      },
+      {
+        "id": "24268:256501",
+        "name": "COMMHUB_00244_U_M_CommHub_ProfiloUtente_Ubook_Step15",
+        "w": 393,
+        "h": 956
+      },
+      {
+        "id": "24268:256503",
+        "name": "COMMHUB_00232_U_M_CommHub_ProfiloUtente_Ubook_Step1",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256512",
+        "name": "COMMHUB_00244_U_M_CommHub_ProfiloUtente_Ubook_Step12",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256519",
+        "name": "COMMHUB_00243_U_M_CommHub_ProfiloUtente_Ubook_Step13",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256527",
+        "name": "Note",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256538",
+        "name": "Note",
+        "w": 393,
+        "h": 852
+      }
+    ]
+  },
+  {
+    "id": "24268:256553",
+    "name": "La tua banca | Il tuo consulente | La tua filiale | Appuntamenti",
+    "frames": [
+      {
+        "id": "24268:256555",
+        "name": "COMMHUB_00257_U_M_CommHub_ProfiloUtente_La tua banca",
+        "w": 393,
+        "h": 1452
+      },
+      {
+        "id": "24268:256610",
+        "name": "COMMHUB_00646_U_M_CommHub_ProfiloUtente_La tua banca_la tua filiale_Private",
+        "w": 393,
+        "h": 1456
+      },
+      {
+        "id": "24268:256665",
+        "name": "COMMHUB_00258_U_M_CommHub_ProfiloUtente_La tua banca_Seleziona filiale",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256733",
+        "name": "COMMHUB_00261_U_M_CommHub_ProfiloUtente_Consulente Remoto",
+        "w": 393,
+        "h": 876
+      },
+      {
+        "id": "24268:256751",
+        "name": "COMMHUB_00246_U_M_CommHub_ProfiloUtente_La tua banca_la tua filiale",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256762",
+        "name": "COMMHUB_00247_U_M_CommHub_ProfiloUtente_La tua banca_la tua filiale",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256776",
+        "name": "COMMHUB_00248_U_M_CommHub_ProfiloUtente_La tua banca_Appuntamenti",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256796",
+        "name": "COMMHUB_00249_U_M_CommHub_ProfiloUtente_La tua banca_Appuntamenti_Ghost",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256810",
+        "name": "COMMHUB_00259_U_M_CommHub_ProfiloUtente_La tua banca_Chiama filiale",
+        "w": 393.23077392578125,
+        "h": 852
+      },
+      {
+        "id": "24268:256814",
+        "name": "COMMHUB_00260_U_M_CommHub_ProfiloUtente_La tua banca_Scrivi una mail",
+        "w": 393.23077392578125,
+        "h": 852
+      },
+      {
+        "id": "24268:256820",
+        "name": "COMMHUB_00263_U_M_CommHub_ProfiloUtente_Consulente Filiale",
+        "w": 393,
+        "h": 876
+      },
+      {
+        "id": "24268:256839",
+        "name": "COMMHUB_00644_U_M_CommHub_ProfiloUtente_La tua banca_Il tuo consulente_Private",
+        "w": 393,
+        "h": 876
+      },
+      {
+        "id": "24268:256858",
+        "name": "COMMHUB_00264_U_M_CommHub_ProfiloUtente_Consulente Filiale_Chiama_Step1",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256892",
+        "name": "COMMHUB_00266_U_M_CommHub_ProfiloUtente_Consulente Filiale_Scrivi una email",
+        "w": 393.23077392578125,
+        "h": 852
+      },
+      {
+        "id": "24268:256898",
+        "name": "COMMHUB_00262_U_M_CommHub_ProfiloUtente_Consulente Remoto_Chiama",
+        "w": 393.23077392578125,
+        "h": 852
+      },
+      {
+        "id": "24268:256902",
+        "name": "COMMHUB_00265_U_M_CommHub_ProfiloUtente_Consulente Filiale_Chiama_Step2",
+        "w": 393.23077392578125,
+        "h": 852
+      },
+      {
+        "id": "24268:256910",
+        "name": "COMMHUB_00250_U_M_CommHub_ProfiloUtente_La tua banca_Modifica appuntamento_Step1",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256925",
+        "name": "COMMHUB_00251_U_M_CommHub_ProfiloUtente_La tua banca_Modifica appuntamento_Step1",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256928",
+        "name": "COMMHUB_00543_U_M_CommHub_ProfiloUtente_La tua banca_Dettaglio_Cancellato",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256940",
+        "name": "COMMHUB_00544_U_M_CommHub_ProfiloUtente_La tua banca_Dettaglio_Da eseguire",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256958",
+        "name": "COMMHUB_00245_U_M_CommHub_ProfiloUtente_La tua banca_Il tuo consulente",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256972",
+        "name": "COMMHUB_00643_U_M_CommHub_ProfiloUtente_La tua banca_Il tuo consulente_Private",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:256992",
+        "name": "COMMHUB_00645_U_M_CommHub_ProfiloUtente_La tua banca_la tua filiale_Private",
+        "w": 393,
+        "h": 852
+      }
+    ]
+  },
+  {
+    "id": "24268:257074",
+    "name": "DOL",
+    "frames": [
+      {
+        "id": "24268:257075",
+        "name": "COMMHUB_00305_U_M_CommHub_ProfiloUtente_DOL_Titolarità conto_Step2",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257088",
+        "name": "COMMHUB_00306_U_M_CommHub_ProfiloUtente_DOL_Titolarità conto_Step3",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257096",
+        "name": "COMMHUB_00309_U_M_CommHub_ProfiloUtente_DOL_ISEE_Step2",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257112",
+        "name": "COMMHUB_00310_U_M_CommHub_ProfiloUtente_DOL_ISEE_Step3",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257130",
+        "name": "COMMHUB_00311_U_M_CommHub_ProfiloUtente_DOL_ISEE_Step4",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257138",
+        "name": "COMMHUB_00312_U_M_CommHub_ProfiloUtente_DOL_ISEE_Step5",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257140",
+        "name": "COMMHUB_00290_U_M_CommHub_ProfiloUtente_DOL_Documenti",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257142",
+        "name": "COMMHUB_00290_U_M_CommHub_ProfiloUtente_DOL_Documenti_Condividi_Step3",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257155",
+        "name": "COMMHUB_00293_U_M_CommHub_ProfiloUtente_DOL_Condividi_Step4",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257293",
+        "name": "COMMHUB_00267_U_M_CommHub_ProfiloUtente_DOL_In primo piano",
+        "w": 393,
+        "h": 1310.00341796875
+      },
+      {
+        "id": "24268:257322",
+        "name": "COMMHUB_00268_U_M_CommHub_ProfiloUtente_DOL_Recenti",
+        "w": 393,
+        "h": 944.0033569335938
+      },
+      {
+        "id": "24268:257347",
+        "name": "COMMHUB_00269_U_M_CommHub_ProfiloUtente_DOL_Conti",
+        "w": 393,
+        "h": 1126.00341796875
+      },
+      {
+        "id": "24268:257372",
+        "name": "COMMHUB_00269_U_M_CommHub_ProfiloUtente_DOL_Conti Empty",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257388",
+        "name": "COMMHUB_00270_U_M_CommHub_ProfiloUtente_DOL_Carte",
+        "w": 393,
+        "h": 1174.00341796875
+      },
+      {
+        "id": "24268:257413",
+        "name": "COMMHUB_00292_U_M_CommHub_ProfiloUtente_DOL_Condividi_Step2",
+        "w": 393,
+        "h": 1293
+      },
+      {
+        "id": "24268:257436",
+        "name": "COMMHUB_00280_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step7",
+        "w": 393,
+        "h": 1132.00341796875
+      },
+      {
+        "id": "24268:257458",
+        "name": "COMMHUB_00280_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step7",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257478",
+        "name": "COMMHUB_00289_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step8",
+        "w": 393,
+        "h": 1086.00341796875
+      },
+      {
+        "id": "24268:257499",
+        "name": "COMMHUB_00513_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step4",
+        "w": 393,
+        "h": 866.0033569335938
+      },
+      {
+        "id": "24268:257517",
+        "name": "COMMHUB_00517_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step4",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257535",
+        "name": "COMMHUB_00471_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Elimina documento_Step1",
+        "w": 393,
+        "h": 1028.00341796875
+      },
+      {
+        "id": "24268:257570",
+        "name": "COMMHUB_00468_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step8",
+        "w": 393,
+        "h": 1054
+      },
+      {
+        "id": "24268:257605",
+        "name": "COMMHUB_00469_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step9",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257607",
+        "name": "COMMHUB_00473_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Elimina documento_Step3",
+        "w": 393,
+        "h": 852.0033569335938
+      },
+      {
+        "id": "24268:257637",
+        "name": "COMMHUB_00472_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Elimina documento_Step2",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257673",
+        "name": "COMMHUB_00281_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step7",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257689",
+        "name": "COMMHUB_00281_U_M_CommHub_ProfiloUtente_DOLL_Filtri Ghost_Step7",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257702",
+        "name": "COMMHUB_00291_U_M_CommHub_ProfiloUtente_DOL_Condividi_Step1",
+        "w": 393,
+        "h": 1164
+      },
+      {
+        "id": "24268:257722",
+        "name": "COMMHUB_00273_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step1",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257747",
+        "name": "COMMHUB_00282_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step1",
+        "w": 393,
+        "h": 1184.013427734375
+      },
+      {
+        "id": "24268:257788",
+        "name": "COMMHUB_00510_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step1",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257817",
+        "name": "COMMHUB_00514_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step1",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257846",
+        "name": "COMMHUB_00282_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Casistica errore",
+        "w": 393,
+        "h": 862.0033569335938
+      },
+      {
+        "id": "24268:257876",
+        "name": "COMMHUB_00463_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step1",
+        "w": 393,
+        "h": 852.0067138671875
+      },
+      {
+        "id": "24268:257909",
+        "name": "COMMHUB_00275_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step3",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257938",
+        "name": "COMMHUB_00287_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step6",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257985",
+        "name": "COMMHUB_00465_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step3",
+        "w": 393,
+        "h": 852.0067138671875
+      },
+      {
+        "id": "24268:258015",
+        "name": "COMMHUB_00277_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step4",
+        "w": 393,
+        "h": 852.0067138671875
+      },
+      {
+        "id": "24268:258048",
+        "name": "COMMHUB_00286_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step5",
+        "w": 393,
+        "h": 1184.013427734375
+      },
+      {
+        "id": "24268:258086",
+        "name": "COMMHUB_00512_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step3",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:258112",
+        "name": "COMMHUB_00516_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step3",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:258138",
+        "name": "COMMHUB_00467_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step5",
+        "w": 393,
+        "h": 852.0067138671875
+      },
+      {
+        "id": "24268:258168",
+        "name": "COMMHUB_00279_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step6",
+        "w": 393,
+        "h": 852.0067138671875
+      },
+      {
+        "id": "24268:258201",
+        "name": "COMMHUB_00288_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step7",
+        "w": 393,
+        "h": 1184.013427734375
+      },
+      {
+        "id": "24268:258242",
+        "name": "COMMHUB_00276_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step4",
+        "w": 393,
+        "h": 1759
+      },
+      {
+        "id": "24268:258354",
+        "name": "COMMHUB_00285_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step4",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:258395",
+        "name": "COMMHUB_00511_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step2",
+        "w": 393,
+        "h": 1764
+      },
+      {
+        "id": "24268:258507",
+        "name": "COMMHUB_00515_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step2",
+        "w": 393,
+        "h": 1764
+      },
+      {
+        "id": "24268:258619",
+        "name": "COMMHUB_00278_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step5",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:258661",
+        "name": "COMMHUB_00274_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step2",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:258739",
+        "name": "COMMHUB_00283_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step2",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:258817",
+        "name": "COMMHUB_00464_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step2",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:258904",
+        "name": "COMMHUB_00304_U_M_CommHub_ProfiloUtente_DOL_Titolarità conto_Step1",
+        "w": 393,
+        "h": 1306.00341796875
+      },
+      {
+        "id": "24268:258938",
+        "name": "COMMHUB_00297_U_M_CommHub_ProfiloUtente_DOLL_Impostazioni documenti",
+        "w": 393,
+        "h": 1856.00341796875
+      },
+      {
+        "id": "24268:258984",
+        "name": "COMMHUB_00297_U_M_CommHub_ProfiloUtente_DOLL_Impostazioni documenti",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:259038",
+        "name": "COMMHUB_00298_U_M_CommHub_ProfiloUtente_DOLL_Impostazioni documenti_Caso private",
+        "w": 393,
+        "h": 1856.00341796875
+      },
+      {
+        "id": "24268:259084",
+        "name": "COMMHUB_00298_U_M_CommHub_ProfiloUtente_DOLL_Impostazioni documenti_Caso private",
+        "w": 393,
+        "h": 2008.00341796875
+      },
+      {
+        "id": "24268:259132",
+        "name": "COMMHUB_00300_U_M_CommHub_ProfiloUtente_DOLL_Impostazioni documenti_Step2",
+        "w": 393,
+        "h": 2080.00341796875
+      },
+      {
+        "id": "24268:259182",
+        "name": "COMMHUB_00299_U_M_CommHub_ProfiloUtente_DOLL_Impostazioni documenti_Step1",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:259240",
+        "name": "COMMHUB_00301_U_M_CommHub_ProfiloUtente_DOLL_Impostazioni documenti_Step3",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:259242",
+        "name": "COMMHUB_00308_U_M_CommHub_ProfiloUtente_DOL_ISEE_Step1",
+        "w": 393,
+        "h": 1306.00341796875
+      },
+      {
+        "id": "24268:259276",
+        "name": "COMMHUB_00302_U_M_CommHub_ProfiloUtente_DOLL_Impostazioni documenti_Step4",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:259278",
+        "name": "COMMHUB_00307_U_M_CommHub_ProfiloUtente_DOL_Titolarità conto_Step4",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:259280",
+        "name": "COMMHUB_00271_U_M_CommHub_ProfiloUtente_DOL_Altro",
+        "w": 393,
+        "h": 1034.00341796875
+      },
+      {
+        "id": "24268:259314",
+        "name": "COMMHUB_00641_U_M_CommHub_ProfiloUtente_DOL_Altro",
+        "w": 393,
+        "h": 1034.00341796875
+      },
+      {
+        "id": "24268:259348",
+        "name": "COMMHUB_00642_U_M_CommHub_ProfiloUtente_DOL_Altro",
+        "w": 393,
+        "h": 1034.00341796875
+      },
+      {
+        "id": "24268:259382",
+        "name": "COMMHUB_00416_U_M_CommHub_ProfiloUtente_DOL_Altro_Risparmio",
+        "w": 393,
+        "h": 1144.00341796875
+      },
+      {
+        "id": "24268:259405",
+        "name": "COMMHUB_00518_U_M_CommHub_ProfiloUtente_DOL_Altro_Investimenti",
+        "w": 393,
+        "h": 1084.00341796875
+      },
+      {
+        "id": "24268:259427",
+        "name": "COMMHUB_00519_U_M_CommHub_ProfiloUtente_DOL_Altro_Consulenza",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:259448",
+        "name": "COMMHUB_00272_U_M_CommHub_ProfiloUtente_DOL_Altro_Risparmio",
+        "w": 393,
+        "h": 1152.00341796875
+      },
+      {
+        "id": "24268:259472",
+        "name": "COMMHUB_00272_U_M_CommHub_ProfiloUtente_DOL_Altro_Risparmio",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:259494",
+        "name": "COMMHUB_00470_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step10",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:259534",
+        "name": "COMMHUB_00294_U_M_CommHub_ProfiloUtente_DOL_In primo piano",
+        "w": 393,
+        "h": 1310.00341796875
+      },
+      {
+        "id": "24268:259563",
+        "name": "COMMHUB_00295_U_M_CommHub_ProfiloUtente_DOL_In primo piano_Segna come letti_Step1",
+        "w": 393,
+        "h": 1479.00341796875
+      },
+      {
+        "id": "24268:259595",
+        "name": "COMMHUB_00296_U_M_CommHub_ProfiloUtente_DOL_In primo piano_Segna come letti_Step2",
+        "w": 393,
+        "h": 1310.00341796875
+      }
+    ]
+  },
+  {
+    "id": "24268:261669",
+    "name": "Comunicazioni e Pratiche",
+    "frames": [
+      {
+        "id": "24268:261670",
+        "name": "COMMHUB_00398_U_M_CommHub_ProfiloUtente_Notifiche",
+        "w": 393,
+        "h": 984.0033569335938
+      },
+      {
+        "id": "24268:261689",
+        "name": "COMMHUB_00401_U_M_CommHub_ProfiloUtente_Notifiche_Dettaglio",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:261700",
+        "name": "COMMHUB_00400_U_M_CommHub_ProfiloUtente_Notifiche_Filtri_Step2",
+        "w": 393,
+        "h": 1068
+      },
+      {
+        "id": "24268:261720",
+        "name": "COMMHUB_00406_U_M_CommHub_ProfiloUtente_Pratiche_Incomplete",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:261733",
+        "name": "COMMHUB_00409_U_M_CommHub_ProfiloUtente_Pratiche_Incomplete_Dettaglio",
+        "w": 393,
+        "h": 918.0033569335938
+      },
+      {
+        "id": "24268:261751",
+        "name": "COMMHUB_00568_U_M_CommHub_ProfiloUtente_Pratiche_Intervista MIFID_Step2",
+        "w": 393,
+        "h": 874.0033569335938
+      },
+      {
+        "id": "24268:261767",
+        "name": "COMMHUB_00573_U_M_CommHub_ProfiloUtente_Pratiche_Intervista MIFID_Annullamento_Step1",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:261785",
+        "name": "COMMHUB_00570_U_M_CommHub_ProfiloUtente_Pratiche_Intervista MIFID_Step4",
+        "w": 393,
+        "h": 874.0033569335938
+      },
+      {
+        "id": "24268:261801",
+        "name": "COMMHUB_00407_U_M_CommHub_ProfiloUtente_Pratiche_In lavorazione",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:261813",
+        "name": "COMMHUB_00408_U_M_CommHub_ProfiloUtente_Pratiche_Chiuse",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:261828",
+        "name": "COMMHUB_00005_U_M_CommHub_ProfiloUtente_TabPratiche",
+        "w": 393,
+        "h": 2166
+      },
+      {
+        "id": "24268:261862",
+        "name": "COMMHUB_00399_U_M_CommHub_ProfiloUtente_Notifiche_Filtri_Step1",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:261902",
+        "name": "COMMHUB_00405_U_M_CommHub_ProfiloUtente_Messaggi_Dettaglio",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:261910",
+        "name": "COMMHUB_00402_U_M_CommHub_ProfiloUtente_Messaggi",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:261929",
+        "name": "COMMHUB_00404_U_M_CommHub_ProfiloUtente_Messaggi_Filtri_Step2",
+        "w": 393,
+        "h": 1052
+      },
+      {
+        "id": "24268:261949",
+        "name": "COMMHUB_00403_U_M_CommHub_ProfiloUtente_Messaggi_Filtri_Step1",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:261985",
+        "name": "COMMHUB_00410_U_M_CommHub_ProfiloUtente_Pratiche_Incomplete_Dettaglio",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:261998",
+        "name": "COMMHUB_00411_U_M_CommHub_ProfiloUtente_Pratiche_In lavorazione_Dettaglio",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:262011",
+        "name": "COMMHUB_00412_U_M_CommHub_ProfiloUtente_Pratiche_Informativa_Dettaglio",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:262022",
+        "name": "COMMHUB_00412_U_M_CommHub_ProfiloUtente_Pratiche_Informativa_Dettaglio",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:262046",
+        "name": "COMMHUB_00567_U_M_CommHub_ProfiloUtente_Pratiche_Intervista MIFID_Step1",
+        "w": 393,
+        "h": 2198
+      },
+      {
+        "id": "24268:262081",
+        "name": "COMMHUB_00569_U_M_CommHub_ProfiloUtente_Pratiche_Intervista MIFID_Step3",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:262094",
+        "name": "COMMHUB_00571_U_W_CommHub_ProfiloUtente_Pratiche_Intervista MIFID_Step5",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:262096",
+        "name": "COMMHUB_00572_U_M_CommHub_ProfiloUtente_Pratiche_Intervista MIFID_Step6",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:262098",
+        "name": "COMMHUB_00574_U_M_CommHub_ProfiloUtente_Pratiche_Intervista MIFID_Annullamento_Step2",
+        "w": 393,
+        "h": 852
+      }
+    ]
+  },
+  {
+    "id": "24268:257009",
+    "name": "Vista con flussi CFE | UCI",
+    "frames": [
+      {
+        "id": "24268:257011",
+        "name": "COMMHUB_00606_U_M_CommHub_ProfiloUtente_La tua banca_Il tuo consulente_CFE",
+        "w": 393,
+        "h": 852
+      },
+      {
+        "id": "24268:257026",
+        "name": "COMMHUB_00607_U_M_CommHub_ProfiloUtente_La tua banca_Il tuo consulente_CFE_Dettaglio",
+        "w": 393,
+        "h": 956
+      },
+      {
+        "id": "24268:257045",
+        "name": "COMMHUB_00608_U_M_CommHub_ProfiloUtente_La tua banca_Il tuo consulente_CFE_Chat",
+        "w": 393,
+        "h": 852
+      }
+    ]
+  }
+]

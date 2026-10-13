@@ -1,0 +1,36 @@
+{
+  "name": "cee-native-update-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "typecheck:production-config": "tsc --ignoreConfig --noEmit --target ES2023 --module ESNext --moduleResolution bundler --strict --skipLibCheck ../native-spike/hot-updater.production.config.ts",
+    "build": "tsc",
+    "schema:generate": "tsx scripts/generate-schema.ts",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "release:preflight": "tsx scripts/release-preflight.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1150.0",
+    "@aws-sdk/s3-request-presigner": "3.1150.0",
+    "@hot-updater/plugin-core": "1.0.1",
+    "@hot-updater/server": "1.0.1",
+    "@vercel/functions": "3.9.11",
+    "hono": "4.13.13",
+    "kysely": "0.29.6",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.9",
+    "@types/node": "24.10.1",
+    "@types/pg": "8.16.0",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "yaml": "2.9.1"
+  }
+}

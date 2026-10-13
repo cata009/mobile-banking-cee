@@ -16,13 +16,14 @@ import type { CountryId } from "@/app/state/demoTypes";
  * - sl: Slovenščina (Slovenia)
  * - cs: Čeština (Czech Republic)
  */
-export type AppLanguage = "en" | "ro" | "sr" | "hu" | "bs" | "sk" | "sl" | "cs";
+export type AppLanguage = "en" | "ro" | "sr" | "hu" | "bs" | "sk" | "sl" | "cs" | "it";
 
 /**
  * Local language mapping for each country
  * Each country has EN + its local language
  */
 export const LOCAL_LANGUAGE_BY_COUNTRY: Record<CountryId, AppLanguage> = {
+  IT: "it",
   RO: "ro", // România → Română
   RS: "sr", // Srbija → Srpski
   HU: "hu", // Magyarország → Magyar
@@ -69,6 +70,7 @@ export function getAvailableLanguages(country: CountryId): AppLanguage[] {
  */
 export function getLanguageDisplayName(language: AppLanguage): string {
   const displayNames: Record<AppLanguage, string> = {
+    it: "Italiano",
     en: "English",
     ro: "Română",
     sr: "Srpski",
@@ -96,6 +98,7 @@ export function getLanguageDisplayName(language: AppLanguage): string {
  */
 export function getLanguageFlag(language: AppLanguage): string {
   const flags: Record<AppLanguage, string> = {
+    it: "🇮🇹",
     en: "🇬🇧",
     ro: "🇷🇴",
     sr: "🇷🇸",

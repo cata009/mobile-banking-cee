@@ -1,0 +1,302 @@
+[
+  {
+    "path": "src/assets/mobile-first/it/investments/common/auction.svg",
+    "bytes": 745,
+    "sha256": "F1D5CCEBB29AE22C1AC54F2A7EA41A506FC74D8CA11C29E9DF56A91885375457",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"22\" height=\"22\" viewBox=\"0 0 22 22\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/back.svg",
+    "bytes": 512,
+    "sha256": "436DBBF1E57D65704847471CEDF863FCEFFF4589D98E8A4A18D5C8126DD48D97",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"40.0034\" height=\"40.0034\" viewBox=\"0 0 40.0034 40.0034\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/banner-close.svg",
+    "bytes": 487,
+    "sha256": "0D8D55D1D8A860436E5A53954A72BE73AE8C654F6FDA3160683621F2F8AF7409",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/bookmark.svg",
+    "bytes": 355,
+    "sha256": "F3202F2A127236D707F69496E34C0F9C9A94572C08CDC9C967300F2C82689409",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/catalog-accounts.svg",
+    "bytes": 1928,
+    "sha256": "BE4BD55649889160DB3BE7DB3D33BF92ABF1120E0A14E5FD747B0FB39E7FFA96",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/catalog-cards.svg",
+    "bytes": 917,
+    "sha256": "35FF51D54A91C01F80873016DB053DFB5F4FEA66FA74D714570D32B6B5AEA9BE",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"24\" height=\"21\" viewBox=\"0 0 24 21\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/catalog-insurance.svg",
+    "bytes": 714,
+    "sha256": "5440E10912FB75A26DCD2CBF1A2DECADC8D2BC065956B878FA05F26F5F4CD68D",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/catalog-investments.svg",
+    "bytes": 938,
+    "sha256": "A6390592CD623B3EAE765039A85A671F1B4BED59D56F914A54B82A26C5502247",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"24\" height=\"22.5\" viewBox=\"0 0 24 22.5\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/catalog-loans.svg",
+    "bytes": 1532,
+    "sha256": "63C35695E66B4A68BA31F87CD707640969788E2B9BFE9B3F4C0572DF4E844304",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"24\" height=\"15\" viewBox=\"0 0 24 15\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/catalog-mortgages.svg",
+    "bytes": 1064,
+    "sha256": "65F6D47A2036BEEAE79890EA218AB5054DB7A0774C67EECCC72EF3A8EDA24F22",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"21\" height=\"24\" viewBox=\"0 0 21 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/close.svg",
+    "bytes": 456,
+    "sha256": "55256E8AD8BF0B4C94C41CDFEC21853BA9B395983F68A04726BA23C28B7AE915",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"40\" height=\"40\" viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/consultant.svg",
+    "bytes": 2535,
+    "sha256": "DF72133B2CF02EF4ADFA11DD92733E1A762425156A9FAA6458255BA140918C35",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/help.svg",
+    "bytes": 1369,
+    "sha256": "E9F9C80A2651FAA71EFABF888DB54AB6CB493C9D100F152B2E864634C948EE88",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"40\" height=\"40\" viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/mifid.svg",
+    "bytes": 1388,
+    "sha256": "6FDB989DC4483FC5DC280E5B3B06A2A5F82968035BADDE60BDFBB5276770BB94",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"16\" height=\"22\" viewBox=\"0 0 16 22\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/orders.svg",
+    "bytes": 897,
+    "sha256": "31558BBCD6DCDC879DC9E0D9B0EF3862B475C5630F1208AB7319854E49D758F7",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/overview.svg",
+    "bytes": 1998,
+    "sha256": "6E3E25FCBA17A4C8433D6B78A4FC62A26443FDE0C14D2CD5C3699BC6911B9A59",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"22\" height=\"22\" viewBox=\"0 0 22 22\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/packages.svg",
+    "bytes": 553,
+    "sha256": "024001ADAF07E252EBF3C6BD8E8F1964DF795D421645C85F255AE4285D839455",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"20\" height=\"22\" viewBox=\"0 0 20 22\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/search.svg",
+    "bytes": 1083,
+    "sha256": "F5948498EAABBDA0E637C27E067302C957FD6A5FCFD7B55BEB0B072B01267AA7",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/common/warning.svg",
+    "bytes": 923,
+    "sha256": "8540AB8FBD5994B194E2E1EA4C3F15ED7C34858F4EA6A9F14D1C1D5C75E83738",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/education/focus.png",
+    "bytes": 81650,
+    "sha256": "77062916D2EBF8EA2A78E4E5410B6CA5863D4FCB79E2368D34A9DCD5D1642468",
+    "root": null
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/education/play.svg",
+    "bytes": 543,
+    "sha256": "BC1EE3995CC322B0AEDE2337643947CBD260CFB56F0EC971267BD0E4E28C87AC",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"40\" height=\"40\" viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/education/tutorial.png",
+    "bytes": 145344,
+    "sha256": "FE0B56AACF45F7E6B1D6606915FD782320F9F0AEE136132685001569656C279F",
+    "root": null
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/education/video-1.png",
+    "bytes": 32546,
+    "sha256": "43E352EC008D1BC535CFC0F701C5388918375C724C115C2C456CAE57D4CD927E",
+    "root": null
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/education/video-2.png",
+    "bytes": 52306,
+    "sha256": "646AE0FB6204966733BA76B9F17A2C27B89D4FE6FBD60BF7403E17B426AD5FAB",
+    "root": null
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/education/video-3.png",
+    "bytes": 42342,
+    "sha256": "17E2A2D08CABB286FAC5256FF1CDE607E65423C93805B44AD1405BEA762E811F",
+    "root": null
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/edge-imgEllipse1201.svg",
+    "bytes": 1261,
+    "sha256": "2316EFBE91ED1ABC10531678127A4ABDF0FE11210E698E3F947B6D31A811C63E",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"216.269\" height=\"177.441\" viewBox=\"0 0 216.269 177.441\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/edge-imgEllipse1202.svg",
+    "bytes": 886,
+    "sha256": "1810D58819D6E06A132CC62B27F478855EE5C8F08CF3FE94674553FFB7A2D36C",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"121.717\" height=\"225.183\" viewBox=\"0 0 121.717 225.183\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/edge-imgEllipse1203.svg",
+    "bytes": 523,
+    "sha256": "845B3C3FEEB32FFE5D70BEB8119956CF8CCC5ED95261E582D4D4069848603857",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"25.9094\" height=\"32.8699\" viewBox=\"0 0 25.9094 32.8699\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/edge-imgEllipse1204.svg",
+    "bytes": 523,
+    "sha256": "C76EEC7797187F8806BFA10E85D7CB8D43801C48D552FD019E07532AF45E074B",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"24.0505\" height=\"33.2187\" viewBox=\"0 0 24.0505 33.2187\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/edge-imgGroup632747.svg",
+    "bytes": 1969,
+    "sha256": "992E2205D0B372822D8C6731630811BDB85842DF8A40CE77426D85EF3FA6C366",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"237.001\" height=\"237.444\" viewBox=\"0 0 237.001 237.444\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/edge-imgIconsInvestimentiGrafico.svg",
+    "bytes": 1363,
+    "sha256": "09071E3C72D31211045D3810371867C29F5167ADF69BFCF066ED74DD3FEA8B4C",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/edge-imgIconsInvestimentiGrafico1.svg",
+    "bytes": 1175,
+    "sha256": "0740F20F2B1EDCDA50F1B0EF956978CC55F183ABB5D8D97D19F1E2414F902A9C",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/edge-imgNavigationAndActionInfoSmall.svg",
+    "bytes": 742,
+    "sha256": "7045D8347B226ABAC9883D1553621936532F13DCF9851D5BFD482C44E8DBF69A",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"14.4\" height=\"14.4\" viewBox=\"0 0 14.4 14.4\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/edge-imgNavigationAndActionInfoSmallK10.svg",
+    "bytes": 814,
+    "sha256": "034CCA5EC8FF9FAE62B77F55EC8654CF3CDD14B2DAE75C99FC4EA861F4D9D9DB",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"12\" height=\"12\" viewBox=\"0 0 12 12\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/product-1.png",
+    "bytes": 36570,
+    "sha256": "2000A672D9A7C48F0B16853125229420A986F1DF7D76B74B2D43158C7039E147",
+    "root": null
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/product-2.png",
+    "bytes": 191566,
+    "sha256": "EC4713CA587D0E55B04A3740E292A1AD4C9EA576E77EBA87278D24E59AB44AEE",
+    "root": null
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/product-3.png",
+    "bytes": 37505,
+    "sha256": "F5B489C102C80216ED72C3B5F52F0422A28B2C8B325A058C911A0DDD8B35153C",
+    "root": null
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/product-4.png",
+    "bytes": 36593,
+    "sha256": "938F037B2604BE15DB509EE58D712D31AB168E4073F8287E9A441B98C04F27D9",
+    "root": null
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/single-imgEllipse1201.svg",
+    "bytes": 545,
+    "sha256": "8E434003BB9E2E5675DBE3C97C07A29F6737707239C0CEE3D4799CAB6F0E29E1",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"238\" height=\"238\" viewBox=\"0 0 238 238\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/single-imgGroup632747.svg",
+    "bytes": 1972,
+    "sha256": "755BB1E6D6FC8604FC108BABA311B40C95E089D73E314C5412DDD2B3604B0653",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"237.001\" height=\"237.444\" viewBox=\"0 0 237.001 237.444\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/single-imgIconsInvestimentiGrafico.svg",
+    "bytes": 1363,
+    "sha256": "09071E3C72D31211045D3810371867C29F5167ADF69BFCF066ED74DD3FEA8B4C",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/single-imgIconsInvestimentiGrafico1.svg",
+    "bytes": 1175,
+    "sha256": "0740F20F2B1EDCDA50F1B0EF956978CC55F183ABB5D8D97D19F1E2414F902A9C",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/single-imgNavigationAndActionInfoSmall.svg",
+    "bytes": 742,
+    "sha256": "7045D8347B226ABAC9883D1553621936532F13DCF9851D5BFD482C44E8DBF69A",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"14.4\" height=\"14.4\" viewBox=\"0 0 14.4 14.4\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/overview/single-imgNavigationAndActionInfoSmallK10.svg",
+    "bytes": 814,
+    "sha256": "034CCA5EC8FF9FAE62B77F55EC8654CF3CDD14B2DAE75C99FC4EA861F4D9D9DB",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"12\" height=\"12\" viewBox=\"0 0 12 12\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/commercial/appointment.svg",
+    "bytes": 836,
+    "sha256": "4DEACCA4AFB01F9420C086D124925C5BE3CBF0BFDADEEFA9D976FC7D4BD2A6B9",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/commercial/brand-line.svg",
+    "bytes": 234,
+    "sha256": "777515EC82C4CD5FEBFB376550C9AB8832BBA9162C96345679D6AA7A887F5C74",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"32\" height=\"1\" viewBox=\"0 0 32 1\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/commercial/buddy.svg",
+    "bytes": 21924,
+    "sha256": "B9FF63879ABE0370470D824FE32390BE5BCBEA04994FEC3BE0BD1751F8EC666A",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"57\" height=\"26\" viewBox=\"0 0 57 26\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/commercial/deposit-detail.png",
+    "bytes": 419860,
+    "sha256": "23F716B40B7A06B53EE8F1DB027D13A8DB3BBCAC9A1DE75C824E0485B99B9434",
+    "root": null
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/commercial/deposit-list.png",
+    "bytes": 297330,
+    "sha256": "921B33560B2091FA667974F0FE9499E6608B02FA7ED208576BB09A79DF432515",
+    "root": null
+  },
+  {
+    "path": "src/assets/mobile-first/it/investments/commercial/unicredit.svg",
+    "bytes": 6068,
+    "sha256": "2B992F10F6EACB286863BC371547A2D1FB81DB61E7A9AB5FFA8C9D029A9D775B",
+    "root": "<svg preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"124.444\" height=\"24\" viewBox=\"0 0 124.444 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">"
+  }
+]

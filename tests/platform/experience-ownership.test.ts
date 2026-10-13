@@ -3,8 +3,14 @@ import { DEFAULT_DEMO_STATE } from '@/app/state/demoStore'
 import { isFeatureActive } from '@/app/state/featureResolver'
 import { EXPERIENCE_COMPOSITION_ADAPTERS, resolveExperienceComposition } from '@/experiences/composition'
 const COUNTRIES = ['RO', 'CZ', 'SK', 'HU', 'RS', 'BA', 'BA_BL', 'SI'] as const
-it('owns eight baseline, four future and three Kids executable composition adapters', () => {
-  expect(EXPERIENCE_COMPOSITION_ADAPTERS).toHaveLength(15)
+it('owns eight CEE baseline, four future, three Kids and one Italy Mobile First composition adapters', () => {
+  expect(EXPERIENCE_COMPOSITION_ADAPTERS).toHaveLength(16)
+  expect(
+    resolveExperienceComposition({ ...DEFAULT_DEMO_STATE, country: 'IT', designSystem: 'mobile-first' }),
+  ).toMatchObject({
+    home: 'pi-mobile-first',
+    manifest: { id: 'pi.it.mobile-first', designSystem: 'mobile-first' },
+  })
   for (const country of COUNTRIES)
     for (const release of ['release-current', 'release-v1', 'release-v2', 'release-v3', 'release-v4'] as const) {
       const composition = resolveExperienceComposition({ ...DEFAULT_DEMO_STATE, country, release })!

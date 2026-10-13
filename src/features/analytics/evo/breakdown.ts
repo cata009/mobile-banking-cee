@@ -1,4 +1,4 @@
-import type { ExpenseDonutSegment } from '@/app/components/analytics/ExpenseDonutChart'
+import type { ExpenseDonutSegment } from '@/features/analytics/chartTypes'
 import type { SpendingAnalyticsTransaction } from '@/data/spendingAnalytics'
 import { getPfmCategory } from '@/data/pfmCategories'
 import type { Product } from '@/data/products'

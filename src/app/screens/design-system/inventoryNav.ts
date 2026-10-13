@@ -37,6 +37,7 @@ export const moreCardLabels: Record<MoreCardType, string> = {
 };
 
 export const accountCardSamples = {
+  IT: { integer: "0", decimals: ",00", current: "0,00" },
   RO: { integer: "25.902", decimals: ",92", current: "23.902,92" },
   CZ: { integer: "126 958", decimals: ",31", current: "117 158,31" },
   SK: { integer: "5 206", decimals: ",80", current: "4 806,80" },

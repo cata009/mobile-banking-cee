@@ -1,0 +1,18 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="32" height="41" viewBox="0 0 32 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="_Key">
+<g id="_KeyContainer" filter="url(#filter0_d_0_331)">
+<rect width="32" height="40" rx="4.6" fill="white"/>
+</g>
+<path id="Shift Active" d="M11.6368 22.2934H7.00068C6.55924 22.2934 6.33461 21.7621 6.64196 21.4448L15.6412 12.152C15.8375 11.9493 16.1625 11.9493 16.3588 12.152L25.358 21.4448C25.6654 21.7621 25.4408 22.2934 24.9993 22.2934H20.3625V27.7997C20.3625 28.076 20.1388 28.3 19.8628 28.3H12.1366C11.8606 28.3 11.6368 28.076 11.6368 27.7997V22.2934Z" fill="black"/>
+</g>
+<defs>
+<filter id="filter0_d_0_331" x="0" y="0" width="32" height="41" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="1"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.3 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_331"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_331" result="shape"/>
+</filter>
+</defs>
+</svg>

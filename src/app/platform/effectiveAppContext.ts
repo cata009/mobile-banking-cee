@@ -4,6 +4,7 @@
  */
 
 import { getBaselineLedgerEntry } from "@/app/registry/baselineRegistry";
+import { isRouteEligibleForProductContext } from '@/app/navigation/routePolicy';
 import { resolveExperienceManifest } from '@/experiences/registry';
 import { getProjectPack } from "@/app/registry/projectPackRegistry";
 import { getReleaseBundle, getReleaseDiff, getReleasePromotionReadiness } from "@/app/registry/releaseRegistry";
@@ -63,6 +64,8 @@ function resolveVisibleScreens(state: DemoState): readonly ScreenId[] {
       screen.products.includes(state.product) &&
       screen.countries.includes(state.country) &&
       screen.designSystems.includes(state.designSystem) &&
+      (!(state.country === 'IT' || state.designSystem === 'mobile-first') ||
+        isRouteEligibleForProductContext(screen.runtimeScreen, state)) &&
       (!screen.releases || screen.releases.includes(state.release)) &&
       !["missing", "blocked", "legacy"].includes(screen.status)
     );

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { COUNTRIES, COUNTRY_META } from '@/app/registry/demoConfig'
+import { COUNTRY_META } from '@/app/registry/demoConfig'
 import {
   createSpendingAnalytics,
   createSpendingAnalyticsTimeline,
@@ -7,6 +7,9 @@ import {
 } from '@/data/spendingAnalytics'
 import { getAccountTransactions } from '@/data/accountDetails'
 import { mockProducts, type Currency, type Product } from '@/data/products'
+
+// Italy's homepage prototype does not include a statement or spending-analytics fixture.
+const COUNTRIES = ['RO', 'CZ', 'SK', 'HU', 'RS', 'BA', 'BA_BL', 'SI'] as const
 
 describe('spending analytics data', () => {
   it('provides two PFM-excluded pending reservations for the primary current-account profile in every country', () => {

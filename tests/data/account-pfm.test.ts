@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { COUNTRIES } from '@/app/registry/demoConfig'
 import { COUNTRY_META } from '@/app/registry/demoConfig'
 import {
   getAccountIdentity,
@@ -13,6 +12,9 @@ import {
   PFM_CATEGORY_GROUPS,
 } from '@/data/pfmCategories'
 import type { Currency } from '@/data/products'
+
+// Italy currently has a homepage prototype and no account-detail ledger.
+const COUNTRIES = ['RO', 'CZ', 'SK', 'HU', 'RS', 'BA', 'BA_BL', 'SI'] as const
 
 const EXPECTED_ACCOUNT_IDENTITIES = {
   RO: [

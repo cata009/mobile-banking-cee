@@ -1,3 +1,4 @@
+import { createAppointmentDraft as createDraft, isPastAppointment, canContinueBooking, validAppointmentEmail, completeFeedback } from '@/features/profile/evoAppointments';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import PageHeader from "@/app/components/PageHeader";
 import PrimaryButton from "@/app/components/PrimaryButton";
@@ -12,7 +13,6 @@ import advisorImage from "figma:asset/e693dd6eed452da6c4cda0e69dbdd3f45039c9f2.p
 import {
   APPOINTMENT_DETAIL_OPTIONS,
   APPOINTMENT_REASON_OPTIONS,
-  DEFAULT_CLIENT_EMAIL,
   addAppointmentDays,
   createAppointmentId,
   formatAppointmentDate,
@@ -410,32 +410,6 @@ function AppointmentMap({
   );
 }
 
-function createDraft(branchName: string, branchAddress: string): AppointmentDraft {
-  const initialDate = getInitialAppointmentDate();
-  return {
-    reasons: [],
-    details: [],
-    appointmentDate: initialDate,
-    meetingType: null,
-    branchName,
-    branchAddress,
-    selectedTime: "",
-    selectedSlotDate: initialDate,
-    notes: "",
-    email: DEFAULT_CLIENT_EMAIL,
-  };
-}
-
-function isPastAppointment(appointment: AppointmentRecord): boolean {
-  if (appointment.status === "cancelled" || appointment.status === "completed") return true;
-  const now = new Date();
-  const date = fromAppointmentDateKey(appointment.appointmentDate);
-  if (date.getTime() < new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()) return true;
-  if (toAppointmentDateKey(date) !== toAppointmentDateKey(now)) return false;
-  const [hours = 0, minutes = 0] = appointment.selectedTime.split(":").map(Number);
-  return hours * 60 + minutes < now.getHours() * 60 + now.getMinutes();
-}
-
 function getPreviousSelectableAppointmentDate(dateKey: string): string | null {
   const todayKey = toAppointmentDateKey(new Date());
   let date = addAppointmentDays(fromAppointmentDateKey(dateKey), -1);
@@ -644,8 +618,7 @@ export default function AppointmentScreen({ country, onBack }: AppointmentScreen
   if (view === "booking") {
     const reasonsLabel = draft.reasons.join(", ");
     const detailsLabel = draft.details.join(", ");
-    const canContinue = draft.reasons.length > 0 && draft.meetingType !== null && draft.appointmentDate !== ""
-      && (draft.meetingType !== "branch" || (draft.branchName.trim() !== "" && draft.branchAddress.trim() !== ""));
+    const canContinue = canContinueBooking(draft);
 
     return (
       <AppointmentPage
@@ -899,7 +872,7 @@ export default function AppointmentScreen({ country, onBack }: AppointmentScreen
   }
 
   if (view === "review") {
-    const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email.trim());
+    const validEmail = validAppointmentEmail(draft.email);
     return (
       <AppointmentPage
         title={text("reviewTitle", "Appointment review")}
@@ -976,7 +949,7 @@ export default function AppointmentScreen({ country, onBack }: AppointmentScreen
 
   if (view === "list") {
     const activeAppointments = sortAppointments(appointments.filter((appointment) => !isPastAppointment(appointment)));
-    const pastAppointments = sortAppointments(appointments.filter(isPastAppointment)).reverse();
+    const pastAppointments = sortAppointments(appointments.filter((appointment) => isPastAppointment(appointment))).reverse();
     const visibleAppointments = activeTab === "active" ? activeAppointments : pastAppointments;
     return (
       <AppointmentPage
@@ -1098,8 +1071,7 @@ export default function AppointmentScreen({ country, onBack }: AppointmentScreen
 
   if (view === "feedback" && selectedAppointment) {
     const isLowRating = feedbackRating === 1 || feedbackRating === 2;
-    const feedbackComplete = feedbackRating > 0
-      && (!isLowRating || (feedbackReason !== "" && (feedbackReason !== "organizedMeeting" || feedbackReasonDetail !== "")));
+    const feedbackComplete = completeFeedback(feedbackRating,feedbackReason,feedbackReasonDetail);
     const mainReasons: Array<{ id: FeedbackIssue; label: string }> = [
       { id: "organizedMeeting", label: text("feedbackIssueMeeting", "There was a problem related with the organized meeting") },
       { id: "advisor", label: text("feedbackIssueAdvisor", "There was a problem with the advisor") },

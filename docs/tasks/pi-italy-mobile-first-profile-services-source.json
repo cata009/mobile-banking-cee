@@ -1,0 +1,902 @@
+[
+  {
+    "id": "24268:256128",
+    "name": "COMMHUB_00238_U_M_CommHub_ProfiloUtente_Ubook_Step6",
+    "text": "Fissa un appuntamento in Filiale|Filiale selezionata|Zanè| V.le Rossi, 125, Milano |Seleziona la categoria dell’appuntamento|Conto, Carte e Servizi digitali|Seleziona lo scopo dell’appuntamento|Informazioni / apertura|Seleziona il giorno e l’orario|gg/mm/aaa - 00:00|Altre filiali|Se non trovi un orario soddisfacente prova a consultare la disponibilità di una delle filiali limitrofe|Thiene Chilesotti|Prima disponibilità: Sab 23 Ottobre, 11.45|80 m|Thiene S.Gaetano|5 Km|12 Km|Sarcedo|16 Km|Breganze|20 Km|mostra altre filiali|Campo note|Note|*informazione obbligatoria|MODIFICA|Lorem ipsum dolor sit amet consectetur. Suspendisse fringilla orci scelerisque eu aenean praesent maecenas diam. Porttitor ut vitae elementum aenean molestie ac amet sed urna feugiat odio.|Continua"
+  },
+  {
+    "id": "24268:256160",
+    "name": "COMMHUB_00239_U_M_CommHub_ProfiloUtente_Ubook_Step7",
+    "text": "Fissa un appuntamento in Filiale|Filiale selezionata|Milano Certosa, V.le Certosa, 125, Milano  |Label|Conto, Carte e Servizi digitali|Informazioni / apertura|19/02/2000|gg/mm/aaaa|Campo note|Inserisci o modifica nota|Continua|Seleziona il giorno e l’orario|Data|MER 5/03|GIO 6/03|VEN 7/03|SAB 8/03|DOM 9/03|LUN 10/03|Ora|11:30|11:50|12:10|11:35|11:55|12:15|11:40|12:00|12:20|11:45|12:05|12:25|Conferma"
+  },
+  {
+    "id": "24268:256192",
+    "name": "COMMHUB_00241_U_M_CommHub_ProfiloUtente_Ubook_Step9",
+    "text": "Fissa un appuntamento in Filiale|Filiale selezionata|Milano Certosa, V.le Certosa, 125, Milano  |Label|Conto, Carte e Servizi digitali|Informazioni / apertura|19/02/2000|gg/mm/aaaa|Campo note|Inserisci o modifica nota|Continua|Seleziona il giorno e l’orario|Data|MER 5/03|GIO 6/03|VEN 7/03|SAB 8/03|DOM 9/03|LUN 10/03|Ora|11:30|11:50|12:10|11:35|11:55|12:15|11:40|12:00|12:20|11:45|12:05|12:25|Conferma"
+  },
+  {
+    "id": "24268:256225",
+    "name": "COMMHUB_00233_U_M_CommHub_ProfiloUtente_Ubook_Step2",
+    "text": "Fissa un appuntamento in Filiale|Filiale selezionata|Milano Certosa| V.le Certosa, 125, Milano |Seleziona la categoria dell’appuntamento|Categoria|Continua"
+  },
+  {
+    "id": "24268:256238",
+    "name": "COMMHUB_00234_U_M_CommHub_ProfiloUtente_Ubook_Step3",
+    "text": "Fissa un appuntamento in Filiale|Filiale selezionata|Milano Certosa, V.le Certosa, 125, Milano  |Label|Categoria|Continua|Categoria dell’appuntamento|Conto, Carte e Servizi digitali|Prodotti assicurativi|Investimenti|Prestiti e finanziamenti|Mutui casa|Cassette di sicurezza|Successione|Altre operazioni|Conferma"
+  },
+  {
+    "id": "24268:256267",
+    "name": "COMMHUB_00235_U_M_CommHub_ProfiloUtente_Ubook_Step4",
+    "text": "Fissa un appuntamento in Filiale|Filiale selezionata|Milano Certosa| V.le Certosa, 125, Milano |Seleziona la categoria dell’appuntamento|Conto, Carte e Servizi digitali|Seleziona lo scopo dell’appuntamento|Scopo appuntamento|Continua"
+  },
+  {
+    "id": "24268:256281",
+    "name": "COMMHUB_00236_U_M_CommHub_ProfiloUtente_Ubook_Step5",
+    "text": "Fissa un appuntamento in Filiale|Filiale selezionata|Milano Certosa, V.le Certosa, 125, Milano  |Label|Categoria|Continua|Scopo dell’appuntamento|Conto Genius Card|Informazioni / apertura|Gestione / chiusura|Altro|Carta debito / prepagata|Carta di credito / Linea premium|Servizi Digitali|Conferma"
+  },
+  {
+    "id": "24268:256335",
+    "name": "COMMHUB_00237_U_M_CommHub_ProfiloUtente_Ubook_Step6",
+    "text": "Fissa un appuntamento in Filiale|Filiale selezionata|Milano Certosa| V.le Certosa, 125, Milano |Seleziona la categoria dell’appuntamento|Conto, Carte e Servizi digitali|Seleziona lo scopo dell’appuntamento|Informazioni / apertura|Filiale non disponibile|La filiale prescelta non ha disponibilità nei prossimi giorni per questo tipo di operazioni, te ne proponiamo di seguito altre disponibili. In alternativa ti invitiamo a contattare il servizio cliente|Altre filiali|Se non trovi un orario soddisfacente prova a consultare la disponibilità di una delle filiali limitrofe|Thiene Chilesotti|Prima disponibilità: Sab 23 Ottobre, 11.45|80 m|Thiene S.Gaetano|5 Km|Zanè|12 Km|Sarcedo|16 Km|Breganze|20 Km|mostra altre filiali|Campo note|Note|*informazione obbligatoria|MODIFICA|Lorem ipsum dolor sit amet consectetur. Suspendisse fringilla orci scelerisque eu aenean praesent maecenas diam. Porttitor ut vitae elementum aenean molestie ac amet sed urna feugiat odio.|Continua"
+  },
+  {
+    "id": "24268:256370",
+    "name": "COMMHUB_00240_U_M_CommHub_ProfiloUtente_Ubook_Step8",
+    "text": "Fissa un appuntamento in Filiale|Filiale selezionata|Zanè| V.le Rossi, 125, Milano |Seleziona la categoria dell’appuntamento|Conto, Carte e Servizi digitali|Seleziona lo scopo dell’appuntamento|Informazioni / apertura|Seleziona il giorno e l’orario|gg/mm/aaa - 00:00|Altre filiali|Se non trovi un orario soddisfacente prova a consultare la disponibilità di una delle filiali limitrofe|Thiene Chilesotti|Prima disponibilità: Sab 23 Ottobre, 11.45|80 m|Thiene S.Gaetano|5 Km|12 Km|Sarcedo|16 Km|Breganze|20 Km|mostra altre filiali|Campo note|Note|*informazione obbligatoria|MODIFICA|Continua"
+  },
+  {
+    "id": "24268:256403",
+    "name": "COMMHUB_00242_U_M_CommHub_ProfiloUtente_Ubook_Step10",
+    "text": "Fissa un appuntamento in Filiale|Filiale selezionata|Zanè| V.le Rossi, 125, Milano |Seleziona la categoria dell’appuntamento|Altro|Seleziona lo scopo dell’appuntamento|Seleziona il giorno e l’orario|06/03/2025 - 12:00|Altre filiali|Se non trovi un orario soddisfacente prova a consultare la disponibilità di una delle filiali limitrofe|Milano Certosa|Prima disponibilità: Sab 23 Ottobre, 11.45|80 m|Thiene S.Gaetano|5 Km|12 Km|Sarcedo|16 Km|Breganze|20 Km|mostra altre filiali|Campo note|Note|*informazione obbligatoria|MODIFICA|Continua"
+  },
+  {
+    "id": "24268:256435",
+    "name": "COMMHUB_00243_U_M_CommHub_ProfiloUtente_Ubook_Step11",
+    "text": "Fissa un appuntamento in Filiale|Filiale selezionata|Zanè| V.le Rossi, 125, Milano |Seleziona la categoria dell’appuntamento|Altro|Seleziona lo scopo dell’appuntamento|Seleziona il giorno e l’orario|06/03/2025 - 12:00|Altre filiali|Se non trovi un orario soddisfacente prova a consultare la disponibilità di una delle filiali limitrofe|Milano Certosa|Prima disponibilità: Sab 23 Ottobre, 11.45|80 m|Thiene S.Gaetano|5 Km|12 Km|Sarcedo|16 Km|Breganze|20 Km|mostra altre filiali|Campo note|Note|*informazione obbligatoria|MODIFICA|Dati mancanti|Per la categoria selezionata, il campo ‘Note’ è obbligatorio per procedere con la richiesta|Continua"
+  },
+  {
+    "id": "24268:256468",
+    "name": "COMMHUB_00626_U_M_CommHub_ProfiloUtente_Ubook_Step14",
+    "text": "Fissa un appuntamento in Filiale|Filiale selezionata|Zanè| V.le Rossi, 125, Milano |Seleziona la categoria dell’appuntamento|Altro|Seleziona lo scopo dell’appuntamento|Seleziona il giorno e l’orario|06/03/2025 - 12:00|Altre filiali|Se non trovi un orario soddisfacente prova a consultare la disponibilità di una delle filiali limitrofe|Milano Certosa|Prima disponibilità: Sab 23 Ottobre, 11.45|80 m|Thiene S.Gaetano|5 Km|12 Km|Sarcedo|16 Km|Breganze|20 Km|mostra altre filiali|Campo note|Note|Imposta di bollo su prodotti finanziari|*informazione obbligatoria|MODIFICA|Continua"
+  },
+  {
+    "id": "24268:256501",
+    "name": "COMMHUB_00244_U_M_CommHub_ProfiloUtente_Ubook_Step15",
+    "text": "L’appuntamento è stato confermato|Riceverai anche una email all’indirizzo indicato.\nConservala e mostrala in filiale in caso di necessità|Filiale|Zanè|Indirizzo| V.le Rossi, 125, Milano |Data e ora|06/03/2025 - 12:00|Scopo dell’appuntamento|Altro|Indirizzo email|andrea.rossini @gmail.com|Note|Imposta di bollo su prodotti finanziari|Cognome e nome|Andrea Rossini|Condividi|Chiudi"
+  },
+  {
+    "id": "24268:256503",
+    "name": "COMMHUB_00232_U_M_CommHub_ProfiloUtente_Ubook_Step1",
+    "text": "Fissa un appuntamento in Filiale|Seleziona la filiale|Seleziona filiale|Seleziona la categoria dell’appuntamento|Categoria|Continua"
+  },
+  {
+    "id": "24268:256512",
+    "name": "COMMHUB_00244_U_M_CommHub_ProfiloUtente_Ubook_Step12",
+    "text": "Note|Scrivi qui una nota...|Massimo 150 caratteri|Go|space|123| |M|N|B|V|C|X|Z|L|K|J|H|G|F|D|S|A|P|O|I|U|Y|T|R|E|W|Q"
+  },
+  {
+    "id": "24268:256519",
+    "name": "COMMHUB_00243_U_M_CommHub_ProfiloUtente_Ubook_Step13",
+    "text": "Note|Imposta di bollo su prodotti finanziari|Massimo 150 caratteri|Conferma"
+  },
+  {
+    "id": "24268:256555",
+    "name": "COMMHUB_00257_U_M_CommHub_ProfiloUtente_La tua banca",
+    "text": "La tua filiale|Milano Garibaldi|Piazza Gae Aulenti 1, \n2124, Milano (MI)|Fissa un \nappuntamento|Chiama la \nfiliale|Scrivi una \nemail|Informazioni|Orari filiale|Lunedì: 08:20-13:20, 14:30-16|Martedì: 08:20-13:20, 14:30-16|Mercoledì: 08:20-13:20, 14:30-16|Giovedì: 08:20-13:20, 14:30-16|Venerdì: 08:20-13:20, 14:30-15:45|Sabato: Chiuso|Domenica: Chiuso|Recapiti filiale|Indirizzo|Piazza Gae Aulenti 1|Direttore|Michele Rossi|Numero di filiale|02 12344567789|Fax|Intestazione rapporti bancari|Intestazioni|Alessandro dell’Acqua|Rapporto|000000012345678|Rossi Anna"
+  },
+  {
+    "id": "24268:256610",
+    "name": "COMMHUB_00646_U_M_CommHub_ProfiloUtente_La tua banca_la tua filiale_Private",
+    "text": "La tua filiale|Milano Garibaldi|Piazza Gae Aulenti 1, \n2124, Milano (MI)|Fissa un \nappuntamento|Chiama la \nfiliale|Scrivi una \nemail|Informazioni|Orari filiale|Lunedì: 08:20-13:20, 14:30-16|Martedì: 08:20-13:20, 14:30-16|Mercoledì: 08:20-13:20, 14:30-16|Giovedì: 08:20-13:20, 14:30-16|Venerdì: 08:20-13:20, 14:30-15:45|Sabato: Chiuso|Domenica: Chiuso|Recapiti filiale|Indirizzo|Piazza Gae Aulenti 1|Private Banker|Mario Bianchi|Numero di filiale|02 12344567789|Fax|Intestazione rapporti bancari|Intestazioni|Alessandro dell’Acqua|Rapporto|000000012345678|Rossi Anna"
+  },
+  {
+    "id": "24268:256665",
+    "name": "COMMHUB_00258_U_M_CommHub_ProfiloUtente_La tua banca_Seleziona filiale",
+    "text": "La tua filiale|Milano Garibaldi|Piazza Gae Aulenti 1, \n2124, Milano (MI)|Fissa un \nappuntamento|Chiama la \nfiliale|Scrivi una \nemail|Informazioni|Orari filiale|Lunedì: 08:20-13:20, 14:30-16|Martedì: 08:20-13:20, 14:30-16|Mercoledì: 08:20-13:20, 14:30-16|Giovedì: 08:20-13:20, 14:30-16|Venerdì: 08:20-13:20, 14:30-15:45|Sabato: Chiuso|Domenica: Chiuso|Recapiti filiale|Indirizzo|Piazza Gae Aulenti 1|Direttore|Michele Rossi|Numero di filiale|02 12344567789|Fax|Intestazione rapporti bancari|Intestazioni|Alessandro dell’Acqua|Rapporto|000000012345678|Rossi Anna|Seleziona filiale|Piazza Gae Aulenti 1, Milano|Giulio Cesare 4|Via Giulio Cesare 4, Milano|Milano Certosa|Via Milano Certosa 125, Milano"
+  },
+  {
+    "id": "24268:256733",
+    "name": "COMMHUB_00261_U_M_CommHub_ProfiloUtente_Consulente Remoto",
+    "text": "Il tuo consulente|MB|Mario Bianchi|Consulente|Chiama|Oppure vieni a trovarci in filiale|Milano Garibaldi|Piazza Gae Aulenti 1, \n2124, Milano (MI)|scopri orari e contatti|Giulio Cesare 4|Via Giulio Cesare 4, \n2124, Milano (MI)"
+  },
+  {
+    "id": "24268:256751",
+    "name": "COMMHUB_00246_U_M_CommHub_ProfiloUtente_La tua banca_la tua filiale",
+    "text": "La tua banca|Il tuo consulente|La tua filiale|Appuntamenti|Milano Garibaldi|Piazza Gae Aulenti 1, Milano|Giulio Cesare 4|Milano Certosa|Via Milano Certosa 125, Milano"
+  },
+  {
+    "id": "24268:256762",
+    "name": "COMMHUB_00247_U_M_CommHub_ProfiloUtente_La tua banca_la tua filiale",
+    "text": "La tua banca|Il tuo consulente|La tua filiale|Appuntamenti|Milano Garibaldi|Piazza Gae Aulenti 1, Milano|Giulio Cesare 4|Milano Certosa|Via Milano Certosa 125, Milano"
+  },
+  {
+    "id": "24268:256776",
+    "name": "COMMHUB_00248_U_M_CommHub_ProfiloUtente_La tua banca_Appuntamenti",
+    "text": "La tua banca|Il tuo consulente|La tua filiale|Appuntamenti|In questa sezione troverai l’elenco degli appuntamenti che hai preso con le relative informazioni. Nuovi appuntamenti o modifiche verranno aggiornate dopo circa 10 min.|28|MAR 25|Appuntamento in filiale|Da eseguire|Conto e Genius Card - Altro|VISUALIZZA|Appuntamenti conclusi ed annullati|14|Cancellato|Mutui Casa - Surroga - Informazioni /Richiesta"
+  },
+  {
+    "id": "24268:256796",
+    "name": "COMMHUB_00249_U_M_CommHub_ProfiloUtente_La tua banca_Appuntamenti_Ghost",
+    "text": "La tua banca|Il tuo consulente|La tua filiale|Appuntamenti|In questa sezione troverai l’elenco degli appuntamenti che hai preso con le relative informazioni. Nuovi appuntamenti o modifiche verranno aggiornate dopo circa 10 min.|Nessun appuntamento disponibile|fissa un appuntamento"
+  },
+  {
+    "id": "24268:256810",
+    "name": "COMMHUB_00259_U_M_CommHub_ProfiloUtente_La tua banca_Chiama filiale",
+    "text": "+02 95364462"
+  },
+  {
+    "id": "24268:256814",
+    "name": "COMMHUB_00260_U_M_CommHub_ProfiloUtente_La tua banca_Scrivi una mail",
+    "text": "andrea.ross@gmail.com|milano.garibaldi@unicredit.eu"
+  },
+  {
+    "id": "24268:256820",
+    "name": "COMMHUB_00263_U_M_CommHub_ProfiloUtente_Consulente Filiale",
+    "text": "Il tuo consulente|M|Mario Bianchi|Consulente|Chiama|Scrivi una email|Oppure vieni a trovarci in filiale|Milano Garibaldi|Piazza Gae Aulenti 1, \n2124, Milano (MI)|scopri orari e contatti|Giulio Cesare 4|Via Giulio Cesare 4, \n2124, Milano (MI)"
+  },
+  {
+    "id": "24268:256839",
+    "name": "COMMHUB_00644_U_M_CommHub_ProfiloUtente_La tua banca_Il tuo consulente_Private",
+    "text": "Il tuo consulente|M|Mario Bianchi|Private Banker|Chiama|Scrivi una email|Oppure vieni a trovarci in filiale|Milano Garibaldi|Piazza Gae Aulenti 1, \n2124, Milano (MI)|scopri orari e contatti|Giulio Cesare 4|Via Giulio Cesare 4, \n2124, Milano (MI)"
+  },
+  {
+    "id": "24268:256858",
+    "name": "COMMHUB_00264_U_M_CommHub_ProfiloUtente_Consulente Filiale_Chiama_Step1",
+    "text": "Il tuo consulente|M|Mario Bianchi|Consulente|Chiama|Scrivi una email|Oppure vieni a trovarci in filiale|Milano Garibaldi|Piazza Gae Aulenti 1, \n2124, Milano (MI)|scopri orari e contatti|Giulio Cesare 4|Via Giulio Cesare 4, \n2124, Milano (MI)|Chiama il tuo consulente|Seleziona il numero da contattare|Numero di cellulare|+39 34517850372|chiama|Numero di telefono|+02 4567878909"
+  },
+  {
+    "id": "24268:256892",
+    "name": "COMMHUB_00266_U_M_CommHub_ProfiloUtente_Consulente Filiale_Scrivi una email",
+    "text": "andrea.ross@gmail.com|mario.bianchi@unicredit.eu"
+  },
+  {
+    "id": "24268:256898",
+    "name": "COMMHUB_00262_U_M_CommHub_ProfiloUtente_Consulente Remoto_Chiama",
+    "text": "800575757"
+  },
+  {
+    "id": "24268:256902",
+    "name": "COMMHUB_00265_U_M_CommHub_ProfiloUtente_Consulente Filiale_Chiama_Step2",
+    "text": "+39 34517850372"
+  },
+  {
+    "id": "24268:256910",
+    "name": "COMMHUB_00250_U_M_CommHub_ProfiloUtente_La tua banca_Modifica appuntamento_Step1",
+    "text": "Appuntamento in filiale |Stato|Da eseguire|Filiale|Bologna Marconi, Via Marconi, 43|Data e ora|28/03/2025 - 11:30|Scopo dell’appuntamento |Conto e Genius Card - Altro|Riferimento|Enrico Laverenir|Se vuoi modificare o cancellare l'appuntamento, seleziona il tasto \"modifica o cancella\" entro le 24 ore precedenti, usa il codice ARN: SA-27125011 e PNR: d531cbaff3|Modifica o cancella"
+  },
+  {
+    "id": "24268:256925",
+    "name": "COMMHUB_00251_U_M_CommHub_ProfiloUtente_La tua banca_Modifica appuntamento_Step1",
+    "text": "Rimando a sito pubblico"
+  },
+  {
+    "id": "24268:256928",
+    "name": "COMMHUB_00543_U_M_CommHub_ProfiloUtente_La tua banca_Dettaglio_Cancellato",
+    "text": "Appuntamento in filiale |Stato|Cancellato|Filiale|Bologna Marconi, Via Marconi, 43|Data e ora|14/03/2025 - 11:30|Scopo dell’appuntamento |Mutui Casa - Surroga - Informazioni /Richiesta"
+  },
+  {
+    "id": "24268:256940",
+    "name": "COMMHUB_00544_U_M_CommHub_ProfiloUtente_La tua banca_Dettaglio_Da eseguire",
+    "text": "Appuntamento in filiale |Stato|Da eseguire|Filiale|Bologna Marconi, Via Marconi, 43|Data e ora|28/03/2025 - 11:30|Scopo dell’appuntamento |Conto e Genius Card - Altro|Riferimento|Enrico Laverenir|Se vuoi modificare o cancellare l'appuntamento, seleziona il tasto \"modifica o cancella\" entro le 24 ore precedenti, usa il codice ARN: SA-27125011 e PNR: d531cbaff3|Modifica o cancella"
+  },
+  {
+    "id": "24268:256958",
+    "name": "COMMHUB_00245_U_M_CommHub_ProfiloUtente_La tua banca_Il tuo consulente",
+    "text": "La tua banca|Il tuo consulente|La tua filiale|Appuntamenti|Mario Bianchi|Consulente"
+  },
+  {
+    "id": "24268:256972",
+    "name": "COMMHUB_00643_U_M_CommHub_ProfiloUtente_La tua banca_Il tuo consulente_Private",
+    "text": "La tua banca|Il tuo consulente|La tua filiale|Appuntamenti|Mario Bianchi|Private Banker"
+  },
+  {
+    "id": "24268:256992",
+    "name": "COMMHUB_00645_U_M_CommHub_ProfiloUtente_La tua banca_la tua filiale_Private",
+    "text": "La tua banca|Il tuo consulente|La tua filiale|Appuntamenti|Milano Garibaldi|Piazza Gae Aulenti 1, Milano|Giulio Cesare 4|Milano Certosa|Via Milano Certosa 125, Milano"
+  },
+  {
+    "id": "24268:261670",
+    "name": "COMMHUB_00398_U_M_CommHub_ProfiloUtente_Notifiche",
+    "text": "Notifiche|SEGNA COME LETTi|23|GEN 25|UniCredit|VISUALIZZA|Notifica pagamento|21|Accesso da Dispositivo secondario|Sicurezza|15|10|09|08|05"
+  },
+  {
+    "id": "24268:261689",
+    "name": "COMMHUB_00401_U_M_CommHub_ProfiloUtente_Notifiche_Dettaglio",
+    "text": "Notifiche|Richiesta autorizzazione|Transazione di 956 € a favore di Apple. |Data|23/01/2025|Categoria|Pagamenti"
+  },
+  {
+    "id": "24268:261700",
+    "name": "COMMHUB_00400_U_M_CommHub_ProfiloUtente_Notifiche_Filtri_Step2",
+    "text": "Risultati di ricerca|Filtri applicati:|Periodo:|31/07/2024 - 31/01/2025|Tag:|Sicurezza, Accesso|SEGNA COME LETTi|23|GEN 25|UniCredit|VISUALIZZA|Notifica pagamento|21|Accesso da Dispositivo secondario|Sicurezza|15|10|09|08|05"
+  },
+  {
+    "id": "24268:261720",
+    "name": "COMMHUB_00406_U_M_CommHub_ProfiloUtente_Pratiche_Incomplete",
+    "text": "Pratiche|Incomplete|In lavorazione|Chiuse|Consulenza|Incompleta|17/01/2025|VISUALIZZA|Scoperto facile|15/01/2025|La tua pratica non è presente?|Contatta il nostro servizio Clienti.|chatta con noi"
+  },
+  {
+    "id": "24268:261733",
+    "name": "COMMHUB_00409_U_M_CommHub_ProfiloUtente_Pratiche_Incomplete_Dettaglio",
+    "text": "Scoperto facile|Data pratica|17/05/2025|Stato pratica|Incompleta|Il contratto è stato firmato. Eventuali altre attività necessarie a completare la richiesta sono elencate in questa pagina. Dopo aver caricato la documentazione richiesta non effettuare altre operazionil La pratica rimarrà incompleta fino alla presa in carico da parte nostra.|Documenti da caricare|Busta paga|Per consentire la valutazione della richiesta è necessario fornire il seguente documento|CARICA|Documentazione facoltativa|Se si desidera è possibile procedere con l’annullamento della pratica|Annulla la pratica"
+  },
+  {
+    "id": "24268:261751",
+    "name": "COMMHUB_00568_U_M_CommHub_ProfiloUtente_Pratiche_Intervista MIFID_Step2",
+    "text": "Intervista MIFID|Per avere maggiori informazioni può contattare:|Nominativo|Giacomo Verdi|Filiale|Legnago|Telefono|02 95364457|Email|giacomo.verdi@unicredit.com|Documenti da visualizzare|Per cliccare su “Prosegui alla firma” è obbligatoria la presa visione della documentazione di seguito riportata e la verifica delle risposte fornite nell’esito intervista/e.|Intervista di adeguatezza|visualizza|Prosegui alla firma|Annulla intervista"
+  },
+  {
+    "id": "24268:261767",
+    "name": "COMMHUB_00573_U_M_CommHub_ProfiloUtente_Pratiche_Intervista MIFID_Annullamento_Step1",
+    "text": "Intervista MIFID|Per avere maggiori informazioni può contattare:|Nominativo|Giacomo Verdi|Filiale|Legnago|Telefono|02 95364457|Email|giacomo.verdi@unicredit.com|Documenti da visualizzare|Per cliccare su “Prosegui alla firma” è obbligatoria la presa visione della documentazione di seguito riportata e la verifica delle risposte fornite nell’esito intervista/e.|Intervista di adeguatezza|visualizza|Prosegui alla firma|Annulla intervista|Stai annullando la tua intervista MIFID|Cliccando su “Conferma” non confermerai la tua intervista e la stessa si intenderà non rilasciata.|Conferma|Annulla"
+  },
+  {
+    "id": "24268:261785",
+    "name": "COMMHUB_00570_U_M_CommHub_ProfiloUtente_Pratiche_Intervista MIFID_Step4",
+    "text": "Intervista MIFID|Per avere maggiori informazioni può contattare:|Nominativo|Giacomo Verdi|Filiale|Legnago|Telefono|02 95364457|Email|giacomo.verdi@unicredit.com|Documenti da visualizzare|Per cliccare su “Prosegui alla firma” è obbligatoria la presa visione della documentazione di seguito riportata e la verifica delle risposte fornite nell’esito intervista/e.|Intervista di adeguatezza|visualizza|Prosegui alla firma|Annulla intervista"
+  },
+  {
+    "id": "24268:261801",
+    "name": "COMMHUB_00407_U_M_CommHub_ProfiloUtente_Pratiche_In lavorazione",
+    "text": "Pratiche|Incomplete|In lavorazione|Chiuse|Pratica Easy Open|18/01/2025|visualizza"
+  },
+  {
+    "id": "24268:261813",
+    "name": "COMMHUB_00408_U_M_CommHub_ProfiloUtente_Pratiche_Chiuse",
+    "text": "Pratiche|Incomplete|In lavorazione|Chiuse|Pratica Easy Open|Rifiutata|10/01/2025|visualizza|Prestito CreditExpress Quick Motor|Completata|20/05/2025|UniCredit Flexia|Annullata|02/01/2025"
+  },
+  {
+    "id": "24268:261828",
+    "name": "COMMHUB_00005_U_M_CommHub_ProfiloUtente_TabPratiche",
+    "text": "Andrea Rossini|I tuoi dati|La tua banca|Supporto|Rubrica|Impostazioni|Mobile Token|Documenti|2|Comunicazioni e attività|Notifiche|3|Messaggi|Pratiche|Scoperto facile|Incompleta|17/01/2025|VISUALIZZA|Pratica Easy Open|In lavorazione|18/01/2025|visualizza|Prestito CreditExpress Quick Motor|Completata|20/05/2025|vedi tutte le pratiche|In evidenza|Il Mio Dono|La piattaforma UniCredit per la raccolta fondi, ideata per sostenere le Organizzazioni del Terzo Settore|Altro|Trova Filiali|My Apps|Iniziative e promo|Vantaggi per te|Casa|Partner|Servizi immobiliari|Scopri i numerosi servizi offerti per te dai nostri partner a prezzi dedicati.|Logout"
+  },
+  {
+    "id": "24268:261862",
+    "name": "COMMHUB_00399_U_M_CommHub_ProfiloUtente_Notifiche_Filtri_Step1",
+    "text": "Filtri di ricerca|Ricerca per Tag|Scrivi la parola chiave o il tag...|Sicurezza|Accesso|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|02/10/2024 - 02/01/2025|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:261902",
+    "name": "COMMHUB_00405_U_M_CommHub_ProfiloUtente_Messaggi_Dettaglio",
+    "text": "Messaggi|TP Più modalità di inserimento ordini tramite internet e mobile banking nella fase di collocamento|Durante la fase di collocamento, che si terrà dal 17 febbraio 2025 al 21 febbraio 2025 (fino alle ore 13) - salvo chiusura anticipata - i Clienti potranno inserire un ordine di acquisto, nell'ambiente protetto via internet* del servizio di online banking a cui il Conto Titoli sia collegato in modalità dispositiva,\ncon i seguenti parametri:\nIsin (in fase di sottoscrizione): IT0005634792 - BTP PIÙ RIMBORSO ANTICIPATO\nFase di negoziazione : CONTINUA\nTipo Prezzo: AL MEGLIO\nCondizione Quantità: \"SENZA CONDIZIONE\"\nTaglio minimo: 1000 euro\n*tramite App per smartphone e, per i clienti che ne abbiano l'accesso, tramite sito internet, msite e App per tablet|Data|23/01/2025|Categoria|Pagamenti"
+  },
+  {
+    "id": "24268:261910",
+    "name": "COMMHUB_00402_U_M_CommHub_ProfiloUtente_Messaggi",
+    "text": "Messaggi|SEGNA COME LETTi|23|GEN 25|Comunicazione|VISUALIZZA|TP Più modalità di inserimento ordini tramite internet e mobile banking nella fase di collocamento|19|Accesso di dispositivo secondario|14|Notizia|Caratteristiche principali del titolo 1/3|Caratteristiche principali del titolo 2/3|Caratteristiche principali del titolo 3/3|13|Informazioni importanti su bonifici per agevolazioni fiscali"
+  },
+  {
+    "id": "24268:261929",
+    "name": "COMMHUB_00404_U_M_CommHub_ProfiloUtente_Messaggi_Filtri_Step2",
+    "text": "Risultati di ricerca|Filtri applicati:|Periodo:|31/07/2024 - 31/01/2025|Tag:|Pagamento, Informazioni, Accesso|SEGNA COME LETTi|23|GEN 25|Notizia|VISUALIZZA|TP Più modalità di inserimento ordini tramite internet e mobile banking nella fase di collocamento|19|Comunicazione|Accesso di dispositivo secondario|14|Caratteristiche principali del titolo 1/3|Caratteristiche principali del titolo 2/3|Caratteristiche principali del titolo 3/3|13|Informazioni importanti su bonifici per agevolazioni fiscali."
+  },
+  {
+    "id": "24268:261949",
+    "name": "COMMHUB_00403_U_M_CommHub_ProfiloUtente_Messaggi_Filtri_Step1",
+    "text": "Filtri di ricerca|Ricerca per Tag|Scrivi la parola chiave o il tag...|Pagamento|Informazioni|Accesso|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|02/10/2024 - 02/01/2025|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:261985",
+    "name": "COMMHUB_00410_U_M_CommHub_ProfiloUtente_Pratiche_Incomplete_Dettaglio",
+    "text": "Consulenza |Data pratica|15/05/2025|Stato pratica|Incompleta|La tua richiesta è incompleta. Per procedere è necessario selezionare “Completa la pratica”.|Se si desidera è possibile procedere con l’annullamento della pratica|Completa la pratica|Annulla la pratica"
+  },
+  {
+    "id": "24268:261998",
+    "name": "COMMHUB_00411_U_M_CommHub_ProfiloUtente_Pratiche_In lavorazione_Dettaglio",
+    "text": "Pratica Easy Open|Data pratica|18/01/2025|Stato pratica|In lavorazione|La tua richiesta è in valutazione.|Se si desidera è possibile procedere con l’annullamento della pratica|Annulla pratica"
+  },
+  {
+    "id": "24268:262011",
+    "name": "COMMHUB_00412_U_M_CommHub_ProfiloUtente_Pratiche_Informativa_Dettaglio",
+    "text": "UniCredit Flexia|Data pratica|02/01/2025|Stato pratica|Annullata|La tua richiesta di carta di credito UniCreditCard con limite di utilizzo 3.000.000€ è stata annullata."
+  },
+  {
+    "id": "24268:262022",
+    "name": "COMMHUB_00412_U_M_CommHub_ProfiloUtente_Pratiche_Informativa_Dettaglio",
+    "text": "Prestito CreditExpress Quick Motor|Data pratica|20/05/2025|Stato pratica|Completata"
+  },
+  {
+    "id": "24268:262046",
+    "name": "COMMHUB_00567_U_M_CommHub_ProfiloUtente_Pratiche_Intervista MIFID_Step1",
+    "text": "Andrea Rossini|I tuoi dati|La tua banca|Supporto|Rubrica|Impostazioni|Mobile Token|Documenti|2|Comunicazioni e attività|Notifiche|3|Messaggi|Pratiche|Intervista MIFID|Incompleta|17/01/2025|VISUALIZZA|Pratica Easy Open|In lavorazione|18/01/2025|visualizza|Prestito CreditExpress Quick Motor|Completata|20/05/2025|vedi tutte le pratiche|In evidenza|Il Mio Dono|La piattaforma UniCredit per la raccolta fondi, ideata per sostenere le Organizzazioni del Terzo Settore|Scopri tutte le offerte dei nostri partner|Scopri i numerosi servizi offerti per te dai nostri partner a prezzi dedicati.|Altro|Trova Filiali|My Apps|Iniziative e promo|Vantaggi per te|Casa|Partner|Servizi immobiliari|Logout"
+  },
+  {
+    "id": "24268:262081",
+    "name": "COMMHUB_00569_U_M_CommHub_ProfiloUtente_Pratiche_Intervista MIFID_Step3",
+    "text": "Intervista di adeguatezza|FACSIMILE|visualizza documento pdf|Continua"
+  },
+  {
+    "id": "24268:262094",
+    "name": "COMMHUB_00571_U_W_CommHub_ProfiloUtente_Pratiche_Intervista MIFID_Step5",
+    "text": "Inserisci il tuo|Mobile Code|1|2|3|4|5|6|7|8|9|0|ho dimenticato il mobile code|Conferma"
+  },
+  {
+    "id": "24268:262096",
+    "name": "COMMHUB_00572_U_M_CommHub_ProfiloUtente_Pratiche_Intervista MIFID_Step6",
+    "text": "Aggiornamento intervista completato|L’intervista rilasciata è stata salvata nella sezione Documenti/Questionari nel tuo profilo personale.\n\nTi ricordiamo che potrai aggiornare la tua posizione in qualunque momento desideri contattando la tua filiale.|Gestione interviste MIFID|Chiudi"
+  },
+  {
+    "id": "24268:262098",
+    "name": "COMMHUB_00574_U_M_CommHub_ProfiloUtente_Pratiche_Intervista MIFID_Annullamento_Step2",
+    "text": "Intervista annullata correttamente|Ti ricordiamo che potrai aggiornare la tua posizione in qualunque momento desideri contattando la tua Filiale|Nuova intervista MIFID|Chiudi"
+  },
+  {
+    "id": "24268:257011",
+    "name": "COMMHUB_00606_U_M_CommHub_ProfiloUtente_La tua banca_Il tuo consulente_CFE",
+    "text": "La tua banca|Il tuo consulente|La tua filiale|Appuntamenti|Giulio Celentano|Consulente patrimoniale (per investimenti, mutui e prestiti)"
+  },
+  {
+    "id": "24268:257026",
+    "name": "COMMHUB_00607_U_M_CommHub_ProfiloUtente_La tua banca_Il tuo consulente_CFE_Dettaglio",
+    "text": "Il tuo consulente|Con il tuo consulente potrai avere consulenze...lorem ipsum dolor sit amet consectetur. Fermentum sit tellus.|GC|Giulio Celentano|Consulente patrimoniale|Oppure vieni a trovarci in filiale|Milano Garibaldi|Piazza Gae Aulenti 1, \n2124, Milano (MI)|scopri orari e contatti|Giulio Cesare 4|Via Giulio Cesare 4, \n2124, Milano (MI)"
+  },
+  {
+    "id": "24268:257045",
+    "name": "COMMHUB_00608_U_M_CommHub_ProfiloUtente_La tua banca_Il tuo consulente_CFE_Chat",
+    "text": "Oggi|Ciao Andrea! |Sono il tuo buddy advisor dedicato alle consulenze patrimoniali,\ndisponibile 24/7! Come posso esserti utile?|Francesco - 10:00|Ciao! Vorrei prenotare una consulenza per avere consigli su una corretta gestione patrimoniale.|Parla con il tuo advisor...|2000 caratteri rimanenti"
+  },
+  {
+    "id": "24268:254540",
+    "name": "COMMHUB_00554_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Conti_Articolo",
+    "text": "Gestione del conto|Conti|Info sulla gestione in self del mio conto corrente|Con l’app Mobile Banking puoi gestire il tuo conto in completa autonomia, senza dover andare in filiale. Puoi visualizzare il saldo aggiornato, controllare i movimenti in tempo reale e accedere a tutte le funzionalità legate a BANCOMAT Pay®.|Ad esempio, puoi sospendere temporaneamente il servizio, modificare i limiti di spesa giornalieri o mensili, oppure cambiare il conto preferito da usare per i pagamenti. Tutto questo è disponibile in pochi tocchi, direttamente dal tuo smartphone.\r\nL’app ti permette inoltre di avere una fotografia completa delle tue risorse (come conti, investimenti, saldo carte, ...) e dei tuoi impegni finanziari (come prestiti o mutui).|Lorem ipsum|Lorem ipsum dolor sit amet consectetur. Lacus ac sapien ante at. Commodo non elementum nec nibh aliquam. Diam urna mauris nunc non ut |Potrebbe interessarti anche|Visualizzazione saldo e movimenti|LEGGI ARTICOLO|Condivisione IBAN tramite “Info Conto”|Contatti utili|Servizio clienti 800.078.777 (dall’estero +39 045.80.64.686)|Chatta con noi|Chiama"
+  },
+  {
+    "id": "24268:254563",
+    "name": "COMMHUB_00558_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Conti_Articolo",
+    "text": "Gestione del conto|Conti|Info sulla gestione in self del mio conto corrente|Con l’app Mobile Banking puoi gestire il tuo conto in completa autonomia, senza dover andare in filiale. Puoi visualizzare il saldo aggiornato, controllare i movimenti in tempo reale e accedere a tutte le funzionalità legate a BANCOMAT Pay®.|Ad esempio, puoi sospendere temporaneamente il servizio, modificare i limiti di spesa giornalieri o mensili, oppure cambiare il conto preferito da usare per i pagamenti. Tutto questo è disponibile in pochi tocchi, direttamente dal tuo smartphone.\r\nL’app ti permette inoltre di avere una fotografia completa delle tue risorse (come conti, investimenti, saldo carte, ...) e dei tuoi impegni finanziari (come prestiti o mutui).|Lorem ipsum|Lorem ipsum dolor sit amet consectetur. Lacus ac sapien ante at. Commodo non elementum nec nibh aliquam. Diam urna mauris nunc non ut |Vai al Conto |Gestione conto|Ricerca movimenti|Contatti utili|Servizio clienti 800.078.777 (dall’estero +39 045.80.64.686)|Chatta con noi|Chiama"
+  },
+  {
+    "id": "24268:254586",
+    "name": "COMMHUB_00559_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Conti_Articolo",
+    "text": "Gestione del conto|Conti|Info sulla gestione in self del mio conto corrente|Con l’app Mobile Banking puoi gestire il tuo conto in completa autonomia, senza dover andare in filiale. Puoi visualizzare il saldo aggiornato, controllare i movimenti in tempo reale e accedere a tutte le funzionalità legate a BANCOMAT Pay®.|Ad esempio, puoi sospendere temporaneamente il servizio, modificare i limiti di spesa giornalieri o mensili, oppure cambiare il conto preferito da usare per i pagamenti. Tutto questo è disponibile in pochi tocchi, direttamente dal tuo smartphone.\r\nL’app ti permette inoltre di avere una fotografia completa delle tue risorse (come conti, investimenti, saldo carte, ...) e dei tuoi impegni finanziari (come prestiti o mutui).|Lorem ipsum|Lorem ipsum dolor sit amet consectetur. Lacus ac sapien ante at. Commodo non elementum nec nibh aliquam. Diam urna mauris nunc non ut |Vai al Conto |Gestione conto|Ricerca movimenti|Potrebbe interessarti anche|Visualizzazione saldo e movimenti|LEGGI ARTICOLO|Condivisione IBAN tramite “Info Conto”|Contatti utili|Servizio clienti 800.078.777 (dall’estero +39 045.80.64.686)|Chatta con noi|Chiama"
+  },
+  {
+    "id": "24268:254615",
+    "name": "COMMHUB_00225_U_M_CommHub_ProfiloUtente_Supporto",
+    "text": "Ciao Andrea,\ncome possiamo aiutarti?|Versione app 01.02|Azioni rapide|Problemi \nCarta|I tuoi codici|Documenti|Trova filiale\no ATM|FISSA un appuntamento|Argomenti suggeriti|Conti|Carte|Profilo|Sicurezza|Pagamenti|Mutui e Prestiti|Bilancio familiare|Investimenti|Protezione|Gestione del conto|Funzionalità per controllare, personalizzare e condividere le informazioni del tuo conto corrente e patrimonio direttamente dall’app.|Approfondisci|Il saldo nel dettaglio|Dettagli sui limiti di utilizzo, saldo contabile e disponibile e altre info utili sulla tua disponibilità di conto.|Aggregazione conti|Funzionalità per collegare conti di altre banche, visualizzare saldo e movimenti, e gestire consensi in modo sicuro.|vedi altro|Tutorial|Scopri tutto quello che c’è da sapere sull’app|Novità|Homepage|Area personale|Mutui e prestiti|Polizze assicurative|vedi tutti i tutorial|Guida|Guida al servizio di banca multicanale|Prospetto delle funzionalità - DOL|Chatta con noi|Chiama"
+  },
+  {
+    "id": "24268:254666",
+    "name": "COMMHUB_00557_U_M_CommHub_ProfiloUtente_Supporto",
+    "text": "Ciao Andrea,\ncome possiamo aiutarti?|Versione app 01.02|Azioni rapide|Problemi \nCarta|I tuoi codici|Documenti|Trova filiale\no ATM|FISSA un appuntamento|Argomenti suggeriti|Conti|Carte|Profilo|Sicurezza|Pagamenti|Mutui e Prestiti|Bilancio familiare|Investimenti|Protezione|Gestione del conto|Funzionalità per controllare, personalizzare e condividere le informazioni del tuo conto corrente e patrimonio direttamente dall’app.|Approfondisci|Il saldo nel dettaglio|Dettagli sui limiti di utilizzo, saldo contabile e disponibile e altre info utili sulla tua disponibilità di conto.|Aggregazione conti|Funzionalità per collegare conti di altre banche, visualizzare saldo e movimenti, e gestire consensi in modo sicuro.|vedi altro|Tutorial|Scopri tutto quello che c’è da sapere sull’app|Novità|Homepage|Area personale|Mutui e prestiti|Polizze assicurative|vedi tutti i tutorial|Guida|Guida al servizio di banca multicanale|Prospetto delle funzionalità - DOL|Chatta con noi|Chiama"
+  },
+  {
+    "id": "24268:254717",
+    "name": "COMMHUB_00226_U_M_CommHub_ProfiloUtente_Supporto_Chiama_Estero_Step1",
+    "text": "Ciao Andrea,\ncome possiamo aiutarti?|Versione app 01.02|Azioni rapide|Problemi \nCarta|I tuoi codici|Documenti|Trova filiale\no ATM|Argomenti suggeriti|Conti|Carte|Pagamenti|Investimenti|Profilo|Bilancio Familiare|Mutui e Prestiti|Prodotti|Altro|Come riproporre un pagamento|Figma ipsum component variant main layer.|Scopri di più|Conti presso altre banche|Dove trovare tutti i movimenti|vedi tutti gli argomenti|Tutorial|Scopri tutto quello che  c’è da sapere sull’app|Homepage|Area personale|Impostazioni|Bilancio\n familiare|Budget|Report|Patrimonio|Sicurezza|Polizze|Switch profilo|Guida|Guida al servizio di banca multicanale|Prospetto delle funzionalità - DOL|Canone Mensile|Chatta con noi|Chiama|fissa un appuntamento|Quale numero vuoi chiamare? |Numero gratuito dall’Italia|800 575 757|Numero a pagamento dall’estero|+39 02 33408973"
+  },
+  {
+    "id": "24268:254893",
+    "name": "COMMHUB_00226_U_M_CommHub_ProfiloUtente_Supporto_Chiama_Estero_Step1",
+    "text": "Ciao Andrea,\ncome possiamo aiutarti?|Versione app 01.02|Azioni rapide|Problemi \nCarta|I tuoi codici|Documenti|Trova filiale\no ATM|Argomenti suggeriti|Conti|Carte|Pagamenti|Investimenti|Profilo|Bilancio Familiare|Mutui e Prestiti|Prodotti|Altro|Come riproporre un pagamento|Figma ipsum component variant main layer.|Scopri di più|Conti presso altre banche|Dove trovare tutti i movimenti|vedi tutti gli argomenti|Tutorial|Scopri tutto quello che  c’è da sapere sull’app|Homepage|Area personale|Impostazioni|Bilancio\n familiare|Budget|Report|Patrimonio|Sicurezza|Polizze|Switch profilo|Guida|Guida al servizio di banca multicanale|Prospetto delle funzionalità - DOL|Canone Mensile|Chatta con noi|Chiama|fissa un appuntamento|Numero gratuito dall’Italia|800 575 757"
+  },
+  {
+    "id": "24268:255067",
+    "name": "COMMHUB_00226_U_M_CommHub_ProfiloUtente_Supporto_Chiama_Estero_Step1",
+    "text": "Ciao Andrea,\ncome possiamo aiutarti?|Versione app 01.02|Azioni rapide|Problemi \nCarta|I tuoi codici|Documenti|Trova filiale\no ATM|Argomenti suggeriti|Conti|Carte|Pagamenti|Investimenti|Profilo|Bilancio Familiare|Mutui e Prestiti|Prodotti|Altro|Come riproporre un pagamento|Figma ipsum component variant main layer.|Scopri di più|Conti presso altre banche|Dove trovare tutti i movimenti|vedi tutti gli argomenti|Tutorial|Scopri tutto quello che  c’è da sapere sull’app|Homepage|Area personale|Impostazioni|Bilancio\n familiare|Budget|Report|Patrimonio|Sicurezza|Polizze|Switch profilo|Guida|Guida al servizio di banca multicanale|Prospetto delle funzionalità - DOL|Canone Mensile|Chatta con noi|Chiama|fissa un appuntamento|Numero a pagamento dall’estero|+39 02 33408973"
+  },
+  {
+    "id": "24268:255265",
+    "name": "COMMHUB_00552_U_M_CommHub_ProfiloUtente_Supporto_Ambito_Conti",
+    "text": "Altri dettagli|Conti|Cerca...|Tutti gli argomenti|Gestione del conto|Funzionalità per controllare, personalizzare e condividere le informazioni del tuo conto corrente e patrimonio direttamente dall’app.|Approfondisci|Il saldo nel dettaglio|Dettagli sui limiti di utilizzo, saldo contabile e disponibile e altre info utili sulla tua disponibilità di conto.|Aggregazione conti|Funzionalità per collegare conti di altre banche, visualizzare saldo e movimenti, e gestire consensi in modo sicuro.|Altro sulle carte|Altre categorie|Carte|visualizza|Pagamenti|Mutui e\nPrestiti|Bilancio familiare|Profilo|Sicurezza|Documenti|Investimenti|Protezione"
+  },
+  {
+    "id": "24268:255301",
+    "name": "COMMHUB_00555_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Carte",
+    "text": "Altri dettagli|Carte|Cerca...|Tutti gli argomenti|Dettaglio movimenti|Tempi di contabilizzazione dei pagamenti, storni, addebiti e rifiuto pagamenti ricorrenti.|Approfondisci|Gestisci la tua carta|Come attivare una nuova carta, impostare e gestire piani rateali, cambiare la modalità, il giorno di addebito della rata o abilitarla ai pagamenti all'estero.|Problemi con la carta|Scopri cosa fare in caso di pagamenti sospetti, frodi, blocchi e sospensione temporanea, furto o smarrimento, sblocco.|MOSTRA ALTRI|Altro sulle carte|Altre categorie|Conti|visualizza|Pagamenti|Mutui e\nPrestiti|Bilancio familiare|Profilo|Sicurezza|Documenti|Investimenti|Protezione"
+  },
+  {
+    "id": "24268:255338",
+    "name": "COMMHUB_00556_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Carte",
+    "text": "Altri dettagli|Carte|Cerca...|Tutti gli argomenti|Dettaglio movimenti|Tempi di contabilizzazione dei pagamenti, storni, addebiti e rifiuto pagamenti ricorrenti.|Approfondisci|Gestisci la tua carta|Come attivare una nuova carta, impostare e gestire piani rateali, cambiare la modalità, il giorno di addebito della rata o abilitarla ai pagamenti all'estero.|Problemi con la carta|Scopri cosa fare in caso di pagamenti sospetti, frodi, blocchi e sospensione temporanea, furto o smarrimento, sblocco.|PIN e numero carta|Dove trovare il pin e cosa ti serve per visualizzarlo, il numero della carta (PAN) e il CVV per i pagamenti online, la data di scadenza.|Panoramica del rapporto|Qui hai una vista di dettaglio sulla tua carta, limiti operativi stato di attivazione, circuito e collegamento ai wallet digitali.|MOSTRA MENO|Altro sulle carte|Altre categorie|Conti|visualizza|Pagamenti|Mutui e\nPrestiti|Bilancio familiare|Profilo|Sicurezza|Documenti|Investimenti|Protezione"
+  },
+  {
+    "id": "24268:255377",
+    "name": "COMMHUB_00001_U_M_CommHub_ProfiloUtente",
+    "text": "Andrea Rossini|I tuoi dati|La tua banca|Supporto|Rubrica|Impostazioni|Mobile Token|Documenti|2|Comunicazioni e attività|Notifiche|3|Messaggi|Pratiche|23|GEN 25|Pagamenti|VISUALIZZA|Pagamenti con carta di debito|21|Sicurezza|Accesso da Dispositivo secondario|15|Errore Accesso Banca Multicanale|10|Accesso Banca Multicanale|vedi tutte le notifiche|In evidenza|Il Mio Dono|La piattaforma UniCredit per la raccolta fondi, ideata per sostenere le Organizzazioni del Terzo Settore|Altro|Trova Filiali|My Apps|Iniziative e promo|Vantaggi per te|Casa|Partner|Servizi immobiliari|Scopri i numerosi servizi offerti per te dai nostri partner a prezzi dedicati.|Logout"
+  },
+  {
+    "id": "24268:255441",
+    "name": "COMMHUB_00534_U_M_CommHub_ProfiloUtente_Help_Dettaglio",
+    "text": "Gestione conto|Puoi gestire in autonomia il tuo conto. Oltre alle informazioni sul conto stesso, puoi visualizzarne il saldo e potrai gestirne le funzionalità BANCOMAT Pay®, in particolare potrai sospenderne il servizio, modificarne i limiti di utilizzo e modificarne il conto di preferenza|Vai al Supporto"
+  },
+  {
+    "id": "24268:255451",
+    "name": "COMMHUB_00566_U_M_CommHub_ProfiloUtente_Help_Dettaglio",
+    "text": "Gestione conto|Puoi gestire in autonomia il tuo conto. Oltre alle informazioni sul conto stesso, puoi visualizzarne il saldo e potrai gestirne le funzionalità BANCOMAT Pay®, in particolare potrai sospenderne il servizio, modificarne i limiti di utilizzo e modificarne il conto di preferenza|guarda il tutorial conti|Vai al Supporto"
+  },
+  {
+    "id": "24268:255462",
+    "name": "COMMHUB_00542_U_M_CommHub_ProfiloUtente_Help_DettaglioUCX",
+    "text": "Titolo|Lorem ipsum dolor sit amet consectetur. Faucibus pellentesque bibendum faucibus purus. Placerat sit eu nulla erat quis bibendum. Morbi convallis ipsum interdum sed tellus quis integer auctor varius. Morbi odio sed parturient id duis venenatis. Libero justo sem sed dolor lorem nec tellus in. Tincidunt.|Chatta con noi|Chiama"
+  },
+  {
+    "id": "24268:255485",
+    "name": "COMMHUB_00156_U_M_CommHub_ProfiloUtente_Impostazioni_Operazioni veloci_Attivazione_Step3",
+    "text": "Attiva operazioni veloci|1|/4|Verifica dati|Indirizzo email|mic****ssi@email.it|MODIFICA|Verificato|Numero di cellulare|335****997|Operatore telefonico|Vodafone|Continua"
+  },
+  {
+    "id": "24268:255578",
+    "name": "COMMHUB_00196_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step2",
+    "text": "Sicurezza|PIN|MODIFICA|Mobile Code|GESTISCI|Screenshot|Disabilitato|Check up sicurezza|visualizza|Storico accessi|Firma digitale|Attiva|Creazione|Modifica|Conferma"
+  },
+  {
+    "id": "24268:255603",
+    "name": "COMMHUB_00195_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step1",
+    "text": "Sicurezza|PIN|MODIFICA|Mobile Code|GESTISCI|Screenshot|Disabilitato|Check up sicurezza|visualizza|Storico accessi|Firma digitale|Attiva"
+  },
+  {
+    "id": "24268:255617",
+    "name": "COMMHUB_00197_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step3",
+    "text": "Modifica il Mobile Code|Il mobile code è il codice che ti permette di generare password monouso con cui autorizzare le tua operazioni dall’App.|Inserisci attuale Mobile Code|Inserisci il tuo Mobile Code|Inserisci il nuovo Mobile Code|Conferma il nuovo Mobile Code|Reinserisci il nuovo Mobile Code|Il tuo nuovo Mobile Code deve:|Essere un numero di lunghezza compresa tra 6 e 10 cifre|Il tuo nuovo Mobile Code non deve:|Contenere numeri consecutivi (ad es: 12345678, 87654321)|Contenere lo stesso numero in sequenza più di 3 volte (es. 11113568, 462222)|Contenere la stessa sequenza di due o tre numeri più di due volte (es. 121212, 12125612, 1231231237)|Essere uguale al tuo codice di adesione, PIN o data di nascita|Essere uguale al Mobile Code precedente|Iniziare con il numero \"zero\"|Salva le modifiche"
+  },
+  {
+    "id": "24268:255646",
+    "name": "COMMHUB_00198_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step4",
+    "text": "Modifica il Mobile Code|Il mobile code è il codice che ti permette di generare password monouso con cui autorizzare le tua operazioni dall’App.|Inserisci attuale Mobile Code|12345678|Inserisci il nuovo Mobile Code|34567812|Conferma il nuovo Mobile Code|Il tuo nuovo Mobile Code deve:|Essere un numero di lunghezza compresa tra 6 e 10 cifre|Il tuo nuovo Mobile Code non deve:|Contenere numeri consecutivi (ad es: 12345678, 87654321)|Contenere lo stesso numero in sequenza più di 3 volte (es. 11113568, 462222)|Contenere la stessa sequenza di due o tre numeri più di due volte (es. 121212, 12125612, 1231231237)|Essere uguale al tuo codice di adesione, PIN o data di nascita|Essere uguale al Mobile Code precedente|Iniziare con il numero \"zero\"|Salva le modifiche"
+  },
+  {
+    "id": "24268:255673",
+    "name": "COMMHUB_00199_U_M_CommHub_ProfiloUtente_Impostazioni_Sicurezza_ModificaMobileCode_Step5",
+    "text": "Mobile Code modificato con successo!|Il tuo Mobile Code è stato modificato correttamente. Da ora potrai utilizzarlo per accedere e autorizzare le operazioni in sicurezza.\n\nSe non hai richiesto questa modifica o hai bisogno di assistenza, contatta il supporto clienti.|Chiudi"
+  },
+  {
+    "id": "24268:255675",
+    "name": "COMMHUB_00553_U_M_CommHub_ProfiloUtente_Supporto_Ambito_Conti_Argomenti_Gestione conto",
+    "text": "Altri dettagli|Gestione del conto|Funzionalità per controllare, personalizzare e condividere le informazioni del tuo conto corrente e patrimonio direttamente dall’app.|Cerca...|Altro sulle carte|Info sulla gestione in self del mio conto corrente|LEGGI ARTICOLO|Visualizzazione saldo e movimenti|Condivisione IBAN tramite “Info Conto”|mostra di più"
+  },
+  {
+    "id": "24268:255700",
+    "name": "COMMHUB_00552_U_M_CommHub_ProfiloUtente_Supporto_Ambito_Conti_Argomenti_Gestione conto_Ricerca",
+    "text": "Altri dettagli|Cosa stai cercando?|Cerca...|Altro sulle carte"
+  },
+  {
+    "id": "24268:255717",
+    "name": "COMMHUB_00564_U_M_CommHub_ProfiloUtente_Supporto_Ambito_Conti_Argomenti_Gestione conto_Ricerca",
+    "text": "Altri dettagli|Cosa stai cercando?|Lorem ipsum dolor sit amet consectetur. Porttitor at elit sagittis sit vitae lacinia morbi. Tempor eu convallis aenean justo. Mollis velit aenean nulla pharetra convallis tortor non egestas. Dapibus venenatis vitae natoque a tellus bibendum proin blandit. Ornare netus lobortis diam nibh vitae iaculis ultricies proin. Quis at quis et lobortis pellentesque nam faucibus diam nisl.|Altro sulle carte|Nessun risultato trovato"
+  },
+  {
+    "id": "24268:255735",
+    "name": "COMMHUB_00560_U_M_CommHub_ProfiloUtente_Supporto_Ambito_Conti_Argomenti_Gestione conto_Ricerca",
+    "text": "Altri dettagli|Cosa stai cercando?|Co|||Altro sulle carte|Q|W|E|R|T|Y|U|I|O|P|A|S|D|F|G|H|J|K|L|Z|X|C|V|B|N|M|123|space|return"
+  },
+  {
+    "id": "24268:255753",
+    "name": "COMMHUB_00561_U_M_CommHub_ProfiloUtente_Supporto_Ambito_Conti_Argomenti_Gestione conto_Ricerca",
+    "text": "Altri dettagli|Cosa stai cercando?|Con|Argomenti|Gestione del conto|Funzionalità per controllare, personalizzare e condividere le informazioni del tuo conto corrente e patrimonio direttamente dall’app.|Gestione e funzionalità della carta|Attivazione nuova carta, associazione con Wallet digitale, \"parental control\", utilizzi della carta all'estero, limiti di spesa e limiti operativi della carta legati al tuo conto.|Gestione notifiche, contatti e feedback|Personalizzazione notiche push legate al tuo conto e profilo, servizio di Ubook per appuntamenti e consulenze, come presentare un reclamo o valutare un'esperienza |mostra di più|Articoli|Info sulla gestione in self del mio conto corrente|Gestione del tuo conto titoli|Condivisione IBAN tramite “Info Conto”|Altro sulle carte"
+  },
+  {
+    "id": "24268:255785",
+    "name": "COMMHUB_00562_U_M_CommHub_ProfiloUtente_Supporto_Ambito_Conti_Argomenti_Gestione conto_Ricerca",
+    "text": "Altri dettagli|Cosa stai cercando?|Con|Argomenti|Gestione del conto|Funzionalità per controllare, personalizzare e condividere le informazioni del tuo conto corrente e patrimonio direttamente dall’app.|Gestione e funzionalità della carta|Attivazione nuova carta, associazione con Wallet digitale, \"parental control\", utilizzi della carta all'estero, limiti di spesa e limiti operativi della carta legati al tuo conto.|Gestione notifiche, contatti e feedback|Personalizzazione notiche push legate al tuo conto e profilo, servizio di Ubook per appuntamenti e consulenze, come presentare un reclamo o valutare un'esperienza |Aggregazione conti|Funzionalità per collegare conti di altre banche, visualizzare saldo e movimenti, e gestire consensi in modo sicuro.|mostra di più|Articoli|Info sulla gestione in self del mio conto corrente|Gestione del tuo conto titoli|Condivisione IBAN tramite “Info Conto”|Altro sulle carte"
+  },
+  {
+    "id": "24268:255827",
+    "name": "COMMHUB_00563_U_M_CommHub_ProfiloUtente_Supporto_Ambito_Conti_Argomenti_Gestione conto_Ricerca",
+    "text": "Altri dettagli|Cosa stai cercando?|Con|Argomenti|Gestione del conto|Funzionalità per controllare, personalizzare e condividere le informazioni del tuo conto corrente e patrimonio direttamente dall’app.|Gestione e funzionalità della carta|Attivazione nuova carta, associazione con Wallet digitale, \"parental control\", utilizzi della carta all'estero, limiti di spesa e limiti operativi della carta legati al tuo conto.|Gestione notifiche, contatti e feedback|Personalizzazione notiche push legate al tuo conto e profilo, servizio di Ubook per appuntamenti e consulenze, come presentare un reclamo o valutare un'esperienza |Aggregazione conti|Funzionalità per collegare conti di altre banche, visualizzare saldo e movimenti, e gestire consensi in modo sicuro.|mostra di meno|Articoli|Info sulla gestione in self del mio conto corrente|Gestione del tuo conto titoli|Condivisione IBAN tramite “Info Conto”|Altro sulle carte"
+  },
+  {
+    "id": "24268:255894",
+    "name": "COMMHUB_00577_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Conti_Articolo",
+    "text": "Lorem ipsum|Conti|Lorem Ipsum|Lorem ipsum dolor sit amet consectetur. Porta et pharetra arcu urna tortor imperdiet nulla nunc in. Vitae ipsum augue facilisis tortor amet. Ut in duis elementum nibh gravida nunc at suspendisse neque. Et a feugiat nunc risus id magna volutpat.|Lorem ipsum dolor sit amet consectetur. Justo dui sapien risus commodo nec. Non sit lectus tempus fermentum at congue. Phasellus ante aliquet dui convallis praesent quisque amet laoreet. Non ultrices est at dui nibh urna. Nulla sit nam ut facilisis facilisis aliquet. Nec eu vestibulum ut velit vulputate nibh quam vel praesent. Et senectus ultricies justo felis venenatis. Est et arcu erat tellus mollis quis sed turpis sit. Faucibus vulputate diam.|Lorem ipsum dolor sit amet consectetur. Lacus ac sapien ante at. Commodo non elementum nec nibh aliquam. Diam urna mauris nunc non ut |Potrebbe interessarti anche|Visualizzazione saldo e movimenti|LEGGI ARTICOLO|Condivisione IBAN tramite “Info Conto”|Contatti utili|Servizio clienti 800.078.777 (dall’estero +39 045.80.64.686)|Chatta con noi|Chiama"
+  },
+  {
+    "id": "24268:255917",
+    "name": "COMMHUB_00578_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Carte_Articolo",
+    "text": "Lorem Ipsum|Carte|Lorem ipsum dolor sit amet consectetur. Porta et pharetra arcu urna tortor imperdiet nulla nunc in. Vitae ipsum augue facilisis tortor amet. Ut in duis elementum nibh gravida nunc at suspendisse neque. Et a feugiat nunc risus id magna volutpat.|Lorem ipsum dolor sit amet consectetur. Justo dui sapien risus commodo nec. Non sit lectus tempus fermentum at congue. Phasellus ante aliquet dui convallis praesent quisque amet laoreet. Non ultrices est at dui nibh urna. Nulla sit nam ut facilisis facilisis aliquet. Nec eu vestibulum ut velit vulputate nibh quam vel praesent. Et senectus ultricies justo felis venenatis. Est et arcu erat tellus mollis quis sed turpis sit. Faucibus vulputate diam.|Lorem ipsum|Lorem ipsum dolor sit amet consectetur. Lacus ac sapien ante at. Commodo non elementum nec nibh aliquam. Diam urna mauris nunc non ut |Potrebbe interessarti anche|Visualizzazione saldo e movimenti|LEGGI ARTICOLO|Condivisione IBAN tramite “Info Conto”|Contatti utili|Servizio clienti 800.078.777 (dall’estero +39 045.80.64.686)|Chatta con noi|Chiama"
+  },
+  {
+    "id": "24268:255940",
+    "name": "COMMHUB_00579_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Pagamenti_Articolo",
+    "text": "Lorem Ipsum|Pagamenti|Lorem ipsum dolor sit amet consectetur. Porta et pharetra arcu urna tortor imperdiet nulla nunc in. Vitae ipsum augue facilisis tortor amet. Ut in duis elementum nibh gravida nunc at suspendisse neque. Et a feugiat nunc risus id magna volutpat.|Lorem ipsum dolor sit amet consectetur. Justo dui sapien risus commodo nec. Non sit lectus tempus fermentum at congue. Phasellus ante aliquet dui convallis praesent quisque amet laoreet. Non ultrices est at dui nibh urna. Nulla sit nam ut facilisis facilisis aliquet. Nec eu vestibulum ut velit vulputate nibh quam vel praesent. Et senectus ultricies justo felis venenatis. Est et arcu erat tellus mollis quis sed turpis sit. Faucibus vulputate diam.|Lorem ipsum|Lorem ipsum dolor sit amet consectetur. Lacus ac sapien ante at. Commodo non elementum nec nibh aliquam. Diam urna mauris nunc non ut |Potrebbe interessarti anche|Visualizzazione saldo e movimenti|LEGGI ARTICOLO|Condivisione IBAN tramite “Info Conto”|Contatti utili|Servizio clienti 800.078.777 (dall’estero +39 045.80.64.686)|Chatta con noi|Chiama"
+  },
+  {
+    "id": "24268:255963",
+    "name": "COMMHUB_00580_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Mutui e prestiti_Articolo",
+    "text": "Lorem Ipsum|Mutui e prestiti|Lorem ipsum dolor sit amet consectetur. Porta et pharetra arcu urna tortor imperdiet nulla nunc in. Vitae ipsum augue facilisis tortor amet. Ut in duis elementum nibh gravida nunc at suspendisse neque. Et a feugiat nunc risus id magna volutpat.|Lorem ipsum dolor sit amet consectetur. Justo dui sapien risus commodo nec. Non sit lectus tempus fermentum at congue. Phasellus ante aliquet dui convallis praesent quisque amet laoreet. Non ultrices est at dui nibh urna. Nulla sit nam ut facilisis facilisis aliquet. Nec eu vestibulum ut velit vulputate nibh quam vel praesent. Et senectus ultricies justo felis venenatis. Est et arcu erat tellus mollis quis sed turpis sit. Faucibus vulputate diam.|Lorem ipsum|Lorem ipsum dolor sit amet consectetur. Lacus ac sapien ante at. Commodo non elementum nec nibh aliquam. Diam urna mauris nunc non ut |Potrebbe interessarti anche|Visualizzazione saldo e movimenti|LEGGI ARTICOLO|Condivisione IBAN tramite “Info Conto”|Contatti utili|Servizio clienti 800.078.777 (dall’estero +39 045.80.64.686)|Chatta con noi|Chiama"
+  },
+  {
+    "id": "24268:255986",
+    "name": "COMMHUB_00581_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Bilancio Familiare_Articolo",
+    "text": "Lorem Ipsum|Bilancio familiare|Lorem ipsum dolor sit amet consectetur. Porta et pharetra arcu urna tortor imperdiet nulla nunc in. Vitae ipsum augue facilisis tortor amet. Ut in duis elementum nibh gravida nunc at suspendisse neque. Et a feugiat nunc risus id magna volutpat.|Lorem ipsum dolor sit amet consectetur. Justo dui sapien risus commodo nec. Non sit lectus tempus fermentum at congue. Phasellus ante aliquet dui convallis praesent quisque amet laoreet. Non ultrices est at dui nibh urna. Nulla sit nam ut facilisis facilisis aliquet. Nec eu vestibulum ut velit vulputate nibh quam vel praesent. Et senectus ultricies justo felis venenatis. Est et arcu erat tellus mollis quis sed turpis sit. Faucibus vulputate diam.|Lorem ipsum|Lorem ipsum dolor sit amet consectetur. Lacus ac sapien ante at. Commodo non elementum nec nibh aliquam. Diam urna mauris nunc non ut |Potrebbe interessarti anche|Visualizzazione saldo e movimenti|LEGGI ARTICOLO|Condivisione IBAN tramite “Info Conto”|Contatti utili|Servizio clienti 800.078.777 (dall’estero +39 045.80.64.686)|Chatta con noi|Chiama"
+  },
+  {
+    "id": "24268:256009",
+    "name": "COMMHUB_00582_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Profilo_Articolo",
+    "text": "Lorem Ipsum|Profilo|Lorem ipsum dolor sit amet consectetur. Porta et pharetra arcu urna tortor imperdiet nulla nunc in. Vitae ipsum augue facilisis tortor amet. Ut in duis elementum nibh gravida nunc at suspendisse neque. Et a feugiat nunc risus id magna volutpat.|Lorem ipsum dolor sit amet consectetur. Justo dui sapien risus commodo nec. Non sit lectus tempus fermentum at congue. Phasellus ante aliquet dui convallis praesent quisque amet laoreet. Non ultrices est at dui nibh urna. Nulla sit nam ut facilisis facilisis aliquet. Nec eu vestibulum ut velit vulputate nibh quam vel praesent. Et senectus ultricies justo felis venenatis. Est et arcu erat tellus mollis quis sed turpis sit. Faucibus vulputate diam.|Lorem ipsum|Lorem ipsum dolor sit amet consectetur. Lacus ac sapien ante at. Commodo non elementum nec nibh aliquam. Diam urna mauris nunc non ut |Potrebbe interessarti anche|Visualizzazione saldo e movimenti|LEGGI ARTICOLO|Condivisione IBAN tramite “Info Conto”|Contatti utili|Servizio clienti 800.078.777 (dall’estero +39 045.80.64.686)|Chatta con noi|Chiama"
+  },
+  {
+    "id": "24268:256032",
+    "name": "COMMHUB_00583_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Sicurezza_Articolo",
+    "text": "Lorem Ipsum|Sicurezza|Lorem ipsum dolor sit amet consectetur. Porta et pharetra arcu urna tortor imperdiet nulla nunc in. Vitae ipsum augue facilisis tortor amet. Ut in duis elementum nibh gravida nunc at suspendisse neque. Et a feugiat nunc risus id magna volutpat.|Lorem ipsum dolor sit amet consectetur. Justo dui sapien risus commodo nec. Non sit lectus tempus fermentum at congue. Phasellus ante aliquet dui convallis praesent quisque amet laoreet. Non ultrices est at dui nibh urna. Nulla sit nam ut facilisis facilisis aliquet. Nec eu vestibulum ut velit vulputate nibh quam vel praesent. Et senectus ultricies justo felis venenatis. Est et arcu erat tellus mollis quis sed turpis sit. Faucibus vulputate diam.|Lorem ipsum|Lorem ipsum dolor sit amet consectetur. Lacus ac sapien ante at. Commodo non elementum nec nibh aliquam. Diam urna mauris nunc non ut |Potrebbe interessarti anche|Visualizzazione saldo e movimenti|LEGGI ARTICOLO|Condivisione IBAN tramite “Info Conto”|Contatti utili|Servizio clienti 800.078.777 (dall’estero +39 045.80.64.686)|Chatta con noi|Chiama"
+  },
+  {
+    "id": "24268:256055",
+    "name": "COMMHUB_00584_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Documenti_Articolo",
+    "text": "Lorem Ipsum|Documenti|Lorem ipsum dolor sit amet consectetur. Porta et pharetra arcu urna tortor imperdiet nulla nunc in. Vitae ipsum augue facilisis tortor amet. Ut in duis elementum nibh gravida nunc at suspendisse neque. Et a feugiat nunc risus id magna volutpat.|Lorem ipsum dolor sit amet consectetur. Justo dui sapien risus commodo nec. Non sit lectus tempus fermentum at congue. Phasellus ante aliquet dui convallis praesent quisque amet laoreet. Non ultrices est at dui nibh urna. Nulla sit nam ut facilisis facilisis aliquet. Nec eu vestibulum ut velit vulputate nibh quam vel praesent. Et senectus ultricies justo felis venenatis. Est et arcu erat tellus mollis quis sed turpis sit. Faucibus vulputate diam.|Lorem ipsum|Lorem ipsum dolor sit amet consectetur. Lacus ac sapien ante at. Commodo non elementum nec nibh aliquam. Diam urna mauris nunc non ut |Potrebbe interessarti anche|Visualizzazione saldo e movimenti|LEGGI ARTICOLO|Condivisione IBAN tramite “Info Conto”|Contatti utili|Servizio clienti 800.078.777 (dall’estero +39 045.80.64.686)|Chatta con noi|Chiama"
+  },
+  {
+    "id": "24268:256078",
+    "name": "COMMHUB_00585_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Investimentii_Articolo",
+    "text": "Lorem Ipsum|Investimenti|Lorem ipsum dolor sit amet consectetur. Porta et pharetra arcu urna tortor imperdiet nulla nunc in. Vitae ipsum augue facilisis tortor amet. Ut in duis elementum nibh gravida nunc at suspendisse neque. Et a feugiat nunc risus id magna volutpat.|Lorem ipsum dolor sit amet consectetur. Justo dui sapien risus commodo nec. Non sit lectus tempus fermentum at congue. Phasellus ante aliquet dui convallis praesent quisque amet laoreet. Non ultrices est at dui nibh urna. Nulla sit nam ut facilisis facilisis aliquet. Nec eu vestibulum ut velit vulputate nibh quam vel praesent. Et senectus ultricies justo felis venenatis. Est et arcu erat tellus mollis quis sed turpis sit. Faucibus vulputate diam.|Lorem ipsum|Lorem ipsum dolor sit amet consectetur. Lacus ac sapien ante at. Commodo non elementum nec nibh aliquam. Diam urna mauris nunc non ut |Potrebbe interessarti anche|Visualizzazione saldo e movimenti|LEGGI ARTICOLO|Condivisione IBAN tramite “Info Conto”|Contatti utili|Servizio clienti 800.078.777 (dall’estero +39 045.80.64.686)|Chatta con noi|Chiama"
+  },
+  {
+    "id": "24268:256101",
+    "name": "COMMHUB_00625_U_M_CommHub_ProfiloUtente_Supporto_Argomenti_Protezione_Articolo",
+    "text": "Lorem Ipsum|Protezione|Lorem ipsum dolor sit amet consectetur. Porta et pharetra arcu urna tortor imperdiet nulla nunc in. Vitae ipsum augue facilisis tortor amet. Ut in duis elementum nibh gravida nunc at suspendisse neque. Et a feugiat nunc risus id magna volutpat.|Lorem ipsum dolor sit amet consectetur. Justo dui sapien risus commodo nec. Non sit lectus tempus fermentum at congue. Phasellus ante aliquet dui convallis praesent quisque amet laoreet. Non ultrices est at dui nibh urna. Nulla sit nam ut facilisis facilisis aliquet. Nec eu vestibulum ut velit vulputate nibh quam vel praesent. Et senectus ultricies justo felis venenatis. Est et arcu erat tellus mollis quis sed turpis sit. Faucibus vulputate diam.|Lorem ipsum|Lorem ipsum dolor sit amet consectetur. Lacus ac sapien ante at. Commodo non elementum nec nibh aliquam. Diam urna mauris nunc non ut |Potrebbe interessarti anche|Visualizzazione saldo e movimenti|LEGGI ARTICOLO|Condivisione IBAN tramite “Info Conto”|Contatti utili|Servizio clienti 800.078.777 (dall’estero +39 045.80.64.686)|Chatta con noi|Chiama"
+  },
+  {
+    "id": "24268:257075",
+    "name": "COMMHUB_00305_U_M_CommHub_ProfiloUtente_DOL_Titolarità conto_Step2",
+    "text": "Titolarità conto|Seleziona il rapporto|Andrea Rossini|IT 123456789000000012|Andrea Rossini e Sara Fumagalli|Conferma"
+  },
+  {
+    "id": "24268:257088",
+    "name": "COMMHUB_00306_U_M_CommHub_ProfiloUtente_DOL_Titolarità conto_Step3",
+    "text": "67|%|Creazione in corso|Stiamo creando il documento richiesto"
+  },
+  {
+    "id": "24268:257096",
+    "name": "COMMHUB_00309_U_M_CommHub_ProfiloUtente_DOL_ISEE_Step2",
+    "text": "Attestazione ISEE|Seleziona il rapporto|Seleziona tutti|Andrea Rossini|IT 123456789000000012|Andrea Rossini e Sara Fumagalli|Conferma"
+  },
+  {
+    "id": "24268:257112",
+    "name": "COMMHUB_00310_U_M_CommHub_ProfiloUtente_DOL_ISEE_Step3",
+    "text": "Attestazione ISEE|Tipo di attestazione|Saldo|Giacenza media|Seleziona l’anno|2020|2021|2022|2023|2024|Conferma"
+  },
+  {
+    "id": "24268:257130",
+    "name": "COMMHUB_00311_U_M_CommHub_ProfiloUtente_DOL_ISEE_Step4",
+    "text": "67|%|Creazione in corso|Stiamo creando il documento richiesto"
+  },
+  {
+    "id": "24268:257138",
+    "name": "COMMHUB_00312_U_M_CommHub_ProfiloUtente_DOL_ISEE_Step5",
+    "text": "Attestazione ISEE|FACSIMILE|Condividi PDF"
+  },
+  {
+    "id": "24268:257140",
+    "name": "COMMHUB_00290_U_M_CommHub_ProfiloUtente_DOL_Documenti",
+    "text": "Documenti online e altri documenti|FACSIMILE|Condividi PDF"
+  },
+  {
+    "id": "24268:257142",
+    "name": "COMMHUB_00290_U_M_CommHub_ProfiloUtente_DOL_Documenti_Condividi_Step3",
+    "text": "Documenti online e altri documenti|FACSIMILE|Condividi PDF|Attenzione|Stai per condividere l’informazione selezionata. Sei sicuro di voler proseguire?|Prosegui|Annulla"
+  },
+  {
+    "id": "24268:257155",
+    "name": "COMMHUB_00293_U_M_CommHub_ProfiloUtente_DOL_Condividi_Step4",
+    "text": "Documenti online e altri documenti|FACSIMILE|Condividi|Scarica PDF|Documento|UniCredit.pdf|Hugo \nCollins|Laura\nScott|Anne \nFrank|Jasper\nJacobs|Maik’s\nMacbook Pro|Message|Mail|Messenger|Whatsapp|Twitter|Copia|Aggiungi a segnalibri"
+  },
+  {
+    "id": "24268:257293",
+    "name": "COMMHUB_00267_U_M_CommHub_ProfiloUtente_DOL_In primo piano",
+    "text": "Documenti|Attestazione ISEE|RICHIEDI|Titolarità conto|In primo piano|Recenti|Conti|Carte|Altro|I documenti della sezione “In primo piano” sono quelli degli ultimi 6 mesi.|SEGNA tutto COME LETTo|condividi|13|GEN 25|Pagamenti e operazioni|Estratto conto|Riferimento: 00000103167429|22|Altri documenti e report|Modulo Unico Amundi|8464|01|Modulo di raccomandazione |9258|06|Modulo di gestione|45678|17|Modulo di pagamento F24|123456789|12|Questionari|Questionario di profilazione e adeguata verifica|81263748596"
+  },
+  {
+    "id": "24268:257322",
+    "name": "COMMHUB_00268_U_M_CommHub_ProfiloUtente_DOL_Recenti",
+    "text": "Documenti|Attestazione ISEE|RICHIEDI|Titolarità conto|In primo piano|Recenti|Conti|Carte|Altro|I documenti nella sezione “Recenti” sono gli ultimi messi a tua disposizione dalla Banca.|condividi|23|GEN 25|Pagamenti e operazioni|Estratto conto|Riferimento: 00000103167429|22|Altri documenti e report|Modulo Unico Amundi|8464|19|Modulo di raccomandazione |9258"
+  },
+  {
+    "id": "24268:257347",
+    "name": "COMMHUB_00269_U_M_CommHub_ProfiloUtente_DOL_Conti",
+    "text": "Documenti|Attestazione ISEE|RICHIEDI|Titolarità conto|In primo piano|Recenti|Conti|Carte|Altro|condividi|20|GEN 25|Pagamenti e operazioni|Estratto conto|IT 000007997710 8374 8221 |Contratti|Aggiornamento condizioni contrattuali|17|Riepilogo movimenti disponibile|08|Nuovo documento sulla sicurezza|05|Avviso di pagamento in scadenza"
+  },
+  {
+    "id": "24268:257372",
+    "name": "COMMHUB_00269_U_M_CommHub_ProfiloUtente_DOL_Conti Empty",
+    "text": "Documenti|Attestazione ISEE|RICHIEDI|Titolarità conto|In primo piano|Recenti|Conti|Carte|Altro|Nessun documento trovato"
+  },
+  {
+    "id": "24268:257388",
+    "name": "COMMHUB_00270_U_M_CommHub_ProfiloUtente_DOL_Carte",
+    "text": "Documenti|Attestazione ISEE|RICHIEDI|Titolarità conto|In primo piano|Recenti|Conti|Carte|Altro|condividi|19|GEN 25|Pagamenti e operazioni|Estratto conto della carta Dicembre 2024|Andrea Rossini  **** 6789|18|Aggiornamento condizioni d’uso della carta|11|Avviso di transazione rilevante|Marco Rossini  **** 5678|08|Cambio plafond della carta|07|Avviso di pagamento in scadenza per la rata"
+  },
+  {
+    "id": "24268:257413",
+    "name": "COMMHUB_00292_U_M_CommHub_ProfiloUtente_DOL_Condividi_Step2",
+    "text": "Risultati di ricerca|Filtri applicati:|Periodo:|10/10/2025 - 19/10/2025|Categoria:|Conti correnti|Intestatario:|Andrea Rossini|Cerca per parola chiave...|Condividi documenti|Seleziona tutti i documenti|18|0TT 25|Contratto di Apertura Conto Corrente|Riferimento: 00000103167429|15|Estratto conto mensile|12|Riepilogo Costi e Condizioni del Conto|11|Documento Informativo sulle Spese|10|OTT 25|Comunicazione di Modifica Unilaterale del Contratto|Condividi PDF"
+  },
+  {
+    "id": "24268:257436",
+    "name": "COMMHUB_00280_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step7",
+    "text": "Risultati di ricerca|Filtri applicati:|Periodo:|10/10/2025 - 19/10/2025|Categoria:|Conti correnti|Intestatario:|Andrea Rossini|Cerca per parola chiave...|condividi|18|0TT 25|Contratto di Apertura Conto Corrente|Riferimento: 00000103167429|15|Estratto conto mensile|12|Riepilogo Costi e Condizioni del Conto|11|Documento Informativo sulle Spese|10|OTT 25|Comunicazione di Modifica Unilaterale del Contratto"
+  },
+  {
+    "id": "24268:257458",
+    "name": "COMMHUB_00280_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step7",
+    "text": "Risultati di ricerca|Filtri applicati:|Periodo:|10/10/2025 - 19/10/2025|Categoria:|Modifiche contrattuali|Intestatario:|Andrea Rossini|SEGNA tutto COME LETTo|condividi|18|0TT 25|Conti correnti|Contratto di Apertura Conto Corrente|Riferimento: 00000103167429|15|Estratto conto mensile|11|Documento Informativo sulle Spese"
+  },
+  {
+    "id": "24268:257478",
+    "name": "COMMHUB_00289_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step8",
+    "text": "Risultati di ricerca|Filtri applicati:|Periodo:|10/02/2024 - 19/02/2024|Categoria:|Altri documenti e report|Intestatario:|Andrea Rossini|Partita IVA:|12345GDX4|condividi|18|0TT 25|Contratto di Apertura Conto Corrente|Riferimento: 00000103167429|15|Estratto conto mensile|12|Riepilogo Costi e Condizioni del Conto|11|Documento Informativo sulle Spese|10|OTT 25|Comunicazione di Modifica Unilaterale del Contratto"
+  },
+  {
+    "id": "24268:257499",
+    "name": "COMMHUB_00513_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step4",
+    "text": "Risultati di ricerca|Filtri applicati:|Periodo:|02/10/2024 - 02/04/2025|Categoria:|Investimenti e trading|condividi|02|MAR 25|Informativa ex ante su costi ed oneri altre operazioni|Riferimento: 00000103167429|Data e ora ordine: 02/03/2025 - 09:33|Stato ordine:|Impartito|14|DIC 24|Data e ora ordine: 14/11/2024 - 11:20|12|NOV 24|Data e ora ordine: 12/11/2024 - 22:56"
+  },
+  {
+    "id": "24268:257517",
+    "name": "COMMHUB_00517_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step4",
+    "text": "Risultati di ricerca|Filtri applicati:|Periodo:|02/10/2024 - 02/04/2025|Categoria:|Consulenze|condividi|28|GIU 25|Consulenza Remote nr: 2501564915901 per Andrea Rossini|Informativa su costi ed oneri - Advice|10|SET 25|Consulenza Remote nr: 2501564565321 per Andrea Rossini|24|GEN 25|Consulenza Remote nr: 2501233310000 per Andrea Rossini"
+  },
+  {
+    "id": "24268:257535",
+    "name": "COMMHUB_00471_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Elimina documento_Step1",
+    "text": "Risultati di ricerca|Filtri applicati:|Periodo:|10/10/2025 - 19/10/2025|Categoria:|Caricati da te|condividi|28|SET 25|Patente|TItolare: Andrea Rossini|Valido|elimina|visualizza documento|23|Documenti d’identità|20|Passaporto|15"
+  },
+  {
+    "id": "24268:257570",
+    "name": "COMMHUB_00468_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step8",
+    "text": "Risultati di ricerca|Filtri applicati:|Periodo:|10/10/2025 - 19/10/2025|Categoria:|Caricati da te|Sottocategoria:|Repository 1|condividi|28|SET 25|Patente|TItolare: Andrea Rossini|Valido|elimina|visualizza documento|23|Documenti d’identità|20|Passaporto|15"
+  },
+  {
+    "id": "24268:257605",
+    "name": "COMMHUB_00469_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step9",
+    "text": "Inserisci il tuo|Mobile Code|1|2|3|4|5|6|7|8|9|0|ho dimenticato il mobile code|Conferma"
+  },
+  {
+    "id": "24268:257607",
+    "name": "COMMHUB_00473_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Elimina documento_Step3",
+    "text": "Risultati di ricerca|Filtri applicati:|Periodo:|10/10/2025 - 19/10/2025|Categoria:|Caricati da te|condividi|28|SET 25|Patente|TItolare: Andrea Rossini|Valido|elimina|visualizza documento|20|Passaporto|15"
+  },
+  {
+    "id": "24268:257637",
+    "name": "COMMHUB_00472_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Elimina documento_Step2",
+    "text": "Desideri eliminare questo documento?|L’azione sarà definitiva e non potrai più recuperare i dati eliminati|Conferma|Indietro|Risultati di ricerca|Filtri applicati:|Periodo:|10/10/2025 - 19/10/2025|Categoria:|Caricati da te|condividi|28|SET 25|Patente|TItolare: Andrea Rossini|Valido|elimina|visualizza documento|23|Documenti d’identità|20|Passaporto|15"
+  },
+  {
+    "id": "24268:257673",
+    "name": "COMMHUB_00281_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step7",
+    "text": "Risultati di ricerca|Filtri applicati:|Periodo:|10/10/2025 - 19/10/2025|Categoria:|Conti correnti|Intestatario:|Andrea Rossini|Contratto|condividi|18|0TT 25|Contratto di Apertura Conto Corrente|Riferimento: 00000103167429"
+  },
+  {
+    "id": "24268:257689",
+    "name": "COMMHUB_00281_U_M_CommHub_ProfiloUtente_DOLL_Filtri Ghost_Step7",
+    "text": "Risultati di ricerca|Filtri applicati:|Periodo:|10/10/2025 - 19/10/2025|Categoria:|Conti correnti|Intestatario:|Andrea Rossini|Contratto|Nessun documento trovato"
+  },
+  {
+    "id": "24268:257702",
+    "name": "COMMHUB_00291_U_M_CommHub_ProfiloUtente_DOL_Condividi_Step1",
+    "text": "Risultati di ricerca|Filtri applicati:|Periodo:|10/10/2025 - 19/10/2025|Categoria:|Conti correnti|Intestatario:|Andrea Rossini|Cerca per parola chiave...|condividi|18|0TT 25|Contratto di Apertura Conto Corrente|Riferimento: 00000103167429|15|Estratto conto mensile|12|Riepilogo Costi e Condizioni del Conto|11|Documento Informativo sulle Spese|10|OTT 25|Comunicazione di Modifica Unilaterale del Contratto"
+  },
+  {
+    "id": "24268:257722",
+    "name": "COMMHUB_00273_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step1",
+    "text": "Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|02/10/2024 - 02/04/2025|Categoria|Seleziona categoria|Scegli la categoria|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:257747",
+    "name": "COMMHUB_00282_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step1",
+    "text": "Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|02/10/2024 - 02/04/2025|Categoria|Seleziona categoria|Altri documenti e report|Tipologia di rapporto|Seleziona tipologia di rapporto|Intestatario|Seleziona intestatario|Seleziona intestario...|Partita IVA|Seleziona P.IVA|Seleziona Partita IVA|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:257788",
+    "name": "COMMHUB_00510_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step1",
+    "text": "Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|02/10/2024 - 02/04/2025|Categoria|Seleziona categoria|Scegli la categoria|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:257817",
+    "name": "COMMHUB_00514_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step1",
+    "text": "Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|02/10/2024 - 02/04/2025|Categoria|Seleziona categoria|Scegli la categoria|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:257846",
+    "name": "COMMHUB_00282_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Casistica errore",
+    "text": "Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|02/10/2024 - 02/04/2025|Categoria|Seleziona categoria|In primo piano|Selezione non possibile|I documenti selezionati possono avere una profondità massima di 6 mesi, ti preghiamo di modificare la selezione dell'arco temporale|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:257876",
+    "name": "COMMHUB_00463_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step1",
+    "text": "Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|02/10/2024 - 02/04/2025|Categoria|Seleziona categoria|Caricati da te|Sottocategoria|Seleziona sottocategoria|Seleziona la sottocategoria|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:257909",
+    "name": "COMMHUB_00275_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step3",
+    "text": "Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|10/10/2025 - 19/10/2025|Categoria|Seleziona categoria|Scegli la categoria|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:257938",
+    "name": "COMMHUB_00287_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step6",
+    "text": "Seleziona intestatario|Andrea Rossini|Andrea Rossini e Massimilano \nFumagalli|Conferma|Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|10/10/2025 - 19/10/2025|Categoria|Seleziona categoria|Altri documenti e report|Tipologia di rapporto|Seleziona tipologia di rapporto|Avvisi effetti|Intestatario|Seleziona intestario...|Partita IVA|Seleziona P.IVA|Seleziona Partita IVA|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:257985",
+    "name": "COMMHUB_00465_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step3",
+    "text": "Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|10/10/2025 - 19/10/2025|Categoria|Seleziona categoria|Caricati da te|Sottocategoria|Seleziona sottocategoria|Seleziona la sottocategoria|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:258015",
+    "name": "COMMHUB_00277_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step4",
+    "text": "Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|10/10/2025 - 19/10/2025|Categoria|Seleziona categoria|Conti correnti|Intestatario|Seleziona intestatario|Seleziona intestario...|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:258048",
+    "name": "COMMHUB_00286_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step5",
+    "text": "Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|10/10/2025 - 19/10/2025|Categoria|Seleziona categoria|Altri documenti e report|Tipologia di rapporto|Seleziona tipologia di rapporto|Intestatario|Seleziona intestatario|Seleziona intestario...|Partita IVA|Seleziona P.IVA|Seleziona Partita IVA|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:258086",
+    "name": "COMMHUB_00512_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step3",
+    "text": "Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|02/10/2024 - 02/04/2025|Categoria|Seleziona categoria|Investimenti e trading|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:258112",
+    "name": "COMMHUB_00516_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step3",
+    "text": "Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|02/10/2024 - 02/04/2025|Categoria|Seleziona categoria|Consulenze|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:258138",
+    "name": "COMMHUB_00467_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step5",
+    "text": "Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|10/10/2025 - 19/10/2025|Categoria|Seleziona categoria|Caricati da te|Sottocategoria|Seleziona sottocategoria|Repository 1|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:258168",
+    "name": "COMMHUB_00279_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step6",
+    "text": "Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|10/10/2025 - 19/10/2025|Categoria|Seleziona categoria|Conti correnti|Intestatario|Seleziona intestatario|Andrea Rossini|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:258201",
+    "name": "COMMHUB_00288_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step7",
+    "text": "Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|10/10/2025 - 19/10/2025|Categoria|Seleziona categoria|Altri documenti e report|Tipologia di rapporto|Seleziona tipologia di rapporto|Avvisi effetti|Intestatario|Seleziona intestatario|Andrea Rossini|Partita IVA|Seleziona P.IVA|12345GDX4|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:258242",
+    "name": "COMMHUB_00276_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step4",
+    "text": "Documenti|Conto Rossi Mario|Altri conti|Cerca documenti...|In evidenza|condividi pdf|30|SET 25|Lorem Ipsum|Riferimento: 000000103769708909|24|Uscite|Pratica EasyOpen|Documenti recenti|28|26|Seleziona la categoria|Gestione conto|In primo piano|Conti correnti|Carte|Pagamenti e operazioni|Risparmio e Investimenti|Risparmio|Libretti di risparmio|Investimenti e trading|Servizi di custodia|Mutui e prestiti|Consulenza e finanza|Consulenze|Consulenze/Ordini wealth management|Documenti e contratti|Modifiche contrattuali|Contratti|Altri documenti e report|Strumenti digitali e di gestione|FirmaMia - UniCredit Digital Mail Box|Questionari|Caricati da te|Obblighi fiscali|Tasse e Imposte|Conferma"
+  },
+  {
+    "id": "24268:258354",
+    "name": "COMMHUB_00285_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step4",
+    "text": "Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|10/10/2025 - 19/10/2025|Categoria|Seleziona categoria|Scegli la categoria|Sottocategoria|Seleziona sottocategoria|Seleziona la sottocategoria|Repostiory 1|Repostiory 2|Repostiory 3|Conferma"
+  },
+  {
+    "id": "24268:258395",
+    "name": "COMMHUB_00511_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step2",
+    "text": "Documenti|Conto Rossi Mario|Altri conti|Cerca documenti...|In evidenza|condividi pdf|30|SET 25|Lorem Ipsum|Riferimento: 000000103769708909|24|Uscite|Pratica EasyOpen|Documenti recenti|28|26|Seleziona la categoria|Gestione conto|In primo piano|Conti correnti|Carte|Pagamenti e operazioni|Risparmio e Investimenti|Risparmio|Libretti di risparmio|Investimenti e trading|Servizi di custodia|Mutui e prestiti|Consulenza e finanza|Consulenze|Consulenze/Ordini wealth management|Documenti e contratti|Modifiche contrattuali|Contratti|Altri documenti e report|Strumenti digitali e di gestione|FirmaMia - UniCredit Digital Mail Box|Questionari|Caricati da te|Obblighi fiscali|Tasse e Imposte|Conferma"
+  },
+  {
+    "id": "24268:258507",
+    "name": "COMMHUB_00515_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step2",
+    "text": "Documenti|Conto Rossi Mario|Altri conti|Cerca documenti...|In evidenza|condividi pdf|30|SET 25|Lorem Ipsum|Riferimento: 000000103769708909|24|Uscite|Pratica EasyOpen|Documenti recenti|28|26|Seleziona la categoria|Gestione conto|In primo piano|Conti correnti|Carte|Pagamenti e operazioni|Risparmio e Investimenti|Risparmio|Libretti di risparmio|Investimenti e trading|Servizi di custodia|Mutui e prestiti|Consulenza e finanza|Consulenze|Consulenze/Ordini wealth management|Documenti e contratti|Modifiche contrattuali|Contratti|Altri documenti e report|Strumenti digitali e di gestione|FirmaMia - UniCredit Digital Mail Box|Questionari|Caricati da te|Obblighi fiscali|Tasse e Imposte|Conferma"
+  },
+  {
+    "id": "24268:258619",
+    "name": "COMMHUB_00278_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step5",
+    "text": "Seleziona intestatario|Andrea Rossini|Andrea Rossini e Massimilano \nFumagalli|Conferma|Filtri di ricerca|Data|Seleziona periodo|3M|6M|12M|Personalizza periodo|10/10/2025 - 19/10/2025|Categoria|Seleziona categoria|Conti correnti|Intestatario|Seleziona intestario...|Rimuovi Filtri|Applica"
+  },
+  {
+    "id": "24268:258661",
+    "name": "COMMHUB_00274_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step2",
+    "text": "Documenti|Conto Rossi Mario|Altri conti|Cerca documenti...|In evidenza|condividi pdf|30|SET 25|Lorem Ipsum|Riferimento: 000000103769708909|24|Uscite|Pratica EasyOpen|Documenti recenti|28|26|Personalizza periodo|Data di inizio|10/02/2024|Data di fine|19/02/2024|Febbraio 2024|M|L|G|V|S|D|18|17|21|16|20|15|19|25|23|22|27|03|02|06|01|05|29|04|11|10|14|13|12|09|08|07|Salva"
+  },
+  {
+    "id": "24268:258739",
+    "name": "COMMHUB_00283_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step2",
+    "text": "Documenti|Conto Rossi Mario|Altri conti|Cerca documenti...|In evidenza|condividi pdf|30|SET 25|Lorem Ipsum|Riferimento: 000000103769708909|24|Uscite|Pratica EasyOpen|Documenti recenti|28|26|Personalizza periodo|Data di inizio|10/02/2024|Data di fine|19/02/2024|Febbraio 2024|M|L|G|V|S|D|18|17|21|16|20|15|19|25|23|22|27|03|02|06|01|05|29|04|11|10|14|13|12|09|08|07|Salva"
+  },
+  {
+    "id": "24268:258817",
+    "name": "COMMHUB_00464_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step2",
+    "text": "Documenti|Conto Rossi Mario|Altri conti|Cerca documenti...|In evidenza|condividi pdf|30|SET 25|Lorem Ipsum|Riferimento: 000000103769708909|24|Uscite|Pratica EasyOpen|Documenti recenti|28|26|Personalizza periodo|Data di inizio|10/02/2024|Data di fine|19/02/2024|Febbraio 2024|M|L|G|V|S|D|18|17|21|16|20|15|19|25|23|22|27|03|02|06|01|05|29|04|11|10|14|13|12|09|08|07|Salva"
+  },
+  {
+    "id": "24268:258904",
+    "name": "COMMHUB_00304_U_M_CommHub_ProfiloUtente_DOL_Titolarità conto_Step1",
+    "text": "Documenti|Attestazione ISEE|RICHIEDI|Titolarità conto|In primo piano|Recenti|Conti|Carte|Altro|I documenti della sezione “In primo piano” sono quelli degli ultimi 6 mesi.|SEGNA tutto COME LETTo|condividi|13|GEN 25|Categoria|Estratto conto|Riferimento: 00000103167429|22|Altri documenti e report|Modulo Unico Amundi|8464|01|Modulo di raccomandazione |9258|06|Modulo di gestione|45678|17|Modulo di pagamento F24|123456789|12|Questionari|Questionario di profilazione e adeguata verifica|81263748596"
+  },
+  {
+    "id": "24268:258938",
+    "name": "COMMHUB_00297_U_M_CommHub_ProfiloUtente_DOLL_Impostazioni documenti",
+    "text": "Scelta modalità di recezione dei documenti|Le notifiche relative alla disponibilità di nuovi documenti ti saranno inviate via email all’indirizzo:|Email|mic****ssi@email.it|MODIFICA|Verificato|Scegli la modalità di ricezione dei documenti per i rapporti elencati:|Tipo: Conto corrente|Andrea Rossini - 30654 0000105323996|Ultimo aggiornamento: 24/07/2018 03:18:35|Online |Cartaceo|Tipo: Deposito titoli|Andrea Rossini - 30654 00001079685747|Tipo: Finanziamento|Andrea Rossini - 30654 00001053267123|Tipo: Gestione patrimoniale|Andrea Rossini - 30654 00001009123476|Tipo: Carta di credito|Andrea Rossini - 30654 0000885323111|Storico attivazione modalità di ricezione online|Seleziona il rapporto|Avanti"
+  },
+  {
+    "id": "24268:258984",
+    "name": "COMMHUB_00297_U_M_CommHub_ProfiloUtente_DOLL_Impostazioni documenti",
+    "text": "Numero carta|1234 5678 9012 1234|Scelta modalità di recezione dei documenti|Le notifiche relative alla disponibilità di nuovi documenti ti saranno inviate via email all’indirizzo:|Email|mic****ssi@email.it|MODIFICA|Verificato|Scegli la modalità di ricezione dei documenti per i rapporti elencati:|Tipo: Conto corrente|Andrea Rossini - 30654 0000105323996|Ultimo aggiornamento: 24/07/2018 03:18:35|Online |Cartaceo|Tipo: Deposito titoli|Andrea Rossini - 30654 00001079685747|Tipo: Finanziamento|Andrea Rossini - 30654 00001053267123|Tipo: Gestione patrimoniale|Andrea Rossini - 30654 00001009123476|Tipo: Carta di credito|Andrea Rossini - 30654 0000885323111|Storico attivazione modalità di ricezione online|Seleziona il rapporto|Avanti"
+  },
+  {
+    "id": "24268:259038",
+    "name": "COMMHUB_00298_U_M_CommHub_ProfiloUtente_DOLL_Impostazioni documenti_Caso private",
+    "text": "Scelta modalità di recezione dei documenti|Le notifiche relative alla disponibilità di nuovi documenti ti saranno inviate via email all’indirizzo:|Email|mic****ssi@email.it|MODIFICA|Verificato|Scegli la modalità di ricezione dei documenti per i rapporti elencati:|Tipo: Conto corrente|Andrea Rossini - 30654 0000105323996|Ultimo aggiornamento: 24/07/2018 03:18:35|Online |Cartaceo|Tipo: Deposito titoli|Andrea Rossini - 30654 00001079685747|Tipo: Finanziamento|Andrea Rossini - 30654 00001053267123|Tipo: Gestione patrimoniale|Andrea Rossini - 30654 00001009123476|Tipo: Carta di credito|Andrea Rossini - 30654 0000885323111|Storico attivazione modalità di ricezione online|Seleziona il rapporto|Avanti"
+  },
+  {
+    "id": "24268:259084",
+    "name": "COMMHUB_00298_U_M_CommHub_ProfiloUtente_DOLL_Impostazioni documenti_Caso private",
+    "text": "Scelta modalità di recezione dei documenti|Le notifiche relative alla disponibilità di nuovi documenti ti saranno inviate via email all’indirizzo:|Email|mic****ssi@email.it|MODIFICA|Verificato|Scegli la modalità di ricezione dei documenti per i rapporti elencati:|Tipo: Conto corrente|Andrea Rossini - 30654 0000105323996|Ultimo aggiornamento: 24/07/2018 03:18:35|Online |Cartaceo|Tipo: Deposito titoli|Andrea Rossini - 30654 00001079685747|Tipo: Finanziamento|Andrea Rossini - 30654 00001053267123|Tipo: Gestione patrimoniale|Andrea Rossini - 30654 00001009123476|Tipo: Carta di credito|Andrea Rossini - 30654 0000885323111|Storico attivazione modalità di ricezione online|Seleziona il rapporto|Se vuoi accedere ai Documenti online e continuare a riceverli anche via posta devi rivolgerti al gestore per richiedere una deroga.|Avanti"
+  },
+  {
+    "id": "24268:259132",
+    "name": "COMMHUB_00300_U_M_CommHub_ProfiloUtente_DOLL_Impostazioni documenti_Step2",
+    "text": "Scelta modalità di recezione dei documenti|Le notifiche relative alla disponibilità di nuovi documenti ti saranno inviate via email all’indirizzo:|Email|mic****ssi@email.it|MODIFICA|Verificato|Scegli la modalità di ricezione dei documenti per i rapporti elencati:|Tipo: Conto corrente|Andrea Rossini - 30654 0000105323996|Ultimo aggiornamento: 24/07/2018 03:18:35|Online |Cartaceo|Tipo: Deposito titoli|Andrea Rossini - 30654 00001079685747|Tipo: Finanziamento|Andrea Rossini - 30654 00001053267123|Tipo: Gestione patrimoniale|Andrea Rossini - 30654 00001009123476|Tipo: Carta di credito|Andrea Rossini - 30654 0000885323111|Storico attivazione modalità di ricezione online|Seleziona il rapporto|Andrea Rossini IT 123456789000000012|Aderito|1752098 - 06/03/2025 - 17:06:23|Non aderito|1752098 - 11/06/20213 - 08:42:19|Avanti"
+  },
+  {
+    "id": "24268:259182",
+    "name": "COMMHUB_00299_U_M_CommHub_ProfiloUtente_DOLL_Impostazioni documenti_Step1",
+    "text": "Seleziona rapporto|Andrea Rossini|IT 123456789000000012|Andrea Rossini e Sara Fumagalli|Conferma|Scelta modalità di recezione dei documenti|Le notifiche relative alla disponibilità di nuovi documenti ti saranno inviate via email all’indirizzo:|Email|mic****ssi@email.it|MODIFICA|Verificato|Scegli la modalità di ricezione dei documenti per i rapporti elencati:|Tipo: Conto corrente|Andrea Rossini - 30654 0000105323996|Ultimo aggiornamento: 24/07/2018 03:18:35|Online |Cartaceo|Tipo: Deposito titoli|Andrea Rossini - 30654 00001079685747|Tipo: Finanziamento|Andrea Rossini - 30654 00001053267123|Tipo: Gestione patrimoniale|Andrea Rossini - 30654 00001009123476|Tipo: Carta di credito|Andrea Rossini - 30654 0000885323111|Storico attivazione modalità di ricezione online|Seleziona il rapporto|Avanti"
+  },
+  {
+    "id": "24268:259240",
+    "name": "COMMHUB_00301_U_M_CommHub_ProfiloUtente_DOLL_Impostazioni documenti_Step3",
+    "text": "Inserisci il tuo|Mobile Code|1|2|3|4|5|6|7|8|9|0|ho dimenticato il mobile code|Conferma"
+  },
+  {
+    "id": "24268:259242",
+    "name": "COMMHUB_00308_U_M_CommHub_ProfiloUtente_DOL_ISEE_Step1",
+    "text": "Documenti|Attestazione ISEE|RICHIEDI|Titolarità conto|In primo piano|Recenti|Conti|Carte|Altro|I documenti della sezione “In primo piano” sono quelli degli ultimi 6 mesi.|SEGNA tutto COME LETTo|condividi|13|GEN 25|Categoria|Estratto conto|Riferimento: 00000103167429|22|Altri documenti e report|Modulo Unico Amundi|8464|01|Modulo di raccomandazione |9258|06|Modulo di gestione|45678|17|Modulo di pagamento F24|123456789|12|Questionari|Questionario di profilazione e adeguata verifica|81263748596"
+  },
+  {
+    "id": "24268:259276",
+    "name": "COMMHUB_00302_U_M_CommHub_ProfiloUtente_DOLL_Impostazioni documenti_Step4",
+    "text": "Scelta effettuata correttamente|La modalità di ricezione è stata modificata.|Chiudi"
+  },
+  {
+    "id": "24268:259278",
+    "name": "COMMHUB_00307_U_M_CommHub_ProfiloUtente_DOL_Titolarità conto_Step4",
+    "text": "Titolarità conto|FACSIMILE|Condividi PDF"
+  },
+  {
+    "id": "24268:259280",
+    "name": "COMMHUB_00271_U_M_CommHub_ProfiloUtente_DOL_Altro",
+    "text": "Documenti|Attestazione ISEE|RICHIEDI|Titolarità conto|In primo piano|Recenti|Conti|Carte|Altro|Pagamenti e operazioni|Tasse e imposte|Investimenti e trading|Consulenze|Mutui e prestiti|FirmaMia - UniCredit Digital Mail Box|Risparmio|Contratti|Moduli|Questionari|Caricati da te|Libretti di risparmio|Servizi di custodia|Altri documenti e report|Modifiche contrattuali|Consulenze/Ordini wealth management"
+  },
+  {
+    "id": "24268:259314",
+    "name": "COMMHUB_00641_U_M_CommHub_ProfiloUtente_DOL_Altro",
+    "text": "Documenti|Attestazione ISEE|RICHIEDI|Titolarità conto|In primo piano|Recenti|Conti|Carte|Altro|Pagamenti e operazioni|Tasse e imposte|Investimenti e trading|Consulenze|Mutui e prestiti|FirmaMia - UniCredit Digital Mail Box|Risparmio|Contratti|Moduli|Questionari|Caricati da te|Libretti di risparmio|Servizi di custodia|Altri documenti e report|Modifiche contrattuali|Consulenze/Ordini wealth management"
+  },
+  {
+    "id": "24268:259348",
+    "name": "COMMHUB_00642_U_M_CommHub_ProfiloUtente_DOL_Altro",
+    "text": "Documenti|Attestazione ISEE|RICHIEDI|Titolarità conto|In primo piano|Recenti|Conti|Carte|Altro|Pagamenti e operazioni|Tasse e imposte|Investimenti e trading|Consulenze|Mutui e prestiti|FirmaMia - UniCredit Digital Mail Box|Risparmio|Contratti|Moduli|Questionari|Caricati da te|Libretti di risparmio|Servizi di custodia|Altri documenti e report|Modifiche contrattuali|Consulenze/Ordini wealth management"
+  },
+  {
+    "id": "24268:259382",
+    "name": "COMMHUB_00416_U_M_CommHub_ProfiloUtente_DOL_Altro_Risparmio",
+    "text": "Documenti|Risparmio|condividi|18|MAR 25|Rendiconto annuale del conto di risparmio|Riferimento: 00000103167429|14|Certificazione degli interessi maturati|12|FEB 25|Informativa sulle condizioni del piano di risparmio|08|Documento riepilogativo delle operazioni di risparmio|07|Contratto di apertura conto di risparmio|05|Comunicazione di variazione tassi di interesse"
+  },
+  {
+    "id": "24268:259405",
+    "name": "COMMHUB_00518_U_M_CommHub_ProfiloUtente_DOL_Altro_Investimenti",
+    "text": "Documenti|Investimenti e trading|I documenti nella sezione Investimenti e trading sono visualizzabili per un massimo di 1 mese alla volta.\r|condividi|18|MAR 25|Informativa ex ante su costi ed oneri altre operazioni|Riferimento: 00000103167429|Data e ora ordine: 16/09/2025 - 09:56|Stato ordine:|Impartito|14|12|FEB 25|02"
+  },
+  {
+    "id": "24268:259427",
+    "name": "COMMHUB_00519_U_M_CommHub_ProfiloUtente_DOL_Altro_Consulenza",
+    "text": "Documenti|Consulenza|I documenti nella sezione Consulenza sono visualizzabili per un massimo di 1 mese alla volta.\r|condividi|12|SET 25|Consulenza Remote nr: 2501564915901 per Andrea Rossini|Informativa su costi ed oneri - Advice|Data e ora ordine: 16/09/2025 - 09:56|10|Consulenza Remote nr: 2501564565321 per Andrea Rossini|24|GEN 25|Consulenza Remote nr: 2501233310000 per Andrea Rossini"
+  },
+  {
+    "id": "24268:259448",
+    "name": "COMMHUB_00272_U_M_CommHub_ProfiloUtente_DOL_Altro_Risparmio",
+    "text": "Documenti|Modifiche contrattuali|SEGNA tutto COME LETTo|condividi|18|MAR 25|Risparmio|Rendiconto annuale del conto di risparmio|Riferimento: 00000103167429|14|Certificazione degli interessi maturati|12|FEB 25|Informativa sulle condizioni del piano di risparmio|08|Documento riepilogativo delle operazioni di risparmio|07|Contratto di apertura conto di risparmio|05|Comunicazione di variazione tassi di interesse"
+  },
+  {
+    "id": "24268:259472",
+    "name": "COMMHUB_00272_U_M_CommHub_ProfiloUtente_DOL_Altro_Risparmio",
+    "text": "Documenti|Risparmio|Nessun documento trovato"
+  },
+  {
+    "id": "24268:259494",
+    "name": "COMMHUB_00470_U_M_CommHub_ProfiloUtente_DOLL_Filtri_Step10",
+    "text": "Documento|FACSIMILE|Condividi PDF"
+  },
+  {
+    "id": "24268:259534",
+    "name": "COMMHUB_00294_U_M_CommHub_ProfiloUtente_DOL_In primo piano",
+    "text": "Documenti|Attestazione ISEE|RICHIEDI|Titolarità conto|In primo piano|Recenti|Conti|Carte|Altro|I documenti della sezione “In primo piano” sono quelli degli ultimi 6 mesi.|SEGNA tutto COME LETTo|condividi|13|GEN 25|Categoria|Estratto conto|Riferimento: 00000103167429|22|Altri documenti e report|Modulo Unico Amundi|8464|01|Modulo di raccomandazione |9258|06|Modulo di gestione|45678|17|Modulo di pagamento F24|123456789|12|Questionari|Questionario di profilazione e adeguata verifica|81263748596"
+  },
+  {
+    "id": "24268:259563",
+    "name": "COMMHUB_00295_U_M_CommHub_ProfiloUtente_DOL_In primo piano_Segna come letti_Step1",
+    "text": "Documenti|Attestazione ISEE|RICHIEDI|Titolarità conto|In primo piano|Recenti|Conti|Carte|Altro|I documenti della sezione “In primo piano” sono quelli degli ultimi 6 mesi.|Segna come letto|Seleziona tutti i documenti|13|GEN 25|Categoria|Estratto conto|Riferimento: 00000103167429|22|Altri documenti e report|Modulo Unico Amundi|8464|01|Modulo di raccomandazione |9258|06|Modulo di gestione|45678|17|Modulo di pagamento F24|123456789|12|Questionari|Questionario di profilazione e adeguata verifica|81263748596|Conferma"
+  },
+  {
+    "id": "24268:259595",
+    "name": "COMMHUB_00296_U_M_CommHub_ProfiloUtente_DOL_In primo piano_Segna come letti_Step2",
+    "text": "Documenti|Attestazione ISEE|RICHIEDI|Titolarità conto|In primo piano|Recenti|Conti|Carte|Altro|I documenti della sezione “In primo piano” sono quelli degli ultimi 6 mesi.|SEGNA tutto COME LETTo|condividi|13|GEN 25|Categoria|Estratto conto|Riferimento: 00000103167429|22|Altri documenti e report|Modulo Unico Amundi|8464|01|Modulo di raccomandazione |9258|06|Modulo di gestione|45678|17|Modulo di pagamento F24|123456789|12|Questionari|Questionario di profilazione e adeguata verifica|81263748596"
+  }
+]

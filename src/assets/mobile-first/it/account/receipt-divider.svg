@@ -1,0 +1,21 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="393" height="16" viewBox="0 0 393 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Divider">
+<g id="Triangle Shape">
+<mask id="mask0_0_1267" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="6" height="16">
+<rect id="Mask" width="6" height="16" fill="#D9D9D9"/>
+</mask>
+<g mask="url(#mask0_0_1267)">
+<path id="Triangle" d="M4.14269 5.17986C5.24301 6.57871 5.28676 8.5363 4.25002 9.98291L-2.74873 19.7486C-5.01364 22.909 -10 21.3067 -10 17.4185L-10 -1.24479C-10 -5.04242 -5.20392 -6.70266 -2.85605 -3.71778L4.14269 5.17986Z" fill="#333333"/>
+</g>
+</g>
+<path id="Line bottom" d="M6 8.00002L393 7.99998" stroke="#CCCCCC" stroke-dasharray="2 4"/>
+<g id="Triangle Shape_2">
+<mask id="mask1_0_1267" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="387" y="0" width="6" height="16">
+<rect id="Mask_2" width="6" height="16" transform="matrix(-1 0 0 1 393 0)" fill="#D9D9D9"/>
+</mask>
+<g mask="url(#mask1_0_1267)">
+<path id="Triangle_2" d="M388.857 5.17986C387.757 6.57871 387.713 8.5363 388.75 9.98291L395.749 19.7486C398.014 22.909 403 21.3067 403 17.4185L403 -1.24479C403 -5.04242 398.204 -6.70266 395.856 -3.71778L388.857 5.17986Z" fill="#333333"/>
+</g>
+</g>
+</g>
+</svg>

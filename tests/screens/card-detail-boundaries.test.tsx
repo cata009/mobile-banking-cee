@@ -376,6 +376,46 @@ describe('card-detail action boundaries', () => {
     expect(screen.getByRole('button', { name: 'Show less' })).toBeInTheDocument()
   })
 
+  it('uses beneficiary-style fact rows only on Evo 2027 transaction details', () => {
+    const transaction = getAccountTransactions('CZ', 0, 'CZK').find((item) => item.source === 'card')
+    if (!transaction) throw new Error('Expected a Czech debit-card transaction')
+
+    const evo = render(
+      <TransactionDetailScreen
+        country="CZ"
+        product={firstDebitCard}
+        transaction={transaction}
+        onBack={() => undefined}
+        onRedoPayment={() => undefined}
+      />,
+      { wrapper: ({ children }) => <AppProviders release="release-future-evo-2027">{children}</AppProviders> },
+    )
+
+    const evoDetails = evo.container.querySelector('[data-evo2027-transaction-details]')
+    expect(evoDetails).toHaveClass('rounded-[18px]', 'bg-[var(--uc-surface)]', 'px-[16px]')
+    expect(evoDetails?.querySelectorAll('[data-transaction-detail-fact-row]').length).toBeGreaterThanOrEqual(3)
+    expect(evoDetails?.querySelector('[data-transaction-detail-fact-row]')).toHaveClass(
+      'justify-between',
+      'py-[13px]',
+    )
+    evo.unmount()
+
+    const current = render(
+      <TransactionDetailScreen
+        country="CZ"
+        product={firstDebitCard}
+        transaction={transaction}
+        onBack={() => undefined}
+        onRedoPayment={() => undefined}
+      />,
+      { wrapper: AppProviders },
+    )
+
+    expect(current.container.querySelector('[data-evo2027-transaction-details]')).not.toBeInTheDocument()
+    const currentDescription = screen.getByText('Transaction description').closest('div')?.parentElement
+    expect(currentDescription).toHaveClass('gap-[12px]', 'py-[17px]')
+  })
+
   it('renders a verified merchant location as a clean static map with no external-map chrome', () => {
     const transaction = getAccountTransactions('RO', 0, 'RON').find((item) => item.label === 'Carrefour')
     if (!transaction) throw new Error('Expected the Carrefour card transaction fixture')

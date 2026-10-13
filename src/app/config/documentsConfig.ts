@@ -60,6 +60,7 @@ const SHARED_DOCUMENTS_CONFIG: DocumentsConfig = {
 };
 
 export const DOCUMENTS_CONFIG_BY_COUNTRY: Record<CountryId, DocumentsConfig> = {
+  IT: { title: "Documents", groups: [] },
   RO: SHARED_DOCUMENTS_CONFIG,
   RS: SHARED_DOCUMENTS_CONFIG,
   HU: SHARED_DOCUMENTS_CONFIG,

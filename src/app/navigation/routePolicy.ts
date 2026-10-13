@@ -1,112 +1,428 @@
-import type { Screen } from "@/app/contexts/NavigationContext";
-import type { CountryId, DesignSystemId, ProductId, ReleaseId, ScreenId, ThemeMode } from "@/app/state/demoTypes";
-import { isReleaseFeatureActive } from '@/app/state/featureResolver';
-import { isFutureGainAvailable } from '@/features/investments/future-gain/model';
+import type { Screen } from '@/app/navigation/screenTypes'
+import type { CountryId, DesignSystemId, ProductId, ReleaseId, ScreenId, ThemeMode } from '@/app/state/demoTypes'
+import { isReleaseFeatureActive } from '@/app/state/featureResolver'
+import { isFutureGainAvailable } from '@/features/investments/future-gain/model'
 
-export type RouteSurface = "prelogin" | "app" | "platform";
-export type RouteStatusBarVariant = "light" | "dark" | "theme";
-export type RoutePayload = "none" | "account" | "card" | "transaction" | "payment-draft" | "product-detail" | "flow";
-export type DeepLinkPayload = "none" | "account" | "card" | "flow";
+export type RouteSurface = 'prelogin' | 'app' | 'platform'
+export type RouteStatusBarVariant = 'light' | 'dark' | 'theme'
+export type RoutePayload = 'none' | 'account' | 'card' | 'transaction' | 'payment-draft' | 'product-detail' | 'flow'
+export type DeepLinkPayload = 'none' | 'account' | 'card' | 'flow'
 
 export interface RoutePolicy {
-  surface: RouteSurface;
-  registryIds: readonly ScreenId[];
-  productEligibility: "mobile-runtime" | "unrestricted";
-  statusBar: Exclude<RouteStatusBarVariant, "theme">;
-  backFallback: Screen;
-  payload: RoutePayload;
+  surface: RouteSurface
+  registryIds: readonly ScreenId[]
+  productEligibility: 'mobile-runtime' | 'unrestricted'
+  statusBar: Exclude<RouteStatusBarVariant, 'theme'>
+  backFallback: Screen
+  payload: RoutePayload
   deepLink: {
-    restorable: boolean;
-    fallback: Screen;
-    fallbackWithCard?: Screen;
-    payload: DeepLinkPayload;
-  };
+    restorable: boolean
+    fallback: Screen
+    fallbackWithCard?: Screen
+    payload: DeepLinkPayload
+  }
 }
 
-const route = (policy: RoutePolicy) => policy;
+const route = (policy: RoutePolicy) => policy
 
 export const ROUTE_POLICY = {
-  "prelogin-inactive": route({ surface: "prelogin", registryIds: ["pi.prelogin.inactive"], productEligibility: "mobile-runtime", statusBar: "dark", backFallback: "prelogin-inactive", payload: "none", deepLink: { restorable: true, fallback: "prelogin-inactive", payload: "none" } }),
-  "prelogin-active": route({ surface: "prelogin", registryIds: ["pi.prelogin.active"], productEligibility: "mobile-runtime", statusBar: "dark", backFallback: "prelogin-active", payload: "none", deepLink: { restorable: true, fallback: "prelogin-active", payload: "none" } }),
-  "co-apping-session": route({ surface: "app", registryIds: ["pi.co-apping.session"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "prelogin-active", payload: "none", deepLink: { restorable: false, fallback: "homepage", payload: "none" } }),
-  homepage: route({ surface: "app", registryIds: ["pi.home.overview", "kids.sk.home-concept", "kids.hu.home-concept", "kids.ro.home-concept"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "homepage", payload: "none" } }),
-  "language-selector": route({ surface: "app", registryIds: ["pi.language.selector"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "prelogin-active", payload: "none", deepLink: { restorable: false, fallback: "homepage", payload: "none" } }),
-  analytics: route({ surface: "app", registryIds: ["pi.analytics.overview"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "analytics", payload: "none" } }),
-  messages: route({ surface: "app", registryIds: ["pi.messages.overview"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "messages", payload: "none" } }),
-  payments: route({ surface: "app", registryIds: ["pi.payments.overview"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "payments", payload: "none" } }),
-  products: route({ surface: "app", registryIds: ["pi.products.overview"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "products", payload: "none" } }),
-  "my-banker": route({ surface: "app", registryIds: ["pi.my-banker.recommendations"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "my-banker", payload: "none" } }),
-  "product-detail": route({ surface: "app", registryIds: ["pi.products.detail"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "products", payload: "product-detail", deepLink: { restorable: false, fallback: "products", payload: "none" } }),
-  investments: route({ surface: "app", registryIds: ["pi.investments.portfolio"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "investments", payload: "none" } }),
-  "smart-investment": route({ surface: "app", registryIds: ["pi.investments.smart-investment"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: false, fallback: "homepage", payload: "none" } }),
-  "future-gain-peer-insights": route({ surface: "app", registryIds: ["pi.investments.future-gain-peer-insights"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "products", payload: "none", deepLink: { restorable: false, fallback: "products", payload: "none" } }),
-  "investments-history": route({ surface: "app", registryIds: ["pi.investments.history"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "investments", payload: "none", deepLink: { restorable: true, fallback: "investments-history", payload: "none" } }),
-  "investment-orders-to-approve": route({ surface: "app", registryIds: [], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "investments", payload: "none", deepLink: { restorable: false, fallback: "investments", payload: "none" } }),
-  prime: route({ surface: "app", registryIds: ["pi.prime.overview"], productEligibility: "mobile-runtime", statusBar: "dark", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "prime", payload: "none" } }),
-  appointments: route({ surface: "app", registryIds: ["pi.prime.appointments"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "prime", payload: "none", deepLink: { restorable: true, fallback: "appointments", payload: "none" } }),
-  "request-call": route({ surface: "app", registryIds: ["pi.prime.call-request"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "prime", payload: "none", deepLink: { restorable: true, fallback: "request-call", payload: "none" } }),
-  more: route({ surface: "app", registryIds: ["pi.more.overview"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "more", payload: "none", deepLink: { restorable: true, fallback: "more", payload: "none" } }),
-  documents: route({ surface: "app", registryIds: ["pi.documents.overview"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "more", payload: "none", deepLink: { restorable: true, fallback: "documents", payload: "none" } }),
-  settings: route({ surface: "app", registryIds: ["pi.settings.overview"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "more", payload: "none", deepLink: { restorable: true, fallback: "settings", payload: "none" } }),
-  contacts: route({ surface: "app", registryIds: ["pi.contacts.overview"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "more", payload: "none", deepLink: { restorable: true, fallback: "contacts", payload: "none" } }),
-  transactions: route({ surface: "app", registryIds: ["pi.transactions.overview"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "transactions", payload: "none" } }),
-  "account-detail": route({ surface: "app", registryIds: ["pi.account.detail"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "account", deepLink: { restorable: true, fallback: "account-detail", payload: "account" } }),
-  "account-details-info": route({ surface: "app", registryIds: ["pi.account.details-info"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "account-detail", payload: "account", deepLink: { restorable: true, fallback: "account-details-info", payload: "account" } }),
-  "account-options": route({ surface: "app", registryIds: ["pi.account.options"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "account-detail", payload: "account", deepLink: { restorable: true, fallback: "account-options", payload: "account" } }),
-  "card-details-info": route({ surface: "app", registryIds: ["pi.card.details-info"], productEligibility: "mobile-runtime", statusBar: "dark", backFallback: "card-detail", payload: "card", deepLink: { restorable: true, fallback: "card-details-info", payload: "card" } }),
-  "card-options": route({ surface: "app", registryIds: ["pi.card.options"], productEligibility: "mobile-runtime", statusBar: "dark", backFallback: "card-detail", payload: "card", deepLink: { restorable: true, fallback: "card-options", payload: "card" } }),
-  "transaction-detail": route({ surface: "app", registryIds: ["pi.transaction.detail"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "account-detail", payload: "transaction", deepLink: { restorable: false, fallback: "account-detail", fallbackWithCard: "card-detail", payload: "none" } }),
-  "card-detail": route({ surface: "app", registryIds: ["pi.card.detail"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "homepage", payload: "card", deepLink: { restorable: true, fallback: "card-detail", payload: "card" } }),
-  "domestic-payment": route({ surface: "app", registryIds: ["pi.payment.domestic-create"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "payments", payload: "payment-draft", deepLink: { restorable: false, fallback: "payments", payload: "none" } }),
-  "payment-review": route({ surface: "app", registryIds: ["pi.payment.review"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "domestic-payment", payload: "payment-draft", deepLink: { restorable: false, fallback: "payments", payload: "none" } }),
-  "payment-sign": route({ surface: "app", registryIds: ["pi.payment.sign"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "payment-review", payload: "none", deepLink: { restorable: false, fallback: "payments", payload: "none" } }),
-  "payment-success": route({ surface: "app", registryIds: ["pi.payment.success"], productEligibility: "mobile-runtime", statusBar: "light", backFallback: "payments", payload: "none", deepLink: { restorable: false, fallback: "payments", payload: "none" } }),
-  "flow-library": route({ surface: "platform", registryIds: ["platform.flow-library"], productEligibility: "unrestricted", statusBar: "dark", backFallback: "homepage", payload: "flow", deepLink: { restorable: true, fallback: "flow-library", payload: "flow" } }),
-  "design-system": route({ surface: "platform", registryIds: ["platform.design-system"], productEligibility: "unrestricted", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "design-system", payload: "none" } }),
-  tools: route({ surface: "platform", registryIds: ["platform.tools"], productEligibility: "unrestricted", statusBar: "light", backFallback: "homepage", payload: "none", deepLink: { restorable: true, fallback: "tools", payload: "none" } }),
-} satisfies Record<Screen, RoutePolicy>;
+  'prelogin-inactive': route({
+    surface: 'prelogin',
+    registryIds: ['pi.prelogin.inactive'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'dark',
+    backFallback: 'prelogin-inactive',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'prelogin-inactive', payload: 'none' },
+  }),
+  'prelogin-active': route({
+    surface: 'prelogin',
+    registryIds: ['pi.prelogin.active'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'dark',
+    backFallback: 'prelogin-active',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'prelogin-active', payload: 'none' },
+  }),
+  'co-apping-session': route({
+    surface: 'app',
+    registryIds: ['pi.co-apping.session'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'prelogin-active',
+    payload: 'none',
+    deepLink: { restorable: false, fallback: 'homepage', payload: 'none' },
+  }),
+  homepage: route({
+    surface: 'app',
+    registryIds: ['pi.home.overview', 'kids.sk.home-concept', 'kids.hu.home-concept', 'kids.ro.home-concept'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'homepage',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'homepage', payload: 'none' },
+  }),
+  'language-selector': route({
+    surface: 'app',
+    registryIds: ['pi.language.selector'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'prelogin-active',
+    payload: 'none',
+    deepLink: { restorable: false, fallback: 'homepage', payload: 'none' },
+  }),
+  analytics: route({
+    surface: 'app',
+    registryIds: ['pi.analytics.overview'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'homepage',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'analytics', payload: 'none' },
+  }),
+  messages: route({
+    surface: 'app',
+    registryIds: ['pi.messages.overview'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'homepage',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'messages', payload: 'none' },
+  }),
+  payments: route({
+    surface: 'app',
+    registryIds: ['pi.payments.overview'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'homepage',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'payments', payload: 'none' },
+  }),
+  products: route({
+    surface: 'app',
+    registryIds: ['pi.products.overview'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'homepage',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'products', payload: 'none' },
+  }),
+  'my-banker': route({
+    surface: 'app',
+    registryIds: ['pi.my-banker.recommendations'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'homepage',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'my-banker', payload: 'none' },
+  }),
+  'product-detail': route({
+    surface: 'app',
+    registryIds: ['pi.products.detail'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'products',
+    payload: 'product-detail',
+    deepLink: { restorable: false, fallback: 'products', payload: 'none' },
+  }),
+  investments: route({
+    surface: 'app',
+    registryIds: ['pi.investments.portfolio'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'homepage',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'investments', payload: 'none' },
+  }),
+  'smart-investment': route({
+    surface: 'app',
+    registryIds: ['pi.investments.smart-investment'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'homepage',
+    payload: 'none',
+    deepLink: { restorable: false, fallback: 'homepage', payload: 'none' },
+  }),
+  'future-gain-peer-insights': route({
+    surface: 'app',
+    registryIds: ['pi.investments.future-gain-peer-insights'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'products',
+    payload: 'none',
+    deepLink: { restorable: false, fallback: 'products', payload: 'none' },
+  }),
+  'investments-history': route({
+    surface: 'app',
+    registryIds: ['pi.investments.history'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'investments',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'investments-history', payload: 'none' },
+  }),
+  'investment-orders-to-approve': route({
+    surface: 'app',
+    registryIds: [],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'investments',
+    payload: 'none',
+    deepLink: { restorable: false, fallback: 'investments', payload: 'none' },
+  }),
+  prime: route({
+    surface: 'app',
+    registryIds: ['pi.prime.overview'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'dark',
+    backFallback: 'homepage',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'prime', payload: 'none' },
+  }),
+  appointments: route({
+    surface: 'app',
+    registryIds: ['pi.prime.appointments'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'prime',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'appointments', payload: 'none' },
+  }),
+  'request-call': route({
+    surface: 'app',
+    registryIds: ['pi.prime.call-request'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'prime',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'request-call', payload: 'none' },
+  }),
+  more: route({
+    surface: 'app',
+    registryIds: ['pi.more.overview'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'more',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'more', payload: 'none' },
+  }),
+  documents: route({
+    surface: 'app',
+    registryIds: ['pi.documents.overview'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'more',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'documents', payload: 'none' },
+  }),
+  settings: route({
+    surface: 'app',
+    registryIds: ['pi.settings.overview'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'more',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'settings', payload: 'none' },
+  }),
+  contacts: route({
+    surface: 'app',
+    registryIds: ['pi.contacts.overview'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'more',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'contacts', payload: 'none' },
+  }),
+  transactions: route({
+    surface: 'app',
+    registryIds: ['pi.transactions.overview'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'homepage',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'transactions', payload: 'none' },
+  }),
+  'account-detail': route({
+    surface: 'app',
+    registryIds: ['pi.account.detail'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'homepage',
+    payload: 'account',
+    deepLink: { restorable: true, fallback: 'account-detail', payload: 'account' },
+  }),
+  'account-details-info': route({
+    surface: 'app',
+    registryIds: ['pi.account.details-info'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'account-detail',
+    payload: 'account',
+    deepLink: { restorable: true, fallback: 'account-details-info', payload: 'account' },
+  }),
+  'account-options': route({
+    surface: 'app',
+    registryIds: ['pi.account.options'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'account-detail',
+    payload: 'account',
+    deepLink: { restorable: true, fallback: 'account-options', payload: 'account' },
+  }),
+  'card-details-info': route({
+    surface: 'app',
+    registryIds: ['pi.card.details-info'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'dark',
+    backFallback: 'card-detail',
+    payload: 'card',
+    deepLink: { restorable: true, fallback: 'card-details-info', payload: 'card' },
+  }),
+  'card-options': route({
+    surface: 'app',
+    registryIds: ['pi.card.options'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'dark',
+    backFallback: 'card-detail',
+    payload: 'card',
+    deepLink: { restorable: true, fallback: 'card-options', payload: 'card' },
+  }),
+  'transaction-detail': route({
+    surface: 'app',
+    registryIds: ['pi.transaction.detail'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'account-detail',
+    payload: 'transaction',
+    deepLink: { restorable: false, fallback: 'account-detail', fallbackWithCard: 'card-detail', payload: 'none' },
+  }),
+  'card-detail': route({
+    surface: 'app',
+    registryIds: ['pi.card.detail'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'homepage',
+    payload: 'card',
+    deepLink: { restorable: true, fallback: 'card-detail', payload: 'card' },
+  }),
+  'domestic-payment': route({
+    surface: 'app',
+    registryIds: ['pi.payment.domestic-create'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'payments',
+    payload: 'payment-draft',
+    deepLink: { restorable: false, fallback: 'payments', payload: 'none' },
+  }),
+  'payment-review': route({
+    surface: 'app',
+    registryIds: ['pi.payment.review'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'domestic-payment',
+    payload: 'payment-draft',
+    deepLink: { restorable: false, fallback: 'payments', payload: 'none' },
+  }),
+  'payment-sign': route({
+    surface: 'app',
+    registryIds: ['pi.payment.sign'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'payment-review',
+    payload: 'none',
+    deepLink: { restorable: false, fallback: 'payments', payload: 'none' },
+  }),
+  'payment-success': route({
+    surface: 'app',
+    registryIds: ['pi.payment.success'],
+    productEligibility: 'mobile-runtime',
+    statusBar: 'light',
+    backFallback: 'payments',
+    payload: 'none',
+    deepLink: { restorable: false, fallback: 'payments', payload: 'none' },
+  }),
+  'flow-library': route({
+    surface: 'platform',
+    registryIds: ['platform.flow-library'],
+    productEligibility: 'unrestricted',
+    statusBar: 'dark',
+    backFallback: 'homepage',
+    payload: 'flow',
+    deepLink: { restorable: true, fallback: 'flow-library', payload: 'flow' },
+  }),
+  'design-system': route({
+    surface: 'platform',
+    registryIds: ['platform.design-system'],
+    productEligibility: 'unrestricted',
+    statusBar: 'light',
+    backFallback: 'homepage',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'design-system', payload: 'none' },
+  }),
+  tools: route({
+    surface: 'platform',
+    registryIds: ['platform.tools'],
+    productEligibility: 'unrestricted',
+    statusBar: 'light',
+    backFallback: 'homepage',
+    payload: 'none',
+    deepLink: { restorable: true, fallback: 'tools', payload: 'none' },
+  }),
+} satisfies Record<Screen, RoutePolicy>
 
 export interface ProductRouteContext {
-  product: ProductId;
-  country: CountryId;
-  designSystem: DesignSystemId;
-  release?: ReleaseId;
-  scenario?: 'active' | 'inactive';
+  product: ProductId
+  country: CountryId
+  designSystem: DesignSystemId
+  release?: ReleaseId
+  scenario?: 'active' | 'inactive'
 }
 
 export function isRouteEligibleForProductContext(screen: Screen, context: ProductRouteContext): boolean {
-  if (ROUTE_POLICY[screen].productEligibility === "unrestricted") return true;
-  if (context.designSystem !== "current") return false;
+  if (ROUTE_POLICY[screen].productEligibility === 'unrestricted') return true
+  if (context.country === 'IT') {
+    return context.product === 'PI' && context.designSystem === 'mobile-first' && screen === 'homepage'
+  }
+  if (context.designSystem !== 'current') return false
   if (screen === 'future-gain-peer-insights') {
     return isFutureGainAvailable({
       product: context.product,
       country: context.country,
       release: context.release ?? 'release-current',
-    });
+    })
   }
   if (screen === 'my-banker') {
-    return isReleaseFeatureActive({
-      ...context,
-      release: context.release ?? 'release-current',
-      scenario: context.scenario ?? 'active',
-    }, 'fx_rsMyBanker');
+    return isReleaseFeatureActive(
+      {
+        ...context,
+        release: context.release ?? 'release-current',
+        scenario: context.scenario ?? 'active',
+      },
+      'fx_rsMyBanker',
+    )
   }
-  if (context.product === "PI") return true;
+  if (context.product === 'PI') return true
   return (
-    context.product === "KIDS_PI" &&
-    (context.country === "HU" || context.country === "SK" || context.country === "RO")
-  );
+    context.product === 'KIDS_PI' && (context.country === 'HU' || context.country === 'SK' || context.country === 'RO')
+  )
 }
 
 export function resolveRouteStatusBarVariant(
   screen: Screen,
   context: ProductRouteContext & { themeMode: ThemeMode },
 ): RouteStatusBarVariant {
-  if (context.product === "KIDS_PI" && context.designSystem === "current" && context.country === "HU") return "theme";
-  if (context.product === "KIDS_PI" && context.designSystem === "current" && context.country === "RO") return "theme";
-  if (context.product === "KIDS_PI" && context.designSystem === "current" && context.country === "SK") return "light";
+  if (context.product === 'PI' && context.country === 'IT' && context.designSystem === 'mobile-first') return 'light'
+  if (context.product === 'KIDS_PI' && context.designSystem === 'current' && context.country === 'HU') return 'theme'
+  if (context.product === 'KIDS_PI' && context.designSystem === 'current' && context.country === 'RO') return 'theme'
+  if (context.product === 'KIDS_PI' && context.designSystem === 'current' && context.country === 'SK') return 'light'
   // Evo 2027 Products opens on a full-bleed photo hero, so the status bar needs light content.
-  if (screen === "products" && context.release === "release-future-evo-2027") return "dark";
-  if (context.themeMode === "dark" && screen !== "prelogin-inactive" && screen !== "prelogin-active" && screen !== "prime") return "dark";
-  return ROUTE_POLICY[screen].statusBar;
+  if (screen === 'products' && context.release === 'release-future-evo-2027') return 'dark'
+  if (
+    context.themeMode === 'dark' &&
+    screen !== 'prelogin-inactive' &&
+    screen !== 'prelogin-active' &&
+    screen !== 'prime'
+  )
+    return 'dark'
+  return ROUTE_POLICY[screen].statusBar
 }

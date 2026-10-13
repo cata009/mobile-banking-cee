@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { COUNTRIES, COUNTRY_META } from '@/app/registry/demoConfig'
+import { COUNTRY_META } from '@/app/registry/demoConfig'
+
 import { getAccountTransactions, getCardTransactions } from '@/data/accountDetails'
 import {
   MERCHANTS,
@@ -11,6 +12,9 @@ import {
 import type { MerchantId } from '@/data/merchantDirectory'
 import { mockProducts } from '@/data/products'
 import type { Currency, DebitCard } from '@/data/products'
+
+// Ledger and merchant fixtures describe the implemented CEE account-detail markets.
+const COUNTRIES = ['RO', 'CZ', 'SK', 'HU', 'RS', 'BA', 'BA_BL', 'SI'] as const
 
 /**
  * The ledger keeps a handful of card rows deliberately unbranded: a market

@@ -1,0 +1,193 @@
+.mf-search-page {
+  --mf-keyboard-height: 290px;
+}
+
+.mf-keyboard {
+  position: absolute;
+  z-index: 30;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+  height: var(--mf-keyboard-height, 290px);
+  padding: 8px 6px max(8px, env(safe-area-inset-bottom, 0px));
+  background: #d1d3d9;
+  color: #111;
+  user-select: none;
+  -webkit-user-select: none;
+  animation: mf-keyboard-enter 350ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.mf-keyboard-row,
+.mf-keyboard-letters {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+}
+
+.mf-keyboard-row {
+  flex: 0 0 42px;
+}
+
+.mf-keyboard-row--middle {
+  padding: 0 4.7%;
+}
+
+.mf-keyboard-letters {
+  flex: 1;
+  margin: 0 4px;
+}
+
+.mf-keyboard .mf-key {
+  position: relative;
+  display: grid;
+  flex: 1;
+  place-items: center;
+  min-width: 0;
+  height: 42px;
+  padding: 0;
+  border: 0;
+  border-radius: 4.6px;
+  background: #fff;
+  color: inherit;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: calc(22px * var(--mf-text-scale, 1));
+  font-weight: 400;
+  line-height: 1;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color 65ms ease,
+    transform 65ms ease;
+}
+
+.mf-keyboard .mf-key[data-pressed='true'] {
+  z-index: 2;
+  background: #eef0f3;
+  transform: translateY(1px);
+}
+
+.mf-keyboard .mf-key--modifier {
+  flex: 0 0 42px;
+  background: #abb0bc;
+}
+
+.mf-keyboard .mf-key--selected,
+.mf-keyboard .mf-key--shift {
+  background: #fff;
+}
+
+.mf-key-label > img {
+  display: block;
+  width: 32px;
+  height: 41px;
+}
+
+.mf-keyboard .mf-key--layout {
+  font-size: calc(15px * var(--mf-text-scale, 1));
+}
+
+.mf-keyboard-row--bottom .mf-key--layout {
+  flex-basis: 23%;
+}
+
+.mf-keyboard .mf-key--space,
+.mf-keyboard .mf-key--return {
+  font-size: calc(16px * var(--mf-text-scale, 1));
+}
+
+.mf-keyboard .mf-key--space {
+  flex: 1;
+}
+
+.mf-keyboard .mf-key--return {
+  flex: 0 0 24%;
+  background: #007a91;
+  color: #fff;
+  font-weight: 500;
+}
+
+.mf-keyboard .mf-key--return[data-pressed='true'] {
+  background: #005e70;
+}
+
+.mf-key-bubble {
+  position: absolute;
+  bottom: calc(100% + 9px);
+  left: 50%;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 57px;
+  border-radius: 9px;
+  background: #fff;
+  font-size: calc(32px * var(--mf-text-scale, 1));
+  line-height: 1;
+  box-shadow: 0 1px 3px #767a8580;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.mf-key-bubble::after {
+  position: absolute;
+  top: calc(100% - 1px);
+  width: 19px;
+  height: 12px;
+  background: #fff;
+  clip-path: polygon(0 0, 100% 0, 75% 100%, 25% 100%);
+  content: '';
+}
+
+.mf-keyboard-utilities {
+  position: absolute;
+  top: 235px;
+  right: 26px;
+  left: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+}
+
+.mf-keyboard-utilities > img {
+  display: block;
+}
+
+.mf-keyboard-home {
+  position: absolute;
+  right: 0;
+  bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  left: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.mf-keyboard-home > span {
+  width: 134px;
+  height: 5px;
+  border-radius: 999px;
+  background: #111;
+}
+
+@keyframes mf-keyboard-enter {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mf-keyboard {
+    animation: none;
+  }
+  .mf-keyboard .mf-key {
+    transition: none;
+  }
+}

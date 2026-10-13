@@ -16,13 +16,13 @@
  */
 
 import { COUNTRIES } from "@/app/registry/demoConfig";
-import { PRODUCT_ORDER } from "@/app/registry/projectModel";
+import { DESIGN_SYSTEM_ORDER, PRODUCT_ORDER } from "@/app/registry/projectModel";
 import { RELEASE_ORDER, getReleaseBundle } from "@/app/registry/releaseRegistry";
 import { BANKING_SCENARIOS } from "@/app/platform/banking/bankingScenarioRegistry";
 import { getAvailableLanguages, type AppLanguage } from "@/app/registry/languageByCountry";
 import { FLOW_PREVIEW_ORDER, type FlowPreviewId } from "@/app/registry/flowPreviewRegistry";
 import type { Screen } from "@/app/contexts/NavigationContext";
-import { ROUTE_POLICY } from "@/app/navigation/routePolicy";
+import { isRouteEligibleForProductContext, ROUTE_POLICY } from "@/app/navigation/routePolicy";
 import type {
   BankingScenarioId,
   CountryId,
@@ -102,7 +102,7 @@ const VALID_COUNTRIES = new Set<string>(COUNTRIES);
 const VALID_RELEASES = new Set<string>(RELEASE_ORDER);
 const VALID_BANKING = new Set<string>(Object.keys(BANKING_SCENARIOS));
 const VALID_SCENARIOS = new Set<string>(["active", "inactive"]);
-const VALID_DESIGN_SYSTEMS = new Set<string>(["current", "next"]);
+const VALID_DESIGN_SYSTEMS = new Set<string>(DESIGN_SYSTEM_ORDER);
 const VALID_THEMES = new Set<string>(["light", "dark"]);
 const VALID_FLOW_PREVIEWS = new Set<string>(FLOW_PREVIEW_ORDER);
 
@@ -193,6 +193,24 @@ export function parseDeepLinkFromUrl(search: string = window.location.search): P
   // frame=0 → frameless "real device" mode.
   if (params.get(PARAM.frame) === "0") parsed.deviceMode = true;
 
+  if (parsed.country === "IT" && (parsed.product ?? "PI") === "PI") {
+    parsed.product = "PI";
+    parsed.designSystem = "mobile-first";
+    parsed.scenario = "active";
+    parsed.release = "release-current";
+    if (parsed.bankingScenario === "kids-child-preview" || parsed.bankingScenario === "sme-owner-preview") {
+      parsed.bankingScenario = "retail-single-account";
+    }
+    if (!parsed.screen || !isRouteEligibleForProductContext(parsed.screen, {
+      product: "PI", country: "IT", designSystem: "mobile-first",
+    })) {
+      parsed.screen = "homepage";
+      delete parsed.accountId;
+      delete parsed.cardId;
+      delete parsed.flowId;
+    }
+  }
+
   return parsed;
 }
 
@@ -237,15 +255,19 @@ export function deepLinkToDemoInitialState(parsed: ParsedDeepLink | null): Parti
 export function buildDeepLinkUrl(state: DeepLinkState): string {
   const hasCardParent = state.screen === 'transaction-detail' && state.transactionSource === 'account'
     ? false : Boolean(state.cardId);
-  const normalizedScreen = normalizeScreen(state.screen, hasCardParent);
+  const stableScreen = normalizeScreen(state.screen, hasCardParent);
+  const isItalyMobileFirst = state.product === "PI" && state.country === "IT";
+  const normalizedScreen = isItalyMobileFirst && !isRouteEligibleForProductContext(stableScreen, {
+    ...state, designSystem: "mobile-first",
+  }) ? "homepage" : stableScreen;
   const payloadPolicy = ROUTE_POLICY[normalizedScreen].deepLink.payload;
   const params = new URLSearchParams();
 
   params.set(PARAM.product, state.product);
   params.set(PARAM.country, state.country);
-  params.set(PARAM.scenario, state.scenario);
-  params.set(PARAM.designSystem, state.designSystem);
-  params.set(PARAM.release, state.release);
+  params.set(PARAM.scenario, isItalyMobileFirst ? "active" : state.scenario);
+  params.set(PARAM.designSystem, isItalyMobileFirst ? "mobile-first" : state.designSystem);
+  params.set(PARAM.release, isItalyMobileFirst ? "release-current" : state.release);
   params.set(PARAM.bankingScenario, state.bankingScenario);
   params.set(PARAM.themeMode, state.themeMode);
   params.set(PARAM.language, state.language);

@@ -20,6 +20,7 @@ export type MoreCardType =
  * Cards are listed in display order (left to right, top to bottom)
  */
 export const MORE_CARDS_CONFIG: Record<CountryId, MoreCardType[]> = {
+  IT: [],
   // Romania - 5 cards
   RO: [
     'contacts',

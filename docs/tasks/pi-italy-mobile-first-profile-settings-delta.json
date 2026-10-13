@@ -1,0 +1,173 @@
+{
+  "owner": "/root/profile_settings",
+  "baseCommit": "538360ead4a6da9ae889f142f8d00e333f99412b",
+  "checkout": "C:/Users/mihai/Desktop/Mobile Banking - CEE",
+  "changes": [
+    {
+      "status": "A",
+      "path": "src/experiences/pi/it/mobile-first/MobileFirstProfileSettings.tsx"
+    },
+    {
+      "status": "A",
+      "path": "src/experiences/pi/it/mobile-first/MobileFirstProfileSettingsBank.tsx"
+    },
+    {
+      "status": "A",
+      "path": "src/experiences/pi/it/mobile-first/MobileFirstProfileSettingsCommunications.tsx"
+    },
+    {
+      "status": "A",
+      "path": "src/experiences/pi/it/mobile-first/MobileFirstProfileSettingsSecurity.tsx"
+    },
+    {
+      "status": "A",
+      "path": "src/experiences/pi/it/mobile-first/MobileFirstProfileSettingsShared.tsx"
+    },
+    {
+      "status": "A",
+      "path": "src/experiences/pi/it/mobile-first/mobile-first-profile-settings.css"
+    },
+    {
+      "status": "A",
+      "path": "src/experiences/pi/it/mobile-first/profileSettingsContent.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/experiences/pi/it/mobile-first/profileSettingsAssets.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/features/profile/mobileFirstProfileSettings.ts"
+    },
+    {
+      "status": "A",
+      "path": "tests/screens/mobile-first-profile-settings.test.tsx"
+    },
+    {
+      "status": "A",
+      "path": "tests/features/mobile-first-profile-settings.test.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/atm.png"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/devices.svg"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/eye.svg"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/face-id.svg"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/general.svg"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/limits-document.png"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/limits.svg"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/newsletter.svg"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/notifications.svg"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/phishing.png"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/privacy-document.png"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/privacy.svg"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/quick.svg"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/relationship-document.png"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/security.svg"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/success.svg"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/telephone.png"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/third-party.svg"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/withdrawal.svg"
+    },
+    {
+      "status": "A",
+      "path": "docs/tasks/pi-italy-mobile-first-profile-settings-assets.json"
+    },
+    {
+      "status": "A",
+      "path": "docs/tasks/pi-italy-mobile-first-profile-settings-coverage.json"
+    },
+    {
+      "status": "A",
+      "path": "docs/tasks/pi-italy-mobile-first-profile-settings-figma.json"
+    },
+    {
+      "status": "A",
+      "path": "docs/tasks/pi-italy-mobile-first-profile-settings-ownership.json"
+    },
+    {
+      "status": "A",
+      "path": "docs/tasks/pi-italy-mobile-first-profile-settings-delta.json"
+    },
+    {
+      "status": "A",
+      "path": "docs/tasks/pi-italy-mobile-first-profile-settings.md"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/edit.svg"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/forth.svg"
+    },
+    {
+      "status": "A",
+      "path": "src/assets/mobile-first/it/profile/settings/email-eye.svg"
+    }
+  ],
+  "outsideScopeEdits": [],
+  "newFileCount": 39,
+  "notes": "All owned files are new. Existing initial user/other-agent deltas were preserved. No Git index mutation/commit.",
+  "handoffs": [
+    {
+      "path": "src/experiences/pi/it/mobile-first/mobile-first-profile-settings.css",
+      "owner": "/root",
+      "reason": "Mechanical --mf-text-scale font/line-height conversion and baseline check; worker CSS edit ownership released."
+    }
+  ]
+}

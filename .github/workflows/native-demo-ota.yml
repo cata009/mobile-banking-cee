@@ -1,0 +1,149 @@
+name: Native demo signed OTA
+
+on:
+  deployment_status:
+  pull_request:
+    paths:
+      [
+        'native-update-server/**',
+        'native-spike/**',
+        'scripts/native-spike/ota/**',
+        'scripts/native-spike/fidelity/**',
+        'src/experiences/pi/it/mobile-first/**',
+        'src/assets/mobile-first/it/**',
+        'src/styles/**',
+        'src/features/**',
+        'src/app/components/BottomSheet.tsx',
+        'src/app/components/ui/ScrollableRegion.tsx',
+        'src/app/components/ui/keyboardActivation.ts',
+        '.github/workflows/native-demo-ota.yml',
+      ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-demo-ota-release
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    if: github.event_name == 'pull_request'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: '24' }
+      - run: npm ci
+        working-directory: native-update-server
+      - run: npm ci
+        working-directory: native-spike
+      - run: npm test
+        working-directory: native-update-server
+      - run: npm run build
+        working-directory: native-update-server
+      - run: npm run typecheck:production-config
+        working-directory: native-update-server
+      - run: npm run fidelity:check
+        working-directory: native-spike
+      - run: npm run fidelity:test
+        working-directory: native-spike
+      - run: npm test -- --runInBand
+        working-directory: native-spike
+      - run: npm run typecheck
+        working-directory: native-spike
+
+  release:
+    # Repository variable must be explicitly enabled after APK confirmation and infrastructure review.
+    if: >-
+      vars.NATIVE_OTA_RELEASE_ENABLED == 'true' &&
+      github.event_name == 'deployment_status' &&
+      github.event.deployment_status.state == 'success' &&
+      (github.event.deployment.environment == 'Production' || github.event.deployment.environment == 'production')
+    runs-on: windows-latest
+    timeout-minutes: 30
+    environment: native-ota-production
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.deployment.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: '24' }
+      - run: npm ci
+        working-directory: native-update-server
+      - run: npm ci
+        working-directory: native-spike
+      - run: npm test
+        working-directory: native-update-server
+      - run: npm run build
+        working-directory: native-update-server
+      - run: npm run typecheck:production-config
+        working-directory: native-update-server
+      - run: npm test -- --runInBand
+        working-directory: native-spike
+      - run: npm run typecheck
+        working-directory: native-spike
+      - run: npm run lint -- --max-warnings 0
+        working-directory: native-spike
+      - name: Reject native changes requiring a new base APK
+        run: node scripts/native-spike/ota/verify-runtime.mjs
+      - name: Detect frozen Italy reference drift
+        run: node scripts/native-spike/fidelity/check-reference.mjs
+      - name: Verify exact Vercel deployment and approved native identity
+        run: npm run release:preflight
+        working-directory: native-update-server
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_OTA_READ_TOKEN }}
+          VERCEL_WEB_PROJECT_ID: ${{ vars.VERCEL_WEB_PROJECT_ID }}
+          VERCEL_WEB_PRODUCTION_URL: ${{ vars.VERCEL_WEB_PRODUCTION_URL }}
+          VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
+          NATIVE_OTA_BASE_FINGERPRINT: ${{ vars.NATIVE_OTA_BASE_FINGERPRINT }}
+          NATIVE_OTA_APK_CERT_SHA256: ${{ vars.NATIVE_OTA_APK_CERT_SHA256 }}
+          NATIVE_OTA_ATTESTATION_PATH: ${{ runner.temp }}/native-ota-attestation.json
+      - name: Build and publish signed JS for this exact deployed SHA
+        shell: pwsh
+        working-directory: native-spike
+        env:
+          NATIVE_OTA_SERVER_URL: ${{ vars.NATIVE_OTA_SERVER_URL }}
+          NATIVE_OTA_CHANNEL: demo-preview
+          NATIVE_OTA_BASE_FINGERPRINT: ${{ vars.NATIVE_OTA_BASE_FINGERPRINT }}
+          NATIVE_OTA_APK_CERT_SHA256: ${{ vars.NATIVE_OTA_APK_CERT_SHA256 }}
+          NATIVE_OTA_ADMIN_TOKEN: ${{ secrets.NATIVE_OTA_ADMIN_TOKEN }}
+          NATIVE_OTA_PRIVATE_KEY_BASE64: ${{ secrets.NATIVE_OTA_PRIVATE_KEY_BASE64 }}
+          S3_ENDPOINT: ${{ vars.S3_ENDPOINT }}
+          S3_REGION: ${{ vars.S3_REGION }}
+          S3_BUCKET: ${{ vars.S3_BUCKET }}
+          S3_ACCESS_KEY_ID: ${{ secrets.NATIVE_OTA_S3_WRITE_ACCESS_KEY_ID }}
+          S3_SECRET_ACCESS_KEY: ${{ secrets.NATIVE_OTA_S3_WRITE_SECRET_ACCESS_KEY }}
+          RELEASE_SOURCE_SHA: ${{ github.event.deployment.sha }}
+          GITHUB_TOKEN: ${{ github.token }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_OTA_READ_TOKEN }}
+          VERCEL_WEB_PROJECT_ID: ${{ vars.VERCEL_WEB_PROJECT_ID }}
+          VERCEL_WEB_PRODUCTION_URL: ${{ vars.VERCEL_WEB_PRODUCTION_URL }}
+          VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (-not $env:NATIVE_OTA_PRIVATE_KEY_BASE64) { throw 'Original OTA signing key secret is required.' }
+          $keyDirectory = Join-Path $env:RUNNER_TEMP 'native-ota-signing'
+          New-Item -ItemType Directory -Force $keyDirectory | Out-Null
+          $env:NATIVE_OTA_PRIVATE_KEY_PATH = Join-Path $keyDirectory 'private-key.pem'
+          [IO.File]::WriteAllBytes($env:NATIVE_OTA_PRIVATE_KEY_PATH, [Convert]::FromBase64String($env:NATIVE_OTA_PRIVATE_KEY_BASE64))
+          $archiveDirectory = Join-Path $env:RUNNER_TEMP 'native-ota-artifacts'
+          # The pinned CLI has no --config switch. Only this disposable runner checkout selects the production config.
+          try {
+            Copy-Item hot-updater.production.config.ts hot-updater.config.ts -Force
+            npx --no-install hot-updater deploy --platform android --channel demo-preview --message "Git source SHA $env:RELEASE_SOURCE_SHA" --bundle-output-path $archiveDirectory
+            if ($LASTEXITCODE -ne 0) { throw 'Signed OTA release failed.' }
+          } finally {
+            Remove-Item -LiteralPath $env:NATIVE_OTA_PRIVATE_KEY_PATH -Force
+          }
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: native-ota-${{ github.event.deployment.sha }}
+          path: |
+            ${{ runner.temp }}/native-ota-attestation.json
+            ${{ runner.temp }}/native-ota-artifacts/*
+          if-no-files-found: error

@@ -5,7 +5,7 @@
  * Extracted verbatim from TemplateCodePreviews.tsx so the preview components
  * read as layout rather than as layout mixed with fixture data.
  */
-import type { IconName } from "@/app/components/icons";
+import type { IconName } from "@/app/components/icons/iconNames";
 import { MESSAGES_CONFIG_BY_COUNTRY } from "@/app/config/messagesConfig";
 import type { MoreCardType } from "@/app/config/moreCardsConfig";
 

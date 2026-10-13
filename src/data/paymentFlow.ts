@@ -63,6 +63,7 @@ export interface TransactionDetailData {
 }
 
 const COUNTRY_BANK_NAMES: Record<CountryId, string> = {
+  IT: "",
   RO: "UniCredit Bank Romania",
   CZ: "UniCredit Bank Czech Republic and Slovakia",
   SK: "UniCredit Bank Czech Republic and Slovakia",
@@ -74,6 +75,7 @@ const COUNTRY_BANK_NAMES: Record<CountryId, string> = {
 };
 
 const COUNTRY_BANK_CODES: Record<CountryId, string> = {
+  IT: "",
   RO: "0292",
   CZ: "0800",
   SK: "1100",

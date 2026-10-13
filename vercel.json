@@ -84,6 +84,11 @@
   ],
   "rewrites": [
     {
+      "source": "/api/native-updates/:path*",
+      "missing": [{ "type": "query", "key": "__native_ota_route" }],
+      "destination": "/api/native-update-proxy?__native_ota_route=:path*"
+    },
+    {
       "source": "/assets/index-:hash.js",
       "destination": "/assets/app.js"
     },

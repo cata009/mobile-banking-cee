@@ -6,6 +6,7 @@ import { PI_RS_BASELINE } from './pi/rs/baseline/manifest'
 import { PI_BA_BASELINE } from './pi/ba/baseline/manifest'
 import { PI_BA_BL_BASELINE } from './pi/ba-bl/baseline/manifest'
 import { PI_SI_BASELINE } from './pi/si/baseline/manifest'
+import { PI_IT_MOBILE_FIRST } from './pi/it/mobile-first/manifest'
 import { PI_CZ_COAPPING } from './pi/cz/coapping/manifest'
 import { PI_CZ_ROBO } from './pi/cz/robo/manifest'
 import { PI_CZ_EVO } from './pi/cz/evo-2027/manifest'
@@ -74,6 +75,7 @@ export const EXPERIENCE_MANIFESTS: readonly ExperienceManifest[] = [
   PI_BA_BASELINE,
   PI_BA_BL_BASELINE,
   PI_SI_BASELINE,
+  PI_IT_MOBILE_FIRST,
   PI_CZ_COAPPING,
   PI_CZ_ROBO,
   PI_CZ_EVO,

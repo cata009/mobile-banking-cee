@@ -1,121 +1,164 @@
-import { FormEvent, ReactNode, CSSProperties, useEffect, useState } from "react";
-import { shouldUseLocalAccess } from "./accessGatePolicy";
+import { FormEvent, ReactNode, CSSProperties, useEffect, useState } from 'react'
+import { shouldUseLocalAccess } from './accessGatePolicy'
 
 type AccessGateProps = {
-  children: ReactNode;
-};
+  children: ReactNode
+}
 
-type AccessStatus = "checking" | "locked" | "unlocked";
+type AccessStatus = 'checking' | 'locked' | 'unlocked' | 'mobile-error'
 
-const LOCAL_ACCESS_KEY = "mb-local-access";
-const SHARE_ACCESS_PARAM = "access_token";
+const LOCAL_ACCESS_KEY = 'mb-local-access'
+const SHARE_ACCESS_PARAM = 'access_token'
+const MOBILE_ENTRY_KEY = 'mb-mobile-entry-context'
+const MOBILE_ATTEMPT_KEY = 'mb-mobile-entry-attempt'
+
+function mobileContextKey() {
+  const params = new URLSearchParams(window.location.search)
+  if (params.get('frame') !== '0') return null
+  return ['product', 'country', 'ds', 'release'].map((key) => params.get(key) ?? '').join(':')
+}
+
+function readSessionValue(key: string) {
+  try {
+    return sessionStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+
+function rememberSessionValue(key: string, value: string | null) {
+  try {
+    if (value === null) sessionStorage.removeItem(key)
+    else sessionStorage.setItem(key, value)
+  } catch {
+    /* Storage is bookkeeping; server validation is always required. */
+  }
+}
+
+function isMobileEntryRequested() {
+  const context = mobileContextKey()
+  return (
+    context !== null &&
+    (new URLSearchParams(window.location.search).get('apk') === '1' || readSessionValue(MOBILE_ENTRY_KEY) === context)
+  )
+}
+
+function mobileAccessUrl(mode: 'mobile-entry' | 'mobile-status') {
+  const query = new URLSearchParams({
+    mode,
+    returnTo: `${window.location.pathname}${window.location.search}${window.location.hash}`,
+  })
+  return `/api/access?${query}`
+}
 const USE_LOCAL_ACCESS = shouldUseLocalAccess({
   isDev: import.meta.env.DEV,
   hostname: window.location.hostname,
-});
-const LOCAL_DEV_PASSWORD = USE_LOCAL_ACCESS ? import.meta.env.VITE_LOCAL_ACCESS_PASSWORD || "" : "";
-const LOCAL_SHARE_ACCESS_TOKEN = USE_LOCAL_ACCESS
-  ? import.meta.env.VITE_LOCAL_SHARE_ACCESS_TOKEN || ""
-  : "";
-const ONE_MONTH_MS = 31 * 24 * 60 * 60 * 1000;
-const SIX_MONTHS_MS = 183 * 24 * 60 * 60 * 1000;
+})
+const LOCAL_DEV_PASSWORD = USE_LOCAL_ACCESS ? import.meta.env.VITE_LOCAL_ACCESS_PASSWORD || '' : ''
+const LOCAL_SHARE_ACCESS_TOKEN = USE_LOCAL_ACCESS ? import.meta.env.VITE_LOCAL_SHARE_ACCESS_TOKEN || '' : ''
+const ONE_MONTH_MS = 31 * 24 * 60 * 60 * 1000
+const SIX_MONTHS_MS = 183 * 24 * 60 * 60 * 1000
 const LOCAL_CONFIGURATION_MESSAGE =
-  "Local access is not configured. Add VITE_LOCAL_ACCESS_PASSWORD to .env.local and restart Vite.";
+  'Local access is not configured. Add VITE_LOCAL_ACCESS_PASSWORD to .env.local and restart Vite.'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
 }
 
 function readLocalJson(key: string): unknown {
   try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : null;
+    const raw = localStorage.getItem(key)
+    return raw ? JSON.parse(raw) : null
   } catch {
-    return null;
+    return null
   }
 }
 
 function isLocalAccessValid() {
-  const access = readLocalJson(LOCAL_ACCESS_KEY);
-  return isRecord(access) && typeof access.expiresAt === "number" &&
-    Number.isFinite(access.expiresAt) && access.expiresAt > Date.now();
+  const access = readLocalJson(LOCAL_ACCESS_KEY)
+  return (
+    isRecord(access) &&
+    typeof access.expiresAt === 'number' &&
+    Number.isFinite(access.expiresAt) &&
+    access.expiresAt > Date.now()
+  )
 }
 
 function setLocalAccess(remember: boolean) {
-  const now = Date.now();
+  const now = Date.now()
   try {
     localStorage.setItem(
       LOCAL_ACCESS_KEY,
-      JSON.stringify({ expiresAt: now + (remember ? SIX_MONTHS_MS : ONE_MONTH_MS) })
-    );
+      JSON.stringify({ expiresAt: now + (remember ? SIX_MONTHS_MS : ONE_MONTH_MS) }),
+    )
   } catch {
     // Persistence is optional; valid local authentication still unlocks this session.
   }
 }
 
 async function checkServerAccess() {
-  const response = await fetch("/api/access", {
-    method: "GET",
-    headers: { Accept: "application/json" },
-    credentials: "same-origin",
-  });
+  const response = await fetch('/api/access', {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+    credentials: 'same-origin',
+  })
 
-  if (!response.ok) return false;
+  if (!response.ok) return false
 
-  const data: unknown = await response.json();
-  return isRecord(data) && data.authenticated === true;
+  const data: unknown = await response.json()
+  return isRecord(data) && data.authenticated === true
 }
 
 async function submitServerAccess(password: string, remember: boolean) {
-  const response = await fetch("/api/access", {
-    method: "POST",
+  const response = await fetch('/api/access', {
+    method: 'POST',
     headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ password, remember }),
-    credentials: "same-origin",
-  });
-  const data: unknown = await response.json().catch(() => null);
+    credentials: 'same-origin',
+  })
+  const data: unknown = await response.json().catch(() => null)
 
   return {
     ok: response.ok && isRecord(data) && data.ok === true,
-    message: isRecord(data) && typeof data.message === "string" ? data.message : undefined,
-  };
+    message: isRecord(data) && typeof data.message === 'string' ? data.message : undefined,
+  }
 }
 
 async function submitServerShareAccess(shareToken: string) {
-  const response = await fetch("/api/access", {
-    method: "POST",
+  const response = await fetch('/api/access', {
+    method: 'POST',
     headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ shareToken }),
-    credentials: "same-origin",
-  });
-  const data: unknown = await response.json().catch(() => null);
+    credentials: 'same-origin',
+  })
+  const data: unknown = await response.json().catch(() => null)
 
   return {
     ok: response.ok && isRecord(data) && data.ok === true,
-    message: isRecord(data) && typeof data.message === "string" ? data.message : undefined,
-  };
+    message: isRecord(data) && typeof data.message === 'string' ? data.message : undefined,
+  }
 }
 
 function readShareAccessToken(search: string = window.location.search) {
   try {
-    return new URLSearchParams(search).get(SHARE_ACCESS_PARAM);
+    return new URLSearchParams(search).get(SHARE_ACCESS_PARAM)
   } catch {
-    return null;
+    return null
   }
 }
 
 function removeShareAccessTokenFromUrl() {
   try {
-    const url = new URL(window.location.href);
-    if (!url.searchParams.has(SHARE_ACCESS_PARAM)) return;
-    url.searchParams.delete(SHARE_ACCESS_PARAM);
-    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+    const url = new URL(window.location.href)
+    if (!url.searchParams.has(SHARE_ACCESS_PARAM)) return
+    url.searchParams.delete(SHARE_ACCESS_PARAM)
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
   } catch {
     // URL cleanup is best-effort; access validation remains server-side.
   }
@@ -123,128 +166,205 @@ function removeShareAccessTokenFromUrl() {
 
 function submitLocalAccess(password: string, remember: boolean) {
   if (!LOCAL_DEV_PASSWORD) {
-    return { ok: false, message: LOCAL_CONFIGURATION_MESSAGE };
+    return { ok: false, message: LOCAL_CONFIGURATION_MESSAGE }
   }
 
   if (password !== LOCAL_DEV_PASSWORD) {
     return {
       ok: false,
-      message: "Incorrect password. Please check the password and try again.",
-    };
+      message: 'Incorrect password. Please check the password and try again.',
+    }
   }
 
-  setLocalAccess(remember);
-  return { ok: true, message: "" };
+  setLocalAccess(remember)
+  return { ok: true, message: '' }
 }
 
 export default function AccessGate({ children }: AccessGateProps) {
-  const [status, setStatus] = useState<AccessStatus>("checking");
-  const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(true);
-  const [message, setMessage] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [usesLocalFallback, setUsesLocalFallback] = useState(false);
-  const localConfigurationMissing = usesLocalFallback && !LOCAL_DEV_PASSWORD;
-  const formDisabled = status === "checking" || isSubmitting || localConfigurationMissing;
+  const [mobileEntry] = useState(isMobileEntryRequested)
+  const [status, setStatus] = useState<AccessStatus>('checking')
+  const [password, setPassword] = useState('')
+  const [remember, setRemember] = useState(true)
+  const [message, setMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [usesLocalFallback, setUsesLocalFallback] = useState(false)
+  const localConfigurationMissing = usesLocalFallback && !LOCAL_DEV_PASSWORD
+  const formDisabled = status === 'checking' || isSubmitting || localConfigurationMissing
 
   useEffect(() => {
-    let isMounted = true;
+    let isMounted = true
 
     const checkAccess = async () => {
-      const shareToken = readShareAccessToken();
+      const shareToken = readShareAccessToken()
+
+      if (mobileEntry) {
+        try {
+          if (shareToken) {
+            const shared = USE_LOCAL_ACCESS
+              ? { ok: Boolean(LOCAL_SHARE_ACCESS_TOKEN && shareToken === LOCAL_SHARE_ACCESS_TOKEN) }
+              : await submitServerShareAccess(shareToken)
+            removeShareAccessTokenFromUrl()
+            if (!isMounted) return
+            if (shared.ok) {
+              if (USE_LOCAL_ACCESS) setLocalAccess(true)
+              setStatus('unlocked')
+              return
+            }
+          }
+          const response = await fetch(mobileAccessUrl('mobile-status'), {
+            credentials: 'same-origin',
+            headers: { Accept: 'application/json' },
+          })
+          const data: unknown = await response.json()
+          if (!isMounted) return
+          const context = mobileContextKey() ?? ''
+          if (response.ok && isRecord(data) && data.mobileEntrySupported === true) {
+            if (data.authenticated === true) {
+              rememberSessionValue(MOBILE_ENTRY_KEY, context)
+              rememberSessionValue(MOBILE_ATTEMPT_KEY, null)
+              setStatus('unlocked')
+              return
+            }
+            if (
+              data.mobileContextSupported !== false &&
+              new URLSearchParams(window.location.search).get('mobile_entry') !== '1' &&
+              readSessionValue(MOBILE_ATTEMPT_KEY) !== context
+            ) {
+              rememberSessionValue(MOBILE_ATTEMPT_KEY, context)
+              window.location.replace(mobileAccessUrl('mobile-entry'))
+              return
+            }
+          }
+          setMessage('Automatic app entry is unavailable. Retry once the demo access service is ready.')
+        } catch {
+          if (!isMounted) return
+          setMessage('Cannot connect to the demo. Check your connection and retry.')
+        }
+        if (isMounted) setStatus('mobile-error')
+        return
+      }
 
       if (USE_LOCAL_ACCESS) {
-        setUsesLocalFallback(true);
+        setUsesLocalFallback(true)
 
         if (shareToken) {
-          removeShareAccessTokenFromUrl();
+          removeShareAccessTokenFromUrl()
           if (LOCAL_SHARE_ACCESS_TOKEN && shareToken === LOCAL_SHARE_ACCESS_TOKEN) {
-            setLocalAccess(true);
-            if (isMounted) setStatus("unlocked");
-            return;
+            setLocalAccess(true)
+            if (isMounted) setStatus('unlocked')
+            return
           }
 
           if (isMounted) {
-            setMessage("This local share link is not configured or is invalid. Enter the local password.");
+            setMessage('This local share link is not configured or is invalid. Enter the local password.')
           }
         }
 
-        if (!isMounted) return;
+        if (!isMounted) return
         if (!LOCAL_DEV_PASSWORD) {
-          setMessage(LOCAL_CONFIGURATION_MESSAGE);
-          setStatus("locked");
-          return;
+          setMessage(LOCAL_CONFIGURATION_MESSAGE)
+          setStatus('locked')
+          return
         }
 
-        setStatus(isLocalAccessValid() ? "unlocked" : "locked");
-        return;
+        setStatus(isLocalAccessValid() ? 'unlocked' : 'locked')
+        return
       }
 
       try {
         if (shareToken) {
-          const result = await submitServerShareAccess(shareToken);
-          removeShareAccessTokenFromUrl();
-          if (!isMounted) return;
+          const result = await submitServerShareAccess(shareToken)
+          removeShareAccessTokenFromUrl()
+          if (!isMounted) return
 
           if (result.ok) {
-            setStatus("unlocked");
-            return;
+            setStatus('unlocked')
+            return
           }
 
-          setMessage(result.message || "This share link has expired. Please scan a fresh QR code or enter the password.");
+          setMessage(
+            result.message || 'This share link has expired. Please scan a fresh QR code or enter the password.',
+          )
         }
 
-        const authenticated = await checkServerAccess();
-        if (!isMounted) return;
-        setStatus(authenticated ? "unlocked" : "locked");
+        const authenticated = await checkServerAccess()
+        if (!isMounted) return
+        setStatus(authenticated ? 'unlocked' : 'locked')
       } catch {
-        if (!isMounted) return;
-        setMessage("Access service unavailable. Please contact the local UX designer for support.");
-        setStatus("locked");
+        if (!isMounted) return
+        setMessage('Access service unavailable. Please contact the local UX designer for support.')
+        setStatus('locked')
       }
-    };
-
-    checkAccess();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!password.trim()) {
-      setMessage("Enter password to continue.");
-      return;
     }
 
-    setIsSubmitting(true);
-    setMessage("");
+    checkAccess()
+
+    return () => {
+      isMounted = false
+    }
+  }, [mobileEntry])
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!password.trim()) {
+      setMessage('Enter password to continue.')
+      return
+    }
+
+    setIsSubmitting(true)
+    setMessage('')
 
     try {
       const result = usesLocalFallback
         ? submitLocalAccess(password, remember)
-        : await submitServerAccess(password, remember);
+        : await submitServerAccess(password, remember)
 
       if (result.ok) {
-        setStatus("unlocked");
-        return;
+        setStatus('unlocked')
+        return
       }
 
-      setMessage(result.message || "Incorrect password. Please check the password and try again.");
+      setMessage(result.message || 'Incorrect password. Please check the password and try again.')
     } catch {
-      setMessage("Access service unavailable. Please contact the local UX designer for support.");
+      setMessage('Access service unavailable. Please contact the local UX designer for support.')
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
-  if (status === "unlocked") {
-    return <>{children}</>;
+  if (status === 'unlocked') {
+    return <>{children}</>
+  }
+
+  if (mobileEntry && !readShareAccessToken()) {
+    return (
+      <main style={styles.page} aria-busy={status === 'checking'}>
+        <section style={styles.card}>
+          <div style={styles.logoMark} aria-hidden="true" />
+          <h1 style={styles.label}>{status === 'checking' ? 'Opening your app…' : 'App entry unavailable'}</h1>
+          {message && (
+            <p role="alert" style={styles.error}>
+              {message}
+            </p>
+          )}
+          {(status === 'mobile-error' || status === 'locked') && (
+            <button
+              style={styles.button}
+              onClick={() => {
+                rememberSessionValue(MOBILE_ATTEMPT_KEY, null)
+                window.location.replace(mobileAccessUrl('mobile-entry'))
+              }}
+            >
+              Retry app entry
+            </button>
+          )}
+        </section>
+      </main>
+    )
   }
 
   return (
-    <main style={styles.page} aria-busy={status === "checking"}>
+    <main style={styles.page} aria-busy={status === 'checking'}>
       <form style={styles.card} onSubmit={handleSubmit}>
         <div style={styles.logoMark} aria-hidden="true" />
         <label style={styles.label} htmlFor="access-password">
@@ -269,104 +389,108 @@ export default function AccessGate({ children }: AccessGateProps) {
           />
           Remember my password
         </label>
-        {message && <p role="alert" style={styles.error}>{message}</p>}
+        {message && (
+          <p role="alert" style={styles.error}>
+            {message}
+          </p>
+        )}
         <button type="submit" disabled={formDisabled} style={formDisabled ? styles.buttonDisabled : styles.button}>
-          {isSubmitting || status === "checking" ? "Checking..." : "Continue"}
+          {isSubmitting || status === 'checking' ? 'Checking...' : 'Continue'}
         </button>
         <p style={styles.helper}>For support, contact the local UX designer</p>
       </form>
     </main>
-  );
+  )
 }
 
 const styles = {
   page: {
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 24,
-    background: "var(--uc-surface-muted)",
-    color: "var(--uc-text)",
-    fontFamily: "UniCredit, Inter, Arial, sans-serif",
+    background: 'var(--uc-surface-muted)',
+    color: 'var(--uc-text)',
+    fontFamily: 'UniCredit, Inter, Arial, sans-serif',
   },
   card: {
-    width: "min(100%, 360px)",
-    display: "flex",
-    flexDirection: "column",
+    width: 'min(100%, 360px)',
+    display: 'flex',
+    flexDirection: 'column',
     gap: 14,
     padding: 24,
     borderRadius: 8,
-    background: "var(--uc-surface)",
-    boxShadow: "0 16px 48px rgba(0, 0, 0, 0.12)",
+    background: 'var(--uc-surface)',
+    boxShadow: '0 16px 48px rgba(0, 0, 0, 0.12)',
   },
   logoMark: {
     width: 40,
     height: 40,
-    borderRadius: "50%",
-    background: "var(--uc-brand)",
+    borderRadius: '50%',
+    background: 'var(--uc-brand)',
     marginBottom: 4,
   },
   label: {
     fontSize: 20,
     fontWeight: 700,
-    lineHeight: "24px",
+    lineHeight: '24px',
   },
   input: {
     height: 44,
-    border: "1px solid var(--uc-border)",
+    border: '1px solid var(--uc-border)',
     borderRadius: 6,
-    padding: "0 12px",
+    padding: '0 12px',
     fontSize: 16,
-    fontFamily: "inherit",
-    color: "var(--uc-text)",
-    background: "var(--uc-surface)",
+    fontFamily: 'inherit',
+    color: 'var(--uc-text)',
+    background: 'var(--uc-surface)',
   },
   checkboxLabel: {
-    display: "flex",
-    alignItems: "center",
+    display: 'flex',
+    alignItems: 'center',
     gap: 10,
     fontSize: 14,
     fontWeight: 700,
-    color: "var(--uc-text)",
+    color: 'var(--uc-text)',
   },
   checkbox: {
     width: 18,
     height: 18,
-    accentColor: "var(--uc-brand)",
+    accentColor: 'var(--uc-brand)',
   },
   error: {
     margin: 0,
     fontSize: 13,
-    lineHeight: "18px",
-    color: "var(--uc-status-red)",
+    lineHeight: '18px',
+    color: 'var(--uc-status-red)',
   },
   button: {
     height: 44,
     border: 0,
     borderRadius: 6,
-    background: "var(--uc-brand)",
-    color: "var(--uc-static-white)",
+    background: 'var(--uc-brand)',
+    color: 'var(--uc-static-white)',
     fontSize: 15,
     fontWeight: 700,
-    fontFamily: "inherit",
-    cursor: "pointer",
+    fontFamily: 'inherit',
+    cursor: 'pointer',
   },
   buttonDisabled: {
     height: 44,
     border: 0,
     borderRadius: 6,
-    background: "var(--uc-border)",
-    color: "var(--uc-static-white)",
+    background: 'var(--uc-border)',
+    color: 'var(--uc-static-white)',
     fontSize: 15,
     fontWeight: 700,
-    fontFamily: "inherit",
-    cursor: "not-allowed",
+    fontFamily: 'inherit',
+    cursor: 'not-allowed',
   },
   helper: {
     margin: 0,
     fontSize: 13,
-    lineHeight: "18px",
-    color: "var(--uc-text-muted)",
+    lineHeight: '18px',
+    color: 'var(--uc-text-muted)',
   },
-} satisfies Record<string, CSSProperties>;
+} satisfies Record<string, CSSProperties>

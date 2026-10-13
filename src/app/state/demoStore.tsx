@@ -6,6 +6,7 @@
 import { createContext, useCallback, useContext, useMemo, useState, ReactNode } from "react";
 import { getReleaseBundle } from "@/app/registry/releaseRegistry";
 import { getContextKey, getCurrentFlags } from './flagContext';
+import { normalizeDemoContext } from './mobileFirstContext';
 export { getContextKey, getCurrentFlags } from './flagContext';
 import {
   DEFAULT_VISIBLE_PRODUCT_OVERRIDES,
@@ -127,7 +128,7 @@ interface DemoProviderProps {
  * ```
  */
 export function DemoProvider({ children, initialState }: DemoProviderProps) {
-  const [state, setState] = useState<DemoState>({
+  const [state, setState] = useState<DemoState>(() => normalizeDemoContext({
     ...DEFAULT_DEMO_STATE,
     ...initialState,
     flagsByContext: {
@@ -138,7 +139,7 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
       ...DEFAULT_DEMO_STATE.productCounts,
       ...initialState?.productCounts,
     },
-  });
+  }));
 
   /**
    * Setters are wrapped in `useCallback` with stable deps so their identity is
@@ -152,7 +153,7 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
    * moment the update is applied, not the one captured at render time.
    */
   const setProduct = useCallback((product: ProductId) => {
-    setState(prev => ({
+    setState(prev => normalizeDemoContext({
       ...prev,
       product,
       bankingScenario: DEFAULT_BANKING_SCENARIO_BY_PRODUCT[product],
@@ -160,24 +161,24 @@ export function DemoProvider({ children, initialState }: DemoProviderProps) {
   }, []);
 
   const setCountry = useCallback((country: CountryId) => {
-    setState(prev => ({ ...prev, country }));
+    setState(prev => normalizeDemoContext({ ...prev, country }));
   }, []);
 
   const setScenario = useCallback((scenario: Scenario) => {
-    setState(prev => ({ ...prev, scenario }));
+    setState(prev => normalizeDemoContext({ ...prev, scenario }));
   }, []);
 
   const setDesignSystem = useCallback((designSystem: DesignSystemId) => {
-    setState(prev => ({ ...prev, designSystem }));
+    setState(prev => normalizeDemoContext({ ...prev, designSystem }));
   }, []);
 
   const setBaseline = useCallback((baseline: BaselineId) => {
-    setState(prev => ({ ...prev, baseline }));
+    setState(prev => normalizeDemoContext({ ...prev, baseline }));
   }, []);
 
   const setRelease = useCallback((release: ReleaseId) => {
     const releaseBundle = getReleaseBundle(release);
-    setState(prev => ({
+    setState(prev => normalizeDemoContext({
       ...prev,
       release,
       baseline: releaseBundle.baseline,

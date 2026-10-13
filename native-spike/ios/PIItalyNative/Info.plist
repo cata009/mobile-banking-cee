@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>CADisableMinimumFrameDurationOnPhone</key>
+		<true/>
+		<key>CFBundleDevelopmentRegion</key>
+		<string>en</string>
+		<key>CFBundleDisplayName</key>
+		<string>PIItalyNative</string>
+		<key>CFBundleExecutable</key>
+		<string>$(EXECUTABLE_NAME)</string>
+		<key>CFBundleIdentifier</key>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+		<key>CFBundleInfoDictionaryVersion</key>
+		<string>6.0</string>
+		<key>CFBundleName</key>
+		<string>$(PRODUCT_NAME)</string>
+		<key>CFBundlePackageType</key>
+		<string>APPL</string>
+		<key>CFBundleShortVersionString</key>
+		<string>$(MARKETING_VERSION)</string>
+		<key>CFBundleSignature</key>
+		<string>????</string>
+		<key>CFBundleVersion</key>
+		<string>$(CURRENT_PROJECT_VERSION)</string>
+		<key>LSRequiresIPhoneOS</key>
+		<true/>
+		<key>NSAppTransportSecurity</key>
+		<dict>
+			<key>NSAllowsArbitraryLoads</key>
+			<false/>
+			<key>NSAllowsLocalNetworking</key>
+			<true/>
+		</dict>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string/>
+		<key>UILaunchStoryboardName</key>
+		<string>LaunchScreen</string>
+		<key>UIRequiredDeviceCapabilities</key>
+		<array>
+			<string>arm64</string>
+		</array>
+		<key>UISupportedInterfaceOrientations</key>
+		<array>
+			<string>UIInterfaceOrientationPortrait</string>
+		</array>
+		<key>UISupportedInterfaceOrientations~ipad</key>
+		<array>
+			<string>UIInterfaceOrientationLandscapeLeft</string>
+			<string>UIInterfaceOrientationLandscapeRight</string>
+			<string>UIInterfaceOrientationPortrait</string>
+			<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		</array>
+		<key>UIViewControllerBasedStatusBarAppearance</key>
+		<false/>
+		<key>HOT_UPDATER_CHANNEL</key>
+		<string>demo-preview</string>
+		<key>HOT_UPDATER_FINGERPRINT_HASH</key>
+		<string>b09f37166ef9b645d479a1fc4ee564ac5276f461</string>
+		<key>HOT_UPDATER_PUBLIC_KEY</key>
+		<string>-----BEGIN PUBLIC KEY-----
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAoCOiXQv4KRJEo4x6q18d
+3VyRiNDacA4QUkQsT1yy3Prnyw0bJWJI4jEus27C0HqpYoVQMn19KO5y3FcvtPZb
+Tbuae4iReYRI3AFSKXIfAqfZfz+wLQkZ9xNPFhfiQcHtF9+htk7pXslGcG13UTrz
+eeZMdbfBrR5i33aj/YnX+eI5EwS2x5Y8ESxyofYWMJJs75niuIiRN5WPXrW2eFrv
+0uVpaHbXbCsjQehsSNOP8+0XYFtrVBwcy0fjspBDSDxI6F2O3GjjBZTe8FU1aFiP
+Z3pM59zZ9FK6802KUqHrCF0hOI7I2YoV9k+mLpr2I8qoCDDPpwQhXYvJyBMAVE/i
+gHIoZ+9FqDv+9lHXE5A040qjYYelqcvUhzKJxt5FtwKdYVJbZhTWPpq1wKjT4bQF
+iVYk91ZLoNRmbU6nXtUAMNyYJYrKTLpxa0UCvlcFM1d5I9wnTQSvuZLuzruXfQe7
+Uf77gfN/YPEK2cOXOJFGvhc8TBrslxYoGk2eKjipFVGoPlEFG5qJ/z4VfJ9bGH6Y
+c/gCKS/2NoV1FWG4Pw4WB1Z9rv+NAZRhU2YINJv/+6kyv3n4X9z5eSZMTg2m/xnl
+jvUkjM0AEwA3dEMAgk6mfh7ML/rnV9uUjDhHvCkhOohCnVteuDUqRKZrIHj88sLU
+XM37Be5IRnOfOenjQFxs32ECAwEAAQ==
+-----END PUBLIC KEY-----</string>
+	</dict>
+</plist>

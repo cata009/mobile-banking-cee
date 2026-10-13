@@ -648,6 +648,7 @@ export function resolveTransactionMerchant(transaction: MerchantResolvable): Mer
  * the transaction detail. Mock data, like the rest of this directory.
  */
 const MARKET_HIGH_STREETS: Record<Country, string> = {
+  IT: "",
   RO: "Calea Victoriei 45, Bucharest",
   CZ: "Na Příkopě 22, Prague",
   SK: "Obchodná 18, Bratislava",
@@ -661,5 +662,6 @@ const MARKET_HIGH_STREETS: Record<Country, string> = {
 /** Merchant street address for the active market; undefined for online merchants. */
 export function getMerchantLocation(entry: MerchantEntry, country: Country): string | undefined {
   if (entry.channel === "online") return undefined;
+  if (country === "IT" && !entry.locations?.IT) return undefined;
   return entry.locations?.[country] ?? `${entry.name} · ${MARKET_HIGH_STREETS[country]}`;
 }

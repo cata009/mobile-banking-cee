@@ -12,14 +12,13 @@ import InvestmentAccountSelectionSheet from "@/app/components/investments/Invest
 import type { InvestmentCatalogSecurity } from "@/app/config/investmentsPortfolioConfig";
 import type { CountryId } from "@/app/state/demoTypes";
 import { formatInvestmentMoney, formatInvestmentNumber } from "@/app/utils/investmentAmountFormatting";
-import { convertCurrency, roundMoney } from "@/data/exchangeRates";
+import { CTS_UNITS_ONLY_MESSAGE, getInvestmentSellOrderValidation, parsePositiveDecimal, type InvestmentSellMode } from "@/features/investments/orders/sellOrder";
 import type { CurrentAccount } from "@/data/products";
 import { formatCzLocalAccountNumber } from "@/data/czechDomesticAccount";
 import InvestmentOrderDocumentsAccordion from "./InvestmentOrderDocumentsAccordion";
 import { ProductEvaluationBullet } from "./InvestmentBuyOrderFlow";
 
 type InvestmentSellOrderStep = "order-data" | "review" | "sign" | "success";
-type InvestmentSellMode = "units" | "amount";
 
 interface InvestmentSellOrderFlowProps {
   security: InvestmentCatalogSecurity;
@@ -34,22 +33,6 @@ export interface InvestmentSellExecution {
   quantity: number;
   amount: number;
   currency: InvestmentCatalogSecurity["instrumentCurrency"];
-}
-
-interface SellQuote {
-  quantity: number;
-  productAmount: number;
-  accountAmount: number;
-}
-
-const CTS_AMOUNT_ERROR = "The amount exceeds the maximum allowed for this instrument. Enter a lower amount.";
-const CTS_UNITS_ONLY_MESSAGE = "Selling by amount is not available for this instrument. You can still sell by units.";
-
-function parsePositiveDecimal(value: string): number | null {
-  const normalized = value.trim().replace(/\s/g, "").replace(",", ".");
-  if (!/^\d+(?:\.\d{0,6})?$/.test(normalized)) return null;
-  const amount = Number(normalized);
-  return Number.isFinite(amount) && amount > 0 ? amount : null;
 }
 
 function trimNumber(value: number, maximumFractionDigits = 6) {
@@ -149,41 +132,7 @@ export default function InvestmentSellOrderFlow({
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   const selectedAccount = accounts.find((account) => account.id === selectedAccountId) ?? accounts[0] ?? null;
-  const units = parsePositiveDecimal(unitsValue);
-  const amount = parsePositiveDecimal(amountValue);
-  const maximumAmount = security.sellAmountLimit ?? roundMoney(security.marketPrice * security.quantity);
-
-  const quote = useMemo<SellQuote | null>(() => {
-    if (!selectedAccount) return null;
-    const quantity = mode === "units" ? units : amount ? amount / security.marketPrice : null;
-    if (!quantity) return null;
-    const productAmount = mode === "amount" && amount ? amount : roundMoney(quantity * security.marketPrice);
-    return {
-      quantity,
-      productAmount,
-      accountAmount: roundMoney(convertCurrency(productAmount, security.instrumentCurrency, selectedAccount.currency)),
-    };
-  }, [amount, mode, security.instrumentCurrency, security.marketPrice, selectedAccount, units]);
-
-  const unitsError = unitsValue.length > 0 && units === null
-    ? "Enter a positive number of units."
-    : units && units > security.quantity
-      ? `You can sell up to ${trimNumber(security.quantity)} PCS.`
-      : null;
-  const amountError = amountValue.length > 0 && amount === null
-    ? "Enter a positive amount."
-    : amount && (amount > maximumAmount || amount / security.marketPrice > security.quantity)
-      ? CTS_AMOUNT_ERROR
-      : null;
-  const currentError = mode === "units" ? unitsError : amountError;
-  const canReview = Boolean(
-    security.owned
-      && security.status === "active"
-      && selectedAccount
-      && quote
-      && !currentError
-      && (mode === "units" || amountSellingAvailable),
-  );
+  const { units, amount, quote, unitsError, amountError, canReview } = useMemo(() => getInvestmentSellOrderValidation({security, account: selectedAccount, mode, unitsValue, amountValue}), [security, selectedAccount, mode, unitsValue, amountValue]);
 
   const selectMode = (nextMode: InvestmentSellMode) => {
     if (nextMode === "amount" && !amountSellingAvailable) return;
