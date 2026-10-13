@@ -8,17 +8,18 @@
 .mfif-deposit > strong { font-size: calc(18px * var(--mf-text-scale, 1)); line-height: calc(24px * var(--mf-text-scale, 1)); margin-bottom: 4px; }
 .mfif-deposit > small, .mfif-muted { font-size: calc(14px * var(--mf-text-scale, 1)); color: #666; line-height: calc(20px * var(--mf-text-scale, 1)); }
 .mfif-deposit-select { align-self: flex-start; border: 0; background: none; display: flex; align-items: center; gap: 8px; padding: 0; margin-bottom: 8px; font-size: 18px !important; line-height: 24px !important; font-weight: 700 !important; }
-.mfif-deposit-values { margin: 24px 0; }
+.mfif-grid.mfif-deposit-values { margin: 24px 0; container-type: inline-size; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .mfif-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .mfif-grid > span { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .mfif-grid .mfix-amount { white-space: nowrap; }
 .mfif-grid strong { font-size: calc(18px * var(--mf-text-scale, 1)); }
-.mfif-deposit-values .mfix-amount strong { font-size: calc(24px * var(--mf-text-scale, 1)); line-height: calc(26px * var(--mf-text-scale, 1)); }
+.mfif-deposit-values .mfix-amount { max-width: 100%; min-width: 0; flex-wrap: wrap; white-space: normal; }
+.mfif-deposit-values .mfix-amount strong { max-width: 100%; overflow-wrap: anywhere; font-size: clamp(calc(18px * var(--mf-text-scale, 1)), calc(7cqw * var(--mf-text-scale, 1)), calc(24px * var(--mf-text-scale, 1))); line-height: 1.08334; }
 .mfif-deposit-values > span { gap: 2px; }
 .mfif-deposit-values .mfif-deposit-label { font-size: calc(16px * var(--mf-text-scale, 1)); line-height: calc(18px * var(--mf-text-scale, 1)); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mfif-deposit-values .mfix-amount > span { font-size: calc(16px * var(--mf-text-scale, 1)); line-height: calc(18px * var(--mf-text-scale, 1)); }
-.mfif-deposit-pnl { display: flex; align-items: baseline; gap: 4px; white-space: nowrap; }
-.mfif-deposit-pnl .mfif-positive { line-height: calc(16px * var(--mf-text-scale, 1)); }
+.mfif-deposit-values .mfix-amount > span { font-size: calc(16px * var(--mf-text-scale, 1)); line-height: calc(18px * var(--mf-text-scale, 1)); white-space: nowrap; }
+.mfif-deposit-pnl { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
+.mfif-deposit-pnl .mfif-positive { max-width: 100%; overflow-wrap: anywhere; line-height: calc(16px * var(--mf-text-scale, 1)); }
 .mfif-positive { color: #3d7d43; font-size: calc(14px * var(--mf-text-scale, 1)); font-weight: 700; }
 .mfif-quick-actions { display: flex; gap: 24px; }
 .mfif-quick-actions button { border: 0; padding: 0; background: none; width: 64px; font-size: calc(14px * var(--mf-text-scale, 1)); line-height: calc(16px * var(--mf-text-scale, 1)); display: flex; flex-direction: column; gap: 8px; align-items: center; color: #666; text-align: center; }

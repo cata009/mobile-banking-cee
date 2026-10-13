@@ -1,6 +1,7 @@
 {
-  "baselineCommit": "e348815 + generated goals illustration 2026-10-08 + generated partner shelf photography 2026-10-09 + Future Gain peer-insights SVGs 2026-10-12 + PI Italy Mobile First 2026-10-12",
+  "baselineCommit": "e348815 + generated goals illustration 2026-10-08 + generated partner shelf photography 2026-10-09 + Future Gain peer-insights SVGs 2026-10-12 + PI Italy Mobile First 2026-10-12 + main 770ea65 native and reference captures 2026-10-13",
   "baselineNote": "Preserves the approved asset inventory and generated goals-summary flag illustration; replaces only the Shopsmart and Partner offers shelf photos with GPT Image 2.1 images and a higher-contrast text scrim; adds 11 local Figma SVGs and 2 credit card art exports for the RS Future Gain peer-insights screens. Adds 864 scoped PI Italy Mobile First assets from Figma and supplied SVGs; preserves all 275 original assets and the operator's recorded pending photography edits. Exact path/blob inventory: docs/tasks/pi-italy-mobile-first-asset-baseline.json.",
-  "assetCount": 1139,
-  "pathBlobSha256Aggregate": "89cb7e4a16ad742c902c2bb3b1a49910a3ce96951be7bd1e4dd73aa1815026af"
+  "assetCount": 1167,
+  "pathBlobSha256Aggregate": "3882bb172d1aab28c075a94f0ce97e7c27094057c04293a99565bd4e85c2823b",
+  "integrationNote": "Preserves every original 1139 path/blob unchanged; includes 16 Source reference captures and 12 native icon exports already committed in main 770ea65. Exact additions and preservation proof: docs/tasks/native-and-reference-asset-baseline.json. Strict count/hash assertions remain unchanged."
 }

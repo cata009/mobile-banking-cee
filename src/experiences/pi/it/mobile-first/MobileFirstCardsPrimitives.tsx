@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { ScrollableRegion } from '@/app/components/ui/ScrollableRegion'
 import { BottomSheet } from '@/app/components/BottomSheet'
 import { cardCapabilities } from '@/features/cards/mobileFirstCards'
@@ -148,6 +148,7 @@ export function CardArt({
 }
 export function CardsPage({
   title,
+  subtitle,
   onBack,
   onClose,
   children,
@@ -157,8 +158,11 @@ export function CardsPage({
   profile = false,
   onProfile,
   blocked = false,
+  scrollPosition = 0,
+  onScrollPositionChange,
 }: {
   title?: string
+  subtitle?: ReactNode
   onBack: () => void
   onClose?: () => void
   children: ReactNode
@@ -168,9 +172,15 @@ export function CardsPage({
   profile?: boolean
   onProfile?: () => void
   blocked?: boolean
+  scrollPosition?: number
+  onScrollPositionChange?: (position: number) => void
 }) {
   const [helpOpen, setHelpOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollPosition
+  }, [title, profileOpen, scrollPosition])
   if (profileOpen)
     return (
       <Suspense fallback={null}>
@@ -188,8 +198,19 @@ export function CardsPage({
         onClose={!profile ? onClose : undefined}
         onProfile={profile ? (onProfile ?? (() => setProfileOpen(true))) : undefined}
       />
-      <ScrollableRegion className="mfc-scroll" aria-label={title ?? 'Carta e movimenti'} key={title ?? 'detail'}>
-        {title && <h1>{title}</h1>}
+      <ScrollableRegion
+        ref={scrollRef}
+        className="mfc-scroll"
+        aria-label={title ?? 'Carta e movimenti'}
+        key={title ?? 'detail'}
+        onScroll={(event) => onScrollPositionChange?.(event.currentTarget.scrollTop)}
+      >
+        {title && (
+          <div className="mfc-page-heading">
+            <h1>{title}</h1>
+            {subtitle && <b className="mfc-subtitle">{subtitle}</b>}
+          </div>
+        )}
         {children}
       </ScrollableRegion>
       {footer && <footer className="mfc-footer">{footer}</footer>}

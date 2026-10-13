@@ -1,0 +1,158 @@
+{
+  "owner": "/root integration",
+  "baseCommit": "770ea65e4505c6befc5bc69982d8eefd8d5020c4",
+  "checkout": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE",
+  "reason": "The first post-integration asset audit includes 16 already-committed Source reference captures and 12 native app icon exports previously untracked outside pending Source application paths. Preserve every original 1139 path/blob; add only the 28 assets already approved and published in main 770ea65.",
+  "previousBaseline": {
+    "baselineCommit": "e348815 + generated goals illustration 2026-10-08 + generated partner shelf photography 2026-10-09 + Future Gain peer-insights SVGs 2026-10-12 + PI Italy Mobile First 2026-10-12",
+    "baselineNote": "Preserves the approved asset inventory and generated goals-summary flag illustration; replaces only the Shopsmart and Partner offers shelf photos with GPT Image 2.1 images and a higher-contrast text scrim; adds 11 local Figma SVGs and 2 credit card art exports for the RS Future Gain peer-insights screens. Adds 864 scoped PI Italy Mobile First assets from Figma and supplied SVGs; preserves all 275 original assets and the operator's recorded pending photography edits. Exact path/blob inventory: docs/tasks/pi-italy-mobile-first-asset-baseline.json.",
+    "assetCount": 1139,
+    "pathBlobSha256Aggregate": "89cb7e4a16ad742c902c2bb3b1a49910a3ce96951be7bd1e4dd73aa1815026af"
+  },
+  "preservedAssetCount": 1139,
+  "preservedAggregate": "89cb7e4a16ad742c902c2bb3b1a49910a3ce96951be7bd1e4dd73aa1815026af",
+  "assetCount": 1167,
+  "pathBlobSha256Aggregate": "3882bb172d1aab28c075a94f0ce97e7c27094057c04293a99565bd4e85c2823b",
+  "addedAssets": [
+    {
+      "path": "docs/tasks/pi-italy-mobile-first-conti-filters.png",
+      "bytes": 37299,
+      "sha256": "51ceec634ff65afb384a2b2975d88761f3b2e170636dd0be1af85ff35ac17b82"
+    },
+    {
+      "path": "docs/tasks/pi-italy-mobile-first-conti-info.png",
+      "bytes": 25978,
+      "sha256": "2a62bb8cff962a803e6fba4e636b6a6501c7048bee694fd895806325d3d97f8a"
+    },
+    {
+      "path": "docs/tasks/pi-italy-mobile-first-conti-list.png",
+      "bytes": 35250,
+      "sha256": "5e80a377dd63bf0bd879d7d46c886bbefabddda5a66c4e6ee46aeef680561dae"
+    },
+    {
+      "path": "docs/tasks/pi-italy-mobile-first-conti-preview.png",
+      "bytes": 25978,
+      "sha256": "2a62bb8cff962a803e6fba4e636b6a6501c7048bee694fd895806325d3d97f8a"
+    },
+    {
+      "path": "docs/tasks/pi-italy-mobile-first-insurance-detail.png",
+      "bytes": 39587,
+      "sha256": "798408af4bf3f796b2bb6a2af5799d6fed3581ba11bccba260a892a1eabbcde9"
+    },
+    {
+      "path": "docs/tasks/pi-italy-mobile-first-insurance-documents.png",
+      "bytes": 40974,
+      "sha256": "7005c06ab0300c9bc346f774dfd12396a6598c302f857ed523bc57a06666deb2"
+    },
+    {
+      "path": "docs/tasks/pi-italy-mobile-first-insurance-favorites.png",
+      "bytes": 37332,
+      "sha256": "8863dbbaf5122055b19653008694e2ad011eff4268ce2178b184234a349e956e"
+    },
+    {
+      "path": "docs/tasks/pi-italy-mobile-first-insurance-home.png",
+      "bytes": 37526,
+      "sha256": "719fc14550ccdfdf54178ade763eaafb68e6b5a84f2cd440505b912bb3ceebfb"
+    },
+    {
+      "path": "docs/tasks/pi-italy-mobile-first-insurance-module.png",
+      "bytes": 26618,
+      "sha256": "1cb8602e107cd0c0e8fc85aa4aabfae6b7d1d4c36dd447aaa068f61c12b810e5"
+    },
+    {
+      "path": "docs/tasks/pi-italy-mobile-first-investments-advisory-preview.jpg",
+      "bytes": 62164,
+      "sha256": "2d6c3bc6233b5708899d9827ddd5c7af257acafd3d6089cc4debb74688ab0ef4"
+    },
+    {
+      "path": "docs/tasks/pi-italy-mobile-first-investments-deposit-preview.jpg",
+      "bytes": 73058,
+      "sha256": "d10a91fb777b06fc8f34cf319405b751c15cd4ecd2a83cf16da2cca36caf3f77"
+    },
+    {
+      "path": "docs/tasks/pi-italy-mobile-first-investments-funds-portfolio-reference.png",
+      "bytes": 83312,
+      "sha256": "342ca7d1eefea6119c9b574da8de1e4e629fa30b67c020bb3c3dd39b83be7f2b"
+    },
+    {
+      "path": "docs/tasks/pi-italy-mobile-first-investments-funds-preview.jpg",
+      "bytes": 51301,
+      "sha256": "1b9a3eb9c9ea36ce20fd08792c124495e0fa99c3d84039841ff7e2453179df49"
+    },
+    {
+      "path": "docs/tasks/pi-italy-mobile-first-investments-securities-preview.jpg",
+      "bytes": 54791,
+      "sha256": "aaddfe7190e44d8f03a6a534cdbd3bd024e3c5b71f94f5fa25174f3a6a57eb04"
+    },
+    {
+      "path": "docs/tasks/pi-italy-mobile-first-investments-services-profile-source.png",
+      "bytes": 46030,
+      "sha256": "2266ce0964722380a30a1a35c0d91af88cbf8280111dad6eea1a5481adbe8f8d"
+    },
+    {
+      "path": "docs/tasks/pi-italy-mobile-first-loans-preview.png",
+      "bytes": 54562,
+      "sha256": "88109f50f11eb0c1ec700b0443622ed229928c181b0216bcf64a5efa8d6d69e5"
+    },
+    {
+      "path": "native-spike/android/app/src/main/res/drawable-nodpi/unicredit_app_icon.png",
+      "bytes": 22434,
+      "sha256": "435d0b4b94acf855931f30aeb382a7a52530f9d5d5d2fb1f4c733ecdd53baa66"
+    },
+    {
+      "path": "native-spike/android/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+      "bytes": 3056,
+      "sha256": "ded7aabf6a56b694e486e096efd89e2f0c9067d292b634663898e352c9491f10"
+    },
+    {
+      "path": "native-spike/android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png",
+      "bytes": 5024,
+      "sha256": "21304a0c9b00da6a72cfa31c7229c9528fc17b6e5eb4e68a969bce08c01a2fee"
+    },
+    {
+      "path": "native-spike/android/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+      "bytes": 2096,
+      "sha256": "eef20f25fb1477d8c9df15757e764811cc503fb0777f18d0f7fb2d19178b5bf6"
+    },
+    {
+      "path": "native-spike/android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png",
+      "bytes": 2858,
+      "sha256": "520d05f978a15ba0ccf23006a1a5691a054a02478c70cafc5ebafae76e600f0d"
+    },
+    {
+      "path": "native-spike/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+      "bytes": 4569,
+      "sha256": "e77c5045bfdb6f4bbe955b3a793bfed3baa369ce4811ae2a9103d5480637cfff"
+    },
+    {
+      "path": "native-spike/android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png",
+      "bytes": 7098,
+      "sha256": "2846e1a703e519791fe22f41bcb243b82f908d12e5ebcb43f020ddf9982780b0"
+    },
+    {
+      "path": "native-spike/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+      "bytes": 6464,
+      "sha256": "eb3a34b13632e0cb3b1c0f4273035866cbe81b1b17b7178ce29d19c78d394a5e"
+    },
+    {
+      "path": "native-spike/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png",
+      "bytes": 10676,
+      "sha256": "363a569beb72e8b007bf046454612148d4c9f782b9391352059fe83179f18e30"
+    },
+    {
+      "path": "native-spike/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+      "bytes": 9250,
+      "sha256": "9ff27328b6916b7f75b99ef36153f154bb4724946e5654635cba2e257352c69f"
+    },
+    {
+      "path": "native-spike/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png",
+      "bytes": 15523,
+      "sha256": "5bacd97a1b41e4413c6092cdbd83f65112a9124e823cfaa3a219c65e2761647b"
+    },
+    {
+      "path": "native-spike/assets/unicredit_app_icon.png",
+      "bytes": 22434,
+      "sha256": "435d0b4b94acf855931f30aeb382a7a52530f9d5d5d2fb1f4c733ecdd53baa66"
+    }
+  ]
+}

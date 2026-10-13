@@ -116,7 +116,9 @@ export function MobileFirstLoansPanel({
                   <strong>{loan.name}</strong>
                   <b>Andrea Rossini - Unicredit</b>
                 </span>
-                <img src={shared.forwardSmall} alt="" />
+                <span className="mf-product-chevron" aria-hidden="true">
+                  <img src={shared.accountChevron} alt="" width={12} height={22} />
+                </span>
               </span>
               <span className="mf-product-credit-balance">
                 <LoanAmount value={loan.outstanding} hidden={amountsHidden} />

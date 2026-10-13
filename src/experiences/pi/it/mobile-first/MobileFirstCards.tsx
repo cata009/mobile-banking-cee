@@ -125,6 +125,7 @@ export default function MobileFirstCards({
   const [operations, setOperations] = useState(false)
   const [resumeOpen, setResumeOpen] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
+  const detailScrollPositions = useRef(new Map<string, number>())
   const card = cards.find((c) => c.id === cardId) ?? cards[1]!
   const repayment = card.repayment ?? 'A saldo'
   const plans = card.plans ?? []
@@ -524,6 +525,8 @@ export default function MobileFirstCards({
     <>
       <CardsPage
         onBack={back}
+        scrollPosition={detailScrollPositions.current.get(cardId) ?? 0}
+        onScrollPositionChange={(position) => detailScrollPositions.current.set(cardId, position)}
         profile
         onProfile={onProfile}
         hidden={amountsHidden}

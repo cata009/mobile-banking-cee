@@ -253,8 +253,10 @@
 }
 .mf-home .mf-product-chevron > img {
   display: block;
+  width: 12px;
+  height: 22px;
   max-width: none;
-  transform: rotate(180deg) scaleX(-1);
+  transform: scaleY(-1);
 }
 .mf-home .mf-product-credit-balance {
   display: flex;
